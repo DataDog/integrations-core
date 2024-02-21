@@ -4,6 +4,7 @@
 from __future__ import division
 
 import copy
+import functools
 import time
 from collections import defaultdict
 
@@ -20,7 +21,7 @@ from datadog_checks.sqlserver.config import SQLServerConfig
 from datadog_checks.sqlserver.metadata import SqlserverMetadata
 from datadog_checks.sqlserver.statements import SqlserverStatementMetrics
 from datadog_checks.sqlserver.stored_procedures import SqlserverProcedureMetrics
-from datadog_checks.sqlserver.utils import Database, parse_sqlserver_major_version
+from datadog_checks.sqlserver.utils import Database, construct_use_statement, parse_sqlserver_major_version
 
 try:
     import datadog_agent
@@ -39,12 +40,13 @@ from datadog_checks.sqlserver.const import (
     AZURE_DEPLOYMENT_TYPE_TO_RESOURCE_TYPES,
     BASE_NAME_QUERY,
     COUNTER_TYPE_QUERY,
+    DATABASE_BACKUP_METRICS,
     DATABASE_FRAGMENTATION_METRICS,
-    DATABASE_INDEX_METRICS,
     DATABASE_MASTER_FILES,
     DATABASE_METRICS,
     DATABASE_SERVICE_CHECK_NAME,
     DBM_MIGRATED_METRICS,
+    DEFAULT_INDEX_USAGE_STATS_INTERVAL,
     ENGINE_EDITION_AZURE_MANAGED_INSTANCE,
     ENGINE_EDITION_SQL_DATABASE,
     INSTANCE_METRICS,
@@ -65,6 +67,7 @@ from datadog_checks.sqlserver.const import (
 )
 from datadog_checks.sqlserver.metrics import DEFAULT_PERFORMANCE_TABLE, VALID_TABLES
 from datadog_checks.sqlserver.queries import (
+    INDEX_USAGE_STATS_QUERY,
     QUERY_AO_FAILOVER_CLUSTER,
     QUERY_AO_FAILOVER_CLUSTER_MEMBER,
     QUERY_FAILOVER_CLUSTER_INSTANCE,
@@ -74,7 +77,11 @@ from datadog_checks.sqlserver.queries import (
     get_query_ao_availability_groups,
     get_query_file_stats,
 )
-from datadog_checks.sqlserver.utils import is_azure_database, set_default_driver_conf
+from datadog_checks.sqlserver.utils import (
+    is_azure_database,
+    is_azure_sql_database,
+    set_default_driver_conf,
+)
 
 try:
     import adodbapi
@@ -111,7 +118,8 @@ class SQLServer(AgentCheck):
 
         self.databases = set()
         self.autodiscovery_query = None
-        self.ad_last_check = 0
+        self._ad_last_check = 0
+        self._index_usage_last_check_ts = 0
         self._sql_counter_types = {}
         self.proc_type_mapping = {'gauge': self.gauge, 'rate': self.rate, 'histogram': self.histogram}
 
@@ -372,7 +380,7 @@ class SQLServer(AgentCheck):
             return False
 
         now = time.time()
-        if now - self.ad_last_check > self._config.autodiscovery_interval:
+        if now - self._ad_last_check > self._config.autodiscovery_interval:
             self.log.info('Performing database autodiscovery')
             query = self._get_autodiscovery_query_cached(cursor)
             cursor.execute(query)
@@ -392,7 +400,7 @@ class SQLServer(AgentCheck):
             filtered_dbs = all_dbs.intersection(included_dbs) - excluded_dbs
 
             self.log.debug('Resulting filtered databases: %s', filtered_dbs)
-            self.ad_last_check = now
+            self._ad_last_check = now
             if filtered_dbs != self.databases:
                 self.log.debug('Databases updated from previous autodiscovery check.')
                 self.databases = filtered_dbs
@@ -451,8 +459,10 @@ class SQLServer(AgentCheck):
 
         # Load database statistics
         db_stats_to_collect = list(DATABASE_METRICS)
-        if is_affirmative(self.instance.get('include_index_usage_metrics', True)):
-            db_stats_to_collect.extend(DATABASE_INDEX_METRICS)
+        engine_edition = self.static_info_cache.get(STATIC_INFO_ENGINE_EDITION)
+        if not is_azure_sql_database(engine_edition):
+            db_stats_to_collect.extend(DATABASE_BACKUP_METRICS)
+
         for name, table, column in db_stats_to_collect:
             # include database as a filter option
             db_names = [d.name for d in self.databases] or [
@@ -517,7 +527,9 @@ class SQLServer(AgentCheck):
                     metrics_to_collect.append(self.typed_metric(cfg_inst=cfg, table=table, column=column))
 
         # Load DB File Space Usage metrics
-        if is_affirmative(self.instance.get('include_tempdb_file_space_usage_metrics', True)):
+        if is_affirmative(
+            self.instance.get('include_tempdb_file_space_usage_metrics', True)
+        ) and not is_azure_sql_database(engine_edition):
             for name, table, column in TEMPDB_FILE_SPACE_USAGE_METRICS:
                 cfg = {'name': name, 'table': table, 'column': column, 'instance_name': 'tempdb', 'tags': tags}
                 metrics_to_collect.append(self.typed_metric(cfg_inst=cfg, table=table, column=column))
@@ -837,16 +849,63 @@ class SQLServer(AgentCheck):
                 if self.dynamic_queries:
                     self.dynamic_queries.execute()
 
+                self.collect_index_usage_metrics()
+
                 # reuse connection for any custom queries
                 self._query_manager.execute()
             finally:
                 with self.connection.get_managed_cursor() as cursor:
                     cursor.execute("SET NOCOUNT OFF")
 
-    def execute_query_raw(self, query):
+    def execute_query_raw(self, query, db=None):
         with self.connection.get_managed_cursor() as cursor:
+            if db:
+                ctx = construct_use_statement(db)
+                self.log.debug("changing cursor context via use statement: %s", ctx)
+                cursor.execute(ctx)
             cursor.execute(query)
             return cursor.fetchall()
+
+    # https://learn.microsoft.com/en-us/sql/relational-databases/system-dynamic-management-views/sys-dm-db-index-usage-stats-transact-sql?view=sql-server-ver15
+    def collect_index_usage_metrics(self):
+        if not is_affirmative(self.instance.get('include_index_usage_metrics', True)):
+            return
+
+        interval = max(int(self.instance.get('index_usage_stats_interval', DEFAULT_INDEX_USAGE_STATS_INTERVAL)), 10)
+
+        now = time.time()
+        if not self._index_usage_last_check_ts or now - self._index_usage_last_check_ts > interval:
+            self._index_usage_last_check_ts = now
+            self.log.debug('Collecting index usage statistics')
+            db_names = [d.name for d in self.databases] or [
+                self.instance.get('database', self.connection.DEFAULT_DATABASE)
+            ]
+            with self.connection.get_managed_cursor() as cursor:
+                cursor.execute(
+                    'select DB_NAME()'
+                )  # This can return None in some implementations, so it cannot be chained
+                data = cursor.fetchall()
+                current_db = data[0][0]
+                self.log.debug("current db is %s", current_db)
+                try:
+                    for database in db_names:
+                        try:
+                            executor = QueryExecutor(
+                                functools.partial(self.execute_query_raw, db=database),
+                                self,
+                                queries=[INDEX_USAGE_STATS_QUERY],
+                                tags=self.tags,
+                                hostname=self.resolved_hostname,
+                            )
+                            executor.compile_queries()
+                            executor.execute()
+                        except Exception as e:
+                            self.log.error("failed to collect index usage statistics: %s", e)
+                finally:
+                    if current_db:
+                        self.log.debug("reverting cursor context via use statement to %s", current_db)
+                        cursor.execute(construct_use_statement(current_db))
+        return
 
     def do_stored_procedure_check(self):
         """

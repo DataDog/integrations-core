@@ -1,66 +1,67 @@
 id: coredns
 metric_id: coredns
+backend_only: false
 facets:
-  - name: Answer Size
-    source: log
+  - facetType: range
+    groups:
+      - DNS
+    name: Answer Size
     path: dns.answer.size
+    source: log
     type: double
-    facetType: range
     unit:
       family: bytes
       name: byte
-    groups:
+  - groups:
       - DNS
-  - name: Question Class
-    source: log
+    name: Question Class
     path: dns.question.class
+    source: log
+  - facetType: range
     groups:
       - DNS
-  - name: Question Size
-    source: log
+    name: Question Size
     path: dns.question.size
+    source: log
     type: double
-    facetType: range
     unit:
       family: bytes
       name: byte
-    groups:
+  - groups:
       - DNS
-  - name: Question Type
-    source: log
+    name: Question Type
     path: dns.question.type
-    groups:
-      - DNS
-  - name: Duration
     source: log
+  - facetType: range
+    groups:
+      - Measure
+    name: Duration
     path: duration
+    source: log
     type: double
-    facetType: range
     unit:
       family: time
       name: nanosecond
-    groups:
-      - Measure
-  - name: Client IP
-    source: log
+  - groups:
+      - Web Access
+    name: Client IP
     path: network.client.ip
-    groups:
-      - Web Access
-  - name: Client Port
     source: log
+  - groups:
+      - Web Access
+    name: Client Port
     path: network.client.port
-    groups:
-      - Web Access
-  - name: DNS protocol
     source: log
+  - groups:
+      - DNS
+    name: DNS protocol
     path: dns.protocol
-    groups:
-      - DNS
-  - name: DNSSEC
     source: log
-    path: dns.dnssec
-    groups:
+  - groups:
       - DNS
+    name: DNSSEC
+    path: dns.dnssec
+    source: log
 pipeline:
   type: pipeline
   name: CoreDNS

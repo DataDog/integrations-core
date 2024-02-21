@@ -19,6 +19,8 @@
   }},
   "assets": {{
     "integration": {{
+      "auto_install": {auto_install},
+      "source_type_id": {source_type_id},
       "source_type_name": "{integration_name}",
       "configuration": {{
         "spec": "assets/configuration/spec.yaml"
@@ -40,5 +42,4 @@
     "logs": {{}},
     "saved_views": {{}}
   }},{pricing_plan}{terms}{author_info}
-  "oauth": {{}}
 }}

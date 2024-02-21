@@ -2,11 +2,11 @@
   "version": 2,
   "created_at": "2022-04-21",
   "last_updated_at": "2022-04-21",
-  "title": "4xx Errors higher than usual",
+  "title": "4xx errors number is high",
   "tags": [
     "integration:traffic-server"
   ],
-  "description": "Notifies when Traffic Server 4xx errors are higher than usual",
+  "description": "Not all the requests headed to the Apache Traffic Server will end correctly. This monitor tracks anomalies in the 4xx HTTP response codes from the Apache Traffic Server to provide insights into unusual client errors.",
   "definition": {
     "message": "Number of 4xx errors on Traffic Server is at {{value}} which is higher than usual.",
     "name": "[Traffic Server] 4xx Errors higher than usual",

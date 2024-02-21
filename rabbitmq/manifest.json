@@ -25,7 +25,6 @@
     "homepage": "https://www.datadoghq.com",
     "sales_email": "info@datadoghq.com"
   },
-  "oauth": {},
   "assets": {
     "integration": {
       "source_type_name": "RabbitMQ",
@@ -46,7 +45,9 @@
       "process_signatures": [
         "rabbitmq",
         "rabbitmq-server"
-      ]
+      ],
+      "source_type_id": 51,
+      "auto_install": true
     },
     "dashboards": {
       "rabbitmq_screenboard": "assets/dashboards/rabbitmq_screenboard_dashboard.json",
@@ -57,7 +58,6 @@
       "message_unacknowledge_rate_anomaly": "assets/monitors/message_unacknowledge_rate_anomaly.json",
       "disk_usage_prometheus": "assets/monitors/disk_usage_prometheus.json",
       "message_unack_prometheus": "assets/monitors/message_unack_prometheus.json"
-
     },
     "saved_views": {
       "pid_overview": "assets/saved_views/status_overview.json",

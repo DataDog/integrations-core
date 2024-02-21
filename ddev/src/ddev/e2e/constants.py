@@ -1,3 +1,7 @@
+# (C) Datadog, Inc. 2024-present
+# All rights reserved
+# Licensed under a 3-clause BSD style license (see LICENSE)
+
 DEFAULT_AGENT_TYPE = 'docker'
 DEFAULT_DOGSTATSD_PORT = 8125
 ENV_VAR_PREFIX = 'DDEV_E2E_ENV_'

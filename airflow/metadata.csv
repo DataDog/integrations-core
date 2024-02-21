@@ -38,6 +38,8 @@ airflow.pool.running_slots,gauge,,,,Number of running slots in the pool,0,airflo
 airflow.pool.starving_tasks,gauge,,task,,Number of starving tasks in the pool,-1,airflow,pool.starving_tasks,
 airflow.dagrun.dependency_check,gauge,,millisecond,,Milliseconds taken to check DAG dependencies,-1,airflow,dagrun.dep_check,
 airflow.dag.task.duration,gauge,,millisecond,,Milliseconds taken to finish a task,-1,airflow,dag.task.duration,
+airflow.dag.task.ongoing_duration,gauge,,second,,Current duration for ongoing DAG tasks,-1,airflow,dag.task.ongoing_duration,
+airflow.dag.task.total_running,gauge,,,,Total number of running tasks,-1,airflow,dag.task.total_running,
 airflow.dag_processing.last_duration,gauge,,millisecond,,Milliseconds taken to load the given DAG file,-1,airflow,dag_proc.last_duration,
 airflow.dagrun.duration.success,gauge,,millisecond,,Milliseconds taken for a DagRun to reach success state,-1,airflow,dagrun.duration.success,
 airflow.dagrun.duration.failed,gauge,,millisecond,,Milliseconds taken for a DagRun to reach failed state,-1,airflow,dagrun.duration.failed,

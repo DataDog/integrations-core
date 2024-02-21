@@ -50,6 +50,7 @@ def test_e2e_profile_generic_lldp(dd_agent_check):
         'profile': 'generic-lldp',
         'status': 1,
         'sys_object_id': '1.2.3.99999',
+        'device_type': 'other',
     }
     device['tags'] = common_tags
     assert_device_metadata(aggregator, device)

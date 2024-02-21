@@ -26,7 +26,6 @@
     "homepage": "https://www.datadoghq.com",
     "sales_email": "info@datadoghq.com"
   },
-  "oauth": {},
   "assets": {
     "integration": {
       "source_type_name": "OpenStack",
@@ -46,7 +45,9 @@
       },
       "process_signatures": [
         "stack.sh"
-      ]
+      ],
+      "source_type_id": 125,
+      "auto_install": true
     },
     "dashboards": {
       "openstack": "assets/dashboards/openstack_dashboard.json"

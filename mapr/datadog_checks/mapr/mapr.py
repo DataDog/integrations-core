@@ -165,7 +165,7 @@ class MaprCheck(AgentCheck):
         self._conn = ck.Consumer(
             {
                 "group.id": "dd-agent",  # uniquely identify this consumer
-                "enable.auto.commit": False  # important, do not store the offset for this consumer,
+                "enable.auto.commit": False,  # important, do not store the offset for this consumer,
                 # if we do it just once the mapr library has a bug/feature which prevents resetting it to the head
             }
         )

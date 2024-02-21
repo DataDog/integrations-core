@@ -128,3 +128,12 @@ def is_azure_database(engine_edition):
     :return: bool
     """
     return engine_edition == ENGINE_EDITION_AZURE_MANAGED_INSTANCE or engine_edition == ENGINE_EDITION_SQL_DATABASE
+
+
+def is_azure_sql_database(engine_edition):
+    """
+    Checks if engine edition matches Azure SQL DB
+    :param engine_edition: The engine version of the database host
+    :return: bool
+    """
+    return engine_edition == ENGINE_EDITION_SQL_DATABASE

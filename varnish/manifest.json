@@ -26,7 +26,6 @@
     "homepage": "https://www.datadoghq.com",
     "sales_email": "info@datadoghq.com"
   },
-  "oauth": {},
   "assets": {
     "integration": {
       "source_type_name": "Varnish",
@@ -47,7 +46,9 @@
       },
       "service_checks": {
         "metadata_path": "assets/service_checks.json"
-      }
+      },
+      "source_type_id": 29,
+      "auto_install": true
     },
     "dashboards": {
       "varnish": "assets/dashboards/varnish_dashboard.json"

@@ -20,7 +20,7 @@ MOCKED_TOPIC_OPERATOR_TAG = f'endpoint:{MOCKED_TOPIC_OPERATOR_INSTANCE["topic_op
 
 MOCKED_USER_OPERATOR_TAG = f'endpoint:{MOCKED_USER_OPERATOR_INSTANCE["user_operator_endpoint"]}'
 
-CLUSTER_OPERATOR_METRICS = (
+CLUSTER_OPERATOR_METRICS = [
     "strimzi.cluster_operator.jvm.buffer.count_buffers",
     "strimzi.cluster_operator.jvm.buffer.memory_used_bytes",
     "strimzi.cluster_operator.jvm.buffer.total_capacity_bytes",
@@ -100,7 +100,11 @@ CLUSTER_OPERATOR_METRICS = (
     "strimzi.cluster_operator.vertx.pool.usage_seconds.count",
     "strimzi.cluster_operator.vertx.pool.usage_seconds.max",
     "strimzi.cluster_operator.vertx.pool.usage_seconds.sum",
-)
+]
+
+E2E_CLUSTER_OPERATOR_METRICS = CLUSTER_OPERATOR_METRICS + [
+    "strimzi.cluster_operator.reconciliations.failed.count",
+]
 
 TOPIC_OPERATOR_METRICS = (
     "strimzi.topic_operator.jvm.gc.memory_promoted_bytes.count",
@@ -201,6 +205,7 @@ USER_OPERATOR_METRICS = (
 )
 
 FLAKY_E2E_METRICS = (
+    "strimzi.cluster_operator.reconciliations.failed.count",
     "strimzi.cluster_operator.reconciliations.periodical.count",
     "strimzi.cluster_operator.resources.paused",
     "strimzi.cluster_operator.vertx.http_client.active_connections",

@@ -41,7 +41,9 @@
       },
       "process_signatures": [
         "torchserve"
-      ]
+      ],
+      "source_type_id": 10357,
+      "auto_install": true
     },
     "monitors": {
       "error_ratio": "assets/monitors/error_ratio.json"
@@ -58,6 +60,5 @@
     "name": "Datadog",
     "homepage": "https://www.datadoghq.com",
     "sales_email": "info@datadoghq.com"
-  },
-  "oauth": {}
+  }
 }

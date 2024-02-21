@@ -27,7 +27,6 @@
     "homepage": "https://www.datadoghq.com",
     "sales_email": "info@datadoghq.com"
   },
-  "oauth": {},
   "assets": {
     "integration": {
       "source_type_name": "Redis",
@@ -45,7 +44,11 @@
       "service_checks": {
         "metadata_path": "assets/service_checks.json"
       },
-      "process_signatures": ["redis-server"]
+      "process_signatures": [
+        "redis-server"
+      ],
+      "source_type_id": 21,
+      "auto_install": true
     },
     "dashboards": {
       "redis": "assets/dashboards/overview.json"

@@ -1,0 +1,5 @@
+python-dotenv==1.0.0
+urllib3==2.2.0
+auditwheel==6.0.0; sys_platform == 'linux'
+delvewheel==1.5.2; sys_platform == 'win32'
+delocate==0.10.7; sys_platform == 'darwin'

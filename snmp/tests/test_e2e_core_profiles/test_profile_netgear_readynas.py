@@ -141,6 +141,7 @@ def test_e2e_profile_netgear_readynas(dd_agent_check):
         'status': 1,
         'sys_object_id': '1.3.6.1.4.1.4526.100.16.1',
         'vendor': 'netgear',
+        'device_type': 'storage',
     }
     device['tags'] = common_tags
     assert_device_metadata(aggregator, device)

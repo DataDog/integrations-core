@@ -497,7 +497,7 @@
                 "id": 7327292918773178,
                 "definition": {
                     "type": "note",
-                    "content": "This section shows messages at different stages of their journey. These message pipelines are filtered by the channel and queue levels in the time series graphs, and broken down to the node and connection levels in the pie charts. ",
+                    "content": "This section shows messages at different stages of their journey. These message pipelines are filtered by the channel and queue levels in the timeseries graphs, and broken down to the node and connection levels in the pie charts. ",
                     "background_color": "orange",
                     "font_size": "14",
                     "text_align": "center",

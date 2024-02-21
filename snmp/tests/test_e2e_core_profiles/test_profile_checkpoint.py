@@ -176,6 +176,7 @@ def test_e2e_profile_checkpoint(dd_agent_check):
         'vendor': 'checkpoint',
         'version': 'R80.10',
         'tags': common_tags,
+        'device_type': 'firewall',
     }
     assert_device_metadata(aggregator, device)
 

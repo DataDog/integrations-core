@@ -2,11 +2,11 @@
   "version": 2,
   "created_at": "2022-03-14",
   "last_updated_at": "2022-05-25",
-  "title": "FoundationDB High Level of Conflicted Transactions",
+  "title": "Transactions are conflicting",
   "tags": [
     "integration:foundationdb"
   ],
-  "description": "Get notified when a significant portion of transactions started are ending up in a conflicted state.",
+  "description": "Transaction conflicts happen where multiple transactions contend for the same resources. This monitor tracks the conflict rate in FoundationDB to indicate issues with data concurrency that may impact system performance or data consistency.",
   "definition": {
     "message": "A significant proportion of transactions started are ending up in a conflicted state. This may indicate a query design problem.",
     "name": "FoundationDB High Level of Conflicted Transactions",

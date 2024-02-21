@@ -1,0 +1,35 @@
+{
+  "name": "Tomcat status code evolution",
+  "type": "logs",
+  "page": "analytics",
+  "query": "source:tomcat",
+  "timerange": {
+    "interval_ms": 3600000
+  },
+  "visible_facets": [
+    "source",
+    "service",
+    "host",
+    "status",
+    "@http.status_code",
+    "@http.method",
+    "@http.url_details.path",
+    "@network.client.ip"
+  ],
+  "options": {
+    "group_bys": [
+      {
+        "facet": "@http.status_code"
+      }
+    ],
+    "aggregations": [
+      {
+        "metric": "count",
+        "type": "count"
+      }
+    ],
+    "step_ms": "30000",
+    "limit": "50",
+    "widget": "timeseries"
+  }
+}

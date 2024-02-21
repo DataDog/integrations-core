@@ -26,7 +26,6 @@
     "homepage": "https://www.datadoghq.com",
     "sales_email": "info@datadoghq.com"
   },
-  "oauth": {},
   "assets": {
     "integration": {
       "source_type_name": "Solr",
@@ -44,7 +43,11 @@
       "service_checks": {
         "metadata_path": "assets/service_checks.json"
       },
-      "process_signatures": ["solr start"]
+      "process_signatures": [
+        "solr start"
+      ],
+      "source_type_id": 42,
+      "auto_install": true
     },
     "dashboards": {
       "solr": "assets/dashboards/solr_dashboard.json"
