@@ -9,7 +9,7 @@ from ddev.cli.release.branch.create import create
 @click.group(short_help='Manage release branches')
 def branch():
     """
-    Manage release branches.
+    Manage Agent release branches.
     """
 
 
