@@ -1112,8 +1112,7 @@
                 "x": 0,
                 "y": 21,
                 "width": 12,
-                "height": 7,
-                "is_column_break": true
+                "height": 7
             }
         },
         {
@@ -1630,7 +1629,8 @@
                 "x": 0,
                 "y": 28,
                 "width": 12,
-                "height": 11
+                "height": 11,
+                "is_column_break": true
             }
         },
         {
