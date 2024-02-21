@@ -79,6 +79,9 @@ facets:
     path: InitiatorBytes
     source: log
     type: integer
+    unit:
+      name: byte
+      family: bytes
   - facetType: range
     groups:
       - Cisco Secure Firewall
@@ -135,6 +138,9 @@ facets:
     path: ResponderBytes
     source: log
     type: integer
+    unit:
+      name: byte
+      family: bytes
   - facetType: range
     groups:
       - Cisco Secure Firewall
