@@ -33,12 +33,5 @@ class TeleportCheck(OpenMetricsBaseCheckV2):
 
     def _parse_config(self):
         if self.diagnostic_url:
-            self.instance.setdefault("openmetrics_endpoint", self.diagnostic_url+"/metrics")
-
-        # if diagnostic_url:
-        #     # We create another config to scrape Gitaly metrics, so we have two different scrapers:
-        #     # one for the main GitLab and another one for the Gitaly endpoint.
-        #     config = copy.deepcopy(self.instance)
-        #     config['openmetrics_endpoint'] = diagnostic_url + "/metrics"
-        #     config['namespace'] = 'teleport'
-        #     self.scraper_configs.append(config)
+            self.instance.setdefault("openmetrics_endpoint", self.diagnostic_url + "/metrics")
+            self.instance.setdefault("metrics", ["process_state"])
