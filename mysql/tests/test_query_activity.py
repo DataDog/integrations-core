@@ -24,8 +24,8 @@ from datadog_checks.mysql.util import StatementTruncationState
 
 from .common import CHECK_NAME, HOST, MYSQL_VERSION_PARSED, PORT
 
-#Boris t check if query runs
-from . import tags
+#Boris not sure if needed
+import threading
 
 ACTIVITY_JSON_PLANS_DIR = os.path.join(os.path.dirname(os.path.abspath(__file__)), "activity")
 
@@ -52,66 +52,74 @@ def dbm_instance(instance_complex):
     return copy(instance_complex)
 
 #Boris exclude MariaDB
-#make test shorter mark as flacky ? 
+#mark as flacky(Nenand's suggestion) ? 
+#Boris test on different versions of MySQL
 @pytest.mark.integration
 @pytest.mark.usefixtures('dd_environment')
 def test_deadlocks(aggregator, dd_run_check, dbm_instance):
-    #set up
-
     check = MySql(CHECK_NAME, {}, [dbm_instance])
     dd_run_check(check)
     deadlocks_start = 0
     deadlock_metric_start =  aggregator.metrics("mysql.innodb.deadlocks")
-    if len(deadlock_metric_start)>0:
-        deadlocks_start = deadlock_metric_start[0].value
+    assert len(deadlock_metric_start) == 1, "there should be one deadlock metric"
+    deadlocks_start = deadlock_metric_start[0].value
 
-#refacrtor these 2 functions
-    def run_first_deadlock_query(conn):
+    first_query = "SELECT * FROM testdb.users WHERE id = 1 FOR UPDATE;"
+    second_query = "SELECT * FROM testdb.users WHERE id = 2 FOR UPDATE;"
+
+    def run_first_deadlock_query(conn, event1, event2):
         conn.begin()
+        #Boris change for with ? if exception is caught in this thread it doesnt matter 
+        # but better for debugging
         try:
             conn.cursor().execute("START TRANSACTION;")
-            conn.cursor().execute("UPDATE testdb.users SET age = 32 WHERE id = 1;") 
-            conn.cursor().execute("SELECT SLEEP(3);")
-            conn.cursor().execute("UPDATE testdb.users SET age = 32 WHERE id = 2;")
+            conn.cursor().execute(first_query) 
+            event1.set()
+            event2.wait()
+            conn.cursor().execute(second_query)
             conn.cursor().execute("COMMIT;")
         except Exception as e:
-            print("Error occurred:", e)
-        conn.commit()
-    def run_second_deadlock_query(conn):
+            #Exception is expected due to a deadlock
+            pass
+        conn.commit() 
+ 
+    def run_second_deadlock_query(conn, event1, event2):
         conn.begin()
         try:
+            event1.wait()
             conn.cursor().execute("START TRANSACTION;")
-            conn.cursor().execute("UPDATE testdb.users SET age = 32 WHERE id = 2;") 
-            conn.cursor().execute("SELECT SLEEP(3);")
-            conn.cursor().execute("UPDATE testdb.users SET age = 32 WHERE id = 1;")
+            conn.cursor().execute(second_query)   
+            event2.set()
+            conn.cursor().execute(first_query)
             conn.cursor().execute("COMMIT;")
         except Exception as e:
-            print("Error occurred:", e)
-        conn.commit()
+            #Exception is expected due to a deadlock
+            pass
+        conn.commit()      
 
-
-    bob_conn = _get_conn_for_user('bob', False)
-    fred_conn = _get_conn_for_user('fred', False)
+    bob_conn = _get_conn_for_user('bob')
+    fred_conn = _get_conn_for_user('fred')
 
     executor = concurrent.futures.thread.ThreadPoolExecutor(2)
-    executor.submit(run_first_deadlock_query, bob_conn)
-    time.sleep(1.5)
-    executor.submit(run_second_deadlock_query, fred_conn)
-    time.sleep(8)
+ 
+    event1 = threading.Event()
+    event2 = threading.Event()
+
+    executor.submit(run_first_deadlock_query, bob_conn, event1, event2)
+    executor.submit(run_second_deadlock_query, fred_conn, event1, event2)
+    #Boris give some time for DB to update or superfluous ? 
+    time.sleep(0.5)
 
     bob_conn.close()
     fred_conn.close()
+
     dd_run_check(check)
 
     executor.shutdown()
 
-    deadlock_metric =  aggregator.metrics("mysql.innodb.deadlocks")
-    if len(deadlock_metric)>0:
-        for_debug = deadlock_metric[1].value
-    else:
-        for_debug = 0
+    deadlock_metric_end =  aggregator.metrics("mysql.innodb.deadlocks")
 
-    assert for_debug - deadlocks_start == 1, "there should be one deadlock"
+    assert len(deadlock_metric_end) == 2 and deadlock_metric_end[1].value - deadlocks_start == 1, "there should be one new deadlock"
 
 
 @pytest.mark.integration
