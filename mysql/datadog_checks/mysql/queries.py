@@ -85,9 +85,6 @@ QUERY_DEADLOCKS = {
             NAME='lock_deadlocks'
     """.strip(),
     'columns': [{'name': 'mysql.innodb.deadlocks', 'type': 'gauge'}],
-                #Boris name ?
-                #Boris name ?
-
 }
 
 QUERY_USER_CONNECTIONS = {

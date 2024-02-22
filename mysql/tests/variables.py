@@ -90,7 +90,7 @@ INNODB_VARS = [
     'mysql.innodb.buffer_pool_read_requests',
     'mysql.innodb.buffer_pool_reads',
     'mysql.innodb.buffer_pool_utilization',
-    'mysql.innodb.deadlocks', #Boris may be was a bad name
+    'mysql.innodb.deadlocks',
 ]
 
 COMPLEX_INNODB_VARS = [

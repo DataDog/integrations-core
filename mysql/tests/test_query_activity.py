@@ -11,6 +11,7 @@ from contextlib import closing
 from copy import copy
 from datetime import datetime
 from os import environ
+from threading import Event
 
 import mock
 import pymysql
@@ -24,11 +25,7 @@ from datadog_checks.mysql.util import StatementTruncationState
 
 from .common import CHECK_NAME, HOST, MYSQL_VERSION_PARSED, PORT
 
-#Boris not sure if needed
-import threading
-
 ACTIVITY_JSON_PLANS_DIR = os.path.join(os.path.dirname(os.path.abspath(__file__)), "activity")
-
 
 @pytest.fixture(autouse=True)
 def stop_orphaned_threads():
@@ -51,9 +48,6 @@ def dbm_instance(instance_complex):
     instance_complex['collect_settings'] = {'enabled': False}
     return copy(instance_complex)
 
-#Boris exclude MariaDB
-#mark as flacky(Nenand's suggestion) ? 
-#Boris test on different versions of MySQL
 @pytest.mark.integration
 @pytest.mark.usefixtures('dd_environment')
 def test_deadlocks(aggregator, dd_run_check, dbm_instance):
@@ -61,7 +55,13 @@ def test_deadlocks(aggregator, dd_run_check, dbm_instance):
     dd_run_check(check)
     deadlocks_start = 0
     deadlock_metric_start =  aggregator.metrics("mysql.innodb.deadlocks")
+
     assert len(deadlock_metric_start) == 1, "there should be one deadlock metric"
+
+    if environ.get('MYSQL_FLAVOR') == 'mariadb':
+        #Skip the test below as count is not updated in MariaDB
+        return
+    
     deadlocks_start = deadlock_metric_start[0].value
 
     first_query = "SELECT * FROM testdb.users WHERE id = 1 FOR UPDATE;"
@@ -69,8 +69,6 @@ def test_deadlocks(aggregator, dd_run_check, dbm_instance):
 
     def run_first_deadlock_query(conn, event1, event2):
         conn.begin()
-        #Boris change for with ? if exception is caught in this thread it doesnt matter 
-        # but better for debugging
         try:
             conn.cursor().execute("START TRANSACTION;")
             conn.cursor().execute(first_query) 
@@ -102,20 +100,20 @@ def test_deadlocks(aggregator, dd_run_check, dbm_instance):
 
     executor = concurrent.futures.thread.ThreadPoolExecutor(2)
  
-    event1 = threading.Event()
-    event2 = threading.Event()
+    event1 = Event()
+    event2 = Event()
 
-    executor.submit(run_first_deadlock_query, bob_conn, event1, event2)
-    executor.submit(run_second_deadlock_query, fred_conn, event1, event2)
-    #Boris give some time for DB to update or superfluous ? 
-    time.sleep(0.5)
-
+    futures_first_query = executor.submit(run_first_deadlock_query, bob_conn, event1, event2)
+    futures_second_query = executor.submit(run_second_deadlock_query, fred_conn, event1, event2)
+    futures_first_query.result()
+    futures_second_query.result()
+    # Make sure innodb is updated.
+    time.sleep(0.3)
     bob_conn.close()
     fred_conn.close()
+    executor.shutdown()
 
     dd_run_check(check)
-
-    executor.shutdown()
 
     deadlock_metric_end =  aggregator.metrics("mysql.innodb.deadlocks")
 
@@ -229,7 +227,7 @@ def test_activity_reported_hostname(aggregator, dbm_instance, dd_run_check, repo
     dbm_instance['reported_hostname'] = reported_hostname
     check = MySql(CHECK_NAME, {}, [dbm_instance])
 
-    dd_run_check(check)#Boris why 2 times dd_run_check?
+    dd_run_check(check)
     dd_run_check(check)
 
     dbm_activity = aggregator.get_event_platform_events("dbm-activity")
