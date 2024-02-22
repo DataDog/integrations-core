@@ -1,6 +1,6 @@
 {
     "title": "Airflow Overview",
-    "description": "## Airflow\n\nThis dashboard provides a high-level overview of your Airflow instances so you can monitor metrics related to DAGs, tasks, pools and executors.\n\nFor further reading on monitoring Airflow, see:\n\n- [Official Airflow integration docs](https://docs.datadoghq.com/integrations/airflow/#data-collected)\n\nClone this template to make changes and add your own graphs and widgets.",
+    "description": "## Airflow\n\nThis dashboard provides a high-level overview of your Airflow instances so you can monitor metrics related to DAGs, tasks, pools and executors.\n\nFor further reading on monitoring Airflow, see:\n\n- [Official Airflow integration docs](https://docs.datadoghq.com/integrations/airflow/#data-collected)\n  \nClone this template to make changes and add your own graphs and widgets.",
     "widgets": [
         {
             "definition": {
@@ -278,7 +278,7 @@
             "id": 7581149594351844,
             "definition": {
                 "title": "Airflow Schedulers & Executors",
-                "background_color": "vivid_orange",
+                "background_color": "vivid_purple",
                 "show_title": true,
                 "type": "group",
                 "layout_type": "ordered",
@@ -288,7 +288,7 @@
                         "definition": {
                             "type": "note",
                             "content": "Airflow scheduler and executor metrics provide insights into the performance and behavior of the Airflow scheduler and task executors, allowing operators and developers to monitor and optimize the scheduling and execution of tasks within Airflow DAGs",
-                            "background_color": "orange",
+                            "background_color": "purple",
                             "font_size": "14",
                             "text_align": "center",
                             "vertical_align": "center",
@@ -319,6 +319,7 @@
                                 "value",
                                 "sum"
                             ],
+                            "time": {},
                             "type": "timeseries",
                             "requests": [
                                 {
@@ -337,7 +338,7 @@
                                     ],
                                     "response_format": "timeseries",
                                     "style": {
-                                        "palette": "warm",
+                                        "palette": "purple",
                                         "line_type": "solid",
                                         "line_width": "normal"
                                     },
@@ -368,6 +369,7 @@
                                 "value",
                                 "sum"
                             ],
+                            "time": {},
                             "type": "timeseries",
                             "requests": [
                                 {
@@ -386,7 +388,7 @@
                                     ],
                                     "response_format": "timeseries",
                                     "style": {
-                                        "palette": "warm",
+                                        "palette": "purple",
                                         "line_type": "solid",
                                         "line_width": "normal"
                                     },
@@ -416,6 +418,7 @@
                                 "value",
                                 "sum"
                             ],
+                            "time": {},
                             "type": "timeseries",
                             "requests": [
                                 {
@@ -443,7 +446,7 @@
                                     ],
                                     "response_format": "timeseries",
                                     "style": {
-                                        "palette": "warm",
+                                        "palette": "purple",
                                         "line_type": "solid",
                                         "line_width": "normal"
                                     },
@@ -474,6 +477,7 @@
                                 "value",
                                 "sum"
                             ],
+                            "time": {},
                             "type": "timeseries",
                             "requests": [
                                 {
@@ -492,7 +496,7 @@
                                     ],
                                     "response_format": "timeseries",
                                     "style": {
-                                        "palette": "warm",
+                                        "palette": "purple",
                                         "line_type": "solid",
                                         "line_width": "normal"
                                     },
@@ -523,6 +527,7 @@
                                 "value",
                                 "sum"
                             ],
+                            "time": {},
                             "type": "timeseries",
                             "requests": [
                                 {
@@ -559,7 +564,7 @@
                                     ],
                                     "response_format": "timeseries",
                                     "style": {
-                                        "palette": "warm",
+                                        "palette": "purple",
                                         "line_type": "solid",
                                         "line_width": "normal"
                                     },
@@ -849,12 +854,16 @@
                                 "value",
                                 "sum"
                             ],
+                            "time": {},
                             "type": "timeseries",
                             "requests": [
                                 {
                                     "formulas": [
                                         {
                                             "alias": "Failures",
+                                            "style": {
+                                                "palette": "red"
+                                            },
                                             "formula": "query1"
                                         },
                                         {
