@@ -345,6 +345,7 @@ class MySql(AgentCheck):
             return self._runtime_queries
 
         queries = [QUERY_DEADLOCKS]
+
         if self.performance_schema_enabled:
             queries.extend([QUERY_USER_CONNECTIONS])
 
