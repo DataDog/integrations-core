@@ -1,4 +1,4 @@
-ARG BASE_IMAGE=quay.io/pypa/manylinux2010_x86_64
+ARG BASE_IMAGE=quay.io/pypa/manylinux2014_aarch64
 FROM ${BASE_IMAGE}
 
 ARG SOURCE_DATE_EPOCH
@@ -22,14 +22,15 @@ RUN yum install -y openssl-devel && \
  VERSION="${PYTHON2_VERSION}" \
  SHA256="da3080e3b488f648a3d7a4560ddee895284c3380b11d6de75edb986526b9a814" \
  RELATIVE_PATH=Python-{{version}} \
+ INSTALL_COMMAND="make altinstall" \
  bash install-from-source.sh \
  --prefix=/opt/python/${PYTHON2_VERSION} --with-ensurepip=yes --enable-shared --enable-ipv6 --enable-unicode=ucs4 \
  && yum remove -y openssl-devel
 
-ENV LD_LIBRARY_PATH="/opt/python/${PYTHON2_VERSION}/lib:${LD_LIBRARY_PATH}"
 # Set up virtual environment for Python 2
-RUN /opt/python/${PYTHON2_VERSION}/bin/python -m pip install --no-warn-script-location virtualenv \
- && /opt/python/${PYTHON2_VERSION}/bin/python -m virtualenv /py2
+RUN export LD_LIBRARY_PATH="/opt/python/${PYTHON2_VERSION}/lib:${LD_LIBRARY_PATH}"; \
+ /opt/python/${PYTHON2_VERSION}/bin/python2.7 -m pip install --no-warn-script-location virtualenv \
+ && /opt/python/${PYTHON2_VERSION}/bin/python2.7 -m virtualenv /py2
 
 # openssl
 RUN yum install -y perl-IPC-Cmd && \
@@ -37,13 +38,21 @@ RUN yum install -y perl-IPC-Cmd && \
  VERSION="3.0.12" \
  SHA256="f93c9e8edde5e9166119de31755fc87b4aa34863662f67ddfcba14d0b6b69b61" \
  RELATIVE_PATH="openssl-{{version}}" \
+ # https://docs.python.org/3/using/unix.html#custom-openssl
+ INSTALL_COMMAND="make install_sw" \
  # no-module prevents the creation of dynamically loaded modules that would be problematic to bundle into Python wheels
  CONFIGURE_SCRIPT="./config" \
  bash install-from-source.sh \
+ --prefix=/usr/local/ssl \
+ --openssldir=/etc/pki/tls \
+ --libdir=lib \
  -fPIC shared \
  # This prevents the creation of dynamically loaded modules that would be problematic to bundle into Python wheels
  no-module \
- no-comp no-idea no-mdc2 no-rc5 no-ssl3 no-gost
+ no-comp no-idea no-mdc2 no-rc5 no-ssl3 no-gost && \
+ echo /usr/local/lib >> /etc/ld.so.conf.d/lib.conf && \
+ echo /usr/local/ssl/lib >> /etc/ld.so.conf.d/openssl.conf && \
+ ldconfig
 
 # Compile and install Python 3
 ENV PYTHON3_VERSION=3.11.5
@@ -52,35 +61,33 @@ RUN yum install -y libffi-devel && \
  VERSION="${PYTHON3_VERSION}" \
  SHA256="a12a0a013a30b846c786c010f2c19dd36b7298d888f7c4bd1581d90ce18b5e58" \
  RELATIVE_PATH="Python-{{version}}" \
- bash install-from-source.sh --prefix=/opt/python/${PYTHON_VERSION} --with-ensurepip=yes --enable-shared --enable-ipv6 --with-dbmliborder=
+ bash install-from-source.sh \
+ --prefix=/opt/python/${PYTHON_VERSION} \
+ --with-openssl=/usr/local/ssl \
+ --with-openssl-rpath=auto \
+ --with-ensurepip=yes \
+ --enable-shared \
+ --enable-ipv6 \
+ --with-dbmliborder=
 ENV PATH="/opt/python/${PYTHON_VERSION}/bin:${PATH}"
-ENV LD_LIBRARY_PATH="/opt/python/${PYTHON_VERSION}/lib:${LD_LIBRARY_PATH}"
 # Set up virtual environment for Python 3
-RUN /opt/python/${PYTHON_VERSION}/bin/python3 -m pip install --no-warn-script-location --upgrade pip \
+RUN export LD_LIBRARY_PATH="/opt/python/${PYTHON_VERSION}/lib:${LD_LIBRARY_PATH}"; \
+ /opt/python/${PYTHON_VERSION}/bin/python3 -m pip install --no-warn-script-location --upgrade pip \
  && /opt/python/${PYTHON_VERSION}/bin/python3 -m pip install --no-warn-script-location virtualenv \
  && /opt/python/${PYTHON_VERSION}/bin/python3 -m virtualenv /py3
 
 # Rust toolchain
 ENV RUST_VERSION="nightly-2022-05-15"
-ENV RUSTC_SHA256="3dc5ef50861ee18657f9db2eeb7392f9c2a6c95c90ab41e45ab4ca71476b4338"
+ENV RUSTC_SHA256="32a1532f7cef072a667bac53f1a5542c99666c4071af0c9549795bbdb2069ec1"
 ENV RUSTUP_VERSION="1.24.3"
-ENV RUSTUP_SHA256="3dc5ef50861ee18657f9db2eeb7392f9c2a6c95c90ab41e45ab4ca71476b4338"
-RUN curl -sSL -o rustup-init "https://static.rust-lang.org/rustup/archive/${RUSTUP_VERSION}/x86_64-unknown-linux-gnu/rustup-init" \
+ENV RUSTUP_SHA256="32a1532f7cef072a667bac53f1a5542c99666c4071af0c9549795bbdb2069ec1"
+RUN curl -sSL -o rustup-init "https://static.rust-lang.org/rustup/archive/${RUSTUP_VERSION}/aarch64-unknown-linux-gnu/rustup-init" \
  && echo "${RUSTUP_SHA256}  rustup-init" | sha256sum --check \
  && chmod +x ./rustup-init \
  && ./rustup-init -y --profile minimal --default-toolchain "${RUST_VERSION}" \
  && echo "${RUSTC_SHA256}  $HOME/.cargo/bin/rustc" | sha256sum --check \
  && rm ./rustup-init
 ENV PATH="/root/.cargo/bin:${PATH}"
-
-# MQ Client library required by pymqi
-ENV IBM_MQ_VERSION="9.2.4.0"
-ENV IBM_MQ_SHA256="d0d583eba72daf20b3762976f8831c2e23150ace90509520e12f8cda5b5bdb49"
-RUN mkdir -p /opt/mqm \
- && curl "https://s3.amazonaws.com/dd-agent-omnibus/ibm-mq-backup/${IBM_MQ_VERSION}-IBM-MQC-Redist-LinuxX64.tar.gz" -o /tmp/mq_client.tar.gz \
- && echo "${IBM_MQ_SHA256}  /tmp/mq_client.tar.gz" | sha256sum --check \
- && tar -C /opt/mqm -xf /tmp/mq_client.tar.gz \
- && rm -rf /tmp/mq_client.tar.gz
 
 # krb5 for dependencies that require kerberos support
 RUN \
@@ -121,6 +128,7 @@ RUN \
  --disable-static
 
 # libpq and pg_config as needed by psycopg2
+RUN yum install openssl-devel -y
 RUN \
  DOWNLOAD_URL="https://ftp.postgresql.org/pub/source/v{{version}}/postgresql-{{version}}.tar.bz2" \
  VERSION="16.0" \
@@ -186,8 +194,14 @@ RUN \
     --without-gnutls \
     --without-librtmp \
     --without-libssh2 \
-    --with-ssl=/usr/local \
+    --with-ssl=/usr/local/ssl \
  && rm /usr/local/bin/curl
+
+# https://doc.rust-lang.org/cargo/reference/config.html#netgit-fetch-with-cli
+# https://github.com/rust-lang/cargo/issues/10762
+ENV CARGO_NET_GIT_FETCH_WITH_CLI="true"
+
+ENV LD_LIBRARY_PATH="/opt/python/${PYTHON_VERSION}/lib:/opt/python/${PYTHON2_VERSION}/lib:${LD_LIBRARY_PATH}"
 
 # Environment variables to help openssl crate find OpenSSL
 ENV OPENSSL_LIB_DIR="/usr/local/lib64"
@@ -200,6 +214,6 @@ RUN python3 -m pip install --no-warn-script-location -r /runner_dependencies.txt
 COPY build_script.sh /build_script.sh
 ENV DD_BUILD_COMMAND="bash /build_script.sh"
 
-ENV MANYLINUX_POLICY="manylinux2010_x86_64"
+ENV MANYLINUX_POLICY="manylinux2014_aarch64"
 
 ENTRYPOINT ["python3", "/home/scripts/build_wheels.py"]
