@@ -1295,14 +1295,12 @@ def test_networks_pagination(
             limit = params.get('limit')
             args_list += [(args[0], limit)]
         assert (
-            args_list.count(('http://127.0.0.1:9696/networking/v2.0/networks', paginated_limit))
-            == expected_api_calls
+            args_list.count(('http://127.0.0.1:9696/networking/v2.0/networks', paginated_limit)) == expected_api_calls
         )
 
     else:
         assert (
-            connection_compute.networks.call_args_list.count(mock.call(details=True, limit=paginated_limit))
-            == expected_api_calls
+            connection_compute.networks.call_args_list.count(mock.call(details=True, limit=paginated_limit)) == expected_api_calls
         )
 
 
