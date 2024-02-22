@@ -890,7 +890,6 @@ def test_statement_samples_enable_consumers(dd_run_check, dbm_instance, root_con
     mysql_check = MySql(common.CHECK_NAME, {}, [dbm_instance])
 
     all_consumers = {'events_statements_current', 'events_statements_history', 'events_statements_history_long'}
-    all_consumers_gt_8_0_28 = all_consumers.union({'events_statements_cpu'})  # CPU consumer was added in MySQL 8.0.28
 
     # deliberately disable one of the consumers
     consumer_to_disable = 'events_statements_history_long'
@@ -908,7 +907,7 @@ def test_statement_samples_enable_consumers(dd_run_check, dbm_instance, root_con
     enabled_consumers = mysql_check._statement_samples._get_enabled_performance_schema_consumers()
     if events_statements_enable_procedure == "datadog.enable_events_statements_consumers":
         # ensure that the consumer was re-enabled by the check run
-        assert enabled_consumers == all_consumers or enabled_consumers == all_consumers_gt_8_0_28
+        assert enabled_consumers == all_consumers
     else:
         # the consumer should not have been re-enabled
         assert enabled_consumers == original_enabled_consumers
