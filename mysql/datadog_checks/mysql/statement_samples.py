@@ -53,7 +53,8 @@ EVENTS_STATEMENTS_SAMPLE_EXCLUDE_KEYS = {
     'current_schema',
     # used for signature
     'digest_text',
-    'uptime' 'now',
+    'uptime',
+    'now',
     'timer_end',
     'max_timer_wait_ns',
     'timer_start',
