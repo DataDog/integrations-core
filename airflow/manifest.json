@@ -61,6 +61,10 @@
       "airflow_retry_logs": "assets/saved_views/airflow_retry_logs.json"
 >>>>>>> b33442b155 (add logs saved views)
     },
+    "monitors": {
+      "Heartbeat Failure": "assets/monitors/heartbeat_failures.json",
+      "Ongoing Duration": "assets/monitors/ongoing_duration.json"
+    },
     "logs": {
       "source": "airflow"
     }
