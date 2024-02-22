@@ -1300,7 +1300,8 @@ def test_networks_pagination(
 
     else:
         assert (
-            connection_compute.networks.call_args_list.count(mock.call(details=True, limit=paginated_limit)) == expected_api_calls
+            connection_compute.networks.call_args_list.count(mock.call(details=True, limit=paginated_limit))
+            == expected_api_calls
         )
 
 
