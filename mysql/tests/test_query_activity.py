@@ -27,6 +27,7 @@ from .common import CHECK_NAME, HOST, MYSQL_VERSION_PARSED, PORT
 
 ACTIVITY_JSON_PLANS_DIR = os.path.join(os.path.dirname(os.path.abspath(__file__)), "activity")
 
+
 @pytest.fixture(autouse=True)
 def stop_orphaned_threads():
     # make sure we shut down any orphaned threads and create a new Executor for each test
@@ -47,6 +48,7 @@ def dbm_instance(instance_complex):
     instance_complex['query_samples'] = {'enabled': False}
     instance_complex['collect_settings'] = {'enabled': False}
     return copy(instance_complex)
+
 
 @pytest.mark.integration
 @pytest.mark.usefixtures('dd_environment')
