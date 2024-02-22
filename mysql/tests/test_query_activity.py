@@ -478,20 +478,21 @@ def _expected_dbm_job_err_tags(dbm_instance):
         'dd.internal.resource:database_instance:stubbed.hostname',
     ]
 
+
 @pytest.mark.integration
 @pytest.mark.usefixtures('dd_environment')
 def test_deadlocks(aggregator, dd_run_check, dbm_instance):
     check = MySql(CHECK_NAME, {}, [dbm_instance])
     dd_run_check(check)
     deadlocks_start = 0
-    deadlock_metric_start =  aggregator.metrics("mysql.innodb.deadlocks")
+    deadlock_metric_start = aggregator.metrics("mysql.innodb.deadlocks")
 
     assert len(deadlock_metric_start) == 1, "there should be one deadlock metric"
 
     if environ.get('MYSQL_FLAVOR') == 'mariadb':
-        #Skip the test below as deadlock count is not updated in MariaDB
+        # Skip the test below as deadlock count is not updated in MariaDB
         return
-    
+
     deadlocks_start = deadlock_metric_start[0].value
 
     first_query = "SELECT * FROM testdb.users WHERE id = 1 FOR UPDATE;"
@@ -501,35 +502,35 @@ def test_deadlocks(aggregator, dd_run_check, dbm_instance):
         conn.begin()
         try:
             conn.cursor().execute("START TRANSACTION;")
-            conn.cursor().execute(first_query) 
+            conn.cursor().execute(first_query)
             event1.set()
             event2.wait()
             conn.cursor().execute(second_query)
             conn.cursor().execute("COMMIT;")
-        except Exception as e:
-            #Exception is expected due to a deadlock
+        except Exception:
+            # Exception is expected due to a deadlock
             pass
-        conn.commit() 
- 
+        conn.commit()
+
     def run_second_deadlock_query(conn, event1, event2):
         conn.begin()
         try:
             event1.wait()
             conn.cursor().execute("START TRANSACTION;")
-            conn.cursor().execute(second_query)   
+            conn.cursor().execute(second_query)
             event2.set()
             conn.cursor().execute(first_query)
             conn.cursor().execute("COMMIT;")
-        except Exception as e:
-            #Exception is expected due to a deadlock
+        except Exception:
+            # Exception is expected due to a deadlock
             pass
-        conn.commit()      
+        conn.commit()
 
     bob_conn = _get_conn_for_user('bob')
     fred_conn = _get_conn_for_user('fred')
 
     executor = concurrent.futures.thread.ThreadPoolExecutor(2)
- 
+
     event1 = Event()
     event2 = Event()
 
@@ -545,9 +546,12 @@ def test_deadlocks(aggregator, dd_run_check, dbm_instance):
 
     dd_run_check(check)
 
-    deadlock_metric_end =  aggregator.metrics("mysql.innodb.deadlocks")
+    deadlock_metric_end = aggregator.metrics("mysql.innodb.deadlocks")
 
-    assert len(deadlock_metric_end) == 2 and deadlock_metric_end[1].value - deadlocks_start == 1, "there should be one new deadlock"
+    assert (
+        len(deadlock_metric_end) == 2 and deadlock_metric_end[1].value - deadlocks_start == 1
+    ), "there should be one new deadlock"
+
 
 def _get_conn_for_user(user, _autocommit=False):
     return pymysql.connect(host=HOST, port=PORT, user=user, password=user, autocommit=_autocommit)

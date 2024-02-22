@@ -56,8 +56,8 @@ from .const import (
 from .innodb_metrics import InnoDBMetrics
 from .metadata import MySQLMetadata
 from .queries import (
-    QUERY_USER_CONNECTIONS,
     QUERY_DEADLOCKS,
+    QUERY_USER_CONNECTIONS,
     SQL_95TH_PERCENTILE,
     SQL_AVG_QUERY_RUN_TIME,
     SQL_GROUP_REPLICATION_MEMBER,
