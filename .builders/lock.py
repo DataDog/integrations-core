@@ -8,6 +8,7 @@ from hashlib import sha256
 from pathlib import Path
 
 from google.cloud import storage
+import packaging.tags
 from packaging.version import Version
 
 BUCKET_NAME = 'dd-agent-int-deps'
@@ -18,11 +19,22 @@ RESOLUTION_DIR = REPO_DIR / '.deps'
 LOCK_FILE_DIR = RESOLUTION_DIR / 'resolved'
 DIRECT_DEP_FILE = REPO_DIR / 'datadog_checks_base' / 'datadog_checks' / 'base' / 'data' / 'agent_requirements.in'
 CONSTANTS_FILE = REPO_DIR / 'ddev' / 'src' / 'ddev' / 'repo' / 'constants.py'
-TARGET_TAG_PATTERNS = {
-    'linux-x86_64': 'manylinux.*_x86_64|linux_x86_64',
-    'linux-aarch64': 'manylinux.*_aarch64',
-    'windows-x86_64': 'win_amd64',
-    'macos-x86_64': 'macosx.*_(x86_64|intel|universal2)',
+
+
+@cache
+def macosx_platform_tags():
+    tags = ['macosx', 'macosx_10_6_intel']
+    for version in ['10_7', '10_9', '10_10', '10_12', '10_15', '11_0']:
+        tags.extend([f'macosx_{version}_x86_64', f'macosx_{version}_universal2'])
+
+    return tags
+
+
+TARGET_PLATFORMS = {
+    'linux-x86_64': ['linux_x86_64', 'manylinux1_x86_64', 'manylinux_2_12_x86_64', 'manylinux2010_x86_64'],
+    'linux-aarch64': ['linux_aarch64', 'manylinux_2_17_aarch64', 'manylinux2014_aarch64'],
+    'windows-x86_64': ['win_amd64'],
+    'macos-x86_64': macosx_platform_tags(),
 }
 
 
@@ -33,30 +45,47 @@ def default_python_version() -> str:
     if not match:
         raise RuntimeError(f'Could not find PYTHON_VERSION in {CONSTANTS_FILE}')
 
-    return match.group(1)
+    return [int(x) for x in match.group(1).split('.')]
 
 
-def is_compatible_wheel(
-    target_name: str,
-    target_python_major: str,
-    interpreter: str,
-    abi: str,
-    platform: str,
-) -> bool:
-    if interpreter.startswith('cp'):
-        target_python = '2.7' if target_python_major == '2' else default_python_version()
-        expected_tag = f'cp{target_python_major}' if abi == 'abi3' else f'cp{target_python}'.replace('.', '')
-        if expected_tag not in interpreter:
-            return False
-    elif f'py{target_python_major}' not in interpreter:
-        return False
+@cache
+def tags_for_platform(platform, target_python_major):
+    python_version = [2, 7] if target_python_major == '2' else default_python_version()
+    abis = ['cp27m', 'cp27mu'] if target_python_major == '2' else [f'cp{"".join(map(str, python_version))}']
+    platforms = TARGET_PLATFORMS[platform]
+    return {
+        *packaging.tags.compatible_tags(python_version, platforms=platforms),
+        *packaging.tags.cpython_tags(python_version, abis=abis, platforms=platforms),
+    }
 
-    if platform != 'any':
-        target_tag_pattern = TARGET_TAG_PATTERNS[target_name]
-        if not re.search(target_tag_pattern, platform):
-            return False
 
-    return True
+def find_candidates_for_project(wheel_names, project, project_version, target, python_major):
+    """Filter the given `wheel_names` to match a given package-version pair for a
+    platform defined by the `target` and a Python major version
+    """
+    candidates = {}
+    for wheel_name in wheel_names:
+        if not wheel_name.endswith('.whl'):
+            continue
+
+        # A wheel filename is {distribution}-{version}(-{build tag})?-{python tag}-{abi tag}-{platform tag}.whl.
+        # https://packaging.python.org/en/latest/specifications/binary-distribution-format/#file-name-convention
+        _proj_name, proj_version, *build, interpreter, abi, platform = wheel_name[:-4].split('-')
+        if Version(proj_version) != project_version:
+            continue
+
+        # This is able to generate a set of tags out of a compressed tag set
+        # https://peps.python.org/pep-0425/#compressed-tag-sets
+        tagset = packaging.tags.parse_tag(f'{interpreter}-{abi}-{platform}')
+
+        # Check for compatibility by checking if the wheel's tags match any of the expected tags for this platform
+        if tagset.isdisjoint(tags_for_platform(target, python_major)):
+            continue
+
+        build_number = int(build[0]) if build else -1
+        candidates[build_number] = wheel_name
+
+    return candidates
 
 
 def generate_lock_file(requirements_file: Path, lock_file: Path) -> None:
@@ -80,27 +109,17 @@ def generate_lock_file(requirements_file: Path, lock_file: Path) -> None:
     for project, version in sorted(dependencies.items()):
         project_version = Version(version)
         for artifact_type in ('built', 'external'):
-            candidates = {}
-            for blob in bucket.list_blobs(prefix=f'{artifact_type}/{project}/'):
-                wheel_name = blob.name.split('/')[-1]
-                if not wheel_name.endswith('.whl'):
-                    continue
-
-                # https://packaging.python.org/en/latest/specifications/binary-distribution-format/#file-name-convention
-                _proj_name, proj_version, *build, interpreter, abi, platform = wheel_name[:-4].split('-')
-                if Version(proj_version) != project_version:
-                    continue
-
-                if not is_compatible_wheel(target, python_major, interpreter, abi, platform):
-                    continue
-
-                build_number = int(build[0]) if build else -1
-                candidates[build_number] = blob
-
+            candidates = find_candidates_for_project(
+                (blob.name.split('/')[-1] for blob in bucket.list_blobs(prefix=f'{artifact_type}/{project}/')),
+                project,
+                project_version,
+                target,
+                python_major,
+            )
             if not candidates:
                 continue
 
-            selected = candidates[max(candidates)]
+            selected = bucket.get_blob(f'{artifact_type}/{project}/{candidates[max(candidates)]}')
             selected.reload()
             sha256_digest = selected.metadata['sha256']
             index_url = f'{STORAGE_URL}/{selected.name}'
