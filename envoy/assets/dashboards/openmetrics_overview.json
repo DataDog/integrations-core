@@ -26,6 +26,12 @@
             "default": "*",
             "name": "listener_address",
             "prefix": "address"
+        },
+        {
+            "available_values": [],
+            "default": "*",
+            "name": "log_service",
+            "prefix": "service"
         }
     ],
     "title": "Envoy Openmetrics",
@@ -2628,6 +2634,112 @@
                 "width": 12,
                 "x": 0,
                 "y": 54
+            }
+        },
+        {
+            "definition": {
+                "background_color": "vivid_pink",
+                "layout_type": "ordered",
+                "show_title": true,
+                "title": "New group",
+                "type": "group",
+                "widgets": [
+                    {
+                        "definition": {
+                            "background_color": "pink",
+                            "content": "Envoy logs are aggregated based on patterns.",
+                            "font_size": "16",
+                            "has_padding": true,
+                            "show_tick": false,
+                            "text_align": "center",
+                            "tick_edge": "left",
+                            "tick_pos": "50%",
+                            "type": "note",
+                            "vertical_align": "top"
+                        },
+                        "id": 8476296512139710,
+                        "layout": {
+                            "height": 1,
+                            "width": 12,
+                            "x": 0,
+                            "y": 0
+                        }
+                    },
+                    {
+                        "definition": {
+                            "requests": [
+                                {
+                                    "columns": [
+                                        {
+                                            "field": "status_line",
+                                            "width": "auto"
+                                        },
+                                        {
+                                            "field": "matches",
+                                            "width": "auto"
+                                        },
+                                        {
+                                            "field": "volume",
+                                            "width": "auto"
+                                        },
+                                        {
+                                            "field": "service",
+                                            "width": "auto"
+                                        },
+                                        {
+                                            "field": "status",
+                                            "width": "auto"
+                                        },
+                                        {
+                                            "field": "@http.status_code",
+                                            "width": "auto"
+                                        },
+                                        {
+                                            "field": "message",
+                                            "width": "auto"
+                                        }
+                                    ],
+                                    "query": {
+                                        "data_source": "logs_pattern_stream",
+                                        "group_by": [
+                                            {
+                                                "facet": "service"
+                                            },
+                                            {
+                                                "facet": "status"
+                                            },
+                                            {
+                                                "facet": "@http.status_code"
+                                            }
+                                        ],
+                                        "indexes": [],
+                                        "query_string": "source:envoy $log_service $host "
+                                    },
+                                    "response_format": "event_list"
+                                }
+                            ],
+                            "time": {},
+                            "title": "Envoy Logs",
+                            "title_align": "left",
+                            "title_size": "16",
+                            "type": "list_stream"
+                        },
+                        "id": 1144868225656048,
+                        "layout": {
+                            "height": 7,
+                            "width": 12,
+                            "x": 0,
+                            "y": 1
+                        }
+                    }
+                ]
+            },
+            "id": 7041784249560904,
+            "layout": {
+                "height": 9,
+                "width": 12,
+                "x": 0,
+                "y": 62
             }
         }
     ]
