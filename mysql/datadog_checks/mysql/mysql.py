@@ -141,6 +141,8 @@ class MySql(AgentCheck):
         # go through the agent internal metrics submission processing those tags
         self._non_internal_tags = copy.deepcopy(self.tags)
         self.set_resource_tags()
+        with self._connect() as db:
+            self._is_innodb_engine_enabled = self._is_innodb_engine_enabled(db)
 
     def execute_query_raw(self, query):
         with closing(self._conn.cursor(pymysql.cursors.SSCursor)) as cursor:
@@ -213,6 +215,12 @@ class MySql(AgentCheck):
             self.performance_schema_enabled = self._get_variable_enabled(results, 'performance_schema')
 
         return self.performance_schema_enabled
+
+    def _check_if_engine_is_innodb(self, db):
+        with closing(db.cursor()) as cursor:
+            cursor.execute(SQL_INNODB_ENGINES)
+            results = dict(cursor.fetchall())
+            return results.get('InnoDB', 'NO') == 'YES'
 
     def check_userstat_enabled(self, db):
         with closing(db.cursor()) as cursor:
@@ -344,7 +352,10 @@ class MySql(AgentCheck):
         if self._runtime_queries:
             return self._runtime_queries
 
-        queries = [QUERY_DEADLOCKS]
+        queries = []
+
+        if self._is_innodb_engine_enabled:
+            queries.extend([QUERY_DEADLOCKS])
 
         if self.performance_schema_enabled:
             queries.extend([QUERY_USER_CONNECTIONS])
@@ -446,9 +457,10 @@ class MySql(AgentCheck):
         with tracked_query(self, operation="variables_metrics"):
             results.update(self._get_stats_from_variables(db))
 
-        if not is_affirmative(
-            self._config.options.get('disable_innodb_metrics', False)
-        ) and self._is_innodb_engine_enabled(db):
+        if (
+            not is_affirmative(self._config.options.get('disable_innodb_metrics', False))
+            and self._is_innodb_engine_enabled
+        ):
             with tracked_query(self, operation="innodb_metrics"):
                 results.update(self.innodb_stats.get_stats_from_innodb_status(db))
             self.innodb_stats.process_innodb_stats(results, self._config.options, metrics)
