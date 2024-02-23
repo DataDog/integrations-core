@@ -25,7 +25,23 @@ This is a cluster check. You can enable this check by adding `datadog.helmCheck.
 For more information, see the [Cluster Check documentation][2].
 
 <!-- xxz tab xxx -->
-<!-- xxx tab "Operator" xxx -->
+<!-- xxx tab "Operator (v1.5.0+)" xxx -->
+
+This is a cluster check. You can enable this check by adding `spec.features.helmCheck.enabled` to your `DatadogAgent` deployment configuration.
+
+```yaml
+apiVersion: datadoghq.com/v2alpha1
+kind: DatadogAgent
+metadata:
+  name: datadog
+spec:
+  features:
+    helmCheck:
+      enabled: true
+```
+
+<!-- xxz tab xxx -->
+<!-- xxx tab "Operator (< v1.5.0)" xxx -->
 
 This is a cluster check. You can enable this check by providing a configuration file `helm.yaml` to the cluster Agent in your `DatadogAgent` deployment configuration.
 
