@@ -216,12 +216,6 @@ class MySql(AgentCheck):
 
         return self.performance_schema_enabled
 
-    def _check_if_engine_is_innodb(self, db):
-        with closing(db.cursor()) as cursor:
-            cursor.execute(SQL_INNODB_ENGINES)
-            results = dict(cursor.fetchall())
-            return results.get('InnoDB', 'NO') == 'YES'
-
     def check_userstat_enabled(self, db):
         with closing(db.cursor()) as cursor:
             cursor.execute("SHOW VARIABLES LIKE 'userstat'")
