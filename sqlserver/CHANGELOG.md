@@ -2,6 +2,12 @@
 
 <!-- towncrier release notes start -->
 
+## 16.0.2 / 2024-02-23
+
+***Fixed***:
+
+* Deal with absence of sys.database_files SpaceUsed attribute on Azure SQL Servers ([#16910](https://github.com/DataDog/integrations-core/pull/16910))
+
 ## 16.0.1 / 2024-02-07
 
 ***Fixed***:
