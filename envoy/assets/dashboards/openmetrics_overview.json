@@ -98,7 +98,7 @@
                     {
                         "definition": {
                             "background_color": "pink",
-                            "content": "Overview of recent recents request and monitors",
+                            "content": "Overview of recent Envoy requests and monitors.",
                             "font_size": "16",
                             "has_padding": true,
                             "show_tick": false,
@@ -250,7 +250,7 @@
                     {
                         "definition": {
                             "background_color": "purple",
-                            "content": "Cluster and Server stats gives quick overview on liveliness of and performance of Envoy clusters and servers",
+                            "content": "Cluster and Server stats give a quick overview of the liveliness and performance of Envoy clusters and servers.",
                             "font_size": "16",
                             "has_padding": true,
                             "show_tick": false,
