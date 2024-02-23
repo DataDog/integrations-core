@@ -258,6 +258,6 @@ class TestCustomQueries:
         query_manager.compile_queries()
         query_manager.execute()
 
-        metric_name = f'{metric_prefix}.test.foo' if metric_prefix else 'test.test.foo'
+        metric_name = '{}.test.foo'.format(metric_prefix) if metric_prefix else 'test.test.foo'
         aggregator.assert_metric(metric_name, 1, metric_type=aggregator.GAUGE, tags=['test:foo', 'test:bar'])
         aggregator.assert_all_metrics_covered()
