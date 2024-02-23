@@ -1257,9 +1257,9 @@ def test_networks_metrics_with_exclude(aggregator, dd_run_check, instance, opens
     [
         pytest.param(
             configs.REST,
-            5,
+            1,
             ApiType.REST,
-            2,
+            3,
             id='api rest small limit',
         ),
         pytest.param(
@@ -1271,7 +1271,7 @@ def test_networks_metrics_with_exclude(aggregator, dd_run_check, instance, opens
         ),
         pytest.param(
             configs.SDK,
-            5,
+            1,
             ApiType.SDK,
             1,
             id='api sdk small limit',
@@ -1326,6 +1326,7 @@ def test_networks_pagination(
             )
             == 1
         )
+    test_networks_metrics(aggregator, openstack_controller_check(paginated_instance), dd_run_check)
 
 
 @pytest.mark.parametrize(
