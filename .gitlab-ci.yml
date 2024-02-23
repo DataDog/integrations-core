@@ -177,6 +177,7 @@ release-auto:
     # Prefix every line with a timestamp
     - ./.gitlab/tagger/tag-release.sh 2>&1 | ts "[%H:%M:%S %Z]  "
   tags: [ "runner:main" ]
+  needs: []
 
 release-manual:
   stage: release
@@ -199,6 +200,7 @@ release-manual:
           ./.gitlab/tagger/build-packages.sh
       fi
   tags: [ "runner:main" ]
+  needs: []
 
 tagger-image-builder:
   stage: build
