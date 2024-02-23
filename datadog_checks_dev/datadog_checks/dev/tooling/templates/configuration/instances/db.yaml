@@ -59,6 +59,8 @@
                  Columns without a name are ignored. To skip a column, enter:
                    - {}
     3. tags (optional) - A list of tags to apply to each metric.
+    4. collection_interval (optional) - The frequency at which to collect the metrics.
+                                       The default is the integration's `min_collection_interval`.
   value:
     type: array
     items:
@@ -74,6 +76,8 @@
           type: array
           items:
             type: string
+        - name: collection_interval
+          type: integer
     example:
       - query: SELECT foo, COUNT(*) FROM table.events GROUP BY foo
         columns:
@@ -83,3 +87,4 @@
             type: gauge
         tags:
           - test:<INTEGRATION>
+        collection_interval: 30
