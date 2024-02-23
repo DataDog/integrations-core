@@ -166,16 +166,16 @@ notify-failed-pipeline:
 release-auto:
   stage: release
   image: $TAGGER_IMAGE
-#  only:
-#    - master
-#    - /^\d+\.\d+\.x$/
+  only:
+    - master
+    - /^\d+\.\d+\.x$/
   except:
     - schedules
   script:
     - ddev --version
-#    - ddev config set core .
-#    # Prefix every line with a timestamp
-#    - ./.gitlab/tagger/tag-release.sh 2>&1 | ts "[%H:%M:%S %Z]  "
+    - ddev config set core .
+    # Prefix every line with a timestamp
+    - ./.gitlab/tagger/tag-release.sh 2>&1 | ts "[%H:%M:%S %Z]  "
   tags: [ "runner:main" ]
   needs: []
 
@@ -234,12 +234,12 @@ validate-log-intgs-builder:
 validate-agent-build-builder:
   stage: build
   image: 486234852809.dkr.ecr.us-east-1.amazonaws.com/docker:24.0.4-gbi-focal
-#  only:
-#    changes:
-#      - .gitlab/validate-agent-build/**/*
-#      - .gitlab-ci.yml
-#    refs:
-#      - master
+  only:
+    changes:
+      - .gitlab/validate-agent-build/**/*
+      - .gitlab-ci.yml
+    refs:
+      - master
   script:
     - cd .gitlab/validate-agent-build/
     - git clone https://gitlab-ci-token:${CI_JOB_TOKEN}@gitlab.ddbuild.io/Datadog/devtools.git --depth 1
