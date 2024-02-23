@@ -1,0 +1,9 @@
+apiVersion: tekton.dev/v1beta1
+kind: Pipeline
+metadata:
+  name: sleep-pipeline
+spec:
+  tasks:
+    - name: sleep-task
+      taskRef:
+        name: sleep
