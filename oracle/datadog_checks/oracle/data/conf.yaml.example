@@ -18,6 +18,7 @@ init_config:
     #   - query: <QUERY>
     #     columns: <COLUMNS>
     #     tags: <TAGS>
+    #     collection_interval: <COLLECTION_INTERVAL>
 
     ## @param service - string - optional
     ## Attach the tag `service:<SERVICE>` to every metric, event, and service check emitted by this integration.
@@ -145,6 +146,8 @@ instances:
     ##              Columns without a name are ignored. To skip a column, enter:
     ##                - {}
     ## 3. tags (optional) - A list of tags to apply to each metric.
+    ## 4. collection_interval (optional) - The frequency at which to collect the metrics.
+    ##                                    The default is the integration `min_collection_interval`.
     #
     # custom_queries:
     #   - query: SELECT foo, COUNT(*) FROM table.events GROUP BY foo
@@ -155,6 +158,7 @@ instances:
     #       type: gauge
     #     tags:
     #     - test:<INTEGRATION>
+    #     collection_interval: 30
 
     ## @param tags - list of strings - optional
     ## A list of tags to attach to every metric and service check emitted by this instance.
