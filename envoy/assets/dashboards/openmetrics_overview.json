@@ -1,6 +1,6 @@
 {
     "author_name": "Datadog",
-    "description": "## Envoy\n\nThis dashboard provides a high-level overview of your Envoy cluster, allowing you to monitor its performance and resource usage, thus making it easier to identify upstream and downstream errors and bottlenecks.\n\nFor further reading on monitoring Envoy, see:\n\n- [Datadog Envoy integration docs](https://docs.datadoghq.com/integrations/envoy/)\n- [Monitoring AWS App Mesh and Envoy with Datadog](https://www.datadoghq.com/blog/envoy-app-mesh-monitoring/)\n\nClone this template to make changes and add your own graphs and widgets.",
+    "description": "## Envoy\n\nThis dashboard provides a high-level overview of your Envoy cluster, allowing you to monitor its performance and resource usage, thus making it easier to identify upstream and downstream errors and bottlenecks.\n\nFor further reading on monitoring Envoy, see:\n\n- [Datadog Envoy integration docs](https://docs.datadoghq.com/integrations/envoy/)\n- [Monitoring AWS App Mesh and Envoy with Datadog](https://www.datadoghq.com/blog/envoy-app-mesh-monitoring/)\n\nClone this template to make changes and add your own graphs and widgets. (cloned)",
     "layout_type": "ordered",
     "template_variables": [
         {
@@ -28,7 +28,7 @@
             "prefix": "address"
         }
     ],
-    "title": "Envoy Openmetrics",
+    "title": "Envoy Openmetrics (cloned)",
     "widgets": [
         {
             "definition": {
@@ -43,7 +43,7 @@
                         "definition": {
                             "background_color": "transparent",
                             "content": "This dashboard provides a high-level overview of your Envoy cluster, allowing you to monitor its performance and resource usage, thus making it easier to identify upstream and downstream errors and bottlenecks.\n",
-                            "font_size": "14",
+                            "font_size": "16",
                             "show_tick": false,
                             "text_align": "left",
                             "tick_edge": "left",
@@ -52,7 +52,7 @@
                         },
                         "id": 4619428141584150,
                         "layout": {
-                            "height": 2,
+                            "height": 3,
                             "width": 3,
                             "x": 0,
                             "y": 0
@@ -62,7 +62,7 @@
                         "definition": {
                             "background_color": "transparent",
                             "content": "**Refer to the following resources for more information**\n\n- [Datadog Envoy documentation](https://www.envoyproxy.io/docs/envoy/latest/)\n\n- [Available Envoy metrics](https://docs.datadoghq.com/integrations/envoy/?tab=host#data-collected) \n\n- [How to monitor Envoy using AWS App Mesh](https://www.datadoghq.com/blog/envoy-app-mesh-monitoring/)",
-                            "font_size": "12",
+                            "font_size": "16",
                             "show_tick": false,
                             "text_align": "left",
                             "tick_edge": "left",
@@ -71,7 +71,7 @@
                         },
                         "id": 6628811856452136,
                         "layout": {
-                            "height": 2,
+                            "height": 3,
                             "width": 3,
                             "x": 3,
                             "y": 0
@@ -81,7 +81,7 @@
             },
             "id": 1156418925779600,
             "layout": {
-                "height": 5,
+                "height": 6,
                 "width": 6,
                 "x": 0,
                 "y": 0
@@ -95,6 +95,27 @@
                 "title": "Overview",
                 "type": "group",
                 "widgets": [
+                    {
+                        "definition": {
+                            "background_color": "pink",
+                            "content": "Overview of recent recents request and monitors",
+                            "font_size": "16",
+                            "has_padding": true,
+                            "show_tick": false,
+                            "text_align": "center",
+                            "tick_edge": "left",
+                            "tick_pos": "50%",
+                            "type": "note",
+                            "vertical_align": "top"
+                        },
+                        "id": 5070255822309936,
+                        "layout": {
+                            "height": 1,
+                            "width": 6,
+                            "x": 0,
+                            "y": 0
+                        }
+                    },
                     {
                         "definition": {
                             "autoscale": true,
@@ -147,7 +168,7 @@
                             "height": 1,
                             "width": 3,
                             "x": 0,
-                            "y": 0
+                            "y": 1
                         }
                     },
                     {
@@ -182,7 +203,7 @@
                             "height": 1,
                             "width": 3,
                             "x": 3,
-                            "y": 0
+                            "y": 1
                         }
                     },
                     {
@@ -205,14 +226,14 @@
                             "height": 3,
                             "width": 6,
                             "x": 0,
-                            "y": 1
+                            "y": 2
                         }
                     }
                 ]
             },
             "id": 77976023640490,
             "layout": {
-                "height": 5,
+                "height": 6,
                 "width": 6,
                 "x": 6,
                 "y": 0
@@ -226,6 +247,27 @@
                 "title": "Clusters and Server Stats",
                 "type": "group",
                 "widgets": [
+                    {
+                        "definition": {
+                            "background_color": "purple",
+                            "content": "Cluster and Server stats gives quick overview on liveliness of and performance of Envoy clusters and servers",
+                            "font_size": "16",
+                            "has_padding": true,
+                            "show_tick": false,
+                            "text_align": "center",
+                            "tick_edge": "left",
+                            "tick_pos": "50%",
+                            "type": "note",
+                            "vertical_align": "top"
+                        },
+                        "id": 7402532067479482,
+                        "layout": {
+                            "height": 1,
+                            "width": 12,
+                            "x": 0,
+                            "y": 0
+                        }
+                    },
                     {
                         "definition": {
                             "has_search_bar": "auto",
@@ -262,7 +304,7 @@
                             "height": 4,
                             "width": 6,
                             "x": 0,
-                            "y": 0
+                            "y": 1
                         }
                     },
                     {
@@ -295,7 +337,7 @@
                             "height": 4,
                             "width": 6,
                             "x": 6,
-                            "y": 0
+                            "y": 1
                         }
                     },
                     {
@@ -343,7 +385,7 @@
                             "height": 3,
                             "width": 4,
                             "x": 0,
-                            "y": 4
+                            "y": 5
                         }
                     },
                     {
@@ -391,7 +433,7 @@
                             "height": 3,
                             "width": 4,
                             "x": 4,
-                            "y": 4
+                            "y": 5
                         }
                     },
                     {
@@ -430,17 +472,17 @@
                             "height": 3,
                             "width": 4,
                             "x": 8,
-                            "y": 4
+                            "y": 5
                         }
                     }
                 ]
             },
             "id": 464064220295152,
             "layout": {
-                "height": 8,
+                "height": 9,
                 "width": 12,
                 "x": 0,
-                "y": 5
+                "y": 6
             }
         },
         {
@@ -1092,7 +1134,7 @@
                 "height": 14,
                 "width": 12,
                 "x": 0,
-                "y": 13
+                "y": 15
             }
         },
         {
@@ -1742,7 +1784,7 @@
                 "is_column_break": true,
                 "width": 12,
                 "x": 0,
-                "y": 27
+                "y": 29
             }
         },
         {
@@ -2252,7 +2294,7 @@
                 "height": 11,
                 "width": 12,
                 "x": 0,
-                "y": 41
+                "y": 43
             }
         },
         {
@@ -2469,7 +2511,6 @@
                                 }
                             ],
                             "show_legend": true,
-                            "time": {},
                             "title": "Deprecate Feature Usage",
                             "title_align": "left",
                             "title_size": "16",
@@ -2586,7 +2627,7 @@
                 "height": 8,
                 "width": 12,
                 "x": 0,
-                "y": 52
+                "y": 54
             }
         }
     ]
