@@ -34,7 +34,10 @@
       },
       "metrics": {
         "prefix": "aerospike.",
-        "check": "aerospike.uptime",
+        "check": [
+          "aerospike.uptime",
+          "aerospike.namespace.memory_free_pct"
+        ],    
         "metadata_path": "metadata.csv"
       },
       "service_checks": {
