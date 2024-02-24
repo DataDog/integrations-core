@@ -38,14 +38,14 @@ docker run -d
 2. Install the Datadog APM Python library.
 
 ```shell
-pip install ddtrace>=1.13
+pip install ddtrace
 ```
 
 
 3. Prefix your OpenAI Python application command with `ddtrace-run` and the following environment variables as shown below: 
 
 ```shell
-DD_SERVICE="my-service" DD_ENV="staging" DD_API_KEY=<DATADOG_API_KEY> ddtrace-run python <your-app>.py
+DD_SERVICE="my-service" DD_ENV="staging" ddtrace-run python <your-app>.py
 ```
 
 **Notes**:
