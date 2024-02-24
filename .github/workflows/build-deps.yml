@@ -102,11 +102,11 @@ jobs:
         python .builders/build.py ${{ matrix.job.image }} --python 2 ${{ env.OUT_DIR }}/py2 --digest $digest
 
     - name: Publish image
-      # if: github.event_name == 'push' && steps.changed-files.outputs.builders_any_changed == 'true'
+      if: github.event_name == 'push' && steps.changed-files.outputs.builders_any_changed == 'true'
       run: docker push ${{ env.BUILDER_IMAGE }}
 
     - name: Save image digest
-      # if: github.event_name == 'push'
+      if: github.event_name == 'push'
       run: >-
         docker inspect --format "{{index .RepoDigests 0}}" ${{ env.BUILDER_IMAGE }}
         | cut -d '@' -f 2
@@ -171,7 +171,7 @@ jobs:
 
   publish:
     name: Publish artifacts
-    # if: github.event_name == 'push'
+    if: github.event_name == 'push'
     needs:
     - build
     - build-macos
