@@ -159,7 +159,8 @@ jobs:
       id: cache-builder-root
       uses: actions/cache@v3.3.3
       with:
-        path: "~/builder_root"
+        path: |
+          ~/builder_root
         key: macos-deps-builder-root-cache-${{ hashFiles('./.builders/images/macos/*', './.builders/images/*', './.builders/deps/*', './.builders/build.py') }}
 
     - name: Run the build
