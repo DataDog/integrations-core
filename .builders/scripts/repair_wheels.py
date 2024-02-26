@@ -164,7 +164,6 @@ def repair_darwin(source_dir: str, built_dir: str, external_dir: str) -> None:
         r'libstdc\+\+\.6\.dylib',
         r'libc\+\+\.1\.dylib',
         r'^/System/Library/',
-        r'libz\.1\.dylib',
     ]]
 
     def copy_filt_func(libname):
