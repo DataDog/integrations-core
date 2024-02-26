@@ -1,0 +1,41 @@
+{
+  "networks": [
+    {
+      "id": "f7b6adc8-24ea-490c-9537-5c4eae015cd8",
+      "name": "shared",
+      "tenant_id": "1e6e233e637d4d55a50a62b63398ad15",
+      "admin_state_up": true,
+      "mtu": 1442,
+      "status": "ACTIVE",
+      "subnets": [
+        "60c84d5f-f884-4fcf-a2de-605662d52ba3"
+      ],
+      "shared": true,
+      "availability_zone_hints": [],
+      "availability_zones": [],
+      "ipv4_address_scope": null,
+      "ipv6_address_scope": null,
+      "router:external": false,
+      "description": "",
+      "port_security_enabled": true,
+      "tags": [],
+      "created_at": "2023-10-18T15:04:01Z",
+      "updated_at": "2023-10-18T15:04:03Z",
+      "revision_number": 2,
+      "project_id": "1e6e233e637d4d55a50a62b63398ad15",
+      "provider:network_type": "geneve",
+      "provider:physical_network": null,
+      "provider:segmentation_id": 16779
+    }
+  ],
+  "networks_links": [
+    {
+      "rel": "next",
+      "href": "http://127.0.0.1:9696/networking/v2.0/networks?limit=1&marker=f7b6adc8-24ea-490c-9537-5c4eae015cd8"
+    },
+    {
+      "rel": "previous",
+      "href": "http://127.0.0.1:9696/networking/v2.0/networks?limit=1&marker=f7b6adc8-24ea-490c-9537-5c4eae015cd8&page_reverse=True"
+    }
+  ]
+  }
