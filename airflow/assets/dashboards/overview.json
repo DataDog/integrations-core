@@ -273,7 +273,7 @@
                                         {
                                             "name": "query1",
                                             "data_source": "metrics",
-                                            "query": "avg:airflow.dagrun.schedule_delay{$host,$dag_id} by {dag_id,host}"
+                                            "query": "avg:airflow.dagrun.schedule_delay{$host} by {host}"
                                         }
                                     ],
                                     "response_format": "timeseries",
