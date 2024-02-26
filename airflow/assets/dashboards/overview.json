@@ -78,9 +78,9 @@
                             "font_size": "14",
                             "text_align": "left",
                             "vertical_align": "center",
-                            "show_tick": true,
+                            "show_tick": false,
                             "tick_pos": "50%",
-                            "tick_edge": "left",
+                            "tick_edge": "bottom",
                             "has_padding": true
                         },
                         "layout": {
@@ -184,7 +184,7 @@
                             "font_size": "14",
                             "text_align": "center",
                             "vertical_align": "center",
-                            "show_tick": true,
+                            "show_tick": false,
                             "tick_pos": "50%",
                             "tick_edge": "left",
                             "has_padding": true
@@ -478,7 +478,7 @@
                                     "response_format": "event_list",
                                     "query": {
                                         "data_source": "logs_stream",
-                                        "query_string": "service:airflow",
+                                        "query_string": "source:airflow ",
                                         "indexes": [],
                                         "storage": "online_archives"
                                     },
@@ -542,7 +542,7 @@
                             "font_size": "14",
                             "text_align": "center",
                             "vertical_align": "center",
-                            "show_tick": true,
+                            "show_tick": false,
                             "tick_pos": "50%",
                             "tick_edge": "left",
                             "has_padding": true
@@ -921,7 +921,7 @@
                             "font_size": "14",
                             "text_align": "center",
                             "vertical_align": "center",
-                            "show_tick": true,
+                            "show_tick": false,
                             "tick_pos": "50%",
                             "tick_edge": "left",
                             "has_padding": true
