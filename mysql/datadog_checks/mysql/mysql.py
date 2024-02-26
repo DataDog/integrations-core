@@ -141,8 +141,7 @@ class MySql(AgentCheck):
         # go through the agent internal metrics submission processing those tags
         self._non_internal_tags = copy.deepcopy(self.tags)
         self.set_resource_tags()
-        with self._connect() as db:
-            self._is_innodb_engine_enabled = self._is_innodb_engine_enabled(db)
+        self._is_innodb_engine_enabled = None
 
     def execute_query_raw(self, query):
         with closing(self._conn.cursor(pymysql.cursors.SSCursor)) as cursor:
@@ -300,8 +299,8 @@ class MySql(AgentCheck):
                 if not self._config.only_custom_queries:
                     self._collect_metrics(db, tags=tags)
                     self._collect_system_metrics(self._config.host, db, tags)
-                    if self.runtime_queries:
-                        self.runtime_queries.execute(extra_tags=tags)
+                    if self._get_runtime_queries(db):
+                        self._get_runtime_queries(db).execute(extra_tags=tags)
 
                 if self._config.dbm_enabled:
                     dbm_tags = list(set(self.service_check_tags) | set(tags))
@@ -338,8 +337,7 @@ class MySql(AgentCheck):
             track_operation_time=True,
         )
 
-    @property
-    def runtime_queries(self):
+    def _get_runtime_queries(self, db):
         """
         Initializes runtime queries which depend on outside factors (e.g. permission checks) to load first.
         """
@@ -348,7 +346,7 @@ class MySql(AgentCheck):
 
         queries = []
 
-        if self._is_innodb_engine_enabled:
+        if self._check_innodb_engine_enabled(db):
             queries.extend([QUERY_DEADLOCKS])
 
         if self.performance_schema_enabled:
@@ -451,10 +449,9 @@ class MySql(AgentCheck):
         with tracked_query(self, operation="variables_metrics"):
             results.update(self._get_stats_from_variables(db))
 
-        if (
-            not is_affirmative(self._config.options.get('disable_innodb_metrics', False))
-            and self._is_innodb_engine_enabled
-        ):
+        if not is_affirmative(
+            self._config.options.get('disable_innodb_metrics', False)
+        ) and self._check_innodb_engine_enabled(db):
             with tracked_query(self, operation="innodb_metrics"):
                 results.update(self.innodb_stats.get_stats_from_innodb_status(db))
             self.innodb_stats.process_innodb_stats(results, self._config.options, metrics)
@@ -1006,18 +1003,21 @@ class MySql(AgentCheck):
             self.warning("Privileges error accessing the BINARY LOGS (must grant REPLICATION CLIENT): %s", e)
             return None
 
-    def _is_innodb_engine_enabled(self, db):
+    def _check_innodb_engine_enabled(self, db):
         # Whether InnoDB engine is available or not can be found out either
         # from the output of SHOW ENGINES or from information_schema.ENGINES
         # table. Later is chosen because that involves no string parsing.
+        if self._is_innodb_engine_enabled is not None:
+            return self._is_innodb_engine_enabled
         try:
             with closing(db.cursor()) as cursor:
                 cursor.execute(SQL_INNODB_ENGINES)
-                return cursor.rowcount > 0
+                self._is_innodb_engine_enabled = cursor.rowcount > 0
 
         except (pymysql.err.InternalError, pymysql.err.OperationalError, pymysql.err.NotSupportedError) as e:
             self.warning("Possibly innodb stats unavailable - error querying engines table: %s", e)
-            return False
+            self._is_innodb_engine_enabled = False
+        return self._is_innodb_engine_enabled
 
     def _get_replica_stats(self, db, is_mariadb, replication_channel):
         replica_results = defaultdict(dict)

@@ -489,7 +489,10 @@ def test_if_deadlock_metric_is_collected(aggregator, dd_run_check, dbm_instance)
     assert len(deadlock_metric) == 1, "there should be one deadlock metric"
 
 
-@pytest.mark.skipif(environ.get('MYSQL_FLAVOR') == 'mariadb', reason='Deadock count is not updated in MariaDB')
+@pytest.mark.skipif(
+    environ.get('MYSQL_FLAVOR') == 'mariadb' or MYSQL_VERSION_PARSED < parse_version('8.0'),
+    reason='Deadock count is not updated in MariaDB or older MySQL versions',
+)
 @pytest.mark.integration
 @pytest.mark.usefixtures('dd_environment')
 def test_deadlocks(aggregator, dd_run_check, dbm_instance):
@@ -514,8 +517,9 @@ def test_deadlocks(aggregator, dd_run_check, dbm_instance):
             event2.wait()
             conn.cursor().execute(second_query)
             conn.cursor().execute("COMMIT;")
-        except Exception:
+        except Exception as e:
             # Exception is expected due to a deadlock
+            print(e)
             pass
         conn.commit()
 
@@ -528,8 +532,9 @@ def test_deadlocks(aggregator, dd_run_check, dbm_instance):
             event2.set()
             conn.cursor().execute(first_query)
             conn.cursor().execute("COMMIT;")
-        except Exception:
+        except Exception as e:
             # Exception is expected due to a deadlock
+            print(e)
             pass
         conn.commit()
 
