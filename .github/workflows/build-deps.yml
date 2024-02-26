@@ -169,7 +169,7 @@ jobs:
         MACOSX_DEPLOYMENT_TARGET: "10.12"
         CACHE_HIT: ${{ steps.cache-builder-root.outputs.cache-hit }}
       run: |-
-        # If we hit the cache, we skip the builder setup
+        # If we hit the cache, we can skip the builder setup
         if [[ ${CACHE_HIT} == "true" ]]; then
           ${DD_PYTHON3} .builders/build.py --builder-root ~/builder_root --python 3 ${{ env.OUT_DIR }}/py3 --skip-setup
         else
