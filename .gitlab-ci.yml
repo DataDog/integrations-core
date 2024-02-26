@@ -1,3 +1,6 @@
+include:
+  - /.gitlab/software_composition_analysis.yaml
+
 variables:
   TAGGER_IMAGE: 486234852809.dkr.ecr.us-east-1.amazonaws.com/ci/integrations-core:tagger
   VALIDATE_LOG_INTGS: 486234852809.dkr.ecr.us-east-1.amazonaws.com/ci/integrations-core:validate_log_intgs
