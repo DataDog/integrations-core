@@ -1,0 +1,66 @@
+{
+    "networks": [
+      {
+        "id": "ec38babc-37e8-4bd7-9de0-03009304b2e4",
+        "name": "public",
+        "tenant_id": "c09ccb52462d49c89595d2194a367198",
+        "admin_state_up": true,
+        "mtu": 1500,
+        "status": "ACTIVE",
+        "subnets": [
+          "4bd0aa9b-bfef-4b64-96ec-4a3c29d694b4",
+          "51b41dcb-ec03-4036-9845-9b819b1e301f"
+        ],
+        "shared": false,
+        "availability_zone_hints": [],
+        "availability_zones": [],
+        "ipv4_address_scope": null,
+        "ipv6_address_scope": null,
+        "router:external": true,
+        "description": "",
+        "port_security_enabled": true,
+        "is_default": true,
+        "tags": [],
+        "created_at": "2023-10-18T15:01:59Z",
+        "updated_at": "2023-10-18T15:02:14Z",
+        "revision_number": 3,
+        "project_id": "c09ccb52462d49c89595d2194a367198",
+        "provider:network_type": "flat",
+        "provider:physical_network": "public",
+        "provider:segmentation_id": null
+      },
+      {
+        "id": "f7b6adc8-24ea-490c-9537-5c4eae015cd8",
+        "name": "shared",
+        "tenant_id": "1e6e233e637d4d55a50a62b63398ad15",
+        "admin_state_up": true,
+        "mtu": 1442,
+        "status": "ACTIVE",
+        "subnets": [
+          "60c84d5f-f884-4fcf-a2de-605662d52ba3"
+        ],
+        "shared": true,
+        "availability_zone_hints": [],
+        "availability_zones": [],
+        "ipv4_address_scope": null,
+        "ipv6_address_scope": null,
+        "router:external": false,
+        "description": "",
+        "port_security_enabled": true,
+        "tags": [],
+        "created_at": "2023-10-18T15:04:01Z",
+        "updated_at": "2023-10-18T15:04:03Z",
+        "revision_number": 2,
+        "project_id": "1e6e233e637d4d55a50a62b63398ad15",
+        "provider:network_type": "geneve",
+        "provider:physical_network": null,
+        "provider:segmentation_id": 16779
+      }
+    ],
+    "networks_links": [
+      {
+        "rel": "previous",
+        "href": "http://34.91.117.188:9696/networking/v2.0/networks?limit=1000&marker=ec38babc-37e8-4bd7-9de0-03009304b2e4&page_reverse=True"
+      }
+    ]
+  }
