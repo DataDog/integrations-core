@@ -151,16 +151,32 @@ jobs:
       uses: actions/checkout@v4
 
     - name: Install management dependencies
-      run: ${DD_PYTHON3} -m pip install -r .builders/deps/host_dependencies.txt
+      run: |
+        ${DD_PYTHON3} -m pip install -r .builders/deps/host_dependencies.txt
+        ${DD_PYTHON3} -m pip install --no-warn-script-location -r ".builders/images/runner_dependencies.txt"
+
+    - name: Cache builder root
+      id: cache-builder-root
+      uses: actions/cache@v3.3.3
+      with:
+        path: "~/builder_root"
+        key: macos-deps-builder-root-cache-${{ hashFiles('./.builders/images/macos/*', './.builders/images/*', './.builders/deps/*', './.builders/build.py') }}
 
     - name: Run the build
       env:
         # This sets the minimum macOS version compatible for all built artifacts
         MACOSX_DEPLOYMENT_TARGET: "10.12"
+        CACHE_HIT: ${{ steps.cache-builder-root.outputs.cache-hit }}
       run: |-
-        mkdir builder_root
-        ${DD_PYTHON3} .builders/build.py --builder-root builder_root --python 3 ${{ env.OUT_DIR }}/py3
-        ${DD_PYTHON3} .builders/build.py --builder-root builder_root --python 2 ${{ env.OUT_DIR }}/py2 --skip-setup
+        # If we hit the cache, we can skip builder setup
+        if [[ ${CACHE_HIT} == "true" ]]; then
+          ${DD_PYTHON3} .builders/build.py --builder-root builder_root --python 3 ${{ env.OUT_DIR }}/py3 --skip-setup
+        else
+          mkdir ~/builder_root
+          ${DD_PYTHON3} .builders/build.py --builder-root ~/builder_root --python 3 ${{ env.OUT_DIR }}/py3
+        fi
+        # At this point we can always skip builder setup since it's equivalent for python versions
+        ${DD_PYTHON3} .builders/build.py --builder-root ~/builder_root --python 2 ${{ env.OUT_DIR }}/py2 --skip-setup
 
     - name: Upload artifacts
       uses: actions/upload-artifact@v4

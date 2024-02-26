@@ -10,8 +10,6 @@ set -euxo pipefail
 "${DD_PYTHON2}" -m pip install --no-warn-script-location virtualenv
 "${DD_PYTHON2}" -m virtualenv py2
 
-"${DD_PYTHON3}" -m pip install --no-warn-script-location -r "${DD_MOUNT_DIR}/build_context/runner_dependencies.txt"
-
 # Install always with our own prefix path
 cp "${DD_MOUNT_DIR}/build_context/install-from-source.sh" .
 install-from-source() {
