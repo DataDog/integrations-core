@@ -35,6 +35,14 @@ CONFIGURE_SCRIPT="./config" \
     no-module \
     no-comp no-idea no-mdc2 no-rc5 no-ssl3 no-gost
 
+# zlib
+CFLAGS="${CFLAGS} -fPIC"
+DOWNLOAD_URL="https://zlib.net/fossils/zlib-{{version}}.tar.gz" \
+VERSION="1.3.1" \
+SHA256="9a93b2b7dfdac77ceba5a558a580e74667dd6fede4585b91eefb60f03b72df23" \
+RELATIVE_PATH="zlib-{{version}}" \
+  install-from-source
+
 # libxml & libxslt for lxml
 DOWNLOAD_URL="https://download.gnome.org/sources/libxml2/2.10/libxml2-{{version}}.tar.xz" \
 VERSION="2.10.3" \
