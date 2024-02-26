@@ -6,7 +6,7 @@
 
 ***Added***:
 
-* collect language detection metrics in datadog_cluster_agent integration ([#16928](https://github.com/DataDog/integrations-core/pull/16928))
+* Collect language detection metrics ([#16928](https://github.com/DataDog/integrations-core/pull/16928))
 
 ## 2.10.0 / 2024-02-16
 
