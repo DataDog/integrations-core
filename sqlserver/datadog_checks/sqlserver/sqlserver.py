@@ -877,9 +877,9 @@ class SQLServer(AgentCheck):
         if not self._index_usage_last_check_ts or now - self._index_usage_last_check_ts > interval:
             self._index_usage_last_check_ts = now
             self.log.debug('Collecting index usage statistics')
-            db_names = [d.name for d in self.databases] or [
-                self.instance.get('database', self.connection.DEFAULT_DATABASE)
-            ]
+            default_database = self.instance.get('database', self.connection.DEFAULT_DATABASE)
+            db_names = [d.name for d in self.databases if d != 'tempdb'] or ([default_database] if default_database != 'tempdb' else [])
+                    
             with self.connection.get_managed_cursor() as cursor:
                 cursor.execute(
                     'select DB_NAME()'
