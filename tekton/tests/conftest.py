@@ -68,7 +68,14 @@ def setup_tekton():
     for task in ("hello", "sleep"):
         for kind in ("task", "pipeline"):
             run_command(
-                ["kubectl", "apply", "-f", os.path.join(HERE, "kind", f"tekton-{kind}-{task}.yaml"), "-n", "tekton-pipelines"]
+                [
+                    "kubectl",
+                    "apply",
+                    "-f",
+                    os.path.join(HERE, "kind", f"tekton-{kind}-{task}.yaml"),
+                    "-n",
+                    "tekton-pipelines",
+                ]
             )
 
             run_command(
