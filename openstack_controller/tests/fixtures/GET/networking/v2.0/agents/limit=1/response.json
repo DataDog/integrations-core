@@ -1,0 +1,36 @@
+{
+    "agents": [
+        {
+            "binary": "ovn-controller",
+            "host": "agent-integrations-openstack-default",
+            "heartbeat_timestamp": "2024-02-26 16:38:44",
+            "availability_zone": "",
+            "topic": "n/a",
+            "description": "",
+            "configurations": {
+                "chassis_name": "4a03dbd4-6cfb-41b7-aff0-69bf2a3728d2",
+                "bridge-mappings": "public:br-ex"
+            },
+            "agent_type": "OVN Controller Gateway agent",
+            "id": "4a03dbd4-6cfb-41b7-aff0-69bf2a3728d2",
+            "alive": true,
+            "admin_state_up": true
+        },
+        {
+            "binary": "neutron-ovn-metadata-agent",
+            "host": "agent-integrations-openstack-default",
+            "heartbeat_timestamp": "2024-02-26 16:38:44",
+            "availability_zone": "",
+            "topic": "n/a",
+            "description": "",
+            "configurations": {
+                "chassis_name": "4a03dbd4-6cfb-41b7-aff0-69bf2a3728d2",
+                "bridge-mappings": "public:br-ex"
+            },
+            "agent_type": "OVN Metadata agent",
+            "id": "b9f72649-accb-55db-83fb-90dfafded7e4",
+            "alive": true,
+            "admin_state_up": true
+        }
+    ]
+}
