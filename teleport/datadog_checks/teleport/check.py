@@ -1,23 +1,26 @@
 # (C) Datadog, Inc. 2024-present
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
-import copy
 
 from datadog_checks.base import OpenMetricsBaseCheckV2
-from datadog_checks.base.errors import CheckException  # noqa: F401
 
-# from datadog_checks.base.utils.db import QueryManager
-# from requests.exceptions import ConnectionError, HTTPError, InvalidURL, Timeout
-# from json import JSONDecodeError
+METRIC_MAP = {
+    "process_state": "process_state",
+    # "certificate_mismatch_total": "certificate_mismatch_total",
+    "rx": "rx",
+    "server_interactive_sessions_total": "server_interactive_sessions_total",
+    # "teleport_build_info": "teleport_build_info",
+    "teleport_cache_events": "teleport_cache_events",
+    "teleport_cache_stale_events": "teleport_cache_stale_events",
+    "tx": "tx",
+}
 
 
 class TeleportCheck(OpenMetricsBaseCheckV2):
-    # This will be the prefix of every metric and service check the integration sends
     __NAMESPACE__ = 'teleport'
 
     def __init__(self, name, init_config, instances):
         super().__init__(name, init_config, instances)
-        self.diagnostic_url = self.instance.get("diagnostic_url")
         self.check_initializations.appendleft(self._parse_config)
 
     def check(self, _):
@@ -32,6 +35,7 @@ class TeleportCheck(OpenMetricsBaseCheckV2):
             pass
 
     def _parse_config(self):
+        self.diagnostic_url = self.instance.get("diagnostic_url")
         if self.diagnostic_url:
             self.instance.setdefault("openmetrics_endpoint", self.diagnostic_url + "/metrics")
-            self.instance.setdefault("metrics", ["process_state"])
+            self.instance.setdefault("metrics", [METRIC_MAP])
