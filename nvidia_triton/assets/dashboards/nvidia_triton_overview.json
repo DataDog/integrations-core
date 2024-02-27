@@ -92,7 +92,7 @@
                     {
                         "definition": {
                             "background_color": "green",
-                            "content": "The service checks show the openmetrics endpoint status along with the Triton server health status.\n\nThe monitor summary shows you any active alerts for the most crucial Nvidia Triton Metrics. ",
+                            "content": "The service checks show the OpenMetrics endpoint status along with the Triton server health status.\n\nThe monitor summary shows you any active alerts for the most crucial Nvidia Triton Metrics. ",
                             "font_size": "14",
                             "has_padding": true,
                             "show_tick": false,
