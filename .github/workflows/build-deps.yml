@@ -39,6 +39,8 @@ jobs:
       matrix:
         job:
         - os: ubuntu-22.04
+          image: linux-aarch64
+        - os: ubuntu-22.04
           image: linux-x86_64
         - os: windows-2022
           image: windows-x86_64
@@ -87,6 +89,12 @@ jobs:
         registry: ghcr.io
         username: ${{ github.actor }}
         password: ${{ secrets.GITHUB_TOKEN }}
+
+    - name: Set up QEMU
+      if: matrix.job.image == 'linux-aarch64'
+      uses: docker/setup-qemu-action@v3
+      with:
+        platforms: arm64
 
     - name: Build image and wheels
       if: steps.changed-files.outputs.builders_any_changed == 'true'
