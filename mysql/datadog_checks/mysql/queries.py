@@ -84,7 +84,7 @@ QUERY_DEADLOCKS = {
         WHERE
             NAME='lock_deadlocks'
     """.strip(),
-    'columns': [{'name': 'mysql.innodb.deadlocks', 'type': 'gauge'}],
+    'columns': [{'name': 'mysql.innodb.deadlocks', 'type': 'monotonic_count'}],
 }
 
 QUERY_USER_CONNECTIONS = {
