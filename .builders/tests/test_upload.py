@@ -100,17 +100,48 @@ def test_upload_external(setup_targets_dir, setup_fake_bucket):
     assert {'all_new-2.31.0-py3-none-any.whl', 'updated_version-3.14.1-cp311-cp311-manylinux1_x86_64.whl'} <= uploads
 
 
-def test_upload_built(setup_targets_dir, setup_fake_bucket):
+def test_upload_built_no_conflict(setup_targets_dir, setup_fake_bucket, monkeypatch):
     wheels = {
         'built': [
             ('without_collision-3.14.1-cp311-cp311-manylinux2010_x86_64.whl', 'without-collision', '3.14.1', '>=3.7'),
+        ]
+    }
+    targets_dir = setup_targets_dir(wheels)
+
+    timestamp = '2024132717021709050439'
+    monkeypatch.setattr(upload, 'timestamp_build_number', mock.Mock(return_value=timestamp))
+
+    bucket, uploads = setup_fake_bucket({})
+
+    upload.upload(targets_dir)
+
+    bucket_files = [f.name for f in bucket.list_blobs()]
+    assert f'built/without-collision/without_collision-3.14.1-{timestamp}-cp311-cp311-manylinux2010_x86_64.whl' in bucket_files
+
+
+def test_upload_built_with_buildnumber_conflict(setup_targets_dir, setup_fake_bucket, monkeypatch):
+    wheels = {
+        'built': [
             ('collision-1.1.1-cp311-cp311-manylinux2010_x86_64.whl', 'collision', '1.1.1', '>=3.7'),
         ]
     }
     targets_dir = setup_targets_dir(wheels)
 
+    initial_timestamp = 2024132717021709050439
+    timestamp = initial_timestamp
+
+    def fake_timestamp():
+        # Increment the timestamp in one after every call
+        nonlocal timestamp
+        timestamp = timestamp + 1
+        return str(timestamp)
+
+    monkeypatch.setattr(upload, 'timestamp_build_number', fake_timestamp)
+
     bucket_files = {
-        'built/collision/collision-1.1.1-0-cp311-cp311-manylinux2010_x86_64.whl':
+        f'built/collision/collision-1.1.1-{initial_timestamp}-cp311-cp311-manylinux2010_x86_64.whl':
+        {'requires-python': '', 'sha256': ''},
+        f'built/collision/collision-1.1.1-{initial_timestamp + 1}-cp311-cp311-manylinux2010_x86_64.whl':
         {'requires-python': '', 'sha256': ''},
     }
     bucket, uploads = setup_fake_bucket(bucket_files)
@@ -118,5 +149,5 @@ def test_upload_built(setup_targets_dir, setup_fake_bucket):
     upload.upload(targets_dir)
 
     bucket_files = [f.name for f in bucket.list_blobs()]
-    assert 'built/without-collision/without_collision-3.14.1-0-cp311-cp311-manylinux2010_x86_64.whl' in bucket_files
-    assert 'built/collision/collision-1.1.1-1-cp311-cp311-manylinux2010_x86_64.whl' in bucket_files
+    expected_timestamp = initial_timestamp + 2
+    assert f'built/collision/collision-1.1.1-{expected_timestamp}-cp311-cp311-manylinux2010_x86_64.whl' in bucket_files

@@ -3,6 +3,7 @@ from __future__ import annotations
 import argparse
 import email
 import re
+import time
 from hashlib import sha256
 from pathlib import Path
 from typing import TYPE_CHECKING, Iterator
@@ -55,6 +56,11 @@ def display_message_block(message: str) -> None:
     print(divider)
     print(f'| {message} |')
     print(divider)
+
+
+def timestamp_build_number() -> str:
+    """Produce a formatted timestamp to use as build numbers"""
+    return time.strftime('%Y%M%d_%H%m%s')
 
 
 def iter_wheel_dirs(targets_dir: str) -> Iterator[Path]:
@@ -115,14 +121,14 @@ def upload(targets_dir):
             else:
                 # https://packaging.python.org/en/latest/specifications/binary-distribution-format/#file-name-convention
                 name, version, python_tag, abi_tag, platform_tag = wheel.stem.split('-')
-                build_number = 0
+                build_number = timestamp_build_number()
                 while True:
                     artifact_name = f'{name}-{version}-{build_number}-{python_tag}-{abi_tag}-{platform_tag}.whl'
                     artifact = bucket.blob(f'{artifact_type}/{project_name}/{artifact_name}')
                     if not artifact.exists():
                         break
 
-                    build_number += 1
+                    build_number = timestamp_build_number()
 
             print(f'{padding}Artifact: {artifact_name}')
             artifact.upload_from_filename(str(wheel))
