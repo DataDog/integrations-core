@@ -200,7 +200,7 @@
                     {
                         "definition": {
                             "background_color": "green",
-                            "content": "GPU memory usage for your Triton server will show up here grouped by the GPU uid and host",
+                            "content": "GPU memory usage for your Triton server shows up here grouped by the GPU UID and host",
                             "font_size": "14",
                             "has_padding": true,
                             "show_tick": false,
