@@ -85,7 +85,7 @@ def upload(targets_dir):
         artifact_types.add(artifact_type)
         display_message_block(f'Processing {artifact_type} wheels')
 
-        upload_data: tuple[str, email.Message, Path] = []
+        upload_data: list[tuple[str, email.Message, Path]] = []
         for wheel in entry.iterdir():
             project_metadata = extract_metadata(wheel)
             project_name = project_metadata['Name']
