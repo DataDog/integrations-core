@@ -259,6 +259,7 @@ def test_images_metrics(aggregator, check, dd_run_check, metrics):
             hostname=metric.get('hostname'),
         )
 
+
 @pytest.mark.parametrize(
     ('instance', 'paginated_limit', 'api_type', 'expected_api_calls', 'metrics'),
     [
@@ -290,7 +291,7 @@ def test_images_pagination(
     api_type,
     dd_run_check,
     mock_http_get,
-    metrics
+    metrics,
 ):
     paginated_instance = copy.deepcopy(instance)
     paginated_instance['paginated_limit'] = paginated_limit
@@ -303,9 +304,7 @@ def test_images_pagination(
             params = kwargs.get('params', {})
             limit = params.get('limit')
             args_list += [(args[0], limit)]
-        assert (
-            args_list.count(('http://127.0.0.1:9292/image/v2/images', paginated_limit)) == expected_api_calls
-        )
+        assert args_list.count(('http://127.0.0.1:9292/image/v2/images', paginated_limit)) == expected_api_calls
     for metric in metrics:
         aggregator.assert_metric(
             metric['name'],
@@ -314,5 +313,5 @@ def test_images_pagination(
             value=metric['value'],
             tags=metric['tags'],
             hostname=metric.get('hostname'),
-            flush_first_value=metric.get('flush_first_value')
+            flush_first_value=metric.get('flush_first_value'),
         )

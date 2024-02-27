@@ -486,5 +486,5 @@ class ApiRest(Api):
             '{}/v2/images'.format(self._catalog.get_endpoint_by_type(Component.Types.IMAGE.value)),
             'images',
             'id',
-            next_signifier='next'
+            next_signifier='next',
         )
