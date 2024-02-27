@@ -71,7 +71,7 @@ jobs:
         branch-suffix: timestamp
         delete-branch: true
         base: master
-        labels: bot
+        labels: bot,qa/skip-qa
         draft: false
     # We generate the changelog if and only if the PR was created
     - name: Update changelogs

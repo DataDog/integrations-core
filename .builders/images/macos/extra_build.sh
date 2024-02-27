@@ -23,6 +23,9 @@ if [[ "${DD_BUILD_PYTHON_VERSION}" == "3" ]]; then
     always_build+=("confluent-kafka")
 fi
 
+# Make sure IBM MQ libraries are found under /opt/mqm even when we're using the builder cache
+sudo cp -Rf "${DD_PREFIX_PATH}/mqm" /opt
+
 # Empty arrays are flagged as unset when using the `-u` flag. This is the safest way to work around that
 # (see https://stackoverflow.com/a/61551944)
 pip_no_binary=${always_build[@]+"${always_build[@]}"}

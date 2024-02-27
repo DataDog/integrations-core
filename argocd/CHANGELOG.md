@@ -18,7 +18,7 @@
 
 ***Added***:
 
-* Collect metrics for ArgoCD ApplicationSet ([#15308](https://github.com/DataDog/integrations-core/pull/15308))
+* Collect metrics for ArgoCD ApplicationSet ([#15308](https://github.com/DataDog/integrations-core/pull/15308)) Thanks [smartfin](https://github.com/smartfin).
 
 ## 2.0.0 / 2023-08-10 / Agent 7.48.0
 
