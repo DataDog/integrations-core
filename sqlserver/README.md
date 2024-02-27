@@ -196,6 +196,7 @@ A fix for this is currently being developed, and in the meantime Agent versions 
 - [Monitor SQL Server performance with Datadog][21]
 - [Custom SQL Server metrics for detailed monitoring][22]
 - [Strategize your Azure migration for SQL workloads with Datadog][23]
+- [Optimize SQL Server performance with Datadog Database Monitoring][24]
 
 [1]: https://raw.githubusercontent.com/DataDog/integrations-core/master/sqlserver/images/sqlserver_dashboard_02_2024.png
 [2]: https://app.datadoghq.com/account/settings/agent/latest
@@ -220,3 +221,4 @@ A fix for this is currently being developed, and in the meantime Agent versions 
 [21]: https://www.datadoghq.com/blog/sql-server-performance
 [22]: https://www.datadoghq.com/blog/sql-server-metrics
 [23]: https://www.datadoghq.com/blog/migrate-sql-workloads-to-azure-with-datadog/
+[24]: https://www.datadoghq.com/blog/optimize-sql-server-performance-with-datadog/

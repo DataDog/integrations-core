@@ -24,7 +24,8 @@ def trigger_pipeline():
         "variables": {
             "RELEASE_VERSION_6": "nightly",
             "RELEASE_VERSION_7": "nightly-a7",
-            "BUCKET_BRANCH": "none",
+            "BUCKET_BRANCH": "dev",
+            "DEPLOY_AGENT": "false",
             "INTEGRATIONS_CORE_VERSION": os.environ['CI_COMMIT_REF_NAME'],
             # disable kitchen tests
             "RUN_KITCHEN_TESTS": "false",

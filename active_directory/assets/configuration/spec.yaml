@@ -18,9 +18,3 @@ files:
     - template: instances/pdh_legacy
       hidden: true
     - template: instances/default
-  - template: logs
-    example:
-    - type: file
-      path: C:\path\to\my\directory\file.log
-      source: ruby
-      service: <SERVICE_NAME>

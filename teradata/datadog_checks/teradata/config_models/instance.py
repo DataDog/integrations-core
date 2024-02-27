@@ -26,6 +26,7 @@ class CustomQuery(BaseModel):
         arbitrary_types_allowed=True,
         frozen=True,
     )
+    collection_interval: Optional[int] = None
     columns: Optional[tuple[MappingProxyType[str, Any], ...]] = None
     query: Optional[str] = None
     tags: Optional[tuple[str, ...]] = None

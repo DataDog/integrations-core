@@ -475,6 +475,8 @@ integration/wincrashdetect:
 - wincrashdetect/**/*
 integration/windows_performance_counters:
 - windows_performance_counters/**/*
+integration/windows_registry:
+- windows_registry/**/*
 integration/windows_service:
 - windows_service/**/*
 integration/winkmem:

@@ -441,3 +441,24 @@ admission_webhooks_rc_provider_configs 2
 # HELP admission_webhooks_rc_provider_configs_invalid Number of invalid remote configurations.
 # TYPE admission_webhooks_rc_provider_configs_invalid gauge
 admission_webhooks_rc_provider_configs_invalid 1
+# HELP language_detection_dca_handler_ok_response Tracks the number of times request processing succeeds
+# TYPE language_detection_dca_handler_ok_response counter
+language_detection_dca_handler_ok_response 1950
+# HELP language_detection_patcher_success_patch Tracks the number of successful annotation patch operations
+# TYPE language_detection_patcher_success_patch counter
+language_detection_patcher_success_patch{namespace="bill-usage",owner_kind="Deployment",owner_name="h2server"} 1
+language_detection_patcher_success_patch{namespace="bill-usage",owner_kind="Deployment",owner_name="hive-metastore"} 1
+language_detection_patcher_success_patch{namespace="bill-usage",owner_kind="Deployment",owner_name="rq-trino-api"} 1
+language_detection_patcher_success_patch{namespace="bill-usage",owner_kind="Deployment",owner_name="rq-trino-coordinator-a"} 1
+# HELP language_detection_dca_handler_fail_response Tracks the number of times request processing fails
+# TYPE language_detection_dca_handler_fail_response counter
+language_detection_dca_handler_fail_response 13
+# HELP language_detection_patcher_fail_patch Tracks the number of failing annotation patch operations
+# TYPE language_detection_patcher_fail_patch counter
+language_detection_patcher_fail_patch{namespace="default",owner_kind="Deployment",owner_name="dummy-user-deployment-new"} 1
+# HELP language_detection_patcher_retries Tracks the number of retries while patching deployments with language annotations
+# TYPE language_detection_patcher_retries counter
+language_detection_patcher_retries{namespace="default",owner_kind="Deployment",owner_name="dummy-user-deployment-new"} 1
+# HELP language_detection_patcher_skipped_patch Tracks the number of times a patch was skipped because no new languages are detected or old languages were expired
+# TYPE language_detection_patcher_skipped_patch counter
+language_detection_patcher_skipped_patch{namespace="default",owner_kind="Deployment",owner_name="dummy-user-deployment-new"} 1

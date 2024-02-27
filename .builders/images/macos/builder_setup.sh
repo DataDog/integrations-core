@@ -10,9 +10,8 @@ set -euxo pipefail
 "${DD_PYTHON2}" -m pip install --no-warn-script-location virtualenv
 "${DD_PYTHON2}" -m virtualenv py2
 
-"${DD_PYTHON3}" -m pip install --no-warn-script-location -r "${DD_MOUNT_DIR}/build_context/runner_dependencies.txt"
-
 # Install always with our own prefix path
+mkdir -p "${DD_PREFIX_PATH}"
 cp "${DD_MOUNT_DIR}/build_context/install-from-source.sh" .
 install-from-source() {
     bash "install-from-source.sh" --prefix="${DD_PREFIX_PATH}" "$@"
@@ -23,6 +22,8 @@ IBM_MQ_VERSION=9.2.4.0-IBM-MQ-DevToolkit
 curl --retry 5 --fail "https://s3.amazonaws.com/dd-agent-omnibus/ibm-mq-backup/${IBM_MQ_VERSION}-MacX64.pkg" -o /tmp/mq_client.pkg
 sudo installer -pkg /tmp/mq_client.pkg -target /
 rm -rf /tmp/mq_client.pkg
+# Copy under prefix so that it can be cached
+cp -R /opt/mqm "${DD_PREFIX_PATH}"
 
 # openssl
 DOWNLOAD_URL="https://www.openssl.org/source/openssl-{{version}}.tar.gz" \
@@ -34,6 +35,14 @@ CONFIGURE_SCRIPT="./config" \
     -fPIC shared \
     no-module \
     no-comp no-idea no-mdc2 no-rc5 no-ssl3 no-gost
+
+# zlib
+CFLAGS="${CFLAGS} -fPIC"
+DOWNLOAD_URL="https://zlib.net/fossils/zlib-{{version}}.tar.gz" \
+VERSION="1.3.1" \
+SHA256="9a93b2b7dfdac77ceba5a558a580e74667dd6fede4585b91eefb60f03b72df23" \
+RELATIVE_PATH="zlib-{{version}}" \
+  install-from-source
 
 # libxml & libxslt for lxml
 DOWNLOAD_URL="https://download.gnome.org/sources/libxml2/2.10/libxml2-{{version}}.tar.xz" \

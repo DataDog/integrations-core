@@ -2,6 +2,12 @@
 
 <!-- towncrier release notes start -->
 
+## 17.0.1 / 2024-02-23
+
+***Fixed***:
+
+* Deal with absence of sys.database_files SpaceUsed attribute on Azure SQL Servers ([#16910](https://github.com/DataDog/integrations-core/pull/16910))
+
 ## 17.0.0 / 2024-02-16
 
 ***Removed***:
@@ -24,6 +30,12 @@
 
 * Improve performance of index_usage_stats query, set default collection interval to 5 minutes and allow interval to be customized. ([#16645](https://github.com/DataDog/integrations-core/pull/16645))
 * Require base check that has fix for null characters in query strings ([#16750](https://github.com/DataDog/integrations-core/pull/16750))
+
+## 16.0.2 / 2024-02-23
+
+***Fixed***:
+
+* Deal with absence of sys.database_files SpaceUsed attribute on Azure SQL Servers ([#16910](https://github.com/DataDog/integrations-core/pull/16910))
 
 ## 16.0.1 / 2024-02-07 / Agent 7.51.0
 

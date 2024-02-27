@@ -93,6 +93,7 @@ class PostgreSql(AgentCheck):
         self._db = None
         self.version = None
         self.raw_version = None
+        self.system_identifier = None
         self.is_aurora = None
         self._version_utils = VersionUtils()
         # Deprecate custom_metrics in favor of custom_queries
@@ -401,6 +402,12 @@ class PostgreSql(AgentCheck):
         now = time()
         oldest_file_age = now - os.path.getctime(oldest_file)
         return oldest_file_age
+
+    def load_system_identifier(self):
+        with self.db() as conn:
+            with conn.cursor() as cursor:
+                cursor.execute('SELECT system_identifier FROM pg_control_system();')
+                self.system_identifier = cursor.fetchone()[0]
 
     def load_version(self):
         self.raw_version = self._version_utils.get_raw_version(self.db())
@@ -995,6 +1002,11 @@ class PostgreSql(AgentCheck):
             # Add raw version as a tag
             tags.append(f'postgresql_version:{self.raw_version}')
             self.tags_without_db.append(f'postgresql_version:{self.raw_version}')
+
+            # Add system identifier as a tag
+            self.load_system_identifier()
+            tags.append(f'system_identifier:{self.system_identifier}')
+            self.tags_without_db.append(f'system_identifier:{self.system_identifier}')
 
             if self._config.tag_replication_role:
                 replication_role_tag = "replication_role:{}".format(self._get_replication_role())
