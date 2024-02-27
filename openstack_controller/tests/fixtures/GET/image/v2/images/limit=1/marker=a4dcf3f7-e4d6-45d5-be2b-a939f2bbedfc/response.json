@@ -1,0 +1,5 @@
+{
+    "images": [],
+    "first": "/v2/images?limit=1",
+    "schema": "/v2/schemas/images"
+}
