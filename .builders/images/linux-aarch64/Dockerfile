@@ -24,7 +24,7 @@ RUN yum install -y openssl-devel && \
  RELATIVE_PATH=Python-{{version}} \
  INSTALL_COMMAND="make altinstall" \
  bash install-from-source.sh \
- --prefix=/opt/python/${PYTHON2_VERSION} --with-ensurepip=yes --enable-shared --enable-ipv6 --enable-unicode=ucs4 \
+ --prefix=/opt/python/${PYTHON2_VERSION} --with-ensurepip=yes --enable-ipv6 --enable-unicode=ucs4 \
  && yum remove -y openssl-devel
 
 # Set up virtual environment for Python 2
@@ -66,7 +66,6 @@ RUN yum install -y libffi-devel && \
  --with-openssl=/usr/local/ssl \
  --with-openssl-rpath=auto \
  --with-ensurepip=yes \
- --enable-shared \
  --enable-ipv6 \
  --with-dbmliborder=
 ENV PATH="/opt/python/${PYTHON_VERSION}/bin:${PATH}"
@@ -200,8 +199,6 @@ RUN \
 # https://doc.rust-lang.org/cargo/reference/config.html#netgit-fetch-with-cli
 # https://github.com/rust-lang/cargo/issues/10762
 ENV CARGO_NET_GIT_FETCH_WITH_CLI="true"
-
-ENV LD_LIBRARY_PATH="/opt/python/${PYTHON_VERSION}/lib:/opt/python/${PYTHON2_VERSION}/lib:${LD_LIBRARY_PATH}"
 
 # Environment variables to help openssl crate find OpenSSL
 ENV OPENSSL_LIB_DIR="/usr/local/lib64"
