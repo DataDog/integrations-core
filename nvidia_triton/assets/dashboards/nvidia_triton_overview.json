@@ -1176,7 +1176,7 @@
                     {
                         "definition": {
                             "background_color": "green",
-                            "content": "*Latencies*: The following graphs shows the Triton server latencies durations, such as request, queue and computation.",
+                            "content": "*Latencies*: The following graphs show the Triton server latency durations, such as request, queue, and computation.",
                             "font_size": "14",
                             "has_padding": true,
                             "show_tick": false,
