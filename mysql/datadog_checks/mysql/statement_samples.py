@@ -146,8 +146,8 @@ PYMYSQL_MISSING_EXPLAIN_STATEMENT_PROC_ERRORS = frozenset(
     }
 )
 
-# the max value of signed BIGINT type column
-BIGINT_MAX = 2**63 - 1
+# the max value of unsigned BIGINT type column
+BIGINT_MAX = 2**64 - 1
 
 
 class DBExplainErrorCode(Enum):
