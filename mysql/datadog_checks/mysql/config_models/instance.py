@@ -198,6 +198,7 @@ class InstanceConfig(BaseModel):
     query_activity: Optional[QueryActivity] = None
     query_metrics: Optional[QueryMetrics] = None
     query_samples: Optional[QuerySamples] = None
+    read_timeout: Optional[float] = None
     reported_hostname: Optional[str] = None
     service: Optional[str] = None
     sock: Optional[str] = None

@@ -82,6 +82,13 @@ files:
               type: number
               example: 10
 
+          - name: read_timeout
+            description: |
+              The timeout for reading from the connection in seconds.
+            value:
+              type: number
+              example: 10
+
           - name: ssl
             description: |
               Use this section to configure a TLS connection between the Agent and MySQL.
