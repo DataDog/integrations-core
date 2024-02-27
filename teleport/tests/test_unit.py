@@ -19,9 +19,24 @@ def test_connect_exception(dd_run_check):
         dd_run_check(check)
 
 
-def test_common_teleport_metrics(dd_run_check, mock_http_response):
+COMMON_METRICS = [
+    "process_state",
+    "certificate_mismatch_total.count",
+    "rx.count",
+    "server_interactive_sessions_total",
+    "teleport_build_info",
+    "teleport_cache_events.count",
+    "teleport_cache_stale_events.count",
+    "tx.count",
+]
+
+def test_common_teleport_metrics(dd_run_check, aggregator, mock_http_response):
     fixtures_path = os.path.join(get_here(), 'fixtures', 'metrics.txt')
     mock_http_response(file_path=fixtures_path)
-    instance = {"diagnostic_url": "http://127.0.0.1:3000"}
+
+    instance = {"diagnostic_url": "http://hostname:3000"}
     check = TeleportCheck('teleport', {}, [instance])
     dd_run_check(check)
+
+    for metric in COMMON_METRICS:
+        aggregator.assert_metric(f"teleport.{metric}")
