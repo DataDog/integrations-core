@@ -69,7 +69,7 @@ metadata:
         "fluxcd": {
           "instances": [
             {
-              "openmetrics_endpoint": "http://%%host%%:8080/metrics",
+              "openmetrics_endpoint": "http://%%host%%:8080/metrics"
             }
           ]
         }
