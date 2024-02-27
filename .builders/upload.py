@@ -58,6 +58,11 @@ def display_message_block(message: str) -> None:
 
 
 def iter_wheel_dirs(targets_dir: str) -> Iterator[Path]:
+    """Iterate over 'built'/'external' folders that contain wheels ready for upload.
+
+    The directory structure that this assumes under `targets_dir` is:
+    {platform} / py{2,3} / wheels / {built,external}
+    """
     for target in Path(targets_dir).iterdir():
         display_message_block(f'Target {target.name}')
         for python_version in target.iterdir():
@@ -71,15 +76,11 @@ def iter_wheel_dirs(targets_dir: str) -> Iterator[Path]:
                 yield entry
 
 
-def main():
-    parser = argparse.ArgumentParser(prog='builder', allow_abbrev=False)
-    parser.add_argument('targets_dir')
-    args = parser.parse_args()
-
+def upload(targets_dir):
     client = storage.Client()
     bucket = client.bucket(BUCKET_NAME)
     artifact_types: set[str] = set()
-    for entry in iter_wheel_dirs(args.targets_dir):
+    for entry in iter_wheel_dirs(targets_dir):
         artifact_type = entry.name
         artifact_types.add(artifact_type)
         display_message_block(f'Processing {artifact_type} wheels')
@@ -184,4 +185,7 @@ def main():
 
 
 if __name__ == '__main__':
-    main()
+    parser = argparse.ArgumentParser(prog='builder', allow_abbrev=False)
+    parser.add_argument('targets_dir')
+    args = parser.parse_args()
+    upload(args.targets_dir)
