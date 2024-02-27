@@ -636,7 +636,7 @@
                     {
                         "definition": {
                             "background_color": "green",
-                            "content": "CPU Metrics are currently only supported on Linux. \nThey collect information from the /proc filesystem.",
+                            "content": "CPU Metrics are only supported on Linux. \nThey collect information from the /proc filesystem.",
                             "font_size": "14",
                             "has_padding": true,
                             "show_tick": false,
