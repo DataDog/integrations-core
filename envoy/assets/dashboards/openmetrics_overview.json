@@ -2665,7 +2665,7 @@
                 "background_color": "vivid_pink",
                 "layout_type": "ordered",
                 "show_title": true,
-                "title": "New group",
+                "title": "Envoy Logs",
                 "type": "group",
                 "widgets": [
                     {
