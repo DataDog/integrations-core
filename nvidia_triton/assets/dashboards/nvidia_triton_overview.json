@@ -364,7 +364,7 @@
                     {
                         "definition": {
                             "background_color": "green",
-                            "content": "The graphs below show the GPU power on your Triton server and the actual usage vs the power limits.",
+                            "content": "The graphs below show the GPU power on your Triton server and the actual usage versus the power limits.",
                             "font_size": "14",
                             "has_padding": true,
                             "show_tick": false,
