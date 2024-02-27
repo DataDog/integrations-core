@@ -861,7 +861,7 @@
                     {
                         "definition": {
                             "background_color": "green",
-                            "content": "*Counts:* The following graphs show the Triton server inference numbers, such as failure, success and peneding, along with total count and batch execution",
+                            "content": "*Counts:* The following graphs show the Triton server inference numbers, such as failure, success, and pending, along with total count and batch execution",
                             "font_size": "14",
                             "has_padding": true,
                             "show_tick": false,
