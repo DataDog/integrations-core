@@ -880,10 +880,11 @@ class SQLServer(AgentCheck):
             default_database = self.instance.get('database', self.connection.DEFAULT_DATABASE)
             # Filter out tempdb as the query might be blocking and it's index usage information is not relevant
             include_temdb_in_metric = is_affirmative(self.instance.get('include_index_usage_metrics_tempdb', False))
-            
-            db_names = [d.name for d in self.databases if include_temdb_in_metric or d != 'tempdb'] \
-            or ([default_database] if include_temdb_in_metric or default_database != 'tempdb' else [])
-            
+
+            db_names = [d.name for d in self.databases if include_temdb_in_metric or d != 'tempdb'] or (
+                [default_database] if include_temdb_in_metric or default_database != 'tempdb' else []
+            )
+
             with self.connection.get_managed_cursor() as cursor:
                 cursor.execute(
                     'select DB_NAME()'
