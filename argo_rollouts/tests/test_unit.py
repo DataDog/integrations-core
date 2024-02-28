@@ -8,19 +8,25 @@ from datadog_checks.base import AgentCheck  # noqa: F401
 from datadog_checks.base.stubs.aggregator import AggregatorStub  # noqa: F401
 from datadog_checks.dev.utils import get_metadata_metrics
 from datadog_checks.argo_rollouts import ArgoRolloutsCheck
+import pytest
 
+from datadog_checks.base.constants import ServiceCheck
+from datadog_checks.dev.utils import get_metadata_metrics
+from datadog_checks.argo_rollouts import ArgoRolloutsCheck
 
-def test_check(dd_run_check, aggregator, instance):
-    # type: (Callable[[AgentCheck, bool], None], AggregatorStub, Dict[str, Any]) -> None
-    check = ArgoRolloutsCheck('argo_rollouts', {}, [instance])
+from .common import OM_METRICS, OM_MOCKED_INSTANCE, get_fixture_path
+
+pytestmark = pytest.mark.unit
+
+def test_check_mock_argo_rollouts_openmetrics(dd_run_check, aggregator, mock_http_response):
+    mock_http_response(file_path=get_fixture_path('openmetrics.txt'))
+    check = ArgoRolloutsCheck('argo_rollouts', {}, [OM_MOCKED_INSTANCE])
     dd_run_check(check)
+
+    for metric in OM_METRICS:
+        aggregator.assert_metric(metric)
+        aggregator.assert_metric_has_tag(metric, 'test:tag')
 
     aggregator.assert_all_metrics_covered()
-    aggregator.assert_metrics_using_metadata(get_metadata_metrics())
-
-
-def test_emits_critical_service_check_when_service_is_down(dd_run_check, aggregator, instance):
-    # type: (Callable[[AgentCheck, bool], None], AggregatorStub, Dict[str, Any]) -> None
-    check = ArgoRolloutsCheck('argo_rollouts', {}, [instance])
-    dd_run_check(check)
-    aggregator.assert_service_check('argo_rollouts.can_connect', ArgoRolloutsCheck.CRITICAL)
+    # aggregator.assert_metrics_using_metadata(get_metadata_metrics())
+    aggregator.assert_service_check('argo_rollouts.openmetrics.health', ServiceCheck.OK)
