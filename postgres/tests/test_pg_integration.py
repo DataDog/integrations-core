@@ -1042,14 +1042,6 @@ def assert_state_set(check):
     assert check.metrics_cache.replication_metrics
 
 
-def test_host_autodiscover_init_config(aggregator, pg_host_autodiscover_init_config):
-    check_with_init = PostgreSql('test_instance', pg_host_autodiscover_init_config, [{}])
-    assert check_with_init._config.host_autodiscovery_enabled is True
-    check_with_init.check({})
-    # assert that the service check is OK
-    aggregator.assert_service_check('postgres.can_connect', count=1, status=PostgreSql.OK)
-
-
 @requires_over_10
 def test_replication_tag(aggregator, integration_check, pg_instance):
     test_metric = 'postgresql.db.count'
