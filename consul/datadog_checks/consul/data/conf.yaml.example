@@ -71,6 +71,13 @@ instances:
     #
     # network_latency_checks: false
 
+    ## @param use_node_id_as_hostname - boolean - optional - default: true
+    ## Whether to use the Consul node name as the host name for network latency metrics.
+    ## If set to true, the agent will use the Consul node name as the host name.
+    ## If set to false, the agent will use the system hostname as the host name.
+    #
+    # use_node_id_as_hostname: true
+
     ## @param self_leader_check - boolean - optional - default: false
     ## Whether to enable self leader checks. Each instance with this enabled
     ## watches for itself to become the leader and emits an event when that

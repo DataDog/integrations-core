@@ -116,5 +116,9 @@ def instance_use_legacy_auth_encoding():
     return True
 
 
+def instance_use_node_id_as_hostname():
+    return True
+
+
 def instance_use_prometheus_endpoint():
     return False
