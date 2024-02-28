@@ -12,12 +12,11 @@ COMMON_METRICS = [
     "teleport_build_info",
     "teleport_cache_events",
     "teleport_cache_stale_events",
-    "tx"
+    "tx",
 ]
 
-METRICS_LIST = [
-    *COMMON_METRICS
-]
+METRICS_LIST = [*COMMON_METRICS]
+
 
 class TeleportCheck(OpenMetricsBaseCheckV2):
     __NAMESPACE__ = 'teleport'

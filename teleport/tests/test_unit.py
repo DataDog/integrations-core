@@ -30,6 +30,7 @@ COMMON_METRICS = [
     "tx.count",
 ]
 
+
 def test_common_teleport_metrics(dd_run_check, aggregator, mock_http_response):
     fixtures_path = os.path.join(get_here(), 'fixtures', 'metrics.txt')
     mock_http_response(file_path=fixtures_path)
