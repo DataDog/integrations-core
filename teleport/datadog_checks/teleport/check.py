@@ -42,3 +42,4 @@ class TeleportCheck(OpenMetricsBaseCheckV2):
         if self.diagnostic_url:
             self.instance.setdefault("openmetrics_endpoint", self.diagnostic_url + "/metrics")
             self.instance.setdefault("metrics", METRICS_LIST)
+            self.instance.setdefault("rename_labels", {'version': "teleport_version"})
