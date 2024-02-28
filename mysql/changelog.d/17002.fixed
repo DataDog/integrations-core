@@ -1,1 +1,1 @@
-[MySQL] - SDBM-830 - Make the autocommit explicit
+Explicitly activate autocommit mode for monitoring connections
