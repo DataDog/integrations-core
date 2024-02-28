@@ -281,4 +281,7 @@ class ApiSdk(Api):
         return response.json().get('amphora_stats', [])
 
     def get_glance_images(self):
-        return [image.to_dict(original_names=True) for image in self.connection.image.images()]
+        return [
+            image.to_dict(original_names=True)
+            for image in self.call_paginated_api(self.connection.image.images, limit=self.config.paginated_limit)
+        ]

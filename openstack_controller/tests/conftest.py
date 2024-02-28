@@ -578,7 +578,7 @@ def connection_image(request, mock_responses):
     param = request.param if hasattr(request, 'param') and request.param is not None else {}
     http_error = param.get('http_error')
 
-    def images():
+    def images(limit=None):
         if http_error and 'images' in http_error:
             raise requests.exceptions.HTTPError(response=http_error['images'])
         return [

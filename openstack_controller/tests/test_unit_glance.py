@@ -6,6 +6,7 @@ import copy
 import logging
 import os
 
+import mock
 import pytest
 
 import tests.configs as configs
@@ -279,9 +280,25 @@ def test_images_metrics(aggregator, check, dd_run_check, metrics):
             IMAGES_METRICS_GLANCE,
             id='api rest high limit',
         ),
+        pytest.param(
+            configs.SDK,
+            1,
+            ApiType.SDK,
+            1,
+            IMAGES_METRICS_GLANCE,
+            id='api sdk small limit',
+        ),
+        pytest.param(
+            configs.SDK,
+            1000,
+            ApiType.SDK,
+            1,
+            IMAGES_METRICS_GLANCE,
+            id='api sdk high limit',
+        ),
     ],
 )
-@pytest.mark.usefixtures('mock_http_get', 'mock_http_post', 'openstack_connection')
+@pytest.mark.usefixtures('mock_http_get', 'connection_image', 'mock_http_post', 'openstack_connection')
 def test_images_pagination(
     aggregator,
     instance,
@@ -291,6 +308,7 @@ def test_images_pagination(
     api_type,
     dd_run_check,
     mock_http_get,
+    connection_image,
     metrics,
 ):
     paginated_instance = copy.deepcopy(instance)
@@ -305,6 +323,9 @@ def test_images_pagination(
             limit = params.get('limit')
             args_list += [(args[0], limit)]
         assert args_list.count(('http://127.0.0.1:9292/image/v2/images', paginated_limit)) == expected_api_calls
+    else:
+        assert connection_image.images.call_count == 1
+        assert connection_image.images.call_args_list.count(mock.call(limit=paginated_limit)) == 1
     for metric in metrics:
         aggregator.assert_metric(
             metric['name'],
