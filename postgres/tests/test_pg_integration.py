@@ -1,6 +1,7 @@
 # (C) Datadog, Inc. 2010-present
 # All rights reserved
 # Licensed under Simplified BSD License (see LICENSE)
+import contextlib
 import socket
 import time
 
@@ -12,7 +13,7 @@ from flaky import flaky
 from datadog_checks.base.errors import ConfigurationError
 from datadog_checks.postgres import PostgreSql
 from datadog_checks.postgres.__about__ import __version__
-from datadog_checks.postgres.util import PartialFormatter, fmt
+from datadog_checks.postgres.util import DatabaseHealthCheckError, PartialFormatter, fmt
 
 from .common import (
     COMMON_METRICS,
@@ -308,6 +309,20 @@ def test_can_connect_service_check(aggregator, integration_check, pg_instance):
     check.db = orig_db
     check.check(pg_instance)
     aggregator.assert_service_check('postgres.can_connect', count=1, status=PostgreSql.OK, tags=expected_tags)
+
+    # Forth: connection health check failed
+    with pytest.raises(DatabaseHealthCheckError):
+        db = mock.MagicMock()
+        db.cursor().__enter__().execute.side_effect = psycopg2.OperationalError('foo')
+
+        @contextlib.contextmanager
+        def mock_db():
+            yield db
+
+        check.db = mock_db
+        check.check(pg_instance)
+    aggregator.assert_service_check('postgres.can_connect', count=1, status=PostgreSql.CRITICAL, tags=tags_without_role)
+    aggregator.reset()
 
 
 def test_schema_metrics(aggregator, integration_check, pg_instance):
