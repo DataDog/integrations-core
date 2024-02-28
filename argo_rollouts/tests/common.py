@@ -9,7 +9,7 @@ from datadog_checks.dev import get_here
 HERE = get_here()
 
 OM_MOCKED_INSTANCE = {
-    'openmetrics_endpoint': 'http://weaviate:2112/metrics',
+    'openmetrics_endpoint': 'http://argo_rollouts:8090/metrics',
     'tags': ['test:tag'],
 }
 
