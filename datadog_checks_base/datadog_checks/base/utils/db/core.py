@@ -128,11 +128,11 @@ class QueryExecutor(object):
                         submission_queue.append((transformer, column_value))
 
                 for transformer, value in submission_queue:
-                    transformer(sources, value, tags=tags, hostname=self.hostname)
+                    transformer(sources, value, tags=tags, hostname=self.hostname, raw=query.metric_name_raw)
 
                 for name, transformer in extra_transformers:
                     try:
-                        result = transformer(sources, tags=tags, hostname=self.hostname)
+                        result = transformer(sources, tags=tags, hostname=self.hostname, raw=query.metric_name_raw)
                     except Exception as e:
                         self.logger.error('Error transforming %s: %s', name, e)
                         continue
