@@ -7,7 +7,6 @@ import copy
 import functools
 import time
 from collections import defaultdict
-
 import six
 from cachetools import TTLCache
 
@@ -880,8 +879,7 @@ class SQLServer(AgentCheck):
             default_database = self.instance.get('database', self.connection.DEFAULT_DATABASE)
             # Filter out tempdb as the query might be blocking and it's index usage information is not relevant
             db_names = [d.name for d in self.databases] or [self.instance.get('database', self.connection.DEFAULT_DATABASE)]
-            include_index_usage_metrics_tempdb = is_affirmative(self.instance.get('include_index_usage_metrics_tempdb', False))
-            if not include_index_usage_metrics_tempdb:
+            if not self._config.include_index_usage_metrics_tempdb:
                 db_names = [db_name for db_name in db_names if db_name != 'tempdb']
 
             with self.connection.get_managed_cursor() as cursor:
