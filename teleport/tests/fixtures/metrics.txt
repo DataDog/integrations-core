@@ -448,6 +448,18 @@ go_memstats_sys_bytes 9.0038552e+07
 # HELP go_threads Number of OS threads created.
 # TYPE go_threads gauge
 go_threads 12
+# HELP grpc_client_started_total Total number of RPCs started on the client.
+# TYPE grpc_client_started_total counter
+grpc_client_started_total 1
+# HELP grpc_client_handled_total Total number of RPCs completed on the client, regardless of success or failure.
+# TYPE grpc_client_handled_total counter
+grpc_client_handled_total 1
+# HELP grpc_client_msg_received_total Total number of RPC stream messages received on the client.
+# TYPE grpc_client_msg_received_total counter
+grpc_client_msg_received_total 1
+# HELP grpc_client_msg_sent_total Total number of gRPC stream messages sent by the client.
+# TYPE grpc_client_msg_sent_total counter
+grpc_client_msg_sent_total 1
 # HELP grpc_server_handled_total Total number of RPCs completed on the server, regardless of success or failure.
 # TYPE grpc_server_handled_total counter
 grpc_server_handled_total{grpc_code="NotFound",grpc_method="GetNetworkRestrictions",grpc_service="proto.AuthService",grpc_type="unary",server="teleport-auth"} 1
