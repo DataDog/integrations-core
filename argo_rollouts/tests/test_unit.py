@@ -4,19 +4,16 @@
 
 from typing import Any, Callable, Dict  # noqa: F401
 
-from datadog_checks.base import AgentCheck  # noqa: F401
-from datadog_checks.base.stubs.aggregator import AggregatorStub  # noqa: F401
-from datadog_checks.dev.utils import get_metadata_metrics
-from datadog_checks.argo_rollouts import ArgoRolloutsCheck
 import pytest
 
-from datadog_checks.base.constants import ServiceCheck
-from datadog_checks.dev.utils import get_metadata_metrics
 from datadog_checks.argo_rollouts import ArgoRolloutsCheck
+from datadog_checks.base.constants import ServiceCheck
 
+# from datadog_checks.dev.utils import get_metadata_metrics
 from .common import OM_METRICS, OM_MOCKED_INSTANCE, get_fixture_path
 
 pytestmark = pytest.mark.unit
+
 
 def test_check_mock_argo_rollouts_openmetrics(dd_run_check, aggregator, mock_http_response):
     mock_http_response(file_path=get_fixture_path('openmetrics.txt'))
