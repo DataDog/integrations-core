@@ -21,7 +21,7 @@ def test_connect_exception(dd_run_check):
 
 COMMON_METRICS = [
     "process_state",
-    "certificate_mismatch_total.count",
+    "certificate_mismatch.count",
     "rx.count",
     "server_interactive_sessions_total",
     "teleport_build_info",

@@ -4,17 +4,20 @@
 
 from datadog_checks.base import OpenMetricsBaseCheckV2
 
-METRIC_MAP = {
-    "process_state": "process_state",
-    # "certificate_mismatch_total": "certificate_mismatch_total",
-    "rx": "rx",
-    "server_interactive_sessions_total": "server_interactive_sessions_total",
-    # "teleport_build_info": "teleport_build_info",
-    "teleport_cache_events": "teleport_cache_events",
-    "teleport_cache_stale_events": "teleport_cache_stale_events",
-    "tx": "tx",
-}
+COMMON_METRICS = [
+    "process_state",
+    "certificate_mismatch",
+    "rx",
+    "server_interactive_sessions_total",
+    "teleport_build_info",
+    "teleport_cache_events",
+    "teleport_cache_stale_events",
+    "tx"
+]
 
+METRICS_LIST = [
+    *COMMON_METRICS
+]
 
 class TeleportCheck(OpenMetricsBaseCheckV2):
     __NAMESPACE__ = 'teleport'
@@ -38,4 +41,4 @@ class TeleportCheck(OpenMetricsBaseCheckV2):
         self.diagnostic_url = self.instance.get("diagnostic_url")
         if self.diagnostic_url:
             self.instance.setdefault("openmetrics_endpoint", self.diagnostic_url + "/metrics")
-            self.instance.setdefault("metrics", [METRIC_MAP])
+            self.instance.setdefault("metrics", METRICS_LIST)
