@@ -1,0 +1,168 @@
+interactions:
+- request:
+    body: '{"name": "my_custom_label", "color": "ff0000"}'
+    headers:
+      accept:
+      - '*/*'
+      accept-encoding:
+      - gzip, deflate
+      connection:
+      - keep-alive
+      content-length:
+      - '46'
+      host:
+      - api.github.com
+      user-agent:
+      - python-httpx/0.25.2
+      x-github-api-version:
+      - '2022-11-28'
+    method: POST
+    uri: https://api.github.com/repos/DataDog/integrations-core/labels
+  response:
+    content: '{"id":6585381716,"node_id":"LA_kwDOAtBC5c8AAAABiITzVA","url":"https://api.github.com/repos/DataDog/integrations-core/labels/my_custom_label","name":"my_custom_label","color":"ff0000","default":false,"description":null}'
+    headers:
+      Access-Control-Allow-Origin:
+      - '*'
+      Access-Control-Expose-Headers:
+      - ETag, Link, Location, Retry-After, X-GitHub-OTP, X-RateLimit-Limit, X-RateLimit-Remaining,
+        X-RateLimit-Used, X-RateLimit-Resource, X-RateLimit-Reset, X-OAuth-Scopes,
+        X-Accepted-OAuth-Scopes, X-Poll-Interval, X-GitHub-Media-Type, X-GitHub-SSO,
+        X-GitHub-Request-Id, Deprecation, Sunset
+      Cache-Control:
+      - private, max-age=60, s-maxage=60
+      Content-Length:
+      - '218'
+      Content-Security-Policy:
+      - default-src 'none'
+      Content-Type:
+      - application/json; charset=utf-8
+      Date:
+      - Tue, 20 Feb 2024 09:03:27 GMT
+      ETag:
+      - '"f825fed983d28311268f4cf5b8181abacec82549ae5edacafc3d067a50598f4e"'
+      Location:
+      - https://api.github.com/repos/DataDog/integrations-core/labels/my_custom_label
+      Referrer-Policy:
+      - origin-when-cross-origin, strict-origin-when-cross-origin
+      Server:
+      - GitHub.com
+      Strict-Transport-Security:
+      - max-age=31536000; includeSubdomains; preload
+      Vary:
+      - Accept, Authorization, Cookie, X-GitHub-OTP
+      - Accept-Encoding, Accept, X-Requested-With
+      X-Accepted-OAuth-Scopes:
+      - ''
+      X-Content-Type-Options:
+      - nosniff
+      X-Frame-Options:
+      - deny
+      X-GitHub-Media-Type:
+      - github.v3; format=json
+      X-GitHub-Request-Id:
+      - F066:2741F5:2F792E5:301516B:65D46ADF
+      X-OAuth-Scopes:
+      - admin:org, admin:org_hook, admin:public_key, delete_repo, repo, user, workflow,
+        write:packages
+      X-RateLimit-Limit:
+      - '5000'
+      X-RateLimit-Remaining:
+      - '4985'
+      X-RateLimit-Reset:
+      - '1708421577'
+      X-RateLimit-Resource:
+      - core
+      X-RateLimit-Used:
+      - '15'
+      X-XSS-Protection:
+      - '0'
+      github-authentication-token-expiration:
+      - 2024-03-31 22:00:00 UTC
+      x-github-api-version-selected:
+      - '2022-11-28'
+    http_version: HTTP/1.1
+    status_code: 201
+- request:
+    body: ''
+    headers:
+      accept:
+      - '*/*'
+      accept-encoding:
+      - gzip, deflate
+      connection:
+      - keep-alive
+      host:
+      - api.github.com
+      user-agent:
+      - python-httpx/0.25.2
+      x-github-api-version:
+      - '2022-11-28'
+    method: GET
+    uri: https://api.github.com/repos/DataDog/integrations-core/labels/my_custom_label
+  response:
+    content: '{"id":6585381716,"node_id":"LA_kwDOAtBC5c8AAAABiITzVA","url":"https://api.github.com/repos/DataDog/integrations-core/labels/my_custom_label","name":"my_custom_label","color":"ff0000","default":false,"description":null}'
+    headers:
+      Access-Control-Allow-Origin:
+      - '*'
+      Access-Control-Expose-Headers:
+      - ETag, Link, Location, Retry-After, X-GitHub-OTP, X-RateLimit-Limit, X-RateLimit-Remaining,
+        X-RateLimit-Used, X-RateLimit-Resource, X-RateLimit-Reset, X-OAuth-Scopes,
+        X-Accepted-OAuth-Scopes, X-Poll-Interval, X-GitHub-Media-Type, X-GitHub-SSO,
+        X-GitHub-Request-Id, Deprecation, Sunset
+      Cache-Control:
+      - private, max-age=60, s-maxage=60
+      Content-Encoding:
+      - gzip
+      Content-Security-Policy:
+      - default-src 'none'
+      Content-Type:
+      - application/json; charset=utf-8
+      Date:
+      - Tue, 20 Feb 2024 09:03:27 GMT
+      ETag:
+      - W/"f825fed983d28311268f4cf5b8181abacec82549ae5edacafc3d067a50598f4e"
+      Last-Modified:
+      - Tue, 20 Feb 2024 09:03:27 GMT
+      Referrer-Policy:
+      - origin-when-cross-origin, strict-origin-when-cross-origin
+      Server:
+      - GitHub.com
+      Strict-Transport-Security:
+      - max-age=31536000; includeSubdomains; preload
+      Transfer-Encoding:
+      - chunked
+      Vary:
+      - Accept, Authorization, Cookie, X-GitHub-OTP
+      - Accept-Encoding, Accept, X-Requested-With
+      X-Accepted-OAuth-Scopes:
+      - repo
+      X-Content-Type-Options:
+      - nosniff
+      X-Frame-Options:
+      - deny
+      X-GitHub-Media-Type:
+      - github.v3; format=json
+      X-GitHub-Request-Id:
+      - F066:2741F5:2F7947E:30152FE:65D46ADF
+      X-OAuth-Scopes:
+      - admin:org, admin:org_hook, admin:public_key, delete_repo, repo, user, workflow,
+        write:packages
+      X-RateLimit-Limit:
+      - '5000'
+      X-RateLimit-Remaining:
+      - '4984'
+      X-RateLimit-Reset:
+      - '1708421577'
+      X-RateLimit-Resource:
+      - core
+      X-RateLimit-Used:
+      - '16'
+      X-XSS-Protection:
+      - '0'
+      github-authentication-token-expiration:
+      - 2024-03-31 22:00:00 UTC
+      x-github-api-version-selected:
+      - '2022-11-28'
+    http_version: HTTP/1.1
+    status_code: 200
+version: 1

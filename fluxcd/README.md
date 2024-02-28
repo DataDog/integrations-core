@@ -30,7 +30,7 @@ For older versions of the Agent, [use these steps to install][10] the integratio
     init_config:
       ...
     instances:
-      - openmetrics_endpoint: http://<FLUXCD_ADDRESS>:8080
+      - openmetrics_endpoint: http://<FLUXCD_ADDRESS>:8080/metrics
     ```
 
 2. [Restart the Agent][5] after modifying the configuration.
@@ -46,7 +46,7 @@ This is an example configuration of a Docker label inside `docker-compose.yml`. 
 
 ```yaml
 labels:
-  com.datadoghq.ad.checks: '{"fluxcd":{"instances":[{"openmetrics_endpoint":"http://%%host%%:8080"}]}}'
+  com.datadoghq.ad.checks: '{"fluxcd":{"instances":[{"openmetrics_endpoint":"http://%%host%%:8080/metrics"}]}}'
 ```
 
 <!-- xxz tab xxx -->
@@ -69,7 +69,7 @@ metadata:
         "fluxcd": {
           "instances": [
             {
-              "openmetrics_endpoint": "http://%%host%%:8080",
+              "openmetrics_endpoint": "http://%%host%%:8080/metrics"
             }
           ]
         }

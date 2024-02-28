@@ -67,6 +67,7 @@ def test_manifest_v2_maintainer_validator_incorrect_maintainer(setup_route):
     validator = common.MaintainerValidator(
         is_extras=False, is_marketplace=False, check_in_extras=False, check_in_marketplace=False, version=V2
     )
+    # TODO stop relying on the current repo and create a fake integration
     validator.validate('active_directory', incorrect_maintainer_manifest, False)
 
     # Assert test case
@@ -93,6 +94,7 @@ def test_manifest_v2_maintainer_validator_invalid_maintainer(setup_route):
     validator = common.MaintainerValidator(
         is_extras=False, is_marketplace=False, check_in_extras=False, check_in_marketplace=False, version=V2
     )
+    # TODO stop relying on the current repo and create a fake integration
     validator.validate('active_directory', invalid_maintainer_manifest, False)
 
     # Assert test case
@@ -105,6 +107,7 @@ def test_manifest_v2_maintainer_validator_correct_maintainer(setup_route):
     validator = common.MaintainerValidator(
         is_extras=False, is_marketplace=False, check_in_extras=False, check_in_marketplace=False, version=V2
     )
+    # TODO stop relying on the current repo and create a fake integration
     validator.validate('active_directory', JSONDict(input_constants.V2_VALID_MANIFEST), False)
 
     # Assert test case
@@ -132,6 +135,7 @@ def test_manifest_v2_metrics_metadata_validator_file_exists_not_in_manifest(setu
     )
     # Use specific validator
     validator = common.MetricsMetadataValidator(version=V2)
+    # TODO stop relying on the current repo and create a fake integration
     validator.validate('active_directory', file_exists_not_in_manifest, False)
 
     # Assert test case
@@ -160,6 +164,7 @@ def test_manifest_v2_metrics_metadata_validator_file_in_manifest_not_exist(_, se
     )
     # Use specific validator
     validator = common.MetricsMetadataValidator(version=V2)
+    # TODO stop relying on the current repo and create a fake integration
     validator.validate('active_directory', file_in_manifest_does_not_exist, False)
 
     # Assert test case
@@ -173,6 +178,7 @@ def test_manifest_v2_metrics_metadata_validator_file_in_manifest_not_exist(_, se
 def test_manifest_v2_metrics_metadata_validator_correct_metadata(_, setup_route):
     # Use specific validator
     validator = common.MetricsMetadataValidator(version=V2)
+    # TODO stop relying on the current repo and create a fake integration
     validator.validate('active_directory', JSONDict(input_constants.V2_VALID_MANIFEST), False)
 
     # Assert test case
@@ -201,6 +207,7 @@ def test_manifest_v2_metrics_to_check_validator_check_not_in_metadata(setup_rout
     )
     # Use specific validator
     validator = common.MetricToCheckValidator(version=V2)
+    # TODO stop relying on the current repo and create a fake integration
     validator.validate('active_directory', check_not_in_metadata_csv, False)
 
     # Assert test case
@@ -229,6 +236,7 @@ def test_manifest_v2_metrics_to_check_validator_check_not_in_manifest(setup_rout
 
     # Use specific validator
     validator = common.MetricToCheckValidator(version=V2)
+    # TODO stop relying on the current repo and create a fake integration
     validator.validate('active_directory', check_not_in_manifest, False)
 
     # Assert test case
@@ -242,6 +250,7 @@ def test_manifest_v2_metrics_to_check_validator_check_not_in_manifest(setup_rout
 def test_manifest_v2_metrics_metadata_validator_correct_check_in_metadata(_, setup_route):
     # Use specific validator
     validator = common.MetricToCheckValidator(version=V2)
+    # TODO stop relying on the current repo and create a fake integration
     validator.validate('active_directory', JSONDict(input_constants.V2_VALID_MANIFEST), False)
 
     # Assert test case
@@ -266,7 +275,8 @@ def test_manifest_v2_logs_category_validator_has_logs_no_tag(_, setup_route):
 
     # Use specific validator
     validator = common.LogsCategoryValidator(version=V2)
-    validator.validate('active_directory', has_logs_no_tag_manifest, False)
+    # TODO stop relying on the current repo and create a fake integration
+    validator.validate('activemq', has_logs_no_tag_manifest, False)
 
     # Assert test case
     assert validator.result.failed, validator.result
@@ -277,7 +287,8 @@ def test_manifest_v2_logs_category_validator_has_logs_no_tag(_, setup_route):
 def test_manifest_v2_logs_category_validator_correct_has_logs_correct_tag(_, setup_route):
     # Use specific validator
     validator = common.LogsCategoryValidator(version=V2)
-    validator.validate('active_directory', JSONDict(input_constants.V2_VALID_MANIFEST), False)
+    # TODO stop relying on the current repo and create a fake integration
+    validator.validate('activemq', JSONDict(input_constants.V2_VALID_MANIFEST), False)
 
     # Assert test case
     assert not validator.result.failed, validator.result
@@ -292,6 +303,7 @@ def test_manifest_v2_display_on_public_validator_invalid(setup_route):
 
     # Use specific validator
     validator = v2_validators.DisplayOnPublicValidator(version=V2)
+    # TODO stop relying on the current repo and create a fake integration
     validator.validate('active_directory', display_on_public_invalid_manifest, False)
 
     # Assert test case
@@ -304,6 +316,7 @@ def test_manifest_v2_display_on_public_validator_valid(setup_route):
 
     # Use specific validator
     validator = v2_validators.DisplayOnPublicValidator(version=V2)
+    # TODO stop relying on the current repo and create a fake integration
     validator.validate('active_directory', display_on_public_valid_manifest, False)
 
     # Assert test case
@@ -318,6 +331,7 @@ def test_manifest_v2_schema_validator_manifest_invalid(_, setup_route):
     """
     # Use specific validator
     validator = v2_validators.SchemaValidator(ctx=input_constants.MockedContextObj(), version=V2, skip_if_errors=False)
+    # TODO stop relying on the current repo and create a fake integration
     validator.validate('active_directory', JSONDict(input_constants.V2_VALID_MANIFEST), False)
 
     # Assert test case
@@ -329,6 +343,7 @@ def test_manifest_v2_schema_validator_manifest_invalid(_, setup_route):
 def test_manifest_v2_schema_validator_manifest_valid(_, setup_route):
     # Use specific validator
     validator = v2_validators.SchemaValidator(ctx=input_constants.MockedContextObj(), version=V2, skip_if_errors=False)
+    # TODO stop relying on the current repo and create a fake integration
     validator.validate('active_directory', JSONDict(input_constants.V2_VALID_MANIFEST), False)
 
     # Assert test case
@@ -346,6 +361,7 @@ def test_manifest_v2_immutable_attributes_validator_invalid_attribute_change(_, 
     """
     # Use specific validator
     validator = common.ImmutableAttributesValidator(version=V2)
+    # TODO stop relying on the current repo and create a fake integration
     validator.validate('active_directory', JSONDict(get_changed_immutable_attribute_manifest()), False)
 
     # Assert test case
@@ -363,6 +379,7 @@ def test_manifest_v2_immutable_attributes_validator_invalid_short_name_change(_,
     """
     # Use specific validator
     validator = common.ImmutableAttributesValidator(version=V2)
+    # TODO stop relying on the current repo and create a fake integration
     validator.validate('active_directory', JSONDict(get_changed_immutable_short_name_manifest()), False)
 
     # Assert test case
@@ -380,6 +397,7 @@ def test_manifest_v2_immutable_attributes_validator_version_upgrade(_, setup_rou
     """
     # Use specific validator
     validator = common.ImmutableAttributesValidator(version=V2)
+    # TODO stop relying on the current repo and create a fake integration
     validator.validate('active_directory', input_constants.IMMUTABLE_ATTRIBUTES_V2_MANIFEST, False)
 
     # Assert test case
@@ -394,6 +412,7 @@ def test_manifest_v2_immutable_attributes_validator_version_upgrade(_, setup_rou
 def test_manifest_v2_immutable_attributes_validator_valid_change(_, setup_route):
     # Use specific validator
     validator = common.ImmutableAttributesValidator(version=V2)
+    # TODO stop relying on the current repo and create a fake integration
     validator.validate('active_directory', JSONDict(input_constants.V2_VALID_MANIFEST), False)
 
     # Assert test case
@@ -405,6 +424,7 @@ def test_manifest_v2_immutable_attributes_validator_valid_change(_, setup_route)
 def test_manifest_v2_media_gallery_validator_pass(_, setup_route):
     # Use specific validator
     validator = v2_validators.MediaGalleryValidator(is_marketplace=True, version=V2, check_in_extras=False)
+    # TODO stop relying on the current repo and create a fake integration
     validator.validate('active_directory', JSONDict(input_constants.VALID_MEDIA_MANIFEST), False)
 
     # Assert test case
@@ -416,6 +436,7 @@ def test_manifest_v2_media_gallery_validator_pass(_, setup_route):
 def test_manifest_v2_media_gallery_validator_image_size_too_large(_, setup_route):
     # Use specific validator
     validator = v2_validators.MediaGalleryValidator(is_marketplace=True, version=V2, check_in_extras=False)
+    # TODO stop relying on the current repo and create a fake integration
     validator.validate('active_directory', JSONDict(input_constants.VALID_MEDIA_MANIFEST), False)
 
     # Assert test case
@@ -427,6 +448,7 @@ def test_manifest_v2_media_gallery_validator_image_size_too_large(_, setup_route
 def test_manifest_v2_media_gallery_validator_too_many_videos(_, setup_route):
     # Use specific validator
     validator = v2_validators.MediaGalleryValidator(is_marketplace=True, version=V2, check_in_extras=False)
+    # TODO stop relying on the current repo and create a fake integration
     validator.validate('active_directory', JSONDict(input_constants.INVALID_MEDIA_MANIFEST_TOO_MANY_VIDEOS), False)
 
     # Assert test case
@@ -449,6 +471,7 @@ def test_manifest_v2_media_gallery_validator_bad_structure(_, setup_route):
 def test_manifest_v2_media_gallery_validator_incorrect_vimeo_id_type(_, setup_route):
     # Use specific validator
     validator = v2_validators.MediaGalleryValidator(is_marketplace=True, version=V2, check_in_extras=False)
+    # TODO stop relying on the current repo and create a fake integration
     validator.validate(
         'active_directory', JSONDict(input_constants.INVALID_MEDIA_MANIFEST_INCORRECT_VIMEO_ID_TYPE), False
     )
@@ -461,6 +484,7 @@ def test_manifest_v2_media_gallery_validator_incorrect_vimeo_id_type(_, setup_ro
 def test_manifest_v2_tile_description_validator_pass(setup_route):
     # Use specific validator
     validator = v2_validators.TileDescriptionValidator(is_marketplace=True, version=V2, check_in_extras=True)
+    # TODO stop relying on the current repo and create a fake integration
     validator.validate('active_directory', input_constants.VALID_TILE_DESCRIPTION_V2_MANIFEST, False)
 
     # Assert test case
@@ -471,6 +495,7 @@ def test_manifest_v2_tile_description_validator_pass(setup_route):
 def test_manifest_v2_tile_description_validator_invalid(setup_route):
     # Use specific validator
     validator = v2_validators.TileDescriptionValidator(is_marketplace=True, version=V2, check_in_extras=True)
+    # TODO stop relying on the current repo and create a fake integration
     validator.validate('active_directory', input_constants.INVALID_TILE_DESCRIPTION_V2_MANIFEST, False)
 
     # Assert test case
@@ -488,6 +513,7 @@ def test_manifest_v2_changelog_found(setup_route):
     )
 
     validator = v2_validators.ChangelogValidator(version=V2)
+    # TODO stop relying on the current repo and create a fake integration
     validator.validate('datadog_checks_dev', manifest, False)
 
     assert not validator.result.failed
@@ -518,6 +544,7 @@ def test_manifest_v2_changelog_case_sensitive(setup_route):
     )
 
     validator = v2_validators.ChangelogValidator(version=V2)
+    # TODO stop relying on the current repo and create a fake integration
     validator.validate('datadog_checks_dev', manifest, False)
 
     assert validator.result.failed

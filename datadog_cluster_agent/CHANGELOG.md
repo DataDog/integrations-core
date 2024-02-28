@@ -2,6 +2,12 @@
 
 <!-- towncrier release notes start -->
 
+## 2.11.0 / 2024-02-26
+
+***Added***:
+
+* Collect language detection metrics ([#16928](https://github.com/DataDog/integrations-core/pull/16928))
+
 ## 2.10.0 / 2024-02-16
 
 ***Added***:

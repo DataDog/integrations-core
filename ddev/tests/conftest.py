@@ -20,6 +20,7 @@ from ddev.e2e.constants import E2EEnvVars
 from ddev.repo.core import Repository
 from ddev.utils.ci import running_in_ci
 from ddev.utils.fs import Path, temp_directory
+from ddev.utils.github import GitHubManager
 from ddev.utils.platform import Platform
 
 PLATFORM = Platform()
@@ -92,6 +93,16 @@ def local_repo() -> Path:
 def valid_integrations(local_repo) -> list[str]:
     repo = Repository(local_repo.name, str(local_repo))
     return [path.name for path in repo.integrations.iter_all(['all'])]
+
+
+@pytest.fixture
+def github_manager(local_repo, config_file, terminal) -> GitHubManager:
+    return GitHubManager(
+        Repository(local_repo.name, str(local_repo)),
+        user=config_file.model.github.user,
+        token=config_file.model.github.token,
+        status=terminal.status,
+    )
 
 
 @pytest.fixture

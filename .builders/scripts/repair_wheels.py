@@ -77,7 +77,7 @@ def repair_linux(source_dir: str, built_dir: str, external_dir: str) -> None:
 
     # Hardcoded policy to the minimum we need to currently support
     policies = WheelPolicies()
-    policy = policies.get_policy_by_name('manylinux2010_x86_64')
+    policy = policies.get_policy_by_name(os.environ['MANYLINUX_POLICY'])
     abis = [policy['name'], *policy['aliases']]
     # We edit the policy to remove zlib out of the whitelist to match the whitelisting policy we use
     # on the Omnibus health check in the Agent
@@ -164,7 +164,6 @@ def repair_darwin(source_dir: str, built_dir: str, external_dir: str) -> None:
         r'libstdc\+\+\.6\.dylib',
         r'libc\+\+\.1\.dylib',
         r'^/System/Library/',
-        r'libz\.1\.dylib',
     ]]
 
     def copy_filt_func(libname):

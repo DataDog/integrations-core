@@ -132,7 +132,9 @@ def _get_expected_replication_tags(check, pg_instance, with_host=True, with_db=F
     )
 
 
-def _get_expected_tags(check, pg_instance, with_host=True, with_db=False, with_version=True, role='master', **kwargs):
+def _get_expected_tags(
+    check, pg_instance, with_host=True, with_db=False, with_version=True, with_sys_id=True, role='master', **kwargs
+):
     base_tags = pg_instance['tags'] + [f'port:{pg_instance["port"]}']
     if role:
         base_tags.append(f'replication_role:{role}')
@@ -140,6 +142,8 @@ def _get_expected_tags(check, pg_instance, with_host=True, with_db=False, with_v
         base_tags.append(f'db:{pg_instance["dbname"]}')
     if with_host:
         base_tags.append(f'dd.internal.resource:database_instance:{check.resolved_hostname}')
+    if with_sys_id and check.system_identifier:
+        base_tags.append(f'system_identifier:{check.system_identifier}')
     if with_version and check.raw_version:
         base_tags.append(f'postgresql_version:{check.raw_version}')
     for k, v in kwargs.items():

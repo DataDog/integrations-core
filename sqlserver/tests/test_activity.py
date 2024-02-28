@@ -19,10 +19,11 @@ import pytest
 from dateutil import parser
 
 from datadog_checks.base.utils.db.utils import DBMAsyncJob, default_json_event_encoding
+from datadog_checks.dev.ci import running_on_windows_ci
 from datadog_checks.sqlserver import SQLServer
 from datadog_checks.sqlserver.activity import DM_EXEC_REQUESTS_COLS, _hash_to_hex
 
-from .common import CHECK_NAME, OPERATION_TIME_METRIC_NAME
+from .common import CHECK_NAME, OPERATION_TIME_METRIC_NAME, SQLSERVER_MAJOR_VERSION
 from .conftest import DEFAULT_TIMEOUT
 
 try:
@@ -203,6 +204,7 @@ def test_collect_load_activity(
     )
 
 
+@pytest.mark.skipif(running_on_windows_ci() and SQLSERVER_MAJOR_VERSION == 2019, reason='Test flakes on this set up')
 def test_activity_nested_blocking_transactions(
     aggregator,
     instance_docker,

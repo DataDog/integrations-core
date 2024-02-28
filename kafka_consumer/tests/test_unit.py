@@ -10,6 +10,7 @@ import pytest
 from confluent_kafka.admin._group import ConsumerGroupListing, ListConsumerGroupsResult
 
 from datadog_checks.kafka_consumer import KafkaCheck
+from datadog_checks.kafka_consumer.kafka_consumer import _get_interpolated_timestamp
 
 pytestmark = [pytest.mark.unit]
 
@@ -87,6 +88,10 @@ def test_tls_verify_is_string(tls_verify, expected, check, kafka_instance):
     assert config._tls_verify == expected
 
 
+mock_client = mock.MagicMock()
+mock_client.get_highwater_offsets.return_value = ({}, "")
+
+
 @pytest.mark.parametrize(
     'sasl_oauth_token_provider, expected_exception, mocked_admin_client',
     [
@@ -117,7 +122,7 @@ def test_tls_verify_is_string(tls_verify, expected, check, kafka_instance):
         pytest.param(
             {'sasl_oauth_token_provider': {'url': 'http://fake.url', 'client_id': 'id', 'client_secret': 'secret'}},
             does_not_raise(),
-            mock.MagicMock(),
+            mock_client,
             id="valid config",
         ),
     ],
@@ -155,7 +160,7 @@ def test_when_consumer_lag_less_than_zero_then_emit_event(
     highwater_offset = {("topic1", "partition1"): 1}
     mock_client = mock.MagicMock()
     mock_client.get_consumer_offsets.return_value = consumer_offset
-    mock_client.get_highwater_offsets.return_value = highwater_offset
+    mock_client.get_highwater_offsets.return_value = (highwater_offset, "cluster_id")
     mock_client.get_partitions_for_topic.return_value = ['partition1']
     mock_generic_client.return_value = mock_client
 
@@ -165,17 +170,31 @@ def test_when_consumer_lag_less_than_zero_then_emit_event(
 
     # Then
     aggregator.assert_metric(
-        "kafka.broker_offset", count=1, tags=['optional:tag1', 'partition:partition1', 'topic:topic1']
+        "kafka.broker_offset",
+        count=1,
+        tags=['optional:tag1', 'partition:partition1', 'topic:topic1', 'kafka_cluster_id:cluster_id'],
     )
     aggregator.assert_metric(
         "kafka.consumer_offset",
         count=1,
-        tags=['consumer_group:consumer_group1', 'optional:tag1', 'partition:partition1', 'topic:topic1'],
+        tags=[
+            'consumer_group:consumer_group1',
+            'optional:tag1',
+            'partition:partition1',
+            'topic:topic1',
+            'kafka_cluster_id:cluster_id',
+        ],
     )
     aggregator.assert_metric(
         "kafka.consumer_lag",
         count=1,
-        tags=['consumer_group:consumer_group1', 'optional:tag1', 'partition:partition1', 'topic:topic1'],
+        tags=[
+            'consumer_group:consumer_group1',
+            'optional:tag1',
+            'partition:partition1',
+            'topic:topic1',
+            'kafka_cluster_id:cluster_id',
+        ],
     )
     aggregator.assert_event(
         "Consumer group: consumer_group1, "
@@ -183,7 +202,13 @@ def test_when_consumer_lag_less_than_zero_then_emit_event(
         "This should never happen and will result in the consumer skipping new messages "
         "until the lag turns positive.",
         count=1,
-        tags=['consumer_group:consumer_group1', 'optional:tag1', 'partition:partition1', 'topic:topic1'],
+        tags=[
+            'consumer_group:consumer_group1',
+            'optional:tag1',
+            'partition:partition1',
+            'topic:topic1',
+            'kafka_cluster_id:cluster_id',
+        ],
     )
 
 
@@ -198,7 +223,7 @@ def test_when_partition_is_none_then_emit_warning_log(
     highwater_offset = {("topic1", "partition1"): 1}
     mock_client = mock.MagicMock()
     mock_client.get_consumer_offsets.return_value = consumer_offset
-    mock_client.get_highwater_offsets.return_value = highwater_offset
+    mock_client.get_highwater_offsets.return_value = (highwater_offset, "cluster_id")
     mock_client.get_partitions_for_topic.return_value = None
     mock_generic_client.return_value = mock_client
     caplog.set_level(logging.WARNING)
@@ -209,7 +234,9 @@ def test_when_partition_is_none_then_emit_warning_log(
 
     # Then
     aggregator.assert_metric(
-        "kafka.broker_offset", count=1, tags=['optional:tag1', 'partition:partition1', 'topic:topic1']
+        "kafka.broker_offset",
+        count=1,
+        tags=['optional:tag1', 'partition:partition1', 'topic:topic1', 'kafka_cluster_id:cluster_id'],
     )
     aggregator.assert_metric("kafka.consumer_offset", count=0)
     aggregator.assert_metric("kafka.consumer_lag", count=0)
@@ -241,7 +268,7 @@ def test_when_partition_not_in_partitions_then_emit_warning_log(
     highwater_offset = {("topic1", "partition1"): 1}
     mock_client = mock.MagicMock()
     mock_client.get_consumer_offsets.return_value = consumer_offset
-    mock_client.get_highwater_offsets.return_value = highwater_offset
+    mock_client.get_highwater_offsets.return_value = (highwater_offset, "cluster_id")
     mock_client.get_partitions_for_topic.return_value = ['partition2']
     mock_generic_client.return_value = mock_client
     caplog.set_level(logging.WARNING)
@@ -252,7 +279,9 @@ def test_when_partition_not_in_partitions_then_emit_warning_log(
 
     # Then
     aggregator.assert_metric(
-        "kafka.broker_offset", count=1, tags=['optional:tag1', 'partition:partition1', 'topic:topic1']
+        "kafka.broker_offset",
+        count=1,
+        tags=['optional:tag1', 'partition:partition1', 'topic:topic1', 'kafka_cluster_id:cluster_id'],
     )
     aggregator.assert_metric("kafka.consumer_offset", count=0)
     aggregator.assert_metric("kafka.consumer_lag", count=0)
@@ -284,7 +313,7 @@ def test_when_highwater_metric_count_hit_context_limit_then_no_more_highwater_me
     highwater_offset = {("topic1", "partition1"): 3, ("topic2", "partition2"): 3}
     mock_client = mock.MagicMock()
     mock_client.get_consumer_offsets.return_value = consumer_offset
-    mock_client.get_highwater_offsets.return_value = highwater_offset
+    mock_client.get_highwater_offsets.return_value = (highwater_offset, "cluster_id")
     mock_client.get_partitions_for_topic.return_value = ['partition1']
     mock_generic_client.return_value = mock_client
     caplog.set_level(logging.WARNING)
@@ -314,7 +343,7 @@ def test_when_consumer_metric_count_hit_context_limit_then_no_more_consumer_metr
     highwater_offset = {("topic1", "partition1"): 3, ("topic2", "partition2"): 3}
     mock_client = mock.MagicMock()
     mock_client.get_consumer_offsets.return_value = consumer_offset
-    mock_client.get_highwater_offsets.return_value = highwater_offset
+    mock_client.get_highwater_offsets.return_value = (highwater_offset, "cluster_id")
     mock_client.get_partitions_for_topic.return_value = ['partition1']
     mock_generic_client.return_value = mock_client
     caplog.set_level(logging.DEBUG)
@@ -349,3 +378,10 @@ def test_when_empty_string_consumer_group_then_skip(kafka_instance):
     with mock.patch("datadog_checks.kafka_consumer.client.AdminClient.list_consumer_groups", return_value=future):
         kafka_consumer_check = KafkaCheck('kafka_consumer', {}, [kafka_instance])
         assert kafka_consumer_check.client._get_consumer_groups() == ["my_consumer"]
+
+
+def test_get_interpolated_timestamp():
+    assert _get_interpolated_timestamp({0: 100, 10: 200}, 5) == 150
+    assert _get_interpolated_timestamp({10: 100, 20: 200}, 5) == 50
+    assert _get_interpolated_timestamp({0: 100, 10: 200}, 15) == 250
+    assert _get_interpolated_timestamp({10: 200}, 15) is None
