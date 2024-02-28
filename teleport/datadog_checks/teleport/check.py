@@ -15,7 +15,42 @@ COMMON_METRICS = [
     "tx",
 ]
 
-METRICS_LIST = [*COMMON_METRICS]
+PROXY_METRICS = [
+    "failed_connect_to_node_attempts",
+    "failed_login_attempts",
+    "grpc_client_started",
+    "grpc_client_handled",
+    "grpc_client_msg_received",
+    "grpc_client_msg_sent",
+    "proxy_connection_limit_exceeded",
+    "proxy_peer_client_dial_error",
+    "proxy_peer_server_connections",
+    "proxy_peer_client_rpc",
+    "proxy_peer_client_rpc",
+    "proxy_peer_client_rpc_duration_seconds",
+    "proxy_peer_client_message_sent_size",
+    "proxy_peer_client_message_received_size",
+    "proxy_peer_server_connections",
+    "proxy_peer_server_rpc",
+    "proxy_peer_server_rpc",
+    "proxy_peer_server_rpc_duration_seconds",
+    "proxy_peer_server_message_sent_size",
+    "proxy_peer_server_message_received_size",
+    "proxy_ssh_sessions_total",
+    "proxy_missing_ssh_tunnels",
+    "remote_clusters",
+    "teleport_connect_to_node_attempts",
+    "teleport_reverse_tunnels_connected",
+    "trusted_clusters",
+    "teleport_proxy_db_connection_setup_time_seconds",
+    "teleport_proxy_db_connection_dial_attempts",
+    "teleport_proxy_db_connection_dial_failures",
+    "teleport_proxy_db_attempted_servers_total",
+    "teleport_proxy_db_connection_tls_config_time_seconds",
+    "teleport_proxy_db_active_connections_total",
+]
+
+METRICS_LIST = [*COMMON_METRICS, *PROXY_METRICS]
 
 
 class TeleportCheck(OpenMetricsBaseCheckV2):
