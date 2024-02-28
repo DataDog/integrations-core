@@ -29,7 +29,13 @@ from datadog_checks.base.utils.db.utils import (
 from datadog_checks.base.utils.serialization import json
 from datadog_checks.base.utils.tracking import tracked_method
 
-from .util import DatabaseConfigurationError, StatementTruncationState, get_truncation_state, warning_with_tags
+from .util import (
+    DatabaseConfigurationError,
+    StatementTruncationState,
+    connect_with_autocommit,
+    get_truncation_state,
+    warning_with_tags,
+)
 
 SUPPORTED_EXPLAIN_STATEMENTS = frozenset({'select', 'table', 'delete', 'insert', 'replace', 'update', 'with'})
 
@@ -270,7 +276,7 @@ class MySQLStatementSamples(DBMAsyncJob):
         :return:
         """
         if not self._db:
-            self._db = pymysql.connect(**self._connection_args)
+            self._db = connect_with_autocommit(**self._connection_args)
         return self._db
 
     def _close_db_conn(self):
