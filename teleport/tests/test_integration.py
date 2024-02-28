@@ -22,4 +22,4 @@ def test_check_collects_teleport_common_metrics(aggregator, dd_run_check):
     check = TeleportCheck('teleport', {}, [instance])
     dd_run_check(check)
 
-    aggregator.assert_metric("teleport.process_state")
+    aggregator.assert_metric("teleport.process.state")

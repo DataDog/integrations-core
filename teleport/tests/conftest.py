@@ -11,11 +11,7 @@ from datadog_checks.dev import docker_run, get_here
 @pytest.fixture(scope='session')
 def dd_environment():
     compose_file = os.path.join(get_here(), 'docker', 'docker-compose.yaml')
-
-    def nothing():
-        pass
-
-    with docker_run(compose_file, sleep=5, down=nothing):
+    with docker_run(compose_file, sleep=5):
         instance = {"diagnostic_url": "http://127.0.0.1:3000"}
         yield instance
 

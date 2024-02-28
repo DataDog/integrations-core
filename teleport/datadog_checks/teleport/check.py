@@ -4,17 +4,6 @@
 
 from datadog_checks.base import OpenMetricsBaseCheckV2
 
-COMMON_METRICS = [
-    "process_state",
-    "certificate_mismatch",
-    "rx",
-    "server_interactive_sessions_total",
-    "teleport_build_info",
-    "teleport_cache_events",
-    "teleport_cache_stale_events",
-    "tx",
-]
-
 PROXY_METRICS = [
     "failed_connect_to_node_attempts",
     "failed_login_attempts",
@@ -50,9 +39,20 @@ PROXY_METRICS = [
     "teleport_proxy_db_active_connections_total",
 ]
 
-METRICS_LIST = [*COMMON_METRICS, *PROXY_METRICS]
+COMMON_METRICS_MAP = {
+    'process_state': 'process.state',
+    'certificate_mismatch': 'certificate_mismatch',
+    'rx': 'rx',
+    'server_interactive_sessions_total': 'server_interactive_sessions_total',
+    'teleport_build_info': 'teleport.build_info',
+    'teleport_cache_events': 'teleport.cache_events',
+    'teleport_cache_stale_events': 'teleport.cache_stale_events',
+    'tx': 'tx',
+}
 
-
+METRIC_MAP = {
+    **COMMON_METRICS_MAP
+}
 class TeleportCheck(OpenMetricsBaseCheckV2):
     __NAMESPACE__ = 'teleport'
 
@@ -75,5 +75,5 @@ class TeleportCheck(OpenMetricsBaseCheckV2):
         self.diagnostic_url = self.instance.get("diagnostic_url")
         if self.diagnostic_url:
             self.instance.setdefault("openmetrics_endpoint", self.diagnostic_url + "/metrics")
-            self.instance.setdefault("metrics", METRICS_LIST)
+            self.instance.setdefault("metrics", [METRIC_MAP])
             self.instance.setdefault("rename_labels", {'version': "teleport_version"})
