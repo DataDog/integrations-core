@@ -1,0 +1,1 @@
+added configuration option to deduplicate hosts created from `consul.net.node` metrics
