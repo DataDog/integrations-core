@@ -876,7 +876,6 @@ class SQLServer(AgentCheck):
         if not self._index_usage_last_check_ts or now - self._index_usage_last_check_ts > interval:
             self._index_usage_last_check_ts = now
             self.log.debug('Collecting index usage statistics')
-            default_database = self.instance.get('database', self.connection.DEFAULT_DATABASE)
             # Filter out tempdb as the query might be blocking and it's index usage information is not relevant
             db_names = [d.name for d in self.databases] or [self.instance.get('database', self.connection.DEFAULT_DATABASE)]
             if not self._config.include_index_usage_metrics_tempdb:
