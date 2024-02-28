@@ -196,7 +196,7 @@ instances:
     # include_index_usage_metrics: true
 
     ## @param include_index_usage_metrics_tempdb - boolean - optional - default: false
-    ## Configure the collection of user table index usage statistics in tempdb database from the 
+    ## Configure the collection of user table index usage statistics in tempdb database from the
     ## `sys.dm_db_index_usage_stats` DMV.
     ##
     ## By default, we do not collect index usage statistics in the tempdb database, as those queries

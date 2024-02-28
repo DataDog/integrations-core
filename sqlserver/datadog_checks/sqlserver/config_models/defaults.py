@@ -76,7 +76,7 @@ def instance_include_index_usage_metrics():
     return True
 
 
-def include_index_usage_metrics_tempdb():
+def instance_include_index_usage_metrics_tempdb():
     return False
 
 
