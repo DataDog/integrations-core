@@ -216,6 +216,7 @@ def write_file(folder, file, content):
     file_path = folder / file
     file_path.write_text(content)
 
+
 @pytest.fixture
 def empty_git_repo(tmp_path_factory):
     '''
@@ -232,6 +233,7 @@ def empty_git_repo(tmp_path_factory):
         PLATFORM.check_command_output(['git', 'commit', '--message', 'let there be light'])
 
     yield repo_path
+
 
 @pytest.fixture
 def fake_repo(empty_git_repo, config_file):
