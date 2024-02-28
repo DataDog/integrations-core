@@ -6,7 +6,7 @@ build-backend = "hatchling.build"
 
 [project]
 name = "datadog-argo-rollouts"
-description = "The Argo_Rollouts check"
+description = "The Argo Rollouts check"
 readme = "README.md"
 license = "BSD-3-Clause"
 requires-python = ">=3.9"

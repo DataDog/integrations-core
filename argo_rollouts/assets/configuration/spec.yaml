@@ -1,4 +1,4 @@
-name: Argo_Rollouts
+name: Argo Rollouts
 files:
 - name: argo_rollouts.yaml
   options:

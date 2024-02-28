@@ -1,4 +1,4 @@
-# CHANGELOG - Argo_Rollouts
+# CHANGELOG - Argo Rollouts
 
 <!-- towncrier release notes start -->
 
