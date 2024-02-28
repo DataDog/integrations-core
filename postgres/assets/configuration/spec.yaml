@@ -258,8 +258,9 @@ files:
     - name: collect_wal_metrics
       description: |
         Collect metrics about WAL file age.
-        NOTE: You must be running the check local to your database if you want to enable this option.
-        Starting PG10, wal metrics are collected by default using `pg_ls_waldir` and don't need local access anymore.
+        NOTE: 
+        For Postgres 9.6 and below, you must run the check local to your database if you want to enable this option.
+        Starting Postgres 10, WAL file metrics are enabled by default using `pg_ls_waldir` and don't need local access.
       value:
         type: boolean
         example: false

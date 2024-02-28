@@ -39,6 +39,8 @@ jobs:
       matrix:
         job:
         - os: ubuntu-22.04
+          image: linux-aarch64
+        - os: ubuntu-22.04
           image: linux-x86_64
         - os: windows-2022
           image: windows-x86_64
@@ -88,6 +90,12 @@ jobs:
         username: ${{ github.actor }}
         password: ${{ secrets.GITHUB_TOKEN }}
 
+    - name: Set up QEMU
+      if: matrix.job.image == 'linux-aarch64'
+      uses: docker/setup-qemu-action@v3
+      with:
+        platforms: arm64
+
     - name: Build image and wheels
       if: steps.changed-files.outputs.builders_any_changed == 'true'
       run: |-
@@ -123,7 +131,8 @@ jobs:
     runs-on: macos-12
 
     env:
-      OUT_DIR: output/macos
+      TARGET_NAME: macos-x86_64
+      OUT_DIR: output/macos-x86_64
       DD_PYTHON3: "/Library/Frameworks/Python.framework/Versions/3.11/bin/python"
       DD_PYTHON2: "/Library/Frameworks/Python.framework/Versions/2.7/bin/python"
 
@@ -171,13 +180,13 @@ jobs:
       run: |-
         # If we hit the cache, we can skip the builder setup
         if [[ ${CACHE_HIT} == "true" ]]; then
-          ${DD_PYTHON3} .builders/build.py --builder-root ~/builder_root --python 3 ${{ env.OUT_DIR }}/py3 --skip-setup
+          ${DD_PYTHON3} .builders/build.py ${{ env.TARGET_NAME }} --builder-root ~/builder_root --python 3 ${{ env.OUT_DIR }}/py3 --skip-setup
         else
           mkdir ~/builder_root
-          ${DD_PYTHON3} .builders/build.py --builder-root ~/builder_root --python 3 ${{ env.OUT_DIR }}/py3
+          ${DD_PYTHON3} .builders/build.py ${{ env.TARGET_NAME }} --builder-root ~/builder_root --python 3 ${{ env.OUT_DIR }}/py3
         fi
         # At this point we can always skip builder setup since it's equivalent for python versions
-        ${DD_PYTHON3} .builders/build.py --builder-root ~/builder_root --python 2 ${{ env.OUT_DIR }}/py2 --skip-setup
+        ${DD_PYTHON3} .builders/build.py ${{ env.TARGET_NAME }} --builder-root ~/builder_root --python 2 ${{ env.OUT_DIR }}/py2 --skip-setup
 
     - name: Upload artifacts
       uses: actions/upload-artifact@v4

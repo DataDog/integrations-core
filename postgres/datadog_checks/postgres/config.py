@@ -2,6 +2,8 @@
 # All rights reserved
 # Licensed under Simplified BSD License (see LICENSE)
 # https://www.postgresql.org/docs/current/libpq-connect.html#LIBPQ-PARAMKEYWORDS
+from typing import Optional
+
 from six import PY2, PY3, iteritems
 
 from datadog_checks.base import AgentCheck, ConfigurationError, is_affirmative
@@ -78,7 +80,7 @@ class PostgresConfig:
         self.collect_activity_metrics = is_affirmative(instance.get('collect_activity_metrics', False))
         self.activity_metrics_excluded_aggregations = instance.get('activity_metrics_excluded_aggregations', [])
         self.collect_database_size_metrics = is_affirmative(instance.get('collect_database_size_metrics', True))
-        self.collect_wal_metrics = is_affirmative(instance.get('collect_wal_metrics', False))
+        self.collect_wal_metrics = self._should_collect_wal_metrics(instance.get('collect_wal_metrics'))
         self.collect_bloat_metrics = is_affirmative(instance.get('collect_bloat_metrics', False))
         self.data_directory = instance.get('data_directory', None)
         self.ignore_databases = instance.get('ignore_databases', DEFAULT_IGNORE_DATABASES)
@@ -257,3 +259,11 @@ class PostgresConfig:
                 raise ConfigurationError('Azure client_id must be set when using Azure managed authentication')
             managed_authentication['enabled'] = enabled
         return managed_authentication
+
+    @staticmethod
+    def _should_collect_wal_metrics(collect_wal_metrics) -> Optional[bool]:
+        if collect_wal_metrics is not None:
+            # if the user has explicitly set the value, return the boolean
+            return is_affirmative(collect_wal_metrics)
+
+        return None
