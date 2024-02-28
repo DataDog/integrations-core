@@ -20,13 +20,13 @@ def test_connect_exception(dd_run_check):
 
 
 COMMON_METRICS = [
-    "process_state",
+    "process.state",
     "certificate_mismatch.count",
     "rx.count",
     "server_interactive_sessions_total",
-    "teleport_build_info",
-    "teleport_cache_events.count",
-    "teleport_cache_stale_events.count",
+    "teleport.build_info",
+    "teleport.cache_events.count",
+    "teleport.cache_stale_events.count",
     "tx.count",
 ]
 
