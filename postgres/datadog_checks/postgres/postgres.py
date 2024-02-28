@@ -287,7 +287,9 @@ class PostgreSql(AgentCheck):
             # ERROR:  Function pg_stat_get_wal_receiver() is currently not supported in Aurora
             if self.is_aurora is False:
                 queries.append(QUERY_PG_STAT_WAL_RECEIVER)
-                queries.append(WAL_FILE_METRICS)
+                if self._config.collect_wal_metrics is not False:
+                    # collect wal metrics for pg >= 10 only if the user has not explicitly disabled it
+                    queries.append(WAL_FILE_METRICS)
             queries.append(QUERY_PG_REPLICATION_SLOTS)
             queries.append(VACUUM_PROGRESS_METRICS)
             queries.append(STAT_SUBSCRIPTION_METRICS)
@@ -1021,6 +1023,7 @@ class PostgreSql(AgentCheck):
                 self.statement_samples.run_job_loop(tags)
                 self.metadata_samples.run_job_loop(tags)
             if self._config.collect_wal_metrics:
+                # collect wal metrics for pg < 10, disabled by enabled
                 self._collect_wal_metrics()
             self._send_database_instance_metadata()
         except Exception as e:
