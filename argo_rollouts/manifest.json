@@ -8,8 +8,8 @@
     "configuration": "README.md#Setup",
     "support": "README.md#Support",
     "changelog": "CHANGELOG.md",
-    "description": "",
-    "title": "Argo_Rollouts",
+    "description": "Argo Rollouts Integration",
+    "title": "Argo Rollouts",
     "media": [],
     "classifier_tags": [
       "Supported OS::Linux",
@@ -17,6 +17,7 @@
       "Supported OS::macOS",
       "Category::Metrics",
       "Category::Kubernetes",
+      "Category::Developer Tools",
       "Category::Log Collection",
       "Submitted Data Type::Metrics",
       "Submitted Data Type::Logs"
@@ -26,7 +27,7 @@
     "integration": {
       "auto_install": true,
       "source_type_id": 8465752,
-      "source_type_name": "Argo_Rollouts",
+      "source_type_name": "Argo Rollouts",
       "configuration": {
         "spec": "assets/configuration/spec.yaml"
       },
