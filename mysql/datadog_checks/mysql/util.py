@@ -2,9 +2,10 @@
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
 
-import pymysql
-from enum import Enum
 from contextlib import closing
+from enum import Enum
+
+import pymysql
 
 
 class DatabaseConfigurationError(Enum):
