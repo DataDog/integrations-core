@@ -4,8 +4,8 @@
 import pytest
 
 from datadog_checks.base.constants import ServiceCheck
-from datadog_checks.dev.utils import get_metadata_metrics
 
+# from datadog_checks.dev.utils import get_metadata_metrics
 from .common import E2E_METRICS
 
 

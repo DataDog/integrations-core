@@ -13,9 +13,12 @@ from datadog_checks.dev.subprocess import run_command
 
 HERE = get_here()
 
+
 def setup_argo_rollouts():
     run_command(['kubectl', 'create', 'ns', 'argo-rollouts'])
-    run_command(['kubectl', 'apply', '-f', os.path.join(HERE, 'kind', 'argo_rollouts_install.yaml'), '-n', 'argo-rollouts'])
+    run_command(
+        ['kubectl', 'apply', '-f', os.path.join(HERE, 'kind', 'argo_rollouts_install.yaml'), '-n', 'argo-rollouts']
+    )
 
     # Tries to ensure that the Kubernetes resources are deployed and ready before we do anything else
     run_command(['kubectl', 'rollout', 'status', 'deployment/argo-rollouts', '-n', 'argo-rollouts'])

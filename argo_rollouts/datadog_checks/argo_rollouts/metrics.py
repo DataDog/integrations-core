@@ -60,7 +60,7 @@ METRIC_MAP = {
     'workqueue_queue_duration_seconds': 'workqueue.queue.duration.seconds',
     'workqueue_retries': 'workqueue.retries',
     'workqueue_unfinished_work_seconds': 'workqueue.unfinished.work.seconds',
-    'workqueue_work_duration_seconds': 'workqueue.work.duration.seconds'
+    'workqueue_work_duration_seconds': 'workqueue.work.duration.seconds',
 }
 
 RENAME_LABELS_MAP = {
