@@ -425,6 +425,12 @@ class MySql(AgentCheck):
         try:
             connect_args = self._get_connection_args()
             db = pymysql.connect(**connect_args)
+            with closing(db.cursor()) as cursor:
+                # PyMYSQL only sets autocommit if it receives a different value from the server
+                # see https://github.com/PyMySQL/PyMySQL/blob/bbd049f40db9c696574ce6f31669880042c56d79/pymysql/connections.py#L443-L447
+                # but there are cases where the server will not send a correct value for autocommit, so we
+                # set it explicitly to ensure it's set correctly
+                cursor.execute("SET AUTOCOMMIT=1")
             self.log.debug("Connected to MySQL")
             self.service_check_tags = list(set(service_check_tags))
             self.service_check(
