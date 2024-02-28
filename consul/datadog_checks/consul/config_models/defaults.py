@@ -116,7 +116,7 @@ def instance_use_legacy_auth_encoding():
     return True
 
 
-def instance_use_node_id_as_hostname():
+def instance_use_node_name_as_hostname():
     return True
 
 

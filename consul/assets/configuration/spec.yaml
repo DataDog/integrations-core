@@ -38,11 +38,13 @@ files:
       value:
         type: boolean
         example: false
-    - name: use_node_id_as_hostname
+    - name: use_node_name_as_hostname
       description: |
-        Whether to use the Consul node name as the host name for network latency metrics.
-        If set to true, the agent will use the Consul node name as the host name.
-        If set to false, the agent will use the system hostname as the host name.
+        Whether to use the Consul node name as the hostname. If set to true, 
+        the agent will use the Consul node name as the hostname. If set to false, 
+        the agent will use the system hostname and avoid duplicate hostnames.
+        Disabling this will cause all the `consul.net.node.*` metrics to be reported 
+        under one host (the host that collects them) and can be filtered using `consul_node_name`.
       value:
         type: boolean
         example: true

@@ -98,7 +98,7 @@ class ConsulCheck(OpenMetricsBaseCheck):
         self.perform_network_latency_checks = is_affirmative(
             self.instance.get('network_latency_checks', self.init_config.get('network_latency_checks'))
         )
-        self.use_node_id_as_hostname = is_affirmative(self.instance.get('use_node_id_as_hostname', True))
+        self.use_node_name_as_hostname = is_affirmative(self.instance.get('use_node_name_as_hostname', True))
         self.disable_legacy_service_tag = is_affirmative(self.instance.get('disable_legacy_service_tag', False))
         default_services_include = self.init_config.get(
             'service_whitelist', self.init_config.get('services_include', [])
@@ -600,10 +600,10 @@ class ConsulCheck(OpenMetricsBaseCheck):
         else:
             known_distances = {}
             for i, node in enumerate(nodes):
-                tags = main_tags + ['consul_node_id:{}'.format(node['Node'])]
+                tags = main_tags + ['consul_node_name:{}'.format(node['Node'])]
 
                 # Use the node name as the hostname if configured
-                if self.use_node_id_as_hostname:
+                if self.use_node_name_as_hostname:
                     node_name = node['Node']
                 else:
                     node_name = ''
