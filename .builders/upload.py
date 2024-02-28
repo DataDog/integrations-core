@@ -63,6 +63,12 @@ def timestamp_build_number() -> str:
     return time.strftime('%Y%M%d_%H%m%s')
 
 
+def hash_file(path: Path) -> str:
+    """Calculate the hash of the file pointed at by `path`"""
+    with path.open('rb') as f:
+        return sha256(f.read()).hexdigest()
+
+
 def iter_wheel_dirs(targets_dir: str) -> Iterator[Path]:
     """Iterate over 'built'/'external' folders that contain wheels ready for upload.
 
@@ -110,6 +116,8 @@ def upload(targets_dir):
             print(f'{prefix} Name: {project_metadata["Name"]}')
             print(f'{padding}Version: {project_metadata["Version"]}')
 
+            sha256_digest = hash_file(wheel)
+
             if artifact_type == 'external':
                 artifact_name = wheel.name
                 artifact = bucket.blob(f'{artifact_type}/{project_name}/{artifact_name}')
@@ -121,21 +129,21 @@ def upload(targets_dir):
             else:
                 # https://packaging.python.org/en/latest/specifications/binary-distribution-format/#file-name-convention
                 name, version, python_tag, abi_tag, platform_tag = wheel.stem.split('-')
-                build_number = timestamp_build_number()
-                while True:
-                    artifact_name = f'{name}-{version}-{build_number}-{python_tag}-{abi_tag}-{platform_tag}.whl'
-                    artifact = bucket.blob(f'{artifact_type}/{project_name}/{artifact_name}')
-                    if not artifact.exists():
-                        break
+                existing_wheels = list(bucket.list_blobs(prefix=f'{artifact_type}/{project_name}/{name}-{version}-'))
+                if existing_wheels:
+                    most_recent_wheel = max(existing_wheels, key=lambda b: b.name)
+                    # Don't upload if it's the same file
+                    if most_recent_wheel.metadata['sha256'] == sha256_digest:
+                        continue
 
-                    build_number = timestamp_build_number()
+                build_number = timestamp_build_number()
+                artifact_name = f'{name}-{version}-{build_number}-{python_tag}-{abi_tag}-{platform_tag}.whl'
+                artifact = bucket.blob(f'{artifact_type}/{project_name}/{artifact_name}')
 
             print(f'{padding}Artifact: {artifact_name}')
             artifact.upload_from_filename(str(wheel))
 
             requires_python = project_metadata.get('Requires-Python', '').replace('<', '&lt;').replace('>', '&gt;')
-            with wheel.open('rb') as wheel_file:
-                sha256_digest = sha256(wheel_file.read()).hexdigest()
 
             artifact.metadata = {'requires-python': requires_python, 'sha256': sha256_digest}
             artifact.patch()

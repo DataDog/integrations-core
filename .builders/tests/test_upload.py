@@ -26,7 +26,7 @@ def setup_fake_bucket(monkeypatch):
             blob.metadata = files.get(name, None)
             return blob
 
-        def list_blobs(prefix=''):
+        def list_blobs(*, prefix=''):
             return [make_blob(f) for f in files if f.startswith(prefix)]
 
         bucket = mock.Mock()
@@ -72,6 +72,24 @@ def setup_targets_dir(tmp_path_factory):
     return _setup
 
 
+@pytest.fixture
+def setup_fake_hash(monkeypatch):
+    def _setup_hash(mapping):
+        def fake_hash(path: Path):
+            return mapping.get(path.name, '')
+
+        monkeypatch.setattr(upload, 'hash_file', fake_hash)
+
+    return _setup_hash
+
+
+@pytest.fixture
+def frozen_timestamp(monkeypatch):
+    timestamp = '20241327_17021709050439'
+    monkeypatch.setattr(upload, 'timestamp_build_number', mock.Mock(return_value=timestamp))
+    return timestamp
+
+
 def test_upload_external(setup_targets_dir, setup_fake_bucket):
     wheels = {
         'external': [
@@ -100,7 +118,7 @@ def test_upload_external(setup_targets_dir, setup_fake_bucket):
     assert {'all_new-2.31.0-py3-none-any.whl', 'updated_version-3.14.1-cp311-cp311-manylinux1_x86_64.whl'} <= uploads
 
 
-def test_upload_built_no_conflict(setup_targets_dir, setup_fake_bucket, monkeypatch):
+def test_upload_built_no_conflict(setup_targets_dir, setup_fake_bucket, frozen_timestamp):
     wheels = {
         'built': [
             ('without_collision-3.14.1-cp311-cp311-manylinux2010_x86_64.whl', 'without-collision', '3.14.1', '>=3.7'),
@@ -108,46 +126,146 @@ def test_upload_built_no_conflict(setup_targets_dir, setup_fake_bucket, monkeypa
     }
     targets_dir = setup_targets_dir(wheels)
 
-    timestamp = '2024132717021709050439'
-    monkeypatch.setattr(upload, 'timestamp_build_number', mock.Mock(return_value=timestamp))
-
     bucket, uploads = setup_fake_bucket({})
 
     upload.upload(targets_dir)
 
     bucket_files = [f.name for f in bucket.list_blobs()]
-    assert f'built/without-collision/without_collision-3.14.1-{timestamp}-cp311-cp311-manylinux2010_x86_64.whl' in bucket_files
+    assert (
+        f'built/without-collision/without_collision-3.14.1-{frozen_timestamp}-cp311-cp311-manylinux2010_x86_64.whl'
+        in bucket_files
+    )
 
 
-def test_upload_built_with_buildnumber_conflict(setup_targets_dir, setup_fake_bucket, monkeypatch):
+def test_upload_built_existing_sha_match_does_not_upload(
+    setup_targets_dir,
+    setup_fake_bucket,
+    setup_fake_hash,
+):
+    whl_hash = 'some-hash'
+
     wheels = {
         'built': [
-            ('collision-1.1.1-cp311-cp311-manylinux2010_x86_64.whl', 'collision', '1.1.1', '>=3.7'),
+            ('existing-1.1.1-cp311-cp311-manylinux2010_x86_64.whl', 'existing', '1.1.1', '>=3.7'),
         ]
     }
     targets_dir = setup_targets_dir(wheels)
 
-    initial_timestamp = 2024132717021709050439
-    timestamp = initial_timestamp
-
-    def fake_timestamp():
-        # Increment the timestamp in one after every call
-        nonlocal timestamp
-        timestamp = timestamp + 1
-        return str(timestamp)
-
-    monkeypatch.setattr(upload, 'timestamp_build_number', fake_timestamp)
-
     bucket_files = {
-        f'built/collision/collision-1.1.1-{initial_timestamp}-cp311-cp311-manylinux2010_x86_64.whl':
-        {'requires-python': '', 'sha256': ''},
-        f'built/collision/collision-1.1.1-{initial_timestamp + 1}-cp311-cp311-manylinux2010_x86_64.whl':
-        {'requires-python': '', 'sha256': ''},
+        'built/existing/existing-1.1.1-cp311-cp311-manylinux2010_x86_64.whl':
+        {'requires-python': '', 'sha256': whl_hash},
     }
     bucket, uploads = setup_fake_bucket(bucket_files)
 
+    setup_fake_hash({
+        'existing-1.1.1-cp311-cp311-manylinux2010_x86_64.whl': whl_hash,
+    })
+
     upload.upload(targets_dir)
 
-    bucket_files = [f.name for f in bucket.list_blobs()]
-    expected_timestamp = initial_timestamp + 2
-    assert f'built/collision/collision-1.1.1-{expected_timestamp}-cp311-cp311-manylinux2010_x86_64.whl' in bucket_files
+    assert not uploads
+
+
+def test_upload_built_existing_different_sha_does_upload(
+    setup_targets_dir,
+    setup_fake_bucket,
+    setup_fake_hash,
+    frozen_timestamp,
+):
+    original_hash = 'first-hash'
+    new_hash = 'second-hash'
+
+    wheels = {
+        'built': [
+            ('existing-1.1.1-cp311-cp311-manylinux2010_x86_64.whl', 'existing', '1.1.1', '>=3.7'),
+        ]
+    }
+    targets_dir = setup_targets_dir(wheels)
+
+    bucket_files = {
+        'built/existing/existing-1.1.1-cp311-cp311-manylinux2010_x86_64.whl':
+        {'requires-python': '', 'sha256': original_hash},
+    }
+    bucket, uploads = setup_fake_bucket(bucket_files)
+
+    setup_fake_hash({
+        'existing-1.1.1-cp311-cp311-manylinux2010_x86_64.whl': new_hash,
+    })
+
+    upload.upload(targets_dir)
+
+    uploads = {str(Path(f).name) for f in uploads}
+
+    assert uploads == {'existing-1.1.1-cp311-cp311-manylinux2010_x86_64.whl'}
+
+    bucket_files = {f.name for f in bucket.list_blobs()}
+    assert f'built/existing/existing-1.1.1-{frozen_timestamp}-cp311-cp311-manylinux2010_x86_64.whl' in bucket_files
+
+
+def test_upload_built_existing_sha_match_does_not_upload_multiple_existing_builds(
+    setup_targets_dir,
+    setup_fake_bucket,
+    setup_fake_hash,
+):
+    whl_hash = 'some-hash'
+
+    wheels = {
+        'built': [
+            ('existing-1.1.1-cp311-cp311-manylinux2010_x86_64.whl', 'existing', '1.1.1', '>=3.7'),
+        ]
+    }
+    targets_dir = setup_targets_dir(wheels)
+
+    bucket_files = {
+        'built/existing/existing-1.1.1-20241326_00000000000000-cp311-cp311-manylinux2010_x86_64.whl':
+        {'requires-python': '', 'sha256': 'b'},
+        'built/existing/existing-1.1.1-20241327_00000000000000-cp311-cp311-manylinux2010_x86_64.whl':
+        {'requires-python': '', 'sha256': whl_hash},
+    }
+    bucket, uploads = setup_fake_bucket(bucket_files)
+
+    setup_fake_hash({
+        'existing-1.1.1-cp311-cp311-manylinux2010_x86_64.whl': whl_hash,
+    })
+
+    upload.upload(targets_dir)
+
+    assert not uploads
+
+
+def test_upload_built_existing_different_sha_does_upload_multiple_existing_builds(
+    setup_targets_dir,
+    setup_fake_bucket,
+    setup_fake_hash,
+    frozen_timestamp,
+):
+    original_hash = 'first-hash'
+    new_hash = 'second-hash'
+
+    wheels = {
+        'built': [
+            ('existing-1.1.1-cp311-cp311-manylinux2010_x86_64.whl', 'existing', '1.1.1', '>=3.7'),
+        ]
+    }
+    targets_dir = setup_targets_dir(wheels)
+
+    bucket_files = {
+        'built/existing/existing-1.1.1-20241326_00000000000000-cp311-cp311-manylinux2010_x86_64.whl':
+        {'requires-python': '', 'sha256': 'b'},
+        'built/existing/existing-1.1.1-20241327_00000000000000-cp311-cp311-manylinux2010_x86_64.whl':
+        {'requires-python': '', 'sha256': original_hash},
+    }
+    bucket, uploads = setup_fake_bucket(bucket_files)
+
+    setup_fake_hash({
+        'existing-1.1.1-cp311-cp311-manylinux2010_x86_64.whl': new_hash,
+    })
+
+    upload.upload(targets_dir)
+
+    uploads = {str(Path(f).name) for f in uploads}
+
+    assert uploads == {'existing-1.1.1-cp311-cp311-manylinux2010_x86_64.whl'}
+
+    bucket_files = {f.name for f in bucket.list_blobs()}
+    assert f'built/existing/existing-1.1.1-{frozen_timestamp}-cp311-cp311-manylinux2010_x86_64.whl' in bucket_files
