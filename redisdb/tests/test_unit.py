@@ -88,16 +88,15 @@ def test__check_total_commands_processed_not_present(check, aggregator, redis_in
 
     # Assert that no metrics were sent
     assert len(list(aggregator.metrics('redis.net.commands'))) == 0
-    
+
+
 def test__check_total_commands_processed_present(check, aggregator, redis_instance):
     """
     The check should send the `redis.net.commands` metric if `total_commands_processed` is present in `c.info`
     """
     redis_check = check(redis_instance)
     conn = mock.MagicMock()
-    conn.info.return_value = {
-        'total_commands_processed': 1000
-    }
+    conn.info.return_value = {'total_commands_processed': 1000}
 
     # Run the check
     redis_check._check_total_commands_processed(conn.info(), ['test_total_commands_processed'])

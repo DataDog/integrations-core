@@ -293,7 +293,7 @@ class Redis(AgentCheck):
         self._check_replication(info, tags)
         if self.instance.get("command_stats", False):
             self._check_command_stats(conn, tags)
-        
+
     def _check_total_commands_processed(self, info, tags):
         # Avoid corner case error by ensuring availability in info before collecting
         if 'total_commands_processed' in info:
