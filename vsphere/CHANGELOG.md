@@ -2,6 +2,12 @@
 
 <!-- towncrier release notes start -->
 
+## 7.4.1-beta.1 / 2024-02-28
+
+***Fixed***:
+
+* Add `ssl_cafile` config. ([#16903](https://github.com/DataDog/integrations-core/pull/16903))
+
 ## 7.4.0 / 2024-02-16
 
 ***Added***:
