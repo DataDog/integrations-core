@@ -1,1 +1,1 @@
-[DBMON-3557] Add read_timeout (default to 10s) for reading from the connection in seconds
+Add read_timeout (default to 10s) for reading from the connection in seconds
