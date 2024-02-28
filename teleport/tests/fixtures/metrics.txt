@@ -1,3 +1,6 @@
+# HELP certificate_mismatch_total Number of times there was a certificate mismatch
+# TYPE certificate_mismatch_total counter
+certificate_mismatch_total 0
 # HELP audit_failed_disk_monitoring Number of times disk monitoring failed.
 # TYPE audit_failed_disk_monitoring counter
 audit_failed_disk_monitoring 0
@@ -349,9 +352,6 @@ backend_write_seconds_count{component="cache"} 86
 # HELP bpf_lost_restricted_events Number of lost restricted events.
 # TYPE bpf_lost_restricted_events counter
 bpf_lost_restricted_events 0
-# HELP certificate_mismatch_total Number of times there was a certificate mismatch
-# TYPE certificate_mismatch_total counter
-certificate_mismatch_total 0
 # HELP cluster_name_not_found_total Number of times a cluster name was not found
 # TYPE cluster_name_not_found_total counter
 cluster_name_not_found_total 0
@@ -661,6 +661,12 @@ teleport_build_info{gitref="v14.3.3-0-g542fbb0",goversion="go1.21.6",version="14
 teleport_cache_events{cache_component="auth"} 21
 teleport_cache_events{cache_component="node"} 11
 teleport_cache_events{cache_component="proxy"} 20
+# HELP teleport_cache_stale_events Number of stale events received by a Teleport service cache. A high percentage of stale events can indicate a degraded backend.
+# TYPE teleport_cache_stale_events  counter
+teleport_cache_stale_events {cache_component="auth"} 1
+teleport_cache_stale_events {cache_component="node"} 2
+teleport_cache_stale_events {cache_component="proxy"} 3
+
 # HELP teleport_connect_to_node_attempts_total Number of SSH connection attempts to a node. Use with `failed_connect_to_node_attempts_total` to get the failure rate.
 # TYPE teleport_connect_to_node_attempts_total counter
 teleport_connect_to_node_attempts_total 0
