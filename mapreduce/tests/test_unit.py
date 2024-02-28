@@ -1,7 +1,6 @@
-# (C) Datadog, Inc. 2018-present
+# (C) Datadog, Inc. 2024-present
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
-import pytest
 from six import iteritems
 
 from datadog_checks.mapreduce import MapReduceCheck
@@ -24,8 +23,6 @@ from .common import (
     MR_CONFIG,
     RM_URI,
 )
-
-pytestmark = pytest.mark.unit
 
 
 def test_check(aggregator, dd_run_check, mocked_request):

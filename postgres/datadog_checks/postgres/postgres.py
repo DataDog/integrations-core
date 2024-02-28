@@ -92,6 +92,8 @@ class PostgreSql(AgentCheck):
         self._agent_hostname = None
         self._db = None
         self.version = None
+        self.raw_version = None
+        self.system_identifier = None
         self.is_aurora = None
         self._version_utils = VersionUtils()
         # Deprecate custom_metrics in favor of custom_queries
@@ -358,7 +360,7 @@ class PostgreSql(AgentCheck):
                 # value fetched for role is of <type 'bool'>
                 return "standby" if role else "master"
 
-    def _collect_wal_metrics(self, instance_tags):
+    def _collect_wal_metrics(self):
         if self.version >= V10:
             # _collect_stats will gather wal file metrics
             # for PG >= V10
@@ -368,7 +370,7 @@ class PostgreSql(AgentCheck):
             self.gauge(
                 "postgresql.wal_age",
                 wal_file_age,
-                tags=copy.copy(self.tags_without_db),
+                tags=self.tags_without_db,
                 hostname=self.resolved_hostname,
             )
 
@@ -401,11 +403,16 @@ class PostgreSql(AgentCheck):
         oldest_file_age = now - os.path.getctime(oldest_file)
         return oldest_file_age
 
+    def load_system_identifier(self):
+        with self.db() as conn:
+            with conn.cursor() as cursor:
+                cursor.execute('SELECT system_identifier FROM pg_control_system();')
+                self.system_identifier = cursor.fetchone()[0]
+
     def load_version(self):
-        raw_version = self._version_utils.get_raw_version(self.db())
-        self.version = self._version_utils.parse_version(raw_version)
-        self.set_metadata('version', raw_version)
-        return self.version
+        self.raw_version = self._version_utils.get_raw_version(self.db())
+        self.version = self._version_utils.parse_version(self.raw_version)
+        self.set_metadata('version', self.raw_version)
 
     def initialize_is_aurora(self):
         if self.is_aurora is None:
@@ -688,7 +695,7 @@ class PostgreSql(AgentCheck):
                     self.gauge(
                         "postgresql.db.count",
                         results_len,
-                        tags=copy.copy(self.tags_without_db),
+                        tags=self.tags_without_db,
                         hostname=self.resolved_hostname,
                     )
 
@@ -984,17 +991,26 @@ class PostgreSql(AgentCheck):
             self.log.info("Waiting for remote configuration to push instance configuration")
             return
         tags = copy.copy(self.tags)
+        self.tags_without_db = [t for t in copy.copy(self.tags) if not t.startswith("db:")]
         # Collect metrics
         try:
             # Check version
             self._connect()
-            self.load_version()  # We don't want to cache versions between runs to capture minor updates for metadata
+            # We don't want to cache versions between runs to capture minor updates for metadata
+            self.load_version()
+
+            # Add raw version as a tag
+            tags.append(f'postgresql_version:{self.raw_version}')
+            self.tags_without_db.append(f'postgresql_version:{self.raw_version}')
+
+            # Add system identifier as a tag
+            self.load_system_identifier()
+            tags.append(f'system_identifier:{self.system_identifier}')
+            self.tags_without_db.append(f'system_identifier:{self.system_identifier}')
+
             if self._config.tag_replication_role:
                 replication_role_tag = "replication_role:{}".format(self._get_replication_role())
                 tags.append(replication_role_tag)
-                self.tags_without_db = [
-                    t for t in copy.copy(self.tags_without_db) if not t.startswith("replication_role:")
-                ]
                 self.tags_without_db.append(replication_role_tag)
 
             self.log.debug("Running check against version %s: is_aurora: %s", str(self.version), str(self.is_aurora))
@@ -1005,7 +1021,7 @@ class PostgreSql(AgentCheck):
                 self.statement_samples.run_job_loop(tags)
                 self.metadata_samples.run_job_loop(tags)
             if self._config.collect_wal_metrics:
-                self._collect_wal_metrics(tags)
+                self._collect_wal_metrics()
             self._send_database_instance_metadata()
         except Exception as e:
             self.log.exception("Unable to collect postgres metrics.")

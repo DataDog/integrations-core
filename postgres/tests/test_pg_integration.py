@@ -298,7 +298,9 @@ def test_can_connect_service_check(aggregator, integration_check, pg_instance):
         check.db = mock.MagicMock(side_effect=AttributeError('foo'))
         check.check(pg_instance)
     # Since we can't connect to the host, we can't gather the replication role
-    tags_without_role = _get_expected_tags(check, pg_instance, with_db=True, role=None)
+    tags_without_role = _get_expected_tags(
+        check, pg_instance, with_db=True, with_version=False, with_sys_id=False, role=None
+    )
     aggregator.assert_service_check('postgres.can_connect', count=1, status=PostgreSql.CRITICAL, tags=tags_without_role)
     aggregator.reset()
 
@@ -648,7 +650,9 @@ def test_config_tags_is_unchanged_between_checks(integration_check, pg_instance)
     check = integration_check(pg_instance)
 
     # Put elements in set as we don't care about order, only elements equality
-    expected_tags = set(_get_expected_tags(check, pg_instance, db=DB_NAME, role=None))
+    expected_tags = set(
+        _get_expected_tags(check, pg_instance, db=DB_NAME, with_version=False, with_sys_id=False, role=None)
+    )
     for _ in range(3):
         check.check(pg_instance)
         assert set(check._config.tags) == expected_tags

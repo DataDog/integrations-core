@@ -202,6 +202,9 @@ datadog_checks_base/datadog_checks/base/checks/windows/              @DataDog/wi
 /windows_performance_counters/                                       @DataDog/windows-agent @DataDog/agent-integrations
 /windows_performance_counters/*.md                                   @DataDog/windows-agent @DataDog/agent-integrations @DataDog/documentation
 /windows_performance_counters/manifest.json                          @DataDog/windows-agent @DataDog/agent-integrations @DataDog/documentation
+/windows_registry/                                                   @DataDog/windows-agent @DataDog/agent-integrations
+/windows_registry/*.md                                               @DataDog/windows-agent @DataDog/agent-integrations @DataDog/documentation
+/windows_registry/manifest.json                                      @DataDog/windows-agent @DataDog/agent-integrations @DataDog/documentation
 /windows_service/                                                    @DataDog/windows-agent @DataDog/agent-integrations
 /windows_service/*.md                                                @DataDog/windows-agent @DataDog/agent-integrations @DataDog/documentation
 /windows_service/manifest.json                                       @DataDog/windows-agent @DataDog/agent-integrations @DataDog/documentation
@@ -211,10 +214,10 @@ datadog_checks_base/datadog_checks/base/checks/windows/              @DataDog/wi
 
 # SaaS Integrations
 /cisco_umbrella_dns/                                                 @DataDog/saas-integrations
-/cisco_umbrella_dns/*.md                                             @DataDog/saas-integrations @DataDog/documentation      
+/cisco_umbrella_dns/*.md                                             @DataDog/saas-integrations @DataDog/documentation
 /cisco_umbrella_dns/manifest.json                                    @DataDog/saas-integrations @DataDog/documentation
 /cisco_duo/                                                          @DataDog/saas-integrations
-/cisco_duo/*.md                                                      @DataDog/saas-integrations @DataDog/documentation      
+/cisco_duo/*.md                                                      @DataDog/saas-integrations @DataDog/documentation
 /cisco_duo/manifest.json                                             @DataDog/saas-integrations @DataDog/documentation
 
 # To keep Security up-to-date with changes to the signing tool.
@@ -225,6 +228,6 @@ docs/developer/process/integration-release.md                         @DataDog/s
 # As well as the pipelines.
 /.github/workflows/                                                   @DataDog/agent-integrations
 /.gitlab-ci.yml                                                       @DataDog/agent-integrations
-
+/.gitlab/software_composition_analysis.yaml                           @DataDog/software-integrity-and-trust
 # Dev container
 /.devcontainer/                                                        @DataDog/agent-integrations @DataDog/container-integrations

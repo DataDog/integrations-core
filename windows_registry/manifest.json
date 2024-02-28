@@ -1,0 +1,41 @@
+{
+    "manifest_version": "2.0.0",
+    "app_uuid": "cc166a5c-6742-4811-b3e1-93dbec0ac5b2",
+    "app_id": "windows-registry",
+    "display_on_public_website": true,
+    "tile": {
+      "overview": "README.md#Overview",
+      "configuration": "README.md#Setup",
+      "support": "README.md#Support",
+      "changelog": "CHANGELOG.md",
+      "description": "Monitor your Windows hosts for changes in registry keys.",
+      "title": "Windows Registry",
+      "media": [],
+      "classifier_tags": [
+        "Supported OS::Windows",
+        "Category::OS & System"
+      ]
+    },
+    "author": {
+      "support_email": "help@datadoghq.com",
+      "name": "Datadog",
+      "homepage": "https://www.datadoghq.com",
+      "sales_email": "info@datadoghq.com"
+    },
+    "oauth": {},
+    "assets": {
+      "integration": {
+        "auto_install": true,
+        "source_type_id": 8444609,
+        "source_type_name": "windows-registry",
+        "configuration": {},
+        "events": {
+          "creates_events": false
+        },
+        "service_checks": {
+          "metadata_path": "assets/service_checks.json"
+        }
+      }
+    }
+  }
+  

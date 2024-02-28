@@ -1,0 +1,27 @@
+{
+    "name": "Airflow Logs Overview",
+    "type": "logs",
+    "page": "stream",
+    "query": "source:airflow",
+    "timerange": {
+      "interval_ms": 3600000
+    },
+    "visible_facets": [
+        "source",
+        "host",
+        "service",
+        "status",
+        "@filename"
+    ],
+    "options": {
+      "columns": [
+        "host",
+        "service",
+        "status"
+      ],
+      "show_date_column": true,
+      "show_message_column": true,
+      "message_display": "inline",
+      "show_timeline": true
+    }
+}
