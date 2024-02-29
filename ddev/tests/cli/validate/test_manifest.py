@@ -90,7 +90,6 @@ def test_passing(ddev, helpers, network_replay):
     assert result.exit_code == 0, result.output
     assert helpers.remove_trailing_spaces(result.output) == helpers.dedent(
         """
-        Validating manifest.json files for 1 checks ...
         Manifests
 
         Passed: 1

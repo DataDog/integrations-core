@@ -188,7 +188,6 @@ def local_clone(isolation, local_repo) -> Generator[ClonedRepo, None, None]:
         PLATFORM.check_command_output(['git', 'config', 'commit.gpgsign', 'false'])
 
     # We pin the clone of the repo used for testing to have reproducible tests.
-
     cloned_repo = ClonedRepo(cloned_repo_path, 'f7f18ca567bd7712e08692f4e73104706d9942f3', 'ddev-testing')
     cloned_repo.reset_branch()
 
