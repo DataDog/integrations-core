@@ -4,12 +4,18 @@ files:
   options:
   - template: init_config
     options:
-      - template: init_config/openmetrics_legacy
+      - template: init_config/openmetrics
   - template: instances
     options:
-      - template: instances/openmetrics_legacy
+      - template: instances/openmetrics_legacy_base
         overrides:
+          prometheus_url.required: false
           prometheus_url.value.example: http://localhost:5000/metrics
+      - template: instances/openmetrics
+        hidden: true
+        overrides:
+          openmetrics_endpoint.required: false
+          openmetrics_endpoint.value.example: http://localhost:5000/metrics
 - name: auto_conf.yaml
   options:
   - template: ad_identifiers
