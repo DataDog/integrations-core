@@ -7,6 +7,11 @@ on:
   pull_request:
     branches:
     - master
+    paths-ignore:
+    - '.github/**'
+    - 'manifest.json'
+    - 'hatch.toml'
+    - '**/tests/**'
 
 jobs:
   build:
