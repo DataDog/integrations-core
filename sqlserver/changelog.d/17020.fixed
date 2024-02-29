@@ -1,0 +1,1 @@
+Fix an issue where logging of obfuscation errors would still hide the statement when it's part of a stored procedure.
