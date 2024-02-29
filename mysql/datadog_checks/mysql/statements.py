@@ -19,7 +19,7 @@ from datadog_checks.base.utils.db.utils import DBMAsyncJob, default_json_event_e
 from datadog_checks.base.utils.serialization import json
 from datadog_checks.base.utils.tracking import tracked_method
 
-from .util import DatabaseConfigurationError, warning_with_tags
+from .util import DatabaseConfigurationError, connect_with_autocommit, warning_with_tags
 
 try:
     import datadog_agent
@@ -97,7 +97,7 @@ class MySQLStatementMetrics(DBMAsyncJob):
         :return:
         """
         if not self._db:
-            self._db = pymysql.connect(**self._connection_args)
+            self._db = connect_with_autocommit(**self._connection_args)
         return self._db
 
     def _close_db_conn(self):

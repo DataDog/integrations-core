@@ -76,7 +76,7 @@ from .queries import (
 )
 from .statement_samples import MySQLStatementSamples
 from .statements import MySQLStatementMetrics
-from .util import DatabaseConfigurationError  # noqa: F401
+from .util import DatabaseConfigurationError, connect_with_autocommit  # noqa: F401
 from .version_utils import get_version
 
 try:
@@ -424,7 +424,7 @@ class MySql(AgentCheck):
         db = None
         try:
             connect_args = self._get_connection_args()
-            db = pymysql.connect(**connect_args)
+            db = connect_with_autocommit(**connect_args)
             self.log.debug("Connected to MySQL")
             self.service_check_tags = list(set(service_check_tags))
             self.service_check(
