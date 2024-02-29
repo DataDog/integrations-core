@@ -122,7 +122,9 @@ class GitHubManager:
         return response.text
 
     def create_label(self, name, color):
-        self.__api_post(self.LABELS_API.format(repo_id=self.repo_id), data=json.dumps({'name': name, 'color': color}))
+        self.__api_post(
+            self.LABELS_API.format(repo_id=self.repo_id), content=json.dumps({'name': name, 'color': color})
+        )
 
     def get_label(self, name):
         return self.__api_get(f'{self.LABELS_API.format(repo_id=self.repo_id)}/{name}')
