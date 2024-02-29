@@ -623,9 +623,112 @@ promhttp_metric_handler_requests_total{code="503"} 0
 # HELP proxy_connection_limit_exceeded_total Number of times the proxy connection limit was exceeded
 # TYPE proxy_connection_limit_exceeded_total counter
 proxy_connection_limit_exceeded_total 0
+# HELP proxy_peer_client_dial_error_total Total number of errors encountered dialling peer Proxy Service instances.
+# TYPE proxy_peer_client_dial_error_total counter
+proxy_peer_client_dial_error_total 5
+# HELP proxy_peer_server_connections Number of currently opened connection to proxy Proxy Service instances.
+# TYPE proxy_peer_server_connections gauge
+proxy_peer_server_connections 10
+# HELP proxy_peer_client_rpc Number of current client RPC requests.
+# TYPE proxy_peer_client_rpc gauge
+proxy_peer_client_rpc 3
+# HELP proxy_peer_client_rpc_total Total number of client RPC requests.
+# TYPE proxy_peer_client_rpc_total counter
+proxy_peer_client_rpc_total 20
+# HELP proxy_peer_client_rpc_duration_seconds Duration in seconds of RPCs sent by the client.
+# TYPE proxy_peer_client_rpc_duration_seconds histogram
+proxy_peer_client_rpc_duration_seconds_bucket{le="0.005"} 30
+proxy_peer_client_rpc_duration_seconds_bucket{le="0.01"} 40
+proxy_peer_client_rpc_duration_seconds_bucket{le="0.025"} 50
+proxy_peer_client_rpc_duration_seconds_bucket{le="0.05"} 60
+proxy_peer_client_rpc_duration_seconds_bucket{le="0.1"} 70
+proxy_peer_client_rpc_duration_seconds_bucket{le="0.25"} 80
+proxy_peer_client_rpc_duration_seconds_bucket{le="0.5"} 90
+proxy_peer_client_rpc_duration_seconds_bucket{le="1"} 100
+proxy_peer_client_rpc_duration_seconds_count 450
+proxy_peer_client_rpc_duration_seconds_sum 150.5
+# HELP proxy_peer_client_message_sent_size Size of messages sent by the client.
+# TYPE proxy_peer_client_message_sent_size histogram
+proxy_peer_client_message_sent_size_bucket{le="100"} 30
+proxy_peer_client_message_sent_size_bucket{le="500"} 40
+proxy_peer_client_message_sent_size_bucket{le="1000"} 50
+proxy_peer_client_message_sent_size_bucket{le="5000"} 60
+proxy_peer_client_message_sent_size_bucket{le="10000"} 70
+proxy_peer_client_message_sent_size_bucket{le="50000"} 80
+proxy_peer_client_message_sent_size_bucket{le="100000"} 90
+proxy_peer_client_message_sent_size_bucket{le="500000"} 100
+proxy_peer_client_message_sent_size_count 450
+proxy_peer_client_message_sent_size_sum 150.5
+# HELP proxy_peer_client_message_received_size Size of messages received by the client.
+# TYPE proxy_peer_client_message_received_size histogram
+proxy_peer_client_message_received_size_bucket{le="100"} 20
+proxy_peer_client_message_received_size_bucket{le="500"} 30
+proxy_peer_client_message_received_size_bucket{le="1000"} 40
+proxy_peer_client_message_received_size_bucket{le="5000"} 50
+proxy_peer_client_message_received_size_bucket{le="10000"} 60
+proxy_peer_client_message_received_size_bucket{le="50000"} 70
+proxy_peer_client_message_received_size_bucket{le="100000"} 80
+proxy_peer_client_message_received_size_bucket{le="500000"} 90
+proxy_peer_client_message_received_size_bucket{le="1000000"} 100
+proxy_peer_client_message_received_size_count 300
+proxy_peer_client_message_received_size_sum 100.5
+
+# HELP proxy_peer_server_connections Number of currently opened connection to peer Proxy Service clients.
+# TYPE proxy_peer_server_connections gauge
+proxy_peer_server_connections 12
+# HELP proxy_peer_server_rpc Number of current server RPC requests.
+# TYPE proxy_peer_server_rpc gauge
+proxy_peer_server_rpc 4
+# HELP proxy_peer_server_rpc_total Total number of server RPC requests.
+# TYPE proxy_peer_server_rpc_total counter
+proxy_peer_server_rpc_total 30
+# HELP proxy_peer_server_rpc_duration_seconds Duration in seconds of RPCs sent by the server.
+# TYPE proxy_peer_server_rpc_duration_seconds histogram
+proxy_peer_server_rpc_duration_seconds_bucket{le="0.005"} 25
+proxy_peer_server_rpc_duration_seconds_bucket{le="0.01"} 35
+proxy_peer_server_rpc_duration_seconds_bucket{le="0.025"} 45
+proxy_peer_server_rpc_duration_seconds_bucket{le="0.05"} 55
+proxy_peer_server_rpc_duration_seconds_bucket{le="0.1"} 65
+proxy_peer_server_rpc_duration_seconds_bucket{le="0.25"} 75
+proxy_peer_server_rpc_duration_seconds_bucket{le="0.5"} 85
+proxy_peer_server_rpc_duration_seconds_bucket{le="1"} 95
+proxy_peer_server_rpc_duration_seconds_count 400
+proxy_peer_server_rpc_duration_seconds_sum 130.2
+
+# HELP proxy_peer_server_message_sent_size Size of messages sent by the server.
+# TYPE proxy_peer_server_message_sent_size histogram
+proxy_peer_server_message_sent_size_bucket{le="100"} 25
+proxy_peer_server_message_sent_size_bucket{le="500"} 35
+proxy_peer_server_message_sent_size_bucket{le="1000"} 45
+proxy_peer_server_message_sent_size_bucket{le="5000"} 55
+proxy_peer_server_message_sent_size_bucket{le="10000"} 65
+proxy_peer_server_message_sent_size_bucket{le="50000"} 75
+proxy_peer_server_message_sent_size_bucket{le="100000"} 85
+proxy_peer_server_message_sent_size_bucket{le="500000"} 95
+proxy_peer_server_message_sent_size_bucket{le="1000000"} 105
+proxy_peer_server_message_sent_size_count 400
+proxy_peer_server_message_sent_size_sum 130.2
+
+# HELP proxy_peer_server_message_received_size Size of messages received by the server.
+# TYPE proxy_peer_server_message_received_size histogram
+proxy_peer_server_message_received_size_bucket{le="100"} 15
+proxy_peer_server_message_received_size_bucket{le="500"} 25
+proxy_peer_server_message_received_size_bucket{le="1000"} 35
+proxy_peer_server_message_received_size_bucket{le="5000"} 45
+proxy_peer_server_message_received_size_bucket{le="10000"} 55
+proxy_peer_server_message_received_size_bucket{le="50000"} 65
+proxy_peer_server_message_received_size_bucket{le="100000"} 75
+proxy_peer_server_message_received_size_bucket{le="500000"} 85
+proxy_peer_server_message_received_size_bucket{le="1000000"} 95
+proxy_peer_server_message_received_size_count 350
+proxy_peer_server_message_received_size_sum 120.6
+
 # HELP proxy_missing_ssh_tunnels Number of missing SSH tunnels
 # TYPE proxy_missing_ssh_tunnels gauge
 proxy_missing_ssh_tunnels 0
+# HELP remote_clusters Number of inbound connections from leaf clusters.
+# TYPE remote_clusters gauge
+remote_clusters 10
 # HELP proxy_ssh_sessions_total Number of active sessions through this proxy
 # TYPE proxy_ssh_sessions_total gauge
 proxy_ssh_sessions_total 0
@@ -682,6 +785,68 @@ teleport_cache_stale_events {cache_component="proxy"} 3
 # HELP teleport_connect_to_node_attempts_total Number of SSH connection attempts to a node. Use with `failed_connect_to_node_attempts_total` to get the failure rate.
 # TYPE teleport_connect_to_node_attempts_total counter
 teleport_connect_to_node_attempts_total 0
+# HELP teleport_reverse_tunnels_connected Number of reverse SSH tunnels connected to the Teleport Proxy Service by Teleport instances.
+# TYPE teleport_reverse_tunnels_connected gauge
+teleport_reverse_tunnels_connected 10
+
+# HELP trusted_clusters Number of outbound connections to leaf clusters.
+# TYPE trusted_clusters gauge
+trusted_clusters 5
+# HELP teleport_proxy_db_connection_setup_time_seconds Time to establish connection to DB service from Proxy service.
+# TYPE teleport_proxy_db_connection_setup_time_seconds histogram
+teleport_proxy_db_connection_setup_time_seconds_bucket{le="0.005"} 15
+teleport_proxy_db_connection_setup_time_seconds_bucket{le="0.01"} 25
+teleport_proxy_db_connection_setup_time_seconds_bucket{le="0.025"} 35
+teleport_proxy_db_connection_setup_time_seconds_bucket{le="0.05"} 45
+teleport_proxy_db_connection_setup_time_seconds_bucket{le="0.1"} 55
+teleport_proxy_db_connection_setup_time_seconds_bucket{le="0.25"} 65
+teleport_proxy_db_connection_setup_time_seconds_bucket{le="0.5"} 75
+teleport_proxy_db_connection_setup_time_seconds_bucket{le="1"} 85
+teleport_proxy_db_connection_setup_time_seconds_count 300
+teleport_proxy_db_connection_setup_time_seconds_sum 100.2
+
+# HELP teleport_proxy_db_connection_dial_attempts_total Number of dial attempts from Proxy to DB service made.
+# TYPE teleport_proxy_db_connection_dial_attempts_total counter
+teleport_proxy_db_connection_dial_attempts_total 50
+
+# HELP teleport_proxy_db_connection_dial_failures_total Number of failed dial attempts from Proxy to DB service made.
+# TYPE teleport_proxy_db_connection_dial_failures_total counter
+teleport_proxy_db_connection_dial_failures_total 10
+
+# HELP teleport_proxy_db_attempted_servers_total Number of servers processed during connection attempt to the DB service from Proxy service.
+# TYPE teleport_proxy_db_attempted_servers_total histogram
+teleport_proxy_db_attempted_servers_total_bucket{le="2"} 20
+teleport_proxy_db_attempted_servers_total_bucket{le="5"} 30
+teleport_proxy_db_attempted_servers_total_bucket{le="10"} 40
+teleport_proxy_db_attempted_servers_total_bucket{le="20"} 50
+teleport_proxy_db_attempted_servers_total_bucket{le="50"} 60
+teleport_proxy_db_attempted_servers_total_bucket{le="100"} 70
+teleport_proxy_db_attempted_servers_total_bucket{le="200"} 80
+teleport_proxy_db_attempted_servers_total_bucket{le="500"} 90
+teleport_proxy_db_attempted_servers_total_count 280
+teleport_proxy_db_attempted_servers_total_sum 90.6
+
+# HELP teleport_proxy_db_connection_tls_config_time_seconds Time to fetch TLS configuration for the connection to DB service from Proxy service.
+# TYPE teleport_proxy_db_connection_tls_config_time_seconds histogram
+teleport_proxy_db_connection_tls_config_time_seconds_bucket{le="0.1"} 10
+teleport_proxy_db_connection_tls_config_time_seconds_bucket{le="0.25"} 20
+teleport_proxy_db_connection_tls_config_time_seconds_bucket{le="0.5"} 30
+teleport_proxy_db_connection_tls_config_time_seconds_bucket{le="1"} 40
+teleport_proxy_db_connection_tls_config_time_seconds_bucket{le="2.5"} 50
+teleport_proxy_db_connection_tls_config_time_seconds_bucket{le="5"} 60
+teleport_proxy_db_connection_tls_config_time_seconds_bucket{le="10"} 70
+teleport_proxy_db_connection_tls_config_time_seconds_bucket{le="25"} 80
+teleport_proxy_db_connection_tls_config_time_seconds_bucket{le="50"} 90
+teleport_proxy_db_connection_tls_config_time_seconds_bucket{le="100"} 100
+teleport_proxy_db_connection_tls_config_time_seconds_count 350
+teleport_proxy_db_connection_tls_config_time_seconds_sum 120.8
+
+# HELP teleport_proxy_db_active_connections_total Number of currently active connections to DB service from Proxy service.
+# TYPE teleport_proxy_db_active_connections_total gauge
+teleport_proxy_db_active_connections_total 25
+
+
+
 # HELP teleport_enrolled_in_upgrades Number of instances enrolled in automatic upgrades
 # TYPE teleport_enrolled_in_upgrades gauge
 teleport_enrolled_in_upgrades 0
