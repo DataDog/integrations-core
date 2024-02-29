@@ -334,13 +334,17 @@ class SqlserverStatementMetrics(DBMAsyncJob):
             query_signature = compute_sql_signature(obfuscated_statement)
 
             procedure_signature = None
+            procedure_content = None
             if row['is_proc']:
                 try:
                     procedure_statement = obfuscate_sql_with_metadata(
                         row['text'], self._config.obfuscator_options, replace_null_character=True
                     )
+                    procedure_content = procedure_statement['query']
+                    procedure_signature = compute_sql_signature(procedure_statement['query'])
                 except Exception as e:
                     procedure_signature = '__procedure_obfuscation_error__'
+                    procedure_content = '__procedure_obfuscation_error__'
                     if self._config.log_unobfuscated_queries:
                         self.log.warning("Failed to obfuscate stored procedure=[%s] | err=[%s]", repr(row['text']), e)
                     else:
@@ -357,11 +361,10 @@ class SqlserverStatementMetrics(DBMAsyncJob):
                     # If we can't obfuscate the stored procedure, we don't need to give up for this row,
                     # we just won't have the association with the stored procedure in the metrics payload
 
-            if procedure_statement:
-                row['procedure_text'] = procedure_statement['query']
-                row['procedure_signature'] = compute_sql_signature(procedure_statement['query'])
+            if procedure_content:
+                row['procedure_text'] = procedure_content
 
-            elif procedure_signature:
+            if procedure_signature:
                 row['procedure_signature'] = procedure_signature
 
             if procedure_name:
