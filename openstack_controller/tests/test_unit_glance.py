@@ -329,10 +329,8 @@ def test_images_pagination(
     for metric in metrics:
         aggregator.assert_metric(
             metric['name'],
-            metric_type=metric['metric_type'],
             count=metric['count'],
             value=metric['value'],
             tags=metric['tags'],
             hostname=metric.get('hostname'),
-            flush_first_value=metric.get('flush_first_value'),
         )

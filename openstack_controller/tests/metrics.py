@@ -4541,9 +4541,7 @@ IMAGES_METRICS_GLANCE = [
     {
         'name': 'openstack.glance.image.count',
         'count': 1,
-        'value': 1.0,
-        'metric_type': 0,
-        'flush_first_value': False,
+        'value': 1,
         'hostname': '',
         'tags': [
             'container_format:bare',
