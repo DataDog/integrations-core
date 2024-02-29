@@ -708,7 +708,6 @@ proxy_peer_server_message_sent_size_bucket{le="500000"} 95
 proxy_peer_server_message_sent_size_bucket{le="1000000"} 105
 proxy_peer_server_message_sent_size_count 400
 proxy_peer_server_message_sent_size_sum 130.2
-
 # HELP proxy_peer_server_message_received_size Size of messages received by the server.
 # TYPE proxy_peer_server_message_received_size histogram
 proxy_peer_server_message_received_size_bucket{le="100"} 15
@@ -722,7 +721,6 @@ proxy_peer_server_message_received_size_bucket{le="500000"} 85
 proxy_peer_server_message_received_size_bucket{le="1000000"} 95
 proxy_peer_server_message_received_size_count 350
 proxy_peer_server_message_received_size_sum 120.6
-
 # HELP proxy_missing_ssh_tunnels Number of missing SSH tunnels
 # TYPE proxy_missing_ssh_tunnels gauge
 proxy_missing_ssh_tunnels 0
