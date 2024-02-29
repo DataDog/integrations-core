@@ -356,7 +356,7 @@ class SqlserverStatementMetrics(DBMAsyncJob):
                     self._check.count(
                         "dd.sqlserver.statements.error",
                         1,
-                        **self._check.debug_stats_kwargs(tags=["error:obfuscate-query-{}".format(type(e))])
+                        **self._check.debug_stats_kwargs(tags=["error:obfuscate-sproc-{}".format(type(e))])
                     )
                     # If we can't obfuscate the stored procedure, we don't need to give up for this row,
                     # we just won't have the association with the stored procedure in the metrics payload
