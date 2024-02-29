@@ -216,7 +216,6 @@ class PostgreSql(AgentCheck):
         """
         db context manager that yields a healthy connection to the main database
         """
-        print(self._db)
         if not self._db or self._db.closed:
             # if the connection is closed, we need to reinitialize the connection
             self._db = self._new_connection(self._config.dbname)
