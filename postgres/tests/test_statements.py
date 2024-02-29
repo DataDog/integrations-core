@@ -1841,7 +1841,7 @@ def test_pg_stat_statements_dealloc(aggregator, integration_check, dbm_instance_
     with conn.cursor() as cur:
         # pg_stat_statements_reset should be tracked
         # Do enough queries to reach the maximum
-        for i in range(101 - count_statements):
+        for i in range(102 - count_statements):
             parameters = ','.join([str(a) for a in range(i)])
             cur.execute("select {};".format(parameters))
 
