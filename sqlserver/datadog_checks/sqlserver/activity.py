@@ -293,7 +293,7 @@ class SqlserverActivity(DBMAsyncJob):
                     )
                     procedure_content = procedure_statement['query']
                 except Exception as e:
-                    row['procedure_signature'] = '__procedure_signature_error__'
+                    row['procedure_signature'] = '__procedure_obfuscation_error__'
                     # if we fail to obfuscate the procedure text,
                     # we should not mark query statement as failed to obfuscate
                     if self._config.log_unobfuscated_queries:
