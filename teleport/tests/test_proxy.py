@@ -66,6 +66,7 @@ PROXY_METRICS = [
     "proxy.teleport_proxy_db_active_connections_total",
 ]
 
+
 def test_proxy_teleport_metrics(dd_run_check, aggregator, mock_http_response):
     fixtures_path = os.path.join(get_here(), 'fixtures', 'metrics.txt')
     mock_http_response(file_path=fixtures_path)

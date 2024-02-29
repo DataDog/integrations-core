@@ -18,7 +18,7 @@ PROXY_METRICS_MAP = {
     "proxy_connection_limit_exceeded": "proxy.connection_limit_exceeded",
     "proxy_peer_client_dial_error": "proxy.peer_client.dial_error",
     "proxy_peer_server_connections": "proxy.peer_server.connections",
-    "proxy_peer_client_rpc": { "name": "proxy.peer_client.rpc",  "type": "native_dynamic"},
+    "proxy_peer_client_rpc": {"name": "proxy.peer_client.rpc", "type": "native_dynamic"},
     "proxy_peer_client_rpc_duration_seconds": "proxy.peer_client.rpc_duration_seconds",
     "proxy_peer_client_message_sent_size": "proxy.peer_client.message_sent_size",
     "proxy_peer_client_message_received_size": "proxy.peer_client.message_received_size",
