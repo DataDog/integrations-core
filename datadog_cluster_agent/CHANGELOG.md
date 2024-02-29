@@ -6,7 +6,7 @@
 
 ***Fixed***:
 
-* fix process language detection  metrics in `datadog_cluster_agent` integration ([#17001](https://github.com/DataDog/integrations-core/pull/17001))
+* Fix process language detection metrics ([#17001](https://github.com/DataDog/integrations-core/pull/17001))
 
 ## 2.11.0 / 2024-02-26
 
