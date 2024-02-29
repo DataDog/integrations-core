@@ -1042,14 +1042,6 @@ def assert_state_set(check):
     assert check.metrics_cache.replication_metrics
 
 
-def test_host_autodiscover_init_config(aggregator, pg_host_autodiscover_init_config):
-    check_with_init = PostgreSql('test_instance', pg_host_autodiscover_init_config, [{}])
-    assert check_with_init._config.host_autodiscovery_enabled is True
-    check_with_init.check({})
-    # assert that the service check is OK
-    aggregator.assert_service_check('postgres.can_connect', count=1, status=PostgreSql.OK)
-
-
 @requires_over_10
 def test_replication_tag(aggregator, integration_check, pg_instance):
     test_metric = 'postgresql.db.count'
@@ -1075,3 +1067,20 @@ def test_replication_tag(aggregator, integration_check, pg_instance):
     check._get_replication_role = mock.MagicMock(return_value=standby_role)
     check.check(pg_instance)
     aggregator.assert_metric(test_metric, tags=_get_expected_tags(check, pg_instance, role=standby_role))
+
+
+@pytest.mark.parametrize(
+    'collect_wal_metrics',
+    [True, False, None],
+)
+@requires_over_10
+def test_collect_wal_metrics_metrics(aggregator, integration_check, pg_instance, collect_wal_metrics):
+    pg_instance['collect_wal_metrics'] = collect_wal_metrics
+    check = integration_check(pg_instance)
+    check.is_aurora = False
+    check.check(pg_instance)
+
+    expected_tags = _get_expected_tags(check, pg_instance)
+    # if collect_wal_metrics is not set, wal metrics are collected on pg >= 10 by default
+    expected_count = 0 if collect_wal_metrics is False else 1
+    check_file_wal_metrics(aggregator, expected_tags=expected_tags, count=expected_count)

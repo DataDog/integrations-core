@@ -198,4 +198,6 @@ RUN python3 -m pip install --no-warn-script-location -r /runner_dependencies.txt
 COPY build_script.sh /build_script.sh
 ENV DD_BUILD_COMMAND="bash /build_script.sh"
 
+ENV MANYLINUX_POLICY="manylinux2010_x86_64"
+
 ENTRYPOINT ["python3", "/home/scripts/build_wheels.py"]
