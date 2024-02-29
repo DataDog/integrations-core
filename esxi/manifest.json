@@ -8,17 +8,18 @@
     "configuration": "README.md#Setup",
     "support": "README.md#Support",
     "changelog": "CHANGELOG.md",
-    "description": "",
+    "description": "Monitor the health of your ESXi machines and VMs",
     "title": "ESXi",
     "media": [],
     "classifier_tags": [
       "Supported OS::Linux",
       "Supported OS::Windows",
       "Supported OS::macOS",
-      "Category::",
-      "Offering::",
-      "Queried Data Type::",
-      "Submitted Data Type::"
+      "Category::Cloud",
+      "Category::Network",
+      "Category::OS & System",
+      "Offering::Integration",
+      "Submitted Data Type::Metrics"
     ]
   },
   "assets": {

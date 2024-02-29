@@ -2,7 +2,7 @@
 
 ## Overview
 
-This check monitors [ESXi][1] through the Datadog Agent.
+This check monitors [ESXi][1] hosts and the virtual machines running on them through the Datadog Agent.
 
 ## Setup
 
@@ -37,14 +37,12 @@ The ESXi integration does not include any events.
 
 The ESXi integration does not include any service checks.
 
-See [service_checks.json][8] for a list of service checks provided by this integration.
-
 ## Troubleshooting
 
 Need help? Contact [Datadog support][9].
 
 
-[1]: **LINK_TO_INTEGRATION_SITE**
+[1]: https://www.vmware.com/products/esxi-and-esx.html
 [2]: https://app.datadoghq.com/account/settings/agent/latest
 [3]: https://docs.datadoghq.com/agent/kubernetes/integrations/
 [4]: https://github.com/DataDog/integrations-core/blob/master/esxi/datadog_checks/esxi/data/conf.yaml.example
