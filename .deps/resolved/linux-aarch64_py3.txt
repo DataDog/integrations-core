@@ -1,10 +1,11 @@
+aerospike @ https://storage.googleapis.com/dd-agent-int-deps/built/aerospike/aerospike-7.1.1-29-cp311-cp311-manylinux_2_12_x86_64.manylinux2010_x86_64.whl#sha256=e29b8f9c77a30237f4b4af5fe5ddbf0775a588beaf45a6a51313040b725a8e8d
 annotated-types @ https://storage.googleapis.com/dd-agent-int-deps/external/annotated-types/annotated_types-0.6.0-py3-none-any.whl#sha256=0641064de18ba7a25dee8f96403ebc39113d0cb953a01429249d5c7564666a43
 asn1crypto @ https://storage.googleapis.com/dd-agent-int-deps/external/asn1crypto/asn1crypto-1.5.1-py2.py3-none-any.whl#sha256=db4e40728b728508912cbb3d44f19ce188f218e9eba635821bb4b68564f8fd67
 attrs @ https://storage.googleapis.com/dd-agent-int-deps/external/attrs/attrs-23.2.0-py3-none-any.whl#sha256=99b87a485a5820b23b879f04c2305b44b951b502fd64be915879d77a7e8fc6f1
 aws-requests-auth @ https://storage.googleapis.com/dd-agent-int-deps/external/aws-requests-auth/aws_requests_auth-0.4.3-py2.py3-none-any.whl#sha256=646bc37d62140ea1c709d20148f5d43197e6bd2d63909eb36fa4bb2345759977
 azure-core @ https://storage.googleapis.com/dd-agent-int-deps/external/azure-core/azure_core-1.30.0-py3-none-any.whl#sha256=3dae7962aad109610e68c9a7abb31d79720e1d982ddf61363038d175a5025e89
 azure-identity @ https://storage.googleapis.com/dd-agent-int-deps/external/azure-identity/azure_identity-1.15.0-py3-none-any.whl#sha256=a14b1f01c7036f11f148f22cd8c16e05035293d714458d6b44ddf534d93eb912
-bcrypt @ https://storage.googleapis.com/dd-agent-int-deps/external/bcrypt/bcrypt-4.1.2-cp39-abi3-win_amd64.whl#sha256=be3ab1071662f6065899fe08428e45c16aa36e28bc42921c4901a191fda6ee42
+bcrypt @ https://storage.googleapis.com/dd-agent-int-deps/built/bcrypt/bcrypt-4.0.1-29-cp311-cp311-manylinux_2_12_x86_64.manylinux2010_x86_64.whl#sha256=b3422fd5d89536d20a64e190f7e2dee1c0c138c711df625356a4b490d5577ecb
 beautifulsoup4 @ https://storage.googleapis.com/dd-agent-int-deps/external/beautifulsoup4/beautifulsoup4-4.12.3-py3-none-any.whl#sha256=b80878c9f40111313e55da8ba20bdba06d8fa3969fc68304167741bbf9e082ed
 binary @ https://storage.googleapis.com/dd-agent-int-deps/external/binary/binary-1.0.0-py2.py3-none-any.whl#sha256=e1b61f3a5c002717d1a28e4d9d2dc8acbc9d6b12baf7b1e4ab25d743da97e323
 boto @ https://storage.googleapis.com/dd-agent-int-deps/external/boto/boto-2.49.0-py2.py3-none-any.whl#sha256=147758d41ae7240dc989f0039f27da8ca0d53734be0eb869ef16e3adcfa462e8
@@ -31,6 +32,7 @@ envier @ https://storage.googleapis.com/dd-agent-int-deps/external/envier/envier
 filelock @ https://storage.googleapis.com/dd-agent-int-deps/external/filelock/filelock-3.13.1-py3-none-any.whl#sha256=57dbda9b35157b05fb3e58ee91448612eb674172fab98ee235ccb0b5bee19a1c
 foundationdb @ https://storage.googleapis.com/dd-agent-int-deps/built/foundationdb/foundationdb-6.3.24-90-py3-none-any.whl#sha256=07e8e97e51dc9248d58d60d33076b82380135c31ab3727a33b885cea17e34bc7
 google-auth @ https://storage.googleapis.com/dd-agent-int-deps/external/google-auth/google_auth-2.28.1-py2.py3-none-any.whl#sha256=25141e2d7a14bfcba945f5e9827f98092716e99482562f15306e5b026e21aa72
+gssapi @ https://storage.googleapis.com/dd-agent-int-deps/built/gssapi/gssapi-1.8.3-29-cp311-cp311-manylinux_2_12_x86_64.manylinux2010_x86_64.whl#sha256=28c21ec841de2658c240ad75542559aabaff3242a6542e19a019244258113f7e
 idna @ https://storage.googleapis.com/dd-agent-int-deps/external/idna/idna-3.6-py3-none-any.whl#sha256=c05567e9c24a6b9faaa835c4821bad0590fbb9d5779e7caa6e1cc4978e7eb24f
 importlib-metadata @ https://storage.googleapis.com/dd-agent-int-deps/external/importlib-metadata/importlib_metadata-6.11.0-py3-none-any.whl#sha256=f0afba6205ad8f8947c7d338b5342d5db2afbfd82f9cbef7879a9539cc12eb9b
 in-toto @ https://storage.googleapis.com/dd-agent-int-deps/external/in-toto/in_toto-2.0.0-py3-none-any.whl#sha256=eaf71733cdd5b2309b58b24169c13c24701da72baa43b7432d1dffc308e7bf32
@@ -44,6 +46,7 @@ jsonpointer @ https://storage.googleapis.com/dd-agent-int-deps/external/jsonpoin
 jsonschema @ https://storage.googleapis.com/dd-agent-int-deps/external/jsonschema/jsonschema-4.21.1-py3-none-any.whl#sha256=7996507afae316306f9e2290407761157c6f78002dcf7419acb99822143d1c6f
 jsonschema-specifications @ https://storage.googleapis.com/dd-agent-int-deps/external/jsonschema-specifications/jsonschema_specifications-2023.12.1-py3-none-any.whl#sha256=87e4fdf3a94858b8a2ba2778d9ba57d8a9cafca7c7489c46ba0d30a8bc6a9c3c
 keystoneauth1 @ https://storage.googleapis.com/dd-agent-int-deps/external/keystoneauth1/keystoneauth1-5.6.0-py3-none-any.whl#sha256=d740843afcf9c159fb929004eee1eecf46573236901e9d8ca2dca5694733a379
+krb5 @ https://storage.googleapis.com/dd-agent-int-deps/built/krb5/krb5-0.5.1-29-cp311-cp311-manylinux_2_12_x86_64.manylinux2010_x86_64.whl#sha256=478df5e6893f5800a7254c481f90b3a0149f5ac1c06a1d79d736801f6eaabe2e
 kubernetes @ https://storage.googleapis.com/dd-agent-int-deps/external/kubernetes/kubernetes-28.1.0-py2.py3-none-any.whl#sha256=10f56f8160dcb73647f15fafda268e7f60cf7dbc9f8e46d52fcd46d3beb0c18d
 ldap3 @ https://storage.googleapis.com/dd-agent-int-deps/external/ldap3/ldap3-2.9.1-py2.py3-none-any.whl#sha256=5869596fc4948797020d3f03b7939da938778a0f9e2009f7a072ccf92b8e8d70
 lxml @ https://storage.googleapis.com/dd-agent-int-deps/built/lxml/lxml-4.9.2-29-cp311-cp311-manylinux_2_12_x86_64.manylinux2010_x86_64.whl#sha256=54a605574d99bbd462c1edc0d437f6531000ba23b89960c1ecdc03a402c0685a
@@ -77,7 +80,6 @@ pydantic @ https://storage.googleapis.com/dd-agent-int-deps/external/pydantic/py
 pydantic-core @ https://storage.googleapis.com/dd-agent-int-deps/built/pydantic-core/pydantic_core-2.1.2-29-cp311-cp311-manylinux_2_12_x86_64.manylinux2010_x86_64.whl#sha256=d63001356e021f435aa7153c37c6c5aa9b8f0de56fad233ae3e816b63cf520e2
 pyjwt @ https://storage.googleapis.com/dd-agent-int-deps/external/pyjwt/PyJWT-2.8.0-py3-none-any.whl#sha256=59127c392cc44c2da5bb3192169a91f429924e17aff6534d70fdc02ab3e04320
 pymongo @ https://storage.googleapis.com/dd-agent-int-deps/built/pymongo/pymongo-4.6.2-3-cp311-cp311-manylinux_2_12_x86_64.manylinux2010_x86_64.whl#sha256=8879b4a078bc78e417acfb653fa47f57967224a864a683f93311929aee031ef3
-pymqi @ https://storage.googleapis.com/dd-agent-int-deps/built/pymqi/pymqi-1.12.10-29-cp311-cp311-win_amd64.whl#sha256=a1c66824db75ea7e95b807a4cc78eb9e7fc5319a79af5e720861dff3250f688b
 pymysql @ https://storage.googleapis.com/dd-agent-int-deps/external/pymysql/PyMySQL-1.1.0-py3-none-any.whl#sha256=8969ec6d763c856f7073c4c64662882675702efcb114b4bcbb955aea3a069fa7
 pynacl @ https://storage.googleapis.com/dd-agent-int-deps/built/pynacl/PyNaCl-1.5.0-29-cp311-cp311-manylinux_2_12_x86_64.manylinux2010_x86_64.whl#sha256=54471a2384f9a563c787b7766f4b9400eb8650aab578901494f0810f244d10f0
 pyodbc @ https://storage.googleapis.com/dd-agent-int-deps/built/pyodbc/pyodbc-5.1.0-28-cp311-cp311-manylinux_2_12_x86_64.manylinux2010_x86_64.whl#sha256=72207dd290c27f563f1d91681fee11d9d93fc12b5697d60292138a0c5e825844
@@ -87,10 +89,11 @@ pysnmp @ https://storage.googleapis.com/dd-agent-int-deps/external/pysnmp/pysnmp
 pysnmp-mibs @ https://storage.googleapis.com/dd-agent-int-deps/external/pysnmp-mibs/pysnmp_mibs-0.1.6-py2.py3-none-any.whl#sha256=5e153ebe8e767c07940cea435f866c623ff6b2376155c7da75085b08d3774d48
 pysocks @ https://storage.googleapis.com/dd-agent-int-deps/external/pysocks/PySocks-1.7.1-py3-none-any.whl#sha256=2725bd0a9925919b9b51739eea5f9e2bae91e83288108a9ad338b2e3a4435ee5
 pyspnego @ https://storage.googleapis.com/dd-agent-int-deps/external/pyspnego/pyspnego-0.10.2-py3-none-any.whl#sha256=3d5c5c28dbd0cd6a679acf45219630254db3c0e5ad4a16de521caa0585b088c0
+python-binary-memcached @ https://storage.googleapis.com/dd-agent-int-deps/external/python-binary-memcached/python_binary_memcached-0.31.2-py3-none-any.whl#sha256=e5b93d54429e835cab7d5b33988649f9748344aa49adaed8eed94b37e714d562
 python-dateutil @ https://storage.googleapis.com/dd-agent-int-deps/external/python-dateutil/python_dateutil-2.8.2-py2.py3-none-any.whl#sha256=961d03dc3453ebbc59dbdea9e4e11c5651520a876d0f4db161e8674aae935da9
+python3-gearman @ https://storage.googleapis.com/dd-agent-int-deps/external/python3-gearman/python3_gearman-0.1.0-py3-none-any.whl#sha256=4a5808d3a0bfc6c243548ad57e7aab4bee62c9cba2b1c3a860fdd292d46a112d
 pytz @ https://storage.googleapis.com/dd-agent-int-deps/external/pytz/pytz-2024.1-py2.py3-none-any.whl#sha256=328171f4e3623139da4983451950b28e95ac706e13f3f2630a879749e7a8b319
 pyvmomi @ https://storage.googleapis.com/dd-agent-int-deps/built/pyvmomi/pyvmomi-8.0.2.0.1-90-py2.py3-none-any.whl#sha256=66788f9e615cae4e6d6d9297fbdfd5b1295e0175d71a213a85917a4a2e4b93ce
-pywin32 @ https://storage.googleapis.com/dd-agent-int-deps/external/pywin32/pywin32-306-cp311-cp311-win_amd64.whl#sha256=a7639f51c184c0272e93f244eb24dafca9b1855707d94c192d4a0b4c01e1100e
 pyyaml @ https://storage.googleapis.com/dd-agent-int-deps/built/pyyaml/PyYAML-6.0.1-29-cp311-cp311-linux_x86_64.whl#sha256=9edcb0ff5d28c28165198d4ed0374fb0961f6dd29bf513a503ba8eb07d64ee46
 redis @ https://storage.googleapis.com/dd-agent-int-deps/external/redis/redis-5.0.1-py3-none-any.whl#sha256=ed4802971884ae19d640775ba3b03aa2e7bd5e8fb8dfaed2decce4d0fc48391f
 referencing @ https://storage.googleapis.com/dd-agent-int-deps/external/referencing/referencing-0.33.0-py3-none-any.whl#sha256=39240f2ecc770258f28b642dd47fd74bc8b02484de54e1882b74b35ebd779bd5
@@ -114,15 +117,14 @@ six @ https://storage.googleapis.com/dd-agent-int-deps/external/six/six-1.16.0-p
 snowflake-connector-python @ https://storage.googleapis.com/dd-agent-int-deps/built/snowflake-connector-python/snowflake_connector_python-3.7.1-3-cp311-cp311-manylinux_2_12_x86_64.manylinux2010_x86_64.whl#sha256=ca88f14a079099411e0d3ea2dabf7368cf012f60e62f2263298ff77e50d3aae1
 sortedcontainers @ https://storage.googleapis.com/dd-agent-int-deps/external/sortedcontainers/sortedcontainers-2.4.0-py2.py3-none-any.whl#sha256=a163dcaede0f1c021485e957a39245190e74249897e2ae4b2aa38595db237ee0
 soupsieve @ https://storage.googleapis.com/dd-agent-int-deps/external/soupsieve/soupsieve-2.5-py3-none-any.whl#sha256=eaa337ff55a1579b6549dc679565eac1e3d000563bcb1c8ab0d0fefbc0c2cdc7
-sspilib @ https://storage.googleapis.com/dd-agent-int-deps/external/sspilib/sspilib-0.1.0-cp311-cp311-win_amd64.whl#sha256=61c9067168cce962f7fead42c28804c3a39a164b9a7b660200b8cfe31e3af071
 stevedore @ https://storage.googleapis.com/dd-agent-int-deps/external/stevedore/stevedore-5.2.0-py3-none-any.whl#sha256=1c15d95766ca0569cad14cb6272d4d31dae66b011a929d7c18219c176ea1b5c9
 supervisor @ https://storage.googleapis.com/dd-agent-int-deps/external/supervisor/supervisor-4.2.5-py2.py3-none-any.whl#sha256=2ecaede32fc25af814696374b79e42644ecaba5c09494c51016ffda9602d0f08
 tenacity @ https://storage.googleapis.com/dd-agent-int-deps/external/tenacity/tenacity-8.2.3-py3-none-any.whl#sha256=ce510e327a630c9e1beaf17d42e6ffacc88185044ad85cf74c0a8887c6a0f88c
 tomlkit @ https://storage.googleapis.com/dd-agent-int-deps/external/tomlkit/tomlkit-0.12.4-py3-none-any.whl#sha256=5cd82d48a3dd89dee1f9d64420aa20ae65cfbd00668d6f094d7578a78efbb77b
 tuf @ https://storage.googleapis.com/dd-agent-int-deps/external/tuf/tuf-2.0.0-py3-none-any.whl#sha256=1524b0fbd8504245f600f121daf86b8fdcb30df74410acc9655944c4868e461c
 typing-extensions @ https://storage.googleapis.com/dd-agent-int-deps/external/typing-extensions/typing_extensions-4.10.0-py3-none-any.whl#sha256=69b1a937c3a517342112fb4c6df7e72fc39a38e7891a5730ed4985b5214b5475
-tzdata @ https://storage.googleapis.com/dd-agent-int-deps/external/tzdata/tzdata-2024.1-py2.py3-none-any.whl#sha256=9068bc196136463f5245e51efda838afa15aaeca9903f49050dfa2679db4d252
 tzlocal @ https://storage.googleapis.com/dd-agent-int-deps/external/tzlocal/tzlocal-5.2-py3-none-any.whl#sha256=49816ef2fe65ea8ac19d19aa7a1ae0551c834303d5014c6d5a62e4cbda8047b8
+uhashring @ https://storage.googleapis.com/dd-agent-int-deps/external/uhashring/uhashring-2.3-py3-none-any.whl#sha256=7ee8a25ca495a97effad10bd563c83b4054a6d7606d9530757049a04edab9297
 uptime @ https://storage.googleapis.com/dd-agent-int-deps/built/uptime/uptime-3.0.1-29-cp311-cp311-win_amd64.whl#sha256=f45d4f913936457ad976b516f39d95b5f13824f29ccabaff24bdfb65c7719cce
 urllib3 @ https://storage.googleapis.com/dd-agent-int-deps/external/urllib3/urllib3-1.26.18-py2.py3-none-any.whl#sha256=34b97092d7e0a3a8cf7cd10e386f401b3737364026c45e622aa02903dffe0f07
 vertica-python @ https://storage.googleapis.com/dd-agent-int-deps/external/vertica-python/vertica_python-1.3.8-py3-none-any.whl#sha256=a52d05251b25adbadd8fc3d80d5a602f0982ad5e7e5fb84cb0ca26147419a0e8
