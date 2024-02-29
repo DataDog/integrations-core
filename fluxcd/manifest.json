@@ -13,6 +13,7 @@
     "media": [],
     "classifier_tags": [
       "Category::Kubernetes",
+      "Category::Developer Tools",
       "Supported OS::Linux",
       "Supported OS::Windows",
       "Supported OS::macOS"
