@@ -340,11 +340,13 @@ class SqlserverStatementMetrics(DBMAsyncJob):
                     )
                 except Exception as e:
                     if self._config.log_unobfuscated_queries:
-                        self.log.warning(
-                            "Failed to obfuscate stored procedure=[%s] | err=[%s]", repr(row['text']), e
-                        )
+                        self.log.warning("Failed to obfuscate stored procedure=[%s] | err=[%s]", repr(row['text']), e)
                     else:
-                        self.log.info("Failed to obfuscate stored procedure for query_signature=[%s] | err=[%s]", query_signature, e)
+                        self.log.info(
+                            "Failed to obfuscate stored procedure for query_signature=[%s] | err=[%s]",
+                            query_signature,
+                            e,
+                        )
                     self._check.count(
                         "dd.sqlserver.statements.error",
                         1,
