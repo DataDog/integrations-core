@@ -540,6 +540,7 @@ def test_conductors_metrics(aggregator, check, dd_run_check, metrics):
             tags=metric['tags'],
         )
 
+
 @pytest.mark.parametrize(
     ('connection_baremetal', 'paginated_limit', 'instance', 'metrics', 'api_type', 'expected_api_call_count'),
     [
@@ -547,7 +548,7 @@ def test_conductors_metrics(aggregator, check, dd_run_check, metrics):
             None,
             1,
             configs.REST,
-            NODES_METRICS_IRONIC_MICROVERSION_DEFAULT,
+            CONDUCTORS_METRICS_IRONIC_MICROVERSION_DEFAULT,
             ApiType.REST,
             1,
             id='api rest no microversion low limit',
@@ -556,7 +557,7 @@ def test_conductors_metrics(aggregator, check, dd_run_check, metrics):
             None,
             1000,
             configs.REST,
-            NODES_METRICS_IRONIC_MICROVERSION_DEFAULT,
+            CONDUCTORS_METRICS_IRONIC_MICROVERSION_DEFAULT,
             ApiType.REST,
             1,
             id='api rest no microversion high limit',
@@ -565,7 +566,7 @@ def test_conductors_metrics(aggregator, check, dd_run_check, metrics):
             None,
             1,
             configs.REST_IRONIC_MICROVERSION_1_80,
-            NODES_METRICS_IRONIC_MICROVERSION_1_80,
+            CONDUCTORS_METRICS_IRONIC_MICROVERSION_1_80,
             ApiType.REST,
             2,
             id='api rest microversion 1.80 low limit',
@@ -574,7 +575,7 @@ def test_conductors_metrics(aggregator, check, dd_run_check, metrics):
             None,
             1000,
             configs.REST_IRONIC_MICROVERSION_1_80,
-            NODES_METRICS_IRONIC_MICROVERSION_1_80,
+            CONDUCTORS_METRICS_IRONIC_MICROVERSION_1_80,
             ApiType.REST,
             2,
             id='api rest microversion 1.80 high limit',
