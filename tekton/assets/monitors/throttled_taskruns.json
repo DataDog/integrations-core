@@ -20,10 +20,6 @@
       "notify_no_data": false,
       "renotify_interval": 0,
       "require_full_window": false,
-      "threshold_windows": {
-        "recovery_window": "last_1h",
-        "trigger_window": "last_1h"
-      },
       "thresholds": {
         "critical": 50,
         "warning": 30
