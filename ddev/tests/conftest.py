@@ -177,6 +177,7 @@ def local_clone(isolation, local_repo) -> Generator[ClonedRepo, None, None]:
 
     This is being deprecated and removed, use empty_git_repo instead!
     '''
+    raise RuntimeError("this is a test")
     cloned_repo_path = isolation / local_repo.name
 
     PLATFORM.check_command_output(
