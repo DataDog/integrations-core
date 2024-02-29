@@ -50,10 +50,7 @@ datadog.cluster_agent.go.memstats.alloc_bytes,gauge,,byte,,Number of bytes alloc
 datadog.cluster_agent.go.threads,gauge,,thread,,Number of OS threads created,0,datadog_cluster_agent,go threads,
 datadog.cluster_agent.kubernetes_apiserver.emitted_events,count,,,,"Datadog events emitted by the kubernetes_apiserver check",0,datadog_cluster_agent,datadog events events,
 datadog.cluster_agent.kubernetes_apiserver.kube_events,count,,,,"Kubernetes events processed by the kubernetes_apiserver check",0,datadog_cluster_agent,apiserver events,
-datadog.cluster_agent.language_detection_dca_handler.fail_response,count,,,,"The number of times language detection request processing fails",0,datadog_cluster_agent,language detection handler failure responses,
-datadog.cluster_agent.language_detection_dca_handler.ok_response,count,,,,"The number of times language detection request processing succeeds",0,datadog_cluster_agent,language detection handler success responses,
-datadog.cluster_agent.language_detection_patcher.fail_patch,count,,,,"The the number of failing language detection annotation patch operations",0,datadog_cluster_agent,language detection failing patch operations,
-datadog.cluster_agent.language_detection_patcher.retries,count,,,,"The the number of retried language detection annotation patch operations",0,datadog_cluster_agent,language detection retried patch operations,
-datadog.cluster_agent.language_detection_patcher.skipped_patch,count,,,,"The number of times a patch was skipped because no new languages are detected or old languages were expired",0,datadog_cluster_agent,language detection skip patch operations,
-datadog.cluster_agent.language_detection_patcher.success_patch,count,,,,"The the number of successful language detection annotation patch operations",0,datadog_cluster_agent,language detection successful patch operations,
+datadog.cluster_agent.language_detection_dca_handler.processed_requests,count,,,,"The number of process language detection requests processed by the handler",0,datadog_cluster_agent,language detection processed requests,
+datadog.cluster_agent.language_detection_patcher.patches,count,,,,"The number of patch requests sent by the patcher to the kube api server",0,datadog_cluster_agent,language detection patches,
+
 datadog.cluster_agent.secret_backend.elapsed,gauge,,millisecond,,The elapsed time of secret backend invocation,0,datadog_cluster_agent,secret backend elapsed time duration,
