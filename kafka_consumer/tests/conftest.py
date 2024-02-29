@@ -15,6 +15,7 @@ from datadog_checks.dev.ci import running_on_ci
 from datadog_checks.kafka_consumer import KafkaCheck
 
 from . import common
+from .common import get_cluster_id
 from .runners import Consumer, Producer
 
 
@@ -36,6 +37,7 @@ def dd_environment():
             [
                 WaitFor(create_topics, attempts=60, wait=3),
                 WaitFor(initialize_topics),
+                WaitFor(is_cluster_id_available),
             ]
         )
 
@@ -56,6 +58,10 @@ def dd_environment():
                 'instances': [common.E2E_INSTANCE],
                 'init_config': {'kafka_timeout': 30},
             }, common.E2E_METADATA
+
+
+def is_cluster_id_available():
+    return get_cluster_id() is not None
 
 
 @pytest.fixture
