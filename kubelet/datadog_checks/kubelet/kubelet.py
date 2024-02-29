@@ -536,14 +536,14 @@ class KubeletCheck(
 
             for status_field, spec_field in [('containerStatuses', 'containers'),
                                              ('initContainerStatuses', 'initContainers')]:
-                for ctr in pod['spec'][spec_field]:
+                for ctr in pod.get('spec', {}).get(spec_field, []):
                     if not ctr.get('resources'):
                         continue
 
                     c_name = ctr.get('name', '')
                     cid = None
                     completed = False
-                    for ctr_status in pod['status'].get(status_field, []):
+                    for ctr_status in pod.get('status', {}).get(status_field, []):
                         if ctr_status.get('name') == c_name:
                             # we found the correct container status, but we don't want to report resources
                             # for completed containers
@@ -591,7 +591,7 @@ class KubeletCheck(
                 continue
 
             for field in ['containerStatuses', 'initContainerStatuses']:
-                for ctr_status in pod['status'].get(field, []):
+                for ctr_status in pod.get('status', {}).get(field, []):
                     c_name = ctr_status.get('name')
                     cid = ctr_status.get('containerID')
 

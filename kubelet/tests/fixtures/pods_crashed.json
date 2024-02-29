@@ -160,13 +160,13 @@
                         },
                         "ready": true,
                         "lastState": {
-                          "terminated": {
-                            "containerID": "docker://3eca48f90f5203547bc1f08fc0e3ee50cb3d82d6014d666075d5d9d1ee6efc16",
-                            "exitCode": 2,
-                            "finishedAt": "2018-02-13T16:05:48Z",
-                            "reason": "OOMKilled",
-                            "startedAt": "2018-02-13T16:01:13Z"
-                          }
+                            "terminated": {
+                                "containerID": "docker://3eca48f90f5203547bc1f08fc0e3ee50cb3d82d6014d666075d5d9d1ee6efc16",
+                                "exitCode": 2,
+                                "finishedAt": "2018-02-13T16:05:48Z",
+                                "reason": "OOMKilled",
+                                "startedAt": "2018-02-13T16:01:13Z"
+                            }
                         },
                         "containerID": "docker://5741ed2471c0e458b6b95db40ba05d1a5ee168256638a0264f08703e48d76561"
                     },
@@ -176,14 +176,35 @@
                         "image": "asia.gcr.io/google-containers/prometheus-to-sd:v0.2.2",
                         "imageID": "docker-pullable://asia.gcr.io/google-containers/prometheus-to-sd@sha256:5831390762c790b0375c202579fd41dd5f40c71950f7538adbe14b0c16f35d56",
                         "state": {
-                          "waiting": {
-                            "message": "Back-off 5m0s restarting failed container=prometheus-to-sd-exporter pod=kube-proxy-gke-haissam-default-pool-be5066f1-wnvn_prometheus-to-sd-exporter(986b21ed-d64d-11e8-a227-0adb9c53b1aa)",
-                            "reason": "CrashLoopBackOff"
-                          }
+                            "waiting": {
+                                "message": "Back-off 5m0s restarting failed container=prometheus-to-sd-exporter pod=kube-proxy-gke-haissam-default-pool-be5066f1-wnvn_prometheus-to-sd-exporter(986b21ed-d64d-11e8-a227-0adb9c53b1aa)",
+                                "reason": "CrashLoopBackOff"
+                            }
                         },
                         "ready": true,
                         "lastState": {},
                         "containerID": "docker://580cb469826a10317fd63cc780441920f49913ae63918d4c7b19a72347645b05"
+                    }
+                ],
+                "initContainerStatuses": [
+                    {
+                        "name": "init",
+                        "state": {
+                            "terminated": {
+                                "exitCode": 0,
+                                "startedAt": "2024-02-27T19:30:39Z",
+                                "finishedAt": "2024-02-27T19:30:49Z",
+                                "reason": "Completed",
+                                "containerID": "docker://1d1f139dc1c9d49010512744df34740abcfaadf9930d3afd85afbf5fccfadbd6"
+                            }
+                        },
+                        "lastState": {},
+                        "ready": true,
+                        "restartCount": 0,
+                        "image": "docker.io/library/alpine:latest",
+                        "imageID": "docker.io/library/alpine@sha256:c5b1261d6d3e43071626931fc004f70149baeba2c8ec672bd4f27761f8e1ad6b",
+                        "containerID": "docker://1d1f139dc1c9d49010512744df34740abcfaadf9930d3afd85afbf5fccfadbd6",
+                        "started": false
                     }
                 ],
                 "podIP": "10.8.2.4",
@@ -397,6 +418,29 @@
                         ],
                         "imagePullPolicy": "IfNotPresent",
                         "resources": {}
+                    }
+                ],
+                "initContainers": [
+                    {
+                        "terminationMessagePath": "/dev/termination-log",
+                        "name": "init",
+                        "image": "alpine:latest",
+                        "terminationMessagePolicy": "File",
+                        "command": [
+                            "/bin/sh",
+                            "-c",
+                            "sleep 10s"
+                        ],
+                        "imagePullPolicy": "IfNotPresent",
+                        "resources": {
+                            "requests": {
+                                "cpu": "50m",
+                                "memory": "100Mi"
+                            },
+                            "limits": {
+                                "memory": "150Mi"
+                            }
+                        }
                     }
                 ],
                 "nodeName": "gke-haissam-default-pool-be5066f1-wnvn"

@@ -196,6 +196,11 @@ COMMON_TAGS = {
         'kube_container_name:fluentd-gcp',
         'kube_deployment:fluentd-gcp-v2.0.10',
     ],
+    'container_id://1d1f139dc1c9d49010512744df34740abcfaadf9930d3afd85afbf5fccfadbd6': [
+        'kube_container_name:init',
+        'kube_deployment:fluentd-gcp-v2.0.10',
+        'kube_namespace:default',
+    ],
     "container_id://580cb469826a10317fd63cc780441920f49913ae63918d4c7b19a72347645b05": [
         'kube_container_name:prometheus-to-sd-exporter',
         'kube_deployment:fluentd-gcp-v2.0.10',
@@ -222,6 +227,10 @@ COMMON_TAGS = {
     "container_id://a335589109ce5506aa69ba7481fc3e6c943abd23c5277016c92dac15d0f40479": [
         'kube_container_name:datadog-agent'
     ],
+    'container_id://80bd9ebe296615341c68d571e843d800fb4a75bef696d858065572ab4e49920c': [
+        'kube_container_name:running-init',
+        'kube_namespace:default',
+    ],
     "container_id://326b384481ca95204018e3e837c61e522b64a3b86c3804142a22b2d1db9dbd7b": [
         'kube_container_name:datadog-agent'
     ],
@@ -242,6 +251,15 @@ COMMON_TAGS = {
         'persistentvolumeclaim:www-web-2',
         'persistentvolumeclaim:www2-web-3',
         'pod_phase:running',
+    ],
+    'kubernetes_pod_uid://d2dfd16e-e829-4f66-91d5-f9233ca7332b': [
+        'pod_name:sidecar-second',
+        'kube_namespace:default',
+    ],
+    'container_id://80bd9ebe296615341c68d571e843d800fb4a75bef696d858065572ab4e49920b': [
+        'kube_container_name:sidecar',
+        'pod_name:sidecar-second',
+        'kube_namespace:default',
     ],
 }
 
@@ -703,6 +721,7 @@ def test_report_pods_running(monkeypatch, tagger):
         mock.call('kubernetes.pods.running', 1, ["pod_name:fluentd-gcp-v2.0.10-9q9t4"]),
         mock.call('kubernetes.pods.running', 1, ["pod_name:fluentd-gcp-v2.0.10-p13r3"]),
         mock.call('kubernetes.pods.running', 1, ['pod_name:demo-app-success-c485bc67b-klj45']),
+        mock.call('kubernetes.pods.running', 1, ['kube_namespace:default', 'pod_name:sidecar-second']),
         mock.call(
             'kubernetes.containers.running',
             2,
@@ -714,12 +733,27 @@ def test_report_pods_running(monkeypatch, tagger):
             ["kube_container_name:prometheus-to-sd-exporter", "kube_deployment:fluentd-gcp-v2.0.10"],
         ),
         mock.call('kubernetes.containers.running', 1, ['pod_name:demo-app-success-c485bc67b-klj45']),
+        mock.call(
+            'kubernetes.containers.running',
+            1,
+            ['kube_container_name:running-init', 'kube_namespace:default'],
+        ),
+        mock.call(
+            'kubernetes.containers.running',
+            1,
+            ['kube_container_name:sidecar', 'kube_namespace:default', 'pod_name:sidecar-second'],
+        ),
     ]
     check.gauge.assert_has_calls(calls, any_order=True)
     # Make sure non running container/pods are not sent
     bad_calls = [
         mock.call('kubernetes.pods.running', 1, ['pod_name:dd-agent-q6hpw']),
         mock.call('kubernetes.containers.running', 1, ['pod_name:dd-agent-q6hpw']),
+        mock.call(
+            'kubernetes.containers.running',
+            1,
+            ["kube_container_name:init", "kube_deployment:fluentd-gcp-v2.0.10"],
+        ),
     ]
     for c in bad_calls:
         assert c not in check.gauge.mock_calls

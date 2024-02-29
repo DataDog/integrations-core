@@ -154,13 +154,14 @@ class PodListUtils(object):
             if is_static_pending_pod(pod):
                 self.static_pod_uids.add(uid)
 
-            for ctr in pod.get('status', {}).get('containerStatuses', []):
-                cid = ctr.get('containerID')
-                if not cid:
-                    continue
-                self.containers[cid] = ctr
-                self.container_id_by_name_tuple[(namespace, pod_name, ctr.get('name'))] = cid
-                self.container_id_to_namespace[cid] = namespace
+            for field in ['containerStatuses', 'initContainerStatuses']:
+                for ctr in pod.get('status', {}).get(field, []):
+                    cid = ctr.get('containerID')
+                    if not cid:
+                        continue
+                    self.containers[cid] = ctr
+                    self.container_id_by_name_tuple[(namespace, pod_name, ctr.get('name'))] = cid
+                    self.container_id_to_namespace[cid] = namespace
 
     def get_uid_by_name_tuple(self, name_tuple):
         """
