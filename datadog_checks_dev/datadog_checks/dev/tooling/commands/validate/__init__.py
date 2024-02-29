@@ -17,7 +17,6 @@ from .integration_style import integration_style
 from .jmx_metrics import jmx_metrics
 from .license_headers import license_headers
 from .licenses import licenses
-from .manifest import manifest
 from .models import models
 from .package import package
 from .readmes import readmes
@@ -39,7 +38,6 @@ ALL_COMMANDS = (
     legacy_signature,
     license_headers,
     licenses,
-    manifest,
     models,
     package,
     readmes,
