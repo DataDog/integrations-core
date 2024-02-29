@@ -333,12 +333,14 @@ class SqlserverStatementMetrics(DBMAsyncJob):
             obfuscated_statement = statement['query']
             query_signature = compute_sql_signature(obfuscated_statement)
 
+            procedure_signature = None
             if row['is_proc']:
                 try:
                     procedure_statement = obfuscate_sql_with_metadata(
                         row['text'], self._config.obfuscator_options, replace_null_character=True
                     )
                 except Exception as e:
+                    procedure_signature = '__procedure_obfuscation_error__'
                     if self._config.log_unobfuscated_queries:
                         self.log.warning("Failed to obfuscate stored procedure=[%s] | err=[%s]", repr(row['text']), e)
                     else:
@@ -358,6 +360,10 @@ class SqlserverStatementMetrics(DBMAsyncJob):
             if procedure_statement:
                 row['procedure_text'] = procedure_statement['query']
                 row['procedure_signature'] = compute_sql_signature(procedure_statement['query'])
+
+            elif procedure_signature:
+                row['procedure_signature'] = procedure_signature
+
             if procedure_name:
                 row['procedure_name'] = procedure_name
 

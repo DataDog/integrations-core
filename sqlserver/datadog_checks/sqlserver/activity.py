@@ -286,20 +286,22 @@ class SqlserverActivity(DBMAsyncJob):
             # sqlserver doesn't have a boolean data type so convert integer to boolean
             comments, row['is_proc'], procedure_name = extract_sql_comments_and_procedure_name(row['text'])
             if row['is_proc'] and 'text' in row:
+                procedure_content = None
                 try:
                     procedure_statement = obfuscate_sql_with_metadata(
                         row['text'], self._config.obfuscator_options, replace_null_character=True
                     )
-                    # procedure_signature is used to link this activity event with
-                    # its related plan events
-                    row['procedure_signature'] = compute_sql_signature(procedure_statement['query'])
+                    procedure_content = procedure_statement['query']
                 except Exception as e:
+                    row['procedure_signature'] = '__procedure_signature_error__'
                     # if we fail to obfuscate the procedure text,
                     # we should not mark query statement as failed to obfuscate
                     if self._config.log_unobfuscated_queries:
                         self.log.warning("Failed to obfuscate stored procedure=[%s] | err=[%s]", repr(row['text']), e)
                     else:
                         self.log.debug("Failed to obfuscate stored procedure | err=[%s]", e)
+                if procedure_content:
+                    row['procedure_signature'] = compute_sql_signature(procedure_content)
             obfuscated_statement = statement['query']
             metadata = statement['metadata']
             row['dd_commands'] = metadata.get('commands', None)
