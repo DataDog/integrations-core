@@ -61,7 +61,8 @@ from .util import (
     SUBSCRIPTION_STATE_METRICS,
     VACUUM_PROGRESS_METRICS,
     WAL_FILE_METRICS,
-    DatabaseConfigurationError,  # noqa: F401
+    DatabaseConfigurationError,
+    DatabaseHealthCheckError,  # noqa: F401
     fmt,
     get_schema_field,
     payload_pg_version,
@@ -235,6 +236,18 @@ class PostgreSql(AgentCheck):
         except Exception:
             self.log.exception("Unhandled exception while using database connection %s", self._config.dbname)
             raise
+
+    def _connection_health_check(self, conn):
+        try:
+            # run a simple query to check if the connection is healthy
+            # health check should run after a connection is established
+            with conn.cursor() as cursor:
+                cursor.execute("SELECT 1")
+                cursor.fetchall()
+        except psycopg2.OperationalError as e:
+            err_msg = f"Database {self._config.dbname} connection health check failed: {str(e)}"
+            self.log.error(err_msg)
+            raise DatabaseHealthCheckError(err_msg)
 
     @property
     def dynamic_queries(self):
@@ -793,8 +806,8 @@ class PostgreSql(AgentCheck):
         The connection created here will be persistent. It will not be automatically
         evicted from the connection pool.
         """
-        with self.db():
-            pass
+        with self.db() as conn:
+            self._connection_health_check(conn)
 
     # Reload pg_settings on a new connection to the main db
     def _load_pg_settings(self, db):
