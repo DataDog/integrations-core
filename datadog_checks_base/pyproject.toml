@@ -89,7 +89,7 @@ http = [
     "win-inet-pton==1.1.0; sys_platform == 'win32' and python_version < '3.0'",
 ]
 json = [
-    "orjson==3.9.7; python_version > '3.0'",
+    "orjson==3.9.15; python_version > '3.0'",
 ]
 kube = [
     "kubernetes==18.20.0; python_version < '3.0'",
