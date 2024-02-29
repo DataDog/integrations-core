@@ -2,6 +2,12 @@
 
 <!-- towncrier release notes start -->
 
+## 2.11.1 / 2024-02-29
+
+***Fixed***:
+
+* Fix process language detection metrics ([#17001](https://github.com/DataDog/integrations-core/pull/17001))
+
 ## 2.11.0 / 2024-02-26
 
 ***Added***:
