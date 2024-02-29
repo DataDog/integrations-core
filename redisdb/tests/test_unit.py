@@ -87,7 +87,7 @@ def test__check_total_commands_processed_not_present(check, aggregator, redis_in
     redis_check._check_total_commands_processed(conn.info(), [])
 
     # Assert that no metrics were sent
-    assert len(list(aggregator.metrics('redis.net.commands'))) == 0
+    aggregator.assert_metric('redis.net.commands', count=0)
 
 
 def test__check_total_commands_processed_present(check, aggregator, redis_instance):
