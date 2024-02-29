@@ -105,7 +105,7 @@ def test_monitor_broker_highwatermarks(
     kafka_instance['consumer_groups'] = {'my_consumer': {'marvel': None}}
     kafka_instance['monitor_all_broker_highwatermarks'] = is_enabled
     dd_run_check(check(kafka_instance))
-    cluster_id = common._get_cluster_id()
+    cluster_id = common.get_cluster_id()
 
     # After refactor and library migration, write unit tests to assert expected metric values
     aggregator.assert_metric('kafka.broker_offset', count=broker_offset_metric_count)
