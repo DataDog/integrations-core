@@ -25,6 +25,8 @@
   "assets": {
     "integration": {
       "source_type_name": "ESXi",
+      "source_type_id": 9254843,
+      "auto_install": true,
       "configuration": {
         "spec": "assets/configuration/spec.yaml"
       },
@@ -40,7 +42,6 @@
         "metadata_path": "assets/service_checks.json"
       }
     },
-    "auto_install": true,
     "dashboards": {},
     "monitors": {},
     "logs": {},
