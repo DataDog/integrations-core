@@ -10,7 +10,6 @@ import pytest
 from datadog_checks.dev import get_here, run_command
 from datadog_checks.dev.kind import kind_run
 from datadog_checks.dev.kube_port_forward import port_forward
-from datadog_checks.tekton import TektonCheck
 
 HERE = get_here()
 
@@ -106,11 +105,6 @@ def dd_environment(dd_save_state):
         instances['triggers_controller_endpoint'] = f'http://{trigger_host}:{trigger_port}/metrics'
 
         yield {'instances': [instances]}
-
-
-@pytest.fixture
-def check():
-    return lambda instance: TektonCheck('tekton', {}, [instance])
 
 
 @pytest.fixture

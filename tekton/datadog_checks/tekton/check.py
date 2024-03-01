@@ -1,8 +1,6 @@
 # (C) Datadog, Inc. 2024-present
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
-from six import PY2
-
 from datadog_checks.base import ConfigurationError, OpenMetricsBaseCheckV2
 from datadog_checks.tekton.config_models import ConfigMixin
 
@@ -16,12 +14,6 @@ class TektonCheck(OpenMetricsBaseCheckV2, ConfigMixin):
     DEFAULT_METRIC_LIMIT = 0
 
     def __init__(self, name, init_config, instances):
-        if PY2:
-            raise ConfigurationError(
-                "This version of the integration is only available when using py3. "
-                "Check https://docs.datadoghq.com/agent/guide/agent-v6-python-3 "
-                "for more information."
-            )
         super(TektonCheck, self).__init__(name, init_config, instances)
         self.check_initializations.appendleft(self.parse_config)
 

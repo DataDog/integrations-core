@@ -3,6 +3,8 @@
 # Licensed under a 3-clause BSD style license (see LICENSE)
 import os
 
+from tekton.datadog_checks.tekton import TektonCheck
+
 from datadog_checks.dev import get_here
 from datadog_checks.dev.http import MockResponse
 
@@ -123,6 +125,10 @@ TRIGGERS_METRICS = [
     "workqueue.work_duration.sum",
 ]
 assert PIPELINES_METRICS == sorted(PIPELINES_METRICS)
+
+
+def check(instance):
+    return TektonCheck('tekton', {}, [instance])
 
 
 def mock_http_responses(url, **_params):

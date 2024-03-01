@@ -2,12 +2,11 @@
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
 import pytest
-from mock import patch
 
-from datadog_checks.base import AgentCheck, ConfigurationError
+from datadog_checks.base import AgentCheck
 from datadog_checks.dev.utils import get_metadata_metrics
 
-from .common import PIPELINES_METRICS, TRIGGERS_METRICS, mock_http_responses
+from .common import PIPELINES_METRICS, TRIGGERS_METRICS, check, mock_http_responses
 
 
 @pytest.mark.parametrize(
@@ -17,7 +16,7 @@ from .common import PIPELINES_METRICS, TRIGGERS_METRICS, mock_http_responses
         pytest.param('triggers_instance', TRIGGERS_METRICS, 'triggers_controller', id='triggers'),
     ],
 )
-def test_check(dd_run_check, aggregator, mocker, check, instance, metrics, request, namespace):
+def test_check(dd_run_check, aggregator, mocker, instance, metrics, request, namespace):
     mocker.patch("requests.get", wraps=mock_http_responses)
     dd_run_check(check(request.getfixturevalue(instance)))
 
@@ -31,7 +30,7 @@ def test_check(dd_run_check, aggregator, mocker, check, instance, metrics, reque
     assert len(aggregator.service_check_names) == 1
 
 
-def test_invalid_url(dd_run_check, aggregator, check, pipelines_instance, mocker):
+def test_invalid_url(dd_run_check, aggregator, pipelines_instance, mocker):
     pipelines_instance["pipelines_controller_endpoint"] = "http://unknowwn"
 
     mocker.patch("requests.get", wraps=mock_http_responses)
@@ -44,7 +43,7 @@ def test_invalid_url(dd_run_check, aggregator, check, pipelines_instance, mocker
     )
 
 
-def test_no_endpoint_configured(dd_run_check, aggregator, check, pipelines_instance):
+def test_no_endpoint_configured(dd_run_check, aggregator, pipelines_instance):
     del pipelines_instance["pipelines_controller_endpoint"]
 
     with pytest.raises(
@@ -53,9 +52,3 @@ def test_no_endpoint_configured(dd_run_check, aggregator, check, pipelines_insta
         "triggers_controller_endpoint.",
     ):
         dd_run_check(check(pipelines_instance))
-
-
-@patch('datadog_checks.tekton.check.PY2', True)
-def test_py2(check, pipelines_instance):
-    with pytest.raises(ConfigurationError, match="This version of the integration is only available when using py3."):
-        check(pipelines_instance)
