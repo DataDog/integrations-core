@@ -544,13 +544,13 @@ def test_conductors_metrics(aggregator, check, dd_run_check, metrics):
 @pytest.mark.parametrize(
     ('connection_baremetal', 'paginated_limit', 'instance', 'metrics', 'api_type', 'expected_api_call_count'),
     [
-        pytest.param(
+                pytest.param(
             None,
             1,
             configs.REST,
             CONDUCTORS_METRICS_IRONIC_MICROVERSION_DEFAULT,
             ApiType.REST,
-            1,
+            2,
             id='api rest no microversion low limit',
         ),
         pytest.param(
@@ -559,7 +559,7 @@ def test_conductors_metrics(aggregator, check, dd_run_check, metrics):
             configs.REST,
             CONDUCTORS_METRICS_IRONIC_MICROVERSION_DEFAULT,
             ApiType.REST,
-            1,
+            2,
             id='api rest no microversion high limit',
         ),
         pytest.param(
@@ -568,7 +568,7 @@ def test_conductors_metrics(aggregator, check, dd_run_check, metrics):
             configs.REST_IRONIC_MICROVERSION_1_80,
             CONDUCTORS_METRICS_IRONIC_MICROVERSION_1_80,
             ApiType.REST,
-            2,
+            1,
             id='api rest microversion 1.80 low limit',
         ),
         pytest.param(
@@ -577,10 +577,47 @@ def test_conductors_metrics(aggregator, check, dd_run_check, metrics):
             configs.REST_IRONIC_MICROVERSION_1_80,
             CONDUCTORS_METRICS_IRONIC_MICROVERSION_1_80,
             ApiType.REST,
-            2,
+            1,
             id='api rest microversion 1.80 high limit',
         ),
+        pytest.param(
+            None,
+            1,
+            configs.SDK,
+            CONDUCTORS_METRICS_IRONIC_MICROVERSION_DEFAULT,
+            ApiType.SDK,
+            2,
+            id='api sdk no microversion low limit',
+        ),
+        pytest.param(
+            None,
+            1000,
+            configs.SDK,
+            CONDUCTORS_METRICS_IRONIC_MICROVERSION_DEFAULT,
+            ApiType.SDK,
+            2,
+            id='api sdk no microversion high limit',
+        ),
+        pytest.param(
+            None,
+            1,
+            configs.SDK_IRONIC_MICROVERSION_1_80,
+            CONDUCTORS_METRICS_IRONIC_MICROVERSION_1_80,
+            ApiType.SDK,
+            1,
+            id='api sdk microversion 1.80 low limit',
+        ),
+        pytest.param(
+            None,
+            1000,
+            configs.SDK_IRONIC_MICROVERSION_1_80,
+            CONDUCTORS_METRICS_IRONIC_MICROVERSION_1_80,
+            ApiType.SDK,
+            1,
+            id='api sdk microversion 1.80 high limit',
+        ),
     ],
+    indirect=['connection_baremetal'],
 )
 @pytest.mark.usefixtures('mock_http_get', 'mock_http_post', 'openstack_connection')
 def test_conductors_pagination(
@@ -593,6 +630,7 @@ def test_conductors_pagination(
     api_type,
     expected_api_call_count,
     mock_http_get,
+    connection_baremetal,
 ):
     paginated_instance = copy.deepcopy(instance)
     paginated_instance['paginated_limit'] = paginated_limit
@@ -613,3 +651,5 @@ def test_conductors_pagination(
 
         baremetal_url = ('http://127.0.0.1:6385/baremetal/v1/conductors')
         assert args_list.count(baremetal_url) == expected_api_call_count
+    if api_type == ApiType.SDK:
+        assert connection_baremetal.conductors.call_count == expected_api_call_count
