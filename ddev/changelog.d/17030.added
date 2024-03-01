@@ -1,0 +1,1 @@
+Do not return an error when running test with `changed` if no integrations were modified

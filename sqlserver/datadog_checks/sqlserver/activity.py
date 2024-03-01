@@ -290,10 +290,9 @@ class SqlserverActivity(DBMAsyncJob):
                     procedure_statement = obfuscate_sql_with_metadata(
                         row['text'], self._config.obfuscator_options, replace_null_character=True
                     )
-                    # procedure_signature is used to link this activity event with
-                    # its related plan events
                     row['procedure_signature'] = compute_sql_signature(procedure_statement['query'])
                 except Exception as e:
+                    row['procedure_signature'] = '__procedure_obfuscation_error__'
                     # if we fail to obfuscate the procedure text,
                     # we should not mark query statement as failed to obfuscate
                     if self._config.log_unobfuscated_queries:

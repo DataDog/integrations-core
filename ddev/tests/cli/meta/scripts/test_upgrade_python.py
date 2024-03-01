@@ -1,7 +1,7 @@
 # (C) Datadog, Inc. 2023-present
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
-from tests.conftest import NEW_PYTHON_VERSION, OLD_PYTHON_VERSION
+from .conftest import NEW_PYTHON_VERSION, OLD_PYTHON_VERSION
 
 
 def test_upgrade_python(fake_repo, ddev):

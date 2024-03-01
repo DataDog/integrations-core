@@ -163,6 +163,17 @@ class TestStandard:
             ),
         ]
 
+    def test_changed_no_modifications(self, ddev, helpers, mocker):
+        mocker.patch('subprocess.run')
+        result = ddev('test')
+
+        assert result.exit_code == 0, result.output
+        assert result.output == helpers.dedent(
+            """
+            No changed testable targets found
+            """
+        )
+
     def test_all_targets(self, ddev, helpers, mocker, repository):
         repo = Repository("core", str(repository.path))
         run = mocker.patch('subprocess.run', return_value=mocker.MagicMock(returncode=0))

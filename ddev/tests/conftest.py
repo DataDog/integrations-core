@@ -24,8 +24,6 @@ from ddev.utils.github import GitHubManager
 from ddev.utils.platform import Platform
 
 PLATFORM = Platform()
-OLD_PYTHON_VERSION = "3.11"
-NEW_PYTHON_VERSION = "3.12"
 
 
 class ClonedRepo:
@@ -172,11 +170,6 @@ def isolation() -> Generator[Path, None, None]:
 
 @pytest.fixture(scope='session')
 def local_clone(isolation, local_repo) -> Generator[ClonedRepo, None, None]:
-    '''
-    Clone integrations-core git repo.
-
-    This is being deprecated and removed, use empty_git_repo instead!
-    '''
     cloned_repo_path = isolation / local_repo.name
 
     PLATFORM.check_command_output(
@@ -187,8 +180,7 @@ def local_clone(isolation, local_repo) -> Generator[ClonedRepo, None, None]:
         PLATFORM.check_command_output(['git', 'config', 'user.email', 'foo@bar.baz'])
         PLATFORM.check_command_output(['git', 'config', 'commit.gpgsign', 'false'])
 
-    # We pin the clone of the repo used for testing to have reproducible tests.
-    cloned_repo = ClonedRepo(cloned_repo_path, 'f7f18ca567bd7712e08692f4e73104706d9942f3', 'ddev-testing')
+    cloned_repo = ClonedRepo(cloned_repo_path, 'origin/master', 'ddev-testing')
     cloned_repo.reset_branch()
 
     yield cloned_repo
@@ -196,11 +188,6 @@ def local_clone(isolation, local_repo) -> Generator[ClonedRepo, None, None]:
 
 @pytest.fixture
 def repository(local_clone, config_file) -> Generator[ClonedRepo, None, None]:
-    '''
-    Fake repository for testing.
-
-    This is being deprecated and removed, use fake_repo instead!
-    '''
     config_file.model.repos['core'] = str(local_clone.path)
     config_file.save()
 
@@ -209,167 +196,6 @@ def repository(local_clone, config_file) -> Generator[ClonedRepo, None, None]:
     finally:
         set_root('')
         local_clone.reset_branch()
-
-
-def write_file(folder, file, content):
-    folder.mkdir(exist_ok=True, parents=True)
-    file_path = folder / file
-    file_path.write_text(content)
-
-
-@pytest.fixture
-def empty_git_repo(tmp_path_factory):
-    '''
-    Initialize empty git repository to stand in for integrations-core.
-    '''
-    repo_path = Path(tmp_path_factory.mktemp('integrations-core'))
-    with repo_path.as_cwd():
-        PLATFORM.check_command_output(['git', 'init', str(repo_path)])
-        PLATFORM.check_command_output(['git', 'config', 'user.name', 'Foo Bar'])
-        PLATFORM.check_command_output(['git', 'config', 'user.email', 'foo@bar.baz'])
-        PLATFORM.check_command_output(['git', 'config', 'commit.gpgsign', 'false'])
-        PLATFORM.check_command_output(['touch', '.gitignore'])
-        PLATFORM.check_command_output(['git', 'add', '.'])
-        PLATFORM.check_command_output(['git', 'commit', '--message', 'let there be light'])
-
-    yield repo_path
-
-
-@pytest.fixture
-def fake_repo(empty_git_repo, config_file):
-    '''
-    Fake repository for testing.
-    '''
-    repo_path = empty_git_repo
-    repo = Repository('integrations-core', str(repo_path))
-
-    config_file.model.repos['core'] = str(repo.path)
-    config_file.save()
-
-    write_file(
-        repo_path / 'ddev' / 'src' / 'ddev' / 'repo',
-        'constants.py',
-        f"""# (C) Datadog, Inc. 2022-present
-# All rights reserved
-# Licensed under a 3-clause BSD style license (see LICENSE)
-CONFIG_DIRECTORY = '.ddev'
-NOT_SHIPPABLE = frozenset(['datadog_checks_dev', 'datadog_checks_tests_helper', 'ddev'])
-FULL_NAMES = {{
-    'core': 'integrations-core',
-    'extras': 'integrations-extras',
-    'marketplace': 'marketplace',
-    'agent': 'datadog-agent',
-}}
-
-# This is automatically maintained
-PYTHON_VERSION = '{OLD_PYTHON_VERSION}'
-""",
-    )
-
-    write_file(
-        repo_path / 'dummy',
-        'hatch.toml',
-        f"""[env.collectors.datadog-checks]
-
-[[envs.default.matrix]]
-python = ["2.7", "{OLD_PYTHON_VERSION}"]
-
-""",
-    )
-
-    write_file(
-        repo_path / 'dummy',
-        'metadata.csv',
-        """metric_name,metric_type,interval,unit_name,per_unit_name,description,orientation,integration,short_name,curated_metric
-dummy.metric,gauge,,,,description,0,dummy,,""",
-    )
-
-    for integration in ('dummy', 'datadog_checks_dependency_provider'):
-        write_file(
-            repo_path / integration,
-            'pyproject.toml',
-            f"""[project]
-    name = "dummy"
-    classifiers = [
-        "Development Status :: 5 - Production/Stable",
-        "Intended Audience :: Developers",
-        "Intended Audience :: System Administrators",
-        "License :: OSI Approved :: BSD License",
-        "Natural Language :: English",
-        "Operating System :: OS Independent",
-        "Programming Language :: Python :: 2.7",
-        "Programming Language :: Python :: {OLD_PYTHON_VERSION}",
-    ]
-    """,
-        )
-
-    write_file(
-        repo_path / 'logs_only',
-        'pyproject.toml',
-        f"""[project]
-    name = "dummy"
-    classifiers = [
-        "Development Status :: 5 - Production/Stable",
-        "Intended Audience :: Developers",
-        "Intended Audience :: System Administrators",
-        "License :: OSI Approved :: BSD License",
-        "Natural Language :: English",
-        "Operating System :: OS Independent",
-        "Programming Language :: Python :: 2.7",
-        "Programming Language :: Python :: {OLD_PYTHON_VERSION}",
-    ]
-    """,
-    )
-
-    write_file(
-        repo_path / '.github' / 'workflows',
-        'build-ddev.yml',
-        f"""name: build ddev
-env:
-  APP_NAME: ddev
-  PYTHON_VERSION: "{OLD_PYTHON_VERSION}"
-  PYOXIDIZER_VERSION: "0.24.0"
-""",
-    )
-
-    write_file(
-        repo_path / 'ddev',
-        'pyproject.toml',
-        f"""[tool.black]
-target-version = ["py{OLD_PYTHON_VERSION.replace('.', '')}"]
-
-[tool.ruff]
-target-version = "py{OLD_PYTHON_VERSION.replace('.', '')}"
-""",
-    )
-
-    write_file(
-        repo_path
-        / 'datadog_checks_dev'
-        / 'datadog_checks'
-        / 'dev'
-        / 'tooling'
-        / 'templates'
-        / 'integration'
-        / 'check'
-        / '{check_name}',
-        'pyproject.toml',
-        f"""[project]
-name = "dummy"
-classifiers = [
-    "Development Status :: 5 - Production/Stable",
-    "Intended Audience :: Developers",
-    "Intended Audience :: System Administrators",
-    "License :: OSI Approved :: BSD License",
-    "Natural Language :: English",
-    "Operating System :: OS Independent",
-    "Programming Language :: Python :: 2.7",
-    "Programming Language :: Python :: {OLD_PYTHON_VERSION}",
-]
-""",
-    )
-
-    yield repo
 
 
 @pytest.fixture(scope='session')

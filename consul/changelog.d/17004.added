@@ -1,0 +1,1 @@
+added configuration option to disable hosts from being created by `consul.net.node.*` metrics
