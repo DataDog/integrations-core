@@ -9,7 +9,7 @@ import traceback
 from copy import deepcopy
 
 import pytest
-
+import pdb
 from datadog_checks.dev import WaitFor, docker_run
 from datadog_checks.dev.conditions import CheckDockerLogs
 from datadog_checks.dev.docker import using_windows_containers
@@ -313,14 +313,17 @@ def dd_environment(full_e2e_config):
         ).is_ready()
 
     compose_file = os.path.join(HERE, os.environ["COMPOSE_FOLDER"], 'docker-compose.yaml')
+    pdb.set_trace()
     conditions = [WaitFor(sqlserver_can_connect, wait=3, attempts=10)]
 
     completion_message = 'INFO: setup.sql completed.'
     if os.environ["COMPOSE_FOLDER"] == 'compose-ha':
+        pdb.set_trace()
         completion_message = (
             'Always On Availability Groups connection with primary database established ' 'for secondary database'
         )
     if 'compose-high-cardinality' in os.environ["COMPOSE_FOLDER"]:
+        pdb.set_trace()
         # This env is a highly loaded database and is expected to take a while to setup.
         # This will wait about 8 minutes before timing out.
         conditions += [WaitFor(high_cardinality_env_is_ready, wait=5, attempts=90)]
@@ -328,4 +331,5 @@ def dd_environment(full_e2e_config):
     conditions += [CheckDockerLogs(compose_file, completion_message)]
 
     with docker_run(compose_file=compose_file, conditions=conditions, mount_logs=True, build=True, attempts=3):
+        pdb.set_trace()
         yield full_e2e_config, E2E_METADATA

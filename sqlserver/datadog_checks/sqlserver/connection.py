@@ -32,7 +32,7 @@ SUPPORT_LINK = "https://docs.datadoghq.com/database_monitoring/setup_sql_server/
 # used to specific azure AD access token, see the docs for more information on this attribute
 # https://learn.microsoft.com/en-us/sql/connect/odbc/using-azure-active-directory?view=sql-server-ver16
 SQL_COPT_SS_ACCESS_TOKEN = 1256
-
+COUNT = 0
 
 def split_sqlserver_host_port(host):
     """
@@ -274,12 +274,15 @@ class Connection(object):
         cs += ';' if cs != '' else ''
 
         self._connection_options_validation(db_key, db_name)
-
+        global COUNT
         try:
             if self.connector == 'adodbapi':
                 cs += self._conn_string_adodbapi(db_key, db_name=db_name)
                 # autocommit: true disables implicit transaction
+                
                 rawconn = adodbapi.connect(cs, {'timeout': self.timeout, 'autocommit': True})
+                COUNT +=1
+                logging.warning('Boris connection counter ', COUNT)
             else:
                 cs += self._conn_string_odbc(db_key, db_name=db_name)
                 if self.managed_auth_enabled:
@@ -289,8 +292,12 @@ class Connection(object):
                     rawconn = pyodbc.connect(
                         cs, timeout=self.timeout, autocommit=True, attrs_before={SQL_COPT_SS_ACCESS_TOKEN: token_struct}
                     )
+                    COUNT +=1
+                    logging.warning('Boris connection counter ', COUNT)
                 else:
                     rawconn = pyodbc.connect(cs, timeout=self.timeout, autocommit=True)
+                    COUNT +=1
+                    logging.warning('Boris connection counter ', COUNT)
                 rawconn.timeout = self.timeout
 
             self.service_check_handler(AgentCheck.OK, host, database, is_default=is_default)

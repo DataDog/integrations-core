@@ -7,7 +7,7 @@ import copy
 import functools
 import time
 from collections import defaultdict
-
+import logging
 import six
 from cachetools import TTLCache
 
@@ -708,6 +708,7 @@ class SQLServer(AgentCheck):
         return cls(cfg_inst, base_name, metric_type, column, self.log)
 
     def check(self, _):
+        logging.warning('Boris log')
         if self.do_check:
             # configure custom queries for the check
             if self._query_manager is None:
@@ -724,6 +725,7 @@ class SQLServer(AgentCheck):
             else:
                 self.collect_metrics()
             if self._config.autodiscovery and self._config.autodiscovery_db_service_check:
+                logging.warning('Boris: entering autodiscovery')
                 for db in self.databases:
                     if db.name != self.connection.DEFAULT_DATABASE:
                         try:
