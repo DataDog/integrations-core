@@ -38,6 +38,7 @@ class WaitFor(LazyFunction):
         last_result = None
         last_error = None
 
+
         for _ in range(self.attempts):
             try:
                 result = self.func(*self.args, **self.kwargs)

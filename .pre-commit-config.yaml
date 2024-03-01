@@ -1,0 +1,10 @@
+---
+repos:
+- repo: local
+  hooks:
+    - id: lint
+      name: Run linters
+      entry: ddev test changed -s
+      language: system
+      files: '.+\.py'
+      pass_filenames: false
