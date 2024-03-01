@@ -28,6 +28,7 @@ class MySQLConfig(object):
         self.additional_status = instance.get('additional_status', [])
         self.additional_variable = instance.get('additional_variable', [])
         self.connect_timeout = instance.get('connect_timeout', 10)
+        self.read_timeout = instance.get('read_timeout', 10)
         self.max_custom_queries = instance.get('max_custom_queries', DEFAULT_MAX_CUSTOM_QUERIES)
         self.charset = instance.get('charset')
         self.dbm_enabled = is_affirmative(instance.get('dbm', instance.get('deep_database_monitoring', False)))
@@ -72,7 +73,7 @@ class MySQLConfig(object):
             'collect_comments': is_affirmative(obfuscator_options_config.get('collect_comments', True)),
             # Config to enable/disable obfuscation of sql statements with go-sqllexer pkg
             # Valid values for this can be found at https://github.com/DataDog/datadog-agent/blob/main/pkg/obfuscate/obfuscate.go#L108
-            'obfuscation_mode': obfuscator_options_config.get('obfuscation_mode', ''),
+            'obfuscation_mode': obfuscator_options_config.get('obfuscation_mode', 'obfuscate_and_normalize'),
             'remove_space_between_parentheses': is_affirmative(
                 obfuscator_options_config.get('remove_space_between_parentheses', False)
             ),

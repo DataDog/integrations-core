@@ -7,6 +7,7 @@ by Integrations within tests.
 """
 import csv
 import inspect
+import json
 import os
 import platform
 import socket
@@ -137,6 +138,15 @@ def get_metadata_metrics():
         for row in csv.DictReader(f):
             metrics[row['metric_name']] = row
     return metrics
+
+
+def get_service_checks():
+    # Only called in tests of a check, so just go back one frame
+    root = find_check_root(depth=1)
+    service_checks_path = os.path.join(root, 'assets', 'service_checks.json')
+
+    with open(service_checks_path) as f:
+        return json.load(f)
 
 
 def get_hostname():

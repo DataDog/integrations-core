@@ -12,7 +12,7 @@ conf.yaml.example     @DataDog/documentation @DataDog/agent-integrations
 conf.yaml.default     @DataDog/documentation @DataDog/agent-integrations @DataDog/agent-metrics-logs
 auto_conf.yaml        @DataDog/documentation @DataDog/agent-integrations @DataDog/container-integrations
 manifest.json         @DataDog/documentation @DataDog/agent-integrations
-assets/               @DataDog/documentation @DataDog/agent-integrations
+**/assets             @DataDog/documentation @DataDog/agent-integrations
 
 # Checks base
 /datadog_checks_base/                                          @DataDog/agent-integrations
@@ -202,12 +202,23 @@ datadog_checks_base/datadog_checks/base/checks/windows/              @DataDog/wi
 /windows_performance_counters/                                       @DataDog/windows-agent @DataDog/agent-integrations
 /windows_performance_counters/*.md                                   @DataDog/windows-agent @DataDog/agent-integrations @DataDog/documentation
 /windows_performance_counters/manifest.json                          @DataDog/windows-agent @DataDog/agent-integrations @DataDog/documentation
+/windows_registry/                                                   @DataDog/windows-agent @DataDog/agent-integrations
+/windows_registry/*.md                                               @DataDog/windows-agent @DataDog/agent-integrations @DataDog/documentation
+/windows_registry/manifest.json                                      @DataDog/windows-agent @DataDog/agent-integrations @DataDog/documentation
 /windows_service/                                                    @DataDog/windows-agent @DataDog/agent-integrations
 /windows_service/*.md                                                @DataDog/windows-agent @DataDog/agent-integrations @DataDog/documentation
 /windows_service/manifest.json                                       @DataDog/windows-agent @DataDog/agent-integrations @DataDog/documentation
 /wmi_check/                                                          @DataDog/windows-agent @DataDog/agent-integrations
 /wmi_check/*.md                                                      @DataDog/windows-agent @DataDog/agent-integrations @DataDog/documentation
 /wmi_check/manifest.json                                             @DataDog/windows-agent @DataDog/agent-integrations @DataDog/documentation
+
+# SaaS Integrations
+/cisco_umbrella_dns/                                                 @DataDog/saas-integrations
+/cisco_umbrella_dns/*.md                                             @DataDog/saas-integrations @DataDog/documentation
+/cisco_umbrella_dns/manifest.json                                    @DataDog/saas-integrations @DataDog/documentation
+/cisco_duo/                                                          @DataDog/saas-integrations
+/cisco_duo/*.md                                                      @DataDog/saas-integrations @DataDog/documentation
+/cisco_duo/manifest.json                                             @DataDog/saas-integrations @DataDog/documentation
 
 # To keep Security up-to-date with changes to the signing tool.
 /datadog_checks_dev/datadog_checks/dev/tooling/signing.py             @DataDog/software-integrity-and-trust @DataDog/agent-integrations @trishankatdatadog
@@ -216,4 +227,7 @@ datadog_checks_base/datadog_checks/base/checks/windows/              @DataDog/wi
 docs/developer/process/integration-release.md                         @DataDog/software-integrity-and-trust @DataDog/agent-integrations @trishankatdatadog
 # As well as the pipelines.
 /.github/workflows/                                                   @DataDog/agent-integrations
-/.gitlab-ci.yml                                                       @DataDog/agent-integrations @trishankatdatadog
+/.gitlab-ci.yml                                                       @DataDog/agent-integrations
+/.gitlab/software_composition_analysis.yaml                           @DataDog/software-integrity-and-trust
+# Dev container
+/.devcontainer/                                                        @DataDog/agent-integrations @DataDog/container-integrations

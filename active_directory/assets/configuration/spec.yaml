@@ -18,9 +18,3 @@ files:
     - template: instances/pdh_legacy
       hidden: true
     - template: instances/default
-  - template: logs
-    example:
-    - type: file
-      path: /path/to/active_directory/file.log
-      source: ruby
-      service: <SERVICE_NAME>

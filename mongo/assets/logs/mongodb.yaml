@@ -1,51 +1,52 @@
 id: mongodb
 metric_id: mongodb
+backend_only: false
 facets:
-  - name: Database
-    source: log
+  - groups:
+      - Database
+    name: Database
     path: db.instance
-    groups:
-      - Database
-  - name: Operation Type
     source: log
+  - groups:
+      - Database
+    name: Operation Type
     path: db.operation
-    groups:
-      - Database
-  - name: Duration
     source: log
+  - facetType: range
+    groups:
+      - Measure
+    name: Duration
     path: duration
+    source: log
     type: double
-    facetType: range
     unit:
       family: time
       name: nanosecond
-    groups:
-      - Measure
-  - name: Client IP
-    source: log
-    path: network.client.ip
-    groups:
+  - groups:
       - Web Access
-  - name: '[Mongo] collection'
+    name: Client IP
+    path: network.client.ip
     source: log
+  - groups:
+      - Mongo
+    name: '[Mongo] collection'
     path: mongo.collection
-    groups:
-      - Mongo
-  - name: '[Mongo] PlanSummary Type'
     source: log
+  - groups:
+      - Mongo
+    name: '[Mongo] PlanSummary Type'
     path: mongo.planSummary.type
-    groups:
-      - Mongo
-  - name: '[Mongo] Query Type'
     source: log
+  - groups:
+      - Mongo
+    name: '[Mongo] Query Type'
     path: mongo.query.type
-    groups:
-      - Mongo
-  - name: '[Mongo] Context'
     source: log
-    path: mongo.context
-    groups:
+  - groups:
       - Mongo
+    name: '[Mongo] Context'
+    path: mongo.context
+    source: log
 pipeline:
   type: pipeline
   name: Mongodb

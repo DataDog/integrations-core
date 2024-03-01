@@ -1,0 +1,1 @@
+Add a method to get the service check defined in the `service_checks.json` file for a integration.

@@ -13,6 +13,7 @@ from datadog_checks.sqlserver.const import (
     AO_METRICS,
     AO_METRICS_PRIMARY,
     AO_METRICS_SECONDARY,
+    DATABASE_BACKUP_METRICS,
     DATABASE_FRAGMENTATION_METRICS,
     DATABASE_INDEX_METRICS,
     DATABASE_MASTER_FILES,
@@ -35,9 +36,9 @@ def get_local_driver():
     if ON_MACOS:
         return '/usr/local/lib/libtdsodbc.so'
     elif ON_WINDOWS:
-        return '{ODBC Driver 17 for SQL Server}'
+        return '{ODBC Driver 18 for SQL Server}'
     else:
-        return 'FreeTDS'
+        return '{ODBC Driver 18 for SQL Server}'
 
 
 HOST = get_docker_hostname()
@@ -83,9 +84,11 @@ EXPECTED_DEFAULT_METRICS = (
             DBM_MIGRATED_METRICS,
             INSTANCE_METRICS_DATABASE,
             DATABASE_METRICS,
+            DATABASE_BACKUP_METRICS,
             TEMPDB_FILE_SPACE_USAGE_METRICS,
         )
     ]
+    + DATABASE_INDEX_METRICS
     + SERVER_METRICS
     + EXPECTED_FILE_STATS_METRICS
 )
@@ -159,7 +162,7 @@ INSTANCE_SQL = INSTANCE_SQL_DEFAULTS.copy()
 INSTANCE_SQL.update(
     {
         'connector': 'odbc',
-        'driver': '{ODBC Driver 17 for SQL Server}',
+        'driver': '{ODBC Driver 18 for SQL Server}',
         'include_task_scheduler_metrics': True,
         'include_db_fragmentation_metrics': True,
         'include_fci_metrics': True,
@@ -238,7 +241,6 @@ OPERATION_TIME_METRICS = [
     'database_backup_metrics',
     'database_file_stats_metrics',
     'incr_fraction_metrics',
-    'db_index_usage_stats_metrics',
 ]
 
 OPERATION_TIME_METRIC_NAME = 'dd.sqlserver.operation.time'
@@ -269,19 +271,18 @@ def assert_metrics(
     if dbm_enabled:
         expected_metrics = [m for m in expected_metrics if m not in DBM_MIGRATED_METRICS_NAMES]
 
-    # remove index usage metrics, which require extra setup & will be tested separately
-    for m in DATABASE_INDEX_METRICS:
-        if m[0] in aggregator._metrics:
-            del aggregator._metrics[m[0]]
-
     if database_autodiscovery:
         # when autodiscovery is enabled, we should not double emit metrics,
         # so we should assert for these separately with the proper tags
         expected_metrics = [m for m in expected_metrics if m not in DB_PERF_COUNT_METRICS_NAMES]
+
         for dbname in dbs:
             tags = check_tags + ['database:{}'.format(dbname)]
             for mname in DB_PERF_COUNT_METRICS_NAMES:
                 aggregator.assert_metric(mname, hostname=hostname, tags=tags)
+    else:
+        # master does not have indexes so none of these metrics will be emitted
+        expected_metrics = [m for m in expected_metrics if m not in DATABASE_INDEX_METRICS]
     for mname in expected_metrics:
         assert hostname is not None, "hostname must be explicitly specified for all metrics"
         aggregator.assert_metric(mname, hostname=hostname)

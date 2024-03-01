@@ -1,5 +1,7 @@
+include:
+  - /.gitlab/software_composition_analysis.yaml
+
 variables:
-  REMINDER_IMAGE: 486234852809.dkr.ecr.us-east-1.amazonaws.com/ci/integrations-core:reminder
   TAGGER_IMAGE: 486234852809.dkr.ecr.us-east-1.amazonaws.com/ci/integrations-core:tagger
   VALIDATE_LOG_INTGS: 486234852809.dkr.ecr.us-east-1.amazonaws.com/ci/integrations-core:validate_log_intgs
   VALIDATE_AGENT_BUILD: 486234852809.dkr.ecr.us-east-1.amazonaws.com/ci/integrations-core:validate_agent_build
@@ -8,16 +10,6 @@ variables:
   TAGGER_NAME: ci.integrations-core
   NOTIFICATIONS_SLACK_CHANNEL: agent-integrations
   AGENT_BUILD_NOTIFICATIONS_SLACK_CHANNEL: agent-integrations-ops
-
-# Uncomment when/if we modify script to use Jira
-#
-# release-reminder:
-#   image: $REMINDER_IMAGE
-#   only:
-#     - master
-#   script:
-#     - ./.gitlab/reminder/release-reminder.sh 2>&1
-#   tags: [ "runner:main" ]
 
 stages:
   - build
@@ -179,6 +171,7 @@ release-auto:
   image: $TAGGER_IMAGE
   only:
     - master
+    - /^\d+\.\d+\.x$/
   except:
     - schedules
   script:
@@ -187,6 +180,7 @@ release-auto:
     # Prefix every line with a timestamp
     - ./.gitlab/tagger/tag-release.sh 2>&1 | ts "[%H:%M:%S %Z]  "
   tags: [ "runner:main" ]
+  needs: []
 
 release-manual:
   stage: release
@@ -209,26 +203,11 @@ release-manual:
           ./.gitlab/tagger/build-packages.sh
       fi
   tags: [ "runner:main" ]
-
-reminder-image-builder:
-  stage: build
-  image: 486234852809.dkr.ecr.us-east-1.amazonaws.com/docker:18.03.1
-  only:
-    changes:
-      - .gitlab/reminder/**/*
-      - .gitlab-ci.yml
-    refs:
-      - master
-  script:
-    - docker build --tag $REMINDER_IMAGE ./.gitlab/reminder/
-    - docker images $REMINDER_IMAGE
-    - docker push $REMINDER_IMAGE
-  except: [ tags, schedules ]
-  tags: [ "runner:docker" ]
+  needs: []
 
 tagger-image-builder:
   stage: build
-  image: 486234852809.dkr.ecr.us-east-1.amazonaws.com/docker:18.03.1
+  image: 486234852809.dkr.ecr.us-east-1.amazonaws.com/docker:24.0.4-gbi-focal
   only:
     changes:
       - .gitlab/tagger/**/*
@@ -237,15 +216,13 @@ tagger-image-builder:
     refs:
       - master
   script:
-    - docker build --tag $TAGGER_IMAGE -f .gitlab/tagger/Dockerfile .
-    - docker images $TAGGER_IMAGE
-    - docker push $TAGGER_IMAGE
+    - docker buildx build --tag $TAGGER_IMAGE -f .gitlab/tagger/Dockerfile . --push
   except: [ tags, schedules ]
-  tags: [ "runner:docker" ]
+  tags: [ "arch:amd64" ]
 
 validate-log-intgs-builder:
   stage: build
-  image: 486234852809.dkr.ecr.us-east-1.amazonaws.com/docker:18.03.1
+  image: 486234852809.dkr.ecr.us-east-1.amazonaws.com/docker:24.0.4-gbi-focal
   only:
     changes:
       - .gitlab/validate-logs-intgs/**/*
@@ -254,14 +231,12 @@ validate-log-intgs-builder:
       - master
   script:
     - cd .gitlab/validate-logs-intgs/
-    - docker build --tag $VALIDATE_LOG_INTGS .
-    - docker images $VALIDATE_LOG_INTGS
-    - docker push $VALIDATE_LOG_INTGS
-  tags: [ "runner:docker" ]
+    - docker buildx build --tag $VALIDATE_LOG_INTGS . --push
+  tags: [ "arch:amd64" ]
 
 validate-agent-build-builder:
   stage: build
-  image: 486234852809.dkr.ecr.us-east-1.amazonaws.com/docker:18.03.1
+  image: 486234852809.dkr.ecr.us-east-1.amazonaws.com/docker:24.0.4-gbi-focal
   only:
     changes:
       - .gitlab/validate-agent-build/**/*
@@ -271,7 +246,5 @@ validate-agent-build-builder:
   script:
     - cd .gitlab/validate-agent-build/
     - git clone https://gitlab-ci-token:${CI_JOB_TOKEN}@gitlab.ddbuild.io/Datadog/devtools.git --depth 1
-    - docker build --tag $VALIDATE_AGENT_BUILD .
-    - docker images $VALIDATE_AGENT_BUILD
-    - docker push $VALIDATE_AGENT_BUILD
-  tags: [ "runner:docker" ]
+    - docker buildx build --tag $VALIDATE_AGENT_BUILD . --push
+  tags: [ "arch:amd64" ]

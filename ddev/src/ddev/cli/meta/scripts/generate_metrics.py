@@ -50,19 +50,27 @@ def generate_metrics(app: Application, integration: str, api_url: str, api_key: 
     configuration.server_index = 1
     configuration.server_variables["name"] = api_url
 
+    # Update this map to avoid generating random values for a given metric
+    overriden_values = {
+        'ray.worker.register_time.sum': [10, 9, 8],
+    }
+
     with ApiClient(configuration) as api_client:
         api_instance = MetricsApi(api_client)
+        loop = 0
 
         while True:
             series = []
             for metric in intg.metrics:
-                value = random.randint(0, 100)
+                value = (
+                    overriden_values[metric.metric_name][loop % len(overriden_values[metric.metric_name])]
+                    if metric.metric_name in overriden_values
+                    else random.randint(0, 100)
+                )
                 type = (
                     MetricIntakeType.GAUGE
                     if metric.metric_type == 'gauge'
-                    else MetricIntakeType.COUNT
-                    if metric.metric_type == 'counter'
-                    else MetricIntakeType.UNSPECIFIED
+                    else MetricIntakeType.COUNT if metric.metric_type == 'counter' else MetricIntakeType.UNSPECIFIED
                 )
                 app.display_info(f"Metric {metric.metric_name} with value {value} and type {type}")
 
@@ -90,3 +98,4 @@ def generate_metrics(app: Application, integration: str, api_url: str, api_key: 
 
             app.display_info("Sleeping for 10 seconds...")
             sleep(10)
+            loop += 1

@@ -28,7 +28,7 @@ COMMON_AND_MAIN_CHECK_METRICS = dict(COMMON_METRICS, **DBM_MIGRATED_METRICS)
     ],
 )
 def test_aurora_replication_metrics(pg_instance, version, is_aurora, expected_metrics):
-    config = PostgresConfig(pg_instance)
+    config = PostgresConfig(instance=pg_instance)
     cache = PostgresMetricsCache(config)
     replication_metrics = cache.get_replication_metrics(version, is_aurora)
     assert replication_metrics == expected_metrics
@@ -50,7 +50,7 @@ def test_dbm_enabled_conn_metric(pg_instance, version, is_dbm_enabled, expected_
     pg_instance['dbm'] = is_dbm_enabled
     pg_instance['collect_resources'] = {'enabled': False}
     pg_instance['collect_database_size_metrics'] = False
-    config = PostgresConfig(pg_instance)
+    config = PostgresConfig(instance=pg_instance)
     cache = PostgresMetricsCache(config)
     instance_metrics = cache.get_instance_metrics(version)
     assert instance_metrics['metrics'] == expected_metrics

@@ -91,6 +91,10 @@ integration/cilium:
 - cilium/**/*
 integration/cisco_aci:
 - cisco_aci/**/*
+integration/cisco_duo:
+- cisco_duo/**/*
+integration/cisco_umbrella_dns:
+- cisco_umbrella_dns/**/*
 integration/citrix_hypervisor:
 - citrix_hypervisor/**/*
 integration/clickhouse:
@@ -163,6 +167,8 @@ integration/flink:
 - flink/**/*
 integration/fluentd:
 - fluentd/**/*
+integration/fluxcd:
+- fluxcd/**/*
 integration/foundationdb:
 - foundationdb/**/*
 integration/gearmand:
@@ -471,6 +477,8 @@ integration/wincrashdetect:
 - wincrashdetect/**/*
 integration/windows_performance_counters:
 - windows_performance_counters/**/*
+integration/windows_registry:
+- windows_registry/**/*
 integration/windows_service:
 - windows_service/**/*
 integration/winkmem:
@@ -479,8 +487,9 @@ integration/wmi_check:
 - wmi_check/**/*
 integration/yarn:
 - yarn/**/*
+integration/zeek:
+- zeek/**/*
 integration/zk:
 - zk/**/*
 release:
-- requirements-agent-release.txt
 - '*/__about__.py'

@@ -40,7 +40,6 @@ V2_TO_V1_MAP = JSONDict(
         "/author/homepage": "/author/homepage",
         "/author/name": "/author/name",
         "/author/support_email": "/maintainer",
-        "/oauth": {},
         "/assets": {},
         "/assets/integration": {},
         "/assets/integration/source_type_name": "/display_name",

@@ -6,7 +6,7 @@ import pytest
 
 from datadog_checks.postgres.util import QUERY_PG_REPLICATION_SLOTS_STATS
 
-from .common import DB_NAME, HOST, _iterate_metric_name, assert_metric_at_least
+from .common import DB_NAME, HOST, _get_expected_tags, _iterate_metric_name, assert_metric_at_least
 from .utils import requires_over_10, requires_over_14
 
 pytestmark = [pytest.mark.integration, pytest.mark.usefixtures('dd_environment')]
@@ -34,29 +34,24 @@ def test_physical_replication_slots(aggregator, integration_check, pg_instance):
     #  phys_3           | physical  | t         | t      |        344 |      | 0/2000028
 
     # Nothing reported for phys_1
-    expected_phys2_tags = pg_instance['tags'] + [
-        'port:{}'.format(pg_instance['port']),
+    base_tags = _get_expected_tags(check, pg_instance)
+    expected_phys2_tags = base_tags + [
         'slot_name:phys_2',
         'slot_persistence:permanent',
         'slot_state:inactive',
         'slot_type:physical',
-        'dd.internal.resource:database_instance:{}'.format(check.resolved_hostname),
     ]
-    expected_phys3_tags = pg_instance['tags'] + [
-        'port:{}'.format(pg_instance['port']),
+    expected_phys3_tags = base_tags + [
         'slot_name:phys_3',
         'slot_persistence:temporary',
         'slot_state:active',
         'slot_type:physical',
-        'dd.internal.resource:database_instance:{}'.format(check.resolved_hostname),
     ]
-    expected_repslot_tags = pg_instance['tags'] + [
-        'port:{}'.format(pg_instance['port']),
+    expected_repslot_tags = base_tags + [
         'slot_name:replication_slot',
         'slot_persistence:permanent',
         'slot_state:active',
         'slot_type:physical',
-        'dd.internal.resource:database_instance:{}'.format(check.resolved_hostname),
     ]
 
     assert_metric_at_least(
@@ -93,13 +88,12 @@ def test_logical_replication_slots(aggregator, integration_check, pg_instance):
 
     check.check(pg_instance)
 
-    expected_tags = pg_instance['tags'] + [
-        'port:{}'.format(pg_instance['port']),
+    base_tags = _get_expected_tags(check, pg_instance)
+    expected_tags = base_tags + [
         'slot_name:logical_slot',
         'slot_persistence:permanent',
         'slot_state:inactive',
         'slot_type:logical',
-        'dd.internal.resource:database_instance:{}'.format(check.resolved_hostname),
     ]
     # Both should be in the past
     assert_metric_at_least(
@@ -123,12 +117,10 @@ def test_replication_slot_stats(aggregator, integration_check, pg_instance):
     check = integration_check(pg_instance)
     check.check(pg_instance)
 
-    expected_tags = pg_instance['tags'] + [
-        'port:{}'.format(pg_instance['port']),
+    expected_tags = _get_expected_tags(check, pg_instance) + [
         'slot_name:logical_slot',
         'slot_state:inactive',
         'slot_type:logical',
-        'dd.internal.resource:database_instance:{}'.format(check.resolved_hostname),
     ]
     for metric_name in _iterate_metric_name(QUERY_PG_REPLICATION_SLOTS_STATS):
         aggregator.assert_metric(metric_name, count=1, tags=expected_tags)

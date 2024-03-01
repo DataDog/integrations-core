@@ -17,7 +17,7 @@ from datadog_checks.base.utils.db.utils import DBMAsyncJob, obfuscate_sql_with_m
 from datadog_checks.base.utils.serialization import json
 from datadog_checks.base.utils.tracking import tracked_method
 
-from .util import DatabaseConfigurationError, get_truncation_state, warning_with_tags
+from .util import DatabaseConfigurationError, connect_with_autocommit, get_truncation_state, warning_with_tags
 
 try:
     import datadog_agent
@@ -129,7 +129,11 @@ class MySQLActivity(DBMAsyncJob):
     def run_job(self):
         # type: () -> None
         # Detect a database misconfiguration by checking if `events-waits-current` is enabled.
-        if not self._check.events_wait_current_enabled:
+        if self._check.events_wait_current_enabled is None:
+            self._log.debug(
+                'Waiting for events_waits_current availability to be determined by the check, skipping run.'
+            )
+        if self._check.events_wait_current_enabled is False:
             self._check.record_warning(
                 DatabaseConfigurationError.events_waits_current_not_enabled,
                 warning_with_tags(
@@ -268,7 +272,7 @@ class MySQLActivity(DBMAsyncJob):
         pymysql connections are not thread safe, so we can't reuse the same connection from the main check.
         """
         if not self._db:
-            self._db = pymysql.connect(**self._connection_args)
+            self._db = connect_with_autocommit(**self._connection_args)
         return self._db
 
     def _close_db_conn(self):

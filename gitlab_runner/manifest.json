@@ -27,7 +27,6 @@
     "homepage": "https://www.datadoghq.com",
     "sales_email": "info@datadoghq.com"
   },
-  "oauth": {},
   "assets": {
     "integration": {
       "source_type_name": "Gitlab Runner",
@@ -48,7 +47,9 @@
       "process_signatures": [
         "gitlab-runner",
         "gitlab-ci-multi-runner"
-      ]
+      ],
+      "source_type_id": 10028,
+      "auto_install": true
     },
     "logs": {
       "source": "gitlab_runner"

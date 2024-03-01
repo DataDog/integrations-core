@@ -1,192 +1,193 @@
 id: pan.firewall
 metric_id: pan-firewall
+backend_only: false
 facets:
-  - name: Event Name
-    source: log
+  - groups:
+      - Event
+    name: Event Name
     path: evt.name
-    groups:
-      - Event
-  - name: Event Outcome
     source: log
+  - groups:
+      - Event
+    name: Event Outcome
     path: evt.outcome
-    groups:
-      - Event
-  - name: Browser
     source: log
+  - groups:
+      - Web Access
+    name: Browser
     path: http.useragent_details.browser.family
-    groups:
-      - Web Access
-  - name: Device
     source: log
+  - groups:
+      - Web Access
+    name: Device
     path: http.useragent_details.device.family
-    groups:
-      - Web Access
-  - name: OS
     source: log
+  - groups:
+      - Web Access
+    name: OS
     path: http.useragent_details.os.family
-    groups:
-      - Web Access
-  - name: City Name
     source: log
+  - groups:
+      - Geoip
+    name: City Name
     path: network.client.geoip.city.name
-    groups:
-      - Geoip
-  - name: Continent Code
     source: log
+  - groups:
+      - Geoip
+    name: Continent Code
     path: network.client.geoip.continent.code
-    groups:
-      - Geoip
-  - name: Continent Name
     source: log
+  - groups:
+      - Geoip
+    name: Continent Name
     path: network.client.geoip.continent.name
-    groups:
-      - Geoip
-  - name: Country ISO Code
     source: log
+  - groups:
+      - Geoip
+    name: Country ISO Code
     path: network.client.geoip.country.iso_code
-    groups:
-      - Geoip
-  - name: Country Name
     source: log
+  - groups:
+      - Geoip
+    name: Country Name
     path: network.client.geoip.country.name
-    groups:
-      - Geoip
-  - name: Subdivision ISO Code
     source: log
+  - groups:
+      - Geoip
+    name: Subdivision ISO Code
     path: network.client.geoip.subdivision.iso_code
-    groups:
-      - Geoip
-  - name: Subdivision Name
     source: log
+  - groups:
+      - Geoip
+    name: Subdivision Name
     path: network.client.geoip.subdivision.name
-    groups:
-      - Geoip
-  - name: Client IP
     source: log
+  - groups:
+      - Web Access
+    name: Client IP
     path: network.client.ip
-    groups:
-      - Web Access
-  - name: Client Port
     source: log
+  - groups:
+      - Web Access
+    name: Client Port
     path: network.client.port
-    groups:
-      - Web Access
-  - name: Destination IP
     source: log
+  - groups:
+      - Web Access
+    name: Destination IP
     path: network.destination.ip
-    groups:
-      - Web Access
-  - name: Destination Port
     source: log
+  - groups:
+      - Web Access
+    name: Destination Port
     path: network.destination.port
-    groups:
-      - Web Access
-  - name: User ID
     source: log
-    path: usr.id
-    groups:
+  - groups:
       - User
-  - name: Type
+    name: User ID
+    path: usr.id
     source: log
-    path: type
-    groups:
+  - groups:
       - Event
-  - name: Sub Type
+    name: Type
+    path: type
     source: log
+  - groups:
+      - PAN Firewall
+    name: Sub Type
     path: subtype
-    groups:
-      - PAN Firewall
-  - name: Module
     source: log
+  - groups:
+      - PAN Firewall
+    name: Module
     path: module
-    groups:
-      - PAN Firewall
-  - name: Source Zone
     source: log
+  - groups:
+      - PAN Firewall
+    name: Source Zone
     path: source_zone
-    groups:
-      - PAN Firewall
-  - name: Destination Zone
     source: log
+  - groups:
+      - PAN Firewall
+    name: Destination Zone
     path: destination_zone
+    source: log
+  - facetType: range
     groups:
       - PAN Firewall
-  - name: Repeat Count
-    source: log
+    name: Repeat Count
     path: repeatcnt
-    type: double
-    facetType: range
-    groups:
-      - PAN Firewall
-  - name: Category
     source: log
+    type: double
+  - groups:
+      - PAN Firewall
+    name: Category
     path: category
-    groups:
-      - PAN Firewall
-  - name: Severity
     source: log
+  - groups:
+      - PAN Firewall
+    name: Severity
     path: severity
-    groups:
-      - PAN Firewall
-  - name: Virtual System Name
     source: log
+  - groups:
+      - PAN Firewall
+    name: Virtual System Name
     path: vsys_name
-    groups:
-      - PAN Firewall
-  - name: Device Name
     source: log
+  - groups:
+      - PAN Firewall
+    name: Device Name
     path: device_name
-    groups:
-      - PAN Firewall
-  - name: Network Bytes Read
     source: log
+  - facetType: range
+    groups:
+      - Web Access
+    name: Network Bytes Read
     path: network.bytes_read
+    source: log
     type: double
-    facetType: range
     unit:
       family: bytes
       name: byte
+  - facetType: range
     groups:
       - Web Access
-  - name: Bytes Written
-    source: log
+    name: Bytes Written
     path: network.bytes_written
+    source: log
     type: double
-    facetType: range
     unit:
       family: bytes
       name: byte
+  - facetType: range
     groups:
       - Web Access
-  - name: Packets Sent
-    source: log
+    name: Packets Sent
     path: pkts_sent
+    source: log
     type: double
-    facetType: range
+  - facetType: range
     groups:
       - Web Access
-  - name: Packets Recieved
-    source: log
+    name: Packets Recieved
     path: pkts_received
+    source: log
     type: double
-    facetType: range
-    groups:
-      - Web Access
-  - name: Authentication Policy
-    source: log
+  - groups:
+      - PAN Firewall
+    name: Authentication Policy
     path: authpolicy
-    groups:
-      - PAN Firewall
-  - name: Server Profile
     source: log
+  - groups:
+      - PAN Firewall
+    name: Server Profile
     path: serverprofile
-    groups:
-      - PAN Firewall
-  - name: Security Rule
     source: log
-    path: rule
-    groups:
+  - groups:
       - PAN Firewall
+    name: Security Rule
+    path: rule
+    source: log
 pipeline:
   type: pipeline
   name: Palo Alto Networks Firewall

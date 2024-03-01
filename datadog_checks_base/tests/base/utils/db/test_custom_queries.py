@@ -226,3 +226,38 @@ class TestCustomQueries:
         aggregator.assert_metric('test.statement.baz', count=0, metric_type=aggregator.GAUGE, tags=['test:bar'])
 
         aggregator.assert_all_metrics_covered()
+
+    @pytest.mark.parametrize(
+        "metric_prefix",
+        [
+            pytest.param(None, id='no_prefix'),
+            pytest.param('custom_prefix', id='with_prefix'),
+        ],
+    )
+    def test_metric_prefix(self, aggregator, metric_prefix):
+        check = AgentCheck(
+            'test',
+            {
+                'global_custom_queries': [
+                    {
+                        'metric_prefix': metric_prefix,
+                        'query': 'foo',
+                        'columns': [{'name': 'test.foo', 'type': 'gauge'}],
+                        'tags': ['test:bar'],
+                    },
+                ],
+            },
+            [{}],
+        )
+        check.__NAMESPACE__ = 'test'
+        query_manager = create_query_manager(
+            check=check,
+            executor=mock_executor([[1]]),
+            tags=['test:foo'],
+        )
+        query_manager.compile_queries()
+        query_manager.execute()
+
+        metric_name = '{}.test.foo'.format(metric_prefix) if metric_prefix else 'test.test.foo'
+        aggregator.assert_metric(metric_name, 1, metric_type=aggregator.GAUGE, tags=['test:foo', 'test:bar'])
+        aggregator.assert_all_metrics_covered()

@@ -1,4 +1,4 @@
-# Datadog Agent Integrations - Core
+# Datadog Integrations - Core
 
 | | |
 | --- | --- |
@@ -6,11 +6,11 @@
 | Docs | [![Docs - Release][19]][20] |
 | Meta | [![Hatch project][26]][27] [![Linting - Ruff][24]][25] [![Code style - black][21]][22] [![Typing - Mypy][28]][29] [![License - BSD-3-Clause][30]][31] |
 
-This repository contains the Agent Integrations that Datadog officially develops and supports.
+This repository contains open source integrations that Datadog officially develops and supports.
 To add a new integration, please see the [Integrations Extras][5] repository and the
 [accompanying documentation][6].
 
-The [Datadog Agent][7] packages are equipped with all the Integrations from this
+The [Datadog Agent][7] packages are equipped with all the Agent integrations from this
 repository, so to get started using them, you can simply [install the Agent][8]
 for your operating system. The [AGENT_CHANGELOG](AGENT_CHANGELOG.md) file shows
 which Integrations have been updated in each Agent version.

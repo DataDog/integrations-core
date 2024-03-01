@@ -19,7 +19,7 @@ from datadog_checks.base.utils.db.utils import DBMAsyncJob, default_json_event_e
 from datadog_checks.base.utils.serialization import json
 from datadog_checks.base.utils.tracking import tracked_method
 
-from .util import DatabaseConfigurationError, warning_with_tags
+from .util import DatabaseConfigurationError, connect_with_autocommit, warning_with_tags
 
 try:
     import datadog_agent
@@ -97,7 +97,7 @@ class MySQLStatementMetrics(DBMAsyncJob):
         :return:
         """
         if not self._db:
-            self._db = pymysql.connect(**self._connection_args)
+            self._db = connect_with_autocommit(**self._connection_args)
         return self._db
 
     def _close_db_conn(self):
@@ -116,7 +116,10 @@ class MySQLStatementMetrics(DBMAsyncJob):
     def collect_per_statement_metrics(self):
         # Detect a database misconfiguration by checking if the performance schema is enabled since mysql
         # just returns no rows without errors if the performance schema is disabled
-        if not self._check.performance_schema_enabled:
+        if self._check.performance_schema_enabled is None:
+            self.log.debug('Waiting for performance schema availability to be determined by the check, skipping run.')
+            return
+        if self._check.performance_schema_enabled is False:
             self._check.record_warning(
                 DatabaseConfigurationError.performance_schema_not_enabled,
                 warning_with_tags(

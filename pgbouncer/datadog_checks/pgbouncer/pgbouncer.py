@@ -101,7 +101,7 @@ class PgBouncer(AgentCheck):
 
                             tags = list(self.tags)
                             tags += ["%s:%s" % (tag, row[column]) for (column, tag) in descriptors if column in row]
-                            for (column, (name, reporter)) in metrics:
+                            for column, (name, reporter) in metrics:
                                 if column in row:
                                     value = row[column]
                                     if column in ['connect_time', 'request_time']:

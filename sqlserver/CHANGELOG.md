@@ -2,6 +2,80 @@
 
 <!-- towncrier release notes start -->
 
+## 17.0.1 / 2024-02-23
+
+***Fixed***:
+
+* Deal with absence of sys.database_files SpaceUsed attribute on Azure SQL Servers ([#16910](https://github.com/DataDog/integrations-core/pull/16910))
+
+## 17.0.0 / 2024-02-16
+
+***Removed***:
+
+* Disables SQL Server metrics on Azure SQL Database instances that rely on cross-database queries. The disabled metrics are:
+
+  * sqlserver.tempdb.file_space_usage.free_space
+  * sqlserver.tempdb.file_space_usage.version_store_space
+  * sqlserver.tempdb.file_space_usage.internal_object_space
+  * sqlserver.tempdb.file_space_usage.user_object_space
+  * sqlserver.tempdb.file_space_usage.mixed_extent_space
+  * sqlserver.database.backup_count ([#16658](https://github.com/DataDog/integrations-core/pull/16658))
+
+***Added***:
+
+* [DBMON-3271] DBM integrations now defaulted to use new go-sqllexer pkg to obfuscate sql statements ([#16681](https://github.com/DataDog/integrations-core/pull/16681))
+* Bump dependencies ([#16858](https://github.com/DataDog/integrations-core/pull/16858))
+
+***Fixed***:
+
+* Improve performance of index_usage_stats query, set default collection interval to 5 minutes and allow interval to be customized. ([#16645](https://github.com/DataDog/integrations-core/pull/16645))
+* Require base check that has fix for null characters in query strings ([#16750](https://github.com/DataDog/integrations-core/pull/16750))
+
+## 16.0.2 / 2024-02-23
+
+***Fixed***:
+
+* Deal with absence of sys.database_files SpaceUsed attribute on Azure SQL Servers ([#16910](https://github.com/DataDog/integrations-core/pull/16910))
+
+## 16.0.1 / 2024-02-07 / Agent 7.51.0
+
+***Fixed***:
+
+* [DBMON-3495] Replace embedded null characters with empty string in query text ([#16742](https://github.com/DataDog/integrations-core/pull/16742))
+
+## 16.0.0 / 2024-01-05
+
+***Removed***:
+
+* remove pyro4 and serpent dependencies ([#16269](https://github.com/DataDog/integrations-core/pull/16269))
+
+***Changed***:
+
+* Always use the database instance's resolved hostname for metrics regardless of whether dbm is enabled or not. For non-dbm customers, this change
+   will result in the host tag having a different value than before. It is possible that dashboards and monitors using the integration's metrics will need to be updated if they relied on the faulty host tagging. ([#16207](https://github.com/DataDog/integrations-core/pull/16207))
+
+***Added***:
+
+* Bump the Python version from py3.9 to py3.11 ([#15997](https://github.com/DataDog/integrations-core/pull/15997))
+* Add stolen memory performance counter ([#16220](https://github.com/DataDog/integrations-core/pull/16220))
+* Collect sqlserver.database.files.space_used, and sqlserver.database.is_read_only/is_in_standby metrics. ([#16419](https://github.com/DataDog/integrations-core/pull/16419))
+* add new obfuscator options to customize SQL obfuscation and normaliza… ([#16429](https://github.com/DataDog/integrations-core/pull/16429))
+* Add ODBC driver support for the SQL Server agent ([#16431](https://github.com/DataDog/integrations-core/pull/16431))
+* [DBMON-3197] add config option to set character limit of stored procedure text ([#16462](https://github.com/DataDog/integrations-core/pull/16462))
+* Adds whether a SPID is a user or system process to DBM activity events. ([#16465](https://github.com/DataDog/integrations-core/pull/16465))
+
+***Fixed***:
+
+* [DBMON-3197] ensure accurate collection of query activity with statement when stored procedure is failed to obfuscate ([#16455](https://github.com/DataDog/integrations-core/pull/16455))
+* [DBMON-3220] skip reporting SqlFractionMetric when base_name is None ([#16469](https://github.com/DataDog/integrations-core/pull/16469))
+
+## 15.2.1 / 2023-12-28 / Agent 7.50.2
+
+***Fixed***:
+
+* Revert "[DBMON-2989] report sql obfuscation error count (#15990)" ([#16439](https://github.com/DataDog/integrations-core/pull/16439))
+* fix unexpected exception when reporting sqlserver statements obfuscate xml plan error ([#16461](https://github.com/DataDog/integrations-core/pull/16461))
+
 ## 15.2.0 / 2023-11-10 / Agent 7.50.0
 
 ***Added***:

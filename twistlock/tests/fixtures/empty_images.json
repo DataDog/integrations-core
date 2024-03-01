@@ -1,0 +1,1135 @@
+[
+    {
+        "_id": "sha256:823f14d29ccab07123f98a8e52459477703d23412572d15beceaaa84ec80b2b0",
+        "hostname": "",
+        "scanTime": "2019-02-14T16:14:15.843Z",
+        "info": {
+            "image": {
+                "created": "0001-01-01T00:00:00Z"
+            },
+            "history": [
+                {
+                    "created": 1536704390,
+                    "instruction": "ADD file:25c10b1d1b41d46a1827ad0b0d2389c24df6d31430005ff4e9a2d84ea23ebd42 in / ",
+                    "sizeBytes": 4413370,
+                    "id": "<missing>"
+                },
+                {
+                    "created": 1536704390,
+                    "instruction": "CMD [\"/bin/sh\"]",
+                    "id": "<missing>"
+                },
+                {
+                    "created": 1544662549,
+                    "instruction": "RUN apk update && apk add ca-certificates mongodb>='3.6.5-r0' mongodb-tools 'musl>=1.1.19-r10' 'busybox>=1.28.4-r0' &&     apk del apk-tools && rm -rf /var/cache/apk/*",
+                    "sizeBytes": 251558986,
+                    "id": "<missing>"
+                },
+                {
+                    "created": 1544662549,
+                    "instruction": "RUN mkdir -p /app/www",
+                    "id": "<missing>"
+                },
+                {
+                    "created": 1544662549,
+                    "instruction": "WORKDIR /app",
+                    "id": "<missing>"
+                },
+                {
+                    "created": 1544662553,
+                    "instruction": "COPY dir:936eda1f437fa005793c38c23a73ecce6b6a54f79db3278dc9e6596081e00f72 in /app/www/ ",
+                    "sizeBytes": 329096314,
+                    "id": "<missing>"
+                },
+                {
+                    "created": 1544662553,
+                    "instruction": "COPY multi:b1752b29bbe76be06672121a042a683c5401b1bce7bff0bc9f6b0a4ba577e0f6 in /var/lib/twistlock/scripts/ ",
+                    "sizeBytes": 50365,
+                    "id": "<missing>"
+                },
+                {
+                    "created": 1544662556,
+                    "instruction": "RUN mv /app/www/server /app/ &&     mkdir /data /images; mv /app/www/twistlock_defender_windows.zip /app/www/twistlock_defender.tar.gz /app/www/twistlock_defender_server.tar.gz /images/ &&     mv /app/www/libtw_serverless.so /app/www/serverless.node /app/www/twistcli /app/www/openscap.tar.gz /app/www/cve-descriptions.json /app/www/cve.json /app/www/cve-windows.json /app/www/stats.json /data/ &&     rm -rf /etc/profile /etc/profile.d &&     find /usr/bin/mongo* -type f -not -name \"mongo\" -not -name \"mongod\" -not -name \"mongodump\" -not -name \"mongorestore\" -delete &&     adduser -D -H twistlock -u 2674 &&     chown -R twistlock /data/ &&     chmod u+xrw -R /data/",
+                    "sizeBytes": 263305585,
+                    "id": "<missing>"
+                },
+                {
+                    "created": 1544662556,
+                    "instruction": "COPY file:282f603db17d0f0daaa08478826f16213c103a8fbd8f467ecbc418029692808d in /data/twistlock-console.service ",
+                    "sizeBytes": 366,
+                    "id": "<missing>"
+                },
+                {
+                    "created": 1544662556,
+                    "instruction": "EXPOSE 8081",
+                    "id": "<missing>"
+                },
+                {
+                    "created": 1544662556,
+                    "instruction": "VOLUME [/var/run /tmp /var/log /var/lib/twistlock /data/]",
+                    "id": "<missing>"
+                },
+                {
+                    "created": 1544662557,
+                    "instruction": "HEALTHCHECK &{[\"CMD-SHELL\" \"/app/server healthcheck\"] \"20m0s\" \"10s\" \"0s\" '\\x03'}",
+                    "id": "<missing>"
+                },
+                {
+                    "created": 1544662557,
+                    "instruction": "LABEL twistlock.model.name=twistlock",
+                    "id": "<missing>"
+                },
+                {
+                    "tags": [
+                        "twistlock/private:console_18_11_103"
+                    ],
+                    "created": 1544662557,
+                    "instruction": "ENTRYPOINT [\"/app/server\"]",
+                    "id": "sha256:823f14d29ccab07123f98a8e52459477703d23412572d15beceaaa84ec80b2b0"
+                }
+            ],
+            "id": "sha256:823f14d29ccab07123f98a8e52459477703d23412572d15beceaaa84ec80b2b0",
+            "complianceVulnerabilities": null,
+            "allCompliance": {},
+            "cveVulnerabilities": [
+                {
+                    "text": "",
+                    "id": 46,
+                    "severity": "high",
+                    "cvss": 7.5,
+                    "status": "",
+                    "cve": "CVE-2018-20679",
+                    "cause": "",
+                    "description": "An issue was discovered in BusyBox before 1.30.0. An out of bounds read in udhcp components (consumed by the DHCP server, client, and relay) allows a remote attacker to leak sensitive information from the stack by sending a crafted DHCP message. This is related to verification in udhcp_get_option() in networking/udhcp/common.c that 4-byte options are indeed 4 bytes.",
+                    "title": "",
+                    "vecStr": "CVSS:3.0/AV:N/AC:L/PR:N/UI:N/S:U/C:H/I:N/A:N",
+                    "exploit": "",
+                    "riskFactors": {
+                        "Attack complexity: low": {},
+                        "Attack vector: network": {},
+                        "High severity": {},
+                        "Recent vulnerability": {}
+                    },
+                    "link": "https://web.nvd.nist.gov/view/vuln/detail?vulnId=CVE-2018-20679",
+                    "type": "image",
+                    "packageName": "busybox",
+                    "packageVersion": "1.28.4-r1",
+                    "layerTime": 1536704390,
+                    "templates": null,
+                    "twistlock": false,
+                    "published": 1547051340,
+                    "applicableRules": [
+                        "<1.30.0"
+                    ]
+                },
+                {
+                    "text": "",
+                    "id": 46,
+                    "severity": "high",
+                    "cvss": 7.5,
+                    "status": "",
+                    "cve": "CVE-2019-5747",
+                    "cause": "",
+                    "description": "An issue was discovered in BusyBox through 1.30.0. An out of bounds read in udhcp components (consumed by the DHCP server, client, and/or relay) might allow a remote attacker to leak sensitive information from the stack by sending a crafted DHCP message. This is related to assurance of a 4-byte length when decoding DHCP_SUBNET. NOTE: this issue exists because of an incomplete fix for CVE-2018-20679.",
+                    "title": "",
+                    "vecStr": "CVSS:3.0/AV:N/AC:L/PR:N/UI:N/S:U/C:H/I:N/A:N",
+                    "exploit": "",
+                    "riskFactors": {
+                        "Attack complexity: low": {},
+                        "Attack vector: network": {},
+                        "High severity": {},
+                        "Recent vulnerability": {}
+                    },
+                    "link": "https://web.nvd.nist.gov/view/vuln/detail?vulnId=CVE-2019-5747",
+                    "type": "image",
+                    "packageName": "busybox",
+                    "packageVersion": "1.28.4-r1",
+                    "layerTime": 1536704390,
+                    "templates": null,
+                    "twistlock": false,
+                    "published": 1547051340,
+                    "applicableRules": [
+                        "<=1.30.0"
+                    ]
+                },
+                {
+                    "text": "",
+                    "id": 46,
+                    "severity": "medium",
+                    "cvss": 6.5,
+                    "status": "",
+                    "cve": "CVE-2018-20573",
+                    "cause": "",
+                    "description": "The Scanner::EnsureTokensInQueue function in yaml-cpp (aka LibYaml-C++) 0.6.2 allows remote attackers to cause a denial of service (stack consumption and application crash) via a crafted YAML file.",
+                    "title": "",
+                    "vecStr": "CVSS:3.0/AV:N/AC:L/PR:N/UI:R/S:U/C:N/I:N/A:H",
+                    "exploit": "",
+                    "riskFactors": {
+                        "Attack complexity: low": {},
+                        "Attack vector: network": {},
+                        "DoS": {},
+                        "Medium severity": {},
+                        "Recent vulnerability": {}
+                    },
+                    "link": "https://web.nvd.nist.gov/view/vuln/detail?vulnId=CVE-2018-20573",
+                    "type": "image",
+                    "packageName": "yaml-cpp",
+                    "packageVersion": "0.6.2-r1",
+                    "layerTime": 1536704390,
+                    "templates": null,
+                    "twistlock": false,
+                    "published": 1546014540,
+                    "applicableRules": [
+                        "==0.6.2"
+                    ]
+                },
+                {
+                    "text": "",
+                    "id": 46,
+                    "severity": "medium",
+                    "cvss": 6.5,
+                    "status": "",
+                    "cve": "CVE-2018-20574",
+                    "cause": "",
+                    "description": "The SingleDocParser::HandleFlowMap function in yaml-cpp (aka LibYaml-C++) 0.6.2 allows remote attackers to cause a denial of service (stack consumption and application crash) via a crafted YAML file.",
+                    "title": "",
+                    "vecStr": "CVSS:3.0/AV:N/AC:L/PR:N/UI:R/S:U/C:N/I:N/A:H",
+                    "exploit": "",
+                    "riskFactors": {
+                        "Attack complexity: low": {},
+                        "Attack vector: network": {},
+                        "DoS": {},
+                        "Medium severity": {},
+                        "Recent vulnerability": {}
+                    },
+                    "link": "https://web.nvd.nist.gov/view/vuln/detail?vulnId=CVE-2018-20574",
+                    "type": "image",
+                    "packageName": "yaml-cpp",
+                    "packageVersion": "0.6.2-r1",
+                    "layerTime": 1536704390,
+                    "templates": null,
+                    "twistlock": false,
+                    "published": 1546014540,
+                    "applicableRules": [
+                        "==0.6.2"
+                    ]
+                },
+                {
+                    "text": "",
+                    "id": 46,
+                    "severity": "medium",
+                    "cvss": 6.5,
+                    "status": "",
+                    "cve": "CVE-2019-6285",
+                    "cause": "",
+                    "description": "The SingleDocParser::HandleFlowSequence function in yaml-cpp (aka LibYaml-C++) 0.6.2 allows remote attackers to cause a denial of service (stack consumption and application crash) via a crafted YAML file.",
+                    "title": "",
+                    "vecStr": "CVSS:3.0/AV:N/AC:L/PR:N/UI:R/S:U/C:N/I:N/A:H",
+                    "exploit": "",
+                    "riskFactors": {
+                        "Attack complexity: low": {},
+                        "Attack vector: network": {},
+                        "DoS": {},
+                        "Medium severity": {},
+                        "Recent vulnerability": {}
+                    },
+                    "link": "https://web.nvd.nist.gov/view/vuln/detail?vulnId=CVE-2019-6285",
+                    "type": "image",
+                    "packageName": "yaml-cpp",
+                    "packageVersion": "0.6.2-r1",
+                    "layerTime": 1536704390,
+                    "templates": null,
+                    "twistlock": false,
+                    "published": 1547504940,
+                    "applicableRules": [
+                        "==0.6.2"
+                    ]
+                },
+                {
+                    "text": "",
+                    "id": 46,
+                    "severity": "medium",
+                    "cvss": 6.5,
+                    "status": "",
+                    "cve": "CVE-2019-6292",
+                    "cause": "",
+                    "description": "An issue was discovered in singledocparser.cpp in yaml-cpp (aka LibYaml-C++) 0.6.2. Stack Exhaustion occurs in YAML::SingleDocParser, and there is a stack consumption problem caused by recursive stack frames: HandleCompactMap, HandleMap, HandleFlowSequence, HandleSequence, HandleNode. Remote attackers could leverage this vulnerability to cause a denial-of-service via a cpp file.",
+                    "title": "",
+                    "vecStr": "",
+                    "exploit": "",
+                    "riskFactors": {
+                        "DoS": {},
+                        "Medium severity": {},
+                        "Recent vulnerability": {}
+                    },
+                    "link": "https://web.nvd.nist.gov/view/vuln/detail?vulnId=CVE-2019-6292",
+                    "type": "image",
+                    "packageName": "yaml-cpp",
+                    "packageVersion": "0.6.2-r1",
+                    "layerTime": 1536704390,
+                    "templates": null,
+                    "twistlock": false,
+                    "published": 1547512140,
+                    "applicableRules": [
+                        "==0.6.2"
+                    ]
+                },
+                {
+                    "text": "",
+                    "id": 46,
+                    "severity": "high",
+                    "cvss": 7.5,
+                    "status": "",
+                    "cve": "CVE-2018-20679",
+                    "cause": "",
+                    "description": "An issue was discovered in BusyBox before 1.30.0. An out of bounds read in udhcp components (consumed by the DHCP server, client, and relay) allows a remote attacker to leak sensitive information from the stack by sending a crafted DHCP message. This is related to verification in udhcp_get_option() in networking/udhcp/common.c that 4-byte options are indeed 4 bytes.",
+                    "title": "",
+                    "vecStr": "CVSS:3.0/AV:N/AC:L/PR:N/UI:N/S:U/C:H/I:N/A:N",
+                    "exploit": "",
+                    "riskFactors": {
+                        "Attack complexity: low": {},
+                        "Attack vector: network": {},
+                        "High severity": {},
+                        "Recent vulnerability": {}
+                    },
+                    "link": "https://web.nvd.nist.gov/view/vuln/detail?vulnId=CVE-2018-20679",
+                    "type": "image",
+                    "packageName": "busybox (used in ssl_client)",
+                    "packageVersion": "1.28.4-r1",
+                    "layerTime": 1536704390,
+                    "templates": null,
+                    "twistlock": false,
+                    "published": 1547051340,
+                    "applicableRules": [
+                        "<1.30.0"
+                    ]
+                },
+                {
+                    "text": "",
+                    "id": 46,
+                    "severity": "high",
+                    "cvss": 7.5,
+                    "status": "",
+                    "cve": "CVE-2019-5747",
+                    "cause": "",
+                    "description": "An issue was discovered in BusyBox through 1.30.0. An out of bounds read in udhcp components (consumed by the DHCP server, client, and/or relay) might allow a remote attacker to leak sensitive information from the stack by sending a crafted DHCP message. This is related to assurance of a 4-byte length when decoding DHCP_SUBNET. NOTE: this issue exists because of an incomplete fix for CVE-2018-20679.",
+                    "title": "",
+                    "vecStr": "CVSS:3.0/AV:N/AC:L/PR:N/UI:N/S:U/C:H/I:N/A:N",
+                    "exploit": "",
+                    "riskFactors": {
+                        "Attack complexity: low": {},
+                        "Attack vector: network": {},
+                        "High severity": {},
+                        "Recent vulnerability": {}
+                    },
+                    "link": "https://web.nvd.nist.gov/view/vuln/detail?vulnId=CVE-2019-5747",
+                    "type": "image",
+                    "packageName": "busybox (used in ssl_client)",
+                    "packageVersion": "1.28.4-r1",
+                    "layerTime": 1536704390,
+                    "templates": null,
+                    "twistlock": false,
+                    "published": 1547051340,
+                    "applicableRules": [
+                        "<=1.30.0"
+                    ]
+                },
+                {
+                    "text": "",
+                    "id": 49,
+                    "severity": "moderate",
+                    "cvss": 9.8,
+                    "status": "fixed in >=4.17.11",
+                    "cve": "CVE-2018-16487",
+                    "cause": "",
+                    "description": "A prototype pollution vulnerability was found in lodash <4.17.11 where the functions merge, mergeWith, and defaultsDeep can be tricked into adding or modifying properties of Object.prototype.",
+                    "title": "",
+                    "vecStr": "",
+                    "exploit": "",
+                    "riskFactors": {
+                        "Has fix": {},
+                        "Medium severity": {},
+                        "Recent vulnerability": {}
+                    },
+                    "link": "https://www.npmjs.com/advisories/782",
+                    "type": "image",
+                    "packageName": "lodash",
+                    "packageVersion": "4.17.10",
+                    "layerTime": 1544662553,
+                    "templates": null,
+                    "twistlock": false,
+                    "published": 1549045740,
+                    "applicableRules": [
+                        "<4.17.11"
+                    ]
+                }
+            ],
+            "repoTag": {
+                "registry": "",
+                "repo": "twistlock/private",
+                "tag": "console_18_11_103",
+                "digest": ""
+            },
+            "tags": [
+                {
+                    "registry": "",
+                    "repo": "twistlock/private",
+                    "tag": "console_18_11_103",
+                    "digest": ""
+                }
+            ],
+            "pkgDistro": "alpine",
+            "pkgDistroRelease": "3.8.1",
+            "distro": "Alpine Linux v3.8",
+            "repoDigests": [],
+            "createdTime": "2018-12-13T00:55:57.924Z",
+            "data": {
+                "binaries": [
+                    {
+                        "name": "server",
+                        "path": "/app/server",
+                        "md5": "4105502164428c24e8af7b6a0a3020f1",
+                        "cveCount": 0,
+                        "layerTime": 0
+                    },
+                    {
+                        "name": "busybox",
+                        "path": "/bin/busybox",
+                        "md5": "b98177c7fdadbbf228e49638221f02a8",
+                        "version": "1.28.4",
+                        "cveCount": 162,
+                        "layerTime": 1536704390
+                    },
+                    {
+                        "name": "serverless.node",
+                        "path": "/data/serverless.node",
+                        "md5": "c3fe25ebd78d41dcb46e6acd9ab28e97",
+                        "cveCount": 0,
+                        "layerTime": 0
+                    },
+                    {
+                        "name": "twistcli",
+                        "path": "/data/twistcli",
+                        "md5": "1d0e9cd85535075df90b708e2269b577",
+                        "cveCount": 0,
+                        "layerTime": 0
+                    },
+                    {
+                        "name": "mkmntdirs",
+                        "path": "/sbin/mkmntdirs",
+                        "md5": "b4129997ea37966ae008233d255de436",
+                        "cveCount": 0,
+                        "layerTime": 0
+                    },
+                    {
+                        "name": "bsondump",
+                        "path": "/usr/bin/bsondump",
+                        "md5": "ce7c5d7cff855dc71554768148427195",
+                        "cveCount": 0,
+                        "layerTime": 0
+                    },
+                    {
+                        "name": "c_rehash",
+                        "path": "/usr/bin/c_rehash",
+                        "md5": "0d7c797d5db3b4c9cda74c043a363fdc",
+                        "cveCount": 0,
+                        "layerTime": 0
+                    },
+                    {
+                        "name": "getconf",
+                        "path": "/usr/bin/getconf",
+                        "md5": "2d28f7c6184dd9ca92f1924cb3347ddb",
+                        "cveCount": 0,
+                        "layerTime": 0
+                    },
+                    {
+                        "name": "getent",
+                        "path": "/usr/bin/getent",
+                        "md5": "777999f8e64a047e09377e50567dda4c",
+                        "cveCount": 0,
+                        "layerTime": 0
+                    },
+                    {
+                        "name": "iconv",
+                        "path": "/usr/bin/iconv",
+                        "md5": "3f5d02d2597bdcf7d5a489bebf45ec56",
+                        "cveCount": 0,
+                        "layerTime": 0
+                    },
+                    {
+                        "name": "mongo",
+                        "path": "/usr/bin/mongo",
+                        "md5": "cb1fa984319274d337f7f850a46504dc",
+                        "cveCount": 7,
+                        "layerTime": 1536704390
+                    },
+                    {
+                        "name": "mongod",
+                        "path": "/usr/bin/mongod",
+                        "md5": "763d6475e155c5aaa9097f93a45f6ec9",
+                        "cveCount": 7,
+                        "layerTime": 1536704390
+                    },
+                    {
+                        "name": "mongodump",
+                        "path": "/usr/bin/mongodump",
+                        "md5": "f03acafc0e6bec06016f590877368385",
+                        "cveCount": 0,
+                        "layerTime": 0
+                    },
+                    {
+                        "name": "mongorestore",
+                        "path": "/usr/bin/mongorestore",
+                        "md5": "72c9cdb2bd6b9d204fc86027cc6af6b5",
+                        "cveCount": 0,
+                        "layerTime": 0
+                    },
+                    {
+                        "name": "scanelf",
+                        "path": "/usr/bin/scanelf",
+                        "md5": "0f8663735b4d0200cbece1199192a9e3",
+                        "cveCount": 0,
+                        "layerTime": 0
+                    },
+                    {
+                        "name": "ssl_client",
+                        "path": "/usr/bin/ssl_client",
+                        "md5": "71d70313facc55decb9c103897f3d000",
+                        "cveCount": 0,
+                        "layerTime": 0
+                    },
+                    {
+                        "name": "update-ca-certificates",
+                        "path": "/usr/sbin/update-ca-certificates",
+                        "md5": "54d0966b0f475dc4276793f6dfc6f348",
+                        "cveCount": 0,
+                        "layerTime": 0
+                    }
+                ],
+                "Secrets": [],
+                "startupBinaries": [
+                    {
+                        "name": "server",
+                        "path": "/app/server",
+                        "md5": "4105502164428c24e8af7b6a0a3020f1",
+                        "cveCount": 0,
+                        "layerTime": 0
+                    }
+                ],
+                "pkgDistro": "alpine",
+                "pkgDistroRelease": "3.8.1",
+                "distro": "Alpine Linux v3.8",
+                "packages": [
+                    {
+                        "pkgsType": "package",
+                        "pkgs": [
+                            {
+                                "version": "1.1.19-r10",
+                                "name": "musl",
+                                "cveCount": 52,
+                                "license": "MIT",
+                                "layerTime": 1536704390
+                            },
+                            {
+                                "version": "1.28.4-r1",
+                                "name": "busybox",
+                                "cveCount": 162,
+                                "license": "GPL-2.0",
+                                "layerTime": 1536704390
+                            },
+                            {
+                                "version": "3.1.0-r0",
+                                "name": "alpine-baselayout",
+                                "cveCount": 0,
+                                "license": "GPL-2.0",
+                                "layerTime": 1536704390
+                            },
+                            {
+                                "version": "2.1-r1",
+                                "name": "alpine-keys",
+                                "cveCount": 0,
+                                "license": "MIT",
+                                "layerTime": 1536704390
+                            },
+                            {
+                                "version": "1.2.11-r1",
+                                "name": "zlib",
+                                "cveCount": 60,
+                                "license": "zlib",
+                                "layerTime": 1536704390
+                            },
+                            {
+                                "version": "20171114-r3",
+                                "name": "ca-certificates",
+                                "cveCount": 0,
+                                "license": "MPL-2.0 GPL-2.0-or-later",
+                                "layerTime": 1536704390
+                            },
+                            {
+                                "version": "8.42-r0",
+                                "name": "pcre",
+                                "cveCount": 91,
+                                "license": "BSD-3-Clause",
+                                "layerTime": 1536704390
+                            },
+                            {
+                                "version": "5.3.28-r0",
+                                "name": "db",
+                                "cveCount": 36,
+                                "license": "custom",
+                                "layerTime": 1536704390
+                            },
+                            {
+                                "version": "1.1.4-r4",
+                                "name": "snappy",
+                                "cveCount": 0,
+                                "license": "BSD-3-Clause",
+                                "layerTime": 1536704390
+                            },
+                            {
+                                "version": "0.6.2-r1",
+                                "name": "yaml-cpp",
+                                "cveCount": 46,
+                                "license": "MIT",
+                                "layerTime": 1536704390
+                            },
+                            {
+                                "version": "3.6.7-r0",
+                                "name": "mongodb",
+                                "cveCount": 91,
+                                "license": "AGPL3",
+                                "layerTime": 1536704390
+                            },
+                            {
+                                "version": "1.8.1-r1",
+                                "name": "libpcap",
+                                "cveCount": 46,
+                                "license": "BSD",
+                                "layerTime": 1536704390
+                            },
+                            {
+                                "version": "3.6.4-r0",
+                                "name": "mongodb-tools",
+                                "cveCount": 0,
+                                "license": "Apache",
+                                "layerTime": 1536704390
+                            },
+                            {
+                                "version": "8.42-r0",
+                                "name": "pcre",
+                                "binaryPkgs": [
+                                    "libpcrecpp"
+                                ],
+                                "cveCount": 91,
+                                "license": "BSD-3-Clause",
+                                "layerTime": 1536704390
+                            },
+                            {
+                                "version": "2.7.4-r0",
+                                "name": "libressl",
+                                "binaryPkgs": [
+                                    "libressl2.7-libcrypto",
+                                    "libressl2.7-libssl",
+                                    "libressl2.7-libtls"
+                                ],
+                                "cveCount": 12,
+                                "license": "custom",
+                                "layerTime": 1536704390
+                            },
+                            {
+                                "version": "1.28.4-r1",
+                                "name": "busybox",
+                                "binaryPkgs": [
+                                    "ssl_client"
+                                ],
+                                "cveCount": 162,
+                                "license": "GPL-2.0",
+                                "layerTime": 1536704390
+                            },
+                            {
+                                "version": "1.2.3-r0",
+                                "name": "pax-utils",
+                                "binaryPkgs": [
+                                    "scanelf"
+                                ],
+                                "cveCount": 4,
+                                "license": "GPL-2.0",
+                                "layerTime": 1536704390
+                            },
+                            {
+                                "version": "0.7.1-r0",
+                                "name": "libc-dev",
+                                "binaryPkgs": [
+                                    "libc-utils"
+                                ],
+                                "cveCount": 0,
+                                "license": "BSD",
+                                "layerTime": 1536704390
+                            },
+                            {
+                                "version": "1.66.0-r0",
+                                "name": "boost",
+                                "binaryPkgs": [
+                                    "boost-system",
+                                    "boost-filesystem",
+                                    "boost-iostreams",
+                                    "boost-program_options"
+                                ],
+                                "cveCount": 6,
+                                "license": "custom",
+                                "layerTime": 1536704390
+                            },
+                            {
+                                "version": "6.4.0-r9",
+                                "name": "gcc",
+                                "binaryPkgs": [
+                                    "libgcc",
+                                    "libstdc++"
+                                ],
+                                "cveCount": 32,
+                                "license": "GPL LGPL",
+                                "layerTime": 1544662549
+                            },
+                            {
+                                "version": "1.0.6-r6",
+                                "name": "bzip2",
+                                "binaryPkgs": [
+                                    "libbz2"
+                                ],
+                                "cveCount": 17,
+                                "license": "BSD",
+                                "layerTime": 1536704390
+                            },
+                            {
+                                "version": "2.1.26-r13",
+                                "name": "cyrus-sasl",
+                                "binaryPkgs": [
+                                    "libsasl"
+                                ],
+                                "cveCount": 5,
+                                "license": "custom",
+                                "layerTime": 1536704390
+                            },
+                            {
+                                "version": "1.1.19-r10",
+                                "name": "musl",
+                                "binaryPkgs": [
+                                    "musl-utils"
+                                ],
+                                "cveCount": 52,
+                                "license": "MIT BSD GPL2+",
+                                "layerTime": 1536704390
+                            }
+                        ]
+                    },
+                    {
+                        "pkgsType": "nodejs",
+                        "pkgs": [
+                            {
+                                "version": "1.6.9",
+                                "name": "angular-animate",
+                                "path": "/app/www/public/libs/angular-animate",
+                                "cveCount": 0,
+                                "license": "",
+                                "layerTime": 1544662553
+                            },
+                            {
+                                "version": "1.6.9",
+                                "name": "angular-sanitize",
+                                "path": "/app/www/public/libs/angular-sanitize",
+                                "cveCount": 0,
+                                "license": "",
+                                "layerTime": 1544662553
+                            },
+                            {
+                                "version": "",
+                                "name": "d3",
+                                "path": "/app/www/public/libs/d3",
+                                "cveCount": 0,
+                                "license": "",
+                                "layerTime": 1544662553
+                            },
+                            {
+                                "version": "0.3.3",
+                                "name": "ng-csv",
+                                "path": "/app/www/public/libs/ng-csv",
+                                "cveCount": 0,
+                                "license": "",
+                                "layerTime": 1544662553
+                            },
+                            {
+                                "version": "1.0.7",
+                                "name": "ng-focus-if",
+                                "path": "/app/www/public/libs/ng-focus-if",
+                                "cveCount": 0,
+                                "license": "",
+                                "layerTime": 1544662553
+                            },
+                            {
+                                "version": "2.5.0",
+                                "name": "twistlock-console",
+                                "path": "/app/www",
+                                "cveCount": 0,
+                                "license": "",
+                                "layerTime": 1544662553
+                            },
+                            {
+                                "version": "0.3.10",
+                                "name": "alertify",
+                                "path": "/app/www/public/libs/alertify",
+                                "cveCount": 0,
+                                "license": "",
+                                "layerTime": 1544662553
+                            },
+                            {
+                                "version": "5.3.0",
+                                "name": "angular-dialog-service",
+                                "path": "/app/www/public/libs/angular-dialog-service",
+                                "cveCount": 0,
+                                "license": "",
+                                "layerTime": 1544662553
+                            },
+                            {
+                                "version": "4.17.10",
+                                "name": "lodash",
+                                "path": "/app/www/public/libs/lodash",
+                                "cveCount": 2,
+                                "license": "",
+                                "layerTime": 1544662553
+                            },
+                            {
+                                "version": "2.5.1",
+                                "name": "nya-bootstrap-select",
+                                "path": "/app/www/public/libs/nya-bootstrap-select",
+                                "cveCount": 0,
+                                "license": "",
+                                "layerTime": 1544662553
+                            },
+                            {
+                                "version": "1.4.1",
+                                "name": "ace-builds",
+                                "path": "/app/www/public/libs/ace-builds",
+                                "cveCount": 0,
+                                "license": "",
+                                "layerTime": 1544662553
+                            },
+                            {
+                                "version": "1.5.5",
+                                "name": "clipboard",
+                                "path": "/app/www/public/libs/clipboard",
+                                "cveCount": 0,
+                                "license": "",
+                                "layerTime": 1544662553
+                            },
+                            {
+                                "version": "",
+                                "name": "jquery",
+                                "path": "/app/www/public/libs/jquery",
+                                "cveCount": 31,
+                                "license": "",
+                                "layerTime": 1544662553
+                            },
+                            {
+                                "version": "1.8.3",
+                                "name": "underscore",
+                                "path": "/app/www/public/libs/lodash/vendor/underscore",
+                                "cveCount": 0,
+                                "license": "",
+                                "layerTime": 1544662553
+                            },
+                            {
+                                "version": "2.5.1",
+                                "name": "@lordfriend/nya-bootstrap-select",
+                                "path": "/app/www/public/libs/nya-bootstrap-select",
+                                "cveCount": 0,
+                                "license": "",
+                                "layerTime": 1544662553
+                            },
+                            {
+                                "version": "1.2.6",
+                                "name": "ace-builds",
+                                "path": "/app/www/public/libs/ace-builds",
+                                "cveCount": 0,
+                                "license": "",
+                                "layerTime": 1544662553
+                            },
+                            {
+                                "version": "1.0.7",
+                                "name": "angular-ui-router",
+                                "path": "/app/www/public/libs/angular-ui-router",
+                                "cveCount": 0,
+                                "license": "",
+                                "layerTime": 1544662553
+                            },
+                            {
+                                "version": "",
+                                "name": "angular-ui-select",
+                                "path": "/app/www/public/libs/angular-ui-select",
+                                "cveCount": 0,
+                                "license": "",
+                                "layerTime": 1544662553
+                            },
+                            {
+                                "version": "0.19.8",
+                                "name": "ui-select",
+                                "path": "/app/www/public/libs/angular-ui-select",
+                                "cveCount": 0,
+                                "license": "",
+                                "layerTime": 1544662553
+                            },
+                            {
+                                "version": "1.4.0",
+                                "name": "firebug-lite-debug",
+                                "path": "/app/www/public/libs/lodash/vendor/firebug-lite/src",
+                                "cveCount": 0,
+                                "license": "",
+                                "layerTime": 1544662553
+                            },
+                            {
+                                "version": "2.1.8",
+                                "name": "angular-smart-table",
+                                "path": "/app/www/public/libs/angular-smart-table",
+                                "cveCount": 0,
+                                "license": "",
+                                "layerTime": 1544662553
+                            },
+                            {
+                                "version": "1.1.1",
+                                "name": "angular-chart.js",
+                                "path": "/app/www/public/libs/angular-chart.js",
+                                "cveCount": 0,
+                                "license": "",
+                                "layerTime": 1544662553
+                            },
+                            {
+                                "version": "",
+                                "name": "bootstrap",
+                                "path": "/app/www/public/libs/bootstrap",
+                                "cveCount": 0,
+                                "license": "",
+                                "layerTime": 1544662553
+                            },
+                            {
+                                "version": "1.0.3",
+                                "name": "d3-polygon",
+                                "path": "/app/www/public/libs/d3-polygon",
+                                "cveCount": 0,
+                                "license": "",
+                                "layerTime": 1544662553
+                            },
+                            {
+                                "version": "",
+                                "name": "d3-transition",
+                                "path": "/app/www/public/libs/d3-transition",
+                                "cveCount": 0,
+                                "license": "",
+                                "layerTime": 1544662553
+                            },
+                            {
+                                "version": "",
+                                "name": "ng-focus-if",
+                                "path": "/app/www/public/libs/ng-focus-if",
+                                "cveCount": 0,
+                                "license": "",
+                                "layerTime": 1544662553
+                            },
+                            {
+                                "version": "1.6.9",
+                                "name": "angular",
+                                "path": "/app/www/public/libs/angular",
+                                "cveCount": 0,
+                                "license": "",
+                                "layerTime": 1544662553
+                            },
+                            {
+                                "version": "2.16.0",
+                                "name": "angular-translate",
+                                "path": "/app/www/public/libs/angular-translate",
+                                "cveCount": 0,
+                                "license": "",
+                                "layerTime": 1544662553
+                            },
+                            {
+                                "version": "3.3.7",
+                                "name": "bootstrap",
+                                "path": "/app/www/public/libs/bootstrap",
+                                "cveCount": 0,
+                                "license": "",
+                                "layerTime": 1544662553
+                            },
+                            {
+                                "version": "1.0.1",
+                                "name": "d3-selection-multi",
+                                "path": "/app/www/public/libs/d3-selection-multi",
+                                "cveCount": 0,
+                                "license": "",
+                                "layerTime": 1544662553
+                            },
+                            {
+                                "version": "",
+                                "name": "font-awesome",
+                                "path": "/app/www/public/libs/font-awesome",
+                                "cveCount": 0,
+                                "license": "",
+                                "layerTime": 1544662553
+                            },
+                            {
+                                "version": "1.3.3",
+                                "name": "backbone",
+                                "path": "/app/www/public/libs/lodash/vendor/backbone",
+                                "cveCount": 9,
+                                "license": "",
+                                "layerTime": 1544662553
+                            },
+                            {
+                                "version": "0.3.4",
+                                "name": "ng-csv",
+                                "path": "/app/www/public/libs/ng-csv",
+                                "cveCount": 0,
+                                "license": "",
+                                "layerTime": 1544662553
+                            },
+                            {
+                                "version": "1.6.3",
+                                "name": "angular-mocks",
+                                "path": "/app/www/public/libs/angular-mocks",
+                                "cveCount": 0,
+                                "license": "",
+                                "layerTime": 1544662553
+                            },
+                            {
+                                "version": "",
+                                "name": "d3-selection-multi",
+                                "path": "/app/www/public/libs/d3-selection-multi",
+                                "cveCount": 0,
+                                "license": "",
+                                "layerTime": 1544662553
+                            },
+                            {
+                                "version": "1.1.1",
+                                "name": "d3-transition",
+                                "path": "/app/www/public/libs/d3-transition",
+                                "cveCount": 0,
+                                "license": "",
+                                "layerTime": 1544662553
+                            },
+                            {
+                                "version": "1.8.3",
+                                "name": "underscore-min",
+                                "path": "/app/www/public/libs/lodash/vendor/underscore",
+                                "cveCount": 0,
+                                "license": "",
+                                "layerTime": 1544662553
+                            },
+                            {
+                                "version": "0.3.11",
+                                "name": "ngstorage",
+                                "path": "/app/www/public/libs/ngstorage",
+                                "cveCount": 0,
+                                "license": "",
+                                "layerTime": 1544662553
+                            },
+                            {
+                                "version": "2.5.0",
+                                "name": "angular-bootstrap",
+                                "path": "/app/www/public/libs/angular-bootstrap",
+                                "cveCount": 0,
+                                "license": "",
+                                "layerTime": 1544662553
+                            },
+                            {
+                                "version": "2.7.2",
+                                "name": "chart.js",
+                                "path": "/app/www/public/libs/chart.js",
+                                "cveCount": 0,
+                                "license": "",
+                                "layerTime": 1544662553
+                            },
+                            {
+                                "version": "",
+                                "name": "d3-polygon",
+                                "path": "/app/www/public/libs/d3-polygon",
+                                "cveCount": 0,
+                                "license": "",
+                                "layerTime": 1544662553
+                            },
+                            {
+                                "version": "3.1.1",
+                                "name": "ng-tags-input",
+                                "path": "/app/www/public/libs/ng-tags-input",
+                                "cveCount": 0,
+                                "license": "",
+                                "layerTime": 1544662553
+                            },
+                            {
+                                "version": "2.5.0",
+                                "name": "angular-ui-bootstrap",
+                                "path": "/app/www/public/libs/angular-bootstrap",
+                                "cveCount": 0,
+                                "license": "",
+                                "layerTime": 1544662553
+                            }
+                        ]
+                    }
+                ],
+                "files": []
+            },
+            "cveVulnerabilitiesCnt": 9,
+            "complianceVulnerabilitiesCnt": 0,
+            "cveVulnerabilityDistribution": {
+                "critical": 0,
+                "high": 4,
+                "medium": 5,
+                "low": 0,
+                "total": 9
+            },
+            "complianceDistribution": {
+                "critical": 0,
+                "high": 0,
+                "medium": 0,
+                "low": 0,
+                "total": 0
+            },
+            "vulnerabilityRiskScore": 0,
+            "complianceRiskScore": 0,
+            "layers": [
+                "sha256:df64d3292fd6194b7865d7326af5255db6d81e9df29f48adde61a918fbd8c332",
+                "sha256:319cc87e7b8046b3dd975e7a31690ba068ced54a06c5065c88fecfa2c71f1a42",
+                "sha256:e15e990a1b77aaed9ec42fd26b1d7942d0ae449ebb0751cee68421186f4bda67",
+                "sha256:2f48bd7c3f53f1b1bca3c005d1f92094d38b695ace533d347669ec1d2c0f84ab",
+                "sha256:905a9e85dbc554f757d8d7367b32d8c55f77a5a8442fc0bc5a0833cc60d8b681",
+                "sha256:eeaa560dc81a03fc6932bd8016ceafc3558cc821750aced4eb3dc04b77f85933",
+                "sha256:a6527b074fa30470dbbe77c07ee9eb1b9854a7a9d484f7d05d9e4d2c7e2ceeea"
+            ],
+            "topLayer": "sha256:a6527b074fa30470dbbe77c07ee9eb1b9854a7a9d484f7d05d9e4d2c7e2ceeea",
+            "riskFactors": {
+                "Attack complexity: low": {},
+                "Attack vector: network": {},
+                "DoS": {},
+                "Has fix": {},
+                "High severity": {},
+                "Medium severity": {},
+                "Recent vulnerability": {}
+            },
+            "labels": [
+                "twistlock.model.name:twistlock"
+            ],
+            "installedProducts": {
+                "docker": "18.09.1"
+            },
+            "version": "18.11.103",
+            "twistlockImage": true
+        },
+        "instances": [
+        ],
+        "hosts": {
+            "ubuntu-bionic": {
+                "modified": "2019-02-14T16:14:15.843Z"
+            }
+        },
+        "err": "",
+        "collections": [
+            "All"
+        ]
+    }
+]

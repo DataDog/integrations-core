@@ -76,6 +76,10 @@ def instance_include_index_usage_metrics():
     return True
 
 
+def instance_include_index_usage_metrics_tempdb():
+    return False
+
+
 def instance_include_instance_metrics():
     return True
 
@@ -98,6 +102,10 @@ def instance_include_task_scheduler_metrics():
 
 def instance_include_tempdb_file_space_usage_metrics():
     return True
+
+
+def instance_index_usage_metrics_interval():
+    return 300
 
 
 def instance_log_unobfuscated_plans():

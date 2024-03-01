@@ -1,26 +1,27 @@
 id: hive
 metric_id: hive
+backend_only: false
 facets:
-  - name: Operation Type
-    source: log
+  - groups:
+      - Database
+    name: Operation Type
     path: db.operation
-    groups:
-      - Database
-  - name: User
     source: log
+  - groups:
+      - Database
+    name: User
     path: db.user
-    groups:
-      - Database
-  - name: Logger Name
     source: log
+  - groups:
+      - Source Code
+    name: Logger Name
     path: logger.name
-    groups:
-      - Source Code
-  - name: Thread Name
     source: log
-    path: logger.thread_name
-    groups:
+  - groups:
       - Source Code
+    name: Thread Name
+    path: logger.thread_name
+    source: log
 pipeline:
   type: pipeline
   name: Hive

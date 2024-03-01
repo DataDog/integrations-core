@@ -68,6 +68,14 @@ class QueryExecutor(object):
             global_tags.extend(list(extra_tags))
 
         for query in self.queries:
+            if not query.should_execute():
+                self.logger.debug(
+                    'Query %s was executed less than %s seconds ago, skipping',
+                    query.name,
+                    query.collection_interval,
+                )
+                continue
+
             query_name = query.name
             query_columns = query.column_transformers
             extra_transformers = query.extra_transformers
@@ -120,11 +128,11 @@ class QueryExecutor(object):
                         submission_queue.append((transformer, column_value))
 
                 for transformer, value in submission_queue:
-                    transformer(sources, value, tags=tags, hostname=self.hostname)
+                    transformer(sources, value, tags=tags, hostname=self.hostname, raw=query.metric_name_raw)
 
                 for name, transformer in extra_transformers:
                     try:
-                        result = transformer(sources, tags=tags, hostname=self.hostname)
+                        result = transformer(sources, tags=tags, hostname=self.hostname, raw=query.metric_name_raw)
                     except Exception as e:
                         self.logger.error('Error transforming %s: %s', name, e)
                         continue

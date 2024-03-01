@@ -688,7 +688,7 @@ class OpenStackCheck(AgentCheck):
             network_ids = [
                 network_id
                 for network_id in all_network_ids
-                if not any([re.match(exclude_id, network_id) for exclude_id in self.exclude_network_id_rules])
+                if not any(re.match(exclude_id, network_id) for exclude_id in self.exclude_network_id_rules)
             ]
         else:
             network_ids = self.init_config.get('network_ids', [])

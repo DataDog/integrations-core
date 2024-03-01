@@ -52,7 +52,14 @@ LOCAL_RATE_LIMIT_METRICS = [
     "envoy.http_local_rate_limit.ok",
 ]
 
-STAT_PREFIX_TAG = ['stat_prefix:http_local_rate_limiter', 'stat_prefix:foo_buz_112']
+RATE_LIMIT_STAT_PREFIX_TAG = ['stat_prefix:http_local_rate_limiter', 'stat_prefix:foo_buz_112']
+
+CONNECTION_LIMIT_METRICS = [
+    "envoy.connection_limit.active_connections",
+    "envoy.connection_limit.limited_connections",
+]
+
+CONNECTION_LIMIT_STAT_PREFIX_TAG = ['stat_prefix:ingress_http']
 
 RBAC_METRICS = [
     "envoy.http.rbac.allowed",

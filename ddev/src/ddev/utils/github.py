@@ -3,6 +3,7 @@
 # Licensed under a 3-clause BSD style license (see LICENSE)
 from __future__ import annotations
 
+import json
 from functools import cached_property
 from time import time
 from typing import TYPE_CHECKING, Any
@@ -20,8 +21,10 @@ class PullRequest:
         self.__title = data['title']
         self.__html_url = data['pull_request']['html_url']
         self.__diff_url = data['pull_request']['diff_url']
-        # Normalize to remove carriage returns on Windows
-        self.__body = '\n'.join(data['body'].splitlines())
+        # Github API returns `None` for empty bodies, but we use empty string as default.
+        # Normalize to remove carriage returns on Windows.
+        raw_body = data['body']
+        self.__body = ('' if raw_body is None else raw_body).replace(r'\r', '')
         self.__author = data['user']['login']
         self.__labels = sorted(label['name'] for label in data['labels'])
 
@@ -62,6 +65,9 @@ class GitHubManager:
 
     # https://docs.github.com/en/rest/issues/issues?apiVersion=2022-11-28#list-repository-issues
     ISSUE_LIST_API = 'https://api.github.com/repos/{repo_id}/issues'
+
+    # https://docs.github.com/en/rest/issues/labels?apiVersion=2022-11-28#create-a-label
+    LABELS_API = 'https://api.github.com/repos/{repo_id}/labels'
 
     def __init__(self, repo: Repository, *, user: str, token: str, status: BorrowedStatus):
         self.__repo = repo
@@ -115,13 +121,27 @@ class GitHubManager:
         response = self.__api_get(pr.diff_url, follow_redirects=True)
         return response.text
 
+    def create_label(self, name, color):
+        self.__api_post(
+            self.LABELS_API.format(repo_id=self.repo_id), content=json.dumps({'name': name, 'color': color})
+        )
+
+    def get_label(self, name):
+        return self.__api_get(f'{self.LABELS_API.format(repo_id=self.repo_id)}/{name}')
+
+    def __api_post(self, *args, **kwargs):
+        return self.__api_call('post', *args, **kwargs)
+
     def __api_get(self, *args, **kwargs):
+        return self.__api_call('get', *args, **kwargs)
+
+    def __api_call(self, method, *args, **kwargs):
         from httpx import HTTPError
 
         retry_wait = 2
         while True:
             try:
-                response = self.client.get(*args, auth=self.__auth, **kwargs)
+                response = getattr(self.client, method)(*args, auth=self.__auth, **kwargs)
 
                 # https://docs.github.com/en/rest/overview/resources-in-the-rest-api?apiVersion=2022-11-28#rate-limiting
                 # https://docs.github.com/en/rest/guides/best-practices-for-integrators?apiVersion=2022-11-28#dealing-with-rate-limits

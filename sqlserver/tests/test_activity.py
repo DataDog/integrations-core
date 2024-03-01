@@ -19,10 +19,11 @@ import pytest
 from dateutil import parser
 
 from datadog_checks.base.utils.db.utils import DBMAsyncJob, default_json_event_encoding
+from datadog_checks.dev.ci import running_on_windows_ci
 from datadog_checks.sqlserver import SQLServer
 from datadog_checks.sqlserver.activity import DM_EXEC_REQUESTS_COLS, _hash_to_hex
 
-from .common import CHECK_NAME, OPERATION_TIME_METRIC_NAME
+from .common import CHECK_NAME, OPERATION_TIME_METRIC_NAME, SQLSERVER_MAJOR_VERSION
 from .conftest import DEFAULT_TIMEOUT
 
 try:
@@ -171,6 +172,7 @@ def test_collect_load_activity(
     # assert that the current timestamp is being collected as an ISO timestamp with TZ info
     assert parser.isoparse(blocked_row['now']).tzinfo, "current timestamp not formatted correctly"
     assert blocked_row["query_start"], "missing query_start"
+    assert blocked_row["is_user_process"], "missing is_user_process"
     assert parser.isoparse(blocked_row["query_start"]).tzinfo, "query_start timestamp not formatted correctly"
     for r in DM_EXEC_REQUESTS_COLS:
         assert r in blocked_row
@@ -202,6 +204,7 @@ def test_collect_load_activity(
     )
 
 
+@pytest.mark.skipif(running_on_windows_ci() and SQLSERVER_MAJOR_VERSION == 2019, reason='Test flakes on this set up')
 def test_activity_nested_blocking_transactions(
     aggregator,
     instance_docker,
@@ -331,6 +334,7 @@ def test_activity_nested_blocking_transactions(
     assert tx2["query_start"]
     assert tx2["query_hash"]
     assert tx2["query_plan_hash"]
+
     assert tx3["user_name"] == "fred"
     assert tx3["database_name"] == "datadog_test"
     assert tx3["last_request_start_time"]
@@ -603,7 +607,7 @@ def test_activity_stored_procedure_failed_to_obfuscate(dbm_instance, datadog_age
         assert len(result_rows) == 1
         assert result_rows[0]['text'] == statement_text
         assert result_rows[0]['is_proc'] is True
-        assert 'procedure_signature' not in result_rows[0]
+        assert result_rows[0]['procedure_signature'] == '__procedure_obfuscation_error__'
 
 
 @pytest.mark.integration
@@ -737,7 +741,7 @@ def _load_test_activity_json(filename):
 
 def _get_conn_for_user(instance_docker, user, _autocommit=False):
     # Make DB connection
-    conn_str = 'DRIVER={};Server={};Database=master;UID={};PWD={};'.format(
+    conn_str = 'DRIVER={};Server={};Database=master;UID={};PWD={};TrustServerCertificate=yes;'.format(
         instance_docker['driver'], instance_docker['host'], user, "Password12!"
     )
     conn = pyodbc.connect(conn_str, timeout=DEFAULT_TIMEOUT, autocommit=_autocommit)

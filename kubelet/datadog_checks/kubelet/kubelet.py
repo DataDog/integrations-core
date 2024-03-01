@@ -600,7 +600,7 @@ class KubeletCheck(
                 restart_count = ctr_status.get('restartCount', 0)
                 self.gauge(self.NAMESPACE + '.containers.restarts', restart_count, tags)
 
-                for (metric_name, field_name) in [('state', 'state'), ('last_state', 'lastState')]:
+                for metric_name, field_name in [('state', 'state'), ('last_state', 'lastState')]:
                     c_state = ctr_status.get(field_name, {})
 
                     for state_name in ['terminated', 'waiting']:
@@ -636,9 +636,8 @@ class KubeletCheck(
         self.update_prometheus_url(instance, self.kubelet_scraper_config, kubelet_metrics_endpoint)
 
         probes_metrics_endpoint = urljoin(endpoint, PROBES_METRICS_PATH)
-        if self.detect_probes(self.get_http_handler(self.probes_scraper_config), probes_metrics_endpoint):
-            instance_probes_metrics_endpoint = instance.get('probes_metrics_endpoint', probes_metrics_endpoint)
-            self.update_prometheus_url(instance, self.probes_scraper_config, instance_probes_metrics_endpoint)
+        instance_probes_metrics_endpoint = instance.get('probes_metrics_endpoint', probes_metrics_endpoint)
+        self.update_prometheus_url(instance, self.probes_scraper_config, instance_probes_metrics_endpoint)
 
     @staticmethod
     def parse_quantity(string):

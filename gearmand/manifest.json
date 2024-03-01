@@ -23,7 +23,6 @@
     "homepage": "https://www.datadoghq.com",
     "sales_email": "info@datadoghq.com"
   },
-  "oauth": {},
   "assets": {
     "integration": {
       "source_type_name": "Gearman",
@@ -44,7 +43,9 @@
       "process_signatures": [
         "gearmand",
         "gearman"
-      ]
+      ],
+      "source_type_id": 52,
+      "auto_install": true
     },
     "dashboards": {
       "gearman": "assets/dashboards/gearman_dashboard.json"

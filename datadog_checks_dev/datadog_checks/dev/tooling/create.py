@@ -2,6 +2,7 @@
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
 import os
+from datetime import datetime
 from uuid import uuid4
 
 from ..fs import (
@@ -110,6 +111,7 @@ To install the {integration_name} check on your host:
 
     config = {
         'author': author,
+        'auto_install': 'false' if repo_choice == 'marketplace' or integration_type == 'metrics_crawler' else 'true',
         'check_class': f"{''.join(part.capitalize() for part in normalized_integration_name.split('_'))}Check",
         'check_name': check_name,
         'project_name': normalize_project_name(normalized_integration_name),
@@ -125,13 +127,16 @@ To install the {integration_name} check on your host:
         'repo_name': REPO_CHOICES.get(repo_choice, ''),
         'support_type': support_type,
         'integration_links': integration_links,
+        # Source Type IDs are unique-per-integration integers
+        # Based on current timestamp with subtraction to start the IDs at around a few million, allowing room to grow.
+        "source_type_id": int(datetime.utcnow().timestamp()) - 1700000000,
     }
     config.update(kwargs)
 
     return config
 
 
-def create_template_files(template_name, new_root, config, read=False):
+def create_template_files(template_name, new_root, config, repo_choice, read=False):
     files = []
 
     template_root = path_join(TEMPLATES_DIR, template_name)
@@ -140,6 +145,8 @@ def create_template_files(template_name, new_root, config, read=False):
 
     for root, _, template_files in os.walk(template_root):
         for template_file in template_files:
+            if template_file.endswith('1.added') and repo_choice != 'core':
+                continue
             if not template_file.endswith(('.pyc', '.pyo')):
                 if template_file == 'README.md' and config.get('support_type') in ('partner', 'contrib'):
                     # Custom README for the marketplace/partner support_type integrations

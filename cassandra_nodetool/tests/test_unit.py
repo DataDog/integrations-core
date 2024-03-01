@@ -57,7 +57,7 @@ def _check(mock_output, aggregator):
         '--',
         'test',
     ]
-    assert all([a == b for a, b in zip(mock_output.call_args[0][0], args)])
+    assert all(a == b for a, b in zip(mock_output.call_args[0][0], args))
     aggregator.assert_metric(
         'cassandra.nodetool.status.replication_availability',
         value=64.5,
@@ -96,27 +96,25 @@ def _check(mock_output, aggregator):
     integration.check(common.CONFIG_INSTANCE)
 
     assert all(
-        [
-            a == b
-            for a, b in zip(
-                mock_output.call_args[0][0],
-                [
-                    'docker',
-                    'exec',
-                    common.CASSANDRA_CONTAINER_NAME,
-                    'nodetool',
-                    '-h',
-                    'localhost',
-                    '-p',
-                    '7199',
-                    '-u',
-                    'controlRole',
-                    '-pw',
-                    'QED',
-                    'status',
-                    '--',
-                    'test',
-                ],
-            )
-        ]
+        a == b
+        for a, b in zip(
+            mock_output.call_args[0][0],
+            [
+                'docker',
+                'exec',
+                common.CASSANDRA_CONTAINER_NAME,
+                'nodetool',
+                '-h',
+                'localhost',
+                '-p',
+                '7199',
+                '-u',
+                'controlRole',
+                '-pw',
+                'QED',
+                'status',
+                '--',
+                'test',
+            ],
+        )
     )

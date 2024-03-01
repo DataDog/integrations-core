@@ -63,6 +63,7 @@ SELECT
     c.client_net_address as client_address,
     sess.host_name as host_name,
     sess.program_name as program_name,
+    sess.is_user_process as is_user_process,
     {exec_request_columns}
 FROM sys.dm_exec_sessions sess
     INNER JOIN sys.dm_exec_connections c
@@ -70,7 +71,9 @@ FROM sys.dm_exec_sessions sess
     INNER JOIN sys.dm_exec_requests req
         ON c.connection_id = req.connection_id
     CROSS APPLY sys.dm_exec_sql_text(req.sql_handle) qt
-WHERE sess.session_id != @@spid AND sess.status != 'sleeping'
+WHERE
+    sess.session_id != @@spid AND
+    sess.status != 'sleeping'
 """,
 ).strip()
 
@@ -97,7 +100,8 @@ SELECT
     c.client_tcp_port as client_port,
     c.client_net_address as client_address,
     sess.host_name as host_name,
-    sess.program_name as program_name
+    sess.program_name as program_name,
+    sess.is_user_process as is_user_process
 FROM sys.dm_exec_sessions sess
     INNER JOIN sys.dm_exec_connections c
         ON sess.session_id = c.session_id
@@ -238,7 +242,7 @@ class SqlserverActivity(DBMAsyncJob):
                 self._check.histogram(
                     "dd.sqlserver.activity.collect_activity.max_bytes.rows_dropped",
                     len(normalized_rows) - len(rows),
-                    **self._check.debug_stats_kwargs()
+                    **self._check.debug_stats_kwargs(),
                 )
                 self._check.warning(
                     "Exceeded the limit of activity rows captured (%s of %s rows included). "
@@ -263,7 +267,7 @@ class SqlserverActivity(DBMAsyncJob):
         available_columns = [c for c in all_expected_columns if c in all_columns]
         missing_columns = set(all_expected_columns) - set(available_columns)
         if missing_columns:
-            self._log.debug("missing the following expected columns from sys.dm_exec_requests: %s", missing_columns)
+            self._log.info("missing the following expected columns from sys.dm_exec_requests: %s", missing_columns)
         self._log.debug("found available sys.dm_exec_requests columns: %s", available_columns)
         return available_columns
 
@@ -276,20 +280,23 @@ class SqlserverActivity(DBMAsyncJob):
         if 'statement_text' not in row:
             return self._sanitize_row(row)
         try:
-            statement = obfuscate_sql_with_metadata(row['statement_text'], self._config.obfuscator_options)
+            statement = obfuscate_sql_with_metadata(
+                row['statement_text'], self._config.obfuscator_options, replace_null_character=True
+            )
             # sqlserver doesn't have a boolean data type so convert integer to boolean
             comments, row['is_proc'], procedure_name = extract_sql_comments_and_procedure_name(row['text'])
             if row['is_proc'] and 'text' in row:
                 try:
-                    procedure_statement = obfuscate_sql_with_metadata(row['text'], self._config.obfuscator_options)
-                    # procedure_signature is used to link this activity event with
-                    # its related plan events
+                    procedure_statement = obfuscate_sql_with_metadata(
+                        row['text'], self._config.obfuscator_options, replace_null_character=True
+                    )
                     row['procedure_signature'] = compute_sql_signature(procedure_statement['query'])
                 except Exception as e:
+                    row['procedure_signature'] = '__procedure_obfuscation_error__'
                     # if we fail to obfuscate the procedure text,
                     # we should not mark query statement as failed to obfuscate
                     if self._config.log_unobfuscated_queries:
-                        self.log.warning("Failed to obfuscate stored procedure=[%s] | err=[%s]", row['text'], e)
+                        self.log.warning("Failed to obfuscate stored procedure=[%s] | err=[%s]", repr(row['text']), e)
                     else:
                         self.log.debug("Failed to obfuscate stored procedure | err=[%s]", e)
             obfuscated_statement = statement['query']
@@ -302,7 +309,7 @@ class SqlserverActivity(DBMAsyncJob):
                 row['procedure_name'] = procedure_name
         except Exception as e:
             if self._config.log_unobfuscated_queries:
-                self.log.warning("Failed to obfuscate query=[%s] | err=[%s]", row['statement_text'], e)
+                self.log.warning("Failed to obfuscate query=[%s] | err=[%s]", repr(row['statement_text']), e)
             else:
                 self.log.debug("Failed to obfuscate query | err=[%s]", e)
             obfuscated_statement = "ERROR: failed to obfuscate"
