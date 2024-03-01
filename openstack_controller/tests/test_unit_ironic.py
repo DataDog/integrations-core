@@ -544,7 +544,7 @@ def test_conductors_metrics(aggregator, check, dd_run_check, metrics):
 @pytest.mark.parametrize(
     ('connection_baremetal', 'paginated_limit', 'instance', 'metrics', 'api_type', 'expected_api_call_count'),
     [
-                pytest.param(
+        pytest.param(
             None,
             1,
             configs.REST,
@@ -649,7 +649,7 @@ def test_conductors_pagination(
             args, _ = call
             args_list += list(args)
 
-        baremetal_url = ('http://127.0.0.1:6385/baremetal/v1/conductors')
+        baremetal_url = 'http://127.0.0.1:6385/baremetal/v1/conductors'
         assert args_list.count(baremetal_url) == expected_api_call_count
     if api_type == ApiType.SDK:
         assert connection_baremetal.conductors.call_count == expected_api_call_count
