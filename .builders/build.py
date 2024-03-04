@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import argparse
+import hashlib
 import os
 import shutil
 import subprocess
@@ -9,9 +10,12 @@ from contextlib import contextmanager
 from itertools import chain
 from pathlib import Path
 from tempfile import TemporaryDirectory
-from typing import Generator
+from typing import TYPE_CHECKING, Generator
 
 from packaging.requirements import InvalidRequirement, Requirement
+
+if TYPE_CHECKING:
+    from collections.abc import Iterable
 
 HERE = Path(__file__).parent
 REQUIREMENTS_FILE = HERE.parent / 'datadog_checks_base' / 'datadog_checks' / 'base' / 'data' / 'agent_requirements.in'
@@ -66,6 +70,20 @@ def read_dependencies() -> dict[str, list[str]]:
         dependencies.setdefault(requirement.name, []).append(line)
 
     return dependencies
+
+
+def hash_build_context(build_context: Path, build_arguments: Iterable[str]) -> str:
+    """Compute a hash digest for a Docker build context"""
+    result = hashlib.sha256()
+    for root, _, files in os.walk(build_context):
+        for fname in files:
+            with open(os.path.join(root, fname), 'rb') as f:
+                result.update(f.read())
+
+    for arg in build_arguments:
+        result.update(arg.encode('utf-8'))
+
+    return result.hexdigest()
 
 
 def build_macos():
@@ -173,7 +191,6 @@ def build_image():
         image_name = f'ghcr.io/datadog/agent-int-builder@{args.digest}'
         check_process(['docker', 'pull', image_name])
     else:
-        image_name = f'ghcr.io/datadog/agent-int-builder:{image}'
         with temporary_directory() as temp_dir:
             build_context_dir = shutil.copytree(image_path, temp_dir, dirs_exist_ok=True)
 
@@ -182,19 +199,32 @@ def build_image():
                 if entry.is_file():
                     shutil.copy2(entry, build_context_dir)
 
-            build_command = ['docker', 'build', str(build_context_dir), '-t', image_name]
-
-            # For some reason this is not supported for Windows images
-            if args.verbose and not windows_image:
-                build_command.extend(['--progress', 'plain'])
-
             build_args = ['SOURCE_DATE_EPOCH=1580601600']
             if args.build_args is not None:
                 build_args.extend(args.build_args)
-            for build_arg in build_args:
-                build_command.extend(['--build-arg', build_arg])
 
-            check_process(build_command)
+            build_context_hash = hash_build_context(build_context_dir, build_args)
+            image_name = f'ghcr.io/datadog/agent-int-builder-{image}:{build_context_hash}'
+
+            print(f'Hash for the build context: {build_context_hash}')
+
+            try:
+                # Try to pull the image first
+                check_process(['docker', 'pull', image_name], check=True)
+            except subprocess.CalledProcessError:
+                # If pull fails, assume the image is not available in the registry and build it
+                print('`docker pull` failed. Assuming the image is not in the registry, will build the image')
+
+                build_command = ['docker', 'build', str(build_context_dir), '-t', image_name]
+
+                # For some reason this is not supported for Windows images
+                if args.verbose and not windows_image:
+                    build_command.extend(['--progress', 'plain'])
+
+                for build_arg in build_args:
+                    build_command.extend(['--build-arg', build_arg])
+
+                check_process(build_command)
 
     if not args.no_run:
         with temporary_directory() as temp_dir:
