@@ -3,10 +3,9 @@
 # Licensed under a 3-clause BSD style license (see LICENSE)
 import os
 
-from tekton.datadog_checks.tekton import TektonCheck
-
 from datadog_checks.dev import get_here
 from datadog_checks.dev.http import MockResponse
+from datadog_checks.tekton import TektonCheck
 
 HERE = get_here()
 
