@@ -7,6 +7,11 @@ on:
   pull_request:
     branches:
     - master
+    paths:
+    - 'docs/**'
+    - 'ddev/**'
+    - 'datadog_checks_dev/**'
+    - 'mkdocs.yml'
 
 jobs:
   build:
