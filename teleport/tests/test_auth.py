@@ -24,12 +24,6 @@ AUTH_METRICS = [
     "auth.cluster_name_not_found.count",
     "auth.user.login.count",
     "auth.migrations",
-    "auth.watcher.event_sizes.bucket",
-    "auth.watcher.event_sizes.count",
-    "auth.watcher.event_sizes.sum",
-    "auth.watcher.events.bucket",
-    "auth.watcher.events.count",
-    "auth.watcher.events.sum",
 ]
 
 AUTH_AUDIT_LOG_METRICS = [
@@ -59,6 +53,31 @@ AUTH_BACKEND_S3_METRICS = [
     "auth.backend.s3.requests_seconds.sum",
 ]
 
+AUTH_BACKEND_CACHE_METRICS = [
+    "auth.backend.cache.backend_batch_read_requests.count",
+    "auth.backend.cache.backend_batch_read_seconds.bucket",
+    "auth.backend.cache.backend_batch_read_seconds.count",
+    "auth.backend.cache.backend_batch_read_seconds.sum",
+    "auth.backend.cache.backend_batch_write_requests.count",
+    "auth.backend.cache.backend_batch_write_seconds.bucket",
+    "auth.backend.cache.backend_batch_write_seconds.count",
+    "auth.backend.cache.backend_batch_write_seconds.sum",
+    "auth.backend.cache.backend_read_requests.count",
+    "auth.backend.cache.backend_read_seconds.bucket",
+    "auth.backend.cache.backend_read_seconds.count",
+    "auth.backend.cache.backend_read_seconds.sum",
+    "auth.backend.cache.backend_requests.count",
+    "auth.backend.cache.backend_write_requests.count",
+    "auth.backend.cache.backend_write_seconds.bucket",
+    "auth.backend.cache.backend_write_seconds.count",
+    "auth.backend.cache.backend_write_seconds.sum",
+    "auth.backend.cache.watcher.event_sizes.count",
+    "auth.backend.cache.watcher.event_sizes.sum",
+    "auth.backend.cache.watcher.events.bucket",
+    "auth.backend.cache.watcher.events.count",
+    "auth.backend.cache.watcher.events.sum",
+]
+
 
 def test_auth_teleport_metrics(dd_run_check, aggregator, mock_http_response):
     fixtures_path = os.path.join(get_here(), "fixtures", "metrics.txt")
@@ -71,7 +90,6 @@ def test_auth_teleport_metrics(dd_run_check, aggregator, mock_http_response):
     for metric in AUTH_METRICS:
         aggregator.assert_metric(f"teleport.{metric}")
 
-
 def test_auth_audit_log_teleport_metrics(dd_run_check, aggregator, mock_http_response):
     fixtures_path = os.path.join(get_here(), "fixtures", "metrics.txt")
     mock_http_response(file_path=fixtures_path)
@@ -83,7 +101,6 @@ def test_auth_audit_log_teleport_metrics(dd_run_check, aggregator, mock_http_res
     for metric in AUTH_AUDIT_LOG_METRICS:
         aggregator.assert_metric(f"teleport.{metric}")
 
-
 def test_auth_backend_s3_teleport_metrics(dd_run_check, aggregator, mock_http_response):
     fixtures_path = os.path.join(get_here(), "fixtures", "metrics.txt")
     mock_http_response(file_path=fixtures_path)
@@ -93,4 +110,15 @@ def test_auth_backend_s3_teleport_metrics(dd_run_check, aggregator, mock_http_re
     dd_run_check(check)
 
     for metric in AUTH_BACKEND_S3_METRICS:
+        aggregator.assert_metric(f"teleport.{metric}")
+
+def test_auth_backend_cache_teleport_metrics(dd_run_check, aggregator, mock_http_response):
+    fixtures_path = os.path.join(get_here(), "fixtures", "metrics.txt")
+    mock_http_response(file_path=fixtures_path)
+
+    instance = {"diagnostic_url": "http://hostname:3000"}
+    check = TeleportCheck("teleport", {}, [instance])
+    dd_run_check(check)
+
+    for metric in AUTH_BACKEND_CACHE_METRICS:
         aggregator.assert_metric(f"teleport.{metric}")

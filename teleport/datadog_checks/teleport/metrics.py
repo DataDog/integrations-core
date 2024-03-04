@@ -84,6 +84,18 @@ AUTH_BACKEND_S3_METRICS_MAP = {
     "s3_requests_seconds": "auth.backend.s3.requests_seconds",
 }
 
-AUTH_METRICS_MAP = {
-    **AUTH_SERVICE_METRICS_MAP, **AUTH_AUDIT_LOG_METRICS_MAP, **AUTH_BACKEND_S3_METRICS_MAP
+AUTH_BACKEND_CACHE_METRICS_MAP = {
+    "backend_batch_read_requests": "auth.backend.cache.backend_batch_read_requests",
+    "backend_batch_read_seconds": "auth.backend.cache.backend_batch_read_seconds",
+    "backend_batch_write_requests": "auth.backend.cache.backend_batch_write_requests",
+    "backend_batch_write_seconds": "auth.backend.cache.backend_batch_write_seconds",
+    "backend_read_requests": "auth.backend.cache.backend_read_requests",
+    "backend_read_seconds": "auth.backend.cache.backend_read_seconds",
+    "backend_requests": "auth.backend.cache.backend_requests",
+    "backend_write_requests": "auth.backend.cache.backend_write_requests",
+    "backend_write_seconds": "auth.backend.cache.backend_write_seconds",
+    "watcher_event_sizes": "auth.backend.cache.watcher.event_sizes",
+    "watcher_events": "auth.backend.cache.watcher.events",
 }
+
+AUTH_METRICS_MAP = {**AUTH_SERVICE_METRICS_MAP, **AUTH_AUDIT_LOG_METRICS_MAP, **AUTH_BACKEND_S3_METRICS_MAP, **AUTH_BACKEND_CACHE_METRICS_MAP}
