@@ -19,6 +19,7 @@ from datadog_checks.base.config import _is_affirmative
 from datadog_checks.base.checks.kubelet_base.base import KubeletBase, KubeletCredentials, urljoin
 from datadog_checks.base.errors import CheckException, SkipInstanceError
 from datadog_checks.base.utils.tagging import tagger
+
 try:
     import datadog_agent
 except ImportError:
