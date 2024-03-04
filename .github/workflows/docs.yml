@@ -11,6 +11,7 @@ on:
     - 'docs/**'
     - 'ddev/**'
     - 'datadog_checks_dev/**'
+    - 'mkdocs.yml'
 
 jobs:
   build:
