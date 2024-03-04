@@ -43,9 +43,10 @@ jobs:
         lookup-only: true
 
     - name: Install dependencies
-      if: steps.cache.outputs.cache-hit != 'true'
+#      if: steps.cache.outputs.cache-hit != 'true'
       run: |-
         pip install ./ddev
+        pip install ./datadog_checks_dev
         pip install ./datadog_checks_dev[cli]
         pip install ./datadog_checks_base[deps]
       
@@ -67,9 +68,9 @@ jobs:
       if: steps.cache.outputs.cache-hit != 'true'
       run: pip install ./datadog_checks_base[deps] ./datadog_checks_dev
 
-    - name: Cache dependencies
-      uses: actions/cache/save@v3
-      if: steps.cache.outputs.cache-hit != 'true'
-      with:
-        path: ${{ runner.os == 'Windows' && '~\AppData\Local\pip\Cache' || runner.os == 'macOS' && '~/Library/Caches/pip' || '~/.cache/pip' }}
-        key: ${{ steps.cache.outputs.cache-primary-key }}
+#    - name: Cache dependencies
+#      uses: actions/cache/save@v3
+#      if: steps.cache.outputs.cache-hit != 'true'
+#      with:
+#        path: ${{ runner.os == 'Windows' && '~\AppData\Local\pip\Cache' || runner.os == 'macOS' && '~/Library/Caches/pip' || '~/.cache/pip' }}
+#        key: ${{ steps.cache.outputs.cache-primary-key }}
