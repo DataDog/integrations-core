@@ -122,5 +122,18 @@ AUTH_GCP_GCS_METRICS_MAP = {
     "gcs_event_storage_uploads": "auth.backend.gcs.event_storage.uploads",
 }
 
+AUTH_ETCD_METRICS_MAP = {
+    "etcd_backend_batch_read_requests": "auth.backend.etcd.backend_batch_read_requests",
+    "etcd_backend_batch_read_seconds": "auth.backend.etcd.backend_batch_read_seconds",
+    "etcd_backend_read_requests": "auth.backend.etcd.backend_read_requests",
+    "etcd_backend_read_seconds": "auth.backend.etcd.backend_read_seconds",
+    "etcd_backend_tx_requests": "auth.backend.etcd.backend_tx_requests",
+    "etcd_backend_tx_seconds": "auth.backend.etcd.backend_tx_seconds",
+    "etcd_backend_write_requests": "auth.backend.etcd.backend_write_requests",
+    "etcd_backend_write_seconds": "auth.backend.etcd.backend_write_seconds",
+    "teleport_etcd_events": "auth.backend.etcd.teleport_etcd_events",
+    "teleport_etcd_event_backpressure": "auth.backend.etcd.teleport_etcd_event_backpressure",
+}
 
-AUTH_METRICS_MAP = {**AUTH_SERVICE_METRICS_MAP, **AUTH_AUDIT_LOG_METRICS_MAP, **AUTH_BACKEND_S3_METRICS_MAP, **AUTH_BACKEND_CACHE_METRICS_MAP, **AUTH_BACKEND_DYNAMO_METRICS_MAP, **AUTH_BACKEND_FIRESTORE_METRICS_MAP, **AUTH_GCP_GCS_METRICS_MAP} # noqa: E501
+
+AUTH_METRICS_MAP = {**AUTH_SERVICE_METRICS_MAP, **AUTH_AUDIT_LOG_METRICS_MAP, **AUTH_BACKEND_S3_METRICS_MAP, **AUTH_BACKEND_CACHE_METRICS_MAP, **AUTH_BACKEND_DYNAMO_METRICS_MAP, **AUTH_BACKEND_FIRESTORE_METRICS_MAP, **AUTH_GCP_GCS_METRICS_MAP, **AUTH_ETCD_METRICS_MAP} # noqa: E501

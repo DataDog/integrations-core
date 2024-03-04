@@ -111,6 +111,27 @@ AUTH_BACKEND_GCP_GCS_METRICS = [
     "auth.backend.gcs.event_storage.uploads.count",
 ]
 
+AUTH_BACKEND_ETCD_METRICS = [
+    "auth.backend.etcd.backend_batch_read_requests.count",
+    "auth.backend.etcd.backend_batch_read_seconds.bucket",
+    "auth.backend.etcd.backend_batch_read_seconds.count",
+    "auth.backend.etcd.backend_batch_read_seconds.sum",
+    "auth.backend.etcd.backend_read_requests.count",
+    "auth.backend.etcd.backend_read_seconds.bucket",
+    "auth.backend.etcd.backend_read_seconds.count",
+    "auth.backend.etcd.backend_read_seconds.sum",
+    "auth.backend.etcd.backend_tx_requests.count",
+    "auth.backend.etcd.backend_tx_seconds.bucket",
+    "auth.backend.etcd.backend_tx_seconds.count",
+    "auth.backend.etcd.backend_tx_seconds.sum",
+    "auth.backend.etcd.backend_write_requests.count",
+    "auth.backend.etcd.backend_write_seconds.bucket",
+    "auth.backend.etcd.backend_write_seconds.count",
+    "auth.backend.etcd.backend_write_seconds.sum",
+    "auth.backend.etcd.teleport_etcd_events.count",
+    "auth.backend.etcd.teleport_etcd_event_backpressure.count",
+]
+
 
 def test_auth_teleport_metrics(dd_run_check, aggregator, mock_http_response):
     fixtures_path = os.path.join(get_here(), "fixtures", "metrics.txt")
@@ -187,4 +208,15 @@ def test_auth_backend_gcp_gcs_teleport_metrics(dd_run_check, aggregator, mock_ht
     dd_run_check(check)
 
     for metric in AUTH_BACKEND_GCP_GCS_METRICS:
+        aggregator.assert_metric(f"teleport.{metric}")
+
+def test_auth_backend_etcd_teleport_metrics(dd_run_check, aggregator, mock_http_response):
+    fixtures_path = os.path.join(get_here(), "fixtures", "metrics.txt")
+    mock_http_response(file_path=fixtures_path)
+
+    instance = {"diagnostic_url": "http://hostname:3000"}
+    check = TeleportCheck("teleport", {}, [instance])
+    dd_run_check(check)
+
+    for metric in AUTH_BACKEND_ETCD_METRICS:
         aggregator.assert_metric(f"teleport.{metric}")

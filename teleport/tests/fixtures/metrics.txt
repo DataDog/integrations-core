@@ -1335,3 +1335,93 @@ gcs_event_storage_uploads_seconds_sum 700
 # HELP gcs_event_storage_uploads Number of uploads to the GCS backend.
 # TYPE gcs_event_storage_uploads counter
 gcs_event_storage_uploads 5000
+
+
+# HELP etcd_backend_batch_read_requests Number of read requests to the etcd database.
+# TYPE etcd_backend_batch_read_requests counter
+etcd_backend_batch_read_requests 200
+
+# HELP etcd_backend_batch_read_seconds Latency for etcd read operations.
+# TYPE etcd_backend_batch_read_seconds histogram
+etcd_backend_batch_read_seconds_bucket{le="0.005"} 20
+etcd_backend_batch_read_seconds_bucket{le="0.01"} 40
+etcd_backend_batch_read_seconds_bucket{le="0.025"} 80
+etcd_backend_batch_read_seconds_bucket{le="0.05"} 120
+etcd_backend_batch_read_seconds_bucket{le="0.075"} 150
+etcd_backend_batch_read_seconds_bucket{le="0.1"} 160
+etcd_backend_batch_read_seconds_bucket{le="0.25"} 180
+etcd_backend_batch_read_seconds_bucket{le="0.5"} 190
+etcd_backend_batch_read_seconds_bucket{le="0.75"} 195
+etcd_backend_batch_read_seconds_bucket{le="1"} 200
+etcd_backend_batch_read_seconds_bucket{le="+Inf"} 200
+etcd_backend_batch_read_seconds_sum 400.0
+etcd_backend_batch_read_seconds_count 200
+
+# HELP etcd_backend_read_requests Number of read requests to the etcd database.
+# TYPE etcd_backend_read_requests counter
+etcd_backend_read_requests 1000
+
+# HELP etcd_backend_read_seconds Latency for etcd read operations.
+# TYPE etcd_backend_read_seconds histogram
+etcd_backend_read_seconds_bucket{le="0.005"} 100
+etcd_backend_read_seconds_bucket{le="0.01"} 200
+etcd_backend_read_seconds_bucket{le="0.025"} 400
+etcd_backend_read_seconds_bucket{le="0.05"} 600
+etcd_backend_read_seconds_bucket{le="0.075"} 800
+etcd_backend_read_seconds_bucket{le="0.1"} 900
+etcd_backend_read_seconds_bucket{le="0.25"} 950
+etcd_backend_read_seconds_bucket{le="0.5"} 975
+etcd_backend_read_seconds_bucket{le="0.75"} 990
+etcd_backend_read_seconds_bucket{le="1"} 1000
+etcd_backend_read_seconds_bucket{le="+Inf"} 1000
+etcd_backend_read_seconds_sum 2000.0
+etcd_backend_read_seconds_count 1000
+
+# HELP etcd_backend_tx_requests Number of transaction requests to the database.
+# TYPE etcd_backend_tx_requests counter
+etcd_backend_tx_requests 500
+
+# HELP etcd_backend_tx_seconds Latency for etcd transaction operations.
+# TYPE etcd_backend_tx_seconds histogram
+etcd_backend_tx_seconds_bucket{le="0.005"} 50
+etcd_backend_tx_seconds_bucket{le="0.01"} 100
+etcd_backend_tx_seconds_bucket{le="0.025"} 200
+etcd_backend_tx_seconds_bucket{le="0.05"} 300
+etcd_backend_tx_seconds_bucket{le="0.075"} 400
+etcd_backend_tx_seconds_bucket{le="0.1"} 450
+etcd_backend_tx_seconds_bucket{le="0.25"} 475
+etcd_backend_tx_seconds_bucket{le="0.5"} 490
+etcd_backend_tx_seconds_bucket{le="0.75"} 498
+etcd_backend_tx_seconds_bucket{le="1"} 500
+etcd_backend_tx_seconds_bucket{le="+Inf"} 500
+etcd_backend_tx_seconds_sum 1000.0
+etcd_backend_tx_seconds_count 500
+
+# HELP etcd_backend_write_requests Number of write requests to the database.
+# TYPE etcd_backend_write_requests counter
+etcd_backend_write_requests 1200
+
+# HELP etcd_backend_write_seconds Latency for etcd write operations.
+# TYPE etcd_backend_write_seconds histogram
+etcd_backend_write_seconds_bucket{le="0.005"} 120
+etcd_backend_write_seconds_bucket{le="0.01"} 240
+etcd_backend_write_seconds_bucket{le="0.025"} 480
+etcd_backend_write_seconds_bucket{le="0.05"} 720
+etcd_backend_write_seconds_bucket{le="0.075"} 960
+etcd_backend_write_seconds_bucket{le="0.1"} 1080
+etcd_backend_write_seconds_bucket{le="0.25"} 1140
+etcd_backend_write_seconds_bucket{le="0.5"} 1176
+etcd_backend_write_seconds_bucket{le="0.75"} 1194
+etcd_backend_write_seconds_bucket{le="1"} 1200
+etcd_backend_write_seconds_bucket{le="+Inf"} 1200
+etcd_backend_write_seconds_sum 2400.0
+etcd_backend_write_seconds_count 1200
+
+# HELP teleport_etcd_events Total number of etcd events processed.
+# TYPE teleport_etcd_events counter
+teleport_etcd_events 2000
+
+# HELP teleport_etcd_event_backpressure Total number of times event processing encountered backpressure.
+# TYPE teleport_etcd_event_backpressure counter
+teleport_etcd_event_backpressure 3
+
