@@ -31,16 +31,6 @@ if [[ "${DD_BUILD_PYTHON_VERSION}" == "3" ]]; then
         RELATIVE_PATH="librdkafka-{{version}}" \
         bash install-from-source.sh --enable-sasl --enable-curl
     always_build+=("confluent-kafka")
-
-    # pydantic-core
-    pydantic_core_version="2.1.2"
-    curl -L "https://github.com/pydantic/pydantic-core/archive/refs/tags/v${pydantic_core_version}.tar.gz" \
-        | tar -C /tmp -xzf -
-    pushd "/tmp/pydantic-core-${pydantic_core_version}"
-    patch -p1 -i "${DD_MOUNT_DIR}/patches/pydantic-core-for-manylinux1.patch"
-    build_wheels --no-deps .
-    echo "pydantic-core == ${pydantic_core_version}" >> "${PIP_CONSTRAINT}"
-    popd
 else
     echo "CFLAGS=\"-I/usr/local/ssl/include ${CFLAGS}\"" >> $DD_ENV_FILE
     echo "LDFLAGS=\"-L/usr/local/ssl/lib ${LDFLAGS}\"" >> $DD_ENV_FILE
