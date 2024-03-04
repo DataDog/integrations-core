@@ -58,9 +58,9 @@ def display_message_block(message: str) -> None:
     print(divider)
 
 
-def timestamp_build_number() -> str:
-    """Produce a formatted timestamp to use as build numbers"""
-    return time.strftime('%Y%M%d_%H%m%s')
+def timestamp_build_number() -> int:
+    """Produce a numeric timestamp to use as build numbers"""
+    return int(time.strftime('%Y%M%d%H%m%s'))
 
 
 def hash_file(path: Path) -> str:
@@ -88,11 +88,11 @@ def iter_wheel_dirs(targets_dir: str) -> Iterator[Path]:
                 yield entry
 
 
-def _build_number_of_wheel_blob(wheel_path: Blob) -> str:
+def _build_number_of_wheel_blob(wheel_path: Blob) -> int:
     """Extract the build number from a blob object representing a wheel."""
     wheel_name = PurePosixPath(wheel_path.name).stem
     _name, _version, *build_number, _python_tag, _abi_tag, _platform_tag = wheel_name.split('-')
-    return build_number[0] if build_number else ''
+    return int(build_number[0]) if build_number else -1
 
 
 def upload(targets_dir):
