@@ -15,9 +15,15 @@ from six import iteritems
 from six.moves.urllib.parse import urlparse
 
 from datadog_checks.base import AgentCheck, OpenMetricsBaseCheck
+from datadog_checks.base.config import _is_affirmative
 from datadog_checks.base.checks.kubelet_base.base import KubeletBase, KubeletCredentials, urljoin
 from datadog_checks.base.errors import CheckException, SkipInstanceError
 from datadog_checks.base.utils.tagging import tagger
+try:
+    import datadog_agent
+except ImportError:
+    from datadog_checks.base.stubs import datadog_agent
+
 
 from .cadvisor import CadvisorScraper
 from .common import (
@@ -164,7 +170,7 @@ class KubeletCheck(
     VOLUME_TAG_KEYS_TO_EXCLUDE = ['persistentvolumeclaim', 'pod_phase']
 
     def __init__(self, name, init_config, instances):
-        if os.getenv("DD_KUBERNETES_KUBELET_CORE_CHECK_ENABLED") == "true":
+        if _is_affirmative(datadog_agent.get_config("kubelet_core_check")):
             raise SkipInstanceError(
                 "The kubelet core check is enabled, skipping initialization of the python kubelet check"
             )

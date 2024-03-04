@@ -1564,8 +1564,11 @@ def test_kubelet_unavailable_check_can_init(monkeypatch):
         assert check is not None
 
 
-def test_kubelet_does_not_init_if_config_var_set_to_true(monkeypatch):
-    monkeypatch.setenv("DD_KUBERNETES_KUBELET_CORE_CHECK_ENABLED", "true")
-    with pytest.raises(SkipInstanceError):
-        KubeletCheck('kubelet', {}, [{}])
-    return
+def test_kubelet_does_not_init_if_kubelet_core_config_var_set_to_true(monkeypatch):
+    with mock.patch(
+        'datadog_checks.base.stubs.datadog_agent.get_config',
+        return_value={'true'},
+    ):
+        with pytest.raises(SkipInstanceError):
+            KubeletCheck('kubelet', {}, [{}])
+        return
