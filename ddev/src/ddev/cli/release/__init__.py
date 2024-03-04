@@ -9,6 +9,7 @@ from datadog_checks.dev.tooling.commands.release.trello import trello
 from datadog_checks.dev.tooling.commands.release.upload import upload
 
 from ddev.cli.release.agent import agent
+from ddev.cli.release.branch import branch
 from ddev.cli.release.changelog import changelog
 from ddev.cli.release.list_versions import list_versions
 from ddev.cli.release.show import show
@@ -23,6 +24,7 @@ def release():
 
 
 release.add_command(agent)
+release.add_command(branch)
 release.add_command(build)
 release.add_command(changelog)
 release.add_command(list_versions)

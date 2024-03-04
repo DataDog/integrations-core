@@ -71,6 +71,15 @@ instances:
     #
     # network_latency_checks: false
 
+    ## @param use_node_name_as_hostname - boolean - optional - default: true
+    ## Whether to use the Consul node name as the hostname. If set to true, 
+    ## the Agent uses the Consul node name as the hostname. If set to false, 
+    ## the Agent uses the system hostname and avoids duplicate hostnames.
+    ## Disabling this causes all the `consul.net.node.*` metrics to be reported 
+    ## under one host (the host that collects them), and they can be filtered using `consul_node_name`.
+    #
+    # use_node_name_as_hostname: true
+
     ## @param self_leader_check - boolean - optional - default: false
     ## Whether to enable self leader checks. Each instance with this enabled
     ## watches for itself to become the leader and emits an event when that

@@ -367,13 +367,13 @@ def test_view_compaction_metrics(aggregator, gauges):
                 r = requests.get(url, auth=self._auth, timeout=1)
                 r.raise_for_status()
             except requests.exceptions.Timeout:
-                None
+                pass
             url = '{}/kennel/_design/dummy/_view/by_data'.format(self._server)
             try:
                 r = requests.get(url, auth=self._auth, timeout=1)
                 r.raise_for_status()
             except requests.exceptions.Timeout:
-                None
+                pass
 
         def update_doc(self, doc):
             body = {'data': str(random.randint(0, 1000000000)), '_rev': doc['rev']}

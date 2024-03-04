@@ -4,6 +4,10 @@
 python = ["2.7", "3.11"]
 version = ["1.12", "1.13", "vts"]
 
+[envs.default.env-vars]
+# We need this for tests that check the "host" tag being submitted with the service check.
+DDEV_SKIP_GENERIC_TAGS_CHECK = "true"
+
 [envs.default.overrides]
 matrix.version.env-vars = [
   { key = "NGINX_IMAGE", value = "nginx:1.12", if = ["1.12"] },

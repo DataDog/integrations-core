@@ -2,7 +2,18 @@
 
 <!-- towncrier release notes start -->
 
-## 7.1.0 / 2024-01-05
+## 7.2.0 / 2024-02-16
+
+***Added***:
+
+* Bump `pycryptodomex` version to 3.19.1 ([#16560](https://github.com/DataDog/integrations-core/pull/16560))
+* Add `device_type` to OOTB profiles ([#16564](https://github.com/DataDog/integrations-core/pull/16564))
+* [SNMP] Add general IPsec profile for Cisco devices ([#16597](https://github.com/DataDog/integrations-core/pull/16597))
+* [SNMP] Add abstract profiles for VoIP ([#16711](https://github.com/DataDog/integrations-core/pull/16711))
+* Update dependencies ([#16788](https://github.com/DataDog/integrations-core/pull/16788))
+* Add ping documentation ([#16881](https://github.com/DataDog/integrations-core/pull/16881))
+
+## 7.1.0 / 2024-01-05 / Agent 7.51.0
 
 ***Added***:
 

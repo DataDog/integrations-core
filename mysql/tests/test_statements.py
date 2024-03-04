@@ -447,9 +447,7 @@ def test_statement_samples_collect(
         statement[:1021] + '...'
         if len(statement) > 1024
         and (MYSQL_VERSION_PARSED == parse_version('5.6') or environ.get('MYSQL_FLAVOR') == 'mariadb')
-        else statement[:4093] + '...'
-        if len(statement) > 4096
-        else statement
+        else statement[:4093] + '...' if len(statement) > 4096 else statement
     )
 
     matching = [e for e in events if expected_statement_prefix.startswith(e['db']['statement'])]
@@ -479,6 +477,8 @@ def test_statement_samples_collect(
             assert event['db']['plan']['collection_errors'] == expected_collection_errors
         else:
             assert event['db']['plan']['collection_errors'] is None
+        assert event['timestamp'] is not None
+        assert time.time() - event['timestamp'] < 60  # ensure the timestamp is recent
 
     # we avoid closing these in a try/finally block in order to maintain the connections in case we want to
     # debug the test with --pdb
@@ -530,7 +530,9 @@ def test_missing_explain_procedure(dbm_instance, dd_run_check, aggregator, state
         'sql_text': statement,
         'query': statement,
         'digest_text': statement,
-        'timer_end_time_s': 10003.1,
+        'now': time.time(),
+        'uptime': '21466230',
+        'timer_end': 3019558487284095384,
         'timer_wait_ns': 12.9,
     }
 
@@ -892,7 +894,6 @@ def test_statement_samples_enable_consumers(dd_run_check, dbm_instance, root_con
     mysql_check = MySql(common.CHECK_NAME, {}, [dbm_instance])
 
     all_consumers = {'events_statements_current', 'events_statements_history', 'events_statements_history_long'}
-    all_consumers_gt_8_0_28 = all_consumers.union({'events_statements_cpu'})  # CPU consumer was added in MySQL 8.0.28
 
     # deliberately disable one of the consumers
     consumer_to_disable = 'events_statements_history_long'
@@ -910,7 +911,7 @@ def test_statement_samples_enable_consumers(dd_run_check, dbm_instance, root_con
     enabled_consumers = mysql_check._statement_samples._get_enabled_performance_schema_consumers()
     if events_statements_enable_procedure == "datadog.enable_events_statements_consumers":
         # ensure that the consumer was re-enabled by the check run
-        assert enabled_consumers == all_consumers or enabled_consumers == all_consumers_gt_8_0_28
+        assert enabled_consumers == all_consumers
     else:
         # the consumer should not have been re-enabled
         assert enabled_consumers == original_enabled_consumers
@@ -972,3 +973,21 @@ def test_normalize_queries(dbm_instance):
             'lock_time': 18298000,
         }
     ]
+
+
+@pytest.mark.unit
+@pytest.mark.parametrize(
+    "timer_end,now,uptime,expected_timestamp",
+    [
+        pytest.param(3019558487284095384, 1708025457, 100, 1711044915487, id="picoseconds not overflow"),
+        pytest.param(3019558487284095384, 1708025457, 21466230, 1708025529560, id="picoseconds overflow"),
+    ],
+)
+def test_statement_samples_calculate_timer_end(dbm_instance, timer_end, now, uptime, expected_timestamp):
+    check = MySql(common.CHECK_NAME, {}, [dbm_instance])
+    row = {
+        'timer_end': timer_end,
+        'now': now,
+        'uptime': uptime,
+    }
+    assert check._statement_samples._calculate_timer_end(row) == expected_timestamp

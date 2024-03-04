@@ -85,7 +85,6 @@ class ConsulCheck(OpenMetricsBaseCheck):
         self.scraper_config = self.get_scraper_config(instance)
 
         self.base_tags = self.instance.get('tags', [])
-
         self.single_node_install = is_affirmative(self.instance.get('single_node_install', False))
         self.perform_new_leader_checks = is_affirmative(
             self.instance.get('new_leader_checks', self.init_config.get('new_leader_checks', False))
@@ -99,6 +98,7 @@ class ConsulCheck(OpenMetricsBaseCheck):
         self.perform_network_latency_checks = is_affirmative(
             self.instance.get('network_latency_checks', self.init_config.get('network_latency_checks'))
         )
+        self.use_node_name_as_hostname = is_affirmative(self.instance.get('use_node_name_as_hostname', True))
         self.disable_legacy_service_tag = is_affirmative(self.instance.get('disable_legacy_service_tag', False))
         default_services_include = self.init_config.get(
             'service_whitelist', self.init_config.get('services_include', [])
@@ -585,9 +585,9 @@ class ConsulCheck(OpenMetricsBaseCheck):
                         median = latencies[half_n]
                     else:
                         median = (latencies[half_n - 1] + latencies[half_n]) / 2
-                    self.gauge('consul.net.dc.latency.min', latencies[0], hostname='', tags=tags)
-                    self.gauge('consul.net.dc.latency.median', median, hostname='', tags=tags)
-                    self.gauge('consul.net.dc.latency.max', latencies[-1], hostname='', tags=tags)
+                    self.gauge('consul.net.dc.latency.min', latencies[0], tags=tags)
+                    self.gauge('consul.net.dc.latency.median', median, tags=tags)
+                    self.gauge('consul.net.dc.latency.max', latencies[-1], tags=tags)
 
                 # We've found ourselves, we can move on
                 break
@@ -600,7 +600,13 @@ class ConsulCheck(OpenMetricsBaseCheck):
         else:
             known_distances = {}
             for i, node in enumerate(nodes):
-                node_name = node['Node']
+                tags = main_tags + ['consul_node_name:{}'.format(node['Node'])]
+
+                # Use the node name as the hostname if configured
+                if self.use_node_name_as_hostname:
+                    node_name = node['Node']
+                else:
+                    node_name = ''
 
                 # Initialize with pre-computed distances
                 latencies = [known_distances[(x, x + 1)] for x in range(i)]
@@ -618,24 +624,14 @@ class ConsulCheck(OpenMetricsBaseCheck):
                     median = latencies[half_n]
                 else:
                     median = (latencies[half_n - 1] + latencies[half_n]) / 2
-                self.gauge('consul.net.node.latency.min', latencies[0], hostname=node_name, tags=main_tags)
-                self.gauge(
-                    'consul.net.node.latency.p25', latencies[ceili(n * 0.25) - 1], hostname=node_name, tags=main_tags
-                )
-                self.gauge('consul.net.node.latency.median', median, hostname=node_name, tags=main_tags)
-                self.gauge(
-                    'consul.net.node.latency.p75', latencies[ceili(n * 0.75) - 1], hostname=node_name, tags=main_tags
-                )
-                self.gauge(
-                    'consul.net.node.latency.p90', latencies[ceili(n * 0.90) - 1], hostname=node_name, tags=main_tags
-                )
-                self.gauge(
-                    'consul.net.node.latency.p95', latencies[ceili(n * 0.95) - 1], hostname=node_name, tags=main_tags
-                )
-                self.gauge(
-                    'consul.net.node.latency.p99', latencies[ceili(n * 0.99) - 1], hostname=node_name, tags=main_tags
-                )
-                self.gauge('consul.net.node.latency.max', latencies[-1], hostname=node_name, tags=main_tags)
+                self.gauge('consul.net.node.latency.min', latencies[0], hostname=node_name, tags=tags)
+                self.gauge('consul.net.node.latency.p25', latencies[ceili(n * 0.25) - 1], hostname=node_name, tags=tags)
+                self.gauge('consul.net.node.latency.median', median, hostname=node_name, tags=tags)
+                self.gauge('consul.net.node.latency.p75', latencies[ceili(n * 0.75) - 1], hostname=node_name, tags=tags)
+                self.gauge('consul.net.node.latency.p90', latencies[ceili(n * 0.90) - 1], hostname=node_name, tags=tags)
+                self.gauge('consul.net.node.latency.p95', latencies[ceili(n * 0.95) - 1], hostname=node_name, tags=tags)
+                self.gauge('consul.net.node.latency.p99', latencies[ceili(n * 0.99) - 1], hostname=node_name, tags=tags)
+                self.gauge('consul.net.node.latency.max', latencies[-1], hostname=node_name, tags=tags)
 
     def _get_all_nodes(self):
         return self.consul_request('v1/catalog/nodes')

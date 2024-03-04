@@ -2,7 +2,17 @@
 
 <!-- towncrier release notes start -->
 
-## 7.1.0 / 2024-01-05
+## 7.2.0 / 2024-02-16
+
+***Added***:
+
+* Update the configuration file to include the new oauth options parameter ([#16835](https://github.com/DataDog/integrations-core/pull/16835))
+
+***Fixed***:
+
+* Remove the direct dependency to `protobuf` ([#16572](https://github.com/DataDog/integrations-core/pull/16572))
+
+## 7.1.0 / 2024-01-05 / Agent 7.51.0
 
 ***Added***:
 

@@ -1,3 +1,6 @@
+include:
+  - /.gitlab/software_composition_analysis.yaml
+
 variables:
   TAGGER_IMAGE: 486234852809.dkr.ecr.us-east-1.amazonaws.com/ci/integrations-core:tagger
   VALIDATE_LOG_INTGS: 486234852809.dkr.ecr.us-east-1.amazonaws.com/ci/integrations-core:validate_log_intgs
@@ -168,7 +171,7 @@ release-auto:
   image: $TAGGER_IMAGE
   only:
     - master
-    - ^\d+\.\d+\.x$
+    - /^\d+\.\d+\.x$/
   except:
     - schedules
   script:
@@ -177,6 +180,7 @@ release-auto:
     # Prefix every line with a timestamp
     - ./.gitlab/tagger/tag-release.sh 2>&1 | ts "[%H:%M:%S %Z]  "
   tags: [ "runner:main" ]
+  needs: []
 
 release-manual:
   stage: release
@@ -199,6 +203,7 @@ release-manual:
           ./.gitlab/tagger/build-packages.sh
       fi
   tags: [ "runner:main" ]
+  needs: []
 
 tagger-image-builder:
   stage: build

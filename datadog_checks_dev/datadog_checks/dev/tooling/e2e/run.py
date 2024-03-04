@@ -39,9 +39,9 @@ def start_environment(check, env):
     else:
         command = _tox + [env]
         env_vars['PYTEST_ADDOPTS'] += ' --benchmark-skip'
-        env_vars[
-            'TOX_TESTENV_PASSENV'
-        ] = f'{E2E_TEAR_DOWN} PROGRAM* USERNAME PYTEST_ADDOPTS {" ".join(get_ci_env_vars())}'
+        env_vars['TOX_TESTENV_PASSENV'] = (
+            f'{E2E_TEAR_DOWN} PROGRAM* USERNAME PYTEST_ADDOPTS {" ".join(get_ci_env_vars())}'
+        )
 
     result = _execute(check, command, env_vars)
     return parse_config_from_result(env, result)
@@ -55,9 +55,9 @@ def stop_environment(check, env, metadata=None):
     else:
         command = _tox + [env]
         env_vars['PYTEST_ADDOPTS'] += ' --benchmark-skip'
-        env_vars[
-            'TOX_TESTENV_PASSENV'
-        ] = f'{E2E_ENV_VAR_PREFIX}* {E2E_SET_UP} PROGRAM* USERNAME PYTEST_ADDOPTS {" ".join(get_ci_env_vars())}'
+        env_vars['TOX_TESTENV_PASSENV'] = (
+            f'{E2E_ENV_VAR_PREFIX}* {E2E_SET_UP} PROGRAM* USERNAME PYTEST_ADDOPTS {" ".join(get_ci_env_vars())}'
+        )
 
     env_vars.update((metadata or {}).get('env_vars', {}))
 

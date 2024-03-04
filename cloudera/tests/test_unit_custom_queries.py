@@ -61,7 +61,10 @@ def test_custom_queries(
     with mock.patch(
         'datadog_checks.cloudera.client.cm_client.CmClient.get_version',
         return_value=Version('7.0.0'),
-    ), mock.patch('datadog_checks.cloudera.client.cm_client.CmClient.read_clusters', return_value=[],), mock.patch(
+    ), mock.patch(
+        'datadog_checks.cloudera.client.cm_client.CmClient.read_clusters',
+        return_value=[],
+    ), mock.patch(
         'datadog_checks.cloudera.client.cm_client.CmClient.query_time_series',
         side_effect=[query_time_series],
     ), mock.patch(
