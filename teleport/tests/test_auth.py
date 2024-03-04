@@ -100,6 +100,17 @@ AUTH_BACKEND_FIRESTORE_METRICS = [
     "auth.backend.firestore.events.backend_write_seconds.sum",
 ]
 
+AUTH_BACKEND_GCP_GCS_METRICS = [
+    "auth.backend.gcs.event_storage.downloads_seconds.bucket",
+    "auth.backend.gcs.event_storage.downloads_seconds.count",
+    "auth.backend.gcs.event_storage.downloads_seconds.sum",
+    "auth.backend.gcs.event_storage.downloads.count",
+    "auth.backend.gcs.event_storage.uploads_seconds.bucket",
+    "auth.backend.gcs.event_storage.uploads_seconds.count",
+    "auth.backend.gcs.event_storage.uploads_seconds.sum",
+    "auth.backend.gcs.event_storage.uploads.count",
+]
+
 
 def test_auth_teleport_metrics(dd_run_check, aggregator, mock_http_response):
     fixtures_path = os.path.join(get_here(), "fixtures", "metrics.txt")
@@ -165,4 +176,15 @@ def test_auth_backend_firestore_teleport_metrics(dd_run_check, aggregator, mock_
     dd_run_check(check)
 
     for metric in AUTH_BACKEND_FIRESTORE_METRICS:
+        aggregator.assert_metric(f"teleport.{metric}")
+
+def test_auth_backend_gcp_gcs_teleport_metrics(dd_run_check, aggregator, mock_http_response):
+    fixtures_path = os.path.join(get_here(), "fixtures", "metrics.txt")
+    mock_http_response(file_path=fixtures_path)
+
+    instance = {"diagnostic_url": "http://hostname:3000"}
+    check = TeleportCheck("teleport", {}, [instance])
+    dd_run_check(check)
+
+    for metric in AUTH_BACKEND_GCP_GCS_METRICS:
         aggregator.assert_metric(f"teleport.{metric}")

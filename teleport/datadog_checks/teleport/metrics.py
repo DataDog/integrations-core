@@ -115,5 +115,12 @@ AUTH_BACKEND_FIRESTORE_METRICS_MAP = {
     "firestore_events_backend_write_seconds": "auth.backend.firestore.events.backend_write_seconds",
 }
 
+AUTH_GCP_GCS_METRICS_MAP = {
+    "gcs_event_storage_downloads_seconds" : "auth.backend.gcs.event_storage.downloads_seconds",
+    "gcs_event_storage_downloads": "auth.backend.gcs.event_storage.downloads",
+    "gcs_event_storage_uploads_seconds" : "auth.backend.gcs.event_storage.uploads_seconds",
+    "gcs_event_storage_uploads": "auth.backend.gcs.event_storage.uploads",
+}
 
-AUTH_METRICS_MAP = {**AUTH_SERVICE_METRICS_MAP, **AUTH_AUDIT_LOG_METRICS_MAP, **AUTH_BACKEND_S3_METRICS_MAP, **AUTH_BACKEND_CACHE_METRICS_MAP, **AUTH_BACKEND_DYNAMO_METRICS_MAP, **AUTH_BACKEND_FIRESTORE_METRICS_MAP } # noqa: E501
+
+AUTH_METRICS_MAP = {**AUTH_SERVICE_METRICS_MAP, **AUTH_AUDIT_LOG_METRICS_MAP, **AUTH_BACKEND_S3_METRICS_MAP, **AUTH_BACKEND_CACHE_METRICS_MAP, **AUTH_BACKEND_DYNAMO_METRICS_MAP, **AUTH_BACKEND_FIRESTORE_METRICS_MAP, **AUTH_GCP_GCS_METRICS_MAP} # noqa: E501

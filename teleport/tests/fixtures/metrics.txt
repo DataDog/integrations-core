@@ -1294,3 +1294,44 @@ firestore_events_backend_write_seconds_bucket{le="1"} 15000
 firestore_events_backend_write_seconds_bucket{le="+Inf"} 16500
 firestore_events_backend_write_seconds_count 16500
 firestore_events_backend_write_seconds_sum 5250
+
+
+# HELP gcs_event_storage_downloads_seconds Latency for GCS download operations.
+# TYPE gcs_event_storage_downloads_seconds histogram
+gcs_event_storage_downloads_seconds_bucket{le="0.005"} 100
+gcs_event_storage_downloads_seconds_bucket{le="0.01"} 300
+gcs_event_storage_downloads_seconds_bucket{le="0.025"} 500
+gcs_event_storage_downloads_seconds_bucket{le="0.05"} 700
+gcs_event_storage_downloads_seconds_bucket{le="0.075"} 900
+gcs_event_storage_downloads_seconds_bucket{le="0.1"} 1100
+gcs_event_storage_downloads_seconds_bucket{le="0.25"} 1300
+gcs_event_storage_downloads_seconds_bucket{le="0.5"} 1500
+gcs_event_storage_downloads_seconds_bucket{le="0.75"} 1700
+gcs_event_storage_downloads_seconds_bucket{le="1"} 1900
+gcs_event_storage_downloads_seconds_bucket{le="+Inf"} 2000
+gcs_event_storage_downloads_seconds_count 2000
+gcs_event_storage_downloads_seconds_sum 600
+
+# HELP gcs_event_storage_downloads Number of downloads from the GCS backend.
+# TYPE gcs_event_storage_downloads counter
+gcs_event_storage_downloads 4500
+
+# HELP gcs_event_storage_uploads_seconds Latency for GCS upload operations.
+# TYPE gcs_event_storage_uploads_seconds histogram
+gcs_event_storage_uploads_seconds_bucket{le="0.005"} 200
+gcs_event_storage_uploads_seconds_bucket{le="0.01"} 400
+gcs_event_storage_uploads_seconds_bucket{le="0.025"} 600
+gcs_event_storage_uploads_seconds_bucket{le="0.05"} 800
+gcs_event_storage_uploads_seconds_bucket{le="0.075"} 1000
+gcs_event_storage_uploads_seconds_bucket{le="0.1"} 1200
+gcs_event_storage_uploads_seconds_bucket{le="0.25"} 1400
+gcs_event_storage_uploads_seconds_bucket{le="0.5"} 1600
+gcs_event_storage_uploads_seconds_bucket{le="0.75"} 1800
+gcs_event_storage_uploads_seconds_bucket{le="1"} 2000
+gcs_event_storage_uploads_seconds_bucket{le="+Inf"} 2200
+gcs_event_storage_uploads_seconds_count 2200
+gcs_event_storage_uploads_seconds_sum 700
+
+# HELP gcs_event_storage_uploads Number of uploads to the GCS backend.
+# TYPE gcs_event_storage_uploads counter
+gcs_event_storage_uploads 5000
