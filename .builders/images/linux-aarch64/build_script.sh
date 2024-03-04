@@ -6,12 +6,6 @@ build_wheels() {
     /py${DD_BUILD_PYTHON_VERSION}/bin/python -m pip wheel "$@"
 }
 
-export PIP_CONSTRAINT="/pip_constraints.txt"
-echo "PIP_CONSTRAINT=\"${PIP_CONSTRAINT}\"" >> $DD_ENV_FILE
-
-# bcrypt >= 4.1.0 requires rust >= 1.64, which dropped support for glibc 2.12 (~Centos 6)
-echo "bcrypt < 4.1.0" >> "${PIP_CONSTRAINT}"
-
 # We don't support pymqi on ARM for now
 sed -i '/pymqi==/d' /home/requirements.in
 

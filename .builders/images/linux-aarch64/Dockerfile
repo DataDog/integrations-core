@@ -75,19 +75,6 @@ RUN export LD_LIBRARY_PATH="/opt/python/${PYTHON_VERSION}/lib:${LD_LIBRARY_PATH}
  && /opt/python/${PYTHON_VERSION}/bin/python3 -m pip install --no-warn-script-location virtualenv \
  && /opt/python/${PYTHON_VERSION}/bin/python3 -m virtualenv /py3
 
-# Rust toolchain
-ENV RUST_VERSION="nightly-2022-05-15"
-ENV RUSTC_SHA256="32a1532f7cef072a667bac53f1a5542c99666c4071af0c9549795bbdb2069ec1"
-ENV RUSTUP_VERSION="1.24.3"
-ENV RUSTUP_SHA256="32a1532f7cef072a667bac53f1a5542c99666c4071af0c9549795bbdb2069ec1"
-RUN curl -sSL -o rustup-init "https://static.rust-lang.org/rustup/archive/${RUSTUP_VERSION}/aarch64-unknown-linux-gnu/rustup-init" \
- && echo "${RUSTUP_SHA256}  rustup-init" | sha256sum --check \
- && chmod +x ./rustup-init \
- && ./rustup-init -y --profile minimal --default-toolchain "${RUST_VERSION}" \
- && echo "${RUSTC_SHA256}  $HOME/.cargo/bin/rustc" | sha256sum --check \
- && rm ./rustup-init
-ENV PATH="/root/.cargo/bin:${PATH}"
-
 # krb5 for dependencies that require kerberos support
 RUN \
  DOWNLOAD_URL="https://kerberos.org/dist/krb5/1.20/krb5-{{version}}.tar.gz" \
