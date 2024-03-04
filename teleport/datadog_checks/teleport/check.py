@@ -4,20 +4,11 @@
 
 from datadog_checks.base import OpenMetricsBaseCheckV2
 
-COMMON_METRICS_MAP = {
-    'process_state': 'process.state',
-    'certificate_mismatch': 'certificate_mismatch',
-    'rx': 'rx',
-    'server_interactive_sessions_total': 'server_interactive_sessions_total',
-    'teleport_build_info': 'teleport.build_info',
-    'teleport_cache_events': 'teleport.cache_events',
-    'teleport_cache_stale_events': 'teleport.cache_stale_events',
-    'tx': 'tx',
-}
+from .metrics import COMMON_METRICS_MAP, PROXY_METRICS_MAP
 
-METRIC_MAP = {
-    **COMMON_METRICS_MAP
-}
+METRIC_MAP = {**COMMON_METRICS_MAP, **PROXY_METRICS_MAP}
+
+
 class TeleportCheck(OpenMetricsBaseCheckV2):
     __NAMESPACE__ = 'teleport'
 
