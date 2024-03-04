@@ -103,4 +103,17 @@ AUTH_BACKEND_DYNAMO_METRICS_MAP = {
     "dynamo_requests_seconds": "auth.backend.dynamo.requests_seconds",
 }
 
-AUTH_METRICS_MAP = {**AUTH_SERVICE_METRICS_MAP, **AUTH_AUDIT_LOG_METRICS_MAP, **AUTH_BACKEND_S3_METRICS_MAP, **AUTH_BACKEND_CACHE_METRICS_MAP, **AUTH_BACKEND_DYNAMO_METRICS_MAP } # noqa: E501
+AUTH_BACKEND_FIRESTORE_METRICS_MAP = {
+    "firestore_events_backend_batch_read_requests": "auth.backend.firestore.events.backend_batch_read_requests",
+    "firestore_events_backend_batch_read_seconds": "auth.backend.firestore.events.backend_batch_read_seconds",
+    "firestore_events_backend_batch_write_requests": "auth.backend.firestore.events.backend_batch_write_requests",
+    "firestore_events_backend_batch_write_seconds": "auth.backend.firestore.events.backend_batch_write_seconds",
+    "firestore_events_backend_read_requests": "auth.backend.firestore.events.backend_read_requests",
+    "firestore_events_backend_read_seconds": "auth.backend.firestore.events.backend_read_seconds",
+    "firestore_events_backend_requests": "auth.backend.firestore.events.backend_requests",
+    "firestore_events_backend_write_requests": "auth.backend.firestore.events.backend_write_requests",
+    "firestore_events_backend_write_seconds": "auth.backend.firestore.events.backend_write_seconds",
+}
+
+
+AUTH_METRICS_MAP = {**AUTH_SERVICE_METRICS_MAP, **AUTH_AUDIT_LOG_METRICS_MAP, **AUTH_BACKEND_S3_METRICS_MAP, **AUTH_BACKEND_CACHE_METRICS_MAP, **AUTH_BACKEND_DYNAMO_METRICS_MAP, **AUTH_BACKEND_FIRESTORE_METRICS_MAP } # noqa: E501

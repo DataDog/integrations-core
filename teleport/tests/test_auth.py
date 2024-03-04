@@ -85,6 +85,21 @@ AUTH_BACKEND_DYNAMO_METRICS = [
     "auth.backend.dynamo.requests_seconds.sum",
 ]
 
+AUTH_BACKEND_FIRESTORE_METRICS = [
+    "auth.backend.firestore.events.backend_batch_read_requests.count",
+    "auth.backend.firestore.events.backend_batch_read_seconds.bucket",
+    "auth.backend.firestore.events.backend_batch_read_seconds.count",
+    "auth.backend.firestore.events.backend_batch_read_seconds.sum",
+    "auth.backend.firestore.events.backend_batch_write_requests.count",
+    "auth.backend.firestore.events.backend_batch_write_seconds.bucket",
+    "auth.backend.firestore.events.backend_batch_write_seconds.count",
+    "auth.backend.firestore.events.backend_batch_write_seconds.sum",
+    "auth.backend.firestore.events.backend_write_requests.count",
+    "auth.backend.firestore.events.backend_write_seconds.bucket",
+    "auth.backend.firestore.events.backend_write_seconds.count",
+    "auth.backend.firestore.events.backend_write_seconds.sum",
+]
+
 
 def test_auth_teleport_metrics(dd_run_check, aggregator, mock_http_response):
     fixtures_path = os.path.join(get_here(), "fixtures", "metrics.txt")
@@ -139,4 +154,15 @@ def test_auth_backend_dynamo_teleport_metrics(dd_run_check, aggregator, mock_htt
     dd_run_check(check)
 
     for metric in AUTH_BACKEND_DYNAMO_METRICS:
+        aggregator.assert_metric(f"teleport.{metric}")
+
+def test_auth_backend_firestore_teleport_metrics(dd_run_check, aggregator, mock_http_response):
+    fixtures_path = os.path.join(get_here(), "fixtures", "metrics.txt")
+    mock_http_response(file_path=fixtures_path)
+
+    instance = {"diagnostic_url": "http://hostname:3000"}
+    check = TeleportCheck("teleport", {}, [instance])
+    dd_run_check(check)
+
+    for metric in AUTH_BACKEND_FIRESTORE_METRICS:
         aggregator.assert_metric(f"teleport.{metric}")

@@ -1233,3 +1233,64 @@ dynamo_requests_seconds_bucket{le="10"} 0
 dynamo_requests_seconds_bucket{le="+Inf"} 0
 dynamo_requests_seconds_sum 0
 dynamo_requests_seconds_count 0
+
+
+# HELP firestore_events_backend_batch_read_requests Number of batch read requests to Cloud Firestore events.
+# TYPE firestore_events_backend_batch_read_requests counter
+firestore_events_backend_batch_read_requests 150
+
+# HELP firestore_events_backend_batch_read_seconds Latency for Cloud Firestore events batch read operations.
+# TYPE firestore_events_backend_batch_read_seconds histogram
+firestore_events_backend_batch_read_seconds_bucket{le="0.005"} 250
+firestore_events_backend_batch_read_seconds_bucket{le="0.01"} 500
+firestore_events_backend_batch_read_seconds_bucket{le="0.025"} 750
+firestore_events_backend_batch_read_seconds_bucket{le="0.05"} 1000
+firestore_events_backend_batch_read_seconds_bucket{le="0.075"} 1200
+firestore_events_backend_batch_read_seconds_bucket{le="0.1"} 1500
+firestore_events_backend_batch_read_seconds_bucket{le="0.25"} 2000
+firestore_events_backend_batch_read_seconds_bucket{le="0.5"} 2500
+firestore_events_backend_batch_read_seconds_bucket{le="0.75"} 2750
+firestore_events_backend_batch_read_seconds_bucket{le="1"} 3000
+firestore_events_backend_batch_read_seconds_bucket{le="+Inf"} 3200
+firestore_events_backend_batch_read_seconds_count 3200
+firestore_events_backend_batch_read_seconds_sum 800
+
+# HELP firestore_events_backend_batch_write_requests Number of batch write requests to Cloud Firestore events.
+# TYPE firestore_events_backend_batch_write_requests counter
+firestore_events_backend_batch_write_requests 4800
+
+# HELP firestore_events_backend_batch_write_seconds Latency for Cloud Firestore events batch write operations.
+# TYPE firestore_events_backend_batch_write_seconds histogram
+firestore_events_backend_batch_write_seconds_bucket{le="0.005"} 1000
+firestore_events_backend_batch_write_seconds_bucket{le="0.01"} 2000
+firestore_events_backend_batch_write_seconds_bucket{le="0.025"} 3000
+firestore_events_backend_batch_write_seconds_bucket{le="0.05"} 4000
+firestore_events_backend_batch_write_seconds_bucket{le="0.075"} 5000
+firestore_events_backend_batch_write_seconds_bucket{le="0.1"} 6000
+firestore_events_backend_batch_write_seconds_bucket{le="0.25"} 7000
+firestore_events_backend_batch_write_seconds_bucket{le="0.5"} 8000
+firestore_events_backend_batch_write_seconds_bucket{le="0.75"} 9000
+firestore_events_backend_batch_write_seconds_bucket{le="1"} 10000
+firestore_events_backend_batch_write_seconds_bucket{le="+Inf"} 11000
+firestore_events_backend_batch_write_seconds_count 11000
+firestore_events_backend_batch_write_seconds_sum 3500
+
+# HELP firestore_events_backend_write_requests Number of write requests to Cloud Firestore events.
+# TYPE firestore_events_backend_write_requests counter
+firestore_events_backend_write_requests 7500
+
+# HELP firestore_events_backend_write_seconds Latency for Cloud Firestore events write operations.
+# TYPE firestore_events_backend_write_seconds histogram
+firestore_events_backend_write_seconds_bucket{le="0.005"} 1500
+firestore_events_backend_write_seconds_bucket{le="0.01"} 3000
+firestore_events_backend_write_seconds_bucket{le="0.025"} 4500
+firestore_events_backend_write_seconds_bucket{le="0.05"} 6000
+firestore_events_backend_write_seconds_bucket{le="0.075"} 7500
+firestore_events_backend_write_seconds_bucket{le="0.1"} 9000
+firestore_events_backend_write_seconds_bucket{le="0.25"} 10500
+firestore_events_backend_write_seconds_bucket{le="0.5"} 12000
+firestore_events_backend_write_seconds_bucket{le="0.75"} 13500
+firestore_events_backend_write_seconds_bucket{le="1"} 15000
+firestore_events_backend_write_seconds_bucket{le="+Inf"} 16500
+firestore_events_backend_write_seconds_count 16500
+firestore_events_backend_write_seconds_sum 5250
