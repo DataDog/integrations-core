@@ -154,6 +154,8 @@ jobs:
     - name: Install ddev from local folder
       if: inputs.repo == 'core'
       run: |-
+        pip cache list
+        pip cache info
         pip install -e ./datadog_checks_dev[cli]
         pip install -e ./ddev
 
