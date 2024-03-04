@@ -20,7 +20,7 @@ DIRECT_DEP_FILE = REPO_DIR / 'datadog_checks_base' / 'datadog_checks' / 'base' /
 CONSTANTS_FILE = REPO_DIR / 'ddev' / 'src' / 'ddev' / 'repo' / 'constants.py'
 TARGET_TAG_PATTERNS = {
     'linux-x86_64': 'manylinux.*_x86_64|linux_x86_64',
-    'linux-aarch64': 'manylinux.*_aarch64',
+    'linux-aarch64': 'manylinux.*_aarch64|linux_aarch64',
     'windows-x86_64': 'win_amd64',
     'macos-x86_64': 'macosx.*_(x86_64|intel|universal2)',
 }
