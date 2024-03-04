@@ -98,4 +98,9 @@ AUTH_BACKEND_CACHE_METRICS_MAP = {
     "watcher_events": "auth.backend.cache.watcher.events",
 }
 
-AUTH_METRICS_MAP = {**AUTH_SERVICE_METRICS_MAP, **AUTH_AUDIT_LOG_METRICS_MAP, **AUTH_BACKEND_S3_METRICS_MAP, **AUTH_BACKEND_CACHE_METRICS_MAP}
+AUTH_BACKEND_DYNAMO_METRICS_MAP = {
+    "dynamo_requests": "auth.backend.dynamo.requests",
+    "dynamo_requests_seconds": "auth.backend.dynamo.requests_seconds",
+}
+
+AUTH_METRICS_MAP = {**AUTH_SERVICE_METRICS_MAP, **AUTH_AUDIT_LOG_METRICS_MAP, **AUTH_BACKEND_S3_METRICS_MAP, **AUTH_BACKEND_CACHE_METRICS_MAP, **AUTH_BACKEND_DYNAMO_METRICS_MAP } # noqa: E501

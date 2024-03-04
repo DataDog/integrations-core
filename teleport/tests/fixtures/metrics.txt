@@ -1207,3 +1207,29 @@ s3_requests_seconds_bucket{le="10"} 0
 s3_requests_seconds_bucket{le="+Inf"} 0
 s3_requests_seconds_sum 0
 s3_requests_seconds_count 0
+
+
+# HELP dynamo_requests_total Total number of requests to the DYNAMO API.
+# TYPE dynamo_requests_total counter
+dynamo_requests_total 4000
+
+# HELP dynamo_requests Total number of requests to the DYNAMO API grouped by result.
+# TYPE dynamo_requests counter
+dynamo_requests{result="success"} 3200
+dynamo_requests{result="failure"} 800
+
+# TYPE dynamo_requests_seconds histogram
+dynamo_requests_seconds_bucket{le="0.005"} 0
+dynamo_requests_seconds_bucket{le="0.01"} 0
+dynamo_requests_seconds_bucket{le="0.025"} 0
+dynamo_requests_seconds_bucket{le="0.05"} 0
+dynamo_requests_seconds_bucket{le="0.1"} 0
+dynamo_requests_seconds_bucket{le="0.25"} 0
+dynamo_requests_seconds_bucket{le="0.5"} 0
+dynamo_requests_seconds_bucket{le="1"} 0
+dynamo_requests_seconds_bucket{le="2.5"} 0
+dynamo_requests_seconds_bucket{le="5"} 0
+dynamo_requests_seconds_bucket{le="10"} 0
+dynamo_requests_seconds_bucket{le="+Inf"} 0
+dynamo_requests_seconds_sum 0
+dynamo_requests_seconds_count 0

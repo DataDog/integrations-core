@@ -78,6 +78,13 @@ AUTH_BACKEND_CACHE_METRICS = [
     "auth.backend.cache.watcher.events.sum",
 ]
 
+AUTH_BACKEND_DYNAMO_METRICS = [
+    "auth.backend.dynamo.requests.count",
+    "auth.backend.dynamo.requests_seconds.bucket",
+    "auth.backend.dynamo.requests_seconds.count",
+    "auth.backend.dynamo.requests_seconds.sum",
+]
+
 
 def test_auth_teleport_metrics(dd_run_check, aggregator, mock_http_response):
     fixtures_path = os.path.join(get_here(), "fixtures", "metrics.txt")
@@ -121,4 +128,15 @@ def test_auth_backend_cache_teleport_metrics(dd_run_check, aggregator, mock_http
     dd_run_check(check)
 
     for metric in AUTH_BACKEND_CACHE_METRICS:
+        aggregator.assert_metric(f"teleport.{metric}")
+
+def test_auth_backend_dynamo_teleport_metrics(dd_run_check, aggregator, mock_http_response):
+    fixtures_path = os.path.join(get_here(), "fixtures", "metrics.txt")
+    mock_http_response(file_path=fixtures_path)
+
+    instance = {"diagnostic_url": "http://hostname:3000"}
+    check = TeleportCheck("teleport", {}, [instance])
+    dd_run_check(check)
+
+    for metric in AUTH_BACKEND_DYNAMO_METRICS:
         aggregator.assert_metric(f"teleport.{metric}")
