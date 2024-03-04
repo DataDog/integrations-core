@@ -221,3 +221,10 @@ files:
           type: string
           example: <SSL_FILE_PATH>
       - template: instances/default
+      - name: data_streams_enabled
+        description: |
+          Collects consumer lag metric in seconds. It may result in additional billing charges.
+        value:
+          type: boolean
+          example: false
+        display_default: false

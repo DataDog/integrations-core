@@ -7,6 +7,7 @@ import sys
 
 import pytest
 
+from ddev.repo.core import Repository
 from ddev.utils.structures import EnvVars
 
 
@@ -160,6 +161,33 @@ class TestStandard:
                 [sys.executable, '-m', 'hatch', 'env', 'run', '--ignore-compat', '--', 'test', '--tb', 'short'],
                 shell=False,
             ),
+        ]
+
+    def test_changed_no_modifications(self, ddev, helpers, mocker):
+        mocker.patch('subprocess.run')
+        result = ddev('test')
+
+        assert result.exit_code == 0, result.output
+        assert result.output == helpers.dedent(
+            """
+            No changed testable targets found
+            """
+        )
+
+    def test_all_targets(self, ddev, helpers, mocker, repository):
+        repo = Repository("core", str(repository.path))
+        run = mocker.patch('subprocess.run', return_value=mocker.MagicMock(returncode=0))
+
+        result = ddev('test', 'all')
+
+        assert result.exit_code == 0, result.output
+
+        assert run.call_args_list == [
+            mocker.call(
+                [sys.executable, '-m', 'hatch', 'env', 'run', '--ignore-compat', '--', 'test', '--tb', 'short'],
+                shell=False,
+            )
+            for _ in repo.integrations.iter_testable('all')
         ]
 
     def test_argument_forwarding(self, ddev, helpers, mocker):

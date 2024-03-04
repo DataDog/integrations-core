@@ -28,8 +28,10 @@ def labeler(app: Application, sync: bool):
         return
 
     valid_integrations = dict.fromkeys(i.name for i in app.repo.integrations.iter("all"))
-    # Remove this when we remove the `datadog_checks_tests_helper` package
-    valid_integrations['datadog_checks_tests_helper'] = None
+
+    include = set(app.repo.config.get('/overrides/validate/labeler/include', []))
+    for integration in include:
+        valid_integrations[integration] = None
 
     pr_labels_config_path = app.repo.path / '.github' / 'workflows' / 'config' / 'labeler.yml'
     if not pr_labels_config_path.exists():

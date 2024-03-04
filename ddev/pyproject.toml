@@ -83,6 +83,8 @@ extend-exclude = "src/ddev/_version.py"
 exclude = []
 target-version = "py311"
 line-length = 120
+
+[tool.ruff.lint]
 # Rules were ported over from the legacy flake8 settings for parity
 # All the rules can be found here: https://beta.ruff.rs/docs/rules/
 select = [
@@ -110,12 +112,12 @@ unfixable = [
   "F401",
 ]
 
-[tool.ruff.isort]
+[tool.ruff.lint.isort]
 known-first-party = ["ddev"]
 
-[tool.ruff.flake8-tidy-imports]
+[tool.ruff.lint.flake8-tidy-imports]
 ban-relative-imports = "all"
 
-[tool.ruff.per-file-ignores]
+[tool.ruff.lint.per-file-ignores]
 #Tests can use assertions and relative imports
 "**/tests/**/*" = ["I252"]

@@ -34,9 +34,9 @@ def test_connection_subprocess(instance):
     check = IbmICheck('ibm_i', {}, [instance])
     check.load_configuration_models()
     with mock.patch('datadog_checks.ibm_i.IbmICheck._create_connection_subprocess') as m:
-        check.connection_subprocess
+        _ = check.connection_subprocess
         check._subprocess = mock.MagicMock()
-        check.connection_subprocess
+        _ = check.connection_subprocess
     m.assert_called_once()
 
 

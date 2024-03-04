@@ -1,0 +1,11 @@
+# https://pre-commit.com/
+---
+repos:
+- repo: local
+  hooks:
+    - id: lint
+      name: Run linters
+      entry: ddev test -s
+      language: system
+      files: '.+\.py'
+      pass_filenames: false

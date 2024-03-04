@@ -4,7 +4,6 @@
 from contextlib import closing
 
 import snowflake.connector as sf
-from cryptography.hazmat.primitives import serialization
 
 from datadog_checks.base import AgentCheck, ConfigurationError, ensure_bytes, to_native_string
 from datadog_checks.base.utils.db import QueryManager
@@ -122,25 +121,6 @@ class SnowflakeCheck(AgentCheck):
 
         return self._config.token
 
-    def read_key(self):
-        if self._config.private_key_path:
-            self.log.debug("Reading Snowflake client key for key pair authentication")
-            # https://docs.snowflake.com/en/user-guide/python-connector-example.html#using-key-pair-authentication-key-pair-rotation
-            with open(self._config.private_key_path, "rb") as key:
-                p_key = serialization.load_pem_private_key(
-                    key.read(), password=ensure_bytes(self._config.private_key_password)
-                )
-
-                pkb = p_key.private_bytes(
-                    encoding=serialization.Encoding.DER,
-                    format=serialization.PrivateFormat.PKCS8,
-                    encryption_algorithm=serialization.NoEncryption(),
-                )
-
-                return pkb
-
-        return None
-
     def check(self, _):
         if self.instance.get('user'):
             self._log_deprecation('_config_renamed', 'user', 'username')
@@ -202,7 +182,8 @@ class SnowflakeCheck(AgentCheck):
                 ocsp_response_cache_filename=self._config.ocsp_response_cache_filename,
                 authenticator=self._config.authenticator,
                 token=self.read_token(),
-                private_key=self.read_key(),
+                private_key_file=self._config.private_key_path,
+                private_key_file_pwd=ensure_bytes(self._config.private_key_password),
                 client_session_keep_alive=self._config.client_keep_alive,
                 proxy_host=self.proxy_host,
                 proxy_port=self.proxy_port,

@@ -3,34 +3,18 @@
 # Licensed under a 3-clause BSD style license (see LICENSE)
 import pytest
 
-from ddev.repo.core import Repository
-from ddev.utils.github import GitHubManager, PullRequest
+from ddev.utils.github import PullRequest
 
 
 class TestGetPullRequest:
-    def test_no_match(self, local_repo, config_file, network_replay, terminal):
+    def test_no_match(self, github_manager, network_replay):
         network_replay('github/get_pr_no_match.yaml')
+        assert github_manager.get_pull_request('fcd9c178cb01bcb349c694d34fe6ae237e3c1aa8') is None
 
-        github = GitHubManager(
-            Repository(local_repo.name, str(local_repo)),
-            user=config_file.model.github.user,
-            token=config_file.model.github.token,
-            status=terminal.status,
-        )
-
-        assert github.get_pull_request('fcd9c178cb01bcb349c694d34fe6ae237e3c1aa8') is None
-
-    def test_found(self, local_repo, helpers, config_file, network_replay, terminal):
+    def test_found(self, helpers, network_replay, github_manager):
         network_replay('github/get_pr_found.yaml')
 
-        github = GitHubManager(
-            Repository(local_repo.name, str(local_repo)),
-            user=config_file.model.github.user,
-            token=config_file.model.github.token,
-            status=terminal.status,
-        )
-
-        pr = github.get_pull_request('382cbb0af210897599cbe5fd8d69a38d4017e425')
+        pr = github_manager.get_pull_request('382cbb0af210897599cbe5fd8d69a38d4017e425')
         assert pr.number == 14849
         assert pr.title == 'Update formatting for changelogs'
         assert pr.body == helpers.dedent(
@@ -63,3 +47,14 @@ class TestGetPullRequest:
             ).body
             == expected_body
         )
+
+
+class TestCreateLabel:
+    def test_create_label(self, network_replay, github_manager):
+        network_replay('github/create_label.yaml', record_mode='none')
+
+        github_manager.create_label('my_custom_label', 'ff0000')
+        label = github_manager.get_label('my_custom_label')
+
+        assert label.json()['name'] == 'my_custom_label'
+        assert label.json()['color'] == 'ff0000'

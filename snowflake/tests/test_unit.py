@@ -8,6 +8,7 @@ import os
 import mock
 import pytest
 
+from datadog_checks.base import ensure_bytes
 from datadog_checks.snowflake import SnowflakeCheck, queries
 
 from .common import CHECK_NAME, EXPECTED_TAGS
@@ -93,7 +94,8 @@ def test_default_auth(instance):
             ocsp_response_cache_filename=None,
             authenticator='snowflake',
             token=None,
-            private_key=None,
+            private_key_file=None,
+            private_key_file_pwd=None,
             client_session_keep_alive=False,
             proxy_host=None,
             proxy_port=None,
@@ -126,7 +128,8 @@ def test_oauth_auth(oauth_instance):
             ocsp_response_cache_filename=None,
             authenticator='oauth',
             token='testtoken',
-            private_key=None,
+            private_key_file=None,
+            private_key_file_pwd=None,
             client_session_keep_alive=False,
             proxy_host=None,
             proxy_port=None,
@@ -135,15 +138,18 @@ def test_oauth_auth(oauth_instance):
         )
 
 
-def test_key_auth(dd_run_check, instance):
+@pytest.mark.parametrize(
+    'key_file, password',
+    [
+        pytest.param('rsa_key_example.p8', None, id='no password'),
+        pytest.param('rsa_key_pass_example.p8', 'keypass', id='with password'),
+    ],
+)
+def test_key_auth(dd_run_check, instance, key_file, password):
     # Key auth
     inst = copy.deepcopy(instance)
-    inst['private_key_path'] = os.path.join(os.path.dirname(__file__), 'keys', 'rsa_key_example.p8')
-
-    check = SnowflakeCheck(CHECK_NAME, {}, [inst])
-    # Checking size instead of the read key
-    read_key = check.read_key()
-    assert len(read_key) == 1216
+    inst['private_key_path'] = os.path.join(os.path.dirname(__file__), 'keys', key_file)
+    inst['private_key_password'] = password
 
     with mock.patch('datadog_checks.snowflake.check.sf') as sf:
         check = SnowflakeCheck(CHECK_NAME, {}, [inst])
@@ -163,24 +169,14 @@ def test_key_auth(dd_run_check, instance):
             ocsp_response_cache_filename=None,
             authenticator='snowflake',
             token=None,
-            private_key=read_key,
+            private_key_file=inst['private_key_path'],
+            private_key_file_pwd=ensure_bytes(inst['private_key_password']),
             client_session_keep_alive=False,
             proxy_host=None,
             proxy_port=None,
             proxy_user=None,
             proxy_password=None,
         )
-
-    inst['private_key_path'] = os.path.join(os.path.dirname(__file__), 'keys', 'wrong_key.p8')
-    check = SnowflakeCheck(CHECK_NAME, {}, [inst])
-    with pytest.raises(FileNotFoundError):
-        check.read_key()
-
-    # Read key protected by a passphrase
-    inst['private_key_path'] = os.path.join(os.path.dirname(__file__), 'keys', 'rsa_key_pass_example.p8')
-    inst['private_key_password'] = 'keypass'
-    check = SnowflakeCheck(CHECK_NAME, {}, [inst])
-    assert len(check.read_key()) == 1218
 
 
 def test_proxy_settings(instance):
@@ -211,7 +207,8 @@ def test_proxy_settings(instance):
             ocsp_response_cache_filename=None,
             authenticator='snowflake',
             token=None,
-            private_key=None,
+            private_key_file=None,
+            private_key_file_pwd=None,
             client_session_keep_alive=False,
             proxy_host='testhost',
             proxy_port=8000,

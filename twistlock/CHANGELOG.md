@@ -2,13 +2,19 @@
 
 <!-- towncrier release notes start -->
 
+## 3.5.0 / 2024-02-16
+
+***Added***:
+
+* Update the configuration file to include the new oauth options parameter ([#16835](https://github.com/DataDog/integrations-core/pull/16835))
+
 ## 3.4.1 / 2024-01-24
 
 ***Fixed***:
 
 * Skip over "/image" endpoint instances with no images ([#16680](https://github.com/DataDog/integrations-core/pull/16680))
 
-## 3.4.0 / 2024-01-05
+## 3.4.0 / 2024-01-05 / Agent 7.51.0
 
 ***Added***:
 

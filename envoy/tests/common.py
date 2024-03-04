@@ -376,12 +376,21 @@ PROMETHEUS_METRICS = [
     "vhost.vcluster.upstream_rq.count",
 ]
 
+CONNECTION_LIMIT_METRICS = [
+    "connection_limit.active_connections",
+    "connection_limit.limited_connections.count",
+]
+
+CONNECTION_LIMIT_STAT_PREFIX_TAG = 'stat_prefix:ingress_http'
+
 LOCAL_RATE_LIMIT_METRICS = [
     "http.local_rate_limit_enabled.count",
     "http.local_rate_limit_enforced.count",
     "http.local_rate_limit_rate_limited.count",
     "http.local_rate_limit_ok.count",
 ]
+
+RATE_LIMIT_STAT_PREFIX_TAG = 'stat_prefix:http_local_rate_limiter'
 
 CLUSTER_AND_LISTENER_SSL_METRICS = [
     "cluster.client_ssl_socket_factory.downstream_context_secrets_not_ready.count",
@@ -393,8 +402,6 @@ CLUSTER_AND_LISTENER_SSL_METRICS = [
 ]
 
 CONNECT_STATE_METRIC = ['control_plane.connected_state']
-
-RATE_LIMIT_STAT_PREFIX_TAG = 'stat_prefix:http_local_rate_limiter'
 
 FLAKY_METRICS = [
     "listener.downstream_cx_active",
@@ -731,6 +738,8 @@ MOCKED_PROMETHEUS_METRICS = [
     "tcp.on_demand_cluster_timeout.count",
     "tcp.upstream_flush.count",
     "tcp.upstream_flush_active",
+    "connection_limit.active_connections",
+    "connection_limit.limited_connections.count",
 ]
 
 

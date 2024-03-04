@@ -30,7 +30,6 @@ TOKENS_PATH = os.path.abspath(os.path.join(get_here(), '..', '..', '..', '..', '
 
 FAKE_ENDPOINT = 'http://fake.endpoint:10055/metrics'
 
-
 PROMETHEUS_CHECK_INSTANCE = {
     'prometheus_url': FAKE_ENDPOINT,
     'metrics': [{'process_virtual_memory_bytes': 'process.vm.bytes'}],
@@ -39,7 +38,6 @@ PROMETHEUS_CHECK_INSTANCE = {
     'send_monotonic_counter': False,
     'health_service_check': True,
 }
-
 
 OPENMETRICS_CHECK_INSTANCE = {
     'prometheus_url': 'http://fake.endpoint:10055/metrics',
@@ -519,7 +517,6 @@ def test_submit_summary(
     count_monotonic_gauge,
     sum_monotonic_gauge,
 ):
-
     # Determine expected metric types for `.count` and `.sum` metrics
     count_type = aggregator.GAUGE
     sum_type = aggregator.GAUGE
@@ -2667,14 +2664,12 @@ def test_metadata_transformer(mocked_openmetrics_check_factory, text_data, datad
 
 
 def test_ssl_verify_not_raise_warning(caplog, mocked_openmetrics_check_factory, text_data):
-    instance = dict(
-        {
-            'prometheus_url': 'https://www.example.com',
-            'metrics': [{'foo': 'bar'}],
-            'namespace': 'openmetrics',
-            'ssl_verify': False,
-        }
-    )
+    instance = {
+        'prometheus_url': 'https://www.example.com',
+        'metrics': [{'foo': 'bar'}],
+        'namespace': 'openmetrics',
+        'ssl_verify': False,
+    }
     check = mocked_openmetrics_check_factory(instance)
     scraper_config = check.get_scraper_config(instance)
 
@@ -2689,14 +2684,13 @@ def test_ssl_verify_not_raise_warning(caplog, mocked_openmetrics_check_factory, 
 
 
 def test_send_request_with_dynamic_prometheus_url(caplog, mocked_openmetrics_check_factory, text_data):
-    instance = dict(
-        {
-            'prometheus_url': 'https://www.example.com',
-            'metrics': [{'foo': 'bar'}],
-            'namespace': 'openmetrics',
-            'ssl_verify': False,
-        }
-    )
+    instance = {
+        'prometheus_url': 'https://www.example.com',
+        'metrics': [{'foo': 'bar'}],
+        'namespace': 'openmetrics',
+        'ssl_verify': False,
+    }
+
     check = mocked_openmetrics_check_factory(instance)
     scraper_config = check.get_scraper_config(instance)
 
@@ -2714,14 +2708,12 @@ def test_send_request_with_dynamic_prometheus_url(caplog, mocked_openmetrics_che
 
 
 def test_http_handler(mocked_openmetrics_check_factory):
-    instance = dict(
-        {
-            'prometheus_url': 'https://www.example.com',
-            'metrics': [{'foo': 'bar'}],
-            'namespace': 'openmetrics',
-            'ssl_verify': False,
-        }
-    )
+    instance = {
+        'prometheus_url': 'https://www.example.com',
+        'metrics': [{'foo': 'bar'}],
+        'namespace': 'openmetrics',
+        'ssl_verify': False,
+    }
     check = mocked_openmetrics_check_factory(instance)
     scraper_config = check.get_scraper_config(instance)
 

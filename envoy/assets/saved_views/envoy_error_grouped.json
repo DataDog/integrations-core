@@ -1,0 +1,18 @@
+{
+    "name": "Envoy Error Responses(4xx and 5xx) Grouped",
+    "query": "source:envoy @http.status_code:[400 TO 599] ",
+    "visible_facets": [
+        "source",
+        "host",
+        "service",
+        "@http.status_code",
+        "@http.method",
+        "@http.url",
+        "@http.authority"
+    ],
+    "type": "logs",
+    "timerange": {
+        "interval_ms": 3600000
+    },
+    "page": "patterns"
+}

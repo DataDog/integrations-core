@@ -2,7 +2,25 @@
 
 <!-- towncrier release notes start -->
 
-## 2.9.0 / 2024-01-05
+## 2.11.1 / 2024-02-29
+
+***Fixed***:
+
+* Fix process language detection metrics ([#17001](https://github.com/DataDog/integrations-core/pull/17001))
+
+## 2.11.0 / 2024-02-26
+
+***Added***:
+
+* Collect language detection metrics ([#16928](https://github.com/DataDog/integrations-core/pull/16928))
+
+## 2.10.0 / 2024-02-16
+
+***Added***:
+
+* Update the configuration file to include the new oauth options parameter ([#16835](https://github.com/DataDog/integrations-core/pull/16835))
+
+## 2.9.0 / 2024-01-05 / Agent 7.51.0
 
 ***Added***:
 

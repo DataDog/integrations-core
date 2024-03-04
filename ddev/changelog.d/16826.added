@@ -1,0 +1,1 @@
+Add the ability to expose multiple payloads consecutively with the `serve-openmetrics-payload` command

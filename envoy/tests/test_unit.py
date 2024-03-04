@@ -12,6 +12,8 @@ from datadog_checks.envoy.metrics import PROMETHEUS_METRICS_MAP
 from .common import (
     CLUSTER_AND_LISTENER_SSL_METRICS,
     CONNECT_STATE_METRIC,
+    CONNECTION_LIMIT_METRICS,
+    CONNECTION_LIMIT_STAT_PREFIX_TAG,
     DEFAULT_INSTANCE,
     LOCAL_RATE_LIMIT_METRICS,
     MOCKED_PROMETHEUS_METRICS,
@@ -51,6 +53,10 @@ def test_check(aggregator, dd_run_check, check, mock_http_response):
 
     for metric in CONNECT_STATE_METRIC:
         aggregator.assert_metric('envoy.{}'.format(metric))
+
+    for metric in CONNECTION_LIMIT_METRICS:
+        aggregator.assert_metric('envoy.{}'.format(metric))
+        aggregator.assert_metric_has_tag('envoy.{}'.format(metric), CONNECTION_LIMIT_STAT_PREFIX_TAG)
 
     aggregator.assert_service_check(
         "envoy.openmetrics.health", status=AgentCheck.OK, tags=['endpoint:http://localhost:8001/stats/prometheus']

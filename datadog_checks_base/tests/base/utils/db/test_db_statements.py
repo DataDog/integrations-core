@@ -3,10 +3,11 @@
 # Licensed under a 3-clause BSD style license (see LICENSE)
 
 import copy
+import random
 
 import pytest
 
-from datadog_checks.base.utils.db.statement_metrics import StatementMetrics
+from datadog_checks.base.utils.db.statement_metrics import StatementMetrics, _merge_duplicate_rows
 
 
 def add_to_dict(a, b):
@@ -181,3 +182,123 @@ class TestStatementMetrics:
         ]
 
         assert expected_merged_metrics == metrics
+
+    def test_merge_duplicate_rows(self):
+        rows = [
+            {
+                'count': 1,
+                'time': 100,
+                'errors': 32,
+                'query': 'SELECT * FROM table1 where id = ANY(?)',
+                'query_signature': 'sig1',
+                'db': 'puppies',
+                'user': 'dog',
+            },
+            {
+                'count': 2,
+                'errors': 1,
+                'query': 'SELECT * FROM table1 where id = ANY(?, ?)',
+                'query_signature': 'sig1',
+                'db': 'puppies',
+                'user': 'dog',
+            },
+            {
+                'count': 26,
+                'time': 125,
+                'errors': 1,
+                'query': 'SELECT * FROM table1 where id = ?',
+                'query_signature': 'sig2',
+                'db': 'puppies',
+                'user': 'dog',
+            },
+            {
+                'count': 26,
+                'time': 101,
+                'errors': 1,
+                'query': 'SELECT * FROM table1 where id != ?',
+                'query_signature': 'sig3',
+                'db': 'puppies',
+                'user': 'dog',
+            },
+        ]
+
+        merged_rows, dropped_metrics = _merge_duplicate_rows(rows, ['count', 'time'], lambda x: x['query_signature'])
+        assert dropped_metrics == {'time'}
+        assert len(merged_rows) == 3
+        assert merged_rows == {
+            'sig1': {
+                'count': 3,
+                'time': 100,
+                'errors': 32,
+                'query': 'SELECT * FROM table1 where id = ANY(?)',
+                'query_signature': 'sig1',
+                'db': 'puppies',
+                'user': 'dog',
+            },
+            'sig2': {
+                'count': 26,
+                'time': 125,
+                'errors': 1,
+                'query': 'SELECT * FROM table1 where id = ?',
+                'query_signature': 'sig2',
+                'db': 'puppies',
+                'user': 'dog',
+            },
+            'sig3': {
+                'count': 26,
+                'time': 101,
+                'errors': 1,
+                'query': 'SELECT * FROM table1 where id != ?',
+                'query_signature': 'sig3',
+                'db': 'puppies',
+                'user': 'dog',
+            },
+        }
+
+    def __run_compute_derivative_rows(self, sm, rounds=10):
+        for _ in range(rounds):
+            rows = [
+                {
+                    'count': 100,
+                    'time': 2005,
+                    'errors': 1,
+                    'query': 'x' * 3000,
+                    'db': 'puppies',
+                    'user': 'dog',
+                    'query_signature': 'sig{}'.format(random.randint(0, 10000)),
+                }
+                for _ in range(10000)
+            ]
+            sm.compute_derivative_rows(rows, ['count', 'time'], lambda x: x['query_signature'])
+
+    def test_compute_derivative_rows_mem_usage(self):
+        '''
+        Test that the memory usage of `compute_derivative_rows` is within acceptable limits
+        Make sure we minimize the temporary objects created when computing the derivative
+        This test is skipped if tracemalloc is not available
+        '''
+        MEMORY_USAGE_THRESHOLD = 7 * 1024 * 1024  # 7 MB
+
+        try:
+            import tracemalloc
+        except ImportError:
+            return
+
+        tracemalloc.start()
+
+        _, peak_before = tracemalloc.get_traced_memory()
+        sm = StatementMetrics()
+        self.__run_compute_derivative_rows(sm)
+
+        _, peak_after = tracemalloc.get_traced_memory()
+        tracemalloc.stop()
+
+        # Calculate the difference in memory usage
+        peak_diff = peak_after - peak_before
+        assert peak_diff < MEMORY_USAGE_THRESHOLD, "Memory usage difference {} is over the threshold {}".format(
+            peak_diff, MEMORY_USAGE_THRESHOLD
+        )
+
+    def test_compute_derivative_rows_benchmark(self, benchmark):
+        sm = StatementMetrics()
+        benchmark(self.__run_compute_derivative_rows, sm)

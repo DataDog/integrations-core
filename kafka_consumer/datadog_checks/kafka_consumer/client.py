@@ -82,12 +82,13 @@ class KafkaClient:
     def get_highwater_offsets(self, consumer_offsets):
         self.log.debug('Getting highwater offsets')
 
+        cluster_id = ""
         highwater_offsets = {}
         topics_with_consumer_offset = set()
         topic_partition_with_consumer_offset = set()
 
         if not self.config._monitor_all_broker_highwatermarks:
-            for (_, topic, partition) in consumer_offsets:
+            for _, topic, partition in consumer_offsets:
                 topics_with_consumer_offset.add(topic)
                 topic_partition_with_consumer_offset.add((topic, partition))
 
@@ -104,6 +105,10 @@ class KafkaClient:
             consumer = self.__create_consumer(consumer_group)
             self.log.debug("Consumer instance %s created for group %s", consumer, consumer_group)
             cluster_metadata = consumer.list_topics(timeout=self.config._request_timeout)
+            try:
+                cluster_id = cluster_metadata.cluster_id
+            except AttributeError:
+                self.log.error("Failed to get cluster metadata for consumer group %s", consumer_group)
             topics = cluster_metadata.topics
 
             for topic in topics:
@@ -153,7 +158,7 @@ class KafkaClient:
             consumer.close()
 
         self.log.debug('Got %s highwater offsets', len(highwater_offsets))
-        return highwater_offsets
+        return highwater_offsets, cluster_id
 
     def get_partitions_for_topic(self, topic):
         if partitions := self.topic_partition_cache.get(topic):

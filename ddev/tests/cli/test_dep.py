@@ -218,7 +218,16 @@ dep-a==1.2.3; python_version > '3.0'
 """
         assert requirements.strip('\n') == expected.strip('\n')
 
-    def test_ignored_deps(self, ddev):
+    def test_ignored_deps(self, ddev, config_file):
+        path = config_file.path.parent / '.ddev'
+        path.mkdir(parents=True, exist_ok=True)
+        (path / 'config.toml').write_text(
+            """[overrides.dep.updates]
+exclude = [
+    'ddtrace',
+]"""
+        )
+
         self.add_integration('foo', ["ddtrace==1.0.0"])
         self.write_requirements()
 

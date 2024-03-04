@@ -2,7 +2,13 @@
 
 <!-- towncrier release notes start -->
 
-## 4.2.0 / 2024-01-05
+## 4.2.1 / 2024-02-16
+
+***Fixed***:
+
+* Update the `log_level` in librkafka and redirect the logs ([#16677](https://github.com/DataDog/integrations-core/pull/16677))
+
+## 4.2.0 / 2024-01-05 / Agent 7.51.0
 
 ***Added***:
 

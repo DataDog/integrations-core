@@ -28,7 +28,7 @@ classifiers = [
     "Private :: Do Not Upload",
 ]
 dependencies = [
-    "datadog-checks-base>=32.6.0",
+    "datadog-checks-base>=35.0.1",
 ]
 dynamic = [
     "version",
@@ -37,7 +37,7 @@ license = "BSD-3-Clause"
 
 [project.optional-dependencies]
 deps = [
-    "snowflake-connector-python==3.7.0; python_version > '3.0'",
+    "snowflake-connector-python==3.7.1; python_version > '3.0'",
 ]
 
 [project.urls]

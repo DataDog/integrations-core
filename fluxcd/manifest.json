@@ -13,6 +13,7 @@
     "media": [],
     "classifier_tags": [
       "Category::Kubernetes",
+      "Category::Developer Tools",
       "Supported OS::Linux",
       "Supported OS::Windows",
       "Supported OS::macOS"
@@ -24,7 +25,6 @@
     "homepage": "https://www.datadoghq.com",
     "sales_email": "info@datadoghq.com"
   },
-  "oauth": {},
   "assets": {
     "integration": {
       "source_type_name": "fluxcd",
