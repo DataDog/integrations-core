@@ -194,7 +194,7 @@
                                 },
                                 "group_by": [
                                     {
-                                        "facet": "@checkpoint_firewall_severity",
+                                        "facet": "@checkpoint.quantum.firewall.severity",
                                         "limit": 10,
                                         "sort": {
                                             "order": "desc",
@@ -255,7 +255,7 @@
                                 },
                                 "group_by": [
                                     {
-                                        "facet": "@checkpoint_firewall_status",
+                                        "facet": "@checkpoint.quantum.firewall.status",
                                         "limit": 10,
                                         "sort": {
                                             "order": "desc",
@@ -304,11 +304,11 @@
                         },
                         "columns": [
                             {
-                                "field": "checkpoint_firewall_severity",
+                                "field": "checkpoint.quantum.firewall.severity",
                                 "width": "auto"
                             },
                             {
-                                "field": "checkpoint_firewall_action",
+                                "field": "checkpoint.quantum.firewall.action",
                                 "width": "auto"
                             },
                             {
@@ -316,7 +316,7 @@
                                 "width": "auto"
                             },
                             {
-                                "field": "checkpoint_firewall_status",
+                                "field": "checkpoint.quantum.firewall.status",
                                 "width": "auto"
                             },
                             {
@@ -345,13 +345,13 @@
         },
         {
             "name": "Status",
-            "prefix": "@checkpoint_firewall_status",
+            "prefix": "@checkpoint.quantum.firewall.status",
             "available_values": [],
             "default": "*"
         },
         {
             "name": "Severity",
-            "prefix": "@checkpoint_firewall_severity",
+            "prefix": "@checkpoint.quantum.firewall.severity",
             "available_values": [],
             "default": "*"
         }

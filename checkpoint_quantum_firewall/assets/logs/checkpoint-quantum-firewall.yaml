@@ -101,7 +101,7 @@ facets:
     groups:
       - Checkpoint Quantum Firewall
     name: Action
-    path: checkpoint_firewall_action
+    path: checkpoint.quantum.firewall.action
     source: log
     type: string
   - facetType: list
@@ -160,7 +160,7 @@ facets:
     groups:
       - Checkpoint Quantum Firewall
     name: Client Name
-    path: checkpoint_firewall_client_name
+    path: checkpoint.quantum.firewall.client_name
     source: log
     type: string
   - facetType: range
@@ -205,7 +205,7 @@ facets:
     groups:
       - Checkpoint Quantum Firewall
     name: Event Type
-    path: checkpoint_event_type
+    path: checkpoint.quantum.firewall.event_type
     source: log
     type: string
   - facetType: list
@@ -261,7 +261,7 @@ facets:
     groups:
       - Checkpoint Quantum Firewall
     name: Operation
-    path: checkpoint_operation
+    path: checkpoint.quantum.firewall.operation
     source: log
     type: string
   - facetType: list
@@ -289,7 +289,7 @@ facets:
     groups:
       - Checkpoint Quantum Firewall
     name: Protocol
-    path: checkpoint_firewall_protocol
+    path: checkpoint.quantum.firewall.protocol
     source: log
     type: string
   - facetType: list
@@ -317,7 +317,7 @@ facets:
     groups:
       - Checkpoint Quantum Firewall
     name: Severity
-    path: checkpoint_firewall_severity
+    path: checkpoint.quantum.firewall.severity
     source: log
     type: string
   - facetType: list
@@ -345,21 +345,21 @@ facets:
     groups:
       - Checkpoint Quantum Firewall
     name: Status
-    path: checkpoint_firewall_status
+    path: checkpoint.quantum.firewall.status
     source: log
     type: string
   - facetType: list
     groups:
       - Checkpoint Quantum Firewall
     name: Subject
-    path: checkpoint_firewall_subject
+    path: checkpoint.quantum.firewall.subject
     source: log
     type: string
   - facetType: range
     groups:
       - Checkpoint Quantum Firewall
     name: Total Bytes
-    path: checkpoint_firewall_bytes
+    path: checkpoint.quantum.firewall.bytes
     source: log
     type: integer
     unit:
@@ -375,23 +375,17 @@ pipeline:
     - type: service-remapper
       name: Define `product` as the official service of the log
       enabled: true
-      meta:
-        tags: []
       sources:
         - product
     - type: date-remapper
       name: Define `time` as the official date of the log
       enabled: true
-      meta:
-        tags: []
       sources:
         - time
-    - name: Lookup for `severity` to `checkpoint_firewall_severity` field
+    - name: Lookup for `severity` to `checkpoint.quantum.firewall.severity` field
       enabled: true
-      meta:
-        tags: []
       source: severity
-      target: checkpoint_firewall_severity
+      target: checkpoint.quantum.firewall.severity
       lookupTable: |-
         0, Info
         1, Low
@@ -405,74 +399,62 @@ pipeline:
         Critical, Critical
       type: lookup-processor
     - type: attribute-remapper
-      name: Map `subject` to `checkpoint_firewall_subject`
+      name: Map `subject` to `checkpoint.quantum.firewall.subject`
       enabled: true
-      meta:
-        tags: []
       sources:
         - subject
       sourceType: attribute
-      target: checkpoint_firewall_subject
+      target: checkpoint.quantum.firewall.subject
       targetType: attribute
       preserveSource: false
       overrideOnConflict: false
     - type: attribute-remapper
-      name: Map `client_name` to `checkpoint_firewall_client_name`
+      name: Map `client_name` to `checkpoint.quantum.firewall.client_name`
       enabled: true
-      meta:
-        tags: []
       sources:
         - client_name
       sourceType: attribute
-      target: checkpoint_firewall_client_name
+      target: checkpoint.quantum.firewall.client_name
       targetType: attribute
       preserveSource: false
       overrideOnConflict: false
     - type: attribute-remapper
-      name: Map `action` to `checkpoint_firewall_action`
+      name: Map `action` to `checkpoint.quantum.firewall.action`
       enabled: true
-      meta:
-        tags: []
       sources:
         - action
       sourceType: attribute
-      target: checkpoint_firewall_action
+      target: checkpoint.quantum.firewall.action
       targetType: attribute
       preserveSource: false
       overrideOnConflict: false
     - type: attribute-remapper
-      name: Map `protocol` to `checkpoint_firewall_protocol`
+      name: Map `protocol` to `checkpoint.quantum.firewall.protocol`
       enabled: true
-      meta:
-        tags: []
       sources:
         - protocol
       sourceType: attribute
-      target: checkpoint_firewall_protocol
+      target: checkpoint.quantum.firewall.protocol
       targetType: attribute
       preserveSource: false
       overrideOnConflict: false
     - type: attribute-remapper
-      name: Map `bytes` to `checkpoint_firewall_bytes`
+      name: Map `bytes` to `checkpoint.quantum.firewall.bytes`
       enabled: true
-      meta:
-        tags: []
       sources:
         - bytes
       sourceType: attribute
-      target: checkpoint_firewall_bytes
+      target: checkpoint.quantum.firewall.bytes
       targetType: attribute
       preserveSource: false
       overrideOnConflict: false
     - type: attribute-remapper
-      name: Map `operation` to `checkpoint_operation`
+      name: Map `operation` to `checkpoint.quantum.firewall.operation`
       enabled: true
-      meta:
-        tags: []
       sources:
         - operation
       sourceType: attribute
-      target: checkpoint_operation
+      target: checkpoint.quantum.firewall.operation
       targetType: attribute
       preserveSource: false
       overrideOnConflict: false
@@ -487,8 +469,6 @@ pipeline:
         - type: attribute-remapper
           name: Map `src` to `network.client.ip`
           enabled: true
-          meta:
-            tags: []
           sources:
             - src
           sourceType: attribute
@@ -499,8 +479,6 @@ pipeline:
         - type: attribute-remapper
           name: Map `dst` to `network.destination.ip`
           enabled: true
-          meta:
-            tags: []
           sources:
             - dst
           sourceType: attribute
@@ -511,8 +489,6 @@ pipeline:
         - type: attribute-remapper
           name: Map `s_port` to `network.client.port`
           enabled: true
-          meta:
-            tags: []
           sources:
             - s_port
           sourceType: attribute
@@ -523,8 +499,6 @@ pipeline:
         - type: attribute-remapper
           name: Map `src_country` to `network.client.geoip.country.iso_code`
           enabled: true
-          meta:
-            tags: []
           sources:
             - src_country
           sourceType: attribute
@@ -535,8 +509,6 @@ pipeline:
         - type: attribute-remapper
           name: Map `service` to `network.destination.port`
           enabled: true
-          meta:
-            tags: []
           sources:
             - service
           sourceType: attribute
@@ -547,8 +519,6 @@ pipeline:
         - type: attribute-remapper
           name: Map `server_inbound_bytes` to `network.bytes_read`
           enabled: true
-          meta:
-            tags: []
           sources:
             - server_inbound_bytes
           sourceType: attribute
@@ -559,8 +529,6 @@ pipeline:
         - type: attribute-remapper
           name: Map `server_outbound_bytes` to `network.bytes_written`
           enabled: true
-          meta:
-            tags: []
           sources:
             - server_outbound_bytes
           sourceType: attribute
@@ -571,8 +539,6 @@ pipeline:
         - type: geo-ip-parser
           name: GeoIP Parser for `network.client.ip`
           enabled: true
-          meta:
-            tags: []
           sources:
             - network.client.ip
           target: network.client.geoip
@@ -580,8 +546,6 @@ pipeline:
         - type: geo-ip-parser
           name: GeoIP Parser for `network.destination.ip`
           enabled: true
-          meta:
-            tags: []
           sources:
             - network.destination.ip
           target: network.destination.geoip
@@ -595,8 +559,6 @@ pipeline:
         - type: attribute-remapper
           name: Map `src_user_name` to `usr.name`
           enabled: true
-          meta:
-            tags: []
           sources:
             - src_user_name
           sourceType: attribute
@@ -605,14 +567,12 @@ pipeline:
           preserveSource: false
           overrideOnConflict: false
         - type: attribute-remapper
-          name: Map `event_type` to `checkpoint_event_type`
+          name: Map `event_type` to `checkpoint.quantum.firewall.event_type`
           enabled: true
-          meta:
-            tags: []
           sources:
             - event_type
           sourceType: attribute
-          target: checkpoint_event_type
+          target: checkpoint.quantum.firewall.event_type
           targetType: attribute
           preserveSource: false
           overrideOnConflict: false
@@ -625,8 +585,6 @@ pipeline:
         - type: attribute-remapper
           name: Map `user` to `usr.name`
           enabled: true
-          meta:
-            tags: []
           sources:
             - user
           sourceType: attribute
@@ -645,8 +603,6 @@ pipeline:
           name: "Define `src_ip_port` equal to %{network.client.ip}:
             %{network.client.port}"
           enabled: true
-          meta:
-            tags: []
           template: "%{network.client.ip}:%{network.client.port}"
           target: src_ip_port
           replaceMissing: false
@@ -654,8 +610,6 @@ pipeline:
           name: "Define `dst_ip_port` equal to %{network.destination.ip}:
             %{network.destination.port}"
           enabled: true
-          meta:
-            tags: []
           template: "%{network.destination.ip}:%{network.destination.port}"
           target: dst_ip_port
           replaceMissing: false
@@ -667,8 +621,6 @@ pipeline:
       processors:
         - name: Lookup for `app_risk` to `app_risk_str` field
           enabled: true
-          meta:
-            tags: []
           source: app_risk
           target: app_risk_str
           lookupTable: |-
@@ -692,14 +644,12 @@ pipeline:
         query: '@product:"HTTPS Inspection" '
       processors:
         - type: attribute-remapper
-          name: Map `status` to `checkpoint_firewall_status`
+          name: Map `status` to `checkpoint.quantum.firewall.status`
           enabled: true
-          meta:
-            tags: []
           sources:
             - status
           sourceType: attribute
-          target: checkpoint_firewall_status
+          target: checkpoint.quantum.firewall.status
           targetType: attribute
           preserveSource: false
           overrideOnConflict: false

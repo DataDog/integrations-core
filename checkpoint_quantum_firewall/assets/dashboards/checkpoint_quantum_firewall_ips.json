@@ -193,7 +193,7 @@
                                 },
                                 "group_by": [
                                     {
-                                        "facet": "@checkpoint_firewall_severity",
+                                        "facet": "@checkpoint.quantum.firewall.severity",
                                         "limit": 10,
                                         "sort": {
                                             "order": "desc",
@@ -315,7 +315,7 @@
                                 },
                                 "group_by": [
                                     {
-                                        "facet": "@checkpoint_firewall_action",
+                                        "facet": "@checkpoint.quantum.firewall.action",
                                         "limit": 10,
                                         "sort": {
                                             "order": "desc",
@@ -754,11 +754,11 @@
                                 "width": "auto"
                             },
                             {
-                                "field": "checkpoint_firewall_action",
+                                "field": "checkpoint.quantum.firewall.action",
                                 "width": "auto"
                             },
                             {
-                                "field": "checkpoint_firewall_severity",
+                                "field": "checkpoint.quantum.firewall.severity",
                                 "width": "auto"
                             },
                             {
@@ -799,7 +799,7 @@
         },
         {
             "name": "Action",
-            "prefix": "@checkpoint_firewall_action",
+            "prefix": "@checkpoint.quantum.firewall.action",
             "available_values": [],
             "default": "*"
         },

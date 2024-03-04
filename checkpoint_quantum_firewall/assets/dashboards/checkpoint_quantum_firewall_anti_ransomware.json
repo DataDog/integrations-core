@@ -193,7 +193,7 @@
                                 },
                                 "group_by": [
                                     {
-                                        "facet": "@checkpoint_firewall_action",
+                                        "facet": "@checkpoint.quantum.firewall.action",
                                         "limit": 10,
                                         "sort": {
                                             "order": "desc",
@@ -254,7 +254,7 @@
                                 },
                                 "group_by": [
                                     {
-                                        "facet": "@checkpoint_firewall_severity",
+                                        "facet": "@checkpoint.quantum.firewall.severity",
                                         "limit": 10,
                                         "sort": {
                                             "order": "desc",
@@ -315,7 +315,7 @@
                                 },
                                 "group_by": [
                                     {
-                                        "facet": "@checkpoint_event_type",
+                                        "facet": "@checkpoint.quantum.firewall.event_type",
                                         "limit": 10,
                                         "sort": {
                                             "order": "desc",
@@ -572,7 +572,7 @@
                                     }
                                 ],
                                 "search": {
-                                    "query": "source:checkpoint-quantum-firewall @product:Anti-Ransomware @checkpoint_firewall_action:Detect $Checkpoint_Server $Action"
+                                    "query": "source:checkpoint-quantum-firewall @product:Anti-Ransomware @checkpoint.quantum.firewall.action:Detect $Checkpoint_Server $Action"
                                 },
                                 "storage": "hot"
                             }
@@ -738,15 +738,15 @@
                                 "width": "auto"
                             },
                             {
-                                "field": "checkpoint_firewall_severity",
+                                "field": "checkpoint.quantum.firewall.severity",
                                 "width": "auto"
                             },
                             {
-                                "field": "checkpoint_firewall_action",
+                                "field": "checkpoint.quantum.firewall.action",
                                 "width": "auto"
                             },
                             {
-                                "field": "checkpoint_event_type",
+                                "field": "checkpoint.quantum.firewall.event_type",
                                 "width": "auto"
                             },
                             {
@@ -803,7 +803,7 @@
         },
         {
             "name": "Action",
-            "prefix": "@checkpoint_firewall_action",
+            "prefix": "@checkpoint.quantum.firewall.action",
             "available_values": [],
             "default": "*"
         }
