@@ -5,7 +5,7 @@ import email
 import re
 import time
 from hashlib import sha256
-from pathlib import Path
+from pathlib import Path, PurePosixPath
 from typing import TYPE_CHECKING, Iterator
 from zipfile import ZipFile
 
@@ -88,6 +88,13 @@ def iter_wheel_dirs(targets_dir: str) -> Iterator[Path]:
                 yield entry
 
 
+def _build_number_of_wheel_blob(wheel_path: Blob) -> str:
+    """Extract the build number from a blob object representing a wheel."""
+    wheel_name = PurePosixPath(wheel_path.name).stem
+    _name, _version, *build_number, _python_tag, _abi_tag, _platform_tag = wheel_name.split('-')
+    return build_number[0] if build_number else ''
+
+
 def upload(targets_dir):
     client = storage.Client()
     bucket = client.bucket(BUCKET_NAME)
@@ -129,9 +136,12 @@ def upload(targets_dir):
             else:
                 # https://packaging.python.org/en/latest/specifications/binary-distribution-format/#file-name-convention
                 name, version, python_tag, abi_tag, platform_tag = wheel.stem.split('-')
-                existing_wheels = list(bucket.list_blobs(prefix=f'{artifact_type}/{project_name}/{name}-{version}-'))
+                existing_wheels = list(bucket.list_blobs(
+                    prefix=f'{artifact_type}/{project_name}/',
+                    match_glob=f'{name}-{version}-*-{abi_tag}-{platform_tag}.whl',
+                ))
                 if existing_wheels:
-                    most_recent_wheel = max(existing_wheels, key=lambda b: b.name)
+                    most_recent_wheel = max(existing_wheels, key=_build_number_of_wheel_blob)
                     # Don't upload if it's the same file
                     if most_recent_wheel.metadata['sha256'] == sha256_digest:
                         continue
