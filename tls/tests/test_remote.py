@@ -6,6 +6,8 @@ from unittest.mock import MagicMock, patch
 
 import mock
 import pytest
+from six import PY2
+
 from datadog_checks.base import ConfigurationError
 from datadog_checks.tls.const import (
     SERVICE_CHECK_CAN_CONNECT,
@@ -15,7 +17,6 @@ from datadog_checks.tls.const import (
 )
 from datadog_checks.tls.tls import TLSCheck
 from datadog_checks.tls.tls_remote import TLSRemoteCheck
-from six import PY2
 
 
 def test_right_class_is_instantiated(instance_remote_no_server):
