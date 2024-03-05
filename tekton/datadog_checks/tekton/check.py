@@ -7,7 +7,6 @@ from datadog_checks.tekton.config_models import ConfigMixin
 from .metrics import ENDPOINTS_METRICS_MAP
 
 
-
 class TektonCheck(OpenMetricsBaseCheckV2, ConfigMixin):
     DEFAULT_METRIC_LIMIT = 0
 
