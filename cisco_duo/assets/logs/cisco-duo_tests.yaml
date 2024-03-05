@@ -260,7 +260,7 @@ tests:
       "service" : "telephony",
       "message" : {
         "telephony_id" : "some-telephony-id",
-        "credits" : 5,
+        "credits" : 6,
         "phone" : "+11234567890",
         "context" : "authentication",
         "txid" : "some-txid",
