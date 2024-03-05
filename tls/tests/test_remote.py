@@ -1,13 +1,12 @@
 # (C) Datadog, Inc. 2019-present
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
-import ssl
-
 import mock
 import pytest
 from six import PY2
 
 from datadog_checks.base import ConfigurationError
+from datadog_checks.dev.testing import requires_py3
 from datadog_checks.tls.const import (
     SERVICE_CHECK_CAN_CONNECT,
     SERVICE_CHECK_EXPIRATION,
@@ -16,11 +15,6 @@ from datadog_checks.tls.const import (
 )
 from datadog_checks.tls.tls import TLSCheck
 from datadog_checks.tls.tls_remote import TLSRemoteCheck
-
-try:
-    from ssl import SSLCertVerificationError
-except ImportError:  # Python version is earlier than 3.7
-    SSLCertVerificationError = ssl.SSLError
 
 try:
     from unittest.mock import MagicMock, patch
@@ -349,12 +343,12 @@ def test_mysql_ok(aggregator, instance_remote_mysql_valid):
     aggregator.assert_all_metrics_covered()
 
 
+@requires_py3
 def test_valid_version_with_critical_certificate_validation_and_critial_certificate_expiration(
     aggregator, instance_remote_ok
 ):
-    if PY2:
-        # Skip this test on Python 2, no longer in active support
-        return
+    from ssl import SSLCertVerificationError
+
     c = TLSCheck('tls', {}, [instance_remote_ok])
     check = TLSRemoteCheck(agent_check=c)
     with patch.object(check.agent_check, 'get_tls_context') as mock_get_tls_context:
@@ -381,10 +375,8 @@ def test_valid_version_with_critical_certificate_validation_and_critial_certific
     aggregator.assert_all_metrics_covered()
 
 
+@requires_py3
 def test_valid_version_and_critical_certificate_validation_due_to_socket_exception(aggregator, instance_remote_ok):
-    if PY2:
-        # Skip this test on Python 2, no longer in active support
-        return
     c = TLSCheck('tls', {}, [instance_remote_ok])
     check = TLSRemoteCheck(agent_check=c)
     with patch.object(check.agent_check, 'get_tls_context') as mock_get_tls_context:
@@ -412,10 +404,8 @@ def test_valid_version_and_critical_certificate_validation_due_to_socket_excepti
     aggregator.assert_all_metrics_covered()
 
 
+@requires_py3
 def test_valid_version_and_critical_certificate_validation_due_to_parsing_error(aggregator, instance_remote_ok):
-    if PY2:
-        # Skip this test on Python 2, no longer in active support
-        return
     c = TLSCheck('tls', {}, [instance_remote_ok])
     check = TLSRemoteCheck(agent_check=c)
     with patch.object(check.agent_check, 'get_tls_context') as mock_get_tls_context:
