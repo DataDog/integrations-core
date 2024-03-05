@@ -108,7 +108,7 @@
                                             },
                                             "group_by": [],
                                             "search": {
-                                                "query": "source:cisco-umbrella-dns service:proxy @verdict:blocked $Verdict $Url $Categories $Identities $Identities_Type $Request_Method"
+                                                "query": "source:cisco-umbrella-dns service:proxy @cisco.umbrella.dns.verdict:blocked $Verdict $Url $Categories $Identities $Identities_Type $Request_Method"
                                             },
                                             "storage": "hot"
                                         }
@@ -159,7 +159,7 @@
                                             },
                                             "group_by": [],
                                             "search": {
-                                                "query": "source:cisco-umbrella-dns service:proxy @verdict:allowed $Verdict $Url $Categories $Identities $Identities_Type $Request_Method"
+                                                "query": "source:cisco-umbrella-dns service:proxy @cisco.umbrella.dns.verdict:allowed $Verdict $Url $Categories $Identities $Identities_Type $Request_Method"
                                             },
                                             "storage": "hot"
                                         }
@@ -237,7 +237,7 @@
                                             },
                                             "group_by": [
                                                 {
-                                                    "facet": "@verdict",
+                                                    "facet": "@cisco.umbrella.dns.verdict",
                                                     "limit": 10,
                                                     "sort": {
                                                         "order": "desc",
@@ -420,7 +420,7 @@
                                             },
                                             "group_by": [
                                                 {
-                                                    "facet": "@categories.label",
+                                                    "facet": "@cisco.umbrella.dns.categories.label",
                                                     "limit": 10,
                                                     "sort": {
                                                         "order": "desc",
@@ -685,7 +685,7 @@
                                             },
                                             "group_by": [
                                                 {
-                                                    "facet": "@categories.label",
+                                                    "facet": "@cisco.umbrella.dns.categories.label",
                                                     "limit": 10,
                                                     "sort": {
                                                         "order": "desc",
@@ -694,7 +694,7 @@
                                                 }
                                             ],
                                             "search": {
-                                                "query": "source:cisco-umbrella-dns service:proxy @verdict:blocked $Verdict $Url $Categories $Identities $Identities_Type $Request_Method"
+                                                "query": "source:cisco-umbrella-dns service:proxy @cisco.umbrella.dns.verdict:blocked $Verdict $Url $Categories $Identities $Identities_Type $Request_Method"
                                             },
                                             "storage": "hot"
                                         }
@@ -746,7 +746,7 @@
                                             },
                                             "group_by": [
                                                 {
-                                                    "facet": "@verdict",
+                                                    "facet": "@cisco.umbrella.dns.verdict",
                                                     "limit": 25,
                                                     "sort": {
                                                         "order": "desc",
@@ -754,7 +754,7 @@
                                                     }
                                                 },
                                                 {
-                                                    "facet": "@categories.label",
+                                                    "facet": "@cisco.umbrella.dns.categories.label",
                                                     "limit": 25,
                                                     "sort": {
                                                         "order": "desc",
@@ -825,7 +825,7 @@
                                                 }
                                             ],
                                             "search": {
-                                                "query": "source:cisco-umbrella-dns service:proxy @verdict:allowed $Verdict $Url $Categories $Identities $Identities_Type $Request_Method"
+                                                "query": "source:cisco-umbrella-dns service:proxy @cisco.umbrella.dns.verdict:allowed $Verdict $Url $Categories $Identities $Identities_Type $Request_Method"
                                             },
                                             "storage": "hot"
                                         }
@@ -887,7 +887,7 @@
                                                 }
                                             ],
                                             "search": {
-                                                "query": "source:cisco-umbrella-dns service:proxy @verdict:blocked $Verdict $Url $Categories $Identities $Identities_Type $Request_Method"
+                                                "query": "source:cisco-umbrella-dns service:proxy @cisco.umbrella.dns.verdict:blocked $Verdict $Url $Categories $Identities $Identities_Type $Request_Method"
                                             },
                                             "storage": "hot"
                                         }
@@ -1125,7 +1125,7 @@
                                             },
                                             "group_by": [
                                                 {
-                                                    "facet": "@isolated.state",
+                                                    "facet": "@cisco.umbrella.dns.isolated.state",
                                                     "limit": 10,
                                                     "sort": {
                                                         "order": "desc",
@@ -1186,7 +1186,7 @@
                                             },
                                             "group_by": [
                                                 {
-                                                    "facet": "@warnstatus",
+                                                    "facet": "@cisco.umbrella.dns.warnstatus",
                                                     "limit": 10,
                                                     "sort": {
                                                         "order": "desc",
@@ -1195,7 +1195,7 @@
                                                 }
                                             ],
                                             "search": {
-                                                "query": "source:cisco-umbrella-dns service:proxy -@warnstatus:\"\" $Verdict $Url $Categories $Identities $Identities_Type $Request_Method"
+                                                "query": "source:cisco-umbrella-dns service:proxy -@cisco.umbrella.dns.warnstatus:\"\" $Verdict $Url $Categories $Identities $Identities_Type $Request_Method"
                                             },
                                             "storage": "hot"
                                         }
@@ -1247,7 +1247,7 @@
                                             ],
                                             "compute": {
                                                 "aggregation": "avg",
-                                                "metric": "@requestsize"
+                                                "metric": "@cisco.umbrella.dns.requestsize"
                                             },
                                             "group_by": [],
                                             "search": {
@@ -1302,7 +1302,7 @@
                                             ],
                                             "compute": {
                                                 "aggregation": "avg",
-                                                "metric": "@responsesize"
+                                                "metric": "@cisco.umbrella.dns.responsesize"
                                             },
                                             "group_by": [],
                                             "search": {
@@ -1677,13 +1677,13 @@
         },
         {
             "name": "Verdict",
-            "prefix": "@verdict",
+            "prefix": "@cisco.umbrella.dns.verdict",
             "available_values": [],
             "default": "*"
         },
         {
             "name": "Categories",
-            "prefix": "@categories.label",
+            "prefix": "@cisco.umbrella.dns.categories.label",
             "available_values": [],
             "default": "*"
         },

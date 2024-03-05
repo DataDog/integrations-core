@@ -95,6 +95,15 @@ tests:
         id: 190
         label: "Search Engines and Portals"
         type: "content"
+      cisco:
+        umbrella:
+          dns:
+            external:
+              geoip:
+                country:
+                  iso_code: "FR"
+            returnmessage: "NOERROR"
+            verdict: "blocked"
       date: "2023-12-11"
       dns:
         answer:
@@ -111,7 +120,6 @@ tests:
             code: "EU"
             name: "Europe"
           country:
-            iso_code: "FR"
             name: "France"
           ipAddress: "185.64.148.0"
           location:
@@ -147,11 +155,9 @@ tests:
         id: 190
         label: "Search Engines and Portals"
         type: "content"
-      returnmessage: "NOERROR"
       time: "09:47:00"
       timestamp: 1702288020000
       type: "dns"
-      verdict: "blocked"
     message: |-
       {
         "date" : "2023-12-11",
@@ -319,6 +325,15 @@ tests:
         id: 194
         label: "Streaming Video"
         type: "content"
+      cisco:
+        umbrella:
+          dns:
+            external:
+              geoip:
+                country:
+                  iso_code: "FR"
+            returnmessage: "NOERROR"
+            verdict: "allowed"
       date: "2023-12-19"
       dns:
         answer:
@@ -335,7 +350,6 @@ tests:
             code: "EU"
             name: "Europe"
           country:
-            iso_code: "FR"
             name: "France"
           ipAddress: "185.64.148.0"
           location:
@@ -363,11 +377,9 @@ tests:
         id: 194
         label: "Streaming Video"
         type: "content"
-      returnmessage: "NOERROR"
       time: "12:56:56"
       timestamp: 1702990616000
       type: "dns"
-      verdict: "allowed"
     message: |-
       {
         "date" : "2023-12-19",
@@ -520,6 +532,15 @@ tests:
         id: 148
         label: "Application"
         type: "application"
+      cisco:
+        umbrella:
+          dns:
+            external:
+              geoip:
+                country:
+                  iso_code: "FR"
+            returnmessage: "NOERROR"
+            verdict: "proxied"
       date: "2023-12-19"
       dns:
         answer:
@@ -536,7 +557,6 @@ tests:
             code: "EU"
             name: "Europe"
           country:
-            iso_code: "FR"
             name: "France"
           ipAddress: "185.64.148.0"
           location:
@@ -564,11 +584,9 @@ tests:
         id: 24
         label: "Social Networking"
         type: "content"
-      returnmessage: "NOERROR"
       time: "12:56:56"
       timestamp: 1702990616000
       type: "dns"
-      verdict: "proxied"
     message: |-
       {
         "date" : "2023-12-19",
@@ -753,6 +771,15 @@ tests:
         id: 190
         label: "Search Engines and Portals"
         type: "content"
+      cisco:
+        umbrella:
+          dns:
+            isolated:
+              state: "not-isolated"
+            requestsize: 517
+            responsesize: 746
+            verdict: "blocked"
+            warnstatus: ""
       contenttype: "text/html"
       datacenter:
         id: "SIN"
@@ -807,7 +834,6 @@ tests:
       internalip: "185.64.148.0"
       isolated:
         fileaction: ""
-        state: "not-isolated"
       network:
         bytes_read: 517
         bytes_written: 746
@@ -842,17 +868,13 @@ tests:
         label: "Search Engines and Portals"
         type: "content"
       port: 443
-      requestsize: 517
       responsefilename: ""
-      responsesize: 746
       securityoverridden: false
       sha256: ""
       tenantcontrols: false
       time: "10:00:41"
       timestamp: 1702288841000
       type: "proxy"
-      verdict: "blocked"
-      warnstatus: ""
     message: |-
       {
         "date" : "2023-12-11",
@@ -1076,6 +1098,15 @@ tests:
         id: 190
         label: "Search Engines and Portals"
         type: "content"
+      cisco:
+        umbrella:
+          dns:
+            isolated:
+              state: "not-isolated"
+            requestsize: 517
+            responsesize: 746
+            verdict: "allowed"
+            warnstatus: ""
       contenttype: "text/html"
       datacenter:
         id: "SIN"
@@ -1130,7 +1161,6 @@ tests:
       internalip: "185.64.148.0"
       isolated:
         fileaction: ""
-        state: "not-isolated"
       network:
         bytes_read: 517
         bytes_written: 746
@@ -1165,17 +1195,13 @@ tests:
         label: "Search Engines and Portals"
         type: "content"
       port: 443
-      requestsize: 517
       responsefilename: ""
-      responsesize: 746
       securityoverridden: false
       sha256: ""
       tenantcontrols: false
       time: "10:00:35"
       timestamp: 1701943235000
-      type: "proxy"
-      verdict: "allowed"
-      warnstatus: ""
+      type: "proxy"   
     message: |-
       {
         "date" : "2023-12-07",
