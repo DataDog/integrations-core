@@ -6,8 +6,6 @@ from datadog_checks.tekton.config_models import ConfigMixin
 
 from .metrics import ENDPOINTS_METRICS_MAP
 
-PIPELINES_CONTROLLER_NAMESPACE = 'tekton.pipelines_controller'
-TRIGGERS_CONTROLLER_NAMESPACE = 'tekton.trigger_controller'
 
 
 class TektonCheck(OpenMetricsBaseCheckV2, ConfigMixin):
