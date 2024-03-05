@@ -127,7 +127,7 @@
                                 ],
                                 "compute": {
                                     "aggregation": "sum",
-                                    "metric": "@credits"
+                                    "metric": "@cisco.duo.credits"
                                 },
                                 "group_by": [],
                                 "search": {
@@ -183,7 +183,7 @@
                                 },
                                 "group_by": [
                                     {
-                                        "facet": "@context",
+                                        "facet": "@cisco.duo.context",
                                         "limit": 10,
                                         "sort": {
                                             "order": "desc",
@@ -240,16 +240,16 @@
                                 ],
                                 "compute": {
                                     "aggregation": "sum",
-                                    "metric": "@credits"
+                                    "metric": "@cisco.duo.credits"
                                 },
                                 "group_by": [
                                     {
-                                        "facet": "@context",
+                                        "facet": "@cisco.duo.context",
                                         "limit": 10,
                                         "sort": {
                                             "order": "desc",
                                             "aggregation": "sum",
-                                            "metric": "@credits"
+                                            "metric": "@cisco.duo.credits"
                                         }
                                     }
                                 ],
@@ -303,7 +303,7 @@
                                 ],
                                 "compute": {
                                     "aggregation": "sum",
-                                    "metric": "@credits"
+                                    "metric": "@cisco.duo.credits"
                                 },
                                 "group_by": [
                                     {
@@ -312,7 +312,7 @@
                                         "sort": {
                                             "order": "desc",
                                             "aggregation": "sum",
-                                            "metric": "@credits"
+                                            "metric": "@cisco.duo.credits"
                                         }
                                     }
                                 ],
@@ -372,16 +372,16 @@
                                 ],
                                 "compute": {
                                     "aggregation": "sum",
-                                    "metric": "@credits"
+                                    "metric": "@cisco.duo.credits"
                                 },
                                 "group_by": [
                                     {
-                                        "facet": "@credits",
+                                        "facet": "@cisco.duo.credits",
                                         "limit": 10,
                                         "sort": {
                                             "order": "desc",
                                             "aggregation": "sum",
-                                            "metric": "@credits"
+                                            "metric": "@cisco.duo.credits"
                                         }
                                     }
                                 ],
@@ -452,7 +452,7 @@
     "template_variables": [
         {
             "name": "Context",
-            "prefix": "@context",
+            "prefix": "@cisco.duo.context",
             "available_values": [],
             "default": "*"
         },
