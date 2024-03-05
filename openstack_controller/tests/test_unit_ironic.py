@@ -559,7 +559,7 @@ def test_conductors_metrics(aggregator, check, dd_run_check, metrics):
             configs.REST,
             CONDUCTORS_METRICS_IRONIC_MICROVERSION_DEFAULT,
             ApiType.REST,
-            2,
+            1,
             id='api rest no microversion high limit',
         ),
         pytest.param(
@@ -568,7 +568,7 @@ def test_conductors_metrics(aggregator, check, dd_run_check, metrics):
             configs.REST_IRONIC_MICROVERSION_1_80,
             CONDUCTORS_METRICS_IRONIC_MICROVERSION_1_80,
             ApiType.REST,
-            1,
+            2,
             id='api rest microversion 1.80 low limit',
         ),
         pytest.param(
@@ -586,7 +586,7 @@ def test_conductors_metrics(aggregator, check, dd_run_check, metrics):
             configs.SDK,
             CONDUCTORS_METRICS_IRONIC_MICROVERSION_DEFAULT,
             ApiType.SDK,
-            2,
+            1,
             id='api sdk no microversion low limit',
         ),
         pytest.param(
@@ -595,7 +595,7 @@ def test_conductors_metrics(aggregator, check, dd_run_check, metrics):
             configs.SDK,
             CONDUCTORS_METRICS_IRONIC_MICROVERSION_DEFAULT,
             ApiType.SDK,
-            2,
+            1,
             id='api sdk no microversion high limit',
         ),
         pytest.param(

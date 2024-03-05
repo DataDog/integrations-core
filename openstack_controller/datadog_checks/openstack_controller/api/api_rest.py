@@ -381,29 +381,12 @@ class ApiRest(Api):
         return self.make_paginated_request(url, 'nodes', 'uuid', params=params)
 
     def get_baremetal_conductors(self):
-        def use_legacy_conductors_resource(microversion):
-            self.log.debug("Configured ironic microversion: %s", microversion)
-            if not microversion:
-                return True
-            legacy_microversion = True
-            try:
-                legacy_microversion = float(microversion) < 1.43
-            except Exception as e:
-                if microversion.lower() == 'latest':
-                    legacy_microversion = False
-                else:
-                    raise Exception(f"Invalid ironic microversion, cannot collect baremetal conductors: {str(e)}")
-            self.log.debug(
-                "Collecting baremetal conductors with use_legacy_conductors_resource =%s", legacy_microversion
-            )
-            return legacy_microversion
 
         ironic_endpoint = self._catalog.get_endpoint_by_type(Component.Types.BAREMETAL.value)
 
-        params = {}
         url = '{}/v1/conductors'.format(ironic_endpoint)
 
-        return self.make_paginated_request(url, 'conductors', 'uuid', params=params)
+        return self.make_paginated_request(url, 'conductors', 'hostname', params={})
 
     def get_load_balancer_loadbalancers(self, project_id):
         params = {'project_id': project_id}
