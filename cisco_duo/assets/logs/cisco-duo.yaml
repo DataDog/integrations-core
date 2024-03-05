@@ -565,3 +565,14 @@ pipeline:
       targetType: attribute
       preserveSource: false
       overrideOnConflict: false
+    - type: attribute-remapper
+      name: Map `type` to `cisco.duo.type`
+      enabled: true
+      sources:
+        - type
+      sourceType: attribute
+      target: cisco.duo.type
+      targetType: attribute
+      preserveSource: false
+      overrideOnConflict: false
+
