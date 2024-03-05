@@ -2,7 +2,14 @@
 
 <!-- towncrier release notes start -->
 
-## 3.3.0 / 2024-01-05
+## 3.4.0 / 2024-02-16
+
+***Added***:
+
+* Add additional ipam metrics for Cilium 1.13+ ([#16261](https://github.com/DataDog/integrations-core/pull/16261))
+* Update the configuration file to include the new oauth options parameter ([#16835](https://github.com/DataDog/integrations-core/pull/16835))
+
+## 3.3.0 / 2024-01-05 / Agent 7.51.0
 
 ***Added***:
 

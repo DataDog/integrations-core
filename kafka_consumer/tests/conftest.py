@@ -15,6 +15,7 @@ from datadog_checks.dev.ci import running_on_ci
 from datadog_checks.kafka_consumer import KafkaCheck
 
 from . import common
+from .common import get_cluster_id
 from .runners import Consumer, Producer
 
 
@@ -36,6 +37,7 @@ def dd_environment():
             [
                 WaitFor(create_topics, attempts=60, wait=3),
                 WaitFor(initialize_topics),
+                WaitFor(is_cluster_id_available),
             ]
         )
 
@@ -58,6 +60,10 @@ def dd_environment():
             }, common.E2E_METADATA
 
 
+def is_cluster_id_available():
+    return get_cluster_id() is not None
+
+
 @pytest.fixture
 def check():
     return lambda instance, init_config=None: KafkaCheck('kafka_consumer', init_config or {}, [instance])
@@ -70,8 +76,9 @@ def kafka_instance():
 
 def create_topics():
     client = _create_admin_client()
+    response = client.list_topics(timeout=1)
 
-    if set(common.TOPICS).issubset(set(client.list_topics(timeout=1).topics.keys())):
+    if set(common.TOPICS).issubset(set(response.topics.keys())):
         return True
 
     for topic in common.TOPICS:

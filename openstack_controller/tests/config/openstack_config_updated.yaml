@@ -1,0 +1,4 @@
+clouds:
+  test_cloud:
+    auth: {auth_url: 'http://10.164.0.71/identity', password: password, user_domain_id: default,
+      username: admin}

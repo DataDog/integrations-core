@@ -26,16 +26,7 @@ when submitting your PR:
 * Write tests for the code you wrote.
 * Make sure that all tests pass locally.
 * Summarize your PR with a meaningful title, [see later on this doc](#pull-request-title).
-* Add the most suitable changelog label choosing one of the following:
-  * `changelog/Added` for new features.
-  * `changelog/Changed` for changes in existing functionality.
-  * `changelog/Deprecated` for soon-to-be removed features.
-  * `changelog/Removed` for now removed features.
-  * `changelog/Fixed` for any bug fixes.
-  * `changelog/Security` in case of vulnerabilities.
-  * `changelog/no-changelog` in case this PR should not appear in the changelog at all.
-
-See [here][5] for more details about changelogs.
+* Add the most suitable changelog entry, [see here for more][8].
 
 Your pull request must pass all CI tests before we will merge it. If you're seeing
 an error and don't think it's your fault, it may not be! [Join us on Slack][6]
@@ -72,3 +63,4 @@ For new integrations, please open a pull request in the [integrations-extras][7]
 [5]: https://keepachangelog.com/en/1.0.0
 [6]: https://datadoghq.slack.com
 [7]: https://github.com/DataDog/integrations-extras
+[8]: https://datadoghq.dev/integrations-core/guidelines/pr

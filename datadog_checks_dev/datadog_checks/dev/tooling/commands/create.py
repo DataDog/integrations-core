@@ -194,6 +194,7 @@ def create(ctx, name, integration_type, location, non_interactive, quiet, dry_ru
                 f"\n    url='https://github.com/DataDog/integrations-{repo_choice}',"
             )
     template_fields['changelog_body'] = STATIC_CHANGELOG_BODY if repo_choice != 'core' else TOWNCRIER_BODY
+    template_fields['starting_version'] = '0.0.1' if repo_choice == 'core' else '1.0.0'
     config = construct_template_fields(name, repo_choice, integration_type, **template_fields)
 
     files = create_template_files(integration_type, root, config, repo_choice, read=not dry_run)

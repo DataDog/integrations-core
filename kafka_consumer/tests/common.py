@@ -5,6 +5,8 @@ import copy
 import os
 import socket
 
+from confluent_kafka.admin import AdminClient
+
 from datadog_checks.dev import get_docker_hostname
 from datadog_checks.dev.utils import get_metadata_metrics
 
@@ -85,11 +87,25 @@ elif AUTHENTICATION == "kerberos":
     E2E_INSTANCE["sasl_kerberos_keytab"] = "/var/lib/secret/localhost.key"
 
 
+def get_cluster_id():
+    config = {
+        "bootstrap.servers": INSTANCE['kafka_connect_str'],
+        "socket.timeout.ms": 1000,
+        "topic.metadata.refresh.interval.ms": 2000,
+    }
+    config.update(get_authentication_configuration(INSTANCE))
+    client = AdminClient(config)
+    return client.list_topics(timeout=5).cluster_id
+
+
 def assert_check_kafka(aggregator, consumer_groups):
+    cluster_id = get_cluster_id()
     for name, consumer_group in consumer_groups.items():
         for topic, partitions in consumer_group.items():
             for partition in partitions:
-                tags = [f"topic:{topic}", f"partition:{partition}"] + ['optional:tag1']
+                tags = [f"topic:{topic}", f"partition:{partition}", "kafka_cluster_id:" + cluster_id] + [
+                    'optional:tag1'
+                ]
                 for mname in BROKER_METRICS:
                     aggregator.assert_metric(mname, tags=tags, count=1)
 

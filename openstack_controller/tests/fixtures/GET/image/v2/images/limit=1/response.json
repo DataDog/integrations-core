@@ -1,0 +1,31 @@
+{
+    "images": [
+        {
+            "name": "cirros-1.5.2-x86_64-disk",
+            "disk_format": "qcow2",
+            "container_format": "bare",
+            "visibility": "public",
+            "size": 16338944,
+            "virtual_size": 117440512,
+            "status": "active",
+            "checksum": "1d3062cd89af34e419f7100277f38b2b",
+            "protected": false,
+            "min_ram": 0,
+            "min_disk": 0,
+            "owner": "29b43a58176646e3870a9ea0b60fb7ad",
+            "os_hidden": false,
+            "os_hash_algo": "sha512",
+            "os_hash_value": "553d220ed58cfee7dafe003c446a9f197ab5edf8ffc09396c74187cf83873c877e7ae041cb80f3b91489acf687183adcd689b53b38e3ddd22e627e7f98a09c46",
+            "id": "28c293db-48c5-4c8b-a711-09b2c11fa8e5",
+            "created_at": "2024-02-28T20:31:08Z",
+            "updated_at": "2024-02-28T20:31:09Z",
+            "tags": [],
+            "self": "/v2/images/28c293db-48c5-4c8b-a711-09b2c11fa8e5",
+            "file": "/v2/images/28c293db-48c5-4c8b-a711-09b2c11fa8e5/file",
+            "schema": "/v2/schemas/image"
+        }
+    ],
+    "first": "/v2/images?limit=1",
+    "schema": "/v2/schemas/images",
+    "next": "/v2/images?limit=1&marker=28c293db-48c5-4c8b-a711-09b2c11fa8e5"
+}

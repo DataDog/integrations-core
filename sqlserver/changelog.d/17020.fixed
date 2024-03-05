@@ -1,0 +1,1 @@
+Fix an issue where logging of obfuscation errors would still hide the statement when it's part of a stored procedure. If the stored procedure obfuscation fails, the `procedure_signature` tag will be set to `__procedure_obfuscation_error__`.

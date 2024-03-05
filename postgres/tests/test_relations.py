@@ -8,7 +8,7 @@ from flaky import flaky
 from datadog_checks.base import ConfigurationError
 from datadog_checks.postgres.relationsmanager import QUERY_PG_CLASS, RelationsManager
 
-from .common import DB_NAME, HOST, PORT, _get_expected_tags, _iterate_metric_name, assert_metric_at_least
+from .common import DB_NAME, HOST, _get_expected_tags, _iterate_metric_name, assert_metric_at_least
 from .utils import _get_superconn, _wait_for_value, requires_over_11
 
 RELATION_METRICS = [
@@ -163,14 +163,14 @@ def test_max_relations(aggregator, integration_check, pg_instance):
     for name in RELATION_METRICS:
         relation_metrics = []
         for m in aggregator._metrics[name]:
-            if any(['table:' in tag for tag in m.tags]):
+            if any('table:' in tag for tag in m.tags):
                 relation_metrics.append(m)
         assert len(relation_metrics) == 1
 
     for name in _iterate_metric_name(QUERY_PG_CLASS):
         relation_metrics = []
         for m in aggregator._metrics[name]:
-            if any(['table:' in tag for tag in m.tags]):
+            if any('table:' in tag for tag in m.tags):
                 relation_metrics.append(m)
         assert len(relation_metrics) == 1
 
@@ -235,14 +235,12 @@ def test_vacuum_age(aggregator, integration_check, pg_instance):
             1,
             'persons',
             [
-                'port:{}'.format(PORT),
                 'db:datadog_test',
                 'lock_mode:AccessExclusiveLock',
                 'lock_type:relation',
                 'granted:True',
                 'table:persons',
                 'schema:public',
-                'dd.internal.resource:database_instance:stubbed.hostname',
             ],
             id="test with single table lock should return 1",
         ),
@@ -284,7 +282,7 @@ def test_locks_metrics(aggregator, integration_check, pg_instance, relations, lo
     check_with_lock(check, pg_instance, lock_table_name)
 
     if tags is not None:
-        expected_tags = pg_instance['tags'] + tags
+        expected_tags = _get_expected_tags(check, pg_instance) + tags
         aggregator.assert_metric('postgresql.locks', count=lock_count, tags=expected_tags)
     else:
         aggregator.assert_metric('postgresql.locks', count=lock_count)

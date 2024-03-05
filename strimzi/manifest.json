@@ -13,6 +13,7 @@
     "media": [],
     "classifier_tags": [
       "Category::Log Collection",
+      "Category::Kubernetes",
       "Supported OS::Linux",
       "Supported OS::Windows",
       "Supported OS::macOS"
@@ -63,6 +64,5 @@
     "name": "Datadog",
     "homepage": "https://www.datadoghq.com",
     "sales_email": "info@datadoghq.com"
-  },
-  "oauth": {}
+  }
 }

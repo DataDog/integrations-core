@@ -38,36 +38,21 @@ class StatementMetrics:
 
         This function resets the statement cache so it should only be called once per check run.
 
-        - **rows** (_List[dict]_) - rows from current check run
-        - **metrics** (_List[str]_) - the metrics to compute for each row
-        - **key** (_callable_) - function for an ID which uniquely identifies a row across runs
+        :params rows (_List[dict]_): rows from current check run
+        :params metrics (_List[str]_): the metrics to compute for each row
+        :params key (_callable_): function for an ID which uniquely identifies a row across runs
+        :return (_List[dict]_): a list of rows with the first derivative of the metrics
         """
         result = []
-        new_cache = {}
         metrics = set(metrics)
 
-        rows = _merge_duplicate_rows(rows, metrics, key)
-        if len(rows) > 0:
-            dropped_metrics = metrics - set(rows[0].keys())
-            if dropped_metrics:
-                logger.warning(
-                    'Some statement metrics are not available from the table: %s', ','.join(m for m in dropped_metrics)
-                )
+        merged_rows, dropped_metrics = _merge_duplicate_rows(rows, metrics, key)
+        if dropped_metrics:
+            logger.warning(
+                'Some statement metrics are not available from the table: %s', ','.join(m for m in dropped_metrics)
+            )
 
-        for row in rows:
-            row_key = key(row)
-            if row_key in new_cache:
-                logger.error(
-                    'Unexpected collision in cached query metrics. Dropping existing row, row_key=%s new=%s dropped=%s',
-                    row_key,
-                    row,
-                    new_cache[row_key],
-                )
-
-            # Set the row on the new cache to be checked the next run. This should happen for every row, regardless of
-            # whether a metric is submitted for the row during this run or not.
-            new_cache[row_key] = row
-
+        for row_key, row in merged_rows.items():
             prev = self._previous_statements.get(row_key)
             if prev is None:
                 continue
@@ -100,7 +85,8 @@ class StatementMetrics:
 
             result.append(diffed_row)
 
-        self._previous_statements = new_cache
+        self._previous_statements.clear()
+        self._previous_statements = merged_rows
 
         return result
 
@@ -111,23 +97,22 @@ def _merge_duplicate_rows(rows, metrics, key):
     with the sum of the stats of all duplicates. This is motivated by database integrations such as postgres
     that can report many instances of a query that are considered the same after the agent normalization.
 
-    - **rows** (_List[dict]_) - rows from current check run
-    - **metrics** (_List[str]_) - the metrics to compute for each row
-    - **key** (_callable_) - function for an ID which uniquely identifies a query row across runs
+    :param rows (_List[dict]_): rows from current check run
+    :param metrics (_List[str]_): the metrics to compute for each row
+    :param key (_callable_): function for an ID which uniquely identifies a query row across runs
+    :return (_Tuple[Dict[str, dict], Set[str]_): a dictionary of merged rows and a set of dropped metrics
     """
-
     queries_by_key = {}
+    dropped_metrics = set()
     for row in rows:
-        merged_row = dict(row)
-
-        query_key = key(merged_row)
-
+        query_key = key(row)
         if query_key in queries_by_key:
-            merged_state = queries_by_key[query_key]
-            queries_by_key[query_key] = {
-                k: merged_row[k] + merged_state[k] if k in metrics else merged_state[k] for k in merged_state.keys()
-            }
+            for metric in metrics:
+                if metric in row:
+                    queries_by_key[query_key][metric] = queries_by_key[query_key].get(metric, 0) + row[metric]
+                else:
+                    dropped_metrics.add(metric)
         else:
-            queries_by_key[query_key] = merged_row
+            queries_by_key[query_key] = row
 
-    return list(queries_by_key.values())
+    return queries_by_key, dropped_metrics

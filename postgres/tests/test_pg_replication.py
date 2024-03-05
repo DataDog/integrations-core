@@ -8,7 +8,7 @@ from flaky import flaky
 
 from .common import (
     DB_NAME,
-    _get_expected_tags,
+    _get_expected_replication_tags,
     assert_metric_at_least,
     check_bgw_metrics,
     check_common_metrics,
@@ -37,7 +37,7 @@ def test_common_replica_metrics(aggregator, integration_check, metrics_cache_rep
     check.initialize_is_aurora()
     check.check(pg_replica_instance)
 
-    expected_tags = _get_expected_tags(check, pg_replica_instance)
+    expected_tags = _get_expected_replication_tags(check, pg_replica_instance)
     check_common_metrics(aggregator, expected_tags=expected_tags)
     check_bgw_metrics(aggregator, expected_tags)
     check_connection_metrics(aggregator, expected_tags=expected_tags)
@@ -62,7 +62,6 @@ def test_wal_receiver_metrics(aggregator, integration_check, pg_instance, pg_rep
     check = integration_check(pg_replica_instance)
     check._connect()
     check.initialize_is_aurora()
-    expected_tags = _get_expected_tags(check, pg_replica_instance, status='streaming')
     with _get_superconn(pg_instance) as conn:
         with conn.cursor() as cur:
             # Ask for a new txid to force a WAL change
@@ -72,6 +71,7 @@ def test_wal_receiver_metrics(aggregator, integration_check, pg_instance, pg_rep
     time.sleep(0.2)
 
     check.check(pg_replica_instance)
+    expected_tags = _get_expected_replication_tags(check, pg_replica_instance, status='streaming')
     aggregator.assert_metric('postgresql.wal_receiver.last_msg_send_age', count=1, tags=expected_tags)
     aggregator.assert_metric('postgresql.wal_receiver.last_msg_receipt_age', count=1, tags=expected_tags)
     aggregator.assert_metric('postgresql.wal_receiver.latest_end_age', count=1, tags=expected_tags)
@@ -102,7 +102,6 @@ def test_wal_receiver_metrics(aggregator, integration_check, pg_instance, pg_rep
 @requires_over_10
 def test_conflicts_lock(aggregator, integration_check, pg_instance, pg_replica_instance2):
     check = integration_check(pg_replica_instance2)
-    expected_tags = _get_expected_tags(check, pg_replica_instance2, db=DB_NAME)
 
     replica_con = _get_superconn(pg_replica_instance2)
     replica_con.set_session(autocommit=False)
@@ -125,6 +124,7 @@ def test_conflicts_lock(aggregator, integration_check, pg_instance, pg_replica_i
     )
 
     check.check(pg_replica_instance2)
+    expected_tags = _get_expected_replication_tags(check, pg_replica_instance2, db=DB_NAME)
     aggregator.assert_metric('postgresql.conflicts.lock', value=1, tags=expected_tags)
 
     replica_con.close()
@@ -134,7 +134,6 @@ def test_conflicts_lock(aggregator, integration_check, pg_instance, pg_replica_i
 @flaky(max_runs=5)
 def test_conflicts_snapshot(aggregator, integration_check, pg_instance, pg_replica_instance2):
     check = integration_check(pg_replica_instance2)
-    expected_tags = _get_expected_tags(check, pg_replica_instance2, db=DB_NAME)
 
     replica2_con = _get_superconn(pg_replica_instance2)
     replica2_con.set_session(autocommit=False)
@@ -157,6 +156,7 @@ def test_conflicts_snapshot(aggregator, integration_check, pg_instance, pg_repli
         query="select confl_snapshot from pg_stat_database_conflicts where datname='datadog_test';",
     )
     check.check(pg_replica_instance2)
+    expected_tags = _get_expected_replication_tags(check, pg_replica_instance2, db=DB_NAME)
     aggregator.assert_metric('postgresql.conflicts.snapshot', value=1, tags=expected_tags)
 
     replica2_con.close()
@@ -166,7 +166,6 @@ def test_conflicts_snapshot(aggregator, integration_check, pg_instance, pg_repli
 @requires_over_10
 def test_conflicts_bufferpin(aggregator, integration_check, pg_instance, pg_replica_instance2):
     check = integration_check(pg_replica_instance2)
-    expected_tags = _get_expected_tags(check, pg_replica_instance2, db=DB_NAME)
 
     with _get_superconn(pg_instance) as conn:
         with conn.cursor() as cur:
@@ -193,4 +192,5 @@ def test_conflicts_bufferpin(aggregator, integration_check, pg_instance, pg_repl
     )
 
     check.check(pg_replica_instance2)
+    expected_tags = _get_expected_replication_tags(check, pg_replica_instance2, db=DB_NAME)
     aggregator.assert_metric('postgresql.conflicts.bufferpin', value=1, tags=expected_tags)

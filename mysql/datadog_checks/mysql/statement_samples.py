@@ -29,7 +29,13 @@ from datadog_checks.base.utils.db.utils import (
 from datadog_checks.base.utils.serialization import json
 from datadog_checks.base.utils.tracking import tracked_method
 
-from .util import DatabaseConfigurationError, StatementTruncationState, get_truncation_state, warning_with_tags
+from .util import (
+    DatabaseConfigurationError,
+    StatementTruncationState,
+    connect_with_autocommit,
+    get_truncation_state,
+    warning_with_tags,
+)
 
 SUPPORTED_EXPLAIN_STATEMENTS = frozenset({'select', 'table', 'delete', 'insert', 'replace', 'update', 'with'})
 
@@ -53,7 +59,9 @@ EVENTS_STATEMENTS_SAMPLE_EXCLUDE_KEYS = {
     'current_schema',
     # used for signature
     'digest_text',
-    'timer_end_time_s',
+    'uptime',
+    'now',
+    'timer_end',
     'max_timer_wait_ns',
     'timer_start',
     # included as network.client.ip
@@ -70,7 +78,9 @@ EVENTS_STATEMENTS_CURRENT_QUERY = re.sub(
         digest,
         digest_text,
         timer_start,
-        @startup_time_s+timer_end*1e-12 as timer_end_time_s,
+        @uptime as uptime,
+        unix_timestamp() as now,
+        timer_end,
         timer_wait / 1000 AS timer_wait_ns,
         lock_time / 1000 AS lock_time_ns,
         rows_affected,
@@ -101,11 +111,11 @@ EVENTS_STATEMENTS_CURRENT_QUERY = re.sub(
 """,
 ).strip()
 
-STARTUP_TIME_SUBQUERY = re.sub(
+UPTIME_SUBQUERY = re.sub(
     r'\s+',
     ' ',
     """
-    (SELECT UNIX_TIMESTAMP()-VARIABLE_VALUE
+    (SELECT VARIABLE_VALUE
     FROM {global_status_table}
     WHERE VARIABLE_NAME='UPTIME')
 """,
@@ -119,6 +129,7 @@ ENABLED_STATEMENTS_CONSUMERS_QUERY = re.sub(
     FROM performance_schema.setup_consumers
     WHERE enabled = 'YES'
     AND name LIKE 'events_statements_%'
+    AND name != 'events_statements_cpu'
 """,
 ).strip()
 
@@ -140,6 +151,9 @@ PYMYSQL_MISSING_EXPLAIN_STATEMENT_PROC_ERRORS = frozenset(
         pymysql.constants.ER.PROCACCESS_DENIED_ERROR,
     }
 )
+
+# the max value of unsigned BIGINT type column
+BIGINT_MAX = 2**64 - 1
 
 
 class DBExplainErrorCode(Enum):
@@ -262,7 +276,7 @@ class MySQLStatementSamples(DBMAsyncJob):
         :return:
         """
         if not self._db:
-            self._db = pymysql.connect(**self._connection_args)
+            self._db = connect_with_autocommit(**self._connection_args)
         return self._db
 
     def _close_db_conn(self):
@@ -323,9 +337,7 @@ class MySQLStatementSamples(DBMAsyncJob):
         with closing(self._get_db_connection().cursor(pymysql.cursors.DictCursor)) as cursor:
             self._cursor_run(
                 cursor,
-                "set @startup_time_s = {}".format(
-                    STARTUP_TIME_SUBQUERY.format(global_status_table=self._global_status_table)
-                ),
+                "set @uptime = {}".format(UPTIME_SUBQUERY.format(global_status_table=self._global_status_table)),
             )
             self._cursor_run(cursor, EVENTS_STATEMENTS_CURRENT_QUERY)
             rows = cursor.fetchall()
@@ -427,7 +439,7 @@ class MySQLStatementSamples(DBMAsyncJob):
         query_plan_cache_key = (query_cache_key, plan_signature)
         if self._seen_samples_ratelimiter.acquire(query_plan_cache_key):
             return {
-                "timestamp": row["timer_end_time_s"] * 1000,
+                "timestamp": self._calculate_timer_end(row),
                 "dbm_type": "plan",
                 "host": self._check.resolved_hostname,
                 "ddagentversion": datadog_agent.get_version(),
@@ -464,6 +476,12 @@ class MySQLStatementSamples(DBMAsyncJob):
     def _collect_plans_for_statements(self, rows):
         for row in rows:
             try:
+                if not row['timer_end']:
+                    # If an event is produced from an instrument that has TIMED = NO,
+                    # timing information is not collected,
+                    # and TIMER_START, TIMER_END, and TIMER_WAIT are all NULL.
+                    self._log.debug("Skipping statement with missing timer_end: %s", row)
+                    continue
                 event = self._collect_plan_for_statement(row)
                 if event:
                     yield event
@@ -798,3 +816,20 @@ class MySQLStatementSamples(DBMAsyncJob):
     @staticmethod
     def _can_explain(obfuscated_statement):
         return obfuscated_statement.split(' ', 1)[0].lower() in SUPPORTED_EXPLAIN_STATEMENTS
+
+    @staticmethod
+    def _calculate_timer_end(row):
+        """
+        Calculate the timer_end_time_s from the timer_end, now and uptime fields
+        """
+        # timer_end is in picoseconds and uptime is in seconds
+        # timer_end can overflow, so we need to calcuate how many times it overflowed
+        timer_end = row['timer_end']
+        now = row['now']
+        uptime = int(row['uptime'])
+
+        bigint_max_in_seconds = BIGINT_MAX * 1e-12
+        # when timer_end is greater than bigint_max_in_seconds, we need to add the difference to the uptime
+        seconds_to_add = uptime // bigint_max_in_seconds * bigint_max_in_seconds
+        timer_end_time_s = now - uptime + seconds_to_add + timer_end * 1e-12
+        return int(timer_end_time_s * 1000)
