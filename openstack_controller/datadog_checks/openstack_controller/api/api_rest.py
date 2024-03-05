@@ -381,11 +381,12 @@ class ApiRest(Api):
         return self.make_paginated_request(url, 'nodes', 'uuid', params=params)
 
     def get_baremetal_conductors(self):
-        response = self.http.get(
-            '{}/v1/conductors'.format(self._catalog.get_endpoint_by_type(Component.Types.BAREMETAL.value))
-        )
-        response.raise_for_status()
-        return response.json().get('conductors', [])
+
+        ironic_endpoint = self._catalog.get_endpoint_by_type(Component.Types.BAREMETAL.value)
+
+        url = '{}/v1/conductors'.format(ironic_endpoint)
+
+        return self.make_paginated_request(url, 'conductors', 'hostname', params={})
 
     def get_load_balancer_loadbalancers(self, project_id):
         params = {'project_id': project_id}
