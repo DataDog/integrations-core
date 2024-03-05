@@ -10,7 +10,7 @@ from contextlib import contextmanager
 from itertools import chain
 from pathlib import Path
 from tempfile import TemporaryDirectory
-from typing import TYPE_CHECKING, Generator
+from typing import TYPE_CHECKING, Generator, Optional
 
 from packaging.requirements import InvalidRequirement, Requirement
 
@@ -70,20 +70,6 @@ def read_dependencies() -> dict[str, list[str]]:
         dependencies.setdefault(requirement.name, []).append(line)
 
     return dependencies
-
-
-def hash_build_context(build_context: Path, build_arguments: Iterable[str]) -> str:
-    """Compute a hash digest for a Docker build context"""
-    result = hashlib.sha256()
-    for root, _, files in os.walk(build_context):
-        for fname in files:
-            with open(os.path.join(root, fname), 'rb') as f:
-                result.update(f.read())
-
-    for arg in build_arguments:
-        result.update(arg.encode('utf-8'))
-
-    return result.hexdigest()
 
 
 def build_macos():
@@ -170,67 +156,98 @@ def build_macos():
         shutil.move(final_requirements, output_dir)
 
 
-def build_image():
+def hash_build_context(build_context: Path, build_arguments: Iterable[str]) -> str:
+    """Compute a hash digest for a Docker build context"""
+    result = hashlib.sha256()
+    for root, _, files in os.walk(build_context):
+        for fname in files:
+            with open(os.path.join(root, fname), 'rb') as f:
+                result.update(f.read())
+
+    for arg in build_arguments:
+        result.update(arg.encode('utf-8'))
+
+    return result.hexdigest()
+
+
+def is_windows_image(image_name: str) -> bool:
+    return image_name.startswith('windows-')
+
+
+def build_or_pull_image(
+        image: str, digest: Optional[str] = None, build_args: Optional[str] = None, verbose: bool = False
+) -> str:
+    """Build or pull an image and return the full name including tag"""
+    image_path = HERE / 'images' / image
+    if not image_path.is_dir():
+        abort(f'Image does not exist: {image_path}')
+
+    with temporary_directory() as temp_dir:
+        build_context_dir = shutil.copytree(image_path, temp_dir, dirs_exist_ok=True)
+
+        # Copy utilities shared by multiple images
+        for entry in image_path.parent.iterdir():
+            if entry.is_file():
+                shutil.copy2(entry, build_context_dir)
+
+        build_args = ['SOURCE_DATE_EPOCH=1580601600']
+        if build_args is not None:
+            build_args.extend(build_args)
+
+        build_context_hash = hash_build_context(build_context_dir, build_args)
+        image_name = f'ghcr.io/datadog/agent-int-builder:{build_context_hash}'
+
+        print(f'Hash for the build context: {build_context_hash}')
+
+        if digest:
+            try:
+                # Try to pull the image first if args.digest was specified
+                check_process(['docker', 'pull', f'{image_name}@{digest}'], check=True)
+            except subprocess.CalledProcessError:
+                # If pull fails, assume the image is not available in the registry and build it
+                print('`docker pull` failed. Assuming the image is not in the registry, will build the image')
+            else:
+                # Pull succeeded, no need to build
+                print('Pull succeeded')
+                return image_name
+
+        build_command = ['docker', 'build', str(build_context_dir), '-t', image_name]
+
+        # For some reason this is not supported for Windows images
+        if verbose and not is_windows_image(image):
+            build_command.extend(['--progress', 'plain'])
+
+        for build_arg in build_args:
+            build_command.extend(['--build-arg', build_arg])
+
+        check_process(build_command)
+
+        return image_name
+
+
+def build_in_docker():
     parser = argparse.ArgumentParser(prog='builder', allow_abbrev=False)
     parser.add_argument('image')
     parser.add_argument('output_dir')
     parser.add_argument('--digest')
     parser.add_argument('--python', default='3')
     parser.add_argument('--no-run', action='store_true')
+    parser.add_argument('--outputs-file',
+                        help='File to write information about the build in key=value format')
     parser.add_argument('-a', '--build-arg', dest='build_args', nargs='+')
     parser.add_argument('-v', '--verbose', action='store_true')
     args = parser.parse_args()
 
-    image: str = args.image
-    image_path = HERE / 'images' / image
-    if not image_path.is_dir():
-        abort(f'Image does not exist: {image_path}')
-
-    windows_image = image.startswith('windows-')
-    if args.digest:
-        image_name = f'ghcr.io/datadog/agent-int-builder@{args.digest}'
-        check_process(['docker', 'pull', image_name])
-    else:
-        with temporary_directory() as temp_dir:
-            build_context_dir = shutil.copytree(image_path, temp_dir, dirs_exist_ok=True)
-
-            # Copy utilities shared by multiple images
-            for entry in image_path.parent.iterdir():
-                if entry.is_file():
-                    shutil.copy2(entry, build_context_dir)
-
-            build_args = ['SOURCE_DATE_EPOCH=1580601600']
-            if args.build_args is not None:
-                build_args.extend(args.build_args)
-
-            build_context_hash = hash_build_context(build_context_dir, build_args)
-            image_name = f'ghcr.io/datadog/agent-int-builder-{image}:{build_context_hash}'
-
-            print(f'Hash for the build context: {build_context_hash}')
-
-            try:
-                # Try to pull the image first
-                check_process(['docker', 'pull', image_name], check=True)
-            except subprocess.CalledProcessError:
-                # If pull fails, assume the image is not available in the registry and build it
-                print('`docker pull` failed. Assuming the image is not in the registry, will build the image')
-
-                build_command = ['docker', 'build', str(build_context_dir), '-t', image_name]
-
-                # For some reason this is not supported for Windows images
-                if args.verbose and not windows_image:
-                    build_command.extend(['--progress', 'plain'])
-
-                for build_arg in build_args:
-                    build_command.extend(['--build-arg', build_arg])
-
-                check_process(build_command)
+    image_name = build_or_pull_image(args.image, args.digest, args.build_args, args.verbose)
+    if args.outputs_file:
+        with open(args.outputs_file, 'a') as f:
+            print(f'builder_image={image_name}', file=f)
 
     if not args.no_run:
         with temporary_directory() as temp_dir:
             mount_dir = temp_dir / 'mnt'
             mount_dir.mkdir()
-            internal_mount_dir = 'C:\\mnt' if windows_image else '/home'
+            internal_mount_dir = 'C:\\mnt' if is_windows_image(args.image) else '/home'
 
             dependency_file = mount_dir / 'requirements.in'
             dependency_file.write_text('\n'.join(chain.from_iterable(read_dependencies().values())))
@@ -272,7 +289,7 @@ def main():
     if sys.platform == 'darwin':
         build_macos()
     else:
-        build_image()
+        build_in_docker()
 
 
 if __name__ == '__main__':
