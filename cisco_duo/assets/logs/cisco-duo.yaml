@@ -156,6 +156,13 @@ facets:
   path: cisco.duo.access_device.geoip.country.name
   source: log
   type: string
+- facetType: list
+  groups:
+  - Cisco Duo
+  name: Type
+  path: cisco.duo.type
+  source: log
+  type: string
 - groups:
   - User
   name: User Email

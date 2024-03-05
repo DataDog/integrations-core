@@ -307,7 +307,7 @@
                                 },
                                 "group_by": [
                                     {
-                                        "facet": "@type",
+                                        "facet": "@cisco.duo.type",
                                         "limit": 10,
                                         "sort": {
                                             "order": "desc",
@@ -458,7 +458,7 @@
         },
         {
             "name": "Type",
-            "prefix": "@type",
+            "prefix": "@cisco.duo.type",
             "available_values": [],
             "default": "*"
         },
