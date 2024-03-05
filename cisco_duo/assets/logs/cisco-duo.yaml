@@ -193,16 +193,12 @@ pipeline:
     - type: date-remapper
       name: Define `isotimestamp`, `ts` as the official date of the log
       enabled: true
-      meta:
-        tags: []
       sources:
         - isotimestamp
         - ts
     - type: service-remapper
       name: Define `service` as the official service of the log
       enabled: true
-      meta:
-        tags: []
       sources:
         - service
     - type: pipeline
@@ -214,8 +210,6 @@ pipeline:
         - type: geo-ip-parser
           name: GeoIP Parser for `access_device.ip`
           enabled: true
-          meta:
-            tags: []
           sources:
             - access_device.ip
           target: access_device.geoip
@@ -223,8 +217,6 @@ pipeline:
         - type: geo-ip-parser
           name: GeoIP Parser for `auth_device.ip`
           enabled: true
-          meta:
-            tags: []
           sources:
             - auth_device.ip
           target: auth_device.geoip
@@ -232,8 +224,6 @@ pipeline:
         - type: attribute-remapper
           name: Map `result` to `evt.outcome`
           enabled: true
-          meta:
-            tags: []
           sources:
             - result
           sourceType: attribute
@@ -244,8 +234,6 @@ pipeline:
         - type: attribute-remapper
           name: Map `email` to `usr.email`
           enabled: true
-          meta:
-            tags: []
           sources:
             - email
           sourceType: attribute
@@ -256,8 +244,6 @@ pipeline:
         - type: attribute-remapper
           name: Map `event_type` to `evt.name`
           enabled: true
-          meta:
-            tags: []
           sources:
             - event_type
           sourceType: attribute
@@ -268,8 +254,6 @@ pipeline:
         - type: attribute-remapper
           name: Map `user.name` to `usr.name`
           enabled: true
-          meta:
-            tags: []
           sources:
             - user.name
           sourceType: attribute
@@ -286,8 +270,6 @@ pipeline:
         - type: geo-ip-parser
           name: GeoIP Parser for `access_device.ip.address`
           enabled: true
-          meta:
-            tags: []
           sources:
             - access_device.ip.address
           target: access_device.geoip
@@ -295,8 +277,6 @@ pipeline:
         - type: attribute-remapper
           name: Map `target` to `duo_target`
           enabled: true
-          meta:
-            tags: []
           sources:
             - target
           sourceType: attribute
@@ -313,8 +293,6 @@ pipeline:
         - type: attribute-remapper
           name: Map `username` to `usr.name`
           enabled: true
-          meta:
-            tags: []
           sources:
             - username
           sourceType: attribute
@@ -331,8 +309,6 @@ pipeline:
         - type: attribute-remapper
           name: Map `username` to `usr.name`
           enabled: true
-          meta:
-            tags: []
           sources:
             - username
           sourceType: attribute
