@@ -178,6 +178,7 @@ def build_or_pull_image(
         image: str, digest: Optional[str] = None, build_args: Optional[str] = None, verbose: bool = False
 ) -> str:
     """Build or pull an image and return the full name including tag"""
+    target_image = 'ghcr.io/datadog/agent-int-builder'
     image_path = HERE / 'images' / image
     if not image_path.is_dir():
         abort(f'Image does not exist: {image_path}')
@@ -195,7 +196,7 @@ def build_or_pull_image(
             build_args.extend(build_args)
 
         build_context_hash = hash_build_context(build_context_dir, build_args)
-        image_name = f'ghcr.io/datadog/agent-int-builder:{build_context_hash}'
+        image_name = f'{target_image}:{build_context_hash}'
 
         print(f'Hash for the build context: {build_context_hash}')
 
@@ -221,6 +222,9 @@ def build_or_pull_image(
             build_command.extend(['--build-arg', build_arg])
 
         check_process(build_command)
+
+        # Add a tag identifying the platform
+        check_process(['docker', 'tag', image_name, f'{target_image}:{image}'])
 
         return image_name
 

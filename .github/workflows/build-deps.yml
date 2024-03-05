@@ -113,10 +113,9 @@ jobs:
     - name: Publish image
       if: github.event_name == 'push'
       run: |-
-        # Push it as tagged with a digest
+        # Push it with the build-context hash tag
         docker push ${{ steps.build-image-and-wheels.outputs.builder_image }}
         # Push it with the platform tag as well
-        docker tag ${{ steps.build-image-and-wheels.outputs.builder_image }} ${{ env.BUILDER_IMAGE }}
         docker push ${{ env.BUILDER_IMAGE }}
 
     - name: Save image digest
