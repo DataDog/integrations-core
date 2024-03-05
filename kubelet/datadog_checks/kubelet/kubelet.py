@@ -3,7 +3,6 @@
 # Licensed under Simplified BSD License (see LICENSE)
 from __future__ import division
 
-import os
 import re
 import sys
 from collections import defaultdict
@@ -15,8 +14,8 @@ from six import iteritems
 from six.moves.urllib.parse import urlparse
 
 from datadog_checks.base import AgentCheck, OpenMetricsBaseCheck
-from datadog_checks.base.config import _is_affirmative
 from datadog_checks.base.checks.kubelet_base.base import KubeletBase, KubeletCredentials, urljoin
+from datadog_checks.base.config import _is_affirmative
 from datadog_checks.base.errors import CheckException, SkipInstanceError
 from datadog_checks.base.utils.tagging import tagger
 
