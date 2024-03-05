@@ -352,6 +352,9 @@ def test_mysql_ok(aggregator, instance_remote_mysql_valid):
 def test_valid_version_with_critical_certificate_validation_and_critial_certificate_expiration(
     aggregator, instance_remote_ok
 ):
+    if PY2:
+        # Skip this test on Python 2, no longer in active support
+        return
     c = TLSCheck('tls', {}, [instance_remote_ok])
     check = TLSRemoteCheck(agent_check=c)
     with patch.object(check.agent_check, 'get_tls_context') as mock_get_tls_context:
@@ -379,6 +382,9 @@ def test_valid_version_with_critical_certificate_validation_and_critial_certific
 
 
 def test_valid_version_and_critical_certificate_validation_due_to_socket_exception(aggregator, instance_remote_ok):
+    if PY2:
+        # Skip this test on Python 2, no longer in active support
+        return
     c = TLSCheck('tls', {}, [instance_remote_ok])
     check = TLSRemoteCheck(agent_check=c)
     with patch.object(check.agent_check, 'get_tls_context') as mock_get_tls_context:
@@ -407,6 +413,9 @@ def test_valid_version_and_critical_certificate_validation_due_to_socket_excepti
 
 
 def test_valid_version_and_critical_certificate_validation_due_to_parsing_error(aggregator, instance_remote_ok):
+    if PY2:
+        # Skip this test on Python 2, no longer in active support
+        return
     c = TLSCheck('tls', {}, [instance_remote_ok])
     check = TLSRemoteCheck(agent_check=c)
     with patch.object(check.agent_check, 'get_tls_context') as mock_get_tls_context:
