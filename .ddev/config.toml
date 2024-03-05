@@ -158,8 +158,6 @@ exclude = [
     'pyasn1',  # https://github.com/pyasn1/pyasn1/issues/52
     'pysnmp',  # Breaking snmp tests
     'aerospike',  # v8+ breaks agent build.
-    # We need pydantic 2.0.2 for the rpm x64 agent build (see https://github.com/DataDog/datadog-agent/pull/18303)
-    'pydantic',
     # https://github.com/DataDog/integrations-core/pull/16080
     'lxml',
     # We need to keep an `oracledb` version that uses the same version of odpi that is used in godror in the agent repo.
