@@ -51,6 +51,7 @@ from datadog_checks.sqlserver.const import (
     ENGINE_EDITION_SQL_DATABASE,
     INSTANCE_METRICS,
     INSTANCE_METRICS_DATABASE,
+    INSTANCE_METRICS_NEWER_2016,
     PERF_AVERAGE_BULK,
     PERF_COUNTER_BULK_COUNT,
     PERF_COUNTER_LARGE_RAWCOUNT,
@@ -430,6 +431,7 @@ class SQLServer(AgentCheck):
         Will also create and cache cursors to query the db.
         """
 
+        major_version = self.static_info_cache.get(STATIC_INFO_MAJOR_VERSION)
         metrics_to_collect = []
         tags = self.instance.get('tags', [])
 
@@ -438,6 +440,8 @@ class SQLServer(AgentCheck):
         # to avoid sending duplicate metrics
         if is_affirmative(self.instance.get('include_instance_metrics', True)):
             common_metrics = list(INSTANCE_METRICS)
+            if major_version and major_version >= 2016:
+                common_metrics.extend(INSTANCE_METRICS_NEWER_2016)
             if not self._config.dbm_enabled:
                 common_metrics.extend(DBM_MIGRATED_METRICS)
             if not self.databases:
