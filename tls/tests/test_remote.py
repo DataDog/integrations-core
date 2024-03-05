@@ -1,8 +1,7 @@
 # (C) Datadog, Inc. 2019-present
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
-from ssl import SSLCertVerificationError
-from unittest.mock import MagicMock, patch
+import ssl
 
 import mock
 import pytest
@@ -17,6 +16,16 @@ from datadog_checks.tls.const import (
 )
 from datadog_checks.tls.tls import TLSCheck
 from datadog_checks.tls.tls_remote import TLSRemoteCheck
+
+try:
+    from ssl import SSLCertVerificationError
+except ImportError:  # Python version is earlier than 3.7
+    SSLCertVerificationError = ssl.SSLError
+
+try:
+    from unittest.mock import MagicMock, patch
+except ImportError:  # Python 2
+    from mock import MagicMock, patch
 
 
 def test_right_class_is_instantiated(instance_remote_no_server):
