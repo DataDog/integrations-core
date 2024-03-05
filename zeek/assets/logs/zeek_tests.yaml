@@ -1,6 +1,7 @@
 id: "zeek"
 tests:
-  - sample: |-
+  - service: "corelight"
+    sample: |-
       {"message" : "<134>Dec 26 01:35:11 machine-name {\"_path\":\"capture_loss\",\"_write_ts\":\"2023-12-12T05:52:50.756358Z\",\"ts\":\"2023-12-12T05:52:32.763303Z\",\"ts_delta\":15.235642194747925,\"peer\":\"zeek\",\"gaps\":3,\"acks\":316,\"percent_lost\":0.9493670886075949}", "service" : "corelight"}
     result:
       custom:
