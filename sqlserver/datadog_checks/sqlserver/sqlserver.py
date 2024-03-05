@@ -7,10 +7,10 @@ import copy
 import functools
 import time
 from collections import defaultdict
-
+import logging
 import six
 from cachetools import TTLCache
-
+import pdb
 from datadog_checks.base import AgentCheck, ConfigurationError
 from datadog_checks.base.config import is_affirmative
 from datadog_checks.base.utils.db import QueryExecutor, QueryManager
@@ -708,6 +708,7 @@ class SQLServer(AgentCheck):
         return cls(cfg_inst, base_name, metric_type, column, self.log)
 
     def check(self, _):
+        self.log.error("Boris STARTING NEW CHECK")
         if self.do_check:
             # configure custom queries for the check
             if self._query_manager is None:
@@ -722,17 +723,23 @@ class SQLServer(AgentCheck):
             if self._config.proc:
                 self.do_stored_procedure_check()
             else:
+                # May be we could execute run_job_loop stuff before as those are not blocking ?
                 self.collect_metrics()
             if self._config.autodiscovery and self._config.autodiscovery_db_service_check:
                 for db in self.databases:
                     if db.name != self.connection.DEFAULT_DATABASE:
                         try:
-                            self.connection.check_database_conns(db.name)
+                            self.log.error("Boris Check for %s", db.name)
+                            # if we apply Nenad's suggestion can go inside collect_metrics
+                            # can it be non blocking ? or we need this to finish before dbm checks ? 
+                            for i in range(0,2):
+                                self.connection.check_database_conns(db.name)
                         except Exception as e:
                             # service_check errors on auto discovered databases should not abort the check
                             self.log.warning("failed service check for auto discovered database: %s", e)
             self._send_database_instance_metadata()
             if self._config.dbm_enabled:
+                #pdb.set_trace()
                 self.statement_metrics.run_job_loop(self.tags)
                 self.procedure_metrics.run_job_loop(self.tags)
                 self.activity.run_job_loop(self.tags)
@@ -795,6 +802,7 @@ class SQLServer(AgentCheck):
 
         with self.connection.open_managed_default_connection():
             with self.connection.get_managed_cursor() as cursor:
+                time.sleep(6)
                 # initiate autodiscovery or if the server was down at check __init__ key could be missing.
                 if self.autodiscover_databases(cursor) or not self.instance_metrics:
                     self._make_metric_list_to_collect(self._config.custom_metrics)
@@ -953,6 +961,7 @@ class SQLServer(AgentCheck):
                 raise e
 
             self.connection.close_cursor(cursor)
+            #why not in with statement ? 
             self.connection.close_db_connections(self.connection.DEFAULT_DB_KEY)
         else:
             self.log.info("Skipping call to %s due to only_if", proc)
@@ -974,6 +983,7 @@ class SQLServer(AgentCheck):
             self.log.error("Failed to run proc_only_if sql %s : %s", sql, e)
 
         self.connection.close_cursor(cursor)
+        #why not in with statement
         self.connection.close_db_connections(self.connection.PROC_GUARD_DB_KEY)
         return should_run
 

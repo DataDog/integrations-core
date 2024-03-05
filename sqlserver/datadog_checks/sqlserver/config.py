@@ -4,7 +4,7 @@
 
 import json
 import re
-
+import pdb
 from datadog_checks.base.config import is_affirmative
 from datadog_checks.base.utils.common import to_native_string
 from datadog_checks.sqlserver.const import DEFAULT_AUTODISCOVERY_INTERVAL, PROC_CHAR_LIMIT
@@ -15,10 +15,10 @@ class SQLServerConfig:
         self.log = log
         self.tags: list[str] = instance.get("tags", [])
         self.reported_hostname: str = instance.get('reported_hostname')
-        self.autodiscovery: bool = is_affirmative(instance.get('database_autodiscovery'))
+        self.autodiscovery: bool = True
         self.autodiscovery_include: list[str] = instance.get('autodiscovery_include', ['.*'])
         self.autodiscovery_exclude: list[str] = instance.get('autodiscovery_exclude', ['model'])
-        self.autodiscovery_db_service_check: bool = is_affirmative(instance.get('autodiscovery_db_service_check', True))
+        self.autodiscovery_db_service_check: bool = True
         self.min_collection_interval: int = instance.get('min_collection_interval', 15)
         self.autodiscovery_interval: int = instance.get('autodiscovery_interval', DEFAULT_AUTODISCOVERY_INTERVAL)
         self._include_patterns = self._compile_valid_patterns(self.autodiscovery_include)
@@ -31,7 +31,8 @@ class SQLServerConfig:
         )
 
         # DBM
-        self.dbm_enabled: bool = is_affirmative(instance.get('dbm', False))
+        self.dbm_enabled: bool = True
+        #pdb.set_trace()
         self.statement_metrics_config: dict = instance.get('query_metrics', {}) or {}
         self.procedure_metrics_config: dict = instance.get('procedure_metrics', {}) or {}
         self.settings_config: dict = instance.get('collect_settings', {}) or {}

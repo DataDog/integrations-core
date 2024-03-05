@@ -15,6 +15,49 @@ CREATE USER fred FOR LOGIN fred;
 GRANT CONNECT ANY DATABASE to fred;
 GO
 
+
+--Create 10 more DB 
+CREATE DATABASE datadog_test1;
+GO
+CREATE DATABASE datadog_test2;
+GO
+CREATE DATABASE datadog_test3;
+GO
+CREATE DATABASE datadog_test4;
+GO
+CREATE DATABASE datadog_test5;
+GO
+CREATE DATABASE datadog_test6;
+GO
+CREATE DATABASE datadog_test7;
+GO
+CREATE DATABASE datadog_test8;
+GO
+CREATE DATABASE datadog_test9;
+GO
+CREATE DATABASE datadog_test10;
+GO
+CREATE DATABASE datadog_test11;
+GO
+CREATE DATABASE datadog_test12;
+GO
+CREATE DATABASE datadog_test13;
+GO
+CREATE DATABASE datadog_test14;
+GO
+CREATE DATABASE datadog_test15;
+GO
+CREATE DATABASE datadog_test16;
+GO
+CREATE DATABASE datadog_test17;
+GO
+CREATE DATABASE datadog_test18;
+GO
+CREATE DATABASE datadog_test19;
+GO
+CREATE DATABASE datadog_test20;
+GO
+
 -- Create test database for integration tests
 -- only bob and fred have read/write access to this database
 CREATE DATABASE datadog_test;

@@ -171,6 +171,7 @@ class SqlserverProcedureMetrics(DBMAsyncJob):
         # raw connection. adodbapi and pyodbc modules are thread safe, but connections are not.
         with self._check.connection.open_managed_default_connection(key_prefix=self._conn_key_prefix):
             with self._check.connection.get_managed_cursor(key_prefix=self._conn_key_prefix) as cursor:
+                time.sleep(10)
                 rows = self._collect_metrics_rows(cursor)
                 if not rows:
                     self.log.debug("collect_procedure_metrics: no rows returned")

@@ -4,12 +4,12 @@
 import logging
 import socket
 from contextlib import closing, contextmanager
-
+import pdb
 from six import raise_from
 
 from datadog_checks.base import AgentCheck, ConfigurationError
 from datadog_checks.base.log import get_check_logger
-
+import time
 try:
     import adodbapi
 except ImportError:
@@ -150,7 +150,7 @@ class Connection(object):
         self._check = check
         self.service_check_handler = service_check_handler
         self.log = get_check_logger()
-
+        self.count_conn  = 0
         self.managed_auth_enabled = False
         self.managed_identity_client_id = None
         self.managed_identity_scope = None
@@ -238,6 +238,7 @@ class Connection(object):
         return db_exists, context
 
     def check_database_conns(self, db_name):
+        #For safety put ehis in with block ?
         self.open_db_connections(None, db_name=db_name, is_default=False)
         self.close_db_connections(None, db_name)
 
@@ -249,6 +250,7 @@ class Connection(object):
     @contextmanager
     def open_managed_default_connection(self, key_prefix=None):
         with self._open_managed_db_connections(self.DEFAULT_DB_KEY, key_prefix=key_prefix):
+            #time.sleep(15)
             yield
 
     @contextmanager
@@ -266,6 +268,7 @@ class Connection(object):
         connections keep locks on the db, presenting issues such as the SQL
         Server Agent being unable to stop.
         """
+        #pdb.set_trace()
         conn_key = self._conn_key(db_key, db_name, key_prefix)
 
         _, host, _, _, database, driver = self._get_access_info(db_key, db_name)
@@ -280,6 +283,8 @@ class Connection(object):
                 cs += self._conn_string_adodbapi(db_key, db_name=db_name)
                 # autocommit: true disables implicit transaction
                 rawconn = adodbapi.connect(cs, {'timeout': self.timeout, 'autocommit': True})
+                self.count_conn +=1
+            
             else:
                 cs += self._conn_string_odbc(db_key, db_name=db_name)
                 if self.managed_auth_enabled:
@@ -289,8 +294,12 @@ class Connection(object):
                     rawconn = pyodbc.connect(
                         cs, timeout=self.timeout, autocommit=True, attrs_before={SQL_COPT_SS_ACCESS_TOKEN: token_struct}
                     )
+                    self.count_conn +=1
+                  
                 else:
                     rawconn = pyodbc.connect(cs, timeout=self.timeout, autocommit=True)
+                    self.count_conn = self.count_conn  + 1
+                    #self.log.debug('Boris connection counter ', self.count_conn)
                 rawconn.timeout = self.timeout
 
             self.service_check_handler(AgentCheck.OK, host, database, is_default=is_default)
@@ -305,6 +314,7 @@ class Connection(object):
 
                 self._conns[conn_key] = rawconn
             self._setup_new_connection(rawconn)
+            self.log.error('Boris connection counter %s ', str(self.count_conn))
         except Exception as e:
             error_message = self.test_network_connectivity()
             tcp_connection_status = error_message if error_message else "OK"
@@ -359,8 +369,11 @@ class Connection(object):
 
         try:
             self._conns[conn_key].close()
+            self.count_conn = self.count_conn  - 1
+            self.log.error('Boris connection counter %s ', str(self.count_conn))
             del self._conns[conn_key]
         except Exception as e:
+            #not necesseraly adodbapi... 
             self.log.warning("Could not close adodbapi db connection\n%s", e)
 
     def _check_db_exists(self):

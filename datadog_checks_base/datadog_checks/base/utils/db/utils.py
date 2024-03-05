@@ -296,7 +296,8 @@ class DBMAsyncJob(object):
         self._job_tags = self._tags + ["job:{}".format(self._job_name)]
         self._job_tags_str = ','.join(self._job_tags)
         self._last_check_run = time.time()
-        if self._run_sync or is_affirmative(os.environ.get('DBM_THREADED_JOB_RUN_SYNC', "false")):
+        #if self._run_sync or is_affirmative(os.environ.get('DBM_THREADED_JOB_RUN_SYNC', "false")):
+        if False:
             self._log.debug("Running threaded job synchronously. job=%s", self._job_name)
             self._run_job_rate_limited()
         elif self._job_loop_future is None or not self._job_loop_future.running():
