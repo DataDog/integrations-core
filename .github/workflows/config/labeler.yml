@@ -3,7 +3,7 @@ base_package:
 changelog/no-changelog:
 - any:
   - requirements-agent-release.txt
-  - '*/__about__.py'
+  - '**/__about__.py'
 - all:
   - '!*/datadog_checks/**'
   - '!*/pyproject.toml'
@@ -490,4 +490,4 @@ integration/zeek:
 integration/zk:
 - zk/**/*
 release:
-- '*/__about__.py'
+- '**/__about__.py'

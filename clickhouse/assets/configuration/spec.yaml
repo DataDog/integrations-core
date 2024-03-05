@@ -73,6 +73,7 @@ files:
                 type: gauge
             tags:
               - test:clickhouse
+            metric_prefix: clickhouse
     - template: instances/default
   - template: logs
     example:

@@ -218,7 +218,12 @@ class ApiSdk(Api):
         ]
 
     def get_baremetal_conductors(self):
-        return [conductor.to_dict(original_names=True) for conductor in self.connection.baremetal.conductors()]
+        return [
+            conductor.to_dict(original_names=True)
+            for conductor in self.call_paginated_api(
+                self.connection.baremetal.conductors, limit=self.config.paginated_limit
+            )
+        ]
 
     def get_auth_projects(self):
         response = self.http.get('{}/v3/auth/projects'.format(self.cloud_config.get_auth_args().get('auth_url')))
