@@ -370,7 +370,7 @@ def test_check_tempdb_file_space_usage_metrics(
 
 @pytest.mark.integration
 @pytest.mark.usefixtures('dd_environment')
-@pytest.mark.skipif(SQLSERVER_MAJOR_VERSION < 2016, reason='Test flakes on this set up')
+@pytest.mark.skipif(SQLSERVER_MAJOR_VERSION < 2016, reason='Metric not supported')
 def test_check_incr_fraction_metrics(
     aggregator,
     dd_run_check,
