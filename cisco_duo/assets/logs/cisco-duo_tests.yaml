@@ -274,12 +274,12 @@ tests:
         duo:
           context: "authentication"
           credits: 5
+          type: "sms"
       phone: "+11234567890"
       service: "telephony"
       telephony_id: "some-telephony-id"
       ts: "2024-01-09T09:08:15.097338+00:00"
       txid: "some-txid"
-      type: "sms"
     tags:
     - "source:LOGS_SOURCE"
     timestamp: 1704791295097
