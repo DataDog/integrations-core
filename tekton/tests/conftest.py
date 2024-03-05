@@ -90,7 +90,7 @@ def setup_tekton():
 
 
 @pytest.fixture(scope='session')
-def dd_environment(dd_save_state):
+def dd_environment():
     with kind_run(conditions=[setup_tekton], sleep=60) as kubeconfig, ExitStack() as stack:
         instances = {}
 
