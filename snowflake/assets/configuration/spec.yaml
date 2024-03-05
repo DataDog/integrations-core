@@ -200,6 +200,7 @@ files:
                   type: gauge
               tags:
                 - test:snowflake
+              metric_prefix: snowflake
       - template: instances/default
         overrides:
           min_collection_interval.description: |
