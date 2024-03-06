@@ -36,7 +36,7 @@
       },
       "metrics": {
         "prefix": "argo_rollouts.",
-        "check": "",
+        "check": "argo_rollouts.go.threads",
         "metadata_path": "metadata.csv"
       },
       "service_checks": {
