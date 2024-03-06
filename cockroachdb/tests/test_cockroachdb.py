@@ -6,7 +6,7 @@ from six import itervalues
 
 from datadog_checks.cockroachdb import CockroachdbCheck
 from datadog_checks.cockroachdb.metrics import METRIC_MAP
-from datadog_checks.dev.utils import get_service_checks
+from datadog_checks.dev.utils import assert_service_checks
 
 from .common import COCKROACHDB_VERSION
 
@@ -54,6 +54,4 @@ def _test_check(aggregator):
 
     assert aggregator.metrics_asserted_pct > 80, 'Missing metrics {}'.format(aggregator.not_asserted())
 
-    # The stub is in the base check and I don't want to bump the min version for testing purposes
-    if hasattr(aggregator, 'assert_service_checks'):
-        aggregator.assert_service_checks(get_service_checks())
+    assert_service_checks(aggregator)
