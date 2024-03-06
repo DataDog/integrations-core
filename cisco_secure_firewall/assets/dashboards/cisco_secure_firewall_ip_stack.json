@@ -624,7 +624,7 @@
                                             },
                                             "group_by": [
                                                 {
-                                                    "facet": "@code",
+                                                    "facet": "@cisco.secure.firewall.code",
                                                     "limit": 10,
                                                     "sort": {
                                                         "order": "desc",
@@ -749,7 +749,7 @@
                                             },
                                             "group_by": [
                                                 {
-                                                    "facet": "@interface_name",
+                                                    "facet": "@cisco.secure.firewall.interface_name",
                                                     "limit": 10,
                                                     "sort": {
                                                         "order": "desc",
@@ -887,7 +887,7 @@
                                             },
                                             "group_by": [
                                                 {
-                                                    "facet": "@interface_name",
+                                                    "facet": "@cisco.secure.firewall.interface_name",
                                                     "limit": 10,
                                                     "sort": {
                                                         "order": "desc",

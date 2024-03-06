@@ -197,7 +197,7 @@
                                         }
                                     },
                                     {
-                                        "facet": "@elapsed_time",
+                                        "facet": "@cisco.secure.firewall.elapsed_time",
                                         "limit": 10,
                                         "sort": {
                                             "order": "desc",
@@ -263,7 +263,7 @@
                                 },
                                 "group_by": [
                                     {
-                                        "facet": "@session_type",
+                                        "facet": "@cisco.secure.firewall.session_type",
                                         "limit": 10,
                                         "sort": {
                                             "order": "desc",
@@ -324,7 +324,7 @@
                                         }
                                     },
                                     {
-                                        "facet": "@acl_id",
+                                        "facet": "@cisco.secure.firewall.acl_id",
                                         "limit": 10,
                                         "sort": {
                                             "order": "desc",

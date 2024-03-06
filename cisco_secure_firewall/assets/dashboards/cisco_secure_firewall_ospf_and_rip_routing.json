@@ -368,7 +368,7 @@
                                             },
                                             "group_by": [
                                                 {
-                                                    "facet": "@interface_name",
+                                                    "facet": "@cisco.secure.firewall.interface_name",
                                                     "limit": 10,
                                                     "sort": {
                                                         "order": "desc",

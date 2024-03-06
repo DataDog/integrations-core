@@ -210,7 +210,7 @@
                                 },
                                 "group_by": [
                                     {
-                                        "facet": "@security_event_name",
+                                        "facet": "@cisco.secure.firewall.security_event_name",
                                         "limit": 10,
                                         "sort": {
                                             "order": "desc",
@@ -650,7 +650,7 @@
                                 },
                                 "group_by": [
                                     {
-                                        "facet": "@Classification",
+                                        "facet": "@cisco.secure.firewall.Classification",
                                         "limit": 10,
                                         "sort": {
                                             "order": "desc",
@@ -773,7 +773,7 @@
                                 },
                                 "group_by": [
                                     {
-                                        "facet": "@Client",
+                                        "facet": "@cisco.secure.firewall.Client",
                                         "limit": 10,
                                         "sort": {
                                             "order": "desc",
@@ -834,7 +834,7 @@
                                 },
                                 "group_by": [
                                     {
-                                        "facet": "@ApplicationProtocol",
+                                        "facet": "@cisco.secure.firewall.ApplicationProtocol",
                                         "limit": 10,
                                         "sort": {
                                             "order": "desc",
@@ -895,7 +895,7 @@
                                 },
                                 "group_by": [
                                     {
-                                        "facet": "@ACPolicy",
+                                        "facet": "@cisco.secure.firewall.ACPolicy",
                                         "limit": 10,
                                         "sort": {
                                             "order": "desc",
@@ -956,7 +956,7 @@
                                 },
                                 "group_by": [
                                     {
-                                        "facet": "@NAPPolicy",
+                                        "facet": "@cisco.secure.firewall.NAPPolicy",
                                         "limit": 10,
                                         "sort": {
                                             "order": "desc",
@@ -1017,7 +1017,7 @@
                                 },
                                 "group_by": [
                                     {
-                                        "facet": "@AccessControlRuleAction",
+                                        "facet": "@cisco.secure.firewall.AccessControlRuleAction",
                                         "limit": 10,
                                         "sort": {
                                             "order": "desc",
@@ -1520,7 +1520,7 @@
                                 ],
                                 "compute": {
                                     "aggregation": "sum",
-                                    "metric": "@InitiatorPackets"
+                                    "metric": "@cisco.secure.firewall.InitiatorPackets"
                                 },
                                 "group_by": [],
                                 "search": {
@@ -1536,7 +1536,7 @@
                                 ],
                                 "compute": {
                                     "aggregation": "sum",
-                                    "metric": "@ResponderPackets"
+                                    "metric": "@cisco.secure.firewall.ResponderPackets"
                                 },
                                 "group_by": [],
                                 "search": {
@@ -1599,7 +1599,7 @@
                                 ],
                                 "compute": {
                                     "aggregation": "avg",
-                                    "metric": "@InitiatorBytes"
+                                    "metric": "@cisco.secure.firewall.InitiatorBytes"
                                 },
                                 "group_by": [],
                                 "search": {
@@ -1615,7 +1615,7 @@
                                 ],
                                 "compute": {
                                     "aggregation": "avg",
-                                    "metric": "@ResponderBytes"
+                                    "metric": "@cisco.secure.firewall.ResponderBytes"
                                 },
                                 "group_by": [],
                                 "search": {

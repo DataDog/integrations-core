@@ -328,7 +328,7 @@
                                 },
                                 "group_by": [
                                     {
-                                        "facet": "@reason_code",
+                                        "facet": "@cisco.secure.firewall.reason_code",
                                         "limit": 10,
                                         "sort": {
                                             "order": "desc",
