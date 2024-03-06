@@ -186,7 +186,7 @@ Loading Errors
         unable to import module 'sqlserver': No module named 'sqlserver'
 ```
 
-This is fixed in version 15.2.0 of the check and in Agent versions 7.5.0 and above.
+This is fixed in version 15.2.0 of the check and in Agent versions 7.49.1 and above.
 
 ## Further Reading
 
