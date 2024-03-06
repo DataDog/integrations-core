@@ -1,4 +1,4 @@
-ARG BASE_IMAGE=quay.io/pypa/manylinux2010_x86_64
+ARG BASE_IMAGE=quay.io/pypa/manylinux2014_x86_64
 FROM ${BASE_IMAGE}
 
 ARG SOURCE_DATE_EPOCH
@@ -45,11 +45,11 @@ RUN yum install -y perl-IPC-Cmd && \
  no-comp no-idea no-mdc2 no-rc5 no-ssl3 no-gost
 
 # Compile and install Python 3
-ENV PYTHON3_VERSION=3.11.5
+ENV PYTHON3_VERSION=3.11.8
 RUN yum install -y libffi-devel && \
  DOWNLOAD_URL="https://python.org/ftp/python/{{version}}/Python-{{version}}.tgz" \
  VERSION="${PYTHON3_VERSION}" \
- SHA256="a12a0a013a30b846c786c010f2c19dd36b7298d888f7c4bd1581d90ce18b5e58" \
+ SHA256="d3019a613b9e8761d260d9ebe3bd4df63976de30464e5c0189566e1ae3f61889" \
  RELATIVE_PATH="Python-{{version}}" \
  bash install-from-source.sh --prefix=/opt/python/${PYTHON_VERSION} --with-ensurepip=yes --enable-ipv6 --with-dbmliborder=
 ENV PATH="/opt/python/${PYTHON_VERSION}/bin:${PATH}"
@@ -198,6 +198,6 @@ RUN python3 -m pip install --no-warn-script-location -r /runner_dependencies.txt
 COPY build_script.sh /build_script.sh
 ENV DD_BUILD_COMMAND="bash /build_script.sh"
 
-ENV MANYLINUX_POLICY="manylinux2010_x86_64"
+ENV MANYLINUX_POLICY="manylinux2014_x86_64"
 
 ENTRYPOINT ["python3", "/home/scripts/build_wheels.py"]
