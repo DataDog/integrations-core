@@ -60,7 +60,7 @@ def display_message_block(message: str) -> None:
 
 def timestamp_build_number() -> int:
     """Produce a numeric timestamp to use as build numbers"""
-    return int(time.strftime('%Y%M%d%H%m%s'))
+    return int(time.strftime('%Y%m%d%H%M%S'))
 
 
 def hash_file(path: Path) -> str:
