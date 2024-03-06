@@ -31,6 +31,9 @@
       "configuration": {
         "spec": "assets/configuration/spec.yaml"
       },
+      "process_signatures": [
+        "rollouts-controller"
+      ],
       "events": {
         "creates_events": false
       },
@@ -45,6 +48,9 @@
     },
     "dashboards": {
       "Argo Rollouts Overview": "assets/dashboards/overview.json"
+    },
+    "logs": {
+      "source": "envoy"
     }
   },
   "author": {
