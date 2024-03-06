@@ -137,8 +137,8 @@ def upload(targets_dir):
                 # https://packaging.python.org/en/latest/specifications/binary-distribution-format/#file-name-convention
                 name, version, python_tag, abi_tag, platform_tag = wheel.stem.split('-')
                 existing_wheels = list(bucket.list_blobs(
-                    prefix=f'{artifact_type}/{project_name}/',
-                    match_glob=f'{name}-{version}*-{python_tag}-{abi_tag}-{platform_tag}.whl',
+                    match_glob=(f'{artifact_type}/{project_name}/'
+                                f'{name}-{version}*-{python_tag}-{abi_tag}-{platform_tag}.whl'),
                 ))
                 if existing_wheels:
                     most_recent_wheel = max(existing_wheels, key=_build_number_of_wheel_blob)
