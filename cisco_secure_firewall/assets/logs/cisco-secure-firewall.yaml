@@ -214,6 +214,13 @@ facets:
     path: cisco.secure.firewall.snmp_ip_address
     source: log
     type: string
+  - facetType: list
+    groups:
+      - Cisco Secure Firewall
+    name: Protocol
+    path: cisco.secure.firewall.protocol
+    source: log
+    type: string
   - groups:
       - Geoip
     name: City Name
@@ -396,13 +403,13 @@ pipeline:
             supportRules: _space %{regex("(\\s)*"):}
             matchRules: >-
               transparent_firewall_110002 Failed to locate egress interface for
-              %{word:protocol} from
+              %{word:cisco.secure.firewall.protocol} from
               %{notSpace:src_interface}%{_space}:%{ip:network.client.ip}%{_space}/%{integer:network.client.port}
               to
               %{ip:network.destination.ip}%{_space}/%{integer:network.destination.port}
 
 
-              transparent_firewall_110003 Routing failed to locate next hop for %{word:protocol} from %{regex("[-a-zA-Z0-9_,. ]*"):src_interface}%{_space}:%{ip:network.client.ip}%{_space}/%{integer:network.client.port} to %{notSpace:dest_interface}%{_space}:%{ip:network.destination.ip}%{_space}/%{integer:network.destination.port}
+              transparent_firewall_110003 Routing failed to locate next hop for %{word:cisco.secure.firewall.protocol} from %{regex("[-a-zA-Z0-9_,. ]*"):src_interface}%{_space}:%{ip:network.client.ip}%{_space}/%{integer:network.client.port} to %{notSpace:dest_interface}%{_space}:%{ip:network.destination.ip}%{_space}/%{integer:network.destination.port}
 
 
               transparent_firewall_110004 Egress interface changed from %{notSpace:old_active_ifc} to %{notSpace:new_active_ifc} on %{notSpace:ip_protocol} connection %{word:connection_id} for %{notSpace:outside_zone}%{_space}/%{_space}%{notSpace:parent_outside_ifc}%{_space}:%{_space}%{ip:outside_address}%{_space}/%{_space}%{integer:outside_port}%{_space}\(%{_space}%{ip:outside_mapped_address}%{_space}/%{integer:outside_mapped_port}%{_space}\) to %{notSpace:inside_zone}%{_space}/%{notSpace:parent_inside_ifc}%{_space}:%{_space}%{ip:inside_address}%{_space}/%{integer:inside_port}%{_space}\(%{_space}%{ip:inside_mapped_address}%{_space}/%{integer:inside_mapped_port}%{_space}\)
@@ -1094,10 +1101,10 @@ pipeline:
             supportRules: _space %{regex("(\\s)*"):}
             matchRules: >-
               ip_stack_209003 Fragment database limit of %{integer:}
-              exceeded:%{_space}src%{_space}=%{_space}%{ip:source_address}%{_space},%{_space}dest%{_space}=%{_space}%{ip:destination_address}%{_space},%{_space}proto%{_space}=%{_space}%{notSpace:protocol}%{_space},%{_space}id%{_space}=%{_space}%{integer:id}
+              exceeded:%{_space}src%{_space}=%{_space}%{ip:source_address}%{_space},%{_space}dest%{_space}=%{_space}%{ip:destination_address}%{_space},%{_space}proto%{_space}=%{_space}%{notSpace:cisco.secure.firewall.protocol}%{_space},%{_space}id%{_space}=%{_space}%{integer:id}
 
 
-              ip_stack_209004 Invalid IP fragment,%{_space}size%{_space}=%{_space}%{integer:bytes} exceeds maximum size%{_space}=%{_space}%{integer:max_bytes}%{_space}:%{_space}src%{_space}=%{_space}%{ip:source_address}%{_space},%{_space}dest%{_space}=%{_space}%{ip:destination_address}%{_space},%{_space}proto%{_space}=%{_space}%{word:protocol}%{_space},%{_space}id%{_space}=%{_space}%{integer:id}
+              ip_stack_209004 Invalid IP fragment,%{_space}size%{_space}=%{_space}%{integer:bytes} exceeds maximum size%{_space}=%{_space}%{integer:max_bytes}%{_space}:%{_space}src%{_space}=%{_space}%{ip:source_address}%{_space},%{_space}dest%{_space}=%{_space}%{ip:destination_address}%{_space},%{_space}proto%{_space}=%{_space}%{word:cisco.secure.firewall.protocol}%{_space},%{_space}id%{_space}=%{_space}%{integer:id}
 
 
               ip_stack_313001 Denied ICMP type=%{regex("[^,]*"):type}%{_space},%{_space}code=%{integer:cisco.secure.firewall.code} from %{ip:source_address} on interface %{notSpace:cisco.secure.firewall.interface_name}

@@ -242,7 +242,6 @@
                             "title": "Top 10 Source IPs of the Packet",
                             "title_size": "16",
                             "title_align": "left",
-                            "time": {},
                             "type": "toplist",
                             "requests": [
                                 {
@@ -305,7 +304,6 @@
                             "title": "Top 10 Destination IPs of the Packet",
                             "title_size": "16",
                             "title_align": "left",
-                            "time": {},
                             "type": "toplist",
                             "requests": [
                                 {
@@ -368,6 +366,7 @@
                             "title": "Log Details",
                             "title_size": "16",
                             "title_align": "left",
+                            "time": {},
                             "requests": [
                                 {
                                     "response_format": "event_list",
@@ -407,7 +406,7 @@
                                             "width": "auto"
                                         },
                                         {
-                                            "field": "protocol",
+                                            "field": "cisco.secure.firewall.protocol",
                                             "width": "auto"
                                         },
                                         {
@@ -498,6 +497,7 @@
                             "title": "Events by Protocol",
                             "title_size": "16",
                             "title_align": "left",
+                            "time": {},
                             "requests": [
                                 {
                                     "formulas": [
@@ -521,7 +521,7 @@
                                             },
                                             "group_by": [
                                                 {
-                                                    "facet": "@protocol",
+                                                    "facet": "@cisco.secure.firewall.protocol",
                                                     "limit": 10,
                                                     "sort": {
                                                         "order": "desc",
@@ -559,7 +559,6 @@
                             "title": "Top 10 Source IP",
                             "title_size": "16",
                             "title_align": "left",
-                            "time": {},
                             "type": "toplist",
                             "requests": [
                                 {
@@ -622,7 +621,6 @@
                             "title": "Top 10 Destination IP",
                             "title_size": "16",
                             "title_align": "left",
-                            "time": {},
                             "type": "toplist",
                             "requests": [
                                 {
@@ -685,7 +683,6 @@
                             "title": "Top 10 Source Interface",
                             "title_size": "16",
                             "title_align": "left",
-                            "time": {},
                             "type": "toplist",
                             "requests": [
                                 {
@@ -748,6 +745,7 @@
                             "title": "Log Details",
                             "title_size": "16",
                             "title_align": "left",
+                            "time": {},
                             "requests": [
                                 {
                                     "response_format": "event_list",
@@ -787,7 +785,7 @@
                                             "width": "auto"
                                         },
                                         {
-                                            "field": "protocol",
+                                            "field": "cisco.secure.firewall.protocol",
                                             "width": "auto"
                                         },
                                         {
