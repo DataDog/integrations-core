@@ -2905,7 +2905,7 @@ jobs:
       job-name: SQL Server on Windows
       target: sqlserver
       platform: windows
-      runner: '["windows-2019"]'
+      runner: '["windows-2022"]'
       repo: "${{ inputs.repo }}"
       python-version: "${{ inputs.python-version }}"
       standard: ${{ inputs.standard }}
