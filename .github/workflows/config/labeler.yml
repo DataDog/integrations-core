@@ -59,6 +59,8 @@ integration/apache:
 - apache/**/*
 integration/arangodb:
 - arangodb/**/*
+integration/argo_rollouts:
+- argo_rollouts/**/*
 integration/argocd:
 - argocd/**/*
 integration/aspdotnet:
