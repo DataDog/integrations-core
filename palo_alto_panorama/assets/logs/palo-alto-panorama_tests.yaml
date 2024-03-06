@@ -12,7 +12,6 @@ tests:
         app: "incomplete"
         appcat: "unknown"
         appflap: 0
-        appstate: "no"
         associd: 0
         bytes: 134
         cat: "any"
@@ -79,6 +78,7 @@ tests:
               action: "allow"
               apprisk: 1
               appsaas: "no"
+              appstate: "no"
               apptech: "unknown"
               dstzone: "WAN"
               pkt: 2
@@ -122,7 +122,6 @@ tests:
         actflags: "0x0"
         app: "facebook-base"
         appcat: "saas"
-        appstate: "no"
         cat: "social-networking"
         contentver: "AppThreat-0-0"
         dir: "client-to-server"
@@ -185,6 +184,7 @@ tests:
               appcont: "facebook"
               apprisk: 4
               appsaas: "yes"
+              appstate: "no"
               apptech: "browser-based"
               dstzone: "WAN"
               severity: "informational"
@@ -233,7 +233,6 @@ tests:
         actflag: "0x0"
         app: "ssl"
         appcat: "business-systems"
-        appstate: 1
         certflags: "padding3"
         certserial: "XYZ420"
         certsize: 65536
@@ -321,6 +320,7 @@ tests:
               appcont: "docker"
               apprisk: 1
               appsaas: 1
+              appstate: 1
               appsubcat: "encrypted-tunnel"
               apptech: "browser-based"
               dcat: "firewall"
