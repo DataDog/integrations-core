@@ -387,7 +387,7 @@
                                 },
                                 "group_by": [
                                     {
-                                        "facet": "@panorama_severity",
+                                        "facet": "@palo.alto.panorama.severity",
                                         "limit": 10,
                                         "sort": {
                                             "order": "desc",
@@ -570,7 +570,7 @@
                                 },
                                 "group_by": [
                                     {
-                                        "facet": "@vsys",
+                                        "facet": "@palo.alto.panorama.vsys",
                                         "limit": 10,
                                         "sort": {
                                             "order": "desc",
@@ -635,7 +635,7 @@
                                 "width": "auto"
                             },
                             {
-                                "field": "panorama_severity",
+                                "field": "palo.alto.panorama.severity",
                                 "width": "auto"
                             },
                             {
@@ -643,7 +643,7 @@
                                 "width": "auto"
                             },
                             {
-                                "field": "vsys",
+                                "field": "palo.alto.panorama.vsys",
                                 "width": "auto"
                             }
                         ]
@@ -674,13 +674,13 @@
         },
         {
             "name": "Severity",
-            "prefix": "@panorama_severity",
+            "prefix": "@palo.alto.panorama.severity",
             "available_values": [],
             "default": "*"
         },
         {
             "name": "App_Category",
-            "prefix": "@category_of_app",
+            "prefix": "@category",
             "available_values": [],
             "default": "*"
         }

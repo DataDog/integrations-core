@@ -204,7 +204,7 @@
                                 },
                                 "group_by": [
                                     {
-                                        "facet": "@clienttype",
+                                        "facet": "@palo.alto.panorama.clienttype",
                                         "limit": 10,
                                         "sort": {
                                             "order": "desc",
@@ -265,7 +265,7 @@
                                 },
                                 "group_by": [
                                     {
-                                        "facet": "@normalize_user",
+                                        "facet": "@palo.alto.panorama.normalize_user",
                                         "limit": 10,
                                         "sort": {
                                             "order": "desc",
@@ -386,7 +386,7 @@
                                 },
                                 "group_by": [
                                     {
-                                        "facet": "@event",
+                                        "facet": "@palo.alto.panorama.event",
                                         "limit": 10,
                                         "sort": {
                                             "order": "desc",
@@ -448,7 +448,7 @@
                                 },
                                 "group_by": [
                                     {
-                                        "facet": "@authproto",
+                                        "facet": "@palo.alto.panorama.authproto",
                                         "limit": 10,
                                         "sort": {
                                             "order": "desc",
@@ -507,7 +507,7 @@
                                 },
                                 "group_by": [
                                     {
-                                        "facet": "@vsys",
+                                        "facet": "@palo.alto.panorama.vsys",
                                         "limit": 10,
                                         "sort": {
                                             "order": "desc",
@@ -569,7 +569,7 @@
                                 },
                                 "group_by": [
                                     {
-                                        "facet": "@authentication_policy",
+                                        "facet": "@palo.alto.panorama.authentication_policy",
                                         "limit": 10,
                                         "sort": {
                                             "order": "desc",
@@ -752,15 +752,15 @@
                                 "width": "auto"
                             },
                             {
-                                "field": "normalize_user",
+                                "field": "palo.alto.panorama.normalize_user",
                                 "width": "auto"
                             },
                             {
-                                "field": "authentication_policy",
+                                "field": "palo.alto.panorama.authentication_policy",
                                 "width": "auto"
                             },
                             {
-                                "field": "clienttype",
+                                "field": "palo.alto.panorama.clienttype",
                                 "width": "auto"
                             },
                             {
@@ -768,7 +768,7 @@
                                 "width": "auto"
                             },
                             {
-                                "field": "event",
+                                "field": "palo.alto.panorama.event",
                                 "width": "auto"
                             },
                             {
@@ -776,7 +776,7 @@
                                 "width": "auto"
                             },
                             {
-                                "field": "authproto",
+                                "field": "palo.alto.panorama.authproto",
                                 "width": "auto"
                             },
                             {
@@ -784,7 +784,7 @@
                                 "width": "auto"
                             },
                             {
-                                "field": "vsys",
+                                "field": "palo.alto.panorama.vsys",
                                 "width": "auto"
                             }
                         ]
@@ -815,13 +815,13 @@
         },
         {
             "name": "Authentication_Policy",
-            "prefix": "@authentication_policy",
+            "prefix": "@palo.alto.panorama.authentication_policy",
             "available_values": [],
             "default": "*"
         },
         {
             "name": "Authentication_Protocol",
-            "prefix": "@authproto",
+            "prefix": "@palo.alto.panorama.authproto",
             "available_values": [],
             "default": "*"
         }

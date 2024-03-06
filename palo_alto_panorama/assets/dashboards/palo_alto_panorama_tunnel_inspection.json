@@ -314,7 +314,7 @@
                                 ],
                                 "compute": {
                                     "aggregation": "sum",
-                                    "metric": "@pkt"
+                                    "metric": "@palo.alto.panorama.pkt"
                                 },
                                 "group_by": [],
                                 "search": {
@@ -409,7 +409,7 @@
                                         }
                                     },
                                     {
-                                        "facet": "@panorama_action",
+                                        "facet": "@palo.alto.panorama.action",
                                         "limit": 10,
                                         "sort": {
                                             "order": "desc",
@@ -653,7 +653,7 @@
                                 },
                                 "group_by": [
                                     {
-                                        "facet": "@panorama_severity",
+                                        "facet": "@palo.alto.panorama.severity",
                                         "limit": 10,
                                         "sort": {
                                             "order": "desc",
@@ -1080,7 +1080,7 @@
                                 },
                                 "group_by": [
                                     {
-                                        "facet": "@srczone",
+                                        "facet": "@palo.alto.panorama.srczone",
                                         "limit": 10,
                                         "sort": {
                                             "order": "desc",
@@ -1141,7 +1141,7 @@
                                 },
                                 "group_by": [
                                     {
-                                        "facet": "@dstzone",
+                                        "facet": "@palo.alto.panorama.dstzone",
                                         "limit": 10,
                                         "sort": {
                                             "order": "desc",
@@ -1783,7 +1783,7 @@
                                         }
                                     },
                                     {
-                                        "facet": "@risk_of_app",
+                                        "facet": "@palo.alto.panorama.risk_of_app",
                                         "limit": 10,
                                         "sort": {
                                             "order": "desc",
@@ -1971,7 +1971,7 @@
                                 },
                                 "group_by": [
                                     {
-                                        "facet": "@vsys",
+                                        "facet": "@palo.alto.panorama.vsys",
                                         "limit": 10,
                                         "sort": {
                                             "order": "desc",
@@ -2148,7 +2148,7 @@
                                 ],
                                 "compute": {
                                     "aggregation": "sum",
-                                    "metric": "@pkt"
+                                    "metric": "@palo.alto.panorama.pkt"
                                 },
                                 "group_by": [],
                                 "search": {
@@ -2196,7 +2196,7 @@
                                 ],
                                 "compute": {
                                     "aggregation": "sum",
-                                    "metric": "@max_encap"
+                                    "metric": "@palo.alto.panorama.max_encap"
                                 },
                                 "group_by": [],
                                 "search": {
@@ -2244,7 +2244,7 @@
                                 ],
                                 "compute": {
                                     "aggregation": "sum",
-                                    "metric": "@unknown_proto"
+                                    "metric": "@palo.alto.panorama.unknown_proto"
                                 },
                                 "group_by": [],
                                 "search": {
@@ -2292,7 +2292,7 @@
                                 ],
                                 "compute": {
                                     "aggregation": "sum",
-                                    "metric": "@tunnel_fragment"
+                                    "metric": "@palo.alto.panorama.tunnel_fragment"
                                 },
                                 "group_by": [],
                                 "search": {
@@ -2340,7 +2340,7 @@
                                 ],
                                 "compute": {
                                     "aggregation": "sum",
-                                    "metric": "@strict_check"
+                                    "metric": "@palo.alto.panorama.strict_check"
                                 },
                                 "group_by": [],
                                 "search": {
@@ -2390,7 +2390,7 @@
                                 "width": "auto"
                             },
                             {
-                                "field": "panorama_action",
+                                "field": "palo.alto.panorama.action",
                                 "width": "auto"
                             },
                             {
@@ -2398,7 +2398,7 @@
                                 "width": "auto"
                             },
                             {
-                                "field": "panorama_severity",
+                                "field": "palo.alto.panorama.severity",
                                 "width": "auto"
                             },
                             {
@@ -2426,11 +2426,11 @@
                                 "width": "auto"
                             },
                             {
-                                "field": "srczone",
+                                "field": "palo.alto.panorama.srczone",
                                 "width": "auto"
                             },
                             {
-                                "field": "dstzone",
+                                "field": "palo.alto.panorama.dstzone",
                                 "width": "auto"
                             },
                             {
@@ -2454,7 +2454,7 @@
                                 "width": "auto"
                             },
                             {
-                                "field": "pkt",
+                                "field": "palo.alto.panorama.pkt",
                                 "width": "auto"
                             },
                             {
@@ -2470,7 +2470,7 @@
                                 "width": "auto"
                             },
                             {
-                                "field": "risk_of_app",
+                                "field": "palo.alto.panorama.risk_of_app",
                                 "width": "auto"
                             },
                             {
@@ -2505,13 +2505,13 @@
         },
         {
             "name": "Action",
-            "prefix": "@panorama_action",
+            "prefix": "@palo.alto.panorama.action",
             "available_values": [],
             "default": "*"
         },
         {
             "name": "Severity",
-            "prefix": "@panorama_severity",
+            "prefix": "@palo.alto.panorama.severity",
             "available_values": [],
             "default": "*"
         }

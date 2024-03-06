@@ -325,7 +325,7 @@
                                 },
                                 "group_by": [
                                     {
-                                        "facet": "@vsys",
+                                        "facet": "@palo.alto.panorama.vsys",
                                         "limit": 10,
                                         "sort": {
                                             "order": "desc",
@@ -521,7 +521,7 @@
                                 "width": "auto"
                             },
                             {
-                                "field": "vsys",
+                                "field": "palo.alto.panorama.vsys",
                                 "width": "auto"
                             },
                             {
