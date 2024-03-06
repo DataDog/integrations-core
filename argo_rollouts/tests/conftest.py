@@ -26,7 +26,7 @@ def setup_argo_rollouts():
 
 
 @pytest.fixture(scope='session')
-def dd_environment(dd_save_state):
+def dd_environment():
     with kind_run(conditions=[setup_argo_rollouts], sleep=30) as kubeconfig, ExitStack() as stack:
         argo_rollouts_host, argo_rollouts_port = stack.enter_context(
             port_forward(kubeconfig, 'argo-rollouts', 8090, 'deployment', 'argo-rollouts')
