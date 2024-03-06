@@ -10,21 +10,24 @@ from six import raise_from
 from datadog_checks.base import AgentCheck, ConfigurationError
 from datadog_checks.base.log import get_check_logger
 import time
-try:
-    import adodbapi
-except ImportError:
-    adodbapi = None
 
-try:
-    import pyodbc
-    #pyodbc.pooling = False
-except ImportError:
-    pyodbc = None
 
 from .azure import generate_managed_identity_token
 from .connection_errors import ConnectionErrorCode, SQLConnectionError, error_with_tags, format_connection_exception
 
 logger = logging.getLogger(__file__)
+
+try:
+    import adodbapi
+except ImportError:
+    adodbapi = None
+    logger.error(" Boris Could not import adodbapi")
+try:
+    import pyodbc
+    #pyodbc.pooling = False
+except ImportError:
+    pyodbc = None
+    logger.error(" Boris Could not import pyodbc")
 
 DATABASE_EXISTS_QUERY = 'select name, collation_name from sys.databases;'
 DEFAULT_CONN_PORT = 1433
@@ -285,8 +288,9 @@ class Connection(object):
                 # autocommit: true disables implicit transaction
                 rawconn = adodbapi.connect(cs, {'timeout': self.timeout, 'autocommit': True})
                 self.count_conn +=1
-            
+                logger.info("Boris connecting with adodbapi")
             else:
+                logger.info("Boris connecting with pyodbc")
                 cs += self._conn_string_odbc(db_key, db_name=db_name)
                 if self.managed_auth_enabled:
                     token_struct = generate_managed_identity_token(
