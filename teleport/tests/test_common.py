@@ -6,6 +6,8 @@ import pytest
 
 from datadog_checks.teleport import TeleportCheck
 
+from .common import COMMON_METRICS
+
 pytestmark = [pytest.mark.unit]
 
 
@@ -14,18 +16,6 @@ def test_connect_exception(dd_run_check):
     check = TeleportCheck("teleport", {}, [instance])
     with pytest.raises(Exception):
         dd_run_check(check)
-
-
-COMMON_METRICS = [
-    "process.state",
-    "certificate_mismatch.count",
-    "rx.count",
-    "server_interactive_sessions_total",
-    "teleport.build_info",
-    "teleport.cache_events.count",
-    "teleport.cache_stale_events.count",
-    "tx.count",
-]
 
 
 def test_common_teleport_metrics(dd_run_check, aggregator, instance, mock_http_response, metrics_path):
