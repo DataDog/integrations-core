@@ -4,7 +4,7 @@
     "widgets": [
         {
             "definition": {
-                "title": "About Airflow",
+                "title": "About Consul",
                 "title_align": "left",
                 "banner_img": "/static/images/logos/consul_small.svg",
                 "show_title": false,
@@ -133,7 +133,7 @@
                     {
                         "id": 4688774104622410,
                         "definition": {
-                            "title": "Airflow Connection State",
+                            "title": "Consul Monitor State",
                             "type": "manage_status",
                             "display_format": "list",
                             "color_preference": "text",
