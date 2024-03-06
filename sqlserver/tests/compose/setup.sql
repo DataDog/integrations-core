@@ -58,6 +58,10 @@ GO
 CREATE DATABASE datadog_test20;
 GO
 
+
+
+
+
 -- Create test database for integration tests
 -- only bob and fred have read/write access to this database
 CREATE DATABASE datadog_test;

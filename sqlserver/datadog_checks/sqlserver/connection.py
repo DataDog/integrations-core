@@ -17,6 +17,7 @@ except ImportError:
 
 try:
     import pyodbc
+    #pyodbc.pooling = False
 except ImportError:
     pyodbc = None
 
