@@ -36,10 +36,10 @@ METRIC_MAP = {
     'process_virtual_memory_max_bytes': 'process.virtual_memory.max_bytes',
     'workqueue_adds': 'workqueue.adds',
     'workqueue_depth': 'workqueue.depth',
-    'workqueue_longest_running_processor_seconds': 'workqueue.longest.running.processor.seconds',
+    'workqueue_longest_running_processor_seconds': 'workqueue.longest.running_processor.seconds',
     'workqueue_queue_duration_seconds': 'workqueue.queue.duration.seconds',
     'workqueue_retries': 'workqueue.retries',
-    'workqueue_unfinished_work_seconds': 'workqueue.unfinished.work.seconds',
+    'workqueue_unfinished_work_seconds': 'workqueue.unfinished_work.seconds',
     'workqueue_work_duration_seconds': 'workqueue.work.duration.seconds',
     # Argo Rollouts Specific:
     'analysis_run_info': 'analysis.run.info',
