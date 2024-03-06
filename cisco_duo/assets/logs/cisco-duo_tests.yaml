@@ -1,7 +1,7 @@
 id: cisco-duo
 tests:
  -
-  service: "authentication",
+  service: "authentication"
   sample: |-
     {
       "message" : {
@@ -132,7 +132,7 @@ tests:
     - "source:LOGS_SOURCE"
     timestamp: 1698828153314
  -
-  service: "activity",
+  service: "activity"
   sample: |-
     {
       "message" : {
@@ -227,7 +227,7 @@ tests:
     - "source:LOGS_SOURCE"
     timestamp: 1696913103639
  -
-  service: "administrator",
+  service: "administrator"
   sample: |-
     {
       "message" : {
@@ -255,7 +255,7 @@ tests:
     - "source:LOGS_SOURCE"
     timestamp: 1701067129000
  -
-  service: "telephony",
+  service: "telephony"
   sample: |-
     {
       "message" : {
@@ -284,7 +284,7 @@ tests:
      - "source:LOGS_SOURCE"
     timestamp: 1704791295097
  -
-  service: "offline_enrollment",
+  service: "offline_enrollment"
   sample: |-
     {
       "message" : {
