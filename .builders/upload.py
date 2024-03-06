@@ -138,7 +138,7 @@ def upload(targets_dir):
                 name, version, python_tag, abi_tag, platform_tag = wheel.stem.split('-')
                 existing_wheels = list(bucket.list_blobs(
                     prefix=f'{artifact_type}/{project_name}/',
-                    match_glob=f'{name}-{version}-*-{abi_tag}-{platform_tag}.whl',
+                    match_glob=f'{name}-{version}*-{python_tag}-{abi_tag}-{platform_tag}.whl',
                 ))
                 if existing_wheels:
                     most_recent_wheel = max(existing_wheels, key=_build_number_of_wheel_blob)
