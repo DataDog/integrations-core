@@ -9,3 +9,9 @@ repos:
       language: system
       files: '.+\.py'
       pass_filenames: false
+    - id: service_checks
+      name: Validate service checks
+      entry: ddev validate service-checks
+      language: system
+      files: '.*/assets/service_checks\.json'
+      pass_filenames: false
