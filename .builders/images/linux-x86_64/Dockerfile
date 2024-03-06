@@ -36,13 +36,17 @@ RUN yum install -y perl-IPC-Cmd && \
  VERSION="3.0.12" \
  SHA256="f93c9e8edde5e9166119de31755fc87b4aa34863662f67ddfcba14d0b6b69b61" \
  RELATIVE_PATH="openssl-{{version}}" \
- # no-module prevents the creation of dynamically loaded modules that would be problematic to bundle into Python wheels
+ # https://docs.python.org/3/using/unix.html#custom-openssl
+ INSTALL_COMMAND="make install_sw" \
  CONFIGURE_SCRIPT="./config" \
  bash install-from-source.sh \
  -fPIC shared \
  # This prevents the creation of dynamically loaded modules that would be problematic to bundle into Python wheels
  no-module \
- no-comp no-idea no-mdc2 no-rc5 no-ssl3 no-gost
+ no-comp no-idea no-mdc2 no-rc5 no-ssl3 no-gost && \
+ echo /usr/local/lib >> /etc/ld.so.conf.d/lib.conf && \
+ echo /usr/local/ssl/lib >> /etc/ld.so.conf.d/openssl.conf && \
+ ldconfig
 
 # Compile and install Python 3
 ENV PYTHON3_VERSION=3.11.8
