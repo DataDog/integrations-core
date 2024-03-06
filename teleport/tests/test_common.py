@@ -31,9 +31,8 @@ COMMON_METRICS = [
 ]
 
 
-def test_common_teleport_metrics(dd_run_check, aggregator, mock_http_response):
-    fixtures_path = os.path.join(get_here(), "fixtures", "metrics.txt")
-    mock_http_response(file_path=fixtures_path)
+def test_common_teleport_metrics(dd_run_check, aggregator, mock_http_response, metrics_path):
+    mock_http_response(file_path=metrics_path)
 
     instance = {"diagnostic_url": "http://hostname:3000"}
     check = TeleportCheck("teleport", {}, [instance])

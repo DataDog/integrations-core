@@ -19,3 +19,7 @@ def dd_environment():
 @pytest.fixture
 def instance():
     return {}
+
+@pytest.fixture
+def metrics_path():
+    return os.path.join(get_here(), "fixtures", "metrics.txt")
