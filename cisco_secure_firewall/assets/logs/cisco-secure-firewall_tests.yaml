@@ -123,6 +123,9 @@ tests:
         timestamp: 1705482454000
         unit: "Primary"
       message: "(Primary) No response from other firewall (reason code = 1)."
+      tags:
+       - "source:LOGS_SOURCE"
+      timestamp: 1705482454000
   - sample: "<190>2024-01-17T09:07:34Z: %FTD-1-735002 IPMI: Cooling Fan
       KS-Y84-AH1-J1 : Failure Detected"
     result:
