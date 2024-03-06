@@ -117,7 +117,6 @@ tests:
         outcome: "fraud"
       isotimestamp: "2023-11-01T08:42:33.314482+00:00"
       result: "fraud"
-      service: "authentication"
       timestamp: 1698828153
       trusted_endpoint_status: "not trusted"
       txid: "some-txid"
@@ -221,7 +220,6 @@ tests:
             type: "phone"
       duo_target:
         key: "SOMEKEY"
-      service: "activity"
       ts: "2023-10-10T04:45:03.639784+00:00"
     tags:
     - "source:LOGS_SOURCE"
@@ -247,7 +245,6 @@ tests:
       description: "{\"directory\": \"AD Sync\", \"Sync Ref. Code\": \"somecode\", \"users\": \"xyz\"}"
       duo_action: "ad_sync_by_user_begin"
       isotimestamp: "2023-11-27T06:38:49+00:00"
-      service: "administrator"
       timestamp: 1701067129
       usr:
         name: "abc"
@@ -276,7 +273,6 @@ tests:
           credits: 6
           type: "sms"
       phone: "+11234567890"
-      service: "telephony"
       telephony_id: "some-telephony-id"
       ts: "2024-01-09T09:08:15.097338+00:00"
       txid: "some-txid"
@@ -304,7 +300,6 @@ tests:
       description: "{\"user_agent\": \"DuoCredProv/4.2.2.1755 (Windows NT 10.0.1809.17763.4851; x64; Server)\", \"hostname\": \"HOST02\", \"factor\": \"duo_otp\"}"
       duo_action: "o2fa_user_provisioned"
       isotimestamp: "2023-10-16T12:20:19+00:00"
-      service: "offline_enrollment"
       timestamp: 1697458819
       usr:
         name: "abc"
