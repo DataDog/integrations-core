@@ -380,6 +380,47 @@ METRIC_MAP = {
     'jobs_row_level_ttl_currently_paused': 'jobs.row.level.ttl.currently_paused',
 }
 
+OMV2_METRIC_MAP = {
+    'changefeed_aggregator_progress': 'changefeed.aggregator_progress',
+    'changefeed_batch_reduction_count': 'changefeed.batch_reduction_count',
+    'changefeed_buffer_entries_allocated_mem': 'changefeed.buffer_entries.allocated_mem',
+    'changefeed_buffer_entries_flush': 'changefeed.buffer_entries.flush',
+    'changefeed_buffer_entries_in': 'changefeed.buffer_entries.in',
+    'changefeed_buffer_entries_kv': 'changefeed.buffer_entries.kv',
+    'changefeed_buffer_entries_out': 'changefeed.buffer_entries.out',
+    'changefeed_buffer_entries_released': 'changefeed.buffer_entries.released',
+    'changefeed_buffer_entries_resolved': 'changefeed.buffer_entries.resolved',
+    'changefeed_buffer_entries_mem_acquired': 'changefeed.buffer_entries_mem.acquired',
+    'changefeed_buffer_entries_mem_released': 'changefeed.buffer_entries_mem.released',
+    'changefeed_buffer_pushback_nanos': 'changefeed.buffer_pushback',
+    'changefeed_bytes_messages_pushback_nanos': 'changefeed.bytes.messages_pushback',
+    'changefeed_checkpoint_hist_nanos': 'changefeed.checkpoint_hist',
+    'changefeed_checkpoint_progress': 'changefeed.checkpoint_progress',
+    'changefeed_cloudstorage_buffered_bytes': 'changefeed.cloudstorage_buffered_bytes',
+    'changefeed_filtered_messages': 'changefeed.filtered_messages',
+    'changefeed_flush_messages_pushback_nanos': 'changefeed.flush.messages_pushback',
+    'changefeed_flush_hist_nanos': 'changefeed.flush_hist',
+    'changefeed_flushed_bytes': 'changefeed.flushed_bytes',
+    'changefeed_flushes': 'changefeed.flushes',
+    'changefeed_forwarded_resolved_messages': 'changefeed.forwarded_resolved_messages',
+    'changefeed_frontier_updates': 'changefeed.frontier_updates',
+    'changefeed_internal_retry_message_count': 'changefeed.internal_retry_message',
+    'changefeed_lagging_ranges': 'changefeed.lagging_ranges',
+    'changefeed_messages_messages_pushback_nanos': 'changefeed.messages.messages_pushback',
+    'changefeed_nprocs_consume_event_nanos': 'changefeed.nprocs_consume_event',
+    'changefeed_nprocs_flush_nanos': 'changefeed.nprocs_flush',
+    'changefeed_nprocs_in_flight_count': 'changefeed.nprocs_in_flight',
+    'changefeed_parallel_io_queue_nanos': 'changefeed.parallel_io_queue',
+    'changefeed_queue_time_nanos': 'changefeed.queue_time',
+    'changefeed_schema_registry_registrations': 'changefeed.schema_registry.registrations',
+    'changefeed_schema_registry_retry_count': 'changefeed.schema_registry.retry',
+    'changefeed_schemafeed_table_history_scans': 'changefeed.schemafeed.table_history_scans',
+    'changefeed_schemafeed_table_metadata_nanos': 'changefeed.schemafeed.table_metadata',
+    'changefeed_sink_batch_hist_nanos': 'changefeed.sink_batch_hist',
+    'changefeed_sink_io_inflight': 'changefeed.sink_io_inflight',
+    'changefeed_size_based_flushes': 'changefeed.size_based_flushes',
+}
+
 
 def construct_metrics_config(metric_map, type_overrides):
     metrics = []

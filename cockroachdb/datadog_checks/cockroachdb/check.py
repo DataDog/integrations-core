@@ -5,7 +5,7 @@ from datadog_checks.base import OpenMetricsBaseCheckV2
 from datadog_checks.base.checks.openmetrics.v2.scraper import OpenMetricsCompatibilityScraper
 
 from .config_models import ConfigMixin
-from .metrics import METRIC_MAP, construct_metrics_config
+from .metrics import METRIC_MAP, OMV2_METRIC_MAP, construct_metrics_config
 
 
 class CockroachdbCheckV2(OpenMetricsBaseCheckV2, ConfigMixin):
@@ -21,7 +21,7 @@ class CockroachdbCheckV2(OpenMetricsBaseCheckV2, ConfigMixin):
     def get_default_config(self):
         return {
             'openmetrics_endpoint': 'http://localhost:8080/_status/vars',
-            'metrics': construct_metrics_config(METRIC_MAP, {}),
+            'metrics': construct_metrics_config(METRIC_MAP | OMV2_METRIC_MAP, {}),
         }
 
     def create_scraper(self, config):
