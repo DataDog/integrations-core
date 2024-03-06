@@ -85,7 +85,7 @@ If your journal is located elsewhere, add a `path` parameter with the correspond
 
 You can filter specific _system-level_ units by using these parameters:
 
-- `include_units`: Includes all system-level units specified.
+- `include_units`: Includes all system-level units specified. To collect
 - `exclude_units`: Excludes all system-level units specified.
 
 
@@ -105,7 +105,7 @@ In Datadog Agent version `7.37.0`+, you can filter _user-level_ units by using t
 - `include_user_units`: Includes all user-level units specified.
 - `exclude_user_units`: Excludes all user-level units specified.
 
-**Note**: Use the `*` wildcard in `exclude_units` or `exclude_user_units` to specify a particular Journald log.
+**Note**: Use the `*` wildcard in `exclude_units` or `exclude_user_units` to specify a particular Journald log. Further note that `*` will not work with `include_units`, by default if no units for both System and User, and no matches are defined, all journal logs will be collected.
 
 Example:
 
