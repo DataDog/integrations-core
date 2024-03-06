@@ -18,7 +18,8 @@ def dd_environment():
 
 @pytest.fixture
 def instance():
-    return {}
+    return {"diagnostic_url": "http://hostname:3000"}
+
 
 @pytest.fixture
 def metrics_path():

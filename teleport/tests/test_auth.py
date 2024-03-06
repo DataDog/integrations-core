@@ -2,11 +2,8 @@
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
 
-import os
-
 import pytest
 
-from datadog_checks.dev import get_here
 from datadog_checks.teleport import TeleportCheck
 
 pytestmark = [pytest.mark.unit]
@@ -133,10 +130,9 @@ AUTH_BACKEND_ETCD_METRICS = [
 ]
 
 
-def test_auth_teleport_metrics(dd_run_check, aggregator, mock_http_response, metrics_path):
+def test_auth_teleport_metrics(dd_run_check, aggregator, instance, mock_http_response, metrics_path):
     mock_http_response(file_path=metrics_path)
 
-    instance = {"diagnostic_url": "http://hostname:3000"}
     check = TeleportCheck("teleport", {}, [instance])
     dd_run_check(check)
 
@@ -144,10 +140,9 @@ def test_auth_teleport_metrics(dd_run_check, aggregator, mock_http_response, met
         aggregator.assert_metric(f"teleport.{metric}")
 
 
-def test_auth_audit_log_teleport_metrics(dd_run_check, aggregator, mock_http_response, metrics_path):
+def test_auth_audit_log_teleport_metrics(dd_run_check, aggregator, instance, mock_http_response, metrics_path):
     mock_http_response(file_path=metrics_path)
 
-    instance = {"diagnostic_url": "http://hostname:3000"}
     check = TeleportCheck("teleport", {}, [instance])
     dd_run_check(check)
 
@@ -155,10 +150,9 @@ def test_auth_audit_log_teleport_metrics(dd_run_check, aggregator, mock_http_res
         aggregator.assert_metric(f"teleport.{metric}")
 
 
-def test_auth_backend_s3_teleport_metrics(dd_run_check, aggregator, mock_http_response, metrics_path):
+def test_auth_backend_s3_teleport_metrics(dd_run_check, aggregator, instance, mock_http_response, metrics_path):
     mock_http_response(file_path=metrics_path)
 
-    instance = {"diagnostic_url": "http://hostname:3000"}
     check = TeleportCheck("teleport", {}, [instance])
     dd_run_check(check)
 
@@ -166,10 +160,9 @@ def test_auth_backend_s3_teleport_metrics(dd_run_check, aggregator, mock_http_re
         aggregator.assert_metric(f"teleport.{metric}")
 
 
-def test_auth_backend_cache_teleport_metrics(dd_run_check, aggregator, mock_http_response, metrics_path):
+def test_auth_backend_cache_teleport_metrics(dd_run_check, aggregator, instance, mock_http_response, metrics_path):
     mock_http_response(file_path=metrics_path)
 
-    instance = {"diagnostic_url": "http://hostname:3000"}
     check = TeleportCheck("teleport", {}, [instance])
     dd_run_check(check)
 
@@ -177,10 +170,9 @@ def test_auth_backend_cache_teleport_metrics(dd_run_check, aggregator, mock_http
         aggregator.assert_metric(f"teleport.{metric}")
 
 
-def test_auth_backend_dynamo_teleport_metrics(dd_run_check, aggregator, mock_http_response, metrics_path):
+def test_auth_backend_dynamo_teleport_metrics(dd_run_check, aggregator, instance, mock_http_response, metrics_path):
     mock_http_response(file_path=metrics_path)
 
-    instance = {"diagnostic_url": "http://hostname:3000"}
     check = TeleportCheck("teleport", {}, [instance])
     dd_run_check(check)
 
@@ -188,10 +180,9 @@ def test_auth_backend_dynamo_teleport_metrics(dd_run_check, aggregator, mock_htt
         aggregator.assert_metric(f"teleport.{metric}")
 
 
-def test_auth_backend_firestore_teleport_metrics(dd_run_check, aggregator, mock_http_response, metrics_path):
+def test_auth_backend_firestore_teleport_metrics(dd_run_check, aggregator, instance, mock_http_response, metrics_path):
     mock_http_response(file_path=metrics_path)
 
-    instance = {"diagnostic_url": "http://hostname:3000"}
     check = TeleportCheck("teleport", {}, [instance])
     dd_run_check(check)
 
@@ -199,10 +190,9 @@ def test_auth_backend_firestore_teleport_metrics(dd_run_check, aggregator, mock_
         aggregator.assert_metric(f"teleport.{metric}")
 
 
-def test_auth_backend_gcp_gcs_teleport_metrics(dd_run_check, aggregator, mock_http_response, metrics_path):
+def test_auth_backend_gcp_gcs_teleport_metrics(dd_run_check, aggregator, instance, mock_http_response, metrics_path):
     mock_http_response(file_path=metrics_path)
 
-    instance = {"diagnostic_url": "http://hostname:3000"}
     check = TeleportCheck("teleport", {}, [instance])
     dd_run_check(check)
 
@@ -210,10 +200,9 @@ def test_auth_backend_gcp_gcs_teleport_metrics(dd_run_check, aggregator, mock_ht
         aggregator.assert_metric(f"teleport.{metric}")
 
 
-def test_auth_backend_etcd_teleport_metrics(dd_run_check, aggregator, mock_http_response, metrics_path):
+def test_auth_backend_etcd_teleport_metrics(dd_run_check, aggregator, instance, mock_http_response, metrics_path):
     mock_http_response(file_path=metrics_path)
 
-    instance = {"diagnostic_url": "http://hostname:3000"}
     check = TeleportCheck("teleport", {}, [instance])
     dd_run_check(check)
 
