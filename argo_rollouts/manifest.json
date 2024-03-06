@@ -45,10 +45,7 @@
     },
     "dashboards": {
       "Argo Rollouts Overview": "assets/dashboards/overview.json"
-    },
-    "monitors": {},
-    "logs": {},
-    "saved_views": {}
+    }
   },
   "author": {
     "support_email": "help@datadoghq.com",
