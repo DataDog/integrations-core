@@ -43,7 +43,9 @@
         "metadata_path": "assets/service_checks.json"
       }
     },
-    "dashboards": {},
+    "dashboards": {
+      "Argo Rollouts Overview": "assets/dashboards/overview.json"
+    },
     "monitors": {},
     "logs": {},
     "saved_views": {}
