@@ -55,10 +55,14 @@
       "auto_install": true
     },
     "dashboards": {
-      "consul": "assets/dashboards/consul_dashboard.json"
+      "consul": "assets/dashboards/consul_overview.json"
+    },
+    "monitors": {
+      "consul": "assets/monitors/consul_status.json"
     },
     "saved_views": {
-      "consul_processes": "assets/saved_views/consul_processes.json"
+      "consul_processes": "assets/saved_views/consul_processes.json",
+      "consul_errors": "assets/saved_views/consul_errors.json"
     },
     "logs": {
       "source": "consul"
