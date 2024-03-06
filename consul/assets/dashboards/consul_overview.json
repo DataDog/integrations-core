@@ -8,7 +8,7 @@
                 "title": "About Consul",
                 "title_align": "left",
                 "banner_img": "/static/images/logos/consul_small.svg",
-                "show_title": false,
+                "show_title": true,
                 "type": "group",
                 "layout_type": "ordered",
                 "widgets": [
@@ -35,7 +35,7 @@
                         "id": 5453680244314134,
                         "definition": {
                             "type": "note",
-                            "content": "**Refer to the following resources for more information**\n\n- [Datadog Consul documentation](https://docs.datadoghq.com/integrations/consul/?tab=host#overview)\n\n- [Available Consul metrics](https://docs.datadoghq.com/integrations/consul/?tab=host#metrics) \n",
+                            "content": "**Refer to the following resources for more information**\n\n- [Datadog Consul documentation](https://docs.datadoghq.com/integrations/consul/?tab=host#overview)\n\n- [Available Consul metrics](https://docs.datadoghq.com/integrations/consul/?tab=host#metrics) \n- [Datadog Consul blog](https://www.datadoghq.com/blog/consul-datadog/)\n",
                             "background_color": "transparent",
                             "font_size": "14",
                             "text_align": "left",
@@ -525,7 +525,7 @@
                                 {
                                     "formulas": [
                                         {
-                                            "alias": "ms",
+                                            "alias": "Max time",
                                             "formula": "query1"
                                         }
                                     ],
@@ -547,6 +547,7 @@
                                 {
                                     "formulas": [
                                         {
+                                            "alias": "Average time",
                                             "formula": "query1"
                                         }
                                     ],
@@ -619,6 +620,7 @@
                                 {
                                     "formulas": [
                                         {
+                                            "alias": "Max time",
                                             "formula": "query1"
                                         }
                                     ],
@@ -639,6 +641,7 @@
                                 {
                                     "formulas": [
                                         {
+                                            "alias": "Average time",
                                             "formula": "query1"
                                         }
                                     ],
@@ -716,6 +719,7 @@
                                 {
                                     "formulas": [
                                         {
+                                            "alias": "Average time",
                                             "formula": "query1"
                                         }
                                     ],
@@ -737,6 +741,7 @@
                                 {
                                     "formulas": [
                                         {
+                                            "alias": "Median time",
                                             "formula": "query1"
                                         }
                                     ],
@@ -838,7 +843,7 @@
                             "font_size": "14",
                             "text_align": "center",
                             "vertical_align": "center",
-                            "show_tick": true,
+                            "show_tick": false,
                             "tick_pos": "50%",
                             "tick_edge": "top",
                             "has_padding": true
