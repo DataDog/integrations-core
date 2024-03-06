@@ -979,7 +979,7 @@ pipeline:
       sources:
         - apprisk
       sourceType: attribute
-      target: palo.alto.panorama.apprisk
+      target: palo.alto.panorama.appstate
       targetType: attribute
       preserveSource: false
       overrideOnConflict: false
