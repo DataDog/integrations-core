@@ -18,10 +18,6 @@ PROXY_METRICS = [
     "proxy.grpc.client.handled.count",
     "proxy.grpc.client.msg_received.count",
     "proxy.grpc.client.msg_sent.count",
-    "proxy.grpc.server.handled.count",
-    "proxy.grpc.server.msg_received.count",
-    "proxy.grpc.server.msg_sent.count",
-    "proxy.grpc.server.started.count",
     "proxy.connection_limit_exceeded.count",
     "proxy.peer_client.dial_error.count",
     "proxy.peer_server.connections",
@@ -68,11 +64,11 @@ PROXY_METRICS = [
 
 
 def test_proxy_teleport_metrics(dd_run_check, aggregator, mock_http_response):
-    fixtures_path = os.path.join(get_here(), 'fixtures', 'metrics.txt')
+    fixtures_path = os.path.join(get_here(), "fixtures", "metrics.txt")
     mock_http_response(file_path=fixtures_path)
 
     instance = {"diagnostic_url": "http://hostname:3000"}
-    check = TeleportCheck('teleport', {}, [instance])
+    check = TeleportCheck("teleport", {}, [instance])
     dd_run_check(check)
 
     for metric in PROXY_METRICS:

@@ -14,7 +14,7 @@ pytestmark = [pytest.mark.unit]
 
 def test_connect_exception(dd_run_check):
     instance = {}
-    check = TeleportCheck('teleport', {}, [instance])
+    check = TeleportCheck("teleport", {}, [instance])
     with pytest.raises(Exception):
         dd_run_check(check)
 
@@ -32,11 +32,11 @@ COMMON_METRICS = [
 
 
 def test_common_teleport_metrics(dd_run_check, aggregator, mock_http_response):
-    fixtures_path = os.path.join(get_here(), 'fixtures', 'metrics.txt')
+    fixtures_path = os.path.join(get_here(), "fixtures", "metrics.txt")
     mock_http_response(file_path=fixtures_path)
 
     instance = {"diagnostic_url": "http://hostname:3000"}
-    check = TeleportCheck('teleport', {}, [instance])
+    check = TeleportCheck("teleport", {}, [instance])
     dd_run_check(check)
 
     for metric in COMMON_METRICS:
