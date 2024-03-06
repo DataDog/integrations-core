@@ -27,7 +27,7 @@ tls = ["true"]
 [envs.default.overrides]
 matrix.version.env-vars = [
     { key = "VOLTDB_VERSION", value = "8.4.2", if = ["8.4"] },
-    { key = "VOLTDB_IMAGE", value = "voltdb/voltdb-community:8.4.2", if = ["8.4"] },
+    { key = "VOLTDB_IMAGE", value = "datadog/docker-library:voltdb_8_4", if = ["8.4"] },
     { key = "VOLTDB_VERSION", value = "10.0.0", if = ["10.0"] },
     { key = "VOLTDB_IMAGE", value = "datadog/docker-library:voltdb_10_0", if = ["10.0"] }
 ]
