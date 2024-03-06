@@ -1,9 +1,9 @@
 id: cisco-duo
 tests:
  -
+  service: "authentication",
   sample: |-
     {
-      "service" : "authentication",
       "message" : {
         "reason" : "user_marked_fraud",
         "txid" : "some-txid",
@@ -132,9 +132,9 @@ tests:
     - "source:LOGS_SOURCE"
     timestamp: 1698828153314
  -
+  service: "activity",
   sample: |-
     {
-      "service" : "activity",
       "message" : {
         "actor" : {
           "name" : "abc",
@@ -227,9 +227,9 @@ tests:
     - "source:LOGS_SOURCE"
     timestamp: 1696913103639
  -
+  service: "administrator",
   sample: |-
     {
-      "service" : "administrator",
       "message" : {
         "action" : "ad_sync_by_user_begin",
         "description" : "{\"directory\": \"AD Sync\", \"Sync Ref. Code\": \"somecode\", \"users\": \"xyz\"}",
@@ -255,9 +255,9 @@ tests:
     - "source:LOGS_SOURCE"
     timestamp: 1701067129000
  -
+  service: "telephony",
   sample: |-
     {
-      "service" : "telephony",
       "message" : {
         "telephony_id" : "some-telephony-id",
         "credits" : 6,
@@ -284,9 +284,9 @@ tests:
      - "source:LOGS_SOURCE"
     timestamp: 1704791295097
  -
+  service: "offline_enrollment",
   sample: |-
     {
-      "service" : "offline_enrollment",
       "message" : {
         "action" : "o2fa_user_provisioned",
         "description" : "{\"user_agent\": \"DuoCredProv/4.2.2.1755 (Windows NT 10.0.1809.17763.4851; x64; Server)\", \"hostname\": \"HOST02\", \"factor\": \"duo_otp\"}",
