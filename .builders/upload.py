@@ -144,6 +144,8 @@ def upload(targets_dir):
                     most_recent_wheel = max(existing_wheels, key=_build_number_of_wheel_blob)
                     # Don't upload if it's the same file
                     if most_recent_wheel.metadata['sha256'] == sha256_digest:
+                        print(f'{prefix} {project_name}=={project_metadata["Version"]} already exists '
+                              'with the same hash')
                         continue
 
                 build_number = timestamp_build_number()
