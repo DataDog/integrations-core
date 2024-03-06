@@ -5,7 +5,7 @@ import os
 
 from datadog_checks.cockroachdb.metrics import METRIC_MAP
 from datadog_checks.dev import get_docker_hostname
-from datadog_checks.dev.utils import get_metadata_metrics, get_service_checks
+from datadog_checks.dev.utils import assert_service_checks, get_metadata_metrics
 
 HOST = get_docker_hostname()
 PORT = '8080'
@@ -231,6 +231,4 @@ def assert_metrics(aggregator):
 
     assert aggregator.metrics_asserted_pct > 80, 'Missing metrics {}'.format(aggregator.not_asserted())
 
-    # The stub is in the base check and I don't want to bump the min version for testing purposes
-    if hasattr(aggregator, 'assert_service_checks'):
-        aggregator.assert_service_checks(get_service_checks())
+    assert_service_checks(aggregator)
