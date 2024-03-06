@@ -558,7 +558,7 @@ def connection_baremetal(request, mock_responses):
             for node in mock_responses('GET', '/baremetal/v1/nodes/detail')['nodes']
         ]
 
-    def conductors():
+    def conductors(limit=None):
         if http_error and 'conductors' in http_error:
             raise requests.exceptions.HTTPError(response=http_error['conductors'])
         return [

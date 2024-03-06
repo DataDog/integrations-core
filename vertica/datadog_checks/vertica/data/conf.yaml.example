@@ -257,6 +257,7 @@ instances:
     #       type: tag
     #     tags:
     #     - test: vertica
+    #     metric_prefix: vertica
 
     ## @param client_lib_log_level - string - optional
     ## Vertica library log level.

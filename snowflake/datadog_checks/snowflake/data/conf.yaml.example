@@ -263,6 +263,7 @@ instances:
     #       type: gauge
     #     tags:
     #     - test:snowflake
+    #     metric_prefix: snowflake
 
     ## @param tags - list of strings - optional
     ## A list of tags to attach to every metric and service check emitted by this instance.
