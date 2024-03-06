@@ -59,10 +59,7 @@ class TestIntegrationsIteration:
             lambda path: (path / 'manifest.json').is_file() and not (path / 'pyproject.toml').is_file(),
             id="tiles",
         ),
-        # TODO: remove tox when the Hatch migration is complete
-        pytest.param(
-            "iter_testable", lambda path: (path / 'hatch.toml').is_file() or (path / 'tox.ini').is_file(), id="testable"
-        ),
+        pytest.param("iter_testable", lambda path: (path / 'hatch.toml').is_file()),
         pytest.param(
             "iter_shippable",
             lambda path: (path / 'pyproject.toml').is_file() and path.name not in NOT_SHIPPABLE,
