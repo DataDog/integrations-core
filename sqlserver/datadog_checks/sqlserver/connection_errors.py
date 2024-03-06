@@ -7,7 +7,6 @@ from enum import Enum
 
 try:
     import pyodbc
-    pyodbc.pooling = False
 except ImportError:
     pyodbc = None
 
