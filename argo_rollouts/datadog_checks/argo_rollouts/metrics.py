@@ -1,3 +1,6 @@
+# (C) Datadog, Inc. 2024-present
+# All rights reserved
+# Licensed under a 3-clause BSD style license (see LICENSE)
 METRIC_MAP = {
     # Generic Metrics:
     'controller_clientset_k8s_request': 'controller.clientset.k8s.request',
