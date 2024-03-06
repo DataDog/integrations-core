@@ -1,8 +1,9 @@
 {
-    "title": "Consul Overview (new)",
+    "title": "Consul Overview",
     "description": "This dashboard displays key metrics from your Consul integration, displaying the size of your deployment and performance over time. Further reading on Consul monitoring:\n\n- [Datadog's Consul integration docs](https://docs.datadoghq.com/integrations/consul/)\n\n- [Monitor Consul health and performance with Datadog](https://www.datadoghq.com/blog/monitor-consul-health-and-performance-with-datadog/)\n\n- [Consul at Datadog](https://www.datadoghq.com/blog/engineering/consul-at-datadog/)\n\nClone this template dashboard to make changes and add your own graph widgets.",
     "widgets": [
         {
+            "id": 5143704290004198,
             "definition": {
                 "title": "About Consul",
                 "title_align": "left",
@@ -133,7 +134,7 @@
                     {
                         "id": 4688774104622410,
                         "definition": {
-                            "title": "Consul Monitor State",
+                            "title": "Consul Monitor Status",
                             "type": "manage_status",
                             "display_format": "list",
                             "color_preference": "text",
@@ -219,7 +220,7 @@
                                         {
                                             "name": "query1",
                                             "data_source": "metrics",
-                                            "query": "sum:consul.catalog.nodes_critical{$consul_service_id, $host, $consul_datacenter} by {consul_service_id,consul_datacenter}"
+                                            "query": "sum:consul.catalog.nodes_critical{$consul_service_id, $host, $consul_datacenter} by {consul_service_id,consul_datacenter,host}"
                                         }
                                     ],
                                     "response_format": "timeseries",
@@ -266,7 +267,7 @@
                                         {
                                             "name": "query1",
                                             "data_source": "metrics",
-                                            "query": "sum:consul.catalog.nodes_up{$host, $consul_datacenter, $consul_service_id} by {consul_service_id,consul_datacenter}"
+                                            "query": "sum:consul.catalog.nodes_up{$host, $consul_datacenter, $consul_service_id} by {consul_service_id,consul_datacenter,host}"
                                         }
                                     ],
                                     "response_format": "timeseries",
@@ -360,7 +361,7 @@
                                         {
                                             "name": "query1",
                                             "data_source": "metrics",
-                                            "query": "sum:consul.catalog.nodes_passing{$consul_service_id,$host, $consul_datacenter} by {consul_service_id,consul_datacenter}"
+                                            "query": "sum:consul.catalog.nodes_passing{$consul_service_id,$host, $consul_datacenter} by {consul_service_id,consul_datacenter,host}"
                                         }
                                     ],
                                     "response_format": "timeseries",
@@ -401,7 +402,7 @@
                                         {
                                             "name": "query1",
                                             "data_source": "metrics",
-                                            "query": "sum:consul.catalog.services_warning{$host} by {consul_node_id,consul_datacenter}",
+                                            "query": "sum:consul.catalog.services_warning{$host} by {consul_node_id,consul_datacenter,host}",
                                             "aggregator": "sum"
                                         }
                                     ],
@@ -436,7 +437,7 @@
                                         {
                                             "name": "query1",
                                             "data_source": "metrics",
-                                            "query": "sum:consul.catalog.services_critical{$host} by {consul_node_id,consul_datacenter}",
+                                            "query": "sum:consul.catalog.services_critical{$host} by {consul_node_id,consul_datacenter,host}",
                                             "aggregator": "sum"
                                         }
                                     ],
@@ -837,9 +838,9 @@
                             "font_size": "14",
                             "text_align": "center",
                             "vertical_align": "center",
-                            "show_tick": false,
+                            "show_tick": true,
                             "tick_pos": "50%",
-                            "tick_edge": "left",
+                            "tick_edge": "top",
                             "has_padding": true
                         },
                         "layout": {
