@@ -1,27 +1,23 @@
-# (C) Datadog, Inc. 2018-present
+# (C) Datadog, Inc. 2024-present
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
 import pytest
-from six import itervalues
 
 from datadog_checks.cockroachdb import CockroachdbCheck
-from datadog_checks.cockroachdb.metrics import METRIC_MAP
-from datadog_checks.dev.utils import assert_service_checks
 
-from .common import COCKROACHDB_VERSION
+from ..common import COCKROACHDB_VERSION
+from .common import assert_check
+
+pytestmark = [pytest.mark.usefixtures("dd_environment")]
 
 
-@pytest.mark.integration
-@pytest.mark.usefixtures("dd_environment")
 def test_integration(aggregator, instance_legacy, dd_run_check):
     check = CockroachdbCheck('cockroachdb', {}, [instance_legacy])
     dd_run_check(check)
 
-    _test_check(aggregator)
+    assert_check(aggregator)
 
 
-@pytest.mark.integration
-@pytest.mark.usefixtures("dd_environment")
 def test_version_metadata(aggregator, instance_legacy, datadog_agent, dd_run_check):
     check_instance = CockroachdbCheck('cockroachdb', {}, [instance_legacy])
     check_instance.check_id = 'test:123'
@@ -46,12 +42,3 @@ def test_version_metadata(aggregator, instance_legacy, datadog_agent, dd_run_che
     }
 
     datadog_agent.assert_metadata('test:123', version_metadata)
-
-
-def _test_check(aggregator):
-    for metric in itervalues(METRIC_MAP):
-        aggregator.assert_metric('cockroachdb.{}'.format(metric), at_least=0)
-
-    assert aggregator.metrics_asserted_pct > 80, 'Missing metrics {}'.format(aggregator.not_asserted())
-
-    assert_service_checks(aggregator)

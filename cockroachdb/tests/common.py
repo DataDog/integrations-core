@@ -4,11 +4,12 @@
 import os
 
 from datadog_checks.cockroachdb.metrics import METRIC_MAP
-from datadog_checks.dev import get_docker_hostname
+from datadog_checks.dev import get_docker_hostname, get_here
 from datadog_checks.dev.utils import assert_service_checks, get_metadata_metrics
 
 HOST = get_docker_hostname()
 PORT = '8080'
+HERE = get_here()
 
 COCKROACHDB_VERSION = os.getenv('COCKROACHDB_VERSION')
 
@@ -232,3 +233,7 @@ def assert_metrics(aggregator):
     assert aggregator.metrics_asserted_pct > 80, 'Missing metrics {}'.format(aggregator.not_asserted())
 
     assert_service_checks(aggregator)
+
+
+def get_fixture_path(filename):
+    return os.path.join(HERE, 'fixtures', filename)
