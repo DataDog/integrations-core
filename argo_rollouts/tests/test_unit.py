@@ -1,9 +1,6 @@
 # (C) Datadog, Inc. 2024-present
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
-
-from typing import Any, Callable, Dict  # noqa: F401
-
 import pytest
 
 from datadog_checks.argo_rollouts import ArgoRolloutsCheck
@@ -27,3 +24,12 @@ def test_check_mock_argo_rollouts_openmetrics(dd_run_check, aggregator, mock_htt
     aggregator.assert_all_metrics_covered()
     # aggregator.assert_metrics_using_metadata(get_metadata_metrics())
     aggregator.assert_service_check('argo_rollouts.openmetrics.health', ServiceCheck.OK)
+
+
+def test_check_mock_invalid_argo_rollouts_openmetrics(dd_run_check, aggregator, mock_http_response):
+    mock_http_response(status_code=503)
+    check = ArgoRolloutsCheck('argo_rollouts', {}, [OM_MOCKED_INSTANCE])
+    with pytest.raises(Exception):
+        dd_run_check(check)
+
+    aggregator.assert_service_check('argo_rollouts.openmetrics.health', ServiceCheck.CRITICAL)
