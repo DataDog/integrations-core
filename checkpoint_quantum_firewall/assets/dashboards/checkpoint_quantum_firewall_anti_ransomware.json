@@ -625,7 +625,7 @@
                                 },
                                 "group_by": [
                                     {
-                                        "facet": "@os_name",
+                                        "facet": "@checkpoint.quantum.firewall.os_name",
                                         "limit": 10,
                                         "sort": {
                                             "order": "desc",
@@ -685,7 +685,7 @@
                                 },
                                 "group_by": [
                                     {
-                                        "facet": "@host_type",
+                                        "facet": "@checkpoint.quantum.firewall.host_type",
                                         "limit": 10,
                                         "sort": {
                                             "order": "desc",
@@ -762,7 +762,7 @@
                                 "width": "auto"
                             },
                             {
-                                "field": "os_name",
+                                "field": "checkpoint.quantum.firewall.os_name",
                                 "width": "auto"
                             },
                             {
@@ -770,11 +770,11 @@
                                 "width": "auto"
                             },
                             {
-                                "field": "protection_type",
+                                "field": "checkpoint.quantum.firewall.protection_type",
                                 "width": "auto"
                             },
                             {
-                                "field": "src_machine_name",
+                                "field": "checkpoint.quantum.firewall.src_machine_name",
                                 "width": "auto"
                             },
                             {

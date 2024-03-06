@@ -494,7 +494,7 @@
                                 },
                                 "group_by": [
                                     {
-                                        "facet": "@reject_category",
+                                        "facet": "@checkpoint.quantum.firewall.reject_category",
                                         "limit": 10,
                                         "sort": {
                                             "order": "desc",
@@ -572,7 +572,7 @@
                                 "width": "auto"
                             },
                             {
-                                "field": "reject_category",
+                                "field": "checkpoint.quantum.firewall.reject_category",
                                 "width": "auto"
                             },
                             {

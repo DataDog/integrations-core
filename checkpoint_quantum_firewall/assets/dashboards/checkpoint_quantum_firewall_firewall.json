@@ -254,7 +254,7 @@
                                 },
                                 "group_by": [
                                     {
-                                        "facet": "@conn_direction",
+                                        "facet": "@checkpoint.quantum.firewall.conn_direction",
                                         "limit": 10,
                                         "sort": {
                                             "order": "desc",
@@ -614,7 +614,7 @@
                                 },
                                 "group_by": [
                                     {
-                                        "facet": "@src_ip_port",
+                                        "facet": "@checkpoint.quantum.firewall.src_ip_port",
                                         "limit": 10,
                                         "sort": {
                                             "order": "desc",
@@ -676,7 +676,7 @@
                                 },
                                 "group_by": [
                                     {
-                                        "facet": "@dst_ip_port",
+                                        "facet": "@checkpoint.quantum.firewall.dst_ip_port",
                                         "limit": 10,
                                         "sort": {
                                             "order": "desc",
@@ -735,7 +735,7 @@
                                 ],
                                 "compute": {
                                     "aggregation": "sum",
-                                    "metric": "@client_inbound_bytes"
+                                    "metric": "@checkpoint.quantum.firewall.client_inbound_bytes"
                                 },
                                 "group_by": [
                                     {
@@ -744,7 +744,7 @@
                                         "sort": {
                                             "order": "desc",
                                             "aggregation": "sum",
-                                            "metric": "@client_inbound_bytes"
+                                            "metric": "@checkpoint.quantum.firewall.client_inbound_bytes"
                                         }
                                     }
                                 ],
@@ -799,7 +799,7 @@
                                 ],
                                 "compute": {
                                     "aggregation": "sum",
-                                    "metric": "@client_outbound_bytes"
+                                    "metric": "@checkpoint.quantum.firewall.client_outbound_bytes"
                                 },
                                 "group_by": [
                                     {
@@ -808,7 +808,7 @@
                                         "sort": {
                                             "order": "desc",
                                             "aggregation": "sum",
-                                            "metric": "@client_outbound_bytes"
+                                            "metric": "@checkpoint.quantum.firewall.client_outbound_bytes"
                                         }
                                     }
                                 ],
@@ -991,7 +991,7 @@
                                 ],
                                 "compute": {
                                     "aggregation": "sum",
-                                    "metric": "@client_inbound_packets"
+                                    "metric": "@checkpoint.quantum.firewall.client_inbound_packets"
                                 },
                                 "group_by": [
                                     {
@@ -1000,7 +1000,7 @@
                                         "sort": {
                                             "order": "desc",
                                             "aggregation": "sum",
-                                            "metric": "@client_inbound_packets"
+                                            "metric": "@checkpoint.quantum.firewall.client_inbound_packets"
                                         }
                                     }
                                 ],
@@ -1055,7 +1055,7 @@
                                 ],
                                 "compute": {
                                     "aggregation": "sum",
-                                    "metric": "@client_outbound_packets"
+                                    "metric": "@checkpoint.quantum.firewall.client_outbound_packets"
                                 },
                                 "group_by": [
                                     {
@@ -1064,7 +1064,7 @@
                                         "sort": {
                                             "order": "desc",
                                             "aggregation": "sum",
-                                            "metric": "@client_outbound_packets"
+                                            "metric": "@checkpoint.quantum.firewall.client_outbound_packets"
                                         }
                                     }
                                 ],
@@ -1119,7 +1119,7 @@
                                 ],
                                 "compute": {
                                     "aggregation": "sum",
-                                    "metric": "@server_inbound_packets"
+                                    "metric": "@checkpoint.quantum.firewall.server_inbound_packets"
                                 },
                                 "group_by": [
                                     {
@@ -1128,7 +1128,7 @@
                                         "sort": {
                                             "order": "desc",
                                             "aggregation": "sum",
-                                            "metric": "@server_inbound_packets"
+                                            "metric": "@checkpoint.quantum.firewall.server_inbound_packets"
                                         }
                                     }
                                 ],
@@ -1183,7 +1183,7 @@
                                 ],
                                 "compute": {
                                     "aggregation": "sum",
-                                    "metric": "@server_outbound_packets"
+                                    "metric": "@checkpoint.quantum.firewall.server_outbound_packets"
                                 },
                                 "group_by": [
                                     {
@@ -1192,7 +1192,7 @@
                                         "sort": {
                                             "order": "desc",
                                             "aggregation": "sum",
-                                            "metric": "@server_outbound_packets"
+                                            "metric": "@checkpoint.quantum.firewall.server_outbound_packets"
                                         }
                                     }
                                 ],
@@ -1253,7 +1253,7 @@
                                 "width": "auto"
                             },
                             {
-                                "field": "conn_direction",
+                                "field": "checkpoint.quantum.firewall.conn_direction",
                                 "width": "auto"
                             },
                             {
@@ -1261,19 +1261,19 @@
                                 "width": "auto"
                             },
                             {
-                                "field": "client_inbound_bytes",
+                                "field": "checkpoint.quantum.firewall.client_inbound_bytes",
                                 "width": "auto"
                             },
                             {
-                                "field": "client_outbound_bytes",
+                                "field": "checkpoint.quantum.firewall.client_outbound_bytes",
                                 "width": "auto"
                             },
                             {
-                                "field": "client_inbound_packets",
+                                "field": "checkpoint.quantum.firewall.client_inbound_packets",
                                 "width": "auto"
                             },
                             {
-                                "field": "client_outbound_packets",
+                                "field": "checkpoint.quantum.firewall.client_outbound_packets",
                                 "width": "auto"
                             },
                             {
@@ -1285,11 +1285,11 @@
                                 "width": "auto"
                             },
                             {
-                                "field": "server_inbound_packets",
+                                "field": "checkpoint.quantum.firewall.server_inbound_packets",
                                 "width": "auto"
                             },
                             {
-                                "field": "server_outbound_packets",
+                                "field": "checkpoint.quantum.firewall.server_outbound_packets",
                                 "width": "auto"
                             },
                             {
@@ -1324,7 +1324,7 @@
         },
         {
             "name": "Connection_Direction",
-            "prefix": "@conn_direction",
+            "prefix": "@checkpoint.quantum.firewall.conn_direction",
             "available_values": [],
             "default": "*"
         }

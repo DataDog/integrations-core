@@ -440,7 +440,7 @@
                                 },
                                 "group_by": [
                                     {
-                                        "facet": "@protection_type",
+                                        "facet": "@checkpoint.quantum.firewall.protection_type",
                                         "limit": 10,
                                         "sort": {
                                             "order": "desc",
@@ -564,7 +564,7 @@
                                 },
                                 "group_by": [
                                     {
-                                        "facet": "@src",
+                                        "facet": "@checkpoint.quantum.firewall.src",
                                         "limit": 10,
                                         "sort": {
                                             "order": "desc",
@@ -626,7 +626,7 @@
                                 },
                                 "group_by": [
                                     {
-                                        "facet": "@dst",
+                                        "facet": "@checkpoint.quantum.firewall.dst",
                                         "limit": 10,
                                         "sort": {
                                             "order": "desc",
@@ -687,7 +687,7 @@
                                 },
                                 "group_by": [
                                     {
-                                        "facet": "@malware_action",
+                                        "facet": "@checkpoint.quantum.firewall.malware_action",
                                         "limit": 10,
                                         "sort": {
                                             "order": "desc",
@@ -748,11 +748,11 @@
                                 "width": "auto"
                             },
                             {
-                                "field": "src",
+                                "field": "checkpoint.quantum.firewall.src",
                                 "width": "auto"
                             },
                             {
-                                "field": "dst",
+                                "field": "checkpoint.quantum.firewall.dst",
                                 "width": "auto"
                             },
                             {
@@ -768,11 +768,11 @@
                                 "width": "auto"
                             },
                             {
-                                "field": "protection_type",
+                                "field": "checkpoint.quantum.firewall.protection_type",
                                 "width": "auto"
                             },
                             {
-                                "field": "malware_action",
+                                "field": "checkpoint.quantum.firewall.malware_action",
                                 "width": "auto"
                             }
                         ]
@@ -803,7 +803,7 @@
         },
         {
             "name": "Protection_Type",
-            "prefix": "@protection_type",
+            "prefix": "@checkpoint.quantum.firewall.protection_type",
             "available_values": [],
             "default": "*"
         }

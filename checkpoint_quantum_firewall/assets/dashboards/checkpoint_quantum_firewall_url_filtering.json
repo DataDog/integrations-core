@@ -539,7 +539,7 @@
                                 },
                                 "group_by": [
                                     {
-                                        "facet": "@appi_name",
+                                        "facet": "@checkpoint.quantum.firewall.appi_name",
                                         "limit": 10,
                                         "sort": {
                                             "order": "desc",
@@ -601,7 +601,7 @@
                                 },
                                 "group_by": [
                                     {
-                                        "facet": "@app_category",
+                                        "facet": "@checkpoint.quantum.firewall.app_category",
                                         "limit": 10,
                                         "sort": {
                                             "order": "desc",
@@ -708,7 +708,7 @@
                                 },
                                 "group_by": [
                                     {
-                                        "facet": "@appi_name",
+                                        "facet": "@checkpoint.quantum.firewall.appi_name",
                                         "limit": 10,
                                         "sort": {
                                             "order": "desc",
@@ -717,7 +717,7 @@
                                         }
                                     },
                                     {
-                                        "facet": "@app_category",
+                                        "facet": "@checkpoint.quantum.firewall.app_category",
                                         "limit": 10,
                                         "sort": {
                                             "order": "desc",
@@ -726,7 +726,7 @@
                                         }
                                     },
                                     {
-                                        "facet": "@app_risk_str",
+                                        "facet": "@checkpoint.quantum.firewall.app_risk_str",
                                         "limit": 10,
                                         "sort": {
                                             "order": "desc",
@@ -786,7 +786,7 @@
                                 },
                                 "group_by": [
                                     {
-                                        "facet": "@appi_name",
+                                        "facet": "@checkpoint.quantum.firewall.appi_name",
                                         "limit": 10,
                                         "sort": {
                                             "order": "desc",
@@ -795,7 +795,7 @@
                                         }
                                     },
                                     {
-                                        "facet": "@app_risk_str",
+                                        "facet": "@checkpoint.quantum.firewall.app_risk_str",
                                         "limit": 10,
                                         "sort": {
                                             "order": "desc",
@@ -863,7 +863,7 @@
                                 },
                                 "group_by": [
                                     {
-                                        "facet": "@layer_name",
+                                        "facet": "@checkpoint.quantum.firewall.layer_name",
                                         "limit": 10,
                                         "sort": {
                                             "order": "desc",
@@ -925,7 +925,7 @@
                                 },
                                 "group_by": [
                                     {
-                                        "facet": "@matched_category",
+                                        "facet": "@checkpoint.quantum.firewall.matched_category",
                                         "limit": 10,
                                         "sort": {
                                             "order": "desc",
@@ -982,31 +982,31 @@
                                 "width": "auto"
                             },
                             {
-                                "field": "@appi_name",
+                                "field": "@checkpoint.quantum.firewall.appi_name",
                                 "width": "auto"
                             },
                             {
-                                "field": "@app_category",
+                                "field": "@checkpoint.quantum.firewall.app_category",
                                 "width": "auto"
                             },
                             {
-                                "field": "@app_risk_str",
+                                "field": "@checkpoint.quantum.firewall.app_risk_str",
                                 "width": "auto"
                             },
                             {
-                                "field": "src_ip_port",
+                                "field": "checkpoint.quantum.firewall.src_ip_port",
                                 "width": "auto"
                             },
                             {
-                                "field": "dst_ip_port",
+                                "field": "checkpoint.quantum.firewall.dst_ip_port",
                                 "width": "auto"
                             },
                             {
-                                "field": "@layer_name",
+                                "field": "@checkpoint.quantum.firewall.layer_name",
                                 "width": "auto"
                             },
                             {
-                                "field": "@matched_category",
+                                "field": "@checkpoint.quantum.firewall.matched_category",
                                 "width": "auto"
                             }
                         ]
@@ -1031,13 +1031,13 @@
         },
         {
             "name": "Application_Name",
-            "prefix": "@appi_name",
+            "prefix": "@checkpoint.quantum.firewall.appi_name",
             "available_values": [],
             "default": "*"
         },
         {
             "name": "Application_Category",
-            "prefix": "@app_category",
+            "prefix": "@checkpoint.quantum.firewall.app_category",
             "available_values": [],
             "default": "*"
         },

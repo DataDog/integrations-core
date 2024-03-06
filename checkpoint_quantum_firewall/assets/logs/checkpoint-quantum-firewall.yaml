@@ -108,42 +108,42 @@ facets:
     groups:
       - Checkpoint Quantum Firewall
     name: Application Category
-    path: app_category
+    path: checkpoint.quantum.firewall.app_category
     source: log
     type: string
   - facetType: list
     groups:
       - Checkpoint Quantum Firewall
     name: Application Name
-    path: appi_name
+    path: checkpoint.quantum.firewall.appi_name
     source: log
     type: string
   - facetType: list
     groups:
       - Checkpoint Quantum Firewall
     name: Application Risk
-    path: app_risk_str
+    path: checkpoint.quantum.firewall.app_risk_str
     source: log
     type: string
   - facetType: list
     groups:
       - Checkpoint Quantum Firewall
     name: Authentication Method
-    path: auth_method
+    path: checkpoint.quantum.firewall.auth_method
     source: log
     type: string
   - facetType: list
     groups:
       - Checkpoint Quantum Firewall
     name: Authentication Status
-    path: auth_status
+    path: checkpoint.quantum.firewall.auth_status
     source: log
     type: string
   - facetType: range
     groups:
       - Checkpoint Quantum Firewall
     name: Client Inbound Bytes
-    path: client_inbound_bytes
+    path: checkpoint.quantum.firewall.client_inbound_bytes
     source: log
     type: integer
     unit:
@@ -153,7 +153,7 @@ facets:
     groups:
       - Checkpoint Quantum Firewall
     name: Client Inbound Packets
-    path: client_inbound_packets
+    path: checkpoint.quantum.firewall.client_inbound_packets
     source: log
     type: integer
   - facetType: list
@@ -167,7 +167,7 @@ facets:
     groups:
       - Checkpoint Quantum Firewall
     name: Client Outbound Bytes
-    path: client_outbound_bytes
+    path: checkpoint.quantum.firewall.client_outbound_bytes
     source: log
     type: integer
     unit:
@@ -177,28 +177,28 @@ facets:
     groups:
       - Checkpoint Quantum Firewall
     name: Client Outbound Packets
-    path: client_outbound_packets
+    path: checkpoint.quantum.firewall.client_outbound_packets
     source: log
     type: integer
   - facetType: list
     groups:
       - Checkpoint Quantum Firewall
     name: Confidence Level
-    path: confidence_level
+    path: checkpoint.quantum.firewall.confidence_level
     source: log
     type: string
   - facetType: list
     groups:
       - Checkpoint Quantum Firewall
     name: Connection Direction
-    path: conn_direction
+    path: checkpoint.quantum.firewall.conn_direction
     source: log
     type: string
   - facetType: list
     groups:
       - Checkpoint Quantum Firewall
     name: Destination
-    path: dst
+    path: checkpoint.quantum.firewall.dst
     source: log
     type: string
   - facetType: list
@@ -212,49 +212,49 @@ facets:
     groups:
       - Checkpoint Quantum Firewall
     name: Host Type
-    path: host_type
+    path: checkpoint.quantum.firewall.host_type
     source: log
     type: string
   - facetType: list
     groups:
       - Checkpoint Quantum Firewall
     name: Identity Source
-    path: identity_src
+    path: checkpoint.quantum.firewall.identity_src
     source: log
     type: string
   - facetType: list
     groups:
       - Checkpoint Quantum Firewall
     name: Identity Type
-    path: identity_type
+    path: checkpoint.quantum.firewall.identity_type
     source: log
     type: string
   - facetType: list
     groups:
       - Checkpoint Quantum Firewall
     name: Layer Name
-    path: layer_name
+    path: checkpoint.quantum.firewall.layer_name
     source: log
     type: string
   - facetType: list
     groups:
       - Checkpoint Quantum Firewall
     name: Malware Action
-    path: malware_action
+    path: checkpoint.quantum.firewall.malware_action
     source: log
     type: string
   - facetType: list
     groups:
       - Checkpoint Quantum Firewall
     name: Malware Rule Name
-    path: malware_rule_name
+    path: checkpoint.quantum.firewall.malware_rule_name
     source: log
     type: string
   - facetType: list
     groups:
       - Checkpoint Quantum Firewall
     name: Matched Category
-    path: matched_category
+    path: checkpoint.quantum.firewall.matched_category
     source: log
     type: string
   - facetType: list
@@ -268,21 +268,21 @@ facets:
     groups:
       - Checkpoint Quantum Firewall
     name: OS Name
-    path: os_name
+    path: checkpoint.quantum.firewall.os_name
     source: log
     type: string
   - facetType: list
     groups:
       - Checkpoint Quantum Firewall
     name: Protection Name
-    path: protection_name
+    path: checkpoint.quantum.firewall.protection_name
     source: log
     type: string
   - facetType: list
     groups:
       - Checkpoint Quantum Firewall
     name: Protection Type
-    path: protection_type
+    path: checkpoint.quantum.firewall.protection_type
     source: log
     type: string
   - facetType: list
@@ -296,21 +296,21 @@ facets:
     groups:
       - Checkpoint Quantum Firewall
     name: Reject Category
-    path: reject_category
+    path: checkpoint.quantum.firewall.reject_category
     source: log
     type: string
   - facetType: range
     groups:
       - Checkpoint Quantum Firewall
     name: Server Inbound Packets
-    path: server_inbound_packets
+    path: checkpoint.quantum.firewall.server_inbound_packets
     source: log
     type: integer
   - facetType: range
     groups:
       - Checkpoint Quantum Firewall
     name: Server Outbound Packets
-    path: server_outbound_packets
+    path: checkpoint.quantum.firewall.server_outbound_packets
     source: log
     type: integer
   - facetType: list
@@ -324,21 +324,21 @@ facets:
     groups:
       - Checkpoint Quantum Firewall
     name: SmartDefense Profile
-    path: smartdefense_profile
+    path: checkpoint.quantum.firewall.smartdefense_profile
     source: log
     type: string
   - facetType: list
     groups:
       - Checkpoint Quantum Firewall
     name: Source
-    path: src
+    path: checkpoint.quantum.firewall.src
     source: log
     type: string
   - facetType: list
     groups:
       - Checkpoint Quantum Firewall
     name: Source Machine Name
-    path: src_machine_name
+    path: checkpoint.quantum.firewall.src_machine_name
     source: log
     type: string
   - facetType: list
@@ -353,6 +353,20 @@ facets:
       - Checkpoint Quantum Firewall
     name: Subject
     path: checkpoint.quantum.firewall.subject
+    source: log
+    type: string
+  - facetType: list
+    groups:
+      - Checkpoint Quantum Firewall
+    name: Source IP Port
+    path: checkpoint.quantum.firewall.src_ip_port
+    source: log
+    type: string
+  - facetType: list
+    groups:
+      - Checkpoint Quantum Firewall
+    name: Destination IP Port
+    path: checkpoint.quantum.firewall.dst_ip_port
     source: log
     type: string
   - facetType: range
@@ -458,13 +472,63 @@ pipeline:
       targetType: attribute
       preserveSource: false
       overrideOnConflict: false
+    - type: attribute-remapper
+      name: Map `confidence_level` to `checkpoint.quantum.firewall.confidence_level`
+      enabled: true
+      sources:
+        - confidence_level
+      sourceType: attribute
+      target: checkpoint.quantum.firewall.confidence_level
+      targetType: attribute
+      preserveSource: false
+      overrideOnConflict: false
+    - type: attribute-remapper
+      name: Map `malware_action` to `checkpoint.quantum.firewall.malware_action`
+      enabled: true
+      sources:
+        - malware_action
+      sourceType: attribute
+      target: checkpoint.quantum.firewall.malware_action
+      targetType: attribute
+      preserveSource: false
+      overrideOnConflict: false
+    - type: attribute-remapper
+      name: Map `protection_name` to `checkpoint.quantum.firewall.protection_name`
+      enabled: true
+      sources:
+        - protection_name
+      sourceType: attribute
+      target: checkpoint.quantum.firewall.protection_name
+      targetType: attribute
+      preserveSource: false
+      overrideOnConflict: false
+    - type: attribute-remapper
+      name: Map `protection_type` to `checkpoint.quantum.firewall.protection_type`
+      enabled: true
+      sources:
+        - protection_type
+      sourceType: attribute
+      target: checkpoint.quantum.firewall.protection_type
+      targetType: attribute
+      preserveSource: false
+      overrideOnConflict: false
+    - type: attribute-remapper
+      name: Map `src_machine_name` to `checkpoint.quantum.firewall.src_machine_name`
+      enabled: true
+      sources:
+        - src_machine_name
+      sourceType: attribute
+      target: checkpoint.quantum.firewall.src_machine_name
+      targetType: attribute
+      preserveSource: false
+      overrideOnConflict: false
     - type: pipeline
       name: Remapper for Web Access Attributes
       enabled: true
       filter:
         query: '@product:("Application Control" OR "DLP" OR Firewall OR "Identity
           Awareness" OR "URL Filtering" OR "Threat Emulation" OR "Anti-Spam and
-          Email Security" OR "IPS") '
+          Email Security" OR "IPS")'
       processors:
         - type: attribute-remapper
           name: Map `src` to `network.client.ip`
@@ -550,11 +614,188 @@ pipeline:
             - network.destination.ip
           target: network.destination.geoip
           ip_processing_behavior: do-nothing
+        - type: attribute-remapper
+          name: Map `appi_name` to `checkpoint.quantum.firewall.appi_name`
+          enabled: true
+          sources:
+            - appi_name
+          sourceType: attribute
+          target: checkpoint.quantum.firewall.appi_name
+          targetType: attribute
+          preserveSource: false
+          overrideOnConflict: false
+        - type: attribute-remapper
+          name: Map `app_category` to `checkpoint.quantum.firewall.app_category`
+          enabled: true
+          sources:
+            - app_category
+          sourceType: attribute
+          target: checkpoint.quantum.firewall.app_category
+          targetType: attribute
+          preserveSource: false
+          overrideOnConflict: false
+        - type: attribute-remapper
+          name: Map `auth_method` to `checkpoint.quantum.firewall.auth_method`
+          enabled: true
+          sources:
+            - auth_method
+          sourceType: attribute
+          target: checkpoint.quantum.firewall.auth_method
+          targetType: attribute
+          preserveSource: false
+          overrideOnConflict: false
+        - type: attribute-remapper
+          name: Map `auth_status` to `checkpoint.quantum.firewall.auth_status`
+          enabled: true
+          sources:
+            - auth_status
+          sourceType: attribute
+          target: checkpoint.quantum.firewall.auth_status
+          targetType: attribute
+          preserveSource: false
+          overrideOnConflict: false
+        - type: attribute-remapper
+          name: Map `client_inbound_bytes` to
+            `checkpoint.quantum.firewall.client_inbound_bytes`
+          enabled: true
+          sources:
+            - client_inbound_bytes
+          sourceType: attribute
+          target: checkpoint.quantum.firewall.client_inbound_bytes
+          targetType: attribute
+          preserveSource: false
+          overrideOnConflict: false
+        - type: attribute-remapper
+          name: Map `client_inbound_packets` to
+            `checkpoint.quantum.firewall.client_inbound_packets`
+          enabled: true
+          sources:
+            - client_inbound_packets
+          sourceType: attribute
+          target: checkpoint.quantum.firewall.client_inbound_packets
+          targetType: attribute
+          preserveSource: false
+          overrideOnConflict: false
+        - type: attribute-remapper
+          name: Map `client_outbound_bytes` to
+            `checkpoint.quantum.firewall.client_outbound_bytes`
+          enabled: true
+          sources:
+            - client_outbound_bytes
+          sourceType: attribute
+          target: checkpoint.quantum.firewall.client_outbound_bytes
+          targetType: attribute
+          preserveSource: false
+          overrideOnConflict: false
+        - type: attribute-remapper
+          name: Map `client_outbound_packets` to
+            `checkpoint.quantum.firewall.client_outbound_packets`
+          enabled: true
+          sources:
+            - client_outbound_packets
+          sourceType: attribute
+          target: checkpoint.quantum.firewall.client_outbound_packets
+          targetType: attribute
+          preserveSource: false
+          overrideOnConflict: false
+        - type: attribute-remapper
+          name: Map `conn_direction` to `checkpoint.quantum.firewall.conn_direction`
+          enabled: true
+          sources:
+            - conn_direction
+          sourceType: attribute
+          target: checkpoint.quantum.firewall.conn_direction
+          targetType: attribute
+          preserveSource: false
+          overrideOnConflict: false
+        - type: attribute-remapper
+          name: Map `identity_src` to `checkpoint.quantum.firewall.identity_src`
+          enabled: true
+          sources:
+            - identity_src
+          sourceType: attribute
+          target: checkpoint.quantum.firewall.identity_src
+          targetType: attribute
+          preserveSource: false
+          overrideOnConflict: false
+        - type: attribute-remapper
+          name: Map `identity_type` to `checkpoint.quantum.firewall.identity_type`
+          enabled: true
+          sources:
+            - identity_type
+          sourceType: attribute
+          target: checkpoint.quantum.firewall.identity_type
+          targetType: attribute
+          preserveSource: false
+          overrideOnConflict: false
+        - type: attribute-remapper
+          name: Map `layer_name` to `checkpoint.quantum.firewall.layer_name`
+          enabled: true
+          sources:
+            - layer_name
+          sourceType: attribute
+          target: checkpoint.quantum.firewall.layer_name
+          targetType: attribute
+          preserveSource: false
+          overrideOnConflict: false
+        - type: attribute-remapper
+          name: Map `malware_rule_name` to `checkpoint.quantum.firewall.malware_rule_name`
+          enabled: true
+          sources:
+            - malware_rule_name
+          sourceType: attribute
+          target: checkpoint.quantum.firewall.malware_rule_name
+          targetType: attribute
+          preserveSource: false
+          overrideOnConflict: false
+        - type: attribute-remapper
+          name: Map `matched_category` to `checkpoint.quantum.firewall.matched_category`
+          enabled: true
+          sources:
+            - matched_category
+          sourceType: attribute
+          target: checkpoint.quantum.firewall.matched_category
+          targetType: attribute
+          preserveSource: false
+          overrideOnConflict: false
+        - type: attribute-remapper
+          name: Map `server_inbound_packets` to
+            `checkpoint.quantum.firewall.server_inbound_packets`
+          enabled: true
+          sources:
+            - server_inbound_packets
+          sourceType: attribute
+          target: checkpoint.quantum.firewall.server_inbound_packets
+          targetType: attribute
+          preserveSource: false
+          overrideOnConflict: false
+        - type: attribute-remapper
+          name: Map `server_outbound_packets` to
+            `checkpoint.quantum.firewall.server_outbound_packets`
+          enabled: true
+          sources:
+            - server_outbound_packets
+          sourceType: attribute
+          target: checkpoint.quantum.firewall.server_outbound_packets
+          targetType: attribute
+          preserveSource: false
+          overrideOnConflict: false
+        - type: attribute-remapper
+          name: Map `smartdefense_profile` to
+            `checkpoint.quantum.firewall.smartdefense_profile`
+          enabled: true
+          sources:
+            - smartdefense_profile
+          sourceType: attribute
+          target: checkpoint.quantum.firewall.smartdefense_profile
+          targetType: attribute
+          preserveSource: false
+          overrideOnConflict: false
     - type: pipeline
       name: Remapper for Username Attribute
       enabled: true
       filter:
-        query: '@product:("Anti-Exploit" OR "Anti-Ransomware" OR "Anti-Bot") '
+        query: '@product:("Anti-Exploit" OR "Anti-Ransomware" OR "Anti-Bot" OR "Anti-Virus")'
       processors:
         - type: attribute-remapper
           name: Map `src_user_name` to `usr.name`
@@ -576,11 +817,51 @@ pipeline:
           targetType: attribute
           preserveSource: false
           overrideOnConflict: false
+        - type: attribute-remapper
+          name: Map `host_type` to `checkpoint.quantum.firewall.host_type`
+          enabled: true
+          sources:
+            - host_type
+          sourceType: attribute
+          target: checkpoint.quantum.firewall.host_type
+          targetType: attribute
+          preserveSource: false
+          overrideOnConflict: false
+        - type: attribute-remapper
+          name: Map `os_name` to `checkpoint.quantum.firewall.os_name`
+          enabled: true
+          sources:
+            - os_name
+          sourceType: attribute
+          target: checkpoint.quantum.firewall.os_name
+          targetType: attribute
+          preserveSource: false
+          overrideOnConflict: false
+        - type: attribute-remapper
+          name: Map `dst` to `checkpoint.quantum.firewall.dst`
+          enabled: true
+          sources:
+            - dst
+          sourceType: attribute
+          target: checkpoint.quantum.firewall.dst
+          targetType: attribute
+          preserveSource: false
+          overrideOnConflict: false
+        - type: attribute-remapper
+          name: Map `src` to `checkpoint.quantum.firewall.src`
+          enabled: true
+          sources:
+            - src
+          sourceType: attribute
+          target: checkpoint.quantum.firewall.src
+          targetType: attribute
+          preserveSource: false
+          overrideOnConflict: false
     - type: pipeline
       name: Remapper for Username Attribute
       enabled: true
       filter:
-        query: "@product:DLP "
+        query: "@product:DLP"
       processors:
         - type: attribute-remapper
           name: Map `user` to `usr.name`
@@ -592,6 +873,16 @@ pipeline:
           targetType: attribute
           preserveSource: false
           overrideOnConflict: false
+        - type: attribute-remapper
+          name: Map `reject_category` to `checkpoint.quantum.firewall.reject_category`
+          enabled: true
+          sources:
+            - reject_category
+          sourceType: attribute
+          target: checkpoint.quantum.firewall.reject_category
+          targetType: attribute
+          preserveSource: false
+          overrideOnConflict: false
     - type: pipeline
       name: String Building for Source and Destination IP Port
       enabled: true
@@ -600,18 +891,18 @@ pipeline:
           Filtering") '
       processors:
         - type: string-builder-processor
-          name: "Define `src_ip_port` equal to %{network.client.ip}:
-            %{network.client.port}"
+          name: "Define `checkpoint.quantum.firewall.src_ip_port` equal to
+            %{network.client.ip}: %{network.client.port}"
           enabled: true
           template: "%{network.client.ip}:%{network.client.port}"
-          target: src_ip_port
+          target: checkpoint.quantum.firewall.src_ip_port
           replaceMissing: false
         - type: string-builder-processor
-          name: "Define `dst_ip_port` equal to %{network.destination.ip}:
-            %{network.destination.port}"
+          name: "Define `checkpoint.quantum.firewall.dst_ip_port` equal to
+            %{network.destination.ip}: %{network.destination.port}"
           enabled: true
           template: "%{network.destination.ip}:%{network.destination.port}"
-          target: dst_ip_port
+          target: checkpoint.quantum.firewall.dst_ip_port
           replaceMissing: false
     - type: pipeline
       name: Lookup for `app_risk` field
@@ -619,10 +910,10 @@ pipeline:
       filter:
         query: '@product:("Application Control" OR "URL Filtering") '
       processors:
-        - name: Lookup for `app_risk` to `app_risk_str` field
+        - name: Lookup for `app_risk` to `checkpoint.quantum.firewall.app_risk_str` field
           enabled: true
           source: app_risk
-          target: app_risk_str
+          target: checkpoint.quantum.firewall.app_risk_str
           lookupTable: |-
             0, Unknown
             1, Very low
@@ -641,7 +932,7 @@ pipeline:
       name: Remapper for Status Attribute
       enabled: true
       filter:
-        query: '@product:"HTTPS Inspection" '
+        query: '@product:"HTTPS Inspection"'
       processors:
         - type: attribute-remapper
           name: Map `status` to `checkpoint.quantum.firewall.status`
