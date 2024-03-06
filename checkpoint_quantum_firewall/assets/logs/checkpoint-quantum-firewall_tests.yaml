@@ -63,27 +63,33 @@ tests:
     custom:
       __policy_id_tag: "product=VPN-1 & FireWall-1[db_tag={ABCD1234-5F67-B89B-AF12-3456B78B91A};mgmt=gw-81a3bc;date=1702026887;policy_name=Standard\\]"
       aggregated_log_count: "10"
-      app_category: "High Risk"
       app_id: "647368112"
       app_properties: "Spyware / Malicious Sites,High Risk,URL Filtering"
       app_risk: 4
-      app_risk_str: "High"
-      appi_name: "malware.wicar.org"
       browse_time: "170"
       checkpoint:
         quantum:
           firewall:
             action: "Accept"
+            app_category: "High Risk"
+            app_risk_str: "High"
+            appi_name: "malware.wicar.org"
             bytes: "187659"
+            client_inbound_bytes: "146518"
+            client_inbound_packets: "217"
+            client_outbound_bytes: "41141"
+            client_outbound_packets: "468"
+            conn_direction: "Internal"
+            dst_ip_port: "185.64.148.0:443"
+            layer_name:
+             - "Network"
+             - "URL"
+            matched_category: "High Risk"
             protocol: "HTTPS"
-      client_inbound_bytes: "146518"
-      client_inbound_packets: "217"
-      client_outbound_bytes: "41141"
-      client_outbound_packets: "468"
-      conn_direction: "Internal"
+            server_inbound_packets: "234"
+            server_outbound_packets: "434"
       connection_count: "5"
       creation_time: "1702027299"
-      dst_ip_port: "185.64.148.0:443"
       duration: "2578"
       flags: "4210688"
       hll_key: "13407405998656291587"
@@ -92,9 +98,6 @@ tests:
       inzone: "Internal"
       last_hit_time: "1702029425"
       lastupdatetime: "1702029877"
-      layer_name:
-       - "Network"
-       - "URL"
       layer_uuid:
        - "a0bc0def-da96-4c9d-a654-37c4125fb5c9"
        - "a0bc0def-da96-4c9d-a654-37c4125fb5c9"
@@ -103,7 +106,6 @@ tests:
       match_id:
        - "2"
        - "16777221"
-      matched_category: "High Risk"
       network:
         bytes_read: "42122"
         bytes_written: "146518"
@@ -163,8 +165,6 @@ tests:
        - "a0bc0def-da96-4c9d-a654-37c4125fb5c9"
        - "a0bc0def-0g0h-0012-90i9-37c4125fb5c9"
       sequencenum: "1"
-      server_inbound_packets: "234"
-      server_outbound_packets: "434"
       service_id: "https"
       sig_id: "4"
       time: "1702027299"
@@ -271,16 +271,19 @@ tests:
         quantum:
           firewall:
             action: "Detect"
+            confidence_level: "Low"
+            dst_ip_port: "185.64.148.0:514"
+            malware_rule_name: "Test"
+            protection_type: "IPS"
             severity: "Low"
-      confidence_level: "Low"
+            smartdefense_profile: "Strict"
+            src_ip_port: "185.64.148.0:35098"
       description_url: "abc.html"
-      dst_ip_port: "185.64.148.0:514"
       hostname: "gw-12e3ab"
       ifdir: "outbound"
       ifname: "eth9"
       lastupdatetime: 1702272887
       log_id: 2
-      malware_rule_name: "Test"
       network:
         client:
           geoip:
@@ -328,15 +331,12 @@ tests:
       policy_time: 1702016778
       product: "IPS"
       protection_id: "sample_514"
-      protection_type: "IPS"
       proto: 17
       received_bytes: 0
       sent_bytes: 0
       sequencenum: 1
       service_id: "syslog"
       severity: "Low"
-      smartdefense_profile: "Strict"
-      src_ip_port: "185.64.148.0:35098"
       suppressed_logs: 352
       time: 1702271803
       version: 5
@@ -405,19 +405,20 @@ tests:
     }
   result:
     custom:
-      auth_method: "Machine Authentication (Active Directory)"
-      auth_status: "Successful Login"
       checkpoint:
         quantum:
           firewall:
             action: "Log In"
+            auth_method: "Machine Authentication (Active Directory)"
+            auth_status: "Successful Login"
             client_name: "Active Directory Query"
+            identity_src: "AD Query"
+            identity_type: "machine"
+            src_machine_name: "sample-46-123"
       client_version: "R81.20"
       domain_name: "abc.xyz"
       endpoint_ip: "185.64.148.0"
       flags: "150783"
-      identity_src: "AD Query"
-      identity_type: "machine"
       ifdir: "inbound"
       logid: "131111"
       loguid: "{0x1abcde0,0x1abcde0,0x1abcde0,0x1abcde0}"
@@ -447,7 +448,6 @@ tests:
       sequencenum: "1"
       snid: "1e23f0dd"
       src_machine_group: "All Machines"
-      src_machine_name: "sample-46-123"
       time: "1702458184"
       version: "5"
     message: |-
@@ -552,16 +552,22 @@ tests:
           firewall:
             action: "Accept"
             bytes: 1264
+            client_inbound_bytes: 3445
+            client_inbound_packets: 26
+            client_outbound_bytes: 7021
+            client_outbound_packets: 60
+            conn_direction: "Internal"
+            dst_ip_port: "185.64.148.0:443"
+            layer_name:
+             - "Network"
+             - "URL"
             protocol: "HTTPS"
-      client_inbound_bytes: 3445
+            server_inbound_packets: 30
+            server_outbound_packets: 52
+            src_ip_port: "185.64.148.0:59029"
       client_inbound_interface: "eth0"
-      client_inbound_packets: 26
-      client_outbound_bytes: 7021
-      client_outbound_packets: 60
-      conn_direction: "Internal"
       context_num: 2
       contextnum: 2
-      dst_ip_port: "185.64.148.0:443"
       elapsed: 593
       hll_key: 1652457895635214780
       hostname: "gw-81e3ba"
@@ -570,9 +576,6 @@ tests:
       inzone: "Internal"
       last_rematch_time: 1702013332
       lastupdatetime: 1702013677
-      layer_name:
-       - "Network"
-       - "URL"
       layer_uuid:
        - "46523c2a-ld45-6q65-8cc5-q165ks7w45sh"
        - "46523c2a-ld45-6q78-8cq5-  q165ks8Qg5ll"
@@ -644,12 +647,9 @@ tests:
        - "46523c2a-ld45-     6q78-8cq5-q165ks8Qg5ll"
       segment_time: 1702013332
       sequencenum: 1
-      server_inbound_packets: 30
       server_outbound_interface: "eth0"
-      server_outbound_packets: 52
       service_id: "https"
       sig_id: 4
-      src_ip_port: "185.64.148.0:59029"
       start_time: 1702013062
       time:
        - 1702013332
@@ -853,7 +853,6 @@ tests:
     custom:
       __policy_id_tag: "product=VPN-1 & FireWall-1[db_tag={AJSK4652-7Q56-A46N-AK56-4652A4665B46B};mgmt=gw-81e3ba;date=1702026887;policy_name=Standard]"
       aggregated_log_count: 2
-      app_category: "Network Protocols"
       app_category_:
         _:
           _match_table:
@@ -880,13 +879,11 @@ tests:
           _match_table:
            - 0
            - 2
-      app_risk_str: "Low"
       app_sig_id: "60526220:1"
       app_sig_id_:
         _:
           _match_table:
            - "60526220:1"
-      appi_name: "ICMP Protocol"
       appi_name_:
         _:
           _match_table:
@@ -895,12 +892,18 @@ tests:
         quantum:
           firewall:
             action: "Accept"
+            app_category: "Network Protocols"
+            app_risk_str: "Low"
+            appi_name: "ICMP Protocol"
             bytes: 106200
-      client_inbound_bytes: 106200
-      client_inbound_packets: 1770
-      client_outbound_bytes: 0
-      client_outbound_packets: 0
-      conn_direction: "Internal"
+            client_inbound_bytes: 106200
+            client_inbound_packets: 1770
+            client_outbound_bytes: 0
+            client_outbound_packets: 0
+            conn_direction: "Internal"
+            matched_category: "Network Protocols"
+            server_inbound_packets: 0
+            server_outbound_packets: 1770
       connection_count: 1
       creation_time: 1702027684
       duration: 10800
@@ -929,7 +932,6 @@ tests:
           _match_table:
            - 2
            - 16777221
-      matched_category: "Network Protocols"
       matched_category_:
         _:
           _match_table:
@@ -1001,8 +1003,6 @@ tests:
            - "46523c2a-ld45-6q65-8cc5-q165ks7w45sh"
            - "46523c2a-ld45-6q78-8cq5-q165ks8Qg5ll"
       sequencenum: 2
-      server_inbound_packets: 0
-      server_outbound_packets: 1770
       service_id: "echo-request"
       time: 1702027684
       update_count: 3
