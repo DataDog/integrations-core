@@ -406,7 +406,7 @@ pipeline:
   name: Palo Alto Panorama
   enabled: true
   filter:
-    query: "source:palo-alto-panorama "
+    query: "source:palo-alto-panorama"
   processors:
     - type: grok-parser
       name: Parsing Palo Alto Panorama logs
@@ -1104,7 +1104,7 @@ pipeline:
       preserveSource: false
       overrideOnConflict: false
     - type: attribute-remapper
-      name: "Map `normalize_user` to `palo.alto.panorama.normalize_user` "
+      name: Map `normalize_user` to `palo.alto.panorama.normalize_user`
       enabled: true
       sources:
         - normalize_user
