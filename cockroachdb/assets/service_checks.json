@@ -11,8 +11,8 @@
       "host",
       "endpoint"
     ],
-    "name": "CockroachDB openmetrics endpoint up",
-    "description": "Returns `CRITICAL` if the check cannot access the openmetrics metrics endpoint of CockroachDB."
+    "name": "CockroachDB OpenMetrics endpoint up",
+    "description": "Returns `CRITICAL` if the check cannot access the OpenMetrics metrics endpoint of CockroachDB."
   },
   {
     "agent_version": "7.19.0",
@@ -26,7 +26,7 @@
       "host",
       "endpoint"
     ],
-    "name": "CockroachDB prometheus endpoint up",
-    "description": "Returns `CRITICAL` if the check cannot access the openmetrics metrics endpoint of CockroachDB."
+    "name": "CockroachDB Prometheus endpoint up",
+    "description": "Returns `CRITICAL` if the check cannot access the Prometheus metrics endpoint of CockroachDB."
   }
 ]
