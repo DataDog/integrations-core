@@ -7,5 +7,6 @@ services:
       dockerfile: Dockerfile
       args:
         - SQLSERVER_BASE_IMAGE=${SQLSERVER_BASE_IMAGE}
+    isolation: hyperv
     ports:
       - "1433:1433"
