@@ -2,7 +2,7 @@
 
 ## Overview
 
-This check monitors [Argo_Rollouts][1] through the Datadog Agent.
+This check monitors [Argo Rollouts][1] through the Datadog Agent.
 
 ## Setup
 
