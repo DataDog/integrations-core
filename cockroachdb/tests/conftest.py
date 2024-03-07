@@ -9,10 +9,7 @@ from packaging.version import parse as parse_version
 from datadog_checks.base import is_affirmative
 from datadog_checks.dev import docker_run, run_command
 
-from .common import COCKROACHDB_VERSION, HOST, PORT
-
-HERE = os.path.dirname(os.path.abspath(__file__))
-DOCKER_DIR = os.path.join(HERE, 'docker')
+from .common import COCKROACHDB_VERSION, HERE, HOST, PORT
 
 
 @pytest.fixture(scope='session')
@@ -22,7 +19,7 @@ def dd_environment(instance):
     conditions = [run_sql] if is_affirmative(os.environ.get("POPULATE_METRICS")) else None
 
     with docker_run(
-        os.path.join(DOCKER_DIR, 'docker-compose.yaml'),
+        os.path.join(HERE, 'docker', 'docker-compose.yaml'),
         env_vars=env_vars,
         endpoints=instance['openmetrics_endpoint'],
         conditions=conditions,
