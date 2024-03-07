@@ -1,4 +1,4 @@
-# Agent Check: Argo_Rollouts
+# Agent Check: Argo Rollouts
 
 ## Overview
 
