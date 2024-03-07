@@ -68,6 +68,5 @@ def test_esxi_perf_metrics(vcsim_instance, dd_run_check, aggregator, caplog):
         aggregator.assert_metric(f"esxi.{metric_name}", at_least=0, tags=base_tags, hostname="ha-host_VM0")
         aggregator.assert_metric(f"esxi.{metric_name}", at_least=0, tags=base_tags, hostname="ha-host_VM1")
 
-
     aggregator.assert_metric("esxi.host.can_connect", 1, count=1, tags=base_tags)
     aggregator.assert_all_metrics_covered()

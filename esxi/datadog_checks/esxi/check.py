@@ -53,9 +53,7 @@ class EsxiCheck(AgentCheck):
         filter_spec.propSet = property_specs
 
         # Only host objects
-        view_ref = self.content.viewManager.CreateContainerView(
-            self.content.rootFolder, resource_types, True
-        )
+        view_ref = self.content.viewManager.CreateContainerView(self.content.rootFolder, resource_types, True)
 
         try:
             obj_spec.obj = view_ref
