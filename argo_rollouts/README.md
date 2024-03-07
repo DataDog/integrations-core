@@ -72,7 +72,7 @@ See [metadata.csv][7] for a list of metrics provided by this integration.
 
 ### Events
 
-The Argo_Rollouts integration does not include any events.
+The Argo Rollouts integration does not include any events.
 
 ### Service Checks
 
