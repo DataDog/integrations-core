@@ -8,14 +8,14 @@ INSTANCE = {"diagnostic_url": "http://127.0.0.1:3000"}
 BAD_HOSTNAME_INSTANCE = {"diagnostic_url": "https://invalid-hostname"}
 
 COMMON_METRICS = [
-    "process.state",
-    "certificate_mismatch.count",
-    "rx.count",
-    "server_interactive_sessions_total",
-    "teleport.build_info",
-    "teleport.cache_events.count",
-    "teleport.cache_stale_events.count",
-    "tx.count",
+    "common.process.state",
+    "common.certificate_mismatch.count",
+    "common.rx.count",
+    "common.server_interactive_sessions_total",
+    "common.teleport.build_info",
+    "common.teleport.cache_events.count",
+    "common.teleport.cache_stale_events.count",
+    "common.tx.count",
 ]
 
 PROXY_METRICS = [
