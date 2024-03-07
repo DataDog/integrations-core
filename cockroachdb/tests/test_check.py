@@ -6,7 +6,7 @@ import pytest
 from datadog_checks.base.constants import ServiceCheck
 from datadog_checks.cockroachdb import CockroachdbCheck
 from datadog_checks.dev.testing import requires_py3
-from datadog_checks.dev.utils import get_metadata_metrics
+from datadog_checks.dev.utils import assert_service_checks, get_metadata_metrics
 
 from .common import COCKROACHDB_VERSION, assert_metrics
 from .utils import get_fixture_path
@@ -22,6 +22,8 @@ def test_metrics(aggregator, instance, dd_run_check):
 
     aggregator.assert_service_check('cockroachdb.openmetrics.health', ServiceCheck.OK)
     aggregator.assert_metrics_using_metadata(get_metadata_metrics(), check_submission_type=True)
+
+    assert_service_checks(aggregator)
 
 
 # The test below is designed to collect metrics that are not exposed in our e2e environment.
@@ -48,6 +50,8 @@ def test_fixture_metrics(aggregator, instance, dd_run_check, mock_http_response,
 
     aggregator.assert_service_check('cockroachdb.openmetrics.health', ServiceCheck.OK)
     aggregator.assert_metrics_using_metadata(get_metadata_metrics(), check_submission_type=True)
+
+    assert_service_checks(aggregator)
 
 
 def test_version_metadata(aggregator, instance, datadog_agent, dd_run_check):

@@ -5,7 +5,7 @@ import os
 
 from datadog_checks.cockroachdb.metrics import METRIC_MAP
 from datadog_checks.dev import get_docker_hostname
-from datadog_checks.dev.utils import get_metadata_metrics
+from datadog_checks.dev.utils import assert_service_checks, get_metadata_metrics
 
 HOST = get_docker_hostname()
 PORT = '8080'
@@ -230,3 +230,5 @@ def assert_metrics(aggregator):
     aggregator.assert_metrics_using_metadata(metadata_metrics, check_submission_type=True)
 
     assert aggregator.metrics_asserted_pct > 80, 'Missing metrics {}'.format(aggregator.not_asserted())
+
+    assert_service_checks(aggregator)
