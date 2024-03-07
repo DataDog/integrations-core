@@ -432,8 +432,8 @@ def test_connection_failure(aggregator, dd_run_check, instance_docker):
             "failed_tcp_connection",
             {"host": "localhost,9999"},
             {
-                "odbc-windows|MSOLEDBSQL": "TCP Provider: No connection could be made"
-                " because the target machine actively refused it",
+                "odbc-windows|MSOLEDBSQL": "TCP-connection\\(ERROR: No connection could be made "
+                "because the target machine actively refused it\\).*",
                 "SQLOLEDB|SQLNCLI11": "TCP-connection\\(ERROR: No connection could be made "
                 "because the target machine actively refused it\\).*"
                 "could not open database requested by login",
