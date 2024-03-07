@@ -2,6 +2,12 @@
 
 <!-- towncrier release notes start -->
 
+## 9.5.0 / 2024-03-07
+
+***Security***:
+
+* Bump cryptography to 42.0.5 ([#17054](https://github.com/DataDog/integrations-core/pull/17054))
+
 ## 9.4.0 / 2024-02-16
 
 ***Added***:
