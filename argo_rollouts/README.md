@@ -16,7 +16,7 @@ This check uses [OpenMetrics][5] to collect metrics from the OpenMetrics endpoin
 
 ### Configuration
 
-The Argo Rollouts controller has Prometheus formatted metrics readily available at `/metrics` on port `8090`. For the Agent to start collecting metrics, the Argo Rollouts pods need to be annotated. For more information about annotations, refer to the [Autodiscovery Integration Templates][3] for guidance. You can find additional configuration options by reviewing the [sample argo_rollouts.d/conf.yaml][4].
+The Argo Rollouts controller has Prometheus-formatted metrics readily available at `/metrics` on port `8090`. For the Agent to start collecting metrics, the Argo Rollouts pods need to be annotated. For more information about annotations, refer to the [Autodiscovery Integration Templates][3] for guidance. You can find additional configuration options by reviewing the [sample argo_rollouts.d/conf.yaml][4].
 
 **Note**: The listed metrics can only be collected if they are available. Some metrics are generated only when certain actions are performed. For example, the `argo_rollout.info.replicas.updated` metric is exposed only after a replica is updated.
 
