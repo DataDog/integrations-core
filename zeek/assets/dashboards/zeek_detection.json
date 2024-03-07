@@ -346,19 +346,19 @@
                                             "width": "auto"
                                         },
                                         {
-                                            "field": "zeek.orig_h",
+                                            "field": "network.client.ip",
                                             "width": "auto"
                                         },
                                         {
-                                            "field": "zeek.orig_p",
+                                            "field": "network.client.port",
                                             "width": "auto"
                                         },
                                         {
-                                            "field": "zeek.resp_h",
+                                            "field": "network.destination.ip",
                                             "width": "auto"
                                         },
                                         {
-                                            "field": "zeek.resp_p",
+                                            "field": "network.destination.port",
                                             "width": "auto"
                                         },
                                         {
@@ -913,19 +913,19 @@
                                             "width": "auto"
                                         },
                                         {
-                                            "field": "zeek.orig_h",
+                                            "field": "network.client.ip",
                                             "width": "auto"
                                         },
                                         {
-                                            "field": "zeek.orig_p",
+                                            "field": "network.client.port",
                                             "width": "auto"
                                         },
                                         {
-                                            "field": "zeek.resp_h",
+                                            "field": "network.destination.ip",
                                             "width": "auto"
                                         },
                                         {
-                                            "field": "zeek.resp_p",
+                                            "field": "network.destination.port",
                                             "width": "auto"
                                         },
                                         {
