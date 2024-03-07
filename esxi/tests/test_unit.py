@@ -103,7 +103,7 @@ def test_esxi_perf_metrics(vcsim_instance, dd_run_check, aggregator, caplog):
 
 
 @pytest.mark.usefixtures("service_instance")
-def test_vm_perf_metrics(vcsim_instance, dd_run_check, aggregator, caplog):
+def test_vm_perf_metrics(vcsim_instance, dd_run_check, aggregator):
     check = EsxiCheck('esxi', {}, [vcsim_instance])
     dd_run_check(check)
 
