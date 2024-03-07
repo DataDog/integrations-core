@@ -18,14 +18,13 @@ class TeleportCheck(OpenMetricsBaseCheckV2):
 
     def check(self, _):
         try:
-            super().check(_)
             response = self.http.get(self.diagnostic_url + "/healthz")
             response.raise_for_status()
             self.service_check("health.up", self.OK)
         except Exception as e:
             self.service_check("health.up", self.CRITICAL, message=str(e))
-        finally:
-            pass
+
+        super().check(_)
 
     def _parse_config(self):
         self.diagnostic_url = self.instance.get("diagnostic_url")
