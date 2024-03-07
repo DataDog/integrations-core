@@ -27,7 +27,7 @@ class EsxiCheck(AgentCheck):
 
         resource_types = [VM_RESOURCE, HOST_RESOURCE]
         for resource_type in resource_types:
-            # Create property spec for only Host objects; only request name attribute
+            # only request name attribute for now
             property_spec = vmodl.query.PropertyCollector.PropertySpec()
             property_spec.type = resource_type
             property_spec.pathSet = ["name"]
@@ -52,7 +52,6 @@ class EsxiCheck(AgentCheck):
         filter_spec = vmodl.query.PropertyCollector.FilterSpec()
         filter_spec.propSet = property_specs
 
-        # Only host objects
         view_ref = self.content.viewManager.CreateContainerView(self.content.rootFolder, resource_types, True)
 
         try:

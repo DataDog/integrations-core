@@ -105,7 +105,6 @@ def test_esxi_perf_metrics(vcsim_instance, dd_run_check, aggregator, caplog):
 @pytest.mark.usefixtures("service_instance")
 def test_vm_perf_metrics(vcsim_instance, dd_run_check, aggregator, caplog):
     check = EsxiCheck('esxi', {}, [vcsim_instance])
-    caplog.set_level(logging.DEBUG)
     dd_run_check(check)
 
     base_tags = ["esxi_url:127.0.0.1:8989"]
