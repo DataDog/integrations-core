@@ -36,6 +36,7 @@
         "metadata_path": "assets/service_checks.json"
       },
       "process_signatures": [
+        "weaviate",
         "/bin/weaviate"
       ],
       "source_type_id": 10371,
