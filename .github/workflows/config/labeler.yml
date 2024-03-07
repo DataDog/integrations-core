@@ -433,6 +433,8 @@ integration/tcp_queue_length:
 - tcp_queue_length/**/*
 integration/teamcity:
 - teamcity/**/*
+integration/tekton:
+- tekton/**/*
 integration/temporal:
 - temporal/**/*
 integration/tenable:
