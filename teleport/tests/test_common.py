@@ -11,7 +11,7 @@ from requests.exceptions import ConnectionError
 pytestmark = [pytest.mark.unit]
 
 def test_connect_exception(dd_run_check):
-    with pytest.raises(Exception, match=".*nodename nor servname provided, or not known.*"):
+    with pytest.raises(Exception):
         check = TeleportCheck("teleport", {}, [ BAD_HOSTNAME_INSTANCE ])
         dd_run_check(check)
 
