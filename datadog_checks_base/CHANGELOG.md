@@ -2,6 +2,13 @@
 
 <!-- towncrier release notes start -->
 
+## 36.2.0 / 2024-03-07
+
+***Security***:
+
+* Bump orjson to 3.9.15
+  Bump cryptography to 42.0.5 ([#17054](https://github.com/DataDog/integrations-core/pull/17054))
+
 ## 36.1.0 / 2024-02-16
 
 ***Added***:
