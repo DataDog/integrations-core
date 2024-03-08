@@ -3,9 +3,9 @@
 # Licensed under a 3-clause BSD style license (see LICENSE)
 
 
-INSTANCE = {"diagnostic_url": "http://127.0.0.1:3000"}
+INSTANCE = {"teleport_url": "http://127.0.0.1", "diag_port": "3000"}
 
-BAD_HOSTNAME_INSTANCE = {"diagnostic_url": "https://invalid-hostname"}
+BAD_HOSTNAME_INSTANCE = {"teleport_url": "https://invalid-hostname"}
 
 COMMON_METRICS = [
     "common.process.state",

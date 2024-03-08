@@ -8,6 +8,7 @@ from .metrics import AUTH_METRICS_MAP, COMMON_METRICS_MAP, PROXY_METRICS_MAP
 
 METRIC_MAP = {**COMMON_METRICS_MAP, **PROXY_METRICS_MAP, **AUTH_METRICS_MAP}
 
+DEFAULT_DIAG_PORT = 3000
 
 class TeleportCheck(OpenMetricsBaseCheckV2):
     __NAMESPACE__ = 'teleport'
@@ -18,7 +19,7 @@ class TeleportCheck(OpenMetricsBaseCheckV2):
 
     def check(self, _):
         try:
-            response = self.http.get(self.diagnostic_url + "/healthz")
+            response = self.http.get("{}/healthz".format(self.diag_addr))
             response.raise_for_status()
             self.service_check("health.up", self.OK)
         except Exception as e:
@@ -27,8 +28,10 @@ class TeleportCheck(OpenMetricsBaseCheckV2):
         super().check(_)
 
     def _parse_config(self):
-        self.diagnostic_url = self.instance.get("diagnostic_url")
-        if self.diagnostic_url:
-            self.instance.setdefault("openmetrics_endpoint", self.diagnostic_url + "/metrics")
+        self.teleport_url = self.instance.get("teleport_url")
+        self.diag_port = self.instance.get("diag_port", DEFAULT_DIAG_PORT)
+        if self.teleport_url:
+            self.diag_addr = "{}:{}".format(self.teleport_url, self.diag_port)
+            self.instance.setdefault("openmetrics_endpoint", "{}/metrics".format(self.diag_addr))
             self.instance.setdefault("metrics", [METRIC_MAP])
             self.instance.setdefault("rename_labels", {'version': "teleport_version"})
