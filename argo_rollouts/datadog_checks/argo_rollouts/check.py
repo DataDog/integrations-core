@@ -10,14 +10,6 @@ class ArgoRolloutsCheck(OpenMetricsBaseCheckV2):
     DEFAULT_METRIC_LIMIT = 0
     __NAMESPACE__ = 'argo_rollouts'
 
-    def __init__(self, name, init_config, instances=None):
-
-        super(ArgoRolloutsCheck, self).__init__(
-            name,
-            init_config,
-            instances,
-        )
-
     def get_default_config(self):
         return {
             'metrics': [METRIC_MAP],
