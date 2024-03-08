@@ -150,3 +150,5 @@ AUTH_METRICS_MAP = {
 SSH_METRICS_MAP = {
     "user_max_concurrent_sessions_hit": "ssh.user.max_concurrent_sessions_hit",
 }
+
+METRIC_MAP = {**COMMON_METRICS_MAP, **PROXY_METRICS_MAP, **AUTH_METRICS_MAP, **SSH_METRICS_MAP}
