@@ -329,7 +329,7 @@
                                             ],
                                             "compute": {
                                                 "aggregation": "sum",
-                                                "metric": "@zeek.http_total"
+                                                "metric": "@zeek.ssl_total"
                                             },
                                             "group_by": [],
                                             "search": {

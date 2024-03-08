@@ -175,13 +175,6 @@ facets:
   - facetType: range
     groups:
       - Zeek
-    name: dns_coal_miss
-    path: zeek.dns_coal_miss
-    source: log
-    type: double
-  - facetType: range
-    groups:
-      - Zeek
     name: dns_red
     path: zeek.dns_red
     source: log
@@ -213,13 +206,6 @@ facets:
     unit:
       family: bytes
       name: byte
-  - facetType: range
-    groups:
-      - Zeek
-    name: files_coal_miss
-    path: zeek.files_coal_miss
-    source: log
-    type: double
   - facetType: range
     groups:
       - Zeek
@@ -353,13 +339,6 @@ facets:
   - facetType: range
     groups:
       - Zeek
-    name: ssl_coal_miss
-    path: zeek.ssl_coal_miss
-    source: log
-    type: double
-  - facetType: range
-    groups:
-      - Zeek
     name: ssl_red
     path: zeek.ssl_red
     source: log
@@ -393,13 +372,6 @@ facets:
       - Zeek
     name: weird_total
     path: zeek.weird_total
-    source: log
-    type: double
-  - facetType: range
-    groups:
-      - Zeek
-    name: x509_coal_miss
-    path: zeek.x509_coal_miss
     source: log
     type: double
   - facetType: range
@@ -791,7 +763,7 @@ pipeline:
       name: Standard attribute remapping for user attributes
       enabled: true
       filter:
-        query: "@_path:(ftp OR socks OR http) "
+        query: "@_path:(ftp OR socks OR http OR http_red) "
       processors:
         - type: attribute-remapper
           name: Map `user`, `username` to `usr.name`
@@ -1044,7 +1016,7 @@ pipeline:
       name: Remap `proto` attribute to `zeek.proto`
       enabled: true
       filter:
-        query: "@_path:(conn* OR notice OR traceroute OR dns OR dpd OR syslog) "
+        query: "@_path:(conn* OR notice OR traceroute OR dns OR dns_red OR dpd OR syslog) "
       processors:
         - type: attribute-remapper
           name: Map `proto` to `zeek.proto`

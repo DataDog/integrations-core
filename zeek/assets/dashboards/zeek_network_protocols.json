@@ -1665,10 +1665,6 @@
                                             "width": "auto"
                                         },
                                         {
-                                            "field": "network.destination.port",
-                                            "width": "auto"
-                                        },
-                                        {
                                             "field": "x_originating_ip",
                                             "width": "auto"
                                         },
