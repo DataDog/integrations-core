@@ -1425,3 +1425,42 @@ teleport_etcd_events 2000
 # TYPE teleport_etcd_event_backpressure counter
 teleport_etcd_event_backpressure 3
 
+# TYPE teleport_kubernetes_client_in_flight_requests gauge
+# HELP teleport_kubernetes_client_in_flight_requests Teleport Kubernetes Service In-flight requests waiting for the upstream response.
+teleport_kubernetes_client_in_flight_requests 0
+
+# TYPE teleport_kubernetes_client_requests_total counter
+# HELP teleport_kubernetes_client_requests_total Teleport Kubernetes Service Total number of requests sent to the upstream teleport proxy, kube_service or Kubernetes Cluster servers.
+teleport_kubernetes_client_requests_total 0
+
+# TYPE teleport_kubernetes_client_tls_duration_seconds histogram
+# HELP teleport_kubernetes_client_tls_duration_seconds Teleport Kubernetes Service Latency distribution of TLS handshakes.
+teleport_kubernetes_client_tls_duration_seconds_bucket{le="0.005"} 0
+teleport_kubernetes_client_tls_duration_seconds_bucket{le="0.01"} 0
+teleport_kubernetes_client_tls_duration_seconds_bucket{le="+Inf"} 0
+teleport_kubernetes_client_tls_duration_seconds_sum 0
+teleport_kubernetes_client_tls_duration_seconds_count 0
+
+# TYPE teleport_kubernetes_client_got_conn_duration_seconds histogram
+# HELP teleport_kubernetes_client_got_conn_duration_seconds Teleport Kubernetes Service Latency distribution of time to dial to the upstream server - using reversetunnel or direct dialer.
+teleport_kubernetes_client_got_conn_duration_seconds_bucket{le="0.005"} 0
+teleport_kubernetes_client_got_conn_duration_seconds_bucket{le="0.01"} 0
+teleport_kubernetes_client_got_conn_duration_seconds_bucket{le="+Inf"} 0
+teleport_kubernetes_client_got_conn_duration_seconds_sum 0
+teleport_kubernetes_client_got_conn_duration_seconds_count 0
+
+# TYPE teleport_kubernetes_client_first_byte_response_duration_seconds histogram
+# HELP teleport_kubernetes_client_first_byte_response_duration_seconds Teleport Kubernetes Service Latency distribution of time to receive the first response byte from the upstream server.
+teleport_kubernetes_client_first_byte_response_duration_seconds_bucket{le="0.005"} 0
+teleport_kubernetes_client_first_byte_response_duration_seconds_bucket{le="0.01"} 0
+teleport_kubernetes_client_first_byte_response_duration_seconds_bucket{le="+Inf"} 0
+teleport_kubernetes_client_first_byte_response_duration_seconds_sum 0
+teleport_kubernetes_client_first_byte_response_duration_seconds_count 0
+
+# TYPE teleport_kubernetes_client_request_duration_seconds histogram
+# HELP teleport_kubernetes_client_request_duration_seconds Teleport Kubernetes Service Latency distribution of the upstream request time.
+teleport_kubernetes_client_request_duration_seconds_bucket{le="0.005"} 0
+teleport_kubernetes_client_request_duration_seconds_bucket{le="0.01"} 0
+teleport_kubernetes_client_request_duration_seconds_bucket{le="+Inf"} 0
+teleport_kubernetes_client_request_duration_seconds_sum 0
+teleport_kubernetes_client_request_duration_seconds_count 0

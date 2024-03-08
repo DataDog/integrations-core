@@ -151,4 +151,19 @@ SSH_METRICS_MAP = {
     "user_max_concurrent_sessions_hit": "ssh.user.max_concurrent_sessions_hit",
 }
 
-METRIC_MAP = {**COMMON_METRICS_MAP, **PROXY_METRICS_MAP, **AUTH_METRICS_MAP, **SSH_METRICS_MAP}
+KUBERNETES_METRICS_MAP = {
+    "teleport_kubernetes_client_in_flight_requests": "kubernetes.client.in_flight_requests",
+    "teleport_kubernetes_client_requests": "kubernetes.client.requests",
+    "teleport_kubernetes_client_tls_duration_seconds": "kubernetes.client.tls_duration_seconds",
+    "teleport_kubernetes_client_got_conn_duration_seconds": "kubernetes.client.got_conn_duration_seconds",
+    "teleport_kubernetes_client_first_byte_response_duration_seconds": "kubernetes.client.first_byte_response_duration_seconds",  # noqa: E501
+    "teleport_kubernetes_client_request_duration_seconds": "kubernetes.client.request_duration_seconds",
+}
+
+METRIC_MAP = {
+    **COMMON_METRICS_MAP,
+    **PROXY_METRICS_MAP,
+    **AUTH_METRICS_MAP,
+    **SSH_METRICS_MAP,
+    **KUBERNETES_METRICS_MAP,
+}
