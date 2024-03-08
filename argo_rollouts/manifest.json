@@ -50,7 +50,7 @@
       "Argo Rollouts Overview": "assets/dashboards/overview.json"
     },
     "logs": {
-      "source": "envoy"
+      "source": "argo_rollouts"
     }
   },
   "author": {
