@@ -219,6 +219,50 @@ for raw_metric_name, metric_name in METRIC_MAP.items():
 
     EXPECTED_METRICS.append(metric_name)
 
+CHANGEFEED_METRICS = {
+    'changefeed.aggregator_progress',
+    'changefeed.backfill',
+    'changefeed.backfill.pending.ranges',
+    'changefeed.batch_reduction_count',
+    'changefeed.buffer_entries.allocated_mem',
+    'changefeed.buffer_entries.flush.count',
+    'changefeed.buffer_entries.in.count',
+    'changefeed.buffer_entries.kv.count',
+    'changefeed.buffer_entries.out.count',
+    'changefeed.buffer_entries.released.count',
+    'changefeed.buffer_entries.resolved.count',
+    'changefeed.buffer_entries_mem.acquired.count',
+    'changefeed.buffer_entries_mem.released.count',
+    'changefeed.buffer_pushback.count',
+    'changefeed.bytes.messages_pushback.count',
+    'changefeed.checkpoint_progress',
+    'changefeed.cloudstorage_buffered_bytes',
+    'changefeed.emitted_bytes.count',
+    'changefeed.emitted.messages.count',
+    'changefeed.failures.count',
+    'changefeed.filtered_messages.count',
+    'changefeed.flush.messages_pushback.count',
+    'changefeed.flushed_bytes.count',
+    'changefeed.flushes.count',
+    'changefeed.forwarded_resolved_messages.count',
+    'changefeed.frontier_updates.count',
+    'changefeed.internal_retry_message',
+    'changefeed.lagging_ranges',
+    'changefeed.messages.messages_pushback.count',
+    'changefeed.nprocs_in_flight',
+    'changefeed.queue_time.count',
+    'changefeed.running',
+    'changefeed.schema_registry.registrations.count',
+    'changefeed.schema_registry.retry.count',
+    'changefeed.schemafeed.table_history_scans.count',
+    'changefeed.schemafeed.table_metadata.count',
+    'changefeed.sink_io_inflight',
+    'changefeed.size_based_flushes.count',
+    'jobs.changefeed.currently_paused',
+    'jobs.changefeed.protected_age_sec',
+    'jobs.changefeed.resume.retry.error.count',
+}
+
 
 def assert_metrics(aggregator):
     metadata_metrics = get_metadata_metrics()
