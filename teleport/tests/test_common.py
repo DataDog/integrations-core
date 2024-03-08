@@ -5,14 +5,15 @@
 import pytest
 
 from datadog_checks.teleport import TeleportCheck
-from .common import COMMON_METRICS, BAD_HOSTNAME_INSTANCE
-from requests.exceptions import ConnectionError
+
+from .common import BAD_HOSTNAME_INSTANCE, COMMON_METRICS
 
 pytestmark = [pytest.mark.unit]
 
+
 def test_connect_exception(dd_run_check):
     with pytest.raises(Exception):
-        check = TeleportCheck("teleport", {}, [ BAD_HOSTNAME_INSTANCE ])
+        check = TeleportCheck("teleport", {}, [BAD_HOSTNAME_INSTANCE])
         dd_run_check(check)
 
 

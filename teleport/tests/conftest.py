@@ -6,6 +6,7 @@ import os
 import pytest
 
 from datadog_checks.dev import docker_run, get_here
+
 from .common import INSTANCE
 
 
