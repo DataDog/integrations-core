@@ -12,7 +12,7 @@ pytestmark = pytest.mark.e2e
 
 CONFIG = {
     'init_config': {},
-    'instances': [ INSTANCE ],
+    'instances': [INSTANCE],
 }
 
 

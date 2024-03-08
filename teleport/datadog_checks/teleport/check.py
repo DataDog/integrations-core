@@ -10,6 +10,7 @@ METRIC_MAP = {**COMMON_METRICS_MAP, **PROXY_METRICS_MAP, **AUTH_METRICS_MAP}
 
 DEFAULT_DIAG_PORT = 3000
 
+
 class TeleportCheck(OpenMetricsBaseCheckV2):
     __NAMESPACE__ = 'teleport'
 
