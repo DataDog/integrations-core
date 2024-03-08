@@ -34,8 +34,3 @@ def dd_environment():
         instances = [{'openmetrics_endpoint': f'http://{argo_rollouts_host}:{argo_rollouts_port}/metrics'}]
 
         yield {'instances': instances}
-
-
-@pytest.fixture
-def instance():
-    return {}

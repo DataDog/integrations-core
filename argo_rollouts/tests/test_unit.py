@@ -5,11 +5,9 @@ import pytest
 
 from datadog_checks.argo_rollouts import ArgoRolloutsCheck
 from datadog_checks.base.constants import ServiceCheck
-from datadog_checks.dev.utils import get_metadata_metrics
+from datadog_checks.dev.utils import assert_service_checks, get_metadata_metrics
 
 from .common import OM_METRICS, OM_MOCKED_INSTANCE, get_fixture_path
-
-pytestmark = pytest.mark.unit
 
 
 def test_check_mock_argo_rollouts_openmetrics(dd_run_check, aggregator, mock_http_response):
@@ -24,6 +22,7 @@ def test_check_mock_argo_rollouts_openmetrics(dd_run_check, aggregator, mock_htt
     aggregator.assert_all_metrics_covered()
     aggregator.assert_metrics_using_metadata(get_metadata_metrics())
     aggregator.assert_service_check('argo_rollouts.openmetrics.health', ServiceCheck.OK)
+    assert_service_checks(aggregator)
 
 
 def test_check_mock_invalid_argo_rollouts_openmetrics(dd_run_check, aggregator, mock_http_response):
@@ -33,3 +32,4 @@ def test_check_mock_invalid_argo_rollouts_openmetrics(dd_run_check, aggregator, 
         dd_run_check(check)
 
     aggregator.assert_service_check('argo_rollouts.openmetrics.health', ServiceCheck.CRITICAL)
+    assert_service_checks(aggregator)
