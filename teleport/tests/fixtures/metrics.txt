@@ -1464,3 +1464,50 @@ teleport_kubernetes_client_request_duration_seconds_bucket{le="0.01"} 0
 teleport_kubernetes_client_request_duration_seconds_bucket{le="+Inf"} 0
 teleport_kubernetes_client_request_duration_seconds_sum 0
 teleport_kubernetes_client_request_duration_seconds_count 0
+
+# TYPE teleport_kubernetes_server_in_flight_requests gauge
+teleport_kubernetes_server_in_flight_requests{} 5
+
+# TYPE teleport_kubernetes_server_api_requests_total counter
+teleport_kubernetes_server_api_requests_total{} 142
+
+# TYPE teleport_kubernetes_server_request_duration_seconds histogram
+teleport_kubernetes_server_request_duration_seconds_bucket{le="0.005"} 0
+teleport_kubernetes_server_request_duration_seconds_bucket{le="0.01"} 1
+teleport_kubernetes_server_request_duration_seconds_bucket{le="0.025"} 3
+teleport_kubernetes_server_request_duration_seconds_bucket{le="0.05"} 8
+teleport_kubernetes_server_request_duration_seconds_bucket{le="0.1"} 15
+teleport_kubernetes_server_request_duration_seconds_bucket{le="0.25"} 24
+teleport_kubernetes_server_request_duration_seconds_bucket{le="0.5"} 30
+teleport_kubernetes_server_request_duration_seconds_bucket{le="1"} 40
+teleport_kubernetes_server_request_duration_seconds_bucket{le="+Inf"} 50
+teleport_kubernetes_server_request_duration_seconds_sum{} 123.45
+teleport_kubernetes_server_request_duration_seconds_count{} 50
+
+# TYPE teleport_kubernetes_server_response_size_bytes histogram
+teleport_kubernetes_server_response_size_bytes_bucket{le="100"} 5
+teleport_kubernetes_server_response_size_bytes_bucket{le="500"} 15
+teleport_kubernetes_server_response_size_bytes_bucket{le="1000"} 20
+teleport_kubernetes_server_response_size_bytes_bucket{le="5000"} 30
+teleport_kubernetes_server_response_size_bytes_bucket{le="10000"} 40
+teleport_kubernetes_server_response_size_bytes_bucket{le="+Inf"} 50
+teleport_kubernetes_server_response_size_bytes_sum{} 1234500
+teleport_kubernetes_server_response_size_bytes_count{} 50
+
+# TYPE teleport_kubernetes_server_exec_in_flight_sessions gauge
+teleport_kubernetes_server_exec_in_flight_sessions{} 4
+
+# TYPE teleport_kubernetes_server_exec_sessions_total counter
+teleport_kubernetes_server_exec_sessions_total{} 89
+
+# TYPE teleport_kubernetes_server_portforward_in_flight_sessions gauge
+teleport_kubernetes_server_portforward_in_flight_sessions{} 3
+
+# TYPE teleport_kubernetes_server_portforward_sessions_total counter
+teleport_kubernetes_server_portforward_sessions_total{} 107
+
+# TYPE teleport_kubernetes_server_join_in_flight_sessions gauge
+teleport_kubernetes_server_join_in_flight_sessions{} 2
+
+# TYPE teleport_kubernetes_server_join_sessions_total counter
+teleport_kubernetes_server_join_sessions_total{} 76

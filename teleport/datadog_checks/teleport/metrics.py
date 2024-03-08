@@ -158,6 +158,16 @@ KUBERNETES_METRICS_MAP = {
     "teleport_kubernetes_client_got_conn_duration_seconds": "kubernetes.client.got_conn_duration_seconds",
     "teleport_kubernetes_client_first_byte_response_duration_seconds": "kubernetes.client.first_byte_response_duration_seconds",  # noqa: E501
     "teleport_kubernetes_client_request_duration_seconds": "kubernetes.client.request_duration_seconds",
+    "teleport_kubernetes_server_in_flight_requests": "kubernetes.server.in_flight_requests",
+    "teleport_kubernetes_server_api_requests": "kubernetes.server.api_requests",
+    "teleport_kubernetes_server_request_duration_seconds": "kubernetes.server.request_duration_seconds",
+    "teleport_kubernetes_server_response_size_bytes": "kubernetes.server.response_size_bytes",
+    "teleport_kubernetes_server_exec_in_flight_sessions": "kubernetes.server.exec_in_flight_sessions",
+    "teleport_kubernetes_server_exec_sessions": "kubernetes.server.exec_sessions",
+    "teleport_kubernetes_server_portforward_in_flight_sessions": "kubernetes.server.portforward_in_flight_sessions",  # noqa: E501
+    "teleport_kubernetes_server_portforward_sessions": "kubernetes.server.portforward_sessions",
+    "teleport_kubernetes_server_join_in_flight_sessions": "kubernetes.server.join_in_flight_sessions",
+    "teleport_kubernetes_server_join_sessions": "kubernetes.server.join_sessions",
 }
 
 METRIC_MAP = {
