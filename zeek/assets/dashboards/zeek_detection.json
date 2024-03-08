@@ -263,12 +263,14 @@
                             "title": "File Mime Types",
                             "title_size": "16",
                             "title_align": "left",
+                            "time": {},
                             "requests": [
                                 {
                                     "formulas": [
                                         {
                                             "formula": "query1",
                                             "limit": {
+                                                "count": 500,
                                                 "order": "desc"
                                             }
                                         }
@@ -294,7 +296,7 @@
                                                 }
                                             ],
                                             "search": {
-                                                "query": "source:zeek service:intel $Host"
+                                                "query": "source:zeek service:intel @file_mime_type:* $Host"
                                             },
                                             "storage": "hot"
                                         }
