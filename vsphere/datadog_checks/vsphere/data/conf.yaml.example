@@ -130,6 +130,11 @@ instances:
     #
     # ssl_verify: true
 
+    ## @param ssl_cafile - string - optional
+    ## Set to the absolute file path of CA certificates in PEM format
+    #
+    # ssl_cafile: <FILE_PATH>
+
     ## @param ssl_capath - string - optional
     ## Set to the absolute file path of a directory containing CA certificates
     ## in PEM format
