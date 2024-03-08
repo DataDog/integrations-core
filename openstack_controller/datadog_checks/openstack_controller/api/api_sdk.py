@@ -232,8 +232,10 @@ class ApiSdk(Api):
 
     def get_load_balancer_loadbalancers(self, project_id):
         return [
-            load_balancer.to_dict(original_names=True)
-            for load_balancer in self.connection.load_balancer.load_balancers(project_id=project_id)
+            network.to_dict(original_names=True)
+            for network in self.call_paginated_api(
+                self.connection.load_balancer.load_balancers, project_id=project_id, limit=self.config.paginated_limit
+            )
         ]
 
     def get_load_balancer_loadbalancer_stats(self, loadbalancer_id):

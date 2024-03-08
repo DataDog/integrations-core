@@ -598,7 +598,7 @@ def connection_load_balancer(request, mock_responses):
     param = request.param if hasattr(request, 'param') and request.param is not None else {}
     http_error = param.get('http_error')
 
-    def load_balancers(project_id):
+    def load_balancers(project_id, limit=None):
         if http_error and 'load_balancers' in http_error and project_id in http_error['load_balancers']:
             raise requests.exceptions.HTTPError(response=http_error['load_balancers'][project_id])
         return [
