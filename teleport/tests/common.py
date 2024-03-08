@@ -226,3 +226,21 @@ KUBERNETES_METRICS = [
     "kubernetes.server.join_in_flight_sessions",
     "kubernetes.server.join_sessions.count",
 ]
+
+DATABASE_METRICS = [
+    "db.messages_from_client.count",
+    "db.messages_from_server.count",
+    "db.method_call_count.count",
+    "db.method_call_latency_seconds.bucket",
+    "db.method_call_latency_seconds.count",
+    "db.method_call_latency_seconds.sum",
+    "db.initialized_connections.count",
+    "db.active_connections_total",
+    "db.connection_durations_seconds.bucket",
+    "db.connection_durations_seconds.count",
+    "db.connection_durations_seconds.sum",
+    "db.connection_setup_time_seconds.bucket",
+    "db.connection_setup_time_seconds.count",
+    "db.connection_setup_time_seconds.sum",
+    "db.errors.count",
+]
