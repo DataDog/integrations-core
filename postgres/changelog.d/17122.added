@@ -1,0 +1,1 @@
+Propagate agent tags from `datadog.yaml` to postgres check
