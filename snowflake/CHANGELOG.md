@@ -6,7 +6,7 @@
 
 ***Added***:
 
-* bump snowflake ([#17099](https://github.com/DataDog/integrations-core/pull/17099))
+* Bump snowflake-connector-python to 3.7.1 ([#17099](https://github.com/DataDog/integrations-core/pull/17099))
 
 ## 5.3.0 / 2024-02-16
 
