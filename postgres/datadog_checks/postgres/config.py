@@ -2,9 +2,14 @@
 # All rights reserved
 # Licensed under Simplified BSD License (see LICENSE)
 # https://www.postgresql.org/docs/current/libpq-connect.html#LIBPQ-PARAMKEYWORDS
-from typing import Optional
+from typing import List, Optional
 
 from six import PY2, PY3, iteritems
+
+try:
+    import datadog_agent
+except ImportError:
+    from ..stubs import datadog_agent
 
 from datadog_checks.base import AgentCheck, ConfigurationError, is_affirmative
 from datadog_checks.base.utils.aws import rds_parse_tags_from_endpoint
@@ -61,7 +66,8 @@ class PostgresConfig:
                 '"dbname" parameter must be set OR autodiscovery must be enabled when using the "relations" parameter.'
             )
         self.max_connections = instance.get('max_connections', 30)
-        self.tags = self._build_tags(instance.get('tags', []))
+        self.agent_tags: List[str] = datadog_agent.get_config('tags') or []
+        self.tags = self._build_tags(instance.get('tags', []), self.agent_tags)
 
         ssl = instance.get('ssl', "allow")
         if ssl in SSL_MODES:
@@ -156,7 +162,7 @@ class PostgresConfig:
         self.log_unobfuscated_plans = is_affirmative(instance.get('log_unobfuscated_plans', False))
         self.database_instance_collection_interval = instance.get('database_instance_collection_interval', 1800)
 
-    def _build_tags(self, custom_tags):
+    def _build_tags(self, custom_tags, agent_tags):
         # Clean up tags in case there was a None entry in the instance
         # e.g. if the yaml contains tags: but no actual tags
         if custom_tags is None:
@@ -178,6 +184,8 @@ class PostgresConfig:
         rds_tags = rds_parse_tags_from_endpoint(self.host)
         if rds_tags:
             tags.extend(rds_tags)
+
+        tags.extend(agent_tags)
         return tags
 
     @staticmethod
