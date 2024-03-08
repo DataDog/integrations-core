@@ -109,18 +109,26 @@ jobs:
         rm -rf ~/miniconda3/miniconda.sh
         ~/miniconda3/bin/conda init bash
 
-    - name: Install docker
-      if: matrix.job.image == 'linux-aarch64'
-      run: |
-        curl -fsSL https://get.docker.com -o get-docker.sh
-        sudo sh get-docker.sh
+        # jq
+        wget https://github.com/jqlang/jq/releases/download/jq-1.7.1/jq-linux-arm64 -O ~/miniconda3/bin/jq
+        chmod +x ~/miniconda3/bin/jq
 
     - name: Install management dependencies
       run: |
         PATH=~/miniconda3/bin/:${PATH}
         pip install -r .builders/deps/host_dependencies.txt
 
+    - name: Install docker and log in (arm64)
+      if: matrix.job.image == 'linux-aarch64'
+      run: |
+        curl -fsSL https://get.docker.com -o get-docker.sh
+        sudo sh get-docker.sh
+
+        # Logging in with sudo is necessary to get authorized with the registry when running docker under sudo
+        echo ${{ secrets.GITHUB_TOKEN }} | sudo docker login --username ${{ github.actor }} --password-stdin ghcr.io
+
     - name: Log in to GitHub Packages
+      if: matrix.job.image != 'linux-aarch64'
       uses: docker/login-action@v3
       with:
         registry: ghcr.io
@@ -128,10 +136,18 @@ jobs:
         password: ${{ secrets.GITHUB_TOKEN }}
 
     - name: Build image and wheels (arm64)
-      if: matrix.job.image == 'linux-aarch64'
+      if: steps.changed-files.outputs.builders_any_changed == 'true' && matrix.job.image == 'linux-aarch64'
       run: |-
         sudo /home/runner/miniconda3/bin/python .builders/build.py ${{ matrix.job.image }} --python 3 ${{ env.OUT_DIR }}/py3
         sudo /home/runner/miniconda3/bin/python .builders/build.py ${{ matrix.job.image }} --python 2 ${{ env.OUT_DIR }}/py2
+
+    - name: Pull image and build wheels (arm64)
+      if: steps.changed-files.outputs.builders_any_changed != 'true' && matrix.job.image == 'linux-aarch64'
+      run: |-
+        PATH=~/miniconda3/bin/:${PATH}
+        digest=$(jq -r '.["${{ matrix.job.image }}"]' .deps/image_digests.json)
+        sudo /home/runner/miniconda3/bin/python .builders/build.py ${{ matrix.job.image }} --python 3 ${{ env.OUT_DIR }}/py3 --digest $digest
+        sudo /home/runner/miniconda3/bin/python .builders/build.py ${{ matrix.job.image }} --python 2 ${{ env.OUT_DIR }}/py2 --digest $digest
 
     - name: Build image and wheels
       if: steps.changed-files.outputs.builders_any_changed == 'true' && matrix.job.image != 'linux-aarch64'
