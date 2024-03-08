@@ -113,9 +113,10 @@ jobs:
         wget https://github.com/jqlang/jq/releases/download/jq-1.7.1/jq-linux-arm64 -O ~/miniconda3/bin/jq
         chmod +x ~/miniconda3/bin/jq
 
+        echo "PATH=~/miniconda3/bin/:${PATH}" >> "$GITHUB_ENV"
+
     - name: Install management dependencies
       run: |
-        PATH=~/miniconda3/bin/:${PATH}
         pip install -r .builders/deps/host_dependencies.txt
 
     - name: Install docker and log in (arm64)
@@ -144,7 +145,6 @@ jobs:
     - name: Pull image and build wheels (arm64)
       if: steps.changed-files.outputs.builders_any_changed != 'true' && matrix.job.image == 'linux-aarch64'
       run: |-
-        PATH=~/miniconda3/bin/:${PATH}
         digest=$(jq -r '.["${{ matrix.job.image }}"]' .deps/image_digests.json)
         sudo /home/runner/miniconda3/bin/python .builders/build.py ${{ matrix.job.image }} --python 3 ${{ env.OUT_DIR }}/py3 --digest $digest
         sudo /home/runner/miniconda3/bin/python .builders/build.py ${{ matrix.job.image }} --python 2 ${{ env.OUT_DIR }}/py2 --digest $digest
