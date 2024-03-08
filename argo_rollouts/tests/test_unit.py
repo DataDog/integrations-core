@@ -33,3 +33,14 @@ def test_check_mock_invalid_argo_rollouts_openmetrics(dd_run_check, aggregator, 
 
     aggregator.assert_service_check('argo_rollouts.openmetrics.health', ServiceCheck.CRITICAL)
     assert_service_checks(aggregator)
+
+
+def test_check_mock_labels_rename(dd_run_check, aggregator, mock_http_response):
+    mock_http_response(file_path=get_fixture_path('openmetrics.txt'))
+    check = ArgoRolloutsCheck('argo_rollouts', {}, [OM_MOCKED_INSTANCE])
+    relabeled_tags = ['argo_rollouts_namespace:default', 'argo_rollouts_name:rollouts-demo']
+    dd_run_check(check)
+
+    aggregator.assert_metric('argo_rollouts.rollout.phase')
+    for tag in relabeled_tags:
+        aggregator.assert_metric_has_tag('argo_rollouts.rollout.phase', tag)
