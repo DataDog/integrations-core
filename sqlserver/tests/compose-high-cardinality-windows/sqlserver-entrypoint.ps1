@@ -1,3 +1,4 @@
+Restart-Service -Name MSSQLSERVER
 echo "INFO: waiting for SQL Server to come up"
 (Get-Service MSSQLSERVER).WaitForStatus('Running')
 
