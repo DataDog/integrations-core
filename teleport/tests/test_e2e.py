@@ -6,13 +6,13 @@ import pytest
 
 from datadog_checks.teleport import TeleportCheck
 
-from .common import COMMON_METRICS
+from .common import COMMON_METRICS, INSTANCE
 
 pytestmark = pytest.mark.e2e
 
 CONFIG = {
     'init_config': {},
-    'instances': [{'diagnostic_url': "http://127.0.0.1:3000"}],
+    'instances': [ INSTANCE ],
 }
 
 
