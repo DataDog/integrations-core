@@ -195,3 +195,20 @@ AUTH_BACKEND_ETCD_METRICS = [
 SSH_METRICS = [
     "ssh.user.max_concurrent_sessions_hit.count",
 ]
+
+KUBERNETES_METRICS = [
+    "kubernetes.client.in_flight_requests",
+    "kubernetes.client.requests.count",
+    "kubernetes.client.tls_duration_seconds.bucket",
+    "kubernetes.client.tls_duration_seconds.count",
+    "kubernetes.client.tls_duration_seconds.sum",
+    "kubernetes.client.got_conn_duration_seconds.bucket",
+    "kubernetes.client.got_conn_duration_seconds.count",
+    "kubernetes.client.got_conn_duration_seconds.sum",
+    "kubernetes.client.first_byte_response_duration_seconds.bucket",
+    "kubernetes.client.first_byte_response_duration_seconds.count",
+    "kubernetes.client.first_byte_response_duration_seconds.sum",
+    "kubernetes.client.request_duration_seconds.bucket",
+    "kubernetes.client.request_duration_seconds.count",
+    "kubernetes.client.request_duration_seconds.sum",
+]
