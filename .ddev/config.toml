@@ -158,8 +158,6 @@ exclude = [
     'pyasn1',  # https://github.com/pyasn1/pyasn1/issues/52
     'pysnmp',  # Breaking snmp tests
     'aerospike',  # v8+ breaks agent build.
-    # We need pydantic 2.0.2 for the rpm x64 agent build (see https://github.com/DataDog/datadog-agent/pull/18303)
-    'pydantic',
     # https://github.com/DataDog/integrations-core/pull/16080
     'lxml',
     # We need to keep an `oracledb` version that uses the same version of odpi that is used in godror in the agent repo.
@@ -169,18 +167,8 @@ exclude = [
     # We're not ready to switch to v3 of the postgres library, see:
     # https://github.com/DataDog/integrations-core/pull/15859
     'psycopg2-binary',
-    # orjson ... requires rustc 1.65+, but the latest we can have (thanks CentOS 6) is 1.62.
-    # We get the following error when compiling orjson on Centos 6:
-    # error: package `associative-cache v2.0.0` cannot be built because it requires rustc 1.65 or newer,
-    # while the currently active rustc version is 1.62.0-nightly
-    # Here's orjson switching to rustc 1.65:
-    # https://github.com/ijl/orjson/commit/ce9bae876657ed377d761bf1234b040e2cc13d3c
-    'orjson',
     # 2.4.10 is broken on py2 and they did not yank the version
     'rethinkdb',
-    # cryptography>=42 requires rust>=1.63.0. We have rust 1.62 on centos 6
-    # https://github.com/DataDog/datadog-agent/pull/22268
-    'cryptography',
     # Brings urllib 2.0.7 which breaks `test_uds_request` in the base check
     # https://github.com/kubernetes-client/python/pull/2131
     'kubernetes',
