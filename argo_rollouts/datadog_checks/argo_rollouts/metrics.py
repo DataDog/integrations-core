@@ -69,6 +69,6 @@ METRIC_MAP = {
 }
 
 RENAME_LABELS_MAP = {
-    "name": "argo_rollout_name",
-    'namespace': 'argo_rollout_namespace',
+    "name": "argo_rollouts_name",
+    'namespace': 'argo_rollouts_namespace',
 }
