@@ -1,26 +1,26 @@
 {
     "listeners": [
         {
-            "id": "9da03992-77a4-4b65-b39a-0e106961f577",
-            "name": "listener-3",
+            "id": "243decd9-3370-4fc1-b163-80c4155bda04",
+            "name": "listener-2",
             "description": "",
             "provisioning_status": "ACTIVE",
             "operating_status": "ONLINE",
             "admin_state_up": true,
             "protocol": "HTTP",
-            "protocol_port": 81,
+            "protocol_port": 80,
             "connection_limit": -1,
             "default_tls_container_ref": null,
             "sni_container_refs": [],
             "project_id": "966af9e5e65f4744840da2a01e48d72a",
-            "default_pool_id": "6dccbec7-b404-47ed-821e-aa15d16a7b4c",
+            "default_pool_id": "43c6410e-c9f2-469f-9506-02dfc0e63585",
             "l7policies": [],
             "insert_headers": {},
-            "created_at": "2023-11-01T17:46:12",
-            "updated_at": "2023-11-01T17:48:00",
+            "created_at": "2023-11-01T17:56:52",
+            "updated_at": "2023-11-01T17:59:34",
             "loadbalancers": [
                 {
-                  "id": "4bb7bfb1-83c2-45e8-b0e1-ed3022329115"
+                  "id": "ae54877c-b186-4b90-b71c-d331b9e732bc"
                 }
             ],
             "timeout_client_data": 50000,
@@ -39,13 +39,6 @@
         }
     ],
     "listeners_links": [
-        {
-            "href": "http://127.0.0.1/load-balancer/v2/lbaas/listeners?limit=1&marker=9da03992-77a4-4b65-b39a-0e106961f577&page_reverse=True",
-            "rel": "previous"
-        },
-        {
-            "href": "http://127.0.0.1/load-balancer/v2/lbaas/listeners?limit=1&marker=9da03992-77a4-4b65-b39a-0e106961f577",
-            "rel": "next"
-        }
+
     ]
 }
