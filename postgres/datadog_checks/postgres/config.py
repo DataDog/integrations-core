@@ -2,7 +2,7 @@
 # All rights reserved
 # Licensed under Simplified BSD License (see LICENSE)
 # https://www.postgresql.org/docs/current/libpq-connect.html#LIBPQ-PARAMKEYWORDS
-from typing import List, Optional
+from typing import Optional
 
 from six import PY2, PY3, iteritems
 
@@ -31,7 +31,7 @@ class PostgresConfig:
     GAUGE = AgentCheck.gauge
     MONOTONIC = AgentCheck.monotonic_count
 
-    def __init__(self, instance):
+    def __init__(self, instance, init_config):
         self.host = instance.get('host', '')
         if not self.host:
             raise ConfigurationError('Specify a Postgres host to connect to.')
@@ -66,8 +66,11 @@ class PostgresConfig:
                 '"dbname" parameter must be set OR autodiscovery must be enabled when using the "relations" parameter.'
             )
         self.max_connections = instance.get('max_connections', 30)
-        self.agent_tags: List[str] = datadog_agent.get_config('tags') or []
-        self.tags = self._build_tags(instance.get('tags', []), self.agent_tags)
+        self.tags = self._build_tags(
+            custom_tags=instance.get('tags', []),
+            agent_tags=datadog_agent.get_config('tags') or [],
+            propagate_agent_tags=self._should_propagate_agent_tags(instance, init_config),
+        )
 
         ssl = instance.get('ssl', "allow")
         if ssl in SSL_MODES:
@@ -162,7 +165,7 @@ class PostgresConfig:
         self.log_unobfuscated_plans = is_affirmative(instance.get('log_unobfuscated_plans', False))
         self.database_instance_collection_interval = instance.get('database_instance_collection_interval', 1800)
 
-    def _build_tags(self, custom_tags, agent_tags):
+    def _build_tags(self, custom_tags, agent_tags, propagate_agent_tags=True):
         # Clean up tags in case there was a None entry in the instance
         # e.g. if the yaml contains tags: but no actual tags
         if custom_tags is None:
@@ -185,7 +188,8 @@ class PostgresConfig:
         if rds_tags:
             tags.extend(rds_tags)
 
-        tags.extend(agent_tags)
+        if propagate_agent_tags and agent_tags:
+            tags.extend(agent_tags)
         return tags
 
     @staticmethod
@@ -273,3 +277,20 @@ class PostgresConfig:
             return is_affirmative(collect_wal_metrics)
 
         return None
+
+    @staticmethod
+    def _should_propagate_agent_tags(instance, init_config) -> bool:
+        '''
+        return True if the agent tags should be propagated to the check
+        '''
+        instance_propagate_agent_tags = instance.get('propagate_agent_tags')
+        init_config_propagate_agent_tags = init_config.get('propagate_agent_tags')
+
+        if instance_propagate_agent_tags is not None:
+            # if the instance has explicitly set the value, return the boolean
+            return instance_propagate_agent_tags
+        if init_config_propagate_agent_tags is not None:
+            # if the init_config has explicitly set the value, return the boolean
+            return init_config_propagate_agent_tags
+        # if neither the instance nor the init_config has set the value, return True (opt-in)
+        return True
