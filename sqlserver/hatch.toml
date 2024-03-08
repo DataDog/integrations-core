@@ -15,7 +15,7 @@ setup = ["single", "ha"]
 python = ["3.11"]
 os = ["windows"]
 driver = ["SQLOLEDB", "SQLNCLI11", "MSOLEDBSQL", "odbc"]
-version = ["2016", "2017", "2019"]
+version = ["2017", "2019"]
 setup = ["single"]
 
 # The high cardinality environment is meant to be used for local dev/testing
