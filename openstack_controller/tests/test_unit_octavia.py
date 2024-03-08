@@ -1443,6 +1443,20 @@ def test_listeners_metrics(aggregator, check, dd_run_check):
             2,
             id='api rest high limit',
         ),
+        pytest.param(
+            configs.SDK,
+            1,
+            ApiType.SDK,
+            1,
+            id='api sdk small limit',
+        ),
+        pytest.param(
+            configs.SDK,
+            1000,
+            ApiType.SDK,
+            1,
+            id='api sdk high limit',
+        ),
     ],
 )
 @pytest.mark.usefixtures('mock_http_get', 'mock_http_post', 'openstack_connection')
@@ -1455,6 +1469,7 @@ def test_listeners_pagination(
     api_type,
     dd_run_check,
     mock_http_get,
+    connection_load_balancer,
 ):
     paginated_instance = copy.deepcopy(instance)
     paginated_instance['paginated_limit'] = paginated_limit
@@ -1470,6 +1485,20 @@ def test_listeners_pagination(
         assert (
             args_list.count(('http://127.0.0.1:9876/load-balancer/v2/lbaas/listeners', paginated_limit))
             == expected_api_calls
+        )
+    else:
+        assert connection_load_balancer.listeners.call_count == 2
+        assert (
+            connection_load_balancer.listeners.call_args_list.count(
+                mock.call(project_id='1e6e233e637d4d55a50a62b63398ad15', limit=paginated_limit)
+            )
+            == 1
+        )
+        assert (
+            connection_load_balancer.listeners.call_args_list.count(
+                mock.call(project_id='6e39099cccde4f809b003d9e0dd09304', limit=paginated_limit)
+            )
+            == 1
         )
 
     test_listeners_metrics(aggregator, openstack_controller_check(paginated_instance), dd_run_check)
