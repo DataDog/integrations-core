@@ -60,8 +60,8 @@ def dd_environment():
                 'ssl_verify': False,
                 'nova_microversion': '2.93',
                 'ironic_microversion': '1.80',
-                'openstack_cloud_name': 'test_cloud',
-                'openstack_config_file_path': '/home/openstack_controller/tests/config/openstack_config_updated.yaml',
+                '#openstack_cloud_name': 'test_cloud',
+                '#openstack_config_file_path': '/home/openstack_controller/tests/config/openstack_config_updated.yaml',
                 'endpoint_region_id': 'RegionOne',
                 'use_legacy_check_version': False,
             }
