@@ -2,6 +2,12 @@
 
 <!-- towncrier release notes start -->
 
+## 36.4.0 / 2024-03-08
+
+***Added***:
+
+* Revert "Bump psutil version to 5.9.7 (#16547)" ([#17112](https://github.com/DataDog/integrations-core/pull/17112))
+
 ## 36.3.0 / 2024-03-08
 
 ***Added***:
