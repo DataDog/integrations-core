@@ -2,6 +2,12 @@
 
 <!-- towncrier release notes start -->
 
+## 36.3.0 / 2024-03-08
+
+***Added***:
+
+* bump snowflake ([#17099](https://github.com/DataDog/integrations-core/pull/17099))
+
 ## 36.2.0 / 2024-03-07
 
 ***Security***:
