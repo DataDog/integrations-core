@@ -45,10 +45,11 @@ init_config:
 #
 instances:
 
-    ## @param prometheus_url - string - required
+  -
+    ## @param prometheus_url - string - optional - default: http://localhost:5000/metrics
     ## The URL where your application metrics are exposed by Prometheus.
     #
-  - prometheus_url: http://localhost:5000/metrics
+    # prometheus_url: http://localhost:5000/metrics
 
     ## @param prometheus_metrics_prefix - string - optional
     ## Removes a given <PREFIX> from exposed Prometheus metrics.
@@ -339,11 +340,6 @@ instances:
     ##     client_secret (required): The client secret.
     ##     basic_auth: Whether the provider expects credentials to be transmitted in
     ##                 an HTTP Basic Auth header. The default is: false
-    ##     options: Mapping of additional options to pass to the provider, such as the audience
-    ##              or the scope. For example:
-    ##                 options:
-    ##                   audience: https://example.com
-    ##                   scope: read:example
     ##
     ## The available writers are:
     ##
@@ -476,10 +472,10 @@ instances:
     #
     # read_timeout: <READ_TIMEOUT>
 
-    ## @param request_size - number - optional - default: 10
+    ## @param request_size - number - optional - default: 16
     ## The number of kibibytes (KiB) to read from streaming HTTP responses at a time.
     #
-    # request_size: 10
+    # request_size: 16
 
     ## @param log_requests - boolean - optional - default: false
     ## Whether or not to debug log the HTTP(S) requests made, including the method and URL.

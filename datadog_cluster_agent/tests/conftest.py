@@ -1,23 +1,28 @@
 # (C) Datadog, Inc. 2021-present
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
+
 import os
-from copy import deepcopy
 
 import mock
 import pytest
 
-INSTANCE = {'prometheus_url': 'http://localhost:5000/metrics'}
+URL = 'http://localhost:5000/metrics'
 
 
 @pytest.fixture(scope='session')
 def dd_environment():
-    yield deepcopy(INSTANCE)
+    yield instance_v1()
 
 
 @pytest.fixture
-def instance():
-    return deepcopy(INSTANCE)
+def instance_v1():
+    return {'prometheus_url': URL}
+
+
+@pytest.fixture
+def instance_v2():
+    return {'openmetrics_endpoint': URL}
 
 
 @pytest.fixture()

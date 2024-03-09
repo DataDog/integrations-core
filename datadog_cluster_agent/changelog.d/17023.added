@@ -1,0 +1,2 @@
+Allow datadog-cluster-agent integration to use OpenMetrics V2, defaulting to OpenMetrics V1.
+Activating usage of OpenMetrics V2 for datadog-cluster-agent is not backward compatible and existing monitors and dashboards need to be adapted.
