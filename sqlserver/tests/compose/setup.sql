@@ -15,6 +15,27 @@ CREATE USER fred FOR LOGIN fred;
 GRANT CONNECT ANY DATABASE to fred;
 GO
 
+
+-- create more dabases for test
+CREATE DATABASE  boris_test;
+GO
+USE boris_test;
+-- This table is pronounced "things" except we've replaced "th" with the greek lower case "theta" to ensure we
+-- correctly support unicode throughout the integration.
+CREATE USER bob FOR LOGIN bob;
+CREATE USER fred FOR LOGIN fred;
+GO
+
+-- create more dabases for test
+CREATE DATABASE  olga_test;
+GO
+USE olga_test;
+-- This table is pronounced "things" except we've replaced "th" with the greek lower case "theta" to ensure we
+-- correctly support unicode throughout the integration.
+CREATE USER bob FOR LOGIN bob;
+CREATE USER fred FOR LOGIN fred;
+GO
+
 -- Create test database for integration tests
 -- only bob and fred have read/write access to this database
 CREATE DATABASE datadog_test;

@@ -16,9 +16,11 @@ class SQLServerConfig:
         self.tags: list[str] = instance.get("tags", [])
         self.reported_hostname: str = instance.get('reported_hostname')
         self.autodiscovery: bool = is_affirmative(instance.get('database_autodiscovery'))
+        #self.autodiscovery: bool = True
         self.autodiscovery_include: list[str] = instance.get('autodiscovery_include', ['.*'])
         self.autodiscovery_exclude: list[str] = instance.get('autodiscovery_exclude', ['model'])
         self.autodiscovery_db_service_check: bool = is_affirmative(instance.get('autodiscovery_db_service_check', True))
+        #self.autodiscovery_db_service_check: bool = True
         self.min_collection_interval: int = instance.get('min_collection_interval', 15)
         self.autodiscovery_interval: int = instance.get('autodiscovery_interval', DEFAULT_AUTODISCOVERY_INTERVAL)
         self._include_patterns = self._compile_valid_patterns(self.autodiscovery_include)
