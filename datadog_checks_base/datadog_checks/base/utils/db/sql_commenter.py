@@ -46,7 +46,7 @@ def add_sql_comment(sql, prepand=True, **data):
         return sql
 
     if prepand:
-        sql = f'{comment} {sql}'
+        sql = '{} {}'.format(comment, sql)
     else:
         if sql[-1] == ';':
             sql = '{} {};'.format(sql[:-1], comment)
