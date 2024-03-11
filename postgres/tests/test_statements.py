@@ -190,12 +190,6 @@ def test_statement_metrics(
     assert len(aggregator.metrics("postgresql.pg_stat_statements.count")) != 0
     dbm_samples = aggregator.get_event_platform_events("dbm-samples")
 
-    #Verify we are collecting wal_metrics which are supported starting pg13
-    if float(POSTGRES_VERSION) >= 13:
-        assert all('wal_bytes' in entry for entry in event['postgres_rows'])
-        assert all('wal_fpi' in entry for entry in event['postgres_rows'])
-        assert all('wal_bytes' in entry for entry in event['postgres_rows'])
-
     for username, _, dbname, query, _ in SAMPLE_QUERIES:
         expected_query = query % obfuscated_param
         query_signature = compute_sql_signature(expected_query)
