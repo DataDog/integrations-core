@@ -348,17 +348,16 @@ def test_statement_metrics_cloud_metadata(
     for conn in connections.values():
         conn.close()
 
+
 @requires_over_13
-def test_wal_metrics(
-    aggregator, integration_check, dbm_instance
-):
+def test_wal_metrics(aggregator, integration_check, dbm_instance):
     dbm_instance['pg_stat_statements_view'] = "pg_stat_statements"
     # don't need samples for this test
     dbm_instance['query_samples'] = {'enabled': False}
     dbm_instance['query_activity'] = {'enabled': False}
     # very low collection interval for test purposes
     dbm_instance['query_metrics'] = {'enabled': True, 'run_sync': True, 'collection_interval': 0.1}
-    
+
     connections = {}
 
     def _run_queries():
@@ -382,7 +381,6 @@ def test_wal_metrics(
     assert all('wal_bytes' in entry for entry in event['postgres_rows'])
     assert all('wal_fpi' in entry for entry in event['postgres_rows'])
     assert all('wal_bytes' in entry for entry in event['postgres_rows'])
-
 
     for conn in connections.values():
         conn.close()
