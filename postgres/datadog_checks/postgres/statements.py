@@ -79,7 +79,7 @@ PG_STAT_STATEMENTS_METRICS_COLUMNS = (
             'min_plan_time',
             'max_plan_time',
             'mean_plan_time',
-            'stddev_plan_time'
+            'stddev_plan_time',
         }
     )
     | PG_STAT_STATEMENTS_TIMING_COLUMNS
