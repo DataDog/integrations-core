@@ -409,12 +409,13 @@ class ApiRest(Api):
 
     def get_load_balancer_listeners(self, project_id):
         params = {'project_id': project_id}
-        response = self.http.get(
+        return self.make_paginated_request(
             '{}/v2/lbaas/listeners'.format(self._catalog.get_endpoint_by_type(Component.Types.LOAD_BALANCER.value)),
+            'listeners',
+            'id',
+            next_signifier='listeners_links',
             params=params,
         )
-        response.raise_for_status()
-        return response.json().get('listeners', [])
 
     def get_load_balancer_listener_stats(self, listener_id):
         response = self.http.get(

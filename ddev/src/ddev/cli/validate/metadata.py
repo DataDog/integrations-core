@@ -66,13 +66,15 @@ def metadata(app: Application, integrations: tuple[str, ...], check_duplicates: 
     """
     Validate `metadata.csv` files
 
-    If `check` is specified, only the check will be validated, if check value is
-    'changed' will only apply to changed checks, an 'all' or empty `check` value
-    will validate all README files.
+    If `integrations` is specified, only the check will be validated, an 'all' or empty value will validate all
+    metadata.csv files, a `changed` value will validate changed integrations.
     """
     from ddev.cli.validate import metadata_utils
 
     validation_tracker = app.create_validation_tracker('Metrics validation')
+
+    if not integrations:
+        integrations = ('all',)
 
     excluded = set(app.repo.config.get('/overrides/validate/metrics/exclude', []))
     for current_check in app.repo.integrations.iter(integrations):

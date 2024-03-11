@@ -627,7 +627,7 @@ def connection_load_balancer(request, mock_responses):
             )
         )
 
-    def listeners(project_id):
+    def listeners(project_id, limit=None):
         if http_error and 'listeners' in http_error and project_id in http_error['listeners']:
             raise requests.exceptions.HTTPError(response=http_error['listeners'][project_id])
         return [
