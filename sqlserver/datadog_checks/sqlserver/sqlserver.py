@@ -2,6 +2,7 @@
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
 from __future__ import division
+
 import copy
 import functools
 import time
@@ -710,7 +711,7 @@ class SQLServer(AgentCheck):
         cfg_inst['hostname'] = self.resolved_hostname
 
         return cls(cfg_inst, base_name, metric_type, column, self.log)
-    
+
     def _check_connections_by_connecting_to_db(self):
         for db in self.databases:
             if db.name != self.connection.DEFAULT_DATABASE:
@@ -719,7 +720,7 @@ class SQLServer(AgentCheck):
                 except Exception as e:
                     # service_check errors on auto discovered databases should not abort the check
                     self.log.warning("failed service check for auto discovered database: %s", e)
-    
+
     def _check_connections_by_use_db(self):
         with self.connection.open_managed_default_connection():
             with self.connection.get_managed_cursor() as cursor:
@@ -729,15 +730,27 @@ class SQLServer(AgentCheck):
                     try:
                         cursor.execute(switch_db_statment)
                     except Exception as e:
-                        self.log.warning(check_err_message.format(db.name, str(e)))                            
-                        self.handle_service_check(AgentCheck.CRITICAL, self.connection.get_host_with_port(), db.name, check_err_message.format(db.name, str(e)), False)
+                        self.log.warning(check_err_message.format(db.name, str(e)))
+                        self.handle_service_check(
+                            AgentCheck.CRITICAL,
+                            self.connection.get_host_with_port(),
+                            db.name,
+                            check_err_message.format(db.name, str(e)),
+                            False,
+                        )
                         continue
-                    try:    
+                    try:
                         cursor.execute(DATABASE_SERVICE_CHECK_QUERY)
                         cursor.fetchall()
                     except Exception as e:
                         self.log.warning(check_err_message.format(db.name, str(e)))
-                        self.handle_service_check(AgentCheck.CRITICAL, self.connection.get_host_with_port(), db.name, check_err_message.format(db.name, str(e)), False)
+                        self.handle_service_check(
+                            AgentCheck.CRITICAL,
+                            self.connection.get_host_with_port(),
+                            db.name,
+                            check_err_message.format(db.name, str(e)),
+                            False,
+                        )
                         continue
                     self.handle_service_check(AgentCheck.OK, self.connection.get_host_with_port(), db.name, False)
 
