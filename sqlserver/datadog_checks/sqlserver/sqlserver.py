@@ -737,7 +737,6 @@ class SQLServer(AgentCheck):
                         cursor.execute(DATABASE_SERVICE_CHECK_QUERY)
                         cursor.fetchall()
                     except Exception as e:
-                        check_err_message = f"Database {db.name} connection service check failed: {str(e)}"
                         self.log.warning(check_err_message.format(db.name, str(e)))
                         self.handle_service_check(AgentCheck.CRITICAL, self.connection.get_host_with_port(), db.name, check_err_message.format(db.name, str(e)), False)
                         continue
@@ -746,7 +745,7 @@ class SQLServer(AgentCheck):
     def _check_database_conns(self):
         engine_edition = self.static_info_cache.get(STATIC_INFO_ENGINE_EDITION)
         if is_azure_sql_database(engine_edition):
-            #This method is more costefull but 
+            # On Azure, we can't use a less costly approach.
             self._check_connection_by_connecting_to_db()
         else:
             self._check_connections_by_use_db()
