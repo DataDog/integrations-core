@@ -9,7 +9,7 @@ from datadog_checks.cockroachdb.metrics import METRIC_MAP, OMV2_METRIC_MAP
 from datadog_checks.dev.testing import requires_py3
 from datadog_checks.dev.utils import assert_service_checks, get_metadata_metrics
 
-from .common import CHANGEFEED_METRICS, assert_metrics, get_fixture_path
+from .common import ADMISSION_METRICS, CHANGEFEED_METRICS, assert_metrics, get_fixture_path
 
 pytestmark = [requires_py3]
 
@@ -45,6 +45,7 @@ def test_fixture_metrics(aggregator, instance, dd_run_check, mock_http_response,
     'file, metrics',
     [
         pytest.param('changefeed_metrics.txt', CHANGEFEED_METRICS, id='changefeed'),
+        pytest.param('admission_metrics.txt', ADMISSION_METRICS, id='admission'),
     ],
 )
 def test_metrics(aggregator, instance, dd_run_check, mock_http_response, file, metrics):
@@ -54,7 +55,9 @@ def test_metrics(aggregator, instance, dd_run_check, mock_http_response, file, m
     tags = ['cluster:cockroachdb-cluster', 'endpoint:http://localhost:8080/_status/vars', 'node:1', 'node_id:1']
 
     for metric in metrics:
-        aggregator.assert_metric('cockroachdb.{}'.format(metric), tags=tags)
+        aggregator.assert_metric('cockroachdb.{}'.format(metric))
+        for tag in tags:
+            aggregator.assert_metric_has_tag('cockroachdb.{}'.format(metric), tag)
 
     aggregator.assert_service_check('cockroachdb.openmetrics.health', ServiceCheck.OK)
     aggregator.assert_all_metrics_covered()
@@ -65,3 +68,9 @@ def test_metrics(aggregator, instance, dd_run_check, mock_http_response, file, m
 
 def test_no_duplicate_metrics_in_maps():
     assert set(OMV2_METRIC_MAP.keys()).intersection(METRIC_MAP.keys()) == set()
+
+
+def test_build_timestamp_not_in_maps():
+    # handled by a custom transformer
+    assert 'build_timestamp' not in OMV2_METRIC_MAP
+    assert 'build_timestamp' not in METRIC_MAP
