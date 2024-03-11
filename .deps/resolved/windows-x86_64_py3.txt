@@ -20,7 +20,7 @@ clickhouse-cityhash @ https://storage.googleapis.com/dd-agent-int-deps/external/
 clickhouse-driver @ https://storage.googleapis.com/dd-agent-int-deps/external/clickhouse-driver/clickhouse_driver-0.2.7-cp311-cp311-win_amd64.whl#sha256=5166643683584bc53fcadda73c65f6a9077feb472f3d167ecef1a1a7024973aa
 cm-client @ https://storage.googleapis.com/dd-agent-int-deps/built/cm-client/cm_client-45.0.4-20243205_13031709645568-py3-none-win_amd64.whl#sha256=1743b32a221d2a0804b4e425ffd53468e8f1754da217fe1e7bd9ff7800fd90f8
 confluent-kafka @ https://storage.googleapis.com/dd-agent-int-deps/external/confluent-kafka/confluent_kafka-2.3.0-cp311-cp311-win_amd64.whl#sha256=1c6b29d57df99dabd45e67fd0aa46f17f195b057734ad84cf9cfdc2542855c10
-cryptography @ https://storage.googleapis.com/dd-agent-int-deps/external/cryptography/cryptography-41.0.7-cp37-abi3-win_amd64.whl#sha256=90452ba79b8788fa380dfb587cca692976ef4e757b194b093d845e8d99f612f2
+cryptography @ https://storage.googleapis.com/dd-agent-int-deps/external/cryptography/cryptography-42.0.5-cp39-abi3-win_amd64.whl#sha256=a011a644f6d7d03736214d38832e030d8268bcff4a41f728e6030325fea3e400
 ddsketch @ https://storage.googleapis.com/dd-agent-int-deps/external/ddsketch/ddsketch-2.0.4-py3-none-any.whl#sha256=3227a270fd686a29d3a7128f9352ccf852314410380fc11384356f1ae2a75938
 ddtrace @ https://storage.googleapis.com/dd-agent-int-deps/external/ddtrace/ddtrace-1.11.2-cp311-cp311-win_amd64.whl#sha256=d11e12ba60969d9b2bf068772f73d94ec884ee097a0008da71a37188f2a34554
 decorator @ https://storage.googleapis.com/dd-agent-int-deps/external/decorator/decorator-5.1.1-py3-none-any.whl#sha256=b8c3f85900b9dc423225913c5aace94729fe1fa9763b38939a95226f02d37186
@@ -30,7 +30,7 @@ dogpile-cache @ https://storage.googleapis.com/dd-agent-int-deps/external/dogpil
 envier @ https://storage.googleapis.com/dd-agent-int-deps/external/envier/envier-0.5.1-py3-none-any.whl#sha256=b45ef6051fea33d0c32a64e186bff2cfb446e2242d6781216c9bc9ce708c5909
 filelock @ https://storage.googleapis.com/dd-agent-int-deps/external/filelock/filelock-3.13.1-py3-none-any.whl#sha256=57dbda9b35157b05fb3e58ee91448612eb674172fab98ee235ccb0b5bee19a1c
 foundationdb @ https://storage.googleapis.com/dd-agent-int-deps/built/foundationdb/foundationdb-6.3.24-20243205_13031709645568-py3-none-win_amd64.whl#sha256=07e8e97e51dc9248d58d60d33076b82380135c31ab3727a33b885cea17e34bc7
-google-auth @ https://storage.googleapis.com/dd-agent-int-deps/external/google-auth/google_auth-2.28.1-py2.py3-none-any.whl#sha256=25141e2d7a14bfcba945f5e9827f98092716e99482562f15306e5b026e21aa72
+google-auth @ https://storage.googleapis.com/dd-agent-int-deps/external/google-auth/google_auth-2.28.2-py2.py3-none-any.whl#sha256=9fd67bbcd40f16d9d42f950228e9cf02a2ded4ae49198b27432d0cded5a74c38
 idna @ https://storage.googleapis.com/dd-agent-int-deps/external/idna/idna-3.6-py3-none-any.whl#sha256=c05567e9c24a6b9faaa835c4821bad0590fbb9d5779e7caa6e1cc4978e7eb24f
 importlib-metadata @ https://storage.googleapis.com/dd-agent-int-deps/external/importlib-metadata/importlib_metadata-6.11.0-py3-none-any.whl#sha256=f0afba6205ad8f8947c7d338b5342d5db2afbfd82f9cbef7879a9539cc12eb9b
 in-toto @ https://storage.googleapis.com/dd-agent-int-deps/external/in-toto/in_toto-2.0.0-py3-none-any.whl#sha256=eaf71733cdd5b2309b58b24169c13c24701da72baa43b7432d1dffc308e7bf32
@@ -56,7 +56,7 @@ oauthlib @ https://storage.googleapis.com/dd-agent-int-deps/external/oauthlib/oa
 openstacksdk @ https://storage.googleapis.com/dd-agent-int-deps/external/openstacksdk/openstacksdk-3.0.0-py3-none-any.whl#sha256=f188e81f881421bdff8d098ce432bf66c78a5a64f1349129c74b5144db9dd27c
 opentelemetry-api @ https://storage.googleapis.com/dd-agent-int-deps/external/opentelemetry-api/opentelemetry_api-1.23.0-py3-none-any.whl#sha256=cc03ea4025353048aadb9c64919099663664672ea1c6be6ddd8fee8e4cd5e774
 oracledb @ https://storage.googleapis.com/dd-agent-int-deps/external/oracledb/oracledb-1.3.2-cp311-cp311-win_amd64.whl#sha256=cedd48e7d107884d4a19c9ad449b3c3cb3b3e4d67a6eddacb966b1370cc1f35e
-orjson @ https://storage.googleapis.com/dd-agent-int-deps/external/orjson/orjson-3.9.7-cp311-none-win_amd64.whl#sha256=9d62c583b5110e6a5cf5169ab616aa4ec71f2c0c30f833306f9e378cf51b6c86
+orjson @ https://storage.googleapis.com/dd-agent-int-deps/external/orjson/orjson-3.9.15-cp311-none-win_amd64.whl#sha256=b3d336ed75d17c7b1af233a6561cf421dee41d9204aa3cfcc6c9c65cd5bb69a8
 os-service-types @ https://storage.googleapis.com/dd-agent-int-deps/external/os-service-types/os_service_types-1.7.0-py2.py3-none-any.whl#sha256=0505c72205690910077fb72b88f2a1f07533c8d39f2fe75b29583481764965d6
 packaging @ https://storage.googleapis.com/dd-agent-int-deps/external/packaging/packaging-23.2-py3-none-any.whl#sha256=8c491190033a9af7e1d931d0b5dacc2ef47509b34dd0de67ed209b5203fc88c7
 paramiko @ https://storage.googleapis.com/dd-agent-int-deps/external/paramiko/paramiko-3.4.0-py3-none-any.whl#sha256=43f0b51115a896f9c00f59618023484cb3a14b98bbceab43394a39c6739b7ee7
@@ -67,7 +67,7 @@ ply @ https://storage.googleapis.com/dd-agent-int-deps/external/ply/ply-3.11-py2
 portalocker @ https://storage.googleapis.com/dd-agent-int-deps/external/portalocker/portalocker-2.8.2-py3-none-any.whl#sha256=cfb86acc09b9aa7c3b43594e19be1345b9d16af3feb08bf92f23d4dce513a28e
 prometheus-client @ https://storage.googleapis.com/dd-agent-int-deps/external/prometheus-client/prometheus_client-0.20.0-py3-none-any.whl#sha256=cde524a85bce83ca359cc837f28b8c0db5cac7aa653a588fd7e84ba061c329e7
 protobuf @ https://storage.googleapis.com/dd-agent-int-deps/external/protobuf/protobuf-4.25.3-py3-none-any.whl#sha256=f0700d54bcf45424477e46a9f0944155b46fb0639d69728739c0e47bab83f2b9
-psutil @ https://storage.googleapis.com/dd-agent-int-deps/external/psutil/psutil-5.9.7-cp37-abi3-win_amd64.whl#sha256=f37f87e4d73b79e6c5e749440c3113b81d1ee7d26f21c19c47371ddea834f414
+psutil @ https://storage.googleapis.com/dd-agent-int-deps/built/psutil/psutil-5.9.0-20240311171402-cp311-cp311-win_amd64.whl#sha256=6d9a3a24a7e8e57e27e898f238a157a0360102905372ab27f7b2ce5ec3ae6710
 psycopg2-binary @ https://storage.googleapis.com/dd-agent-int-deps/external/psycopg2-binary/psycopg2_binary-2.9.9-cp311-cp311-win_amd64.whl#sha256=b76bedd166805480ab069612119ea636f5ab8f8771e640ae103e05a4aae3e417
 pyasn1 @ https://storage.googleapis.com/dd-agent-int-deps/external/pyasn1/pyasn1-0.4.6-py2.py3-none-any.whl#sha256=3bb81821d47b17146049e7574ab4bf1e315eb7aead30efe5d6a9ca422c9710be
 pyasn1-modules @ https://storage.googleapis.com/dd-agent-int-deps/external/pyasn1-modules/pyasn1_modules-0.3.0-py2.py3-none-any.whl#sha256=d3ccd6ed470d9ffbc716be08bd90efbd44d0734bc9303818f7336070984a162d
@@ -81,7 +81,7 @@ pymqi @ https://storage.googleapis.com/dd-agent-int-deps/built/pymqi/pymqi-1.12.
 pymysql @ https://storage.googleapis.com/dd-agent-int-deps/external/pymysql/PyMySQL-1.1.0-py3-none-any.whl#sha256=8969ec6d763c856f7073c4c64662882675702efcb114b4bcbb955aea3a069fa7
 pynacl @ https://storage.googleapis.com/dd-agent-int-deps/external/pynacl/PyNaCl-1.5.0-cp36-abi3-win_amd64.whl#sha256=20f42270d27e1b6a29f54032090b972d97f0a1b0948cc52392041ef7831fee93
 pyodbc @ https://storage.googleapis.com/dd-agent-int-deps/external/pyodbc/pyodbc-5.1.0-cp311-cp311-win_amd64.whl#sha256=a1bd14633e91b7a9814f4fd944c9ebb89fb7f1fd4710c4e3999b5ef041536347
-pyopenssl @ https://storage.googleapis.com/dd-agent-int-deps/external/pyopenssl/pyOpenSSL-24.0.0-py3-none-any.whl#sha256=ba07553fb6fd6a7a2259adb9b84e12302a9a8a75c44046e8bb5d3e5ee887e3c3
+pyopenssl @ https://storage.googleapis.com/dd-agent-int-deps/external/pyopenssl/pyOpenSSL-24.1.0-py3-none-any.whl#sha256=17ed5be5936449c5418d1cd269a1a9e9081bc54c17aed272b45856a3d3dc86ad
 pysmi @ https://storage.googleapis.com/dd-agent-int-deps/external/pysmi/pysmi-0.3.4-py2.py3-none-any.whl#sha256=2ec6ebd41aaef562695e7d0058763c6e1e8c1fbf8710804c11ef3a857fc9cad7
 pysnmp @ https://storage.googleapis.com/dd-agent-int-deps/external/pysnmp/pysnmp-4.4.9-py2.py3-none-any.whl#sha256=128a4832ce170213a59b82e7eeb886fc07d4b2e6eb638db8049af03f1014b0f8
 pysnmp-mibs @ https://storage.googleapis.com/dd-agent-int-deps/external/pysnmp-mibs/pysnmp_mibs-0.1.6-py2.py3-none-any.whl#sha256=5e153ebe8e767c07940cea435f866c623ff6b2376155c7da75085b08d3774d48
