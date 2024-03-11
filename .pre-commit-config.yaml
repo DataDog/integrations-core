@@ -21,3 +21,9 @@ repos:
       language: system
       files: '\.github/workflows/config/labeler\.yml'
       pass_filenames: false
+    - id: metadata
+      name: Validate metadata files
+      entry: ddev validate metadata changed
+      language: system
+      files: '.*/metadata\.csv'
+      pass_filenames: false
