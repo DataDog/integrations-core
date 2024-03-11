@@ -421,6 +421,17 @@ pipeline:
       sources:
         - ts
     - type: pipeline
+      name: Datetime Remapper for files_red logs
+      enabled: true
+      filter:
+        query: "@_path:files_red "
+      processors:
+        - type: date-remapper
+          name: Define `_write_ts` as the official date of the log
+          enabled: true
+          sources:
+            - _write_ts
+    - type: pipeline
       name: Processing for conn logs
       enabled: true
       filter:
