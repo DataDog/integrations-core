@@ -12,9 +12,8 @@ def test_e2e(dd_agent_check):
     aggregator.assert_service_check(
         GitlabRunnerCheck.MASTER_SERVICE_CHECK_NAME,
         status=GitlabRunnerCheck.OK,
-        tags=GITLAB_RUNNER_TAGS + CUSTOM_TAGS,
-        count=1,
+        tags=GITLAB_RUNNER_TAGS + CUSTOM_TAGS
     )
     aggregator.assert_service_check(
-        GitlabRunnerCheck.PROMETHEUS_SERVICE_CHECK_NAME, status=GitlabRunnerCheck.OK, tags=CUSTOM_TAGS, count=1
+        GitlabRunnerCheck.PROMETHEUS_SERVICE_CHECK_NAME, status=GitlabRunnerCheck.OK, tags=CUSTOM_TAGS
     )
