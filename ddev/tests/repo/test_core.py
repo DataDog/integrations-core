@@ -115,6 +115,15 @@ class TestIntegrationsIteration:
         assert [integration.name for integration in integrations] == selection
         assert list(iter_method(selection)) == integrations
 
+    def test_integrations_iteration_selection_changed(self, repository):
+        repo = Repository(repository.path.name, str(repository.path))
+
+        (repo.path / 'tekton' / 'foo.txt').touch()
+        selection = ['changed']
+        integrations = list(repo.integrations.iter(selection))
+
+        assert [integration.name for integration in integrations] == ["tekton"]
+
     @pytest.mark.parametrize(
         "method_name, integration_filter",
         iter_test_params,
