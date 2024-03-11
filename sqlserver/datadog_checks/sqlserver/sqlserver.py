@@ -2,7 +2,7 @@
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
 from __future__ import division
-
+#import pdb
 import copy
 import functools
 import time
@@ -45,6 +45,7 @@ from datadog_checks.sqlserver.const import (
     DATABASE_MASTER_FILES,
     DATABASE_METRICS,
     DATABASE_SERVICE_CHECK_NAME,
+    DATABASE_SERVICE_CHECK_QUERY,
     DBM_MIGRATED_METRICS,
     DEFAULT_INDEX_USAGE_STATS_INTERVAL,
     ENGINE_EDITION_AZURE_MANAGED_INSTANCE,
@@ -711,6 +712,47 @@ class SQLServer(AgentCheck):
 
         return cls(cfg_inst, base_name, metric_type, column, self.log)
 
+    def _check_database_conns(self):
+        engine_edition = self.static_info_cache.get(STATIC_INFO_ENGINE_EDITION)
+        if is_azure_sql_database(engine_edition):
+            for db in self.databases:
+                if db.name != self.connection.DEFAULT_DATABASE:
+                    try:
+                        self.connection.check_database_conns(db.name)
+                    except Exception as e:
+                        # service_check errors on auto discovered databases should not abort the check
+                        self.log.warning("failed service check for auto discovered database: %s", e)
+        else:
+            with self.connection.open_managed_default_connection():
+                with self.connection.get_managed_cursor() as cursor:
+                    for db in self.databases:
+                        switch_db_statment = "USE {};".format(db.name)
+                        try: 
+                            #pdb.set_trace()
+                            cursor.execute(switch_db_statment)
+                        except Exception as e:
+                            self.log.error("Couldn't execute USE {} statement the exception is '{}'".format(db.name, str(e)))
+                            print(e)
+                            continue
+                            # if somehow we are ended up on some cloud where we cannot do switch what should we log?
+                            # or it can be a DB problem already rather than config 
+                        
+                            #test on windows will we get an exception or not ? Or it will faile silently 
+                        try:
+                            #pdb.set_trace()    
+                            cursor.execute(DATABASE_SERVICE_CHECK_QUERY)
+                            cursor.fetchall()
+                        except Exception as e:
+                            check_err_message = f"Database {db.name} connection service check failed: {str(e)}"
+                            self.log.warning(check_err_message)
+                            self.handle_service_check(AgentCheck.CRITICAL, self.connection.get_host_with_port(), db.name, check_err_message, False)
+                            #debug if this continue will work
+                            continue
+                            #inform here that it didn't work with a different error msg
+                        self.handle_service_check(AgentCheck.OK, self.connection.get_host_with_port(), db.name, False)
+        #we are not returning to master DB as connection is closed, check that it works.
+
+
     def check(self, _):
         if self.do_check:
             # configure custom queries for the check
@@ -728,13 +770,7 @@ class SQLServer(AgentCheck):
             else:
                 self.collect_metrics()
             if self._config.autodiscovery and self._config.autodiscovery_db_service_check:
-                for db in self.databases:
-                    if db.name != self.connection.DEFAULT_DATABASE:
-                        try:
-                            self.connection.check_database_conns(db.name)
-                        except Exception as e:
-                            # service_check errors on auto discovered databases should not abort the check
-                            self.log.warning("failed service check for auto discovered database: %s", e)
+                self._check_database_conns()
             self._send_database_instance_metadata()
             if self._config.dbm_enabled:
                 self.statement_metrics.run_job_loop(self.tags)
