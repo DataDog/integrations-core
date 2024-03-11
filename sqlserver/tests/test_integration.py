@@ -3,7 +3,6 @@
 # Licensed under a 3-clause BSD style license (see LICENSE)
 import logging
 from copy import copy, deepcopy
-
 import pytest
 
 from datadog_checks.sqlserver import SQLServer
