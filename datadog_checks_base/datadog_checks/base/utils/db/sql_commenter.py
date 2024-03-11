@@ -1,9 +1,6 @@
 # (C) Datadog, Inc. 2024-present
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
-from six.moves.urllib.parse import quote
-
-
 def generate_sql_comment(**data):
     '''
     Generate a SQL comment from a dictionary of key-value pairs.
@@ -15,9 +12,7 @@ def generate_sql_comment(**data):
     if not data:
         return ''
 
-    comment = ','.join(
-        "{}='{}'".format(quote(key), quote(value)) for key, value in data.items() if value is not None and value != ''
-    )
+    comment = ','.join("{}='{}'".format(key, value) for key, value in data.items() if value is not None and value != '')
 
     return '/* {} */'.format(comment)
 
