@@ -415,11 +415,6 @@ pipeline:
       enabled: true
       sources:
         - _path
-    - type: date-remapper
-      name: Define `ts` as the official date of the log
-      enabled: true
-      sources:
-        - ts
     - type: pipeline
       name: Datetime Remapper for other than files_red logs
       enabled: true
