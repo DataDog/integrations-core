@@ -8,11 +8,10 @@ from .metrics import AUTH_METRICS_MAP, COMMON_METRICS_MAP, PROXY_METRICS_MAP
 
 METRIC_MAP = {**COMMON_METRICS_MAP, **PROXY_METRICS_MAP, **AUTH_METRICS_MAP}
 
-DEFAULT_DIAG_PORT = 3000
-
 
 class TeleportCheck(OpenMetricsBaseCheckV2):
     __NAMESPACE__ = 'teleport'
+    DEFAULT_DIAG_PORT = 3000
 
     def __init__(self, name, init_config, instances):
         super().__init__(name, init_config, instances)
@@ -30,7 +29,7 @@ class TeleportCheck(OpenMetricsBaseCheckV2):
 
     def _parse_config(self):
         self.teleport_url = self.instance.get("teleport_url")
-        self.diag_port = self.instance.get("diag_port", DEFAULT_DIAG_PORT)
+        self.diag_port = self.instance.get("diag_port", self.DEFAULT_DIAG_PORT)
         if self.teleport_url:
             self.diag_addr = "{}:{}".format(self.teleport_url, self.diag_port)
             self.instance.setdefault("openmetrics_endpoint", "{}/metrics".format(self.diag_addr))
