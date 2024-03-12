@@ -428,12 +428,13 @@ class ApiRest(Api):
 
     def get_load_balancer_pools(self, project_id):
         params = {'project_id': project_id}
-        response = self.http.get(
+        return self.make_paginated_request(
             '{}/v2/lbaas/pools'.format(self._catalog.get_endpoint_by_type(Component.Types.LOAD_BALANCER.value)),
+            'pools',
+            'id',
+            next_signifier='pools_links',
             params=params,
         )
-        response.raise_for_status()
-        return response.json().get('pools', [])
 
     def get_load_balancer_pool_members(self, pool_id, project_id):
         params = {'project_id': project_id}

@@ -254,7 +254,10 @@ class ApiSdk(Api):
 
     def get_load_balancer_pools(self, project_id):
         return [
-            pool.to_dict(original_names=True) for pool in self.connection.load_balancer.pools(project_id=project_id)
+            pool.to_dict(original_names=True)
+            for pool in self.call_paginated_api(
+                self.connection.load_balancer.pools, project_id=project_id, limit=self.config.paginated_limit
+            )
         ]
 
     def get_load_balancer_pool_members(self, pool_id, project_id):

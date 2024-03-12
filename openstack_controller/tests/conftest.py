@@ -652,7 +652,7 @@ def connection_load_balancer(request, mock_responses):
             )
         )
 
-    def pools(project_id):
+    def pools(project_id, limit=None):
         if http_error and 'pools' in http_error and project_id in http_error['pools']:
             raise requests.exceptions.HTTPError(response=http_error['pools'][project_id])
         return [
