@@ -280,7 +280,9 @@ class ApiSdk(Api):
     def get_load_balancer_amphorae(self, project_id):
         return [
             amphora.to_dict(original_names=True)
-            for amphora in self.connection.load_balancer.amphorae(project_id=project_id)
+            for amphora in self.call_paginated_api(
+                self.connection.load_balancer.amphorae, project_id=project_id, limit=self.config.paginated_limit
+            )
         ]
 
     def get_load_balancer_amphora_stats(self, amphora_id):
