@@ -16,6 +16,7 @@ from datadog_checks.base.utils.db.sql import compute_sql_signature
 from datadog_checks.base.utils.db.utils import DBMAsyncJob, obfuscate_sql_with_metadata
 from datadog_checks.base.utils.serialization import json
 from datadog_checks.base.utils.tracking import tracked_method
+from datadog_checks.mysql.cursor import CommenterDictCursor
 
 from .util import DatabaseConfigurationError, connect_with_autocommit, get_truncation_state, warning_with_tags
 
@@ -165,7 +166,7 @@ class MySQLActivity(DBMAsyncJob):
         # type: () -> None
         # do not emit any dd.internal metrics for DBM specific check code
         tags = [t for t in self._tags if not t.startswith('dd.internal')]
-        with closing(self._get_db_connection().cursor(pymysql.cursors.DictCursor)) as cursor:
+        with closing(self._get_db_connection().cursor(CommenterDictCursor)) as cursor:
             rows = self._get_activity(cursor)
             rows = self._normalize_rows(rows)
             event = self._create_activity_event(rows, tags)
