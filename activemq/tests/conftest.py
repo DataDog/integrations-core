@@ -55,7 +55,6 @@ def populate_server():
                 "arguments": ["activemq.notifications", "ANYCAST", queue, None, True, -1, False, True],
             }
             s.post(ARTEMIS_URL + '/exec', json=body)
-
     else:
         for queue in TEST_QUEUES:
             url = '{}/{}?type=queue'.format(ACTIVEMQ_URL, queue)

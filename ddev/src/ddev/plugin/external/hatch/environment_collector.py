@@ -100,7 +100,8 @@ class DatadogChecksEnvironmentCollector(EnvironmentCollectorInterface):
                 env_config.setdefault('features', ['deps'])
 
             base_package_features = env_config.get('base-package-features', self.config.get('base-package-features'))
-            install_commands = []
+            install_commands = ["python -m pip cache dir"]
+            install_commands.append("echo $PIP_CACHE_DIR")
             if install_command := self.base_package_install_command(base_package_features):
                 install_commands.append(install_command)
 
