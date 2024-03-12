@@ -1,0 +1,571 @@
+# HELP tekton_pipelines_controller_client_latency How long Kubernetes API requests take
+# TYPE tekton_pipelines_controller_client_latency histogram
+tekton_pipelines_controller_client_latency_bucket{name="",le="1e-05"} 0
+tekton_pipelines_controller_client_latency_bucket{name="",le="0.0001"} 0
+tekton_pipelines_controller_client_latency_bucket{name="",le="0.001"} 12
+tekton_pipelines_controller_client_latency_bucket{name="",le="0.01"} 164
+tekton_pipelines_controller_client_latency_bucket{name="",le="0.1"} 218
+tekton_pipelines_controller_client_latency_bucket{name="",le="1"} 218
+tekton_pipelines_controller_client_latency_bucket{name="",le="10"} 218
+tekton_pipelines_controller_client_latency_bucket{name="",le="100"} 218
+tekton_pipelines_controller_client_latency_bucket{name="",le="+Inf"} 218
+tekton_pipelines_controller_client_latency_sum{name=""} 1.4035505760000007
+tekton_pipelines_controller_client_latency_count{name=""} 218
+# HELP tekton_pipelines_controller_client_results Total number of API requests (broken down by status code)
+# TYPE tekton_pipelines_controller_client_results counter
+tekton_pipelines_controller_client_results{name=""} 232
+# HELP tekton_pipelines_controller_go_alloc The number of bytes of allocated heap objects.
+# TYPE tekton_pipelines_controller_go_alloc gauge
+tekton_pipelines_controller_go_alloc{name=""} 1.0219264e+07
+# HELP tekton_pipelines_controller_go_bucket_hash_sys The number of bytes of memory in profiling bucket hash tables.
+# TYPE tekton_pipelines_controller_go_bucket_hash_sys gauge
+tekton_pipelines_controller_go_bucket_hash_sys{name=""} 1.468483e+06
+# HELP tekton_pipelines_controller_go_frees The cumulative count of heap objects freed.
+# TYPE tekton_pipelines_controller_go_frees gauge
+tekton_pipelines_controller_go_frees{name=""} 350028
+# HELP tekton_pipelines_controller_go_gc_cpu_fraction The fraction of this program's available CPU time used by the GC since the program started.
+# TYPE tekton_pipelines_controller_go_gc_cpu_fraction gauge
+tekton_pipelines_controller_go_gc_cpu_fraction{name=""} 2.724419637439758e-05
+# HELP tekton_pipelines_controller_go_gc_sys The number of bytes of memory in garbage collection metadata.
+# TYPE tekton_pipelines_controller_go_gc_sys gauge
+tekton_pipelines_controller_go_gc_sys{name=""} 5.86324e+06
+# HELP tekton_pipelines_controller_go_heap_alloc The number of bytes of allocated heap objects.
+# TYPE tekton_pipelines_controller_go_heap_alloc gauge
+tekton_pipelines_controller_go_heap_alloc{name=""} 1.0219264e+07
+# HELP tekton_pipelines_controller_go_heap_idle The number of bytes in idle (unused) spans.
+# TYPE tekton_pipelines_controller_go_heap_idle gauge
+tekton_pipelines_controller_go_heap_idle{name=""} 8.92928e+06
+# HELP tekton_pipelines_controller_go_heap_in_use The number of bytes in in-use spans.
+# TYPE tekton_pipelines_controller_go_heap_in_use gauge
+tekton_pipelines_controller_go_heap_in_use{name=""} 1.4860288e+07
+# HELP tekton_pipelines_controller_go_heap_objects The number of allocated heap objects.
+# TYPE tekton_pipelines_controller_go_heap_objects gauge
+tekton_pipelines_controller_go_heap_objects{name=""} 42778
+# HELP tekton_pipelines_controller_go_heap_released The number of bytes of physical memory returned to the OS.
+# TYPE tekton_pipelines_controller_go_heap_released gauge
+tekton_pipelines_controller_go_heap_released{name=""} 2.965504e+06
+# HELP tekton_pipelines_controller_go_heap_sys The number of bytes of heap memory obtained from the OS.
+# TYPE tekton_pipelines_controller_go_heap_sys gauge
+tekton_pipelines_controller_go_heap_sys{name=""} 2.3789568e+07
+# HELP tekton_pipelines_controller_go_last_gc The time the last garbage collection finished, as nanoseconds since 1970 (the UNIX epoch).
+# TYPE tekton_pipelines_controller_go_last_gc gauge
+tekton_pipelines_controller_go_last_gc{name=""} 1.7083570192795546e+18
+# HELP tekton_pipelines_controller_go_lookups The number of pointer lookups performed by the runtime.
+# TYPE tekton_pipelines_controller_go_lookups gauge
+tekton_pipelines_controller_go_lookups{name=""} 0
+# HELP tekton_pipelines_controller_go_mallocs The cumulative count of heap objects allocated.
+# TYPE tekton_pipelines_controller_go_mallocs gauge
+tekton_pipelines_controller_go_mallocs{name=""} 392806
+# HELP tekton_pipelines_controller_go_mcache_in_use The number of bytes of allocated mcache structures.
+# TYPE tekton_pipelines_controller_go_mcache_in_use gauge
+tekton_pipelines_controller_go_mcache_in_use{name=""} 8400
+# HELP tekton_pipelines_controller_go_mcache_sys The number of bytes of memory obtained from the OS for mcache structures.
+# TYPE tekton_pipelines_controller_go_mcache_sys gauge
+tekton_pipelines_controller_go_mcache_sys{name=""} 15600
+# HELP tekton_pipelines_controller_go_mspan_in_use The number of bytes of allocated mspan structures.
+# TYPE tekton_pipelines_controller_go_mspan_in_use gauge
+tekton_pipelines_controller_go_mspan_in_use{name=""} 203904
+# HELP tekton_pipelines_controller_go_mspan_sys The number of bytes of memory obtained from the OS for mspan structures.
+# TYPE tekton_pipelines_controller_go_mspan_sys gauge
+tekton_pipelines_controller_go_mspan_sys{name=""} 260352
+# HELP tekton_pipelines_controller_go_next_gc The target heap size of the next GC cycle.
+# TYPE tekton_pipelines_controller_go_next_gc gauge
+tekton_pipelines_controller_go_next_gc{name=""} 2.020232e+07
+# HELP tekton_pipelines_controller_go_num_forced_gc The number of GC cycles that were forced by the application calling the GC function.
+# TYPE tekton_pipelines_controller_go_num_forced_gc gauge
+tekton_pipelines_controller_go_num_forced_gc{name=""} 0
+# HELP tekton_pipelines_controller_go_num_gc The number of completed GC cycles.
+# TYPE tekton_pipelines_controller_go_num_gc gauge
+tekton_pipelines_controller_go_num_gc{name=""} 9
+# HELP tekton_pipelines_controller_go_other_sys The number of bytes of memory in miscellaneous off-heap runtime allocations.
+# TYPE tekton_pipelines_controller_go_other_sys gauge
+tekton_pipelines_controller_go_other_sys{name=""} 1.400717e+06
+# HELP tekton_pipelines_controller_go_stack_in_use The number of bytes in stack spans.
+# TYPE tekton_pipelines_controller_go_stack_in_use gauge
+tekton_pipelines_controller_go_stack_in_use{name=""} 1.376256e+06
+# HELP tekton_pipelines_controller_go_stack_sys The number of bytes of stack memory obtained from the OS.
+# TYPE tekton_pipelines_controller_go_stack_sys gauge
+tekton_pipelines_controller_go_stack_sys{name=""} 1.376256e+06
+# HELP tekton_pipelines_controller_go_sys The total bytes of memory obtained from the OS.
+# TYPE tekton_pipelines_controller_go_sys gauge
+tekton_pipelines_controller_go_sys{name=""} 3.4174216e+07
+# HELP tekton_pipelines_controller_go_total_alloc The cumulative bytes allocated for heap objects.
+# TYPE tekton_pipelines_controller_go_total_alloc gauge
+tekton_pipelines_controller_go_total_alloc{name=""} 3.871716e+07
+# HELP tekton_pipelines_controller_go_total_gc_pause_ns The cumulative nanoseconds in GC stop-the-world pauses since the program started.
+# TYPE tekton_pipelines_controller_go_total_gc_pause_ns gauge
+tekton_pipelines_controller_go_total_gc_pause_ns{name=""} 1.955793e+06
+# HELP tekton_pipelines_controller_pipelinerun_count number of pipelineruns
+# TYPE tekton_pipelines_controller_pipelinerun_count counter
+tekton_pipelines_controller_pipelinerun_count{status="failed"} 1
+# HELP tekton_pipelines_controller_pipelinerun_duration_seconds The pipelinerun execution time in seconds
+# TYPE tekton_pipelines_controller_pipelinerun_duration_seconds histogram
+tekton_pipelines_controller_pipelinerun_duration_seconds_bucket{namespace="tekton-pipelines",pipeline="hello-pipeline",status="failed",le="10"} 1
+tekton_pipelines_controller_pipelinerun_duration_seconds_bucket{namespace="tekton-pipelines",pipeline="hello-pipeline",status="failed",le="30"} 1
+tekton_pipelines_controller_pipelinerun_duration_seconds_bucket{namespace="tekton-pipelines",pipeline="hello-pipeline",status="failed",le="60"} 1
+tekton_pipelines_controller_pipelinerun_duration_seconds_bucket{namespace="tekton-pipelines",pipeline="hello-pipeline",status="failed",le="300"} 1
+tekton_pipelines_controller_pipelinerun_duration_seconds_bucket{namespace="tekton-pipelines",pipeline="hello-pipeline",status="failed",le="900"} 1
+tekton_pipelines_controller_pipelinerun_duration_seconds_bucket{namespace="tekton-pipelines",pipeline="hello-pipeline",status="failed",le="1800"} 1
+tekton_pipelines_controller_pipelinerun_duration_seconds_bucket{namespace="tekton-pipelines",pipeline="hello-pipeline",status="failed",le="3600"} 1
+tekton_pipelines_controller_pipelinerun_duration_seconds_bucket{namespace="tekton-pipelines",pipeline="hello-pipeline",status="failed",le="5400"} 1
+tekton_pipelines_controller_pipelinerun_duration_seconds_bucket{namespace="tekton-pipelines",pipeline="hello-pipeline",status="failed",le="10800"} 1
+tekton_pipelines_controller_pipelinerun_duration_seconds_bucket{namespace="tekton-pipelines",pipeline="hello-pipeline",status="failed",le="21600"} 1
+tekton_pipelines_controller_pipelinerun_duration_seconds_bucket{namespace="tekton-pipelines",pipeline="hello-pipeline",status="failed",le="43200"} 1
+tekton_pipelines_controller_pipelinerun_duration_seconds_bucket{namespace="tekton-pipelines",pipeline="hello-pipeline",status="failed",le="86400"} 1
+tekton_pipelines_controller_pipelinerun_duration_seconds_bucket{namespace="tekton-pipelines",pipeline="hello-pipeline",status="failed",le="+Inf"} 1
+tekton_pipelines_controller_pipelinerun_duration_seconds_sum{namespace="tekton-pipelines",pipeline="hello-pipeline",status="failed"} 0.002997333
+tekton_pipelines_controller_pipelinerun_duration_seconds_count{namespace="tekton-pipelines",pipeline="hello-pipeline",status="failed"} 1
+# HELP tekton_pipelines_controller_reconcile_count Number of reconcile operations
+# TYPE tekton_pipelines_controller_reconcile_count counter
+tekton_pipelines_controller_reconcile_count{namespace_name="tekton-pipelines",reconciler="github.com.tektoncd.pipeline.pkg.reconciler.pipelinerun.Reconciler",success="false"} 1
+tekton_pipelines_controller_reconcile_count{namespace_name="tekton-pipelines",reconciler="github.com.tektoncd.pipeline.pkg.reconciler.pipelinerun.Reconciler",success="true"} 2
+tekton_pipelines_controller_reconcile_count{namespace_name="tekton-pipelines",reconciler="github.com.tektoncd.pipeline.pkg.reconciler.taskrun.Reconciler",success="false"} 23
+tekton_pipelines_controller_reconcile_count{namespace_name="tekton-pipelines",reconciler="github.com.tektoncd.pipeline.pkg.reconciler.taskrun.Reconciler",success="true"} 4
+# HELP tekton_pipelines_controller_reconcile_latency Latency of reconcile operations
+# TYPE tekton_pipelines_controller_reconcile_latency histogram
+tekton_pipelines_controller_reconcile_latency_bucket{namespace_name="tekton-pipelines",reconciler="github.com.tektoncd.pipeline.pkg.reconciler.pipelinerun.Reconciler",success="false",le="10"} 0
+tekton_pipelines_controller_reconcile_latency_bucket{namespace_name="tekton-pipelines",reconciler="github.com.tektoncd.pipeline.pkg.reconciler.pipelinerun.Reconciler",success="false",le="100"} 1
+tekton_pipelines_controller_reconcile_latency_bucket{namespace_name="tekton-pipelines",reconciler="github.com.tektoncd.pipeline.pkg.reconciler.pipelinerun.Reconciler",success="false",le="1000"} 1
+tekton_pipelines_controller_reconcile_latency_bucket{namespace_name="tekton-pipelines",reconciler="github.com.tektoncd.pipeline.pkg.reconciler.pipelinerun.Reconciler",success="false",le="10000"} 1
+tekton_pipelines_controller_reconcile_latency_bucket{namespace_name="tekton-pipelines",reconciler="github.com.tektoncd.pipeline.pkg.reconciler.pipelinerun.Reconciler",success="false",le="30000"} 1
+tekton_pipelines_controller_reconcile_latency_bucket{namespace_name="tekton-pipelines",reconciler="github.com.tektoncd.pipeline.pkg.reconciler.pipelinerun.Reconciler",success="false",le="60000"} 1
+tekton_pipelines_controller_reconcile_latency_bucket{namespace_name="tekton-pipelines",reconciler="github.com.tektoncd.pipeline.pkg.reconciler.pipelinerun.Reconciler",success="false",le="+Inf"} 1
+tekton_pipelines_controller_reconcile_latency_sum{namespace_name="tekton-pipelines",reconciler="github.com.tektoncd.pipeline.pkg.reconciler.pipelinerun.Reconciler",success="false"} 39
+tekton_pipelines_controller_reconcile_latency_count{namespace_name="tekton-pipelines",reconciler="github.com.tektoncd.pipeline.pkg.reconciler.pipelinerun.Reconciler",success="false"} 1
+tekton_pipelines_controller_reconcile_latency_bucket{namespace_name="tekton-pipelines",reconciler="github.com.tektoncd.pipeline.pkg.reconciler.pipelinerun.Reconciler",success="true",le="10"} 2
+tekton_pipelines_controller_reconcile_latency_bucket{namespace_name="tekton-pipelines",reconciler="github.com.tektoncd.pipeline.pkg.reconciler.pipelinerun.Reconciler",success="true",le="100"} 2
+tekton_pipelines_controller_reconcile_latency_bucket{namespace_name="tekton-pipelines",reconciler="github.com.tektoncd.pipeline.pkg.reconciler.pipelinerun.Reconciler",success="true",le="1000"} 2
+tekton_pipelines_controller_reconcile_latency_bucket{namespace_name="tekton-pipelines",reconciler="github.com.tektoncd.pipeline.pkg.reconciler.pipelinerun.Reconciler",success="true",le="10000"} 2
+tekton_pipelines_controller_reconcile_latency_bucket{namespace_name="tekton-pipelines",reconciler="github.com.tektoncd.pipeline.pkg.reconciler.pipelinerun.Reconciler",success="true",le="30000"} 2
+tekton_pipelines_controller_reconcile_latency_bucket{namespace_name="tekton-pipelines",reconciler="github.com.tektoncd.pipeline.pkg.reconciler.pipelinerun.Reconciler",success="true",le="60000"} 2
+tekton_pipelines_controller_reconcile_latency_bucket{namespace_name="tekton-pipelines",reconciler="github.com.tektoncd.pipeline.pkg.reconciler.pipelinerun.Reconciler",success="true",le="+Inf"} 2
+tekton_pipelines_controller_reconcile_latency_sum{namespace_name="tekton-pipelines",reconciler="github.com.tektoncd.pipeline.pkg.reconciler.pipelinerun.Reconciler",success="true"} 0
+tekton_pipelines_controller_reconcile_latency_count{namespace_name="tekton-pipelines",reconciler="github.com.tektoncd.pipeline.pkg.reconciler.pipelinerun.Reconciler",success="true"} 2
+tekton_pipelines_controller_reconcile_latency_bucket{namespace_name="tekton-pipelines",reconciler="github.com.tektoncd.pipeline.pkg.reconciler.taskrun.Reconciler",success="false",le="10"} 12
+tekton_pipelines_controller_reconcile_latency_bucket{namespace_name="tekton-pipelines",reconciler="github.com.tektoncd.pipeline.pkg.reconciler.taskrun.Reconciler",success="false",le="100"} 23
+tekton_pipelines_controller_reconcile_latency_bucket{namespace_name="tekton-pipelines",reconciler="github.com.tektoncd.pipeline.pkg.reconciler.taskrun.Reconciler",success="false",le="1000"} 23
+tekton_pipelines_controller_reconcile_latency_bucket{namespace_name="tekton-pipelines",reconciler="github.com.tektoncd.pipeline.pkg.reconciler.taskrun.Reconciler",success="false",le="10000"} 23
+tekton_pipelines_controller_reconcile_latency_bucket{namespace_name="tekton-pipelines",reconciler="github.com.tektoncd.pipeline.pkg.reconciler.taskrun.Reconciler",success="false",le="30000"} 23
+tekton_pipelines_controller_reconcile_latency_bucket{namespace_name="tekton-pipelines",reconciler="github.com.tektoncd.pipeline.pkg.reconciler.taskrun.Reconciler",success="false",le="60000"} 23
+tekton_pipelines_controller_reconcile_latency_bucket{namespace_name="tekton-pipelines",reconciler="github.com.tektoncd.pipeline.pkg.reconciler.taskrun.Reconciler",success="false",le="+Inf"} 23
+tekton_pipelines_controller_reconcile_latency_sum{namespace_name="tekton-pipelines",reconciler="github.com.tektoncd.pipeline.pkg.reconciler.taskrun.Reconciler",success="false"} 253
+tekton_pipelines_controller_reconcile_latency_count{namespace_name="tekton-pipelines",reconciler="github.com.tektoncd.pipeline.pkg.reconciler.taskrun.Reconciler",success="false"} 23
+tekton_pipelines_controller_reconcile_latency_bucket{namespace_name="tekton-pipelines",reconciler="github.com.tektoncd.pipeline.pkg.reconciler.taskrun.Reconciler",success="true",le="10"} 4
+tekton_pipelines_controller_reconcile_latency_bucket{namespace_name="tekton-pipelines",reconciler="github.com.tektoncd.pipeline.pkg.reconciler.taskrun.Reconciler",success="true",le="100"} 4
+tekton_pipelines_controller_reconcile_latency_bucket{namespace_name="tekton-pipelines",reconciler="github.com.tektoncd.pipeline.pkg.reconciler.taskrun.Reconciler",success="true",le="1000"} 4
+tekton_pipelines_controller_reconcile_latency_bucket{namespace_name="tekton-pipelines",reconciler="github.com.tektoncd.pipeline.pkg.reconciler.taskrun.Reconciler",success="true",le="10000"} 4
+tekton_pipelines_controller_reconcile_latency_bucket{namespace_name="tekton-pipelines",reconciler="github.com.tektoncd.pipeline.pkg.reconciler.taskrun.Reconciler",success="true",le="30000"} 4
+tekton_pipelines_controller_reconcile_latency_bucket{namespace_name="tekton-pipelines",reconciler="github.com.tektoncd.pipeline.pkg.reconciler.taskrun.Reconciler",success="true",le="60000"} 4
+tekton_pipelines_controller_reconcile_latency_bucket{namespace_name="tekton-pipelines",reconciler="github.com.tektoncd.pipeline.pkg.reconciler.taskrun.Reconciler",success="true",le="+Inf"} 4
+tekton_pipelines_controller_reconcile_latency_sum{namespace_name="tekton-pipelines",reconciler="github.com.tektoncd.pipeline.pkg.reconciler.taskrun.Reconciler",success="true"} 6
+tekton_pipelines_controller_reconcile_latency_count{namespace_name="tekton-pipelines",reconciler="github.com.tektoncd.pipeline.pkg.reconciler.taskrun.Reconciler",success="true"} 4
+# HELP tekton_pipelines_controller_running_pipelineruns_count Number of pipelineruns executing currently
+# TYPE tekton_pipelines_controller_running_pipelineruns_count gauge
+tekton_pipelines_controller_running_pipelineruns_count 0
+# HELP tekton_pipelines_controller_running_pipelineruns_waiting_on_pipeline_resolution_count Number of pipelineruns executing currently that are waiting on resolution requests for their pipeline references.
+# TYPE tekton_pipelines_controller_running_pipelineruns_waiting_on_pipeline_resolution_count gauge
+tekton_pipelines_controller_running_pipelineruns_waiting_on_pipeline_resolution_count 0
+# HELP tekton_pipelines_controller_running_pipelineruns_waiting_on_task_resolution_count Number of pipelineruns executing currently that are waiting on resolution requests for the task references of their taskrun children.
+# TYPE tekton_pipelines_controller_running_pipelineruns_waiting_on_task_resolution_count gauge
+tekton_pipelines_controller_running_pipelineruns_waiting_on_task_resolution_count 0
+# HELP tekton_pipelines_controller_running_taskruns_count Number of taskruns executing currently
+# TYPE tekton_pipelines_controller_running_taskruns_count gauge
+tekton_pipelines_controller_running_taskruns_count 1
+# HELP tekton_pipelines_controller_running_taskruns_throttled_by_node_count Number of taskruns executing currently, but whose underlying Pods or Containers are suspended by k8s because of Node level constraints. Such suspensions can occur as part of initial scheduling of the Pod, or scheduling of any of the subsequent Container(s) in the Pod after the first Container is started
+# TYPE tekton_pipelines_controller_running_taskruns_throttled_by_node_count gauge
+tekton_pipelines_controller_running_taskruns_throttled_by_node_count 0
+# HELP tekton_pipelines_controller_running_taskruns_throttled_by_quota_count Number of taskruns executing currently, but whose underlying Pods or Containers are suspended by k8s because of defined ResourceQuotas.  Such suspensions can occur as part of initial scheduling of the Pod, or scheduling of any of the subsequent Container(s) in the Pod after the first Container is started
+# TYPE tekton_pipelines_controller_running_taskruns_throttled_by_quota_count gauge
+tekton_pipelines_controller_running_taskruns_throttled_by_quota_count 0
+# HELP tekton_pipelines_controller_running_taskruns_waiting_on_task_resolution_count Number of taskruns executing currently that are waiting on resolution requests for their task references.
+# TYPE tekton_pipelines_controller_running_taskruns_waiting_on_task_resolution_count gauge
+tekton_pipelines_controller_running_taskruns_waiting_on_task_resolution_count 0
+# HELP tekton_pipelines_controller_taskrun_count number of taskruns
+# TYPE tekton_pipelines_controller_taskrun_count counter
+tekton_pipelines_controller_taskrun_count{status="success"} 1
+# HELP tekton_pipelines_controller_taskrun_duration_seconds The taskrun's execution time in seconds
+# TYPE tekton_pipelines_controller_taskrun_duration_seconds histogram
+tekton_pipelines_controller_taskrun_duration_seconds_bucket{namespace="tekton-pipelines",status="success",task="hello",le="10"} 0
+tekton_pipelines_controller_taskrun_duration_seconds_bucket{namespace="tekton-pipelines",status="success",task="hello",le="30"} 1
+tekton_pipelines_controller_taskrun_duration_seconds_bucket{namespace="tekton-pipelines",status="success",task="hello",le="60"} 1
+tekton_pipelines_controller_taskrun_duration_seconds_bucket{namespace="tekton-pipelines",status="success",task="hello",le="300"} 1
+tekton_pipelines_controller_taskrun_duration_seconds_bucket{namespace="tekton-pipelines",status="success",task="hello",le="900"} 1
+tekton_pipelines_controller_taskrun_duration_seconds_bucket{namespace="tekton-pipelines",status="success",task="hello",le="1800"} 1
+tekton_pipelines_controller_taskrun_duration_seconds_bucket{namespace="tekton-pipelines",status="success",task="hello",le="3600"} 1
+tekton_pipelines_controller_taskrun_duration_seconds_bucket{namespace="tekton-pipelines",status="success",task="hello",le="5400"} 1
+tekton_pipelines_controller_taskrun_duration_seconds_bucket{namespace="tekton-pipelines",status="success",task="hello",le="10800"} 1
+tekton_pipelines_controller_taskrun_duration_seconds_bucket{namespace="tekton-pipelines",status="success",task="hello",le="21600"} 1
+tekton_pipelines_controller_taskrun_duration_seconds_bucket{namespace="tekton-pipelines",status="success",task="hello",le="43200"} 1
+tekton_pipelines_controller_taskrun_duration_seconds_bucket{namespace="tekton-pipelines",status="success",task="hello",le="86400"} 1
+tekton_pipelines_controller_taskrun_duration_seconds_bucket{namespace="tekton-pipelines",status="success",task="hello",le="+Inf"} 1
+tekton_pipelines_controller_taskrun_duration_seconds_sum{namespace="tekton-pipelines",status="success",task="hello"} 15.778069045
+tekton_pipelines_controller_taskrun_duration_seconds_count{namespace="tekton-pipelines",status="success",task="hello"} 1
+# HELP tekton_pipelines_controller_taskruns_pod_latency_milliseconds scheduling latency for the taskruns pods
+# TYPE tekton_pipelines_controller_taskruns_pod_latency_milliseconds gauge
+tekton_pipelines_controller_taskruns_pod_latency_milliseconds{namespace="tekton-pipelines",pod="hello-task-run-pod",task="hello"} 0
+tekton_pipelines_controller_taskruns_pod_latency_milliseconds{namespace="tekton-pipelines",pod="sleep-task-run-pod",task="sleep"} 0
+# HELP tekton_pipelines_controller_work_queue_depth Depth of the work queue
+# TYPE tekton_pipelines_controller_work_queue_depth gauge
+tekton_pipelines_controller_work_queue_depth{reconciler="github.com.tektoncd.pipeline.pkg.reconciler.pipelinerun.Reconciler"} 0
+tekton_pipelines_controller_work_queue_depth{reconciler="github.com.tektoncd.pipeline.pkg.reconciler.taskrun.Reconciler"} 0
+# HELP tekton_pipelines_controller_workqueue_adds_total Total number of adds handled by workqueue
+# TYPE tekton_pipelines_controller_workqueue_adds_total counter
+tekton_pipelines_controller_workqueue_adds_total{name="github.com.tektoncd.pipeline.pkg.reconciler.pipelinerun.Reconciler-consumer"} 3
+tekton_pipelines_controller_workqueue_adds_total{name="github.com.tektoncd.pipeline.pkg.reconciler.pipelinerun.Reconciler-fast"} 4
+tekton_pipelines_controller_workqueue_adds_total{name="github.com.tektoncd.pipeline.pkg.reconciler.taskrun.Reconciler-consumer"} 27
+tekton_pipelines_controller_workqueue_adds_total{name="github.com.tektoncd.pipeline.pkg.reconciler.taskrun.Reconciler-fast"} 36
+# HELP tekton_pipelines_controller_workqueue_depth Current depth of workqueue
+# TYPE tekton_pipelines_controller_workqueue_depth gauge
+tekton_pipelines_controller_workqueue_depth{name="github.com.tektoncd.pipeline.pkg.reconciler.pipelinerun.Reconciler-consumer"} 0
+tekton_pipelines_controller_workqueue_depth{name="github.com.tektoncd.pipeline.pkg.reconciler.pipelinerun.Reconciler-fast"} 0
+tekton_pipelines_controller_workqueue_depth{name="github.com.tektoncd.pipeline.pkg.reconciler.taskrun.Reconciler-consumer"} 0
+tekton_pipelines_controller_workqueue_depth{name="github.com.tektoncd.pipeline.pkg.reconciler.taskrun.Reconciler-fast"} 0
+# HELP tekton_pipelines_controller_workqueue_longest_running_processor_seconds How long in seconds the longest outstanding workqueue item has been in flight.
+# TYPE tekton_pipelines_controller_workqueue_longest_running_processor_seconds histogram
+tekton_pipelines_controller_workqueue_longest_running_processor_seconds_bucket{name="github.com.tektoncd.pipeline.pkg.reconciler.pipelinerun.Reconciler-consumer",le="1e-08"} 471
+tekton_pipelines_controller_workqueue_longest_running_processor_seconds_bucket{name="github.com.tektoncd.pipeline.pkg.reconciler.pipelinerun.Reconciler-consumer",le="1e-07"} 471
+tekton_pipelines_controller_workqueue_longest_running_processor_seconds_bucket{name="github.com.tektoncd.pipeline.pkg.reconciler.pipelinerun.Reconciler-consumer",le="1e-06"} 471
+tekton_pipelines_controller_workqueue_longest_running_processor_seconds_bucket{name="github.com.tektoncd.pipeline.pkg.reconciler.pipelinerun.Reconciler-consumer",le="9.999999999999999e-06"} 471
+tekton_pipelines_controller_workqueue_longest_running_processor_seconds_bucket{name="github.com.tektoncd.pipeline.pkg.reconciler.pipelinerun.Reconciler-consumer",le="9.999999999999999e-05"} 471
+tekton_pipelines_controller_workqueue_longest_running_processor_seconds_bucket{name="github.com.tektoncd.pipeline.pkg.reconciler.pipelinerun.Reconciler-consumer",le="0.001"} 471
+tekton_pipelines_controller_workqueue_longest_running_processor_seconds_bucket{name="github.com.tektoncd.pipeline.pkg.reconciler.pipelinerun.Reconciler-consumer",le="0.01"} 471
+tekton_pipelines_controller_workqueue_longest_running_processor_seconds_bucket{name="github.com.tektoncd.pipeline.pkg.reconciler.pipelinerun.Reconciler-consumer",le="0.1"} 471
+tekton_pipelines_controller_workqueue_longest_running_processor_seconds_bucket{name="github.com.tektoncd.pipeline.pkg.reconciler.pipelinerun.Reconciler-consumer",le="1"} 471
+tekton_pipelines_controller_workqueue_longest_running_processor_seconds_bucket{name="github.com.tektoncd.pipeline.pkg.reconciler.pipelinerun.Reconciler-consumer",le="10"} 471
+tekton_pipelines_controller_workqueue_longest_running_processor_seconds_bucket{name="github.com.tektoncd.pipeline.pkg.reconciler.pipelinerun.Reconciler-consumer",le="+Inf"} 471
+tekton_pipelines_controller_workqueue_longest_running_processor_seconds_sum{name="github.com.tektoncd.pipeline.pkg.reconciler.pipelinerun.Reconciler-consumer"} 0
+tekton_pipelines_controller_workqueue_longest_running_processor_seconds_count{name="github.com.tektoncd.pipeline.pkg.reconciler.pipelinerun.Reconciler-consumer"} 471
+tekton_pipelines_controller_workqueue_longest_running_processor_seconds_bucket{name="github.com.tektoncd.pipeline.pkg.reconciler.pipelinerun.Reconciler-fast",le="1e-08"} 471
+tekton_pipelines_controller_workqueue_longest_running_processor_seconds_bucket{name="github.com.tektoncd.pipeline.pkg.reconciler.pipelinerun.Reconciler-fast",le="1e-07"} 471
+tekton_pipelines_controller_workqueue_longest_running_processor_seconds_bucket{name="github.com.tektoncd.pipeline.pkg.reconciler.pipelinerun.Reconciler-fast",le="1e-06"} 471
+tekton_pipelines_controller_workqueue_longest_running_processor_seconds_bucket{name="github.com.tektoncd.pipeline.pkg.reconciler.pipelinerun.Reconciler-fast",le="9.999999999999999e-06"} 471
+tekton_pipelines_controller_workqueue_longest_running_processor_seconds_bucket{name="github.com.tektoncd.pipeline.pkg.reconciler.pipelinerun.Reconciler-fast",le="9.999999999999999e-05"} 471
+tekton_pipelines_controller_workqueue_longest_running_processor_seconds_bucket{name="github.com.tektoncd.pipeline.pkg.reconciler.pipelinerun.Reconciler-fast",le="0.001"} 471
+tekton_pipelines_controller_workqueue_longest_running_processor_seconds_bucket{name="github.com.tektoncd.pipeline.pkg.reconciler.pipelinerun.Reconciler-fast",le="0.01"} 471
+tekton_pipelines_controller_workqueue_longest_running_processor_seconds_bucket{name="github.com.tektoncd.pipeline.pkg.reconciler.pipelinerun.Reconciler-fast",le="0.1"} 471
+tekton_pipelines_controller_workqueue_longest_running_processor_seconds_bucket{name="github.com.tektoncd.pipeline.pkg.reconciler.pipelinerun.Reconciler-fast",le="1"} 471
+tekton_pipelines_controller_workqueue_longest_running_processor_seconds_bucket{name="github.com.tektoncd.pipeline.pkg.reconciler.pipelinerun.Reconciler-fast",le="10"} 471
+tekton_pipelines_controller_workqueue_longest_running_processor_seconds_bucket{name="github.com.tektoncd.pipeline.pkg.reconciler.pipelinerun.Reconciler-fast",le="+Inf"} 471
+tekton_pipelines_controller_workqueue_longest_running_processor_seconds_sum{name="github.com.tektoncd.pipeline.pkg.reconciler.pipelinerun.Reconciler-fast"} 0
+tekton_pipelines_controller_workqueue_longest_running_processor_seconds_count{name="github.com.tektoncd.pipeline.pkg.reconciler.pipelinerun.Reconciler-fast"} 471
+tekton_pipelines_controller_workqueue_longest_running_processor_seconds_bucket{name="github.com.tektoncd.pipeline.pkg.reconciler.pipelinerun.Reconciler-slow",le="1e-08"} 471
+tekton_pipelines_controller_workqueue_longest_running_processor_seconds_bucket{name="github.com.tektoncd.pipeline.pkg.reconciler.pipelinerun.Reconciler-slow",le="1e-07"} 471
+tekton_pipelines_controller_workqueue_longest_running_processor_seconds_bucket{name="github.com.tektoncd.pipeline.pkg.reconciler.pipelinerun.Reconciler-slow",le="1e-06"} 471
+tekton_pipelines_controller_workqueue_longest_running_processor_seconds_bucket{name="github.com.tektoncd.pipeline.pkg.reconciler.pipelinerun.Reconciler-slow",le="9.999999999999999e-06"} 471
+tekton_pipelines_controller_workqueue_longest_running_processor_seconds_bucket{name="github.com.tektoncd.pipeline.pkg.reconciler.pipelinerun.Reconciler-slow",le="9.999999999999999e-05"} 471
+tekton_pipelines_controller_workqueue_longest_running_processor_seconds_bucket{name="github.com.tektoncd.pipeline.pkg.reconciler.pipelinerun.Reconciler-slow",le="0.001"} 471
+tekton_pipelines_controller_workqueue_longest_running_processor_seconds_bucket{name="github.com.tektoncd.pipeline.pkg.reconciler.pipelinerun.Reconciler-slow",le="0.01"} 471
+tekton_pipelines_controller_workqueue_longest_running_processor_seconds_bucket{name="github.com.tektoncd.pipeline.pkg.reconciler.pipelinerun.Reconciler-slow",le="0.1"} 471
+tekton_pipelines_controller_workqueue_longest_running_processor_seconds_bucket{name="github.com.tektoncd.pipeline.pkg.reconciler.pipelinerun.Reconciler-slow",le="1"} 471
+tekton_pipelines_controller_workqueue_longest_running_processor_seconds_bucket{name="github.com.tektoncd.pipeline.pkg.reconciler.pipelinerun.Reconciler-slow",le="10"} 471
+tekton_pipelines_controller_workqueue_longest_running_processor_seconds_bucket{name="github.com.tektoncd.pipeline.pkg.reconciler.pipelinerun.Reconciler-slow",le="+Inf"} 471
+tekton_pipelines_controller_workqueue_longest_running_processor_seconds_sum{name="github.com.tektoncd.pipeline.pkg.reconciler.pipelinerun.Reconciler-slow"} 0
+tekton_pipelines_controller_workqueue_longest_running_processor_seconds_count{name="github.com.tektoncd.pipeline.pkg.reconciler.pipelinerun.Reconciler-slow"} 471
+tekton_pipelines_controller_workqueue_longest_running_processor_seconds_bucket{name="github.com.tektoncd.pipeline.pkg.reconciler.resolutionrequest.Reconciler-consumer",le="1e-08"} 471
+tekton_pipelines_controller_workqueue_longest_running_processor_seconds_bucket{name="github.com.tektoncd.pipeline.pkg.reconciler.resolutionrequest.Reconciler-consumer",le="1e-07"} 471
+tekton_pipelines_controller_workqueue_longest_running_processor_seconds_bucket{name="github.com.tektoncd.pipeline.pkg.reconciler.resolutionrequest.Reconciler-consumer",le="1e-06"} 471
+tekton_pipelines_controller_workqueue_longest_running_processor_seconds_bucket{name="github.com.tektoncd.pipeline.pkg.reconciler.resolutionrequest.Reconciler-consumer",le="9.999999999999999e-06"} 471
+tekton_pipelines_controller_workqueue_longest_running_processor_seconds_bucket{name="github.com.tektoncd.pipeline.pkg.reconciler.resolutionrequest.Reconciler-consumer",le="9.999999999999999e-05"} 471
+tekton_pipelines_controller_workqueue_longest_running_processor_seconds_bucket{name="github.com.tektoncd.pipeline.pkg.reconciler.resolutionrequest.Reconciler-consumer",le="0.001"} 471
+tekton_pipelines_controller_workqueue_longest_running_processor_seconds_bucket{name="github.com.tektoncd.pipeline.pkg.reconciler.resolutionrequest.Reconciler-consumer",le="0.01"} 471
+tekton_pipelines_controller_workqueue_longest_running_processor_seconds_bucket{name="github.com.tektoncd.pipeline.pkg.reconciler.resolutionrequest.Reconciler-consumer",le="0.1"} 471
+tekton_pipelines_controller_workqueue_longest_running_processor_seconds_bucket{name="github.com.tektoncd.pipeline.pkg.reconciler.resolutionrequest.Reconciler-consumer",le="1"} 471
+tekton_pipelines_controller_workqueue_longest_running_processor_seconds_bucket{name="github.com.tektoncd.pipeline.pkg.reconciler.resolutionrequest.Reconciler-consumer",le="10"} 471
+tekton_pipelines_controller_workqueue_longest_running_processor_seconds_bucket{name="github.com.tektoncd.pipeline.pkg.reconciler.resolutionrequest.Reconciler-consumer",le="+Inf"} 471
+tekton_pipelines_controller_workqueue_longest_running_processor_seconds_sum{name="github.com.tektoncd.pipeline.pkg.reconciler.resolutionrequest.Reconciler-consumer"} 0
+tekton_pipelines_controller_workqueue_longest_running_processor_seconds_count{name="github.com.tektoncd.pipeline.pkg.reconciler.resolutionrequest.Reconciler-consumer"} 471
+tekton_pipelines_controller_workqueue_longest_running_processor_seconds_bucket{name="github.com.tektoncd.pipeline.pkg.reconciler.resolutionrequest.Reconciler-fast",le="1e-08"} 471
+tekton_pipelines_controller_workqueue_longest_running_processor_seconds_bucket{name="github.com.tektoncd.pipeline.pkg.reconciler.resolutionrequest.Reconciler-fast",le="1e-07"} 471
+tekton_pipelines_controller_workqueue_longest_running_processor_seconds_bucket{name="github.com.tektoncd.pipeline.pkg.reconciler.resolutionrequest.Reconciler-fast",le="1e-06"} 471
+tekton_pipelines_controller_workqueue_longest_running_processor_seconds_bucket{name="github.com.tektoncd.pipeline.pkg.reconciler.resolutionrequest.Reconciler-fast",le="9.999999999999999e-06"} 471
+tekton_pipelines_controller_workqueue_longest_running_processor_seconds_bucket{name="github.com.tektoncd.pipeline.pkg.reconciler.resolutionrequest.Reconciler-fast",le="9.999999999999999e-05"} 471
+tekton_pipelines_controller_workqueue_longest_running_processor_seconds_bucket{name="github.com.tektoncd.pipeline.pkg.reconciler.resolutionrequest.Reconciler-fast",le="0.001"} 471
+tekton_pipelines_controller_workqueue_longest_running_processor_seconds_bucket{name="github.com.tektoncd.pipeline.pkg.reconciler.resolutionrequest.Reconciler-fast",le="0.01"} 471
+tekton_pipelines_controller_workqueue_longest_running_processor_seconds_bucket{name="github.com.tektoncd.pipeline.pkg.reconciler.resolutionrequest.Reconciler-fast",le="0.1"} 471
+tekton_pipelines_controller_workqueue_longest_running_processor_seconds_bucket{name="github.com.tektoncd.pipeline.pkg.reconciler.resolutionrequest.Reconciler-fast",le="1"} 471
+tekton_pipelines_controller_workqueue_longest_running_processor_seconds_bucket{name="github.com.tektoncd.pipeline.pkg.reconciler.resolutionrequest.Reconciler-fast",le="10"} 471
+tekton_pipelines_controller_workqueue_longest_running_processor_seconds_bucket{name="github.com.tektoncd.pipeline.pkg.reconciler.resolutionrequest.Reconciler-fast",le="+Inf"} 471
+tekton_pipelines_controller_workqueue_longest_running_processor_seconds_sum{name="github.com.tektoncd.pipeline.pkg.reconciler.resolutionrequest.Reconciler-fast"} 0
+tekton_pipelines_controller_workqueue_longest_running_processor_seconds_count{name="github.com.tektoncd.pipeline.pkg.reconciler.resolutionrequest.Reconciler-fast"} 471
+tekton_pipelines_controller_workqueue_longest_running_processor_seconds_bucket{name="github.com.tektoncd.pipeline.pkg.reconciler.resolutionrequest.Reconciler-slow",le="1e-08"} 471
+tekton_pipelines_controller_workqueue_longest_running_processor_seconds_bucket{name="github.com.tektoncd.pipeline.pkg.reconciler.resolutionrequest.Reconciler-slow",le="1e-07"} 471
+tekton_pipelines_controller_workqueue_longest_running_processor_seconds_bucket{name="github.com.tektoncd.pipeline.pkg.reconciler.resolutionrequest.Reconciler-slow",le="1e-06"} 471
+tekton_pipelines_controller_workqueue_longest_running_processor_seconds_bucket{name="github.com.tektoncd.pipeline.pkg.reconciler.resolutionrequest.Reconciler-slow",le="9.999999999999999e-06"} 471
+tekton_pipelines_controller_workqueue_longest_running_processor_seconds_bucket{name="github.com.tektoncd.pipeline.pkg.reconciler.resolutionrequest.Reconciler-slow",le="9.999999999999999e-05"} 471
+tekton_pipelines_controller_workqueue_longest_running_processor_seconds_bucket{name="github.com.tektoncd.pipeline.pkg.reconciler.resolutionrequest.Reconciler-slow",le="0.001"} 471
+tekton_pipelines_controller_workqueue_longest_running_processor_seconds_bucket{name="github.com.tektoncd.pipeline.pkg.reconciler.resolutionrequest.Reconciler-slow",le="0.01"} 471
+tekton_pipelines_controller_workqueue_longest_running_processor_seconds_bucket{name="github.com.tektoncd.pipeline.pkg.reconciler.resolutionrequest.Reconciler-slow",le="0.1"} 471
+tekton_pipelines_controller_workqueue_longest_running_processor_seconds_bucket{name="github.com.tektoncd.pipeline.pkg.reconciler.resolutionrequest.Reconciler-slow",le="1"} 471
+tekton_pipelines_controller_workqueue_longest_running_processor_seconds_bucket{name="github.com.tektoncd.pipeline.pkg.reconciler.resolutionrequest.Reconciler-slow",le="10"} 471
+tekton_pipelines_controller_workqueue_longest_running_processor_seconds_bucket{name="github.com.tektoncd.pipeline.pkg.reconciler.resolutionrequest.Reconciler-slow",le="+Inf"} 471
+tekton_pipelines_controller_workqueue_longest_running_processor_seconds_sum{name="github.com.tektoncd.pipeline.pkg.reconciler.resolutionrequest.Reconciler-slow"} 0
+tekton_pipelines_controller_workqueue_longest_running_processor_seconds_count{name="github.com.tektoncd.pipeline.pkg.reconciler.resolutionrequest.Reconciler-slow"} 471
+tekton_pipelines_controller_workqueue_longest_running_processor_seconds_bucket{name="github.com.tektoncd.pipeline.pkg.reconciler.taskrun.Reconciler-consumer",le="1e-08"} 471
+tekton_pipelines_controller_workqueue_longest_running_processor_seconds_bucket{name="github.com.tektoncd.pipeline.pkg.reconciler.taskrun.Reconciler-consumer",le="1e-07"} 471
+tekton_pipelines_controller_workqueue_longest_running_processor_seconds_bucket{name="github.com.tektoncd.pipeline.pkg.reconciler.taskrun.Reconciler-consumer",le="1e-06"} 471
+tekton_pipelines_controller_workqueue_longest_running_processor_seconds_bucket{name="github.com.tektoncd.pipeline.pkg.reconciler.taskrun.Reconciler-consumer",le="9.999999999999999e-06"} 471
+tekton_pipelines_controller_workqueue_longest_running_processor_seconds_bucket{name="github.com.tektoncd.pipeline.pkg.reconciler.taskrun.Reconciler-consumer",le="9.999999999999999e-05"} 471
+tekton_pipelines_controller_workqueue_longest_running_processor_seconds_bucket{name="github.com.tektoncd.pipeline.pkg.reconciler.taskrun.Reconciler-consumer",le="0.001"} 471
+tekton_pipelines_controller_workqueue_longest_running_processor_seconds_bucket{name="github.com.tektoncd.pipeline.pkg.reconciler.taskrun.Reconciler-consumer",le="0.01"} 471
+tekton_pipelines_controller_workqueue_longest_running_processor_seconds_bucket{name="github.com.tektoncd.pipeline.pkg.reconciler.taskrun.Reconciler-consumer",le="0.1"} 471
+tekton_pipelines_controller_workqueue_longest_running_processor_seconds_bucket{name="github.com.tektoncd.pipeline.pkg.reconciler.taskrun.Reconciler-consumer",le="1"} 471
+tekton_pipelines_controller_workqueue_longest_running_processor_seconds_bucket{name="github.com.tektoncd.pipeline.pkg.reconciler.taskrun.Reconciler-consumer",le="10"} 471
+tekton_pipelines_controller_workqueue_longest_running_processor_seconds_bucket{name="github.com.tektoncd.pipeline.pkg.reconciler.taskrun.Reconciler-consumer",le="+Inf"} 471
+tekton_pipelines_controller_workqueue_longest_running_processor_seconds_sum{name="github.com.tektoncd.pipeline.pkg.reconciler.taskrun.Reconciler-consumer"} 0
+tekton_pipelines_controller_workqueue_longest_running_processor_seconds_count{name="github.com.tektoncd.pipeline.pkg.reconciler.taskrun.Reconciler-consumer"} 471
+tekton_pipelines_controller_workqueue_longest_running_processor_seconds_bucket{name="github.com.tektoncd.pipeline.pkg.reconciler.taskrun.Reconciler-fast",le="1e-08"} 471
+tekton_pipelines_controller_workqueue_longest_running_processor_seconds_bucket{name="github.com.tektoncd.pipeline.pkg.reconciler.taskrun.Reconciler-fast",le="1e-07"} 471
+tekton_pipelines_controller_workqueue_longest_running_processor_seconds_bucket{name="github.com.tektoncd.pipeline.pkg.reconciler.taskrun.Reconciler-fast",le="1e-06"} 471
+tekton_pipelines_controller_workqueue_longest_running_processor_seconds_bucket{name="github.com.tektoncd.pipeline.pkg.reconciler.taskrun.Reconciler-fast",le="9.999999999999999e-06"} 471
+tekton_pipelines_controller_workqueue_longest_running_processor_seconds_bucket{name="github.com.tektoncd.pipeline.pkg.reconciler.taskrun.Reconciler-fast",le="9.999999999999999e-05"} 471
+tekton_pipelines_controller_workqueue_longest_running_processor_seconds_bucket{name="github.com.tektoncd.pipeline.pkg.reconciler.taskrun.Reconciler-fast",le="0.001"} 471
+tekton_pipelines_controller_workqueue_longest_running_processor_seconds_bucket{name="github.com.tektoncd.pipeline.pkg.reconciler.taskrun.Reconciler-fast",le="0.01"} 471
+tekton_pipelines_controller_workqueue_longest_running_processor_seconds_bucket{name="github.com.tektoncd.pipeline.pkg.reconciler.taskrun.Reconciler-fast",le="0.1"} 471
+tekton_pipelines_controller_workqueue_longest_running_processor_seconds_bucket{name="github.com.tektoncd.pipeline.pkg.reconciler.taskrun.Reconciler-fast",le="1"} 471
+tekton_pipelines_controller_workqueue_longest_running_processor_seconds_bucket{name="github.com.tektoncd.pipeline.pkg.reconciler.taskrun.Reconciler-fast",le="10"} 471
+tekton_pipelines_controller_workqueue_longest_running_processor_seconds_bucket{name="github.com.tektoncd.pipeline.pkg.reconciler.taskrun.Reconciler-fast",le="+Inf"} 471
+tekton_pipelines_controller_workqueue_longest_running_processor_seconds_sum{name="github.com.tektoncd.pipeline.pkg.reconciler.taskrun.Reconciler-fast"} 0
+tekton_pipelines_controller_workqueue_longest_running_processor_seconds_count{name="github.com.tektoncd.pipeline.pkg.reconciler.taskrun.Reconciler-fast"} 471
+tekton_pipelines_controller_workqueue_longest_running_processor_seconds_bucket{name="github.com.tektoncd.pipeline.pkg.reconciler.taskrun.Reconciler-slow",le="1e-08"} 471
+tekton_pipelines_controller_workqueue_longest_running_processor_seconds_bucket{name="github.com.tektoncd.pipeline.pkg.reconciler.taskrun.Reconciler-slow",le="1e-07"} 471
+tekton_pipelines_controller_workqueue_longest_running_processor_seconds_bucket{name="github.com.tektoncd.pipeline.pkg.reconciler.taskrun.Reconciler-slow",le="1e-06"} 471
+tekton_pipelines_controller_workqueue_longest_running_processor_seconds_bucket{name="github.com.tektoncd.pipeline.pkg.reconciler.taskrun.Reconciler-slow",le="9.999999999999999e-06"} 471
+tekton_pipelines_controller_workqueue_longest_running_processor_seconds_bucket{name="github.com.tektoncd.pipeline.pkg.reconciler.taskrun.Reconciler-slow",le="9.999999999999999e-05"} 471
+tekton_pipelines_controller_workqueue_longest_running_processor_seconds_bucket{name="github.com.tektoncd.pipeline.pkg.reconciler.taskrun.Reconciler-slow",le="0.001"} 471
+tekton_pipelines_controller_workqueue_longest_running_processor_seconds_bucket{name="github.com.tektoncd.pipeline.pkg.reconciler.taskrun.Reconciler-slow",le="0.01"} 471
+tekton_pipelines_controller_workqueue_longest_running_processor_seconds_bucket{name="github.com.tektoncd.pipeline.pkg.reconciler.taskrun.Reconciler-slow",le="0.1"} 471
+tekton_pipelines_controller_workqueue_longest_running_processor_seconds_bucket{name="github.com.tektoncd.pipeline.pkg.reconciler.taskrun.Reconciler-slow",le="1"} 471
+tekton_pipelines_controller_workqueue_longest_running_processor_seconds_bucket{name="github.com.tektoncd.pipeline.pkg.reconciler.taskrun.Reconciler-slow",le="10"} 471
+tekton_pipelines_controller_workqueue_longest_running_processor_seconds_bucket{name="github.com.tektoncd.pipeline.pkg.reconciler.taskrun.Reconciler-slow",le="+Inf"} 471
+tekton_pipelines_controller_workqueue_longest_running_processor_seconds_sum{name="github.com.tektoncd.pipeline.pkg.reconciler.taskrun.Reconciler-slow"} 0
+tekton_pipelines_controller_workqueue_longest_running_processor_seconds_count{name="github.com.tektoncd.pipeline.pkg.reconciler.taskrun.Reconciler-slow"} 471
+# HELP tekton_pipelines_controller_workqueue_queue_latency_seconds How long in seconds an item stays in workqueue before being requested.
+# TYPE tekton_pipelines_controller_workqueue_queue_latency_seconds histogram
+tekton_pipelines_controller_workqueue_queue_latency_seconds_bucket{name="github.com.tektoncd.pipeline.pkg.reconciler.pipelinerun.Reconciler-consumer",le="1e-08"} 0
+tekton_pipelines_controller_workqueue_queue_latency_seconds_bucket{name="github.com.tektoncd.pipeline.pkg.reconciler.pipelinerun.Reconciler-consumer",le="1e-07"} 0
+tekton_pipelines_controller_workqueue_queue_latency_seconds_bucket{name="github.com.tektoncd.pipeline.pkg.reconciler.pipelinerun.Reconciler-consumer",le="1e-06"} 0
+tekton_pipelines_controller_workqueue_queue_latency_seconds_bucket{name="github.com.tektoncd.pipeline.pkg.reconciler.pipelinerun.Reconciler-consumer",le="9.999999999999999e-06"} 2
+tekton_pipelines_controller_workqueue_queue_latency_seconds_bucket{name="github.com.tektoncd.pipeline.pkg.reconciler.pipelinerun.Reconciler-consumer",le="9.999999999999999e-05"} 2
+tekton_pipelines_controller_workqueue_queue_latency_seconds_bucket{name="github.com.tektoncd.pipeline.pkg.reconciler.pipelinerun.Reconciler-consumer",le="0.001"} 2
+tekton_pipelines_controller_workqueue_queue_latency_seconds_bucket{name="github.com.tektoncd.pipeline.pkg.reconciler.pipelinerun.Reconciler-consumer",le="0.01"} 2
+tekton_pipelines_controller_workqueue_queue_latency_seconds_bucket{name="github.com.tektoncd.pipeline.pkg.reconciler.pipelinerun.Reconciler-consumer",le="0.1"} 3
+tekton_pipelines_controller_workqueue_queue_latency_seconds_bucket{name="github.com.tektoncd.pipeline.pkg.reconciler.pipelinerun.Reconciler-consumer",le="1"} 3
+tekton_pipelines_controller_workqueue_queue_latency_seconds_bucket{name="github.com.tektoncd.pipeline.pkg.reconciler.pipelinerun.Reconciler-consumer",le="10"} 3
+tekton_pipelines_controller_workqueue_queue_latency_seconds_bucket{name="github.com.tektoncd.pipeline.pkg.reconciler.pipelinerun.Reconciler-consumer",le="+Inf"} 3
+tekton_pipelines_controller_workqueue_queue_latency_seconds_sum{name="github.com.tektoncd.pipeline.pkg.reconciler.pipelinerun.Reconciler-consumer"} 0.034049084
+tekton_pipelines_controller_workqueue_queue_latency_seconds_count{name="github.com.tektoncd.pipeline.pkg.reconciler.pipelinerun.Reconciler-consumer"} 3
+tekton_pipelines_controller_workqueue_queue_latency_seconds_bucket{name="github.com.tektoncd.pipeline.pkg.reconciler.pipelinerun.Reconciler-fast",le="1e-08"} 0
+tekton_pipelines_controller_workqueue_queue_latency_seconds_bucket{name="github.com.tektoncd.pipeline.pkg.reconciler.pipelinerun.Reconciler-fast",le="1e-07"} 0
+tekton_pipelines_controller_workqueue_queue_latency_seconds_bucket{name="github.com.tektoncd.pipeline.pkg.reconciler.pipelinerun.Reconciler-fast",le="1e-06"} 0
+tekton_pipelines_controller_workqueue_queue_latency_seconds_bucket{name="github.com.tektoncd.pipeline.pkg.reconciler.pipelinerun.Reconciler-fast",le="9.999999999999999e-06"} 4
+tekton_pipelines_controller_workqueue_queue_latency_seconds_bucket{name="github.com.tektoncd.pipeline.pkg.reconciler.pipelinerun.Reconciler-fast",le="9.999999999999999e-05"} 4
+tekton_pipelines_controller_workqueue_queue_latency_seconds_bucket{name="github.com.tektoncd.pipeline.pkg.reconciler.pipelinerun.Reconciler-fast",le="0.001"} 4
+tekton_pipelines_controller_workqueue_queue_latency_seconds_bucket{name="github.com.tektoncd.pipeline.pkg.reconciler.pipelinerun.Reconciler-fast",le="0.01"} 4
+tekton_pipelines_controller_workqueue_queue_latency_seconds_bucket{name="github.com.tektoncd.pipeline.pkg.reconciler.pipelinerun.Reconciler-fast",le="0.1"} 4
+tekton_pipelines_controller_workqueue_queue_latency_seconds_bucket{name="github.com.tektoncd.pipeline.pkg.reconciler.pipelinerun.Reconciler-fast",le="1"} 4
+tekton_pipelines_controller_workqueue_queue_latency_seconds_bucket{name="github.com.tektoncd.pipeline.pkg.reconciler.pipelinerun.Reconciler-fast",le="10"} 4
+tekton_pipelines_controller_workqueue_queue_latency_seconds_bucket{name="github.com.tektoncd.pipeline.pkg.reconciler.pipelinerun.Reconciler-fast",le="+Inf"} 4
+tekton_pipelines_controller_workqueue_queue_latency_seconds_sum{name="github.com.tektoncd.pipeline.pkg.reconciler.pipelinerun.Reconciler-fast"} 2.1541999999999998e-05
+tekton_pipelines_controller_workqueue_queue_latency_seconds_count{name="github.com.tektoncd.pipeline.pkg.reconciler.pipelinerun.Reconciler-fast"} 4
+tekton_pipelines_controller_workqueue_queue_latency_seconds_bucket{name="github.com.tektoncd.pipeline.pkg.reconciler.taskrun.Reconciler-consumer",le="1e-08"} 0
+tekton_pipelines_controller_workqueue_queue_latency_seconds_bucket{name="github.com.tektoncd.pipeline.pkg.reconciler.taskrun.Reconciler-consumer",le="1e-07"} 0
+tekton_pipelines_controller_workqueue_queue_latency_seconds_bucket{name="github.com.tektoncd.pipeline.pkg.reconciler.taskrun.Reconciler-consumer",le="1e-06"} 0
+tekton_pipelines_controller_workqueue_queue_latency_seconds_bucket{name="github.com.tektoncd.pipeline.pkg.reconciler.taskrun.Reconciler-consumer",le="9.999999999999999e-06"} 16
+tekton_pipelines_controller_workqueue_queue_latency_seconds_bucket{name="github.com.tektoncd.pipeline.pkg.reconciler.taskrun.Reconciler-consumer",le="9.999999999999999e-05"} 19
+tekton_pipelines_controller_workqueue_queue_latency_seconds_bucket{name="github.com.tektoncd.pipeline.pkg.reconciler.taskrun.Reconciler-consumer",le="0.001"} 21
+tekton_pipelines_controller_workqueue_queue_latency_seconds_bucket{name="github.com.tektoncd.pipeline.pkg.reconciler.taskrun.Reconciler-consumer",le="0.01"} 22
+tekton_pipelines_controller_workqueue_queue_latency_seconds_bucket{name="github.com.tektoncd.pipeline.pkg.reconciler.taskrun.Reconciler-consumer",le="0.1"} 27
+tekton_pipelines_controller_workqueue_queue_latency_seconds_bucket{name="github.com.tektoncd.pipeline.pkg.reconciler.taskrun.Reconciler-consumer",le="1"} 27
+tekton_pipelines_controller_workqueue_queue_latency_seconds_bucket{name="github.com.tektoncd.pipeline.pkg.reconciler.taskrun.Reconciler-consumer",le="10"} 27
+tekton_pipelines_controller_workqueue_queue_latency_seconds_bucket{name="github.com.tektoncd.pipeline.pkg.reconciler.taskrun.Reconciler-consumer",le="+Inf"} 27
+tekton_pipelines_controller_workqueue_queue_latency_seconds_sum{name="github.com.tektoncd.pipeline.pkg.reconciler.taskrun.Reconciler-consumer"} 0.147137417
+tekton_pipelines_controller_workqueue_queue_latency_seconds_count{name="github.com.tektoncd.pipeline.pkg.reconciler.taskrun.Reconciler-consumer"} 27
+tekton_pipelines_controller_workqueue_queue_latency_seconds_bucket{name="github.com.tektoncd.pipeline.pkg.reconciler.taskrun.Reconciler-fast",le="1e-08"} 0
+tekton_pipelines_controller_workqueue_queue_latency_seconds_bucket{name="github.com.tektoncd.pipeline.pkg.reconciler.taskrun.Reconciler-fast",le="1e-07"} 0
+tekton_pipelines_controller_workqueue_queue_latency_seconds_bucket{name="github.com.tektoncd.pipeline.pkg.reconciler.taskrun.Reconciler-fast",le="1e-06"} 0
+tekton_pipelines_controller_workqueue_queue_latency_seconds_bucket{name="github.com.tektoncd.pipeline.pkg.reconciler.taskrun.Reconciler-fast",le="9.999999999999999e-06"} 29
+tekton_pipelines_controller_workqueue_queue_latency_seconds_bucket{name="github.com.tektoncd.pipeline.pkg.reconciler.taskrun.Reconciler-fast",le="9.999999999999999e-05"} 35
+tekton_pipelines_controller_workqueue_queue_latency_seconds_bucket{name="github.com.tektoncd.pipeline.pkg.reconciler.taskrun.Reconciler-fast",le="0.001"} 36
+tekton_pipelines_controller_workqueue_queue_latency_seconds_bucket{name="github.com.tektoncd.pipeline.pkg.reconciler.taskrun.Reconciler-fast",le="0.01"} 36
+tekton_pipelines_controller_workqueue_queue_latency_seconds_bucket{name="github.com.tektoncd.pipeline.pkg.reconciler.taskrun.Reconciler-fast",le="0.1"} 36
+tekton_pipelines_controller_workqueue_queue_latency_seconds_bucket{name="github.com.tektoncd.pipeline.pkg.reconciler.taskrun.Reconciler-fast",le="1"} 36
+tekton_pipelines_controller_workqueue_queue_latency_seconds_bucket{name="github.com.tektoncd.pipeline.pkg.reconciler.taskrun.Reconciler-fast",le="10"} 36
+tekton_pipelines_controller_workqueue_queue_latency_seconds_bucket{name="github.com.tektoncd.pipeline.pkg.reconciler.taskrun.Reconciler-fast",le="+Inf"} 36
+tekton_pipelines_controller_workqueue_queue_latency_seconds_sum{name="github.com.tektoncd.pipeline.pkg.reconciler.taskrun.Reconciler-fast"} 0.00040391599999999993
+tekton_pipelines_controller_workqueue_queue_latency_seconds_count{name="github.com.tektoncd.pipeline.pkg.reconciler.taskrun.Reconciler-fast"} 36
+# HELP tekton_pipelines_controller_workqueue_retries_total Total number of retries handled by workqueue
+# TYPE tekton_pipelines_controller_workqueue_retries_total counter
+tekton_pipelines_controller_workqueue_retries_total{name="github.com.tektoncd.pipeline.pkg.reconciler.taskrun.Reconciler-fast"} 23
+# HELP tekton_pipelines_controller_workqueue_unfinished_work_seconds How long in seconds the outstanding workqueue items have been in flight (total).
+# TYPE tekton_pipelines_controller_workqueue_unfinished_work_seconds histogram
+tekton_pipelines_controller_workqueue_unfinished_work_seconds_bucket{name="github.com.tektoncd.pipeline.pkg.reconciler.pipelinerun.Reconciler-consumer",le="1e-08"} 471
+tekton_pipelines_controller_workqueue_unfinished_work_seconds_bucket{name="github.com.tektoncd.pipeline.pkg.reconciler.pipelinerun.Reconciler-consumer",le="1e-07"} 471
+tekton_pipelines_controller_workqueue_unfinished_work_seconds_bucket{name="github.com.tektoncd.pipeline.pkg.reconciler.pipelinerun.Reconciler-consumer",le="1e-06"} 471
+tekton_pipelines_controller_workqueue_unfinished_work_seconds_bucket{name="github.com.tektoncd.pipeline.pkg.reconciler.pipelinerun.Reconciler-consumer",le="9.999999999999999e-06"} 471
+tekton_pipelines_controller_workqueue_unfinished_work_seconds_bucket{name="github.com.tektoncd.pipeline.pkg.reconciler.pipelinerun.Reconciler-consumer",le="9.999999999999999e-05"} 471
+tekton_pipelines_controller_workqueue_unfinished_work_seconds_bucket{name="github.com.tektoncd.pipeline.pkg.reconciler.pipelinerun.Reconciler-consumer",le="0.001"} 471
+tekton_pipelines_controller_workqueue_unfinished_work_seconds_bucket{name="github.com.tektoncd.pipeline.pkg.reconciler.pipelinerun.Reconciler-consumer",le="0.01"} 471
+tekton_pipelines_controller_workqueue_unfinished_work_seconds_bucket{name="github.com.tektoncd.pipeline.pkg.reconciler.pipelinerun.Reconciler-consumer",le="0.1"} 471
+tekton_pipelines_controller_workqueue_unfinished_work_seconds_bucket{name="github.com.tektoncd.pipeline.pkg.reconciler.pipelinerun.Reconciler-consumer",le="1"} 471
+tekton_pipelines_controller_workqueue_unfinished_work_seconds_bucket{name="github.com.tektoncd.pipeline.pkg.reconciler.pipelinerun.Reconciler-consumer",le="10"} 471
+tekton_pipelines_controller_workqueue_unfinished_work_seconds_bucket{name="github.com.tektoncd.pipeline.pkg.reconciler.pipelinerun.Reconciler-consumer",le="+Inf"} 471
+tekton_pipelines_controller_workqueue_unfinished_work_seconds_sum{name="github.com.tektoncd.pipeline.pkg.reconciler.pipelinerun.Reconciler-consumer"} 0
+tekton_pipelines_controller_workqueue_unfinished_work_seconds_count{name="github.com.tektoncd.pipeline.pkg.reconciler.pipelinerun.Reconciler-consumer"} 471
+tekton_pipelines_controller_workqueue_unfinished_work_seconds_bucket{name="github.com.tektoncd.pipeline.pkg.reconciler.pipelinerun.Reconciler-fast",le="1e-08"} 471
+tekton_pipelines_controller_workqueue_unfinished_work_seconds_bucket{name="github.com.tektoncd.pipeline.pkg.reconciler.pipelinerun.Reconciler-fast",le="1e-07"} 471
+tekton_pipelines_controller_workqueue_unfinished_work_seconds_bucket{name="github.com.tektoncd.pipeline.pkg.reconciler.pipelinerun.Reconciler-fast",le="1e-06"} 471
+tekton_pipelines_controller_workqueue_unfinished_work_seconds_bucket{name="github.com.tektoncd.pipeline.pkg.reconciler.pipelinerun.Reconciler-fast",le="9.999999999999999e-06"} 471
+tekton_pipelines_controller_workqueue_unfinished_work_seconds_bucket{name="github.com.tektoncd.pipeline.pkg.reconciler.pipelinerun.Reconciler-fast",le="9.999999999999999e-05"} 471
+tekton_pipelines_controller_workqueue_unfinished_work_seconds_bucket{name="github.com.tektoncd.pipeline.pkg.reconciler.pipelinerun.Reconciler-fast",le="0.001"} 471
+tekton_pipelines_controller_workqueue_unfinished_work_seconds_bucket{name="github.com.tektoncd.pipeline.pkg.reconciler.pipelinerun.Reconciler-fast",le="0.01"} 471
+tekton_pipelines_controller_workqueue_unfinished_work_seconds_bucket{name="github.com.tektoncd.pipeline.pkg.reconciler.pipelinerun.Reconciler-fast",le="0.1"} 471
+tekton_pipelines_controller_workqueue_unfinished_work_seconds_bucket{name="github.com.tektoncd.pipeline.pkg.reconciler.pipelinerun.Reconciler-fast",le="1"} 471
+tekton_pipelines_controller_workqueue_unfinished_work_seconds_bucket{name="github.com.tektoncd.pipeline.pkg.reconciler.pipelinerun.Reconciler-fast",le="10"} 471
+tekton_pipelines_controller_workqueue_unfinished_work_seconds_bucket{name="github.com.tektoncd.pipeline.pkg.reconciler.pipelinerun.Reconciler-fast",le="+Inf"} 471
+tekton_pipelines_controller_workqueue_unfinished_work_seconds_sum{name="github.com.tektoncd.pipeline.pkg.reconciler.pipelinerun.Reconciler-fast"} 0
+tekton_pipelines_controller_workqueue_unfinished_work_seconds_count{name="github.com.tektoncd.pipeline.pkg.reconciler.pipelinerun.Reconciler-fast"} 471
+tekton_pipelines_controller_workqueue_unfinished_work_seconds_bucket{name="github.com.tektoncd.pipeline.pkg.reconciler.pipelinerun.Reconciler-slow",le="1e-08"} 471
+tekton_pipelines_controller_workqueue_unfinished_work_seconds_bucket{name="github.com.tektoncd.pipeline.pkg.reconciler.pipelinerun.Reconciler-slow",le="1e-07"} 471
+tekton_pipelines_controller_workqueue_unfinished_work_seconds_bucket{name="github.com.tektoncd.pipeline.pkg.reconciler.pipelinerun.Reconciler-slow",le="1e-06"} 471
+tekton_pipelines_controller_workqueue_unfinished_work_seconds_bucket{name="github.com.tektoncd.pipeline.pkg.reconciler.pipelinerun.Reconciler-slow",le="9.999999999999999e-06"} 471
+tekton_pipelines_controller_workqueue_unfinished_work_seconds_bucket{name="github.com.tektoncd.pipeline.pkg.reconciler.pipelinerun.Reconciler-slow",le="9.999999999999999e-05"} 471
+tekton_pipelines_controller_workqueue_unfinished_work_seconds_bucket{name="github.com.tektoncd.pipeline.pkg.reconciler.pipelinerun.Reconciler-slow",le="0.001"} 471
+tekton_pipelines_controller_workqueue_unfinished_work_seconds_bucket{name="github.com.tektoncd.pipeline.pkg.reconciler.pipelinerun.Reconciler-slow",le="0.01"} 471
+tekton_pipelines_controller_workqueue_unfinished_work_seconds_bucket{name="github.com.tektoncd.pipeline.pkg.reconciler.pipelinerun.Reconciler-slow",le="0.1"} 471
+tekton_pipelines_controller_workqueue_unfinished_work_seconds_bucket{name="github.com.tektoncd.pipeline.pkg.reconciler.pipelinerun.Reconciler-slow",le="1"} 471
+tekton_pipelines_controller_workqueue_unfinished_work_seconds_bucket{name="github.com.tektoncd.pipeline.pkg.reconciler.pipelinerun.Reconciler-slow",le="10"} 471
+tekton_pipelines_controller_workqueue_unfinished_work_seconds_bucket{name="github.com.tektoncd.pipeline.pkg.reconciler.pipelinerun.Reconciler-slow",le="+Inf"} 471
+tekton_pipelines_controller_workqueue_unfinished_work_seconds_sum{name="github.com.tektoncd.pipeline.pkg.reconciler.pipelinerun.Reconciler-slow"} 0
+tekton_pipelines_controller_workqueue_unfinished_work_seconds_count{name="github.com.tektoncd.pipeline.pkg.reconciler.pipelinerun.Reconciler-slow"} 471
+tekton_pipelines_controller_workqueue_unfinished_work_seconds_bucket{name="github.com.tektoncd.pipeline.pkg.reconciler.resolutionrequest.Reconciler-consumer",le="1e-08"} 471
+tekton_pipelines_controller_workqueue_unfinished_work_seconds_bucket{name="github.com.tektoncd.pipeline.pkg.reconciler.resolutionrequest.Reconciler-consumer",le="1e-07"} 471
+tekton_pipelines_controller_workqueue_unfinished_work_seconds_bucket{name="github.com.tektoncd.pipeline.pkg.reconciler.resolutionrequest.Reconciler-consumer",le="1e-06"} 471
+tekton_pipelines_controller_workqueue_unfinished_work_seconds_bucket{name="github.com.tektoncd.pipeline.pkg.reconciler.resolutionrequest.Reconciler-consumer",le="9.999999999999999e-06"} 471
+tekton_pipelines_controller_workqueue_unfinished_work_seconds_bucket{name="github.com.tektoncd.pipeline.pkg.reconciler.resolutionrequest.Reconciler-consumer",le="9.999999999999999e-05"} 471
+tekton_pipelines_controller_workqueue_unfinished_work_seconds_bucket{name="github.com.tektoncd.pipeline.pkg.reconciler.resolutionrequest.Reconciler-consumer",le="0.001"} 471
+tekton_pipelines_controller_workqueue_unfinished_work_seconds_bucket{name="github.com.tektoncd.pipeline.pkg.reconciler.resolutionrequest.Reconciler-consumer",le="0.01"} 471
+tekton_pipelines_controller_workqueue_unfinished_work_seconds_bucket{name="github.com.tektoncd.pipeline.pkg.reconciler.resolutionrequest.Reconciler-consumer",le="0.1"} 471
+tekton_pipelines_controller_workqueue_unfinished_work_seconds_bucket{name="github.com.tektoncd.pipeline.pkg.reconciler.resolutionrequest.Reconciler-consumer",le="1"} 471
+tekton_pipelines_controller_workqueue_unfinished_work_seconds_bucket{name="github.com.tektoncd.pipeline.pkg.reconciler.resolutionrequest.Reconciler-consumer",le="10"} 471
+tekton_pipelines_controller_workqueue_unfinished_work_seconds_bucket{name="github.com.tektoncd.pipeline.pkg.reconciler.resolutionrequest.Reconciler-consumer",le="+Inf"} 471
+tekton_pipelines_controller_workqueue_unfinished_work_seconds_sum{name="github.com.tektoncd.pipeline.pkg.reconciler.resolutionrequest.Reconciler-consumer"} 0
+tekton_pipelines_controller_workqueue_unfinished_work_seconds_count{name="github.com.tektoncd.pipeline.pkg.reconciler.resolutionrequest.Reconciler-consumer"} 471
+tekton_pipelines_controller_workqueue_unfinished_work_seconds_bucket{name="github.com.tektoncd.pipeline.pkg.reconciler.resolutionrequest.Reconciler-fast",le="1e-08"} 471
+tekton_pipelines_controller_workqueue_unfinished_work_seconds_bucket{name="github.com.tektoncd.pipeline.pkg.reconciler.resolutionrequest.Reconciler-fast",le="1e-07"} 471
+tekton_pipelines_controller_workqueue_unfinished_work_seconds_bucket{name="github.com.tektoncd.pipeline.pkg.reconciler.resolutionrequest.Reconciler-fast",le="1e-06"} 471
+tekton_pipelines_controller_workqueue_unfinished_work_seconds_bucket{name="github.com.tektoncd.pipeline.pkg.reconciler.resolutionrequest.Reconciler-fast",le="9.999999999999999e-06"} 471
+tekton_pipelines_controller_workqueue_unfinished_work_seconds_bucket{name="github.com.tektoncd.pipeline.pkg.reconciler.resolutionrequest.Reconciler-fast",le="9.999999999999999e-05"} 471
+tekton_pipelines_controller_workqueue_unfinished_work_seconds_bucket{name="github.com.tektoncd.pipeline.pkg.reconciler.resolutionrequest.Reconciler-fast",le="0.001"} 471
+tekton_pipelines_controller_workqueue_unfinished_work_seconds_bucket{name="github.com.tektoncd.pipeline.pkg.reconciler.resolutionrequest.Reconciler-fast",le="0.01"} 471
+tekton_pipelines_controller_workqueue_unfinished_work_seconds_bucket{name="github.com.tektoncd.pipeline.pkg.reconciler.resolutionrequest.Reconciler-fast",le="0.1"} 471
+tekton_pipelines_controller_workqueue_unfinished_work_seconds_bucket{name="github.com.tektoncd.pipeline.pkg.reconciler.resolutionrequest.Reconciler-fast",le="1"} 471
+tekton_pipelines_controller_workqueue_unfinished_work_seconds_bucket{name="github.com.tektoncd.pipeline.pkg.reconciler.resolutionrequest.Reconciler-fast",le="10"} 471
+tekton_pipelines_controller_workqueue_unfinished_work_seconds_bucket{name="github.com.tektoncd.pipeline.pkg.reconciler.resolutionrequest.Reconciler-fast",le="+Inf"} 471
+tekton_pipelines_controller_workqueue_unfinished_work_seconds_sum{name="github.com.tektoncd.pipeline.pkg.reconciler.resolutionrequest.Reconciler-fast"} 0
+tekton_pipelines_controller_workqueue_unfinished_work_seconds_count{name="github.com.tektoncd.pipeline.pkg.reconciler.resolutionrequest.Reconciler-fast"} 471
+tekton_pipelines_controller_workqueue_unfinished_work_seconds_bucket{name="github.com.tektoncd.pipeline.pkg.reconciler.resolutionrequest.Reconciler-slow",le="1e-08"} 471
+tekton_pipelines_controller_workqueue_unfinished_work_seconds_bucket{name="github.com.tektoncd.pipeline.pkg.reconciler.resolutionrequest.Reconciler-slow",le="1e-07"} 471
+tekton_pipelines_controller_workqueue_unfinished_work_seconds_bucket{name="github.com.tektoncd.pipeline.pkg.reconciler.resolutionrequest.Reconciler-slow",le="1e-06"} 471
+tekton_pipelines_controller_workqueue_unfinished_work_seconds_bucket{name="github.com.tektoncd.pipeline.pkg.reconciler.resolutionrequest.Reconciler-slow",le="9.999999999999999e-06"} 471
+tekton_pipelines_controller_workqueue_unfinished_work_seconds_bucket{name="github.com.tektoncd.pipeline.pkg.reconciler.resolutionrequest.Reconciler-slow",le="9.999999999999999e-05"} 471
+tekton_pipelines_controller_workqueue_unfinished_work_seconds_bucket{name="github.com.tektoncd.pipeline.pkg.reconciler.resolutionrequest.Reconciler-slow",le="0.001"} 471
+tekton_pipelines_controller_workqueue_unfinished_work_seconds_bucket{name="github.com.tektoncd.pipeline.pkg.reconciler.resolutionrequest.Reconciler-slow",le="0.01"} 471
+tekton_pipelines_controller_workqueue_unfinished_work_seconds_bucket{name="github.com.tektoncd.pipeline.pkg.reconciler.resolutionrequest.Reconciler-slow",le="0.1"} 471
+tekton_pipelines_controller_workqueue_unfinished_work_seconds_bucket{name="github.com.tektoncd.pipeline.pkg.reconciler.resolutionrequest.Reconciler-slow",le="1"} 471
+tekton_pipelines_controller_workqueue_unfinished_work_seconds_bucket{name="github.com.tektoncd.pipeline.pkg.reconciler.resolutionrequest.Reconciler-slow",le="10"} 471
+tekton_pipelines_controller_workqueue_unfinished_work_seconds_bucket{name="github.com.tektoncd.pipeline.pkg.reconciler.resolutionrequest.Reconciler-slow",le="+Inf"} 471
+tekton_pipelines_controller_workqueue_unfinished_work_seconds_sum{name="github.com.tektoncd.pipeline.pkg.reconciler.resolutionrequest.Reconciler-slow"} 0
+tekton_pipelines_controller_workqueue_unfinished_work_seconds_count{name="github.com.tektoncd.pipeline.pkg.reconciler.resolutionrequest.Reconciler-slow"} 471
+tekton_pipelines_controller_workqueue_unfinished_work_seconds_bucket{name="github.com.tektoncd.pipeline.pkg.reconciler.taskrun.Reconciler-consumer",le="1e-08"} 471
+tekton_pipelines_controller_workqueue_unfinished_work_seconds_bucket{name="github.com.tektoncd.pipeline.pkg.reconciler.taskrun.Reconciler-consumer",le="1e-07"} 471
+tekton_pipelines_controller_workqueue_unfinished_work_seconds_bucket{name="github.com.tektoncd.pipeline.pkg.reconciler.taskrun.Reconciler-consumer",le="1e-06"} 471
+tekton_pipelines_controller_workqueue_unfinished_work_seconds_bucket{name="github.com.tektoncd.pipeline.pkg.reconciler.taskrun.Reconciler-consumer",le="9.999999999999999e-06"} 471
+tekton_pipelines_controller_workqueue_unfinished_work_seconds_bucket{name="github.com.tektoncd.pipeline.pkg.reconciler.taskrun.Reconciler-consumer",le="9.999999999999999e-05"} 471
+tekton_pipelines_controller_workqueue_unfinished_work_seconds_bucket{name="github.com.tektoncd.pipeline.pkg.reconciler.taskrun.Reconciler-consumer",le="0.001"} 471
+tekton_pipelines_controller_workqueue_unfinished_work_seconds_bucket{name="github.com.tektoncd.pipeline.pkg.reconciler.taskrun.Reconciler-consumer",le="0.01"} 471
+tekton_pipelines_controller_workqueue_unfinished_work_seconds_bucket{name="github.com.tektoncd.pipeline.pkg.reconciler.taskrun.Reconciler-consumer",le="0.1"} 471
+tekton_pipelines_controller_workqueue_unfinished_work_seconds_bucket{name="github.com.tektoncd.pipeline.pkg.reconciler.taskrun.Reconciler-consumer",le="1"} 471
+tekton_pipelines_controller_workqueue_unfinished_work_seconds_bucket{name="github.com.tektoncd.pipeline.pkg.reconciler.taskrun.Reconciler-consumer",le="10"} 471
+tekton_pipelines_controller_workqueue_unfinished_work_seconds_bucket{name="github.com.tektoncd.pipeline.pkg.reconciler.taskrun.Reconciler-consumer",le="+Inf"} 471
+tekton_pipelines_controller_workqueue_unfinished_work_seconds_sum{name="github.com.tektoncd.pipeline.pkg.reconciler.taskrun.Reconciler-consumer"} 0
+tekton_pipelines_controller_workqueue_unfinished_work_seconds_count{name="github.com.tektoncd.pipeline.pkg.reconciler.taskrun.Reconciler-consumer"} 471
+tekton_pipelines_controller_workqueue_unfinished_work_seconds_bucket{name="github.com.tektoncd.pipeline.pkg.reconciler.taskrun.Reconciler-fast",le="1e-08"} 471
+tekton_pipelines_controller_workqueue_unfinished_work_seconds_bucket{name="github.com.tektoncd.pipeline.pkg.reconciler.taskrun.Reconciler-fast",le="1e-07"} 471
+tekton_pipelines_controller_workqueue_unfinished_work_seconds_bucket{name="github.com.tektoncd.pipeline.pkg.reconciler.taskrun.Reconciler-fast",le="1e-06"} 471
+tekton_pipelines_controller_workqueue_unfinished_work_seconds_bucket{name="github.com.tektoncd.pipeline.pkg.reconciler.taskrun.Reconciler-fast",le="9.999999999999999e-06"} 471
+tekton_pipelines_controller_workqueue_unfinished_work_seconds_bucket{name="github.com.tektoncd.pipeline.pkg.reconciler.taskrun.Reconciler-fast",le="9.999999999999999e-05"} 471
+tekton_pipelines_controller_workqueue_unfinished_work_seconds_bucket{name="github.com.tektoncd.pipeline.pkg.reconciler.taskrun.Reconciler-fast",le="0.001"} 471
+tekton_pipelines_controller_workqueue_unfinished_work_seconds_bucket{name="github.com.tektoncd.pipeline.pkg.reconciler.taskrun.Reconciler-fast",le="0.01"} 471
+tekton_pipelines_controller_workqueue_unfinished_work_seconds_bucket{name="github.com.tektoncd.pipeline.pkg.reconciler.taskrun.Reconciler-fast",le="0.1"} 471
+tekton_pipelines_controller_workqueue_unfinished_work_seconds_bucket{name="github.com.tektoncd.pipeline.pkg.reconciler.taskrun.Reconciler-fast",le="1"} 471
+tekton_pipelines_controller_workqueue_unfinished_work_seconds_bucket{name="github.com.tektoncd.pipeline.pkg.reconciler.taskrun.Reconciler-fast",le="10"} 471
+tekton_pipelines_controller_workqueue_unfinished_work_seconds_bucket{name="github.com.tektoncd.pipeline.pkg.reconciler.taskrun.Reconciler-fast",le="+Inf"} 471
+tekton_pipelines_controller_workqueue_unfinished_work_seconds_sum{name="github.com.tektoncd.pipeline.pkg.reconciler.taskrun.Reconciler-fast"} 0
+tekton_pipelines_controller_workqueue_unfinished_work_seconds_count{name="github.com.tektoncd.pipeline.pkg.reconciler.taskrun.Reconciler-fast"} 471
+tekton_pipelines_controller_workqueue_unfinished_work_seconds_bucket{name="github.com.tektoncd.pipeline.pkg.reconciler.taskrun.Reconciler-slow",le="1e-08"} 471
+tekton_pipelines_controller_workqueue_unfinished_work_seconds_bucket{name="github.com.tektoncd.pipeline.pkg.reconciler.taskrun.Reconciler-slow",le="1e-07"} 471
+tekton_pipelines_controller_workqueue_unfinished_work_seconds_bucket{name="github.com.tektoncd.pipeline.pkg.reconciler.taskrun.Reconciler-slow",le="1e-06"} 471
+tekton_pipelines_controller_workqueue_unfinished_work_seconds_bucket{name="github.com.tektoncd.pipeline.pkg.reconciler.taskrun.Reconciler-slow",le="9.999999999999999e-06"} 471
+tekton_pipelines_controller_workqueue_unfinished_work_seconds_bucket{name="github.com.tektoncd.pipeline.pkg.reconciler.taskrun.Reconciler-slow",le="9.999999999999999e-05"} 471
+tekton_pipelines_controller_workqueue_unfinished_work_seconds_bucket{name="github.com.tektoncd.pipeline.pkg.reconciler.taskrun.Reconciler-slow",le="0.001"} 471
+tekton_pipelines_controller_workqueue_unfinished_work_seconds_bucket{name="github.com.tektoncd.pipeline.pkg.reconciler.taskrun.Reconciler-slow",le="0.01"} 471
+tekton_pipelines_controller_workqueue_unfinished_work_seconds_bucket{name="github.com.tektoncd.pipeline.pkg.reconciler.taskrun.Reconciler-slow",le="0.1"} 471
+tekton_pipelines_controller_workqueue_unfinished_work_seconds_bucket{name="github.com.tektoncd.pipeline.pkg.reconciler.taskrun.Reconciler-slow",le="1"} 471
+tekton_pipelines_controller_workqueue_unfinished_work_seconds_bucket{name="github.com.tektoncd.pipeline.pkg.reconciler.taskrun.Reconciler-slow",le="10"} 471
+tekton_pipelines_controller_workqueue_unfinished_work_seconds_bucket{name="github.com.tektoncd.pipeline.pkg.reconciler.taskrun.Reconciler-slow",le="+Inf"} 471
+tekton_pipelines_controller_workqueue_unfinished_work_seconds_sum{name="github.com.tektoncd.pipeline.pkg.reconciler.taskrun.Reconciler-slow"} 0
+tekton_pipelines_controller_workqueue_unfinished_work_seconds_count{name="github.com.tektoncd.pipeline.pkg.reconciler.taskrun.Reconciler-slow"} 471
+# HELP tekton_pipelines_controller_workqueue_work_duration_seconds How long in seconds processing an item from workqueue takes.
+# TYPE tekton_pipelines_controller_workqueue_work_duration_seconds histogram
+tekton_pipelines_controller_workqueue_work_duration_seconds_bucket{name="github.com.tektoncd.pipeline.pkg.reconciler.pipelinerun.Reconciler-consumer",le="1e-08"} 0
+tekton_pipelines_controller_workqueue_work_duration_seconds_bucket{name="github.com.tektoncd.pipeline.pkg.reconciler.pipelinerun.Reconciler-consumer",le="1e-07"} 0
+tekton_pipelines_controller_workqueue_work_duration_seconds_bucket{name="github.com.tektoncd.pipeline.pkg.reconciler.pipelinerun.Reconciler-consumer",le="1e-06"} 0
+tekton_pipelines_controller_workqueue_work_duration_seconds_bucket{name="github.com.tektoncd.pipeline.pkg.reconciler.pipelinerun.Reconciler-consumer",le="9.999999999999999e-06"} 0
+tekton_pipelines_controller_workqueue_work_duration_seconds_bucket{name="github.com.tektoncd.pipeline.pkg.reconciler.pipelinerun.Reconciler-consumer",le="9.999999999999999e-05"} 1
+tekton_pipelines_controller_workqueue_work_duration_seconds_bucket{name="github.com.tektoncd.pipeline.pkg.reconciler.pipelinerun.Reconciler-consumer",le="0.001"} 2
+tekton_pipelines_controller_workqueue_work_duration_seconds_bucket{name="github.com.tektoncd.pipeline.pkg.reconciler.pipelinerun.Reconciler-consumer",le="0.01"} 2
+tekton_pipelines_controller_workqueue_work_duration_seconds_bucket{name="github.com.tektoncd.pipeline.pkg.reconciler.pipelinerun.Reconciler-consumer",le="0.1"} 3
+tekton_pipelines_controller_workqueue_work_duration_seconds_bucket{name="github.com.tektoncd.pipeline.pkg.reconciler.pipelinerun.Reconciler-consumer",le="1"} 3
+tekton_pipelines_controller_workqueue_work_duration_seconds_bucket{name="github.com.tektoncd.pipeline.pkg.reconciler.pipelinerun.Reconciler-consumer",le="10"} 3
+tekton_pipelines_controller_workqueue_work_duration_seconds_bucket{name="github.com.tektoncd.pipeline.pkg.reconciler.pipelinerun.Reconciler-consumer",le="+Inf"} 3
+tekton_pipelines_controller_workqueue_work_duration_seconds_sum{name="github.com.tektoncd.pipeline.pkg.reconciler.pipelinerun.Reconciler-consumer"} 0.04006266700000001
+tekton_pipelines_controller_workqueue_work_duration_seconds_count{name="github.com.tektoncd.pipeline.pkg.reconciler.pipelinerun.Reconciler-consumer"} 3
+tekton_pipelines_controller_workqueue_work_duration_seconds_bucket{name="github.com.tektoncd.pipeline.pkg.reconciler.pipelinerun.Reconciler-fast",le="1e-08"} 0
+tekton_pipelines_controller_workqueue_work_duration_seconds_bucket{name="github.com.tektoncd.pipeline.pkg.reconciler.pipelinerun.Reconciler-fast",le="1e-07"} 0
+tekton_pipelines_controller_workqueue_work_duration_seconds_bucket{name="github.com.tektoncd.pipeline.pkg.reconciler.pipelinerun.Reconciler-fast",le="1e-06"} 0
+tekton_pipelines_controller_workqueue_work_duration_seconds_bucket{name="github.com.tektoncd.pipeline.pkg.reconciler.pipelinerun.Reconciler-fast",le="9.999999999999999e-06"} 3
+tekton_pipelines_controller_workqueue_work_duration_seconds_bucket{name="github.com.tektoncd.pipeline.pkg.reconciler.pipelinerun.Reconciler-fast",le="9.999999999999999e-05"} 4
+tekton_pipelines_controller_workqueue_work_duration_seconds_bucket{name="github.com.tektoncd.pipeline.pkg.reconciler.pipelinerun.Reconciler-fast",le="0.001"} 4
+tekton_pipelines_controller_workqueue_work_duration_seconds_bucket{name="github.com.tektoncd.pipeline.pkg.reconciler.pipelinerun.Reconciler-fast",le="0.01"} 4
+tekton_pipelines_controller_workqueue_work_duration_seconds_bucket{name="github.com.tektoncd.pipeline.pkg.reconciler.pipelinerun.Reconciler-fast",le="0.1"} 4
+tekton_pipelines_controller_workqueue_work_duration_seconds_bucket{name="github.com.tektoncd.pipeline.pkg.reconciler.pipelinerun.Reconciler-fast",le="1"} 4
+tekton_pipelines_controller_workqueue_work_duration_seconds_bucket{name="github.com.tektoncd.pipeline.pkg.reconciler.pipelinerun.Reconciler-fast",le="10"} 4
+tekton_pipelines_controller_workqueue_work_duration_seconds_bucket{name="github.com.tektoncd.pipeline.pkg.reconciler.pipelinerun.Reconciler-fast",le="+Inf"} 4
+tekton_pipelines_controller_workqueue_work_duration_seconds_sum{name="github.com.tektoncd.pipeline.pkg.reconciler.pipelinerun.Reconciler-fast"} 2.0167e-05
+tekton_pipelines_controller_workqueue_work_duration_seconds_count{name="github.com.tektoncd.pipeline.pkg.reconciler.pipelinerun.Reconciler-fast"} 4
+tekton_pipelines_controller_workqueue_work_duration_seconds_bucket{name="github.com.tektoncd.pipeline.pkg.reconciler.taskrun.Reconciler-consumer",le="1e-08"} 0
+tekton_pipelines_controller_workqueue_work_duration_seconds_bucket{name="github.com.tektoncd.pipeline.pkg.reconciler.taskrun.Reconciler-consumer",le="1e-07"} 0
+tekton_pipelines_controller_workqueue_work_duration_seconds_bucket{name="github.com.tektoncd.pipeline.pkg.reconciler.taskrun.Reconciler-consumer",le="1e-06"} 0
+tekton_pipelines_controller_workqueue_work_duration_seconds_bucket{name="github.com.tektoncd.pipeline.pkg.reconciler.taskrun.Reconciler-consumer",le="9.999999999999999e-06"} 0
+tekton_pipelines_controller_workqueue_work_duration_seconds_bucket{name="github.com.tektoncd.pipeline.pkg.reconciler.taskrun.Reconciler-consumer",le="9.999999999999999e-05"} 0
+tekton_pipelines_controller_workqueue_work_duration_seconds_bucket{name="github.com.tektoncd.pipeline.pkg.reconciler.taskrun.Reconciler-consumer",le="0.001"} 11
+tekton_pipelines_controller_workqueue_work_duration_seconds_bucket{name="github.com.tektoncd.pipeline.pkg.reconciler.taskrun.Reconciler-consumer",le="0.01"} 16
+tekton_pipelines_controller_workqueue_work_duration_seconds_bucket{name="github.com.tektoncd.pipeline.pkg.reconciler.taskrun.Reconciler-consumer",le="0.1"} 27
+tekton_pipelines_controller_workqueue_work_duration_seconds_bucket{name="github.com.tektoncd.pipeline.pkg.reconciler.taskrun.Reconciler-consumer",le="1"} 27
+tekton_pipelines_controller_workqueue_work_duration_seconds_bucket{name="github.com.tektoncd.pipeline.pkg.reconciler.taskrun.Reconciler-consumer",le="10"} 27
+tekton_pipelines_controller_workqueue_work_duration_seconds_bucket{name="github.com.tektoncd.pipeline.pkg.reconciler.taskrun.Reconciler-consumer",le="+Inf"} 27
+tekton_pipelines_controller_workqueue_work_duration_seconds_sum{name="github.com.tektoncd.pipeline.pkg.reconciler.taskrun.Reconciler-consumer"} 0.26903408300000003
+tekton_pipelines_controller_workqueue_work_duration_seconds_count{name="github.com.tektoncd.pipeline.pkg.reconciler.taskrun.Reconciler-consumer"} 27
+tekton_pipelines_controller_workqueue_work_duration_seconds_bucket{name="github.com.tektoncd.pipeline.pkg.reconciler.taskrun.Reconciler-fast",le="1e-08"} 0
+tekton_pipelines_controller_workqueue_work_duration_seconds_bucket{name="github.com.tektoncd.pipeline.pkg.reconciler.taskrun.Reconciler-fast",le="1e-07"} 0
+tekton_pipelines_controller_workqueue_work_duration_seconds_bucket{name="github.com.tektoncd.pipeline.pkg.reconciler.taskrun.Reconciler-fast",le="1e-06"} 0
+tekton_pipelines_controller_workqueue_work_duration_seconds_bucket{name="github.com.tektoncd.pipeline.pkg.reconciler.taskrun.Reconciler-fast",le="9.999999999999999e-06"} 34
+tekton_pipelines_controller_workqueue_work_duration_seconds_bucket{name="github.com.tektoncd.pipeline.pkg.reconciler.taskrun.Reconciler-fast",le="9.999999999999999e-05"} 36
+tekton_pipelines_controller_workqueue_work_duration_seconds_bucket{name="github.com.tektoncd.pipeline.pkg.reconciler.taskrun.Reconciler-fast",le="0.001"} 36
+tekton_pipelines_controller_workqueue_work_duration_seconds_bucket{name="github.com.tektoncd.pipeline.pkg.reconciler.taskrun.Reconciler-fast",le="0.01"} 36
+tekton_pipelines_controller_workqueue_work_duration_seconds_bucket{name="github.com.tektoncd.pipeline.pkg.reconciler.taskrun.Reconciler-fast",le="0.1"} 36
+tekton_pipelines_controller_workqueue_work_duration_seconds_bucket{name="github.com.tektoncd.pipeline.pkg.reconciler.taskrun.Reconciler-fast",le="1"} 36
+tekton_pipelines_controller_workqueue_work_duration_seconds_bucket{name="github.com.tektoncd.pipeline.pkg.reconciler.taskrun.Reconciler-fast",le="10"} 36
+tekton_pipelines_controller_workqueue_work_duration_seconds_bucket{name="github.com.tektoncd.pipeline.pkg.reconciler.taskrun.Reconciler-fast",le="+Inf"} 36
+tekton_pipelines_controller_workqueue_work_duration_seconds_sum{name="github.com.tektoncd.pipeline.pkg.reconciler.taskrun.Reconciler-fast"} 0.000133248
+tekton_pipelines_controller_workqueue_work_duration_seconds_count{name="github.com.tektoncd.pipeline.pkg.reconciler.taskrun.Reconciler-fast"} 36

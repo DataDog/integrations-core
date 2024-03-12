@@ -6,12 +6,6 @@ build_wheels() {
     /py${DD_BUILD_PYTHON_VERSION}/bin/python -m pip wheel "$@"
 }
 
-export PIP_CONSTRAINT="/pip_constraints.txt"
-echo "PIP_CONSTRAINT=\"${PIP_CONSTRAINT}\"" >> $DD_ENV_FILE
-
-# bcrypt >= 4.1.0 requires rust >= 1.64, which dropped support for glibc 2.12 (~Centos 6)
-echo "bcrypt < 4.1.0" >> "${PIP_CONSTRAINT}"
-
 # Packages which must be built from source
 always_build=()
 
@@ -28,16 +22,6 @@ if [[ "${DD_BUILD_PYTHON_VERSION}" == "3" ]]; then
         RELATIVE_PATH="librdkafka-{{version}}" \
         bash install-from-source.sh --enable-sasl --enable-curl
     always_build+=("confluent-kafka")
-
-    # pydantic-core
-    pydantic_core_version="2.1.2"
-    curl -L "https://github.com/pydantic/pydantic-core/archive/refs/tags/v${pydantic_core_version}.tar.gz" \
-        | tar -C /tmp -xzf -
-    pushd "/tmp/pydantic-core-${pydantic_core_version}"
-    patch -p1 -i "${DD_MOUNT_DIR}/patches/pydantic-core-for-manylinux1.patch"
-    build_wheels --no-deps .
-    echo "pydantic-core == ${pydantic_core_version}" >> "${PIP_CONSTRAINT}"
-    popd
 fi
 
 # Empty arrays are flagged as unset when using the `-u` flag. This is the safest way to work around that

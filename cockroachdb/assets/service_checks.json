@@ -1,1 +1,32 @@
-[]
+[
+  {
+    "agent_version": "7.34.0",
+    "integration": "CockroachDB",
+    "check": "cockroachdb.openmetrics.health",
+    "statuses": [
+      "ok",
+      "critical"
+    ],
+    "groups": [
+      "host",
+      "endpoint"
+    ],
+    "name": "CockroachDB OpenMetrics endpoint up",
+    "description": "Returns `CRITICAL` if the check cannot access the OpenMetrics metrics endpoint of CockroachDB."
+  },
+  {
+    "agent_version": "7.19.0",
+    "integration": "CockroachDB",
+    "check": "cockroachdb.prometheus.health",
+    "statuses": [
+      "ok",
+      "critical"
+    ],
+    "groups": [
+      "host",
+      "endpoint"
+    ],
+    "name": "CockroachDB Prometheus endpoint up",
+    "description": "Returns `CRITICAL` if the check cannot access the Prometheus metrics endpoint of CockroachDB."
+  }
+]

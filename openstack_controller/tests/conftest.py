@@ -558,7 +558,7 @@ def connection_baremetal(request, mock_responses):
             for node in mock_responses('GET', '/baremetal/v1/nodes/detail')['nodes']
         ]
 
-    def conductors():
+    def conductors(limit=None):
         if http_error and 'conductors' in http_error:
             raise requests.exceptions.HTTPError(response=http_error['conductors'])
         return [
@@ -598,7 +598,7 @@ def connection_load_balancer(request, mock_responses):
     param = request.param if hasattr(request, 'param') and request.param is not None else {}
     http_error = param.get('http_error')
 
-    def load_balancers(project_id):
+    def load_balancers(project_id, limit=None):
         if http_error and 'load_balancers' in http_error and project_id in http_error['load_balancers']:
             raise requests.exceptions.HTTPError(response=http_error['load_balancers'][project_id])
         return [
@@ -627,7 +627,7 @@ def connection_load_balancer(request, mock_responses):
             )
         )
 
-    def listeners(project_id):
+    def listeners(project_id, limit=None):
         if http_error and 'listeners' in http_error and project_id in http_error['listeners']:
             raise requests.exceptions.HTTPError(response=http_error['listeners'][project_id])
         return [

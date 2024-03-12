@@ -1,0 +1,14 @@
+apiVersion: tekton.dev/v1beta1
+kind: Task
+metadata:
+  name: sleep
+spec:
+  steps:
+    - name: echo
+      image: alpine
+      script: |
+        #!/bin/sh
+        while true; do
+            echo "Sleeping 5 seconds..."
+            sleep 5
+        done

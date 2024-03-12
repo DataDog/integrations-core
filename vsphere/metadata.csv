@@ -26,6 +26,7 @@ vsphere.cpu.totalCapacity.avg,gauge,,megahertz,,Total CPU capacity reserved by a
 vsphere.cpu.totalmhz.avg,gauge,,megahertz,,Total megahertz of CPU being used,-1,vsphere,cpu totalmhz avg,
 vsphere.cpu.usage,gauge,,percent,,Percentage of CPU capacity being used [Legacy],-1,vsphere,cpu usage,
 vsphere.cpu.usage.avg,gauge,,percent,,Percentage of CPU capacity being used,-1,vsphere,cpu usage avg,
+vsphere.cpu.usage.vcpus.avg,gauge,,percent,,Virtual CPU usage as a percentage during the interval,-1,vsphere,cpu usage vcpus avg,
 vsphere.cpu.usagemhz,gauge,,megahertz,,Total megehertz of CPU being used [Legacy],-1,vsphere,cpu usagemhz,
 vsphere.cpu.usagemhz.avg,gauge,,megahertz,,"CPU usage, as measured in megahertz",-1,vsphere,cpu usagemhz avg,
 vsphere.cpu.used.sum,gauge,,millisecond,,"Time accounted to the virtual machine. If a system service runs on behalf of this virtual machine, the time spent by that service (represented by cpu.system) should be charged to this virtual machine. If not, the time spent (represented by cpu.overlap) should not be charged against this virtual machine.",0,vsphere,cpu used sum,

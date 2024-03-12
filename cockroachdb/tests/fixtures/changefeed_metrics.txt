@@ -1,0 +1,690 @@
+# HELP changefeed_schema_registry_retry_count Number of retries encountered when sending requests to the schema registry
+# TYPE changefeed_schema_registry_retry_count counter
+changefeed_schema_registry_retry_count{node_id="1"} 0
+# HELP changefeed_flush_messages_pushback_nanos Total time spent throttled for flush quota
+# TYPE changefeed_flush_messages_pushback_nanos counter
+changefeed_flush_messages_pushback_nanos{node_id="1"} 0
+# HELP changefeed_backfill_pending_ranges Number of ranges in an ongoing backfill that are yet to be fully emitted
+# TYPE changefeed_backfill_pending_ranges gauge
+changefeed_backfill_pending_ranges{node_id="1"} 0
+# HELP changefeed_flushes Total flushes across all feeds
+# TYPE changefeed_flushes counter
+changefeed_flushes{node_id="1"} 0
+# HELP changefeed_filtered_messages Messages filtered out by all feeds. This count does not include the number of messages that may be filtered due to the range constraints.
+# TYPE changefeed_filtered_messages counter
+changefeed_filtered_messages{node_id="1"} 0
+# HELP changefeed_buffer_entries_allocated_mem Current quota pool memory allocation
+# TYPE changefeed_buffer_entries_allocated_mem gauge
+changefeed_buffer_entries_allocated_mem{node_id="1"} 0
+# HELP changefeed_checkpoint_progress The earliest timestamp of any changefeed's persisted checkpoint (values prior to this timestamp will never need to be re-emitted)
+# TYPE changefeed_checkpoint_progress gauge
+changefeed_checkpoint_progress{node_id="1"} 0
+# HELP changefeed_schemafeed_table_history_scans The number of table history scans during polling
+# TYPE changefeed_schemafeed_table_history_scans counter
+changefeed_schemafeed_table_history_scans{node_id="1"} 0
+# HELP changefeed_failures Total number of changefeed jobs which have failed
+# TYPE changefeed_failures counter
+changefeed_failures{node_id="1"} 0
+# HELP changefeed_size_based_flushes Total size based flushes across all feeds
+# TYPE changefeed_size_based_flushes counter
+changefeed_size_based_flushes{node_id="1"} 0
+# HELP changefeed_nprocs_consume_event_nanos Total time spent waiting to add an event to the parallel consumer
+# TYPE changefeed_nprocs_consume_event_nanos histogram
+changefeed_nprocs_consume_event_nanos_bucket{node_id="1",le="10000"} 0
+changefeed_nprocs_consume_event_nanos_bucket{node_id="1",le="12638.482029342978"} 0
+changefeed_nprocs_consume_event_nanos_bucket{node_id="1",le="15973.122800602541"} 0
+changefeed_nprocs_consume_event_nanos_bucket{node_id="1",le="20187.602546790382"} 0
+changefeed_nprocs_consume_event_nanos_bucket{node_id="1",le="25514.065200312878"} 0
+changefeed_nprocs_consume_event_nanos_bucket{node_id="1",le="32245.90545296394"} 0
+changefeed_nprocs_consume_event_nanos_bucket{node_id="1",le="40753.92965871775"} 0
+changefeed_nprocs_consume_event_nanos_bucket{node_id="1",le="51506.78076168121"} 0
+changefeed_nprocs_consume_event_nanos_bucket{node_id="1",le="65096.75230458167"} 0
+changefeed_nprocs_consume_event_nanos_bucket{node_id="1",le="82272.41341700466"} 0
+changefeed_nprocs_consume_event_nanos_bucket{node_id="1",le="103979.84184814895"} 0
+changefeed_nprocs_consume_event_nanos_bucket{node_id="1",le="131414.73626117557"} 0
+changefeed_nprocs_consume_event_nanos_bucket{node_id="1",le="166088.27826277143"} 0
+changefeed_nprocs_consume_event_nanos_bucket{node_id="1",le="209910.3720108553"} 0
+changefeed_nprocs_consume_event_nanos_bucket{node_id="1",le="265294.8464431894"} 0
+changefeed_nprocs_consume_event_nanos_bucket{node_id="1",le="335292.41492495546"} 0
+changefeed_nprocs_consume_event_nanos_bucket{node_id="1",le="423758.7160604059"} 0
+changefeed_nprocs_consume_event_nanos_bucket{node_id="1",le="535566.6917706894"} 0
+changefeed_nprocs_consume_event_nanos_bucket{node_id="1",le="676875.0009458527"} 0
+changefeed_nprocs_consume_event_nanos_bucket{node_id="1",le="855467.2535565672"} 0
+changefeed_nprocs_consume_event_nanos_bucket{node_id="1",le="1.0811807510766068e+06"} 0
+changefeed_nprocs_consume_event_nanos_bucket{node_id="1",le="1.3664483492953242e+06"} 0
+changefeed_nprocs_consume_event_nanos_bucket{node_id="1",le="1.7269832906594332e+06"} 0
+changefeed_nprocs_consume_event_nanos_bucket{node_id="1",le="2.182644728397485e+06"} 0
+changefeed_nprocs_consume_event_nanos_bucket{node_id="1",le="2.7585316176291797e+06"} 0
+changefeed_nprocs_consume_event_nanos_bucket{node_id="1",le="3.4863652276780806e+06"} 0
+changefeed_nprocs_consume_event_nanos_bucket{node_id="1",le="4.406236427773566e+06"} 0
+changefeed_nprocs_consume_event_nanos_bucket{node_id="1",le="5.568813990945262e+06"} 0
+changefeed_nprocs_consume_event_nanos_bucket{node_id="1",le="7.038135554931545e+06"} 0
+changefeed_nprocs_consume_event_nanos_bucket{node_id="1",le="8.89513497310822e+06"} 0
+changefeed_nprocs_consume_event_nanos_bucket{node_id="1",le="1.1242100350620849e+07"} 0
+changefeed_nprocs_consume_event_nanos_bucket{node_id="1",le="1.4208308325339198e+07"} 0
+changefeed_nprocs_consume_event_nanos_bucket{node_id="1",le="1.795714494371637e+07"} 0
+changefeed_nprocs_consume_event_nanos_bucket{node_id="1",le="2.269510536694665e+07"} 0
+changefeed_nprocs_consume_event_nanos_bucket{node_id="1",le="2.868316813342006e+07"} 0
+changefeed_nprocs_consume_event_nanos_bucket{node_id="1",le="3.625117049988527e+07"} 0
+changefeed_nprocs_consume_event_nanos_bucket{node_id="1",le="4.581597669054482e+07"} 0
+changefeed_nprocs_consume_event_nanos_bucket{node_id="1",le="5.790443980602476e+07"} 0
+changefeed_nprocs_consume_event_nanos_bucket{node_id="1",le="7.318242219076161e+07"} 0
+changefeed_nprocs_consume_event_nanos_bucket{node_id="1",le="9.249147277217315e+07"} 0
+changefeed_nprocs_consume_event_nanos_bucket{node_id="1",le="1.1689518164985757e+08"} 0
+changefeed_nprocs_consume_event_nanos_bucket{node_id="1",le="1.4773776525985083e+08"} 0
+changefeed_nprocs_consume_event_nanos_bucket{node_id="1",le="1.8671810912919158e+08"} 0
+changefeed_nprocs_consume_event_nanos_bucket{node_id="1",le="2.359833466782189e+08"} 0
+changefeed_nprocs_consume_event_nanos_bucket{node_id="1",le="2.9824712862168837e+08"} 0
+changefeed_nprocs_consume_event_nanos_bucket{node_id="1",le="3.769390975388353e+08"} 0
+changefeed_nprocs_consume_event_nanos_bucket{node_id="1",le="4.7639380104013294e+08"} 0
+changefeed_nprocs_consume_event_nanos_bucket{node_id="1",le="6.020894493336115e+08"} 0
+changefeed_nprocs_consume_event_nanos_bucket{node_id="1",le="7.609496685459859e+08"} 0
+changefeed_nprocs_consume_event_nanos_bucket{node_id="1",le="9.61724871115294e+08"} 0
+changefeed_nprocs_consume_event_nanos_bucket{node_id="1",le="1.2154742500762835e+09"} 0
+changefeed_nprocs_consume_event_nanos_bucket{node_id="1",le="1.5361749466718242e+09"} 0
+changefeed_nprocs_consume_event_nanos_bucket{node_id="1",le="1.941491945743876e+09"} 0
+changefeed_nprocs_consume_event_nanos_bucket{node_id="1",le="2.453751106639811e+09"} 0
+changefeed_nprocs_consume_event_nanos_bucket{node_id="1",le="3.10116892657477e+09"} 0
+changefeed_nprocs_consume_event_nanos_bucket{node_id="1",le="3.919406774847209e+09"} 0
+changefeed_nprocs_consume_event_nanos_bucket{node_id="1",le="4.953535208959157e+09"} 0
+changefeed_nprocs_consume_event_nanos_bucket{node_id="1",le="6.260516572014802e+09"} 0
+changefeed_nprocs_consume_event_nanos_bucket{node_id="1",le="7.912342618981298e+09"} 0
+changefeed_nprocs_consume_event_nanos_bucket{node_id="1",le="9.99999999999997e+09"} 0
+changefeed_nprocs_consume_event_nanos_bucket{node_id="1",le="+Inf"} 0
+changefeed_nprocs_consume_event_nanos_sum{node_id="1"} 0
+changefeed_nprocs_consume_event_nanos_count{node_id="1"} 0
+# HELP changefeed_buffer_pushback_nanos Total time spent waiting while the buffer was full
+# TYPE changefeed_buffer_pushback_nanos counter
+changefeed_buffer_pushback_nanos{node_id="1"} 0
+# HELP changefeed_buffer_entries_out Total entries leaving the buffer between raft and changefeed sinks
+# TYPE changefeed_buffer_entries_out counter
+changefeed_buffer_entries_out{node_id="1"} 0
+# HELP jobs_changefeed_protected_record_count Number of protected timestamp records held by changefeed jobs
+# TYPE jobs_changefeed_protected_record_count gauge
+jobs_changefeed_protected_record_count{node_id="1"} 0
+# HELP changefeed_queue_time_nanos Time KV event spent waiting to be processed
+# TYPE changefeed_queue_time_nanos counter
+changefeed_queue_time_nanos{node_id="1"} 0
+# HELP changefeed_bytes_messages_pushback_nanos Total time spent throttled for bytes quota
+# TYPE changefeed_bytes_messages_pushback_nanos counter
+changefeed_bytes_messages_pushback_nanos{node_id="1"} 0
+# HELP changefeed_buffer_entries_in Total entries entering the buffer between raft and changefeed sinks
+# TYPE changefeed_buffer_entries_in counter
+changefeed_buffer_entries_in{node_id="1"} 0
+# HELP changefeed_nprocs_in_flight_count Number of buffered events in the parallel consumer
+# TYPE changefeed_nprocs_in_flight_count gauge
+changefeed_nprocs_in_flight_count{node_id="1"} 0
+# HELP jobs_changefeed_fail_or_cancel_retry_error Number of changefeed jobs which failed with a retriable error on their failure or cancelation process
+# TYPE jobs_changefeed_fail_or_cancel_retry_error counter
+jobs_changefeed_fail_or_cancel_retry_error{node_id="1"} 0
+# HELP jobs_changefeed_currently_paused Number of changefeed jobs currently considered Paused
+# TYPE jobs_changefeed_currently_paused gauge
+jobs_changefeed_currently_paused{node_id="1"} 0
+# HELP changefeed_buffer_entries_kv Number of kv elements added to the buffer
+# TYPE changefeed_buffer_entries_kv counter
+changefeed_buffer_entries_kv{node_id="1"} 0
+# HELP jobs_changefeed_protected_age_sec The age of the oldest PTS record protected by changefeed jobs
+# TYPE jobs_changefeed_protected_age_sec gauge
+jobs_changefeed_protected_age_sec{node_id="1"} 0
+# HELP changefeed_message_size_hist Message size histogram
+# TYPE changefeed_message_size_hist histogram
+changefeed_message_size_hist_bucket{node_id="1",le="1000"} 0
+changefeed_message_size_hist_bucket{node_id="1",le="2000"} 0
+changefeed_message_size_hist_bucket{node_id="1",le="4000"} 0
+changefeed_message_size_hist_bucket{node_id="1",le="8000"} 0
+changefeed_message_size_hist_bucket{node_id="1",le="16000"} 0
+changefeed_message_size_hist_bucket{node_id="1",le="32000"} 0
+changefeed_message_size_hist_bucket{node_id="1",le="64000"} 0
+changefeed_message_size_hist_bucket{node_id="1",le="128000"} 0
+changefeed_message_size_hist_bucket{node_id="1",le="256000"} 0
+changefeed_message_size_hist_bucket{node_id="1",le="512000"} 0
+changefeed_message_size_hist_bucket{node_id="1",le="1.024e+06"} 0
+changefeed_message_size_hist_bucket{node_id="1",le="2.048e+06"} 0
+changefeed_message_size_hist_bucket{node_id="1",le="4.096e+06"} 0
+changefeed_message_size_hist_bucket{node_id="1",le="8.192e+06"} 0
+changefeed_message_size_hist_bucket{node_id="1",le="1.6384e+07"} 0
+changefeed_message_size_hist_bucket{node_id="1",le="+Inf"} 0
+changefeed_message_size_hist_sum{node_id="1"} 0
+changefeed_message_size_hist_count{node_id="1"} 0
+# HELP jobs_changefeed_resume_completed Number of changefeed jobs which successfully resumed to completion
+# TYPE jobs_changefeed_resume_completed counter
+jobs_changefeed_resume_completed{node_id="1"} 0
+# HELP changefeed_buffer_entries_mem_released Total amount of memory released by the entries after they have been emitted
+# TYPE changefeed_buffer_entries_mem_released counter
+changefeed_buffer_entries_mem_released{node_id="1"} 0
+# HELP changefeed_emitted_bytes Bytes emitted by all feeds
+# TYPE changefeed_emitted_bytes counter
+changefeed_emitted_bytes{node_id="1"} 0
+# HELP jobs_changefeed_currently_idle Number of changefeed jobs currently considered Idle and can be freely shut down
+# TYPE jobs_changefeed_currently_idle gauge
+jobs_changefeed_currently_idle{node_id="1"} 0
+# HELP changefeed_lagging_ranges The number of ranges considered to be lagging behind
+# TYPE changefeed_lagging_ranges gauge
+changefeed_lagging_ranges{node_id="1"} 0
+# HELP changefeed_batch_reduction_count Number of times a changefeed aggregator node attempted to reduce the size of message batches it emitted to the sink
+# TYPE changefeed_batch_reduction_count gauge
+changefeed_batch_reduction_count{node_id="1"} 0
+# HELP jobs_changefeed_fail_or_cancel_completed Number of changefeed jobs which successfully completed their failure or cancelation process
+# TYPE jobs_changefeed_fail_or_cancel_completed counter
+jobs_changefeed_fail_or_cancel_completed{node_id="1"} 0
+# HELP changefeed_backfill_count Number of changefeeds currently executing backfill
+# TYPE changefeed_backfill_count gauge
+changefeed_backfill_count{node_id="1"} 0
+# HELP changefeed_emitted_messages Messages emitted by all feeds
+# TYPE changefeed_emitted_messages counter
+changefeed_emitted_messages{node_id="1"} 0
+# HELP changefeed_messages_messages_pushback_nanos Total time spent throttled for messages quota
+# TYPE changefeed_messages_messages_pushback_nanos counter
+changefeed_messages_messages_pushback_nanos{node_id="1"} 0
+# HELP changefeed_buffer_entries_released Total entries processed, emitted and acknowledged by the sinks
+# TYPE changefeed_buffer_entries_released counter
+changefeed_buffer_entries_released{node_id="1"} 0
+# HELP changefeed_cloudstorage_buffered_bytes The number of bytes buffered in cloudstorage sink files which have not been emitted yet
+# TYPE changefeed_cloudstorage_buffered_bytes gauge
+changefeed_cloudstorage_buffered_bytes{node_id="1"} 0
+# HELP changefeed_parallel_io_queue_nanos Time spent with outgoing requests to the sink waiting in queue due to inflight requests with conflicting keys
+# TYPE changefeed_parallel_io_queue_nanos histogram
+changefeed_parallel_io_queue_nanos_bucket{node_id="1",le="5e+08"} 0
+changefeed_parallel_io_queue_nanos_bucket{node_id="1",le="5.572592853587432e+08"} 0
+changefeed_parallel_io_queue_nanos_bucket{node_id="1",le="6.210758222370743e+08"} 0
+changefeed_parallel_io_queue_nanos_bucket{node_id="1",le="6.922005377068515e+08"} 0
+changefeed_parallel_io_queue_nanos_bucket{node_id="1",le="7.714703539349157e+08"} 0
+changefeed_parallel_io_queue_nanos_bucket{node_id="1",le="8.598180362184556e+08"} 0
+changefeed_parallel_io_queue_nanos_bucket{node_id="1",le="9.582831688033088e+08"} 0
+changefeed_parallel_io_queue_nanos_bucket{node_id="1",le="1.0680243876372875e+09"} 0
+changefeed_parallel_io_queue_nanos_bucket{node_id="1",le="1.1903330140009282e+09"} 0
+changefeed_parallel_io_queue_nanos_bucket{node_id="1",le="1.326648249442152e+09"} 0
+changefeed_parallel_io_queue_nanos_bucket{node_id="1",le="1.4785741108131227e+09"} 0
+changefeed_parallel_io_queue_nanos_bucket{node_id="1",le="1.6478983046833196e+09"} 0
+changefeed_parallel_io_queue_nanos_bucket{node_id="1",le="1.8366132632234223e+09"} 0
+changefeed_parallel_io_queue_nanos_bucket{node_id="1",le="2.046939589088547e+09"} 0
+changefeed_parallel_io_queue_nanos_bucket{node_id="1",le="2.2813521851760063e+09"} 0
+changefeed_parallel_io_queue_nanos_bucket{node_id="1",le="2.5426093767255764e+09"} 0
+changefeed_parallel_io_queue_nanos_bucket{node_id="1",le="2.833785368441068e+09"} 0
+changefeed_parallel_io_queue_nanos_bucket{node_id="1",le="3.1583064185550647e+09"} 0
+changefeed_parallel_io_queue_nanos_bucket{node_id="1",le="3.5199911554958534e+09"} 0
+changefeed_parallel_io_queue_nanos_bucket{node_id="1",le="3.9230955115614314e+09"} 0
+changefeed_parallel_io_queue_nanos_bucket{node_id="1",le="4.372362802333632e+09"} 0
+changefeed_parallel_io_queue_nanos_bucket{node_id="1",le="4.873079541115184e+09"} 0
+changefeed_parallel_io_queue_nanos_bucket{node_id="1",le="5.431137645156319e+09"} 0
+changefeed_parallel_io_queue_nanos_bucket{node_id="1",le="6.053103765649553e+09"} 0
+changefeed_parallel_io_queue_nanos_bucket{node_id="1",le="6.746296557296375e+09"} 0
+changefeed_parallel_io_queue_nanos_bucket{node_id="1",le="7.518872796674253e+09"} 0
+changefeed_parallel_io_queue_nanos_bucket{node_id="1",le="8.37992336275598e+09"} 0
+changefeed_parallel_io_queue_nanos_bucket{node_id="1",le="9.339580208980864e+09"} 0
+changefeed_parallel_io_queue_nanos_bucket{node_id="1",le="1.0409135585614676e+10"} 0
+changefeed_parallel_io_queue_nanos_bucket{node_id="1",le="1.1601174915283792e+10"} 0
+changefeed_parallel_io_queue_nanos_bucket{node_id="1",le="1.2929724885225649e+10"} 0
+changefeed_parallel_io_queue_nanos_bucket{node_id="1",le="1.4410418498852003e+10"} 0
+changefeed_parallel_io_queue_nanos_bucket{node_id="1",le="1.6060679028781363e+10"} 0
+changefeed_parallel_io_queue_nanos_bucket{node_id="1",le="1.789992503590971e+10"} 0
+changefeed_parallel_io_queue_nanos_bucket{node_id="1",le="1.9949798866972237e+10"} 0
+changefeed_parallel_io_queue_nanos_bucket{node_id="1",le="2.2234421319319225e+10"} 0
+changefeed_parallel_io_queue_nanos_bucket{node_id="1",le="2.478067546953807e+10"} 0
+changefeed_parallel_io_queue_nanos_bucket{node_id="1",le="2.7618523005723442e+10"} 0
+changefeed_parallel_io_queue_nanos_bucket{node_id="1",le="3.0781356785666904e+10"} 0
+changefeed_parallel_io_queue_nanos_bucket{node_id="1",le="3.4306393769506477e+10"} 0
+changefeed_parallel_io_queue_nanos_bucket{node_id="1",le="3.823511295046164e+10"} 0
+changefeed_parallel_io_queue_nanos_bucket{node_id="1",le="4.261374343677016e+10"} 0
+changefeed_parallel_io_queue_nanos_bucket{node_id="1",le="4.749380842807073e+10"} 0
+changefeed_parallel_io_queue_nanos_bucket{node_id="1",le="5.2932731487183495e+10"} 0
+changefeed_parallel_io_queue_nanos_bucket{node_id="1",le="5.899451224126824e+10"} 0
+changefeed_parallel_io_queue_nanos_bucket{node_id="1",le="6.575047946331352e+10"} 0
+changefeed_parallel_io_queue_nanos_bucket{node_id="1",le="7.328013039544164e+10"} 0
+changefeed_parallel_io_queue_nanos_bucket{node_id="1",le="8.167206619031862e+10"} 0
+changefeed_parallel_io_queue_nanos_bucket{node_id="1",le="9.102503447797786e+10"} 0
+changefeed_parallel_io_queue_nanos_bucket{node_id="1",le="1.0144909132590578e+11"} 0
+changefeed_parallel_io_queue_nanos_bucket{node_id="1",le="1.1306689626513626e+11"} 0
+changefeed_parallel_io_queue_nanos_bucket{node_id="1",le="1.2601515562088194e+11"} 0
+changefeed_parallel_io_queue_nanos_bucket{node_id="1",le="1.4044623113132697e+11"} 0
+changefeed_parallel_io_queue_nanos_bucket{node_id="1",le="1.5652993278314426e+11"} 0
+changefeed_parallel_io_queue_nanos_bucket{node_id="1",le="1.7445551695997415e+11"} 0
+changefeed_parallel_io_queue_nanos_bucket{node_id="1",le="1.9443391341601053e+11"} 0
+changefeed_parallel_io_queue_nanos_bucket{node_id="1",le="2.167002072794196e+11"} 0
+changefeed_parallel_io_queue_nanos_bucket{node_id="1",le="2.415164052912417e+11"} 0
+changefeed_parallel_io_queue_nanos_bucket{node_id="1",le="2.691745188300199e+11"} 0
+changefeed_parallel_io_queue_nanos_bucket{node_id="1",le="3.0000000000000085e+11"} 0
+changefeed_parallel_io_queue_nanos_bucket{node_id="1",le="+Inf"} 0
+changefeed_parallel_io_queue_nanos_sum{node_id="1"} 0
+changefeed_parallel_io_queue_nanos_count{node_id="1"} 0
+# HELP jobs_changefeed_expired_pts_records Number of expired protected timestamp records owned by changefeed jobs
+# TYPE jobs_changefeed_expired_pts_records counter
+jobs_changefeed_expired_pts_records{node_id="1"} 0
+# HELP jobs_changefeed_resume_retry_error Number of changefeed jobs which failed with a retriable error
+# TYPE jobs_changefeed_resume_retry_error counter
+jobs_changefeed_resume_retry_error{node_id="1"} 0
+# HELP changefeed_buffer_entries_mem_acquired Total amount of memory acquired for entries as they enter the system
+# TYPE changefeed_buffer_entries_mem_acquired counter
+changefeed_buffer_entries_mem_acquired{node_id="1"} 0
+# HELP changefeed_admit_latency Event admission latency: a difference between event MVCC timestamp and the time it was admitted into changefeed pipeline; Note: this metric includes the time spent waiting until event can be processed due to backpressure or time spent resolving schema descriptors. Also note, this metric excludes latency during backfill
+# TYPE changefeed_admit_latency histogram
+changefeed_admit_latency_bucket{node_id="1",le="5e+08"} 0
+changefeed_admit_latency_bucket{node_id="1",le="5.572592853587432e+08"} 0
+changefeed_admit_latency_bucket{node_id="1",le="6.210758222370743e+08"} 0
+changefeed_admit_latency_bucket{node_id="1",le="6.922005377068515e+08"} 0
+changefeed_admit_latency_bucket{node_id="1",le="7.714703539349157e+08"} 0
+changefeed_admit_latency_bucket{node_id="1",le="8.598180362184556e+08"} 0
+changefeed_admit_latency_bucket{node_id="1",le="9.582831688033088e+08"} 0
+changefeed_admit_latency_bucket{node_id="1",le="1.0680243876372875e+09"} 0
+changefeed_admit_latency_bucket{node_id="1",le="1.1903330140009282e+09"} 0
+changefeed_admit_latency_bucket{node_id="1",le="1.326648249442152e+09"} 0
+changefeed_admit_latency_bucket{node_id="1",le="1.4785741108131227e+09"} 0
+changefeed_admit_latency_bucket{node_id="1",le="1.6478983046833196e+09"} 0
+changefeed_admit_latency_bucket{node_id="1",le="1.8366132632234223e+09"} 0
+changefeed_admit_latency_bucket{node_id="1",le="2.046939589088547e+09"} 0
+changefeed_admit_latency_bucket{node_id="1",le="2.2813521851760063e+09"} 0
+changefeed_admit_latency_bucket{node_id="1",le="2.5426093767255764e+09"} 0
+changefeed_admit_latency_bucket{node_id="1",le="2.833785368441068e+09"} 0
+changefeed_admit_latency_bucket{node_id="1",le="3.1583064185550647e+09"} 0
+changefeed_admit_latency_bucket{node_id="1",le="3.5199911554958534e+09"} 0
+changefeed_admit_latency_bucket{node_id="1",le="3.9230955115614314e+09"} 0
+changefeed_admit_latency_bucket{node_id="1",le="4.372362802333632e+09"} 0
+changefeed_admit_latency_bucket{node_id="1",le="4.873079541115184e+09"} 0
+changefeed_admit_latency_bucket{node_id="1",le="5.431137645156319e+09"} 0
+changefeed_admit_latency_bucket{node_id="1",le="6.053103765649553e+09"} 0
+changefeed_admit_latency_bucket{node_id="1",le="6.746296557296375e+09"} 0
+changefeed_admit_latency_bucket{node_id="1",le="7.518872796674253e+09"} 0
+changefeed_admit_latency_bucket{node_id="1",le="8.37992336275598e+09"} 0
+changefeed_admit_latency_bucket{node_id="1",le="9.339580208980864e+09"} 0
+changefeed_admit_latency_bucket{node_id="1",le="1.0409135585614676e+10"} 0
+changefeed_admit_latency_bucket{node_id="1",le="1.1601174915283792e+10"} 0
+changefeed_admit_latency_bucket{node_id="1",le="1.2929724885225649e+10"} 0
+changefeed_admit_latency_bucket{node_id="1",le="1.4410418498852003e+10"} 0
+changefeed_admit_latency_bucket{node_id="1",le="1.6060679028781363e+10"} 0
+changefeed_admit_latency_bucket{node_id="1",le="1.789992503590971e+10"} 0
+changefeed_admit_latency_bucket{node_id="1",le="1.9949798866972237e+10"} 0
+changefeed_admit_latency_bucket{node_id="1",le="2.2234421319319225e+10"} 0
+changefeed_admit_latency_bucket{node_id="1",le="2.478067546953807e+10"} 0
+changefeed_admit_latency_bucket{node_id="1",le="2.7618523005723442e+10"} 0
+changefeed_admit_latency_bucket{node_id="1",le="3.0781356785666904e+10"} 0
+changefeed_admit_latency_bucket{node_id="1",le="3.4306393769506477e+10"} 0
+changefeed_admit_latency_bucket{node_id="1",le="3.823511295046164e+10"} 0
+changefeed_admit_latency_bucket{node_id="1",le="4.261374343677016e+10"} 0
+changefeed_admit_latency_bucket{node_id="1",le="4.749380842807073e+10"} 0
+changefeed_admit_latency_bucket{node_id="1",le="5.2932731487183495e+10"} 0
+changefeed_admit_latency_bucket{node_id="1",le="5.899451224126824e+10"} 0
+changefeed_admit_latency_bucket{node_id="1",le="6.575047946331352e+10"} 0
+changefeed_admit_latency_bucket{node_id="1",le="7.328013039544164e+10"} 0
+changefeed_admit_latency_bucket{node_id="1",le="8.167206619031862e+10"} 0
+changefeed_admit_latency_bucket{node_id="1",le="9.102503447797786e+10"} 0
+changefeed_admit_latency_bucket{node_id="1",le="1.0144909132590578e+11"} 0
+changefeed_admit_latency_bucket{node_id="1",le="1.1306689626513626e+11"} 0
+changefeed_admit_latency_bucket{node_id="1",le="1.2601515562088194e+11"} 0
+changefeed_admit_latency_bucket{node_id="1",le="1.4044623113132697e+11"} 0
+changefeed_admit_latency_bucket{node_id="1",le="1.5652993278314426e+11"} 0
+changefeed_admit_latency_bucket{node_id="1",le="1.7445551695997415e+11"} 0
+changefeed_admit_latency_bucket{node_id="1",le="1.9443391341601053e+11"} 0
+changefeed_admit_latency_bucket{node_id="1",le="2.167002072794196e+11"} 0
+changefeed_admit_latency_bucket{node_id="1",le="2.415164052912417e+11"} 0
+changefeed_admit_latency_bucket{node_id="1",le="2.691745188300199e+11"} 0
+changefeed_admit_latency_bucket{node_id="1",le="3.0000000000000085e+11"} 0
+changefeed_admit_latency_bucket{node_id="1",le="+Inf"} 0
+changefeed_admit_latency_sum{node_id="1"} 0
+changefeed_admit_latency_count{node_id="1"} 0
+# HELP jobs_changefeed_resume_failed Number of changefeed jobs which failed with a non-retriable error
+# TYPE jobs_changefeed_resume_failed counter
+jobs_changefeed_resume_failed{node_id="1"} 0
+# HELP changefeed_buffer_entries_flush Number of flush elements added to the buffer
+# TYPE changefeed_buffer_entries_flush counter
+changefeed_buffer_entries_flush{node_id="1"} 0
+# HELP changefeed_buffer_entries_resolved Number of resolved elements added to the buffer
+# TYPE changefeed_buffer_entries_resolved counter
+changefeed_buffer_entries_resolved{node_id="1"} 0
+# HELP changefeed_schemafeed_table_metadata_nanos Time blocked while verifying table metadata histories
+# TYPE changefeed_schemafeed_table_metadata_nanos counter
+changefeed_schemafeed_table_metadata_nanos{node_id="1"} 0
+# HELP changefeed_sink_io_inflight The number of keys currently inflight as IO requests being sent to the sink
+# TYPE changefeed_sink_io_inflight gauge
+changefeed_sink_io_inflight{node_id="1"} 0
+# HELP changefeed_schema_registry_registrations Number of registration attempts with the schema registry
+# TYPE changefeed_schema_registry_registrations counter
+changefeed_schema_registry_registrations{node_id="1"} 0
+# HELP changefeed_sink_batch_hist_nanos Time spent batched in the sink buffer before being flushed and acknowledged
+# TYPE changefeed_sink_batch_hist_nanos histogram
+changefeed_sink_batch_hist_nanos_bucket{node_id="1",le="5e+08"} 0
+changefeed_sink_batch_hist_nanos_bucket{node_id="1",le="5.572592853587432e+08"} 0
+changefeed_sink_batch_hist_nanos_bucket{node_id="1",le="6.210758222370743e+08"} 0
+changefeed_sink_batch_hist_nanos_bucket{node_id="1",le="6.922005377068515e+08"} 0
+changefeed_sink_batch_hist_nanos_bucket{node_id="1",le="7.714703539349157e+08"} 0
+changefeed_sink_batch_hist_nanos_bucket{node_id="1",le="8.598180362184556e+08"} 0
+changefeed_sink_batch_hist_nanos_bucket{node_id="1",le="9.582831688033088e+08"} 0
+changefeed_sink_batch_hist_nanos_bucket{node_id="1",le="1.0680243876372875e+09"} 0
+changefeed_sink_batch_hist_nanos_bucket{node_id="1",le="1.1903330140009282e+09"} 0
+changefeed_sink_batch_hist_nanos_bucket{node_id="1",le="1.326648249442152e+09"} 0
+changefeed_sink_batch_hist_nanos_bucket{node_id="1",le="1.4785741108131227e+09"} 0
+changefeed_sink_batch_hist_nanos_bucket{node_id="1",le="1.6478983046833196e+09"} 0
+changefeed_sink_batch_hist_nanos_bucket{node_id="1",le="1.8366132632234223e+09"} 0
+changefeed_sink_batch_hist_nanos_bucket{node_id="1",le="2.046939589088547e+09"} 0
+changefeed_sink_batch_hist_nanos_bucket{node_id="1",le="2.2813521851760063e+09"} 0
+changefeed_sink_batch_hist_nanos_bucket{node_id="1",le="2.5426093767255764e+09"} 0
+changefeed_sink_batch_hist_nanos_bucket{node_id="1",le="2.833785368441068e+09"} 0
+changefeed_sink_batch_hist_nanos_bucket{node_id="1",le="3.1583064185550647e+09"} 0
+changefeed_sink_batch_hist_nanos_bucket{node_id="1",le="3.5199911554958534e+09"} 0
+changefeed_sink_batch_hist_nanos_bucket{node_id="1",le="3.9230955115614314e+09"} 0
+changefeed_sink_batch_hist_nanos_bucket{node_id="1",le="4.372362802333632e+09"} 0
+changefeed_sink_batch_hist_nanos_bucket{node_id="1",le="4.873079541115184e+09"} 0
+changefeed_sink_batch_hist_nanos_bucket{node_id="1",le="5.431137645156319e+09"} 0
+changefeed_sink_batch_hist_nanos_bucket{node_id="1",le="6.053103765649553e+09"} 0
+changefeed_sink_batch_hist_nanos_bucket{node_id="1",le="6.746296557296375e+09"} 0
+changefeed_sink_batch_hist_nanos_bucket{node_id="1",le="7.518872796674253e+09"} 0
+changefeed_sink_batch_hist_nanos_bucket{node_id="1",le="8.37992336275598e+09"} 0
+changefeed_sink_batch_hist_nanos_bucket{node_id="1",le="9.339580208980864e+09"} 0
+changefeed_sink_batch_hist_nanos_bucket{node_id="1",le="1.0409135585614676e+10"} 0
+changefeed_sink_batch_hist_nanos_bucket{node_id="1",le="1.1601174915283792e+10"} 0
+changefeed_sink_batch_hist_nanos_bucket{node_id="1",le="1.2929724885225649e+10"} 0
+changefeed_sink_batch_hist_nanos_bucket{node_id="1",le="1.4410418498852003e+10"} 0
+changefeed_sink_batch_hist_nanos_bucket{node_id="1",le="1.6060679028781363e+10"} 0
+changefeed_sink_batch_hist_nanos_bucket{node_id="1",le="1.789992503590971e+10"} 0
+changefeed_sink_batch_hist_nanos_bucket{node_id="1",le="1.9949798866972237e+10"} 0
+changefeed_sink_batch_hist_nanos_bucket{node_id="1",le="2.2234421319319225e+10"} 0
+changefeed_sink_batch_hist_nanos_bucket{node_id="1",le="2.478067546953807e+10"} 0
+changefeed_sink_batch_hist_nanos_bucket{node_id="1",le="2.7618523005723442e+10"} 0
+changefeed_sink_batch_hist_nanos_bucket{node_id="1",le="3.0781356785666904e+10"} 0
+changefeed_sink_batch_hist_nanos_bucket{node_id="1",le="3.4306393769506477e+10"} 0
+changefeed_sink_batch_hist_nanos_bucket{node_id="1",le="3.823511295046164e+10"} 0
+changefeed_sink_batch_hist_nanos_bucket{node_id="1",le="4.261374343677016e+10"} 0
+changefeed_sink_batch_hist_nanos_bucket{node_id="1",le="4.749380842807073e+10"} 0
+changefeed_sink_batch_hist_nanos_bucket{node_id="1",le="5.2932731487183495e+10"} 0
+changefeed_sink_batch_hist_nanos_bucket{node_id="1",le="5.899451224126824e+10"} 0
+changefeed_sink_batch_hist_nanos_bucket{node_id="1",le="6.575047946331352e+10"} 0
+changefeed_sink_batch_hist_nanos_bucket{node_id="1",le="7.328013039544164e+10"} 0
+changefeed_sink_batch_hist_nanos_bucket{node_id="1",le="8.167206619031862e+10"} 0
+changefeed_sink_batch_hist_nanos_bucket{node_id="1",le="9.102503447797786e+10"} 0
+changefeed_sink_batch_hist_nanos_bucket{node_id="1",le="1.0144909132590578e+11"} 0
+changefeed_sink_batch_hist_nanos_bucket{node_id="1",le="1.1306689626513626e+11"} 0
+changefeed_sink_batch_hist_nanos_bucket{node_id="1",le="1.2601515562088194e+11"} 0
+changefeed_sink_batch_hist_nanos_bucket{node_id="1",le="1.4044623113132697e+11"} 0
+changefeed_sink_batch_hist_nanos_bucket{node_id="1",le="1.5652993278314426e+11"} 0
+changefeed_sink_batch_hist_nanos_bucket{node_id="1",le="1.7445551695997415e+11"} 0
+changefeed_sink_batch_hist_nanos_bucket{node_id="1",le="1.9443391341601053e+11"} 0
+changefeed_sink_batch_hist_nanos_bucket{node_id="1",le="2.167002072794196e+11"} 0
+changefeed_sink_batch_hist_nanos_bucket{node_id="1",le="2.415164052912417e+11"} 0
+changefeed_sink_batch_hist_nanos_bucket{node_id="1",le="2.691745188300199e+11"} 0
+changefeed_sink_batch_hist_nanos_bucket{node_id="1",le="3.0000000000000085e+11"} 0
+changefeed_sink_batch_hist_nanos_bucket{node_id="1",le="+Inf"} 0
+changefeed_sink_batch_hist_nanos_sum{node_id="1"} 0
+changefeed_sink_batch_hist_nanos_count{node_id="1"} 0
+# HELP changefeed_flush_hist_nanos Time spent flushing messages across all changefeeds
+# TYPE changefeed_flush_hist_nanos histogram
+changefeed_flush_hist_nanos_bucket{node_id="1",le="5e+08"} 0
+changefeed_flush_hist_nanos_bucket{node_id="1",le="5.572592853587432e+08"} 0
+changefeed_flush_hist_nanos_bucket{node_id="1",le="6.210758222370743e+08"} 0
+changefeed_flush_hist_nanos_bucket{node_id="1",le="6.922005377068515e+08"} 0
+changefeed_flush_hist_nanos_bucket{node_id="1",le="7.714703539349157e+08"} 0
+changefeed_flush_hist_nanos_bucket{node_id="1",le="8.598180362184556e+08"} 0
+changefeed_flush_hist_nanos_bucket{node_id="1",le="9.582831688033088e+08"} 0
+changefeed_flush_hist_nanos_bucket{node_id="1",le="1.0680243876372875e+09"} 0
+changefeed_flush_hist_nanos_bucket{node_id="1",le="1.1903330140009282e+09"} 0
+changefeed_flush_hist_nanos_bucket{node_id="1",le="1.326648249442152e+09"} 0
+changefeed_flush_hist_nanos_bucket{node_id="1",le="1.4785741108131227e+09"} 0
+changefeed_flush_hist_nanos_bucket{node_id="1",le="1.6478983046833196e+09"} 0
+changefeed_flush_hist_nanos_bucket{node_id="1",le="1.8366132632234223e+09"} 0
+changefeed_flush_hist_nanos_bucket{node_id="1",le="2.046939589088547e+09"} 0
+changefeed_flush_hist_nanos_bucket{node_id="1",le="2.2813521851760063e+09"} 0
+changefeed_flush_hist_nanos_bucket{node_id="1",le="2.5426093767255764e+09"} 0
+changefeed_flush_hist_nanos_bucket{node_id="1",le="2.833785368441068e+09"} 0
+changefeed_flush_hist_nanos_bucket{node_id="1",le="3.1583064185550647e+09"} 0
+changefeed_flush_hist_nanos_bucket{node_id="1",le="3.5199911554958534e+09"} 0
+changefeed_flush_hist_nanos_bucket{node_id="1",le="3.9230955115614314e+09"} 0
+changefeed_flush_hist_nanos_bucket{node_id="1",le="4.372362802333632e+09"} 0
+changefeed_flush_hist_nanos_bucket{node_id="1",le="4.873079541115184e+09"} 0
+changefeed_flush_hist_nanos_bucket{node_id="1",le="5.431137645156319e+09"} 0
+changefeed_flush_hist_nanos_bucket{node_id="1",le="6.053103765649553e+09"} 0
+changefeed_flush_hist_nanos_bucket{node_id="1",le="6.746296557296375e+09"} 0
+changefeed_flush_hist_nanos_bucket{node_id="1",le="7.518872796674253e+09"} 0
+changefeed_flush_hist_nanos_bucket{node_id="1",le="8.37992336275598e+09"} 0
+changefeed_flush_hist_nanos_bucket{node_id="1",le="9.339580208980864e+09"} 0
+changefeed_flush_hist_nanos_bucket{node_id="1",le="1.0409135585614676e+10"} 0
+changefeed_flush_hist_nanos_bucket{node_id="1",le="1.1601174915283792e+10"} 0
+changefeed_flush_hist_nanos_bucket{node_id="1",le="1.2929724885225649e+10"} 0
+changefeed_flush_hist_nanos_bucket{node_id="1",le="1.4410418498852003e+10"} 0
+changefeed_flush_hist_nanos_bucket{node_id="1",le="1.6060679028781363e+10"} 0
+changefeed_flush_hist_nanos_bucket{node_id="1",le="1.789992503590971e+10"} 0
+changefeed_flush_hist_nanos_bucket{node_id="1",le="1.9949798866972237e+10"} 0
+changefeed_flush_hist_nanos_bucket{node_id="1",le="2.2234421319319225e+10"} 0
+changefeed_flush_hist_nanos_bucket{node_id="1",le="2.478067546953807e+10"} 0
+changefeed_flush_hist_nanos_bucket{node_id="1",le="2.7618523005723442e+10"} 0
+changefeed_flush_hist_nanos_bucket{node_id="1",le="3.0781356785666904e+10"} 0
+changefeed_flush_hist_nanos_bucket{node_id="1",le="3.4306393769506477e+10"} 0
+changefeed_flush_hist_nanos_bucket{node_id="1",le="3.823511295046164e+10"} 0
+changefeed_flush_hist_nanos_bucket{node_id="1",le="4.261374343677016e+10"} 0
+changefeed_flush_hist_nanos_bucket{node_id="1",le="4.749380842807073e+10"} 0
+changefeed_flush_hist_nanos_bucket{node_id="1",le="5.2932731487183495e+10"} 0
+changefeed_flush_hist_nanos_bucket{node_id="1",le="5.899451224126824e+10"} 0
+changefeed_flush_hist_nanos_bucket{node_id="1",le="6.575047946331352e+10"} 0
+changefeed_flush_hist_nanos_bucket{node_id="1",le="7.328013039544164e+10"} 0
+changefeed_flush_hist_nanos_bucket{node_id="1",le="8.167206619031862e+10"} 0
+changefeed_flush_hist_nanos_bucket{node_id="1",le="9.102503447797786e+10"} 0
+changefeed_flush_hist_nanos_bucket{node_id="1",le="1.0144909132590578e+11"} 0
+changefeed_flush_hist_nanos_bucket{node_id="1",le="1.1306689626513626e+11"} 0
+changefeed_flush_hist_nanos_bucket{node_id="1",le="1.2601515562088194e+11"} 0
+changefeed_flush_hist_nanos_bucket{node_id="1",le="1.4044623113132697e+11"} 0
+changefeed_flush_hist_nanos_bucket{node_id="1",le="1.5652993278314426e+11"} 0
+changefeed_flush_hist_nanos_bucket{node_id="1",le="1.7445551695997415e+11"} 0
+changefeed_flush_hist_nanos_bucket{node_id="1",le="1.9443391341601053e+11"} 0
+changefeed_flush_hist_nanos_bucket{node_id="1",le="2.167002072794196e+11"} 0
+changefeed_flush_hist_nanos_bucket{node_id="1",le="2.415164052912417e+11"} 0
+changefeed_flush_hist_nanos_bucket{node_id="1",le="2.691745188300199e+11"} 0
+changefeed_flush_hist_nanos_bucket{node_id="1",le="3.0000000000000085e+11"} 0
+changefeed_flush_hist_nanos_bucket{node_id="1",le="+Inf"} 0
+changefeed_flush_hist_nanos_sum{node_id="1"} 0
+changefeed_flush_hist_nanos_count{node_id="1"} 0
+# HELP changefeed_frontier_updates Number of change frontier updates across all feeds
+# TYPE changefeed_frontier_updates counter
+changefeed_frontier_updates{node_id="1"} 0
+# HELP jobs_changefeed_currently_running Number of changefeed jobs currently running in Resume or OnFailOrCancel state
+# TYPE jobs_changefeed_currently_running gauge
+jobs_changefeed_currently_running{node_id="1"} 0
+# HELP changefeed_flushed_bytes Bytes emitted by all feeds; maybe different from changefeed.emitted_bytes when compression is enabled
+# TYPE changefeed_flushed_bytes counter
+changefeed_flushed_bytes{node_id="1"} 0
+# HELP changefeed_aggregator_progress The earliest timestamp up to which any aggregator is guaranteed to have emitted all values for
+# TYPE changefeed_aggregator_progress gauge
+changefeed_aggregator_progress{node_id="1"} 0
+# HELP jobs_changefeed_fail_or_cancel_failed Number of changefeed jobs which failed with a non-retriable error on their failure or cancelation process
+# TYPE jobs_changefeed_fail_or_cancel_failed counter
+jobs_changefeed_fail_or_cancel_failed{node_id="1"} 0
+# HELP changefeed_commit_latency Event commit latency: a difference between event MVCC timestamp and the time it was acknowledged by the downstream sink.  If the sink batches events,  then the difference between the oldest event in the batch and acknowledgement is recorded; Excludes latency during backfill
+# TYPE changefeed_commit_latency histogram
+changefeed_commit_latency_bucket{node_id="1",le="5e+08"} 0
+changefeed_commit_latency_bucket{node_id="1",le="5.572592853587432e+08"} 0
+changefeed_commit_latency_bucket{node_id="1",le="6.210758222370743e+08"} 0
+changefeed_commit_latency_bucket{node_id="1",le="6.922005377068515e+08"} 0
+changefeed_commit_latency_bucket{node_id="1",le="7.714703539349157e+08"} 0
+changefeed_commit_latency_bucket{node_id="1",le="8.598180362184556e+08"} 0
+changefeed_commit_latency_bucket{node_id="1",le="9.582831688033088e+08"} 0
+changefeed_commit_latency_bucket{node_id="1",le="1.0680243876372875e+09"} 0
+changefeed_commit_latency_bucket{node_id="1",le="1.1903330140009282e+09"} 0
+changefeed_commit_latency_bucket{node_id="1",le="1.326648249442152e+09"} 0
+changefeed_commit_latency_bucket{node_id="1",le="1.4785741108131227e+09"} 0
+changefeed_commit_latency_bucket{node_id="1",le="1.6478983046833196e+09"} 0
+changefeed_commit_latency_bucket{node_id="1",le="1.8366132632234223e+09"} 0
+changefeed_commit_latency_bucket{node_id="1",le="2.046939589088547e+09"} 0
+changefeed_commit_latency_bucket{node_id="1",le="2.2813521851760063e+09"} 0
+changefeed_commit_latency_bucket{node_id="1",le="2.5426093767255764e+09"} 0
+changefeed_commit_latency_bucket{node_id="1",le="2.833785368441068e+09"} 0
+changefeed_commit_latency_bucket{node_id="1",le="3.1583064185550647e+09"} 0
+changefeed_commit_latency_bucket{node_id="1",le="3.5199911554958534e+09"} 0
+changefeed_commit_latency_bucket{node_id="1",le="3.9230955115614314e+09"} 0
+changefeed_commit_latency_bucket{node_id="1",le="4.372362802333632e+09"} 0
+changefeed_commit_latency_bucket{node_id="1",le="4.873079541115184e+09"} 0
+changefeed_commit_latency_bucket{node_id="1",le="5.431137645156319e+09"} 0
+changefeed_commit_latency_bucket{node_id="1",le="6.053103765649553e+09"} 0
+changefeed_commit_latency_bucket{node_id="1",le="6.746296557296375e+09"} 0
+changefeed_commit_latency_bucket{node_id="1",le="7.518872796674253e+09"} 0
+changefeed_commit_latency_bucket{node_id="1",le="8.37992336275598e+09"} 0
+changefeed_commit_latency_bucket{node_id="1",le="9.339580208980864e+09"} 0
+changefeed_commit_latency_bucket{node_id="1",le="1.0409135585614676e+10"} 0
+changefeed_commit_latency_bucket{node_id="1",le="1.1601174915283792e+10"} 0
+changefeed_commit_latency_bucket{node_id="1",le="1.2929724885225649e+10"} 0
+changefeed_commit_latency_bucket{node_id="1",le="1.4410418498852003e+10"} 0
+changefeed_commit_latency_bucket{node_id="1",le="1.6060679028781363e+10"} 0
+changefeed_commit_latency_bucket{node_id="1",le="1.789992503590971e+10"} 0
+changefeed_commit_latency_bucket{node_id="1",le="1.9949798866972237e+10"} 0
+changefeed_commit_latency_bucket{node_id="1",le="2.2234421319319225e+10"} 0
+changefeed_commit_latency_bucket{node_id="1",le="2.478067546953807e+10"} 0
+changefeed_commit_latency_bucket{node_id="1",le="2.7618523005723442e+10"} 0
+changefeed_commit_latency_bucket{node_id="1",le="3.0781356785666904e+10"} 0
+changefeed_commit_latency_bucket{node_id="1",le="3.4306393769506477e+10"} 0
+changefeed_commit_latency_bucket{node_id="1",le="3.823511295046164e+10"} 0
+changefeed_commit_latency_bucket{node_id="1",le="4.261374343677016e+10"} 0
+changefeed_commit_latency_bucket{node_id="1",le="4.749380842807073e+10"} 0
+changefeed_commit_latency_bucket{node_id="1",le="5.2932731487183495e+10"} 0
+changefeed_commit_latency_bucket{node_id="1",le="5.899451224126824e+10"} 0
+changefeed_commit_latency_bucket{node_id="1",le="6.575047946331352e+10"} 0
+changefeed_commit_latency_bucket{node_id="1",le="7.328013039544164e+10"} 0
+changefeed_commit_latency_bucket{node_id="1",le="8.167206619031862e+10"} 0
+changefeed_commit_latency_bucket{node_id="1",le="9.102503447797786e+10"} 0
+changefeed_commit_latency_bucket{node_id="1",le="1.0144909132590578e+11"} 0
+changefeed_commit_latency_bucket{node_id="1",le="1.1306689626513626e+11"} 0
+changefeed_commit_latency_bucket{node_id="1",le="1.2601515562088194e+11"} 0
+changefeed_commit_latency_bucket{node_id="1",le="1.4044623113132697e+11"} 0
+changefeed_commit_latency_bucket{node_id="1",le="1.5652993278314426e+11"} 0
+changefeed_commit_latency_bucket{node_id="1",le="1.7445551695997415e+11"} 0
+changefeed_commit_latency_bucket{node_id="1",le="1.9443391341601053e+11"} 0
+changefeed_commit_latency_bucket{node_id="1",le="2.167002072794196e+11"} 0
+changefeed_commit_latency_bucket{node_id="1",le="2.415164052912417e+11"} 0
+changefeed_commit_latency_bucket{node_id="1",le="2.691745188300199e+11"} 0
+changefeed_commit_latency_bucket{node_id="1",le="3.0000000000000085e+11"} 0
+changefeed_commit_latency_bucket{node_id="1",le="+Inf"} 0
+changefeed_commit_latency_sum{node_id="1"} 0
+changefeed_commit_latency_count{node_id="1"} 0
+# HELP changefeed_forwarded_resolved_messages Resolved timestamps forwarded from the change aggregator to the change frontier
+# TYPE changefeed_forwarded_resolved_messages counter
+changefeed_forwarded_resolved_messages{node_id="1"} 0
+# HELP changefeed_internal_retry_message_count Number of messages for which an attempt to retry them within an aggregator node was made
+# TYPE changefeed_internal_retry_message_count gauge
+changefeed_internal_retry_message_count{node_id="1"} 0
+# HELP changefeed_nprocs_flush_nanos Total time spent idle waiting for the parallel consumer to flush
+# TYPE changefeed_nprocs_flush_nanos histogram
+changefeed_nprocs_flush_nanos_bucket{node_id="1",le="10000"} 0
+changefeed_nprocs_flush_nanos_bucket{node_id="1",le="12638.482029342978"} 0
+changefeed_nprocs_flush_nanos_bucket{node_id="1",le="15973.122800602541"} 0
+changefeed_nprocs_flush_nanos_bucket{node_id="1",le="20187.602546790382"} 0
+changefeed_nprocs_flush_nanos_bucket{node_id="1",le="25514.065200312878"} 0
+changefeed_nprocs_flush_nanos_bucket{node_id="1",le="32245.90545296394"} 0
+changefeed_nprocs_flush_nanos_bucket{node_id="1",le="40753.92965871775"} 0
+changefeed_nprocs_flush_nanos_bucket{node_id="1",le="51506.78076168121"} 0
+changefeed_nprocs_flush_nanos_bucket{node_id="1",le="65096.75230458167"} 0
+changefeed_nprocs_flush_nanos_bucket{node_id="1",le="82272.41341700466"} 0
+changefeed_nprocs_flush_nanos_bucket{node_id="1",le="103979.84184814895"} 0
+changefeed_nprocs_flush_nanos_bucket{node_id="1",le="131414.73626117557"} 0
+changefeed_nprocs_flush_nanos_bucket{node_id="1",le="166088.27826277143"} 0
+changefeed_nprocs_flush_nanos_bucket{node_id="1",le="209910.3720108553"} 0
+changefeed_nprocs_flush_nanos_bucket{node_id="1",le="265294.8464431894"} 0
+changefeed_nprocs_flush_nanos_bucket{node_id="1",le="335292.41492495546"} 0
+changefeed_nprocs_flush_nanos_bucket{node_id="1",le="423758.7160604059"} 0
+changefeed_nprocs_flush_nanos_bucket{node_id="1",le="535566.6917706894"} 0
+changefeed_nprocs_flush_nanos_bucket{node_id="1",le="676875.0009458527"} 0
+changefeed_nprocs_flush_nanos_bucket{node_id="1",le="855467.2535565672"} 0
+changefeed_nprocs_flush_nanos_bucket{node_id="1",le="1.0811807510766068e+06"} 0
+changefeed_nprocs_flush_nanos_bucket{node_id="1",le="1.3664483492953242e+06"} 0
+changefeed_nprocs_flush_nanos_bucket{node_id="1",le="1.7269832906594332e+06"} 0
+changefeed_nprocs_flush_nanos_bucket{node_id="1",le="2.182644728397485e+06"} 0
+changefeed_nprocs_flush_nanos_bucket{node_id="1",le="2.7585316176291797e+06"} 0
+changefeed_nprocs_flush_nanos_bucket{node_id="1",le="3.4863652276780806e+06"} 0
+changefeed_nprocs_flush_nanos_bucket{node_id="1",le="4.406236427773566e+06"} 0
+changefeed_nprocs_flush_nanos_bucket{node_id="1",le="5.568813990945262e+06"} 0
+changefeed_nprocs_flush_nanos_bucket{node_id="1",le="7.038135554931545e+06"} 0
+changefeed_nprocs_flush_nanos_bucket{node_id="1",le="8.89513497310822e+06"} 0
+changefeed_nprocs_flush_nanos_bucket{node_id="1",le="1.1242100350620849e+07"} 0
+changefeed_nprocs_flush_nanos_bucket{node_id="1",le="1.4208308325339198e+07"} 0
+changefeed_nprocs_flush_nanos_bucket{node_id="1",le="1.795714494371637e+07"} 0
+changefeed_nprocs_flush_nanos_bucket{node_id="1",le="2.269510536694665e+07"} 0
+changefeed_nprocs_flush_nanos_bucket{node_id="1",le="2.868316813342006e+07"} 0
+changefeed_nprocs_flush_nanos_bucket{node_id="1",le="3.625117049988527e+07"} 0
+changefeed_nprocs_flush_nanos_bucket{node_id="1",le="4.581597669054482e+07"} 0
+changefeed_nprocs_flush_nanos_bucket{node_id="1",le="5.790443980602476e+07"} 0
+changefeed_nprocs_flush_nanos_bucket{node_id="1",le="7.318242219076161e+07"} 0
+changefeed_nprocs_flush_nanos_bucket{node_id="1",le="9.249147277217315e+07"} 0
+changefeed_nprocs_flush_nanos_bucket{node_id="1",le="1.1689518164985757e+08"} 0
+changefeed_nprocs_flush_nanos_bucket{node_id="1",le="1.4773776525985083e+08"} 0
+changefeed_nprocs_flush_nanos_bucket{node_id="1",le="1.8671810912919158e+08"} 0
+changefeed_nprocs_flush_nanos_bucket{node_id="1",le="2.359833466782189e+08"} 0
+changefeed_nprocs_flush_nanos_bucket{node_id="1",le="2.9824712862168837e+08"} 0
+changefeed_nprocs_flush_nanos_bucket{node_id="1",le="3.769390975388353e+08"} 0
+changefeed_nprocs_flush_nanos_bucket{node_id="1",le="4.7639380104013294e+08"} 0
+changefeed_nprocs_flush_nanos_bucket{node_id="1",le="6.020894493336115e+08"} 0
+changefeed_nprocs_flush_nanos_bucket{node_id="1",le="7.609496685459859e+08"} 0
+changefeed_nprocs_flush_nanos_bucket{node_id="1",le="9.61724871115294e+08"} 0
+changefeed_nprocs_flush_nanos_bucket{node_id="1",le="1.2154742500762835e+09"} 0
+changefeed_nprocs_flush_nanos_bucket{node_id="1",le="1.5361749466718242e+09"} 0
+changefeed_nprocs_flush_nanos_bucket{node_id="1",le="1.941491945743876e+09"} 0
+changefeed_nprocs_flush_nanos_bucket{node_id="1",le="2.453751106639811e+09"} 0
+changefeed_nprocs_flush_nanos_bucket{node_id="1",le="3.10116892657477e+09"} 0
+changefeed_nprocs_flush_nanos_bucket{node_id="1",le="3.919406774847209e+09"} 0
+changefeed_nprocs_flush_nanos_bucket{node_id="1",le="4.953535208959157e+09"} 0
+changefeed_nprocs_flush_nanos_bucket{node_id="1",le="6.260516572014802e+09"} 0
+changefeed_nprocs_flush_nanos_bucket{node_id="1",le="7.912342618981298e+09"} 0
+changefeed_nprocs_flush_nanos_bucket{node_id="1",le="9.99999999999997e+09"} 0
+changefeed_nprocs_flush_nanos_bucket{node_id="1",le="+Inf"} 0
+changefeed_nprocs_flush_nanos_sum{node_id="1"} 0
+changefeed_nprocs_flush_nanos_count{node_id="1"} 0
+# HELP changefeed_running Number of currently running changefeeds, including sinkless
+# TYPE changefeed_running gauge
+changefeed_running{node_id="1"} 0
+# HELP changefeed_checkpoint_hist_nanos Time spent checkpointing changefeed progress
+# TYPE changefeed_checkpoint_hist_nanos histogram
+changefeed_checkpoint_hist_nanos_bucket{node_id="1",le="10000"} 0
+changefeed_checkpoint_hist_nanos_bucket{node_id="1",le="12638.482029342978"} 0
+changefeed_checkpoint_hist_nanos_bucket{node_id="1",le="15973.122800602541"} 0
+changefeed_checkpoint_hist_nanos_bucket{node_id="1",le="20187.602546790382"} 0
+changefeed_checkpoint_hist_nanos_bucket{node_id="1",le="25514.065200312878"} 0
+changefeed_checkpoint_hist_nanos_bucket{node_id="1",le="32245.90545296394"} 0
+changefeed_checkpoint_hist_nanos_bucket{node_id="1",le="40753.92965871775"} 0
+changefeed_checkpoint_hist_nanos_bucket{node_id="1",le="51506.78076168121"} 0
+changefeed_checkpoint_hist_nanos_bucket{node_id="1",le="65096.75230458167"} 0
+changefeed_checkpoint_hist_nanos_bucket{node_id="1",le="82272.41341700466"} 0
+changefeed_checkpoint_hist_nanos_bucket{node_id="1",le="103979.84184814895"} 0
+changefeed_checkpoint_hist_nanos_bucket{node_id="1",le="131414.73626117557"} 0
+changefeed_checkpoint_hist_nanos_bucket{node_id="1",le="166088.27826277143"} 0
+changefeed_checkpoint_hist_nanos_bucket{node_id="1",le="209910.3720108553"} 0
+changefeed_checkpoint_hist_nanos_bucket{node_id="1",le="265294.8464431894"} 0
+changefeed_checkpoint_hist_nanos_bucket{node_id="1",le="335292.41492495546"} 0
+changefeed_checkpoint_hist_nanos_bucket{node_id="1",le="423758.7160604059"} 0
+changefeed_checkpoint_hist_nanos_bucket{node_id="1",le="535566.6917706894"} 0
+changefeed_checkpoint_hist_nanos_bucket{node_id="1",le="676875.0009458527"} 0
+changefeed_checkpoint_hist_nanos_bucket{node_id="1",le="855467.2535565672"} 0
+changefeed_checkpoint_hist_nanos_bucket{node_id="1",le="1.0811807510766068e+06"} 0
+changefeed_checkpoint_hist_nanos_bucket{node_id="1",le="1.3664483492953242e+06"} 0
+changefeed_checkpoint_hist_nanos_bucket{node_id="1",le="1.7269832906594332e+06"} 0
+changefeed_checkpoint_hist_nanos_bucket{node_id="1",le="2.182644728397485e+06"} 0
+changefeed_checkpoint_hist_nanos_bucket{node_id="1",le="2.7585316176291797e+06"} 0
+changefeed_checkpoint_hist_nanos_bucket{node_id="1",le="3.4863652276780806e+06"} 0
+changefeed_checkpoint_hist_nanos_bucket{node_id="1",le="4.406236427773566e+06"} 0
+changefeed_checkpoint_hist_nanos_bucket{node_id="1",le="5.568813990945262e+06"} 0
+changefeed_checkpoint_hist_nanos_bucket{node_id="1",le="7.038135554931545e+06"} 0
+changefeed_checkpoint_hist_nanos_bucket{node_id="1",le="8.89513497310822e+06"} 0
+changefeed_checkpoint_hist_nanos_bucket{node_id="1",le="1.1242100350620849e+07"} 0
+changefeed_checkpoint_hist_nanos_bucket{node_id="1",le="1.4208308325339198e+07"} 0
+changefeed_checkpoint_hist_nanos_bucket{node_id="1",le="1.795714494371637e+07"} 0
+changefeed_checkpoint_hist_nanos_bucket{node_id="1",le="2.269510536694665e+07"} 0
+changefeed_checkpoint_hist_nanos_bucket{node_id="1",le="2.868316813342006e+07"} 0
+changefeed_checkpoint_hist_nanos_bucket{node_id="1",le="3.625117049988527e+07"} 0
+changefeed_checkpoint_hist_nanos_bucket{node_id="1",le="4.581597669054482e+07"} 0
+changefeed_checkpoint_hist_nanos_bucket{node_id="1",le="5.790443980602476e+07"} 0
+changefeed_checkpoint_hist_nanos_bucket{node_id="1",le="7.318242219076161e+07"} 0
+changefeed_checkpoint_hist_nanos_bucket{node_id="1",le="9.249147277217315e+07"} 0
+changefeed_checkpoint_hist_nanos_bucket{node_id="1",le="1.1689518164985757e+08"} 0
+changefeed_checkpoint_hist_nanos_bucket{node_id="1",le="1.4773776525985083e+08"} 0
+changefeed_checkpoint_hist_nanos_bucket{node_id="1",le="1.8671810912919158e+08"} 0
+changefeed_checkpoint_hist_nanos_bucket{node_id="1",le="2.359833466782189e+08"} 0
+changefeed_checkpoint_hist_nanos_bucket{node_id="1",le="2.9824712862168837e+08"} 0
+changefeed_checkpoint_hist_nanos_bucket{node_id="1",le="3.769390975388353e+08"} 0
+changefeed_checkpoint_hist_nanos_bucket{node_id="1",le="4.7639380104013294e+08"} 0
+changefeed_checkpoint_hist_nanos_bucket{node_id="1",le="6.020894493336115e+08"} 0
+changefeed_checkpoint_hist_nanos_bucket{node_id="1",le="7.609496685459859e+08"} 0
+changefeed_checkpoint_hist_nanos_bucket{node_id="1",le="9.61724871115294e+08"} 0
+changefeed_checkpoint_hist_nanos_bucket{node_id="1",le="1.2154742500762835e+09"} 0
+changefeed_checkpoint_hist_nanos_bucket{node_id="1",le="1.5361749466718242e+09"} 0
+changefeed_checkpoint_hist_nanos_bucket{node_id="1",le="1.941491945743876e+09"} 0
+changefeed_checkpoint_hist_nanos_bucket{node_id="1",le="2.453751106639811e+09"} 0
+changefeed_checkpoint_hist_nanos_bucket{node_id="1",le="3.10116892657477e+09"} 0
+changefeed_checkpoint_hist_nanos_bucket{node_id="1",le="3.919406774847209e+09"} 0
+changefeed_checkpoint_hist_nanos_bucket{node_id="1",le="4.953535208959157e+09"} 0
+changefeed_checkpoint_hist_nanos_bucket{node_id="1",le="6.260516572014802e+09"} 0
+changefeed_checkpoint_hist_nanos_bucket{node_id="1",le="7.912342618981298e+09"} 0
+changefeed_checkpoint_hist_nanos_bucket{node_id="1",le="9.99999999999997e+09"} 0
+changefeed_checkpoint_hist_nanos_bucket{node_id="1",le="+Inf"} 0
+changefeed_checkpoint_hist_nanos_sum{node_id="1"} 0
+changefeed_checkpoint_hist_nanos_count{node_id="1"} 0

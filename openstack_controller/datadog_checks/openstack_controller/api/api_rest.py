@@ -381,20 +381,22 @@ class ApiRest(Api):
         return self.make_paginated_request(url, 'nodes', 'uuid', params=params)
 
     def get_baremetal_conductors(self):
-        response = self.http.get(
-            '{}/v1/conductors'.format(self._catalog.get_endpoint_by_type(Component.Types.BAREMETAL.value))
-        )
-        response.raise_for_status()
-        return response.json().get('conductors', [])
+
+        ironic_endpoint = self._catalog.get_endpoint_by_type(Component.Types.BAREMETAL.value)
+
+        url = '{}/v1/conductors'.format(ironic_endpoint)
+
+        return self.make_paginated_request(url, 'conductors', 'hostname', params={})
 
     def get_load_balancer_loadbalancers(self, project_id):
         params = {'project_id': project_id}
-        response = self.http.get(
+        return self.make_paginated_request(
             '{}/v2/lbaas/loadbalancers'.format(self._catalog.get_endpoint_by_type(Component.Types.LOAD_BALANCER.value)),
+            'loadbalancers',
+            'id',
+            next_signifier='loadbalancers_links',
             params=params,
         )
-        response.raise_for_status()
-        return response.json().get('loadbalancers', [])
 
     def get_load_balancer_loadbalancer_stats(self, loadbalancer_id):
         response = self.http.get(
@@ -407,12 +409,13 @@ class ApiRest(Api):
 
     def get_load_balancer_listeners(self, project_id):
         params = {'project_id': project_id}
-        response = self.http.get(
+        return self.make_paginated_request(
             '{}/v2/lbaas/listeners'.format(self._catalog.get_endpoint_by_type(Component.Types.LOAD_BALANCER.value)),
+            'listeners',
+            'id',
+            next_signifier='listeners_links',
             params=params,
         )
-        response.raise_for_status()
-        return response.json().get('listeners', [])
 
     def get_load_balancer_listener_stats(self, listener_id):
         response = self.http.get(

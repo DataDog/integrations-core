@@ -106,7 +106,6 @@ INSTANCE_METRICS = [
     # SQLServer:Locks
     ('sqlserver.stats.lock_waits', 'Lock Waits/sec', '_Total'),  # BULK_COUNT
     ('sqlserver.latches.latch_waits', 'Latch Waits/sec', ''),  # BULK_COUNT
-    ('sqlserver.latches.latch_wait_time', 'Average Latch Wait Time (ms)', ''),  # BULK_COUNT
     ('sqlserver.locks.deadlocks', 'Number of Deadlocks/sec', '_Total'),  # BULK_COUNT
     # SQLServer:Plan Cache
     ('sqlserver.cache.object_counts', 'Cache Object Counts', '_Total'),
@@ -119,6 +118,15 @@ INSTANCE_METRICS = [
     ('sqlserver.transactions.version_cleanup_rate', 'Version Cleanup rate (KB/s)', ''),
     ('sqlserver.transactions.version_generation_rate', 'Version Generation rate (KB/s)', ''),
     ('sqlserver.transactions.longest_transaction_running_time', 'Longest Transaction Running Time', ''),
+]
+
+# SQLServer version >= 2016
+# Default performance table metrics - Database Instance level
+# datadog metric name, counter name, instance name
+INSTANCE_METRICS_NEWER_2016 = [
+    # SQLServer:Locks
+    # base counter Average Latch Wait Time Base is available starting with SQL Server 2016
+    ('sqlserver.latches.latch_wait_time', 'Average Latch Wait Time (ms)', ''),  # BULK_COUNT
 ]
 
 # Performance table metrics, initially configured to track at instance-level only

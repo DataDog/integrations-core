@@ -1,6 +1,7 @@
 from pathlib import Path
 from unittest import mock
 from zipfile import ZipFile
+import fnmatch
 
 import pytest
 
@@ -26,8 +27,13 @@ def setup_fake_bucket(monkeypatch):
             blob.metadata = files.get(name, None)
             return blob
 
-        def list_blobs(*, prefix=''):
-            return [make_blob(f) for f in files if f.startswith(prefix)]
+        def list_blobs(*, prefix='', match_glob='*'):
+            # Note that this is a limited emulation of match_glob, as fnmatch doesn't treat '/' specially,
+            # but it should be good enough for what we use it for.
+            return (
+                make_blob(f) for f in files
+                if f.startswith(prefix) and fnmatch.fnmatch(f, match_glob)
+            )
 
         bucket = mock.Mock()
         bucket.list_blobs.side_effect = list_blobs
@@ -85,7 +91,7 @@ def setup_fake_hash(monkeypatch):
 
 @pytest.fixture
 def frozen_timestamp(monkeypatch):
-    timestamp = '20241327_17021709050439'
+    timestamp = 20241327_090504
     monkeypatch.setattr(upload, 'timestamp_build_number', mock.Mock(return_value=timestamp))
     return timestamp
 
@@ -207,7 +213,8 @@ def test_upload_built_existing_sha_match_does_not_upload_multiple_existing_build
     setup_fake_bucket,
     setup_fake_hash,
 ):
-    whl_hash = 'some-hash'
+    matching_hash = 'some-hash'
+    non_matching_hash = 'xxxx'
 
     wheels = {
         'built': [
@@ -217,15 +224,22 @@ def test_upload_built_existing_sha_match_does_not_upload_multiple_existing_build
     targets_dir = setup_targets_dir(wheels)
 
     bucket_files = {
-        'built/existing/existing-1.1.1-20241326_00000000000000-cp311-cp311-manylinux2010_x86_64.whl':
-        {'requires-python': '', 'sha256': 'b'},
-        'built/existing/existing-1.1.1-20241327_00000000000000-cp311-cp311-manylinux2010_x86_64.whl':
-        {'requires-python': '', 'sha256': whl_hash},
+        'built/existing/existing-1.1.1-cp311-cp311-manylinux2010_x86_64.whl':
+        {'requires-python': '', 'sha256': non_matching_hash},
+        'built/existing/existing-1.1.1-20241326000000-cp311-cp311-manylinux2010_x86_64.whl':
+        {'requires-python': '', 'sha256': non_matching_hash},
+        'built/existing/existing-1.1.1-20241327000000-cp311-cp311-manylinux2010_x86_64.whl':
+        {'requires-python': '', 'sha256': matching_hash},
+        # The following two builds are for different platforms and should therefore not count
+        'built/existing/existing-1.1.1-2024132700001-cp311-cp311-manylinux2010_aarch64.whl':
+        {'requires-python': '', 'sha256': non_matching_hash},
+        'built/existing/existing-1.1.1-2024132700002-py27-py27mu-manylinux2010_x86_64.whl':
+        {'requires-python': '', 'sha256': non_matching_hash},
     }
     bucket, uploads = setup_fake_bucket(bucket_files)
 
     setup_fake_hash({
-        'existing-1.1.1-cp311-cp311-manylinux2010_x86_64.whl': whl_hash,
+        'existing-1.1.1-cp311-cp311-manylinux2010_x86_64.whl': matching_hash,
     })
 
     upload.upload(targets_dir)
@@ -250,9 +264,9 @@ def test_upload_built_existing_different_sha_does_upload_multiple_existing_build
     targets_dir = setup_targets_dir(wheels)
 
     bucket_files = {
-        'built/existing/existing-1.1.1-20241326_00000000000000-cp311-cp311-manylinux2010_x86_64.whl':
+        'built/existing/existing-1.1.1-2024132600000-cp311-cp311-manylinux2010_x86_64.whl':
         {'requires-python': '', 'sha256': 'b'},
-        'built/existing/existing-1.1.1-20241327_00000000000000-cp311-cp311-manylinux2010_x86_64.whl':
+        'built/existing/existing-1.1.1-2024132700000-cp311-cp311-manylinux2010_x86_64.whl':
         {'requires-python': '', 'sha256': original_hash},
     }
     bucket, uploads = setup_fake_bucket(bucket_files)

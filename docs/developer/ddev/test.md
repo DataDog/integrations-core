@@ -98,18 +98,10 @@ def test_large_payload(benchmark, dd_run_check):
     benchmark(dd_run_check, check)
 ```
 
-To add benchmarks, define environments in `tox.ini` with `bench` somewhere in their names:
+To add benchmarks, define a `bench` environment in `hatch.toml`:
 
-```ini
-[tox]
-...
-envlist =
-    ...
-    bench
-
-...
-
-[testenv:bench]
+```toml
+[envs.bench]
 ```
 
 By default, the [test](cli.md#ddev-test) command skips all benchmark environments. To run only benchmark

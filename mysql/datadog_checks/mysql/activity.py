@@ -35,6 +35,7 @@ SELECT
     thread_a.processlist_command,
     thread_a.processlist_state,
     COALESCE(statement.sql_text, thread_a.PROCESSLIST_info) AS sql_text,
+    statement.digest_text as digest_text,
     statement.timer_start AS event_timer_start,
     statement.timer_end AS event_timer_end,
     statement.lock_time,
@@ -210,7 +211,11 @@ class MySQLActivity(DBMAsyncJob):
         if "sql_text" not in row:
             return row
         try:
-            self._finalize_row(row, obfuscate_sql_with_metadata(row["sql_text"], self._obfuscator_options))
+            self._finalize_row(
+                row,
+                obfuscate_sql_with_metadata(row["sql_text"], self._obfuscator_options),
+                obfuscate_sql_with_metadata(row.get("digest_text"), self._obfuscator_options),
+            )
         except Exception as e:
             if self._config.log_unobfuscated_queries:
                 self._log.warning("Failed to obfuscate query=[%s] | err=[%s]", row["sql_text"], e)
@@ -225,11 +230,16 @@ class MySQLActivity(DBMAsyncJob):
         return {key: val for key, val in row.items() if val is not None}
 
     @staticmethod
-    def _finalize_row(row, statement):
-        # type: (Dict[str], Dict[str]) -> None
-        obfuscated_statement = statement["query"]
-        row["sql_text"] = obfuscated_statement
-        row["query_signature"] = compute_sql_signature(obfuscated_statement)
+    def _finalize_row(row, statement, digest_statement):
+        # type: (Dict[str], Dict[str], Dict[str]) -> None
+        row["sql_text"] = statement["query"]
+        if digest_statement["query"]:
+            # if digest_text is not NULL, use it to compute the query signature
+            row["query_signature"] = compute_sql_signature(digest_statement["query"])
+        else:
+            # fallback to sql_text when digest_text is NULL
+            # MySQL < 8.0 sometimes have NULL digest_text even when statements_digest consumer is enabled
+            row["query_signature"] = compute_sql_signature(statement["query"])
 
         metadata = statement["metadata"]
         row["dd_commands"] = metadata.get("commands", None)
