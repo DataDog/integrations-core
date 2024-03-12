@@ -170,7 +170,7 @@ class KubeletCheck(
     VOLUME_TAG_KEYS_TO_EXCLUDE = ['persistentvolumeclaim', 'pod_phase']
 
     def __init__(self, name, init_config, instances):
-        if _is_affirmative(datadog_agent.get_config("kubelet_core_check")):
+        if _is_affirmative(datadog_agent.get_config("kubelet_core_check_enabled")):
             raise SkipInstanceError(
                 "The kubelet core check is enabled, skipping initialization of the python kubelet check"
             )
