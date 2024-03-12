@@ -6,7 +6,7 @@
   "tags": [
     "integration:tekton"
   ],
-  "description": "This monitor tracks changes in the number of failed TaskRuns in your cluster.",
+  "description": "An important number of failed TaskRuns can be the sign of an underlying bigger issue within your cluster. This monitor tracks changes in the number of failed TaskRuns in your cluster and warn you if the number is increasing..",
   "definition": {
     "message": "The number of failed TaskRuns is increasing.",
     "name": "[Tekton] Increasing number of failed TaskRuns",

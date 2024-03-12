@@ -896,7 +896,7 @@
             "id": 3842809483320060,
             "definition": {
               "type": "note",
-              "content": "When investigating logs, you can refer to the timeseries data to see the ratio of a certain log status to other expected statuses. In situations where you notice an increase in the ratio of error logs, you can refer to the log stream set up to filter erroneous logs for your perusal. Please note that you will have to enable logs to see the widgets in this group populate. ",
+              "content": "When investigating logs, use the timeseries data to see the ratio of a log status to other expected statuses. In situations where you notice an increase in the ratio of error logs, filter the log stream by erroneous logs to investigate. Note that you have to enable logs to see the widgets in this group populate. ",
               "background_color": "blue",
               "font_size": "14",
               "text_align": "center",
