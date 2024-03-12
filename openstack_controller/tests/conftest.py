@@ -704,7 +704,7 @@ def connection_load_balancer(request, mock_responses):
             for pool in mock_responses('GET', f'/load-balancer/v2/lbaas/quotas?project_id={project_id}')['quotas']
         ]
 
-    def amphorae(project_id):
+    def amphorae(project_id, limit=None):
         if http_error and 'amphorae' in http_error and project_id in http_error['amphorae']:
             raise requests.exceptions.HTTPError(response=http_error['amphorae'][project_id])
         return [
