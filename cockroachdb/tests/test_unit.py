@@ -9,7 +9,7 @@ from datadog_checks.cockroachdb.metrics import METRIC_MAP, OMV2_METRIC_MAP
 from datadog_checks.dev.testing import requires_py3
 from datadog_checks.dev.utils import assert_service_checks, get_metadata_metrics
 
-from .common import ADMISSION_METRICS, CHANGEFEED_METRICS, assert_metrics, get_fixture_path
+from .common import ADMISSION_METRICS, CHANGEFEED_METRICS, DISTSENDER_METRICS, assert_metrics, get_fixture_path
 
 pytestmark = [requires_py3]
 
@@ -46,6 +46,7 @@ def test_fixture_metrics(aggregator, instance, dd_run_check, mock_http_response,
     [
         pytest.param('changefeed_metrics.txt', CHANGEFEED_METRICS, id='changefeed'),
         pytest.param('admission_metrics.txt', ADMISSION_METRICS, id='admission'),
+        pytest.param('distsender_metrics.txt', DISTSENDER_METRICS, id='distsender'),
     ],
 )
 def test_metrics(aggregator, instance, dd_run_check, mock_http_response, file, metrics):
@@ -70,7 +71,8 @@ def test_no_duplicate_metrics_in_maps():
     assert set(OMV2_METRIC_MAP.keys()).intersection(METRIC_MAP.keys()) == set()
 
 
-def test_build_timestamp_not_in_maps():
+@pytest.mark.parametrize('map', [OMV2_METRIC_MAP, METRIC_MAP])
+@pytest.mark.parametrize('metric', ['build_timestamp', 'distsender_rpc_err_errordetailtype'])
+def test_metrics_not_in_maps(map, metric):
     # handled by a custom transformer
-    assert 'build_timestamp' not in OMV2_METRIC_MAP
-    assert 'build_timestamp' not in METRIC_MAP
+    assert metric not in map
