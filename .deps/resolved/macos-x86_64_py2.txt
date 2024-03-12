@@ -44,7 +44,7 @@ pep562 @ https://storage.googleapis.com/dd-agent-int-deps/external/pep562/pep562
 ply @ https://storage.googleapis.com/dd-agent-int-deps/external/ply/ply-3.11-py2.py3-none-any.whl#sha256=096f9b8350b65ebd2fd1346b12452efe5b9607f7482813ffca50c22722a807ce
 prometheus-client @ https://storage.googleapis.com/dd-agent-int-deps/external/prometheus-client/prometheus_client-0.12.0-py2.py3-none-any.whl#sha256=317453ebabff0a1b02df7f708efbab21e3489e7072b61cb6957230dd004a0af0
 protobuf @ https://storage.googleapis.com/dd-agent-int-deps/external/protobuf/protobuf-3.17.3-py2.py3-none-any.whl#sha256=2bfb815216a9cd9faec52b16fd2bfa68437a44b67c56bee59bc3926522ecb04e
-psutil @ https://storage.googleapis.com/dd-agent-int-deps/external/psutil/psutil-5.9.7-cp27-cp27m-macosx_10_9_x86_64.whl#sha256=0bd41bf2d1463dfa535942b2a8f0e958acf6607ac0be52265ab31f7923bcd5e6
+psutil @ https://storage.googleapis.com/dd-agent-int-deps/built/psutil/psutil-5.9.0-20240311171357-cp27-cp27m-macosx_10_12_x86_64.whl#sha256=37aea7f2689ff44d2dd1e3ee96e4abb43037a061ac3b2d98ba6db25f2f90bf20
 pyasn1 @ https://storage.googleapis.com/dd-agent-int-deps/external/pyasn1/pyasn1-0.4.6-py2.py3-none-any.whl#sha256=3bb81821d47b17146049e7574ab4bf1e315eb7aead30efe5d6a9ca422c9710be
 pyasn1-modules @ https://storage.googleapis.com/dd-agent-int-deps/external/pyasn1-modules/pyasn1_modules-0.3.0-py2.py3-none-any.whl#sha256=d3ccd6ed470d9ffbc716be08bd90efbd44d0734bc9303818f7336070984a162d
 pycparser @ https://storage.googleapis.com/dd-agent-int-deps/external/pycparser/pycparser-2.21-py2.py3-none-any.whl#sha256=8ee45429555515e1f6b185e78100aea234072576aa43ab53aefcae078162fca9
