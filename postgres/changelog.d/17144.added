@@ -1,0 +1,1 @@
+Added support for new query metrics wal_bytes, wal_records, and wal_fpi for PG versions >= 13. These metrics can now be accessed under postgresql.queries.wal_bytes, postgresql.queries.wal_records, and postgresql.queries.wal_fpi. In order to collect these metrics Database Monitoring must be enabled. 
