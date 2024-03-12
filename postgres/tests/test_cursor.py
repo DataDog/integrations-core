@@ -39,5 +39,5 @@ def __check_prepand_sql_comment(pg_instance):
         cursor.execute("SELECT query FROM pg_stat_activity where query like '%pg_settings%'")
         result = cursor.fetchall()
         assert len(result) > 0
-        assert result[0][0].startswith('/* source=\'datadog-agent\' */')
+        assert result[0][0].startswith('/* service=\'datadog-agent\' */')
     super_conn.close()
