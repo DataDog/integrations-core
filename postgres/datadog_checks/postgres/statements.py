@@ -441,6 +441,7 @@ class PostgresStatementMetrics(DBMAsyncJob):
             metadata = statement['metadata']
             normalized_row['dd_tables'] = metadata.get('tables', None)
             normalized_row['dd_commands'] = metadata.get('commands', None)
+            normalized_row['dd_comments'] = metadata.get('comments', None)
             normalized_rows.append(normalized_row)
 
         return normalized_rows
@@ -469,6 +470,7 @@ class PostgresStatementMetrics(DBMAsyncJob):
                     "metadata": {
                         "tables": row['dd_tables'],
                         "commands": row['dd_commands'],
+                        "comments": row['dd_comments'],
                     },
                 },
                 "postgres": {
