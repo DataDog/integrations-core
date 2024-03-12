@@ -2618,7 +2618,7 @@ def test_amphorae_pagination(
     api_type,
     dd_run_check,
     mock_http_get,
-    connection_load_balancer
+    connection_load_balancer,
 ):
     paginated_instance = copy.deepcopy(instance)
     paginated_instance['paginated_limit'] = paginated_limit
