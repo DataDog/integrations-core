@@ -325,16 +325,6 @@ def test_can_connect_service_check(aggregator, integration_check, pg_instance):
     aggregator.reset()
 
 
-def test_schema_metrics(aggregator, integration_check, pg_instance):
-    pg_instance['table_count_limit'] = 1
-    check = integration_check(pg_instance)
-    check.check(pg_instance)
-
-    expected_tags = _get_expected_tags(check, pg_instance, db=DB_NAME, schema='public')
-    aggregator.assert_metric('postgresql.table.count', value=1, count=1, tags=expected_tags)
-    aggregator.assert_metric('postgresql.db.count', value=106, count=1)
-
-
 def test_connections_metrics(aggregator, integration_check, pg_instance):
     check = integration_check(pg_instance)
     check.check(pg_instance)

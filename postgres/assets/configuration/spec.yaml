@@ -218,7 +218,7 @@ files:
         type: boolean
         example: false
     - name: collect_count_metrics
-      description: Collect count of user tables up to max_relations size from pg_stat_user_tables.
+      description: Collect count of user tables from pg_class.
       value:
         type: boolean
         example: true
