@@ -72,6 +72,9 @@ PG_STAT_STATEMENTS_METRICS_COLUMNS = (
             'local_blks_written',
             'temp_blks_read',
             'temp_blks_written',
+            'wal_records',
+            'wal_fpi',
+            'wal_bytes',
         }
     )
     | PG_STAT_STATEMENTS_TIMING_COLUMNS

@@ -166,7 +166,7 @@ instances:
     # collect_function_metrics: false
 
     ## @param collect_count_metrics - boolean - optional - default: true
-    ## Collect count of user tables up to max_relations size from pg_stat_user_tables.
+    ## Collect count of user tables from pg_class.
     #
     # collect_count_metrics: true
 

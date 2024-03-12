@@ -16,7 +16,6 @@ from .util import (
     COMMON_ARCHIVER_METRICS,
     COMMON_BGW_METRICS,
     COMMON_METRICS,
-    COUNT_METRICS,
     DATABASE_SIZE_METRICS,
     DBM_MIGRATED_METRICS,
     NEWER_14_METRICS,
@@ -132,16 +131,6 @@ class PostgresMetricsCache:
             'relation': False,
             'name': 'bgw_metrics',
         }
-
-    def get_count_metrics(self):
-        if self._count_metrics is not None:
-            return self._count_metrics
-        metrics = dict(COUNT_METRICS)
-        metrics['query'] = COUNT_METRICS['query'].format(
-            metrics_columns="{metrics_columns}", table_count_limit=self.config.table_count_limit
-        )
-        self._count_metrics = metrics
-        return metrics
 
     def get_archiver_metrics(self, version):
         """Use COMMON_ARCHIVER_METRICS to read from pg_stat_archiver as

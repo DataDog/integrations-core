@@ -159,7 +159,6 @@ cockroachdb.changefeed.parallel_io_queue_nanos.count,count,,nanosecond,,Time spe
 cockroachdb.changefeed.parallel_io_queue_nanos.sum,count,,nanosecond,,Time spent with outgoing requests to the sink waiting in queue due to inflight requests with conflicting keys,0,cockroachdb,,
 cockroachdb.changefeed.queue_time.count,count,,nanosecond,,Time KV event spent waiting to be processed,0,cockroachdb,,
 cockroachdb.changefeed.running,gauge,,,,"[OpenMetrics v1 & v2] Number of currently running changefeeds, including sinkless",0,cockroachdb,,
-cockroachdb.changefeed.running,gauge,,,,"Number of currently running changefeeds, including sinkless",0,cockroachdb,,
 cockroachdb.changefeed.schema_registry.registrations.count,count,,,,Number of registration attempts with the schema registry,0,cockroachdb,,
 cockroachdb.changefeed.schema_registry.retry.count,count,,,,Number of retries encountered when sending requests to the schema registry,0,cockroachdb,,
 cockroachdb.changefeed.schemafeed.table_history_scans.count,count,,,,The number of table history scans during polling,0,cockroachdb,,

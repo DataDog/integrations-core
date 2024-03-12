@@ -106,4 +106,4 @@ tekton.pipelines_controller.taskrun.count,count,,,,Total number of TaskRun trigg
 tekton.pipelines_controller.taskrun_duration.bucket,count,,,,Duration of the TaskRun.,0,tekton,,
 tekton.pipelines_controller.taskrun_duration.count,count,,,,Duration of the TaskRun.,0,tekton,,
 tekton.pipelines_controller.taskrun_duration.sum,count,,,,Duration of the TaskRun.,0,tekton,,
-tekton.pipelines_controller.taskruns_pod_latency,gauge,millisecond,,,The scheduling latency for the taskruns pods.,0,tekton,,
+tekton.pipelines_controller.taskruns_pod_latency,gauge,,millisecond,,The scheduling latency for the taskruns pods.,0,tekton,,

@@ -15,3 +15,15 @@ repos:
       language: system
       files: '.*/assets/service_checks\.json'
       pass_filenames: false
+    - id: labeler_config
+      name: Validate labeler config
+      entry: ddev validate labeler
+      language: system
+      files: '\.github/workflows/config/labeler\.yml'
+      pass_filenames: false
+    - id: metadata
+      name: Validate metadata files
+      entry: ddev validate metadata changed
+      language: system
+      files: '.*/metadata\.csv'
+      pass_filenames: false
