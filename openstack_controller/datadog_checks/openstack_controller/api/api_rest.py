@@ -468,12 +468,13 @@ class ApiRest(Api):
 
     def get_load_balancer_amphorae(self, project_id):
         params = {'project_id': project_id}
-        response = self.http.get(
+        return self.make_paginated_request(
             '{}/v2/octavia/amphorae'.format(self._catalog.get_endpoint_by_type(Component.Types.LOAD_BALANCER.value)),
+            'amphorae',
+            'id',
+            next_signifier='amphorae_links',
             params=params,
         )
-        response.raise_for_status()
-        return response.json().get('amphorae', [])
 
     def get_load_balancer_amphora_stats(self, amphora_id):
         response = self.http.get(

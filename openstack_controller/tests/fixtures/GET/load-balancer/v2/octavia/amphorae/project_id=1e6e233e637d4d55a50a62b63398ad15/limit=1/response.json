@@ -2,7 +2,7 @@
     "amphorae": [
         {
             "id": "a34dc4b7-b608-4a9d-9fbd-2a4e611475c2",
-            "loadbalancer_id": "df692609-aca3-421a-8c3c-9f3fa2ce8b76",
+            "loadbalancer_id": "4bb7bfb1-83c2-45e8-b0e1-ed3022329115",
             "compute_id": "d5832930-a60d-4fdf-b3cd-c3b7143cf116",
             "lb_network_ip": "192.168.0.79",
             "vrrp_ip": "10.0.0.7",

@@ -2,7 +2,7 @@
     "amphorae": [
         {
             "id": "a34dc4b7-b608-4a9d-9fbd-2a4e611475c2",
-            "loadbalancer_id": "df692609-aca3-421a-8c3c-9f3fa2ce8b76",
+            "loadbalancer_id": "4bb7bfb1-83c2-45e8-b0e1-ed3022329115",
             "compute_id": "d5832930-a60d-4fdf-b3cd-c3b7143cf116",
             "lb_network_ip": "192.168.0.79",
             "vrrp_ip": "10.0.0.7",
@@ -24,7 +24,7 @@
         },
         {
             "id": "042bcca4-4d97-47a9-bc04-d88c1e3a4d72",
-            "loadbalancer_id": "24e2def0-010f-4d75-9724-90d56e45b2b6",
+            "loadbalancer_id": "ae54877c-b186-4b90-b71c-d331b9e732bc",
             "compute_id": "6e3b36c1-dca8-4a6d-84b5-f7f3b7c27084",
             "lb_network_ip": "192.168.0.193",
             "vrrp_ip": "10.0.0.94",
