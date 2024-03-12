@@ -133,6 +133,7 @@ class SqlserverMetadata(DBMAsyncJob):
     def report_sqlserver_metadata(self):
         with self._check.connection.open_managed_default_connection(key_prefix=self._conn_key_prefix):
             with self._check.connection.get_managed_cursor(key_prefix=self._conn_key_prefix) as cursor:
+                time.sleep(10)
                 settings_rows = self._load_settings_rows(cursor)
                 event = {
                     "host": self._check.resolved_hostname,
