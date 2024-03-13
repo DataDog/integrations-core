@@ -42,4 +42,4 @@ def __check_prepand_sql_comment(sa_conn):
             )
             result = cursor.fetchall()
             assert len(result) > 0
-            assert result[0][0].endswith('/* service=\'datadog-agent\' */')
+            assert result[0][0].startswith('/* service=\'datadog-agent\' */')

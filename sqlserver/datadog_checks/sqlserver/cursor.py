@@ -23,7 +23,7 @@ class CommenterCursorWrapper:
         self.__cursor = cursor
 
     def execute(self, query, *params):
-        query = add_sql_comment(query, prepand=False, **self.__attributes)
+        query = add_sql_comment(query, True, **self.__attributes)
         return self.__cursor.execute(query, *params)
 
     def __getattr__(self, item):
