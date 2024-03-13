@@ -489,6 +489,7 @@ class SqlserverStatementMetrics(DBMAsyncJob):
                     "metadata": {
                         "tables": row['dd_tables'],
                         "commands": row['dd_commands'],
+                        "comments": row.get('dd_comments', None),
                     },
                 },
                 'sqlserver': {
