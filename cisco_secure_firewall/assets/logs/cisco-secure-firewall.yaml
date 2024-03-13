@@ -99,7 +99,7 @@ facets:
   - facetType: range
     groups:
       - Web Access
-    name: Bytes Read
+    name: Network Bytes Read
     path: network.bytes_read
     source: log
     type: double
