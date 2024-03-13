@@ -375,7 +375,7 @@
                                 },
                                 "group_by": [
                                     {
-                                        "facet": "@cisco.duo.factor",
+                                        "facet": "@factor",
                                         "limit": 10,
                                         "sort": {
                                             "order": "desc",
@@ -442,7 +442,7 @@
                                 },
                                 "group_by": [
                                     {
-                                        "facet": "@cisco.duo.factor",
+                                        "facet": "@factor",
                                         "limit": 10,
                                         "sort": {
                                             "order": "desc",
@@ -555,7 +555,7 @@
                                 },
                                 "group_by": [
                                     {
-                                        "facet": "@cisco.duo.duo_reason",
+                                        "facet": "@reason",
                                         "limit": 10,
                                         "sort": {
                                             "order": "desc",
@@ -748,7 +748,7 @@
                                         }
                                     },
                                     {
-                                        "facet": "@cisco.duo.duo_reason",
+                                        "facet": "@reason",
                                         "limit": 2,
                                         "sort": {
                                             "order": "desc",
@@ -756,7 +756,7 @@
                                         }
                                     },
                                     {
-                                        "facet": "@cisco.duo.auth_device.name",
+                                        "facet": "@auth_device.ip",
                                         "limit": 2,
                                         "sort": {
                                             "order": "desc",
@@ -764,7 +764,7 @@
                                         }
                                     },
                                     {
-                                        "facet": "@cisco.duo.auth_device.ip",
+                                        "facet": "@auth_device.ip",
                                         "limit": 2,
                                         "sort": {
                                             "order": "desc",
@@ -772,7 +772,7 @@
                                         }
                                     },
                                     {
-                                        "facet": "@cisco.duo.auth_device.geoip.country.name",
+                                        "facet": "@auth_device.geoip.country.name",
                                         "limit": 2,
                                         "sort": {
                                             "order": "desc",
@@ -780,7 +780,7 @@
                                         }
                                     },
                                     {
-                                        "facet": "@cisco.duo.access_device.geoip.country.name",
+                                        "facet": "@access_device.geoip.country.name",
                                         "limit": 2,
                                         "sort": {
                                             "order": "desc",
@@ -838,7 +838,7 @@
                                 },
                                 "group_by": [
                                     {
-                                        "facet": "@cisco.duo.auth_device.name",
+                                        "facet": "@auth_device.ip",
                                         "limit": 10,
                                         "sort": {
                                             "order": "desc",
@@ -846,7 +846,7 @@
                                         }
                                     },
                                     {
-                                        "facet": "@cisco.duo.duo_reason",
+                                        "facet": "@reason",
                                         "limit": 10,
                                         "sort": {
                                             "order": "desc",
@@ -1000,7 +1000,7 @@
         },
         {
             "name": "Authentication-Method",
-            "prefix": "@cisco.duo.factor",
+            "prefix": "@factor",
             "available_values": [],
             "default": "*"
         },

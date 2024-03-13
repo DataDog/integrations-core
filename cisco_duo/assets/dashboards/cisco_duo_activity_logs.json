@@ -213,7 +213,7 @@
                                 },
                                 "group_by": [
                                     {
-                                        "facet": "@cisco.duo.duo_action_name",
+                                        "facet": "@duo_action.name",
                                         "limit": 10,
                                         "sort": {
                                             "order": "desc",
@@ -265,7 +265,7 @@
                                 },
                                 "group_by": [
                                     {
-                                        "facet": "@cisco.duo.actor.name",
+                                        "facet": "@actor.name",
                                         "limit": 2,
                                         "sort": {
                                             "order": "desc",
@@ -273,7 +273,7 @@
                                         }
                                     },
                                     {
-                                        "facet": "@cisco.duo.duo_action_name",
+                                        "facet": "@duo_action.name",
                                         "limit": 2,
                                         "sort": {
                                             "order": "desc",
@@ -281,7 +281,7 @@
                                         }
                                     },
                                     {
-                                        "facet": "@cisco.duo.duo_target.type",
+                                        "facet": "@duo_target.type",
                                         "limit": 2,
                                         "sort": {
                                             "order": "desc",
@@ -289,7 +289,7 @@
                                         }
                                     },
                                     {
-                                        "facet": "@cisco.duo.duo_target.name",
+                                        "facet": "@duo_target.name",
                                         "limit": 2,
                                         "sort": {
                                             "order": "desc",
@@ -297,7 +297,7 @@
                                         }
                                     },
                                     {
-                                        "facet": "@cisco.duo.duo_target.details",
+                                        "facet": "@duo_target.details",
                                         "limit": 2,
                                         "sort": {
                                             "order": "desc",
@@ -355,7 +355,7 @@
                                 },
                                 "group_by": [
                                     {
-                                        "facet": "@cisco.duo.actor.name",
+                                        "facet": "@actor.name",
                                         "limit": 2,
                                         "sort": {
                                             "order": "desc",
@@ -363,7 +363,7 @@
                                         }
                                     },
                                     {
-                                        "facet": "@cisco.duo.duo_action_name",
+                                        "facet": "@duo_action.name",
                                         "limit": 2,
                                         "sort": {
                                             "order": "desc",
@@ -371,7 +371,7 @@
                                         }
                                     },
                                     {
-                                        "facet": "@cisco.duo.access_device.ip.address",
+                                        "facet": "@access_device.ip.address",
                                         "limit": 2,
                                         "sort": {
                                             "order": "desc",
@@ -379,7 +379,7 @@
                                         }
                                     },
                                     {
-                                        "facet": "@cisco.duo.access_device.geoip.country.name",
+                                        "facet": "@access_device.geoip.country.name",
                                         "limit": 2,
                                         "sort": {
                                             "order": "desc",
@@ -387,7 +387,7 @@
                                         }
                                     },
                                     {
-                                        "facet": "@cisco.duo.access_device.browser",
+                                        "facet": "@access_device.browser",
                                         "limit": 2,
                                         "sort": {
                                             "order": "desc",
@@ -395,7 +395,7 @@
                                         }
                                     },
                                     {
-                                        "facet": "@cisco.duo.access_device.browser_version",
+                                        "facet": "@access_device.browser_version",
                                         "limit": 2,
                                         "sort": {
                                             "order": "desc",
@@ -403,7 +403,7 @@
                                         }
                                     },
                                     {
-                                        "facet": "@cisco.duo.access_device.os",
+                                        "facet": "@access_device.os",
                                         "limit": 2,
                                         "sort": {
                                             "order": "desc",
@@ -411,7 +411,7 @@
                                         }
                                     },
                                     {
-                                        "facet": "@cisco.duo.access_device.os_version",
+                                        "facet": "@access_device.os_version",
                                         "limit": 2,
                                         "sort": {
                                             "order": "desc",
@@ -469,7 +469,7 @@
                                 },
                                 "group_by": [
                                     {
-                                        "facet": "@cisco.duo.actor.name",
+                                        "facet": "@actor.name",
                                         "limit": 2,
                                         "sort": {
                                             "order": "desc",
@@ -477,7 +477,7 @@
                                         }
                                     },
                                     {
-                                        "facet": "@cisco.duo.duo_action_name",
+                                        "facet": "@duo_action.name",
                                         "limit": 2,
                                         "sort": {
                                             "order": "desc",
@@ -485,7 +485,7 @@
                                         }
                                     },
                                     {
-                                        "facet": "@cisco.duo.access_device.geoip.city.name",
+                                        "facet": "@access_device.geoip.city.name",
                                         "limit": 2,
                                         "sort": {
                                             "order": "desc",
@@ -493,7 +493,7 @@
                                         }
                                     },
                                     {
-                                        "facet": "@cisco.duo.access_device.geoip.subdivision.name",
+                                        "facet": "@access_device.geoip.subdivision.name",
                                         "limit": 2,
                                         "sort": {
                                             "order": "desc",
@@ -501,7 +501,7 @@
                                         }
                                     },
                                     {
-                                        "facet": "@cisco.duo.access_device.geoip.country.name",
+                                        "facet": "@access_device.geoip.country.name",
                                         "limit": 2,
                                         "sort": {
                                             "order": "desc",
@@ -509,7 +509,7 @@
                                         }
                                     },
                                     {
-                                        "facet": "@cisco.duo.access_device.os",
+                                        "facet": "@access_device.os",
                                         "limit": 2,
                                         "sort": {
                                             "order": "desc",
@@ -596,13 +596,13 @@
         },
         {
             "name": "Action",
-            "prefix": "@cisco.duo.duo_action_name",
+            "prefix": "@duo_action.name",
             "available_values": [],
             "default": "*"
         },
         {
             "name": "Actor",
-            "prefix": "@cisco.duo.actor.name",
+            "prefix": "@actor.name",
             "available_values": [],
             "default": "*"
         }

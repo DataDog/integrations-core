@@ -145,7 +145,7 @@
                                         }
                                     },
                                     {
-                                        "facet": "@cisco.duo.object",
+                                        "facet": "@object",
                                         "limit": 10,
                                         "sort": {
                                             "order": "desc",

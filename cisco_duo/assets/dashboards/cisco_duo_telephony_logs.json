@@ -183,7 +183,7 @@
                                 },
                                 "group_by": [
                                     {
-                                        "facet": "@cisco.duo.context",
+                                        "facet": "@context",
                                         "limit": 10,
                                         "sort": {
                                             "order": "desc",
@@ -244,7 +244,7 @@
                                 },
                                 "group_by": [
                                     {
-                                        "facet": "@cisco.duo.context",
+                                        "facet": "@context",
                                         "limit": 10,
                                         "sort": {
                                             "order": "desc",
@@ -307,7 +307,7 @@
                                 },
                                 "group_by": [
                                     {
-                                        "facet": "@cisco.duo.type",
+                                        "facet": "@type",
                                         "limit": 10,
                                         "sort": {
                                             "order": "desc",
@@ -452,13 +452,13 @@
     "template_variables": [
         {
             "name": "Context",
-            "prefix": "@cisco.duo.context",
+            "prefix": "@context",
             "available_values": [],
             "default": "*"
         },
         {
             "name": "Type",
-            "prefix": "@cisco.duo.type",
+            "prefix": "@type",
             "available_values": [],
             "default": "*"
         },
