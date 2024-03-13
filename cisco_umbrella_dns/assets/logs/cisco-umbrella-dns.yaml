@@ -171,13 +171,6 @@ facets:
     path: cisco.umbrella.dns.external.geoip.country.iso_code
     source: log
     type: string
-  - facetType: list
-    groups:
-      - Cisco Umbrella DNS
-    name: Isolated State
-    path: cisco.umbrella.dns.isolated.state
-    source: log
-    type: string
   - facetType: range
     groups:
       - Cisco Umbrella DNS
@@ -198,27 +191,6 @@ facets:
     unit:
       family: bytes
       name: byte
-  - facetType: list
-    groups:
-      - Cisco Umbrella DNS
-    name: Return Message
-    path: cisco.umbrella.dns.returnmessage
-    source: log
-    type: string
-  - facetType: list
-    groups:
-      - Cisco Umbrella DNS
-    name: Verdict
-    path: cisco.umbrella.dns.verdict
-    source: log
-    type: string
-  - facetType: list
-    groups:
-      - Cisco Umbrella DNS
-    name: Warn Status
-    path: cisco.umbrella.dns.warnstatus
-    source: log
-    type: string
 pipeline:
   type: pipeline
   name: Cisco Umbrella DNS
@@ -303,16 +275,6 @@ pipeline:
             - external.geoip.country.iso_code
           sourceType: attribute
           target: cisco.umbrella.dns.external.geoip.country.iso_code
-          targetType: attribute
-          preserveSource: false
-          overrideOnConflict: false
-        - type: attribute-remapper
-          name: Map `returnmessage` to `cisco.umbrella.dns.returnmessage`
-          enabled: true
-          sources:
-            - returnmessage
-          sourceType: attribute
-          target: cisco.umbrella.dns.returnmessage
           targetType: attribute
           preserveSource: false
           overrideOnConflict: false
@@ -441,15 +403,6 @@ pipeline:
             - network.destination.ip
           target: network.destination.geoip
           ip_processing_behavior: do-nothing
-        - type: attribute-remapper
-          name: Map `isolated.state` to `cisco.umbrella.dns.isolated.state`
-          enabled: true
-          sources:
-            - isolated.state
-          sourceType: attribute
-          target: cisco.umbrella.dns.isolated.state
-          targetType: attribute
-          preserveSource: false
           overrideOnConflict: false
         - type: attribute-remapper
           name: Map `requestsize` to `cisco.umbrella.dns.requestsize`
@@ -471,16 +424,6 @@ pipeline:
           targetType: attribute
           preserveSource: false
           overrideOnConflict: false
-        - type: attribute-remapper
-          name: Map `warnstatus` to `cisco.umbrella.dns.warnstatus`
-          enabled: true
-          sources:
-            - warnstatus
-          sourceType: attribute
-          target: cisco.umbrella.dns.warnstatus
-          targetType: attribute
-          preserveSource: false
-          overrideOnConflict: false
     - type: attribute-remapper
       name: Map `categories.label` to `cisco.umbrella.dns.categories.label`
       enabled: true
@@ -488,16 +431,6 @@ pipeline:
         - categories.label
       sourceType: attribute
       target: cisco.umbrella.dns.categories.label
-      targetType: attribute
-      preserveSource: false
-      overrideOnConflict: false
-    - type: attribute-remapper
-      name: Map `verdict` to `cisco.umbrella.dns.verdict`
-      enabled: true
-      sources:
-        - verdict
-      sourceType: attribute
-      target: cisco.umbrella.dns.verdict
       targetType: attribute
       preserveSource: false
       overrideOnConflict: false

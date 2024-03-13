@@ -102,8 +102,8 @@ tests:
               geoip:
                 country:
                   iso_code: "FR"
-            returnmessage: "NOERROR"
-            verdict: "blocked"
+      returnmessage: "NOERROR"
+      verdict: "blocked"
       date: "2023-12-11"
       dns:
         answer:
@@ -332,8 +332,8 @@ tests:
               geoip:
                 country:
                   iso_code: "FR"
-            returnmessage: "NOERROR"
-            verdict: "allowed"
+      returnmessage: "NOERROR"
+      verdict: "allowed"
       date: "2023-12-19"
       dns:
         answer:
@@ -539,8 +539,8 @@ tests:
               geoip:
                 country:
                   iso_code: "FR"
-            returnmessage: "NOERROR"
-            verdict: "proxied"
+      returnmessage: "NOERROR"
+      verdict: "proxied"
       date: "2023-12-19"
       dns:
         answer:
@@ -774,12 +774,10 @@ tests:
       cisco:
         umbrella:
           dns:
-            isolated:
-              state: "not-isolated"
             requestsize: 517
             responsesize: 746
-            verdict: "blocked"
-            warnstatus: ""
+      warnstatus: ""
+      verdict: "blocked"
       contenttype: "text/html"
       datacenter:
         id: "SIN"
@@ -833,6 +831,7 @@ tests:
           type: "network"
       internalip: "185.64.148.0"
       isolated:
+        state: "not-isolated"
         fileaction: ""
       network:
         bytes_read: 517
@@ -1101,12 +1100,10 @@ tests:
       cisco:
         umbrella:
           dns:
-            isolated:
-              state: "not-isolated"
             requestsize: 517
             responsesize: 746
-            verdict: "allowed"
-            warnstatus: ""
+      verdict: "allowed"
+      warnstatus: ""
       contenttype: "text/html"
       datacenter:
         id: "SIN"
@@ -1160,6 +1157,7 @@ tests:
           type: "network"
       internalip: "185.64.148.0"
       isolated:
+        state: "not-isolated"
         fileaction: ""
       network:
         bytes_read: 517
