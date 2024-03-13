@@ -157,7 +157,7 @@ def config(ctx, check, sync, verbose):
             if verbose:
                 check_display_queue.append(lambda **kwargs: echo_info('Valid spec', **kwargs))
             for display in check_display_queue:
-                display(indent=True)
+                display()
 
     num_files = len(file_counter)
     files_failed = len(files_failed)
