@@ -170,7 +170,7 @@ def build_image():
         abort(f'Image does not exist: {image_path}')
 
     windows_image = image.startswith('windows-')
-    if args.digest:
+    if args.digest and windows_image:
         image_name = f'ghcr.io/datadog/agent-int-builder@{args.digest}'
         check_process(['docker', 'pull', image_name])
     else:
@@ -183,7 +183,13 @@ def build_image():
                 if entry.is_file():
                     shutil.copy2(entry, build_context_dir)
 
-            build_command = ['docker', 'build', str(build_context_dir), '-t', image_name]
+            build_command = ['docker', 'build',
+                             str(build_context_dir), '-t', image_name]
+
+            if not windows_image:
+                build_command.extend(['--cache-to', 'type=inline'])
+                if args.digest:
+                    build_command.extend(['--cache-from', f'{image_name}@{args.digest}'])
 
             # For some reason this is not supported for Windows images
             if args.verbose and not windows_image:
