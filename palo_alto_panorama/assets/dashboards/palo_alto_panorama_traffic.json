@@ -645,7 +645,7 @@
                                 },
                                 "group_by": [
                                     {
-                                        "facet": "@palo.alto.panorama.apptech",
+                                        "facet": "@apptech",
                                         "limit": 10,
                                         "sort": {
                                             "order": "desc",
@@ -805,7 +805,7 @@
                                 },
                                 "group_by": [
                                     {
-                                        "facet": "@palo.alto.panorama.srczone",
+                                        "facet": "@srczone",
                                         "limit": 10,
                                         "sort": {
                                             "order": "desc",
@@ -866,7 +866,7 @@
                                 },
                                 "group_by": [
                                     {
-                                        "facet": "@palo.alto.panorama.dstzone",
+                                        "facet": "@dstzone",
                                         "limit": 10,
                                         "sort": {
                                             "order": "desc",
@@ -927,7 +927,7 @@
                                 },
                                 "group_by": [
                                     {
-                                        "facet": "@palo.alto.panorama.action",
+                                        "facet": "@act",
                                         "limit": 10,
                                         "sort": {
                                             "order": "desc",
@@ -989,7 +989,7 @@
                                 },
                                 "group_by": [
                                     {
-                                        "facet": "@palo.alto.panorama.sessionendreason",
+                                        "facet": "@sessionendreason",
                                         "limit": 10,
                                         "sort": {
                                             "order": "desc",
@@ -1356,7 +1356,7 @@
                                         }
                                     },
                                     {
-                                        "facet": "@palo.alto.panorama.apptech",
+                                        "facet": "@apptech",
                                         "limit": 5,
                                         "sort": {
                                             "order": "desc",
@@ -1374,7 +1374,7 @@
                                         }
                                     },
                                     {
-                                        "facet": "@palo.alto.panorama.appsaas",
+                                        "facet": "@appsaas",
                                         "limit": 5,
                                         "sort": {
                                             "order": "desc",
@@ -1383,7 +1383,7 @@
                                         }
                                     },
                                     {
-                                        "facet": "@palo.alto.panorama.appstate",
+                                        "facet": "@appstate",
                                         "limit": 5,
                                         "sort": {
                                             "order": "desc",
@@ -1462,7 +1462,7 @@
                                 "width": "auto"
                             },
                             {
-                                "field": "palo.alto.panorama.action",
+                                "field": "act",
                                 "width": "auto"
                             },
                             {
@@ -1498,11 +1498,11 @@
                                 "width": "auto"
                             },
                             {
-                                "field": "palo.alto.panorama.srczone",
+                                "field": "srczone",
                                 "width": "auto"
                             },
                             {
-                                "field": "palo.alto.panorama.dstzone",
+                                "field": "dstzone",
                                 "width": "auto"
                             },
                             {
@@ -1510,7 +1510,7 @@
                                 "width": "auto"
                             },
                             {
-                                "field": "palo.alto.panorama.sessionendreason",
+                                "field": "sessionendreason",
                                 "width": "auto"
                             },
                             {
@@ -1522,7 +1522,7 @@
                                 "width": "auto"
                             },
                             {
-                                "field": "palo.alto.panorama.apptech",
+                                "field": "apptech",
                                 "width": "auto"
                             },
                             {
@@ -1557,7 +1557,7 @@
         },
         {
             "name": "Action",
-            "prefix": "@palo.alto.panorama.action",
+            "prefix": "@act",
             "available_values": [],
             "default": "*"
         }

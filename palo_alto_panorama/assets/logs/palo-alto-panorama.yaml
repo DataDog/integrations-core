@@ -125,20 +125,6 @@ facets:
   - facetType: list
     groups:
       - Palo Alto Panorama
-    name: Action (Panorama)
-    path: palo.alto.panorama.action
-    source: log
-    type: string
-  - facetType: list
-    groups:
-      - Palo Alto Panorama
-    name: App Risk
-    path: palo.alto.panorama.risk_of_app
-    source: log
-    type: integer
-  - facetType: list
-    groups:
-      - Palo Alto Panorama
     name: Application Characteristic
     path: palo.alto.panorama.appchar
     source: log
@@ -153,29 +139,8 @@ facets:
   - facetType: list
     groups:
       - Palo Alto Panorama
-    name: Application SaaS
-    path: palo.alto.panorama.appsaas
-    source: log
-    type: string
-  - facetType: list
-    groups:
-      - Palo Alto Panorama
-    name: Application Sanctioned State
-    path: palo.alto.panorama.appstate
-    source: log
-    type: string
-  - facetType: list
-    groups:
-      - Palo Alto Panorama
     name: Application Subcategory
     path: palo.alto.panorama.appsubcat
-    source: log
-    type: string
-  - facetType: list
-    groups:
-      - Palo Alto Panorama
-    name: Application Technology
-    path: palo.alto.panorama.apptech
     source: log
     type: string
   - facetType: range
@@ -188,29 +153,8 @@ facets:
   - facetType: list
     groups:
       - Palo Alto Panorama
-    name: Authentication Policy
-    path: palo.alto.panorama.authentication_policy
-    source: log
-    type: string
-  - facetType: list
-    groups:
-      - Palo Alto Panorama
-    name: Authentication Protocol
-    path: palo.alto.panorama.authproto
-    source: log
-    type: string
-  - facetType: list
-    groups:
-      - Palo Alto Panorama
     name: Authentication Result
     path: palo.alto.panorama.event
-    source: log
-    type: string
-  - facetType: list
-    groups:
-      - Palo Alto Panorama
-    name: Client Type
-    path: palo.alto.panorama.clienttype
     source: log
     type: string
   - facetType: list
@@ -255,13 +199,6 @@ facets:
     path: palo.alto.panorama.dmac
     source: log
     type: string
-  - facetType: list
-    groups:
-      - Palo Alto Panorama
-    name: Destination Zone
-    path: palo.alto.panorama.dstzone
-    source: log
-    type: string
   - facetType: range
     groups:
       - Palo Alto Panorama
@@ -269,13 +206,6 @@ facets:
     path: palo.alto.panorama.max_encap
     source: log
     type: double
-  - facetType: list
-    groups:
-      - Palo Alto Panorama
-    name: Normalized Username
-    path: palo.alto.panorama.normalize_user
-    source: log
-    type: string
   - facetType: range
     groups:
       - Palo Alto Panorama
@@ -297,13 +227,6 @@ facets:
     path: palo.alto.panorama.pktsent
     source: log
     type: integer
-  - facetType: list
-    groups:
-      - Palo Alto Panorama
-    name: Session End Reason
-    path: palo.alto.panorama.sessionendreason
-    source: log
-    type: string
   - facetType: list
     groups:
       - Palo Alto Panorama
@@ -339,13 +262,6 @@ facets:
     path: palo.alto.panorama.sven
     source: log
     type: string
-  - facetType: list
-    groups:
-      - Palo Alto Panorama
-    name: Source Zone
-    path: palo.alto.panorama.srczone
-    source: log
-    type: string
   - facetType: range
     groups:
       - Palo Alto Panorama
@@ -372,13 +288,6 @@ facets:
       - Palo Alto Panorama
     name: Virtual System
     path: palo.alto.panorama.vsys
-    source: log
-    type: string
-  - facetType: list
-    groups:
-      - Palo Alto Panorama
-    name: Severity
-    path: palo.alto.panorama.severity
     source: log
     type: string
   - facetType: range
@@ -470,21 +379,27 @@ pipeline:
       sources:
         - type
     - type: pipeline
-      name: Map `severity` to `panorama_severity`
+      name: Processors for `severity` field
       enabled: true
       filter:
         query: '@type:("THREAT" OR "START" OR "END" OR "SYSTEM" OR "CORRELATION") '
       processors:
-        - type: attribute-remapper
-          name: Map `severity` to `palo.alto.panorama.severity`
+        - name: Lookup for `severity` to `status`
+          enabled: true
+          source: severity
+          target: status
+          lookupTable: |-
+            informational, info
+            low, info
+            medium, warning
+            high, warning
+            critical, critical
+          type: lookup-processor
+        - type: status-remapper
+          name: Define `status` as the official status of the log
           enabled: true
           sources:
-            - severity
-          sourceType: attribute
-          target: palo.alto.panorama.severity
-          targetType: attribute
-          preserveSource: false
-          overrideOnConflict: false
+            - status
     - type: pipeline
       name: Processors for "Decryption" OR "Traffic" OR "Threat" OR "Tunnel
         Inspection" log types
@@ -611,16 +526,6 @@ pipeline:
 
             0x00000100,payload of the outer tunnel is being inspected
           type: lookup-processor
-        - type: attribute-remapper
-          name: Map `act` to `palo.alto.panorama.action`
-          enabled: true
-          sources:
-            - act
-          sourceType: attribute
-          target: palo.alto.panorama.action
-          targetType: attribute
-          preserveSource: false
-          overrideOnConflict: false
     - type: pipeline
       name: Processors for "User ID" log type
       enabled: true
@@ -878,16 +783,6 @@ pipeline:
           preserveSource: false
           overrideOnConflict: false
     - type: attribute-remapper
-      name: Map `risk_of_app` to `palo.alto.panorama.risk_of_app`
-      enabled: true
-      sources:
-        - risk_of_app
-      sourceType: attribute
-      target: palo.alto.panorama.risk_of_app
-      targetType: attribute
-      preserveSource: false
-      overrideOnConflict: false
-    - type: attribute-remapper
       name: Map `appchar` to `palo.alto.panorama.appchar`
       enabled: true
       sources:
@@ -924,16 +819,6 @@ pipeline:
         - appcont
       sourceType: attribute
       target: palo.alto.panorama.appcont
-      targetType: attribute
-      preserveSource: false
-      overrideOnConflict: false
-    - type: attribute-remapper
-      name: Map `appsaas` to `palo.alto.panorama.appsaas`
-      enabled: true
-      sources:
-        - appsaas
-      sourceType: attribute
-      target: palo.alto.panorama.appsaas
       targetType: attribute
       preserveSource: false
       overrideOnConflict: false
@@ -948,16 +833,6 @@ pipeline:
       preserveSource: false
       overrideOnConflict: false
     - type: attribute-remapper
-      name: Map `apptech` to `palo.alto.panorama.apptech`
-      enabled: true
-      sources:
-        - apptech
-      sourceType: attribute
-      target: palo.alto.panorama.apptech
-      targetType: attribute
-      preserveSource: false
-      overrideOnConflict: false
-    - type: attribute-remapper
       name: Map `apprisk` to `palo.alto.panorama.apprisk`
       enabled: true
       sources:
@@ -968,52 +843,12 @@ pipeline:
       preserveSource: false
       overrideOnConflict: false
     - type: attribute-remapper
-      name: Map `appstate` to `palo.alto.panorama.appstate`
-      enabled: true
-      sources:
-        - appstate
-      sourceType: attribute
-      target: palo.alto.panorama.appstate
-      targetType: attribute
-      preserveSource: false
-      overrideOnConflict: false
-    - type: attribute-remapper
-      name: Map `authpolicy` to `palo.alto.panorama.authentication_policy`
-      enabled: true
-      sources:
-        - authpolicy
-      sourceType: attribute
-      target: palo.alto.panorama.authentication_policy
-      targetType: attribute
-      preserveSource: false
-      overrideOnConflict: false
-    - type: attribute-remapper
-      name: Map `authproto` to `palo.alto.panorama.authproto`
-      enabled: true
-      sources:
-        - authproto
-      sourceType: attribute
-      target: palo.alto.panorama.authproto
-      targetType: attribute
-      preserveSource: false
-      overrideOnConflict: false
-    - type: attribute-remapper
       name: Map `event` to `palo.alto.panorama.event`
       enabled: true
       sources:
         - event
       sourceType: attribute
       target: palo.alto.panorama.event
-      targetType: attribute
-      preserveSource: false
-      overrideOnConflict: false
-    - type: attribute-remapper
-      name: Map `clienttype` to `palo.alto.panorama.clienttype`
-      enabled: true
-      sources:
-        - clienttype
-      sourceType: attribute
-      target: palo.alto.panorama.clienttype
       targetType: attribute
       preserveSource: false
       overrideOnConflict: false
@@ -1078,32 +913,12 @@ pipeline:
       preserveSource: false
       overrideOnConflict: false
     - type: attribute-remapper
-      name: Map `dstzone` to `palo.alto.panorama.dstzone`
-      enabled: true
-      sources:
-        - dstzone
-      sourceType: attribute
-      target: palo.alto.panorama.dstzone
-      targetType: attribute
-      preserveSource: false
-      overrideOnConflict: false
-    - type: attribute-remapper
       name: Map `max_encap` to `palo.alto.panorama.max_encap`
       enabled: true
       sources:
         - max_encap
       sourceType: attribute
       target: palo.alto.panorama.max_encap
-      targetType: attribute
-      preserveSource: false
-      overrideOnConflict: false
-    - type: attribute-remapper
-      name: Map `normalize_user` to `palo.alto.panorama.normalize_user`
-      enabled: true
-      sources:
-        - normalize_user
-      sourceType: attribute
-      target: palo.alto.panorama.normalize_user
       targetType: attribute
       preserveSource: false
       overrideOnConflict: false
@@ -1134,16 +949,6 @@ pipeline:
         - pktsent
       sourceType: attribute
       target: palo.alto.panorama.pktsent
-      targetType: attribute
-      preserveSource: false
-      overrideOnConflict: false
-    - type: attribute-remapper
-      name: Map `sessionendreason` to `palo.alto.panorama.sessionendreason`
-      enabled: true
-      sources:
-        - sessionendreason
-      sourceType: attribute
-      target: palo.alto.panorama.sessionendreason
       targetType: attribute
       preserveSource: false
       overrideOnConflict: false
@@ -1194,16 +999,6 @@ pipeline:
         - sven
       sourceType: attribute
       target: palo.alto.panorama.sven
-      targetType: attribute
-      preserveSource: false
-      overrideOnConflict: false
-    - type: attribute-remapper
-      name: Map `srczone` to `palo.alto.panorama.srczone`
-      enabled: true
-      sources:
-        - srczone
-      sourceType: attribute
-      target: palo.alto.panorama.srczone
       targetType: attribute
       preserveSource: false
       overrideOnConflict: false

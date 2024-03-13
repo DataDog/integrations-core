@@ -203,7 +203,7 @@
                                 },
                                 "group_by": [
                                     {
-                                        "facet": "@palo.alto.panorama.srczone",
+                                        "facet": "@srczone",
                                         "limit": 10,
                                         "sort": {
                                             "order": "desc",
@@ -264,7 +264,7 @@
                                 },
                                 "group_by": [
                                     {
-                                        "facet": "@palo.alto.panorama.dstzone",
+                                        "facet": "@dstzone",
                                         "limit": 10,
                                         "sort": {
                                             "order": "desc",
@@ -1119,7 +1119,7 @@
                                 },
                                 "group_by": [
                                     {
-                                        "facet": "@palo.alto.panorama.apptech",
+                                        "facet": "@apptech",
                                         "limit": 10,
                                         "sort": {
                                             "order": "desc",
@@ -1297,7 +1297,7 @@
                                 },
                                 "group_by": [],
                                 "search": {
-                                    "query": "source:palo-alto-panorama @type:DECRYPTION @palo.alto.panorama.appsaas:1 $Device_Serial_Number $Action $Decryption_Policy"
+                                    "query": "source:palo-alto-panorama @type:DECRYPTION @appsaas:1 $Device_Serial_Number $Action $Decryption_Policy"
                                 },
                                 "storage": "hot"
                             }
@@ -1344,7 +1344,7 @@
                                 },
                                 "group_by": [],
                                 "search": {
-                                    "query": "source:palo-alto-panorama @type:DECRYPTION @palo.alto.panorama.appstate:1 $Device_Serial_Number $Action $Decryption_Policy"
+                                    "query": "source:palo-alto-panorama @type:DECRYPTION @appstate:1 $Device_Serial_Number $Action $Decryption_Policy"
                                 },
                                 "storage": "hot"
                             }
@@ -1521,7 +1521,7 @@
                                 },
                                 "group_by": [
                                     {
-                                        "facet": "@palo.alto.panorama.action",
+                                        "facet": "@act",
                                         "limit": 10,
                                         "sort": {
                                             "order": "desc",
@@ -1938,11 +1938,11 @@
                                 "width": "auto"
                             },
                             {
-                                "field": "palo.alto.panorama.appsaas",
+                                "field": "appsaas",
                                 "width": "auto"
                             },
                             {
-                                "field": "palo.alto.panorama.appstate",
+                                "field": "appstate",
                                 "width": "auto"
                             },
                             {
@@ -1950,7 +1950,7 @@
                                 "width": "auto"
                             },
                             {
-                                "field": "palo.alto.panorama.apptech",
+                                "field": "apptech",
                                 "width": "auto"
                             },
                             {
@@ -1994,15 +1994,15 @@
                                 "width": "auto"
                             },
                             {
-                                "field": "palo.alto.panorama.action",
+                                "field": "act",
                                 "width": "auto"
                             },
                             {
-                                "field": "palo.alto.panorama.srczone",
+                                "field": "srczone",
                                 "width": "auto"
                             },
                             {
-                                "field": "palo.alto.panorama.dstzone",
+                                "field": "dstzone",
                                 "width": "auto"
                             },
                             {
@@ -2083,7 +2083,7 @@
         },
         {
             "name": "Action",
-            "prefix": "@palo.alto.panorama.action",
+            "prefix": "@act",
             "available_values": [],
             "default": "*"
         },
