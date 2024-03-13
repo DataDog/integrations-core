@@ -7,7 +7,6 @@ import copy
 import functools
 import time
 from collections import defaultdict
-
 import six
 from cachetools import TTLCache
 
@@ -62,6 +61,7 @@ from datadog_checks.sqlserver.const import (
     STATIC_INFO_ENGINE_EDITION,
     STATIC_INFO_MAJOR_VERSION,
     STATIC_INFO_VERSION,
+    SWITCH_DB_STATEMENT,
     TASK_SCHEDULER_METRICS,
     TEMPDB_FILE_SPACE_USAGE_METRICS,
     VALID_METRIC_TYPES,
@@ -725,10 +725,9 @@ class SQLServer(AgentCheck):
         with self.connection.open_managed_default_connection():
             with self.connection.get_managed_cursor() as cursor:
                 for db in self.databases:
-                    switch_db_statment = "USE {};".format(db.name)
                     check_err_message = "Database {} connection service check failed: {}"
                     try:
-                        cursor.execute(switch_db_statment)
+                        cursor.execute(SWITCH_DB_STATEMENT.format(db.name))
                     except Exception as e:
                         self.log.warning(check_err_message.format(db.name, str(e)))
                         self.handle_service_check(
@@ -753,6 +752,9 @@ class SQLServer(AgentCheck):
                         )
                         continue
                     self.handle_service_check(AgentCheck.OK, self.connection.get_host_with_port(), db.name, False)
+                #set here back to master
+            with self.connection.get_managed_cursor() as cursor:
+                cursor.execute(SWITCH_DB_STATEMENT.format(self.connection.DEFAULT_DATABASE))
 
     def _check_database_conns(self):
         engine_edition = self.static_info_cache.get(STATIC_INFO_ENGINE_EDITION)
