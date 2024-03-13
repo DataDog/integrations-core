@@ -134,7 +134,6 @@ SPARK_EXECUTOR_TEMPLATE_METRICS = {
     'peakMemoryMetrics.ProcessTreePythonRSSMemory': ('spark.{}.peak_mem.process_tree_python_rss', COUNT),
     'peakMemoryMetrics.ProcessTreeOtherVMemory': ('spark.{}.peak_mem.process_tree_other', COUNT),
     'peakMemoryMetrics.ProcessTreeOtherRSSMemory': ('spark.{}.peak_mem.process_tree_other_rss', COUNT),
-
 }
 
 SPARK_DRIVER_METRICS = {
