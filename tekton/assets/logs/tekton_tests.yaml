@@ -34,7 +34,7 @@ tests:
     tags:
      - "source:LOGS_SOURCE"
     timestamp: 1709108118164
-    traceId: "f9171cbc-d40e-4bb8-912a-8781b387cd97"
+    trace_id: "f9171cbc-d40e-4bb8-912a-8781b387cd97"
  -
   sample: |-
     {
@@ -68,3 +68,4 @@ tests:
     tags:
      - "source:LOGS_SOURCE"
     timestamp: 1709108118161
+    trace_id: "f9171cbc-d40e-4bb8-912a-8781b387cd97"
