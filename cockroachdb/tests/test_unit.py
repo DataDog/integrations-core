@@ -9,7 +9,14 @@ from datadog_checks.cockroachdb.metrics import METRIC_MAP, OMV2_METRIC_MAP
 from datadog_checks.dev.testing import requires_py3
 from datadog_checks.dev.utils import assert_service_checks, get_metadata_metrics
 
-from .common import ADMISSION_METRICS, CHANGEFEED_METRICS, DISTSENDER_METRICS, assert_metrics, get_fixture_path
+from .common import (
+    ADMISSION_METRICS,
+    CHANGEFEED_METRICS,
+    DISTSENDER_METRICS,
+    JOBS_METRICS,
+    assert_metrics,
+    get_fixture_path,
+)
 
 pytestmark = [requires_py3]
 
@@ -47,6 +54,7 @@ def test_fixture_metrics(aggregator, instance, dd_run_check, mock_http_response,
         pytest.param('changefeed_metrics.txt', CHANGEFEED_METRICS, id='changefeed'),
         pytest.param('admission_metrics.txt', ADMISSION_METRICS, id='admission'),
         pytest.param('distsender_metrics.txt', DISTSENDER_METRICS, id='distsender'),
+        pytest.param('jobs_metrics.txt', JOBS_METRICS, id='jobs'),
     ],
 )
 def test_metrics(aggregator, instance, dd_run_check, mock_http_response, file, metrics):
