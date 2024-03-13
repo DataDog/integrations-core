@@ -250,3 +250,8 @@ BPF_METRICS = [
     "bpf.lost_disk_events.count",
     "bpf.lost_network_events.count",
 ]
+
+PROMETHEUS_METRICS = [
+    "prom.http_metric_handler.requests_in_flight",
+    "prom.http_metric_handler.requests.count",
+]

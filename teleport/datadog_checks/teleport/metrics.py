@@ -188,6 +188,12 @@ BPF_METRICS_MAP = {
     "bpf_lost_network_events": "bpf.lost_network_events",
 }
 
+PROMETHEUS_METRICS_MAP = {
+    "promhttp_metric_handler_requests_in_flight": "prom.http_metric_handler.requests_in_flight",
+    "promhttp_metric_handler_requests": "prom.http_metric_handler.requests",
+}
+
+
 METRIC_MAP = {
     **COMMON_METRICS_MAP,
     **PROXY_METRICS_MAP,
@@ -196,4 +202,5 @@ METRIC_MAP = {
     **KUBERNETES_METRICS_MAP,
     **DATABASE_METRICS_MAP,
     **BPF_METRICS_MAP,
+    **PROMETHEUS_METRICS_MAP,
 }
