@@ -1,33 +1,19 @@
 # HELP admission_wait_queue_length_sql_sql_response_locking_normal_pri Length of wait queue
 # TYPE admission_wait_queue_length_sql_sql_response_locking_normal_pri gauge
 admission_wait_queue_length_sql_sql_response_locking_normal_pri{node_id="1"} 0
-# HELP kvadmission_flow_controller_regular_tokens_deducted Flow tokens deducted by regular requests, across all replication streams
-# TYPE kvadmission_flow_controller_regular_tokens_deducted counter
-kvadmission_flow_controller_regular_tokens_deducted{node_id="1"} 0
+
 # HELP admission_errored_kv_stores Number of requests not admitted due to error
 # TYPE admission_errored_kv_stores counter
 admission_errored_kv_stores{node_id="1"} 0
 # HELP admission_wait_queue_length_sql_kv_response Length of wait queue
 # TYPE admission_wait_queue_length_sql_kv_response gauge
 admission_wait_queue_length_sql_kv_response{node_id="1"} 0
-# HELP kvadmission_flow_token_dispatch_coalesced_regular Number of coalesced regular flow token dispatches (where we're informing the sender of a higher log entry being admitted)
-# TYPE kvadmission_flow_token_dispatch_coalesced_regular counter
-kvadmission_flow_token_dispatch_coalesced_regular{node_id="1"} 0
-# HELP kvadmission_flow_controller_elastic_tokens_unaccounted Flow tokens returned by elastic requests that were unaccounted for, across all replication streams
-# TYPE kvadmission_flow_controller_elastic_tokens_unaccounted counter
-kvadmission_flow_controller_elastic_tokens_unaccounted{node_id="1"} 0
 # HELP admission_errored_sql_sql_response_normal_pri Number of requests not admitted due to error
 # TYPE admission_errored_sql_sql_response_normal_pri counter
 admission_errored_sql_sql_response_normal_pri{node_id="1"} 0
 # HELP admission_elastic_cpu_returned_nanos Total CPU nanoseconds returned by elastic work
 # TYPE admission_elastic_cpu_returned_nanos counter
 admission_elastic_cpu_returned_nanos{node_id="1"} 0
-# HELP kvadmission_flow_handle_regular_requests_waiting Number of regular requests waiting for flow tokens, at the handle level
-# TYPE kvadmission_flow_handle_regular_requests_waiting gauge
-kvadmission_flow_handle_regular_requests_waiting{node_id="1"} 0
-# HELP kvadmission_flow_controller_elastic_blocked_stream_count Number of replication streams with no flow tokens available for elastic requests
-# TYPE kvadmission_flow_controller_elastic_blocked_stream_count gauge
-kvadmission_flow_controller_elastic_blocked_stream_count{node_id="1"} 0
 # HELP admission_granter_io_tokens_returned_kv Total number of tokens returned
 # TYPE admission_granter_io_tokens_returned_kv counter
 admission_granter_io_tokens_returned_kv{node_id="1"} 725
@@ -37,21 +23,9 @@ admission_admitted_sql_root_start_normal_pri{node_id="1"} 0
 # HELP admission_requested_kv_normal_pri Number of requests
 # TYPE admission_requested_kv_normal_pri counter
 admission_requested_kv_normal_pri{node_id="1"} 6907
-# HELP kvadmission_flow_controller_elastic_stream_count Total number of replication streams for elastic requests
-# TYPE kvadmission_flow_controller_elastic_stream_count gauge
-kvadmission_flow_controller_elastic_stream_count{node_id="1"} 0
-# HELP kvadmission_flow_controller_regular_tokens_available Flow tokens available for regular requests, across all replication streams
-# TYPE kvadmission_flow_controller_regular_tokens_available gauge
-kvadmission_flow_controller_regular_tokens_available{node_id="1"} 0
-# HELP kvadmission_flow_controller_elastic_requests_waiting Number of elastic requests waiting for flow tokens
-# TYPE kvadmission_flow_controller_elastic_requests_waiting gauge
-kvadmission_flow_controller_elastic_requests_waiting{node_id="1"} 0
 # HELP admission_wait_queue_length_sql_kv_response_locking_normal_pri Length of wait queue
 # TYPE admission_wait_queue_length_sql_kv_response_locking_normal_pri gauge
 admission_wait_queue_length_sql_kv_response_locking_normal_pri{node_id="1"} 0
-# HELP kvadmission_flow_token_dispatch_pending_elastic Number of pending elastic flow token dispatches
-# TYPE kvadmission_flow_token_dispatch_pending_elastic gauge
-kvadmission_flow_token_dispatch_pending_elastic{node_id="1"} 0
 # HELP admission_errored_elastic_cpu Number of requests not admitted due to error
 # TYPE admission_errored_elastic_cpu counter
 admission_errored_elastic_cpu{node_id="1"} 0
@@ -126,9 +100,6 @@ admission_wait_durations_sql_sql_response_normal_pri_count{node_id="1"} 0
 # HELP admission_requested_elastic_cpu_normal_pri Number of requests
 # TYPE admission_requested_elastic_cpu_normal_pri counter
 admission_requested_elastic_cpu_normal_pri{node_id="1"} 0
-# HELP kvadmission_flow_controller_regular_requests_admitted Number of regular requests admitted by the flow controller
-# TYPE kvadmission_flow_controller_regular_requests_admitted counter
-kvadmission_flow_controller_regular_requests_admitted{node_id="1"} 472
 # HELP admission_wait_durations_sql_kv_response Wait time durations for requests that waited
 # TYPE admission_wait_durations_sql_kv_response histogram
 admission_wait_durations_sql_kv_response_bucket{node_id="1",le="10000"} 6139
@@ -209,15 +180,6 @@ admission_errored_kv_locking_normal_pri{node_id="1"} 0
 # HELP admission_admitted_kv_stores_bulk_normal_pri Number of requests admitted
 # TYPE admission_admitted_kv_stores_bulk_normal_pri counter
 admission_admitted_kv_stores_bulk_normal_pri{node_id="1"} 0
-# HELP kvadmission_flow_controller_regular_requests_waiting Number of regular requests waiting for flow tokens
-# TYPE kvadmission_flow_controller_regular_requests_waiting gauge
-kvadmission_flow_controller_regular_requests_waiting{node_id="1"} 0
-# HELP kvadmission_flow_controller_elastic_tokens_available Flow tokens available for elastic requests, across all replication streams
-# TYPE kvadmission_flow_controller_elastic_tokens_available gauge
-kvadmission_flow_controller_elastic_tokens_available{node_id="1"} 0
-# HELP kvadmission_flow_token_dispatch_coalesced_elastic Number of coalesced elastic flow token dispatches (where we're informing the sender of a higher log entry being admitted)
-# TYPE kvadmission_flow_token_dispatch_coalesced_elastic counter
-kvadmission_flow_token_dispatch_coalesced_elastic{node_id="1"} 0
 # HELP admission_admitted_sql_root_start Number of requests admitted
 # TYPE admission_admitted_sql_root_start counter
 admission_admitted_sql_root_start{node_id="1"} 0
@@ -292,9 +254,6 @@ admission_granter_used_slots_sql_root_start{node_id="1"} 0
 # HELP admission_errored_sql_root_start_locking_normal_pri Number of requests not admitted due to error
 # TYPE admission_errored_sql_root_start_locking_normal_pri counter
 admission_errored_sql_root_start_locking_normal_pri{node_id="1"} 0
-# HELP kvadmission_flow_token_dispatch_remote_elastic Number of remote elastic flow token dispatches
-# TYPE kvadmission_flow_token_dispatch_remote_elastic counter
-kvadmission_flow_token_dispatch_remote_elastic{node_id="1"} 0
 # HELP admission_l0_tokens_produced_kv Total bytes produced for L0 writes
 # TYPE admission_l0_tokens_produced_kv counter
 admission_l0_tokens_produced_kv{node_id="1"} -36
@@ -304,9 +263,6 @@ admission_errored_kv{node_id="1"} 0
 # HELP admission_admitted_sql_root_start_locking_normal_pri Number of requests admitted
 # TYPE admission_admitted_sql_root_start_locking_normal_pri counter
 admission_admitted_sql_root_start_locking_normal_pri{node_id="1"} 0
-# HELP kvadmission_flow_handle_regular_requests_admitted Number of regular requests admitted by the flow handle
-# TYPE kvadmission_flow_handle_regular_requests_admitted counter
-kvadmission_flow_handle_regular_requests_admitted{node_id="1"} 472
 # HELP admission_admitted_sql_kv_response_normal_pri Number of requests admitted
 # TYPE admission_admitted_sql_kv_response_normal_pri counter
 admission_admitted_sql_kv_response_normal_pri{node_id="1"} 3066
@@ -319,9 +275,6 @@ admission_admitted_sql_kv_response{node_id="1"} 6139
 # HELP admission_granter_slot_adjuster_increments_kv Number of increments of the total KV slots
 # TYPE admission_granter_slot_adjuster_increments_kv counter
 admission_granter_slot_adjuster_increments_kv{node_id="1"} 9
-# HELP kvadmission_flow_controller_regular_blocked_stream_count Number of replication streams with no flow tokens available for regular requests
-# TYPE kvadmission_flow_controller_regular_blocked_stream_count gauge
-kvadmission_flow_controller_regular_blocked_stream_count{node_id="1"} 0
 # HELP admission_wait_durations_sql_sql_response_locking_normal_pri Wait time durations for requests that waited
 # TYPE admission_wait_durations_sql_sql_response_locking_normal_pri histogram
 admission_wait_durations_sql_sql_response_locking_normal_pri_bucket{node_id="1",le="10000"} 0
@@ -390,9 +343,6 @@ admission_wait_durations_sql_sql_response_locking_normal_pri_count{node_id="1"} 
 # HELP admission_requested_sql_root_start_normal_pri Number of requests
 # TYPE admission_requested_sql_root_start_normal_pri counter
 admission_requested_sql_root_start_normal_pri{node_id="1"} 0
-# HELP kvadmission_flow_controller_regular_requests_bypassed Number of regular waiting requests that bypassed the flow controller due to disconnecting streams
-# TYPE kvadmission_flow_controller_regular_requests_bypassed counter
-kvadmission_flow_controller_regular_requests_bypassed{node_id="1"} 0
 # HELP admission_wait_queue_length_kv_high_pri Length of wait queue
 # TYPE admission_wait_queue_length_kv_high_pri gauge
 admission_wait_queue_length_kv_high_pri{node_id="1"} 0
@@ -476,9 +426,6 @@ admission_wait_durations_elastic_cpu_count{node_id="1"} 0
 # HELP admission_admitted_kv_locking_normal_pri Number of requests admitted
 # TYPE admission_admitted_kv_locking_normal_pri counter
 admission_admitted_kv_locking_normal_pri{node_id="1"} 5193
-# HELP kvadmission_flow_controller_elastic_tokens_returned Flow tokens returned by elastic requests, across all replication streams
-# TYPE kvadmission_flow_controller_elastic_tokens_returned counter
-kvadmission_flow_controller_elastic_tokens_returned{node_id="1"} 0
 # HELP admission_wait_queue_length_sql_leaf_start Length of wait queue
 # TYPE admission_wait_queue_length_sql_leaf_start gauge
 admission_wait_queue_length_sql_leaf_start{node_id="1"} 0
@@ -494,71 +441,6 @@ admission_granter_cpu_load_long_period_duration_kv{node_id="1"} 5.455e+08
 # HELP admission_requested_kv_stores_normal_pri Number of requests
 # TYPE admission_requested_kv_stores_normal_pri counter
 admission_requested_kv_stores_normal_pri{node_id="1"} 2979
-# HELP kvadmission_flow_handle_regular_wait_duration Latency histogram for time regular requests spent waiting for flow tokens, at the handle level
-# TYPE kvadmission_flow_handle_regular_wait_duration histogram
-kvadmission_flow_handle_regular_wait_duration_bucket{node_id="1",le="10000"} 466
-kvadmission_flow_handle_regular_wait_duration_bucket{node_id="1",le="12638.482029342978"} 469
-kvadmission_flow_handle_regular_wait_duration_bucket{node_id="1",le="15973.122800602541"} 470
-kvadmission_flow_handle_regular_wait_duration_bucket{node_id="1",le="20187.602546790382"} 471
-kvadmission_flow_handle_regular_wait_duration_bucket{node_id="1",le="25514.065200312878"} 472
-kvadmission_flow_handle_regular_wait_duration_bucket{node_id="1",le="32245.90545296394"} 472
-kvadmission_flow_handle_regular_wait_duration_bucket{node_id="1",le="40753.92965871775"} 472
-kvadmission_flow_handle_regular_wait_duration_bucket{node_id="1",le="51506.78076168121"} 472
-kvadmission_flow_handle_regular_wait_duration_bucket{node_id="1",le="65096.75230458167"} 472
-kvadmission_flow_handle_regular_wait_duration_bucket{node_id="1",le="82272.41341700466"} 472
-kvadmission_flow_handle_regular_wait_duration_bucket{node_id="1",le="103979.84184814895"} 472
-kvadmission_flow_handle_regular_wait_duration_bucket{node_id="1",le="131414.73626117557"} 472
-kvadmission_flow_handle_regular_wait_duration_bucket{node_id="1",le="166088.27826277143"} 472
-kvadmission_flow_handle_regular_wait_duration_bucket{node_id="1",le="209910.3720108553"} 472
-kvadmission_flow_handle_regular_wait_duration_bucket{node_id="1",le="265294.8464431894"} 472
-kvadmission_flow_handle_regular_wait_duration_bucket{node_id="1",le="335292.41492495546"} 472
-kvadmission_flow_handle_regular_wait_duration_bucket{node_id="1",le="423758.7160604059"} 472
-kvadmission_flow_handle_regular_wait_duration_bucket{node_id="1",le="535566.6917706894"} 472
-kvadmission_flow_handle_regular_wait_duration_bucket{node_id="1",le="676875.0009458527"} 472
-kvadmission_flow_handle_regular_wait_duration_bucket{node_id="1",le="855467.2535565672"} 472
-kvadmission_flow_handle_regular_wait_duration_bucket{node_id="1",le="1.0811807510766068e+06"} 472
-kvadmission_flow_handle_regular_wait_duration_bucket{node_id="1",le="1.3664483492953242e+06"} 472
-kvadmission_flow_handle_regular_wait_duration_bucket{node_id="1",le="1.7269832906594332e+06"} 472
-kvadmission_flow_handle_regular_wait_duration_bucket{node_id="1",le="2.182644728397485e+06"} 472
-kvadmission_flow_handle_regular_wait_duration_bucket{node_id="1",le="2.7585316176291797e+06"} 472
-kvadmission_flow_handle_regular_wait_duration_bucket{node_id="1",le="3.4863652276780806e+06"} 472
-kvadmission_flow_handle_regular_wait_duration_bucket{node_id="1",le="4.406236427773566e+06"} 472
-kvadmission_flow_handle_regular_wait_duration_bucket{node_id="1",le="5.568813990945262e+06"} 472
-kvadmission_flow_handle_regular_wait_duration_bucket{node_id="1",le="7.038135554931545e+06"} 472
-kvadmission_flow_handle_regular_wait_duration_bucket{node_id="1",le="8.89513497310822e+06"} 472
-kvadmission_flow_handle_regular_wait_duration_bucket{node_id="1",le="1.1242100350620849e+07"} 472
-kvadmission_flow_handle_regular_wait_duration_bucket{node_id="1",le="1.4208308325339198e+07"} 472
-kvadmission_flow_handle_regular_wait_duration_bucket{node_id="1",le="1.795714494371637e+07"} 472
-kvadmission_flow_handle_regular_wait_duration_bucket{node_id="1",le="2.269510536694665e+07"} 472
-kvadmission_flow_handle_regular_wait_duration_bucket{node_id="1",le="2.868316813342006e+07"} 472
-kvadmission_flow_handle_regular_wait_duration_bucket{node_id="1",le="3.625117049988527e+07"} 472
-kvadmission_flow_handle_regular_wait_duration_bucket{node_id="1",le="4.581597669054482e+07"} 472
-kvadmission_flow_handle_regular_wait_duration_bucket{node_id="1",le="5.790443980602476e+07"} 472
-kvadmission_flow_handle_regular_wait_duration_bucket{node_id="1",le="7.318242219076161e+07"} 472
-kvadmission_flow_handle_regular_wait_duration_bucket{node_id="1",le="9.249147277217315e+07"} 472
-kvadmission_flow_handle_regular_wait_duration_bucket{node_id="1",le="1.1689518164985757e+08"} 472
-kvadmission_flow_handle_regular_wait_duration_bucket{node_id="1",le="1.4773776525985083e+08"} 472
-kvadmission_flow_handle_regular_wait_duration_bucket{node_id="1",le="1.8671810912919158e+08"} 472
-kvadmission_flow_handle_regular_wait_duration_bucket{node_id="1",le="2.359833466782189e+08"} 472
-kvadmission_flow_handle_regular_wait_duration_bucket{node_id="1",le="2.9824712862168837e+08"} 472
-kvadmission_flow_handle_regular_wait_duration_bucket{node_id="1",le="3.769390975388353e+08"} 472
-kvadmission_flow_handle_regular_wait_duration_bucket{node_id="1",le="4.7639380104013294e+08"} 472
-kvadmission_flow_handle_regular_wait_duration_bucket{node_id="1",le="6.020894493336115e+08"} 472
-kvadmission_flow_handle_regular_wait_duration_bucket{node_id="1",le="7.609496685459859e+08"} 472
-kvadmission_flow_handle_regular_wait_duration_bucket{node_id="1",le="9.61724871115294e+08"} 472
-kvadmission_flow_handle_regular_wait_duration_bucket{node_id="1",le="1.2154742500762835e+09"} 472
-kvadmission_flow_handle_regular_wait_duration_bucket{node_id="1",le="1.5361749466718242e+09"} 472
-kvadmission_flow_handle_regular_wait_duration_bucket{node_id="1",le="1.941491945743876e+09"} 472
-kvadmission_flow_handle_regular_wait_duration_bucket{node_id="1",le="2.453751106639811e+09"} 472
-kvadmission_flow_handle_regular_wait_duration_bucket{node_id="1",le="3.10116892657477e+09"} 472
-kvadmission_flow_handle_regular_wait_duration_bucket{node_id="1",le="3.919406774847209e+09"} 472
-kvadmission_flow_handle_regular_wait_duration_bucket{node_id="1",le="4.953535208959157e+09"} 472
-kvadmission_flow_handle_regular_wait_duration_bucket{node_id="1",le="6.260516572014802e+09"} 472
-kvadmission_flow_handle_regular_wait_duration_bucket{node_id="1",le="7.912342618981298e+09"} 472
-kvadmission_flow_handle_regular_wait_duration_bucket{node_id="1",le="9.99999999999997e+09"} 472
-kvadmission_flow_handle_regular_wait_duration_bucket{node_id="1",le="+Inf"} 472
-kvadmission_flow_handle_regular_wait_duration_sum{node_id="1"} 1.082999e+06
-kvadmission_flow_handle_regular_wait_duration_count{node_id="1"} 472
 # HELP admission_wait_queue_length_elastic_cpu_bulk_normal_pri Length of wait queue
 # TYPE admission_wait_queue_length_elastic_cpu_bulk_normal_pri gauge
 admission_wait_queue_length_elastic_cpu_bulk_normal_pri{node_id="1"} 0
@@ -568,9 +450,6 @@ admission_requested_sql_kv_response_locking_normal_pri{node_id="1"} 3073
 # HELP admission_admitted_sql_leaf_start_normal_pri Number of requests admitted
 # TYPE admission_admitted_sql_leaf_start_normal_pri counter
 admission_admitted_sql_leaf_start_normal_pri{node_id="1"} 0
-# HELP kvadmission_flow_token_dispatch_pending_nodes Number of nodes pending flow token dispatches
-# TYPE kvadmission_flow_token_dispatch_pending_nodes gauge
-kvadmission_flow_token_dispatch_pending_nodes{node_id="1"} 0
 # HELP admission_wait_queue_length_sql_root_start_locking_normal_pri Length of wait queue
 # TYPE admission_wait_queue_length_sql_root_start_locking_normal_pri gauge
 admission_wait_queue_length_sql_root_start_locking_normal_pri{node_id="1"} 0
@@ -657,9 +536,6 @@ admission_wait_queue_length_sql_sql_response_normal_pri{node_id="1"} 0
 # HELP admission_admitted_kv_stores_ttl_low_pri Number of requests admitted
 # TYPE admission_admitted_kv_stores_ttl_low_pri counter
 admission_admitted_kv_stores_ttl_low_pri{node_id="1"} 0
-# HELP kvadmission_flow_token_dispatch_pending_regular Number of pending regular flow token dispatches
-# TYPE kvadmission_flow_token_dispatch_pending_regular gauge
-kvadmission_flow_token_dispatch_pending_regular{node_id="1"} 0
 # HELP admission_errored_sql_kv_response_locking_normal_pri Number of requests not admitted due to error
 # TYPE admission_errored_sql_kv_response_locking_normal_pri counter
 admission_errored_sql_kv_response_locking_normal_pri{node_id="1"} 0
@@ -743,12 +619,6 @@ admission_raft_paused_replicas{store="1",node_id="1"} 0
 # HELP admission_wait_queue_length_elastic_cpu Length of wait queue
 # TYPE admission_wait_queue_length_elastic_cpu gauge
 admission_wait_queue_length_elastic_cpu{node_id="1"} 0
-# HELP kvadmission_flow_token_dispatch_local_elastic Number of local elastic flow token dispatches
-# TYPE kvadmission_flow_token_dispatch_local_elastic counter
-kvadmission_flow_token_dispatch_local_elastic{node_id="1"} 0
-# HELP kvadmission_flow_handle_elastic_requests_errored Number of elastic requests that errored out while waiting for flow tokens, at the handle level
-# TYPE kvadmission_flow_handle_elastic_requests_errored counter
-kvadmission_flow_handle_elastic_requests_errored{node_id="1"} 0
 # HELP admission_requested_elastic_cpu Number of requests
 # TYPE admission_requested_elastic_cpu counter
 admission_requested_elastic_cpu{node_id="1"} 0
@@ -915,9 +785,6 @@ admission_errored_sql_sql_response{node_id="1"} 0
 # HELP admission_scheduler_latency_listener_p99_nanos The scheduling latency at p99 as observed by the scheduler latency listener
 # TYPE admission_scheduler_latency_listener_p99_nanos gauge
 admission_scheduler_latency_listener_p99_nanos{node_id="1"} 2.710568e+06
-# HELP kvadmission_flow_controller_regular_stream_count Total number of replication streams for regular requests
-# TYPE kvadmission_flow_controller_regular_stream_count gauge
-kvadmission_flow_controller_regular_stream_count{node_id="1"} 0
 # HELP admission_wait_durations_kv_stores_ttl_low_pri Wait time durations for requests that waited
 # TYPE admission_wait_durations_kv_stores_ttl_low_pri histogram
 admission_wait_durations_kv_stores_ttl_low_pri_bucket{node_id="1",le="10000"} 0
@@ -1122,113 +989,28 @@ admission_wait_durations_sql_kv_response_normal_pri_bucket{node_id="1",le="9.999
 admission_wait_durations_sql_kv_response_normal_pri_bucket{node_id="1",le="+Inf"} 3066
 admission_wait_durations_sql_kv_response_normal_pri_sum{node_id="1"} 0
 admission_wait_durations_sql_kv_response_normal_pri_count{node_id="1"} 3066
-# HELP kvadmission_flow_controller_regular_tokens_unaccounted Flow tokens returned by regular requests that were unaccounted for, across all replication streams
-# TYPE kvadmission_flow_controller_regular_tokens_unaccounted counter
-kvadmission_flow_controller_regular_tokens_unaccounted{node_id="1"} 0
+
 # HELP admission_elastic_cpu_utilization CPU utilization by elastic work
 # TYPE admission_elastic_cpu_utilization gauge
 admission_elastic_cpu_utilization{node_id="1"} 0
-# HELP kvadmission_flow_controller_elastic_requests_bypassed Number of elastic waiting requests that bypassed the flow controller due to disconnecting streams
-# TYPE kvadmission_flow_controller_elastic_requests_bypassed counter
-kvadmission_flow_controller_elastic_requests_bypassed{node_id="1"} 0
-# HELP kvadmission_flow_controller_elastic_tokens_deducted Flow tokens deducted by elastic requests, across all replication streams
-# TYPE kvadmission_flow_controller_elastic_tokens_deducted counter
-kvadmission_flow_controller_elastic_tokens_deducted{node_id="1"} 0
-# HELP kvadmission_flow_controller_regular_requests_errored Number of regular requests that errored out while waiting for flow tokens
-# TYPE kvadmission_flow_controller_regular_requests_errored counter
-kvadmission_flow_controller_regular_requests_errored{node_id="1"} 0
 # HELP admission_wait_queue_length_sql_leaf_start_normal_pri Length of wait queue
 # TYPE admission_wait_queue_length_sql_leaf_start_normal_pri gauge
 admission_wait_queue_length_sql_leaf_start_normal_pri{node_id="1"} 0
 # HELP admission_errored_kv_stores_high_pri Number of requests not admitted due to error
 # TYPE admission_errored_kv_stores_high_pri counter
 admission_errored_kv_stores_high_pri{node_id="1"} 0
-# HELP kvadmission_flow_controller_elastic_wait_duration Latency histogram for time elastic requests spent waiting for flow tokens
-# TYPE kvadmission_flow_controller_elastic_wait_duration histogram
-kvadmission_flow_controller_elastic_wait_duration_bucket{node_id="1",le="10000"} 0
-kvadmission_flow_controller_elastic_wait_duration_bucket{node_id="1",le="12638.482029342978"} 0
-kvadmission_flow_controller_elastic_wait_duration_bucket{node_id="1",le="15973.122800602541"} 0
-kvadmission_flow_controller_elastic_wait_duration_bucket{node_id="1",le="20187.602546790382"} 0
-kvadmission_flow_controller_elastic_wait_duration_bucket{node_id="1",le="25514.065200312878"} 0
-kvadmission_flow_controller_elastic_wait_duration_bucket{node_id="1",le="32245.90545296394"} 0
-kvadmission_flow_controller_elastic_wait_duration_bucket{node_id="1",le="40753.92965871775"} 0
-kvadmission_flow_controller_elastic_wait_duration_bucket{node_id="1",le="51506.78076168121"} 0
-kvadmission_flow_controller_elastic_wait_duration_bucket{node_id="1",le="65096.75230458167"} 0
-kvadmission_flow_controller_elastic_wait_duration_bucket{node_id="1",le="82272.41341700466"} 0
-kvadmission_flow_controller_elastic_wait_duration_bucket{node_id="1",le="103979.84184814895"} 0
-kvadmission_flow_controller_elastic_wait_duration_bucket{node_id="1",le="131414.73626117557"} 0
-kvadmission_flow_controller_elastic_wait_duration_bucket{node_id="1",le="166088.27826277143"} 0
-kvadmission_flow_controller_elastic_wait_duration_bucket{node_id="1",le="209910.3720108553"} 0
-kvadmission_flow_controller_elastic_wait_duration_bucket{node_id="1",le="265294.8464431894"} 0
-kvadmission_flow_controller_elastic_wait_duration_bucket{node_id="1",le="335292.41492495546"} 0
-kvadmission_flow_controller_elastic_wait_duration_bucket{node_id="1",le="423758.7160604059"} 0
-kvadmission_flow_controller_elastic_wait_duration_bucket{node_id="1",le="535566.6917706894"} 0
-kvadmission_flow_controller_elastic_wait_duration_bucket{node_id="1",le="676875.0009458527"} 0
-kvadmission_flow_controller_elastic_wait_duration_bucket{node_id="1",le="855467.2535565672"} 0
-kvadmission_flow_controller_elastic_wait_duration_bucket{node_id="1",le="1.0811807510766068e+06"} 0
-kvadmission_flow_controller_elastic_wait_duration_bucket{node_id="1",le="1.3664483492953242e+06"} 0
-kvadmission_flow_controller_elastic_wait_duration_bucket{node_id="1",le="1.7269832906594332e+06"} 0
-kvadmission_flow_controller_elastic_wait_duration_bucket{node_id="1",le="2.182644728397485e+06"} 0
-kvadmission_flow_controller_elastic_wait_duration_bucket{node_id="1",le="2.7585316176291797e+06"} 0
-kvadmission_flow_controller_elastic_wait_duration_bucket{node_id="1",le="3.4863652276780806e+06"} 0
-kvadmission_flow_controller_elastic_wait_duration_bucket{node_id="1",le="4.406236427773566e+06"} 0
-kvadmission_flow_controller_elastic_wait_duration_bucket{node_id="1",le="5.568813990945262e+06"} 0
-kvadmission_flow_controller_elastic_wait_duration_bucket{node_id="1",le="7.038135554931545e+06"} 0
-kvadmission_flow_controller_elastic_wait_duration_bucket{node_id="1",le="8.89513497310822e+06"} 0
-kvadmission_flow_controller_elastic_wait_duration_bucket{node_id="1",le="1.1242100350620849e+07"} 0
-kvadmission_flow_controller_elastic_wait_duration_bucket{node_id="1",le="1.4208308325339198e+07"} 0
-kvadmission_flow_controller_elastic_wait_duration_bucket{node_id="1",le="1.795714494371637e+07"} 0
-kvadmission_flow_controller_elastic_wait_duration_bucket{node_id="1",le="2.269510536694665e+07"} 0
-kvadmission_flow_controller_elastic_wait_duration_bucket{node_id="1",le="2.868316813342006e+07"} 0
-kvadmission_flow_controller_elastic_wait_duration_bucket{node_id="1",le="3.625117049988527e+07"} 0
-kvadmission_flow_controller_elastic_wait_duration_bucket{node_id="1",le="4.581597669054482e+07"} 0
-kvadmission_flow_controller_elastic_wait_duration_bucket{node_id="1",le="5.790443980602476e+07"} 0
-kvadmission_flow_controller_elastic_wait_duration_bucket{node_id="1",le="7.318242219076161e+07"} 0
-kvadmission_flow_controller_elastic_wait_duration_bucket{node_id="1",le="9.249147277217315e+07"} 0
-kvadmission_flow_controller_elastic_wait_duration_bucket{node_id="1",le="1.1689518164985757e+08"} 0
-kvadmission_flow_controller_elastic_wait_duration_bucket{node_id="1",le="1.4773776525985083e+08"} 0
-kvadmission_flow_controller_elastic_wait_duration_bucket{node_id="1",le="1.8671810912919158e+08"} 0
-kvadmission_flow_controller_elastic_wait_duration_bucket{node_id="1",le="2.359833466782189e+08"} 0
-kvadmission_flow_controller_elastic_wait_duration_bucket{node_id="1",le="2.9824712862168837e+08"} 0
-kvadmission_flow_controller_elastic_wait_duration_bucket{node_id="1",le="3.769390975388353e+08"} 0
-kvadmission_flow_controller_elastic_wait_duration_bucket{node_id="1",le="4.7639380104013294e+08"} 0
-kvadmission_flow_controller_elastic_wait_duration_bucket{node_id="1",le="6.020894493336115e+08"} 0
-kvadmission_flow_controller_elastic_wait_duration_bucket{node_id="1",le="7.609496685459859e+08"} 0
-kvadmission_flow_controller_elastic_wait_duration_bucket{node_id="1",le="9.61724871115294e+08"} 0
-kvadmission_flow_controller_elastic_wait_duration_bucket{node_id="1",le="1.2154742500762835e+09"} 0
-kvadmission_flow_controller_elastic_wait_duration_bucket{node_id="1",le="1.5361749466718242e+09"} 0
-kvadmission_flow_controller_elastic_wait_duration_bucket{node_id="1",le="1.941491945743876e+09"} 0
-kvadmission_flow_controller_elastic_wait_duration_bucket{node_id="1",le="2.453751106639811e+09"} 0
-kvadmission_flow_controller_elastic_wait_duration_bucket{node_id="1",le="3.10116892657477e+09"} 0
-kvadmission_flow_controller_elastic_wait_duration_bucket{node_id="1",le="3.919406774847209e+09"} 0
-kvadmission_flow_controller_elastic_wait_duration_bucket{node_id="1",le="4.953535208959157e+09"} 0
-kvadmission_flow_controller_elastic_wait_duration_bucket{node_id="1",le="6.260516572014802e+09"} 0
-kvadmission_flow_controller_elastic_wait_duration_bucket{node_id="1",le="7.912342618981298e+09"} 0
-kvadmission_flow_controller_elastic_wait_duration_bucket{node_id="1",le="9.99999999999997e+09"} 0
-kvadmission_flow_controller_elastic_wait_duration_bucket{node_id="1",le="+Inf"} 0
-kvadmission_flow_controller_elastic_wait_duration_sum{node_id="1"} 0
-kvadmission_flow_controller_elastic_wait_duration_count{node_id="1"} 0
 # HELP admission_wait_queue_length_kv_stores_normal_pri Length of wait queue
 # TYPE admission_wait_queue_length_kv_stores_normal_pri gauge
 admission_wait_queue_length_kv_stores_normal_pri{node_id="1"} 0
-# HELP kvadmission_flow_handle_elastic_requests_admitted Number of elastic requests admitted by the flow handle
-# TYPE kvadmission_flow_handle_elastic_requests_admitted counter
-kvadmission_flow_handle_elastic_requests_admitted{node_id="1"} 0
 # HELP admission_requested_sql_sql_response Number of requests
 # TYPE admission_requested_sql_sql_response counter
 admission_requested_sql_sql_response{node_id="1"} 0
 # HELP admission_requested_kv_stores_locking_normal_pri Number of requests
 # TYPE admission_requested_kv_stores_locking_normal_pri counter
 admission_requested_kv_stores_locking_normal_pri{node_id="1"} 2804
-# HELP kvadmission_flow_handle_regular_requests_errored Number of regular requests that errored out while waiting for flow tokens, at the handle level
-# TYPE kvadmission_flow_handle_regular_requests_errored counter
-kvadmission_flow_handle_regular_requests_errored{node_id="1"} 0
 # HELP admission_wait_queue_length_sql_root_start Length of wait queue
 # TYPE admission_wait_queue_length_sql_root_start gauge
 admission_wait_queue_length_sql_root_start{node_id="1"} 0
-# HELP kvadmission_flow_controller_elastic_requests_errored Number of elastic requests that errored out while waiting for flow tokens
-# TYPE kvadmission_flow_controller_elastic_requests_errored counter
-kvadmission_flow_controller_elastic_requests_errored{node_id="1"} 0
 # HELP admission_wait_queue_length_sql_kv_response_normal_pri Length of wait queue
 # TYPE admission_wait_queue_length_sql_kv_response_normal_pri gauge
 admission_wait_queue_length_sql_kv_response_normal_pri{node_id="1"} 0
@@ -1250,9 +1032,6 @@ admission_requested_kv_stores_ttl_low_pri{node_id="1"} 0
 # HELP admission_errored_elastic_cpu_normal_pri Number of requests not admitted due to error
 # TYPE admission_errored_elastic_cpu_normal_pri counter
 admission_errored_elastic_cpu_normal_pri{node_id="1"} 0
-# HELP kvadmission_flow_controller_elastic_requests_admitted Number of elastic requests admitted by the flow controller
-# TYPE kvadmission_flow_controller_elastic_requests_admitted counter
-kvadmission_flow_controller_elastic_requests_admitted{node_id="1"} 0
 # HELP admission_errored_kv_high_pri Number of requests not admitted due to error
 # TYPE admission_errored_kv_high_pri counter
 admission_errored_kv_high_pri{node_id="1"} 0
@@ -1327,9 +1106,6 @@ admission_requested_sql_root_start{node_id="1"} 0
 # HELP admission_admitted_kv Number of requests admitted
 # TYPE admission_admitted_kv counter
 admission_admitted_kv{node_id="1"} 12322
-# HELP kvadmission_flow_token_dispatch_remote_regular Number of remote regular flow token dispatches
-# TYPE kvadmission_flow_token_dispatch_remote_regular counter
-kvadmission_flow_token_dispatch_remote_regular{node_id="1"} 0
 # HELP admission_admitted_kv_stores Number of requests admitted
 # TYPE admission_admitted_kv_stores counter
 admission_admitted_kv_stores{node_id="1"} 5894
@@ -1478,9 +1254,6 @@ admission_admitted_elastic_cpu{node_id="1"} 0
 # HELP admission_errored_sql_leaf_start Number of requests not admitted due to error
 # TYPE admission_errored_sql_leaf_start counter
 admission_errored_sql_leaf_start{node_id="1"} 0
-# HELP kvadmission_flow_token_dispatch_local_regular Number of local regular flow token dispatches
-# TYPE kvadmission_flow_token_dispatch_local_regular counter
-kvadmission_flow_token_dispatch_local_regular{node_id="1"} 0
 # HELP admission_errored_kv_stores_ttl_low_pri Number of requests not admitted due to error
 # TYPE admission_errored_kv_stores_ttl_low_pri counter
 admission_errored_kv_stores_ttl_low_pri{node_id="1"} 0
@@ -1594,86 +1367,15 @@ admission_admitted_sql_leaf_start_locking_normal_pri{node_id="1"} 0
 # HELP admission_granter_io_tokens_available_kv Number of tokens available
 # TYPE admission_granter_io_tokens_available_kv gauge
 admission_granter_io_tokens_available_kv{node_id="1"} 1.5372286728091293e+17
-# HELP kvadmission_flow_controller_regular_tokens_returned Flow tokens returned by regular requests, across all replication streams
-# TYPE kvadmission_flow_controller_regular_tokens_returned counter
-kvadmission_flow_controller_regular_tokens_returned{node_id="1"} 0
 # HELP admission_wait_queue_length_sql_leaf_start_locking_normal_pri Length of wait queue
 # TYPE admission_wait_queue_length_sql_leaf_start_locking_normal_pri gauge
 admission_wait_queue_length_sql_leaf_start_locking_normal_pri{node_id="1"} 0
 # HELP admission_errored_kv_normal_pri Number of requests not admitted due to error
 # TYPE admission_errored_kv_normal_pri counter
 admission_errored_kv_normal_pri{node_id="1"} 0
-# HELP kvadmission_flow_handle_elastic_wait_duration Latency histogram for time elastic requests spent waiting for flow tokens, at the handle level
-# TYPE kvadmission_flow_handle_elastic_wait_duration histogram
-kvadmission_flow_handle_elastic_wait_duration_bucket{node_id="1",le="10000"} 0
-kvadmission_flow_handle_elastic_wait_duration_bucket{node_id="1",le="12638.482029342978"} 0
-kvadmission_flow_handle_elastic_wait_duration_bucket{node_id="1",le="15973.122800602541"} 0
-kvadmission_flow_handle_elastic_wait_duration_bucket{node_id="1",le="20187.602546790382"} 0
-kvadmission_flow_handle_elastic_wait_duration_bucket{node_id="1",le="25514.065200312878"} 0
-kvadmission_flow_handle_elastic_wait_duration_bucket{node_id="1",le="32245.90545296394"} 0
-kvadmission_flow_handle_elastic_wait_duration_bucket{node_id="1",le="40753.92965871775"} 0
-kvadmission_flow_handle_elastic_wait_duration_bucket{node_id="1",le="51506.78076168121"} 0
-kvadmission_flow_handle_elastic_wait_duration_bucket{node_id="1",le="65096.75230458167"} 0
-kvadmission_flow_handle_elastic_wait_duration_bucket{node_id="1",le="82272.41341700466"} 0
-kvadmission_flow_handle_elastic_wait_duration_bucket{node_id="1",le="103979.84184814895"} 0
-kvadmission_flow_handle_elastic_wait_duration_bucket{node_id="1",le="131414.73626117557"} 0
-kvadmission_flow_handle_elastic_wait_duration_bucket{node_id="1",le="166088.27826277143"} 0
-kvadmission_flow_handle_elastic_wait_duration_bucket{node_id="1",le="209910.3720108553"} 0
-kvadmission_flow_handle_elastic_wait_duration_bucket{node_id="1",le="265294.8464431894"} 0
-kvadmission_flow_handle_elastic_wait_duration_bucket{node_id="1",le="335292.41492495546"} 0
-kvadmission_flow_handle_elastic_wait_duration_bucket{node_id="1",le="423758.7160604059"} 0
-kvadmission_flow_handle_elastic_wait_duration_bucket{node_id="1",le="535566.6917706894"} 0
-kvadmission_flow_handle_elastic_wait_duration_bucket{node_id="1",le="676875.0009458527"} 0
-kvadmission_flow_handle_elastic_wait_duration_bucket{node_id="1",le="855467.2535565672"} 0
-kvadmission_flow_handle_elastic_wait_duration_bucket{node_id="1",le="1.0811807510766068e+06"} 0
-kvadmission_flow_handle_elastic_wait_duration_bucket{node_id="1",le="1.3664483492953242e+06"} 0
-kvadmission_flow_handle_elastic_wait_duration_bucket{node_id="1",le="1.7269832906594332e+06"} 0
-kvadmission_flow_handle_elastic_wait_duration_bucket{node_id="1",le="2.182644728397485e+06"} 0
-kvadmission_flow_handle_elastic_wait_duration_bucket{node_id="1",le="2.7585316176291797e+06"} 0
-kvadmission_flow_handle_elastic_wait_duration_bucket{node_id="1",le="3.4863652276780806e+06"} 0
-kvadmission_flow_handle_elastic_wait_duration_bucket{node_id="1",le="4.406236427773566e+06"} 0
-kvadmission_flow_handle_elastic_wait_duration_bucket{node_id="1",le="5.568813990945262e+06"} 0
-kvadmission_flow_handle_elastic_wait_duration_bucket{node_id="1",le="7.038135554931545e+06"} 0
-kvadmission_flow_handle_elastic_wait_duration_bucket{node_id="1",le="8.89513497310822e+06"} 0
-kvadmission_flow_handle_elastic_wait_duration_bucket{node_id="1",le="1.1242100350620849e+07"} 0
-kvadmission_flow_handle_elastic_wait_duration_bucket{node_id="1",le="1.4208308325339198e+07"} 0
-kvadmission_flow_handle_elastic_wait_duration_bucket{node_id="1",le="1.795714494371637e+07"} 0
-kvadmission_flow_handle_elastic_wait_duration_bucket{node_id="1",le="2.269510536694665e+07"} 0
-kvadmission_flow_handle_elastic_wait_duration_bucket{node_id="1",le="2.868316813342006e+07"} 0
-kvadmission_flow_handle_elastic_wait_duration_bucket{node_id="1",le="3.625117049988527e+07"} 0
-kvadmission_flow_handle_elastic_wait_duration_bucket{node_id="1",le="4.581597669054482e+07"} 0
-kvadmission_flow_handle_elastic_wait_duration_bucket{node_id="1",le="5.790443980602476e+07"} 0
-kvadmission_flow_handle_elastic_wait_duration_bucket{node_id="1",le="7.318242219076161e+07"} 0
-kvadmission_flow_handle_elastic_wait_duration_bucket{node_id="1",le="9.249147277217315e+07"} 0
-kvadmission_flow_handle_elastic_wait_duration_bucket{node_id="1",le="1.1689518164985757e+08"} 0
-kvadmission_flow_handle_elastic_wait_duration_bucket{node_id="1",le="1.4773776525985083e+08"} 0
-kvadmission_flow_handle_elastic_wait_duration_bucket{node_id="1",le="1.8671810912919158e+08"} 0
-kvadmission_flow_handle_elastic_wait_duration_bucket{node_id="1",le="2.359833466782189e+08"} 0
-kvadmission_flow_handle_elastic_wait_duration_bucket{node_id="1",le="2.9824712862168837e+08"} 0
-kvadmission_flow_handle_elastic_wait_duration_bucket{node_id="1",le="3.769390975388353e+08"} 0
-kvadmission_flow_handle_elastic_wait_duration_bucket{node_id="1",le="4.7639380104013294e+08"} 0
-kvadmission_flow_handle_elastic_wait_duration_bucket{node_id="1",le="6.020894493336115e+08"} 0
-kvadmission_flow_handle_elastic_wait_duration_bucket{node_id="1",le="7.609496685459859e+08"} 0
-kvadmission_flow_handle_elastic_wait_duration_bucket{node_id="1",le="9.61724871115294e+08"} 0
-kvadmission_flow_handle_elastic_wait_duration_bucket{node_id="1",le="1.2154742500762835e+09"} 0
-kvadmission_flow_handle_elastic_wait_duration_bucket{node_id="1",le="1.5361749466718242e+09"} 0
-kvadmission_flow_handle_elastic_wait_duration_bucket{node_id="1",le="1.941491945743876e+09"} 0
-kvadmission_flow_handle_elastic_wait_duration_bucket{node_id="1",le="2.453751106639811e+09"} 0
-kvadmission_flow_handle_elastic_wait_duration_bucket{node_id="1",le="3.10116892657477e+09"} 0
-kvadmission_flow_handle_elastic_wait_duration_bucket{node_id="1",le="3.919406774847209e+09"} 0
-kvadmission_flow_handle_elastic_wait_duration_bucket{node_id="1",le="4.953535208959157e+09"} 0
-kvadmission_flow_handle_elastic_wait_duration_bucket{node_id="1",le="6.260516572014802e+09"} 0
-kvadmission_flow_handle_elastic_wait_duration_bucket{node_id="1",le="7.912342618981298e+09"} 0
-kvadmission_flow_handle_elastic_wait_duration_bucket{node_id="1",le="9.99999999999997e+09"} 0
-kvadmission_flow_handle_elastic_wait_duration_bucket{node_id="1",le="+Inf"} 0
-kvadmission_flow_handle_elastic_wait_duration_sum{node_id="1"} 0
-kvadmission_flow_handle_elastic_wait_duration_count{node_id="1"} 0
 # HELP admission_granter_slot_adjuster_decrements_kv Number of decrements of the total KV slots
 # TYPE admission_granter_slot_adjuster_decrements_kv counter
 admission_granter_slot_adjuster_decrements_kv{node_id="1"} 0
-# HELP kvadmission_flow_handle_streams_disconnected Number of times we've disconnected from a stream, at the handle level
-# TYPE kvadmission_flow_handle_streams_disconnected counter
-kvadmission_flow_handle_streams_disconnected{node_id="1"} 13
 # HELP admission_elastic_cpu_nanos_exhausted_duration Total duration when elastic CPU nanoseconds were exhausted, in micros
 # TYPE admission_elastic_cpu_nanos_exhausted_duration gauge
 admission_elastic_cpu_nanos_exhausted_duration{node_id="1"} 0
@@ -2094,80 +1796,12 @@ admission_wait_queue_length_kv_stores_locking_normal_pri{node_id="1"} 0
 # HELP admission_wait_queue_length_kv_stores_high_pri Length of wait queue
 # TYPE admission_wait_queue_length_kv_stores_high_pri gauge
 admission_wait_queue_length_kv_stores_high_pri{node_id="1"} 0
-# HELP kvadmission_flow_controller_regular_wait_duration Latency histogram for time regular requests spent waiting for flow tokens
-# TYPE kvadmission_flow_controller_regular_wait_duration histogram
-kvadmission_flow_controller_regular_wait_duration_bucket{node_id="1",le="10000"} 471
-kvadmission_flow_controller_regular_wait_duration_bucket{node_id="1",le="12638.482029342978"} 471
-kvadmission_flow_controller_regular_wait_duration_bucket{node_id="1",le="15973.122800602541"} 472
-kvadmission_flow_controller_regular_wait_duration_bucket{node_id="1",le="20187.602546790382"} 472
-kvadmission_flow_controller_regular_wait_duration_bucket{node_id="1",le="25514.065200312878"} 472
-kvadmission_flow_controller_regular_wait_duration_bucket{node_id="1",le="32245.90545296394"} 472
-kvadmission_flow_controller_regular_wait_duration_bucket{node_id="1",le="40753.92965871775"} 472
-kvadmission_flow_controller_regular_wait_duration_bucket{node_id="1",le="51506.78076168121"} 472
-kvadmission_flow_controller_regular_wait_duration_bucket{node_id="1",le="65096.75230458167"} 472
-kvadmission_flow_controller_regular_wait_duration_bucket{node_id="1",le="82272.41341700466"} 472
-kvadmission_flow_controller_regular_wait_duration_bucket{node_id="1",le="103979.84184814895"} 472
-kvadmission_flow_controller_regular_wait_duration_bucket{node_id="1",le="131414.73626117557"} 472
-kvadmission_flow_controller_regular_wait_duration_bucket{node_id="1",le="166088.27826277143"} 472
-kvadmission_flow_controller_regular_wait_duration_bucket{node_id="1",le="209910.3720108553"} 472
-kvadmission_flow_controller_regular_wait_duration_bucket{node_id="1",le="265294.8464431894"} 472
-kvadmission_flow_controller_regular_wait_duration_bucket{node_id="1",le="335292.41492495546"} 472
-kvadmission_flow_controller_regular_wait_duration_bucket{node_id="1",le="423758.7160604059"} 472
-kvadmission_flow_controller_regular_wait_duration_bucket{node_id="1",le="535566.6917706894"} 472
-kvadmission_flow_controller_regular_wait_duration_bucket{node_id="1",le="676875.0009458527"} 472
-kvadmission_flow_controller_regular_wait_duration_bucket{node_id="1",le="855467.2535565672"} 472
-kvadmission_flow_controller_regular_wait_duration_bucket{node_id="1",le="1.0811807510766068e+06"} 472
-kvadmission_flow_controller_regular_wait_duration_bucket{node_id="1",le="1.3664483492953242e+06"} 472
-kvadmission_flow_controller_regular_wait_duration_bucket{node_id="1",le="1.7269832906594332e+06"} 472
-kvadmission_flow_controller_regular_wait_duration_bucket{node_id="1",le="2.182644728397485e+06"} 472
-kvadmission_flow_controller_regular_wait_duration_bucket{node_id="1",le="2.7585316176291797e+06"} 472
-kvadmission_flow_controller_regular_wait_duration_bucket{node_id="1",le="3.4863652276780806e+06"} 472
-kvadmission_flow_controller_regular_wait_duration_bucket{node_id="1",le="4.406236427773566e+06"} 472
-kvadmission_flow_controller_regular_wait_duration_bucket{node_id="1",le="5.568813990945262e+06"} 472
-kvadmission_flow_controller_regular_wait_duration_bucket{node_id="1",le="7.038135554931545e+06"} 472
-kvadmission_flow_controller_regular_wait_duration_bucket{node_id="1",le="8.89513497310822e+06"} 472
-kvadmission_flow_controller_regular_wait_duration_bucket{node_id="1",le="1.1242100350620849e+07"} 472
-kvadmission_flow_controller_regular_wait_duration_bucket{node_id="1",le="1.4208308325339198e+07"} 472
-kvadmission_flow_controller_regular_wait_duration_bucket{node_id="1",le="1.795714494371637e+07"} 472
-kvadmission_flow_controller_regular_wait_duration_bucket{node_id="1",le="2.269510536694665e+07"} 472
-kvadmission_flow_controller_regular_wait_duration_bucket{node_id="1",le="2.868316813342006e+07"} 472
-kvadmission_flow_controller_regular_wait_duration_bucket{node_id="1",le="3.625117049988527e+07"} 472
-kvadmission_flow_controller_regular_wait_duration_bucket{node_id="1",le="4.581597669054482e+07"} 472
-kvadmission_flow_controller_regular_wait_duration_bucket{node_id="1",le="5.790443980602476e+07"} 472
-kvadmission_flow_controller_regular_wait_duration_bucket{node_id="1",le="7.318242219076161e+07"} 472
-kvadmission_flow_controller_regular_wait_duration_bucket{node_id="1",le="9.249147277217315e+07"} 472
-kvadmission_flow_controller_regular_wait_duration_bucket{node_id="1",le="1.1689518164985757e+08"} 472
-kvadmission_flow_controller_regular_wait_duration_bucket{node_id="1",le="1.4773776525985083e+08"} 472
-kvadmission_flow_controller_regular_wait_duration_bucket{node_id="1",le="1.8671810912919158e+08"} 472
-kvadmission_flow_controller_regular_wait_duration_bucket{node_id="1",le="2.359833466782189e+08"} 472
-kvadmission_flow_controller_regular_wait_duration_bucket{node_id="1",le="2.9824712862168837e+08"} 472
-kvadmission_flow_controller_regular_wait_duration_bucket{node_id="1",le="3.769390975388353e+08"} 472
-kvadmission_flow_controller_regular_wait_duration_bucket{node_id="1",le="4.7639380104013294e+08"} 472
-kvadmission_flow_controller_regular_wait_duration_bucket{node_id="1",le="6.020894493336115e+08"} 472
-kvadmission_flow_controller_regular_wait_duration_bucket{node_id="1",le="7.609496685459859e+08"} 472
-kvadmission_flow_controller_regular_wait_duration_bucket{node_id="1",le="9.61724871115294e+08"} 472
-kvadmission_flow_controller_regular_wait_duration_bucket{node_id="1",le="1.2154742500762835e+09"} 472
-kvadmission_flow_controller_regular_wait_duration_bucket{node_id="1",le="1.5361749466718242e+09"} 472
-kvadmission_flow_controller_regular_wait_duration_bucket{node_id="1",le="1.941491945743876e+09"} 472
-kvadmission_flow_controller_regular_wait_duration_bucket{node_id="1",le="2.453751106639811e+09"} 472
-kvadmission_flow_controller_regular_wait_duration_bucket{node_id="1",le="3.10116892657477e+09"} 472
-kvadmission_flow_controller_regular_wait_duration_bucket{node_id="1",le="3.919406774847209e+09"} 472
-kvadmission_flow_controller_regular_wait_duration_bucket{node_id="1",le="4.953535208959157e+09"} 472
-kvadmission_flow_controller_regular_wait_duration_bucket{node_id="1",le="6.260516572014802e+09"} 472
-kvadmission_flow_controller_regular_wait_duration_bucket{node_id="1",le="7.912342618981298e+09"} 472
-kvadmission_flow_controller_regular_wait_duration_bucket{node_id="1",le="9.99999999999997e+09"} 472
-kvadmission_flow_controller_regular_wait_duration_bucket{node_id="1",le="+Inf"} 472
-kvadmission_flow_controller_regular_wait_duration_sum{node_id="1"} 100622
-kvadmission_flow_controller_regular_wait_duration_count{node_id="1"} 472
 # HELP admission_granter_io_tokens_taken_kv Total number of tokens taken
 # TYPE admission_granter_io_tokens_taken_kv counter
 admission_granter_io_tokens_taken_kv{node_id="1"} 4.5556403e+07
 # HELP admission_wait_queue_length_sql_sql_response Length of wait queue
 # TYPE admission_wait_queue_length_sql_sql_response gauge
 admission_wait_queue_length_sql_sql_response{node_id="1"} 0
-# HELP kvadmission_flow_handle_streams_connected Number of times we've connected to a stream, at the handle level
-# TYPE kvadmission_flow_handle_streams_connected counter
-kvadmission_flow_handle_streams_connected{node_id="1"} 67
 # HELP admission_wait_durations_kv_normal_pri Wait time durations for requests that waited
 # TYPE admission_wait_durations_kv_normal_pri histogram
 admission_wait_durations_kv_normal_pri_bucket{node_id="1",le="10000"} 6907
@@ -2372,9 +2006,6 @@ admission_elastic_cpu_over_limit_durations_bucket{node_id="1",le="9.999999999999
 admission_elastic_cpu_over_limit_durations_bucket{node_id="1",le="+Inf"} 0
 admission_elastic_cpu_over_limit_durations_sum{node_id="1"} 0
 admission_elastic_cpu_over_limit_durations_count{node_id="1"} 0
-# HELP kvadmission_flow_handle_elastic_requests_waiting Number of elastic requests waiting for flow tokens, at the handle level
-# TYPE kvadmission_flow_handle_elastic_requests_waiting gauge
-kvadmission_flow_handle_elastic_requests_waiting{node_id="1"} 0
 # HELP admission_granter_total_slots_kv Total slots for kv work
 # TYPE admission_granter_total_slots_kv gauge
 admission_granter_total_slots_kv{node_id="1"} 10
