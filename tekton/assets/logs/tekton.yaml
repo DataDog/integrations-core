@@ -23,3 +23,8 @@ pipeline:
       enabled: true
       sources:
         - severity
+    - type: trace-id-remapper
+      name: Define `knative.dev/traceid` as the official traceId of the log
+      enabled: true
+      sources:
+        - knative.dev/traceid
