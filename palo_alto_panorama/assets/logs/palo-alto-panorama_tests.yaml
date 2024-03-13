@@ -7,7 +7,6 @@ tests:
       12:46:45|elapsed=0|cat=any|seq=7288183648727243213|actflag=0x0|sloc=10.0.0.0-10.255.255.255|dloc=10.0.0.0-10.255.255.255|pktsent=1|pktrcvd=1|sessionendreason=tcp-rst-from-server|vsysname=|dvc=PA-VM|actsrc=from-policy|suuid=|duuid=|tunnelid=0|monitortag=|parentid=0|parentst=|tunnel=N/A|associd=0|chunk=0|chunksent=0|chunkrcvd=0|ruleuuid=9d526565-xxyy-4e35-9c2e-6f54430132ec|http2conn=0|appflap=0|policyid=|link=|dynusrgrp=|xffip=|scat=|sprofile=|smodel=|sven=|sosfam=|sosver=|shost=|smac=|dcat=|dprofile=|dmodel=|dven=|dosfam=|dosver=|dhost=|dmac=|contid=|podnamespace=|podname=|sedl=|dedl=|hostid=|srnum=|sdag=|ddag=|sessionown=|subcatapp=unknown|appcat=unknown|apptech=unknown|apprisk=1|appchar=|appcont=|tunneledapp=incomplete|appsaas=no|appstate=no|offloaded=0|flowtype=|cluster=
     result:
       custom:
-        act: "allow"
         actflag: "0x0"
         actsrc: "from-policy"
         app: "incomplete"
@@ -80,6 +79,7 @@ tests:
         palo:
           alto:
             panorama:
+              action: "allow"
               apprisk: 1
               pkt: 2
               pktrcvd: 1
@@ -119,7 +119,6 @@ tests:
       Apps|suser=|duser=|app=facebook-base|vsys=vsys1|from=LAN|to=WAN|inboundif=ethernet1/2|outboundif=ethernet1/1|logset=New_Log_Profile|sessionid=1553|repeatcnt=1|sport=49896|dport=443|natsport=16742|natdport=443|flags=0x403400|proto=tcp|act=block-url|misc=www.facebook.com/|threatid=9999(9999)|cat=social-networking|severity=informational|dir=client-to-server|seqno=7312400435275366420|actflags=0x0|sloc=10.0.0.0-10.255.255.255|dloc=India|contenttype=|pcapip=0|filedigest=|cloud=|urlidx=0|useragent=|filetype=|xff=|ref=|sender=|sub=|recipient=|reportid=0|vsysname=|dvc=PA-VM|suuid=|duuid=|http_method=|tunnelid=0|monitortag=|tunnel=N/A|thrcategory=N/A|contentver=AppThreat-0-0|ppid=4294967295|httpheaders=|urlcategory=social-networking,low-risk|ruleuuid=b77632fb-xxyy-49f2-b319-e02d91a826fc|http2conn=0|dynusrgrp=|xffip=|scat=|sprofile=|smodel=|sven=|sosfam=|sosver=|shost=|smac=|dcat=|dprofile=|dmodel=|dven=|dosfam=|dosver=|dhost=|dmac=|contid=|podnamespace=|podname=|hostid=|srnum=|reason=|justification=|subcatApp=social-networking|appcat=saas|apptech=browser-based|apprisk=4|appchar=used-by-malware,able-to-transfer-file,has-known-vulnerability,tunnel-other-application,pervasive-use,is-saas,no-certifications|appcont=facebook|tunneledapp=facebook-base|appsaas=yes|appstate=no|cloudreportid=|cluster=|flowtype=
     result:
       custom:
-        act: "block-url"
         actflags: "0x0"
         app: "facebook-base"
         appcat: "saas"
@@ -184,6 +183,7 @@ tests:
         palo:
           alto:
             panorama:
+              act: "block-url"
               appchar: "used-by-malware,able-to-transfer-file,has-known-vulnerability,tunnel-other-application,pervasive-use,is-saas,no-certifications"
               appcont: "facebook"
               apprisk: 4
@@ -231,7 +231,6 @@ tests:
       validation|contid=fashfgdshkfgdskfsh21515|podnamespace=pod_namespace|podname=pod_name|sedl=src_edl|dedl=dst_edl|sdag=src_dag|ddag=dst_dag|scat=network|sprofile=roaming_comp|smodel=lenovo-win|sven=win|src_osfamily=windows|sosver=1803|shost=WIN45|smac=00:11:22:33:44:55|dcat=firewall|dprofile=router|dmodel=44OS|dven=cisfo|dosfam=windows|dosver=1809|dhost=DE423|dmac=BE:EF:57:33:13:C4|seqno=7288183790458945051|actflag=0x0|vsysname=vsys2|dvc=PA-VM|vsysid=5455545|appsubcat=encrypted-tunnel|appcat=business-systems|apptech=browser-based|apprisk=1|appchar=used-by-malware,able-to-transfer-file,has-known-vulnerability,tunnel-other-application,pervasive-use|appcont=docker|appsaas=1|appstate=1|cluster=CLN0
     result:
       custom:
-        act: "deny"
         actflag: "0x0"
         app: "ssl"
         appcat: "business-systems"
@@ -321,6 +320,7 @@ tests:
         palo:
           alto:
             panorama:
+              act: "deny"
               appchar: "used-by-malware,able-to-transfer-file,has-known-vulnerability,tunnel-other-application,pervasive-use"
               appcont: "docker"
               apprisk: 1

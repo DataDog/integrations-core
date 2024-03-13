@@ -125,6 +125,13 @@ facets:
   - facetType: list
     groups:
       - Palo Alto Panorama
+    name: Action (Panorama)
+    path: palo.alto.panorama.action
+    source: log
+    type: string
+  - facetType: list
+    groups:
+      - Palo Alto Panorama
     name: Application Characteristic
     path: palo.alto.panorama.appchar
     source: log
@@ -526,6 +533,16 @@ pipeline:
 
             0x00000100,payload of the outer tunnel is being inspected
           type: lookup-processor
+        - type: attribute-remapper
+          name: Map `act` to `palo.alto.panorama.action`
+          enabled: true
+          sources:
+            - act
+          sourceType: attribute
+          target: palo.alto.panorama.action
+          targetType: attribute
+          preserveSource: false
+          overrideOnConflict: false
     - type: pipeline
       name: Processors for "User ID" log type
       enabled: true

@@ -1521,7 +1521,7 @@
                                 },
                                 "group_by": [
                                     {
-                                        "facet": "@act",
+                                        "facet": "@palo.alto.panorama.action",
                                         "limit": 10,
                                         "sort": {
                                             "order": "desc",
@@ -1994,7 +1994,7 @@
                                 "width": "auto"
                             },
                             {
-                                "field": "act",
+                                "field": "palo.alto.panorama.action",
                                 "width": "auto"
                             },
                             {
@@ -2083,7 +2083,7 @@
         },
         {
             "name": "Action",
-            "prefix": "@act",
+            "prefix": "@palo.alto.panorama.action",
             "available_values": [],
             "default": "*"
         },
