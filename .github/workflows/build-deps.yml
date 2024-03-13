@@ -85,10 +85,11 @@ jobs:
       uses: tj-actions/changed-files@v42
       with:
         files_yaml: |-
-          builders:
-          - .builders/**
-          dependencies:
-          - ${{ env.DIRECT_DEPENDENCY_FILE }}
+          windows_builders:
+          - .builders/images/*
+          - .builders/images/windows-*/**
+          - .builders/deps/build_dependencies.txt
+          - .builders/patches/**
 
     - name: Checkout code
       if: github.event_name == 'pull_request'
@@ -136,34 +137,35 @@ jobs:
         username: ${{ github.actor }}
         password: ${{ secrets.GITHUB_TOKEN }}
 
-    - name: Build image and wheels (arm64)
-      if: steps.changed-files.outputs.builders_any_changed == 'true' && matrix.job.image == 'linux-aarch64'
-      run: |-
-        sudo /home/runner/miniconda3/bin/python .builders/build.py ${{ matrix.job.image }} --python 3 ${{ env.OUT_DIR }}/py3
-        sudo /home/runner/miniconda3/bin/python .builders/build.py ${{ matrix.job.image }} --python 2 ${{ env.OUT_DIR }}/py2
-
-    - name: Pull image and build wheels (arm64)
-      if: steps.changed-files.outputs.builders_any_changed != 'true' && matrix.job.image == 'linux-aarch64'
+    - name: Build wheels (linux-aarch64)
+      if: matrix.job.image == 'linux-aarch64'
       run: |-
         digest=$(jq -r '.["${{ matrix.job.image }}"]' .deps/image_digests.json)
         sudo /home/runner/miniconda3/bin/python .builders/build.py ${{ matrix.job.image }} --python 3 ${{ env.OUT_DIR }}/py3 --digest $digest
         sudo /home/runner/miniconda3/bin/python .builders/build.py ${{ matrix.job.image }} --python 2 ${{ env.OUT_DIR }}/py2 --digest $digest
 
-    - name: Build image and wheels
-      if: steps.changed-files.outputs.builders_any_changed == 'true' && matrix.job.image != 'linux-aarch64'
-      run: |-
-        python .builders/build.py ${{ matrix.job.image }} --python 3 ${{ env.OUT_DIR }}/py3
-        python .builders/build.py ${{ matrix.job.image }} --python 2 ${{ env.OUT_DIR }}/py2
-
-    - name: Pull image and build wheels
-      if: steps.changed-files.outputs.builders_any_changed != 'true' && matrix.job.image != 'linux-aarch64'
+    - name: Build wheels (linux-x86_64)
+      if: matrix.job.image == 'linux-x86_64'
       run: |-
         digest=$(jq -r '.["${{ matrix.job.image }}"]' .deps/image_digests.json)
         python .builders/build.py ${{ matrix.job.image }} --python 3 ${{ env.OUT_DIR }}/py3 --digest $digest
         python .builders/build.py ${{ matrix.job.image }} --python 2 ${{ env.OUT_DIR }}/py2 --digest $digest
 
+    - name: Pull image and build wheels (windows)
+      if: matrix.job.image == 'windows-x86_64' && steps.changed-files.outputs.windows_builders_any_changed == 'true'
+      run: |-
+        digest=$(jq -r '.["${{ matrix.job.image }}"]' .deps/image_digests.json)
+        python .builders/build.py ${{ matrix.job.image }} --python 3 ${{ env.OUT_DIR }}/py3 --digest $digest
+        python .builders/build.py ${{ matrix.job.image }} --python 2 ${{ env.OUT_DIR }}/py2 --digest $digest
+
+    - name: Build wheels (windows)
+      if: matrix.job.image == 'windows-x86_64' && steps.changed-files.outputs.windows_builders_any_changed != 'true'
+      run: |-
+        python .builders/build.py ${{ matrix.job.image }} --python 3 ${{ env.OUT_DIR }}/py3
+        python .builders/build.py ${{ matrix.job.image }} --python 2 ${{ env.OUT_DIR }}/py2
+
     - name: Publish image
-      if: github.event_name == 'push' && steps.changed-files.outputs.builders_any_changed == 'true' && matrix.job.image != 'linux-aarch64'
+      if: github.event_name == 'push' && matrix.job.image != 'linux-aarch64'
       run: docker push ${{ env.BUILDER_IMAGE }}
 
     - name: Save image digest
