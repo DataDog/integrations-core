@@ -15,8 +15,15 @@ from six.moves.urllib.parse import urlparse
 
 from datadog_checks.base import AgentCheck, OpenMetricsBaseCheck
 from datadog_checks.base.checks.kubelet_base.base import KubeletBase, KubeletCredentials, urljoin
-from datadog_checks.base.errors import CheckException
+from datadog_checks.base.config import _is_affirmative
+from datadog_checks.base.errors import CheckException, SkipInstanceError
 from datadog_checks.base.utils.tagging import tagger
+
+try:
+    import datadog_agent
+except ImportError:
+    from datadog_checks.base.stubs import datadog_agent
+
 
 from .cadvisor import CadvisorScraper
 from .common import (
@@ -163,6 +170,10 @@ class KubeletCheck(
     VOLUME_TAG_KEYS_TO_EXCLUDE = ['persistentvolumeclaim', 'pod_phase']
 
     def __init__(self, name, init_config, instances):
+        if _is_affirmative(datadog_agent.get_config("kubelet_core_check_enabled")):
+            raise SkipInstanceError(
+                "The kubelet core check is enabled, skipping initialization of the python kubelet check"
+            )
         self.KUBELET_METRIC_TRANSFORMERS = {
             'kubelet_container_log_filesystem_used_bytes': self.kubelet_container_log_filesystem_used_bytes,
             'rest_client_request_latency_seconds': self.rest_client_latency,
