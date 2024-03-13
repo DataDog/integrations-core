@@ -186,6 +186,7 @@ def build_image():
             build_command = ['docker', 'build',
                              str(build_context_dir), '-t', image_name]
 
+            # Windows containers don't use BuildKit and they don't support these caching features
             if not windows_image:
                 build_command.extend(['--cache-to', 'type=inline'])
                 if args.digest:
