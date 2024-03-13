@@ -35,7 +35,7 @@ def test_none_properties_data(vcsim_instance, dd_run_check, aggregator, service_
 
 
 @pytest.mark.usefixtures("service_instance")
-def test_esxi_no_hostname_data(vcsim_instance, dd_run_check, aggregator, service_instance, caplog):
+def test_esxi_no_properties(vcsim_instance, dd_run_check, aggregator, service_instance, caplog):
     retrieve_result = vim.PropertyCollector.RetrieveResult(
         objects=[
             vim.ObjectContent(
@@ -49,11 +49,34 @@ def test_esxi_no_hostname_data(vcsim_instance, dd_run_check, aggregator, service
     caplog.set_level(logging.WARNING)
     dd_run_check(check)
 
-    assert "No host name found" in caplog.text
+    assert "No resources found; halting check execution" in caplog.text
 
     base_tags = ["esxi_url:127.0.0.1:8989"]
     aggregator.assert_metric("esxi.host.can_connect", 1, count=1, tags=base_tags)
     aggregator.assert_all_metrics_covered()
+
+
+@pytest.mark.usefixtures("service_instance")
+def test_esxi_no_hostname(vcsim_instance, dd_run_check, aggregator, service_instance, caplog):
+    retrieve_result = vim.PropertyCollector.RetrieveResult(
+        objects=[
+            vim.ObjectContent(
+                obj=vim.HostSystem(moId="host"),
+                propSet=[
+                    vmodl.DynamicProperty(
+                        name='test',
+                        val='c1',
+                    ),
+                ],
+            )
+        ]
+    )
+    service_instance.content.propertyCollector.RetrievePropertiesEx = MagicMock(return_value=retrieve_result)
+    check = EsxiCheck('esxi', {}, [vcsim_instance])
+    caplog.set_level(logging.DEBUG)
+    dd_run_check(check)
+
+    assert "No host name found for 'vim.HostSystem:host'; skipping" in caplog.text
 
 
 @pytest.mark.usefixtures("service_instance")
@@ -94,10 +117,10 @@ def test_esxi_perf_metrics(vcsim_instance, dd_run_check, aggregator, caplog):
     aggregator.assert_metric("esxi.host.can_connect", 1, count=1, tags=base_tags)
 
     assert "Skipping metric net.droppedRx.sum for localhost.localdomain, because the value "
-    "returned by the Host is negative (i.e. the metric is not yet available). values: [-1]" in caplog.text
+    "returned by the host is negative (i.e. the metric is not yet available). values: [-1]" in caplog.text
 
     assert (
-        "Skipping metric net.droppedRx.sum for localhost.localdomain because no value was returned by the Host"
+        "Skipping metric net.droppedRx.sum for localhost.localdomain because no value was returned by the host"
         in caplog.text
     )
 
@@ -111,3 +134,35 @@ def test_vm_perf_metrics(vcsim_instance, dd_run_check, aggregator):
     aggregator.assert_metric("esxi.cpu.usage.avg", value=18, tags=base_tags, hostname="vm1")
     aggregator.assert_metric("esxi.cpu.usage.avg", value=19, tags=base_tags, hostname="vm2")
     aggregator.assert_metric("esxi.net.droppedRx.sum", value=28, tags=base_tags, hostname="vm1")
+
+
+@pytest.mark.usefixtures("service_instance")
+def test_external_host_tags(vcsim_instance, datadog_agent, dd_run_check):
+    check = EsxiCheck('esxi', {}, [vcsim_instance])
+    dd_run_check(check)
+    datadog_agent.assert_external_tags(
+        'localhost.localdomain',
+        {
+            'esxi': [
+                'esxi_datacenter:dc2',
+                'esxi_folder:folder_1',
+                'esxi_type:host',
+                'esxi_url:127.0.0.1:8989',
+            ]
+        },
+    )
+    datadog_agent.assert_external_tags(
+        'vm1',
+        {
+            'esxi': [
+                'esxi_datacenter:dc2',
+                'esxi_folder:folder_1',
+                'esxi_type:VM',
+                'esxi_url:127.0.0.1:8989',
+            ]
+        },
+    )
+    datadog_agent.assert_external_tags(
+        'vm2',
+        {'esxi': ['esxi_cluster:c1', 'esxi_compute:c1', 'esxi_type:VM', 'esxi_url:127.0.0.1:8989']},
+    )

@@ -7,8 +7,9 @@ from pyVmomi import vim, vmodl
 
 from datadog_checks.base import AgentCheck  # noqa: F401
 
-from .constants import HOST_RESOURCE, MAX_PROPERTIES, RESOURCE_TYPE_TO_NAME, SHORT_ROLLUP, VM_RESOURCE
+from .constants import ALL_RESOURCES, HOST_RESOURCE, MAX_PROPERTIES, RESOURCE_TYPE_TO_NAME, SHORT_ROLLUP, VM_RESOURCE
 from .metrics import RESOURCE_NAME_TO_METRICS
+from .utils import get_tags_recursively
 
 
 class EsxiCheck(AgentCheck):
@@ -25,13 +26,13 @@ class EsxiCheck(AgentCheck):
         self.log.debug("Retrieving resources")
         property_specs = []
 
-        resource_types = [VM_RESOURCE, HOST_RESOURCE]
-        for resource_type in resource_types:
-            # only request name attribute for now
+        for resource_type in ALL_RESOURCES:
             property_spec = vmodl.query.PropertyCollector.PropertySpec()
             property_spec.type = resource_type
-            property_spec.pathSet = ["name"]
+            property_spec.pathSet = ["name", "parent"]
             property_specs.append(property_spec)
+            if resource_type == VM_RESOURCE:
+                property_spec.pathSet.append("runtime.host")
 
         # Specify the attribute of the root object to traverse to obtain all the attributes
         traversal_spec = vmodl.query.PropertyCollector.TraversalSpec()
@@ -39,7 +40,6 @@ class EsxiCheck(AgentCheck):
         traversal_spec.skip = False
         traversal_spec.type = vim.view.ContainerView
 
-        # Only collect 1 item for now
         retr_opts = vmodl.query.PropertyCollector.RetrieveOptions()
         retr_opts.maxObjects = MAX_PROPERTIES
 
@@ -52,7 +52,7 @@ class EsxiCheck(AgentCheck):
         filter_spec = vmodl.query.PropertyCollector.FilterSpec()
         filter_spec.propSet = property_specs
 
-        view_ref = self.content.viewManager.CreateContainerView(self.content.rootFolder, resource_types, True)
+        view_ref = self.content.viewManager.CreateContainerView(self.content.rootFolder, ALL_RESOURCES, True)
 
         try:
             obj_spec.obj = view_ref
@@ -144,22 +144,55 @@ class EsxiCheck(AgentCheck):
         self.content = connection.content
 
         resources = self.get_resources()
-        resource_map = {}
-        for resource in resources:
-            name = None
-            for prop in resource.propSet:
-                if prop.name == "name":
-                    name = prop.val
-            if name:
-                resource_map[name] = resource.obj
-            else:
-                self.log.warning("No host name found for entity %s", resource.obj)
+        resource_map = {
+            obj_content.obj: {prop.name: prop.val for prop in obj_content.propSet}
+            for obj_content in resources
+            if obj_content.propSet
+        }
 
         if not resource_map:
             self.log.warning("No resources found; halting check execution")
             return
 
-        for resource_name, resource_obj in resource_map.items():
+        # Add the root folder entity as it can't be fetched from the previous api calls.
+        root_folder = self.content.rootFolder
+        resource_map[root_folder] = {"name": root_folder.name, "parent": None}
+        self.log.debug("All resources: %s", resource_map)
+
+        external_host_tags = []
+
+        all_resources_with_metrics = {
+            resource_obj: resource_props
+            for (resource_obj, resource_props) in resource_map.items()
+            if type(resource_obj) in [VM_RESOURCE, HOST_RESOURCE]
+        }
+
+        for resource_obj, resource_props in all_resources_with_metrics.items():
+            hostname = resource_props.get("name")
+            self.log.debug("Collect metrics and host tags for hostname: %s, object: %s", hostname, resource_obj)
 
             counter_keys_and_names, metric_ids = self.get_available_metric_ids_for_entity(resource_obj)
-            self.collect_metrics_for_entity(metric_ids, counter_keys_and_names, resource_obj, resource_name)
+            tags = []
+            parent = resource_props.get('parent')
+            runtime_host = resource_props.get('runtime.host')
+            if parent is not None:
+                tags.extend(get_tags_recursively(parent, resource_map))
+            if runtime_host is not None:
+                tags.extend(
+                    get_tags_recursively(
+                        runtime_host,
+                        resource_map,
+                        include_only=['esxi_cluster'],
+                    )
+                )
+            tags.append('esxi_type:{}'.format(RESOURCE_TYPE_TO_NAME[type(resource_obj)]))
+            tags.extend(self.tags)
+            if hostname is not None:
+                external_host_tags.append((hostname, {self.__NAMESPACE__: tags}))
+            else:
+                self.log.debug("No host name found for %s; skipping ", resource_obj)
+
+            self.collect_metrics_for_entity(metric_ids, counter_keys_and_names, resource_obj, hostname)
+
+        if external_host_tags:
+            self.set_external_tags(external_host_tags)

@@ -47,7 +47,7 @@ def test_esxi_perf_metrics(vcsim_instance, dd_run_check, aggregator, caplog):
         set(VCSIM_HOST_METRICS) - set(ALL_VCSIM_HOST_METRICS_WITH_VALS) - set(FLAKEY_HOST_METRICS)
     )
     for metric_name in host_metrics_without_vals:
-        log_line = f"Skipping metric {metric_name} for localhost.localdomain because no value was returned by the Host"
+        log_line = f"Skipping metric {metric_name} for localhost.localdomain because no value was returned by the host"
         assert log_line in caplog.text
 
     all_expected_vm_metrics = set(ALL_VCSIM_VM_METRICS_WITH_VALS) - set(FLAKEY_VM_METRICS)
@@ -70,3 +70,47 @@ def test_esxi_perf_metrics(vcsim_instance, dd_run_check, aggregator, caplog):
 
     aggregator.assert_metric("esxi.host.can_connect", 1, count=1, tags=base_tags)
     aggregator.assert_all_metrics_covered()
+
+
+@pytest.mark.integration
+@pytest.mark.usefixtures("dd_environment")
+def test_vcsim_external_host_tags(vcsim_instance, datadog_agent, dd_run_check):
+    check = EsxiCheck('esxi', {}, [vcsim_instance])
+    dd_run_check(check)
+    datadog_agent.assert_external_tags(
+        'localhost.localdomain',
+        {
+            'esxi': [
+                'esxi_compute:localhost.localdomain',
+                'esxi_datacenter:ha-datacenter',
+                'esxi_folder:ha-folder-root',
+                'esxi_folder:host',
+                'esxi_type:host',
+                'esxi_url:127.0.0.1:8989',
+            ]
+        },
+    )
+    datadog_agent.assert_external_tags(
+        'ha-host_VM0',
+        {
+            'esxi': [
+                'esxi_datacenter:ha-datacenter',
+                'esxi_folder:ha-folder-root',
+                'esxi_folder:vm',
+                'esxi_type:VM',
+                'esxi_url:127.0.0.1:8989',
+            ]
+        },
+    )
+    datadog_agent.assert_external_tags(
+        'ha-host_VM1',
+        {
+            'esxi': [
+                'esxi_datacenter:ha-datacenter',
+                'esxi_folder:ha-folder-root',
+                'esxi_folder:vm',
+                'esxi_type:VM',
+                'esxi_url:127.0.0.1:8989',
+            ]
+        },
+    )
