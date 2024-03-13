@@ -244,3 +244,9 @@ DATABASE_METRICS = [
     "db.connection_setup_time_seconds.sum",
     "db.errors.count",
 ]
+
+BPF_METRICS = [
+    "bpf.lost_command_events.count",
+    "bpf.lost_disk_events.count",
+    "bpf.lost_network_events.count",
+]

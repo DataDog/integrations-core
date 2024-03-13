@@ -182,6 +182,12 @@ DATABASE_METRICS_MAP = {
     "teleport_db_errors": "db.errors",
 }
 
+BPF_METRICS_MAP = {
+    "bpf_lost_command_events": "bpf.lost_command_events",
+    "bpf_lost_disk_events": "bpf.lost_disk_events",
+    "bpf_lost_network_events": "bpf.lost_network_events",
+}
+
 METRIC_MAP = {
     **COMMON_METRICS_MAP,
     **PROXY_METRICS_MAP,
@@ -189,4 +195,5 @@ METRIC_MAP = {
     **SSH_METRICS_MAP,
     **KUBERNETES_METRICS_MAP,
     **DATABASE_METRICS_MAP,
+    **BPF_METRICS_MAP,
 }

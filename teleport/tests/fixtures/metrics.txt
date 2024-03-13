@@ -1563,3 +1563,12 @@ teleport_db_connection_setup_time_seconds_sum 2.5
 # TYPE teleport_db_errors_total counter
 # HELP teleport_db_errors_total Number of synthetic DB errors sent to the client
 teleport_db_errors_total 2
+
+# TYPE bpf_lost_command_events counter
+bpf_lost_command_events{} 320
+
+# TYPE bpf_lost_disk_events counter
+bpf_lost_disk_events{} 214
+
+# TYPE bpf_lost_network_events counter
+bpf_lost_network_events{} 587
