@@ -102,7 +102,7 @@ facets:
     name: Bytes Read
     path: network.bytes_read
     source: log
-    type: integer
+    type: double
     unit:
       family: bytes
       name: byte
@@ -112,7 +112,7 @@ facets:
     name: Bytes Written
     path: network.bytes_written
     source: log
-    type: integer
+    type: double
     unit:
       family: bytes
       name: byte
