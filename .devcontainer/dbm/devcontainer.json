@@ -1,0 +1,17 @@
+{
+	// Use this devcontainer to develop the DBM integrations including postgres, mysql and sqlserver
+	"name": "integrations-core dbm devcontainer",
+	"build": {
+		"context": "../..",
+		"dockerfile": "./Dockerfile"
+	},
+	"privileged": true,
+	"features": {
+		"ghcr.io/devcontainers/features/python:1": {
+			"version": "3.11"
+		}
+	},
+	"postCreateCommand": "ddev config set repos.core /workspaces/integrations-core && ddev config set repo core",
+	"postStartCommand": "nohup bash -c 'dockerd --storage-driver=vfs &'",
+	"remoteUser": "root"
+}
