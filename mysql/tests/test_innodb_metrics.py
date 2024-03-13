@@ -18,7 +18,7 @@ def test_innodb_status_unicode_error(caplog):
             return MockCursor()
 
     class MockDatabase:
-        def cursor(self):
+        def cursor(self, cursor):
             return MockCursor()
 
     caplog.at_level(logging.WARNING)
