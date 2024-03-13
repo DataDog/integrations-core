@@ -989,7 +989,7 @@
                                             },
                                             "group_by": [
                                                 {
-                                                    "facet": "@cisco.umbrella.dns.categories.label",
+                                                    "facet": "@categories.label",
                                                     "limit": 10,
                                                     "sort": {
                                                         "order": "desc",
@@ -1058,7 +1058,7 @@
                                                     }
                                                 },
                                                 {
-                                                    "facet": "@cisco.umbrella.dns.categories.label",
+                                                    "facet": "@categories.label",
                                                     "limit": 25,
                                                     "sort": {
                                                         "order": "desc",
@@ -1193,7 +1193,7 @@
         },
         {
             "name": "Categories",
-            "prefix": "@cisco.umbrella.dns.categories.label",
+            "prefix": "@categories.label",
             "available_values": [],
             "default": "*"
         }

@@ -159,13 +159,6 @@ facets:
     source: log
   - facetType: list
     groups:
-    - Cisco Umbrella DNS
-    name: Category
-    path: cisco.umbrella.dns.categories.label
-    source: log
-    type: string
-  - facetType: list
-    groups:
       - Cisco Umbrella DNS
     name: Client Country Code
     path: cisco.umbrella.dns.external.geoip.country.iso_code
@@ -424,13 +417,3 @@ pipeline:
           targetType: attribute
           preserveSource: false
           overrideOnConflict: false
-    - type: attribute-remapper
-      name: Map `categories.label` to `cisco.umbrella.dns.categories.label`
-      enabled: true
-      sources:
-        - categories.label
-      sourceType: attribute
-      target: cisco.umbrella.dns.categories.label
-      targetType: attribute
-      preserveSource: false
-      overrideOnConflict: false
