@@ -1511,3 +1511,55 @@ teleport_kubernetes_server_join_in_flight_sessions{} 2
 
 # TYPE teleport_kubernetes_server_join_sessions_total counter
 teleport_kubernetes_server_join_sessions_total{} 76
+
+# TYPE teleport_db_messages_from_client_total counter
+# HELP teleport_db_messages_from_client_total Number of messages (packets) received from the DB client
+teleport_db_messages_from_client_total 10
+
+# TYPE teleport_db_messages_from_server_total counter
+# HELP teleport_db_messages_from_server_total Number of messages (packets) received from the DB server
+teleport_db_messages_from_server_total 5
+
+# TYPE teleport_db_method_call_count_total counter
+# HELP teleport_db_method_call_count_total Number of times a DB method was called
+teleport_db_method_call_count_total 20
+
+# TYPE teleport_db_method_call_latency_seconds histogram
+# HELP teleport_db_method_call_latency_seconds Call latency for a DB method calls
+teleport_db_method_call_latency_seconds_bucket{le="0.005"} 5
+teleport_db_method_call_latency_seconds_bucket{le="0.01"} 10
+teleport_db_method_call_latency_seconds_bucket{le="0.025"} 15
+teleport_db_method_call_latency_seconds_bucket{le="0.05"} 18
+teleport_db_method_call_latency_seconds_bucket{le="0.1"} 20
+teleport_db_method_call_latency_seconds_count 20
+teleport_db_method_call_latency_seconds_sum 0.2
+
+# TYPE teleport_db_initialized_connections_total counter
+# HELP teleport_db_initialized_connections_total Number of initialized DB connections
+teleport_db_initialized_connections_total 3
+
+# TYPE teleport_db_active_connections_total gauge
+# HELP teleport_db_active_connections_total Number of active DB connections
+teleport_db_active_connections_total 2
+
+# TYPE teleport_db_connection_durations_seconds histogram
+# HELP teleport_db_connection_durations_seconds Duration of DB connection
+teleport_db_connection_durations_seconds_bucket{le="1"} 3
+teleport_db_connection_durations_seconds_bucket{le="5"} 6
+teleport_db_connection_durations_seconds_bucket{le="10"} 8
+teleport_db_connection_durations_seconds_bucket{le="+Inf"} 8
+teleport_db_connection_durations_seconds_count 8
+teleport_db_connection_durations_seconds_sum 43
+
+# TYPE teleport_db_connection_setup_time_seconds histogram
+# HELP teleport_db_connection_setup_time_seconds Initial time to setup DB connection, before any requests are handled
+teleport_db_connection_setup_time_seconds_bucket{le="0.01"} 2
+teleport_db_connection_setup_time_seconds_bucket{le="0.1"} 4
+teleport_db_connection_setup_time_seconds_bucket{le="1"} 6
+teleport_db_connection_setup_time_seconds_bucket{le="+Inf"} 6
+teleport_db_connection_setup_time_seconds_count 6
+teleport_db_connection_setup_time_seconds_sum 2.5
+
+# TYPE teleport_db_errors_total counter
+# HELP teleport_db_errors_total Number of synthetic DB errors sent to the client
+teleport_db_errors_total 2

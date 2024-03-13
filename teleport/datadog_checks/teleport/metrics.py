@@ -170,10 +170,23 @@ KUBERNETES_METRICS_MAP = {
     "teleport_kubernetes_server_join_sessions": "kubernetes.server.join_sessions",
 }
 
+DATABASE_METRICS_MAP = {
+    "teleport_db_messages_from_client": "db.messages_from_client",
+    "teleport_db_messages_from_server": "db.messages_from_server",
+    "teleport_db_method_call_count": "db.method_call_count",
+    "teleport_db_method_call_latency_seconds": "db.method_call_latency_seconds",
+    "teleport_db_initialized_connections": "db.initialized_connections",
+    "teleport_db_active_connections_total": "db.active_connections_total",
+    "teleport_db_connection_durations_seconds": "db.connection_durations_seconds",
+    "teleport_db_connection_setup_time_seconds": "db.connection_setup_time_seconds",
+    "teleport_db_errors": "db.errors",
+}
+
 METRIC_MAP = {
     **COMMON_METRICS_MAP,
     **PROXY_METRICS_MAP,
     **AUTH_METRICS_MAP,
     **SSH_METRICS_MAP,
     **KUBERNETES_METRICS_MAP,
+    **DATABASE_METRICS_MAP,
 }
