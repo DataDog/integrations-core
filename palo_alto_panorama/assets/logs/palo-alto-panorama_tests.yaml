@@ -183,7 +183,7 @@ tests:
         palo:
           alto:
             panorama:
-              act: "block-url"
+              action: "block-url"
               appchar: "used-by-malware,able-to-transfer-file,has-known-vulnerability,tunnel-other-application,pervasive-use,is-saas,no-certifications"
               appcont: "facebook"
               apprisk: 4
@@ -320,7 +320,7 @@ tests:
         palo:
           alto:
             panorama:
-              act: "deny"
+              action: "deny"
               appchar: "used-by-malware,able-to-transfer-file,has-known-vulnerability,tunnel-other-application,pervasive-use"
               appcont: "docker"
               apprisk: 1
