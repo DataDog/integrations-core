@@ -2,40 +2,24 @@
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
 
-import os
-
 import pytest
 
-from datadog_checks.dev import get_here
 from datadog_checks.teleport import TeleportCheck
+
+from .common import BAD_HOSTNAME_INSTANCE, COMMON_METRICS
 
 pytestmark = [pytest.mark.unit]
 
 
 def test_connect_exception(dd_run_check):
-    instance = {}
-    check = TeleportCheck("teleport", {}, [instance])
     with pytest.raises(Exception):
+        check = TeleportCheck("teleport", {}, [BAD_HOSTNAME_INSTANCE])
         dd_run_check(check)
 
 
-COMMON_METRICS = [
-    "process.state",
-    "certificate_mismatch.count",
-    "rx.count",
-    "server_interactive_sessions_total",
-    "teleport.build_info",
-    "teleport.cache_events.count",
-    "teleport.cache_stale_events.count",
-    "tx.count",
-]
+def test_common_teleport_metrics(dd_run_check, aggregator, instance, mock_http_response, metrics_path):
+    mock_http_response(file_path=metrics_path)
 
-
-def test_common_teleport_metrics(dd_run_check, aggregator, mock_http_response):
-    fixtures_path = os.path.join(get_here(), "fixtures", "metrics.txt")
-    mock_http_response(file_path=fixtures_path)
-
-    instance = {"diagnostic_url": "http://hostname:3000"}
     check = TeleportCheck("teleport", {}, [instance])
     dd_run_check(check)
 

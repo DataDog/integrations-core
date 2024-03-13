@@ -3,14 +3,14 @@
 # Licensed under a 3-clause BSD style license (see LICENSE)
 
 COMMON_METRICS_MAP = {
-    "process_state": "process.state",
-    "certificate_mismatch": "certificate_mismatch",
-    "rx": "rx",
-    "server_interactive_sessions_total": "server_interactive_sessions_total",
-    "teleport_build_info": "teleport.build_info",
-    "teleport_cache_events": "teleport.cache_events",
-    "teleport_cache_stale_events": "teleport.cache_stale_events",
-    "tx": "tx",
+    "process_state": "common.process.state",
+    "certificate_mismatch": "common.certificate_mismatch",
+    "rx": "common.rx",
+    "server_interactive_sessions_total": "common.server_interactive_sessions_total",
+    "teleport_build_info": "common.teleport.build_info",
+    "teleport_cache_events": "common.teleport.cache_events",
+    "teleport_cache_stale_events": "common.teleport.cache_stale_events",
+    "tx": "common.tx",
 }
 
 PROXY_METRICS_MAP = {
