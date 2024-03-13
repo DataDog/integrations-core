@@ -4,9 +4,7 @@
 
 from datadog_checks.base import OpenMetricsBaseCheckV2
 
-from .metrics import AUTH_METRICS_MAP, COMMON_METRICS_MAP, PROXY_METRICS_MAP
-
-METRIC_MAP = {**COMMON_METRICS_MAP, **PROXY_METRICS_MAP, **AUTH_METRICS_MAP}
+from .metrics import METRIC_MAP
 
 
 class TeleportCheck(OpenMetricsBaseCheckV2):

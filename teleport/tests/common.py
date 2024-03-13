@@ -191,3 +191,7 @@ AUTH_BACKEND_ETCD_METRICS = [
     "auth.backend.etcd.teleport_etcd_events.count",
     "auth.backend.etcd.teleport_etcd_event_backpressure.count",
 ]
+
+SSH_METRICS = [
+    "ssh.user.max_concurrent_sessions_hit.count",
+]
