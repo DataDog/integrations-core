@@ -15,6 +15,8 @@ from .common import (
     DISTSENDER_METRICS,
     JOBS_METRICS,
     KV_METRICS,
+    PHYSICAL_METRICS,
+    QUEUE_METRICS,
     assert_metrics,
     get_fixture_path,
 )
@@ -57,6 +59,8 @@ def test_fixture_metrics(aggregator, instance, dd_run_check, mock_http_response,
         pytest.param('distsender_metrics.txt', DISTSENDER_METRICS, id='distsender'),
         pytest.param('jobs_metrics.txt', JOBS_METRICS, id='jobs'),
         pytest.param('kv_metrics.txt', KV_METRICS, id='kv'),
+        pytest.param('physical_metrics.txt', PHYSICAL_METRICS, id='physical'),
+        pytest.param('queue_metrics.txt', QUEUE_METRICS, id='queue'),
     ],
 )
 def test_metrics(aggregator, instance, dd_run_check, mock_http_response, file, metrics):
