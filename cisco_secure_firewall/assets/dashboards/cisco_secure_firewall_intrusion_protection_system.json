@@ -208,7 +208,7 @@
                                 },
                                 "group_by": [
                                     {
-                                        "facet": "@cisco.secure.firewall.shun_ip_address",
+                                        "facet": "@shun_ip_address",
                                         "limit": 10,
                                         "sort": {
                                             "order": "desc",
@@ -216,7 +216,7 @@
                                         }
                                     },
                                     {
-                                        "facet": "@cisco.secure.firewall.shun_port",
+                                        "facet": "@shun_port",
                                         "limit": 10,
                                         "sort": {
                                             "order": "desc",
@@ -277,7 +277,7 @@
                                 },
                                 "group_by": [
                                     {
-                                        "facet": "@cisco.secure.firewall.shun_ip_address",
+                                        "facet": "@shun_ip_address",
                                         "limit": 10,
                                         "sort": {
                                             "order": "desc",
@@ -285,7 +285,7 @@
                                         }
                                     },
                                     {
-                                        "facet": "@cisco.secure.firewall.interface_name",
+                                        "facet": "@interface_name",
                                         "limit": 10,
                                         "sort": {
                                             "order": "desc",
@@ -391,7 +391,7 @@
         },
         {
             "name": "Shun-IP-Address",
-            "prefix": "@cisco.secure.firewall.shun_ip_address",
+            "prefix": "@shun_ip_address",
             "available_values": [],
             "default": "*"
         }

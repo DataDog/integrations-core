@@ -242,7 +242,7 @@
                                 },
                                 "group_by": [
                                     {
-                                        "facet": "@cisco.secure.firewall.resource",
+                                        "facet": "@resource",
                                         "limit": 10,
                                         "sort": {
                                             "order": "desc",

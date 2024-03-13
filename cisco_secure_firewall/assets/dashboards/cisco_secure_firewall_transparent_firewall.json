@@ -406,7 +406,7 @@
                                             "width": "auto"
                                         },
                                         {
-                                            "field": "cisco.secure.firewall.protocol",
+                                            "field": "protocol",
                                             "width": "auto"
                                         },
                                         {
@@ -521,7 +521,7 @@
                                             },
                                             "group_by": [
                                                 {
-                                                    "facet": "@cisco.secure.firewall.protocol",
+                                                    "facet": "@protocol",
                                                     "limit": 10,
                                                     "sort": {
                                                         "order": "desc",
@@ -785,7 +785,7 @@
                                             "width": "auto"
                                         },
                                         {
-                                            "field": "cisco.secure.firewall.protocol",
+                                            "field": "protocol",
                                             "width": "auto"
                                         },
                                         {

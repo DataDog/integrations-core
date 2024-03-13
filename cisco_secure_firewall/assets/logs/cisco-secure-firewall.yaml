@@ -2,76 +2,6 @@ id: cisco-secure-firewall
 metric_id: cisco-secure-firewall
 backend_only: false
 facets:
-  - facetType: list
-    groups:
-      - Cisco Secure Firewall
-    name: Access Control Rule Action
-    path: cisco.secure.firewall.AccessControlRuleAction
-    source: log
-    type: string
-  - facetType: list
-    groups:
-      - Cisco Secure Firewall
-    name: ACL ID
-    path: cisco.secure.firewall.acl_id
-    source: log
-    type: string
-  - facetType: list
-    groups:
-      - Cisco Secure Firewall
-    name: AC Policy
-    path: cisco.secure.firewall.ACPolicy
-    source: log
-    type: string
-  - facetType: list
-    groups:
-      - Cisco Secure Firewall
-    name: Application Protocol
-    path: cisco.secure.firewall.ApplicationProtocol
-    source: log
-    type: string
-  - facetType: list
-    groups:
-      - Cisco Secure Firewall
-    name: Classification
-    path: cisco.secure.firewall.Classification
-    source: log
-    type: string
-  - facetType: list
-    groups:
-      - Cisco Secure Firewall
-    name: Client
-    path: cisco.secure.firewall.Client
-    source: log
-    type: string
-  - facetType: list
-    groups:
-      - Cisco Secure Firewall
-    name: Code
-    path: cisco.secure.firewall.code
-    source: log
-    type: string
-  - facetType: list
-    groups:
-      - Cisco Secure Firewall
-    name: Elapsed Time
-    path: cisco.secure.firewall.elapsed_time
-    source: log
-    type: string
-  - facetType: list
-    groups:
-      - Cisco Secure Firewall
-    name: Error Message
-    path: cisco.secure.firewall.error_message
-    source: log
-    type: string
-  - facetType: list
-    groups:
-      - Cisco Secure Firewall
-    name: Group Name
-    path: cisco.secure.firewall.groupname
-    source: log
-    type: string
   - facetType: range
     groups:
       - Cisco Secure Firewall
@@ -89,48 +19,6 @@ facets:
     path: cisco.secure.firewall.InitiatorPackets
     source: log
     type: integer
-  - facetType: list
-    groups:
-      - Cisco Secure Firewall
-    name: Interface Name
-    path: cisco.secure.firewall.interface_name
-    source: log
-    type: string
-  - facetType: list
-    groups:
-      - Cisco Secure Firewall
-    name: Interface Number
-    path: cisco.secure.firewall.interface_number
-    source: log
-    type: string
-  - facetType: list
-    groups:
-      - Cisco Secure Firewall
-    name: Internal Error Code
-    path: cisco.secure.firewall.internal_error_code
-    source: log
-    type: string
-  - facetType: list
-    groups:
-      - Cisco Secure Firewall
-    name: NAP Policy
-    path: cisco.secure.firewall.NAPPolicy
-    source: log
-    type: string
-  - facetType: list
-    groups:
-      - Cisco Secure Firewall
-    name: Reason Code
-    path: cisco.secure.firewall.reason_code
-    source: log
-    type: string
-  - facetType: list
-    groups:
-      - Cisco Secure Firewall
-    name: Resource
-    path: cisco.secure.firewall.resource
-    source: log
-    type: string
   - facetType: range
     groups:
       - Cisco Secure Firewall
@@ -148,34 +36,6 @@ facets:
     path: cisco.secure.firewall.ResponderPackets
     source: log
     type: integer
-  - facetType: list
-    groups:
-      - Cisco Secure Firewall
-    name: Security Event Name
-    path: cisco.secure.firewall.security_event_name
-    source: log
-    type: string
-  - facetType: list
-    groups:
-      - Cisco Secure Firewall
-    name: Session Type
-    path: cisco.secure.firewall.session_type
-    source: log
-    type: string
-  - facetType: list
-    groups:
-      - Cisco Secure Firewall
-    name: Shun IP Address
-    path: cisco.secure.firewall.shun_ip_address
-    source: log
-    type: string
-  - facetType: list
-    groups:
-      - Cisco Secure Firewall
-    name: Shun Port
-    path: cisco.secure.firewall.shun_port
-    source: log
-    type: string
   - facetType: range
     groups:
       - Cisco Secure Firewall
@@ -186,41 +46,6 @@ facets:
     unit:
       family: bytes
       name: byte
-  - facetType: list
-    groups:
-      - Cisco Secure Firewall
-    name: SNMP Drop Reason
-    path: cisco.secure.firewall.snmp_drop_reason
-    source: log
-    type: string
-  - facetType: list
-    groups:
-      - Cisco Secure Firewall
-    name: SNMP Failure Reason
-    path: cisco.secure.firewall.snmp_failure_reason
-    source: log
-    type: string
-  - facetType: list
-    groups:
-      - Cisco Secure Firewall
-    name: SNMP Host
-    path: cisco.secure.firewall.snmp_host
-    source: log
-    type: string
-  - facetType: list
-    groups:
-      - Cisco Secure Firewall
-    name: SNMP IP Address
-    path: cisco.secure.firewall.snmp_ip_address
-    source: log
-    type: string
-  - facetType: list
-    groups:
-      - Cisco Secure Firewall
-    name: Protocol
-    path: cisco.secure.firewall.protocol
-    source: log
-    type: string
   - groups:
       - Geoip
     name: City Name
@@ -271,6 +96,26 @@ facets:
     name: Destination IP
     path: network.destination.ip
     source: log
+  - facetType: range
+    groups:
+      - Web Access
+    name: Bytes Read
+    path: network.bytes_read
+    source: log
+    type: integer
+    unit:
+      family: bytes
+      name: byte
+  - facetType: range
+    groups:
+      - Web Access
+    name: Bytes Written
+    path: network.bytes_written
+    source: log
+    type: integer
+    unit:
+      family: bytes
+      name: byte
   - groups:
       - Web Access
     name: Destination Port
@@ -403,13 +248,13 @@ pipeline:
             supportRules: _space %{regex("(\\s)*"):}
             matchRules: >-
               transparent_firewall_110002 Failed to locate egress interface for
-              %{word:cisco.secure.firewall.protocol} from
+              %{word:protocol} from
               %{notSpace:src_interface}%{_space}:%{ip:network.client.ip}%{_space}/%{integer:network.client.port}
               to
               %{ip:network.destination.ip}%{_space}/%{integer:network.destination.port}
 
 
-              transparent_firewall_110003 Routing failed to locate next hop for %{word:cisco.secure.firewall.protocol} from %{regex("[-a-zA-Z0-9_,. ]*"):src_interface}%{_space}:%{ip:network.client.ip}%{_space}/%{integer:network.client.port} to %{notSpace:dest_interface}%{_space}:%{ip:network.destination.ip}%{_space}/%{integer:network.destination.port}
+              transparent_firewall_110003 Routing failed to locate next hop for %{word:protocol} from %{regex("[-a-zA-Z0-9_,. ]*"):src_interface}%{_space}:%{ip:network.client.ip}%{_space}/%{integer:network.client.port} to %{notSpace:dest_interface}%{_space}:%{ip:network.destination.ip}%{_space}/%{integer:network.destination.port}
 
 
               transparent_firewall_110004 Egress interface changed from %{notSpace:old_active_ifc} to %{notSpace:new_active_ifc} on %{notSpace:ip_protocol} connection %{word:connection_id} for %{notSpace:outside_zone}%{_space}/%{_space}%{notSpace:parent_outside_ifc}%{_space}:%{_space}%{ip:outside_address}%{_space}/%{_space}%{integer:outside_port}%{_space}\(%{_space}%{ip:outside_mapped_address}%{_space}/%{integer:outside_mapped_port}%{_space}\) to %{notSpace:inside_zone}%{_space}/%{notSpace:parent_inside_ifc}%{_space}:%{_space}%{ip:inside_address}%{_space}/%{integer:inside_port}%{_space}\(%{_space}%{ip:inside_mapped_address}%{_space}/%{integer:inside_mapped_port}%{_space}\)
@@ -465,10 +310,10 @@ pipeline:
               '%{notSpace:usr.name}%{_space}'.*
 
 
-              user_authentication_109012 Authen Session End: user '%{notSpace:usr.name}%{_space}',%{regex("[^,]*"):},%{_space}elapsed %{integer:cisco.secure.firewall.elapsed_time} seconds
+              user_authentication_109012 Authen Session End: user '%{notSpace:usr.name}%{_space}',%{regex("[^,]*"):},%{_space}elapsed %{integer:elapsed_time} seconds
 
 
-              user_authentication_109016 Can't find authorization ACL %{notSpace:cisco.secure.firewall.acl_id} for user '%{_space}%{notSpace:usr.name}%{_space}'
+              user_authentication_109016 Can't find authorization ACL %{notSpace:acl_id} for user '%{_space}%{notSpace:usr.name}%{_space}'
 
 
               user_authentication_113001 Unable to open AAA session. Session limit \[%{integer:limit}%{_space}] reached%{_space}.
@@ -483,7 +328,7 @@ pipeline:
               user_authentication_113007 User %{notSpace:usr.name} unlocked by %{notSpace:administrator}
 
 
-              user_authentication_113019 Group = %{notSpace:group}%{_space},%{_space}Username = %{notSpace:usr.name}%{_space},%{_space}IP = %{ip:peer_address}%{_space}, Session disconnected. Session Type:%{_space}%{notSpace:cisco.secure.firewall.session_type}%{_space},%{_space}Duration:%{_space}%{date("HH:mm:ss"):duration_sec}%{_space},%{_space}Bytes xmt:%{_space}%{integer:network.bytes_read}%{_space},%{_space}Bytes rcv:%{_space}%{integer:network.bytes_written}%{_space},%{_space}Reason:%{_space}%{data:reason}
+              user_authentication_113019 Group = %{notSpace:group}%{_space},%{_space}Username = %{notSpace:usr.name}%{_space},%{_space}IP = %{ip:peer_address}%{_space}, Session disconnected. Session Type:%{_space}%{notSpace:session_type}%{_space},%{_space}Duration:%{_space}%{date("HH:mm:ss"):duration_sec}%{_space},%{_space}Bytes xmt:%{_space}%{integer:network.bytes_read}%{_space},%{_space}Bytes rcv:%{_space}%{integer:network.bytes_written}%{_space},%{_space}Reason:%{_space}%{data:reason}
 
 
               user_authentication_113021 Attempted console login failed. User %{notSpace:usr.name} did NOT have appropriate Admin Rights.
@@ -570,7 +415,7 @@ pipeline:
         - name: Lookup for `message_id` to `security_event_name`
           enabled: true
           source: message_id
-          target: cisco.secure.firewall.security_event_name
+          target: security_event_name
           lookupTable: |-
             430001, Intrusion Event
             430002, Connection Started
@@ -585,57 +430,6 @@ pipeline:
             - network.client.ip
           target: network.client.geoip
           ip_processing_behavior: do-nothing
-        - type: attribute-remapper
-          name: Map `ACPolicy` to `cisco.secure.firewall.ACPolicy`
-          enabled: true
-          sources:
-            - ACPolicy
-          sourceType: attribute
-          target: cisco.secure.firewall.ACPolicy
-          targetType: attribute
-          preserveSource: false
-          overrideOnConflict: false
-        - type: attribute-remapper
-          name: Map `AccessControlRuleAction` to
-            `cisco.secure.firewall.AccessControlRuleAction`
-          enabled: true
-          sources:
-            - AccessControlRuleAction
-          sourceType: attribute
-          target: cisco.secure.firewall.AccessControlRuleAction
-          targetType: attribute
-          preserveSource: false
-          overrideOnConflict: false
-        - type: attribute-remapper
-          name: Map `ApplicationProtocol` to `cisco.secure.firewall.ApplicationProtocol`
-          enabled: true
-          sources:
-            - ApplicationProtocol
-          sourceType: attribute
-          target: cisco.secure.firewall.ApplicationProtocol
-          targetType: attribute
-          preserveSource: false
-          overrideOnConflict: false
-        - type: attribute-remapper
-          name: Map `Classification` to `cisco.secure.firewall.Classification`
-          enabled: true
-          sources:
-            - Classification
-          sourceType: attribute
-          target: cisco.secure.firewall.Classification
-          targetType: attribute
-          preserveSource: false
-          overrideOnConflict: false
-        - type: attribute-remapper
-          name: Map `Client` to `cisco.secure.firewall.Client`
-          enabled: true
-          sources:
-            - Client
-          sourceType: attribute
-          target: cisco.secure.firewall.Client
-          targetType: attribute
-          preserveSource: false
-          overrideOnConflict: false
         - type: attribute-remapper
           name: Map `InitiatorBytes` to `cisco.secure.firewall.InitiatorBytes`
           enabled: true
@@ -653,16 +447,6 @@ pipeline:
             - InitiatorPackets
           sourceType: attribute
           target: cisco.secure.firewall.InitiatorPackets
-          targetType: attribute
-          preserveSource: false
-          overrideOnConflict: false
-        - type: attribute-remapper
-          name: Map `NAPPolicy` to `cisco.secure.firewall.NAPPolicy`
-          enabled: true
-          sources:
-            - NAPPolicy
-          sourceType: attribute
-          target: cisco.secure.firewall.NAPPolicy
           targetType: attribute
           preserveSource: false
           overrideOnConflict: false
@@ -708,7 +492,7 @@ pipeline:
               (')?%{regex("[^']*"):cisco_secure_firewall_command}(')?(.)?
 
 
-              command_interface_111111 %{data:cisco.secure.firewall.error_message}
+              command_interface_111111 %{data:error_message}
     - type: pipeline
       name: VPN Failover
       enabled: true
@@ -805,43 +589,43 @@ pipeline:
             matchRules: >-
               snmp_212001 Unable to open SNMP channel \(%{word} port
               %{integer:port}%{_space}\) on interface
-              %{word:cisco.secure.firewall.interface_number}%{_space}, error
+              %{word:interface_number}%{_space}, error
               code = %{integer:error_code_212001}
 
 
-              snmp_212002 Unable to open SNMP trap channel \(%{word} port %{integer:port}%{_space}\) on interface %{word:cisco.secure.firewall.interface_number}%{_space}, error code = %{integer:error_code_212002}
+              snmp_212002 Unable to open SNMP trap channel \(%{word} port %{integer:port}%{_space}\) on interface %{word:interface_number}%{_space}, error code = %{integer:error_code_212002}
 
 
-              snmp_212003 Unable to receive an SNMP request on interface %{word:cisco.secure.firewall.interface_number}%{_space}, error code = %{integer:error_code_212003}%{_space}, will try again.
+              snmp_212003 Unable to receive an SNMP request on interface %{word:interface_number}%{_space}, error code = %{integer:error_code_212003}%{_space}, will try again.
 
 
-              snmp_212004 Unable to send an SNMP response to IP Address %{ip:cisco.secure.firewall.snmp_ip_address} Port %{integer:port} interface %{word:cisco.secure.firewall.interface_number}%{_space}, error code = %{integer:error_code_212004}
+              snmp_212004 Unable to send an SNMP response to IP Address %{ip:snmp_ip_address} Port %{integer:port} interface %{word:interface_number}%{_space}, error code = %{integer:error_code_212004}
 
 
-              snmp_212005 incoming SNMP request \(%{integer:cisco.secure.firewall.snmp_bytes} bytes\) on interface %{notSpace:cisco.secure.firewall.interface_name} exceeds data buffer size, discarding this SNMP request.
+              snmp_212005 incoming SNMP request \(%{integer:cisco.secure.firewall.snmp_bytes} bytes\) on interface %{notSpace:interface_name} exceeds data buffer size, discarding this SNMP request.
 
 
-              snmp_212006 Dropping SNMP request from %{ip:src_address}%{_space}/%{integer:port} to %{notSpace:ifc}%{_space}:%{_space}%{ip:dst_address}%{_space}/%{integer:dst_port} because:%{_space}%{regex("[-a-zA-Z0-9_,. ]*"):cisco.secure.firewall.snmp_drop_reason}%{_space}%{word:usr.name}
+              snmp_212006 Dropping SNMP request from %{ip:src_address}%{_space}/%{integer:port} to %{notSpace:ifc}%{_space}:%{_space}%{ip:dst_address}%{_space}/%{integer:dst_port} because:%{_space}%{regex("[-a-zA-Z0-9_,. ]*"):snmp_drop_reason}%{_space}%{word:usr.name}
 
 
-              snmp_212009 Configuration request for SNMP group %{notSpace:cisco.secure.firewall.groupname} failed. User %{notSpace:usr.name}%{_space}, %{regex("[^.]*"):cisco.secure.firewall.snmp_failure_reason}%{_space}.
+              snmp_212009 Configuration request for SNMP group %{notSpace:groupname} failed. User %{notSpace:usr.name}%{_space}, %{regex("[^.]*"):snmp_failure_reason}%{_space}.
 
 
-              snmp_212010 Configuration request for SNMP user %{notSpace:usr.name} failed. Host %{notSpace:cisco.secure.firewall.snmp_host} %{data:cisco.secure.firewall.snmp_failure_reason}%{_space}.
-        - name: Lookup for `error_code_212001` to `cisco.secure.firewall.error_message`
+              snmp_212010 Configuration request for SNMP user %{notSpace:usr.name} failed. Host %{notSpace:snmp_host} %{data:snmp_failure_reason}%{_space}.
+        - name: Lookup for `error_code_212001` to `error_message`
           enabled: true
           source: error_code_212001
-          target: cisco.secure.firewall.error_message
+          target: error_message
           lookupTable: >-
             -1,Secure Firewall Threat Defense device cannot open the SNMP
             transport for the interface
 
             -2,Secure Firewall Threat Defense device cannot bind the SNMP transport for the interface
           type: lookup-processor
-        - name: Lookup for `error_code_212002` to `cisco.secure.firewall.error_message`
+        - name: Lookup for `error_code_212002` to `error_message`
           enabled: true
           source: error_code_212002
-          target: cisco.secure.firewall.error_message
+          target: error_message
           lookupTable: >-
             -1,Secure Firewall Threat Defense device cannot open the SNMP trap
             transport for the interface
@@ -850,10 +634,10 @@ pipeline:
 
             -3,Secure Firewall Threat Defense device cannot set the trap channel as write-only
           type: lookup-processor
-        - name: Lookup for `error_code_212003` to `cisco.secure.firewall.error_message`
+        - name: Lookup for `error_code_212003` to `error_message`
           enabled: true
           source: error_code_212003
-          target: cisco.secure.firewall.error_message
+          target: error_message
           lookupTable: >-
             -1,Secure Firewall Threat Defense device cannot find a supported
             transport type for the interface
@@ -866,10 +650,10 @@ pipeline:
 
             -22,Secure Firewall Threat Defense device received an invalid parameter
           type: lookup-processor
-        - name: Lookup for `error_code_212004` to `cisco.secure.firewall.error_message`
+        - name: Lookup for `error_code_212004` to `error_message`
           enabled: true
           source: error_code_212004
-          target: cisco.secure.firewall.error_message
+          target: error_message
           lookupTable: >-
             -1,Secure Firewall Threat Defense device cannot find a supported
             transport type for the interface
@@ -902,17 +686,17 @@ pipeline:
             supportRules: _space %{regex("(\\s)*"):}
             matchRules: >-
               intrusion_protection_system_401002 Shun added:%{_space}IP_address
-              %{ip:cisco.secure.firewall.shun_ip_address} port
-              %{integer:cisco.secure.firewall.shun_port}
+              %{ip:shun_ip_address} port
+              %{integer:shun_port}
 
 
               intrusion_protection_system_401003 Shun deleted:%{_space}%{ip:shun_ip_adddress}
 
 
-              intrusion_protection_system_401004 Shunned packet:%{_space}IP_address%{_space}=%{_space}%{ip:cisco.secure.firewall.shun_ip_address} on interface %{notSpace:cisco.secure.firewall.interface_name}
+              intrusion_protection_system_401004 Shunned packet:%{_space}IP_address%{_space}=%{_space}%{ip:shun_ip_address} on interface %{notSpace:interface_name}
 
 
-              intrusion_protection_system_401005 Shun add failed:%{_space}unable to allocate resources for IP_address %{ip:cisco.secure.firewall.shun_ip_address} port %{integer:cisco.secure.firewall.shun_port}
+              intrusion_protection_system_401005 Shun add failed:%{_space}unable to allocate resources for IP_address %{ip:shun_ip_address} port %{integer:shun_port}
     - type: pipeline
       name: Dynamic Access Policies
       enabled: true
@@ -928,7 +712,7 @@ pipeline:
           grok:
             supportRules: _space %{regex("(\\s)*"):}
             matchRules: dynamic_access_policies_734004 DAP%{_space}:%{_space}Processing
-              error%{_space}:%{_space}%{data:cisco.secure.firewall.internal_error_code}
+              error%{_space}:%{_space}%{data:internal_error_code}
     - type: pipeline
       name: Failover
       enabled: true
@@ -958,10 +742,10 @@ pipeline:
 
 
               failover_104001_104002 \(%{word:unit}\) Switching to (ACTIVE|STANDBY)%{_space}\(%{_space}cause:%{_space}%{regex("[^)]*"):cause}%{_space}\)%{_space}(.)?
-        - name: Map `code` to `cisco.secure.firewall.reason_code`
+        - name: Map `code` to `reason_code`
           enabled: true
           source: code
-          target: cisco.secure.firewall.reason_code
+          target: reason_code
           lookupTable: >-
             1, The local unit is not receiving the hello packet on the failover
             LAN interface when LAN failover occurs and declares that the peer is
@@ -1001,7 +785,7 @@ pipeline:
               ospf_routing_318001 Internal error:%{_space}%{data:reason}
 
 
-              ospf_routing_409003 Received invalid packet:%{_space}%{regex("[-a-zA-Z0-9,._ ]*"):reason} from %{ip:ip_address}%{_space},%{_space}%{data:cisco.secure.firewall.interface_name}
+              ospf_routing_409003 Received invalid packet:%{_space}%{regex("[-a-zA-Z0-9,._ ]*"):reason} from %{ip:ip_address}%{_space},%{_space}%{data:interface_name}
     - type: pipeline
       name: RIP Routing
       enabled: true
@@ -1022,7 +806,7 @@ pipeline:
             supportRules: _space %{regex("(\\s)*"):}
             matchRules: rip_routing_107001 RIP auth failed from
               %{ip:ip_address}%{_space}:%{_space}version%{_space}=%{_space}%{integer:version}%{_space},%{_space}type%{_space}=%{_space}%{regex("[^,]*"):type}%{_space},%{_space}mode%{_space}=%{_space}%{regex("[^,]*"):mode}%{_space},%{_space}sequence%{_space}=%{_space}%{integer:sequence}
-              on interface %{notSpace:cisco.secure.firewall.interface_name}
+              on interface %{notSpace:interface_name}
     - type: pipeline
       name: Resource Manager
       enabled: true
@@ -1044,11 +828,11 @@ pipeline:
             supportRules: _space %{regex("(\\s)*"):}
             matchRules: >-
               resource_manager_321002 Resource %{regex("[-a-zA-Z0-9_.!@#$%
-              ]*"):cisco.secure.firewall.resource} rate limit of
+              ]*"):resource} rate limit of
               %{regex("[-a-zA-Z0-9_.!@#$% ]*"):} reached(.)?
 
 
-              resource_manager_321001 Resource %{regex("[-a-zA-Z0-9_.!@#$% ]*"):cisco.secure.firewall.resource} limit of %{regex("[-a-zA-Z0-9_.!@#$% ]*"):} reached(.)?
+              resource_manager_321001 Resource %{regex("[-a-zA-Z0-9_.!@#$% ]*"):resource} limit of %{regex("[-a-zA-Z0-9_.!@#$% ]*"):} reached(.)?
 
 
               resource_manager_321005 System CPU utilization reached %{number:cpu_utilization}
@@ -1101,16 +885,16 @@ pipeline:
             supportRules: _space %{regex("(\\s)*"):}
             matchRules: >-
               ip_stack_209003 Fragment database limit of %{integer:}
-              exceeded:%{_space}src%{_space}=%{_space}%{ip:source_address}%{_space},%{_space}dest%{_space}=%{_space}%{ip:destination_address}%{_space},%{_space}proto%{_space}=%{_space}%{notSpace:cisco.secure.firewall.protocol}%{_space},%{_space}id%{_space}=%{_space}%{integer:id}
+              exceeded:%{_space}src%{_space}=%{_space}%{ip:source_address}%{_space},%{_space}dest%{_space}=%{_space}%{ip:destination_address}%{_space},%{_space}proto%{_space}=%{_space}%{notSpace:protocol}%{_space},%{_space}id%{_space}=%{_space}%{integer:id}
 
 
-              ip_stack_209004 Invalid IP fragment,%{_space}size%{_space}=%{_space}%{integer:bytes} exceeds maximum size%{_space}=%{_space}%{integer:max_bytes}%{_space}:%{_space}src%{_space}=%{_space}%{ip:source_address}%{_space},%{_space}dest%{_space}=%{_space}%{ip:destination_address}%{_space},%{_space}proto%{_space}=%{_space}%{word:cisco.secure.firewall.protocol}%{_space},%{_space}id%{_space}=%{_space}%{integer:id}
+              ip_stack_209004 Invalid IP fragment,%{_space}size%{_space}=%{_space}%{integer:bytes} exceeds maximum size%{_space}=%{_space}%{integer:max_bytes}%{_space}:%{_space}src%{_space}=%{_space}%{ip:source_address}%{_space},%{_space}dest%{_space}=%{_space}%{ip:destination_address}%{_space},%{_space}proto%{_space}=%{_space}%{word:protocol}%{_space},%{_space}id%{_space}=%{_space}%{integer:id}
 
 
-              ip_stack_313001 Denied ICMP type=%{regex("[^,]*"):type}%{_space},%{_space}code=%{integer:cisco.secure.firewall.code} from %{ip:source_address} on interface %{notSpace:cisco.secure.firewall.interface_name}
+              ip_stack_313001 Denied ICMP type=%{regex("[^,]*"):type}%{_space},%{_space}code=%{integer:code} from %{ip:source_address} on interface %{notSpace:interface_name}
 
 
-              ip_stack_313004 Denied ICMP type=%{regex("[^,]*"):type}%{_space},%{_space}from (%{word} )?%{ip:source_address} on interface %{notSpace:cisco.secure.firewall.interface_name} to %{ip:destination_address}%{_space}:%{_space}no matching session
+              ip_stack_313004 Denied ICMP type=%{regex("[^,]*"):type}%{_space},%{_space}from (%{word} )?%{ip:source_address} on interface %{notSpace:interface_name} to %{ip:destination_address}%{_space}:%{_space}no matching session
     - type: message-remapper
       name: Define `message_text` as the official message of the log
       enabled: true

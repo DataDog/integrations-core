@@ -210,7 +210,7 @@
                                 },
                                 "group_by": [
                                     {
-                                        "facet": "@cisco.secure.firewall.security_event_name",
+                                        "facet": "@security_event_name",
                                         "limit": 10,
                                         "sort": {
                                             "order": "desc",
@@ -650,7 +650,7 @@
                                 },
                                 "group_by": [
                                     {
-                                        "facet": "@cisco.secure.firewall.Classification",
+                                        "facet": "@Classification",
                                         "limit": 10,
                                         "sort": {
                                             "order": "desc",
@@ -773,7 +773,7 @@
                                 },
                                 "group_by": [
                                     {
-                                        "facet": "@cisco.secure.firewall.Client",
+                                        "facet": "@Client",
                                         "limit": 10,
                                         "sort": {
                                             "order": "desc",
@@ -834,7 +834,7 @@
                                 },
                                 "group_by": [
                                     {
-                                        "facet": "@cisco.secure.firewall.ApplicationProtocol",
+                                        "facet": "@ApplicationProtocol",
                                         "limit": 10,
                                         "sort": {
                                             "order": "desc",
@@ -895,7 +895,7 @@
                                 },
                                 "group_by": [
                                     {
-                                        "facet": "@cisco.secure.firewall.ACPolicy",
+                                        "facet": "@ACPolicy",
                                         "limit": 10,
                                         "sort": {
                                             "order": "desc",
@@ -956,7 +956,7 @@
                                 },
                                 "group_by": [
                                     {
-                                        "facet": "@cisco.secure.firewall.NAPPolicy",
+                                        "facet": "@NAPPolicy",
                                         "limit": 10,
                                         "sort": {
                                             "order": "desc",
@@ -1017,7 +1017,7 @@
                                 },
                                 "group_by": [
                                     {
-                                        "facet": "@cisco.secure.firewall.AccessControlRuleAction",
+                                        "facet": "@AccessControlRuleAction",
                                         "limit": 10,
                                         "sort": {
                                             "order": "desc",

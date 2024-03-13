@@ -278,7 +278,7 @@
                                 },
                                 "group_by": [
                                     {
-                                        "facet": "@cisco.secure.firewall.error_message",
+                                        "facet": "@error_message",
                                         "limit": 10,
                                         "sort": {
                                             "order": "desc",

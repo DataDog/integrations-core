@@ -155,7 +155,7 @@
                                 },
                                 "group_by": [
                                     {
-                                        "facet": "@cisco.secure.firewall.error_message",
+                                        "facet": "@error_message",
                                         "limit": 10,
                                         "sort": {
                                             "order": "desc",
@@ -163,7 +163,7 @@
                                         }
                                     },
                                     {
-                                        "facet": "@cisco.secure.firewall.interface_number",
+                                        "facet": "@interface_number",
                                         "limit": 10,
                                         "sort": {
                                             "order": "desc",
@@ -226,7 +226,7 @@
                                 },
                                 "group_by": [
                                     {
-                                        "facet": "@cisco.secure.firewall.error_message",
+                                        "facet": "@error_message",
                                         "limit": 10,
                                         "sort": {
                                             "order": "desc",
@@ -234,7 +234,7 @@
                                         }
                                     },
                                     {
-                                        "facet": "@cisco.secure.firewall.interface_number",
+                                        "facet": "@interface_number",
                                         "limit": 10,
                                         "sort": {
                                             "order": "desc",
@@ -297,7 +297,7 @@
                                 },
                                 "group_by": [
                                     {
-                                        "facet": "@cisco.secure.firewall.error_message",
+                                        "facet": "@error_message",
                                         "limit": 10,
                                         "sort": {
                                             "order": "desc",
@@ -305,7 +305,7 @@
                                         }
                                     },
                                     {
-                                        "facet": "@cisco.secure.firewall.interface_number",
+                                        "facet": "@interface_number",
                                         "limit": 10,
                                         "sort": {
                                             "order": "desc",
@@ -368,7 +368,7 @@
                                 },
                                 "group_by": [
                                     {
-                                        "facet": "@cisco.secure.firewall.error_message",
+                                        "facet": "@error_message",
                                         "limit": 10,
                                         "sort": {
                                             "order": "desc",
@@ -376,7 +376,7 @@
                                         }
                                     },
                                     {
-                                        "facet": "@cisco.secure.firewall.interface_number",
+                                        "facet": "@interface_number",
                                         "limit": 10,
                                         "sort": {
                                             "order": "desc",
@@ -495,7 +495,7 @@
                                 },
                                 "group_by": [
                                     {
-                                        "facet": "@cisco.secure.firewall.snmp_ip_address",
+                                        "facet": "@snmp_ip_address",
                                         "limit": 10,
                                         "sort": {
                                             "order": "desc",
@@ -624,7 +624,7 @@
                                 },
                                 "group_by": [
                                     {
-                                        "facet": "@cisco.secure.firewall.interface_name",
+                                        "facet": "@interface_name",
                                         "limit": 10,
                                         "sort": {
                                             "order": "desc",
@@ -677,7 +677,7 @@
                                 },
                                 "group_by": [
                                     {
-                                        "facet": "@cisco.secure.firewall.groupname",
+                                        "facet": "@groupname",
                                         "limit": 10,
                                         "sort": {
                                             "order": "desc",
@@ -693,7 +693,7 @@
                                         }
                                     },
                                     {
-                                        "facet": "@cisco.secure.firewall.snmp_failure_reason",
+                                        "facet": "@snmp_failure_reason",
                                         "limit": 10,
                                         "sort": {
                                             "order": "desc",
@@ -761,7 +761,7 @@
                                 },
                                 "group_by": [
                                     {
-                                        "facet": "@cisco.secure.firewall.snmp_drop_reason",
+                                        "facet": "@snmp_drop_reason",
                                         "limit": 10,
                                         "sort": {
                                             "order": "desc",
@@ -822,7 +822,7 @@
                                 },
                                 "group_by": [
                                     {
-                                        "facet": "@cisco.secure.firewall.snmp_host",
+                                        "facet": "@snmp_host",
                                         "limit": 10,
                                         "sort": {
                                             "order": "desc",
@@ -830,7 +830,7 @@
                                         }
                                     },
                                     {
-                                        "facet": "@cisco.secure.firewall.snmp_failure_reason",
+                                        "facet": "@snmp_failure_reason",
                                         "limit": 10,
                                         "sort": {
                                             "order": "desc",
@@ -893,7 +893,7 @@
                                 },
                                 "group_by": [
                                     {
-                                        "facet": "@cisco.secure.firewall.snmp_failure_reason",
+                                        "facet": "@snmp_failure_reason",
                                         "limit": 10,
                                         "sort": {
                                             "order": "desc",
@@ -962,7 +962,7 @@
                                         }
                                     },
                                     {
-                                        "facet": "@cisco.secure.firewall.snmp_failure_reason",
+                                        "facet": "@snmp_failure_reason",
                                         "limit": 10,
                                         "sort": {
                                             "order": "desc",
