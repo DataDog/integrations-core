@@ -70,6 +70,7 @@ jobs:
     env:
       OUT_DIR: output/${{ matrix.job.image }}
       BUILDER_IMAGE: ghcr.io/datadog/agent-int-builder:${{ matrix.job.image }}
+      DOCKER: docker
 
     steps:
     - name: Checkout code
@@ -114,6 +115,7 @@ jobs:
         chmod +x ~/miniconda3/bin/jq
 
         echo "PATH=~/miniconda3/bin/:${PATH}" >> "$GITHUB_ENV"
+        echo DOCKER="sudo docker" >> "$GITHUB_ENV"
 
     - name: Install management dependencies
       run: |
@@ -141,6 +143,8 @@ jobs:
       run: |-
         sudo /home/runner/miniconda3/bin/python .builders/build.py ${{ matrix.job.image }} --python 3 ${{ env.OUT_DIR }}/py3
         sudo /home/runner/miniconda3/bin/python .builders/build.py ${{ matrix.job.image }} --python 2 ${{ env.OUT_DIR }}/py2
+        # Give ownership of the output back to the user
+        sudo chown ${USER} ${{ env.OUT_DIR }}
 
     - name: Pull image and build wheels (arm64)
       if: steps.changed-files.outputs.builders_any_changed != 'true' && matrix.job.image == 'linux-aarch64'
@@ -163,13 +167,13 @@ jobs:
         python .builders/build.py ${{ matrix.job.image }} --python 2 ${{ env.OUT_DIR }}/py2 --digest $digest
 
     - name: Publish image
-      if: github.event_name == 'push' && steps.changed-files.outputs.builders_any_changed == 'true' && matrix.job.image != 'linux-aarch64'
-      run: docker push ${{ env.BUILDER_IMAGE }}
+      if: github.event_name == 'push' && steps.changed-files.outputs.builders_any_changed == 'true'
+      run: ${DOCKER} push ${{ env.BUILDER_IMAGE }}
 
     - name: Save image digest
-      if: github.event_name == 'push' && matrix.job.image != 'linux-aarch64'
+      if: github.event_name == 'push'
       run: >-
-        docker inspect --format "{{index .RepoDigests 0}}" ${{ env.BUILDER_IMAGE }}
+        ${DOCKER} inspect --format "{{index .RepoDigests 0}}" ${{ env.BUILDER_IMAGE }}
         | cut -d '@' -f 2
         > ${{ env.OUT_DIR }}/image_digest
 
