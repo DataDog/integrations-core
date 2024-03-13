@@ -100,5 +100,5 @@ Different guidelines apply depending on which repo you are contributing to.
     It will add files in `changelog.d` folder inside the integrations that you have modified.
     Commit these files and push them to your PR.
     
-    If you decide that you do not need a changelog because the change you made won't be shipped with the agent, add the `changelog/no-changelog` label to the PR.
+    If you decide that you do not need a changelog because the change you made won't be shipped with the Agent, add the `changelog/no-changelog` label to the PR.
 
