@@ -742,8 +742,7 @@ class SQLServer(AgentCheck):
                             False,
                         )
                         continue
-            # Switch DB back to MASTER
-            with self.connection.get_managed_cursor() as cursor:
+                # Switch DB back to MASTER
                 cursor.execute(SWITCH_DB_STATEMENT.format(self.connection.DEFAULT_DATABASE))
 
     def _check_database_conns(self):
