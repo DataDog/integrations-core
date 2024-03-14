@@ -404,7 +404,7 @@ tests:
       "src_machine_group" : "All Machines"
     }
   result:
-    nucustom:
+    custom:
       action: "Log In"
       auth_method: "Machine Authentication (Active Directory)"
       auth_status: "Successful Login"
@@ -475,7 +475,7 @@ tests:
       }
     tags:
      - "source:LOGS_SOURCE"
-    timestamp: 1702458184ll
+    timestamp: 1702458184
  -
   sample: |-
     {
