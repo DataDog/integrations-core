@@ -115,14 +115,16 @@ class VSphereAPI(object):
             # Remove type ignore when this is merged https://github.com/python/typeshed/pull/3855
             context = ssl.SSLContext(ssl.PROTOCOL_TLS)  # type: ignore
             context.verify_mode = ssl.CERT_NONE
-        elif self.config.ssl_capath:
+        elif self.config.ssl_capath or self.config.ssl_cafile:
             # Remove type ignore when this is merged https://github.com/python/typeshed/pull/3855
             context = ssl.SSLContext(ssl.PROTOCOL_TLS)  # type: ignore
             context.verify_mode = ssl.CERT_REQUIRED
             # `check_hostname` must be enabled as well to verify the authenticity of a cert.
             context.check_hostname = True
-            context.load_verify_locations(capath=self.config.ssl_capath)
-
+            if self.config.ssl_capath:
+                context.load_verify_locations(cafile=None, capath=self.config.ssl_capath)
+            else:
+                context.load_verify_locations(cafile=self.config.ssl_cafile, capath=None)
         try:
             # Object returned by SmartConnect is a ServerInstance
             # https://www.vmware.com/support/developer/vc-sdk/visdk2xpubs/ReferenceGuide/vim.ServiceInstance.html

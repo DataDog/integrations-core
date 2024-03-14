@@ -101,6 +101,12 @@ files:
         value:
           type: boolean
           example: true
+      - name: ssl_cafile
+        description: |
+          Set to the absolute file path of CA certificates in PEM format
+        value:
+          type: string
+          example: "<FILE_PATH>"
       - name: ssl_capath
         description: |
           Set to the absolute file path of a directory containing CA certificates

@@ -35,7 +35,7 @@ from .common import (
     _get_expected_replication_tags,
     _get_expected_tags,
 )
-from .utils import _get_conn, _get_superconn, requires_over_10, run_one_check
+from .utils import _get_conn, _get_superconn, requires_over_10, requires_over_13, run_one_check
 
 pytestmark = [pytest.mark.integration, pytest.mark.usefixtures('dd_environment')]
 
@@ -349,6 +349,43 @@ def test_statement_metrics_cloud_metadata(
         conn.close()
 
 
+@requires_over_13
+def test_wal_metrics(aggregator, integration_check, dbm_instance):
+    dbm_instance['pg_stat_statements_view'] = "pg_stat_statements"
+    # don't need samples for this test
+    dbm_instance['query_samples'] = {'enabled': False}
+    dbm_instance['query_activity'] = {'enabled': False}
+    # very low collection interval for test purposes
+    dbm_instance['query_metrics'] = {'enabled': True, 'run_sync': True, 'collection_interval': 0.1}
+
+    connections = {}
+
+    def _run_queries():
+        for user, password, dbname, query, arg in SAMPLE_QUERIES:
+            if dbname not in connections:
+                connections[dbname] = psycopg2.connect(host=HOST, dbname=dbname, user=user, password=password)
+            connections[dbname].cursor().execute(query, (arg,))
+
+    check = integration_check(dbm_instance)
+    check._connect()
+
+    _run_queries()
+    run_one_check(check, dbm_instance)
+    _run_queries()
+    run_one_check(check, dbm_instance)
+
+    events = aggregator.get_event_platform_events("dbm-metrics")
+    assert len(events) == 1, "should capture exactly one metrics payload"
+    event = events[0]
+
+    assert all('wal_bytes' in entry for entry in event['postgres_rows'])
+    assert all('wal_fpi' in entry for entry in event['postgres_rows'])
+    assert all('wal_bytes' in entry for entry in event['postgres_rows'])
+
+    for conn in connections.values():
+        conn.close()
+
+
 def test_statement_metrics_with_duplicates(aggregator, integration_check, dbm_instance, datadog_agent):
     # don't need samples for this test
     dbm_instance['query_samples'] = {'enabled': False}
@@ -594,16 +631,14 @@ def test_failed_explain_handling(
             [{'code': 'failed_function', 'message': "<class 'psycopg2.errors.UndefinedFunction'>"}],
             StatementTruncationState.not_truncated.value,
             [
-                'Unable to collect execution plans in dbname=dogs_nofunc. Check that the '
-                'function datadog.explain_statement exists in the database. See '
-                'https://docs.datadoghq.com/database_monitoring/setup_postgres/'
-                'troubleshooting#undefined-explain-function for more details: function '
-                'datadog.explain_statement(unknown) does not exist\nLINE 1: SELECT '
-                'datadog.explain_statement($stmt$SELECT * FROM pg_stat...\n               '
-                '^\nHINT:  No function matches the given name and argument types. You might need to add '
-                'explicit type casts.\n'
-                '\n'
-                'code=undefined-explain-function dbname=dogs_nofunc host=stubbed.hostname',
+                "Unable to collect execution plans in dbname=dogs_nofunc. Check that the function "
+                "datadog.explain_statement exists in the database. See "
+                "https://docs.datadoghq.com/database_monitoring/setup_postgres/troubleshooting#undefined-explain-function"
+                " for more details: function datadog.explain_statement(unknown) does not exist\nLINE 1: "
+                "/* service='datadog-agent' */ SELECT datadog.explain_stateme...\n"
+                "                                             ^\nHINT:  No function matches the given name"
+                " and argument types. You might need to add explicit type casts.\n\ncode=undefined-explain-function "
+                "dbname=dogs_nofunc host=stubbed.hostname",
             ],
         ),
         (
@@ -1841,7 +1876,7 @@ def test_pg_stat_statements_dealloc(aggregator, integration_check, dbm_instance_
     with conn.cursor() as cur:
         # pg_stat_statements_reset should be tracked
         # Do enough queries to reach the maximum
-        for i in range(101 - count_statements):
+        for i in range(102 - count_statements):
             parameters = ','.join([str(a) for a in range(i)])
             cur.execute("select {};".format(parameters))
 

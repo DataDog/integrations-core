@@ -64,12 +64,8 @@ METRICS = [
     'go.threads',
     'kubernetes_apiserver.emitted_events',
     'kubernetes_apiserver.kube_events',
-    'language_detection_dca_handler.fail_response',
-    'language_detection_dca_handler.ok_response',
-    'language_detection_patcher.fail_patch',
-    'language_detection_patcher.retries',
-    'language_detection_patcher.skipped_patch',
-    'language_detection_patcher.success_patch',
+    'language_detection_dca_handler.processed_requests',
+    'language_detection_patcher.patches',
     'secret_backend.elapsed',
 ]
 

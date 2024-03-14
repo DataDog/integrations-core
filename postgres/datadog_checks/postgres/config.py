@@ -26,17 +26,15 @@ class PostgresConfig:
     GAUGE = AgentCheck.gauge
     MONOTONIC = AgentCheck.monotonic_count
 
-    def __init__(self, init_config, instance):
-        autodiscover_config = init_config.get('autodiscover_hosts', {})
-        self.host_autodiscovery_enabled = is_affirmative(autodiscover_config.get('enabled', False))
+    def __init__(self, instance):
         self.host = instance.get('host', '')
-        if not self.host and not self.host_autodiscovery_enabled:
+        if not self.host:
             raise ConfigurationError('Specify a Postgres host to connect to.')
         self.port = instance.get('port', '')
         if self.port != '':
             self.port = int(self.port)
         self.user = instance.get('username', '')
-        if not self.user and not self.host_autodiscovery_enabled:
+        if not self.user:
             raise ConfigurationError('Please specify a user to connect to Postgres.')
         self.password = instance.get('password', '')
         self.dbname = instance.get('dbname', 'postgres')

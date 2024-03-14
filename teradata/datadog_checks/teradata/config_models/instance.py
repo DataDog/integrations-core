@@ -28,6 +28,7 @@ class CustomQuery(BaseModel):
     )
     collection_interval: Optional[int] = None
     columns: Optional[tuple[MappingProxyType[str, Any], ...]] = None
+    metric_prefix: Optional[str] = None
     query: Optional[str] = None
     tags: Optional[tuple[str, ...]] = None
 

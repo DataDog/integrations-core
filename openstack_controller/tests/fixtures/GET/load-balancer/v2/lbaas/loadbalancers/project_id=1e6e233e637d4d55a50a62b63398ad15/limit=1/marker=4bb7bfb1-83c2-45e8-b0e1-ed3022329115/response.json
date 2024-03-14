@@ -1,0 +1,42 @@
+{
+    "loadbalancers": [
+        {
+            "id": "ae54877c-b186-4b90-b71c-d331b9e732bc",
+            "name": "new-lb",
+            "description": "",
+            "provisioning_status": "ACTIVE",
+            "operating_status": "ONLINE",
+            "admin_state_up": true,
+            "project_id": "966af9e5e65f4744840da2a01e48d72a",
+            "created_at": "2023-11-01T17:50:16",
+            "updated_at": "2023-11-01T17:59:34",
+            "vip_address": "10.0.0.84",
+            "vip_port_id": "2b6cd5ae-f451-49a8-b5f2-faa653c899eb",
+            "vip_subnet_id": "78f7c6c7-7e05-43bc-8abd-cfb0b96c2b03",
+            "vip_network_id": "2fb6236c-349a-41af-8c92-3c7689641016",
+            "additional_vips": [],
+            "listeners": [
+                {
+                    "id": "08d6cc52-30bb-4ddb-9727-021d8cfeafa8"
+                }
+            ],
+            "pools": [
+                {
+                    "id": "43c6410e-c9f2-469f-9506-02dfc0e63585"
+                }
+            ],
+            "provider": "amphora",
+            "flavor_id": null,
+            "vip_qos_policy_id": null,
+            "tags": [],
+            "availability_zone": null,
+            "tenant_id": "966af9e5e65f4744840da2a01e48d72a"
+        }
+    ],
+    "loadbalancers_links": [
+        {
+            "href": "http://35.204.143.7/load-balancer/v2/lbaas/loadbalancers?limit=1&marker=ae54877c-b186-4b90-b71c-d331b9e732bc&page_reverse=True",
+            "rel": "previous"
+        }
+    ]
+}

@@ -1,3 +1,7 @@
+## Datadog Agent version [7.51.1](https://github.com/DataDog/datadog-agent/blob/master/CHANGELOG.rst#7511)
+
+* SQL Server [16.0.2](https://github.com/DataDog/integrations-core/blob/master/sqlserver/CHANGELOG.md)
+
 ## Datadog Agent version [7.51.0](https://github.com/DataDog/datadog-agent/blob/master/CHANGELOG.rst#7510)
 
 * Active Directory [2.1.0](https://github.com/DataDog/integrations-core/blob/master/active_directory/CHANGELOG.md)

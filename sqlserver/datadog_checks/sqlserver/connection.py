@@ -9,6 +9,7 @@ from six import raise_from
 
 from datadog_checks.base import AgentCheck, ConfigurationError
 from datadog_checks.base.log import get_check_logger
+from datadog_checks.sqlserver.cursor import CommenterCursorWrapper
 
 try:
     import adodbapi
@@ -218,7 +219,7 @@ class Connection(object):
             # FIXME: we should find a better way to compute unique keys to map opened connections other than
             # using auth info in clear text!
             raise SQLConnectionError("Cannot find an opened connection for host: {}".format(self.instance.get('host')))
-        return conn.cursor()
+        return CommenterCursorWrapper(conn.cursor())
 
     def close_cursor(self, cursor):
         """
@@ -382,7 +383,7 @@ class Connection(object):
             try:
                 self.existing_databases = {}
                 cursor.execute(DATABASE_EXISTS_QUERY)
-                for row in cursor:
+                for row in cursor.fetchall():
                     # collation_name can be NULL if db offline, in that case assume its case_insensitive
                     case_insensitive = not row.collation_name or 'CI' in row.collation_name
                     self.existing_databases[row.name.lower()] = (

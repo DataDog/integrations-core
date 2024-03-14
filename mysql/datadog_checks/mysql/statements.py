@@ -18,8 +18,9 @@ from datadog_checks.base.utils.db.statement_metrics import StatementMetrics
 from datadog_checks.base.utils.db.utils import DBMAsyncJob, default_json_event_encoding, obfuscate_sql_with_metadata
 from datadog_checks.base.utils.serialization import json
 from datadog_checks.base.utils.tracking import tracked_method
+from datadog_checks.mysql.cursor import CommenterDictCursor
 
-from .util import DatabaseConfigurationError, warning_with_tags
+from .util import DatabaseConfigurationError, connect_with_autocommit, warning_with_tags
 
 try:
     import datadog_agent
@@ -97,7 +98,7 @@ class MySQLStatementMetrics(DBMAsyncJob):
         :return:
         """
         if not self._db:
-            self._db = pymysql.connect(**self._connection_args)
+            self._db = connect_with_autocommit(**self._connection_args)
         return self._db
 
     def _close_db_conn(self):
@@ -197,7 +198,7 @@ class MySQLStatementMetrics(DBMAsyncJob):
             ORDER BY `count_star` DESC
             LIMIT 10000"""
 
-        with closing(self._get_db_connection().cursor(pymysql.cursors.DictCursor)) as cursor:
+        with closing(self._get_db_connection().cursor(CommenterDictCursor)) as cursor:
             cursor.execute(sql_statement_summary)
 
             rows = cursor.fetchall() or []  # type: ignore
@@ -220,6 +221,7 @@ class MySQLStatementMetrics(DBMAsyncJob):
             metadata = statement['metadata']
             normalized_row['dd_tables'] = metadata.get('tables', None)
             normalized_row['dd_commands'] = metadata.get('commands', None)
+            normalized_row['dd_comments'] = metadata.get('comments', None)
             normalized_rows.append(normalized_row)
 
         return normalized_rows
@@ -245,6 +247,7 @@ class MySQLStatementMetrics(DBMAsyncJob):
                     "metadata": {
                         "tables": row['dd_tables'],
                         "commands": row['dd_commands'],
+                        "comments": row['dd_comments'],
                     },
                 },
                 "mysql": {"schema": row["schema_name"]},

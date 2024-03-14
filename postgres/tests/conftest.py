@@ -84,20 +84,6 @@ def pg_instance():
 
 
 @pytest.fixture
-def pg_init_config():
-    return {}
-
-
-@pytest.fixture
-def pg_host_autodiscover_init_config():
-    return {
-        'autodiscover_hosts': {
-            'enabled': True,
-        }
-    }
-
-
-@pytest.fixture
 def pg_replica_instance():
     instance = copy.deepcopy(INSTANCE)
     instance['port'] = PORT_REPLICA
@@ -119,14 +105,14 @@ def pg_replica_logical():
 
 
 @pytest.fixture
-def metrics_cache(pg_init_config, pg_instance):
-    config = PostgresConfig(init_config=pg_init_config, instance=pg_instance)
+def metrics_cache(pg_instance):
+    config = PostgresConfig(instance=pg_instance)
     return PostgresMetricsCache(config)
 
 
 @pytest.fixture
-def metrics_cache_replica(pg_init_config, pg_replica_instance):
-    config = PostgresConfig(init_config=pg_init_config, instance=pg_replica_instance)
+def metrics_cache_replica(pg_replica_instance):
+    config = PostgresConfig(instance=pg_replica_instance)
     return PostgresMetricsCache(config)
 
 

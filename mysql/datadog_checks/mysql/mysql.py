@@ -25,6 +25,7 @@ from datadog_checks.base.utils.db.utils import (
     resolve_db_host as agent_host_resolver,
 )
 from datadog_checks.base.utils.serialization import json
+from datadog_checks.mysql.cursor import CommenterCursor, CommenterDictCursor, CommenterSSCursor
 
 from .__about__ import __version__
 from .activity import MySQLActivity
@@ -76,7 +77,7 @@ from .queries import (
 )
 from .statement_samples import MySQLStatementSamples
 from .statements import MySQLStatementMetrics
-from .util import DatabaseConfigurationError  # noqa: F401
+from .util import DatabaseConfigurationError, connect_with_autocommit  # noqa: F401
 from .version_utils import get_version
 
 try:
@@ -144,7 +145,7 @@ class MySql(AgentCheck):
         self._is_innodb_engine_enabled_cached = None
 
     def execute_query_raw(self, query):
-        with closing(self._conn.cursor(pymysql.cursors.SSCursor)) as cursor:
+        with closing(self._conn.cursor(CommenterSSCursor)) as cursor:
             cursor.execute(query)
             for row in cursor.fetchall_unbuffered():
                 yield row
@@ -208,7 +209,7 @@ class MySql(AgentCheck):
         self._check_events_wait_current_enabled(db)
 
     def _check_performance_schema_enabled(self, db):
-        with closing(db.cursor()) as cursor:
+        with closing(db.cursor(CommenterCursor)) as cursor:
             cursor.execute("SHOW VARIABLES LIKE 'performance_schema'")
             results = dict(cursor.fetchall())
             self.performance_schema_enabled = self._get_variable_enabled(results, 'performance_schema')
@@ -216,7 +217,7 @@ class MySql(AgentCheck):
         return self.performance_schema_enabled
 
     def check_userstat_enabled(self, db):
-        with closing(db.cursor()) as cursor:
+        with closing(db.cursor(CommenterCursor)) as cursor:
             cursor.execute("SHOW VARIABLES LIKE 'userstat'")
             results = dict(cursor.fetchall())
             self.userstat_enabled = self._get_variable_enabled(results, 'userstat')
@@ -232,7 +233,7 @@ class MySql(AgentCheck):
             self.log.debug('`performance_schema` is required to enable `events_waits_current`')
             self.events_wait_current_enabled = False
             return self.events_wait_current_enabled
-        with closing(db.cursor()) as cursor:
+        with closing(db.cursor(CommenterCursor)) as cursor:
             cursor.execute(
                 """\
                 SELECT
@@ -424,7 +425,7 @@ class MySql(AgentCheck):
         db = None
         try:
             connect_args = self._get_connection_args()
-            db = pymysql.connect(**connect_args)
+            db = connect_with_autocommit(**connect_args)
             self.log.debug("Connected to MySQL")
             self.service_check_tags = list(set(service_check_tags))
             self.service_check(
@@ -640,7 +641,7 @@ class MySql(AgentCheck):
 
     def _collect_group_replica_metrics(self, db, results):
         try:
-            with closing(db.cursor()) as cursor:
+            with closing(db.cursor(CommenterCursor)) as cursor:
                 cursor.execute(SQL_GROUP_REPLICATION_MEMBER)
                 replica_results = cursor.fetchone()
                 status = self.OK
@@ -776,7 +777,7 @@ class MySql(AgentCheck):
         return collect_string('Master_Host', results) or collect_string('Source_Host', results)
 
     def _is_group_replication_active(self, db):
-        with closing(db.cursor()) as cursor:
+        with closing(db.cursor(CommenterCursor)) as cursor:
             cursor.execute(SQL_GROUP_REPLICATION_PLUGIN_STATUS)
             r = cursor.fetchone()
 
@@ -827,7 +828,7 @@ class MySql(AgentCheck):
         field_metric_map: {"Seconds_behind_master": "mysqlSecondsBehindMaster"}
         """
         try:
-            with closing(db.cursor()) as cursor:
+            with closing(db.cursor(CommenterCursor)) as cursor:
                 cursor.execute(query)
                 result = cursor.fetchone()
                 if result is not None:
@@ -864,7 +865,7 @@ class MySql(AgentCheck):
         runtime_tags = []
 
         try:
-            with closing(db.cursor()) as cursor:
+            with closing(db.cursor(CommenterCursor)) as cursor:
                 cursor.execute(SQL_REPLICATION_ROLE_AWS_AURORA)
                 replication_role = cursor.fetchone()[0]
 
@@ -909,7 +910,7 @@ class MySql(AgentCheck):
         """
         pid_file = None
         try:
-            with closing(db.cursor()) as cursor:
+            with closing(db.cursor(CommenterCursor)) as cursor:
                 cursor.execute("SHOW VARIABLES LIKE 'pid_file'")
                 pid_file = cursor.fetchone()[1]
         except Exception:
@@ -955,7 +956,7 @@ class MySql(AgentCheck):
             return self._is_aurora
 
         try:
-            with closing(db.cursor()) as cursor:
+            with closing(db.cursor(CommenterCursor)) as cursor:
                 cursor.execute(SQL_SERVER_ID_AWS_AURORA)
                 if len(cursor.fetchall()) > 0:
                     self._is_aurora = True
@@ -974,7 +975,7 @@ class MySql(AgentCheck):
 
     @classmethod
     def _get_stats_from_status(cls, db):
-        with closing(db.cursor()) as cursor:
+        with closing(db.cursor(CommenterCursor)) as cursor:
             cursor.execute("SHOW /*!50002 GLOBAL */ STATUS;")
             results = dict(cursor.fetchall())
 
@@ -982,7 +983,7 @@ class MySql(AgentCheck):
 
     @classmethod
     def _get_stats_from_variables(cls, db):
-        with closing(db.cursor()) as cursor:
+        with closing(db.cursor(CommenterCursor)) as cursor:
             cursor.execute("SHOW GLOBAL VARIABLES;")
             results = dict(cursor.fetchall())
 
@@ -990,7 +991,7 @@ class MySql(AgentCheck):
 
     def _get_binary_log_stats(self, db):
         try:
-            with closing(db.cursor()) as cursor:
+            with closing(db.cursor(CommenterCursor)) as cursor:
                 cursor.execute("SHOW BINARY LOGS;")
                 cursor_results = cursor.fetchall()
                 master_logs = {result[0]: result[1] for result in cursor_results}
@@ -1011,7 +1012,7 @@ class MySql(AgentCheck):
         if self._is_innodb_engine_enabled_cached is not None:
             return self._is_innodb_engine_enabled_cached
         try:
-            with closing(db.cursor()) as cursor:
+            with closing(db.cursor(CommenterCursor)) as cursor:
                 cursor.execute(SQL_INNODB_ENGINES)
                 self._is_innodb_engine_enabled_cached = cursor.rowcount > 0
 
@@ -1023,7 +1024,7 @@ class MySql(AgentCheck):
     def _get_replica_stats(self, db, is_mariadb, replication_channel):
         replica_results = defaultdict(dict)
         try:
-            with closing(db.cursor(pymysql.cursors.DictCursor)) as cursor:
+            with closing(db.cursor(CommenterDictCursor)) as cursor:
                 if is_mariadb and replication_channel:
                     cursor.execute("SET @@default_master_connection = '{0}';".format(replication_channel))
                 cursor.execute(show_replica_status_query(self.version, is_mariadb, replication_channel))
@@ -1049,7 +1050,7 @@ class MySql(AgentCheck):
                 self.warning("Privileges error getting replication status (must grant REPLICATION CLIENT): %s", e)
 
         try:
-            with closing(db.cursor(pymysql.cursors.DictCursor)) as cursor:
+            with closing(db.cursor(CommenterDictCursor)) as cursor:
                 cursor.execute("SHOW MASTER STATUS;")
                 binlog_results = cursor.fetchone()
                 if binlog_results:
@@ -1066,7 +1067,7 @@ class MySql(AgentCheck):
         2. The `information_schema.processlist` table. Blocking
         """
         try:
-            with closing(db.cursor()) as cursor:
+            with closing(db.cursor(CommenterCursor)) as cursor:
                 if above_560 and nonblocking:
                     # Query `performance_schema.threads` instead of `
                     # information_schema.processlist` to avoid mutex impact on performance.
@@ -1097,7 +1098,7 @@ class MySql(AgentCheck):
         # Fetches the 95th percentile query execution time and returns the value
         # in microseconds
         try:
-            with closing(db.cursor()) as cursor:
+            with closing(db.cursor(CommenterCursor)) as cursor:
                 cursor.execute(SQL_95TH_PERCENTILE)
 
                 if cursor.rowcount < 1:
@@ -1119,7 +1120,7 @@ class MySql(AgentCheck):
         # Fetches the avg query execution time per schema and returns the
         # value in microseconds
         try:
-            with closing(db.cursor()) as cursor:
+            with closing(db.cursor(CommenterCursor)) as cursor:
                 cursor.execute(SQL_AVG_QUERY_RUN_TIME)
 
                 if cursor.rowcount < 1:
@@ -1145,7 +1146,7 @@ class MySql(AgentCheck):
 
     def _query_size_per_table(self, db, system_tables=False):
         try:
-            with closing(db.cursor()) as cursor:
+            with closing(db.cursor(CommenterCursor)) as cursor:
                 if system_tables:
                     cursor.execute(SQL_QUERY_SYSTEM_TABLE_SIZE)
                 else:
@@ -1177,7 +1178,7 @@ class MySql(AgentCheck):
         # Fetches the avg query execution time per schema and returns the
         # value in microseconds
         try:
-            with closing(db.cursor()) as cursor:
+            with closing(db.cursor(CommenterCursor)) as cursor:
                 cursor.execute(SQL_QUERY_SCHEMA_SIZE)
 
                 if cursor.rowcount < 1:
@@ -1200,7 +1201,7 @@ class MySql(AgentCheck):
 
     def _query_rows_stats_per_table(self, db):
         try:
-            with closing(db.cursor()) as cursor:
+            with closing(db.cursor(CommenterCursor)) as cursor:
                 cursor.execute(SQL_QUERY_TABLE_ROWS_STATS)
 
                 if cursor.rowcount < 1:

@@ -13,23 +13,22 @@ init_config:
 #
 instances:
 
-  -
-    ## @param host - string - optional
+    ## @param host - string - required
     ## The hostname to connect to.
     ## NOTE: Even if the server name is `localhost`, the Agent connects to PostgreSQL using TCP/IP unless you also
     ## provide a value for the sock key.
     #
-    # host: <HOST>
+  - host: localhost
 
     ## @param port - integer - optional - default: 5432
     ## The port to use when connecting to PostgreSQL.
     #
     # port: 5432
 
-    ## @param username - string - optional
+    ## @param username - string - required
     ## The Datadog username created to connect to PostgreSQL.
     #
-    # username: <USERNAME>
+    username: datadog
 
     ## @param password - string - optional
     ## The password associated with the Datadog user.
@@ -167,7 +166,7 @@ instances:
     # collect_function_metrics: false
 
     ## @param collect_count_metrics - boolean - optional - default: true
-    ## Collect count of user tables up to max_relations size from pg_stat_user_tables.
+    ## Collect count of user tables from pg_class.
     #
     # collect_count_metrics: true
 

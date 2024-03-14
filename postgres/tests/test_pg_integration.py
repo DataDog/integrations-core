@@ -1,6 +1,7 @@
 # (C) Datadog, Inc. 2010-present
 # All rights reserved
 # Licensed under Simplified BSD License (see LICENSE)
+import contextlib
 import socket
 import time
 
@@ -12,7 +13,7 @@ from flaky import flaky
 from datadog_checks.base.errors import ConfigurationError
 from datadog_checks.postgres import PostgreSql
 from datadog_checks.postgres.__about__ import __version__
-from datadog_checks.postgres.util import PartialFormatter, fmt
+from datadog_checks.postgres.util import DatabaseHealthCheckError, PartialFormatter, fmt
 
 from .common import (
     COMMON_METRICS,
@@ -309,15 +310,19 @@ def test_can_connect_service_check(aggregator, integration_check, pg_instance):
     check.check(pg_instance)
     aggregator.assert_service_check('postgres.can_connect', count=1, status=PostgreSql.OK, tags=expected_tags)
 
+    # Forth: connection health check failed
+    with pytest.raises(DatabaseHealthCheckError):
+        db = mock.MagicMock()
+        db.cursor().__enter__().execute.side_effect = psycopg2.OperationalError('foo')
 
-def test_schema_metrics(aggregator, integration_check, pg_instance):
-    pg_instance['table_count_limit'] = 1
-    check = integration_check(pg_instance)
-    check.check(pg_instance)
+        @contextlib.contextmanager
+        def mock_db():
+            yield db
 
-    expected_tags = _get_expected_tags(check, pg_instance, db=DB_NAME, schema='public')
-    aggregator.assert_metric('postgresql.table.count', value=1, count=1, tags=expected_tags)
-    aggregator.assert_metric('postgresql.db.count', value=106, count=1)
+        check.db = mock_db
+        check.check(pg_instance)
+    aggregator.assert_service_check('postgres.can_connect', count=1, status=PostgreSql.CRITICAL, tags=tags_without_role)
+    aggregator.reset()
 
 
 def test_connections_metrics(aggregator, integration_check, pg_instance):
@@ -1040,14 +1045,6 @@ def assert_state_set(check):
     if POSTGRES_VERSION != '9.3':
         assert check.metrics_cache.archiver_metrics
     assert check.metrics_cache.replication_metrics
-
-
-def test_host_autodiscover_init_config(aggregator, pg_host_autodiscover_init_config):
-    check_with_init = PostgreSql('test_instance', pg_host_autodiscover_init_config, [{}])
-    assert check_with_init._config.host_autodiscovery_enabled is True
-    check_with_init.check({})
-    # assert that the service check is OK
-    aggregator.assert_service_check('postgres.can_connect', count=1, status=PostgreSql.OK)
 
 
 @requires_over_10

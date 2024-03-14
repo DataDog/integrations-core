@@ -1,0 +1,37 @@
+{
+    "version": 2,
+    "created_at": "2024-03-01",
+    "last_updated_at": "2024-03-01",
+    "title": "",
+    "tags": [
+      "integration:consul"
+    ],
+    "description": "Notify your team of consul service status by host",
+    "definition": {
+        "name": "Consul service status",
+        "type": "service check",
+        "query": "\"consul.check\".over(\"*\").by(\"host\").last(3).count_by_status()",
+        "message": "{{#is_warning}}\n  There is an issue with consul service for {{host.name}}\n{{/is_warning}}\n\n{{#is_alert}}\n  Consul service is down for {{host.name}}\n{{/is_alert}}",
+        "tags": [
+            "integration:consul"
+        ],
+        "options": {
+            "thresholds": {
+                "critical": 2,
+                "warning": 2,
+                "ok": 1
+            },
+            "notify_audit": false,
+            "notify_no_data": false,
+            "renotify_interval": 0,
+            "timeout_h": 0,
+            "threshold_windows": null,
+            "include_tags": true,
+            "new_group_delay": 30,
+            "silenced": {},
+            "avalanche_window": 10
+        },
+        "priority": null,
+        "restricted_roles": null
+    }
+}

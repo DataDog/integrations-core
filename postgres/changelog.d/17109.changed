@@ -1,0 +1,1 @@
+PostgreSQL: Optimise table count query. postgresql.table.count metric doesn't use max_relations parameter anymore and will always yield the total number of tables per schema. Parent table of partitions tables will also be included in the table count for PG 11, 12 and 13. All versions after PG 14 already included parent table.

@@ -6,12 +6,6 @@ build_wheels() {
     /py${DD_BUILD_PYTHON_VERSION}/bin/python -m pip wheel "$@"
 }
 
-export PIP_CONSTRAINT="/pip_constraints.txt"
-echo "PIP_CONSTRAINT=\"${PIP_CONSTRAINT}\"" >> $DD_ENV_FILE
-
-# bcrypt >= 4.1.0 requires rust >= 1.64, which dropped support for glibc 2.12 (~Centos 6)
-echo "bcrypt < 4.1.0" >> "${PIP_CONSTRAINT}"
-
 # We don't support pymqi on ARM for now
 sed -i '/pymqi==/d' /home/requirements.in
 
@@ -32,19 +26,10 @@ if [[ "${DD_BUILD_PYTHON_VERSION}" == "3" ]]; then
         bash install-from-source.sh --enable-sasl --enable-curl
     always_build+=("confluent-kafka")
 
-    # pydantic-core
-    pydantic_core_version="2.1.2"
-    curl -L "https://github.com/pydantic/pydantic-core/archive/refs/tags/v${pydantic_core_version}.tar.gz" \
-        | tar -C /tmp -xzf -
-    pushd "/tmp/pydantic-core-${pydantic_core_version}"
-    patch -p1 -i "${DD_MOUNT_DIR}/patches/pydantic-core-for-manylinux1.patch"
-    build_wheels --no-deps .
-    echo "pydantic-core == ${pydantic_core_version}" >> "${PIP_CONSTRAINT}"
-    popd
+    # The version of pyodbc is dynamically linked against a version of the odbc which doesn't come included in the wheel
+    # That causes the omnibus' health check to flag it. Forcing the build so that we do include it in the wheel.
+    always_build+=("pyodbc")
 else
-    echo "CFLAGS=\"-I/usr/local/ssl/include ${CFLAGS}\"" >> $DD_ENV_FILE
-    echo "LDFLAGS=\"-L/usr/local/ssl/lib ${LDFLAGS}\"" >> $DD_ENV_FILE
-
     # Not working on Python 2
     sed -i '/aerospike==/d' /home/requirements.in
 fi

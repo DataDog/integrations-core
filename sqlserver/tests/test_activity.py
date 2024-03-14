@@ -607,7 +607,7 @@ def test_activity_stored_procedure_failed_to_obfuscate(dbm_instance, datadog_age
         assert len(result_rows) == 1
         assert result_rows[0]['text'] == statement_text
         assert result_rows[0]['is_proc'] is True
-        assert 'procedure_signature' not in result_rows[0]
+        assert result_rows[0]['procedure_signature'] == '__procedure_obfuscation_error__'
 
 
 @pytest.mark.integration

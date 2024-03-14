@@ -14,6 +14,7 @@ import requests_mock
 from six import iteritems
 
 from datadog_checks.base.checks.kubelet_base.base import KubeletCredentials
+from datadog_checks.base.errors import SkipInstanceError
 from datadog_checks.base.utils.date import parse_rfc3339
 from datadog_checks.dev.http import MockResponse
 from datadog_checks.kubelet import KubeletCheck, PodListUtils
@@ -1626,3 +1627,13 @@ def test_kubelet_unavailable_check_can_init(monkeypatch):
     with mock.patch('datadog_checks.kubelet.kubelet.get_connection_info', return_value=kubelet_conn_info):
         check = mock_kubelet_check(monkeypatch, [instance], kube_version=None)
         assert check is not None
+
+
+def test_kubelet_does_not_init_if_kubelet_core_config_var_set_to_true(monkeypatch):
+    with mock.patch(
+        'datadog_checks.base.stubs.datadog_agent.get_config',
+        return_value={'true'},
+    ):
+        with pytest.raises(SkipInstanceError):
+            KubeletCheck('kubelet', {}, [{}])
+        return

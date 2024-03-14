@@ -3,7 +3,7 @@ base_package:
 changelog/no-changelog:
 - any:
   - requirements-agent-release.txt
-  - '*/__about__.py'
+  - '**/__about__.py'
 - all:
   - '!*/datadog_checks/**'
   - '!*/pyproject.toml'
@@ -433,6 +433,8 @@ integration/tcp_queue_length:
 - tcp_queue_length/**/*
 integration/teamcity:
 - teamcity/**/*
+integration/tekton:
+- tekton/**/*
 integration/temporal:
 - temporal/**/*
 integration/tenable:
@@ -489,5 +491,9 @@ integration/zeek:
 - zeek/**/*
 integration/zk:
 - zk/**/*
+qa/skip-qa:
+- '**/__about__.py'
+- requirements-agent-release.txt
+- '*/CHANGELOG.md'
 release:
-- '*/__about__.py'
+- '**/__about__.py'
