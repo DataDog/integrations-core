@@ -863,7 +863,7 @@
                                 },
                                 "group_by": [
                                     {
-                                        "facet": "@checkpoint.quantum.firewall.layer_name",
+                                        "facet": "@layer_name",
                                         "limit": 10,
                                         "sort": {
                                             "order": "desc",
@@ -963,6 +963,7 @@
                 "title": "Log Details",
                 "title_size": "16",
                 "title_align": "left",
+                "time": {},
                 "requests": [
                     {
                         "response_format": "event_list",
@@ -974,23 +975,23 @@
                         },
                         "columns": [
                             {
-                                "field": "@action",
+                                "field": "action",
                                 "width": "auto"
                             },
                             {
-                                "field": "@severity",
+                                "field": "severity",
                                 "width": "auto"
                             },
                             {
-                                "field": "@checkpoint.quantum.firewall.appi_name",
+                                "field": "checkpoint.quantum.firewall.appi_name",
                                 "width": "auto"
                             },
                             {
-                                "field": "@app_category",
+                                "field": "app_category",
                                 "width": "auto"
                             },
                             {
-                                "field": "@checkpoint.quantum.firewall.app_risk_str",
+                                "field": "checkpoint.quantum.firewall.app_risk_str",
                                 "width": "auto"
                             },
                             {
@@ -998,15 +999,15 @@
                                 "width": "auto"
                             },
                             {
-                                "field": "dst_ip_port",
+                                "field": "checkpoint.quantum.firewall.dst_ip_port",
                                 "width": "auto"
                             },
                             {
-                                "field": "@checkpoint.quantum.firewall.layer_name",
+                                "field": "layer_name",
                                 "width": "auto"
                             },
                             {
-                                "field": "@matched_category",
+                                "field": "matched_category",
                                 "width": "auto"
                             }
                         ]
