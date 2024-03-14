@@ -7,8 +7,8 @@ from pyVmomi import vim, vmodl
 
 from datadog_checks.base import AgentCheck  # noqa: F401
 
-from .constants import HOST_RESOURCE, SHORT_ROLLUP
-from .metrics import HOST_METRICS
+from .constants import HOST_RESOURCE, MAX_PROPERTIES, RESOURCE_TYPE_TO_NAME, SHORT_ROLLUP, VM_RESOURCE
+from .metrics import RESOURCE_NAME_TO_METRICS
 
 
 class EsxiCheck(AgentCheck):
@@ -21,13 +21,17 @@ class EsxiCheck(AgentCheck):
         self.password = self.instance.get("password")
         self.tags = [f"esxi_url:{self.host}"]
 
-    def get_host_info(self):
-        self.log.debug("Retrieving host properties")
+    def get_resources(self):
+        self.log.debug("Retrieving resources")
+        property_specs = []
 
-        # Create property spec for only Host objects; only request name attribute
-        property_spec = vmodl.query.PropertyCollector.PropertySpec()
-        property_spec.type = HOST_RESOURCE
-        property_spec.pathSet = ["name"]
+        resource_types = [VM_RESOURCE, HOST_RESOURCE]
+        for resource_type in resource_types:
+            # only request name attribute for now
+            property_spec = vmodl.query.PropertyCollector.PropertySpec()
+            property_spec.type = resource_type
+            property_spec.pathSet = ["name"]
+            property_specs.append(property_spec)
 
         # Specify the attribute of the root object to traverse to obtain all the attributes
         traversal_spec = vmodl.query.PropertyCollector.TraversalSpec()
@@ -37,7 +41,7 @@ class EsxiCheck(AgentCheck):
 
         # Only collect 1 item for now
         retr_opts = vmodl.query.PropertyCollector.RetrieveOptions()
-        retr_opts.maxObjects = 1
+        retr_opts.maxObjects = MAX_PROPERTIES
 
         # Specify the root object from where we collect the rest of the objects
         obj_spec = vmodl.query.PropertyCollector.ObjectSpec()
@@ -46,10 +50,9 @@ class EsxiCheck(AgentCheck):
 
         # Create our filter spec from the above specs
         filter_spec = vmodl.query.PropertyCollector.FilterSpec()
-        filter_spec.propSet = [property_spec]
+        filter_spec.propSet = property_specs
 
-        # Only host objects
-        view_ref = self.content.viewManager.CreateContainerView(self.content.rootFolder, [HOST_RESOURCE], True)
+        view_ref = self.content.viewManager.CreateContainerView(self.content.rootFolder, resource_types, True)
 
         try:
             obj_spec.obj = view_ref
@@ -66,47 +69,51 @@ class EsxiCheck(AgentCheck):
 
         return obj_content_list
 
-    def get_available_metric_ids(self):
+    def get_available_metric_ids_for_entity(self, entity):
+        resource_name = RESOURCE_TYPE_TO_NAME[type(entity)]
+        avaliable_metrics = RESOURCE_NAME_TO_METRICS[resource_name]
+
         counter_keys_and_names = {}
         for counter in self.content.perfManager.perfCounter:
             full_name = f"{counter.groupInfo.key}.{counter.nameInfo.key}.{SHORT_ROLLUP[counter.rollupType]}"
-            if full_name in HOST_METRICS:
+            if full_name in avaliable_metrics:
                 counter_keys_and_names[counter.key] = full_name
             else:
                 self.log.trace("Skipping metric %s as it is not recognized", full_name)
 
-        available_counter_ids = [
-            m.counterId for m in self.content.perfManager.QueryAvailablePerfMetric(entity=self.host_entity)
-        ]
+        available_counter_ids = [m.counterId for m in self.content.perfManager.QueryAvailablePerfMetric(entity=entity)]
         counter_ids = [
             counter_id for counter_id in available_counter_ids if counter_id in counter_keys_and_names.keys()
         ]
         metric_ids = [vim.PerformanceManager.MetricId(counterId=counter, instance="") for counter in counter_ids]
         return counter_keys_and_names, metric_ids
 
-    def collect_host_metrics(self, metric_ids):
+    def collect_metrics_for_entity(self, metric_ids, counter_keys_and_names, entity, entity_name):
 
-        spec = vim.PerformanceManager.QuerySpec(maxSample=1, entity=self.host_entity, metricId=metric_ids)
+        resource_name = RESOURCE_TYPE_TO_NAME[type(entity)]
+        spec = vim.PerformanceManager.QuerySpec(maxSample=1, entity=entity, metricId=metric_ids)
         result_stats = self.content.perfManager.QueryPerf([spec])
 
         for results_for_entity in result_stats:
             for metric_result in results_for_entity.value:
-                metric_name = self.counter_keys_and_names.get(metric_result.id.counterId)
+                metric_name = counter_keys_and_names.get(metric_result.id.counterId)
                 if len(metric_result.value) == 0:
                     self.log.debug(
-                        "Skipping metric %s for %s because no value was returned by the ESXi host",
+                        "Skipping metric %s for %s because no value was returned by the %s",
                         metric_name,
-                        self.host_name,
+                        entity_name,
+                        resource_name,
                     )
                     continue
 
                 valid_values = [v for v in metric_result.value if v >= 0]
                 if len(valid_values) <= 0:
                     self.log.debug(
-                        "Skipping metric %s for %s, because the value returned by the ESXi host"
+                        "Skipping metric %s for %s, because the value returned by the %s"
                         " is negative (i.e. the metric is not yet available). values: %s",
                         metric_name,
-                        self.host_name,
+                        entity_name,
+                        resource_name,
                         list(metric_result.value),
                     )
                     continue
@@ -117,10 +124,10 @@ class EsxiCheck(AgentCheck):
                         "Submit metric: name=`%s`, value=`%s`, hostname=`%s`, tags=`%s`",
                         metric_name,
                         most_recent_val,
-                        self.host_name,
+                        entity_name,
                         self.tags,
                     )
-                    self.gauge(metric_name, most_recent_val, hostname=self.host_name, tags=self.tags)
+                    self.gauge(metric_name, most_recent_val, hostname=entity_name, tags=self.tags)
 
     def check(self, _):
         try:
@@ -136,29 +143,23 @@ class EsxiCheck(AgentCheck):
 
         self.content = connection.content
 
-        # get info about host
-        host_list = self.get_host_info()
-        if len(host_list) == 0:
-            self.log.warning("Did not retrieve any properties from the ESXi host.")
+        resources = self.get_resources()
+        resource_map = {}
+        for resource in resources:
+            name = None
+            for prop in resource.propSet:
+                if prop.name == "name":
+                    name = prop.val
+            if name:
+                resource_map[name] = resource.obj
+            else:
+                self.log.warning("No host name found for entity %s", resource.obj)
+
+        if not resource_map:
+            self.log.warning("No resources found; halting check execution")
             return
 
-        host_result = host_list[0]
-        self.host_entity = host_result.obj
-        host_name = None
+        for resource_name, resource_obj in resource_map.items():
 
-        # Get the host name we requested
-        for prop in host_result.propSet:
-            if prop.name == "name":
-                host_name = prop.val
-
-        if host_name is None:
-            self.log.error("No host name found")
-            return
-
-        self.host_name = host_name
-
-        # determine what metrics are available to collect
-        self.counter_keys_and_names, metric_ids = self.get_available_metric_ids()
-
-        # collect metrics
-        self.collect_host_metrics(metric_ids)
+            counter_keys_and_names, metric_ids = self.get_available_metric_ids_for_entity(resource_obj)
+            self.collect_metrics_for_entity(metric_ids, counter_keys_and_names, resource_obj, resource_name)
