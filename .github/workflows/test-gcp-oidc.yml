@@ -28,5 +28,5 @@ jobs:
         text=$(openssl rand -hex 12)
         echo $text
         echo $text > $text.txt
-        gcloud storage cp $text.txt gs://dd-agent-int-deps
-        gcloud storage cat gs://dd-agent-int-deps/$text.txt
+        gcloud storage cp $text.txt gs://deps-agent-int-datadoghq-com
+        gcloud storage cat gs://deps-agent-int-datadoghq-com/$text.txt
