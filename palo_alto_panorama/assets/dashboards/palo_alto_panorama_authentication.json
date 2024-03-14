@@ -569,7 +569,7 @@
                                 },
                                 "group_by": [
                                     {
-                                        "facet": "@authentication_policy",
+                                        "facet": "@authpolicy",
                                         "limit": 10,
                                         "sort": {
                                             "order": "desc",
@@ -756,7 +756,7 @@
                                 "width": "auto"
                             },
                             {
-                                "field": "authentication_policy",
+                                "field": "authpolicy",
                                 "width": "auto"
                             },
                             {
@@ -815,7 +815,7 @@
         },
         {
             "name": "Authentication_Policy",
-            "prefix": "@authentication_policy",
+            "prefix": "@authpolicy",
             "available_values": [],
             "default": "*"
         },

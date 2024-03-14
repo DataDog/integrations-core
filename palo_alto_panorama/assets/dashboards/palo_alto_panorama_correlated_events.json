@@ -387,7 +387,7 @@
                                 },
                                 "group_by": [
                                     {
-                                        "facet": "@palo.alto.panorama.severity",
+                                        "facet": "@severity",
                                         "limit": 10,
                                         "sort": {
                                             "order": "desc",
@@ -635,7 +635,7 @@
                                 "width": "auto"
                             },
                             {
-                                "field": "palo.alto.panorama.severity",
+                                "field": "severity",
                                 "width": "auto"
                             },
                             {
@@ -674,7 +674,7 @@
         },
         {
             "name": "Severity",
-            "prefix": "@palo.alto.panorama.severity",
+            "prefix": "@severity",
             "available_values": [],
             "default": "*"
         },

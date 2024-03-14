@@ -1365,7 +1365,7 @@
                                         }
                                     },
                                     {
-                                        "facet": "@palo.alto.panorama.appcat",
+                                        "facet": "@appcat",
                                         "limit": 5,
                                         "sort": {
                                             "order": "desc",
