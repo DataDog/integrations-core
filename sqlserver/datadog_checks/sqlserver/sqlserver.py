@@ -7,6 +7,7 @@ import copy
 import functools
 import time
 from collections import defaultdict
+
 import six
 from cachetools import TTLCache
 
@@ -728,19 +729,9 @@ class SQLServer(AgentCheck):
                     check_err_message = "Database {} connection service check failed: {}"
                     try:
                         cursor.execute(SWITCH_DB_STATEMENT.format(db.name))
-                    except Exception as e:
-                        self.log.warning(check_err_message.format(db.name, str(e)))
-                        self.handle_service_check(
-                            AgentCheck.CRITICAL,
-                            self.connection.get_host_with_port(),
-                            db.name,
-                            check_err_message.format(db.name, str(e)),
-                            False,
-                        )
-                        continue
-                    try:
                         cursor.execute(DATABASE_SERVICE_CHECK_QUERY)
                         cursor.fetchall()
+                        self.handle_service_check(AgentCheck.OK, self.connection.get_host_with_port(), db.name, False)
                     except Exception as e:
                         self.log.warning(check_err_message.format(db.name, str(e)))
                         self.handle_service_check(
@@ -751,8 +742,7 @@ class SQLServer(AgentCheck):
                             False,
                         )
                         continue
-                    self.handle_service_check(AgentCheck.OK, self.connection.get_host_with_port(), db.name, False)
-                #set here back to master
+            # Switch DB back to MASTER
             with self.connection.get_managed_cursor() as cursor:
                 cursor.execute(SWITCH_DB_STATEMENT.format(self.connection.DEFAULT_DATABASE))
 
