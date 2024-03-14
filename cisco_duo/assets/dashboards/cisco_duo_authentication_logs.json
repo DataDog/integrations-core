@@ -756,7 +756,7 @@
                                         }
                                     },
                                     {
-                                        "facet": "@auth_device.ip",
+                                        "facet": "@auth_device.name",
                                         "limit": 2,
                                         "sort": {
                                             "order": "desc",
@@ -838,7 +838,7 @@
                                 },
                                 "group_by": [
                                     {
-                                        "facet": "@auth_device.ip",
+                                        "facet": "@auth_device.name",
                                         "limit": 10,
                                         "sort": {
                                             "order": "desc",
