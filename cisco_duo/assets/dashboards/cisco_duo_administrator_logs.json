@@ -138,7 +138,7 @@
                                 },
                                 "group_by": [
                                     {
-                                        "facet": "@duo_action",
+                                        "facet": "@cisco.duo.action",
                                         "limit": 10,
                                         "sort": {
                                             "order": "desc",
@@ -190,7 +190,7 @@
                                 },
                                 "group_by": [
                                     {
-                                        "facet": "@duo_action",
+                                        "facet": "@cisco.duo.action",
                                         "limit": 10,
                                         "sort": {
                                             "order": "desc",
@@ -279,7 +279,7 @@
     "template_variables": [
         {
             "name": "Action",
-            "prefix": "@duo_action",
+            "prefix": "@cisco.duo.action",
             "available_values": [],
             "default": "*"
         },

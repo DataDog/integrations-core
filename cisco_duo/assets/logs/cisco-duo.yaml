@@ -163,12 +163,12 @@ pipeline:
           preserveSource: false
           overrideOnConflict: false
     - type: attribute-remapper
-      name: Map `action` to `duo_action`
+      name: Map `action` to `cisco.duo.action`
       enabled: true
       sources:
         - action
       sourceType: attribute
-      target: duo_action
+      target: cisco.duo.action
       targetType: attribute
       preserveSource: false
       overrideOnConflict: false
