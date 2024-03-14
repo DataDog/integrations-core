@@ -194,7 +194,7 @@
                                 },
                                 "group_by": [
                                     {
-                                        "facet": "@checkpoint.quantum.firewall.severity",
+                                        "facet": "@severity",
                                         "limit": 10,
                                         "sort": {
                                             "order": "desc",
@@ -255,7 +255,7 @@
                                 },
                                 "group_by": [
                                     {
-                                        "facet": "@checkpoint.quantum.firewall.action",
+                                        "facet": "@action",
                                         "limit": 10,
                                         "sort": {
                                             "order": "desc",
@@ -494,7 +494,7 @@
                                 },
                                 "group_by": [
                                     {
-                                        "facet": "@checkpoint.quantum.firewall.reject_category",
+                                        "facet": "@reject_category",
                                         "limit": 10,
                                         "sort": {
                                             "order": "desc",
@@ -560,11 +560,11 @@
                                 "width": "auto"
                             },
                             {
-                                "field": "checkpoint.quantum.firewall.action",
+                                "field": "action",
                                 "width": "auto"
                             },
                             {
-                                "field": "checkpoint.quantum.firewall.severity",
+                                "field": "severity",
                                 "width": "auto"
                             },
                             {
@@ -572,7 +572,7 @@
                                 "width": "auto"
                             },
                             {
-                                "field": "checkpoint.quantum.firewall.reject_category",
+                                "field": "reject_category",
                                 "width": "auto"
                             },
                             {
@@ -601,7 +601,7 @@
         },
         {
             "name": "Action",
-            "prefix": "@checkpoint.quantum.firewall.action",
+            "prefix": "@action",
             "available_values": [],
             "default": "*"
         },

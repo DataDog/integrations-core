@@ -194,7 +194,7 @@
                                 },
                                 "group_by": [
                                     {
-                                        "facet": "@checkpoint.quantum.firewall.severity",
+                                        "facet": "@severity",
                                         "limit": 10,
                                         "sort": {
                                             "order": "desc",
@@ -255,7 +255,7 @@
                                 },
                                 "group_by": [
                                     {
-                                        "facet": "@checkpoint.quantum.firewall.action",
+                                        "facet": "@action",
                                         "limit": 10,
                                         "sort": {
                                             "order": "desc",
@@ -564,7 +564,7 @@
                                 },
                                 "group_by": [
                                     {
-                                        "facet": "@checkpoint.quantum.firewall.malware_action",
+                                        "facet": "@malware_action",
                                         "limit": 10,
                                         "sort": {
                                             "order": "desc",
@@ -625,7 +625,7 @@
                                 },
                                 "group_by": [
                                     {
-                                        "facet": "@checkpoint.quantum.firewall.protection_type",
+                                        "facet": "@protection_type",
                                         "limit": 10,
                                         "sort": {
                                             "order": "desc",
@@ -686,7 +686,7 @@
                                 },
                                 "group_by": [
                                     {
-                                        "facet": "@checkpoint.quantum.firewall.protection_name",
+                                        "facet": "@protection_name",
                                         "limit": 10,
                                         "sort": {
                                             "order": "desc",
@@ -796,11 +796,11 @@
                         },
                         "columns": [
                             {
-                                "field": "checkpoint.quantum.firewall.severity",
+                                "field": "severity",
                                 "width": "auto"
                             },
                             {
-                                "field": "checkpoint.quantum.firewall.action",
+                                "field": "action",
                                 "width": "auto"
                             },
                             {
@@ -820,15 +820,15 @@
                                 "width": "auto"
                             },
                             {
-                                "field": "checkpoint.quantum.firewall.malware_action",
+                                "field": "malware_action",
                                 "width": "auto"
                             },
                             {
-                                "field": "checkpoint.quantum.firewall.protection_name",
+                                "field": "protection_name",
                                 "width": "auto"
                             },
                             {
-                                "field": "checkpoint.quantum.firewall.protection_type",
+                                "field": "protection_type",
                                 "width": "auto"
                             },
                             {
@@ -857,13 +857,13 @@
         },
         {
             "name": "Severity",
-            "prefix": "@checkpoint.quantum.firewall.severity",
+            "prefix": "@severity",
             "available_values": [],
             "default": "*"
         },
         {
             "name": "Action",
-            "prefix": "@checkpoint.quantum.firewall.action",
+            "prefix": "@action",
             "available_values": [],
             "default": "*"
         },

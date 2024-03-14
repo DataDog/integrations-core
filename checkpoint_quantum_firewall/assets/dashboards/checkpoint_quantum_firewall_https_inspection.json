@@ -194,7 +194,7 @@
                                 },
                                 "group_by": [
                                     {
-                                        "facet": "@checkpoint.quantum.firewall.severity",
+                                        "facet": "@severity",
                                         "limit": 10,
                                         "sort": {
                                             "order": "desc",
@@ -304,11 +304,11 @@
                         },
                         "columns": [
                             {
-                                "field": "checkpoint.quantum.firewall.severity",
+                                "field": "severity",
                                 "width": "auto"
                             },
                             {
-                                "field": "checkpoint.quantum.firewall.action",
+                                "field": "action",
                                 "width": "auto"
                             },
                             {
@@ -351,7 +351,7 @@
         },
         {
             "name": "Severity",
-            "prefix": "@checkpoint.quantum.firewall.severity",
+            "prefix": "@severity",
             "available_values": [],
             "default": "*"
         }

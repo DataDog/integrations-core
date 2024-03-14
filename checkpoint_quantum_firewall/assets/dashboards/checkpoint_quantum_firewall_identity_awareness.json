@@ -194,7 +194,7 @@
                                 },
                                 "group_by": [
                                     {
-                                        "facet": "@checkpoint.quantum.firewall.severity",
+                                        "facet": "@severity",
                                         "limit": 10,
                                         "sort": {
                                             "order": "desc",
@@ -255,7 +255,7 @@
                                 },
                                 "group_by": [
                                     {
-                                        "facet": "@checkpoint.quantum.firewall.identity_type",
+                                        "facet": "@identity_type",
                                         "limit": 10,
                                         "sort": {
                                             "order": "desc",
@@ -316,7 +316,7 @@
                                 },
                                 "group_by": [
                                     {
-                                        "facet": "@checkpoint.quantum.firewall.identity_src",
+                                        "facet": "@identity_src",
                                         "limit": 10,
                                         "sort": {
                                             "order": "desc",
@@ -377,7 +377,7 @@
                                 },
                                 "group_by": [
                                     {
-                                        "facet": "@checkpoint.quantum.firewall.action",
+                                        "facet": "@action",
                                         "limit": 10,
                                         "sort": {
                                             "order": "desc",
@@ -439,7 +439,7 @@
                                 },
                                 "group_by": [
                                     {
-                                        "facet": "@checkpoint.quantum.firewall.src_machine_name",
+                                        "facet": "@src_machine_name",
                                         "limit": 10,
                                         "sort": {
                                             "order": "desc",
@@ -492,7 +492,7 @@
                                 },
                                 "group_by": [
                                     {
-                                        "facet": "@checkpoint.quantum.firewall.auth_method",
+                                        "facet": "@auth_method",
                                         "limit": 10,
                                         "sort": {
                                             "order": "desc",
@@ -500,7 +500,7 @@
                                         }
                                     },
                                     {
-                                        "facet": "@checkpoint.quantum.firewall.auth_status",
+                                        "facet": "@auth_status",
                                         "limit": 10,
                                         "sort": {
                                             "order": "desc",
@@ -558,7 +558,7 @@
                                 "width": "auto"
                             },
                             {
-                                "field": "checkpoint.quantum.firewall.action",
+                                "field": "action",
                                 "width": "auto"
                             },
                             {
@@ -566,27 +566,27 @@
                                 "width": "auto"
                             },
                             {
-                                "field": "checkpoint.quantum.firewall.identity_src",
+                                "field": "identity_src",
                                 "width": "auto"
                             },
                             {
-                                "field": "checkpoint.quantum.firewall.src_machine_name",
+                                "field": "src_machine_name",
                                 "width": "auto"
                             },
                             {
-                                "field": "checkpoint.quantum.firewall.identity_type",
+                                "field": "identity_type",
                                 "width": "auto"
                             },
                             {
-                                "field": "@checkpoint.quantum.firewall.action",
+                                "field": "@action",
                                 "width": "auto"
                             },
                             {
-                                "field": "checkpoint.quantum.firewall.auth_method",
+                                "field": "auth_method",
                                 "width": "auto"
                             },
                             {
-                                "field": "checkpoint.quantum.firewall.auth_status",
+                                "field": "auth_status",
                                 "width": "auto"
                             }
                         ]
@@ -611,13 +611,13 @@
         },
         {
             "name": "Identity-Source",
-            "prefix": "@checkpoint.quantum.firewall.identity_src",
+            "prefix": "@identity_src",
             "available_values": [],
             "default": "*"
         },
         {
             "name": "Identity-Type",
-            "prefix": "@checkpoint.quantum.firewall.identity_type",
+            "prefix": "@identity_type",
             "available_values": [],
             "default": "*"
         }
