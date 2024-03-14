@@ -817,9 +817,27 @@ def test_report_container_spec_metrics(monkeypatch, tagger):
         mock.call('kubernetes.cpu.limits', 0.25, ['kube_container_name:datadog-agent'] + instance_tags),
         mock.call('kubernetes.memory.limits', 536870912.0, ['kube_container_name:datadog-agent'] + instance_tags),
         mock.call('kubernetes.cpu.requests', 0.1, ["pod_name:demo-app-success-c485bc67b-klj45"] + instance_tags),
+        # init container
+        mock.call(
+            'kubernetes.cpu.requests',
+            0.05,
+            ['kube_container_name:running-init', 'kube_namespace:default'] + instance_tags,
+        ),
+        mock.call(
+            'kubernetes.memory.requests',
+            104857600.0,
+            ['kube_container_name:running-init', 'kube_namespace:default'] + instance_tags,
+        ),
+        mock.call(
+            'kubernetes.memory.limits',
+            157286400.0,
+            ['kube_container_name:running-init', 'kube_namespace:default'] + instance_tags,
+        ),
     ]
     if any(('pod_name:pi-kff76' in e for e in [x[0][2] for x in check.gauge.call_args_list])):
         raise AssertionError("kubernetes.cpu.requests was submitted for a non-running pod")
+    if any(('kube_container_name:init' in e for e in [x[0][2] for x in check.gauge.call_args_list])):
+        raise AssertionError("kubernetes.cpu.requests was submitted for a terminated init container")
     check.gauge.assert_has_calls(calls, any_order=True)
 
 
@@ -869,6 +887,12 @@ def test_report_container_state_metrics(monkeypatch, tagger):
         ),
         mock.call('kubernetes.containers.restarts', 0, ['kube_container_name:datadog-agent'] + instance_tags),
         mock.call('kubernetes.containers.restarts', 0, ['kube_container_name:datadog-agent'] + instance_tags),
+        # init container
+        mock.call(
+            'kubernetes.containers.restarts',
+            0,
+            ['kube_container_name:init', 'kube_deployment:fluentd-gcp-v2.0.10', 'kube_namespace:default'] + instance_tags,
+        ),
     ]
     check.gauge.assert_has_calls(calls, any_order=True)
 
@@ -1152,6 +1176,10 @@ def test_process_stats_summary_not_source_linux(monkeypatch, aggregator, tagger)
     aggregator.assert_metric('kubernetes.kubelet.cpu.usage', 36755862.0, ['instance:tag'])
     aggregator.assert_metric('kubernetes.runtime.memory.rss', 101273600.0, ['instance:tag'])
     aggregator.assert_metric('kubernetes.kubelet.memory.rss', 88477696.0, ['instance:tag'])
+    # pending pod
+    aggregator.assert_metric(
+        'kubernetes.ephemeral_storage.usage', 32768.0, ['instance:tag', 'pod_name:sidecar-second', 'kube_namespace:default']
+    )
 
 
 def test_process_stats_summary_as_source(monkeypatch, aggregator, tagger):

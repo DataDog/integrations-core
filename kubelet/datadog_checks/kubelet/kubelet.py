@@ -534,8 +534,10 @@ class KubeletCheck(
             if self._should_ignore_pod(pod_name, pod_phase):
                 continue
 
-            for status_field, spec_field in [('containerStatuses', 'containers'),
-                                             ('initContainerStatuses', 'initContainers')]:
+            for status_field, spec_field in [
+                ('containerStatuses', 'containers'),
+                ('initContainerStatuses', 'initContainers')
+            ]:
                 for ctr in pod.get('spec', {}).get(spec_field, []):
                     if not ctr.get('resources'):
                         continue
