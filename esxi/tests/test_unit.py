@@ -231,6 +231,19 @@ def test_external_host_tags_all_resources(vcsim_instance, datadog_agent, dd_run_
                         name='name',
                         val='c1',
                     ),
+                    vmodl.DynamicProperty(
+                        name='parent',
+                        val=vim.HostServiceSystem(moId="hss"),
+                    ),
+                ],
+            ),
+            vim.ObjectContent(
+                obj=vim.HostServiceSystem(moId="hss"),
+                propSet=[
+                    vmodl.DynamicProperty(
+                        name='name',
+                        val='hss',
+                    )
                 ],
             ),
         ]
