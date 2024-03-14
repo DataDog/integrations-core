@@ -166,3 +166,99 @@ def test_external_host_tags(vcsim_instance, datadog_agent, dd_run_check):
         'vm2',
         {'esxi': ['esxi_cluster:c1', 'esxi_compute:c1', 'esxi_type:VM', 'esxi_url:127.0.0.1:8989']},
     )
+
+
+@pytest.mark.usefixtures("service_instance")
+def test_external_host_tags_all_resources(vcsim_instance, datadog_agent, dd_run_check, service_instance):
+    retrieve_result = vim.PropertyCollector.RetrieveResult(
+        objects=[
+            vim.ObjectContent(
+                obj=vim.VirtualMachine(moId="vm1"),
+                propSet=[
+                    vmodl.DynamicProperty(
+                        name='runtime.host',
+                        val=vim.HostSystem(moId="host"),
+                    ),
+                    vmodl.DynamicProperty(
+                        name='name',
+                        val='vm1',
+                    ),
+                ],
+            ),
+            vim.ObjectContent(
+                obj=vim.HostSystem(moId="host"),
+                propSet=[
+                    vmodl.DynamicProperty(
+                        name='parent',
+                        val=vim.StoragePod(moId="pod1"),
+                    ),
+                    vmodl.DynamicProperty(
+                        name='name',
+                        val='hostname',
+                    ),
+                ],
+            ),
+            vim.ObjectContent(
+                obj=vim.StoragePod(moId="pod1"),
+                propSet=[
+                    vmodl.DynamicProperty(
+                        name='name',
+                        val='pod1',
+                    ),
+                    vmodl.DynamicProperty(
+                        name='parent',
+                        val=vim.Datastore(moId="ds1"),
+                    ),
+                ],
+            ),
+            vim.ObjectContent(
+                obj=vim.Datastore(moId="ds1"),
+                propSet=[
+                    vmodl.DynamicProperty(
+                        name='name',
+                        val='ds1',
+                    ),
+                    vmodl.DynamicProperty(
+                        name='parent',
+                        val=vim.ClusterComputeResource(moId="c1"),
+                    ),
+                ],
+            ),
+            vim.ObjectContent(
+                obj=vim.ClusterComputeResource(moId="c1"),
+                propSet=[
+                    vmodl.DynamicProperty(
+                        name='name',
+                        val='c1',
+                    ),
+                ],
+            ),
+        ]
+    )
+    service_instance.content.propertyCollector.RetrievePropertiesEx = MagicMock(return_value=retrieve_result)
+
+    check = EsxiCheck('esxi', {}, [vcsim_instance])
+    dd_run_check(check)
+    datadog_agent.assert_external_tags(
+        'hostname',
+        {
+            'esxi': [
+                'esxi_cluster:c1',
+                'esxi_compute:c1',
+                'esxi_datastore:ds1',
+                'esxi_datastore_cluster:pod1',
+                'esxi_type:host',
+                'esxi_url:127.0.0.1:8989',
+            ]
+        },
+    )
+    datadog_agent.assert_external_tags(
+        'vm1',
+        {
+            'esxi': [
+                'esxi_type:VM',
+                'esxi_cluster:c1',
+                'esxi_url:127.0.0.1:8989',
+            ]
+        },
+    )

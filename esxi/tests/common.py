@@ -594,6 +594,7 @@ ALL_VCSIM_VM_METRICS_WITH_VALS = [
 ]
 
 FLAKEY_VM_METRICS = [
+    'cpu.costop.sum',
     'disk.maxTotalLatency.latest',
     'virtualDisk.read.avg',
 ]
