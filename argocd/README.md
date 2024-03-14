@@ -111,6 +111,8 @@ spec:
 # (...)
 ```
 
+**Note**: For the full list of supported endpoints, see the [conf.yaml example file][15].
+
 ##### Troubleshooting 
 
 **Clashing Tag Names**:
@@ -194,4 +196,5 @@ Need help? Contact [Datadog support][9].
 [12]: https://github.com/DataDog/integrations-core/blob/master/argocd/datadog_checks/argocd/data/conf.yaml.example
 [13]: https://github.com/DataDog/integrations-core/blob/7.45.x/argocd/datadog_checks/argocd/data/conf.yaml.example#L164-L166
 [14]: https://argo-cd.readthedocs.io/en/stable/operator-manual/metrics/#exposing-application-labels-as-prometheus-metrics
+[15]: https://github.com/DataDog/integrations-core/blob/master/argocd/datadog_checks/argocd/data/conf.yaml.example#L45-L72
 
