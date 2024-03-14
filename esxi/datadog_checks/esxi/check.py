@@ -196,4 +196,3 @@ class EsxiCheck(AgentCheck):
 
         if external_host_tags:
             self.set_external_tags(external_host_tags)
-

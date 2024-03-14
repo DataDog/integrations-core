@@ -121,9 +121,8 @@ def test_esxi_perf_metrics(vcsim_instance, dd_run_check, aggregator, caplog):
 
     assert (
         "Skipping metric net.droppedRx.sum for localhost.localdomain because no value was returned by the host"
-    "returned by the Host is negative (i.e. the metric is not yet available). values: [-1]" 
-    )
-    in caplog.text
+        "returned by the Host is negative (i.e. the metric is not yet available). values: [-1]"
+    ) in caplog.text
 
 
 @pytest.mark.usefixtures("service_instance")
@@ -276,4 +275,3 @@ def test_external_host_tags_all_resources(vcsim_instance, datadog_agent, dd_run_
             ]
         },
     )
-
