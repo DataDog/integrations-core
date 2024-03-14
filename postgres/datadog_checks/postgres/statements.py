@@ -27,6 +27,11 @@ try:
 except ImportError:
     from ..stubs import datadog_agent
 
+QUERY_COUNTS_QUERY = """
+SELECT queryid, calls
+  FROM {pg_stat_statements_view}
+"""
+
 STATEMENTS_QUERY = """
 SELECT {cols}
   FROM {pg_stat_statements_view} as pg_stat_statements
@@ -36,6 +41,7 @@ SELECT {cols}
          ON pg_stat_statements.dbid = pg_database.oid
   WHERE query != '<insufficient privilege>'
   AND query NOT LIKE 'EXPLAIN %%'
+  AND queryid = ANY(ARRAY[{called_queryids}]::bigint[])
   {filters}
   {extra_clauses}
 """
@@ -141,6 +147,7 @@ class PostgresStatementMetrics(DBMAsyncJob):
         self.tags = None
         self._state = StatementMetrics()
         self._stat_column_cache = []
+        self._query_count_cache = {}
         self._track_io_timing_cache = None
         self._obfuscate_options = to_native_string(json.dumps(self._config.obfuscator_options))
         # full_statement_text_cache: limit the ingestion rate of full statement text events per query_signature
@@ -172,7 +179,11 @@ class PostgresStatementMetrics(DBMAsyncJob):
 
         # Querying over '*' with limit 0 allows fetching only the column names from the cursor without data
         query = STATEMENTS_QUERY.format(
-            cols='*', pg_stat_statements_view=self._config.pg_stat_statements_view, extra_clauses="LIMIT 0", filters=""
+            cols='*',
+            pg_stat_statements_view=self._config.pg_stat_statements_view,
+            extra_clauses="LIMIT 0",
+            filters="",
+            called_queryids="",
         )
         with self._check._get_main_db() as conn:
             with conn.cursor(cursor_factory=CommenterCursor) as cursor:
@@ -180,6 +191,40 @@ class PostgresStatementMetrics(DBMAsyncJob):
                 col_names = [desc[0] for desc in cursor.description] if cursor.description else []
                 self._stat_column_cache = col_names
                 return col_names
+
+    def _check_called_queries(self):
+        pgss_view_without_query_text = self._config.pg_stat_statements_view
+        if pgss_view_without_query_text == "pg_stat_statements":
+            pgss_view_without_query_text = "pg_stat_statements(false)"
+
+        with self._check._get_main_db() as conn:
+            with conn.cursor() as cursor:
+                called_queryids = []
+                query = QUERY_COUNTS_QUERY.format(pg_stat_statements_view=pgss_view_without_query_text)
+                rows = self._execute_query(cursor, query, params=(self._config.dbname,))
+                for row in rows:
+                    queryid = row[0]
+                    if queryid is None:
+                        continue
+
+                    calls = row[1]
+                    if queryid in self._query_count_cache:
+                        diff = calls - self._query_count_cache[queryid]
+                        if diff > 0:
+                            called_queryids.append(queryid)
+                    else:
+                        called_queryids.append(queryid)
+
+                    self._query_count_cache[queryid] = calls
+
+                self._check.gauge(
+                    "postgresql.pg_stat_statements.called",
+                    len(called_queryids),
+                    tags=self.tags,
+                    hostname=self._check.resolved_hostname,
+                )
+
+                return called_queryids
 
     def run_job(self):
         # do not emit any dd.internal metrics for DBM specific check code
@@ -217,6 +262,7 @@ class PostgresStatementMetrics(DBMAsyncJob):
     @tracked_method(agent_check_getter=agent_check_getter, track_result_length=True)
     def _load_pg_stat_statements(self):
         try:
+            called_queryids = self._check_called_queries()
             available_columns = set(self._get_pg_stat_statements_columns())
             missing_columns = PG_STAT_STATEMENTS_REQUIRED_COLUMNS - available_columns
             if len(missing_columns) > 0:
@@ -291,6 +337,7 @@ class PostgresStatementMetrics(DBMAsyncJob):
                             pg_stat_statements_view=self._config.pg_stat_statements_view,
                             filters=filters,
                             extra_clauses="",
+                            called_queryids=', '.join([str(i) for i in called_queryids]),
                         ),
                         params=params,
                     )
