@@ -112,7 +112,7 @@ SPARK_EXECUTOR_TEMPLATE_METRICS = {
     'memoryMetrics.usedOffHeapStorageMemory': ('spark.{}.mem.used_off_heap_storage', COUNT),
     'memoryMetrics.totalOnHeapStorageMemory': ('spark.{}.mem.total_on_heap_storage', COUNT),
     'memoryMetrics.totalOffHeapStorageMemory': ('spark.{}.mem.total_off_heap_storage', COUNT),
-    # peakMemoryMetrics is a dictionary of metrics
+    # peakMemoryMetrics is a dictionary of metrics (available only in Spark 3.0+: https://issues.apache.org/jira/browse/SPARK-23429)
     'peakMemoryMetrics.JVMHeapMemory': ('spark.{}.peak_mem.jvm_heap_memory', COUNT),
     'peakMemoryMetrics.JVMOffHeapMemory': ('spark.{}.peak_mem.jvm_off_heap_memory', COUNT),
     'peakMemoryMetrics.OnHeapExecutionMemory': ('spark.{}.peak_mem.on_heap_execution', COUNT),

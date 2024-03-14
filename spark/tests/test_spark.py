@@ -496,6 +496,9 @@ SPARK_DRIVER_METRIC_VALUES = {
     'spark.driver.mem.used_off_heap_storage': 0,
     'spark.driver.mem.total_on_heap_storage': 384093388,
     'spark.driver.mem.total_off_heap_storage': 0,
+}
+
+SPARK_DRIVER_OPTIONAL_METRIC_VALUES = {
     'spark.driver.peak_mem.jvm_heap_memory': 345498432,
     'spark.driver.peak_mem.jvm_off_heap_memory': 196924864,
     'spark.driver.peak_mem.on_heap_execution': 0,
@@ -510,9 +513,6 @@ SPARK_DRIVER_METRIC_VALUES = {
     'spark.driver.peak_mem.minor_gc_time': 1436,
     'spark.driver.peak_mem.major_gc_count': 4,
     'spark.driver.peak_mem.major_gc_time': 419,
-}
-
-SPARK_DRIVER_OPTIONAL_PROCESS_TREE_METRIC_VALUES = {
     'spark.driver.peak_mem.process_tree_jvm': 0,
     'spark.driver.peak_mem.process_tree_jvm_rss': 0,
     'spark.driver.peak_mem.process_tree_python': 0,
@@ -539,6 +539,9 @@ SPARK_EXECUTOR_METRIC_VALUES = {
     'spark.executor.mem.used_off_heap_storage': 0,
     'spark.executor.mem.total_on_heap_storage': 384093388,
     'spark.executor.mem.total_off_heap_storage': 0,
+}
+
+SPARK_EXECUTOR_OPTIONAL_METRIC_VALUES = {
     'spark.executor.peak_mem.jvm_heap_memory': 361970928,
     'spark.executor.peak_mem.jvm_off_heap_memory': 94409256,
     'spark.executor.peak_mem.on_heap_execution': 16777216,
@@ -553,9 +556,6 @@ SPARK_EXECUTOR_METRIC_VALUES = {
     'spark.executor.peak_mem.minor_gc_time': 5670,
     'spark.executor.peak_mem.major_gc_count': 3,
     'spark.executor.peak_mem.major_gc_time': 252,
-}
-
-SPARK_EXECUTOR_OPTIONAL_PROCESS_TREE_METRIC_VALUES = {
     'spark.executor.peak_mem.process_tree_jvm': 0,
     'spark.executor.peak_mem.process_tree_jvm_rss': 0,
     'spark.executor.peak_mem.process_tree_python': 0,
@@ -581,6 +581,9 @@ SPARK_EXECUTOR_LEVEL_METRIC_VALUES = {
     'spark.executor.id.mem.used_off_heap_storage': 0,
     'spark.executor.id.mem.total_on_heap_storage': 384093388,
     'spark.executor.id.mem.total_off_heap_storage': 0,
+}
+
+SPARK_EXECUTOR_LEVEL_OPTIONAL_PROCESS_TREE_METRIC_VALUES = {
     'spark.executor.id.peak_mem.jvm_heap_memory': 361970928,
     'spark.executor.id.peak_mem.jvm_off_heap_memory': 94409256,
     'spark.executor.id.peak_mem.on_heap_execution': 16777216,
@@ -595,9 +598,6 @@ SPARK_EXECUTOR_LEVEL_METRIC_VALUES = {
     'spark.executor.id.peak_mem.minor_gc_time': 5670,
     'spark.executor.id.peak_mem.major_gc_count': 3,
     'spark.executor.id.peak_mem.major_gc_time': 252,
-}
-
-SPARK_EXECUTOR_LEVEL_OPTIONAL_PROCESS_TREE_METRIC_VALUES = {
     'spark.executor.id.peak_mem.process_tree_jvm': 0,
     'spark.executor.id.peak_mem.process_tree_jvm_rss': 0,
     'spark.executor.id.peak_mem.process_tree_python': 0,
@@ -678,7 +678,7 @@ def test_yarn(aggregator, dd_run_check):
             aggregator.assert_metric(metric, value=value, tags=COMMON_TAGS + CUSTOM_TAGS)
 
         # Check the optional driver metrics
-        for metric, value in iteritems(SPARK_DRIVER_OPTIONAL_PROCESS_TREE_METRIC_VALUES):
+        for metric, value in iteritems(SPARK_DRIVER_OPTIONAL_METRIC_VALUES):
             aggregator.assert_metric(metric, value=value, tags=COMMON_TAGS + CUSTOM_TAGS)
 
         # Check the executor level metrics
@@ -694,7 +694,7 @@ def test_yarn(aggregator, dd_run_check):
             aggregator.assert_metric(metric, value=value, tags=COMMON_TAGS + CUSTOM_TAGS)
 
         # Check the optional summary executor metrics
-        for metric, value in iteritems(SPARK_EXECUTOR_OPTIONAL_PROCESS_TREE_METRIC_VALUES):
+        for metric, value in iteritems(SPARK_EXECUTOR_OPTIONAL_METRIC_VALUES):
             aggregator.assert_metric(metric, value=value, tags=COMMON_TAGS + CUSTOM_TAGS)
 
         # Check the RDD metrics
@@ -772,7 +772,7 @@ def test_mesos(aggregator, dd_run_check):
             aggregator.assert_metric(metric, value=value, tags=COMMON_TAGS + CUSTOM_TAGS)
 
         # Check the optional driver metrics
-        for metric, value in iteritems(SPARK_DRIVER_OPTIONAL_PROCESS_TREE_METRIC_VALUES):
+        for metric, value in iteritems(SPARK_DRIVER_OPTIONAL_METRIC_VALUES):
             aggregator.assert_metric(metric, value=value, tags=COMMON_TAGS + CUSTOM_TAGS)
 
         # Check the executor level metrics
@@ -788,7 +788,7 @@ def test_mesos(aggregator, dd_run_check):
             aggregator.assert_metric(metric, value=value, tags=COMMON_TAGS + CUSTOM_TAGS)
 
         # Check the optional summary executor metrics
-        for metric, value in iteritems(SPARK_EXECUTOR_OPTIONAL_PROCESS_TREE_METRIC_VALUES):
+        for metric, value in iteritems(SPARK_EXECUTOR_OPTIONAL_METRIC_VALUES):
             aggregator.assert_metric(metric, value=value, tags=COMMON_TAGS + CUSTOM_TAGS)
 
         # Check the RDD metrics
@@ -863,7 +863,7 @@ def test_driver_unit(aggregator, dd_run_check):
             aggregator.assert_metric(metric, value=value, tags=COMMON_TAGS + CUSTOM_TAGS)
 
         # Check the optional driver metrics
-        for metric, value in iteritems(SPARK_DRIVER_OPTIONAL_PROCESS_TREE_METRIC_VALUES):
+        for metric, value in iteritems(SPARK_DRIVER_OPTIONAL_METRIC_VALUES):
             aggregator.assert_metric(metric, value=value, tags=COMMON_TAGS + CUSTOM_TAGS)
 
         # Check the executor level metrics
@@ -879,7 +879,7 @@ def test_driver_unit(aggregator, dd_run_check):
             aggregator.assert_metric(metric, value=value, tags=COMMON_TAGS + CUSTOM_TAGS)
 
         # Check the optional summary executor metrics
-        for metric, value in iteritems(SPARK_EXECUTOR_OPTIONAL_PROCESS_TREE_METRIC_VALUES):
+        for metric, value in iteritems(SPARK_EXECUTOR_OPTIONAL_METRIC_VALUES):
             aggregator.assert_metric(metric, value=value, tags=COMMON_TAGS + CUSTOM_TAGS)
 
         # Check the RDD metrics
@@ -945,7 +945,7 @@ def test_standalone_unit(aggregator, dd_run_check):
             aggregator.assert_metric(metric, value=value, tags=COMMON_TAGS)
 
         # Check the optional driver metrics
-        for metric, value in iteritems(SPARK_DRIVER_OPTIONAL_PROCESS_TREE_METRIC_VALUES):
+        for metric, value in iteritems(SPARK_DRIVER_OPTIONAL_METRIC_VALUES):
             aggregator.assert_metric(metric, value=value, tags=COMMON_TAGS)
 
         # Check the executor level metrics
@@ -961,7 +961,7 @@ def test_standalone_unit(aggregator, dd_run_check):
             aggregator.assert_metric(metric, value=value, tags=COMMON_TAGS)
 
         # Check the optional summary executor metrics
-        for metric, value in iteritems(SPARK_EXECUTOR_OPTIONAL_PROCESS_TREE_METRIC_VALUES):
+        for metric, value in iteritems(SPARK_EXECUTOR_OPTIONAL_METRIC_VALUES):
             aggregator.assert_metric(metric, value=value, tags=COMMON_TAGS)
 
         # Check the RDD metrics
@@ -1020,7 +1020,7 @@ def test_standalone_unit_with_proxy_warning_page(aggregator, dd_run_check):
             aggregator.assert_metric(metric, value=value, tags=COMMON_TAGS)
 
         # Check the optional driver metrics
-        for metric, value in iteritems(SPARK_DRIVER_OPTIONAL_PROCESS_TREE_METRIC_VALUES):
+        for metric, value in iteritems(SPARK_DRIVER_OPTIONAL_METRIC_VALUES):
             aggregator.assert_metric(metric, value=value, tags=COMMON_TAGS)
 
         # Check the executor level metrics
@@ -1036,7 +1036,7 @@ def test_standalone_unit_with_proxy_warning_page(aggregator, dd_run_check):
             aggregator.assert_metric(metric, value=value, tags=COMMON_TAGS)
 
         # Check the optional summary executor metrics
-        for metric, value in iteritems(SPARK_EXECUTOR_OPTIONAL_PROCESS_TREE_METRIC_VALUES):
+        for metric, value in iteritems(SPARK_EXECUTOR_OPTIONAL_METRIC_VALUES):
             aggregator.assert_metric(metric, value=value, tags=COMMON_TAGS)
 
         # Check the RDD metrics
@@ -1095,7 +1095,7 @@ def test_standalone_pre20(aggregator, dd_run_check):
             aggregator.assert_metric(metric, value=value, tags=COMMON_TAGS)
 
         # Check the optional driver metrics
-        for metric, value in iteritems(SPARK_DRIVER_OPTIONAL_PROCESS_TREE_METRIC_VALUES):
+        for metric, value in iteritems(SPARK_DRIVER_OPTIONAL_METRIC_VALUES):
             aggregator.assert_metric(metric, value=value, tags=COMMON_TAGS)
 
         # Check the executor level metrics
@@ -1111,7 +1111,7 @@ def test_standalone_pre20(aggregator, dd_run_check):
             aggregator.assert_metric(metric, value=value, tags=COMMON_TAGS)
 
         # Check the optional summary executor metrics
-        for metric, value in iteritems(SPARK_EXECUTOR_OPTIONAL_PROCESS_TREE_METRIC_VALUES):
+        for metric, value in iteritems(SPARK_EXECUTOR_OPTIONAL_METRIC_VALUES):
             aggregator.assert_metric(metric, value=value, tags=COMMON_TAGS)
 
         # Check the RDD metrics
@@ -1322,8 +1322,6 @@ SPARK_DRIVER_CLUSTER_TAGS = ['spark_cluster:{}'.format('SparkDriver'), 'cluster_
 @pytest.mark.integration
 @pytest.mark.usefixtures('dd_environment')
 def test_integration_standalone(aggregator, dd_run_check):
-    # Sleep to ensure GC has been run and peak memory metrics are exposed
-    time.sleep(10)
     c = SparkCheck('spark', {}, [INSTANCE_STANDALONE])
     dd_run_check(c)
 
@@ -1336,8 +1334,8 @@ def test_integration_standalone(aggregator, dd_run_check):
     )
     optional_metric_values = (
         SPARK_STREAMING_STATISTICS_METRIC_VALUES,
-        SPARK_DRIVER_OPTIONAL_PROCESS_TREE_METRIC_VALUES,
-        SPARK_EXECUTOR_OPTIONAL_PROCESS_TREE_METRIC_VALUES,
+        SPARK_DRIVER_OPTIONAL_METRIC_VALUES,
+        SPARK_EXECUTOR_OPTIONAL_METRIC_VALUES,
     )
     # Extract all keys
     expected_metrics = {k for j in expected_metric_values for k in j}
@@ -1360,8 +1358,6 @@ def test_integration_standalone(aggregator, dd_run_check):
 @pytest.mark.integration
 @pytest.mark.usefixtures('dd_environment')
 def test_integration_driver_1(aggregator, dd_run_check):
-    # Sleep to ensure GC has been run and peak memory metrics are exposed
-    time.sleep(10)
     c = SparkCheck('spark', {}, [INSTANCE_DRIVER_1])
     dd_run_check(c)
 
@@ -1373,8 +1369,8 @@ def test_integration_driver_1(aggregator, dd_run_check):
     optional_metric_values = (
         SPARK_STREAMING_STATISTICS_METRIC_VALUES,
         SPARK_EXECUTOR_METRIC_VALUES,
-        SPARK_EXECUTOR_OPTIONAL_PROCESS_TREE_METRIC_VALUES,
-        SPARK_DRIVER_OPTIONAL_PROCESS_TREE_METRIC_VALUES,
+        SPARK_EXECUTOR_OPTIONAL_METRIC_VALUES,
+        SPARK_DRIVER_OPTIONAL_METRIC_VALUES,
     )
     # Extract all keys
     expected_metrics = {k for j in all_metric_values for k in j}
@@ -1398,8 +1394,6 @@ def test_integration_driver_1(aggregator, dd_run_check):
 @pytest.mark.integration
 @pytest.mark.usefixtures('dd_environment')
 def test_integration_driver_2(aggregator, dd_run_check):
-    # Sleep to ensure GC has been run and peak memory metrics are exposed
-    time.sleep(10)
     c = SparkCheck('spark', {}, [INSTANCE_DRIVER_2])
     dd_run_check(c)
 
@@ -1410,8 +1404,8 @@ def test_integration_driver_2(aggregator, dd_run_check):
     optional_metric_values = (
         SPARK_STAGE_RUNNING_METRIC_VALUES,
         SPARK_EXECUTOR_METRIC_VALUES,
-        SPARK_EXECUTOR_OPTIONAL_PROCESS_TREE_METRIC_VALUES,
-        SPARK_DRIVER_OPTIONAL_PROCESS_TREE_METRIC_VALUES,
+        SPARK_EXECUTOR_OPTIONAL_METRIC_VALUES,
+        SPARK_DRIVER_OPTIONAL_METRIC_VALUES,
         SPARK_JOB_RUNNING_METRIC_VALUES,
         SPARK_JOB_SUCCEEDED_METRIC_VALUES,
     )
