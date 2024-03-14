@@ -42,12 +42,9 @@ RUN yum install -y perl-IPC-Cmd && \
  RELATIVE_PATH="openssl-{{version}}" \
  # https://docs.python.org/3/using/unix.html#custom-openssl
  INSTALL_COMMAND="make install_sw" \
- # no-module prevents the creation of dynamically loaded modules that would be problematic to bundle into Python wheels
  CONFIGURE_SCRIPT="./config" \
  bash install-from-source.sh \
- --prefix=/usr/local/ssl \
  --openssldir=/etc/pki/tls \
- --libdir=lib \
  -fPIC shared \
  # This prevents the creation of dynamically loaded modules that would be problematic to bundle into Python wheels
  no-module \
@@ -65,15 +62,12 @@ RUN yum install -y libffi-devel && \
  RELATIVE_PATH="Python-{{version}}" \
  bash install-from-source.sh \
  --prefix=/opt/python/${PYTHON_VERSION} \
- --with-openssl=/usr/local/ssl \
- --with-openssl-rpath=auto \
  --with-ensurepip=yes \
  --enable-ipv6 \
  --with-dbmliborder=
 ENV PATH="/opt/python/${PYTHON_VERSION}/bin:${PATH}"
 # Set up virtual environment for Python 3
-RUN export LD_LIBRARY_PATH="/opt/python/${PYTHON_VERSION}/lib:${LD_LIBRARY_PATH}"; \
- /opt/python/${PYTHON_VERSION}/bin/python3 -m pip install --no-warn-script-location --upgrade pip \
+RUN /opt/python/${PYTHON_VERSION}/bin/python3 -m pip install --no-warn-script-location --upgrade pip \
  && /opt/python/${PYTHON_VERSION}/bin/python3 -m pip install --no-warn-script-location virtualenv \
  && /opt/python/${PYTHON_VERSION}/bin/python3 -m virtualenv /py3
 
@@ -116,7 +110,6 @@ RUN \
  --disable-static
 
 # libpq and pg_config as needed by psycopg2
-RUN yum install openssl-devel -y
 RUN \
  DOWNLOAD_URL="https://ftp.postgresql.org/pub/source/v{{version}}/postgresql-{{version}}.tar.bz2" \
  VERSION="16.0" \
@@ -182,7 +175,7 @@ RUN \
     --without-gnutls \
     --without-librtmp \
     --without-libssh2 \
-    --with-ssl=/usr/local/ssl \
+    --with-ssl=/usr/local \
  && rm /usr/local/bin/curl
 
 # https://doc.rust-lang.org/cargo/reference/config.html#netgit-fetch-with-cli
