@@ -66,12 +66,11 @@ trigger-agent-build:
     - git fetch origin master
     - BASE_REF=$(git merge-base HEAD FETCH_HEAD)
     - git --no-pager diff --exit-code --name-only HEAD $BASE_REF -- datadog_checks_base/datadog_checks/base/data/agent_requirements.in || export AGENT_REQUIREMENTS_CHANGED="true" || true
-    - export RELEASE_BRANCH=""
+    - export RELEASE_BRANCH="celian/fix-run-pipeline-message-acix-101"
     - |
       if [[ "$AGENT_REQUIREMENTS_CHANGED" = "true" ]]; then
-          export RELEASE_BRANCH=$(git tag -l '7\.*' --points-at $BASE_REF | cat | sed 's/\..-.*/\.x/')
           echo "File agent_requirements.in has been modified, triggering an agent build pipeline."
-          DATADOG_AGENT_PIPELINE_URL=$DATADOG_AGENT_PIPELINE_URL RELEASE_BRANCH=$RELEASE_BRANCH python -u /trigger_agent_build.py --output-file pipeline_id.txt
+          DATADOG_AGENT_PIPELINE_URL=$DATADOG_AGENT_PIPELINE_URL RELEASE_BRANCH="$RELEASE_BRANCH" python -u /trigger_agent_build.py --output-file pipeline_id.txt
 
           # Get slack user
           if [[ $GITLAB_USER_LOGIN = "codesync" ]]; then EMAIL=$(git show -s --format="%ae" "$CI_COMMIT_SHA"); else EMAIL=$GITLAB_USER_EMAIL; fi
