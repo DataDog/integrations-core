@@ -131,7 +131,12 @@ tuf = 'https://github.com/theupdateframework/python-tuf'
 typing = 'https://github.com/python/typing'
 
 [overrides.validate.openmetrics]
-exclude = ["openmetrics"]
+exclude = [
+    "kube_apiserver_metrics",
+    "kube_controller_manager",
+    "kube_scheduler",
+    "openmetrics",
+]
 
 [overrides.validate.labeler]
 include = ["datadog_checks_tests_helper"]
