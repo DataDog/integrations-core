@@ -131,6 +131,10 @@ def replay_check_run(agent_collector, stub_aggregator, stub_agent):
                 if data.get('source_type_name') == 'JMX':
                     raw_metric_type = JMX_TO_INAPP_TYPES.get(raw_metric_type, raw_metric_type)
                 metric_type = stub_aggregator.METRIC_ENUM_MAP[raw_metric_type]
+
+                if not data['metric']:
+                    print(data)
+
                 stub_aggregator.submit_metric_e2e(
                     # device is only present when replaying e2e tests. In integration tests it will be a tag
                     check_name,
