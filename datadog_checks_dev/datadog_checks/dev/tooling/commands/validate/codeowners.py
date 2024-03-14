@@ -7,8 +7,11 @@ import click
 
 from ...utils import get_codeowners, get_codeowners_file, get_valid_integrations
 from ..console import CONTEXT_SETTINGS, abort, annotate_error, echo_failure, echo_success
+from ...codeowners import CodeOwners
 
 DIRECTORY_REGEX = re.compile(r"\/(.*)\/$")
+
+LOGS_TEAM = '@DataDog/logs-backend'
 
 # Integrations that are known to be tiles and have email-based codeowners
 IGNORE_TILES = {
@@ -29,6 +32,28 @@ IGNORE_TILES = {
     'sqreen',
     'squadcast',
 }
+
+
+def create_codeowners_resolver():
+    """Creates an object that resolves owners for files in a repo."""
+    owners_resolver = CodeOwners("\n".join(get_codeowners()))
+    return owners_resolver
+
+
+def validate_logs_assets_codeowners():
+    """Validate `CODEOWNERS` assigns logs as owner for all log assets."""
+
+    has_failed = False
+
+    owners_resolver = create_codeowners_resolver()
+    all_integrations = sorted(get_valid_integrations())
+    for integration in all_integrations:
+        logs_assets_owners = owners_resolver.of(f"/{integration}/assets/logs/")
+        if not (('TEAM', LOGS_TEAM) in logs_assets_owners):
+            echo_failure(f"/{integration}/assets/logs/ is not owned by {LOGS_TEAM}")
+            has_failed = True
+
+    return has_failed
 
 
 def create_codeowners_map():
@@ -57,6 +82,11 @@ def create_codeowners_map():
 @click.pass_context
 def codeowners(ctx):
     """Validate that every integration has an entry in the `CODEOWNERS` file."""
+
+    codeowner_map = create_codeowners_map()
+    owners_resolver = create_codeowners_resolver()
+    if not validate_logs_assets_codeowners():
+        echo_success("All integrations have valid logs codeowners.")
 
     has_failed = False
     is_core_check = ctx.obj['repo_choice'] == 'core'
