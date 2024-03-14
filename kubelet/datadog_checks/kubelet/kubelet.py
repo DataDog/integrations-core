@@ -536,7 +536,7 @@ class KubeletCheck(
 
             for status_field, spec_field in [
                 ('containerStatuses', 'containers'),
-                ('initContainerStatuses', 'initContainers')
+                ('initContainerStatuses', 'initContainers'),
             ]:
                 for ctr in pod.get('spec', {}).get(spec_field, []):
                     if not ctr.get('resources'):

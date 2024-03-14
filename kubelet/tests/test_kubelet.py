@@ -891,7 +891,8 @@ def test_report_container_state_metrics(monkeypatch, tagger):
         mock.call(
             'kubernetes.containers.restarts',
             0,
-            ['kube_container_name:init', 'kube_deployment:fluentd-gcp-v2.0.10', 'kube_namespace:default'] + instance_tags,
+            ['kube_container_name:init', 'kube_deployment:fluentd-gcp-v2.0.10', 'kube_namespace:default']
+            + instance_tags,
         ),
     ]
     check.gauge.assert_has_calls(calls, any_order=True)
@@ -1178,7 +1179,9 @@ def test_process_stats_summary_not_source_linux(monkeypatch, aggregator, tagger)
     aggregator.assert_metric('kubernetes.kubelet.memory.rss', 88477696.0, ['instance:tag'])
     # pending pod
     aggregator.assert_metric(
-        'kubernetes.ephemeral_storage.usage', 32768.0, ['instance:tag', 'pod_name:sidecar-second', 'kube_namespace:default']
+        'kubernetes.ephemeral_storage.usage',
+        32768.0,
+        ['instance:tag', 'pod_name:sidecar-second', 'kube_namespace:default'],
     )
 
 
