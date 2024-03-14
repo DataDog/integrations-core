@@ -1,5 +1,5 @@
 metric_name,metric_type,interval,unit_name,per_unit_name,description,orientation,integration,short_name,curated_metric
-winkmem.paged_pool_bytes,gauge,,,,,0,windows_kernel_memory,paged_pool_bytes,
+winkmem.nonpaged_allocs_outstanding,gauge,,,,,0,windows_kernel_memory,nonpaged_allocs,
 winkmem.nonpaged_pool_bytes,gauge,,,,,0,windows_kernel_memory,nonpaged_pool_bytes,
 winkmem.paged_allocs_outstanding,gauge,,,,,0,windows_kernel_memory,paged_allocs,
-winkmem.nonpaged_allocs_outstanding,gauge,,,,,0,windows_kernel_memory,nonpaged_allocs,
+winkmem.paged_pool_bytes,gauge,,,,,0,windows_kernel_memory,paged_pool_bytes,
