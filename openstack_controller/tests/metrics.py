@@ -4542,6 +4542,7 @@ IMAGES_METRICS_GLANCE = [
         'name': 'openstack.glance.image.count',
         'count': 1,
         'value': 1,
+        'hostname': '',
         'tags': [
             'container_format:bare',
             'image_name:cirros-1.5.2-x86_64-disk',

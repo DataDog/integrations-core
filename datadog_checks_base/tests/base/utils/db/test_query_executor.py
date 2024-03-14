@@ -215,3 +215,53 @@ class TestQueryExecutor:
 
         with pytest.raises(expected_exception):
             qe.compile_queries()
+
+    @pytest.mark.parametrize(
+        "metric_prefix",
+        [
+            pytest.param(None, id='no_prefix'),
+            pytest.param('custom_prefix', id='custom_prefix'),
+        ],
+    )
+    def test_query_with_metric_prefix(self, aggregator, metric_prefix):
+        queries = [
+            {
+                'metric_prefix': metric_prefix,
+                'name': 'query1',
+                'query': 'select 1',
+                'columns': [{'name': 'metric', 'type': 'gauge'}],
+            }
+        ]
+
+        check = AgentCheck('test', {}, [{}])
+        check.__NAMESPACE__ = 'test_check'
+        qe = QueryExecutor(mock_executor([[1]]), check, queries)
+        qe.compile_queries()
+        qe.execute()
+
+        metric_name = '{}.metric'.format(metric_prefix) if metric_prefix else 'test_check.metric'
+        aggregator.assert_metric(metric_name, 1, metric_type=aggregator.GAUGE)
+
+    @pytest.mark.parametrize(
+        "metric_prefix,expected_exception",
+        [
+            pytest.param(123, ValueError, id='invalid prefix not a string'),
+            pytest.param('', ValueError, id='empty prefix'),
+        ],
+    )
+    def test_query_with_metric_prefix_with_exception(self, metric_prefix, expected_exception):
+        queries = [
+            {
+                'metric_prefix': metric_prefix,
+                'name': 'query1',
+                'query': 'select 1',
+                'columns': [{'name': 'metric', 'type': 'gauge'}],
+            }
+        ]
+
+        check = AgentCheck('test', {}, [{}])
+        check.__NAMESPACE__ = 'test_check'
+        qe = QueryExecutor(mock_executor([[1]]), check, queries)
+
+        with pytest.raises(expected_exception):
+            qe.compile_queries()

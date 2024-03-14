@@ -26,6 +26,9 @@ class SQLServerConfig:
 
         self.proc: str = instance.get('stored_procedure')
         self.custom_metrics: list[dict] = init_config.get('custom_metrics', [])
+        self.include_index_usage_metrics_tempdb: bool = is_affirmative(
+            instance.get('include_index_usage_metrics_tempdb', False)
+        )
 
         # DBM
         self.dbm_enabled: bool = is_affirmative(instance.get('dbm', False))

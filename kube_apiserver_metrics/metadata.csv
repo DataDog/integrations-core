@@ -68,3 +68,5 @@ kube_apiserver.flowcontrol_request_concurrency_limit,gauge,,,,"Shared concurrenc
 kube_apiserver.flowcontrol_rejected_requests_total.count,count,,,,"Number of requests rejected by API Priority and Fairness subsystem",0,kubernetes_api_server_metrics, flowcontrol rejected requests total,
 kube_apiserver.flowcontrol_current_inqueue_requests,count,,,,"Number of requests currently pending in queues of the API Priority and Fairness subsystem",0,kubernetes_api_server_metrics, flowcontrol current inqueue requests,
 kube_apiserver.flowcontrol_dispatched_requests_total,count,,,,"Number of requests executed by API Priority and Fairness subsystem",0,kubernetes_api_server_metrics, flowcontrol dispatched requests total,
+kube_apiserver.slis.kubernetes_healthcheck,gauge,,,,"Result of a single kubernetes apiserver healthcheck (alpha; requires k8s v1.26+)",0,kubernetes_api_server_metrics,slis.kubernetes_healthcheck,
+kube_apiserver.slis.kubernetes_healthcheck_total,count,,,,"The monotonic count of all kubernetes apiserver healthchecks (alpha; requires k8s v1.26+)",0,kubernetes_api_server_metrics,slis.kubernetes_healthcheck_total,

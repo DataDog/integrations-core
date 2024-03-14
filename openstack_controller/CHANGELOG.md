@@ -2,7 +2,18 @@
 
 <!-- towncrier release notes start -->
 
-## 6.2.1 / 2024-01-10
+## 6.3.0 / 2024-02-16
+
+***Added***:
+
+* Bump `openstacksdk` version to 2.0.0 ([#16549](https://github.com/DataDog/integrations-core/pull/16549))
+* Update dependencies ([#16788](https://github.com/DataDog/integrations-core/pull/16788))
+
+***Fixed***:
+
+* Add support for pagination for servers details ([#16529](https://github.com/DataDog/integrations-core/pull/16529))
+
+## 6.2.1 / 2024-01-10 / Agent 7.51.0
 
 ***Fixed***:
 

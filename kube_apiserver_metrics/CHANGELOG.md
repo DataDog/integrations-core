@@ -2,7 +2,14 @@
 
 <!-- towncrier release notes start -->
 
-## 4.2.0 / 2024-01-05
+## 4.3.0 / 2024-02-16
+
+***Added***:
+
+* Add support for kube_apiserver SLI metrics ([#16657](https://github.com/DataDog/integrations-core/pull/16657))
+* Update the configuration file to include the new oauth options parameter ([#16835](https://github.com/DataDog/integrations-core/pull/16835))
+
+## 4.2.0 / 2024-01-05 / Agent 7.51.0
 
 ***Added***:
 

@@ -2,7 +2,13 @@
 
 <!-- towncrier release notes start -->
 
-## 2.1.0 / 2024-01-05
+## 2.2.0 / 2024-02-16
+
+***Added***:
+
+* Bump dependencies ([#16858](https://github.com/DataDog/integrations-core/pull/16858))
+
+## 2.1.0 / 2024-01-05 / Agent 7.51.0
 
 ***Added***:
 

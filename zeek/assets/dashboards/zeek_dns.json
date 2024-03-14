@@ -1085,7 +1085,7 @@
                                             ],
                                             "compute": {
                                                 "aggregation": "sum",
-                                                "metric": "@dns_bytes"
+                                                "metric": "@zeek.dns_bytes"
                                             },
                                             "group_by": [],
                                             "search": {
@@ -1202,7 +1202,7 @@
                                             ],
                                             "compute": {
                                                 "aggregation": "cardinality",
-                                                "metric": "@dns_bytes"
+                                                "metric": "@zeek.dns_bytes"
                                             },
                                             "group_by": [
                                                 {
@@ -1211,7 +1211,7 @@
                                                     "sort": {
                                                         "order": "desc",
                                                         "aggregation": "cardinality",
-                                                        "metric": "@dns_bytes"
+                                                        "metric": "@zeek.dns_bytes"
                                                     }
                                                 }
                                             ],
@@ -1272,7 +1272,7 @@
                                             "width": "auto"
                                         },
                                         {
-                                            "field": "dns_bytes",
+                                            "field": "zeek.dns_bytes",
                                             "width": "auto"
                                         },
                                         {

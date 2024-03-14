@@ -68,8 +68,8 @@ class SummaryScraperMixin(object):
         net_pod_metrics = {'rxBytes': 'kubernetes.network.rx_bytes', 'txBytes': 'kubernetes.network.tx_bytes'}
         for k, v in net_pod_metrics.items():
             # ensure we can filter out metrics per the configuration.
-            pod_level_match = any([fnmatch(v, p) for p in self.pod_level_metrics])
-            enabled_rate = any([fnmatch(v, p) for p in self.enabled_rates])
+            pod_level_match = any(fnmatch(v, p) for p in self.pod_level_metrics)
+            enabled_rate = any(fnmatch(v, p) for p in self.enabled_rates)
             if pod_level_match and enabled_rate:
                 net_bytes = pod.get('network', {}).get(k)
                 if net_bytes:

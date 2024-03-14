@@ -40,6 +40,7 @@ from datadog_checks.sqlserver.const import (
     AZURE_DEPLOYMENT_TYPE_TO_RESOURCE_TYPES,
     BASE_NAME_QUERY,
     COUNTER_TYPE_QUERY,
+    DATABASE_BACKUP_METRICS,
     DATABASE_FRAGMENTATION_METRICS,
     DATABASE_MASTER_FILES,
     DATABASE_METRICS,
@@ -76,7 +77,11 @@ from datadog_checks.sqlserver.queries import (
     get_query_ao_availability_groups,
     get_query_file_stats,
 )
-from datadog_checks.sqlserver.utils import is_azure_database, set_default_driver_conf
+from datadog_checks.sqlserver.utils import (
+    is_azure_database,
+    is_azure_sql_database,
+    set_default_driver_conf,
+)
 
 try:
     import adodbapi
@@ -454,6 +459,10 @@ class SQLServer(AgentCheck):
 
         # Load database statistics
         db_stats_to_collect = list(DATABASE_METRICS)
+        engine_edition = self.static_info_cache.get(STATIC_INFO_ENGINE_EDITION)
+        if not is_azure_sql_database(engine_edition):
+            db_stats_to_collect.extend(DATABASE_BACKUP_METRICS)
+
         for name, table, column in db_stats_to_collect:
             # include database as a filter option
             db_names = [d.name for d in self.databases] or [
@@ -518,7 +527,9 @@ class SQLServer(AgentCheck):
                     metrics_to_collect.append(self.typed_metric(cfg_inst=cfg, table=table, column=column))
 
         # Load DB File Space Usage metrics
-        if is_affirmative(self.instance.get('include_tempdb_file_space_usage_metrics', True)):
+        if is_affirmative(
+            self.instance.get('include_tempdb_file_space_usage_metrics', True)
+        ) and not is_azure_sql_database(engine_edition):
             for name, table, column in TEMPDB_FILE_SPACE_USAGE_METRICS:
                 cfg = {'name': name, 'table': table, 'column': column, 'instance_name': 'tempdb', 'tags': tags}
                 metrics_to_collect.append(self.typed_metric(cfg_inst=cfg, table=table, column=column))
@@ -866,9 +877,13 @@ class SQLServer(AgentCheck):
         if not self._index_usage_last_check_ts or now - self._index_usage_last_check_ts > interval:
             self._index_usage_last_check_ts = now
             self.log.debug('Collecting index usage statistics')
+            # Filter out tempdb as the query might be blocking and it's index usage information is not relevant
             db_names = [d.name for d in self.databases] or [
                 self.instance.get('database', self.connection.DEFAULT_DATABASE)
             ]
+            if not self._config.include_index_usage_metrics_tempdb:
+                db_names = [db_name for db_name in db_names if db_name != 'tempdb']
+
             with self.connection.get_managed_cursor() as cursor:
                 cursor.execute(
                     'select DB_NAME()'

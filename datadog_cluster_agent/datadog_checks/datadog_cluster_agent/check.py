@@ -48,6 +48,8 @@ DEFAULT_METRICS = {
     'go_threads': 'go.threads',
     'kubernetes_apiserver_emitted_events': 'kubernetes_apiserver.emitted_events',
     'kubernetes_apiserver_kube_events': 'kubernetes_apiserver.kube_events',
+    'language_detection_dca_handler_processed_requests': 'language_detection_dca_handler.processed_requests',
+    'language_detection_patcher_patches': 'language_detection_patcher.patches',
     'rate_limit_queries_limit': 'datadog.rate_limit_queries.limit',
     'rate_limit_queries_period': 'datadog.rate_limit_queries.period',
     'rate_limit_queries_remaining': 'datadog.rate_limit_queries.remaining',

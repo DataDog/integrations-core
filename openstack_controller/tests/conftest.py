@@ -513,7 +513,7 @@ def connection_network(request, mock_responses):
             for agent in mock_responses('GET', '/networking/v2.0/agents')['agents']
         ]
 
-    def networks(project_id):
+    def networks(project_id, limit=None):
         if http_error and 'networks' in http_error and project_id in http_error['networks']:
             raise requests.exceptions.HTTPError(response=http_error['networks'])
         return [
@@ -578,7 +578,7 @@ def connection_image(request, mock_responses):
     param = request.param if hasattr(request, 'param') and request.param is not None else {}
     http_error = param.get('http_error')
 
-    def images():
+    def images(limit=None):
         if http_error and 'images' in http_error:
             raise requests.exceptions.HTTPError(response=http_error['images'])
         return [

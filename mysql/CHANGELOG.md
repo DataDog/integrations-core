@@ -2,7 +2,17 @@
 
 <!-- towncrier release notes start -->
 
-## 12.0.0 / 2024-01-05
+## 12.1.0 / 2024-02-16
+
+***Added***:
+
+* [DBMON-3271] DBM integrations now defaulted to use new go-sqllexer pkg to obfuscate sql statements ([#16681](https://github.com/DataDog/integrations-core/pull/16681))
+
+***Fixed***:
+
+* [DBMON-3263] Check performance_schema, userstat and events_wait_current status on every check run. Fixes warning "Query Activity and Wait Event Collection not Enabled" on database restart. ([#16669](https://github.com/DataDog/integrations-core/pull/16669))
+
+## 12.0.0 / 2024-01-05 / Agent 7.51.0
 
 ***Changed***:
 

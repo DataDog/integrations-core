@@ -11,6 +11,7 @@ from contextlib import closing
 from copy import copy
 from datetime import datetime
 from os import environ
+from threading import Event
 
 import mock
 import pymysql
@@ -63,9 +64,11 @@ def dbm_instance(instance_complex):
             'SELECT id, {} FROM testdb.users FOR UPDATE'.format(
                 ", ".join("name as name{}".format(i) for i in range(254))
             ),
-            '63bd1fd025c7f7fb'
-            if MYSQL_VERSION_PARSED > parse_version('5.6') and environ.get('MYSQL_FLAVOR') != 'mariadb'
-            else '4a12d7afe06cf40',
+            (
+                '63bd1fd025c7f7fb'
+                if MYSQL_VERSION_PARSED > parse_version('5.6') and environ.get('MYSQL_FLAVOR') != 'mariadb'
+                else '4a12d7afe06cf40'
+            ),
             StatementTruncationState.truncated.value,
         ),
     ],
@@ -127,9 +130,7 @@ def test_activity_collection(aggregator, dbm_instance, dd_run_check, query, quer
         query[:1021] + '...'
         if len(query) > 1024
         and (MYSQL_VERSION_PARSED == parse_version('5.6') or environ.get('MYSQL_FLAVOR') == 'mariadb')
-        else query[:4093] + '...'
-        if len(query) > 4096
-        else query
+        else query[:4093] + '...' if len(query) > 4096 else query
     )
     assert blocked_row['sql_text'] == expected_sql_text
     assert blocked_row['processlist_state'], "missing state"
@@ -476,6 +477,92 @@ def _expected_dbm_job_err_tags(dbm_instance):
         'port:{}'.format(PORT),
         'dd.internal.resource:database_instance:stubbed.hostname',
     ]
+
+
+@pytest.mark.integration
+@pytest.mark.usefixtures('dd_environment')
+def test_if_deadlock_metric_is_collected(aggregator, dd_run_check, dbm_instance):
+    check = MySql(CHECK_NAME, {}, [dbm_instance])
+    dd_run_check(check)
+    deadlock_metric = aggregator.metrics("mysql.innodb.deadlocks")
+
+    assert len(deadlock_metric) == 1, "there should be one deadlock metric"
+
+
+@pytest.mark.skipif(
+    environ.get('MYSQL_FLAVOR') == 'mariadb' or MYSQL_VERSION_PARSED < parse_version('8.0'),
+    reason='Deadock count is not updated in MariaDB or older MySQL versions',
+)
+@pytest.mark.integration
+@pytest.mark.usefixtures('dd_environment')
+def test_deadlocks(aggregator, dd_run_check, dbm_instance):
+    check = MySql(CHECK_NAME, {}, [dbm_instance])
+    dd_run_check(check)
+    deadlocks_start = 0
+    deadlock_metric_start = aggregator.metrics("mysql.innodb.deadlocks")
+
+    assert len(deadlock_metric_start) == 1, "there should be one deadlock metric"
+
+    deadlocks_start = deadlock_metric_start[0].value
+
+    first_query = "SELECT * FROM testdb.users WHERE id = 1 FOR UPDATE;"
+    second_query = "SELECT * FROM testdb.users WHERE id = 2 FOR UPDATE;"
+
+    def run_first_deadlock_query(conn, event1, event2):
+        conn.begin()
+        try:
+            conn.cursor().execute("START TRANSACTION;")
+            conn.cursor().execute(first_query)
+            event1.set()
+            event2.wait()
+            conn.cursor().execute(second_query)
+            conn.cursor().execute("COMMIT;")
+        except Exception as e:
+            # Exception is expected due to a deadlock
+            print(e)
+            pass
+        conn.commit()
+
+    def run_second_deadlock_query(conn, event1, event2):
+        conn.begin()
+        try:
+            event1.wait()
+            conn.cursor().execute("START TRANSACTION;")
+            conn.cursor().execute(second_query)
+            event2.set()
+            conn.cursor().execute(first_query)
+            conn.cursor().execute("COMMIT;")
+        except Exception as e:
+            # Exception is expected due to a deadlock
+            print(e)
+            pass
+        conn.commit()
+
+    bob_conn = _get_conn_for_user('bob')
+    fred_conn = _get_conn_for_user('fred')
+
+    executor = concurrent.futures.thread.ThreadPoolExecutor(2)
+
+    event1 = Event()
+    event2 = Event()
+
+    futures_first_query = executor.submit(run_first_deadlock_query, bob_conn, event1, event2)
+    futures_second_query = executor.submit(run_second_deadlock_query, fred_conn, event1, event2)
+    futures_first_query.result()
+    futures_second_query.result()
+    # Make sure innodb is updated.
+    time.sleep(0.3)
+    bob_conn.close()
+    fred_conn.close()
+    executor.shutdown()
+
+    dd_run_check(check)
+
+    deadlock_metric_end = aggregator.metrics("mysql.innodb.deadlocks")
+
+    assert (
+        len(deadlock_metric_end) == 2 and deadlock_metric_end[1].value - deadlocks_start == 1
+    ), "there should be one new deadlock"
 
 
 def _get_conn_for_user(user, _autocommit=False):

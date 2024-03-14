@@ -12,6 +12,7 @@ mysql.innodb.buffer_pool_utilization,gauge,,fraction,,The utilization of the Inn
 mysql.innodb.current_row_locks,gauge,,lock,,The number of current row locks.,-1,mysql,current row locks,
 mysql.innodb.data_reads,gauge,,read,second,The rate of data reads.,0,mysql,data reads,
 mysql.innodb.data_writes,gauge,,write,second,The rate of data writes.,0,mysql,data writes,
+mysql.innodb.deadlocks,count,,lock,,"The number of deadlocks.",0,mysql,number of deadlocks,
 mysql.innodb.mutex_os_waits,gauge,,event,second,The rate of mutex OS waits.,0,mysql,mutex os waits,
 mysql.innodb.mutex_spin_rounds,gauge,,event,second,The rate of mutex spin rounds.,0,mysql,mutex spin rounds,
 mysql.innodb.mutex_spin_waits,gauge,,event,second,The rate of mutex spin waits.,0,mysql,mutex spin waits,

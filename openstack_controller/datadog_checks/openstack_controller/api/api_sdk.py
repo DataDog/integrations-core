@@ -200,7 +200,10 @@ class ApiSdk(Api):
 
     def get_network_networks(self, project_id):
         return [
-            network.to_dict(original_names=True) for network in self.connection.network.networks(project_id=project_id)
+            network.to_dict(original_names=True)
+            for network in self.call_paginated_api(
+                self.connection.network.networks, project_id=project_id, limit=self.config.paginated_limit
+            )
         ]
 
     def get_network_quota(self, project_id):
@@ -278,4 +281,7 @@ class ApiSdk(Api):
         return response.json().get('amphora_stats', [])
 
     def get_glance_images(self):
-        return [image.to_dict(original_names=True) for image in self.connection.image.images()]
+        return [
+            image.to_dict(original_names=True)
+            for image in self.call_paginated_api(self.connection.image.images, limit=self.config.paginated_limit)
+        ]

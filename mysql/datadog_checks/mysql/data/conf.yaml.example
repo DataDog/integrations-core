@@ -71,8 +71,15 @@ instances:
 
     ## @param connect_timeout - number - optional - default: 10
     ## Maximum number of seconds to wait before timing out when connecting to MySQL.
+    ## The default connection timeout is 10 seconds.
     #
     # connect_timeout: 10
+
+    ## @param read_timeout - number - optional - default: 10
+    ## The timeout for reading from the connection in seconds.
+    ## The default read timeout is 10 seconds.
+    #
+    # read_timeout: 10
 
     ## @param ssl - mapping - optional
     ## Use this section to configure a TLS connection between the Agent and MySQL.
@@ -148,6 +155,13 @@ instances:
     ##              Columns without a name are ignored. To skip a column, enter:
     ##                - {}
     ## 3. tags (optional) - A list of tags to apply to each metric.
+    ## 4. collection_interval (optional) - The frequency at which to collect the metrics.
+    ##     If collection_interval is not set, the query will be run every check run.
+    ##     If the collection interval is less than check collection interval, 
+    ##     the query will be run every check run.
+    ##     If the collection interval is greater than check collection interval, 
+    ##     the query will NOT BE RUN exactly at the collection interval.
+    ##     The query will be run at the next check run after the collection interval has passed.
     #
     # custom_queries:
     #   - query: SELECT foo, COUNT(*) FROM table.events GROUP BY foo

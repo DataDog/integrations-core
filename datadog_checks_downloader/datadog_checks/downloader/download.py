@@ -320,7 +320,7 @@ class TUFDownloader:
     def __get_versions(self, standard_distribution_name):
         index_relpath = 'simple/{}/index.html'.format(standard_distribution_name)
         # https://www.python.org/dev/peps/pep-0491/#escaping-and-unicode
-        wheel_distribution_name = re.sub('[^\\w\\d.]+', '_', standard_distribution_name, re.UNICODE)
+        wheel_distribution_name = re.sub('[^\\w\\d.]+', '_', standard_distribution_name, re.UNICODE)  # noqa: B034
         pattern = "<a href='(" + wheel_distribution_name + "-(.*?)-(.*?)-none-any\\.whl)'>(.*?)</a><br />"
         # version: {python_tag: href}
         wheels = collections.defaultdict(dict)

@@ -1,0 +1,1 @@
+[DBMON-3686] Exclude events_statements_cpu when checking enabled events_statements consumers

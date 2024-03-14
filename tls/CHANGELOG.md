@@ -2,7 +2,14 @@
 
 <!-- towncrier release notes start -->
 
-## 2.14.0 / 2024-01-05
+## 2.15.0 / 2024-02-16
+
+***Added***:
+
+* Bump `service-identity` version to 23.1.0 ([#16558](https://github.com/DataDog/integrations-core/pull/16558))
+* Update dependencies ([#16788](https://github.com/DataDog/integrations-core/pull/16788))
+
+## 2.14.0 / 2024-01-05 / Agent 7.51.0
 
 ***Added***:
 

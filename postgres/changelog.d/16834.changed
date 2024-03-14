@@ -1,1 +1,0 @@
-postgres schemas: don't exclude tables without metrics from schema collection

@@ -2,6 +2,19 @@
 
 <!-- towncrier release notes start -->
 
+## 36.1.0 / 2024-02-16
+
+***Added***:
+
+* Support customizable collection interval per query in query executor ([#16765](https://github.com/DataDog/integrations-core/pull/16765))
+* Update dependencies ([#16788](https://github.com/DataDog/integrations-core/pull/16788))
+* Add custom auth params for OAuth2 authentication ([#16812](https://github.com/DataDog/integrations-core/pull/16812))
+* Bump dependencies ([#16858](https://github.com/DataDog/integrations-core/pull/16858))
+
+***Fixed***:
+
+* [DBM] Minimize temporary objects  when merge duplicate statement metrics ([#16796](https://github.com/DataDog/integrations-core/pull/16796))
+
 ## 36.0.0 / 2024-01-30
 
 ***Removed***:
@@ -21,6 +34,12 @@
 ***Fixed***:
 
 * Remove unused dependencies in the Agent file ([#16538](https://github.com/DataDog/integrations-core/pull/16538))
+* [DBMON-3495] Add `replace_null_character` option to replace embedded null characters with empty string in query text ([#16742](https://github.com/DataDog/integrations-core/pull/16742))
+
+## 35.0.1 / 2024-02-07 / Agent 7.51.0
+
+***Fixed***:
+
 * [DBMON-3495] Add `replace_null_character` option to replace embedded null characters with empty string in query text ([#16742](https://github.com/DataDog/integrations-core/pull/16742))
 
 ## 35.0.0 / 2024-01-05

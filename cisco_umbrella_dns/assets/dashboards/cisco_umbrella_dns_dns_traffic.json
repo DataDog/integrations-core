@@ -57,7 +57,7 @@
                                             },
                                             "group_by": [],
                                             "search": {
-                                                "query": "source:cisco_umbrella_dns service:dns $Verdict $Identity $Identity_Type $Domain $Categories"
+                                                "query": "source:cisco-umbrella-dns service:dns $Verdict $Identity $Identity_Type $Domain $Categories"
                                             },
                                             "storage": "hot"
                                         }
@@ -109,7 +109,7 @@
                                             },
                                             "group_by": [],
                                             "search": {
-                                                "query": "source:cisco_umbrella_dns service:dns @verdict:blocked $Verdict $Identity $Identity_Type $Domain $Categories"
+                                                "query": "source:cisco-umbrella-dns service:dns @verdict:blocked $Verdict $Identity $Identity_Type $Domain $Categories"
                                             },
                                             "storage": "hot"
                                         }
@@ -160,7 +160,7 @@
                                             },
                                             "group_by": [],
                                             "search": {
-                                                "query": "source:cisco_umbrella_dns service:dns @verdict:allowed $Verdict $Identity $Identity_Type $Domain $Categories"
+                                                "query": "source:cisco-umbrella-dns service:dns @verdict:allowed $Verdict $Identity $Identity_Type $Domain $Categories"
                                             },
                                             "storage": "hot"
                                         }
@@ -211,7 +211,7 @@
                                             },
                                             "group_by": [],
                                             "search": {
-                                                "query": "source:cisco_umbrella_dns service:dns @verdict:proxied $Verdict $Identity $Identity_Type $Domain $Categories"
+                                                "query": "source:cisco-umbrella-dns service:dns @verdict:proxied $Verdict $Identity $Identity_Type $Domain $Categories"
                                             },
                                             "storage": "hot"
                                         }
@@ -298,7 +298,7 @@
                                                 }
                                             ],
                                             "search": {
-                                                "query": "source:cisco_umbrella_dns service:dns $Verdict $Identity $Identity_Type $Domain $Categories"
+                                                "query": "source:cisco-umbrella-dns service:dns $Verdict $Identity $Identity_Type $Domain $Categories"
                                             },
                                             "storage": "hot"
                                         }
@@ -359,7 +359,7 @@
                                                 }
                                             ],
                                             "search": {
-                                                "query": "source:cisco_umbrella_dns service:dns $Verdict $Identity $Identity_Type $Domain $Categories"
+                                                "query": "source:cisco-umbrella-dns service:dns $Verdict $Identity $Identity_Type $Domain $Categories"
                                             },
                                             "storage": "hot"
                                         }
@@ -421,7 +421,7 @@
                                                 }
                                             ],
                                             "search": {
-                                                "query": "source:cisco_umbrella_dns service:dns $Verdict $Identity $Identity_Type $Domain $Categories"
+                                                "query": "source:cisco-umbrella-dns service:dns $Verdict $Identity $Identity_Type $Domain $Categories"
                                             },
                                             "storage": "hot"
                                         }
@@ -483,7 +483,7 @@
                                                 }
                                             ],
                                             "search": {
-                                                "query": "source:cisco_umbrella_dns service:dns $Verdict $Identity $Identity_Type $Domain $Categories"
+                                                "query": "source:cisco-umbrella-dns service:dns $Verdict $Identity $Identity_Type $Domain $Categories"
                                             },
                                             "storage": "hot"
                                         }
@@ -545,7 +545,7 @@
                                                 }
                                             ],
                                             "search": {
-                                                "query": "source:cisco_umbrella_dns service:dns $Verdict $Identity $Identity_Type $Domain $Categories"
+                                                "query": "source:cisco-umbrella-dns service:dns $Verdict $Identity $Identity_Type $Domain $Categories"
                                             },
                                             "storage": "hot"
                                         }
@@ -607,7 +607,7 @@
                                                 }
                                             ],
                                             "search": {
-                                                "query": "source:cisco_umbrella_dns service:dns $Verdict $Identity $Identity_Type $Domain $Categories"
+                                                "query": "source:cisco-umbrella-dns service:dns $Verdict $Identity $Identity_Type $Domain $Categories"
                                             },
                                             "storage": "hot"
                                         }
@@ -669,7 +669,7 @@
                                                 }
                                             ],
                                             "search": {
-                                                "query": "source:cisco_umbrella_dns service:dns @verdict:allowed $Verdict $Identity $Identity_Type $Domain $Categories"
+                                                "query": "source:cisco-umbrella-dns service:dns @verdict:allowed $Verdict $Identity $Identity_Type $Domain $Categories"
                                             },
                                             "storage": "hot"
                                         }
@@ -731,7 +731,7 @@
                                                 }
                                             ],
                                             "search": {
-                                                "query": "source:cisco_umbrella_dns service:dns @verdict:blocked $Verdict $Identity $Identity_Type $Domain $Categories"
+                                                "query": "source:cisco-umbrella-dns service:dns @verdict:blocked $Verdict $Identity $Identity_Type $Domain $Categories"
                                             },
                                             "storage": "hot"
                                         }
@@ -793,7 +793,7 @@
                                                 }
                                             ],
                                             "search": {
-                                                "query": "source:cisco_umbrella_dns service:dns @verdict:proxied $Verdict $Identity $Identity_Type $Domain $Categories"
+                                                "query": "source:cisco-umbrella-dns service:dns @verdict:proxied $Verdict $Identity $Identity_Type $Domain $Categories"
                                             },
                                             "storage": "hot"
                                         }
@@ -874,7 +874,7 @@
                                                 }
                                             ],
                                             "search": {
-                                                "query": "source:cisco_umbrella_dns service:dns $Verdict $Identity $Identity_Type $Domain $Categories"
+                                                "query": "source:cisco-umbrella-dns service:dns $Verdict $Identity $Identity_Type $Domain $Categories"
                                             },
                                             "storage": "hot"
                                         }
@@ -937,7 +937,7 @@
                                                 }
                                             ],
                                             "search": {
-                                                "query": "source:cisco_umbrella_dns service:dns $Verdict $Identity $Identity_Type $Domain $Categories"
+                                                "query": "source:cisco-umbrella-dns service:dns $Verdict $Identity $Identity_Type $Domain $Categories"
                                             },
                                             "storage": "hot"
                                         }
@@ -998,7 +998,7 @@
                                                 }
                                             ],
                                             "search": {
-                                                "query": "source:cisco_umbrella_dns service:dns @verdict:blocked $Verdict $Identity $Identity_Type $Domain $Categories"
+                                                "query": "source:cisco-umbrella-dns service:dns @verdict:blocked $Verdict $Identity $Identity_Type $Domain $Categories"
                                             },
                                             "storage": "hot"
                                         }
@@ -1067,7 +1067,7 @@
                                                 }
                                             ],
                                             "search": {
-                                                "query": "source:cisco_umbrella_dns service:dns $Verdict $Identity $Identity_Type $Domain $Categories"
+                                                "query": "source:cisco-umbrella-dns service:dns $Verdict $Identity $Identity_Type $Domain $Categories"
                                             },
                                             "storage": "hot"
                                         }
@@ -1119,7 +1119,7 @@
                                     "response_format": "event_list",
                                     "query": {
                                         "data_source": "logs_stream",
-                                        "query_string": "source:cisco_umbrella_dns service:dns $Verdict $Identity $Identity_Type $Domain $Categories",
+                                        "query_string": "source:cisco-umbrella-dns service:dns $Verdict $Identity $Identity_Type $Domain $Categories",
                                         "indexes": [],
                                         "storage": "hot"
                                     },

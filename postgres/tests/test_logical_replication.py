@@ -7,10 +7,6 @@ from flaky import flaky
 from datadog_checks.postgres.util import STAT_SUBSCRIPTION_METRICS
 
 from .common import (
-    DB_NAME,
-    HOST,
-    PASSWORD_ADMIN,
-    USER_ADMIN,
     _get_expected_tags,
     _iterate_metric_name,
     assert_metric_at_least,
@@ -34,12 +30,6 @@ from .common import (
 from .utils import requires_over_10, requires_over_11, requires_over_14, requires_over_15
 
 pytestmark = [pytest.mark.integration, pytest.mark.usefixtures('dd_environment')]
-
-
-def _get_connection_string(instance):
-    return 'port={} host={} user={} password={} dbname={}'.format(
-        instance['port'], HOST, USER_ADMIN, PASSWORD_ADMIN, DB_NAME
-    )
 
 
 @requires_over_11
@@ -90,11 +80,7 @@ def test_subscription_stats_apply_errors(aggregator, integration_check, pg_repli
     #  16649 | subscription_persons  |                17 |                0 |
     #  16650 | subscription_cities   |                 0 |               16 |
     #  16651 | subscription_persons2 |                 0 |                0 |
-    expected_subscription_tags = pg_replica_logical['tags'] + [
-        'subscription_name:subscription_persons',
-        'port:{}'.format(pg_replica_logical['port']),
-        'dd.internal.resource:database_instance:{}'.format(check.resolved_hostname),
-    ]
+    expected_subscription_tags = _get_expected_tags(check, pg_replica_logical, subscription_name='subscription_persons')
     assert_metric_at_least(
         aggregator,
         'postgresql.subscription.apply_error',
@@ -114,12 +100,9 @@ def test_subscription_stats_sync_errors(aggregator, integration_check, pg_replic
     #  16649 | subscription_persons  |                17 |                0 |
     #  16650 | subscription_cities   |                 0 |               16 |
     #  16651 | subscription_persons2 |                 0 |                0 |
-    expected_subscription_tags = pg_replica_logical['tags'] + [
-        'subscription_name:subscription_cities',
-        'port:{}'.format(pg_replica_logical['port']),
-        'dd.internal.resource:database_instance:{}'.format(check.resolved_hostname),
-    ]
+
     check.check(pg_replica_logical)
+    expected_subscription_tags = _get_expected_tags(check, pg_replica_logical, subscription_name='subscription_cities')
     assert_metric_at_least(
         aggregator,
         'postgresql.subscription.sync_error',
@@ -139,11 +122,8 @@ def test_stat_subscription(aggregator, integration_check, pg_replica_logical):
     #  16649 | subscription_persons  |     |       |              |                               |...
     #  16650 | subscription_cities   | 276 |       | 0/220954B0   | 2023-11-10 15:24:05.354626+00 |...
     #  16651 | subscription_persons2 |     |       |              |                               |...
-    expected_subscription_tags = pg_replica_logical['tags'] + [
-        'subscription_name:subscription_cities',
-        'port:{}'.format(pg_replica_logical['port']),
-        f'dd.internal.resource:database_instance:{check.resolved_hostname}',
-    ]
+    expected_subscription_tags = _get_expected_tags(check, pg_replica_logical, subscription_name='subscription_cities')
+
     # All age metrics should be reported
     for metric in _iterate_metric_name(STAT_SUBSCRIPTION_METRICS):
         assert_metric_at_least(
@@ -165,10 +145,7 @@ def test_subscription_state(aggregator, integration_check, pg_replica_logical):
     #  subscription_persons  | persons_indexed | ready
     #  subscription_persons2 | persons_indexed | initialize
     #  subscription_cities   | cities          | data_copied
-    base_tags = pg_replica_logical['tags'] + [
-        'port:{}'.format(pg_replica_logical['port']),
-        f'dd.internal.resource:database_instance:{check.resolved_hostname}',
-    ]
+    base_tags = _get_expected_tags(check, pg_replica_logical)
     expected_states = [
         ['subscription_name:subscription_persons', 'relation:persons_indexed', 'state:ready'],
         ['subscription_name:subscription_persons2', 'relation:persons_indexed', 'state:initialize'],

@@ -98,9 +98,9 @@ class Compute(Component):
                     prefix=NOVA_SERVICES_METRICS_PREFIX,
                     metrics=NOVA_SERVICES_METRICS,
                     lambda_name=lambda key: 'up' if key == 'state' else key,
-                    lambda_value=lambda key, value, item=item: (item['state'] == 'up' and item['status'] == 'enabled')
-                    if key == 'state'
-                    else value,
+                    lambda_value=lambda key, value, item=item: (
+                        (item['state'] == 'up' and item['status'] == 'enabled') if key == 'state' else value
+                    ),
                 )
                 self.check.log.debug("service: %s", service)
                 self.check.gauge(NOVA_SERVICES_COUNT, 1, tags=tags + service['tags'])
@@ -161,9 +161,9 @@ class Compute(Component):
                     prefix=NOVA_HYPERVISOR_METRICS_PREFIX,
                     metrics=NOVA_HYPERVISOR_METRICS,
                     lambda_name=lambda key: 'up' if key == 'state' else key,
-                    lambda_value=lambda key, value, item=item: (item['state'] == 'up' and item['status'] == 'enabled')
-                    if key == 'state'
-                    else value,
+                    lambda_value=lambda key, value, item=item: (
+                        (item['state'] == 'up' and item['status'] == 'enabled') if key == 'state' else value
+                    ),
                 )
                 self.check.log.debug("hypervisor: %s", hypervisor)
                 hypervisor_hostname = item['hypervisor_hostname']
@@ -272,14 +272,14 @@ class Compute(Component):
                     tags=NOVA_SERVER_TAGS,
                     prefix=NOVA_SERVER_METRICS_PREFIX,
                     metrics=NOVA_SERVER_METRICS,
-                    lambda_name=lambda key, item=item: 'active'
-                    if key == 'status' and item['status'] == 'ACTIVE'
-                    else 'error'
-                    if key == 'status' and item['status'] == 'ERROR'
-                    else key,
-                    lambda_value=lambda key, value, item=item: 1
-                    if key == 'status' and (item['status'] == 'ACTIVE' or item['status'] == 'ERROR')
-                    else value,
+                    lambda_name=lambda key, item=item: (
+                        'active'
+                        if key == 'status' and item['status'] == 'ACTIVE'
+                        else 'error' if key == 'status' and item['status'] == 'ERROR' else key
+                    ),
+                    lambda_value=lambda key, value, item=item: (
+                        1 if key == 'status' and (item['status'] == 'ACTIVE' or item['status'] == 'ERROR') else value
+                    ),
                 )
                 self.check.log.debug("server: %s", server)
                 self.check.gauge(NOVA_SERVER_COUNT, 1, tags=tags + server['tags'], hostname=item['id'])

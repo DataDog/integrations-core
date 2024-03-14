@@ -74,10 +74,10 @@ class BareMetal(Component):
                 metrics=IRONIC_NODE_METRICS,
                 lambda_name=lambda key: 'up' if key == 'power_state' else key,
                 lambda_value=lambda key, value, item=item: (
-                    item.get('power_state') == 'power on' and item.get('maintenance') is False
-                )
-                if key == 'power_state'
-                else value,
+                    (item.get('power_state') == 'power on' and item.get('maintenance') is False)
+                    if key == 'power_state'
+                    else value
+                ),
             )
             self.check.log.debug("node: %s", node)
             self.check.gauge(IRONIC_NODE_COUNT, 1, tags=tags + node['tags'], hostname=item['uuid'])

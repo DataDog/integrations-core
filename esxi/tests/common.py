@@ -199,6 +199,7 @@ PROPERTIES_EX = vim.PropertyCollector.RetrieveResult(
     ]
 )
 
+
 VCSIM_HOST_METRICS = [
     'cpu.coreUtilization.avg',
     'cpu.costop.sum',

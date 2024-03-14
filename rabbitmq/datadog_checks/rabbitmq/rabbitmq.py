@@ -33,7 +33,6 @@ from .const import (
 
 
 class RabbitMQManagement(AgentCheck):
-
     """This check is for gathering statistics from the RabbitMQ
     Management Plugin (http://www.rabbitmq.com/management.html)
     """

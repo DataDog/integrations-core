@@ -1477,7 +1477,7 @@ def mock_request():
 
 def test_detect_probes(monkeypatch, mock_request):
     mock_request.head('http://kubelet:10250/metrics/probes', status_code=200)
-    instance = dict({'prometheus_url': 'http://kubelet:10250', 'namespace': 'kubernetes'})
+    instance = {'prometheus_url': 'http://kubelet:10250', 'namespace': 'kubernetes'}
     check = mock_kubelet_check(monkeypatch, [instance])
     scraper_config = check.get_scraper_config(instance)
     http_handler = check.get_http_handler(scraper_config)
@@ -1489,7 +1489,7 @@ def test_detect_probes(monkeypatch, mock_request):
 
 def test_detect_probes_cached(monkeypatch, mock_request):
     mock_request.head('http://kubelet:10250/metrics/probes', status_code=200)
-    instance = dict({'prometheus_url': 'http://kubelet:10250', 'namespace': 'kubernetes'})
+    instance = {'prometheus_url': 'http://kubelet:10250', 'namespace': 'kubernetes'}
     check = mock_kubelet_check(monkeypatch, [instance])
     scraper_config = check.get_scraper_config(instance)
     http_handler = check.get_http_handler(scraper_config)
@@ -1505,7 +1505,7 @@ def test_detect_probes_cached(monkeypatch, mock_request):
 
 def test_detect_probes_404(monkeypatch, mock_request):
     mock_request.head('http://kubelet:10250/metrics/probes', status_code=404)
-    instance = dict({'prometheus_url': 'http://kubelet:10250', 'namespace': 'kubernetes'})
+    instance = {'prometheus_url': 'http://kubelet:10250', 'namespace': 'kubernetes'}
     check = mock_kubelet_check(monkeypatch, [instance])
     scraper_config = check.get_scraper_config(instance)
     http_handler = check.get_http_handler(scraper_config)
@@ -1517,7 +1517,7 @@ def test_detect_probes_404(monkeypatch, mock_request):
 
 def test_detect_probes_404_cached(monkeypatch, mock_request):
     mock_request.head('http://kubelet:10250/metrics/probes', status_code=404)
-    instance = dict({'prometheus_url': 'http://kubelet:10250', 'namespace': 'kubernetes'})
+    instance = {'prometheus_url': 'http://kubelet:10250', 'namespace': 'kubernetes'}
     check = mock_kubelet_check(monkeypatch, [instance])
     scraper_config = check.get_scraper_config(instance)
     http_handler = check.get_http_handler(scraper_config)
@@ -1533,7 +1533,7 @@ def test_detect_probes_404_cached(monkeypatch, mock_request):
 
 def test_detect_probes_req_exception(monkeypatch, mock_request):
     mock_request.head('http://kubelet:10250/metrics/probes', exc=requests.exceptions.ConnectTimeout)
-    instance = dict({'prometheus_url': 'http://kubelet:10250', 'namespace': 'kubernetes'})
+    instance = {'prometheus_url': 'http://kubelet:10250', 'namespace': 'kubernetes'}
     check = mock_kubelet_check(monkeypatch, [instance])
     scraper_config = check.get_scraper_config(instance)
     http_handler = check.get_http_handler(scraper_config)

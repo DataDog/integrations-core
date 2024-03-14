@@ -25,7 +25,6 @@
     "homepage": "https://www.datadoghq.com",
     "sales_email": "info@datadoghq.com"
   },
-  "oauth": {},
   "assets": {
     "integration": {
       "source_type_name": "Airflow",
@@ -51,6 +50,13 @@
     },
     "dashboards": {
       "Airflow Overview": "assets/dashboards/overview.json"
+    },
+    "saved_views": {
+      "airflow_overview": "assets/saved_views/airflow_overview.json"
+    },
+    "monitors": {
+      "Heartbeat Failure": "assets/monitors/heartbeat_failures.json",
+      "Ongoing Duration": "assets/monitors/ongoing_duration.json"
     },
     "logs": {
       "source": "airflow"

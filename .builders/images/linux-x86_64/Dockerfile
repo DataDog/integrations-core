@@ -23,10 +23,9 @@ RUN yum install -y openssl-devel && \
  SHA256="da3080e3b488f648a3d7a4560ddee895284c3380b11d6de75edb986526b9a814" \
  RELATIVE_PATH=Python-{{version}} \
  bash install-from-source.sh \
- --prefix=/opt/python/${PYTHON2_VERSION} --with-ensurepip=yes --enable-shared --enable-ipv6 --enable-unicode=ucs4 \
+ --prefix=/opt/python/${PYTHON2_VERSION} --with-ensurepip=yes --enable-ipv6 --enable-unicode=ucs4 \
  && yum remove -y openssl-devel
 
-ENV LD_LIBRARY_PATH="/opt/python/${PYTHON2_VERSION}/lib:${LD_LIBRARY_PATH}"
 # Set up virtual environment for Python 2
 RUN /opt/python/${PYTHON2_VERSION}/bin/python -m pip install --no-warn-script-location virtualenv \
  && /opt/python/${PYTHON2_VERSION}/bin/python -m virtualenv /py2
@@ -52,9 +51,8 @@ RUN yum install -y libffi-devel && \
  VERSION="${PYTHON3_VERSION}" \
  SHA256="a12a0a013a30b846c786c010f2c19dd36b7298d888f7c4bd1581d90ce18b5e58" \
  RELATIVE_PATH="Python-{{version}}" \
- bash install-from-source.sh --prefix=/opt/python/${PYTHON_VERSION} --with-ensurepip=yes --enable-shared --enable-ipv6 --with-dbmliborder=
+ bash install-from-source.sh --prefix=/opt/python/${PYTHON_VERSION} --with-ensurepip=yes --enable-ipv6 --with-dbmliborder=
 ENV PATH="/opt/python/${PYTHON_VERSION}/bin:${PATH}"
-ENV LD_LIBRARY_PATH="/opt/python/${PYTHON_VERSION}/lib:${LD_LIBRARY_PATH}"
 # Set up virtual environment for Python 3
 RUN /opt/python/${PYTHON_VERSION}/bin/python3 -m pip install --no-warn-script-location --upgrade pip \
  && /opt/python/${PYTHON_VERSION}/bin/python3 -m pip install --no-warn-script-location virtualenv \
@@ -199,5 +197,7 @@ RUN python3 -m pip install --no-warn-script-location -r /runner_dependencies.txt
 
 COPY build_script.sh /build_script.sh
 ENV DD_BUILD_COMMAND="bash /build_script.sh"
+
+ENV MANYLINUX_POLICY="manylinux2010_x86_64"
 
 ENTRYPOINT ["python3", "/home/scripts/build_wheels.py"]

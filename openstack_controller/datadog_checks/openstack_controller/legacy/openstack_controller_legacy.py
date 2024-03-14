@@ -146,7 +146,7 @@ class OpenStackControllerLegacyCheck(AgentCheck):
             filtered_networks = [
                 network
                 for network in networks
-                if not any([re.match(exclude_id, network.get('id')) for exclude_id in exclude_network_id_rules])
+                if not any(re.match(exclude_id, network.get('id')) for exclude_id in exclude_network_id_rules)
             ]
         else:
             for network in networks:
@@ -380,7 +380,7 @@ class OpenStackControllerLegacyCheck(AgentCheck):
         # Filter out excluded servers
         servers = {}
         for updated_server_id, updated_server in iteritems(updated_servers):
-            if not any([re.match(rule, updated_server_id) for rule in exclude_server_id_rules]):
+            if not any(re.match(rule, updated_server_id) for rule in exclude_server_id_rules):
                 servers[updated_server_id] = updated_server
 
         # Initialize or update cache for this instance

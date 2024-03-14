@@ -83,6 +83,10 @@ class DBExplainError(Enum):
     no_plan_returned_with_prepared_statement = 'no_plan_returned_with_prepared_statement'
 
 
+class DatabaseHealthCheckError(Exception):
+    pass
+
+
 def warning_with_tags(warning_message, *args, **kwargs):
     if args:
         warning_message = warning_message % args

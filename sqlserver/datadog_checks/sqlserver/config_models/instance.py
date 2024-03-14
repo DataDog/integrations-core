@@ -51,6 +51,7 @@ class CustomQuery(BaseModel):
         arbitrary_types_allowed=True,
         frozen=True,
     )
+    collection_interval: Optional[int] = None
     columns: Optional[tuple[MappingProxyType[str, Any], ...]] = None
     query: Optional[str] = None
     tags: Optional[tuple[str, ...]] = None
@@ -173,6 +174,7 @@ class InstanceConfig(BaseModel):
     include_db_fragmentation_metrics: Optional[bool] = None
     include_fci_metrics: Optional[bool] = None
     include_index_usage_metrics: Optional[bool] = None
+    include_index_usage_metrics_tempdb: Optional[bool] = None
     include_instance_metrics: Optional[bool] = None
     include_master_files_metrics: Optional[bool] = None
     include_primary_log_shipping_metrics: Optional[bool] = None

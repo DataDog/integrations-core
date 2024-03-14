@@ -510,9 +510,11 @@ class ProcessCheck(AgentCheck):
             "process.up",
             status,
             tags=service_check_tags,
-            message="PROCS {}: {} processes found for {}".format(status_str[status], nb_procs, name)
-            if status is not AgentCheck.OK
-            else None,
+            message=(
+                "PROCS {}: {} processes found for {}".format(status_str[status], nb_procs, name)
+                if status is not AgentCheck.OK
+                else None
+            ),
         )
 
     def _filter_by_user(self, user, pids):
