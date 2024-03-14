@@ -11,7 +11,16 @@
 			"version": "3.11"
 		}
 	},
+	"customizations": {
+		"vscode": {
+			"extensions": [
+				"ms-python.python",
+				"ms-azuretools.vscode-docker",
+				"GitHub.copilot"
+			]
+		}
+	},
 	"postCreateCommand": "ddev config set repos.core /workspaces/integrations-core && ddev config set repo core",
-	"postStartCommand": "nohup bash -c 'dockerd --storage-driver=vfs &'",
+	"postStartCommand": "/usr/local/bin/start_dockerd.sh",
 	"remoteUser": "root"
 }
