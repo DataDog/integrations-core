@@ -1,0 +1,2 @@
+Improve service check of autodiscovered databases for in sqlserver integration. The fix prevents agent from creating a connection per database.
+The fix is not applied for Azure hosted databases due to the restriction applied to a dabase connection. 
