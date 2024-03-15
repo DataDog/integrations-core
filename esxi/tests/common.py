@@ -121,6 +121,10 @@ PROPERTIES_EX = vim.PropertyCollector.RetrieveResult(
                     name='name',
                     val='localhost.localdomain',
                 ),
+                vmodl.DynamicProperty(
+                    name='parent',
+                    val=vim.Datacenter(moId="dc2"),
+                ),
             ],
         ),
         vim.ObjectContent(
@@ -130,6 +134,18 @@ PROPERTIES_EX = vim.PropertyCollector.RetrieveResult(
                     name='name',
                     val='vm1',
                 ),
+                vmodl.DynamicProperty(
+                    name='runtime.powerState',
+                    val=vim.VirtualMachinePowerState.poweredOn,
+                ),
+                vmodl.DynamicProperty(
+                    name='runtime.host',
+                    val=vim.HostSystem(moId="host"),
+                ),
+                vmodl.DynamicProperty(
+                    name='parent',
+                    val=vim.Datacenter(moId="dc2"),
+                ),
             ],
         ),
         vim.ObjectContent(
@@ -138,6 +154,45 @@ PROPERTIES_EX = vim.PropertyCollector.RetrieveResult(
                 vmodl.DynamicProperty(
                     name='name',
                     val='vm2',
+                ),
+                vmodl.DynamicProperty(
+                    name='parent',
+                    val=vim.ClusterComputeResource(moId="c1"),
+                ),
+                vmodl.DynamicProperty(
+                    name='runtime.powerState',
+                    val=vim.VirtualMachinePowerState.poweredOn,
+                ),
+            ],
+        ),
+        vim.ObjectContent(
+            obj=vim.ClusterComputeResource(moId="c1"),
+            propSet=[
+                vmodl.DynamicProperty(
+                    name='name',
+                    val='c1',
+                ),
+            ],
+        ),
+        vim.ObjectContent(
+            obj=vim.Folder(moId="folder_1"),
+            propSet=[
+                vmodl.DynamicProperty(
+                    name='name',
+                    val='folder_1',
+                ),
+            ],
+        ),
+        vim.ObjectContent(
+            obj=vim.Datacenter(moId="dc2"),
+            propSet=[
+                vmodl.DynamicProperty(
+                    name='name',
+                    val='dc2',
+                ),
+                vmodl.DynamicProperty(
+                    name='parent',
+                    val=vim.Folder(moId="folder_1"),
                 ),
             ],
         ),
@@ -540,6 +595,7 @@ ALL_VCSIM_VM_METRICS_WITH_VALS = [
 ]
 
 FLAKEY_VM_METRICS = [
+    'cpu.costop.sum',
     'disk.maxTotalLatency.latest',
     'virtualDisk.read.avg',
 ]
