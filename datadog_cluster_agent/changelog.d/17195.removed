@@ -1,0 +1,1 @@
+removed `admission_webhooks.mutation_errors` metric in the `datadog_cluster_agent` integration
