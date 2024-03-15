@@ -14,7 +14,7 @@ import pytest
 from datadog_checks.base import ConfigurationError
 
 from .common import HOST, PASSWORD_ADMIN, USER_ADMIN, _get_expected_tags
-from .utils import requires_over_13, run_one_check
+from .utils import requires_over_13, requires_over_14, run_one_check
 
 DISCOVERY_CONFIG = {
     "enabled": True,
@@ -61,6 +61,11 @@ FUNCTION_METRICS = {
 
 COUNT_METRICS = {
     'postgresql.table.count',
+}
+
+CHECKSUM_METRICS = {
+    'postgresql.checksums.enabled',
+    'postgresql.checksums.checksum_failures'
 }
 
 
@@ -174,6 +179,7 @@ def test_autodiscovery_relations_disabled(integration_check, pg_instance):
 
 @pytest.mark.integration
 @pytest.mark.usefixtures('dd_environment')
+@requires_over_14
 def test_autodiscovery_collect_all_metrics(aggregator, integration_check, pg_instance):
     """
     Check that metrics get collected for each database discovered.
@@ -185,6 +191,7 @@ def test_autodiscovery_collect_all_metrics(aggregator, integration_check, pg_ins
     ]
     pg_instance['collect_function_metrics'] = True
     pg_instance['collect_count_metrics'] = True
+    pg_instance['collect_checksum_metrics'] = True
     del pg_instance['dbname']
 
     # execute dummy_function to populate pg_stat_user_functions for dogs_nofunc database
@@ -203,12 +210,15 @@ def test_autodiscovery_collect_all_metrics(aggregator, integration_check, pg_ins
     for db in databases:
         relation_metrics_expected_tags = _get_expected_tags(check, pg_instance, db=db, table='breed', schema='public')
         count_metrics_expected_tags = _get_expected_tags(check, pg_instance, db=db, schema='public')
+        checksum_metrics_expected_tags = _get_expected_tags(check, pg_instance, db=db, schema='public')
         for metric in RELATION_METRICS:
             aggregator.assert_metric(metric, tags=relation_metrics_expected_tags)
         for metric in DYNAMIC_RELATION_METRICS:
             aggregator.assert_metric(metric, tags=relation_metrics_expected_tags)
         for metric in COUNT_METRICS:
             aggregator.assert_metric(metric, tags=count_metrics_expected_tags)
+        for metric in CHECKSUM_METRICS:
+            aggregator.assert_metric(metric, tags=checksum_metrics_expected_tags)
 
     # we only created and executed the dummy_function in dogs_nofunc database
     for metric in FUNCTION_METRICS:

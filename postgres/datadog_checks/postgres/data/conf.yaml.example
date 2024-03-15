@@ -170,6 +170,11 @@ instances:
     #
     # collect_count_metrics: true
 
+    ## @param collect_checksum_metrics - boolean - optional - default: false
+    ## Collect counts of database failed checksums. Only supported on versions >= 14.
+    #
+    # collect_checksum_metrics: true
+
     ## @param collect_activity_metrics - boolean - optional - default: false
     ## Collect metrics regarding transactions from pg_stat_activity. Please make sure the user
     ## has sufficient privileges to read from pg_stat_activity before enabling this option.

@@ -28,6 +28,10 @@ def instance_collect_count_metrics():
     return True
 
 
+def instance_collect_checksum_metrics():
+    return True
+
+
 def instance_collect_database_size_metrics():
     return True
 
