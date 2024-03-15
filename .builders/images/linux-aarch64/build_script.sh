@@ -25,10 +25,11 @@ if [[ "${DD_BUILD_PYTHON_VERSION}" == "3" ]]; then
         RELATIVE_PATH="librdkafka-{{version}}" \
         bash install-from-source.sh --enable-sasl --enable-curl
     always_build+=("confluent-kafka")
-else
-    echo "CFLAGS=\"-I/usr/local/ssl/include ${CFLAGS}\"" >> $DD_ENV_FILE
-    echo "LDFLAGS=\"-L/usr/local/ssl/lib ${LDFLAGS}\"" >> $DD_ENV_FILE
 
+    # The version of pyodbc is dynamically linked against a version of the odbc which doesn't come included in the wheel
+    # That causes the omnibus' health check to flag it. Forcing the build so that we do include it in the wheel.
+    always_build+=("pyodbc")
+else
     # Not working on Python 2
     sed -i '/aerospike==/d' /home/requirements.in
 fi
