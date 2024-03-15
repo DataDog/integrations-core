@@ -51,7 +51,7 @@ pyasn1-modules @ https://storage.googleapis.com/dd-agent-int-deps/external/pyasn
 pycparser @ https://storage.googleapis.com/dd-agent-int-deps/external/pycparser/pycparser-2.21-py2.py3-none-any.whl#sha256=8ee45429555515e1f6b185e78100aea234072576aa43ab53aefcae078162fca9
 pycryptodomex @ https://storage.googleapis.com/dd-agent-int-deps/external/pycryptodomex/pycryptodomex-3.20.0-cp27-cp27mu-manylinux2010_x86_64.whl#sha256=653b29b0819605fe0898829c8ad6400a6ccde096146730c2da54eede9b7b8baa
 pyjwt @ https://storage.googleapis.com/dd-agent-int-deps/external/pyjwt/PyJWT-1.7.1-py2.py3-none-any.whl#sha256=5c6eca3c2940464d106b99ba83b00c6add741c9becaec087fb7ccdefea71350e
-pykerberos @ https://storage.googleapis.com/dd-agent-int-deps/built/pykerberos/pykerberos-1.2.4-20240314094028-cp27-cp27mu-manylinux_2_17_x86_64.manylinux2014_x86_64.whl#sha256=fad64c94e74d37f08b4519911b7fa38539e4521f96b42c9e895a188ab57f67a8
+pykerberos @ https://storage.googleapis.com/dd-agent-int-deps/built/pykerberos/pykerberos-1.2.4-20240315142226-cp27-cp27mu-manylinux_2_17_x86_64.manylinux2014_x86_64.whl#sha256=2494c4b3169e2a7d9d702d5811341504e0ff9741ca9a68c599fa841f505ac441
 pymysql @ https://storage.googleapis.com/dd-agent-int-deps/external/pymysql/PyMySQL-0.10.1-py2.py3-none-any.whl#sha256=44f47128dda8676e021c8d2dbb49a82be9e4ab158b9f03e897152a3a287c69ea
 pynacl @ https://storage.googleapis.com/dd-agent-int-deps/external/pynacl/PyNaCl-1.4.0-cp27-cp27mu-manylinux1_x86_64.whl#sha256=7757ae33dae81c300487591c68790dfb5145c7d03324000433d9a2c141f82af7
 pyparsing @ https://storage.googleapis.com/dd-agent-int-deps/external/pyparsing/pyparsing-2.4.7-py2.py3-none-any.whl#sha256=ef9d7589ef3c200abe66653d3f1ab1033c3c419ae9b9bdb1240a85b024efc88b
