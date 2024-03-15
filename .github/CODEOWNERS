@@ -292,3 +292,4 @@ docs/developer/process/integration-release.md                         @DataDog/s
 /.gitlab/software_composition_analysis.yaml                           @DataDog/software-integrity-and-trust
 # Dev container
 /.devcontainer/                                                        @DataDog/agent-integrations @DataDog/container-integrations
+/.devcontainer/dbm                                                     @DataDog/database-monitoring-agent
