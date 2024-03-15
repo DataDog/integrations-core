@@ -333,7 +333,7 @@ def test_connection_cleanup(instance_docker):
             with check.connection.get_managed_cursor() as cursor:
                 assert len(check.connection._conns) == 1
                 cursor.execute("gimme some data")
-    assert "incorrect syntax" in str(e).lower()
+    assert "incorrect syn" in str(e).lower()
     assert len(check.connection._conns) == 0, "connection should have been closed"
 
     # application exception

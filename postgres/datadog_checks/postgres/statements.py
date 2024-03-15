@@ -17,6 +17,7 @@ from datadog_checks.base.utils.db.statement_metrics import StatementMetrics
 from datadog_checks.base.utils.db.utils import DBMAsyncJob, default_json_event_encoding, obfuscate_sql_with_metadata
 from datadog_checks.base.utils.serialization import json
 from datadog_checks.base.utils.tracking import tracked_method
+from datadog_checks.postgres.cursor import CommenterCursor, CommenterDictCursor
 
 from .util import DatabaseConfigurationError, payload_pg_version, warning_with_tags
 from .version_utils import V9_4, V14
@@ -72,6 +73,9 @@ PG_STAT_STATEMENTS_METRICS_COLUMNS = (
             'local_blks_written',
             'temp_blks_read',
             'temp_blks_written',
+            'wal_records',
+            'wal_fpi',
+            'wal_bytes',
         }
     )
     | PG_STAT_STATEMENTS_TIMING_COLUMNS
@@ -171,7 +175,7 @@ class PostgresStatementMetrics(DBMAsyncJob):
             cols='*', pg_stat_statements_view=self._config.pg_stat_statements_view, extra_clauses="LIMIT 0", filters=""
         )
         with self._check._get_main_db() as conn:
-            with conn.cursor() as cursor:
+            with conn.cursor(cursor_factory=CommenterCursor) as cursor:
                 self._execute_query(cursor, query, params=(self._config.dbname,))
                 col_names = [desc[0] for desc in cursor.description] if cursor.description else []
                 self._stat_column_cache = col_names
@@ -279,7 +283,7 @@ class PostgresStatementMetrics(DBMAsyncJob):
                 )
                 params = params + tuple(self._config.ignore_databases)
             with self._check._get_main_db() as conn:
-                with conn.cursor(cursor_factory=psycopg2.extras.DictCursor) as cursor:
+                with conn.cursor(cursor_factory=CommenterDictCursor) as cursor:
                     return self._execute_query(
                         cursor,
                         STATEMENTS_QUERY.format(
@@ -353,7 +357,7 @@ class PostgresStatementMetrics(DBMAsyncJob):
             return
         try:
             with self._check._get_main_db() as conn:
-                with conn.cursor(cursor_factory=psycopg2.extras.DictCursor) as cursor:
+                with conn.cursor(cursor_factory=CommenterDictCursor) as cursor:
                     rows = self._execute_query(
                         cursor,
                         PG_STAT_STATEMENTS_DEALLOC,
@@ -374,7 +378,7 @@ class PostgresStatementMetrics(DBMAsyncJob):
         query = PG_STAT_STATEMENTS_COUNT_QUERY_LT_9_4 if self._check.version < V9_4 else PG_STAT_STATEMENTS_COUNT_QUERY
         try:
             with self._check._get_main_db() as conn:
-                with conn.cursor(cursor_factory=psycopg2.extras.DictCursor) as cursor:
+                with conn.cursor(cursor_factory=CommenterDictCursor) as cursor:
                     rows = self._execute_query(
                         cursor,
                         query,
@@ -437,6 +441,7 @@ class PostgresStatementMetrics(DBMAsyncJob):
             metadata = statement['metadata']
             normalized_row['dd_tables'] = metadata.get('tables', None)
             normalized_row['dd_commands'] = metadata.get('commands', None)
+            normalized_row['dd_comments'] = metadata.get('comments', None)
             normalized_rows.append(normalized_row)
 
         return normalized_rows
@@ -465,6 +470,7 @@ class PostgresStatementMetrics(DBMAsyncJob):
                     "metadata": {
                         "tables": row['dd_tables'],
                         "commands": row['dd_commands'],
+                        "comments": row['dd_comments'],
                     },
                 },
                 "postgres": {

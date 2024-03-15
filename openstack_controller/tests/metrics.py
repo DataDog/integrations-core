@@ -4530,6 +4530,16 @@ CONDUCTORS_METRICS_IRONIC_MICROVERSION_1_80 = [
         'value': 1,
         'tags': [
             'conductor_group:',
+            'conductor_hostname:agent-integrations-openstack-ironic-to-next',
+            'keystone_server:http://127.0.0.1:8080/identity',
+        ],
+    },
+    {
+        'name': 'openstack.ironic.conductor.count',
+        'count': 1,
+        'value': 1,
+        'tags': [
+            'conductor_group:',
             'conductor_hostname:agent-integrations-openstack-ironic',
             'keystone_server:http://127.0.0.1:8080/identity',
         ],

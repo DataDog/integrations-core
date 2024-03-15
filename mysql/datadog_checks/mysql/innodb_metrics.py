@@ -10,6 +10,7 @@ from six import PY3, iteritems
 
 from datadog_checks.base import is_affirmative
 from datadog_checks.base.log import get_check_logger
+from datadog_checks.mysql.cursor import CommenterCursor
 
 from .collection_utils import collect_scalar
 from .const import OPTIONAL_INNODB_VARS
@@ -33,7 +34,7 @@ class InnoDBMetrics(object):
         # as a part of STATUS variables in Percona Server and MariaDB.
         # Requires querying user to have PROCESS privileges.
         try:
-            with closing(db.cursor()) as cursor:
+            with closing(db.cursor(CommenterCursor)) as cursor:
                 cursor.execute("SHOW /*!50000 ENGINE*/ INNODB STATUS")
         except (pymysql.err.InternalError, pymysql.err.OperationalError, pymysql.err.NotSupportedError) as e:
             self.log.warning(
