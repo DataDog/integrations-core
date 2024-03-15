@@ -19,6 +19,7 @@ from datadog_checks.base.utils.serialization import json
 from datadog_checks.base.utils.tracking import tracked_method
 from datadog_checks.postgres.cursor import CommenterCursor, CommenterDictCursor
 
+from .query_count_cache import QueryCountCache
 from .util import DatabaseConfigurationError, payload_pg_version, warning_with_tags
 from .version_utils import V9_4, V14
 
@@ -153,6 +154,7 @@ class PostgresStatementMetrics(DBMAsyncJob):
         self._state = StatementMetrics()
         self._stat_column_cache = []
         self._query_count_cache = {}
+        self._query_count_cache = QueryCountCache()
         self._track_io_timing_cache = None
         self._obfuscate_options = to_native_string(json.dumps(self._config.obfuscator_options))
         # full_statement_text_cache: limit the ingestion rate of full statement text events per query_signature
@@ -213,14 +215,9 @@ class PostgresStatementMetrics(DBMAsyncJob):
                         continue
 
                     calls = row[1]
-                    if queryid in self._query_count_cache:
-                        diff = calls - self._query_count_cache[queryid]
-                        if diff > 0:
-                            called_queryids.append(queryid)
-                    else:
+                    calls_changed = self._query_count_cache.set_calls(queryid, calls)
+                    if calls_changed:
                         called_queryids.append(queryid)
-
-                    self._query_count_cache[queryid] = calls
 
                 self._check.gauge(
                     "postgresql.pg_stat_statements.called",
