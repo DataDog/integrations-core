@@ -223,7 +223,7 @@ files:
         type: boolean
         example: true
     - name: collect_checksum_metrics
-      description: Collect counts of database failed checksums. Only supported on versions >= 14.
+      description: Collect counts of database failed checksums. Only supported on versions >= 12.
       value:
         type: boolean
         example: true

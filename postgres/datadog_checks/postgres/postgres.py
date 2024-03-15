@@ -670,7 +670,7 @@ class PostgreSql(AgentCheck):
         if self._config.collect_count_metrics:
             # Count metrics are collected from all databases discovered
             per_database_metric_scope.append(COUNT_METRICS)
-        if self._config.collect_checksum_metrics and self.version >= V14:
+        if self._config.collect_checksum_metrics and self.version >= V12:
             per_database_metric_scope.append(CHECKSUM_METRICS)
         if self.version >= V13:
             metric_scope.append(SLRU_METRICS)
@@ -719,7 +719,7 @@ class PostgreSql(AgentCheck):
             with conn.cursor(cursor_factory=CommenterCursor) as cursor:
                 self._query_scope(cursor, archiver_instance_metrics, instance_tags, False)
 
-            if self._config.collect_checksum_metrics and self.version >= V14:
+            if self._config.collect_checksum_metrics and self.version >= V12:
                 # SHOW queries need manual cursor execution so can't be bundled with the metrics
                 with conn.cursor(cursor_factory=CommenterCursor) as cursor:
                     cursor.execute("SHOW data_checksums;")

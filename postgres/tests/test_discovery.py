@@ -14,7 +14,7 @@ import pytest
 from datadog_checks.base import ConfigurationError
 
 from .common import HOST, PASSWORD_ADMIN, USER_ADMIN, _get_expected_tags
-from .utils import requires_over_13, requires_over_14, run_one_check
+from .utils import requires_over_12, requires_over_13, run_one_check
 
 DISCOVERY_CONFIG = {
     "enabled": True,
@@ -179,7 +179,7 @@ def test_autodiscovery_relations_disabled(integration_check, pg_instance):
 
 @pytest.mark.integration
 @pytest.mark.usefixtures('dd_environment')
-@requires_over_14
+@requires_over_12
 def test_autodiscovery_collect_all_metrics(aggregator, integration_check, pg_instance):
     """
     Check that metrics get collected for each database discovered.
