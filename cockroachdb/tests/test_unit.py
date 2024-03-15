@@ -17,6 +17,8 @@ from .common import (
     KV_METRICS,
     PHYSICAL_METRICS,
     QUEUE_METRICS,
+    RAFT_METRICS,
+    SQL_METRICS,
     assert_metrics,
     get_fixture_path,
 )
@@ -61,6 +63,8 @@ def test_fixture_metrics(aggregator, instance, dd_run_check, mock_http_response,
         pytest.param('kv_metrics.txt', KV_METRICS, id='kv'),
         pytest.param('physical_metrics.txt', PHYSICAL_METRICS, id='physical'),
         pytest.param('queue_metrics.txt', QUEUE_METRICS, id='queue'),
+        pytest.param('raft_metrics.txt', RAFT_METRICS, id='raft'),
+        pytest.param('sql_metrics.txt', SQL_METRICS, id='sql'),
     ],
 )
 def test_metrics(aggregator, instance, dd_run_check, mock_http_response, file, metrics):

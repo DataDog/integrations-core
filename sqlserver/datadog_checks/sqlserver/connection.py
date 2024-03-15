@@ -448,7 +448,7 @@ class Connection(object):
         password = self.instance.get('password')
         database = self.instance.get(db_key) if db_name is None else db_name
         driver = self.instance.get('driver')
-        host = self._get_host_with_port()
+        host = self.get_host_with_port()
 
         if not dsn:
             if not host:
@@ -468,7 +468,7 @@ class Connection(object):
                 driver = self.DEFAULT_DRIVER
         return dsn, host, username, password, database, driver
 
-    def _get_host_with_port(self):
+    def get_host_with_port(self):
         """Return a string with correctly formatted host and, if necessary, port.
         If the host string in the config contains a port, that port is used.
         If not, any port provided as a separate port config option is used.
