@@ -99,7 +99,7 @@ class HarborCheck(AgentCheck):
             self._submit_read_only_status(api, tags)
         except Exception:
             self.log.exception("An error occurred when collecting Harbor metrics")
-            self.service_check(CAN_CONNECT, AgentCheck.CRITICAL)
+            self.service_check(CAN_CONNECT, AgentCheck.CRITICAL, tags)
             raise
         else:
-            self.service_check(CAN_CONNECT, AgentCheck.OK)
+            self.service_check(CAN_CONNECT, AgentCheck.OK, tags)
