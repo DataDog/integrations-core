@@ -41,7 +41,7 @@ SELECT {cols}
          ON pg_stat_statements.dbid = pg_database.oid
   WHERE query != '<insufficient privilege>'
   AND query NOT LIKE 'EXPLAIN %%'
-  AND queryid = ANY(ARRAY[{called_queryids}]::bigint[])
+  AND queryid = ANY('{{ {called_queryids} }}'::bigint[])
   {filters}
   {extra_clauses}
 """
