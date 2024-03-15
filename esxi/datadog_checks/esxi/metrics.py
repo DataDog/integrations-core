@@ -401,6 +401,6 @@ VM_METRICS = {
     'virtualDisk.writeOIO.latest',
 }
 RESOURCE_NAME_TO_METRICS = {
-    "VM": VM_METRICS,
+    "vm": VM_METRICS,
     "host": HOST_METRICS,
 }

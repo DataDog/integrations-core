@@ -33,5 +33,5 @@ ALL_RESOURCES = [
 
 RESOURCE_TYPE_TO_NAME = {
     HOST_RESOURCE: 'host',
-    VM_RESOURCE: 'VM',
+    VM_RESOURCE: 'vm',
 }

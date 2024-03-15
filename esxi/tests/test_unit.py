@@ -156,14 +156,14 @@ def test_external_host_tags(vcsim_instance, datadog_agent, dd_run_check):
             'esxi': [
                 'esxi_datacenter:dc2',
                 'esxi_folder:folder_1',
-                'esxi_type:VM',
+                'esxi_type:vm',
                 'esxi_url:127.0.0.1:8989',
             ]
         },
     )
     datadog_agent.assert_external_tags(
         'vm2',
-        {'esxi': ['esxi_cluster:c1', 'esxi_compute:c1', 'esxi_type:VM', 'esxi_url:127.0.0.1:8989']},
+        {'esxi': ['esxi_cluster:c1', 'esxi_compute:c1', 'esxi_type:vm', 'esxi_url:127.0.0.1:8989']},
     )
 
 
@@ -268,7 +268,7 @@ def test_external_host_tags_all_resources(vcsim_instance, datadog_agent, dd_run_
         'vm1',
         {
             'esxi': [
-                'esxi_type:VM',
+                'esxi_type:vm',
                 'esxi_cluster:c1',
                 'esxi_url:127.0.0.1:8989',
             ]

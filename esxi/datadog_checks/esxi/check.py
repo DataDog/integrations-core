@@ -169,9 +169,9 @@ class EsxiCheck(AgentCheck):
 
         for resource_obj, resource_props in all_resources_with_metrics.items():
             hostname = resource_props.get("name")
+            resource_type = RESOURCE_TYPE_TO_NAME[type(resource_obj)]
             self.log.debug("Collect metrics and host tags for hostname: %s, object: %s", hostname, resource_obj)
 
-            counter_keys_and_names, metric_ids = self.get_available_metric_ids_for_entity(resource_obj)
             tags = []
             parent = resource_props.get('parent')
             runtime_host = resource_props.get('runtime.host')
@@ -185,13 +185,16 @@ class EsxiCheck(AgentCheck):
                         include_only=['esxi_cluster'],
                     )
                 )
-            tags.append('esxi_type:{}'.format(RESOURCE_TYPE_TO_NAME[type(resource_obj)]))
+            tags.append('esxi_type:{}'.format(resource_type))
             tags.extend(self.tags)
             if hostname is not None:
                 external_host_tags.append((hostname, {self.__NAMESPACE__: tags}))
             else:
-                self.log.debug("No host name found for %s; skipping ", resource_obj)
+                self.log.debug("No host name found for %s; skipping external tag submission", resource_obj)
 
+            self.count(f"{resource_type}.count", 1, tags=tags, hostname=None)
+
+            counter_keys_and_names, metric_ids = self.get_available_metric_ids_for_entity(resource_obj)
             self.collect_metrics_for_entity(metric_ids, counter_keys_and_names, resource_obj, hostname)
 
         if external_host_tags:
