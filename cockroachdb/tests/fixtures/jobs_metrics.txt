@@ -314,9 +314,6 @@ jobs_new_schema_change_currently_idle{node_id="1"} 0
 # HELP jobs_poll_jobs_stats_currently_idle Number of poll_jobs_stats jobs currently considered Idle and can be freely shut down
 # TYPE jobs_poll_jobs_stats_currently_idle gauge
 jobs_poll_jobs_stats_currently_idle{node_id="1"} 1
-# HELP schedules_round_jobs_started The number of jobs started
-# TYPE schedules_round_jobs_started gauge
-schedules_round_jobs_started{node_id="1"} 0
 # HELP jobs_auto_schema_telemetry_currently_idle Number of auto_schema_telemetry jobs currently considered Idle and can be freely shut down
 # TYPE jobs_auto_schema_telemetry_currently_idle gauge
 jobs_auto_schema_telemetry_currently_idle{node_id="1"} 0
