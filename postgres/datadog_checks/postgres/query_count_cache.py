@@ -1,7 +1,6 @@
-# (C) Datadog, Inc. 2020-present
+# (C) Datadog, Inc. 2024-present
 # All rights reserved
-# Licensed under Simplified BSD License (see LICENSE)
-# https://www.postgresql.org/docs/current/libpq-connect.html#LIBPQ-PARAMKEYWORDS
+# Licensed under a 3-clause BSD style license (see LICENSE)
 from cachetools import TTLCache
 
 # 8 hours
