@@ -50,9 +50,9 @@ pyasn1-modules @ https://storage.googleapis.com/dd-agent-int-deps/external/pyasn
 pycparser @ https://storage.googleapis.com/dd-agent-int-deps/external/pycparser/pycparser-2.21-py2.py3-none-any.whl#sha256=8ee45429555515e1f6b185e78100aea234072576aa43ab53aefcae078162fca9
 pycryptodomex @ https://storage.googleapis.com/dd-agent-int-deps/external/pycryptodomex/pycryptodomex-3.20.0-cp27-cp27mu-manylinux_2_17_aarch64.manylinux2014_aarch64.whl#sha256=62a5ec91388984909bb5398ea49ee61b68ecb579123694bffa172c3b0a107079
 pyjwt @ https://storage.googleapis.com/dd-agent-int-deps/external/pyjwt/PyJWT-1.7.1-py2.py3-none-any.whl#sha256=5c6eca3c2940464d106b99ba83b00c6add741c9becaec087fb7ccdefea71350e
-pykerberos @ https://storage.googleapis.com/dd-agent-int-deps/built/pykerberos/pykerberos-1.2.4-20240314094122-cp27-cp27mu-manylinux_2_17_aarch64.manylinux2014_aarch64.whl#sha256=a6e64875b715e8413c691b272a80a01743232dc85bcea12f76ddfab578fa1563
+pykerberos @ https://storage.googleapis.com/dd-agent-int-deps/built/pykerberos/pykerberos-1.2.4-20240315142254-cp27-cp27mu-manylinux_2_17_aarch64.manylinux2014_aarch64.whl#sha256=4fb6954aa65119894595e773ce257bf9f9cac4945e579e779bcfae73e24497f8
 pymysql @ https://storage.googleapis.com/dd-agent-int-deps/external/pymysql/PyMySQL-0.10.1-py2.py3-none-any.whl#sha256=44f47128dda8676e021c8d2dbb49a82be9e4ab158b9f03e897152a3a287c69ea
-pynacl @ https://storage.googleapis.com/dd-agent-int-deps/built/pynacl/PyNaCl-1.4.0-20240314094122-cp27-cp27mu-manylinux_2_17_aarch64.manylinux2014_aarch64.whl#sha256=53fa04fce93fafa2f6a62c4d320a50d764fb65ecc9864c8072351ee6263e18ad
+pynacl @ https://storage.googleapis.com/dd-agent-int-deps/built/pynacl/PyNaCl-1.4.0-20240315142255-cp27-cp27mu-manylinux_2_17_aarch64.manylinux2014_aarch64.whl#sha256=0f5bbbf2e301275f863ac82473ed86dedf05653933b1d106172fc9a3d96a70c1
 pyparsing @ https://storage.googleapis.com/dd-agent-int-deps/external/pyparsing/pyparsing-2.4.7-py2.py3-none-any.whl#sha256=ef9d7589ef3c200abe66653d3f1ab1033c3c419ae9b9bdb1240a85b024efc88b
 pysmi @ https://storage.googleapis.com/dd-agent-int-deps/external/pysmi/pysmi-0.3.4-py2.py3-none-any.whl#sha256=2ec6ebd41aaef562695e7d0058763c6e1e8c1fbf8710804c11ef3a857fc9cad7
 pysnmp @ https://storage.googleapis.com/dd-agent-int-deps/external/pysnmp/pysnmp-4.4.9-py2.py3-none-any.whl#sha256=128a4832ce170213a59b82e7eeb886fc07d4b2e6eb638db8049af03f1014b0f8
