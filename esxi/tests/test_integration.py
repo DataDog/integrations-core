@@ -58,8 +58,8 @@ def test_esxi_perf_metrics(vcsim_instance, dd_run_check, aggregator, caplog):
 
     vm_metrics_without_vals = set(VCSIM_VM_METRICS) - set(ALL_VCSIM_VM_METRICS_WITH_VALS) - set(FLAKEY_VM_METRICS)
     for metric_name in vm_metrics_without_vals:
-        log_line_vm0 = f"Skipping metric {metric_name} for ha-host_VM0 because no value was returned by the VM"
-        log_line_vm1 = f"Skipping metric {metric_name} for ha-host_VM1 because no value was returned by the VM"
+        log_line_vm0 = f"Skipping metric {metric_name} for ha-host_VM0 because no value was returned by the vm"
+        log_line_vm1 = f"Skipping metric {metric_name} for ha-host_VM1 because no value was returned by the vm"
         assert log_line_vm0 in caplog.text
         assert log_line_vm1 in caplog.text
 
@@ -68,7 +68,10 @@ def test_esxi_perf_metrics(vcsim_instance, dd_run_check, aggregator, caplog):
         aggregator.assert_metric(f"esxi.{metric_name}", at_least=0, tags=base_tags, hostname="ha-host_VM0")
         aggregator.assert_metric(f"esxi.{metric_name}", at_least=0, tags=base_tags, hostname="ha-host_VM1")
 
+    aggregator.assert_metric("esxi.host.count")
+    aggregator.assert_metric("esxi.vm.count")
     aggregator.assert_metric("esxi.host.can_connect", 1, count=1, tags=base_tags)
+
     aggregator.assert_all_metrics_covered()
 
 
@@ -97,7 +100,7 @@ def test_vcsim_external_host_tags(vcsim_instance, datadog_agent, dd_run_check):
                 'esxi_datacenter:ha-datacenter',
                 'esxi_folder:ha-folder-root',
                 'esxi_folder:vm',
-                'esxi_type:VM',
+                'esxi_type:vm',
                 'esxi_url:127.0.0.1:8989',
             ]
         },
@@ -109,8 +112,34 @@ def test_vcsim_external_host_tags(vcsim_instance, datadog_agent, dd_run_check):
                 'esxi_datacenter:ha-datacenter',
                 'esxi_folder:ha-folder-root',
                 'esxi_folder:vm',
-                'esxi_type:VM',
+                'esxi_type:vm',
                 'esxi_url:127.0.0.1:8989',
             ]
         },
     )
+
+
+@pytest.mark.integration
+@pytest.mark.usefixtures("dd_environment")
+def test_esxi_resource_count_metrics(vcsim_instance, dd_run_check, aggregator):
+    check = EsxiCheck('esxi', {}, [vcsim_instance])
+    dd_run_check(check)
+
+    host_tags = [
+        'esxi_compute:localhost.localdomain',
+        'esxi_datacenter:ha-datacenter',
+        'esxi_folder:ha-folder-root',
+        'esxi_folder:host',
+        'esxi_type:host',
+        'esxi_url:127.0.0.1:8989',
+    ]
+    vm_tags = [
+        'esxi_datacenter:ha-datacenter',
+        'esxi_folder:ha-folder-root',
+        'esxi_folder:vm',
+        'esxi_type:vm',
+        'esxi_url:127.0.0.1:8989',
+    ]
+
+    aggregator.assert_metric("esxi.host.count", 1, tags=host_tags, hostname=None)
+    aggregator.assert_metric("esxi.vm.count", 2, tags=vm_tags, hostname=None)
