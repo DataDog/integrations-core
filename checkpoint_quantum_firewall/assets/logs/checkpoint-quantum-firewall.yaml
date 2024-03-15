@@ -111,6 +111,13 @@ facets:
     path: checkpoint.quantum.firewall.app_risk_str
     source: log
     type: string
+  - facetType: list
+    groups:
+      - Checkpoint Quantum Firewall
+    name: Status
+    path: checkpoint.quantum.firewall.status
+    source: log
+    type: string
   - facetType: range
     groups:
       - Checkpoint Quantum Firewall
