@@ -104,6 +104,13 @@ facets:
     path: checkpoint.quantum.firewall.appi_name
     source: log
     type: string
+  - facetType: list
+    groups:
+      - Checkpoint Quantum Firewall
+    name: Application Risk
+    path: checkpoint.quantum.firewall.app_risk_str
+    source: log
+    type: string
   - facetType: range
     groups:
       - Checkpoint Quantum Firewall
@@ -429,18 +436,18 @@ pipeline:
           Filtering") '
       processors:
         - type: string-builder-processor
-          name: "Define `checkpoint.quantum.firewall.src_ip_port` equal to
+          name: "Define `src_ip_port` equal to
             %{network.client.ip}: %{network.client.port}"
           enabled: true
           template: "%{network.client.ip}:%{network.client.port}"
-          target: checkpoint.quantum.firewall.src_ip_port
+          target: src_ip_port
           replaceMissing: false
         - type: string-builder-processor
-          name: "Define `checkpoint.quantum.firewall.dst_ip_port` equal to
+          name: "Define `dst_ip_port` equal to
             %{network.destination.ip}: %{network.destination.port}"
           enabled: true
           template: "%{network.destination.ip}:%{network.destination.port}"
-          target: checkpoint.quantum.firewall.dst_ip_port
+          target: dst_ip_port
           replaceMissing: false
     - type: pipeline
       name: Lookup for `app_risk` field

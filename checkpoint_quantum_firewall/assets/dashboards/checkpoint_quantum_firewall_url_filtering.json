@@ -995,11 +995,11 @@
                                 "width": "auto"
                             },
                             {
-                                "field": "checkpoint.quantum.firewall.src_ip_port",
+                                "field": "src_ip_port",
                                 "width": "auto"
                             },
                             {
-                                "field": "checkpoint.quantum.firewall.dst_ip_port",
+                                "field": "dst_ip_port",
                                 "width": "auto"
                             },
                             {

@@ -614,7 +614,7 @@
                                 },
                                 "group_by": [
                                     {
-                                        "facet": "@checkpoint.quantum.firewall.src_ip_port",
+                                        "facet": "@src_ip_port",
                                         "limit": 10,
                                         "sort": {
                                             "order": "desc",
