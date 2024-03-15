@@ -351,6 +351,21 @@ FROM pg_stat_replication
 }
 
 
+CHECKSUM_METRICS = {
+    'descriptors': [('name', 'database_instance')],
+    'metrics': {
+        'checksum_failures': ('postgresql.checksums.checksum_failures', AgentCheck.gauge),
+    },
+    'relation': False,
+    'query': """
+SELECT datname AS name, 
+       checksum_failures
+FROM pg_catalog.pg_stat_database;
+""",
+    'name': 'checksum_metrics',
+}
+
+
 QUERY_PG_STAT_WAL_RECEIVER = {
     'name': 'pg_stat_wal_receiver',
     'query': """

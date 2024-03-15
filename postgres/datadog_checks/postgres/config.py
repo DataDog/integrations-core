@@ -76,6 +76,7 @@ class PostgresConfig:
         # Default value for `count_metrics` is True for backward compatibility
         self.collect_count_metrics = is_affirmative(instance.get('collect_count_metrics', True))
         self.collect_activity_metrics = is_affirmative(instance.get('collect_activity_metrics', False))
+        self.collect_checksum_metrics = is_affirmative(instance.get('collect_checksum_metrics', False))
         self.activity_metrics_excluded_aggregations = instance.get('activity_metrics_excluded_aggregations', [])
         self.collect_database_size_metrics = is_affirmative(instance.get('collect_database_size_metrics', True))
         self.collect_wal_metrics = self._should_collect_wal_metrics(instance.get('collect_wal_metrics'))
