@@ -14,6 +14,7 @@ tests:
       status: "INFO"
       timestamp: 1536118977264
     message: "INFO: 2018/09/05 03:42:57.264469 Setting up IPsec between aa:aa:aa:aa:aa:aa(ip-127.0.0.1.ec2.internal) and bb:bb:bb:bb:bb:bb(ip-127.0.0.2.ec2.internal)"
+    status: "info"
     tags:
      - "source:LOGS_SOURCE"
     timestamp: 1536118977264
@@ -31,6 +32,7 @@ tests:
       status: "INFO"
       timestamp: 1536118977265
     message: "INFO: 2018/09/05 03:42:57.265098 ipsec: InitSALocal: 127.0.0.1 -> 127.0.0.2 :6784 0x5fc70829"
+    status: "info"
     tags:
      - "source:LOGS_SOURCE"
     timestamp: 1536118977265
@@ -47,6 +49,7 @@ tests:
       status: "INFO"
       timestamp: 1536118977583
     message: "INFO: 2018/09/05 03:42:57.583259 ipsec: destroy: in 127.0.0.1 -> 127.0.0.2 0x5038c53c"
+    status: "info"
     tags:
      - "source:LOGS_SOURCE"
     timestamp: 1536118977583
@@ -64,6 +67,7 @@ tests:
       status: "INFO"
       timestamp: 1536118977264
     message: "INFO: 2018/09/05 03:42:57.264469 Setting up IPsec between aa:aa:aa:aa:aa:aa(ip-127.0.0.1.ec2.internal) and bb:bb:bb:bb:bb:bb(ip-127.0.0.2.ec2.internal)"
+    status: "info"
     tags:
      - "source:LOGS_SOURCE"
     timestamp: 1536118977264
@@ -78,6 +82,7 @@ tests:
       status: "INFO"
       timestamp: 1548161551767
     message: "INFO: 2019/01/22 12:52:31.767170 ->[127.0.0.1:6783] error during connection attempt: dial tcp4 :0->127.0.0.1:6783: connect: no route to host"
+    status: "info"
     tags:
      - "source:LOGS_SOURCE"
     timestamp: 1548161551767
@@ -93,6 +98,7 @@ tests:
       status: "INFO"
       timestamp: 1497793559383
     message: "INFO: 2017/06/18 13:45:59.383012 overlay_switch ->[aa:aa:aa:aa:aa:aa(ip-127.0.0.1.ec2.internal)] using fastdp"
+    status: "info"
     tags:
      - "source:LOGS_SOURCE"
     timestamp: 1497793559383
@@ -110,6 +116,7 @@ tests:
       status: "INFO"
       timestamp: 1497793559388
     message: "INFO: 2017/06/18 13:45:59.388897 sleeve ->[127.0.0.1:6783|aa:aa:aa:aa:aa:aa(ip-127.0.0.1.ec2.internal)]: Effective MTU verified at 8939"
+    status: "info"
     tags:
      - "source:LOGS_SOURCE"
     timestamp: 1497793559388
@@ -124,6 +131,7 @@ tests:
       status: "INFO"
       timestamp: 1536122169634
     message: "INFO: 2018/09/05 04:36:09.634899 Removed unreachable peer aa:aa:aa:aa:aa:aa(ip-127.0.0.1.ec2.internal)"
+    status: "info"
     tags:
      - "source:LOGS_SOURCE"
     timestamp: 1536122169634
@@ -142,6 +150,7 @@ tests:
       status: "ERRO"
       timestamp: 1544207413232
     message: "ERRO: 2018/12/07 18:30:13.232527 Captured frame from MAC (aa:aa:aa:aa:aa:aa) to (bb:bb:bb:bb:bb:bb) associated with another peer cc:cc:cc:cc:cc:cc(k8s-slave-1)"
+    status: "error"
     tags:
      - "source:LOGS_SOURCE"
     timestamp: 1544207413232
@@ -158,6 +167,7 @@ tests:
       status: "INFO"
       timestamp: 1548161516307
     message: "INFO: 2019/01/22 12:51:56.307609 Discovered remote MAC aa:aa:aa:aa:aa:aa at bb:bb:bb:bb:bb:bb(ip-127.0.0.2.eu-west-3.compute.internal)"
+    status: "info"
     tags:
      - "source:LOGS_SOURCE"
     timestamp: 1548161516307
@@ -168,6 +178,7 @@ tests:
       status: "WARN"
       timestamp: 1544207417107
     message: "WARN: 2018/12/07 18:30:17.107279 [allocator]: Delete: no addresses for e11f2de4d4017cd1947fd80c02306ff39e433d25d6b0846caf957405682ea287"
+    status: "warn"
     tags:
      - "source:LOGS_SOURCE"
     timestamp: 1544207417107
@@ -180,6 +191,7 @@ tests:
       status: "INFO"
       timestamp: 1536118977057
     message: "INFO: 2018/09/05 03:42:57.057642 [allocator aa:aa:aa:aa:aa:aa] No valid persisted data"
+    status: "info"
     tags:
      - "source:LOGS_SOURCE"
     timestamp: 1536118977057
@@ -190,6 +202,7 @@ tests:
       status: "INFO"
       timestamp: 1497793559387
     message: "INFO: 2017/06/18 13:45:59.387055 EMSGSIZE on send, expecting PMTU update (IP packet was 60028 bytes, payload was 60020 bytes)"
+    status: "info"
     tags:
      - "source:LOGS_SOURCE"
     timestamp: 1497793559387

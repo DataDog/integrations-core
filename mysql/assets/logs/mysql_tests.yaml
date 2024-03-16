@@ -23,6 +23,7 @@ tests:
       message: "System table \"plugin\" is expected to be transactional."
       thread_id: 0
     message: "2017-12-29T12:04:09.954078Z 0 [Warning] System table \"plugin\" is expected to be transactional."
+    status: "warn"
     tags:
      - "source:LOGS_SOURCE"
     timestamp: 1514549049954
@@ -74,6 +75,7 @@ tests:
       thread_id: 0
     message: |
       2021-07-06  7:29:32 0 [Warning] You need to use --log-bin to make --expire-logs-days or --binlog-expire-logs-seconds work.
+    status: "warn"
     tags:
      - "source:LOGS_SOURCE"
     timestamp: 1625556572000
@@ -89,6 +91,7 @@ tests:
       thread_id: 139651251140544
     message: |
       2016-06-15 16:53:33 139651251140544 [Note] InnoDB: The InnoDB memory heap is disabled
+    status: "notice"
     tags:
      - "source:LOGS_SOURCE"
     timestamp: 1466009613000
@@ -104,6 +107,7 @@ tests:
       thread_id: 139651251140544
     message: |
       2016-06-15  7:53:33 139651251140544 [Note] InnoDB: The InnoDB memory heap is disabled
+    status: "notice"
     tags:
      - "source:LOGS_SOURCE"
     timestamp: 1465977213000

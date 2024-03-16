@@ -32,6 +32,7 @@ tests:
         name: "runner.go"
       timestamp: 1530785288000
     message: "2018-07-05 10:08:08 GMT | INFO | (runner.go:309 in work) | Done running check network"
+    status: "info"
     tags:
      - "source:LOGS_SOURCE"
     timestamp: 1530785288000
@@ -46,6 +47,7 @@ tests:
         thread_id: 1.0
       timestamp: 44634025000
     message: "W0601 14:20:25.000572       1 manager.go:147] Failed to get all responses in time (got 3/4)"
+    status: "warn"
     tags:
      - "source:LOGS_SOURCE"
     timestamp: 44634025000
@@ -63,6 +65,7 @@ tests:
         name: "AGENT"
       timestamp: 1531333677000
     message: "[ AGENT ] 2018-07-11 18:27:57 UTC | INFO | (transaction.go:121 in Process) | Successfully posted payload to \"https://6-3-0-app.agent.datadoghq.com/api/v1/series?api_key=*************************64a86\""
+    status: "info"
     tags:
      - "source:LOGS_SOURCE"
     timestamp: 1531333677000

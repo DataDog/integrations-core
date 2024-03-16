@@ -12,6 +12,7 @@ tests:
       pid: 7
       timestamp: 1573017547473
     message: "Loaded queue"
+    status: "debug"
     tags:
      - "source:LOGS_SOURCE"
     timestamp: 1573017547473
@@ -25,6 +26,7 @@ tests:
       pid: 32
       timestamp: 1573017547489
     message: "(from 127.0.0.1:43218) INSERT INTO tableau VALUES"
+    status: "debug"
     tags:
      - "source:LOGS_SOURCE"
     timestamp: 1573017547489
@@ -38,6 +40,7 @@ tests:
       pid: 11
       timestamp: 1573017548484
     message: "Became leader"
+    status: "info"
     tags:
      - "source:LOGS_SOURCE"
     timestamp: 1573017548484
@@ -51,6 +54,7 @@ tests:
       pid: 48
       timestamp: 1574316216595
     message: "Waiting for threads to finish"
+    status: "debug"
     tags:
      - "source:LOGS_SOURCE"
     timestamp: 1574316216595

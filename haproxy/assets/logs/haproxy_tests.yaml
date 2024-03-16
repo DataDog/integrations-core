@@ -40,6 +40,7 @@ tests:
           ip: "10.0.1.2"
           port: 33317
     message: "10.0.1.2:33317 [06/Feb/2009:12:14:14.655] http-in static/srv1 10/0/30/69/109 200 2750 - - ---- 1/1/1/1/0 0/0 {1wt.eu} {} \"GET /index.html HTTP/1.1\""
+    status: "ok"
     tags:
      - "source:LOGS_SOURCE"
     timestamp: 1233922454655
@@ -150,6 +151,7 @@ tests:
         date: 34281250000
         host: "localhost"
     message: "Feb  1 18:34:10 localhost haproxy[42471]: 73.18.215.121:50886 [01/Feb/2018:18:34:10.200] fr_proxy.lirn.net-HTTP bk_UnivOfThePeople-9797/bk_mp01-UnivOfThePeople-9797 0/0/0/121/122 200 938 - - --VN 4/4/3/3/0 0/0 \"GET /MuseProxyID=mp01/MuseSessionID=0000fx7/MuseProtocol=http/MuseHost=go.galegroup.com/MusePath/ps/browseIndex?inPS=true&prodId=PPCA&userGroupName=lirn17237&tabID=T003&topicId=&searchId=R3&searchType=AdvancedSearchForm&searchResultsType=SingleTab&sort=&browseIndex=TY&browsePagination=50&displayFormat=LIST&isMultiSelect=false&initPageSize=3&buildLimiterValues=true&userGroupName=lirn17237&prodId=PPCA HTTP/1.1\""
+    status: "ok"
     tags:
      - "source:LOGS_SOURCE"
     timestamp: 1517510050200
@@ -212,6 +214,7 @@ tests:
         date: 34281250000
         host: "-"
     message: "Feb 01 18:34:10 - haproxy[42471]: 73.18.215.121:50886 [01/Feb/2018:18:34:10.200] fr_proxy.lirn.net-HTTP bk_UnivOfThePeople-9797/bk_mp01-UnivOfThePeople-9797 0/0/0/121/122 200 938 - - --VN 4/4/3/3/0 0/0 \"GET /MuseProxyID=mp01/MuseSessionID=0000fx7/MuseProtocol=http/MuseHost=go.galegroup.com/MusePath/ps/browseIndex?inPS=true&prodId=PPCA&userGroupName=lirn17237&tabID=T003&topicId=&searchId=R3&searchType=AdvancedSearchForm&searchResultsType=SingleTab&sort=&browseIndex=TY&browsePagination=50&displayFormat=LIST&isMultiSelect=false&initPageSize=3&buildLimiterValues=true&userGroupName=lirn17237&prodId=PPCA HTTP/1.1\""
+    status: "ok"
     tags:
      - "source:LOGS_SOURCE"
     timestamp: 1517510050200
@@ -258,6 +261,7 @@ tests:
         date: 40657028000
         host: "haproxy-test-fri4"
     message: "Apr 16 13:37:08 haproxy-test-fri4 haproxy[4720]: 127.0.0.1:34902 [16/Apr/2018:13:37:08.576] stats stats/<STATS> 0/0/0/0/0 200 1316 - - LR-- 1/1/0/0/0 0/0 \"GET /haproxy_stats/;csv;norefresh HTTP/1.1\""
+    status: "ok"
     tags:
      - "source:LOGS_SOURCE"
     timestamp: 1523885828576
@@ -307,6 +311,7 @@ tests:
         date: 1547502563000
         host: "localhost"
     message: "2019-01-14T21:49:23+00:00 localhost haproxy[6]: 130.211.2.246:64478 [14/Jan/2019:21:49:23.640] http-0_0_0_0-8080 propjoe/propjoe-71 0/0/0/2/2 202 142 - - ---- 64/64/16/0/0 0/0 {34.204.102.208, 35.190.30.199} \"POST /api/v1/check_run/?api_key=****************************aedd HTTP/1.1\""
+    status: "ok"
     tags:
      - "source:LOGS_SOURCE"
     timestamp: 1547502563640
