@@ -255,12 +255,18 @@ V_22_METRICS = [
     'clickhouse.parts.active',
 ]
 
+V_23_METRICS = [
+    'clickhouse.query.asyncinsert',
+    'clickhouse.query.asyncinsert.failed',
+]
+
 version_mapper = {
     '18': V_18_19_METRICS,
     '19': V_18_19_METRICS,
     '20': V_20_METRICS,
     '21': V_21_METRICS,
     '22': V_22_METRICS,
+    '23': V_23_METRICS,
 }
 
 
