@@ -28,6 +28,8 @@ class QueryCountCache:
         if queryid in self.cache:
             diff = calls - self.cache[queryid]
             calls_changed = diff > 0
+        else:
+            calls_changed = True
 
         self.cache[queryid] = calls
 
