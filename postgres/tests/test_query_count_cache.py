@@ -9,7 +9,7 @@ pytestmark = [pytest.mark.unit]
 
 
 def test_statement_queryid_cache_same_calls_does_not_change():
-    cache = QueryCountCache()
+    cache = QueryCountCache(10000)
     cache.set_calls(123, 1)
     changed = cache.set_calls(123, 1)
 
@@ -17,8 +17,15 @@ def test_statement_queryid_cache_same_calls_does_not_change():
 
 
 def test_statement_queryid_cache_multiple_calls_change():
-    cache = QueryCountCache()
+    cache = QueryCountCache(10000)
     cache.set_calls(123, 1)
     changed = cache.set_calls(123, 2)
+
+    assert changed is True
+
+def test_statement_queryid_cache_after_pg_stat_statement_eviction():
+    cache = QueryCountCache(10000)
+    cache.set_calls(123, 100)
+    changed = cache.set_calls(123, 5)
 
     assert changed is True

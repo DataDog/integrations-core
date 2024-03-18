@@ -154,7 +154,7 @@ class PostgresStatementMetrics(DBMAsyncJob):
         self._state = StatementMetrics()
         self._stat_column_cache = []
         self._query_count_cache = {}
-        self._query_count_cache = QueryCountCache()
+        self._query_count_cache = QueryCountCache(int(self._check.pg_settings.get("pg_stat_statements.max", 10000)))
         self._track_io_timing_cache = None
         self._obfuscate_options = to_native_string(json.dumps(self._config.obfuscator_options))
         # full_statement_text_cache: limit the ingestion rate of full statement text events per query_signature

@@ -3,19 +3,18 @@
 # Licensed under a 3-clause BSD style license (see LICENSE)
 from cachetools import TTLCache
 
-# 8 hours
-CACHE_TTL = 60 * 60 * 8
+# 1 hour
+CACHE_TTL = 60 * 60
 
 
 class QueryCountCache:
     """Maintains a cache of the last-known number of calls per queryid"""
 
-    def __init__(self):
+    def __init__(self, maxsize):
         self.cache = TTLCache(
-            maxsize=10000,
+            maxsize=maxsize,
             ttl=CACHE_TTL,
         )
-        self.update_counts = {}
 
     def set_calls(self, queryid, calls):
         """Updates the cache of calls per query id.
@@ -27,7 +26,11 @@ class QueryCountCache:
         calls_changed = False
         if queryid in self.cache:
             diff = calls - self.cache[queryid]
-            calls_changed = diff > 0
+            # Positive deltas mean the statement remained in pg_stat_statements
+            # between check calls. Negaitve deltas mean the statement was evicted
+            # and replaced with a new call count. Both cases should count as a call
+            # change.
+            calls_changed = diff != 0
         else:
             calls_changed = True
 
