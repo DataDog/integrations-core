@@ -95,6 +95,9 @@ def codeowners(ctx):
     else:
         echo_success("All integrations have valid logs codeowners.")
 
+    has_failed = False
+    is_core_check = ctx.obj['repo_choice'] == 'core'
+
     if not is_core_check:  # We do not need this rule in integrations-core
         codeowner_map = create_codeowners_map()
         codeowners_file = get_codeowners_file()
