@@ -63,7 +63,10 @@ COUNT_METRICS = {
     'postgresql.table.count',
 }
 
-CHECKSUM_METRICS = {'postgresql.checksums.enabled', 'postgresql.checksums.checksum_failures'}
+CHECKSUM_METRICS = {
+    'postgresql.checksums.enabled', 
+    'postgresql.checksums.checksum_failures',
+}
 
 
 @contextmanager

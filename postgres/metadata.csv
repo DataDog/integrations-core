@@ -56,6 +56,8 @@ postgresql.toast_size,gauge,,byte,,"The total disk space used by the toast table
 postgresql.total_size,gauge,,byte,,"Enabled with `relations`. The total disk space used by the table, including indexes and TOAST data. This metric is tagged with db, schema, table.",0,postgres,tot size,
 postgresql.individual_index_size,gauge,,byte,,"The disk space used by a specified index. This metric is tagged with db, schema, table, index.",0,postgres,idx size,
 postgresql.table.count,gauge,,table,,"The number of user tables in this database. This metric is tagged with db, schema.",0,postgres,tbl count,
+postgresql.checksums.enabled,gauge,,count,,"Whether database checksums are enabled. This metric is tagged with db.",0,postgres,checksums.enabled,
+postgresql.checksums.checksum_failures,gauge,,count,,"The number of checksum failures in this database. This metric is tagged with db.",0,postgres,checksums,
 postgresql.max_connections,gauge,,connection,, The maximum number of client connections allowed to this database.,0,postgres,max conns,
 postgresql.percent_usage_connections,gauge,,fraction,,The number of connections to this database as a fraction of the maximum number of allowed connections.,0,postgres,pct usg conns,
 postgresql.replication_delay,gauge,,second,,The current replication delay in seconds. Only available with postgresql 9.1 and newer,-1,postgres,repl delay,
