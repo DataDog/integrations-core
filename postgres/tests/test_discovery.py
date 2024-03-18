@@ -64,7 +64,7 @@ COUNT_METRICS = {
 }
 
 CHECKSUM_METRICS = {
-    'postgresql.checksums.enabled', 
+    'postgresql.checksums.enabled',
     'postgresql.checksums.checksum_failures',
 }
 
