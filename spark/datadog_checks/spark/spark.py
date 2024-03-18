@@ -582,8 +582,8 @@ class SparkCheck(AgentCheck):
             #   foo.bar -> baz
             #   foo.qux -> quux
             if '.' in status:
-                pt1, pt2 = status.split('.')
-                metric_status = metrics_json.get(pt1, {}).get(pt_2)
+                parent_key, child_key = status.split('.')
+                metric_status = metrics_json.get(parent_key, {}).get(child_key)
             else:
                 metric_status = metrics_json.get(status)
 
