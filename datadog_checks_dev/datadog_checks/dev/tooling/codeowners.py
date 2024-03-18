@@ -1,7 +1,11 @@
+# This file is adapted from [sbdchd/codeowners] (https://github.com/sbdchd/codeowners),
+# originally licensed under the MIT license. You can find the complete license text in the repository.
+
 import re
 from typing import Generator, List, Optional, Pattern, Tuple
 
 from typing_extensions import Literal
+
 
 OwnerTuple = Tuple[Literal["USERNAME", "TEAM", "EMAIL"], str]
 
@@ -13,11 +17,6 @@ MASK = "/" * 20
 
 
 def path_to_regex(pattern: str) -> Pattern[str]:
-    """
-    This code is adapted from [sbdchd/codeowners] (https://github.com/sbdchd/codeowners),
-    originally licensed under the MIT license. You can find the complete license text in the repository.
-
-    """
     regex = ""
 
     slash_pos = pattern.find("/")
