@@ -358,7 +358,7 @@ CHECKSUM_METRICS = {
     },
     'relation': False,
     'query': """
-SELECT datname AS name, 
+SELECT datname AS name,
        checksum_failures
 FROM pg_catalog.pg_stat_database;
 """,
