@@ -220,7 +220,7 @@ class PostgresStatementMetrics(DBMAsyncJob):
                         called_queryids.append(queryid)
 
                 self._check.gauge(
-                    "postgresql.pg_stat_statements.called",
+                    "dd.postgresql.pg_stat_statements.calls_changed",
                     len(called_queryids),
                     tags=self.tags,
                     hostname=self._check.resolved_hostname,
