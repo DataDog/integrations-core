@@ -7,6 +7,8 @@ from operator import attrgetter
 
 import pymysql
 
+from datadog_checks.mysql.cursor import CommenterDictCursor
+
 from .util import connect_with_autocommit
 
 try:
@@ -108,7 +110,7 @@ class MySQLMetadata(DBMAsyncJob):
         settings = []
         table_name = MYSQL_TABLE_NAME if not self._check.is_mariadb else MARIADB_TABLE_NAME
         query = SETTINGS_QUERY.format(table_name=table_name)
-        with closing(self._get_db_connection().cursor(pymysql.cursors.DictCursor)) as cursor:
+        with closing(self._get_db_connection().cursor(CommenterDictCursor)) as cursor:
             self._cursor_run(
                 cursor,
                 query,

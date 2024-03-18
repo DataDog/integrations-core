@@ -9,9 +9,11 @@ ENV SOURCE_DATE_EPOCH=${SOURCE_DATE_EPOCH}
 COPY install-from-source.sh /
 
 ENV CFLAGS="-O2"
+ENV CXXFLAGS="${CFLAGS}"
 # Auditwheel will only set RPATH's for copied libs if an existing RPATH is found,
 # so we may as well set it to origin here anyway.
-ENV LDFLAGS="-Wl,-rpath,'\$\$ORIGIN'"
+# --strip-debug reduces binary sizes and improves reproducibility
+ENV LDFLAGS="-Wl,-rpath,'\$\$ORIGIN' -Wl,--strip-debug"
 
 # For Python 2, we get openssl(1) via yum just to get the necessary headers,
 # and we remove the package after compilation to prevent it from interfering
@@ -40,12 +42,9 @@ RUN yum install -y perl-IPC-Cmd && \
  RELATIVE_PATH="openssl-{{version}}" \
  # https://docs.python.org/3/using/unix.html#custom-openssl
  INSTALL_COMMAND="make install_sw" \
- # no-module prevents the creation of dynamically loaded modules that would be problematic to bundle into Python wheels
  CONFIGURE_SCRIPT="./config" \
  bash install-from-source.sh \
- --prefix=/usr/local/ssl \
  --openssldir=/etc/pki/tls \
- --libdir=lib \
  -fPIC shared \
  # This prevents the creation of dynamically loaded modules that would be problematic to bundle into Python wheels
  no-module \
@@ -63,30 +62,14 @@ RUN yum install -y libffi-devel && \
  RELATIVE_PATH="Python-{{version}}" \
  bash install-from-source.sh \
  --prefix=/opt/python/${PYTHON_VERSION} \
- --with-openssl=/usr/local/ssl \
- --with-openssl-rpath=auto \
  --with-ensurepip=yes \
  --enable-ipv6 \
  --with-dbmliborder=
 ENV PATH="/opt/python/${PYTHON_VERSION}/bin:${PATH}"
 # Set up virtual environment for Python 3
-RUN export LD_LIBRARY_PATH="/opt/python/${PYTHON_VERSION}/lib:${LD_LIBRARY_PATH}"; \
- /opt/python/${PYTHON_VERSION}/bin/python3 -m pip install --no-warn-script-location --upgrade pip \
+RUN /opt/python/${PYTHON_VERSION}/bin/python3 -m pip install --no-warn-script-location --upgrade pip \
  && /opt/python/${PYTHON_VERSION}/bin/python3 -m pip install --no-warn-script-location virtualenv \
  && /opt/python/${PYTHON_VERSION}/bin/python3 -m virtualenv /py3
-
-# Rust toolchain
-ENV RUST_VERSION="nightly-2022-05-15"
-ENV RUSTC_SHA256="32a1532f7cef072a667bac53f1a5542c99666c4071af0c9549795bbdb2069ec1"
-ENV RUSTUP_VERSION="1.24.3"
-ENV RUSTUP_SHA256="32a1532f7cef072a667bac53f1a5542c99666c4071af0c9549795bbdb2069ec1"
-RUN curl -sSL -o rustup-init "https://static.rust-lang.org/rustup/archive/${RUSTUP_VERSION}/aarch64-unknown-linux-gnu/rustup-init" \
- && echo "${RUSTUP_SHA256}  rustup-init" | sha256sum --check \
- && chmod +x ./rustup-init \
- && ./rustup-init -y --profile minimal --default-toolchain "${RUST_VERSION}" \
- && echo "${RUSTC_SHA256}  $HOME/.cargo/bin/rustc" | sha256sum --check \
- && rm ./rustup-init
-ENV PATH="/root/.cargo/bin:${PATH}"
 
 # krb5 for dependencies that require kerberos support
 RUN \
@@ -127,7 +110,6 @@ RUN \
  --disable-static
 
 # libpq and pg_config as needed by psycopg2
-RUN yum install openssl-devel -y
 RUN \
  DOWNLOAD_URL="https://ftp.postgresql.org/pub/source/v{{version}}/postgresql-{{version}}.tar.bz2" \
  VERSION="16.0" \
@@ -193,7 +175,7 @@ RUN \
     --without-gnutls \
     --without-librtmp \
     --without-libssh2 \
-    --with-ssl=/usr/local/ssl \
+    --with-ssl=/usr/local \
  && rm /usr/local/bin/curl
 
 # https://doc.rust-lang.org/cargo/reference/config.html#netgit-fetch-with-cli

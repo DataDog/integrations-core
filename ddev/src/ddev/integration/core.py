@@ -191,8 +191,7 @@ class Integration:
 
     @cached_property
     def is_testable(self) -> bool:
-        # TODO: remove tox when the Hatch migration is complete
-        return (self.path / 'hatch.toml').is_file() or (self.path / 'tox.ini').is_file()
+        return (self.path / 'hatch.toml').is_file()
 
     @cached_property
     def is_shippable(self) -> bool:

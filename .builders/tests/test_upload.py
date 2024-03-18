@@ -32,7 +32,7 @@ def setup_fake_bucket(monkeypatch):
             # but it should be good enough for what we use it for.
             return (
                 make_blob(f) for f in files
-                if f.startswith(prefix) and fnmatch.fnmatch(Path(f).name, match_glob)
+                if f.startswith(prefix) and fnmatch.fnmatch(f, match_glob)
             )
 
         bucket = mock.Mock()

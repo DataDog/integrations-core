@@ -66,6 +66,7 @@
         If the collection interval is greater than check collection interval, 
         the query will NOT BE RUN exactly at the collection interval.
         The query will be run at the next check run after the collection interval has passed.
+    5. metric_prefix (optional) - The prefix to apply to each metric.
   value:
     type: array
     items:
@@ -83,6 +84,8 @@
             type: string
         - name: collection_interval
           type: integer
+        - name: metric_prefix
+          type: string
     example:
       - query: SELECT foo, COUNT(*) FROM table.events GROUP BY foo
         columns:
@@ -93,3 +96,4 @@
         tags:
           - test:<INTEGRATION>
         collection_interval: 30
+        metric_prefix: foo_prefix

@@ -190,7 +190,12 @@ def models(ctx, check, sync, verbose):
 
             if not current_model_file_lines or not content_matches(current_model_file_lines, expected_model_file_lines):
                 if sync:
-                    echo_info(f'Writing data model file to `{model_file_path}`')
+                    check_display_queue.append(
+                        (
+                            echo_info,
+                            f'Writing data model file to `{model_file_path}`',
+                        )
+                    )
                     ensure_parent_dir_exists(model_file_path)
                     write_file_lines(model_file_path, expected_model_file_lines)
                 else:

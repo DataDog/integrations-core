@@ -12,6 +12,8 @@ from operator import attrgetter
 import pymysql
 from cachetools import TTLCache
 
+from datadog_checks.mysql.cursor import CommenterCursor, CommenterDictCursor
+
 try:
     import datadog_agent
 except ImportError:
@@ -334,7 +336,7 @@ class MySQLStatementSamples(DBMAsyncJob):
     @tracked_method(agent_check_getter=attrgetter('_check'))
     def _get_new_events_statements_current(self):
         start = time.time()
-        with closing(self._get_db_connection().cursor(pymysql.cursors.DictCursor)) as cursor:
+        with closing(self._get_db_connection().cursor(CommenterDictCursor)) as cursor:
             self._cursor_run(
                 cursor,
                 "set @uptime = {}".format(UPTIME_SUBQUERY.format(global_status_table=self._global_status_table)),
@@ -402,7 +404,7 @@ class MySQLStatementSamples(DBMAsyncJob):
         if not self._explained_statements_ratelimiter.acquire(query_cache_key):
             return None
 
-        with closing(self._get_db_connection().cursor()) as cursor:
+        with closing(self._get_db_connection().cursor(CommenterCursor)) as cursor:
             plan, error_states = self._explain_statement(
                 cursor, row['sql_text'], row['current_schema'], obfuscated_statement, query_signature
             )
@@ -494,7 +496,7 @@ class MySQLStatementSamples(DBMAsyncJob):
         I.e. (events_statements_current, events_statements_history)
         :return:
         """
-        with closing(self._get_db_connection().cursor()) as cursor:
+        with closing(self._get_db_connection().cursor(CommenterCursor)) as cursor:
             self._cursor_run(cursor, ENABLED_STATEMENTS_CONSUMERS_QUERY)
             return {r[0] for r in cursor.fetchall()}
 
@@ -504,7 +506,7 @@ class MySQLStatementSamples(DBMAsyncJob):
         :return:
         """
         try:
-            with closing(self._get_db_connection().cursor()) as cursor:
+            with closing(self._get_db_connection().cursor(CommenterCursor)) as cursor:
                 self._cursor_run(cursor, 'CALL {}()'.format(self._events_statements_enable_procedure))
         except pymysql.err.DatabaseError as e:
             self._log.debug(
