@@ -769,7 +769,7 @@ jmx_metrics:
                 "unassigned": 0
                 "running": 1
                 "paused": 2
-                "falied": 3
+                "failed": 3
                 "destroyed": 4
 
   # Kafka Connect Metrics

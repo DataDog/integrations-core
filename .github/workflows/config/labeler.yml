@@ -491,5 +491,9 @@ integration/zeek:
 - zeek/**/*
 integration/zk:
 - zk/**/*
+qa/skip-qa:
+- '**/__about__.py'
+- requirements-agent-release.txt
+- '*/CHANGELOG.md'
 release:
 - '**/__about__.py'

@@ -23,8 +23,8 @@ HARBOR_METRICS = [
 
 HERE = os.path.dirname(os.path.abspath(__file__))
 URL = 'http://{}'.format(get_docker_hostname())
-INSTANCE = {'url': URL, 'username': 'NotAnAdmin', 'password': 'Str0ngPassw0rd'}
-ADMIN_INSTANCE = {'url': URL, 'username': 'admin', 'password': 'Harbor12345'}
+INSTANCE = {'url': URL, 'username': 'NotAnAdmin', 'password': 'Str0ngPassw0rd', 'tags': ['environment:test']}
+ADMIN_INSTANCE = {'url': URL, 'username': 'admin', 'password': 'Harbor12345', 'tags': ['environment:test']}
 
 HEALTH_FIXTURE = {
     "status": "healthy",

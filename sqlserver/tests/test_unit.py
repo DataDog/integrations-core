@@ -73,7 +73,7 @@ def test_db_exists(get_cursor, mock_connect, instance_docker_defaults, dd_run_ch
     mock_connect.__enter__ = mock.Mock(return_value='foo')
 
     mock_results = mock.MagicMock()
-    mock_results.__iter__.return_value = db_results
+    mock_results.fetchall.return_value = db_results
     get_cursor.return_value = mock_results
 
     instance = copy.copy(instance_docker_defaults)
@@ -137,7 +137,7 @@ def test_azure_cross_database_queries_excluded(get_cursor, mock_connect, instanc
     mock_connect.__enter__ = mock.Mock(return_value='foo')
 
     mock_results = mock.MagicMock()
-    mock_results.__iter__.return_value = db_results
+    mock_results.fetchall.return_value = db_results
     get_cursor.return_value = mock_results
 
     instance = copy.copy(instance_docker_defaults)

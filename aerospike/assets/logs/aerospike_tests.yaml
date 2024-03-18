@@ -11,6 +11,7 @@ tests:
       status: "INFO"
       timestamp: 1605534089000
     message: "{test} /opt/aerospike/data/test.dat: used-bytes 0 free-wblocks 4088 write-q 0 write (0,0.0) defrag-q 0 defrag-read (0,0.0) defrag-write (0,0.0)"
+    status: "info"
     tags:
      - "source:LOGS_SOURCE"
     timestamp: 1605534089000
@@ -25,6 +26,7 @@ tests:
       status: "INFO"
       timestamp: 1605534069000
     message: "NODE-ID bb902b0a8c04202 CLUSTER-SIZE 1"
+    status: "info"
     tags:
      - "source:LOGS_SOURCE"
     timestamp: 1605534069000
@@ -39,6 +41,7 @@ tests:
       status: "INFO"
       timestamp: 1605533949000
     message: "detected 2 CPU(s), 2 core(s), 1 NUMA node(s)"
+    status: "info"
     tags:
      - "source:LOGS_SOURCE"
     timestamp: 1605533949000

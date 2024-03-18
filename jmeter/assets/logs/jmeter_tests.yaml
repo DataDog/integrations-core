@@ -87,6 +87,7 @@ tests:
         "all_threads" : 9,
         "data_encoding" : "utf-8"
       }
+    status: "warn"
     tags:
      - "source:LOGS_SOURCE"
 

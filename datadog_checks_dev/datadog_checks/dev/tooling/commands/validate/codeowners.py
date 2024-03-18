@@ -54,30 +54,34 @@ def create_codeowners_map():
 @click.command(
     context_settings=CONTEXT_SETTINGS, short_help='Validate `CODEOWNERS` file has an entry for each integration'
 )
-def codeowners():
+@click.pass_context
+def codeowners(ctx):
     """Validate that every integration has an entry in the `CODEOWNERS` file."""
 
     has_failed = False
-    codeowner_map = create_codeowners_map()
-    codeowners_file = get_codeowners_file()
-    for integration, codeowner in codeowner_map.items():
-        if not codeowner:
-            has_failed = True
-            message = f"Integration {integration} does not have a valid `CODEOWNERS` entry."
-            echo_failure(message)
-            annotate_error(codeowners_file, message)
-        elif codeowner == "empty":
-            has_failed = True
-            message = f"Integration {integration} has a `CODEOWNERS` entry, but the codeowner is empty."
-            echo_failure(message)
-            annotate_error(codeowners_file, message)
-        elif not codeowner.startswith("@") and integration not in IGNORE_TILES:
-            has_failed = True
-            message = (
-                f"Integration {integration} has a `CODEOWNERS` entry, but the codeowner is not a username or team."
-            )
-            echo_failure(message)
-            annotate_error(codeowners_file, message)
+    is_core_check = ctx.obj['repo_choice'] == 'core'
+
+    if not is_core_check:  # We do not need this rule in integrations-core
+        codeowner_map = create_codeowners_map()
+        codeowners_file = get_codeowners_file()
+        for integration, codeowner in codeowner_map.items():
+            if not codeowner:
+                has_failed = True
+                message = f"Integration {integration} does not have a valid `CODEOWNERS` entry."
+                echo_failure(message)
+                annotate_error(codeowners_file, message)
+            elif codeowner == "empty":
+                has_failed = True
+                message = f"Integration {integration} has a `CODEOWNERS` entry, but the codeowner is empty."
+                echo_failure(message)
+                annotate_error(codeowners_file, message)
+            elif not codeowner.startswith("@") and integration not in IGNORE_TILES:
+                has_failed = True
+                message = (
+                    f"Integration {integration} has a `CODEOWNERS` entry, but the codeowner is not a username or team."
+                )
+                echo_failure(message)
+                annotate_error(codeowners_file, message)
 
     if not has_failed:
         echo_success("All integrations have valid codeowners.")

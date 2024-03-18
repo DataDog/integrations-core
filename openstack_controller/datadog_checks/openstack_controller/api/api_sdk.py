@@ -232,8 +232,10 @@ class ApiSdk(Api):
 
     def get_load_balancer_loadbalancers(self, project_id):
         return [
-            load_balancer.to_dict(original_names=True)
-            for load_balancer in self.connection.load_balancer.load_balancers(project_id=project_id)
+            network.to_dict(original_names=True)
+            for network in self.call_paginated_api(
+                self.connection.load_balancer.load_balancers, project_id=project_id, limit=self.config.paginated_limit
+            )
         ]
 
     def get_load_balancer_loadbalancer_stats(self, loadbalancer_id):
@@ -241,8 +243,10 @@ class ApiSdk(Api):
 
     def get_load_balancer_listeners(self, project_id):
         return [
-            listener.to_dict(original_names=True)
-            for listener in self.connection.load_balancer.listeners(project_id=project_id)
+            network.to_dict(original_names=True)
+            for network in self.call_paginated_api(
+                self.connection.load_balancer.listeners, project_id=project_id, limit=self.config.paginated_limit
+            )
         ]
 
     def get_load_balancer_listener_stats(self, listener_id):
@@ -250,7 +254,10 @@ class ApiSdk(Api):
 
     def get_load_balancer_pools(self, project_id):
         return [
-            pool.to_dict(original_names=True) for pool in self.connection.load_balancer.pools(project_id=project_id)
+            pool.to_dict(original_names=True)
+            for pool in self.call_paginated_api(
+                self.connection.load_balancer.pools, project_id=project_id, limit=self.config.paginated_limit
+            )
         ]
 
     def get_load_balancer_pool_members(self, pool_id, project_id):
@@ -273,7 +280,9 @@ class ApiSdk(Api):
     def get_load_balancer_amphorae(self, project_id):
         return [
             amphora.to_dict(original_names=True)
-            for amphora in self.connection.load_balancer.amphorae(project_id=project_id)
+            for amphora in self.call_paginated_api(
+                self.connection.load_balancer.amphorae, project_id=project_id, limit=self.config.paginated_limit
+            )
         ]
 
     def get_load_balancer_amphora_stats(self, amphora_id):

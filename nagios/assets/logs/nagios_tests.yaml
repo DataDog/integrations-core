@@ -35,6 +35,7 @@ tests:
       usr:
         name: "nagiosadmin"
     message: "DISK CRITICAL - free space: / 2023 MB (3.56% inode=68%):"
+    status: "critical"
     tags:
      - "source:LOGS_SOURCE"
     timestamp: 1606472947000
@@ -51,6 +52,7 @@ tests:
       timestamp: 1.606472584E12
       type: "SERVICE ALERT"
     message: "HTTP WARNING: HTTP/1.1 401 Unauthorized - 695 bytes in 0.001 second response time"
+    status: "warn"
     tags:
      - "source:LOGS_SOURCE"
     timestamp: 1606472584000
@@ -67,6 +69,7 @@ tests:
       timestamp: 1.60647483E12
       type: "SERVICE ALERT"
     message: "DISK CRITICAL - free space: / 2020 MB (3.56% inode=68%):"
+    status: "critical"
     tags:
      - "source:LOGS_SOURCE"
     timestamp: 1606474830000
@@ -82,6 +85,7 @@ tests:
       timestamp: 1.606810725E12
       type: "HOST ALERT"
     message: "PING OK - Packet loss = 0%, RTA = 0.06 ms"
+    status: "info"
     tags:
      - "source:LOGS_SOURCE"
     timestamp: 1606810725000
@@ -98,6 +102,7 @@ tests:
       timestamp: 1.2978144E12
       type: "CURRENT SERVICE STATE"
     message: "DISK OK"
+    status: "ok"
     tags:
      - "source:LOGS_SOURCE"
     timestamp: 1297814400000
@@ -113,6 +118,7 @@ tests:
       timestamp: 1.2978144E12
       type: "CURRENT HOST STATE"
     message: "PING OK - Packet loss = 0%, RTA = 1.68 ms"
+    status: "info"
     tags:
      - "source:LOGS_SOURCE"
     timestamp: 1297814400000

@@ -10,6 +10,7 @@ tests:
         thread_name: "main"
       timestamp: 1584414832000
     message: "Loading 'hazelcast-default.xml' from the classpath."
+    status: "info"
     tags:
      - "source:LOGS_SOURCE"
     timestamp: 1584414832000
@@ -27,6 +28,7 @@ tests:
         thread_name: "main"
       timestamp: 1584414834000
     message: "Prefer IPv4 stack is true, prefer IPv6 addresses is false"
+    status: "info"
     tags:
      - "source:LOGS_SOURCE"
     timestamp: 1584414834000
@@ -44,6 +46,7 @@ tests:
         thread_name: "main"
       timestamp: 1584414834000
     message: "Backpressure is disabled"
+    status: "info"
     tags:
      - "source:LOGS_SOURCE"
     timestamp: 1584414834000
@@ -73,6 +76,7 @@ tests:
         Member [172.28.0.2]:5701 - d06deb64-59ad-4183-ac4d-f0797ad7f8eb
         Member [172.28.0.3]:5701 - 50cd2566-61ff-4e35-aed4-553d6d5adb7e this
       ]
+    status: "info"
     tags:
      - "source:LOGS_SOURCE"
     timestamp: 1584414843000

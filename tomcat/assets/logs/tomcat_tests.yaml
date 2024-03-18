@@ -10,6 +10,7 @@ tests:
       status: "INFO"
       timestamp: 968335661508
     message: "Entering application."
+    status: "info"
     tags:
      - "source:LOGS_SOURCE"
     timestamp: 968335661508
@@ -23,6 +24,7 @@ tests:
       status: "ERROR"
       timestamp: 1611927778152
     message: "Starting Workflow"
+    status: "error"
     tags:
      - "source:LOGS_SOURCE"
     timestamp: 1611927778152
@@ -36,6 +38,7 @@ tests:
         thread_name: "main"
       status: "INFO"
     message: "Entering application."
+    status: "info"
     tags:
      - "source:LOGS_SOURCE"
     timestamp: 1
@@ -49,6 +52,7 @@ tests:
       status: "INFO"
       timestamp: 968335664000
     message: "Entering application."
+    status: "info"
     tags:
      - "source:LOGS_SOURCE"
     timestamp: 968335664000
@@ -86,6 +90,7 @@ tests:
           ip: "172.17.0.1"
       timestamp: 1483719397000
     message: "172.17.0.1 - - [06/Jan/2017:16:16:37 +0000] \"GET /datadoghq/company?test=var1%20Pl HTTP/1.1\" 200 612 \"http://www.perdu.com/\" \"Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/55.0.2883.87 Safari/537.36\" \"-\" those are random characters"
+    status: "ok"
     tags:
      - "source:LOGS_SOURCE"
     timestamp: 1483719397000
@@ -108,6 +113,7 @@ tests:
           ip: "127.0.0.1"
       timestamp: 1468407336000
     message: "127.0.0.1 - frank [13/Jul/2016:10:55:36 +0000] \"GET /apache_pb.gif HTTP/1.0\" 200 2326"
+    status: "ok"
     tags:
      - "source:LOGS_SOURCE"
     timestamp: 1468407336000
@@ -121,6 +127,7 @@ tests:
       status: "INFO"
       timestamp: 1543438289344
     message: "Server startup in 1335 ms"
+    status: "info"
     tags:
      - "source:LOGS_SOURCE"
     timestamp: 1543438289344

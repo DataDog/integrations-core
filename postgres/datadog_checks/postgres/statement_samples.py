@@ -12,6 +12,8 @@ import psycopg2
 from cachetools import TTLCache
 from six import PY2
 
+from datadog_checks.postgres.cursor import CommenterCursor, CommenterDictCursor
+
 try:
     import datadog_agent
 except ImportError:
@@ -229,7 +231,7 @@ class PostgresStatementSamples(DBMAsyncJob):
             pg_stat_activity_view=self._config.pg_stat_activity_view, extra_filters=extra_filters
         )
         with self._check._get_main_db() as conn:
-            with conn.cursor(cursor_factory=psycopg2.extras.DictCursor) as cursor:
+            with conn.cursor(cursor_factory=CommenterDictCursor) as cursor:
                 self._log.debug("Running query [%s] %s", query, params)
                 cursor.execute(query, params)
                 rows = cursor.fetchall()
@@ -264,7 +266,7 @@ class PostgresStatementSamples(DBMAsyncJob):
         )
 
         with self._check._get_main_db() as conn:
-            with conn.cursor(cursor_factory=psycopg2.extras.DictCursor) as cursor:
+            with conn.cursor(cursor_factory=CommenterDictCursor) as cursor:
                 self._log.debug("Running query [%s] %s", query, params)
                 cursor.execute(query, params)
                 rows = cursor.fetchall()
@@ -283,7 +285,7 @@ class PostgresStatementSamples(DBMAsyncJob):
     @tracked_method(agent_check_getter=agent_check_getter, track_result_length=True)
     def _get_available_activity_columns(self, all_expected_columns):
         with self._check._get_main_db() as conn:
-            with conn.cursor(cursor_factory=psycopg2.extras.DictCursor) as cursor:
+            with conn.cursor(cursor_factory=CommenterDictCursor) as cursor:
                 cursor.execute(
                     "select * from {pg_stat_activity_view} LIMIT 0".format(
                         pg_stat_activity_view=self._config.pg_stat_activity_view
@@ -547,7 +549,7 @@ class PostgresStatementSamples(DBMAsyncJob):
     def _run_explain(self, dbname, statement, obfuscated_statement):
         start_time = time.time()
         with self.db_pool.get_connection(dbname, ttl_ms=self._conn_ttl_ms) as conn:
-            with conn.cursor() as cursor:
+            with conn.cursor(cursor_factory=CommenterCursor) as cursor:
                 self._log.debug(
                     "Running query on dbname=%s: %s(%s)", dbname, self._explain_function, obfuscated_statement
                 )
