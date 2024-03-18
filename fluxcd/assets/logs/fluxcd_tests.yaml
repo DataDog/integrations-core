@@ -31,6 +31,7 @@ tests:
       reconcileID: "3a8d111e-0116-4057-ad1c-45e8f4ccd424"
       ts: "2024-01-17T11:08:37.330Z"
     message: "HelmChart/monitoring/monitoring-loki-stack with SourceRef 'HelmRepository/monitoring/grafana-charts' is in-sync"
+    status: "info"
     tags:
      - "source:LOGS_SOURCE"
     timestamp: 1705489717330
@@ -63,6 +64,7 @@ tests:
       logger: "event-server"
       ts: "2024-01-17T10:56:32.536Z"
     message: "discarding event, no alerts found for the involved object"
+    status: "info"
     tags:
      - "source:LOGS_SOURCE"
     timestamp: 1705488992536

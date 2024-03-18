@@ -32,6 +32,7 @@ tests:
         client:
           ip: "72.23.68.8"
     message: "72.23.68.8 - - [24/Oct/2018:00:00:01 +0100] \"POST /eval XDBC/1.0\" 401 0 - \"Java/1.8.0_181 MarkLogicXCC/8.0-5\""
+    status: "warn"
     tags:
      - "source:LOGS_SOURCE"
     timestamp: 1540335601000
@@ -68,6 +69,7 @@ tests:
         client:
           ip: "172.23.68.8"
     message: "172.23.68.8 - isite2-content-reader [24/Oct/2018:00:00:01 +0100] \"POST /eval XDBC/1.0\" 200 138 - \"Java/1.8.0_181 MarkLogicXCC/8.0-5\""
+    status: "ok"
     tags:
      - "source:LOGS_SOURCE"
     timestamp: 1540335601000
@@ -121,6 +123,7 @@ tests:
       tree: "128MB"
       tripleIndex: "64MB"
     message: "2018-10-24 00:00:01.388 Debug: InMemoryStand /xstore/contentstore/Forests/sports-data-forest-08-replica/00048c53, disk=15MB, memory=655MB, list=512MB, tree=128MB, rangeIndex=16MB, reverseIndex=16MB, tripleIndex=64MB"
+    status: "debug"
     tags:
      - "source:LOGS_SOURCE"
     timestamp: 1540339201388

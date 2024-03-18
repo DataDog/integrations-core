@@ -13,6 +13,7 @@ tests:
       lineno: 4264.0
       timestamp: 1609964610817
     message: "Received status volume req for volume gv0"
+    status: "info"
     tags:
      - "source:LOGS_SOURCE"
     timestamp: 1609964610817
@@ -28,6 +29,7 @@ tests:
       lineno: 775.0
       timestamp: 1609886459503
     message: "ready on 172.29.187.90:49131 failed (No data available)"
+    status: "warn"
     tags:
      - "source:LOGS_SOURCE"
     timestamp: 1609886459503
@@ -44,6 +46,7 @@ tests:
       lineno: 1883.0
       timestamp: 1609743833445
     message: "Unable to acquire lock for gv0"
+    status: "error"
     tags:
      - "source:LOGS_SOURCE"
     timestamp: 1609743833445
@@ -65,6 +68,7 @@ tests:
           start: 1609964487000
       timestamp: 1609964599843
     message: "Received status volume req for volume gv0"
+    status: "info"
     tags:
      - "source:LOGS_SOURCE"
     timestamp: 1609964599843

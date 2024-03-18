@@ -19,6 +19,7 @@ tests:
         thread_name: "MemtableFlushWriter"
       partition_key: "2016-6-29"
     message: "WARN  [MemtableFlushWriter:20342] 2016-06-29 08:35:35,936  SSTableWriter.java:240 - Compacting large partition limo/read_audit_history:2016-6-29 (115624250 bytes)"
+    status: "warn"
     tags:
      - "source:LOGS_SOURCE"
     timestamp: 1467189335936
@@ -48,6 +49,7 @@ tests:
       logger:
         thread_name: "SlabPoolCleaner"
     message: "INFO  [SlabPoolCleaner] 2016-06-28 16:13:14,966  ColumnFamilyStore.java:1211 - Flushing largest CFS(Keyspace='order_store', ColumnFamily='orderdata') to free up room. Used total: 0.11/0.00, live: 0.11/0.00, flushing: 0.00/0.00, this: 0.10/0.10"
+    status: "info"
     tags:
      - "source:LOGS_SOURCE"
     timestamp: 1467130394966
@@ -72,6 +74,7 @@ tests:
       logger:
         thread_name: "SlabPoolCleaner"
     message: "INFO  [SlabPoolCleaner] 2016-06-28 16:13:14,967  ColumnFamilyStore.java:905 - Enqueuing flush of orderdata: 216588472 (10%) on-heap, 0 (0%) off-heap"
+    status: "info"
     tags:
      - "source:LOGS_SOURCE"
     timestamp: 1467130394967
@@ -97,6 +100,7 @@ tests:
         thread_id: 320
         thread_name: "MemtableFlushWriter"
     message: "INFO  [MemtableFlushWriter:320] 2016-06-28 16:13:14,969  Memtable.java:347 - Writing Memtable-orderdata@849528272(129.804MiB serialized bytes, 297813 ops, 10%/0% of on/off-heap limit)"
+    status: "info"
     tags:
      - "source:LOGS_SOURCE"
     timestamp: 1467130394969
@@ -118,6 +122,7 @@ tests:
         thread_id: 1
         thread_name: "MemtableFlushWriter"
     message: "INFO  [MemtableFlushWriter:1] 2016-06-28 16:19:48,627  Memtable.java:382 - Completed flushing /app/cassandra/datastax/dse-data01/system/local-7ad54392bcdd35a684174e047860b377/system-local-tmp-ka-3981-Data.db (0.000KiB) for commitlog position ReplayPosition(segmentId=1467130786324, position=567)"
+    status: "info"
     tags:
      - "source:LOGS_SOURCE"
     timestamp: 1467130788627
@@ -145,6 +150,7 @@ tests:
         thread_id: 26
         thread_name: "CompactionExecutor"
     message: "INFO  [CompactionExecutor:26] 2016-06-28 14:38:40,545  CompactionTask.java:274 - Compacted 2 sstables to [/app/cassandra/datastax/dse-data03/order_store/orderhistory-65765df1fc1f11e5974cd5203249f77a/order_store-orderhistory-ka-139517,].  32,011,749 bytes to 29,390,144 (~91% of original) in 1,771ms = 15.826440MB/s.  39,261 total partitions merged to 36,402.  Partition merge counts were {1:33543, 2:2859, }"
+    status: "info"
     tags:
      - "source:LOGS_SOURCE"
     timestamp: 1467124720545
@@ -168,6 +174,7 @@ tests:
       logger:
         thread_name: "ServiceThread"
     message: "WARN  [ServiceThread] 2016-06-30 14:42:41,538  GCInspector.java:256 - G1 Young Generation GC in 202ms.  G1 Eden Space: 1157627904 -> 0; G1 Old Gen: 6819034128 -> 4151661080; G1 Survivor Space: 553648128 -> 218103808;"
+    status: "warn"
     tags:
      - "source:LOGS_SOURCE"
     timestamp: 1467297761538
@@ -187,6 +194,7 @@ tests:
       logger:
         thread_name: "ServiceThread"
     message: "INFO  [ServiceThread] 2016-06-30 14:42:41,542  StatusLogger.java:99 - KeyCache                  365405196               1073741824                      all"
+    status: "info"
     tags:
      - "source:LOGS_SOURCE"
     timestamp: 1467297761542
@@ -203,6 +211,7 @@ tests:
         thread_name: "ServiceThread"
       msg: "whatever"
     message: "WARN  [ServiceThread] 2016-06-30 14:42:41,538  GCInspector.java:256 - whatever"
+    status: "warn"
     tags:
      - "source:LOGS_SOURCE"
     timestamp: 1467297761538
@@ -218,6 +227,7 @@ tests:
         thread_name: "ServiceThread"
       msg: "whatever"
     message: "2016-06-30 14:42:41 [ServiceThread] WARN GCInspector.java:256 - whatever"
+    status: "warn"
     tags:
      - "source:LOGS_SOURCE"
     timestamp: 1467297761000
@@ -235,6 +245,7 @@ tests:
         thread_name: "ValidationExecutor"
       msg: "[0..0]: 1"
     message: "DEBUG [ValidationExecutor:108] 2016-06-30 14:42:41,538 EstimatedHistogram.java:304 - [0..0]: 1"
+    status: "debug"
     tags:
      - "source:LOGS_SOURCE"
     timestamp: 1467297761538
@@ -256,6 +267,7 @@ tests:
         thread_id: 6272
         thread_name: "PerDiskMemtableFlushWriter_0"
     message: "DEBUG [PerDiskMemtableFlushWriter_0:6272] 2019-02-11 16:22:18,428 Memtable.java:485 - Completed flushing /cassdata/system/batches-845e4cb463211234e12b64ff2c24a132/321-big-Data.db (17.861KiB) for commitlog position CommitLogPosition(segmentId=1539908174810, position=5726318)"
+    status: "debug"
     tags:
      - "source:LOGS_SOURCE"
     timestamp: 1549902138428
@@ -286,6 +298,7 @@ tests:
       <SELECT * FROM offernet.work_e WHERE community_id = 1496222336 AND member_id = 49 AND ~~edge_label_id = 65550 LIMIT 50000>, time 505 msec - slow timeout 500 msec
       <SELECT * FROM offernet.item_e WHERE community_id = 2052914560 AND member_id = 189 AND ~~edge_label_id = 65553 LIMIT 50000>, time 505 msec - slow timeout 500 msec
       <SELECT * FROM offernet.item_e WHERE community_id = 2140990336 AND member_id = 212 AND ~~edge_label_id = 65553 LIMIT 50000>, time 504 msec - slow timeout 500 msec
+    status: "debug"
     tags:
      - "source:LOGS_SOURCE"
     timestamp: 1542891031441
@@ -313,6 +326,7 @@ tests:
       DEBUG [ScheduledTasks:1] 2019-12-30 15:24:19,781 MonitoringTask.java:173 - 1 operations were slow in the last 5000 msecs:
       <SELECT * FROM system_schema.tables LIMIT 100>, was slow 2 times: avg/min/max 2/2/3 msec - slow timeout 2 msec
       <SELECT * FROM system_schema.columns LIMIT 200>, was slow 3 times: avg/min/max 4/5/6 msec - slow timeout 3 msec
+    status: "debug"
     tags:
      - "source:LOGS_SOURCE"
     timestamp: 1577719459781
@@ -330,6 +344,7 @@ tests:
         thread_name: "GossipStage"
       msg: "Updating heartbeat state version to 2344 from 2343 for 127.0.0.2:7000"
     message: "TRACE [GossipStage:1] 2018-07-04 17:07:47,879 Gossiper.java:1234 - Updating heartbeat state version to 2344 from 2343 for 127.0.0.2:7000"
+    status: "debug"
     tags:
      - "source:LOGS_SOURCE"
     timestamp: 1530724067879
@@ -346,6 +361,7 @@ tests:
         thread_name: "SharedPool-Worker-1"
       msg: "Received: OPTIONS, v=4"
     message: "TRACE [SharedPool-Worker-1] 2016-02-05 19:44:00,154 Message.java:506 - Received: OPTIONS, v=4"
+    status: "debug"
     tags:
      - "source:LOGS_SOURCE"
     timestamp: 1454701440154
@@ -362,6 +378,7 @@ tests:
         thread_name: "SharedPool-Worker-1"
       msg: "Responding: ROWS [user_id(tlp_example, user_data), org.apache.cassandra.db.marshal.UUIDType][email(tlp_example, user_data), org.apache.cassandra.db.marshal.UTF8Type][tax_id(tlp_example, user_data), org.apache.cassandra.db.marshal.UTF8Type] | db8f7a00-cc3e-11e5-b248-091830ac5256 | nate+logex@thelastpickle.com | abc123 | 19be0e40-cc3f-11e5-b248-091830ac5256 | nate+logex@thelastpickle.com | abc123 ---, v=4"
     message: "TRACE [SharedPool-Worker-1] 2016-02-05 19:44:09,346 Message.java:525 - Responding: ROWS [user_id(tlp_example, user_data), org.apache.cassandra.db.marshal.UUIDType][email(tlp_example, user_data), org.apache.cassandra.db.marshal.UTF8Type][tax_id(tlp_example, user_data), org.apache.cassandra.db.marshal.UTF8Type] | db8f7a00-cc3e-11e5-b248-091830ac5256 | nate+logex@thelastpickle.com | abc123 | 19be0e40-cc3f-11e5-b248-091830ac5256 | nate+logex@thelastpickle.com | abc123 ---, v=4"
+    status: "debug"
     tags:
      - "source:LOGS_SOURCE"
     timestamp: 1454701449346

@@ -60,8 +60,8 @@ def dd_environment():
                 'ssl_verify': False,
                 'nova_microversion': '2.93',
                 'ironic_microversion': '1.80',
-                'openstack_cloud_name': 'test_cloud',
-                'openstack_config_file_path': '/home/openstack_controller/tests/config/openstack_config_updated.yaml',
+                '#openstack_cloud_name': 'test_cloud',
+                '#openstack_config_file_path': '/home/openstack_controller/tests/config/openstack_config_updated.yaml',
                 'endpoint_region_id': 'RegionOne',
                 'use_legacy_check_version': False,
             }
@@ -627,7 +627,7 @@ def connection_load_balancer(request, mock_responses):
             )
         )
 
-    def listeners(project_id):
+    def listeners(project_id, limit=None):
         if http_error and 'listeners' in http_error and project_id in http_error['listeners']:
             raise requests.exceptions.HTTPError(response=http_error['listeners'][project_id])
         return [
@@ -652,7 +652,7 @@ def connection_load_balancer(request, mock_responses):
             )
         )
 
-    def pools(project_id):
+    def pools(project_id, limit=None):
         if http_error and 'pools' in http_error and project_id in http_error['pools']:
             raise requests.exceptions.HTTPError(response=http_error['pools'][project_id])
         return [
@@ -704,7 +704,7 @@ def connection_load_balancer(request, mock_responses):
             for pool in mock_responses('GET', f'/load-balancer/v2/lbaas/quotas?project_id={project_id}')['quotas']
         ]
 
-    def amphorae(project_id):
+    def amphorae(project_id, limit=None):
         if http_error and 'amphorae' in http_error and project_id in http_error['amphorae']:
             raise requests.exceptions.HTTPError(response=http_error['amphorae'][project_id])
         return [

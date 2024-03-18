@@ -12,6 +12,7 @@ tests:
       scan_name: "scan_name"
       status: "info"
     message: "Started scan 'scan_name' as '1fc82d8d-770b-59c1-4c7d-daa1ab70dbf8c8e449bb9eaa9a50'"
+    status: "info"
     tags:
      - "source:LOGS_SOURCE"
     timestamp: 1570377658000
@@ -23,6 +24,7 @@ tests:
       function: "scan"
       status: "debug"
     message: "done processing scan"
+    status: "debug"
     tags:
      - "source:LOGS_SOURCE"
     timestamp: 1570377658000
@@ -33,6 +35,7 @@ tests:
       date: 1570731140000
       status: "debug"
     message: "Generating the attached csv report."
+    status: "debug"
     tags:
      - "source:LOGS_SOURCE"
     timestamp: 1570731140000

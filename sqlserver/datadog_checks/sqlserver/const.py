@@ -58,6 +58,9 @@ expected_sys_databases_columns = [
     'physical_database_name',
 ]
 
+DATABASE_SERVICE_CHECK_QUERY = """SELECT 1;"""
+SWITCH_DB_STATEMENT = """USE {};"""
+
 VALID_METRIC_TYPES = ('gauge', 'rate', 'histogram')
 
 SERVICE_CHECK_NAME = 'sqlserver.can_connect'

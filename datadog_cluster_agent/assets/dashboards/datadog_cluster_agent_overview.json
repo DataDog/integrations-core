@@ -1393,7 +1393,7 @@
                             {
                                 "data_source": "metrics",
                                 "name": "query1",
-                                "query": "avg:datadog.cluster_agent.admission_webhooks.mutation_attempts{injected:true,$cluster,$namespace} by {mutation_type}"
+                                "query": "avg:datadog.cluster_agent.admission_webhooks.mutation_attempts{status:success,$cluster,$namespace} by {mutation_type, injected}"
                             }
                         ],
                         "response_format": "timeseries",
@@ -1415,59 +1415,6 @@
             },
             "layout": {
                 "x": 4,
-                "y": 16,
-                "width": 4,
-                "height": 2
-            }
-        },
-        {
-            "id": 4551516642114976,
-            "definition": {
-                "title": "Mutation errors by type and reason",
-                "show_legend": true,
-                "legend_layout": "auto",
-                "legend_columns": [
-                    "avg",
-                    "min",
-                    "max",
-                    "value",
-                    "sum"
-                ],
-                "type": "timeseries",
-                "requests": [
-                    {
-                        "formulas": [
-                            {
-                                "formula": "query1"
-                            }
-                        ],
-                        "on_right_yaxis": false,
-                        "queries": [
-                            {
-                                "data_source": "metrics",
-                                "name": "query1",
-                                "query": "avg:datadog.cluster_agent.admission_webhooks.mutation_errors{$cluster,$namespace} by {mutation_type,reason}"
-                            }
-                        ],
-                        "response_format": "timeseries",
-                        "style": {
-                            "palette": "dog_classic",
-                            "line_type": "solid",
-                            "line_width": "normal"
-                        },
-                        "display_type": "area"
-                    }
-                ],
-                "yaxis": {
-                    "include_zero": true,
-                    "scale": "linear",
-                    "min": "auto",
-                    "max": "auto"
-                },
-                "markers": []
-            },
-            "layout": {
-                "x": 8,
                 "y": 16,
                 "width": 4,
                 "height": 2
@@ -1583,7 +1530,7 @@
                             {
                                 "data_source": "metrics",
                                 "name": "query1",
-                                "query": "avg:datadog.cluster_agent.admission_webhooks.mutation_attempts{injected:false,$cluster,$namespace} by {mutation_type}"
+                                "query": "avg:datadog.cluster_agent.admission_webhooks.mutation_attempts{status:error,$cluster,$namespace} by {mutation_type}"
                             }
                         ],
                         "response_format": "timeseries",

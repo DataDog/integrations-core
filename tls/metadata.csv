@@ -1,5 +1,5 @@
 metric_name,metric_type,interval,unit_name,per_unit_name,description,orientation,integration,short_name,curated_metric
 tls.days_left,gauge,,day,,Days until X.509 certificate expiration,1,tls,Days until expiration,
-tls.seconds_left,gauge,,second,,Seconds until X.509 certificate expiration,1,tls,Seconds until expiration,
 tls.issued_days,count,,day,,Day duration of timespan certificate is issued for,1,tls,Certificate duration in days,
 tls.issued_seconds,count,,second,,Second duration of timespan certificate is issued for,1,tls,Certificate duration in seconds,
+tls.seconds_left,gauge,,second,,Seconds until X.509 certificate expiration,1,tls,Seconds until expiration,

@@ -9,7 +9,19 @@ from datadog_checks.cockroachdb.metrics import METRIC_MAP, OMV2_METRIC_MAP
 from datadog_checks.dev.testing import requires_py3
 from datadog_checks.dev.utils import assert_service_checks, get_metadata_metrics
 
-from .common import CHANGEFEED_METRICS, assert_metrics, get_fixture_path
+from .common import (
+    ADMISSION_METRICS,
+    CHANGEFEED_METRICS,
+    DISTSENDER_METRICS,
+    JOBS_METRICS,
+    KV_METRICS,
+    PHYSICAL_METRICS,
+    QUEUE_METRICS,
+    RAFT_METRICS,
+    SQL_METRICS,
+    assert_metrics,
+    get_fixture_path,
+)
 
 pytestmark = [requires_py3]
 
@@ -45,6 +57,14 @@ def test_fixture_metrics(aggregator, instance, dd_run_check, mock_http_response,
     'file, metrics',
     [
         pytest.param('changefeed_metrics.txt', CHANGEFEED_METRICS, id='changefeed'),
+        pytest.param('admission_metrics.txt', ADMISSION_METRICS, id='admission'),
+        pytest.param('distsender_metrics.txt', DISTSENDER_METRICS, id='distsender'),
+        pytest.param('jobs_metrics.txt', JOBS_METRICS, id='jobs'),
+        pytest.param('kv_metrics.txt', KV_METRICS, id='kv'),
+        pytest.param('physical_metrics.txt', PHYSICAL_METRICS, id='physical'),
+        pytest.param('queue_metrics.txt', QUEUE_METRICS, id='queue'),
+        pytest.param('raft_metrics.txt', RAFT_METRICS, id='raft'),
+        pytest.param('sql_metrics.txt', SQL_METRICS, id='sql'),
     ],
 )
 def test_metrics(aggregator, instance, dd_run_check, mock_http_response, file, metrics):
@@ -54,7 +74,9 @@ def test_metrics(aggregator, instance, dd_run_check, mock_http_response, file, m
     tags = ['cluster:cockroachdb-cluster', 'endpoint:http://localhost:8080/_status/vars', 'node:1', 'node_id:1']
 
     for metric in metrics:
-        aggregator.assert_metric('cockroachdb.{}'.format(metric), tags=tags)
+        aggregator.assert_metric('cockroachdb.{}'.format(metric))
+        for tag in tags:
+            aggregator.assert_metric_has_tag('cockroachdb.{}'.format(metric), tag)
 
     aggregator.assert_service_check('cockroachdb.openmetrics.health', ServiceCheck.OK)
     aggregator.assert_all_metrics_covered()
@@ -65,3 +87,10 @@ def test_metrics(aggregator, instance, dd_run_check, mock_http_response, file, m
 
 def test_no_duplicate_metrics_in_maps():
     assert set(OMV2_METRIC_MAP.keys()).intersection(METRIC_MAP.keys()) == set()
+
+
+@pytest.mark.parametrize('map', [OMV2_METRIC_MAP, METRIC_MAP])
+@pytest.mark.parametrize('metric', ['build_timestamp', 'distsender_rpc_err_errordetailtype'])
+def test_metrics_not_in_maps(map, metric):
+    # handled by a custom transformer
+    assert metric not in map

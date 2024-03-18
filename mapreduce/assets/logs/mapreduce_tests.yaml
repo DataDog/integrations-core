@@ -10,6 +10,7 @@ tests:
         name: "org.apache.hadoop.mapred.MapTask"
       timestamp: 1597850461647
     message: "Processing split: hdfs://namenode:9000/user/root/input/hadoop-env.cmd:0+3999"
+    status: "info"
     tags:
      - "source:LOGS_SOURCE"
     timestamp: 1597850461647
@@ -26,6 +27,7 @@ tests:
           attempt_id: "attempt_1597861183743_0001_m_000012_0"
       timestamp: 1597861239315
     message: "Could not delete hdfs://namenode:9000/user/root/grep-temp-312857601/_temporary/1/_temporary/attempt_1597861183743_0001_m_000012_0"
+    status: "warn"
     tags:
      - "source:LOGS_SOURCE"
     timestamp: 1597861239315
@@ -42,6 +44,7 @@ tests:
           attempt_id: "attempt_1597851676689_0007_r_000000_0"
       timestamp: 1597852386319
     message: "KILLING attempt_1597851676689_0007_r_000000_0"
+    status: "info"
     tags:
      - "source:LOGS_SOURCE"
     timestamp: 1597852386319
@@ -59,6 +62,7 @@ tests:
           state: "SUCCEEDED"
       timestamp: 1597868268161
     message: "attempt_1597861183743_0008_r_000000_0 TaskAttempt Transitioned from SUCCESS_FINISHING_CONTAINER to SUCCEEDED"
+    status: "info"
     tags:
      - "source:LOGS_SOURCE"
     timestamp: 1597868268161

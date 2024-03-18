@@ -85,7 +85,8 @@ http = [
     "requests-kerberos==0.14.0; python_version > '3.0'",
     "requests-ntlm==1.1.0; python_version < '3.0'",
     "requests-ntlm==1.2.0; python_version > '3.0'",
-    "requests-oauthlib==1.3.1",
+    "requests-oauthlib==1.4.0; python_version > '3.0'",
+    "requests-oauthlib==1.3.1; python_version < '3.0'",
     "win-inet-pton==1.1.0; sys_platform == 'win32' and python_version < '3.0'",
 ]
 json = [
@@ -94,6 +95,7 @@ json = [
 kube = [
     "kubernetes==18.20.0; python_version < '3.0'",
     "kubernetes==28.1.0; python_version > '3.0'",
+    "requests-oauthlib==1.3.1; python_version < '3.0'",
 ]
 
 [project.urls]

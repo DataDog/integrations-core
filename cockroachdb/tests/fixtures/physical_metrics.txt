@@ -1,0 +1,462 @@
+# HELP physical_replication_events_ingested Events ingested by all replication jobs
+# TYPE physical_replication_events_ingested counter
+physical_replication_events_ingested{node_id="1"} 0
+# HELP physical_replication_flushes Total flushes across all replication jobs
+# TYPE physical_replication_flushes counter
+physical_replication_flushes{node_id="1"} 0
+# HELP physical_replication_flush_hist_nanos Time spent flushing messages across all replication streams
+# TYPE physical_replication_flush_hist_nanos histogram
+physical_replication_flush_hist_nanos_bucket{node_id="1",le="5e+08"} 0
+physical_replication_flush_hist_nanos_bucket{node_id="1",le="5.572592853587432e+08"} 0
+physical_replication_flush_hist_nanos_bucket{node_id="1",le="6.210758222370743e+08"} 0
+physical_replication_flush_hist_nanos_bucket{node_id="1",le="6.922005377068515e+08"} 0
+physical_replication_flush_hist_nanos_bucket{node_id="1",le="7.714703539349157e+08"} 0
+physical_replication_flush_hist_nanos_bucket{node_id="1",le="8.598180362184556e+08"} 0
+physical_replication_flush_hist_nanos_bucket{node_id="1",le="9.582831688033088e+08"} 0
+physical_replication_flush_hist_nanos_bucket{node_id="1",le="1.0680243876372875e+09"} 0
+physical_replication_flush_hist_nanos_bucket{node_id="1",le="1.1903330140009282e+09"} 0
+physical_replication_flush_hist_nanos_bucket{node_id="1",le="1.326648249442152e+09"} 0
+physical_replication_flush_hist_nanos_bucket{node_id="1",le="1.4785741108131227e+09"} 0
+physical_replication_flush_hist_nanos_bucket{node_id="1",le="1.6478983046833196e+09"} 0
+physical_replication_flush_hist_nanos_bucket{node_id="1",le="1.8366132632234223e+09"} 0
+physical_replication_flush_hist_nanos_bucket{node_id="1",le="2.046939589088547e+09"} 0
+physical_replication_flush_hist_nanos_bucket{node_id="1",le="2.2813521851760063e+09"} 0
+physical_replication_flush_hist_nanos_bucket{node_id="1",le="2.5426093767255764e+09"} 0
+physical_replication_flush_hist_nanos_bucket{node_id="1",le="2.833785368441068e+09"} 0
+physical_replication_flush_hist_nanos_bucket{node_id="1",le="3.1583064185550647e+09"} 0
+physical_replication_flush_hist_nanos_bucket{node_id="1",le="3.5199911554958534e+09"} 0
+physical_replication_flush_hist_nanos_bucket{node_id="1",le="3.9230955115614314e+09"} 0
+physical_replication_flush_hist_nanos_bucket{node_id="1",le="4.372362802333632e+09"} 0
+physical_replication_flush_hist_nanos_bucket{node_id="1",le="4.873079541115184e+09"} 0
+physical_replication_flush_hist_nanos_bucket{node_id="1",le="5.431137645156319e+09"} 0
+physical_replication_flush_hist_nanos_bucket{node_id="1",le="6.053103765649553e+09"} 0
+physical_replication_flush_hist_nanos_bucket{node_id="1",le="6.746296557296375e+09"} 0
+physical_replication_flush_hist_nanos_bucket{node_id="1",le="7.518872796674253e+09"} 0
+physical_replication_flush_hist_nanos_bucket{node_id="1",le="8.37992336275598e+09"} 0
+physical_replication_flush_hist_nanos_bucket{node_id="1",le="9.339580208980864e+09"} 0
+physical_replication_flush_hist_nanos_bucket{node_id="1",le="1.0409135585614676e+10"} 0
+physical_replication_flush_hist_nanos_bucket{node_id="1",le="1.1601174915283792e+10"} 0
+physical_replication_flush_hist_nanos_bucket{node_id="1",le="1.2929724885225649e+10"} 0
+physical_replication_flush_hist_nanos_bucket{node_id="1",le="1.4410418498852003e+10"} 0
+physical_replication_flush_hist_nanos_bucket{node_id="1",le="1.6060679028781363e+10"} 0
+physical_replication_flush_hist_nanos_bucket{node_id="1",le="1.789992503590971e+10"} 0
+physical_replication_flush_hist_nanos_bucket{node_id="1",le="1.9949798866972237e+10"} 0
+physical_replication_flush_hist_nanos_bucket{node_id="1",le="2.2234421319319225e+10"} 0
+physical_replication_flush_hist_nanos_bucket{node_id="1",le="2.478067546953807e+10"} 0
+physical_replication_flush_hist_nanos_bucket{node_id="1",le="2.7618523005723442e+10"} 0
+physical_replication_flush_hist_nanos_bucket{node_id="1",le="3.0781356785666904e+10"} 0
+physical_replication_flush_hist_nanos_bucket{node_id="1",le="3.4306393769506477e+10"} 0
+physical_replication_flush_hist_nanos_bucket{node_id="1",le="3.823511295046164e+10"} 0
+physical_replication_flush_hist_nanos_bucket{node_id="1",le="4.261374343677016e+10"} 0
+physical_replication_flush_hist_nanos_bucket{node_id="1",le="4.749380842807073e+10"} 0
+physical_replication_flush_hist_nanos_bucket{node_id="1",le="5.2932731487183495e+10"} 0
+physical_replication_flush_hist_nanos_bucket{node_id="1",le="5.899451224126824e+10"} 0
+physical_replication_flush_hist_nanos_bucket{node_id="1",le="6.575047946331352e+10"} 0
+physical_replication_flush_hist_nanos_bucket{node_id="1",le="7.328013039544164e+10"} 0
+physical_replication_flush_hist_nanos_bucket{node_id="1",le="8.167206619031862e+10"} 0
+physical_replication_flush_hist_nanos_bucket{node_id="1",le="9.102503447797786e+10"} 0
+physical_replication_flush_hist_nanos_bucket{node_id="1",le="1.0144909132590578e+11"} 0
+physical_replication_flush_hist_nanos_bucket{node_id="1",le="1.1306689626513626e+11"} 0
+physical_replication_flush_hist_nanos_bucket{node_id="1",le="1.2601515562088194e+11"} 0
+physical_replication_flush_hist_nanos_bucket{node_id="1",le="1.4044623113132697e+11"} 0
+physical_replication_flush_hist_nanos_bucket{node_id="1",le="1.5652993278314426e+11"} 0
+physical_replication_flush_hist_nanos_bucket{node_id="1",le="1.7445551695997415e+11"} 0
+physical_replication_flush_hist_nanos_bucket{node_id="1",le="1.9443391341601053e+11"} 0
+physical_replication_flush_hist_nanos_bucket{node_id="1",le="2.167002072794196e+11"} 0
+physical_replication_flush_hist_nanos_bucket{node_id="1",le="2.415164052912417e+11"} 0
+physical_replication_flush_hist_nanos_bucket{node_id="1",le="2.691745188300199e+11"} 0
+physical_replication_flush_hist_nanos_bucket{node_id="1",le="3.0000000000000085e+11"} 0
+physical_replication_flush_hist_nanos_bucket{node_id="1",le="+Inf"} 0
+physical_replication_flush_hist_nanos_sum{node_id="1"} 0
+physical_replication_flush_hist_nanos_count{node_id="1"} 0
+# HELP physical_replication_latest_data_checkpoint_span The latest timestamp of the last checkpoint forwarded by an ingestion data processor
+# TYPE physical_replication_latest_data_checkpoint_span gauge
+physical_replication_latest_data_checkpoint_span{node_id="1"} 0
+# HELP physical_replication_commit_latency Event commit latency: a difference between event MVCC timestamp and the time it was flushed into disk. If we batch events, then the difference between the oldest event in the batch and flush is recorded
+# TYPE physical_replication_commit_latency histogram
+physical_replication_commit_latency_bucket{node_id="1",le="5e+08"} 0
+physical_replication_commit_latency_bucket{node_id="1",le="5.572592853587432e+08"} 0
+physical_replication_commit_latency_bucket{node_id="1",le="6.210758222370743e+08"} 0
+physical_replication_commit_latency_bucket{node_id="1",le="6.922005377068515e+08"} 0
+physical_replication_commit_latency_bucket{node_id="1",le="7.714703539349157e+08"} 0
+physical_replication_commit_latency_bucket{node_id="1",le="8.598180362184556e+08"} 0
+physical_replication_commit_latency_bucket{node_id="1",le="9.582831688033088e+08"} 0
+physical_replication_commit_latency_bucket{node_id="1",le="1.0680243876372875e+09"} 0
+physical_replication_commit_latency_bucket{node_id="1",le="1.1903330140009282e+09"} 0
+physical_replication_commit_latency_bucket{node_id="1",le="1.326648249442152e+09"} 0
+physical_replication_commit_latency_bucket{node_id="1",le="1.4785741108131227e+09"} 0
+physical_replication_commit_latency_bucket{node_id="1",le="1.6478983046833196e+09"} 0
+physical_replication_commit_latency_bucket{node_id="1",le="1.8366132632234223e+09"} 0
+physical_replication_commit_latency_bucket{node_id="1",le="2.046939589088547e+09"} 0
+physical_replication_commit_latency_bucket{node_id="1",le="2.2813521851760063e+09"} 0
+physical_replication_commit_latency_bucket{node_id="1",le="2.5426093767255764e+09"} 0
+physical_replication_commit_latency_bucket{node_id="1",le="2.833785368441068e+09"} 0
+physical_replication_commit_latency_bucket{node_id="1",le="3.1583064185550647e+09"} 0
+physical_replication_commit_latency_bucket{node_id="1",le="3.5199911554958534e+09"} 0
+physical_replication_commit_latency_bucket{node_id="1",le="3.9230955115614314e+09"} 0
+physical_replication_commit_latency_bucket{node_id="1",le="4.372362802333632e+09"} 0
+physical_replication_commit_latency_bucket{node_id="1",le="4.873079541115184e+09"} 0
+physical_replication_commit_latency_bucket{node_id="1",le="5.431137645156319e+09"} 0
+physical_replication_commit_latency_bucket{node_id="1",le="6.053103765649553e+09"} 0
+physical_replication_commit_latency_bucket{node_id="1",le="6.746296557296375e+09"} 0
+physical_replication_commit_latency_bucket{node_id="1",le="7.518872796674253e+09"} 0
+physical_replication_commit_latency_bucket{node_id="1",le="8.37992336275598e+09"} 0
+physical_replication_commit_latency_bucket{node_id="1",le="9.339580208980864e+09"} 0
+physical_replication_commit_latency_bucket{node_id="1",le="1.0409135585614676e+10"} 0
+physical_replication_commit_latency_bucket{node_id="1",le="1.1601174915283792e+10"} 0
+physical_replication_commit_latency_bucket{node_id="1",le="1.2929724885225649e+10"} 0
+physical_replication_commit_latency_bucket{node_id="1",le="1.4410418498852003e+10"} 0
+physical_replication_commit_latency_bucket{node_id="1",le="1.6060679028781363e+10"} 0
+physical_replication_commit_latency_bucket{node_id="1",le="1.789992503590971e+10"} 0
+physical_replication_commit_latency_bucket{node_id="1",le="1.9949798866972237e+10"} 0
+physical_replication_commit_latency_bucket{node_id="1",le="2.2234421319319225e+10"} 0
+physical_replication_commit_latency_bucket{node_id="1",le="2.478067546953807e+10"} 0
+physical_replication_commit_latency_bucket{node_id="1",le="2.7618523005723442e+10"} 0
+physical_replication_commit_latency_bucket{node_id="1",le="3.0781356785666904e+10"} 0
+physical_replication_commit_latency_bucket{node_id="1",le="3.4306393769506477e+10"} 0
+physical_replication_commit_latency_bucket{node_id="1",le="3.823511295046164e+10"} 0
+physical_replication_commit_latency_bucket{node_id="1",le="4.261374343677016e+10"} 0
+physical_replication_commit_latency_bucket{node_id="1",le="4.749380842807073e+10"} 0
+physical_replication_commit_latency_bucket{node_id="1",le="5.2932731487183495e+10"} 0
+physical_replication_commit_latency_bucket{node_id="1",le="5.899451224126824e+10"} 0
+physical_replication_commit_latency_bucket{node_id="1",le="6.575047946331352e+10"} 0
+physical_replication_commit_latency_bucket{node_id="1",le="7.328013039544164e+10"} 0
+physical_replication_commit_latency_bucket{node_id="1",le="8.167206619031862e+10"} 0
+physical_replication_commit_latency_bucket{node_id="1",le="9.102503447797786e+10"} 0
+physical_replication_commit_latency_bucket{node_id="1",le="1.0144909132590578e+11"} 0
+physical_replication_commit_latency_bucket{node_id="1",le="1.1306689626513626e+11"} 0
+physical_replication_commit_latency_bucket{node_id="1",le="1.2601515562088194e+11"} 0
+physical_replication_commit_latency_bucket{node_id="1",le="1.4044623113132697e+11"} 0
+physical_replication_commit_latency_bucket{node_id="1",le="1.5652993278314426e+11"} 0
+physical_replication_commit_latency_bucket{node_id="1",le="1.7445551695997415e+11"} 0
+physical_replication_commit_latency_bucket{node_id="1",le="1.9443391341601053e+11"} 0
+physical_replication_commit_latency_bucket{node_id="1",le="2.167002072794196e+11"} 0
+physical_replication_commit_latency_bucket{node_id="1",le="2.415164052912417e+11"} 0
+physical_replication_commit_latency_bucket{node_id="1",le="2.691745188300199e+11"} 0
+physical_replication_commit_latency_bucket{node_id="1",le="3.0000000000000085e+11"} 0
+physical_replication_commit_latency_bucket{node_id="1",le="+Inf"} 0
+physical_replication_commit_latency_sum{node_id="1"} 0
+physical_replication_commit_latency_count{node_id="1"} 0
+# HELP physical_replication_earliest_data_checkpoint_span The earliest timestamp of the last checkpoint forwarded by an ingestion data processor
+# TYPE physical_replication_earliest_data_checkpoint_span gauge
+physical_replication_earliest_data_checkpoint_span{node_id="1"} 0
+# HELP physical_replication_resolved_events_ingested Resolved events ingested by all replication jobs
+# TYPE physical_replication_resolved_events_ingested counter
+physical_replication_resolved_events_ingested{node_id="1"} 0
+# HELP physical_replication_job_progress_updates Total number of updates to the ingestion job progress
+# TYPE physical_replication_job_progress_updates counter
+physical_replication_job_progress_updates{node_id="1"} 0
+# HELP physical_replication_replicated_time_seconds The replicated time of the physical replication stream in seconds since the unix epoch.
+# TYPE physical_replication_replicated_time_seconds gauge
+physical_replication_replicated_time_seconds{node_id="1"} 0
+# HELP physical_replication_running Number of currently running replication streams
+# TYPE physical_replication_running gauge
+physical_replication_running{node_id="1"} 0
+# HELP physical_replication_admit_latency Event admission latency: a difference between event MVCC timestamp and the time it was admitted into ingestion processor
+# TYPE physical_replication_admit_latency histogram
+physical_replication_admit_latency_bucket{node_id="1",le="5e+08"} 0
+physical_replication_admit_latency_bucket{node_id="1",le="5.572592853587432e+08"} 0
+physical_replication_admit_latency_bucket{node_id="1",le="6.210758222370743e+08"} 0
+physical_replication_admit_latency_bucket{node_id="1",le="6.922005377068515e+08"} 0
+physical_replication_admit_latency_bucket{node_id="1",le="7.714703539349157e+08"} 0
+physical_replication_admit_latency_bucket{node_id="1",le="8.598180362184556e+08"} 0
+physical_replication_admit_latency_bucket{node_id="1",le="9.582831688033088e+08"} 0
+physical_replication_admit_latency_bucket{node_id="1",le="1.0680243876372875e+09"} 0
+physical_replication_admit_latency_bucket{node_id="1",le="1.1903330140009282e+09"} 0
+physical_replication_admit_latency_bucket{node_id="1",le="1.326648249442152e+09"} 0
+physical_replication_admit_latency_bucket{node_id="1",le="1.4785741108131227e+09"} 0
+physical_replication_admit_latency_bucket{node_id="1",le="1.6478983046833196e+09"} 0
+physical_replication_admit_latency_bucket{node_id="1",le="1.8366132632234223e+09"} 0
+physical_replication_admit_latency_bucket{node_id="1",le="2.046939589088547e+09"} 0
+physical_replication_admit_latency_bucket{node_id="1",le="2.2813521851760063e+09"} 0
+physical_replication_admit_latency_bucket{node_id="1",le="2.5426093767255764e+09"} 0
+physical_replication_admit_latency_bucket{node_id="1",le="2.833785368441068e+09"} 0
+physical_replication_admit_latency_bucket{node_id="1",le="3.1583064185550647e+09"} 0
+physical_replication_admit_latency_bucket{node_id="1",le="3.5199911554958534e+09"} 0
+physical_replication_admit_latency_bucket{node_id="1",le="3.9230955115614314e+09"} 0
+physical_replication_admit_latency_bucket{node_id="1",le="4.372362802333632e+09"} 0
+physical_replication_admit_latency_bucket{node_id="1",le="4.873079541115184e+09"} 0
+physical_replication_admit_latency_bucket{node_id="1",le="5.431137645156319e+09"} 0
+physical_replication_admit_latency_bucket{node_id="1",le="6.053103765649553e+09"} 0
+physical_replication_admit_latency_bucket{node_id="1",le="6.746296557296375e+09"} 0
+physical_replication_admit_latency_bucket{node_id="1",le="7.518872796674253e+09"} 0
+physical_replication_admit_latency_bucket{node_id="1",le="8.37992336275598e+09"} 0
+physical_replication_admit_latency_bucket{node_id="1",le="9.339580208980864e+09"} 0
+physical_replication_admit_latency_bucket{node_id="1",le="1.0409135585614676e+10"} 0
+physical_replication_admit_latency_bucket{node_id="1",le="1.1601174915283792e+10"} 0
+physical_replication_admit_latency_bucket{node_id="1",le="1.2929724885225649e+10"} 0
+physical_replication_admit_latency_bucket{node_id="1",le="1.4410418498852003e+10"} 0
+physical_replication_admit_latency_bucket{node_id="1",le="1.6060679028781363e+10"} 0
+physical_replication_admit_latency_bucket{node_id="1",le="1.789992503590971e+10"} 0
+physical_replication_admit_latency_bucket{node_id="1",le="1.9949798866972237e+10"} 0
+physical_replication_admit_latency_bucket{node_id="1",le="2.2234421319319225e+10"} 0
+physical_replication_admit_latency_bucket{node_id="1",le="2.478067546953807e+10"} 0
+physical_replication_admit_latency_bucket{node_id="1",le="2.7618523005723442e+10"} 0
+physical_replication_admit_latency_bucket{node_id="1",le="3.0781356785666904e+10"} 0
+physical_replication_admit_latency_bucket{node_id="1",le="3.4306393769506477e+10"} 0
+physical_replication_admit_latency_bucket{node_id="1",le="3.823511295046164e+10"} 0
+physical_replication_admit_latency_bucket{node_id="1",le="4.261374343677016e+10"} 0
+physical_replication_admit_latency_bucket{node_id="1",le="4.749380842807073e+10"} 0
+physical_replication_admit_latency_bucket{node_id="1",le="5.2932731487183495e+10"} 0
+physical_replication_admit_latency_bucket{node_id="1",le="5.899451224126824e+10"} 0
+physical_replication_admit_latency_bucket{node_id="1",le="6.575047946331352e+10"} 0
+physical_replication_admit_latency_bucket{node_id="1",le="7.328013039544164e+10"} 0
+physical_replication_admit_latency_bucket{node_id="1",le="8.167206619031862e+10"} 0
+physical_replication_admit_latency_bucket{node_id="1",le="9.102503447797786e+10"} 0
+physical_replication_admit_latency_bucket{node_id="1",le="1.0144909132590578e+11"} 0
+physical_replication_admit_latency_bucket{node_id="1",le="1.1306689626513626e+11"} 0
+physical_replication_admit_latency_bucket{node_id="1",le="1.2601515562088194e+11"} 0
+physical_replication_admit_latency_bucket{node_id="1",le="1.4044623113132697e+11"} 0
+physical_replication_admit_latency_bucket{node_id="1",le="1.5652993278314426e+11"} 0
+physical_replication_admit_latency_bucket{node_id="1",le="1.7445551695997415e+11"} 0
+physical_replication_admit_latency_bucket{node_id="1",le="1.9443391341601053e+11"} 0
+physical_replication_admit_latency_bucket{node_id="1",le="2.167002072794196e+11"} 0
+physical_replication_admit_latency_bucket{node_id="1",le="2.415164052912417e+11"} 0
+physical_replication_admit_latency_bucket{node_id="1",le="2.691745188300199e+11"} 0
+physical_replication_admit_latency_bucket{node_id="1",le="3.0000000000000085e+11"} 0
+physical_replication_admit_latency_bucket{node_id="1",le="+Inf"} 0
+physical_replication_admit_latency_sum{node_id="1"} 0
+physical_replication_admit_latency_count{node_id="1"} 0
+# HELP physical_replication_sst_bytes SST bytes (compressed) sent to KV by all replication jobs
+# TYPE physical_replication_sst_bytes counter
+physical_replication_sst_bytes{node_id="1"} 0
+# HELP physical_replication_logical_bytes Logical bytes (sum of keys + values) ingested by all replication jobs
+# TYPE physical_replication_logical_bytes counter
+physical_replication_logical_bytes{node_id="1"} 0
+# HELP physical_replication_cutover_progress The number of ranges left to revert in order to complete an inflight cutover
+# TYPE physical_replication_cutover_progress gauge
+physical_replication_cutover_progress{node_id="1"} 0
+# HELP physical_replication_distsql_replan_count Total number of dist sql replanning events
+# TYPE physical_replication_distsql_replan_count counter
+physical_replication_distsql_replan_count{node_id="1"} 0
+# HELP physical_replication_events_ingested Events ingested by all replication jobs
+# TYPE physical_replication_events_ingested counter
+physical_replication_events_ingested{node_id="1"} 0
+# HELP physical_replication_flushes Total flushes across all replication jobs
+# TYPE physical_replication_flushes counter
+physical_replication_flushes{node_id="1"} 0
+# HELP physical_replication_flush_hist_nanos Time spent flushing messages across all replication streams
+# TYPE physical_replication_flush_hist_nanos histogram
+physical_replication_flush_hist_nanos_bucket{node_id="1",le="5e+08"} 0
+physical_replication_flush_hist_nanos_bucket{node_id="1",le="5.572592853587432e+08"} 0
+physical_replication_flush_hist_nanos_bucket{node_id="1",le="6.210758222370743e+08"} 0
+physical_replication_flush_hist_nanos_bucket{node_id="1",le="6.922005377068515e+08"} 0
+physical_replication_flush_hist_nanos_bucket{node_id="1",le="7.714703539349157e+08"} 0
+physical_replication_flush_hist_nanos_bucket{node_id="1",le="8.598180362184556e+08"} 0
+physical_replication_flush_hist_nanos_bucket{node_id="1",le="9.582831688033088e+08"} 0
+physical_replication_flush_hist_nanos_bucket{node_id="1",le="1.0680243876372875e+09"} 0
+physical_replication_flush_hist_nanos_bucket{node_id="1",le="1.1903330140009282e+09"} 0
+physical_replication_flush_hist_nanos_bucket{node_id="1",le="1.326648249442152e+09"} 0
+physical_replication_flush_hist_nanos_bucket{node_id="1",le="1.4785741108131227e+09"} 0
+physical_replication_flush_hist_nanos_bucket{node_id="1",le="1.6478983046833196e+09"} 0
+physical_replication_flush_hist_nanos_bucket{node_id="1",le="1.8366132632234223e+09"} 0
+physical_replication_flush_hist_nanos_bucket{node_id="1",le="2.046939589088547e+09"} 0
+physical_replication_flush_hist_nanos_bucket{node_id="1",le="2.2813521851760063e+09"} 0
+physical_replication_flush_hist_nanos_bucket{node_id="1",le="2.5426093767255764e+09"} 0
+physical_replication_flush_hist_nanos_bucket{node_id="1",le="2.833785368441068e+09"} 0
+physical_replication_flush_hist_nanos_bucket{node_id="1",le="3.1583064185550647e+09"} 0
+physical_replication_flush_hist_nanos_bucket{node_id="1",le="3.5199911554958534e+09"} 0
+physical_replication_flush_hist_nanos_bucket{node_id="1",le="3.9230955115614314e+09"} 0
+physical_replication_flush_hist_nanos_bucket{node_id="1",le="4.372362802333632e+09"} 0
+physical_replication_flush_hist_nanos_bucket{node_id="1",le="4.873079541115184e+09"} 0
+physical_replication_flush_hist_nanos_bucket{node_id="1",le="5.431137645156319e+09"} 0
+physical_replication_flush_hist_nanos_bucket{node_id="1",le="6.053103765649553e+09"} 0
+physical_replication_flush_hist_nanos_bucket{node_id="1",le="6.746296557296375e+09"} 0
+physical_replication_flush_hist_nanos_bucket{node_id="1",le="7.518872796674253e+09"} 0
+physical_replication_flush_hist_nanos_bucket{node_id="1",le="8.37992336275598e+09"} 0
+physical_replication_flush_hist_nanos_bucket{node_id="1",le="9.339580208980864e+09"} 0
+physical_replication_flush_hist_nanos_bucket{node_id="1",le="1.0409135585614676e+10"} 0
+physical_replication_flush_hist_nanos_bucket{node_id="1",le="1.1601174915283792e+10"} 0
+physical_replication_flush_hist_nanos_bucket{node_id="1",le="1.2929724885225649e+10"} 0
+physical_replication_flush_hist_nanos_bucket{node_id="1",le="1.4410418498852003e+10"} 0
+physical_replication_flush_hist_nanos_bucket{node_id="1",le="1.6060679028781363e+10"} 0
+physical_replication_flush_hist_nanos_bucket{node_id="1",le="1.789992503590971e+10"} 0
+physical_replication_flush_hist_nanos_bucket{node_id="1",le="1.9949798866972237e+10"} 0
+physical_replication_flush_hist_nanos_bucket{node_id="1",le="2.2234421319319225e+10"} 0
+physical_replication_flush_hist_nanos_bucket{node_id="1",le="2.478067546953807e+10"} 0
+physical_replication_flush_hist_nanos_bucket{node_id="1",le="2.7618523005723442e+10"} 0
+physical_replication_flush_hist_nanos_bucket{node_id="1",le="3.0781356785666904e+10"} 0
+physical_replication_flush_hist_nanos_bucket{node_id="1",le="3.4306393769506477e+10"} 0
+physical_replication_flush_hist_nanos_bucket{node_id="1",le="3.823511295046164e+10"} 0
+physical_replication_flush_hist_nanos_bucket{node_id="1",le="4.261374343677016e+10"} 0
+physical_replication_flush_hist_nanos_bucket{node_id="1",le="4.749380842807073e+10"} 0
+physical_replication_flush_hist_nanos_bucket{node_id="1",le="5.2932731487183495e+10"} 0
+physical_replication_flush_hist_nanos_bucket{node_id="1",le="5.899451224126824e+10"} 0
+physical_replication_flush_hist_nanos_bucket{node_id="1",le="6.575047946331352e+10"} 0
+physical_replication_flush_hist_nanos_bucket{node_id="1",le="7.328013039544164e+10"} 0
+physical_replication_flush_hist_nanos_bucket{node_id="1",le="8.167206619031862e+10"} 0
+physical_replication_flush_hist_nanos_bucket{node_id="1",le="9.102503447797786e+10"} 0
+physical_replication_flush_hist_nanos_bucket{node_id="1",le="1.0144909132590578e+11"} 0
+physical_replication_flush_hist_nanos_bucket{node_id="1",le="1.1306689626513626e+11"} 0
+physical_replication_flush_hist_nanos_bucket{node_id="1",le="1.2601515562088194e+11"} 0
+physical_replication_flush_hist_nanos_bucket{node_id="1",le="1.4044623113132697e+11"} 0
+physical_replication_flush_hist_nanos_bucket{node_id="1",le="1.5652993278314426e+11"} 0
+physical_replication_flush_hist_nanos_bucket{node_id="1",le="1.7445551695997415e+11"} 0
+physical_replication_flush_hist_nanos_bucket{node_id="1",le="1.9443391341601053e+11"} 0
+physical_replication_flush_hist_nanos_bucket{node_id="1",le="2.167002072794196e+11"} 0
+physical_replication_flush_hist_nanos_bucket{node_id="1",le="2.415164052912417e+11"} 0
+physical_replication_flush_hist_nanos_bucket{node_id="1",le="2.691745188300199e+11"} 0
+physical_replication_flush_hist_nanos_bucket{node_id="1",le="3.0000000000000085e+11"} 0
+physical_replication_flush_hist_nanos_bucket{node_id="1",le="+Inf"} 0
+physical_replication_flush_hist_nanos_sum{node_id="1"} 0
+physical_replication_flush_hist_nanos_count{node_id="1"} 0
+# HELP physical_replication_latest_data_checkpoint_span The latest timestamp of the last checkpoint forwarded by an ingestion data processor
+# TYPE physical_replication_latest_data_checkpoint_span gauge
+physical_replication_latest_data_checkpoint_span{node_id="1"} 0
+# HELP physical_replication_commit_latency Event commit latency: a difference between event MVCC timestamp and the time it was flushed into disk. If we batch events, then the difference between the oldest event in the batch and flush is recorded
+# TYPE physical_replication_commit_latency histogram
+physical_replication_commit_latency_bucket{node_id="1",le="5e+08"} 0
+physical_replication_commit_latency_bucket{node_id="1",le="5.572592853587432e+08"} 0
+physical_replication_commit_latency_bucket{node_id="1",le="6.210758222370743e+08"} 0
+physical_replication_commit_latency_bucket{node_id="1",le="6.922005377068515e+08"} 0
+physical_replication_commit_latency_bucket{node_id="1",le="7.714703539349157e+08"} 0
+physical_replication_commit_latency_bucket{node_id="1",le="8.598180362184556e+08"} 0
+physical_replication_commit_latency_bucket{node_id="1",le="9.582831688033088e+08"} 0
+physical_replication_commit_latency_bucket{node_id="1",le="1.0680243876372875e+09"} 0
+physical_replication_commit_latency_bucket{node_id="1",le="1.1903330140009282e+09"} 0
+physical_replication_commit_latency_bucket{node_id="1",le="1.326648249442152e+09"} 0
+physical_replication_commit_latency_bucket{node_id="1",le="1.4785741108131227e+09"} 0
+physical_replication_commit_latency_bucket{node_id="1",le="1.6478983046833196e+09"} 0
+physical_replication_commit_latency_bucket{node_id="1",le="1.8366132632234223e+09"} 0
+physical_replication_commit_latency_bucket{node_id="1",le="2.046939589088547e+09"} 0
+physical_replication_commit_latency_bucket{node_id="1",le="2.2813521851760063e+09"} 0
+physical_replication_commit_latency_bucket{node_id="1",le="2.5426093767255764e+09"} 0
+physical_replication_commit_latency_bucket{node_id="1",le="2.833785368441068e+09"} 0
+physical_replication_commit_latency_bucket{node_id="1",le="3.1583064185550647e+09"} 0
+physical_replication_commit_latency_bucket{node_id="1",le="3.5199911554958534e+09"} 0
+physical_replication_commit_latency_bucket{node_id="1",le="3.9230955115614314e+09"} 0
+physical_replication_commit_latency_bucket{node_id="1",le="4.372362802333632e+09"} 0
+physical_replication_commit_latency_bucket{node_id="1",le="4.873079541115184e+09"} 0
+physical_replication_commit_latency_bucket{node_id="1",le="5.431137645156319e+09"} 0
+physical_replication_commit_latency_bucket{node_id="1",le="6.053103765649553e+09"} 0
+physical_replication_commit_latency_bucket{node_id="1",le="6.746296557296375e+09"} 0
+physical_replication_commit_latency_bucket{node_id="1",le="7.518872796674253e+09"} 0
+physical_replication_commit_latency_bucket{node_id="1",le="8.37992336275598e+09"} 0
+physical_replication_commit_latency_bucket{node_id="1",le="9.339580208980864e+09"} 0
+physical_replication_commit_latency_bucket{node_id="1",le="1.0409135585614676e+10"} 0
+physical_replication_commit_latency_bucket{node_id="1",le="1.1601174915283792e+10"} 0
+physical_replication_commit_latency_bucket{node_id="1",le="1.2929724885225649e+10"} 0
+physical_replication_commit_latency_bucket{node_id="1",le="1.4410418498852003e+10"} 0
+physical_replication_commit_latency_bucket{node_id="1",le="1.6060679028781363e+10"} 0
+physical_replication_commit_latency_bucket{node_id="1",le="1.789992503590971e+10"} 0
+physical_replication_commit_latency_bucket{node_id="1",le="1.9949798866972237e+10"} 0
+physical_replication_commit_latency_bucket{node_id="1",le="2.2234421319319225e+10"} 0
+physical_replication_commit_latency_bucket{node_id="1",le="2.478067546953807e+10"} 0
+physical_replication_commit_latency_bucket{node_id="1",le="2.7618523005723442e+10"} 0
+physical_replication_commit_latency_bucket{node_id="1",le="3.0781356785666904e+10"} 0
+physical_replication_commit_latency_bucket{node_id="1",le="3.4306393769506477e+10"} 0
+physical_replication_commit_latency_bucket{node_id="1",le="3.823511295046164e+10"} 0
+physical_replication_commit_latency_bucket{node_id="1",le="4.261374343677016e+10"} 0
+physical_replication_commit_latency_bucket{node_id="1",le="4.749380842807073e+10"} 0
+physical_replication_commit_latency_bucket{node_id="1",le="5.2932731487183495e+10"} 0
+physical_replication_commit_latency_bucket{node_id="1",le="5.899451224126824e+10"} 0
+physical_replication_commit_latency_bucket{node_id="1",le="6.575047946331352e+10"} 0
+physical_replication_commit_latency_bucket{node_id="1",le="7.328013039544164e+10"} 0
+physical_replication_commit_latency_bucket{node_id="1",le="8.167206619031862e+10"} 0
+physical_replication_commit_latency_bucket{node_id="1",le="9.102503447797786e+10"} 0
+physical_replication_commit_latency_bucket{node_id="1",le="1.0144909132590578e+11"} 0
+physical_replication_commit_latency_bucket{node_id="1",le="1.1306689626513626e+11"} 0
+physical_replication_commit_latency_bucket{node_id="1",le="1.2601515562088194e+11"} 0
+physical_replication_commit_latency_bucket{node_id="1",le="1.4044623113132697e+11"} 0
+physical_replication_commit_latency_bucket{node_id="1",le="1.5652993278314426e+11"} 0
+physical_replication_commit_latency_bucket{node_id="1",le="1.7445551695997415e+11"} 0
+physical_replication_commit_latency_bucket{node_id="1",le="1.9443391341601053e+11"} 0
+physical_replication_commit_latency_bucket{node_id="1",le="2.167002072794196e+11"} 0
+physical_replication_commit_latency_bucket{node_id="1",le="2.415164052912417e+11"} 0
+physical_replication_commit_latency_bucket{node_id="1",le="2.691745188300199e+11"} 0
+physical_replication_commit_latency_bucket{node_id="1",le="3.0000000000000085e+11"} 0
+physical_replication_commit_latency_bucket{node_id="1",le="+Inf"} 0
+physical_replication_commit_latency_sum{node_id="1"} 0
+physical_replication_commit_latency_count{node_id="1"} 0
+# HELP physical_replication_earliest_data_checkpoint_span The earliest timestamp of the last checkpoint forwarded by an ingestion data processor
+# TYPE physical_replication_earliest_data_checkpoint_span gauge
+physical_replication_earliest_data_checkpoint_span{node_id="1"} 0
+# HELP physical_replication_resolved_events_ingested Resolved events ingested by all replication jobs
+# TYPE physical_replication_resolved_events_ingested counter
+physical_replication_resolved_events_ingested{node_id="1"} 0
+# HELP physical_replication_job_progress_updates Total number of updates to the ingestion job progress
+# TYPE physical_replication_job_progress_updates counter
+physical_replication_job_progress_updates{node_id="1"} 0
+# HELP physical_replication_replicated_time_seconds The replicated time of the physical replication stream in seconds since the unix epoch.
+# TYPE physical_replication_replicated_time_seconds gauge
+physical_replication_replicated_time_seconds{node_id="1"} 0
+# HELP physical_replication_running Number of currently running replication streams
+# TYPE physical_replication_running gauge
+physical_replication_running{node_id="1"} 0
+# HELP physical_replication_admit_latency Event admission latency: a difference between event MVCC timestamp and the time it was admitted into ingestion processor
+# TYPE physical_replication_admit_latency histogram
+physical_replication_admit_latency_bucket{node_id="1",le="5e+08"} 0
+physical_replication_admit_latency_bucket{node_id="1",le="5.572592853587432e+08"} 0
+physical_replication_admit_latency_bucket{node_id="1",le="6.210758222370743e+08"} 0
+physical_replication_admit_latency_bucket{node_id="1",le="6.922005377068515e+08"} 0
+physical_replication_admit_latency_bucket{node_id="1",le="7.714703539349157e+08"} 0
+physical_replication_admit_latency_bucket{node_id="1",le="8.598180362184556e+08"} 0
+physical_replication_admit_latency_bucket{node_id="1",le="9.582831688033088e+08"} 0
+physical_replication_admit_latency_bucket{node_id="1",le="1.0680243876372875e+09"} 0
+physical_replication_admit_latency_bucket{node_id="1",le="1.1903330140009282e+09"} 0
+physical_replication_admit_latency_bucket{node_id="1",le="1.326648249442152e+09"} 0
+physical_replication_admit_latency_bucket{node_id="1",le="1.4785741108131227e+09"} 0
+physical_replication_admit_latency_bucket{node_id="1",le="1.6478983046833196e+09"} 0
+physical_replication_admit_latency_bucket{node_id="1",le="1.8366132632234223e+09"} 0
+physical_replication_admit_latency_bucket{node_id="1",le="2.046939589088547e+09"} 0
+physical_replication_admit_latency_bucket{node_id="1",le="2.2813521851760063e+09"} 0
+physical_replication_admit_latency_bucket{node_id="1",le="2.5426093767255764e+09"} 0
+physical_replication_admit_latency_bucket{node_id="1",le="2.833785368441068e+09"} 0
+physical_replication_admit_latency_bucket{node_id="1",le="3.1583064185550647e+09"} 0
+physical_replication_admit_latency_bucket{node_id="1",le="3.5199911554958534e+09"} 0
+physical_replication_admit_latency_bucket{node_id="1",le="3.9230955115614314e+09"} 0
+physical_replication_admit_latency_bucket{node_id="1",le="4.372362802333632e+09"} 0
+physical_replication_admit_latency_bucket{node_id="1",le="4.873079541115184e+09"} 0
+physical_replication_admit_latency_bucket{node_id="1",le="5.431137645156319e+09"} 0
+physical_replication_admit_latency_bucket{node_id="1",le="6.053103765649553e+09"} 0
+physical_replication_admit_latency_bucket{node_id="1",le="6.746296557296375e+09"} 0
+physical_replication_admit_latency_bucket{node_id="1",le="7.518872796674253e+09"} 0
+physical_replication_admit_latency_bucket{node_id="1",le="8.37992336275598e+09"} 0
+physical_replication_admit_latency_bucket{node_id="1",le="9.339580208980864e+09"} 0
+physical_replication_admit_latency_bucket{node_id="1",le="1.0409135585614676e+10"} 0
+physical_replication_admit_latency_bucket{node_id="1",le="1.1601174915283792e+10"} 0
+physical_replication_admit_latency_bucket{node_id="1",le="1.2929724885225649e+10"} 0
+physical_replication_admit_latency_bucket{node_id="1",le="1.4410418498852003e+10"} 0
+physical_replication_admit_latency_bucket{node_id="1",le="1.6060679028781363e+10"} 0
+physical_replication_admit_latency_bucket{node_id="1",le="1.789992503590971e+10"} 0
+physical_replication_admit_latency_bucket{node_id="1",le="1.9949798866972237e+10"} 0
+physical_replication_admit_latency_bucket{node_id="1",le="2.2234421319319225e+10"} 0
+physical_replication_admit_latency_bucket{node_id="1",le="2.478067546953807e+10"} 0
+physical_replication_admit_latency_bucket{node_id="1",le="2.7618523005723442e+10"} 0
+physical_replication_admit_latency_bucket{node_id="1",le="3.0781356785666904e+10"} 0
+physical_replication_admit_latency_bucket{node_id="1",le="3.4306393769506477e+10"} 0
+physical_replication_admit_latency_bucket{node_id="1",le="3.823511295046164e+10"} 0
+physical_replication_admit_latency_bucket{node_id="1",le="4.261374343677016e+10"} 0
+physical_replication_admit_latency_bucket{node_id="1",le="4.749380842807073e+10"} 0
+physical_replication_admit_latency_bucket{node_id="1",le="5.2932731487183495e+10"} 0
+physical_replication_admit_latency_bucket{node_id="1",le="5.899451224126824e+10"} 0
+physical_replication_admit_latency_bucket{node_id="1",le="6.575047946331352e+10"} 0
+physical_replication_admit_latency_bucket{node_id="1",le="7.328013039544164e+10"} 0
+physical_replication_admit_latency_bucket{node_id="1",le="8.167206619031862e+10"} 0
+physical_replication_admit_latency_bucket{node_id="1",le="9.102503447797786e+10"} 0
+physical_replication_admit_latency_bucket{node_id="1",le="1.0144909132590578e+11"} 0
+physical_replication_admit_latency_bucket{node_id="1",le="1.1306689626513626e+11"} 0
+physical_replication_admit_latency_bucket{node_id="1",le="1.2601515562088194e+11"} 0
+physical_replication_admit_latency_bucket{node_id="1",le="1.4044623113132697e+11"} 0
+physical_replication_admit_latency_bucket{node_id="1",le="1.5652993278314426e+11"} 0
+physical_replication_admit_latency_bucket{node_id="1",le="1.7445551695997415e+11"} 0
+physical_replication_admit_latency_bucket{node_id="1",le="1.9443391341601053e+11"} 0
+physical_replication_admit_latency_bucket{node_id="1",le="2.167002072794196e+11"} 0
+physical_replication_admit_latency_bucket{node_id="1",le="2.415164052912417e+11"} 0
+physical_replication_admit_latency_bucket{node_id="1",le="2.691745188300199e+11"} 0
+physical_replication_admit_latency_bucket{node_id="1",le="3.0000000000000085e+11"} 0
+physical_replication_admit_latency_bucket{node_id="1",le="+Inf"} 0
+physical_replication_admit_latency_sum{node_id="1"} 0
+physical_replication_admit_latency_count{node_id="1"} 0
+# HELP physical_replication_sst_bytes SST bytes (compressed) sent to KV by all replication jobs
+# TYPE physical_replication_sst_bytes counter
+physical_replication_sst_bytes{node_id="1"} 0
+# HELP physical_replication_logical_bytes Logical bytes (sum of keys + values) ingested by all replication jobs
+# TYPE physical_replication_logical_bytes counter
+physical_replication_logical_bytes{node_id="1"} 0
+# HELP physical_replication_cutover_progress The number of ranges left to revert in order to complete an inflight cutover
+# TYPE physical_replication_cutover_progress gauge
+physical_replication_cutover_progress{node_id="1"} 0
+# HELP physical_replication_distsql_replan_count Total number of dist sql replanning events
+# TYPE physical_replication_distsql_replan_count counter
+physical_replication_distsql_replan_count{node_id="1"} 0

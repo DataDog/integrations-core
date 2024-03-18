@@ -1,0 +1,44 @@
+{
+    "listeners": [
+        {
+            "id": "243decd9-3370-4fc1-b163-80c4155bda04",
+            "name": "listener-2",
+            "description": "",
+            "provisioning_status": "ACTIVE",
+            "operating_status": "ONLINE",
+            "admin_state_up": true,
+            "protocol": "HTTP",
+            "protocol_port": 80,
+            "connection_limit": -1,
+            "default_tls_container_ref": null,
+            "sni_container_refs": [],
+            "project_id": "966af9e5e65f4744840da2a01e48d72a",
+            "default_pool_id": "43c6410e-c9f2-469f-9506-02dfc0e63585",
+            "l7policies": [],
+            "insert_headers": {},
+            "created_at": "2023-11-01T17:56:52",
+            "updated_at": "2023-11-01T17:59:34",
+            "loadbalancers": [
+                {
+                  "id": "ae54877c-b186-4b90-b71c-d331b9e732bc"
+                }
+            ],
+            "timeout_client_data": 50000,
+            "timeout_member_connect": 5000,
+            "timeout_member_data": 50000,
+            "timeout_tcp_inspect": 0,
+            "tags": [],
+            "client_ca_tls_container_ref": null,
+            "client_authentication": "NONE",
+            "client_crl_container_ref": null,
+            "allowed_cidrs": null,
+            "tls_ciphers": null,
+            "tls_versions": null,
+            "alpn_protocols": null,
+            "tenant_id": "966af9e5e65f4744840da2a01e48d72a"
+        }
+    ],
+    "listeners_links": [
+
+    ]
+}
