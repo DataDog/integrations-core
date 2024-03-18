@@ -14,8 +14,8 @@ MASK = "/" * 20
 
 def path_to_regex(pattern: str) -> Pattern[str]:
     """
-    // This code is adapted from [sbdchd/codeowners] (https://github.com/sbdchd/codeowners),
-    // originally licensed under the MIT license. You can find the complete license text in the repository.
+    This code is adapted from [sbdchd/codeowners] (https://github.com/sbdchd/codeowners),
+    originally licensed under the MIT license. You can find the complete license text in the repository.
 
     """
     regex = ""
