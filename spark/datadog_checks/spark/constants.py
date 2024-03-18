@@ -107,6 +107,33 @@ SPARK_EXECUTOR_TEMPLATE_METRICS = {
     'totalShuffleRead': ('spark.{}.total_shuffle_read', COUNT),
     'totalShuffleWrite': ('spark.{}.total_shuffle_write', COUNT),
     'maxMemory': ('spark.{}.max_memory', COUNT),
+    # memoryMetrics is a dictionary of metrics
+    'memoryMetrics.usedOnHeapStorageMemory': ('spark.{}.mem.used_on_heap_storage', COUNT),
+    'memoryMetrics.usedOffHeapStorageMemory': ('spark.{}.mem.used_off_heap_storage', COUNT),
+    'memoryMetrics.totalOnHeapStorageMemory': ('spark.{}.mem.total_on_heap_storage', COUNT),
+    'memoryMetrics.totalOffHeapStorageMemory': ('spark.{}.mem.total_off_heap_storage', COUNT),
+    # peakMemoryMetrics is a dictionary of metrics (available only in Spark 3.0+: https://issues.apache.org/jira/browse/SPARK-23429)
+    'peakMemoryMetrics.JVMHeapMemory': ('spark.{}.peak_mem.jvm_heap_memory', COUNT),
+    'peakMemoryMetrics.JVMOffHeapMemory': ('spark.{}.peak_mem.jvm_off_heap_memory', COUNT),
+    'peakMemoryMetrics.OnHeapExecutionMemory': ('spark.{}.peak_mem.on_heap_execution', COUNT),
+    'peakMemoryMetrics.OffHeapExecutionMemory': ('spark.{}.peak_mem.off_heap_execution', COUNT),
+    'peakMemoryMetrics.OnHeapStorageMemory': ('spark.{}.peak_mem.on_heap_storage', COUNT),
+    'peakMemoryMetrics.OffHeapStorageMemory': ('spark.{}.peak_mem.off_heap_storage', COUNT),
+    'peakMemoryMetrics.OnHeapUnifiedMemory': ('spark.{}.peak_mem.on_heap_unified', COUNT),
+    'peakMemoryMetrics.OffHeapUnifiedMemory': ('spark.{}.peak_mem.off_heap_unified', COUNT),
+    'peakMemoryMetrics.DirectPoolMemory': ('spark.{}.peak_mem.direct_pool', COUNT),
+    'peakMemoryMetrics.MappedPoolMemory': ('spark.{}.peak_mem.mapped_pool', COUNT),
+    'peakMemoryMetrics.MinorGCCount': ('spark.{}.peak_mem.minor_gc_count', COUNT),
+    'peakMemoryMetrics.MinorGCTime': ('spark.{}.peak_mem.minor_gc_time', COUNT),
+    'peakMemoryMetrics.MajorGCCount': ('spark.{}.peak_mem.major_gc_count', COUNT),
+    'peakMemoryMetrics.MajorGCTime': ('spark.{}.peak_mem.major_gc_time', COUNT),
+    # Within peakMemoryMetrics, enabled if spark.executor.processTreeMetrics.enabled is true.
+    'peakMemoryMetrics.ProcessTreeJVMVMemory': ('spark.{}.peak_mem.process_tree_jvm', COUNT),
+    'peakMemoryMetrics.ProcessTreeJVMRSSMemory': ('spark.{}.peak_mem.process_tree_jvm_rss', COUNT),
+    'peakMemoryMetrics.ProcessTreePythonVMemory': ('spark.{}.peak_mem.process_tree_python', COUNT),
+    'peakMemoryMetrics.ProcessTreePythonRSSMemory': ('spark.{}.peak_mem.process_tree_python_rss', COUNT),
+    'peakMemoryMetrics.ProcessTreeOtherVMemory': ('spark.{}.peak_mem.process_tree_other', COUNT),
+    'peakMemoryMetrics.ProcessTreeOtherRSSMemory': ('spark.{}.peak_mem.process_tree_other_rss', COUNT),
 }
 
 SPARK_DRIVER_METRICS = {
