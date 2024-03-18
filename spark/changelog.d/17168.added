@@ -1,3 +1,1 @@
-Adds additional Executor-level memory metrics (https://spark.apache.org/docs/latest/monitoring.html#executor-metrics) :
-* `spark.{driver/executor/executor.id}.mem.*` : current value of memory metrics
-* `spark.{driver/executor/executor.id}.peak_mem.*` : peak value of memory (and GC) metrics (Spark 3.0+)
+Adds additional Executor-level memory metrics (https://spark.apache.org/docs/latest/monitoring.html#executor-metrics)
