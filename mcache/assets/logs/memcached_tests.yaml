@@ -9,6 +9,7 @@ tests:
       level: "info"
       socket_descriptor: 26.0
     message: "<26 server listening (auto-negotiate)"
+    status: "info"
     tags:
      - "source:LOGS_SOURCE"
  -
@@ -20,6 +21,7 @@ tests:
       level: "info"
       socket_descriptor: 26.0
     message: ">26 server listening (auto-negotiate)"
+    status: "info"
     tags:
      - "source:LOGS_SOURCE"
  -
@@ -29,6 +31,7 @@ tests:
       level: "info"
       socket_descriptor: 32.0
     message: "32: Client using the ascii protocol"
+    status: "info"
     tags:
      - "source:LOGS_SOURCE"
  -
@@ -39,6 +42,7 @@ tests:
         message: "Can't listen for events on fd %d"
       level: "warning"
     message: "Can't listen for events on fd %d"
+    status: "warn"
     tags:
      - "source:LOGS_SOURCE"
  -
@@ -48,6 +52,7 @@ tests:
       level: "info"
       socket_descriptor: 39.0
     message: "slab class  39: chunk size 458992 perslab \t2"
+    status: "info"
     tags:
      - "source:LOGS_SOURCE"
  -
@@ -57,6 +62,7 @@ tests:
       level: "info"
       socket_descriptor: 2.0
     message: "slab class   2: chunk size\t320 perslab  3276"
+    status: "info"
     tags:
      - "source:LOGS_SOURCE"
  -
@@ -69,6 +75,7 @@ tests:
         message: "NOT FOUND my_key"
       level: "warning"
     message: "> NOT FOUND my_key"
+    status: "warn"
     tags:
      - "source:LOGS_SOURCE"
 

@@ -20,6 +20,7 @@ tests:
         thread_name: "spid51"
       timestamp: 1589285557010
     message: "The join order has been enforced because a local join hint is used."
+    status: "warn"
     tags:
      - "source:LOGS_SOURCE"
     timestamp: 1589285557010
@@ -32,6 +33,7 @@ tests:
         thread_name: "spid52"
       timestamp: 1526467107860
     message: "5105, Severity: 16, State: 2."
+    status: "error"
     tags:
      - "source:LOGS_SOURCE"
     timestamp: 1526467107860

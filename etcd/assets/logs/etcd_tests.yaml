@@ -8,6 +8,7 @@ tests:
       level: "I"
       package: "embed"
     message: "ready to serve client requests"
+    status: "info"
     tags:
      - "source:LOGS_SOURCE"
     timestamp: 1597947565769
@@ -19,6 +20,7 @@ tests:
       level: "W"
       package: "rafthttp"
     message: "lost the TCP streaming connection with peer d282ac2ce600c1ce (stream Message reader)"
+    status: "warn"
     tags:
      - "source:LOGS_SOURCE"
     timestamp: 1597947824714
