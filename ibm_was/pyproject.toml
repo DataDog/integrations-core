@@ -39,7 +39,7 @@ license = "BSD-3-Clause"
 
 [project.optional-dependencies]
 deps = [
-    "lxml==4.9.2",
+    "lxml==4.9.4",
 ]
 
 [project.urls]
