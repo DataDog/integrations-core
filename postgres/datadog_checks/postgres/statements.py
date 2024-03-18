@@ -202,6 +202,10 @@ class PostgresStatementMetrics(DBMAsyncJob):
     def _check_called_queries(self):
         pgss_view_without_query_text = self._config.pg_stat_statements_view
         if pgss_view_without_query_text == "pg_stat_statements":
+            # Passing false for the showtext argument leads to a huge performance increase. This
+            # allows the engine to avoid retrieving the potentially large amount of text data.
+            # The query count query does not depend on the statement text, so it's safe for this use case.
+            # For more info: https://www.postgresql.org/docs/current/pgstatstatements.html#PGSTATSTATEMENTS-FUNCS
             pgss_view_without_query_text = "pg_stat_statements(false)"
 
         with self._check._get_main_db() as conn:

@@ -23,6 +23,7 @@ def test_statement_queryid_cache_multiple_calls_change():
 
     assert changed is True
 
+
 def test_statement_queryid_cache_after_pg_stat_statement_eviction():
     cache = QueryCountCache(10000)
     cache.set_calls(123, 100)
