@@ -43,17 +43,15 @@ def create_codeowners_resolver():
 def validate_logs_assets_codeowners():
     """Validate `CODEOWNERS` assigns logs as owner for all log assets."""
 
-    has_failed = False
-
+    failed_integrations = []
     owners_resolver = create_codeowners_resolver()
     all_integrations = sorted(get_valid_integrations())
     for integration in all_integrations:
         logs_assets_owners = owners_resolver.of(f"/{integration}/assets/logs/")
         if not (('TEAM', LOGS_TEAM) in logs_assets_owners):
-            echo_failure(f"/{integration}/assets/logs/ is not owned by {LOGS_TEAM}")
-            has_failed = True
+            failed_integrations.append(integration)
 
-    return has_failed
+    return failed_integrations
 
 
 def create_codeowners_map():
@@ -85,7 +83,12 @@ def codeowners(ctx):
 
     codeowner_map = create_codeowners_map()
     owners_resolver = create_codeowners_resolver()
-    if not validate_logs_assets_codeowners():
+
+    failed_integrations = validate_logs_assets_codeowners()
+    if failed_integrations:
+        for integration in failed_integrations:
+            echo_failure(f"/{integration}/assets/logs/ is not owned by {LOGS_TEAM}")
+    else:
         echo_success("All integrations have valid logs codeowners.")
 
     has_failed = False
