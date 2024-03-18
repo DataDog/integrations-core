@@ -658,10 +658,12 @@ class SQLServer(AgentCheck):
                 # and PERF_AVERAGE_BULK), we need two metrics: the metrics specified and
                 # a base metrics to get the ratio. There is no unique schema, so we generate
                 # the possible candidates, and we look at which ones exist in the db.
+                counter_name_lowercase = counter_name.lower()
+                # lowercase is used to avoid case sensitivity issues such as base vs. Base or BASE
                 candidates = (
-                    counter_name + " base",
-                    counter_name.replace("(ms)", "base"),
-                    counter_name.replace("Avg ", "") + " base",
+                    counter_name_lowercase + " base",
+                    counter_name_lowercase.replace("(ms)", "base"),
+                    counter_name_lowercase.replace("avg ", "") + " base",
                 )
                 try:
                     cursor.execute(BASE_NAME_QUERY, candidates)
