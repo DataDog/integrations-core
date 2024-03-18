@@ -354,7 +354,7 @@ FROM pg_stat_replication
 CHECKSUM_METRICS = {
     'descriptors': [('name', 'database_instance')],
     'metrics': {
-        'checksum_failures': ('postgresql.checksums.checksum_failures', AgentCheck.gauge),
+        'checksum_failures': ('postgresql.checksums.checksum_failures', AgentCheck.monotonic_count),
     },
     'relation': False,
     'query': """
