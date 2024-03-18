@@ -2,11 +2,13 @@
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
 import re
+import os
 
 import click
 
 from ...utils import get_codeowners, get_codeowners_file, get_valid_integrations
 from ..console import CONTEXT_SETTINGS, abort, annotate_error, echo_failure, echo_success
+from ...constants import get_root
 from ...codeowners import CodeOwners
 
 DIRECTORY_REGEX = re.compile(r"\/(.*)\/$")
@@ -48,7 +50,8 @@ def validate_logs_assets_codeowners():
     all_integrations = sorted(get_valid_integrations())
     for integration in all_integrations:
         logs_assets_owners = owners_resolver.of(f"/{integration}/assets/logs/")
-        if not (('TEAM', LOGS_TEAM) in logs_assets_owners):
+        path = os.path.join(get_root(), integration, 'assets', 'logs')
+        if not (('TEAM', LOGS_TEAM) in logs_assets_owners) and os.path.exists(path):
             failed_integrations.append(integration)
 
     return failed_integrations
@@ -88,11 +91,9 @@ def codeowners(ctx):
     if failed_integrations:
         for integration in failed_integrations:
             echo_failure(f"/{integration}/assets/logs/ is not owned by {LOGS_TEAM}")
+        abort()
     else:
         echo_success("All integrations have valid logs codeowners.")
-
-    has_failed = False
-    is_core_check = ctx.obj['repo_choice'] == 'core'
 
     if not is_core_check:  # We do not need this rule in integrations-core
         codeowner_map = create_codeowners_map()
