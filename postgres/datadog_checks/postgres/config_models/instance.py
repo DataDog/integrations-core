@@ -198,8 +198,8 @@ class InstanceConfig(BaseModel):
     azure: Optional[Azure] = None
     collect_activity_metrics: Optional[bool] = None
     collect_bloat_metrics: Optional[bool] = None
-    collect_count_metrics: Optional[bool] = None
     collect_checksum_metrics: Optional[bool] = None
+    collect_count_metrics: Optional[bool] = None
     collect_database_size_metrics: Optional[bool] = None
     collect_default_database: Optional[bool] = None
     collect_function_metrics: Optional[bool] = None
