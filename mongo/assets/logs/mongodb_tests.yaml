@@ -108,6 +108,7 @@ tests:
         query:
           type: "eval"
     message: "2018-10-26T10:09:49.632+0000 I COMMAND  [conn6] command demo command: eval { $eval: \"sleep(411)\", find: { group: \"admin\" } } keyUpdates:0 writeConflicts:0 numYields:0 reslen:45 locks:{ Global: { acquireCount: { r: 3, W: 1 }, acquireWaitCount: { W: 1 }, timeAcquiringMicros: { W: 85426 } }, Database: { acquireCount: { r: 1 } }, Collection: { acquireCount: { r: 1 } } } protocol:op_query 529ms"
+    status: "info"
     tags:
      - "source:LOGS_SOURCE"
     timestamp: 1540548589632
@@ -139,6 +140,7 @@ tests:
         query:
           type: "find"
     message: "2019-05-09T13:18:48.741+0000 I COMMAND  [conn26] command db.collection command: find { find: \"collection\", filter: { scope: \"1\" }, sort: { discoveryHour: -1 }, limit: 1, singleBatch: true, $readPreference: { mode: \"secondaryPreferred\" }, $db: \"logs\" } planSummary: IXSCAN { scope: 1, discoveryHour: 1 } keysExamined:1 docsExamined:1 cursorExhausted:1 numYields:1 nreturned:1 reslen:188 locks:{ Global: { acquireCount: { r: 4 } }, Database: { acquireCount: { r: 2 } }, Collection: { acquireCount: { r: 2 } } } protocol:op_query 284ms"
+    status: "info"
     tags:
      - "source:LOGS_SOURCE"
     timestamp: 1557407928741
@@ -170,6 +172,7 @@ tests:
         query:
           type: "find"
     message: "2019-05-09T13:18:48.741+0000 I COMMAND  [conn26] command db-a.collection command: find { find: \"collection\", filter: { scope: \"1\" }, sort: { discoveryHour: -1 }, limit: 1, singleBatch: true, $readPreference: { mode: \"secondaryPreferred\" }, $db: \"logs\" } planSummary: IXSCAN { scope: 1, discoveryHour: 1 } keysExamined:1 docsExamined:1 cursorExhausted:1 numYields:1 nreturned:1 reslen:188 locks:{ Global: { acquireCount: { r: 4 } }, Database: { acquireCount: { r: 2 } }, Collection: { acquireCount: { r: 2 } } } protocol:op_query 284ms"
+    status: "info"
     tags:
      - "source:LOGS_SOURCE"
     timestamp: 1557407928741
@@ -201,6 +204,7 @@ tests:
         query:
           type: "aggregate"
     message: "2019-05-13T12:03:01.487+0000 I COMMAND  [conn808463] command logs.mycoll command: aggregate { aggregate: \"mycoll\", pipeline: [ { $match: { timestamp: { $gte: 1557662400000, $lt: 1557748800000 } } }, { $group: { _id: { type: \"$type\", timestamp: \"$timestamp\" }, events_count: { $sum: \"$events_count\" }, type: { $first: \"$type\" } } } ], cursor: {}, $readPreference: { mode: \"secondaryPreferred\" }, $db: \"logs\" } planSummary: IXSCAN { timestamp: 1 } cursorid:7375279878905417346 keysExamined:123934 docsExamined:123934 numYields:975 nreturned:101 reslen:10652 locks:{ Global: { acquireCount: { r: 1970 } }, Database: { acquireCount: { r: 985 } }, Collection: { acquireCount: { r: 985 } } } protocol:op_query 969ms"
+    status: "info"
     tags:
      - "source:LOGS_SOURCE"
     timestamp: 1557748981487
@@ -224,6 +228,7 @@ tests:
         query:
           type: "isMaster"
     message: "2019-05-12T14:44:33.584+0000 I COMMAND  [conn5093490] command admin.$cmd command: isMaster { ismaster: 1, $db: \"admin\" } numYields:0 reslen:1059 locks:{} protocol:op_query 117ms"
+    status: "info"
     tags:
      - "source:LOGS_SOURCE"
     timestamp: 1557672273584
@@ -247,6 +252,7 @@ tests:
         query:
           type: "isMaster"
     message: "2019-05-12T14:44:33.584+0000 I  COMMAND  [conn5092762] command admin.$cmd command: isMaster { ismaster: 1, $db: \"admin\" } numYields:0 reslen:1059 locks:{} protocol:op_query 117ms"
+    status: "info"
     tags:
      - "source:LOGS_SOURCE"
     timestamp: 1557672273584
@@ -268,6 +274,7 @@ tests:
         query:
           type: "update"
     message: "2017-07-24T14:14:42.965+0000 I COMMAND [conn646272] command logs.$cmd command: update { update: \"usage_timeseries\", ordered: true, updates: 3 } numYields:0 reslen:119 locks:{ Global: { acquireCount: { r: 6, w: 6 } }, Database: { acquireCount: { w: 6 } }, Collection: { acquireCount: { w: 3 } }, Metadata: { acquireCount: { w: 3 } }, oplog: { acquireCount: { w: 3 } } } protocol:op_query 0ms"
+    status: "info"
     tags:
      - "source:LOGS_SOURCE"
     timestamp: 1500905682965
@@ -283,6 +290,7 @@ tests:
       mongo:
         context: "conn814671"
     message: "2017-07-24T14:13:40.319+0000 D QUERY [conn814671] Collection local.system.namespaces does not exist. Using EOF plan: query: { name: \"local.oplog.rs\" } sort: {} projection: {} limit: 1"
+    status: "debug"
     tags:
      - "source:LOGS_SOURCE"
     timestamp: 1500905620319
@@ -300,6 +308,7 @@ tests:
           ip: "172.32.197.139"
           port: 50460
     message: "2017-07-24T13:44:27.016+0000 I NETWORK [thread1] connection accepted from 172.32.197.139:50460 #813540 (43 connections now open)"
+    status: "info"
     tags:
      - "source:LOGS_SOURCE"
     timestamp: 1500903867016
@@ -328,6 +337,7 @@ tests:
         query:
           type: "update"
     message: "2019-12-16T10:30:46.476+0000 I COMMAND  [conn127693] command n6_sppd.price_ps appName: \"AppName-Test_123 .abc\" command: update { update: \"price_ps\", ordered: false, writeConcern: { w: \"majority\" }, txnNumber: 96006, $db: \"n6_sppd\", $clusterTime: { clusterTime: Timestamp(1576492246, 3126), signature: { hash: BinData(0, 7278C962DAA1BE13C24B2F11522C10826DCDE365), keyId: 6712813775164014626 } }, lsid: { id: UUID(\"aa02e877-28ea-48c7-9e7a-6f0743288f8f\") } } nShards:11 nMatched:1000 nModified:1000 numYields:0 reslen:185 protocol:op_msg 163ms"
+    status: "info"
     tags:
      - "source:LOGS_SOURCE"
     timestamp: 1576492246476
@@ -355,6 +365,7 @@ tests:
       tags:
        - "startupWarnings"
     message: "Access control is not enabled for the database. Read and write access to data and configuration is unrestricted"
+    status: "warn"
     tags:
      - "source:LOGS_SOURCE"
     timestamp: 1680869304679
@@ -386,6 +397,7 @@ tests:
       t:
         $date: "2023-04-07T12:08:24.800+00:00"
     message: "Waiting for connections"
+    status: "info"
     tags:
      - "source:LOGS_SOURCE"
     timestamp: 1680869304800

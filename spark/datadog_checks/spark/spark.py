@@ -577,7 +577,15 @@ class SparkCheck(AgentCheck):
             return
 
         for status, (metric_name, metric_type) in iteritems(metrics):
-            metric_status = metrics_json.get(status)
+            # Metrics defined with a dot `.` are exposed in a nested dictionary.
+            # {"foo": {"bar": "baz", "qux": "quux"}}
+            #   foo.bar -> baz
+            #   foo.qux -> quux
+            if '.' in status:
+                parent_key, child_key = status.split('.')
+                metric_status = metrics_json.get(parent_key, {}).get(child_key)
+            else:
+                metric_status = metrics_json.get(status)
 
             if metric_status is not None:
                 self._set_metric(metric_name, metric_type, metric_status, tags)

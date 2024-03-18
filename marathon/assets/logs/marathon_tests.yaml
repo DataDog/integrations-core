@@ -10,6 +10,7 @@ tests:
         name: "mesosphere.marathon.core.heartbeat.MesosHeartbeatMonitor$$EnhancerByGuice$$c91d095e"
         thread_name: "main"
     message: "created mesos heartbeat monitor for scheduler mesosphere.marathon.MarathonScheduler$$EnhancerByGuice$$107a8f82@36c281ed"
+    status: "debug"
     tags:
      - "source:LOGS_SOURCE"
     timestamp: 1561144591597
@@ -23,6 +24,7 @@ tests:
         name: "org.apache.zookeeper.ClientCnxn"
         thread_name: "ForkJoinPool-2-worker-13-SendThread(zookeeper:2181)"
     message: "Session establishment complete on server zookeeper/192.168.48.5:2181, sessionid = 0x1000ec1b87b0004, negotiated timeout = 10000"
+    status: "info"
     tags:
      - "source:LOGS_SOURCE"
     timestamp: 1561144593225
@@ -36,6 +38,7 @@ tests:
         name: "m.m.c.plugin.impl.PluginManagerImpl"
         thread_name: "HttpService$$EnhancerByGuice$$96825a6"
     message: "Found 0 plugins."
+    status: "info"
     tags:
      - "source:LOGS_SOURCE"
     timestamp: 1561144595205
@@ -49,6 +52,7 @@ tests:
         name: "org.apache.zookeeper.ClientCnxn"
         thread_name: "ForkJoinPool-2-worker-13-SendThread(zookeeper:2181)"
     message: "Got ping response for sessionid: 0x1000ec1b87b0004 after 6ms"
+    status: "debug"
     tags:
      - "source:LOGS_SOURCE"
     timestamp: 1561144604723

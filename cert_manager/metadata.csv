@@ -1,9 +1,9 @@
 metric_name,metric_type,interval,unit_name,per_unit_name,description,orientation,integration,short_name,curated_metric
-cert_manager.clock_time,gauge,,second,,The clock time given in seconds (from 1970/01/01 UTC),0,cert-manager,cm.clock_time,
-cert_manager.certificate.ready_status,gauge,,,,The ready status of the certificate,0,cert-manager,cm.cert_ready_status,
 cert_manager.certificate.expiration_timestamp,gauge,,second,,The date after which the certificate expires. Expressed as a Unix Epoch Time,0,cert-manager,cm.cert_exp_time,
+cert_manager.certificate.ready_status,gauge,,,,The ready status of the certificate,0,cert-manager,cm.cert_ready_status,
+cert_manager.clock_time,gauge,,second,,The clock time given in seconds (from 1970/01/01 UTC),0,cert-manager,cm.clock_time,
+cert_manager.controller.sync_call.count,count,,,,The number of sync() calls made by a controller,1,cert-manager,cm.sync_call_cnt,
 cert_manager.http_acme_client.request.count,count,,,,The number of requests made by the ACME client,1,cert-manager,cm.acme_req_cnt,
-cert_manager.http_acme_client.request.duration.sum,count,,,,The sum of the HTTP request latencies in seconds for the ACME client,1,cert-manager,cm.req_duration.sum,
 cert_manager.http_acme_client.request.duration.count,count,,,,The count of the HTTP request latencies in seconds for the ACME client,1,cert-manager,cm.req_duration.cnt,
 cert_manager.http_acme_client.request.duration.quantile,gauge,,,,The quantiles of the HTTP request latencies in seconds for the ACME client,1,cert-manager,cm.req_duration.quant,
-cert_manager.controller.sync_call.count,count,,,,The number of sync() calls made by a controller,1,cert-manager,cm.sync_call_cnt,
+cert_manager.http_acme_client.request.duration.sum,count,,,,The sum of the HTTP request latencies in seconds for the ACME client,1,cert-manager,cm.req_duration.sum,
