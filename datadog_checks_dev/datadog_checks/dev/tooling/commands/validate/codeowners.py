@@ -51,7 +51,7 @@ def validate_logs_assets_codeowners():
     for integration in all_integrations:
         logs_assets_owners = owners_resolver.of(f"/{integration}/assets/logs/")
         path = os.path.join(get_root(), integration, 'assets', 'logs')
-        if not (('TEAM', LOGS_TEAM) in logs_assets_owners) and os.path.exists(path):
+        if ("TEAM", LOGS_TEAM) not in logs_assets_owners and os.path.exists(path):
             failed_integrations.append(integration)
 
     return failed_integrations
@@ -84,9 +84,6 @@ def create_codeowners_map():
 def codeowners(ctx):
     """Validate that every integration has an entry in the `CODEOWNERS` file."""
 
-    codeowner_map = create_codeowners_map()
-    owners_resolver = create_codeowners_resolver()
-
     failed_integrations = validate_logs_assets_codeowners()
     if failed_integrations:
         for integration in failed_integrations:
@@ -94,6 +91,8 @@ def codeowners(ctx):
         abort()
     else:
         echo_success("All integrations have valid logs codeowners.")
+
+    codeowner_map = create_codeowners_map()
 
     has_failed = False
     is_core_check = ctx.obj['repo_choice'] == 'core'
