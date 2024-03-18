@@ -7,6 +7,7 @@ tests:
       status: "DEBUG"
       timestamp: 24325596000
     message: "debug message"
+    status: "debug"
     tags:
      - "source:LOGS_SOURCE"
     timestamp: 24325596000

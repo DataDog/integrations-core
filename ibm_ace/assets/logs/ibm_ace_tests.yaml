@@ -36,6 +36,7 @@ tests:
       module: "integration_server.ACESERVER"
       type: "ace_message"
     message: "1990I: Integration server 'ACESERVER' starting initialization; version '12.0.3.0' (64-bit) \nThe integration server is starting. \nNo user action required. "
+    status: "info"
     tags:
      - "source:LOGS_SOURCE"
     timestamp: 1647035715112
