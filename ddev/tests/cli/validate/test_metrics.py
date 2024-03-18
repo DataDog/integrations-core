@@ -5,6 +5,8 @@ import json
 import os
 from pathlib import Path
 
+from datadog_checks.dev.fs import write_file
+
 
 def test_metrics_empty(ddev, repository, helpers):
     metrics_file = repository.path / 'apache' / 'metadata.csv'
@@ -30,16 +32,17 @@ def test_metrics_empty(ddev, repository, helpers):
 
 
 def test_column_number(ddev, repository, helpers):
-    metrics_file = repository.path / 'apache' / 'metadata.csv'
     outfile = os.path.join('apache', 'metadata.csv')
 
-    with metrics_file.open(encoding='utf-8') as file:
-        metrics = file.readlines()
-
-    metrics[1] = metrics[1][:-2] + '\n'
-
-    with metrics_file.open(mode='w', encoding='utf-8') as file:
-        file.writelines(metrics)
+    write_file(
+        repository.path / 'apache' / 'metadata.csv',
+        helpers.dedent(
+            """
+        metric_name,metric_type,interval,unit_name,per_unit_name,description,orientation,integration,short_name,curated_metric
+        apache.conns_total,gauge,,connection,,The number of connections.,0,apache,
+        """
+        ),
+    )
 
     result = ddev("validate", "metadata", 'apache')
 
@@ -97,16 +100,17 @@ def test_header_missing_invalid(ddev, repository, helpers):
 
 
 def test_normalized_metrics(ddev, repository, helpers):
-    metrics_file = repository.path / 'apache' / 'metadata.csv'
     outfile = os.path.join('apache', 'metadata.csv')
 
-    with metrics_file.open(encoding='utf-8') as file:
-        metrics = file.readlines()
-
-    metrics[1] = metrics[1].replace('_', '-')
-
-    with metrics_file.open(mode='w', encoding='utf-8') as file:
-        file.writelines(metrics)
+    write_file(
+        repository.path / 'apache' / 'metadata.csv',
+        helpers.dedent(
+            """
+        metric_name,metric_type,interval,unit_name,per_unit_name,description,orientation,integration,short_name,curated_metric
+        apache.conns-total,gauge,,connection,,The number of connections.,0,apache,,
+        """
+        ),
+    )
 
     result = ddev("validate", "metadata", 'apache')
 
@@ -552,16 +556,18 @@ def test_prefix_match(ddev, repository, helpers):
 
 
 def test_duplicate_metric_name(ddev, repository, helpers):
-    metrics_file = repository.path / 'apache' / 'metadata.csv'
     outfile = os.path.join('apache', 'metadata.csv')
 
-    with metrics_file.open(encoding='utf-8') as file:
-        metrics = file.readlines()
-
-    metrics[2] = metrics[2].replace('apache.conns_async_writing', 'apache.conns_total')
-
-    with metrics_file.open(mode='w', encoding='utf-8') as file:
-        file.writelines(metrics)
+    write_file(
+        repository.path / 'apache' / 'metadata.csv',
+        helpers.dedent(
+            """
+        metric_name,metric_type,interval,unit_name,per_unit_name,description,orientation,integration,short_name,curated_metric
+        apache.conns_async_keep_alive,gauge,,connection,,The number of asynchronous closing connections.,0,apache,,
+        apache.conns_async_keep_alive,gauge,,connection,,description,0,apache,,
+        """
+        ),
+    )
 
     result = ddev("validate", "metadata", 'apache')
 
@@ -572,7 +578,7 @@ def test_duplicate_metric_name(ddev, repository, helpers):
         └── Apache
             └── {outfile}
 
-                apache:3 `apache.conns_total` is a duplicate metric_name
+                apache:3 `apache.conns_async_keep_alive` is a duplicate metric_name
 
         Errors: 1
         """
@@ -580,17 +586,18 @@ def test_duplicate_metric_name(ddev, repository, helpers):
 
 
 def test_warnings(ddev, repository, helpers):
-    metrics_file = repository.path / 'apache' / 'metadata.csv'
     outfile = os.path.join('apache', 'metadata.csv')
 
-    with metrics_file.open(encoding='utf-8') as file:
-        metrics = file.readlines()
-
-    metrics[1] = metrics[1].replace('The total number of connections performed.', '')
-    metrics[2] = metrics[2].replace('ConnsAsyncWriting', 'ConnsTotal')
-
-    with metrics_file.open(mode='w', encoding='utf-8') as file:
-        file.writelines(metrics)
+    write_file(
+        repository.path / 'apache' / 'metadata.csv',
+        helpers.dedent(
+            """
+        metric_name,metric_type,interval,unit_name,per_unit_name,description,orientation,integration,short_name,curated_metric
+        apache.conns_async_closing,gauge,,connection,,T,0,apache,ConnsAsyncKeepAlive,
+        apache.conns_async_keep_alive,gauge,,connection,,,0,apache,ConnsAsyncKeepAlive,
+        """
+        ),
+    )
 
     result = ddev("validate", "metadata", 'apache', '--check-duplicates', '--show-warnings')
 
@@ -601,7 +608,7 @@ def test_warnings(ddev, repository, helpers):
         └── Apache
             └── {outfile}
 
-                apache:3 `ConnsTotal` is a duplicate short_name
+                apache:3 `ConnsAsyncKeepAlive` is a duplicate short_name
                 apache: description is empty in 1 rows.
 
         Passed: 1
