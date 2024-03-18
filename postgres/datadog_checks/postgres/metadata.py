@@ -151,6 +151,7 @@ WHERE  pi.inhparent = {parent_oid}
 GROUP  BY pi.inhparent;
 """
 
+
 def agent_check_getter(self):
     return self._check
 

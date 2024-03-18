@@ -729,7 +729,7 @@ class PostgreSql(AgentCheck):
                         enabled == "on",
                         tags=instance_tags,
                         hostname=self.resolved_hostname,
-                    )                    
+                    )
             if self._config.collect_activity_metrics:
                 activity_metrics = self.metrics_cache.get_activity_metrics(self.version)
                 with conn.cursor(cursor_factory=CommenterCursor) as cursor:
