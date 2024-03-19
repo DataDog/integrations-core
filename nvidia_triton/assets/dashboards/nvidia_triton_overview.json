@@ -53,7 +53,7 @@
                     {
                         "definition": {
                             "background_color": "white",
-                            "content": "**RabbitMQ**\n\nThis dashboard provides an overview of your Triton Inference Server. It monitors inference request status, model inferencing latency, cache activities, and GPU/CPU usage from inferencing.\n\n**Useful Links**\n- [Nvidia Triton Integration doc](https://docs.datadoghq.com/integrations/nvidia_triton/?tab=host)\n- [AI Stack Integrations blog](https://www.datadoghq.com/blog/ai-integrations/)\n- [Nvidia Triton metric collection](https://docs.nvidia.com/deeplearning/triton-inference-server/user-guide/docs/user_guide/metrics.html) ",
+                            "content": "**NVIDIA Triton**\n\nThis dashboard provides an overview of your Triton Inference Server. It monitors inference request status, model inferencing latency, cache activities, and GPU/CPU usage from inferencing.\n\n**Useful Links**\n- [Nvidia Triton Integration doc](https://docs.datadoghq.com/integrations/nvidia_triton/?tab=host)\n- [AI Stack Integrations blog](https://www.datadoghq.com/blog/ai-integrations/)\n- [Nvidia Triton metric collection](https://docs.nvidia.com/deeplearning/triton-inference-server/user-guide/docs/user_guide/metrics.html) ",
                             "font_size": "14",
                             "has_padding": true,
                             "show_tick": false,

@@ -9,6 +9,7 @@ from six import raise_from
 
 from datadog_checks.base import AgentCheck, ConfigurationError
 from datadog_checks.base.log import get_check_logger
+from datadog_checks.sqlserver.cursor import CommenterCursorWrapper
 
 try:
     import adodbapi
@@ -218,7 +219,7 @@ class Connection(object):
             # FIXME: we should find a better way to compute unique keys to map opened connections other than
             # using auth info in clear text!
             raise SQLConnectionError("Cannot find an opened connection for host: {}".format(self.instance.get('host')))
-        return conn.cursor()
+        return CommenterCursorWrapper(conn.cursor())
 
     def close_cursor(self, cursor):
         """
@@ -382,7 +383,7 @@ class Connection(object):
             try:
                 self.existing_databases = {}
                 cursor.execute(DATABASE_EXISTS_QUERY)
-                for row in cursor:
+                for row in cursor.fetchall():
                     # collation_name can be NULL if db offline, in that case assume its case_insensitive
                     case_insensitive = not row.collation_name or 'CI' in row.collation_name
                     self.existing_databases[row.name.lower()] = (
@@ -447,7 +448,7 @@ class Connection(object):
         password = self.instance.get('password')
         database = self.instance.get(db_key) if db_name is None else db_name
         driver = self.instance.get('driver')
-        host = self._get_host_with_port()
+        host = self.get_host_with_port()
 
         if not dsn:
             if not host:
@@ -467,7 +468,7 @@ class Connection(object):
                 driver = self.DEFAULT_DRIVER
         return dsn, host, username, password, database, driver
 
-    def _get_host_with_port(self):
+    def get_host_with_port(self):
         """Return a string with correctly formatted host and, if necessary, port.
         If the host string in the config contains a port, that port is used.
         If not, any port provided as a separate port config option is used.

@@ -1,0 +1,387 @@
+# HELP distsender_rpc_err_txnalreadyencounterederrtype Number of TxnAlreadyEncounteredErrType errors received replica-bound RPCs\n\nThis counts how often error of the specified type was received back from replicas\nas part of executing possibly range-spanning requests. Failures to reach the target\nreplica will be accounted for as 'roachpb.CommunicationErrType' and unclassified\nerrors as 'roachpb.InternalErrType'.\n
+# TYPE distsender_rpc_err_txnalreadyencounterederrtype counter
+distsender_rpc_err_txnalreadyencounterederrtype{node_id="1"} 0
+# HELP distsender_rangefeed_retry_store_not_found Number of ranges that encountered retryable store not found error
+# TYPE distsender_rangefeed_retry_store_not_found counter
+distsender_rangefeed_retry_store_not_found{node_id="1"} 0
+# HELP distsender_rpc_refreshrange_sent Number of RefreshRange requests processed.\n\nThis counts the requests in batches handed to DistSender, not the RPCs\nsent to individual Ranges as a result.
+# TYPE distsender_rpc_refreshrange_sent counter
+distsender_rpc_refreshrange_sent{node_id="1"} 3
+# HELP distsender_rpc_revertrange_sent Number of RevertRange requests processed.\n\nThis counts the requests in batches handed to DistSender, not the RPCs\nsent to individual Ranges as a result.
+# TYPE distsender_rpc_revertrange_sent counter
+distsender_rpc_revertrange_sent{node_id="1"} 0
+# HELP distsender_rpc_err_errordetailtype_19_ Number of ErrorDetailType(19) errors received replica-bound RPCs\n\nThis counts how often error of the specified type was received back from replicas\nas part of executing possibly range-spanning requests. Failures to reach the target\nreplica will be accounted for as 'roachpb.CommunicationErrType' and unclassified\nerrors as 'roachpb.InternalErrType'.\n
+# TYPE distsender_rpc_err_errordetailtype_19_ counter
+distsender_rpc_err_errordetailtype_19_{node_id="1"} 0
+# HELP distsender_rpc_put_sent Number of Put requests processed.\n\nThis counts the requests in batches handed to DistSender, not the RPCs\nsent to individual Ranges as a result.
+# TYPE distsender_rpc_put_sent counter
+distsender_rpc_put_sent{node_id="1"} 466
+# HELP distsender_rpc_err_lockconflicterrtype Number of LockConflictErrType errors received replica-bound RPCs\n\nThis counts how often error of the specified type was received back from replicas\nas part of executing possibly range-spanning requests. Failures to reach the target\nreplica will be accounted for as 'roachpb.CommunicationErrType' and unclassified\nerrors as 'roachpb.InternalErrType'.\n
+# TYPE distsender_rpc_err_lockconflicterrtype counter
+distsender_rpc_err_lockconflicterrtype{node_id="1"} 0
+# HELP distsender_rpc_adminsplit_sent Number of AdminSplit requests processed.\n\nThis counts the requests in batches handed to DistSender, not the RPCs\nsent to individual Ranges as a result.
+# TYPE distsender_rpc_adminsplit_sent counter
+distsender_rpc_adminsplit_sent{node_id="1"} 0
+# HELP distsender_rpc_querytxn_sent Number of QueryTxn requests processed.\n\nThis counts the requests in batches handed to DistSender, not the RPCs\nsent to individual Ranges as a result.
+# TYPE distsender_rpc_querytxn_sent counter
+distsender_rpc_querytxn_sent{node_id="1"} 0
+# HELP distsender_rpc_err_notleaseholdererrtype Number of NotLeaseHolderErrType errors received replica-bound RPCs\n\nThis counts how often error of the specified type was received back from replicas\nas part of executing possibly range-spanning requests. Failures to reach the target\nreplica will be accounted for as 'roachpb.CommunicationErrType' and unclassified\nerrors as 'roachpb.InternalErrType'.\n
+# TYPE distsender_rpc_err_notleaseholdererrtype counter
+distsender_rpc_err_notleaseholdererrtype{node_id="1"} 5
+# HELP distsender_rpc_err_batchtimestampbeforegcerrtype Number of BatchTimestampBeforeGCErrType errors received replica-bound RPCs\n\nThis counts how often error of the specified type was received back from replicas\nas part of executing possibly range-spanning requests. Failures to reach the target\nreplica will be accounted for as 'roachpb.CommunicationErrType' and unclassified\nerrors as 'roachpb.InternalErrType'.\n
+# TYPE distsender_rpc_err_batchtimestampbeforegcerrtype counter
+distsender_rpc_err_batchtimestampbeforegcerrtype{node_id="1"} 0
+# HELP distsender_rangefeed_retry_slow_consumer Number of ranges that encountered retryable SLOW_CONSUMER error
+# TYPE distsender_rangefeed_retry_slow_consumer counter
+distsender_rangefeed_retry_slow_consumer{node_id="1"} 0
+# HELP distsender_rangefeed_restart_ranges Number of ranges that were restarted due to transient errors
+# TYPE distsender_rangefeed_restart_ranges counter
+distsender_rangefeed_restart_ranges{node_id="1"} 0
+# HELP distsender_rpc_err_indeterminatecommiterrtype Number of IndeterminateCommitErrType errors received replica-bound RPCs\n\nThis counts how often error of the specified type was received back from replicas\nas part of executing possibly range-spanning requests. Failures to reach the target\nreplica will be accounted for as 'roachpb.CommunicationErrType' and unclassified\nerrors as 'roachpb.InternalErrType'.\n
+# TYPE distsender_rpc_err_indeterminatecommiterrtype counter
+distsender_rpc_err_indeterminatecommiterrtype{node_id="1"} 0
+# HELP distsender_rpc_err_replicacorruptionerrtype Number of ReplicaCorruptionErrType errors received replica-bound RPCs\n\nThis counts how often error of the specified type was received back from replicas\nas part of executing possibly range-spanning requests. Failures to reach the target\nreplica will be accounted for as 'roachpb.CommunicationErrType' and unclassified\nerrors as 'roachpb.InternalErrType'.\n
+# TYPE distsender_rpc_err_replicacorruptionerrtype counter
+distsender_rpc_err_replicacorruptionerrtype{node_id="1"} 0
+# HELP distsender_rpc_err_replicatooolderrtype Number of ReplicaTooOldErrType errors received replica-bound RPCs\n\nThis counts how often error of the specified type was received back from replicas\nas part of executing possibly range-spanning requests. Failures to reach the target\nreplica will be accounted for as 'roachpb.CommunicationErrType' and unclassified\nerrors as 'roachpb.InternalErrType'.\n
+# TYPE distsender_rpc_err_replicatooolderrtype counter
+distsender_rpc_err_replicatooolderrtype{node_id="1"} 0
+# HELP distsender_batch_requests_cross_zone_bytes Total byte count of replica-addressed batch requests processed cross\n		zone within the same region when region and zone tiers are configured.\n		However, if the region tiers are not configured, this count may also include\n		batch data sent between different regions. Ensuring consistent configuration\n		of region and zone tiers across nodes helps to accurately monitor the data\n		transmitted.
+# TYPE distsender_batch_requests_cross_zone_bytes counter
+distsender_batch_requests_cross_zone_bytes{node_id="1"} 0
+# HELP distsender_rpc_err_writeintenterrtype Number of WriteIntentErrType errors received replica-bound RPCs\n\nThis counts how often error of the specified type was received back from replicas\nas part of executing possibly range-spanning requests. Failures to reach the target\nreplica will be accounted for as 'roachpb.CommunicationErrType' and unclassified\nerrors as 'roachpb.InternalErrType'.\n
+# TYPE distsender_rpc_err_writeintenterrtype counter
+distsender_rpc_err_writeintenterrtype{node_id="1"} 1
+# HELP distsender_rpc_err_transactionstatuserrtype Number of TransactionStatusErrType errors received replica-bound RPCs\n\nThis counts how often error of the specified type was received back from replicas\nas part of executing possibly range-spanning requests. Failures to reach the target\nreplica will be accounted for as 'roachpb.CommunicationErrType' and unclassified\nerrors as 'roachpb.InternalErrType'.\n
+# TYPE distsender_rpc_err_transactionstatuserrtype counter
+distsender_rpc_err_transactionstatuserrtype{node_id="1"} 0
+# HELP distsender_rpc_err_transactionabortederrtype Number of TransactionAbortedErrType errors received replica-bound RPCs\n\nThis counts how often error of the specified type was received back from replicas\nas part of executing possibly range-spanning requests. Failures to reach the target\nreplica will be accounted for as 'roachpb.CommunicationErrType' and unclassified\nerrors as 'roachpb.InternalErrType'.\n
+# TYPE distsender_rpc_err_transactionabortederrtype counter
+distsender_rpc_err_transactionabortederrtype{node_id="1"} 0
+# HELP distsender_batch_responses_cross_region_bytes Total byte count of replica-addressed batch responses received cross\n		region when region tiers are configured
+# TYPE distsender_batch_responses_cross_region_bytes counter
+distsender_batch_responses_cross_region_bytes{node_id="1"} 0
+# HELP distsender_rpc_err_refreshfailederrtype Number of RefreshFailedErrType errors received replica-bound RPCs\n\nThis counts how often error of the specified type was received back from replicas\nas part of executing possibly range-spanning requests. Failures to reach the target\nreplica will be accounted for as 'roachpb.CommunicationErrType' and unclassified\nerrors as 'roachpb.InternalErrType'.\n
+# TYPE distsender_rpc_err_refreshfailederrtype counter
+distsender_rpc_err_refreshfailederrtype{node_id="1"} 0
+# HELP distsender_errors_notleaseholder Number of NotLeaseHolderErrors encountered from replica-addressed RPCs
+# TYPE distsender_errors_notleaseholder counter
+distsender_errors_notleaseholder{node_id="1"} 5
+# HELP distsender_batches Number of batches processed
+# TYPE distsender_batches counter
+distsender_batches{node_id="1"} 7045
+# HELP distsender_errors_inleasetransferbackoffs Number of times backed off due to NotLeaseHolderErrors during lease transfer
+# TYPE distsender_errors_inleasetransferbackoffs counter
+distsender_errors_inleasetransferbackoffs{node_id="1"} 0
+# HELP distsender_rpc_sent_nextreplicaerror Number of replica-addressed RPCs sent due to per-replica errors
+# TYPE distsender_rpc_sent_nextreplicaerror counter
+distsender_rpc_sent_nextreplicaerror{node_id="1"} 5
+# HELP distsender_rpc_err_errordetailtype_0_ Number of ErrorDetailType(0) errors received replica-bound RPCs\n\nThis counts how often error of the specified type was received back from replicas\nas part of executing possibly range-spanning requests. Failures to reach the target\nreplica will be accounted for as 'roachpb.CommunicationErrType' and unclassified\nerrors as 'roachpb.InternalErrType'.\n
+# TYPE distsender_rpc_err_errordetailtype_0_ counter
+distsender_rpc_err_errordetailtype_0_{node_id="1"} 0
+# HELP distsender_rpc_resolveintent_sent Number of ResolveIntent requests processed.\n\nThis counts the requests in batches handed to DistSender, not the RPCs\nsent to individual Ranges as a result.
+# TYPE distsender_rpc_resolveintent_sent counter
+distsender_rpc_resolveintent_sent{node_id="1"} 398
+# HELP distsender_batch_responses_cross_zone_bytes Total byte count of replica-addressed batch responses received cross\n		zone within the same region when region and zone tiers are configured.\n		However, if the region tiers are not configured, this count may also include\n		batch data received between different regions. Ensuring consistent\n		configuration of region and zone tiers across nodes helps to accurately\n		monitor the data transmitted.
+# TYPE distsender_batch_responses_cross_zone_bytes counter
+distsender_batch_responses_cross_zone_bytes{node_id="1"} 0
+# HELP distsender_rpc_subsume_sent Number of Subsume requests processed.\n\nThis counts the requests in batches handed to DistSender, not the RPCs\nsent to individual Ranges as a result.
+# TYPE distsender_rpc_subsume_sent counter
+distsender_rpc_subsume_sent{node_id="1"} 0
+# HELP distsender_rpc_sent_local Number of replica-addressed RPCs sent through the local-server optimization
+# TYPE distsender_rpc_sent_local counter
+distsender_rpc_sent_local{node_id="1"} 8039
+# HELP distsender_rpc_adminunsplit_sent Number of AdminUnsplit requests processed.\n\nThis counts the requests in batches handed to DistSender, not the RPCs\nsent to individual Ranges as a result.
+# TYPE distsender_rpc_adminunsplit_sent counter
+distsender_rpc_adminunsplit_sent{node_id="1"} 0
+# HELP distsender_rangefeed_retry_range_key_mismatch Number of ranges that encountered retryable range key mismatch error
+# TYPE distsender_rangefeed_retry_range_key_mismatch counter
+distsender_rangefeed_retry_range_key_mismatch{node_id="1"} 0
+# HELP distsender_rpc_err_integeroverflowerrtype Number of IntegerOverflowErrType errors received replica-bound RPCs\n\nThis counts how often error of the specified type was received back from replicas\nas part of executing possibly range-spanning requests. Failures to reach the target\nreplica will be accounted for as 'roachpb.CommunicationErrType' and unclassified\nerrors as 'roachpb.InternalErrType'.\n
+# TYPE distsender_rpc_err_integeroverflowerrtype counter
+distsender_rpc_err_integeroverflowerrtype{node_id="1"} 0
+# HELP distsender_rangefeed_retry_replica_removed Number of ranges that encountered retryable REPLICA_REMOVED error
+# TYPE distsender_rangefeed_retry_replica_removed counter
+distsender_rangefeed_retry_replica_removed{node_id="1"} 0
+# HELP distsender_rpc_export_sent Number of Export requests processed.\n\nThis counts the requests in batches handed to DistSender, not the RPCs\nsent to individual Ranges as a result.
+# TYPE distsender_rpc_export_sent counter
+distsender_rpc_export_sent{node_id="1"} 0
+# HELP distsender_rpc_initput_sent Number of InitPut requests processed.\n\nThis counts the requests in batches handed to DistSender, not the RPCs\nsent to individual Ranges as a result.
+# TYPE distsender_rpc_initput_sent counter
+distsender_rpc_initput_sent{node_id="1"} 362
+# HELP distsender_rpc_err_intentmissingerrtype Number of IntentMissingErrType errors received replica-bound RPCs\n\nThis counts how often error of the specified type was received back from replicas\nas part of executing possibly range-spanning requests. Failures to reach the target\nreplica will be accounted for as 'roachpb.CommunicationErrType' and unclassified\nerrors as 'roachpb.InternalErrType'.\n
+# TYPE distsender_rpc_err_intentmissingerrtype counter
+distsender_rpc_err_intentmissingerrtype{node_id="1"} 0
+# HELP distsender_rpc_err_communicationerrtype Number of CommunicationErrType errors received replica-bound RPCs\n\nThis counts how often error of the specified type was received back from replicas\nas part of executing possibly range-spanning requests. Failures to reach the target\nreplica will be accounted for as 'roachpb.CommunicationErrType' and unclassified\nerrors as 'roachpb.InternalErrType'.\n
+# TYPE distsender_rpc_err_communicationerrtype counter
+distsender_rpc_err_communicationerrtype{node_id="1"} 0
+# HELP distsender_rpc_err_optimisticevalconflictserrtype Number of OptimisticEvalConflictsErrType errors received replica-bound RPCs\n\nThis counts how often error of the specified type was received back from replicas\nas part of executing possibly range-spanning requests. Failures to reach the target\nreplica will be accounted for as 'roachpb.CommunicationErrType' and unclassified\nerrors as 'roachpb.InternalErrType'.\n
+# TYPE distsender_rpc_err_optimisticevalconflictserrtype counter
+distsender_rpc_err_optimisticevalconflictserrtype{node_id="1"} 0
+# HELP distsender_rangefeed_retry_logical_ops_missing Number of ranges that encountered retryable LOGICAL_OPS_MISSING error
+# TYPE distsender_rangefeed_retry_logical_ops_missing counter
+distsender_rangefeed_retry_logical_ops_missing{node_id="1"} 0
+# HELP distsender_rpc_err_conditionfailederrtype Number of ConditionFailedErrType errors received replica-bound RPCs\n\nThis counts how often error of the specified type was received back from replicas\nas part of executing possibly range-spanning requests. Failures to reach the target\nreplica will be accounted for as 'roachpb.CommunicationErrType' and unclassified\nerrors as 'roachpb.InternalErrType'.\n
+# TYPE distsender_rpc_err_conditionfailederrtype counter
+distsender_rpc_err_conditionfailederrtype{node_id="1"} 0
+# HELP distsender_rpc_err_transactionretrywithprotorefresherrtype Number of TransactionRetryWithProtoRefreshErrType errors received replica-bound RPCs\n\nThis counts how often error of the specified type was received back from replicas\nas part of executing possibly range-spanning requests. Failures to reach the target\nreplica will be accounted for as 'roachpb.CommunicationErrType' and unclassified\nerrors as 'roachpb.InternalErrType'.\n
+# TYPE distsender_rpc_err_transactionretrywithprotorefresherrtype counter
+distsender_rpc_err_transactionretrywithprotorefresherrtype{node_id="1"} 0
+# HELP distsender_rpc_checkconsistency_sent Number of CheckConsistency requests processed.\n\nThis counts the requests in batches handed to DistSender, not the RPCs\nsent to individual Ranges as a result.
+# TYPE distsender_rpc_checkconsistency_sent counter
+distsender_rpc_checkconsistency_sent{node_id="1"} 0
+# HELP distsender_rpc_get_sent Number of Get requests processed.\n\nThis counts the requests in batches handed to DistSender, not the RPCs\nsent to individual Ranges as a result.
+# TYPE distsender_rpc_get_sent counter
+distsender_rpc_get_sent{node_id="1"} 300
+# HELP distsender_rpc_isspanempty_sent Number of IsSpanEmpty requests processed.\n\nThis counts the requests in batches handed to DistSender, not the RPCs\nsent to individual Ranges as a result.
+# TYPE distsender_rpc_isspanempty_sent counter
+distsender_rpc_isspanempty_sent{node_id="1"} 0
+# HELP distsender_rpc_heartbeattxn_sent Number of HeartbeatTxn requests processed.\n\nThis counts the requests in batches handed to DistSender, not the RPCs\nsent to individual Ranges as a result.
+# TYPE distsender_rpc_heartbeattxn_sent counter
+distsender_rpc_heartbeattxn_sent{node_id="1"} 0
+# HELP distsender_rpc_delete_sent Number of Delete requests processed.\n\nThis counts the requests in batches handed to DistSender, not the RPCs\nsent to individual Ranges as a result.
+# TYPE distsender_rpc_delete_sent counter
+distsender_rpc_delete_sent{node_id="1"} 268
+# HELP distsender_rpc_endtxn_sent Number of EndTxn requests processed.\n\nThis counts the requests in batches handed to DistSender, not the RPCs\nsent to individual Ranges as a result.
+# TYPE distsender_rpc_endtxn_sent counter
+distsender_rpc_endtxn_sent{node_id="1"} 1178
+# HELP distsender_rpc_recomputestats_sent Number of RecomputeStats requests processed.\n\nThis counts the requests in batches handed to DistSender, not the RPCs\nsent to individual Ranges as a result.
+# TYPE distsender_rpc_recomputestats_sent counter
+distsender_rpc_recomputestats_sent{node_id="1"} 1
+# HELP distsender_rpc_adminscatter_sent Number of AdminScatter requests processed.\n\nThis counts the requests in batches handed to DistSender, not the RPCs\nsent to individual Ranges as a result.
+# TYPE distsender_rpc_adminscatter_sent counter
+distsender_rpc_adminscatter_sent{node_id="1"} 0
+# HELP distsender_rpc_recovertxn_sent Number of RecoverTxn requests processed.\n\nThis counts the requests in batches handed to DistSender, not the RPCs\nsent to individual Ranges as a result.
+# TYPE distsender_rpc_recovertxn_sent counter
+distsender_rpc_recovertxn_sent{node_id="1"} 0
+# HELP distsender_rpc_reversescan_sent Number of ReverseScan requests processed.\n\nThis counts the requests in batches handed to DistSender, not the RPCs\nsent to individual Ranges as a result.
+# TYPE distsender_rpc_reversescan_sent counter
+distsender_rpc_reversescan_sent{node_id="1"} 6
+# HELP distsender_rpc_err_errordetailtype_15_ Number of ErrorDetailType(15) errors received replica-bound RPCs\n\nThis counts how often error of the specified type was received back from replicas\nas part of executing possibly range-spanning requests. Failures to reach the target\nreplica will be accounted for as 'roachpb.CommunicationErrType' and unclassified\nerrors as 'roachpb.InternalErrType'.\n
+# TYPE distsender_rpc_err_errordetailtype_15_ counter
+distsender_rpc_err_errordetailtype_15_{node_id="1"} 0
+# HELP distsender_rpc_adminverifyprotectedtimestamp_sent Number of AdminVerifyProtectedTimestamp requests processed.\n\nThis counts the requests in batches handed to DistSender, not the RPCs\nsent to individual Ranges as a result.
+# TYPE distsender_rpc_adminverifyprotectedtimestamp_sent counter
+distsender_rpc_adminverifyprotectedtimestamp_sent{node_id="1"} 0
+# HELP distsender_rpc_err_rangekeymismatcherrtype Number of RangeKeyMismatchErrType errors received replica-bound RPCs\n\nThis counts how often error of the specified type was received back from replicas\nas part of executing possibly range-spanning requests. Failures to reach the target\nreplica will be accounted for as 'roachpb.CommunicationErrType' and unclassified\nerrors as 'roachpb.InternalErrType'.\n
+# TYPE distsender_rpc_err_rangekeymismatcherrtype counter
+distsender_rpc_err_rangekeymismatcherrtype{node_id="1"} 0
+# HELP distsender_rangefeed_retry_rangefeed_closed Number of ranges that encountered retryable RANGEFEED_CLOSED error
+# TYPE distsender_rangefeed_retry_rangefeed_closed counter
+distsender_rangefeed_retry_rangefeed_closed{node_id="1"} 0
+# HELP distsender_rpc_truncatelog_sent Number of TruncateLog requests processed.\n\nThis counts the requests in batches handed to DistSender, not the RPCs\nsent to individual Ranges as a result.
+# TYPE distsender_rpc_truncatelog_sent counter
+distsender_rpc_truncatelog_sent{node_id="1"} 56
+# HELP distsender_rpc_addsstable_sent Number of AddSSTable requests processed.\n\nThis counts the requests in batches handed to DistSender, not the RPCs\nsent to individual Ranges as a result.
+# TYPE distsender_rpc_addsstable_sent counter
+distsender_rpc_addsstable_sent{node_id="1"} 0
+# HELP distsender_rangefeed_retry_node_not_found Number of ranges that encountered retryable node not found error
+# TYPE distsender_rangefeed_retry_node_not_found counter
+distsender_rangefeed_retry_node_not_found{node_id="1"} 0
+# HELP distsender_rangefeed_retry_no_leaseholder Number of ranges that encountered retryable NO_LEASEHOLDER error
+# TYPE distsender_rangefeed_retry_no_leaseholder counter
+distsender_rangefeed_retry_no_leaseholder{node_id="1"} 0
+# HELP distsender_rpc_resolveintentrange_sent Number of ResolveIntentRange requests processed.\n\nThis counts the requests in batches handed to DistSender, not the RPCs\nsent to individual Ranges as a result.
+# TYPE distsender_rpc_resolveintentrange_sent counter
+distsender_rpc_resolveintentrange_sent{node_id="1"} 527
+# HELP distsender_rangelookups Number of range lookups
+# TYPE distsender_rangelookups counter
+distsender_rangelookups{node_id="1"} 19
+# HELP distsender_rangefeed_retry_stuck Number of ranges that encountered retryable stuck error
+# TYPE distsender_rangefeed_retry_stuck counter
+distsender_rangefeed_retry_stuck{node_id="1"} 0
+# HELP distsender_rpc_sent Number of replica-addressed RPCs sent
+# TYPE distsender_rpc_sent counter
+distsender_rpc_sent{node_id="1"} 8039
+# HELP distsender_rangefeed_retry_range_not_found Number of ranges that encountered retryable range not found error
+# TYPE distsender_rangefeed_retry_range_not_found counter
+distsender_rangefeed_retry_range_not_found{node_id="1"} 0
+# HELP distsender_rpc_querylocks_sent Number of QueryLocks requests processed.\n\nThis counts the requests in batches handed to DistSender, not the RPCs\nsent to individual Ranges as a result.
+# TYPE distsender_rpc_querylocks_sent counter
+distsender_rpc_querylocks_sent{node_id="1"} 0
+# HELP distsender_batches_async_throttled Number of partial batches not sent asynchronously due to throttling
+# TYPE distsender_batches_async_throttled counter
+distsender_batches_async_throttled{node_id="1"} 0
+# HELP distsender_rpc_err_errordetailtype_24_ Number of ErrorDetailType(24) errors received replica-bound RPCs\n\nThis counts how often error of the specified type was received back from replicas\nas part of executing possibly range-spanning requests. Failures to reach the target\nreplica will be accounted for as 'roachpb.CommunicationErrType' and unclassified\nerrors as 'roachpb.InternalErrType'.\n
+# TYPE distsender_rpc_err_errordetailtype_24_ counter
+distsender_rpc_err_errordetailtype_24_{node_id="1"} 0
+# HELP distsender_rangefeed_total_ranges Number of ranges executing rangefeed\n\nThis counts the number of ranges with an active rangefeed.\n
+# TYPE distsender_rangefeed_total_ranges gauge
+distsender_rangefeed_total_ranges{node_id="1"} 13
+# HELP distsender_rpc_err_unsupportedrequesterrtype Number of UnsupportedRequestErrType errors received replica-bound RPCs\n\nThis counts how often error of the specified type was received back from replicas\nas part of executing possibly range-spanning requests. Failures to reach the target\nreplica will be accounted for as 'roachpb.CommunicationErrType' and unclassified\nerrors as 'roachpb.InternalErrType'.\n
+# TYPE distsender_rpc_err_unsupportedrequesterrtype counter
+distsender_rpc_err_unsupportedrequesterrtype{node_id="1"} 0
+# HELP distsender_rpc_err_invalidleaseerrtype Number of InvalidLeaseErrType errors received replica-bound RPCs\n\nThis counts how often error of the specified type was received back from replicas\nas part of executing possibly range-spanning requests. Failures to reach the target\nreplica will be accounted for as 'roachpb.CommunicationErrType' and unclassified\nerrors as 'roachpb.InternalErrType'.\n
+# TYPE distsender_rpc_err_invalidleaseerrtype counter
+distsender_rpc_err_invalidleaseerrtype{node_id="1"} 0
+# HELP distsender_rpc_rangestats_sent Number of RangeStats requests processed.\n\nThis counts the requests in batches handed to DistSender, not the RPCs\nsent to individual Ranges as a result.
+# TYPE distsender_rpc_rangestats_sent counter
+distsender_rpc_rangestats_sent{node_id="1"} 25
+# HELP distsender_rangefeed_error_catchup_ranges Number of ranges in catchup mode which experienced an error
+# TYPE distsender_rangefeed_error_catchup_ranges counter
+distsender_rangefeed_error_catchup_ranges{node_id="1"} 0
+# HELP distsender_rpc_err_ambiguousresulterrtype Number of AmbiguousResultErrType errors received replica-bound RPCs\n\nThis counts how often error of the specified type was received back from replicas\nas part of executing possibly range-spanning requests. Failures to reach the target\nreplica will be accounted for as 'roachpb.CommunicationErrType' and unclassified\nerrors as 'roachpb.InternalErrType'.\n
+# TYPE distsender_rpc_err_ambiguousresulterrtype counter
+distsender_rpc_err_ambiguousresulterrtype{node_id="1"} 0
+# HELP distsender_rangefeed_retry_send Number of ranges that encountered retryable send error
+# TYPE distsender_rangefeed_retry_send counter
+distsender_rangefeed_retry_send{node_id="1"} 0
+# HELP distsender_rpc_err_mvcchistorymutationerrtype Number of MVCCHistoryMutationErrType errors received replica-bound RPCs\n\nThis counts how often error of the specified type was received back from replicas\nas part of executing possibly range-spanning requests. Failures to reach the target\nreplica will be accounted for as 'roachpb.CommunicationErrType' and unclassified\nerrors as 'roachpb.InternalErrType'.\n
+# TYPE distsender_rpc_err_mvcchistorymutationerrtype counter
+distsender_rpc_err_mvcchistorymutationerrtype{node_id="1"} 0
+# HELP distsender_rpc_err_transactionretryerrtype Number of TransactionRetryErrType errors received replica-bound RPCs\n\nThis counts how often error of the specified type was received back from replicas\nas part of executing possibly range-spanning requests. Failures to reach the target\nreplica will be accounted for as 'roachpb.CommunicationErrType' and unclassified\nerrors as 'roachpb.InternalErrType'.\n
+# TYPE distsender_rpc_err_transactionretryerrtype counter
+distsender_rpc_err_transactionretryerrtype{node_id="1"} 0
+# HELP distsender_rpc_admintransferlease_sent Number of AdminTransferLease requests processed.\n\nThis counts the requests in batches handed to DistSender, not the RPCs\nsent to individual Ranges as a result.
+# TYPE distsender_rpc_admintransferlease_sent counter
+distsender_rpc_admintransferlease_sent{node_id="1"} 0
+# HELP distsender_rpc_err_storenotfounderrtype Number of StoreNotFoundErrType errors received replica-bound RPCs\n\nThis counts how often error of the specified type was received back from replicas\nas part of executing possibly range-spanning requests. Failures to reach the target\nreplica will be accounted for as 'roachpb.CommunicationErrType' and unclassified\nerrors as 'roachpb.InternalErrType'.\n
+# TYPE distsender_rpc_err_storenotfounderrtype counter
+distsender_rpc_err_storenotfounderrtype{node_id="1"} 0
+# HELP distsender_rpc_deleterange_sent Number of DeleteRange requests processed.\n\nThis counts the requests in batches handed to DistSender, not the RPCs\nsent to individual Ranges as a result.
+# TYPE distsender_rpc_deleterange_sent counter
+distsender_rpc_deleterange_sent{node_id="1"} 523
+# HELP distsender_rpc_adminmerge_sent Number of AdminMerge requests processed.\n\nThis counts the requests in batches handed to DistSender, not the RPCs\nsent to individual Ranges as a result.
+# TYPE distsender_rpc_adminmerge_sent counter
+distsender_rpc_adminmerge_sent{node_id="1"} 0
+# HELP distsender_rpc_err_errordetailtype_20_ Number of ErrorDetailType(20) errors received replica-bound RPCs\n\nThis counts how often error of the specified type was received back from replicas\nas part of executing possibly range-spanning requests. Failures to reach the target\nreplica will be accounted for as 'roachpb.CommunicationErrType' and unclassified\nerrors as 'roachpb.InternalErrType'.\n
+# TYPE distsender_rpc_err_errordetailtype_20_ counter
+distsender_rpc_err_errordetailtype_20_{node_id="1"} 0
+# HELP distsender_batches_partial Number of partial batches processed after being divided on range boundaries
+# TYPE distsender_batches_partial counter
+distsender_batches_partial{node_id="1"} 1649
+# HELP distsender_rpc_leaseinfo_sent Number of LeaseInfo requests processed.\n\nThis counts the requests in batches handed to DistSender, not the RPCs\nsent to individual Ranges as a result.
+# TYPE distsender_rpc_leaseinfo_sent counter
+distsender_rpc_leaseinfo_sent{node_id="1"} 0
+# HELP distsender_rpc_err_transactionpusherrtype Number of TransactionPushErrType errors received replica-bound RPCs\n\nThis counts how often error of the specified type was received back from replicas\nas part of executing possibly range-spanning requests. Failures to reach the target\nreplica will be accounted for as 'roachpb.CommunicationErrType' and unclassified\nerrors as 'roachpb.InternalErrType'.\n
+# TYPE distsender_rpc_err_transactionpusherrtype counter
+distsender_rpc_err_transactionpusherrtype{node_id="1"} 1
+# HELP distsender_batch_responses_replica_addressed_bytes Total byte count of replica-addressed batch responses received
+# TYPE distsender_batch_responses_replica_addressed_bytes counter
+distsender_batch_responses_replica_addressed_bytes{node_id="1"} 5.433402e+06
+# HELP distsender_rpc_clearrange_sent Number of ClearRange requests processed.\n\nThis counts the requests in batches handed to DistSender, not the RPCs\nsent to individual Ranges as a result.
+# TYPE distsender_rpc_clearrange_sent counter
+distsender_rpc_clearrange_sent{node_id="1"} 0
+# HELP distsender_rpc_barrier_sent Number of Barrier requests processed.\n\nThis counts the requests in batches handed to DistSender, not the RPCs\nsent to individual Ranges as a result.
+# TYPE distsender_rpc_barrier_sent counter
+distsender_rpc_barrier_sent{node_id="1"} 0
+# HELP distsender_rpc_err_mergeinprogresserrtype Number of MergeInProgressErrType errors received replica-bound RPCs\n\nThis counts how often error of the specified type was received back from replicas\nas part of executing possibly range-spanning requests. Failures to reach the target\nreplica will be accounted for as 'roachpb.CommunicationErrType' and unclassified\nerrors as 'roachpb.InternalErrType'.\n
+# TYPE distsender_rpc_err_mergeinprogresserrtype counter
+distsender_rpc_err_mergeinprogresserrtype{node_id="1"} 0
+# HELP distsender_batch_requests_replica_addressed_bytes Total byte count of replica-addressed batch requests processed
+# TYPE distsender_batch_requests_replica_addressed_bytes counter
+distsender_batch_requests_replica_addressed_bytes{node_id="1"} 9.488964e+06
+# HELP distsender_rpc_adminrelocaterange_sent Number of AdminRelocateRange requests processed.\n\nThis counts the requests in batches handed to DistSender, not the RPCs\nsent to individual Ranges as a result.
+# TYPE distsender_rpc_adminrelocaterange_sent counter
+distsender_rpc_adminrelocaterange_sent{node_id="1"} 0
+# HELP distsender_rpc_err_nodeunavailableerrtype Number of NodeUnavailableErrType errors received replica-bound RPCs\n\nThis counts how often error of the specified type was received back from replicas\nas part of executing possibly range-spanning requests. Failures to reach the target\nreplica will be accounted for as 'roachpb.CommunicationErrType' and unclassified\nerrors as 'roachpb.InternalErrType'.\n
+# TYPE distsender_rpc_err_nodeunavailableerrtype counter
+distsender_rpc_err_nodeunavailableerrtype{node_id="1"} 0
+# HELP distsender_rpc_err_oprequirestxnerrtype Number of OpRequiresTxnErrType errors received replica-bound RPCs\n\nThis counts how often error of the specified type was received back from replicas\nas part of executing possibly range-spanning requests. Failures to reach the target\nreplica will be accounted for as 'roachpb.CommunicationErrType' and unclassified\nerrors as 'roachpb.InternalErrType'.\n
+# TYPE distsender_rpc_err_oprequirestxnerrtype counter
+distsender_rpc_err_oprequirestxnerrtype{node_id="1"} 0
+# HELP distsender_rpc_pushtxn_sent Number of PushTxn requests processed.\n\nThis counts the requests in batches handed to DistSender, not the RPCs\nsent to individual Ranges as a result.
+# TYPE distsender_rpc_pushtxn_sent counter
+distsender_rpc_pushtxn_sent{node_id="1"} 1
+# HELP distsender_rpc_err_raftgroupdeletederrtype Number of RaftGroupDeletedErrType errors received replica-bound RPCs\n\nThis counts how often error of the specified type was received back from replicas\nas part of executing possibly range-spanning requests. Failures to reach the target\nreplica will be accounted for as 'roachpb.CommunicationErrType' and unclassified\nerrors as 'roachpb.InternalErrType'.\n
+# TYPE distsender_rpc_err_raftgroupdeletederrtype counter
+distsender_rpc_err_raftgroupdeletederrtype{node_id="1"} 0
+# HELP distsender_batches_async_sent Number of partial batches sent asynchronously
+# TYPE distsender_batches_async_sent counter
+distsender_batches_async_sent{node_id="1"} 445
+# HELP distsender_rangefeed_retry_raft_snapshot Number of ranges that encountered retryable RAFT_SNAPSHOT error
+# TYPE distsender_rangefeed_retry_raft_snapshot counter
+distsender_rangefeed_retry_raft_snapshot{node_id="1"} 0
+# HELP distsender_rpc_err_writetooolderrtype Number of WriteTooOldErrType errors received replica-bound RPCs\n\nThis counts how often error of the specified type was received back from replicas\nas part of executing possibly range-spanning requests. Failures to reach the target\nreplica will be accounted for as 'roachpb.CommunicationErrType' and unclassified\nerrors as 'roachpb.InternalErrType'.\n
+# TYPE distsender_rpc_err_writetooolderrtype counter
+distsender_rpc_err_writetooolderrtype{node_id="1"} 0
+# HELP distsender_rpc_err_internalerrtype Number of InternalErrType errors received replica-bound RPCs\n\nThis counts how often error of the specified type was received back from replicas\nas part of executing possibly range-spanning requests. Failures to reach the target\nreplica will be accounted for as 'roachpb.CommunicationErrType' and unclassified\nerrors as 'roachpb.InternalErrType'.\n
+# TYPE distsender_rpc_err_internalerrtype counter
+distsender_rpc_err_internalerrtype{node_id="1"} 0
+# HELP distsender_rpc_queryresolvedtimestamp_sent Number of QueryResolvedTimestamp requests processed.\n\nThis counts the requests in batches handed to DistSender, not the RPCs\nsent to individual Ranges as a result.
+# TYPE distsender_rpc_queryresolvedtimestamp_sent counter
+distsender_rpc_queryresolvedtimestamp_sent{node_id="1"} 0
+# HELP distsender_rpc_err_readwithinuncertaintyintervalerrtype Number of ReadWithinUncertaintyIntervalErrType errors received replica-bound RPCs\n\nThis counts how often error of the specified type was received back from replicas\nas part of executing possibly range-spanning requests. Failures to reach the target\nreplica will be accounted for as 'roachpb.CommunicationErrType' and unclassified\nerrors as 'roachpb.InternalErrType'.\n
+# TYPE distsender_rpc_err_readwithinuncertaintyintervalerrtype counter
+distsender_rpc_err_readwithinuncertaintyintervalerrtype{node_id="1"} 0
+# HELP distsender_rpc_scan_sent Number of Scan requests processed.\n\nThis counts the requests in batches handed to DistSender, not the RPCs\nsent to individual Ranges as a result.
+# TYPE distsender_rpc_scan_sent counter
+distsender_rpc_scan_sent{node_id="1"} 5449
+# HELP distsender_rangefeed_retry_range_split Number of ranges that encountered retryable RANGE_SPLIT error
+# TYPE distsender_rangefeed_retry_range_split counter
+distsender_rangefeed_retry_range_split{node_id="1"} 0
+# HELP distsender_rpc_err_errordetailtype_21_ Number of ErrorDetailType(21) errors received replica-bound RPCs\n\nThis counts how often error of the specified type was received back from replicas\nas part of executing possibly range-spanning requests. Failures to reach the target\nreplica will be accounted for as 'roachpb.CommunicationErrType' and unclassified\nerrors as 'roachpb.InternalErrType'.\n
+# TYPE distsender_rpc_err_errordetailtype_21_ counter
+distsender_rpc_err_errordetailtype_21_{node_id="1"} 0
+# HELP distsender_rpc_adminchangereplicas_sent Number of AdminChangeReplicas requests processed.\n\nThis counts the requests in batches handed to DistSender, not the RPCs\nsent to individual Ranges as a result.
+# TYPE distsender_rpc_adminchangereplicas_sent counter
+distsender_rpc_adminchangereplicas_sent{node_id="1"} 0
+# HELP distsender_rpc_err_errordetailtype_23_ Number of ErrorDetailType(23) errors received replica-bound RPCs\n\nThis counts how often error of the specified type was received back from replicas\nas part of executing possibly range-spanning requests. Failures to reach the target\nreplica will be accounted for as 'roachpb.CommunicationErrType' and unclassified\nerrors as 'roachpb.InternalErrType'.\n
+# TYPE distsender_rpc_err_errordetailtype_23_ counter
+distsender_rpc_err_errordetailtype_23_{node_id="1"} 0
+# HELP distsender_rangefeed_retry_range_merged Number of ranges that encountered retryable RANGE_MERGED error
+# TYPE distsender_rangefeed_retry_range_merged counter
+distsender_rangefeed_retry_range_merged{node_id="1"} 0
+# HELP distsender_rpc_err_errordetailtype_29_ Number of ErrorDetailType(29) errors received replica-bound RPCs\n\nThis counts how often error of the specified type was received back from replicas\nas part of executing possibly range-spanning requests. Failures to reach the target\nreplica will be accounted for as 'roachpb.CommunicationErrType' and unclassified\nerrors as 'roachpb.InternalErrType'.\n
+# TYPE distsender_rpc_err_errordetailtype_29_ counter
+distsender_rpc_err_errordetailtype_29_{node_id="1"} 0
+# HELP distsender_rpc_transferlease_sent Number of TransferLease requests processed.\n\nThis counts the requests in batches handed to DistSender, not the RPCs\nsent to individual Ranges as a result.
+# TYPE distsender_rpc_transferlease_sent counter
+distsender_rpc_transferlease_sent{node_id="1"} 0
+# HELP distsender_rpc_migrate_sent Number of Migrate requests processed.\n\nThis counts the requests in batches handed to DistSender, not the RPCs\nsent to individual Ranges as a result.
+# TYPE distsender_rpc_migrate_sent counter
+distsender_rpc_migrate_sent{node_id="1"} 0
+# HELP distsender_rpc_err_rangefeedretryerrtype Number of RangeFeedRetryErrType errors received replica-bound RPCs\n\nThis counts how often error of the specified type was received back from replicas\nas part of executing possibly range-spanning requests. Failures to reach the target\nreplica will be accounted for as 'roachpb.CommunicationErrType' and unclassified\nerrors as 'roachpb.InternalErrType'.\n
+# TYPE distsender_rpc_err_rangefeedretryerrtype counter
+distsender_rpc_err_rangefeedretryerrtype{node_id="1"} 0
+# HELP distsender_batch_requests_cross_region_bytes Total byte count of replica-addressed batch requests processed cross\n		region when region tiers are configured
+# TYPE distsender_batch_requests_cross_region_bytes counter
+distsender_batch_requests_cross_region_bytes{node_id="1"} 0
+# HELP distsender_rpc_probe_sent Number of Probe requests processed.\n\nThis counts the requests in batches handed to DistSender, not the RPCs\nsent to individual Ranges as a result.
+# TYPE distsender_rpc_probe_sent counter
+distsender_rpc_probe_sent{node_id="1"} 0
+# HELP distsender_rpc_conditionalput_sent Number of ConditionalPut requests processed.\n\nThis counts the requests in batches handed to DistSender, not the RPCs\nsent to individual Ranges as a result.
+# TYPE distsender_rpc_conditionalput_sent counter
+distsender_rpc_conditionalput_sent{node_id="1"} 1576
+# HELP distsender_rpc_merge_sent Number of Merge requests processed.\n\nThis counts the requests in batches handed to DistSender, not the RPCs\nsent to individual Ranges as a result.
+# TYPE distsender_rpc_merge_sent counter
+distsender_rpc_merge_sent{node_id="1"} 30436
+# HELP distsender_rpc_gc_sent Number of GC requests processed.\n\nThis counts the requests in batches handed to DistSender, not the RPCs\nsent to individual Ranges as a result.
+# TYPE distsender_rpc_gc_sent counter
+distsender_rpc_gc_sent{node_id="1"} 442
+# HELP distsender_rpc_queryintent_sent Number of QueryIntent requests processed.\n\nThis counts the requests in batches handed to DistSender, not the RPCs\nsent to individual Ranges as a result.
+# TYPE distsender_rpc_queryintent_sent counter
+distsender_rpc_queryintent_sent{node_id="1"} 2492
+# HELP distsender_rpc_err_leaserejectederrtype Number of LeaseRejectedErrType errors received replica-bound RPCs\n\nThis counts how often error of the specified type was received back from replicas\nas part of executing possibly range-spanning requests. Failures to reach the target\nreplica will be accounted for as 'roachpb.CommunicationErrType' and unclassified\nerrors as 'roachpb.InternalErrType'.\n
+# TYPE distsender_rpc_err_leaserejectederrtype counter
+distsender_rpc_err_leaserejectederrtype{node_id="1"} 0
+# HELP distsender_rpc_err_errordetailtype_33_ Number of ErrorDetailType(33) errors received replica-bound RPCs\n\nThis counts how often error of the specified type was received back from replicas\nas part of executing possibly range-spanning requests. Failures to reach the target\nreplica will be accounted for as 'roachpb.CommunicationErrType' and unclassified\nerrors as 'roachpb.InternalErrType'.\n
+# TYPE distsender_rpc_err_errordetailtype_33_ counter
+distsender_rpc_err_errordetailtype_33_{node_id="1"} 0
+# HELP distsender_rpc_writebatch_sent Number of WriteBatch requests processed.\n\nThis counts the requests in batches handed to DistSender, not the RPCs\nsent to individual Ranges as a result.
+# TYPE distsender_rpc_writebatch_sent counter
+distsender_rpc_writebatch_sent{node_id="1"} 0
+# HELP distsender_rpc_requestlease_sent Number of RequestLease requests processed.\n\nThis counts the requests in batches handed to DistSender, not the RPCs\nsent to individual Ranges as a result.
+# TYPE distsender_rpc_requestlease_sent counter
+distsender_rpc_requestlease_sent{node_id="1"} 0
+# HELP distsender_rpc_err_mintimestampboundunsatisfiableerrtype Number of MinTimestampBoundUnsatisfiableErrType errors received replica-bound RPCs\n\nThis counts how often error of the specified type was received back from replicas\nas part of executing possibly range-spanning requests. Failures to reach the target\nreplica will be accounted for as 'roachpb.CommunicationErrType' and unclassified\nerrors as 'roachpb.InternalErrType'.\n
+# TYPE distsender_rpc_err_mintimestampboundunsatisfiableerrtype counter
+distsender_rpc_err_mintimestampboundunsatisfiableerrtype{node_id="1"} 0
+# HELP distsender_rangefeed_catchup_ranges Number of ranges in catchup mode\n\nThis counts the number of ranges with an active rangefeed that are performing catchup scan.\n
+# TYPE distsender_rangefeed_catchup_ranges gauge
+distsender_rangefeed_catchup_ranges{node_id="1"} 0
+# HELP distsender_rpc_err_errordetailtype_30_ Number of ErrorDetailType(30) errors received replica-bound RPCs\n\nThis counts how often error of the specified type was received back from replicas\nas part of executing possibly range-spanning requests. Failures to reach the target\nreplica will be accounted for as 'roachpb.CommunicationErrType' and unclassified\nerrors as 'roachpb.InternalErrType'.\n
+# TYPE distsender_rpc_err_errordetailtype_30_ counter
+distsender_rpc_err_errordetailtype_30_{node_id="1"} 0
+# HELP distsender_rpc_refresh_sent Number of Refresh requests processed.\n\nThis counts the requests in batches handed to DistSender, not the RPCs\nsent to individual Ranges as a result.
+# TYPE distsender_rpc_refresh_sent counter
+distsender_rpc_refresh_sent{node_id="1"} 0
+# HELP distsender_rpc_increment_sent Number of Increment requests processed.\n\nThis counts the requests in batches handed to DistSender, not the RPCs\nsent to individual Ranges as a result.
+# TYPE distsender_rpc_increment_sent counter
+distsender_rpc_increment_sent{node_id="1"} 4
+# HELP distsender_rpc_computechecksum_sent Number of ComputeChecksum requests processed.\n\nThis counts the requests in batches handed to DistSender, not the RPCs\nsent to individual Ranges as a result.
+# TYPE distsender_rpc_computechecksum_sent counter
+distsender_rpc_computechecksum_sent{node_id="1"} 67
+# HELP distsender_rpc_err_rangenotfounderrtype Number of RangeNotFoundErrType errors received replica-bound RPCs\n\nThis counts how often error of the specified type was received back from replicas\nas part of executing possibly range-spanning requests. Failures to reach the target\nreplica will be accounted for as 'roachpb.CommunicationErrType' and unclassified\nerrors as 'roachpb.InternalErrType'.\n
+# TYPE distsender_rpc_err_rangenotfounderrtype counter
+distsender_rpc_err_rangenotfounderrtype{node_id="1"} 0

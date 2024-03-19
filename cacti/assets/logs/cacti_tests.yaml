@@ -10,6 +10,7 @@ tests:
         thread_name: "Poller"
       timestamp: 1578647690000
     message: "Cacti Master Poller process terminated by user"
+    status: "warn"
     tags:
      - "source:LOGS_SOURCE"
     timestamp: 1578647690000
@@ -23,6 +24,7 @@ tests:
         thread_name: "Poller"
       timestamp: 1601544070000
     message: "MySQL Error:'2013', Message:'Lost connection to MySQL server during query'"
+    status: "emergency"
     tags:
      - "source:LOGS_SOURCE"
     timestamp: 1601544070000

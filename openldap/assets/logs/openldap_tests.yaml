@@ -13,6 +13,7 @@ tests:
         operation: 2
         thread_id: 1008
     message: "[19-06-2019 09:12:19] slapd debug  conn=1008 op=2 do_unbind"
+    status: "debug"
     tags:
      - "source:LOGS_SOURCE"
     timestamp: 1560935539000
@@ -29,6 +30,7 @@ tests:
         name: "slapd"
       message: "search access to \"olcDatabase={-1}frontend,cn=config\" \"objectClass\" requested"
     message: "[19-06-2019 09:12:06] slapd debug  => access_allowed: search access to \"olcDatabase={-1}frontend,cn=config\" \"objectClass\" requested"
+    status: "debug"
     tags:
      - "source:LOGS_SOURCE"
     timestamp: 1560935526000
@@ -45,6 +47,7 @@ tests:
         name: "slapd"
       message: "gidNumber=0+uidNumber=0,cn=peercred,cn=external,cn=auth"
     message: "[19-06-2019 09:12:06] slapd debug  <= check a_dn_pat: gidNumber=0+uidNumber=0,cn=peercred,cn=external,cn=auth"
+    status: "debug"
     tags:
      - "source:LOGS_SOURCE"
     timestamp: 1560935526000
@@ -68,6 +71,7 @@ tests:
           ip: "192.168.1.1"
           port: "389"
     message: "[19-06-2019 12:40:17] slapd debug  conn=1015 fd=12 ACCEPT from IP=192.168.100.9:39994 (IP=192.168.1.1:389)"
+    status: "debug"
     tags:
      - "source:LOGS_SOURCE"
     timestamp: 1560948017000
@@ -88,6 +92,7 @@ tests:
       source:
         path: "/var/run/slapd/ldapi"
     message: "[19-06-2019 12:28:30] slapd debug  conn=1014 fd=12 ACCEPT from PATH=/var/run/slapd/ldapi (PATH=/var/run/slapd/ldapi/dest)"
+    status: "debug"
     tags:
      - "source:LOGS_SOURCE"
     timestamp: 1560947310000
@@ -108,6 +113,7 @@ tests:
         nentries: 0
         tag: 101
     message: "[19-06-2019 12:40:17] slapd debug  conn=1015 op=1 SEARCH RESULT tag=101 err=32 nentries=0 text="
+    status: "debug"
     tags:
      - "source:LOGS_SOURCE"
     timestamp: 1560948017000

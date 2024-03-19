@@ -192,12 +192,13 @@ class IntegrationRegistry:
         return integration
 
     def __finalize_selection(self, selection: Iterable[str]) -> set[str] | None:
-        if not selection:
+        if not selection or 'changed' in selection:
             return self.__get_changed_root_entries() or None
-        elif 'all' in selection:
+
+        if 'all' in selection:
             return set()
-        else:
-            return set(selection)
+
+        return set(selection)
 
     def __get_changed_root_entries(self) -> set[str]:
         return {relative_path.split('/', 1)[0] for relative_path in self.repo.git.changed_files}

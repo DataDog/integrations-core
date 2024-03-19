@@ -12,14 +12,14 @@ datadog-aspdotnet==2.1.0; sys_platform == 'win32'
 datadog-avi-vantage==4.2.0
 datadog-azure-iot-edge==4.2.0
 datadog-boundary==2.2.0
-datadog-btrfs==2.2.0; sys_platform != 'win32'
+datadog-btrfs==2.3.0; sys_platform != 'win32'
 datadog-cacti==2.1.0; sys_platform == 'linux2'
 datadog-calico==2.2.0
 datadog-cassandra-nodetool==1.13.0
 datadog-cassandra==1.18.0
 datadog-ceph==2.10.0; sys_platform != 'win32'
 datadog-cert-manager==4.1.0
-datadog-checks-base==36.2.0
+datadog-checks-base==36.5.0
 datadog-checks-dependency-provider==1.4.0
 datadog-checks-downloader==4.5.0
 datadog-cilium==3.4.0
@@ -38,7 +38,7 @@ datadog-crio==2.6.0
 datadog-datadog-cluster-agent==2.11.1
 datadog-dcgm==2.3.0
 datadog-directory==2.1.1
-datadog-disk==5.2.0
+datadog-disk==5.3.0
 datadog-dns-check==3.2.0
 datadog-dotnetclr==2.1.0; sys_platform == 'win32'
 datadog-druid==2.5.0
@@ -58,7 +58,7 @@ datadog-gitlab-runner==4.2.0
 datadog-gitlab==7.2.0
 datadog-glusterfs==1.7.0; sys_platform == 'linux2'
 datadog-go-expvar==2.5.0
-datadog-gunicorn==2.6.0; sys_platform != 'win32'
+datadog-gunicorn==2.7.0; sys_platform != 'win32'
 datadog-haproxy==5.2.0
 datadog-harbor==3.2.0
 datadog-hazelcast==3.2.0
@@ -72,7 +72,7 @@ datadog-hyperv==1.11.0; sys_platform == 'win32'
 datadog-ibm-ace==2.2.1
 datadog-ibm-db2==2.2.0
 datadog-ibm-i==2.2.0; sys_platform != 'win32'
-datadog-ibm-mq==6.2.0
+datadog-ibm-mq==6.3.0
 datadog-ibm-was==3.3.0
 datadog-ignite==2.4.0
 datadog-iis==3.1.0; sys_platform == 'win32'
@@ -106,7 +106,7 @@ datadog-mesos-slave==3.3.0; sys_platform != 'win32'
 datadog-mongo==6.2.0
 datadog-mysql==12.2.0
 datadog-nagios==1.13.0
-datadog-network==3.2.0
+datadog-network==3.3.0
 datadog-nfsstat==1.13.0; sys_platform == 'linux2'
 datadog-nginx-ingress-controller==2.6.0
 datadog-nginx==6.2.0
@@ -124,7 +124,7 @@ datadog-postfix==1.14.0; sys_platform != 'win32'
 datadog-postgres==17.0.0
 datadog-powerdns-recursor==2.5.0
 datadog-presto==2.8.0
-datadog-process==3.2.0
+datadog-process==3.3.0
 datadog-prometheus==3.6.0
 datadog-proxysql==5.1.0
 datadog-pulsar==2.2.0
@@ -140,7 +140,7 @@ datadog-sidekiq==1.4.0
 datadog-silk==2.2.0
 datadog-singlestore==2.1.0
 datadog-snmp==7.2.0
-datadog-snowflake==5.3.0
+datadog-snowflake==5.4.0
 datadog-solr==1.13.0
 datadog-sonarqube==3.2.0
 datadog-spark==4.2.0
@@ -150,8 +150,8 @@ datadog-ssh-check==2.8.0
 datadog-statsd==1.12.0
 datadog-strimzi==2.2.0
 datadog-supervisord==2.6.0
-datadog-system-core==2.3.0
-datadog-system-swap==1.17.0
+datadog-system-core==2.4.0
+datadog-system-swap==1.18.0
 datadog-tcp-check==4.8.0
 datadog-teamcity==4.2.0
 datadog-temporal==2.2.0

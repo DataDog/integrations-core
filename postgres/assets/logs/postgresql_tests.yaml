@@ -8,6 +8,7 @@ tests:
         date: 1510075839000
         severity: "LOG"
     message: "incomplete startup packet"
+    status: "info"
     tags:
      - "source:LOGS_SOURCE"
     timestamp: 1510075839000
@@ -30,6 +31,7 @@ tests:
         proc_id: "5237"
         session_id: "5a0348cd.1475"
     message: "2017-11-08 18:11:35.727 UTC [5237] postgres psql postgres [local] 5a0348cd.1475 LOG:  statement: SELECT * FROM playground;"
+    status: "info"
     tags:
      - "source:LOGS_SOURCE"
      - "db:postgres"
@@ -54,6 +56,7 @@ tests:
         proc_id: "114"
         session_id: "5defc7c5.72"
     message: "2019-12-10 18:27:45.389 UTC [114] datadog_test datadog-agent datadog 172.28.0.1 5defc7c5.72 LOG:  duration: 0.140 ms  statement: select checkpoints_timed, checkpoints_req, buffers_checkpoint, buffers_clean, maxwritten_clean, buffers_backend, buffers_alloc, buffers_backend_fsync, checkpoint_write_time, checkpoint_sync_time FROM pg_stat_bgwriter"
+    status: "info"
     tags:
      - "source:LOGS_SOURCE"
      - "db:datadog_test"

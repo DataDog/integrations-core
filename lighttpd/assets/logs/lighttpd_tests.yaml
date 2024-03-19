@@ -29,6 +29,7 @@ tests:
           ip: "172.26.0.1"
       timestamp: 1600439139000
     message: "172.26.0.1 localhost:9449 - [18/Sep/2020:14:25:39 +0000] \"GET /server-status HTTP/1.1\" 200 5695 \"-\" \"Datadog Agent/7.23.0\""
+    status: "ok"
     tags:
      - "source:LOGS_SOURCE"
  -
