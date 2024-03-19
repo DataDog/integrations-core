@@ -74,6 +74,19 @@ SQL_GROUP_REPLICATION_PLUGIN_STATUS = """\
 SELECT plugin_status
 FROM information_schema.plugins WHERE plugin_name='group_replication'"""
 
+QUERY_DEADLOCKS = {
+    'name': 'information_schema.INNODB_METRICS.lock_deadlocks',
+    'query': """
+        SELECT
+            count as deadlocks
+        FROM
+            information_schema.INNODB_METRICS
+        WHERE
+            NAME='lock_deadlocks'
+    """.strip(),
+    'columns': [{'name': 'mysql.innodb.deadlocks', 'type': 'monotonic_count'}],
+}
+
 QUERY_USER_CONNECTIONS = {
     'name': 'performance_schema.threads',
     'query': """

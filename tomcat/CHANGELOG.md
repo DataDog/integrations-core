@@ -2,7 +2,18 @@
 
 <!-- towncrier release notes start -->
 
-## 1.13.0 / 2024-01-05
+## 2.0.0 / 2024-02-16
+
+***Removed***:
+
+* Remove deprecated `tomcat.cache` metrics ([#16650](https://github.com/DataDog/integrations-core/pull/16650))
+
+***Added***:
+
+* Collect more metrics by default ([#16631](https://github.com/DataDog/integrations-core/pull/16631))
+* Add support for Connection Pool metrics ([#16673](https://github.com/DataDog/integrations-core/pull/16673))
+
+## 1.13.0 / 2024-01-05 / Agent 7.51.0
 
 ***Added***:
 

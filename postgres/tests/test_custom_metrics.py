@@ -5,6 +5,8 @@ import pytest
 
 from datadog_checks.postgres import PostgreSql
 
+from .common import _get_expected_tags
+
 
 @pytest.mark.integration
 @pytest.mark.usefixtures('dd_environment')
@@ -27,13 +29,7 @@ def test_custom_metrics(aggregator, pg_instance):
     postgres_check = PostgreSql('postgres', {}, [pg_instance])
     postgres_check.check(pg_instance)
 
-    tags = [
-        'customdb:a',
-        'port:{}'.format(pg_instance['port']),
-        'dd.internal.resource:database_instance:{}'.format(postgres_check.resolved_hostname),
-    ]
-    tags.extend(pg_instance['tags'])
-
+    tags = _get_expected_tags(postgres_check, pg_instance, customdb='a')
     aggregator.assert_metric('custom.num', value=21, tags=tags)
 
 
@@ -60,16 +56,11 @@ def test_custom_queries(aggregator, pg_instance):
     )
     postgres_check = PostgreSql('postgres', {}, [pg_instance])
     postgres_check.check(pg_instance)
-    tags = [
-        'db:{}'.format(pg_instance['dbname']),
-        'port:{}'.format(pg_instance['port']),
-        'dd.internal.resource:database_instance:{}'.format(postgres_check.resolved_hostname),
-    ]
-    tags.extend(pg_instance['tags'])
+    tags = _get_expected_tags(postgres_check, pg_instance, with_db=True)
 
     for tag in ('a', 'b', 'c'):
         value = ord(tag)
-        custom_tags = ['customtag:{}'.format(tag)]
+        custom_tags = [f'customtag:{tag}']
         custom_tags.extend(tags)
 
         aggregator.assert_metric('custom.num', value=value, tags=custom_tags + ['query:custom'])

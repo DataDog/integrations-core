@@ -1,0 +1,2 @@
+connection_limit.ingress_http.active_connections: 0
+connection_limit.ingress_http.limited_connections: 0

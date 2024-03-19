@@ -25,7 +25,6 @@
     "homepage": "https://www.datadoghq.com",
     "sales_email": "info@datadoghq.com"
   },
-  "oauth": {},
   "assets": {
     "integration": {
       "source_type_name": "WebLogic",
@@ -59,6 +58,11 @@
     },
     "logs": {
       "source": "weblogic"
+    },
+    "saved_views": {
+      "weblogic_error_logs": "assets/saved_views/error_logs.json",
+      "weblogic_overview": "assets/saved_views/weblogic_overview.json",
+      "weblogic_patterns": "assets/saved_views/weblogic_patterns.json"
     }
   }
 }

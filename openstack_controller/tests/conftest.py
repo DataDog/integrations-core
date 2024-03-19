@@ -60,8 +60,8 @@ def dd_environment():
                 'ssl_verify': False,
                 'nova_microversion': '2.93',
                 'ironic_microversion': '1.80',
-                'openstack_cloud_name': 'test_cloud',
-                'openstack_config_file_path': '/home/openstack_controller/tests/config/openstack_config_updated.yaml',
+                '#openstack_cloud_name': 'test_cloud',
+                '#openstack_config_file_path': '/home/openstack_controller/tests/config/openstack_config_updated.yaml',
                 'endpoint_region_id': 'RegionOne',
                 'use_legacy_check_version': False,
             }
@@ -513,7 +513,7 @@ def connection_network(request, mock_responses):
             for agent in mock_responses('GET', '/networking/v2.0/agents')['agents']
         ]
 
-    def networks(project_id):
+    def networks(project_id, limit=None):
         if http_error and 'networks' in http_error and project_id in http_error['networks']:
             raise requests.exceptions.HTTPError(response=http_error['networks'])
         return [
@@ -558,7 +558,7 @@ def connection_baremetal(request, mock_responses):
             for node in mock_responses('GET', '/baremetal/v1/nodes/detail')['nodes']
         ]
 
-    def conductors():
+    def conductors(limit=None):
         if http_error and 'conductors' in http_error:
             raise requests.exceptions.HTTPError(response=http_error['conductors'])
         return [
@@ -578,7 +578,7 @@ def connection_image(request, mock_responses):
     param = request.param if hasattr(request, 'param') and request.param is not None else {}
     http_error = param.get('http_error')
 
-    def images():
+    def images(limit=None):
         if http_error and 'images' in http_error:
             raise requests.exceptions.HTTPError(response=http_error['images'])
         return [
@@ -598,7 +598,7 @@ def connection_load_balancer(request, mock_responses):
     param = request.param if hasattr(request, 'param') and request.param is not None else {}
     http_error = param.get('http_error')
 
-    def load_balancers(project_id):
+    def load_balancers(project_id, limit=None):
         if http_error and 'load_balancers' in http_error and project_id in http_error['load_balancers']:
             raise requests.exceptions.HTTPError(response=http_error['load_balancers'][project_id])
         return [
@@ -627,7 +627,7 @@ def connection_load_balancer(request, mock_responses):
             )
         )
 
-    def listeners(project_id):
+    def listeners(project_id, limit=None):
         if http_error and 'listeners' in http_error and project_id in http_error['listeners']:
             raise requests.exceptions.HTTPError(response=http_error['listeners'][project_id])
         return [
@@ -652,7 +652,7 @@ def connection_load_balancer(request, mock_responses):
             )
         )
 
-    def pools(project_id):
+    def pools(project_id, limit=None):
         if http_error and 'pools' in http_error and project_id in http_error['pools']:
             raise requests.exceptions.HTTPError(response=http_error['pools'][project_id])
         return [
@@ -704,7 +704,7 @@ def connection_load_balancer(request, mock_responses):
             for pool in mock_responses('GET', f'/load-balancer/v2/lbaas/quotas?project_id={project_id}')['quotas']
         ]
 
-    def amphorae(project_id):
+    def amphorae(project_id, limit=None):
         if http_error and 'amphorae' in http_error and project_id in http_error['amphorae']:
             raise requests.exceptions.HTTPError(response=http_error['amphorae'][project_id])
         return [

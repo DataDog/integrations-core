@@ -40,16 +40,19 @@ from datadog_checks.sqlserver.const import (
     AZURE_DEPLOYMENT_TYPE_TO_RESOURCE_TYPES,
     BASE_NAME_QUERY,
     COUNTER_TYPE_QUERY,
+    DATABASE_BACKUP_METRICS,
     DATABASE_FRAGMENTATION_METRICS,
     DATABASE_MASTER_FILES,
     DATABASE_METRICS,
     DATABASE_SERVICE_CHECK_NAME,
+    DATABASE_SERVICE_CHECK_QUERY,
     DBM_MIGRATED_METRICS,
     DEFAULT_INDEX_USAGE_STATS_INTERVAL,
     ENGINE_EDITION_AZURE_MANAGED_INSTANCE,
     ENGINE_EDITION_SQL_DATABASE,
     INSTANCE_METRICS,
     INSTANCE_METRICS_DATABASE,
+    INSTANCE_METRICS_NEWER_2016,
     PERF_AVERAGE_BULK,
     PERF_COUNTER_BULK_COUNT,
     PERF_COUNTER_LARGE_RAWCOUNT,
@@ -59,6 +62,7 @@ from datadog_checks.sqlserver.const import (
     STATIC_INFO_ENGINE_EDITION,
     STATIC_INFO_MAJOR_VERSION,
     STATIC_INFO_VERSION,
+    SWITCH_DB_STATEMENT,
     TASK_SCHEDULER_METRICS,
     TEMPDB_FILE_SPACE_USAGE_METRICS,
     VALID_METRIC_TYPES,
@@ -76,7 +80,11 @@ from datadog_checks.sqlserver.queries import (
     get_query_ao_availability_groups,
     get_query_file_stats,
 )
-from datadog_checks.sqlserver.utils import is_azure_database, set_default_driver_conf
+from datadog_checks.sqlserver.utils import (
+    is_azure_database,
+    is_azure_sql_database,
+    set_default_driver_conf,
+)
 
 try:
     import adodbapi
@@ -425,6 +433,7 @@ class SQLServer(AgentCheck):
         Will also create and cache cursors to query the db.
         """
 
+        major_version = self.static_info_cache.get(STATIC_INFO_MAJOR_VERSION)
         metrics_to_collect = []
         tags = self.instance.get('tags', [])
 
@@ -433,6 +442,8 @@ class SQLServer(AgentCheck):
         # to avoid sending duplicate metrics
         if is_affirmative(self.instance.get('include_instance_metrics', True)):
             common_metrics = list(INSTANCE_METRICS)
+            if major_version and major_version >= 2016:
+                common_metrics.extend(INSTANCE_METRICS_NEWER_2016)
             if not self._config.dbm_enabled:
                 common_metrics.extend(DBM_MIGRATED_METRICS)
             if not self.databases:
@@ -454,6 +465,10 @@ class SQLServer(AgentCheck):
 
         # Load database statistics
         db_stats_to_collect = list(DATABASE_METRICS)
+        engine_edition = self.static_info_cache.get(STATIC_INFO_ENGINE_EDITION)
+        if not is_azure_sql_database(engine_edition):
+            db_stats_to_collect.extend(DATABASE_BACKUP_METRICS)
+
         for name, table, column in db_stats_to_collect:
             # include database as a filter option
             db_names = [d.name for d in self.databases] or [
@@ -518,7 +533,9 @@ class SQLServer(AgentCheck):
                     metrics_to_collect.append(self.typed_metric(cfg_inst=cfg, table=table, column=column))
 
         # Load DB File Space Usage metrics
-        if is_affirmative(self.instance.get('include_tempdb_file_space_usage_metrics', True)):
+        if is_affirmative(
+            self.instance.get('include_tempdb_file_space_usage_metrics', True)
+        ) and not is_azure_sql_database(engine_edition):
             for name, table, column in TEMPDB_FILE_SPACE_USAGE_METRICS:
                 cfg = {'name': name, 'table': table, 'column': column, 'instance_name': 'tempdb', 'tags': tags}
                 metrics_to_collect.append(self.typed_metric(cfg_inst=cfg, table=table, column=column))
@@ -696,6 +713,46 @@ class SQLServer(AgentCheck):
 
         return cls(cfg_inst, base_name, metric_type, column, self.log)
 
+    def _check_connections_by_connecting_to_db(self):
+        for db in self.databases:
+            if db.name != self.connection.DEFAULT_DATABASE:
+                try:
+                    self.connection.check_database_conns(db.name)
+                except Exception as e:
+                    # service_check errors on auto discovered databases should not abort the check
+                    self.log.warning("failed service check for auto discovered database: %s", e)
+
+    def _check_connections_by_use_db(self):
+        with self.connection.open_managed_default_connection():
+            with self.connection.get_managed_cursor() as cursor:
+                for db in self.databases:
+                    check_err_message = "Database {} connection service check failed: {}"
+                    try:
+                        cursor.execute(SWITCH_DB_STATEMENT.format(db.name))
+                        cursor.execute(DATABASE_SERVICE_CHECK_QUERY)
+                        cursor.fetchall()
+                        self.handle_service_check(AgentCheck.OK, self.connection.get_host_with_port(), db.name, False)
+                    except Exception as e:
+                        self.log.warning(check_err_message.format(db.name, str(e)))
+                        self.handle_service_check(
+                            AgentCheck.CRITICAL,
+                            self.connection.get_host_with_port(),
+                            db.name,
+                            check_err_message.format(db.name, str(e)),
+                            False,
+                        )
+                        continue
+                # Switch DB back to MASTER
+                cursor.execute(SWITCH_DB_STATEMENT.format(self.connection.DEFAULT_DATABASE))
+
+    def _check_database_conns(self):
+        engine_edition = self.static_info_cache.get(STATIC_INFO_ENGINE_EDITION)
+        if is_azure_sql_database(engine_edition):
+            # On Azure, we can't use a less costly approach.
+            self._check_connection_by_connecting_to_db()
+        else:
+            self._check_connections_by_use_db()
+
     def check(self, _):
         if self.do_check:
             # configure custom queries for the check
@@ -713,13 +770,7 @@ class SQLServer(AgentCheck):
             else:
                 self.collect_metrics()
             if self._config.autodiscovery and self._config.autodiscovery_db_service_check:
-                for db in self.databases:
-                    if db.name != self.connection.DEFAULT_DATABASE:
-                        try:
-                            self.connection.check_database_conns(db.name)
-                        except Exception as e:
-                            # service_check errors on auto discovered databases should not abort the check
-                            self.log.warning("failed service check for auto discovered database: %s", e)
+                self._check_database_conns()
             self._send_database_instance_metadata()
             if self._config.dbm_enabled:
                 self.statement_metrics.run_job_loop(self.tags)
@@ -866,9 +917,13 @@ class SQLServer(AgentCheck):
         if not self._index_usage_last_check_ts or now - self._index_usage_last_check_ts > interval:
             self._index_usage_last_check_ts = now
             self.log.debug('Collecting index usage statistics')
+            # Filter out tempdb as the query might be blocking and it's index usage information is not relevant
             db_names = [d.name for d in self.databases] or [
                 self.instance.get('database', self.connection.DEFAULT_DATABASE)
             ]
+            if not self._config.include_index_usage_metrics_tempdb:
+                db_names = [db_name for db_name in db_names if db_name != 'tempdb']
+
             with self.connection.get_managed_cursor() as cursor:
                 cursor.execute(
                     'select DB_NAME()'

@@ -105,6 +105,9 @@ def test(
         for integration in app.repo.integrations.iter_changed():
             if integration.is_testable:
                 targets[integration.name] = integration
+    elif target_name == 'all':
+        for integration in app.repo.integrations.iter_testable('all'):
+            targets[integration.name] = integration
     else:
         try:
             integration = app.repo.integrations.get(target_name)
@@ -115,7 +118,11 @@ def test(
             targets[integration.name] = integration
 
     if not targets:
-        app.abort('No testable targets found')
+        if target_name == 'changed':
+            app.display_info('No changed testable targets found')
+            return
+        else:
+            app.abort('No testable targets found')
 
     if list_envs:
         multiple_targets = len(targets) > 1

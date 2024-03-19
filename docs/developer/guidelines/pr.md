@@ -1,10 +1,22 @@
 # Pull requests
 
+## Separation of concerns
+
+  Every pull request should do one thing only for easier Git management. For example, if you are
+    editing documentation and notice an error in the shipped example configuration, fix the
+    error in a separate pull request. Doing so enables a clean cherry-pick or revert of the bug fix
+    should the need arise.
+
+## Merges
+
+  Datadog only allows GitHub's [squash and merge][github-squash-and-merge] to keep a clean Git history.
+
+## Changelog entries
+
 Different guidelines apply depending on which repo you are contributing to.
 
 === "integrations-extras and marketplace"
 
-    ## Changelog entries
 
     Every PR must add a changelog entry to each integration that has had its shipped code modified.
 
@@ -82,19 +94,11 @@ Different guidelines apply depending on which repo you are contributing to.
         * `Changelogs should start with asterisks, on line {line count}`: All changelog details below each header should be
         bullet points, using asterisks.
 
-    ## Separation of concerns
-
-    Every pull request should do one thing only for easier Git management. For example, if you are
-    editing documentation and notice an error in the shipped example configuration, you should fix the
-    error in a separate pull request. Doing so will enable a clean cherry-pick or revert of the bug fix
-    should the need arise.
-
-    ## Merges
-
-    We only allow GitHub's [squash and merge][github-squash-and-merge] to keep a clean Git history.
-
 === "integrations-core"
 
     If you are contributing to [integrations-core](https://github.com/DataDog/integrations-core) all you need to do is use the [`release changelog new`](../ddev/cli.md#ddev-release-changelog-new) command.
-    It will take care of all the formalities.
-    Add the `changelog/no-changelog` label if you don't need a changelog.
+    It adds files in the `changelog.d` folder inside the integrations that you have modified.
+    Commit these files and push them to your PR.
+    
+    If you decide that you do not need a changelog because the change you made won't be shipped with the Agent, add the `changelog/no-changelog` label to the PR.
+

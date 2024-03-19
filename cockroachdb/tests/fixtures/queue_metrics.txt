@@ -1,0 +1,564 @@
+# HELP queue_replicagc_process_failure Number of replicas which failed processing in the replica GC queue
+# TYPE queue_replicagc_process_failure counter
+queue_replicagc_process_failure{store="1",node_id="1"} 0
+# HELP queue_gc_info_resolvefailed Number of cleanup intent failures during GC
+# TYPE queue_gc_info_resolvefailed counter
+queue_gc_info_resolvefailed{store="1",node_id="1"} 0
+# HELP queue_gc_info_enqueuehighpriority Number of replicas enqueued for GC with high priority
+# TYPE queue_gc_info_enqueuehighpriority counter
+queue_gc_info_enqueuehighpriority{store="1",node_id="1"} 0
+# HELP queue_replicate_removevoterreplica Number of voter replica removals attempted by the replicate queue (typically in response to a rebalancer-initiated addition)
+# TYPE queue_replicate_removevoterreplica counter
+queue_replicate_removevoterreplica{store="1",node_id="1"} 0
+# HELP queue_gc_info_transactionspanscanned Number of entries in transaction spans scanned from the engine
+# TYPE queue_gc_info_transactionspanscanned counter
+queue_gc_info_transactionspanscanned{store="1",node_id="1"} 0
+# HELP queue_replicate_removedeadreplica_success Number of successful dead replica removals processed by the replicate queue
+# TYPE queue_replicate_removedeadreplica_success counter
+queue_replicate_removedeadreplica_success{store="1",node_id="1"} 0
+# HELP queue_gc_info_pushtxn Number of attempted pushes
+# TYPE queue_gc_info_pushtxn counter
+queue_gc_info_pushtxn{store="1",node_id="1"} 0
+# HELP queue_replicate_replacedecommissioningreplica_error Number of failed decommissioning replica replacements processed by the replicate queue
+# TYPE queue_replicate_replacedecommissioningreplica_error counter
+queue_replicate_replacedecommissioningreplica_error{store="1",node_id="1"} 0
+# HELP queue_split_purgatory Number of replicas in the split queue's purgatory, waiting to become splittable
+# TYPE queue_split_purgatory gauge
+queue_split_purgatory{store="1",node_id="1"} 0
+# HELP queue_split_process_success Number of replicas successfully processed by the split queue
+# TYPE queue_split_process_success counter
+queue_split_process_success{store="1",node_id="1"} 0
+# HELP queue_merge_pending Number of pending replicas in the merge queue
+# TYPE queue_merge_pending gauge
+queue_merge_pending{store="1",node_id="1"} 0
+# HELP queue_replicate_removelearnerreplica Number of learner replica removals attempted by the replicate queue (typically due to internal race conditions)
+# TYPE queue_replicate_removelearnerreplica counter
+queue_replicate_removelearnerreplica{store="1",node_id="1"} 0
+# HELP queue_split_process_failure Number of replicas which failed processing in the split queue
+# TYPE queue_split_process_failure counter
+queue_split_process_failure{store="1",node_id="1"} 0
+# HELP queue_replicate_pending Number of pending replicas in the replicate queue
+# TYPE queue_replicate_pending gauge
+queue_replicate_pending{store="1",node_id="1"} 0
+# HELP queue_replicate_replacedeadreplica_success Number of successful dead replica replacements processed by the replicate queue
+# TYPE queue_replicate_replacedeadreplica_success counter
+queue_replicate_replacedeadreplica_success{store="1",node_id="1"} 0
+# HELP queue_gc_info_numrangekeysaffected Number of range keys GC'able
+# TYPE queue_gc_info_numrangekeysaffected counter
+queue_gc_info_numrangekeysaffected{store="1",node_id="1"} 0
+# HELP queue_gc_info_abortspangcnum Number of AbortSpan entries fit for removal
+# TYPE queue_gc_info_abortspangcnum counter
+queue_gc_info_abortspangcnum{store="1",node_id="1"} 0
+# HELP queue_replicate_removedecommissioningreplica Number of decommissioning replica removals attempted by the replicate queue (typically in response to a node outage)
+# TYPE queue_replicate_removedecommissioningreplica counter
+queue_replicate_removedecommissioningreplica{store="1",node_id="1"} 0
+# HELP queue_consistency_processingnanos Nanoseconds spent processing replicas in the consistency checker queue
+# TYPE queue_consistency_processingnanos counter
+queue_consistency_processingnanos{store="1",node_id="1"} 5.36495164e+08
+# HELP queue_replicate_removedeadreplica_error Number of failed dead replica removals processed by the replicate queue
+# TYPE queue_replicate_removedeadreplica_error counter
+queue_replicate_removedeadreplica_error{store="1",node_id="1"} 0
+# HELP queue_raftsnapshot_processingnanos Nanoseconds spent processing replicas in the Raft repair queue
+# TYPE queue_raftsnapshot_processingnanos counter
+queue_raftsnapshot_processingnanos{store="1",node_id="1"} 0
+# HELP queue_replicagc_removereplica Number of replica removals attempted by the replica GC queue
+# TYPE queue_replicagc_removereplica counter
+queue_replicagc_removereplica{store="1",node_id="1"} 0
+# HELP queue_replicate_purgatory Number of replicas in the replicate queue's purgatory, awaiting allocation options
+# TYPE queue_replicate_purgatory gauge
+queue_replicate_purgatory{store="1",node_id="1"} 0
+# HELP queue_split_processingnanos Nanoseconds spent processing replicas in the split queue
+# TYPE queue_split_processingnanos counter
+queue_split_processingnanos{store="1",node_id="1"} 0
+# HELP queue_raftsnapshot_pending Number of pending replicas in the Raft repair queue
+# TYPE queue_raftsnapshot_pending gauge
+queue_raftsnapshot_pending{store="1",node_id="1"} 0
+# HELP queue_raftlog_process_success Number of replicas successfully processed by the Raft log queue
+# TYPE queue_raftlog_process_success counter
+queue_raftlog_process_success{store="1",node_id="1"} 723
+# HELP queue_replicagc_processingnanos Nanoseconds spent processing replicas in the replica GC queue
+# TYPE queue_replicagc_processingnanos counter
+queue_replicagc_processingnanos{store="1",node_id="1"} 0
+# HELP queue_gc_info_clearrangefailed Number of failed ClearRange operations during GC
+# TYPE queue_gc_info_clearrangefailed counter
+queue_gc_info_clearrangefailed{store="1",node_id="1"} 0
+# HELP queue_tsmaintenance_process_success Number of replicas successfully processed by the time series maintenance queue
+# TYPE queue_tsmaintenance_process_success counter
+queue_tsmaintenance_process_success{store="1",node_id="1"} 3
+# HELP queue_replicate_removedeadnonvoterreplica Number of dead non-voter replica removals attempted by the replicate queue (typically in response to a node outage)
+# TYPE queue_replicate_removedeadnonvoterreplica counter
+queue_replicate_removedeadnonvoterreplica{store="1",node_id="1"} 0
+# HELP queue_replicate_removereplica_success Number of successful replica removals processed by the replicate queue
+# TYPE queue_replicate_removereplica_success counter
+queue_replicate_removereplica_success{store="1",node_id="1"} 0
+# HELP queue_replicate_addreplica Number of replica additions attempted by the replicate queue
+# TYPE queue_replicate_addreplica counter
+queue_replicate_addreplica{store="1",node_id="1"} 0
+# HELP queue_replicate_processingnanos Nanoseconds spent processing replicas in the replicate queue
+# TYPE queue_replicate_processingnanos counter
+queue_replicate_processingnanos{store="1",node_id="1"} 8.7358164e+07
+# HELP queue_raftsnapshot_process_success Number of replicas successfully processed by the Raft repair queue
+# TYPE queue_raftsnapshot_process_success counter
+queue_raftsnapshot_process_success{store="1",node_id="1"} 0
+# HELP queue_merge_process_success Number of replicas successfully processed by the merge queue
+# TYPE queue_merge_process_success counter
+queue_merge_process_success{store="1",node_id="1"} 13
+# HELP queue_merge_process_failure Number of replicas which failed processing in the merge queue
+# TYPE queue_merge_process_failure counter
+queue_merge_process_failure{store="1",node_id="1"} 0
+# HELP queue_replicate_addvoterreplica Number of voter replica additions attempted by the replicate queue
+# TYPE queue_replicate_addvoterreplica counter
+queue_replicate_addvoterreplica{store="1",node_id="1"} 0
+# HELP queue_gc_info_clearrangesuccess Number of successful ClearRange operations during GC
+# TYPE queue_gc_info_clearrangesuccess counter
+queue_gc_info_clearrangesuccess{store="1",node_id="1"} 0
+# HELP queue_replicate_rebalancenonvoterreplica Number of non-voter replica rebalancer-initiated additions attempted by the replicate queue
+# TYPE queue_replicate_rebalancenonvoterreplica counter
+queue_replicate_rebalancenonvoterreplica{store="1",node_id="1"} 0
+# HELP queue_gc_info_transactionspangcstaging Number of GC'able entries corresponding to staging txns
+# TYPE queue_gc_info_transactionspangcstaging counter
+queue_gc_info_transactionspangcstaging{store="1",node_id="1"} 0
+# HELP queue_replicate_replacedecommissioningreplica_success Number of successful decommissioning replica replacements processed by the replicate queue
+# TYPE queue_replicate_replacedecommissioningreplica_success counter
+queue_replicate_replacedecommissioningreplica_success{store="1",node_id="1"} 0
+# HELP queue_replicate_rebalancevoterreplica Number of voter replica rebalancer-initiated additions attempted by the replicate queue
+# TYPE queue_replicate_rebalancevoterreplica counter
+queue_replicate_rebalancevoterreplica{store="1",node_id="1"} 0
+# HELP queue_replicate_removenonvoterreplica Number of non-voter replica removals attempted by the replicate queue (typically in response to a rebalancer-initiated addition)
+# TYPE queue_replicate_removenonvoterreplica counter
+queue_replicate_removenonvoterreplica{store="1",node_id="1"} 0
+# HELP queue_raftlog_process_failure Number of replicas which failed processing in the Raft log queue
+# TYPE queue_raftlog_process_failure counter
+queue_raftlog_process_failure{store="1",node_id="1"} 0
+# HELP queue_gc_info_abortspanscanned Number of transactions present in the AbortSpan scanned from the engine
+# TYPE queue_gc_info_abortspanscanned counter
+queue_gc_info_abortspanscanned{store="1",node_id="1"} 0
+# HELP queue_consistency_process_success Number of replicas successfully processed by the consistency checker queue
+# TYPE queue_consistency_process_success counter
+queue_consistency_process_success{store="1",node_id="1"} 67
+# HELP queue_gc_info_intenttxns Number of associated distinct transactions
+# TYPE queue_gc_info_intenttxns counter
+queue_gc_info_intenttxns{store="1",node_id="1"} 0
+# HELP queue_consistency_pending Number of pending replicas in the consistency checker queue
+# TYPE queue_consistency_pending gauge
+queue_consistency_pending{store="1",node_id="1"} 0
+# HELP queue_tsmaintenance_pending Number of pending replicas in the time series maintenance queue
+# TYPE queue_tsmaintenance_pending gauge
+queue_tsmaintenance_pending{store="1",node_id="1"} 0
+# HELP queue_gc_info_resolvetotal Number of attempted intent resolutions
+# TYPE queue_gc_info_resolvetotal counter
+queue_gc_info_resolvetotal{store="1",node_id="1"} 0
+# HELP queue_replicate_nonvoterpromotions Number of non-voters promoted to voters by the replicate queue
+# TYPE queue_replicate_nonvoterpromotions counter
+queue_replicate_nonvoterpromotions{store="1",node_id="1"} 0
+# HELP queue_gc_processingnanos Nanoseconds spent processing replicas in the MVCC GC queue
+# TYPE queue_gc_processingnanos counter
+queue_gc_processingnanos{store="1",node_id="1"} 1.3394542e+07
+# HELP queue_replicate_removedecommissioningreplica_error Number of failed decommissioning replica removals processed by the replicate queue
+# TYPE queue_replicate_removedecommissioningreplica_error counter
+queue_replicate_removedecommissioningreplica_error{store="1",node_id="1"} 0
+# HELP queue_gc_info_abortspanconsidered Number of AbortSpan entries old enough to be considered for removal
+# TYPE queue_gc_info_abortspanconsidered counter
+queue_gc_info_abortspanconsidered{store="1",node_id="1"} 0
+# HELP queue_tsmaintenance_processingnanos Nanoseconds spent processing replicas in the time series maintenance queue
+# TYPE queue_tsmaintenance_processingnanos counter
+queue_tsmaintenance_processingnanos{store="1",node_id="1"} 3.9305124e+07
+# HELP queue_replicate_removereplica_error Number of failed replica removals processed by the replicate queue
+# TYPE queue_replicate_removereplica_error counter
+queue_replicate_removereplica_error{store="1",node_id="1"} 0
+# HELP queue_gc_info_transactionspangcpending Number of GC'able entries corresponding to pending txns
+# TYPE queue_gc_info_transactionspangcpending counter
+queue_gc_info_transactionspangcpending{store="1",node_id="1"} 0
+# HELP queue_replicate_rebalancereplica Number of replica rebalancer-initiated additions attempted by the replicate queue
+# TYPE queue_replicate_rebalancereplica counter
+queue_replicate_rebalancereplica{store="1",node_id="1"} 0
+# HELP queue_replicate_removereplica Number of replica removals attempted by the replicate queue (typically in response to a rebalancer-initiated addition)
+# TYPE queue_replicate_removereplica counter
+queue_replicate_removereplica{store="1",node_id="1"} 0
+# HELP queue_gc_process_success Number of replicas successfully processed by the MVCC GC queue
+# TYPE queue_gc_process_success counter
+queue_gc_process_success{store="1",node_id="1"} 1
+# HELP queue_replicate_removedeadreplica Number of dead replica removals attempted by the replicate queue (typically in response to a node outage)
+# TYPE queue_replicate_removedeadreplica counter
+queue_replicate_removedeadreplica{store="1",node_id="1"} 0
+# HELP queue_replicate_addreplica_success Number of successful replica additions processed by the replicate queue
+# TYPE queue_replicate_addreplica_success counter
+queue_replicate_addreplica_success{store="1",node_id="1"} 0
+# HELP queue_gc_info_transactionspangcaborted Number of GC'able entries corresponding to aborted txns
+# TYPE queue_gc_info_transactionspangcaborted counter
+queue_gc_info_transactionspangcaborted{store="1",node_id="1"} 0
+# HELP queue_replicate_addreplica_error Number of failed replica additions processed by the replicate queue
+# TYPE queue_replicate_addreplica_error counter
+queue_replicate_addreplica_error{store="1",node_id="1"} 72
+# HELP queue_raftlog_processingnanos Nanoseconds spent processing replicas in the Raft log queue
+# TYPE queue_raftlog_processingnanos counter
+queue_raftlog_processingnanos{store="1",node_id="1"} 2.061517204e+09
+# HELP queue_gc_pending Number of pending replicas in the MVCC GC queue
+# TYPE queue_gc_pending gauge
+queue_gc_pending{store="1",node_id="1"} 0
+# HELP queue_split_span_config_based Number of range splits due to span configuration
+# TYPE queue_split_span_config_based counter
+queue_split_span_config_based{store="1",node_id="1"} 0
+# HELP queue_merge_purgatory Number of replicas in the merge queue's purgatory, waiting to become mergeable
+# TYPE queue_merge_purgatory gauge
+queue_merge_purgatory{store="1",node_id="1"} 0
+# HELP queue_replicagc_pending Number of pending replicas in the replica GC queue
+# TYPE queue_replicagc_pending gauge
+queue_replicagc_pending{store="1",node_id="1"} 0
+# HELP queue_gc_info_transactionspangccommitted Number of GC'able entries corresponding to committed txns
+# TYPE queue_gc_info_transactionspangccommitted counter
+queue_gc_info_transactionspangccommitted{store="1",node_id="1"} 0
+# HELP queue_split_pending Number of pending replicas in the split queue
+# TYPE queue_split_pending gauge
+queue_split_pending{store="1",node_id="1"} 0
+# HELP queue_replicate_removedecommissioningvoterreplica Number of decommissioning voter replica removals attempted by the replicate queue (typically in response to a node outage)
+# TYPE queue_replicate_removedecommissioningvoterreplica counter
+queue_replicate_removedecommissioningvoterreplica{store="1",node_id="1"} 0
+# HELP queue_raftlog_pending Number of pending replicas in the Raft log queue
+# TYPE queue_raftlog_pending gauge
+queue_raftlog_pending{store="1",node_id="1"} 0
+# HELP queue_gc_info_intentsconsidered Number of 'old' intents
+# TYPE queue_gc_info_intentsconsidered counter
+queue_gc_info_intentsconsidered{store="1",node_id="1"} 0
+# HELP queue_gc_info_transactionresolvefailed Number of intent cleanup failures for local transactions during GC
+# TYPE queue_gc_info_transactionresolvefailed counter
+queue_gc_info_transactionresolvefailed{store="1",node_id="1"} 0
+# HELP queue_gc_process_failure Number of replicas which failed processing in the MVCC GC queue
+# TYPE queue_gc_process_failure counter
+queue_gc_process_failure{store="1",node_id="1"} 0
+# HELP queue_replicate_transferlease Number of range lease transfers attempted by the replicate queue
+# TYPE queue_replicate_transferlease counter
+queue_replicate_transferlease{store="1",node_id="1"} 0
+# HELP queue_replicagc_process_success Number of replicas successfully processed by the replica GC queue
+# TYPE queue_replicagc_process_success counter
+queue_replicagc_process_success{store="1",node_id="1"} 0
+# HELP queue_raftsnapshot_process_failure Number of replicas which failed processing in the Raft repair queue
+# TYPE queue_raftsnapshot_process_failure counter
+queue_raftsnapshot_process_failure{store="1",node_id="1"} 0
+# HELP queue_replicate_voterdemotions Number of voters demoted to non-voters by the replicate queue
+# TYPE queue_replicate_voterdemotions counter
+queue_replicate_voterdemotions{store="1",node_id="1"} 0
+# HELP queue_gc_info_numkeysaffected Number of keys with GC'able data
+# TYPE queue_gc_info_numkeysaffected counter
+queue_gc_info_numkeysaffected{store="1",node_id="1"} 1
+# HELP queue_replicate_removedeadvoterreplica Number of dead voter replica removals attempted by the replicate queue (typically in response to a node outage)
+# TYPE queue_replicate_removedeadvoterreplica counter
+queue_replicate_removedeadvoterreplica{store="1",node_id="1"} 0
+# HELP queue_gc_info_resolvesuccess Number of successful intent resolutions
+# TYPE queue_gc_info_resolvesuccess counter
+queue_gc_info_resolvesuccess{store="1",node_id="1"} 0
+# HELP queue_replicate_process_success Number of replicas successfully processed by the replicate queue
+# TYPE queue_replicate_process_success counter
+queue_replicate_process_success{store="1",node_id="1"} 67
+# HELP queue_split_size_based Number of range splits due to a range being greater than the configured max range size
+# TYPE queue_split_size_based counter
+queue_split_size_based{store="1",node_id="1"} 0
+# HELP queue_consistency_process_failure Number of replicas which failed processing in the consistency checker queue
+# TYPE queue_consistency_process_failure counter
+queue_consistency_process_failure{store="1",node_id="1"} 0
+# HELP queue_split_load_based Number of range splits due to a range being greater than the configured max range load
+# TYPE queue_split_load_based counter
+queue_split_load_based{store="1",node_id="1"} 0
+# HELP queue_replicate_replacedeadreplica_error Number of failed dead replica replacements processed by the replicate queue
+# TYPE queue_replicate_replacedeadreplica_error counter
+queue_replicate_replacedeadreplica_error{store="1",node_id="1"} 0
+# HELP queue_replicate_addnonvoterreplica Number of non-voter replica additions attempted by the replicate queue
+# TYPE queue_replicate_addnonvoterreplica counter
+queue_replicate_addnonvoterreplica{store="1",node_id="1"} 0
+# HELP queue_tsmaintenance_process_failure Number of replicas which failed processing in the time series maintenance queue
+# TYPE queue_tsmaintenance_process_failure counter
+queue_tsmaintenance_process_failure{store="1",node_id="1"} 0
+# HELP queue_merge_processingnanos Nanoseconds spent processing replicas in the merge queue
+# TYPE queue_merge_processingnanos counter
+queue_merge_processingnanos{store="1",node_id="1"} 1.81088254e+08
+# HELP queue_replicate_process_failure Number of replicas which failed processing in the replicate queue
+# TYPE queue_replicate_process_failure counter
+queue_replicate_process_failure{store="1",node_id="1"} 72
+# HELP queue_replicate_removedecommissioningreplica_success Number of successful decommissioning replica removals processed by the replicate queue
+# TYPE queue_replicate_removedecommissioningreplica_success counter
+queue_replicate_removedecommissioningreplica_success{store="1",node_id="1"} 0
+# HELP queue_replicate_removedecommissioningnonvoterreplica Number of decommissioning non-voter replica removals attempted by the replicate queue (typically in response to a node outage)
+# TYPE queue_replicate_removedecommissioningnonvoterreplica counter
+queue_replicate_removedecommissioningnonvoterreplica{store="1",node_id="1"} 0
+# HELP queue_replicagc_process_failure Number of replicas which failed processing in the replica GC queue
+# TYPE queue_replicagc_process_failure counter
+queue_replicagc_process_failure{store="1",node_id="1"} 0
+# HELP queue_gc_info_resolvefailed Number of cleanup intent failures during GC
+# TYPE queue_gc_info_resolvefailed counter
+queue_gc_info_resolvefailed{store="1",node_id="1"} 0
+# HELP queue_gc_info_enqueuehighpriority Number of replicas enqueued for GC with high priority
+# TYPE queue_gc_info_enqueuehighpriority counter
+queue_gc_info_enqueuehighpriority{store="1",node_id="1"} 0
+# HELP queue_replicate_removevoterreplica Number of voter replica removals attempted by the replicate queue (typically in response to a rebalancer-initiated addition)
+# TYPE queue_replicate_removevoterreplica counter
+queue_replicate_removevoterreplica{store="1",node_id="1"} 0
+# HELP queue_gc_info_transactionspanscanned Number of entries in transaction spans scanned from the engine
+# TYPE queue_gc_info_transactionspanscanned counter
+queue_gc_info_transactionspanscanned{store="1",node_id="1"} 0
+# HELP queue_replicate_removedeadreplica_success Number of successful dead replica removals processed by the replicate queue
+# TYPE queue_replicate_removedeadreplica_success counter
+queue_replicate_removedeadreplica_success{store="1",node_id="1"} 0
+# HELP queue_gc_info_pushtxn Number of attempted pushes
+# TYPE queue_gc_info_pushtxn counter
+queue_gc_info_pushtxn{store="1",node_id="1"} 0
+# HELP queue_replicate_replacedecommissioningreplica_error Number of failed decommissioning replica replacements processed by the replicate queue
+# TYPE queue_replicate_replacedecommissioningreplica_error counter
+queue_replicate_replacedecommissioningreplica_error{store="1",node_id="1"} 0
+# HELP queue_split_purgatory Number of replicas in the split queue's purgatory, waiting to become splittable
+# TYPE queue_split_purgatory gauge
+queue_split_purgatory{store="1",node_id="1"} 0
+# HELP queue_split_process_success Number of replicas successfully processed by the split queue
+# TYPE queue_split_process_success counter
+queue_split_process_success{store="1",node_id="1"} 0
+# HELP queue_merge_pending Number of pending replicas in the merge queue
+# TYPE queue_merge_pending gauge
+queue_merge_pending{store="1",node_id="1"} 0
+# HELP queue_replicate_removelearnerreplica Number of learner replica removals attempted by the replicate queue (typically due to internal race conditions)
+# TYPE queue_replicate_removelearnerreplica counter
+queue_replicate_removelearnerreplica{store="1",node_id="1"} 0
+# HELP queue_split_process_failure Number of replicas which failed processing in the split queue
+# TYPE queue_split_process_failure counter
+queue_split_process_failure{store="1",node_id="1"} 0
+# HELP queue_replicate_pending Number of pending replicas in the replicate queue
+# TYPE queue_replicate_pending gauge
+queue_replicate_pending{store="1",node_id="1"} 0
+# HELP queue_replicate_replacedeadreplica_success Number of successful dead replica replacements processed by the replicate queue
+# TYPE queue_replicate_replacedeadreplica_success counter
+queue_replicate_replacedeadreplica_success{store="1",node_id="1"} 0
+# HELP queue_gc_info_numrangekeysaffected Number of range keys GC'able
+# TYPE queue_gc_info_numrangekeysaffected counter
+queue_gc_info_numrangekeysaffected{store="1",node_id="1"} 0
+# HELP queue_gc_info_abortspangcnum Number of AbortSpan entries fit for removal
+# TYPE queue_gc_info_abortspangcnum counter
+queue_gc_info_abortspangcnum{store="1",node_id="1"} 0
+# HELP queue_replicate_removedecommissioningreplica Number of decommissioning replica removals attempted by the replicate queue (typically in response to a node outage)
+# TYPE queue_replicate_removedecommissioningreplica counter
+queue_replicate_removedecommissioningreplica{store="1",node_id="1"} 0
+# HELP queue_consistency_processingnanos Nanoseconds spent processing replicas in the consistency checker queue
+# TYPE queue_consistency_processingnanos counter
+queue_consistency_processingnanos{store="1",node_id="1"} 5.36495164e+08
+# HELP queue_replicate_removedeadreplica_error Number of failed dead replica removals processed by the replicate queue
+# TYPE queue_replicate_removedeadreplica_error counter
+queue_replicate_removedeadreplica_error{store="1",node_id="1"} 0
+# HELP queue_raftsnapshot_processingnanos Nanoseconds spent processing replicas in the Raft repair queue
+# TYPE queue_raftsnapshot_processingnanos counter
+queue_raftsnapshot_processingnanos{store="1",node_id="1"} 0
+# HELP queue_replicagc_removereplica Number of replica removals attempted by the replica GC queue
+# TYPE queue_replicagc_removereplica counter
+queue_replicagc_removereplica{store="1",node_id="1"} 0
+# HELP queue_replicate_purgatory Number of replicas in the replicate queue's purgatory, awaiting allocation options
+# TYPE queue_replicate_purgatory gauge
+queue_replicate_purgatory{store="1",node_id="1"} 0
+# HELP queue_split_processingnanos Nanoseconds spent processing replicas in the split queue
+# TYPE queue_split_processingnanos counter
+queue_split_processingnanos{store="1",node_id="1"} 0
+# HELP queue_raftsnapshot_pending Number of pending replicas in the Raft repair queue
+# TYPE queue_raftsnapshot_pending gauge
+queue_raftsnapshot_pending{store="1",node_id="1"} 0
+# HELP queue_raftlog_process_success Number of replicas successfully processed by the Raft log queue
+# TYPE queue_raftlog_process_success counter
+queue_raftlog_process_success{store="1",node_id="1"} 723
+# HELP queue_replicagc_processingnanos Nanoseconds spent processing replicas in the replica GC queue
+# TYPE queue_replicagc_processingnanos counter
+queue_replicagc_processingnanos{store="1",node_id="1"} 0
+# HELP queue_gc_info_clearrangefailed Number of failed ClearRange operations during GC
+# TYPE queue_gc_info_clearrangefailed counter
+queue_gc_info_clearrangefailed{store="1",node_id="1"} 0
+# HELP queue_tsmaintenance_process_success Number of replicas successfully processed by the time series maintenance queue
+# TYPE queue_tsmaintenance_process_success counter
+queue_tsmaintenance_process_success{store="1",node_id="1"} 3
+# HELP queue_replicate_removedeadnonvoterreplica Number of dead non-voter replica removals attempted by the replicate queue (typically in response to a node outage)
+# TYPE queue_replicate_removedeadnonvoterreplica counter
+queue_replicate_removedeadnonvoterreplica{store="1",node_id="1"} 0
+# HELP queue_replicate_removereplica_success Number of successful replica removals processed by the replicate queue
+# TYPE queue_replicate_removereplica_success counter
+queue_replicate_removereplica_success{store="1",node_id="1"} 0
+# HELP queue_replicate_addreplica Number of replica additions attempted by the replicate queue
+# TYPE queue_replicate_addreplica counter
+queue_replicate_addreplica{store="1",node_id="1"} 0
+# HELP queue_replicate_processingnanos Nanoseconds spent processing replicas in the replicate queue
+# TYPE queue_replicate_processingnanos counter
+queue_replicate_processingnanos{store="1",node_id="1"} 8.7358164e+07
+# HELP queue_raftsnapshot_process_success Number of replicas successfully processed by the Raft repair queue
+# TYPE queue_raftsnapshot_process_success counter
+queue_raftsnapshot_process_success{store="1",node_id="1"} 0
+# HELP queue_merge_process_success Number of replicas successfully processed by the merge queue
+# TYPE queue_merge_process_success counter
+queue_merge_process_success{store="1",node_id="1"} 13
+# HELP queue_merge_process_failure Number of replicas which failed processing in the merge queue
+# TYPE queue_merge_process_failure counter
+queue_merge_process_failure{store="1",node_id="1"} 0
+# HELP queue_replicate_addvoterreplica Number of voter replica additions attempted by the replicate queue
+# TYPE queue_replicate_addvoterreplica counter
+queue_replicate_addvoterreplica{store="1",node_id="1"} 0
+# HELP queue_gc_info_clearrangesuccess Number of successful ClearRange operations during GC
+# TYPE queue_gc_info_clearrangesuccess counter
+queue_gc_info_clearrangesuccess{store="1",node_id="1"} 0
+# HELP queue_replicate_rebalancenonvoterreplica Number of non-voter replica rebalancer-initiated additions attempted by the replicate queue
+# TYPE queue_replicate_rebalancenonvoterreplica counter
+queue_replicate_rebalancenonvoterreplica{store="1",node_id="1"} 0
+# HELP queue_gc_info_transactionspangcstaging Number of GC'able entries corresponding to staging txns
+# TYPE queue_gc_info_transactionspangcstaging counter
+queue_gc_info_transactionspangcstaging{store="1",node_id="1"} 0
+# HELP queue_replicate_replacedecommissioningreplica_success Number of successful decommissioning replica replacements processed by the replicate queue
+# TYPE queue_replicate_replacedecommissioningreplica_success counter
+queue_replicate_replacedecommissioningreplica_success{store="1",node_id="1"} 0
+# HELP queue_replicate_rebalancevoterreplica Number of voter replica rebalancer-initiated additions attempted by the replicate queue
+# TYPE queue_replicate_rebalancevoterreplica counter
+queue_replicate_rebalancevoterreplica{store="1",node_id="1"} 0
+# HELP queue_replicate_removenonvoterreplica Number of non-voter replica removals attempted by the replicate queue (typically in response to a rebalancer-initiated addition)
+# TYPE queue_replicate_removenonvoterreplica counter
+queue_replicate_removenonvoterreplica{store="1",node_id="1"} 0
+# HELP queue_raftlog_process_failure Number of replicas which failed processing in the Raft log queue
+# TYPE queue_raftlog_process_failure counter
+queue_raftlog_process_failure{store="1",node_id="1"} 0
+# HELP queue_gc_info_abortspanscanned Number of transactions present in the AbortSpan scanned from the engine
+# TYPE queue_gc_info_abortspanscanned counter
+queue_gc_info_abortspanscanned{store="1",node_id="1"} 0
+# HELP queue_consistency_process_success Number of replicas successfully processed by the consistency checker queue
+# TYPE queue_consistency_process_success counter
+queue_consistency_process_success{store="1",node_id="1"} 67
+# HELP queue_gc_info_intenttxns Number of associated distinct transactions
+# TYPE queue_gc_info_intenttxns counter
+queue_gc_info_intenttxns{store="1",node_id="1"} 0
+# HELP queue_consistency_pending Number of pending replicas in the consistency checker queue
+# TYPE queue_consistency_pending gauge
+queue_consistency_pending{store="1",node_id="1"} 0
+# HELP queue_tsmaintenance_pending Number of pending replicas in the time series maintenance queue
+# TYPE queue_tsmaintenance_pending gauge
+queue_tsmaintenance_pending{store="1",node_id="1"} 0
+# HELP queue_gc_info_resolvetotal Number of attempted intent resolutions
+# TYPE queue_gc_info_resolvetotal counter
+queue_gc_info_resolvetotal{store="1",node_id="1"} 0
+# HELP queue_replicate_nonvoterpromotions Number of non-voters promoted to voters by the replicate queue
+# TYPE queue_replicate_nonvoterpromotions counter
+queue_replicate_nonvoterpromotions{store="1",node_id="1"} 0
+# HELP queue_gc_processingnanos Nanoseconds spent processing replicas in the MVCC GC queue
+# TYPE queue_gc_processingnanos counter
+queue_gc_processingnanos{store="1",node_id="1"} 1.3394542e+07
+# HELP queue_replicate_removedecommissioningreplica_error Number of failed decommissioning replica removals processed by the replicate queue
+# TYPE queue_replicate_removedecommissioningreplica_error counter
+queue_replicate_removedecommissioningreplica_error{store="1",node_id="1"} 0
+# HELP queue_gc_info_abortspanconsidered Number of AbortSpan entries old enough to be considered for removal
+# TYPE queue_gc_info_abortspanconsidered counter
+queue_gc_info_abortspanconsidered{store="1",node_id="1"} 0
+# HELP queue_tsmaintenance_processingnanos Nanoseconds spent processing replicas in the time series maintenance queue
+# TYPE queue_tsmaintenance_processingnanos counter
+queue_tsmaintenance_processingnanos{store="1",node_id="1"} 3.9305124e+07
+# HELP queue_replicate_removereplica_error Number of failed replica removals processed by the replicate queue
+# TYPE queue_replicate_removereplica_error counter
+queue_replicate_removereplica_error{store="1",node_id="1"} 0
+# HELP queue_gc_info_transactionspangcpending Number of GC'able entries corresponding to pending txns
+# TYPE queue_gc_info_transactionspangcpending counter
+queue_gc_info_transactionspangcpending{store="1",node_id="1"} 0
+# HELP queue_replicate_rebalancereplica Number of replica rebalancer-initiated additions attempted by the replicate queue
+# TYPE queue_replicate_rebalancereplica counter
+queue_replicate_rebalancereplica{store="1",node_id="1"} 0
+# HELP queue_replicate_removereplica Number of replica removals attempted by the replicate queue (typically in response to a rebalancer-initiated addition)
+# TYPE queue_replicate_removereplica counter
+queue_replicate_removereplica{store="1",node_id="1"} 0
+# HELP queue_gc_process_success Number of replicas successfully processed by the MVCC GC queue
+# TYPE queue_gc_process_success counter
+queue_gc_process_success{store="1",node_id="1"} 1
+# HELP queue_replicate_removedeadreplica Number of dead replica removals attempted by the replicate queue (typically in response to a node outage)
+# TYPE queue_replicate_removedeadreplica counter
+queue_replicate_removedeadreplica{store="1",node_id="1"} 0
+# HELP queue_replicate_addreplica_success Number of successful replica additions processed by the replicate queue
+# TYPE queue_replicate_addreplica_success counter
+queue_replicate_addreplica_success{store="1",node_id="1"} 0
+# HELP queue_gc_info_transactionspangcaborted Number of GC'able entries corresponding to aborted txns
+# TYPE queue_gc_info_transactionspangcaborted counter
+queue_gc_info_transactionspangcaborted{store="1",node_id="1"} 0
+# HELP queue_replicate_addreplica_error Number of failed replica additions processed by the replicate queue
+# TYPE queue_replicate_addreplica_error counter
+queue_replicate_addreplica_error{store="1",node_id="1"} 72
+# HELP queue_raftlog_processingnanos Nanoseconds spent processing replicas in the Raft log queue
+# TYPE queue_raftlog_processingnanos counter
+queue_raftlog_processingnanos{store="1",node_id="1"} 2.061517204e+09
+# HELP queue_gc_pending Number of pending replicas in the MVCC GC queue
+# TYPE queue_gc_pending gauge
+queue_gc_pending{store="1",node_id="1"} 0
+# HELP queue_split_span_config_based Number of range splits due to span configuration
+# TYPE queue_split_span_config_based counter
+queue_split_span_config_based{store="1",node_id="1"} 0
+# HELP queue_merge_purgatory Number of replicas in the merge queue's purgatory, waiting to become mergeable
+# TYPE queue_merge_purgatory gauge
+queue_merge_purgatory{store="1",node_id="1"} 0
+# HELP queue_replicagc_pending Number of pending replicas in the replica GC queue
+# TYPE queue_replicagc_pending gauge
+queue_replicagc_pending{store="1",node_id="1"} 0
+# HELP queue_gc_info_transactionspangccommitted Number of GC'able entries corresponding to committed txns
+# TYPE queue_gc_info_transactionspangccommitted counter
+queue_gc_info_transactionspangccommitted{store="1",node_id="1"} 0
+# HELP queue_split_pending Number of pending replicas in the split queue
+# TYPE queue_split_pending gauge
+queue_split_pending{store="1",node_id="1"} 0
+# HELP queue_replicate_removedecommissioningvoterreplica Number of decommissioning voter replica removals attempted by the replicate queue (typically in response to a node outage)
+# TYPE queue_replicate_removedecommissioningvoterreplica counter
+queue_replicate_removedecommissioningvoterreplica{store="1",node_id="1"} 0
+# HELP queue_raftlog_pending Number of pending replicas in the Raft log queue
+# TYPE queue_raftlog_pending gauge
+queue_raftlog_pending{store="1",node_id="1"} 0
+# HELP queue_gc_info_intentsconsidered Number of 'old' intents
+# TYPE queue_gc_info_intentsconsidered counter
+queue_gc_info_intentsconsidered{store="1",node_id="1"} 0
+# HELP queue_gc_info_transactionresolvefailed Number of intent cleanup failures for local transactions during GC
+# TYPE queue_gc_info_transactionresolvefailed counter
+queue_gc_info_transactionresolvefailed{store="1",node_id="1"} 0
+# HELP queue_gc_process_failure Number of replicas which failed processing in the MVCC GC queue
+# TYPE queue_gc_process_failure counter
+queue_gc_process_failure{store="1",node_id="1"} 0
+# HELP queue_replicate_transferlease Number of range lease transfers attempted by the replicate queue
+# TYPE queue_replicate_transferlease counter
+queue_replicate_transferlease{store="1",node_id="1"} 0
+# HELP queue_replicagc_process_success Number of replicas successfully processed by the replica GC queue
+# TYPE queue_replicagc_process_success counter
+queue_replicagc_process_success{store="1",node_id="1"} 0
+# HELP queue_raftsnapshot_process_failure Number of replicas which failed processing in the Raft repair queue
+# TYPE queue_raftsnapshot_process_failure counter
+queue_raftsnapshot_process_failure{store="1",node_id="1"} 0
+# HELP queue_replicate_voterdemotions Number of voters demoted to non-voters by the replicate queue
+# TYPE queue_replicate_voterdemotions counter
+queue_replicate_voterdemotions{store="1",node_id="1"} 0
+# HELP queue_gc_info_numkeysaffected Number of keys with GC'able data
+# TYPE queue_gc_info_numkeysaffected counter
+queue_gc_info_numkeysaffected{store="1",node_id="1"} 1
+# HELP queue_replicate_removedeadvoterreplica Number of dead voter replica removals attempted by the replicate queue (typically in response to a node outage)
+# TYPE queue_replicate_removedeadvoterreplica counter
+queue_replicate_removedeadvoterreplica{store="1",node_id="1"} 0
+# HELP queue_gc_info_resolvesuccess Number of successful intent resolutions
+# TYPE queue_gc_info_resolvesuccess counter
+queue_gc_info_resolvesuccess{store="1",node_id="1"} 0
+# HELP queue_replicate_process_success Number of replicas successfully processed by the replicate queue
+# TYPE queue_replicate_process_success counter
+queue_replicate_process_success{store="1",node_id="1"} 67
+# HELP queue_split_size_based Number of range splits due to a range being greater than the configured max range size
+# TYPE queue_split_size_based counter
+queue_split_size_based{store="1",node_id="1"} 0
+# HELP queue_consistency_process_failure Number of replicas which failed processing in the consistency checker queue
+# TYPE queue_consistency_process_failure counter
+queue_consistency_process_failure{store="1",node_id="1"} 0
+# HELP queue_split_load_based Number of range splits due to a range being greater than the configured max range load
+# TYPE queue_split_load_based counter
+queue_split_load_based{store="1",node_id="1"} 0
+# HELP queue_replicate_replacedeadreplica_error Number of failed dead replica replacements processed by the replicate queue
+# TYPE queue_replicate_replacedeadreplica_error counter
+queue_replicate_replacedeadreplica_error{store="1",node_id="1"} 0
+# HELP queue_replicate_addnonvoterreplica Number of non-voter replica additions attempted by the replicate queue
+# TYPE queue_replicate_addnonvoterreplica counter
+queue_replicate_addnonvoterreplica{store="1",node_id="1"} 0
+# HELP queue_tsmaintenance_process_failure Number of replicas which failed processing in the time series maintenance queue
+# TYPE queue_tsmaintenance_process_failure counter
+queue_tsmaintenance_process_failure{store="1",node_id="1"} 0
+# HELP queue_merge_processingnanos Nanoseconds spent processing replicas in the merge queue
+# TYPE queue_merge_processingnanos counter
+queue_merge_processingnanos{store="1",node_id="1"} 1.81088254e+08
+# HELP queue_replicate_process_failure Number of replicas which failed processing in the replicate queue
+# TYPE queue_replicate_process_failure counter
+queue_replicate_process_failure{store="1",node_id="1"} 72
+# HELP queue_replicate_removedecommissioningreplica_success Number of successful decommissioning replica removals processed by the replicate queue
+# TYPE queue_replicate_removedecommissioningreplica_success counter
+queue_replicate_removedecommissioningreplica_success{store="1",node_id="1"} 0
+# HELP queue_replicate_removedecommissioningnonvoterreplica Number of decommissioning non-voter replica removals attempted by the replicate queue (typically in response to a node outage)
+# TYPE queue_replicate_removedecommissioningnonvoterreplica counter
+queue_replicate_removedecommissioningnonvoterreplica{store="1",node_id="1"} 0

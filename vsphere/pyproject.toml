@@ -40,7 +40,8 @@ license = "BSD-3-Clause"
 [project.optional-dependencies]
 deps = [
     "futures==3.4.0; python_version < '3.0'",
-    "pyvmomi==8.0.2.0.1",
+    "pyvmomi==8.0.0.1; python_version < '3.0'",
+    "pyvmomi==8.0.2.0.1; python_version > '3.0'",
 ]
 
 [project.urls]

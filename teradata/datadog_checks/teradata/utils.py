@@ -111,9 +111,12 @@ def submit_version(check, row):
     """
     try:
         teradata_version = row[0]
-        version_parts = {
-            name: part for name, part in zip(('major', 'minor', 'maintenance', 'patch'), teradata_version.split('.'))
-        }
+        version_parts = dict(
+            zip(
+                ('major', 'minor', 'maintenance', 'patch'),
+                teradata_version.split('.'),
+            )
+        )
         check.set_metadata('version', teradata_version, scheme='parts', final_scheme='semver', part_map=version_parts)
     except Exception as e:
         check.log.warning("Could not collect version info: %s", e)

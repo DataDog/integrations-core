@@ -2,7 +2,13 @@
 
 <!-- towncrier release notes start -->
 
-## 2.1.0 / 2024-01-05
+## 2.1.1 / 2024-02-16
+
+***Fixed***:
+
+* Switch to os.scandir for Python >= 3.5 ([#16702](https://github.com/DataDog/integrations-core/pull/16702))
+
+## 2.1.0 / 2024-01-05 / Agent 7.51.0
 
 ***Added***:
 

@@ -60,6 +60,7 @@ class VSphereConfig(object):
         self.password = instance['password']
         self.ssl_verify = is_affirmative(instance.get('ssl_verify', True))
         self.ssl_capath = instance.get('ssl_capath')
+        self.ssl_cafile = instance.get('ssl_cafile')
         self.tls_ignore_warning = instance.get('tls_ignore_warning', False)
 
         self.rest_api_options = {
@@ -197,7 +198,7 @@ class VSphereConfig(object):
                 )
 
             # Check required fields and their types
-            for (field, field_type) in iteritems(
+            for field, field_type in iteritems(
                 {'resource': string_types, 'property': string_types, 'type': string_types, 'patterns': list}
             ):
                 if field not in resource_filter:

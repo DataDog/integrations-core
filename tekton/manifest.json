@@ -1,0 +1,68 @@
+{
+  "manifest_version": "2.0.0",
+  "app_uuid": "4e8f129e-1c9b-4078-a966-f0099dbf9465",
+  "app_id": "tekton",
+  "display_on_public_website": false,
+  "tile": {
+    "overview": "README.md#Overview",
+    "configuration": "README.md#Setup",
+    "support": "README.md#Support",
+    "changelog": "CHANGELOG.md",
+    "description": "Track all your Tekton metrics with Datadog.",
+    "title": "Tekton",
+    "media": [],
+    "classifier_tags": [
+      "Supported OS::Linux",
+      "Supported OS::Windows",
+      "Supported OS::macOS",
+      "Category::Log Collection",
+      "Category::Developer Tools"
+    ]
+  },
+  "assets": {
+    "integration": {
+      "auto_install": true,
+      "source_type_id": 5667413,
+      "source_type_name": "Tekton",
+      "configuration": {
+        "spec": "assets/configuration/spec.yaml"
+      },
+      "events": {
+        "creates_events": false
+      },
+      "metrics": {
+        "prefix": "tekton.",
+        "check": [
+          "tekton.pipelines_controller.go.alloc",
+          "tekton.triggers_controller.go.alloc"
+        ],
+        "metadata_path": "metadata.csv"
+      },
+      "service_checks": {
+        "metadata_path": "assets/service_checks.json"
+      }
+    },
+    "dashboards": {
+      "Tekton Overview": "assets/dashboards/overview.json"
+    },
+    "monitors": {
+      "[Tekton] High number of throttled TaskRuns": "assets/monitors/throttled_taskruns.json",
+      "[Tekton] Increasing number of failed TaskRuns": "assets/monitors/increasing_failed_taskruns.json",
+      "[Tekton] Increasing number of failed PieplineRuns": "assets/monitors/increasing_failed_pipelineruns.json"
+    },
+    "logs": {
+      "source": "tekton"
+    },
+    "saved_views": {
+      "tekton_overview": "assets/saved_views/tekton_overview.json",
+      "tekton_errors": "assets/saved_views/tekton_errors.json"
+    }
+  },
+  "author": {
+    "support_email": "help@datadoghq.com",
+    "name": "Datadog",
+    "homepage": "https://www.datadoghq.com",
+    "sales_email": "info@datadoghq.com"
+  },
+  "oauth": {}
+}

@@ -32,6 +32,7 @@ VTS_METRIC_MAP = {
     'nginx.upstream.weight': 'nginx.upstream.peers.weight',
     'nginx.upstream.backup': 'nginx.upstream.peers.backup',
     'nginx.upstream.down': 'nginx.upstream.peers.health_checks.last_passed',
+    'nginx.upstream.responseMsec': 'nginx.upstream.peers.response_time',
 }
 
 # NGINX Plus metrics that are sent as both a count and gauge for backwards compatibility

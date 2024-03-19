@@ -2,7 +2,26 @@
 
 <!-- towncrier release notes start -->
 
-## 16.1.1 / 2024-01-15
+## 17.0.0 / 2024-02-16
+
+***Changed***:
+
+* Postgres schemas: don't exclude tables without metrics from schema collection ([#16834](https://github.com/DataDog/integrations-core/pull/16834))
+* Don't require relation metrics to be enabled to collect schemas ([#16870](https://github.com/DataDog/integrations-core/pull/16870))
+
+***Added***:
+
+* Collect function & count metrics for auto discovered databases ([#16530](https://github.com/DataDog/integrations-core/pull/16530))
+* Allow configuration of ignored patterns for settings collection, under the `ignored_settings_patterns` key ([#16634](https://github.com/DataDog/integrations-core/pull/16634))
+* DBM integrations now defaulted to use new go-sqllexer pkg to obfuscate sql statements ([#16681](https://github.com/DataDog/integrations-core/pull/16681))
+* Update dependencies ([#16788](https://github.com/DataDog/integrations-core/pull/16788))
+* Bump dependencies ([#16858](https://github.com/DataDog/integrations-core/pull/16858))
+
+***Fixed***:
+
+* Update default table schema collection limit to 300 ([#16880](https://github.com/DataDog/integrations-core/pull/16880))
+
+## 16.1.1 / 2024-01-15 / Agent 7.51.0
 
 ***Fixed***:
 
@@ -30,27 +49,27 @@
 * Bump the Python version from py3.9 to py3.11 ([#15997](https://github.com/DataDog/integrations-core/pull/15997))
 * PostgreSQL: Add metrics for logical replication subscriptions ([#16191](https://github.com/DataDog/integrations-core/pull/16191))
 * PostgreSQL: Add replication slots stats metric from pg_stat_replication_slots ([#16197](https://github.com/DataDog/integrations-core/pull/16197))
-* [DBMON-3147] Add managed_authentication config option to explicitly enable or disable AWS IAM Authentication and Azure Managed Identity Authentication ([#16221](https://github.com/DataDog/integrations-core/pull/16221))
+* Add managed_authentication config option to explicitly enable or disable AWS IAM Authentication and Azure Managed Identity Authentication ([#16221](https://github.com/DataDog/integrations-core/pull/16221))
 * Add metrics tracking vacuum, analyze and cluster progress ([#16236](https://github.com/DataDog/integrations-core/pull/16236))
 * PostgreSQL: Add granted tag to `postgresql.locks` metric ([#16268](https://github.com/DataDog/integrations-core/pull/16268))
 * Add metrics tracking vacuum and analyze age ([#16272](https://github.com/DataDog/integrations-core/pull/16272))
 * Create `postgresql.create_index.*` metrics tracking progress of index creation ([#16330](https://github.com/DataDog/integrations-core/pull/16330))
 * Update dependencies ([#16394](https://github.com/DataDog/integrations-core/pull/16394)), ([#16448](https://github.com/DataDog/integrations-core/pull/16448)), ([#16502](https://github.com/DataDog/integrations-core/pull/16502))
-* add new obfuscator options to customize SQL obfuscation and normaliza… ([#16429](https://github.com/DataDog/integrations-core/pull/16429))
+* Add new obfuscator options to customize SQL obfuscation and normaliza… ([#16429](https://github.com/DataDog/integrations-core/pull/16429))
 
 ***Fixed***:
 
 * PostgreSQL: Exclude manually launched vacuum from pg_stat_activity metrics ([#16206](https://github.com/DataDog/integrations-core/pull/16206))
 * Exclude manual vacuum from reported xid and xmin age ([#16290](https://github.com/DataDog/integrations-core/pull/16290))
-* add rdsadmin to autodiscovery exclusion list ([#16396](https://github.com/DataDog/integrations-core/pull/16396))
-* [DBMON-3302] emit correct error message when explain parameterized query fails ([#16516](https://github.com/DataDog/integrations-core/pull/16516))
-* [DBMON-3299] Improve edge case handling on partitioned table activity query  when a partitioned table has no children (partitioned sub-tables) ([#16517](https://github.com/DataDog/integrations-core/pull/16517))
+* Add rdsadmin to autodiscovery exclusion list ([#16396](https://github.com/DataDog/integrations-core/pull/16396))
+* Emit correct error message when explain parameterized query fails ([#16516](https://github.com/DataDog/integrations-core/pull/16516))
+* Improve edge case handling on partitioned table activity query  when a partitioned table has no children (partitioned sub-tables) ([#16517](https://github.com/DataDog/integrations-core/pull/16517))
 
 ## 15.3.1 / 2023-12-28 / Agent 7.50.2
 
 ***Fixed***:
 
-* Revert "[DBMON-2989] report sql obfuscation error count (#15990)" ([#16439](https://github.com/DataDog/integrations-core/pull/16439))
+* Revert "report sql obfuscation error count (#15990)" ([#16439](https://github.com/DataDog/integrations-core/pull/16439))
 
 ## 15.3.0 / 2023-11-10 / Agent 7.50.0
 
@@ -61,7 +80,7 @@
 ***Fixed***:
 
 * Remove an unnecessary print statement ([#15594](https://github.com/DataDog/integrations-core/pull/15594))
-* * Fix edge-case causing potentially duplicate/wrong time series for activity metrics when `activity_metrics_excluded_aggregations` included `datname` ([#16106](https://github.com/DataDog/integrations-core/pull/16106)) ([#16106](https://github.com/DataDog/integrations-core/pull/16106))
+* * Fix edge-case causing potentially duplicate/wrong timeseries for activity metrics when `activity_metrics_excluded_aggregations` included `datname` ([#16106](https://github.com/DataDog/integrations-core/pull/16106)) ([#16106](https://github.com/DataDog/integrations-core/pull/16106))
 * Database instance metadata payloads should not contain duplicate `db` tags ([#16146](https://github.com/DataDog/integrations-core/pull/16146))
 
 ## 15.2.0 / 2023-10-26

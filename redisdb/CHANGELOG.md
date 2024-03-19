@@ -2,7 +2,13 @@
 
 <!-- towncrier release notes start -->
 
-## 5.3.0 / 2024-01-05
+## 5.3.1 / 2024-03-05
+
+***Fixed***:
+
+* Check existence of total_commands_processed ([#16996](https://github.com/DataDog/integrations-core/pull/16996))
+
+## 5.3.0 / 2024-01-05 / Agent 7.51.0
 
 ***Added***:
 

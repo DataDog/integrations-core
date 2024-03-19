@@ -10,7 +10,6 @@ from .metrics import ADDITIONAL_METRICS_MAP, INSTANCE_DEFAULT_METRICS
 
 
 class ScyllaCheck(OpenMetricsBaseCheck):
-
     """
     This is a legacy implementation that will be removed at some point, refer to check.py for the new implementation.
     """

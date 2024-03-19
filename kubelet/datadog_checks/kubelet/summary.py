@@ -48,7 +48,7 @@ class SummaryScraperMixin(object):
         # avoid calling the tagger for pods that aren't running, as these are
         # never stored
         pod_phase = pod_list_utils.pods.get(pod_uid, {}).get('status', {}).get('phase', None)
-        if pod_phase != 'Running':
+        if pod_phase != 'Running' and pod_phase != 'Pending':
             return
 
         pod_tags = tags_for_pod(pod_uid, tagger.ORCHESTRATOR)
@@ -68,8 +68,8 @@ class SummaryScraperMixin(object):
         net_pod_metrics = {'rxBytes': 'kubernetes.network.rx_bytes', 'txBytes': 'kubernetes.network.tx_bytes'}
         for k, v in net_pod_metrics.items():
             # ensure we can filter out metrics per the configuration.
-            pod_level_match = any([fnmatch(v, p) for p in self.pod_level_metrics])
-            enabled_rate = any([fnmatch(v, p) for p in self.enabled_rates])
+            pod_level_match = any(fnmatch(v, p) for p in self.pod_level_metrics)
+            enabled_rate = any(fnmatch(v, p) for p in self.enabled_rates)
             if pod_level_match and enabled_rate:
                 net_bytes = pod.get('network', {}).get(k)
                 if net_bytes:

@@ -2,6 +2,8 @@
 # All rights reserved
 # Licensed under Simplified BSD License (see LICENSE)
 # https://www.postgresql.org/docs/current/libpq-connect.html#LIBPQ-PARAMKEYWORDS
+from typing import Optional
+
 from six import PY2, PY3, iteritems
 
 from datadog_checks.base import AgentCheck, ConfigurationError, is_affirmative
@@ -24,17 +26,15 @@ class PostgresConfig:
     GAUGE = AgentCheck.gauge
     MONOTONIC = AgentCheck.monotonic_count
 
-    def __init__(self, init_config, instance):
-        autodiscover_config = init_config.get('autodiscover_hosts', {})
-        self.host_autodiscovery_enabled = is_affirmative(autodiscover_config.get('enabled', False))
+    def __init__(self, instance):
         self.host = instance.get('host', '')
-        if not self.host and not self.host_autodiscovery_enabled:
+        if not self.host:
             raise ConfigurationError('Specify a Postgres host to connect to.')
         self.port = instance.get('port', '')
         if self.port != '':
             self.port = int(self.port)
         self.user = instance.get('username', '')
-        if not self.user and not self.host_autodiscovery_enabled:
+        if not self.user:
             raise ConfigurationError('Please specify a user to connect to Postgres.')
         self.password = instance.get('password', '')
         self.dbname = instance.get('dbname', 'postgres')
@@ -78,14 +78,14 @@ class PostgresConfig:
         self.collect_activity_metrics = is_affirmative(instance.get('collect_activity_metrics', False))
         self.activity_metrics_excluded_aggregations = instance.get('activity_metrics_excluded_aggregations', [])
         self.collect_database_size_metrics = is_affirmative(instance.get('collect_database_size_metrics', True))
-        self.collect_wal_metrics = is_affirmative(instance.get('collect_wal_metrics', False))
+        self.collect_wal_metrics = self._should_collect_wal_metrics(instance.get('collect_wal_metrics'))
         self.collect_bloat_metrics = is_affirmative(instance.get('collect_bloat_metrics', False))
         self.data_directory = instance.get('data_directory', None)
         self.ignore_databases = instance.get('ignore_databases', DEFAULT_IGNORE_DATABASES)
         if is_affirmative(instance.get('collect_default_database', True)):
             self.ignore_databases = [d for d in self.ignore_databases if d != 'postgres']
         self.custom_queries = instance.get('custom_queries', [])
-        self.tag_replication_role = is_affirmative(instance.get('tag_replication_role', False))
+        self.tag_replication_role = is_affirmative(instance.get('tag_replication_role', True))
         self.custom_metrics = self._get_custom_metrics(instance.get('custom_metrics', []))
         self.max_relations = int(instance.get('max_relations', 300))
         self.min_collection_interval = instance.get('min_collection_interval', 15)
@@ -102,11 +102,6 @@ class PostgresConfig:
         self.statement_samples_config = instance.get('query_samples', instance.get('statement_samples', {})) or {}
         self.settings_metadata_config = instance.get('collect_settings', {}) or {}
         self.schemas_metadata_config = instance.get('collect_schemas', {"enabled": False})
-        if not self.relations and self.schemas_metadata_config['enabled']:
-            raise ConfigurationError(
-                'In order to collect schemas on this database, you must enable relation metrics collection.'
-            )
-
         self.resources_metadata_config = instance.get('collect_resources', {}) or {}
         self.statement_activity_config = instance.get('query_activity', {}) or {}
         self.statement_metrics_config = instance.get('query_metrics', {}) or {}
@@ -262,3 +257,11 @@ class PostgresConfig:
                 raise ConfigurationError('Azure client_id must be set when using Azure managed authentication')
             managed_authentication['enabled'] = enabled
         return managed_authentication
+
+    @staticmethod
+    def _should_collect_wal_metrics(collect_wal_metrics) -> Optional[bool]:
+        if collect_wal_metrics is not None:
+            # if the user has explicitly set the value, return the boolean
+            return is_affirmative(collect_wal_metrics)
+
+        return None

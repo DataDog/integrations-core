@@ -4,7 +4,6 @@ import argparse
 import os
 import subprocess
 import sys
-from hashlib import sha256
 from pathlib import Path
 from tempfile import TemporaryDirectory
 
@@ -125,14 +124,12 @@ def main():
             project_metadata = extract_metadata(entry)
             project_name = normalize_project_name(project_metadata['Name'])
             project_version = project_metadata['Version']
-            wheel_hash = sha256(entry.read_bytes()).hexdigest()
-            dependencies[project_name] = (project_version, wheel_hash)
+            dependencies[project_name] = project_version
 
     final_requirements = MOUNT_DIR / 'frozen.txt'
     with final_requirements.open('w', encoding='utf-8') as f:
-        for project_name, (project_version, wheel_hash) in sorted(dependencies.items()):
-            f.write(f'{project_name}=={project_version} \\\n')
-            f.write(f'  --hash=sha256:{wheel_hash}\n')
+        for project_name, project_version in sorted(dependencies.items()):
+            f.write(f'{project_name}=={project_version}\n')
 
 
 if __name__ == '__main__':

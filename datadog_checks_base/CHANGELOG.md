@@ -2,6 +2,47 @@
 
 <!-- towncrier release notes start -->
 
+## 36.5.0 / 2024-03-12
+
+***Added***:
+
+* Update dependencies ([#16899](https://github.com/DataDog/integrations-core/pull/16899)), ([#16963](https://github.com/DataDog/integrations-core/pull/16963))
+* Add a method in the aggregator to validate service checks based on the definition file ([#16916](https://github.com/DataDog/integrations-core/pull/16916))
+* support custom metric_prefix in QueryExecutor ([#16958](https://github.com/DataDog/integrations-core/pull/16958))
+* Add a method to assert several metric tags at once ([#17134](https://github.com/DataDog/integrations-core/pull/17134))
+* Add db util to prepand/append comma delimited SQL comment from key/value pairs ([#17145](https://github.com/DataDog/integrations-core/pull/17145))
+
+## 36.4.0 / 2024-03-08
+
+***Added***:
+
+* Revert "Bump psutil version to 5.9.7 (#16547)" ([#17112](https://github.com/DataDog/integrations-core/pull/17112))
+
+## 36.3.0 / 2024-03-08
+
+***Added***:
+
+* Bump snowflake-connector-python to 3.7.1 ([#17099](https://github.com/DataDog/integrations-core/pull/17099))
+
+## 36.2.0 / 2024-03-07
+
+***Security***:
+
+* Bump orjson to 3.9.15 and cryptography to 42.0.5 ([#17054](https://github.com/DataDog/integrations-core/pull/17054))
+
+## 36.1.0 / 2024-02-16
+
+***Added***:
+
+* Support customizable collection interval per query in query executor ([#16765](https://github.com/DataDog/integrations-core/pull/16765))
+* Update dependencies ([#16788](https://github.com/DataDog/integrations-core/pull/16788))
+* Add custom auth params for OAuth2 authentication ([#16812](https://github.com/DataDog/integrations-core/pull/16812))
+* Bump dependencies ([#16858](https://github.com/DataDog/integrations-core/pull/16858))
+
+***Fixed***:
+
+* [DBM] Minimize temporary objects  when merge duplicate statement metrics ([#16796](https://github.com/DataDog/integrations-core/pull/16796))
+
 ## 36.0.0 / 2024-01-30
 
 ***Removed***:
@@ -21,6 +62,12 @@
 ***Fixed***:
 
 * Remove unused dependencies in the Agent file ([#16538](https://github.com/DataDog/integrations-core/pull/16538))
+* [DBMON-3495] Add `replace_null_character` option to replace embedded null characters with empty string in query text ([#16742](https://github.com/DataDog/integrations-core/pull/16742))
+
+## 35.0.1 / 2024-02-07 / Agent 7.51.0
+
+***Fixed***:
+
 * [DBMON-3495] Add `replace_null_character` option to replace embedded null characters with empty string in query text ([#16742](https://github.com/DataDog/integrations-core/pull/16742))
 
 ## 35.0.0 / 2024-01-05

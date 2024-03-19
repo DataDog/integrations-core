@@ -91,6 +91,8 @@ class DockerAgent(AgentInterface):
         return self._container_name
 
     def start(self, *, agent_build: str, local_packages: dict[Path, str], env_vars: dict[str, str]) -> None:
+        from ddev.e2e.agent.constants import AgentEnvVars
+
         if not agent_build:
             agent_build = 'datadog/agent-dev:master'
 
@@ -105,22 +107,22 @@ class DockerAgent(AgentInterface):
         env_vars = env_vars.copy()
 
         # Containerized agents require an API key to start
-        if 'DD_API_KEY' not in env_vars:
+        if AgentEnvVars.API_KEY not in env_vars:
             # This fake key must be the proper length
-            env_vars['DD_API_KEY'] = 'a' * 32
+            env_vars[AgentEnvVars.API_KEY] = 'a' * 32
 
         # Set Agent hostname for CI
-        env_vars['DD_HOSTNAME'] = _get_hostname()
+        env_vars[AgentEnvVars.HOSTNAME] = _get_hostname()
 
         # Run API on a random free port
-        env_vars['DD_CMD_PORT'] = str(_find_free_port())
+        env_vars[AgentEnvVars.CMD_PORT] = str(_find_free_port())
 
         # Disable trace Agent
-        env_vars['DD_APM_ENABLED'] = 'false'
+        env_vars[AgentEnvVars.APM_ENABLED] = 'false'
 
         # Set up telemetry
-        env_vars['DD_TELEMETRY_ENABLED'] = '1'
-        env_vars['DD_EXPVAR_PORT'] = '5000'
+        env_vars[AgentEnvVars.TELEMETRY_ENABLED] = '1'
+        env_vars[AgentEnvVars.EXPVAR_PORT] = '5000'
 
         # TODO: Remove this when Python 2 support is removed
         #
@@ -132,9 +134,9 @@ class DockerAgent(AgentInterface):
 
         if (proxy_data := self.metadata.get('proxy')) is not None:
             if (http_proxy := proxy_data.get('http')) is not None:
-                env_vars['DD_PROXY_HTTP'] = http_proxy
+                env_vars[AgentEnvVars.PROXY_HTTP] = http_proxy
             if (https_proxy := proxy_data.get('https')) is not None:
-                env_vars['DD_PROXY_HTTPS'] = https_proxy
+                env_vars[AgentEnvVars.PROXY_HTTPS] = https_proxy
 
         volumes = []
 
@@ -198,7 +200,7 @@ class DockerAgent(AgentInterface):
         for host, ip in self.metadata.get('custom_hosts', []):
             command.extend(['--add-host', f'{host}:{ip}'])
 
-        if dogstatsd_port := env_vars.get('DD_DOGSTATSD_PORT'):
+        if dogstatsd_port := env_vars.get(AgentEnvVars.DOGSTATSD_PORT):
             command.extend(['-p', f'{dogstatsd_port}:{dogstatsd_port}/udp'])
 
         # The chosen tag

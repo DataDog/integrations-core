@@ -9,6 +9,7 @@ tests:
       status: "INFO"
       timestamp: 1584006042403
     message: "Starting ZkClient event thread."
+    status: "info"
     tags:
      - "source:LOGS_SOURCE"
     timestamp: 1584006042403
@@ -21,6 +22,7 @@ tests:
       status: "INFO"
       timestamp: 1584006051497
     message: "Server started, listening for requests..."
+    status: "info"
     tags:
      - "source:LOGS_SOURCE"
     timestamp: 1584006051497
@@ -34,6 +36,7 @@ tests:
       status: "INFO"
       timestamp: 1584977649096
     message: "Kafka version: 5.4.1-ce"
+    status: "info"
     tags:
      - "source:LOGS_SOURCE"
     timestamp: 1584977649096
@@ -50,6 +53,7 @@ tests:
       status: "ERROR"
       timestamp: 1584007009924
     message: "Unable to resolve address: zookeeper:2181"
+    status: "error"
     tags:
      - "source:LOGS_SOURCE"
     timestamp: 1584007009924

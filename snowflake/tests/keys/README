@@ -1,0 +1,7 @@
+To generate the key without a password:
+
+- openssl genrsa 2048 | openssl pkcs8 -topk8 -v2 des3 -inform PEM -nocrypt -out rsa_key_no_pass.p8
+
+With a password:
+
+- openssl genrsa 2048 | openssl pkcs8 -topk8 -v2 des3 -inform PEM -out rsa_key_pass.p8

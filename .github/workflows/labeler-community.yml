@@ -16,4 +16,5 @@ jobs:
     if: ${{ github.event.pull_request.head.repo.full_name != github.repository }} # only PRs from other repos
     uses: ./.github/workflows/labeler-reusable.yml
     secrets:
-      repo-token: "${{ secrets.DD_CHANGELOG_CHECK_TOKEN }}"
+      app-id: "${{ secrets.DD_AGENT_INTEGRATIONS_BOT_APP_ID }}"
+      private-key: "${{ secrets.DD_AGENT_INTEGRATIONS_BOT_PRIVATE_KEY }}"

@@ -1,5 +1,7 @@
+include:
+  - /.gitlab/software_composition_analysis.yaml
+
 variables:
-  REMINDER_IMAGE: 486234852809.dkr.ecr.us-east-1.amazonaws.com/ci/integrations-core:reminder
   TAGGER_IMAGE: 486234852809.dkr.ecr.us-east-1.amazonaws.com/ci/integrations-core:tagger
   VALIDATE_LOG_INTGS: 486234852809.dkr.ecr.us-east-1.amazonaws.com/ci/integrations-core:validate_log_intgs
   VALIDATE_AGENT_BUILD: 486234852809.dkr.ecr.us-east-1.amazonaws.com/ci/integrations-core:validate_agent_build
@@ -8,16 +10,6 @@ variables:
   TAGGER_NAME: ci.integrations-core
   NOTIFICATIONS_SLACK_CHANNEL: agent-integrations
   AGENT_BUILD_NOTIFICATIONS_SLACK_CHANNEL: agent-integrations-ops
-
-# Uncomment when/if we modify script to use Jira
-#
-# release-reminder:
-#   image: $REMINDER_IMAGE
-#   only:
-#     - master
-#   script:
-#     - ./.gitlab/reminder/release-reminder.sh 2>&1
-#   tags: [ "runner:main" ]
 
 stages:
   - build
@@ -179,6 +171,7 @@ release-auto:
   image: $TAGGER_IMAGE
   only:
     - master
+    - /^\d+\.\d+\.x$/
   except:
     - schedules
   script:
@@ -187,6 +180,7 @@ release-auto:
     # Prefix every line with a timestamp
     - ./.gitlab/tagger/tag-release.sh 2>&1 | ts "[%H:%M:%S %Z]  "
   tags: [ "runner:main" ]
+  needs: []
 
 release-manual:
   stage: release
@@ -209,20 +203,7 @@ release-manual:
           ./.gitlab/tagger/build-packages.sh
       fi
   tags: [ "runner:main" ]
-
-reminder-image-builder:
-  stage: build
-  image: 486234852809.dkr.ecr.us-east-1.amazonaws.com/docker:24.0.4-gbi-focal
-  only:
-    changes:
-      - .gitlab/reminder/**/*
-      - .gitlab-ci.yml
-    refs:
-      - master
-  script:
-    - docker buildx build --tag $REMINDER_IMAGE ./.gitlab/reminder/ --push
-  except: [ tags, schedules ]
-  tags: [ "arch:amd64" ]
+  needs: []
 
 tagger-image-builder:
   stage: build

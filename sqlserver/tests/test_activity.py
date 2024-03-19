@@ -19,10 +19,11 @@ import pytest
 from dateutil import parser
 
 from datadog_checks.base.utils.db.utils import DBMAsyncJob, default_json_event_encoding
+from datadog_checks.dev.ci import running_on_windows_ci
 from datadog_checks.sqlserver import SQLServer
 from datadog_checks.sqlserver.activity import DM_EXEC_REQUESTS_COLS, _hash_to_hex
 
-from .common import CHECK_NAME, OPERATION_TIME_METRIC_NAME
+from .common import CHECK_NAME, OPERATION_TIME_METRIC_NAME, SQLSERVER_MAJOR_VERSION
 from .conftest import DEFAULT_TIMEOUT
 
 try:
@@ -203,6 +204,7 @@ def test_collect_load_activity(
     )
 
 
+@pytest.mark.skipif(running_on_windows_ci() and SQLSERVER_MAJOR_VERSION == 2019, reason='Test flakes on this set up')
 def test_activity_nested_blocking_transactions(
     aggregator,
     instance_docker,
@@ -605,7 +607,7 @@ def test_activity_stored_procedure_failed_to_obfuscate(dbm_instance, datadog_age
         assert len(result_rows) == 1
         assert result_rows[0]['text'] == statement_text
         assert result_rows[0]['is_proc'] is True
-        assert 'procedure_signature' not in result_rows[0]
+        assert result_rows[0]['procedure_signature'] == '__procedure_obfuscation_error__'
 
 
 @pytest.mark.integration

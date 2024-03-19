@@ -10,7 +10,7 @@ This check monitors [IBM MQ][1] versions 9.1 and above.
 
 The IBM MQ check is included in the [Datadog Agent][2] package.
 
-To use the IBM MQ check, you need to make sure the [IBM MQ Client][3] 9.1+ is installed (unless a compatible version of IBM MQ server is installed on the Agent host). Currently, the IBM MQ check does not support connecting to an IBM MQ server on z/OS.
+To use the IBM MQ check, ensure that an [IBM MQ Client][3] version 9.1+ is installed (unless a compatible version of IBM MQ server is already installed on the Agent host). For example the [9.3 Redistributable client][17]. Currently, the IBM MQ check does not support connecting to an IBM MQ server on z/OS.
 
 #### On Linux
 
@@ -306,7 +306,7 @@ Additional helpful documentation, links, and articles:
 
 [1]: https://www.ibm.com/products/mq
 [2]: https://app.datadoghq.com/account/settings/agent/latest
-[3]: https://www.ibm.com/support/pages/mqc9-ibm-mq-9-clients
+[3]: https://www.ibm.com/docs/en/ibm-mq/9.3?topic=roadmap-mq-downloads#mq_downloads_admins__familyraclients__title__1
 [4]: https://developer.apple.com/library/archive/documentation/Security/Conceptual/System_Integrity_Protection_Guide/RuntimeProtections/RuntimeProtections.html#//apple_ref/doc/uid/TP40016462-CH3-SW1
 [5]: https://github.com/DataDog/integrations-core/blob/master/ibm_mq/datadog_checks/ibm_mq/data/conf.yaml.example
 [6]: https://docs.datadoghq.com/agent/guide/agent-commands/#start-stop-and-restart-the-agent
@@ -320,3 +320,4 @@ Additional helpful documentation, links, and articles:
 [14]: https://www.ibm.com/docs/en/ibm-mq/9.1?topic=formats-reset-queue-statistics
 [15]: https://www.ibm.com/docs/en/ibm-mq/9.2?topic=reference-setmqaut-grant-revoke-authority
 [16]: https://www.ibm.com/docs/en/ibm-mq/9.2?topic=queues-dynamic-model
+[17]: https://www.ibm.com/support/fixcentral/swg/selectFixes?parent=ibm~WebSphere&product=ibm/WebSphere/WebSphere+MQ&release=9.3.0.0&platform=All&function=fixid&fixids=*IBM-MQC-Redist-*

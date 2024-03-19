@@ -2,7 +2,20 @@
 
 <!-- towncrier release notes start -->
 
-## 2.14.0 / 2024-01-05
+## 2.16.0 / 2024-03-07
+
+***Security***:
+
+* Bump cryptography to 42.0.5 ([#17054](https://github.com/DataDog/integrations-core/pull/17054))
+
+## 2.15.0 / 2024-02-16
+
+***Added***:
+
+* Bump `service-identity` version to 23.1.0 ([#16558](https://github.com/DataDog/integrations-core/pull/16558))
+* Update dependencies ([#16788](https://github.com/DataDog/integrations-core/pull/16788))
+
+## 2.14.0 / 2024-01-05 / Agent 7.51.0
 
 ***Added***:
 

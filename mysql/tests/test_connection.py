@@ -25,6 +25,7 @@ def test_connection_with_defaults_file():
         'autocommit': True,
         'ssl': None,
         'connect_timeout': 10,
+        'read_timeout': 10,
         'read_default_file': '/foo/bar',
     }
     assert 'host' not in connection_args
@@ -44,6 +45,7 @@ def test_connection_with_sock():
         'autocommit': True,
         'ssl': None,
         'connect_timeout': 10,
+        'read_timeout': 10,
         'unix_socket': '/foo/bar',
         'user': 'ddog',
         'passwd': 'pwd',
@@ -63,6 +65,7 @@ def test_connection_with_host():
         'autocommit': True,
         'ssl': None,
         'connect_timeout': 10,
+        'read_timeout': 10,
         'user': 'ddog',
         'passwd': 'pwd',
         'host': 'localhost',
@@ -77,6 +80,7 @@ def test_connection_with_host_and_port():
         'autocommit': True,
         'ssl': None,
         'connect_timeout': 10,
+        'read_timeout': 10,
         'user': 'ddog',
         'passwd': 'pwd',
         'host': 'localhost',
@@ -98,5 +102,6 @@ def test_connection_with_charset(instance_basic):
         'port': common.PORT,
         'ssl': None,
         'connect_timeout': 10,
+        'read_timeout': 10,
         'charset': 'utf8mb4',
     }

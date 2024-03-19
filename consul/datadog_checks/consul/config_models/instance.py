@@ -105,6 +105,7 @@ class InstanceConfig(BaseModel):
     tls_verify: Optional[bool] = None
     url: str
     use_legacy_auth_encoding: Optional[bool] = None
+    use_node_name_as_hostname: Optional[bool] = None
     use_prometheus_endpoint: Optional[bool] = None
     username: Optional[str] = None
 

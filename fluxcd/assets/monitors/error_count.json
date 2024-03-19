@@ -11,7 +11,7 @@
     "name": "[Fluxcd] Error Count",
     "type": "query alert",
     "query": "sum(last_5m):sum:fluxcd.controller.runtime.reconcile.errors.count{*} by {kube_namespace,controller}.as_count() >= 1",
-    "message": "{{#is_alert}}\nController {{controller.name}} has encountered {{value}} state reconcile errors namespace:{{kube_namespace.name}} for the last 5 minutes.\n{{/is_alert}}",
+    "message": "{{#is_alert}}\nController {{controller.name}} has encountered {{value}} state reconcile errors in namespace:{{kube_namespace.name}} for the last 5 minutes.\n{{/is_alert}}",
     "tags": ["integration:fluxcd"],
     "options": {
       "thresholds": {

@@ -35,6 +35,7 @@ def test_vts(check, instance_vts, aggregator):
         'nginx.server_zone.requests',
         'nginx.server_zone.sent',
         'nginx.upstream.peers.sent',
+        'nginx.upstream.peers.response_time',
         'nginx.upstream.peers.health_checks.last_passed',
         'nginx.upstream.peers.weight',
         'nginx.upstream.peers.backup',
@@ -53,6 +54,10 @@ def test_vts_unit(dd_run_check, aggregator, mocked_instance_vts, check, mocker):
     dd_run_check(c)
 
     for mapped in VTS_MOCKED_METRICS:
-        aggregator.assert_metric(mapped, tags=TAGS)
+        aggregator.assert_metric(mapped)
+        for tag in TAGS:
+            aggregator.assert_metric_has_tag(mapped, tag)
 
-    aggregator.assert_metrics_using_metadata(get_metadata_metrics())
+    aggregator.assert_metrics_using_metadata(
+        get_metadata_metrics(), exclude=['nginx.upstream.peers.response_time_histogram']
+    )

@@ -173,6 +173,9 @@ OPERATOR_AWS_METRICS = [
     'cilium.operator.ipam.resync.latency.seconds.sum',
     'cilium.operator.num_ceps_per_ces.count',
     'cilium.operator.num_ceps_per_ces.sum',
+    "cilium.operator.ipam.empty_interface_slots",
+    "cilium.operator.ipam.interface_candidates",
+    "cilium.operator.ipam.ip_allocation_ops",
 ]
 
 OPERATOR_AZURE_METRICS = [

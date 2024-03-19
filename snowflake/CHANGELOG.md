@@ -2,7 +2,19 @@
 
 <!-- towncrier release notes start -->
 
-## 5.2.0 / 2024-01-05
+## 5.4.0 / 2024-03-08
+
+***Added***:
+
+* Bump snowflake-connector-python to 3.7.1 ([#17099](https://github.com/DataDog/integrations-core/pull/17099))
+
+## 5.3.0 / 2024-02-16
+
+***Added***:
+
+* Update dependencies ([#16788](https://github.com/DataDog/integrations-core/pull/16788))
+
+## 5.2.0 / 2024-01-05 / Agent 7.51.0
 
 ***Added***:
 

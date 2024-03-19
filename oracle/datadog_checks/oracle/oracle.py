@@ -1,7 +1,6 @@
 # (C) Datadog, Inc. 2018-present
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
-import itertools
 import threading
 from contextlib import closing
 
@@ -77,8 +76,6 @@ class Oracle(AgentCheck):
         if not self.instance.get('only_custom_queries', False):
             manager_queries.extend([queries.ProcessMetrics, queries.SystemMetrics, queries.TableSpaceMetrics])
 
-        self._fix_custom_queries()
-
         self._query_manager = QueryManager(
             self,
             self.execute_query_raw,
@@ -91,22 +88,6 @@ class Oracle(AgentCheck):
 
         self._query_errors = 0
         self._connection_errors = 0
-
-    def _fix_custom_queries(self):
-        """
-        For backward compatibility reasons, if a custom query specifies a
-        `metric_prefix`, change the submission name to contain it.
-        """
-        custom_queries = self.instance.get('custom_queries', [])
-        global_custom_queries = self.init_config.get('global_custom_queries', [])
-        for query in itertools.chain(custom_queries, global_custom_queries):
-            prefix = query.get('metric_prefix')
-            if prefix and prefix != self.__NAMESPACE__:
-                if prefix.startswith(self.__NAMESPACE__ + '.'):
-                    prefix = prefix[len(self.__NAMESPACE__) + 1 :]
-                for column in query.get('columns', []):
-                    if column.get('type') != 'tag' and column.get('name'):
-                        column['name'] = '{}.{}'.format(prefix, column['name'])
 
     def execute_query_raw(self, query):
         with closing(self._connection.cursor()) as cursor:

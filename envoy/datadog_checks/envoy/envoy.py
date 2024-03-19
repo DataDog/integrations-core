@@ -56,7 +56,7 @@ class Envoy(AgentCheck):
         self.custom_tags.append("endpoint:{}".format(self.stats_url))
 
         included_metrics = {
-            re.sub(r'^envoy\\?\.', '', s, 1)
+            re.sub(r'^envoy\\?\.', '', s, 1)  # noqa: B034
             for s in self.instance.get(
                 'included_metrics',
                 self.instance.get(
@@ -71,7 +71,7 @@ class Envoy(AgentCheck):
         self.config_included_metrics = [re.compile(pattern) for pattern in included_metrics]
 
         excluded_metrics = {
-            re.sub(r'^envoy\\?\.', '', s, 1)
+            re.sub(r'^envoy\\?\.', '', s, 1)  # noqa: B034
             for s in self.instance.get(
                 'excluded_metrics',
                 self.instance.get(

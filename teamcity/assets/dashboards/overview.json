@@ -33,7 +33,7 @@
             "id": 7506655173365042,
             "definition": {
               "type": "note",
-              "content": "## TeamCity\nThis dashboard provides an overview of your TeamCity environment. It monitors resource utilization, provides information on build statuses and progress, and gives you insight into various other observability measures. \n\n***Note:*** \nThe current time periods for most time series based measures are set to the past 1 week. For measures like service checks, the time period is set to 1 day. The agent collects data every 15 seconds. ",
+              "content": "## TeamCity\nThis dashboard provides an overview of your TeamCity environment. It monitors resource utilization, provides information on build statuses and progress, and gives you insight into various other observability measures. \n\n***Note:*** \nThe current time periods for most timeseries based measures are set to the past 1 week. For measures like service checks, the time period is set to 1 day. The agent collects data every 15 seconds. ",
               "background_color": "white",
               "font_size": "12",
               "text_align": "left",

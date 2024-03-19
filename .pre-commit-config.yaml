@@ -1,0 +1,29 @@
+# https://pre-commit.com/
+---
+repos:
+- repo: local
+  hooks:
+    - id: lint
+      name: Run linters
+      entry: ddev test -s
+      language: system
+      files: '.+\.py'
+      pass_filenames: false
+    - id: service_checks
+      name: Validate service checks
+      entry: ddev validate service-checks
+      language: system
+      files: '.*/assets/service_checks\.json'
+      pass_filenames: false
+    - id: labeler_config
+      name: Validate labeler config
+      entry: ddev validate labeler
+      language: system
+      files: '\.github/workflows/config/labeler\.yml'
+      pass_filenames: false
+    - id: metadata
+      name: Validate metadata files
+      entry: ddev validate metadata changed
+      language: system
+      files: '.*/metadata\.csv'
+      pass_filenames: false

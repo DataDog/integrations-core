@@ -8,3 +8,5 @@ cluster.foo.ext_authz.bar.disabled: 6
 cluster.foo.ext_authz.bar.error: 7
 cluster.foo.ext_authz.bar.failure_mode_allowed: 8
 cluster.foo.ext_authz.bar.ok: 9
+connection_limit.ingress_http.active_connections: 0
+connection_limit.ingress_http.limited_connections: 0

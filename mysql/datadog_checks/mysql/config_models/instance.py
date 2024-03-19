@@ -51,7 +51,9 @@ class CustomQuery(BaseModel):
         arbitrary_types_allowed=True,
         frozen=True,
     )
+    collection_interval: Optional[int] = None
     columns: Optional[tuple[MappingProxyType[str, Any], ...]] = None
+    metric_prefix: Optional[str] = None
     query: Optional[str] = None
     tags: Optional[tuple[str, ...]] = None
 
@@ -197,6 +199,7 @@ class InstanceConfig(BaseModel):
     query_activity: Optional[QueryActivity] = None
     query_metrics: Optional[QueryMetrics] = None
     query_samples: Optional[QuerySamples] = None
+    read_timeout: Optional[float] = None
     reported_hostname: Optional[str] = None
     service: Optional[str] = None
     sock: Optional[str] = None

@@ -9,6 +9,7 @@ tests:
       vault:
         service: "core"
     message: "security barrier not initialized"
+    status: "info"
     tags:
      - "source:LOGS_SOURCE"
     timestamp: 1576700772000
@@ -21,6 +22,7 @@ tests:
       vault:
         service: "expiration"
     message: "collecting leases"
+    status: "debug"
     tags:
      - "source:LOGS_SOURCE"
     timestamp: 1575676780398
@@ -31,6 +33,7 @@ tests:
       level: "WARN"
       timestamp: 1575676780425
     message: "no `api_addr` value specified in config or in VAULT_API_ADDR; falling back to detection if possible, but this value should be manually set"
+    status: "warn"
     tags:
      - "source:LOGS_SOURCE"
     timestamp: 1575676780425

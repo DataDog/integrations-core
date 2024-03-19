@@ -70,6 +70,7 @@ def read_dependencies() -> dict[str, list[str]]:
 
 def build_macos():
     parser = argparse.ArgumentParser(prog='builder', allow_abbrev=False)
+    parser.add_argument('image')
     parser.add_argument('output_dir')
     parser.add_argument('--python', default='3')
     parser.add_argument('--builder-root', required=True,
@@ -78,7 +79,8 @@ def build_macos():
                         help='Skip builder setup, assuming it has already been set up.')
     args = parser.parse_args()
 
-    context_path = HERE / 'images' / 'macos'
+    image: str = args.image
+    context_path = HERE / 'images' / image
     builder_root = Path(args.builder_root).absolute()
     builder_root.mkdir(exist_ok=True)
 
@@ -119,13 +121,14 @@ def build_macos():
             # Common compilation flags
             'LDFLAGS': f'-L{prefix_path}/lib',
             'CFLAGS': f'-I{prefix_path}/include -O2',
+            'CXXFLAGS': f'-I{prefix_path}/include -O2',
             # Build command for extra platform-specific build steps
             'DD_BUILD_COMMAND': f'bash {build_context_dir}/extra_build.sh'
         }
 
         if not args.skip_setup:
             check_process(
-                ['bash', str(HERE / 'images' / 'macos' / 'builder_setup.sh')],
+                ['bash', str(HERE / 'images' / image / 'builder_setup.sh')],
                 env=env,
                 cwd=builder_root,
             )
@@ -186,9 +189,11 @@ def build_image():
             if args.verbose and not windows_image:
                 build_command.extend(['--progress', 'plain'])
 
+            build_args = ['SOURCE_DATE_EPOCH=1580601600']
             if args.build_args is not None:
-                for build_arg in args.build_args:
-                    build_command.extend(['--build-arg', build_arg])
+                build_args.extend(args.build_args)
+            for build_arg in build_args:
+                build_command.extend(['--build-arg', build_arg])
 
             check_process(build_command)
 

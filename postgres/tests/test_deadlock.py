@@ -10,7 +10,7 @@ import psycopg2
 import pytest
 from flaky import flaky
 
-from .common import DB_NAME, HOST, PORT, POSTGRES_VERSION
+from .common import DB_NAME, HOST, POSTGRES_VERSION, _get_expected_tags
 
 
 def wait_on_result(cursor=None, sql=None, binds=None, expected_value=None):
@@ -139,12 +139,7 @@ commit;
     aggregator.assert_metric(
         'postgresql.deadlocks.count',
         value=deadlocks_before + 1,
-        tags=pg_instance["tags"]
-        + [
-            "db:{}".format(DB_NAME),
-            "port:{}".format(PORT),
-            'dd.internal.resource:database_instance:{}'.format(check.resolved_hostname),
-        ],
+        tags=_get_expected_tags(check, pg_instance, db=pg_instance["dbname"]),
     )
 
     conn.close()

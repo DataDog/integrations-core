@@ -1,0 +1,106 @@
+{
+  "manifest_version": "2.0.0",
+  "app_uuid": "15c8217d-1a43-4efb-a338-053fca68169d",
+  "app_id": "cisco-secure-firewall",
+  "display_on_public_website": false,
+  "tile": {
+    "overview": "README.md#Overview",
+    "configuration": "README.md#Setup",
+    "support": "README.md#Support",
+    "changelog": "CHANGELOG.md",
+    "description": "Gain insights into Cisco Secure Firewall logs",
+    "title": "Cisco Secure Firewall",
+    "media": [
+      {
+        "caption": "Cisco Secure Firewall - SNMP",
+        "image_url": "images/cisco_secure_firewall_snmp.png",
+        "media_type": "image"
+      },
+      {
+        "caption": "Cisco Secure Firewall - Application and Identity-based Firewall",
+        "image_url": "images/cisco_secure_firewall_application_and_identity_based_firewall.png",
+        "media_type": "image"
+      },
+      {
+        "caption": "Cisco Secure Firewall - Failover",
+        "image_url": "images/cisco_secure_firewall_failover.png",
+        "media_type": "image"
+      },
+      {
+        "caption": "Cisco Secure Firewall - Intrusion Protection System",
+        "image_url": "images/cisco_secure_firewall_intrusion_protection_system.png",
+        "media_type": "image"
+      },
+      {
+        "caption": "Cisco Secure Firewall - IP Stack",
+        "image_url": "images/cisco_secure_firewall_ip_stack.png",
+        "media_type": "image"
+      },
+      {
+        "caption": "Cisco Secure Firewall - Threat Detection",
+        "image_url": "images/cisco_secure_firewall_threat_detection.png",
+        "media_type": "image"
+      },
+      {
+        "caption": "Cisco Secure Firewall - Transparent Firewall",
+        "image_url": "images/cisco_secure_firewall_transparent_firewall.png",
+        "media_type": "image"
+      },
+      {
+        "caption": "Cisco Secure Firewall - User Authentication",
+        "image_url": "images/cisco_secure_firewall_user_authentication.png",
+        "media_type": "image"
+      }
+    ],
+    "classifier_tags": [
+      "Supported OS::Linux",
+      "Supported OS::Windows",
+      "Supported OS::macOS",
+      "Category::Network",
+      "Category::Security",
+      "Category::Log Collection",
+      "Submitted Data Type::Logs"
+    ]
+  },
+  "assets": {
+    "integration": {
+      "auto_install": true,
+      "source_type_id": 6690422,
+      "source_type_name": "cisco-secure-firewall",
+      "configuration": {
+        "spec": "assets/configuration/spec.yaml"
+      },
+      "events": {
+        "creates_events": false
+      },
+      "service_checks": {
+        "metadata_path": "assets/service_checks.json"
+      }
+    },
+    "dashboards": {
+      "Cisco Secure Firewall - Overview": "assets/dashboards/cisco_secure_firewall_overview.json",
+      "Cisco Secure Firewall - User Authentication": "assets/dashboards/cisco_secure_firewall_user_authentication.json",
+      "Cisco Secure Firewall - SNMP": "assets/dashboards/cisco_secure_firewall_snmp.json",
+      "Cisco Secure Firewall - Transparent Firewall": "assets/dashboards/cisco_secure_firewall_transparent_firewall.json",
+      "Cisco Secure Firewall - Application and Identity-based Firewall": "assets/dashboards/cisco_secure_firewall_application_and_identity_firewall.json",
+      "Cisco Secure Firewall - IP Stack": "assets/dashboards/cisco_secure_firewall_ip_stack.json",
+      "Cisco Secure Firewall - Failover": "assets/dashboards/cisco_secure_firewall_failover.json",
+      "Cisco Secure Firewall - Threat Detection": "assets/dashboards/cisco_secure_firewall_threat detection.json",
+      "Cisco Secure Firewall - Command Interface": "assets/dashboards/cisco_secure_firewall_command_interface.json",
+      "Cisco Secure Firewall - OSPF and RIP Routing": "assets/dashboards/cisco_secure_firewall_ospf_and_rip_routing.json",
+      "Cisco Secure Firewall - Security Events": "assets/dashboards/cisco_secure_firewall_security_events.json",
+      "Cisco Secure Firewall - Resource Manager": "assets/dashboards/cisco_secure_firewall_resource_manager.json",
+      "Cisco Secure Firewall - VPN Failover": "assets/dashboards/cisco_secure_firewall_vpn_failover.json",
+      "Cisco Secure Firewall - Intrusion Protection System": "assets/dashboards/cisco_secure_firewall_intrusion_protection_system.json"
+    },
+    "logs": {
+      "source": "cisco-secure-firewall"
+    }
+  },
+  "author": {
+    "support_email": "help@datadoghq.com",
+    "name": "Datadog",
+    "homepage": "https://www.datadoghq.com",
+    "sales_email": "info@datadoghq.com"
+  }
+}

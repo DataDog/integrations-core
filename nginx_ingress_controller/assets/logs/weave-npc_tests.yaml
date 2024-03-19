@@ -61,6 +61,7 @@ tests:
         action: "updatepod"
       timestamp: 1544208305217
     message: "DEBU: 2018/12/07 18:45:05.217708 EVENT UpdatePod {\"metadata\":{\"creationTimestamp\":\"2018-12-07T18:45:00Z\",\"generateName\":\"dns-update-1544208300-\",\"labels\":{\"controller-uid\":\"33718ae4-fa50-11e8-aa50-be3ec6ae8e2f\",\"job-name\":\"dns-update-1544208300\"},\"name\":\"dns-update-1544208300-mkb5b\",\"namespace\":\"default\",\"resourceVersion\":\"4371420\",\"selfLink\":\"/api/v1/namespaces/default/pods/dns-update-1544208300-mkb5b\",\"uid\":\"337712a0-fa50-11e8-aa50-be3ec6ae8e2f\"},\"spec\":{\"containers\":[{\"image\":\"evns/rpi-utilities\",\"imagePullPolicy\":\"Always\",\"name\":\"dns-update\",\"terminationMessagePath\":\"/dev/termination-log\",\"terminationMessagePolicy\":\"File\"}],\"dnsPolicy\":\"ClusterFirst\",\"nodeName\":\"k8s-slave-2\",\"priority\":0,\"restartPolicy\":\"OnFailure\",\"schedulerName\":\"default-scheduler\",\"securityContext\":{},\"serviceAccount\":\"default\",\"serviceAccountName\":\"default\",\"terminationGracePeriodSeconds\":30},\"status\":{\"conditions\":[{\"lastProbeTime\":null,\"lastTransitionTime\":\"2018-12-07T18:45:00Z\",\"status\":\"True\",\"type\":\"Initialized\"},{\"lastProbeTime\":null,\"lastTransitionTime\":\"2018-12-07T18:45:00Z\",\"message\":\"containers with unready status: [dns-update]\",\"reason\":\"ContainersNotReady\",\"status\":\"False\",\"type\":\"Ready\"},{\"lastProbeTime\":null,\"lastTransitionTime\":\"2018-12-07T18:45:00Z\",\"message\":\"containers with unready status: [dns-update]\",\"reason\":\"ContainersNotReady\",\"status\":\"False\",\"type\":\"ContainersReady\"},{\"lastProbeTime\":null,\"lastTransitionTime\":\"2018-12-07T18:45:00Z\",\"status\":\"True\",\"type\":\"PodScheduled\"}],\"hostIP\":\"192.168.0.102\",\"phase\":\"Pending\",\"qosClass\":\"BestEffort\",\"startTime\":\"2018-12-07T18:45:00Z\"}} {\"metadata\":{\"creationTimestamp\":\"2018-12-07T18:45:00Z\",\"generateName\":\"dns-update-1544208300-\",\"labels\":{\"controller-uid\":\"33718ae4-fa50-11e8-aa50-be3ec6ae8e2f\",\"job-name\":\"dns-update-1544208300\"},\"name\":\"dns-update-1544208300-mkb5b\",\"namespace\":\"default\",\"resourceVersion\":\"4371432\",\"selfLink\":\"/api/v1/namespaces/default/pods/dns-update-1544208300-mkb5b\",\"uid\":\"337712a0-fa50-11e8-aa50-be3ec6ae8e2f\"},\"spec\":{\"containers\":[{\"image\":\"evns/rpi-utilities\",\"imagePullPolicy\":\"Always\",\"name\":\"dns-update\",\"terminationMessagePath\":\"/dev/termination-log\",\"terminationMessagePolicy\":\"File\"}],\"dnsPolicy\":\"ClusterFirst\",\"nodeName\":\"k8s-slave-2\",\"priority\":0,\"restartPolicy\":\"OnFailure\",\"schedulerName\":\"default-scheduler\",\"securityContext\":{},\"serviceAccount\":\"default\",\"serviceAccountName\":\"default\",\"terminationGracePeriodSeconds\":30},\"status\":{\"conditions\":[{\"lastProbeTime\":null,\"lastTransitionTime\":\"2018-12-07T18:45:00Z\",\"status\":\"True\",\"type\":\"Initialized\"},{\"lastProbeTime\":null,\"lastTransitionTime\":\"2018-12-07T18:45:05Z\",\"status\":\"True\",\"type\":\"Ready\"},{\"lastProbeTime\":null,\"lastTransitionTime\":\"2018-12-07T18:45:05Z\",\"status\":\"True\",\"type\":\"ContainersReady\"},{\"lastProbeTime\":null,\"lastTransitionTime\":\"2018-12-07T18:45:00Z\",\"status\":\"True\",\"type\":\"PodScheduled\"}],\"hostIP\":\"192.168.0.102\",\"phase\":\"Running\",\"podIP\":\"10.42.0.2\",\"qosClass\":\"BestEffort\",\"startTime\":\"2018-12-07T18:45:00Z”}}"
+    status: "info"
     tags:
      - "source:LOGS_SOURCE"
     timestamp: 1544208305217
@@ -78,6 +79,7 @@ tests:
         user: "337712a0-fa50-11e8-aa50-be3ec6ae8e2f"
       timestamp: 1544208310580
     message: "INFO: 2018/12/07 18:45:10.580325 deleting entry 10.42.0.2 from weave-k?Z;25^M}|1s7P3|H9i;*;MhG of 337712a0-fa50-11e8-aa50-be3ec6ae8e2f"
+    status: "info"
     tags:
      - "source:LOGS_SOURCE"
     timestamp: 1544208310580
@@ -95,6 +97,7 @@ tests:
         user: "337712a0-fa50-11e8-aa50-be3ec6ae8e2f"
       timestamp: 1544208305223
     message: "INFO: 2018/12/07 18:45:05.223738 added entry 10.42.0.2 to weave-k?Z;25^M}|1s7P3|H9i;*;MhG of 337712a0-fa50-11e8-aa50-be3ec6ae8e2f"
+    status: "info"
     tags:
      - "source:LOGS_SOURCE"
     timestamp: 1544208305223
@@ -116,6 +119,7 @@ tests:
         action: "blocked"
       timestamp: 1544208574228
     message: "WARN: 2018/12/07 18:49:34.228275 UDP connection from 0.0.0.0:68 to 255.255.255.255:67 blocked by Weave NPC."
+    status: "warn"
     tags:
      - "source:LOGS_SOURCE"
     timestamp: 1544208574228
@@ -132,6 +136,7 @@ tests:
         action: "failed"
       timestamp: 1519727460769
     message: "FATA: 2018/02/27 10:31:00.769529 ipset [create weave-IdwzZLfj(%b(2#AY)mt/Me/~X hash:ip comment] failed: ipset v6.32: Set cannot be created: set with the same name already exists"
+    status: "emergency"
     tags:
      - "source:LOGS_SOURCE"
     timestamp: 1519727460769
@@ -150,6 +155,7 @@ tests:
         action: "destroying"
       timestamp: 1519727355725
     message: "INFO: 2018/02/27 10:29:15.725883 destroying ipset: &npc.selectorSpec{key:\"\", selector:labels.internalSelector{}, dst:false, ipsetType:\"hash:ip\", ipsetName:\"weave-V7d@]hQsm@w.FTL;i6Lv]yC8g\", nsName:\"helium\"}"
+    status: "info"
     tags:
      - "source:LOGS_SOURCE"
     timestamp: 1519727355725

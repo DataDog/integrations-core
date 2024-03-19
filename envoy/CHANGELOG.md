@@ -2,7 +2,15 @@
 
 <!-- towncrier release notes start -->
 
-## 3.3.0 / 2024-01-05
+## 3.4.0 / 2024-02-16
+
+***Added***:
+
+* Add additional cluster and listener metrics for OpenMetrics version of check ([#16649](https://github.com/DataDog/integrations-core/pull/16649))
+* Add connection limit metrics for envoy ([#16718](https://github.com/DataDog/integrations-core/pull/16718))
+* Update the configuration file to include the new oauth options parameter ([#16835](https://github.com/DataDog/integrations-core/pull/16835))
+
+## 3.3.0 / 2024-01-05 / Agent 7.51.0
 
 ***Added***:
 

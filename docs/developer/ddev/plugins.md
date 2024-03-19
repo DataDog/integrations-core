@@ -2,11 +2,6 @@
 
 -----
 
-## tox
-
-Our [tox plugin][datadog-checks-dev-plugin-tox] dynamically adds environments based on the presence of
-options defined in the `[testenv]` section of each integration's `tox.ini` file.
-
 ### Style
 
 Setting `dd_check_style` to `true` will enable 2 environments for enforcing our [style conventions](../guidelines/style.md):

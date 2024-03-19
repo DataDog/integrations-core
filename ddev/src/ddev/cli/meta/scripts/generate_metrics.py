@@ -70,9 +70,7 @@ def generate_metrics(app: Application, integration: str, api_url: str, api_key: 
                 type = (
                     MetricIntakeType.GAUGE
                     if metric.metric_type == 'gauge'
-                    else MetricIntakeType.COUNT
-                    if metric.metric_type == 'counter'
-                    else MetricIntakeType.UNSPECIFIED
+                    else MetricIntakeType.COUNT if metric.metric_type == 'counter' else MetricIntakeType.UNSPECIFIED
                 )
                 app.display_info(f"Metric {metric.metric_name} with value {value} and type {type}")
 

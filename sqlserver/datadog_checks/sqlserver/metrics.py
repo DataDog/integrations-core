@@ -571,7 +571,7 @@ class SqlDatabaseFileStats(BaseSqlServerMetric):
                 continue
             column_val = row[value_column_index]
             if self.column in ('size', 'max_size', 'space_used'):
-                column_val *= 8  # size reported in 8 KB pages
+                column_val = (column_val or 0) * 8  # size reported in 8 KB pages
 
             fileid = row[file_id]
             filetype = self.DB_TYPE_MAP[row[file_type]]

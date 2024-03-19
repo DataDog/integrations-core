@@ -78,6 +78,15 @@ files:
           - name: connect_timeout
             description: |
               Maximum number of seconds to wait before timing out when connecting to MySQL.
+              The default connection timeout is 10 seconds.
+            value:
+              type: number
+              example: 10
+
+          - name: read_timeout
+            description: |
+              The timeout for reading from the connection in seconds.
+              The default read timeout is 10 seconds.
             value:
               type: number
               example: 10
@@ -119,6 +128,7 @@ files:
                       type: gauge
                   tags:
                     - test:mysql
+                  metric_prefix: mysql
           - name: additional_status
             description: |
               Set this parameter to collect additional MySQL status variables as metrics

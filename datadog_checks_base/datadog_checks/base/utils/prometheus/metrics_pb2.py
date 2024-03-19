@@ -771,7 +771,7 @@ else:
         (_message.Message,),
         dict(
             DESCRIPTOR=_LABELPAIR,
-            __module__='metrics_pb2'
+            __module__='metrics_pb2',
             # @@protoc_insertion_point(class_scope:io.prometheus.client.LabelPair)
         ),
     )
@@ -782,7 +782,7 @@ else:
         (_message.Message,),
         dict(
             DESCRIPTOR=_GAUGE,
-            __module__='metrics_pb2'
+            __module__='metrics_pb2',
             # @@protoc_insertion_point(class_scope:io.prometheus.client.Gauge)
         ),
     )
@@ -793,7 +793,7 @@ else:
         (_message.Message,),
         dict(
             DESCRIPTOR=_COUNTER,
-            __module__='metrics_pb2'
+            __module__='metrics_pb2',
             # @@protoc_insertion_point(class_scope:io.prometheus.client.Counter)
         ),
     )
@@ -804,7 +804,7 @@ else:
         (_message.Message,),
         dict(
             DESCRIPTOR=_QUANTILE,
-            __module__='metrics_pb2'
+            __module__='metrics_pb2',
             # @@protoc_insertion_point(class_scope:io.prometheus.client.Quantile)
         ),
     )
@@ -815,7 +815,7 @@ else:
         (_message.Message,),
         dict(
             DESCRIPTOR=_SUMMARY,
-            __module__='metrics_pb2'
+            __module__='metrics_pb2',
             # @@protoc_insertion_point(class_scope:io.prometheus.client.Summary)
         ),
     )
@@ -826,7 +826,7 @@ else:
         (_message.Message,),
         dict(
             DESCRIPTOR=_UNTYPED,
-            __module__='metrics_pb2'
+            __module__='metrics_pb2',
             # @@protoc_insertion_point(class_scope:io.prometheus.client.Untyped)
         ),
     )
@@ -837,7 +837,7 @@ else:
         (_message.Message,),
         dict(
             DESCRIPTOR=_HISTOGRAM,
-            __module__='metrics_pb2'
+            __module__='metrics_pb2',
             # @@protoc_insertion_point(class_scope:io.prometheus.client.Histogram)
         ),
     )
@@ -848,7 +848,7 @@ else:
         (_message.Message,),
         dict(
             DESCRIPTOR=_BUCKET,
-            __module__='metrics_pb2'
+            __module__='metrics_pb2',
             # @@protoc_insertion_point(class_scope:io.prometheus.client.Bucket)
         ),
     )
@@ -859,7 +859,7 @@ else:
         (_message.Message,),
         dict(
             DESCRIPTOR=_METRIC,
-            __module__='metrics_pb2'
+            __module__='metrics_pb2',
             # @@protoc_insertion_point(class_scope:io.prometheus.client.Metric)
         ),
     )
@@ -870,7 +870,7 @@ else:
         (_message.Message,),
         dict(
             DESCRIPTOR=_METRICFAMILY,
-            __module__='metrics_pb2'
+            __module__='metrics_pb2',
             # @@protoc_insertion_point(class_scope:io.prometheus.client.MetricFamily)
         ),
     )

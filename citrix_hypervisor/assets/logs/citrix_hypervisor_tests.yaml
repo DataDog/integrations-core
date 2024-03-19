@@ -12,6 +12,7 @@ tests:
         hostname: "xenserver-c"
         pid: 0
     message: "Forking command /usr/sbin/tap-ctl list"
+    status: "debug"
     tags:
      - "source:LOGS_SOURCE"
     timestamp: 17830089000
@@ -28,6 +29,7 @@ tests:
         hostname: "xenserver-c"
         pid: 119817
     message: "task dispatch:event.from D:da0fb60666cd created by task D:da9ec36fd6f1"
+    status: "debug"
     tags:
      - "source:LOGS_SOURCE"
     timestamp: 17830086000
@@ -43,6 +45,7 @@ tests:
         hostname: "xenserver-c"
         pid: 7
     message: "GC heap_words = 566784"
+    status: "info"
     tags:
      - "source:LOGS_SOURCE"
     timestamp: 21719526000
@@ -60,6 +63,7 @@ tests:
         hostname: "xenserver-c"
         pid: 204169
     message: "Session.create trackid=123abc pool=true uname= originator=xapi is_local_superuser=true auth_user_sid= parent=trackid=456def"
+    status: "info"
     tags:
      - "source:LOGS_SOURCE"
     timestamp: 22228111000

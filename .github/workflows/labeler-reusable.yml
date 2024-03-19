@@ -3,7 +3,9 @@ name: Reusable Labeler Workflow
 on:
   workflow_call:
     secrets:
-      repo-token:
+      app-id:
+        required: true
+      private-key:
         required: true
 
 jobs:
@@ -13,11 +15,18 @@ jobs:
       contents: read
       pull-requests: write
     steps:
+      - name: Create token
+        uses: actions/create-github-app-token@v1
+        id: token-generator
+        with:
+          app-id: ${{ secrets.app-id }}
+          private-key: ${{ secrets.private-key }}
+          repositories: integrations-core
       - name: Add labels
         uses: actions/labeler@v4
         with:
           configuration-path: .github/workflows/config/labeler.yml
-          repo-token: "${{ secrets.repo-token }}"
+          repo-token: "${{ steps.token-generator.outputs.token }}"
           sync-labels: ""   # workaround for sync-labels bug:
                             # https://github.com/actions/labeler/issues/112#issuecomment-1000491676
       - name: Add team labels
@@ -28,6 +37,6 @@ jobs:
           done
         env:
           GITHUB_CONTEXT: ${{ toJson(github) }}
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          GITHUB_TOKEN: "${{ steps.token-generator.outputs.token }}"
           GH_REPO: ${{ github.repository }}
           NUMBER: ${{ github.event.number }}

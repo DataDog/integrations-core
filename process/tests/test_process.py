@@ -24,7 +24,7 @@ except Exception:
 _PSUTIL_MEM_SHARED = True
 try:
     p = psutil.Process(os.getpid())
-    p.memory_info().shared
+    _ = p.memory_info().shared
 except Exception:
     _PSUTIL_MEM_SHARED = False
 

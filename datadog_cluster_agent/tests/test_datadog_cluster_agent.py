@@ -17,7 +17,6 @@ METRICS = [
     'admission_webhooks.library_injection_attempts',
     'admission_webhooks.library_injection_errors',
     'admission_webhooks.mutation_attempts',
-    'admission_webhooks.mutation_errors',
     'admission_webhooks.patcher.attempts',
     'admission_webhooks.patcher.completed',
     'admission_webhooks.patcher.errors',
@@ -64,6 +63,8 @@ METRICS = [
     'go.threads',
     'kubernetes_apiserver.emitted_events',
     'kubernetes_apiserver.kube_events',
+    'language_detection_dca_handler.processed_requests',
+    'language_detection_patcher.patches',
     'secret_backend.elapsed',
 ]
 

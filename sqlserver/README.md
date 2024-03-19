@@ -186,7 +186,7 @@ Loading Errors
         unable to import module 'sqlserver': No module named 'sqlserver'
 ```
 
-A fix for this is currently being developed, and in the meantime Agent versions 7.47 and below will continue to function properly.
+This is fixed in version 15.2.0 of the check and in Agent versions 7.49.1 and above.
 
 ## Further Reading
 
@@ -196,8 +196,9 @@ A fix for this is currently being developed, and in the meantime Agent versions 
 - [Monitor SQL Server performance with Datadog][21]
 - [Custom SQL Server metrics for detailed monitoring][22]
 - [Strategize your Azure migration for SQL workloads with Datadog][23]
+- [Optimize SQL Server performance with Datadog Database Monitoring][24]
 
-[1]: https://raw.githubusercontent.com/DataDog/integrations-core/master/sqlserver/images/sqlserver_dashboard.png
+[1]: https://raw.githubusercontent.com/DataDog/integrations-core/master/sqlserver/images/sqlserver_dashboard_02_2024.png
 [2]: https://app.datadoghq.com/account/settings/agent/latest
 [3]: https://docs.microsoft.com/en-us/sql/t-sql/statements/grant-server-permissions-transact-sql?view=sql-server-ver15
 [4]: https://docs.microsoft.com/en-us/sql/tools/configuration-manager/tcp-ip-properties-ip-addresses-tab
@@ -220,3 +221,4 @@ A fix for this is currently being developed, and in the meantime Agent versions 
 [21]: https://www.datadoghq.com/blog/sql-server-performance
 [22]: https://www.datadoghq.com/blog/sql-server-metrics
 [23]: https://www.datadoghq.com/blog/migrate-sql-workloads-to-azure-with-datadog/
+[24]: https://www.datadoghq.com/blog/optimize-sql-server-performance-with-datadog/

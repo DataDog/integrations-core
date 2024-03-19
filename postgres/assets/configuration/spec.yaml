@@ -8,11 +8,13 @@ files:
   - template: instances
     options:
     - name: host
+      required: true
       description: |
         The hostname to connect to.
         NOTE: Even if the server name is `localhost`, the Agent connects to PostgreSQL using TCP/IP unless you also
         provide a value for the sock key.
       value:
+        example: "localhost"
         type: string
     - name: port
       description: The port to use when connecting to PostgreSQL.
@@ -21,8 +23,10 @@ files:
         example: 5432
     - name: username
       description: The Datadog username created to connect to PostgreSQL.
+      required: true
       value:
-          type: string
+        type: string
+        example: datadog
     - name: password
       description: The password associated with the Datadog user.
       value:
@@ -214,7 +218,7 @@ files:
         type: boolean
         example: false
     - name: collect_count_metrics
-      description: Collect count of user tables up to max_relations size from pg_stat_user_tables.
+      description: Collect count of user tables from pg_class.
       value:
         type: boolean
         example: true
@@ -258,8 +262,9 @@ files:
     - name: collect_wal_metrics
       description: |
         Collect metrics about WAL file age.
-        NOTE: You must be running the check local to your database if you want to enable this option.
-        Starting PG10, wal metrics are collected by default using `pg_ls_waldir` and don't need local access anymore.
+        NOTE: 
+        For Postgres 9.6 and below, you must run the check local to your database if you want to enable this option.
+        Starting Postgres 10, WAL file metrics are enabled by default using `pg_ls_waldir` and don't need local access.
       value:
         type: boolean
         example: false
@@ -522,7 +527,6 @@ files:
         Enable collection of database schemas. In order to collect schemas from all user databases,
         enable `database_autodiscovery`. To collect from a single database, set `dbname` to collect
         the schema for that database.
-        Relation metrics must be enabled for schema collection.
       options:
         - name: enabled
           description: |
@@ -535,8 +539,8 @@ files:
             Maximum amount of tables the Agent collects from the instance.
           value:
             type: number
-            example: 1000
-            display_default: 1000
+            example: 300
+            display_default: 300
         - name: max_columns
           description: |
             Maximum amount of columns the Agent collects per table.

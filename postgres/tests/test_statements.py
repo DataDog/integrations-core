@@ -27,8 +27,15 @@ from datadog_checks.postgres.statements import PG_STAT_STATEMENTS_METRICS_COLUMN
 from datadog_checks.postgres.util import payload_pg_version
 from datadog_checks.postgres.version_utils import V12
 
-from .common import DB_NAME, HOST, PORT, PORT_REPLICA2, POSTGRES_VERSION
-from .utils import _get_conn, _get_superconn, requires_over_10, run_one_check
+from .common import (
+    DB_NAME,
+    HOST,
+    PORT_REPLICA2,
+    POSTGRES_VERSION,
+    _get_expected_replication_tags,
+    _get_expected_tags,
+)
+from .utils import _get_conn, _get_superconn, requires_over_10, requires_over_13, run_one_check
 
 pytestmark = [pytest.mark.integration, pytest.mark.usefixtures('dd_environment')]
 
@@ -175,7 +182,7 @@ def test_statement_metrics(
     assert event['ddagentversion'] == datadog_agent.get_version()
     assert event['ddagenthostname'] == datadog_agent.get_hostname()
     assert event['min_collection_interval'] == dbm_instance['query_metrics']['collection_interval']
-    expected_dbm_metrics_tags = {'foo:bar', 'port:{}'.format(PORT)}
+    expected_dbm_metrics_tags = set(_get_expected_tags(check, dbm_instance, with_host=False))
     assert set(event['tags']) == expected_dbm_metrics_tags
     obfuscated_param = '?' if POSTGRES_VERSION.split('.')[0] == "9" else '$1'
 
@@ -342,6 +349,43 @@ def test_statement_metrics_cloud_metadata(
         conn.close()
 
 
+@requires_over_13
+def test_wal_metrics(aggregator, integration_check, dbm_instance):
+    dbm_instance['pg_stat_statements_view'] = "pg_stat_statements"
+    # don't need samples for this test
+    dbm_instance['query_samples'] = {'enabled': False}
+    dbm_instance['query_activity'] = {'enabled': False}
+    # very low collection interval for test purposes
+    dbm_instance['query_metrics'] = {'enabled': True, 'run_sync': True, 'collection_interval': 0.1}
+
+    connections = {}
+
+    def _run_queries():
+        for user, password, dbname, query, arg in SAMPLE_QUERIES:
+            if dbname not in connections:
+                connections[dbname] = psycopg2.connect(host=HOST, dbname=dbname, user=user, password=password)
+            connections[dbname].cursor().execute(query, (arg,))
+
+    check = integration_check(dbm_instance)
+    check._connect()
+
+    _run_queries()
+    run_one_check(check, dbm_instance)
+    _run_queries()
+    run_one_check(check, dbm_instance)
+
+    events = aggregator.get_event_platform_events("dbm-metrics")
+    assert len(events) == 1, "should capture exactly one metrics payload"
+    event = events[0]
+
+    assert all('wal_bytes' in entry for entry in event['postgres_rows'])
+    assert all('wal_fpi' in entry for entry in event['postgres_rows'])
+    assert all('wal_bytes' in entry for entry in event['postgres_rows'])
+
+    for conn in connections.values():
+        conn.close()
+
+
 def test_statement_metrics_with_duplicates(aggregator, integration_check, dbm_instance, datadog_agent):
     # don't need samples for this test
     dbm_instance['query_samples'] = {'enabled': False}
@@ -417,21 +461,6 @@ def dbm_instance_replica2(pg_instance):
     pg_instance['query_metrics'] = {'enabled': True, 'run_sync': True, 'collection_interval': 0.2}
     pg_instance['collect_resources'] = {'enabled': False}
     return pg_instance
-
-
-def _expected_dbm_instance_tags(dbm_instance):
-    return dbm_instance['tags'] + [
-        'port:{}'.format(PORT),
-        'db:{}'.format(dbm_instance['dbname']),
-    ]
-
-
-def _expected_dbm_job_err_tags(dbm_instance):
-    return dbm_instance['tags'] + [
-        'port:{}'.format(PORT),
-        'db:{}'.format(dbm_instance['dbname']),
-        'dd.internal.resource:database_instance:stubbed.hostname',
-    ]
 
 
 @pytest.mark.parametrize(
@@ -535,12 +564,9 @@ def test_failed_explain_handling(
     for _ in range(failed_explain_test_repeat_count):
         check.statement_samples._run_and_track_explain(dbname, query, query, query)
 
-    expected_tags = dbm_instance['tags'] + [
-        'db:{}'.format(DB_NAME),
-        'port:{}'.format(PORT),
-        'agent_hostname:stubbed.hostname',
-        expected_error_tag,
-    ]
+    expected_tags = _get_expected_tags(
+        check, dbm_instance, with_host=False, with_db=True, agent_hostname='stubbed.hostname'
+    ) + [expected_error_tag]
 
     aggregator.assert_metric(
         'dd.postgres.statement_samples.error',
@@ -605,16 +631,14 @@ def test_failed_explain_handling(
             [{'code': 'failed_function', 'message': "<class 'psycopg2.errors.UndefinedFunction'>"}],
             StatementTruncationState.not_truncated.value,
             [
-                'Unable to collect execution plans in dbname=dogs_nofunc. Check that the '
-                'function datadog.explain_statement exists in the database. See '
-                'https://docs.datadoghq.com/database_monitoring/setup_postgres/'
-                'troubleshooting#undefined-explain-function for more details: function '
-                'datadog.explain_statement(unknown) does not exist\nLINE 1: SELECT '
-                'datadog.explain_statement($stmt$SELECT * FROM pg_stat...\n               '
-                '^\nHINT:  No function matches the given name and argument types. You might need to add '
-                'explicit type casts.\n'
-                '\n'
-                'code=undefined-explain-function dbname=dogs_nofunc host=stubbed.hostname',
+                "Unable to collect execution plans in dbname=dogs_nofunc. Check that the function "
+                "datadog.explain_statement exists in the database. See "
+                "https://docs.datadoghq.com/database_monitoring/setup_postgres/troubleshooting#undefined-explain-function"
+                " for more details: function datadog.explain_statement(unknown) does not exist\nLINE 1: "
+                "/* service='datadog-agent' */ SELECT datadog.explain_stateme...\n"
+                "                                             ^\nHINT:  No function matches the given name"
+                " and argument types. You might need to add explicit type casts.\n\ncode=undefined-explain-function "
+                "dbname=dogs_nofunc host=stubbed.hostname",
             ],
         ),
         (
@@ -664,11 +688,6 @@ def test_statement_samples_collect(
     check = integration_check(dbm_instance)
     check._connect()
 
-    tags = dbm_instance['tags'] + [
-        'port:{}'.format(PORT),
-        'db:{}'.format(dbname),
-    ]
-
     conn = psycopg2.connect(host=HOST, dbname=dbname, user=user, password=password)
     # we are able to see the full query (including the raw parameters) in pg_stat_activity because psycopg2 uses
     # the simple query protocol, sending the whole query as a plain string to postgres.
@@ -678,6 +697,7 @@ def test_statement_samples_collect(
     try:
         conn.cursor().execute(query, (arg,))
         run_one_check(check, dbm_instance)
+        tags = _get_expected_tags(check, dbm_instance, with_host=False, db=dbname)
 
         dbm_samples = aggregator.get_event_platform_events("dbm-samples")
 
@@ -1047,9 +1067,7 @@ def test_activity_snapshot_collection(
 
         assert 'query' not in bobs_query
 
-        expected_tags = dbm_instance['tags'] + [
-            'port:{}'.format(PORT),
-        ]
+        expected_tags = _get_expected_tags(check, dbm_instance, with_host=False)
 
         # check postgres_connections are set
         assert len(event['postgres_connections']) > 0
@@ -1068,7 +1086,7 @@ def test_activity_snapshot_collection(
         for key in expected_conn_out:
             assert expected_conn_out[key] == bobs_conns[key]
 
-        assert event['ddtags'] == expected_tags
+        assert set(event['ddtags']) == set(expected_tags)
 
         if POSTGRES_VERSION == '9.5':
             # rest of test is to confirm blocking behavior
@@ -1284,11 +1302,9 @@ def test_statement_run_explain_errors(
     assert explain_err_code == expected_explain_err_code
     assert err == expected_err
 
-    expected_tags = dbm_instance['tags'] + [
-        'db:{}'.format(DB_NAME),
-        'port:{}'.format(PORT),
-        'agent_hostname:stubbed.hostname',
-    ]
+    expected_tags = _get_expected_tags(
+        check, dbm_instance, with_host=False, with_db=True, agent_hostname='stubbed.hostname'
+    )
 
     aggregator.assert_metric(
         'dd.postgres.statement_samples.error',
@@ -1405,19 +1421,21 @@ def test_load_pg_settings(aggregator, integration_check, dbm_instance, db_user):
     if db_user == 'datadog_no_catalog':
         aggregator.assert_metric(
             "dd.postgres.error",
-            tags=_expected_dbm_instance_tags(dbm_instance)
-            + [
-                'error:load-pg-settings',
-                'agent_hostname:stubbed.hostname',
-                'dd.internal.resource:database_instance:stubbed.hostname',
-            ],
+            tags=_get_expected_tags(
+                check,
+                dbm_instance,
+                role=None,
+                with_db=True,
+                error='load-pg-settings',
+                agent_hostname='stubbed.hostname',
+            ),
             hostname='stubbed.hostname',
         )
     else:
         assert len(aggregator.metrics("dd.postgres.error")) == 0
 
 
-def test_pg_settings_caching(aggregator, integration_check, dbm_instance):
+def test_pg_settings_caching(integration_check, dbm_instance):
     dbm_instance["username"] = "datadog"
     dbm_instance["dbname"] = "postgres"
     check = integration_check(dbm_instance)
@@ -1605,7 +1623,7 @@ def test_async_job_inactive_stop(aggregator, integration_check, dbm_instance):
     for job in ['query-metrics', 'query-samples']:
         aggregator.assert_metric(
             "dd.postgres.async_job.inactive_stop",
-            tags=_expected_dbm_job_err_tags(dbm_instance) + ['job:' + job],
+            tags=_get_expected_tags(check, dbm_instance, with_db=True, job=job),
         )
 
 
@@ -1623,7 +1641,7 @@ def test_async_job_cancel_cancel(aggregator, integration_check, dbm_instance):
     for job in ['query-metrics', 'query-samples']:
         aggregator.assert_metric(
             "dd.postgres.async_job.cancel",
-            tags=_expected_dbm_job_err_tags(dbm_instance) + ['job:' + job],
+            tags=_get_expected_tags(check, dbm_instance, with_db=True, job=job),
         )
 
 
@@ -1648,11 +1666,13 @@ def test_statement_samples_invalid_activity_view(aggregator, integration_check, 
     check.statement_samples._job_loop_future.result()
     aggregator.assert_metric(
         "dd.postgres.async_job.error",
-        tags=_expected_dbm_job_err_tags(dbm_instance)
-        + [
-            'job:query-samples',
-            "error:database-<class 'psycopg2.errors.UndefinedTable'>",
-        ],
+        tags=_get_expected_tags(
+            check,
+            dbm_instance,
+            with_db=True,
+            job='query-samples',
+            error="database-<class 'psycopg2.errors.UndefinedTable'>",
+        ),
     )
 
 
@@ -1782,12 +1802,9 @@ def test_statement_metrics_database_errors(
     ):
         run_one_check(check, dbm_instance)
 
-    expected_tags = dbm_instance['tags'] + [
-        'db:{}'.format(DB_NAME),
-        'port:{}'.format(PORT),
-        'agent_hostname:stubbed.hostname',
-        expected_error_tag,
-    ]
+    expected_tags = _get_expected_tags(
+        check, dbm_instance, with_host=False, with_db=True, agent_hostname='stubbed.hostname'
+    ) + [expected_error_tag]
 
     aggregator.assert_metric(
         'dd.postgres.statement_metrics.error', value=1.0, count=1, tags=expected_tags, hostname='stubbed.hostname'
@@ -1848,10 +1865,7 @@ def test_pg_stat_statements_dealloc(aggregator, integration_check, dbm_instance_
         cur.execute("SELECT COUNT(*) FROM pg_stat_statements(false);")
         count_statements = cur.fetchall()[0][0]
 
-    expected_tags = dbm_instance_replica2['tags'] + [
-        'port:{}'.format(PORT_REPLICA2),
-        'db:{}'.format(DB_NAME),
-    ]
+    expected_tags = _get_expected_replication_tags(check, dbm_instance_replica2, with_host=False, db=DB_NAME)
     aggregator.assert_metric("postgresql.pg_stat_statements.max", value=100, tags=expected_tags)
     if float(POSTGRES_VERSION) >= 14.0:
         aggregator.assert_metric("postgresql.pg_stat_statements.dealloc", value=0, tags=expected_tags)
@@ -1862,7 +1876,7 @@ def test_pg_stat_statements_dealloc(aggregator, integration_check, dbm_instance_
     with conn.cursor() as cur:
         # pg_stat_statements_reset should be tracked
         # Do enough queries to reach the maximum
-        for i in range(101 - count_statements):
+        for i in range(102 - count_statements):
             parameters = ','.join([str(a) for a in range(i)])
             cur.execute("select {};".format(parameters))
 
@@ -1872,3 +1886,42 @@ def test_pg_stat_statements_dealloc(aggregator, integration_check, dbm_instance_
     if float(POSTGRES_VERSION) >= 14.0:
         aggregator.assert_metric("postgresql.pg_stat_statements.dealloc", value=1, tags=expected_tags)
     aggregator.assert_metric("postgresql.pg_stat_statements.count", tags=expected_tags)
+
+
+@requires_over_13
+def test_plan_time_metrics(aggregator, integration_check, dbm_instance):
+    dbm_instance['pg_stat_statements_view'] = "pg_stat_statements"
+    # don't need samples for this test
+    dbm_instance['query_samples'] = {'enabled': False}
+    dbm_instance['query_activity'] = {'enabled': False}
+    # very low collection interval for test purposes
+    dbm_instance['query_metrics'] = {'enabled': True, 'run_sync': True, 'collection_interval': 0.1}
+
+    connections = {}
+
+    def _run_queries():
+        for user, password, dbname, query, arg in SAMPLE_QUERIES:
+            if dbname not in connections:
+                connections[dbname] = psycopg2.connect(host=HOST, dbname=dbname, user=user, password=password)
+            connections[dbname].cursor().execute(query, (arg,))
+
+    check = integration_check(dbm_instance)
+    check._connect()
+
+    _run_queries()
+    run_one_check(check, dbm_instance)
+    _run_queries()
+    run_one_check(check, dbm_instance)
+
+    events = aggregator.get_event_platform_events("dbm-metrics")
+    assert len(events) == 1, "should capture exactly one metrics payload"
+    event = events[0]
+
+    assert all('total_plan_time' in entry for entry in event['postgres_rows'])
+    assert all('min_plan_time' in entry for entry in event['postgres_rows'])
+    assert all('max_plan_time' in entry for entry in event['postgres_rows'])
+    assert all('mean_plan_time' in entry for entry in event['postgres_rows'])
+    assert all('stddev_plan_time' in entry for entry in event['postgres_rows'])
+
+    for conn in connections.values():
+        conn.close()

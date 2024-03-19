@@ -212,6 +212,10 @@ class AggregatorStub(object):
             for stub in self._histogram_buckets.get(to_native_string(name), [])
         ]
 
+    def assert_metric_has_tags(self, metric_name, tags, count=None, at_least=1):
+        for tag in tags:
+            self.assert_metric_has_tag(metric_name, tag, count, at_least)
+
     def assert_metric_has_tag(self, metric_name, tag, count=None, at_least=1):
         """
         Assert a metric is tagged with tag
@@ -475,6 +479,42 @@ class AggregatorStub(object):
                         )
 
         assert not errors, "Metadata assertion errors using metadata.csv:" + "\n\t- ".join([''] + sorted(errors))
+
+    def assert_service_checks(self, service_checks):
+        """
+        Assert service checks using service_checks.json
+
+        Usage:
+
+            from datadog_checks.dev.utils import get_service_checks
+            aggregator.assert_service_checks(get_service_checks())
+
+        """
+
+        errors = set()
+
+        for service_check_name, service_check_stubs in iteritems(self._service_checks):
+            for service_check_stub in service_check_stubs:
+                # Checking the metric is in `service_checks.json`
+                if service_check_name not in [sc['check'] for sc in service_checks]:
+                    errors.add("Expect `{}` to be in service_check.json.".format(service_check_name))
+                    continue
+
+                status_string = {value: key for key, value in iteritems(ServiceCheck._asdict())}[
+                    service_check_stub.status
+                ].lower()
+                service_check = [c for c in service_checks if c['check'] == service_check_name][0]
+
+                if status_string not in service_check['statuses']:
+                    errors.add(
+                        "Expect `{}` value to be in service_check.json for service check {}.".format(
+                            status_string, service_check_stub.name
+                        )
+                    )
+
+        assert not errors, "Service checks assertion errors using service_checks.json:" + "\n\t- ".join(
+            [''] + sorted(errors)
+        )
 
     def assert_no_duplicate_all(self):
         """
