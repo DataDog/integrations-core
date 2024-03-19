@@ -745,7 +745,7 @@ class SQLServer(AgentCheck):
         engine_edition = self.static_info_cache.get(STATIC_INFO_ENGINE_EDITION)
         if is_azure_sql_database(engine_edition):
             # On Azure, we can't use a less costly approach.
-            self._check_connection_by_connecting_to_db()
+            self._check_connections_by_connecting_to_db()
         else:
             self._check_connections_by_use_db()
 
