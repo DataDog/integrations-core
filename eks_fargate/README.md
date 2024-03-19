@@ -186,7 +186,7 @@ The following is a `spec.containers` snippet from a Redis deployment where the A
 
 ###### Sidecar profiles and custom selectors
 
-To further configure the Agent or its container resources, use the Helm property `clusterAgent.admissionController.agentSidecarInjection.profiles` to add environment variable definitions and resource settings. With this property, you can configure a custom selector to target workload pods instead of updating the workload to add `agent.datadoghq.com/sidecar:fargate` labels.
+To further configure the Agent or its container resources, use the Helm property `clusterAgent.admissionController.agentSidecarInjection.profiles` to add environment variable definitions and resource settings. Use the `clusterAgent.admissionController.agentSidecarInjection.selectors` property to configure a custom selector to target workload pods instead of updating the workload to add `agent.datadoghq.com/sidecar:fargate` labels.
 
 1. Create a Helm `datadog-values.yaml` file that configures a sidecar profile and a custom pod selector. 
 
