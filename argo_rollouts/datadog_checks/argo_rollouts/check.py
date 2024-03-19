@@ -6,7 +6,7 @@ from datadog_checks.base import OpenMetricsBaseCheckV2  # noqa: F401
 from .metrics import METRIC_MAP, RENAME_LABELS_MAP
 
 
-class ArgoRolloutsCheck(OpenMetricsBaseCheckV2):
+class ArgoRolloutsCheck(OpenMetricsBaseCheckV2, ConfigMixin):
     DEFAULT_METRIC_LIMIT = 0
     __NAMESPACE__ = 'argo_rollouts'
 
