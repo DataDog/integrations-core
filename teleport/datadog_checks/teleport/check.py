@@ -36,8 +36,6 @@ class TeleportCheck(OpenMetricsBaseCheckV2):
             self.instance.setdefault("rename_labels", {'version': "teleport_version"})
 
     def _configure_additional_transformers(self):
-        if not self.scrapers:
-            return
         metric_transformer = self.scrapers[self.instance['openmetrics_endpoint']].metric_transformer
         metric_transformer.add_custom_transformer(r'.*', self.configure_transformer_teleport_metrics(), pattern=True)
 
