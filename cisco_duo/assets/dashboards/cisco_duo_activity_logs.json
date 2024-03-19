@@ -213,7 +213,7 @@
                                 },
                                 "group_by": [
                                     {
-                                        "facet": "@duo_action.name",
+                                        "facet": "@cisco.duo.action.name",
                                         "limit": 10,
                                         "sort": {
                                             "order": "desc",
@@ -273,7 +273,7 @@
                                         }
                                     },
                                     {
-                                        "facet": "@duo_action.name",
+                                        "facet": "@cisco.duo.action.name",
                                         "limit": 2,
                                         "sort": {
                                             "order": "desc",
@@ -363,7 +363,7 @@
                                         }
                                     },
                                     {
-                                        "facet": "@duo_action.name",
+                                        "facet": "@cisco.duo.action.name",
                                         "limit": 2,
                                         "sort": {
                                             "order": "desc",
@@ -477,7 +477,7 @@
                                         }
                                     },
                                     {
-                                        "facet": "@duo_action.name",
+                                        "facet": "@cisco.duo.action.name",
                                         "limit": 2,
                                         "sort": {
                                             "order": "desc",
@@ -596,7 +596,7 @@
         },
         {
             "name": "Action",
-            "prefix": "@duo_action.name",
+            "prefix": "@cisco.duo.action.name",
             "available_values": [],
             "default": "*"
         },
