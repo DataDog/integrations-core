@@ -6,7 +6,6 @@ from typing import Generator, List, Optional, Pattern, Tuple
 
 from typing_extensions import Literal
 
-
 OwnerTuple = Tuple[Literal["USERNAME", "TEAM", "EMAIL"], str]
 
 
