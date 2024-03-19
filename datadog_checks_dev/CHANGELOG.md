@@ -2,12 +2,6 @@
 
 <!-- towncrier release notes start -->
 
-## 32.0.0 / 2024-03-18
-
-***Changed***:
-
-* Added a check to the `ddev validate codeowners` to make sure that logs assets are owned by `@DatadDog/logs-backend`. ([#17185](https://github.com/DataDog/integrations-core/pull/17185))
-
 ## 31.0.0 / 2024-02-06
 
 ***Changed***:
