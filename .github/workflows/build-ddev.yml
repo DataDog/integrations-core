@@ -206,6 +206,7 @@ jobs:
     - name: Build managed binary
       env:
         PYAPP_SELF_COMMAND: "none"
+        RUST_BACKTRACE: "1"
       run: hatch build --target app
 
     - name: Correct binary version

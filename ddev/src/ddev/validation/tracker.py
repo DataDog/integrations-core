@@ -38,6 +38,7 @@ class ValidationTracker:
 
     @property
     def warnings(self) -> int:
+
         return self.__warnings
 
     def display(self, *, fix_command: str = ''):
