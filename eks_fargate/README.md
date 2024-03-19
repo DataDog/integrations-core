@@ -104,10 +104,13 @@ metadata:
 
 #### Running the Agent as a sidecar
 
-You can run the Agent as a sidecar by using the [Datadog Admission Controller][36] (requires Cluster Agent v7.52+) or with manual sidecar configuration. With the Admission Controller, you can inject an Agent sidecar into every pod that has the label `agent.datadoghq.com/sidecar:fargate`. With manual configuration, you must modify every workload manifest when adding or changing the Agent sidecar. Datadog recommends you use the Admission Controller.
+You can run the Agent as a sidecar by using the [Datadog Admission Controller][36] (requires Cluster Agent v7.52+) or with manual sidecar configuration. With the Admission Controller, you can inject an Agent sidecar into every pod that has the label `agent.datadoghq.com/sidecar:fargate`. 
 
-{{< tabs >}}
-{{% tab "Admission Controller" %}}
+With manual configuration, you must modify every workload manifest when adding or changing the Agent sidecar. Datadog recommends you use the Admission Controller.
+
+<!-- xxx tabs xxx -->
+<!-- xxx tab "Admission Controller" xxx -->
+##### Admission Controller
 
 <div class="alert alert-warning">This feature requires Cluster Agent v7.52.0+ and the <a href="http://docs.datadoghq.com/integrations/ecs_fargate">ECS Fargate integration</a>.
 </div>
@@ -117,31 +120,33 @@ The setup below configures the Cluster Agent to communicate with the Agent sidec
 **Prerequisites**
 
 * Set up RBAC in the application namespace(s). See the [AWS EKS Fargate RBAC](#aws-eks-fargate-rbac) section on this page.
-* Create a Kubernetes secret containing your Datadog API key and Cluster Agent token in the Datadog installation and application namespaces. 
-   ```yaml
+* Create a Kubernetes secret containing your Datadog API key and Cluster Agent token in the Datadog installation and application namespaces:
+
+   ```shell
    kubectl create secret generic datadog-secret -n datadog-agent \
            --from-literal api-key=<YOUR_DATADOG_API_KEY> --from-literal token=<CLUSTER_AGENT_ TOKEN>
    kubectl create secret generic datadog-secret -n fargate \
            --from-literal api-key=<YOUR_DATADOG_API_KEY> --from-literal token=<CLUSTER_AGENT_TOKEN>
    ```
-   For more information how these secrets are used, see the [Cluster Agent Setup][25].
+   For more information how these secrets are used, see the [Cluster Agent Setup][35].
 
-##### Setup
+###### Setup
 
 1. Install the Datadog Agent with the Cluster Agent and Admission Controller enabled:
 
-  ```sh
-  helm install datadog datadog/datadog -n datadog-agent \
-      --set datadog.clusterName=cluster-name \
-      --set agents.enabled=false \
-      --set datadog.apiKeyExistingSecret=datadog-secret \
-      --set clusterAgent.tokenExistingSecret=datadog-secret \
-      --set clusterAgent.admissionController.agentSidecarInjection.enabled=true \
-      --set clusterAgent.admissionController.agentSidecarInjection.provider=fargate
-  ```
-  **Note**: Use `agents.enabled=false` for a Fargate-only cluster. On a mixed cluster, set `agents.enabled=true` to create a DaemonSet for monitoring workloads on EC2 instances.
+   ```sh
+   helm install datadog datadog/datadog -n datadog-agent \
+       --set datadog.clusterName=cluster-name \
+       --set agents.enabled=false \
+       --set datadog.apiKeyExistingSecret=datadog-secret \
+       --set clusterAgent.tokenExistingSecret=datadog-secret \
+       --set clusterAgent.admissionController.agentSidecarInjection.enabled=true \
+       --set clusterAgent.admissionController.agentSidecarInjection.provider=fargate
+   ```
+   **Note**: Use `agents.enabled=false` for a Fargate-only cluster. On a mixed cluster, set `agents.enabled=true` to create a DaemonSet for monitoring workloads on EC2 instances.
 
-2. After the Cluster Agent reaches a running state and registers Admission Controller mutating webhooks, an Agent sidecar is automatically injected into any pod created with the label `agent.datadoghq.com/sidecar:fargate`. **The Admission Controller does not mutate pods that are already created**.
+2. After the Cluster Agent reaches a running state and registers Admission Controller mutating webhooks, an Agent sidecar is automatically injected into any pod created with the label `agent.datadoghq.com/sidecar:fargate`. 
+   **The Admission Controller does not mutate pods that are already created**.
 
 **Example result**
 
@@ -179,13 +184,14 @@ The following is a `spec.containers` snippet from a Redis deployment where the A
         memory: 256Mi
 {{< /highlight >}}
 
-##### Sidecar profiles and custom selectors
+###### Sidecar profiles and custom selectors
 
 To further configure the Agent or its container resources, use the Helm property `clusterAgent.admissionController.agentSidecarInjection.profiles` to add environment variable definitions and resource settings. With this property, you can configure a custom selector to target workload pods instead of updating the workload to add `agent.datadoghq.com/sidecar:fargate` labels.
 
 1. Create a Helm `datadog-values.yaml` file that configures a sidecar profile and a custom pod selector. 
 
    **Example**
+
    In the following example, a selector targets all pods with the label `"app": redis`. The sidecar profile configures a `DD_PROCESS_AGENT_PROCESS_COLLECTION_ENABLED` environment variable and resource settings. 
 
    ```yaml
@@ -211,7 +217,7 @@ To further configure the Agent or its container resources, use the Helm property
 
 2. Install the chart:
 
-   ```sh
+   ```shell
    helm install datadog datadog/datadog -n datadog-agent \
        --set datadog.clusterName=cluster-name \
        --set agents.enabled=false \
@@ -223,7 +229,8 @@ To further configure the Agent or its container resources, use the Helm property
    ```
    **Note**: Use `agents.enabled=false` for a Fargate-only cluster. On a mixed cluster, set `agents.enabled=true` to create a DaemonSet for monitoring workloads on EC2 instances.
 
-3. After the Cluster Agent reaches a running state and registers Admission Controller mutating webhooks, an Agent sidecar is automatically injected into any pod created with the label `app:redis`. **The Admission Controller does not mutate pods that are already created**.
+3. After the Cluster Agent reaches a running state and registers Admission Controller mutating webhooks, an Agent sidecar is automatically injected into any pod created with the label `app:redis`. 
+   **The Admission Controller does not mutate pods that are already created**.
 
 **Example result**
 
@@ -261,13 +268,11 @@ containers:
       cpu: 400m
       memory: 256Mi
 {{< /highlight >}}
-  
-[25]: http://docs.datadoghq.com/agent/cluster_agent
-[29]: https://docs.datadoghq.com/agent/kubernetes/?tab=helm#event-collection
-[30]: https://docs.datadoghq.com/infrastructure/livecontainers/#kubernetes-resources-view
-[31]: https://docs.datadoghq.com/agent/cluster_agent/clusterchecks/#overview
-{{% /tab %}}
-{{% tab "Manual" %}}
+
+
+<!-- xxz tab xxx -->
+<!-- xxx tab "Manual" xxx -->
+##### Manual
 
 To start collecting data from your Fargate type pod, deploy the Datadog Agent v7.17+ as a sidecar of your application. This is the minimum configuration required to collect metrics from your application running in the pod, notice the addition of `DD_EKS_FARGATE=true` in the manifest to deploy your Datadog Agent sidecar.
 
@@ -324,7 +329,7 @@ spec:
 
 **Note**: Add your desired `kube_cluster_name:<CLUSTER_NAME>` to the list of `DD_TAGS` to ensure your metrics are tagged by your desired cluster. You can append additional tags here as space separated `<KEY>:<VALUE>` tags. For Agents `7.34+` and `6.34+`, this is not required. Instead, set the `DD_CLUSTER_NAME` environment variable.
 
-#### Running the Cluster Agent or the Cluster Checks Runner
+###### Running the Cluster Agent or the Cluster Checks Runner
 
 Datadog recommends you run the Cluster Agent to access features such as [events collection][29], [Kubernetes resources view][30], and [cluster checks][31].
 
@@ -374,8 +379,8 @@ In both cases, you need to change the Datadog Agent sidecar manifest in order to
           value: <CLUSTER_NAME>
 ```
 
-{{% /tab %}}
-{{% /tabs %}}
+<!-- xxz tab xxx -->
+<!-- xxz tabs xxx -->
 
 
 ## Cluster performance
