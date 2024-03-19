@@ -22,7 +22,7 @@ BASE_METRICS = [
     'clickhouse.file.read.total',
     'clickhouse.file.write.size.total',
     'clickhouse.file.write.total',
-    'clickhouse.io_buffer.allocated.bytes',
+    'clickhouse.io_buffer.allocated.bytes.total',
     'clickhouse.io_buffer.allocated',
     'clickhouse.lock.context.acquisition.total',
     'clickhouse.lock.read.rwlock.acquired',
