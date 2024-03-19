@@ -105,7 +105,7 @@ SystemMetrics = {
                     'name': 'threads.database_replicated.scheduled',
                     'type': 'gauge',
                 },
-                'DelayedInserts': {'name': 'queries.insert.delayed', 'type': 'gauge'},
+                'DelayedInserts': {'name': 'query.insert.delayed', 'type': 'gauge'},
                 'DestroyAggregatesThreads': {'name': 'threads.destroy_aggregates.total', 'type': 'gauge'},
                 'DestroyAggregatesThreadsActive': {'name': 'threads.destroy_aggregates.active', 'type': 'gauge'},
                 'DestroyAggregatesThreadsScheduled': {'name': 'threads.destroy_aggregates.scheduled', 'type': 'gauge'},
