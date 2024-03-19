@@ -9,6 +9,7 @@ tests:
         name: "ET_NET 1"
       timestamp: 37292500141
     message: "clearing cache directory '/opt/ats/var/trafficserver/cache.db 16384:32766'"
+    status: "debug"
     tags:
      - "source:LOGS_SOURCE"
     timestamp: 37292500141
@@ -21,6 +22,7 @@ tests:
         name: "ET_NET 1"
       timestamp: 37292500132
     message: "disk header different for disk /opt/ats/var/trafficserver/cache.db: clearing the disk"
+    status: "warn"
     tags:
      - "source:LOGS_SOURCE"
     timestamp: 37292500132
@@ -33,6 +35,7 @@ tests:
         name: "traffic_server"
       timestamp: 37292500160
     message: "remap.config finished loading"
+    status: "notice"
     tags:
      - "source:LOGS_SOURCE"
     timestamp: 37292500160
@@ -78,6 +81,7 @@ tests:
         name: "traffic_crashlo"
       timestamp: 37292500160
     message: "wrote crash log to /var/tmp/double/ts/log/crash-2021-06-14-122746.log"
+    status: "error"
     tags:
      - "source:LOGS_SOURCE"
     timestamp: 37292500160

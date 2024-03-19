@@ -20,6 +20,7 @@ tests:
       time: "2023-11-28T16:49:41.858Z"
       timestamp: 1701190181858
     message: "discovered cluster endpoint"
+    status: "debug"
     tags:
      - "source:LOGS_SOURCE"
     timestamp: 1701190181858
@@ -41,6 +42,7 @@ tests:
       time: "2023-11-28T16:49:41.683Z"
       timestamp: 1701190181683
     message: "retrieving region from IMDS"
+    status: "debug"
     tags:
      - "source:LOGS_SOURCE"
     timestamp: 1701190181683
@@ -68,6 +70,7 @@ tests:
       time: "2023-11-28T17:42:02.908Z"
       timestamp: 1701193322908
     message: "Starting Controller"
+    status: "info"
     tags:
      - "source:LOGS_SOURCE"
     timestamp: 1701193322908
@@ -89,6 +92,8 @@ tests:
       time: "2023-11-28T17:42:02.908Z"
       timestamp: 1701193322908
     message: "getting messages from queue, discovering queue url, fetching queue url, AWS.SimpleQueueService.NonExistentQueue: The specified queue does not exist for this wsdl version.\n\tstatus code: 400, request id: ae70a985-8d67-5d68-8513-f441f2c7e8c7"
+    status: "error"
     tags:
      - "source:LOGS_SOURCE"
     timestamp: 1701193322908
+

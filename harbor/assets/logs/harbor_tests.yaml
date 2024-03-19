@@ -40,6 +40,8 @@ tests:
         appname: "proxy"
         timestamp: 44826544000
     message: "172.19.0.1 - \"GET /harbor/sign-in?redirect_url=%2Fharbor%2Fprojects HTTP/1.1\" 200 693 \"-\" \"Mozilla/5.0 (Macintosh; Intel Mac OS X 10_14_5) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/74.0.3729.169 Safari/537.36\" 0.001 0.000 ."
+    service: "proxy"
+    status: "ok"
     tags:
      - "source:LOGS_SOURCE"
     timestamp: 44826544000
@@ -75,6 +77,8 @@ tests:
         appname: "proxy"
         timestamp: 44826579000
     message: "172.19.0.1 - \"GET /api/health HTTP/1.1\" 308 172 \"-\" \"insomnia/6.5.3\" 0.000 - ."
+    service: "proxy"
+    status: "notice"
     tags:
      - "source:LOGS_SOURCE"
     timestamp: 44826579000
@@ -98,6 +102,8 @@ tests:
         appname: "registryctl"
         timestamp: 44889129000
     message: "172.19.0.7 - - [04/Jun/2019:13:12:09 +0000] \"GET /api/health HTTP/1.1\" 200 9"
+    service: "registryctl"
+    status: "ok"
     tags:
      - "source:LOGS_SOURCE"
     timestamp: 44889129000
@@ -132,6 +138,8 @@ tests:
         appname: "portal"
         timestamp: 44889617000
     message: "172.19.0.7 - - [04/Jun/2019:13:20:16 +0000] \"GET / HTTP/1.1\" 200 693 \"-\" \"Go-http-client/1.1\""
+    service: "portal"
+    status: "ok"
     tags:
      - "source:LOGS_SOURCE"
     timestamp: 44889617000
@@ -163,6 +171,7 @@ tests:
           ip: "10.60.2.10"
       severity: "ok"
     message: "10.60.2.10 - - [02/Dec/2021:13:50:26 +0000] \"GET / HTTP/1.1\" 200 532 \"-\" \"Go-http-client/1.1\""
+    status: "ok"
     tags:
      - "source:LOGS_SOURCE"
     timestamp: 1
@@ -177,6 +186,8 @@ tests:
         appname: "jobservice"
         timestamp: 44826207000
     message: "2019-06-03T19:43:27Z [INFO] [/common/dao/base.go:84]: Registering database: type-PostgreSQL host-postgresql port-5432 databse-registry sslmode-\"disable\""
+    service: "jobservice"
+    status: "info"
     tags:
      - "source:LOGS_SOURCE"
     timestamp: 44826207000
@@ -191,6 +202,8 @@ tests:
         appname: "jobservice"
         timestamp: 43945721000
     message: "2019-05-24T15:08:41Z [ERROR] [/common/config/store/driver/rest.go:27]: Failed on load rest config err:Get http://core:8080/api/internal/configurations: dial tcp 172.28.0.7:8080: getsockopt: connection refused, url:http://core:8080/api/internal/configurations"
+    service: "jobservice"
+    status: "error"
     tags:
      - "source:LOGS_SOURCE"
     timestamp: 43945721000
@@ -205,6 +218,8 @@ tests:
         appname: "core"
         timestamp: 44888841000
     message: "2019-06-04T13:07:21Z [ERROR] [/replication/adapter/image_registry.go:145]: failed to ping registry https://demo.goharbor.io: http error: code 401, message"
+    service: "core"
+    status: "error"
     tags:
      - "source:LOGS_SOURCE"
     timestamp: 44888841000
@@ -229,6 +244,8 @@ tests:
         appname: "core"
         timestamp: 44889657000
     message: "2019/06/04 13:20:57 #033[1;44m[D] [server.go:2619] |      127.0.0.1|#033[42m 200 #033[0m|     9.9379ms|   match|#033[44m GET     #033[0m /api/ping   r:/api/ping#033[0m"
+    service: "core"
+    status: "ok"
     tags:
      - "source:LOGS_SOURCE"
     timestamp: 44889657000
@@ -241,6 +258,8 @@ tests:
         appname: "postgresql"
         timestamp: 43962500000
     message: "LOG:  stats_timestamp 2019-05-24 19:48:20.586618+00 is later than collector's time 2019-05-24 19:48:20.564753+00 for database 16388"
+    service: "postgresql"
+    status: "info"
     tags:
      - "source:LOGS_SOURCE"
     timestamp: 43962500000
@@ -256,6 +275,8 @@ tests:
         appname: "postgresql"
         timestamp: 43962500000
     message: "LOG:  statement: SELECT * FROM playground;"
+    service: "postgresql"
+    status: "info"
     tags:
      - "source:LOGS_SOURCE"
     timestamp: 43962500000
@@ -272,6 +293,8 @@ tests:
         appname: "redis"
         timestamp: 44826196000
     message: "8:M 03 Jun 19:43:16.664 # WARNING: The TCP backlog setting of 511 cannot be enforced because /proc/sys/net/core/somaxconn is set to the lower value of 128."
+    service: "redis"
+    status: "warn"
     tags:
      - "source:LOGS_SOURCE"
     timestamp: 44826196000
@@ -288,6 +311,8 @@ tests:
         appname: "redis"
         timestamp: 44826798000
     message: "8:M 03 Jun 19:53:18.077 * 10 changes in 300 seconds. Saving..."
+    service: "redis"
+    status: "notice"
     tags:
      - "source:LOGS_SOURCE"
     timestamp: 44826798000
@@ -317,6 +342,8 @@ tests:
         appname: "chartmuseum"
         timestamp: 44826548000
     message: "[47] Request served"
+    service: "chartmuseum"
+    status: "ok"
     tags:
      - "source:LOGS_SOURCE"
     timestamp: 44826548000
@@ -333,6 +360,8 @@ tests:
         appname: "chartmuseum"
         timestamp: 43946215000
     message: "Starting ChartMuseum"
+    service: "chartmuseum"
+    status: "info"
     tags:
      - "source:LOGS_SOURCE"
     timestamp: 43946215000
@@ -372,6 +401,8 @@ tests:
         appname: "registry"
         timestamp: 44890017000
     message: "time=\"2019-06-04T13:26:57.2139804Z\" level=warning msg=\"error authorizing context: authorization token required\" go.version=go1.11.8 http.request.host=\"registry:5000\" http.request.id=f87f0124-2631-4518-b0ed-3b741fe2d9e3 http.request.method=GET http.request.referer=\"http://registry:5000/v2\" http.request.remoteaddr=\"172.19.0.7:41842\" http.request.uri=\"/v2/\" http.request.useragent=\"Go-http-client/1.1\""
+    service: "registry"
+    status: "warn"
     tags:
      - "source:LOGS_SOURCE"
     timestamp: 44890017000
