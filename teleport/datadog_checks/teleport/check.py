@@ -67,8 +67,6 @@ class TeleportCheck(OpenMetricsBaseCheckV2):
                     self.count(new_metric_name + ".count", sample.value, tags=tags, hostname=hostname)
                 elif metric_type == "gauge":
                     self.gauge(new_metric_name, sample.value, tags=tags, hostname=hostname)
-                elif metric_type == "rate":
-                    self.rate(new_metric_name, sample.value, tags=tags, hostname=hostname)
                 else:
                     native_transformer = get_native_dynamic_transformer(
                         self, new_metric_name, None, metric_transformer.global_options
