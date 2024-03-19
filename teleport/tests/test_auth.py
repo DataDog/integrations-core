@@ -28,6 +28,7 @@ def test_auth_teleport_metrics(dd_run_check, aggregator, instance, mock_http_res
 
     for metric in AUTH_METRICS:
         aggregator.assert_metric(f"teleport.{metric}")
+        aggregator.assert_metric_has_tag(f"teleport.{metric}", "teleport_service:auth")
 
 
 def test_auth_audit_log_teleport_metrics(dd_run_check, aggregator, instance, mock_http_response, metrics_path):
@@ -38,6 +39,7 @@ def test_auth_audit_log_teleport_metrics(dd_run_check, aggregator, instance, moc
 
     for metric in AUTH_AUDIT_LOG_METRICS:
         aggregator.assert_metric(f"teleport.{metric}")
+        aggregator.assert_metric_has_tag(f"teleport.{metric}", "teleport_service:auth")
 
 
 def test_auth_backend_s3_teleport_metrics(dd_run_check, aggregator, instance, mock_http_response, metrics_path):
@@ -48,6 +50,7 @@ def test_auth_backend_s3_teleport_metrics(dd_run_check, aggregator, instance, mo
 
     for metric in AUTH_BACKEND_S3_METRICS:
         aggregator.assert_metric(f"teleport.{metric}")
+        aggregator.assert_metric_has_tag(f"teleport.{metric}", "teleport_service:auth")
 
 
 def test_auth_backend_cache_teleport_metrics(dd_run_check, aggregator, instance, mock_http_response, metrics_path):
@@ -58,6 +61,7 @@ def test_auth_backend_cache_teleport_metrics(dd_run_check, aggregator, instance,
 
     for metric in AUTH_BACKEND_CACHE_METRICS:
         aggregator.assert_metric(f"teleport.{metric}")
+        aggregator.assert_metric_has_tag(f"teleport.{metric}", "teleport_service:auth")
 
 
 def test_auth_backend_dynamo_teleport_metrics(dd_run_check, aggregator, instance, mock_http_response, metrics_path):
@@ -68,6 +72,7 @@ def test_auth_backend_dynamo_teleport_metrics(dd_run_check, aggregator, instance
 
     for metric in AUTH_BACKEND_DYNAMO_METRICS:
         aggregator.assert_metric(f"teleport.{metric}")
+        aggregator.assert_metric_has_tag(f"teleport.{metric}", "teleport_service:auth")
 
 
 def test_auth_backend_firestore_teleport_metrics(dd_run_check, aggregator, instance, mock_http_response, metrics_path):
@@ -78,6 +83,7 @@ def test_auth_backend_firestore_teleport_metrics(dd_run_check, aggregator, insta
 
     for metric in AUTH_BACKEND_FIRESTORE_METRICS:
         aggregator.assert_metric(f"teleport.{metric}")
+        aggregator.assert_metric_has_tag(f"teleport.{metric}", "teleport_service:auth")
 
 
 def test_auth_backend_gcp_gcs_teleport_metrics(dd_run_check, aggregator, instance, mock_http_response, metrics_path):
@@ -88,6 +94,7 @@ def test_auth_backend_gcp_gcs_teleport_metrics(dd_run_check, aggregator, instanc
 
     for metric in AUTH_BACKEND_GCP_GCS_METRICS:
         aggregator.assert_metric(f"teleport.{metric}")
+        aggregator.assert_metric_has_tag(f"teleport.{metric}", "teleport_service:auth")
 
 
 def test_auth_backend_etcd_teleport_metrics(dd_run_check, aggregator, instance, mock_http_response, metrics_path):
@@ -98,3 +105,4 @@ def test_auth_backend_etcd_teleport_metrics(dd_run_check, aggregator, instance, 
 
     for metric in AUTH_BACKEND_ETCD_METRICS:
         aggregator.assert_metric(f"teleport.{metric}")
+        aggregator.assert_metric_has_tag(f"teleport.{metric}", "teleport_service:auth")
