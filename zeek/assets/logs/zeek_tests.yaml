@@ -1,8 +1,7 @@
 id: "zeek"
 tests:
  -
-  sample: |-
-    <134>Dec 26 01:35:11 machine-name {"_path":"capture_loss","_write_ts":"2023-12-12T05:52:50.756358Z","ts":"2023-12-12T05:52:32.763303Z","ts_delta":15.235642194747925,"peer":"zeek","gaps":3,"acks":316,"percent_lost":0.9493670886075949}
+  sample: "<134>Dec 26 01:35:11 machine-name {\"_path\":\"capture_loss\",\"_write_ts\":\"2023-12-12T05:52:50.756358Z\",\"ts\":\"2023-12-12T05:52:32.763303Z\",\"ts_delta\":15.235642194747925,\"peer\":\"zeek\",\"gaps\":3,\"acks\":316,\"percent_lost\":0.9493670886075949}"
   service: "corelight"
   result:
     custom:
@@ -11,7 +10,6 @@ tests:
       acks: 316
       gaps: 3
       peer: "zeek"
-      service: "corelight"
       ts: "2023-12-12T05:52:32.763303Z"
       ts_delta: 15.235642194747925
       zeek:
@@ -328,14 +326,12 @@ tests:
      - "source:LOGS_SOURCE"
     timestamp: 1702360352763
  -
-  sample: |-
-    <134>Jan 12 18:13:46 machine-name {"_path":"datared","_write_ts":"2024-01-13T00:13:42.817478Z","ts":"2024-01-13T00:13:42.817478Z","conn_red":1310,"conn_total":18460,"dns_red":1141,"dns_total":1604,"files_red":313,"files_total":796,"http_red":140,"http_total":140,"ssl_red":215,"ssl_total":227,"weird_red":20,"weird_total":20}
+  sample: "<134>Jan 12 18:13:46 machine-name {\"_path\":\"datared\",\"_write_ts\":\"2024-01-13T00:13:42.817478Z\",\"ts\":\"2024-01-13T00:13:42.817478Z\",\"conn_red\":1310,\"conn_total\":18460,\"dns_red\":1141,\"dns_total\":1604,\"files_red\":313,\"files_total\":796,\"http_red\":140,\"http_total\":140,\"ssl_red\":215,\"ssl_total\":227,\"weird_red\":20,\"weird_total\":20}"
   service: "corelight"
   result:
     custom:
       _path: "datared"
       _write_ts: "2024-01-13T00:13:42.817478Z"
-      service: "corelight"
       ts: "2024-01-13T00:13:42.817478Z"
       zeek:
         conn_red: 1310
@@ -351,24 +347,24 @@ tests:
         weird_red: 20
         weird_total: 20
     message: "<134>Jan 12 18:13:46 machine-name {\"_path\":\"datared\",\"_write_ts\":\"2024-01-13T00:13:42.817478Z\",\"ts\":\"2024-01-13T00:13:42.817478Z\",\"conn_red\":1310,\"conn_total\":18460,\"dns_red\":1141,\"dns_total\":1604,\"files_red\":313,\"files_total\":796,\"http_red\":140,\"http_total\":140,\"ssl_red\":215,\"ssl_total\":227,\"weird_red\":20,\"weird_total\":20}"
+    service: "datared"
     tags:
-    - "source:LOGS_SOURCE"
+     - "source:LOGS_SOURCE"
     timestamp: 1705104822817
  -
-  sample: |-
-    <134>Mar  6 20:22:19 machine-name {"_path":"files_red","_write_ts":"2024-03-07T02:22:18.145479Z","ts":["2024-03-07T02:12:12.099810Z"],"fuid":"FJcjJV2mrRbxT0TWi","tx_hosts":["10.10.10.10"],"rx_hosts":["20.20.20.20"],"conn_uids":["CALvyD1AyopngTm5Xh"],"source":"HTTP","depth":0,"analyzers":["SHA1","MD5","DATA_EVENT","SHA256"],"local_orig":true,"is_orig":false,"seen_bytes":163,"total_bytes":163,"missing_bytes":0,"overflow_bytes":0,"timedout":false,"extracted":[],"md5":"e335c05220a3858e858d2026071e3se2","sha1":"8514de756fa993adb449c282affe84c752bab495","sha256":"2733c2e83762f8a9542ebacf40642505fee0247295161ced264b44d2ad6f9456","num":1}
+  sample: "<134>Mar  6 20:22:19 machine-name {\"_path\":\"files_red\",\"_write_ts\":\"2024-03-07T02:22:18.145479Z\",\"ts\":[\"2024-03-07T02:12:12.099810Z\"],\"fuid\":\"FJcjJV2mrRbxT0TWi\",\"tx_hosts\":[\"10.10.10.10\"],\"rx_hosts\":[\"20.20.20.20\"],\"conn_uids\":[\"CALvyD1AyopngTm5Xh\"],\"source\":\"HTTP\",\"depth\":0,\"analyzers\":[\"SHA1\",\"MD5\",\"DATA_EVENT\",\"SHA256\"],\"local_orig\":true,\"is_orig\":false,\"seen_bytes\":163,\"total_bytes\":163,\"missing_bytes\":0,\"overflow_bytes\":0,\"timedout\":false,\"extracted\":[],\"md5\":\"e335c05220a3858e858d2026071e3se2\",\"sha1\":\"8514de756fa993adb449c282affe84c752bab495\",\"sha256\":\"2733c2e83762f8a9542ebacf40642505fee0247295161ced264b44d2ad6f9456\",\"num\":1}"
   service: "corelight"
   result:
     custom:
       _path: "files_red"
       _write_ts: "2024-03-07T02:22:18.145479Z"
       analyzers:
-      - "SHA1"
-      - "MD5"
-      - "DATA_EVENT"
-      - "SHA256"
+       - "SHA1"
+       - "MD5"
+       - "DATA_EVENT"
+       - "SHA256"
       conn_uids:
-      - "CALvyD1AyopngTm5Xh"
+       - "CALvyD1AyopngTm5Xh"
       depth: 0
       fuid: "FJcjJV2mrRbxT0TWi"
       is_orig: false
@@ -377,30 +373,29 @@ tests:
       network:
         client:
           ip:
-          - "10.10.10.10"
+           - "10.10.10.10"
         destination:
           ip:
-          - "20.20.20.20"
+           - "20.20.20.20"
       num: 1
-      service: "corelight"
       sha1: "8514de756fa993adb449c282affe84c752bab495"
       sha256: "2733c2e83762f8a9542ebacf40642505fee0247295161ced264b44d2ad6f9456"
       source: "HTTP"
       timedout: false
       ts:
-      - "2024-03-07T02:12:12.099810Z"
+       - "2024-03-07T02:12:12.099810Z"
       zeek:
         missing_bytes: 0
         overflow_bytes: 0
         seen_bytes: 163
         total_bytes: 163
     message: "<134>Mar  6 20:22:19 machine-name {\"_path\":\"files_red\",\"_write_ts\":\"2024-03-07T02:22:18.145479Z\",\"ts\":[\"2024-03-07T02:12:12.099810Z\"],\"fuid\":\"FJcjJV2mrRbxT0TWi\",\"tx_hosts\":[\"10.10.10.10\"],\"rx_hosts\":[\"20.20.20.20\"],\"conn_uids\":[\"CALvyD1AyopngTm5Xh\"],\"source\":\"HTTP\",\"depth\":0,\"analyzers\":[\"SHA1\",\"MD5\",\"DATA_EVENT\",\"SHA256\"],\"local_orig\":true,\"is_orig\":false,\"seen_bytes\":163,\"total_bytes\":163,\"missing_bytes\":0,\"overflow_bytes\":0,\"timedout\":false,\"extracted\":[],\"md5\":\"e335c05220a3858e858d2026071e3se2\",\"sha1\":\"8514de756fa993adb449c282affe84c752bab495\",\"sha256\":\"2733c2e83762f8a9542ebacf40642505fee0247295161ced264b44d2ad6f9456\",\"num\":1}"
+    service: "files_red"
     tags:
-    - "source:LOGS_SOURCE"
+     - "source:LOGS_SOURCE"
     timestamp: 1709778138145
  -
-  sample: |-
-    <134>Mar  6 22:39:30 machine-name {"_path":"dns_red","_write_ts":"2024-03-07T04:39:28.580374Z","ts":"2024-03-07T04:38:40.085451Z","uid":"CyArTY2KEgcygwMLi1","id.orig_h":"10.10.10.10","id.orig_p":123,"id.resp_h":"20.20.20.20","id.resp_p":321,"query":"time.missouri.edu","qtype_name":"A","num":4}
+  sample: "<134>Mar  6 22:39:30 machine-name {\"_path\":\"dns_red\",\"_write_ts\":\"2024-03-07T04:39:28.580374Z\",\"ts\":\"2024-03-07T04:38:40.085451Z\",\"uid\":\"CyArTY2KEgcygwMLi1\",\"id.orig_h\":\"10.10.10.10\",\"id.orig_p\":123,\"id.resp_h\":\"20.20.20.20\",\"id.resp_p\":321,\"query\":\"time.missouri.edu\",\"qtype_name\":\"A\",\"num\":4}"
   service: "corelight"
   result:
     custom:
@@ -419,10 +414,10 @@ tests:
           ip: "20.20.20.20"
           port: 321
       num: 4
-      service: "corelight"
       ts: "2024-03-07T04:38:40.085451Z"
       uid: "CyArTY2KEgcygwMLi1"
     message: "<134>Mar  6 22:39:30 machine-name {\"_path\":\"dns_red\",\"_write_ts\":\"2024-03-07T04:39:28.580374Z\",\"ts\":\"2024-03-07T04:38:40.085451Z\",\"uid\":\"CyArTY2KEgcygwMLi1\",\"id.orig_h\":\"10.10.10.10\",\"id.orig_p\":123,\"id.resp_h\":\"20.20.20.20\",\"id.resp_p\":321,\"query\":\"time.missouri.edu\",\"qtype_name\":\"A\",\"num\":4}"
+    service: "dns_red"
     tags:
-    - "source:LOGS_SOURCE"
+     - "source:LOGS_SOURCE"
     timestamp: 1709786320085
