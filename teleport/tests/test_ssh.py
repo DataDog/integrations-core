@@ -19,3 +19,4 @@ def test_ssh_teleport_metrics(dd_run_check, aggregator, instance, mock_http_resp
 
     for metric in SSH_METRICS:
         aggregator.assert_metric(f"teleport.{metric}")
+        aggregator.assert_metric_has_tag(f"teleport.{metric}", "teleport_service:ssh")
