@@ -40,7 +40,14 @@ class MasterDatabase(Query):
     def __init__(self):
         super(MasterDatabase, self).__init__(
             schema="SYS",
-            fields=('db_name', 'host', 'start_time', 'usage', 'version', 'current_time'),
+            fields=(
+                "db_name",
+                "host",
+                "start_time",
+                "usage",
+                "version",
+                "current_time",
+            ),
             view="M_DATABASE",
             query="""
                 SELECT
@@ -63,7 +70,7 @@ class SystemDatabases(Query):
     def __init__(self):
         super(SystemDatabases, self).__init__(
             schema="SYS",
-            fields=('db_name', 'status', 'details'),
+            fields=("db_name", "status", "details"),
             view="M_DATABASES",
             query="""
                 SELECT
@@ -83,11 +90,10 @@ class GlobalSystemBackupProgress(Query):
     def __init__(self, schema):
         super(GlobalSystemBackupProgress, self).__init__(
             schema=schema,
-            fields=('db_name', 'host', 'service', 'status', 'end_time', 'current_time'),
+            fields=("host", "service", "status", "end_time", "current_time"),
             view="M_BACKUP_PROGRESS",
             query="""
                 SELECT
-                  DATABASE_NAME,
                   HOST,
                   SERVICE_NAME,
                   STATE_NAME,
@@ -106,7 +112,14 @@ class GlobalSystemLicenses(Query):
     def __init__(self, schema):
         super(GlobalSystemLicenses, self).__init__(
             schema=schema,
-            fields=('sid', 'product_name', 'limit', 'usage', 'start_date', 'expiration_date'),
+            fields=(
+                "sid",
+                "product_name",
+                "limit",
+                "usage",
+                "start_date",
+                "expiration_date",
+            ),
             view="M_LICENSES",
             query="""
                 SELECT
@@ -129,18 +142,17 @@ class GlobalSystemConnectionsStatus(Query):
     def __init__(self, schema):
         super(GlobalSystemConnectionsStatus, self).__init__(
             schema=schema,
-            fields=('db_name', 'host', 'port', 'status', 'total'),
+            fields=("host", "port", "status", "total"),
             view="M_CONNECTIONS",
             query="""
                 SELECT
-                  DATABASE_NAME,
                   HOST,
                   PORT,
                   CONNECTION_STATUS,
                   COUNT(*)
                 FROM {}
                 WHERE CONNECTION_STATUS != ''
-                GROUP BY DATABASE_NAME, HOST, PORT, CONNECTION_STATUS
+                GROUP BY HOST, PORT, CONNECTION_STATUS
             """,
         )
 
@@ -153,11 +165,10 @@ class GlobalSystemDiskUsage(Query):
     def __init__(self, schema):
         super(GlobalSystemDiskUsage, self).__init__(
             schema=schema,
-            fields=('db_name', 'host', 'resource', 'used', 'total'),
+            fields=("host", "resource", "used", "total"),
             view="M_DISK_USAGE",
             query="""
                 SELECT
-                  DATABASE_NAME,
                   HOST,
                   USAGE_TYPE,
                   USED_SIZE,
@@ -176,25 +187,23 @@ class GlobalSystemServiceMemory(Query):
         super(GlobalSystemServiceMemory, self).__init__(
             schema=schema,
             fields=(
-                'db_name',
-                'host',
-                'port',
-                'service',
-                'virtual',
-                'physical',
-                'total',
-                'used',
-                'heap_total',
-                'heap_used',
-                'shared_total',
-                'shared_used',
-                'compactors_total',
-                'compactors_free',
+                "host",
+                "port",
+                "service",
+                "virtual",
+                "physical",
+                "total",
+                "used",
+                "heap_total",
+                "heap_used",
+                "shared_total",
+                "shared_used",
+                "compactors_total",
+                "compactors_free",
             ),
             view="M_SERVICE_MEMORY",
             query="""
                 SELECT
-                  DATABASE_NAME,
                   HOST,
                   PORT,
                   SERVICE_NAME,
@@ -221,11 +230,10 @@ class GlobalSystemServiceComponentMemory(Query):
     def __init__(self, schema):
         super(GlobalSystemServiceComponentMemory, self).__init__(
             schema=schema,
-            fields=('db_name', 'host', 'port', 'component', 'used'),
+            fields=("host", "port", "component", "used"),
             view="M_SERVICE_COMPONENT_MEMORY",
             query="""
             SELECT
-              DATABASE_NAME,
               HOST,
               PORT,
               COMPONENT,
@@ -243,11 +251,10 @@ class GlobalSystemRowStoreMemory(Query):
     def __init__(self, schema):
         super(GlobalSystemRowStoreMemory, self).__init__(
             schema=schema,
-            fields=('db_name', 'host', 'port', 'category', 'total', 'used', 'free'),
+            fields=("host", "port", "category", "total", "used", "free"),
             view="M_RS_MEMORY",
             query="""
                 SELECT
-                  DATABASE_NAME,
                   HOST,
                   PORT,
                   CATEGORY,
@@ -268,25 +275,23 @@ class GlobalSystemServiceStatistics(Query):
         super(GlobalSystemServiceStatistics, self).__init__(
             schema=schema,
             fields=(
-                'db_name',
-                'host',
-                'port',
-                'service',
-                'requests_per_second',
-                'response_time',
-                'requests_active',
-                'requests_pending',
-                'requests_finished_external',
-                'requests_finished_total',
-                'threads_total',
-                'threads_active',
-                'files_open',
-                'cpu_time',
+                "host",
+                "port",
+                "service",
+                "requests_per_second",
+                "response_time",
+                "requests_active",
+                "requests_pending",
+                "requests_finished_external",
+                "requests_finished_total",
+                "threads_total",
+                "threads_active",
+                "files_open",
+                "cpu_time",
             ),
             view="M_SERVICE_STATISTICS",
             query="""
                 SELECT
-                  DATABASE_NAME,
                   HOST,
                   PORT,
                   SERVICE_NAME,
@@ -314,23 +319,21 @@ class GlobalSystemVolumeIO(Query):
         super(GlobalSystemVolumeIO, self).__init__(
             schema=schema,
             fields=(
-                'db_name',
-                'host',
-                'port',
-                'resource',
-                'path',
-                'reads',
-                'read_size',
-                'read_time',
-                'writes',
-                'write_size',
-                'write_time',
-                'io_time',
+                "host",
+                "port",
+                "resource",
+                "path",
+                "reads",
+                "read_size",
+                "read_time",
+                "writes",
+                "write_size",
+                "write_time",
+                "io_time",
             ),
             view="M_VOLUME_IO_TOTAL_STATISTICS",
             query="""
                 SELECT
-                  DATABASE_NAME,
                   HOST,
                   PORT,
                   TYPE,
