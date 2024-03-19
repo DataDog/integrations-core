@@ -255,7 +255,7 @@
                                 },
                                 "group_by": [
                                     {
-                                        "facet": "@checkpoint.quantum.firewall.status",
+                                        "facet": "@status",
                                         "limit": 10,
                                         "sort": {
                                             "order": "desc",
@@ -316,7 +316,7 @@
                                 "width": "auto"
                             },
                             {
-                                "field": "checkpoint.quantum.firewall.status",
+                                "field": "@status",
                                 "width": "auto"
                             },
                             {
@@ -345,7 +345,7 @@
         },
         {
             "name": "Status",
-            "prefix": "@checkpoint.quantum.firewall.status",
+            "prefix": "@status",
             "available_values": [],
             "default": "*"
         },

@@ -111,13 +111,6 @@ facets:
     path: checkpoint.quantum.firewall.app_risk_str
     source: log
     type: string
-  - facetType: list
-    groups:
-      - Checkpoint Quantum Firewall
-    name: Status
-    path: checkpoint.quantum.firewall.status
-    source: log
-    type: string
   - facetType: range
     groups:
       - Checkpoint Quantum Firewall
@@ -486,22 +479,12 @@ pipeline:
       filter:
         query: '@product:"HTTPS Inspection"'
       processors:
-        - type: attribute-remapper
-          name: Map `status` to `checkpoint.quantum.firewall.status`
-          enabled: true
-          sources:
-            - status
-          sourceType: attribute
-          target: checkpoint.quantum.firewall.status
-          targetType: attribute
-          preserveSource: false
-          overrideOnConflict: false
         - type: status-remapper
-          name: Define `checkpoint.quantum.firewall.status` as the official status of the
+          name: Define `status` as the official status of the
             log
           enabled: true
           sources:
-            - checkpoint.quantum.firewall.status
+            - status
     - type: status-remapper
       name: Define `severity_to_status` as the official status of the log
       enabled: true
