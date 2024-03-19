@@ -36,7 +36,7 @@ argo_rollouts.go.memstats.lookups.count,count,,,,The number of pointer lookups,0
 argo_rollouts.go.memstats.mallocs.count,count,,,,The number of mallocs,0,argo_rollouts,argo_rollouts go memstats mallocs,
 argo_rollouts.go.memstats.mcache.inuse_bytes,gauge,,byte,,The number of bytes in use by mcache structures in the Argo Rollouts instance,0,argo_rollouts,argo_rollouts go memstats mcache inuse_bytes,
 argo_rollouts.go.memstats.mcache.sys_bytes,gauge,,byte,,The number of bytes used for mcache structures obtained from system in the Argo Rollouts instance,0,argo_rollouts,argo_rollouts go memstats mcache sys_bytes,
-argo_rollouts.go.memstats.mspan.inuse_use,gauge,,byte,,The number of bytes in use by mspan structures in the Argo Rollouts instance,0,argo_rollouts,argo_rollouts go memstats mspan inuse_use,
+argo_rollouts.go.memstats.mspan.inuse_bytes,gauge,,byte,,The number of bytes in use by mspan structures in the Argo Rollouts instance,0,argo_rollouts,argo_rollouts go memstats mspan inuse_use,
 argo_rollouts.go.memstats.mspan.sys_bytes,gauge,,byte,,The number of bytes used for mspan structures obtained from system in the Argo Rollouts instance,0,argo_rollouts,argo_rollouts go memstats mspan sys_bytes,
 argo_rollouts.go.memstats.next.gc_bytes,gauge,,byte,,The number of heap bytes when next garbage collection takes place in the Argo Rollouts instance,0,argo_rollouts,argo_rollouts go memstats next gc_bytes,
 argo_rollouts.go.memstats.other.sys_bytes,gauge,,byte,,The number of bytes used for other system allocations in the Argo Rollouts instance,0,argo_rollouts,argo_rollouts go memstats other sys_bytes,
