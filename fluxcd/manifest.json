@@ -42,6 +42,12 @@
       "service_checks": {
         "metadata_path": "assets/service_checks.json"
       },
+      "process_signatures": [
+        "helm-controller",
+        "kustomize-controller",
+        "notification-controller",
+        "source-controller"
+      ],
       "source_type_id": 10302,
       "auto_install": true
     },
