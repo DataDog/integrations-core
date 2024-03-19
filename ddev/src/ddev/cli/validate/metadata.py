@@ -286,14 +286,12 @@ def metadata(app: Application, integrations: tuple[str, ...], check_duplicates: 
         if is_core and current_check.name not in unsorted:
             sorted_rows = sorted(rows, key=lambda x: x['metric_name'])
             if sorted_rows != rows:
-                errors = True
+                error_message = f"{current_check.name}: metadata.csv is not sorted by metric name.\n"
 
-                error_message += (
-                    f"{current_check.name}: metadata.csv is not sorted by metric name. "
-                    f"Run `ddev validate metadata {current_check.name} --sync` to sort it.\n"
-                )
-
-                if sync:
+                if not sync:
+                    errors = True
+                    error_message += f"Run `ddev validate metadata {current_check.name} --sync` to sort it.\n"
+                else:
                     error_message += f"Sorting {metadata_file.relative_to(app.repo.path)} by metric names."
                     with metadata_file.open(mode='w', encoding='utf-8') as f:
                         writer = csv.DictWriter(f, fieldnames=metadata_utils.ORDERED_HEADERS)

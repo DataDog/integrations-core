@@ -716,17 +716,18 @@ metadata_integration.metric_b,gauge,,,,My metric B,0,metadata_integration,,
 
 
 def test_metrics_not_ordered(fake_repo, ddev, helpers):
+    outfile = os.path.join('metadata_integration', 'metadata.csv')
     result = ddev('validate', 'metadata', 'metadata_integration')
 
     assert result.exit_code == 1, result.output
     assert helpers.remove_trailing_spaces(result.output) == helpers.dedent(
-        """
+        f"""
         Metrics validation
         └── metadata_integration
-            └── metadata_integration/metadata.csv
+            └── {outfile}
 
-                metadata_integration: metadata.csv is not sorted by metric name. Run
-                `ddev validate metadata metadata_integration --sync` to sort it.
+                metadata_integration: metadata.csv is not sorted by metric name.
+                Run `ddev validate metadata metadata_integration --sync` to sort it.
 
         Errors: 1
         """
@@ -736,18 +737,12 @@ def test_metrics_not_ordered(fake_repo, ddev, helpers):
 def test_metrics_not_ordered_sync(fake_repo, ddev, helpers):
     result = ddev('validate', 'metadata', 'metadata_integration', '--sync')
 
-    assert result.exit_code == 1, result.output
+    assert result.exit_code == 0, result.output
     assert helpers.remove_trailing_spaces(result.output) == helpers.dedent(
         """
         Metrics validation
-        └── metadata_integration
-            └── metadata_integration/metadata.csv
 
-                metadata_integration: metadata.csv is not sorted by metric name. Run
-                `ddev validate metadata metadata_integration --sync` to sort it.
-                Sorting metadata_integration/metadata.csv by metric names
-
-        Errors: 1
+        Passed: 1
         """
     )
 
