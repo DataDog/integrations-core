@@ -19,3 +19,4 @@ def test_database_teleport_metrics(dd_run_check, aggregator, instance, mock_http
 
     for metric in DATABASE_METRICS:
         aggregator.assert_metric(f"teleport.{metric}")
+        aggregator.assert_metric_has_tag(f"teleport.{metric}", "teleport_service:database")
