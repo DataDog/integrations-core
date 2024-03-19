@@ -35,7 +35,7 @@ OM_METRICS = [
     'argo_rollouts.go.memstats.mallocs.count',
     'argo_rollouts.go.memstats.mcache.inuse_bytes',
     'argo_rollouts.go.memstats.mcache.sys_bytes',
-    'argo_rollouts.go.memstats.mspan.inuse_use',
+    'argo_rollouts.go.memstats.mspan.inuse_bytes',
     'argo_rollouts.go.memstats.mspan.sys_bytes',
     'argo_rollouts.go.memstats.next.gc_bytes',
     'argo_rollouts.go.memstats.other.sys_bytes',

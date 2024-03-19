@@ -3,6 +3,7 @@
 # Licensed under a 3-clause BSD style license (see LICENSE)
 from datadog_checks.base import OpenMetricsBaseCheckV2  # noqa: F401
 
+from .config_models import ConfigMixin
 from .metrics import METRIC_MAP, RENAME_LABELS_MAP
 
 
