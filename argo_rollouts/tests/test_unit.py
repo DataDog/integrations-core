@@ -36,11 +36,33 @@ def test_check_mock_invalid_argo_rollouts_openmetrics(dd_run_check, aggregator, 
 
 
 def test_check_mock_labels_rename(dd_run_check, aggregator, mock_http_response):
-    mock_http_response(file_path=get_fixture_path('openmetrics.txt'))
+    mock_http_response(file_path=get_fixture_path('label_rename.txt'))
     check = ArgoRolloutsCheck('argo_rollouts', {}, [OM_MOCKED_INSTANCE])
-    relabeled_tags = ['argo_rollouts_namespace:default', 'argo_rollouts_name:rollouts-demo']
+    relabeled_tags = ['argo_rollouts_namespace:default', 'argo_rollouts_name:rollouts-demo', 'go_version:go1.20.12']
     dd_run_check(check)
 
-    aggregator.assert_metric('argo_rollouts.rollout.phase')
+    aggregator.assert_metric('argo_rollouts.rollout.info')
     for tag in relabeled_tags:
-        aggregator.assert_metric_has_tag('argo_rollouts.rollout.phase', tag)
+        aggregator.assert_metric_has_tag('argo_rollouts.rollout.info', tag)
+
+
+def test_version_metadata(datadog_agent, dd_run_check, mock_http_response):
+    """
+    Test metadata version collection with V2 implementation
+    """
+    mock_http_response(file_path=get_fixture_path('openmetrics.txt'))
+    check = ArgoRolloutsCheck('argo_rollouts', {}, [OM_MOCKED_INSTANCE])
+    check.check_id = 'test:123'
+    dd_run_check(check)
+
+    # Version from fixture
+    version_metadata = {
+        'version.scheme': 'semver',
+        'version.major': '1',
+        'version.minor': '6',
+        'version.patch': '4',
+        'version.build': 'a312af9',
+        'version.raw': 'v1.6.4+a312af9',
+    }
+
+    datadog_agent.assert_metadata('test:123', version_metadata)

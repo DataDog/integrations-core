@@ -51,7 +51,6 @@ METRIC_MAP = {
     'analysis_run_phase': 'analysis.run.phase',
     'analysis_run_reconcile': 'analysis.run.reconcile',
     'analysis_run_reconcile_error': 'analysis.run.reconcile.error',
-    'argo_rollouts_controller_info': 'conroller.info',
     'experiment_info': 'experiment.info',
     'experiment_phase': 'experiment.phase',
     'experiment_reconcile': 'experiment.reconcile',
@@ -68,7 +67,12 @@ METRIC_MAP = {
     'rollout_reconcile_error': 'rollout.reconcile.error',
 }
 
+ARGO_ROLLOUT_VERSION = {'argo_rollouts_controller_info': {'type': 'metadata', 'label': 'version', 'name': 'version'}}
+
+METRIC_MAP.update(ARGO_ROLLOUT_VERSION)
+
 RENAME_LABELS_MAP = {
-    "name": "argo_rollouts_name",
+    'name': 'argo_rollouts_name',
     'namespace': 'argo_rollouts_namespace',
+    'version': 'go_version',
 }

@@ -7,7 +7,6 @@ argo_rollouts.analysis.run.reconcile.bucket,count,,,,The number of observations 
 argo_rollouts.analysis.run.reconcile.count,count,,,,The number of observations in the Analysis Run reconciliation performance histogram,0,argo_rollouts,argo_rollouts analysis run reconcile count,
 argo_rollouts.analysis.run.reconcile.error.count,count,,,,Error occurring during the analysis run,0,argo_rollouts,argo_rollouts analysis run reconcile error count,
 argo_rollouts.analysis.run.reconcile.sum,count,,,,The duration sum of all observations in the Analysis Run reconciliation performance histogram,0,argo_rollouts,argo_rollouts analysis run reconcile sum,
-argo_rollouts.conroller.info,gauge,,,,Running Argo-rollouts version. The value of this metric will be `1` and will be tagged by `version`,0,argo_rollouts,argo_rollouts controller info,
 argo_rollouts.controller.clientset.k8s.request.count,count,,,,The total number of Kubernetes requests executed during application reconciliation,0,argo_rollouts,argo_rollouts controller clientset k8s request,
 argo_rollouts.experiment.info,gauge,,,,Information about Experiment,0,argo_rollouts,argo_rollouts experiment info,
 argo_rollouts.experiment.phase,gauge,,,,Information on the state of the experiment,0,argo_rollouts,argo_rollouts experiment phase,

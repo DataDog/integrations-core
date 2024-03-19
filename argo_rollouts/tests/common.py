@@ -13,7 +13,7 @@ OM_MOCKED_INSTANCE = {
 }
 
 OM_METRICS = [
-    'argo_rollouts.conroller.info',
+    # 'argo_rollouts.conroller.info',
     'argo_rollouts.controller.clientset.k8s.request.count',
     'argo_rollouts.go.gc.duration.seconds.count',
     'argo_rollouts.go.gc.duration.seconds.quantile',
