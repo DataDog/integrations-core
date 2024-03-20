@@ -152,7 +152,9 @@ def mock_http_responses(url, **_params):
         (
             '/metrics/detailed?family=queue_consumer_count' '&family=queue_coarse_metrics'
         ): 'detailed-queue_coarse_metrics-queue_consumer_count.txt',
-        '/metrics/detailed?family=vhost_status': 'detailed-vhost_status.txt',
+        (
+            '/metrics/detailed?family=vhost_status&family=exchange_names&family=exchange_bindings'
+        ): 'detailed-only-metrics.txt',
     }[parsed.path + (f"?{parsed.query}" if parsed.query else "")]
     with open(OM_RESPONSE_FIXTURES / fname) as fh:
         return MockResponse(content=fh.read())
@@ -233,7 +235,7 @@ def test_detailed_only_metrics(aggregator, dd_run_check, mocker):
     A few, however, only expose metrics in the detailed endpoint.
     This means they show up without a `detailed` prefix.
     """
-    endpoint = 'detailed?family=vhost_status'
+    endpoint = 'detailed?family=vhost_status&family=exchange_names&family=exchange_bindings'
     check = _rmq_om_check(
         {
             'url': "http://localhost:15692",
