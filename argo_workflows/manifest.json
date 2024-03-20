@@ -31,7 +31,9 @@
       },
       "metrics": {
         "prefix": "argo_workflows.",
-        "check": "",
+        "check": [
+          "argo_workflows.go.info"
+        ],
         "metadata_path": "metadata.csv"
       },
       "service_checks": {
