@@ -21,6 +21,7 @@ tests:
       logger:
         thread_id: 12
     message: "2019-06-13 11:38:29.250 12 LOG Stats: 0 xacts/s, 0 queries/s, in 0 B/s, out 0 B/s, xact 0 us, query 0 us wait time 52 us"
+    status: "info"
     tags:
      - "source:LOGS_SOURCE"
     timestamp: 1560425909250
@@ -45,6 +46,7 @@ tests:
       logger:
         thread_id: 12
     message: "2019-06-13 11:38:29.250 UTC [12] LOG Stats: 0 xacts/s, 0 queries/s, in 0 B/s, out 0 B/s, xact 0 us, query 0 us wait time 52 us"
+    status: "info"
     tags:
      - "source:LOGS_SOURCE"
     timestamp: 1560425909250
@@ -67,6 +69,7 @@ tests:
           ip: "172.25.0.1"
           port: 34884
     message: "2019-06-13 11:37:31.382 12 LOG C-0xa845e0: datadog_test/postgres@172.25.0.1:34884 login attempt: db=datadog_test user=postgres tls=no"
+    status: "info"
     tags:
      - "source:LOGS_SOURCE"
     timestamp: 1560425851382
@@ -89,6 +92,7 @@ tests:
           ip: "172.25.0.1"
           port: 34884
     message: "2019-06-13 11:37:31.382 UTC [12] LOG C-0xa845e0: datadog_test/postgres@172.25.0.1:34884 login attempt: db=datadog_test user=postgres tls=no"
+    status: "info"
     tags:
      - "source:LOGS_SOURCE"
     timestamp: 1560425851382
@@ -110,6 +114,7 @@ tests:
           ip: "127.0.0.1"
           port: 42806
     message: "2019-06-13 12:55:18.603 13049 LOG C-0x5562e9990540: (nodb)/(nouser)@127.0.0.1:42806 login failed: db=postgres user=root"
+    status: "info"
     tags:
      - "source:LOGS_SOURCE"
     timestamp: 1560430518603
@@ -131,6 +136,7 @@ tests:
           ip: "127.0.0.1"
           port: 42806
     message: "2019-06-13 12:55:18.603 UTC [13049] LOG C-0x5562e9990540: (nodb)/(nouser)@127.0.0.1:42806 login failed: db=postgres user=root"
+    status: "info"
     tags:
      - "source:LOGS_SOURCE"
     timestamp: 1560430518603
@@ -151,6 +157,7 @@ tests:
           ip: "127.0.0.1"
           port: 42798
     message: "2019-06-13 12:54:30.775 13049 WARNING C-0x5562e9990540: (nodb)/(nouser)@127.0.0.1:42798 Pooler Error: No such database: postgres"
+    status: "warn"
     tags:
      - "source:LOGS_SOURCE"
     timestamp: 1560430470775
@@ -171,6 +178,7 @@ tests:
           ip: "127.0.0.1"
           port: 42798
     message: "2019-06-13 12:54:30.775 UTC [13049] WARNING C-0x5562e9990540: (nodb)/(nouser)@127.0.0.1:42798 Pooler Error: No such database: postgres"
+    status: "warn"
     tags:
      - "source:LOGS_SOURCE"
     timestamp: 1560430470775
@@ -184,6 +192,7 @@ tests:
       logger:
         thread_id: 47
     message: "2019-06-13 13:04:01.893 47 ERROR fill_defaults fail"
+    status: "error"
     tags:
      - "source:LOGS_SOURCE"
     timestamp: 1560431041893
@@ -197,6 +206,7 @@ tests:
       logger:
         thread_id: 47
     message: "2019-06-13 13:04:01.893 UTC [47] ERROR fill_defaults fail"
+    status: "error"
     tags:
      - "source:LOGS_SOURCE"
     timestamp: 1560431041893
@@ -210,6 +220,7 @@ tests:
       logger:
         thread_id: 12
     message: "2019-06-13 11:37:29.314 12 LOG process up: pgbouncer 1.8.1, libevent 2.0.21-stable (epoll), adns: c-ares 1.10.0, tls: OpenSSL 1.0.2g  1 Mar 2016"
+    status: "info"
     tags:
      - "source:LOGS_SOURCE"
     timestamp: 1560425849314
@@ -223,6 +234,7 @@ tests:
       logger:
         thread_id: 12
     message: "2019-06-13 11:37:29.314 UTC [12] LOG process up: pgbouncer 1.8.1, libevent 2.0.21-stable (epoll), adns: c-ares 1.10.0, tls: OpenSSL 1.0.2g  1 Mar 2016"
+    status: "info"
     tags:
      - "source:LOGS_SOURCE"
     timestamp: 1560425849314
@@ -236,6 +248,7 @@ tests:
       logger:
         thread_id: 12
     message: "2019-06-13 11:37:29.313 12 LOG listening on 0.0.0.0:6432"
+    status: "info"
     tags:
      - "source:LOGS_SOURCE"
     timestamp: 1560425849313
@@ -249,6 +262,7 @@ tests:
       logger:
         thread_id: 12
     message: "2019-06-13 11:37:29.313 UTC [12] LOG listening on 0.0.0.0:6432"
+    status: "info"
     tags:
      - "source:LOGS_SOURCE"
     timestamp: 1560425849313
@@ -270,6 +284,7 @@ tests:
           ip: "172.25.0.1"
           port: 34884
     message: "2019-06-13 11:37:31.382 12 LOG C-0xa845e0: (nodb)/(nouser)@172.25.0.1:34884 registered new auto-database: db = datadog_test"
+    status: "info"
     tags:
      - "source:LOGS_SOURCE"
     timestamp: 1560425851382
@@ -291,6 +306,7 @@ tests:
           ip: "172.25.0.1"
           port: 34884
     message: "2019-06-13 11:37:31.382 UTC [12] LOG C-0xa845e0: (nodb)/(nouser)@172.25.0.1:34884 registered new auto-database: db = datadog_test"
+    status: "info"
     tags:
      - "source:LOGS_SOURCE"
     timestamp: 1560425851382

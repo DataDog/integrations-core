@@ -9,6 +9,7 @@ tests:
         name: "org.apache.kafka.clients.producer.ProducerConfig"
       timestamp: 1580755387009
     message: "The configuration 'group.id' was supplied but isn't a known config."
+    status: "warn"
     tags:
      - "source:LOGS_SOURCE"
     timestamp: 1580755387009
@@ -21,6 +22,7 @@ tests:
         name: "org.apache.kafka.common.utils.AppInfoParser"
       timestamp: 1580755387389
     message: "Kafka version: 2.2.0"
+    status: "info"
     tags:
      - "source:LOGS_SOURCE"
     timestamp: 1580755387389
@@ -33,6 +35,7 @@ tests:
         name: "org.apache.flink.streaming.api.functions.sink.TwoPhaseCommitSinkFunction"
       timestamp: 1580755392251
     message: "FlinkKafkaProducer 1/2 - checkpoint 88 complete, committing transaction TransactionHolder{handle=KafkaTransactionState [transactionalId=null, producerId=-1, epoch=-1], transactionStartTime=1580755391235} from checkpoint 88"
+    status: "info"
     tags:
      - "source:LOGS_SOURCE"
     timestamp: 1580755392251

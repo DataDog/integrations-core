@@ -59,10 +59,7 @@ class TestIntegrationsIteration:
             lambda path: (path / 'manifest.json').is_file() and not (path / 'pyproject.toml').is_file(),
             id="tiles",
         ),
-        # TODO: remove tox when the Hatch migration is complete
-        pytest.param(
-            "iter_testable", lambda path: (path / 'hatch.toml').is_file() or (path / 'tox.ini').is_file(), id="testable"
-        ),
+        pytest.param("iter_testable", lambda path: (path / 'hatch.toml').is_file()),
         pytest.param(
             "iter_shippable",
             lambda path: (path / 'pyproject.toml').is_file() and path.name not in NOT_SHIPPABLE,
@@ -117,6 +114,15 @@ class TestIntegrationsIteration:
 
         assert [integration.name for integration in integrations] == selection
         assert list(iter_method(selection)) == integrations
+
+    def test_integrations_iteration_selection_changed(self, repository):
+        repo = Repository(repository.path.name, str(repository.path))
+
+        (repo.path / 'tekton' / 'foo.txt').touch()
+        selection = ['changed']
+        integrations = list(repo.integrations.iter(selection))
+
+        assert [integration.name for integration in integrations] == ["tekton"]
 
     @pytest.mark.parametrize(
         "method_name, integration_filter",

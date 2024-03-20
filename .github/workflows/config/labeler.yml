@@ -3,7 +3,7 @@ base_package:
 changelog/no-changelog:
 - any:
   - requirements-agent-release.txt
-  - '*/__about__.py'
+  - '**/__about__.py'
 - all:
   - '!*/datadog_checks/**'
   - '!*/pyproject.toml'
@@ -93,6 +93,8 @@ integration/cisco_aci:
 - cisco_aci/**/*
 integration/cisco_duo:
 - cisco_duo/**/*
+integration/cisco_secure_firewall:
+- cisco_secure_firewall/**/*
 integration/cisco_umbrella_dns:
 - cisco_umbrella_dns/**/*
 integration/citrix_hypervisor:
@@ -435,6 +437,8 @@ integration/tcp_queue_length:
 - tcp_queue_length/**/*
 integration/teamcity:
 - teamcity/**/*
+integration/tekton:
+- tekton/**/*
 integration/temporal:
 - temporal/**/*
 integration/tenable:
@@ -491,5 +495,9 @@ integration/zeek:
 - zeek/**/*
 integration/zk:
 - zk/**/*
+qa/skip-qa:
+- '**/__about__.py'
+- requirements-agent-release.txt
+- '*/CHANGELOG.md'
 release:
-- '*/__about__.py'
+- '**/__about__.py'

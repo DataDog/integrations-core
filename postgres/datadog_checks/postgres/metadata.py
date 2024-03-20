@@ -7,6 +7,8 @@ from typing import Dict, List, Optional, Tuple, Union  # noqa: F401
 
 import psycopg2
 
+from datadog_checks.postgres.cursor import CommenterDictCursor
+
 try:
     import datadog_agent
 except ImportError:
@@ -457,7 +459,7 @@ class PostgresMetadata(DBMAsyncJob):
     @tracked_method(agent_check_getter=agent_check_getter)
     def _collect_postgres_settings(self):
         with self._check._get_main_db() as conn:
-            with conn.cursor(cursor_factory=psycopg2.extras.DictCursor) as cursor:
+            with conn.cursor(cursor_factory=CommenterDictCursor) as cursor:
                 if self.pg_settings_ignored_patterns:
                     query = PG_SETTINGS_QUERY + " WHERE name NOT LIKE ALL(%s)"
                 else:

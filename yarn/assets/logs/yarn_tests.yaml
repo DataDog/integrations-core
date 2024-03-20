@@ -9,6 +9,7 @@ tests:
         name: "org.apache.hadoop.metrics2.impl.MetricsSystemImpl"
       timestamp: 1594745035414
     message: "NodeManager metrics system started"
+    status: "info"
     tags:
      - "source:LOGS_SOURCE"
     timestamp: 1594745035414
@@ -21,6 +22,7 @@ tests:
         name: "org.apache.hadoop.yarn.server.nodemanager.DirectoryCollection"
       timestamp: 1594745035460
     message: "Directory /tmp/hadoop-root/nm-local-dir error, used space above threshold of 90.0%, removing from list of valid directories"
+    status: "warn"
     tags:
      - "source:LOGS_SOURCE"
     timestamp: 1594745035460
@@ -33,6 +35,7 @@ tests:
         name: "org.apache.hadoop.yarn.server.resourcemanager.rmnode.RMNodeImpl"
       timestamp: 1594745182349
     message: "yarn-container:40113 Node Transitioned from NEW to RUNNING"
+    status: "info"
     tags:
      - "source:LOGS_SOURCE"
     timestamp: 1594745182349
@@ -49,6 +52,7 @@ tests:
           state: "FINAL_SAVING"
       timestamp: 1594745182349
     message: "appattempt_1595271076848_0001_000001 State change from SCHEDULED to FINAL_SAVING"
+    status: "info"
     tags:
      - "source:LOGS_SOURCE"
     timestamp: 1594745182349

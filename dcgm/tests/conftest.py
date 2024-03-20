@@ -28,7 +28,6 @@ def dd_environment():
         }
 
 
-# For E2E and Unit testing:
 @pytest.fixture
 def instance():
     return copy.deepcopy(common.INSTANCE)

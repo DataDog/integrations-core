@@ -69,6 +69,7 @@ tests:
         "OriginalDateTime" : "2022-01-25T08:13:40Z",
         "TrackLatestType" : "Rolled"
       }
+    status: "info"
     tags:
      - "source:LOGS_SOURCE"
     timestamp: 1643923866000
@@ -117,6 +118,7 @@ tests:
         "DateTime" : "2022-02-03T21:31:06Z",
         "Machine" : "127.0.0.1:4500"
       }
+    status: "warn"
     tags:
      - "source:LOGS_SOURCE"
     timestamp: 1643923866000
@@ -225,6 +227,7 @@ tests:
         "LimitingStorageServerDurabilityLag" : "5000000",
         "TrackLatestType" : "Original"
       }
+    status: "info"
     tags:
      - "source:LOGS_SOURCE"
     timestamp: 1643923867000

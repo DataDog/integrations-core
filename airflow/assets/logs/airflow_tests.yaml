@@ -9,6 +9,7 @@ tests:
       lineno: 820
       timestamp: 1577381609431
     message: "Processing files using up to 1 processes at a time"
+    status: "info"
     tags:
      - "source:LOGS_SOURCE"
     timestamp: 1577381609431
@@ -21,6 +22,7 @@ tests:
       lineno: 1409
       timestamp: 1596036083192
     message: "Harvested 0 SimpleDAGs"
+    status: "debug"
     tags:
      - "source:LOGS_SOURCE"
     timestamp: 1596036083192
@@ -33,6 +35,7 @@ tests:
       lineno: 211
       timestamp: 1577381965646
     message: "Setting up DB connection pool (PID 711)"
+    status: "debug"
     tags:
      - "source:LOGS_SOURCE"
     timestamp: 1577381965646
@@ -47,6 +50,7 @@ tests:
       subtask: "hello_world_fail_task"
       timestamp: 1577381688568
     message: "Setting up DB connection pool (PID 202)"
+    status: "debug"
     tags:
      - "source:LOGS_SOURCE"
     timestamp: 1577381688568
@@ -83,6 +87,7 @@ tests:
       lineno: 1058
       timestamp: 1577381689039
     message: "Hello world fail!"
+    status: "error"
     tags:
      - "source:LOGS_SOURCE"
     timestamp: 1577381689039
@@ -131,6 +136,7 @@ tests:
       lineno: 207
       timestamp: 1577381624033
     message: "Failed to import: /usr/local/airflow/dags/dag_file_error.py"
+    status: "error"
     tags:
      - "source:LOGS_SOURCE"
     timestamp: 1577381624033
@@ -157,6 +163,7 @@ tests:
         /usr/local/airflow/dags/task_sleep10.py
         /usr/local/airflow/dags/task_ok.py
         /usr/local/airflow/dags/tuto.py
+    status: "debug"
     tags:
      - "source:LOGS_SOURCE"
     timestamp: 1577381609452
@@ -184,6 +191,7 @@ tests:
       AIRFLOW_CTX_TASK_ID=hello_world_fail_task
       AIRFLOW_CTX_EXECUTION_DATE=2017-03-20T00:00:00+00:00
       AIRFLOW_CTX_DAG_RUN_ID=scheduled__2017-03-20T00:00:00+00:00
+    status: "info"
     tags:
      - "source:LOGS_SOURCE"
     timestamp: 1577381689039
@@ -202,6 +210,7 @@ tests:
       Random content
       foo
       bar
+    status: "info"
     tags:
      - "source:LOGS_SOURCE"
     timestamp: 1577381689039

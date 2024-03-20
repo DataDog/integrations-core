@@ -10,6 +10,7 @@ tests:
       status: "INFO"
       timestamp: 968335661508
     message: "Entering application."
+    status: "info"
     tags:
      - "source:LOGS_SOURCE"
     timestamp: 968335661508
@@ -23,6 +24,7 @@ tests:
         thread_name: "main"
       status: "INFO"
     message: "Entering application."
+    status: "info"
     tags:
      - "source:LOGS_SOURCE"
     timestamp: 1
@@ -36,6 +38,7 @@ tests:
       status: "INFO"
       timestamp: 968335664000
     message: "Entering application."
+    status: "info"
     tags:
      - "source:LOGS_SOURCE"
     timestamp: 968335664000

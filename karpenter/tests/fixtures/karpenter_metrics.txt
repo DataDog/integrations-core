@@ -2527,3 +2527,53 @@ karpenter_provisioner_usage{provisioner="karpenter-default",resource_type="pods"
 # HELP karpenter_provisioner_usage_pct The Provisioner Usage Percentage is the percentage of each resource used based on the resources provisioned and the limits that have been configured in the range [0,100].  Labeled by provisioner name and resource type.
 # TYPE karpenter_provisioner_usage_pct gauge
 karpenter_provisioner_usage_pct{provisioner="karpenter-default",resource_type="cpu"} 27
+# HELP karpenter_build_info A metric with a constant '1' value labeled by version from which karpenter was built.
+# TYPE karpenter_build_info gauge
+karpenter_build_info{commit="1cc62b0-dirty",goarch="amd64",goversion="go1.21.5",version="0.35.0-4-g1cc62b08"} 1
+# HELP karpenter_disruption_queue_depth The number of commands currently being waited on in the disruption orchestration queue.
+# TYPE karpenter_disruption_queue_depth gauge
+karpenter_disruption_queue_depth 0
+karpenter_disruption_queue_depth 10
+# HELP karpenter_disruption_pods_disrupted_total Total number of reschedulable pods disrupted on nodes. Labeled by NodePool, disruption action, method, and consolidation type.
+# TYPE karpenter_disruption_pods_disrupted_total counter
+karpenter_disruption_pods_disrupted_total{action="delete",consolidation_type="empty",method="consolidation",nodepool="test-1"} 0
+karpenter_disruption_pods_disrupted_total{action="delete",consolidation_type="empty",method="consolidation",nodepool="test-2"} 0
+karpenter_disruption_pods_disrupted_total{action="delete",consolidation_type="single",method="consolidation",nodepool="test-1"} 3
+karpenter_disruption_pods_disrupted_total{action="delete",consolidation_type="single",method="consolidation",nodepool="test-2"} 189
+karpenter_disruption_pods_disrupted_total{action="replace",consolidation_type="single",method="consolidation",nodepool="test-2"} 62
+# HELP karpenter_disruption_nodes_disrupted_total Total number of nodes disrupted. Labeled by NodePool, disruption action, method, and consolidation type.
+# TYPE karpenter_disruption_nodes_disrupted_total counter
+karpenter_disruption_nodes_disrupted_total{action="delete",consolidation_type="empty",method="consolidation",nodepool="test-1"} 1
+karpenter_disruption_nodes_disrupted_total{action="delete",consolidation_type="empty",method="consolidation",nodepool="test-2"} 10
+karpenter_disruption_nodes_disrupted_total{action="delete",consolidation_type="single",method="consolidation",nodepool="test-1"} 2
+karpenter_disruption_nodes_disrupted_total{action="delete",consolidation_type="single",method="consolidation",nodepool="test-2"} 31
+karpenter_disruption_nodes_disrupted_total{action="replace",consolidation_type="single",method="consolidation",nodepool="test-2"} 7
+# HELP karpenter_disruption_budgets_allowed_disruptions The number of nodes for a given NodePool that can be disrupted at a point in time. Labeled by NodePool. Note that allowed disruptions can change very rapidly, as new nodes may be created and others may be deleted at any point.
+# TYPE karpenter_disruption_budgets_allowed_disruptions gauge
+karpenter_disruption_budgets_allowed_disruptions{nodepool="test-1"} 1
+karpenter_disruption_budgets_allowed_disruptions{nodepool="test-4"} 1
+karpenter_disruption_budgets_allowed_disruptions{nodepool="test-2"} 17
+karpenter_disruption_budgets_allowed_disruptions{nodepool="test-3"} 3
+# HELP karpenter_disruption_actions_performed_total Number of disruption actions performed. Labeled by disruption action, method, and consolidation type.
+# TYPE karpenter_disruption_actions_performed_total counter
+karpenter_disruption_actions_performed_total{action="delete",consolidation_type="empty",method="consolidation"} 11
+karpenter_disruption_actions_performed_total{action="delete",consolidation_type="single",method="consolidation"} 36
+karpenter_disruption_actions_performed_total{action="replace",consolidation_type="single",method="consolidation"} 7
+# HELP karpenter_nodes_eviction_queue_depth The number of pods currently waiting for a successful eviction in the eviction queue.
+# TYPE karpenter_nodes_eviction_queue_depth gauge
+karpenter_nodes_eviction_queue_depth 0
+karpenter_nodes_eviction_queue_depth 5
+karpenter_nodes_eviction_queue_depth 2
+# HELP karpenter_provisioner_scheduling_queue_depth The number of pods currently waiting to be scheduled.
+# TYPE karpenter_provisioner_scheduling_queue_depth gauge
+karpenter_provisioner_scheduling_queue_depth{controller="disruption",scheduling_id="7899eca7-1ed7-4382-ab75-ca2a9fe5b1e3"} 0
+karpenter_provisioner_scheduling_queue_depth{controller="provisioner",scheduling_id="deb5d782-a9b4-4044-bba6-11ba59bb668b"} 0
+# HELP karpenter_cluster_state_synced Returns 1 if cluster state is synced and 0 otherwise. Synced checks that nodeclaims and nodes that are stored in the APIServer have the same representation as Karpenter's cluster state
+# TYPE karpenter_cluster_state_synced gauge
+karpenter_cluster_state_synced 1
+# HELP karpenter_cluster_state_node_count Current count of nodes in cluster state
+# TYPE karpenter_cluster_state_node_count gauge
+karpenter_cluster_state_node_count 265
+# HELP karpenter_disruption_consolidation_timeouts_total Number of times the Consolidation algorithm has reached a timeout. Labeled by consolidation type.
+# TYPE karpenter_disruption_consolidation_timeouts_total counter
+karpenter_disruption_consolidation_timeouts_total{consolidation_type="single"} 5

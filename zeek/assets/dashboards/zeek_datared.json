@@ -1,0 +1,447 @@
+{
+    "title": "Zeek - Datared",
+    "description": "-   This dashboard provides details for the number of log entries that would end up getting reported to the original log, compared to the number of entries in the reduced logs.",
+    "widgets": [
+        {
+            "id": 4116167915972166,
+            "definition": {
+                "type": "image",
+                "url": "https://i0.wp.com/zeek.org/wp-content/uploads/2019/09/logo.png?fit=275%2C91&ssl=1",
+                "sizing": "scale-down",
+                "has_background": true,
+                "has_border": false,
+                "vertical_align": "center",
+                "horizontal_align": "center"
+            },
+            "layout": {
+                "x": 0,
+                "y": 0,
+                "width": 4,
+                "height": 2
+            }
+        },
+        {
+            "id": 5254589726654618,
+            "definition": {
+                "type": "note",
+                "content": "## Overview\n- This dashboard provides details for the number of log entries that would end up getting reported to the original log, compared to the number of entries in the reduced logs.",
+                "background_color": "white",
+                "font_size": "14",
+                "text_align": "left",
+                "vertical_align": "top",
+                "show_tick": false,
+                "tick_pos": "50%",
+                "tick_edge": "left",
+                "has_padding": true
+            },
+            "layout": {
+                "x": 4,
+                "y": 0,
+                "width": 4,
+                "height": 2
+            }
+        },
+        {
+            "id": 3548511128016828,
+            "definition": {
+                "type": "note",
+                "content": "## Widgets\n1. Red Log Entries\n2. Original log Entries",
+                "background_color": "white",
+                "font_size": "14",
+                "text_align": "left",
+                "vertical_align": "top",
+                "show_tick": false,
+                "tick_pos": "50%",
+                "tick_edge": "left",
+                "has_padding": true
+            },
+            "layout": {
+                "x": 8,
+                "y": 0,
+                "width": 4,
+                "height": 2
+            }
+        },
+        {
+            "id": 3160930111305446,
+            "definition": {
+                "title": "Datared Overview",
+                "background_color": "vivid_purple",
+                "show_title": true,
+                "type": "group",
+                "layout_type": "ordered",
+                "widgets": [
+                    {
+                        "id": 933723809067650,
+                        "definition": {
+                            "title": "Red Log Entries",
+                            "title_size": "16",
+                            "title_align": "left",
+                            "type": "query_table",
+                            "requests": [
+                                {
+                                    "queries": [
+                                        {
+                                            "data_source": "logs",
+                                            "name": "query1",
+                                            "indexes": [
+                                                "*"
+                                            ],
+                                            "compute": {
+                                                "aggregation": "sum",
+                                                "metric": "@zeek.conn_red"
+                                            },
+                                            "group_by": [],
+                                            "search": {
+                                                "query": "source:zeek service:datared $Host"
+                                            },
+                                            "storage": "hot"
+                                        },
+                                        {
+                                            "data_source": "logs",
+                                            "name": "query3",
+                                            "indexes": [
+                                                "*"
+                                            ],
+                                            "compute": {
+                                                "aggregation": "sum",
+                                                "metric": "@zeek.dns_red"
+                                            },
+                                            "group_by": [],
+                                            "search": {
+                                                "query": "source:zeek service:datared $Host"
+                                            },
+                                            "storage": "hot"
+                                        },
+                                        {
+                                            "data_source": "logs",
+                                            "name": "query6",
+                                            "indexes": [
+                                                "*"
+                                            ],
+                                            "compute": {
+                                                "aggregation": "sum",
+                                                "metric": "@zeek.files_red"
+                                            },
+                                            "group_by": [],
+                                            "search": {
+                                                "query": "source:zeek service:datared $Host"
+                                            },
+                                            "storage": "hot"
+                                        },
+                                        {
+                                            "data_source": "logs",
+                                            "name": "query9",
+                                            "indexes": [
+                                                "*"
+                                            ],
+                                            "compute": {
+                                                "aggregation": "sum",
+                                                "metric": "@zeek.http_red"
+                                            },
+                                            "group_by": [],
+                                            "search": {
+                                                "query": "source:zeek service:datared $Host"
+                                            },
+                                            "storage": "hot"
+                                        },
+                                        {
+                                            "data_source": "logs",
+                                            "name": "query11",
+                                            "indexes": [
+                                                "*"
+                                            ],
+                                            "compute": {
+                                                "aggregation": "sum",
+                                                "metric": "@zeek.ssl_red"
+                                            },
+                                            "group_by": [],
+                                            "search": {
+                                                "query": "source:zeek service:datared $Host"
+                                            },
+                                            "storage": "hot"
+                                        },
+                                        {
+                                            "data_source": "logs",
+                                            "name": "query15",
+                                            "indexes": [
+                                                "*"
+                                            ],
+                                            "compute": {
+                                                "aggregation": "sum",
+                                                "metric": "@zeek.weird_red"
+                                            },
+                                            "group_by": [],
+                                            "search": {
+                                                "query": "source:zeek service:datared $Host"
+                                            },
+                                            "storage": "hot"
+                                        },
+                                        {
+                                            "data_source": "logs",
+                                            "name": "query17",
+                                            "indexes": [
+                                                "*"
+                                            ],
+                                            "compute": {
+                                                "aggregation": "sum",
+                                                "metric": "@zeek.x509_red"
+                                            },
+                                            "group_by": [],
+                                            "search": {
+                                                "query": "source:zeek service:datared $Host"
+                                            },
+                                            "storage": "hot"
+                                        }
+                                    ],
+                                    "response_format": "scalar",
+                                    "formulas": [
+                                        {
+                                            "cell_display_mode": "number",
+                                            "alias": "conn_red",
+                                            "formula": "query1",
+                                            "limit": {
+                                                "count": 500,
+                                                "order": "desc"
+                                            }
+                                        },
+                                        {
+                                            "cell_display_mode": "number",
+                                            "alias": "dns_red",
+                                            "formula": "query3"
+                                        },
+                                        {
+                                            "cell_display_mode": "number",
+                                            "alias": "files_red",
+                                            "formula": "query6"
+                                        },
+                                        {
+                                            "cell_display_mode": "number",
+                                            "alias": "http_red",
+                                            "formula": "query9"
+                                        },
+                                        {
+                                            "cell_display_mode": "number",
+                                            "alias": "ssl_red",
+                                            "formula": "query11"
+                                        },
+                                        {
+                                            "cell_display_mode": "number",
+                                            "alias": "weird_red",
+                                            "formula": "query15"
+                                        },
+                                        {
+                                            "cell_display_mode": "number",
+                                            "alias": "x509_red",
+                                            "formula": "query17"
+                                        }
+                                    ]
+                                }
+                            ],
+                            "has_search_bar": "auto"
+                        },
+                        "layout": {
+                            "x": 0,
+                            "y": 0,
+                            "width": 12,
+                            "height": 2
+                        }
+                    },
+                    {
+                        "id": 7222910795017826,
+                        "definition": {
+                            "title": "Original log Entries",
+                            "title_size": "16",
+                            "title_align": "left",
+                            "type": "query_table",
+                            "requests": [
+                                {
+                                    "queries": [
+                                        {
+                                            "data_source": "logs",
+                                            "name": "query1",
+                                            "indexes": [
+                                                "*"
+                                            ],
+                                            "compute": {
+                                                "aggregation": "sum",
+                                                "metric": "@zeek.conn_total"
+                                            },
+                                            "group_by": [],
+                                            "search": {
+                                                "query": "source:zeek service:datared $Host"
+                                            },
+                                            "storage": "hot"
+                                        },
+                                        {
+                                            "data_source": "logs",
+                                            "name": "query3",
+                                            "indexes": [
+                                                "*"
+                                            ],
+                                            "compute": {
+                                                "aggregation": "sum",
+                                                "metric": "@zeek.dns_total"
+                                            },
+                                            "group_by": [],
+                                            "search": {
+                                                "query": "source:zeek service:datared $Host"
+                                            },
+                                            "storage": "hot"
+                                        },
+                                        {
+                                            "data_source": "logs",
+                                            "name": "query9",
+                                            "indexes": [
+                                                "*"
+                                            ],
+                                            "compute": {
+                                                "aggregation": "sum",
+                                                "metric": "@zeek.files_total"
+                                            },
+                                            "group_by": [],
+                                            "search": {
+                                                "query": "source:zeek service:datared $Host"
+                                            },
+                                            "storage": "hot"
+                                        },
+                                        {
+                                            "data_source": "logs",
+                                            "name": "query15",
+                                            "indexes": [
+                                                "*"
+                                            ],
+                                            "compute": {
+                                                "aggregation": "sum",
+                                                "metric": "@zeek.http_total"
+                                            },
+                                            "group_by": [],
+                                            "search": {
+                                                "query": "source:zeek service:datared $Host"
+                                            },
+                                            "storage": "hot"
+                                        },
+                                        {
+                                            "data_source": "logs",
+                                            "name": "query17",
+                                            "indexes": [
+                                                "*"
+                                            ],
+                                            "compute": {
+                                                "aggregation": "sum",
+                                                "metric": "@zeek.ssl_total"
+                                            },
+                                            "group_by": [],
+                                            "search": {
+                                                "query": "source:zeek service:datared $Host"
+                                            },
+                                            "storage": "hot"
+                                        },
+                                        {
+                                            "data_source": "logs",
+                                            "name": "query8",
+                                            "indexes": [
+                                                "*"
+                                            ],
+                                            "compute": {
+                                                "aggregation": "sum",
+                                                "metric": "@zeek.weird_total"
+                                            },
+                                            "group_by": [],
+                                            "search": {
+                                                "query": "source:zeek service:datared $Host"
+                                            },
+                                            "storage": "hot"
+                                        },
+                                        {
+                                            "data_source": "logs",
+                                            "name": "query10",
+                                            "indexes": [
+                                                "*"
+                                            ],
+                                            "compute": {
+                                                "aggregation": "sum",
+                                                "metric": "@zeek.x509_total"
+                                            },
+                                            "group_by": [],
+                                            "search": {
+                                                "query": "source:zeek service:datared $Host"
+                                            },
+                                            "storage": "hot"
+                                        }
+                                    ],
+                                    "response_format": "scalar",
+                                    "formulas": [
+                                        {
+                                            "cell_display_mode": "number",
+                                            "alias": "conn_total",
+                                            "formula": "query1",
+                                            "limit": {
+                                                "count": 500,
+                                                "order": "desc"
+                                            }
+                                        },
+                                        {
+                                            "cell_display_mode": "number",
+                                            "alias": "dns_total",
+                                            "formula": "query3"
+                                        },
+                                        {
+                                            "cell_display_mode": "number",
+                                            "alias": "files_total",
+                                            "formula": "query9"
+                                        },
+                                        {
+                                            "cell_display_mode": "number",
+                                            "alias": "http_total",
+                                            "formula": "query15"
+                                        },
+                                        {
+                                            "cell_display_mode": "number",
+                                            "alias": "ssl_total",
+                                            "formula": "query17"
+                                        },
+                                        {
+                                            "cell_display_mode": "number",
+                                            "alias": "weird_total",
+                                            "formula": "query8"
+                                        },
+                                        {
+                                            "cell_display_mode": "number",
+                                            "alias": "x509_total",
+                                            "formula": "query10"
+                                        }
+                                    ]
+                                }
+                            ],
+                            "has_search_bar": "auto"
+                        },
+                        "layout": {
+                            "x": 0,
+                            "y": 2,
+                            "width": 12,
+                            "height": 2
+                        }
+                    }
+                ]
+            },
+            "layout": {
+                "x": 0,
+                "y": 2,
+                "width": 12,
+                "height": 5
+            }
+        }
+    ],
+    "template_variables": [
+        {
+            "name": "Host",
+            "prefix": "host",
+            "available_values": [],
+            "default": "*"
+        }
+    ],
+    "layout_type": "ordered",
+    "notify_list": [],
+    "reflow_type": "fixed"
+}

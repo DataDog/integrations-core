@@ -118,7 +118,11 @@ def test(
             targets[integration.name] = integration
 
     if not targets:
-        app.abort('No testable targets found')
+        if target_name == 'changed':
+            app.display_info('No changed testable targets found')
+            return
+        else:
+            app.abort('No testable targets found')
 
     if list_envs:
         multiple_targets = len(targets) > 1

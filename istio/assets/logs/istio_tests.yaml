@@ -42,6 +42,7 @@ tests:
         "user" : "unknown",
         "responseCode" : 200
       }
+    status: "ok"
     tags:
      - "source:LOGS_SOURCE"
     timestamp: 1537044395982
@@ -87,6 +88,7 @@ tests:
         "user" : "unknown",
         "responseCode" : 200
       }
+    status: "ok"
     tags:
      - "source:LOGS_SOURCE"
     timestamp: 1537044396009
