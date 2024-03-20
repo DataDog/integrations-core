@@ -141,7 +141,7 @@ WHERE  inhparent = {parent_oid};
 
 PARTITION_ACTIVITY_QUERY = """
 SELECT pi.inhparent :: regclass         AS parent_table_name,
-       SUM(psu.seq_scan + psu.idx_scan) AS total_activity
+       COALESCE(SUM(psu.seq_scan + psu.idx_scan), 0) AS total_activity
 FROM   pg_catalog.pg_stat_user_tables psu
        join pg_class pc
          ON psu.relname = pc.relname
