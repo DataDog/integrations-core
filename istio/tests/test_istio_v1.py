@@ -36,7 +36,7 @@ def test_legacy_proxy_mesh(aggregator, dd_run_check):
     for metric in common.LEGACY_MESH_METRICS + common.MESH_MERICS_1_5:
         aggregator.assert_metric(metric)
 
-    _assert_tags_excluded(aggregator, [])
+    _assert_tags_excluded(aggregator, [], True)
 
     aggregator.assert_all_metrics_covered()
 
@@ -58,7 +58,7 @@ def test_legacy_proxy_mesh_exclude(aggregator, dd_run_check):
     for metric in common.LEGACY_MESH_METRICS + common.MESH_MERICS_1_5:
         aggregator.assert_metric(metric)
 
-    _assert_tags_excluded(aggregator, exclude_tags)
+    _assert_tags_excluded(aggregator, exclude_tags, True)
 
     aggregator.assert_all_metrics_covered()
 

@@ -62,7 +62,8 @@ def test_proxy_exclude_labels(aggregator, dd_run_check, mock_http_response):
     for metric in common.V2_MESH_METRICS:
         aggregator.assert_metric(metric)
 
-    _assert_tags_excluded(aggregator, common.CONFIG_EXCLUDE_LABELS)
+    # Edited this test since v2 doesn't exclude connectionID
+    _assert_tags_excluded(aggregator, common.CONFIG_EXCLUDE_LABELS, False)
 
     aggregator.assert_metrics_using_metadata(get_metadata_metrics(), check_submission_type=True)
     aggregator.assert_all_metrics_covered()
@@ -126,7 +127,24 @@ def test_istio_agent(aggregator, dd_run_check, mock_http_response):
     'exclude_labels, expected_exclude_labels',
     [
         (
-            None,
+            [
+                'source_version',
+                'destination_version',
+                'source_canonical_revision',
+                'destination_canonical_revision',
+                'source_principal',
+                'destination_principal',
+                'source_cluster',
+                'destination_cluster',
+                'source_canonical_service',
+                'destination_canonical_service',
+                'source_workload_namespace',
+                'destination_workload_namespace',
+                'request_protocol',
+                'connection_security_policy',
+                'destination_service',
+                'source_workload',
+            ],
             [
                 'source_version',
                 'destination_version',
@@ -152,8 +170,7 @@ def test_istio_agent(aggregator, dd_run_check, mock_http_response):
 )
 def test_exclude_labels(exclude_labels, expected_exclude_labels):
     instance = copy.deepcopy(common.MOCK_V2_MESH_INSTANCE)
-    if exclude_labels is not None:
-        instance["exclude_labels"] = exclude_labels
+    instance["exclude_labels"] = exclude_labels
     check = Istio('istio', {}, [instance])
     assert check.instance["exclude_labels"] == expected_exclude_labels
 
