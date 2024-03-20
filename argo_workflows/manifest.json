@@ -9,7 +9,7 @@
     "support": "README.md#Support",
     "changelog": "CHANGELOG.md",
     "description": "Monitor the health and performance of Argo Workflows",
-    "title": "Argo_Workflows",
+    "title": "Argo Workflows",
     "media": [],
     "classifier_tags": [
       "Supported OS::Linux",
@@ -22,7 +22,7 @@
     "integration": {
       "auto_install": true,
       "source_type_id": 8511369,
-      "source_type_name": "Argo_Workflows",
+      "source_type_name": "Argo Workflows",
       "configuration": {
         "spec": "assets/configuration/spec.yaml"
       },
