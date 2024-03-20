@@ -6,7 +6,7 @@ import pytest
 
 from datadog_checks.argo_workflows import ArgoWorkflowsCheck
 from datadog_checks.base.stubs import aggregator as agg
-from datadog_checks.dev.utils import get_metadata_metrics
+from datadog_checks.dev.utils import assert_service_checks, get_metadata_metrics
 
 
 @pytest.fixture
@@ -59,6 +59,7 @@ COUNTS = {
         'go.memstats.mallocs.count',
     }
 }
+# Sorting eases debugging of missing metrics.
 EXPECTED_METRICS = sorted(GAUGES | COUNTS)
 
 
@@ -68,22 +69,23 @@ def test_check(dd_run_check, aggregator, instance, mock_http_response):
     dd_run_check(check)
 
     for m_name, m_type in EXPECTED_METRICS:
-        aggregator.assert_metric('argo_workflows.' + m_name, metric_type=m_type, at_least=1)
+        aggregator.assert_metric(f'argo_workflows.{m_name}', metric_type=m_type)
 
-    histograms = {
+    histograms = (
         'operation_duration_seconds',
         'queue_latency',
-    }
+    )
     for m_name in histograms:
-        aggregator.assert_metric('argo_workflows.' + m_name + '.sum', metric_type=agg.MONOTONIC_COUNT, at_least=1)
-        aggregator.assert_metric("argo_workflows." + m_name + '.count', metric_type=agg.MONOTONIC_COUNT, at_least=1)
-        aggregator.assert_metric('argo_workflows.' + m_name + '.bucket', metric_type=agg.MONOTONIC_COUNT, at_least=1)
+        aggregator.assert_metric(f'argo_workflows.{m_name}.sum', metric_type=agg.MONOTONIC_COUNT)
+        aggregator.assert_metric(f'argo_workflows.{m_name}.count', metric_type=agg.MONOTONIC_COUNT)
+        aggregator.assert_metric(f'argo_workflows.{m_name}.bucket', metric_type=agg.MONOTONIC_COUNT)
 
-    for suff in ('.count', '.quantile', '.sum'):
-        aggregator.assert_metric('argo_workflows.go.gc.duration.seconds' + suff, at_least=1)
+    for suff in ('count', 'quantile', 'sum'):
+        aggregator.assert_metric(f'argo_workflows.go.gc.duration.seconds.{suff}')
 
     aggregator.assert_all_metrics_covered()
     aggregator.assert_metrics_using_metadata(get_metadata_metrics())
+    assert_service_checks(aggregator)
 
 
 def test_emits_critical_service_check_when_service_is_down(dd_run_check, aggregator, instance, mock_http_response):
