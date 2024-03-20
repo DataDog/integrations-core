@@ -36,7 +36,7 @@ class MockedCollection(object):
                 content = json.load(f, object_hook=json_util.object_hook)
                 self.find_one = MagicMock(return_value=content)
         else:
-            with open(os.path.join(HERE, "fixtures", "indexStats-{}".format(coll_name)), 'r') as f:
+            with open(os.path.join(HERE, "fixtures", f"indexStats-{coll_name}"), 'r') as f:
                 self.aggregate = MagicMock(return_value=json.load(f, object_hook=json_util.object_hook))
 
 
@@ -51,15 +51,15 @@ class MockedDB(object):
     def command(self, command, *args, **_):
         filename = command
         if command == "dbstats":
-            filename += "-{}".format(self._db_name)
+            filename += f"-{self._db_name}"
         elif command == "collstats":
             coll_name = args[0]
-            filename += "-{}".format(coll_name)
+            filename += f"-{coll_name}"
         elif command in ("getCmdLineOpts", "replSetGetStatus"):
-            filename += "-{}".format(self.deployment)
+            filename += f"-{self.deployment}"
         elif command in ("find", "count", "aggregate"):
             # At time of writing, those commands only are for custom queries.
-            filename = "custom-query-{}".format(command)
+            filename = f"custom-query-{command}"
         with open(os.path.join(HERE, "fixtures", filename), 'r') as f:
             return json.load(f, object_hook=json_util.object_hook)
 

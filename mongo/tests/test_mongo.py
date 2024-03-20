@@ -5,7 +5,6 @@ import logging
 
 import mock
 import pytest
-from six import iteritems
 
 from datadog_checks.dev.utils import get_metadata_metrics
 from datadog_checks.mongo import MongoDb
@@ -84,7 +83,7 @@ def test_mongo_db_test(aggregator, check, instance_user, dd_run_check):
     check = check(instance_user)
     dd_run_check(check)
 
-    tags = ['host:{}'.format(common.HOST), 'port:{}'.format(common.PORT1), 'db:test']
+    tags = [f'host:{common.HOST}', f'port:{common.PORT1}', 'db:test']
     aggregator.assert_service_check('mongodb.can_connect', status=MongoDb.OK, tags=tags)
 
     metric_names = aggregator.metric_names
@@ -102,7 +101,7 @@ def test_mongo_arbiter(aggregator, check, instance_arbiter, dd_run_check):
     check = check(instance_arbiter)
     dd_run_check(check)
 
-    tags = ['host:{}'.format(common.HOST), 'port:{}'.format(common.PORT_ARBITER), 'db:admin']
+    tags = [f'host:{common.HOST}', f'port:{common.PORT_ARBITER}', 'db:admin']
     aggregator.assert_service_check('mongodb.can_connect', status=MongoDb.OK, tags=tags)
 
     metric_names = aggregator.metric_names
@@ -126,7 +125,7 @@ def test_mongo_arbiter(aggregator, check, instance_arbiter, dd_run_check):
         'replset_state:arbiter',
         'sharding_cluster_role:shardsvr',
     ]
-    for metric, value in iteritems(expected_metrics):
+    for metric, value in expected_metrics.items():
         aggregator.assert_metric(metric, value, expected_tags, count=1)
 
 
