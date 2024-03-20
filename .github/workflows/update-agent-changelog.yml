@@ -3,7 +3,7 @@ name: Update the Agent changelog
 on:
   push:
     tags:
-      - '^[0-9]+.[0-9]+.[0-9]+$'
+      - '[0-9]+.[0-9]+.[0-9]+'
 
 jobs:
   update_agent_changelog:
