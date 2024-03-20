@@ -7,7 +7,7 @@ import mock
 import pytest
 import requests
 
-from .common import FIXTURES_PATH, HOST, NGINX_VERSION, PORT, TAGS, USING_VTS
+from .common import FIXTURES_PATH, HOST, NGINX_VERSION, PORT, PORT_SSL, TAGS, USING_VTS
 from .utils import mocked_perform_request, requires_static_version
 
 pytestmark = [pytest.mark.skipif(USING_VTS, reason='Using VTS'), pytest.mark.integration]
@@ -20,9 +20,9 @@ def test_connect(check, instance, aggregator):
     """
     check = check(instance)
     check.check(instance)
-    aggregator.assert_metric("nginx.net.connections", tags=TAGS, count=1)
-    extra_tags = ['nginx_host:{}'.format(HOST), 'port:{}'.format(PORT)]
-    aggregator.assert_service_check('nginx.can_connect', tags=TAGS + extra_tags)
+    tags = TAGS + ['nginx_host:{}'.format(HOST), 'port:{}'.format(PORT)]
+    aggregator.assert_metric("nginx.net.connections", tags=tags, count=1)
+    aggregator.assert_service_check('nginx.can_connect', tags=tags)
 
 
 @pytest.mark.usefixtures('dd_environment')
@@ -37,15 +37,14 @@ def test_generic_tags(check, instance, aggregator, disable_generic_tags, host_ta
     """
     Generic tags should be removed from with the appropriate config toggle.
 
-    Important: this only applies to service checks, metrics don't have any host/port tags.
+    Important: this only applies to service checks, metrics always have only 'nginx_host' tag.
     """
     instance['disable_generic_tags'] = disable_generic_tags
     check = check(instance)
     check.check(instance)
-    aggregator.assert_metric("nginx.net.connections", tags=TAGS, count=1)
-    aggregator.assert_service_check(
-        'nginx.can_connect', tags=TAGS + ['nginx_host:{}'.format(HOST), 'port:{}'.format(PORT)] + host_tag
-    )
+    tags = TAGS + ['nginx_host:{}'.format(HOST), 'port:{}'.format(PORT)]
+    aggregator.assert_metric("nginx.net.connections", tags=tags, count=1)
+    aggregator.assert_service_check('nginx.can_connect', tags=tags + host_tag)
 
 
 @pytest.mark.usefixtures('dd_environment')
@@ -56,7 +55,9 @@ def test_connect_ssl(check, instance_ssl, aggregator):
     instance_ssl['ssl_validation'] = False
     check_no_ssl = check(instance_ssl)
     check_no_ssl.check(instance_ssl)
-    aggregator.assert_metric("nginx.net.connections", tags=TAGS, count=1)
+    aggregator.assert_metric(
+        "nginx.net.connections", tags=TAGS + ['nginx_host:{}'.format(HOST), 'port:{}'.format(PORT_SSL)], count=1
+    )
 
     # assert ssl validation throws an error
     with pytest.raises(requests.exceptions.SSLError):
