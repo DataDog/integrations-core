@@ -48,6 +48,32 @@ def test_db_storage_metrics(dd_run_check, aggregator, instance):
     aggregator.assert_metrics_using_metadata(get_metadata_metrics())
     aggregator.assert_all_metrics_covered()
 
+def test_table_storage_metrics(dd_run_check, aggregator, instance):
+    # type: (Callable[[SnowflakeCheck], None], AggregatorStub, Dict[str, Any]) -> None
+
+    expected_table_storage_usage = [('SNOWFLAKE_TABLE', 'SNOWFLAKE_SCHEMA', 'SNOWFLAKE_DB', False,
+                                     Decimal('14.6'), Decimal('80.9'), Decimal('13.7'), Decimal('96.1'),
+                                     Decimal('58.7'), Decimal('48.3'), Decimal('44.1'), Decimal('38.3'), )]
+    expected_tags = EXPECTED_TAGS + ['database:SNOWFLAKE_DB', 'deleted:False', 'schema:SNOWFLAKE_SCHEMA',
+                                     'table:SNOWFLAKE_TABLE']
+    with mock.patch(
+        'datadog_checks.snowflake.SnowflakeCheck.execute_query_raw', return_value=expected_table_storage_usage
+    ):
+        check = SnowflakeCheck(CHECK_NAME, {}, [instance])
+        check._conn = mock.MagicMock()
+        check._query_manager.queries = [Query(queries.TableStorage)]
+        dd_run_check(check)
+    aggregator.assert_metric('snowflake.storage.table.active_bytes.avg', value=14.6, tags=expected_tags)
+    aggregator.assert_metric('snowflake.storage.table.time_travel_bytes.avg', value=80.9, tags=expected_tags)
+    aggregator.assert_metric('snowflake.storage.table.failsafe_bytes.avg', value=13.7, tags=expected_tags)
+    aggregator.assert_metric('snowflake.storage.table.retained_bytes.avg', value=96.1, tags=expected_tags)
+    aggregator.assert_metric('snowflake.storage.table.active_bytes.sum', value=58.7, tags=expected_tags)
+    aggregator.assert_metric('snowflake.storage.table.time_travel_bytes.sum', value=48.3, tags=expected_tags)
+    aggregator.assert_metric('snowflake.storage.table.failsafe_bytes.sum', value=44.1, tags=expected_tags)
+    aggregator.assert_metric('snowflake.storage.table.retained_bytes.sum', value=38.3, tags=expected_tags)
+    aggregator.assert_metrics_using_metadata(get_metadata_metrics())
+    aggregator.assert_all_metrics_covered()
+
 
 def test_credit_usage_metrics(dd_run_check, aggregator, instance):
     # type: (Callable[[SnowflakeCheck], None], AggregatorStub, Dict[str, Any]) -> None
