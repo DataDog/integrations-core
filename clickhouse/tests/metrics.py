@@ -227,6 +227,8 @@ OPTIONAL_METRICS = [
     'clickhouse.table.replicated.active',
     'clickhouse.table.replicated.log.max',
     'clickhouse.table.replicated.log.pointer',
+    'clickhouse.table.replicated.part.check.count',
+    'clickhouse.table.replicated.part.check.total',
     'clickhouse.table.replicated.part.future',
     'clickhouse.table.replicated.part.suspect',
     'clickhouse.table.replicated.queue.insert',

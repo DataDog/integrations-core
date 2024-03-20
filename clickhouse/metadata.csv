@@ -371,6 +371,8 @@ clickhouse.table.replicated.leader.yield.total,gauge,,event,,The total number of
 clickhouse.table.replicated.log.max,gauge,,item,,Maximum entry number in the log of general activity.,0,clickhouse,,
 clickhouse.table.replicated.log.pointer,gauge,,item,,"Maximum entry number in the log of general activity that the replica copied to its execution queue, plus one. If this is much smaller than `clickhouse.table.replicated.log.max`, something is wrong.",0,clickhouse,,
 clickhouse.table.replicated.part.check,gauge,,item,,The number of data parts checking for consistency,0,clickhouse,,
+clickhouse.table.replicated.part.check.count,count,,item,,The number of data parts checking for consistency,0,clickhouse,,
+clickhouse.table.replicated.part.check.total,gauge,,item,,The number of data parts checking for consistency,0,clickhouse,,
 clickhouse.table.replicated.part.fetch,gauge,,item,,The number of data parts being fetched from replica,0,clickhouse,,
 clickhouse.table.replicated.part.future,gauge,,item,,The number of data parts that will appear as the result of INSERTs or merges that haven't been done yet.,0,clickhouse,,
 clickhouse.table.replicated.part.loss.count,count,,item,,"The number of times a data part we wanted doesn't exist on any replica (even on replicas that are offline right now) during the last interval. Those data parts are definitely lost. This is normal due to asynchronous replication (if quorum inserts were not enabled), when the replica on which the data part was written failed and when it became online after fail it doesn't contain that data part.",0,clickhouse,,
