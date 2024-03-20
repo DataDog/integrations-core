@@ -125,6 +125,8 @@ OPTIONAL_METRICS = [
     'clickhouse.fs.read.size.total',
     'clickhouse.fs.write.size.count',
     'clickhouse.fs.write.size.total',
+    'clickhouse.hash_table.elements.allocated.aggregation.count',
+    'clickhouse.hash_table.elements.allocated.aggregation.total',
     'clickhouse.jemalloc.active',
     'clickhouse.jemalloc.allocated',
     'clickhouse.jemalloc.background_thread.run_interval',
