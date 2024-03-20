@@ -484,7 +484,7 @@
                                             },
                                             "group_by": [],
                                             "search": {
-                                                "query": "source:zeek service:http $Host $Destination-Port $Destination-IP $Client-Port $Client-IP"
+                                                "query": "source:zeek service:(http OR http_red) $Host $Destination-Port $Destination-IP $Client-Port $Client-IP"
                                             },
                                             "storage": "hot"
                                         }
@@ -544,7 +544,7 @@
                                                 }
                                             ],
                                             "search": {
-                                                "query": "source:zeek service:http @http.method:* $Host $Destination-Port $Destination-IP $Client-Port $Client-IP"
+                                                "query": "source:zeek service:(http OR http_red) @http.method:* $Host $Destination-Port $Destination-IP $Client-Port $Client-IP"
                                             },
                                             "storage": "hot"
                                         }
@@ -593,7 +593,7 @@
                                             },
                                             "group_by": [],
                                             "search": {
-                                                "query": "source:zeek service:http $Host $Destination-Port $Destination-IP $Client-Port $Client-IP"
+                                                "query": "source:zeek service:(http OR http_red) $Host $Destination-Port $Destination-IP $Client-Port $Client-IP"
                                             },
                                             "storage": "hot"
                                         }
@@ -653,7 +653,7 @@
                                                 }
                                             ],
                                             "search": {
-                                                "query": "source:zeek service:http $Host $Destination-Port $Destination-IP $Client-Port $Client-IP"
+                                                "query": "source:zeek service:(http OR http_red) $Host $Destination-Port $Destination-IP $Client-Port $Client-IP"
                                             },
                                             "storage": "hot"
                                         }
@@ -715,7 +715,7 @@
                                                 }
                                             ],
                                             "search": {
-                                                "query": "source:zeek service:http $Host $Destination-Port $Destination-IP $Client-Port $Client-IP"
+                                                "query": "source:zeek service:(http OR http_red) $Host $Destination-Port $Destination-IP $Client-Port $Client-IP"
                                             },
                                             "storage": "hot"
                                         }
@@ -777,7 +777,7 @@
                                                 }
                                             ],
                                             "search": {
-                                                "query": "source:zeek service:http $Host $Destination-Port $Destination-IP $Client-Port $Client-IP"
+                                                "query": "source:zeek service:(http OR http_red) $Host $Destination-Port $Destination-IP $Client-Port $Client-IP"
                                             },
                                             "storage": "hot"
                                         }
@@ -839,7 +839,7 @@
                                                 }
                                             ],
                                             "search": {
-                                                "query": "source:zeek service:http $Host $Destination-Port $Destination-IP $Client-Port $Client-IP"
+                                                "query": "source:zeek service:(http OR http_red) $Host $Destination-Port $Destination-IP $Client-Port $Client-IP"
                                             },
                                             "storage": "hot"
                                         }
@@ -909,7 +909,7 @@
                                                 }
                                             ],
                                             "search": {
-                                                "query": "source:zeek service:http $Host $Destination-Port $Destination-IP $Client-Port $Client-IP"
+                                                "query": "source:zeek service:(http OR http_red) $Host $Destination-Port $Destination-IP $Client-Port $Client-IP"
                                             },
                                             "storage": "hot"
                                         }
@@ -979,7 +979,7 @@
                                                 }
                                             ],
                                             "search": {
-                                                "query": "source:zeek service:http $Host $Destination-Port $Destination-IP $Client-Port $Client-IP"
+                                                "query": "source:zeek service:(http OR http_red) $Host $Destination-Port $Destination-IP $Client-Port $Client-IP"
                                             },
                                             "storage": "hot"
                                         }
@@ -1013,7 +1013,7 @@
                                     "response_format": "event_list",
                                     "query": {
                                         "data_source": "logs_stream",
-                                        "query_string": "source:zeek service:http $Host $Destination-Port $Destination-IP $Client-Port $Client-IP",
+                                        "query_string": "source:zeek service:(http OR http_red) $Host $Destination-Port $Destination-IP $Client-Port $Client-IP",
                                         "indexes": [],
                                         "storage": "hot"
                                     },
@@ -1658,10 +1658,6 @@
                                         },
                                         {
                                             "field": "network.destination.ip",
-                                            "width": "auto"
-                                        },
-                                        {
-                                            "field": "network.destination.port",
                                             "width": "auto"
                                         },
                                         {
