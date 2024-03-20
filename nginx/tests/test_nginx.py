@@ -7,7 +7,7 @@ import mock
 import pytest
 import requests
 
-from .common import FIXTURES_PATH, HOST, NGINX_VERSION, PORT, PORT_SSL, TAGS, USING_VTS
+from .common import FIXTURES_PATH, HOST, NGINX_VERSION, PORT_SSL, TAGS_WITH_HOST, TAGS_WITH_HOST_AND_PORT, USING_VTS
 from .utils import mocked_perform_request, requires_static_version
 
 pytestmark = [pytest.mark.skipif(USING_VTS, reason='Using VTS'), pytest.mark.integration]
@@ -20,9 +20,8 @@ def test_connect(check, instance, aggregator):
     """
     check = check(instance)
     check.check(instance)
-    tags = TAGS + ['nginx_host:{}'.format(HOST), 'port:{}'.format(PORT)]
-    aggregator.assert_metric("nginx.net.connections", tags=tags, count=1)
-    aggregator.assert_service_check('nginx.can_connect', tags=tags)
+    aggregator.assert_metric("nginx.net.connections", tags=TAGS_WITH_HOST_AND_PORT, count=1)
+    aggregator.assert_service_check('nginx.can_connect', tags=TAGS_WITH_HOST_AND_PORT)
 
 
 @pytest.mark.usefixtures('dd_environment')
@@ -42,7 +41,7 @@ def test_generic_tags(check, instance, aggregator, disable_generic_tags, host_ta
     instance['disable_generic_tags'] = disable_generic_tags
     check = check(instance)
     check.check(instance)
-    tags = TAGS + ['nginx_host:{}'.format(HOST), 'port:{}'.format(PORT)]
+    tags = TAGS_WITH_HOST_AND_PORT
     aggregator.assert_metric("nginx.net.connections", tags=tags, count=1)
     aggregator.assert_service_check('nginx.can_connect', tags=tags + host_tag)
 
@@ -55,9 +54,7 @@ def test_connect_ssl(check, instance_ssl, aggregator):
     instance_ssl['ssl_validation'] = False
     check_no_ssl = check(instance_ssl)
     check_no_ssl.check(instance_ssl)
-    aggregator.assert_metric(
-        "nginx.net.connections", tags=TAGS + ['nginx_host:{}'.format(HOST), 'port:{}'.format(PORT_SSL)], count=1
-    )
+    aggregator.assert_metric("nginx.net.connections", tags=TAGS_WITH_HOST + ['port:{}'.format(PORT_SSL)], count=1)
 
     # assert ssl validation throws an error
     with pytest.raises(requests.exceptions.SSLError):
