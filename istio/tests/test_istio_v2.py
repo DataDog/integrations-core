@@ -54,7 +54,8 @@ def test_proxy_exclude_labels(aggregator, dd_run_check, mock_http_response):
     Test proxy mesh check for V2 implementation
     """
     mock_http_response(file_path=get_fixture_path('1.5', 'istio-proxy.txt'))
-    instance = common.MOCK_V2_MESH_INSTANCE
+    # Copy to prevent the instance in common from being overwritten
+    instance = copy.copy(common.MOCK_V2_MESH_INSTANCE)
     instance['exclude_labels'] = common.CONFIG_EXCLUDE_LABELS
     check = Istio(common.CHECK_NAME, {}, [instance])
     dd_run_check(check)
@@ -207,3 +208,13 @@ def test_unverified_metrics(aggregator, dd_run_check, mock_http_response):
 
     aggregator.assert_metrics_using_metadata(get_metadata_metrics(), check_submission_type=True)
     aggregator.assert_all_metrics_covered()
+
+
+def test_all_labels_submitted(aggregator, dd_run_check, mock_http_response):
+    mock_http_response(file_path=get_fixture_path(FIXTURE_DIR, 'test-labels.txt'))
+    # breakpoint()
+    check = Istio(common.CHECK_NAME, {}, [common.MOCK_V2_MESH_INSTANCE])
+    dd_run_check(check)
+
+    for tag in common.PREVIOUSLY_BLACKLISTED_TAGS:
+        aggregator.assert_metric_has_tag('istio.mesh.request.count', tag)

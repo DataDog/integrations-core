@@ -21,19 +21,14 @@ MOCK_V2_MESH_OVERRIDE_INSTANCE = {
     ],
 }
 
-MOCK_LEGACY_MESH_INSTANCE = {
-    'istio_mesh_endpoint': 'http://localhost:15090/metrics',
-    'use_openmetrics': False,
-}
-
-MOCK_V2_MESH_INSTANCE = {
-    'istio_mesh_endpoint': 'http://localhost:15090/metrics',
-    'use_openmetrics': True,
-}
-
 MOCK_V2_ISTIOD_INSTANCE = {
     'istiod_endpoint': 'http://localhost:8080/metrics',
     'use_openmetrics': True,
+}
+
+MOCK_LEGACY_MESH_INSTANCE = {
+    'istio_mesh_endpoint': 'http://localhost:15090/metrics',
+    'use_openmetrics': False,
 }
 
 MOCK_LEGACY_ISTIOD_INSTANCE = {
@@ -392,4 +387,32 @@ MOCK_TEST_METRICS = [
     'istio.galley.istio.networking.destinationrules',
     'istio.galley.istio.networking.gateways',
     'istio.galley.istio.authentication.meshpolicies',
+]
+
+PREVIOUSLY_BLACKLISTED_TAGS = [
+    'response_code:1',
+    'reporter:1',
+    'source_workload:1',
+    'source_workload_namespace:1',
+    'source_principal:1',
+    'source_app:1',
+    'source_version:1',
+    'source_cluster:1',
+    'destination_workload:1',
+    'destination_workload_namespace:1',
+    'destination_principal:1',
+    'destination_app:1',
+    'destination_version:1',
+    'destination_service:1',
+    'destination_service_name:1',
+    'destination_service_namespace:1',
+    'destination_cluster:1',
+    'request_protocol:1',
+    'response_flags:1',
+    'grpc_response_status:1',
+    'connection_security_policy:1',
+    'source_canonical_service:1',
+    'destination_canonical_service:1',
+    'source_canonical_revision:1',
+    'destination_canonical_revision:1',
 ]
