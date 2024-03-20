@@ -48,14 +48,32 @@ def test_db_storage_metrics(dd_run_check, aggregator, instance):
     aggregator.assert_metrics_using_metadata(get_metadata_metrics())
     aggregator.assert_all_metrics_covered()
 
+
 def test_table_storage_metrics(dd_run_check, aggregator, instance):
     # type: (Callable[[SnowflakeCheck], None], AggregatorStub, Dict[str, Any]) -> None
 
-    expected_table_storage_usage = [('SNOWFLAKE_TABLE', 'SNOWFLAKE_SCHEMA', 'SNOWFLAKE_DB', False,
-                                     Decimal('14.6'), Decimal('80.9'), Decimal('13.7'), Decimal('96.1'),
-                                     Decimal('58.7'), Decimal('48.3'), Decimal('44.1'), Decimal('38.3'), )]
-    expected_tags = EXPECTED_TAGS + ['database:SNOWFLAKE_DB', 'deleted:False', 'schema:SNOWFLAKE_SCHEMA',
-                                     'table:SNOWFLAKE_TABLE']
+    expected_table_storage_usage = [
+        (
+            'SNOWFLAKE_TABLE',
+            'SNOWFLAKE_SCHEMA',
+            'SNOWFLAKE_DB',
+            False,
+            Decimal('14.6'),
+            Decimal('80.9'),
+            Decimal('13.7'),
+            Decimal('96.1'),
+            Decimal('58.7'),
+            Decimal('48.3'),
+            Decimal('44.1'),
+            Decimal('38.3'),
+        )
+    ]
+    expected_tags = EXPECTED_TAGS + [
+        'database:SNOWFLAKE_DB',
+        'deleted:False',
+        'schema:SNOWFLAKE_SCHEMA',
+        'table:SNOWFLAKE_TABLE',
+    ]
     with mock.patch(
         'datadog_checks.snowflake.SnowflakeCheck.execute_query_raw', return_value=expected_table_storage_usage
     ):
