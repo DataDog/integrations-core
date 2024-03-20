@@ -144,6 +144,8 @@ OPTIONAL_METRICS = [
     'clickhouse.memory.arena.chunks.count',
     'clickhouse.memory.arena.chunks.total',
     'clickhouse.merge.count',
+    'clickhouse.merge.parts.compact.count',
+    'clickhouse.merge.parts.compact.total',
     'clickhouse.merge.read.size.uncompressed.count',
     'clickhouse.merge.read.size.uncompressed.total',
     'clickhouse.merge.row.read.count',
