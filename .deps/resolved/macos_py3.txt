@@ -132,4 +132,3 @@ websocket-client @ https://storage.googleapis.com/dd-agent-int-deps/external/web
 wrapt @ https://storage.googleapis.com/dd-agent-int-deps/external/wrapt/wrapt-1.16.0-cp311-cp311-win_amd64.whl#sha256=aefbc4cb0a54f91af643660a0a150ce2c090d3652cf4052a5397fb2de549cd89
 xmltodict @ https://storage.googleapis.com/dd-agent-int-deps/external/xmltodict/xmltodict-0.13.0-py2.py3-none-any.whl#sha256=aa89e8fd76320154a40d19a0df04a4695fb9dc5ba977cbb68ab3e4eb225e7852
 zipp @ https://storage.googleapis.com/dd-agent-int-deps/external/zipp/zipp-3.17.0-py3-none-any.whl#sha256=0e923e726174922dce09c53c59ad483ff7bbb8e572e00c7f7c46b88556409f31
-
