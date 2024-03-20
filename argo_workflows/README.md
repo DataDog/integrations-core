@@ -1,4 +1,4 @@
-# Agent Check: Argo_Workflows
+# Agent Check: Argo Workflows
 
 ## Overview
 

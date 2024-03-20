@@ -1,7 +1,7 @@
 [
     {
         "agent_version": "7.53.0",
-        "integration": "Argo_Workflows",
+        "integration": "Argo Workflows",
         "check": "argo_workflows.openmetrics.health",
         "statuses": [
             "ok",
@@ -11,7 +11,7 @@
             "host",
             "endpoint"
         ],
-        "name": "Argo Workflows openmetrics endpoint up",
-        "description": "Returns `CRITICAL` if the check cannot access the openmetrics metrics endpoint of Ray."
+        "name": "Argo Workflows OpenMetrics endpoint up",
+        "description": "Returns `CRITICAL` if the check cannot access the OpenMetrics metrics endpoint of Argo Workflows."
     }
 ]

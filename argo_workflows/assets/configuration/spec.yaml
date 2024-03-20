@@ -1,4 +1,4 @@
-name: Argo_Workflows
+name: Argo Workflows
 files:
 - name: argo_workflows.yaml
   options:
@@ -9,7 +9,6 @@ files:
     options:
     - template: instances/openmetrics
       overrides:
-        openmetrics_endpoint.required: true
         openmetrics_endpoint.value.example: http://localhost:9090/metrics
         openmetrics_endpoint.description: |
           Endpoint exposing the Workflow Controller's Prometheus metrics. For more information refer to:

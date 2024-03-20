@@ -375,7 +375,7 @@ jobs:
   jea02f7c:
     uses: ./.github/workflows/test-target.yml
     with:
-      job-name: Argo_Workflows
+      job-name: Argo Workflows
       target: argo_workflows
       platform: linux
       runner: '["ubuntu-22.04"]'

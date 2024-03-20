@@ -1,4 +1,4 @@
-# CHANGELOG - Argo_Workflows
+# CHANGELOG - Argo Workflows
 
 <!-- towncrier release notes start -->
 
