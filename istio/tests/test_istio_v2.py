@@ -212,7 +212,6 @@ def test_unverified_metrics(aggregator, dd_run_check, mock_http_response):
 
 def test_all_labels_submitted(aggregator, dd_run_check, mock_http_response):
     mock_http_response(file_path=get_fixture_path(FIXTURE_DIR, 'test-labels.txt'))
-    # breakpoint()
     check = Istio(common.CHECK_NAME, {}, [common.MOCK_V2_MESH_INSTANCE])
     dd_run_check(check)
 
