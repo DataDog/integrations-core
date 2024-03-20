@@ -9,6 +9,7 @@ tests:
         name: "org.apache.hudi.timeline.service.TimelineService"
       timestamp: 1632257446169
     message: "Starting Timeline server on port :41517"
+    status: "info"
     tags:
      - "source:LOGS_SOURCE"
     timestamp: 1632257446169
@@ -21,6 +22,7 @@ tests:
         name: "HoodieDeltaStreamer"
       timestamp: 1631294474101
     message: "Got error running delta sync once. Shutting down"
+    status: "error"
     tags:
      - "source:LOGS_SOURCE"
     timestamp: 1631294474101
@@ -33,6 +35,7 @@ tests:
         name: "org.apache.hudi.common.table.HoodieTableConfig"
       timestamp: 1632257445546
     message: "Loading table properties from file:/tmp/hudi_table/.hoodie/hoodie.properties"
+    status: "info"
     tags:
      - "source:LOGS_SOURCE"
     timestamp: 1632257445546

@@ -22,12 +22,15 @@ if [[ "${DD_BUILD_PYTHON_VERSION}" == "3" ]]; then
         RELATIVE_PATH="librdkafka-{{version}}" \
         bash install-from-source.sh --enable-sasl --enable-curl
     always_build+=("confluent-kafka")
+
+    # The version of pyodbc is dynamically linked against a version of the odbc which doesn't come included in the wheel
+    # That causes the omnibus' health check to flag it. Forcing the build so that we do include it in the wheel.
+    always_build+=("pyodbc")
 fi
 
-# Empty arrays are flagged as unset when using the `-u` flag. This is the safest way to work around that
-# (see https://stackoverflow.com/a/61551944)
-pip_no_binary=${always_build[@]+"${always_build[@]}"}
+# package names passed to PIP_NO_BINARY need to be separated by commas
+pip_no_binary=$(IFS=, ; printf "${always_build[*]-}")
 if [[ "$pip_no_binary" ]]; then
     # If there are any packages that must always be built, inform pip
-    echo "PIP_NO_BINARY=\"${pip_no_binary}\"" >> $DD_ENV_FILE
+    echo "PIP_NO_BINARY=${pip_no_binary}" >> $DD_ENV_FILE
 fi

@@ -1,0 +1,2079 @@
+# HELP admission_wait_queue_length_sql_sql_response_locking_normal_pri Length of wait queue
+# TYPE admission_wait_queue_length_sql_sql_response_locking_normal_pri gauge
+admission_wait_queue_length_sql_sql_response_locking_normal_pri{node_id="1"} 0
+
+# HELP admission_errored_kv_stores Number of requests not admitted due to error
+# TYPE admission_errored_kv_stores counter
+admission_errored_kv_stores{node_id="1"} 0
+# HELP admission_wait_queue_length_sql_kv_response Length of wait queue
+# TYPE admission_wait_queue_length_sql_kv_response gauge
+admission_wait_queue_length_sql_kv_response{node_id="1"} 0
+# HELP admission_errored_sql_sql_response_normal_pri Number of requests not admitted due to error
+# TYPE admission_errored_sql_sql_response_normal_pri counter
+admission_errored_sql_sql_response_normal_pri{node_id="1"} 0
+# HELP admission_elastic_cpu_returned_nanos Total CPU nanoseconds returned by elastic work
+# TYPE admission_elastic_cpu_returned_nanos counter
+admission_elastic_cpu_returned_nanos{node_id="1"} 0
+# HELP admission_granter_io_tokens_returned_kv Total number of tokens returned
+# TYPE admission_granter_io_tokens_returned_kv counter
+admission_granter_io_tokens_returned_kv{node_id="1"} 725
+# HELP admission_admitted_sql_root_start_normal_pri Number of requests admitted
+# TYPE admission_admitted_sql_root_start_normal_pri counter
+admission_admitted_sql_root_start_normal_pri{node_id="1"} 0
+# HELP admission_requested_kv_normal_pri Number of requests
+# TYPE admission_requested_kv_normal_pri counter
+admission_requested_kv_normal_pri{node_id="1"} 6907
+# HELP admission_wait_queue_length_sql_kv_response_locking_normal_pri Length of wait queue
+# TYPE admission_wait_queue_length_sql_kv_response_locking_normal_pri gauge
+admission_wait_queue_length_sql_kv_response_locking_normal_pri{node_id="1"} 0
+# HELP admission_errored_elastic_cpu Number of requests not admitted due to error
+# TYPE admission_errored_elastic_cpu counter
+admission_errored_elastic_cpu{node_id="1"} 0
+# HELP admission_admitted_sql_sql_response_normal_pri Number of requests admitted
+# TYPE admission_admitted_sql_sql_response_normal_pri counter
+admission_admitted_sql_sql_response_normal_pri{node_id="1"} 0
+# HELP admission_wait_durations_sql_sql_response_normal_pri Wait time durations for requests that waited
+# TYPE admission_wait_durations_sql_sql_response_normal_pri histogram
+admission_wait_durations_sql_sql_response_normal_pri_bucket{node_id="1",le="10000"} 0
+admission_wait_durations_sql_sql_response_normal_pri_bucket{node_id="1",le="12638.482029342978"} 0
+admission_wait_durations_sql_sql_response_normal_pri_bucket{node_id="1",le="15973.122800602541"} 0
+admission_wait_durations_sql_sql_response_normal_pri_bucket{node_id="1",le="20187.602546790382"} 0
+admission_wait_durations_sql_sql_response_normal_pri_bucket{node_id="1",le="25514.065200312878"} 0
+admission_wait_durations_sql_sql_response_normal_pri_bucket{node_id="1",le="32245.90545296394"} 0
+admission_wait_durations_sql_sql_response_normal_pri_bucket{node_id="1",le="40753.92965871775"} 0
+admission_wait_durations_sql_sql_response_normal_pri_bucket{node_id="1",le="51506.78076168121"} 0
+admission_wait_durations_sql_sql_response_normal_pri_bucket{node_id="1",le="65096.75230458167"} 0
+admission_wait_durations_sql_sql_response_normal_pri_bucket{node_id="1",le="82272.41341700466"} 0
+admission_wait_durations_sql_sql_response_normal_pri_bucket{node_id="1",le="103979.84184814895"} 0
+admission_wait_durations_sql_sql_response_normal_pri_bucket{node_id="1",le="131414.73626117557"} 0
+admission_wait_durations_sql_sql_response_normal_pri_bucket{node_id="1",le="166088.27826277143"} 0
+admission_wait_durations_sql_sql_response_normal_pri_bucket{node_id="1",le="209910.3720108553"} 0
+admission_wait_durations_sql_sql_response_normal_pri_bucket{node_id="1",le="265294.8464431894"} 0
+admission_wait_durations_sql_sql_response_normal_pri_bucket{node_id="1",le="335292.41492495546"} 0
+admission_wait_durations_sql_sql_response_normal_pri_bucket{node_id="1",le="423758.7160604059"} 0
+admission_wait_durations_sql_sql_response_normal_pri_bucket{node_id="1",le="535566.6917706894"} 0
+admission_wait_durations_sql_sql_response_normal_pri_bucket{node_id="1",le="676875.0009458527"} 0
+admission_wait_durations_sql_sql_response_normal_pri_bucket{node_id="1",le="855467.2535565672"} 0
+admission_wait_durations_sql_sql_response_normal_pri_bucket{node_id="1",le="1.0811807510766068e+06"} 0
+admission_wait_durations_sql_sql_response_normal_pri_bucket{node_id="1",le="1.3664483492953242e+06"} 0
+admission_wait_durations_sql_sql_response_normal_pri_bucket{node_id="1",le="1.7269832906594332e+06"} 0
+admission_wait_durations_sql_sql_response_normal_pri_bucket{node_id="1",le="2.182644728397485e+06"} 0
+admission_wait_durations_sql_sql_response_normal_pri_bucket{node_id="1",le="2.7585316176291797e+06"} 0
+admission_wait_durations_sql_sql_response_normal_pri_bucket{node_id="1",le="3.4863652276780806e+06"} 0
+admission_wait_durations_sql_sql_response_normal_pri_bucket{node_id="1",le="4.406236427773566e+06"} 0
+admission_wait_durations_sql_sql_response_normal_pri_bucket{node_id="1",le="5.568813990945262e+06"} 0
+admission_wait_durations_sql_sql_response_normal_pri_bucket{node_id="1",le="7.038135554931545e+06"} 0
+admission_wait_durations_sql_sql_response_normal_pri_bucket{node_id="1",le="8.89513497310822e+06"} 0
+admission_wait_durations_sql_sql_response_normal_pri_bucket{node_id="1",le="1.1242100350620849e+07"} 0
+admission_wait_durations_sql_sql_response_normal_pri_bucket{node_id="1",le="1.4208308325339198e+07"} 0
+admission_wait_durations_sql_sql_response_normal_pri_bucket{node_id="1",le="1.795714494371637e+07"} 0
+admission_wait_durations_sql_sql_response_normal_pri_bucket{node_id="1",le="2.269510536694665e+07"} 0
+admission_wait_durations_sql_sql_response_normal_pri_bucket{node_id="1",le="2.868316813342006e+07"} 0
+admission_wait_durations_sql_sql_response_normal_pri_bucket{node_id="1",le="3.625117049988527e+07"} 0
+admission_wait_durations_sql_sql_response_normal_pri_bucket{node_id="1",le="4.581597669054482e+07"} 0
+admission_wait_durations_sql_sql_response_normal_pri_bucket{node_id="1",le="5.790443980602476e+07"} 0
+admission_wait_durations_sql_sql_response_normal_pri_bucket{node_id="1",le="7.318242219076161e+07"} 0
+admission_wait_durations_sql_sql_response_normal_pri_bucket{node_id="1",le="9.249147277217315e+07"} 0
+admission_wait_durations_sql_sql_response_normal_pri_bucket{node_id="1",le="1.1689518164985757e+08"} 0
+admission_wait_durations_sql_sql_response_normal_pri_bucket{node_id="1",le="1.4773776525985083e+08"} 0
+admission_wait_durations_sql_sql_response_normal_pri_bucket{node_id="1",le="1.8671810912919158e+08"} 0
+admission_wait_durations_sql_sql_response_normal_pri_bucket{node_id="1",le="2.359833466782189e+08"} 0
+admission_wait_durations_sql_sql_response_normal_pri_bucket{node_id="1",le="2.9824712862168837e+08"} 0
+admission_wait_durations_sql_sql_response_normal_pri_bucket{node_id="1",le="3.769390975388353e+08"} 0
+admission_wait_durations_sql_sql_response_normal_pri_bucket{node_id="1",le="4.7639380104013294e+08"} 0
+admission_wait_durations_sql_sql_response_normal_pri_bucket{node_id="1",le="6.020894493336115e+08"} 0
+admission_wait_durations_sql_sql_response_normal_pri_bucket{node_id="1",le="7.609496685459859e+08"} 0
+admission_wait_durations_sql_sql_response_normal_pri_bucket{node_id="1",le="9.61724871115294e+08"} 0
+admission_wait_durations_sql_sql_response_normal_pri_bucket{node_id="1",le="1.2154742500762835e+09"} 0
+admission_wait_durations_sql_sql_response_normal_pri_bucket{node_id="1",le="1.5361749466718242e+09"} 0
+admission_wait_durations_sql_sql_response_normal_pri_bucket{node_id="1",le="1.941491945743876e+09"} 0
+admission_wait_durations_sql_sql_response_normal_pri_bucket{node_id="1",le="2.453751106639811e+09"} 0
+admission_wait_durations_sql_sql_response_normal_pri_bucket{node_id="1",le="3.10116892657477e+09"} 0
+admission_wait_durations_sql_sql_response_normal_pri_bucket{node_id="1",le="3.919406774847209e+09"} 0
+admission_wait_durations_sql_sql_response_normal_pri_bucket{node_id="1",le="4.953535208959157e+09"} 0
+admission_wait_durations_sql_sql_response_normal_pri_bucket{node_id="1",le="6.260516572014802e+09"} 0
+admission_wait_durations_sql_sql_response_normal_pri_bucket{node_id="1",le="7.912342618981298e+09"} 0
+admission_wait_durations_sql_sql_response_normal_pri_bucket{node_id="1",le="9.99999999999997e+09"} 0
+admission_wait_durations_sql_sql_response_normal_pri_bucket{node_id="1",le="+Inf"} 0
+admission_wait_durations_sql_sql_response_normal_pri_sum{node_id="1"} 0
+admission_wait_durations_sql_sql_response_normal_pri_count{node_id="1"} 0
+# HELP admission_requested_elastic_cpu_normal_pri Number of requests
+# TYPE admission_requested_elastic_cpu_normal_pri counter
+admission_requested_elastic_cpu_normal_pri{node_id="1"} 0
+# HELP admission_wait_durations_sql_kv_response Wait time durations for requests that waited
+# TYPE admission_wait_durations_sql_kv_response histogram
+admission_wait_durations_sql_kv_response_bucket{node_id="1",le="10000"} 6139
+admission_wait_durations_sql_kv_response_bucket{node_id="1",le="12638.482029342978"} 6139
+admission_wait_durations_sql_kv_response_bucket{node_id="1",le="15973.122800602541"} 6139
+admission_wait_durations_sql_kv_response_bucket{node_id="1",le="20187.602546790382"} 6139
+admission_wait_durations_sql_kv_response_bucket{node_id="1",le="25514.065200312878"} 6139
+admission_wait_durations_sql_kv_response_bucket{node_id="1",le="32245.90545296394"} 6139
+admission_wait_durations_sql_kv_response_bucket{node_id="1",le="40753.92965871775"} 6139
+admission_wait_durations_sql_kv_response_bucket{node_id="1",le="51506.78076168121"} 6139
+admission_wait_durations_sql_kv_response_bucket{node_id="1",le="65096.75230458167"} 6139
+admission_wait_durations_sql_kv_response_bucket{node_id="1",le="82272.41341700466"} 6139
+admission_wait_durations_sql_kv_response_bucket{node_id="1",le="103979.84184814895"} 6139
+admission_wait_durations_sql_kv_response_bucket{node_id="1",le="131414.73626117557"} 6139
+admission_wait_durations_sql_kv_response_bucket{node_id="1",le="166088.27826277143"} 6139
+admission_wait_durations_sql_kv_response_bucket{node_id="1",le="209910.3720108553"} 6139
+admission_wait_durations_sql_kv_response_bucket{node_id="1",le="265294.8464431894"} 6139
+admission_wait_durations_sql_kv_response_bucket{node_id="1",le="335292.41492495546"} 6139
+admission_wait_durations_sql_kv_response_bucket{node_id="1",le="423758.7160604059"} 6139
+admission_wait_durations_sql_kv_response_bucket{node_id="1",le="535566.6917706894"} 6139
+admission_wait_durations_sql_kv_response_bucket{node_id="1",le="676875.0009458527"} 6139
+admission_wait_durations_sql_kv_response_bucket{node_id="1",le="855467.2535565672"} 6139
+admission_wait_durations_sql_kv_response_bucket{node_id="1",le="1.0811807510766068e+06"} 6139
+admission_wait_durations_sql_kv_response_bucket{node_id="1",le="1.3664483492953242e+06"} 6139
+admission_wait_durations_sql_kv_response_bucket{node_id="1",le="1.7269832906594332e+06"} 6139
+admission_wait_durations_sql_kv_response_bucket{node_id="1",le="2.182644728397485e+06"} 6139
+admission_wait_durations_sql_kv_response_bucket{node_id="1",le="2.7585316176291797e+06"} 6139
+admission_wait_durations_sql_kv_response_bucket{node_id="1",le="3.4863652276780806e+06"} 6139
+admission_wait_durations_sql_kv_response_bucket{node_id="1",le="4.406236427773566e+06"} 6139
+admission_wait_durations_sql_kv_response_bucket{node_id="1",le="5.568813990945262e+06"} 6139
+admission_wait_durations_sql_kv_response_bucket{node_id="1",le="7.038135554931545e+06"} 6139
+admission_wait_durations_sql_kv_response_bucket{node_id="1",le="8.89513497310822e+06"} 6139
+admission_wait_durations_sql_kv_response_bucket{node_id="1",le="1.1242100350620849e+07"} 6139
+admission_wait_durations_sql_kv_response_bucket{node_id="1",le="1.4208308325339198e+07"} 6139
+admission_wait_durations_sql_kv_response_bucket{node_id="1",le="1.795714494371637e+07"} 6139
+admission_wait_durations_sql_kv_response_bucket{node_id="1",le="2.269510536694665e+07"} 6139
+admission_wait_durations_sql_kv_response_bucket{node_id="1",le="2.868316813342006e+07"} 6139
+admission_wait_durations_sql_kv_response_bucket{node_id="1",le="3.625117049988527e+07"} 6139
+admission_wait_durations_sql_kv_response_bucket{node_id="1",le="4.581597669054482e+07"} 6139
+admission_wait_durations_sql_kv_response_bucket{node_id="1",le="5.790443980602476e+07"} 6139
+admission_wait_durations_sql_kv_response_bucket{node_id="1",le="7.318242219076161e+07"} 6139
+admission_wait_durations_sql_kv_response_bucket{node_id="1",le="9.249147277217315e+07"} 6139
+admission_wait_durations_sql_kv_response_bucket{node_id="1",le="1.1689518164985757e+08"} 6139
+admission_wait_durations_sql_kv_response_bucket{node_id="1",le="1.4773776525985083e+08"} 6139
+admission_wait_durations_sql_kv_response_bucket{node_id="1",le="1.8671810912919158e+08"} 6139
+admission_wait_durations_sql_kv_response_bucket{node_id="1",le="2.359833466782189e+08"} 6139
+admission_wait_durations_sql_kv_response_bucket{node_id="1",le="2.9824712862168837e+08"} 6139
+admission_wait_durations_sql_kv_response_bucket{node_id="1",le="3.769390975388353e+08"} 6139
+admission_wait_durations_sql_kv_response_bucket{node_id="1",le="4.7639380104013294e+08"} 6139
+admission_wait_durations_sql_kv_response_bucket{node_id="1",le="6.020894493336115e+08"} 6139
+admission_wait_durations_sql_kv_response_bucket{node_id="1",le="7.609496685459859e+08"} 6139
+admission_wait_durations_sql_kv_response_bucket{node_id="1",le="9.61724871115294e+08"} 6139
+admission_wait_durations_sql_kv_response_bucket{node_id="1",le="1.2154742500762835e+09"} 6139
+admission_wait_durations_sql_kv_response_bucket{node_id="1",le="1.5361749466718242e+09"} 6139
+admission_wait_durations_sql_kv_response_bucket{node_id="1",le="1.941491945743876e+09"} 6139
+admission_wait_durations_sql_kv_response_bucket{node_id="1",le="2.453751106639811e+09"} 6139
+admission_wait_durations_sql_kv_response_bucket{node_id="1",le="3.10116892657477e+09"} 6139
+admission_wait_durations_sql_kv_response_bucket{node_id="1",le="3.919406774847209e+09"} 6139
+admission_wait_durations_sql_kv_response_bucket{node_id="1",le="4.953535208959157e+09"} 6139
+admission_wait_durations_sql_kv_response_bucket{node_id="1",le="6.260516572014802e+09"} 6139
+admission_wait_durations_sql_kv_response_bucket{node_id="1",le="7.912342618981298e+09"} 6139
+admission_wait_durations_sql_kv_response_bucket{node_id="1",le="9.99999999999997e+09"} 6139
+admission_wait_durations_sql_kv_response_bucket{node_id="1",le="+Inf"} 6139
+admission_wait_durations_sql_kv_response_sum{node_id="1"} 0
+admission_wait_durations_sql_kv_response_count{node_id="1"} 6139
+# HELP admission_admitted_kv_high_pri Number of requests admitted
+# TYPE admission_admitted_kv_high_pri counter
+admission_admitted_kv_high_pri{node_id="1"} 222
+# HELP admission_requested_sql_leaf_start_locking_normal_pri Number of requests
+# TYPE admission_requested_sql_leaf_start_locking_normal_pri counter
+admission_requested_sql_leaf_start_locking_normal_pri{node_id="1"} 0
+# HELP admission_requested_kv_locking_normal_pri Number of requests
+# TYPE admission_requested_kv_locking_normal_pri counter
+admission_requested_kv_locking_normal_pri{node_id="1"} 5193
+# HELP admission_errored_kv_locking_normal_pri Number of requests not admitted due to error
+# TYPE admission_errored_kv_locking_normal_pri counter
+admission_errored_kv_locking_normal_pri{node_id="1"} 0
+# HELP admission_admitted_kv_stores_bulk_normal_pri Number of requests admitted
+# TYPE admission_admitted_kv_stores_bulk_normal_pri counter
+admission_admitted_kv_stores_bulk_normal_pri{node_id="1"} 0
+# HELP admission_admitted_sql_root_start Number of requests admitted
+# TYPE admission_admitted_sql_root_start counter
+admission_admitted_sql_root_start{node_id="1"} 0
+# HELP admission_wait_durations_kv Wait time durations for requests that waited
+# TYPE admission_wait_durations_kv histogram
+admission_wait_durations_kv_bucket{node_id="1",le="10000"} 12322
+admission_wait_durations_kv_bucket{node_id="1",le="12638.482029342978"} 12322
+admission_wait_durations_kv_bucket{node_id="1",le="15973.122800602541"} 12322
+admission_wait_durations_kv_bucket{node_id="1",le="20187.602546790382"} 12322
+admission_wait_durations_kv_bucket{node_id="1",le="25514.065200312878"} 12322
+admission_wait_durations_kv_bucket{node_id="1",le="32245.90545296394"} 12322
+admission_wait_durations_kv_bucket{node_id="1",le="40753.92965871775"} 12322
+admission_wait_durations_kv_bucket{node_id="1",le="51506.78076168121"} 12322
+admission_wait_durations_kv_bucket{node_id="1",le="65096.75230458167"} 12322
+admission_wait_durations_kv_bucket{node_id="1",le="82272.41341700466"} 12322
+admission_wait_durations_kv_bucket{node_id="1",le="103979.84184814895"} 12322
+admission_wait_durations_kv_bucket{node_id="1",le="131414.73626117557"} 12322
+admission_wait_durations_kv_bucket{node_id="1",le="166088.27826277143"} 12322
+admission_wait_durations_kv_bucket{node_id="1",le="209910.3720108553"} 12322
+admission_wait_durations_kv_bucket{node_id="1",le="265294.8464431894"} 12322
+admission_wait_durations_kv_bucket{node_id="1",le="335292.41492495546"} 12322
+admission_wait_durations_kv_bucket{node_id="1",le="423758.7160604059"} 12322
+admission_wait_durations_kv_bucket{node_id="1",le="535566.6917706894"} 12322
+admission_wait_durations_kv_bucket{node_id="1",le="676875.0009458527"} 12322
+admission_wait_durations_kv_bucket{node_id="1",le="855467.2535565672"} 12322
+admission_wait_durations_kv_bucket{node_id="1",le="1.0811807510766068e+06"} 12322
+admission_wait_durations_kv_bucket{node_id="1",le="1.3664483492953242e+06"} 12322
+admission_wait_durations_kv_bucket{node_id="1",le="1.7269832906594332e+06"} 12322
+admission_wait_durations_kv_bucket{node_id="1",le="2.182644728397485e+06"} 12322
+admission_wait_durations_kv_bucket{node_id="1",le="2.7585316176291797e+06"} 12322
+admission_wait_durations_kv_bucket{node_id="1",le="3.4863652276780806e+06"} 12322
+admission_wait_durations_kv_bucket{node_id="1",le="4.406236427773566e+06"} 12322
+admission_wait_durations_kv_bucket{node_id="1",le="5.568813990945262e+06"} 12322
+admission_wait_durations_kv_bucket{node_id="1",le="7.038135554931545e+06"} 12322
+admission_wait_durations_kv_bucket{node_id="1",le="8.89513497310822e+06"} 12322
+admission_wait_durations_kv_bucket{node_id="1",le="1.1242100350620849e+07"} 12322
+admission_wait_durations_kv_bucket{node_id="1",le="1.4208308325339198e+07"} 12322
+admission_wait_durations_kv_bucket{node_id="1",le="1.795714494371637e+07"} 12322
+admission_wait_durations_kv_bucket{node_id="1",le="2.269510536694665e+07"} 12322
+admission_wait_durations_kv_bucket{node_id="1",le="2.868316813342006e+07"} 12322
+admission_wait_durations_kv_bucket{node_id="1",le="3.625117049988527e+07"} 12322
+admission_wait_durations_kv_bucket{node_id="1",le="4.581597669054482e+07"} 12322
+admission_wait_durations_kv_bucket{node_id="1",le="5.790443980602476e+07"} 12322
+admission_wait_durations_kv_bucket{node_id="1",le="7.318242219076161e+07"} 12322
+admission_wait_durations_kv_bucket{node_id="1",le="9.249147277217315e+07"} 12322
+admission_wait_durations_kv_bucket{node_id="1",le="1.1689518164985757e+08"} 12322
+admission_wait_durations_kv_bucket{node_id="1",le="1.4773776525985083e+08"} 12322
+admission_wait_durations_kv_bucket{node_id="1",le="1.8671810912919158e+08"} 12322
+admission_wait_durations_kv_bucket{node_id="1",le="2.359833466782189e+08"} 12322
+admission_wait_durations_kv_bucket{node_id="1",le="2.9824712862168837e+08"} 12322
+admission_wait_durations_kv_bucket{node_id="1",le="3.769390975388353e+08"} 12322
+admission_wait_durations_kv_bucket{node_id="1",le="4.7639380104013294e+08"} 12322
+admission_wait_durations_kv_bucket{node_id="1",le="6.020894493336115e+08"} 12322
+admission_wait_durations_kv_bucket{node_id="1",le="7.609496685459859e+08"} 12322
+admission_wait_durations_kv_bucket{node_id="1",le="9.61724871115294e+08"} 12322
+admission_wait_durations_kv_bucket{node_id="1",le="1.2154742500762835e+09"} 12322
+admission_wait_durations_kv_bucket{node_id="1",le="1.5361749466718242e+09"} 12322
+admission_wait_durations_kv_bucket{node_id="1",le="1.941491945743876e+09"} 12322
+admission_wait_durations_kv_bucket{node_id="1",le="2.453751106639811e+09"} 12322
+admission_wait_durations_kv_bucket{node_id="1",le="3.10116892657477e+09"} 12322
+admission_wait_durations_kv_bucket{node_id="1",le="3.919406774847209e+09"} 12322
+admission_wait_durations_kv_bucket{node_id="1",le="4.953535208959157e+09"} 12322
+admission_wait_durations_kv_bucket{node_id="1",le="6.260516572014802e+09"} 12322
+admission_wait_durations_kv_bucket{node_id="1",le="7.912342618981298e+09"} 12322
+admission_wait_durations_kv_bucket{node_id="1",le="9.99999999999997e+09"} 12322
+admission_wait_durations_kv_bucket{node_id="1",le="+Inf"} 12322
+admission_wait_durations_kv_sum{node_id="1"} 0
+admission_wait_durations_kv_count{node_id="1"} 12322
+# HELP admission_granter_used_slots_sql_root_start Used slots
+# TYPE admission_granter_used_slots_sql_root_start gauge
+admission_granter_used_slots_sql_root_start{node_id="1"} 0
+# HELP admission_errored_sql_root_start_locking_normal_pri Number of requests not admitted due to error
+# TYPE admission_errored_sql_root_start_locking_normal_pri counter
+admission_errored_sql_root_start_locking_normal_pri{node_id="1"} 0
+# HELP admission_l0_tokens_produced_kv Total bytes produced for L0 writes
+# TYPE admission_l0_tokens_produced_kv counter
+admission_l0_tokens_produced_kv{node_id="1"} -36
+# HELP admission_errored_kv Number of requests not admitted due to error
+# TYPE admission_errored_kv counter
+admission_errored_kv{node_id="1"} 0
+# HELP admission_admitted_sql_root_start_locking_normal_pri Number of requests admitted
+# TYPE admission_admitted_sql_root_start_locking_normal_pri counter
+admission_admitted_sql_root_start_locking_normal_pri{node_id="1"} 0
+# HELP admission_admitted_sql_kv_response_normal_pri Number of requests admitted
+# TYPE admission_admitted_sql_kv_response_normal_pri counter
+admission_admitted_sql_kv_response_normal_pri{node_id="1"} 3066
+# HELP admission_errored_elastic_cpu_bulk_normal_pri Number of requests not admitted due to error
+# TYPE admission_errored_elastic_cpu_bulk_normal_pri counter
+admission_errored_elastic_cpu_bulk_normal_pri{node_id="1"} 0
+# HELP admission_admitted_sql_kv_response Number of requests admitted
+# TYPE admission_admitted_sql_kv_response counter
+admission_admitted_sql_kv_response{node_id="1"} 6139
+# HELP admission_granter_slot_adjuster_increments_kv Number of increments of the total KV slots
+# TYPE admission_granter_slot_adjuster_increments_kv counter
+admission_granter_slot_adjuster_increments_kv{node_id="1"} 9
+# HELP admission_wait_durations_sql_sql_response_locking_normal_pri Wait time durations for requests that waited
+# TYPE admission_wait_durations_sql_sql_response_locking_normal_pri histogram
+admission_wait_durations_sql_sql_response_locking_normal_pri_bucket{node_id="1",le="10000"} 0
+admission_wait_durations_sql_sql_response_locking_normal_pri_bucket{node_id="1",le="12638.482029342978"} 0
+admission_wait_durations_sql_sql_response_locking_normal_pri_bucket{node_id="1",le="15973.122800602541"} 0
+admission_wait_durations_sql_sql_response_locking_normal_pri_bucket{node_id="1",le="20187.602546790382"} 0
+admission_wait_durations_sql_sql_response_locking_normal_pri_bucket{node_id="1",le="25514.065200312878"} 0
+admission_wait_durations_sql_sql_response_locking_normal_pri_bucket{node_id="1",le="32245.90545296394"} 0
+admission_wait_durations_sql_sql_response_locking_normal_pri_bucket{node_id="1",le="40753.92965871775"} 0
+admission_wait_durations_sql_sql_response_locking_normal_pri_bucket{node_id="1",le="51506.78076168121"} 0
+admission_wait_durations_sql_sql_response_locking_normal_pri_bucket{node_id="1",le="65096.75230458167"} 0
+admission_wait_durations_sql_sql_response_locking_normal_pri_bucket{node_id="1",le="82272.41341700466"} 0
+admission_wait_durations_sql_sql_response_locking_normal_pri_bucket{node_id="1",le="103979.84184814895"} 0
+admission_wait_durations_sql_sql_response_locking_normal_pri_bucket{node_id="1",le="131414.73626117557"} 0
+admission_wait_durations_sql_sql_response_locking_normal_pri_bucket{node_id="1",le="166088.27826277143"} 0
+admission_wait_durations_sql_sql_response_locking_normal_pri_bucket{node_id="1",le="209910.3720108553"} 0
+admission_wait_durations_sql_sql_response_locking_normal_pri_bucket{node_id="1",le="265294.8464431894"} 0
+admission_wait_durations_sql_sql_response_locking_normal_pri_bucket{node_id="1",le="335292.41492495546"} 0
+admission_wait_durations_sql_sql_response_locking_normal_pri_bucket{node_id="1",le="423758.7160604059"} 0
+admission_wait_durations_sql_sql_response_locking_normal_pri_bucket{node_id="1",le="535566.6917706894"} 0
+admission_wait_durations_sql_sql_response_locking_normal_pri_bucket{node_id="1",le="676875.0009458527"} 0
+admission_wait_durations_sql_sql_response_locking_normal_pri_bucket{node_id="1",le="855467.2535565672"} 0
+admission_wait_durations_sql_sql_response_locking_normal_pri_bucket{node_id="1",le="1.0811807510766068e+06"} 0
+admission_wait_durations_sql_sql_response_locking_normal_pri_bucket{node_id="1",le="1.3664483492953242e+06"} 0
+admission_wait_durations_sql_sql_response_locking_normal_pri_bucket{node_id="1",le="1.7269832906594332e+06"} 0
+admission_wait_durations_sql_sql_response_locking_normal_pri_bucket{node_id="1",le="2.182644728397485e+06"} 0
+admission_wait_durations_sql_sql_response_locking_normal_pri_bucket{node_id="1",le="2.7585316176291797e+06"} 0
+admission_wait_durations_sql_sql_response_locking_normal_pri_bucket{node_id="1",le="3.4863652276780806e+06"} 0
+admission_wait_durations_sql_sql_response_locking_normal_pri_bucket{node_id="1",le="4.406236427773566e+06"} 0
+admission_wait_durations_sql_sql_response_locking_normal_pri_bucket{node_id="1",le="5.568813990945262e+06"} 0
+admission_wait_durations_sql_sql_response_locking_normal_pri_bucket{node_id="1",le="7.038135554931545e+06"} 0
+admission_wait_durations_sql_sql_response_locking_normal_pri_bucket{node_id="1",le="8.89513497310822e+06"} 0
+admission_wait_durations_sql_sql_response_locking_normal_pri_bucket{node_id="1",le="1.1242100350620849e+07"} 0
+admission_wait_durations_sql_sql_response_locking_normal_pri_bucket{node_id="1",le="1.4208308325339198e+07"} 0
+admission_wait_durations_sql_sql_response_locking_normal_pri_bucket{node_id="1",le="1.795714494371637e+07"} 0
+admission_wait_durations_sql_sql_response_locking_normal_pri_bucket{node_id="1",le="2.269510536694665e+07"} 0
+admission_wait_durations_sql_sql_response_locking_normal_pri_bucket{node_id="1",le="2.868316813342006e+07"} 0
+admission_wait_durations_sql_sql_response_locking_normal_pri_bucket{node_id="1",le="3.625117049988527e+07"} 0
+admission_wait_durations_sql_sql_response_locking_normal_pri_bucket{node_id="1",le="4.581597669054482e+07"} 0
+admission_wait_durations_sql_sql_response_locking_normal_pri_bucket{node_id="1",le="5.790443980602476e+07"} 0
+admission_wait_durations_sql_sql_response_locking_normal_pri_bucket{node_id="1",le="7.318242219076161e+07"} 0
+admission_wait_durations_sql_sql_response_locking_normal_pri_bucket{node_id="1",le="9.249147277217315e+07"} 0
+admission_wait_durations_sql_sql_response_locking_normal_pri_bucket{node_id="1",le="1.1689518164985757e+08"} 0
+admission_wait_durations_sql_sql_response_locking_normal_pri_bucket{node_id="1",le="1.4773776525985083e+08"} 0
+admission_wait_durations_sql_sql_response_locking_normal_pri_bucket{node_id="1",le="1.8671810912919158e+08"} 0
+admission_wait_durations_sql_sql_response_locking_normal_pri_bucket{node_id="1",le="2.359833466782189e+08"} 0
+admission_wait_durations_sql_sql_response_locking_normal_pri_bucket{node_id="1",le="2.9824712862168837e+08"} 0
+admission_wait_durations_sql_sql_response_locking_normal_pri_bucket{node_id="1",le="3.769390975388353e+08"} 0
+admission_wait_durations_sql_sql_response_locking_normal_pri_bucket{node_id="1",le="4.7639380104013294e+08"} 0
+admission_wait_durations_sql_sql_response_locking_normal_pri_bucket{node_id="1",le="6.020894493336115e+08"} 0
+admission_wait_durations_sql_sql_response_locking_normal_pri_bucket{node_id="1",le="7.609496685459859e+08"} 0
+admission_wait_durations_sql_sql_response_locking_normal_pri_bucket{node_id="1",le="9.61724871115294e+08"} 0
+admission_wait_durations_sql_sql_response_locking_normal_pri_bucket{node_id="1",le="1.2154742500762835e+09"} 0
+admission_wait_durations_sql_sql_response_locking_normal_pri_bucket{node_id="1",le="1.5361749466718242e+09"} 0
+admission_wait_durations_sql_sql_response_locking_normal_pri_bucket{node_id="1",le="1.941491945743876e+09"} 0
+admission_wait_durations_sql_sql_response_locking_normal_pri_bucket{node_id="1",le="2.453751106639811e+09"} 0
+admission_wait_durations_sql_sql_response_locking_normal_pri_bucket{node_id="1",le="3.10116892657477e+09"} 0
+admission_wait_durations_sql_sql_response_locking_normal_pri_bucket{node_id="1",le="3.919406774847209e+09"} 0
+admission_wait_durations_sql_sql_response_locking_normal_pri_bucket{node_id="1",le="4.953535208959157e+09"} 0
+admission_wait_durations_sql_sql_response_locking_normal_pri_bucket{node_id="1",le="6.260516572014802e+09"} 0
+admission_wait_durations_sql_sql_response_locking_normal_pri_bucket{node_id="1",le="7.912342618981298e+09"} 0
+admission_wait_durations_sql_sql_response_locking_normal_pri_bucket{node_id="1",le="9.99999999999997e+09"} 0
+admission_wait_durations_sql_sql_response_locking_normal_pri_bucket{node_id="1",le="+Inf"} 0
+admission_wait_durations_sql_sql_response_locking_normal_pri_sum{node_id="1"} 0
+admission_wait_durations_sql_sql_response_locking_normal_pri_count{node_id="1"} 0
+# HELP admission_requested_sql_root_start_normal_pri Number of requests
+# TYPE admission_requested_sql_root_start_normal_pri counter
+admission_requested_sql_root_start_normal_pri{node_id="1"} 0
+# HELP admission_wait_queue_length_kv_high_pri Length of wait queue
+# TYPE admission_wait_queue_length_kv_high_pri gauge
+admission_wait_queue_length_kv_high_pri{node_id="1"} 0
+# HELP admission_wait_queue_length_kv Length of wait queue
+# TYPE admission_wait_queue_length_kv gauge
+admission_wait_queue_length_kv{node_id="1"} 0
+# HELP admission_requested_elastic_cpu_bulk_normal_pri Number of requests
+# TYPE admission_requested_elastic_cpu_bulk_normal_pri counter
+admission_requested_elastic_cpu_bulk_normal_pri{node_id="1"} 0
+# HELP admission_granter_io_tokens_exhausted_duration_kv Total duration when IO tokens were exhausted, in micros
+# TYPE admission_granter_io_tokens_exhausted_duration_kv counter
+admission_granter_io_tokens_exhausted_duration_kv{node_id="1"} 0
+# HELP admission_requested_sql_sql_response_normal_pri Number of requests
+# TYPE admission_requested_sql_sql_response_normal_pri counter
+admission_requested_sql_sql_response_normal_pri{node_id="1"} 0
+# HELP admission_wait_durations_elastic_cpu Wait time durations for requests that waited
+# TYPE admission_wait_durations_elastic_cpu histogram
+admission_wait_durations_elastic_cpu_bucket{node_id="1",le="10000"} 0
+admission_wait_durations_elastic_cpu_bucket{node_id="1",le="12638.482029342978"} 0
+admission_wait_durations_elastic_cpu_bucket{node_id="1",le="15973.122800602541"} 0
+admission_wait_durations_elastic_cpu_bucket{node_id="1",le="20187.602546790382"} 0
+admission_wait_durations_elastic_cpu_bucket{node_id="1",le="25514.065200312878"} 0
+admission_wait_durations_elastic_cpu_bucket{node_id="1",le="32245.90545296394"} 0
+admission_wait_durations_elastic_cpu_bucket{node_id="1",le="40753.92965871775"} 0
+admission_wait_durations_elastic_cpu_bucket{node_id="1",le="51506.78076168121"} 0
+admission_wait_durations_elastic_cpu_bucket{node_id="1",le="65096.75230458167"} 0
+admission_wait_durations_elastic_cpu_bucket{node_id="1",le="82272.41341700466"} 0
+admission_wait_durations_elastic_cpu_bucket{node_id="1",le="103979.84184814895"} 0
+admission_wait_durations_elastic_cpu_bucket{node_id="1",le="131414.73626117557"} 0
+admission_wait_durations_elastic_cpu_bucket{node_id="1",le="166088.27826277143"} 0
+admission_wait_durations_elastic_cpu_bucket{node_id="1",le="209910.3720108553"} 0
+admission_wait_durations_elastic_cpu_bucket{node_id="1",le="265294.8464431894"} 0
+admission_wait_durations_elastic_cpu_bucket{node_id="1",le="335292.41492495546"} 0
+admission_wait_durations_elastic_cpu_bucket{node_id="1",le="423758.7160604059"} 0
+admission_wait_durations_elastic_cpu_bucket{node_id="1",le="535566.6917706894"} 0
+admission_wait_durations_elastic_cpu_bucket{node_id="1",le="676875.0009458527"} 0
+admission_wait_durations_elastic_cpu_bucket{node_id="1",le="855467.2535565672"} 0
+admission_wait_durations_elastic_cpu_bucket{node_id="1",le="1.0811807510766068e+06"} 0
+admission_wait_durations_elastic_cpu_bucket{node_id="1",le="1.3664483492953242e+06"} 0
+admission_wait_durations_elastic_cpu_bucket{node_id="1",le="1.7269832906594332e+06"} 0
+admission_wait_durations_elastic_cpu_bucket{node_id="1",le="2.182644728397485e+06"} 0
+admission_wait_durations_elastic_cpu_bucket{node_id="1",le="2.7585316176291797e+06"} 0
+admission_wait_durations_elastic_cpu_bucket{node_id="1",le="3.4863652276780806e+06"} 0
+admission_wait_durations_elastic_cpu_bucket{node_id="1",le="4.406236427773566e+06"} 0
+admission_wait_durations_elastic_cpu_bucket{node_id="1",le="5.568813990945262e+06"} 0
+admission_wait_durations_elastic_cpu_bucket{node_id="1",le="7.038135554931545e+06"} 0
+admission_wait_durations_elastic_cpu_bucket{node_id="1",le="8.89513497310822e+06"} 0
+admission_wait_durations_elastic_cpu_bucket{node_id="1",le="1.1242100350620849e+07"} 0
+admission_wait_durations_elastic_cpu_bucket{node_id="1",le="1.4208308325339198e+07"} 0
+admission_wait_durations_elastic_cpu_bucket{node_id="1",le="1.795714494371637e+07"} 0
+admission_wait_durations_elastic_cpu_bucket{node_id="1",le="2.269510536694665e+07"} 0
+admission_wait_durations_elastic_cpu_bucket{node_id="1",le="2.868316813342006e+07"} 0
+admission_wait_durations_elastic_cpu_bucket{node_id="1",le="3.625117049988527e+07"} 0
+admission_wait_durations_elastic_cpu_bucket{node_id="1",le="4.581597669054482e+07"} 0
+admission_wait_durations_elastic_cpu_bucket{node_id="1",le="5.790443980602476e+07"} 0
+admission_wait_durations_elastic_cpu_bucket{node_id="1",le="7.318242219076161e+07"} 0
+admission_wait_durations_elastic_cpu_bucket{node_id="1",le="9.249147277217315e+07"} 0
+admission_wait_durations_elastic_cpu_bucket{node_id="1",le="1.1689518164985757e+08"} 0
+admission_wait_durations_elastic_cpu_bucket{node_id="1",le="1.4773776525985083e+08"} 0
+admission_wait_durations_elastic_cpu_bucket{node_id="1",le="1.8671810912919158e+08"} 0
+admission_wait_durations_elastic_cpu_bucket{node_id="1",le="2.359833466782189e+08"} 0
+admission_wait_durations_elastic_cpu_bucket{node_id="1",le="2.9824712862168837e+08"} 0
+admission_wait_durations_elastic_cpu_bucket{node_id="1",le="3.769390975388353e+08"} 0
+admission_wait_durations_elastic_cpu_bucket{node_id="1",le="4.7639380104013294e+08"} 0
+admission_wait_durations_elastic_cpu_bucket{node_id="1",le="6.020894493336115e+08"} 0
+admission_wait_durations_elastic_cpu_bucket{node_id="1",le="7.609496685459859e+08"} 0
+admission_wait_durations_elastic_cpu_bucket{node_id="1",le="9.61724871115294e+08"} 0
+admission_wait_durations_elastic_cpu_bucket{node_id="1",le="1.2154742500762835e+09"} 0
+admission_wait_durations_elastic_cpu_bucket{node_id="1",le="1.5361749466718242e+09"} 0
+admission_wait_durations_elastic_cpu_bucket{node_id="1",le="1.941491945743876e+09"} 0
+admission_wait_durations_elastic_cpu_bucket{node_id="1",le="2.453751106639811e+09"} 0
+admission_wait_durations_elastic_cpu_bucket{node_id="1",le="3.10116892657477e+09"} 0
+admission_wait_durations_elastic_cpu_bucket{node_id="1",le="3.919406774847209e+09"} 0
+admission_wait_durations_elastic_cpu_bucket{node_id="1",le="4.953535208959157e+09"} 0
+admission_wait_durations_elastic_cpu_bucket{node_id="1",le="6.260516572014802e+09"} 0
+admission_wait_durations_elastic_cpu_bucket{node_id="1",le="7.912342618981298e+09"} 0
+admission_wait_durations_elastic_cpu_bucket{node_id="1",le="9.99999999999997e+09"} 0
+admission_wait_durations_elastic_cpu_bucket{node_id="1",le="+Inf"} 0
+admission_wait_durations_elastic_cpu_sum{node_id="1"} 0
+admission_wait_durations_elastic_cpu_count{node_id="1"} 0
+# HELP admission_admitted_kv_locking_normal_pri Number of requests admitted
+# TYPE admission_admitted_kv_locking_normal_pri counter
+admission_admitted_kv_locking_normal_pri{node_id="1"} 5193
+# HELP admission_wait_queue_length_sql_leaf_start Length of wait queue
+# TYPE admission_wait_queue_length_sql_leaf_start gauge
+admission_wait_queue_length_sql_leaf_start{node_id="1"} 0
+# HELP admission_admitted_sql_kv_response_locking_normal_pri Number of requests admitted
+# TYPE admission_admitted_sql_kv_response_locking_normal_pri counter
+admission_admitted_sql_kv_response_locking_normal_pri{node_id="1"} 3073
+# HELP admission_elastic_cpu_max_available_nanos Maximum available CPU nanoseconds per second ignoring utilization limit
+# TYPE admission_elastic_cpu_max_available_nanos counter
+admission_elastic_cpu_max_available_nanos{node_id="1"} 7e+09
+# HELP admission_granter_cpu_load_long_period_duration_kv Total duration when CPULoad was being called with a long period, in micros
+# TYPE admission_granter_cpu_load_long_period_duration_kv counter
+admission_granter_cpu_load_long_period_duration_kv{node_id="1"} 5.455e+08
+# HELP admission_requested_kv_stores_normal_pri Number of requests
+# TYPE admission_requested_kv_stores_normal_pri counter
+admission_requested_kv_stores_normal_pri{node_id="1"} 2979
+# HELP admission_wait_queue_length_elastic_cpu_bulk_normal_pri Length of wait queue
+# TYPE admission_wait_queue_length_elastic_cpu_bulk_normal_pri gauge
+admission_wait_queue_length_elastic_cpu_bulk_normal_pri{node_id="1"} 0
+# HELP admission_requested_sql_kv_response_locking_normal_pri Number of requests
+# TYPE admission_requested_sql_kv_response_locking_normal_pri counter
+admission_requested_sql_kv_response_locking_normal_pri{node_id="1"} 3073
+# HELP admission_admitted_sql_leaf_start_normal_pri Number of requests admitted
+# TYPE admission_admitted_sql_leaf_start_normal_pri counter
+admission_admitted_sql_leaf_start_normal_pri{node_id="1"} 0
+# HELP admission_wait_queue_length_sql_root_start_locking_normal_pri Length of wait queue
+# TYPE admission_wait_queue_length_sql_root_start_locking_normal_pri gauge
+admission_wait_queue_length_sql_root_start_locking_normal_pri{node_id="1"} 0
+# HELP admission_requested_kv Number of requests
+# TYPE admission_requested_kv counter
+admission_requested_kv{node_id="1"} 12322
+# HELP admission_granter_elastic_io_tokens_available_kv Number of tokens available
+# TYPE admission_granter_elastic_io_tokens_available_kv gauge
+admission_granter_elastic_io_tokens_available_kv{node_id="1"} 1.5372286728091293e+17
+# HELP admission_wait_durations_sql_kv_response_locking_normal_pri Wait time durations for requests that waited
+# TYPE admission_wait_durations_sql_kv_response_locking_normal_pri histogram
+admission_wait_durations_sql_kv_response_locking_normal_pri_bucket{node_id="1",le="10000"} 3073
+admission_wait_durations_sql_kv_response_locking_normal_pri_bucket{node_id="1",le="12638.482029342978"} 3073
+admission_wait_durations_sql_kv_response_locking_normal_pri_bucket{node_id="1",le="15973.122800602541"} 3073
+admission_wait_durations_sql_kv_response_locking_normal_pri_bucket{node_id="1",le="20187.602546790382"} 3073
+admission_wait_durations_sql_kv_response_locking_normal_pri_bucket{node_id="1",le="25514.065200312878"} 3073
+admission_wait_durations_sql_kv_response_locking_normal_pri_bucket{node_id="1",le="32245.90545296394"} 3073
+admission_wait_durations_sql_kv_response_locking_normal_pri_bucket{node_id="1",le="40753.92965871775"} 3073
+admission_wait_durations_sql_kv_response_locking_normal_pri_bucket{node_id="1",le="51506.78076168121"} 3073
+admission_wait_durations_sql_kv_response_locking_normal_pri_bucket{node_id="1",le="65096.75230458167"} 3073
+admission_wait_durations_sql_kv_response_locking_normal_pri_bucket{node_id="1",le="82272.41341700466"} 3073
+admission_wait_durations_sql_kv_response_locking_normal_pri_bucket{node_id="1",le="103979.84184814895"} 3073
+admission_wait_durations_sql_kv_response_locking_normal_pri_bucket{node_id="1",le="131414.73626117557"} 3073
+admission_wait_durations_sql_kv_response_locking_normal_pri_bucket{node_id="1",le="166088.27826277143"} 3073
+admission_wait_durations_sql_kv_response_locking_normal_pri_bucket{node_id="1",le="209910.3720108553"} 3073
+admission_wait_durations_sql_kv_response_locking_normal_pri_bucket{node_id="1",le="265294.8464431894"} 3073
+admission_wait_durations_sql_kv_response_locking_normal_pri_bucket{node_id="1",le="335292.41492495546"} 3073
+admission_wait_durations_sql_kv_response_locking_normal_pri_bucket{node_id="1",le="423758.7160604059"} 3073
+admission_wait_durations_sql_kv_response_locking_normal_pri_bucket{node_id="1",le="535566.6917706894"} 3073
+admission_wait_durations_sql_kv_response_locking_normal_pri_bucket{node_id="1",le="676875.0009458527"} 3073
+admission_wait_durations_sql_kv_response_locking_normal_pri_bucket{node_id="1",le="855467.2535565672"} 3073
+admission_wait_durations_sql_kv_response_locking_normal_pri_bucket{node_id="1",le="1.0811807510766068e+06"} 3073
+admission_wait_durations_sql_kv_response_locking_normal_pri_bucket{node_id="1",le="1.3664483492953242e+06"} 3073
+admission_wait_durations_sql_kv_response_locking_normal_pri_bucket{node_id="1",le="1.7269832906594332e+06"} 3073
+admission_wait_durations_sql_kv_response_locking_normal_pri_bucket{node_id="1",le="2.182644728397485e+06"} 3073
+admission_wait_durations_sql_kv_response_locking_normal_pri_bucket{node_id="1",le="2.7585316176291797e+06"} 3073
+admission_wait_durations_sql_kv_response_locking_normal_pri_bucket{node_id="1",le="3.4863652276780806e+06"} 3073
+admission_wait_durations_sql_kv_response_locking_normal_pri_bucket{node_id="1",le="4.406236427773566e+06"} 3073
+admission_wait_durations_sql_kv_response_locking_normal_pri_bucket{node_id="1",le="5.568813990945262e+06"} 3073
+admission_wait_durations_sql_kv_response_locking_normal_pri_bucket{node_id="1",le="7.038135554931545e+06"} 3073
+admission_wait_durations_sql_kv_response_locking_normal_pri_bucket{node_id="1",le="8.89513497310822e+06"} 3073
+admission_wait_durations_sql_kv_response_locking_normal_pri_bucket{node_id="1",le="1.1242100350620849e+07"} 3073
+admission_wait_durations_sql_kv_response_locking_normal_pri_bucket{node_id="1",le="1.4208308325339198e+07"} 3073
+admission_wait_durations_sql_kv_response_locking_normal_pri_bucket{node_id="1",le="1.795714494371637e+07"} 3073
+admission_wait_durations_sql_kv_response_locking_normal_pri_bucket{node_id="1",le="2.269510536694665e+07"} 3073
+admission_wait_durations_sql_kv_response_locking_normal_pri_bucket{node_id="1",le="2.868316813342006e+07"} 3073
+admission_wait_durations_sql_kv_response_locking_normal_pri_bucket{node_id="1",le="3.625117049988527e+07"} 3073
+admission_wait_durations_sql_kv_response_locking_normal_pri_bucket{node_id="1",le="4.581597669054482e+07"} 3073
+admission_wait_durations_sql_kv_response_locking_normal_pri_bucket{node_id="1",le="5.790443980602476e+07"} 3073
+admission_wait_durations_sql_kv_response_locking_normal_pri_bucket{node_id="1",le="7.318242219076161e+07"} 3073
+admission_wait_durations_sql_kv_response_locking_normal_pri_bucket{node_id="1",le="9.249147277217315e+07"} 3073
+admission_wait_durations_sql_kv_response_locking_normal_pri_bucket{node_id="1",le="1.1689518164985757e+08"} 3073
+admission_wait_durations_sql_kv_response_locking_normal_pri_bucket{node_id="1",le="1.4773776525985083e+08"} 3073
+admission_wait_durations_sql_kv_response_locking_normal_pri_bucket{node_id="1",le="1.8671810912919158e+08"} 3073
+admission_wait_durations_sql_kv_response_locking_normal_pri_bucket{node_id="1",le="2.359833466782189e+08"} 3073
+admission_wait_durations_sql_kv_response_locking_normal_pri_bucket{node_id="1",le="2.9824712862168837e+08"} 3073
+admission_wait_durations_sql_kv_response_locking_normal_pri_bucket{node_id="1",le="3.769390975388353e+08"} 3073
+admission_wait_durations_sql_kv_response_locking_normal_pri_bucket{node_id="1",le="4.7639380104013294e+08"} 3073
+admission_wait_durations_sql_kv_response_locking_normal_pri_bucket{node_id="1",le="6.020894493336115e+08"} 3073
+admission_wait_durations_sql_kv_response_locking_normal_pri_bucket{node_id="1",le="7.609496685459859e+08"} 3073
+admission_wait_durations_sql_kv_response_locking_normal_pri_bucket{node_id="1",le="9.61724871115294e+08"} 3073
+admission_wait_durations_sql_kv_response_locking_normal_pri_bucket{node_id="1",le="1.2154742500762835e+09"} 3073
+admission_wait_durations_sql_kv_response_locking_normal_pri_bucket{node_id="1",le="1.5361749466718242e+09"} 3073
+admission_wait_durations_sql_kv_response_locking_normal_pri_bucket{node_id="1",le="1.941491945743876e+09"} 3073
+admission_wait_durations_sql_kv_response_locking_normal_pri_bucket{node_id="1",le="2.453751106639811e+09"} 3073
+admission_wait_durations_sql_kv_response_locking_normal_pri_bucket{node_id="1",le="3.10116892657477e+09"} 3073
+admission_wait_durations_sql_kv_response_locking_normal_pri_bucket{node_id="1",le="3.919406774847209e+09"} 3073
+admission_wait_durations_sql_kv_response_locking_normal_pri_bucket{node_id="1",le="4.953535208959157e+09"} 3073
+admission_wait_durations_sql_kv_response_locking_normal_pri_bucket{node_id="1",le="6.260516572014802e+09"} 3073
+admission_wait_durations_sql_kv_response_locking_normal_pri_bucket{node_id="1",le="7.912342618981298e+09"} 3073
+admission_wait_durations_sql_kv_response_locking_normal_pri_bucket{node_id="1",le="9.99999999999997e+09"} 3073
+admission_wait_durations_sql_kv_response_locking_normal_pri_bucket{node_id="1",le="+Inf"} 3073
+admission_wait_durations_sql_kv_response_locking_normal_pri_sum{node_id="1"} 0
+admission_wait_durations_sql_kv_response_locking_normal_pri_count{node_id="1"} 3073
+# HELP admission_errored_kv_stores_normal_pri Number of requests not admitted due to error
+# TYPE admission_errored_kv_stores_normal_pri counter
+admission_errored_kv_stores_normal_pri{node_id="1"} 0
+# HELP admission_errored_sql_sql_response_locking_normal_pri Number of requests not admitted due to error
+# TYPE admission_errored_sql_sql_response_locking_normal_pri counter
+admission_errored_sql_sql_response_locking_normal_pri{node_id="1"} 0
+# HELP admission_wait_queue_length_sql_sql_response_normal_pri Length of wait queue
+# TYPE admission_wait_queue_length_sql_sql_response_normal_pri gauge
+admission_wait_queue_length_sql_sql_response_normal_pri{node_id="1"} 0
+# HELP admission_admitted_kv_stores_ttl_low_pri Number of requests admitted
+# TYPE admission_admitted_kv_stores_ttl_low_pri counter
+admission_admitted_kv_stores_ttl_low_pri{node_id="1"} 0
+# HELP admission_errored_sql_kv_response_locking_normal_pri Number of requests not admitted due to error
+# TYPE admission_errored_sql_kv_response_locking_normal_pri counter
+admission_errored_sql_kv_response_locking_normal_pri{node_id="1"} 0
+# HELP admission_granter_cpu_load_short_period_duration_kv Total duration when CPULoad was being called with a short period, in micros
+# TYPE admission_granter_cpu_load_short_period_duration_kv counter
+admission_granter_cpu_load_short_period_duration_kv{node_id="1"} 6.773e+06
+# HELP admission_errored_sql_kv_response Number of requests not admitted due to error
+# TYPE admission_errored_sql_kv_response counter
+admission_errored_sql_kv_response{node_id="1"} 0
+# HELP admission_wait_durations_kv_stores_high_pri Wait time durations for requests that waited
+# TYPE admission_wait_durations_kv_stores_high_pri histogram
+admission_wait_durations_kv_stores_high_pri_bucket{node_id="1",le="10000"} 111
+admission_wait_durations_kv_stores_high_pri_bucket{node_id="1",le="12638.482029342978"} 111
+admission_wait_durations_kv_stores_high_pri_bucket{node_id="1",le="15973.122800602541"} 111
+admission_wait_durations_kv_stores_high_pri_bucket{node_id="1",le="20187.602546790382"} 111
+admission_wait_durations_kv_stores_high_pri_bucket{node_id="1",le="25514.065200312878"} 111
+admission_wait_durations_kv_stores_high_pri_bucket{node_id="1",le="32245.90545296394"} 111
+admission_wait_durations_kv_stores_high_pri_bucket{node_id="1",le="40753.92965871775"} 111
+admission_wait_durations_kv_stores_high_pri_bucket{node_id="1",le="51506.78076168121"} 111
+admission_wait_durations_kv_stores_high_pri_bucket{node_id="1",le="65096.75230458167"} 111
+admission_wait_durations_kv_stores_high_pri_bucket{node_id="1",le="82272.41341700466"} 111
+admission_wait_durations_kv_stores_high_pri_bucket{node_id="1",le="103979.84184814895"} 111
+admission_wait_durations_kv_stores_high_pri_bucket{node_id="1",le="131414.73626117557"} 111
+admission_wait_durations_kv_stores_high_pri_bucket{node_id="1",le="166088.27826277143"} 111
+admission_wait_durations_kv_stores_high_pri_bucket{node_id="1",le="209910.3720108553"} 111
+admission_wait_durations_kv_stores_high_pri_bucket{node_id="1",le="265294.8464431894"} 111
+admission_wait_durations_kv_stores_high_pri_bucket{node_id="1",le="335292.41492495546"} 111
+admission_wait_durations_kv_stores_high_pri_bucket{node_id="1",le="423758.7160604059"} 111
+admission_wait_durations_kv_stores_high_pri_bucket{node_id="1",le="535566.6917706894"} 111
+admission_wait_durations_kv_stores_high_pri_bucket{node_id="1",le="676875.0009458527"} 111
+admission_wait_durations_kv_stores_high_pri_bucket{node_id="1",le="855467.2535565672"} 111
+admission_wait_durations_kv_stores_high_pri_bucket{node_id="1",le="1.0811807510766068e+06"} 111
+admission_wait_durations_kv_stores_high_pri_bucket{node_id="1",le="1.3664483492953242e+06"} 111
+admission_wait_durations_kv_stores_high_pri_bucket{node_id="1",le="1.7269832906594332e+06"} 111
+admission_wait_durations_kv_stores_high_pri_bucket{node_id="1",le="2.182644728397485e+06"} 111
+admission_wait_durations_kv_stores_high_pri_bucket{node_id="1",le="2.7585316176291797e+06"} 111
+admission_wait_durations_kv_stores_high_pri_bucket{node_id="1",le="3.4863652276780806e+06"} 111
+admission_wait_durations_kv_stores_high_pri_bucket{node_id="1",le="4.406236427773566e+06"} 111
+admission_wait_durations_kv_stores_high_pri_bucket{node_id="1",le="5.568813990945262e+06"} 111
+admission_wait_durations_kv_stores_high_pri_bucket{node_id="1",le="7.038135554931545e+06"} 111
+admission_wait_durations_kv_stores_high_pri_bucket{node_id="1",le="8.89513497310822e+06"} 111
+admission_wait_durations_kv_stores_high_pri_bucket{node_id="1",le="1.1242100350620849e+07"} 111
+admission_wait_durations_kv_stores_high_pri_bucket{node_id="1",le="1.4208308325339198e+07"} 111
+admission_wait_durations_kv_stores_high_pri_bucket{node_id="1",le="1.795714494371637e+07"} 111
+admission_wait_durations_kv_stores_high_pri_bucket{node_id="1",le="2.269510536694665e+07"} 111
+admission_wait_durations_kv_stores_high_pri_bucket{node_id="1",le="2.868316813342006e+07"} 111
+admission_wait_durations_kv_stores_high_pri_bucket{node_id="1",le="3.625117049988527e+07"} 111
+admission_wait_durations_kv_stores_high_pri_bucket{node_id="1",le="4.581597669054482e+07"} 111
+admission_wait_durations_kv_stores_high_pri_bucket{node_id="1",le="5.790443980602476e+07"} 111
+admission_wait_durations_kv_stores_high_pri_bucket{node_id="1",le="7.318242219076161e+07"} 111
+admission_wait_durations_kv_stores_high_pri_bucket{node_id="1",le="9.249147277217315e+07"} 111
+admission_wait_durations_kv_stores_high_pri_bucket{node_id="1",le="1.1689518164985757e+08"} 111
+admission_wait_durations_kv_stores_high_pri_bucket{node_id="1",le="1.4773776525985083e+08"} 111
+admission_wait_durations_kv_stores_high_pri_bucket{node_id="1",le="1.8671810912919158e+08"} 111
+admission_wait_durations_kv_stores_high_pri_bucket{node_id="1",le="2.359833466782189e+08"} 111
+admission_wait_durations_kv_stores_high_pri_bucket{node_id="1",le="2.9824712862168837e+08"} 111
+admission_wait_durations_kv_stores_high_pri_bucket{node_id="1",le="3.769390975388353e+08"} 111
+admission_wait_durations_kv_stores_high_pri_bucket{node_id="1",le="4.7639380104013294e+08"} 111
+admission_wait_durations_kv_stores_high_pri_bucket{node_id="1",le="6.020894493336115e+08"} 111
+admission_wait_durations_kv_stores_high_pri_bucket{node_id="1",le="7.609496685459859e+08"} 111
+admission_wait_durations_kv_stores_high_pri_bucket{node_id="1",le="9.61724871115294e+08"} 111
+admission_wait_durations_kv_stores_high_pri_bucket{node_id="1",le="1.2154742500762835e+09"} 111
+admission_wait_durations_kv_stores_high_pri_bucket{node_id="1",le="1.5361749466718242e+09"} 111
+admission_wait_durations_kv_stores_high_pri_bucket{node_id="1",le="1.941491945743876e+09"} 111
+admission_wait_durations_kv_stores_high_pri_bucket{node_id="1",le="2.453751106639811e+09"} 111
+admission_wait_durations_kv_stores_high_pri_bucket{node_id="1",le="3.10116892657477e+09"} 111
+admission_wait_durations_kv_stores_high_pri_bucket{node_id="1",le="3.919406774847209e+09"} 111
+admission_wait_durations_kv_stores_high_pri_bucket{node_id="1",le="4.953535208959157e+09"} 111
+admission_wait_durations_kv_stores_high_pri_bucket{node_id="1",le="6.260516572014802e+09"} 111
+admission_wait_durations_kv_stores_high_pri_bucket{node_id="1",le="7.912342618981298e+09"} 111
+admission_wait_durations_kv_stores_high_pri_bucket{node_id="1",le="9.99999999999997e+09"} 111
+admission_wait_durations_kv_stores_high_pri_bucket{node_id="1",le="+Inf"} 111
+admission_wait_durations_kv_stores_high_pri_sum{node_id="1"} 0
+admission_wait_durations_kv_stores_high_pri_count{node_id="1"} 111
+# HELP admission_elastic_cpu_pre_work_nanos Total CPU nanoseconds spent doing pre-work, before doing elastic work
+# TYPE admission_elastic_cpu_pre_work_nanos counter
+admission_elastic_cpu_pre_work_nanos{node_id="1"} 0
+# HELP admission_raft_paused_replicas Number of followers (i.e. Replicas) to which replication is currently paused to help them recover from I/O overload.\n\nSuch Replicas will be ignored for the purposes of proposal quota, and will not\nreceive replication traffic. They are essentially treated as offline for the\npurpose of replication. This serves as a crude form of admission control.\n\nThe count is emitted by the leaseholder of each range.
+# TYPE admission_raft_paused_replicas gauge
+admission_raft_paused_replicas{store="1",node_id="1"} 0
+# HELP admission_wait_queue_length_elastic_cpu Length of wait queue
+# TYPE admission_wait_queue_length_elastic_cpu gauge
+admission_wait_queue_length_elastic_cpu{node_id="1"} 0
+# HELP admission_requested_elastic_cpu Number of requests
+# TYPE admission_requested_elastic_cpu counter
+admission_requested_elastic_cpu{node_id="1"} 0
+# HELP admission_admitted_elastic_cpu_normal_pri Number of requests admitted
+# TYPE admission_admitted_elastic_cpu_normal_pri counter
+admission_admitted_elastic_cpu_normal_pri{node_id="1"} 0
+# HELP admission_wait_durations_kv_stores Wait time durations for requests that waited
+# TYPE admission_wait_durations_kv_stores histogram
+admission_wait_durations_kv_stores_bucket{node_id="1",le="10000"} 5894
+admission_wait_durations_kv_stores_bucket{node_id="1",le="12638.482029342978"} 5894
+admission_wait_durations_kv_stores_bucket{node_id="1",le="15973.122800602541"} 5894
+admission_wait_durations_kv_stores_bucket{node_id="1",le="20187.602546790382"} 5894
+admission_wait_durations_kv_stores_bucket{node_id="1",le="25514.065200312878"} 5894
+admission_wait_durations_kv_stores_bucket{node_id="1",le="32245.90545296394"} 5894
+admission_wait_durations_kv_stores_bucket{node_id="1",le="40753.92965871775"} 5894
+admission_wait_durations_kv_stores_bucket{node_id="1",le="51506.78076168121"} 5894
+admission_wait_durations_kv_stores_bucket{node_id="1",le="65096.75230458167"} 5894
+admission_wait_durations_kv_stores_bucket{node_id="1",le="82272.41341700466"} 5894
+admission_wait_durations_kv_stores_bucket{node_id="1",le="103979.84184814895"} 5894
+admission_wait_durations_kv_stores_bucket{node_id="1",le="131414.73626117557"} 5894
+admission_wait_durations_kv_stores_bucket{node_id="1",le="166088.27826277143"} 5894
+admission_wait_durations_kv_stores_bucket{node_id="1",le="209910.3720108553"} 5894
+admission_wait_durations_kv_stores_bucket{node_id="1",le="265294.8464431894"} 5894
+admission_wait_durations_kv_stores_bucket{node_id="1",le="335292.41492495546"} 5894
+admission_wait_durations_kv_stores_bucket{node_id="1",le="423758.7160604059"} 5894
+admission_wait_durations_kv_stores_bucket{node_id="1",le="535566.6917706894"} 5894
+admission_wait_durations_kv_stores_bucket{node_id="1",le="676875.0009458527"} 5894
+admission_wait_durations_kv_stores_bucket{node_id="1",le="855467.2535565672"} 5894
+admission_wait_durations_kv_stores_bucket{node_id="1",le="1.0811807510766068e+06"} 5894
+admission_wait_durations_kv_stores_bucket{node_id="1",le="1.3664483492953242e+06"} 5894
+admission_wait_durations_kv_stores_bucket{node_id="1",le="1.7269832906594332e+06"} 5894
+admission_wait_durations_kv_stores_bucket{node_id="1",le="2.182644728397485e+06"} 5894
+admission_wait_durations_kv_stores_bucket{node_id="1",le="2.7585316176291797e+06"} 5894
+admission_wait_durations_kv_stores_bucket{node_id="1",le="3.4863652276780806e+06"} 5894
+admission_wait_durations_kv_stores_bucket{node_id="1",le="4.406236427773566e+06"} 5894
+admission_wait_durations_kv_stores_bucket{node_id="1",le="5.568813990945262e+06"} 5894
+admission_wait_durations_kv_stores_bucket{node_id="1",le="7.038135554931545e+06"} 5894
+admission_wait_durations_kv_stores_bucket{node_id="1",le="8.89513497310822e+06"} 5894
+admission_wait_durations_kv_stores_bucket{node_id="1",le="1.1242100350620849e+07"} 5894
+admission_wait_durations_kv_stores_bucket{node_id="1",le="1.4208308325339198e+07"} 5894
+admission_wait_durations_kv_stores_bucket{node_id="1",le="1.795714494371637e+07"} 5894
+admission_wait_durations_kv_stores_bucket{node_id="1",le="2.269510536694665e+07"} 5894
+admission_wait_durations_kv_stores_bucket{node_id="1",le="2.868316813342006e+07"} 5894
+admission_wait_durations_kv_stores_bucket{node_id="1",le="3.625117049988527e+07"} 5894
+admission_wait_durations_kv_stores_bucket{node_id="1",le="4.581597669054482e+07"} 5894
+admission_wait_durations_kv_stores_bucket{node_id="1",le="5.790443980602476e+07"} 5894
+admission_wait_durations_kv_stores_bucket{node_id="1",le="7.318242219076161e+07"} 5894
+admission_wait_durations_kv_stores_bucket{node_id="1",le="9.249147277217315e+07"} 5894
+admission_wait_durations_kv_stores_bucket{node_id="1",le="1.1689518164985757e+08"} 5894
+admission_wait_durations_kv_stores_bucket{node_id="1",le="1.4773776525985083e+08"} 5894
+admission_wait_durations_kv_stores_bucket{node_id="1",le="1.8671810912919158e+08"} 5894
+admission_wait_durations_kv_stores_bucket{node_id="1",le="2.359833466782189e+08"} 5894
+admission_wait_durations_kv_stores_bucket{node_id="1",le="2.9824712862168837e+08"} 5894
+admission_wait_durations_kv_stores_bucket{node_id="1",le="3.769390975388353e+08"} 5894
+admission_wait_durations_kv_stores_bucket{node_id="1",le="4.7639380104013294e+08"} 5894
+admission_wait_durations_kv_stores_bucket{node_id="1",le="6.020894493336115e+08"} 5894
+admission_wait_durations_kv_stores_bucket{node_id="1",le="7.609496685459859e+08"} 5894
+admission_wait_durations_kv_stores_bucket{node_id="1",le="9.61724871115294e+08"} 5894
+admission_wait_durations_kv_stores_bucket{node_id="1",le="1.2154742500762835e+09"} 5894
+admission_wait_durations_kv_stores_bucket{node_id="1",le="1.5361749466718242e+09"} 5894
+admission_wait_durations_kv_stores_bucket{node_id="1",le="1.941491945743876e+09"} 5894
+admission_wait_durations_kv_stores_bucket{node_id="1",le="2.453751106639811e+09"} 5894
+admission_wait_durations_kv_stores_bucket{node_id="1",le="3.10116892657477e+09"} 5894
+admission_wait_durations_kv_stores_bucket{node_id="1",le="3.919406774847209e+09"} 5894
+admission_wait_durations_kv_stores_bucket{node_id="1",le="4.953535208959157e+09"} 5894
+admission_wait_durations_kv_stores_bucket{node_id="1",le="6.260516572014802e+09"} 5894
+admission_wait_durations_kv_stores_bucket{node_id="1",le="7.912342618981298e+09"} 5894
+admission_wait_durations_kv_stores_bucket{node_id="1",le="9.99999999999997e+09"} 5894
+admission_wait_durations_kv_stores_bucket{node_id="1",le="+Inf"} 5894
+admission_wait_durations_kv_stores_sum{node_id="1"} 0
+admission_wait_durations_kv_stores_count{node_id="1"} 5894
+# HELP admission_errored_kv_stores_locking_normal_pri Number of requests not admitted due to error
+# TYPE admission_errored_kv_stores_locking_normal_pri counter
+admission_errored_kv_stores_locking_normal_pri{node_id="1"} 0
+# HELP admission_errored_sql_root_start Number of requests not admitted due to error
+# TYPE admission_errored_sql_root_start counter
+admission_errored_sql_root_start{node_id="1"} 0
+# HELP admission_wait_queue_length_kv_stores_ttl_low_pri Length of wait queue
+# TYPE admission_wait_queue_length_kv_stores_ttl_low_pri gauge
+admission_wait_queue_length_kv_stores_ttl_low_pri{node_id="1"} 0
+# HELP admission_wait_durations_kv_stores_bulk_normal_pri Wait time durations for requests that waited
+# TYPE admission_wait_durations_kv_stores_bulk_normal_pri histogram
+admission_wait_durations_kv_stores_bulk_normal_pri_bucket{node_id="1",le="10000"} 0
+admission_wait_durations_kv_stores_bulk_normal_pri_bucket{node_id="1",le="12638.482029342978"} 0
+admission_wait_durations_kv_stores_bulk_normal_pri_bucket{node_id="1",le="15973.122800602541"} 0
+admission_wait_durations_kv_stores_bulk_normal_pri_bucket{node_id="1",le="20187.602546790382"} 0
+admission_wait_durations_kv_stores_bulk_normal_pri_bucket{node_id="1",le="25514.065200312878"} 0
+admission_wait_durations_kv_stores_bulk_normal_pri_bucket{node_id="1",le="32245.90545296394"} 0
+admission_wait_durations_kv_stores_bulk_normal_pri_bucket{node_id="1",le="40753.92965871775"} 0
+admission_wait_durations_kv_stores_bulk_normal_pri_bucket{node_id="1",le="51506.78076168121"} 0
+admission_wait_durations_kv_stores_bulk_normal_pri_bucket{node_id="1",le="65096.75230458167"} 0
+admission_wait_durations_kv_stores_bulk_normal_pri_bucket{node_id="1",le="82272.41341700466"} 0
+admission_wait_durations_kv_stores_bulk_normal_pri_bucket{node_id="1",le="103979.84184814895"} 0
+admission_wait_durations_kv_stores_bulk_normal_pri_bucket{node_id="1",le="131414.73626117557"} 0
+admission_wait_durations_kv_stores_bulk_normal_pri_bucket{node_id="1",le="166088.27826277143"} 0
+admission_wait_durations_kv_stores_bulk_normal_pri_bucket{node_id="1",le="209910.3720108553"} 0
+admission_wait_durations_kv_stores_bulk_normal_pri_bucket{node_id="1",le="265294.8464431894"} 0
+admission_wait_durations_kv_stores_bulk_normal_pri_bucket{node_id="1",le="335292.41492495546"} 0
+admission_wait_durations_kv_stores_bulk_normal_pri_bucket{node_id="1",le="423758.7160604059"} 0
+admission_wait_durations_kv_stores_bulk_normal_pri_bucket{node_id="1",le="535566.6917706894"} 0
+admission_wait_durations_kv_stores_bulk_normal_pri_bucket{node_id="1",le="676875.0009458527"} 0
+admission_wait_durations_kv_stores_bulk_normal_pri_bucket{node_id="1",le="855467.2535565672"} 0
+admission_wait_durations_kv_stores_bulk_normal_pri_bucket{node_id="1",le="1.0811807510766068e+06"} 0
+admission_wait_durations_kv_stores_bulk_normal_pri_bucket{node_id="1",le="1.3664483492953242e+06"} 0
+admission_wait_durations_kv_stores_bulk_normal_pri_bucket{node_id="1",le="1.7269832906594332e+06"} 0
+admission_wait_durations_kv_stores_bulk_normal_pri_bucket{node_id="1",le="2.182644728397485e+06"} 0
+admission_wait_durations_kv_stores_bulk_normal_pri_bucket{node_id="1",le="2.7585316176291797e+06"} 0
+admission_wait_durations_kv_stores_bulk_normal_pri_bucket{node_id="1",le="3.4863652276780806e+06"} 0
+admission_wait_durations_kv_stores_bulk_normal_pri_bucket{node_id="1",le="4.406236427773566e+06"} 0
+admission_wait_durations_kv_stores_bulk_normal_pri_bucket{node_id="1",le="5.568813990945262e+06"} 0
+admission_wait_durations_kv_stores_bulk_normal_pri_bucket{node_id="1",le="7.038135554931545e+06"} 0
+admission_wait_durations_kv_stores_bulk_normal_pri_bucket{node_id="1",le="8.89513497310822e+06"} 0
+admission_wait_durations_kv_stores_bulk_normal_pri_bucket{node_id="1",le="1.1242100350620849e+07"} 0
+admission_wait_durations_kv_stores_bulk_normal_pri_bucket{node_id="1",le="1.4208308325339198e+07"} 0
+admission_wait_durations_kv_stores_bulk_normal_pri_bucket{node_id="1",le="1.795714494371637e+07"} 0
+admission_wait_durations_kv_stores_bulk_normal_pri_bucket{node_id="1",le="2.269510536694665e+07"} 0
+admission_wait_durations_kv_stores_bulk_normal_pri_bucket{node_id="1",le="2.868316813342006e+07"} 0
+admission_wait_durations_kv_stores_bulk_normal_pri_bucket{node_id="1",le="3.625117049988527e+07"} 0
+admission_wait_durations_kv_stores_bulk_normal_pri_bucket{node_id="1",le="4.581597669054482e+07"} 0
+admission_wait_durations_kv_stores_bulk_normal_pri_bucket{node_id="1",le="5.790443980602476e+07"} 0
+admission_wait_durations_kv_stores_bulk_normal_pri_bucket{node_id="1",le="7.318242219076161e+07"} 0
+admission_wait_durations_kv_stores_bulk_normal_pri_bucket{node_id="1",le="9.249147277217315e+07"} 0
+admission_wait_durations_kv_stores_bulk_normal_pri_bucket{node_id="1",le="1.1689518164985757e+08"} 0
+admission_wait_durations_kv_stores_bulk_normal_pri_bucket{node_id="1",le="1.4773776525985083e+08"} 0
+admission_wait_durations_kv_stores_bulk_normal_pri_bucket{node_id="1",le="1.8671810912919158e+08"} 0
+admission_wait_durations_kv_stores_bulk_normal_pri_bucket{node_id="1",le="2.359833466782189e+08"} 0
+admission_wait_durations_kv_stores_bulk_normal_pri_bucket{node_id="1",le="2.9824712862168837e+08"} 0
+admission_wait_durations_kv_stores_bulk_normal_pri_bucket{node_id="1",le="3.769390975388353e+08"} 0
+admission_wait_durations_kv_stores_bulk_normal_pri_bucket{node_id="1",le="4.7639380104013294e+08"} 0
+admission_wait_durations_kv_stores_bulk_normal_pri_bucket{node_id="1",le="6.020894493336115e+08"} 0
+admission_wait_durations_kv_stores_bulk_normal_pri_bucket{node_id="1",le="7.609496685459859e+08"} 0
+admission_wait_durations_kv_stores_bulk_normal_pri_bucket{node_id="1",le="9.61724871115294e+08"} 0
+admission_wait_durations_kv_stores_bulk_normal_pri_bucket{node_id="1",le="1.2154742500762835e+09"} 0
+admission_wait_durations_kv_stores_bulk_normal_pri_bucket{node_id="1",le="1.5361749466718242e+09"} 0
+admission_wait_durations_kv_stores_bulk_normal_pri_bucket{node_id="1",le="1.941491945743876e+09"} 0
+admission_wait_durations_kv_stores_bulk_normal_pri_bucket{node_id="1",le="2.453751106639811e+09"} 0
+admission_wait_durations_kv_stores_bulk_normal_pri_bucket{node_id="1",le="3.10116892657477e+09"} 0
+admission_wait_durations_kv_stores_bulk_normal_pri_bucket{node_id="1",le="3.919406774847209e+09"} 0
+admission_wait_durations_kv_stores_bulk_normal_pri_bucket{node_id="1",le="4.953535208959157e+09"} 0
+admission_wait_durations_kv_stores_bulk_normal_pri_bucket{node_id="1",le="6.260516572014802e+09"} 0
+admission_wait_durations_kv_stores_bulk_normal_pri_bucket{node_id="1",le="7.912342618981298e+09"} 0
+admission_wait_durations_kv_stores_bulk_normal_pri_bucket{node_id="1",le="9.99999999999997e+09"} 0
+admission_wait_durations_kv_stores_bulk_normal_pri_bucket{node_id="1",le="+Inf"} 0
+admission_wait_durations_kv_stores_bulk_normal_pri_sum{node_id="1"} 0
+admission_wait_durations_kv_stores_bulk_normal_pri_count{node_id="1"} 0
+# HELP admission_wait_queue_length_kv_normal_pri Length of wait queue
+# TYPE admission_wait_queue_length_kv_normal_pri gauge
+admission_wait_queue_length_kv_normal_pri{node_id="1"} 0
+# HELP admission_granter_used_slots_kv Used slots
+# TYPE admission_granter_used_slots_kv gauge
+admission_granter_used_slots_kv{node_id="1"} 0
+# HELP admission_raft_paused_replicas_dropped_msgs Number of messages dropped instead of being sent to paused replicas.\n\nThe messages are dropped to help these replicas to recover from I/O overload.
+# TYPE admission_raft_paused_replicas_dropped_msgs counter
+admission_raft_paused_replicas_dropped_msgs{store="1",node_id="1"} 0
+# HELP admission_wait_queue_length_kv_stores Length of wait queue
+# TYPE admission_wait_queue_length_kv_stores gauge
+admission_wait_queue_length_kv_stores{node_id="1"} 0
+# HELP admission_elastic_cpu_utilization_limit Utilization limit set for the elastic CPU work
+# TYPE admission_elastic_cpu_utilization_limit gauge
+admission_elastic_cpu_utilization_limit{node_id="1"} 0.05
+# HELP admission_errored_sql_sql_response Number of requests not admitted due to error
+# TYPE admission_errored_sql_sql_response counter
+admission_errored_sql_sql_response{node_id="1"} 0
+# HELP admission_scheduler_latency_listener_p99_nanos The scheduling latency at p99 as observed by the scheduler latency listener
+# TYPE admission_scheduler_latency_listener_p99_nanos gauge
+admission_scheduler_latency_listener_p99_nanos{node_id="1"} 2.710568e+06
+# HELP admission_wait_durations_kv_stores_ttl_low_pri Wait time durations for requests that waited
+# TYPE admission_wait_durations_kv_stores_ttl_low_pri histogram
+admission_wait_durations_kv_stores_ttl_low_pri_bucket{node_id="1",le="10000"} 0
+admission_wait_durations_kv_stores_ttl_low_pri_bucket{node_id="1",le="12638.482029342978"} 0
+admission_wait_durations_kv_stores_ttl_low_pri_bucket{node_id="1",le="15973.122800602541"} 0
+admission_wait_durations_kv_stores_ttl_low_pri_bucket{node_id="1",le="20187.602546790382"} 0
+admission_wait_durations_kv_stores_ttl_low_pri_bucket{node_id="1",le="25514.065200312878"} 0
+admission_wait_durations_kv_stores_ttl_low_pri_bucket{node_id="1",le="32245.90545296394"} 0
+admission_wait_durations_kv_stores_ttl_low_pri_bucket{node_id="1",le="40753.92965871775"} 0
+admission_wait_durations_kv_stores_ttl_low_pri_bucket{node_id="1",le="51506.78076168121"} 0
+admission_wait_durations_kv_stores_ttl_low_pri_bucket{node_id="1",le="65096.75230458167"} 0
+admission_wait_durations_kv_stores_ttl_low_pri_bucket{node_id="1",le="82272.41341700466"} 0
+admission_wait_durations_kv_stores_ttl_low_pri_bucket{node_id="1",le="103979.84184814895"} 0
+admission_wait_durations_kv_stores_ttl_low_pri_bucket{node_id="1",le="131414.73626117557"} 0
+admission_wait_durations_kv_stores_ttl_low_pri_bucket{node_id="1",le="166088.27826277143"} 0
+admission_wait_durations_kv_stores_ttl_low_pri_bucket{node_id="1",le="209910.3720108553"} 0
+admission_wait_durations_kv_stores_ttl_low_pri_bucket{node_id="1",le="265294.8464431894"} 0
+admission_wait_durations_kv_stores_ttl_low_pri_bucket{node_id="1",le="335292.41492495546"} 0
+admission_wait_durations_kv_stores_ttl_low_pri_bucket{node_id="1",le="423758.7160604059"} 0
+admission_wait_durations_kv_stores_ttl_low_pri_bucket{node_id="1",le="535566.6917706894"} 0
+admission_wait_durations_kv_stores_ttl_low_pri_bucket{node_id="1",le="676875.0009458527"} 0
+admission_wait_durations_kv_stores_ttl_low_pri_bucket{node_id="1",le="855467.2535565672"} 0
+admission_wait_durations_kv_stores_ttl_low_pri_bucket{node_id="1",le="1.0811807510766068e+06"} 0
+admission_wait_durations_kv_stores_ttl_low_pri_bucket{node_id="1",le="1.3664483492953242e+06"} 0
+admission_wait_durations_kv_stores_ttl_low_pri_bucket{node_id="1",le="1.7269832906594332e+06"} 0
+admission_wait_durations_kv_stores_ttl_low_pri_bucket{node_id="1",le="2.182644728397485e+06"} 0
+admission_wait_durations_kv_stores_ttl_low_pri_bucket{node_id="1",le="2.7585316176291797e+06"} 0
+admission_wait_durations_kv_stores_ttl_low_pri_bucket{node_id="1",le="3.4863652276780806e+06"} 0
+admission_wait_durations_kv_stores_ttl_low_pri_bucket{node_id="1",le="4.406236427773566e+06"} 0
+admission_wait_durations_kv_stores_ttl_low_pri_bucket{node_id="1",le="5.568813990945262e+06"} 0
+admission_wait_durations_kv_stores_ttl_low_pri_bucket{node_id="1",le="7.038135554931545e+06"} 0
+admission_wait_durations_kv_stores_ttl_low_pri_bucket{node_id="1",le="8.89513497310822e+06"} 0
+admission_wait_durations_kv_stores_ttl_low_pri_bucket{node_id="1",le="1.1242100350620849e+07"} 0
+admission_wait_durations_kv_stores_ttl_low_pri_bucket{node_id="1",le="1.4208308325339198e+07"} 0
+admission_wait_durations_kv_stores_ttl_low_pri_bucket{node_id="1",le="1.795714494371637e+07"} 0
+admission_wait_durations_kv_stores_ttl_low_pri_bucket{node_id="1",le="2.269510536694665e+07"} 0
+admission_wait_durations_kv_stores_ttl_low_pri_bucket{node_id="1",le="2.868316813342006e+07"} 0
+admission_wait_durations_kv_stores_ttl_low_pri_bucket{node_id="1",le="3.625117049988527e+07"} 0
+admission_wait_durations_kv_stores_ttl_low_pri_bucket{node_id="1",le="4.581597669054482e+07"} 0
+admission_wait_durations_kv_stores_ttl_low_pri_bucket{node_id="1",le="5.790443980602476e+07"} 0
+admission_wait_durations_kv_stores_ttl_low_pri_bucket{node_id="1",le="7.318242219076161e+07"} 0
+admission_wait_durations_kv_stores_ttl_low_pri_bucket{node_id="1",le="9.249147277217315e+07"} 0
+admission_wait_durations_kv_stores_ttl_low_pri_bucket{node_id="1",le="1.1689518164985757e+08"} 0
+admission_wait_durations_kv_stores_ttl_low_pri_bucket{node_id="1",le="1.4773776525985083e+08"} 0
+admission_wait_durations_kv_stores_ttl_low_pri_bucket{node_id="1",le="1.8671810912919158e+08"} 0
+admission_wait_durations_kv_stores_ttl_low_pri_bucket{node_id="1",le="2.359833466782189e+08"} 0
+admission_wait_durations_kv_stores_ttl_low_pri_bucket{node_id="1",le="2.9824712862168837e+08"} 0
+admission_wait_durations_kv_stores_ttl_low_pri_bucket{node_id="1",le="3.769390975388353e+08"} 0
+admission_wait_durations_kv_stores_ttl_low_pri_bucket{node_id="1",le="4.7639380104013294e+08"} 0
+admission_wait_durations_kv_stores_ttl_low_pri_bucket{node_id="1",le="6.020894493336115e+08"} 0
+admission_wait_durations_kv_stores_ttl_low_pri_bucket{node_id="1",le="7.609496685459859e+08"} 0
+admission_wait_durations_kv_stores_ttl_low_pri_bucket{node_id="1",le="9.61724871115294e+08"} 0
+admission_wait_durations_kv_stores_ttl_low_pri_bucket{node_id="1",le="1.2154742500762835e+09"} 0
+admission_wait_durations_kv_stores_ttl_low_pri_bucket{node_id="1",le="1.5361749466718242e+09"} 0
+admission_wait_durations_kv_stores_ttl_low_pri_bucket{node_id="1",le="1.941491945743876e+09"} 0
+admission_wait_durations_kv_stores_ttl_low_pri_bucket{node_id="1",le="2.453751106639811e+09"} 0
+admission_wait_durations_kv_stores_ttl_low_pri_bucket{node_id="1",le="3.10116892657477e+09"} 0
+admission_wait_durations_kv_stores_ttl_low_pri_bucket{node_id="1",le="3.919406774847209e+09"} 0
+admission_wait_durations_kv_stores_ttl_low_pri_bucket{node_id="1",le="4.953535208959157e+09"} 0
+admission_wait_durations_kv_stores_ttl_low_pri_bucket{node_id="1",le="6.260516572014802e+09"} 0
+admission_wait_durations_kv_stores_ttl_low_pri_bucket{node_id="1",le="7.912342618981298e+09"} 0
+admission_wait_durations_kv_stores_ttl_low_pri_bucket{node_id="1",le="9.99999999999997e+09"} 0
+admission_wait_durations_kv_stores_ttl_low_pri_bucket{node_id="1",le="+Inf"} 0
+admission_wait_durations_kv_stores_ttl_low_pri_sum{node_id="1"} 0
+admission_wait_durations_kv_stores_ttl_low_pri_count{node_id="1"} 0
+# HELP admission_requested_sql_root_start_locking_normal_pri Number of requests
+# TYPE admission_requested_sql_root_start_locking_normal_pri counter
+admission_requested_sql_root_start_locking_normal_pri{node_id="1"} 0
+# HELP admission_granter_io_tokens_bypassed_kv Total number of tokens taken by work bypassing admission control (for example, follower writes without flow control)
+# TYPE admission_granter_io_tokens_bypassed_kv counter
+admission_granter_io_tokens_bypassed_kv{node_id="1"} 0
+# HELP admission_wait_durations_elastic_cpu_bulk_normal_pri Wait time durations for requests that waited
+# TYPE admission_wait_durations_elastic_cpu_bulk_normal_pri histogram
+admission_wait_durations_elastic_cpu_bulk_normal_pri_bucket{node_id="1",le="10000"} 0
+admission_wait_durations_elastic_cpu_bulk_normal_pri_bucket{node_id="1",le="12638.482029342978"} 0
+admission_wait_durations_elastic_cpu_bulk_normal_pri_bucket{node_id="1",le="15973.122800602541"} 0
+admission_wait_durations_elastic_cpu_bulk_normal_pri_bucket{node_id="1",le="20187.602546790382"} 0
+admission_wait_durations_elastic_cpu_bulk_normal_pri_bucket{node_id="1",le="25514.065200312878"} 0
+admission_wait_durations_elastic_cpu_bulk_normal_pri_bucket{node_id="1",le="32245.90545296394"} 0
+admission_wait_durations_elastic_cpu_bulk_normal_pri_bucket{node_id="1",le="40753.92965871775"} 0
+admission_wait_durations_elastic_cpu_bulk_normal_pri_bucket{node_id="1",le="51506.78076168121"} 0
+admission_wait_durations_elastic_cpu_bulk_normal_pri_bucket{node_id="1",le="65096.75230458167"} 0
+admission_wait_durations_elastic_cpu_bulk_normal_pri_bucket{node_id="1",le="82272.41341700466"} 0
+admission_wait_durations_elastic_cpu_bulk_normal_pri_bucket{node_id="1",le="103979.84184814895"} 0
+admission_wait_durations_elastic_cpu_bulk_normal_pri_bucket{node_id="1",le="131414.73626117557"} 0
+admission_wait_durations_elastic_cpu_bulk_normal_pri_bucket{node_id="1",le="166088.27826277143"} 0
+admission_wait_durations_elastic_cpu_bulk_normal_pri_bucket{node_id="1",le="209910.3720108553"} 0
+admission_wait_durations_elastic_cpu_bulk_normal_pri_bucket{node_id="1",le="265294.8464431894"} 0
+admission_wait_durations_elastic_cpu_bulk_normal_pri_bucket{node_id="1",le="335292.41492495546"} 0
+admission_wait_durations_elastic_cpu_bulk_normal_pri_bucket{node_id="1",le="423758.7160604059"} 0
+admission_wait_durations_elastic_cpu_bulk_normal_pri_bucket{node_id="1",le="535566.6917706894"} 0
+admission_wait_durations_elastic_cpu_bulk_normal_pri_bucket{node_id="1",le="676875.0009458527"} 0
+admission_wait_durations_elastic_cpu_bulk_normal_pri_bucket{node_id="1",le="855467.2535565672"} 0
+admission_wait_durations_elastic_cpu_bulk_normal_pri_bucket{node_id="1",le="1.0811807510766068e+06"} 0
+admission_wait_durations_elastic_cpu_bulk_normal_pri_bucket{node_id="1",le="1.3664483492953242e+06"} 0
+admission_wait_durations_elastic_cpu_bulk_normal_pri_bucket{node_id="1",le="1.7269832906594332e+06"} 0
+admission_wait_durations_elastic_cpu_bulk_normal_pri_bucket{node_id="1",le="2.182644728397485e+06"} 0
+admission_wait_durations_elastic_cpu_bulk_normal_pri_bucket{node_id="1",le="2.7585316176291797e+06"} 0
+admission_wait_durations_elastic_cpu_bulk_normal_pri_bucket{node_id="1",le="3.4863652276780806e+06"} 0
+admission_wait_durations_elastic_cpu_bulk_normal_pri_bucket{node_id="1",le="4.406236427773566e+06"} 0
+admission_wait_durations_elastic_cpu_bulk_normal_pri_bucket{node_id="1",le="5.568813990945262e+06"} 0
+admission_wait_durations_elastic_cpu_bulk_normal_pri_bucket{node_id="1",le="7.038135554931545e+06"} 0
+admission_wait_durations_elastic_cpu_bulk_normal_pri_bucket{node_id="1",le="8.89513497310822e+06"} 0
+admission_wait_durations_elastic_cpu_bulk_normal_pri_bucket{node_id="1",le="1.1242100350620849e+07"} 0
+admission_wait_durations_elastic_cpu_bulk_normal_pri_bucket{node_id="1",le="1.4208308325339198e+07"} 0
+admission_wait_durations_elastic_cpu_bulk_normal_pri_bucket{node_id="1",le="1.795714494371637e+07"} 0
+admission_wait_durations_elastic_cpu_bulk_normal_pri_bucket{node_id="1",le="2.269510536694665e+07"} 0
+admission_wait_durations_elastic_cpu_bulk_normal_pri_bucket{node_id="1",le="2.868316813342006e+07"} 0
+admission_wait_durations_elastic_cpu_bulk_normal_pri_bucket{node_id="1",le="3.625117049988527e+07"} 0
+admission_wait_durations_elastic_cpu_bulk_normal_pri_bucket{node_id="1",le="4.581597669054482e+07"} 0
+admission_wait_durations_elastic_cpu_bulk_normal_pri_bucket{node_id="1",le="5.790443980602476e+07"} 0
+admission_wait_durations_elastic_cpu_bulk_normal_pri_bucket{node_id="1",le="7.318242219076161e+07"} 0
+admission_wait_durations_elastic_cpu_bulk_normal_pri_bucket{node_id="1",le="9.249147277217315e+07"} 0
+admission_wait_durations_elastic_cpu_bulk_normal_pri_bucket{node_id="1",le="1.1689518164985757e+08"} 0
+admission_wait_durations_elastic_cpu_bulk_normal_pri_bucket{node_id="1",le="1.4773776525985083e+08"} 0
+admission_wait_durations_elastic_cpu_bulk_normal_pri_bucket{node_id="1",le="1.8671810912919158e+08"} 0
+admission_wait_durations_elastic_cpu_bulk_normal_pri_bucket{node_id="1",le="2.359833466782189e+08"} 0
+admission_wait_durations_elastic_cpu_bulk_normal_pri_bucket{node_id="1",le="2.9824712862168837e+08"} 0
+admission_wait_durations_elastic_cpu_bulk_normal_pri_bucket{node_id="1",le="3.769390975388353e+08"} 0
+admission_wait_durations_elastic_cpu_bulk_normal_pri_bucket{node_id="1",le="4.7639380104013294e+08"} 0
+admission_wait_durations_elastic_cpu_bulk_normal_pri_bucket{node_id="1",le="6.020894493336115e+08"} 0
+admission_wait_durations_elastic_cpu_bulk_normal_pri_bucket{node_id="1",le="7.609496685459859e+08"} 0
+admission_wait_durations_elastic_cpu_bulk_normal_pri_bucket{node_id="1",le="9.61724871115294e+08"} 0
+admission_wait_durations_elastic_cpu_bulk_normal_pri_bucket{node_id="1",le="1.2154742500762835e+09"} 0
+admission_wait_durations_elastic_cpu_bulk_normal_pri_bucket{node_id="1",le="1.5361749466718242e+09"} 0
+admission_wait_durations_elastic_cpu_bulk_normal_pri_bucket{node_id="1",le="1.941491945743876e+09"} 0
+admission_wait_durations_elastic_cpu_bulk_normal_pri_bucket{node_id="1",le="2.453751106639811e+09"} 0
+admission_wait_durations_elastic_cpu_bulk_normal_pri_bucket{node_id="1",le="3.10116892657477e+09"} 0
+admission_wait_durations_elastic_cpu_bulk_normal_pri_bucket{node_id="1",le="3.919406774847209e+09"} 0
+admission_wait_durations_elastic_cpu_bulk_normal_pri_bucket{node_id="1",le="4.953535208959157e+09"} 0
+admission_wait_durations_elastic_cpu_bulk_normal_pri_bucket{node_id="1",le="6.260516572014802e+09"} 0
+admission_wait_durations_elastic_cpu_bulk_normal_pri_bucket{node_id="1",le="7.912342618981298e+09"} 0
+admission_wait_durations_elastic_cpu_bulk_normal_pri_bucket{node_id="1",le="9.99999999999997e+09"} 0
+admission_wait_durations_elastic_cpu_bulk_normal_pri_bucket{node_id="1",le="+Inf"} 0
+admission_wait_durations_elastic_cpu_bulk_normal_pri_sum{node_id="1"} 0
+admission_wait_durations_elastic_cpu_bulk_normal_pri_count{node_id="1"} 0
+# HELP admission_requested_kv_stores_bulk_normal_pri Number of requests
+# TYPE admission_requested_kv_stores_bulk_normal_pri counter
+admission_requested_kv_stores_bulk_normal_pri{node_id="1"} 0
+# HELP admission_wait_durations_sql_kv_response_normal_pri Wait time durations for requests that waited
+# TYPE admission_wait_durations_sql_kv_response_normal_pri histogram
+admission_wait_durations_sql_kv_response_normal_pri_bucket{node_id="1",le="10000"} 3066
+admission_wait_durations_sql_kv_response_normal_pri_bucket{node_id="1",le="12638.482029342978"} 3066
+admission_wait_durations_sql_kv_response_normal_pri_bucket{node_id="1",le="15973.122800602541"} 3066
+admission_wait_durations_sql_kv_response_normal_pri_bucket{node_id="1",le="20187.602546790382"} 3066
+admission_wait_durations_sql_kv_response_normal_pri_bucket{node_id="1",le="25514.065200312878"} 3066
+admission_wait_durations_sql_kv_response_normal_pri_bucket{node_id="1",le="32245.90545296394"} 3066
+admission_wait_durations_sql_kv_response_normal_pri_bucket{node_id="1",le="40753.92965871775"} 3066
+admission_wait_durations_sql_kv_response_normal_pri_bucket{node_id="1",le="51506.78076168121"} 3066
+admission_wait_durations_sql_kv_response_normal_pri_bucket{node_id="1",le="65096.75230458167"} 3066
+admission_wait_durations_sql_kv_response_normal_pri_bucket{node_id="1",le="82272.41341700466"} 3066
+admission_wait_durations_sql_kv_response_normal_pri_bucket{node_id="1",le="103979.84184814895"} 3066
+admission_wait_durations_sql_kv_response_normal_pri_bucket{node_id="1",le="131414.73626117557"} 3066
+admission_wait_durations_sql_kv_response_normal_pri_bucket{node_id="1",le="166088.27826277143"} 3066
+admission_wait_durations_sql_kv_response_normal_pri_bucket{node_id="1",le="209910.3720108553"} 3066
+admission_wait_durations_sql_kv_response_normal_pri_bucket{node_id="1",le="265294.8464431894"} 3066
+admission_wait_durations_sql_kv_response_normal_pri_bucket{node_id="1",le="335292.41492495546"} 3066
+admission_wait_durations_sql_kv_response_normal_pri_bucket{node_id="1",le="423758.7160604059"} 3066
+admission_wait_durations_sql_kv_response_normal_pri_bucket{node_id="1",le="535566.6917706894"} 3066
+admission_wait_durations_sql_kv_response_normal_pri_bucket{node_id="1",le="676875.0009458527"} 3066
+admission_wait_durations_sql_kv_response_normal_pri_bucket{node_id="1",le="855467.2535565672"} 3066
+admission_wait_durations_sql_kv_response_normal_pri_bucket{node_id="1",le="1.0811807510766068e+06"} 3066
+admission_wait_durations_sql_kv_response_normal_pri_bucket{node_id="1",le="1.3664483492953242e+06"} 3066
+admission_wait_durations_sql_kv_response_normal_pri_bucket{node_id="1",le="1.7269832906594332e+06"} 3066
+admission_wait_durations_sql_kv_response_normal_pri_bucket{node_id="1",le="2.182644728397485e+06"} 3066
+admission_wait_durations_sql_kv_response_normal_pri_bucket{node_id="1",le="2.7585316176291797e+06"} 3066
+admission_wait_durations_sql_kv_response_normal_pri_bucket{node_id="1",le="3.4863652276780806e+06"} 3066
+admission_wait_durations_sql_kv_response_normal_pri_bucket{node_id="1",le="4.406236427773566e+06"} 3066
+admission_wait_durations_sql_kv_response_normal_pri_bucket{node_id="1",le="5.568813990945262e+06"} 3066
+admission_wait_durations_sql_kv_response_normal_pri_bucket{node_id="1",le="7.038135554931545e+06"} 3066
+admission_wait_durations_sql_kv_response_normal_pri_bucket{node_id="1",le="8.89513497310822e+06"} 3066
+admission_wait_durations_sql_kv_response_normal_pri_bucket{node_id="1",le="1.1242100350620849e+07"} 3066
+admission_wait_durations_sql_kv_response_normal_pri_bucket{node_id="1",le="1.4208308325339198e+07"} 3066
+admission_wait_durations_sql_kv_response_normal_pri_bucket{node_id="1",le="1.795714494371637e+07"} 3066
+admission_wait_durations_sql_kv_response_normal_pri_bucket{node_id="1",le="2.269510536694665e+07"} 3066
+admission_wait_durations_sql_kv_response_normal_pri_bucket{node_id="1",le="2.868316813342006e+07"} 3066
+admission_wait_durations_sql_kv_response_normal_pri_bucket{node_id="1",le="3.625117049988527e+07"} 3066
+admission_wait_durations_sql_kv_response_normal_pri_bucket{node_id="1",le="4.581597669054482e+07"} 3066
+admission_wait_durations_sql_kv_response_normal_pri_bucket{node_id="1",le="5.790443980602476e+07"} 3066
+admission_wait_durations_sql_kv_response_normal_pri_bucket{node_id="1",le="7.318242219076161e+07"} 3066
+admission_wait_durations_sql_kv_response_normal_pri_bucket{node_id="1",le="9.249147277217315e+07"} 3066
+admission_wait_durations_sql_kv_response_normal_pri_bucket{node_id="1",le="1.1689518164985757e+08"} 3066
+admission_wait_durations_sql_kv_response_normal_pri_bucket{node_id="1",le="1.4773776525985083e+08"} 3066
+admission_wait_durations_sql_kv_response_normal_pri_bucket{node_id="1",le="1.8671810912919158e+08"} 3066
+admission_wait_durations_sql_kv_response_normal_pri_bucket{node_id="1",le="2.359833466782189e+08"} 3066
+admission_wait_durations_sql_kv_response_normal_pri_bucket{node_id="1",le="2.9824712862168837e+08"} 3066
+admission_wait_durations_sql_kv_response_normal_pri_bucket{node_id="1",le="3.769390975388353e+08"} 3066
+admission_wait_durations_sql_kv_response_normal_pri_bucket{node_id="1",le="4.7639380104013294e+08"} 3066
+admission_wait_durations_sql_kv_response_normal_pri_bucket{node_id="1",le="6.020894493336115e+08"} 3066
+admission_wait_durations_sql_kv_response_normal_pri_bucket{node_id="1",le="7.609496685459859e+08"} 3066
+admission_wait_durations_sql_kv_response_normal_pri_bucket{node_id="1",le="9.61724871115294e+08"} 3066
+admission_wait_durations_sql_kv_response_normal_pri_bucket{node_id="1",le="1.2154742500762835e+09"} 3066
+admission_wait_durations_sql_kv_response_normal_pri_bucket{node_id="1",le="1.5361749466718242e+09"} 3066
+admission_wait_durations_sql_kv_response_normal_pri_bucket{node_id="1",le="1.941491945743876e+09"} 3066
+admission_wait_durations_sql_kv_response_normal_pri_bucket{node_id="1",le="2.453751106639811e+09"} 3066
+admission_wait_durations_sql_kv_response_normal_pri_bucket{node_id="1",le="3.10116892657477e+09"} 3066
+admission_wait_durations_sql_kv_response_normal_pri_bucket{node_id="1",le="3.919406774847209e+09"} 3066
+admission_wait_durations_sql_kv_response_normal_pri_bucket{node_id="1",le="4.953535208959157e+09"} 3066
+admission_wait_durations_sql_kv_response_normal_pri_bucket{node_id="1",le="6.260516572014802e+09"} 3066
+admission_wait_durations_sql_kv_response_normal_pri_bucket{node_id="1",le="7.912342618981298e+09"} 3066
+admission_wait_durations_sql_kv_response_normal_pri_bucket{node_id="1",le="9.99999999999997e+09"} 3066
+admission_wait_durations_sql_kv_response_normal_pri_bucket{node_id="1",le="+Inf"} 3066
+admission_wait_durations_sql_kv_response_normal_pri_sum{node_id="1"} 0
+admission_wait_durations_sql_kv_response_normal_pri_count{node_id="1"} 3066
+
+# HELP admission_elastic_cpu_utilization CPU utilization by elastic work
+# TYPE admission_elastic_cpu_utilization gauge
+admission_elastic_cpu_utilization{node_id="1"} 0
+# HELP admission_wait_queue_length_sql_leaf_start_normal_pri Length of wait queue
+# TYPE admission_wait_queue_length_sql_leaf_start_normal_pri gauge
+admission_wait_queue_length_sql_leaf_start_normal_pri{node_id="1"} 0
+# HELP admission_errored_kv_stores_high_pri Number of requests not admitted due to error
+# TYPE admission_errored_kv_stores_high_pri counter
+admission_errored_kv_stores_high_pri{node_id="1"} 0
+# HELP admission_wait_queue_length_kv_stores_normal_pri Length of wait queue
+# TYPE admission_wait_queue_length_kv_stores_normal_pri gauge
+admission_wait_queue_length_kv_stores_normal_pri{node_id="1"} 0
+# HELP admission_requested_sql_sql_response Number of requests
+# TYPE admission_requested_sql_sql_response counter
+admission_requested_sql_sql_response{node_id="1"} 0
+# HELP admission_requested_kv_stores_locking_normal_pri Number of requests
+# TYPE admission_requested_kv_stores_locking_normal_pri counter
+admission_requested_kv_stores_locking_normal_pri{node_id="1"} 2804
+# HELP admission_wait_queue_length_sql_root_start Length of wait queue
+# TYPE admission_wait_queue_length_sql_root_start gauge
+admission_wait_queue_length_sql_root_start{node_id="1"} 0
+# HELP admission_wait_queue_length_sql_kv_response_normal_pri Length of wait queue
+# TYPE admission_wait_queue_length_sql_kv_response_normal_pri gauge
+admission_wait_queue_length_sql_kv_response_normal_pri{node_id="1"} 0
+# HELP admission_elastic_cpu_available_nanos Instantaneous available CPU nanoseconds per second ignoring utilization limit
+# TYPE admission_elastic_cpu_available_nanos gauge
+admission_elastic_cpu_available_nanos{node_id="1"} 3.5e+08
+# HELP admission_errored_sql_leaf_start_normal_pri Number of requests not admitted due to error
+# TYPE admission_errored_sql_leaf_start_normal_pri counter
+admission_errored_sql_leaf_start_normal_pri{node_id="1"} 0
+# HELP admission_admitted_sql_leaf_start Number of requests admitted
+# TYPE admission_admitted_sql_leaf_start counter
+admission_admitted_sql_leaf_start{node_id="1"} 0
+# HELP admission_admitted_sql_sql_response_locking_normal_pri Number of requests admitted
+# TYPE admission_admitted_sql_sql_response_locking_normal_pri counter
+admission_admitted_sql_sql_response_locking_normal_pri{node_id="1"} 0
+# HELP admission_requested_kv_stores_ttl_low_pri Number of requests
+# TYPE admission_requested_kv_stores_ttl_low_pri counter
+admission_requested_kv_stores_ttl_low_pri{node_id="1"} 0
+# HELP admission_errored_elastic_cpu_normal_pri Number of requests not admitted due to error
+# TYPE admission_errored_elastic_cpu_normal_pri counter
+admission_errored_elastic_cpu_normal_pri{node_id="1"} 0
+# HELP admission_errored_kv_high_pri Number of requests not admitted due to error
+# TYPE admission_errored_kv_high_pri counter
+admission_errored_kv_high_pri{node_id="1"} 0
+# HELP admission_wait_durations_kv_stores_normal_pri Wait time durations for requests that waited
+# TYPE admission_wait_durations_kv_stores_normal_pri histogram
+admission_wait_durations_kv_stores_normal_pri_bucket{node_id="1",le="10000"} 2979
+admission_wait_durations_kv_stores_normal_pri_bucket{node_id="1",le="12638.482029342978"} 2979
+admission_wait_durations_kv_stores_normal_pri_bucket{node_id="1",le="15973.122800602541"} 2979
+admission_wait_durations_kv_stores_normal_pri_bucket{node_id="1",le="20187.602546790382"} 2979
+admission_wait_durations_kv_stores_normal_pri_bucket{node_id="1",le="25514.065200312878"} 2979
+admission_wait_durations_kv_stores_normal_pri_bucket{node_id="1",le="32245.90545296394"} 2979
+admission_wait_durations_kv_stores_normal_pri_bucket{node_id="1",le="40753.92965871775"} 2979
+admission_wait_durations_kv_stores_normal_pri_bucket{node_id="1",le="51506.78076168121"} 2979
+admission_wait_durations_kv_stores_normal_pri_bucket{node_id="1",le="65096.75230458167"} 2979
+admission_wait_durations_kv_stores_normal_pri_bucket{node_id="1",le="82272.41341700466"} 2979
+admission_wait_durations_kv_stores_normal_pri_bucket{node_id="1",le="103979.84184814895"} 2979
+admission_wait_durations_kv_stores_normal_pri_bucket{node_id="1",le="131414.73626117557"} 2979
+admission_wait_durations_kv_stores_normal_pri_bucket{node_id="1",le="166088.27826277143"} 2979
+admission_wait_durations_kv_stores_normal_pri_bucket{node_id="1",le="209910.3720108553"} 2979
+admission_wait_durations_kv_stores_normal_pri_bucket{node_id="1",le="265294.8464431894"} 2979
+admission_wait_durations_kv_stores_normal_pri_bucket{node_id="1",le="335292.41492495546"} 2979
+admission_wait_durations_kv_stores_normal_pri_bucket{node_id="1",le="423758.7160604059"} 2979
+admission_wait_durations_kv_stores_normal_pri_bucket{node_id="1",le="535566.6917706894"} 2979
+admission_wait_durations_kv_stores_normal_pri_bucket{node_id="1",le="676875.0009458527"} 2979
+admission_wait_durations_kv_stores_normal_pri_bucket{node_id="1",le="855467.2535565672"} 2979
+admission_wait_durations_kv_stores_normal_pri_bucket{node_id="1",le="1.0811807510766068e+06"} 2979
+admission_wait_durations_kv_stores_normal_pri_bucket{node_id="1",le="1.3664483492953242e+06"} 2979
+admission_wait_durations_kv_stores_normal_pri_bucket{node_id="1",le="1.7269832906594332e+06"} 2979
+admission_wait_durations_kv_stores_normal_pri_bucket{node_id="1",le="2.182644728397485e+06"} 2979
+admission_wait_durations_kv_stores_normal_pri_bucket{node_id="1",le="2.7585316176291797e+06"} 2979
+admission_wait_durations_kv_stores_normal_pri_bucket{node_id="1",le="3.4863652276780806e+06"} 2979
+admission_wait_durations_kv_stores_normal_pri_bucket{node_id="1",le="4.406236427773566e+06"} 2979
+admission_wait_durations_kv_stores_normal_pri_bucket{node_id="1",le="5.568813990945262e+06"} 2979
+admission_wait_durations_kv_stores_normal_pri_bucket{node_id="1",le="7.038135554931545e+06"} 2979
+admission_wait_durations_kv_stores_normal_pri_bucket{node_id="1",le="8.89513497310822e+06"} 2979
+admission_wait_durations_kv_stores_normal_pri_bucket{node_id="1",le="1.1242100350620849e+07"} 2979
+admission_wait_durations_kv_stores_normal_pri_bucket{node_id="1",le="1.4208308325339198e+07"} 2979
+admission_wait_durations_kv_stores_normal_pri_bucket{node_id="1",le="1.795714494371637e+07"} 2979
+admission_wait_durations_kv_stores_normal_pri_bucket{node_id="1",le="2.269510536694665e+07"} 2979
+admission_wait_durations_kv_stores_normal_pri_bucket{node_id="1",le="2.868316813342006e+07"} 2979
+admission_wait_durations_kv_stores_normal_pri_bucket{node_id="1",le="3.625117049988527e+07"} 2979
+admission_wait_durations_kv_stores_normal_pri_bucket{node_id="1",le="4.581597669054482e+07"} 2979
+admission_wait_durations_kv_stores_normal_pri_bucket{node_id="1",le="5.790443980602476e+07"} 2979
+admission_wait_durations_kv_stores_normal_pri_bucket{node_id="1",le="7.318242219076161e+07"} 2979
+admission_wait_durations_kv_stores_normal_pri_bucket{node_id="1",le="9.249147277217315e+07"} 2979
+admission_wait_durations_kv_stores_normal_pri_bucket{node_id="1",le="1.1689518164985757e+08"} 2979
+admission_wait_durations_kv_stores_normal_pri_bucket{node_id="1",le="1.4773776525985083e+08"} 2979
+admission_wait_durations_kv_stores_normal_pri_bucket{node_id="1",le="1.8671810912919158e+08"} 2979
+admission_wait_durations_kv_stores_normal_pri_bucket{node_id="1",le="2.359833466782189e+08"} 2979
+admission_wait_durations_kv_stores_normal_pri_bucket{node_id="1",le="2.9824712862168837e+08"} 2979
+admission_wait_durations_kv_stores_normal_pri_bucket{node_id="1",le="3.769390975388353e+08"} 2979
+admission_wait_durations_kv_stores_normal_pri_bucket{node_id="1",le="4.7639380104013294e+08"} 2979
+admission_wait_durations_kv_stores_normal_pri_bucket{node_id="1",le="6.020894493336115e+08"} 2979
+admission_wait_durations_kv_stores_normal_pri_bucket{node_id="1",le="7.609496685459859e+08"} 2979
+admission_wait_durations_kv_stores_normal_pri_bucket{node_id="1",le="9.61724871115294e+08"} 2979
+admission_wait_durations_kv_stores_normal_pri_bucket{node_id="1",le="1.2154742500762835e+09"} 2979
+admission_wait_durations_kv_stores_normal_pri_bucket{node_id="1",le="1.5361749466718242e+09"} 2979
+admission_wait_durations_kv_stores_normal_pri_bucket{node_id="1",le="1.941491945743876e+09"} 2979
+admission_wait_durations_kv_stores_normal_pri_bucket{node_id="1",le="2.453751106639811e+09"} 2979
+admission_wait_durations_kv_stores_normal_pri_bucket{node_id="1",le="3.10116892657477e+09"} 2979
+admission_wait_durations_kv_stores_normal_pri_bucket{node_id="1",le="3.919406774847209e+09"} 2979
+admission_wait_durations_kv_stores_normal_pri_bucket{node_id="1",le="4.953535208959157e+09"} 2979
+admission_wait_durations_kv_stores_normal_pri_bucket{node_id="1",le="6.260516572014802e+09"} 2979
+admission_wait_durations_kv_stores_normal_pri_bucket{node_id="1",le="7.912342618981298e+09"} 2979
+admission_wait_durations_kv_stores_normal_pri_bucket{node_id="1",le="9.99999999999997e+09"} 2979
+admission_wait_durations_kv_stores_normal_pri_bucket{node_id="1",le="+Inf"} 2979
+admission_wait_durations_kv_stores_normal_pri_sum{node_id="1"} 0
+admission_wait_durations_kv_stores_normal_pri_count{node_id="1"} 2979
+# HELP admission_requested_sql_root_start Number of requests
+# TYPE admission_requested_sql_root_start counter
+admission_requested_sql_root_start{node_id="1"} 0
+# HELP admission_admitted_kv Number of requests admitted
+# TYPE admission_admitted_kv counter
+admission_admitted_kv{node_id="1"} 12322
+# HELP admission_admitted_kv_stores Number of requests admitted
+# TYPE admission_admitted_kv_stores counter
+admission_admitted_kv_stores{node_id="1"} 5894
+# HELP admission_admitted_kv_stores_normal_pri Number of requests admitted
+# TYPE admission_admitted_kv_stores_normal_pri counter
+admission_admitted_kv_stores_normal_pri{node_id="1"} 2979
+# HELP admission_wait_durations_kv_high_pri Wait time durations for requests that waited
+# TYPE admission_wait_durations_kv_high_pri histogram
+admission_wait_durations_kv_high_pri_bucket{node_id="1",le="10000"} 222
+admission_wait_durations_kv_high_pri_bucket{node_id="1",le="12638.482029342978"} 222
+admission_wait_durations_kv_high_pri_bucket{node_id="1",le="15973.122800602541"} 222
+admission_wait_durations_kv_high_pri_bucket{node_id="1",le="20187.602546790382"} 222
+admission_wait_durations_kv_high_pri_bucket{node_id="1",le="25514.065200312878"} 222
+admission_wait_durations_kv_high_pri_bucket{node_id="1",le="32245.90545296394"} 222
+admission_wait_durations_kv_high_pri_bucket{node_id="1",le="40753.92965871775"} 222
+admission_wait_durations_kv_high_pri_bucket{node_id="1",le="51506.78076168121"} 222
+admission_wait_durations_kv_high_pri_bucket{node_id="1",le="65096.75230458167"} 222
+admission_wait_durations_kv_high_pri_bucket{node_id="1",le="82272.41341700466"} 222
+admission_wait_durations_kv_high_pri_bucket{node_id="1",le="103979.84184814895"} 222
+admission_wait_durations_kv_high_pri_bucket{node_id="1",le="131414.73626117557"} 222
+admission_wait_durations_kv_high_pri_bucket{node_id="1",le="166088.27826277143"} 222
+admission_wait_durations_kv_high_pri_bucket{node_id="1",le="209910.3720108553"} 222
+admission_wait_durations_kv_high_pri_bucket{node_id="1",le="265294.8464431894"} 222
+admission_wait_durations_kv_high_pri_bucket{node_id="1",le="335292.41492495546"} 222
+admission_wait_durations_kv_high_pri_bucket{node_id="1",le="423758.7160604059"} 222
+admission_wait_durations_kv_high_pri_bucket{node_id="1",le="535566.6917706894"} 222
+admission_wait_durations_kv_high_pri_bucket{node_id="1",le="676875.0009458527"} 222
+admission_wait_durations_kv_high_pri_bucket{node_id="1",le="855467.2535565672"} 222
+admission_wait_durations_kv_high_pri_bucket{node_id="1",le="1.0811807510766068e+06"} 222
+admission_wait_durations_kv_high_pri_bucket{node_id="1",le="1.3664483492953242e+06"} 222
+admission_wait_durations_kv_high_pri_bucket{node_id="1",le="1.7269832906594332e+06"} 222
+admission_wait_durations_kv_high_pri_bucket{node_id="1",le="2.182644728397485e+06"} 222
+admission_wait_durations_kv_high_pri_bucket{node_id="1",le="2.7585316176291797e+06"} 222
+admission_wait_durations_kv_high_pri_bucket{node_id="1",le="3.4863652276780806e+06"} 222
+admission_wait_durations_kv_high_pri_bucket{node_id="1",le="4.406236427773566e+06"} 222
+admission_wait_durations_kv_high_pri_bucket{node_id="1",le="5.568813990945262e+06"} 222
+admission_wait_durations_kv_high_pri_bucket{node_id="1",le="7.038135554931545e+06"} 222
+admission_wait_durations_kv_high_pri_bucket{node_id="1",le="8.89513497310822e+06"} 222
+admission_wait_durations_kv_high_pri_bucket{node_id="1",le="1.1242100350620849e+07"} 222
+admission_wait_durations_kv_high_pri_bucket{node_id="1",le="1.4208308325339198e+07"} 222
+admission_wait_durations_kv_high_pri_bucket{node_id="1",le="1.795714494371637e+07"} 222
+admission_wait_durations_kv_high_pri_bucket{node_id="1",le="2.269510536694665e+07"} 222
+admission_wait_durations_kv_high_pri_bucket{node_id="1",le="2.868316813342006e+07"} 222
+admission_wait_durations_kv_high_pri_bucket{node_id="1",le="3.625117049988527e+07"} 222
+admission_wait_durations_kv_high_pri_bucket{node_id="1",le="4.581597669054482e+07"} 222
+admission_wait_durations_kv_high_pri_bucket{node_id="1",le="5.790443980602476e+07"} 222
+admission_wait_durations_kv_high_pri_bucket{node_id="1",le="7.318242219076161e+07"} 222
+admission_wait_durations_kv_high_pri_bucket{node_id="1",le="9.249147277217315e+07"} 222
+admission_wait_durations_kv_high_pri_bucket{node_id="1",le="1.1689518164985757e+08"} 222
+admission_wait_durations_kv_high_pri_bucket{node_id="1",le="1.4773776525985083e+08"} 222
+admission_wait_durations_kv_high_pri_bucket{node_id="1",le="1.8671810912919158e+08"} 222
+admission_wait_durations_kv_high_pri_bucket{node_id="1",le="2.359833466782189e+08"} 222
+admission_wait_durations_kv_high_pri_bucket{node_id="1",le="2.9824712862168837e+08"} 222
+admission_wait_durations_kv_high_pri_bucket{node_id="1",le="3.769390975388353e+08"} 222
+admission_wait_durations_kv_high_pri_bucket{node_id="1",le="4.7639380104013294e+08"} 222
+admission_wait_durations_kv_high_pri_bucket{node_id="1",le="6.020894493336115e+08"} 222
+admission_wait_durations_kv_high_pri_bucket{node_id="1",le="7.609496685459859e+08"} 222
+admission_wait_durations_kv_high_pri_bucket{node_id="1",le="9.61724871115294e+08"} 222
+admission_wait_durations_kv_high_pri_bucket{node_id="1",le="1.2154742500762835e+09"} 222
+admission_wait_durations_kv_high_pri_bucket{node_id="1",le="1.5361749466718242e+09"} 222
+admission_wait_durations_kv_high_pri_bucket{node_id="1",le="1.941491945743876e+09"} 222
+admission_wait_durations_kv_high_pri_bucket{node_id="1",le="2.453751106639811e+09"} 222
+admission_wait_durations_kv_high_pri_bucket{node_id="1",le="3.10116892657477e+09"} 222
+admission_wait_durations_kv_high_pri_bucket{node_id="1",le="3.919406774847209e+09"} 222
+admission_wait_durations_kv_high_pri_bucket{node_id="1",le="4.953535208959157e+09"} 222
+admission_wait_durations_kv_high_pri_bucket{node_id="1",le="6.260516572014802e+09"} 222
+admission_wait_durations_kv_high_pri_bucket{node_id="1",le="7.912342618981298e+09"} 222
+admission_wait_durations_kv_high_pri_bucket{node_id="1",le="9.99999999999997e+09"} 222
+admission_wait_durations_kv_high_pri_bucket{node_id="1",le="+Inf"} 222
+admission_wait_durations_kv_high_pri_sum{node_id="1"} 0
+admission_wait_durations_kv_high_pri_count{node_id="1"} 222
+# HELP admission_errored_sql_leaf_start_locking_normal_pri Number of requests not admitted due to error
+# TYPE admission_errored_sql_leaf_start_locking_normal_pri counter
+admission_errored_sql_leaf_start_locking_normal_pri{node_id="1"} 0
+# HELP admission_wait_durations_sql_leaf_start_locking_normal_pri Wait time durations for requests that waited
+# TYPE admission_wait_durations_sql_leaf_start_locking_normal_pri histogram
+admission_wait_durations_sql_leaf_start_locking_normal_pri_bucket{node_id="1",le="10000"} 0
+admission_wait_durations_sql_leaf_start_locking_normal_pri_bucket{node_id="1",le="12638.482029342978"} 0
+admission_wait_durations_sql_leaf_start_locking_normal_pri_bucket{node_id="1",le="15973.122800602541"} 0
+admission_wait_durations_sql_leaf_start_locking_normal_pri_bucket{node_id="1",le="20187.602546790382"} 0
+admission_wait_durations_sql_leaf_start_locking_normal_pri_bucket{node_id="1",le="25514.065200312878"} 0
+admission_wait_durations_sql_leaf_start_locking_normal_pri_bucket{node_id="1",le="32245.90545296394"} 0
+admission_wait_durations_sql_leaf_start_locking_normal_pri_bucket{node_id="1",le="40753.92965871775"} 0
+admission_wait_durations_sql_leaf_start_locking_normal_pri_bucket{node_id="1",le="51506.78076168121"} 0
+admission_wait_durations_sql_leaf_start_locking_normal_pri_bucket{node_id="1",le="65096.75230458167"} 0
+admission_wait_durations_sql_leaf_start_locking_normal_pri_bucket{node_id="1",le="82272.41341700466"} 0
+admission_wait_durations_sql_leaf_start_locking_normal_pri_bucket{node_id="1",le="103979.84184814895"} 0
+admission_wait_durations_sql_leaf_start_locking_normal_pri_bucket{node_id="1",le="131414.73626117557"} 0
+admission_wait_durations_sql_leaf_start_locking_normal_pri_bucket{node_id="1",le="166088.27826277143"} 0
+admission_wait_durations_sql_leaf_start_locking_normal_pri_bucket{node_id="1",le="209910.3720108553"} 0
+admission_wait_durations_sql_leaf_start_locking_normal_pri_bucket{node_id="1",le="265294.8464431894"} 0
+admission_wait_durations_sql_leaf_start_locking_normal_pri_bucket{node_id="1",le="335292.41492495546"} 0
+admission_wait_durations_sql_leaf_start_locking_normal_pri_bucket{node_id="1",le="423758.7160604059"} 0
+admission_wait_durations_sql_leaf_start_locking_normal_pri_bucket{node_id="1",le="535566.6917706894"} 0
+admission_wait_durations_sql_leaf_start_locking_normal_pri_bucket{node_id="1",le="676875.0009458527"} 0
+admission_wait_durations_sql_leaf_start_locking_normal_pri_bucket{node_id="1",le="855467.2535565672"} 0
+admission_wait_durations_sql_leaf_start_locking_normal_pri_bucket{node_id="1",le="1.0811807510766068e+06"} 0
+admission_wait_durations_sql_leaf_start_locking_normal_pri_bucket{node_id="1",le="1.3664483492953242e+06"} 0
+admission_wait_durations_sql_leaf_start_locking_normal_pri_bucket{node_id="1",le="1.7269832906594332e+06"} 0
+admission_wait_durations_sql_leaf_start_locking_normal_pri_bucket{node_id="1",le="2.182644728397485e+06"} 0
+admission_wait_durations_sql_leaf_start_locking_normal_pri_bucket{node_id="1",le="2.7585316176291797e+06"} 0
+admission_wait_durations_sql_leaf_start_locking_normal_pri_bucket{node_id="1",le="3.4863652276780806e+06"} 0
+admission_wait_durations_sql_leaf_start_locking_normal_pri_bucket{node_id="1",le="4.406236427773566e+06"} 0
+admission_wait_durations_sql_leaf_start_locking_normal_pri_bucket{node_id="1",le="5.568813990945262e+06"} 0
+admission_wait_durations_sql_leaf_start_locking_normal_pri_bucket{node_id="1",le="7.038135554931545e+06"} 0
+admission_wait_durations_sql_leaf_start_locking_normal_pri_bucket{node_id="1",le="8.89513497310822e+06"} 0
+admission_wait_durations_sql_leaf_start_locking_normal_pri_bucket{node_id="1",le="1.1242100350620849e+07"} 0
+admission_wait_durations_sql_leaf_start_locking_normal_pri_bucket{node_id="1",le="1.4208308325339198e+07"} 0
+admission_wait_durations_sql_leaf_start_locking_normal_pri_bucket{node_id="1",le="1.795714494371637e+07"} 0
+admission_wait_durations_sql_leaf_start_locking_normal_pri_bucket{node_id="1",le="2.269510536694665e+07"} 0
+admission_wait_durations_sql_leaf_start_locking_normal_pri_bucket{node_id="1",le="2.868316813342006e+07"} 0
+admission_wait_durations_sql_leaf_start_locking_normal_pri_bucket{node_id="1",le="3.625117049988527e+07"} 0
+admission_wait_durations_sql_leaf_start_locking_normal_pri_bucket{node_id="1",le="4.581597669054482e+07"} 0
+admission_wait_durations_sql_leaf_start_locking_normal_pri_bucket{node_id="1",le="5.790443980602476e+07"} 0
+admission_wait_durations_sql_leaf_start_locking_normal_pri_bucket{node_id="1",le="7.318242219076161e+07"} 0
+admission_wait_durations_sql_leaf_start_locking_normal_pri_bucket{node_id="1",le="9.249147277217315e+07"} 0
+admission_wait_durations_sql_leaf_start_locking_normal_pri_bucket{node_id="1",le="1.1689518164985757e+08"} 0
+admission_wait_durations_sql_leaf_start_locking_normal_pri_bucket{node_id="1",le="1.4773776525985083e+08"} 0
+admission_wait_durations_sql_leaf_start_locking_normal_pri_bucket{node_id="1",le="1.8671810912919158e+08"} 0
+admission_wait_durations_sql_leaf_start_locking_normal_pri_bucket{node_id="1",le="2.359833466782189e+08"} 0
+admission_wait_durations_sql_leaf_start_locking_normal_pri_bucket{node_id="1",le="2.9824712862168837e+08"} 0
+admission_wait_durations_sql_leaf_start_locking_normal_pri_bucket{node_id="1",le="3.769390975388353e+08"} 0
+admission_wait_durations_sql_leaf_start_locking_normal_pri_bucket{node_id="1",le="4.7639380104013294e+08"} 0
+admission_wait_durations_sql_leaf_start_locking_normal_pri_bucket{node_id="1",le="6.020894493336115e+08"} 0
+admission_wait_durations_sql_leaf_start_locking_normal_pri_bucket{node_id="1",le="7.609496685459859e+08"} 0
+admission_wait_durations_sql_leaf_start_locking_normal_pri_bucket{node_id="1",le="9.61724871115294e+08"} 0
+admission_wait_durations_sql_leaf_start_locking_normal_pri_bucket{node_id="1",le="1.2154742500762835e+09"} 0
+admission_wait_durations_sql_leaf_start_locking_normal_pri_bucket{node_id="1",le="1.5361749466718242e+09"} 0
+admission_wait_durations_sql_leaf_start_locking_normal_pri_bucket{node_id="1",le="1.941491945743876e+09"} 0
+admission_wait_durations_sql_leaf_start_locking_normal_pri_bucket{node_id="1",le="2.453751106639811e+09"} 0
+admission_wait_durations_sql_leaf_start_locking_normal_pri_bucket{node_id="1",le="3.10116892657477e+09"} 0
+admission_wait_durations_sql_leaf_start_locking_normal_pri_bucket{node_id="1",le="3.919406774847209e+09"} 0
+admission_wait_durations_sql_leaf_start_locking_normal_pri_bucket{node_id="1",le="4.953535208959157e+09"} 0
+admission_wait_durations_sql_leaf_start_locking_normal_pri_bucket{node_id="1",le="6.260516572014802e+09"} 0
+admission_wait_durations_sql_leaf_start_locking_normal_pri_bucket{node_id="1",le="7.912342618981298e+09"} 0
+admission_wait_durations_sql_leaf_start_locking_normal_pri_bucket{node_id="1",le="9.99999999999997e+09"} 0
+admission_wait_durations_sql_leaf_start_locking_normal_pri_bucket{node_id="1",le="+Inf"} 0
+admission_wait_durations_sql_leaf_start_locking_normal_pri_sum{node_id="1"} 0
+admission_wait_durations_sql_leaf_start_locking_normal_pri_count{node_id="1"} 0
+# HELP admission_requested_sql_kv_response_normal_pri Number of requests
+# TYPE admission_requested_sql_kv_response_normal_pri counter
+admission_requested_sql_kv_response_normal_pri{node_id="1"} 3066
+# HELP admission_admitted_elastic_cpu Number of requests admitted
+# TYPE admission_admitted_elastic_cpu counter
+admission_admitted_elastic_cpu{node_id="1"} 0
+# HELP admission_errored_sql_leaf_start Number of requests not admitted due to error
+# TYPE admission_errored_sql_leaf_start counter
+admission_errored_sql_leaf_start{node_id="1"} 0
+# HELP admission_errored_kv_stores_ttl_low_pri Number of requests not admitted due to error
+# TYPE admission_errored_kv_stores_ttl_low_pri counter
+admission_errored_kv_stores_ttl_low_pri{node_id="1"} 0
+# HELP admission_l0_compacted_bytes_kv Total bytes compacted out of L0 (used to generate IO tokens)
+# TYPE admission_l0_compacted_bytes_kv counter
+admission_l0_compacted_bytes_kv{node_id="1"} 0
+# HELP admission_errored_kv_stores_bulk_normal_pri Number of requests not admitted due to error
+# TYPE admission_errored_kv_stores_bulk_normal_pri counter
+admission_errored_kv_stores_bulk_normal_pri{node_id="1"} 0
+# HELP admission_admitted_sql_sql_response Number of requests admitted
+# TYPE admission_admitted_sql_sql_response counter
+admission_admitted_sql_sql_response{node_id="1"} 0
+# HELP admission_wait_queue_length_sql_root_start_normal_pri Length of wait queue
+# TYPE admission_wait_queue_length_sql_root_start_normal_pri gauge
+admission_wait_queue_length_sql_root_start_normal_pri{node_id="1"} 0
+# HELP admission_wait_queue_length_kv_stores_bulk_normal_pri Length of wait queue
+# TYPE admission_wait_queue_length_kv_stores_bulk_normal_pri gauge
+admission_wait_queue_length_kv_stores_bulk_normal_pri{node_id="1"} 0
+# HELP admission_elastic_cpu_acquired_nanos Total CPU nanoseconds acquired by elastic work
+# TYPE admission_elastic_cpu_acquired_nanos counter
+admission_elastic_cpu_acquired_nanos{node_id="1"} 0
+# HELP admission_wait_durations_sql_leaf_start Wait time durations for requests that waited
+# TYPE admission_wait_durations_sql_leaf_start histogram
+admission_wait_durations_sql_leaf_start_bucket{node_id="1",le="10000"} 0
+admission_wait_durations_sql_leaf_start_bucket{node_id="1",le="12638.482029342978"} 0
+admission_wait_durations_sql_leaf_start_bucket{node_id="1",le="15973.122800602541"} 0
+admission_wait_durations_sql_leaf_start_bucket{node_id="1",le="20187.602546790382"} 0
+admission_wait_durations_sql_leaf_start_bucket{node_id="1",le="25514.065200312878"} 0
+admission_wait_durations_sql_leaf_start_bucket{node_id="1",le="32245.90545296394"} 0
+admission_wait_durations_sql_leaf_start_bucket{node_id="1",le="40753.92965871775"} 0
+admission_wait_durations_sql_leaf_start_bucket{node_id="1",le="51506.78076168121"} 0
+admission_wait_durations_sql_leaf_start_bucket{node_id="1",le="65096.75230458167"} 0
+admission_wait_durations_sql_leaf_start_bucket{node_id="1",le="82272.41341700466"} 0
+admission_wait_durations_sql_leaf_start_bucket{node_id="1",le="103979.84184814895"} 0
+admission_wait_durations_sql_leaf_start_bucket{node_id="1",le="131414.73626117557"} 0
+admission_wait_durations_sql_leaf_start_bucket{node_id="1",le="166088.27826277143"} 0
+admission_wait_durations_sql_leaf_start_bucket{node_id="1",le="209910.3720108553"} 0
+admission_wait_durations_sql_leaf_start_bucket{node_id="1",le="265294.8464431894"} 0
+admission_wait_durations_sql_leaf_start_bucket{node_id="1",le="335292.41492495546"} 0
+admission_wait_durations_sql_leaf_start_bucket{node_id="1",le="423758.7160604059"} 0
+admission_wait_durations_sql_leaf_start_bucket{node_id="1",le="535566.6917706894"} 0
+admission_wait_durations_sql_leaf_start_bucket{node_id="1",le="676875.0009458527"} 0
+admission_wait_durations_sql_leaf_start_bucket{node_id="1",le="855467.2535565672"} 0
+admission_wait_durations_sql_leaf_start_bucket{node_id="1",le="1.0811807510766068e+06"} 0
+admission_wait_durations_sql_leaf_start_bucket{node_id="1",le="1.3664483492953242e+06"} 0
+admission_wait_durations_sql_leaf_start_bucket{node_id="1",le="1.7269832906594332e+06"} 0
+admission_wait_durations_sql_leaf_start_bucket{node_id="1",le="2.182644728397485e+06"} 0
+admission_wait_durations_sql_leaf_start_bucket{node_id="1",le="2.7585316176291797e+06"} 0
+admission_wait_durations_sql_leaf_start_bucket{node_id="1",le="3.4863652276780806e+06"} 0
+admission_wait_durations_sql_leaf_start_bucket{node_id="1",le="4.406236427773566e+06"} 0
+admission_wait_durations_sql_leaf_start_bucket{node_id="1",le="5.568813990945262e+06"} 0
+admission_wait_durations_sql_leaf_start_bucket{node_id="1",le="7.038135554931545e+06"} 0
+admission_wait_durations_sql_leaf_start_bucket{node_id="1",le="8.89513497310822e+06"} 0
+admission_wait_durations_sql_leaf_start_bucket{node_id="1",le="1.1242100350620849e+07"} 0
+admission_wait_durations_sql_leaf_start_bucket{node_id="1",le="1.4208308325339198e+07"} 0
+admission_wait_durations_sql_leaf_start_bucket{node_id="1",le="1.795714494371637e+07"} 0
+admission_wait_durations_sql_leaf_start_bucket{node_id="1",le="2.269510536694665e+07"} 0
+admission_wait_durations_sql_leaf_start_bucket{node_id="1",le="2.868316813342006e+07"} 0
+admission_wait_durations_sql_leaf_start_bucket{node_id="1",le="3.625117049988527e+07"} 0
+admission_wait_durations_sql_leaf_start_bucket{node_id="1",le="4.581597669054482e+07"} 0
+admission_wait_durations_sql_leaf_start_bucket{node_id="1",le="5.790443980602476e+07"} 0
+admission_wait_durations_sql_leaf_start_bucket{node_id="1",le="7.318242219076161e+07"} 0
+admission_wait_durations_sql_leaf_start_bucket{node_id="1",le="9.249147277217315e+07"} 0
+admission_wait_durations_sql_leaf_start_bucket{node_id="1",le="1.1689518164985757e+08"} 0
+admission_wait_durations_sql_leaf_start_bucket{node_id="1",le="1.4773776525985083e+08"} 0
+admission_wait_durations_sql_leaf_start_bucket{node_id="1",le="1.8671810912919158e+08"} 0
+admission_wait_durations_sql_leaf_start_bucket{node_id="1",le="2.359833466782189e+08"} 0
+admission_wait_durations_sql_leaf_start_bucket{node_id="1",le="2.9824712862168837e+08"} 0
+admission_wait_durations_sql_leaf_start_bucket{node_id="1",le="3.769390975388353e+08"} 0
+admission_wait_durations_sql_leaf_start_bucket{node_id="1",le="4.7639380104013294e+08"} 0
+admission_wait_durations_sql_leaf_start_bucket{node_id="1",le="6.020894493336115e+08"} 0
+admission_wait_durations_sql_leaf_start_bucket{node_id="1",le="7.609496685459859e+08"} 0
+admission_wait_durations_sql_leaf_start_bucket{node_id="1",le="9.61724871115294e+08"} 0
+admission_wait_durations_sql_leaf_start_bucket{node_id="1",le="1.2154742500762835e+09"} 0
+admission_wait_durations_sql_leaf_start_bucket{node_id="1",le="1.5361749466718242e+09"} 0
+admission_wait_durations_sql_leaf_start_bucket{node_id="1",le="1.941491945743876e+09"} 0
+admission_wait_durations_sql_leaf_start_bucket{node_id="1",le="2.453751106639811e+09"} 0
+admission_wait_durations_sql_leaf_start_bucket{node_id="1",le="3.10116892657477e+09"} 0
+admission_wait_durations_sql_leaf_start_bucket{node_id="1",le="3.919406774847209e+09"} 0
+admission_wait_durations_sql_leaf_start_bucket{node_id="1",le="4.953535208959157e+09"} 0
+admission_wait_durations_sql_leaf_start_bucket{node_id="1",le="6.260516572014802e+09"} 0
+admission_wait_durations_sql_leaf_start_bucket{node_id="1",le="7.912342618981298e+09"} 0
+admission_wait_durations_sql_leaf_start_bucket{node_id="1",le="9.99999999999997e+09"} 0
+admission_wait_durations_sql_leaf_start_bucket{node_id="1",le="+Inf"} 0
+admission_wait_durations_sql_leaf_start_sum{node_id="1"} 0
+admission_wait_durations_sql_leaf_start_count{node_id="1"} 0
+# HELP admission_io_overload 1-normalized float indicating whether IO admission control considers the store as overloaded with respect to compaction out of L0 (considers sub-level and file counts).
+# TYPE admission_io_overload gauge
+admission_io_overload{store="1",node_id="1"} 0
+# HELP admission_admitted_kv_stores_locking_normal_pri Number of requests admitted
+# TYPE admission_admitted_kv_stores_locking_normal_pri counter
+admission_admitted_kv_stores_locking_normal_pri{node_id="1"} 2804
+# HELP admission_wait_queue_length_kv_locking_normal_pri Length of wait queue
+# TYPE admission_wait_queue_length_kv_locking_normal_pri gauge
+admission_wait_queue_length_kv_locking_normal_pri{node_id="1"} 0
+# HELP admission_wait_queue_length_elastic_cpu_normal_pri Length of wait queue
+# TYPE admission_wait_queue_length_elastic_cpu_normal_pri gauge
+admission_wait_queue_length_elastic_cpu_normal_pri{node_id="1"} 0
+# HELP admission_granter_used_slots_sql_leaf_start Used slots
+# TYPE admission_granter_used_slots_sql_leaf_start gauge
+admission_granter_used_slots_sql_leaf_start{node_id="1"} 0
+# HELP admission_requested_sql_leaf_start Number of requests
+# TYPE admission_requested_sql_leaf_start counter
+admission_requested_sql_leaf_start{node_id="1"} 0
+# HELP admission_requested_kv_high_pri Number of requests
+# TYPE admission_requested_kv_high_pri counter
+admission_requested_kv_high_pri{node_id="1"} 222
+# HELP admission_admitted_sql_leaf_start_locking_normal_pri Number of requests admitted
+# TYPE admission_admitted_sql_leaf_start_locking_normal_pri counter
+admission_admitted_sql_leaf_start_locking_normal_pri{node_id="1"} 0
+# HELP admission_granter_io_tokens_available_kv Number of tokens available
+# TYPE admission_granter_io_tokens_available_kv gauge
+admission_granter_io_tokens_available_kv{node_id="1"} 1.5372286728091293e+17
+# HELP admission_wait_queue_length_sql_leaf_start_locking_normal_pri Length of wait queue
+# TYPE admission_wait_queue_length_sql_leaf_start_locking_normal_pri gauge
+admission_wait_queue_length_sql_leaf_start_locking_normal_pri{node_id="1"} 0
+# HELP admission_errored_kv_normal_pri Number of requests not admitted due to error
+# TYPE admission_errored_kv_normal_pri counter
+admission_errored_kv_normal_pri{node_id="1"} 0
+# HELP admission_granter_slot_adjuster_decrements_kv Number of decrements of the total KV slots
+# TYPE admission_granter_slot_adjuster_decrements_kv counter
+admission_granter_slot_adjuster_decrements_kv{node_id="1"} 0
+# HELP admission_elastic_cpu_nanos_exhausted_duration Total duration when elastic CPU nanoseconds were exhausted, in micros
+# TYPE admission_elastic_cpu_nanos_exhausted_duration gauge
+admission_elastic_cpu_nanos_exhausted_duration{node_id="1"} 0
+# HELP admission_admitted_elastic_cpu_bulk_normal_pri Number of requests admitted
+# TYPE admission_admitted_elastic_cpu_bulk_normal_pri counter
+admission_admitted_elastic_cpu_bulk_normal_pri{node_id="1"} 0
+# HELP admission_wait_durations_sql_root_start Wait time durations for requests that waited
+# TYPE admission_wait_durations_sql_root_start histogram
+admission_wait_durations_sql_root_start_bucket{node_id="1",le="10000"} 0
+admission_wait_durations_sql_root_start_bucket{node_id="1",le="12638.482029342978"} 0
+admission_wait_durations_sql_root_start_bucket{node_id="1",le="15973.122800602541"} 0
+admission_wait_durations_sql_root_start_bucket{node_id="1",le="20187.602546790382"} 0
+admission_wait_durations_sql_root_start_bucket{node_id="1",le="25514.065200312878"} 0
+admission_wait_durations_sql_root_start_bucket{node_id="1",le="32245.90545296394"} 0
+admission_wait_durations_sql_root_start_bucket{node_id="1",le="40753.92965871775"} 0
+admission_wait_durations_sql_root_start_bucket{node_id="1",le="51506.78076168121"} 0
+admission_wait_durations_sql_root_start_bucket{node_id="1",le="65096.75230458167"} 0
+admission_wait_durations_sql_root_start_bucket{node_id="1",le="82272.41341700466"} 0
+admission_wait_durations_sql_root_start_bucket{node_id="1",le="103979.84184814895"} 0
+admission_wait_durations_sql_root_start_bucket{node_id="1",le="131414.73626117557"} 0
+admission_wait_durations_sql_root_start_bucket{node_id="1",le="166088.27826277143"} 0
+admission_wait_durations_sql_root_start_bucket{node_id="1",le="209910.3720108553"} 0
+admission_wait_durations_sql_root_start_bucket{node_id="1",le="265294.8464431894"} 0
+admission_wait_durations_sql_root_start_bucket{node_id="1",le="335292.41492495546"} 0
+admission_wait_durations_sql_root_start_bucket{node_id="1",le="423758.7160604059"} 0
+admission_wait_durations_sql_root_start_bucket{node_id="1",le="535566.6917706894"} 0
+admission_wait_durations_sql_root_start_bucket{node_id="1",le="676875.0009458527"} 0
+admission_wait_durations_sql_root_start_bucket{node_id="1",le="855467.2535565672"} 0
+admission_wait_durations_sql_root_start_bucket{node_id="1",le="1.0811807510766068e+06"} 0
+admission_wait_durations_sql_root_start_bucket{node_id="1",le="1.3664483492953242e+06"} 0
+admission_wait_durations_sql_root_start_bucket{node_id="1",le="1.7269832906594332e+06"} 0
+admission_wait_durations_sql_root_start_bucket{node_id="1",le="2.182644728397485e+06"} 0
+admission_wait_durations_sql_root_start_bucket{node_id="1",le="2.7585316176291797e+06"} 0
+admission_wait_durations_sql_root_start_bucket{node_id="1",le="3.4863652276780806e+06"} 0
+admission_wait_durations_sql_root_start_bucket{node_id="1",le="4.406236427773566e+06"} 0
+admission_wait_durations_sql_root_start_bucket{node_id="1",le="5.568813990945262e+06"} 0
+admission_wait_durations_sql_root_start_bucket{node_id="1",le="7.038135554931545e+06"} 0
+admission_wait_durations_sql_root_start_bucket{node_id="1",le="8.89513497310822e+06"} 0
+admission_wait_durations_sql_root_start_bucket{node_id="1",le="1.1242100350620849e+07"} 0
+admission_wait_durations_sql_root_start_bucket{node_id="1",le="1.4208308325339198e+07"} 0
+admission_wait_durations_sql_root_start_bucket{node_id="1",le="1.795714494371637e+07"} 0
+admission_wait_durations_sql_root_start_bucket{node_id="1",le="2.269510536694665e+07"} 0
+admission_wait_durations_sql_root_start_bucket{node_id="1",le="2.868316813342006e+07"} 0
+admission_wait_durations_sql_root_start_bucket{node_id="1",le="3.625117049988527e+07"} 0
+admission_wait_durations_sql_root_start_bucket{node_id="1",le="4.581597669054482e+07"} 0
+admission_wait_durations_sql_root_start_bucket{node_id="1",le="5.790443980602476e+07"} 0
+admission_wait_durations_sql_root_start_bucket{node_id="1",le="7.318242219076161e+07"} 0
+admission_wait_durations_sql_root_start_bucket{node_id="1",le="9.249147277217315e+07"} 0
+admission_wait_durations_sql_root_start_bucket{node_id="1",le="1.1689518164985757e+08"} 0
+admission_wait_durations_sql_root_start_bucket{node_id="1",le="1.4773776525985083e+08"} 0
+admission_wait_durations_sql_root_start_bucket{node_id="1",le="1.8671810912919158e+08"} 0
+admission_wait_durations_sql_root_start_bucket{node_id="1",le="2.359833466782189e+08"} 0
+admission_wait_durations_sql_root_start_bucket{node_id="1",le="2.9824712862168837e+08"} 0
+admission_wait_durations_sql_root_start_bucket{node_id="1",le="3.769390975388353e+08"} 0
+admission_wait_durations_sql_root_start_bucket{node_id="1",le="4.7639380104013294e+08"} 0
+admission_wait_durations_sql_root_start_bucket{node_id="1",le="6.020894493336115e+08"} 0
+admission_wait_durations_sql_root_start_bucket{node_id="1",le="7.609496685459859e+08"} 0
+admission_wait_durations_sql_root_start_bucket{node_id="1",le="9.61724871115294e+08"} 0
+admission_wait_durations_sql_root_start_bucket{node_id="1",le="1.2154742500762835e+09"} 0
+admission_wait_durations_sql_root_start_bucket{node_id="1",le="1.5361749466718242e+09"} 0
+admission_wait_durations_sql_root_start_bucket{node_id="1",le="1.941491945743876e+09"} 0
+admission_wait_durations_sql_root_start_bucket{node_id="1",le="2.453751106639811e+09"} 0
+admission_wait_durations_sql_root_start_bucket{node_id="1",le="3.10116892657477e+09"} 0
+admission_wait_durations_sql_root_start_bucket{node_id="1",le="3.919406774847209e+09"} 0
+admission_wait_durations_sql_root_start_bucket{node_id="1",le="4.953535208959157e+09"} 0
+admission_wait_durations_sql_root_start_bucket{node_id="1",le="6.260516572014802e+09"} 0
+admission_wait_durations_sql_root_start_bucket{node_id="1",le="7.912342618981298e+09"} 0
+admission_wait_durations_sql_root_start_bucket{node_id="1",le="9.99999999999997e+09"} 0
+admission_wait_durations_sql_root_start_bucket{node_id="1",le="+Inf"} 0
+admission_wait_durations_sql_root_start_sum{node_id="1"} 0
+admission_wait_durations_sql_root_start_count{node_id="1"} 0
+# HELP admission_wait_durations_elastic_cpu_normal_pri Wait time durations for requests that waited
+# TYPE admission_wait_durations_elastic_cpu_normal_pri histogram
+admission_wait_durations_elastic_cpu_normal_pri_bucket{node_id="1",le="10000"} 0
+admission_wait_durations_elastic_cpu_normal_pri_bucket{node_id="1",le="12638.482029342978"} 0
+admission_wait_durations_elastic_cpu_normal_pri_bucket{node_id="1",le="15973.122800602541"} 0
+admission_wait_durations_elastic_cpu_normal_pri_bucket{node_id="1",le="20187.602546790382"} 0
+admission_wait_durations_elastic_cpu_normal_pri_bucket{node_id="1",le="25514.065200312878"} 0
+admission_wait_durations_elastic_cpu_normal_pri_bucket{node_id="1",le="32245.90545296394"} 0
+admission_wait_durations_elastic_cpu_normal_pri_bucket{node_id="1",le="40753.92965871775"} 0
+admission_wait_durations_elastic_cpu_normal_pri_bucket{node_id="1",le="51506.78076168121"} 0
+admission_wait_durations_elastic_cpu_normal_pri_bucket{node_id="1",le="65096.75230458167"} 0
+admission_wait_durations_elastic_cpu_normal_pri_bucket{node_id="1",le="82272.41341700466"} 0
+admission_wait_durations_elastic_cpu_normal_pri_bucket{node_id="1",le="103979.84184814895"} 0
+admission_wait_durations_elastic_cpu_normal_pri_bucket{node_id="1",le="131414.73626117557"} 0
+admission_wait_durations_elastic_cpu_normal_pri_bucket{node_id="1",le="166088.27826277143"} 0
+admission_wait_durations_elastic_cpu_normal_pri_bucket{node_id="1",le="209910.3720108553"} 0
+admission_wait_durations_elastic_cpu_normal_pri_bucket{node_id="1",le="265294.8464431894"} 0
+admission_wait_durations_elastic_cpu_normal_pri_bucket{node_id="1",le="335292.41492495546"} 0
+admission_wait_durations_elastic_cpu_normal_pri_bucket{node_id="1",le="423758.7160604059"} 0
+admission_wait_durations_elastic_cpu_normal_pri_bucket{node_id="1",le="535566.6917706894"} 0
+admission_wait_durations_elastic_cpu_normal_pri_bucket{node_id="1",le="676875.0009458527"} 0
+admission_wait_durations_elastic_cpu_normal_pri_bucket{node_id="1",le="855467.2535565672"} 0
+admission_wait_durations_elastic_cpu_normal_pri_bucket{node_id="1",le="1.0811807510766068e+06"} 0
+admission_wait_durations_elastic_cpu_normal_pri_bucket{node_id="1",le="1.3664483492953242e+06"} 0
+admission_wait_durations_elastic_cpu_normal_pri_bucket{node_id="1",le="1.7269832906594332e+06"} 0
+admission_wait_durations_elastic_cpu_normal_pri_bucket{node_id="1",le="2.182644728397485e+06"} 0
+admission_wait_durations_elastic_cpu_normal_pri_bucket{node_id="1",le="2.7585316176291797e+06"} 0
+admission_wait_durations_elastic_cpu_normal_pri_bucket{node_id="1",le="3.4863652276780806e+06"} 0
+admission_wait_durations_elastic_cpu_normal_pri_bucket{node_id="1",le="4.406236427773566e+06"} 0
+admission_wait_durations_elastic_cpu_normal_pri_bucket{node_id="1",le="5.568813990945262e+06"} 0
+admission_wait_durations_elastic_cpu_normal_pri_bucket{node_id="1",le="7.038135554931545e+06"} 0
+admission_wait_durations_elastic_cpu_normal_pri_bucket{node_id="1",le="8.89513497310822e+06"} 0
+admission_wait_durations_elastic_cpu_normal_pri_bucket{node_id="1",le="1.1242100350620849e+07"} 0
+admission_wait_durations_elastic_cpu_normal_pri_bucket{node_id="1",le="1.4208308325339198e+07"} 0
+admission_wait_durations_elastic_cpu_normal_pri_bucket{node_id="1",le="1.795714494371637e+07"} 0
+admission_wait_durations_elastic_cpu_normal_pri_bucket{node_id="1",le="2.269510536694665e+07"} 0
+admission_wait_durations_elastic_cpu_normal_pri_bucket{node_id="1",le="2.868316813342006e+07"} 0
+admission_wait_durations_elastic_cpu_normal_pri_bucket{node_id="1",le="3.625117049988527e+07"} 0
+admission_wait_durations_elastic_cpu_normal_pri_bucket{node_id="1",le="4.581597669054482e+07"} 0
+admission_wait_durations_elastic_cpu_normal_pri_bucket{node_id="1",le="5.790443980602476e+07"} 0
+admission_wait_durations_elastic_cpu_normal_pri_bucket{node_id="1",le="7.318242219076161e+07"} 0
+admission_wait_durations_elastic_cpu_normal_pri_bucket{node_id="1",le="9.249147277217315e+07"} 0
+admission_wait_durations_elastic_cpu_normal_pri_bucket{node_id="1",le="1.1689518164985757e+08"} 0
+admission_wait_durations_elastic_cpu_normal_pri_bucket{node_id="1",le="1.4773776525985083e+08"} 0
+admission_wait_durations_elastic_cpu_normal_pri_bucket{node_id="1",le="1.8671810912919158e+08"} 0
+admission_wait_durations_elastic_cpu_normal_pri_bucket{node_id="1",le="2.359833466782189e+08"} 0
+admission_wait_durations_elastic_cpu_normal_pri_bucket{node_id="1",le="2.9824712862168837e+08"} 0
+admission_wait_durations_elastic_cpu_normal_pri_bucket{node_id="1",le="3.769390975388353e+08"} 0
+admission_wait_durations_elastic_cpu_normal_pri_bucket{node_id="1",le="4.7639380104013294e+08"} 0
+admission_wait_durations_elastic_cpu_normal_pri_bucket{node_id="1",le="6.020894493336115e+08"} 0
+admission_wait_durations_elastic_cpu_normal_pri_bucket{node_id="1",le="7.609496685459859e+08"} 0
+admission_wait_durations_elastic_cpu_normal_pri_bucket{node_id="1",le="9.61724871115294e+08"} 0
+admission_wait_durations_elastic_cpu_normal_pri_bucket{node_id="1",le="1.2154742500762835e+09"} 0
+admission_wait_durations_elastic_cpu_normal_pri_bucket{node_id="1",le="1.5361749466718242e+09"} 0
+admission_wait_durations_elastic_cpu_normal_pri_bucket{node_id="1",le="1.941491945743876e+09"} 0
+admission_wait_durations_elastic_cpu_normal_pri_bucket{node_id="1",le="2.453751106639811e+09"} 0
+admission_wait_durations_elastic_cpu_normal_pri_bucket{node_id="1",le="3.10116892657477e+09"} 0
+admission_wait_durations_elastic_cpu_normal_pri_bucket{node_id="1",le="3.919406774847209e+09"} 0
+admission_wait_durations_elastic_cpu_normal_pri_bucket{node_id="1",le="4.953535208959157e+09"} 0
+admission_wait_durations_elastic_cpu_normal_pri_bucket{node_id="1",le="6.260516572014802e+09"} 0
+admission_wait_durations_elastic_cpu_normal_pri_bucket{node_id="1",le="7.912342618981298e+09"} 0
+admission_wait_durations_elastic_cpu_normal_pri_bucket{node_id="1",le="9.99999999999997e+09"} 0
+admission_wait_durations_elastic_cpu_normal_pri_bucket{node_id="1",le="+Inf"} 0
+admission_wait_durations_elastic_cpu_normal_pri_sum{node_id="1"} 0
+admission_wait_durations_elastic_cpu_normal_pri_count{node_id="1"} 0
+# HELP admission_errored_sql_root_start_normal_pri Number of requests not admitted due to error
+# TYPE admission_errored_sql_root_start_normal_pri counter
+admission_errored_sql_root_start_normal_pri{node_id="1"} 0
+# HELP admission_wait_durations_sql_leaf_start_normal_pri Wait time durations for requests that waited
+# TYPE admission_wait_durations_sql_leaf_start_normal_pri histogram
+admission_wait_durations_sql_leaf_start_normal_pri_bucket{node_id="1",le="10000"} 0
+admission_wait_durations_sql_leaf_start_normal_pri_bucket{node_id="1",le="12638.482029342978"} 0
+admission_wait_durations_sql_leaf_start_normal_pri_bucket{node_id="1",le="15973.122800602541"} 0
+admission_wait_durations_sql_leaf_start_normal_pri_bucket{node_id="1",le="20187.602546790382"} 0
+admission_wait_durations_sql_leaf_start_normal_pri_bucket{node_id="1",le="25514.065200312878"} 0
+admission_wait_durations_sql_leaf_start_normal_pri_bucket{node_id="1",le="32245.90545296394"} 0
+admission_wait_durations_sql_leaf_start_normal_pri_bucket{node_id="1",le="40753.92965871775"} 0
+admission_wait_durations_sql_leaf_start_normal_pri_bucket{node_id="1",le="51506.78076168121"} 0
+admission_wait_durations_sql_leaf_start_normal_pri_bucket{node_id="1",le="65096.75230458167"} 0
+admission_wait_durations_sql_leaf_start_normal_pri_bucket{node_id="1",le="82272.41341700466"} 0
+admission_wait_durations_sql_leaf_start_normal_pri_bucket{node_id="1",le="103979.84184814895"} 0
+admission_wait_durations_sql_leaf_start_normal_pri_bucket{node_id="1",le="131414.73626117557"} 0
+admission_wait_durations_sql_leaf_start_normal_pri_bucket{node_id="1",le="166088.27826277143"} 0
+admission_wait_durations_sql_leaf_start_normal_pri_bucket{node_id="1",le="209910.3720108553"} 0
+admission_wait_durations_sql_leaf_start_normal_pri_bucket{node_id="1",le="265294.8464431894"} 0
+admission_wait_durations_sql_leaf_start_normal_pri_bucket{node_id="1",le="335292.41492495546"} 0
+admission_wait_durations_sql_leaf_start_normal_pri_bucket{node_id="1",le="423758.7160604059"} 0
+admission_wait_durations_sql_leaf_start_normal_pri_bucket{node_id="1",le="535566.6917706894"} 0
+admission_wait_durations_sql_leaf_start_normal_pri_bucket{node_id="1",le="676875.0009458527"} 0
+admission_wait_durations_sql_leaf_start_normal_pri_bucket{node_id="1",le="855467.2535565672"} 0
+admission_wait_durations_sql_leaf_start_normal_pri_bucket{node_id="1",le="1.0811807510766068e+06"} 0
+admission_wait_durations_sql_leaf_start_normal_pri_bucket{node_id="1",le="1.3664483492953242e+06"} 0
+admission_wait_durations_sql_leaf_start_normal_pri_bucket{node_id="1",le="1.7269832906594332e+06"} 0
+admission_wait_durations_sql_leaf_start_normal_pri_bucket{node_id="1",le="2.182644728397485e+06"} 0
+admission_wait_durations_sql_leaf_start_normal_pri_bucket{node_id="1",le="2.7585316176291797e+06"} 0
+admission_wait_durations_sql_leaf_start_normal_pri_bucket{node_id="1",le="3.4863652276780806e+06"} 0
+admission_wait_durations_sql_leaf_start_normal_pri_bucket{node_id="1",le="4.406236427773566e+06"} 0
+admission_wait_durations_sql_leaf_start_normal_pri_bucket{node_id="1",le="5.568813990945262e+06"} 0
+admission_wait_durations_sql_leaf_start_normal_pri_bucket{node_id="1",le="7.038135554931545e+06"} 0
+admission_wait_durations_sql_leaf_start_normal_pri_bucket{node_id="1",le="8.89513497310822e+06"} 0
+admission_wait_durations_sql_leaf_start_normal_pri_bucket{node_id="1",le="1.1242100350620849e+07"} 0
+admission_wait_durations_sql_leaf_start_normal_pri_bucket{node_id="1",le="1.4208308325339198e+07"} 0
+admission_wait_durations_sql_leaf_start_normal_pri_bucket{node_id="1",le="1.795714494371637e+07"} 0
+admission_wait_durations_sql_leaf_start_normal_pri_bucket{node_id="1",le="2.269510536694665e+07"} 0
+admission_wait_durations_sql_leaf_start_normal_pri_bucket{node_id="1",le="2.868316813342006e+07"} 0
+admission_wait_durations_sql_leaf_start_normal_pri_bucket{node_id="1",le="3.625117049988527e+07"} 0
+admission_wait_durations_sql_leaf_start_normal_pri_bucket{node_id="1",le="4.581597669054482e+07"} 0
+admission_wait_durations_sql_leaf_start_normal_pri_bucket{node_id="1",le="5.790443980602476e+07"} 0
+admission_wait_durations_sql_leaf_start_normal_pri_bucket{node_id="1",le="7.318242219076161e+07"} 0
+admission_wait_durations_sql_leaf_start_normal_pri_bucket{node_id="1",le="9.249147277217315e+07"} 0
+admission_wait_durations_sql_leaf_start_normal_pri_bucket{node_id="1",le="1.1689518164985757e+08"} 0
+admission_wait_durations_sql_leaf_start_normal_pri_bucket{node_id="1",le="1.4773776525985083e+08"} 0
+admission_wait_durations_sql_leaf_start_normal_pri_bucket{node_id="1",le="1.8671810912919158e+08"} 0
+admission_wait_durations_sql_leaf_start_normal_pri_bucket{node_id="1",le="2.359833466782189e+08"} 0
+admission_wait_durations_sql_leaf_start_normal_pri_bucket{node_id="1",le="2.9824712862168837e+08"} 0
+admission_wait_durations_sql_leaf_start_normal_pri_bucket{node_id="1",le="3.769390975388353e+08"} 0
+admission_wait_durations_sql_leaf_start_normal_pri_bucket{node_id="1",le="4.7639380104013294e+08"} 0
+admission_wait_durations_sql_leaf_start_normal_pri_bucket{node_id="1",le="6.020894493336115e+08"} 0
+admission_wait_durations_sql_leaf_start_normal_pri_bucket{node_id="1",le="7.609496685459859e+08"} 0
+admission_wait_durations_sql_leaf_start_normal_pri_bucket{node_id="1",le="9.61724871115294e+08"} 0
+admission_wait_durations_sql_leaf_start_normal_pri_bucket{node_id="1",le="1.2154742500762835e+09"} 0
+admission_wait_durations_sql_leaf_start_normal_pri_bucket{node_id="1",le="1.5361749466718242e+09"} 0
+admission_wait_durations_sql_leaf_start_normal_pri_bucket{node_id="1",le="1.941491945743876e+09"} 0
+admission_wait_durations_sql_leaf_start_normal_pri_bucket{node_id="1",le="2.453751106639811e+09"} 0
+admission_wait_durations_sql_leaf_start_normal_pri_bucket{node_id="1",le="3.10116892657477e+09"} 0
+admission_wait_durations_sql_leaf_start_normal_pri_bucket{node_id="1",le="3.919406774847209e+09"} 0
+admission_wait_durations_sql_leaf_start_normal_pri_bucket{node_id="1",le="4.953535208959157e+09"} 0
+admission_wait_durations_sql_leaf_start_normal_pri_bucket{node_id="1",le="6.260516572014802e+09"} 0
+admission_wait_durations_sql_leaf_start_normal_pri_bucket{node_id="1",le="7.912342618981298e+09"} 0
+admission_wait_durations_sql_leaf_start_normal_pri_bucket{node_id="1",le="9.99999999999997e+09"} 0
+admission_wait_durations_sql_leaf_start_normal_pri_bucket{node_id="1",le="+Inf"} 0
+admission_wait_durations_sql_leaf_start_normal_pri_sum{node_id="1"} 0
+admission_wait_durations_sql_leaf_start_normal_pri_count{node_id="1"} 0
+# HELP admission_requested_sql_leaf_start_normal_pri Number of requests
+# TYPE admission_requested_sql_leaf_start_normal_pri counter
+admission_requested_sql_leaf_start_normal_pri{node_id="1"} 0
+# HELP admission_wait_durations_sql_root_start_normal_pri Wait time durations for requests that waited
+# TYPE admission_wait_durations_sql_root_start_normal_pri histogram
+admission_wait_durations_sql_root_start_normal_pri_bucket{node_id="1",le="10000"} 0
+admission_wait_durations_sql_root_start_normal_pri_bucket{node_id="1",le="12638.482029342978"} 0
+admission_wait_durations_sql_root_start_normal_pri_bucket{node_id="1",le="15973.122800602541"} 0
+admission_wait_durations_sql_root_start_normal_pri_bucket{node_id="1",le="20187.602546790382"} 0
+admission_wait_durations_sql_root_start_normal_pri_bucket{node_id="1",le="25514.065200312878"} 0
+admission_wait_durations_sql_root_start_normal_pri_bucket{node_id="1",le="32245.90545296394"} 0
+admission_wait_durations_sql_root_start_normal_pri_bucket{node_id="1",le="40753.92965871775"} 0
+admission_wait_durations_sql_root_start_normal_pri_bucket{node_id="1",le="51506.78076168121"} 0
+admission_wait_durations_sql_root_start_normal_pri_bucket{node_id="1",le="65096.75230458167"} 0
+admission_wait_durations_sql_root_start_normal_pri_bucket{node_id="1",le="82272.41341700466"} 0
+admission_wait_durations_sql_root_start_normal_pri_bucket{node_id="1",le="103979.84184814895"} 0
+admission_wait_durations_sql_root_start_normal_pri_bucket{node_id="1",le="131414.73626117557"} 0
+admission_wait_durations_sql_root_start_normal_pri_bucket{node_id="1",le="166088.27826277143"} 0
+admission_wait_durations_sql_root_start_normal_pri_bucket{node_id="1",le="209910.3720108553"} 0
+admission_wait_durations_sql_root_start_normal_pri_bucket{node_id="1",le="265294.8464431894"} 0
+admission_wait_durations_sql_root_start_normal_pri_bucket{node_id="1",le="335292.41492495546"} 0
+admission_wait_durations_sql_root_start_normal_pri_bucket{node_id="1",le="423758.7160604059"} 0
+admission_wait_durations_sql_root_start_normal_pri_bucket{node_id="1",le="535566.6917706894"} 0
+admission_wait_durations_sql_root_start_normal_pri_bucket{node_id="1",le="676875.0009458527"} 0
+admission_wait_durations_sql_root_start_normal_pri_bucket{node_id="1",le="855467.2535565672"} 0
+admission_wait_durations_sql_root_start_normal_pri_bucket{node_id="1",le="1.0811807510766068e+06"} 0
+admission_wait_durations_sql_root_start_normal_pri_bucket{node_id="1",le="1.3664483492953242e+06"} 0
+admission_wait_durations_sql_root_start_normal_pri_bucket{node_id="1",le="1.7269832906594332e+06"} 0
+admission_wait_durations_sql_root_start_normal_pri_bucket{node_id="1",le="2.182644728397485e+06"} 0
+admission_wait_durations_sql_root_start_normal_pri_bucket{node_id="1",le="2.7585316176291797e+06"} 0
+admission_wait_durations_sql_root_start_normal_pri_bucket{node_id="1",le="3.4863652276780806e+06"} 0
+admission_wait_durations_sql_root_start_normal_pri_bucket{node_id="1",le="4.406236427773566e+06"} 0
+admission_wait_durations_sql_root_start_normal_pri_bucket{node_id="1",le="5.568813990945262e+06"} 0
+admission_wait_durations_sql_root_start_normal_pri_bucket{node_id="1",le="7.038135554931545e+06"} 0
+admission_wait_durations_sql_root_start_normal_pri_bucket{node_id="1",le="8.89513497310822e+06"} 0
+admission_wait_durations_sql_root_start_normal_pri_bucket{node_id="1",le="1.1242100350620849e+07"} 0
+admission_wait_durations_sql_root_start_normal_pri_bucket{node_id="1",le="1.4208308325339198e+07"} 0
+admission_wait_durations_sql_root_start_normal_pri_bucket{node_id="1",le="1.795714494371637e+07"} 0
+admission_wait_durations_sql_root_start_normal_pri_bucket{node_id="1",le="2.269510536694665e+07"} 0
+admission_wait_durations_sql_root_start_normal_pri_bucket{node_id="1",le="2.868316813342006e+07"} 0
+admission_wait_durations_sql_root_start_normal_pri_bucket{node_id="1",le="3.625117049988527e+07"} 0
+admission_wait_durations_sql_root_start_normal_pri_bucket{node_id="1",le="4.581597669054482e+07"} 0
+admission_wait_durations_sql_root_start_normal_pri_bucket{node_id="1",le="5.790443980602476e+07"} 0
+admission_wait_durations_sql_root_start_normal_pri_bucket{node_id="1",le="7.318242219076161e+07"} 0
+admission_wait_durations_sql_root_start_normal_pri_bucket{node_id="1",le="9.249147277217315e+07"} 0
+admission_wait_durations_sql_root_start_normal_pri_bucket{node_id="1",le="1.1689518164985757e+08"} 0
+admission_wait_durations_sql_root_start_normal_pri_bucket{node_id="1",le="1.4773776525985083e+08"} 0
+admission_wait_durations_sql_root_start_normal_pri_bucket{node_id="1",le="1.8671810912919158e+08"} 0
+admission_wait_durations_sql_root_start_normal_pri_bucket{node_id="1",le="2.359833466782189e+08"} 0
+admission_wait_durations_sql_root_start_normal_pri_bucket{node_id="1",le="2.9824712862168837e+08"} 0
+admission_wait_durations_sql_root_start_normal_pri_bucket{node_id="1",le="3.769390975388353e+08"} 0
+admission_wait_durations_sql_root_start_normal_pri_bucket{node_id="1",le="4.7639380104013294e+08"} 0
+admission_wait_durations_sql_root_start_normal_pri_bucket{node_id="1",le="6.020894493336115e+08"} 0
+admission_wait_durations_sql_root_start_normal_pri_bucket{node_id="1",le="7.609496685459859e+08"} 0
+admission_wait_durations_sql_root_start_normal_pri_bucket{node_id="1",le="9.61724871115294e+08"} 0
+admission_wait_durations_sql_root_start_normal_pri_bucket{node_id="1",le="1.2154742500762835e+09"} 0
+admission_wait_durations_sql_root_start_normal_pri_bucket{node_id="1",le="1.5361749466718242e+09"} 0
+admission_wait_durations_sql_root_start_normal_pri_bucket{node_id="1",le="1.941491945743876e+09"} 0
+admission_wait_durations_sql_root_start_normal_pri_bucket{node_id="1",le="2.453751106639811e+09"} 0
+admission_wait_durations_sql_root_start_normal_pri_bucket{node_id="1",le="3.10116892657477e+09"} 0
+admission_wait_durations_sql_root_start_normal_pri_bucket{node_id="1",le="3.919406774847209e+09"} 0
+admission_wait_durations_sql_root_start_normal_pri_bucket{node_id="1",le="4.953535208959157e+09"} 0
+admission_wait_durations_sql_root_start_normal_pri_bucket{node_id="1",le="6.260516572014802e+09"} 0
+admission_wait_durations_sql_root_start_normal_pri_bucket{node_id="1",le="7.912342618981298e+09"} 0
+admission_wait_durations_sql_root_start_normal_pri_bucket{node_id="1",le="9.99999999999997e+09"} 0
+admission_wait_durations_sql_root_start_normal_pri_bucket{node_id="1",le="+Inf"} 0
+admission_wait_durations_sql_root_start_normal_pri_sum{node_id="1"} 0
+admission_wait_durations_sql_root_start_normal_pri_count{node_id="1"} 0
+# HELP admission_errored_sql_kv_response_normal_pri Number of requests not admitted due to error
+# TYPE admission_errored_sql_kv_response_normal_pri counter
+admission_errored_sql_kv_response_normal_pri{node_id="1"} 0
+# HELP admission_admitted_kv_normal_pri Number of requests admitted
+# TYPE admission_admitted_kv_normal_pri counter
+admission_admitted_kv_normal_pri{node_id="1"} 6907
+# HELP admission_wait_durations_sql_sql_response Wait time durations for requests that waited
+# TYPE admission_wait_durations_sql_sql_response histogram
+admission_wait_durations_sql_sql_response_bucket{node_id="1",le="10000"} 0
+admission_wait_durations_sql_sql_response_bucket{node_id="1",le="12638.482029342978"} 0
+admission_wait_durations_sql_sql_response_bucket{node_id="1",le="15973.122800602541"} 0
+admission_wait_durations_sql_sql_response_bucket{node_id="1",le="20187.602546790382"} 0
+admission_wait_durations_sql_sql_response_bucket{node_id="1",le="25514.065200312878"} 0
+admission_wait_durations_sql_sql_response_bucket{node_id="1",le="32245.90545296394"} 0
+admission_wait_durations_sql_sql_response_bucket{node_id="1",le="40753.92965871775"} 0
+admission_wait_durations_sql_sql_response_bucket{node_id="1",le="51506.78076168121"} 0
+admission_wait_durations_sql_sql_response_bucket{node_id="1",le="65096.75230458167"} 0
+admission_wait_durations_sql_sql_response_bucket{node_id="1",le="82272.41341700466"} 0
+admission_wait_durations_sql_sql_response_bucket{node_id="1",le="103979.84184814895"} 0
+admission_wait_durations_sql_sql_response_bucket{node_id="1",le="131414.73626117557"} 0
+admission_wait_durations_sql_sql_response_bucket{node_id="1",le="166088.27826277143"} 0
+admission_wait_durations_sql_sql_response_bucket{node_id="1",le="209910.3720108553"} 0
+admission_wait_durations_sql_sql_response_bucket{node_id="1",le="265294.8464431894"} 0
+admission_wait_durations_sql_sql_response_bucket{node_id="1",le="335292.41492495546"} 0
+admission_wait_durations_sql_sql_response_bucket{node_id="1",le="423758.7160604059"} 0
+admission_wait_durations_sql_sql_response_bucket{node_id="1",le="535566.6917706894"} 0
+admission_wait_durations_sql_sql_response_bucket{node_id="1",le="676875.0009458527"} 0
+admission_wait_durations_sql_sql_response_bucket{node_id="1",le="855467.2535565672"} 0
+admission_wait_durations_sql_sql_response_bucket{node_id="1",le="1.0811807510766068e+06"} 0
+admission_wait_durations_sql_sql_response_bucket{node_id="1",le="1.3664483492953242e+06"} 0
+admission_wait_durations_sql_sql_response_bucket{node_id="1",le="1.7269832906594332e+06"} 0
+admission_wait_durations_sql_sql_response_bucket{node_id="1",le="2.182644728397485e+06"} 0
+admission_wait_durations_sql_sql_response_bucket{node_id="1",le="2.7585316176291797e+06"} 0
+admission_wait_durations_sql_sql_response_bucket{node_id="1",le="3.4863652276780806e+06"} 0
+admission_wait_durations_sql_sql_response_bucket{node_id="1",le="4.406236427773566e+06"} 0
+admission_wait_durations_sql_sql_response_bucket{node_id="1",le="5.568813990945262e+06"} 0
+admission_wait_durations_sql_sql_response_bucket{node_id="1",le="7.038135554931545e+06"} 0
+admission_wait_durations_sql_sql_response_bucket{node_id="1",le="8.89513497310822e+06"} 0
+admission_wait_durations_sql_sql_response_bucket{node_id="1",le="1.1242100350620849e+07"} 0
+admission_wait_durations_sql_sql_response_bucket{node_id="1",le="1.4208308325339198e+07"} 0
+admission_wait_durations_sql_sql_response_bucket{node_id="1",le="1.795714494371637e+07"} 0
+admission_wait_durations_sql_sql_response_bucket{node_id="1",le="2.269510536694665e+07"} 0
+admission_wait_durations_sql_sql_response_bucket{node_id="1",le="2.868316813342006e+07"} 0
+admission_wait_durations_sql_sql_response_bucket{node_id="1",le="3.625117049988527e+07"} 0
+admission_wait_durations_sql_sql_response_bucket{node_id="1",le="4.581597669054482e+07"} 0
+admission_wait_durations_sql_sql_response_bucket{node_id="1",le="5.790443980602476e+07"} 0
+admission_wait_durations_sql_sql_response_bucket{node_id="1",le="7.318242219076161e+07"} 0
+admission_wait_durations_sql_sql_response_bucket{node_id="1",le="9.249147277217315e+07"} 0
+admission_wait_durations_sql_sql_response_bucket{node_id="1",le="1.1689518164985757e+08"} 0
+admission_wait_durations_sql_sql_response_bucket{node_id="1",le="1.4773776525985083e+08"} 0
+admission_wait_durations_sql_sql_response_bucket{node_id="1",le="1.8671810912919158e+08"} 0
+admission_wait_durations_sql_sql_response_bucket{node_id="1",le="2.359833466782189e+08"} 0
+admission_wait_durations_sql_sql_response_bucket{node_id="1",le="2.9824712862168837e+08"} 0
+admission_wait_durations_sql_sql_response_bucket{node_id="1",le="3.769390975388353e+08"} 0
+admission_wait_durations_sql_sql_response_bucket{node_id="1",le="4.7639380104013294e+08"} 0
+admission_wait_durations_sql_sql_response_bucket{node_id="1",le="6.020894493336115e+08"} 0
+admission_wait_durations_sql_sql_response_bucket{node_id="1",le="7.609496685459859e+08"} 0
+admission_wait_durations_sql_sql_response_bucket{node_id="1",le="9.61724871115294e+08"} 0
+admission_wait_durations_sql_sql_response_bucket{node_id="1",le="1.2154742500762835e+09"} 0
+admission_wait_durations_sql_sql_response_bucket{node_id="1",le="1.5361749466718242e+09"} 0
+admission_wait_durations_sql_sql_response_bucket{node_id="1",le="1.941491945743876e+09"} 0
+admission_wait_durations_sql_sql_response_bucket{node_id="1",le="2.453751106639811e+09"} 0
+admission_wait_durations_sql_sql_response_bucket{node_id="1",le="3.10116892657477e+09"} 0
+admission_wait_durations_sql_sql_response_bucket{node_id="1",le="3.919406774847209e+09"} 0
+admission_wait_durations_sql_sql_response_bucket{node_id="1",le="4.953535208959157e+09"} 0
+admission_wait_durations_sql_sql_response_bucket{node_id="1",le="6.260516572014802e+09"} 0
+admission_wait_durations_sql_sql_response_bucket{node_id="1",le="7.912342618981298e+09"} 0
+admission_wait_durations_sql_sql_response_bucket{node_id="1",le="9.99999999999997e+09"} 0
+admission_wait_durations_sql_sql_response_bucket{node_id="1",le="+Inf"} 0
+admission_wait_durations_sql_sql_response_sum{node_id="1"} 0
+admission_wait_durations_sql_sql_response_count{node_id="1"} 0
+# HELP admission_granter_slots_exhausted_duration_kv Total duration when KV slots were exhausted, in micros
+# TYPE admission_granter_slots_exhausted_duration_kv counter
+admission_granter_slots_exhausted_duration_kv{node_id="1"} 110518
+# HELP admission_wait_durations_sql_root_start_locking_normal_pri Wait time durations for requests that waited
+# TYPE admission_wait_durations_sql_root_start_locking_normal_pri histogram
+admission_wait_durations_sql_root_start_locking_normal_pri_bucket{node_id="1",le="10000"} 0
+admission_wait_durations_sql_root_start_locking_normal_pri_bucket{node_id="1",le="12638.482029342978"} 0
+admission_wait_durations_sql_root_start_locking_normal_pri_bucket{node_id="1",le="15973.122800602541"} 0
+admission_wait_durations_sql_root_start_locking_normal_pri_bucket{node_id="1",le="20187.602546790382"} 0
+admission_wait_durations_sql_root_start_locking_normal_pri_bucket{node_id="1",le="25514.065200312878"} 0
+admission_wait_durations_sql_root_start_locking_normal_pri_bucket{node_id="1",le="32245.90545296394"} 0
+admission_wait_durations_sql_root_start_locking_normal_pri_bucket{node_id="1",le="40753.92965871775"} 0
+admission_wait_durations_sql_root_start_locking_normal_pri_bucket{node_id="1",le="51506.78076168121"} 0
+admission_wait_durations_sql_root_start_locking_normal_pri_bucket{node_id="1",le="65096.75230458167"} 0
+admission_wait_durations_sql_root_start_locking_normal_pri_bucket{node_id="1",le="82272.41341700466"} 0
+admission_wait_durations_sql_root_start_locking_normal_pri_bucket{node_id="1",le="103979.84184814895"} 0
+admission_wait_durations_sql_root_start_locking_normal_pri_bucket{node_id="1",le="131414.73626117557"} 0
+admission_wait_durations_sql_root_start_locking_normal_pri_bucket{node_id="1",le="166088.27826277143"} 0
+admission_wait_durations_sql_root_start_locking_normal_pri_bucket{node_id="1",le="209910.3720108553"} 0
+admission_wait_durations_sql_root_start_locking_normal_pri_bucket{node_id="1",le="265294.8464431894"} 0
+admission_wait_durations_sql_root_start_locking_normal_pri_bucket{node_id="1",le="335292.41492495546"} 0
+admission_wait_durations_sql_root_start_locking_normal_pri_bucket{node_id="1",le="423758.7160604059"} 0
+admission_wait_durations_sql_root_start_locking_normal_pri_bucket{node_id="1",le="535566.6917706894"} 0
+admission_wait_durations_sql_root_start_locking_normal_pri_bucket{node_id="1",le="676875.0009458527"} 0
+admission_wait_durations_sql_root_start_locking_normal_pri_bucket{node_id="1",le="855467.2535565672"} 0
+admission_wait_durations_sql_root_start_locking_normal_pri_bucket{node_id="1",le="1.0811807510766068e+06"} 0
+admission_wait_durations_sql_root_start_locking_normal_pri_bucket{node_id="1",le="1.3664483492953242e+06"} 0
+admission_wait_durations_sql_root_start_locking_normal_pri_bucket{node_id="1",le="1.7269832906594332e+06"} 0
+admission_wait_durations_sql_root_start_locking_normal_pri_bucket{node_id="1",le="2.182644728397485e+06"} 0
+admission_wait_durations_sql_root_start_locking_normal_pri_bucket{node_id="1",le="2.7585316176291797e+06"} 0
+admission_wait_durations_sql_root_start_locking_normal_pri_bucket{node_id="1",le="3.4863652276780806e+06"} 0
+admission_wait_durations_sql_root_start_locking_normal_pri_bucket{node_id="1",le="4.406236427773566e+06"} 0
+admission_wait_durations_sql_root_start_locking_normal_pri_bucket{node_id="1",le="5.568813990945262e+06"} 0
+admission_wait_durations_sql_root_start_locking_normal_pri_bucket{node_id="1",le="7.038135554931545e+06"} 0
+admission_wait_durations_sql_root_start_locking_normal_pri_bucket{node_id="1",le="8.89513497310822e+06"} 0
+admission_wait_durations_sql_root_start_locking_normal_pri_bucket{node_id="1",le="1.1242100350620849e+07"} 0
+admission_wait_durations_sql_root_start_locking_normal_pri_bucket{node_id="1",le="1.4208308325339198e+07"} 0
+admission_wait_durations_sql_root_start_locking_normal_pri_bucket{node_id="1",le="1.795714494371637e+07"} 0
+admission_wait_durations_sql_root_start_locking_normal_pri_bucket{node_id="1",le="2.269510536694665e+07"} 0
+admission_wait_durations_sql_root_start_locking_normal_pri_bucket{node_id="1",le="2.868316813342006e+07"} 0
+admission_wait_durations_sql_root_start_locking_normal_pri_bucket{node_id="1",le="3.625117049988527e+07"} 0
+admission_wait_durations_sql_root_start_locking_normal_pri_bucket{node_id="1",le="4.581597669054482e+07"} 0
+admission_wait_durations_sql_root_start_locking_normal_pri_bucket{node_id="1",le="5.790443980602476e+07"} 0
+admission_wait_durations_sql_root_start_locking_normal_pri_bucket{node_id="1",le="7.318242219076161e+07"} 0
+admission_wait_durations_sql_root_start_locking_normal_pri_bucket{node_id="1",le="9.249147277217315e+07"} 0
+admission_wait_durations_sql_root_start_locking_normal_pri_bucket{node_id="1",le="1.1689518164985757e+08"} 0
+admission_wait_durations_sql_root_start_locking_normal_pri_bucket{node_id="1",le="1.4773776525985083e+08"} 0
+admission_wait_durations_sql_root_start_locking_normal_pri_bucket{node_id="1",le="1.8671810912919158e+08"} 0
+admission_wait_durations_sql_root_start_locking_normal_pri_bucket{node_id="1",le="2.359833466782189e+08"} 0
+admission_wait_durations_sql_root_start_locking_normal_pri_bucket{node_id="1",le="2.9824712862168837e+08"} 0
+admission_wait_durations_sql_root_start_locking_normal_pri_bucket{node_id="1",le="3.769390975388353e+08"} 0
+admission_wait_durations_sql_root_start_locking_normal_pri_bucket{node_id="1",le="4.7639380104013294e+08"} 0
+admission_wait_durations_sql_root_start_locking_normal_pri_bucket{node_id="1",le="6.020894493336115e+08"} 0
+admission_wait_durations_sql_root_start_locking_normal_pri_bucket{node_id="1",le="7.609496685459859e+08"} 0
+admission_wait_durations_sql_root_start_locking_normal_pri_bucket{node_id="1",le="9.61724871115294e+08"} 0
+admission_wait_durations_sql_root_start_locking_normal_pri_bucket{node_id="1",le="1.2154742500762835e+09"} 0
+admission_wait_durations_sql_root_start_locking_normal_pri_bucket{node_id="1",le="1.5361749466718242e+09"} 0
+admission_wait_durations_sql_root_start_locking_normal_pri_bucket{node_id="1",le="1.941491945743876e+09"} 0
+admission_wait_durations_sql_root_start_locking_normal_pri_bucket{node_id="1",le="2.453751106639811e+09"} 0
+admission_wait_durations_sql_root_start_locking_normal_pri_bucket{node_id="1",le="3.10116892657477e+09"} 0
+admission_wait_durations_sql_root_start_locking_normal_pri_bucket{node_id="1",le="3.919406774847209e+09"} 0
+admission_wait_durations_sql_root_start_locking_normal_pri_bucket{node_id="1",le="4.953535208959157e+09"} 0
+admission_wait_durations_sql_root_start_locking_normal_pri_bucket{node_id="1",le="6.260516572014802e+09"} 0
+admission_wait_durations_sql_root_start_locking_normal_pri_bucket{node_id="1",le="7.912342618981298e+09"} 0
+admission_wait_durations_sql_root_start_locking_normal_pri_bucket{node_id="1",le="9.99999999999997e+09"} 0
+admission_wait_durations_sql_root_start_locking_normal_pri_bucket{node_id="1",le="+Inf"} 0
+admission_wait_durations_sql_root_start_locking_normal_pri_sum{node_id="1"} 0
+admission_wait_durations_sql_root_start_locking_normal_pri_count{node_id="1"} 0
+# HELP admission_requested_kv_stores Number of requests
+# TYPE admission_requested_kv_stores counter
+admission_requested_kv_stores{node_id="1"} 5894
+# HELP admission_wait_queue_length_kv_stores_locking_normal_pri Length of wait queue
+# TYPE admission_wait_queue_length_kv_stores_locking_normal_pri gauge
+admission_wait_queue_length_kv_stores_locking_normal_pri{node_id="1"} 0
+# HELP admission_wait_queue_length_kv_stores_high_pri Length of wait queue
+# TYPE admission_wait_queue_length_kv_stores_high_pri gauge
+admission_wait_queue_length_kv_stores_high_pri{node_id="1"} 0
+# HELP admission_granter_io_tokens_taken_kv Total number of tokens taken
+# TYPE admission_granter_io_tokens_taken_kv counter
+admission_granter_io_tokens_taken_kv{node_id="1"} 4.5556403e+07
+# HELP admission_wait_queue_length_sql_sql_response Length of wait queue
+# TYPE admission_wait_queue_length_sql_sql_response gauge
+admission_wait_queue_length_sql_sql_response{node_id="1"} 0
+# HELP admission_wait_durations_kv_normal_pri Wait time durations for requests that waited
+# TYPE admission_wait_durations_kv_normal_pri histogram
+admission_wait_durations_kv_normal_pri_bucket{node_id="1",le="10000"} 6907
+admission_wait_durations_kv_normal_pri_bucket{node_id="1",le="12638.482029342978"} 6907
+admission_wait_durations_kv_normal_pri_bucket{node_id="1",le="15973.122800602541"} 6907
+admission_wait_durations_kv_normal_pri_bucket{node_id="1",le="20187.602546790382"} 6907
+admission_wait_durations_kv_normal_pri_bucket{node_id="1",le="25514.065200312878"} 6907
+admission_wait_durations_kv_normal_pri_bucket{node_id="1",le="32245.90545296394"} 6907
+admission_wait_durations_kv_normal_pri_bucket{node_id="1",le="40753.92965871775"} 6907
+admission_wait_durations_kv_normal_pri_bucket{node_id="1",le="51506.78076168121"} 6907
+admission_wait_durations_kv_normal_pri_bucket{node_id="1",le="65096.75230458167"} 6907
+admission_wait_durations_kv_normal_pri_bucket{node_id="1",le="82272.41341700466"} 6907
+admission_wait_durations_kv_normal_pri_bucket{node_id="1",le="103979.84184814895"} 6907
+admission_wait_durations_kv_normal_pri_bucket{node_id="1",le="131414.73626117557"} 6907
+admission_wait_durations_kv_normal_pri_bucket{node_id="1",le="166088.27826277143"} 6907
+admission_wait_durations_kv_normal_pri_bucket{node_id="1",le="209910.3720108553"} 6907
+admission_wait_durations_kv_normal_pri_bucket{node_id="1",le="265294.8464431894"} 6907
+admission_wait_durations_kv_normal_pri_bucket{node_id="1",le="335292.41492495546"} 6907
+admission_wait_durations_kv_normal_pri_bucket{node_id="1",le="423758.7160604059"} 6907
+admission_wait_durations_kv_normal_pri_bucket{node_id="1",le="535566.6917706894"} 6907
+admission_wait_durations_kv_normal_pri_bucket{node_id="1",le="676875.0009458527"} 6907
+admission_wait_durations_kv_normal_pri_bucket{node_id="1",le="855467.2535565672"} 6907
+admission_wait_durations_kv_normal_pri_bucket{node_id="1",le="1.0811807510766068e+06"} 6907
+admission_wait_durations_kv_normal_pri_bucket{node_id="1",le="1.3664483492953242e+06"} 6907
+admission_wait_durations_kv_normal_pri_bucket{node_id="1",le="1.7269832906594332e+06"} 6907
+admission_wait_durations_kv_normal_pri_bucket{node_id="1",le="2.182644728397485e+06"} 6907
+admission_wait_durations_kv_normal_pri_bucket{node_id="1",le="2.7585316176291797e+06"} 6907
+admission_wait_durations_kv_normal_pri_bucket{node_id="1",le="3.4863652276780806e+06"} 6907
+admission_wait_durations_kv_normal_pri_bucket{node_id="1",le="4.406236427773566e+06"} 6907
+admission_wait_durations_kv_normal_pri_bucket{node_id="1",le="5.568813990945262e+06"} 6907
+admission_wait_durations_kv_normal_pri_bucket{node_id="1",le="7.038135554931545e+06"} 6907
+admission_wait_durations_kv_normal_pri_bucket{node_id="1",le="8.89513497310822e+06"} 6907
+admission_wait_durations_kv_normal_pri_bucket{node_id="1",le="1.1242100350620849e+07"} 6907
+admission_wait_durations_kv_normal_pri_bucket{node_id="1",le="1.4208308325339198e+07"} 6907
+admission_wait_durations_kv_normal_pri_bucket{node_id="1",le="1.795714494371637e+07"} 6907
+admission_wait_durations_kv_normal_pri_bucket{node_id="1",le="2.269510536694665e+07"} 6907
+admission_wait_durations_kv_normal_pri_bucket{node_id="1",le="2.868316813342006e+07"} 6907
+admission_wait_durations_kv_normal_pri_bucket{node_id="1",le="3.625117049988527e+07"} 6907
+admission_wait_durations_kv_normal_pri_bucket{node_id="1",le="4.581597669054482e+07"} 6907
+admission_wait_durations_kv_normal_pri_bucket{node_id="1",le="5.790443980602476e+07"} 6907
+admission_wait_durations_kv_normal_pri_bucket{node_id="1",le="7.318242219076161e+07"} 6907
+admission_wait_durations_kv_normal_pri_bucket{node_id="1",le="9.249147277217315e+07"} 6907
+admission_wait_durations_kv_normal_pri_bucket{node_id="1",le="1.1689518164985757e+08"} 6907
+admission_wait_durations_kv_normal_pri_bucket{node_id="1",le="1.4773776525985083e+08"} 6907
+admission_wait_durations_kv_normal_pri_bucket{node_id="1",le="1.8671810912919158e+08"} 6907
+admission_wait_durations_kv_normal_pri_bucket{node_id="1",le="2.359833466782189e+08"} 6907
+admission_wait_durations_kv_normal_pri_bucket{node_id="1",le="2.9824712862168837e+08"} 6907
+admission_wait_durations_kv_normal_pri_bucket{node_id="1",le="3.769390975388353e+08"} 6907
+admission_wait_durations_kv_normal_pri_bucket{node_id="1",le="4.7639380104013294e+08"} 6907
+admission_wait_durations_kv_normal_pri_bucket{node_id="1",le="6.020894493336115e+08"} 6907
+admission_wait_durations_kv_normal_pri_bucket{node_id="1",le="7.609496685459859e+08"} 6907
+admission_wait_durations_kv_normal_pri_bucket{node_id="1",le="9.61724871115294e+08"} 6907
+admission_wait_durations_kv_normal_pri_bucket{node_id="1",le="1.2154742500762835e+09"} 6907
+admission_wait_durations_kv_normal_pri_bucket{node_id="1",le="1.5361749466718242e+09"} 6907
+admission_wait_durations_kv_normal_pri_bucket{node_id="1",le="1.941491945743876e+09"} 6907
+admission_wait_durations_kv_normal_pri_bucket{node_id="1",le="2.453751106639811e+09"} 6907
+admission_wait_durations_kv_normal_pri_bucket{node_id="1",le="3.10116892657477e+09"} 6907
+admission_wait_durations_kv_normal_pri_bucket{node_id="1",le="3.919406774847209e+09"} 6907
+admission_wait_durations_kv_normal_pri_bucket{node_id="1",le="4.953535208959157e+09"} 6907
+admission_wait_durations_kv_normal_pri_bucket{node_id="1",le="6.260516572014802e+09"} 6907
+admission_wait_durations_kv_normal_pri_bucket{node_id="1",le="7.912342618981298e+09"} 6907
+admission_wait_durations_kv_normal_pri_bucket{node_id="1",le="9.99999999999997e+09"} 6907
+admission_wait_durations_kv_normal_pri_bucket{node_id="1",le="+Inf"} 6907
+admission_wait_durations_kv_normal_pri_sum{node_id="1"} 0
+admission_wait_durations_kv_normal_pri_count{node_id="1"} 6907
+# HELP admission_requested_sql_sql_response_locking_normal_pri Number of requests
+# TYPE admission_requested_sql_sql_response_locking_normal_pri counter
+admission_requested_sql_sql_response_locking_normal_pri{node_id="1"} 0
+# HELP admission_requested_sql_kv_response Number of requests
+# TYPE admission_requested_sql_kv_response counter
+admission_requested_sql_kv_response{node_id="1"} 6139
+# HELP admission_requested_kv_stores_high_pri Number of requests
+# TYPE admission_requested_kv_stores_high_pri counter
+admission_requested_kv_stores_high_pri{node_id="1"} 111
+# HELP admission_wait_durations_kv_locking_normal_pri Wait time durations for requests that waited
+# TYPE admission_wait_durations_kv_locking_normal_pri histogram
+admission_wait_durations_kv_locking_normal_pri_bucket{node_id="1",le="10000"} 5193
+admission_wait_durations_kv_locking_normal_pri_bucket{node_id="1",le="12638.482029342978"} 5193
+admission_wait_durations_kv_locking_normal_pri_bucket{node_id="1",le="15973.122800602541"} 5193
+admission_wait_durations_kv_locking_normal_pri_bucket{node_id="1",le="20187.602546790382"} 5193
+admission_wait_durations_kv_locking_normal_pri_bucket{node_id="1",le="25514.065200312878"} 5193
+admission_wait_durations_kv_locking_normal_pri_bucket{node_id="1",le="32245.90545296394"} 5193
+admission_wait_durations_kv_locking_normal_pri_bucket{node_id="1",le="40753.92965871775"} 5193
+admission_wait_durations_kv_locking_normal_pri_bucket{node_id="1",le="51506.78076168121"} 5193
+admission_wait_durations_kv_locking_normal_pri_bucket{node_id="1",le="65096.75230458167"} 5193
+admission_wait_durations_kv_locking_normal_pri_bucket{node_id="1",le="82272.41341700466"} 5193
+admission_wait_durations_kv_locking_normal_pri_bucket{node_id="1",le="103979.84184814895"} 5193
+admission_wait_durations_kv_locking_normal_pri_bucket{node_id="1",le="131414.73626117557"} 5193
+admission_wait_durations_kv_locking_normal_pri_bucket{node_id="1",le="166088.27826277143"} 5193
+admission_wait_durations_kv_locking_normal_pri_bucket{node_id="1",le="209910.3720108553"} 5193
+admission_wait_durations_kv_locking_normal_pri_bucket{node_id="1",le="265294.8464431894"} 5193
+admission_wait_durations_kv_locking_normal_pri_bucket{node_id="1",le="335292.41492495546"} 5193
+admission_wait_durations_kv_locking_normal_pri_bucket{node_id="1",le="423758.7160604059"} 5193
+admission_wait_durations_kv_locking_normal_pri_bucket{node_id="1",le="535566.6917706894"} 5193
+admission_wait_durations_kv_locking_normal_pri_bucket{node_id="1",le="676875.0009458527"} 5193
+admission_wait_durations_kv_locking_normal_pri_bucket{node_id="1",le="855467.2535565672"} 5193
+admission_wait_durations_kv_locking_normal_pri_bucket{node_id="1",le="1.0811807510766068e+06"} 5193
+admission_wait_durations_kv_locking_normal_pri_bucket{node_id="1",le="1.3664483492953242e+06"} 5193
+admission_wait_durations_kv_locking_normal_pri_bucket{node_id="1",le="1.7269832906594332e+06"} 5193
+admission_wait_durations_kv_locking_normal_pri_bucket{node_id="1",le="2.182644728397485e+06"} 5193
+admission_wait_durations_kv_locking_normal_pri_bucket{node_id="1",le="2.7585316176291797e+06"} 5193
+admission_wait_durations_kv_locking_normal_pri_bucket{node_id="1",le="3.4863652276780806e+06"} 5193
+admission_wait_durations_kv_locking_normal_pri_bucket{node_id="1",le="4.406236427773566e+06"} 5193
+admission_wait_durations_kv_locking_normal_pri_bucket{node_id="1",le="5.568813990945262e+06"} 5193
+admission_wait_durations_kv_locking_normal_pri_bucket{node_id="1",le="7.038135554931545e+06"} 5193
+admission_wait_durations_kv_locking_normal_pri_bucket{node_id="1",le="8.89513497310822e+06"} 5193
+admission_wait_durations_kv_locking_normal_pri_bucket{node_id="1",le="1.1242100350620849e+07"} 5193
+admission_wait_durations_kv_locking_normal_pri_bucket{node_id="1",le="1.4208308325339198e+07"} 5193
+admission_wait_durations_kv_locking_normal_pri_bucket{node_id="1",le="1.795714494371637e+07"} 5193
+admission_wait_durations_kv_locking_normal_pri_bucket{node_id="1",le="2.269510536694665e+07"} 5193
+admission_wait_durations_kv_locking_normal_pri_bucket{node_id="1",le="2.868316813342006e+07"} 5193
+admission_wait_durations_kv_locking_normal_pri_bucket{node_id="1",le="3.625117049988527e+07"} 5193
+admission_wait_durations_kv_locking_normal_pri_bucket{node_id="1",le="4.581597669054482e+07"} 5193
+admission_wait_durations_kv_locking_normal_pri_bucket{node_id="1",le="5.790443980602476e+07"} 5193
+admission_wait_durations_kv_locking_normal_pri_bucket{node_id="1",le="7.318242219076161e+07"} 5193
+admission_wait_durations_kv_locking_normal_pri_bucket{node_id="1",le="9.249147277217315e+07"} 5193
+admission_wait_durations_kv_locking_normal_pri_bucket{node_id="1",le="1.1689518164985757e+08"} 5193
+admission_wait_durations_kv_locking_normal_pri_bucket{node_id="1",le="1.4773776525985083e+08"} 5193
+admission_wait_durations_kv_locking_normal_pri_bucket{node_id="1",le="1.8671810912919158e+08"} 5193
+admission_wait_durations_kv_locking_normal_pri_bucket{node_id="1",le="2.359833466782189e+08"} 5193
+admission_wait_durations_kv_locking_normal_pri_bucket{node_id="1",le="2.9824712862168837e+08"} 5193
+admission_wait_durations_kv_locking_normal_pri_bucket{node_id="1",le="3.769390975388353e+08"} 5193
+admission_wait_durations_kv_locking_normal_pri_bucket{node_id="1",le="4.7639380104013294e+08"} 5193
+admission_wait_durations_kv_locking_normal_pri_bucket{node_id="1",le="6.020894493336115e+08"} 5193
+admission_wait_durations_kv_locking_normal_pri_bucket{node_id="1",le="7.609496685459859e+08"} 5193
+admission_wait_durations_kv_locking_normal_pri_bucket{node_id="1",le="9.61724871115294e+08"} 5193
+admission_wait_durations_kv_locking_normal_pri_bucket{node_id="1",le="1.2154742500762835e+09"} 5193
+admission_wait_durations_kv_locking_normal_pri_bucket{node_id="1",le="1.5361749466718242e+09"} 5193
+admission_wait_durations_kv_locking_normal_pri_bucket{node_id="1",le="1.941491945743876e+09"} 5193
+admission_wait_durations_kv_locking_normal_pri_bucket{node_id="1",le="2.453751106639811e+09"} 5193
+admission_wait_durations_kv_locking_normal_pri_bucket{node_id="1",le="3.10116892657477e+09"} 5193
+admission_wait_durations_kv_locking_normal_pri_bucket{node_id="1",le="3.919406774847209e+09"} 5193
+admission_wait_durations_kv_locking_normal_pri_bucket{node_id="1",le="4.953535208959157e+09"} 5193
+admission_wait_durations_kv_locking_normal_pri_bucket{node_id="1",le="6.260516572014802e+09"} 5193
+admission_wait_durations_kv_locking_normal_pri_bucket{node_id="1",le="7.912342618981298e+09"} 5193
+admission_wait_durations_kv_locking_normal_pri_bucket{node_id="1",le="9.99999999999997e+09"} 5193
+admission_wait_durations_kv_locking_normal_pri_bucket{node_id="1",le="+Inf"} 5193
+admission_wait_durations_kv_locking_normal_pri_sum{node_id="1"} 0
+admission_wait_durations_kv_locking_normal_pri_count{node_id="1"} 5193
+# HELP admission_elastic_cpu_over_limit_durations Measurement of how much over the prescribed limit elastic requests ran (not recorded if requests don't run over)
+# TYPE admission_elastic_cpu_over_limit_durations histogram
+admission_elastic_cpu_over_limit_durations_bucket{node_id="1",le="10000"} 0
+admission_elastic_cpu_over_limit_durations_bucket{node_id="1",le="12638.482029342978"} 0
+admission_elastic_cpu_over_limit_durations_bucket{node_id="1",le="15973.122800602541"} 0
+admission_elastic_cpu_over_limit_durations_bucket{node_id="1",le="20187.602546790382"} 0
+admission_elastic_cpu_over_limit_durations_bucket{node_id="1",le="25514.065200312878"} 0
+admission_elastic_cpu_over_limit_durations_bucket{node_id="1",le="32245.90545296394"} 0
+admission_elastic_cpu_over_limit_durations_bucket{node_id="1",le="40753.92965871775"} 0
+admission_elastic_cpu_over_limit_durations_bucket{node_id="1",le="51506.78076168121"} 0
+admission_elastic_cpu_over_limit_durations_bucket{node_id="1",le="65096.75230458167"} 0
+admission_elastic_cpu_over_limit_durations_bucket{node_id="1",le="82272.41341700466"} 0
+admission_elastic_cpu_over_limit_durations_bucket{node_id="1",le="103979.84184814895"} 0
+admission_elastic_cpu_over_limit_durations_bucket{node_id="1",le="131414.73626117557"} 0
+admission_elastic_cpu_over_limit_durations_bucket{node_id="1",le="166088.27826277143"} 0
+admission_elastic_cpu_over_limit_durations_bucket{node_id="1",le="209910.3720108553"} 0
+admission_elastic_cpu_over_limit_durations_bucket{node_id="1",le="265294.8464431894"} 0
+admission_elastic_cpu_over_limit_durations_bucket{node_id="1",le="335292.41492495546"} 0
+admission_elastic_cpu_over_limit_durations_bucket{node_id="1",le="423758.7160604059"} 0
+admission_elastic_cpu_over_limit_durations_bucket{node_id="1",le="535566.6917706894"} 0
+admission_elastic_cpu_over_limit_durations_bucket{node_id="1",le="676875.0009458527"} 0
+admission_elastic_cpu_over_limit_durations_bucket{node_id="1",le="855467.2535565672"} 0
+admission_elastic_cpu_over_limit_durations_bucket{node_id="1",le="1.0811807510766068e+06"} 0
+admission_elastic_cpu_over_limit_durations_bucket{node_id="1",le="1.3664483492953242e+06"} 0
+admission_elastic_cpu_over_limit_durations_bucket{node_id="1",le="1.7269832906594332e+06"} 0
+admission_elastic_cpu_over_limit_durations_bucket{node_id="1",le="2.182644728397485e+06"} 0
+admission_elastic_cpu_over_limit_durations_bucket{node_id="1",le="2.7585316176291797e+06"} 0
+admission_elastic_cpu_over_limit_durations_bucket{node_id="1",le="3.4863652276780806e+06"} 0
+admission_elastic_cpu_over_limit_durations_bucket{node_id="1",le="4.406236427773566e+06"} 0
+admission_elastic_cpu_over_limit_durations_bucket{node_id="1",le="5.568813990945262e+06"} 0
+admission_elastic_cpu_over_limit_durations_bucket{node_id="1",le="7.038135554931545e+06"} 0
+admission_elastic_cpu_over_limit_durations_bucket{node_id="1",le="8.89513497310822e+06"} 0
+admission_elastic_cpu_over_limit_durations_bucket{node_id="1",le="1.1242100350620849e+07"} 0
+admission_elastic_cpu_over_limit_durations_bucket{node_id="1",le="1.4208308325339198e+07"} 0
+admission_elastic_cpu_over_limit_durations_bucket{node_id="1",le="1.795714494371637e+07"} 0
+admission_elastic_cpu_over_limit_durations_bucket{node_id="1",le="2.269510536694665e+07"} 0
+admission_elastic_cpu_over_limit_durations_bucket{node_id="1",le="2.868316813342006e+07"} 0
+admission_elastic_cpu_over_limit_durations_bucket{node_id="1",le="3.625117049988527e+07"} 0
+admission_elastic_cpu_over_limit_durations_bucket{node_id="1",le="4.581597669054482e+07"} 0
+admission_elastic_cpu_over_limit_durations_bucket{node_id="1",le="5.790443980602476e+07"} 0
+admission_elastic_cpu_over_limit_durations_bucket{node_id="1",le="7.318242219076161e+07"} 0
+admission_elastic_cpu_over_limit_durations_bucket{node_id="1",le="9.249147277217315e+07"} 0
+admission_elastic_cpu_over_limit_durations_bucket{node_id="1",le="1.1689518164985757e+08"} 0
+admission_elastic_cpu_over_limit_durations_bucket{node_id="1",le="1.4773776525985083e+08"} 0
+admission_elastic_cpu_over_limit_durations_bucket{node_id="1",le="1.8671810912919158e+08"} 0
+admission_elastic_cpu_over_limit_durations_bucket{node_id="1",le="2.359833466782189e+08"} 0
+admission_elastic_cpu_over_limit_durations_bucket{node_id="1",le="2.9824712862168837e+08"} 0
+admission_elastic_cpu_over_limit_durations_bucket{node_id="1",le="3.769390975388353e+08"} 0
+admission_elastic_cpu_over_limit_durations_bucket{node_id="1",le="4.7639380104013294e+08"} 0
+admission_elastic_cpu_over_limit_durations_bucket{node_id="1",le="6.020894493336115e+08"} 0
+admission_elastic_cpu_over_limit_durations_bucket{node_id="1",le="7.609496685459859e+08"} 0
+admission_elastic_cpu_over_limit_durations_bucket{node_id="1",le="9.61724871115294e+08"} 0
+admission_elastic_cpu_over_limit_durations_bucket{node_id="1",le="1.2154742500762835e+09"} 0
+admission_elastic_cpu_over_limit_durations_bucket{node_id="1",le="1.5361749466718242e+09"} 0
+admission_elastic_cpu_over_limit_durations_bucket{node_id="1",le="1.941491945743876e+09"} 0
+admission_elastic_cpu_over_limit_durations_bucket{node_id="1",le="2.453751106639811e+09"} 0
+admission_elastic_cpu_over_limit_durations_bucket{node_id="1",le="3.10116892657477e+09"} 0
+admission_elastic_cpu_over_limit_durations_bucket{node_id="1",le="3.919406774847209e+09"} 0
+admission_elastic_cpu_over_limit_durations_bucket{node_id="1",le="4.953535208959157e+09"} 0
+admission_elastic_cpu_over_limit_durations_bucket{node_id="1",le="6.260516572014802e+09"} 0
+admission_elastic_cpu_over_limit_durations_bucket{node_id="1",le="7.912342618981298e+09"} 0
+admission_elastic_cpu_over_limit_durations_bucket{node_id="1",le="9.99999999999997e+09"} 0
+admission_elastic_cpu_over_limit_durations_bucket{node_id="1",le="+Inf"} 0
+admission_elastic_cpu_over_limit_durations_sum{node_id="1"} 0
+admission_elastic_cpu_over_limit_durations_count{node_id="1"} 0
+# HELP admission_granter_total_slots_kv Total slots for kv work
+# TYPE admission_granter_total_slots_kv gauge
+admission_granter_total_slots_kv{node_id="1"} 10
+# HELP admission_admitted_kv_stores_high_pri Number of requests admitted
+# TYPE admission_admitted_kv_stores_high_pri counter
+admission_admitted_kv_stores_high_pri{node_id="1"} 111
+# HELP admission_wait_durations_kv_stores_locking_normal_pri Wait time durations for requests that waited
+# TYPE admission_wait_durations_kv_stores_locking_normal_pri histogram
+admission_wait_durations_kv_stores_locking_normal_pri_bucket{node_id="1",le="10000"} 2804
+admission_wait_durations_kv_stores_locking_normal_pri_bucket{node_id="1",le="12638.482029342978"} 2804
+admission_wait_durations_kv_stores_locking_normal_pri_bucket{node_id="1",le="15973.122800602541"} 2804
+admission_wait_durations_kv_stores_locking_normal_pri_bucket{node_id="1",le="20187.602546790382"} 2804
+admission_wait_durations_kv_stores_locking_normal_pri_bucket{node_id="1",le="25514.065200312878"} 2804
+admission_wait_durations_kv_stores_locking_normal_pri_bucket{node_id="1",le="32245.90545296394"} 2804
+admission_wait_durations_kv_stores_locking_normal_pri_bucket{node_id="1",le="40753.92965871775"} 2804
+admission_wait_durations_kv_stores_locking_normal_pri_bucket{node_id="1",le="51506.78076168121"} 2804
+admission_wait_durations_kv_stores_locking_normal_pri_bucket{node_id="1",le="65096.75230458167"} 2804
+admission_wait_durations_kv_stores_locking_normal_pri_bucket{node_id="1",le="82272.41341700466"} 2804
+admission_wait_durations_kv_stores_locking_normal_pri_bucket{node_id="1",le="103979.84184814895"} 2804
+admission_wait_durations_kv_stores_locking_normal_pri_bucket{node_id="1",le="131414.73626117557"} 2804
+admission_wait_durations_kv_stores_locking_normal_pri_bucket{node_id="1",le="166088.27826277143"} 2804
+admission_wait_durations_kv_stores_locking_normal_pri_bucket{node_id="1",le="209910.3720108553"} 2804
+admission_wait_durations_kv_stores_locking_normal_pri_bucket{node_id="1",le="265294.8464431894"} 2804
+admission_wait_durations_kv_stores_locking_normal_pri_bucket{node_id="1",le="335292.41492495546"} 2804
+admission_wait_durations_kv_stores_locking_normal_pri_bucket{node_id="1",le="423758.7160604059"} 2804
+admission_wait_durations_kv_stores_locking_normal_pri_bucket{node_id="1",le="535566.6917706894"} 2804
+admission_wait_durations_kv_stores_locking_normal_pri_bucket{node_id="1",le="676875.0009458527"} 2804
+admission_wait_durations_kv_stores_locking_normal_pri_bucket{node_id="1",le="855467.2535565672"} 2804
+admission_wait_durations_kv_stores_locking_normal_pri_bucket{node_id="1",le="1.0811807510766068e+06"} 2804
+admission_wait_durations_kv_stores_locking_normal_pri_bucket{node_id="1",le="1.3664483492953242e+06"} 2804
+admission_wait_durations_kv_stores_locking_normal_pri_bucket{node_id="1",le="1.7269832906594332e+06"} 2804
+admission_wait_durations_kv_stores_locking_normal_pri_bucket{node_id="1",le="2.182644728397485e+06"} 2804
+admission_wait_durations_kv_stores_locking_normal_pri_bucket{node_id="1",le="2.7585316176291797e+06"} 2804
+admission_wait_durations_kv_stores_locking_normal_pri_bucket{node_id="1",le="3.4863652276780806e+06"} 2804
+admission_wait_durations_kv_stores_locking_normal_pri_bucket{node_id="1",le="4.406236427773566e+06"} 2804
+admission_wait_durations_kv_stores_locking_normal_pri_bucket{node_id="1",le="5.568813990945262e+06"} 2804
+admission_wait_durations_kv_stores_locking_normal_pri_bucket{node_id="1",le="7.038135554931545e+06"} 2804
+admission_wait_durations_kv_stores_locking_normal_pri_bucket{node_id="1",le="8.89513497310822e+06"} 2804
+admission_wait_durations_kv_stores_locking_normal_pri_bucket{node_id="1",le="1.1242100350620849e+07"} 2804
+admission_wait_durations_kv_stores_locking_normal_pri_bucket{node_id="1",le="1.4208308325339198e+07"} 2804
+admission_wait_durations_kv_stores_locking_normal_pri_bucket{node_id="1",le="1.795714494371637e+07"} 2804
+admission_wait_durations_kv_stores_locking_normal_pri_bucket{node_id="1",le="2.269510536694665e+07"} 2804
+admission_wait_durations_kv_stores_locking_normal_pri_bucket{node_id="1",le="2.868316813342006e+07"} 2804
+admission_wait_durations_kv_stores_locking_normal_pri_bucket{node_id="1",le="3.625117049988527e+07"} 2804
+admission_wait_durations_kv_stores_locking_normal_pri_bucket{node_id="1",le="4.581597669054482e+07"} 2804
+admission_wait_durations_kv_stores_locking_normal_pri_bucket{node_id="1",le="5.790443980602476e+07"} 2804
+admission_wait_durations_kv_stores_locking_normal_pri_bucket{node_id="1",le="7.318242219076161e+07"} 2804
+admission_wait_durations_kv_stores_locking_normal_pri_bucket{node_id="1",le="9.249147277217315e+07"} 2804
+admission_wait_durations_kv_stores_locking_normal_pri_bucket{node_id="1",le="1.1689518164985757e+08"} 2804
+admission_wait_durations_kv_stores_locking_normal_pri_bucket{node_id="1",le="1.4773776525985083e+08"} 2804
+admission_wait_durations_kv_stores_locking_normal_pri_bucket{node_id="1",le="1.8671810912919158e+08"} 2804
+admission_wait_durations_kv_stores_locking_normal_pri_bucket{node_id="1",le="2.359833466782189e+08"} 2804
+admission_wait_durations_kv_stores_locking_normal_pri_bucket{node_id="1",le="2.9824712862168837e+08"} 2804
+admission_wait_durations_kv_stores_locking_normal_pri_bucket{node_id="1",le="3.769390975388353e+08"} 2804
+admission_wait_durations_kv_stores_locking_normal_pri_bucket{node_id="1",le="4.7639380104013294e+08"} 2804
+admission_wait_durations_kv_stores_locking_normal_pri_bucket{node_id="1",le="6.020894493336115e+08"} 2804
+admission_wait_durations_kv_stores_locking_normal_pri_bucket{node_id="1",le="7.609496685459859e+08"} 2804
+admission_wait_durations_kv_stores_locking_normal_pri_bucket{node_id="1",le="9.61724871115294e+08"} 2804
+admission_wait_durations_kv_stores_locking_normal_pri_bucket{node_id="1",le="1.2154742500762835e+09"} 2804
+admission_wait_durations_kv_stores_locking_normal_pri_bucket{node_id="1",le="1.5361749466718242e+09"} 2804
+admission_wait_durations_kv_stores_locking_normal_pri_bucket{node_id="1",le="1.941491945743876e+09"} 2804
+admission_wait_durations_kv_stores_locking_normal_pri_bucket{node_id="1",le="2.453751106639811e+09"} 2804
+admission_wait_durations_kv_stores_locking_normal_pri_bucket{node_id="1",le="3.10116892657477e+09"} 2804
+admission_wait_durations_kv_stores_locking_normal_pri_bucket{node_id="1",le="3.919406774847209e+09"} 2804
+admission_wait_durations_kv_stores_locking_normal_pri_bucket{node_id="1",le="4.953535208959157e+09"} 2804
+admission_wait_durations_kv_stores_locking_normal_pri_bucket{node_id="1",le="6.260516572014802e+09"} 2804
+admission_wait_durations_kv_stores_locking_normal_pri_bucket{node_id="1",le="7.912342618981298e+09"} 2804
+admission_wait_durations_kv_stores_locking_normal_pri_bucket{node_id="1",le="9.99999999999997e+09"} 2804
+admission_wait_durations_kv_stores_locking_normal_pri_bucket{node_id="1",le="+Inf"} 2804
+admission_wait_durations_kv_stores_locking_normal_pri_sum{node_id="1"} 0
+admission_wait_durations_kv_stores_locking_normal_pri_count{node_id="1"} 2804

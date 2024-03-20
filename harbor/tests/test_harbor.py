@@ -52,6 +52,8 @@ def assert_basic_case(aggregator):
 
 
 def assert_service_checks(aggregator):
-    aggregator.assert_service_check('harbor.can_connect', status=HarborCheck.OK)
+    aggregator.assert_service_check('harbor.can_connect', status=HarborCheck.OK, tags=['environment:test'])
     for c in HARBOR_COMPONENTS:
-        aggregator.assert_service_check('harbor.status', status=mock.ANY, tags=['component:{}'.format(c)])
+        aggregator.assert_service_check(
+            'harbor.status', status=mock.ANY, tags=['component:{}'.format(c), 'environment:test']
+        )

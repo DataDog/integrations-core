@@ -9,7 +9,7 @@
     "visible_facets": ["source", "host", "service", "status", "weblogic"],
     "options": {
       "group_bys": [
-        {"facet": "@weblogic.subsystem"},
+        {"facet": "@weblogic.subsystem"}
       ],
       "aggregations": [
         { "metric": "count", "type": "count" }

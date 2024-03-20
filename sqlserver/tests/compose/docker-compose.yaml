@@ -10,6 +10,7 @@ services:
       dockerfile: Dockerfile
       args:
         - SQLSERVER_IMAGE_TAG=${SQLSERVER_IMAGE_TAG}
+    platform: linux/amd64
     environment:
       - ACCEPT_EULA=Y
       - SA_PASSWORD=Password123

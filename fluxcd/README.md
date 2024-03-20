@@ -106,6 +106,12 @@ See [service_checks.json][8] for a list of service checks provided by this integ
 
 Need help? Contact [Datadog support][9].
 
+## Further Reading
+
+Additional helpful documentation, links, and articles:
+
+- [Monitoring your container-native technologies][11]
+
 
 [1]: https://fluxcd.io/
 [2]: https://app.datadoghq.com/account/settings/agent/latest
@@ -117,3 +123,4 @@ Need help? Contact [Datadog support][9].
 [8]: https://github.com/DataDog/integrations-core/blob/master/fluxcd/assets/service_checks.json
 [9]: https://docs.datadoghq.com/help/
 [10]: https://docs.datadoghq.com/agent/guide/use-community-integrations/?tab=agentv721v621#installation
+[11]: https://www.datadoghq.com/blog/container-native-integrations/#cicd-with-flux

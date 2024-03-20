@@ -19,6 +19,7 @@ tests:
           servers: 2
           service: "redis"
     message: "p 5 listening on '0.0.0.0:6100' in redis pool 0 'situ' with 2 servers"
+    status: "info"
     tags:
      - "source:LOGS_SOURCE"
     timestamp: 1617119463000
@@ -38,6 +39,7 @@ tests:
           live: 1
           total: 1
     message: "1 of 1 servers are live for pool 1 'alpha'"
+    status: "info"
     tags:
      - "source:LOGS_SOURCE"
     timestamp: 1616153076976
@@ -60,6 +62,7 @@ tests:
           servers: 2
           service: "memcache"
     message: "p 9 listening on '127.0.0.1:22121' in memcache pool 3 'gamma' with 2 servers"
+    status: "info"
     tags:
      - "source:LOGS_SOURCE"
     timestamp: 1616153077302
@@ -77,6 +80,7 @@ tests:
           number: 4
           servers: 2
     message: "init 2 servers in pool 4 'omega'"
+    status: "info"
     tags:
      - "source:LOGS_SOURCE"
     timestamp: 1616153076975
@@ -92,6 +96,7 @@ tests:
       lineno: 505
       timestamp: 1616153089387
     message: "address resolution of node 'invalid' service '11213' failed: Name or service not known"
+    status: "warn"
     tags:
      - "source:LOGS_SOURCE"
     timestamp: 1616153089387
@@ -104,6 +109,7 @@ tests:
       lineno: 190
       timestamp: 1616153076975
     message: "run, rabbit run / dig that hole, forget the sun / and when at last the work is done / don't sit down / it's time to dig another one"
+    status: "info"
     tags:
      - "source:LOGS_SOURCE"
     timestamp: 1616153076975
@@ -116,6 +122,7 @@ tests:
       lineno: 190
       timestamp: 1617814974000
     message: "run, rabbit run / dig that hole, forget the sun / and when at last the work is done / don't sit down / it's time to dig another one"
+    status: "info"
     tags:
      - "source:LOGS_SOURCE"
     timestamp: 1617814974000

@@ -9,6 +9,7 @@ tests:
       thread:
         name: "main"
     message: "Initializing Gear on port 4730 with SSL: false"
+    status: "info"
     tags:
      - "source:LOGS_SOURCE"
     timestamp: 1600332167694
@@ -21,6 +22,7 @@ tests:
       thread:
         name: "main"
     message: "Timeout occurred when calling bind() for 0.0.0.0:4730 -> libgearman-server/gearmand.cc:688"
+    status: "error"
     tags:
      - "source:LOGS_SOURCE"
     timestamp: 1600335470000

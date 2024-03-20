@@ -15,6 +15,7 @@ tests:
       pid: 325
       timestamp: 1693297856041
     message: "Tried to decrease ref count for nonexistent object ID: 685e172318b7aa3448435dc2817a544720a5639a0100000003000000"
+    status: "warn"
     tags:
      - "source:LOGS_SOURCE"
     timestamp: 1693297856041
@@ -36,6 +37,7 @@ tests:
         pid: 22736
         token: 234
     message: "Started worker process with pid 22736, the token is 234"
+    status: "info"
     tags:
      - "source:LOGS_SOURCE"
     timestamp: 1693357518830
@@ -53,6 +55,7 @@ tests:
           port: "6379"
       timestamp: 1685610934601
     message: "Submitting job with RAY_ADDRESS = 10.0.24.73:6379"
+    status: "info"
     tags:
      - "source:LOGS_SOURCE"
     timestamp: 1685610934601
@@ -68,6 +71,7 @@ tests:
       level: "INFO"
       timestamp: 1693297858303
     message: "The autoscaler took 0.0 seconds to fetch the list of non-terminated nodes."
+    status: "info"
     tags:
      - "source:LOGS_SOURCE"
     timestamp: 1693297858303
@@ -89,6 +93,8 @@ tests:
       pid: 22661
       timestamp: 1693357518630
     message: "driver server started, listening on port 10329."
+    status: "info"
     tags:
      - "source:LOGS_SOURCE"
     timestamp: 1693357518630
+
