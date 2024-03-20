@@ -204,3 +204,12 @@ METRIC_MAP = {
     **BPF_METRICS_MAP,
     **PROMETHEUS_METRICS_MAP,
 }
+
+METRIC_MAP_BY_SERVICE = {
+    **{metric: "teleport" for metric in COMMON_METRICS_MAP.keys()},
+    **{metric: "proxy" for metric in PROXY_METRICS_MAP.keys()},
+    **{metric: "auth" for metric in AUTH_METRICS_MAP.keys()},
+    **{metric: "ssh" for metric in SSH_METRICS_MAP.keys()},
+    **{metric: "kubernetes" for metric in KUBERNETES_METRICS_MAP.keys()},
+    **{metric: "database" for metric in DATABASE_METRICS_MAP.keys()},
+}

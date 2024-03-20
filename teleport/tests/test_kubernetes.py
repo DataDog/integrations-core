@@ -19,3 +19,4 @@ def test_kubernetes_teleport_metrics(dd_run_check, aggregator, instance, mock_ht
 
     for metric in KUBERNETES_METRICS:
         aggregator.assert_metric(f"teleport.{metric}")
+        aggregator.assert_metric_has_tag(f"teleport.{metric}", "teleport_service:kubernetes")
