@@ -65,7 +65,7 @@ pipeline:
     query: source:apache
   processors:
     - type: grok-parser
-      name: Parsing Apache logs
+      name: Parsing Apache logs Test
       enabled: true
       source: message
       samples:
