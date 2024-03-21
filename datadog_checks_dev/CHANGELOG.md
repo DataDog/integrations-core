@@ -6,8 +6,7 @@
 
 ***Removed***:
 
-* Remove migrated commands. ([#16995](https://github.com/DataDog/integrations-core/pull/16995))
-* Remove commands that are migrated to the new `ddev` CLI. ([#17008](https://github.com/DataDog/integrations-core/pull/17008))
+* Remove commands that are migrated to the new `ddev` CLI. ([#17008](https://github.com/DataDog/integrations-core/pull/17008)), ([#16995](https://github.com/DataDog/integrations-core/pull/16995))
 
 ***Added***:
 
