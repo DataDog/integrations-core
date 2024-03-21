@@ -12,7 +12,7 @@
 * Add a method to assert several metric tags at once ([#17134](https://github.com/DataDog/integrations-core/pull/17134))
 * Add db util to prepand/append comma delimited SQL comment from key/value pairs ([#17145](https://github.com/DataDog/integrations-core/pull/17145))
 
-## 36.4.0 / 2024-03-08
+## 36.4.0 / 2024-03-08 / Agent 7.52.0
 
 ***Added***:
 

@@ -1,7 +1,7 @@
 id: cisco-secure-firewall
 tests:
-  - sample: "<190>2024-01-17T09:07:34Z: %FTD-2-109011: Authen Session Start: user
-      testuser1, sid 23"
+  -
+    sample: "<190>2024-01-17T09:07:34Z: %FTD-2-109011: Authen Session Start: user testuser1, sid 23"
     result:
       custom:
         message_id: "109011"
@@ -10,20 +10,12 @@ tests:
           severity: "Critical"
         timestamp: 1705482454000
       message: "Authen Session Start: user testuser1, sid 23"
+      status: "critical"
       tags:
         - "source:LOGS_SOURCE"
       timestamp: 1705482454000
-  - sample: "2024-01-04T05:49:44Z   %FTD-1-430001: DeviceUUID:
-      fbf9ef28-9b2a-51ur-495e-e9384ce3a258, InstanceID: 1, FirstPacketSecond:
-      2024-01-04T05:49:44Z, ConnectionID: 39298, SrcIP: 185.64.148.0, DstIP:
-      185.64.148.0, SrcPort: 53, DstPort: 61550, Protocol: udp, IngressInterface:
-      WAN, EgressInterface: LAN, IngressZone: WAN, EgressZone: LAN, Priority: 2,
-      GID: 1, SID: 254, Revision: 17, Message: PROTOCOL-DNS SPOOF query response
-      with TTL of 1 min. and no authority, Classification: Potentially Bad
-      Traffic, Client: DNS, ApplicationProtocol: DNS, IntrusionPolicy: ABC-IPS,
-      ACPolicy: default, AccessControlRuleName: New-rule, NAPPolicy: Balanced
-      Security and Connectivity, InlineResult: Dropped, IngressVRF: Global,
-      EgressVRF: Global"
+  -
+    sample: "2024-01-04T05:49:44Z   %FTD-1-430001: DeviceUUID: fbf9ef28-9b2a-51ur-495e-e9384ce3a258, InstanceID: 1, FirstPacketSecond: 2024-01-04T05:49:44Z, ConnectionID: 39298, SrcIP: 185.64.148.0, DstIP: 185.64.148.0, SrcPort: 53, DstPort: 61550, Protocol: udp, IngressInterface: WAN, EgressInterface: LAN, IngressZone: WAN, EgressZone: LAN, Priority: 2, GID: 1, SID: 254, Revision: 17, Message: PROTOCOL-DNS SPOOF query response with TTL of 1 min. and no authority, Classification: Potentially Bad Traffic, Client: DNS, ApplicationProtocol: DNS, IntrusionPolicy: ABC-IPS, ACPolicy: default, AccessControlRuleName: New-rule, NAPPolicy: Balanced Security and Connectivity, InlineResult: Dropped, IngressVRF: Global, EgressVRF: Global"
     result:
       custom:
         ACPolicy: "default"
@@ -81,11 +73,12 @@ tests:
           severity: "Alert"
         timestamp: 1704347384000
       message: "DeviceUUID: fbf9ef28-9b2a-51ur-495e-e9384ce3a258, InstanceID: 1, FirstPacketSecond: 2024-01-04T05:49:44Z, ConnectionID: 39298, SrcIP: 185.64.148.0, DstIP: 185.64.148.0, SrcPort: 53, DstPort: 61550, Protocol: udp, IngressInterface: WAN, EgressInterface: LAN, IngressZone: WAN, EgressZone: LAN, Priority: 2, GID: 1, SID: 254, Revision: 17, Message: PROTOCOL-DNS SPOOF query response with TTL of 1 min. and no authority, Classification: Potentially Bad Traffic, Client: DNS, ApplicationProtocol: DNS, IntrusionPolicy: ABC-IPS, ACPolicy: default, AccessControlRuleName: New-rule, NAPPolicy: Balanced Security and Connectivity, InlineResult: Dropped, IngressVRF: Global, EgressVRF: Global"
+      status: "alert"
       tags:
         - "source:LOGS_SOURCE"
       timestamp: 1704347384000
-  - sample: "<190>2024-01-17T09:07:34Z: %FTD-3-212001: Unable to open SNMP channel
-      (UDP port 3224 ) on interface 89 , error code = -1"
+  -
+    sample: "<190>2024-01-17T09:07:34Z: %FTD-3-212001: Unable to open SNMP channel (UDP port 3224 ) on interface 89 , error code = -1"
     result:
       custom:
         error_code_212001: -1
@@ -98,11 +91,12 @@ tests:
           severity: "Error"
         timestamp: 1705482454000
       message: "Unable to open SNMP channel (UDP port 3224 ) on interface 89 , error code = -1"
+      status: "error"
       tags:
         - "source:LOGS_SOURCE"
       timestamp: 1705482454000
-  - sample: "<190>2024-01-17T09:07:34Z: %FTD-1-103001: (Primary) No response from
-      other firewall (reason code = 1)."
+  -
+    sample: "<190>2024-01-17T09:07:34Z: %FTD-1-103001: (Primary) No response from other firewall (reason code = 1)."
     result:
       custom:
         code: 1
@@ -114,11 +108,12 @@ tests:
         timestamp: 1705482454000
         unit: "Primary"
       message: "(Primary) No response from other firewall (reason code = 1)."
+      status: "alert"
       tags:
         - "source:LOGS_SOURCE"
       timestamp: 1705482454000
-  - sample: "<190>2024-01-17T09:07:34Z: %FTD-1-735002 IPMI: Cooling Fan
-      KS-Y84-AH1-J1 : Failure Detected"
+  -
+    sample: "<190>2024-01-17T09:07:34Z: %FTD-1-735002 IPMI: Cooling Fan KS-Y84-AH1-J1 : Failure Detected"
     result:
       custom:
         message_id: "735002"
@@ -128,6 +123,7 @@ tests:
           severity: "Alert"
         timestamp: 1705482454000
       message: "IPMI: Cooling Fan KS-Y84-AH1-J1 : Failure Detected"
+      status: "alert"
       tags:
         - "source:LOGS_SOURCE"
       timestamp: 1705482454000

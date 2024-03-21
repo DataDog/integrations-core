@@ -27,7 +27,7 @@ To configure this check for an Agent running on a host:
 
 1. Edit the `ignite.d/conf.yaml` file, in the `conf.d/` folder at the root of your Agent's configuration directory to start collecting your ignite performance data. See the [sample ignite.d/conf.yaml][4] for all available configuration options.
 
-   This check has a limit of 350 metrics per instance. The number of returned metrics is indicated in the info page.
+   This check has a limit of 350 metrics per instance. The number of returned metrics is indicated in [the status page][11].
    You can specify the metrics you are interested in by editing the configuration below.
    To learn how to customize the metrics to collect see the [JMX Checks documentation][5] for more information.
    If you need to monitor more metrics, contact [Datadog support][6].

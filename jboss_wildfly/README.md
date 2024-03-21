@@ -12,7 +12,7 @@ The JBoss/WildFly check is included in the [Datadog Agent][3] package so you don
 
 ### Configuration
 
-This check has a limit of 350 metrics per instance. The number of returned metrics is indicated in the info page. You can specify the metrics you are interested in by editing the configuration below. To learn how to customize the collected metrics, see the [JMX Checks documentation][4] for more detailed instructions. If you need to monitor more metrics, contact [Datadog support][5].
+This check has a limit of 350 metrics per instance. The number of returned metrics is indicated in [the status page][11]. You can specify the metrics you are interested in by editing the configuration below. To learn how to customize the collected metrics, see the [JMX Checks documentation][4] for more detailed instructions. If you need to monitor more metrics, contact [Datadog support][5].
 
 <!-- xxx tabs xxx -->
 <!-- xxx tab "Host" xxx -->
