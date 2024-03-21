@@ -175,6 +175,8 @@ OPTIONAL_METRICS = [
     'clickhouse.parts.wide',
     'clickhouse.postgresql.connection',
     'clickhouse.query.count',
+    'clickhouse.query.profiler.runs.count',
+    'clickhouse.query.profiler.runs.total',
     'clickhouse.query.select.count',
     'clickhouse.query.select.time',
     'clickhouse.query.time',
