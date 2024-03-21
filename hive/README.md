@@ -50,7 +50,7 @@ Follow the instructions below to configure this check for an Agent running on a 
 
 1. Edit the `hive.d/conf.yaml` file, in the `conf.d/` folder at the root of your Agent's configuration directory to start collecting your hive performance data. See the [sample hive.d/conf.yaml][4] for all available configuration options.
 
-    This check has a limit of 350 metrics per instance. The number of returned metrics is indicated in the info page. You can specify the metrics you are interested in by editing the configuration below.
+    This check has a limit of 350 metrics per instance. The number of returned metrics is indicated in [the status page][11]. You can specify the metrics you are interested in by editing the configuration below.
     To learn how to customize the metrics to collect, see the [JMX Checks documentation][5] for more detailed instructions. If you need to monitor more metrics, contact [Datadog support][6].
 
 2. [Restart the Agent][7].
