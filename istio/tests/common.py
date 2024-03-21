@@ -389,7 +389,8 @@ MOCK_TEST_METRICS = [
     'istio.galley.istio.authentication.meshpolicies',
 ]
 
-PREVIOUSLY_BLACKLISTED_TAGS = [
+# Tags were previously excluded from agent 7.32.0 to 7.53.0 or check version 3.15.0 to 6.0.0
+PREVIOUSLY_EXCLUDED_TAGS = [
     'response_code:1',
     'reporter:1',
     'source_workload:1',

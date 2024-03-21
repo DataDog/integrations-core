@@ -64,7 +64,7 @@ def test_proxy_exclude_labels(aggregator, dd_run_check, mock_http_response):
         aggregator.assert_metric(metric)
 
     # Edited this test since v2 doesn't exclude connectionID
-    _assert_tags_excluded(aggregator, common.CONFIG_EXCLUDE_LABELS, False)
+    _assert_tags_excluded(aggregator, common.CONFIG_EXCLUDE_LABELS, exclude_connectionid=False)
 
     aggregator.assert_metrics_using_metadata(get_metadata_metrics(), check_submission_type=True)
     aggregator.assert_all_metrics_covered()
@@ -215,5 +215,5 @@ def test_all_labels_submitted(aggregator, dd_run_check, mock_http_response):
     check = Istio(common.CHECK_NAME, {}, [common.MOCK_V2_MESH_INSTANCE])
     dd_run_check(check)
 
-    for tag in common.PREVIOUSLY_BLACKLISTED_TAGS:
+    for tag in common.PREVIOUSLY_EXCLUDED_TAGS:
         aggregator.assert_metric_has_tag('istio.mesh.request.count', tag)

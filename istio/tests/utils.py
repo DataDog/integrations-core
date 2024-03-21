@@ -20,18 +20,18 @@ def get_response(version, filename):
     return response
 
 
-def _assert_tags_excluded(aggregator, addl_blacklist, exclude_connectionid):
+def _assert_tags_excluded(aggregator, addl_exclusion, exclude_connectionid):
     """
     Test excluded labels. ConnectionID is only excluded in the v1 version of the check.
     """
     fail = 0
     if exclude_connectionid:
-        addl_blacklist = BLACKLIST_LABELS + addl_blacklist
+        addl_exclusion = BLACKLIST_LABELS + addl_exclusion
 
     for _, stubs in aggregator._metrics.items():
         for stub in stubs:
             for tag in stub.tags:
-                for excluded_tag in addl_blacklist:
+                for excluded_tag in addl_exclusion:
                     if tag.startswith(excluded_tag + ':'):
                         fail += 1
     assert fail == 0
