@@ -207,10 +207,10 @@ pipeline:
       source: severity
       target: severity_to_status
       lookupTable: |-
-        Info, info
+        Info, debug
         Low, info
         Medium, warning
-        High, warning
+        High, error
         Critical, critical
       type: lookup-processor
     - type: status-remapper
