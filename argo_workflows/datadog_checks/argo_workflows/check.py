@@ -2,8 +2,7 @@
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
 
-from argo_workflows.datadog_checks.argo_workflows.metrics import METRIC_MAP
-
+from datadog_checks.argo_workflows.metrics import METRIC_MAP
 from datadog_checks.base import OpenMetricsBaseCheckV2
 
 
