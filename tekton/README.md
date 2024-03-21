@@ -10,7 +10,7 @@ Follow the instructions below to install and configure this check for an Agent r
 
 ### Installation
 
-Starting from Agent release 7.52.0, the Tekton check is included in the [Datadog Agent][2] package. No additional installation is needed on your server.
+Starting from Agent release 7.53.0, the Tekton check is included in the [Datadog Agent][2] package. No additional installation is needed on your server.
 
 **WARNING**: This check uses [OpenMetrics](https://docs.datadoghq.com/integrations/openmetrics/) to collect metrics from the OpenMetrics endpoint that Tekton exposes, which requires Python 3.
 
