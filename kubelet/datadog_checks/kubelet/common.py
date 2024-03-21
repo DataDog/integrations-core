@@ -16,7 +16,7 @@ except ImportError:
 
     logging.getLogger(__name__).info('Agent does not provide filtering logic, disabling container filtering')
 
-    def c_is_excluded(name, image, namespace=""):
+    def c_is_excluded(annotation, name, image, namespace=""):
         return False
 
 
@@ -182,13 +182,14 @@ class PodListUtils(object):
         """
         return self.container_id_by_name_tuple.get(name_tuple, None)
 
-    def is_excluded(self, cid, pod_uid=None):
+    def is_excluded(self, annotation, cid, pod_uid=None):
         """
         Queries the agent6 container filter interface. It retrieves container
         name + image from the podlist, so static pod filtering is not supported.
 
         Result is cached between calls to avoid the python-go switching cost for
         prometheus metrics (will be called once per metric)
+        :param annotation: pod annotations (used for filtering)
         :param cid: container id
         :param pod_uid: pod UID for static pod detection
         :return: bool
@@ -223,7 +224,7 @@ class PodListUtils(object):
         if image.startswith("sha256:") and len(image) == 71:  # 7 + 64
             image = re.sub(r"^[a-z-]+://", "", ctr.get("imageID"))
 
-        excluded = c_is_excluded(ctr.get("name"), image, self.container_id_to_namespace.get(cid, ""))
+        excluded = c_is_excluded(annotation, ctr.get("name"), image, self.container_id_to_namespace.get(cid, ""))
         self.cache[cid] = excluded
         return excluded
 
@@ -242,7 +243,7 @@ class PodListUtils(object):
 
         # Sent empty container name and image because we are interested in
         # applying only the namespace exclusion rules.
-        excluded = c_is_excluded('', '', namespace)
+        excluded = c_is_excluded('', '', '', namespace)
         self.cache_namespace_exclusion[namespace] = excluded
         return excluded
 
