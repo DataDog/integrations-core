@@ -30,6 +30,7 @@ tests:
       severity: "info"
       timestamp: "2024-02-28T08:15:18.164Z"
     message: "Reconcile succeeded"
+    status: "info"
     tags:
      - "source:LOGS_SOURCE"
     timestamp: 1709108118164
@@ -62,7 +63,7 @@ tests:
       severity: "info"
       timestamp: "2024-02-28T08:15:18.161Z"
     message: "taskrun done : hello-task-run \n"
-    traceId: "f9171cbc-d40e-4bb8-912a-8781b387cd97"
+    status: "info"
     tags:
      - "source:LOGS_SOURCE"
     timestamp: 1709108118161
