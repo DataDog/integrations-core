@@ -1,7 +1,8 @@
 id: "argo_rollouts"
 tests:
  -
-  sample: "time=\"2024-02-20T20:49:32Z\" level=info msg=\"Start processing\" resource=default/rollouts-demo
+  sample: "time=\"2024-02-20T20:49:32Z\" level=info msg=\"Start processing\" resource=default/rollouts-demo"
+  result:
     custom:
       argo_rollouts:
         resource:
@@ -13,7 +14,8 @@ tests:
      - "source:LOGS_SOURCE"
     timestamp: 1708462172000
  -
-  sample: "time=\"2024-02-20T20:49:32Z\" level=info msg=\"Processing completed\" resource=default/rollouts-demo
+  sample: "time=\"2024-02-20T20:49:32Z\" level=info msg=\"Processing completed\" resource=default/rollouts-demo"
+  result:
     custom:
       argo_rollouts:
         resource:
@@ -25,7 +27,8 @@ tests:
      - "source:LOGS_SOURCE"
     timestamp: 1708462172000
  -
-  sample: "time=\"2024-02-20T20:49:32Z\" level=info msg=\"Started syncing rollout\" generation=4 namespace=default resourceVersion=24435167 rollout=rollouts-demo
+  sample: "time=\"2024-02-20T20:49:32Z\" level=info msg=\"Started syncing rollout\" generation=4 namespace=default resourceVersion=24435167 rollout=rollouts-demo"
+  result:
     custom:
       argo_rollouts:
         name: "rollouts-demo"
