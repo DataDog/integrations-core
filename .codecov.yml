@@ -62,6 +62,10 @@ coverage:
         target: 75
         flags:
         - argo_rollouts
+      Argo_Workflows:
+        target: 75
+        flags:
+        - argo_workflows
       Avi_Vantage:
         target: 75
         flags:
@@ -709,6 +713,11 @@ flags:
     paths:
     - argo_rollouts/datadog_checks/argo_rollouts
     - argo_rollouts/tests
+  argo_workflows:
+    carryforward: true
+    paths:
+    - argo_workflows/datadog_checks/argo_workflows
+    - argo_workflows/tests
   argocd:
     carryforward: true
     paths:
