@@ -1,17 +1,17 @@
-id: argo_rollouts
+id: argo-rollouts
 metric_id: argo_rollouts
 backend_only: false
 facets:
-  - name: Argo Rollouts Name
-    source: log
-    path: argo_rollouts.name
-    groups:
-      - Argo Rollouts
   - name: Argo Resource Name
-    source: log
-    path: argo_rollouts.resource.name
     groups:
       - Argo Rollouts
+    path: argo_rollouts.resource.name
+    source: log
+  - name: Argo Rollouts Name
+    groups:
+      - Argo Rollouts
+    path: argo_rollouts.name
+    source: log
 pipeline:
   type: pipeline
   name: Argo Rollouts
