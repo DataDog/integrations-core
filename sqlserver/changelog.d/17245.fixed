@@ -1,0 +1,5 @@
+Refactor SQLServer instance connector and adoprovider initialization from configuration.
+The connector/adoprovider config takes precedence in the following order:
+- instance config
+- init config
+- the default connection/adoprovider
