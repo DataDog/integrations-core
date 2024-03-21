@@ -80,6 +80,7 @@ def test_e2e_profile_dell_powerconnect(dd_agent_check):
         'sys_object_id': '1.3.6.1.4.1.674.10895.3115',
         'vendor': 'dell',
         'version': '6.0',
+        'device_type': 'switch',
     }
     device['tags'] = common_tags
     assert_device_metadata(aggregator, device)

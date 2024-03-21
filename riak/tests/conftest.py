@@ -16,15 +16,12 @@ from . import common
 
 
 def populate():
-    res = requests.post(
+    requests.post(
         "{}/riak/bucket/german".format(common.BASE_URL),
         headers={"Content-Type": "text/plain"},
         data='herzlich willkommen',
     )
-    res.raise_for_status
-
-    res = requests.get("{}/riak/bucket/german".format(common.BASE_URL))
-    res.raise_for_status
+    requests.get("{}/riak/bucket/german".format(common.BASE_URL))
 
 
 @pytest.fixture(scope="session")

@@ -169,6 +169,32 @@ def test_obfuscate_sql_with_metadata(obfuscator_return_value, expected_value):
     assert statement['metadata'] == {}
 
 
+@pytest.mark.parametrize(
+    "input_query,expected_query,replace_null_character",
+    [
+        (
+            "SELECT * FROM randomtable where name = '123\x00'",
+            "SELECT * FROM randomtable where name = '123'",
+            True,
+        ),
+        (
+            "SELECT * FROM randomtable where name = '123\x00'",
+            "SELECT * FROM randomtable where name = '123\x00'",
+            False,
+        ),
+    ],
+)
+def test_obfuscate_sql_with_metadata_replace_null_character(input_query, expected_query, replace_null_character):
+    def _mock_obfuscate_sql(query, options=None):
+        return json.dumps({'query': query, 'metadata': {}})
+
+    # Check that it can handle null characters
+    with mock.patch.object(datadog_agent, 'obfuscate_sql', passthrough=True) as mock_agent:
+        mock_agent.side_effect = _mock_obfuscate_sql
+        statement = obfuscate_sql_with_metadata(input_query, None, replace_null_character=replace_null_character)
+        assert statement['query'] == expected_query
+
+
 class TestJob(DBMAsyncJob):
     def __init__(self, check, run_sync=False, enabled=True, rate_limit=10, min_collection_interval=15):
         super(TestJob, self).__init__(

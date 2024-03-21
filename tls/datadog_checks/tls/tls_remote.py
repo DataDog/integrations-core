@@ -52,9 +52,11 @@ class TLSRemoteCheck(object):
         self.agent_check.check_age(cert)
 
     def _get_cert_and_protocol_version(self, sock):
+        cert = None
+        protocol_version = None
         if sock is None:
             self.log.debug("Could not validate certificate because there is no connection")
-            return None, None
+            return cert, protocol_version
         # Get the cert & TLS version from the connection
         with closing(sock):
             self.log.debug('Getting cert and TLS protocol version')
@@ -64,8 +66,8 @@ class TLSRemoteCheck(object):
                         sock, server_hostname=self.agent_check._server_hostname
                     )
                 ) as secure_sock:
-                    der_cert = secure_sock.getpeercert(binary_form=True)
                     protocol_version = secure_sock.version()
+                    der_cert = secure_sock.getpeercert(binary_form=True)
                     self.log.debug('Received serialized peer certificate and TLS protocol version %s', protocol_version)
             except Exception as e:
                 # https://docs.python.org/3/library/ssl.html#ssl.SSLCertVerificationError
@@ -86,8 +88,8 @@ class TLSRemoteCheck(object):
                         tags=self.agent_check._tags,
                         message='Certificate has expired',
                     )
-
-                return None, None
+                self.log.debug('Returning cert %s and protocol version %s', cert, protocol_version)
+                return cert, protocol_version
 
         # Load https://cryptography.io/en/latest/x509/reference/#cryptography.x509.Certificate
         try:
@@ -103,7 +105,8 @@ class TLSRemoteCheck(object):
                 tags=self.agent_check._tags,
                 message='Unable to parse the certificate: {}'.format(e),
             )
-            return None, None
+            self.log.debug('Returning cert %s and protocol version %s', cert, protocol_version)
+            return cert, protocol_version
 
     def _get_connection(self):
         try:

@@ -6,7 +6,7 @@
   "tags": [
     "integration:sql-server"
   ],
-  "description": "Notify your team when your availability group is not healthy.",
+  "description": "SQL Server provides redundancy among the Availability Groups. This monitor tracks the sync health score of the availability group to indicate if there might be be synchronization issues potentially affecting data consistency and availability.",
   "definition": {
     "message": "Availability group has not been healthy for the last 5 minutes",
     "name": "[SQLServer] Availability Group is not healthy",

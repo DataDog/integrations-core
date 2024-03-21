@@ -26,7 +26,6 @@
     "homepage": "https://www.datadoghq.com",
     "sales_email": "info@datadoghq.com"
   },
-  "oauth": {},
   "assets": {
     "integration": {
       "source_type_name": "ClickHouse",
@@ -43,7 +42,9 @@
       },
       "service_checks": {
         "metadata_path": "assets/service_checks.json"
-      }
+      },
+      "source_type_id": 10078,
+      "auto_install": true
     },
     "dashboards": {
       "ClickHouse Overview": "assets/dashboards/overview.json"

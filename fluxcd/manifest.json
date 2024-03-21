@@ -1,0 +1,62 @@
+{
+  "manifest_version": "2.0.0",
+  "app_uuid": "11cc5047-83aa-44df-b7ca-9c6e1c32b723",
+  "app_id": "fluxcd",
+  "display_on_public_website": true,
+  "tile": {
+    "overview": "README.md#Overview",
+    "configuration": "README.md#Setup",
+    "support": "README.md#Support",
+    "changelog": "CHANGELOG.md",
+    "description": "Fluxcd integration with openmetric v2",
+    "title": "fluxcd",
+    "media": [],
+    "classifier_tags": [
+      "Category::Kubernetes",
+      "Category::Developer Tools",
+      "Supported OS::Linux",
+      "Supported OS::Windows",
+      "Supported OS::macOS"
+    ]
+  },
+  "author": {
+    "support_email": "help@datadoghq.com",
+    "name": "Datadog",
+    "homepage": "https://www.datadoghq.com",
+    "sales_email": "info@datadoghq.com"
+  },
+  "assets": {
+    "integration": {
+      "source_type_name": "fluxcd",
+      "configuration": {
+        "spec": "assets/configuration/spec.yaml"
+      },
+      "events": {
+        "creates_events": false
+      },
+      "metrics": {
+        "prefix": "fluxcd.",
+        "check": "fluxcd.gotk.suspend.status",
+        "metadata_path": "metadata.csv"
+      },
+      "service_checks": {
+        "metadata_path": "assets/service_checks.json"
+      },
+      "process_signatures": [
+        "helm-controller",
+        "kustomize-controller",
+        "notification-controller",
+        "source-controller"
+      ],
+      "source_type_id": 10302,
+      "auto_install": true
+    },
+    "dashboards": {
+      "Fluxcd": "assets/dashboards/fluxcd.json"
+    },
+    "monitors": {
+      "Active Workers": "assets/monitors/active_workers.json",
+      "Error Count": "assets/monitors/error_count.json"
+    }
+  }
+}

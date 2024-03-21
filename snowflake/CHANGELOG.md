@@ -2,6 +2,27 @@
 
 <!-- towncrier release notes start -->
 
+## 5.4.0 / 2024-03-08
+
+***Added***:
+
+* Bump snowflake-connector-python to 3.7.1 ([#17099](https://github.com/DataDog/integrations-core/pull/17099))
+
+## 5.3.0 / 2024-02-16
+
+***Added***:
+
+* Update dependencies ([#16788](https://github.com/DataDog/integrations-core/pull/16788))
+
+## 5.2.0 / 2024-01-05 / Agent 7.51.0
+
+***Added***:
+
+* Bump the Python version from py3.9 to py3.11 ([#15997](https://github.com/DataDog/integrations-core/pull/15997))
+* Added `schema` and `database` tags to snowpipe metrics. ([#16222](https://github.com/DataDog/integrations-core/pull/16222))
+* Bump the snowflake version to 3.5.0 ([#16324](https://github.com/DataDog/integrations-core/pull/16324))
+* Update dependencies ([#16394](https://github.com/DataDog/integrations-core/pull/16394))
+
 ## 5.1.0 / 2023-11-10 / Agent 7.50.0
 
 ***Added***:

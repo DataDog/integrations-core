@@ -1,4 +1,0 @@
-Nvidia Triton supports log collection:
-- Add configuration section for logs.
-- Add documentation section about logs.
-- Add classifier for log collection.

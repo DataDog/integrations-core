@@ -1,31 +1,32 @@
 id: ambari
 metric_id: ambari
+backend_only: false
 facets:
-  - name: Thread Name
-    source: log
-    path: logger.thread_name
-    groups:
+  - groups:
       - Source Code
-  - name: Client IP
+    name: Thread Name
+    path: logger.thread_name
     source: log
-    path: network.client.ip
-    groups:
+  - groups:
       - Web Access
-  - name: User Name
+    name: Client IP
+    path: network.client.ip
     source: log
-    path: usr.name
-    groups:
+  - groups:
       - User
-  - name: Ambari Service
+    name: User Name
+    path: usr.name
     source: log
-    path: ambari.service
-    groups:
+  - groups:
       - Ambari
-  - name: Action
+    name: Ambari Service
+    path: ambari.service
     source: log
-    path: system.action
-    groups:
+  - groups:
       - System
+    name: Action
+    path: system.action
+    source: log
 pipeline:
   type: pipeline
   name: Ambari

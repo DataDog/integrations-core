@@ -23,7 +23,6 @@
     "homepage": "https://www.datadoghq.com",
     "sales_email": "info@datadoghq.com"
   },
-  "oauth": {},
   "assets": {
     "integration": {
       "source_type_name": "GlusterFS",
@@ -41,7 +40,12 @@
       "service_checks": {
         "metadata_path": "assets/service_checks.json"
       },
-      "process_signatures": ["glusterd", "gluster"]
+      "process_signatures": [
+        "glusterd",
+        "gluster"
+      ],
+      "source_type_id": 10145,
+      "auto_install": true
     },
     "dashboards": {
       "Red Hat Gluster Storage": "assets/dashboards/red_hat_gluster_storage.json"

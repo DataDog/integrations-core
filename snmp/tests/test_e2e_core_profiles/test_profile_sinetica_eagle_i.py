@@ -110,6 +110,7 @@ def test_e2e_profile_sinetica_eagle_i(dd_agent_check):
         'status': 1,
         'sys_object_id': '1.3.6.1.4.1.3711.24',
         'vendor': 'sinetica',
+        'device_type': 'other',
     }
     device['tags'] = common_tags
     assert_device_metadata(aggregator, device)

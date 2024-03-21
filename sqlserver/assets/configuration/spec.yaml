@@ -206,6 +206,27 @@ files:
       value:
         type: boolean
         example: true
+    - name: include_index_usage_metrics_tempdb
+      description: |
+        Configure the collection of user table index usage statistics in tempdb database from the
+        `sys.dm_db_index_usage_stats` DMV.
+
+        By default, we do not collect index usage statistics in the tempdb database, as those queries
+        might cause blocking. This configuration parameter allows enabling the collection of this metric.
+        This parameter is ignored if 'include_index_usage_metrics' is set to false.
+      value:
+        type: boolean
+        example: false
+    - name: index_usage_metrics_interval
+      description: |
+        Configure the interval (in seconds) for the collection of index usage statistics from the 
+        `sys.dm_db_index_usage_stats` DMV. 
+        Defaults to 300 seconds (5 minutes). If you intend on updating this value, it is strongly recommended
+        to use a consistent value throughout all SQL Server agent deployments. 
+      value:
+        type: integer
+        example: 300
+        display_default: 300
     - name: db_fragmentation_object_names
       description: |
         Fragmentation metrics normally emit metrics for all objects within a database.

@@ -161,12 +161,18 @@ def instance_e2e():
 
 @pytest.fixture
 def instance_remote_ok_ip():
-    return {'server': '1.1.1.1', 'tls_validate_hostname': False}
+    return {'server': '1.1.1.1', 'tls_validate_hostname': False, 'days_warning': 1, 'days_critical': 1}
 
 
 @pytest.fixture
 def instance_remote_ok_udp():
-    return {'server': '1.1.1.1', 'transport': 'udp', 'tls_validate_hostname': False}
+    return {
+        'server': '1.1.1.1',
+        'transport': 'udp',
+        'tls_validate_hostname': False,
+        'days_warning': 1,
+        'days_critical': 1,
+    }
 
 
 @pytest.fixture

@@ -64,6 +64,8 @@ metadata:
           OID: 1.3.6.1.4.1.14823.2.2.1.2.1.28.0
           name: wlsxSysExtSwVersion
           # Examples: `8.6.0.4`
+      type:
+        value: "switch"
 
 metrics:
   ### Sensor

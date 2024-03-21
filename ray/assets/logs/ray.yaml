@@ -1,45 +1,46 @@
 id: ray
+backend_only: false
 facets:
-  - name: Thread Name
-    source: log
-    path: logger.thread_name
-    groups:
+  - groups:
       - Source Code
-  - name: Client IP
+    name: Thread Name
+    path: logger.thread_name
     source: log
+  - groups:
+      - Web Access
+    name: Client IP
     path: network.client.ip
-    groups:
-      - Web Access
-  - name: Client Port
     source: log
+  - groups:
+      - Web Access
+    name: Client Port
     path: network.client.port
-    groups:
-      - Web Access
-  - name: Component name
     source: log
+  - groups:
+      - Ray
+    name: Component name
     path: ray.component.name
-    groups:
-      - Ray
-  - name: Redis PID
     source: log
-    path: pid
-    groups:
+  - groups:
       - Database
-  - name: Worker token
+    name: Redis PID
+    path: pid
     source: log
+  - groups:
+      - Ray
+    name: Worker token
     path: ray.worker.token
-    groups:
-      - Ray
-  - name: Worker Process ID
     source: log
+  - groups:
+      - Ray
+    name: Worker Process ID
     path: ray.worker.pid
-    groups:
-      - Ray
-  - name: Server name
     source: log
-    path: ray.server.name
-    groups:
+  - groups:
       - Ray
+    name: Server name
+    path: ray.server.name
+    source: log
 pipeline:
   type: pipeline
   name: Ray

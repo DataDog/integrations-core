@@ -3,6 +3,7 @@
 # Licensed under a 3-clause BSD style license (see LICENSE)
 
 
+import copy
 import logging
 import os
 from importlib.metadata import metadata
@@ -1855,6 +1856,170 @@ def test_servers_metrics(aggregator, check, dd_run_check, metrics):
             tags=metric.get('tags'),
             hostname=metric.get('hostname'),
         )
+
+
+@pytest.mark.parametrize(
+    ('instance', 'metrics', 'paginated_limit', 'api_type', 'expected_api_calls_proj1', 'expected_api_calls_proj2'),
+    [
+        pytest.param(
+            configs.REST,
+            metrics.COMPUTE_SERVERS_NOVA_MICROVERSION_DEFAULT,
+            3,
+            ApiType.REST,
+            3,
+            1,
+            id='api rest small limit',
+        ),
+        pytest.param(
+            configs.REST,
+            metrics.COMPUTE_SERVERS_NOVA_MICROVERSION_DEFAULT,
+            1000,
+            ApiType.REST,
+            1,
+            1,
+            id='api rest high limit',
+        ),
+        pytest.param(
+            configs.REST_NOVA_MICROVERSION_2_93,
+            metrics.COMPUTE_SERVERS_NOVA_MICROVERSION_2_93,
+            3,
+            ApiType.REST,
+            3,
+            1,
+            id='api rest microversion 2.93',
+        ),
+        pytest.param(
+            configs.SDK,
+            metrics.COMPUTE_SERVERS_NOVA_MICROVERSION_DEFAULT,
+            3,
+            ApiType.SDK,
+            1,
+            1,
+            id='api sdk no microversion',
+        ),
+        pytest.param(
+            configs.SDK,
+            metrics.COMPUTE_SERVERS_NOVA_MICROVERSION_DEFAULT,
+            1000,
+            ApiType.SDK,
+            1,
+            1,
+            id='api sdk high limit',
+        ),
+        pytest.param(
+            configs.SDK_NOVA_MICROVERSION_2_93,
+            metrics.COMPUTE_SERVERS_NOVA_MICROVERSION_2_93,
+            3,
+            ApiType.SDK,
+            1,
+            1,
+            id='api sdk microversion 2.93',
+        ),
+    ],
+)
+@pytest.mark.usefixtures('mock_http_get', 'mock_http_post', 'openstack_connection')
+def test_servers_pagination(
+    aggregator,
+    instance,
+    metrics,
+    openstack_controller_check,
+    paginated_limit,
+    expected_api_calls_proj1,
+    expected_api_calls_proj2,
+    api_type,
+    dd_run_check,
+    mock_http_get,
+    connection_compute,
+):
+    paginated_instance = copy.deepcopy(instance)
+    paginated_instance['paginated_limit'] = paginated_limit
+    dd_run_check(openstack_controller_check(paginated_instance))
+    for metric in metrics:
+        aggregator.assert_metric(
+            metric['name'],
+            count=metric.get('count'),
+            value=metric.get('value'),
+            tags=metric.get('tags'),
+            hostname=metric.get('hostname'),
+        )
+
+    if api_type == ApiType.REST:
+        args_list = []
+        for call in mock_http_get.call_args_list:
+            args, kwargs = call
+            params = kwargs.get('params', {})
+            project_id = params.get('project_id')
+            limit = params.get('limit')
+            args_list += [(args[0], project_id, limit)]
+        servers_url = 'http://127.0.0.1:8774/compute/v2.1/servers/detail'
+        assert (
+            args_list.count((servers_url, '1e6e233e637d4d55a50a62b63398ad15', paginated_limit))
+            == expected_api_calls_proj1
+        )
+        assert (
+            args_list.count((servers_url, '6e39099cccde4f809b003d9e0dd09304', paginated_limit))
+            == expected_api_calls_proj2
+        )
+
+    if api_type == ApiType.SDK:
+        assert (
+            connection_compute.servers.call_args_list.count(
+                mock.call(project_id='6e39099cccde4f809b003d9e0dd09304', details=True, limit=paginated_limit)
+            )
+            == expected_api_calls_proj1
+        )
+        assert (
+            connection_compute.servers.call_args_list.count(
+                mock.call(project_id='1e6e233e637d4d55a50a62b63398ad15', details=True, limit=paginated_limit)
+            )
+            == expected_api_calls_proj2
+        )
+
+
+@pytest.mark.parametrize(
+    ('mock_http_get', 'paginated_limit'),
+    [
+        pytest.param(
+            {
+                'mock_data': {
+                    '/compute/v2.1/servers/detail': {"servers": []},
+                }
+            },
+            1,
+            id='api empty servers',
+        ),
+        pytest.param(
+            {
+                'mock_data': {
+                    '/compute/v2.1/servers/detail': {"servers": [{"test": "attr"}], "servers_links": [{"rel": "next"}]},
+                }
+            },
+            1,
+            id='api one invalid server',
+        ),
+        pytest.param(
+            {
+                'mock_data': {
+                    '/compute/v2.1/servers/detail': {
+                        "servers": [{"test": "attr", "id": "test"}],
+                        "servers_links": [{"rel": "test"}],
+                    },
+                }
+            },
+            1,
+            id='api one invalid server link',
+        ),
+    ],
+    indirect=['mock_http_get'],
+)
+@pytest.mark.usefixtures('mock_http_get', 'mock_http_post', 'openstack_connection')
+def test_pagination_invalid_no_exception(aggregator, openstack_controller_check, dd_run_check, paginated_limit):
+    paginated_instance = copy.deepcopy(configs.REST)
+    paginated_instance['paginated_limit'] = paginated_limit
+    check = openstack_controller_check(paginated_instance)
+    dd_run_check(check)
+    for metric in metrics.NOVA_SERVER_DETAILS_METRICS:
+        aggregator.assert_metric(metric, count=0)
 
 
 @pytest.mark.parametrize(

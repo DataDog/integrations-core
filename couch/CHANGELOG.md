@@ -2,6 +2,19 @@
 
 <!-- towncrier release notes start -->
 
+## 6.2.0 / 2024-02-16
+
+***Added***:
+
+* Added the `enable_per_db_metrics` flag, to allow the gathering of these metrics to be disabled ([#16641](https://github.com/DataDog/integrations-core/pull/16641))
+* Update the configuration file to include the new oauth options parameter ([#16835](https://github.com/DataDog/integrations-core/pull/16835))
+
+## 6.1.0 / 2024-01-05 / Agent 7.51.0
+
+***Added***:
+
+* Bump the Python version from py3.9 to py3.11 ([#15997](https://github.com/DataDog/integrations-core/pull/15997))
+
 ## 6.0.0 / 2023-08-10 / Agent 7.48.0
 
 ***Changed***:

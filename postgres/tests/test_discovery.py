@@ -53,6 +53,24 @@ DYNAMIC_RELATION_METRICS = {
     'postgresql.total_size',
 }
 
+FUNCTION_METRICS = {
+    'postgresql.function.calls',
+    'postgresql.function.total_time',
+    'postgresql.function.self_time',
+}
+
+COUNT_METRICS = {
+    'postgresql.table.count',
+}
+
+
+@contextmanager
+def get_postgres_connection(dbname="postgres"):
+    conn_args = {'host': HOST, 'dbname': dbname, 'user': USER_ADMIN, 'password': PASSWORD_ADMIN}
+    conn = psycopg2.connect(**conn_args)
+    conn.autocommit = True
+    yield conn
+
 
 @pytest.mark.integration
 @pytest.mark.usefixtures('dd_environment')
@@ -111,13 +129,6 @@ def test_autodiscovery_refresh(integration_check, pg_instance):
     """
     database_to_find = "cats"
 
-    @contextmanager
-    def get_postgres_connection():
-        conn_args = {'host': HOST, 'dbname': "postgres", 'user': USER_ADMIN, 'password': PASSWORD_ADMIN}
-        conn = psycopg2.connect(**conn_args)
-        conn.autocommit = True
-        yield conn
-
     pg_instance["database_autodiscovery"] = copy.deepcopy(DISCOVERY_CONFIG)
     pg_instance['database_autodiscovery']['include'].append(database_to_find)
     pg_instance['relations'] = ['pg_index']
@@ -163,28 +174,48 @@ def test_autodiscovery_relations_disabled(integration_check, pg_instance):
 
 @pytest.mark.integration
 @pytest.mark.usefixtures('dd_environment')
-def test_autodiscovery_collect_all_relations(aggregator, integration_check, pg_instance):
+def test_autodiscovery_collect_all_metrics(aggregator, integration_check, pg_instance):
     """
-    Check that relation metrics get collected for each database discovered.
+    Check that metrics get collected for each database discovered.
     """
     pg_instance["database_autodiscovery"] = copy.deepcopy(DISCOVERY_CONFIG)
     pg_instance["database_autodiscovery"]["include"] = ["dogs$", "dogs_noschema$", "dogs_nofunc$"]
     pg_instance['relations'] = [
         {'relation_regex': '.*'},
     ]
+    pg_instance['collect_function_metrics'] = True
+    pg_instance['collect_count_metrics'] = True
     del pg_instance['dbname']
+
+    # execute dummy_function to populate pg_stat_user_functions for dogs_nofunc database
+    # it does not make sense to create and execute the dummy_function for every single database
+    with get_postgres_connection(dbname='dogs_nofunc') as conn:
+        with conn.cursor() as cursor:
+            cursor.execute("SELECT dummy_function()")
+    conn.close()
 
     check = integration_check(pg_instance)
     check.check(pg_instance)
 
-    # assert that for all databases found, a relation metric was reported
+    # assert that for all databases found,
+    # relation/function/count metrics were reported
     databases = check.autodiscovery.get_items()
     for db in databases:
-        expected_tags = _get_expected_tags(check, pg_instance, db=db, table='breed', schema='public')
+        relation_metrics_expected_tags = _get_expected_tags(check, pg_instance, db=db, table='breed', schema='public')
+        count_metrics_expected_tags = _get_expected_tags(check, pg_instance, db=db, schema='public')
         for metric in RELATION_METRICS:
-            aggregator.assert_metric(metric, tags=expected_tags)
+            aggregator.assert_metric(metric, tags=relation_metrics_expected_tags)
         for metric in DYNAMIC_RELATION_METRICS:
-            aggregator.assert_metric(metric, tags=expected_tags)
+            aggregator.assert_metric(metric, tags=relation_metrics_expected_tags)
+        for metric in COUNT_METRICS:
+            aggregator.assert_metric(metric, tags=count_metrics_expected_tags)
+
+    # we only created and executed the dummy_function in dogs_nofunc database
+    for metric in FUNCTION_METRICS:
+        aggregator.assert_metric(
+            metric,
+            tags=_get_expected_tags(check, pg_instance, db='dogs_nofunc', schema='public', function='dummy_function'),
+        )
 
     aggregator.assert_metric(
         'dd.postgres._collect_relations_autodiscovery.time',

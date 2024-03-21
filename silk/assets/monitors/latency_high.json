@@ -2,11 +2,11 @@
   "version": 2,
   "created_at": "2022-02-17",
   "last_updated_at": "2022-02-17",
-  "title": "Latency is high on host {{silk_host.name}}",
+  "title": "Latency is high",
   "tags": [
     "integration:silk"
   ],
-  "description": "Get notified when Silk latency is high.",
+  "description": "Silk intelligently offloads tasks from the network layer to the compute layer, resulting in significant and consistent reductions in latency for maximum application responsiveness. This monitor tracks the inner latency of each host to identify slowness.",
   "definition": {
     "message": "{{#is_warning}}Latency is over 100ms on host {{silk_host.name}}{{/is_warning}} \\n\n{{#is_alert}}Latency is over 150ms on host {{silk_host.name}}{{/is_alert}}\\n\\n\n{{#is_recovery}}Latency is less than 100ms on host {{silk_host.name}}{{/is_recovery}}",
     "name": "[Silk] Latency is high on host {{silk_host.name}}",

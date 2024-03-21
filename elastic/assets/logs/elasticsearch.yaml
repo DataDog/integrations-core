@@ -1,36 +1,37 @@
 id: elasticsearch
 metric_id: elasticsearch
+backend_only: false
 facets:
-  - name: Duration
-    source: log
+  - facetType: range
+    groups:
+      - Measure
+    name: Duration
     path: duration
+    source: log
     type: double
-    facetType: range
     unit:
       family: time
       name: nanosecond
-    groups:
-      - Measure
-  - name: Logger Name
-    source: log
-    path: logger.name
-    groups:
+  - groups:
       - Source Code
-  - name: Index
+    name: Logger Name
+    path: logger.name
     source: log
+  - groups:
+      - Elasticsearch
+    name: Index
     path: elasticsearch.index
-    groups:
-      - Elasticsearch
-  - name: Shard
     source: log
+  - groups:
+      - Elasticsearch
+    name: Shard
     path: elasticsearch.shard
-    groups:
-      - Elasticsearch
-  - name: Operation
     source: log
-    path: elasticsearch.operation
-    groups:
+  - groups:
       - Elasticsearch
+    name: Operation
+    path: elasticsearch.operation
+    source: log
 pipeline:
   type: pipeline
   name: Elasticsearch

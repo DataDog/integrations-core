@@ -17,7 +17,6 @@ if TYPE_CHECKING:
 def manifest(ctx: click.Context, integrations: tuple[str, ...]):
     """Validate integration manifests."""
     import httpx
-    from datadog_checks.dev.tooling.commands.validate.manifest import manifest as legacy_manifest_validation
 
     app: Application = ctx.obj
     validation_tracker = app.create_validation_tracker('Manifests')
@@ -47,5 +46,4 @@ def manifest(ctx: click.Context, integrations: tuple[str, ...]):
         validation_tracker.display()
         app.abort()
 
-    ctx.invoke(legacy_manifest_validation, check=integrations[0] if integrations else None, ignore_schema=True)
     validation_tracker.display()

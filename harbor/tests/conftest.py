@@ -8,8 +8,8 @@ import pytest
 import requests
 from mock import patch
 
-from datadog_checks.dev import LazyFunction, docker_run
-from datadog_checks.dev.conditions import CheckDockerLogs
+from datadog_checks.dev import docker_run
+from datadog_checks.dev.conditions import CheckDockerLogs, WaitFor
 from datadog_checks.dev.http import MockResponse
 from datadog_checks.harbor import HarborCheck
 from datadog_checks.harbor.api import HarborAPI
@@ -36,7 +36,7 @@ from .common import (
     REGISTRIES_FIXTURE,
     SYSTEM_INFO_FIXTURE,
     URL,
-    USERS_URL,
+    USERS_PATH,
     VERSION_2_2,
     VOLUME_INFO_FIXTURE,
     VOLUME_INFO_PRE_2_2_FIXTURE,
@@ -50,25 +50,24 @@ def dd_environment(e2e_instance):
     conditions = [
         CheckDockerLogs(compose_file, expected_log, wait=3),
         lambda: time.sleep(4),
-        CreateSimpleUser(),
+        WaitFor(create_simple_user),
     ]
-    with docker_run(compose_file, conditions=conditions, attempts=3):
+    with docker_run(compose_file, conditions=conditions, attempts=5):
         yield e2e_instance
 
 
-class CreateSimpleUser(LazyFunction):
-    def __call__(self, *args, **kwargs):
-        requests.post(
-            URL + USERS_URL,
-            auth=("admin", "Harbor12345"),
-            json={
-                "username": "NotAnAdmin",
-                "email": "NotAnAdmin@goharbor.io",
-                "password": "Str0ngPassw0rd",
-                "realname": "Not An Admin",
-            },
-            verify=False,
-        )
+def create_simple_user():
+    requests.post(
+        URL + USERS_PATH,
+        auth=("admin", "Harbor12345"),
+        json={
+            "username": "NotAnAdmin",
+            "email": "NotAnAdmin@goharbor.io",
+            "password": "Str0ngPassw0rd",
+            "realname": "Not An Admin",
+        },
+        verify=False,
+    )
 
 
 @pytest.fixture(scope='session')

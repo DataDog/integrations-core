@@ -11,6 +11,7 @@ concurrency:
 jobs:
   run:
     uses: ./.github/workflows/pr-quick-check.yml
+    if: ${{ github.base_ref == 'master' }}
     with:
       repo: core
     secrets: inherit

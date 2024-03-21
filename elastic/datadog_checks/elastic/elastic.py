@@ -533,7 +533,7 @@ class ESCheck(AgentCheck):
         path = '{}.{}'.format(data_path, value_path)
 
         # Collect the value of tags first, and then append to tags_to_submit
-        for (dynamic_tag_path, dynamic_tag_name) in dynamic_tags:
+        for dynamic_tag_path, dynamic_tag_name in dynamic_tags:
             # Traverse down the tree to find the tag value
             dynamic_tag_value = get_value_from_path(value, dynamic_tag_path)
 

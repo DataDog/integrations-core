@@ -1,0 +1,39 @@
+name: Backport PR
+on:
+  pull_request_target:
+    types:
+      - closed
+      - labeled
+
+jobs:
+  backport:
+    name: Backport PR
+    runs-on: ubuntu-latest
+    if: >
+      github.event.pull_request.merged
+      && (
+        github.event.action == 'closed'
+        || (
+          github.event.action == 'labeled'
+          && contains(github.event.label.name, 'backport')
+        )
+      )
+    steps:
+      - name: Create token
+        uses: actions/create-github-app-token@v1
+        id: token-generator
+        with:
+          app-id: ${{ secrets.DD_AGENT_INTEGRATIONS_BOT_APP_ID }}
+          private-key: ${{ secrets.DD_AGENT_INTEGRATIONS_BOT_PRIVATE_KEY }}
+          repositories: integrations-core
+      - uses: tibdex/backport@v2
+        with:
+          label_pattern: "^backport/(?<base>([^ ]+))$"
+          labels_template: "[\"backport\", \"bot\"]"
+          body_template: |
+            Backport <%= mergeCommitSha %> from #<%= number %>.
+
+            ___
+
+            <%= body %>
+          github_token: ${{ steps.token-generator.outputs.token }}

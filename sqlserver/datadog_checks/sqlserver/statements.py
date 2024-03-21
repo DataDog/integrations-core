@@ -193,7 +193,7 @@ def obfuscate_xml_plan(raw_plan, obfuscator_options=None):
         for k in XML_PLAN_OBFUSCATION_ATTRS:
             val = e.attrib.get(k, None)
             if val:
-                statement = obfuscate_sql_with_metadata(val, obfuscator_options)
+                statement = obfuscate_sql_with_metadata(val, obfuscator_options, replace_null_character=True)
                 e.attrib[k] = ensure_unicode(statement['query'])
     return to_native_string(ET.tostring(tree, encoding="UTF-8"))
 
@@ -308,19 +308,17 @@ class SqlserverStatementMetrics(DBMAsyncJob):
         normalized_rows = []
 
         for row in rows:
+            # Attempt to obfuscate SQL statement with metadata
+            procedure_statement = None
             try:
-                # Attempt to obfuscate SQL statement with metadata
-                procedure_statement = None
-                statement = obfuscate_sql_with_metadata(row['statement_text'], self._config.obfuscator_options)
+                statement = obfuscate_sql_with_metadata(
+                    row['statement_text'], self._config.obfuscator_options, replace_null_character=True
+                )
                 comments, row['is_proc'], procedure_name = extract_sql_comments_and_procedure_name(row['text'])
-
-                if row['is_proc']:
-                    procedure_statement = obfuscate_sql_with_metadata(row['text'], self._config.obfuscator_options)
 
             except Exception as e:
                 if self._config.log_unobfuscated_queries:
-                    raw_query_text = row['text'] if row.get('is_proc', False) else row['statement_text']
-                    self.log.warning("Failed to obfuscate query=[%s] | err=[%s]", raw_query_text, e)
+                    self.log.warning("Failed to obfuscate query=[%s] | err=[%s]", repr(row['statement_text']), e)
                 else:
                     self.log.debug("Failed to obfuscate query | err=[%s]", e)
                 self._check.count(
@@ -328,20 +326,53 @@ class SqlserverStatementMetrics(DBMAsyncJob):
                     1,
                     **self._check.debug_stats_kwargs(tags=["error:obfuscate-query-{}".format(type(e))])
                 )
+                # If we can't obfuscate the query, give up.
                 continue
 
             # Extract obfuscated statement and update row fields
             obfuscated_statement = statement['query']
-            row['dd_comments'] = comments
+            query_signature = compute_sql_signature(obfuscated_statement)
 
-            if procedure_statement:
-                row['procedure_text'] = procedure_statement['query']
-                row['procedure_signature'] = compute_sql_signature(procedure_statement['query'])
+            procedure_signature = None
+            procedure_content = None
+            if row['is_proc']:
+                try:
+                    procedure_statement = obfuscate_sql_with_metadata(
+                        row['text'], self._config.obfuscator_options, replace_null_character=True
+                    )
+                    procedure_content = procedure_statement['query']
+                    procedure_signature = compute_sql_signature(procedure_statement['query'])
+                except Exception as e:
+                    procedure_signature = '__procedure_obfuscation_error__'
+                    procedure_content = '__procedure_obfuscation_error__'
+                    if self._config.log_unobfuscated_queries:
+                        self.log.warning("Failed to obfuscate stored procedure=[%s] | err=[%s]", repr(row['text']), e)
+                    else:
+                        self.log.debug(
+                            "Failed to obfuscate stored procedure for query_signature=[%s] | err=[%s]",
+                            query_signature,
+                            e,
+                        )
+                    self._check.count(
+                        "dd.sqlserver.statements.error",
+                        1,
+                        **self._check.debug_stats_kwargs(tags=["error:obfuscate-sproc-{}".format(type(e))])
+                    )
+                    # If we can't obfuscate the stored procedure, we don't need to give up for this row,
+                    # we just won't have the association with the stored procedure in the metrics payload
+
+            if procedure_content:
+                row['procedure_text'] = procedure_content
+
+            if procedure_signature:
+                row['procedure_signature'] = procedure_signature
+
             if procedure_name:
                 row['procedure_name'] = procedure_name
 
+            row['dd_comments'] = comments
             row['text'] = obfuscated_statement
-            row['query_signature'] = compute_sql_signature(obfuscated_statement)
+            row['query_signature'] = query_signature
             row['query_hash'] = _hash_to_hex(row['query_hash'])
             row['query_plan_hash'] = _hash_to_hex(row['query_plan_hash'])
             row['plan_handle'] = _hash_to_hex(row['plan_handle'])
@@ -458,6 +489,7 @@ class SqlserverStatementMetrics(DBMAsyncJob):
                     "metadata": {
                         "tables": row['dd_tables'],
                         "commands": row['dd_commands'],
+                        "comments": row.get('dd_comments', None),
                     },
                 },
                 'sqlserver': {

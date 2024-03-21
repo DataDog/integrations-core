@@ -21,6 +21,11 @@ sysobjectid:
   - 1.3.6.1.4.1.9.1.2774           # Cisco FPR 4115 SM24
   - 1.3.6.1.4.1.9.1.2775           # Cisco FPR 4125 SM32
   - 1.3.6.1.4.1.9.1.2776           # Cisco FPR 4145 SM44
+metadata:
+  device:
+    fields:
+      type:
+        value: "firewall"
 metrics:
   - MIB: CISCO-PROCESS-MIB
     table:

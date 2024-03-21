@@ -11,7 +11,7 @@ HARBOR_COMPONENTS = ['chartmuseum', 'registry', 'redis', 'jobservice', 'registry
 
 HARBOR_VERSION = [int(i) for i in os.environ['HARBOR_VERSION'].split('.')]
 
-USERS_URL = '/api/users/' if HARBOR_VERSION < VERSION_2_2 else '/api/v2.0/users/'
+USERS_PATH = '/api/users/' if HARBOR_VERSION < VERSION_2_2 else '/api/v2.0/users/'
 
 HARBOR_METRICS = [
     # Metric_name, requires admin privileges
@@ -23,8 +23,8 @@ HARBOR_METRICS = [
 
 HERE = os.path.dirname(os.path.abspath(__file__))
 URL = 'http://{}'.format(get_docker_hostname())
-INSTANCE = {'url': URL, 'username': 'NotAnAdmin', 'password': 'Str0ngPassw0rd'}
-ADMIN_INSTANCE = {'url': URL, 'username': 'admin', 'password': 'Harbor12345'}
+INSTANCE = {'url': URL, 'username': 'NotAnAdmin', 'password': 'Str0ngPassw0rd', 'tags': ['environment:test']}
+ADMIN_INSTANCE = {'url': URL, 'username': 'admin', 'password': 'Harbor12345', 'tags': ['environment:test']}
 
 HEALTH_FIXTURE = {
     "status": "healthy",

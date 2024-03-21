@@ -1,80 +1,81 @@
 id: azure.iot_edge
 metric_id: azure-iot-edge
+backend_only: false
 facets:
-  - name: Duration
-    source: log
+  - facetType: range
+    groups:
+      - Measure
+    name: Duration
     path: duration
+    source: log
     type: double
-    facetType: range
     unit:
       family: time
       name: nanosecond
-    groups:
-      - Measure
-  - name: Method
-    source: log
+  - groups:
+      - Web Access
+    name: Method
     path: http.method
-    groups:
-      - Web Access
-  - name: Status Code
     source: log
+  - groups:
+      - Web Access
+    name: Status Code
     path: http.status_code
-    groups:
-      - Web Access
-  - name: URL Host
     source: log
+  - groups:
+      - Web Access
+    name: URL Host
     path: http.url_details.host
-    groups:
-      - Web Access
-  - name: URL Path
     source: log
+  - groups:
+      - Web Access
+    name: URL Path
     path: http.url_details.path
-    groups:
-      - Web Access
-  - name: URL Port
     source: log
+  - groups:
+      - Web Access
+    name: URL Port
     path: http.url_details.port
-    groups:
-      - Web Access
-  - name: URL scheme
     source: log
+  - groups:
+      - Web Access
+    name: URL scheme
     path: http.url_details.scheme
-    groups:
-      - Web Access
-  - name: Logger Name
     source: log
-    path: logger.name
-    groups:
+  - groups:
       - Source Code
-  - name: User ID
+    name: Logger Name
+    path: logger.name
     source: log
-    path: usr.id
-    groups:
+  - groups:
       - User
-  - name: Resource ID
+    name: User ID
+    path: usr.id
     source: log
+  - groups:
+      - Azure
+    name: Resource ID
     path: resourceId
-    type: string
-    groups:
-      - Azure
-  - name: Resource Name
     source: log
+    type: string
+  - groups:
+      - Azure
+    name: Resource Name
     path: resource_name
+    source: log
     type: string
-    groups:
+  - groups:
       - Azure
-  - name: Subscription ID
-    source: tag
+    name: Subscription ID
     path: subscription_id
-    type: string
-    groups:
-      - Azure
-  - name: Resource Group
     source: tag
-    path: resource_group
     type: string
-    groups:
+  - groups:
       - Azure
+    name: Resource Group
+    path: resource_group
+    source: tag
+    type: string
 pipeline:
   type: pipeline
   name: Azure IoT Edge

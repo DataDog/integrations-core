@@ -54,6 +54,7 @@ def ci(app: Application, sync: bool):
     from ddev.utils.scripts.ci_matrix import construct_job_matrix, get_all_targets
 
     is_core = app.repo.name == 'core'
+    is_marketplace = app.repo.name == 'marketplace'
     test_workflow = (
         './.github/workflows/test-target.yml'
         if app.repo.name == 'core'
@@ -82,13 +83,14 @@ def ci(app: Application, sync: bool):
             'test-py2': '2' in python_restriction if python_restriction else '${{ inputs.test-py2 }}',
             'test-py3': '3' in python_restriction if python_restriction else '${{ inputs.test-py3 }}',
         }
-        if is_core:
+        if is_core or is_marketplace:
             config.update(
                 {
                     'minimum-base-package': '${{ inputs.minimum-base-package }}',
                 }
             )
-        else:
+
+        if not is_core:
             config.update(
                 {
                     'setup-env-vars': '${{ inputs.setup-env-vars }}',

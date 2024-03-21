@@ -3,6 +3,7 @@ Running this script by itself requires Python 3.11 or later and must not use any
 
 The logic is also imported by ddev to perform the CI validation on 3.8 which works because dependencies exist.
 """
+
 # (C) Datadog, Inc. 2023-present
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
@@ -223,7 +224,7 @@ def construct_job_matrix(root: Path, targets: list[str]) -> list[dict[str, Any]]
 
             if target in display_overrides:
                 config['name'] = display_overrides[target]
-            elif manifest:
+            elif manifest and 'integration' in manifest.get('assets', {}):
                 config['name'] = manifest['assets']['integration']['source_type_name']
             else:
                 config['name'] = target

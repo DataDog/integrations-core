@@ -1,0 +1,1343 @@
+{
+    "title": "Zeek - DNS",
+    "description": "-   This dashboard gives insights into DNS activities.",
+    "widgets": [
+        {
+            "id": 5160038899390256,
+            "definition": {
+                "type": "image",
+                "url": "https://i0.wp.com/zeek.org/wp-content/uploads/2019/09/logo.png?fit=275%2C91&ssl=1",
+                "sizing": "scale-down",
+                "has_background": true,
+                "has_border": false,
+                "vertical_align": "center",
+                "horizontal_align": "center"
+            },
+            "layout": {
+                "x": 0,
+                "y": 0,
+                "width": 4,
+                "height": 2
+            }
+        },
+        {
+            "id": 7600747351294194,
+            "definition": {
+                "type": "note",
+                "content": "## Overview\n- This dashboard gives insights into DNS activities.",
+                "background_color": "white",
+                "font_size": "14",
+                "text_align": "left",
+                "vertical_align": "top",
+                "show_tick": false,
+                "tick_pos": "50%",
+                "tick_edge": "left",
+                "has_padding": true
+            },
+            "layout": {
+                "x": 4,
+                "y": 0,
+                "width": 4,
+                "height": 2
+            }
+        },
+        {
+            "id": 3629616868480862,
+            "definition": {
+                "type": "note",
+                "content": "## Widgets\n1. Total DNS Requests\n2. Timeline by DNS Request\n3. Total DNS Responses\n4. Timeline by DNS Response\n5. DNS Requests by Client IP, Client Port\n6. Top 10 Transport Layer Protocols of Connection\n7. Top 10 DNS Query Types\n8. Rejected DNS Requests by Client IP, Client Port\n9. Top 10 DNS Response Codes\n10. Top 10 DNS Queried Domain\n11. Top 10 Rejected DNS Requests by Domain Name\n12. Rejected DNS Requests by Region\n13. DNS Log Details\n14. Top 10 Responder IPs\n15. Encrypted DNS Log Details\n16. Total Generic DNS Tunnels Logs\n17. Total Bytes Sent Over DNS Tunnel\n18. Top 10 DNS Tunnelling Domains\n19. Bytes Sent Over DNS Tunneling by Clients\n20. Generic DNS Tunnels Log Details",
+                "background_color": "white",
+                "font_size": "14",
+                "text_align": "left",
+                "vertical_align": "top",
+                "show_tick": false,
+                "tick_pos": "50%",
+                "tick_edge": "left",
+                "has_padding": true
+            },
+            "layout": {
+                "x": 8,
+                "y": 0,
+                "width": 4,
+                "height": 2
+            }
+        },
+        {
+            "id": 3088214791163396,
+            "definition": {
+                "title": "DNS",
+                "background_color": "vivid_purple",
+                "show_title": true,
+                "type": "group",
+                "layout_type": "ordered",
+                "widgets": [
+                    {
+                        "id": 2601099924789768,
+                        "definition": {
+                            "title": "Total DNS Requests",
+                            "title_size": "16",
+                            "title_align": "left",
+                            "type": "query_value",
+                            "requests": [
+                                {
+                                    "response_format": "scalar",
+                                    "queries": [
+                                        {
+                                            "data_source": "logs",
+                                            "name": "query1",
+                                            "indexes": [
+                                                "*"
+                                            ],
+                                            "compute": {
+                                                "aggregation": "count"
+                                            },
+                                            "group_by": [],
+                                            "search": {
+                                                "query": "source:zeek service:(dns OR dns_red) -@rcode:* $Host $Client-IP $Client-Port $Destination-IP $Destination-Port"
+                                            },
+                                            "storage": "hot"
+                                        }
+                                    ],
+                                    "formulas": [
+                                        {
+                                            "formula": "query1"
+                                        }
+                                    ]
+                                }
+                            ],
+                            "autoscale": true,
+                            "precision": 2,
+                            "timeseries_background": {
+                                "type": "area"
+                            }
+                        },
+                        "layout": {
+                            "x": 0,
+                            "y": 0,
+                            "width": 3,
+                            "height": 3
+                        }
+                    },
+                    {
+                        "id": 4709205802728564,
+                        "definition": {
+                            "title": "Timeline by DNS Request",
+                            "title_size": "16",
+                            "title_align": "left",
+                            "show_legend": true,
+                            "legend_layout": "auto",
+                            "legend_columns": [
+                                "avg",
+                                "min",
+                                "max",
+                                "value",
+                                "sum"
+                            ],
+                            "type": "timeseries",
+                            "requests": [
+                                {
+                                    "formulas": [
+                                        {
+                                            "alias": "DNS Requests",
+                                            "formula": "query1"
+                                        }
+                                    ],
+                                    "queries": [
+                                        {
+                                            "data_source": "logs",
+                                            "name": "query1",
+                                            "indexes": [
+                                                "*"
+                                            ],
+                                            "compute": {
+                                                "aggregation": "count"
+                                            },
+                                            "group_by": [],
+                                            "search": {
+                                                "query": "source:zeek service:(dns OR dns_red) -@rcode:* $Host $Client-IP $Client-Port $Destination-IP $Destination-Port"
+                                            },
+                                            "storage": "hot"
+                                        }
+                                    ],
+                                    "response_format": "timeseries",
+                                    "style": {
+                                        "palette": "dog_classic",
+                                        "line_type": "solid",
+                                        "line_width": "normal"
+                                    },
+                                    "display_type": "line"
+                                }
+                            ]
+                        },
+                        "layout": {
+                            "x": 3,
+                            "y": 0,
+                            "width": 9,
+                            "height": 3
+                        }
+                    },
+                    {
+                        "id": 6745220734518538,
+                        "definition": {
+                            "title": "Total DNS Responses",
+                            "title_size": "16",
+                            "title_align": "left",
+                            "type": "query_value",
+                            "requests": [
+                                {
+                                    "response_format": "scalar",
+                                    "queries": [
+                                        {
+                                            "data_source": "logs",
+                                            "name": "query1",
+                                            "indexes": [
+                                                "*"
+                                            ],
+                                            "compute": {
+                                                "aggregation": "count"
+                                            },
+                                            "group_by": [],
+                                            "search": {
+                                                "query": "source:zeek service:(dns OR dns_red) @rcode:* $Host $Client-IP $Client-Port $Destination-IP $Destination-Port"
+                                            },
+                                            "storage": "hot"
+                                        }
+                                    ],
+                                    "formulas": [
+                                        {
+                                            "formula": "query1"
+                                        }
+                                    ]
+                                }
+                            ],
+                            "autoscale": true,
+                            "precision": 2,
+                            "timeseries_background": {
+                                "type": "area"
+                            }
+                        },
+                        "layout": {
+                            "x": 0,
+                            "y": 3,
+                            "width": 3,
+                            "height": 3
+                        }
+                    },
+                    {
+                        "id": 5946037594492684,
+                        "definition": {
+                            "title": "Timeline by DNS Response",
+                            "title_size": "16",
+                            "title_align": "left",
+                            "show_legend": true,
+                            "legend_layout": "auto",
+                            "legend_columns": [
+                                "avg",
+                                "min",
+                                "max",
+                                "value",
+                                "sum"
+                            ],
+                            "type": "timeseries",
+                            "requests": [
+                                {
+                                    "formulas": [
+                                        {
+                                            "alias": "DNS Responses",
+                                            "formula": "query1"
+                                        }
+                                    ],
+                                    "queries": [
+                                        {
+                                            "data_source": "logs",
+                                            "name": "query1",
+                                            "indexes": [
+                                                "*"
+                                            ],
+                                            "compute": {
+                                                "aggregation": "count"
+                                            },
+                                            "group_by": [],
+                                            "search": {
+                                                "query": "source:zeek service:(dns OR dns_red) @rcode:* $Host $Client-IP $Client-Port $Destination-IP $Destination-Port"
+                                            },
+                                            "storage": "hot"
+                                        }
+                                    ],
+                                    "response_format": "timeseries",
+                                    "style": {
+                                        "palette": "dog_classic",
+                                        "line_type": "solid",
+                                        "line_width": "normal"
+                                    },
+                                    "display_type": "line"
+                                }
+                            ]
+                        },
+                        "layout": {
+                            "x": 3,
+                            "y": 3,
+                            "width": 9,
+                            "height": 3
+                        }
+                    },
+                    {
+                        "id": 4461843701338280,
+                        "definition": {
+                            "title": "DNS Requests by Client IP, Client Port",
+                            "title_size": "16",
+                            "title_align": "left",
+                            "requests": [
+                                {
+                                    "response_format": "scalar",
+                                    "formulas": [
+                                        {
+                                            "formula": "query1",
+                                            "limit": {
+                                                "count": 10,
+                                                "order": "desc"
+                                            }
+                                        }
+                                    ],
+                                    "queries": [
+                                        {
+                                            "data_source": "logs",
+                                            "name": "query1",
+                                            "indexes": [
+                                                "*"
+                                            ],
+                                            "compute": {
+                                                "aggregation": "count"
+                                            },
+                                            "group_by": [
+                                                {
+                                                    "facet": "@network.client.ip",
+                                                    "limit": 10,
+                                                    "sort": {
+                                                        "order": "desc",
+                                                        "aggregation": "count"
+                                                    }
+                                                },
+                                                {
+                                                    "facet": "@network.client.port",
+                                                    "limit": 10,
+                                                    "sort": {
+                                                        "order": "desc",
+                                                        "aggregation": "count"
+                                                    }
+                                                }
+                                            ],
+                                            "search": {
+                                                "query": "source:zeek service:(dns OR dns_red) -@rcode:* $Host $Client-IP $Client-Port $Destination-IP $Destination-Port"
+                                            },
+                                            "storage": "hot"
+                                        }
+                                    ],
+                                    "style": {
+                                        "palette": "datadog16"
+                                    }
+                                }
+                            ],
+                            "type": "sunburst",
+                            "legend": {
+                                "type": "automatic"
+                            }
+                        },
+                        "layout": {
+                            "x": 0,
+                            "y": 6,
+                            "width": 12,
+                            "height": 4
+                        }
+                    },
+                    {
+                        "id": 4834347481271294,
+                        "definition": {
+                            "title": "Top 10 Transport Layer Protocols of Connection",
+                            "title_size": "16",
+                            "title_align": "left",
+                            "type": "toplist",
+                            "requests": [
+                                {
+                                    "queries": [
+                                        {
+                                            "data_source": "logs",
+                                            "name": "query1",
+                                            "indexes": [
+                                                "*"
+                                            ],
+                                            "compute": {
+                                                "aggregation": "count"
+                                            },
+                                            "group_by": [
+                                                {
+                                                    "facet": "@zeek.proto",
+                                                    "limit": 10,
+                                                    "sort": {
+                                                        "order": "desc",
+                                                        "aggregation": "count"
+                                                    }
+                                                }
+                                            ],
+                                            "search": {
+                                                "query": "source:zeek service:(dns OR dns_red) $Host $Client-IP $Client-Port $Destination-IP $Destination-Port"
+                                            },
+                                            "storage": "hot"
+                                        }
+                                    ],
+                                    "formulas": [
+                                        {
+                                            "formula": "query1",
+                                            "limit": {
+                                                "count": 10,
+                                                "order": "desc"
+                                            }
+                                        }
+                                    ],
+                                    "response_format": "scalar"
+                                }
+                            ],
+                            "style": {
+                                "display": {
+                                    "type": "stacked",
+                                    "legend": "automatic"
+                                }
+                            }
+                        },
+                        "layout": {
+                            "x": 0,
+                            "y": 10,
+                            "width": 6,
+                            "height": 4
+                        }
+                    },
+                    {
+                        "id": 2585217271950342,
+                        "definition": {
+                            "title": "Top 10 DNS Query Types",
+                            "title_size": "16",
+                            "title_align": "left",
+                            "type": "toplist",
+                            "requests": [
+                                {
+                                    "queries": [
+                                        {
+                                            "data_source": "logs",
+                                            "name": "query1",
+                                            "indexes": [
+                                                "*"
+                                            ],
+                                            "compute": {
+                                                "aggregation": "count"
+                                            },
+                                            "group_by": [
+                                                {
+                                                    "facet": "@dns.question.type",
+                                                    "limit": 10,
+                                                    "sort": {
+                                                        "order": "desc",
+                                                        "aggregation": "count"
+                                                    }
+                                                }
+                                            ],
+                                            "search": {
+                                                "query": "source:zeek service:(dns OR dns_red) $Host $Client-IP $Client-Port $Destination-IP $Destination-Port"
+                                            },
+                                            "storage": "hot"
+                                        }
+                                    ],
+                                    "formulas": [
+                                        {
+                                            "formula": "query1",
+                                            "limit": {
+                                                "count": 10,
+                                                "order": "desc"
+                                            }
+                                        }
+                                    ],
+                                    "response_format": "scalar"
+                                }
+                            ],
+                            "style": {
+                                "display": {
+                                    "type": "stacked",
+                                    "legend": "automatic"
+                                }
+                            }
+                        },
+                        "layout": {
+                            "x": 6,
+                            "y": 10,
+                            "width": 6,
+                            "height": 4
+                        }
+                    },
+                    {
+                        "id": 5217518191449300,
+                        "definition": {
+                            "title": "Rejected DNS Requests by Client IP, Client Port",
+                            "title_size": "16",
+                            "title_align": "left",
+                            "requests": [
+                                {
+                                    "response_format": "scalar",
+                                    "formulas": [
+                                        {
+                                            "formula": "query1",
+                                            "limit": {
+                                                "count": 10,
+                                                "order": "desc"
+                                            }
+                                        }
+                                    ],
+                                    "queries": [
+                                        {
+                                            "data_source": "logs",
+                                            "name": "query1",
+                                            "indexes": [
+                                                "*"
+                                            ],
+                                            "compute": {
+                                                "aggregation": "count"
+                                            },
+                                            "group_by": [
+                                                {
+                                                    "facet": "@network.client.ip",
+                                                    "limit": 10,
+                                                    "sort": {
+                                                        "order": "desc",
+                                                        "aggregation": "count"
+                                                    }
+                                                },
+                                                {
+                                                    "facet": "@network.client.port",
+                                                    "limit": 10,
+                                                    "sort": {
+                                                        "order": "desc",
+                                                        "aggregation": "count"
+                                                    }
+                                                }
+                                            ],
+                                            "search": {
+                                                "query": "source:zeek service:(dns OR dns_red) @rejected:true $Host $Client-IP $Client-Port $Destination-IP $Destination-Port"
+                                            },
+                                            "storage": "hot"
+                                        }
+                                    ],
+                                    "style": {
+                                        "palette": "datadog16"
+                                    }
+                                }
+                            ],
+                            "type": "sunburst",
+                            "legend": {
+                                "type": "automatic"
+                            }
+                        },
+                        "layout": {
+                            "x": 0,
+                            "y": 14,
+                            "width": 8,
+                            "height": 4
+                        }
+                    },
+                    {
+                        "id": 8201107334846814,
+                        "definition": {
+                            "title": "Top 10 DNS Response Codes",
+                            "title_size": "16",
+                            "title_align": "left",
+                            "type": "toplist",
+                            "requests": [
+                                {
+                                    "queries": [
+                                        {
+                                            "data_source": "logs",
+                                            "name": "query1",
+                                            "indexes": [
+                                                "*"
+                                            ],
+                                            "compute": {
+                                                "aggregation": "count"
+                                            },
+                                            "group_by": [
+                                                {
+                                                    "facet": "@dns.flags.rcode",
+                                                    "limit": 10,
+                                                    "sort": {
+                                                        "order": "desc",
+                                                        "aggregation": "count"
+                                                    }
+                                                }
+                                            ],
+                                            "search": {
+                                                "query": "source:zeek service:(dns OR dns_red) $Host $Client-IP $Client-Port $Destination-IP $Destination-Port"
+                                            },
+                                            "storage": "hot"
+                                        }
+                                    ],
+                                    "formulas": [
+                                        {
+                                            "formula": "query1",
+                                            "limit": {
+                                                "count": 10,
+                                                "order": "desc"
+                                            }
+                                        }
+                                    ],
+                                    "response_format": "scalar"
+                                }
+                            ],
+                            "style": {
+                                "display": {
+                                    "type": "stacked",
+                                    "legend": "automatic"
+                                }
+                            }
+                        },
+                        "layout": {
+                            "x": 8,
+                            "y": 14,
+                            "width": 4,
+                            "height": 4
+                        }
+                    },
+                    {
+                        "id": 4187063147206662,
+                        "definition": {
+                            "title": "Top 10 DNS Queried Domain",
+                            "title_size": "16",
+                            "title_align": "left",
+                            "type": "toplist",
+                            "requests": [
+                                {
+                                    "queries": [
+                                        {
+                                            "data_source": "logs",
+                                            "name": "query1",
+                                            "indexes": [
+                                                "*"
+                                            ],
+                                            "compute": {
+                                                "aggregation": "count"
+                                            },
+                                            "group_by": [
+                                                {
+                                                    "facet": "@dns.question.name",
+                                                    "limit": 10,
+                                                    "sort": {
+                                                        "order": "desc",
+                                                        "aggregation": "count"
+                                                    }
+                                                }
+                                            ],
+                                            "search": {
+                                                "query": "source:zeek service:(dns OR dns_red) $Host $Client-IP $Client-Port $Destination-IP $Destination-Port"
+                                            },
+                                            "storage": "hot"
+                                        }
+                                    ],
+                                    "formulas": [
+                                        {
+                                            "formula": "query1",
+                                            "limit": {
+                                                "count": 10,
+                                                "order": "desc"
+                                            }
+                                        }
+                                    ],
+                                    "response_format": "scalar"
+                                }
+                            ],
+                            "style": {
+                                "display": {
+                                    "type": "stacked",
+                                    "legend": "automatic"
+                                }
+                            }
+                        },
+                        "layout": {
+                            "x": 0,
+                            "y": 18,
+                            "width": 6,
+                            "height": 4
+                        }
+                    },
+                    {
+                        "id": 7452976121132030,
+                        "definition": {
+                            "title": "Top 10 Rejected DNS Requests by Domain Name",
+                            "title_size": "16",
+                            "title_align": "left",
+                            "type": "toplist",
+                            "requests": [
+                                {
+                                    "queries": [
+                                        {
+                                            "data_source": "logs",
+                                            "name": "query1",
+                                            "indexes": [
+                                                "*"
+                                            ],
+                                            "compute": {
+                                                "aggregation": "count"
+                                            },
+                                            "group_by": [
+                                                {
+                                                    "facet": "@dns.question.name",
+                                                    "limit": 10,
+                                                    "sort": {
+                                                        "order": "desc",
+                                                        "aggregation": "count"
+                                                    }
+                                                }
+                                            ],
+                                            "search": {
+                                                "query": "source:zeek service:(dns OR dns_red) @rejected:true $Host $Client-IP $Client-Port $Destination-IP $Destination-Port"
+                                            },
+                                            "storage": "hot"
+                                        }
+                                    ],
+                                    "formulas": [
+                                        {
+                                            "formula": "query1",
+                                            "limit": {
+                                                "count": 10,
+                                                "order": "desc"
+                                            }
+                                        }
+                                    ],
+                                    "response_format": "scalar"
+                                }
+                            ],
+                            "style": {
+                                "display": {
+                                    "type": "stacked",
+                                    "legend": "automatic"
+                                }
+                            }
+                        },
+                        "layout": {
+                            "x": 6,
+                            "y": 18,
+                            "width": 6,
+                            "height": 4
+                        }
+                    },
+                    {
+                        "id": 5261263897336508,
+                        "definition": {
+                            "title": "Rejected DNS Requests by Region",
+                            "title_size": "16",
+                            "title_align": "left",
+                            "type": "geomap",
+                            "requests": [
+                                {
+                                    "queries": [
+                                        {
+                                            "data_source": "logs",
+                                            "name": "query1",
+                                            "indexes": [
+                                                "*"
+                                            ],
+                                            "compute": {
+                                                "aggregation": "count"
+                                            },
+                                            "group_by": [
+                                                {
+                                                    "facet": "@network.client.geoip.country.iso_code",
+                                                    "limit": 10,
+                                                    "sort": {
+                                                        "order": "desc",
+                                                        "aggregation": "count"
+                                                    }
+                                                }
+                                            ],
+                                            "search": {
+                                                "query": "source:zeek service:(dns OR dns_red) $Host $Client-IP $Client-Port $Destination-IP $Destination-Port"
+                                            },
+                                            "storage": "hot"
+                                        }
+                                    ],
+                                    "formulas": [
+                                        {
+                                            "formula": "query1",
+                                            "limit": {
+                                                "count": 10,
+                                                "order": "desc"
+                                            }
+                                        }
+                                    ],
+                                    "response_format": "scalar"
+                                }
+                            ],
+                            "style": {
+                                "palette": "YlOrRd",
+                                "palette_flip": false
+                            },
+                            "view": {
+                                "focus": "WORLD"
+                            }
+                        },
+                        "layout": {
+                            "x": 0,
+                            "y": 22,
+                            "width": 12,
+                            "height": 5
+                        }
+                    },
+                    {
+                        "id": 4130804215481568,
+                        "definition": {
+                            "title": "DNS Log Details",
+                            "title_size": "16",
+                            "title_align": "left",
+                            "requests": [
+                                {
+                                    "response_format": "event_list",
+                                    "query": {
+                                        "data_source": "logs_stream",
+                                        "query_string": "source:zeek service:(dns OR dns_red) $Host $Client-IP $Client-Port $Destination-IP $Destination-Port",
+                                        "indexes": [],
+                                        "storage": "hot"
+                                    },
+                                    "columns": [
+                                        {
+                                            "field": "status_line",
+                                            "width": "auto"
+                                        },
+                                        {
+                                            "field": "timestamp",
+                                            "width": "auto"
+                                        },
+                                        {
+                                            "field": "host",
+                                            "width": "auto"
+                                        },
+                                        {
+                                            "field": "network.client.ip",
+                                            "width": "auto"
+                                        },
+                                        {
+                                            "field": "network.client.port",
+                                            "width": "auto"
+                                        },
+                                        {
+                                            "field": "network.destination.ip",
+                                            "width": "auto"
+                                        },
+                                        {
+                                            "field": "network.destination.port",
+                                            "width": "auto"
+                                        },
+                                        {
+                                            "field": "dns.question.name",
+                                            "width": "auto"
+                                        },
+                                        {
+                                            "field": "dns.question.class",
+                                            "width": "auto"
+                                        },
+                                        {
+                                            "field": "dns.question.type",
+                                            "width": "auto"
+                                        },
+                                        {
+                                            "field": "dns.flags.rcode",
+                                            "width": "auto"
+                                        },
+                                        {
+                                            "field": "rejected",
+                                            "width": "auto"
+                                        }
+                                    ]
+                                }
+                            ],
+                            "type": "list_stream"
+                        },
+                        "layout": {
+                            "x": 0,
+                            "y": 27,
+                            "width": 12,
+                            "height": 4
+                        }
+                    }
+                ]
+            },
+            "layout": {
+                "x": 0,
+                "y": 2,
+                "width": 12,
+                "height": 32
+            }
+        },
+        {
+            "id": 1822674093397186,
+            "definition": {
+                "title": "Encrypted DNS",
+                "background_color": "vivid_purple",
+                "show_title": true,
+                "type": "group",
+                "layout_type": "ordered",
+                "widgets": [
+                    {
+                        "id": 3461616142667064,
+                        "definition": {
+                            "title": "Top 10 Responder IPs",
+                            "title_size": "16",
+                            "title_align": "left",
+                            "type": "toplist",
+                            "requests": [
+                                {
+                                    "queries": [
+                                        {
+                                            "data_source": "logs",
+                                            "name": "query1",
+                                            "indexes": [
+                                                "*"
+                                            ],
+                                            "compute": {
+                                                "aggregation": "count"
+                                            },
+                                            "group_by": [
+                                                {
+                                                    "facet": "@resp_h",
+                                                    "limit": 10,
+                                                    "sort": {
+                                                        "order": "desc",
+                                                        "aggregation": "count"
+                                                    }
+                                                }
+                                            ],
+                                            "search": {
+                                                "query": "source:zeek service:encrypted_dns $Host $Client-IP $Client-Port $Destination-IP $Destination-Port "
+                                            },
+                                            "storage": "hot"
+                                        }
+                                    ],
+                                    "formulas": [
+                                        {
+                                            "formula": "query1",
+                                            "limit": {
+                                                "count": 10,
+                                                "order": "desc"
+                                            }
+                                        }
+                                    ],
+                                    "response_format": "scalar"
+                                }
+                            ],
+                            "style": {
+                                "display": {
+                                    "type": "stacked",
+                                    "legend": "automatic"
+                                }
+                            }
+                        },
+                        "layout": {
+                            "x": 0,
+                            "y": 0,
+                            "width": 4,
+                            "height": 2
+                        }
+                    },
+                    {
+                        "id": 1666060280191088,
+                        "definition": {
+                            "title": "Encrypted DNS Log Details",
+                            "title_size": "16",
+                            "title_align": "left",
+                            "requests": [
+                                {
+                                    "response_format": "event_list",
+                                    "query": {
+                                        "data_source": "logs_stream",
+                                        "query_string": "source:zeek service:encrypted_dns $Host $Client-IP $Client-Port $Destination-IP $Destination-Port",
+                                        "indexes": [],
+                                        "storage": "hot"
+                                    },
+                                    "columns": [
+                                        {
+                                            "field": "status_line",
+                                            "width": "auto"
+                                        },
+                                        {
+                                            "field": "timestamp",
+                                            "width": "auto"
+                                        },
+                                        {
+                                            "field": "host",
+                                            "width": "auto"
+                                        },
+                                        {
+                                            "field": "resp_h",
+                                            "width": "auto"
+                                        },
+                                        {
+                                            "field": "cert.cn",
+                                            "width": "auto"
+                                        },
+                                        {
+                                            "field": "cert.sans",
+                                            "width": "auto"
+                                        },
+                                        {
+                                            "field": "sni",
+                                            "width": "auto"
+                                        },
+                                        {
+                                            "field": "match",
+                                            "width": "auto"
+                                        }
+                                    ]
+                                }
+                            ],
+                            "type": "list_stream"
+                        },
+                        "layout": {
+                            "x": 4,
+                            "y": 0,
+                            "width": 8,
+                            "height": 2
+                        }
+                    }
+                ]
+            },
+            "layout": {
+                "x": 0,
+                "y": 34,
+                "width": 12,
+                "height": 3
+            }
+        },
+        {
+            "id": 6885302046234854,
+            "definition": {
+                "title": "Generic DNS Tunnels",
+                "background_color": "vivid_purple",
+                "show_title": true,
+                "type": "group",
+                "layout_type": "ordered",
+                "widgets": [
+                    {
+                        "id": 5014588284518200,
+                        "definition": {
+                            "title": "Total Generic DNS Tunnels Logs",
+                            "title_size": "16",
+                            "title_align": "left",
+                            "type": "query_value",
+                            "requests": [
+                                {
+                                    "response_format": "scalar",
+                                    "queries": [
+                                        {
+                                            "data_source": "logs",
+                                            "name": "query1",
+                                            "indexes": [
+                                                "*"
+                                            ],
+                                            "compute": {
+                                                "aggregation": "count"
+                                            },
+                                            "group_by": [],
+                                            "search": {
+                                                "query": "source:zeek service:generic_dns_tunnels $Host $Client-IP $Client-Port $Destination-IP $Destination-Port "
+                                            },
+                                            "storage": "hot"
+                                        }
+                                    ],
+                                    "formulas": [
+                                        {
+                                            "formula": "query1"
+                                        }
+                                    ]
+                                }
+                            ],
+                            "autoscale": true,
+                            "precision": 2,
+                            "timeseries_background": {
+                                "type": "area"
+                            }
+                        },
+                        "layout": {
+                            "x": 0,
+                            "y": 0,
+                            "width": 6,
+                            "height": 2
+                        }
+                    },
+                    {
+                        "id": 7441008845277838,
+                        "definition": {
+                            "title": "Total Bytes Sent Over DNS Tunnel",
+                            "title_size": "16",
+                            "title_align": "left",
+                            "type": "query_value",
+                            "requests": [
+                                {
+                                    "response_format": "scalar",
+                                    "queries": [
+                                        {
+                                            "data_source": "logs",
+                                            "name": "query1",
+                                            "indexes": [
+                                                "*"
+                                            ],
+                                            "compute": {
+                                                "aggregation": "sum",
+                                                "metric": "@zeek.dns_bytes"
+                                            },
+                                            "group_by": [],
+                                            "search": {
+                                                "query": "source:zeek service:generic_dns_tunnels $Host $Client-IP $Client-Port $Destination-IP $Destination-Port "
+                                            },
+                                            "storage": "hot"
+                                        }
+                                    ],
+                                    "formulas": [
+                                        {
+                                            "formula": "query1"
+                                        }
+                                    ]
+                                }
+                            ],
+                            "autoscale": true,
+                            "precision": 2,
+                            "timeseries_background": {
+                                "type": "area"
+                            }
+                        },
+                        "layout": {
+                            "x": 6,
+                            "y": 0,
+                            "width": 6,
+                            "height": 2
+                        }
+                    },
+                    {
+                        "id": 72279988731966,
+                        "definition": {
+                            "title": "Top 10 DNS Tunnelling Domains",
+                            "title_size": "16",
+                            "title_align": "left",
+                            "type": "toplist",
+                            "requests": [
+                                {
+                                    "formulas": [
+                                        {
+                                            "formula": "query1",
+                                            "limit": {
+                                                "count": 10,
+                                                "order": "desc"
+                                            }
+                                        }
+                                    ],
+                                    "queries": [
+                                        {
+                                            "data_source": "logs",
+                                            "name": "query1",
+                                            "indexes": [
+                                                "*"
+                                            ],
+                                            "compute": {
+                                                "aggregation": "count"
+                                            },
+                                            "group_by": [
+                                                {
+                                                    "facet": "@dns.question.name",
+                                                    "limit": 10,
+                                                    "sort": {
+                                                        "order": "desc",
+                                                        "aggregation": "count"
+                                                    }
+                                                }
+                                            ],
+                                            "search": {
+                                                "query": "source:zeek service:generic_dns_tunnels $Host $Client-IP $Client-Port $Destination-IP $Destination-Port "
+                                            },
+                                            "storage": "hot"
+                                        }
+                                    ],
+                                    "response_format": "scalar"
+                                }
+                            ],
+                            "style": {
+                                "display": {
+                                    "type": "stacked",
+                                    "legend": "automatic"
+                                },
+                                "scaling": "relative"
+                            }
+                        },
+                        "layout": {
+                            "x": 0,
+                            "y": 2,
+                            "width": 4,
+                            "height": 5
+                        }
+                    },
+                    {
+                        "id": 5595612373803828,
+                        "definition": {
+                            "title": "Bytes Sent Over DNS Tunneling by Clients",
+                            "title_size": "16",
+                            "title_align": "left",
+                            "requests": [
+                                {
+                                    "formulas": [
+                                        {
+                                            "formula": "query1",
+                                            "limit": {
+                                                "count": 500,
+                                                "order": "desc"
+                                            }
+                                        }
+                                    ],
+                                    "queries": [
+                                        {
+                                            "data_source": "logs",
+                                            "name": "query1",
+                                            "indexes": [
+                                                "*"
+                                            ],
+                                            "compute": {
+                                                "aggregation": "cardinality",
+                                                "metric": "@zeek.dns_bytes"
+                                            },
+                                            "group_by": [
+                                                {
+                                                    "facet": "@dns_client",
+                                                    "limit": 10,
+                                                    "sort": {
+                                                        "order": "desc",
+                                                        "aggregation": "cardinality",
+                                                        "metric": "@zeek.dns_bytes"
+                                                    }
+                                                }
+                                            ],
+                                            "search": {
+                                                "query": "source:zeek service:generic_dns_tunnels $Host $Client-IP $Client-Port $Destination-IP $Destination-Port "
+                                            },
+                                            "storage": "hot"
+                                        }
+                                    ],
+                                    "response_format": "scalar",
+                                    "style": {
+                                        "palette": "datadog16"
+                                    }
+                                }
+                            ],
+                            "type": "sunburst",
+                            "legend": {
+                                "type": "table"
+                            }
+                        },
+                        "layout": {
+                            "x": 4,
+                            "y": 2,
+                            "width": 8,
+                            "height": 5
+                        }
+                    },
+                    {
+                        "id": 126875729582084,
+                        "definition": {
+                            "title": "Generic DNS Tunnels Log Details",
+                            "title_size": "16",
+                            "title_align": "left",
+                            "requests": [
+                                {
+                                    "response_format": "event_list",
+                                    "query": {
+                                        "data_source": "logs_stream",
+                                        "query_string": "source:zeek service:generic_dns_tunnels $Host $Client-IP $Client-Port $Destination-IP $Destination-Port",
+                                        "indexes": [],
+                                        "storage": "hot"
+                                    },
+                                    "columns": [
+                                        {
+                                            "field": "status_line",
+                                            "width": "auto"
+                                        },
+                                        {
+                                            "field": "timestamp",
+                                            "width": "auto"
+                                        },
+                                        {
+                                            "field": "host",
+                                            "width": "auto"
+                                        },
+                                        {
+                                            "field": "dns_client",
+                                            "width": "auto"
+                                        },
+                                        {
+                                            "field": "zeek.dns_bytes",
+                                            "width": "auto"
+                                        },
+                                        {
+                                            "field": "dns.question.name",
+                                            "width": "auto"
+                                        },
+                                        {
+                                            "field": "capture_secs",
+                                            "width": "auto"
+                                        }
+                                    ]
+                                }
+                            ],
+                            "type": "list_stream"
+                        },
+                        "layout": {
+                            "x": 0,
+                            "y": 7,
+                            "width": 12,
+                            "height": 4
+                        }
+                    }
+                ]
+            },
+            "layout": {
+                "x": 0,
+                "y": 37,
+                "width": 12,
+                "height": 12
+            }
+        }
+    ],
+    "template_variables": [
+        {
+            "name": "Host",
+            "prefix": "host",
+            "available_values": [],
+            "default": "*"
+        },
+        {
+            "name": "Client-IP",
+            "prefix": "@network.client.ip",
+            "available_values": [],
+            "default": "*"
+        },
+        {
+            "name": "Client-Port",
+            "prefix": "@network.client.port",
+            "available_values": [],
+            "default": "*"
+        },
+        {
+            "name": "Destination-IP",
+            "prefix": "@network.destination.ip",
+            "available_values": [],
+            "default": "*"
+        },
+        {
+            "name": "Destination-Port",
+            "prefix": "@network.destination.port",
+            "available_values": [],
+            "default": "*"
+        }
+    ],
+    "layout_type": "ordered",
+    "notify_list": [],
+    "reflow_type": "fixed"
+}

@@ -490,12 +490,12 @@ def test_statement_metrics_limit(
     "metadata,expected_metadata_payload",
     [
         (
-            {'tables_csv': 'sys.databases', 'commands': ['SELECT'], 'comments': ['-- Test comment']},
-            {'tables': ['sys.databases'], 'commands': ['SELECT'], 'comments': ['-- Test comment']},
+            {'tables_csv': 'sys.databases', 'commands': ['SELECT']},
+            {'tables': ['sys.databases'], 'commands': ['SELECT']},
         ),
         (
-            {'tables_csv': '', 'commands': None, 'comments': None},
-            {'tables': None, 'commands': None, 'comments': None},
+            {'tables_csv': '', 'commands': None},
+            {'tables': None, 'commands': None},
         ),
     ],
 )
@@ -504,9 +504,7 @@ def test_statement_metadata(
 ):
     check = SQLServer(CHECK_NAME, {}, [dbm_instance])
 
-    query = '''
-    -- Test comment
-    select * from sys.sysusers'''
+    query = "select * from sys.databases /* service='datadog-agent' */"
     query_signature = '6d1d070f9b6c5647'
 
     def _run_query():
@@ -531,7 +529,7 @@ def test_statement_metadata(
     sample = matching[0]
     assert sample['db']['metadata']['tables'] == expected_metadata_payload['tables']
     assert sample['db']['metadata']['commands'] == expected_metadata_payload['commands']
-    assert sample['db']['metadata']['comments'] == expected_metadata_payload['comments']
+    assert sample['db']['metadata']['comments'] == ["/* service='datadog-agent' */"]
 
     fqt_samples = [
         s for s in dbm_samples if s.get('dbm_type') == 'fqt' and s['db']['query_signature'] == query_signature
@@ -540,6 +538,7 @@ def test_statement_metadata(
     fqt = fqt_samples[0]
     assert fqt['db']['metadata']['tables'] == expected_metadata_payload['tables']
     assert fqt['db']['metadata']['commands'] == expected_metadata_payload['commands']
+    assert fqt['db']['metadata']['comments'] == ["/* service='datadog-agent' */"]
 
     dbm_metrics = aggregator.get_event_platform_events("dbm-metrics")
     assert len(dbm_metrics) == 1
@@ -727,7 +726,7 @@ def test_statement_basic_metrics_query(datadog_conn_docker, dbm_instance):
         columns = [i[0] for i in cursor.description]
         # construct row dicts manually as there's no DictCursor for pyodbc
         rows = [dict(zip(columns, row)) for row in cursor.fetchall()]
-        matching = [r for r in rows if r['text'] == test_query]
+        matching = [r for r in rows if r['statement_text'] == test_query]
         assert matching, "the test query should be visible in the query stats, found all rows: {}".format(rows)
         row = matching[0]
 
@@ -955,6 +954,39 @@ def test_statement_stored_procedure_characters_limit(
     if stored_procedure_characters_limit > 500:
         assert matched_rows, "should have collected the metric row with expected procedure name"
         assert "procedure_signature" in matched_rows[0]
+
+
+@pytest.mark.integration
+@pytest.mark.usefixtures('dd_environment')
+def test_statement_with_embedded_characters(aggregator, datadog_agent, dd_run_check, dbm_instance, bob_conn):
+    check = SQLServer(CHECK_NAME, {}, [dbm_instance])
+    query = "EXEC nullCharTest;"
+
+    def _obfuscate_sql(sql_query, options=None):
+        return json.dumps({'query': sql_query, 'metadata': {}})
+
+    # Execute the query with the mocked obfuscate_sql. The result should produce an event payload with the metadata.
+    with mock.patch.object(datadog_agent, 'obfuscate_sql', passthrough=True) as mock_agent:
+        mock_agent.side_effect = _obfuscate_sql
+        dd_run_check(check)
+        bob_conn.execute_with_retries(query, (), database="datadog_test")
+        dd_run_check(check)
+        aggregator.reset()
+        bob_conn.execute_with_retries(query, (), database="datadog_test")
+        dd_run_check(check)
+
+    # dbm-metrics
+    dbm_metrics = aggregator.get_event_platform_events("dbm-metrics")
+    assert len(dbm_metrics) == 1, "should have collected exactly one dbm-metrics payload"
+    payload = dbm_metrics[0]
+    # metrics rows
+    sqlserver_rows = payload.get('sqlserver_rows', [])
+    assert sqlserver_rows, "should have collected some sqlserver query metrics rows"
+
+    matched_rows = [s for s in sqlserver_rows if s.get("procedure_name") == "nullchartest"]
+    assert matched_rows, "should have collected the metric row with expected procedure name"
+    assert "text" in matched_rows[0]
+    assert "\x00" not in matched_rows[0]["text"]
 
 
 def _mock_database_list():

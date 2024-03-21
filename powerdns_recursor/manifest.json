@@ -26,7 +26,6 @@
     "homepage": "https://www.datadoghq.com",
     "sales_email": "info@datadoghq.com"
   },
-  "oauth": {},
   "assets": {
     "integration": {
       "source_type_name": "PowerDNS Recursor",
@@ -47,7 +46,9 @@
       "process_signatures": [
         "pdns_server",
         "systemctl start pdns@"
-      ]
+      ],
+      "source_type_id": 144,
+      "auto_install": true
     },
     "dashboards": {
       "powerdns": "assets/dashboards/powerdns_dashboard.json"

@@ -1,5 +1,6 @@
 id: singlestore
 metric_id: singlestore
+backend_only: false
 facets:
 pipeline:
   type: pipeline

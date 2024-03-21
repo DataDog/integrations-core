@@ -6,7 +6,6 @@ import pytest
 from datadog_checks.base.constants import ServiceCheck
 
 from .common import (
-    ACTIVE_ENV,
     DEFAULT_METRICS,
     E2E_EXCLUDE_METRICS,
     EXPECTED_TAGS,
@@ -16,14 +15,13 @@ from .common import (
     SERVICE_CHECK_QUERY,
     TABLE_DISK_METRICS,
     TERADATA_SERVER,
+    USE_TD_SANDBOX,
 )
 
-skip_on_ci = pytest.mark.skipif(
-    ON_CI and ACTIVE_ENV != 'py38-sandbox', reason='Do not run E2E test on sandbox environment'
-)
+skip_on_ci = pytest.mark.skipif(ON_CI and not USE_TD_SANDBOX, reason='Do not run E2E test on sandbox environment')
 
 
-@pytest.mark.skipif(ACTIVE_ENV == 'py38-sandbox', reason='Test only available for py38 environment')
+@pytest.mark.skipif(USE_TD_SANDBOX, reason='Test only available for non-sandbox environments')
 @pytest.mark.e2e
 def test_e2e(dd_agent_check, aggregator, instance):
     with pytest.raises(Exception, match="Hostname lookup failed"):
@@ -32,7 +30,7 @@ def test_e2e(dd_agent_check, aggregator, instance):
     aggregator.assert_service_check(SERVICE_CHECK_QUERY, count=0)
 
 
-@pytest.mark.skipif(ACTIVE_ENV != 'py38-sandbox', reason='Test only available for py38 sandbox environment')
+@pytest.mark.skipif(not USE_TD_SANDBOX, reason='Test only available for sandbox environments')
 @pytest.mark.e2e
 def test_e2e_sandbox(dd_agent_check, aggregator, instance):
     global_tags = ['teradata_port:1025', 'teradata_server:{}'.format(TERADATA_SERVER)]

@@ -2,6 +2,18 @@
 
 <!-- towncrier release notes start -->
 
+## 2.2.1 / 2024-01-10 / Agent 7.51.0
+
+***Fixed***:
+
+* Properly drop support for Python 2 ([#16589](https://github.com/DataDog/integrations-core/pull/16589))
+
+## 2.2.0 / 2024-01-05
+
+***Added***:
+
+* Bump the Python version from py3.9 to py3.11 ([#15997](https://github.com/DataDog/integrations-core/pull/15997))
+
 ## 2.1.0 / 2023-08-18 / Agent 7.48.0
 
 ***Added***:

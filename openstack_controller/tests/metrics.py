@@ -109,11 +109,16 @@ NOVA_SERVER_FLAVOR_METRICS = {
     'openstack.nova.server.flavor.rxtx_factor',
 }
 
-NOVA_SERVER_METRICS = {
+NOVA_SERVER_COUNT = {
     'openstack.nova.server.count',
+}
+
+NOVA_SERVER_DETAILS_METRICS = {
     'openstack.nova.server.active',
     'openstack.nova.server.error',
 }
+
+NOVA_SERVER_METRICS = NOVA_SERVER_COUNT | NOVA_SERVER_DETAILS_METRICS
 
 NOVA_ALL_DIAGNOSTIC_METRICS = (
     NOVA_SERVER_DIAGNOSTIC_METRICS
@@ -125,6 +130,8 @@ NOVA_ALL_DIAGNOSTIC_METRICS = (
 NOVA_ALL_SERVER_METRICS = NOVA_SERVER_METRICS | NOVA_SERVER_FLAVOR_METRICS | NOVA_ALL_DIAGNOSTIC_METRICS
 
 NOVA_PROJECT_METRICS = NOVA_QUOTA_SET_METRICS | NOVA_ALL_SERVER_METRICS
+
+IRONIC_NODE_COUNT = "openstack.ironic.node.count"
 
 NEUTRON_NETWORK_METRICS = {
     'openstack.neutron.network.admin_state_up',
@@ -4523,6 +4530,16 @@ CONDUCTORS_METRICS_IRONIC_MICROVERSION_1_80 = [
         'value': 1,
         'tags': [
             'conductor_group:',
+            'conductor_hostname:agent-integrations-openstack-ironic-to-next',
+            'keystone_server:http://127.0.0.1:8080/identity',
+        ],
+    },
+    {
+        'name': 'openstack.ironic.conductor.count',
+        'count': 1,
+        'value': 1,
+        'tags': [
+            'conductor_group:',
             'conductor_hostname:agent-integrations-openstack-ironic',
             'keystone_server:http://127.0.0.1:8080/identity',
         ],
@@ -4535,6 +4552,7 @@ IMAGES_METRICS_GLANCE = [
         'name': 'openstack.glance.image.count',
         'count': 1,
         'value': 1,
+        'hostname': '',
         'tags': [
             'container_format:bare',
             'image_name:cirros-1.5.2-x86_64-disk',

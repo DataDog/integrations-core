@@ -3,7 +3,7 @@ base_package:
 changelog/no-changelog:
 - any:
   - requirements-agent-release.txt
-  - '*/__about__.py'
+  - '**/__about__.py'
 - all:
   - '!*/datadog_checks/**'
   - '!*/pyproject.toml'
@@ -89,6 +89,12 @@ integration/cilium:
 - cilium/**/*
 integration/cisco_aci:
 - cisco_aci/**/*
+integration/cisco_duo:
+- cisco_duo/**/*
+integration/cisco_secure_firewall:
+- cisco_secure_firewall/**/*
+integration/cisco_umbrella_dns:
+- cisco_umbrella_dns/**/*
 integration/citrix_hypervisor:
 - citrix_hypervisor/**/*
 integration/clickhouse:
@@ -161,6 +167,8 @@ integration/flink:
 - flink/**/*
 integration/fluentd:
 - fluentd/**/*
+integration/fluxcd:
+- fluxcd/**/*
 integration/foundationdb:
 - foundationdb/**/*
 integration/gearmand:
@@ -429,6 +437,8 @@ integration/tcp_queue_length:
 - tcp_queue_length/**/*
 integration/teamcity:
 - teamcity/**/*
+integration/tekton:
+- tekton/**/*
 integration/temporal:
 - temporal/**/*
 integration/tenable:
@@ -471,6 +481,8 @@ integration/wincrashdetect:
 - wincrashdetect/**/*
 integration/windows_performance_counters:
 - windows_performance_counters/**/*
+integration/windows_registry:
+- windows_registry/**/*
 integration/windows_service:
 - windows_service/**/*
 integration/winkmem:
@@ -479,8 +491,13 @@ integration/wmi_check:
 - wmi_check/**/*
 integration/yarn:
 - yarn/**/*
+integration/zeek:
+- zeek/**/*
 integration/zk:
 - zk/**/*
-release:
+qa/skip-qa:
+- '**/__about__.py'
 - requirements-agent-release.txt
-- '*/__about__.py'
+- '*/CHANGELOG.md'
+release:
+- '**/__about__.py'

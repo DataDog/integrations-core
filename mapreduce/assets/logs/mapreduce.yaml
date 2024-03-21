@@ -1,52 +1,47 @@
 id: mapreduce
 metric_id: mapreduce
+backend_only: false
 facets:
-  - name: Logger Name
-    source: log
-    path: logger.name
-    groups:
+  - groups:
       - Source Code
-
-  - name: MapReduce ApplicationID
+    name: Logger Name
+    path: logger.name
     source: log
+  - groups:
+      - MapReduce
+    name: MapReduce ApplicationID
     path: mapreduce.application.app_id
-    groups:
-      - MapReduce
-
-  - name: MapReduce Application State
     source: log
+  - groups:
+      - MapReduce
+    name: MapReduce Application State
     path: mapreduce.application.state
-    groups:
-      - MapReduce
-  - name: MapReduce ContainerID
     source: log
+  - groups:
+      - MapReduce
+    name: MapReduce ContainerID
     path: mapreduce.application.container_id
-    groups:
-      - MapReduce
-  - name: MapReduce ApplicationAttemptID
     source: log
+  - groups:
+      - MapReduce
+    name: MapReduce ApplicationAttemptID
     path: mapreduce.attempt.attempt_id
-    groups:
-      - MapReduce
-
-  - name: MapReduce ApplicationAttempt State
     source: log
+  - groups:
+      - MapReduce
+    name: MapReduce ApplicationAttempt State
     path: mapreduce.attempt.state
-    groups:
-      - MapReduce
-
-  - name: MapReduce TaskID
     source: log
+  - groups:
+      - MapReduce
+    name: MapReduce TaskID
     path: mapreduce.task.task_id
-    groups:
-      - MapReduce
-
-  - name: MapReduce Task State
     source: log
-    path: mapreduce.task.state
-    groups:
+  - groups:
       - MapReduce
-
+    name: MapReduce Task State
+    path: mapreduce.task.state
+    source: log
 pipeline:
   type: pipeline
   name: mapreduce
@@ -91,9 +86,9 @@ pipeline:
           app_ids_with_container_second %{data}(%{_app_id}|%{_attempt_id}|%{_task_id})%{data}%{_container_id}%{data}
           app_ids_solo %{data}(%{_app_id}|%{_attempt_id}|%{_task_id})%{data}
       samples:
-        - 'Could not delete hdfs://namenode:9000/user/root/grep-temp-312857601/_temporary/1/_temporary/attempt_1597861183743_0001_m_000012_0'
-        - 'KILLING attempt_1597851676689_0007_r_000000_0'
-        - 'attempt_1597861183743_0008_r_000000_0 TaskAttempt Transitioned from SUCCESS_FINISHING_CONTAINER to SUCCEEDED'
+        - Could not delete hdfs://namenode:9000/user/root/grep-temp-312857601/_temporary/1/_temporary/attempt_1597861183743_0001_m_000012_0
+        - KILLING attempt_1597851676689_0007_r_000000_0
+        - attempt_1597861183743_0008_r_000000_0 TaskAttempt Transitioned from SUCCESS_FINISHING_CONTAINER to SUCCEEDED
     - type: grok-parser
       name: Parse state per activity type
       enabled: true

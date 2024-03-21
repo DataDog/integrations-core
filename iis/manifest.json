@@ -22,7 +22,6 @@
     "homepage": "https://www.datadoghq.com",
     "sales_email": "info@datadoghq.com"
   },
-  "oauth": {},
   "assets": {
     "integration": {
       "source_type_name": "IIS",
@@ -39,7 +38,9 @@
       },
       "service_checks": {
         "metadata_path": "assets/service_checks.json"
-      }
+      },
+      "source_type_id": 46,
+      "auto_install": true
     },
     "dashboards": {
       "iis": "assets/dashboards/iis_dashboard.json",

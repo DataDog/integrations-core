@@ -12,3 +12,5 @@ metadata:
     fields:
       vendor:
         value: "cisco"
+      type:
+        value: "server"

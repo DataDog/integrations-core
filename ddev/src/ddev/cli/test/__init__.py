@@ -23,9 +23,26 @@ def fix_coverage_report(report_file: Path):
     report_file.write_bytes(report)
 
 
-@click.command(short_help='Run tests')
+epilog = '''
+Examples
+
+\b
+List possible environments for postgres:
+ddev test -l postgres
+
+\b
+Run only unit tests:
+ddev test postgres:py3.11-9.6 -- -m unit
+
+\b
+Run specific test in multiple environments:
+ddev test postgres:py3.11-9.6,py3.11-16.0 -- -k test_my_special_test
+'''
+
+
+@click.command(epilog=epilog)
 @click.argument('target_spec', required=False)
-@click.argument('args', nargs=-1)
+@click.argument('pytest_args', nargs=-1)
 @click.option('--lint', '-s', is_flag=True, help='Run only lint & style checks')
 @click.option('--fmt', '-fs', is_flag=True, help='Run only the code formatter')
 @click.option('--bench', '-b', is_flag=True, help='Run only benchmarks')
@@ -44,7 +61,7 @@ def fix_coverage_report(report_file: Path):
 def test(
     app: Application,
     target_spec: str | None,
-    args: tuple[str, ...],
+    pytest_args: tuple[str, ...],
     lint: bool,
     fmt: bool,
     bench: bool,
@@ -61,7 +78,12 @@ def test(
     e2e: bool,
 ):
     """
-    Run tests.
+    Run unit and integration tests.
+
+    Please see these docs for to pass TARGET_SPEC and PYTEST_ARGS:
+
+    \b
+    https://datadoghq.dev/integrations-core/testing/
     """
     import json
     import os
@@ -83,6 +105,9 @@ def test(
         for integration in app.repo.integrations.iter_changed():
             if integration.is_testable:
                 targets[integration.name] = integration
+    elif target_name == 'all':
+        for integration in app.repo.integrations.iter_testable('all'):
+            targets[integration.name] = integration
     else:
         try:
             integration = app.repo.integrations.get(target_name)
@@ -93,7 +118,11 @@ def test(
             targets[integration.name] = integration
 
     if not targets:
-        app.abort('No testable targets found')
+        if target_name == 'changed':
+            app.display_info('No changed testable targets found')
+            return
+        else:
+            app.abort('No testable targets found')
 
     if list_envs:
         multiple_targets = len(targets) > 1
@@ -210,7 +239,7 @@ def test(
             ):
                 env_vars[TestEnvVars.BASE_PACKAGE_VERSION] = target.minimum_base_package_version
 
-        command.extend(args)
+        command.extend(pytest_args)
 
         with target.path.as_cwd(env_vars=env_vars):
             app.display_debug(f'Command: {command}')

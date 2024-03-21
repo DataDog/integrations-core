@@ -213,6 +213,7 @@ def test_e2e_profile_servertech_pdu3(dd_agent_check):
         'status': 1,
         'sys_object_id': '1.3.6.1.4.1.1718.3',
         'vendor': 'servertech',
+        'device_type': 'pdu',
     }
     device['tags'] = common_tags
     assert_device_metadata(aggregator, device)

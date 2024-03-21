@@ -24,7 +24,6 @@
     "homepage": "https://www.datadoghq.com",
     "sales_email": "info@datadoghq.com"
   },
-  "oauth": {},
   "assets": {
     "integration": {
       "source_type_name": "MapReduce",
@@ -41,7 +40,9 @@
       },
       "service_checks": {
         "metadata_path": "assets/service_checks.json"
-      }
+      },
+      "source_type_id": 133,
+      "auto_install": true
     },
     "dashboards": {
       "mapreduce": "assets/dashboards/mapreduce_dashboard.json"

@@ -2,7 +2,12 @@
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
 
+from contextlib import closing
 from enum import Enum
+
+import pymysql
+
+from datadog_checks.mysql.cursor import CommenterCursor
 
 
 class DatabaseConfigurationError(Enum):
@@ -40,3 +45,15 @@ def get_truncation_state(statement):
     # a statement is truncated
     truncated = statement[-3:] == '...'
     return StatementTruncationState.truncated if truncated else StatementTruncationState.not_truncated
+
+
+def connect_with_autocommit(**connect_args):
+    db = pymysql.connect(**connect_args)
+    with closing(db.cursor(CommenterCursor)) as cursor:
+        # PyMYSQL only sets autocommit if it receives a different value from the server
+        # see https://github.com/PyMySQL/PyMySQL/blob/bbd049f40db9c696574ce6f31669880042c56d79/pymysql/connections.py#L443-L447
+        # but there are cases where the server will not send a correct value for autocommit, so we
+        # set it explicitly to ensure it's set correctly
+        cursor.execute("SET AUTOCOMMIT=1")
+
+    return db

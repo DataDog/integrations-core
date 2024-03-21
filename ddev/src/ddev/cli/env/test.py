@@ -11,10 +11,10 @@ if TYPE_CHECKING:
     from ddev.cli.application import Application
 
 
-@click.command('test', short_help='Test environments')
+@click.command('test')
 @click.argument('intg_name', metavar='INTEGRATION')
 @click.argument('environment', required=False)
-@click.argument('args', nargs=-1)
+@click.argument('pytest_args', nargs=-1)
 @click.option('--dev', 'local_dev', is_flag=True, help='Install the local version of the integration')
 @click.option(
     '--base',
@@ -46,7 +46,7 @@ def test_command(
     *,
     intg_name: str,
     environment: str | None,
-    args: tuple[str, ...],
+    pytest_args: tuple[str, ...],
     local_dev: bool,
     local_base: bool,
     agent_build: str | None,
@@ -58,16 +58,24 @@ def test_command(
     """
     Test environments.
 
-    If no environment is specified, `active` is selected which will test all environments
+    This runs the end-to-end tests.
+
+    If no ENVIRONMENT is specified, `active` is selected which will test all environments
     that are currently running. You may choose `all` to test all environments whether or not
     they are running.
 
     Testing active environments will not stop them after tests complete. Testing environments
     that are not running will start and stop them automatically.
+
+    See these docs for to pass ENVIRONMENT and PYTEST_ARGS:
+
+    \b
+    https://datadoghq.dev/integrations-core/testing/
     """
     from ddev.cli.env.start import start
     from ddev.cli.env.stop import stop
     from ddev.cli.test import test
+    from ddev.config.constants import AppEnvVars
     from ddev.e2e.config import EnvDataStorage
     from ddev.e2e.constants import E2EMetadata
     from ddev.utils.ci import running_in_ci
@@ -129,9 +137,17 @@ def test_command(
         env_data = storage.get(integration.name, env_name)
         metadata = env_data.read_metadata()
         try:
-            with EnvVars(metadata.get(E2EMetadata.ENV_VARS, {})):
+            env_vars = metadata.get(E2EMetadata.ENV_VARS, {})
+            env_vars[AppEnvVars.REPO] = app.repo.name
+
+            with EnvVars(env_vars):
                 ctx.invoke(
-                    test, target_spec=f'{intg_name}:{env_name}', args=args, junit=junit, hide_header=True, e2e=True
+                    test,
+                    target_spec=f'{intg_name}:{env_name}',
+                    pytest_args=pytest_args,
+                    junit=junit,
+                    hide_header=True,
+                    e2e=True,
                 )
         finally:
             ctx.invoke(stop, intg_name=intg_name, environment=env_name, ignore_state=env_active)

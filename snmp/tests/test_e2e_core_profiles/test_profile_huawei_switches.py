@@ -74,6 +74,7 @@ def test_e2e_profile_huawei_switches(dd_agent_check):
         'status': 1,
         'sys_object_id': '1.3.6.1.4.1.2011.2.23.606',
         'vendor': 'huawei',
+        'device_type': 'switch',
     }
     device['tags'] = common_tags
     assert_device_metadata(aggregator, device)

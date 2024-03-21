@@ -6,6 +6,8 @@ metadata:
     fields:
       vendor:
         value: "chatsworth"
+      type:
+        value: "PDU"
 
 device:
   vendor: "chatsworth"

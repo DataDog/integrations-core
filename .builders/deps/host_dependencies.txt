@@ -1,0 +1,2 @@
+google-cloud-storage==2.14.0
+packaging==23.2

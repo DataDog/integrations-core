@@ -598,6 +598,45 @@ def test_report_realtime_vm_percent_metrics(aggregator, dd_run_check, realtime_i
     )
 
 
+def test_report_realtime_vm_vcpu_percent_metrics(aggregator, dd_run_check, realtime_instance, service_instance):
+    service_instance.content.perfManager.QueryPerfCounterByLevel = mock.MagicMock(
+        return_value=[
+            vim.PerformanceManager.CounterInfo(
+                key=33,
+                groupInfo=vim.ElementDescription(key='cpu'),
+                nameInfo=vim.ElementDescription(key='usage.vcpus'),
+                rollupType=vim.PerformanceManager.CounterInfo.RollupType.average,
+                unitInfo=vim.ElementDescription(key='percent'),
+            ),
+        ]
+    )
+    service_instance.content.perfManager.QueryPerf = mock.MagicMock(
+        side_effect=[
+            [
+                vim.PerformanceManager.EntityMetric(
+                    entity=vim.VirtualMachine(moId="vm1"),
+                    value=[
+                        vim.PerformanceManager.IntSeries(
+                            value=[5299],
+                            id=vim.PerformanceManager.MetricId(counterId=33),
+                        )
+                    ],
+                ),
+            ],
+            [],
+        ]
+    )
+    check = VSphereCheck('vsphere', {}, [realtime_instance])
+    dd_run_check(check)
+    aggregator.assert_metric(
+        'vsphere.cpu.usage.vcpus.avg',
+        value=52.99,
+        count=1,
+        hostname='vm1',
+        tags=['vcenter_server:FAKE'],
+    )
+
+
 def test_report_realtime_vm_metrics_invalid_value(aggregator, dd_run_check, realtime_instance, service_instance):
     service_instance.content.perfManager.QueryPerf = mock.MagicMock(
         return_value=[

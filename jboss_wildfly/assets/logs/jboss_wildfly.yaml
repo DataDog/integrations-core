@@ -1,51 +1,52 @@
 id: jboss_wildfly
 metric_id: jboss-wildfly
+backend_only: false
 facets:
-  - name: Method
-    source: log
+  - groups:
+      - Web Access
+    name: Method
     path: http.method
-    groups:
-      - Web Access
-  - name: Status Code
     source: log
+  - groups:
+      - Web Access
+    name: Status Code
     path: http.status_code
-    groups:
-      - Web Access
-  - name: URL Host
     source: log
+  - groups:
+      - Web Access
+    name: URL Host
     path: http.url_details.host
-    groups:
-      - Web Access
-  - name: URL Path
     source: log
+  - groups:
+      - Web Access
+    name: URL Path
     path: http.url_details.path
-    groups:
-      - Web Access
-  - name: URL Port
     source: log
+  - groups:
+      - Web Access
+    name: URL Port
     path: http.url_details.port
-    groups:
-      - Web Access
-  - name: URL scheme
     source: log
+  - groups:
+      - Web Access
+    name: URL scheme
     path: http.url_details.scheme
-    groups:
-      - Web Access
-  - name: Logger Name
     source: log
+  - groups:
+      - Source Code
+    name: Logger Name
     path: logger.name
-    groups:
-      - Source Code
-  - name: Thread Name
     source: log
+  - groups:
+      - Source Code
+    name: Thread Name
     path: logger.thread_name
-    groups:
-      - Source Code
-  - name: Client IP
     source: log
-    path: network.client.ip
-    groups:
+  - groups:
       - Web Access
+    name: Client IP
+    path: network.client.ip
+    source: log
 pipeline:
   type: pipeline
   name: JBoss/Wildfly

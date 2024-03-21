@@ -2,11 +2,11 @@
   "version": 2,
   "created_at": "2021-02-23",
   "last_updated_at": "2021-02-23",
-  "title": "resource utilization",
+  "title": "CPU load is running high",
   "tags": [
     "integration:apache"
   ],
-  "description": "Notify your team when the number of keep-alive async connections and the CPU load are both running high.",
+  "description": "An anomaly in CPU load occurs when the server's processor use deviates significantly from its usual pattern, potentially indicating issues. This monitor tracks CPU load in Apache servers to identify spikes.",
   "definition": {
     "message": "High number of keep-alive async connections, combined with high CPU. You may want to lower the maximum number of simultaneous connections to the server (MaxRequestWorkers), and/or decrease the KeepAliveTimeout to avoid holding connections open longer than necessary.\n\n",
     "name": "[Apache] resource utilization",

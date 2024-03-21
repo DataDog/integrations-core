@@ -106,15 +106,15 @@ class CadvisorScraper(object):
         if isinstance(dat, numbers.Number):
             # Pod level metric filtering
             is_pod_metric = False
-            if self.pod_level_metrics and any([fnmatch(metric, pat) for pat in self.pod_level_metrics]):
+            if self.pod_level_metrics and any(fnmatch(metric, pat) for pat in self.pod_level_metrics):
                 is_pod_metric = True
             if is_pod_metric != is_pod:
                 return
 
             # Metric submission
-            if self.enabled_rates and any([fnmatch(metric, pat) for pat in self.enabled_rates]):
+            if self.enabled_rates and any(fnmatch(metric, pat) for pat in self.enabled_rates):
                 self.rate(metric, float(dat), tags)
-            elif self.enabled_gauges and any([fnmatch(metric, pat) for pat in self.enabled_gauges]):
+            elif self.enabled_gauges and any(fnmatch(metric, pat) for pat in self.enabled_gauges):
                 self.gauge(metric, float(dat), tags)
 
         elif isinstance(dat, dict):

@@ -6,7 +6,7 @@
   "tags": [
     "integration:sql-server"
   ],
-  "description": "Notify your team when your database is not online.",
+  "description": "A Database in SQL Servers can have different states ranging from operational to corruption or error states. This monitor tracks the state across different databases and identifies situations where SQL Server databases are not in a healthy state.",
   "definition": {
     "message": "SQLServer database is not online for the last 5 minutes",
     "name": "[SQLServer] Database is not online",

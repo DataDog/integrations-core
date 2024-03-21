@@ -1170,6 +1170,25 @@ jobs:
       test-py3: ${{ inputs.test-py3 }}
       minimum-base-package: ${{ inputs.minimum-base-package }}
     secrets: inherit
+  j6134697:
+    uses: ./.github/workflows/test-target.yml
+    with:
+      job-name: fluxcd
+      target: fluxcd
+      platform: linux
+      runner: '["ubuntu-22.04"]'
+      repo: "${{ inputs.repo }}"
+      python-version: "${{ inputs.python-version }}"
+      standard: ${{ inputs.standard }}
+      latest: ${{ inputs.latest }}
+      agent-image: "${{ inputs.agent-image }}"
+      agent-image-py2: "${{ inputs.agent-image-py2 }}"
+      agent-image-windows: "${{ inputs.agent-image-windows }}"
+      agent-image-windows-py2: "${{ inputs.agent-image-windows-py2 }}"
+      test-py2: ${{ inputs.test-py2 }}
+      test-py3: ${{ inputs.test-py3 }}
+      minimum-base-package: ${{ inputs.minimum-base-package }}
+    secrets: inherit
   jc364450:
     uses: ./.github/workflows/test-target.yml
     with:
@@ -3094,6 +3113,25 @@ jobs:
     with:
       job-name: TeamCity
       target: teamcity
+      platform: linux
+      runner: '["ubuntu-22.04"]'
+      repo: "${{ inputs.repo }}"
+      python-version: "${{ inputs.python-version }}"
+      standard: ${{ inputs.standard }}
+      latest: ${{ inputs.latest }}
+      agent-image: "${{ inputs.agent-image }}"
+      agent-image-py2: "${{ inputs.agent-image-py2 }}"
+      agent-image-windows: "${{ inputs.agent-image-windows }}"
+      agent-image-windows-py2: "${{ inputs.agent-image-windows-py2 }}"
+      test-py2: ${{ inputs.test-py2 }}
+      test-py3: ${{ inputs.test-py3 }}
+      minimum-base-package: ${{ inputs.minimum-base-package }}
+    secrets: inherit
+  jf4a7e97:
+    uses: ./.github/workflows/test-target.yml
+    with:
+      job-name: Tekton
+      target: tekton
       platform: linux
       runner: '["ubuntu-22.04"]'
       repo: "${{ inputs.repo }}"

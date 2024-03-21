@@ -26,7 +26,6 @@
     "homepage": "https://www.datadoghq.com",
     "sales_email": "info@datadoghq.com"
   },
-  "oauth": {},
   "assets": {
     "integration": {
       "source_type_name": "SingleStore",
@@ -44,7 +43,11 @@
       "service_checks": {
         "metadata_path": "assets/service_checks.json"
       },
-      "process_signatures": ["memsqld"]
+      "process_signatures": [
+        "memsqld"
+      ],
+      "source_type_id": 10215,
+      "auto_install": true
     },
     "dashboards": {
       "Singlestore Overview": "assets/dashboards/overview.json"

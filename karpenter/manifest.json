@@ -17,6 +17,7 @@
       "Supported OS::macOS",
       "Category::Metrics",
       "Category::Kubernetes",
+      "Category::Log Collection",
       "Category::Provisioning",
       "Submitted Data Type::Metrics",
       "Submitted Data Type::Logs"
@@ -38,13 +39,18 @@
       },
       "service_checks": {
         "metadata_path": "assets/service_checks.json"
-      }
+      },
+      "source_type_id": 10437,
+      "auto_install": true
     },
     "dashboards": {
       "karpenter_overview": "assets/dashboards/karpenter_overview.json"
     },
     "logs": {
       "source": "karpenter"
+    },
+    "monitors": {
+      "pod states": "assets/monitors/pod_state.json"
     }
   },
   "author": {
@@ -52,6 +58,5 @@
     "name": "Datadog",
     "homepage": "https://www.datadoghq.com",
     "sales_email": "info@datadoghq.com"
-  },
-  "oauth": {}
+  }
 }

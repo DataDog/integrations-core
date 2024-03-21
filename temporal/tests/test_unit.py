@@ -6,7 +6,7 @@ import pytest
 from datadog_checks.dev.utils import get_metadata_metrics
 from datadog_checks.temporal import TemporalCheck
 
-from .common import METRICS, TAGS
+from .common import METRICS, MOCKED_METRICS, TAGS
 
 pytestmark = [pytest.mark.unit]
 
@@ -22,12 +22,12 @@ def test_check(dd_run_check, aggregator, check, mock_metrics):
             tags=expected_metric.get("tags", TAGS),
         )
 
+    for metric in MOCKED_METRICS:
+        aggregator.assert_metric(name=metric)
+        for tag in TAGS:
+            aggregator.assert_metric_has_tag(metric, tag)
+
     aggregator.assert_metrics_using_metadata(get_metadata_metrics())
-
-    for metric in get_metadata_metrics():
-        aggregator.assert_metric(name=metric, tags=TAGS, at_least=0)
-
-    assert len(aggregator.metric_names) > 100
     aggregator.assert_all_metrics_covered()
     aggregator.assert_no_duplicate_all()
 

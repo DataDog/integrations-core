@@ -121,7 +121,7 @@ class SqlserverMetadata(DBMAsyncJob):
     def _load_settings_rows(self, cursor):
         self.log.debug("collecting sql server instance settings")
         query = self._get_settings_query_cached(cursor)
-        self.log.debug("Running query [%s] %s", query)
+        self.log.debug("Running query [%s]", query)
         cursor.execute(query)
         columns = [i[0] for i in cursor.description]
         # construct row dicts manually as there's no DictCursor for pyodbc

@@ -16,8 +16,9 @@ from datadog_checks.base.utils.db.sql import compute_sql_signature
 from datadog_checks.base.utils.db.utils import DBMAsyncJob, obfuscate_sql_with_metadata
 from datadog_checks.base.utils.serialization import json
 from datadog_checks.base.utils.tracking import tracked_method
+from datadog_checks.mysql.cursor import CommenterDictCursor
 
-from .util import DatabaseConfigurationError, get_truncation_state, warning_with_tags
+from .util import DatabaseConfigurationError, connect_with_autocommit, get_truncation_state, warning_with_tags
 
 try:
     import datadog_agent
@@ -35,6 +36,7 @@ SELECT
     thread_a.processlist_command,
     thread_a.processlist_state,
     COALESCE(statement.sql_text, thread_a.PROCESSLIST_info) AS sql_text,
+    statement.digest_text as digest_text,
     statement.timer_start AS event_timer_start,
     statement.timer_end AS event_timer_end,
     statement.lock_time,
@@ -129,7 +131,11 @@ class MySQLActivity(DBMAsyncJob):
     def run_job(self):
         # type: () -> None
         # Detect a database misconfiguration by checking if `events-waits-current` is enabled.
-        if not self._check.events_wait_current_enabled:
+        if self._check.events_wait_current_enabled is None:
+            self._log.debug(
+                'Waiting for events_waits_current availability to be determined by the check, skipping run.'
+            )
+        if self._check.events_wait_current_enabled is False:
             self._check.record_warning(
                 DatabaseConfigurationError.events_waits_current_not_enabled,
                 warning_with_tags(
@@ -160,7 +166,7 @@ class MySQLActivity(DBMAsyncJob):
         # type: () -> None
         # do not emit any dd.internal metrics for DBM specific check code
         tags = [t for t in self._tags if not t.startswith('dd.internal')]
-        with closing(self._get_db_connection().cursor(pymysql.cursors.DictCursor)) as cursor:
+        with closing(self._get_db_connection().cursor(CommenterDictCursor)) as cursor:
             rows = self._get_activity(cursor)
             rows = self._normalize_rows(rows)
             event = self._create_activity_event(rows, tags)
@@ -206,7 +212,11 @@ class MySQLActivity(DBMAsyncJob):
         if "sql_text" not in row:
             return row
         try:
-            self._finalize_row(row, obfuscate_sql_with_metadata(row["sql_text"], self._obfuscator_options))
+            self._finalize_row(
+                row,
+                obfuscate_sql_with_metadata(row["sql_text"], self._obfuscator_options),
+                obfuscate_sql_with_metadata(row.get("digest_text"), self._obfuscator_options),
+            )
         except Exception as e:
             if self._config.log_unobfuscated_queries:
                 self._log.warning("Failed to obfuscate query=[%s] | err=[%s]", row["sql_text"], e)
@@ -221,11 +231,16 @@ class MySQLActivity(DBMAsyncJob):
         return {key: val for key, val in row.items() if val is not None}
 
     @staticmethod
-    def _finalize_row(row, statement):
-        # type: (Dict[str], Dict[str]) -> None
-        obfuscated_statement = statement["query"]
-        row["sql_text"] = obfuscated_statement
-        row["query_signature"] = compute_sql_signature(obfuscated_statement)
+    def _finalize_row(row, statement, digest_statement):
+        # type: (Dict[str], Dict[str], Dict[str]) -> None
+        row["sql_text"] = statement["query"]
+        if digest_statement["query"]:
+            # if digest_text is not NULL, use it to compute the query signature
+            row["query_signature"] = compute_sql_signature(digest_statement["query"])
+        else:
+            # fallback to sql_text when digest_text is NULL
+            # MySQL < 8.0 sometimes have NULL digest_text even when statements_digest consumer is enabled
+            row["query_signature"] = compute_sql_signature(statement["query"])
 
         metadata = statement["metadata"]
         row["dd_commands"] = metadata.get("commands", None)
@@ -268,7 +283,7 @@ class MySQLActivity(DBMAsyncJob):
         pymysql connections are not thread safe, so we can't reuse the same connection from the main check.
         """
         if not self._db:
-            self._db = pymysql.connect(**self._connection_args)
+            self._db = connect_with_autocommit(**self._connection_args)
         return self._db
 
     def _close_db_conn(self):

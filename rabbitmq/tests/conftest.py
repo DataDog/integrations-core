@@ -23,16 +23,12 @@ def dd_environment():
     up.
     """
 
-    env = {}
-
     if 'RABBITMQ_VERSION' not in os.environ:
         pytest.exit('RABBITMQ_VERSION not available')
 
     compose_file = os.path.join(HERE, 'compose', 'docker-compose.yaml')
 
-    with docker_run(
-        compose_file, log_patterns='Server startup complete', env_vars=env, conditions=[setup_rabbitmq], sleep=5
-    ):
+    with docker_run(compose_file, log_patterns='Server startup complete', conditions=[setup_rabbitmq], sleep=5):
         if RABBITMQ_METRICS_PLUGIN == "prometheus":
             yield OPENMETRICS_CONFIG
         else:

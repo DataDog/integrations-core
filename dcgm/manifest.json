@@ -37,7 +37,9 @@
       },
       "process_signatures": [
         "dcgm-exporter"
-      ]
+      ],
+      "source_type_id": 10374,
+      "auto_install": true
     },
     "dashboards": {
       "DCGM Exporter (Nvidia GPU Monitoring) Overview": "assets/dashboards/dcgm_overview.json"
@@ -53,6 +55,5 @@
     "name": "Datadog",
     "homepage": "https://www.datadoghq.com",
     "sales_email": "info@datadoghq.com"
-  },
-  "oauth": {}
+  }
 }

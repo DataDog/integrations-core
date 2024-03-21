@@ -262,6 +262,7 @@ def test_e2e_profile_synology_disk_station(dd_agent_check):
         'status': 1,
         'sys_object_id': '1.3.6.1.4.1.6574.1',
         'vendor': 'synology',
+        'device_type': 'storage',
     }
     device['tags'] = common_tags
     assert_device_metadata(aggregator, device)

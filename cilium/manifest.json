@@ -27,7 +27,6 @@
     "homepage": "https://www.datadoghq.com",
     "sales_email": "info@datadoghq.com"
   },
-  "oauth": {},
   "assets": {
     "integration": {
       "source_type_name": "Cilium",
@@ -44,15 +43,18 @@
       },
       "service_checks": {
         "metadata_path": "assets/service_checks.json"
-      }, 
+      },
       "process_signatures": [
         "cilium-operator-generic",
         "cilium-agent",
         "cilium-health-responder"
-      ]
+      ],
+      "source_type_id": 10077,
+      "auto_install": true
     },
     "dashboards": {
-      "Cilium Overview": "assets/dashboards/overview.json"
+      "Cilium Overview": "assets/dashboards/overview.json",
+      "Cilium Overview v2": "assets/dashboards/overview_v2.json"
     }
   }
 }

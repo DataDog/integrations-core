@@ -1,16 +1,17 @@
 id: temporal
 metric_id: temporal
+backend_only: false
 facets:
-  - name: Namespace
-    source: log
+  - groups:
+      - Temporal
+    name: Namespace
     path: wf-namespace
-    groups:
-      - Temporal
-  - name: Task Queue
     source: log
-    path: wf-task-queue-name
-    groups:
+  - groups:
       - Temporal
+    name: Task Queue
+    path: wf-task-queue-name
+    source: log
 pipeline:
   type: pipeline
   name: Temporal

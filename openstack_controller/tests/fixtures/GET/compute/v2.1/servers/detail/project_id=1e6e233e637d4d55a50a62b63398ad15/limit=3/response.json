@@ -1,0 +1,208 @@
+{
+    "servers": [
+        {
+            "id": "3b27b706-c0ad-4528-a865-7afaf7712130",
+            "name": "demo-2",
+            "status": "ERROR",
+            "tenant_id": "1e6e233e637d4d55a50a62b63398ad15",
+            "user_id": "78205c506b534738bc851d3e189a00c3",
+            "metadata": {},
+            "hostId": "1ef00efcf95709f5083a0604bdd4642524c02085d41fbfdd404a707f",
+            "image": "",
+            "flavor": {
+                "id": "c1",
+                "links": [
+                    {
+                        "rel": "bookmark",
+                        "href": "http://34.91.114.145/compute/1e6e233e637d4d55a50a62b63398ad15/flavors/c1"
+                    }
+                ]
+            },
+            "created": "2023-04-08T11:15:18Z",
+            "updated": "2023-04-08T11:16:03Z",
+            "addresses": {
+                "shared": [
+                    {
+                        "version": 4,
+                        "addr": "192.168.233.51",
+                        "OS-EXT-IPS:type": "fixed",
+                        "OS-EXT-IPS-MAC:mac_addr": "fa:16:3e:ea:85:7d"
+                    }
+                ]
+            },
+            "accessIPv4": "",
+            "accessIPv6": "",
+            "links": [
+                {
+                    "rel": "self",
+                    "href": "http://34.91.114.145/compute/v2.1/1e6e233e637d4d55a50a62b63398ad15/servers/3b27b706-c0ad-4528-a865-7afaf7712130"
+                },
+                {
+                    "rel": "bookmark",
+                    "href": "http://34.91.114.145/compute/1e6e233e637d4d55a50a62b63398ad15/servers/3b27b706-c0ad-4528-a865-7afaf7712130"
+                }
+            ],
+            "OS-DCF:diskConfig": "AUTO",
+            "progress": 0,
+            "OS-EXT-AZ:availability_zone": "availability-zone",
+            "config_drive": "",
+            "key_name": null,
+            "OS-SRV-USG:launched_at": "2023-04-08T11:16:02.000000",
+            "OS-SRV-USG:terminated_at": null,
+            "OS-EXT-SRV-ATTR:host": "agent-integrations-openstack-default",
+            "OS-EXT-SRV-ATTR:instance_name": "instance-0000004d",
+            "OS-EXT-SRV-ATTR:hypervisor_hostname": "agent-integrations-openstack-default",
+            "OS-EXT-STS:task_state": null,
+            "OS-EXT-STS:vm_state": "active",
+            "OS-EXT-STS:power_state": 1,
+            "os-extended-volumes:volumes_attached": [
+                {
+                    "id": "ebbab6ad-a768-4098-9853-065bd545abe4"
+                }
+            ],
+            "security_groups": [
+                {
+                    "name": "default"
+                }
+            ]
+        },
+        {
+            "id": "4caf78dc-2e5d-40a7-8d56-1c2f7f664283",
+            "name": "demo-5",
+            "status": "ACTIVE",
+            "tenant_id": "1e6e233e637d4d55a50a62b63398ad15",
+            "user_id": "78205c506b534738bc851d3e189a00c3",
+            "metadata": {},
+            "hostId": "1ef00efcf95709f5083a0604bdd4642524c02085d41fbfdd404a707f",
+            "image": "",
+            "flavor": {
+                "id": "c1",
+                "links": [
+                    {
+                        "rel": "bookmark",
+                        "href": "http://34.91.114.145/compute/1e6e233e637d4d55a50a62b63398ad15/flavors/c1"
+                    }
+                ]
+            },
+            "created": "2023-04-08T11:15:18Z",
+            "updated": "2023-04-08T11:16:28Z",
+            "addresses": {
+                "shared": [
+                    {
+                        "version": 4,
+                        "addr": "192.168.233.184",
+                        "OS-EXT-IPS:type": "fixed",
+                        "OS-EXT-IPS-MAC:mac_addr": "fa:16:3e:4b:3d:11"
+                    }
+                ]
+            },
+            "accessIPv4": "",
+            "accessIPv6": "",
+            "links": [
+                {
+                    "rel": "self",
+                    "href": "http://34.91.114.145/compute/v2.1/1e6e233e637d4d55a50a62b63398ad15/servers/4caf78dc-2e5d-40a7-8d56-1c2f7f664283"
+                },
+                {
+                    "rel": "bookmark",
+                    "href": "http://34.91.114.145/compute/1e6e233e637d4d55a50a62b63398ad15/servers/4caf78dc-2e5d-40a7-8d56-1c2f7f664283"
+                }
+            ],
+            "OS-DCF:diskConfig": "AUTO",
+            "progress": 0,
+            "OS-EXT-AZ:availability_zone": "availability-zone",
+            "config_drive": "",
+            "key_name": null,
+            "OS-SRV-USG:launched_at": "2023-04-08T11:16:28.000000",
+            "OS-SRV-USG:terminated_at": null,
+            "OS-EXT-SRV-ATTR:host": "agent-integrations-openstack-default",
+            "OS-EXT-SRV-ATTR:instance_name": "instance-00000050",
+            "OS-EXT-SRV-ATTR:hypervisor_hostname": "agent-integrations-openstack-default",
+            "OS-EXT-STS:task_state": null,
+            "OS-EXT-STS:vm_state": "active",
+            "OS-EXT-STS:power_state": 1,
+            "os-extended-volumes:volumes_attached": [
+                {
+                    "id": "b0b1aaff-f67d-4719-9127-a62b97df26d5"
+                }
+            ],
+            "security_groups": [
+                {
+                    "name": "default"
+                }
+            ]
+        },
+        {
+            "id": "67ca710a-e73f-4801-a12f-d0c55ccb8955",
+            "name": "demo-1",
+            "status": "ACTIVE",
+            "tenant_id": "1e6e233e637d4d55a50a62b63398ad15",
+            "user_id": "78205c506b534738bc851d3e189a00c3",
+            "metadata": {},
+            "hostId": "1ef00efcf95709f5083a0604bdd4642524c02085d41fbfdd404a707f",
+            "image": "",
+            "flavor": {
+                "id": "c1",
+                "links": [
+                    {
+                        "rel": "bookmark",
+                        "href": "http://34.91.114.145/compute/1e6e233e637d4d55a50a62b63398ad15/flavors/c1"
+                    }
+                ]
+            },
+            "created": "2023-04-08T11:15:18Z",
+            "updated": "2023-04-08T11:15:49Z",
+            "addresses": {
+                "shared": [
+                    {
+                        "version": 4,
+                        "addr": "192.168.233.119",
+                        "OS-EXT-IPS:type": "fixed",
+                        "OS-EXT-IPS-MAC:mac_addr": "fa:16:3e:65:61:fe"
+                    }
+                ]
+            },
+            "accessIPv4": "",
+            "accessIPv6": "",
+            "links": [
+                {
+                    "rel": "self",
+                    "href": "http://34.91.114.145/compute/v2.1/1e6e233e637d4d55a50a62b63398ad15/servers/67ca710a-e73f-4801-a12f-d0c55ccb8955"
+                },
+                {
+                    "rel": "bookmark",
+                    "href": "http://34.91.114.145/compute/1e6e233e637d4d55a50a62b63398ad15/servers/67ca710a-e73f-4801-a12f-d0c55ccb8955"
+                }
+            ],
+            "OS-DCF:diskConfig": "AUTO",
+            "progress": 0,
+            "OS-EXT-AZ:availability_zone": "availability-zone",
+            "config_drive": "",
+            "key_name": null,
+            "OS-SRV-USG:launched_at": "2023-04-08T11:15:48.000000",
+            "OS-SRV-USG:terminated_at": null,
+            "OS-EXT-SRV-ATTR:host": "agent-integrations-openstack-default",
+            "OS-EXT-SRV-ATTR:instance_name": "instance-0000004c",
+            "OS-EXT-SRV-ATTR:hypervisor_hostname": "agent-integrations-openstack-default",
+            "OS-EXT-STS:task_state": null,
+            "OS-EXT-STS:vm_state": "active",
+            "OS-EXT-STS:power_state": 1,
+            "os-extended-volumes:volumes_attached": [
+                {
+                    "id": "055253bd-4202-4dd8-ba85-383108c8f4b5"
+                }
+            ],
+            "security_groups": [
+                {
+                    "name": "default"
+                }
+            ]
+        }
+    ],
+    "servers_links": [
+        {
+            "rel": "next",
+            "href": "http://34.141.226.224/compute/v2.1/***************************8ad15/servers/detail?limit=1&project_id=***************************8ad15&marker=67ca710a-e73f-4801-a12f-d0c55ccb8955"
+        }
+    ]
+}

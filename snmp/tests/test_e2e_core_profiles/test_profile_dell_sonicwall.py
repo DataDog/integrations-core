@@ -100,6 +100,7 @@ def test_e2e_profile_dell_sonicwall(dd_agent_check):
         'sys_object_id': '1.3.6.1.4.1.8741.1',
         'vendor': 'dell',
         'version': '01972WA81B1D',
+        'device_type': 'firewall',
     }
     device['tags'] = common_tags
     assert_device_metadata(aggregator, device)

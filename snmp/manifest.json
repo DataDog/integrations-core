@@ -26,7 +26,6 @@
     "homepage": "https://www.datadoghq.com",
     "sales_email": "info@datadoghq.com"
   },
-  "oauth": {},
   "assets": {
     "integration": {
       "source_type_name": "SNMP",
@@ -43,19 +42,27 @@
       },
       "service_checks": {
         "metadata_path": "assets/service_checks.json"
-      }
+      },
+      "source_type_id": 78,
+      "auto_install": true
     },
     "dashboards": {
       "Interface Performance": "assets/dashboards/interface_performance.json",
       "Datacenter Overview": "assets/dashboards/datacenter_overview.json",
       "Netflow Monitoring": "assets/dashboards/netflow_monitoring.json",
-      "Datadog NDM Environment": "assets/dashboards/datadog_ndm_environment.json"
+      "Datadog NDM Environment": "assets/dashboards/datadog_ndm_environment.json",
+      "BGP & OSPF Overview": "assets/dashboards/bgp_ospf_overview.json"
     },
     "monitors": {
       "[SNMP] Device Down Alert": "assets/monitors/device_down.json",
       "[SNMP] Device Unreachable Alert": "assets/monitors/device_unreachable.json",
       "[SNMP] Interface Down Alert": "assets/monitors/interface_down.json",
-      "[SNMP] LinkDown Trap Alert": "assets/monitors/traps_linkDown.json"
+      "[SNMP] LinkDown Trap Alert": "assets/monitors/traps_linkDown.json",
+      "[SNMP] CPU usage high for {{snmp_device.name}} in namespace {{device_namespace.name}}": "assets/monitors/high_cpu.json",
+      "[SNMP] High memory usage for device {{snmp_device.name}} in namespace {{device_namespace.name}}": "assets/monitors/high_memory.json",
+      "[SNMP] High interface bandwidth usage for incoming traffic for device {{snmp_device.name}} on interface {{interface.name}} in {{device_namespace.name}}": "assets/monitors/high_interface_bandwidth_usage_in.json",
+      "[SNMP] High interface bandwidth usage for outgoing traffic for device {{snmp_device.name}} on interface {{interface.name}} in {{device_namespace.name}}": "assets/monitors/high_interface_bandwidth_usage_out.json",
+      "[SNMP] BGP peer state between {{snmp_device.name}} and neighbor {{neighbor.name}} is stuck in an unestablished state": "assets/monitors/bgp_peer_state_stuck.json"
     }
   }
 }

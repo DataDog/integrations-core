@@ -27,7 +27,6 @@
     "homepage": "https://www.datadoghq.com",
     "sales_email": "info@datadoghq.com"
   },
-  "oauth": {},
   "assets": {
     "integration": {
       "source_type_name": "Palo Alto Networks Firewall",
@@ -40,7 +39,9 @@
       "service_checks": {
         "metadata_path": "assets/service_checks.json"
       },
-      "process_signatures": []
+      "process_signatures": [],
+      "source_type_id": 10155,
+      "auto_install": true
     },
     "dashboards": {
       "Palo Alto Networks Firewall Overview": "assets/dashboards/palo_alto_networks_firewall_overview.json"

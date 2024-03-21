@@ -2,58 +2,58 @@ id: calico
 metric_id: calico
 backend_only: false
 facets:
-  - name: Dataplane ID
-    source: log
+  - groups:
+      - Calico
+    name: Dataplane ID
     path: calico.id.name
-    groups:
-      - Calico
-  - name: Dataplane Endpoint
     source: log
+  - groups:
+      - Calico
+    name: Dataplane Endpoint
     path: calico.endpoint.name
-    groups:
-      - Calico
-  - name: Dataplane Interface
     source: log
+  - groups:
+      - Calico
+    name: Dataplane Interface
     path: calico.interface.name
+    source: log
+  - facetType: range
     groups:
       - Calico
-  - name: Dataplane Reconciliation Average
-    source: log
+    name: Dataplane Reconciliation Average
     path: calico.dataplane_reconciliation.avg
+    source: log
     type: double
-    facetType: range
     unit:
       family: time
       name: millisecond
+  - facetType: range
     groups:
       - Calico
-  - name: Dataplane Reconciliation Count
-    source: log
+    name: Dataplane Reconciliation Count
     path: calico.dataplane_reconciliation.count
+    source: log
     type: integer
-    facetType: range
+  - facetType: range
     groups:
       - Calico
-  - name: Dataplane Reconciliation Longest
-    source: log
+    name: Dataplane Reconciliation Longest
     path: calico.dataplane_reconciliation.longest
+    source: log
     type: double
-    facetType: range
     unit:
       family: time
       name: millisecond
-    groups:
+  - groups:
       - Calico
-  - name: Config Key
-    source: log
+    name: Config Key
     path: calico.config.key
-    groups:
-      - Calico
-  - name: Table
     source: log
-    path: calico.table
-    groups:
+  - groups:
       - Calico
+    name: Table
+    path: calico.table
+    source: log
 pipeline:
   type: pipeline
   name: Calico

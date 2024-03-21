@@ -6,7 +6,7 @@ import ssl
 
 import pytest
 from mock import ANY, MagicMock, patch
-from pyVmomi import SoapAdapter, vim, vmodl
+from pyVmomi import vim, vmodl
 
 from datadog_checks.vsphere.api import APIConnectionError, VSphereAPI
 from datadog_checks.vsphere.config import VSphereConfig
@@ -31,6 +31,7 @@ def test_ssl_verify_false(realtime_instance):
 
 def test_ssl_cert(realtime_instance):
     realtime_instance['ssl_verify'] = True
+    realtime_instance['ssl_cafile'] = '/dummy/path/cafile.pem'
     realtime_instance['ssl_capath'] = '/dummy/path'
 
     with patch('datadog_checks.vsphere.api.connect') as connect, patch(
@@ -45,7 +46,45 @@ def test_ssl_cert(realtime_instance):
         assert actual_context.protocol == ssl.PROTOCOL_TLS
         assert actual_context.verify_mode == ssl.CERT_REQUIRED
         assert actual_context.check_hostname is True
-        load_verify_locations.assert_called_with(capath='/dummy/path')
+        load_verify_locations.assert_called_with(cafile=None, capath='/dummy/path')
+
+
+def test_ssl_cafile(realtime_instance):
+    realtime_instance['ssl_verify'] = True
+    realtime_instance['ssl_capath'] = '/dummy/path'
+
+    with patch('datadog_checks.vsphere.api.connect') as connect, patch(
+        'ssl.SSLContext.load_verify_locations'
+    ) as load_verify_locations:
+        smart_connect = connect.SmartConnect
+
+        config = VSphereConfig(realtime_instance, {}, MagicMock())
+        VSphereAPI(config, MagicMock())
+
+        actual_context = smart_connect.call_args.kwargs['sslContext']  # type: ssl.SSLContext
+        assert actual_context.protocol == ssl.PROTOCOL_TLS
+        assert actual_context.verify_mode == ssl.CERT_REQUIRED
+        assert actual_context.check_hostname is True
+        load_verify_locations.assert_called_with(cafile=None, capath='/dummy/path')
+
+
+def test_ssl_capath(realtime_instance):
+    realtime_instance['ssl_verify'] = True
+    realtime_instance['ssl_cafile'] = '/dummy/path/cafile.pem'
+
+    with patch('datadog_checks.vsphere.api.connect') as connect, patch(
+        'ssl.SSLContext.load_verify_locations'
+    ) as load_verify_locations:
+        smart_connect = connect.SmartConnect
+
+        config = VSphereConfig(realtime_instance, {}, MagicMock())
+        VSphereAPI(config, MagicMock())
+
+        actual_context = smart_connect.call_args.kwargs['sslContext']  # type: ssl.SSLContext
+        assert actual_context.protocol == ssl.PROTOCOL_TLS
+        assert actual_context.verify_mode == ssl.CERT_REQUIRED
+        assert actual_context.check_hostname is True
+        load_verify_locations.assert_called_with(cafile='/dummy/path/cafile.pem', capath=None)
 
 
 def test_connect_success(realtime_instance):
@@ -183,9 +222,9 @@ def test_get_new_events_failure_without_fallback(realtime_instance):
         config = VSphereConfig(realtime_instance, {}, MagicMock())
         api = VSphereAPI(config, MagicMock())
 
-        api._conn.content.eventManager.QueryEvents.side_effect = SoapAdapter.ParserError("some parse error")
+        api._conn.content.eventManager.QueryEvents.side_effect = KeyError("some parse error")
 
-        with pytest.raises(SoapAdapter.ParserError):
+        with pytest.raises(KeyError):
             api.get_new_events(start_time=dt.datetime.now())
 
 
@@ -200,16 +239,16 @@ def test_get_new_events_with_fallback(realtime_instance):
         event3 = vim.event.Event(key=3)
         event_collector = MagicMock()
         api._conn.content.eventManager.QueryEvents.side_effect = [
-            SoapAdapter.ParserError("some parse error"),
+            KeyError("some parse error"),
             [event1],
-            SoapAdapter.ParserError("event parse error"),
+            KeyError("event parse error"),
             [event3],
         ]
         api._conn.content.eventManager.CreateCollectorForEvents.return_value = event_collector
 
         event_collector.ReadNextEvents.side_effect = [
             [event1],
-            SoapAdapter.ParserError("event parse error"),
+            KeyError("event parse error"),
             [event3],
             [],
         ]

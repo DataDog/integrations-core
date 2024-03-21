@@ -187,7 +187,7 @@ metrics:
 
 #### Table metrics tagging
 
-Table metrics require `metric_tags` to identify each row's metric. 
+Table metrics require `metric_tags` to identify each row's metric.
 It is possible to add tags to metrics retrieved from a table in three ways:
 
 ##### Using a column within the same table
@@ -302,7 +302,7 @@ metrics:
 
 ##### Using an index
 
-Important: "_index_" refers to one digit of the index part of the row OID. For example, if the column OID is `1.2.3.1.2` and the row OID is `1.2.3.1.2.7.8.9`, the full index is `7.8.9`. In this example, `index: 1` refers to `7` and `index: 2` refers to `8`, and so on.  
+Important: "_index_" refers to one digit of the index part of the row OID. For example, if the column OID is `1.2.3.1.2` and the row OID is `1.2.3.1.2.7.8.9`, the full index is `7.8.9`. In this example, `index: 1` refers to `7` and `index: 2` refers to `8`, and so on.
 
 Here is specific example of an OID with multiple positions in the index ([OID ref](http://oidref.com/1.3.6.1.4.1.9.9.147.1.2.2.2.1)):
 
@@ -330,7 +330,7 @@ cfwConnectionStatService OBJECT-TYPE
             statistics."
     ::= { cfwConnectionStatEntry 1 }
 ```
-For example, when we fetch the value of `cfwConnectionStatValue`, the OID with the index is like `1.3.6.1.4.1.9.9.147.1.2.2.2.1.5.20.2` = `4087850099`, here the indexes are 20.2 (`1.3.6.1.4.1.9.9.147.1.2.2.2.1.5.<service type>.<stat type>`).  Here is how we would specify this configuration in the yaml (as seen in the [corresponding profile](https://github.com/DataDog/integrations-core/blob/3a7b1d1877b7a0dfcd16e2ff856e636c8717ef5b/snmp/datadog_checks/snmp/data/profiles/_cisco-asa.yaml#L7-L18) packaged with the agent): 
+For example, when we fetch the value of `cfwConnectionStatValue`, the OID with the index is like `1.3.6.1.4.1.9.9.147.1.2.2.2.1.5.20.2` = `4087850099`, here the indexes are 20.2 (`1.3.6.1.4.1.9.9.147.1.2.2.2.1.5.<service type>.<stat type>`).  Here is how we would specify this configuration in the yaml (as seen in the [corresponding profile](https://github.com/DataDog/integrations-core/blob/3a7b1d1877b7a0dfcd16e2ff856e636c8717ef5b/snmp/datadog_checks/snmp/data/profiles/_cisco-asa.yaml#L7-L18) packaged with the agent):
 
 ```yaml
 metrics:
@@ -458,7 +458,7 @@ metrics:
 When the value is a flag stream like `010101`, you can use `metric_type: flag_stream` to submit each flag as individual metric with value `0` or `1`. Two options are required when using `flag_stream`:
 
 - `options.placement`: position of the flag in the flag stream (1-based indexing, first element is placement 1).
-- `options.metric_suffix`: suffix appended to the metric name for a specific flag, usually matching the name of the flag. 
+- `options.metric_suffix`: suffix appended to the metric name for a specific flag, usually matching the name of the flag.
 
 Example:
 
@@ -558,7 +558,7 @@ metadata:
         value: "dell"
 ```
 
-Supported resources and fields can be found here: [payload.go](https://github.com/DataDog/datadog-agent/blob/main/pkg/collector/corechecks/snmp/internal/metadata/payload.go)
+Supported resources and fields can be found here: [payload.go](https://github.com/DataDog/datadog-agent/blob/main/pkg/networkdevice/metadata/payload.go)
 
 #### Value from a static value
 
@@ -738,11 +738,11 @@ metrics:
 
 In this case, the metrics `snmp.myOidSymbol` will be tagged like this: `connected_device:10.67.0.7`.
 
-This `format: ip_address` formatter also works for IPv6 when the input bytes represent IPv6. 
+This `format: ip_address` formatter also works for IPv6 when the input bytes represent IPv6.
 
 #### `scale_factor`
 
-In a value is in kilobytes and you would like to convert it to bytes, `scale_factor` can be used for that.  
+In a value is in kilobytes and you would like to convert it to bytes, `scale_factor` can be used for that.
 
 Example:
 

@@ -12,6 +12,7 @@ import shutil
 import string
 import subprocess
 import sys
+import time
 from collections import defaultdict, namedtuple
 from contextlib import contextmanager
 from datetime import datetime
@@ -19,6 +20,7 @@ from urllib.parse import urljoin
 
 import pytest
 import requests
+from flaky import flaky
 from freezegun import freeze_time
 from packaging.version import parse as parse_version
 from tenacity import retry, stop_after_attempt, wait_exponential
@@ -61,6 +63,11 @@ EXCLUDED_INTEGRATION_VERSION = [
 ]
 
 
+def delay_rerun(*args):
+    time.sleep(10)
+    return True
+
+
 @contextmanager
 def modified_args(argv):
     old_sys_argv = sys.argv
@@ -80,6 +87,7 @@ def _do_run_downloader(argv):
 
 
 @pytest.mark.online
+@flaky(max_runs=3, rerun_filter=delay_rerun)
 def test_download(capfd, distribution_name, distribution_version, temporary_local_repo, disable_verification, mocker):
     """Test datadog-checks-downloader successfully downloads and validates a wheel file."""
     argv = [distribution_name, "--version", distribution_version]

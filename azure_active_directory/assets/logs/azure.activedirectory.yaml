@@ -1,160 +1,161 @@
 id: azure.activedirectory
 metric_id: azure-active-directory
+backend_only: false
 facets:
-  - name: Duration
-    source: log
+  - facetType: range
+    groups:
+      - Measure
+    name: Duration
     path: duration
+    source: log
     type: double
-    facetType: range
     unit:
       family: time
       name: nanosecond
-    groups:
-      - Measure
-  - name: Event Name
-    source: log
+  - groups:
+      - Event
+    name: Event Name
     path: evt.name
-    groups:
-      - Event
-  - name: Event Outcome
     source: log
+  - groups:
+      - Event
+    name: Event Outcome
     path: evt.outcome
-    groups:
-      - Event
-  - name: User-Agent
     source: log
+  - groups:
+      - Web Access
+    name: User-Agent
     path: http.useragent
-    groups:
-      - Web Access
-  - name: Browser
     source: log
+  - groups:
+      - Web Access
+    name: Browser
     path: http.useragent_details.browser.family
-    groups:
-      - Web Access
-  - name: Device
     source: log
+  - groups:
+      - Web Access
+    name: Device
     path: http.useragent_details.device.family
-    groups:
-      - Web Access
-  - name: OS
     source: log
+  - groups:
+      - Web Access
+    name: OS
     path: http.useragent_details.os.family
-    groups:
-      - Web Access
-  - name: City Name
     source: log
+  - groups:
+      - Geoip
+    name: City Name
     path: network.client.geoip.city.name
-    groups:
-      - Geoip
-  - name: Continent Code
     source: log
+  - groups:
+      - Geoip
+    name: Continent Code
     path: network.client.geoip.continent.code
-    groups:
-      - Geoip
-  - name: Continent Name
     source: log
+  - groups:
+      - Geoip
+    name: Continent Name
     path: network.client.geoip.continent.name
-    groups:
-      - Geoip
-  - name: Country ISO Code
     source: log
+  - groups:
+      - Geoip
+    name: Country ISO Code
     path: network.client.geoip.country.iso_code
-    groups:
-      - Geoip
-  - name: Country Name
     source: log
+  - groups:
+      - Geoip
+    name: Country Name
     path: network.client.geoip.country.name
-    groups:
-      - Geoip
-  - name: Subdivision ISO Code
     source: log
+  - groups:
+      - Geoip
+    name: Subdivision ISO Code
     path: network.client.geoip.subdivision.iso_code
-    groups:
-      - Geoip
-  - name: Subdivision Name
     source: log
+  - groups:
+      - Geoip
+    name: Subdivision Name
     path: network.client.geoip.subdivision.name
-    groups:
-      - Geoip
-  - name: Client IP
     source: log
-    path: network.client.ip
-    groups:
+  - groups:
       - Web Access
-  - name: User Email
+    name: Client IP
+    path: network.client.ip
     source: log
+  - groups:
+      - User
+    name: User Email
     path: usr.email
-    groups:
-      - User
-  - name: User ID
     source: log
+  - groups:
+      - User
+    name: User ID
     path: usr.id
-    groups:
-      - User
-  - name: User Name
     source: log
+  - groups:
+      - User
+    name: User Name
     path: usr.name
-    groups:
-      - User
-  - name: Resource ID
     source: log
+  - groups:
+      - Azure
+    name: Resource ID
     path: resourceId
-    type: string
-    groups:
-      - Azure
-  - name: Resource Name
     source: log
+    type: string
+  - groups:
+      - Azure
+    name: Resource Name
     path: resource_name
-    type: string
-    groups:
-      - Azure
-  - name: Client Application
     source: log
+    type: string
+  - groups:
+      - Azure
+    name: Client Application
     path: properties.clientAppUsed
-    type: string
-    groups:
-      - Azure
-  - name: Service Principal
     source: log
+    type: string
+  - groups:
+      - Azure
+    name: Service Principal
     path: properties.servicePrincipalName
-    type: string
-    groups:
-      - Azure
-  - name: Application Display Name
     source: log
+    type: string
+  - groups:
+      - Azure
+    name: Application Display Name
     path: properties.appDisplayName
-    type: string
-    groups:
-      - Azure
-  - name: Application ID
     source: log
+    type: string
+  - groups:
+      - Azure
+    name: Application ID
     path: properties.appId
-    type: string
-    groups:
-      - Azure
-  - name: Resource Group
-    source: tag
-    path: resource_group
-    type: string
-    groups:
-      - Azure
-  - name: Event Category
     source: log
-    path: evt.category
-    groups:
+    type: string
+  - groups:
+      - Azure
+    name: Resource Group
+    path: resource_group
+    source: tag
+    type: string
+  - groups:
       - Event
-  - name: Subscription ID
-    source: tag
+    name: Event Category
+    path: evt.category
+    source: log
+  - groups:
+      - Azure
+    name: Subscription ID
     path: subscription_id
-    type: string
-    groups:
-      - Azure
-  - name: Tenant
     source: tag
-    path: tenant
     type: string
-    groups:
+  - groups:
       - Azure
+    name: Tenant
+    path: tenant
+    source: tag
+    type: string
 pipeline:
   type: pipeline
   name: Azure Active Directory

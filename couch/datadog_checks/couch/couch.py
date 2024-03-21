@@ -152,43 +152,44 @@ class CouchDB1:
 
         couchdb['stats'] = overall_stats
 
-        # Next, get all database names.
-        endpoint = '/_all_dbs/'
+        if self.instance.get("enable_per_db_metrics", True):
+            # Next, get all database names.
+            endpoint = '/_all_dbs/'
 
-        url = urljoin(server, endpoint)
+            url = urljoin(server, endpoint)
 
-        # Get the list of included databases.
-        db_include = self.instance.get('db_include', self.instance.get('db_whitelist'))
-        db_include = set(db_include) if db_include else None
-        self.db_exclude.setdefault(server, [])
-        self.db_exclude[server].extend(self.instance.get('db_exclude', self.instance.get('db_blacklist', [])))
-        databases = set(self.agent_check.get(url, tags)) - set(self.db_exclude[server])
-        databases = databases.intersection(db_include) if db_include else databases
+            # Get the list of included databases.
+            db_include = self.instance.get('db_include', self.instance.get('db_whitelist'))
+            db_include = set(db_include) if db_include else None
+            self.db_exclude.setdefault(server, [])
+            self.db_exclude[server].extend(self.instance.get('db_exclude', self.instance.get('db_blacklist', [])))
+            databases = set(self.agent_check.get(url, tags)) - set(self.db_exclude[server])
+            databases = databases.intersection(db_include) if db_include else databases
 
-        max_dbs_per_check = self.instance.get('max_dbs_per_check', self.agent_check.MAX_DB)
-        if len(databases) > max_dbs_per_check:
-            self.agent_check.warning('Too many databases, only the first %s will be checked.', max_dbs_per_check)
-            databases = list(databases)[:max_dbs_per_check]
+            max_dbs_per_check = self.instance.get('max_dbs_per_check', self.agent_check.MAX_DB)
+            if len(databases) > max_dbs_per_check:
+                self.agent_check.warning('Too many databases, only the first %s will be checked.', max_dbs_per_check)
+                databases = list(databases)[:max_dbs_per_check]
 
-        for dbName in databases:
-            url = urljoin(server, quote(dbName, safe=''))
-            db_stats = None
-            try:
-                db_stats = self.agent_check.get(url, tags)
-            except requests.exceptions.HTTPError as e:
-                couchdb['databases'][dbName] = None
-                if (e.response.status_code == 403) or (e.response.status_code == 401):
-                    self.db_exclude[server].append(dbName)
+            for dbName in databases:
+                url = urljoin(server, quote(dbName, safe=''))
+                db_stats = None
+                try:
+                    db_stats = self.agent_check.get(url, tags)
+                except requests.exceptions.HTTPError as e:
+                    couchdb['databases'][dbName] = None
+                    if (e.response.status_code == 403) or (e.response.status_code == 401):
+                        self.db_exclude[server].append(dbName)
 
-                    self.agent_check.warning(
-                        'Database %s is not readable by the configured user. '
-                        'It will be added to the exclusion list. Please restart the agent to clear.',
-                        dbName,
-                    )
-                    del couchdb['databases'][dbName]
-                    continue
-            if db_stats is not None:
-                couchdb['databases'][dbName] = db_stats
+                        self.agent_check.warning(
+                            'Database %s is not readable by the configured user. '
+                            'It will be added to the exclusion list. Please restart the agent to clear.',
+                            dbName,
+                        )
+                        del couchdb['databases'][dbName]
+                        continue
+                if db_stats is not None:
+                    couchdb['databases'][dbName] = db_stats
         return couchdb
 
 
@@ -345,23 +346,24 @@ class CouchDB2:
             self._build_system_metrics(self._get_system_stats(server, name, tags), tags)
             self._build_active_tasks_metrics(self._get_active_tasks(server, name, tags), tags)
 
-            db_include = self.instance.get('db_include', self.instance.get('db_whitelist'))
-            db_exclude = self.instance.get('db_exclude', self.instance.get('db_blacklist', []))
-            scanned_dbs = 0
-            for db in self._get_dbs_to_scan(server, name, tags):
-                if (db_include is None or db in db_include) and (db not in db_exclude):
-                    db_tags = config_tags + ["db:{0}".format(db)]
-                    db_url = urljoin(server, db)
-                    self._build_db_metrics(self.agent_check.get(db_url, db_tags), db_tags)
-                    for dd in self.agent_check.get(
-                        "{0}/_all_docs?startkey=\"_design/\"&endkey=\"_design0\"".format(db_url), db_tags
-                    )['rows']:
-                        self._build_dd_metrics(
-                            self.agent_check.get("{0}/{1}/_info".format(db_url, dd['id']), db_tags), db_tags
-                        )
-                    scanned_dbs += 1
-                    if scanned_dbs >= max_dbs_per_check:
-                        break
+            if self.instance.get("enable_per_db_metrics", True):
+                db_include = self.instance.get('db_include', self.instance.get('db_whitelist'))
+                db_exclude = self.instance.get('db_exclude', self.instance.get('db_blacklist', []))
+                scanned_dbs = 0
+                for db in self._get_dbs_to_scan(server, name, tags):
+                    if (db_include is None or db in db_include) and (db not in db_exclude):
+                        db_tags = config_tags + ["db:{0}".format(db)]
+                        db_url = urljoin(server, db)
+                        self._build_db_metrics(self.agent_check.get(db_url, db_tags), db_tags)
+                        for dd in self.agent_check.get(
+                            "{0}/_all_docs?startkey=\"_design/\"&endkey=\"_design0\"".format(db_url), db_tags
+                        )['rows']:
+                            self._build_dd_metrics(
+                                self.agent_check.get("{0}/{1}/_info".format(db_url, dd['id']), db_tags), db_tags
+                            )
+                        scanned_dbs += 1
+                        if scanned_dbs >= max_dbs_per_check:
+                            break
 
     def _get_node_stats(self, server, name, tags):
         url = urljoin(server, "/_node/{0}/_stats".format(name))

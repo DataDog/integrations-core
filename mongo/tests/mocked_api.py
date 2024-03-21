@@ -6,7 +6,6 @@ import itertools
 import json
 import os
 
-import pymongo.errors
 from bson import Timestamp, json_util
 from mock import MagicMock
 
@@ -37,42 +36,30 @@ class MockedCollection(object):
                 content = json.load(f, object_hook=json_util.object_hook)
                 self.find_one = MagicMock(return_value=content)
         else:
-            with open(os.path.join(HERE, "fixtures", "indexStats-{}".format(coll_name)), 'r') as f:
+            with open(os.path.join(HERE, "fixtures", f"indexStats-{coll_name}"), 'r') as f:
                 self.aggregate = MagicMock(return_value=json.load(f, object_hook=json_util.object_hook))
 
 
 class MockedDB(object):
     def __init__(self, db_name, deployment):
         self._db_name = db_name
-        self.current_op = lambda: self.command("current_op")
         self.deployment = deployment
 
     def __getitem__(self, coll_name):
         return MockedCollection(self._db_name, coll_name)
 
-    def aggregate(self, pipeline, **kwargs):
-        assert pipeline == [{"$currentOp": {}}], "Unexpected input to mocked DB method"
-
-        if self._db_name != "admin":
-            raise pymongo.errors.OperationFailure(
-                "$currentOp must be run against the 'admin' database with {aggregate: 1}"
-            )
-
-        with open(os.path.join(HERE, "fixtures", "current_op"), 'r') as f:
-            return json.load(f, object_hook=json_util.object_hook)
-
     def command(self, command, *args, **_):
         filename = command
         if command == "dbstats":
-            filename += "-{}".format(self._db_name)
+            filename += f"-{self._db_name}"
         elif command == "collstats":
             coll_name = args[0]
-            filename += "-{}".format(coll_name)
+            filename += f"-{coll_name}"
         elif command in ("getCmdLineOpts", "replSetGetStatus"):
-            filename += "-{}".format(self.deployment)
+            filename += f"-{self.deployment}"
         elif command in ("find", "count", "aggregate"):
             # At time of writing, those commands only are for custom queries.
-            filename = "custom-query-{}".format(command)
+            filename = f"custom-query-{command}"
         with open(os.path.join(HERE, "fixtures", filename), 'r') as f:
             return json.load(f, object_hook=json_util.object_hook)
 

@@ -1,0 +1,75 @@
+{
+  "manifest_version": "2.0.0",
+  "app_uuid": "8d3e0e2f-df52-4a12-a976-3ded71553a3a",
+  "app_id": "cisco-duo",
+  "display_on_public_website": false,
+  "tile": {
+    "overview": "README.md#Overview",
+    "configuration": "README.md#Setup",
+    "support": "README.md#Support",
+    "changelog": "CHANGELOG.md",
+    "description": "Gain insights into Cisco Duo logs.",
+    "title": "Cisco Duo",
+    "media": [
+      {
+        "caption": "Cisco Duo - Authentication Logs",
+        "image_url": "images/cisco_duo_authentication_logs.png",
+        "media_type": "image"
+      },
+      {
+        "caption": "Cisco Duo - Activity Logs",
+        "image_url": "images/cisco_duo_activity_logs.png",
+        "media_type": "image"
+      },
+      {
+        "caption": "Cisco Duo - Administrator Logs",
+        "image_url": "images/cisco_duo_administrator_logs.png",
+        "media_type": "image"
+      },
+      {
+        "caption": "Cisco Duo - Telephony Logs",
+        "image_url": "images/cisco_duo_telephony_logs.png",
+        "media_type": "image"
+      },
+      {
+        "caption": "Cisco Duo - Offline Enrollment Logs",
+        "image_url": "images/cisco_duo_offline_enrollment_logs.png",
+        "media_type": "image"
+      }
+    ],
+    "classifier_tags": [
+      "Category::Log Collection",
+      "Category::Security",
+      "Submitted Data Type::Logs"
+    ]
+  },
+  "assets": {
+    "integration": {
+      "auto_install": false,
+      "source_type_id": 6576439,
+      "source_type_name": "cisco-duo",
+      "events": {
+        "creates_events": false
+      },
+      "service_checks": {
+        "metadata_path": "assets/service_checks.json"
+      }
+    },
+    "dashboards": {
+      "Cisco Duo - Authentication Logs": "assets/dashboards/cisco_duo_authentication_logs.json",
+      "Cisco Duo - Activity Logs": "assets/dashboards/cisco_duo_activity_logs.json",
+      "Cisco Duo - Administrator Logs": "assets/dashboards/cisco_duo_administrator_logs.json",
+      "Cisco Duo - Telephony Logs": "assets/dashboards/cisco_duo_telephony_logs.json",
+      "Cisco Duo - Offline Enrollment Logs": "assets/dashboards/cisco_duo_offline_enrollment_logs.json"
+    },
+    "logs": {
+      "source": "cisco-duo"
+    }
+  },
+  "author": {
+    "support_email": "help@datadoghq.com",
+    "name": "Datadog",
+    "homepage": "https://www.datadoghq.com",
+    "sales_email": "info@datadoghq.com"
+  }
+}

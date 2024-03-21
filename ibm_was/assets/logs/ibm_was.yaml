@@ -1,16 +1,17 @@
 id: ibm_was
 metric_id: ibm-was
+backend_only: false
 facets:
-  - name: Thread Name
-    source: log
-    path: logger.thread_name
-    groups:
+  - groups:
       - Source Code
-  - name: IBM provider
+    name: Thread Name
+    path: logger.thread_name
     source: log
-    path: provider
-    groups:
+  - groups:
       - IBM
+    name: IBM provider
+    path: provider
+    source: log
 pipeline:
   type: pipeline
   name: IBM Websphere

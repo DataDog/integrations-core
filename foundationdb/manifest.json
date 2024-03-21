@@ -25,7 +25,6 @@
     "homepage": "https://www.datadoghq.com",
     "sales_email": "info@datadoghq.com"
   },
-  "oauth": {},
   "assets": {
     "integration": {
       "source_type_name": "FoundationDB",
@@ -37,12 +36,17 @@
       },
       "metrics": {
         "prefix": "foundationdb.",
-        "check": ["foundationdb.processes", "foundationdb.instances"],
+        "check": [
+          "foundationdb.processes",
+          "foundationdb.instances"
+        ],
         "metadata_path": "metadata.csv"
       },
       "service_checks": {
         "metadata_path": "assets/service_checks.json"
-      }
+      },
+      "source_type_id": 10258,
+      "auto_install": true
     },
     "dashboards": {
       "FoundationDB Latency Probe": "assets/dashboards/foundationdb_latency_probe.json",

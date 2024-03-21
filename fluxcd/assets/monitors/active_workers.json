@@ -1,0 +1,31 @@
+{
+  "version": 2,
+  "created_at": "2023-10-24",
+  "last_updated_at": "2023-10-24",
+  "title": "Active Workers Count",
+  "tags": [
+    "integration:fluxcd"
+  ],
+  "description": "Notify your team when your active worker count has reached system resource capacity.",
+  "definition": {
+    "name": "[Fluxcd] Active Workers Count",
+    "type": "query alert",
+    "query": "sum(last_5m):max:fluxcd.controller.runtime.active.workers{*} by {kube_namespace,controller} >= 2",
+    "message": "{{#is_warning}}\nController {{controller.name}} has {{value}} active workers in namespace:{{kube_namespace.name}} for the last 5 minutes.\n{{/is_warning}} \n{{#is_alert}}\nController {{controller.name}} has {{value}} active workers in namespace:{{kube_namespace.name}} for the last 5 minutes.\n{{/is_alert}}",
+    "tags": ["integration:fluxcd"],
+    "options": {
+      "thresholds": {
+        "critical": 2,
+        "warning": 1
+      },
+      "notify_audit": false,
+      "include_tags": true,
+      "new_group_delay": 60,
+      "avalanche_window": 10,
+      "silenced": {}
+    },
+    "priority": null,
+    "restricted_roles": null
+  }
+}
+

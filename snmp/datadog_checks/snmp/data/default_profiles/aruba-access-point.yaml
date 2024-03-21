@@ -53,3 +53,5 @@ metadata:
           match_pattern: '\bVersion\s+([\d.]+)'
           match_value: '$1'
           # Example: `6.5.1.0` part of `Version 6.5.1.0-4.3.1.2`
+      type:
+        value: "access_point"

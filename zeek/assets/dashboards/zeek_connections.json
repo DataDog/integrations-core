@@ -1,0 +1,834 @@
+{
+    "title": "Zeek - Connections",
+    "description": "- This dashboard provides the details of the TCP, UDP, and ICMP traffic.",
+    "widgets": [
+        {
+            "id": 6194204023115768,
+            "definition": {
+                "type": "image",
+                "url": "https://i0.wp.com/zeek.org/wp-content/uploads/2019/09/logo.png?fit=275%2C91&ssl=1",
+                "sizing": "scale-down",
+                "has_background": true,
+                "has_border": false,
+                "vertical_align": "center",
+                "horizontal_align": "center"
+            },
+            "layout": {
+                "x": 0,
+                "y": 0,
+                "width": 4,
+                "height": 2
+            }
+        },
+        {
+            "id": 7130055585319982,
+            "definition": {
+                "type": "note",
+                "content": "## Overview\n- This dashboard provides the details of the TCP, UDP, and ICMP traffic.",
+                "background_color": "white",
+                "font_size": "14",
+                "text_align": "left",
+                "vertical_align": "top",
+                "show_tick": false,
+                "tick_pos": "50%",
+                "tick_edge": "left",
+                "has_padding": true
+            },
+            "layout": {
+                "x": 4,
+                "y": 0,
+                "width": 4,
+                "height": 2
+            }
+        },
+        {
+            "id": 5813254737568752,
+            "definition": {
+                "type": "note",
+                "content": "## Widgets\n1. Total Connections\n2. Longest Duration of the Connection\n3. Avg. Missed Bytes\n4. Connections by Protocol Types\n5. Connections Over Time\n6. Top Connection States\n7. Top 10 Originator\n8. Top 10 Responder\n9. Bytes Transferred Over Time\n10. Avg. Packets Transferred Over Time\n11. Connection Log Details",
+                "background_color": "white",
+                "font_size": "14",
+                "text_align": "left",
+                "vertical_align": "top",
+                "show_tick": false,
+                "tick_pos": "50%",
+                "tick_edge": "left",
+                "has_padding": true
+            },
+            "layout": {
+                "x": 8,
+                "y": 0,
+                "width": 4,
+                "height": 2
+            }
+        },
+        {
+            "id": 2356878557366748,
+            "definition": {
+                "title": "Connections",
+                "background_color": "vivid_purple",
+                "show_title": true,
+                "type": "group",
+                "layout_type": "ordered",
+                "widgets": [
+                    {
+                        "id": 2601099924789768,
+                        "definition": {
+                            "title": "Total Connections",
+                            "title_size": "16",
+                            "title_align": "left",
+                            "time": {},
+                            "type": "query_value",
+                            "requests": [
+                                {
+                                    "response_format": "scalar",
+                                    "queries": [
+                                        {
+                                            "data_source": "logs",
+                                            "name": "query1",
+                                            "indexes": [
+                                                "*"
+                                            ],
+                                            "compute": {
+                                                "aggregation": "count"
+                                            },
+                                            "group_by": [],
+                                            "search": {
+                                                "query": "source:zeek service:conn* $Protocol $Host $Responder-Port $Responder-IP $Originator-Port $Originator-IP"
+                                            },
+                                            "storage": "hot"
+                                        }
+                                    ],
+                                    "formulas": [
+                                        {
+                                            "formula": "query1"
+                                        }
+                                    ]
+                                }
+                            ],
+                            "autoscale": true,
+                            "precision": 2,
+                            "timeseries_background": {
+                                "type": "area"
+                            }
+                        },
+                        "layout": {
+                            "x": 0,
+                            "y": 0,
+                            "width": 4,
+                            "height": 2
+                        }
+                    },
+                    {
+                        "id": 8134443467613694,
+                        "definition": {
+                            "title": "Longest Duration of the Connection",
+                            "title_size": "16",
+                            "title_align": "left",
+                            "time": {},
+                            "type": "query_value",
+                            "requests": [
+                                {
+                                    "response_format": "scalar",
+                                    "queries": [
+                                        {
+                                            "data_source": "logs",
+                                            "name": "query1",
+                                            "indexes": [
+                                                "*"
+                                            ],
+                                            "compute": {
+                                                "aggregation": "max",
+                                                "metric": "@zeek.duration_sec"
+                                            },
+                                            "group_by": [],
+                                            "search": {
+                                                "query": "source:zeek service:conn* $Protocol $Host $Responder-Port $Responder-IP $Originator-Port $Originator-IP"
+                                            },
+                                            "storage": "hot"
+                                        }
+                                    ],
+                                    "formulas": [
+                                        {
+                                            "formula": "query1"
+                                        }
+                                    ]
+                                }
+                            ],
+                            "autoscale": true,
+                            "precision": 2,
+                            "timeseries_background": {
+                                "type": "area"
+                            }
+                        },
+                        "layout": {
+                            "x": 4,
+                            "y": 0,
+                            "width": 4,
+                            "height": 2
+                        }
+                    },
+                    {
+                        "id": 7679477897003622,
+                        "definition": {
+                            "title": "Avg. Missed Bytes",
+                            "title_size": "16",
+                            "title_align": "left",
+                            "time": {},
+                            "type": "query_value",
+                            "requests": [
+                                {
+                                    "response_format": "scalar",
+                                    "queries": [
+                                        {
+                                            "data_source": "logs",
+                                            "name": "query1",
+                                            "indexes": [
+                                                "*"
+                                            ],
+                                            "compute": {
+                                                "aggregation": "avg",
+                                                "metric": "@zeek.missed_bytes"
+                                            },
+                                            "group_by": [],
+                                            "search": {
+                                                "query": "source:zeek service:conn* $Protocol $Host $Responder-Port $Responder-IP $Originator-Port $Originator-IP"
+                                            },
+                                            "storage": "hot"
+                                        }
+                                    ],
+                                    "formulas": [
+                                        {
+                                            "formula": "query1"
+                                        }
+                                    ]
+                                }
+                            ],
+                            "autoscale": true,
+                            "precision": 2,
+                            "timeseries_background": {
+                                "type": "area"
+                            }
+                        },
+                        "layout": {
+                            "x": 8,
+                            "y": 0,
+                            "width": 4,
+                            "height": 2
+                        }
+                    },
+                    {
+                        "id": 1016935866580974,
+                        "definition": {
+                            "title": "Connections by Protocol Types",
+                            "title_size": "16",
+                            "title_align": "left",
+                            "time": {},
+                            "requests": [
+                                {
+                                    "response_format": "scalar",
+                                    "formulas": [
+                                        {
+                                            "formula": "query1",
+                                            "limit": {
+                                                "count": 10,
+                                                "order": "desc"
+                                            }
+                                        }
+                                    ],
+                                    "queries": [
+                                        {
+                                            "data_source": "logs",
+                                            "name": "query1",
+                                            "indexes": [
+                                                "*"
+                                            ],
+                                            "compute": {
+                                                "aggregation": "count"
+                                            },
+                                            "group_by": [
+                                                {
+                                                    "facet": "@zeek.proto",
+                                                    "limit": 10,
+                                                    "sort": {
+                                                        "order": "desc",
+                                                        "aggregation": "count"
+                                                    }
+                                                }
+                                            ],
+                                            "search": {
+                                                "query": "source:zeek service:conn* $Protocol $Host $Responder-Port $Responder-IP $Originator-Port $Originator-IP"
+                                            },
+                                            "storage": "hot"
+                                        }
+                                    ],
+                                    "style": {
+                                        "palette": "datadog16"
+                                    }
+                                }
+                            ],
+                            "type": "sunburst",
+                            "legend": {
+                                "type": "automatic"
+                            }
+                        },
+                        "layout": {
+                            "x": 0,
+                            "y": 2,
+                            "width": 4,
+                            "height": 4
+                        }
+                    },
+                    {
+                        "id": 8406160055529632,
+                        "definition": {
+                            "title": "Connections Over Time",
+                            "title_size": "16",
+                            "title_align": "left",
+                            "show_legend": true,
+                            "legend_layout": "auto",
+                            "legend_columns": [
+                                "avg",
+                                "min",
+                                "max",
+                                "value",
+                                "sum"
+                            ],
+                            "time": {},
+                            "type": "timeseries",
+                            "requests": [
+                                {
+                                    "formulas": [
+                                        {
+                                            "alias": "Connections",
+                                            "formula": "query1"
+                                        }
+                                    ],
+                                    "queries": [
+                                        {
+                                            "data_source": "logs",
+                                            "name": "query1",
+                                            "indexes": [
+                                                "*"
+                                            ],
+                                            "compute": {
+                                                "aggregation": "count"
+                                            },
+                                            "group_by": [],
+                                            "search": {
+                                                "query": "source:zeek service:conn* $Protocol $Host $Responder-Port $Responder-IP $Originator-Port $Originator-IP"
+                                            },
+                                            "storage": "hot"
+                                        }
+                                    ],
+                                    "response_format": "timeseries",
+                                    "style": {
+                                        "palette": "dog_classic",
+                                        "line_type": "solid",
+                                        "line_width": "normal"
+                                    },
+                                    "display_type": "line"
+                                }
+                            ]
+                        },
+                        "layout": {
+                            "x": 4,
+                            "y": 2,
+                            "width": 8,
+                            "height": 4
+                        }
+                    },
+                    {
+                        "id": 6576749535092582,
+                        "definition": {
+                            "title": "Top Connection States",
+                            "title_size": "16",
+                            "title_align": "left",
+                            "time": {},
+                            "type": "toplist",
+                            "requests": [
+                                {
+                                    "queries": [
+                                        {
+                                            "data_source": "logs",
+                                            "name": "query1",
+                                            "indexes": [
+                                                "*"
+                                            ],
+                                            "compute": {
+                                                "aggregation": "count"
+                                            },
+                                            "group_by": [
+                                                {
+                                                    "facet": "@connection_state",
+                                                    "limit": 10,
+                                                    "sort": {
+                                                        "order": "desc",
+                                                        "aggregation": "count"
+                                                    }
+                                                }
+                                            ],
+                                            "search": {
+                                                "query": "source:zeek service:conn* $Protocol $Host $Responder-Port $Responder-IP $Originator-Port $Originator-IP"
+                                            },
+                                            "storage": "hot"
+                                        }
+                                    ],
+                                    "formulas": [
+                                        {
+                                            "formula": "query1",
+                                            "limit": {
+                                                "count": 10,
+                                                "order": "desc"
+                                            }
+                                        }
+                                    ],
+                                    "response_format": "scalar"
+                                }
+                            ],
+                            "style": {
+                                "display": {
+                                    "type": "stacked",
+                                    "legend": "automatic"
+                                },
+                                "scaling": "relative"
+                            }
+                        },
+                        "layout": {
+                            "x": 0,
+                            "y": 6,
+                            "width": 12,
+                            "height": 4
+                        }
+                    },
+                    {
+                        "id": 4228891150919148,
+                        "definition": {
+                            "title": "Top 10 Originator",
+                            "title_size": "16",
+                            "title_align": "left",
+                            "time": {},
+                            "type": "toplist",
+                            "requests": [
+                                {
+                                    "queries": [
+                                        {
+                                            "data_source": "logs",
+                                            "name": "query1",
+                                            "indexes": [
+                                                "*"
+                                            ],
+                                            "compute": {
+                                                "aggregation": "count"
+                                            },
+                                            "group_by": [
+                                                {
+                                                    "facet": "@network.client.ip",
+                                                    "limit": 10,
+                                                    "sort": {
+                                                        "order": "desc",
+                                                        "aggregation": "count"
+                                                    }
+                                                }
+                                            ],
+                                            "search": {
+                                                "query": "source:zeek service:conn* $Protocol $Host $Responder-Port $Responder-IP $Originator-Port $Originator-IP"
+                                            },
+                                            "storage": "hot"
+                                        }
+                                    ],
+                                    "formulas": [
+                                        {
+                                            "formula": "query1",
+                                            "limit": {
+                                                "count": 10,
+                                                "order": "desc"
+                                            }
+                                        }
+                                    ],
+                                    "response_format": "scalar"
+                                }
+                            ],
+                            "style": {
+                                "display": {
+                                    "type": "stacked",
+                                    "legend": "automatic"
+                                },
+                                "scaling": "relative"
+                            }
+                        },
+                        "layout": {
+                            "x": 0,
+                            "y": 10,
+                            "width": 6,
+                            "height": 4
+                        }
+                    },
+                    {
+                        "id": 3676027079803600,
+                        "definition": {
+                            "title": "Top 10 Responder",
+                            "title_size": "16",
+                            "title_align": "left",
+                            "time": {},
+                            "type": "toplist",
+                            "requests": [
+                                {
+                                    "queries": [
+                                        {
+                                            "data_source": "logs",
+                                            "name": "query1",
+                                            "indexes": [
+                                                "*"
+                                            ],
+                                            "compute": {
+                                                "aggregation": "count"
+                                            },
+                                            "group_by": [
+                                                {
+                                                    "facet": "@network.destination.ip",
+                                                    "limit": 10,
+                                                    "sort": {
+                                                        "order": "desc",
+                                                        "aggregation": "count"
+                                                    }
+                                                }
+                                            ],
+                                            "search": {
+                                                "query": "source:zeek service:conn* $Protocol $Host $Responder-Port $Responder-IP $Originator-Port $Originator-IP"
+                                            },
+                                            "storage": "hot"
+                                        }
+                                    ],
+                                    "formulas": [
+                                        {
+                                            "formula": "query1",
+                                            "limit": {
+                                                "count": 10,
+                                                "order": "desc"
+                                            }
+                                        }
+                                    ],
+                                    "response_format": "scalar"
+                                }
+                            ],
+                            "style": {
+                                "display": {
+                                    "type": "stacked",
+                                    "legend": "automatic"
+                                },
+                                "scaling": "relative"
+                            }
+                        },
+                        "layout": {
+                            "x": 6,
+                            "y": 10,
+                            "width": 6,
+                            "height": 4
+                        }
+                    },
+                    {
+                        "id": 8872958197243618,
+                        "definition": {
+                            "title": "Bytes Transferred Over Time",
+                            "title_size": "16",
+                            "title_align": "left",
+                            "show_legend": true,
+                            "legend_layout": "auto",
+                            "legend_columns": [
+                                "avg",
+                                "min",
+                                "max",
+                                "value",
+                                "sum"
+                            ],
+                            "time": {},
+                            "type": "timeseries",
+                            "requests": [
+                                {
+                                    "formulas": [
+                                        {
+                                            "alias": "Originator",
+                                            "formula": "query1"
+                                        },
+                                        {
+                                            "alias": "Responder",
+                                            "formula": "query2"
+                                        }
+                                    ],
+                                    "queries": [
+                                        {
+                                            "data_source": "logs",
+                                            "name": "query1",
+                                            "indexes": [
+                                                "*"
+                                            ],
+                                            "compute": {
+                                                "aggregation": "sum",
+                                                "metric": "@network.bytes_read"
+                                            },
+                                            "group_by": [],
+                                            "search": {
+                                                "query": "source:zeek service:conn* $Protocol $Host $Responder-Port $Responder-IP $Originator-Port $Originator-IP"
+                                            },
+                                            "storage": "hot"
+                                        },
+                                        {
+                                            "data_source": "logs",
+                                            "name": "query2",
+                                            "indexes": [
+                                                "*"
+                                            ],
+                                            "compute": {
+                                                "aggregation": "sum",
+                                                "metric": "@network.bytes_written"
+                                            },
+                                            "group_by": [],
+                                            "search": {
+                                                "query": "source:zeek service:conn* $Protocol $Host $Responder-Port $Responder-IP $Originator-Port $Originator-IP"
+                                            },
+                                            "storage": "hot"
+                                        }
+                                    ],
+                                    "response_format": "timeseries",
+                                    "style": {
+                                        "palette": "dog_classic",
+                                        "line_type": "solid",
+                                        "line_width": "normal"
+                                    },
+                                    "display_type": "line"
+                                }
+                            ]
+                        },
+                        "layout": {
+                            "x": 0,
+                            "y": 14,
+                            "width": 12,
+                            "height": 4
+                        }
+                    },
+                    {
+                        "id": 6408542701449996,
+                        "definition": {
+                            "title": "Avg. Packets Transferred Over Time",
+                            "title_size": "16",
+                            "title_align": "left",
+                            "show_legend": true,
+                            "legend_layout": "auto",
+                            "legend_columns": [
+                                "avg",
+                                "min",
+                                "max",
+                                "value",
+                                "sum"
+                            ],
+                            "time": {},
+                            "type": "timeseries",
+                            "requests": [
+                                {
+                                    "formulas": [
+                                        {
+                                            "alias": "Originator Packets",
+                                            "formula": "query1"
+                                        },
+                                        {
+                                            "alias": "Responder Packets",
+                                            "formula": "query2"
+                                        }
+                                    ],
+                                    "queries": [
+                                        {
+                                            "data_source": "logs",
+                                            "name": "query1",
+                                            "indexes": [
+                                                "*"
+                                            ],
+                                            "compute": {
+                                                "aggregation": "avg",
+                                                "metric": "@orig_pkts"
+                                            },
+                                            "group_by": [],
+                                            "search": {
+                                                "query": "source:zeek service:conn* $Protocol $Host $Responder-Port $Responder-IP $Originator-Port $Originator-IP"
+                                            },
+                                            "storage": "hot"
+                                        },
+                                        {
+                                            "data_source": "logs",
+                                            "name": "query2",
+                                            "indexes": [
+                                                "*"
+                                            ],
+                                            "compute": {
+                                                "aggregation": "avg",
+                                                "metric": "@resp_pkts"
+                                            },
+                                            "group_by": [],
+                                            "search": {
+                                                "query": "source:zeek service:conn* $Protocol $Host $Responder-Port $Responder-IP $Originator-Port $Originator-IP"
+                                            },
+                                            "storage": "hot"
+                                        }
+                                    ],
+                                    "response_format": "timeseries",
+                                    "style": {
+                                        "palette": "dog_classic",
+                                        "line_type": "solid",
+                                        "line_width": "normal"
+                                    },
+                                    "display_type": "line"
+                                }
+                            ]
+                        },
+                        "layout": {
+                            "x": 0,
+                            "y": 18,
+                            "width": 12,
+                            "height": 4
+                        }
+                    },
+                    {
+                        "id": 6905747560442274,
+                        "definition": {
+                            "title": "Connection Log Details",
+                            "title_size": "16",
+                            "title_align": "left",
+                            "time": {},
+                            "requests": [
+                                {
+                                    "response_format": "event_list",
+                                    "query": {
+                                        "data_source": "logs_stream",
+                                        "query_string": "service:conn* $Host $Protocol $Responder-Port $Responder-IP $Originator-Port $Originator-IP ",
+                                        "indexes": [],
+                                        "storage": "hot"
+                                    },
+                                    "columns": [
+                                        {
+                                            "field": "status_line",
+                                            "width": "auto"
+                                        },
+                                        {
+                                            "field": "timestamp",
+                                            "width": "auto"
+                                        },
+                                        {
+                                            "field": "host",
+                                            "width": "auto"
+                                        },
+                                        {
+                                            "field": "network.client.ip",
+                                            "width": "auto"
+                                        },
+                                        {
+                                            "field": "network.client.port",
+                                            "width": "auto"
+                                        },
+                                        {
+                                            "field": "network.destination.ip",
+                                            "width": "auto"
+                                        },
+                                        {
+                                            "field": "network.destination.port",
+                                            "width": "auto"
+                                        },
+                                        {
+                                            "field": "zeek.proto",
+                                            "width": "auto"
+                                        },
+                                        {
+                                            "field": "conn_state",
+                                            "width": "auto"
+                                        },
+                                        {
+                                            "field": "connection_state",
+                                            "width": "auto"
+                                        },
+                                        {
+                                            "field": "network.bytes_read",
+                                            "width": "auto"
+                                        },
+                                        {
+                                            "field": "network.bytes_written",
+                                            "width": "auto"
+                                        },
+                                        {
+                                            "field": "orig_pkts",
+                                            "width": "auto"
+                                        },
+                                        {
+                                            "field": "resp_pkts",
+                                            "width": "auto"
+                                        },
+                                        {
+                                            "field": "zeek.missed_bytes",
+                                            "width": "auto"
+                                        },
+                                        {
+                                            "field": "zeek.duration_sec",
+                                            "width": "auto"
+                                        }
+                                    ]
+                                }
+                            ],
+                            "type": "list_stream"
+                        },
+                        "layout": {
+                            "x": 0,
+                            "y": 22,
+                            "width": 12,
+                            "height": 3
+                        }
+                    }
+                ]
+            },
+            "layout": {
+                "x": 0,
+                "y": 2,
+                "width": 12,
+                "height": 26
+            }
+        }
+    ],
+    "template_variables": [
+        {
+            "name": "Host",
+            "prefix": "host",
+            "available_values": [],
+            "default": "*"
+        },
+        {
+            "name": "Originator-IP",
+            "prefix": "@network.client.ip",
+            "available_values": [],
+            "default": "*"
+        },
+        {
+            "name": "Originator-Port",
+            "prefix": "@network.client.port",
+            "available_values": [],
+            "default": "*"
+        },
+        {
+            "name": "Responder-IP",
+            "prefix": "@network.destination.ip",
+            "available_values": [],
+            "default": "*"
+        },
+        {
+            "name": "Responder-Port",
+            "prefix": "@network.destination.port",
+            "available_values": [],
+            "default": "*"
+        },
+        {
+            "name": "Protocol",
+            "prefix": "@zeek.proto",
+            "available_values": [],
+            "default": "*"
+        }
+    ],
+    "layout_type": "ordered",
+    "notify_list": [],
+    "reflow_type": "fixed"
+}

@@ -1,26 +1,27 @@
 id: sidekiq
 metric_id: sidekiq
+backend_only: false
 facets:
-  - name: Duration
-    source: log
+  - facetType: range
+    groups:
+      - Measure
+    name: Duration
     path: duration
+    source: log
     type: double
-    facetType: range
     unit:
       family: time
       name: nanosecond
-    groups:
-      - Measure
-  - name: Class
-    source: log
+  - groups:
+      - Sidekiq
+    name: Class
     path: sidekiq.class
-    groups:
-      - Sidekiq
-  - name: Job ID
     source: log
-    path: sidekiq.jobid
-    groups:
+  - groups:
       - Sidekiq
+    name: Job ID
+    path: sidekiq.jobid
+    source: log
 pipeline:
   type: pipeline
   name: Sidekiq

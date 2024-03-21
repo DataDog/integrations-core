@@ -35,12 +35,18 @@ jobs:
       env:
         DD_GITHUB_USER: "${{ github.actor }}"
         DD_GITHUB_TOKEN: "${{ secrets.GITHUB_TOKEN }}"
+    - name: Create token
+      uses: actions/create-github-app-token@v1
+      id: token-generator
+      with:
+        app-id: ${{ secrets.DD_AGENT_INTEGRATIONS_BOT_APP_ID }}
+        private-key: ${{ secrets.DD_AGENT_INTEGRATIONS_BOT_PRIVATE_KEY }}
+        repositories: integrations-core
     - name: Create Pull Request
       id: cpr
       uses: peter-evans/create-pull-request@v5
       with:
-        # TODO Change once we have another bot account for this pipeline
-        token: ${{ secrets.DD_CHANGELOG_CHECK_TOKEN }}
+        token: ${{ steps.token-generator.outputs.token }}
         commit-message: Update dependencies
         body: |
           ### What does this PR do?
@@ -65,7 +71,7 @@ jobs:
         branch-suffix: timestamp
         delete-branch: true
         base: master
-        labels: bot
+        labels: bot,qa/skip-qa
         draft: false
     # We generate the changelog if and only if the PR was created
     - name: Update changelogs

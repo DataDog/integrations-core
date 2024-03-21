@@ -53,6 +53,7 @@ def test_e2e_profile_fortinet(dd_agent_check):
             "snmp_profile:fortinet",
         ],
         "vendor": "fortinet",
+        'device_type': 'other',
     }
     assert_device_metadata(aggregator, device)
 

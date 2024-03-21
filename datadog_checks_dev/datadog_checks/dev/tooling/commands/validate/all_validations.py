@@ -13,7 +13,6 @@ from .dep import dep
 from .eula import eula
 from .imports import imports
 from .jmx_metrics import jmx_metrics
-from .manifest import manifest
 from .models import models
 from .package import package
 from .readmes import readmes
@@ -30,7 +29,6 @@ ALL_VALIDATIONS = (
     (eula, ('marketplace',)),
     (jmx_metrics, (None,)),
     (imports, (None,)),
-    (manifest, (None,)),
     (models, (None,)),
     (package, (None,)),
     (readmes, (None,)),

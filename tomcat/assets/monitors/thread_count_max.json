@@ -2,11 +2,11 @@
   "version": 2,
   "created_at": "2021-03-09",
   "last_updated_at": "2021-03-09",
-  "title": "% of busy threads is high for host: {{host.name}}",
+  "title": "All threads are busy",
   "tags": [
     "integration:tomcat"
   ],
-  "description": "Notifies when Tomcat current amount of busy threads represents a high percentage of the current amount of threads managed by the thread pool for a specific host.",
+  "description": "Tomcat uses thread pools to efficiently manage concurrent requests and to avoid creating and destroying threads for each request, which can be resource-intensive. This monitor tracks the amount of busy threads over the current amount of threads per host.",
   "definition": {
     "message": "{{#is_alert}}\n\nALERT: The current amount of busy threads represents {{value}} % of  the current amount of threads managed by the thread pool for host: {{host.name}}\n\n{{/is_alert}} \n\n{{#is_warning}}\n\nWARNING: The current amount of busy threads represents {{value}} % of  the current amount of threads managed by the thread pool for host: {{host.name}}\n\n{{/is_warning}} \n\nLearn in the [Key metrics for monitoring Tomcat](https://www.datadoghq.com/blog/tomcat-architecture-and-performance/#fine-tuning-tomcat-thread-usage) blog post how you could fine-tune your Tomcat thread usage.",
     "name": "[Tomcat] % of busy threads is high for host: {{host.name}}",

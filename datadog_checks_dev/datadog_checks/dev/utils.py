@@ -7,6 +7,7 @@ by Integrations within tests.
 """
 import csv
 import inspect
+import json
 import os
 import platform
 import socket
@@ -137,6 +138,24 @@ def get_metadata_metrics():
         for row in csv.DictReader(f):
             metrics[row['metric_name']] = row
     return metrics
+
+
+def get_service_checks(depth=1):
+    # If it's called directly we can use depth=1, otherwise the caller should pass the correct depth
+    check_root = find_check_root(depth=depth)
+    service_checks_path = os.path.join(check_root, 'assets', 'service_checks.json')
+
+    with open(service_checks_path) as f:
+        return json.load(f)
+
+
+def assert_service_checks(aggregator):
+    # The stub is in the base check, and we don't want to bump the min version for testing purposes
+    # Remove this function when all checks are using a base check that includes this function, or we
+    # manage to move the aggregator somewhere else
+    if hasattr(aggregator, 'assert_service_checks'):
+        # We use depth=2 since this function is called from the check and calls another one
+        aggregator.assert_service_checks(get_service_checks(depth=2))
 
 
 def get_hostname():

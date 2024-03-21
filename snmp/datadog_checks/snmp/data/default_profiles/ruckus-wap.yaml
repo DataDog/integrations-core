@@ -4,6 +4,11 @@ extends:
 sysobjectid:
   - 1.3.6.1.4.1.25053.3.1.4.*  # Ruckus Wireless
   - 1.3.6.1.4.1.25053.3.1.4.91  # Ruckus R510
+metadata:
+  device:
+    fields:
+      type:
+        value: "access_point"
 metrics:
   - MIB: RUCKUS-SYSTEM-MIB
     symbol:

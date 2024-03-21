@@ -61,7 +61,6 @@ services:
       - SETGID
       - SETUID
     volumes:
-      - ./config/core/certificates/:/etc/core/certificates/:z
       - type: bind
         source: ./config/core/app.conf
         target: /etc/core/app.conf

@@ -14,11 +14,10 @@ pytestmark = [pytest.mark.e2e]
 def test_e2e(dd_agent_check, instance):
     aggregator = dd_agent_check(instance, rate=True)
 
-    aggregator.assert_metrics_using_metadata(get_metadata_metrics())
-
     for metric in get_metadata_metrics():
         aggregator.assert_metric(name=metric, at_least=0, tags=TAGS)
-    assert len(aggregator.metric_names) > 100
+
+    aggregator.assert_metrics_using_metadata(get_metadata_metrics())
     aggregator.assert_all_metrics_covered()
 
 

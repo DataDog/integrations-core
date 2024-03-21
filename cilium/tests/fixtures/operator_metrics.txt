@@ -1122,6 +1122,15 @@ cilium_operator_ipam_nodes{category="total"} 3
 cilium_operator_ipam_release_ops{subnet_id="subnet-0fde931a7793de82c"} 3
 cilium_operator_ipam_release_ops{subnet_id="subnet-0fde931a7793de82c"} 13
 cilium_operator_ipam_release_ops{subnet_id="subnet-0fde931a7793de82c"} 11
+# HELP cilium_operator_ipam_interface_candidates
+# TYPE cilium_operator_ipam_interface_candidates counter
+cilium_operator_ipam_interface_candidates{subnet_id="subnet-0fde931a7793de82c"} 4
+# HELP cilium_operator_ipam_empty_interface_slots
+# TYPE cilium_operator_ipam_empty_interface_slots counter
+cilium_operator_ipam_empty_interface_slots{subnet_id="subnet-0fde931a7793de82c"} 5
+# HELP cilium_operator_ipam_ip_allocation_ops
+# TYPE cilium_operator_ipam_ip_allocation_ops counter
+cilium_operator_ipam_ip_allocation_ops{subnet_id="subnet-0fde931a7793de82c"} 6
 # HELP cilium_operator_ipam_resync_duration_seconds Duration of trigger runs
 # TYPE cilium_operator_ipam_resync_duration_seconds histogram
 cilium_operator_ipam_resync_duration_seconds_bucket{le="0.005"} 0

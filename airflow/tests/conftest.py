@@ -1,6 +1,7 @@
 # (C) Datadog, Inc. 2010-2018
 # All rights reserved
 # Licensed under Simplified BSD License (see LICENSE)
+import json
 import os
 from os import path
 
@@ -21,6 +22,11 @@ def get_readme_mappings():
     start = readme.find('dogstatsd_mapper_profiles:')
     end = readme[start:].find('```')
     return readme[start : start + end]
+
+
+def read_fixture_file(fname):
+    with open(os.path.join(HERE, 'fixtures', fname)) as f:
+        return json.loads(f.read())
 
 
 @pytest.fixture(scope='session')
@@ -44,4 +50,9 @@ dogstatsd_metrics_stats_enable: true
 
 @pytest.fixture(scope='session')
 def instance():
-    return {'url': URL}
+    return {'url': URL, 'username': 'airflow', 'password': 'airflow'}
+
+
+@pytest.fixture
+def task_instance():
+    return read_fixture_file('task.json')

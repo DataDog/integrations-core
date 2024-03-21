@@ -1,5 +1,6 @@
 id: aerospike
 metric_id: aerospike
+backend_only: false
 pipeline:
   type: pipeline
   name: Aerospike

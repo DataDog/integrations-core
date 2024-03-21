@@ -1,36 +1,37 @@
 id: istio
 metric_id: istio
+backend_only: false
 facets:
-  - name: Duration
-    source: log
+  - facetType: range
+    groups:
+      - Measure
+    name: Duration
     path: duration
+    source: log
     type: double
-    facetType: range
     unit:
       family: time
       name: nanosecond
-    groups:
-      - Measure
-  - name: Status Code
-    source: log
-    path: http.status_code
-    groups:
+  - groups:
       - Web Access
-  - name: User Name
+    name: Status Code
+    path: http.status_code
     source: log
-    path: usr.name
-    groups:
+  - groups:
       - User
-  - name: Istio Source
+    name: User Name
+    path: usr.name
     source: log
+  - groups:
+      - Istio
+    name: Istio Source
     path: istio.source
-    groups:
-      - Istio
-  - name: Istio destination
     source: log
-    path: istio.destination
-    groups:
+  - groups:
       - Istio
+    name: Istio destination
+    path: istio.destination
+    source: log
 pipeline:
   type: pipeline
   name: Istio

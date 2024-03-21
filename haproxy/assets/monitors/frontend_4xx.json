@@ -2,11 +2,11 @@
   "version": 2,
   "created_at": "2021-03-01",
   "last_updated_at": "2021-03-01",
-  "title": "Anomalous number of frontend 4xx HTTP responses for host: {{host.name}}",
+  "title": "Number of frontend 4xx HTTP responses is high",
   "tags": [
     "integration:haproxy"
   ],
-  "description": "Notifies when HAProxy frontend 4xx errors are higher than usual for a specific host.",
+  "description": "When HAProxy receives invalid client requests, 4xx responses are sent back to the client. This monitor tracks anomalies in the 4xx frontend response rate for HAProxy, on different hosts, to identify and address issues related to client errors.",
   "definition": {
     "message": "An anomalous number of HAProxy frontend 4xx HTTP responses for host: {{host.name}}  has been detected over the last 15mins.",
     "name": "[HAProxy] Anomalous number of frontend 4xx HTTP responses for host: {{host.name}}",

@@ -25,7 +25,6 @@
     "homepage": "https://www.datadoghq.com",
     "sales_email": "info@datadoghq.com"
   },
-  "oauth": {},
   "assets": {
     "integration": {
       "source_type_name": "Vault",
@@ -45,7 +44,9 @@
       },
       "process_signatures": [
         "vault server"
-      ]
+      ],
+      "source_type_id": 10059,
+      "auto_install": true
     },
     "dashboards": {
       "Vault - Overview": "assets/dashboards/vault_overview_legacy.json",

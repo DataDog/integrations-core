@@ -1,0 +1,105 @@
+{
+  "manifest_version": "2.0.0",
+  "app_uuid": "81ba5f4a-0e85-48c3-9ba3-2e5ea37b1ed2",
+  "app_id": "zeek",
+  "display_on_public_website": false,
+  "tile": {
+    "overview": "README.md#Overview",
+    "configuration": "README.md#Setup",
+    "support": "README.md#Support",
+    "changelog": "CHANGELOG.md",
+    "description": "Gain insights into Zeek logs. Connect to Cloud SIEM",
+    "title": "Zeek",
+    "media": [
+      {
+        "caption": "Zeek - Connections",
+        "image_url": "images/zeek_connections.png",
+        "media_type": "image"
+      },
+      {
+        "caption": "Zeek - DHCP",
+        "image_url": "images/zeek_dhcp.png",
+        "media_type": "image"
+      },
+      {
+        "caption": "Zeek - DNS",
+        "image_url": "images/zeek_dns.png",
+        "media_type": "image"
+      },
+      {
+        "caption": "Zeek - Network Protocols",
+        "image_url": "images/zeek_network_protocols.png",
+        "media_type": "image"
+      },
+      {
+        "caption": "Zeek - Detection",
+        "image_url": "images/zeek_detection.png",
+        "media_type": "image"
+      },
+      {
+        "caption": "Zeek - Diagnostics",
+        "image_url": "images/zeek_diagnostics.png",
+        "media_type": "image"
+      },
+      {
+        "caption": "Zeek - Files",
+        "image_url": "images/zeek_files.png",
+        "media_type": "image"
+      },
+      {
+        "caption": "Zeek - Network Observations",
+        "image_url": "images/zeek_network_observations.png",
+        "media_type": "image"
+      }
+    ],
+    "classifier_tags": [
+      "Supported OS::Linux",
+      "Supported OS::macOS",
+      "Category::Log Collection",
+      "Category::Security",
+      "Category::Network",
+      "Offering::Integration",
+      "Submitted Data Type::Logs"
+    ]
+  },
+  "assets": {
+    "integration": {
+      "auto_install": true,
+      "source_type_id": 6777560,
+      "source_type_name": "zeek",
+      "configuration": {
+        "spec": "assets/configuration/spec.yaml"
+      },
+      "events": {
+        "creates_events": false
+      },
+      "service_checks": {
+        "metadata_path": "assets/service_checks.json"
+      }
+    },
+    "dashboards": {
+      "Zeek - Connections": "assets/dashboards/zeek_connections.json",
+      "Zeek - DHCP": "assets/dashboards/zeek_dhcp.json",
+      "Zeek - DNS": "assets/dashboards/zeek_dns.json",
+      "Zeek - Network Protocols": "assets/dashboards/zeek_network_protocols.json",
+      "Zeek - Network Protocols (NTP, SNMP, SSL)": "assets/dashboards/zeek_network_protocols_ntp_snmp_ssl.json",
+      "Zeek - Detection": "assets/dashboards/zeek_detection.json",
+      "Zeek - Diagnostics": "assets/dashboards/zeek_diagnostics.json",
+      "Zeek - Files": "assets/dashboards/zeek_files.json",
+      "Zeek - Network Observations": "assets/dashboards/zeek_network_observations.json",
+      "Zeek - Miscellaneous": "assets/dashboards/zeek_miscellaneous.json",
+      "Zeek - Syslog": "assets/dashboards/zeek_syslog.json",
+      "Zeek - Datared": "assets/dashboards/zeek_datared.json",
+      "Corelight Suricata": "assets/dashboards/corelight_suricata.json"
+    },
+    "logs": {
+      "source": "zeek"
+    }
+  },
+  "author": {
+    "support_email": "help@datadoghq.com",
+    "name": "Datadog",
+    "homepage": "https://www.datadoghq.com",
+    "sales_email": "info@datadoghq.com"
+  }
+}

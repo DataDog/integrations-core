@@ -27,7 +27,6 @@
     "homepage": "https://www.datadoghq.com",
     "sales_email": "info@datadoghq.com"
   },
-  "oauth": {},
   "assets": {
     "integration": {
       "source_type_name": "etcd",
@@ -50,7 +49,9 @@
       },
       "process_signatures": [
         "etcd"
-      ]
+      ],
+      "source_type_id": 111,
+      "auto_install": true
     },
     "dashboards": {
       "Etcd Overview": "assets/dashboards/etcd_overview.json",

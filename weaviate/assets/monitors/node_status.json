@@ -2,11 +2,11 @@
   "version": 2,
   "created_at": "2023-07-24",
   "last_updated_at": "2023-07-24",
-  "title": "Weaviate Node {weaviate_node.name} on {host.name} is {weaviate_node_status.name}",
+  "title": "Weaviate Node in unhealthy state",
   "tags": [
     "integration:weaviate"
   ],
-  "description": "Notify your team when a Weaviate Node is not 'Healthy'",
+  "description": "Weaviate node states are classified as HEALTHY, UNHEALTHY, UNAVAILABLE, or UNKNOWN, corresponding to status codes from 0 to 3. This monitor tracks each node by host and status, alerting if any node deviates from the HEALTHY state.",
   "definition": {
     "message": "{{#is_alert}}\n\nWeaviate Node {{weaviate_node.name}} on {{host.name}} has been {{weaviate_node_status.name}} for the last 10 mins.\n\n{{/is_alert}} \n\n{{#is_recovery}}\n\nWeaviate Node {{weaviate_node.name}} on {{host.name}} has recovered back to {{weaviate_node_status.name}} status for the last 10 mins.\n\n{{/is_recovery}}",
     "name": "Weaviate Node {weaviate_node.name} on {host.name} is {weaviate_node_status.name}",

@@ -2,11 +2,11 @@
   "version": 2,
   "created_at": "2022-03-14",
   "last_updated_at": "2022-05-25",
-  "title": "FoundationDB High Level of Rejected Transactions",
+  "title": "Transactions are rejected",
   "tags": [
     "integration:foundationdb"
   ],
-  "description": "Get notified when a significant proportion of transactions started are being rejected.",
+  "description": "Incoming transactions can be rejected when they have been waiting in a queue for an extended period. This monitor calculates the rate of transactions rejected due to queuing for too long, which helps spot performance issues or bottlenecks in the system.",
   "definition": {
     "message": "A significant proportion of transactions started are being rejected having been queued for too long. This may indicate that the database cluster cannot keep up with the workload.",
     "name": "FoundationDB High Level of Rejected Transactions",

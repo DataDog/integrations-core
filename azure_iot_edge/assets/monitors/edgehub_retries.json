@@ -2,11 +2,11 @@
   "version": 2,
   "created_at": "2020-10-22",
   "last_updated_at": "2020-10-22",
-  "title": "Rate of Edge Hub operations retries is higher than usual on device device {{host}}",
+  "title": "Edge Hub operation retries is higher than usual",
   "tags": [
     "integration:azure-iot-edge"
   ],
-  "description": "Notifies when rate of Edge Hub operation retries is higher than usual",
+  "description": "When an operation fails, the Azure IoT Edge Hub retries to perform it. This monitor detects anomalies in the rate of these retries on specific hosts to identify potential issues with message processing or communication within the IoT Edge Hub.",
   "definition": {
     "message": "Please check device {{host}}, as Edge Hub reports a rate of operation retries of {{value}} per minute, which is higher than usual.",
     "name": "[Azure IoT Edge] Rate of Edge Hub operations retries is higher than usual on device device {{host}}",

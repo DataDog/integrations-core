@@ -1,21 +1,22 @@
 id: openldap
 metric_id: openldap
+backend_only: false
 facets:
-  - name: Logger Name
-    source: log
-    path: logger.name
-    groups:
+  - groups:
       - Source Code
-  - name: Client IP
+    name: Logger Name
+    path: logger.name
     source: log
-    path: network.client.ip
-    groups:
+  - groups:
       - Web Access
-  - name: Function Name
+    name: Client IP
+    path: network.client.ip
     source: log
-    path: function.name
-    groups:
+  - groups:
       - Functions
+    name: Function Name
+    path: function.name
+    source: log
 pipeline:
   type: pipeline
   name: Openldap

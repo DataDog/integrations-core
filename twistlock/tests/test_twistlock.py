@@ -89,6 +89,23 @@ def test_config_project(aggregator, instance, fixture_group):
         aggregator.assert_metric_has_tag(metric, project_tag)
 
 
+@pytest.mark.parametrize('fixture_group', ['twistlock', 'prisma_cloud'])
+def test_report_image_scan_empty_instances(aggregator, instance, fixture_group):
+    check = TwistlockCheck('twistlock', {}, [instance])
+
+    def mock_get(url, *args, **kwargs):
+        split_url = url.split('/')
+        path = split_url[-1]
+
+        if path != 'images':
+            return MockResponse(file_path=os.path.join(HERE, 'fixtures', fixture_group, '{}.json'.format(path)))
+        return MockResponse(file_path=os.path.join(HERE, 'fixtures', 'empty_images.json'))
+
+    with mock.patch('requests.get', side_effect=mock_get):
+        check.check(instance)
+        check.check(instance)
+
+
 def test_err_response(aggregator, instance):
 
     check = TwistlockCheck('twistlock', {}, [instance])

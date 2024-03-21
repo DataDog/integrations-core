@@ -7,6 +7,9 @@ import re
 from datadog_checks.base import ConfigurationError, is_affirmative
 from datadog_checks.kafka_consumer.constants import CONTEXT_UPPER_BOUND, DEFAULT_KAFKA_TIMEOUT
 
+# https://github.com/confluentinc/librdkafka/blob/e03d3bb91ed92a38f38d9806b8d8deffe78a1de5/src/rd.h#L78-L89
+LIBRDKAFKA_LOG_CRIT = 2
+
 
 class KafkaConfig:
     def __init__(self, init_config, instance, log) -> None:
@@ -37,8 +40,12 @@ class KafkaConfig:
         if isinstance(self._kafka_version, str):
             self._kafka_version = tuple(map(int, self._kafka_version.split(".")))
         self._crlfile = instance.get('ssl_crlfile', instance.get('tls_crlfile'))
+
         self._request_timeout = init_config.get('kafka_timeout', DEFAULT_KAFKA_TIMEOUT)
         self._request_timeout_ms = self._request_timeout * 1000
+        self._librdkafka_log_level = instance.get(
+            'librdkafka_log_level', init_config.get('librdkafka_log_level', LIBRDKAFKA_LOG_CRIT)
+        )
         self._security_protocol = instance.get('security_protocol', 'PLAINTEXT')
         self._sasl_mechanism = instance.get('sasl_mechanism')
         self._sasl_plain_username = instance.get('sasl_plain_username')

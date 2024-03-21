@@ -568,6 +568,7 @@ def test_e2e_profile__dell_rac(dd_agent_check):
         'profile': 'dell-rac',
         'status': 1,
         'sys_object_id': '1.2.3.1003',
+        'device_type': 'other',
     }
     device['tags'] = common_tags
     assert_device_metadata(aggregator, device)

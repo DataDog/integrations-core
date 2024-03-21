@@ -37,6 +37,7 @@ from .common import (
     EXPECTED_QUERY_EXECUTOR_AO_METRICS_REPLICA_COMMON,
     EXPECTED_QUERY_EXECUTOR_AO_METRICS_SECONDARY,
     SERVER_METRICS,
+    SQLSERVER_MAJOR_VERSION,
 )
 from .utils import always_on, not_windows_ci
 
@@ -239,7 +240,7 @@ def test_check_index_usage_metrics(
 
     check_sqlserver_can_connect(aggregator, instance_docker_metrics['host'], sqlserver_check.resolved_hostname, tags)
 
-    for metric_name, _, _ in DATABASE_INDEX_METRICS:
+    for metric_name in DATABASE_INDEX_METRICS:
         expected_tags = tags + [
             'db:{}'.format(instance_docker_metrics['database']),
             'index_name:thingsindex',
@@ -369,6 +370,7 @@ def test_check_tempdb_file_space_usage_metrics(
 
 @pytest.mark.integration
 @pytest.mark.usefixtures('dd_environment')
+@pytest.mark.skipif(SQLSERVER_MAJOR_VERSION < 2016, reason='Metric not supported')
 def test_check_incr_fraction_metrics(
     aggregator,
     dd_run_check,

@@ -169,6 +169,7 @@ def test_e2e_profile_nasuni_filer(dd_agent_check):
         'status': 1,
         'sys_object_id': '1.3.6.1.4.1.42040.1.1.0',
         'vendor': 'nasuni',
+        'device_type': 'storage',
     }
     device['tags'] = common_tags
     assert_device_metadata(aggregator, device)

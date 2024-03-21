@@ -303,6 +303,7 @@ def test_e2e_profile_huawei_routers(dd_agent_check):
         'status': 1,
         'sys_object_id': '1.3.6.1.4.1.2011.2.224.279',
         'vendor': 'huawei',
+        'device_type': 'router',
     }
     device['tags'] = common_tags
     assert_device_metadata(aggregator, device)

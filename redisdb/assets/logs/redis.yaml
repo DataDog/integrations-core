@@ -1,11 +1,12 @@
 id: redis
 metric_id: redis
+backend_only: false
 facets:
-  - name: Redis PID
-    source: log
-    path: pid
-    groups:
+  - groups:
       - Database
+    name: Redis PID
+    path: pid
+    source: log
 pipeline:
   type: pipeline
   name: Redis

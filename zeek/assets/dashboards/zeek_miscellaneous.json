@@ -1,0 +1,1146 @@
+{
+    "title": "Zeek - Miscellaneous",
+    "description": "- This dashboard provides details for Dynamic Protocol Detection Failures, weirds, LDAP, and LDAP search.",
+    "widgets": [
+        {
+            "id": 1256106701437384,
+            "definition": {
+                "type": "image",
+                "url": "https://i0.wp.com/zeek.org/wp-content/uploads/2019/09/logo.png?fit=275%2C91&ssl=1",
+                "sizing": "scale-down",
+                "has_background": true,
+                "has_border": false,
+                "vertical_align": "center",
+                "horizontal_align": "center"
+            },
+            "layout": {
+                "x": 0,
+                "y": 0,
+                "width": 4,
+                "height": 2
+            }
+        },
+        {
+            "id": 8238951016548552,
+            "definition": {
+                "type": "note",
+                "content": "## Overview\n- This dashboard provides details for Dynamic Protocol Detection Failures, weirds, LDAP and LDAP search.",
+                "background_color": "white",
+                "font_size": "14",
+                "text_align": "left",
+                "vertical_align": "top",
+                "show_tick": false,
+                "tick_pos": "50%",
+                "tick_edge": "left",
+                "has_padding": true
+            },
+            "layout": {
+                "x": 4,
+                "y": 0,
+                "width": 4,
+                "height": 2
+            }
+        },
+        {
+            "id": 3461513738311906,
+            "definition": {
+                "type": "note",
+                "content": "## Widgets\n1. Types of Protocol for the Violation\n2. Top Analyser that Generated the Violation\n3. Dynamic Protocol Detection Log Details\n4. No. of Weird Logs that Turned into a Notice\n5. Top 10 Names of Weird\n6. Top 10 Peers that Originated the Weird\n7. Weird Log Details\n8. LDAP Versions\n9. Top 10 LDAP Operation Codes\n10. Top 10 Arguments\n11. Top 10 Objects\n12. LDAP Log Details\n13. Search Scopes\n14. Top 10 Search Filters\n15. Top 10 Search Base Objects\n16. LDAP Search Log Details",
+                "background_color": "white",
+                "font_size": "14",
+                "text_align": "left",
+                "vertical_align": "top",
+                "show_tick": false,
+                "tick_pos": "50%",
+                "tick_edge": "left",
+                "has_padding": true
+            },
+            "layout": {
+                "x": 8,
+                "y": 0,
+                "width": 4,
+                "height": 2
+            }
+        },
+        {
+            "id": 4782969578268030,
+            "definition": {
+                "title": "Dynamic Protocol Detection Failures",
+                "background_color": "vivid_purple",
+                "show_title": true,
+                "type": "group",
+                "layout_type": "ordered",
+                "widgets": [
+                    {
+                        "id": 2177734834599194,
+                        "definition": {
+                            "title": "Types of Protocol for the Violation",
+                            "title_size": "16",
+                            "title_align": "left",
+                            "requests": [
+                                {
+                                    "formulas": [
+                                        {
+                                            "formula": "query1",
+                                            "limit": {
+                                                "order": "desc"
+                                            }
+                                        }
+                                    ],
+                                    "queries": [
+                                        {
+                                            "data_source": "logs",
+                                            "name": "query1",
+                                            "indexes": [
+                                                "*"
+                                            ],
+                                            "compute": {
+                                                "aggregation": "count"
+                                            },
+                                            "group_by": [
+                                                {
+                                                    "facet": "@zeek.proto",
+                                                    "limit": 10,
+                                                    "sort": {
+                                                        "order": "desc",
+                                                        "aggregation": "count"
+                                                    }
+                                                }
+                                            ],
+                                            "search": {
+                                                "query": "source:zeek service:dpd $Host"
+                                            },
+                                            "storage": "hot"
+                                        }
+                                    ],
+                                    "response_format": "scalar",
+                                    "style": {
+                                        "palette": "datadog16"
+                                    }
+                                }
+                            ],
+                            "type": "sunburst",
+                            "legend": {
+                                "type": "automatic"
+                            }
+                        },
+                        "layout": {
+                            "x": 0,
+                            "y": 0,
+                            "width": 6,
+                            "height": 3
+                        }
+                    },
+                    {
+                        "id": 2431625929106236,
+                        "definition": {
+                            "title": "Top Analyser that Generated the Violation",
+                            "title_size": "16",
+                            "title_align": "left",
+                            "type": "toplist",
+                            "requests": [
+                                {
+                                    "queries": [
+                                        {
+                                            "data_source": "logs",
+                                            "name": "query1",
+                                            "indexes": [
+                                                "*"
+                                            ],
+                                            "compute": {
+                                                "aggregation": "count"
+                                            },
+                                            "group_by": [
+                                                {
+                                                    "facet": "@analyzer",
+                                                    "limit": 10,
+                                                    "sort": {
+                                                        "order": "desc",
+                                                        "aggregation": "count"
+                                                    }
+                                                }
+                                            ],
+                                            "search": {
+                                                "query": "source:zeek service:dpd $Host"
+                                            },
+                                            "storage": "hot"
+                                        }
+                                    ],
+                                    "formulas": [
+                                        {
+                                            "formula": "query1",
+                                            "limit": {
+                                                "count": 10,
+                                                "order": "desc"
+                                            }
+                                        }
+                                    ],
+                                    "response_format": "scalar"
+                                }
+                            ],
+                            "style": {
+                                "display": {
+                                    "type": "stacked",
+                                    "legend": "automatic"
+                                },
+                                "scaling": "relative"
+                            }
+                        },
+                        "layout": {
+                            "x": 6,
+                            "y": 0,
+                            "width": 6,
+                            "height": 3
+                        }
+                    },
+                    {
+                        "id": 5537216429418486,
+                        "definition": {
+                            "title": "Dynamic Protocol Detection Log Details",
+                            "title_size": "16",
+                            "title_align": "left",
+                            "requests": [
+                                {
+                                    "response_format": "event_list",
+                                    "query": {
+                                        "data_source": "logs_stream",
+                                        "query_string": "source:zeek service:dpd $Host",
+                                        "indexes": [],
+                                        "storage": "hot"
+                                    },
+                                    "columns": [
+                                        {
+                                            "field": "status_line",
+                                            "width": "auto"
+                                        },
+                                        {
+                                            "field": "timestamp",
+                                            "width": "auto"
+                                        },
+                                        {
+                                            "field": "network.client.ip",
+                                            "width": "auto"
+                                        },
+                                        {
+                                            "field": "network.client.port",
+                                            "width": "auto"
+                                        },
+                                        {
+                                            "field": "network.destination.ip",
+                                            "width": "auto"
+                                        },
+                                        {
+                                            "field": "network.destination.port",
+                                            "width": "auto"
+                                        },
+                                        {
+                                            "field": "zeek.proto",
+                                            "width": "auto"
+                                        },
+                                        {
+                                            "field": "analyzer",
+                                            "width": "auto"
+                                        }
+                                    ]
+                                }
+                            ],
+                            "type": "list_stream"
+                        },
+                        "layout": {
+                            "x": 0,
+                            "y": 3,
+                            "width": 12,
+                            "height": 4
+                        }
+                    }
+                ]
+            },
+            "layout": {
+                "x": 0,
+                "y": 2,
+                "width": 12,
+                "height": 8
+            }
+        },
+        {
+            "id": 4367063296963846,
+            "definition": {
+                "title": "Unexpected Network Level Activity",
+                "background_color": "vivid_purple",
+                "show_title": true,
+                "type": "group",
+                "layout_type": "ordered",
+                "widgets": [
+                    {
+                        "id": 7481145435300886,
+                        "definition": {
+                            "title": "No. of Weird Logs that Turned into a Notice",
+                            "title_size": "16",
+                            "title_align": "left",
+                            "type": "query_value",
+                            "requests": [
+                                {
+                                    "formulas": [
+                                        {
+                                            "formula": "query1"
+                                        }
+                                    ],
+                                    "queries": [
+                                        {
+                                            "data_source": "logs",
+                                            "name": "query1",
+                                            "indexes": [
+                                                "*"
+                                            ],
+                                            "compute": {
+                                                "aggregation": "count"
+                                            },
+                                            "group_by": [],
+                                            "search": {
+                                                "query": "source:zeek service:(weird OR weird_red) @zeek.note:* $Host"
+                                            },
+                                            "storage": "hot"
+                                        }
+                                    ],
+                                    "response_format": "scalar"
+                                }
+                            ],
+                            "autoscale": true,
+                            "precision": 2,
+                            "timeseries_background": {
+                                "type": "area"
+                            }
+                        },
+                        "layout": {
+                            "x": 0,
+                            "y": 0,
+                            "width": 4,
+                            "height": 3
+                        }
+                    },
+                    {
+                        "id": 6099322810217496,
+                        "definition": {
+                            "title": "Top 10 Names of Weird",
+                            "title_size": "16",
+                            "title_align": "left",
+                            "type": "toplist",
+                            "requests": [
+                                {
+                                    "queries": [
+                                        {
+                                            "data_source": "logs",
+                                            "name": "query1",
+                                            "indexes": [
+                                                "*"
+                                            ],
+                                            "compute": {
+                                                "aggregation": "count"
+                                            },
+                                            "group_by": [
+                                                {
+                                                    "facet": "@name",
+                                                    "limit": 10,
+                                                    "sort": {
+                                                        "order": "desc",
+                                                        "aggregation": "count"
+                                                    }
+                                                }
+                                            ],
+                                            "search": {
+                                                "query": "source:zeek service:(weird OR weird_red) $Host"
+                                            },
+                                            "storage": "hot"
+                                        }
+                                    ],
+                                    "formulas": [
+                                        {
+                                            "formula": "query1",
+                                            "limit": {
+                                                "count": 10,
+                                                "order": "desc"
+                                            }
+                                        }
+                                    ],
+                                    "response_format": "scalar"
+                                }
+                            ],
+                            "style": {
+                                "display": {
+                                    "type": "stacked",
+                                    "legend": "automatic"
+                                },
+                                "scaling": "relative"
+                            }
+                        },
+                        "layout": {
+                            "x": 4,
+                            "y": 0,
+                            "width": 8,
+                            "height": 3
+                        }
+                    },
+                    {
+                        "id": 8115016380042636,
+                        "definition": {
+                            "title": "Top 10 Peers that Originated the Weird",
+                            "title_size": "16",
+                            "title_align": "left",
+                            "type": "toplist",
+                            "requests": [
+                                {
+                                    "queries": [
+                                        {
+                                            "data_source": "logs",
+                                            "name": "query1",
+                                            "indexes": [
+                                                "*"
+                                            ],
+                                            "compute": {
+                                                "aggregation": "count"
+                                            },
+                                            "group_by": [
+                                                {
+                                                    "facet": "@peer",
+                                                    "limit": 10,
+                                                    "sort": {
+                                                        "order": "desc",
+                                                        "aggregation": "count"
+                                                    }
+                                                }
+                                            ],
+                                            "search": {
+                                                "query": "source:zeek service:(weird OR weird_red) $Host"
+                                            },
+                                            "storage": "hot"
+                                        }
+                                    ],
+                                    "formulas": [
+                                        {
+                                            "formula": "query1",
+                                            "limit": {
+                                                "count": 10,
+                                                "order": "desc"
+                                            }
+                                        }
+                                    ],
+                                    "response_format": "scalar"
+                                }
+                            ],
+                            "style": {
+                                "display": {
+                                    "type": "stacked",
+                                    "legend": "automatic"
+                                },
+                                "scaling": "relative"
+                            }
+                        },
+                        "layout": {
+                            "x": 0,
+                            "y": 3,
+                            "width": 4,
+                            "height": 4
+                        }
+                    },
+                    {
+                        "id": 3411108245482740,
+                        "definition": {
+                            "title": "Weird Log Details",
+                            "title_size": "16",
+                            "title_align": "left",
+                            "requests": [
+                                {
+                                    "response_format": "event_list",
+                                    "query": {
+                                        "data_source": "logs_stream",
+                                        "query_string": "source:zeek service:(weird OR weird_red) $Host",
+                                        "indexes": [],
+                                        "storage": "hot"
+                                    },
+                                    "columns": [
+                                        {
+                                            "field": "status_line",
+                                            "width": "auto"
+                                        },
+                                        {
+                                            "field": "timestamp",
+                                            "width": "auto"
+                                        },
+                                        {
+                                            "field": "host",
+                                            "width": "auto"
+                                        },
+                                        {
+                                            "field": "network.client.ip",
+                                            "width": "auto"
+                                        },
+                                        {
+                                            "field": "network.client.port",
+                                            "width": "auto"
+                                        },
+                                        {
+                                            "field": "network.destination.ip",
+                                            "width": "auto"
+                                        },
+                                        {
+                                            "field": "network.destination.port",
+                                            "width": "auto"
+                                        },
+                                        {
+                                            "field": "name",
+                                            "width": "auto"
+                                        },
+                                        {
+                                            "field": "peer",
+                                            "width": "auto"
+                                        }
+                                    ]
+                                }
+                            ],
+                            "type": "list_stream"
+                        },
+                        "layout": {
+                            "x": 4,
+                            "y": 3,
+                            "width": 8,
+                            "height": 4
+                        }
+                    }
+                ]
+            },
+            "layout": {
+                "x": 0,
+                "y": 10,
+                "width": 12,
+                "height": 8
+            }
+        },
+        {
+            "id": 44544775877110,
+            "definition": {
+                "title": "LDAP",
+                "background_color": "vivid_purple",
+                "show_title": true,
+                "type": "group",
+                "layout_type": "ordered",
+                "widgets": [
+                    {
+                        "id": 4173944612522486,
+                        "definition": {
+                            "title": "LDAP Versions",
+                            "title_size": "16",
+                            "title_align": "left",
+                            "requests": [
+                                {
+                                    "formulas": [
+                                        {
+                                            "formula": "query1",
+                                            "limit": {
+                                                "count": 500,
+                                                "order": "desc"
+                                            }
+                                        }
+                                    ],
+                                    "queries": [
+                                        {
+                                            "data_source": "logs",
+                                            "name": "query1",
+                                            "indexes": [
+                                                "*"
+                                            ],
+                                            "compute": {
+                                                "aggregation": "count"
+                                            },
+                                            "group_by": [
+                                                {
+                                                    "facet": "@version",
+                                                    "limit": 10,
+                                                    "sort": {
+                                                        "order": "desc",
+                                                        "aggregation": "count"
+                                                    }
+                                                }
+                                            ],
+                                            "search": {
+                                                "query": "source:zeek service:ldap @version:* $Host"
+                                            },
+                                            "storage": "hot"
+                                        }
+                                    ],
+                                    "response_format": "scalar",
+                                    "style": {
+                                        "palette": "datadog16"
+                                    }
+                                }
+                            ],
+                            "type": "sunburst",
+                            "legend": {
+                                "type": "automatic"
+                            }
+                        },
+                        "layout": {
+                            "x": 0,
+                            "y": 0,
+                            "width": 4,
+                            "height": 3
+                        }
+                    },
+                    {
+                        "id": 3647403937259404,
+                        "definition": {
+                            "title": "Top 10 LDAP Operation Codes",
+                            "title_size": "16",
+                            "title_align": "left",
+                            "type": "toplist",
+                            "requests": [
+                                {
+                                    "queries": [
+                                        {
+                                            "data_source": "logs",
+                                            "name": "query1",
+                                            "indexes": [
+                                                "*"
+                                            ],
+                                            "compute": {
+                                                "aggregation": "count"
+                                            },
+                                            "group_by": [
+                                                {
+                                                    "facet": "@opcodes",
+                                                    "limit": 10,
+                                                    "sort": {
+                                                        "order": "desc",
+                                                        "aggregation": "count"
+                                                    }
+                                                }
+                                            ],
+                                            "search": {
+                                                "query": "source:zeek service:ldap $Host"
+                                            },
+                                            "storage": "hot"
+                                        }
+                                    ],
+                                    "formulas": [
+                                        {
+                                            "formula": "query1",
+                                            "limit": {
+                                                "count": 10,
+                                                "order": "desc"
+                                            }
+                                        }
+                                    ],
+                                    "response_format": "scalar"
+                                }
+                            ],
+                            "style": {
+                                "display": {
+                                    "type": "stacked",
+                                    "legend": "automatic"
+                                },
+                                "scaling": "relative"
+                            }
+                        },
+                        "layout": {
+                            "x": 4,
+                            "y": 0,
+                            "width": 8,
+                            "height": 3
+                        }
+                    },
+                    {
+                        "id": 6995005798650874,
+                        "definition": {
+                            "title": "Top 10 Arguments",
+                            "title_size": "16",
+                            "title_align": "left",
+                            "type": "toplist",
+                            "requests": [
+                                {
+                                    "queries": [
+                                        {
+                                            "data_source": "logs",
+                                            "name": "query1",
+                                            "indexes": [
+                                                "*"
+                                            ],
+                                            "compute": {
+                                                "aggregation": "count"
+                                            },
+                                            "group_by": [
+                                                {
+                                                    "facet": "@arguments",
+                                                    "limit": 10,
+                                                    "sort": {
+                                                        "order": "desc",
+                                                        "aggregation": "count"
+                                                    }
+                                                }
+                                            ],
+                                            "search": {
+                                                "query": "source:zeek service:ldap $Host"
+                                            },
+                                            "storage": "hot"
+                                        }
+                                    ],
+                                    "formulas": [
+                                        {
+                                            "formula": "query1",
+                                            "limit": {
+                                                "count": 10,
+                                                "order": "desc"
+                                            }
+                                        }
+                                    ],
+                                    "response_format": "scalar"
+                                }
+                            ],
+                            "style": {
+                                "display": {
+                                    "type": "stacked",
+                                    "legend": "automatic"
+                                },
+                                "scaling": "relative"
+                            }
+                        },
+                        "layout": {
+                            "x": 0,
+                            "y": 3,
+                            "width": 6,
+                            "height": 3
+                        }
+                    },
+                    {
+                        "id": 8421519596334558,
+                        "definition": {
+                            "title": "Top 10 Objects",
+                            "title_size": "16",
+                            "title_align": "left",
+                            "type": "toplist",
+                            "requests": [
+                                {
+                                    "queries": [
+                                        {
+                                            "data_source": "logs",
+                                            "name": "query1",
+                                            "indexes": [
+                                                "*"
+                                            ],
+                                            "compute": {
+                                                "aggregation": "count"
+                                            },
+                                            "group_by": [
+                                                {
+                                                    "facet": "@objects",
+                                                    "limit": 10,
+                                                    "sort": {
+                                                        "order": "desc",
+                                                        "aggregation": "count"
+                                                    }
+                                                }
+                                            ],
+                                            "search": {
+                                                "query": "source:zeek service:ldap $Host"
+                                            },
+                                            "storage": "hot"
+                                        }
+                                    ],
+                                    "formulas": [
+                                        {
+                                            "formula": "query1",
+                                            "limit": {
+                                                "count": 10,
+                                                "order": "desc"
+                                            }
+                                        }
+                                    ],
+                                    "response_format": "scalar"
+                                }
+                            ],
+                            "style": {
+                                "display": {
+                                    "type": "stacked",
+                                    "legend": "automatic"
+                                },
+                                "scaling": "relative"
+                            }
+                        },
+                        "layout": {
+                            "x": 6,
+                            "y": 3,
+                            "width": 6,
+                            "height": 3
+                        }
+                    },
+                    {
+                        "id": 1957298759163394,
+                        "definition": {
+                            "title": "LDAP Log Details",
+                            "title_size": "16",
+                            "title_align": "left",
+                            "requests": [
+                                {
+                                    "response_format": "event_list",
+                                    "query": {
+                                        "data_source": "logs_stream",
+                                        "query_string": "source:zeek service:ldap $Host",
+                                        "indexes": [],
+                                        "storage": "hot"
+                                    },
+                                    "columns": [
+                                        {
+                                            "field": "status_line",
+                                            "width": "auto"
+                                        },
+                                        {
+                                            "field": "timestamp",
+                                            "width": "auto"
+                                        },
+                                        {
+                                            "field": "host",
+                                            "width": "auto"
+                                        },
+                                        {
+                                            "field": "network.client.ip",
+                                            "width": "auto"
+                                        },
+                                        {
+                                            "field": "network.client.port",
+                                            "width": "auto"
+                                        },
+                                        {
+                                            "field": "network.destination.ip",
+                                            "width": "auto"
+                                        },
+                                        {
+                                            "field": "network.destination.port",
+                                            "width": "auto"
+                                        },
+                                        {
+                                            "field": "version",
+                                            "width": "auto"
+                                        },
+                                        {
+                                            "field": "opcodes",
+                                            "width": "auto"
+                                        },
+                                        {
+                                            "field": "arguments",
+                                            "width": "auto"
+                                        },
+                                        {
+                                            "field": "objects",
+                                            "width": "auto"
+                                        },
+                                        {
+                                            "field": "results",
+                                            "width": "auto"
+                                        }
+                                    ]
+                                }
+                            ],
+                            "type": "list_stream"
+                        },
+                        "layout": {
+                            "x": 0,
+                            "y": 6,
+                            "width": 12,
+                            "height": 4
+                        }
+                    }
+                ]
+            },
+            "layout": {
+                "x": 0,
+                "y": 18,
+                "width": 12,
+                "height": 11
+            }
+        },
+        {
+            "id": 8766870001102034,
+            "definition": {
+                "title": "LDAP Search",
+                "background_color": "vivid_purple",
+                "show_title": true,
+                "type": "group",
+                "layout_type": "ordered",
+                "widgets": [
+                    {
+                        "id": 3370550814618792,
+                        "definition": {
+                            "title": "Search Scopes",
+                            "title_size": "16",
+                            "title_align": "left",
+                            "requests": [
+                                {
+                                    "formulas": [
+                                        {
+                                            "formula": "query1",
+                                            "limit": {
+                                                "count": 500,
+                                                "order": "desc"
+                                            }
+                                        }
+                                    ],
+                                    "queries": [
+                                        {
+                                            "data_source": "logs",
+                                            "name": "query1",
+                                            "indexes": [
+                                                "*"
+                                            ],
+                                            "compute": {
+                                                "aggregation": "count"
+                                            },
+                                            "group_by": [
+                                                {
+                                                    "facet": "@scopes",
+                                                    "limit": 10,
+                                                    "sort": {
+                                                        "order": "desc",
+                                                        "aggregation": "count"
+                                                    }
+                                                }
+                                            ],
+                                            "search": {
+                                                "query": "source:zeek service:ldap_search @scopes:* $Host"
+                                            },
+                                            "storage": "hot"
+                                        }
+                                    ],
+                                    "response_format": "scalar",
+                                    "style": {
+                                        "palette": "datadog16"
+                                    }
+                                }
+                            ],
+                            "type": "sunburst",
+                            "legend": {
+                                "type": "automatic"
+                            }
+                        },
+                        "layout": {
+                            "x": 0,
+                            "y": 0,
+                            "width": 4,
+                            "height": 3
+                        }
+                    },
+                    {
+                        "id": 6546822637589562,
+                        "definition": {
+                            "title": "Top 10 Search Filters",
+                            "title_size": "16",
+                            "title_align": "left",
+                            "type": "toplist",
+                            "requests": [
+                                {
+                                    "queries": [
+                                        {
+                                            "data_source": "logs",
+                                            "name": "query1",
+                                            "indexes": [
+                                                "*"
+                                            ],
+                                            "compute": {
+                                                "aggregation": "count"
+                                            },
+                                            "group_by": [
+                                                {
+                                                    "facet": "@filter",
+                                                    "limit": 10,
+                                                    "sort": {
+                                                        "order": "desc",
+                                                        "aggregation": "count"
+                                                    }
+                                                }
+                                            ],
+                                            "search": {
+                                                "query": "source:zeek service:ldap_search $Host"
+                                            },
+                                            "storage": "hot"
+                                        }
+                                    ],
+                                    "formulas": [
+                                        {
+                                            "formula": "query1",
+                                            "limit": {
+                                                "count": 10,
+                                                "order": "desc"
+                                            }
+                                        }
+                                    ],
+                                    "response_format": "scalar"
+                                }
+                            ],
+                            "style": {
+                                "display": {
+                                    "type": "stacked",
+                                    "legend": "automatic"
+                                },
+                                "scaling": "relative"
+                            }
+                        },
+                        "layout": {
+                            "x": 4,
+                            "y": 0,
+                            "width": 8,
+                            "height": 3
+                        }
+                    },
+                    {
+                        "id": 113143292081182,
+                        "definition": {
+                            "title": "Top 10 Search Base Objects",
+                            "title_size": "16",
+                            "title_align": "left",
+                            "type": "toplist",
+                            "requests": [
+                                {
+                                    "queries": [
+                                        {
+                                            "data_source": "logs",
+                                            "name": "query1",
+                                            "indexes": [
+                                                "*"
+                                            ],
+                                            "compute": {
+                                                "aggregation": "count"
+                                            },
+                                            "group_by": [
+                                                {
+                                                    "facet": "@base_objects",
+                                                    "limit": 10,
+                                                    "sort": {
+                                                        "order": "desc",
+                                                        "aggregation": "count"
+                                                    }
+                                                }
+                                            ],
+                                            "search": {
+                                                "query": "source:zeek service:ldap_search $Host"
+                                            },
+                                            "storage": "hot"
+                                        }
+                                    ],
+                                    "formulas": [
+                                        {
+                                            "formula": "query1",
+                                            "limit": {
+                                                "count": 10,
+                                                "order": "desc"
+                                            }
+                                        }
+                                    ],
+                                    "response_format": "scalar"
+                                }
+                            ],
+                            "style": {
+                                "display": {
+                                    "type": "stacked",
+                                    "legend": "automatic"
+                                },
+                                "scaling": "relative"
+                            }
+                        },
+                        "layout": {
+                            "x": 0,
+                            "y": 3,
+                            "width": 4,
+                            "height": 4
+                        }
+                    },
+                    {
+                        "id": 29323150318654,
+                        "definition": {
+                            "title": "LDAP Search Log Details",
+                            "title_size": "16",
+                            "title_align": "left",
+                            "requests": [
+                                {
+                                    "response_format": "event_list",
+                                    "query": {
+                                        "data_source": "logs_stream",
+                                        "query_string": "source:zeek service:ldap_search $Host",
+                                        "indexes": [],
+                                        "storage": "hot"
+                                    },
+                                    "columns": [
+                                        {
+                                            "field": "status_line",
+                                            "width": "auto"
+                                        },
+                                        {
+                                            "field": "timestamp",
+                                            "width": "auto"
+                                        },
+                                        {
+                                            "field": "host",
+                                            "width": "auto"
+                                        },
+                                        {
+                                            "field": "network.client.ip",
+                                            "width": "auto"
+                                        },
+                                        {
+                                            "field": "network.client.port",
+                                            "width": "auto"
+                                        },
+                                        {
+                                            "field": "network.destination.ip",
+                                            "width": "auto"
+                                        },
+                                        {
+                                            "field": "network.destination.port",
+                                            "width": "auto"
+                                        },
+                                        {
+                                            "field": "scopes",
+                                            "width": "auto"
+                                        },
+                                        {
+                                            "field": "results",
+                                            "width": "auto"
+                                        },
+                                        {
+                                            "field": "filter",
+                                            "width": "auto"
+                                        },
+                                        {
+                                            "field": "base_objects",
+                                            "width": "auto"
+                                        }
+                                    ]
+                                }
+                            ],
+                            "type": "list_stream"
+                        },
+                        "layout": {
+                            "x": 4,
+                            "y": 3,
+                            "width": 8,
+                            "height": 4
+                        }
+                    }
+                ]
+            },
+            "layout": {
+                "x": 0,
+                "y": 29,
+                "width": 12,
+                "height": 8
+            }
+        }
+    ],
+    "template_variables": [
+        {
+            "name": "Host",
+            "prefix": "host",
+            "available_values": [],
+            "default": "*"
+        }
+    ],
+    "layout_type": "ordered",
+    "notify_list": [],
+    "reflow_type": "fixed"
+}

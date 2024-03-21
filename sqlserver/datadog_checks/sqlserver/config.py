@@ -26,6 +26,9 @@ class SQLServerConfig:
 
         self.proc: str = instance.get('stored_procedure')
         self.custom_metrics: list[dict] = init_config.get('custom_metrics', [])
+        self.include_index_usage_metrics_tempdb: bool = is_affirmative(
+            instance.get('include_index_usage_metrics_tempdb', False)
+        )
 
         # DBM
         self.dbm_enabled: bool = is_affirmative(instance.get('dbm', False))
@@ -66,7 +69,7 @@ class SQLServerConfig:
                     'collect_comments': is_affirmative(obfuscator_options_config.get('collect_comments', True)),
                     # Config to enable/disable obfuscation of sql statements with go-sqllexer pkg
                     # Valid values for this can be found at https://github.com/DataDog/datadog-agent/blob/main/pkg/obfuscate/obfuscate.go#L108
-                    'obfuscation_mode': obfuscator_options_config.get('obfuscation_mode', ''),
+                    'obfuscation_mode': obfuscator_options_config.get('obfuscation_mode', 'obfuscate_and_normalize'),
                     'remove_space_between_parentheses': is_affirmative(
                         obfuscator_options_config.get('remove_space_between_parentheses', False)
                     ),

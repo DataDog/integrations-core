@@ -9,6 +9,8 @@ metadata:
     fields:
       vendor:
         value: "nasuni"
+      type:
+        value: "storage"
 metrics:
 #  - MIB: NASUNI-FILER-MIB
 #    symbol:

@@ -37,7 +37,9 @@
       },
       "process_signatures": [
         "cdp"
-      ]
+      ],
+      "source_type_id": 10318,
+      "auto_install": true
     },
     "dashboards": {
       "Cloudera Data Platform Overview": "assets/dashboards/cloudera_overview.json"
@@ -51,6 +53,5 @@
     "name": "Datadog",
     "homepage": "https://www.datadoghq.com",
     "sales_email": "info@datadoghq.com"
-  },
-  "oauth": {}
+  }
 }

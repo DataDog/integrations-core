@@ -2,11 +2,11 @@
   "version": 2,
   "created_at": "2022-03-14",
   "last_updated_at": "2022-05-25",
-  "title": "FoundationDB Log Queue Reaching Spill Threshold",
+  "title": "Log queue is approaching the limit",
   "tags": [
     "integration:foundationdb"
   ],
-  "description": "Get notified when the log queue is approaching the spill threshold.",
+  "description": "When transactions are committed, they are temporarily written as logs, and then added to a queue before being written durably to disk. This monitor tracks the queue length to make sure transactions are not waiting too long to be processed.",
   "definition": {
     "message": "{{#is_warning}}\nThe FoundationDB log queue is approaching the spill threshold, implying that one or more storage server is struggling to keep up with the workload.\n{{/is_warning}}\n\n{{#is_alert}}\nThe FoundationDB log queue has reached the spill threshold, where logs have not been taken and persisted by storage servers soon enough. This may mean the database workload is more than the cluster can sustain.\n{{/is_alert}}",
     "name": "FoundationDB Log Queue Reaching Spill Threshold",

@@ -26,7 +26,6 @@
     "homepage": "https://www.datadoghq.com",
     "sales_email": "info@datadoghq.com"
   },
-  "oauth": {},
   "assets": {
     "integration": {
       "source_type_name": "cert-manager",
@@ -43,7 +42,9 @@
       },
       "service_checks": {
         "metadata_path": "assets/service_checks.json"
-      }
+      },
+      "source_type_id": 10161,
+      "auto_install": true
     },
     "dashboards": {
       "Cert-Manager Overview Dashboard": "assets/dashboards/certmanager_overview.json"

@@ -16,7 +16,6 @@ from .util import (
     COMMON_ARCHIVER_METRICS,
     COMMON_BGW_METRICS,
     COMMON_METRICS,
-    COUNT_METRICS,
     DATABASE_SIZE_METRICS,
     DBM_MIGRATED_METRICS,
     NEWER_14_METRICS,
@@ -133,16 +132,6 @@ class PostgresMetricsCache:
             'name': 'bgw_metrics',
         }
 
-    def get_count_metrics(self):
-        if self._count_metrics is not None:
-            return self._count_metrics
-        metrics = dict(COUNT_METRICS)
-        metrics['query'] = COUNT_METRICS['query'].format(
-            metrics_columns="{metrics_columns}", table_count_limit=self.config.table_count_limit
-        )
-        self._count_metrics = metrics
-        return metrics
-
     def get_archiver_metrics(self, version):
         """Use COMMON_ARCHIVER_METRICS to read from pg_stat_archiver as
         defined in 9.4 (first version to have this table).
@@ -229,7 +218,7 @@ class PostgresMetricsCache:
 
             if version >= V10:
                 metrics_query = ACTIVITY_METRICS_10
-            if version >= V9_6:
+            elif version >= V9_6:
                 metrics_query = ACTIVITY_METRICS_9_6
             elif version >= V9_2:
                 metrics_query = ACTIVITY_METRICS_9_2
@@ -242,7 +231,7 @@ class PostgresMetricsCache:
                 if '{dd__user}' in q:
                     metrics_query[i] = q.format(dd__user=self.config.user)
 
-            metrics = dict(zip(metrics_query, ACTIVITY_DD_METRICS, strict=False))
+            metrics = dict(zip(metrics_query, ACTIVITY_DD_METRICS))
 
             self.activity_metrics = (metrics, query, descriptors)
         else:

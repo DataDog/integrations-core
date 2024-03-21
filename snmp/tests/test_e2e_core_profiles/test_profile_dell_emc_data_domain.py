@@ -294,6 +294,7 @@ def test_e2e_profile_dell_emc_data_domain(dd_agent_check):
         'status': 1,
         'sys_object_id': '1.3.6.1.4.1.19746.3.1.37',
         'vendor': 'dell',
+        'device_type': 'other',
     }
     device['tags'] = common_tags
     assert_device_metadata(aggregator, device)

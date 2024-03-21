@@ -64,6 +64,7 @@ def test_sync(ddev, fake_repo):
     create_integration(fake_repo, 'foo', ['dep-a==1.0.0', 'dep-b==3.1.4'])
     create_integration(fake_repo, 'bar', ['dep-a==1.0.0'])
     create_integration(fake_repo, 'datadog_checks_base', ['dep-a==1.0.0'])
+    create_integration(fake_repo, 'datadog_checks_downloader', ['dep-a==1.0.0'])
 
     requirements = """
 dep-a==1.1.1
@@ -76,10 +77,11 @@ dep-b==3.1.4
     result = ddev('dep', 'sync')
 
     assert result.exit_code == 0
-    assert result.output == 'Files updated: 3\n'
+    assert result.output == 'Files updated: 4\n'
 
     assert_dependencies(fake_repo, 'foo', ['dep-a==1.1.1', 'dep-b==3.1.4'])
     assert_dependencies(fake_repo, 'bar', ['dep-a==1.1.1'])
+    assert_dependencies(fake_repo, 'datadog_checks_base', ['dep-a==1.1.1'])
     assert_dependencies(fake_repo, 'datadog_checks_base', ['dep-a==1.1.1'])
 
 
@@ -138,6 +140,7 @@ dep-a can be updated to version 1.2.3 on py2 and py3
         self.add_integration('foo', ['dep-a==1.0.0', 'dep-b==3.1.4'])
         self.add_integration('bar', ['dep-a==1.0.0'])
         self.add_integration('datadog_checks_base', ['dep-a==1.0.0', 'dep-b==3.1.4'])
+        self.add_integration('datadog_checks_downloader', ['dep-a==1.0.0', 'dep-b==3.1.4'])
         self.write_requirements()
 
         self.add_pypi_entry(
@@ -154,7 +157,7 @@ dep-a can be updated to version 1.2.3 on py2 and py3
         assert result.exit_code == 0
         assert (
             result.output
-            == '''Files updated: 3
+            == '''Files updated: 4
 Updated 1 dependencies
 '''
         )
@@ -162,6 +165,7 @@ Updated 1 dependencies
         assert_dependencies(self.repo, 'foo', ['dep-a==1.2.3', 'dep-b==3.1.4'])
         assert_dependencies(self.repo, 'bar', ['dep-a==1.2.3'])
         assert_dependencies(self.repo, 'datadog_checks_base', ['dep-a==1.2.3', 'dep-b==3.1.4'])
+        assert_dependencies(self.repo, 'datadog_checks_downloader', ['dep-a==1.2.3', 'dep-b==3.1.4'])
 
         requirements = self.requirements_path.read_text()
         expected = """
@@ -214,7 +218,16 @@ dep-a==1.2.3; python_version > '3.0'
 """
         assert requirements.strip('\n') == expected.strip('\n')
 
-    def test_ignored_deps(self, ddev):
+    def test_ignored_deps(self, ddev, config_file):
+        path = config_file.path.parent / '.ddev'
+        path.mkdir(parents=True, exist_ok=True)
+        (path / 'config.toml').write_text(
+            """[overrides.dep.updates]
+exclude = [
+    'ddtrace',
+]"""
+        )
+
         self.add_integration('foo', ["ddtrace==1.0.0"])
         self.write_requirements()
 

@@ -52,6 +52,7 @@ def test_e2e_features(dd_agent_check):
         'profile': 'features',
         'status': 1,
         'sys_object_id': '1.2.3.20231012',
+        'device_type': 'other',
     }
     device['tags'] = common_tags
     assert_device_metadata(aggregator, device)

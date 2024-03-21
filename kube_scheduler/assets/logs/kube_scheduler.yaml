@@ -1,5 +1,6 @@
 id: kube_scheduler
 metric_id: kube-scheduler
+backend_only: false
 installation_sources:
   - kube_scheduler
   - kube-scheduler

@@ -6,7 +6,8 @@ RUN apk add --no-cache openssl git build-base
 # Build the faketime lib, used to generate expired certificate
 RUN git clone https://github.com/wolfcw/libfaketime /libfaketime
 WORKDIR /libfaketime
-RUN make \
+RUN git checkout v0.9.10 \
+ && make \
  && make install \
  && cp /usr/local/lib/faketime/libfaketimeMT.so.1 /lib/faketime.so
 
@@ -21,7 +22,7 @@ RUN openssl genrsa -out valid.mock.key 2048 \
 
 ## Generate a self-signed non-expired certificate for selfsigned.mock
 
-RUN openssl req -nodes -new -x509 -days 1 -keyout selfsigned.mock.key -out selfsigned.mock.cert -subj "/C=US/ST=NY/O=foo/CN=selfsigned.mock"
+RUN openssl req -nodes -new -x509 -days 1 -keyout selfsigned.mock.key -out selfsigned.mock.cert -subj "/C=US/ST=NY/O=foo/CN=selfsigned.mock" -addext "subjectAltName = DNS:selfsigned.mock"
 
 
 ## Generate a valid but expired certificate for expired.mock

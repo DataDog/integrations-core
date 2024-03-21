@@ -1,33 +1,34 @@
 id: pgbouncer
 metric_id: pgbouncer
+backend_only: false
 facets:
-  - name: Database
-    source: log
+  - groups:
+      - Database
+    name: Database
     path: db.instance
-    groups:
-      - Database
-  - name: User
     source: log
+  - groups:
+      - Database
+    name: User
     path: db.user
+    source: log
+  - groups:
+      - Web Access
+    name: Destination IP
+    path: network.destination.ip
+    source: log
+  - groups:
+      - Web Access
+    name: Destination Port
+    path: network.destination.port
+    source: log
+  - faceType: range
     groups:
       - Database
-  - name: Destination IP
-    source: log
-    path: network.destination.ip
-    groups:
-      - Web Access
-  - name: Destination Port
-    source: log
-    path: network.destination.port
-    groups:
-      - Web Access
-  - name: Query rate
+    name: Query rate
+    path: db.query.rate
     source: log
     type: double
-    faceType: range
-    path: db.query.rate
-    groups:
-      - Database
 pipeline:
   type: pipeline
   name: Pgbouncer

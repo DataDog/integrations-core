@@ -2,11 +2,11 @@
   "version": 2,
   "created_at": "2021-03-01",
   "last_updated_at": "2021-03-01",
-  "title": "Number of backend connection failures for host: {{host.name}} is above normal.",
+  "title": "Number of backend connection failures is high",
   "tags": [
     "integration:haproxy"
   ],
-  "description": "Notifies when HAProxy the number of backend connection errors is above normal for a specific host.",
+  "description": "HAProxy needs to establish a connection with the backend server to route clients' requests. This monitor tracks anomalies in the connection error rate for different hosts to identify spikes in connection errors, allowing for prompt attention.",
   "definition": {
     "message": "There is a higher number of backend connection failures for host: {{host.name}}\n\nNote: This monitored metric doesn't only includes failed backend requests but additionally includes general backend errors, like a backend without an active frontend. Correlating this metric with `haproxy.backend.errors.resp_rate` and response codes from both your frontend and backend servers will give you a better idea of the causes of an increase in backend connection errors.",
     "name": "[HAProxy] Number of backend connection failures for host: {{host.name}} is above normal.",

@@ -77,7 +77,7 @@
               "type": "query_value",
               "requests": [
                 {
-                  "q": "max:postgresql.percent_usage_connections{*}*100",
+                  "q": "max:postgresql.percent_usage_connections{$scope}*100",
                   "aggregator": "last",
                   "conditional_formats": [
                     {
@@ -127,13 +127,13 @@
                   "response_format": "scalar",
                   "queries": [
                     {
-                      "query": "sum:postgresql.rows_fetched{*}",
+                      "query": "sum:postgresql.rows_fetched{$scope}",
                       "data_source": "metrics",
                       "name": "query1",
                       "aggregator": "avg"
                     },
                     {
-                      "query": "sum:postgresql.rows_returned{*}",
+                      "query": "sum:postgresql.rows_returned{$scope}",
                       "data_source": "metrics",
                       "name": "query2",
                       "aggregator": "avg"
@@ -1141,7 +1141,7 @@
           {
             "id": 1998962873985110,
             "definition": {
-              "title": "Top function calls",
+              "title": "Top table scans",
               "title_size": "16",
               "title_align": "left",
               "type": "query_table",
@@ -1546,7 +1546,7 @@
     {
       "name": "scope",
       "default": "*",
-      "prefix": "scope"
+      "prefix": null
     },
     {
       "name": "table",

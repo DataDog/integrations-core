@@ -2,11 +2,11 @@
   "version": 2,
   "created_at": "2021-03-01",
   "last_updated_at": "2021-03-01",
-  "title": "Number of client-side request error for {{host.name}} is above normal.",
+  "title": "Number of client-side request error is high",
   "tags": [
     "integration:haproxy"
   ],
-  "description": "Notifies when HAProxy frontend error request rate is above normal for a specific host.",
+  "description": "The clients send requests asking the server for a specific resource. This monitor tracks anomalies in the request error rate for HAProxy frontends, on different hosts, to identify issues on the frontend of your web application infrastructure.",
   "definition": {
     "message": "There is a higher number of client-side request error for host: {{host.name}}\n\nClient-side request errors could have a number of causes:\n\n- Client terminates before sending request\n- Read error from client\n- Client timeout\n- Client terminated connection\n- Request was tarpitted/subject to ACL",
     "name": "[HAProxy] Number of client-side request error for {{host.name}} is above normal.",

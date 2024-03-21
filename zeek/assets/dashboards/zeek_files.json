@@ -1,0 +1,1738 @@
+{
+    "title": "Zeek - Files",
+    "description": "-   This dashboard provides details for Files, Portable Executable, and X.509 Certificate Info.",
+    "widgets": [
+        {
+            "id": 4116167915972166,
+            "definition": {
+                "type": "image",
+                "url": "https://i0.wp.com/zeek.org/wp-content/uploads/2019/09/logo.png?fit=275%2C91&ssl=1",
+                "sizing": "scale-down",
+                "has_background": true,
+                "has_border": false,
+                "vertical_align": "center",
+                "horizontal_align": "center"
+            },
+            "layout": {
+                "x": 0,
+                "y": 0,
+                "width": 4,
+                "height": 2
+            }
+        },
+        {
+            "id": 5254589726654618,
+            "definition": {
+                "type": "note",
+                "content": "## Overview\n- This dashboard provides details for Files, Portable Executable and X.509 Certificate Info.",
+                "background_color": "white",
+                "font_size": "14",
+                "text_align": "left",
+                "vertical_align": "top",
+                "show_tick": false,
+                "tick_pos": "50%",
+                "tick_edge": "left",
+                "has_padding": true
+            },
+            "layout": {
+                "x": 4,
+                "y": 0,
+                "width": 4,
+                "height": 2
+            }
+        },
+        {
+            "id": 3548511128016828,
+            "definition": {
+                "type": "note",
+                "content": "## Widgets\n1. Hidden Executable Files\n2. File Stream Bytes Over Time\n3. Top 10 Originating Hosts\n4. Top 10 Responding Hosts\n3. Locally Originated Files\n4. Files by Source\n5. Files Sent by Connection Originator\n6. Top 10 File Analyzers\n7. Files Received from Responder\n8. Top 10 MIME Types\n9. Files Log Details\n10. Total Executable Files\n11. Executables With ASLR Support\n12. Executables With DEP Support\n13. Executables With Enforced Code Integrity\n14. File Types\n15. Executable Target Machine\n16. Executable Operating Systems\n17. PE Log Details\n18. Total Certificates\n19. End Host Certificates\n20. Chain Certificates\n21. Certificates Sent from Client\n22. Certificates by Versions\n23. Certificates by Key Algorithm and Key Type\n24. Certificates by Signature Algorithms\n25. X.509 Log Details",
+                "background_color": "white",
+                "font_size": "14",
+                "text_align": "left",
+                "vertical_align": "top",
+                "show_tick": false,
+                "tick_pos": "50%",
+                "tick_edge": "left",
+                "has_padding": true
+            },
+            "layout": {
+                "x": 8,
+                "y": 0,
+                "width": 4,
+                "height": 2
+            }
+        },
+        {
+            "id": 7929957879017638,
+            "definition": {
+                "title": "File Analysis Results",
+                "background_color": "vivid_purple",
+                "show_title": true,
+                "type": "group",
+                "layout_type": "ordered",
+                "widgets": [
+                    {
+                        "id": 1881736164031364,
+                        "definition": {
+                            "title": "Hidden Executable Files",
+                            "title_size": "16",
+                            "title_align": "left",
+                            "type": "query_value",
+                            "requests": [
+                                {
+                                    "formulas": [
+                                        {
+                                            "formula": "query1"
+                                        }
+                                    ],
+                                    "queries": [
+                                        {
+                                            "data_source": "logs",
+                                            "name": "query1",
+                                            "indexes": [
+                                                "*"
+                                            ],
+                                            "compute": {
+                                                "aggregation": "count"
+                                            },
+                                            "group_by": [],
+                                            "search": {
+                                                "query": "source:zeek service:(files OR files_red) @mime_type:\"application/x-dosexec\" @filename:* -@filename:*exe* $Host "
+                                            },
+                                            "storage": "hot"
+                                        }
+                                    ],
+                                    "response_format": "scalar"
+                                }
+                            ],
+                            "autoscale": true,
+                            "precision": 2,
+                            "timeseries_background": {
+                                "type": "area"
+                            }
+                        },
+                        "layout": {
+                            "x": 0,
+                            "y": 0,
+                            "width": 3,
+                            "height": 4
+                        }
+                    },
+                    {
+                        "id": 8233243795296070,
+                        "definition": {
+                            "title": "File Stream Bytes Over Time",
+                            "title_size": "16",
+                            "title_align": "left",
+                            "show_legend": true,
+                            "legend_layout": "horizontal",
+                            "legend_columns": [
+                                "min",
+                                "max",
+                                "sum",
+                                "avg"
+                            ],
+                            "type": "timeseries",
+                            "requests": [
+                                {
+                                    "formulas": [
+                                        {
+                                            "alias": "Total Bytes",
+                                            "formula": "query1"
+                                        },
+                                        {
+                                            "alias": "Seen Bytes",
+                                            "formula": "query2"
+                                        },
+                                        {
+                                            "alias": "Missing Bytes",
+                                            "formula": "query3"
+                                        },
+                                        {
+                                            "alias": "Overflow Bytes",
+                                            "formula": "query4"
+                                        }
+                                    ],
+                                    "queries": [
+                                        {
+                                            "data_source": "logs",
+                                            "name": "query1",
+                                            "indexes": [
+                                                "*"
+                                            ],
+                                            "compute": {
+                                                "aggregation": "sum",
+                                                "metric": "@zeek.total_bytes"
+                                            },
+                                            "group_by": [],
+                                            "search": {
+                                                "query": "source:zeek service:(files OR files_red) $Host"
+                                            },
+                                            "storage": "hot"
+                                        },
+                                        {
+                                            "data_source": "logs",
+                                            "name": "query2",
+                                            "indexes": [
+                                                "*"
+                                            ],
+                                            "compute": {
+                                                "aggregation": "sum",
+                                                "metric": "@zeek.seen_bytes"
+                                            },
+                                            "group_by": [],
+                                            "search": {
+                                                "query": "source:zeek service:(files OR files_red) $Host"
+                                            },
+                                            "storage": "hot"
+                                        },
+                                        {
+                                            "data_source": "logs",
+                                            "name": "query3",
+                                            "indexes": [
+                                                "*"
+                                            ],
+                                            "compute": {
+                                                "aggregation": "sum",
+                                                "metric": "@zeek.missing_bytes"
+                                            },
+                                            "group_by": [],
+                                            "search": {
+                                                "query": "source:zeek service:(files OR files_red) $Host"
+                                            },
+                                            "storage": "hot"
+                                        },
+                                        {
+                                            "data_source": "logs",
+                                            "name": "query4",
+                                            "indexes": [
+                                                "*"
+                                            ],
+                                            "compute": {
+                                                "aggregation": "sum",
+                                                "metric": "@zeek.overflow_bytes"
+                                            },
+                                            "group_by": [],
+                                            "search": {
+                                                "query": "source:zeek service:(files OR files_red) $Host"
+                                            },
+                                            "storage": "hot"
+                                        }
+                                    ],
+                                    "response_format": "timeseries",
+                                    "style": {
+                                        "palette": "dog_classic",
+                                        "line_type": "solid",
+                                        "line_width": "normal"
+                                    },
+                                    "display_type": "line"
+                                }
+                            ]
+                        },
+                        "layout": {
+                            "x": 3,
+                            "y": 0,
+                            "width": 9,
+                            "height": 4
+                        }
+                    },
+                    {
+                        "id": 5002935234597270,
+                        "definition": {
+                            "title": "Top 10 Originating Hosts",
+                            "title_size": "16",
+                            "title_align": "left",
+                            "time": {},
+                            "requests": [
+                                {
+                                    "response_format": "scalar",
+                                    "formulas": [
+                                        {
+                                            "formula": "query1",
+                                            "limit": {
+                                                "count": 10,
+                                                "order": "desc"
+                                            }
+                                        }
+                                    ],
+                                    "queries": [
+                                        {
+                                            "data_source": "logs",
+                                            "name": "query1",
+                                            "indexes": [
+                                                "*"
+                                            ],
+                                            "compute": {
+                                                "aggregation": "count"
+                                            },
+                                            "group_by": [
+                                                {
+                                                    "facet": "@network.client.ip",
+                                                    "limit": 10,
+                                                    "sort": {
+                                                        "order": "desc",
+                                                        "aggregation": "count"
+                                                    }
+                                                }
+                                            ],
+                                            "search": {
+                                                "query": "source:zeek service:(files OR files_red) @network.client.ip:* $Host"
+                                            },
+                                            "storage": "hot"
+                                        }
+                                    ],
+                                    "style": {
+                                        "palette": "datadog16"
+                                    }
+                                }
+                            ],
+                            "type": "sunburst",
+                            "legend": {
+                                "type": "automatic"
+                            }
+                        },
+                        "layout": {
+                            "x": 0,
+                            "y": 4,
+                            "width": 6,
+                            "height": 4
+                        }
+                    },
+                    {
+                        "id": 4238883201193698,
+                        "definition": {
+                            "title": "Top 10 Responding Hosts",
+                            "title_size": "16",
+                            "title_align": "left",
+                            "time": {},
+                            "requests": [
+                                {
+                                    "response_format": "scalar",
+                                    "formulas": [
+                                        {
+                                            "formula": "query1",
+                                            "limit": {
+                                                "count": 10,
+                                                "order": "desc"
+                                            }
+                                        }
+                                    ],
+                                    "queries": [
+                                        {
+                                            "data_source": "logs",
+                                            "name": "query1",
+                                            "indexes": [
+                                                "*"
+                                            ],
+                                            "compute": {
+                                                "aggregation": "count"
+                                            },
+                                            "group_by": [
+                                                {
+                                                    "facet": "@network.destination.ip",
+                                                    "limit": 10,
+                                                    "sort": {
+                                                        "order": "desc",
+                                                        "aggregation": "count"
+                                                    }
+                                                }
+                                            ],
+                                            "search": {
+                                                "query": "source:zeek service:(files OR files_red) @network.destination.ip:* $Host"
+                                            },
+                                            "storage": "hot"
+                                        }
+                                    ],
+                                    "style": {
+                                        "palette": "datadog16"
+                                    }
+                                }
+                            ],
+                            "type": "sunburst",
+                            "legend": {
+                                "type": "automatic"
+                            }
+                        },
+                        "layout": {
+                            "x": 6,
+                            "y": 4,
+                            "width": 6,
+                            "height": 4
+                        }
+                    },
+                    {
+                        "id": 6199418431416224,
+                        "definition": {
+                            "title": "Locally Originated Files",
+                            "title_size": "16",
+                            "title_align": "left",
+                            "type": "query_value",
+                            "requests": [
+                                {
+                                    "formulas": [
+                                        {
+                                            "formula": "query1"
+                                        }
+                                    ],
+                                    "queries": [
+                                        {
+                                            "data_source": "logs",
+                                            "name": "query1",
+                                            "indexes": [
+                                                "*"
+                                            ],
+                                            "compute": {
+                                                "aggregation": "count"
+                                            },
+                                            "group_by": [],
+                                            "search": {
+                                                "query": "source:zeek service:(files OR files_red) @local_orig:true $Host"
+                                            },
+                                            "storage": "hot"
+                                        }
+                                    ],
+                                    "response_format": "scalar"
+                                }
+                            ],
+                            "autoscale": true,
+                            "precision": 2,
+                            "timeseries_background": {
+                                "type": "area"
+                            }
+                        },
+                        "layout": {
+                            "x": 0,
+                            "y": 8,
+                            "width": 4,
+                            "height": 4
+                        }
+                    },
+                    {
+                        "id": 4057692382208760,
+                        "definition": {
+                            "title": "Files by Source",
+                            "title_size": "16",
+                            "title_align": "left",
+                            "requests": [
+                                {
+                                    "response_format": "scalar",
+                                    "formulas": [
+                                        {
+                                            "formula": "query1",
+                                            "limit": {
+                                                "count": 10,
+                                                "order": "desc"
+                                            }
+                                        }
+                                    ],
+                                    "queries": [
+                                        {
+                                            "data_source": "logs",
+                                            "name": "query1",
+                                            "indexes": [
+                                                "*"
+                                            ],
+                                            "compute": {
+                                                "aggregation": "count"
+                                            },
+                                            "group_by": [
+                                                {
+                                                    "facet": "@source",
+                                                    "limit": 10,
+                                                    "sort": {
+                                                        "order": "desc",
+                                                        "aggregation": "count"
+                                                    }
+                                                }
+                                            ],
+                                            "search": {
+                                                "query": "source:zeek service:(files OR files_red) $Host"
+                                            },
+                                            "storage": "hot"
+                                        }
+                                    ],
+                                    "style": {
+                                        "palette": "datadog16"
+                                    }
+                                }
+                            ],
+                            "type": "sunburst",
+                            "legend": {
+                                "type": "automatic"
+                            }
+                        },
+                        "layout": {
+                            "x": 4,
+                            "y": 8,
+                            "width": 8,
+                            "height": 4
+                        }
+                    },
+                    {
+                        "id": 23716960456646,
+                        "definition": {
+                            "title": "Files Sent by Connection Originator",
+                            "title_size": "16",
+                            "title_align": "left",
+                            "type": "query_value",
+                            "requests": [
+                                {
+                                    "formulas": [
+                                        {
+                                            "formula": "query1"
+                                        }
+                                    ],
+                                    "queries": [
+                                        {
+                                            "data_source": "logs",
+                                            "name": "query1",
+                                            "indexes": [
+                                                "*"
+                                            ],
+                                            "compute": {
+                                                "aggregation": "count"
+                                            },
+                                            "group_by": [],
+                                            "search": {
+                                                "query": "source:zeek service:(files OR files_red) @is_orig:true $Host"
+                                            },
+                                            "storage": "hot"
+                                        }
+                                    ],
+                                    "response_format": "scalar"
+                                }
+                            ],
+                            "autoscale": true,
+                            "precision": 2,
+                            "timeseries_background": {
+                                "type": "area"
+                            }
+                        },
+                        "layout": {
+                            "x": 0,
+                            "y": 12,
+                            "width": 4,
+                            "height": 4
+                        }
+                    },
+                    {
+                        "id": 6164338318587780,
+                        "definition": {
+                            "title": "Top 10 File Analyzers",
+                            "title_size": "16",
+                            "title_align": "left",
+                            "type": "toplist",
+                            "requests": [
+                                {
+                                    "formulas": [
+                                        {
+                                            "formula": "query1",
+                                            "limit": {
+                                                "count": 10,
+                                                "order": "desc"
+                                            }
+                                        }
+                                    ],
+                                    "queries": [
+                                        {
+                                            "data_source": "logs",
+                                            "name": "query1",
+                                            "indexes": [
+                                                "*"
+                                            ],
+                                            "compute": {
+                                                "aggregation": "count"
+                                            },
+                                            "group_by": [
+                                                {
+                                                    "facet": "@analyzers",
+                                                    "limit": 10,
+                                                    "sort": {
+                                                        "order": "desc",
+                                                        "aggregation": "count"
+                                                    }
+                                                }
+                                            ],
+                                            "search": {
+                                                "query": "source:zeek service:(files OR files_red) $Host"
+                                            },
+                                            "storage": "hot"
+                                        }
+                                    ],
+                                    "response_format": "scalar"
+                                }
+                            ],
+                            "style": {
+                                "display": {
+                                    "type": "stacked",
+                                    "legend": "automatic"
+                                },
+                                "scaling": "relative"
+                            }
+                        },
+                        "layout": {
+                            "x": 4,
+                            "y": 12,
+                            "width": 8,
+                            "height": 4
+                        }
+                    },
+                    {
+                        "id": 3694584513165004,
+                        "definition": {
+                            "title": "Files Received from Responder",
+                            "title_size": "16",
+                            "title_align": "left",
+                            "type": "query_value",
+                            "requests": [
+                                {
+                                    "formulas": [
+                                        {
+                                            "formula": "query1"
+                                        }
+                                    ],
+                                    "queries": [
+                                        {
+                                            "data_source": "logs",
+                                            "name": "query1",
+                                            "indexes": [
+                                                "*"
+                                            ],
+                                            "compute": {
+                                                "aggregation": "count"
+                                            },
+                                            "group_by": [],
+                                            "search": {
+                                                "query": "source:zeek service:(files OR files_red) @is_orig:false $Host"
+                                            },
+                                            "storage": "hot"
+                                        }
+                                    ],
+                                    "response_format": "scalar"
+                                }
+                            ],
+                            "autoscale": true,
+                            "precision": 2,
+                            "timeseries_background": {
+                                "type": "area"
+                            }
+                        },
+                        "layout": {
+                            "x": 0,
+                            "y": 16,
+                            "width": 4,
+                            "height": 4
+                        }
+                    },
+                    {
+                        "id": 8328454004450108,
+                        "definition": {
+                            "title": "Top 10 MIME Types",
+                            "title_size": "16",
+                            "title_align": "left",
+                            "type": "toplist",
+                            "requests": [
+                                {
+                                    "formulas": [
+                                        {
+                                            "formula": "query1",
+                                            "limit": {
+                                                "count": 10,
+                                                "order": "desc"
+                                            }
+                                        }
+                                    ],
+                                    "queries": [
+                                        {
+                                            "data_source": "logs",
+                                            "name": "query1",
+                                            "indexes": [
+                                                "*"
+                                            ],
+                                            "compute": {
+                                                "aggregation": "count"
+                                            },
+                                            "group_by": [
+                                                {
+                                                    "facet": "@mime_type",
+                                                    "limit": 10,
+                                                    "sort": {
+                                                        "order": "desc",
+                                                        "aggregation": "count"
+                                                    }
+                                                }
+                                            ],
+                                            "search": {
+                                                "query": "source:zeek service:(files OR files_red) $Host"
+                                            },
+                                            "storage": "hot"
+                                        }
+                                    ],
+                                    "response_format": "scalar"
+                                }
+                            ],
+                            "style": {
+                                "display": {
+                                    "type": "stacked",
+                                    "legend": "automatic"
+                                },
+                                "scaling": "relative"
+                            }
+                        },
+                        "layout": {
+                            "x": 4,
+                            "y": 16,
+                            "width": 8,
+                            "height": 4
+                        }
+                    },
+                    {
+                        "id": 6373698670708144,
+                        "definition": {
+                            "title": "Files Log Details",
+                            "title_size": "16",
+                            "title_align": "left",
+                            "requests": [
+                                {
+                                    "response_format": "event_list",
+                                    "query": {
+                                        "data_source": "logs_stream",
+                                        "query_string": "source:zeek service:(files OR files_red) $Host",
+                                        "indexes": [],
+                                        "storage": "hot"
+                                    },
+                                    "columns": [
+                                        {
+                                            "field": "status_line",
+                                            "width": "auto"
+                                        },
+                                        {
+                                            "field": "timestamp",
+                                            "width": "auto"
+                                        },
+                                        {
+                                            "field": "host",
+                                            "width": "auto"
+                                        },
+                                        {
+                                            "field": "network.client.ip",
+                                            "width": "auto"
+                                        },
+                                        {
+                                            "field": "network.client.port",
+                                            "width": "auto"
+                                        },
+                                        {
+                                            "field": "network.destination.ip",
+                                            "width": "auto"
+                                        },
+                                        {
+                                            "field": "network.destination.port",
+                                            "width": "auto"
+                                        },
+                                        {
+                                            "field": "@source",
+                                            "width": "auto"
+                                        },
+                                        {
+                                            "field": "zeek.seen_bytes",
+                                            "width": "auto"
+                                        },
+                                        {
+                                            "field": "zeek.total_bytes",
+                                            "width": "auto"
+                                        },
+                                        {
+                                            "field": "local_orig",
+                                            "width": "auto"
+                                        },
+                                        {
+                                            "field": "is_orig",
+                                            "width": "auto"
+                                        },
+                                        {
+                                            "field": "zeek.missing_bytes",
+                                            "width": "auto"
+                                        },
+                                        {
+                                            "field": "zeek.overflow_bytes",
+                                            "width": "auto"
+                                        },
+                                        {
+                                            "field": "analyzers",
+                                            "width": "auto"
+                                        },
+                                        {
+                                            "field": "mime_type",
+                                            "width": "auto"
+                                        }
+                                    ]
+                                }
+                            ],
+                            "type": "list_stream"
+                        },
+                        "layout": {
+                            "x": 0,
+                            "y": 20,
+                            "width": 12,
+                            "height": 4
+                        }
+                    }
+                ]
+            },
+            "layout": {
+                "x": 0,
+                "y": 2,
+                "width": 12,
+                "height": 25
+            }
+        },
+        {
+            "id": 2967592002752250,
+            "definition": {
+                "title": "Portable Executable",
+                "background_color": "vivid_purple",
+                "show_title": true,
+                "type": "group",
+                "layout_type": "ordered",
+                "widgets": [
+                    {
+                        "id": 8290386771498816,
+                        "definition": {
+                            "title": "Total Executable Files",
+                            "title_size": "16",
+                            "title_align": "left",
+                            "type": "query_value",
+                            "requests": [
+                                {
+                                    "response_format": "scalar",
+                                    "queries": [
+                                        {
+                                            "data_source": "logs",
+                                            "name": "query1",
+                                            "indexes": [
+                                                "*"
+                                            ],
+                                            "compute": {
+                                                "aggregation": "cardinality",
+                                                "metric": "@id"
+                                            },
+                                            "group_by": [],
+                                            "search": {
+                                                "query": "source:zeek service:pe $Host"
+                                            },
+                                            "storage": "hot"
+                                        }
+                                    ],
+                                    "formulas": [
+                                        {
+                                            "formula": "query1"
+                                        }
+                                    ]
+                                }
+                            ],
+                            "autoscale": true,
+                            "precision": 2,
+                            "timeseries_background": {
+                                "type": "area"
+                            }
+                        },
+                        "layout": {
+                            "x": 0,
+                            "y": 0,
+                            "width": 3,
+                            "height": 3
+                        }
+                    },
+                    {
+                        "id": 1949678000837632,
+                        "definition": {
+                            "title": "Executables With ASLR Support",
+                            "title_size": "16",
+                            "title_align": "left",
+                            "type": "query_value",
+                            "requests": [
+                                {
+                                    "formulas": [
+                                        {
+                                            "formula": "query1"
+                                        }
+                                    ],
+                                    "queries": [
+                                        {
+                                            "data_source": "logs",
+                                            "name": "query1",
+                                            "indexes": [
+                                                "*"
+                                            ],
+                                            "compute": {
+                                                "aggregation": "count"
+                                            },
+                                            "group_by": [],
+                                            "search": {
+                                                "query": "source:zeek service:pe @uses_aslr:true $Host"
+                                            },
+                                            "storage": "hot"
+                                        }
+                                    ],
+                                    "response_format": "scalar"
+                                }
+                            ],
+                            "autoscale": true,
+                            "precision": 2,
+                            "timeseries_background": {
+                                "type": "area"
+                            }
+                        },
+                        "layout": {
+                            "x": 3,
+                            "y": 0,
+                            "width": 3,
+                            "height": 3
+                        }
+                    },
+                    {
+                        "id": 3643027696756524,
+                        "definition": {
+                            "title": "Executables With DEP Support",
+                            "title_size": "16",
+                            "title_align": "left",
+                            "type": "query_value",
+                            "requests": [
+                                {
+                                    "formulas": [
+                                        {
+                                            "formula": "query1"
+                                        }
+                                    ],
+                                    "queries": [
+                                        {
+                                            "data_source": "logs",
+                                            "name": "query1",
+                                            "indexes": [
+                                                "*"
+                                            ],
+                                            "compute": {
+                                                "aggregation": "count"
+                                            },
+                                            "group_by": [],
+                                            "search": {
+                                                "query": "source:zeek service:pe @uses_dep:true $Host"
+                                            },
+                                            "storage": "hot"
+                                        }
+                                    ],
+                                    "response_format": "scalar"
+                                }
+                            ],
+                            "autoscale": true,
+                            "precision": 2,
+                            "timeseries_background": {
+                                "type": "area"
+                            }
+                        },
+                        "layout": {
+                            "x": 6,
+                            "y": 0,
+                            "width": 3,
+                            "height": 3
+                        }
+                    },
+                    {
+                        "id": 552527215999180,
+                        "definition": {
+                            "title": "Executables With Enforced Code Integrity",
+                            "title_size": "16",
+                            "title_align": "left",
+                            "type": "query_value",
+                            "requests": [
+                                {
+                                    "formulas": [
+                                        {
+                                            "formula": "query1"
+                                        }
+                                    ],
+                                    "queries": [
+                                        {
+                                            "data_source": "logs",
+                                            "name": "query1",
+                                            "indexes": [
+                                                "*"
+                                            ],
+                                            "compute": {
+                                                "aggregation": "count"
+                                            },
+                                            "group_by": [],
+                                            "search": {
+                                                "query": "source:zeek service:pe @uses_code_integrity:true $Host"
+                                            },
+                                            "storage": "hot"
+                                        }
+                                    ],
+                                    "response_format": "scalar"
+                                }
+                            ],
+                            "autoscale": true,
+                            "precision": 2,
+                            "timeseries_background": {
+                                "type": "area"
+                            }
+                        },
+                        "layout": {
+                            "x": 9,
+                            "y": 0,
+                            "width": 3,
+                            "height": 3
+                        }
+                    },
+                    {
+                        "id": 765342539041484,
+                        "definition": {
+                            "title": "File Types",
+                            "title_size": "16",
+                            "title_align": "left",
+                            "requests": [
+                                {
+                                    "formulas": [
+                                        {
+                                            "formula": "query1",
+                                            "limit": {
+                                                "count": 500,
+                                                "order": "desc"
+                                            }
+                                        }
+                                    ],
+                                    "queries": [
+                                        {
+                                            "data_source": "logs",
+                                            "name": "query1",
+                                            "indexes": [
+                                                "*"
+                                            ],
+                                            "compute": {
+                                                "aggregation": "count"
+                                            },
+                                            "group_by": [
+                                                {
+                                                    "facet": "@file_type",
+                                                    "limit": 10,
+                                                    "sort": {
+                                                        "order": "desc",
+                                                        "aggregation": "count"
+                                                    }
+                                                }
+                                            ],
+                                            "search": {
+                                                "query": "source:zeek service:pe $Host"
+                                            },
+                                            "storage": "hot"
+                                        }
+                                    ],
+                                    "response_format": "scalar",
+                                    "style": {
+                                        "palette": "datadog16"
+                                    }
+                                }
+                            ],
+                            "type": "sunburst",
+                            "legend": {
+                                "type": "inline"
+                            }
+                        },
+                        "layout": {
+                            "x": 0,
+                            "y": 3,
+                            "width": 4,
+                            "height": 4
+                        }
+                    },
+                    {
+                        "id": 1981450850228880,
+                        "definition": {
+                            "title": "Executable Target Machine",
+                            "title_size": "16",
+                            "title_align": "left",
+                            "requests": [
+                                {
+                                    "formulas": [
+                                        {
+                                            "formula": "query1",
+                                            "limit": {
+                                                "count": 500,
+                                                "order": "desc"
+                                            }
+                                        }
+                                    ],
+                                    "queries": [
+                                        {
+                                            "data_source": "logs",
+                                            "name": "query1",
+                                            "indexes": [
+                                                "*"
+                                            ],
+                                            "compute": {
+                                                "aggregation": "count"
+                                            },
+                                            "group_by": [
+                                                {
+                                                    "facet": "@machine",
+                                                    "limit": 10,
+                                                    "sort": {
+                                                        "order": "desc",
+                                                        "aggregation": "count"
+                                                    }
+                                                }
+                                            ],
+                                            "search": {
+                                                "query": "source:zeek service:pe $Host"
+                                            },
+                                            "storage": "hot"
+                                        }
+                                    ],
+                                    "response_format": "scalar",
+                                    "style": {
+                                        "palette": "datadog16"
+                                    }
+                                }
+                            ],
+                            "type": "sunburst",
+                            "legend": {
+                                "type": "automatic"
+                            }
+                        },
+                        "layout": {
+                            "x": 4,
+                            "y": 3,
+                            "width": 8,
+                            "height": 4
+                        }
+                    },
+                    {
+                        "id": 26712208361034,
+                        "definition": {
+                            "title": "Executable Operating Systems",
+                            "title_size": "16",
+                            "title_align": "left",
+                            "requests": [
+                                {
+                                    "formulas": [
+                                        {
+                                            "formula": "query1",
+                                            "limit": {
+                                                "count": 500,
+                                                "order": "desc"
+                                            }
+                                        }
+                                    ],
+                                    "queries": [
+                                        {
+                                            "data_source": "logs",
+                                            "name": "query1",
+                                            "indexes": [
+                                                "*"
+                                            ],
+                                            "compute": {
+                                                "aggregation": "count"
+                                            },
+                                            "group_by": [
+                                                {
+                                                    "facet": "@os",
+                                                    "limit": 10,
+                                                    "sort": {
+                                                        "order": "desc",
+                                                        "aggregation": "count"
+                                                    }
+                                                }
+                                            ],
+                                            "search": {
+                                                "query": "source:zeek service:pe @os:* $Host "
+                                            },
+                                            "storage": "hot"
+                                        }
+                                    ],
+                                    "response_format": "scalar",
+                                    "style": {
+                                        "palette": "datadog16"
+                                    }
+                                }
+                            ],
+                            "type": "sunburst",
+                            "legend": {
+                                "type": "automatic"
+                            }
+                        },
+                        "layout": {
+                            "x": 0,
+                            "y": 7,
+                            "width": 12,
+                            "height": 4
+                        }
+                    },
+                    {
+                        "id": 6282577830956932,
+                        "definition": {
+                            "title": "PE Log Details",
+                            "title_size": "16",
+                            "title_align": "left",
+                            "requests": [
+                                {
+                                    "response_format": "event_list",
+                                    "query": {
+                                        "data_source": "logs_stream",
+                                        "query_string": "source:zeek service:pe $Host",
+                                        "indexes": [],
+                                        "storage": "hot"
+                                    },
+                                    "columns": [
+                                        {
+                                            "field": "status_line",
+                                            "width": "auto"
+                                        },
+                                        {
+                                            "field": "timestamp",
+                                            "width": "auto"
+                                        },
+                                        {
+                                            "field": "host",
+                                            "width": "auto"
+                                        },
+                                        {
+                                            "field": "machine",
+                                            "width": "auto"
+                                        },
+                                        {
+                                            "field": "os",
+                                            "width": "auto"
+                                        },
+                                        {
+                                            "field": "file_type",
+                                            "width": "auto"
+                                        },
+                                        {
+                                            "field": "machine",
+                                            "width": "auto"
+                                        },
+                                        {
+                                            "field": "uses_aslr",
+                                            "width": "auto"
+                                        },
+                                        {
+                                            "field": "uses_dep",
+                                            "width": "auto"
+                                        },
+                                        {
+                                            "field": "is_exe",
+                                            "width": "auto"
+                                        },
+                                        {
+                                            "field": "is_64bit",
+                                            "width": "auto"
+                                        },
+                                        {
+                                            "field": "uses_code_integrity",
+                                            "width": "auto"
+                                        }
+                                    ]
+                                }
+                            ],
+                            "type": "list_stream"
+                        },
+                        "layout": {
+                            "x": 0,
+                            "y": 11,
+                            "width": 12,
+                            "height": 4
+                        }
+                    }
+                ]
+            },
+            "layout": {
+                "x": 0,
+                "y": 27,
+                "width": 12,
+                "height": 16
+            }
+        },
+        {
+            "id": 7539803875040262,
+            "definition": {
+                "title": "X.509 Certificate Info",
+                "background_color": "vivid_purple",
+                "show_title": true,
+                "type": "group",
+                "layout_type": "ordered",
+                "widgets": [
+                    {
+                        "id": 8180926989703732,
+                        "definition": {
+                            "title": "Total Certificates",
+                            "title_size": "16",
+                            "title_align": "left",
+                            "type": "query_value",
+                            "requests": [
+                                {
+                                    "response_format": "scalar",
+                                    "queries": [
+                                        {
+                                            "data_source": "logs",
+                                            "name": "query1",
+                                            "indexes": [
+                                                "*"
+                                            ],
+                                            "compute": {
+                                                "aggregation": "cardinality",
+                                                "metric": "@certificate.serial"
+                                            },
+                                            "group_by": [],
+                                            "search": {
+                                                "query": "source:zeek service:(x509 OR x509_red) $Host"
+                                            },
+                                            "storage": "hot"
+                                        }
+                                    ],
+                                    "formulas": [
+                                        {
+                                            "formula": "query1"
+                                        }
+                                    ]
+                                }
+                            ],
+                            "autoscale": true,
+                            "precision": 2,
+                            "timeseries_background": {
+                                "type": "area"
+                            }
+                        },
+                        "layout": {
+                            "x": 0,
+                            "y": 0,
+                            "width": 4,
+                            "height": 2
+                        }
+                    },
+                    {
+                        "id": 402603942295732,
+                        "definition": {
+                            "title": "End Host Certificates",
+                            "title_size": "16",
+                            "title_align": "left",
+                            "type": "query_value",
+                            "requests": [
+                                {
+                                    "response_format": "scalar",
+                                    "queries": [
+                                        {
+                                            "data_source": "logs",
+                                            "name": "query1",
+                                            "indexes": [
+                                                "*"
+                                            ],
+                                            "compute": {
+                                                "aggregation": "cardinality",
+                                                "metric": "@certificate.serial"
+                                            },
+                                            "group_by": [],
+                                            "search": {
+                                                "query": "source:zeek service:(x509 OR x509_red) @host_cert:true $Host"
+                                            },
+                                            "storage": "hot"
+                                        }
+                                    ],
+                                    "formulas": [
+                                        {
+                                            "formula": "query1"
+                                        }
+                                    ]
+                                }
+                            ],
+                            "autoscale": true,
+                            "precision": 2,
+                            "timeseries_background": {
+                                "type": "area"
+                            }
+                        },
+                        "layout": {
+                            "x": 4,
+                            "y": 0,
+                            "width": 4,
+                            "height": 2
+                        }
+                    },
+                    {
+                        "id": 5896860395376148,
+                        "definition": {
+                            "title": "Chain Certificates",
+                            "title_size": "16",
+                            "title_align": "left",
+                            "type": "query_value",
+                            "requests": [
+                                {
+                                    "response_format": "scalar",
+                                    "queries": [
+                                        {
+                                            "data_source": "logs",
+                                            "name": "query1",
+                                            "indexes": [
+                                                "*"
+                                            ],
+                                            "compute": {
+                                                "aggregation": "cardinality",
+                                                "metric": "@certificate.serial"
+                                            },
+                                            "group_by": [],
+                                            "search": {
+                                                "query": "source:zeek service:(x509 OR x509_red) @host_cert:false $Host"
+                                            },
+                                            "storage": "hot"
+                                        }
+                                    ],
+                                    "formulas": [
+                                        {
+                                            "formula": "query1"
+                                        }
+                                    ]
+                                }
+                            ],
+                            "autoscale": true,
+                            "precision": 2,
+                            "timeseries_background": {
+                                "type": "area"
+                            }
+                        },
+                        "layout": {
+                            "x": 8,
+                            "y": 0,
+                            "width": 4,
+                            "height": 2
+                        }
+                    },
+                    {
+                        "id": 5138859854305968,
+                        "definition": {
+                            "title": "Certificates Sent from Client",
+                            "title_size": "16",
+                            "title_align": "left",
+                            "type": "query_value",
+                            "requests": [
+                                {
+                                    "formulas": [
+                                        {
+                                            "formula": "query1"
+                                        }
+                                    ],
+                                    "queries": [
+                                        {
+                                            "data_source": "logs",
+                                            "name": "query1",
+                                            "indexes": [
+                                                "*"
+                                            ],
+                                            "compute": {
+                                                "aggregation": "count"
+                                            },
+                                            "group_by": [],
+                                            "search": {
+                                                "query": "source:zeek service:(x509 OR x509_red) @client_cert:true $Host"
+                                            },
+                                            "storage": "hot"
+                                        }
+                                    ],
+                                    "response_format": "scalar"
+                                }
+                            ],
+                            "autoscale": true,
+                            "precision": 2,
+                            "timeseries_background": {
+                                "type": "area"
+                            }
+                        },
+                        "layout": {
+                            "x": 0,
+                            "y": 2,
+                            "width": 4,
+                            "height": 3
+                        }
+                    },
+                    {
+                        "id": 3831306629077230,
+                        "definition": {
+                            "title": "Certificates by Versions",
+                            "title_size": "16",
+                            "title_align": "left",
+                            "requests": [
+                                {
+                                    "formulas": [
+                                        {
+                                            "formula": "query1",
+                                            "limit": {
+                                                "count": 500,
+                                                "order": "desc"
+                                            }
+                                        }
+                                    ],
+                                    "queries": [
+                                        {
+                                            "data_source": "logs",
+                                            "name": "query1",
+                                            "indexes": [
+                                                "*"
+                                            ],
+                                            "compute": {
+                                                "aggregation": "cardinality",
+                                                "metric": "@certificate.serial"
+                                            },
+                                            "group_by": [
+                                                {
+                                                    "facet": "@certificate.version",
+                                                    "limit": 10,
+                                                    "sort": {
+                                                        "order": "desc",
+                                                        "aggregation": "cardinality",
+                                                        "metric": "@certificate.serial"
+                                                    }
+                                                }
+                                            ],
+                                            "search": {
+                                                "query": "source:zeek service:(x509 OR x509_red) $Host"
+                                            },
+                                            "storage": "hot"
+                                        }
+                                    ],
+                                    "response_format": "scalar",
+                                    "style": {
+                                        "palette": "datadog16"
+                                    }
+                                }
+                            ],
+                            "type": "sunburst",
+                            "legend": {
+                                "type": "automatic"
+                            }
+                        },
+                        "layout": {
+                            "x": 4,
+                            "y": 2,
+                            "width": 8,
+                            "height": 3
+                        }
+                    },
+                    {
+                        "id": 7402375446412652,
+                        "definition": {
+                            "title": "Certificates by Key Algorithm and Key Type",
+                            "title_size": "16",
+                            "title_align": "left",
+                            "requests": [
+                                {
+                                    "formulas": [
+                                        {
+                                            "formula": "query1",
+                                            "limit": {
+                                                "count": 500,
+                                                "order": "desc"
+                                            }
+                                        }
+                                    ],
+                                    "queries": [
+                                        {
+                                            "data_source": "logs",
+                                            "name": "query1",
+                                            "indexes": [
+                                                "*"
+                                            ],
+                                            "compute": {
+                                                "aggregation": "count"
+                                            },
+                                            "group_by": [
+                                                {
+                                                    "facet": "@certificate.key_alg",
+                                                    "limit": 10,
+                                                    "sort": {
+                                                        "order": "desc",
+                                                        "aggregation": "count"
+                                                    }
+                                                },
+                                                {
+                                                    "facet": "@certificate.key_type",
+                                                    "limit": 10,
+                                                    "sort": {
+                                                        "order": "desc",
+                                                        "aggregation": "count"
+                                                    }
+                                                }
+                                            ],
+                                            "search": {
+                                                "query": "source:zeek service:(x509 OR x509_red) $Host"
+                                            },
+                                            "storage": "hot"
+                                        }
+                                    ],
+                                    "response_format": "scalar",
+                                    "style": {
+                                        "palette": "datadog16"
+                                    }
+                                }
+                            ],
+                            "type": "sunburst",
+                            "legend": {
+                                "type": "automatic"
+                            }
+                        },
+                        "layout": {
+                            "x": 0,
+                            "y": 5,
+                            "width": 12,
+                            "height": 4
+                        }
+                    },
+                    {
+                        "id": 660294772769066,
+                        "definition": {
+                            "title": "Certificates by Signature Algorithms",
+                            "title_size": "16",
+                            "title_align": "left",
+                            "requests": [
+                                {
+                                    "formulas": [
+                                        {
+                                            "formula": "query1",
+                                            "limit": {
+                                                "count": 500,
+                                                "order": "desc"
+                                            }
+                                        }
+                                    ],
+                                    "queries": [
+                                        {
+                                            "data_source": "logs",
+                                            "name": "query1",
+                                            "indexes": [
+                                                "*"
+                                            ],
+                                            "compute": {
+                                                "aggregation": "count"
+                                            },
+                                            "group_by": [
+                                                {
+                                                    "facet": "@certificate.sig_alg",
+                                                    "limit": 10,
+                                                    "sort": {
+                                                        "order": "desc",
+                                                        "aggregation": "count"
+                                                    }
+                                                }
+                                            ],
+                                            "search": {
+                                                "query": "source:zeek service:(x509 OR x509_red) $Host"
+                                            },
+                                            "storage": "hot"
+                                        }
+                                    ],
+                                    "response_format": "scalar",
+                                    "style": {
+                                        "palette": "datadog16"
+                                    }
+                                }
+                            ],
+                            "type": "sunburst",
+                            "legend": {
+                                "type": "automatic"
+                            }
+                        },
+                        "layout": {
+                            "x": 0,
+                            "y": 9,
+                            "width": 12,
+                            "height": 4
+                        }
+                    },
+                    {
+                        "id": 8050841026054896,
+                        "definition": {
+                            "title": "X.509 Log Details",
+                            "title_size": "16",
+                            "title_align": "left",
+                            "requests": [
+                                {
+                                    "response_format": "event_list",
+                                    "query": {
+                                        "data_source": "logs_stream",
+                                        "query_string": "source:zeek service:(x509 OR x509_red) $Host",
+                                        "indexes": [],
+                                        "storage": "hot"
+                                    },
+                                    "columns": [
+                                        {
+                                            "field": "status_line",
+                                            "width": "auto"
+                                        },
+                                        {
+                                            "field": "timestamp",
+                                            "width": "auto"
+                                        },
+                                        {
+                                            "field": "host",
+                                            "width": "auto"
+                                        },
+                                        {
+                                            "field": "fingerprint",
+                                            "width": "auto"
+                                        },
+                                        {
+                                            "field": "certificate.version",
+                                            "width": "auto"
+                                        },
+                                        {
+                                            "field": "certificate.key_alg",
+                                            "width": "auto"
+                                        },
+                                        {
+                                            "field": "certificate.key_type",
+                                            "width": "auto"
+                                        },
+                                        {
+                                            "field": "certificate.sig_alg",
+                                            "width": "auto"
+                                        },
+                                        {
+                                            "field": "host_cert",
+                                            "width": "auto"
+                                        },
+                                        {
+                                            "field": "client_cert",
+                                            "width": "auto"
+                                        }
+                                    ]
+                                }
+                            ],
+                            "type": "list_stream"
+                        },
+                        "layout": {
+                            "x": 0,
+                            "y": 13,
+                            "width": 12,
+                            "height": 4
+                        }
+                    }
+                ]
+            },
+            "layout": {
+                "x": 0,
+                "y": 43,
+                "width": 12,
+                "height": 18
+            }
+        }
+    ],
+    "template_variables": [
+        {
+            "name": "Host",
+            "prefix": "host",
+            "available_values": [],
+            "default": "*"
+        }
+    ],
+    "layout_type": "ordered",
+    "notify_list": [],
+    "reflow_type": "fixed"
+}

@@ -2,6 +2,24 @@
 
 <!-- towncrier release notes start -->
 
+## 5.0.0 / 2024-02-16
+
+***Changed***:
+
+* Remove python 2 support ([#16854](https://github.com/DataDog/integrations-core/pull/16854))
+
+***Added***:
+
+* Use Airflow version to determine health endpoint ([#16646](https://github.com/DataDog/integrations-core/pull/16646))
+* Update the configuration file to include the new oauth options parameter ([#16835](https://github.com/DataDog/integrations-core/pull/16835))
+* Add ongoing duration metric for dag tasks ([#16847](https://github.com/DataDog/integrations-core/pull/16847))
+
+## 4.1.0 / 2024-01-05 / Agent 7.51.0
+
+***Added***:
+
+* Bump the Python version from py3.9 to py3.11 ([#15997](https://github.com/DataDog/integrations-core/pull/15997))
+
 ## 4.0.0 / 2023-08-10 / Agent 7.48.0
 
 ***Changed***:

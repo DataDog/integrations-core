@@ -558,6 +558,10 @@ coverage:
         target: 75
         flags:
         - teamcity
+      Tekton:
+        target: 75
+        flags:
+        - tekton
       Temporal:
         target: 75
         flags:
@@ -646,6 +650,10 @@ coverage:
         target: 75
         flags:
         - etcd
+      fluxcd:
+        target: 75
+        flags:
+        - fluxcd
       vSphere:
         target: 75
         flags:
@@ -902,6 +910,11 @@ flags:
     paths:
     - fluentd/datadog_checks/fluentd
     - fluentd/tests
+  fluxcd:
+    carryforward: true
+    paths:
+    - fluxcd/datadog_checks/fluxcd
+    - fluxcd/tests
   foundationdb:
     carryforward: true
     paths:
@@ -1352,6 +1365,11 @@ flags:
     paths:
     - teamcity/datadog_checks/teamcity
     - teamcity/tests
+  tekton:
+    carryforward: true
+    paths:
+    - tekton/datadog_checks/tekton
+    - tekton/tests
   temporal:
     carryforward: true
     paths:

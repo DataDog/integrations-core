@@ -1,0 +1,542 @@
+# HELP certwatcher_read_certificate_errors_total Total number of certificate read errors
+# TYPE certwatcher_read_certificate_errors_total counter
+certwatcher_read_certificate_errors_total 0
+# HELP certwatcher_read_certificate_total Total number of certificate reads
+# TYPE certwatcher_read_certificate_total counter
+certwatcher_read_certificate_total 0
+# HELP controller_runtime_active_workers Number of currently used workers per controller
+# TYPE controller_runtime_active_workers gauge
+controller_runtime_active_workers{controller="bucket"} 0
+controller_runtime_active_workers{controller="gitrepository"} 0
+controller_runtime_active_workers{controller="helmchart"} 0
+controller_runtime_active_workers{controller="helmrepository"} 0
+controller_runtime_active_workers{controller="ocirepository"} 0
+# HELP controller_runtime_max_concurrent_reconciles Maximum number of concurrent reconciles per controller
+# TYPE controller_runtime_max_concurrent_reconciles gauge
+controller_runtime_max_concurrent_reconciles{controller="bucket"} 20
+controller_runtime_max_concurrent_reconciles{controller="gitrepository"} 20
+controller_runtime_max_concurrent_reconciles{controller="helmchart"} 20
+controller_runtime_max_concurrent_reconciles{controller="helmrepository"} 20
+controller_runtime_max_concurrent_reconciles{controller="ocirepository"} 20
+# HELP controller_runtime_reconcile_errors_total Total number of reconciliation errors per controller
+# TYPE controller_runtime_reconcile_errors_total counter
+controller_runtime_reconcile_errors_total{controller="bucket"} 0
+controller_runtime_reconcile_errors_total{controller="gitrepository"} 0
+controller_runtime_reconcile_errors_total{controller="helmchart"} 0
+controller_runtime_reconcile_errors_total{controller="helmrepository"} 0
+controller_runtime_reconcile_errors_total{controller="ocirepository"} 0
+# HELP controller_runtime_reconcile_time_seconds Length of time per reconciliation per controller
+# TYPE controller_runtime_reconcile_time_seconds histogram
+controller_runtime_reconcile_time_seconds_bucket{controller="gitrepository",le="0.005"} 0
+controller_runtime_reconcile_time_seconds_bucket{controller="gitrepository",le="0.01"} 1
+controller_runtime_reconcile_time_seconds_bucket{controller="gitrepository",le="0.025"} 1
+controller_runtime_reconcile_time_seconds_bucket{controller="gitrepository",le="0.05"} 1
+controller_runtime_reconcile_time_seconds_bucket{controller="gitrepository",le="0.1"} 1
+controller_runtime_reconcile_time_seconds_bucket{controller="gitrepository",le="0.15"} 1
+controller_runtime_reconcile_time_seconds_bucket{controller="gitrepository",le="0.2"} 1
+controller_runtime_reconcile_time_seconds_bucket{controller="gitrepository",le="0.25"} 1
+controller_runtime_reconcile_time_seconds_bucket{controller="gitrepository",le="0.3"} 1
+controller_runtime_reconcile_time_seconds_bucket{controller="gitrepository",le="0.35"} 1
+controller_runtime_reconcile_time_seconds_bucket{controller="gitrepository",le="0.4"} 1
+controller_runtime_reconcile_time_seconds_bucket{controller="gitrepository",le="0.45"} 1
+controller_runtime_reconcile_time_seconds_bucket{controller="gitrepository",le="0.5"} 1
+controller_runtime_reconcile_time_seconds_bucket{controller="gitrepository",le="0.6"} 1
+controller_runtime_reconcile_time_seconds_bucket{controller="gitrepository",le="0.7"} 1
+controller_runtime_reconcile_time_seconds_bucket{controller="gitrepository",le="0.8"} 1
+controller_runtime_reconcile_time_seconds_bucket{controller="gitrepository",le="0.9"} 1
+controller_runtime_reconcile_time_seconds_bucket{controller="gitrepository",le="1"} 1
+controller_runtime_reconcile_time_seconds_bucket{controller="gitrepository",le="1.25"} 206
+controller_runtime_reconcile_time_seconds_bucket{controller="gitrepository",le="1.5"} 219
+controller_runtime_reconcile_time_seconds_bucket{controller="gitrepository",le="1.75"} 222
+controller_runtime_reconcile_time_seconds_bucket{controller="gitrepository",le="2"} 222
+controller_runtime_reconcile_time_seconds_bucket{controller="gitrepository",le="2.5"} 222
+controller_runtime_reconcile_time_seconds_bucket{controller="gitrepository",le="3"} 222
+controller_runtime_reconcile_time_seconds_bucket{controller="gitrepository",le="3.5"} 222
+controller_runtime_reconcile_time_seconds_bucket{controller="gitrepository",le="4"} 222
+controller_runtime_reconcile_time_seconds_bucket{controller="gitrepository",le="4.5"} 222
+controller_runtime_reconcile_time_seconds_bucket{controller="gitrepository",le="5"} 222
+controller_runtime_reconcile_time_seconds_bucket{controller="gitrepository",le="6"} 222
+controller_runtime_reconcile_time_seconds_bucket{controller="gitrepository",le="7"} 222
+controller_runtime_reconcile_time_seconds_bucket{controller="gitrepository",le="8"} 222
+controller_runtime_reconcile_time_seconds_bucket{controller="gitrepository",le="9"} 222
+controller_runtime_reconcile_time_seconds_bucket{controller="gitrepository",le="10"} 222
+controller_runtime_reconcile_time_seconds_bucket{controller="gitrepository",le="15"} 222
+controller_runtime_reconcile_time_seconds_bucket{controller="gitrepository",le="20"} 222
+controller_runtime_reconcile_time_seconds_bucket{controller="gitrepository",le="25"} 222
+controller_runtime_reconcile_time_seconds_bucket{controller="gitrepository",le="30"} 222
+controller_runtime_reconcile_time_seconds_bucket{controller="gitrepository",le="40"} 222
+controller_runtime_reconcile_time_seconds_bucket{controller="gitrepository",le="50"} 222
+controller_runtime_reconcile_time_seconds_bucket{controller="gitrepository",le="60"} 222
+controller_runtime_reconcile_time_seconds_bucket{controller="gitrepository",le="+Inf"} 222
+controller_runtime_reconcile_time_seconds_sum{controller="gitrepository"} 258.2682547870001
+controller_runtime_reconcile_time_seconds_count{controller="gitrepository"} 222
+controller_runtime_reconcile_time_seconds_bucket{controller="helmchart",le="0.005"} 0
+controller_runtime_reconcile_time_seconds_bucket{controller="helmchart",le="0.01"} 2
+controller_runtime_reconcile_time_seconds_bucket{controller="helmchart",le="0.025"} 2
+controller_runtime_reconcile_time_seconds_bucket{controller="helmchart",le="0.05"} 2
+controller_runtime_reconcile_time_seconds_bucket{controller="helmchart",le="0.1"} 6
+controller_runtime_reconcile_time_seconds_bucket{controller="helmchart",le="0.15"} 6
+controller_runtime_reconcile_time_seconds_bucket{controller="helmchart",le="0.2"} 6
+controller_runtime_reconcile_time_seconds_bucket{controller="helmchart",le="0.25"} 6
+controller_runtime_reconcile_time_seconds_bucket{controller="helmchart",le="0.3"} 6
+controller_runtime_reconcile_time_seconds_bucket{controller="helmchart",le="0.35"} 6
+controller_runtime_reconcile_time_seconds_bucket{controller="helmchart",le="0.4"} 6
+controller_runtime_reconcile_time_seconds_bucket{controller="helmchart",le="0.45"} 6
+controller_runtime_reconcile_time_seconds_bucket{controller="helmchart",le="0.5"} 6
+controller_runtime_reconcile_time_seconds_bucket{controller="helmchart",le="0.6"} 6
+controller_runtime_reconcile_time_seconds_bucket{controller="helmchart",le="0.7"} 6
+controller_runtime_reconcile_time_seconds_bucket{controller="helmchart",le="0.8"} 6
+controller_runtime_reconcile_time_seconds_bucket{controller="helmchart",le="0.9"} 7
+controller_runtime_reconcile_time_seconds_bucket{controller="helmchart",le="1"} 7
+controller_runtime_reconcile_time_seconds_bucket{controller="helmchart",le="1.25"} 7
+controller_runtime_reconcile_time_seconds_bucket{controller="helmchart",le="1.5"} 7
+controller_runtime_reconcile_time_seconds_bucket{controller="helmchart",le="1.75"} 7
+controller_runtime_reconcile_time_seconds_bucket{controller="helmchart",le="2"} 7
+controller_runtime_reconcile_time_seconds_bucket{controller="helmchart",le="2.5"} 7
+controller_runtime_reconcile_time_seconds_bucket{controller="helmchart",le="3"} 8
+controller_runtime_reconcile_time_seconds_bucket{controller="helmchart",le="3.5"} 9
+controller_runtime_reconcile_time_seconds_bucket{controller="helmchart",le="4"} 10
+controller_runtime_reconcile_time_seconds_bucket{controller="helmchart",le="4.5"} 10
+controller_runtime_reconcile_time_seconds_bucket{controller="helmchart",le="5"} 10
+controller_runtime_reconcile_time_seconds_bucket{controller="helmchart",le="6"} 10
+controller_runtime_reconcile_time_seconds_bucket{controller="helmchart",le="7"} 11
+controller_runtime_reconcile_time_seconds_bucket{controller="helmchart",le="8"} 11
+controller_runtime_reconcile_time_seconds_bucket{controller="helmchart",le="9"} 11
+controller_runtime_reconcile_time_seconds_bucket{controller="helmchart",le="10"} 11
+controller_runtime_reconcile_time_seconds_bucket{controller="helmchart",le="15"} 11
+controller_runtime_reconcile_time_seconds_bucket{controller="helmchart",le="20"} 11
+controller_runtime_reconcile_time_seconds_bucket{controller="helmchart",le="25"} 11
+controller_runtime_reconcile_time_seconds_bucket{controller="helmchart",le="30"} 11
+controller_runtime_reconcile_time_seconds_bucket{controller="helmchart",le="40"} 11
+controller_runtime_reconcile_time_seconds_bucket{controller="helmchart",le="50"} 11
+controller_runtime_reconcile_time_seconds_bucket{controller="helmchart",le="60"} 11
+controller_runtime_reconcile_time_seconds_bucket{controller="helmchart",le="+Inf"} 11
+controller_runtime_reconcile_time_seconds_sum{controller="helmchart"} 17.470864716
+controller_runtime_reconcile_time_seconds_count{controller="helmchart"} 11
+controller_runtime_reconcile_time_seconds_bucket{controller="helmrepository",le="0.005"} 2
+controller_runtime_reconcile_time_seconds_bucket{controller="helmrepository",le="0.01"} 2
+controller_runtime_reconcile_time_seconds_bucket{controller="helmrepository",le="0.025"} 2
+controller_runtime_reconcile_time_seconds_bucket{controller="helmrepository",le="0.05"} 2
+controller_runtime_reconcile_time_seconds_bucket{controller="helmrepository",le="0.1"} 2
+controller_runtime_reconcile_time_seconds_bucket{controller="helmrepository",le="0.15"} 2
+controller_runtime_reconcile_time_seconds_bucket{controller="helmrepository",le="0.2"} 2
+controller_runtime_reconcile_time_seconds_bucket{controller="helmrepository",le="0.25"} 2
+controller_runtime_reconcile_time_seconds_bucket{controller="helmrepository",le="0.3"} 2
+controller_runtime_reconcile_time_seconds_bucket{controller="helmrepository",le="0.35"} 3
+controller_runtime_reconcile_time_seconds_bucket{controller="helmrepository",le="0.4"} 3
+controller_runtime_reconcile_time_seconds_bucket{controller="helmrepository",le="0.45"} 3
+controller_runtime_reconcile_time_seconds_bucket{controller="helmrepository",le="0.5"} 3
+controller_runtime_reconcile_time_seconds_bucket{controller="helmrepository",le="0.6"} 4
+controller_runtime_reconcile_time_seconds_bucket{controller="helmrepository",le="0.7"} 4
+controller_runtime_reconcile_time_seconds_bucket{controller="helmrepository",le="0.8"} 4
+controller_runtime_reconcile_time_seconds_bucket{controller="helmrepository",le="0.9"} 4
+controller_runtime_reconcile_time_seconds_bucket{controller="helmrepository",le="1"} 4
+controller_runtime_reconcile_time_seconds_bucket{controller="helmrepository",le="1.25"} 4
+controller_runtime_reconcile_time_seconds_bucket{controller="helmrepository",le="1.5"} 4
+controller_runtime_reconcile_time_seconds_bucket{controller="helmrepository",le="1.75"} 4
+controller_runtime_reconcile_time_seconds_bucket{controller="helmrepository",le="2"} 4
+controller_runtime_reconcile_time_seconds_bucket{controller="helmrepository",le="2.5"} 4
+controller_runtime_reconcile_time_seconds_bucket{controller="helmrepository",le="3"} 4
+controller_runtime_reconcile_time_seconds_bucket{controller="helmrepository",le="3.5"} 4
+controller_runtime_reconcile_time_seconds_bucket{controller="helmrepository",le="4"} 4
+controller_runtime_reconcile_time_seconds_bucket{controller="helmrepository",le="4.5"} 4
+controller_runtime_reconcile_time_seconds_bucket{controller="helmrepository",le="5"} 4
+controller_runtime_reconcile_time_seconds_bucket{controller="helmrepository",le="6"} 4
+controller_runtime_reconcile_time_seconds_bucket{controller="helmrepository",le="7"} 4
+controller_runtime_reconcile_time_seconds_bucket{controller="helmrepository",le="8"} 4
+controller_runtime_reconcile_time_seconds_bucket{controller="helmrepository",le="9"} 4
+controller_runtime_reconcile_time_seconds_bucket{controller="helmrepository",le="10"} 4
+controller_runtime_reconcile_time_seconds_bucket{controller="helmrepository",le="15"} 4
+controller_runtime_reconcile_time_seconds_bucket{controller="helmrepository",le="20"} 4
+controller_runtime_reconcile_time_seconds_bucket{controller="helmrepository",le="25"} 4
+controller_runtime_reconcile_time_seconds_bucket{controller="helmrepository",le="30"} 4
+controller_runtime_reconcile_time_seconds_bucket{controller="helmrepository",le="40"} 4
+controller_runtime_reconcile_time_seconds_bucket{controller="helmrepository",le="50"} 4
+controller_runtime_reconcile_time_seconds_bucket{controller="helmrepository",le="60"} 4
+controller_runtime_reconcile_time_seconds_bucket{controller="helmrepository",le="+Inf"} 4
+controller_runtime_reconcile_time_seconds_sum{controller="helmrepository"} 0.881499584
+controller_runtime_reconcile_time_seconds_count{controller="helmrepository"} 4
+# HELP controller_runtime_reconcile_total Total number of reconciliations per controller
+# TYPE controller_runtime_reconcile_total counter
+controller_runtime_reconcile_total{controller="bucket",result="error"} 0
+controller_runtime_reconcile_total{controller="bucket",result="requeue"} 0
+controller_runtime_reconcile_total{controller="bucket",result="requeue_after"} 0
+controller_runtime_reconcile_total{controller="bucket",result="success"} 0
+controller_runtime_reconcile_total{controller="gitrepository",result="error"} 0
+controller_runtime_reconcile_total{controller="gitrepository",result="requeue"} 1
+controller_runtime_reconcile_total{controller="gitrepository",result="requeue_after"} 221
+controller_runtime_reconcile_total{controller="gitrepository",result="success"} 0
+controller_runtime_reconcile_total{controller="helmchart",result="error"} 0
+controller_runtime_reconcile_total{controller="helmchart",result="requeue"} 2
+controller_runtime_reconcile_total{controller="helmchart",result="requeue_after"} 9
+controller_runtime_reconcile_total{controller="helmchart",result="success"} 0
+controller_runtime_reconcile_total{controller="helmrepository",result="error"} 0
+controller_runtime_reconcile_total{controller="helmrepository",result="requeue"} 1
+controller_runtime_reconcile_total{controller="helmrepository",result="requeue_after"} 2
+controller_runtime_reconcile_total{controller="helmrepository",result="success"} 1
+controller_runtime_reconcile_total{controller="ocirepository",result="error"} 0
+controller_runtime_reconcile_total{controller="ocirepository",result="requeue"} 0
+controller_runtime_reconcile_total{controller="ocirepository",result="requeue_after"} 0
+controller_runtime_reconcile_total{controller="ocirepository",result="success"} 0
+# HELP go_gc_duration_seconds A summary of the pause duration of garbage collection cycles.
+# TYPE go_gc_duration_seconds summary
+go_gc_duration_seconds{quantile="0"} 4.6042e-05
+go_gc_duration_seconds{quantile="0.25"} 0.00016175
+go_gc_duration_seconds{quantile="0.5"} 0.000269708
+go_gc_duration_seconds{quantile="0.75"} 0.000458334
+go_gc_duration_seconds{quantile="1"} 0.005114001
+go_gc_duration_seconds_sum 0.048597676
+go_gc_duration_seconds_count 130
+# HELP go_goroutines Number of goroutines that currently exist.
+# TYPE go_goroutines gauge
+go_goroutines 207
+# HELP go_info Information about the Go environment.
+# TYPE go_info gauge
+go_info{version="go1.21.5"} 1
+# HELP go_memstats_alloc_bytes Number of bytes allocated and still in use.
+# TYPE go_memstats_alloc_bytes gauge
+go_memstats_alloc_bytes 9.969232e+06
+# HELP go_memstats_alloc_bytes_total Total number of bytes allocated, even if freed.
+# TYPE go_memstats_alloc_bytes_total counter
+go_memstats_alloc_bytes_total 6.1275676e+08
+# HELP go_memstats_buck_hash_sys_bytes Number of bytes used by the profiling bucket hash table.
+# TYPE go_memstats_buck_hash_sys_bytes gauge
+go_memstats_buck_hash_sys_bytes 1.612353e+06
+# HELP go_memstats_frees_total Total number of frees.
+# TYPE go_memstats_frees_total counter
+go_memstats_frees_total 5.142497e+06
+# HELP go_memstats_gc_sys_bytes Number of bytes used for garbage collection system metadata.
+# TYPE go_memstats_gc_sys_bytes gauge
+go_memstats_gc_sys_bytes 5.189448e+06
+# HELP go_memstats_heap_alloc_bytes Number of heap bytes allocated and still in use.
+# TYPE go_memstats_heap_alloc_bytes gauge
+go_memstats_heap_alloc_bytes 9.969232e+06
+# HELP go_memstats_heap_idle_bytes Number of heap bytes waiting to be used.
+# TYPE go_memstats_heap_idle_bytes gauge
+go_memstats_heap_idle_bytes 4.6800896e+07
+# HELP go_memstats_heap_inuse_bytes Number of heap bytes that are in use.
+# TYPE go_memstats_heap_inuse_bytes gauge
+go_memstats_heap_inuse_bytes 1.4573568e+07
+# HELP go_memstats_heap_objects Number of allocated objects.
+# TYPE go_memstats_heap_objects gauge
+go_memstats_heap_objects 38450
+# HELP go_memstats_heap_released_bytes Number of heap bytes released to OS.
+# TYPE go_memstats_heap_released_bytes gauge
+go_memstats_heap_released_bytes 4.399104e+07
+# HELP go_memstats_heap_sys_bytes Number of heap bytes obtained from system.
+# TYPE go_memstats_heap_sys_bytes gauge
+go_memstats_heap_sys_bytes 6.1374464e+07
+# HELP go_memstats_last_gc_time_seconds Number of seconds since 1970 of last garbage collection.
+# TYPE go_memstats_last_gc_time_seconds gauge
+go_memstats_last_gc_time_seconds 1.70308464466357e+09
+# HELP go_memstats_lookups_total Total number of pointer lookups.
+# TYPE go_memstats_lookups_total counter
+go_memstats_lookups_total 0
+# HELP go_memstats_mallocs_total Total number of mallocs.
+# TYPE go_memstats_mallocs_total counter
+go_memstats_mallocs_total 5.180947e+06
+# HELP go_memstats_mcache_inuse_bytes Number of bytes in use by mcache structures.
+# TYPE go_memstats_mcache_inuse_bytes gauge
+go_memstats_mcache_inuse_bytes 6000
+# HELP go_memstats_mcache_sys_bytes Number of bytes used for mcache structures obtained from system.
+# TYPE go_memstats_mcache_sys_bytes gauge
+go_memstats_mcache_sys_bytes 15600
+# HELP go_memstats_mspan_inuse_bytes Number of bytes in use by mspan structures.
+# TYPE go_memstats_mspan_inuse_bytes gauge
+go_memstats_mspan_inuse_bytes 254688
+# HELP go_memstats_mspan_sys_bytes Number of bytes used for mspan structures obtained from system.
+# TYPE go_memstats_mspan_sys_bytes gauge
+go_memstats_mspan_sys_bytes 945168
+# HELP go_memstats_next_gc_bytes Number of heap bytes when next garbage collection will take place.
+# TYPE go_memstats_next_gc_bytes gauge
+go_memstats_next_gc_bytes 1.8930328e+07
+# HELP go_memstats_other_sys_bytes Number of bytes used for other system allocations.
+# TYPE go_memstats_other_sys_bytes gauge
+go_memstats_other_sys_bytes 1.057407e+06
+# HELP go_memstats_stack_inuse_bytes Number of bytes in use by the stack allocator.
+# TYPE go_memstats_stack_inuse_bytes gauge
+go_memstats_stack_inuse_bytes 1.540096e+06
+# HELP go_memstats_stack_sys_bytes Number of bytes obtained from system for stack allocator.
+# TYPE go_memstats_stack_sys_bytes gauge
+go_memstats_stack_sys_bytes 1.540096e+06
+# HELP go_memstats_sys_bytes Number of bytes obtained from system.
+# TYPE go_memstats_sys_bytes gauge
+go_memstats_sys_bytes 7.1734536e+07
+# HELP go_threads Number of OS threads created.
+# TYPE go_threads gauge
+go_threads 11
+# HELP gotk_reconcile_condition The current condition status of a GitOps Toolkit resource reconciliation.
+# TYPE gotk_reconcile_condition gauge
+gotk_reconcile_condition{kind="GitRepository",name="flux-system",namespace="flux-system",status="False",type="Ready"} 0
+gotk_reconcile_condition{kind="GitRepository",name="flux-system",namespace="flux-system",status="True",type="Ready"} 1
+gotk_reconcile_condition{kind="GitRepository",name="flux-system",namespace="flux-system",status="Unknown",type="Ready"} 0
+gotk_reconcile_condition{kind="HelmChart",name="monitoring-kube-prometheus-stack",namespace="monitoring",status="False",type="Ready"} 0
+gotk_reconcile_condition{kind="HelmChart",name="monitoring-kube-prometheus-stack",namespace="monitoring",status="True",type="Ready"} 1
+gotk_reconcile_condition{kind="HelmChart",name="monitoring-kube-prometheus-stack",namespace="monitoring",status="Unknown",type="Ready"} 0
+gotk_reconcile_condition{kind="HelmChart",name="monitoring-loki-stack",namespace="monitoring",status="False",type="Ready"} 0
+gotk_reconcile_condition{kind="HelmChart",name="monitoring-loki-stack",namespace="monitoring",status="True",type="Ready"} 1
+gotk_reconcile_condition{kind="HelmChart",name="monitoring-loki-stack",namespace="monitoring",status="Unknown",type="Ready"} 0
+gotk_reconcile_condition{kind="HelmRepository",name="grafana-charts",namespace="monitoring",status="False",type="Ready"} 0
+gotk_reconcile_condition{kind="HelmRepository",name="grafana-charts",namespace="monitoring",status="True",type="Ready"} 1
+gotk_reconcile_condition{kind="HelmRepository",name="grafana-charts",namespace="monitoring",status="Unknown",type="Ready"} 0
+# HELP gotk_reconcile_duration_seconds The duration in seconds of a GitOps Toolkit resource reconciliation.
+# TYPE gotk_reconcile_duration_seconds histogram
+gotk_reconcile_duration_seconds_bucket{kind="GitRepository",name="flux-system",namespace="flux-system",le="0.01"} 1
+gotk_reconcile_duration_seconds_bucket{kind="GitRepository",name="flux-system",namespace="flux-system",le="0.038363583488692544"} 1
+gotk_reconcile_duration_seconds_bucket{kind="GitRepository",name="flux-system",namespace="flux-system",le="0.1471764538093883"} 1
+gotk_reconcile_duration_seconds_bucket{kind="GitRepository",name="flux-system",namespace="flux-system",le="0.5646216173286169"} 1
+gotk_reconcile_duration_seconds_bucket{kind="GitRepository",name="flux-system",namespace="flux-system",le="2.166090855590701"} 222
+gotk_reconcile_duration_seconds_bucket{kind="GitRepository",name="flux-system",namespace="flux-system",le="8.309900738254731"} 222
+gotk_reconcile_duration_seconds_bucket{kind="GitRepository",name="flux-system",namespace="flux-system",le="31.879757075478317"} 222
+gotk_reconcile_duration_seconds_bucket{kind="GitRepository",name="flux-system",namespace="flux-system",le="122.30217221643493"} 222
+gotk_reconcile_duration_seconds_bucket{kind="GitRepository",name="flux-system",namespace="flux-system",le="469.19495946736544"} 222
+gotk_reconcile_duration_seconds_bucket{kind="GitRepository",name="flux-system",namespace="flux-system",le="1799.9999999999986"} 222
+gotk_reconcile_duration_seconds_bucket{kind="GitRepository",name="flux-system",namespace="flux-system",le="+Inf"} 222
+gotk_reconcile_duration_seconds_sum{kind="GitRepository",name="flux-system",namespace="flux-system"} 258.1942491629997
+gotk_reconcile_duration_seconds_count{kind="GitRepository",name="flux-system",namespace="flux-system"} 222
+gotk_reconcile_duration_seconds_bucket{kind="HelmChart",name="monitoring-kube-prometheus-stack",namespace="monitoring",le="0.01"} 1
+gotk_reconcile_duration_seconds_bucket{kind="HelmChart",name="monitoring-kube-prometheus-stack",namespace="monitoring",le="0.038363583488692544"} 1
+gotk_reconcile_duration_seconds_bucket{kind="HelmChart",name="monitoring-kube-prometheus-stack",namespace="monitoring",le="0.1471764538093883"} 1
+gotk_reconcile_duration_seconds_bucket{kind="HelmChart",name="monitoring-kube-prometheus-stack",namespace="monitoring",le="0.5646216173286169"} 1
+gotk_reconcile_duration_seconds_bucket{kind="HelmChart",name="monitoring-kube-prometheus-stack",namespace="monitoring",le="2.166090855590701"} 1
+gotk_reconcile_duration_seconds_bucket{kind="HelmChart",name="monitoring-kube-prometheus-stack",namespace="monitoring",le="8.309900738254731"} 5
+gotk_reconcile_duration_seconds_bucket{kind="HelmChart",name="monitoring-kube-prometheus-stack",namespace="monitoring",le="31.879757075478317"} 5
+gotk_reconcile_duration_seconds_bucket{kind="HelmChart",name="monitoring-kube-prometheus-stack",namespace="monitoring",le="122.30217221643493"} 5
+gotk_reconcile_duration_seconds_bucket{kind="HelmChart",name="monitoring-kube-prometheus-stack",namespace="monitoring",le="469.19495946736544"} 5
+gotk_reconcile_duration_seconds_bucket{kind="HelmChart",name="monitoring-kube-prometheus-stack",namespace="monitoring",le="1799.9999999999986"} 5
+gotk_reconcile_duration_seconds_bucket{kind="HelmChart",name="monitoring-kube-prometheus-stack",namespace="monitoring",le="+Inf"} 5
+gotk_reconcile_duration_seconds_sum{kind="HelmChart",name="monitoring-kube-prometheus-stack",namespace="monitoring"} 16.30100509
+gotk_reconcile_duration_seconds_count{kind="HelmChart",name="monitoring-kube-prometheus-stack",namespace="monitoring"} 5
+gotk_reconcile_duration_seconds_bucket{kind="HelmChart",name="monitoring-loki-stack",namespace="monitoring",le="0.01"} 1
+gotk_reconcile_duration_seconds_bucket{kind="HelmChart",name="monitoring-loki-stack",namespace="monitoring",le="0.038363583488692544"} 1
+gotk_reconcile_duration_seconds_bucket{kind="HelmChart",name="monitoring-loki-stack",namespace="monitoring",le="0.1471764538093883"} 5
+gotk_reconcile_duration_seconds_bucket{kind="HelmChart",name="monitoring-loki-stack",namespace="monitoring",le="0.5646216173286169"} 5
+gotk_reconcile_duration_seconds_bucket{kind="HelmChart",name="monitoring-loki-stack",namespace="monitoring",le="2.166090855590701"} 6
+gotk_reconcile_duration_seconds_bucket{kind="HelmChart",name="monitoring-loki-stack",namespace="monitoring",le="8.309900738254731"} 6
+gotk_reconcile_duration_seconds_bucket{kind="HelmChart",name="monitoring-loki-stack",namespace="monitoring",le="31.879757075478317"} 6
+gotk_reconcile_duration_seconds_bucket{kind="HelmChart",name="monitoring-loki-stack",namespace="monitoring",le="122.30217221643493"} 6
+gotk_reconcile_duration_seconds_bucket{kind="HelmChart",name="monitoring-loki-stack",namespace="monitoring",le="469.19495946736544"} 6
+gotk_reconcile_duration_seconds_bucket{kind="HelmChart",name="monitoring-loki-stack",namespace="monitoring",le="1799.9999999999986"} 6
+gotk_reconcile_duration_seconds_bucket{kind="HelmChart",name="monitoring-loki-stack",namespace="monitoring",le="+Inf"} 6
+gotk_reconcile_duration_seconds_sum{kind="HelmChart",name="monitoring-loki-stack",namespace="monitoring"} 1.167242042
+gotk_reconcile_duration_seconds_count{kind="HelmChart",name="monitoring-loki-stack",namespace="monitoring"} 6
+gotk_reconcile_duration_seconds_bucket{kind="HelmRepository",name="grafana-charts",namespace="monitoring",le="0.01"} 1
+gotk_reconcile_duration_seconds_bucket{kind="HelmRepository",name="grafana-charts",namespace="monitoring",le="0.038363583488692544"} 1
+gotk_reconcile_duration_seconds_bucket{kind="HelmRepository",name="grafana-charts",namespace="monitoring",le="0.1471764538093883"} 1
+gotk_reconcile_duration_seconds_bucket{kind="HelmRepository",name="grafana-charts",namespace="monitoring",le="0.5646216173286169"} 3
+gotk_reconcile_duration_seconds_bucket{kind="HelmRepository",name="grafana-charts",namespace="monitoring",le="2.166090855590701"} 3
+gotk_reconcile_duration_seconds_bucket{kind="HelmRepository",name="grafana-charts",namespace="monitoring",le="8.309900738254731"} 3
+gotk_reconcile_duration_seconds_bucket{kind="HelmRepository",name="grafana-charts",namespace="monitoring",le="31.879757075478317"} 3
+gotk_reconcile_duration_seconds_bucket{kind="HelmRepository",name="grafana-charts",namespace="monitoring",le="122.30217221643493"} 3
+gotk_reconcile_duration_seconds_bucket{kind="HelmRepository",name="grafana-charts",namespace="monitoring",le="469.19495946736544"} 3
+gotk_reconcile_duration_seconds_bucket{kind="HelmRepository",name="grafana-charts",namespace="monitoring",le="1799.9999999999986"} 3
+gotk_reconcile_duration_seconds_bucket{kind="HelmRepository",name="grafana-charts",namespace="monitoring",le="+Inf"} 3
+gotk_reconcile_duration_seconds_sum{kind="HelmRepository",name="grafana-charts",namespace="monitoring"} 0.8787527500000001
+gotk_reconcile_duration_seconds_count{kind="HelmRepository",name="grafana-charts",namespace="monitoring"} 3
+# HELP gotk_suspend_status The current suspend status of a GitOps Toolkit resource.
+# TYPE gotk_suspend_status gauge
+gotk_suspend_status{kind="GitRepository",name="flux-system",namespace="flux-system"} 0
+gotk_suspend_status{kind="HelmChart",name="monitoring-kube-prometheus-stack",namespace="monitoring"} 0
+gotk_suspend_status{kind="HelmChart",name="monitoring-loki-stack",namespace="monitoring"} 0
+gotk_suspend_status{kind="HelmRepository",name="grafana-charts",namespace="monitoring"} 0
+# HELP leader_election_master_status Gauge of if the reporting system is master of the relevant lease, 0 indicates backup, 1 indicates master. 'name' is the string used to identify the lease. Please make sure to group by name.
+# TYPE leader_election_master_status gauge
+leader_election_master_status{name="source-controller-leader-election"} 1
+# HELP process_cpu_seconds_total Total user and system CPU time spent in seconds.
+# TYPE process_cpu_seconds_total counter
+process_cpu_seconds_total 40.09
+# HELP process_max_fds Maximum number of open file descriptors.
+# TYPE process_max_fds gauge
+process_max_fds 1.048576e+06
+# HELP process_open_fds Number of open file descriptors.
+# TYPE process_open_fds gauge
+process_open_fds 13
+# HELP process_resident_memory_bytes Resident memory size in bytes.
+# TYPE process_resident_memory_bytes gauge
+process_resident_memory_bytes 7.7561856e+07
+# HELP process_start_time_seconds Start time of the process since unix epoch in seconds.
+# TYPE process_start_time_seconds gauge
+process_start_time_seconds 1.70307119805e+09
+# HELP process_virtual_memory_bytes Virtual memory size in bytes.
+# TYPE process_virtual_memory_bytes gauge
+process_virtual_memory_bytes 5.63247104e+09
+# HELP process_virtual_memory_max_bytes Maximum amount of virtual memory available in bytes.
+# TYPE process_virtual_memory_max_bytes gauge
+process_virtual_memory_max_bytes 1.8446744073709552e+19
+# HELP rest_client_requests_total Number of HTTP requests, partitioned by status code, method, and host.
+# TYPE rest_client_requests_total counter
+rest_client_requests_total{code="200",host="10.96.0.1:443",method="GET"} 3068
+rest_client_requests_total{code="200",host="10.96.0.1:443",method="PATCH"} 108
+rest_client_requests_total{code="200",host="10.96.0.1:443",method="PUT"} 2685
+rest_client_requests_total{code="201",host="10.96.0.1:443",method="POST"} 11
+rest_client_requests_total{code="404",host="10.96.0.1:443",method="GET"} 1
+rest_client_requests_total{code="404",host="10.96.0.1:443",method="PATCH"} 1
+# HELP workqueue_adds_total Total number of adds handled by workqueue
+# TYPE workqueue_adds_total counter
+workqueue_adds_total{name="bucket"} 0
+workqueue_adds_total{name="gitrepository"} 222
+workqueue_adds_total{name="helmchart"} 11
+workqueue_adds_total{name="helmrepository"} 4
+workqueue_adds_total{name="ocirepository"} 0
+# HELP workqueue_depth Current depth of workqueue
+# TYPE workqueue_depth gauge
+workqueue_depth{name="bucket"} 0
+workqueue_depth{name="gitrepository"} 0
+workqueue_depth{name="helmchart"} 0
+workqueue_depth{name="helmrepository"} 0
+workqueue_depth{name="ocirepository"} 0
+# HELP workqueue_longest_running_processor_seconds How many seconds has the longest running processor for workqueue been running.
+# TYPE workqueue_longest_running_processor_seconds gauge
+workqueue_longest_running_processor_seconds{name="bucket"} 0
+workqueue_longest_running_processor_seconds{name="gitrepository"} 0
+workqueue_longest_running_processor_seconds{name="helmchart"} 0
+workqueue_longest_running_processor_seconds{name="helmrepository"} 0
+workqueue_longest_running_processor_seconds{name="ocirepository"} 0
+# HELP workqueue_queue_duration_seconds How long in seconds an item stays in workqueue before being requested
+# TYPE workqueue_queue_duration_seconds histogram
+workqueue_queue_duration_seconds_bucket{name="bucket",le="1e-08"} 0
+workqueue_queue_duration_seconds_bucket{name="bucket",le="1e-07"} 0
+workqueue_queue_duration_seconds_bucket{name="bucket",le="1e-06"} 0
+workqueue_queue_duration_seconds_bucket{name="bucket",le="9.999999999999999e-06"} 0
+workqueue_queue_duration_seconds_bucket{name="bucket",le="9.999999999999999e-05"} 0
+workqueue_queue_duration_seconds_bucket{name="bucket",le="0.001"} 0
+workqueue_queue_duration_seconds_bucket{name="bucket",le="0.01"} 0
+workqueue_queue_duration_seconds_bucket{name="bucket",le="0.1"} 0
+workqueue_queue_duration_seconds_bucket{name="bucket",le="1"} 0
+workqueue_queue_duration_seconds_bucket{name="bucket",le="10"} 0
+workqueue_queue_duration_seconds_bucket{name="bucket",le="+Inf"} 0
+workqueue_queue_duration_seconds_sum{name="bucket"} 0
+workqueue_queue_duration_seconds_count{name="bucket"} 0
+workqueue_queue_duration_seconds_bucket{name="gitrepository",le="1e-08"} 0
+workqueue_queue_duration_seconds_bucket{name="gitrepository",le="1e-07"} 0
+workqueue_queue_duration_seconds_bucket{name="gitrepository",le="1e-06"} 0
+workqueue_queue_duration_seconds_bucket{name="gitrepository",le="9.999999999999999e-06"} 8
+workqueue_queue_duration_seconds_bucket{name="gitrepository",le="9.999999999999999e-05"} 214
+workqueue_queue_duration_seconds_bucket{name="gitrepository",le="0.001"} 222
+workqueue_queue_duration_seconds_bucket{name="gitrepository",le="0.01"} 222
+workqueue_queue_duration_seconds_bucket{name="gitrepository",le="0.1"} 222
+workqueue_queue_duration_seconds_bucket{name="gitrepository",le="1"} 222
+workqueue_queue_duration_seconds_bucket{name="gitrepository",le="10"} 222
+workqueue_queue_duration_seconds_bucket{name="gitrepository",le="+Inf"} 222
+workqueue_queue_duration_seconds_sum{name="gitrepository"} 0.010983911999999998
+workqueue_queue_duration_seconds_count{name="gitrepository"} 222
+workqueue_queue_duration_seconds_bucket{name="helmchart",le="1e-08"} 0
+workqueue_queue_duration_seconds_bucket{name="helmchart",le="1e-07"} 0
+workqueue_queue_duration_seconds_bucket{name="helmchart",le="1e-06"} 0
+workqueue_queue_duration_seconds_bucket{name="helmchart",le="9.999999999999999e-06"} 2
+workqueue_queue_duration_seconds_bucket{name="helmchart",le="9.999999999999999e-05"} 10
+workqueue_queue_duration_seconds_bucket{name="helmchart",le="0.001"} 10
+workqueue_queue_duration_seconds_bucket{name="helmchart",le="0.01"} 10
+workqueue_queue_duration_seconds_bucket{name="helmchart",le="0.1"} 10
+workqueue_queue_duration_seconds_bucket{name="helmchart",le="1"} 11
+workqueue_queue_duration_seconds_bucket{name="helmchart",le="10"} 11
+workqueue_queue_duration_seconds_bucket{name="helmchart",le="+Inf"} 11
+workqueue_queue_duration_seconds_sum{name="helmchart"} 0.6471591259999999
+workqueue_queue_duration_seconds_count{name="helmchart"} 11
+workqueue_queue_duration_seconds_bucket{name="helmrepository",le="1e-08"} 0
+workqueue_queue_duration_seconds_bucket{name="helmrepository",le="1e-07"} 0
+workqueue_queue_duration_seconds_bucket{name="helmrepository",le="1e-06"} 0
+workqueue_queue_duration_seconds_bucket{name="helmrepository",le="9.999999999999999e-06"} 3
+workqueue_queue_duration_seconds_bucket{name="helmrepository",le="9.999999999999999e-05"} 4
+workqueue_queue_duration_seconds_bucket{name="helmrepository",le="0.001"} 4
+workqueue_queue_duration_seconds_bucket{name="helmrepository",le="0.01"} 4
+workqueue_queue_duration_seconds_bucket{name="helmrepository",le="0.1"} 4
+workqueue_queue_duration_seconds_bucket{name="helmrepository",le="1"} 4
+workqueue_queue_duration_seconds_bucket{name="helmrepository",le="10"} 4
+workqueue_queue_duration_seconds_bucket{name="helmrepository",le="+Inf"} 4
+workqueue_queue_duration_seconds_sum{name="helmrepository"} 5.2166e-05
+workqueue_queue_duration_seconds_count{name="helmrepository"} 4
+workqueue_queue_duration_seconds_bucket{name="ocirepository",le="1e-08"} 0
+workqueue_queue_duration_seconds_bucket{name="ocirepository",le="1e-07"} 0
+workqueue_queue_duration_seconds_bucket{name="ocirepository",le="1e-06"} 0
+workqueue_queue_duration_seconds_bucket{name="ocirepository",le="9.999999999999999e-06"} 0
+workqueue_queue_duration_seconds_bucket{name="ocirepository",le="9.999999999999999e-05"} 0
+workqueue_queue_duration_seconds_bucket{name="ocirepository",le="0.001"} 0
+workqueue_queue_duration_seconds_bucket{name="ocirepository",le="0.01"} 0
+workqueue_queue_duration_seconds_bucket{name="ocirepository",le="0.1"} 0
+workqueue_queue_duration_seconds_bucket{name="ocirepository",le="1"} 0
+workqueue_queue_duration_seconds_bucket{name="ocirepository",le="10"} 0
+workqueue_queue_duration_seconds_bucket{name="ocirepository",le="+Inf"} 0
+workqueue_queue_duration_seconds_sum{name="ocirepository"} 0
+workqueue_queue_duration_seconds_count{name="ocirepository"} 0
+# HELP workqueue_retries_total Total number of retries handled by workqueue
+# TYPE workqueue_retries_total counter
+workqueue_retries_total{name="bucket"} 0
+workqueue_retries_total{name="gitrepository"} 222
+workqueue_retries_total{name="helmchart"} 11
+workqueue_retries_total{name="helmrepository"} 3
+workqueue_retries_total{name="ocirepository"} 0
+# HELP workqueue_unfinished_work_seconds How many seconds of work has been done that is in progress and hasn't been observed by work_duration. Large values indicate stuck threads. One can deduce the number of stuck threads by observing the rate at which this increases.
+# TYPE workqueue_unfinished_work_seconds gauge
+workqueue_unfinished_work_seconds{name="bucket"} 0
+workqueue_unfinished_work_seconds{name="gitrepository"} 0
+workqueue_unfinished_work_seconds{name="helmchart"} 0
+workqueue_unfinished_work_seconds{name="helmrepository"} 0
+workqueue_unfinished_work_seconds{name="ocirepository"} 0
+# HELP workqueue_work_duration_seconds How long in seconds processing an item from workqueue takes.
+# TYPE workqueue_work_duration_seconds histogram
+workqueue_work_duration_seconds_bucket{name="bucket",le="1e-08"} 0
+workqueue_work_duration_seconds_bucket{name="bucket",le="1e-07"} 0
+workqueue_work_duration_seconds_bucket{name="bucket",le="1e-06"} 0
+workqueue_work_duration_seconds_bucket{name="bucket",le="9.999999999999999e-06"} 0
+workqueue_work_duration_seconds_bucket{name="bucket",le="9.999999999999999e-05"} 0
+workqueue_work_duration_seconds_bucket{name="bucket",le="0.001"} 0
+workqueue_work_duration_seconds_bucket{name="bucket",le="0.01"} 0
+workqueue_work_duration_seconds_bucket{name="bucket",le="0.1"} 0
+workqueue_work_duration_seconds_bucket{name="bucket",le="1"} 0
+workqueue_work_duration_seconds_bucket{name="bucket",le="10"} 0
+workqueue_work_duration_seconds_bucket{name="bucket",le="+Inf"} 0
+workqueue_work_duration_seconds_sum{name="bucket"} 0
+workqueue_work_duration_seconds_count{name="bucket"} 0
+workqueue_work_duration_seconds_bucket{name="gitrepository",le="1e-08"} 0
+workqueue_work_duration_seconds_bucket{name="gitrepository",le="1e-07"} 0
+workqueue_work_duration_seconds_bucket{name="gitrepository",le="1e-06"} 0
+workqueue_work_duration_seconds_bucket{name="gitrepository",le="9.999999999999999e-06"} 0
+workqueue_work_duration_seconds_bucket{name="gitrepository",le="9.999999999999999e-05"} 0
+workqueue_work_duration_seconds_bucket{name="gitrepository",le="0.001"} 0
+workqueue_work_duration_seconds_bucket{name="gitrepository",le="0.01"} 1
+workqueue_work_duration_seconds_bucket{name="gitrepository",le="0.1"} 1
+workqueue_work_duration_seconds_bucket{name="gitrepository",le="1"} 1
+workqueue_work_duration_seconds_bucket{name="gitrepository",le="10"} 222
+workqueue_work_duration_seconds_bucket{name="gitrepository",le="+Inf"} 222
+workqueue_work_duration_seconds_sum{name="gitrepository"} 258.2790764940001
+workqueue_work_duration_seconds_count{name="gitrepository"} 222
+workqueue_work_duration_seconds_bucket{name="helmchart",le="1e-08"} 0
+workqueue_work_duration_seconds_bucket{name="helmchart",le="1e-07"} 0
+workqueue_work_duration_seconds_bucket{name="helmchart",le="1e-06"} 0
+workqueue_work_duration_seconds_bucket{name="helmchart",le="9.999999999999999e-06"} 0
+workqueue_work_duration_seconds_bucket{name="helmchart",le="9.999999999999999e-05"} 0
+workqueue_work_duration_seconds_bucket{name="helmchart",le="0.001"} 0
+workqueue_work_duration_seconds_bucket{name="helmchart",le="0.01"} 2
+workqueue_work_duration_seconds_bucket{name="helmchart",le="0.1"} 6
+workqueue_work_duration_seconds_bucket{name="helmchart",le="1"} 7
+workqueue_work_duration_seconds_bucket{name="helmchart",le="10"} 11
+workqueue_work_duration_seconds_bucket{name="helmchart",le="+Inf"} 11
+workqueue_work_duration_seconds_sum{name="helmchart"} 17.471173927
+workqueue_work_duration_seconds_count{name="helmchart"} 11
+workqueue_work_duration_seconds_bucket{name="helmrepository",le="1e-08"} 0
+workqueue_work_duration_seconds_bucket{name="helmrepository",le="1e-07"} 0
+workqueue_work_duration_seconds_bucket{name="helmrepository",le="1e-06"} 0
+workqueue_work_duration_seconds_bucket{name="helmrepository",le="9.999999999999999e-06"} 0
+workqueue_work_duration_seconds_bucket{name="helmrepository",le="9.999999999999999e-05"} 0
+workqueue_work_duration_seconds_bucket{name="helmrepository",le="0.001"} 0
+workqueue_work_duration_seconds_bucket{name="helmrepository",le="0.01"} 2
+workqueue_work_duration_seconds_bucket{name="helmrepository",le="0.1"} 2
+workqueue_work_duration_seconds_bucket{name="helmrepository",le="1"} 4
+workqueue_work_duration_seconds_bucket{name="helmrepository",le="10"} 4
+workqueue_work_duration_seconds_bucket{name="helmrepository",le="+Inf"} 4
+workqueue_work_duration_seconds_sum{name="helmrepository"} 0.881562292
+workqueue_work_duration_seconds_count{name="helmrepository"} 4
+workqueue_work_duration_seconds_bucket{name="ocirepository",le="1e-08"} 0
+workqueue_work_duration_seconds_bucket{name="ocirepository",le="1e-07"} 0
+workqueue_work_duration_seconds_bucket{name="ocirepository",le="1e-06"} 0
+workqueue_work_duration_seconds_bucket{name="ocirepository",le="9.999999999999999e-06"} 0
+workqueue_work_duration_seconds_bucket{name="ocirepository",le="9.999999999999999e-05"} 0
+workqueue_work_duration_seconds_bucket{name="ocirepository",le="0.001"} 0
+workqueue_work_duration_seconds_bucket{name="ocirepository",le="0.01"} 0
+workqueue_work_duration_seconds_bucket{name="ocirepository",le="0.1"} 0
+workqueue_work_duration_seconds_bucket{name="ocirepository",le="1"} 0
+workqueue_work_duration_seconds_bucket{name="ocirepository",le="10"} 0
+workqueue_work_duration_seconds_bucket{name="ocirepository",le="+Inf"} 0
+workqueue_work_duration_seconds_sum{name="ocirepository"} 0
+workqueue_work_duration_seconds_count{name="ocirepository"} 0

@@ -51,6 +51,7 @@ def test_e2e_profile_nvidia_mellanox_switchx(dd_agent_check):
         'status': 1,
         'sys_object_id': '1.3.6.1.4.1.33049.1.1.1.27002',
         'vendor': 'nvidia',
+        'device_type': 'switch',
     }
     device['tags'] = common_tags
     assert_device_metadata(aggregator, device)

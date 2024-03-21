@@ -1,5 +1,6 @@
 id: statsd
 metric_id: statsd
+backend_only: false
 pipeline:
   type: pipeline
   name: Statsd

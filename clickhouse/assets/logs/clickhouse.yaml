@@ -1,16 +1,17 @@
 id: clickhouse
 metric_id: clickhouse
+backend_only: false
 facets:
-  - name: ClickHouse Service Name
-    source: log
+  - groups:
+      - ClickHouse
+    name: ClickHouse Service Name
     path: clickhouse.service
-    groups:
-      - ClickHouse
-  - name: ClickHouse Application Name
     source: log
-    path: clickhouse.application.id
-    groups:
+  - groups:
       - ClickHouse
+    name: ClickHouse Application Name
+    path: clickhouse.application.id
+    source: log
 pipeline:
   type: pipeline
   name: ClickHouse
@@ -34,8 +35,8 @@ pipeline:
         matchRules: |
           clickhouse %{_date} \[ %{_pid} \] \{%{_uuid}\} <%{_level}> (%{_service_common}( %{_app})?|%{_service_verbose}): %{data:message}
       samples:
-        - "2019.11.06 05:19:07.473780 [ 7 ] {} <Trace> default.tableau (ReplicatedMergeTreeQueue): Loaded queue"
-        - "2019.11.06 05:19:07.489819 [ 32 ] {a05c4495-ebdb-4f1d-894a-523a8d3a1d5f} <Debug> executeQuery: (from 127.0.0.1:43218) INSERT INTO tableau VALUES"
+        - '2019.11.06 05:19:07.473780 [ 7 ] {} <Trace> default.tableau (ReplicatedMergeTreeQueue): Loaded queue'
+        - '2019.11.06 05:19:07.489819 [ 32 ] {a05c4495-ebdb-4f1d-894a-523a8d3a1d5f} <Debug> executeQuery: (from 127.0.0.1:43218) INSERT INTO tableau VALUES'
     - type: date-remapper
       name: Define `timestamp` as the official date of the log
       enabled: true

@@ -25,7 +25,6 @@
     "homepage": "https://www.datadoghq.com",
     "sales_email": "info@datadoghq.com"
   },
-  "oauth": {},
   "assets": {
     "integration": {
       "source_type_name": "Envoy",
@@ -45,13 +44,25 @@
       },
       "process_signatures": [
         "envoy"
-      ]
+      ],
+      "source_type_id": 10012,
+      "auto_install": true
     },
     "dashboards": {
-      "Envoy - Overview": "assets/dashboards/envoy_overview.json"
+      "Envoy - Overview": "assets/dashboards/envoy_overview.json",
+      "Envoy Openmetrics Overview": "assets/dashboards/openmetrics_overview.json"
     },
     "logs": {
       "source": "envoy"
+    },
+    "monitors": {
+      "Envoy - connected state": "assets/monitors/connected_state.json"
+    },
+    "saved_views": {
+      "envoy_overview": "assets/saved_views/envoy_overview.json",
+      "envoy_4xx": "assets/saved_views/envoy_4xx.json",
+      "envoy_5xx": "assets/saved_views/envoy_5xx.json",
+      "envoy_error_grouped": "assets/saved_views/envoy_error_grouped.json"
     }
   }
 }

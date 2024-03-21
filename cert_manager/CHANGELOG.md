@@ -2,6 +2,22 @@
 
 <!-- towncrier release notes start -->
 
+## 4.1.0 / 2024-02-16
+
+***Added***:
+
+* Update the configuration file to include the new oauth options parameter ([#16835](https://github.com/DataDog/integrations-core/pull/16835))
+
+## 4.0.0 / 2024-01-05 / Agent 7.51.0
+
+***Changed***:
+
+* Add missing config_models files and update the base check version ([#16300](https://github.com/DataDog/integrations-core/pull/16300))
+
+***Added***:
+
+* Bump the Python version from py3.9 to py3.11 ([#15997](https://github.com/DataDog/integrations-core/pull/15997))
+
 ## 3.1.1 / 2023-07-10 / Agent 7.47.0
 
 ***Fixed***:

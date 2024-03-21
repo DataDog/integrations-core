@@ -3,9 +3,7 @@
 # Licensed under Simplified BSD License (see LICENSE)
 import copy
 import os
-from collections import deque
 
-import mock
 import psycopg2
 import pytest
 from semver import VersionInfo
@@ -108,13 +106,13 @@ def pg_replica_logical():
 
 @pytest.fixture
 def metrics_cache(pg_instance):
-    config = PostgresConfig(pg_instance)
+    config = PostgresConfig(instance=pg_instance)
     return PostgresMetricsCache(config)
 
 
 @pytest.fixture
 def metrics_cache_replica(pg_replica_instance):
-    config = PostgresConfig(pg_replica_instance)
+    config = PostgresConfig(instance=pg_replica_instance)
     return PostgresMetricsCache(config)
 
 
@@ -124,31 +122,3 @@ def e2e_instance():
     instance['dbm'] = True
     instance['collect_resources'] = {'collection_interval': 0.1}
     return instance
-
-
-@pytest.fixture()
-def mock_cursor_for_replica_stats():
-    with mock.patch('psycopg2.connect') as connect:
-        cursor = mock.MagicMock()
-        data = deque()
-        connect.return_value = mock.MagicMock(cursor=mock.MagicMock(return_value=cursor))
-
-        def cursor_execute(query, second_arg=""):
-            if "FROM pg_stat_replication" in query:
-                data.appendleft(['app1', 'streaming', 'async', '1.1.1.1', 12, 12, 12, 12])
-                data.appendleft(['app2', 'backup', 'sync', '1.1.1.1', 13, 13, 13, 13])
-            elif query == 'SHOW SERVER_VERSION;':
-                data.appendleft([POSTGRES_VERSION])
-
-        def cursor_fetchall():
-            while data:
-                yield data.pop()
-
-        def cursor_fetchone():
-            return data.pop()
-
-        cursor.__enter__().execute = cursor_execute
-        cursor.__enter__().fetchall = cursor_fetchall
-        cursor.__enter__().fetchone = cursor_fetchone
-
-        yield

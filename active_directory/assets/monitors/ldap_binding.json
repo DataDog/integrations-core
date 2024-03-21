@@ -2,11 +2,11 @@
   "version": 2,
   "created_at": "2021-04-20",
   "last_updated_at": "2021-04-20",
-  "title": "Elevated LDAP binding duration for host {{host.name}}",
+  "title": "LDAP binding duration is high",
   "tags": [
     "integration:active-directory"
   ],
-  "description": "Notifies when Active Directory LDAP binding duration goes above 15ms for a specific host.",
+  "description": "The binding process is crucial for authentication and authorization between a client and LDAP server. This monitor tracks the binding duration to indicate performance issues or delays in LDAP authentication or directory access.",
   "definition": {
     "message": "{{#is_alert}}\n\nAlert: the LDAP binding duration for host {{host.name}}  went above {{threshold}}, current value is: {{value}} ms \n\n{{/is_alert}} \n{{#is_warning}}\n\nWarning: the LDAP binding duration for host {{host.name}}  went above {{threshold}}, current value is: {{value}} ms\n\n{{/is_warning}} \n\nLDAP bind times that start to exceed 15 or 30 ms may be an indication network issues are present.",
     "name": "[Active Directory] Elevated LDAP binding duration for host {{host.name}}",

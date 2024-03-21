@@ -367,13 +367,13 @@ def test_view_compaction_metrics(aggregator, gauges):
                 r = requests.get(url, auth=self._auth, timeout=1)
                 r.raise_for_status()
             except requests.exceptions.Timeout:
-                None
+                pass
             url = '{}/kennel/_design/dummy/_view/by_data'.format(self._server)
             try:
                 r = requests.get(url, auth=self._auth, timeout=1)
                 r.raise_for_status()
             except requests.exceptions.Timeout:
-                None
+                pass
 
         def update_doc(self, doc):
             body = {'data': str(random.randint(0, 1000000000)), '_rev': doc['rev']}
@@ -451,3 +451,19 @@ def test_config_tags(aggregator, gauges):
         aggregator.assert_metric_has_tag(gauge, TEST_TAG)
     expected_tags = ["instance:{0}".format(config["name"]), TEST_TAG]
     aggregator.assert_service_check(CouchDb.SERVICE_CHECK_NAME, tags=expected_tags)
+
+
+@pytest.mark.usefixtures('dd_environment')
+@pytest.mark.integration
+@pytest.mark.parametrize('enable_per_db_metrics', [True, False])
+def test_per_db_metrics(aggregator, check, enable_per_db_metrics):
+    config = common.BASIC_CONFIG_V2.copy()
+    config["enable_per_db_metrics"] = enable_per_db_metrics
+
+    check.instance = config
+    check.check({})
+
+    if enable_per_db_metrics:
+        aggregator.assert_metric("couchdb.by_db.doc_count", at_least=1)
+    else:
+        aggregator.assert_metric("couchdb.by_db.doc_count", count=0)

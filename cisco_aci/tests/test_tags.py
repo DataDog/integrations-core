@@ -238,25 +238,30 @@ def test_tenant_mapper():
     assert tags._tenant_mapper({}) == []
     assert tags._tenant_mapper({"aaa": "aaa"}) == []
     assert all(
-        [
-            a == b
-            for a, b in zip(
-                sorted(tags._tenant_mapper({"attributes": {"name": "aaa", "dn": "a/tn-bbb/ap-ccc/a"}})),
-                sorted(['tenant:bbb', 'endpoint_group:aaa', 'application:ccc']),
-            )
-        ]
+        a == b
+        for a, b in zip(
+            sorted(tags._tenant_mapper({"attributes": {"name": "aaa", "dn": "a/tn-bbb/ap-ccc/a"}})),
+            sorted(['tenant:bbb', 'endpoint_group:aaa', 'application:ccc']),
+        )
     )
 
     api2 = ApiMock2()
     tags.api = api2
     assert all(
-        [
-            a == b
-            for a, b in zip(
-                sorted(tags._tenant_mapper({"attributes": {"name": "aaa", "dn": "a/tn-bbb/ap-ccc/a"}})),
-                sorted(['tenant:bbb', 'application:ccc', 'endpoint_group:aaa', "ip:ddd", "mac:eee", "encap:fff"]),
-            )
-        ]
+        a == b
+        for a, b in zip(
+            sorted(tags._tenant_mapper({"attributes": {"name": "aaa", "dn": "a/tn-bbb/ap-ccc/a"}})),
+            sorted(
+                [
+                    'tenant:bbb',
+                    'application:ccc',
+                    'endpoint_group:aaa',
+                    "ip:ddd",
+                    "mac:eee",
+                    "encap:fff",
+                ]
+            ),
+        )
     )
 
     context_hash = hash_mutable(
@@ -266,23 +271,21 @@ def test_tenant_mapper():
     tags.api = api3
     tags.tenant_tags = {context_hash: ["test:ggg"]}
     assert all(
-        [
-            a == b
-            for a, b in zip(
-                sorted(tags._tenant_mapper({"attributes": {"name": "aaa", "dn": "a/tn-bbb/ap-ccc/a"}})),
-                sorted(
-                    [
-                        'tenant:bbb',
-                        'application:ccc',
-                        'endpoint_group:aaa',
-                        "ip:ddd",
-                        "mac:eee",
-                        "encap:fff",
-                        "test:ggg",
-                    ]
-                ),
-            )
-        ]
+        a == b
+        for a, b in zip(
+            sorted(tags._tenant_mapper({"attributes": {"name": "aaa", "dn": "a/tn-bbb/ap-ccc/a"}})),
+            sorted(
+                [
+                    'tenant:bbb',
+                    'application:ccc',
+                    'endpoint_group:aaa',
+                    "ip:ddd",
+                    "mac:eee",
+                    "encap:fff",
+                    "test:ggg",
+                ]
+            ),
+        )
     )
     assert tags.tenant_farbic_mapper == {}
 
@@ -290,34 +293,30 @@ def test_tenant_mapper():
     tags.api = api3
     tags.tenant_tags = {}
     assert all(
-        [
-            a == b
-            for a, b in zip(
-                sorted(tags._tenant_mapper({"attributes": {"name": "aaa", "dn": "a/tn-bbb/ap-ccc/a"}})),
-                sorted(
-                    [
-                        'ip:ddd',
-                        'mac:eee',
-                        'encap:fff',
-                        'endpoint_group:aaa',
-                        'application:ccc',
-                        'tenant:bbb',
-                        'port:bbb',
-                        'port:ccc',
-                        'port:ddd',
-                        'port:kkk',
-                        'node_id:[jjj]',
-                    ]
-                ),
-            )
-        ]
+        a == b
+        for a, b in zip(
+            sorted(tags._tenant_mapper({"attributes": {"name": "aaa", "dn": "a/tn-bbb/ap-ccc/a"}})),
+            sorted(
+                [
+                    'ip:ddd',
+                    'mac:eee',
+                    'encap:fff',
+                    'endpoint_group:aaa',
+                    'application:ccc',
+                    'tenant:bbb',
+                    'port:bbb',
+                    'port:ccc',
+                    'port:ddd',
+                    'port:kkk',
+                    'node_id:[jjj]',
+                ]
+            ),
+        )
     )
     assert all(
-        [
-            a == b
-            for a, b in zip(
-                sorted(tags.tenant_farbic_mapper.get('[jjj]:kkk', [])),
-                sorted(['application:ccc', 'endpoint_group:aaa', 'tenant:bbb']),
-            )
-        ]
+        a == b
+        for a, b in zip(
+            sorted(tags.tenant_farbic_mapper.get('[jjj]:kkk', [])),
+            sorted(['application:ccc', 'endpoint_group:aaa', 'tenant:bbb']),
+        )
     )

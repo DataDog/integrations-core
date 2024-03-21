@@ -1,0 +1,13 @@
+hatchling==1.21.1; python_version > '3.0'
+hatchling==0.25.1; python_version < '3.0'
+setuptools==66.1.1; python_version > '3.0'
+setuptools==40.9.0; python_version < '3.0'
+wheel==0.38.4; python_version > '3.0'
+wheel==0.37.1; python_version < '3.0'
+setuptools-scm; python_version > '3.0'
+setuptools-scm==5.0.2; python_version < '3.0'
+setuptools-rust>=1.7.0; python_version > '3.0'
+maturin; python_version > '3.0'
+cffi>=1.12
+cython<3.0.0
+tomli>=2.0.1; python_version > '3.0'

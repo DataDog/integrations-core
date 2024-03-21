@@ -126,13 +126,28 @@ def _iterate_metric_name(query):
             yield metric[0]
 
 
-def _get_expected_tags(check, pg_instance, **kwargs):
-    base_tags = pg_instance['tags'] + [
-        'port:{}'.format(pg_instance['port']),
-        'dd.internal.resource:database_instance:{}'.format(check.resolved_hostname),
-    ]
+def _get_expected_replication_tags(check, pg_instance, with_host=True, with_db=False, with_version=True, **kwargs):
+    return _get_expected_tags(
+        check, pg_instance, with_host=with_host, with_db=with_db, with_version=with_version, role='standby', **kwargs
+    )
+
+
+def _get_expected_tags(
+    check, pg_instance, with_host=True, with_db=False, with_version=True, with_sys_id=True, role='master', **kwargs
+):
+    base_tags = pg_instance['tags'] + [f'port:{pg_instance["port"]}']
+    if role:
+        base_tags.append(f'replication_role:{role}')
+    if with_db:
+        base_tags.append(f'db:{pg_instance["dbname"]}')
+    if with_host:
+        base_tags.append(f'dd.internal.resource:database_instance:{check.resolved_hostname}')
+    if with_sys_id and check.system_identifier:
+        base_tags.append(f'system_identifier:{check.system_identifier}')
+    if with_version and check.raw_version:
+        base_tags.append(f'postgresql_version:{check.raw_version}')
     for k, v in kwargs.items():
-        base_tags.append('{}:{}'.format(k, v))
+        base_tags.append(f'{k}:{v}')
     return base_tags
 
 
@@ -185,18 +200,15 @@ def check_common_metrics(aggregator, expected_tags, count=1):
         for name in COMMON_METRICS:
             aggregator.assert_metric(name, count=count, tags=db_tags)
         if POSTGRES_VERSION is None or float(POSTGRES_VERSION) >= 14.0:
-            for (metric_name, _) in NEWER_14_METRICS.values():
+            for metric_name, _ in NEWER_14_METRICS.values():
                 aggregator.assert_metric(metric_name, count=count, tags=db_tags)
 
 
 def check_db_count(aggregator, expected_tags, count=1):
     table_count = 7
-    # We create 2 additional partition tables when partition is available
+    # We create 2 additional partition tables when partition is available + 2 parent tables
     if float(POSTGRES_VERSION) >= 11.0:
-        table_count = 9
-    # And PG >= 14 will also report the parent table
-    if float(POSTGRES_VERSION) >= 14.0:
-        table_count = 10
+        table_count = 11
     aggregator.assert_metric(
         'postgresql.table.count',
         value=table_count,
@@ -240,7 +252,7 @@ def check_stat_replication(aggregator, expected_tags, count=1):
         'wal_state:streaming',
         'wal_sync_state:async',
     ]
-    for (metric_name, _) in REPLICATION_STATS_METRICS['metrics'].values():
+    for metric_name, _ in REPLICATION_STATS_METRICS['metrics'].values():
         aggregator.assert_metric(metric_name, count=count, tags=replication_tags)
 
 
@@ -302,7 +314,7 @@ def check_replication_slots_stats(aggregator, expected_tags, count=1):
 
 def check_replication_delay(aggregator, metrics_cache, expected_tags, count=1):
     replication_metrics = metrics_cache.get_replication_metrics(VersionUtils.parse_version(POSTGRES_VERSION), False)
-    for (metric_name, _) in replication_metrics.values():
+    for metric_name, _ in replication_metrics.values():
         aggregator.assert_metric(metric_name, count=count, tags=expected_tags)
 
 
@@ -339,7 +351,7 @@ def check_slru_metrics(aggregator, expected_tags, count=1):
         return
 
     slru_caches = ['Subtrans', 'Serial', 'MultiXactMember', 'Xact', 'other', 'Notify', 'CommitTs', 'MultiXactOffset']
-    for (metric_name, _) in SLRU_METRICS['metrics'].values():
+    for metric_name, _ in SLRU_METRICS['metrics'].values():
         for slru_cache in slru_caches:
             aggregator.assert_metric(metric_name, count=count, tags=expected_tags + ['slru_name:{}'.format(slru_cache)])
 

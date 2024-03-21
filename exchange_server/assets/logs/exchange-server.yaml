@@ -1,11 +1,12 @@
 id: exchange-server
 metric_id: exchange-server
+backend_only: false
 facets:
-  - name: Event ID
-    source: log
-    path: event_id
-    groups:
+  - groups:
       - Exchange Server
+    name: Event ID
+    path: event_id
+    source: log
 pipeline:
   type: pipeline
   name: Exchange Server

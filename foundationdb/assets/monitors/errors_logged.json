@@ -2,11 +2,11 @@
   "version": 2,
   "created_at": "2022-03-14",
   "last_updated_at": "2022-05-25",
-  "title": "FoundationDB Errors Logged",
+  "title": "High severity errors logs are found",
   "tags": [
     "integration:foundationdb"
   ],
-  "description": "Get notified when there is an error logged",
+  "description": "FoundationDB logs have a severity field which can indicate different situations. This monitor examines logs where the severity is SevError, indicating that one of the assumptions of the database has been violated.",
   "definition": {
     "message": "FoundationDB has logged errors. This indicates that one of the assumptions of the database has been violated; such situations are generally caused by hardware failures.",
     "name": "FoundationDB Errors Logged",

@@ -1,5 +1,6 @@
 id: agent
 metric_id: datadog-cluster-agent # Only one official integration for the agent for now
+backend_only: false
 installation_sources:
   - agent
   - datadog-agent

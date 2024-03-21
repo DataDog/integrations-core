@@ -67,6 +67,7 @@ def test_e2e_profile_vmware_esx(dd_agent_check):
         'status': 1,
         'sys_object_id': '1.3.6.1.4.1.6876.4.1',
         'vendor': 'vmware',
+        'device_type': 'server',
     }
     device['tags'] = common_tags
     assert_device_metadata(aggregator, device)

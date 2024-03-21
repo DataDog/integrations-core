@@ -135,6 +135,7 @@ def test_e2e_profile_ixsystems_truenas(dd_agent_check):
         'status': 1,
         'sys_object_id': '1.3.6.1.4.1.50536.3.2',
         'vendor': 'iXsystems',
+        'device_type': 'storage',
     }
     device['tags'] = common_tags
     assert_device_metadata(aggregator, device)

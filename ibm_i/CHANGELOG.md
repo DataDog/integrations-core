@@ -2,6 +2,19 @@
 
 <!-- towncrier release notes start -->
 
+## 2.2.0 / 2024-02-16
+
+***Added***:
+
+* Bump dependencies ([#16858](https://github.com/DataDog/integrations-core/pull/16858))
+
+## 2.1.0 / 2024-01-05 / Agent 7.51.0
+
+***Added***:
+
+* Bump the Python version from py3.9 to py3.11 ([#15997](https://github.com/DataDog/integrations-core/pull/15997))
+* Add `cpu_usage.pct` metric from `ELAPSED_CPU_PERCENTAGE` retrieved from query ([#16332](https://github.com/DataDog/integrations-core/pull/16332))
+
 ## 2.0.1 / 2023-10-26 / Agent 7.50.0
 
 ***Fixed***:

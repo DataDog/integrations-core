@@ -1,3 +1,67 @@
+# HELP ack_level_update wf_too_many_pending_child_workflows counter
+# TYPE wf_too_many_pending_child_workflows counter
+wf_too_many_pending_child_workflows 10
+# HELP ack_level_update wf_too_many_pending_activities counter
+# TYPE wf_too_many_pending_activities counter
+wf_too_many_pending_activities 10
+# HELP ack_level_update wf_too_many_pending_cancel_requests counter
+# TYPE wf_too_many_pending_cancel_requests counter
+wf_too_many_pending_cancel_requests 10
+# HELP ack_level_update wf_too_many_pending_external_workflow_signals counter
+# TYPE wf_too_many_pending_external_workflow_signals counter
+wf_too_many_pending_external_workflow_signals 10
+
+# HELP ack_level_update add_search_attributes_workflow_success counter
+# TYPE add_search_attributes_workflow_success counter
+add_search_attributes_workflow_success 10
+# HELP ack_level_update add_search_attributes_workflow_failure counter
+# TYPE add_search_attributes_workflow_failure counter
+add_search_attributes_workflow_failure 10
+# HELP ack_level_update add_search_attributes_workflow_failure gauge
+# TYPE add_search_attributes_workflow_failure gauge
+add_search_attributes_workflow_failure 10
+# HELP ack_level_update certificates_expired gauge
+# TYPE certificates_expiring gauge
+certificates_expiring 10
+# HELP ack_level_update certificates_expired gauge
+# TYPE certificates_expired gauge
+certificates_expired 10
+# HELP ack_level_update service_errors counter
+# TYPE service_errors counter
+service_errors 10
+# HELP ack_level_update service_errors_resource_exhausted counter
+# TYPE service_errors_resource_exhausted counter
+service_errors_resource_exhausted 10
+# HELP ack_level_update service_errors_critical counter
+# TYPE service_errors_critical counter
+service_errors_critical 10
+# HELP ack_level_update lock_failures counter
+# TYPE lock_failures counter
+lock_failures 10
+# HELP acquire_shards_latency search_attributes_size histogram
+# TYPE search_attributes_size histogram
+search_attributes_size_bucket{operation="ShardController",service_name="history",le="0.001"} 1
+search_attributes_size_bucket{operation="ShardController",service_name="history",le="0.002"} 1
+search_attributes_size_bucket{operation="ShardController",service_name="history",le="0.005"} 1
+search_attributes_size_bucket{operation="ShardController",service_name="history",le="0.01"} 1
+search_attributes_size_bucket{operation="ShardController",service_name="history",le="0.02"} 1
+search_attributes_size_bucket{operation="ShardController",service_name="history",le="0.05"} 1
+search_attributes_size_bucket{operation="ShardController",service_name="history",le="0.1"} 2
+search_attributes_size_bucket{operation="ShardController",service_name="history",le="0.2"} 2
+search_attributes_size_bucket{operation="ShardController",service_name="history",le="0.5"} 2
+search_attributes_size_bucket{operation="ShardController",service_name="history",le="1"} 2
+search_attributes_size_bucket{operation="ShardController",service_name="history",le="2"} 2
+search_attributes_size_bucket{operation="ShardController",service_name="history",le="5"} 2
+search_attributes_size_bucket{operation="ShardController",service_name="history",le="10"} 2
+search_attributes_size_bucket{operation="ShardController",service_name="history",le="20"} 2
+search_attributes_size_bucket{operation="ShardController",service_name="history",le="50"} 2
+search_attributes_size_bucket{operation="ShardController",service_name="history",le="100"} 2
+search_attributes_size_bucket{operation="ShardController",service_name="history",le="200"} 2
+search_attributes_size_bucket{operation="ShardController",service_name="history",le="500"} 2
+search_attributes_size_bucket{operation="ShardController",service_name="history",le="1000"} 2
+search_attributes_size_bucket{operation="ShardController",service_name="history",le="+Inf"} 2
+search_attributes_size_sum{operation="ShardController",service_name="history"} 0.066191125
+search_attributes_size_count{operation="ShardController",service_name="history"} 2
 # HELP ack_level_update ack_level_update counter
 # TYPE ack_level_update counter
 ack_level_update{operation="TimerQueueProcessor",service_name="history"} 12

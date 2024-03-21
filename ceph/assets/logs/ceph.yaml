@@ -1,21 +1,22 @@
 id: ceph
 metric_id: ceph
+backend_only: false
 facets:
-  - name: Thread Name
-    source: log
-    path: logger.thread_name
-    groups:
+  - groups:
       - Source Code
-  - name: Subsystem
+    name: Thread Name
+    path: logger.thread_name
     source: log
+  - groups:
+      - System
+    name: Subsystem
     path: ceph.subsystem
-    groups:
-      - System
-  - name: Priority
     source: log
-    path: ceph.priority
-    groups:
+  - groups:
       - System
+    name: Priority
+    path: ceph.priority
+    source: log
 pipeline:
   type: pipeline
   name: Ceph

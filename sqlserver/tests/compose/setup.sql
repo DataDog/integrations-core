@@ -69,6 +69,17 @@ GRANT EXECUTE on procedureWithLargeCommment to bob;
 GRANT EXECUTE on procedureWithLargeCommment to fred;
 GO
 
+-- test procedure with embedded null characters
+CREATE PROCEDURE nullCharTest
+AS
+BEGIN
+ SELECT * FROM ϑings WHERE name = 'foo\x00';
+END;
+GO
+GRANT EXECUTE on nullCharTest to bob;
+GRANT EXECUTE on nullCharTest to fred;
+GO
+
 -- create an offline database to have an unavailable database to test with
 CREATE DATABASE unavailable_db;
 GO

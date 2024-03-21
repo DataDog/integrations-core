@@ -2,6 +2,22 @@
 
 <!-- towncrier release notes start -->
 
+## 6.2.0 / 2024-02-16
+
+***Added***:
+
+* Bump `pymongo` version to 4.6.1 ([#16554](https://github.com/DataDog/integrations-core/pull/16554))
+
+## 6.1.0 / 2024-01-05 / Agent 7.51.0
+
+***Added***:
+
+* Bump the Python version from py3.9 to py3.11 ([#15997](https://github.com/DataDog/integrations-core/pull/15997))
+
+***Fixed***:
+
+* Fix fsynclocked metric ([#16525](https://github.com/DataDog/integrations-core/pull/16525))
+
 ## 6.0.2 / 2023-11-10 / Agent 7.50.0
 
 ***Fixed***:

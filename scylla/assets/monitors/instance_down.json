@@ -2,11 +2,11 @@
   "version": 2,
   "created_at": "2020-08-05",
   "last_updated_at": "2021-02-03",
-  "title": "Server is shutting down",
+  "title": "Node State is abnormal",
   "tags": [
     "integration:scylla"
   ],
-  "description": "Notify if Scylla node is in a state other than NORMAL.",
+  "description": "A Scylla server \"shutting down\" typically indicates a planned maintenance, upgrade, or scaling operation. The monitor tracks if your Scylla node change states.",
   "definition": {
     "message": "{{server.name}} is shutting down. Current value of {{value}} \n\nThe operation mode of the current nodes can have values of UNKNOWN = 0; STARTING = 1; JOINING = 2; NORMAL = 3; LEAVING = 4; DECOMMISSIONED = 5; DRAINING = 6; DRAINED = 7; MOVING = 8",
     "name": "[Scylla] Server is shutting down",

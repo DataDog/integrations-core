@@ -32,6 +32,10 @@ def instance_empty_default_hostname():
     return False
 
 
+def instance_enable_per_db_metrics():
+    return True
+
+
 def instance_kerberos_auth():
     return 'disabled'
 

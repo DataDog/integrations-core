@@ -2,11 +2,11 @@
   "version": 2,
   "created_at": "2021-10-28",
   "last_updated_at": "2021-10-28",
-  "title": "Unused topic partition",
+  "title": "Topic partition is not used",
   "tags": [
     "integration:confluent-platform"
   ],
-  "description": "Get notified if a partition has not seen bytes produced or consumed.",
+  "description": "A partition that is neither producing nor consuming data is a signal for potential issues with data flow. This monitor tracks each topic partition that hasn't sent or received any data for a given time frame.",
   "definition": {
     "message": "The partition {{topic-partition.name}} appears to be unused. \n\nVerify that this is intentional and be aware that unused partitions increase Broker overhead, reducing efficiency. \n\nDeleting unused partitions is recommended.",
     "name": "[Confluent Platform] Unused topic partition",

@@ -1,6 +1,6 @@
 id: powerdns
 metric_id: powerdns
-
+backend_only: false
 pipeline:
   type: pipeline
   name: Powerdns Recursor

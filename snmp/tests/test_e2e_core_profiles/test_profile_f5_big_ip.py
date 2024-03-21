@@ -471,6 +471,7 @@ def test_e2e_profile_f5_big_ip(dd_agent_check):
         'sys_object_id': '1.3.6.1.4.1.3375.2.1.3.4.43',
         'vendor': 'f5',
         'version': '15.0.1',
+        'device_type': 'load_balancer',
     }
     device['tags'] = common_tags
     assert_device_metadata(aggregator, device)

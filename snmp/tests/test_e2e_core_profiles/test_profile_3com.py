@@ -53,6 +53,7 @@ def test_e2e_profile_3com(dd_agent_check):
             'snmp_profile:3com',
         ],
         'vendor': '3com',
+        'device_type': 'other',
     }
     assert_device_metadata(aggregator, device)
 

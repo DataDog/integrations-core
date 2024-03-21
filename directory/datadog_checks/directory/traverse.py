@@ -5,7 +5,11 @@ import platform
 import sys
 
 import six
-from scandir import scandir
+
+try:
+    from os import scandir
+except ImportError:
+    from scandir import scandir
 
 
 def _walk(top, onerror=None, followlinks=False):

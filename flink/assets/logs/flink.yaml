@@ -1,16 +1,17 @@
 id: flink
 metric_id: flink
+backend_only: false
 facets:
-  - name: Logger Name
-    source: log
-    path: logger.name
-    groups:
+  - groups:
       - Source Code
-  - name: Error Type
-    source: log
+    name: Error Type
     path: error.kind
-    groups:
+    source: log
+  - groups:
       - Source Code
+    name: Logger Name
+    path: logger.name
+    source: log
 pipeline:
   type: pipeline
   name: Flink

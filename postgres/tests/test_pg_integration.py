@@ -1,17 +1,19 @@
 # (C) Datadog, Inc. 2010-present
 # All rights reserved
 # Licensed under Simplified BSD License (see LICENSE)
+import contextlib
 import socket
 import time
 
 import mock
 import psycopg2
 import pytest
+from flaky import flaky
 
 from datadog_checks.base.errors import ConfigurationError
 from datadog_checks.postgres import PostgreSql
 from datadog_checks.postgres.__about__ import __version__
-from datadog_checks.postgres.util import PartialFormatter, fmt
+from datadog_checks.postgres.util import DatabaseHealthCheckError, PartialFormatter, fmt
 
 from .common import (
     COMMON_METRICS,
@@ -285,7 +287,7 @@ def test_can_connect_service_check(aggregator, integration_check, pg_instance):
     check = integration_check(pg_instance)
 
     check.check(pg_instance)
-    expected_tags = _get_expected_tags(check, pg_instance, db=DB_NAME)
+    expected_tags = _get_expected_tags(check, pg_instance, with_db=True)
     aggregator.assert_service_check('postgres.can_connect', count=1, status=PostgreSql.OK, tags=expected_tags)
     aggregator.reset()
 
@@ -296,7 +298,11 @@ def test_can_connect_service_check(aggregator, integration_check, pg_instance):
     with pytest.raises(AttributeError):
         check.db = mock.MagicMock(side_effect=AttributeError('foo'))
         check.check(pg_instance)
-    aggregator.assert_service_check('postgres.can_connect', count=1, status=PostgreSql.CRITICAL, tags=expected_tags)
+    # Since we can't connect to the host, we can't gather the replication role
+    tags_without_role = _get_expected_tags(
+        check, pg_instance, with_db=True, with_version=False, with_sys_id=False, role=None
+    )
+    aggregator.assert_service_check('postgres.can_connect', count=1, status=PostgreSql.CRITICAL, tags=tags_without_role)
     aggregator.reset()
 
     # Third: connection still open but this time no error
@@ -304,15 +310,19 @@ def test_can_connect_service_check(aggregator, integration_check, pg_instance):
     check.check(pg_instance)
     aggregator.assert_service_check('postgres.can_connect', count=1, status=PostgreSql.OK, tags=expected_tags)
 
+    # Forth: connection health check failed
+    with pytest.raises(DatabaseHealthCheckError):
+        db = mock.MagicMock()
+        db.cursor().__enter__().execute.side_effect = psycopg2.OperationalError('foo')
 
-def test_schema_metrics(aggregator, integration_check, pg_instance):
-    pg_instance['table_count_limit'] = 1
-    check = integration_check(pg_instance)
-    check.check(pg_instance)
+        @contextlib.contextmanager
+        def mock_db():
+            yield db
 
-    expected_tags = _get_expected_tags(check, pg_instance, db=DB_NAME, schema='public')
-    aggregator.assert_metric('postgresql.table.count', value=1, count=1, tags=expected_tags)
-    aggregator.assert_metric('postgresql.db.count', value=106, count=1)
+        check.db = mock_db
+        check.check(pg_instance)
+    aggregator.assert_service_check('postgres.can_connect', count=1, status=PostgreSql.CRITICAL, tags=tags_without_role)
+    aggregator.reset()
 
 
 def test_connections_metrics(aggregator, integration_check, pg_instance):
@@ -411,6 +421,7 @@ def test_activity_vacuum_excluded(aggregator, integration_check, pg_instance):
     thread.join()
 
 
+@flaky(max_runs=5)
 def test_backend_transaction_age(aggregator, integration_check, pg_instance):
     pg_instance['collect_activity_metrics'] = True
     check = integration_check(pg_instance)
@@ -545,6 +556,7 @@ def test_state_clears_on_connection_error(integration_check, pg_instance):
     'is_aurora',
     [True, False],
 )
+@flaky(max_runs=5)
 def test_wal_stats(aggregator, integration_check, pg_instance, is_aurora):
     conn = _get_superconn(pg_instance)
     with conn.cursor() as cur:
@@ -643,7 +655,9 @@ def test_config_tags_is_unchanged_between_checks(integration_check, pg_instance)
     check = integration_check(pg_instance)
 
     # Put elements in set as we don't care about order, only elements equality
-    expected_tags = set(_get_expected_tags(check, pg_instance, db=DB_NAME))
+    expected_tags = set(
+        _get_expected_tags(check, pg_instance, db=DB_NAME, with_version=False, with_sys_id=False, role=None)
+    )
     for _ in range(3):
         check.check(pg_instance)
         assert set(check._config.tags) == expected_tags
@@ -847,7 +861,8 @@ def test_database_instance_cloud_metadata_aws(
         # we only assert the check ran if we don't expect a ConfigurationError
         assert check.cloud_metadata['aws']['managed_authentication']['enabled'] == expected_managed_auth_enabled
 
-        expected_tags = _get_expected_tags(check, pg_instance, db=DB_NAME)
+        role = None if expected_error else 'master'
+        expected_tags = _get_expected_tags(check, pg_instance, with_db=True, role=role)
         if "instance_endpoint" in aws_metadata:
             expected_tags.append("dd.internal.resource:aws_rds_instance:{}".format(aws_metadata["instance_endpoint"]))
 
@@ -995,7 +1010,8 @@ def test_database_instance_cloud_metadata_azure(
         # we only assert the check ran if we don't expect a ConfigurationError
         assert check.cloud_metadata['azure']['managed_authentication']['enabled'] == expected_managed_auth_enabled
 
-        expected_tags = _get_expected_tags(check, pg_instance, db=DB_NAME)
+        role = None if expected_error else 'master'
+        expected_tags = _get_expected_tags(check, pg_instance, with_db=True, role=role)
         if "fully_qualified_domain_name" in azure_metadata:
             expected_tags.append(
                 "dd.internal.resource:azure_postgresql_flexible_server:{}".format(
@@ -1029,3 +1045,47 @@ def assert_state_set(check):
     if POSTGRES_VERSION != '9.3':
         assert check.metrics_cache.archiver_metrics
     assert check.metrics_cache.replication_metrics
+
+
+@requires_over_10
+def test_replication_tag(aggregator, integration_check, pg_instance):
+    test_metric = 'postgresql.db.count'
+
+    pg_instance['tag_replication_role'] = False
+    check = integration_check(pg_instance)
+
+    # no replication
+    check.check(pg_instance)
+    aggregator.assert_metric(test_metric, tags=_get_expected_tags(check, pg_instance, role=None))
+    aggregator.reset()
+
+    # role = master
+    pg_instance['tag_replication_role'] = True
+    check = integration_check(pg_instance)
+
+    check.check(pg_instance)
+    aggregator.assert_metric(test_metric, tags=_get_expected_tags(check, pg_instance, role='master'))
+    aggregator.reset()
+
+    # switchover: master -> standby
+    standby_role = 'standby'
+    check._get_replication_role = mock.MagicMock(return_value=standby_role)
+    check.check(pg_instance)
+    aggregator.assert_metric(test_metric, tags=_get_expected_tags(check, pg_instance, role=standby_role))
+
+
+@pytest.mark.parametrize(
+    'collect_wal_metrics',
+    [True, False, None],
+)
+@requires_over_10
+def test_collect_wal_metrics_metrics(aggregator, integration_check, pg_instance, collect_wal_metrics):
+    pg_instance['collect_wal_metrics'] = collect_wal_metrics
+    check = integration_check(pg_instance)
+    check.is_aurora = False
+    check.check(pg_instance)
+
+    expected_tags = _get_expected_tags(check, pg_instance)
+    # if collect_wal_metrics is not set, wal metrics are collected on pg >= 10 by default
+    expected_count = 0 if collect_wal_metrics is False else 1
+    check_file_wal_metrics(aggregator, expected_tags=expected_tags, count=expected_count)

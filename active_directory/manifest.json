@@ -13,8 +13,7 @@
     "media": [],
     "classifier_tags": [
       "Supported OS::Windows",
-      "Category::OS & System",
-      "Category::Log Collection"
+      "Category::OS & System"
     ]
   },
   "author": {
@@ -23,7 +22,6 @@
     "homepage": "https://www.datadoghq.com",
     "sales_email": "info@datadoghq.com"
   },
-  "oauth": {},
   "assets": {
     "integration": {
       "source_type_name": "Active Directory",
@@ -40,7 +38,9 @@
       },
       "service_checks": {
         "metadata_path": "assets/service_checks.json"
-      }
+      },
+      "source_type_id": 10068,
+      "auto_install": true
     },
     "dashboards": {
       "Active Directory": "assets/dashboards/active_directory.json"
@@ -49,9 +49,6 @@
       "[Active Directory] Elevated LDAP binding duration for host {{host.name}}": "assets/monitors/ldap_binding.json",
       "[Active Directory] Anomalous number of sessions for connected LDAP clients for host: {{host.name}}": "assets/monitors/ldap_client_sessions.json",
       "[Active Directory] Anomalous number of successful LDAP bindings for host: {{host.name}}": "assets/monitors/ldap_binding_successful.json"
-    },
-    "logs": {
-      "source": "ruby"
     }
   }
 }

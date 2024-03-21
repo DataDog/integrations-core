@@ -8,6 +8,8 @@ metadata:
     fields:
       vendor:
         value: "kyocera"
+      type:
+        value: "printer"
 metrics:
   - MIB: KYOCERA-MIB
     table:

@@ -1,22 +1,22 @@
 id: gitlab-runner
 metric_id: gitlab-runner
+backend_only: false
 facets:
-  - name: Job Outcome
-    source: log
+  - groups:
+      - Event
+    name: Job Outcome
     path: job.outcome
-    groups:
-      - Event
-  - name: Job ID
     source: log
+  - groups:
+      - Event
+    name: Job ID
     path: job.id
-    groups:
-      - Event
-  - name: Job Runner
     source: log
-    path: job.runner
-    groups:
+  - groups:
       - Event
-
+    name: Job Runner
+    path: job.runner
+    source: log
 pipeline:
   type: pipeline
   name: Gitlab Runner
@@ -48,8 +48,8 @@ pipeline:
           gitlab_runner_check Checking for jobs... %{word:job.outcome}\s+%{_color}\s+job%{_color}=%{integer:job.id} repo_url%{_color}=%{notSpace:url} runner%{_color}=%{word:job.runner}
           gitlab_runner_level %{word:level}: %{data:message}
       samples:
-        - 'Checking for jobs... received                       job=141847259 repo_url=https://gitlab.ddbuild.io/DataDog/k8s-nodegroups.git runner=nXySy2Hv'
-        - 'Job succeeded                    duration=24.383583446s job=2154106 project=141 runner=cxxE2HUr'
+        - Checking for jobs... received                       job=141847259 repo_url=https://gitlab.ddbuild.io/DataDog/k8s-nodegroups.git runner=nXySy2Hv
+        - Job succeeded                    duration=24.383583446s job=2154106 project=141 runner=cxxE2HUr
     - type: grok-parser
       name: Parsing JSON Gitlab Runner logs
       enabled: true

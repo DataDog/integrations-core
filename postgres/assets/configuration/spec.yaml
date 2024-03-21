@@ -14,7 +14,7 @@ files:
         NOTE: Even if the server name is `localhost`, the Agent connects to PostgreSQL using TCP/IP unless you also
         provide a value for the sock key.
       value:
-        example: localhost
+        example: "localhost"
         type: string
     - name: port
       description: The port to use when connecting to PostgreSQL.
@@ -22,11 +22,11 @@ files:
         type: integer
         example: 5432
     - name: username
-      required: true
       description: The Datadog username created to connect to PostgreSQL.
+      required: true
       value:
-          type: string
-          example: datadog
+        type: string
+        example: datadog
     - name: password
       description: The password associated with the Datadog user.
       value:
@@ -141,9 +141,9 @@ files:
       hidden: true
       description: |
         Sets the upper bound limit on the number of concurrent connections the Agent can have on the database server.
-        The Agent needs to open additional connections to collect explain plans across databases. 
-        Idle connections are cached, but pruned over time to balance the performance impact of opening connections and the cost of having many open connections. 
-        Raising the default value should only be needed on workloads with >50 databases. 
+        The Agent needs to open additional connections to collect explain plans across databases.
+        Idle connections are cached, but pruned over time to balance the performance impact of opening connections and the cost of having many open connections.
+        Raising the default value should only be needed on workloads with >50 databases.
         Lowering the default value can reduce the number of explain plans collected and is not recommended in most cases.
       value:
         type: integer
@@ -218,7 +218,7 @@ files:
         type: boolean
         example: false
     - name: collect_count_metrics
-      description: Collect count of user tables up to max_relations size from pg_stat_user_tables.
+      description: Collect count of user tables from pg_class.
       value:
         type: boolean
         example: true
@@ -262,8 +262,9 @@ files:
     - name: collect_wal_metrics
       description: |
         Collect metrics about WAL file age.
-        NOTE: You must be running the check local to your database if you want to enable this option.
-        Starting PG10, wal metrics are collected by default using `pg_ls_waldir` and don't need local access anymore.
+        NOTE: 
+        For Postgres 9.6 and below, you must run the check local to your database if you want to enable this option.
+        Starting Postgres 10, WAL file metrics are enabled by default using `pg_ls_waldir` and don't need local access.
       value:
         type: boolean
         example: false
@@ -305,18 +306,18 @@ files:
                   type: <COLUMNS_2_TYPE>
               tags:
                 - <TAG_KEY>:<TAG_VALUE>
-    - name: database_autodiscovery 
+    - name: database_autodiscovery
       description: |
         Define the configuration for database autodiscovery.
         Complete this section if you want to auto-discover databases on this host
-        instead of specifying each using dbname. 
+        instead of specifying each using dbname.
       options:
         - name: enabled
           description: Enable database autodiscovery.
           value:
             type: boolean
             example: false
-            display_default: false 
+            display_default: false
         - name: max_databases
           description: The maximum number of databases this host should monitor.
           value:
@@ -325,14 +326,14 @@ files:
             display_default: 100
         - name: include
           description: |
-            Regular expression for database names to include as part of 
+            Regular expression for database names to include as part of
             database autodiscovery.
-            Will report metrics for databases that are found in this instance, 
+            Will report metrics for databases that are found in this instance,
             ignores databases listed but not found.
-            Character casing is ignored. The regular expressions start matching from 
+            Character casing is ignored. The regular expressions start matching from
             the beginning, so to match anywhere, prepend `.*`. For exact matches append `$`.
             Defaults to `.*` to include everything.
-          value: 
+          value:
             type: array
             items:
               type: string
@@ -509,13 +510,23 @@ files:
           value:
             type: number
             example: 600
-
+        - name: ignored_settings_patterns
+          description: |
+            A list of setting patterns to ignore. Any setting key matching one of the value in this list will 
+            not be collected. This uses the traditional LIKE pattern-matching approach.
+          value:
+              type: array
+              items:
+                type: string
+              example:
+                - plpgsql%
+              default:
+                - plpgsql%
     - name: collect_schemas
       description: |
-        Enable collection of database schemas. In order to collect schemas from all user databases, 
-        enable `database_autodiscovery`. To collect from a single database, set `dbname` to collect 
+        Enable collection of database schemas. In order to collect schemas from all user databases,
+        enable `database_autodiscovery`. To collect from a single database, set `dbname` to collect
         the schema for that database.
-        Relation metrics must be enabled for schema collection.
       options:
         - name: enabled
           description: |
@@ -528,8 +539,8 @@ files:
             Maximum amount of tables the Agent collects from the instance.
           value:
             type: number
-            example: 1000
-            display_default: 1000
+            example: 300
+            display_default: 300
         - name: max_columns
           description: |
             Maximum amount of columns the Agent collects per table.
@@ -546,27 +557,27 @@ files:
 
     - name: aws
       description: |
-        This block defines the configuration for AWS RDS and Aurora instances. 
-        
-        Complete this section if you have installed the Datadog AWS Integration 
-        (https://docs.datadoghq.com/integrations/amazon_web_services) to enrich instances 
+        This block defines the configuration for AWS RDS and Aurora instances.
+
+        Complete this section if you have installed the Datadog AWS Integration
+        (https://docs.datadoghq.com/integrations/amazon_web_services) to enrich instances
         with Postgres integration telemetry.
-        
+
         These values are only applied when `dbm: true` option is set.
       options:
         - name: instance_endpoint
           description: |
-            Equal to the Endpoint.Address of the instance the agent is connecting to. 
+            Equal to the Endpoint.Address of the instance the agent is connecting to.
             This value is optional if the value of `host` is already configured to the instance endpoint.
-            
-            For more information on instance endpoints, 
+
+            For more information on instance endpoints,
             see the AWS docs https://docs.aws.amazon.com/AmazonRDS/latest/APIReference/API_Endpoint.html
           value:
             type: string
             example: mydb.cfxgae8cilcf.us-east-1.rds.amazonaws.com
         - name: region
           description: |
-            Equal to the region of the instance the agent is connecting to. 
+            Equal to the region of the instance the agent is connecting to.
             This value is used to configure IAM authentication.
           value:
             type: string
@@ -579,7 +590,7 @@ files:
 
             For more information on configuration, see
             https://docs.datadoghq.com/database_monitoring/guide/managed_authentication
-            
+
             For more information on RDS IAM Authentication, see the AWS docs
             https://docs.aws.amazon.com/AmazonRDS/latest/UserGuide/UsingWithRDS.IAMDBAuth.Connecting.html
 
@@ -596,17 +607,17 @@ files:
     - name: gcp
       description: |
         This block defines the configuration for Google Cloud SQL instances.
-        
-        Complete this section if you have installed the Datadog GCP Integration 
-        (https://docs.datadoghq.com/integrations/google_cloud_platform) to enrich instances 
+
+        Complete this section if you have installed the Datadog GCP Integration
+        (https://docs.datadoghq.com/integrations/google_cloud_platform) to enrich instances
         with Postgres integration telemetry.
-        
+
         These values are only applied when `dbm: true` option is set.
       options:
         - name: project_id
           description: |
             Equal to the GCP resource's project ID.
-            
+
             For more information on project IDs,
             See the GCP docs https://cloud.google.com/resource-manager/docs/creating-managing-projects
           value:
@@ -615,7 +626,7 @@ files:
         - name: instance_id
           description: |
             Equal to the GCP resource's instance ID.
-            
+
             For more information on instance IDs,
             See the GCP docs https://cloud.google.com/sql/docs/postgres/instance-settings#instance-id-2ndgen
           value:
@@ -625,22 +636,22 @@ files:
     - name: azure
       description: |
         This block defines the configuration for Azure Database for PostgreSQL.
-        
-        Complete this section if you have installed the Datadog Azure Integration 
-        (https://docs.datadoghq.com/integrations/azure) to enrich instances 
+
+        Complete this section if you have installed the Datadog Azure Integration
+        (https://docs.datadoghq.com/integrations/azure) to enrich instances
         with Postgres integration telemetry.
         These values are only applied when `dbm: true` option is set.
       options:
         - name: deployment_type
           description: |
-            Equal to the deployment type for the managed database. 
-            
+            Equal to the deployment type for the managed database.
+
             Acceptable values are:
-              - `flexible_server` 
+              - `flexible_server`
               - `single_server`
               - `virtual_machine`
-            
-            For more information on deployment types, 
+
+            For more information on deployment types,
             see the Azure docs https://docs.microsoft.com/en-us/azure/postgresql/overview-postgres-choose-server-options
           value:
             type: string
@@ -648,7 +659,7 @@ files:
         - name: fully_qualified_domain_name
           description: |
             Equal to the full qualified domain name of the Azure PostgreSQL database.
-            
+
             This value is optional if the value of `host` is already configured to the fully qualified domain name.
           value:
             type: string
@@ -656,12 +667,12 @@ files:
         - name: managed_authentication
           description: |
             Configuration section used for Azure AD Authentication.
-        
+
             This supports using System or User assigned managed identities.
 
             For more information on configuration, see
             https://docs.datadoghq.com/database_monitoring/guide/managed_authentication
-            
+
             For more information on Managed Identities, see the Azure docs
             https://learn.microsoft.com/en-us/azure/active-directory/managed-identities-azure-resources/overview
 
@@ -688,10 +699,10 @@ files:
         DEPRECATED: Please use `azure.managed_authentication` instead.
 
         Configuration section used for Azure AD Authentication.
-        
+
         This supports using System or User assigned managed identities.
         If this section is set, then the `username` and `password` fields will be ignored.
-        
+
         For more information on Managed Identities, see the Azure docs
         https://learn.microsoft.com/en-us/azure/active-directory/managed-identities-azure-resources/overview
       options:
@@ -704,7 +715,7 @@ files:
           description: |
             The permission scope from where to access the identity token. This value is optional if using the default
             identity scope for Azure managed databases.
-            
+
             For more information on scopes, see the Azure docs
             https://learn.microsoft.com/en-us/azure/active-directory/develop/scopes-oidc
           value:
@@ -847,7 +858,7 @@ files:
       hidden: true
       description: |
         Set the database instance collection interval (in seconds). The database instance collection sends
-        basic information about the database instance along with a signal that it still exists. 
+        basic information about the database instance along with a signal that it still exists.
         This collection does not involve any additional queries to the database.
       value:
         type: number

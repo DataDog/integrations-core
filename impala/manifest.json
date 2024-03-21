@@ -39,7 +39,9 @@
         "impalad",
         "catalogd",
         "statestored"
-      ]
+      ],
+      "source_type_id": 10301,
+      "auto_install": true
     },
     "logs": {
       "source": "impala"
@@ -56,6 +58,5 @@
     "name": "Datadog",
     "homepage": "https://www.datadoghq.com",
     "sales_email": "info@datadoghq.com"
-  },
-  "oauth": {}
+  }
 }

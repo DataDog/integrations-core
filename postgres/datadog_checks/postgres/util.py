@@ -36,6 +36,57 @@ class DatabaseConfigurationError(Enum):
     autodiscovered_metrics_exceeds_collection_interval = "autodiscovered-metrics-exceeds-collection-interval"
 
 
+class DBExplainError(Enum):
+    """
+    Denotes the various reasons a query may not have an explain statement.
+    """
+
+    # may be due to a misconfiguration of the database during setup or the Agent is
+    # not able to access the required function
+    database_error = 'database_error'
+
+    # datatype mismatch occurs when return type is not json, for instance when multiple queries are explained
+    datatype_mismatch = 'datatype_mismatch'
+
+    # this could be the result of a missing EXPLAIN function
+    invalid_schema = 'invalid_schema'
+
+    # a value retrieved from the EXPLAIN function could be invalid
+    invalid_result = 'invalid_result'
+
+    # some statements cannot be explained i.e AUTOVACUUM
+    no_plans_possible = 'no_plans_possible'
+
+    # there could be a problem with the EXPLAIN function (missing, invalid permissions, or an incorrect definition)
+    failed_function = 'failed_function'
+
+    # a truncated statement can't be explained
+    query_truncated = "query_truncated"
+
+    # connection error may be due to a misconfiguration during setup
+    connection_error = 'connection_error'
+
+    # clients using the extended query protocol or prepared statements can't be explained due to
+    # the separation of the parsed query and raw bind parameters
+    parameterized_query = 'parameterized_query'
+
+    # search path may be different when the client executed a query from where we executed it.
+    undefined_table = 'undefined_table'
+
+    # the statement was explained with the prepared statement workaround
+    explained_with_prepared_statement = 'explained_with_prepared_statement'
+
+    # the statement was tried to be explained with the prepared statement workaround but failedd
+    failed_to_explain_with_prepared_statement = 'failed_to_explain_with_prepared_statement'
+
+    # the statement was tried to be explained with the prepared statement workaround but no plan was returned
+    no_plan_returned_with_prepared_statement = 'no_plan_returned_with_prepared_statement'
+
+
+class DatabaseHealthCheckError(Exception):
+    pass
+
+
 def warning_with_tags(warning_message, *args, **kwargs):
     if args:
         warning_message = warning_message % args
@@ -193,22 +244,31 @@ COMMON_ARCHIVER_METRICS = {
 }
 
 
+# We used to use pg_stat_user_tables to count the number of tables and limit using max_relations.
+# This created multiple issues:
+# - pg_stat_user_tables is a view that group pg_class results by C.oid, N.nspname, C.relname. Doing the group by
+#   will generate a sort
+# - pg_stat_user_tables processes elements from pg_class that are dropped like toast tables and system tables
+# - we added another layer of sort (ORDER BY relname, relnamespace) to make the max_relations filter stable
+# Those sorts will eventually spill on temporary blocks if the number of relations is high enough, making this
+# query expensive to run.
+# In the end, we only care about the table count per schema so it's better to process the pg_class table directly.
+# We can filter tuples as much as possibles (we only care about relations and partition tables) and only do the
+# pg_namespace at the end, removing an expensive nested loop.
 COUNT_METRICS = {
     'descriptors': [('schemaname', 'schema')],
-    'metrics': {'pg_stat_user_tables': ('postgresql.table.count', AgentCheck.gauge)},
+    'metrics': {'count (*)': ('postgresql.table.count', AgentCheck.gauge)},
     'relation': False,
     'use_global_db_tag': True,
-    'query': fmt.format(
-        """
-SELECT schemaname, count(*) FROM
-(
-SELECT schemaname
-FROM {metrics_columns}
-ORDER BY schemaname, relname
-LIMIT {table_count_limit}
-) AS subquery GROUP BY schemaname
-    """
-    ),
+    'query': """
+SELECT N.nspname AS schemaname, {metrics_columns} FROM
+    (SELECT C.relnamespace
+    FROM pg_class C
+    WHERE C.relkind IN ('r', 'p')) AS subquery
+LEFT JOIN pg_namespace N ON (N.oid = relnamespace)
+WHERE N.nspname NOT IN ('pg_catalog', 'information_schema')
+GROUP BY N.nspname;
+    """,
     'name': 'count_metrics',
 }
 
@@ -609,6 +669,7 @@ SELECT s.schemaname,
     ON o.funcname = s.funcname;
 """,
     'relation': False,
+    'use_global_db_tag': True,
     'name': 'function_metrics',
 }
 

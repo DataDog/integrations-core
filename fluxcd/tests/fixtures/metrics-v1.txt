@@ -1,0 +1,80 @@
+# HELP gotk_suspend_status The current suspend status of a GitOps Toolkit resource.
+# TYPE gotk_suspend_status gauge
+gotk_suspend_status{kind="HelmRelease",name="my-service",namespace="my-namespace"} 0
+# HELP gotk_reconcile_condition The current condition status of a GitOps Toolkit resource reconciliation.
+# TYPE gotk_reconcile_condition gauge
+gotk_reconcile_condition{kind="HelmRelease",name="my-service",namespace="my-namespace",status="Deleted",type="Ready"} 0
+gotk_reconcile_condition{kind="HelmRelease",name="my-service",namespace="my-namespace",status="False",type="Ready"} 0
+gotk_reconcile_condition{kind="HelmRelease",name="my-service",namespace="my-namespace",status="True",type="Ready"} 1
+# HELP gotk_reconcile_duration_seconds The duration in seconds of a GitOps Toolkit resource reconciliation.
+# TYPE gotk_reconcile_duration_seconds histogram
+gotk_reconcile_duration_seconds_bucket{kind="HelmRelease",name="my-service",namespace="my-namespace",le="1e-08"} 0
+gotk_reconcile_duration_seconds_bucket{kind="HelmRelease",name="my-service",namespace="my-namespace",le="1e-07"} 0
+gotk_reconcile_duration_seconds_bucket{kind="HelmRelease",name="my-service",namespace="my-namespace",le="1e-06"} 0
+gotk_reconcile_duration_seconds_bucket{kind="HelmRelease",name="my-service",namespace="my-namespace",le="9.999999999999999e-06"} 0
+gotk_reconcile_duration_seconds_bucket{kind="HelmRelease",name="my-service",namespace="my-namespace",le="9.999999999999999e-05"} 0
+gotk_reconcile_duration_seconds_bucket{kind="HelmRelease",name="my-service",namespace="my-namespace",le="0.001"} 0
+gotk_reconcile_duration_seconds_bucket{kind="HelmRelease",name="my-service",namespace="my-namespace",le="0.01"} 36
+gotk_reconcile_duration_seconds_bucket{kind="HelmRelease",name="my-service",namespace="my-namespace",le="0.1"} 80
+gotk_reconcile_duration_seconds_bucket{kind="HelmRelease",name="my-service",namespace="my-namespace",le="1"} 80
+gotk_reconcile_duration_seconds_bucket{kind="HelmRelease",name="my-service",namespace="my-namespace",le="10"} 80
+gotk_reconcile_duration_seconds_bucket{kind="HelmRelease",name="my-service",namespace="my-namespace",le="+Inf"} 80
+gotk_reconcile_duration_seconds_sum{kind="HelmRelease",name="my-service",namespace="my-namespace"} 0.922391175
+gotk_reconcile_duration_seconds_count{kind="HelmRelease",name="my-service",namespace="my-namespace"} 80
+# HELP controller_runtime_active_workers Number of currently used workers per controller
+# TYPE controller_runtime_active_workers gauge
+controller_runtime_active_workers{controller="alert"} 0
+# HELP controller_runtime_reconcile_total Total number of reconciliations per controller
+# TYPE controller_runtime_reconcile_total counter
+controller_runtime_reconcile_total{controller="alert",result="error"} 42
+# HELP controller_runtime_reconcile_time_seconds Length of time per reconciliation per controller
+# TYPE controller_runtime_reconcile_time_seconds histogram
+controller_runtime_reconcile_time_seconds_bucket{controller="alert",le="0.005"} 2
+controller_runtime_reconcile_time_seconds_bucket{controller="alert",le="0.01"} 2
+controller_runtime_reconcile_time_seconds_bucket{controller="alert",le="0.025"} 2
+controller_runtime_reconcile_time_seconds_bucket{controller="alert",le="0.05"} 2
+controller_runtime_reconcile_time_seconds_bucket{controller="alert",le="0.1"} 2
+controller_runtime_reconcile_time_seconds_bucket{controller="alert",le="0.15"} 2
+controller_runtime_reconcile_time_seconds_bucket{controller="alert",le="0.2"} 2
+controller_runtime_reconcile_time_seconds_bucket{controller="alert",le="0.25"} 2
+controller_runtime_reconcile_time_seconds_bucket{controller="alert",le="0.3"} 2
+controller_runtime_reconcile_time_seconds_bucket{controller="alert",le="0.35"} 2
+controller_runtime_reconcile_time_seconds_bucket{controller="alert",le="0.4"} 2
+controller_runtime_reconcile_time_seconds_bucket{controller="alert",le="0.45"} 2
+controller_runtime_reconcile_time_seconds_bucket{controller="alert",le="0.5"} 2
+controller_runtime_reconcile_time_seconds_bucket{controller="alert",le="0.6"} 2
+controller_runtime_reconcile_time_seconds_bucket{controller="alert",le="0.7"} 2
+controller_runtime_reconcile_time_seconds_bucket{controller="alert",le="0.8"} 2
+controller_runtime_reconcile_time_seconds_bucket{controller="alert",le="0.9"} 2
+controller_runtime_reconcile_time_seconds_bucket{controller="alert",le="1"} 2
+controller_runtime_reconcile_time_seconds_bucket{controller="alert",le="1.25"} 2
+controller_runtime_reconcile_time_seconds_bucket{controller="alert",le="1.5"} 2
+controller_runtime_reconcile_time_seconds_bucket{controller="alert",le="1.75"} 2
+controller_runtime_reconcile_time_seconds_bucket{controller="alert",le="2"} 2
+controller_runtime_reconcile_time_seconds_bucket{controller="alert",le="2.5"} 2
+controller_runtime_reconcile_time_seconds_bucket{controller="alert",le="3"} 2
+controller_runtime_reconcile_time_seconds_bucket{controller="alert",le="3.5"} 2
+controller_runtime_reconcile_time_seconds_bucket{controller="alert",le="4"} 2
+controller_runtime_reconcile_time_seconds_bucket{controller="alert",le="4.5"} 2
+controller_runtime_reconcile_time_seconds_bucket{controller="alert",le="5"} 2
+controller_runtime_reconcile_time_seconds_bucket{controller="alert",le="6"} 2
+controller_runtime_reconcile_time_seconds_bucket{controller="alert",le="7"} 2
+controller_runtime_reconcile_time_seconds_bucket{controller="alert",le="8"} 2
+controller_runtime_reconcile_time_seconds_bucket{controller="alert",le="9"} 2
+controller_runtime_reconcile_time_seconds_bucket{controller="alert",le="10"} 2
+controller_runtime_reconcile_time_seconds_bucket{controller="alert",le="15"} 2
+controller_runtime_reconcile_time_seconds_bucket{controller="alert",le="20"} 2
+controller_runtime_reconcile_time_seconds_bucket{controller="alert",le="25"} 2
+controller_runtime_reconcile_time_seconds_bucket{controller="alert",le="30"} 2
+controller_runtime_reconcile_time_seconds_bucket{controller="alert",le="40"} 2
+controller_runtime_reconcile_time_seconds_bucket{controller="alert",le="50"} 2
+controller_runtime_reconcile_time_seconds_bucket{controller="alert",le="60"} 2
+controller_runtime_reconcile_time_seconds_bucket{controller="alert",le="+Inf"} 2
+controller_runtime_reconcile_time_seconds_sum{controller="alert"} 0.00166606
+controller_runtime_reconcile_time_seconds_count{controller="alert"} 2
+# HELP controller_runtime_max_concurrent_reconciles Maximum number of concurrent reconciles per controller
+# TYPE controller_runtime_max_concurrent_reconciles gauge
+controller_runtime_max_concurrent_reconciles{controller="alert"} 4
+# HELP controller_runtime_reconcile_errors_total Total number of reconciliation errors per controller
+# TYPE controller_runtime_reconcile_errors_total counter
+controller_runtime_reconcile_errors_total{controller="alert"} 42

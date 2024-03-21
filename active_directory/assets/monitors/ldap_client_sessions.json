@@ -2,11 +2,11 @@
   "version": 2,
   "created_at": "2021-04-20",
   "last_updated_at": "2021-04-20",
-  "title": "Anomalous number of sessions for connected LDAP clients for host: {{host.name}}",
+  "title": "Number of sessions for LDAP clients is anomalous",
   "tags": [
     "integration:active-directory"
   ],
-  "description": "Notifies when Active Directory number of sessions for connected LDAP clients becomes anomalous for a specific host.",
+  "description": "Sessions enable LDAP clients to interact with directory servers securely. This monitor detects anomalies in the number of client sessions in Active Directory LDAP to identify unusual activity or issues related to client sessions.",
   "definition": {
     "message": "There is an anomalous number of sessions for connected LDAP clients for host: {{host.name}} ",
     "name": "[Active Directory] Anomalous number of sessions for connected LDAP clients for host: {{host.name}}",

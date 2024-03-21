@@ -2,11 +2,11 @@
   "version": 2,
   "created_at": "2021-01-11",
   "last_updated_at": "2021-01-11",
-  "title": "Increased number of failed sidecar injection requests",
+  "title": "Number of failed Istio sidecar injection is high",
   "tags": [
     "integration:istio"
   ],
-  "description": "Notify your team when there is more than 1 failed sidecar injection requesst in your Istio integration.",
+  "description": "Increased failed Istio sidecar injections indicate problems in applying sidecar proxies to containers. This can arise from configuration, resource constraints, network connectivity, control plane health, or version mismatches. The monitor highlights a potential issue that needs attention.",
   "definition": {
     "message": "Monitor Istio for failed sidecar injection requests. Increasing failed requests may signify other issues in your Istio mesh and requires attention.",
     "name": "[Istio] Increased number of failed sidecar injection requests",

@@ -21,6 +21,7 @@ from datadog_checks.base.utils.db.utils import resolve_db_host as agent_host_res
 from datadog_checks.base.utils.serialization import json
 from datadog_checks.postgres import aws, azure
 from datadog_checks.postgres.connections import MultiDatabaseConnectionPool
+from datadog_checks.postgres.cursor import CommenterCursor, CommenterDictCursor
 from datadog_checks.postgres.discovery import PostgresAutodiscovery
 from datadog_checks.postgres.metadata import PostgresMetadata
 from datadog_checks.postgres.metrics_cache import PostgresMetricsCache
@@ -42,6 +43,7 @@ from .util import (
     AZURE_DEPLOYMENT_TYPE_TO_RESOURCE_TYPE,
     CLUSTER_VACUUM_PROGRESS_METRICS,
     CONNECTION_METRICS,
+    COUNT_METRICS,
     FUNCTION_METRICS,
     INDEX_PROGRESS_METRICS,
     QUERY_PG_CONTROL_CHECKPOINT,
@@ -61,7 +63,8 @@ from .util import (
     SUBSCRIPTION_STATE_METRICS,
     VACUUM_PROGRESS_METRICS,
     WAL_FILE_METRICS,
-    DatabaseConfigurationError,  # noqa: F401
+    DatabaseConfigurationError,
+    DatabaseHealthCheckError,  # noqa: F401
     fmt,
     get_schema_field,
     payload_pg_version,
@@ -92,6 +95,8 @@ class PostgreSql(AgentCheck):
         self._agent_hostname = None
         self._db = None
         self.version = None
+        self.raw_version = None
+        self.system_identifier = None
         self.is_aurora = None
         self._version_utils = VersionUtils()
         # Deprecate custom_metrics in favor of custom_queries
@@ -198,7 +203,7 @@ class PostgreSql(AgentCheck):
 
     def execute_query_raw(self, query, db):
         with db() as conn:
-            with conn.cursor() as cursor:
+            with conn.cursor(cursor_factory=CommenterCursor) as cursor:
                 cursor.execute(query)
                 rows = cursor.fetchall()
                 return rows
@@ -233,6 +238,18 @@ class PostgreSql(AgentCheck):
         except Exception:
             self.log.exception("Unhandled exception while using database connection %s", self._config.dbname)
             raise
+
+    def _connection_health_check(self, conn):
+        try:
+            # run a simple query to check if the connection is healthy
+            # health check should run after a connection is established
+            with conn.cursor(cursor_factory=CommenterCursor) as cursor:
+                cursor.execute("SELECT 1")
+                cursor.fetchall()
+        except psycopg2.OperationalError as e:
+            err_msg = f"Database {self._config.dbname} connection health check failed: {str(e)}"
+            self.log.error(err_msg)
+            raise DatabaseHealthCheckError(err_msg)
 
     @property
     def dynamic_queries(self):
@@ -280,7 +297,9 @@ class PostgreSql(AgentCheck):
             # ERROR:  Function pg_stat_get_wal_receiver() is currently not supported in Aurora
             if self.is_aurora is False:
                 queries.append(QUERY_PG_STAT_WAL_RECEIVER)
-                queries.append(WAL_FILE_METRICS)
+                if self._config.collect_wal_metrics is not False:
+                    # collect wal metrics for pg >= 10 only if the user has not explicitly disabled it
+                    queries.append(WAL_FILE_METRICS)
             queries.append(QUERY_PG_REPLICATION_SLOTS)
             queries.append(VACUUM_PROGRESS_METRICS)
             queries.append(STAT_SUBSCRIPTION_METRICS)
@@ -345,20 +364,15 @@ class PostgreSql(AgentCheck):
     def _get_debug_tags(self):
         return ['agent_hostname:{}'.format(self.agent_hostname)]
 
-    def _get_service_check_tags(self):
-        service_check_tags = []
-        service_check_tags.extend(self.tags)
-        return list(service_check_tags)
-
     def _get_replication_role(self):
         with self.db() as conn:
-            with conn.cursor() as cursor:
+            with conn.cursor(cursor_factory=CommenterCursor) as cursor:
                 cursor.execute('SELECT pg_is_in_recovery();')
                 role = cursor.fetchone()[0]
                 # value fetched for role is of <type 'bool'>
                 return "standby" if role else "master"
 
-    def _collect_wal_metrics(self, instance_tags):
+    def _collect_wal_metrics(self):
         if self.version >= V10:
             # _collect_stats will gather wal file metrics
             # for PG >= V10
@@ -368,7 +382,7 @@ class PostgreSql(AgentCheck):
             self.gauge(
                 "postgresql.wal_age",
                 wal_file_age,
-                tags=copy.copy(self.tags_without_db),
+                tags=self.tags_without_db,
                 hostname=self.resolved_hostname,
             )
 
@@ -390,7 +404,7 @@ class PostgreSql(AgentCheck):
         all_wal_files = [
             os.path.join(wal_log_dir, file_name)
             for file_name in all_files
-            if not any([ext for ext in exluded_file_exts if file_name.endswith(ext)])
+            if not any(ext for ext in exluded_file_exts if file_name.endswith(ext))
         ]
         if len(all_wal_files) < 1:
             self.log.warning("No WAL files found in directory: %s.", wal_log_dir)
@@ -401,11 +415,16 @@ class PostgreSql(AgentCheck):
         oldest_file_age = now - os.path.getctime(oldest_file)
         return oldest_file_age
 
+    def load_system_identifier(self):
+        with self.db() as conn:
+            with conn.cursor(cursor_factory=CommenterCursor) as cursor:
+                cursor.execute('SELECT system_identifier FROM pg_control_system();')
+                self.system_identifier = cursor.fetchone()[0]
+
     def load_version(self):
-        raw_version = self._version_utils.get_raw_version(self.db())
-        self.version = self._version_utils.parse_version(raw_version)
-        self.set_metadata('version', raw_version)
-        return self.version
+        self.raw_version = self._version_utils.get_raw_version(self.db())
+        self.version = self._version_utils.parse_version(self.raw_version)
+        self.set_metadata('version', self.raw_version)
 
     def initialize_is_aurora(self):
         if self.is_aurora is None:
@@ -537,7 +556,7 @@ class PostgreSql(AgentCheck):
             column_values = row[len(descriptors) :]
 
             # build a map of descriptors and their values
-            desc_map = {name: value for (_, name), value in zip(descriptors, descriptor_values, strict=False)}
+            desc_map = {name: value for (_, name), value in zip(descriptors, descriptor_values)}
 
             # Build tags.
 
@@ -559,7 +578,7 @@ class PostgreSql(AgentCheck):
             tags += [("%s:%s" % (k, v)) for (k, v) in iteritems(desc_map)]
 
             # Submit metrics to the Agent.
-            for column, value in zip(cols, column_values, strict=False):
+            for column, value in zip(cols, column_values):
                 name, submit_metric = scope['metrics'][column]
                 submit_metric(self, name, value, tags=set(tags), hostname=self.resolved_hostname)
 
@@ -589,7 +608,7 @@ class PostgreSql(AgentCheck):
 
         self.metrics_cache.table_activity_metrics[db][tablename][metric_name] = value
 
-    def _collect_relations_autodiscovery(self, instance_tags, relations_scopes):
+    def _collect_metric_autodiscovery(self, instance_tags, scopes, scope_type):
         if not self.autodiscovery:
             return
 
@@ -597,12 +616,12 @@ class PostgreSql(AgentCheck):
         databases = self.autodiscovery.get_items()
         for db in databases:
             with self.db_pool.get_connection(db, self._config.idle_connection_timeout) as conn:
-                with conn.cursor() as cursor:
-                    for scope in relations_scopes:
+                with conn.cursor(cursor_factory=CommenterCursor) as cursor:
+                    for scope in scopes:
                         self._query_scope(cursor, scope, instance_tags, False, db)
         elapsed_ms = (time() - start_time) * 1000
         self.histogram(
-            "dd.postgres._collect_relations_autodiscovery.time",
+            f"dd.postgres.{scope_type}.time",
             elapsed_ms,
             tags=self.tags + self._get_debug_tags(),
             hostname=self.resolved_hostname,
@@ -642,11 +661,14 @@ class PostgreSql(AgentCheck):
         archiver_instance_metrics = self.metrics_cache.get_archiver_metrics(self.version)
 
         metric_scope = [CONNECTION_METRICS]
+        per_database_metric_scope = []
 
         if self._config.collect_function_metrics:
-            metric_scope.append(FUNCTION_METRICS)
+            # Function metrics are collected from all databases discovered
+            per_database_metric_scope.append(FUNCTION_METRICS)
         if self._config.collect_count_metrics:
-            metric_scope.append(self.metrics_cache.get_count_metrics())
+            # Count metrics are collected from all databases discovered
+            per_database_metric_scope.append(COUNT_METRICS)
         if self.version >= V13:
             metric_scope.append(SLRU_METRICS)
 
@@ -659,7 +681,11 @@ class PostgreSql(AgentCheck):
 
             # If autodiscovery is enabled, get relation metrics from all databases found
             if self.autodiscovery:
-                self._collect_relations_autodiscovery(instance_tags, relations_scopes)
+                self._collect_metric_autodiscovery(
+                    instance_tags,
+                    scopes=relations_scopes,
+                    scope_type='_collect_relations_autodiscovery',
+                )
             # otherwise, continue just with dbname
             else:
                 metric_scope.extend(relations_scopes)
@@ -675,32 +701,44 @@ class PostgreSql(AgentCheck):
             metric_scope.append(replication_stats_metrics)
 
         with self.db() as conn:
-            with conn.cursor() as cursor:
+            with conn.cursor(cursor_factory=CommenterCursor) as cursor:
                 results_len = self._query_scope(cursor, db_instance_metrics, instance_tags, False)
                 if results_len is not None:
                     self.gauge(
                         "postgresql.db.count",
                         results_len,
-                        tags=copy.copy(self.tags_without_db),
+                        tags=self.tags_without_db,
                         hostname=self.resolved_hostname,
                     )
 
-            with conn.cursor() as cursor:
+            with conn.cursor(cursor_factory=CommenterCursor) as cursor:
                 self._query_scope(cursor, bgw_instance_metrics, instance_tags, False)
-            with conn.cursor() as cursor:
+            with conn.cursor(cursor_factory=CommenterCursor) as cursor:
                 self._query_scope(cursor, archiver_instance_metrics, instance_tags, False)
 
             if self._config.collect_activity_metrics:
                 activity_metrics = self.metrics_cache.get_activity_metrics(self.version)
-                with conn.cursor() as cursor:
+                with conn.cursor(cursor_factory=CommenterCursor) as cursor:
                     self._query_scope(cursor, activity_metrics, instance_tags, False)
 
+            if per_database_metric_scope:
+                # if autodiscovery is enabled, get per-database metrics from all databases found
+                if self.autodiscovery:
+                    self._collect_metric_autodiscovery(
+                        instance_tags,
+                        scopes=per_database_metric_scope,
+                        scope_type='_collect_stat_autodiscovery',
+                    )
+                else:
+                    # otherwise, continue just with dbname
+                    metric_scope.extend(per_database_metric_scope)
+
             for scope in list(metric_scope):
-                with conn.cursor() as cursor:
+                with conn.cursor(cursor_factory=CommenterCursor) as cursor:
                     self._query_scope(cursor, scope, instance_tags, False)
 
             for scope in self._config.custom_metrics:
-                with conn.cursor() as cursor:
+                with conn.cursor(cursor_factory=CommenterCursor) as cursor:
                     self._query_scope(cursor, scope, instance_tags, True)
 
         if self.dynamic_queries:
@@ -770,13 +808,13 @@ class PostgreSql(AgentCheck):
         The connection created here will be persistent. It will not be automatically
         evicted from the connection pool.
         """
-        with self.db():
-            pass
+        with self.db() as conn:
+            self._connection_health_check(conn)
 
     # Reload pg_settings on a new connection to the main db
     def _load_pg_settings(self, db):
         try:
-            with db.cursor(cursor_factory=psycopg2.extras.DictCursor) as cursor:
+            with db.cursor(cursor_factory=CommenterDictCursor) as cursor:
                 self.log.debug("Running query [%s]", PG_SETTINGS_QUERY)
                 cursor.execute(
                     PG_SETTINGS_QUERY,
@@ -835,7 +873,7 @@ class PostgreSql(AgentCheck):
                 continue
 
             with self.db() as conn:
-                with conn.cursor() as cursor:
+                with conn.cursor(cursor_factory=CommenterCursor) as cursor:
                     try:
                         self.log.debug("Running query: %s", query)
                         with tracked_query(
@@ -864,7 +902,7 @@ class PostgreSql(AgentCheck):
                         query_tags = list(custom_query.get('tags', []))
                         query_tags.extend(tags)
 
-                        for column, value in zip(columns, row, strict=False):
+                        for column, value in zip(columns, row):
                             # Columns can be ignored via configuration.
                             if not column:
                                 continue
@@ -955,17 +993,26 @@ class PostgreSql(AgentCheck):
 
     def check(self, _):
         tags = copy.copy(self.tags)
+        self.tags_without_db = [t for t in copy.copy(self.tags) if not t.startswith("db:")]
         # Collect metrics
         try:
             # Check version
             self._connect()
-            self.load_version()  # We don't want to cache versions between runs to capture minor updates for metadata
+            # We don't want to cache versions between runs to capture minor updates for metadata
+            self.load_version()
+
+            # Add raw version as a tag
+            tags.append(f'postgresql_version:{self.raw_version}')
+            self.tags_without_db.append(f'postgresql_version:{self.raw_version}')
+
+            # Add system identifier as a tag
+            self.load_system_identifier()
+            tags.append(f'system_identifier:{self.system_identifier}')
+            self.tags_without_db.append(f'system_identifier:{self.system_identifier}')
+
             if self._config.tag_replication_role:
                 replication_role_tag = "replication_role:{}".format(self._get_replication_role())
                 tags.append(replication_role_tag)
-                self.tags_without_db = [
-                    t for t in copy.copy(self.tags_without_db) if not t.startswith("replication_role:")
-                ]
                 self.tags_without_db.append(replication_role_tag)
 
             self.log.debug("Running check against version %s: is_aurora: %s", str(self.version), str(self.is_aurora))
@@ -976,7 +1023,8 @@ class PostgreSql(AgentCheck):
                 self.statement_samples.run_job_loop(tags)
                 self.metadata_samples.run_job_loop(tags)
             if self._config.collect_wal_metrics:
-                self._collect_wal_metrics(tags)
+                # collect wal metrics for pg < 10, disabled by enabled
+                self._collect_wal_metrics()
             self._send_database_instance_metadata()
         except Exception as e:
             self.log.exception("Unable to collect postgres metrics.")
@@ -987,7 +1035,7 @@ class PostgreSql(AgentCheck):
             self.service_check(
                 self.SERVICE_CHECK_NAME,
                 AgentCheck.CRITICAL,
-                tags=self._get_service_check_tags(),
+                tags=tags,
                 message=message,
                 hostname=self.resolved_hostname,
             )
@@ -996,7 +1044,7 @@ class PostgreSql(AgentCheck):
             self.service_check(
                 self.SERVICE_CHECK_NAME,
                 AgentCheck.OK,
-                tags=self._get_service_check_tags(),
+                tags=tags,
                 hostname=self.resolved_hostname,
             )
         finally:

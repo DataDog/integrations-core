@@ -232,6 +232,7 @@ def test_e2e_profile_chatsworth_pdu(dd_agent_check):
         'status': 1,
         'sys_object_id': '1.3.6.1.4.1.30932.1.1',
         'vendor': 'chatsworth',
+        'device_type': 'pdu',
     }
     device['tags'] = common_tags
     assert_device_metadata(aggregator, device)

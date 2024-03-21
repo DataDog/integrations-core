@@ -1,31 +1,32 @@
 id: postfix
 metric_id: postfix
+backend_only: false
 facets:
-  - name: Client ID
-    source: log
+  - groups:
+      - Postfix
+    name: Client ID
     path: postfix.client_id
-    groups:
-      - Postfix
-  - name: Queue Status
     source: log
+  - groups:
+      - Postfix
+    name: Queue Status
     path: postfix.queue.state
-    groups:
-      - Postfix
-  - name: Email Recipient
     source: log
+  - groups:
+      - Postfix
+    name: Email Recipient
     path: properties.to
-    groups:
-      - Postfix
-  - name: Email Status
     source: log
+  - groups:
+      - Postfix
+    name: Email Status
     path: properties.status
-    groups:
-      - Postfix
-  - name: User
     source: log
-    path: system.user
-    groups:
+  - groups:
       - System
+    name: User
+    path: system.user
+    source: log
 pipeline:
   type: pipeline
   name: Postfix

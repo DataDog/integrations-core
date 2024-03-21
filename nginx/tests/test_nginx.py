@@ -26,6 +26,29 @@ def test_connect(check, instance, aggregator):
 
 
 @pytest.mark.usefixtures('dd_environment')
+@pytest.mark.parametrize(
+    'disable_generic_tags, host_tag',
+    [
+        pytest.param(True, [], id="disabled"),
+        pytest.param(False, ['host:{}'.format(HOST)], id="enabled"),
+    ],
+)
+def test_generic_tags(check, instance, aggregator, disable_generic_tags, host_tag):
+    """
+    Generic tags should be removed from with the appropriate config toggle.
+
+    Important: this only applies to service checks, metrics don't have any host/port tags.
+    """
+    instance['disable_generic_tags'] = disable_generic_tags
+    check = check(instance)
+    check.check(instance)
+    aggregator.assert_metric("nginx.net.connections", tags=TAGS, count=1)
+    aggregator.assert_service_check(
+        'nginx.can_connect', tags=TAGS + ['nginx_host:{}'.format(HOST), 'port:{}'.format(PORT)] + host_tag
+    )
+
+
+@pytest.mark.usefixtures('dd_environment')
 def test_connect_ssl(check, instance_ssl, aggregator):
     """
     Testing ssl connection

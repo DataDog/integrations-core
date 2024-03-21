@@ -1,0 +1,1 @@
+Skip index usage collection for tempdb, fixes a blocking query

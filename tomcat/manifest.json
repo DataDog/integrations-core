@@ -25,7 +25,6 @@
     "homepage": "https://www.datadoghq.com",
     "sales_email": "info@datadoghq.com"
   },
-  "oauth": {},
   "assets": {
     "integration": {
       "source_type_name": "Tomcat",
@@ -45,7 +44,9 @@
       },
       "process_signatures": [
         "java tomcat"
-      ]
+      ],
+      "source_type_id": 43,
+      "auto_install": true
     },
     "dashboards": {
       "tomcat--overview": "assets/dashboards/overview.json",
@@ -60,7 +61,11 @@
       "[Tomcat] Increase of the errors/second rate for host: {{host.name}}": "assets/monitors/error_count.json"
     },
     "saved_views": {
-      "tomcat_processes": "assets/saved_views/tomcat_processes.json"
+      "tomcat_processes": "assets/saved_views/tomcat_processes.json",
+      "tomcat_overview": "assets/saved_views/tomcat_overview.json",
+      "tomcat_4xx": "assets/saved_views/tomcat_4xx.json",
+      "tomcat_5xx": "assets/saved_views/tomcat_5xx.json",
+      "tomcat_status_code_overview": "assets/saved_views/tomcat_status_code_overview.json"
     },
     "logs": {
       "source": "tomcat"

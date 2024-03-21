@@ -38,8 +38,9 @@ dependencies = [
     "mock",
     "psutil",
     "py>=1.8.2; python_version < '3.0'",  # https://github.com/ionelmc/pytest-benchmark/issues/226
-    "pytest",
-    "pytest-asyncio>=0.20.3; python_version > '3.0'",
+    "pytest==4.6.11; python_version < '3.0'",
+    "pytest==8.0.2; python_version > '3.0'",
+    "pytest-asyncio>=0.23.4; python_version > '3.0'",
     "pytest-benchmark[histogram]<4.0.0; python_version < '3.0'",
     "pytest-benchmark[histogram]>=4.0.0; python_version > '3.0'",
     "pytest-cov>=2.6.1",
@@ -62,6 +63,7 @@ cli = [
     "aiomultiprocess",
     "atomicwrites",
     "beautifulsoup4>=4.9.3",
+    "black==23.12.1",  # TODO Remove once https://github.com/koxudaxi/datamodel-code-generator/issues/1821 is fixed
     "build>=0.7.0",
     "click~=8.1.6",
     "codespell",
@@ -86,7 +88,9 @@ cli = [
     "tomli-w>=1.0.0",
     "tox>=3.12.1, <4.0.0",
     # Move towncrier dependency to ddev once we migrate changelog-related commands.
-    "towncrier==23.10.0",
+    # We need at least v23.11.0, because it lets us release with empty changelogs:
+    # The issue that is fixed: https://github.com/twisted/towncrier/issues/538
+    "towncrier>=23.11.0",
     "twine>=1.11.0",
     "virtualenv<20.22.0",
     # TODO: Remove once every check has a pyproject.toml
@@ -97,9 +101,6 @@ cli = [
 
 [project.entry-points.pytest11]
 datadog_checks = "datadog_checks.dev.plugin.pytest"
-
-[project.entry-points.tox]
-datadog_checks = "datadog_checks.dev.plugin.tox"
 
 [project.urls]
 Source = "https://github.com/DataDog/integrations-core"

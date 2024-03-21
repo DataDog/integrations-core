@@ -18,7 +18,6 @@ DASHBOARD_NOT_POSSIBLE = {
     'pdh_check',  # No default metrics
     'prometheus',  # No default metrics
     'teamcity',  # No metrics
-    'windows_service',  # No metrics
     'win32_event_log',  # No metrics
     'wmi_check',  # No default metrics
     'windows_service',  # No metrics

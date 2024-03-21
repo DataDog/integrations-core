@@ -9,7 +9,9 @@ import psycopg2
 
 from datadog_checks.base.utils.db.sql import compute_sql_signature
 from datadog_checks.base.utils.tracking import tracked_method
+from datadog_checks.postgres.cursor import CommenterDictCursor
 
+from .util import DBExplainError
 from .version_utils import V12
 
 logger = logging.getLogger(__name__)
@@ -65,25 +67,48 @@ class ExplainParameterizedQueries:
                 Returns: (plan)
     '''
 
-    def __init__(self, check, config):
+    def __init__(self, check, config, explain_function):
         self._check = check
         self._config = config
+        self._explain_function = explain_function
 
     @tracked_method(agent_check_getter=agent_check_getter)
     def explain_statement(self, dbname, statement, obfuscated_statement):
         if self._check.version < V12:
-            return None
+            # if pg version < 12, skip explaining parameterized queries because
+            # plan_cache_mode is not supported
+            e = psycopg2.errors.UndefinedParameter("Unable to explain parameterized query")
+            logger.debug(
+                "Unable to explain parameterized query. Postgres version %s does not support plan_cache_mode",
+                self._check.version,
+            )
+            return None, DBExplainError.parameterized_query, '{}'.format(type(e))
         self._set_plan_cache_mode(dbname)
 
         query_signature = compute_sql_signature(obfuscated_statement)
-        if not self._create_prepared_statement(dbname, statement, obfuscated_statement, query_signature):
-            return None
+        try:
+            self._create_prepared_statement(dbname, statement, obfuscated_statement, query_signature)
+        except Exception as e:
+            # if we fail to create a prepared statement, we cannot explain the query
+            return None, DBExplainError.failed_to_explain_with_prepared_statement, '{}'.format(type(e))
 
-        result = self._explain_prepared_statement(dbname, statement, obfuscated_statement, query_signature)
-        self._deallocate_prepared_statement(dbname, query_signature)
-        if result:
-            return result[0][0][0]
-        return None
+        try:
+            result = self._explain_prepared_statement(dbname, statement, obfuscated_statement, query_signature)
+            if result:
+                plan = result[0][0][0]
+                return plan, DBExplainError.explained_with_prepared_statement, None
+            else:
+                # the explain function was executed but no plan was returned
+                logger.debug(
+                    "Unable to explain parameterized query. "
+                    "The explain function %s was executed but no plan was returned",
+                    self._explain_function,
+                )
+                return None, DBExplainError.no_plan_returned_with_prepared_statement, None
+        except Exception as e:
+            return None, DBExplainError.failed_to_explain_with_prepared_statement, '{}'.format(type(e))
+        finally:
+            self._deallocate_prepared_statement(dbname, query_signature)
 
     def _set_plan_cache_mode(self, dbname):
         self._execute_query(dbname, "SET plan_cache_mode = force_generic_plan")
@@ -95,7 +120,6 @@ class ExplainParameterizedQueries:
                 dbname,
                 PREPARE_STATEMENT_QUERY.format(query_signature=query_signature, statement=statement),
             )
-            return True
         except Exception as e:
             logged_statement = obfuscated_statement
             if self._config.log_unobfuscated_plans:
@@ -106,7 +130,7 @@ class ExplainParameterizedQueries:
                 logged_statement,
                 e,
             )
-        return False
+            raise
 
     @tracked_method(agent_check_getter=agent_check_getter)
     def _get_number_of_parameters_for_prepared_statement(self, dbname, query_signature):
@@ -127,9 +151,7 @@ class ExplainParameterizedQueries:
             return self._execute_query_and_fetch_rows(
                 dbname,
                 EXPLAIN_QUERY.format(
-                    explain_function=self._config.statement_samples_config.get(
-                        'explain_function', 'datadog.explain_statement'
-                    ),
+                    explain_function=self._explain_function,
                     statement=execute_prepared_statement_query,
                 ),
             )
@@ -143,7 +165,7 @@ class ExplainParameterizedQueries:
                 logged_statement,
                 e,
             )
-        return None
+            raise
 
     def _deallocate_prepared_statement(self, dbname, query_signature):
         try:
@@ -161,13 +183,13 @@ class ExplainParameterizedQueries:
         # Psycopg2 connections do not get closed when context ends;
         # leaving context will just mark the connection as inactive in MultiDatabaseConnectionPool
         with self._check.db_pool.get_connection(dbname, self._check._config.idle_connection_timeout) as conn:
-            with conn.cursor(cursor_factory=psycopg2.extras.DictCursor) as cursor:
+            with conn.cursor(cursor_factory=CommenterDictCursor) as cursor:
                 logger.debug('Executing query=[%s]', query)
                 cursor.execute(query)
 
     def _execute_query_and_fetch_rows(self, dbname, query):
         with self._check.db_pool.get_connection(dbname, self._check._config.idle_connection_timeout) as conn:
-            with conn.cursor(cursor_factory=psycopg2.extras.DictCursor) as cursor:
+            with conn.cursor(cursor_factory=CommenterDictCursor) as cursor:
                 cursor.execute(query)
                 return cursor.fetchall()
 

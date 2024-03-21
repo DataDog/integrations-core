@@ -19,6 +19,8 @@ metadata:
     fields:
       vendor:
         value: "iXsystems"
+      type:
+        value: "storage"
 
 metrics:
   - MIB: FREENAS-MIB

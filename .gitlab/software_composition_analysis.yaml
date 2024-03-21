@@ -1,0 +1,20 @@
+---
+datadog-sca-ci:
+  stage: build
+  tags: ["arch:amd64"]
+  image: 486234852809.dkr.ecr.us-east-1.amazonaws.com/datadog-static-analyzer:2024031801
+  when: always
+  # We don't want to disrupt the pipeline so let's fail silently.
+  allow_failure: true
+  # This specifies the job does not have any dependency, meaning it can start as soon as it can.
+  needs: []
+  script:
+    # Disabling tracing to avoid leaking secrets.
+    # See https://www.gnu.org/software/bash/manual/bash.html#The-Set-Builtin:
+    # "Using ‘+’ rather than ‘-’ causes these options to be turned off"
+    - set +o xtrace
+    - export DD_API_KEY=$(aws ssm get-parameter --region us-east-1 --name "ci.integrations-core.datadog_api_key_org2" --with-decryption --query "Parameter.Value" --out text)
+    - export DD_APP_KEY=$(aws ssm get-parameter --region us-east-1 --name "ci.integrations-core.datadog_app_key_org2" --with-decryption --query "Parameter.Value" --out text)
+    - set -o xtrace
+    - osv-scanner --skip-git --recursive --experimental-only-packages --format=cyclonedx-1-4 --output=/tmp/sbom.json .
+    - datadog-ci sbom upload --service integrations-core --env ci /tmp/sbom.json

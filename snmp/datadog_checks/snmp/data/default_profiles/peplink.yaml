@@ -12,6 +12,8 @@ metadata:
     fields:
       vendor:
         value: "peplink"
+      type:
+        value: "router"
 
 metrics:
   - MIB: PEPLINK-DEVICE

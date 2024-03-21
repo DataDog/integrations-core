@@ -26,7 +26,6 @@
     "homepage": "https://www.datadoghq.com",
     "sales_email": "info@datadoghq.com"
   },
-  "oauth": {},
   "assets": {
     "integration": {
       "source_type_name": "Couchbase",
@@ -44,7 +43,11 @@
       "service_checks": {
         "metadata_path": "assets/service_checks.json"
       },
-      "process_signatures": ["beam.smp couchbase"]
+      "process_signatures": [
+        "beam.smp couchbase"
+      ],
+      "source_type_id": 59,
+      "auto_install": true
     },
     "dashboards": {
       "couchbase": "assets/dashboards/couchbase_dashboard.json"

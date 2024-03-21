@@ -1,31 +1,32 @@
 id: hazelcast
 metric_id: hazelcast
+backend_only: false
 facets:
-  - name: Logger Name
-    source: log
+  - groups:
+      - Source Code
+    name: Logger Name
     path: logger.name
-    groups:
-      - Source Code
-  - name: Thread Name
     source: log
+  - groups:
+      - Source Code
+    name: Thread Name
     path: logger.thread_name
-    groups:
-      - Source Code
-  - name: Hazelcast Cluster Name
     source: log
+  - groups:
+      - Hazelcast
+    name: Hazelcast Cluster Name
     path: hazelcast.cluster
-    groups:
-      - Hazelcast
-  - name: Hazelcast Host
     source: log
+  - groups:
+      - Hazelcast
+    name: Hazelcast Host
     path: hazelcast.host
-    groups:
-      - Hazelcast
-  - name: Hazelcast Version
     source: log
-    path: hazelcast.version
-    groups:
+  - groups:
       - Hazelcast
+    name: Hazelcast Version
+    path: hazelcast.version
+    source: log
 pipeline:
   type: pipeline
   name: Hazelcast

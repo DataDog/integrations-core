@@ -2,6 +2,24 @@
 
 <!-- towncrier release notes start -->
 
+## 3.4.0 / 2024-02-16
+
+***Added***:
+
+* Add additional cluster and listener metrics for OpenMetrics version of check ([#16649](https://github.com/DataDog/integrations-core/pull/16649))
+* Add connection limit metrics for envoy ([#16718](https://github.com/DataDog/integrations-core/pull/16718))
+* Update the configuration file to include the new oauth options parameter ([#16835](https://github.com/DataDog/integrations-core/pull/16835))
+
+## 3.3.0 / 2024-01-05 / Agent 7.51.0
+
+***Added***:
+
+* Bump the Python version from py3.9 to py3.11 ([#15997](https://github.com/DataDog/integrations-core/pull/15997))
+* Add local rate limit metrics ([#16313](https://github.com/DataDog/integrations-core/pull/16313))
+* Add new RBAC metrics in Legacy check ([#16432](https://github.com/DataDog/integrations-core/pull/16432))
+* Add connect state metric for OpenmetricsV2 and add way to collect shadow prefixes in legacy check for RBAC metrics ([#16453](https://github.com/DataDog/integrations-core/pull/16453))
+* Add a `endpoint` tag to every metric in the legacy version of the check ([#16478](https://github.com/DataDog/integrations-core/pull/16478))
+
 ## 3.2.0 / 2023-11-10 / Agent 7.50.0
 
 ***Added***:

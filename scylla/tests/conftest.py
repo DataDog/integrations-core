@@ -15,24 +15,31 @@ INSTANCE_URL = "http://{}:{}/metrics".format(HOST, INSTANCE_PORT)
 
 
 @pytest.fixture(scope='session')
-def dd_environment():
+def dd_environment(instance):
     compose_file = os.path.join(HERE, 'compose', 'docker-compose.yaml')
 
     with docker_run(compose_file, log_patterns=[r'init - Scylla version \S* initialization completed.']):
-        instances = {'instances': [{'prometheus_url': INSTANCE_URL}]}
+        instances = {'instances': [instance]}
         yield instances
 
 
 @pytest.fixture(scope="session")
-def db_instance():
-    return {'prometheus_url': INSTANCE_URL, 'tags': ['instance_test']}
+def instance_legacy():
+    return {'prometheus_url': INSTANCE_URL, 'tags': ['prometheus:true']}
+
+
+@pytest.fixture(scope="session")
+def instance():
+    return {'openmetrics_endpoint': INSTANCE_URL, 'tags': ['prometheus:false']}
 
 
 @pytest.fixture()
 def mock_db_data():
     if os.environ['SCYLLA_VERSION'].startswith('5.'):
         f_name = os.path.join(os.path.dirname(__file__), 'fixtures', 'scylla_5_metrics.txt')
-    else:
+    elif os.environ['SCYLLA_VERSION'].startswith('3.3'):
+        f_name = os.path.join(os.path.dirname(__file__), 'fixtures', 'scylla_3_3_metrics.txt')
+    elif os.environ['SCYLLA_VERSION'].startswith('3.1'):
         f_name = os.path.join(os.path.dirname(__file__), 'fixtures', 'scylla_metrics.txt')
 
     with open(f_name, 'r') as f:

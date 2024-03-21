@@ -109,6 +109,7 @@ def test_e2e_profile_cisco_firepower(dd_agent_check):
         'status': 1,
         'sys_object_id': '1.3.6.1.4.1.9.1.2404',
         'vendor': 'cisco',
+        'device_type': 'firewall',
     }
     device['tags'] = common_tags
     assert_device_metadata(aggregator, device)

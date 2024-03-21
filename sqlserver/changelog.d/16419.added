@@ -1,1 +1,0 @@
-Collect sqlserver.database.files.space_used, and sqlserver.database.is_read_only/is_in_standby metrics.

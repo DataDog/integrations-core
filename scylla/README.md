@@ -16,7 +16,7 @@ The Scylla check is included in the [Datadog Agent][2] package. No additional in
 
 ### Configuration
 
-1. Edit the `scylla.d/conf.yaml` file, in the `conf.d/` folder at the root of your Agent's configuration directory to start collecting your scylla performance data. See the [sample scylla.d/conf.yaml][3] for all available configuration options.
+1. Edit the `scylla.d/conf.yaml` file, in the `conf.d/` folder at the root of your Agent's configuration directory to start collecting your scylla performance data. See the [sample scylla.d/conf.yaml][3] for all available configuration options. If you previously implemented this integration, see the [legacy example][11].
 
 2. [Restart the Agent][4].
 
@@ -82,3 +82,4 @@ Need help? Contact [Datadog support][10].
 [8]: https://github.com/DataDog/integrations-core/blob/master/scylla/metadata.csv
 [9]: https://github.com/DataDog/integrations-core/blob/master/scylla/assets/service_checks.json
 [10]: https://docs.datadoghq.com/help/
+[11]: https://github.com/DataDog/integrations-core/blob/7.50.x/scylla/datadog_checks/scylla/data/conf.yaml.example

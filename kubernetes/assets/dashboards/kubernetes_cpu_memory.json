@@ -1,0 +1,1334 @@
+{
+  "author_name": "Datadog",
+  "title": "Kubernetes - CPU & Memory usage",
+  "description": "This dashboard aims to provide the relevant information for Kubernetes administrators and users to identify if the CPU and Mem requests are properly configured and not generating unnecessary waste",
+  "widgets": [
+    {
+      "id": 443466849361936,
+      "definition": {
+        "type": "note",
+        "content": "# Kubernetes Capacity Planning\n\nThis dashboard aims to provide the relevant information for Kubernetes administrators and users to identify if the CPU and Mem requests are properly configured and not generating unnecessary waste.",
+        "background_color": "gray",
+        "font_size": "14",
+        "text_align": "left",
+        "vertical_align": "top",
+        "show_tick": false,
+        "tick_pos": "50%",
+        "tick_edge": "left",
+        "has_padding": true
+      },
+      "layout": {
+        "x": 0,
+        "y": 0,
+        "width": 3,
+        "height": 4
+      }
+    },
+    {
+      "id": 446586294053350,
+      "definition": {
+        "type": "note",
+        "content": "## How to use this dashboard\n\n1. Select a large timeframe (recommended 1 week+)\n2. Select the cluster of interest\n3. Once a deployment or daemonset is identified, select it to visualize its usage across time.",
+        "background_color": "gray",
+        "font_size": "14",
+        "text_align": "left",
+        "vertical_align": "top",
+        "show_tick": false,
+        "tick_pos": "50%",
+        "tick_edge": "left",
+        "has_padding": true
+      },
+      "layout": {
+        "x": 3,
+        "y": 0,
+        "width": 2,
+        "height": 4
+      }
+    },
+    {
+      "id": 7328840637400146,
+      "definition": {
+        "type": "note",
+        "content": "## Requests and Limits\n\nRequests define the minimum amount of resources that containers need.\n\nFor instance, if you think that your app requires at least 256MB of memory to operate, this is the request value. The application can use more than 256MB, but Kubernetes guarantees a minimum of 256MB to the container.\n\nLimits define the max amount of resources that the container can consume.\n\n### Overprovisioned Pods\n\nIf the utilization vs request is low, it means that some pods have a resource request higher than their nominal utilization and should be resized. This will help Kubernetes allocate pods more properly.\n",
+        "background_color": "gray",
+        "font_size": "14",
+        "text_align": "left",
+        "vertical_align": "top",
+        "show_tick": false,
+        "tick_pos": "50%",
+        "tick_edge": "left",
+        "has_padding": true
+      },
+      "layout": {
+        "x": 5,
+        "y": 0,
+        "width": 4,
+        "height": 4
+      }
+    },
+    {
+      "id": 3857869053162142,
+      "definition": {
+        "type": "image",
+        "url": "/static/images/integration_dashboard/kubernetes_hero_2.jpeg",
+        "sizing": "cover",
+        "has_background": true,
+        "has_border": true,
+        "vertical_align": "center",
+        "horizontal_align": "center"
+      },
+      "layout": {
+        "x": 9,
+        "y": 0,
+        "width": 3,
+        "height": 4
+      }
+    },
+    {
+      "id": 6541756623956422,
+      "definition": {
+        "title": "Cluster Capacity Review",
+        "background_color": "purple",
+        "show_title": true,
+        "type": "group",
+        "layout_type": "ordered",
+        "widgets": [
+          {
+            "id": 3018187039179016,
+            "definition": {
+              "type": "note",
+              "content": "## Cluster Capacity Review\n\n",
+              "background_color": "gray",
+              "font_size": "14",
+              "text_align": "left",
+              "vertical_align": "top",
+              "show_tick": false,
+              "tick_pos": "50%",
+              "tick_edge": "left",
+              "has_padding": true
+            },
+            "layout": {
+              "x": 0,
+              "y": 0,
+              "width": 2,
+              "height": 4
+            }
+          },
+          {
+            "id": 898849511779978,
+            "definition": {
+              "title": "CPU and Mem by cluster",
+              "title_size": "16",
+              "title_align": "left",
+              "type": "query_table",
+              "requests": [
+                {
+                  "response_format": "scalar",
+                  "queries": [
+                    {
+                      "query": "sum:kubernetes.cpu.requests{$scope,$env,$kube_namespace,$kube_cluster_name} by {kube_cluster_name,env}",
+                      "data_source": "metrics",
+                      "name": "query1",
+                      "aggregator": "avg"
+                    },
+                    {
+                      "query": "sum:kubernetes.cpu.usage.total{$scope,$env,$kube_namespace,$kube_cluster_name} by {kube_cluster_name,env}",
+                      "data_source": "metrics",
+                      "name": "query7",
+                      "aggregator": "avg"
+                    },
+                    {
+                      "query": "sum:kubernetes.memory.requests{$scope,$env,$kube_namespace,$kube_cluster_name} by {kube_cluster_name,env}",
+                      "data_source": "metrics",
+                      "name": "query5",
+                      "aggregator": "avg"
+                    },
+                    {
+                      "query": "sum:kubernetes.memory.usage{$scope,$env,$kube_namespace,$kube_cluster_name} by {kube_cluster_name,env}",
+                      "data_source": "metrics",
+                      "name": "query8",
+                      "aggregator": "avg"
+                    }
+                  ],
+                  "formulas": [
+                    {
+                      "alias": "CPU idle",
+                      "conditional_formats": [
+                        {
+                          "palette": "black_on_light_green",
+                          "comparator": "<",
+                          "value": 0
+                        },
+                        {
+                          "palette": "white_on_yellow",
+                          "comparator": ">=",
+                          "value": 40
+                        },
+                        {
+                          "palette": "black_on_light_yellow",
+                          "comparator": ">=",
+                          "value": 0
+                        }
+                      ],
+                      "formula": "query1 - query7 / 1000000000",
+                      "limit": {
+                        "count": 500,
+                        "order": "desc"
+                      }
+                    },
+                    {
+                      "alias": "MEM unused",
+                      "conditional_formats": [
+                        {
+                          "palette": "black_on_light_green",
+                          "comparator": "<",
+                          "value": 0
+                        },
+                        {
+                          "palette": "white_on_yellow",
+                          "comparator": ">=",
+                          "value": 50000000000
+                        },
+                        {
+                          "palette": "black_on_light_yellow",
+                          "comparator": ">=",
+                          "value": 0
+                        }
+                      ],
+                      "formula": "query5 - query8"
+                    }
+                  ]
+                }
+              ],
+              "has_search_bar": "auto"
+            },
+            "layout": {
+              "x": 2,
+              "y": 0,
+              "width": 10,
+              "height": 4
+            }
+          },
+          {
+            "id": 8268929096975252,
+            "definition": {
+              "type": "note",
+              "content": "## Utilization per Kubernetes object\n\n- Each line represent a specific Kubernetes object: daemonset, deployment, etc.\n- The last two columns represent the average usage vs the request setup\n\n",
+              "background_color": "gray",
+              "font_size": "14",
+              "text_align": "left",
+              "vertical_align": "top",
+              "show_tick": true,
+              "tick_pos": "50%",
+              "tick_edge": "right",
+              "has_padding": true
+            },
+            "layout": {
+              "x": 0,
+              "y": 4,
+              "width": 2,
+              "height": 5
+            }
+          },
+          {
+            "id": 454023358841718,
+            "definition": {
+              "title": "CPU and Mem by Kubernetes Objects",
+              "title_size": "16",
+              "title_align": "left",
+              "type": "query_table",
+              "requests": [
+                {
+                  "response_format": "scalar",
+                  "queries": [
+                    {
+                      "query": "sum:kubernetes.cpu.requests{$scope,$env,$kube_namespace,$kube_cluster_name} by {kube_cluster_name,env,kube_deployment,kube_daemon_set,kube_stateful_set}",
+                      "data_source": "metrics",
+                      "name": "query1",
+                      "aggregator": "avg"
+                    },
+                    {
+                      "query": "sum:kubernetes.cpu.limits{$scope,$env,$kube_namespace,$kube_cluster_name} by {kube_cluster_name,env,kube_deployment,kube_daemon_set,kube_stateful_set}",
+                      "data_source": "metrics",
+                      "name": "query2",
+                      "aggregator": "avg"
+                    },
+                    {
+                      "query": "sum:kubernetes.cpu.usage.total{$scope,$env,$kube_namespace,$kube_cluster_name} by {kube_cluster_name,env,kube_deployment,kube_daemon_set,kube_stateful_set}",
+                      "data_source": "metrics",
+                      "name": "query7",
+                      "aggregator": "avg"
+                    },
+                    {
+                      "query": "sum:kubernetes.memory.requests{$scope,$env,$kube_namespace,$kube_cluster_name} by {kube_cluster_name,env,kube_deployment,kube_daemon_set,kube_stateful_set}",
+                      "data_source": "metrics",
+                      "name": "query5",
+                      "aggregator": "avg"
+                    },
+                    {
+                      "query": "sum:kubernetes.memory.limits{$scope,$env,$kube_namespace,$kube_cluster_name} by {kube_cluster_name,env,kube_deployment,kube_daemon_set,kube_stateful_set}",
+                      "data_source": "metrics",
+                      "name": "query6",
+                      "aggregator": "avg"
+                    },
+                    {
+                      "query": "sum:kubernetes.memory.usage{$scope,$env,$kube_namespace,$kube_cluster_name} by {kube_cluster_name,env,kube_deployment,kube_daemon_set,kube_stateful_set}",
+                      "data_source": "metrics",
+                      "name": "query8",
+                      "aggregator": "avg"
+                    }
+                  ],
+                  "formulas": [
+                    {
+                      "alias": "CPU requests",
+                      "cell_display_mode": "number",
+                      "formula": "query1",
+                      "limit": {
+                        "count": 500,
+                        "order": "desc"
+                      }
+                    },
+                    {
+                      "alias": "CPU usage",
+                      "cell_display_mode": "number",
+                      "formula": "query7"
+                    },
+                    {
+                      "alias": "MEM requests",
+                      "formula": "query5"
+                    },
+                    {
+                      "alias": "MEM usage",
+                      "formula": "query8"
+                    },
+                    {
+                      "alias": "% CPU requests",
+                      "conditional_formats": [
+                        {
+                          "palette": "white_on_red",
+                          "comparator": "<",
+                          "value": 60
+                        }
+                      ],
+                      "formula": "query7 / (query1 * 1000000000) * 100"
+                    },
+                    {
+                      "alias": "% MEM requests",
+                      "conditional_formats": [
+                        {
+                          "palette": "white_on_red",
+                          "comparator": "<",
+                          "value": 60
+                        }
+                      ],
+                      "formula": "query8 / query5 * 100"
+                    }
+                  ]
+                }
+              ],
+              "has_search_bar": "auto"
+            },
+            "layout": {
+              "x": 2,
+              "y": 4,
+              "width": 10,
+              "height": 5
+            }
+          },
+          {
+            "id": 39184828621360,
+            "definition": {
+              "title": "CPU Opportunity - Deployments",
+              "type": "treemap",
+              "requests": [
+                {
+                  "response_format": "scalar",
+                  "queries": [
+                    {
+                      "query": "sum:kubernetes.cpu.requests{$scope,$env,$kube_namespace,$kube_cluster_name ,kube_deployment:*} by {kube_cluster_name,kube_deployment}",
+                      "data_source": "metrics",
+                      "name": "query1",
+                      "aggregator": "avg"
+                    },
+                    {
+                      "query": "sum:kubernetes.cpu.usage.total{$scope,$env,$kube_namespace,$kube_cluster_name ,kube_deployment:*} by {kube_cluster_name,kube_deployment}",
+                      "data_source": "metrics",
+                      "name": "query7",
+                      "aggregator": "avg"
+                    }
+                  ],
+                  "formulas": [
+                    {
+                      "alias": "CPU opportunity",
+                      "formula": "query1 - query7 / 1000 / 1000 / 1000"
+                    }
+                  ]
+                }
+              ]
+            },
+            "layout": {
+              "x": 0,
+              "y": 9,
+              "width": 6,
+              "height": 3
+            }
+          },
+          {
+            "id": 2889197562919864,
+            "definition": {
+              "title": "MEM Opportunity - Deployment",
+              "type": "treemap",
+              "requests": [
+                {
+                  "response_format": "scalar",
+                  "queries": [
+                    {
+                      "query": "sum:kubernetes.memory.requests{$scope,$env,$kube_namespace,$kube_cluster_name ,kube_deployment:*} by {kube_cluster_name,kube_deployment}",
+                      "data_source": "metrics",
+                      "name": "query5",
+                      "aggregator": "avg"
+                    },
+                    {
+                      "query": "sum:kubernetes.memory.usage{$scope,$env,$kube_namespace,$kube_cluster_name ,kube_deployment:*} by {kube_cluster_name,kube_deployment}",
+                      "data_source": "metrics",
+                      "name": "query8",
+                      "aggregator": "avg"
+                    }
+                  ],
+                  "formulas": [
+                    {
+                      "alias": "% MEM requests",
+                      "formula": "query5 - query8"
+                    }
+                  ]
+                }
+              ]
+            },
+            "layout": {
+              "x": 6,
+              "y": 9,
+              "width": 6,
+              "height": 3
+            }
+          },
+          {
+            "id": 7705765655502342,
+            "definition": {
+              "title": "CPU Opportunity - DaemonSet",
+              "type": "treemap",
+              "requests": [
+                {
+                  "response_format": "scalar",
+                  "queries": [
+                    {
+                      "query": "sum:kubernetes.cpu.requests{$scope,$env,$kube_namespace,$kube_cluster_name, kube_daemon_set:*} by {kube_cluster_name,kube_daemon_set}",
+                      "data_source": "metrics",
+                      "name": "query1",
+                      "aggregator": "avg"
+                    },
+                    {
+                      "query": "sum:kubernetes.cpu.usage.total{$scope,$env,$kube_namespace,$kube_cluster_name,kube_daemon_set:*} by {kube_cluster_name,kube_daemon_set}",
+                      "data_source": "metrics",
+                      "name": "query7",
+                      "aggregator": "avg"
+                    }
+                  ],
+                  "formulas": [
+                    {
+                      "alias": "CPU opportunity",
+                      "formula": "query1 - query7 / 1000 / 1000 / 1000"
+                    }
+                  ]
+                }
+              ]
+            },
+            "layout": {
+              "x": 0,
+              "y": 12,
+              "width": 6,
+              "height": 3
+            }
+          },
+          {
+            "id": 6126760839503358,
+            "definition": {
+              "title": "MEM Opportunity - DaemonSet",
+              "type": "treemap",
+              "requests": [
+                {
+                  "response_format": "scalar",
+                  "queries": [
+                    {
+                      "query": "sum:kubernetes.memory.requests{$scope,$env,$kube_namespace,$kube_cluster_name,kube_daemon_set:*} by {kube_cluster_name,kube_daemon_set}",
+                      "data_source": "metrics",
+                      "name": "query5",
+                      "aggregator": "avg"
+                    },
+                    {
+                      "query": "sum:kubernetes.memory.usage{$scope,$env,$kube_namespace,$kube_cluster_name,kube_daemon_set:*} by {kube_cluster_name,kube_daemon_set}",
+                      "data_source": "metrics",
+                      "name": "query8",
+                      "aggregator": "avg"
+                    }
+                  ],
+                  "formulas": [
+                    {
+                      "alias": "% MEM requests",
+                      "formula": "query5 - query8"
+                    }
+                  ]
+                }
+              ]
+            },
+            "layout": {
+              "x": 6,
+              "y": 12,
+              "width": 6,
+              "height": 3
+            }
+          }
+        ]
+      },
+      "layout": {
+        "x": 0,
+        "y": 4,
+        "width": 12,
+        "height": 16
+      }
+    },
+    {
+      "id": 554427394930086,
+      "definition": {
+        "title": "Capacity Review per Kubernetes Object",
+        "background_color": "purple",
+        "show_title": true,
+        "type": "group",
+        "layout_type": "ordered",
+        "widgets": [
+          {
+            "id": 1326422038975066,
+            "definition": {
+              "type": "note",
+              "content": "## How to use this section\n\n1. Select a deployment or daemonset\n2. It is preferable to not set a cluster or environment for this section to see the impact cross clusters and environments. This can help observe different behavior and different \"request\" needs for different environments and clusters",
+              "background_color": "gray",
+              "font_size": "14",
+              "text_align": "left",
+              "vertical_align": "top",
+              "show_tick": false,
+              "tick_pos": "50%",
+              "tick_edge": "left",
+              "has_padding": true
+            },
+            "layout": {
+              "x": 0,
+              "y": 0,
+              "width": 2,
+              "height": 4
+            }
+          },
+          {
+            "id": 2350886867040916,
+            "definition": {
+              "title": "CPU and Mem by Kubernetes Objects",
+              "title_size": "16",
+              "title_align": "left",
+              "type": "query_table",
+              "requests": [
+                {
+                  "response_format": "scalar",
+                  "queries": [
+                    {
+                      "query": "sum:kubernetes.cpu.requests{$scope,$env,$kube_namespace,$kube_cluster_name,$kube_deployment,$kube_daemon_set,$kube_stateful_set} by {kube_cluster_name,env,kube_deployment,kube_daemon_set,kube_stateful_set}",
+                      "data_source": "metrics",
+                      "name": "query1",
+                      "aggregator": "avg"
+                    },
+                    {
+                      "query": "sum:kubernetes.cpu.usage.total{$scope,$env,$kube_namespace,$kube_cluster_name,$kube_deployment,$kube_daemon_set,$kube_stateful_set} by {kube_cluster_name,env,kube_deployment,kube_daemon_set,kube_stateful_set}",
+                      "data_source": "metrics",
+                      "name": "query7",
+                      "aggregator": "avg"
+                    },
+                    {
+                      "query": "sum:kubernetes.memory.requests{$scope,$env,$kube_namespace,$kube_cluster_name,$kube_deployment,$kube_daemon_set,$kube_stateful_set} by {kube_cluster_name,env,kube_deployment,kube_daemon_set,kube_stateful_set}",
+                      "data_source": "metrics",
+                      "name": "query5",
+                      "aggregator": "avg"
+                    },
+                    {
+                      "query": "sum:kubernetes.memory.usage{$scope,$env,$kube_namespace,$kube_cluster_name,$kube_deployment,$kube_daemon_set,$kube_stateful_set} by {kube_cluster_name,env,kube_deployment,kube_daemon_set,kube_stateful_set}",
+                      "data_source": "metrics",
+                      "name": "query8",
+                      "aggregator": "avg"
+                    },
+                    {
+                      "query": "avg:kubernetes.cpu.usage.total{$scope,$env,$kube_namespace,$kube_cluster_name,$kube_deployment,$kube_daemon_set,$kube_stateful_set} by {kube_cluster_name,env,kube_deployment,kube_daemon_set,kube_stateful_set}",
+                      "data_source": "metrics",
+                      "name": "query9",
+                      "aggregator": "avg"
+                    },
+                    {
+                      "query": "avg:kubernetes.memory.usage{$scope,$env,$kube_namespace,$kube_cluster_name,$kube_deployment,$kube_daemon_set,$kube_stateful_set} by {kube_cluster_name,env,kube_deployment,kube_daemon_set,kube_stateful_set}",
+                      "data_source": "metrics",
+                      "name": "query10",
+                      "aggregator": "avg"
+                    },
+                    {
+                      "query": "sum:kubernetes.cpu.limits{$scope,$env,$kube_namespace,$kube_cluster_name,$kube_stateful_set} by {kube_cluster_name,env,kube_deployment,kube_daemon_set,kube_stateful_set}",
+                      "data_source": "metrics",
+                      "name": "query2",
+                      "aggregator": "avg"
+                    },
+                    {
+                      "query": "sum:kubernetes.memory.limits{$scope,$env,$kube_namespace,$kube_cluster_name,$kube_stateful_set} by {kube_cluster_name,env,kube_deployment,kube_daemon_set,kube_stateful_set}",
+                      "data_source": "metrics",
+                      "name": "query6",
+                      "aggregator": "avg"
+                    }
+                  ],
+                  "formulas": [
+                    {
+                      "alias": "CPU requests",
+                      "cell_display_mode": "number",
+                      "formula": "query1",
+                      "limit": {
+                        "count": 500,
+                        "order": "desc"
+                      }
+                    },
+                    {
+                      "alias": "CPU usage",
+                      "cell_display_mode": "number",
+                      "formula": "query7"
+                    },
+                    {
+                      "alias": "MEM requests",
+                      "formula": "query5"
+                    },
+                    {
+                      "alias": "MEM usage",
+                      "formula": "query8"
+                    },
+                    {
+                      "alias": "% CPU requests",
+                      "conditional_formats": [
+                        {
+                          "palette": "white_on_red",
+                          "comparator": "<",
+                          "value": 60
+                        }
+                      ],
+                      "formula": "query7 / (query1 * 1000000000) * 100"
+                    },
+                    {
+                      "alias": "% MEM requests",
+                      "conditional_formats": [
+                        {
+                          "palette": "white_on_red",
+                          "comparator": "<",
+                          "value": 60
+                        }
+                      ],
+                      "formula": "query8 / query5 * 100"
+                    }
+                  ]
+                }
+              ],
+              "has_search_bar": "auto"
+            },
+            "layout": {
+              "x": 2,
+              "y": 0,
+              "width": 10,
+              "height": 4
+            }
+          },
+          {
+            "id": 2377355700631554,
+            "definition": {
+              "type": "note",
+              "content": "Use the two graphs on the right to identify if the utilization has spikes or if this is relatively stable through time.",
+              "background_color": "gray",
+              "font_size": "14",
+              "text_align": "left",
+              "vertical_align": "top",
+              "show_tick": true,
+              "tick_pos": "50%",
+              "tick_edge": "right",
+              "has_padding": true
+            },
+            "layout": {
+              "x": 0,
+              "y": 4,
+              "width": 2,
+              "height": 3
+            }
+          },
+          {
+            "id": 8138378275514268,
+            "definition": {
+              "title": "CPU utilization vs request",
+              "title_size": "16",
+              "title_align": "left",
+              "show_legend": true,
+              "legend_layout": "auto",
+              "legend_columns": [
+                "avg",
+                "min",
+                "max",
+                "value",
+                "sum"
+              ],
+              "type": "timeseries",
+              "requests": [
+                {
+                  "formulas": [
+                    {
+                      "alias": "% CPU requests",
+                      "formula": "query7 / (query1 * 1000000000) * 100"
+                    }
+                  ],
+                  "queries": [
+                    {
+                      "query": "sum:kubernetes.cpu.requests{$scope,$env,$kube_namespace,$kube_cluster_name,$kube_deployment,$kube_daemon_set,$kube_stateful_set} by {kube_cluster_name,env,kube_deployment,kube_daemon_set,kube_stateful_set}",
+                      "data_source": "metrics",
+                      "name": "query1"
+                    },
+                    {
+                      "query": "sum:kubernetes.cpu.usage.total{$scope,$env,$kube_namespace,$kube_cluster_name,$kube_deployment,$kube_daemon_set,$kube_stateful_set} by {kube_cluster_name,env,kube_deployment,kube_daemon_set,kube_stateful_set}",
+                      "data_source": "metrics",
+                      "name": "query7"
+                    },
+                    {
+                      "query": "sum:kubernetes.memory.requests{$scope,$env,$kube_namespace,$kube_cluster_name,$kube_deployment,$kube_daemon_set,$kube_stateful_set} by {kube_cluster_name,env,kube_deployment,kube_daemon_set,kube_stateful_set}",
+                      "data_source": "metrics",
+                      "name": "query5"
+                    },
+                    {
+                      "query": "sum:kubernetes.memory.usage{$scope,$env,$kube_namespace,$kube_cluster_name,$kube_deployment,$kube_daemon_set,$kube_stateful_set} by {kube_cluster_name,env,kube_deployment,kube_daemon_set,kube_stateful_set}",
+                      "data_source": "metrics",
+                      "name": "query8"
+                    },
+                    {
+                      "query": "sum:kubernetes.cpu.limits{$scope,$env,$kube_namespace,$kube_cluster_name,$kube_stateful_set} by {kube_cluster_name,env,kube_deployment,kube_daemon_set,kube_stateful_set}",
+                      "data_source": "metrics",
+                      "name": "query2"
+                    },
+                    {
+                      "query": "sum:kubernetes.memory.limits{$scope,$env,$kube_namespace,$kube_cluster_name,$kube_stateful_set} by {kube_cluster_name,env,kube_deployment,kube_daemon_set,kube_stateful_set}",
+                      "data_source": "metrics",
+                      "name": "query6"
+                    }
+                  ],
+                  "response_format": "timeseries",
+                  "style": {
+                    "palette": "dog_classic",
+                    "line_type": "solid",
+                    "line_width": "normal"
+                  },
+                  "display_type": "line"
+                }
+              ],
+              "yaxis": {
+                "scale": "sqrt",
+                "include_zero": false,
+                "max": "120"
+              },
+              "markers": [
+                {
+                  "value": "y < 60",
+                  "display_type": "error dashed"
+                },
+                {
+                  "value": "y < 80",
+                  "display_type": "warning dashed"
+                }
+              ]
+            },
+            "layout": {
+              "x": 2,
+              "y": 4,
+              "width": 5,
+              "height": 3
+            }
+          },
+          {
+            "id": 4788165208070154,
+            "definition": {
+              "title": "Mem utilization vs request",
+              "title_size": "16",
+              "title_align": "left",
+              "show_legend": false,
+              "type": "timeseries",
+              "requests": [
+                {
+                  "response_format": "timeseries",
+                  "queries": [
+                    {
+                      "query": "sum:kubernetes.cpu.requests{$scope,$env,$kube_namespace,$kube_cluster_name,$kube_deployment,$kube_daemon_set,$kube_stateful_set} by {kube_cluster_name,env,kube_deployment,kube_daemon_set,kube_stateful_set}",
+                      "data_source": "metrics",
+                      "name": "query1"
+                    },
+                    {
+                      "query": "sum:kubernetes.cpu.usage.total{$scope,$env,$kube_namespace,$kube_cluster_name,$kube_deployment,$kube_daemon_set,$kube_stateful_set} by {kube_cluster_name,env,kube_deployment,kube_daemon_set,kube_stateful_set}",
+                      "data_source": "metrics",
+                      "name": "query7"
+                    },
+                    {
+                      "query": "sum:kubernetes.memory.requests{$scope,$env,$kube_namespace,$kube_cluster_name,$kube_deployment,$kube_daemon_set,$kube_stateful_set} by {kube_cluster_name,env,kube_deployment,kube_daemon_set,kube_stateful_set}",
+                      "data_source": "metrics",
+                      "name": "query5"
+                    },
+                    {
+                      "query": "sum:kubernetes.memory.usage{$scope,$env,$kube_namespace,$kube_cluster_name,$kube_deployment,$kube_daemon_set,$kube_stateful_set} by {kube_cluster_name,env,kube_deployment,kube_daemon_set,kube_stateful_set}",
+                      "data_source": "metrics",
+                      "name": "query8"
+                    },
+                    {
+                      "query": "sum:kubernetes.cpu.limits{$scope,$env,$kube_namespace,$kube_cluster_name,$kube_stateful_set} by {kube_cluster_name,env,kube_deployment,kube_daemon_set,kube_stateful_set}",
+                      "data_source": "metrics",
+                      "name": "query2"
+                    },
+                    {
+                      "query": "sum:kubernetes.memory.limits{$scope,$env,$kube_namespace,$kube_cluster_name,$kube_stateful_set} by {kube_cluster_name,env,kube_deployment,kube_daemon_set,kube_stateful_set}",
+                      "data_source": "metrics",
+                      "name": "query6"
+                    }
+                  ],
+                  "formulas": [
+                    {
+                      "formula": "query8 / query5 * 100",
+                      "alias": "% MEM requests"
+                    }
+                  ],
+                  "style": {
+                    "palette": "dog_classic",
+                    "line_type": "solid",
+                    "line_width": "normal"
+                  },
+                  "display_type": "line"
+                }
+              ],
+              "yaxis": {
+                "scale": "sqrt",
+                "min": "0",
+                "max": "120"
+              },
+              "markers": [
+                {
+                  "value": "y < 60",
+                  "display_type": "error dashed"
+                },
+                {
+                  "value": "y < 75",
+                  "display_type": "warning dashed"
+                }
+              ]
+            },
+            "layout": {
+              "x": 7,
+              "y": 4,
+              "width": 5,
+              "height": 3
+            }
+          },
+          {
+            "id": 4085731654655840,
+            "definition": {
+              "type": "note",
+              "content": "Use the two graphs on the right to identify the right request to set. Do not hesitate to filter per cluster to improve the clarity.",
+              "background_color": "gray",
+              "font_size": "14",
+              "text_align": "left",
+              "vertical_align": "top",
+              "show_tick": true,
+              "tick_pos": "50%",
+              "tick_edge": "right",
+              "has_padding": true
+            },
+            "layout": {
+              "x": 0,
+              "y": 7,
+              "width": 2,
+              "height": 3
+            }
+          },
+          {
+            "id": 7078539035969836,
+            "definition": {
+              "title": "CPU utilization vs request",
+              "title_size": "16",
+              "title_align": "left",
+              "show_legend": true,
+              "legend_layout": "auto",
+              "legend_columns": [
+                "avg",
+                "min",
+                "max",
+                "value",
+                "sum"
+              ],
+              "type": "timeseries",
+              "requests": [
+                {
+                  "formulas": [
+                    {
+                      "alias": "usage per pod",
+                      "formula": "query7"
+                    }
+                  ],
+                  "queries": [
+                    {
+                      "query": "avg:kubernetes.cpu.usage.total{$scope,$env,$kube_namespace,$kube_cluster_name,$kube_deployment,$kube_daemon_set,$kube_stateful_set} by {kube_cluster_name,env,kube_deployment,kube_daemon_set,kube_stateful_set}",
+                      "data_source": "metrics",
+                      "name": "query7"
+                    },
+                    {
+                      "query": "avg:kubernetes.cpu.requests{$scope,$env,$kube_namespace,$kube_cluster_name,$kube_deployment,$kube_daemon_set,$kube_stateful_set} by {kube_cluster_name,env,kube_deployment,kube_daemon_set,kube_stateful_set}",
+                      "data_source": "metrics",
+                      "name": "query1"
+                    },
+                    {
+                      "query": "sum:kubernetes.memory.requests{$scope,$env,$kube_namespace,$kube_cluster_name,$kube_deployment,$kube_daemon_set,$kube_stateful_set} by {kube_cluster_name,env,kube_deployment,kube_daemon_set,kube_stateful_set}",
+                      "data_source": "metrics",
+                      "name": "query5"
+                    },
+                    {
+                      "query": "sum:kubernetes.memory.usage{$scope,$env,$kube_namespace,$kube_cluster_name,$kube_deployment,$kube_daemon_set,$kube_stateful_set} by {kube_cluster_name,env,kube_deployment,kube_daemon_set,kube_stateful_set}",
+                      "data_source": "metrics",
+                      "name": "query8"
+                    },
+                    {
+                      "query": "sum:kubernetes.cpu.limits{$scope,$env,$kube_namespace,$kube_cluster_name,$kube_stateful_set} by {kube_cluster_name,env,kube_deployment,kube_daemon_set,kube_stateful_set}",
+                      "data_source": "metrics",
+                      "name": "query2"
+                    },
+                    {
+                      "query": "sum:kubernetes.memory.limits{$scope,$env,$kube_namespace,$kube_cluster_name,$kube_stateful_set} by {kube_cluster_name,env,kube_deployment,kube_daemon_set,kube_stateful_set}",
+                      "data_source": "metrics",
+                      "name": "query6"
+                    }
+                  ],
+                  "response_format": "timeseries",
+                  "style": {
+                    "palette": "dog_classic",
+                    "line_type": "solid",
+                    "line_width": "normal"
+                  },
+                  "display_type": "line"
+                },
+                {
+                  "formulas": [
+                    {
+                      "alias": "request per pod",
+                      "formula": "query0"
+                    }
+                  ],
+                  "queries": [
+                    {
+                      "data_source": "metrics",
+                      "name": "query0",
+                      "query": "avg:kubernetes.cpu.requests{$scope,$env,$kube_namespace,$kube_cluster_name,$kube_deployment,$kube_daemon_set,$kube_stateful_set} by {kube_cluster_name,env,kube_deployment,kube_daemon_set,kube_stateful_set}"
+                    }
+                  ],
+                  "response_format": "timeseries",
+                  "style": {
+                    "palette": "dog_classic",
+                    "line_type": "dashed",
+                    "line_width": "normal"
+                  },
+                  "display_type": "line"
+                }
+              ],
+              "yaxis": {
+                "scale": "sqrt",
+                "include_zero": false
+              },
+              "markers": []
+            },
+            "layout": {
+              "x": 2,
+              "y": 7,
+              "width": 5,
+              "height": 3
+            }
+          },
+          {
+            "id": 4295241541769676,
+            "definition": {
+              "title": "Mem utilization vs request",
+              "title_size": "16",
+              "title_align": "left",
+              "show_legend": false,
+              "legend_layout": "auto",
+              "legend_columns": [
+                "avg",
+                "min",
+                "max",
+                "value",
+                "sum"
+              ],
+              "type": "timeseries",
+              "requests": [
+                {
+                  "formulas": [
+                    {
+                      "alias": "usage per pod",
+                      "formula": "query8"
+                    }
+                  ],
+                  "queries": [
+                    {
+                      "query": "avg:kubernetes.memory.usage{$scope,$env,$kube_namespace,$kube_cluster_name,$kube_deployment,$kube_daemon_set,$kube_stateful_set} by {kube_cluster_name,env,kube_deployment,kube_daemon_set,kube_stateful_set}",
+                      "data_source": "metrics",
+                      "name": "query8"
+                    },
+                    {
+                      "query": "avg:kubernetes.memory.requests{$scope,$env,$kube_namespace,$kube_cluster_name,$kube_deployment,$kube_daemon_set,$kube_stateful_set} by {kube_cluster_name,env,kube_deployment,kube_daemon_set,kube_stateful_set}",
+                      "data_source": "metrics",
+                      "name": "query5"
+                    },
+                    {
+                      "query": "sum:kubernetes.cpu.requests{$scope,$env,$kube_namespace,$kube_cluster_name,$kube_deployment,$kube_daemon_set,$kube_stateful_set} by {kube_cluster_name,env,kube_deployment,kube_daemon_set,kube_stateful_set}",
+                      "data_source": "metrics",
+                      "name": "query1"
+                    },
+                    {
+                      "query": "sum:kubernetes.cpu.usage.total{$scope,$env,$kube_namespace,$kube_cluster_name,$kube_deployment,$kube_daemon_set,$kube_stateful_set} by {kube_cluster_name,env,kube_deployment,kube_daemon_set,kube_stateful_set}",
+                      "data_source": "metrics",
+                      "name": "query7"
+                    },
+                    {
+                      "query": "sum:kubernetes.cpu.limits{$scope,$env,$kube_namespace,$kube_cluster_name,$kube_stateful_set} by {kube_cluster_name,env,kube_deployment,kube_daemon_set,kube_stateful_set}",
+                      "data_source": "metrics",
+                      "name": "query2"
+                    },
+                    {
+                      "query": "sum:kubernetes.memory.limits{$scope,$env,$kube_namespace,$kube_cluster_name,$kube_stateful_set} by {kube_cluster_name,env,kube_deployment,kube_daemon_set,kube_stateful_set}",
+                      "data_source": "metrics",
+                      "name": "query6"
+                    }
+                  ],
+                  "response_format": "timeseries",
+                  "style": {
+                    "palette": "dog_classic",
+                    "line_type": "solid",
+                    "line_width": "normal"
+                  },
+                  "display_type": "line"
+                },
+                {
+                  "formulas": [
+                    {
+                      "alias": "request per pod",
+                      "formula": "query0"
+                    }
+                  ],
+                  "queries": [
+                    {
+                      "data_source": "metrics",
+                      "name": "query0",
+                      "query": "avg:kubernetes.memory.requests{$scope,$env,$kube_namespace,$kube_cluster_name,$kube_deployment,$kube_daemon_set,$kube_stateful_set} by {kube_cluster_name,env,kube_deployment,kube_daemon_set,kube_stateful_set}"
+                    }
+                  ],
+                  "response_format": "timeseries",
+                  "style": {
+                    "palette": "dog_classic",
+                    "line_type": "dashed",
+                    "line_width": "normal"
+                  },
+                  "display_type": "line"
+                }
+              ],
+              "yaxis": {
+                "scale": "sqrt",
+                "min": "0"
+              },
+              "markers": []
+            },
+            "layout": {
+              "x": 7,
+              "y": 7,
+              "width": 5,
+              "height": 3
+            }
+          }
+        ]
+      },
+      "layout": {
+        "x": 0,
+        "y": 0,
+        "width": 12,
+        "height": 11,
+        "is_column_break": true
+      }
+    },
+    {
+      "id": 986801580339488,
+      "definition": {
+        "title": "CPU and Memory utilization per cluster",
+        "background_color": "purple",
+        "show_title": true,
+        "type": "group",
+        "layout_type": "ordered",
+        "widgets": [
+          {
+            "id": 3899377194392834,
+            "definition": {
+              "title": "CPU by cluster",
+              "title_size": "16",
+              "title_align": "left",
+              "type": "query_table",
+              "requests": [
+                {
+                  "response_format": "scalar",
+                  "queries": [
+                    {
+                      "query": "sum:kubernetes.cpu.requests{$scope,$env,$kube_namespace,$kube_cluster_name} by {kube_cluster_name,env}",
+                      "data_source": "metrics",
+                      "name": "query1",
+                      "aggregator": "avg"
+                    },
+                    {
+                      "query": "sum:kubernetes.cpu.limits{$scope,$env,$kube_namespace,$kube_cluster_name} by {kube_cluster_name,env}",
+                      "data_source": "metrics",
+                      "name": "query2",
+                      "aggregator": "avg"
+                    },
+                    {
+                      "query": "sum:kubernetes.cpu.usage.total{$scope,$env,$kube_namespace,$kube_cluster_name} by {kube_cluster_name,env}",
+                      "data_source": "metrics",
+                      "name": "query7",
+                      "aggregator": "avg"
+                    },
+                    {
+                      "query": "sum:system.cpu.num_cores{$scope,$env,$kube_namespace,$kube_cluster_name} by {kube_cluster_name,env}",
+                      "data_source": "metrics",
+                      "name": "query3",
+                      "aggregator": "avg"
+                    },
+                    {
+                      "query": "avg:system.cpu.idle{$scope,$env,$kube_namespace,$kube_cluster_name} by {kube_cluster_name,env}",
+                      "data_source": "metrics",
+                      "name": "query4",
+                      "aggregator": "avg"
+                    },
+                    {
+                      "query": "avg:system.cpu.system{$scope,$env,$kube_namespace,$kube_cluster_name} by {kube_cluster_name,env}",
+                      "data_source": "metrics",
+                      "name": "query5",
+                      "aggregator": "avg"
+                    },
+                    {
+                      "query": "avg:system.cpu.user{$scope,$env,$kube_namespace,$kube_cluster_name} by {kube_cluster_name,env}",
+                      "data_source": "metrics",
+                      "name": "query6",
+                      "aggregator": "avg"
+                    }
+                  ],
+                  "formulas": [
+                    {
+                      "alias": "requests",
+                      "cell_display_mode": "bar",
+                      "limit": {
+                        "count": 500,
+                        "order": "desc"
+                      },
+                      "formula": "query1"
+                    },
+                    {
+                      "alias": "limits",
+                      "cell_display_mode": "bar",
+                      "formula": "query2"
+                    },
+                    {
+                      "alias": "usage",
+                      "cell_display_mode": "bar",
+                      "formula": "query7"
+                    },
+                    {
+                      "alias": "num cores",
+                      "cell_display_mode": "bar",
+                      "formula": "query3"
+                    },
+                    {
+                      "alias": "cpu idle",
+                      "cell_display_mode": "bar",
+                      "formula": "query4"
+                    },
+                    {
+                      "alias": "cpu system",
+                      "cell_display_mode": "bar",
+                      "formula": "query5"
+                    },
+                    {
+                      "alias": "cpu user",
+                      "cell_display_mode": "bar",
+                      "formula": "query6"
+                    }
+                  ]
+                }
+              ],
+              "has_search_bar": "auto"
+            },
+            "layout": {
+              "x": 0,
+              "y": 0,
+              "width": 12,
+              "height": 3
+            }
+          },
+          {
+            "id": 7573198214876406,
+            "definition": {
+              "title": "Memory by cluster",
+              "title_size": "16",
+              "title_align": "left",
+              "type": "query_table",
+              "requests": [
+                {
+                  "response_format": "scalar",
+                  "queries": [
+                    {
+                      "query": "sum:kubernetes.memory.requests{$scope,$env,$kube_namespace,$kube_cluster_name} by {kube_cluster_name,env}",
+                      "data_source": "metrics",
+                      "name": "query1",
+                      "aggregator": "avg"
+                    },
+                    {
+                      "query": "sum:kubernetes.memory.limits{$scope,$env,$kube_namespace,$kube_cluster_name} by {kube_cluster_name,env}",
+                      "data_source": "metrics",
+                      "name": "query2",
+                      "aggregator": "avg"
+                    },
+                    {
+                      "query": "sum:kubernetes.memory.usage{$scope,$env,$kube_namespace,$kube_cluster_name} by {kube_cluster_name,env}",
+                      "data_source": "metrics",
+                      "name": "query6",
+                      "aggregator": "avg"
+                    },
+                    {
+                      "query": "sum:system.mem.total{$scope,$env,$kube_namespace,$kube_cluster_name} by {kube_cluster_name,env}",
+                      "data_source": "metrics",
+                      "name": "query3",
+                      "aggregator": "avg"
+                    },
+                    {
+                      "query": "sum:system.mem.free{$scope,$env,$kube_namespace,$kube_cluster_name} by {kube_cluster_name,env}",
+                      "data_source": "metrics",
+                      "name": "query4",
+                      "aggregator": "avg"
+                    },
+                    {
+                      "query": "sum:system.mem.used{$scope,$env,$kube_namespace,$kube_cluster_name} by {kube_cluster_name,env}",
+                      "data_source": "metrics",
+                      "name": "query5",
+                      "aggregator": "avg"
+                    }
+                  ],
+                  "formulas": [
+                    {
+                      "alias": "requests",
+                      "cell_display_mode": "bar",
+                      "limit": {
+                        "count": 500,
+                        "order": "desc"
+                      },
+                      "formula": "query1"
+                    },
+                    {
+                      "alias": "limits",
+                      "cell_display_mode": "bar",
+                      "formula": "query2"
+                    },
+                    {
+                      "alias": "usage",
+                      "cell_display_mode": "bar",
+                      "formula": "query6"
+                    },
+                    {
+                      "alias": "total",
+                      "cell_display_mode": "bar",
+                      "formula": "query3"
+                    },
+                    {
+                      "alias": "Free",
+                      "cell_display_mode": "bar",
+                      "formula": "query4"
+                    },
+                    {
+                      "alias": "Used",
+                      "cell_display_mode": "bar",
+                      "formula": "query5"
+                    }
+                  ]
+                }
+              ],
+              "has_search_bar": "auto"
+            },
+            "layout": {
+              "x": 0,
+              "y": 3,
+              "width": 12,
+              "height": 3
+            }
+          }
+        ]
+      },
+      "layout": {
+        "x": 0,
+        "y": 11,
+        "width": 12,
+        "height": 7
+      }
+    }
+  ],
+  "template_variables": [
+    {
+      "name": "scope",
+      "prefix": "*",
+      "available_values": [],
+      "default": "*"
+    },
+    {
+      "name": "env",
+      "prefix": "env",
+      "available_values": [],
+      "default": "*"
+    },
+    {
+      "name": "kube_cluster_name",
+      "prefix": "kube_cluster_name",
+      "available_values": [],
+      "default": "*"
+    },
+    {
+      "name": "kube_namespace",
+      "prefix": "kube_namespace",
+      "available_values": [],
+      "default": "*"
+    },
+    {
+      "name": "kube_deployment",
+      "prefix": "kube_deployment",
+      "available_values": [],
+      "default": "*"
+    },
+    {
+      "name": "kube_daemon_set",
+      "prefix": "kube_daemon_set",
+      "available_values": [],
+      "default": "*"
+    },
+    {
+      "name": "kube_stateful_set",
+      "prefix": "kube_stateful_set",
+      "available_values": [],
+      "default": "*"
+    }
+  ],
+  "layout_type": "ordered",
+  "notify_list": [],
+  "reflow_type": "fixed",
+  "tags": []
+}

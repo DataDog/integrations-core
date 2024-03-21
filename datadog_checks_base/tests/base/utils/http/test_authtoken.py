@@ -507,6 +507,52 @@ class TestAuthTokenOAuth:
 
             assert http.options['headers'] == expected_headers
 
+    def test_success_with_auth_params(self):
+        instance = {
+            'auth_token': {
+                'reader': {
+                    'type': 'oauth',
+                    'url': 'foo',
+                    'client_id': 'bar',
+                    'client_secret': 'baz',
+                    "options": {"audience": "http://example.com", "scope": "openid"},
+                },
+                'writer': {'type': 'header', 'name': 'Authorization', 'value': 'Bearer <TOKEN>'},
+            }
+        }
+        init_config = {}
+        http = RequestsWrapper(instance, init_config)
+
+        expected_headers = {'Authorization': 'Bearer foo'}
+        expected_headers.update(DEFAULT_OPTIONS['headers'])
+
+        class MockOAuth2Session(object):
+            def __init__(self, *args, **kwargs):
+                pass
+
+            def fetch_token(self, *args, **kwargs):
+                assert kwargs['scope'] == 'openid'
+                assert kwargs['audience'] == 'http://example.com'
+                return {'access_token': 'foo', 'expires_in': 9000}
+
+        with mock.patch('requests.get') as get, mock.patch('oauthlib.oauth2.BackendApplicationClient'), mock.patch(
+            'requests_oauthlib.OAuth2Session', side_effect=MockOAuth2Session
+        ):
+            http.get('https://www.google.com')
+
+            get.assert_called_with(
+                'https://www.google.com',
+                headers=expected_headers,
+                auth=None,
+                cert=None,
+                proxies=None,
+                timeout=(10.0, 10.0),
+                verify=True,
+                allow_redirects=True,
+            )
+
+            assert http.options['headers'] == expected_headers
+
 
 class TestAuthTokenDCOS:
     def test_token_auth(self):

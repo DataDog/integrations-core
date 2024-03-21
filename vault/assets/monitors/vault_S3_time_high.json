@@ -2,11 +2,11 @@
   "version": 2,
   "created_at": "2021-03-08",
   "last_updated_at": "2021-03-08",
-  "title": "S3 time to access secrets is high",
+  "title": "Time to access secrets is high",
   "tags": [
     "integration:vault"
   ],
-  "description": "Notify your team when the time for S3 to access secrets is too high",
+  "description": "Vault is a tool designed for secrets management that can be integrated with various backend storage systems for storing secrets securely. This monitor tracks the time it takes an AWS S3 backend to access secrets, to identify performance issues.",
   "definition": {
     "message": "S3 time to access secrets is high in the past 1 minute.",
     "name": "[Vault] S3 time to access secrets is high",

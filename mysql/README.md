@@ -93,6 +93,8 @@ Query OK, 0 rows affected (0.00 sec)
 
 Follow the instructions below to configure this check for an Agent running on a host. For containerized environments, see the [Docker](?tab=docker#docker), [Kubernetes](?tab=kubernetes#kubernetes), or [ECS](?tab=ecs#ecs) sections.
 
+**Note**: For a full list of available configuration options, see the [sample mysql.d/conf.yaml][8].
+
 <!-- xxx tabs xxx -->
 <!-- xxx tab "Host" xxx -->
 
@@ -100,7 +102,9 @@ Follow the instructions below to configure this check for an Agent running on a 
 
 To configure this check for an Agent running on a host:
 
-Edit the `mysql.d/conf.yaml` file, in the `conf.d/` folder at the root of your [Agent's configuration directory][7] to start collecting your MySQL [metrics](#metric-collection) and [logs](#log-collection). See the [sample mysql.d/conf.yaml][8] for all available configuration options.
+Edit the `mysql.d/conf.yaml` file, in the `conf.d/` folder at the root of your [Agent's configuration directory][7] to start collecting your MySQL [metrics](#metric-collection) and [logs](#log-collection).
+
+For a full list of available configuration options, see the [sample `mysql.d/conf.yaml`][8].
 
 ##### Metric collection
 
@@ -128,8 +132,6 @@ Edit the `mysql.d/conf.yaml` file, in the `conf.d/` folder at the root of your [
 To collect `extra_performance_metrics`, your MySQL server must have `performance_schema` enabled - otherwise set `extra_performance_metrics` to `false`. For more information on `performance_schema`, see [MySQL Performance Schema Quick Start][9].
 
 **Note**: The `datadog` user should be set up in the MySQL integration configuration as `host: 127.0.0.1` instead of `localhost`. Alternatively, you may also use `sock`.
-
-See the [sample mysql.yaml][8] for all available configuration options, including those for custom metrics.
 
 [Restart the Agent][10] to start sending MySQL metrics to Datadog.
 

@@ -1,11 +1,12 @@
 id: scylla
 metric_id: scylla
+backend_only: false
 facets:
-  - name: Database
-    source: log
-    path: db.instance
-    groups:
+  - groups:
       - Database
+    name: Database
+    path: db.instance
+    source: log
 pipeline:
   type: pipeline
   name: Scylla

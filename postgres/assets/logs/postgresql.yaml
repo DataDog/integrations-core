@@ -1,36 +1,37 @@
 id: postgresql
 metric_id: postgres
+backend_only: false
 facets:
-  - name: Database
-    source: log
+  - groups:
+      - Database
+    name: Database
     path: db.instance
-    groups:
-      - Database
-  - name: Operation Type
     source: log
+  - groups:
+      - Database
+    name: Operation Type
     path: db.operation
-    groups:
-      - Database
-  - name: User
     source: log
+  - groups:
+      - Database
+    name: User
     path: db.user
-    groups:
-      - Database
-  - name: Duration
     source: log
+  - facetType: range
+    groups:
+      - Measure
+    name: Duration
     path: duration
+    source: log
     type: double
-    facetType: range
     unit:
       family: time
       name: nanosecond
-    groups:
-      - Measure
-  - name: Session ID
-    source: log
-    path: postgres.session_id
-    groups:
+  - groups:
       - Database
+    name: Session ID
+    path: postgres.session_id
+    source: log
 pipeline:
   type: pipeline
   name: Postgresql

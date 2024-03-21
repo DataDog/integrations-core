@@ -54,6 +54,10 @@ on:
         required: false
         default: false
         type: boolean
+      labeler:
+        required: false
+        default: false
+        type: boolean
       legacy-signature:
         required: false
         default: false
@@ -147,7 +151,7 @@ jobs:
       if: inputs.ci
       run: ddev validate ci
 
-    - name: Validate every integration has a defined owner
+    - name: Validate the CODEOWNERS file
       if: inputs.codeowners
       run: ddev validate codeowners
 
@@ -161,7 +165,7 @@ jobs:
 
     - name: Validate dependencies
       if: inputs.dep
-      run: ddev validate dep $TARGET
+      run: ddev validate dep
 
     - name: Validate EULA files
       if: inputs.eula
@@ -222,6 +226,10 @@ jobs:
     - name: Validate spelling
       if: inputs.typos
       run: ddev validate typos $TARGET
+
+    - name: Validate labeler configuration
+      if: inputs.labeler
+      run: ddev validate labeler
 
     # Every validation below here is sorted by increasing runtime rather than alphabetically
     - name: Validate third-party license metadata

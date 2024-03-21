@@ -1,0 +1,1169 @@
+{
+    "author_name": "Datadog",
+    "description": "**This Dashboard provides Flux CI/CD Observability metrics for your Kubernetes clusters with the Flux Integration**\n\n# Flux Documentation\n- [Flux Integration&nbsp;\u2197](https://docs.datadoghq.com/integrations/fluxcd)\n- [Flux Metrics&nbsp;\u2197](https://docs.datadoghq.com/integrations/fluxcd/#metrics)\n- [Flux Documentation&nbsp;\u2197](https://fluxcd.io/flux/#flux-in-short)",
+    "layout_type": "ordered",
+    "template_variables": [
+        {
+            "available_values": [],
+            "default": "*",
+            "name": "namespace",
+            "prefix": "namespace"
+        },
+        {
+            "available_values": [],
+            "default": "*",
+            "name": "controller",
+            "prefix": "controller"
+        },
+        {
+            "available_values": [],
+            "default": "*",
+            "name": "name",
+            "prefix": "name"
+        },
+        {
+            "available_values": [],
+            "default": "*",
+            "name": "kind",
+            "prefix": "kind"
+        }
+    ],
+    "title": "Flux",
+    "widgets": [
+        {
+            "definition": {
+                "banner_img": "/static/images/logos/fluxcd_large.svg",
+                "layout_type": "ordered",
+                "show_title": false,
+                "title": "About Flux",
+                "type": "group",
+                "widgets": [
+                    {
+                        "definition": {
+                            "background_color": "transparent",
+                            "content": "**This dashboard provides Flux CI/CD Observability metrics for your Kubernetes clusters with the Flux Integration**\n",
+                            "font_size": "14",
+                            "has_padding": true,
+                            "show_tick": true,
+                            "text_align": "center",
+                            "tick_edge": "left",
+                            "tick_pos": "50%",
+                            "type": "note",
+                            "vertical_align": "center"
+                        },
+                        "id": 3678862533884494,
+                        "layout": {
+                            "height": 2,
+                            "width": 3,
+                            "x": 0,
+                            "y": 0
+                        }
+                    },
+                    {
+                        "definition": {
+                            "background_color": "transparent",
+                            "content": "# Useful Links\n- [Flux Integration&nbsp;\u2197](https://docs.datadoghq.com/integrations/fluxcd)\n- [Flux Metrics&nbsp;\u2197](https://docs.datadoghq.com/integrations/fluxcd/#metrics)\n- [Flux Documentation&nbsp;\u2197](https://fluxcd.io/flux/#flux-in-short)",
+                            "font_size": "14",
+                            "has_padding": true,
+                            "show_tick": true,
+                            "text_align": "center",
+                            "tick_edge": "left",
+                            "tick_pos": "50%",
+                            "type": "note",
+                            "vertical_align": "center"
+                        },
+                        "id": 5450156093230630,
+                        "layout": {
+                            "height": 2,
+                            "width": 3,
+                            "x": 3,
+                            "y": 0
+                        }
+                    }
+                ]
+            },
+            "id": 2880454926207210,
+            "layout": {
+                "height": 5,
+                "width": 6,
+                "x": 0,
+                "y": 0
+            }
+        },
+        {
+            "definition": {
+                "background_color": "vivid_blue",
+                "layout_type": "ordered",
+                "show_title": true,
+                "title": "Overview",
+                "type": "group",
+                "widgets": [
+                    {
+                        "definition": {
+                            "background_color": "blue",
+                            "content": "This section provides you with an overview of your system activity.  The monitor summary notifies you of Flux alerts. ",
+                            "font_size": "14",
+                            "has_padding": true,
+                            "show_tick": false,
+                            "text_align": "center",
+                            "tick_edge": "left",
+                            "tick_pos": "50%",
+                            "type": "note",
+                            "vertical_align": "center"
+                        },
+                        "id": 6499557150759586,
+                        "layout": {
+                            "height": 2,
+                            "width": 2,
+                            "x": 0,
+                            "y": 0
+                        }
+                    },
+                    {
+                        "definition": {
+                            "color_preference": "text",
+                            "count": 50,
+                            "display_format": "countsAndList",
+                            "hide_zero_counts": true,
+                            "query": "tag:integration:fluxcd",
+                            "show_last_triggered": false,
+                            "show_priority": false,
+                            "sort": "status,asc",
+                            "start": 0,
+                            "summary_type": "groups",
+                            "title": "Monitor Summary",
+                            "type": "manage_status"
+                        },
+                        "id": 3331110254153362,
+                        "layout": {
+                            "height": 4,
+                            "width": 4,
+                            "x": 2,
+                            "y": 0
+                        }
+                    },
+                    {
+                        "definition": {
+                            "check": "fluxcd.openmetrics.health",
+                            "group_by": [
+                                "endpoint"
+                            ],
+                            "grouping": "cluster",
+                            "tags": [
+                                "$controller",
+                                "$namespace",
+                                "$name",
+                                "$kind"
+                            ],
+                            "title": "Service Checks",
+                            "title_align": "left",
+                            "title_size": "16",
+                            "type": "check_status"
+                        },
+                        "id": 83983289591112,
+                        "layout": {
+                            "height": 2,
+                            "width": 2,
+                            "x": 0,
+                            "y": 2
+                        }
+                    }
+                ]
+            },
+            "id": 3209093674658668,
+            "layout": {
+                "height": 5,
+                "width": 6,
+                "x": 6,
+                "y": 0
+            }
+        },
+        {
+            "definition": {
+                "background_color": "vivid_blue",
+                "layout_type": "ordered",
+                "show_title": true,
+                "title": "Objects Overview",
+                "type": "group",
+                "widgets": [
+                    {
+                        "definition": {
+                            "background_color": "blue",
+                            "content": "This section provides an overview of how many fluxcd objects are present and how many of them are failing. It also shows a high-level view of how long reconciliation takes. Objects are divided into two groups: source manifests (for example a git repository) and cluster reconcilers (for instance a Helm chart).",
+                            "font_size": "14",
+                            "has_padding": true,
+                            "show_tick": false,
+                            "text_align": "center",
+                            "tick_edge": "left",
+                            "tick_pos": "50%",
+                            "type": "note",
+                            "vertical_align": "center"
+                        },
+                        "id": 7877152359004176,
+                        "layout": {
+                            "height": 1,
+                            "width": 12,
+                            "x": 0,
+                            "y": 0
+                        }
+                    },
+                    {
+                        "definition": {
+                            "autoscale": true,
+                            "precision": 2,
+                            "requests": [
+                                {
+                                    "formulas": [
+                                        {
+                                            "formula": "query1"
+                                        }
+                                    ],
+                                    "queries": [
+                                        {
+                                            "aggregator": "last",
+                                            "data_source": "metrics",
+                                            "name": "query1",
+                                            "query": "sum:fluxcd.gotk.reconcile.condition{kind IN (helmchart,kustomization,helmrelease)}"
+                                        }
+                                    ],
+                                    "response_format": "scalar"
+                                }
+                            ],
+                            "timeseries_background": {
+                                "type": "bars",
+                                "yaxis": {}
+                            },
+                            "title": "Cluster Reconcilers",
+                            "title_align": "left",
+                            "title_size": "16",
+                            "type": "query_value"
+                        },
+                        "id": 1833148763375274,
+                        "layout": {
+                            "height": 1,
+                            "width": 3,
+                            "x": 0,
+                            "y": 1
+                        }
+                    },
+                    {
+                        "definition": {
+                            "autoscale": true,
+                            "precision": 2,
+                            "requests": [
+                                {
+                                    "conditional_formats": [
+                                        {
+                                            "comparator": ">",
+                                            "palette": "white_on_red",
+                                            "value": 0
+                                        },
+                                        {
+                                            "comparator": "=",
+                                            "palette": "white_on_green",
+                                            "value": 0
+                                        }
+                                    ],
+                                    "formulas": [
+                                        {
+                                            "formula": "query1"
+                                        }
+                                    ],
+                                    "queries": [
+                                        {
+                                            "aggregator": "last",
+                                            "data_source": "metrics",
+                                            "name": "query1",
+                                            "query": "sum:fluxcd.gotk.reconcile.condition{kind IN (helmchart,kustomization,helmrelease) AND status:false}"
+                                        }
+                                    ],
+                                    "response_format": "scalar"
+                                }
+                            ],
+                            "timeseries_background": {
+                                "type": "bars",
+                                "yaxis": {}
+                            },
+                            "title": "Failing Reconcilers",
+                            "title_align": "left",
+                            "title_size": "16",
+                            "type": "query_value"
+                        },
+                        "id": 8254573692114170,
+                        "layout": {
+                            "height": 1,
+                            "width": 3,
+                            "x": 3,
+                            "y": 1
+                        }
+                    },
+                    {
+                        "definition": {
+                            "autoscale": true,
+                            "precision": 2,
+                            "requests": [
+                                {
+                                    "formulas": [
+                                        {
+                                            "formula": "query1"
+                                        }
+                                    ],
+                                    "queries": [
+                                        {
+                                            "aggregator": "last",
+                                            "data_source": "metrics",
+                                            "name": "query1",
+                                            "query": "sum:fluxcd.gotk.reconcile.condition{kind IN (helmrepository,gitrepository,ocirepository)}"
+                                        }
+                                    ],
+                                    "response_format": "scalar"
+                                }
+                            ],
+                            "timeseries_background": {
+                                "type": "bars"
+                            },
+                            "title": "Manifests Sources",
+                            "title_align": "left",
+                            "title_size": "16",
+                            "type": "query_value"
+                        },
+                        "id": 3272692549266076,
+                        "layout": {
+                            "height": 1,
+                            "width": 3,
+                            "x": 6,
+                            "y": 1
+                        }
+                    },
+                    {
+                        "definition": {
+                            "autoscale": true,
+                            "precision": 2,
+                            "requests": [
+                                {
+                                    "conditional_formats": [
+                                        {
+                                            "comparator": ">",
+                                            "palette": "white_on_red",
+                                            "value": 0
+                                        },
+                                        {
+                                            "comparator": "=",
+                                            "palette": "white_on_green",
+                                            "value": 0
+                                        }
+                                    ],
+                                    "formulas": [
+                                        {
+                                            "formula": "query1"
+                                        }
+                                    ],
+                                    "queries": [
+                                        {
+                                            "aggregator": "last",
+                                            "data_source": "metrics",
+                                            "name": "query1",
+                                            "query": "sum:fluxcd.gotk.reconcile.condition{kind IN (helmrepository,gitrepository,ocirepository) AND status:false}"
+                                        }
+                                    ],
+                                    "response_format": "scalar"
+                                }
+                            ],
+                            "timeseries_background": {
+                                "type": "bars"
+                            },
+                            "title": "Failing Sources",
+                            "title_align": "left",
+                            "title_size": "16",
+                            "type": "query_value"
+                        },
+                        "id": 5180168765668464,
+                        "layout": {
+                            "height": 1,
+                            "width": 3,
+                            "x": 9,
+                            "y": 1
+                        }
+                    },
+                    {
+                        "definition": {
+                            "requests": [
+                                {
+                                    "formulas": [
+                                        {
+                                            "formula": "query1 / query2",
+                                            "limit": {
+                                                "count": 10,
+                                                "order": "desc"
+                                            }
+                                        }
+                                    ],
+                                    "queries": [
+                                        {
+                                            "aggregator": "avg",
+                                            "data_source": "metrics",
+                                            "name": "query1",
+                                            "query": "avg:fluxcd.gotk.reconcile.duration.seconds.sum{kind IN (helmchart,kustomization,helmrelease)} by {kind}.as_count()"
+                                        },
+                                        {
+                                            "aggregator": "avg",
+                                            "data_source": "metrics",
+                                            "name": "query2",
+                                            "query": "avg:fluxcd.gotk.reconcile.duration.seconds.count{kind IN (helmchart,kustomization,helmrelease)} by {kind}.as_count()"
+                                        }
+                                    ],
+                                    "response_format": "scalar"
+                                }
+                            ],
+                            "style": {
+                                "display": {
+                                    "legend": "automatic",
+                                    "type": "stacked"
+                                }
+                            },
+                            "title": "Cluster Reconciliation Duration",
+                            "title_align": "left",
+                            "title_size": "16",
+                            "type": "toplist"
+                        },
+                        "id": 975724465189136,
+                        "layout": {
+                            "height": 2,
+                            "width": 6,
+                            "x": 0,
+                            "y": 2
+                        }
+                    },
+                    {
+                        "definition": {
+                            "requests": [
+                                {
+                                    "formulas": [
+                                        {
+                                            "formula": "query1 / query2",
+                                            "limit": {
+                                                "count": 10,
+                                                "order": "desc"
+                                            }
+                                        }
+                                    ],
+                                    "queries": [
+                                        {
+                                            "aggregator": "avg",
+                                            "data_source": "metrics",
+                                            "name": "query1",
+                                            "query": "avg:fluxcd.gotk.reconcile.duration.seconds.sum{kind IN (helmrepository,gitrepository,ocirepository)} by {kind}.as_count()"
+                                        },
+                                        {
+                                            "aggregator": "avg",
+                                            "data_source": "metrics",
+                                            "name": "query2",
+                                            "query": "avg:fluxcd.gotk.reconcile.duration.seconds.count{kind IN (helmrepository,gitrepository,ocirepository)} by {kind}.as_count()"
+                                        }
+                                    ],
+                                    "response_format": "scalar"
+                                }
+                            ],
+                            "style": {
+                                "display": {
+                                    "legend": "automatic",
+                                    "type": "stacked"
+                                }
+                            },
+                            "title": "Source Acquisition Duration",
+                            "title_align": "left",
+                            "title_size": "16",
+                            "type": "toplist"
+                        },
+                        "id": 630104954834116,
+                        "layout": {
+                            "height": 2,
+                            "width": 6,
+                            "x": 6,
+                            "y": 2
+                        }
+                    }
+                ]
+            },
+            "id": 2543230025440316,
+            "layout": {
+                "height": 5,
+                "width": 12,
+                "x": 0,
+                "y": 5
+            }
+        },
+        {
+            "definition": {
+                "background_color": "vivid_blue",
+                "layout_type": "ordered",
+                "show_title": true,
+                "title": "Readiness",
+                "type": "group",
+                "widgets": [
+                    {
+                        "definition": {
+                            "background_color": "blue",
+                            "content": "This section shows whether manifest sources and cluster reconcilers are ready or suspended. ",
+                            "font_size": "14",
+                            "has_padding": true,
+                            "show_tick": false,
+                            "text_align": "center",
+                            "tick_edge": "left",
+                            "tick_pos": "50%",
+                            "type": "note",
+                            "vertical_align": "center"
+                        },
+                        "id": 7839169684041304,
+                        "layout": {
+                            "height": 1,
+                            "width": 12,
+                            "x": 0,
+                            "y": 0
+                        }
+                    },
+                    {
+                        "definition": {
+                            "has_search_bar": "auto",
+                            "requests": [
+                                {
+                                    "formulas": [
+                                        {
+                                            "alias": "Ready",
+                                            "cell_display_mode": "number",
+                                            "conditional_formats": [
+                                                {
+                                                    "comparator": ">=",
+                                                    "palette": "white_on_green",
+                                                    "value": 1
+                                                },
+                                                {
+                                                    "comparator": "<",
+                                                    "palette": "white_on_red",
+                                                    "value": 1
+                                                }
+                                            ],
+                                            "formula": "query1",
+                                            "limit": {
+                                                "count": 500,
+                                                "order": "desc"
+                                            }
+                                        },
+                                        {
+                                            "alias": "Suspended",
+                                            "cell_display_mode": "number",
+                                            "conditional_formats": [
+                                                {
+                                                    "comparator": ">",
+                                                    "palette": "white_on_red",
+                                                    "value": 0
+                                                },
+                                                {
+                                                    "comparator": "<=",
+                                                    "palette": "white_on_green",
+                                                    "value": 1
+                                                }
+                                            ],
+                                            "formula": "query2"
+                                        }
+                                    ],
+                                    "queries": [
+                                        {
+                                            "aggregator": "last",
+                                            "data_source": "metrics",
+                                            "name": "query1",
+                                            "query": "avg:fluxcd.gotk.reconcile.condition{status:true AND kind IN (helmchart,kustomization,helmrelease)} by {kind,namespace,name}"
+                                        },
+                                        {
+                                            "aggregator": "last",
+                                            "data_source": "metrics",
+                                            "name": "query2",
+                                            "query": "avg:fluxcd.gotk.suspend.status{kind IN (helmchart,kustomization,helmrelease)} by {kind,namespace,name}"
+                                        }
+                                    ],
+                                    "response_format": "scalar"
+                                }
+                            ],
+                            "title": "Cluster Reconciliation",
+                            "title_align": "left",
+                            "title_size": "16",
+                            "type": "query_table"
+                        },
+                        "id": 3600789162924586,
+                        "layout": {
+                            "height": 3,
+                            "width": 6,
+                            "x": 0,
+                            "y": 1
+                        }
+                    },
+                    {
+                        "definition": {
+                            "has_search_bar": "auto",
+                            "requests": [
+                                {
+                                    "formulas": [
+                                        {
+                                            "alias": "Ready",
+                                            "cell_display_mode": "number",
+                                            "conditional_formats": [
+                                                {
+                                                    "comparator": ">=",
+                                                    "palette": "white_on_green",
+                                                    "value": 1
+                                                },
+                                                {
+                                                    "comparator": "<",
+                                                    "palette": "white_on_red",
+                                                    "value": 1
+                                                }
+                                            ],
+                                            "formula": "query1",
+                                            "limit": {
+                                                "count": 500,
+                                                "order": "desc"
+                                            }
+                                        },
+                                        {
+                                            "alias": "Suspended",
+                                            "cell_display_mode": "number",
+                                            "conditional_formats": [
+                                                {
+                                                    "comparator": ">",
+                                                    "palette": "white_on_red",
+                                                    "value": 0
+                                                },
+                                                {
+                                                    "comparator": "<=",
+                                                    "palette": "white_on_green",
+                                                    "value": 1
+                                                }
+                                            ],
+                                            "formula": "query2"
+                                        }
+                                    ],
+                                    "queries": [
+                                        {
+                                            "aggregator": "last",
+                                            "data_source": "metrics",
+                                            "name": "query1",
+                                            "query": "avg:fluxcd.gotk.reconcile.condition{status:true AND kind IN (helmrepository,gitrepository,ocirepository)} by {kind,namespace,name}"
+                                        },
+                                        {
+                                            "aggregator": "last",
+                                            "data_source": "metrics",
+                                            "name": "query2",
+                                            "query": "avg:fluxcd.gotk.suspend.status{kind IN (helmrepository,gitrepository,ocirepository)} by {kind,namespace,name}"
+                                        }
+                                    ],
+                                    "response_format": "scalar"
+                                }
+                            ],
+                            "title": "Source Acquisition",
+                            "title_align": "left",
+                            "title_size": "16",
+                            "type": "query_table"
+                        },
+                        "id": 343510221773686,
+                        "layout": {
+                            "height": 3,
+                            "width": 6,
+                            "x": 6,
+                            "y": 1
+                        }
+                    }
+                ]
+            },
+            "id": 6806087993630108,
+            "layout": {
+                "height": 5,
+                "width": 12,
+                "x": 0,
+                "y": 10
+            }
+        },
+        {
+            "definition": {
+                "background_color": "vivid_blue",
+                "layout_type": "ordered",
+                "show_title": true,
+                "title": "Duration",
+                "type": "group",
+                "widgets": [
+                    {
+                        "definition": {
+                            "background_color": "blue",
+                            "content": "This section tracks how long it takes to acquire the source manifests and then reconcile cluster resources with these manifests.",
+                            "font_size": "14",
+                            "has_padding": true,
+                            "show_tick": false,
+                            "text_align": "center",
+                            "tick_edge": "left",
+                            "tick_pos": "50%",
+                            "type": "note",
+                            "vertical_align": "center"
+                        },
+                        "id": 7555744300438146,
+                        "layout": {
+                            "height": 1,
+                            "width": 12,
+                            "x": 0,
+                            "y": 0
+                        }
+                    },
+                    {
+                        "definition": {
+                            "legend_columns": [
+                                "avg",
+                                "min",
+                                "max",
+                                "value",
+                                "sum"
+                            ],
+                            "legend_layout": "auto",
+                            "requests": [
+                                {
+                                    "display_type": "line",
+                                    "formulas": [
+                                        {
+                                            "formula": "query1"
+                                        },
+                                        {
+                                            "formula": "query2"
+                                        },
+                                        {
+                                            "alias": "reconcile duration",
+                                            "formula": "query1 / query2"
+                                        }
+                                    ],
+                                    "queries": [
+                                        {
+                                            "data_source": "metrics",
+                                            "name": "query1",
+                                            "query": "avg:fluxcd.gotk.reconcile.duration.seconds.sum{kind IN (helmchart,kustomization,helmrelease)} by {name,kind}.as_count()"
+                                        },
+                                        {
+                                            "data_source": "metrics",
+                                            "name": "query2",
+                                            "query": "avg:fluxcd.gotk.reconcile.duration.seconds.count{kind IN (helmchart,kustomization,helmrelease)} by {name,kind}.as_count()"
+                                        }
+                                    ],
+                                    "response_format": "timeseries",
+                                    "style": {
+                                        "line_type": "solid",
+                                        "line_width": "normal",
+                                        "palette": "dog_classic"
+                                    }
+                                }
+                            ],
+                            "show_legend": true,
+                            "title": "Cluster Reconciliation",
+                            "title_align": "left",
+                            "title_size": "16",
+                            "type": "timeseries"
+                        },
+                        "id": 2174063851391706,
+                        "layout": {
+                            "height": 3,
+                            "width": 6,
+                            "x": 0,
+                            "y": 1
+                        }
+                    },
+                    {
+                        "definition": {
+                            "legend_columns": [
+                                "avg",
+                                "min",
+                                "max",
+                                "value",
+                                "sum"
+                            ],
+                            "legend_layout": "auto",
+                            "requests": [
+                                {
+                                    "display_type": "line",
+                                    "formulas": [
+                                        {
+                                            "formula": "query1"
+                                        },
+                                        {
+                                            "formula": "query2"
+                                        },
+                                        {
+                                            "alias": "reconcile duration",
+                                            "formula": "query1 / query2"
+                                        }
+                                    ],
+                                    "queries": [
+                                        {
+                                            "data_source": "metrics",
+                                            "name": "query1",
+                                            "query": "avg:fluxcd.gotk.reconcile.duration.seconds.sum{kind IN (helmrepository,gitrepository,ocirepository)} by {name,kind}.as_count()"
+                                        },
+                                        {
+                                            "data_source": "metrics",
+                                            "name": "query2",
+                                            "query": "avg:fluxcd.gotk.reconcile.duration.seconds.count{kind IN (helmrepository,gitrepository,ocirepository)} by {name,kind}.as_count()"
+                                        }
+                                    ],
+                                    "response_format": "timeseries",
+                                    "style": {
+                                        "line_type": "solid",
+                                        "line_width": "normal",
+                                        "palette": "dog_classic"
+                                    }
+                                }
+                            ],
+                            "show_legend": true,
+                            "title": "Source Acquisition",
+                            "title_align": "left",
+                            "title_size": "16",
+                            "type": "timeseries"
+                        },
+                        "id": 8440392220159016,
+                        "layout": {
+                            "height": 3,
+                            "width": 6,
+                            "x": 6,
+                            "y": 1
+                        }
+                    }
+                ]
+            },
+            "id": 81927768942716,
+            "layout": {
+                "height": 5,
+                "is_column_break": true,
+                "width": 12,
+                "x": 0,
+                "y": 15
+            }
+        },
+        {
+            "definition": {
+                "background_color": "vivid_blue",
+                "layout_type": "ordered",
+                "show_title": true,
+                "title": "Controller Runtimes ",
+                "type": "group",
+                "widgets": [
+                    {
+                        "definition": {
+                            "background_color": "blue",
+                            "content": "This section lets you drill deeper into the controller runtimes. Controllers are what flux uses to ensure consistent state between your manifests and your cluster.",
+                            "font_size": "14",
+                            "has_padding": true,
+                            "show_tick": false,
+                            "text_align": "center",
+                            "tick_edge": "left",
+                            "tick_pos": "50%",
+                            "type": "note",
+                            "vertical_align": "center"
+                        },
+                        "id": 5044765797073056,
+                        "layout": {
+                            "height": 1,
+                            "width": 12,
+                            "x": 0,
+                            "y": 0
+                        }
+                    },
+                    {
+                        "definition": {
+                            "legend_columns": [
+                                "avg",
+                                "min",
+                                "max",
+                                "value",
+                                "sum"
+                            ],
+                            "legend_layout": "auto",
+                            "requests": [
+                                {
+                                    "display_type": "bars",
+                                    "formulas": [
+                                        {
+                                            "formula": "query1"
+                                        }
+                                    ],
+                                    "queries": [
+                                        {
+                                            "data_source": "metrics",
+                                            "name": "query1",
+                                            "query": "max:fluxcd.controller.runtime.max.concurrent.reconciles{$controller,$namespace} by {controller}"
+                                        }
+                                    ],
+                                    "response_format": "timeseries",
+                                    "style": {
+                                        "line_type": "solid",
+                                        "line_width": "normal",
+                                        "palette": "dog_classic"
+                                    }
+                                }
+                            ],
+                            "show_legend": false,
+                            "title": "Concurrent Reconciles",
+                            "title_align": "left",
+                            "title_size": "16",
+                            "type": "timeseries"
+                        },
+                        "id": 1687981553232298,
+                        "layout": {
+                            "height": 3,
+                            "width": 6,
+                            "x": 0,
+                            "y": 1
+                        }
+                    },
+                    {
+                        "definition": {
+                            "legend_columns": [
+                                "avg",
+                                "min",
+                                "max",
+                                "value",
+                                "sum"
+                            ],
+                            "legend_layout": "auto",
+                            "requests": [
+                                {
+                                    "display_type": "bars",
+                                    "formulas": [
+                                        {
+                                            "alias": " ",
+                                            "formula": "query1"
+                                        }
+                                    ],
+                                    "queries": [
+                                        {
+                                            "data_source": "metrics",
+                                            "name": "query1",
+                                            "query": "sum:fluxcd.controller.runtime.reconcile.count{$controller,$namespace} by {controller}.as_count()"
+                                        }
+                                    ],
+                                    "response_format": "timeseries",
+                                    "style": {
+                                        "line_type": "solid",
+                                        "line_width": "normal",
+                                        "palette": "dog_classic"
+                                    }
+                                }
+                            ],
+                            "show_legend": true,
+                            "title": "Reconciliation Total",
+                            "title_align": "left",
+                            "title_size": "16",
+                            "type": "timeseries"
+                        },
+                        "id": 4456771885836550,
+                        "layout": {
+                            "height": 3,
+                            "width": 6,
+                            "x": 6,
+                            "y": 1
+                        }
+                    },
+                    {
+                        "definition": {
+                            "legend_columns": [
+                                "avg",
+                                "min",
+                                "max",
+                                "value",
+                                "sum"
+                            ],
+                            "legend_layout": "auto",
+                            "requests": [
+                                {
+                                    "display_type": "bars",
+                                    "formulas": [
+                                        {
+                                            "formula": "query1"
+                                        }
+                                    ],
+                                    "queries": [
+                                        {
+                                            "data_source": "metrics",
+                                            "name": "query1",
+                                            "query": "max:fluxcd.controller.runtime.reconcile.errors.count{$controller,$namespace} by {controller}.as_count()"
+                                        }
+                                    ],
+                                    "response_format": "timeseries",
+                                    "style": {
+                                        "line_type": "solid",
+                                        "line_width": "normal",
+                                        "palette": "purple"
+                                    }
+                                }
+                            ],
+                            "show_legend": true,
+                            "title": "Reconcile Errors",
+                            "title_align": "left",
+                            "title_size": "16",
+                            "type": "timeseries"
+                        },
+                        "id": 7368842486754292,
+                        "layout": {
+                            "height": 3,
+                            "width": 6,
+                            "x": 0,
+                            "y": 4
+                        }
+                    },
+                    {
+                        "definition": {
+                            "legend_columns": [
+                                "avg",
+                                "min",
+                                "max",
+                                "value",
+                                "sum"
+                            ],
+                            "legend_layout": "auto",
+                            "requests": [
+                                {
+                                    "display_type": "bars",
+                                    "formulas": [
+                                        {
+                                            "alias": " ",
+                                            "formula": "query1"
+                                        }
+                                    ],
+                                    "queries": [
+                                        {
+                                            "data_source": "metrics",
+                                            "name": "query1",
+                                            "query": "max:fluxcd.controller.runtime.active.workers{$controller,$namespace} by {controller}.rollup(max)"
+                                        }
+                                    ],
+                                    "response_format": "timeseries",
+                                    "style": {
+                                        "line_type": "solid",
+                                        "line_width": "normal",
+                                        "palette": "dog_classic"
+                                    }
+                                }
+                            ],
+                            "show_legend": true,
+                            "title": "Active Workers",
+                            "title_align": "left",
+                            "title_size": "16",
+                            "type": "timeseries"
+                        },
+                        "id": 6508247970961016,
+                        "layout": {
+                            "height": 3,
+                            "width": 6,
+                            "x": 6,
+                            "y": 4
+                        }
+                    },
+                    {
+                        "definition": {
+                            "legend_columns": [
+                                "avg",
+                                "min",
+                                "max",
+                                "value",
+                                "sum"
+                            ],
+                            "legend_layout": "auto",
+                            "requests": [
+                                {
+                                    "display_type": "bars",
+                                    "formulas": [
+                                        {
+                                            "alias": "Controller Runtime",
+                                            "formula": "query1"
+                                        }
+                                    ],
+                                    "queries": [
+                                        {
+                                            "data_source": "metrics",
+                                            "name": "query1",
+                                            "query": "sum:fluxcd.controller.runtime.reconcile.time.seconds.sum{$controller,$namespace} by {controller}.as_count()"
+                                        }
+                                    ],
+                                    "response_format": "timeseries",
+                                    "style": {
+                                        "line_type": "solid",
+                                        "line_width": "normal",
+                                        "palette": "semantic"
+                                    }
+                                }
+                            ],
+                            "show_legend": true,
+                            "title": "Reconciliation Length (sum)",
+                            "title_align": "left",
+                            "title_size": "16",
+                            "type": "timeseries"
+                        },
+                        "id": 7058430792271476,
+                        "layout": {
+                            "height": 3,
+                            "width": 6,
+                            "x": 0,
+                            "y": 7
+                        }
+                    },
+                    {
+                        "definition": {
+                            "legend_columns": [
+                                "avg",
+                                "min",
+                                "max",
+                                "value",
+                                "sum"
+                            ],
+                            "legend_layout": "auto",
+                            "requests": [
+                                {
+                                    "display_type": "bars",
+                                    "formulas": [
+                                        {
+                                            "alias": " ",
+                                            "formula": "query1"
+                                        }
+                                    ],
+                                    "queries": [
+                                        {
+                                            "data_source": "metrics",
+                                            "name": "query1",
+                                            "query": "max:fluxcd.controller.runtime.reconcile.time.seconds.count{$controller,$namespace} by {controller}.as_count().rollup(max)"
+                                        }
+                                    ],
+                                    "response_format": "timeseries",
+                                    "style": {
+                                        "line_type": "solid",
+                                        "line_width": "normal",
+                                        "palette": "dog_classic"
+                                    }
+                                }
+                            ],
+                            "show_legend": true,
+                            "title": "Reconciliation Length (count)",
+                            "title_align": "left",
+                            "title_size": "16",
+                            "type": "timeseries"
+                        },
+                        "id": 5386014953102600,
+                        "layout": {
+                            "height": 3,
+                            "width": 6,
+                            "x": 6,
+                            "y": 7
+                        }
+                    }
+                ]
+            },
+            "id": 851940491562172,
+            "layout": {
+                "height": 11,
+                "width": 12,
+                "x": 0,
+                "y": 20
+            }
+        }
+    ]
+}

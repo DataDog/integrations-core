@@ -25,7 +25,6 @@
     "homepage": "https://www.datadoghq.com",
     "sales_email": "info@datadoghq.com"
   },
-  "oauth": {},
   "assets": {
     "integration": {
       "source_type_name": "TokuMX",
@@ -43,7 +42,9 @@
       "service_checks": {
         "metadata_path": "assets/service_checks.json"
       },
-      "process_signatures": []
+      "process_signatures": [],
+      "source_type_id": 74,
+      "auto_install": true
     },
     "dashboards": {
       "tokumx": "assets/dashboards/tokumx_dashboard.json"

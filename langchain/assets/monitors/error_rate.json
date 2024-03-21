@@ -2,11 +2,11 @@
   "version": 2,
   "created_at": "2023-07-21",
   "last_updated_at": "2023-07-21",
-  "title": "LangChain service has a high error rate",
+  "title": "Error rate is high",
   "tags": [
     "integration:langchain"
   ],
-  "description": "Notify your team when requests made with LangChain have increased error rates",
+  "description": "LangChain requests are captured by Datadog's APM generated trace metrics. This monitor tracks the error rate of LangChain requests, alerting if errors exceed 10% of total requests in the last 5 minutes.",
   "definition": {
     "message": "{{#is_alert}}\n\nALERT: The error rate of your LangChain requests is higher than normal. The error rate is currently over {{value}} errors per request.\n{{/is_alert}}",
     "name": "[LangChain] LangChain service has a high error rate",

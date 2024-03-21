@@ -2,6 +2,16 @@
 
 <!-- towncrier release notes start -->
 
+## 2.0.0 / 2024-01-05 / Agent 7.51.0
+
+***Changed***:
+
+* Add missing config_models files and update the base check version ([#16299](https://github.com/DataDog/integrations-core/pull/16299))
+
+***Added***:
+
+* Bump the Python version from py3.9 to py3.11 ([#15997](https://github.com/DataDog/integrations-core/pull/15997))
+
 ## 1.13.2 / 2023-07-10 / Agent 7.47.0
 
 ***Fixed***:

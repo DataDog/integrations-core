@@ -24,7 +24,6 @@
     "homepage": "https://www.datadoghq.com",
     "sales_email": "info@datadoghq.com"
   },
-  "oauth": {},
   "assets": {
     "integration": {
       "source_type_name": "Yarn",
@@ -45,7 +44,9 @@
       "process_signatures": [
         "java org.apache.hadoop.yarn.server.resourcemanager.ResourceManager",
         "java org.apache.hadoop.yarn.server.nodemanager.NodeManager"
-      ]
+      ],
+      "source_type_id": 134,
+      "auto_install": true
     },
     "dashboards": {
       "yarn": "assets/dashboards/yarn_dashboard.json",

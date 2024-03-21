@@ -25,7 +25,6 @@
     "homepage": "https://www.datadoghq.com",
     "sales_email": "info@datadoghq.com"
   },
-  "oauth": {},
   "assets": {
     "integration": {
       "source_type_name": "MongoDB",
@@ -43,7 +42,11 @@
       "service_checks": {
         "metadata_path": "assets/service_checks.json"
       },
-      "process_signatures": ["mongod"]
+      "process_signatures": [
+        "mongod"
+      ],
+      "source_type_id": 19,
+      "auto_install": true
     },
     "dashboards": {
       "mongodb": "assets/dashboards/overview.json"

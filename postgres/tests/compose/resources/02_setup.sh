@@ -85,8 +85,19 @@ psql -v ON_ERROR_STOP=1 --username "$POSTGRES_USER" "$DBNAME" <<-'EOSQL'
     RETURNS NULL ON NULL INPUT
     SECURITY DEFINER;
     ALTER FUNCTION datadog.explain_statement_noaccess(l_query TEXT, OUT explain JSON) OWNER TO datadog;
-EOSQL
 
+    -- create dummy function to be executed to populate function metrics
+    CREATE OR REPLACE FUNCTION dummy_function()
+    RETURNS text AS
+    $$
+    BEGIN
+        RETURN 'Hello, world!';
+    END;
+    $$
+    LANGUAGE 'plpgsql'
+    SECURITY DEFINER;
+    ALTER FUNCTION dummy_function() OWNER TO datadog;
+EOSQL
 done
 
 psql -v ON_ERROR_STOP=1 --username "$POSTGRES_USER" dogs_nofunc <<-'EOSQL'

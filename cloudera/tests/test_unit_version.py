@@ -148,7 +148,10 @@ def test_version(
     with expected_exception, mock.patch(
         'datadog_checks.cloudera.client.cm_client.CmClient.get_version',
         side_effect=[cloudera_version],
-    ), mock.patch('datadog_checks.cloudera.client.cm_client.CmClient.read_clusters', return_value=[],), mock.patch(
+    ), mock.patch(
+        'datadog_checks.cloudera.client.cm_client.CmClient.read_clusters',
+        return_value=[],
+    ), mock.patch(
         'datadog_checks.cloudera.client.cm_client.CmClient.read_events',
         return_value=[],
     ):

@@ -1218,19 +1218,8 @@ class AgentCheck(object):
                     from ..utils.agent.debug import enter_pdb
 
                     enter_pdb(self.check, line=self.init_config['set_breakpoint'], args=(instance,))
-                elif 'profile_memory' in self.init_config or (
-                    datadog_agent.tracemalloc_enabled() and should_profile_memory(datadog_agent, self.name)
-                ):
-                    from ..utils.agent.memory import profile_memory
-
-                    metrics = profile_memory(
-                        self.check, self.init_config, namespaces=self.check_id.split(':', 1), args=(instance,)
-                    )
-
-                    tags = self.get_debug_metric_tags()
-                    tags.extend(instance.get('__memory_profiling_tags', []))
-                    for m in metrics:
-                        self.gauge(m.name, m.value, tags=tags, raw=True)
+                elif self.should_profile_memory():
+                    self.profile_memory(self.check, self.init_config, args=(instance,))
                 else:
                     self.check(instance)
 
@@ -1361,3 +1350,31 @@ class AgentCheck(object):
         tags = ['check_name:{}'.format(self.name), 'check_version:{}'.format(self.check_version)]
         tags.extend(self.instance.get('tags', []))
         return tags
+
+    def get_memory_profile_tags(self):
+        # type: () -> List[str]
+        tags = self.get_debug_metric_tags()
+        tags.extend(self.instance.get('__memory_profiling_tags', []))
+        return tags
+
+    def should_profile_memory(self):
+        # type: () -> bool
+        return 'profile_memory' in self.init_config or (
+            datadog_agent.tracemalloc_enabled() and should_profile_memory(datadog_agent, self.name)
+        )
+
+    def profile_memory(self, func, namespaces=None, args=(), kwargs=None, extra_tags=None):
+        # type: (Callable[..., Any], Optional[Sequence[str]], Sequence[Any], Optional[Dict[str, Any]], Optional[List[str]]) -> None  # noqa: E501
+        from ..utils.agent.memory import profile_memory
+
+        if namespaces is None:
+            namespaces = self.check_id.split(':', 1)
+
+        tags = self.get_memory_profile_tags()
+        if extra_tags is not None:
+            tags.extend(extra_tags)
+
+        metrics = profile_memory(func, self.init_config, namespaces=namespaces, args=args, kwargs=kwargs)
+
+        for m in metrics:
+            self.gauge(m.name, m.value, tags=tags, raw=True)

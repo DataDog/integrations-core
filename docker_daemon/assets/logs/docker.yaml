@@ -1,5 +1,6 @@
 id: docker
 metric_id: docker
+backend_only: false
 facets:
 pipeline:
   type: pipeline

@@ -1,41 +1,42 @@
 id: proxysql
 metric_id: proxysql
+backend_only: false
 facets:
-  - name: Database
-    source: log
+  - groups:
+      - Database
+    name: Database
     path: db.instance
-    groups:
-      - Database
-  - name: Statement
     source: log
+  - groups:
+      - Database
+    name: Statement
     path: db.statement
-    groups:
-      - Database
-  - name: User
     source: log
+  - groups:
+      - Database
+    name: User
     path: db.user
-    groups:
-      - Database
-  - name: Duration
     source: log
+  - facetType: range
+    groups:
+      - Measure
+    name: Duration
     path: duration
+    source: log
     type: double
-    facetType: range
     unit:
       family: time
       name: nanosecond
-    groups:
-      - Measure
-  - name: Logger Name
-    source: log
-    path: logger.name
-    groups:
+  - groups:
       - Source Code
-  - name: Client IP
+    name: Logger Name
+    path: logger.name
     source: log
-    path: network.client.ip
-    groups:
+  - groups:
       - Web Access
+    name: Client IP
+    path: network.client.ip
+    source: log
 pipeline:
   type: pipeline
   name: ProxySQL
@@ -62,8 +63,8 @@ pipeline:
           stdout %{data:proxysql_service}\s+%{_revision}\s+--\s+%{notSpace:logger.name}\s+--\s+%{_textDate}
       samples:
         - "2020-04-06 08:59:07 MySQL_Monitor.cpp:960:monitor_read_only_thread(): [ERROR] Timeout on read_only check for db:3306 after 2ms. Unable to create a connection. If the server is overload, increase mysql-monitor_connect_timeout. Error: timeout on creating new connection: Can't connect to MySQL server on 'db' (115)."
-        - '2020-04-06 08:59:08 [INFO] New mysql_aws_aurora_hostgroups table'
-        - "Standard MySQL Authentication rev. 0.2.0902 -- MySQL_Authentication.cpp -- Tue Oct 15 17:03:55 2019"
+        - 2020-04-06 08:59:08 [INFO] New mysql_aws_aurora_hostgroups table
+        - Standard MySQL Authentication rev. 0.2.0902 -- MySQL_Authentication.cpp -- Tue Oct 15 17:03:55 2019
     - type: grok-parser
       # Audit logs have a duration field that specify a unit
       name: '[audit log] Format duration field unit and move into duration_us'
@@ -107,7 +108,7 @@ pipeline:
           logger %{notSpace:logger.name}\:%{number:logger.line_number}\:%{notSpace:logger.method_name}
         supportRules: ''
       samples:
-        -  MySQL_Thread.cpp:2652:~MySQL_Thread()
+        - MySQL_Thread.cpp:2652:~MySQL_Thread()
     - type: attribute-remapper
       name: Map `schemaname` to `db.instance`
       enabled: true

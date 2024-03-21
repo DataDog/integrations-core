@@ -170,34 +170,35 @@ def start(
 
 
 def _get_agent_env_vars(org_config, metadata, extra_env_vars, dogstatsd):
+    from ddev.e2e.agent.constants import AgentEnvVars
     from ddev.e2e.constants import DEFAULT_DOGSTATSD_PORT, E2EEnvVars, E2EMetadata
 
     # Use the environment variables defined by tests as defaults so tooling can override them
     env_vars: dict[str, str] = metadata.get('env_vars', {}).copy()
 
     if api_key := org_config.get('api_key'):
-        env_vars['DD_API_KEY'] = api_key
+        env_vars[AgentEnvVars.API_KEY] = api_key
 
     if site := org_config.get('site'):
-        env_vars['DD_SITE'] = site
+        env_vars[AgentEnvVars.SITE] = site
 
     # Custom core Agent intake
     if dd_url := org_config.get('dd_url'):
-        env_vars['DD_DD_URL'] = dd_url
+        env_vars[AgentEnvVars.URL] = dd_url
 
     # Custom logs Agent intake
     if log_url := org_config.get('log_url'):
-        env_vars['DD_LOGS_CONFIG_DD_URL'] = log_url
+        env_vars[AgentEnvVars.LOGS_URL] = log_url
 
     # TODO: remove the CLI flag and exclusively rely on the metadata flag
     if metadata.get('dogstatsd') or dogstatsd:
-        env_vars['DD_DOGSTATSD_PORT'] = str(DEFAULT_DOGSTATSD_PORT)
-        env_vars['DD_DOGSTATSD_NON_LOCAL_TRAFFIC'] = 'true'
-        env_vars['DD_DOGSTATSD_METRICS_STATS_ENABLE'] = 'true'
+        env_vars[AgentEnvVars.DOGSTATSD_PORT] = str(DEFAULT_DOGSTATSD_PORT)
+        env_vars[AgentEnvVars.DOGSTATSD_NON_LOCAL_TRAFFIC] = 'true'
+        env_vars[AgentEnvVars.DOGSTATSD_METRICS_STATS] = 'true'
 
     # Enable logs Agent by default if the environment is mounting logs
     if any(ev.startswith(E2EEnvVars.LOGS_DIR_PREFIX) for ev in metadata.get(E2EMetadata.ENV_VARS, {})):
-        env_vars.setdefault('DD_LOGS_ENABLED', 'true')
+        env_vars.setdefault(AgentEnvVars.LOGS_ENABLED, 'true')
 
     env_vars.update(ev.split('=', maxsplit=1) for ev in extra_env_vars)
 

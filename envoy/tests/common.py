@@ -61,6 +61,7 @@ PROMETHEUS_METRICS = [
     "cluster.http2.trailers.count",
     "cluster.http2.tx_flush_timeout.count",
     "cluster.http2.tx_reset.count",
+    "cluster.http2.stream_refused_errors.count",
     "cluster.internal.upstream_rq.count",
     "cluster.internal.upstream_rq_completed.count",
     "cluster.internal.upstream_rq_xx.count",
@@ -317,6 +318,7 @@ PROMETHEUS_METRICS = [
     "server.version",
     "server.watchdog_mega_miss.count",
     "server.watchdog_miss.count",
+    "server.dropped_stat_flushes.count",
     "vhost.vcluster.upstream_rq_retry.count",
     "vhost.vcluster.upstream_rq_retry_limit_exceeded.count",
     "vhost.vcluster.upstream_rq_retry_overflow.count",
@@ -374,6 +376,13 @@ PROMETHEUS_METRICS = [
     "vhost.vcluster.upstream_rq.count",
 ]
 
+CONNECTION_LIMIT_METRICS = [
+    "connection_limit.active_connections",
+    "connection_limit.limited_connections.count",
+]
+
+CONNECTION_LIMIT_STAT_PREFIX_TAG = 'stat_prefix:ingress_http'
+
 LOCAL_RATE_LIMIT_METRICS = [
     "http.local_rate_limit_enabled.count",
     "http.local_rate_limit_enforced.count",
@@ -381,9 +390,18 @@ LOCAL_RATE_LIMIT_METRICS = [
     "http.local_rate_limit_ok.count",
 ]
 
-CONNECT_STATE_METRIC = ['control_plane.connected_state']
-
 RATE_LIMIT_STAT_PREFIX_TAG = 'stat_prefix:http_local_rate_limiter'
+
+CLUSTER_AND_LISTENER_SSL_METRICS = [
+    "cluster.client_ssl_socket_factory.downstream_context_secrets_not_ready.count",
+    "cluster.client_ssl_socket_factory.ssl_context_update_by_sds.count",
+    "cluster.client_ssl_socket_factory.upstream_context_secrets_not_ready.count",
+    "listener.server_ssl_socket_factory.downstream_context_secrets_not_ready.count",
+    "listener.server_ssl_socket_factory.ssl_context_update_by_sds.count",
+    "listener.server_ssl_socket_factory.upstream_context_secrets_not_ready.count",
+]
+
+CONNECT_STATE_METRIC = ['control_plane.connected_state']
 
 FLAKY_METRICS = [
     "listener.downstream_cx_active",
@@ -391,8 +409,15 @@ FLAKY_METRICS = [
     "cluster.internal.upstream_rq.count",
     "cluster.internal.upstream_rq_completed.count",
     "cluster.internal.upstream_rq_xx.count",
-    "cluster.http2.keepalive_timeout.count",
+    "cluster.external.upstream_rq.count",
+    "cluster.external.upstream_rq_time.bucket",
+    "cluster.external.upstream_rq_time.count",
+    "cluster.external.upstream_rq_time.sum",
+    "cluster.upstream_rq_time.bucket",
+    "cluster.upstream_rq_time.count",
+    "cluster.upstream_rq_time.sum",
     "cluster.upstream_rq_xx.count",
+    "cluster.http2.keepalive_timeout.count",
     "access_logs.grpc_access_log.logs_written.count",
     "access_logs.grpc_access_log.logs_dropped.count",
 ]
@@ -430,6 +455,7 @@ MOCKED_PROMETHEUS_METRICS = [
     "cluster.http2.rx_reset.count",
     "cluster.http2.trailers.count",
     "cluster.http2.tx_reset.count",
+    "cluster.http2.stream_refused_errors.count",
     "cluster.internal.upstream_rq.count",
     "cluster.internal.upstream_rq_completed.count",
     "cluster.internal.upstream_rq_xx.count",
@@ -689,6 +715,7 @@ MOCKED_PROMETHEUS_METRICS = [
     "server.version",
     "server.watchdog_mega_miss.count",
     "server.watchdog_miss.count",
+    "server.dropped_stat_flushes.count",
     "vhost.vcluster.upstream_rq.count",
     "vhost.vcluster.upstream_rq_retry.count",
     "vhost.vcluster.upstream_rq_retry_limit_exceeded.count",
@@ -711,6 +738,8 @@ MOCKED_PROMETHEUS_METRICS = [
     "tcp.on_demand_cluster_timeout.count",
     "tcp.upstream_flush.count",
     "tcp.upstream_flush_active",
+    "connection_limit.active_connections",
+    "connection_limit.limited_connections.count",
 ]
 
 

@@ -248,6 +248,11 @@ instances:
     ##     client_secret (required): The client secret.
     ##     basic_auth: Whether the provider expects credentials to be transmitted in
     ##                 an HTTP Basic Auth header. The default is: false
+    ##     options: Mapping of additional options to pass to the provider, such as the audience
+    ##              or the scope. For example:
+    ##                 options:
+    ##                   audience: https://example.com
+    ##                   scope: read:example
     ##
     ## The available writers are:
     ##
@@ -432,6 +437,7 @@ instances:
     ## @param disable_generic_tags - boolean - optional - default: false
     ## Generic tags such as `cluster` will be replaced by <integration_name>_cluster to avoid
     ## getting mixed with other integration tags.
+    ## Note that this is only relevant to service check submissions. Metrics do not include any generic tags.
     #
     disable_generic_tags: true
 

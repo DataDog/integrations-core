@@ -2,11 +2,11 @@
   "version": 2,
   "created_at": "2023-04-13",
   "last_updated_at": "2023-04-13",
-  "title": "Temporal persistence latency is elevated",
+  "title": "Persistence latency is elevated",
   "tags": [
     "integration:temporal"
   ],
-  "description": "Get notified when the persistence's latency is elevated.",
+  "description": "Persistence store is a database used by Temporal Services to persist events generated and processed in your Temporal Cluster and SDK. This monitor tracks the latency of the Persistence service to avoid performance issues or slow data access times.",
   "definition": {
     "message": "The latency for the Temporal persistence is elevated ({{ value }}).",
     "name": "Temporal persistence latency is elevated",

@@ -8,6 +8,8 @@ metadata:
     fields:
       vendor:
         value: "cyberpower"
+      type:
+        value: "PDU"
 
 metrics:
   - MIB: CPS-MIB

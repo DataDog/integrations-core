@@ -13,6 +13,7 @@
     "media": [],
     "classifier_tags": [
       "Category::Log Collection",
+      "Category::Kubernetes",
       "Supported OS::Linux",
       "Supported OS::Windows",
       "Supported OS::macOS"
@@ -43,7 +44,9 @@
       ],
       "service_checks": {
         "metadata_path": "assets/service_checks.json"
-      }
+      },
+      "source_type_id": 10352,
+      "auto_install": true
     },
     "monitors": {
       "cluster_operate_resource_state": "assets/monitors/cluster_operator_resource.json",
@@ -61,6 +64,5 @@
     "name": "Datadog",
     "homepage": "https://www.datadoghq.com",
     "sales_email": "info@datadoghq.com"
-  },
-  "oauth": {}
+  }
 }
