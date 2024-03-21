@@ -85,6 +85,7 @@ def test_check(dd_run_check, aggregator, instance, mock_http_response):
 
     aggregator.assert_all_metrics_covered()
     aggregator.assert_metrics_using_metadata(get_metadata_metrics())
+    aggregator.assert_service_check('argo_workflows.openmetrics.health', ArgoWorkflowsCheck.OK)
     assert_service_checks(aggregator)
 
 
