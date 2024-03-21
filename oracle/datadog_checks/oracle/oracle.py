@@ -55,8 +55,8 @@ class Oracle(AgentCheck):
         instance_loader = instance.get("loader", init_config_loader)
         if instance_loader != "python":
             raise SkipInstanceError(
-                'Oracle integration written in Python is deprecated. ' \
-                'Set `loader = core` in the configuration file to avoid this error. ' \
+                'Oracle integration written in Python is deprecated. '
+                'Set `loader = core` in the configuration file to avoid this error. '
                 'Loading the latest Oracle check now.'
             )
 
