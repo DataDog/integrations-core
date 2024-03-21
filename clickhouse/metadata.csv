@@ -42,7 +42,6 @@ clickhouse.background_pool.distributed.task.active,gauge,,task,,Number of active
 clickhouse.background_pool.distributed.task.limit,gauge,,,,Limit on number of tasks in BackgroundDistributedSchedulePool,0,clickhouse,,
 clickhouse.background_pool.fetches.task.active,gauge,,task,,Number of active tasks in BackgroundFetchesPool,0,clickhouse,,
 clickhouse.background_pool.fetches.task.limit,gauge,,,,Limit on number of simultaneous fetches in an associated background pool,0,clickhouse,,
-clickhouse.background_pool.merges.task.active,gauge,,,,Number of active merges and mutations in an associated background pool,0,clickhouse,,
 clickhouse.background_pool.merges.task.active,gauge,,task,,Number of active merges and mutations in an associated background pool,0,clickhouse,,
 clickhouse.background_pool.merges.task.limit,gauge,,,,Limit on number of active merges and mutations in an associated background pool,0,clickhouse,,
 clickhouse.background_pool.message_broker.task.active,gauge,,task,,Number of active tasks in BackgroundProcessingPool for message streaming,0,clickhouse,,
