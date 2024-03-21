@@ -89,7 +89,7 @@ def test_e2e_mongo_auth(dd_agent_check, instance_authdb):
 @pytest.mark.e2e
 def test_e2e_mongo_tls(dd_agent_check):
     instance = {
-        'hosts': ['{}:{}'.format(HOST, PORT1)],
+        'hosts': [f'{HOST}:{PORT1}'],
         'database': 'test',
         'tls': True,
         'tls_allow_invalid_certificates': True,

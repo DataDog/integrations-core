@@ -18,7 +18,7 @@ def _assert_metrics(aggregator, metrics_categories, additional_tags=None):
     if additional_tags is None:
         additional_tags = []
     for cat in metrics_categories:
-        with open(os.path.join(HERE, "results", "metrics-{}.json".format(cat)), 'r') as f:
+        with open(os.path.join(HERE, "results", f"metrics-{cat}.json"), 'r') as f:
             for metric in json.load(f):
                 aggregator.assert_metric(
                     metric['name'],
@@ -594,7 +594,7 @@ def test_db_names_missing_existent_database(check, instance_integration, aggrega
 @pytest.mark.usefixtures('dd_environment')
 def test_mongod_auth_ok(check, dd_run_check, aggregator):
     instance = {
-        'hosts': ['{}:{}'.format(HOST, PORT1)],
+        'hosts': [f'{HOST}:{PORT1}'],
         'username': 'testUser',
         'password': 'testPass',
         'options': {'authSource': 'authDB'},
@@ -615,7 +615,7 @@ def test_mongod_auth_ok(check, dd_run_check, aggregator):
 )
 def test_mongod_bad_auth(check, dd_run_check, aggregator, username, password):
     instance = {
-        'hosts': ['{}:{}'.format(HOST, PORT1)],
+        'hosts': [f'{HOST}:{PORT1}'],
         'username': username,
         'password': password,
         'options': {'authSource': 'authDB'},
@@ -630,11 +630,11 @@ def test_mongod_bad_auth(check, dd_run_check, aggregator, username, password):
 @pytest.mark.usefixtures('dd_environment')
 def test_mongod_tls_ok(check, dd_run_check, aggregator):
     instance = {
-        'hosts': ['{}:{}'.format(HOST, PORT1)],
+        'hosts': [f'{HOST}:{PORT1}'],
         'tls': True,
         'tls_allow_invalid_certificates': True,
-        'tls_certificate_key_file': '{}/client1.pem'.format(TLS_CERTS_FOLDER),
-        'tls_ca_file': '{}/ca.pem'.format(TLS_CERTS_FOLDER),
+        'tls_certificate_key_file': f'{TLS_CERTS_FOLDER}/client1.pem',
+        'tls_ca_file': f'{TLS_CERTS_FOLDER}/ca.pem',
     }
     mongo_check = check(instance)
     dd_run_check(mongo_check)
@@ -645,11 +645,11 @@ def test_mongod_tls_ok(check, dd_run_check, aggregator):
 @pytest.mark.usefixtures('dd_environment')
 def test_mongod_tls_fail(check, dd_run_check, aggregator):
     instance = {
-        'hosts': ['{}:{}'.format(HOST, PORT1)],
+        'hosts': [f'{HOST}:{PORT1}'],
         'tls': True,
         'tls_allow_invalid_certificates': True,
-        'tls_certificate_key_file': '{}/fail.pem'.format(TLS_CERTS_FOLDER),
-        'tls_ca_file': '{}/ca.pem'.format(TLS_CERTS_FOLDER),
+        'tls_certificate_key_file': f'{TLS_CERTS_FOLDER}/fail.pem',
+        'tls_ca_file': f'{TLS_CERTS_FOLDER}/ca.pem',
     }
     mongo_check = check(instance)
     with pytest.raises(Exception, match=("pymongo.errors.ConfigurationError: Private key doesn't match certificate")):

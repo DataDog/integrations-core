@@ -263,12 +263,14 @@
                             "title": "File Mime Types",
                             "title_size": "16",
                             "title_align": "left",
+                            "time": {},
                             "requests": [
                                 {
                                     "formulas": [
                                         {
                                             "formula": "query1",
                                             "limit": {
+                                                "count": 500,
                                                 "order": "desc"
                                             }
                                         }
@@ -294,7 +296,7 @@
                                                 }
                                             ],
                                             "search": {
-                                                "query": "source:zeek service:intel $Host"
+                                                "query": "source:zeek service:intel @file_mime_type:* $Host"
                                             },
                                             "storage": "hot"
                                         }
@@ -346,19 +348,19 @@
                                             "width": "auto"
                                         },
                                         {
-                                            "field": "zeek.orig_h",
+                                            "field": "network.client.ip",
                                             "width": "auto"
                                         },
                                         {
-                                            "field": "zeek.orig_p",
+                                            "field": "network.client.port",
                                             "width": "auto"
                                         },
                                         {
-                                            "field": "zeek.resp_h",
+                                            "field": "network.destination.ip",
                                             "width": "auto"
                                         },
                                         {
-                                            "field": "zeek.resp_p",
+                                            "field": "network.destination.port",
                                             "width": "auto"
                                         },
                                         {
@@ -913,19 +915,19 @@
                                             "width": "auto"
                                         },
                                         {
-                                            "field": "zeek.orig_h",
+                                            "field": "network.client.ip",
                                             "width": "auto"
                                         },
                                         {
-                                            "field": "zeek.orig_p",
+                                            "field": "network.client.port",
                                             "width": "auto"
                                         },
                                         {
-                                            "field": "zeek.resp_h",
+                                            "field": "network.destination.ip",
                                             "width": "auto"
                                         },
                                         {
-                                            "field": "zeek.resp_p",
+                                            "field": "network.destination.port",
                                             "width": "auto"
                                         },
                                         {

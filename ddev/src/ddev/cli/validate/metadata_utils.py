@@ -9,6 +9,19 @@ OPTIONAL_HEADERS = {'description', 'interval', 'unit_name', 'per_unit_name', 'sh
 
 ALL_HEADERS = REQUIRED_HEADERS | OPTIONAL_HEADERS
 
+ORDERED_HEADERS = [
+    "metric_name",
+    "metric_type",
+    "interval",
+    "unit_name",
+    "per_unit_name",
+    "description",
+    "orientation",
+    "integration",
+    "short_name",
+    "curated_metric",
+]
+
 VALID_METRIC_TYPE = {'count', 'gauge', 'rate'}
 
 VALID_ORIENTATION = {'0', '1', '-1'}

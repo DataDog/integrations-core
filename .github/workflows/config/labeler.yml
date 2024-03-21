@@ -91,6 +91,8 @@ integration/cisco_aci:
 - cisco_aci/**/*
 integration/cisco_duo:
 - cisco_duo/**/*
+integration/cisco_secure_firewall:
+- cisco_secure_firewall/**/*
 integration/cisco_umbrella_dns:
 - cisco_umbrella_dns/**/*
 integration/citrix_hypervisor:

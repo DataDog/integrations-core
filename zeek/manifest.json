@@ -55,6 +55,7 @@
     "classifier_tags": [
       "Supported OS::Linux",
       "Supported OS::macOS",
+      "Category::Log Collection",
       "Category::Security",
       "Category::Network",
       "Offering::Integration",
@@ -88,6 +89,7 @@
       "Zeek - Network Observations": "assets/dashboards/zeek_network_observations.json",
       "Zeek - Miscellaneous": "assets/dashboards/zeek_miscellaneous.json",
       "Zeek - Syslog": "assets/dashboards/zeek_syslog.json",
+      "Zeek - Datared": "assets/dashboards/zeek_datared.json",
       "Corelight Suricata": "assets/dashboards/corelight_suricata.json"
     },
     "logs": {
