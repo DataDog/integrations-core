@@ -84,9 +84,9 @@ def create_codeowners_map():
 def codeowners(ctx):
     """Validate that every integration has an entry in the `CODEOWNERS` file."""
 
+    has_failed = False
     is_core_check = ctx.obj['repo_choice'] == 'core'
 
-    has_failed = False
     if not is_core_check:  # We do not need this rule in integrations-core
         codeowner_map = create_codeowners_map()
         codeowners_file = get_codeowners_file()
