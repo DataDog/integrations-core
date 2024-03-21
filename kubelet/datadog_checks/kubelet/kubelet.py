@@ -3,7 +3,6 @@
 # Licensed under Simplified BSD License (see LICENSE)
 from __future__ import division
 
-import json
 import re
 import sys
 from collections import defaultdict

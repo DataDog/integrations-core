@@ -156,6 +156,7 @@ def test_is_namespace_excluded(monkeypatch):
     c_is_excluded.assert_called_once()
     c_is_excluded.assert_called_with('', '', '', 'a_non_excluded_namespace')
 
+
 def test_is_annotation_excluded(monkeypatch):
     c_is_excluded = mock.Mock(return_value=False)
     monkeypatch.setattr('datadog_checks.kubelet.common.c_is_excluded', c_is_excluded)
@@ -166,16 +167,34 @@ def test_is_annotation_excluded(monkeypatch):
     # Test excluded container
     c_is_excluded.reset_mock()
     c_is_excluded.return_value = True
-    assert pod_list_utils.is_excluded("docker://6941ed2471c0e458b6b95db40ba05d1a5ee168256638a0264f08703e48d76561", "2edfd4d9-10ce-11e8-bd5a-42010af00137") is True
+    assert (
+        pod_list_utils.is_excluded(
+            "docker://6941ed2471c0e458b6b95db40ba05d1a5ee168256638a0264f08703e48d76561",
+            "2edfd4d9-10ce-11e8-bd5a-42010af00137",
+        )
+        is True
+    )
     c_is_excluded.assert_called_once()
-    c_is_excluded.assert_called_with('{"scheduler.alpha.kubernetes.io/critical-pod": "", "kubernetes.io/config.source": "api", "kubernetes.io/config.seen": "2018-02-13T16:10:19.509264637Z", "ad.datadoghq.com/fluentd-gcp.exclude_metrics": "true"}', "fluentd-gcp", "asia.gcr.io/google-containers/fluentd-gcp:2.0.10", "kube-system")
+    c_is_excluded.assert_called_with(
+        '{"kubernetes.io/config.source": "api", "ad.datadoghq.com/fluentd-gcp.exclude_metrics": "true"}',
+        "fluentd-gcp",
+        "asia.gcr.io/google-containers/fluentd-gcp:2.0.10",
+        "kube-system",
+    )
 
     # Test non-excluded container
     c_is_excluded.reset_mock()
     c_is_excluded.return_value = False
-    assert pod_list_utils.is_excluded("docker://f69aa93ce78ee11e78e7c75dc71f535567961740a308422dafebdb4030b04903", "dbf813d6-e9e1-11e8-b4ce-42010a840233") is False
+    assert (
+        pod_list_utils.is_excluded(
+            "docker://f69aa93ce78ee11e78e7c75dc71f535567961740a308422dafebdb4030b04903",
+            "dbf813d6-e9e1-11e8-b4ce-42010a840233",
+        )
+        is False
+    )
     c_is_excluded.assert_called_once()
-    c_is_excluded.assert_called_with("", "pi", "perl:latest", "default")
+    c_is_excluded.assert_called_with("{}", "pi", "perl:latest", "default")
+
 
 def test_pod_by_uid():
     podlist = json.loads(mock_from_file('pods.json'))
