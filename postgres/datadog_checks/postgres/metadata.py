@@ -28,7 +28,7 @@ DEFAULT_RESOURCES_COLLECTION_INTERVAL = 300
 DEFAULT_SETTINGS_IGNORED_PATTERNS = ["plpgsql%"]
 
 PG_SETTINGS_QUERY = """
-SELECT name, setting FROM pg_settings
+SELECT name, setting, source FROM pg_settings
 """
 
 DATABASE_INFORMATION_QUERY = """

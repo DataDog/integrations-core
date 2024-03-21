@@ -44,6 +44,7 @@ def test_collect_metadata(integration_check, dbm_instance, aggregator):
     assert event['dbms'] == "postgres"
     assert event['kind'] == "pg_settings"
     assert len(event["metadata"]) > 0
+    assert set(event["metadata"][0].keys()) == {'name', 'setting', 'source'}
     assert all(not k['name'].startswith('max_wal') for k in event['metadata'])
 
 
