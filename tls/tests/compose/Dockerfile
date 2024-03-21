@@ -6,7 +6,8 @@ RUN apk add --no-cache openssl git build-base
 # Build the faketime lib, used to generate expired certificate
 RUN git clone https://github.com/wolfcw/libfaketime /libfaketime
 WORKDIR /libfaketime
-RUN make \
+RUN git checkout v0.9.10 \
+ && make \
  && make install \
  && cp /usr/local/lib/faketime/libfaketimeMT.so.1 /lib/faketime.so
 

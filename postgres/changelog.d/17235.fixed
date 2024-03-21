@@ -1,0 +1,1 @@
+Fix NoneType error in schema collection when partition tables have no activities

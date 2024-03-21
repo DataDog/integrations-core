@@ -46,8 +46,7 @@ COUNTER_TYPE_QUERY = """select distinct cntr_type
 BASE_NAME_QUERY = (
     """select distinct counter_name
        from sys.dm_os_performance_counters
-       where (counter_name=? or counter_name=?
-       or counter_name=?) and cntr_type=%s;"""
+       where lower(counter_name) IN (?, ?, ?) and cntr_type=%s;"""
     % PERF_LARGE_RAW_BASE
 )
 

@@ -372,11 +372,11 @@ jobs:
       test-py3: ${{ inputs.test-py3 }}
       minimum-base-package: ${{ inputs.minimum-base-package }}
     secrets: inherit
-  j14e797c:
+  j3650884:
     uses: ./.github/workflows/test-target.yml
     with:
-      job-name: Argo Workflows
-      target: argo_workflows
+      job-name: Argo Rollouts
+      target: argo_rollouts
       platform: linux
       runner: '["ubuntu-22.04"]'
       repo: "${{ inputs.repo }}"

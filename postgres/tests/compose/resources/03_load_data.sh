@@ -40,6 +40,9 @@ psql -v ON_ERROR_STOP=1 --username "$POSTGRES_USER" datadog_test <<-EOSQL
     INSERT INTO test_part (filler) SELECT array_to_string(ARRAY(SELECT chr((65 + round(random() * 50)) :: integer) FROM generate_series(1,3000)), '');
     VACUUM ANALYZE test_part;
     CREATE TABLE test_part_no_children (id SERIAL PRIMARY KEY, filler text) PARTITION BY RANGE (id);
+    CREATE TABLE test_part_no_activity (id SERIAL PRIMARY KEY, filler text) PARTITION BY RANGE (id);
+    CREATE TABLE test_part_no_activity1 PARTITION OF test_part_no_activity FOR VALUES FROM (MINVALUE) TO (500);
+    CREATE TABLE test_part_no_activity2 PARTITION OF test_part_no_activity FOR VALUES FROM (500) TO (MAXVALUE);
 EOSQL
 fi
 
