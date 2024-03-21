@@ -2,7 +2,7 @@
 
 ## Overview
 
-This check monitors [Tekton][1] through the Datadog Agent.
+This check monitors [Tekton][1] through the Datadog Agent. Tekton is a powerful and flexible open-source framework for creating CI/CD systems, allowing developers to build, test, and deploy across cloud providers and on-premise systems.
 
 ## Setup
 
@@ -10,8 +10,9 @@ Follow the instructions below to install and configure this check for an Agent r
 
 ### Installation
 
-The Tekton check is included in the [Datadog Agent][2] package.
-No additional installation is needed on your server.
+Starting from Agent release 7.52.0, the Tekton check is included in the [Datadog Agent][2] package. No additional installation is needed on your server.
+
+**WARNING**: This check uses [OpenMetrics](https://docs.datadoghq.com/integrations/openmetrics/) to collect metrics from the OpenMetrics endpoint Tekton can expose, which requires Python 3.
 
 ### Configuration
 
@@ -35,8 +36,6 @@ The Tekton integration does not include any events.
 
 ### Service Checks
 
-The Tekton integration does not include any service checks.
-
 See [service_checks.json][8] for a list of service checks provided by this integration.
 
 ## Troubleshooting
@@ -44,7 +43,7 @@ See [service_checks.json][8] for a list of service checks provided by this integ
 Need help? Contact [Datadog support][9].
 
 
-[1]: **LINK_TO_INTEGRATION_SITE**
+[1]: https://tekton.dev/
 [2]: https://app.datadoghq.com/account/settings/agent/latest
 [3]: https://docs.datadoghq.com/agent/kubernetes/integrations/
 [4]: https://github.com/DataDog/integrations-core/blob/master/tekton/datadog_checks/tekton/data/conf.yaml.example
