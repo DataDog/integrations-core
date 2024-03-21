@@ -968,7 +968,7 @@ class SQLServer(AgentCheck):
 
             try:
                 self.log.debug("Calling Stored Procedure : %s", proc)
-                if self.connection.get_connector() == 'adodbapi':
+                if self.connection.connector == 'adodbapi':
                     cursor.callproc(proc)
                 else:
                     # pyodbc does not support callproc; use execute instead.
