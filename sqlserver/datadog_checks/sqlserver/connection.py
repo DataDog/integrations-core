@@ -383,8 +383,8 @@ class Connection(object):
         '''
         Get the connector to use for the instance.
         The connector config value takes precedence in the following order:
-        - init_config
         - instance_config
+        - init_config
         - DEFAULT_CONNECTOR
         '''
         # First we check the valid connectors available. i.e. adodbapi, odbc
@@ -422,8 +422,8 @@ class Connection(object):
         '''
         Get the adoprovider to use for the instance.
         The adoprovider config value takes precedence in the following order:
-        - init_config
         - instance_config
+        - init_config
         - DEFAULT_ADOPROVIDER
         '''
         adoprovider_from_init_config = init_config.get('adoprovider')
