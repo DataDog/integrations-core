@@ -8,6 +8,7 @@ import oracledb
 from six import PY2
 
 from datadog_checks.base import AgentCheck, ConfigurationError, is_affirmative
+from datadog_checks.base.errors import SkipInstanceError
 from datadog_checks.base.utils.db import QueryManager
 
 from . import queries
@@ -47,6 +48,17 @@ class Oracle(AgentCheck):
 
     SERVICE_CHECK_NAME = 'can_connect'
     SERVICE_CHECK_CAN_QUERY = "can_query"
+
+    def __new__(cls, name, init_config, instances):        
+        init_config_loader = init_config.get("loader", "core")
+        instance = instances[0]
+        instance_loader = instance.get("loader", init_config_loader)
+        if instance_loader != "python":
+            raise SkipInstanceError(
+                "Oracle integration written in Python is deprecated. Set `loader = core` in the configuration file to avoid this error. Loading the latest Oracle check now."
+            )
+
+        return super(Oracle, cls).__new__(cls)
 
     def __init__(self, name, init_config, instances):
         if PY2:
