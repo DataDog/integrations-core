@@ -84,19 +84,9 @@ def create_codeowners_map():
 def codeowners(ctx):
     """Validate that every integration has an entry in the `CODEOWNERS` file."""
 
-    failed_integrations = validate_logs_assets_codeowners()
-    if failed_integrations:
-        for integration in failed_integrations:
-            echo_failure(f"/{integration}/assets/logs/ is not owned by {LOGS_TEAM}")
-        abort()
-    else:
-        echo_success("All integrations have valid logs codeowners.")
-
-    codeowner_map = create_codeowners_map()
-
-    has_failed = False
     is_core_check = ctx.obj['repo_choice'] == 'core'
 
+    has_failed = False
     if not is_core_check:  # We do not need this rule in integrations-core
         codeowner_map = create_codeowners_map()
         codeowners_file = get_codeowners_file()
@@ -119,7 +109,10 @@ def codeowners(ctx):
                 echo_failure(message)
                 annotate_error(codeowners_file, message)
 
-    if not has_failed:
-        echo_success("All integrations have valid codeowners.")
-    else:
+    failed_integrations = validate_logs_assets_codeowners()
+    if has_failed or failed_integrations:
+        for integration in failed_integrations:
+            echo_failure(f"/{integration}/assets/logs/ is not owned by {LOGS_TEAM}")
         abort()
+    else:
+        echo_success("All integrations have valid codeowners.")
