@@ -147,7 +147,7 @@ class DatadogChecksEnvironmentCollector(EnvironmentCollectorInterface):
                 'black==24.2.0',
                 'ruff==0.3.3',
                 # Keep in sync with: /datadog_checks_base/pyproject.toml
-                'pydantic==2.6.2',
+                'pydantic==2.0.2',
             ],
         }
         config = {'lint': lint_env}
