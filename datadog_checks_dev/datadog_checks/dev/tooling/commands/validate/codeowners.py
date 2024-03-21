@@ -1,14 +1,19 @@
 # (C) Datadog, Inc. 2020-present
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
+import os
 import re
 
 import click
 
+from ...codeowners import CodeOwners
+from ...constants import get_root
 from ...utils import get_codeowners, get_codeowners_file, get_valid_integrations
 from ..console import CONTEXT_SETTINGS, abort, annotate_error, echo_failure, echo_success
 
 DIRECTORY_REGEX = re.compile(r"\/(.*)\/$")
+
+LOGS_TEAM = '@DataDog/logs-backend'
 
 # Integrations that are known to be tiles and have email-based codeowners
 IGNORE_TILES = {
@@ -29,6 +34,27 @@ IGNORE_TILES = {
     'sqreen',
     'squadcast',
 }
+
+
+def create_codeowners_resolver():
+    """Creates an object that resolves owners for files in a repo."""
+    owners_resolver = CodeOwners("\n".join(get_codeowners()))
+    return owners_resolver
+
+
+def validate_logs_assets_codeowners():
+    """Validate `CODEOWNERS` assigns logs as owner for all log assets."""
+
+    failed_integrations = []
+    owners_resolver = create_codeowners_resolver()
+    all_integrations = sorted(get_valid_integrations())
+    for integration in all_integrations:
+        logs_assets_owners = owners_resolver.of(f"/{integration}/assets/logs/")
+        path = os.path.join(get_root(), integration, 'assets', 'logs')
+        if ("TEAM", LOGS_TEAM) not in logs_assets_owners and os.path.exists(path):
+            failed_integrations.append(integration)
+
+    return failed_integrations
 
 
 def create_codeowners_map():
@@ -83,7 +109,10 @@ def codeowners(ctx):
                 echo_failure(message)
                 annotate_error(codeowners_file, message)
 
-    if not has_failed:
-        echo_success("All integrations have valid codeowners.")
-    else:
+    failed_integrations = validate_logs_assets_codeowners()
+    if has_failed or failed_integrations:
+        for integration in failed_integrations:
+            echo_failure(f"/{integration}/assets/logs/ is not owned by {LOGS_TEAM}")
         abort()
+    else:
+        echo_success("All integrations have valid codeowners.")
