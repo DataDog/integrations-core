@@ -19,7 +19,7 @@ from datadog_checks.base.utils.serialization import json
 from datadog_checks.base.utils.tracking import tracked_method
 from datadog_checks.postgres.cursor import CommenterCursor, CommenterDictCursor
 
-from .query_count_cache import QueryCountCache
+from .query_calls_cache import QueryCallsCache
 from .util import DatabaseConfigurationError, payload_pg_version, warning_with_tags
 from .version_utils import V9_4, V14
 
@@ -28,9 +28,10 @@ try:
 except ImportError:
     from ..stubs import datadog_agent
 
-QUERY_COUNTS_QUERY = """
+QUERYID_TO_CALLS_QUERY = """
 SELECT queryid, calls
   FROM {pg_stat_statements_view}
+  WHERE queryid IS NOT NULL
 """
 
 STATEMENTS_QUERY = """
@@ -40,8 +41,7 @@ SELECT {cols}
          ON pg_stat_statements.userid = pg_roles.oid
   LEFT JOIN pg_database
          ON pg_stat_statements.dbid = pg_database.oid
-  WHERE query != '<insufficient privilege>'
-  AND query NOT LIKE 'EXPLAIN %%'
+  WHERE query NOT LIKE 'EXPLAIN %%'
   AND queryid = ANY('{{ {called_queryids} }}'::bigint[])
   {filters}
   {extra_clauses}
@@ -153,8 +153,7 @@ class PostgresStatementMetrics(DBMAsyncJob):
         self.tags = None
         self._state = StatementMetrics()
         self._stat_column_cache = []
-        self._query_count_cache = {}
-        self._query_count_cache = QueryCountCache(int(self._check.pg_settings.get("pg_stat_statements.max", 10000)))
+        self._query_calls_cache = QueryCallsCache()
         self._track_io_timing_cache = None
         self._obfuscate_options = to_native_string(json.dumps(self._config.obfuscator_options))
         # full_statement_text_cache: limit the ingestion rate of full statement text events per query_signature
@@ -211,7 +210,7 @@ class PostgresStatementMetrics(DBMAsyncJob):
         with self._check._get_main_db() as conn:
             with conn.cursor(cursor_factory=CommenterCursor) as cursor:
                 called_queryids = []
-                query = QUERY_COUNTS_QUERY.format(pg_stat_statements_view=pgss_view_without_query_text)
+                query = QUERYID_TO_CALLS_QUERY.format(pg_stat_statements_view=pgss_view_without_query_text)
                 rows = self._execute_query(cursor, query, params=(self._config.dbname,))
                 for row in rows:
                     queryid = row[0]
@@ -219,10 +218,10 @@ class PostgresStatementMetrics(DBMAsyncJob):
                         continue
 
                     calls = row[1]
-                    calls_changed = self._query_count_cache.set_calls(queryid, calls)
+                    calls_changed = self._query_calls_cache.set_calls(queryid, calls)
                     if calls_changed:
                         called_queryids.append(queryid)
-
+                self._query_calls_cache.end_query_call_snapshot()
                 self._check.gauge(
                     "dd.postgresql.pg_stat_statements.calls_changed",
                     len(called_queryids),

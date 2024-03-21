@@ -1,20 +1,18 @@
 # (C) Datadog, Inc. 2024-present
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
-from cachetools import TTLCache
+class QueryCallsCache:
+    """Maintains a cache of the last-known number of calls per queryid, as per pg_stat_statements"""
 
-# 1 hour
-CACHE_TTL = 60 * 60
+    def __init__(self):
+        self.cache = {}
+        self.next_cache = {}
 
-
-class QueryCountCache:
-    """Maintains a cache of the last-known number of calls per queryid"""
-
-    def __init__(self, maxsize):
-        self.cache = TTLCache(
-            maxsize=maxsize,
-            ttl=CACHE_TTL,
-        )
+    def end_query_call_snapshot(self):
+        """To prevent evicted statements from building up in the cache we
+        replace the cache outright after each sampling of pg_stat_statements."""
+        self.cache = self.next_cache
+        self.next_cache = {}
 
     def set_calls(self, queryid, calls):
         """Updates the cache of calls per query id.
@@ -27,13 +25,13 @@ class QueryCountCache:
         if queryid in self.cache:
             diff = calls - self.cache[queryid]
             # Positive deltas mean the statement remained in pg_stat_statements
-            # between check calls. Negaitve deltas mean the statement was evicted
+            # between check calls. Negative deltas mean the statement was evicted
             # and replaced with a new call count. Both cases should count as a call
             # change.
             calls_changed = diff != 0
         else:
             calls_changed = True
 
-        self.cache[queryid] = calls
+        self.next_cache[queryid] = calls
 
         return calls_changed
