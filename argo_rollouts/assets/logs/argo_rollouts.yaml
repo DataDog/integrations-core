@@ -2,7 +2,6 @@ id: argo_rollouts
 metric_id: argo_rollouts
 backend_only: false
 facets:
-facets:
   - name: Argo Rollouts Name
     source: log
     path: argo_rollouts.name
