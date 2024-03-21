@@ -49,7 +49,7 @@ class Oracle(AgentCheck):
     SERVICE_CHECK_NAME = 'can_connect'
     SERVICE_CHECK_CAN_QUERY = "can_query"
 
-    def __new__(cls, name, init_config, instances):        
+    def __new__(cls, name, init_config, instances):
         init_config_loader = init_config.get("loader", "core")
         instance = instances[0]
         instance_loader = instance.get("loader", init_config_loader)
