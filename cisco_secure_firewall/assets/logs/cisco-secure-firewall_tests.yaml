@@ -4,7 +4,7 @@ tests:
       testuser1, sid 23"
     result:
       custom:
-        message_id: "109011"
+        message_id: "1090112"
         severity: 2
         syslog:
           severity: "Critical"

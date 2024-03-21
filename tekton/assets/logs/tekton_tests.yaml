@@ -11,7 +11,7 @@ tests:
       "message" : "Reconcile succeeded",
       "timestamp" : "2024-02-28T08:15:18.164Z",
       "knative" : {
-        "dev/kind" : "tekton.dev.TaskRun",
+        "dev/kind" : "tekton.dev",
         "dev/traceid" : "f9171cbc-d40e-4bb8-912a-8781b387cd97",
         "dev/controller" : "github.com.tektoncd.pipeline.pkg.reconciler.taskrun.Reconciler",
         "dev/key" : "tekton-pipelines/hello-task-run"
