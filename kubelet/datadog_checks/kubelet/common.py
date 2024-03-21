@@ -2,6 +2,7 @@
 # All rights reserved
 # Licensed under Simplified BSD License (see LICENSE)
 
+import json
 import re
 
 from kubeutil import get_connection_info
@@ -182,16 +183,16 @@ class PodListUtils(object):
         """
         return self.container_id_by_name_tuple.get(name_tuple, None)
 
-    def is_excluded(self, annotation, cid, pod_uid=None):
+    def is_excluded(self, cid, pod_uid=None):
         """
         Queries the agent6 container filter interface. It retrieves container
         name + image from the podlist, so static pod filtering is not supported.
 
         Result is cached between calls to avoid the python-go switching cost for
         prometheus metrics (will be called once per metric)
-        :param annotation: pod annotations (used for filtering)
         :param cid: container id
         :param pod_uid: pod UID for static pod detection
+        :param annotation: pod annotations (used for filtering); defaults to ""
         :return: bool
         """
         if not cid:
@@ -203,6 +204,10 @@ class PodListUtils(object):
         if pod_uid and pod_uid in self.static_pod_uids:
             self.cache[cid] = False
             return False
+
+        annotation = ""
+        if pod_uid:
+            annotation = json.dumps(self.pods[pod_uid].get("metadata", {}).get("annotations"))
 
         if cid not in self.containers:
             # Filter out metrics not coming from a container (system slices)

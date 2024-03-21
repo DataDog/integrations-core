@@ -58,7 +58,7 @@ def test_container_filter(monkeypatch):
     c_is_excluded.reset_mock()
     assert pod_list_utils.is_excluded(long_cid) is False
     c_is_excluded.assert_called_once()
-    c_is_excluded.assert_called_with(ctr_name, ctr_image, namespace)
+    c_is_excluded.assert_called_with('', ctr_name, ctr_image, namespace)
 
     # Clear exclusion cache
     pod_list_utils.cache = {}
@@ -68,7 +68,7 @@ def test_container_filter(monkeypatch):
     c_is_excluded.return_value = True
     assert pod_list_utils.is_excluded(long_cid) is True
     c_is_excluded.assert_called_once()
-    c_is_excluded.assert_called_with(ctr_name, ctr_image, namespace)
+    c_is_excluded.assert_called_with('', ctr_name, ctr_image, namespace)
 
 
 def test_container_filter_imageID(monkeypatch):
@@ -82,6 +82,7 @@ def test_container_filter_imageID(monkeypatch):
     c_is_excluded.reset_mock()
     assert pod_list_utils.is_excluded("docker://5741ed2471c0e458b6b95db40ba05d1a5ee168256638a0264f08703e48d76561")
     c_is_excluded.assert_called_once_with(
+        '',
         mock.ANY,
         "asia.gcr.io/google-containers/fluentd-gcp:2.0.10",
         mock.ANY,
@@ -91,6 +92,7 @@ def test_container_filter_imageID(monkeypatch):
     c_is_excluded.reset_mock()
     assert pod_list_utils.is_excluded("docker://580cb469826a10317fd63cc780441920f49913ae63918d4c7b19a72347645b05")
     c_is_excluded.assert_called_once_with(
+        '',
         mock.ANY,
         "asia.gcr.io/p@sha256:5831390762c790b0375c202579fd41dd5f40c71950f7538adbe14b0c16f35d56",
         mock.ANY,
@@ -100,6 +102,7 @@ def test_container_filter_imageID(monkeypatch):
     c_is_excluded.reset_mock()
     assert pod_list_utils.is_excluded("containerd://1258aef41f9b5181dd6b2328f0248af12af5e5e897dc197bd32d59e3dad4f9f4")
     c_is_excluded.assert_called_once_with(
+        '',
         mock.ANY,
         "docker.io/library/redis@sha256:b0e0e30549716e5a53d455c7cde800578358ed7cfd9686113433597cea56d899",
         mock.ANY,
@@ -144,15 +147,35 @@ def test_is_namespace_excluded(monkeypatch):
     c_is_excluded.return_value = True
     assert pod_list_utils.is_namespace_excluded('an_excluded_namespace') is True
     c_is_excluded.assert_called_once()
-    c_is_excluded.assert_called_with('', '', 'an_excluded_namespace')
+    c_is_excluded.assert_called_with('', '', '', 'an_excluded_namespace')
 
     # Test non-excluded namespace
     c_is_excluded.reset_mock()
     c_is_excluded.return_value = False
     assert pod_list_utils.is_namespace_excluded('a_non_excluded_namespace') is False
     c_is_excluded.assert_called_once()
-    c_is_excluded.assert_called_with('', '', 'a_non_excluded_namespace')
+    c_is_excluded.assert_called_with('', '', '', 'a_non_excluded_namespace')
 
+def test_is_annotation_excluded(monkeypatch):
+    c_is_excluded = mock.Mock(return_value=False)
+    monkeypatch.setattr('datadog_checks.kubelet.common.c_is_excluded', c_is_excluded)
+
+    pods = json.loads(mock_from_file('pods_exclude_annotation.json'))
+    pod_list_utils = PodListUtils(pods)
+
+    # Test excluded container
+    c_is_excluded.reset_mock()
+    c_is_excluded.return_value = True
+    assert pod_list_utils.is_excluded("docker://6941ed2471c0e458b6b95db40ba05d1a5ee168256638a0264f08703e48d76561", "2edfd4d9-10ce-11e8-bd5a-42010af00137") is True
+    c_is_excluded.assert_called_once()
+    c_is_excluded.assert_called_with('{"scheduler.alpha.kubernetes.io/critical-pod": "", "kubernetes.io/config.source": "api", "kubernetes.io/config.seen": "2018-02-13T16:10:19.509264637Z", "ad.datadoghq.com/fluentd-gcp.exclude_metrics": "true"}', "fluentd-gcp", "asia.gcr.io/google-containers/fluentd-gcp:2.0.10", "kube-system")
+
+    # Test non-excluded container
+    c_is_excluded.reset_mock()
+    c_is_excluded.return_value = False
+    assert pod_list_utils.is_excluded("docker://f69aa93ce78ee11e78e7c75dc71f535567961740a308422dafebdb4030b04903", "dbf813d6-e9e1-11e8-b4ce-42010a840233") is False
+    c_is_excluded.assert_called_once()
+    c_is_excluded.assert_called_with("", "pi", "perl:latest", "default")
 
 def test_pod_by_uid():
     podlist = json.loads(mock_from_file('pods.json'))

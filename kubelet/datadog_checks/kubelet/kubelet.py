@@ -570,9 +570,7 @@ class KubeletCheck(
                         continue
 
                     pod_uid = pod.get('metadata', {}).get('uid')
-                    pod_annotation = pod.get('metadata', {}).get('annotations')
-                    pod_annotation_flattened = json.dumps(pod_annotation)
-                    if self.pod_list_utils.is_excluded(pod_annotation_flattened, cid, pod_uid):
+                    if self.pod_list_utils.is_excluded(cid, pod_uid):
                         continue
 
                     tags = tagger.tag(replace_container_rt_prefix(cid), tagger.HIGH)
@@ -602,8 +600,6 @@ class KubeletCheck(
         for pod in pod_list.get('items', []):
             pod_name = pod.get('metadata', {}).get('name')
             pod_uid = pod.get('metadata', {}).get('uid')
-            pod_annotation = pod.get('metadata', {}).get('annotations')
-            pod_annotation_flattened = json.dumps(pod_annotation)
 
             if not pod_name or not pod_uid:
                 continue
@@ -616,7 +612,7 @@ class KubeletCheck(
                     if not c_name or not cid:
                         continue
 
-                    if self.pod_list_utils.is_excluded(pod_annotation_flattened, cid, pod_uid):
+                    if self.pod_list_utils.is_excluded(cid, pod_uid):
                         continue
 
                     tags = tagger.tag(replace_container_rt_prefix(cid), tagger.ORCHESTRATOR)
@@ -751,7 +747,7 @@ class KubeletCheck(
         container_id = self.pod_list_utils.get_cid_by_labels(labels)
         tags = []
         if container_id is not None:
-            if self.pod_list_utils.is_excluded('', container_id):
+            if self.pod_list_utils.is_excluded(container_id):
                 return
 
             tags = tags_for_docker(replace_container_rt_prefix(container_id), tagger.HIGH, True)
