@@ -6,7 +6,7 @@
 
 ***Added***:
 
-* Addd configuration option to disable hosts from being created by `consul.net.node.*` metrics ([#17004](https://github.com/DataDog/integrations-core/pull/17004))
+* Add configuration option to disable hosts from being created by `consul.net.node.*` metrics ([#17004](https://github.com/DataDog/integrations-core/pull/17004))
 
 ## 2.5.0 / 2024-02-16 / Agent 7.52.0
 
