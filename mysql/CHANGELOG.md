@@ -9,7 +9,7 @@
 * Adding a deadlock metric to MySQL databases. ([#16904](https://github.com/DataDog/integrations-core/pull/16904))
 * Update custom_queries configuration to support optional collection_interval ([#16957](https://github.com/DataDog/integrations-core/pull/16957))
 * Add read_timeout (default to 10s) for reading from the connection in seconds ([#16988](https://github.com/DataDog/integrations-core/pull/16988))
-* Tag MyQql integration queries with service:datadog-agent ([#17158](https://github.com/DataDog/integrations-core/pull/17158))
+* Tag MySQL integration queries with service:datadog-agent ([#17158](https://github.com/DataDog/integrations-core/pull/17158))
 
 ***Fixed***:
 
