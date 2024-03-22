@@ -13,7 +13,16 @@ init_config:
 #
 instances:
 
-  -
+    ## @param teleport_url - string - required
+    ## The Teleport URL to connect to.
+    #
+  - teleport_url: http://127.0.0.1
+
+    ## @param diag_port - integer - optional - default: 3000
+    ## The Teleport Diagnostic Port.
+    #
+    # diag_port: 3000
+
     ## @param tags - list of strings - optional
     ## A list of tags to attach to every metric and service check emitted by this instance.
     ##
