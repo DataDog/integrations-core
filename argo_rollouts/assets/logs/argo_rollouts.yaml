@@ -1,4 +1,4 @@
-id: argo-rollouts
+id: argo_rollouts
 metric_id: argo_rollouts
 backend_only: false
 facets:
