@@ -2,6 +2,28 @@
 
 <!-- towncrier release notes start -->
 
+## 17.1.0 / 2024-03-22
+
+***Added***:
+
+* update custom_queries configuration to support optional collection_interval ([#16957](https://github.com/DataDog/integrations-core/pull/16957))
+* Tag sqlserver agent queries with service:datadog-agent ([#17162](https://github.com/DataDog/integrations-core/pull/17162))
+
+***Fixed***:
+
+* Skip index usage collection for tempdb, fixes a blocking query ([#16977](https://github.com/DataDog/integrations-core/pull/16977))
+* Fix an issue where logging of obfuscation errors would still hide the statement when it's part of a stored procedure. If the stored procedure obfuscation fails, the `procedure_signature` tag will be set to `__procedure_obfuscation_error__`. ([#17020](https://github.com/DataDog/integrations-core/pull/17020))
+* Skip `sqlserver.latches.latch_wait_time metric` on SQL Server version 2012 and 2014. ([#17063](https://github.com/DataDog/integrations-core/pull/17063))
+* Update the configuration to include the `metric_prefix` option ([#17065](https://github.com/DataDog/integrations-core/pull/17065))
+* Improve service check of autodiscovered databases for the sqlserver integration. The fix prevents agent from creating a connection per database.
+  The fix is not applied for Azure hosted databases due to the restriction in switching to dabases within the connection. ([#17139](https://github.com/DataDog/integrations-core/pull/17139))
+* Update performance counter base name query to lookup by lowercase counter name ([#17207](https://github.com/DataDog/integrations-core/pull/17207))
+* Refactor SQLServer instance connector and adoprovider initialization from configuration.
+  The connector/adoprovider config takes precedence in the following order:
+  - instance config
+  - init config
+  - the default connection/adoprovider ([#17245](https://github.com/DataDog/integrations-core/pull/17245))
+
 ## 17.0.1 / 2024-02-23 / Agent 7.52.0
 
 ***Fixed***:
