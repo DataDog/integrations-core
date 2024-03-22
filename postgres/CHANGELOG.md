@@ -12,7 +12,7 @@
 ***Added***:
 
 * Update dependencies ([#16899](https://github.com/DataDog/integrations-core/pull/16899)), ([#16963](https://github.com/DataDog/integrations-core/pull/16963))
-* PostgreSQL: Add postgresql server version as a tag ([#16900](https://github.com/DataDog/integrations-core/pull/16900))
+* PostgreSQL: Add PostgreSQL server version as a tag ([#16900](https://github.com/DataDog/integrations-core/pull/16900))
 * PostgreSQL: Add system_identifier as a metric tag ([#16911](https://github.com/DataDog/integrations-core/pull/16911))
 * Set `collect_wal_metrics` to false will disable wal file metrics collection for all pg versions ([#16990](https://github.com/DataDog/integrations-core/pull/16990))
 * Perform database connection health check at the start of check run ([#17007](https://github.com/DataDog/integrations-core/pull/17007))
@@ -28,7 +28,7 @@
 
   There's no need to send a metric if no calls of a query have occurred since the last check. So this makes an additional up-front query to pg_stat_statements that pulls just enough data to create a mapping from queryid to calls which we cache in between runs. We then use that to determine what has been executed since the last check, and only query full metrics data for queries that have been executed.
 
-  In the benchmark environment, this led to a 98% reduction in how many queries need to be returned to the agent, which reduces agent processing time, memory consumption, and network ingress. ([#17187](https://github.com/DataDog/integrations-core/pull/17187))
+  In the benchmark environment, this led to a 98% reduction in how many queries need to be returned to the Agent, which reduces Agent processing time, memory consumption, and network ingress. ([#17187](https://github.com/DataDog/integrations-core/pull/17187))
 * Skip relations with granted AccessExclusiveLock to avoid relations metrics query timeout ([#17234](https://github.com/DataDog/integrations-core/pull/17234))
 * Fix NoneType error in schema collection when partition tables have no activities ([#17235](https://github.com/DataDog/integrations-core/pull/17235))
 

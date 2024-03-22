@@ -10,7 +10,7 @@
 
 ***Added***:
 
-* Ppdate custom_queries configuration to support optional collection_interval ([#16957](https://github.com/DataDog/integrations-core/pull/16957))
+* Update custom_queries configuration to support optional collection_interval ([#16957](https://github.com/DataDog/integrations-core/pull/16957))
 * Bump the min base check version to 36.5.0 ([#17197](https://github.com/DataDog/integrations-core/pull/17197))
 
 ***Fixed***:

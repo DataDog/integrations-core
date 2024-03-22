@@ -6,7 +6,7 @@
 
 ***Added***:
 
-* Tag metrics with nginx host and port. ([#17233](https://github.com/DataDog/integrations-core/pull/17233))
+* Tag metrics with Nginx host and port. ([#17233](https://github.com/DataDog/integrations-core/pull/17233))
 
 ***Fixed***:
 
