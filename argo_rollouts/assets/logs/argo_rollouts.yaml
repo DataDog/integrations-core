@@ -2,14 +2,14 @@ id: argo_rollouts
 metric_id: argo-rollouts
 backend_only: false
 facets:
-  - name: Argo Resource Name
-    groups:
+  - groups:
       - Argo Rollouts
+    name: Argo Resource Name
     path: argo_rollouts.resource.name
     source: log
-  - name: Argo Rollouts Name
-    groups:
+  - groups:
       - Argo Rollouts
+    name: Argo Rollouts Name
     path: argo_rollouts.name
     source: log
 pipeline:
@@ -36,7 +36,7 @@ pipeline:
           _msg %{data:msg}
           _level %{word:level}
     - type: attribute-remapper
-      name: Define `rollout` as `argo_rollouts.name`
+      name: Map `rollout` as `argo_rollouts.name`
       enabled: true
       sources:
         - rollout
@@ -46,7 +46,7 @@ pipeline:
       sourceType: attribute
       targetType: attribute
     - type: attribute-remapper
-      name: Define `resource` as `argo_rollouts.resource.name`
+      name: Map `resource` as `argo_rollouts.resource.name`
       enabled: true
       sources:
         - resource
@@ -56,7 +56,7 @@ pipeline:
       sourceType: attribute
       targetType: attribute
     - type: attribute-remapper
-      name: Define `namespace` as `argo_rollouts_namespace`
+      name: Map `namespace` as `argo_rollouts_namespace`
       enabled: true
       sources:
         - namespace
@@ -66,7 +66,7 @@ pipeline:
       sourceType: attribute
       targetType: attribute
     - type: attribute-remapper
-      name: Define `resourceVersion` as argo_rollouts.resource.version
+      name: Map `resourceVersion` as argo_rollouts.resource.version
       enabled: true
       sources:
         - resourceVersion
@@ -76,17 +76,17 @@ pipeline:
       sourceType: attribute
       targetType: attribute
     - type: date-remapper
-      name: Define `timestamp` as the official date of the log
+      name: Map `timestamp` as the official date of the log
       enabled: true
       sources:
         - timestamp
     - type: status-remapper
-      name: Define `level` as the official status of the log
+      name: Map `level` as the official status of the log
       enabled: true
       sources:
         - level
     - type: message-remapper
-      name: Define `msg` as the official message of the log
+      name: Map `msg` as the official message of the log
       enabled: true
       sources:
         - msg
