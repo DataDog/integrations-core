@@ -2,6 +2,23 @@
 
 <!-- towncrier release notes start -->
 
+## 12.3.0 / 2024-03-22
+
+***Added***:
+
+* Adding a deadlock metric to MySQL databases. ([#16904](https://github.com/DataDog/integrations-core/pull/16904))
+* update custom_queries configuration to support optional collection_interval ([#16957](https://github.com/DataDog/integrations-core/pull/16957))
+* Add read_timeout (default to 10s) for reading from the connection in seconds ([#16988](https://github.com/DataDog/integrations-core/pull/16988))
+* Tag mysql integration queries with service:datadog-agent ([#17158](https://github.com/DataDog/integrations-core/pull/17158))
+
+***Fixed***:
+
+* Exclude events_statements_cpu when checking enabled events_statements consumers ([#16924](https://github.com/DataDog/integrations-core/pull/16924))
+* Proper handle events_statements_* timer_end overflow ([#16936](https://github.com/DataDog/integrations-core/pull/16936))
+* Explicitly activate autocommit mode for monitoring connections ([#17002](https://github.com/DataDog/integrations-core/pull/17002))
+* Use digest_text to compute query signature for collected activities ([#17029](https://github.com/DataDog/integrations-core/pull/17029))
+* Update the configuration to include the `metric_prefix` option ([#17065](https://github.com/DataDog/integrations-core/pull/17065))
+
 ## 12.2.0 / 2024-03-07 / Agent 7.52.0
 
 ***Security***:
