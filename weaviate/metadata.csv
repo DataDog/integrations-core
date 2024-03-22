@@ -43,7 +43,7 @@ weaviate.go.memstats.lookups.count,count,,,,The number of pointer lookups,0,weav
 weaviate.go.memstats.mallocs.count,count,,,,The number of mallocs,0,weaviate,weaviate go memstats mallocs,
 weaviate.go.memstats.mcache.inuse_bytes,gauge,,byte,,The number of bytes in use by mcache structures in the Weaviate instance,0,weaviate,weaviate go memstats mcache inuse_bytes,
 weaviate.go.memstats.mcache.sys_bytes,gauge,,byte,,The number of bytes used for mcache structures obtained from system in the Weaviate instance,0,weaviate,weaviate go memstats mcache sys_bytes,
-weaviate.go.memstats.mspan.inuse_use,gauge,,byte,,The number of bytes in use by mspan structures in the Weaviate instance,0,weaviate,weaviate go memstats mspan inuse_use,
+weaviate.go.memstats.mspan.inuse_bytes,gauge,,byte,,The number of bytes in use by mspan structures in the Weaviate instance,0,weaviate,weaviate go memstats mspan inuse_use,
 weaviate.go.memstats.mspan.sys_bytes,gauge,,byte,,The number of bytes used for mspan structures obtained from system in the Weaviate instance,0,weaviate,weaviate go memstats mspan sys_bytes,
 weaviate.go.memstats.next.gc_bytes,gauge,,byte,,The number of heap bytes when next garbage collection takes place in the Weaviate instance,0,weaviate,weaviate go memstats next gc_bytes,
 weaviate.go.memstats.other.sys_bytes,gauge,,byte,,The number of bytes used for other system allocations in the Weaviate instance,0,weaviate,weaviate go memstats other sys_bytes,

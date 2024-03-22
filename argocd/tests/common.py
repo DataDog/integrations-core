@@ -42,7 +42,7 @@ general_gauges = [
     'go.memstats.last_gc_time.seconds',
     'go.memstats.mcache.inuse_bytes',
     'go.memstats.mcache.sys_bytes',
-    'go.memstats.mspan.inuse_use',
+    'go.memstats.mspan.inuse_bytes',
     'go.memstats.mspan.sys_bytes',
     'go.memstats.next.gc_bytes',
     'go.memstats.other.sys_bytes',
