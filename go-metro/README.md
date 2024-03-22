@@ -72,7 +72,7 @@ $ sudo setcap cap_net_raw+ep /opt/datadog-agent/bin/go-metro
 
 Because of different package names for different distributions, if the instructions above don't work for you, issue an `apt-cache search libcap` or `yum search libcap` for a shortlist of packages that provide the binary. Contact [Datadog support][6], if you need assistance.
 
-**Note**: go-metro logs to its own file - found in `/var/log/datadog/go-metro.log`. Additionally, go-metro runs standalone so it does not appear on the Agent's info page.
+**Note**: go-metro logs to its own file - found in `/var/log/datadog/go-metro.log`. Additionally, go-metro runs standalone so it does not appear on the Agent's status output.
 
 Finally, because the go-metro binary is only bundled with the 64-bit RPM and DEB distributions of the Datadog Agent, it is only available in those packaged versions, that is go-metro is unavailable with the source install or 32-bit packages.
 
