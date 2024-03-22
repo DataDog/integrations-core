@@ -8,6 +8,10 @@
 #     ddev -x validate models -s <INTEGRATION_NAME>
 
 
+def instance_diag_port():
+    return 3000
+
+
 def instance_disable_generic_tags():
     return False
 

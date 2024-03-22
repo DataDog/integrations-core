@@ -34,12 +34,14 @@ class InstanceConfig(BaseModel):
         arbitrary_types_allowed=True,
         frozen=True,
     )
+    diag_port: Optional[int] = None
     disable_generic_tags: Optional[bool] = None
     empty_default_hostname: Optional[bool] = None
     metric_patterns: Optional[MetricPatterns] = None
     min_collection_interval: Optional[float] = None
     service: Optional[str] = None
     tags: Optional[tuple[str, ...]] = None
+    teleport_url: str
 
     @model_validator(mode='before')
     def _initial_validation(cls, values):
