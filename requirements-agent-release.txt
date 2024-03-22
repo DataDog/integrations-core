@@ -118,7 +118,7 @@ datadog-openldap==1.12.0
 datadog-openmetrics==4.2.0
 datadog-openstack-controller==6.4.0
 datadog-openstack==2.0.0
-datadog-oracle==5.1.1
+datadog-oracle==5.2.0
 datadog-pan-firewall==1.2.0
 datadog-pdh-check==2.1.0; sys_platform == 'win32'
 datadog-pgbouncer==6.2.0; sys_platform != 'win32'
