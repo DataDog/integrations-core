@@ -10,12 +10,12 @@
 
 ***Added***:
 
-* update custom_queries configuration to support optional collection_interval ([#16957](https://github.com/DataDog/integrations-core/pull/16957))
+* Ppdate custom_queries configuration to support optional collection_interval ([#16957](https://github.com/DataDog/integrations-core/pull/16957))
 * Bump the min base check version to 36.5.0 ([#17197](https://github.com/DataDog/integrations-core/pull/17197))
 
 ***Fixed***:
 
-* support custom metric_prefix in QueryExecutor and remove manual fix of metric_prefix ([#16958](https://github.com/DataDog/integrations-core/pull/16958))
+* Support custom metric_prefix in QueryExecutor and remove manual fix of metric_prefix ([#16958](https://github.com/DataDog/integrations-core/pull/16958))
 * Update the configuration to include the `metric_prefix` option ([#17065](https://github.com/DataDog/integrations-core/pull/17065))
 
 ## 5.1.1 / 2024-01-10 / Agent 7.51.0

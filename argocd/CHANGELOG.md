@@ -6,7 +6,7 @@
 
 ***Added***:
 
-* Collect 'argocd_app_labels' argocd metric ([#16897](https://github.com/DataDog/integrations-core/pull/16897))
+* Collect 'argocd_app_labels' for ArgoCD metric ([#16897](https://github.com/DataDog/integrations-core/pull/16897))
 
 ***Fixed***:
 
