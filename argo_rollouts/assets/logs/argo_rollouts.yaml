@@ -1,5 +1,5 @@
 id: argo_rollouts
-metric_id: argo_rollouts
+metric_id: argo-rollouts
 backend_only: false
 facets:
   - name: Argo Resource Name
