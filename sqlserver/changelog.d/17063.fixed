@@ -1,1 +1,0 @@
-Skip `sqlserver.latches.latch_wait_time metric` on SQL Server version 2012 and 2014.

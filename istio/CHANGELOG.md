@@ -2,6 +2,12 @@
 
 <!-- towncrier release notes start -->
 
+## 6.0.0 / 2024-03-22
+
+***Changed***:
+
+* Disable `exclude_labels` by default ([#17225](https://github.com/DataDog/integrations-core/pull/17225))
+
 ## 5.4.0 / 2024-02-16 / Agent 7.52.0
 
 ***Added***:

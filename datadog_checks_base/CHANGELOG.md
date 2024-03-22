@@ -2,6 +2,12 @@
 
 <!-- towncrier release notes start -->
 
+## 36.5.1 / 2024-03-22
+
+***Fixed***:
+
+* Pin requests-oauthlib for Py2 ([#17181](https://github.com/DataDog/integrations-core/pull/17181))
+
 ## 36.5.0 / 2024-03-12
 
 ***Added***:

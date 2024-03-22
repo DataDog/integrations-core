@@ -1,5 +1,0 @@
-Performance optimization: Limit how many records are pulled from pg_stat_statements.
-
-There's no need to send a metric if no calls of a query have occurred since the last check. So this makes an additional up-front query to pg_stat_statements that pulls just enough data to create a mapping from queryid to calls which we cache in between runs. We then use that to determine what has been executed since the last check, and only query full metrics data for queries that have been executed.
-
-In the benchmark environment, this led to a 98% reduction in how many queries need to be returned to the agent, which reduces agent processing time, memory consumption, and network ingress.
