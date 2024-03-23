@@ -383,6 +383,7 @@ def test_connection_failure(aggregator, dd_run_check, instance_docker):
         status=check.OK,
     )
 
+
 @pytest.mark.unit
 @pytest.mark.parametrize(
     "test_case_name,instance_overrides,expected_error_patterns,expected_error",

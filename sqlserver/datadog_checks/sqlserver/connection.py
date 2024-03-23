@@ -10,7 +10,7 @@ from six import raise_from
 from datadog_checks.base import AgentCheck, ConfigurationError
 from datadog_checks.base.log import get_check_logger
 from datadog_checks.sqlserver.cursor import CommenterCursorWrapper
-import pdb
+
 try:
     import adodbapi
 except ImportError:
@@ -205,8 +205,11 @@ class Connection(object):
         except Exception as e:
             self.log.warning("Could not close adodbapi cursor\n%s", e)
 
+    #TODO this check doesnt make distinction between offline and non existant, is it fine ?
+    # General idea that "cannot connect to database" with TCP OK is only due to non existant or offline DB.        
     def check_database(self):
         with self.open_managed_default_database():
+            #TODO
             #we can modify tests expectations or keep it with idea that we check a connection to a master DB first
             #thus more secure that if exception happens next it's a db issue.
             print("for tests/test_metrics.py::test_check_index_usage_metrics and tests/test_metrics.py::test_check_incr_fraction_metrics")
