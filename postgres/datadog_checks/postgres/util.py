@@ -176,6 +176,28 @@ QUERY_PG_STAT_DATABASE = {
     ],
 }
 
+QUERY_TXID_EXHAUSTION = {
+    'name': 'txid_exhaustion_metrics',
+    'query': """
+    WITH per_database_stats AS (
+        SELECT
+            datname,
+            2147483648 AS max_old_xid,
+            AGE(d.datfrozenxid) AS oldest_current_xid
+        FROM pg_catalog.pg_database d
+        WHERE d.datallowconn
+    )
+    SELECT
+        pds.datname,
+        MAX(ROUND(100*(oldest_current_xid/max_old_xid::float))) AS percent_to_txid_exhaustion
+    FROM per_database_stats pds GROUP BY pds.datname;
+    """.strip(),
+    'columns': [
+        {'name': 'db', 'type': 'tag'},
+        {'name': 'postgresql.autovacuum.txid_exhaustion_percent', 'type': 'gauge'},
+    ],
+}
+
 QUERY_PG_STAT_DATABASE_CONFLICTS = {
     'name': 'pg_stat_database_conflicts',
     'query': """
