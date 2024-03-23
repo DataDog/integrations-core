@@ -207,6 +207,10 @@ class Connection(object):
             self.log.warning("Could not close adodbapi cursor\n%s", e)
 
     def check_database(self):
+        with self.open_managed_default_database():
+            #we can modify tests expectations or keep it with idea that we check a connection to a master DB first
+            #thus more secure that if exception happens next it's a db issue.
+            print("for tests/test_metrics.py::test_check_index_usage_metrics and tests/test_metrics.py::test_check_incr_fraction_metrics")
         db_exists = True
         _, host, _, _, database, _ = self._get_access_info(self.DEFAULT_DB_KEY)
         context = "{} - {}".format(host, database)

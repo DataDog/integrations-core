@@ -336,7 +336,6 @@ class SQLServer(AgentCheck):
                             self.autodiscover_databases(cursor)
                         self._make_metric_list_to_collect(self._config.custom_metrics)
             else:
-                print("do nothing")
                 # How much do we care that the DB doesn't exist?
                 ignore = is_affirmative(self.instance.get("ignore_missing_database", False))
                 if ignore is not None and ignore:
