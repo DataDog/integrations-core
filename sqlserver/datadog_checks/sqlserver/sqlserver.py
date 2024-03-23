@@ -338,17 +338,17 @@ class SQLServer(AgentCheck):
             else:
                 print("do nothing")
                 # How much do we care that the DB doesn't exist?
-                #ignore = is_affirmative(self.instance.get("ignore_missing_database", False))
-                #if ignore is not None and ignore:
+                ignore = is_affirmative(self.instance.get("ignore_missing_database", False))
+                if ignore is not None and ignore:
                     # not much : we expect it. leave checks disabled
-                #    self.do_check = False
-                #    self.log.warning("Database %s does not exist. Disabling checks for this instance.", context)
-                #else:
+                    self.do_check = False
+                    self.log.warning("Database %s does not exist. Disabling checks for this instance.", context)
+                else:
                     # yes we do. Keep trying
-                #    msg = "Database {} does not exist. Please resolve invalid database and restart agent".format(
-                #        context
-                #    )
-                #    raise ConfigurationError(msg)
+                    msg = "Database {} does not exist. Please resolve invalid database and restart agent".format(
+                        context
+                    )
+                    raise ConfigurationError(msg)
 
         except SQLConnectionError as e:
             self.log.exception("Error connecting to database: %s", e)
