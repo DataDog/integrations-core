@@ -10,7 +10,7 @@ from six import raise_from
 from datadog_checks.base import AgentCheck, ConfigurationError
 from datadog_checks.base.log import get_check_logger
 from datadog_checks.sqlserver.cursor import CommenterCursorWrapper
-
+import pdb
 try:
     import adodbapi
 except ImportError:
@@ -22,7 +22,7 @@ except ImportError:
     pyodbc = None
 
 from .azure import generate_managed_identity_token
-from .connection_errors import ConnectionErrorCode, SQLConnectionError, error_with_tags, format_connection_exception
+from .connection_errors import ConnectionErrorCode, SQLConnectionError, error_with_tags, format_connection_exception, is_conn_error_possibly_db_related
 
 logger = logging.getLogger(__file__)
 
@@ -207,9 +207,18 @@ class Connection(object):
             self.log.warning("Could not close adodbapi cursor\n%s", e)
 
     def check_database(self):
-        with self.open_managed_default_database():
-            db_exists, context = self._check_db_exists()
-
+        db_exists = True
+        _, host, _, _, database, _ = self._get_access_info(self.DEFAULT_DB_KEY)
+        context = "{} - {}".format(host, database)
+        try:
+            self.open_db_connections(self.DEFAULT_DB_KEY)
+        except SQLConnectionError as e:
+            if e.is_database_exist_error():
+                db_exists = False
+            else:
+                raise e
+        finally:
+            self.close_db_connections(self.DEFAULT_DB_KEY)
         return db_exists, context
 
     def check_database_conns(self, db_name):
@@ -284,6 +293,7 @@ class Connection(object):
             error_message = self.test_network_connectivity()
             tcp_connection_status = error_message if error_message else "OK"
             exception_msg, conn_warn_msg = format_connection_exception(e, driver)
+            is_possibly_db_name_error = is_conn_error_possibly_db_related(conn_warn_msg)
             if tcp_connection_status != "OK" and conn_warn_msg is ConnectionErrorCode.unknown:
                 conn_warn_msg = ConnectionErrorCode.tcp_connection_failed
 
@@ -311,7 +321,7 @@ class Connection(object):
             if is_default:
                 # the message that is raised here (along with the exception stack trace)
                 # is what will be seen in the agent status output.
-                raise_from(SQLConnectionError(check_err_message), None)
+                raise_from(SQLConnectionError(check_err_message, tcp_connection_status == "OK", is_possibly_db_name_error), None)
             else:
                 # if not the default db, we should still log this exception
                 # to give the customer an opportunity to fix the issue
@@ -337,47 +347,6 @@ class Connection(object):
             del self._conns[conn_key]
         except Exception as e:
             self.log.warning("Could not close adodbapi db connection\n%s", e)
-
-    def _check_db_exists(self):
-        """
-        Check for existence of a database, but take into consideration whether the db is case-sensitive or not.
-
-        If not case-sensitive, then we normalize the database name to lowercase on both sides and check.
-        If case-sensitive, then we only accept exact-name matches.
-
-        If the check fails, then we won't do any checks if `ignore_missing_database` is enabled, or we will fail
-        with a ConfigurationError otherwise.
-        """
-
-        _, host, _, _, database, _ = self._get_access_info(self.DEFAULT_DB_KEY)
-        context = "{} - {}".format(host, database)
-        if self.existing_databases is None:
-            cursor = self.get_cursor(None, self.DEFAULT_DATABASE)
-
-            try:
-                self.existing_databases = {}
-                cursor.execute(DATABASE_EXISTS_QUERY)
-                for row in cursor.fetchall():
-                    # collation_name can be NULL if db offline, in that case assume its case_insensitive
-                    case_insensitive = not row.collation_name or 'CI' in row.collation_name
-                    self.existing_databases[row.name.lower()] = (
-                        case_insensitive,
-                        row.name,
-                    )
-
-            except Exception as e:
-                self.log.error("Failed to check if database %s exists: %s", database, e)
-                return False, context
-            finally:
-                self.close_cursor(cursor)
-
-        exists = False
-        if database.lower() in self.existing_databases:
-            case_insensitive, cased_name = self.existing_databases[database.lower()]
-            if case_insensitive or database == cased_name:
-                exists = True
-
-        return exists, context
 
     def _get_connector(self, init_config, instance_config):
         '''

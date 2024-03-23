@@ -19,10 +19,13 @@ except ImportError:
 
 
 class SQLConnectionError(Exception):
-    """Exception raised for SQL instance connection issues"""
+    def __init__(self, error_text, tcp_status = None, is_possibly_db_error = None):
+        super(SQLConnectionError, self).__init__(error_text)
+        self._tcp_status = tcp_status
+        self._is_possibly_db_error = is_possibly_db_error
 
-    pass
-
+    def is_database_exist_error(self):
+        return self._tcp_status and self._is_possibly_db_error
 
 class ConnectionErrorCode(Enum):
     """
@@ -77,6 +80,8 @@ def error_with_tags(error_message, *args, **kwargs):
         msg=error_message, tags=" ".join('{key}={value}'.format(key=k, value=v) for k, v in sorted(kwargs.items()))
     )
 
+def is_conn_error_possibly_db_related(conn_warn_msg):
+    return conn_warn_msg is ConnectionErrorCode.tcp_connection_failed
 
 def format_connection_exception(e, driver):
     """

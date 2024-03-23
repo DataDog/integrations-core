@@ -191,7 +191,7 @@ def test_check_database_metrics(
         for metric_name, _, _ in DATABASE_BACKUP_METRICS:
             aggregator.assert_metric(metric_name, tags=db_tags, hostname=sqlserver_check.resolved_hostname, count=1)
 
-
+import pdb
 @pytest.mark.integration
 @pytest.mark.usefixtures('dd_environment')
 def test_check_index_usage_metrics(
@@ -235,9 +235,9 @@ def test_check_index_usage_metrics(
 
     sqlserver_check = SQLServer(CHECK_NAME, init_config, [instance_docker_metrics])
     dd_run_check(sqlserver_check)
-
+    
     tags = instance_docker_metrics.get('tags', [])
-
+    pdb.set_trace()
     check_sqlserver_can_connect(aggregator, instance_docker_metrics['host'], sqlserver_check.resolved_hostname, tags)
 
     for metric_name in DATABASE_INDEX_METRICS:
