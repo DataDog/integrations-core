@@ -205,7 +205,7 @@ class Connection(object):
         except Exception as e:
             self.log.warning("Could not close adodbapi cursor\n%s", e)
 
-    #TODO this check doesnt make distinction between offline and non existant, is it fine ?
+    #TODO probably this check doesnt make distinction between offline and non existant, is it fine ?
     # General idea that "cannot connect to database" with TCP OK is only due to non existant or offline DB.        
     def check_database(self):
         with self.open_managed_default_database():
