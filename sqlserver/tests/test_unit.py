@@ -39,6 +39,7 @@ def test_get_cursor(instance_docker):
     with pytest.raises(SQLConnectionError):
         check.connection.get_cursor('foo')
 
+
 def test_missing_db(instance_docker, dd_run_check):
     instance = copy.copy(instance_docker)
     instance['ignore_missing_database'] = False
