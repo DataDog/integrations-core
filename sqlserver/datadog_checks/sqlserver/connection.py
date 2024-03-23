@@ -165,7 +165,6 @@ class Connection(object):
         # mapping of raw connections based on conn_key to different databases
         self._conns = {}
         self.timeout = int(self.instance.get('command_timeout', self.DEFAULT_COMMAND_TIMEOUT))
-        self.existing_databases = None
         self.server_version = int(self.instance.get('server_version', self.DEFAULT_SQLSERVER_VERSION))
         self.connector = self._get_connector(init_config, instance_config)
         self.adoprovider = self._get_adoprovider(init_config, instance_config)
