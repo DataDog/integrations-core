@@ -2,6 +2,12 @@
 
 <!-- towncrier release notes start -->
 
+## 1.3.0 / 2024-03-22
+
+***Added***:
+
+* New karpenter metrics. ([#17127](https://github.com/DataDog/integrations-core/pull/17127))
+
 ## 1.2.0 / 2024-02-16 / Agent 7.52.0
 
 ***Added***:

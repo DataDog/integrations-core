@@ -2,6 +2,12 @@
 
 <!-- towncrier release notes start -->
 
+## 4.3.0 / 2024-03-22
+
+***Added***:
+
+* Add consumer lag in seconds metric ([#16889](https://github.com/DataDog/integrations-core/pull/16889))
+
 ## 4.2.1 / 2024-02-16 / Agent 7.52.0
 
 ***Fixed***:
