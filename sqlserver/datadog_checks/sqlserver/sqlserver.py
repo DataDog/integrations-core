@@ -7,6 +7,7 @@ import copy
 import functools
 import time
 from collections import defaultdict
+from typing import List
 
 import six
 from cachetools import TTLCache
@@ -176,12 +177,16 @@ class SQLServer(AgentCheck):
                 "Autodiscovery is disabled, autodiscovery_include and autodiscovery_exclude will be ignored"
             )
 
-    def _new_query_executor(self, queries):
+    def _new_query_executor(self, queries, executor=None, extra_tags=None):
+        if executor is None:
+            executor = self.execute_query_raw
+        tags = self.tags + (extra_tags or [])
+
         return QueryExecutor(
-            self.execute_query_raw,
+            executor,
             self,
             queries=queries,
-            tags=self.tags,
+            tags=tags,
             hostname=self.resolved_hostname,
         )
 
@@ -532,14 +537,6 @@ class SQLServer(AgentCheck):
                     }
                     metrics_to_collect.append(self.typed_metric(cfg_inst=cfg, table=table, column=column))
 
-        # Load DB File Space Usage metrics
-        if is_affirmative(
-            self.instance.get('include_tempdb_file_space_usage_metrics', True)
-        ) and not is_azure_sql_database(engine_edition):
-            for name, table, column in TEMPDB_FILE_SPACE_USAGE_METRICS:
-                cfg = {'name': name, 'table': table, 'column': column, 'instance_name': 'tempdb', 'tags': tags}
-                metrics_to_collect.append(self.typed_metric(cfg_inst=cfg, table=table, column=column))
-
         # Load any custom metrics from conf.d/sqlserver.yaml
         for cfg in custom_metrics:
             sql_counter_type = None
@@ -789,6 +786,8 @@ class SQLServer(AgentCheck):
         """
         if self._dynamic_queries:
             return self._dynamic_queries
+        
+        self._dynamic_queries = []
 
         major_version = self.static_info_cache.get(STATIC_INFO_MAJOR_VERSION)
         engine_edition = self.static_info_cache.get(STATIC_INFO_ENGINE_EDITION)
@@ -821,8 +820,22 @@ class SQLServer(AgentCheck):
         if is_affirmative(self.instance.get('include_secondary_log_shipping_metrics', False)):
             queries.extend([QUERY_LOG_SHIPPING_SECONDARY])
 
-        self._dynamic_queries = self._new_query_executor(queries)
-        self._dynamic_queries.compile_queries()
+        self._dynamic_queries.append(self._new_query_executor(queries))
+
+        # TempDB File Space Usage metrics
+        if is_affirmative(
+            self.instance.get('include_tempdb_file_space_usage_metrics', True)
+        ) and not is_azure_sql_database(engine_edition):
+            self._dynamic_queries.append(
+                self._new_query_executor(
+                    [TEMPDB_FILE_SPACE_USAGE_METRICS],
+                    executor=functools.partial(self.execute_query_raw, db='tempdb'),
+                    extra_tags=['db:tempdb'],
+                )
+            )
+        
+        for dynamic_query in self._dynamic_queries:
+            dynamic_query.compile_queries()
         self.log.debug("initialized dynamic queries")
         return self._dynamic_queries
 
@@ -888,8 +901,13 @@ class SQLServer(AgentCheck):
                 ]:
                     self.server_state_queries.execute()
 
+                if self.metrics_to_collect_by_config:
+                    for metric in self.metrics_to_collect_by_config:
+                        metric.execute()
+
                 if self.dynamic_queries:
-                    self.dynamic_queries.execute()
+                    for dynamic_query in self.dynamic_queries:
+                        dynamic_query.execute()
 
                 self.collect_index_usage_metrics()
 

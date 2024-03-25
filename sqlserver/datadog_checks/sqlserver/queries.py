@@ -174,6 +174,26 @@ INDEX_USAGE_STATS_QUERY = {
     ],
 }
 
+QUERY_TEMPDB_SPACE_USAGE = {
+    "name": "sys.dm_db_file_space_usage",
+    "query": """SELECT
+        database_id,
+        ISNULL(SUM(unallocated_extent_page_count)*1.0/128, 0) as free_space,
+        ISNULL(SUM(version_store_reserved_page_count)*1.0/128, 0) as used_space_by_version_store,
+        ISNULL(SUM(internal_object_reserved_page_count)*1.0/128, 0) as used_space_by_internal_object,
+        ISNULL(SUM(user_object_reserved_page_count)*1.0/128, 0) as used_space_by_user_object,
+        ISNULL(SUM(mixed_extent_page_count)*1.0/128, 0) as mixed_extent_space
+    FROM sys.dm_db_file_space_usage group by database_id""",
+    "columns": [
+        {"name": "database_id", "type": "tag"},
+        {"name": "tempdb.file_space_usage.free_space", "type": "gauge"},
+        {"name": "tempdb.file_space_usage.version_store_space", "type": "gauge"},
+        {"name": "tempdb.file_space_usage.internal_object_space", "type": "gauge"},
+        {"name": "tempdb.file_space_usage.user_object_space", "type": "gauge"},
+        {"name": "tempdb.file_space_usage.mixed_extent_space", "type": "gauge"},
+    ],
+}
+
 
 def get_query_ao_availability_groups(sqlserver_major_version):
     """
