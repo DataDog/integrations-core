@@ -35,7 +35,9 @@ PG_SETTINGS_QUERY = """
 SELECT
 name,
 case when source = 'session' then reset_val else setting end as setting,
-source
+source,
+sourcefile,
+pending_restart
 FROM pg_settings
 """
 

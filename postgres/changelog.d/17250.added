@@ -1,1 +1,1 @@
-Collect postgres setting parameter source from pg_settings
+Collect postgres setting parameter `source`, `sourcefile` and `pending_restart` from pg_settings
