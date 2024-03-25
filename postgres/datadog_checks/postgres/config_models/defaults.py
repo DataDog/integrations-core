@@ -9,7 +9,7 @@
 
 
 def shared_propagate_agent_tags():
-    return True
+    return False
 
 
 def instance_activity_metrics_excluded_aggregations():
@@ -113,7 +113,7 @@ def instance_port():
 
 
 def instance_propagate_agent_tags():
-    return True
+    return False
 
 
 def instance_query_timeout():

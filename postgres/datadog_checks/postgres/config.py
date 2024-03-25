@@ -292,5 +292,5 @@ class PostgresConfig:
         if init_config_propagate_agent_tags is not None:
             # if the init_config has explicitly set the value, return the boolean
             return init_config_propagate_agent_tags
-        # if neither the instance nor the init_config has set the value, return True (opt-in)
-        return True
+        # if neither the instance nor the init_config has set the value, return False
+        return False

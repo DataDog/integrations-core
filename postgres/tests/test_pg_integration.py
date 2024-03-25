@@ -1111,7 +1111,7 @@ def test_collect_wal_metrics_metrics(aggregator, integration_check, pg_instance,
         (False, False, False),
         (None, True, True),  # init_config config applies to all instances
         (None, False, False),  # init_config config applies to all instances
-        (None, None, True),  # default opted-in
+        (None, None, False),  # default to false
         (True, None, True),  # instance config prevails
         (False, None, False),  # instance config prevails
     ],
