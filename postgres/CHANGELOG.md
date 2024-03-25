@@ -2,6 +2,36 @@
 
 <!-- towncrier release notes start -->
 
+## 18.0.0 / 2024-03-22
+
+***Changed***:
+
+* PostgreSQL: Enable replication role tag by default ([#16895](https://github.com/DataDog/integrations-core/pull/16895))
+* PostgreSQL: Optimise table count query. postgresql.table.count metric doesn't use max_relations parameter anymore and will always yield the total number of tables per schema. Parent table of partitions tables will also be included in the table count for PG 11, 12 and 13. All versions after PG 14 already included parent table. ([#17109](https://github.com/DataDog/integrations-core/pull/17109))
+
+***Added***:
+
+* Update dependencies ([#16899](https://github.com/DataDog/integrations-core/pull/16899)), ([#16963](https://github.com/DataDog/integrations-core/pull/16963))
+* PostgreSQL: Add PostgreSQL server version as a tag ([#16900](https://github.com/DataDog/integrations-core/pull/16900))
+* PostgreSQL: Add system_identifier as a metric tag ([#16911](https://github.com/DataDog/integrations-core/pull/16911))
+* Set `collect_wal_metrics` to false will disable wal file metrics collection for all pg versions ([#16990](https://github.com/DataDog/integrations-core/pull/16990))
+* Perform database connection health check at the start of check run ([#17007](https://github.com/DataDog/integrations-core/pull/17007))
+* Added support for new query metrics wal_bytes, wal_records, and wal_fpi for PG versions >= 13. These metrics can now be accessed under postgresql.queries.wal_bytes, postgresql.queries.wal_records, and postgresql.queries.wal_fpi. In order to collect these metrics Database Monitoring must be enabled. ([#17144](https://github.com/DataDog/integrations-core/pull/17144))
+* Added support for collecting total_plan_time, max_plan_time, mean_plan_time , min_plan_time, stddev_plan_time query metrics for PostgreSQL versions 13 and above.
+  These new query metrics can now be accessed under postgresql.queries.total_plan_time, postgresql.queries.max_plan_time, postgresql.queries.mean_plan_time, postgresql.queries.min_plan_time, and postgresql.queries.stddev_plan_time.
+  To collect these metrics Database monitoring needs to be enabled. You will also need to enable pg_stat_statements.track_planning in your database. ([#17148](https://github.com/DataDog/integrations-core/pull/17148))
+* Tag postgres integration queries with service:datadog-agent ([#17156](https://github.com/DataDog/integrations-core/pull/17156))
+
+***Fixed***:
+
+* Performance optimization: Limit how many records are pulled from pg_stat_statements.
+
+  There's no need to send a metric if no calls of a query have occurred since the last check. So this makes an additional up-front query to pg_stat_statements that pulls just enough data to create a mapping from queryid to calls which we cache in between runs. We then use that to determine what has been executed since the last check, and only query full metrics data for queries that have been executed.
+
+  In the benchmark environment, this led to a 98% reduction in how many queries need to be returned to the Agent, which reduces Agent processing time, memory consumption, and network ingress. ([#17187](https://github.com/DataDog/integrations-core/pull/17187))
+* Skip relations with granted AccessExclusiveLock to avoid relations metrics query timeout ([#17234](https://github.com/DataDog/integrations-core/pull/17234))
+* Fix NoneType error in schema collection when partition tables have no activities ([#17235](https://github.com/DataDog/integrations-core/pull/17235))
+
 ## 17.0.0 / 2024-02-16 / Agent 7.52.0
 
 ***Changed***:

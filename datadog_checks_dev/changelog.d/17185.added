@@ -1,1 +1,0 @@
-Added a check to the `ddev validate codeowners` to make sure that logs assets are owned by `@DatadDog/logs-backend`.

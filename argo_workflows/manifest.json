@@ -26,6 +26,9 @@
       "configuration": {
         "spec": "assets/configuration/spec.yaml"
       },
+      "process_signatures": [
+        "workflow-controller"
+      ],
       "events": {
         "creates_events": false
       },
