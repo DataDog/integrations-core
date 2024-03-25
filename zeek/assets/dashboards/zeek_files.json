@@ -45,7 +45,7 @@
             "id": 3548511128016828,
             "definition": {
                 "type": "note",
-                "content": "## Widgets\n1. Hidden Executable Files\n2. File Stream Bytes Over Time\n3. Locally Originated Files\n4. Files by Source\n5. Files Sent by Connection Originator\n6. Top 10 File Analyzers\n7. Files Received from Responder\n8. Top 10 MIME Types\n9. Files Log Details\n10. Total Executable Files\n11. Executables With ASLR Support\n12. Executables With DEP Support\n13. Executables With Enforced Code Integrity\n14. File Types\n15. Executable Target Machine\n16. Executable Operating Systems\n17. PE Log Details\n18. Total Certificates\n19. End Host Certificates\n20. Chain Certificates\n21. Certificates Sent from Client\n22. Certificates by Versions\n23. Certificates by Key Algorithm and Key Type\n24. Certificates by Signature Algorithms\n25. X.509 Log Details",
+                "content": "## Widgets\n1. Hidden Executable Files\n2. File Stream Bytes Over Time\n3. Top 10 Originating Hosts\n4. Top 10 Responding Hosts\n3. Locally Originated Files\n4. Files by Source\n5. Files Sent by Connection Originator\n6. Top 10 File Analyzers\n7. Files Received from Responder\n8. Top 10 MIME Types\n9. Files Log Details\n10. Total Executable Files\n11. Executables With ASLR Support\n12. Executables With DEP Support\n13. Executables With Enforced Code Integrity\n14. File Types\n15. Executable Target Machine\n16. Executable Operating Systems\n17. PE Log Details\n18. Total Certificates\n19. End Host Certificates\n20. Chain Certificates\n21. Certificates Sent from Client\n22. Certificates by Versions\n23. Certificates by Key Algorithm and Key Type\n24. Certificates by Signature Algorithms\n25. X.509 Log Details",
                 "background_color": "white",
                 "font_size": "14",
                 "text_align": "left",
@@ -97,7 +97,7 @@
                                             },
                                             "group_by": [],
                                             "search": {
-                                                "query": "source:zeek service:files @mime_type:\"application/x-dosexec\" @filename:* -@filename:*exe* $Host "
+                                                "query": "source:zeek service:(files OR files_red) @mime_type:\"application/x-dosexec\" @filename:* -@filename:*exe* $Host "
                                             },
                                             "storage": "hot"
                                         }
@@ -166,7 +166,7 @@
                                             },
                                             "group_by": [],
                                             "search": {
-                                                "query": "source:zeek service:files $Host"
+                                                "query": "source:zeek service:(files OR files_red) $Host"
                                             },
                                             "storage": "hot"
                                         },
@@ -182,7 +182,7 @@
                                             },
                                             "group_by": [],
                                             "search": {
-                                                "query": "source:zeek service:files $Host"
+                                                "query": "source:zeek service:(files OR files_red) $Host"
                                             },
                                             "storage": "hot"
                                         },
@@ -198,7 +198,7 @@
                                             },
                                             "group_by": [],
                                             "search": {
-                                                "query": "source:zeek service:files $Host"
+                                                "query": "source:zeek service:(files OR files_red) $Host"
                                             },
                                             "storage": "hot"
                                         },
@@ -214,7 +214,7 @@
                                             },
                                             "group_by": [],
                                             "search": {
-                                                "query": "source:zeek service:files $Host"
+                                                "query": "source:zeek service:(files OR files_red) $Host"
                                             },
                                             "storage": "hot"
                                         }
@@ -233,6 +233,130 @@
                             "x": 3,
                             "y": 0,
                             "width": 9,
+                            "height": 4
+                        }
+                    },
+                    {
+                        "id": 5002935234597270,
+                        "definition": {
+                            "title": "Top 10 Originating Hosts",
+                            "title_size": "16",
+                            "title_align": "left",
+                            "time": {},
+                            "requests": [
+                                {
+                                    "response_format": "scalar",
+                                    "formulas": [
+                                        {
+                                            "formula": "query1",
+                                            "limit": {
+                                                "count": 10,
+                                                "order": "desc"
+                                            }
+                                        }
+                                    ],
+                                    "queries": [
+                                        {
+                                            "data_source": "logs",
+                                            "name": "query1",
+                                            "indexes": [
+                                                "*"
+                                            ],
+                                            "compute": {
+                                                "aggregation": "count"
+                                            },
+                                            "group_by": [
+                                                {
+                                                    "facet": "@network.client.ip",
+                                                    "limit": 10,
+                                                    "sort": {
+                                                        "order": "desc",
+                                                        "aggregation": "count"
+                                                    }
+                                                }
+                                            ],
+                                            "search": {
+                                                "query": "source:zeek service:(files OR files_red) @network.client.ip:* $Host"
+                                            },
+                                            "storage": "hot"
+                                        }
+                                    ],
+                                    "style": {
+                                        "palette": "datadog16"
+                                    }
+                                }
+                            ],
+                            "type": "sunburst",
+                            "legend": {
+                                "type": "automatic"
+                            }
+                        },
+                        "layout": {
+                            "x": 0,
+                            "y": 4,
+                            "width": 6,
+                            "height": 4
+                        }
+                    },
+                    {
+                        "id": 4238883201193698,
+                        "definition": {
+                            "title": "Top 10 Responding Hosts",
+                            "title_size": "16",
+                            "title_align": "left",
+                            "time": {},
+                            "requests": [
+                                {
+                                    "response_format": "scalar",
+                                    "formulas": [
+                                        {
+                                            "formula": "query1",
+                                            "limit": {
+                                                "count": 10,
+                                                "order": "desc"
+                                            }
+                                        }
+                                    ],
+                                    "queries": [
+                                        {
+                                            "data_source": "logs",
+                                            "name": "query1",
+                                            "indexes": [
+                                                "*"
+                                            ],
+                                            "compute": {
+                                                "aggregation": "count"
+                                            },
+                                            "group_by": [
+                                                {
+                                                    "facet": "@network.destination.ip",
+                                                    "limit": 10,
+                                                    "sort": {
+                                                        "order": "desc",
+                                                        "aggregation": "count"
+                                                    }
+                                                }
+                                            ],
+                                            "search": {
+                                                "query": "source:zeek service:(files OR files_red) @network.destination.ip:* $Host"
+                                            },
+                                            "storage": "hot"
+                                        }
+                                    ],
+                                    "style": {
+                                        "palette": "datadog16"
+                                    }
+                                }
+                            ],
+                            "type": "sunburst",
+                            "legend": {
+                                "type": "automatic"
+                            }
+                        },
+                        "layout": {
+                            "x": 6,
+                            "y": 4,
+                            "width": 6,
                             "height": 4
                         }
                     },
@@ -262,7 +386,7 @@
                                             },
                                             "group_by": [],
                                             "search": {
-                                                "query": "source:zeek service:files @local_orig:true $Host"
+                                                "query": "source:zeek service:(files OR files_red) @local_orig:true $Host"
                                             },
                                             "storage": "hot"
                                         }
@@ -278,7 +402,7 @@
                         },
                         "layout": {
                             "x": 0,
-                            "y": 4,
+                            "y": 8,
                             "width": 4,
                             "height": 4
                         }
@@ -322,7 +446,7 @@
                                                 }
                                             ],
                                             "search": {
-                                                "query": "source:zeek service:files $Host"
+                                                "query": "source:zeek service:(files OR files_red) $Host"
                                             },
                                             "storage": "hot"
                                         }
@@ -339,7 +463,7 @@
                         },
                         "layout": {
                             "x": 4,
-                            "y": 4,
+                            "y": 8,
                             "width": 8,
                             "height": 4
                         }
@@ -370,7 +494,7 @@
                                             },
                                             "group_by": [],
                                             "search": {
-                                                "query": "source:zeek service:files @is_orig:true $Host"
+                                                "query": "source:zeek service:(files OR files_red) @is_orig:true $Host"
                                             },
                                             "storage": "hot"
                                         }
@@ -386,7 +510,7 @@
                         },
                         "layout": {
                             "x": 0,
-                            "y": 8,
+                            "y": 12,
                             "width": 4,
                             "height": 4
                         }
@@ -430,7 +554,7 @@
                                                 }
                                             ],
                                             "search": {
-                                                "query": "source:zeek service:files $Host"
+                                                "query": "source:zeek service:(files OR files_red) $Host"
                                             },
                                             "storage": "hot"
                                         }
@@ -448,7 +572,7 @@
                         },
                         "layout": {
                             "x": 4,
-                            "y": 8,
+                            "y": 12,
                             "width": 8,
                             "height": 4
                         }
@@ -479,7 +603,7 @@
                                             },
                                             "group_by": [],
                                             "search": {
-                                                "query": "source:zeek service:files @is_orig:false $Host"
+                                                "query": "source:zeek service:(files OR files_red) @is_orig:false $Host"
                                             },
                                             "storage": "hot"
                                         }
@@ -495,7 +619,7 @@
                         },
                         "layout": {
                             "x": 0,
-                            "y": 12,
+                            "y": 16,
                             "width": 4,
                             "height": 4
                         }
@@ -539,7 +663,7 @@
                                                 }
                                             ],
                                             "search": {
-                                                "query": "source:zeek service:files $Host"
+                                                "query": "source:zeek service:(files OR files_red) $Host"
                                             },
                                             "storage": "hot"
                                         }
@@ -557,7 +681,7 @@
                         },
                         "layout": {
                             "x": 4,
-                            "y": 12,
+                            "y": 16,
                             "width": 8,
                             "height": 4
                         }
@@ -573,7 +697,7 @@
                                     "response_format": "event_list",
                                     "query": {
                                         "data_source": "logs_stream",
-                                        "query_string": "source:zeek service:files $Host",
+                                        "query_string": "source:zeek service:(files OR files_red) $Host",
                                         "indexes": [],
                                         "storage": "hot"
                                     },
@@ -591,19 +715,19 @@
                                             "width": "auto"
                                         },
                                         {
-                                            "field": "zeek.orig_h",
+                                            "field": "network.client.ip",
                                             "width": "auto"
                                         },
                                         {
-                                            "field": "zeek.orig_p",
+                                            "field": "network.client.port",
                                             "width": "auto"
                                         },
                                         {
-                                            "field": "zeek.resp_h",
+                                            "field": "network.destination.ip",
                                             "width": "auto"
                                         },
                                         {
-                                            "field": "zeek.resp_p",
+                                            "field": "network.destination.port",
                                             "width": "auto"
                                         },
                                         {
@@ -649,7 +773,7 @@
                         },
                         "layout": {
                             "x": 0,
-                            "y": 16,
+                            "y": 20,
                             "width": 12,
                             "height": 4
                         }
@@ -660,7 +784,7 @@
                 "x": 0,
                 "y": 2,
                 "width": 12,
-                "height": 21
+                "height": 25
             }
         },
         {
@@ -1124,7 +1248,7 @@
             },
             "layout": {
                 "x": 0,
-                "y": 23,
+                "y": 27,
                 "width": 12,
                 "height": 16
             }
@@ -1161,7 +1285,7 @@
                                             },
                                             "group_by": [],
                                             "search": {
-                                                "query": "source:zeek service:x509 $Host"
+                                                "query": "source:zeek service:(x509 OR x509_red) $Host"
                                             },
                                             "storage": "hot"
                                         }
@@ -1209,7 +1333,7 @@
                                             },
                                             "group_by": [],
                                             "search": {
-                                                "query": "source:zeek service:x509 @host_cert:true $Host"
+                                                "query": "source:zeek service:(x509 OR x509_red) @host_cert:true $Host"
                                             },
                                             "storage": "hot"
                                         }
@@ -1257,7 +1381,7 @@
                                             },
                                             "group_by": [],
                                             "search": {
-                                                "query": "source:zeek service:x509 @host_cert:false $Host"
+                                                "query": "source:zeek service:(x509 OR x509_red) @host_cert:false $Host"
                                             },
                                             "storage": "hot"
                                         }
@@ -1308,7 +1432,7 @@
                                             },
                                             "group_by": [],
                                             "search": {
-                                                "query": "source:zeek service:x509 @client_cert:true $Host"
+                                                "query": "source:zeek service:(x509 OR x509_red) @client_cert:true $Host"
                                             },
                                             "storage": "hot"
                                         }
@@ -1369,7 +1493,7 @@
                                                 }
                                             ],
                                             "search": {
-                                                "query": "source:zeek service:x509 $Host"
+                                                "query": "source:zeek service:(x509 OR x509_red) $Host"
                                             },
                                             "storage": "hot"
                                         }
@@ -1438,7 +1562,7 @@
                                                 }
                                             ],
                                             "search": {
-                                                "query": "source:zeek service:x509 $Host"
+                                                "query": "source:zeek service:(x509 OR x509_red) $Host"
                                             },
                                             "storage": "hot"
                                         }
@@ -1499,7 +1623,7 @@
                                                 }
                                             ],
                                             "search": {
-                                                "query": "source:zeek service:x509 $Host"
+                                                "query": "source:zeek service:(x509 OR x509_red) $Host"
                                             },
                                             "storage": "hot"
                                         }
@@ -1533,7 +1657,7 @@
                                     "response_format": "event_list",
                                     "query": {
                                         "data_source": "logs_stream",
-                                        "query_string": "source:zeek service:x509 $Host",
+                                        "query_string": "source:zeek service:(x509 OR x509_red) $Host",
                                         "indexes": [],
                                         "storage": "hot"
                                     },
@@ -1594,7 +1718,7 @@
             },
             "layout": {
                 "x": 0,
-                "y": 39,
+                "y": 43,
                 "width": 12,
                 "height": 18
             }

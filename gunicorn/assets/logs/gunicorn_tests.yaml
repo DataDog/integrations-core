@@ -19,6 +19,7 @@ tests:
         client:
           ip: "127.0.0.1"
     message: "127.0.0.1 - frank [13/Jul/2016:10:55:36 +0000] \"GET /apache_pb.gif HTTP/1.0\" 200 2326"
+    status: "info"
     tags:
      - "source:LOGS_SOURCE"
     timestamp: 1468407336000
@@ -54,6 +55,7 @@ tests:
         client:
           ip: "192.0.2.1"
     message: "192.0.2.1 - Ultan [07/Mar/2004:16:43:54 -0800] \"GET /unencrypted_password_list?foo=bar HTTP/1.1\" 404 9001 \"http://passwords.hackz0r\" \"Mozilla/4.08 [en] (Win95)\""
+    status: "warn"
     tags:
      - "source:LOGS_SOURCE"
     timestamp: 1078706634000
@@ -65,6 +67,7 @@ tests:
       pid: 17
       timestamp: 1529660004000
     message: "[2018-06-22 09:33:24 +0000] [17] [INFO] Booting worker with pid: 17"
+    status: "info"
     tags:
      - "source:LOGS_SOURCE"
     timestamp: 1529660004000
@@ -78,6 +81,7 @@ tests:
       level: "ERROR"
       timestamp: 1498123871580
     message: "[2017-06-22 09:31:11,580] ERROR in app: Exception on /api/users [POST] Traceback (most recent call last): File \"/usr/local/lib/python3.5/dist-packages/flask/app.py\", line 1982, in wsgi_app response = self.full_dispatch_request()"
+    status: "error"
     tags:
      - "source:LOGS_SOURCE"
     timestamp: 1498123871580

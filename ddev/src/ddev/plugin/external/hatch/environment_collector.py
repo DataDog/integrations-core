@@ -131,11 +131,11 @@ class DatadogChecksEnvironmentCollector(EnvironmentCollectorInterface):
             'scripts': {
                 'style': [
                     f'black --config {settings_dir}/pyproject.toml --check --diff .',
-                    f'ruff --config {settings_dir}/pyproject.toml .',
+                    f'ruff check --config {settings_dir}/pyproject.toml .',
                 ],
                 'fmt': [
                     f'black . --config {settings_dir}/pyproject.toml',
-                    f'ruff --config {settings_dir}/pyproject.toml --fix .',
+                    f'ruff check --config {settings_dir}/pyproject.toml --fix .',
                     'python -c "print(\'\\n[NOTE] ruff may still report style errors for things '
                     'black cannot fix, these will need to be fixed manually.\')"',
                     'style',
@@ -145,7 +145,7 @@ class DatadogChecksEnvironmentCollector(EnvironmentCollectorInterface):
             # We pin deps in order to make CI more stable/reliable.
             'dependencies': [
                 'black==24.2.0',
-                'ruff==0.2.1',
+                'ruff==0.3.3',
                 # Keep in sync with: /datadog_checks_base/pyproject.toml
                 'pydantic==2.0.2',
             ],

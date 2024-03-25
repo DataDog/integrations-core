@@ -477,8 +477,8 @@ def test_connection_error_reporting(
         if instance_docker['connector'] == 'odbc':
             pytest.skip("adoprovider_override is not relevant for the odbc connector")
         adoprovider_override = instance_overrides['adoprovider'].upper()
-        if adoprovider_override not in Connection.valid_adoproviders:
-            Connection.valid_adoproviders.append(adoprovider_override)
+        if adoprovider_override not in Connection.VALID_ADOPROVIDERS:
+            Connection.VALID_ADOPROVIDERS.append(adoprovider_override)
     if 'adoprovider' in instance_docker and ('driver' in instance_overrides or 'dsn' in instance_overrides):
         pytest.skip("driver or DSN overrides is not relevant for the adoprovider")
 

@@ -7,6 +7,7 @@ tests:
       level: "SYSTEM"
       timestamp: 1602848328063
     message: "================ [START]: pid=1"
+    status: "ok"
     tags:
      - "source:LOGS_SOURCE"
     timestamp: 1602848328063
@@ -17,6 +18,7 @@ tests:
       level: "SYSTEM"
       timestamp: 1602848328066
     message: "server socket opened: expr=:1978 timeout=30.0"
+    status: "ok"
     tags:
      - "source:LOGS_SOURCE"
     timestamp: 1602848328066
@@ -39,6 +41,7 @@ tests:
           port: 57458
       timestamp: 1602848336803
     message: "2020-10-16T11:38:56.803553Z: [INFO]: (172.23.0.1:57458): GET /rpc/report HTTP/1.1: 200"
+    status: "info"
     tags:
      - "source:LOGS_SOURCE"
     timestamp: 1602848336803
@@ -61,6 +64,7 @@ tests:
           port: 57666
       timestamp: 1602848715115
     message: "2020-10-16T11:45:15.115938Z: [INFO]: (172.23.0.1:57666): GET /not-found HTTP/1.1: 404"
+    status: "info"
     tags:
      - "source:LOGS_SOURCE"
     timestamp: 1602848715115
@@ -71,6 +75,7 @@ tests:
       level: "SYSTEM"
       timestamp: 1602848327141
     message: "server stopped"
+    status: "ok"
     tags:
      - "source:LOGS_SOURCE"
     timestamp: 1602848327141

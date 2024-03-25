@@ -18,6 +18,8 @@ tests:
       service: "temporal-history"
       ts: "2023-03-16T12:25:24.072Z"
     message: "Created gRPC listener"
+    service: "temporal-history"
+    status: "info"
     tags:
      - "source:LOGS_SOURCE"
      - "service_name:history"
@@ -25,18 +27,18 @@ tests:
  -
   sample: |-
     {
-      "level": "error",
-      "ts": "2023-03-16T12:46:57.921Z",
-      "msg": "Persistent store operation failure",
-      "service": "matching",
-      "component": "matching-engine",
-      "wf-task-queue-name": "/_sys/python-task-queue/2",
-      "wf-task-queue-type": "Activity",
-      "wf-namespace": "default",
-      "store-operation": "update-task-queue",
-      "error": "Failed to lock task queue. Error: driver: bad connection",
-      "logging-call-at": "taskReader.go:212",
-      "stacktrace": "go.temporal.io/server/common/log.(*zapLogger).Error\n\t/home/builder/temporal/common/log/zap_logger.go:144\ngo.temporal.io/server/service/matching.(*taskReader).getTasksPump\n\t/home/builder/temporal/service/matching/taskReader.go:212\ngo.temporal.io/server/internal/goro.(*Group).Go.func1\n\t/home/builder/temporal/internal/goro/group.go:57"
+      "msg" : "Persistent store operation failure",
+      "wf-task-queue-name" : "/_sys/python-task-queue/2",
+      "component" : "matching-engine",
+      "wf-namespace" : "default",
+      "store-operation" : "update-task-queue",
+      "wf-task-queue-type" : "Activity",
+      "stacktrace" : "go.temporal.io/server/common/log.(*zapLogger).Error\n\t/home/builder/temporal/common/log/zap_logger.go:144\ngo.temporal.io/server/service/matching.(*taskReader).getTasksPump\n\t/home/builder/temporal/service/matching/taskReader.go:212\ngo.temporal.io/server/internal/goro.(*Group).Go.func1\n\t/home/builder/temporal/internal/goro/group.go:57",
+      "level" : "error",
+      "service" : "matching",
+      "error" : "Failed to lock task queue. Error: driver: bad connection",
+      "logging-call-at" : "taskReader.go:212",
+      "ts" : "2023-03-16T12:46:57.921Z"
     }
   result:
     custom:
@@ -52,11 +54,13 @@ tests:
       wf-task-queue-name: "/_sys/python-task-queue/2"
       wf-task-queue-type: "Activity"
     message: "Persistent store operation failure"
+    service: "temporal-matching"
+    status: "error"
     tags:
-      - "source:LOGS_SOURCE"
-      - "service_name:matching"
-      - "namespace:default"
-      - "taskqueue:/_sys/python-task-queue/2"
-      - "task_type:activity"
+     - "source:LOGS_SOURCE"
+     - "service_name:matching"
+     - "namespace:default"
+     - "taskqueue:/_sys/python-task-queue/2"
+     - "task_type:activity"
     timestamp: 1678970817921
 

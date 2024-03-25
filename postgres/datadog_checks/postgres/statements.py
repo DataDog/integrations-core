@@ -19,6 +19,7 @@ from datadog_checks.base.utils.serialization import json
 from datadog_checks.base.utils.tracking import tracked_method
 from datadog_checks.postgres.cursor import CommenterCursor, CommenterDictCursor
 
+from .query_calls_cache import QueryCallsCache
 from .util import DatabaseConfigurationError, payload_pg_version, warning_with_tags
 from .version_utils import V9_4, V14
 
@@ -27,6 +28,12 @@ try:
 except ImportError:
     from ..stubs import datadog_agent
 
+QUERYID_TO_CALLS_QUERY = """
+SELECT queryid, calls
+  FROM {pg_stat_statements_view}
+  WHERE queryid IS NOT NULL
+"""
+
 STATEMENTS_QUERY = """
 SELECT {cols}
   FROM {pg_stat_statements_view} as pg_stat_statements
@@ -34,8 +41,8 @@ SELECT {cols}
          ON pg_stat_statements.userid = pg_roles.oid
   LEFT JOIN pg_database
          ON pg_stat_statements.dbid = pg_database.oid
-  WHERE query != '<insufficient privilege>'
-  AND query NOT LIKE 'EXPLAIN %%'
+  WHERE query NOT LIKE 'EXPLAIN %%'
+  AND queryid = ANY('{{ {called_queryids} }}'::bigint[])
   {filters}
   {extra_clauses}
 """
@@ -146,6 +153,7 @@ class PostgresStatementMetrics(DBMAsyncJob):
         self.tags = None
         self._state = StatementMetrics()
         self._stat_column_cache = []
+        self._query_calls_cache = QueryCallsCache()
         self._track_io_timing_cache = None
         self._obfuscate_options = to_native_string(json.dumps(self._config.obfuscator_options))
         # full_statement_text_cache: limit the ingestion rate of full statement text events per query_signature
@@ -177,7 +185,11 @@ class PostgresStatementMetrics(DBMAsyncJob):
 
         # Querying over '*' with limit 0 allows fetching only the column names from the cursor without data
         query = STATEMENTS_QUERY.format(
-            cols='*', pg_stat_statements_view=self._config.pg_stat_statements_view, extra_clauses="LIMIT 0", filters=""
+            cols='*',
+            pg_stat_statements_view=self._config.pg_stat_statements_view,
+            extra_clauses="LIMIT 0",
+            filters="",
+            called_queryids="",
         )
         with self._check._get_main_db() as conn:
             with conn.cursor(cursor_factory=CommenterCursor) as cursor:
@@ -185,6 +197,39 @@ class PostgresStatementMetrics(DBMAsyncJob):
                 col_names = [desc[0] for desc in cursor.description] if cursor.description else []
                 self._stat_column_cache = col_names
                 return col_names
+
+    def _check_called_queries(self):
+        pgss_view_without_query_text = self._config.pg_stat_statements_view
+        if pgss_view_without_query_text == "pg_stat_statements":
+            # Passing false for the showtext argument leads to a huge performance increase. This
+            # allows the engine to avoid retrieving the potentially large amount of text data.
+            # The query count query does not depend on the statement text, so it's safe for this use case.
+            # For more info: https://www.postgresql.org/docs/current/pgstatstatements.html#PGSTATSTATEMENTS-FUNCS
+            pgss_view_without_query_text = "pg_stat_statements(false)"
+
+        with self._check._get_main_db() as conn:
+            with conn.cursor(cursor_factory=CommenterCursor) as cursor:
+                called_queryids = []
+                query = QUERYID_TO_CALLS_QUERY.format(pg_stat_statements_view=pgss_view_without_query_text)
+                rows = self._execute_query(cursor, query, params=(self._config.dbname,))
+                for row in rows:
+                    queryid = row[0]
+                    if queryid is None:
+                        continue
+
+                    calls = row[1]
+                    calls_changed = self._query_calls_cache.set_calls(queryid, calls)
+                    if calls_changed:
+                        called_queryids.append(queryid)
+                self._query_calls_cache.end_query_call_snapshot()
+                self._check.gauge(
+                    "dd.postgresql.pg_stat_statements.calls_changed",
+                    len(called_queryids),
+                    tags=self.tags,
+                    hostname=self._check.resolved_hostname,
+                )
+
+                return called_queryids
 
     def run_job(self):
         # do not emit any dd.internal metrics for DBM specific check code
@@ -222,6 +267,7 @@ class PostgresStatementMetrics(DBMAsyncJob):
     @tracked_method(agent_check_getter=agent_check_getter, track_result_length=True)
     def _load_pg_stat_statements(self):
         try:
+            called_queryids = self._check_called_queries()
             available_columns = set(self._get_pg_stat_statements_columns())
             missing_columns = PG_STAT_STATEMENTS_REQUIRED_COLUMNS - available_columns
             if len(missing_columns) > 0:
@@ -296,6 +342,7 @@ class PostgresStatementMetrics(DBMAsyncJob):
                             pg_stat_statements_view=self._config.pg_stat_statements_view,
                             filters=filters,
                             extra_clauses="",
+                            called_queryids=', '.join([str(i) for i in called_queryids]),
                         ),
                         params=params,
                     )

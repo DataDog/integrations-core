@@ -1,6 +1,6 @@
 {
-    "title": "Zeek - Network Protocols (NTP, SNMP, SSL)",
-    "description": "- This dashboard gives insights into network protocols such as NTP, SNMP, SSH.",
+    "title": "Zeek - Network Protocols (NTP, SNMP, SSL, Kerberos)",
+    "description": "- This dashboard gives insights into network protocols such as NTP, SNMP, SSH and Kerberos.",
     "widgets": [
         {
             "id": 2155798533869120,
@@ -24,7 +24,7 @@
             "id": 686192146703606,
             "definition": {
                 "type": "note",
-                "content": "## Overview\n- This dashboard gives insights into network protocols such as NTP, SNMP, SSH.",
+                "content": "## Overview\n- This dashboard gives insights into network protocols such as NTP, SNMP, SSH and Kerberos.",
                 "background_color": "white",
                 "font_size": "14",
                 "text_align": "left",
@@ -45,7 +45,7 @@
             "id": 8931483032941896,
             "definition": {
                 "type": "note",
-                "content": "## Widgets\n1. NTP versions\n2. Top 10 NTP Modes\n3. NTP stratum levels\n4. NTP Log Details\n5. Timeline for SNMP Activities\n6. SNMP Log Details\n7. Successfully Established Sessions\n8. Failed Established Sessions\n9. TLS Versions\n10. Top 10 TLS Version and Protocol Used\n11. Top 10 Handshake Alerts\n12. Top 10 Validation Messages\n13. Top 10 SSL Packet Orders\n14. Top 10 Requested Server Names\n15. Top 10 Ciphers\n16. Top Certificate Subjects\n17. SSL Log Details",
+                "content": "## Widgets\n1. NTP versions\n2. Top 10 NTP Modes\n3. NTP stratum levels\n4. NTP Log Details\n5. Timeline for SNMP Activities\n6. SNMP Log Details\n7. Successfully Established Sessions\n8. Failed Established Sessions\n9. TLS Versions\n10. Top 10 TLS Version and Protocol Used\n11. Top 10 Handshake Alerts\n12. Top 10 Validation Messages\n13. Top 10 SSL Packet Orders\n14. Top 10 Requested Server Names\n15. Top 10 Ciphers\n16. Top Certificate Subjects\n17. SSL Log Details\n18. Failed Requests\n19. Error Occurred\n20. Request Types\n21. Forwardable Tickets\n22. Renewable Tickets\n23. Top 10 Clients\n24. Top 10 Originators\n25. Top 10 Responders\n26. Top 10 Ticket Encryption Types\n27. Top 10 Service\n28. Kerberos Log Details",
                 "background_color": "white",
                 "font_size": "14",
                 "text_align": "left",
@@ -282,19 +282,19 @@
                                             "width": "auto"
                                         },
                                         {
-                                            "field": "zeek.orig_h",
+                                            "field": "network.client.ip",
                                             "width": "auto"
                                         },
                                         {
-                                            "field": "zeek.orig_p",
+                                            "field": "network.client.port",
                                             "width": "auto"
                                         },
                                         {
-                                            "field": "zeek.resp_h",
+                                            "field": "network.destination.ip",
                                             "width": "auto"
                                         },
                                         {
-                                            "field": "zeek.resp_p",
+                                            "field": "network.destination.port",
                                             "width": "auto"
                                         },
                                         {
@@ -422,19 +422,19 @@
                                             "width": "auto"
                                         },
                                         {
-                                            "field": "zeek.orig_h",
+                                            "field": "network.client.ip",
                                             "width": "auto"
                                         },
                                         {
-                                            "field": "zeek.orig_p",
+                                            "field": "network.client.port",
                                             "width": "auto"
                                         },
                                         {
-                                            "field": "zeek.resp_h",
+                                            "field": "network.destination.ip",
                                             "width": "auto"
                                         },
                                         {
-                                            "field": "zeek.resp_p",
+                                            "field": "network.destination.port",
                                             "width": "auto"
                                         },
                                         {
@@ -501,7 +501,7 @@
                                             },
                                             "group_by": [],
                                             "search": {
-                                                "query": "source:zeek service:ssl @established:true $Host $Originator-IP $Originator-Port $Responder-IP $Responder-Port"
+                                                "query": "source:zeek service:(ssl OR ssl_red) @established:true $Host $Originator-IP $Originator-Port $Responder-IP $Responder-Port"
                                             },
                                             "storage": "hot"
                                         }
@@ -548,7 +548,7 @@
                                             },
                                             "group_by": [],
                                             "search": {
-                                                "query": "source:zeek service:ssl @established:false $Host $Originator-IP $Originator-Port $Responder-IP $Responder-Port "
+                                                "query": "source:zeek service:(ssl OR ssl_red) @established:false $Host $Originator-IP $Originator-Port $Responder-IP $Responder-Port "
                                             },
                                             "storage": "hot"
                                         }
@@ -608,7 +608,7 @@
                                                 }
                                             ],
                                             "search": {
-                                                "query": "source:zeek service:ssl @version:* $Host $Originator-IP $Originator-Port $Responder-IP $Responder-Port"
+                                                "query": "source:zeek service:(ssl OR ssl_red) @version:* $Host $Originator-IP $Originator-Port $Responder-IP $Responder-Port"
                                             },
                                             "storage": "hot"
                                         }
@@ -677,7 +677,7 @@
                                                 }
                                             ],
                                             "search": {
-                                                "query": "source:zeek service:ssl @next_protocol:* $Host $Originator-IP $Originator-Port $Responder-IP $Responder-Port"
+                                                "query": "source:zeek service:(ssl OR ssl_red) @next_protocol:* $Host $Originator-IP $Originator-Port $Responder-IP $Responder-Port"
                                             },
                                             "storage": "hot"
                                         }
@@ -739,7 +739,7 @@
                                                 }
                                             ],
                                             "search": {
-                                                "query": "source:zeek service:ssl $Host $Originator-IP $Originator-Port $Responder-IP $Responder-Port"
+                                                "query": "source:zeek service:(ssl OR ssl_red) $Host $Originator-IP $Originator-Port $Responder-IP $Responder-Port"
                                             },
                                             "storage": "hot"
                                         }
@@ -801,7 +801,7 @@
                                                 }
                                             ],
                                             "search": {
-                                                "query": "source:zeek service:ssl $Host $Originator-IP $Originator-Port $Responder-IP $Responder-Port"
+                                                "query": "source:zeek service:(ssl OR ssl_red) $Host $Originator-IP $Originator-Port $Responder-IP $Responder-Port"
                                             },
                                             "storage": "hot"
                                         }
@@ -863,7 +863,7 @@
                                                 }
                                             ],
                                             "search": {
-                                                "query": "source:zeek service:ssl $Host $Originator-IP $Originator-Port $Responder-IP $Responder-Port"
+                                                "query": "source:zeek service:(ssl OR ssl_red) $Host $Originator-IP $Originator-Port $Responder-IP $Responder-Port"
                                             },
                                             "storage": "hot"
                                         }
@@ -925,7 +925,7 @@
                                                 }
                                             ],
                                             "search": {
-                                                "query": "source:zeek service:ssl $Host $Originator-IP $Originator-Port $Responder-IP $Responder-Port"
+                                                "query": "source:zeek service:(ssl OR ssl_red) $Host $Originator-IP $Originator-Port $Responder-IP $Responder-Port"
                                             },
                                             "storage": "hot"
                                         }
@@ -987,7 +987,7 @@
                                                 }
                                             ],
                                             "search": {
-                                                "query": "source:zeek service:ssl $Host $Originator-IP $Originator-Port $Responder-IP $Responder-Port"
+                                                "query": "source:zeek service:(ssl OR ssl_red) $Host $Originator-IP $Originator-Port $Responder-IP $Responder-Port"
                                             },
                                             "storage": "hot"
                                         }
@@ -1048,7 +1048,7 @@
                                                 }
                                             ],
                                             "search": {
-                                                "query": "source:zeek service:ssl $Host $Originator-IP $Originator-Port $Responder-IP $Responder-Port"
+                                                "query": "source:zeek service:(ssl OR ssl_red) $Host $Originator-IP $Originator-Port $Responder-IP $Responder-Port"
                                             },
                                             "storage": "hot"
                                         }
@@ -1081,7 +1081,7 @@
                                     "response_format": "event_list",
                                     "query": {
                                         "data_source": "logs_stream",
-                                        "query_string": "source:zeek service:ssl $Host $Originator-IP $Originator-Port $Responder-IP $Responder-Port",
+                                        "query_string": "source:zeek service:(ssl OR ssl_red) $Host $Originator-IP $Originator-Port $Responder-IP $Responder-Port",
                                         "indexes": [],
                                         "storage": "hot"
                                     },
@@ -1099,19 +1099,19 @@
                                             "width": "auto"
                                         },
                                         {
-                                            "field": "zeek.orig_h",
+                                            "field": "network.client.ip",
                                             "width": "auto"
                                         },
                                         {
-                                            "field": "zeek.orig_p",
+                                            "field": "network.client.port",
                                             "width": "auto"
                                         },
                                         {
-                                            "field": "zeek.resp_h",
+                                            "field": "network.destination.ip",
                                             "width": "auto"
                                         },
                                         {
-                                            "field": "zeek.resp_p",
+                                            "field": "network.destination.port",
                                             "width": "auto"
                                         },
                                         {
@@ -1146,6 +1146,669 @@
                 "width": 12,
                 "height": 21
             }
+        },
+        {
+            "id": 3137578041234626,
+            "definition": {
+                "title": "Kerberos",
+                "background_color": "vivid_purple",
+                "show_title": true,
+                "type": "group",
+                "layout_type": "ordered",
+                "widgets": [
+                    {
+                        "id": 757414958463254,
+                        "definition": {
+                            "title": "Failed Requests",
+                            "title_size": "16",
+                            "title_align": "left",
+                            "type": "query_value",
+                            "requests": [
+                                {
+                                    "formulas": [
+                                        {
+                                            "formula": "query1"
+                                        }
+                                    ],
+                                    "queries": [
+                                        {
+                                            "data_source": "logs",
+                                            "name": "query1",
+                                            "indexes": [
+                                                "*"
+                                            ],
+                                            "compute": {
+                                                "aggregation": "count"
+                                            },
+                                            "group_by": [],
+                                            "search": {
+                                                "query": "source:zeek service:kerberos @success:false $Host $Originator-IP $Originator-Port $Responder-IP $Responder-Port"
+                                            },
+                                            "storage": "hot"
+                                        }
+                                    ],
+                                    "response_format": "scalar"
+                                }
+                            ],
+                            "autoscale": true,
+                            "precision": 2
+                        },
+                        "layout": {
+                            "x": 0,
+                            "y": 0,
+                            "width": 3,
+                            "height": 3
+                        }
+                    },
+                    {
+                        "id": 5806146998903702,
+                        "definition": {
+                            "title": "Error Occurred",
+                            "title_size": "16",
+                            "title_align": "left",
+                            "time": {},
+                            "type": "query_value",
+                            "requests": [
+                                {
+                                    "formulas": [
+                                        {
+                                            "formula": "query1"
+                                        }
+                                    ],
+                                    "queries": [
+                                        {
+                                            "data_source": "logs",
+                                            "name": "query1",
+                                            "indexes": [
+                                                "*"
+                                            ],
+                                            "compute": {
+                                                "aggregation": "count"
+                                            },
+                                            "group_by": [],
+                                            "search": {
+                                                "query": "source:zeek service:kerberos @error_msg:* $Host $Originator-IP $Originator-Port $Responder-IP $Responder-Port"
+                                            },
+                                            "storage": "hot"
+                                        }
+                                    ],
+                                    "response_format": "scalar"
+                                }
+                            ],
+                            "autoscale": true,
+                            "precision": 2
+                        },
+                        "layout": {
+                            "x": 3,
+                            "y": 0,
+                            "width": 3,
+                            "height": 3
+                        }
+                    },
+                    {
+                        "id": 5141410440264284,
+                        "definition": {
+                            "title": "Request Types",
+                            "title_size": "16",
+                            "title_align": "left",
+                            "requests": [
+                                {
+                                    "formulas": [
+                                        {
+                                            "formula": "query1",
+                                            "limit": {
+                                                "count": 500,
+                                                "order": "desc"
+                                            }
+                                        }
+                                    ],
+                                    "queries": [
+                                        {
+                                            "data_source": "logs",
+                                            "name": "query1",
+                                            "indexes": [
+                                                "*"
+                                            ],
+                                            "compute": {
+                                                "aggregation": "count"
+                                            },
+                                            "group_by": [
+                                                {
+                                                    "facet": "@request_type",
+                                                    "limit": 10,
+                                                    "sort": {
+                                                        "order": "desc",
+                                                        "aggregation": "count"
+                                                    }
+                                                }
+                                            ],
+                                            "search": {
+                                                "query": "source:zeek service:kerberos $Host $Originator-IP $Originator-Port $Responder-IP $Responder-Port"
+                                            },
+                                            "storage": "hot"
+                                        }
+                                    ],
+                                    "response_format": "scalar",
+                                    "style": {
+                                        "palette": "datadog16"
+                                    }
+                                }
+                            ],
+                            "type": "sunburst",
+                            "legend": {
+                                "type": "automatic"
+                            }
+                        },
+                        "layout": {
+                            "x": 6,
+                            "y": 0,
+                            "width": 6,
+                            "height": 3
+                        }
+                    },
+                    {
+                        "id": 6496503126767804,
+                        "definition": {
+                            "title": "Forwardable Tickets",
+                            "title_size": "16",
+                            "title_align": "left",
+                            "time": {},
+                            "type": "query_value",
+                            "requests": [
+                                {
+                                    "formulas": [
+                                        {
+                                            "formula": "query1"
+                                        }
+                                    ],
+                                    "queries": [
+                                        {
+                                            "data_source": "logs",
+                                            "name": "query1",
+                                            "indexes": [
+                                                "*"
+                                            ],
+                                            "compute": {
+                                                "aggregation": "count"
+                                            },
+                                            "group_by": [],
+                                            "search": {
+                                                "query": "source:zeek service:kerberos @forwardable:true $Host $Originator-IP $Originator-Port $Responder-IP $Responder-Port"
+                                            },
+                                            "storage": "hot"
+                                        }
+                                    ],
+                                    "response_format": "scalar"
+                                }
+                            ],
+                            "autoscale": true,
+                            "precision": 2
+                        },
+                        "layout": {
+                            "x": 0,
+                            "y": 3,
+                            "width": 3,
+                            "height": 3
+                        }
+                    },
+                    {
+                        "id": 6248515777709240,
+                        "definition": {
+                            "title": "Renewable Tickets",
+                            "title_size": "16",
+                            "title_align": "left",
+                            "time": {},
+                            "type": "query_value",
+                            "requests": [
+                                {
+                                    "formulas": [
+                                        {
+                                            "formula": "query1"
+                                        }
+                                    ],
+                                    "queries": [
+                                        {
+                                            "data_source": "logs",
+                                            "name": "query1",
+                                            "indexes": [
+                                                "*"
+                                            ],
+                                            "compute": {
+                                                "aggregation": "count"
+                                            },
+                                            "group_by": [],
+                                            "search": {
+                                                "query": "source:zeek service:kerberos @renewable:true $Host $Originator-IP $Originator-Port $Responder-IP $Responder-Port"
+                                            },
+                                            "storage": "hot"
+                                        }
+                                    ],
+                                    "response_format": "scalar"
+                                }
+                            ],
+                            "autoscale": true,
+                            "precision": 2
+                        },
+                        "layout": {
+                            "x": 3,
+                            "y": 3,
+                            "width": 3,
+                            "height": 3
+                        }
+                    },
+                    {
+                        "id": 3574654627720712,
+                        "definition": {
+                            "title": "Top 10 Clients",
+                            "title_size": "16",
+                            "title_align": "left",
+                            "time": {},
+                            "type": "toplist",
+                            "requests": [
+                                {
+                                    "formulas": [
+                                        {
+                                            "formula": "query1",
+                                            "limit": {
+                                                "count": 10,
+                                                "order": "desc"
+                                            }
+                                        }
+                                    ],
+                                    "queries": [
+                                        {
+                                            "data_source": "logs",
+                                            "name": "query1",
+                                            "indexes": [
+                                                "*"
+                                            ],
+                                            "compute": {
+                                                "aggregation": "count"
+                                            },
+                                            "group_by": [
+                                                {
+                                                    "facet": "@client",
+                                                    "limit": 10,
+                                                    "sort": {
+                                                        "order": "desc",
+                                                        "aggregation": "count"
+                                                    }
+                                                }
+                                            ],
+                                            "search": {
+                                                "query": "source:zeek service:kerberos $Host $Originator-IP $Originator-Port $Responder-IP $Responder-Port"
+                                            },
+                                            "storage": "hot"
+                                        }
+                                    ],
+                                    "response_format": "scalar"
+                                }
+                            ],
+                            "style": {
+                                "display": {
+                                    "type": "stacked",
+                                    "legend": "automatic"
+                                },
+                                "palette": "dog_classic",
+                                "scaling": "relative"
+                            }
+                        },
+                        "layout": {
+                            "x": 6,
+                            "y": 3,
+                            "width": 6,
+                            "height": 3
+                        }
+                    },
+                    {
+                        "id": 5867312865540194,
+                        "definition": {
+                            "title": "Top 10 Originators",
+                            "title_size": "16",
+                            "title_align": "left",
+                            "type": "toplist",
+                            "requests": [
+                                {
+                                    "formulas": [
+                                        {
+                                            "formula": "query1",
+                                            "limit": {
+                                                "count": 10,
+                                                "order": "desc"
+                                            }
+                                        }
+                                    ],
+                                    "queries": [
+                                        {
+                                            "data_source": "logs",
+                                            "name": "query1",
+                                            "indexes": [
+                                                "*"
+                                            ],
+                                            "compute": {
+                                                "aggregation": "count"
+                                            },
+                                            "group_by": [
+                                                {
+                                                    "facet": "@network.client.ip",
+                                                    "limit": 10,
+                                                    "sort": {
+                                                        "order": "desc",
+                                                        "aggregation": "count"
+                                                    }
+                                                }
+                                            ],
+                                            "search": {
+                                                "query": "source:zeek service:kerberos $Host $Originator-IP $Originator-Port $Responder-IP $Responder-Port"
+                                            },
+                                            "storage": "hot"
+                                        }
+                                    ],
+                                    "response_format": "scalar"
+                                }
+                            ],
+                            "style": {
+                                "display": {
+                                    "type": "stacked",
+                                    "legend": "automatic"
+                                },
+                                "palette": "dog_classic",
+                                "scaling": "relative"
+                            }
+                        },
+                        "layout": {
+                            "x": 0,
+                            "y": 6,
+                            "width": 6,
+                            "height": 3
+                        }
+                    },
+                    {
+                        "id": 8782907206210596,
+                        "definition": {
+                            "title": "Top 10 Responders",
+                            "title_size": "16",
+                            "title_align": "left",
+                            "type": "toplist",
+                            "requests": [
+                                {
+                                    "formulas": [
+                                        {
+                                            "formula": "query1",
+                                            "limit": {
+                                                "count": 10,
+                                                "order": "desc"
+                                            }
+                                        }
+                                    ],
+                                    "queries": [
+                                        {
+                                            "data_source": "logs",
+                                            "name": "query1",
+                                            "indexes": [
+                                                "*"
+                                            ],
+                                            "compute": {
+                                                "aggregation": "count"
+                                            },
+                                            "group_by": [
+                                                {
+                                                    "facet": "@network.destination.ip",
+                                                    "limit": 10,
+                                                    "sort": {
+                                                        "order": "desc",
+                                                        "aggregation": "count"
+                                                    }
+                                                }
+                                            ],
+                                            "search": {
+                                                "query": "source:zeek service:kerberos $Host $Originator-IP $Originator-Port $Responder-IP $Responder-Port"
+                                            },
+                                            "storage": "hot"
+                                        }
+                                    ],
+                                    "response_format": "scalar"
+                                }
+                            ],
+                            "style": {
+                                "display": {
+                                    "type": "stacked",
+                                    "legend": "automatic"
+                                },
+                                "palette": "dog_classic",
+                                "scaling": "relative"
+                            }
+                        },
+                        "layout": {
+                            "x": 6,
+                            "y": 6,
+                            "width": 6,
+                            "height": 3
+                        }
+                    },
+                    {
+                        "id": 1332541889872172,
+                        "definition": {
+                            "title": "Top 10 Ticket Encryption Types",
+                            "title_size": "16",
+                            "title_align": "left",
+                            "type": "toplist",
+                            "requests": [
+                                {
+                                    "formulas": [
+                                        {
+                                            "formula": "query1",
+                                            "limit": {
+                                                "count": 10,
+                                                "order": "desc"
+                                            }
+                                        }
+                                    ],
+                                    "queries": [
+                                        {
+                                            "data_source": "logs",
+                                            "name": "query1",
+                                            "indexes": [
+                                                "*"
+                                            ],
+                                            "compute": {
+                                                "aggregation": "count"
+                                            },
+                                            "group_by": [
+                                                {
+                                                    "facet": "@cipher",
+                                                    "limit": 10,
+                                                    "sort": {
+                                                        "order": "desc",
+                                                        "aggregation": "count"
+                                                    }
+                                                }
+                                            ],
+                                            "search": {
+                                                "query": "source:zeek service:kerberos $Host $Originator-IP $Originator-Port $Responder-IP $Responder-Port"
+                                            },
+                                            "storage": "hot"
+                                        }
+                                    ],
+                                    "response_format": "scalar"
+                                }
+                            ],
+                            "style": {
+                                "display": {
+                                    "type": "stacked",
+                                    "legend": "automatic"
+                                },
+                                "palette": "dog_classic",
+                                "scaling": "relative"
+                            }
+                        },
+                        "layout": {
+                            "x": 0,
+                            "y": 9,
+                            "width": 6,
+                            "height": 3
+                        }
+                    },
+                    {
+                        "id": 8208220638272818,
+                        "definition": {
+                            "title": "Top 10 Service",
+                            "title_size": "16",
+                            "title_align": "left",
+                            "type": "toplist",
+                            "requests": [
+                                {
+                                    "formulas": [
+                                        {
+                                            "formula": "query1",
+                                            "limit": {
+                                                "count": 10,
+                                                "order": "desc"
+                                            }
+                                        }
+                                    ],
+                                    "queries": [
+                                        {
+                                            "data_source": "logs",
+                                            "name": "query1",
+                                            "indexes": [
+                                                "*"
+                                            ],
+                                            "compute": {
+                                                "aggregation": "count"
+                                            },
+                                            "group_by": [
+                                                {
+                                                    "facet": "@service",
+                                                    "limit": 10,
+                                                    "sort": {
+                                                        "order": "desc",
+                                                        "aggregation": "count"
+                                                    }
+                                                }
+                                            ],
+                                            "search": {
+                                                "query": "source:zeek service:kerberos $Host $Originator-IP $Originator-Port $Responder-IP $Responder-Port"
+                                            },
+                                            "storage": "hot"
+                                        }
+                                    ],
+                                    "response_format": "scalar"
+                                }
+                            ],
+                            "style": {
+                                "display": {
+                                    "type": "stacked",
+                                    "legend": "automatic"
+                                },
+                                "palette": "dog_classic",
+                                "scaling": "relative"
+                            }
+                        },
+                        "layout": {
+                            "x": 6,
+                            "y": 9,
+                            "width": 6,
+                            "height": 3
+                        }
+                    },
+                    {
+                        "id": 3579435585853128,
+                        "definition": {
+                            "title": "Kerberos Log Details",
+                            "title_size": "16",
+                            "title_align": "left",
+                            "time": {},
+                            "requests": [
+                                {
+                                    "response_format": "event_list",
+                                    "query": {
+                                        "data_source": "logs_stream",
+                                        "query_string": "source:zeek service:kerberos $Host $Originator-IP $Originator-Port $Responder-IP $Responder-Port ",
+                                        "indexes": [],
+                                        "storage": "hot"
+                                    },
+                                    "columns": [
+                                        {
+                                            "field": "status_line",
+                                            "width": "auto"
+                                        },
+                                        {
+                                            "field": "timestamp",
+                                            "width": "auto"
+                                        },
+                                        {
+                                            "field": "host",
+                                            "width": "auto"
+                                        },
+                                        {
+                                            "field": "network.client.ip",
+                                            "width": "auto"
+                                        },
+                                        {
+                                            "field": "network.client.port",
+                                            "width": "auto"
+                                        },
+                                        {
+                                            "field": "network.destination.ip",
+                                            "width": "auto"
+                                        },
+                                        {
+                                            "field": "network.destination.port",
+                                            "width": "auto"
+                                        },
+                                        {
+                                            "field": "request_type",
+                                            "width": "auto"
+                                        },
+                                        {
+                                            "field": "client",
+                                            "width": "auto"
+                                        },
+                                        {
+                                            "field": "@service",
+                                            "width": "auto"
+                                        },
+                                        {
+                                            "field": "success",
+                                            "width": "auto"
+                                        },
+                                        {
+                                            "field": "till",
+                                            "width": "auto"
+                                        },
+                                        {
+                                            "field": "cipher",
+                                            "width": "auto"
+                                        },
+                                        {
+                                            "field": "forwardable",
+                                            "width": "auto"
+                                        },
+                                        {
+                                            "field": "renewable",
+                                            "width": "auto"
+                                        }
+                                    ]
+                                }
+                            ],
+                            "type": "list_stream"
+                        },
+                        "layout": {
+                            "x": 0,
+                            "y": 12,
+                            "width": 12,
+                            "height": 4
+                        }
+                    }
+                ]
+            },
+            "layout": {
+                "x": 0,
+                "y": 40,
+                "width": 12,
+                "height": 17
+            }
         }
     ],
     "template_variables": [
@@ -1157,25 +1820,25 @@
         },
         {
             "name": "Originator-IP",
-            "prefix": "@zeek.orig_h",
+            "prefix": "@network.client.ip",
             "available_values": [],
             "default": "*"
         },
         {
             "name": "Originator-Port",
-            "prefix": "@zeek.orig_p",
+            "prefix": "@network.client.port",
             "available_values": [],
             "default": "*"
         },
         {
             "name": "Responder-IP",
-            "prefix": "@zeek.resp_h",
+            "prefix": "@network.destination.ip",
             "available_values": [],
             "default": "*"
         },
         {
             "name": "Responder-Port",
-            "prefix": "@zeek.resp_p",
+            "prefix": "@network.destination.port",
             "available_values": [],
             "default": "*"
         }

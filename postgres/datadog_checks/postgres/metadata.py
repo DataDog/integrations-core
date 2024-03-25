@@ -27,8 +27,15 @@ DEFAULT_SCHEMAS_COLLECTION_INTERVAL = 600
 DEFAULT_RESOURCES_COLLECTION_INTERVAL = 300
 DEFAULT_SETTINGS_IGNORED_PATTERNS = ["plpgsql%"]
 
+# PG_SETTINGS_QURERY is used to collect all the settings from the pg_settings table
+# Edge case: If source is 'session', it uses reset_val
+# (which represents the value that the setting would revert to on session end or reset),
+# otherwise, it uses the current setting value.
 PG_SETTINGS_QUERY = """
-SELECT name, setting FROM pg_settings
+SELECT
+name,
+case when source = 'session' then reset_val else setting end as setting
+FROM pg_settings
 """
 
 DATABASE_INFORMATION_QUERY = """
@@ -141,7 +148,7 @@ WHERE  inhparent = {parent_oid};
 
 PARTITION_ACTIVITY_QUERY = """
 SELECT pi.inhparent :: regclass         AS parent_table_name,
-       SUM(psu.seq_scan + psu.idx_scan) AS total_activity
+       SUM(COALESCE(psu.seq_scan, 0) + COALESCE(psu.idx_scan, 0)) AS total_activity
 FROM   pg_catalog.pg_stat_user_tables psu
        join pg_class pc
          ON psu.relname = pc.relname
