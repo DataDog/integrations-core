@@ -17,6 +17,8 @@ HOST = get_docker_hostname()
 PORT = '8080'
 PORT_SSL = '8081'
 TAGS = ['foo:foo', 'bar:bar']
+TAGS_WITH_HOST = TAGS + ['nginx_host:{}'.format(HOST)]
+TAGS_WITH_HOST_AND_PORT = TAGS_WITH_HOST + ['port:{}'.format(PORT)]
 USING_VTS = os.getenv('NGINX_IMAGE', '').endswith('nginx-vts')
 USING_LATEST = os.getenv('NGINX_IMAGE', '').endswith('latest')
 NGINX_VERSION = os.getenv('NGINX_VERSION', os.environ.get('NGINX_IMAGE'))
@@ -104,7 +106,7 @@ def assert_num_metrics(aggregator, num_expected):
 
 def mock_http_responses(url, **_params):
     mapping = {
-        'http://nginx:9999/vts_status': 'vts.json',
+        'http://localhost:8080/vts_status': 'vts.json',
     }
 
     metrics_file = mapping.get(url)

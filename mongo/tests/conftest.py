@@ -183,7 +183,7 @@ def setup_sharding(compose_file):
 class InitializeDB(LazyFunction):
     def __call__(self):
         cli = pymongo.mongo_client.MongoClient(
-            "mongodb://%s:%s" % (common.HOST, common.PORT1),
+            f"mongodb://{common.HOST}:{common.PORT1}",
             socketTimeoutMS=30000,
             read_preference=pymongo.ReadPreference.PRIMARY_PREFERRED,
         )
@@ -233,7 +233,7 @@ class InitializeDB(LazyFunction):
 class InitializeAuthDB(LazyFunction):
     def __call__(self):
         cli = pymongo.mongo_client.MongoClient(
-            "mongodb://root:rootPass@%s:%s" % (common.HOST, common.PORT1),
+            f"mongodb://root:rootPass@{common.HOST}:{common.PORT1}",
             socketTimeoutMS=30000,
             read_preference=pymongo.ReadPreference.PRIMARY_PREFERRED,
         )

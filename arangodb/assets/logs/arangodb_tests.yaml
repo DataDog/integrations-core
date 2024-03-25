@@ -11,6 +11,7 @@ tests:
       timestamp: 1650923931000
       topic: "memory"
     message: "maximum number of memory mappings per process is 262144, which seems too low. it is recommended to set it to at least 320000"
+    status: "warn"
     tags:
      - "source:LOGS_SOURCE"
     timestamp: 1650923931000
@@ -28,6 +29,7 @@ tests:
         id: 1
       timestamp: 1623168571000
     message: "using storage engine 'rocksdb'"
+    status: "info"
     tags:
      - "source:LOGS_SOURCE"
     timestamp: 1623168571000
@@ -46,6 +48,7 @@ tests:
       timestamp: 1623168571000
       topic: "authentication"
     message: "Jwt secret not specified, generating..."
+    status: "info"
     tags:
      - "source:LOGS_SOURCE"
     timestamp: 1623168571000

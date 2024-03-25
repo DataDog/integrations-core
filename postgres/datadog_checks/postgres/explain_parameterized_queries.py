@@ -9,6 +9,7 @@ import psycopg2
 
 from datadog_checks.base.utils.db.sql import compute_sql_signature
 from datadog_checks.base.utils.tracking import tracked_method
+from datadog_checks.postgres.cursor import CommenterDictCursor
 
 from .util import DBExplainError
 from .version_utils import V12
@@ -182,13 +183,13 @@ class ExplainParameterizedQueries:
         # Psycopg2 connections do not get closed when context ends;
         # leaving context will just mark the connection as inactive in MultiDatabaseConnectionPool
         with self._check.db_pool.get_connection(dbname, self._check._config.idle_connection_timeout) as conn:
-            with conn.cursor(cursor_factory=psycopg2.extras.DictCursor) as cursor:
+            with conn.cursor(cursor_factory=CommenterDictCursor) as cursor:
                 logger.debug('Executing query=[%s]', query)
                 cursor.execute(query)
 
     def _execute_query_and_fetch_rows(self, dbname, query):
         with self._check.db_pool.get_connection(dbname, self._check._config.idle_connection_timeout) as conn:
-            with conn.cursor(cursor_factory=psycopg2.extras.DictCursor) as cursor:
+            with conn.cursor(cursor_factory=CommenterDictCursor) as cursor:
                 cursor.execute(query)
                 return cursor.fetchall()
 

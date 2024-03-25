@@ -2,7 +2,29 @@
 
 <!-- towncrier release notes start -->
 
-## 17.0.1 / 2024-02-23
+## 17.1.0 / 2024-03-22
+
+***Added***:
+
+* Update custom_queries configuration to support optional collection_interval ([#16957](https://github.com/DataDog/integrations-core/pull/16957))
+* Tag SQL Server agent queries with service:datadog-agent ([#17162](https://github.com/DataDog/integrations-core/pull/17162))
+
+***Fixed***:
+
+* Skip index usage collection for tempdb, fixes a blocking query ([#16977](https://github.com/DataDog/integrations-core/pull/16977))
+* Fix an issue where logging of obfuscation errors would still hide the statement when it's part of a stored procedure. If the stored procedure obfuscation fails, the `procedure_signature` tag will be set to `__procedure_obfuscation_error__`. ([#17020](https://github.com/DataDog/integrations-core/pull/17020))
+* Skip `sqlserver.latches.latch_wait_time metric` on SQL Server version 2012 and 2014. ([#17063](https://github.com/DataDog/integrations-core/pull/17063))
+* Update the configuration to include the `metric_prefix` option ([#17065](https://github.com/DataDog/integrations-core/pull/17065))
+* Improve service check of autodiscovered databases for the SQL Server integration. The fix prevents agent from creating a connection per database.
+  The fix is not applied for Azure hosted databases due to the restriction in switching to dabases within the connection. ([#17139](https://github.com/DataDog/integrations-core/pull/17139))
+* Update performance counter base name query to lookup by lowercase counter name ([#17207](https://github.com/DataDog/integrations-core/pull/17207))
+* Refactor SQLServer instance connector and adoprovider initialization from configuration.
+  The connector/adoprovider config takes precedence in the following order:
+  - instance config
+  - init config
+  - the default connection/adoprovider ([#17245](https://github.com/DataDog/integrations-core/pull/17245))
+
+## 17.0.1 / 2024-02-23 / Agent 7.52.0
 
 ***Fixed***:
 
@@ -23,7 +45,7 @@
 
 ***Added***:
 
-* [DBMON-3271] DBM integrations now defaulted to use new go-sqllexer pkg to obfuscate sql statements ([#16681](https://github.com/DataDog/integrations-core/pull/16681))
+* DBM integrations now defaulted to use new go-sqllexer pkg to obfuscate sql statements ([#16681](https://github.com/DataDog/integrations-core/pull/16681))
 * Bump dependencies ([#16858](https://github.com/DataDog/integrations-core/pull/16858))
 
 ***Fixed***:
@@ -41,7 +63,7 @@
 
 ***Fixed***:
 
-* [DBMON-3495] Replace embedded null characters with empty string in query text ([#16742](https://github.com/DataDog/integrations-core/pull/16742))
+* Replace embedded null characters with empty string in query text ([#16742](https://github.com/DataDog/integrations-core/pull/16742))
 
 ## 16.0.0 / 2024-01-05
 
@@ -61,19 +83,19 @@
 * Collect sqlserver.database.files.space_used, and sqlserver.database.is_read_only/is_in_standby metrics. ([#16419](https://github.com/DataDog/integrations-core/pull/16419))
 * add new obfuscator options to customize SQL obfuscation and normaliza… ([#16429](https://github.com/DataDog/integrations-core/pull/16429))
 * Add ODBC driver support for the SQL Server agent ([#16431](https://github.com/DataDog/integrations-core/pull/16431))
-* [DBMON-3197] add config option to set character limit of stored procedure text ([#16462](https://github.com/DataDog/integrations-core/pull/16462))
+* Add config option to set character limit of stored procedure text ([#16462](https://github.com/DataDog/integrations-core/pull/16462))
 * Adds whether a SPID is a user or system process to DBM activity events. ([#16465](https://github.com/DataDog/integrations-core/pull/16465))
 
 ***Fixed***:
 
-* [DBMON-3197] ensure accurate collection of query activity with statement when stored procedure is failed to obfuscate ([#16455](https://github.com/DataDog/integrations-core/pull/16455))
-* [DBMON-3220] skip reporting SqlFractionMetric when base_name is None ([#16469](https://github.com/DataDog/integrations-core/pull/16469))
+* Ensure accurate collection of query activity with statement when stored procedure is failed to obfuscate ([#16455](https://github.com/DataDog/integrations-core/pull/16455))
+* Skip reporting SqlFractionMetric when base_name is None ([#16469](https://github.com/DataDog/integrations-core/pull/16469))
 
 ## 15.2.1 / 2023-12-28 / Agent 7.50.2
 
 ***Fixed***:
 
-* Revert "[DBMON-2989] report sql obfuscation error count (#15990)" ([#16439](https://github.com/DataDog/integrations-core/pull/16439))
+* Revert "report sql obfuscation error count (#15990)" ([#16439](https://github.com/DataDog/integrations-core/pull/16439))
 * fix unexpected exception when reporting sqlserver statements obfuscate xml plan error ([#16461](https://github.com/DataDog/integrations-core/pull/16461))
 
 ## 15.2.0 / 2023-11-10 / Agent 7.50.0
@@ -81,9 +103,9 @@
 ***Added***:
 
 * Add support for log shipping monitoring on primary and secondary instances through the `include_primary_log_shipping_metrics` and `include_secondary_log_shipping_metrics` configuration options. ([#16101](https://github.com/DataDog/integrations-core/pull/16101))
-* * Add obfuscation_mode config option to allow enabling obfuscation with go-sqllexer ([#16125](https://github.com/DataDog/integrations-core/pull/16125)) ([#16125](https://github.com/DataDog/integrations-core/pull/16125))
-* [DBMON-3054] Move check config to SQLServerConfig class ([#16130](https://github.com/DataDog/integrations-core/pull/16130))
-* DBMON-3054] Add unit tests to assert every configurable metrics collection ([#16136](https://github.com/DataDog/integrations-core/pull/16136))
+* Add obfuscation_mode config option to allow enabling obfuscation with go-sqllexer ([#16125](https://github.com/DataDog/integrations-core/pull/16125)) ([#16125](https://github.com/DataDog/integrations-core/pull/16125))
+* Move check config to SQLServerConfig class ([#16130](https://github.com/DataDog/integrations-core/pull/16130))
+* Add unit tests to assert every configurable metrics collection ([#16136](https://github.com/DataDog/integrations-core/pull/16136))
 * Updated dependencies. ([#16154](https://github.com/DataDog/integrations-core/pull/16154))
 
 ***Fixed***:

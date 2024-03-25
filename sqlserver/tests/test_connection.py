@@ -333,7 +333,7 @@ def test_connection_cleanup(instance_docker):
             with check.connection.get_managed_cursor() as cursor:
                 assert len(check.connection._conns) == 1
                 cursor.execute("gimme some data")
-    assert "incorrect syntax" in str(e).lower()
+    assert "incorrect syn" in str(e).lower()
     assert len(check.connection._conns) == 0, "connection should have been closed"
 
     # application exception
@@ -477,8 +477,8 @@ def test_connection_error_reporting(
         if instance_docker['connector'] == 'odbc':
             pytest.skip("adoprovider_override is not relevant for the odbc connector")
         adoprovider_override = instance_overrides['adoprovider'].upper()
-        if adoprovider_override not in Connection.valid_adoproviders:
-            Connection.valid_adoproviders.append(adoprovider_override)
+        if adoprovider_override not in Connection.VALID_ADOPROVIDERS:
+            Connection.VALID_ADOPROVIDERS.append(adoprovider_override)
     if 'adoprovider' in instance_docker and ('driver' in instance_overrides or 'dsn' in instance_overrides):
         pytest.skip("driver or DSN overrides is not relevant for the adoprovider")
 

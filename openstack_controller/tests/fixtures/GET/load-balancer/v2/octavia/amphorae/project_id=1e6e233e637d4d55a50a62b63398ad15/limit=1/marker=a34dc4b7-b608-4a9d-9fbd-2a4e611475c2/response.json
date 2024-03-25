@@ -1,0 +1,32 @@
+{
+    "amphorae": [
+        {
+            "id": "042bcca4-4d97-47a9-bc04-d88c1e3a4d72",
+            "loadbalancer_id": "ae54877c-b186-4b90-b71c-d331b9e732bc",
+            "compute_id": "6e3b36c1-dca8-4a6d-84b5-f7f3b7c27084",
+            "lb_network_ip": "192.168.0.193",
+            "vrrp_ip": "10.0.0.94",
+            "ha_ip": "10.0.0.84",
+            "vrrp_port_id": "705320df-9daf-4ac4-b439-57cd45a627d0",
+            "ha_port_id": "2b6cd5ae-f451-49a8-b5f2-faa653c899eb",
+            "cert_expiration": "2024-04-07T18:16:54",
+            "cert_busy": false,
+            "role": "STANDALONE",
+            "status": "ALLOCATED",
+            "vrrp_interface": null,
+            "vrrp_id": 1,
+            "vrrp_priority": null,
+            "cached_zone": "nova",
+            "created_at": "2023-11-01T17:50:18",
+            "updated_at": "2024-03-08T18:16:55",
+            "image_id": "eacccbc7-1df3-4111-802c-02853c1036a1",
+            "compute_flavor": "auto"
+        }
+    ],
+    "amphorae_links": [
+        {
+            "href": "http://127.0.0.1/load-balancer/v2/octavia/amphorae?limit=1&marker=042bcca4-4d97-47a9-bc04-d88c1e3a4d72&page_reverse=True",
+            "rel": "previous"
+        }
+    ]
+}

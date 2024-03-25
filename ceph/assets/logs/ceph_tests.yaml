@@ -13,6 +13,7 @@ tests:
       logger:
         index: 0
     message: "2019-06-19 08:00:04.025198 mon.ceph-node-1 unknown.0 - 0 :  [INF] mkfs 9f7d54f4-56b0-4f37-ab0a-eeaf198fd8f6"
+    status: "info"
     tags:
      - "source:LOGS_SOURCE"
     timestamp: 1560931204025
@@ -29,6 +30,7 @@ tests:
       logger:
         index: 1
     message: "2019-06-19 08:03:12.463811 mgr.ceph-node-1 mgr.4110 10.164.0.4:0/8674 1 : cluster [DBG] pgmap v3: 0 pgs: ; 0 B data, 0 B used, 0 B / 0 B avail"
+    status: "debug"
     tags:
      - "source:LOGS_SOURCE"
     timestamp: 1560931392463
@@ -45,6 +47,7 @@ tests:
       logger:
         index: 7
     message: "2019-06-19 08:00:05.945153 mon.ceph-node-1 mon.0 10.164.0.4:6789/0 7 : audit [DBG] from='admin socket' entity='admin socket' cmd='mon_status' args=[]: dispatch"
+    status: "debug"
     tags:
      - "source:LOGS_SOURCE"
     timestamp: 1560931205945
@@ -61,6 +64,7 @@ tests:
       logger:
         index: 78
     message: "2019-06-19 08:03:46.798992 mon.ceph-node-1 mon.0 10.164.0.4:6789/0 78 : audit [INF] from='osd.2 10.164.0.5:6800/7528' entity='osd.2' cmd='[{\"prefix\": \"osd crush create-or-move\", \"id\": 2, \"weight\":0.0195, \"args\": [\"host=ceph-node-3\", \"root=default\"]}]': finished"
+    status: "info"
     tags:
      - "source:LOGS_SOURCE"
     timestamp: 1560931426798
@@ -73,6 +77,7 @@ tests:
       date: 1560931388911
       level: "INFO"
     message: "[2019-06-19 08:03:08,911][ceph_volume.main][INFO  ] Running command: ceph-volume --cluster ceph lvm create --bluestore --data /dev/sdb"
+    status: "info"
     tags:
      - "source:LOGS_SOURCE"
     timestamp: 1560931388911
@@ -144,6 +149,7 @@ tests:
       logger:
         index: 4867123
     message: "2021-01-15T00:30:03.410926-0500 mon.mon1 (mon.1) 4867123 : audit [DBG] from='client.? v1:192.0.2.1:0/557007769' entity='client.client1' cmd=[{'prefix':'df','format':'json'}]: dispatch"
+    status: "debug"
     tags:
      - "source:LOGS_SOURCE"
     timestamp: 1610688603410

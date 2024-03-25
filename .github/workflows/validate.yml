@@ -19,6 +19,7 @@ jobs:
       # Validations
       agent-reqs: true
       ci: true
+      codeowners: true
       config: true
       dashboards: true
       dep: true

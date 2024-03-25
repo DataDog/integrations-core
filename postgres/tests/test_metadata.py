@@ -45,6 +45,10 @@ def test_collect_metadata(integration_check, dbm_instance, aggregator):
     assert event['kind'] == "pg_settings"
     assert len(event["metadata"]) > 0
     assert all(not k['name'].startswith('max_wal') for k in event['metadata'])
+    statement_timeout_setting = next((k for k in event['metadata'] if k['name'] == 'statement_timeout'), None)
+    assert statement_timeout_setting is not None
+    # statement_timeout should be server level setting not session level
+    assert statement_timeout_setting['setting'] == '10000'
 
 
 def test_collect_schemas(integration_check, dbm_instance, aggregator):
@@ -75,7 +79,7 @@ def test_collect_schemas(integration_check, dbm_instance, aggregator):
     tables_set = {'persons', "personsdup1", "personsdup2", "pgtable", "pg_newtable", "cities"}
     # if version isn't 9 or 10, check that partition master is in tables
     if float(POSTGRES_VERSION) >= 11:
-        tables_set.update({'test_part', 'test_part_no_children'})
+        tables_set.update({'test_part', 'test_part_no_children', 'test_part_no_activity'})
     tables_not_reported_set = {'test_part1', 'test_part2'}
 
     tables_got = []
@@ -102,7 +106,7 @@ def test_collect_schemas(integration_check, dbm_instance, aggregator):
             assert_fields(keys, ["indexes", "columns", "toast_table", "id", "name"])
             assert_fields(list(table['indexes'][0].keys()), ['name', 'definition'])
         if float(POSTGRES_VERSION) >= 11:
-            if table['name'] == 'test_part':
+            if table['name'] in ('test_part', 'test_part_no_activity'):
                 keys = list(table.keys())
                 assert_fields(keys, ["indexes", "num_partitions", "partition_key"])
                 assert table['num_partitions'] == 2

@@ -13,22 +13,12 @@ from . import common
 def test_e2e(dd_agent_check, instance):
     aggregator = dd_agent_check(instance, rate=True)
 
-    aggregator.assert_metric('nginx.net.writing', count=2, tags=common.TAGS)
-    aggregator.assert_metric('nginx.net.waiting', count=2, tags=common.TAGS)
-    aggregator.assert_metric('nginx.net.reading', count=2, tags=common.TAGS)
-    aggregator.assert_metric('nginx.net.conn_dropped_per_s', count=1, tags=common.TAGS)
-    aggregator.assert_metric('nginx.net.conn_opened_per_s', count=1, tags=common.TAGS)
-    aggregator.assert_metric('nginx.net.request_per_s', count=1, tags=common.TAGS)
+    for m in ('nginx.net.conn_dropped_per_s', 'nginx.net.conn_opened_per_s', 'nginx.net.request_per_s'):
+        aggregator.assert_metric(m, count=1, tags=common.TAGS_WITH_HOST_AND_PORT)
+    for m in ('nginx.net.writing', 'nginx.net.reading', 'nginx.net.waiting', 'nginx.net.connections'):
+        aggregator.assert_metric(m, count=2, tags=common.TAGS_WITH_HOST_AND_PORT)
 
-    aggregator.assert_metric('nginx.net.connections', count=2, tags=common.TAGS)
-
-    aggregator.assert_all_metrics_covered()
-
-    tags = common.TAGS + [
-        'nginx_host:{}'.format(common.HOST),
-        'port:{}'.format(common.PORT),
-    ]
-    aggregator.assert_service_check('nginx.can_connect', status=Nginx.OK, tags=tags)
+    aggregator.assert_service_check('nginx.can_connect', status=Nginx.OK, tags=common.TAGS_WITH_HOST_AND_PORT)
 
 
 @pytest.mark.e2e
@@ -36,44 +26,47 @@ def test_e2e(dd_agent_check, instance):
 def test_e2e_vts(dd_agent_check, instance_vts):
     aggregator = dd_agent_check(instance_vts, rate=True)
 
-    aggregator.assert_metric('nginx.net.writing', count=2, tags=common.TAGS)
-    aggregator.assert_metric('nginx.net.waiting', count=2, tags=common.TAGS)
-    aggregator.assert_metric('nginx.net.reading', count=2, tags=common.TAGS)
-    aggregator.assert_metric('nginx.net.conn_dropped_per_s', count=1, tags=common.TAGS)
-    aggregator.assert_metric('nginx.net.conn_opened_per_s', count=1, tags=common.TAGS)
-    aggregator.assert_metric('nginx.net.request_per_s', count=1, tags=common.TAGS)
+    for m in (
+        'nginx.net.writing',
+        'nginx.net.reading',
+        'nginx.net.waiting',
+        'nginx.connections.active',
+        'nginx.requests.total',
+        'nginx.timestamp',
+        'nginx.load_timestamp',
+        'nginx.connections.accepted',
+    ):
+        aggregator.assert_metric(m, count=2, tags=common.TAGS_WITH_HOST_AND_PORT)
+    for m in (
+        'nginx.net.conn_dropped_per_s',
+        'nginx.net.conn_opened_per_s',
+        'nginx.net.request_per_s',
+        'nginx.connections.accepted_count',
+        'nginx.requests.total_count',
+    ):
+        aggregator.assert_metric(m, count=1, tags=common.TAGS_WITH_HOST_AND_PORT)
 
-    tags_server_zone = common.TAGS + ['server_zone:*']
-
-    aggregator.assert_metric('nginx.connections.active', count=2, tags=common.TAGS)
-    aggregator.assert_metric('nginx.server_zone.sent', count=2, tags=tags_server_zone)
-    aggregator.assert_metric('nginx.server_zone.sent_count', count=1, tags=tags_server_zone)
-    aggregator.assert_metric('nginx.server_zone.received', count=2, tags=tags_server_zone)
-    aggregator.assert_metric('nginx.server_zone.received_count', count=1, tags=tags_server_zone)
-    aggregator.assert_metric('nginx.requests.total_count', count=1, tags=common.TAGS)
-    aggregator.assert_metric('nginx.requests.total', count=2, tags=common.TAGS)
-    aggregator.assert_metric('nginx.timestamp', count=2, tags=common.TAGS)
-    aggregator.assert_metric('nginx.server_zone.requests_count', count=1, tags=tags_server_zone)
-    aggregator.assert_metric('nginx.load_timestamp', count=2, tags=common.TAGS)
-    aggregator.assert_metric('nginx.server_zone.requests', count=2, tags=tags_server_zone)
-    aggregator.assert_metric('nginx.connections.accepted', count=2, tags=common.TAGS)
-    aggregator.assert_metric('nginx.connections.accepted_count', count=1, tags=common.TAGS)
-
-    aggregator.assert_metric('nginx.server_zone.responses.1xx_count', count=1, tags=tags_server_zone)
-    aggregator.assert_metric('nginx.server_zone.responses.2xx_count', count=1, tags=tags_server_zone)
-    aggregator.assert_metric('nginx.server_zone.responses.3xx_count', count=1, tags=tags_server_zone)
-    aggregator.assert_metric('nginx.server_zone.responses.4xx_count', count=1, tags=tags_server_zone)
-    aggregator.assert_metric('nginx.server_zone.responses.5xx_count', count=1, tags=tags_server_zone)
-    aggregator.assert_metric('nginx.server_zone.responses.1xx', count=2, tags=tags_server_zone)
-    aggregator.assert_metric('nginx.server_zone.responses.2xx', count=2, tags=tags_server_zone)
-    aggregator.assert_metric('nginx.server_zone.responses.3xx', count=2, tags=tags_server_zone)
-    aggregator.assert_metric('nginx.server_zone.responses.4xx', count=2, tags=tags_server_zone)
-    aggregator.assert_metric('nginx.server_zone.responses.5xx', count=2, tags=tags_server_zone)
+    tags_server_zone = common.TAGS_WITH_HOST_AND_PORT + ['server_zone:*']
+    for m, count in (
+        ('nginx.server_zone.sent', 2),
+        ('nginx.server_zone.sent_count', 1),
+        ('nginx.server_zone.received', 2),
+        ('nginx.server_zone.received_count', 1),
+        ('nginx.server_zone.requests_count', 1),
+        ('nginx.server_zone.requests', 2),
+        ('nginx.server_zone.responses.1xx_count', 1),
+        ('nginx.server_zone.responses.2xx_count', 1),
+        ('nginx.server_zone.responses.3xx_count', 1),
+        ('nginx.server_zone.responses.4xx_count', 1),
+        ('nginx.server_zone.responses.5xx_count', 1),
+        ('nginx.server_zone.responses.1xx', 2),
+        ('nginx.server_zone.responses.2xx', 2),
+        ('nginx.server_zone.responses.3xx', 2),
+        ('nginx.server_zone.responses.4xx', 2),
+        ('nginx.server_zone.responses.5xx', 2),
+    ):
+        aggregator.assert_metric(m, count=count, tags=tags_server_zone)
 
     aggregator.assert_all_metrics_covered()
 
-    tags = common.TAGS + [
-        'nginx_host:{}'.format(common.HOST),
-        'port:{}'.format(common.PORT),
-    ]
-    aggregator.assert_service_check('nginx.can_connect', status=Nginx.OK, tags=tags)
+    aggregator.assert_service_check('nginx.can_connect', status=Nginx.OK, tags=common.TAGS_WITH_HOST_AND_PORT)

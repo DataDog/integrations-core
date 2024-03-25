@@ -34,12 +34,13 @@ classifiers = [
 dependencies = [
     "contextlib2; python_version < '3.0'",
     "coverage>=5.0.3",
-    "flaky",
+    "flaky; python_version < '3.0'",
+    "flaky>=3.8.0; python_version > '3.0'",
     "mock",
     "psutil",
     "py>=1.8.2; python_version < '3.0'",  # https://github.com/ionelmc/pytest-benchmark/issues/226
     "pytest==4.6.11; python_version < '3.0'",
-    "pytest==8.0.2; python_version > '3.0'",
+    "pytest==8.1.1; python_version > '3.0'",
     "pytest-asyncio>=0.23.4; python_version > '3.0'",
     "pytest-benchmark[histogram]<4.0.0; python_version < '3.0'",
     "pytest-benchmark[histogram]>=4.0.0; python_version > '3.0'",
