@@ -2,6 +2,18 @@
 
 <!-- towncrier release notes start -->
 
+## 6.4.0 / 2024-03-22
+
+***Added***:
+
+* Add pagination support for network networks ([#16930](https://github.com/DataDog/integrations-core/pull/16930))
+* Update dependencies ([#16963](https://github.com/DataDog/integrations-core/pull/16963))
+* Add pagination support for baremetal conductors ([#17026](https://github.com/DataDog/integrations-core/pull/17026))
+* Add pagination support for loadbalancers ([#17100](https://github.com/DataDog/integrations-core/pull/17100))
+* Add pagination support for listeners ([#17120](https://github.com/DataDog/integrations-core/pull/17120))
+* Add pagination support for pools ([#17140](https://github.com/DataDog/integrations-core/pull/17140))
+* Add pagination support for amphorae ([#17150](https://github.com/DataDog/integrations-core/pull/17150))
+
 ## 6.3.0 / 2024-02-16 / Agent 7.52.0
 
 ***Added***:
