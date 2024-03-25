@@ -128,12 +128,12 @@ def test_mongo_arbiter(aggregator, check, instance_arbiter, dd_run_check):
     for metric, value in expected_metrics.items():
         aggregator.assert_metric(metric, value, expected_tags, count=1)
 
+
 @common.standalone
 def test_mongo_dbstats_tag(aggregator, check, instance_dbstats_tag_dbname, dd_run_check):
     check = check(instance_dbstats_tag_dbname)
     dd_run_check(check)
 
-  
     metric_names = aggregator.metric_names
     assert metric_names
 
@@ -144,14 +144,15 @@ def test_mongo_dbstats_tag(aggregator, check, instance_dbstats_tag_dbname, dd_ru
     aggregator.assert_metrics_using_metadata(get_metadata_metrics(), check_submission_type=True)
 
     expected_metrics = {
-        'mongodb.stats.avgobjsize':0,
-        'mongodb.stats.storagesize':20480.0,
+        'mongodb.stats.avgobjsize': 0,
+        'mongodb.stats.storagesize': 20480.0,
     }
     expected_tags = [
         'server:mongodb://localhost:27017/',
     ]
     for metric, value in expected_metrics.items():
         aggregator.assert_metric(metric, value, expected_tags, count=1)
+
 
 @common.standalone
 def test_mongo_old_config(aggregator, check, instance, dd_run_check):

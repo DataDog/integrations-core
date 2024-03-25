@@ -283,7 +283,7 @@ TLS_METADATA = {
     ],
 }
 
-INSTANCE_DBSTATS_TAG_DBNAME= {
+INSTANCE_DBSTATS_TAG_DBNAME = {
     'hosts': [f'{HOST}:{PORT1}'],
     'dbstats_tag_dbname': False,
 }
