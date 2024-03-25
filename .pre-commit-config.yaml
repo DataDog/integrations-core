@@ -1,4 +1,13 @@
 # https://pre-commit.com/
+# If you face issues with the DD default hooks:
+# 1. Get the path to your current Datadog global hooks installation.
+#    $ git config --global core.hooksPath
+#    $ /usr/local/dd/global_hooks
+# 2. Unset the global hooks path.
+#    $ git config --global --unset core.hooksPath
+# 3. Run `pre-commit install`
+# 4. Reset the global hooks path to point back at the DataDog global hooks installation.
+#    $ git config --global core.hooksPath /usr/local/dd/global_hooks
 ---
 repos:
 - repo: local
