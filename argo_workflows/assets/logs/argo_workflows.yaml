@@ -1,4 +1,5 @@
 id: argo_workflows
+metric_id: argo-workflows
 backend_only: false
 facets:
 pipeline:
