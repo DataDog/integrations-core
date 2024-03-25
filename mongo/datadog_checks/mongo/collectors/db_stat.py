@@ -9,7 +9,7 @@ from datadog_checks.mongo.common import MongosDeployment, ReplicaSetDeployment
 class DbStatCollector(MongoCollector):
     """Collects database statistics using the 'dbstats' mongo command. This collector can be instantiated multiple
     times, for each database to monitor.
-    Metrics are tagged with the database name so they don't overlap with each other. 
+    Metrics are tagged with the database name so they don't overlap with each other.
     You can choose to exclude the database name as a tag using the parameter 'dbstats_tag_dbname'.
     """
 
