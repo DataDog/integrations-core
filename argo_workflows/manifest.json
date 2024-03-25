@@ -1,7 +1,7 @@
 {
   "manifest_version": "2.0.0",
   "app_uuid": "f96fd144-a3c0-4fed-adcc-53f11f80ec04",
-  "app_id": "argo-workflows",
+  "app_id": "argo_workflows",
   "display_on_public_website": false,
   "tile": {
     "overview": "README.md#Overview",

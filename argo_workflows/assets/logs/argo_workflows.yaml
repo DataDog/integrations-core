@@ -1,4 +1,4 @@
-id: argo-workflows
+id: argo_workflows
 backend_only: false
 facets:
 pipeline:
