@@ -7,7 +7,6 @@ import copy
 import functools
 import time
 from collections import defaultdict
-from typing import List
 
 import six
 from cachetools import TTLCache
@@ -65,7 +64,6 @@ from datadog_checks.sqlserver.const import (
     STATIC_INFO_VERSION,
     SWITCH_DB_STATEMENT,
     TASK_SCHEDULER_METRICS,
-    TEMPDB_FILE_SPACE_USAGE_METRICS,
     VALID_METRIC_TYPES,
     expected_sys_databases_columns,
 )
@@ -78,6 +76,7 @@ from datadog_checks.sqlserver.queries import (
     QUERY_LOG_SHIPPING_PRIMARY,
     QUERY_LOG_SHIPPING_SECONDARY,
     QUERY_SERVER_STATIC_INFO,
+    TEMPDB_SPACE_USAGE_QUERY,
     get_query_ao_availability_groups,
     get_query_file_stats,
 )
@@ -786,7 +785,7 @@ class SQLServer(AgentCheck):
         """
         if self._dynamic_queries:
             return self._dynamic_queries
-        
+
         self._dynamic_queries = []
 
         major_version = self.static_info_cache.get(STATIC_INFO_MAJOR_VERSION)
@@ -828,12 +827,16 @@ class SQLServer(AgentCheck):
         ) and not is_azure_sql_database(engine_edition):
             self._dynamic_queries.append(
                 self._new_query_executor(
-                    [TEMPDB_FILE_SPACE_USAGE_METRICS],
+                    [TEMPDB_SPACE_USAGE_QUERY],
                     executor=functools.partial(self.execute_query_raw, db='tempdb'),
-                    extra_tags=['db:tempdb'],
+                    extra_tags=['db:tempdb', 'database:tempdb'],
                 )
             )
-        
+
+        # Index Usage metrics
+        if is_affirmative(self.instance.get('include_index_usage_metrics', True)):
+            self._dynamic_queries.extend(self._collect_index_usage_metrics())
+
         for dynamic_query in self._dynamic_queries:
             dynamic_query.compile_queries()
         self.log.debug("initialized dynamic queries")
@@ -901,15 +904,10 @@ class SQLServer(AgentCheck):
                 ]:
                     self.server_state_queries.execute()
 
-                if self.metrics_to_collect_by_config:
-                    for metric in self.metrics_to_collect_by_config:
-                        metric.execute()
-
-                if self.dynamic_queries:
-                    for dynamic_query in self.dynamic_queries:
-                        dynamic_query.execute()
-
-                self.collect_index_usage_metrics()
+                with self.connection.restore_current_database():
+                    if self.dynamic_queries:
+                        for dynamic_query in self.dynamic_queries:
+                            dynamic_query.execute()
 
                 # reuse connection for any custom queries
                 self._query_manager.execute()
@@ -927,49 +925,25 @@ class SQLServer(AgentCheck):
             return cursor.fetchall()
 
     # https://learn.microsoft.com/en-us/sql/relational-databases/system-dynamic-management-views/sys-dm-db-index-usage-stats-transact-sql?view=sql-server-ver15
-    def collect_index_usage_metrics(self):
-        if not is_affirmative(self.instance.get('include_index_usage_metrics', True)):
-            return
+    def _collect_index_usage_metrics(self):
+        index_usage_metrics = []
 
-        interval = max(int(self.instance.get('index_usage_stats_interval', DEFAULT_INDEX_USAGE_STATS_INTERVAL)), 10)
+        collection_interval = int(self.instance.get('index_usage_stats_interval', DEFAULT_INDEX_USAGE_STATS_INTERVAL))
+        # update index usage stats query with the collection interval
+        INDEX_USAGE_STATS_QUERY['collect_interval'] = collection_interval
 
-        now = time.time()
-        if not self._index_usage_last_check_ts or now - self._index_usage_last_check_ts > interval:
-            self._index_usage_last_check_ts = now
-            self.log.debug('Collecting index usage statistics')
-            # Filter out tempdb as the query might be blocking and it's index usage information is not relevant
-            db_names = [d.name for d in self.databases] or [
-                self.instance.get('database', self.connection.DEFAULT_DATABASE)
-            ]
-            if not self._config.include_index_usage_metrics_tempdb:
-                db_names = [db_name for db_name in db_names if db_name != 'tempdb']
-
-            with self.connection.get_managed_cursor() as cursor:
-                cursor.execute(
-                    'select DB_NAME()'
-                )  # This can return None in some implementations, so it cannot be chained
-                data = cursor.fetchall()
-                current_db = data[0][0]
-                self.log.debug("current db is %s", current_db)
-                try:
-                    for database in db_names:
-                        try:
-                            executor = QueryExecutor(
-                                functools.partial(self.execute_query_raw, db=database),
-                                self,
-                                queries=[INDEX_USAGE_STATS_QUERY],
-                                tags=self.tags,
-                                hostname=self.resolved_hostname,
-                            )
-                            executor.compile_queries()
-                            executor.execute()
-                        except Exception as e:
-                            self.log.error("failed to collect index usage statistics: %s", e)
-                finally:
-                    if current_db:
-                        self.log.debug("reverting cursor context via use statement to %s", current_db)
-                        cursor.execute(construct_use_statement(current_db))
-        return
+        # Filter out tempdb as the query might be blocking and it's index usage information is not relevant
+        db_names = [d.name for d in self.databases] or [self.instance.get('database', self.connection.DEFAULT_DATABASE)]
+        if not self._config.include_index_usage_metrics_tempdb:
+            db_names = [db_name for db_name in db_names if db_name != 'tempdb']
+        for database in db_names:
+            index_usage_metrics.append(
+                self._new_query_executor(
+                    [INDEX_USAGE_STATS_QUERY],
+                    executor=functools.partial(self.execute_query_raw, db=database),
+                )
+            )
+        return index_usage_metrics
 
     def do_stored_procedure_check(self):
         """

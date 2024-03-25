@@ -174,7 +174,7 @@ INDEX_USAGE_STATS_QUERY = {
     ],
 }
 
-QUERY_TEMPDB_SPACE_USAGE = {
+TEMPDB_SPACE_USAGE_QUERY = {
     "name": "sys.dm_db_file_space_usage",
     "query": """SELECT
         database_id,
