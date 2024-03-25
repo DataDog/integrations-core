@@ -131,11 +131,11 @@ class DatadogChecksEnvironmentCollector(EnvironmentCollectorInterface):
             'scripts': {
                 'style': [
                     f'black --config {settings_dir}/pyproject.toml --check --diff .',
-                    f'ruff --config {settings_dir}/pyproject.toml .',
+                    f'ruff check --config {settings_dir}/pyproject.toml .',
                 ],
                 'fmt': [
                     f'black . --config {settings_dir}/pyproject.toml',
-                    f'ruff --config {settings_dir}/pyproject.toml --fix .',
+                    f'ruff check --config {settings_dir}/pyproject.toml --fix .',
                     'python -c "print(\'\\n[NOTE] ruff may still report style errors for things '
                     'black cannot fix, these will need to be fixed manually.\')"',
                     'style',
