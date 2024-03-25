@@ -16,6 +16,10 @@ def instance_connection_scheme():
     return 'mongodb'
 
 
+def instance_dbstats_tag_dbname():
+    return True
+
+
 def instance_disable_generic_tags():
     return False
 

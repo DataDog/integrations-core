@@ -64,6 +64,7 @@ class InstanceConfig(BaseModel):
     custom_queries: Optional[tuple[CustomQuery, ...]] = None
     database: Optional[str] = None
     dbnames: Optional[tuple[str, ...]] = None
+    dbstats_tag_dbname: Optional[bool] = None
     disable_generic_tags: Optional[bool] = None
     empty_default_hostname: Optional[bool] = None
     hosts: Optional[Union[str, tuple[str, ...]]] = None

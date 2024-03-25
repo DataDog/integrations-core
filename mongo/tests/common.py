@@ -282,3 +282,8 @@ TLS_METADATA = {
         f'{TLS_CERTS_FOLDER}:/certs',
     ],
 }
+
+INSTANCE_DBSTATS_TAG_DBNAME= {
+    'hosts': [f'{HOST}:{PORT1}'],
+    'dbstats_tag_dbname': False,
+}
