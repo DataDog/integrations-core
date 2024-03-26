@@ -422,7 +422,7 @@ def connection_compute(request, mock_responses):
             for service in mock_responses('GET', '/compute/v2.1/flavors/detail')['flavors']
         ]
 
-    def hypervisors(details):
+    def hypervisors(details, limit=None):
         if http_error and 'hypervisors' in http_error:
             raise requests.exceptions.HTTPError(response=http_error['hypervisors'])
         return [

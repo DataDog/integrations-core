@@ -1216,6 +1216,105 @@ def test_hypervisors_exception(aggregator, check, dd_run_check, mock_http_get, c
 
 
 @pytest.mark.parametrize(
+    ('instance', 'metrics', 'paginated_limit', 'api_type', 'expected_api_calls'),
+    [
+        pytest.param(
+            configs.REST,
+            metrics.COMPUTE_HYPERVISORS_NOVA_MICROVERSION_DEFAULT,
+            1,
+            ApiType.REST,
+            2,
+            id='api rest small limit',
+        ),
+        pytest.param(
+            configs.REST,
+            metrics.COMPUTE_HYPERVISORS_NOVA_MICROVERSION_DEFAULT,
+            1000,
+            ApiType.REST,
+            1,
+            id='api rest high limit',
+        ),
+        pytest.param(
+            configs.REST_NOVA_MICROVERSION_2_93,
+            metrics.COMPUTE_HYPERVISORS_NOVA_MICROVERSION_2_93,
+            1,
+            ApiType.REST,
+            2,
+            id='api rest microversion 2.93',
+        ),
+        pytest.param(
+            configs.SDK,
+            metrics.COMPUTE_HYPERVISORS_NOVA_MICROVERSION_DEFAULT,
+            1,
+            ApiType.SDK,
+            1,
+            id='api sdk no microversion',
+        ),
+        pytest.param(
+            configs.SDK,
+            metrics.COMPUTE_HYPERVISORS_NOVA_MICROVERSION_DEFAULT,
+            1000,
+            ApiType.SDK,
+            1,
+            id='api sdk high limit',
+        ),
+        pytest.param(
+            configs.SDK_NOVA_MICROVERSION_2_93,
+            metrics.COMPUTE_HYPERVISORS_NOVA_MICROVERSION_2_93,
+            1,
+            ApiType.SDK,
+            1,
+            id='api sdk microversion 2.93',
+        ),
+    ],
+)
+@pytest.mark.usefixtures('mock_http_get', 'mock_http_post', 'openstack_connection')
+def test_hypervisors_pagination(
+    aggregator,
+    instance,
+    metrics,
+    openstack_controller_check,
+    paginated_limit,
+    expected_api_calls,
+    api_type,
+    dd_run_check,
+    mock_http_get,
+    connection_compute,
+):
+    paginated_instance = copy.deepcopy(instance)
+    paginated_instance['paginated_limit'] = paginated_limit
+    dd_run_check(openstack_controller_check(paginated_instance))
+
+    if api_type == ApiType.REST:
+        args_list = []
+        for call in mock_http_get.call_args_list:
+            args, kwargs = call
+            args_list += list(args)
+            params = kwargs.get('params', {})
+            limit = params.get('limit')
+            args_list += [(args[0], limit)]
+        assert (
+            args_list.count(('http://127.0.0.1:8774/compute/v2.1/os-hypervisors/detail', paginated_limit))
+            == expected_api_calls
+        )
+
+    else:
+        assert (
+            connection_compute.hypervisors.call_args_list.count(mock.call(details=True, limit=paginated_limit))
+            == expected_api_calls
+        )
+
+    for metric in metrics:
+        aggregator.assert_metric(
+            metric['name'],
+            count=metric.get('count'),
+            value=metric.get('value'),
+            tags=metric.get('tags'),
+            hostname=metric.get('hostname'),
+        )
+
+
+@pytest.mark.parametrize(
     ('mock_http_get', 'connection_compute', 'instance', 'api_type'),
     [
         pytest.param(
