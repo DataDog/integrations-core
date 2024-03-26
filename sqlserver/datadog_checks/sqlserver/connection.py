@@ -147,9 +147,9 @@ class Connection(object):
 
     VALID_ADOPROVIDERS = ['SQLOLEDB', 'MSOLEDBSQL', 'MSOLEDBSQL19', 'SQLNCLI11']
 
-    def __init__(self, check, init_config, instance_config, service_check_handler):
+    def __init__(self, host, init_config, instance_config, service_check_handler):
+        self.host = host
         self.instance = instance_config
-        self._check = check
         self.service_check_handler = service_check_handler
         self.log = get_check_logger()
 
@@ -298,7 +298,7 @@ class Connection(object):
                 conn_warn_msg.value,
                 tcp_connection_status,
                 exception_msg,
-                host=self._check.resolved_hostname,
+                host=host,
                 connection_host=host,
                 database=database,
                 code=conn_warn_msg.value,
