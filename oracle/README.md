@@ -321,7 +321,7 @@ To configure this check for an Agent running on a host:
         password: <PASSWORD>
    ```
 
-**Note:** For the Agent version `7.53.0` and higher, the configuration files are created in the subdirectory `oracle.d`. For the Agent versions between `7.50.1` and `7.53.0`, the configuration subdirectory is `oracle-dbm.d`. Oracle monitoring for the agent versions lower than `7.50.1` is deprecated.
+**Note:** For the Agent releases between `7.50.1` and `7.53.0`, the configuration subdirectory is `oracle-dbm.d`. For all other Agent releases, the configuration directoru is `oracle.d`.
 
 2. [Restart the Agent][7].
 
