@@ -237,7 +237,6 @@ OPERATION_TIME_METRICS = [
     'simple_metrics',
     'database_stats_metrics',
     'fraction_metrics',
-    'database_backup_metrics',
     'database_file_stats_metrics',
     'incr_fraction_metrics',
 ]

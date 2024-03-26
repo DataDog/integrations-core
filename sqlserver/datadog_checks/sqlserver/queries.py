@@ -222,7 +222,7 @@ DB_FRAGMENTATION_QUERY = {
     ],
 }
 
-MASTER_FILES_METRICS = {
+MASTER_FILES_METRICS_QUERY = {
     "name": "sys.master_files",
     "query": """SELECT
         sys.databases.name as db,
@@ -245,6 +245,23 @@ MASTER_FILES_METRICS = {
         {"name": "database.master_files.size", "type": "gauge"},
         {"name": "database.master_files.state", "type": "gauge"},
         {"name": "database_files_state_desc", "type": "tag"},
+    ],
+}
+
+DATABASE_BACKUP_METRICS_QUERY = {
+    "name": "msdb.dbo.backupset",
+    "query": """SELECT
+        sys.databases.name as db,
+        sys.databases.name as database_name,
+        count(backup_set_id) as backup_set_id_count
+        from msdb.dbo.backupset right outer join sys.databases
+        on sys.databases.name = msdb.dbo.backupset.database_name
+        group by sys.databases.name
+    """,
+    "columns": [
+        {"name": "db", "type": "tag"},
+        {"name": "database", "type": "tag"},
+        {"name": "database.backup_count", "type": "gauge"},
     ],
 }
 

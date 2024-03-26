@@ -10,9 +10,10 @@ from datadog_checks.sqlserver.const import (
     STATIC_INFO_MAJOR_VERSION,
 )
 from datadog_checks.sqlserver.queries import (
+    DATABASE_BACKUP_METRICS_QUERY,
     DB_FRAGMENTATION_QUERY,
     INDEX_USAGE_STATS_QUERY,
-    MASTER_FILES_METRICS,
+    MASTER_FILES_METRICS_QUERY,
     QUERY_AO_FAILOVER_CLUSTER,
     QUERY_AO_FAILOVER_CLUSTER_MEMBER,
     QUERY_FAILOVER_CLUSTER_INSTANCE,
@@ -270,4 +271,21 @@ class SqlserverMasterFilesMetrics(SqlserverDatabaseMetricsBase):
 
     @property
     def queries(self):
-        return [MASTER_FILES_METRICS]
+        return [MASTER_FILES_METRICS_QUERY]
+
+
+class SqlserverDatabaseBackupMetrics(SqlserverDatabaseMetricsBase):
+    # msdb.dbo.backupset
+    #
+    # Contains a row for each backup set. A backup set
+    # contains the backup from a single, successful backup operation.
+    # https://docs.microsoft.com/en-us/sql/relational-databases/system-tables/backupset-transact-sql?view=sql-server-ver15
+    @property
+    def enabled(self):
+        if is_azure_sql_database(self.engine_edition):
+            return False
+        return True
+
+    @property
+    def queries(self):
+        return [DATABASE_BACKUP_METRICS_QUERY]

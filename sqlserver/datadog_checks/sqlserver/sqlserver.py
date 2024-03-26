@@ -19,6 +19,7 @@ from datadog_checks.sqlserver.activity import SqlserverActivity
 from datadog_checks.sqlserver.config import SQLServerConfig
 from datadog_checks.sqlserver.database_metrics import (
     SqlserverAoMetrics,
+    SqlserverDatabaseBackupMetrics,
     SqlserverDbFragmentationMetrics,
     SqlserverFciMetrics,
     SqlserverFileStatsMetrics,
@@ -50,7 +51,6 @@ from datadog_checks.sqlserver.const import (
     AZURE_DEPLOYMENT_TYPE_TO_RESOURCE_TYPES,
     BASE_NAME_QUERY,
     COUNTER_TYPE_QUERY,
-    DATABASE_BACKUP_METRICS,
     DATABASE_METRICS,
     DATABASE_SERVICE_CHECK_NAME,
     DATABASE_SERVICE_CHECK_QUERY,
@@ -465,9 +465,6 @@ class SQLServer(AgentCheck):
 
         # Load database statistics
         db_stats_to_collect = list(DATABASE_METRICS)
-        engine_edition = self.static_info_cache.get(STATIC_INFO_ENGINE_EDITION)
-        if not is_azure_sql_database(engine_edition):
-            db_stats_to_collect.extend(DATABASE_BACKUP_METRICS)
 
         for name, table, column in db_stats_to_collect:
             # include database as a filter option
@@ -754,6 +751,7 @@ class SQLServer(AgentCheck):
             self.instance.get('database', self.connection.DEFAULT_DATABASE)
         ]
 
+        # metrics that are collected for the server
         file_stats_metrics = SqlserverFileStatsMetrics(
             instance_config=self.instance,
             new_query_executor=self._new_query_executor,
@@ -784,6 +782,11 @@ class SQLServer(AgentCheck):
             new_query_executor=self._new_query_executor,
             server_static_info=self.static_info_cache,
         )
+        database_backup_metrics = SqlserverDatabaseBackupMetrics(
+            instance_config=self.instance,
+            new_query_executor=self._new_query_executor,
+            server_static_info=self.static_info_cache,
+        )
 
         # metrics that are collected for each database
         tempdb_file_space_usage_metrics = SqlserverTempDBFileSpaceUsageMetrics(
@@ -807,13 +810,17 @@ class SQLServer(AgentCheck):
             databases=databases,
         )
 
+        # create a list of dynamic queries to execute
         self._dynamic_queries = [
+            # server level metrics
             file_stats_metrics,
             ao_metrics,
             fci_metrics,
             primary_log_shipping_metrics,
             secondary_log_shipping_metrics,
             master_files_metrics,
+            database_backup_metrics,
+            # database specific metrics
             tempdb_file_space_usage_metrics,
             index_usage_metrics,
             db_fragmentation_metrics,
