@@ -222,6 +222,32 @@ DB_FRAGMENTATION_QUERY = {
     ],
 }
 
+MASTER_FILES_METRICS = {
+    "name": "sys.master_files",
+    "query": """SELECT
+        sys.databases.name as db,
+        sys.databases.name as database_name,
+        file_id,
+        type,
+        physical_name,
+        size * 8 as size,
+        sys.master_files.state as state,
+        sys.master_files.state_desc as state_desc
+        from sys.master_files
+        right outer join sys.databases on sys.master_files.database_id = sys.databases.database_id
+    """,
+    "columns": [
+        {"name": "db", "type": "tag"},
+        {"name": "database", "type": "tag"},
+        {"name": "file_id", "type": "tag"},
+        {"name": "file_type", "type": "tag"},
+        {"name": "file_location", "type": "tag"},
+        {"name": "database.master_files.size", "type": "gauge"},
+        {"name": "database.master_files.state", "type": "gauge"},
+        {"name": "database_files_state_desc", "type": "tag"},
+    ],
+}
+
 
 def get_query_ao_availability_groups(sqlserver_major_version):
     """

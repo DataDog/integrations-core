@@ -23,6 +23,7 @@ from datadog_checks.sqlserver.database_metrics import (
     SqlserverFciMetrics,
     SqlserverFileStatsMetrics,
     SqlserverIndexUsageMetrics,
+    SqlserverMasterFilesMetrics,
     SqlserverPrimaryLogShippingMetrics,
     SqlserverSecondaryLogShippingMetrics,
     SqlserverTempDBFileSpaceUsageMetrics,
@@ -50,7 +51,6 @@ from datadog_checks.sqlserver.const import (
     BASE_NAME_QUERY,
     COUNTER_TYPE_QUERY,
     DATABASE_BACKUP_METRICS,
-    DATABASE_MASTER_FILES,
     DATABASE_METRICS,
     DATABASE_SERVICE_CHECK_NAME,
     DATABASE_SERVICE_CHECK_QUERY,
@@ -500,12 +500,6 @@ class SQLServer(AgentCheck):
                 cfg = {'name': name, 'table': table, 'column': column, 'tags': tags}
                 metrics_to_collect.append(self.typed_metric(cfg_inst=cfg, table=table, column=column))
 
-        # Load sys.master_files metrics
-        if is_affirmative(self.instance.get('include_master_files_metrics', False)):
-            for name, table, column in DATABASE_MASTER_FILES:
-                cfg = {'name': name, 'table': table, 'column': column, 'tags': tags}
-                metrics_to_collect.append(self.typed_metric(cfg_inst=cfg, table=table, column=column))
-
         # Load any custom metrics from conf.d/sqlserver.yaml
         for cfg in custom_metrics:
             sql_counter_type = None
@@ -785,6 +779,13 @@ class SQLServer(AgentCheck):
             new_query_executor=self._new_query_executor,
             server_static_info=self.static_info_cache,
         )
+        master_files_metrics = SqlserverMasterFilesMetrics(
+            instance_config=self.instance,
+            new_query_executor=self._new_query_executor,
+            server_static_info=self.static_info_cache,
+        )
+
+        # metrics that are collected for each database
         tempdb_file_space_usage_metrics = SqlserverTempDBFileSpaceUsageMetrics(
             instance_config=self.instance,
             new_query_executor=self._new_query_executor,
@@ -812,6 +813,7 @@ class SQLServer(AgentCheck):
             fci_metrics,
             primary_log_shipping_metrics,
             secondary_log_shipping_metrics,
+            master_files_metrics,
             tempdb_file_space_usage_metrics,
             index_usage_metrics,
             db_fragmentation_metrics,

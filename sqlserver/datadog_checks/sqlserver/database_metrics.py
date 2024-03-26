@@ -12,6 +12,7 @@ from datadog_checks.sqlserver.const import (
 from datadog_checks.sqlserver.queries import (
     DB_FRAGMENTATION_QUERY,
     INDEX_USAGE_STATS_QUERY,
+    MASTER_FILES_METRICS,
     QUERY_AO_FAILOVER_CLUSTER,
     QUERY_AO_FAILOVER_CLUSTER_MEMBER,
     QUERY_FAILOVER_CLUSTER_INSTANCE,
@@ -257,3 +258,16 @@ class SqlserverDbFragmentationMetrics(SqlserverDatabaseMetricsBase):
             executor.compile_queries()
             executors.append(executor)
         return executors
+
+
+class SqlserverMasterFilesMetrics(SqlserverDatabaseMetricsBase):
+    # https://docs.microsoft.com/en-us/sql/relational-databases/system-catalog-views/sys-master-files-transact-sql
+    @property
+    def enabled(self):
+        if not is_affirmative(self.instance_config.get('include_master_files_metrics', False)):
+            return False
+        return True
+
+    @property
+    def queries(self):
+        return [MASTER_FILES_METRICS]
