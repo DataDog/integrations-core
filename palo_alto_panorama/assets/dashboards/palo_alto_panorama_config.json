@@ -1,0 +1,571 @@
+{
+    "title": "Palo Alto Panorama: Config",
+    "description": "",
+    "widgets": [
+        {
+            "id": 3092474590624262,
+            "definition": {
+                "type": "image",
+                "url": "https://upload.wikimedia.org/wikipedia/commons/thumb/d/de/PaloAltoNetworks_2020_Logo.svg/220px-PaloAltoNetworks_2020_Logo.svg.png",
+                "url_dark_theme": "https://upload.wikimedia.org/wikipedia/commons/thumb/d/de/PaloAltoNetworks_2020_Logo.svg/220px-PaloAltoNetworks_2020_Logo.svg.png",
+                "sizing": "scale-down",
+                "has_background": true,
+                "has_border": false,
+                "vertical_align": "center",
+                "horizontal_align": "center"
+            },
+            "layout": {
+                "x": 0,
+                "y": 0,
+                "width": 3,
+                "height": 2
+            }
+        },
+        {
+            "id": 4688297178923336,
+            "definition": {
+                "type": "note",
+                "content": "## Overview\n- This dashboard gives insights about config logs.\n- Config logs displays the administrator username, the type of client (Web, CLI, or Panorama), the type of command executed, the command status (succeeded or failed), etc.\n",
+                "background_color": "white",
+                "font_size": "14",
+                "text_align": "left",
+                "vertical_align": "top",
+                "show_tick": false,
+                "tick_pos": "50%",
+                "tick_edge": "left",
+                "has_padding": true
+            },
+            "layout": {
+                "x": 3,
+                "y": 0,
+                "width": 4,
+                "height": 2
+            }
+        },
+        {
+            "id": 8599185040282124,
+            "definition": {
+                "type": "note",
+                "content": "## Widgets\n1. Total Config Events\n2. Config Events Overtime\n3. Top Administrators\n4. Clients Distribution\n5. Configuration Results\n6. Top Firewall Hosts\n7. Top Commands Performed\n8. Log Details",
+                "background_color": "white",
+                "font_size": "14",
+                "text_align": "left",
+                "vertical_align": "top",
+                "show_tick": false,
+                "tick_pos": "50%",
+                "tick_edge": "left",
+                "has_padding": true
+            },
+            "layout": {
+                "x": 7,
+                "y": 0,
+                "width": 5,
+                "height": 2
+            }
+        },
+        {
+            "id": 345407825527640,
+            "definition": {
+                "title": "Total Config Events",
+                "title_size": "16",
+                "title_align": "left",
+                "type": "query_value",
+                "requests": [
+                    {
+                        "formulas": [
+                            {
+                                "formula": "query1"
+                            }
+                        ],
+                        "queries": [
+                            {
+                                "data_source": "logs",
+                                "name": "query1",
+                                "indexes": [
+                                    "*"
+                                ],
+                                "compute": {
+                                    "aggregation": "count"
+                                },
+                                "group_by": [],
+                                "search": {
+                                    "query": "source:palo-alto-panorama @type:CONFIG $Config_Result $Client $User_Name $Device_Serial_Number"
+                                },
+                                "storage": "hot"
+                            }
+                        ],
+                        "response_format": "scalar"
+                    }
+                ],
+                "autoscale": true,
+                "precision": 2
+            },
+            "layout": {
+                "x": 0,
+                "y": 2,
+                "width": 3,
+                "height": 3
+            }
+        },
+        {
+            "id": 6804421863386286,
+            "definition": {
+                "title": "Config Events Overtime",
+                "title_size": "16",
+                "title_align": "left",
+                "show_legend": true,
+                "legend_layout": "auto",
+                "legend_columns": [
+                    "avg",
+                    "min",
+                    "max",
+                    "value",
+                    "sum"
+                ],
+                "type": "timeseries",
+                "requests": [
+                    {
+                        "formulas": [
+                            {
+                                "alias": "Config",
+                                "formula": "query1"
+                            }
+                        ],
+                        "queries": [
+                            {
+                                "data_source": "logs",
+                                "name": "query1",
+                                "indexes": [
+                                    "*"
+                                ],
+                                "compute": {
+                                    "aggregation": "count"
+                                },
+                                "group_by": [
+                                    {
+                                        "facet": "@type",
+                                        "limit": 10,
+                                        "sort": {
+                                            "order": "desc",
+                                            "aggregation": "count"
+                                        }
+                                    }
+                                ],
+                                "search": {
+                                    "query": "source:palo-alto-panorama @type:CONFIG $Config_Result $Client $User_Name $Device_Serial_Number"
+                                },
+                                "storage": "hot"
+                            }
+                        ],
+                        "response_format": "timeseries",
+                        "style": {
+                            "palette": "dog_classic",
+                            "line_type": "solid",
+                            "line_width": "normal"
+                        },
+                        "display_type": "line"
+                    }
+                ]
+            },
+            "layout": {
+                "x": 3,
+                "y": 2,
+                "width": 9,
+                "height": 3
+            }
+        },
+        {
+            "id": 5074642991254010,
+            "definition": {
+                "title": "Top Administrators",
+                "title_size": "16",
+                "title_align": "left",
+                "type": "toplist",
+                "requests": [
+                    {
+                        "formulas": [
+                            {
+                                "formula": "query1",
+                                "limit": {
+                                    "count": 10,
+                                    "order": "desc"
+                                }
+                            }
+                        ],
+                        "queries": [
+                            {
+                                "data_source": "logs",
+                                "name": "query1",
+                                "indexes": [
+                                    "*"
+                                ],
+                                "compute": {
+                                    "aggregation": "count"
+                                },
+                                "group_by": [
+                                    {
+                                        "facet": "@usr.name",
+                                        "limit": 10,
+                                        "sort": {
+                                            "order": "desc",
+                                            "aggregation": "count"
+                                        }
+                                    }
+                                ],
+                                "search": {
+                                    "query": "source:palo-alto-panorama @type:CONFIG $Config_Result $Client $User_Name $Device_Serial_Number"
+                                },
+                                "storage": "hot"
+                            }
+                        ],
+                        "response_format": "scalar"
+                    }
+                ],
+                "style": {
+                    "display": {
+                        "type": "stacked",
+                        "legend": "automatic"
+                    }
+                }
+            },
+            "layout": {
+                "x": 0,
+                "y": 5,
+                "width": 3,
+                "height": 4
+            }
+        },
+        {
+            "id": 8681469698339168,
+            "definition": {
+                "title": "Clients Distribution",
+                "title_size": "16",
+                "title_align": "left",
+                "requests": [
+                    {
+                        "formulas": [
+                            {
+                                "formula": "query1",
+                                "limit": {
+                                    "order": "desc"
+                                }
+                            }
+                        ],
+                        "queries": [
+                            {
+                                "data_source": "logs",
+                                "name": "query1",
+                                "indexes": [
+                                    "*"
+                                ],
+                                "compute": {
+                                    "aggregation": "count"
+                                },
+                                "group_by": [
+                                    {
+                                        "facet": "@client",
+                                        "limit": 10,
+                                        "sort": {
+                                            "order": "desc",
+                                            "aggregation": "count"
+                                        }
+                                    }
+                                ],
+                                "search": {
+                                    "query": "source:palo-alto-panorama @type:CONFIG $Config_Result $Client $User_Name $Device_Serial_Number"
+                                },
+                                "storage": "hot"
+                            }
+                        ],
+                        "response_format": "scalar",
+                        "style": {
+                            "palette": "datadog16"
+                        }
+                    }
+                ],
+                "type": "sunburst",
+                "legend": {
+                    "type": "automatic"
+                }
+            },
+            "layout": {
+                "x": 3,
+                "y": 5,
+                "width": 9,
+                "height": 4
+            }
+        },
+        {
+            "id": 1561976797598968,
+            "definition": {
+                "title": "Configuration Results",
+                "title_size": "16",
+                "title_align": "left",
+                "type": "toplist",
+                "requests": [
+                    {
+                        "formulas": [
+                            {
+                                "formula": "query1",
+                                "limit": {
+                                    "count": 10,
+                                    "order": "desc"
+                                }
+                            }
+                        ],
+                        "queries": [
+                            {
+                                "data_source": "logs",
+                                "name": "query1",
+                                "indexes": [
+                                    "*"
+                                ],
+                                "compute": {
+                                    "aggregation": "count"
+                                },
+                                "group_by": [
+                                    {
+                                        "facet": "@result",
+                                        "limit": 10,
+                                        "sort": {
+                                            "order": "desc",
+                                            "aggregation": "count"
+                                        }
+                                    }
+                                ],
+                                "search": {
+                                    "query": "source:palo-alto-panorama @type:CONFIG $Config_Result $Client $User_Name $Device_Serial_Number"
+                                },
+                                "storage": "hot"
+                            }
+                        ],
+                        "response_format": "scalar"
+                    }
+                ],
+                "style": {
+                    "display": {
+                        "type": "stacked",
+                        "legend": "automatic"
+                    }
+                }
+            },
+            "layout": {
+                "x": 0,
+                "y": 9,
+                "width": 4,
+                "height": 4
+            }
+        },
+        {
+            "id": 995832136782352,
+            "definition": {
+                "title": "Top Firewall Hosts",
+                "title_size": "16",
+                "title_align": "left",
+                "type": "toplist",
+                "requests": [
+                    {
+                        "formulas": [
+                            {
+                                "formula": "query1",
+                                "limit": {
+                                    "count": 10,
+                                    "order": "desc"
+                                }
+                            }
+                        ],
+                        "queries": [
+                            {
+                                "data_source": "logs",
+                                "name": "query1",
+                                "indexes": [
+                                    "*"
+                                ],
+                                "compute": {
+                                    "aggregation": "count"
+                                },
+                                "group_by": [
+                                    {
+                                        "facet": "@device_name",
+                                        "limit": 10,
+                                        "sort": {
+                                            "order": "desc",
+                                            "aggregation": "count"
+                                        }
+                                    }
+                                ],
+                                "search": {
+                                    "query": "source:palo-alto-panorama @type:CONFIG $Config_Result $Client $User_Name $Device_Serial_Number"
+                                },
+                                "storage": "hot"
+                            }
+                        ],
+                        "response_format": "scalar"
+                    }
+                ],
+                "style": {
+                    "display": {
+                        "type": "stacked",
+                        "legend": "automatic"
+                    }
+                }
+            },
+            "layout": {
+                "x": 4,
+                "y": 9,
+                "width": 4,
+                "height": 4
+            }
+        },
+        {
+            "id": 6205045309047866,
+            "definition": {
+                "title": "Top Commands Performed",
+                "title_size": "16",
+                "title_align": "left",
+                "type": "toplist",
+                "requests": [
+                    {
+                        "formulas": [
+                            {
+                                "formula": "query1",
+                                "limit": {
+                                    "count": 500,
+                                    "order": "desc"
+                                }
+                            }
+                        ],
+                        "queries": [
+                            {
+                                "data_source": "logs",
+                                "name": "query1",
+                                "indexes": [
+                                    "*"
+                                ],
+                                "compute": {
+                                    "aggregation": "count"
+                                },
+                                "group_by": [
+                                    {
+                                        "facet": "@cmd",
+                                        "limit": 10,
+                                        "sort": {
+                                            "order": "desc",
+                                            "aggregation": "count"
+                                        }
+                                    }
+                                ],
+                                "search": {
+                                    "query": "source:palo-alto-panorama @type:CONFIG $Config_Result $Client $User_Name $Device_Serial_Number"
+                                },
+                                "storage": "hot"
+                            }
+                        ],
+                        "response_format": "scalar"
+                    }
+                ],
+                "style": {
+                    "display": {
+                        "type": "stacked",
+                        "legend": "automatic"
+                    }
+                }
+            },
+            "layout": {
+                "x": 8,
+                "y": 9,
+                "width": 4,
+                "height": 4
+            }
+        },
+        {
+            "id": 2669721022694840,
+            "definition": {
+                "title": "Log Details",
+                "title_size": "16",
+                "title_align": "left",
+                "requests": [
+                    {
+                        "response_format": "event_list",
+                        "query": {
+                            "data_source": "logs_stream",
+                            "query_string": "source:palo-alto-panorama @type:CONFIG $Config_Result $Client $User_Name $Device_Serial_Number",
+                            "indexes": [],
+                            "storage": "hot"
+                        },
+                        "columns": [
+                            {
+                                "field": "type",
+                                "width": "auto"
+                            },
+                            {
+                                "field": "usr.name",
+                                "width": "auto"
+                            },
+                            {
+                                "field": "result",
+                                "width": "auto"
+                            },
+                            {
+                                "field": "client",
+                                "width": "auto"
+                            },
+                            {
+                                "field": "cmd",
+                                "width": "auto"
+                            },
+                            {
+                                "field": "before-change-detail",
+                                "width": "auto"
+                            },
+                            {
+                                "field": "after-change-detail",
+                                "width": "auto"
+                            },
+                            {
+                                "field": "comment",
+                                "width": "auto"
+                            }
+                        ]
+                    }
+                ],
+                "type": "list_stream"
+            },
+            "layout": {
+                "x": 0,
+                "y": 13,
+                "width": 12,
+                "height": 3
+            }
+        }
+    ],
+    "template_variables": [
+        {
+            "name": "Device_Serial_Number",
+            "prefix": "@serial",
+            "available_values": [],
+            "default": "*"
+        },
+        {
+            "name": "Config_Result",
+            "prefix": "@result",
+            "available_values": [],
+            "default": "*"
+        },
+        {
+            "name": "Client",
+            "prefix": "@client",
+            "available_values": [],
+            "default": "*"
+        },
+        {
+            "name": "User_Name",
+            "prefix": "@usr.name",
+            "available_values": [],
+            "default": "*"
+        }
+    ],
+    "layout_type": "ordered",
+    "notify_list": [],
+    "reflow_type": "fixed"
+}

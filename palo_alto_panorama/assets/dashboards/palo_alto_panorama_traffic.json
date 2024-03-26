@@ -1,0 +1,1568 @@
+{
+    "title": "Palo Alto Panorama: Traffic",
+    "description": null,
+    "widgets": [
+        {
+            "id": 3092474590624262,
+            "definition": {
+                "type": "image",
+                "url": "https://upload.wikimedia.org/wikipedia/commons/thumb/d/de/PaloAltoNetworks_2020_Logo.svg/220px-PaloAltoNetworks_2020_Logo.svg.png",
+                "url_dark_theme": "https://upload.wikimedia.org/wikipedia/commons/thumb/d/de/PaloAltoNetworks_2020_Logo.svg/220px-PaloAltoNetworks_2020_Logo.svg.png",
+                "sizing": "scale-down",
+                "has_background": true,
+                "has_border": false,
+                "vertical_align": "center",
+                "horizontal_align": "center"
+            },
+            "layout": {
+                "x": 0,
+                "y": 0,
+                "width": 3,
+                "height": 2
+            }
+        },
+        {
+            "id": 4688297178923336,
+            "definition": {
+                "type": "note",
+                "content": "## Overview\n- This dashboard gives insights about traffic related logs.\n- Traffic logs displays source and destination zones, addresses, and ports; security rule applied to the traffic flow; rule action (allow, deny, or drop); number of bytes; session end reason; etc.",
+                "background_color": "white",
+                "font_size": "14",
+                "text_align": "left",
+                "vertical_align": "top",
+                "show_tick": false,
+                "tick_pos": "50%",
+                "tick_edge": "left",
+                "has_padding": true
+            },
+            "layout": {
+                "x": 3,
+                "y": 0,
+                "width": 4,
+                "height": 2
+            }
+        },
+        {
+            "id": 8599185040282124,
+            "definition": {
+                "type": "note",
+                "content": "## Widgets\n2. Total Traffic Events\n3. Traffic Events Overtime\n5. Bytes Activity Overtime\n6. Packets Activity Overtime\n7. Top Source Users\n8. Top Destination Users\n9. Top Sources\n10. Top Destinations\n11. Application vs Technology Breakdown\n12. Traffic by Application\n13. Source Zone Distribution\n14. Destination Zone Distribution\n15. Action Distribution\n16. Top Reasons for Session End\n17. Top Rules\n18. Top Flags\n19. Top Policies\n20. Tunnel Type Distribution \n21. Protocol Distribution\n22. App details with Risk\n23. Log Details\n",
+                "background_color": "white",
+                "font_size": "14",
+                "text_align": "left",
+                "vertical_align": "top",
+                "show_tick": false,
+                "tick_pos": "50%",
+                "tick_edge": "left",
+                "has_padding": true
+            },
+            "layout": {
+                "x": 7,
+                "y": 0,
+                "width": 5,
+                "height": 2
+            }
+        },
+        {
+            "id": 345407825527640,
+            "definition": {
+                "title": "Total Traffic Events",
+                "title_size": "16",
+                "title_align": "left",
+                "type": "query_value",
+                "requests": [
+                    {
+                        "formulas": [
+                            {
+                                "formula": "query1"
+                            }
+                        ],
+                        "queries": [
+                            {
+                                "data_source": "logs",
+                                "name": "query1",
+                                "indexes": [
+                                    "*"
+                                ],
+                                "compute": {
+                                    "aggregation": "count"
+                                },
+                                "group_by": [],
+                                "search": {
+                                    "query": "source:palo-alto-panorama @type:TRAFFIC $Device_Serial_Number $Subtype $Action"
+                                },
+                                "storage": "hot"
+                            }
+                        ],
+                        "response_format": "scalar"
+                    }
+                ],
+                "autoscale": true,
+                "precision": 2
+            },
+            "layout": {
+                "x": 0,
+                "y": 2,
+                "width": 3,
+                "height": 3
+            }
+        },
+        {
+            "id": 6804421863386286,
+            "definition": {
+                "title": "Traffic Events Overtime",
+                "title_size": "16",
+                "title_align": "left",
+                "show_legend": true,
+                "legend_layout": "auto",
+                "legend_columns": [
+                    "avg",
+                    "min",
+                    "max",
+                    "value",
+                    "sum"
+                ],
+                "type": "timeseries",
+                "requests": [
+                    {
+                        "formulas": [
+                            {
+                                "alias": "TRAFFIC",
+                                "formula": "query1"
+                            }
+                        ],
+                        "queries": [
+                            {
+                                "data_source": "logs",
+                                "name": "query1",
+                                "indexes": [
+                                    "*"
+                                ],
+                                "compute": {
+                                    "aggregation": "count"
+                                },
+                                "group_by": [
+                                    {
+                                        "facet": "@subtype",
+                                        "limit": 10,
+                                        "sort": {
+                                            "order": "desc",
+                                            "aggregation": "count"
+                                        }
+                                    }
+                                ],
+                                "search": {
+                                    "query": "source:palo-alto-panorama @type:TRAFFIC $Device_Serial_Number $Subtype $Action"
+                                },
+                                "storage": "hot"
+                            }
+                        ],
+                        "response_format": "timeseries",
+                        "style": {
+                            "palette": "dog_classic",
+                            "line_type": "solid",
+                            "line_width": "normal"
+                        },
+                        "display_type": "line"
+                    }
+                ]
+            },
+            "layout": {
+                "x": 3,
+                "y": 2,
+                "width": 9,
+                "height": 3
+            }
+        },
+        {
+            "id": 1262858690778924,
+            "definition": {
+                "title": "Bytes Activity Overtime",
+                "title_size": "16",
+                "title_align": "left",
+                "show_legend": true,
+                "legend_layout": "auto",
+                "legend_columns": [
+                    "avg",
+                    "min",
+                    "max",
+                    "value",
+                    "sum"
+                ],
+                "type": "timeseries",
+                "requests": [
+                    {
+                        "formulas": [
+                            {
+                                "alias": "Total Bytes",
+                                "formula": "query1"
+                            },
+                            {
+                                "alias": "Bytes Read",
+                                "formula": "query2"
+                            },
+                            {
+                                "alias": "Bytes Written",
+                                "formula": "query3"
+                            }
+                        ],
+                        "queries": [
+                            {
+                                "data_source": "logs",
+                                "name": "query1",
+                                "indexes": [
+                                    "*"
+                                ],
+                                "compute": {
+                                    "aggregation": "sum",
+                                    "metric": "@bytes"
+                                },
+                                "group_by": [],
+                                "search": {
+                                    "query": "source:palo-alto-panorama @type:TRAFFIC $Device_Serial_Number $Subtype $Action"
+                                },
+                                "storage": "hot"
+                            },
+                            {
+                                "data_source": "logs",
+                                "name": "query2",
+                                "indexes": [
+                                    "*"
+                                ],
+                                "compute": {
+                                    "aggregation": "sum",
+                                    "metric": "@network.bytes_read"
+                                },
+                                "group_by": [],
+                                "search": {
+                                    "query": "source:palo-alto-panorama @type:TRAFFIC $Device_Serial_Number $Subtype $Action"
+                                },
+                                "storage": "hot"
+                            },
+                            {
+                                "data_source": "logs",
+                                "name": "query3",
+                                "indexes": [
+                                    "*"
+                                ],
+                                "compute": {
+                                    "aggregation": "sum",
+                                    "metric": "@network.bytes_written"
+                                },
+                                "group_by": [],
+                                "search": {
+                                    "query": "source:palo-alto-panorama @type:TRAFFIC $Device_Serial_Number $Subtype $Action"
+                                },
+                                "storage": "hot"
+                            }
+                        ],
+                        "response_format": "timeseries",
+                        "style": {
+                            "palette": "dog_classic",
+                            "line_type": "solid",
+                            "line_width": "normal"
+                        },
+                        "display_type": "line"
+                    }
+                ]
+            },
+            "layout": {
+                "x": 0,
+                "y": 5,
+                "width": 12,
+                "height": 3
+            }
+        },
+        {
+            "id": 4755645693815292,
+            "definition": {
+                "title": "Packets Activity Overtime",
+                "title_size": "16",
+                "title_align": "left",
+                "show_legend": true,
+                "legend_layout": "auto",
+                "legend_columns": [
+                    "avg",
+                    "min",
+                    "max",
+                    "value",
+                    "sum"
+                ],
+                "type": "timeseries",
+                "requests": [
+                    {
+                        "formulas": [
+                            {
+                                "alias": "Total Packets",
+                                "formula": "query1"
+                            },
+                            {
+                                "alias": "Packets Received",
+                                "formula": "query2"
+                            },
+                            {
+                                "alias": "Packets Sent",
+                                "formula": "query3"
+                            }
+                        ],
+                        "queries": [
+                            {
+                                "data_source": "logs",
+                                "name": "query1",
+                                "indexes": [
+                                    "*"
+                                ],
+                                "compute": {
+                                    "aggregation": "sum",
+                                    "metric": "@palo.alto.panorama.pkt"
+                                },
+                                "group_by": [],
+                                "search": {
+                                    "query": "source:palo-alto-panorama @type:TRAFFIC $Device_Serial_Number $Subtype $Action"
+                                },
+                                "storage": "hot"
+                            },
+                            {
+                                "data_source": "logs",
+                                "name": "query2",
+                                "indexes": [
+                                    "*"
+                                ],
+                                "compute": {
+                                    "aggregation": "sum",
+                                    "metric": "@palo.alto.panorama.pktrcvd"
+                                },
+                                "group_by": [],
+                                "search": {
+                                    "query": "source:palo-alto-panorama @type:TRAFFIC $Device_Serial_Number $Subtype $Action"
+                                },
+                                "storage": "hot"
+                            },
+                            {
+                                "data_source": "logs",
+                                "name": "query3",
+                                "indexes": [
+                                    "*"
+                                ],
+                                "compute": {
+                                    "aggregation": "sum",
+                                    "metric": "@palo.alto.panorama.pktsent"
+                                },
+                                "group_by": [],
+                                "search": {
+                                    "query": "source:palo-alto-panorama @type:TRAFFIC $Device_Serial_Number $Subtype $Action"
+                                },
+                                "storage": "hot"
+                            }
+                        ],
+                        "response_format": "timeseries",
+                        "style": {
+                            "palette": "dog_classic",
+                            "line_type": "solid",
+                            "line_width": "normal"
+                        },
+                        "display_type": "line"
+                    }
+                ]
+            },
+            "layout": {
+                "x": 0,
+                "y": 8,
+                "width": 12,
+                "height": 3
+            }
+        },
+        {
+            "id": 4555792593992804,
+            "definition": {
+                "title": "Top Source Users",
+                "title_size": "16",
+                "title_align": "left",
+                "type": "toplist",
+                "requests": [
+                    {
+                        "formulas": [
+                            {
+                                "formula": "query1",
+                                "limit": {
+                                    "count": 10,
+                                    "order": "desc"
+                                }
+                            }
+                        ],
+                        "queries": [
+                            {
+                                "data_source": "logs",
+                                "name": "query1",
+                                "indexes": [
+                                    "*"
+                                ],
+                                "compute": {
+                                    "aggregation": "count"
+                                },
+                                "group_by": [
+                                    {
+                                        "facet": "@suser",
+                                        "limit": 10,
+                                        "sort": {
+                                            "order": "desc",
+                                            "aggregation": "count"
+                                        }
+                                    }
+                                ],
+                                "search": {
+                                    "query": "source:palo-alto-panorama @type:TRAFFIC $Device_Serial_Number $Subtype $Action"
+                                },
+                                "storage": "hot"
+                            }
+                        ],
+                        "response_format": "scalar"
+                    }
+                ],
+                "style": {
+                    "display": {
+                        "type": "stacked",
+                        "legend": "automatic"
+                    }
+                }
+            },
+            "layout": {
+                "x": 0,
+                "y": 11,
+                "width": 3,
+                "height": 3
+            }
+        },
+        {
+            "id": 1125426737335600,
+            "definition": {
+                "title": "Top Destination Users",
+                "title_size": "16",
+                "title_align": "left",
+                "type": "toplist",
+                "requests": [
+                    {
+                        "formulas": [
+                            {
+                                "formula": "query1",
+                                "limit": {
+                                    "count": 10,
+                                    "order": "desc"
+                                }
+                            }
+                        ],
+                        "queries": [
+                            {
+                                "data_source": "logs",
+                                "name": "query1",
+                                "indexes": [
+                                    "*"
+                                ],
+                                "compute": {
+                                    "aggregation": "count"
+                                },
+                                "group_by": [
+                                    {
+                                        "facet": "@duser",
+                                        "limit": 10,
+                                        "sort": {
+                                            "order": "desc",
+                                            "aggregation": "count"
+                                        }
+                                    }
+                                ],
+                                "search": {
+                                    "query": "source:palo-alto-panorama @type:TRAFFIC $Device_Serial_Number $Subtype $Action"
+                                },
+                                "storage": "hot"
+                            }
+                        ],
+                        "response_format": "scalar"
+                    }
+                ],
+                "style": {
+                    "display": {
+                        "type": "stacked",
+                        "legend": "automatic"
+                    }
+                }
+            },
+            "layout": {
+                "x": 3,
+                "y": 11,
+                "width": 3,
+                "height": 3
+            }
+        },
+        {
+            "id": 4842646254107800,
+            "definition": {
+                "title": "Top Sources",
+                "title_size": "16",
+                "title_align": "left",
+                "type": "toplist",
+                "requests": [
+                    {
+                        "formulas": [
+                            {
+                                "formula": "query1",
+                                "limit": {
+                                    "count": 10,
+                                    "order": "desc"
+                                }
+                            }
+                        ],
+                        "queries": [
+                            {
+                                "data_source": "logs",
+                                "name": "query1",
+                                "indexes": [
+                                    "*"
+                                ],
+                                "compute": {
+                                    "aggregation": "count"
+                                },
+                                "group_by": [
+                                    {
+                                        "facet": "@src",
+                                        "limit": 10,
+                                        "sort": {
+                                            "order": "desc",
+                                            "aggregation": "count"
+                                        }
+                                    }
+                                ],
+                                "search": {
+                                    "query": "source:palo-alto-panorama @type:TRAFFIC $Device_Serial_Number $Subtype $Action"
+                                },
+                                "storage": "hot"
+                            }
+                        ],
+                        "response_format": "scalar"
+                    }
+                ],
+                "style": {
+                    "display": {
+                        "type": "stacked",
+                        "legend": "automatic"
+                    }
+                }
+            },
+            "layout": {
+                "x": 6,
+                "y": 11,
+                "width": 3,
+                "height": 3
+            }
+        },
+        {
+            "id": 5074642991254010,
+            "definition": {
+                "title": "Top Destinations",
+                "title_size": "16",
+                "title_align": "left",
+                "type": "toplist",
+                "requests": [
+                    {
+                        "formulas": [
+                            {
+                                "formula": "query1",
+                                "limit": {
+                                    "count": 10,
+                                    "order": "desc"
+                                }
+                            }
+                        ],
+                        "queries": [
+                            {
+                                "data_source": "logs",
+                                "name": "query1",
+                                "indexes": [
+                                    "*"
+                                ],
+                                "compute": {
+                                    "aggregation": "count"
+                                },
+                                "group_by": [
+                                    {
+                                        "facet": "@dst",
+                                        "limit": 10,
+                                        "sort": {
+                                            "order": "desc",
+                                            "aggregation": "count"
+                                        }
+                                    }
+                                ],
+                                "search": {
+                                    "query": "source:palo-alto-panorama @type:TRAFFIC $Device_Serial_Number $Subtype $Action"
+                                },
+                                "storage": "hot"
+                            }
+                        ],
+                        "response_format": "scalar"
+                    }
+                ],
+                "style": {
+                    "display": {
+                        "type": "stacked",
+                        "legend": "automatic"
+                    }
+                }
+            },
+            "layout": {
+                "x": 9,
+                "y": 11,
+                "width": 3,
+                "height": 3
+            }
+        },
+        {
+            "id": 1017889768747050,
+            "definition": {
+                "title": "Application vs Technology Breakdown",
+                "title_size": "16",
+                "title_align": "left",
+                "requests": [
+                    {
+                        "formulas": [
+                            {
+                                "formula": "query1",
+                                "limit": {
+                                    "count": 500,
+                                    "order": "desc"
+                                }
+                            }
+                        ],
+                        "queries": [
+                            {
+                                "data_source": "logs",
+                                "name": "query1",
+                                "indexes": [
+                                    "*"
+                                ],
+                                "compute": {
+                                    "aggregation": "count"
+                                },
+                                "group_by": [
+                                    {
+                                        "facet": "@apptech",
+                                        "limit": 10,
+                                        "sort": {
+                                            "order": "desc",
+                                            "aggregation": "count"
+                                        }
+                                    },
+                                    {
+                                        "facet": "@app",
+                                        "limit": 10,
+                                        "sort": {
+                                            "order": "desc",
+                                            "aggregation": "count"
+                                        }
+                                    }
+                                ],
+                                "search": {
+                                    "query": "source:palo-alto-panorama @type:TRAFFIC $Device_Serial_Number $Subtype $Action"
+                                },
+                                "storage": "hot"
+                            }
+                        ],
+                        "response_format": "scalar",
+                        "style": {
+                            "palette": "datadog16"
+                        }
+                    }
+                ],
+                "type": "sunburst",
+                "legend": {
+                    "type": "table"
+                }
+            },
+            "layout": {
+                "x": 0,
+                "y": 14,
+                "width": 6,
+                "height": 4
+            }
+        },
+        {
+            "id": 847936980174736,
+            "definition": {
+                "title": "Traffic by Application ",
+                "title_size": "16",
+                "title_align": "left",
+                "type": "query_table",
+                "requests": [
+                    {
+                        "response_format": "scalar",
+                        "queries": [
+                            {
+                                "data_source": "logs",
+                                "name": "query1",
+                                "indexes": [
+                                    "*"
+                                ],
+                                "compute": {
+                                    "aggregation": "sum",
+                                    "metric": "@palo.alto.panorama.pkt"
+                                },
+                                "group_by": [
+                                    {
+                                        "facet": "@app",
+                                        "limit": 10,
+                                        "sort": {
+                                            "order": "desc",
+                                            "aggregation": "sum",
+                                            "metric": "@bytes"
+                                        }
+                                    }
+                                ],
+                                "search": {
+                                    "query": "source:palo-alto-panorama @type:TRAFFIC $Device_Serial_Number $Subtype $Action"
+                                },
+                                "storage": "hot"
+                            },
+                            {
+                                "data_source": "logs",
+                                "name": "query2",
+                                "indexes": [
+                                    "*"
+                                ],
+                                "compute": {
+                                    "aggregation": "sum",
+                                    "metric": "@bytes"
+                                },
+                                "group_by": [
+                                    {
+                                        "facet": "@app",
+                                        "limit": 10,
+                                        "sort": {
+                                            "order": "desc",
+                                            "aggregation": "sum",
+                                            "metric": "@bytes"
+                                        }
+                                    }
+                                ],
+                                "search": {
+                                    "query": "source:palo-alto-panorama @type:TRAFFIC $Device_Serial_Number $Subtype $Action"
+                                },
+                                "storage": "hot"
+                            }
+                        ],
+                        "formulas": [
+                            {
+                                "cell_display_mode": "bar",
+                                "alias": "Total Packets",
+                                "formula": "query1"
+                            },
+                            {
+                                "cell_display_mode": "bar",
+                                "alias": "Total Bytes",
+                                "formula": "query2",
+                                "limit": {
+                                    "count": 20,
+                                    "order": "desc"
+                                }
+                            }
+                        ]
+                    }
+                ],
+                "has_search_bar": "auto"
+            },
+            "layout": {
+                "x": 6,
+                "y": 14,
+                "width": 6,
+                "height": 4
+            }
+        },
+        {
+            "id": 8681469698339168,
+            "definition": {
+                "title": "Source Zone Distribution",
+                "title_size": "16",
+                "title_align": "left",
+                "requests": [
+                    {
+                        "formulas": [
+                            {
+                                "formula": "query1",
+                                "limit": {
+                                    "count": 500,
+                                    "order": "desc"
+                                }
+                            }
+                        ],
+                        "queries": [
+                            {
+                                "data_source": "logs",
+                                "name": "query1",
+                                "indexes": [
+                                    "*"
+                                ],
+                                "compute": {
+                                    "aggregation": "count"
+                                },
+                                "group_by": [
+                                    {
+                                        "facet": "@srczone",
+                                        "limit": 10,
+                                        "sort": {
+                                            "order": "desc",
+                                            "aggregation": "count"
+                                        }
+                                    }
+                                ],
+                                "search": {
+                                    "query": "source:palo-alto-panorama @type:TRAFFIC $Device_Serial_Number $Subtype $Action"
+                                },
+                                "storage": "hot"
+                            }
+                        ],
+                        "response_format": "scalar",
+                        "style": {
+                            "palette": "datadog16"
+                        }
+                    }
+                ],
+                "type": "sunburst",
+                "legend": {
+                    "type": "table"
+                }
+            },
+            "layout": {
+                "x": 0,
+                "y": 18,
+                "width": 3,
+                "height": 3
+            }
+        },
+        {
+            "id": 1561976797598968,
+            "definition": {
+                "title": "Destination Zone Distribution",
+                "title_size": "16",
+                "title_align": "left",
+                "requests": [
+                    {
+                        "formulas": [
+                            {
+                                "formula": "query1",
+                                "limit": {
+                                    "count": 500,
+                                    "order": "desc"
+                                }
+                            }
+                        ],
+                        "queries": [
+                            {
+                                "data_source": "logs",
+                                "name": "query1",
+                                "indexes": [
+                                    "*"
+                                ],
+                                "compute": {
+                                    "aggregation": "count"
+                                },
+                                "group_by": [
+                                    {
+                                        "facet": "@dstzone",
+                                        "limit": 10,
+                                        "sort": {
+                                            "order": "desc",
+                                            "aggregation": "count"
+                                        }
+                                    }
+                                ],
+                                "search": {
+                                    "query": "source:palo-alto-panorama @type:TRAFFIC $Device_Serial_Number $Subtype $Action"
+                                },
+                                "storage": "hot"
+                            }
+                        ],
+                        "response_format": "scalar",
+                        "style": {
+                            "palette": "datadog16"
+                        }
+                    }
+                ],
+                "type": "sunburst",
+                "legend": {
+                    "type": "table"
+                }
+            },
+            "layout": {
+                "x": 3,
+                "y": 18,
+                "width": 3,
+                "height": 3
+            }
+        },
+        {
+            "id": 6072982711177336,
+            "definition": {
+                "title": "Action Distribution",
+                "title_size": "16",
+                "title_align": "left",
+                "requests": [
+                    {
+                        "formulas": [
+                            {
+                                "formula": "query1",
+                                "limit": {
+                                    "count": 500,
+                                    "order": "desc"
+                                }
+                            }
+                        ],
+                        "queries": [
+                            {
+                                "data_source": "logs",
+                                "name": "query1",
+                                "indexes": [
+                                    "*"
+                                ],
+                                "compute": {
+                                    "aggregation": "count"
+                                },
+                                "group_by": [
+                                    {
+                                        "facet": "@palo.alto.panorama.action",
+                                        "limit": 10,
+                                        "sort": {
+                                            "order": "desc",
+                                            "aggregation": "count"
+                                        }
+                                    }
+                                ],
+                                "search": {
+                                    "query": "source:palo-alto-panorama @type:TRAFFIC $Device_Serial_Number $Subtype $Action"
+                                },
+                                "storage": "hot"
+                            }
+                        ],
+                        "response_format": "scalar",
+                        "style": {
+                            "palette": "datadog16"
+                        }
+                    }
+                ],
+                "type": "sunburst",
+                "legend": {
+                    "type": "table"
+                }
+            },
+            "layout": {
+                "x": 6,
+                "y": 18,
+                "width": 6,
+                "height": 3
+            }
+        },
+        {
+            "id": 3127493630425506,
+            "definition": {
+                "title": "Top Reasons for Session End",
+                "title_size": "16",
+                "title_align": "left",
+                "type": "toplist",
+                "requests": [
+                    {
+                        "formulas": [
+                            {
+                                "formula": "query1",
+                                "limit": {
+                                    "count": 10,
+                                    "order": "desc"
+                                }
+                            }
+                        ],
+                        "queries": [
+                            {
+                                "data_source": "logs",
+                                "name": "query1",
+                                "indexes": [
+                                    "*"
+                                ],
+                                "compute": {
+                                    "aggregation": "count"
+                                },
+                                "group_by": [
+                                    {
+                                        "facet": "@sessionendreason",
+                                        "limit": 10,
+                                        "sort": {
+                                            "order": "desc",
+                                            "aggregation": "count"
+                                        }
+                                    }
+                                ],
+                                "search": {
+                                    "query": "source:palo-alto-panorama @type:TRAFFIC $Device_Serial_Number $Subtype $Action"
+                                },
+                                "storage": "hot"
+                            }
+                        ],
+                        "response_format": "scalar"
+                    }
+                ],
+                "style": {
+                    "display": {
+                        "type": "stacked",
+                        "legend": "automatic"
+                    }
+                }
+            },
+            "layout": {
+                "x": 0,
+                "y": 21,
+                "width": 3,
+                "height": 3
+            }
+        },
+        {
+            "id": 7727127522985056,
+            "definition": {
+                "title": "Top Rules",
+                "title_size": "16",
+                "title_align": "left",
+                "type": "toplist",
+                "requests": [
+                    {
+                        "formulas": [
+                            {
+                                "formula": "query1",
+                                "limit": {
+                                    "count": 10,
+                                    "order": "desc"
+                                }
+                            }
+                        ],
+                        "queries": [
+                            {
+                                "data_source": "logs",
+                                "name": "query1",
+                                "indexes": [
+                                    "*"
+                                ],
+                                "compute": {
+                                    "aggregation": "count"
+                                },
+                                "group_by": [
+                                    {
+                                        "facet": "@rule",
+                                        "limit": 10,
+                                        "sort": {
+                                            "order": "desc",
+                                            "aggregation": "count"
+                                        }
+                                    }
+                                ],
+                                "search": {
+                                    "query": "source:palo-alto-panorama @type:TRAFFIC $Device_Serial_Number $Subtype $Action"
+                                },
+                                "storage": "hot"
+                            }
+                        ],
+                        "response_format": "scalar"
+                    }
+                ],
+                "style": {
+                    "display": {
+                        "type": "stacked",
+                        "legend": "automatic"
+                    }
+                }
+            },
+            "layout": {
+                "x": 3,
+                "y": 21,
+                "width": 3,
+                "height": 3
+            }
+        },
+        {
+            "id": 8291612460816156,
+            "definition": {
+                "title": "Top Flags",
+                "title_size": "16",
+                "title_align": "left",
+                "type": "toplist",
+                "requests": [
+                    {
+                        "formulas": [
+                            {
+                                "formula": "query1",
+                                "limit": {
+                                    "count": 10,
+                                    "order": "desc"
+                                }
+                            }
+                        ],
+                        "queries": [
+                            {
+                                "data_source": "logs",
+                                "name": "query1",
+                                "indexes": [
+                                    "*"
+                                ],
+                                "compute": {
+                                    "aggregation": "count"
+                                },
+                                "group_by": [
+                                    {
+                                        "facet": "@flags",
+                                        "limit": 10,
+                                        "sort": {
+                                            "order": "desc",
+                                            "aggregation": "count"
+                                        }
+                                    }
+                                ],
+                                "search": {
+                                    "query": "source:palo-alto-panorama @type:TRAFFIC $Device_Serial_Number $Subtype $Action"
+                                },
+                                "storage": "hot"
+                            }
+                        ],
+                        "response_format": "scalar"
+                    }
+                ],
+                "style": {
+                    "display": {
+                        "type": "stacked",
+                        "legend": "automatic"
+                    }
+                }
+            },
+            "layout": {
+                "x": 6,
+                "y": 21,
+                "width": 3,
+                "height": 3
+            }
+        },
+        {
+            "id": 528357851839282,
+            "definition": {
+                "title": "Top Policies",
+                "title_size": "16",
+                "title_align": "left",
+                "type": "toplist",
+                "requests": [
+                    {
+                        "formulas": [
+                            {
+                                "formula": "query1",
+                                "limit": {
+                                    "count": 10,
+                                    "order": "desc"
+                                }
+                            }
+                        ],
+                        "queries": [
+                            {
+                                "data_source": "logs",
+                                "name": "query1",
+                                "indexes": [
+                                    "*"
+                                ],
+                                "compute": {
+                                    "aggregation": "count"
+                                },
+                                "group_by": [
+                                    {
+                                        "facet": "@policyid",
+                                        "limit": 10,
+                                        "sort": {
+                                            "order": "desc",
+                                            "aggregation": "count"
+                                        }
+                                    }
+                                ],
+                                "search": {
+                                    "query": "source:palo-alto-panorama @type:TRAFFIC $Device_Serial_Number $Subtype $Action"
+                                },
+                                "storage": "hot"
+                            }
+                        ],
+                        "response_format": "scalar"
+                    }
+                ],
+                "style": {
+                    "display": {
+                        "type": "stacked",
+                        "legend": "automatic"
+                    }
+                }
+            },
+            "layout": {
+                "x": 9,
+                "y": 21,
+                "width": 3,
+                "height": 3
+            }
+        },
+        {
+            "id": 2607404900043900,
+            "definition": {
+                "title": "Tunnel Type Distribution ",
+                "title_size": "16",
+                "title_align": "left",
+                "requests": [
+                    {
+                        "formulas": [
+                            {
+                                "formula": "query1",
+                                "limit": {
+                                    "count": 500,
+                                    "order": "desc"
+                                }
+                            }
+                        ],
+                        "queries": [
+                            {
+                                "data_source": "logs",
+                                "name": "query1",
+                                "indexes": [
+                                    "*"
+                                ],
+                                "compute": {
+                                    "aggregation": "count"
+                                },
+                                "group_by": [
+                                    {
+                                        "facet": "@tunnel",
+                                        "limit": 10,
+                                        "sort": {
+                                            "order": "desc",
+                                            "aggregation": "count"
+                                        }
+                                    }
+                                ],
+                                "search": {
+                                    "query": "source:palo-alto-panorama @type:TRAFFIC $Device_Serial_Number $Subtype $Action"
+                                },
+                                "storage": "hot"
+                            }
+                        ],
+                        "response_format": "scalar",
+                        "style": {
+                            "palette": "datadog16"
+                        }
+                    }
+                ],
+                "type": "sunburst",
+                "legend": {
+                    "type": "table"
+                }
+            },
+            "layout": {
+                "x": 0,
+                "y": 24,
+                "width": 6,
+                "height": 3
+            }
+        },
+        {
+            "id": 5772405259988610,
+            "definition": {
+                "title": "Protocol Distribution",
+                "title_size": "16",
+                "title_align": "left",
+                "requests": [
+                    {
+                        "formulas": [
+                            {
+                                "formula": "query1",
+                                "limit": {
+                                    "count": 500,
+                                    "order": "desc"
+                                }
+                            }
+                        ],
+                        "queries": [
+                            {
+                                "data_source": "logs",
+                                "name": "query1",
+                                "indexes": [
+                                    "*"
+                                ],
+                                "compute": {
+                                    "aggregation": "count"
+                                },
+                                "group_by": [
+                                    {
+                                        "facet": "@proto",
+                                        "limit": 10,
+                                        "sort": {
+                                            "order": "desc",
+                                            "aggregation": "count"
+                                        }
+                                    }
+                                ],
+                                "search": {
+                                    "query": "source:palo-alto-panorama @type:TRAFFIC $Device_Serial_Number $Subtype $Action"
+                                },
+                                "storage": "hot"
+                            }
+                        ],
+                        "response_format": "scalar",
+                        "style": {
+                            "palette": "datadog16"
+                        }
+                    }
+                ],
+                "type": "sunburst",
+                "legend": {
+                    "type": "table"
+                }
+            },
+            "layout": {
+                "x": 6,
+                "y": 24,
+                "width": 6,
+                "height": 3
+            }
+        },
+        {
+            "id": 5436272002600982,
+            "definition": {
+                "title": "App details with Risk",
+                "title_size": "16",
+                "title_align": "left",
+                "type": "query_table",
+                "requests": [
+                    {
+                        "queries": [
+                            {
+                                "data_source": "logs",
+                                "name": "query1",
+                                "indexes": [
+                                    "*"
+                                ],
+                                "compute": {
+                                    "aggregation": "avg",
+                                    "metric": "@palo.alto.panorama.apprisk"
+                                },
+                                "group_by": [
+                                    {
+                                        "facet": "@app",
+                                        "limit": 5,
+                                        "sort": {
+                                            "order": "desc",
+                                            "aggregation": "avg",
+                                            "metric": "@palo.alto.panorama.apprisk"
+                                        }
+                                    },
+                                    {
+                                        "facet": "@apptech",
+                                        "limit": 5,
+                                        "sort": {
+                                            "order": "desc",
+                                            "aggregation": "avg",
+                                            "metric": "@palo.alto.panorama.apprisk"
+                                        }
+                                    },
+                                    {
+                                        "facet": "@appcat",
+                                        "limit": 5,
+                                        "sort": {
+                                            "order": "desc",
+                                            "aggregation": "avg",
+                                            "metric": "@palo.alto.panorama.apprisk"
+                                        }
+                                    },
+                                    {
+                                        "facet": "@appsaas",
+                                        "limit": 5,
+                                        "sort": {
+                                            "order": "desc",
+                                            "aggregation": "avg",
+                                            "metric": "@palo.alto.panorama.apprisk"
+                                        }
+                                    },
+                                    {
+                                        "facet": "@appstate",
+                                        "limit": 5,
+                                        "sort": {
+                                            "order": "desc",
+                                            "aggregation": "avg",
+                                            "metric": "@palo.alto.panorama.apprisk"
+                                        }
+                                    }
+                                ],
+                                "search": {
+                                    "query": "source:palo-alto-panorama @type:TRAFFIC $Device_Serial_Number $Subtype $Action"
+                                },
+                                "storage": "hot"
+                            }
+                        ],
+                        "response_format": "scalar",
+                        "text_formats": [
+                            [],
+                            [
+                                {
+                                    "match": {
+                                        "type": "is",
+                                        "value": ""
+                                    },
+                                    "palette": "white_on_green"
+                                }
+                            ]
+                        ],
+                        "formulas": [
+                            {
+                                "cell_display_mode": "bar",
+                                "alias": "App Risk",
+                                "formula": "query1",
+                                "limit": {
+                                    "count": 3125,
+                                    "order": "desc"
+                                }
+                            }
+                        ]
+                    }
+                ],
+                "has_search_bar": "auto"
+            },
+            "layout": {
+                "x": 0,
+                "y": 27,
+                "width": 12,
+                "height": 3
+            }
+        },
+        {
+            "id": 5804081654824820,
+            "definition": {
+                "title": "Log Details",
+                "title_size": "16",
+                "title_align": "left",
+                "requests": [
+                    {
+                        "response_format": "event_list",
+                        "query": {
+                            "data_source": "logs_stream",
+                            "query_string": "source:palo-alto-panorama @type:TRAFFIC $Device_Serial_Number $Subtype $Action",
+                            "indexes": [],
+                            "storage": "hot"
+                        },
+                        "columns": [
+                            {
+                                "field": "serial",
+                                "width": "auto"
+                            },
+                            {
+                                "field": "time_generated",
+                                "width": "auto"
+                            },
+                            {
+                                "field": "subtype",
+                                "width": "auto"
+                            },
+                            {
+                                "field": "palo.alto.panorama.action",
+                                "width": "auto"
+                            },
+                            {
+                                "field": "src",
+                                "width": "auto"
+                            },
+                            {
+                                "field": "dst",
+                                "width": "auto"
+                            },
+                            {
+                                "field": "rule",
+                                "width": "auto"
+                            },
+                            {
+                                "field": "suser",
+                                "width": "auto"
+                            },
+                            {
+                                "field": "duser",
+                                "width": "auto"
+                            },
+                            {
+                                "field": "app",
+                                "width": "auto"
+                            },
+                            {
+                                "field": "bytes",
+                                "width": "auto"
+                            },
+                            {
+                                "field": "palo.alto.panorama.pkt",
+                                "width": "auto"
+                            },
+                            {
+                                "field": "srczone",
+                                "width": "auto"
+                            },
+                            {
+                                "field": "dstzone",
+                                "width": "auto"
+                            },
+                            {
+                                "field": "proto",
+                                "width": "auto"
+                            },
+                            {
+                                "field": "sessionendreason",
+                                "width": "auto"
+                            },
+                            {
+                                "field": "tunnel",
+                                "width": "auto"
+                            },
+                            {
+                                "field": "policyid",
+                                "width": "auto"
+                            },
+                            {
+                                "field": "apptech",
+                                "width": "auto"
+                            },
+                            {
+                                "field": "palo.alto.panorama.apprisk",
+                                "width": "auto"
+                            }
+                        ]
+                    }
+                ],
+                "type": "list_stream"
+            },
+            "layout": {
+                "x": 0,
+                "y": 30,
+                "width": 12,
+                "height": 5
+            }
+        }
+    ],
+    "template_variables": [
+        {
+            "name": "Device_Serial_Number",
+            "prefix": "@serial",
+            "available_values": [],
+            "default": "*"
+        },
+        {
+            "name": "Subtype",
+            "prefix": "@subtype",
+            "available_values": [],
+            "default": "*"
+        },
+        {
+            "name": "Action",
+            "prefix": "@palo.alto.panorama.action",
+            "available_values": [],
+            "default": "*"
+        }
+    ],
+    "layout_type": "ordered",
+    "notify_list": [],
+    "reflow_type": "fixed"
+}
