@@ -20,6 +20,7 @@ from datadog_checks.sqlserver.config import SQLServerConfig
 from datadog_checks.sqlserver.database_metrics import (
     SqlserverAoMetrics,
     SqlserverDatabaseBackupMetrics,
+    SqlserverDatabaseStatsMetrics,
     SqlserverDbFragmentationMetrics,
     SqlserverFciMetrics,
     SqlserverFileStatsMetrics,
@@ -52,7 +53,7 @@ from datadog_checks.sqlserver.const import (
     AZURE_DEPLOYMENT_TYPE_TO_RESOURCE_TYPES,
     BASE_NAME_QUERY,
     COUNTER_TYPE_QUERY,
-    DATABASE_METRICS,
+    DATABASE_FILES_METRICS,
     DATABASE_SERVICE_CHECK_NAME,
     DATABASE_SERVICE_CHECK_QUERY,
     DBM_MIGRATED_METRICS,
@@ -464,7 +465,7 @@ class SQLServer(AgentCheck):
                     )
 
         # Load database statistics
-        db_stats_to_collect = list(DATABASE_METRICS)
+        db_stats_to_collect = list(DATABASE_FILES_METRICS)
 
         for name, table, column in db_stats_to_collect:
             # include database as a filter option
@@ -786,6 +787,11 @@ class SQLServer(AgentCheck):
             new_query_executor=self._new_query_executor,
             server_static_info=self.static_info_cache,
         )
+        database_stats_metrics = SqlserverDatabaseStatsMetrics(
+            instance_config=self.instance,
+            new_query_executor=self._new_query_executor,
+            server_static_info=self.static_info_cache,
+        )
 
         # metrics that are collected for each database
         tempdb_file_space_usage_metrics = SqlserverTempDBFileSpaceUsageMetrics(
@@ -820,6 +826,7 @@ class SQLServer(AgentCheck):
             master_files_metrics,
             database_backup_metrics,
             task_scheduler_metrics,
+            database_stats_metrics,
             # database specific metrics
             tempdb_file_space_usage_metrics,
             index_usage_metrics,

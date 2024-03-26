@@ -208,7 +208,6 @@ DATABASE_STATS_METRICS = [
 DATABASE_BACKUP_METRICS = [
     ('sqlserver.database.backup_count', 'msdb.dbo.backupset', 'backup_set_id_count'),
 ]
-DATABASE_METRICS = DATABASE_FILES_METRICS + DATABASE_STATS_METRICS
 
 DATABASE_INDEX_METRICS = [
     'sqlserver.index.user_seeks',

@@ -476,42 +476,6 @@ class SqlDatabaseFileStats(BaseSqlServerMetric):
             self.report_function(metric_name, column_val, tags=metric_tags)
 
 
-# https://docs.microsoft.com/en-us/sql/relational-databases/system-catalog-views/sys-databases-transact-sql?view=sql-server-ver15
-class SqlDatabaseStats(BaseSqlServerMetric):
-    CUSTOM_QUERIES_AVAILABLE = False
-    TABLE = 'sys.databases'
-    DEFAULT_METRIC_TYPE = 'gauge'
-    QUERY_BASE = "select * from {table}".format(table=TABLE)
-    OPERATION_NAME = 'database_stats_metrics'
-
-    @classmethod
-    def fetch_all_values(cls, cursor, counters_list, logger, databases=None):
-        return cls._fetch_generic_values(cursor, None, logger)
-
-    def fetch_metric(self, rows, columns, values_cache=None):
-        database_name = columns.index("name")
-        db_state_desc_index = columns.index("state_desc")
-        db_recovery_model_desc_index = columns.index("recovery_model_desc")
-        value_column_index = columns.index(self.column)
-
-        for row in rows:
-            if row[database_name].lower() != self.instance.lower():
-                continue
-
-            column_val = row[value_column_index]
-            db_state_desc = row[db_state_desc_index]
-            db_recovery_model_desc = row[db_recovery_model_desc_index]
-            metric_tags = [
-                'database:{}'.format(str(self.instance)),
-                'db:{}'.format(str(self.instance)),
-                'database_state_desc:{}'.format(str(db_state_desc)),
-                'database_recovery_model_desc:{}'.format(str(db_recovery_model_desc)),
-            ]
-            metric_tags.extend(self.tags)
-            metric_name = '{}'.format(self.metric_name)
-            self.report_function(metric_name, column_val, tags=metric_tags)
-
-
 # https://docs.microsoft.com/en-us/sql/relational-databases/system-dynamic-management-views/sys-dm-hadr-database-replica-states-transact-sql?view=sql-server-ver15
 class SqlDbReplicaStates(BaseSqlServerMetric):
     TABLE = 'sys.dm_hadr_database_replica_states'

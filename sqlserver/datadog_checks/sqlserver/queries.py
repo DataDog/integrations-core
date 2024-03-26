@@ -307,6 +307,31 @@ OS_TASK_METRICS_QUERY = {
     ],
 }
 
+DATABASE_STATS_METRICS_QUERY = {
+    "name": "sys.databases",
+    "query": """SELECT
+        name as db,
+        name as database_name,
+        state_desc,
+        recovery_model_desc,
+        state,
+        is_sync_with_backup,
+        is_in_standby,
+        is_read_only
+        from sys.databases
+    """,
+    "columns": [
+        {"name": "db", "type": "tag"},
+        {"name": "database", "type": "tag"},
+        {"name": "database_state_desc", "type": "tag"},
+        {"name": "database_recovery_model_desc", "type": "tag"},
+        {"name": "database.state", "type": "gauge"},
+        {"name": "database.is_sync_with_backup", "type": "gauge"},
+        {"name": "database.is_in_standby", "type": "gauge"},
+        {"name": "database.is_read_only", "type": "gauge"},
+    ],
+}
+
 
 def get_query_ao_availability_groups(sqlserver_major_version):
     """

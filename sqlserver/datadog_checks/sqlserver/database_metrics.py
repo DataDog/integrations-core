@@ -11,6 +11,7 @@ from datadog_checks.sqlserver.const import (
 )
 from datadog_checks.sqlserver.queries import (
     DATABASE_BACKUP_METRICS_QUERY,
+    DATABASE_STATS_METRICS_QUERY,
     DB_FRAGMENTATION_QUERY,
     INDEX_USAGE_STATS_QUERY,
     MASTER_FILES_METRICS_QUERY,
@@ -305,3 +306,14 @@ class SqlserverTaskSchedulerMetrics(SqlserverDatabaseMetricsBase):
     @property
     def queries(self):
         return [TASK_SCHEDULER_METRICS_QUERY, OS_TASK_METRICS_QUERY]
+
+
+class SqlserverDatabaseStatsMetrics(SqlserverDatabaseMetricsBase):
+    # https://docs.microsoft.com/en-us/sql/relational-databases/system-catalog-views/sys-databases-transact-sql?view=sql-server-ver15
+    @property
+    def enabled(self):
+        return True
+
+    @property
+    def queries(self):
+        return [DATABASE_STATS_METRICS_QUERY]

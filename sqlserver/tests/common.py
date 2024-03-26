@@ -14,10 +14,11 @@ from datadog_checks.sqlserver.const import (
     AO_METRICS_PRIMARY,
     AO_METRICS_SECONDARY,
     DATABASE_BACKUP_METRICS,
+    DATABASE_FILES_METRICS,
     DATABASE_FRAGMENTATION_METRICS,
     DATABASE_INDEX_METRICS,
     DATABASE_MASTER_FILES,
-    DATABASE_METRICS,
+    DATABASE_STATS_METRICS,
     DBM_MIGRATED_METRICS,
     INSTANCE_METRICS,
     INSTANCE_METRICS_DATABASE,
@@ -83,7 +84,8 @@ EXPECTED_DEFAULT_METRICS = (
             EXPECTED_INSTANCE_METRICS,
             DBM_MIGRATED_METRICS,
             INSTANCE_METRICS_DATABASE,
-            DATABASE_METRICS,
+            DATABASE_FILES_METRICS,
+            DATABASE_STATS_METRICS,
             DATABASE_BACKUP_METRICS,
             TEMPDB_FILE_SPACE_USAGE_METRICS,
         )
@@ -235,7 +237,6 @@ INIT_CONFIG_ALT_TABLES = {
 
 OPERATION_TIME_METRICS = [
     'simple_metrics',
-    'database_stats_metrics',
     'fraction_metrics',
     'database_file_stats_metrics',
     'incr_fraction_metrics',
