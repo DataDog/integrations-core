@@ -43,7 +43,7 @@ Skip this step if you are not using Instant Client.
 <!-- xxx tab "Windows" xxx -->
 ###### Windows
 
-1. Follow the [Oracle Windows installation guide[4] to configure your Oracle Instant Client.
+1. Follow the [Oracle Windows installation guide][4] to configure your Oracle Instant Client.
 
 2. Verify the following:
     - The [Microsoft Visual Studio 2017 Redistributable][3] or the appropriate version is installed for the Oracle Instant Client.
@@ -61,7 +61,7 @@ Skip this step if you are not using Instant Client.
 <!-- xxx tabs xxx -->
 <!-- xxx tab "Non-CDB" xxx -->
 
-### Create user
+##### Create user
 
 Create a read-only login to connect to your server and grant the required permissions:
 
@@ -71,7 +71,7 @@ CREATE USER c##datadog IDENTIFIED BY &password CONTAINER = ALL ;
 ALTER USER c##datadog SET CONTAINER_DATA=ALL CONTAINER=CURRENT;
 ```
 
-### Grant permissions
+##### Grant permissions
 
 Log on as `sysdba`, and grant the following permissions:
 
@@ -125,7 +125,7 @@ grant set container to c##datadog ;
 
 <!-- xxx tab "Non-CDB" xxx -->
 
-### Create user
+##### Create user
 
 Create a read-only login to connect to your server and grant the required permissions:
 
@@ -133,7 +133,7 @@ Create a read-only login to connect to your server and grant the required permis
 CREATE USER datadog IDENTIFIED BY &password ;
 ```
 
-### Grant permissions
+##### Grant permissions
 
 Log on as `sysdba`, and grant the following permissions:
 
@@ -179,7 +179,7 @@ grant select on dba_data_files to datadog;
 
 <!-- xxx tab "RDS" xxx -->
 
-### Create user
+##### Create user
 
 If you installed the legacy Oracle integration, skip this step because the user already exists. You must, however, execute the subsequent steps.
 
@@ -189,7 +189,7 @@ Create a read-only login to connect to your server and grant the required permis
 CREATE USER datadog IDENTIFIED BY your_password ;
 ```
 
-### Grant permissions 
+##### Grant permissions 
 
 ```SQL
 grant create session to datadog ;
@@ -234,7 +234,7 @@ exec rdsadmin.rdsadmin_util.grant_sys_object('DBA_DATA_FILES','DATADOG','SELECT'
 
 <!-- xxx tab "Oracle Autonomous Database" xxx -->
 
-### Create user
+##### Create user
 
 Create a read-only login to connect to your server and grant the required permissions:
 
@@ -242,7 +242,7 @@ Create a read-only login to connect to your server and grant the required permis
 CREATE USER datadog IDENTIFIED BY your_password ;
 ```
 
-### Grant permissions 
+##### Grant permissions 
 
 ```SQL
 grant create session to datadog ;
@@ -324,13 +324,13 @@ To configure this check for an Agent running on a host:
         password: <PASSWORD>
    ```
 
-**Note:** For the Agent version `7.53.0` and higher, the configuration file must be created in the subdirectory `oracle.d`. For the Agent versions between `7.50.1` and `7.53.0`, the configuration subdirectory is `oracle-dbm.d`. Oracle monitoring for the agent versions lower than `7.50.1` is deprecated.
+**Note:** For the Agent version `7.53.0` and higher, the configuration files are created in the subdirectory `oracle.d`. For the Agent versions between `7.50.1` and `7.53.0`, the configuration subdirectory is `oracle-dbm.d`. Oracle monitoring for the agent versions lower than `7.50.1` is deprecated.
 
 2. [Restart the Agent][7].
 
 #### Connect to Oracle through TCPS
 
-1. To connect to Oracle through TCPS (TCP with SSL), uncomment the `protocol` configuration option and select `TCPS`. Update the `server` option to set the TCPS server to monitor.
+To connect to Oracle through TCPS (TCP with SSL), uncomment the `protocol` configuration option and select `TCPS`. Update the `server` option to set the TCPS server to monitor.
 
     ```yaml
     init_config:
@@ -344,7 +344,6 @@ To configure this check for an Agent running on a host:
         ## @param service_name - string - required
         ## The Oracle Database service name. To view the services available on your server,
         ## run the following query:
-        ## `SELECT value FROM v$parameter WHERE name='service_names'`
         #
         service_name: "<SERVICE_NAME>"
     
@@ -364,8 +363,6 @@ To configure this check for an Agent running on a host:
         #
         protocol: TCPS
     ```
-
-2. Update the `sqlnet.ora`, `listener.ora`, and `tnsnames.ora` to allow TCPS connections on your Oracle Database. 
 
 <!-- xxz tab xxx -->
 
@@ -414,69 +411,6 @@ is what the following example configuration would become:
 ```
 
 See the [sample oracle.d/conf.yaml][5] for all available configuration options.
-
-### Example
-
-Create a query configuration to help identify database locks:
-
-1. To include a custom query, modify `conf.d\oracle.d\conf.yaml`. Uncomment the `custom_queries` block, add the required queries and columns, and restart the Agent.
-
-```yaml
-  init_config:
-  instances:
-      - server: localhost:1521
-        service_name: orcl11g.us.oracle.com
-        username: datadog
-        password: xxxxxxx
-        jdbc_driver_path: /u01/app/oracle/product/11.2/dbhome_1/jdbc/lib/ojdbc6.jar
-        tags:
-          - db:oracle
-        custom_queries:
-          - query: |
-              select blocking_session, username, osuser, sid, serial# as serial, wait_class, seconds_in_wait
-              from v_$session
-              where blocking_session is not NULL order by blocking_session
-            columns:
-              - name: blocking_session
-                type: gauge
-              - name: username
-                type: tag
-              - name: osuser
-                type: tag
-              - name: sid
-                type: tag
-              - name: serial
-                type: tag
-              - name: wait_class
-                type: tag
-              - name: seconds_in_wait
-                type: tag
-```
-
-2. To access `v_$session`, give permission to `DATADOG` and test the permissions.
-
-```text
-SQL> grant select on sys.v_$session to datadog;
-
-##connecting with the DD user to validate the access:
-
-
-SQL> show user
-USER is "DATADOG"
-
-
-##creating a synonym to make the view visible
-SQL> create synonym datadog.v_$session for sys.v_$session;
-
-
-Synonym created.
-
-
-SQL> select blocking_session,username,osuser, sid, serial#, wait_class, seconds_in_wait from v_$session
-where blocking_session is not NULL order by blocking_session;
-```
-
-3. Once configured, you can create a [monitor][10] based on `oracle.custom_query.locks` metrics.
 
 ## Data Collected
 
