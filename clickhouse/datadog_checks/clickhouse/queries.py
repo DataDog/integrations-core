@@ -615,17 +615,17 @@ SystemEvents = {
                 'DictCacheLockReadNs': {
                     'name': 'dictionary.cache.read.waiting.time',
                     'type': 'temporal_percent',
-                    'scale': 'microsecond',
+                    'scale': 'nanosecond',
                 },
                 'DictCacheLockWriteNs': {
                     'name': 'dictionary.cache.write.waiting.time',
                     'type': 'temporal_percent',
-                    'scale': 'microsecond',
+                    'scale': 'nanosecond',
                 },
                 'DictCacheRequestTimeNs': {
                     'name': 'dictionary.cache.request.time',
                     'type': 'temporal_percent',
-                    'scale': 'microsecond',
+                    'scale': 'nanosecond',
                 },
                 'DictCacheRequests': {'name': 'dictionary.cache.requests', 'type': 'monotonic_gauge'},
                 'DirectorySync': {'name': 'syscall.directory.sync', 'type': 'monotonic_gauge'},
