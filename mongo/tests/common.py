@@ -286,7 +286,8 @@ TLS_METADATA = {
 INSTANCE_DBSTATS_TAG_DBNAME = {
     'hosts': [f'{HOST}:{PORT1}'],
     'dbstats_tag_dbname': False,
-    
+}
+
 METRIC_VAL_CHECKS = {
     'mongodb.asserts.msgps': lambda x: x >= 0,
     'mongodb.fsynclocked': lambda x: x >= 0,
