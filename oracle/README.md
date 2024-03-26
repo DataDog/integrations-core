@@ -51,7 +51,7 @@ Skip this step if you are not using Instant Client.
 
     - The *Instant Client Basic* package from Oracle's [download page][8] is installed, and is available to all users on the given machine (for example, `C:\oracle\instantclient_19`).
 
-    - The `PATH` environment variable contains the the directory whith the Instant Client (for example, `C:\oracle\instantclient_19`).
+    - The `PATH` environment variable contains the directory with the Instant Client (for example, `C:\oracle\instantclient_19`).
 
 
 <!-- xxz tab xxx -->
@@ -115,7 +115,7 @@ grant select on cdb_data_files to c##datadog;
 grant select on dba_data_files to c##datadog;
 ```
 
-If you conifgured custom queries that run on a pluggable database (PDB), you must grant `set container` privilege to the `C##DATADOG` user:
+If you configured custom queries that run on a pluggable database (PDB), you must grant the `set container` privilege to the `C##DATADOG` user:
 
 ```SQL
 connect / as sysdba
