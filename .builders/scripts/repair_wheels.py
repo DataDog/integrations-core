@@ -66,7 +66,7 @@ def wheel_was_built(wheel: Path) -> bool:
 
 class WheelName(NamedTuple):
     """Helper class to manipulate wheel names."""
-    # Note: this assumes no build number is ever used to avoid extra parsing logic
+    # Note: this implementation ignores build tags (it drops them on parsing)
     name: str
     version: str
     python_tag: str
@@ -76,7 +76,10 @@ class WheelName(NamedTuple):
     @classmethod
     def parse(cls, wheel_name: str):
         name, _ext = os.path.splitext(wheel_name)
-        return cls(*name.split('-'))
+        parts = name.split('-')
+        if len(parts) == 6:
+            parts.pop(2)
+        return cls(*parts)
 
     def __str__(self):
         return '-'.join([
