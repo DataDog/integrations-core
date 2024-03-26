@@ -194,6 +194,34 @@ TEMPDB_SPACE_USAGE_QUERY = {
     ],
 }
 
+DB_FRAGMENTATION_QUERY = {
+    "name": "sys.dm_db_index_physical_stats",
+    "query": """SELECT
+        DB_NAME(DDIPS.database_id) as database_name,
+        OBJECT_NAME(DDIPS.object_id, DDIPS.database_id) as object_name,
+        DDIPS.index_id as index_id,
+        DDIPS.fragment_count as fragment_count,
+        DDIPS.avg_fragment_size_in_pages as avg_fragment_size_in_pages,
+        DDIPS.page_count as page_count,
+        DDIPS.avg_fragmentation_in_percent as avg_fragmentation_in_percent,
+        I.name as index_name
+        FROM sys.dm_db_index_physical_stats (DB_ID('{db}'),null,null,null,null) as DDIPS
+        INNER JOIN sys.indexes as I ON I.object_id = DDIPS.object_id
+        AND DDIPS.index_id = I.index_id
+        WHERE DDIPS.fragment_count is not null
+    """,
+    "columns": [
+        {"name": "database_name", "type": "tag"},
+        {"name": "object_name", "type": "tag"},
+        {"name": "index_id", "type": "tag"},
+        {"name": "database.fragment_count", "type": "gauge"},
+        {"name": "database.avg_fragment_size_in_pages", "type": "gauge"},
+        {"name": "database.index_page_count", "type": "gauge"},
+        {"name": "database.avg_fragmentation_in_percent", "type": "gauge"},
+        {"name": "index_name", "type": "tag"},
+    ],
+}
+
 
 def get_query_ao_availability_groups(sqlserver_major_version):
     """

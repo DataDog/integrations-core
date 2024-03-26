@@ -348,6 +348,36 @@ def test_check_db_fragmentation_metrics(
 
 @pytest.mark.integration
 @pytest.mark.usefixtures('dd_environment')
+def test_check_db_fragmentation_metrics_object_names(
+    aggregator,
+    dd_run_check,
+    init_config,
+    instance_docker_metrics,
+):
+    db_fragmentation_object_names = ['spt_fallback_db', 'spt_fallback_dev', 'spt_fallback_usg']
+    instance_docker_metrics['include_db_fragmentation_metrics'] = True
+    instance_docker_metrics['db_fragmentation_object_names'] = db_fragmentation_object_names
+    sqlserver_check = SQLServer(CHECK_NAME, init_config, [instance_docker_metrics])
+    dd_run_check(sqlserver_check)
+
+    tags = instance_docker_metrics.get('tags', [])
+
+    check_sqlserver_can_connect(
+        aggregator, instance_docker_metrics['host'], sqlserver_check.resolved_hostname, tags, False
+    )
+
+    db_tags = tags + ['database_name:master', 'db:master']
+    for metric_name, _, _ in DATABASE_FRAGMENTATION_METRICS:
+        for tag in db_tags:
+            aggregator.assert_metric_has_tag(metric_name, tag=tag)
+        for tag_prefix in ('index_id', 'index_name'):
+            aggregator.assert_metric_has_tag_prefix(metric_name, tag_prefix=tag_prefix)
+        for object_name in db_fragmentation_object_names:
+            aggregator.assert_metric_has_tag(metric_name, tag='object_name:{}'.format(object_name))
+
+
+@pytest.mark.integration
+@pytest.mark.usefixtures('dd_environment')
 def test_check_tempdb_file_space_usage_metrics(
     aggregator,
     dd_run_check,
