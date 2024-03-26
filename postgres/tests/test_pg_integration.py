@@ -1095,15 +1095,15 @@ def test_collect_wal_metrics_metrics(aggregator, integration_check, pg_instance,
 @pytest.mark.parametrize(
     'instance_propagate_agent_tags,init_config_propagate_agent_tags,should_propagate_agent_tags',
     [
-        (True, True, True),
-        (True, False, True),  # instance config prevails
-        (False, True, False),  # instance config prevails
-        (False, False, False),
-        (None, True, True),  # init_config config applies to all instances
-        (None, False, False),  # init_config config applies to all instances
-        (None, None, False),  # default to false
-        (True, None, True),  # instance config prevails
-        (False, None, False),  # instance config prevails
+        pytest.param(True, True, True, id="both true"),
+        pytest.param(True, False, True, id="instance config true prevails"),
+        pytest.param(False, True, False, id="instance config false prevails"),
+        pytest.param(False, False, False, id="both false"),
+        pytest.param(None, True, True, id="init_config true applies to all instances"),
+        pytest.param(None, False, False, id="init_config false applies to all instances"),
+        pytest.param(None, None, False, id="default to false"),
+        pytest.param(True, None, True, id="instance config true prevails, init_config is None"),
+        pytest.param(False, None, False, id="instance config false prevails, init_config is None"),
     ],
 )
 def test_propagate_agent_tags(
