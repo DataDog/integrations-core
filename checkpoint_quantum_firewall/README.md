@@ -68,7 +68,7 @@ To install the Checkpoint Quantum Firewall integration, follow the steps below:
 
 ### Logs
 
-The checkpoint_quantum_firewall integration collects Firewall, URL Filtering, IPS, Identity Awareness, Application Control, Threat Emulation, Audit, Anti Ransomware, Anti Spam & Email Security, Anti Exploit, Anti Bot, Anti Virus, HTTPS Inspection, DLP, and Anti Malware logs.
+The Checkpoint Quantum Firewall integration collects Firewall, URL Filtering, IPS, Identity Awareness, Application Control, Threat Emulation, Audit, Anti Ransomware, Anti Spam & Email Security, Anti Exploit, Anti Bot, Anti Virus, HTTPS Inspection, DLP, and Anti Malware logs.
 
 ### Metrics
 
@@ -86,7 +86,7 @@ The Checkpoint Quantum Firewall integration does not include any service checks.
 
 **Checkpoint Quantum Firewall:**
 
-#### Permission denied while port binding:
+#### Permission denied while port binding
 
 If you see a **Permission denied** error while port binding in the Agent logs, see the following instructions:
 
@@ -114,11 +114,11 @@ If you see a **Permission denied** error while port binding in the Agent logs, s
 
 2.  [Restart the Agent][1].
 
-#### Data is not being collected:
+#### Data is not being collected
 
 Make sure that traffic is bypassed from the configured port if the firewall is enabled.
 
-#### Port already in use:
+#### Port already in use
 
 If you see the **Port <PORT-NO\> Already in Use** error, see the following instructions. The example below is for PORT-NO = 514:
 
