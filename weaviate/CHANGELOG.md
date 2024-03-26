@@ -2,6 +2,12 @@
 
 <!-- towncrier release notes start -->
 
+## 2.3.1 / 2024-03-22
+
+***Fixed***:
+
+* Rename Go inuse_use metric to the correct inuse_bytes name ([#17252](https://github.com/DataDog/integrations-core/pull/17252))
+
 ## 2.3.0 / 2024-02-16 / Agent 7.52.0
 
 ***Added***:

@@ -2,6 +2,12 @@
 
 <!-- towncrier release notes start -->
 
+## 2.16.1 / 2024-03-22
+
+***Fixed***:
+
+* Attempt getting protocol version before certificate ([#17046](https://github.com/DataDog/integrations-core/pull/17046))
+
 ## 2.16.0 / 2024-03-07 / Agent 7.52.0
 
 ***Security***:

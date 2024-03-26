@@ -2,6 +2,12 @@
 
 <!-- towncrier release notes start -->
 
+## 3.2.1 / 2024-03-22
+
+***Fixed***:
+
+* Add missing custom tags to the `can_connect` service check ([#17194](https://github.com/DataDog/integrations-core/pull/17194))
+
 ## 3.2.0 / 2024-02-16 / Agent 7.52.0
 
 ***Added***:

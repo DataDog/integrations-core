@@ -1,1 +1,0 @@
-Skip relations with granted AccessExclusiveLock to avoid relations metrics query timeout
