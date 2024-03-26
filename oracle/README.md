@@ -22,6 +22,7 @@ To use the Oracle integration you can either use the native client (no additiona
 Skip this step if you are not using Instant Client.
 
 <!-- xxx tabs xxx -->
+
 <!-- xxx tab "Linux" xxx -->
 ###### Linux
 
@@ -59,9 +60,10 @@ Skip this step if you are not using Instant Client.
 #### Datadog user creation
 
 <!-- xxx tabs xxx -->
-<!-- xxx tab "Non-CDB" xxx -->
+<!-- xxx tab "Multi-tenant" xxx -->
+##### Multi-tenant
 
-##### Create user
+###### Create user
 
 Create a read-only login to connect to your server and grant the required permissions:
 
@@ -71,7 +73,7 @@ CREATE USER c##datadog IDENTIFIED BY &password CONTAINER = ALL ;
 ALTER USER c##datadog SET CONTAINER_DATA=ALL CONTAINER=CURRENT;
 ```
 
-##### Grant permissions
+###### Grant permissions
 
 Log on as `sysdba`, and grant the following permissions:
 
@@ -124,8 +126,9 @@ grant set container to c##datadog ;
 <!-- xxz tab xxx -->
 
 <!-- xxx tab "Non-CDB" xxx -->
+##### Non-CDB
 
-##### Create user
+###### Create user
 
 Create a read-only login to connect to your server and grant the required permissions:
 
@@ -133,7 +136,7 @@ Create a read-only login to connect to your server and grant the required permis
 CREATE USER datadog IDENTIFIED BY &password ;
 ```
 
-##### Grant permissions
+###### Grant permissions
 
 Log on as `sysdba`, and grant the following permissions:
 
@@ -178,10 +181,9 @@ grant select on dba_data_files to datadog;
 <!-- xxz tab xxx -->
 
 <!-- xxx tab "RDS" xxx -->
+##### RDS
 
-##### Create user
-
-If you installed the legacy Oracle integration, skip this step because the user already exists. You must, however, execute the subsequent steps.
+###### Create user
 
 Create a read-only login to connect to your server and grant the required permissions:
 
@@ -189,7 +191,7 @@ Create a read-only login to connect to your server and grant the required permis
 CREATE USER datadog IDENTIFIED BY your_password ;
 ```
 
-##### Grant permissions 
+###### Grant permissions 
 
 ```SQL
 grant create session to datadog ;
@@ -233,8 +235,9 @@ exec rdsadmin.rdsadmin_util.grant_sys_object('DBA_DATA_FILES','DATADOG','SELECT'
 <!-- xxz tab xxx -->
 
 <!-- xxx tab "Oracle Autonomous Database" xxx -->
+##### Oracle Autonomous Database
 
-##### Create user
+###### Create user
 
 Create a read-only login to connect to your server and grant the required permissions:
 
@@ -242,7 +245,7 @@ Create a read-only login to connect to your server and grant the required permis
 CREATE USER datadog IDENTIFIED BY your_password ;
 ```
 
-##### Grant permissions 
+###### Grant permissions 
 
 ```SQL
 grant create session to datadog ;
@@ -287,12 +290,6 @@ grant select on dba_data_files to datadog;
 <!-- xxz tabs xxx -->
 
 ### Configuration
-
-<!-- xxx tabs xxx -->
-
-<!-- xxx tab "Host" xxx -->
-
-#### Host
 
 To configure this check for an Agent running on a host:
 
@@ -372,7 +369,7 @@ To connect to Oracle through TCPS (TCP with SSL), uncomment the `protocol` confi
 
 [Run the Agent's status subcommand][9] and look for `oracle` under the Checks section.
 
-## Custom query
+### Custom query
 
 Providing custom queries is also supported. Each query must have two parameters:
 
