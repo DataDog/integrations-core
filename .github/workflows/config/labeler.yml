@@ -333,6 +333,8 @@ integration/otel:
 - otel/**/*
 integration/pan_firewall:
 - pan_firewall/**/*
+integration/palo_alto_panorama:
+- palo_alto_panorama/**/*
 integration/pdh_check:
 - pdh_check/**/*
 integration/pgbouncer:
