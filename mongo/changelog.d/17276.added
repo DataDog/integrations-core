@@ -1,1 +1,1 @@
-add flag to exclude db tag from dbstats metric
+Add flag to exclude `db` tag from dbstats metrics
