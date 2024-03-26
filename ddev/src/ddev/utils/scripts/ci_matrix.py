@@ -88,6 +88,15 @@ def read_manifest(root: Path, target: str) -> dict:
     return json.loads(manifest_path.read_text(encoding='utf-8'))
 
 
+@lru_cache(maxsize=None)
+def read_pyproject(root: Path, target: str) -> dict:
+    pyproject_path = root / target / 'pyproject.toml'
+    if not pyproject_path.is_file():
+        return {}
+
+    return tomllib.loads(pyproject_path.read_text(encoding='utf-8'))
+
+
 def normalize_job_name(job_name: str) -> str:
     # The job name is sometimes used to construct unique file paths, so we must replace characters that are reserved on
     # Windows, see: https://learn.microsoft.com/en-us/windows/win32/fileio/naming-a-file#naming-conventions
@@ -210,6 +219,9 @@ def construct_job_matrix(root: Path, targets: list[str]) -> list[dict[str, Any]]
             else:
                 platform_ids = ['linux']
 
+        pyproject = read_pyproject(root, target)
+        classifiers = pyproject.get('project', {}).get('classifiers', [])
+
         runners = matrix_overrides.get('runners', {})
         for platform_id in platform_ids:
             if platform_id not in PLATFORMS:
@@ -234,11 +246,10 @@ def construct_job_matrix(root: Path, targets: list[str]) -> list[dict[str, Any]]
 
             supported_python_versions = []
             for major_version in ('2', '3'):
-                if matrix_overrides.get(f'only-py{major_version}', False):
+                if any(c for c in classifiers if c.startswith(f'Programming Language :: Python :: {major_version}')):
                     supported_python_versions.append(major_version)
 
-            if supported_python_versions:
-                config['python-support'] = ''.join(supported_python_versions)
+            config['python-support'] = ''.join(supported_python_versions)
 
             config['name'] = normalize_job_name(config['name'])
             job_matrix.append(config)

@@ -202,13 +202,13 @@ jobs:
         python .ddev/ci/scripts/traces.py capture --port "${{ inputs.trace-agent-port }}" --record-file "${{ env.TRACE_CAPTURE_FILE }}" > "${{ env.TRACE_CAPTURE_LOG }}" 2>&1 &
 
     - name: Run Unit & Integration tests
-      if: inputs.standard && !inputs.minimum-base-package
+      if: inputs.standard && !inputs.minimum-base-package && (inputs.test-py3 || inputs.test-py2)
       env:
         DDEV_TEST_ENABLE_TRACING: "${{ inputs.repo == 'core' && '1' || '0' }}"
       run: ddev test --cov --junit ${{ inputs.target }}
 
     - name: Run Unit & Integration tests with minimum version of base package
-      if: inputs.standard && inputs.minimum-base-package
+      if: inputs.standard && inputs.minimum-base-package && (inputs.test-py3 || inputs.test-py2)
       run: ddev test --compat --recreate --junit ${{ inputs.target }}
 
     - name: Run E2E tests with latest base package
@@ -218,21 +218,21 @@ jobs:
       run: ddev env test --base --new-env --junit ${{ inputs.target }}
 
     - name: Run E2E tests
-      if: inputs.standard && inputs.repo != 'core'
+      if: inputs.standard && inputs.repo != 'core' && (inputs.test-py3 || inputs.test-py2)
       env:
         DD_API_KEY: "${{ secrets.DD_API_KEY }}"
       run: ddev env test --new-env --junit ${{ inputs.target }}
 
     - name: Run benchmarks
-      if: inputs.benchmark
+      if: inputs.benchmark && (inputs.test-py3 || inputs.test-py2)
       run: ddev test --bench --junit ${{ inputs.target }}
 
     - name: Run tests and verify support for the latest version
-      if: inputs.latest
+      if: inputs.latest && (inputs.test-py3 || inputs.test-py2)
       run: ddev test --latest --junit ${{ inputs.target }}
 
     - name: Run E2E tests for the latest version
-      if: inputs.latest
+      if: inputs.latest && (inputs.test-py3 || inputs.test-py2)
       env:
         DD_API_KEY: "${{ secrets.DD_API_KEY }}"
         DDEV_TEST_ENABLE_TRACING: "${{ inputs.repo == 'core' && '1' || '0' }}"
