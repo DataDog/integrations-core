@@ -361,10 +361,6 @@ To connect to Oracle through TCPS (TCP with SSL), uncomment the `protocol` confi
         protocol: TCPS
     ```
 
-<!-- xxz tab xxx -->
-
-<!-- xxz tabs xxx -->
-
 ### Validation
 
 [Run the Agent's status subcommand][9] and look for `oracle` under the Checks section.
