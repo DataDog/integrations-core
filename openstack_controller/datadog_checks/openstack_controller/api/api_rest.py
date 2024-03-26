@@ -250,11 +250,9 @@ class ApiRest(Api):
         return response.json().get('services', [])
 
     def get_compute_flavors(self):
-        response = self.http.get(
-            '{}/flavors/detail'.format(self._catalog.get_endpoint_by_type(Component.Types.COMPUTE.value))
-        )
-        response.raise_for_status()
-        return response.json().get('flavors', [])
+        url = '{}/flavors/detail'.format(self._catalog.get_endpoint_by_type(Component.Types.COMPUTE.value))
+
+        return self.make_paginated_request(url, 'flavors', 'id', next_signifier='flavors_links')
 
     def get_compute_hypervisors(self):
         response = self.http.get(

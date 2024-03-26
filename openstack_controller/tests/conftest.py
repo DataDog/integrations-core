@@ -410,7 +410,7 @@ def connection_compute(request, mock_responses):
             for aggregate in mock_responses('GET', '/compute/v2.1/os-aggregates')['aggregates']
         ]
 
-    def flavors(details):
+    def flavors(details, limit=None):
         if http_error and 'flavors' in http_error:
             raise requests.exceptions.HTTPError(response=http_error['flavors'])
         return [
