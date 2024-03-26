@@ -29,11 +29,13 @@ Skip this step if you are not using Instant Client.
 
 2. Verify that the *Instant Client Basic* package is installed. Find it on Oracle's [download page][8].
 
-        After the Instant Client libraries are installed, ensure the runtime linker can find the libraries, for example:
+    After the Instant Client libraries are installed, ensure the runtime linker can find the libraries, for example:
     
-       ```shell
-       # Put the library location in the /etc/datadog-agent/environment file.
-      echo "LD_LIBRARY_PATH=/u01/app/oracle/product/instantclient_19" > /etc/datadog-agent/environment
+      ```shell
+      # Put the library location in the /etc/datadog-agent/environment file.
+
+      echo "LD_LIBRARY_PATH=/u01/app/oracle/product/instantclient_19" \
+      >> /etc/datadog-agent/environment
       ```
 
 <!-- xxz tab xxx -->
