@@ -33,7 +33,7 @@ Skip this step if you are not using Instant Client.
     
        ```shell
        # Put the library location in the /etc/datadog-agent/environment file.
-      echo "LD_LIBRARY_PATH=/u01/app/oracle/product/instantclient_19" >> /etc/datadog-agent/environment
+      echo "LD_LIBRARY_PATH=/u01/app/oracle/product/instantclient_19" > /etc/datadog-agent/environment
        ```
 
 <!-- xxz tab xxx -->
