@@ -4,7 +4,10 @@
 
 ## Overview
 
-Get metrics from Oracle Database servers in real time to visualize and monitor availability and performance.
+The Postgres integration provides health and performance metrics for your Postgres database in near real-time. Visualize these metrics with the provided dashboard and create monitors to alert your team on PostgreSQL states.
+
+Enable [Database Monitoring][2] (DBM) for enhanced insights into query performance and database health. In addition to the standard integration, Datadog DBM provides query-level metrics, live and historical query snapshots, wait event analysis, database load, query explain plans, and blocking query insights.
+
 
 ## Setup
 
@@ -12,121 +15,281 @@ Get metrics from Oracle Database servers in real time to visualize and monitor a
 
 #### Prerequisite
 
-To use the Oracle integration you can either use the native client (no additional install steps required), the Oracle Instant Client, or download the Oracle JDBC driver (Linux only). To use the Oracle integration with JDBC, download the Oracle JDBC driver. If you are not using the JDBC method, the minimum [supported version][2] is Oracle 12c.
-Due to licensing restrictions, the JDBC library is not included in the Datadog Agent, but can be downloaded directly from Oracle.
-
-*NOTE*: Starting in v7.42.x, the Oracle integration only supports Python 3.
+To use the Oracle integration you can either use the native client (no additional install steps required), or the Oracle Instant Client.
 
 ##### Oracle Instant Client
+
+Skip this step if you are not using Instant Client.
 
 <!-- xxx tabs xxx -->
 <!-- xxx tab "Linux" xxx -->
 ###### Linux
 
-1. Follow the [Oracle Instant Client installation for Linux][17].
+1. Follow the [Oracle Instant Client installation for Linux][15].
 
-2. Verify the following:
-    - Both the *Instant Client Basic* and *SDK* packages are installed. Find them on Oracle's [download page][18].
+2. Verify that the *Instant Client Basic* package is installed. Find it on Oracle's [download page][8].
 
-        After the Instant Client libraries are installed, ensure the runtime linker can find the libraries. For example, using `ldconfig`:
+        After the Instant Client libraries are installed, ensure the runtime linker can find the libraries, for example:
     
        ```shell
-       # Put the library location in an ld configuration file.
+       # Put the library location in the /etc/datadog-agent/environment file.
     
-       sudo sh -c "echo /usr/lib/oracle/12.2/client64/lib > \
-           /etc/ld.so.conf.d/oracle-instantclient.conf"
-    
-       # Update the bindings.
-    
-       sudo ldconfig
-       ```
-
-    - Both packages are decompressed into a single directory that is available to all users on the given machine (for example, `/opt/oracle`):
-       ```shell
-       mkdir -p /opt/oracle/ && cd /opt/oracle/
-       unzip /opt/oracle/instantclient-basic-linux.x64-12.1.0.2.0.zip
-       unzip /opt/oracle/instantclient-sdk-linux.x64-12.1.0.2.0.zip
+      echo "LD_LIBRARY_PATH=/u01/app/oracle/product/instantclient_19" >> \
+        /etc/datadog-agent/environment
        ```
 
 <!-- xxz tab xxx -->
+
 <!-- xxx tab "Windows" xxx -->
 ###### Windows
 
-1. Follow the [Oracle Windows installation guide][19] to configure your Oracle Instant Client.
+1. Follow the [Oracle Windows installation guide[4] to configure your Oracle Instant Client.
 
 2. Verify the following:
-    - The [Microsoft Visual Studio 2017 Redistributable][20] or the appropriate version is installed for the Oracle Instant Client.
+    - The [Microsoft Visual Studio 2017 Redistributable][3] or the appropriate version is installed for the Oracle Instant Client.
 
-    - Both the *Instant Client Basic* and *SDK* packages from Oracle's [download page][18] are installed.
+    - The *Instant Client Basic* package from Oracle's [download page][8] is installed, and is available to all users on the given machine (for example, `C:\oracle\instantclient_19`).
 
-    - Both packages are extracted into a single directory that is available to all users on the given machine (for example, `C:\oracle`).
+    - The `PATH` environment variable contains the the directory whith the Instant Client (for example, `C:\oracle\instantclient_19`).
 
 
 <!-- xxz tab xxx -->
 <!-- xxz tabs xxx -->
 
-##### JDBC driver
-
-*NOTE*: This method only works on Linux.
-
-Java 8 or higher is required on your system for JPype, one of the libraries used by the Agent when using JDBC driver.
-
-Once it is installed, complete the following steps: 
-
-1. [Download the JDBC Driver][4] JAR file.
-2. Add the path to the downloaded file in your `$CLASSPATH` or the check configuration file under `jdbc_driver_path` (see the [sample oracle.yaml][5]).
-
 #### Datadog user creation
 
 <!-- xxx tabs xxx -->
-<!-- xxx tab "Stand Alone" xxx -->
+<!-- xxx tab "Non-CDB" xxx -->
 
-Create a read-only `datadog` user with proper access to your Oracle Database Server. Connect to your Oracle database with an administrative user, such as `SYSDBA` or `SYSOPER`, and run:
+### Create user
 
-```text
--- Enable Oracle Script.
-ALTER SESSION SET "_ORACLE_SCRIPT"=true;
+Create a read-only login to connect to your server and grant the required permissions:
 
--- Create the datadog user. Replace the password placeholder with a secure password.
-CREATE USER datadog IDENTIFIED BY <PASSWORD>;
+```SQL
+CREATE USER c##datadog IDENTIFIED BY &password CONTAINER = ALL ;
 
--- Grant access to the datadog user.
-GRANT CONNECT TO datadog;
-GRANT SELECT ON GV_$PROCESS TO datadog;
-GRANT SELECT ON gv_$sysmetric TO datadog;
-GRANT SELECT ON sys.dba_data_files TO datadog;
-GRANT SELECT ON sys.dba_tablespaces TO datadog;
-GRANT SELECT ON sys.dba_tablespace_usage_metrics TO datadog;
+ALTER USER c##datadog SET CONTAINER_DATA=ALL CONTAINER=CURRENT;
 ```
 
-**Note**: If you're using Oracle 11g, there's no need to run the following line:
+### Grant permissions
 
-```text
-ALTER SESSION SET "_ORACLE_SCRIPT"=true;
+Log on as `sysdba`, and grant the following permissions:
+
+```SQL
+grant create session to c##datadog ;
+grant select on v_$session to c##datadog ;
+grant select on v_$database to c##datadog ;
+grant select on v_$containers to c##datadog;
+grant select on v_$sqlstats to c##datadog ;
+grant select on v_$instance to c##datadog ;
+grant select on dba_feature_usage_statistics to c##datadog ;
+grant select on V_$SQL_PLAN_STATISTICS_ALL to c##datadog ;
+grant select on V_$PROCESS to c##datadog ;
+grant select on V_$SESSION to c##datadog ;
+grant select on V_$CON_SYSMETRIC to c##datadog ;
+grant select on CDB_TABLESPACE_USAGE_METRICS to c##datadog ;
+grant select on CDB_TABLESPACES to c##datadog ;
+grant select on V_$SQLCOMMAND to c##datadog ;
+grant select on V_$DATAFILE to c##datadog ;
+grant select on V_$SYSMETRIC to c##datadog ;
+grant select on V_$SGAINFO to c##datadog ;
+grant select on V_$PDBS to c##datadog ;
+grant select on CDB_SERVICES to c##datadog ;
+grant select on V_$OSSTAT to c##datadog ;
+grant select on V_$PARAMETER to c##datadog ;
+grant select on V_$SQLSTATS to c##datadog ;
+grant select on V_$CONTAINERS to c##datadog ;
+grant select on V_$SQL_PLAN_STATISTICS_ALL to c##datadog ;
+grant select on V_$SQL to c##datadog ;
+grant select on V_$PGASTAT to c##datadog ;
+grant select on v_$asm_diskgroup to c##datadog ;
+grant select on v_$rsrcmgrmetric to c##datadog ;
+grant select on v_$dataguard_config to c##datadog ;
+grant select on v_$dataguard_stats to c##datadog ;
+grant select on v_$transaction to c##datadog;
+grant select on v_$locked_object to c##datadog;
+grant select on dba_objects to c##datadog;
+grant select on cdb_data_files to c##datadog;
+grant select on dba_data_files to c##datadog;
+```
+
+If you conifgured custom queries that run on a pluggable database (PDB), you must grant `set container` privilege to the `C##DATADOG` user:
+
+```SQL
+connect / as sysdba
+alter session set container = your_pdb ;
+grant set container to c##datadog ;
 ```
 
 <!-- xxz tab xxx -->
-<!-- xxx tab "Multitenant" xxx -->
 
-##### Oracle 12c or 19c
+<!-- xxx tab "Non-CDB" xxx -->
 
-Log in to the root database as an Administrator to create a `datadog` user and grant permissions:
+### Create user
 
-```text
-alter session set container = cdb$root;
-CREATE USER c##datadog IDENTIFIED BY password CONTAINER=ALL;
-GRANT CREATE SESSION TO c##datadog CONTAINER=ALL;
-Grant select any dictionary to c##datadog container=all;
-GRANT SELECT ON GV_$PROCESS TO c##datadog CONTAINER=ALL;
-GRANT SELECT ON gv_$sysmetric TO c##datadog CONTAINER=ALL;
+Create a read-only login to connect to your server and grant the required permissions:
+
+```SQL
+CREATE USER datadog IDENTIFIED BY &password ;
+```
+
+### Grant permissions
+
+Log on as `sysdba`, and grant the following permissions:
+
+```SQL
+grant create session to datadog ;
+grant select on v_$session to datadog ;
+grant select on v_$database to datadog ;
+grant select on v_$containers to datadog;
+grant select on v_$sqlstats to datadog ;
+grant select on v_$instance to datadog ;
+grant select on dba_feature_usage_statistics to datadog ;
+grant select on V_$SQL_PLAN_STATISTICS_ALL to datadog ;
+grant select on V_$PROCESS to datadog ;
+grant select on V_$SESSION to datadog ;
+grant select on V_$CON_SYSMETRIC to datadog ;
+grant select on CDB_TABLESPACE_USAGE_METRICS to datadog ;
+grant select on CDB_TABLESPACES to datadog ;
+grant select on V_$SQLCOMMAND to datadog ;
+grant select on V_$DATAFILE to datadog ;
+grant select on V_$SYSMETRIC to datadog ;
+grant select on V_$SGAINFO to datadog ;
+grant select on V_$PDBS to datadog ;
+grant select on CDB_SERVICES to datadog ;
+grant select on V_$OSSTAT to datadog ;
+grant select on V_$PARAMETER to datadog ;
+grant select on V_$SQLSTATS to datadog ;
+grant select on V_$CONTAINERS to datadog ;
+grant select on V_$SQL_PLAN_STATISTICS_ALL to datadog ;
+grant select on V_$SQL to datadog ;
+grant select on V_$PGASTAT to datadog ;
+grant select on v_$asm_diskgroup to datadog ;
+grant select on v_$rsrcmgrmetric to datadog ;
+grant select on v_$dataguard_config to datadog ;
+grant select on v_$dataguard_stats to datadog ;
+grant select on v_$transaction to datadog;
+grant select on v_$locked_object to datadog;
+grant select on dba_objects to datadog;
+grant select on cdb_data_files to datadog;
+grant select on dba_data_files to datadog;
 ```
 
 <!-- xxz tab xxx -->
+
+<!-- xxx tab "RDS" xxx -->
+
+### Create user
+
+If you installed the legacy Oracle integration, skip this step because the user already exists. You must, however, execute the subsequent steps.
+
+Create a read-only login to connect to your server and grant the required permissions:
+
+```SQL
+CREATE USER datadog IDENTIFIED BY your_password ;
+```
+
+### Grant permissions 
+
+```SQL
+grant create session to datadog ;
+exec rdsadmin.rdsadmin_util.grant_sys_object('V_$SESSION','DATADOG','SELECT',p_grant_option => false); 
+exec rdsadmin.rdsadmin_util.grant_sys_object('V_$DATABASE','DATADOG','SELECT',p_grant_option => false); 
+exec rdsadmin.rdsadmin_util.grant_sys_object('V_$CONTAINERS','DATADOG','SELECT',p_grant_option => false); 
+exec rdsadmin.rdsadmin_util.grant_sys_object('V_$SQLSTATS','DATADOG','SELECT',p_grant_option => false); 
+exec rdsadmin.rdsadmin_util.grant_sys_object('V_$SQL','DATADOG','SELECT',p_grant_option => false); 
+exec rdsadmin.rdsadmin_util.grant_sys_object('V_$INSTANCE','DATADOG','SELECT',p_grant_option => false); 
+exec rdsadmin.rdsadmin_util.grant_sys_object('V_$SQL_PLAN_STATISTICS_ALL','DATADOG','SELECT',p_grant_option => false); 
+exec rdsadmin.rdsadmin_util.grant_sys_object('DBA_FEATURE_USAGE_STATISTICS','DATADOG','SELECT',p_grant_option => false); 
+exec rdsadmin.rdsadmin_util.grant_sys_object('V_$PROCESS','DATADOG','SELECT',p_grant_option => false); 
+exec rdsadmin.rdsadmin_util.grant_sys_object('V_$SESSION','DATADOG','SELECT',p_grant_option => false); 
+exec rdsadmin.rdsadmin_util.grant_sys_object('V_$CON_SYSMETRIC','DATADOG','SELECT',p_grant_option => false); 
+exec rdsadmin.rdsadmin_util.grant_sys_object('CDB_TABLESPACE_USAGE_METRICS','DATADOG','SELECT',p_grant_option => false); 
+exec rdsadmin.rdsadmin_util.grant_sys_object('CDB_TABLESPACES','DATADOG','SELECT',p_grant_option => false); 
+exec rdsadmin.rdsadmin_util.grant_sys_object('V_$SQLCOMMAND','DATADOG','SELECT',p_grant_option => false);
+exec rdsadmin.rdsadmin_util.grant_sys_object('V_$DATAFILE','DATADOG','SELECT',p_grant_option => false);
+exec rdsadmin.rdsadmin_util.grant_sys_object('V_$SGAINFO','DATADOG','SELECT',p_grant_option => false);
+exec rdsadmin.rdsadmin_util.grant_sys_object('V_$SYSMETRIC','DATADOG','SELECT',p_grant_option => false);
+exec rdsadmin.rdsadmin_util.grant_sys_object('V_$PDBS','DATADOG','SELECT',p_grant_option => false);
+exec rdsadmin.rdsadmin_util.grant_sys_object('CDB_SERVICES','DATADOG','SELECT',p_grant_option => false);
+exec rdsadmin.rdsadmin_util.grant_sys_object('V_$OSSTAT','DATADOG','SELECT',p_grant_option => false);
+exec rdsadmin.rdsadmin_util.grant_sys_object('V_$PARAMETER','DATADOG','SELECT',p_grant_option => false);
+exec rdsadmin.rdsadmin_util.grant_sys_object('V_$SQLSTATS','DATADOG','SELECT',p_grant_option => false);
+exec rdsadmin.rdsadmin_util.grant_sys_object('V_$CONTAINERS','DATADOG','SELECT',p_grant_option => false);
+exec rdsadmin.rdsadmin_util.grant_sys_object('V_$SQL_PLAN_STATISTICS_ALL','DATADOG','SELECT',p_grant_option => false);
+exec rdsadmin.rdsadmin_util.grant_sys_object('V_$SQL','DATADOG','SELECT',p_grant_option => false);
+exec rdsadmin.rdsadmin_util.grant_sys_object('V_$PGASTAT','DATADOG','SELECT',p_grant_option => false);
+exec rdsadmin.rdsadmin_util.grant_sys_object('V_$ASM_DISKGROUP','DATADOG','SELECT',p_grant_option => false);
+exec rdsadmin.rdsadmin_util.grant_sys_object('V_$RSRCMGRMETRIC','DATADOG','SELECT',p_grant_option => false);
+exec rdsadmin.rdsadmin_util.grant_sys_object('V_$DATAGUARD_CONFIG','DATADOG','SELECT',p_grant_option => false);
+exec rdsadmin.rdsadmin_util.grant_sys_object('V_$DATAGUARD_STATS','DATADOG','SELECT',p_grant_option => false);
+exec rdsadmin.rdsadmin_util.grant_sys_object('V_$TRANSACTION','DATADOG','SELECT',p_grant_option => false);
+exec rdsadmin.rdsadmin_util.grant_sys_object('V_$LOCKED_OBJECT','DATADOG','SELECT',p_grant_option => false);
+exec rdsadmin.rdsadmin_util.grant_sys_object('DBA_OBJECTS','DATADOG','SELECT',p_grant_option => false);
+exec rdsadmin.rdsadmin_util.grant_sys_object('CDB_DATA_FILES','DATADOG','SELECT',p_grant_option => false);
+exec rdsadmin.rdsadmin_util.grant_sys_object('DBA_DATA_FILES','DATADOG','SELECT',p_grant_option => false);
+```
+
+<!-- xxz tab xxx -->
+
+<!-- xxx tab "Oracle Autonomous Database" xxx -->
+
+### Create user
+
+Create a read-only login to connect to your server and grant the required permissions:
+
+```SQL
+CREATE USER datadog IDENTIFIED BY your_password ;
+```
+
+### Grant permissions 
+
+```SQL
+grant create session to datadog ;
+grant select on v$session to datadog ;
+grant select on v$database to datadog ;
+grant select on v$containers to datadog;
+grant select on v$sqlstats to datadog ;
+grant select on v$instance to datadog ;
+grant select on dba_feature_usage_statistics to datadog ;
+grant select on V$SQL_PLAN_STATISTICS_ALL to datadog ;
+grant select on V$PROCESS to datadog ;
+grant select on V$SESSION to datadog ;
+grant select on V$CON_SYSMETRIC to datadog ;
+grant select on CDB_TABLESPACE_USAGE_METRICS to datadog ;
+grant select on CDB_TABLESPACES to datadog ;
+grant select on V$SQLCOMMAND to datadog ;
+grant select on V$DATAFILE to datadog ;
+grant select on V$SYSMETRIC to datadog ;
+grant select on V$SGAINFO to datadog ;
+grant select on V$PDBS to datadog ;
+grant select on CDB_SERVICES to datadog ;
+grant select on V$OSSTAT to datadog ;
+grant select on V$PARAMETER to datadog ;
+grant select on V$SQLSTATS to datadog ;
+grant select on V$CONTAINERS to datadog ;
+grant select on V$SQL_PLAN_STATISTICS_ALL to datadog ;
+grant select on V$SQL to datadog ;
+grant select on V$PGASTAT to datadog ;
+grant select on v$asm_diskgroup to datadog ;
+grant select on v$rsrcmgrmetric to datadog ;
+grant select on v$dataguard_config to datadog ;
+grant select on v$dataguard_stats to datadog ;
+grant select on v$transaction to datadog;
+grant select on v$locked_object to datadog;
+grant select on dba_objects to datadog;
+grant select on cdb_data_files to datadog;
+grant select on dba_data_files to datadog;
+```
+
+<!-- xxz tab xxx -->
+
 <!-- xxz tabs xxx -->
 
 ### Configuration
 
 <!-- xxx tabs xxx -->
+
 <!-- xxx tab "Host" xxx -->
 
 #### Host
@@ -161,45 +324,9 @@ To configure this check for an Agent running on a host:
         password: <PASSWORD>
    ```
 
+**Note:** For the Agent version `7.53.0` and higher, the configuration file must be created in the subdirectory `oracle.d`. For the Agent versions between `7.50.1` and `7.53.0`, the configuration subdirectory is `oracle-dbm.d`. Oracle monitoring for the agent versions lower than `7.50.1` is deprecated.
+
 2. [Restart the Agent][7].
-
-
-#### Only custom queries
-
-To skip default metric checks for an instance and only run custom queries with an existing metrics gathering user, insert the tag `only_custom_queries` with a value of `true`. This allows a configured instance of the Oracle integration to skip the system, process, and tablespace metrics from running, and allows custom queries to be run without having the permissions described in the [Datadog user creation](#datadog-user-creation) section. If this configuration entry is omitted, the user you specify is required to have those table permissions to run a custom query.
-
-```yaml
-init_config:
-
-instances:
-  ## @param server - string - required
-  ## The IP address or hostname of the Oracle Database Server.
-  #
-  - server: localhost:1521
-
-    ## @param service_name - string - required
-    ## The Oracle Database service name. To view the services available on your server,
-    ## run the following query:
-    ## `SELECT value FROM v$parameter WHERE name='service_names'`
-    #
-    service_name: "<SERVICE_NAME>"
-
-    ## @param username - string - required
-    ## The username for the user account.
-    #
-    username: <USER>
-
-    ## @param password - string - required
-    ## The password for the user account.
-    #
-    password: "<PASSWORD>"
-
-    ## @param only_custom_queries - string - optional
-    ## Set this parameter to any value if you want to only run custom
-    ## queries for this instance.
-    #
-    only_custom_queries: true
-```
 
 #### Connect to Oracle through TCPS
 
@@ -234,72 +361,14 @@ instances:
         ## @param protocol - string - optional - default: TCP
         ## The protocol to connect to the Oracle Database Server. Valid protocols include TCP and TCPS.
         ##
-        ## When connecting to Oracle Database via JDBC, `jdbc_truststore` and `jdbc_truststore_type` are required.
-        ## More information can be found from Oracle Database's whitepaper:
-        ##
-        ## https://www.oracle.com/technetwork/topics/wp-oracle-jdbc-thin-ssl-130128.pdf
         #
         protocol: TCPS
     ```
 
 2. Update the `sqlnet.ora`, `listener.ora`, and `tnsnames.ora` to allow TCPS connections on your Oracle Database. 
 
-##### TCPS through Oracle without JDBC
-
-If you are not using JDBC, verify that the Datadog Agent is able to connect to your database. Use the `sqlplus` command line tool with the information inputted in your configuration options:
-
-```shell
-sqlplus <USER>/<PASSWORD>@(DESCRIPTION=(ADDRESS_LIST=(ADDRESS=(PROTOCOL=TCPS)(HOST=<HOST>)(PORT=<PORT>))(SERVICE_NAME=<SERVICE_NAME>)))
-```
-
-When using the [Oracle Instant Client][16] connection, move three files to the `network/admin` directory of the client libraries used by your application:
-  * `tnsnames.ora`: Maps net service names used for application connection strings to your database services.
-  * `sqlnet.ora`: Configures Oracle Network settings.
-  * `cwallet.sso`: Enables SSL or TLS connections. Keep this file secure.
-
-##### TCPS through JDBC
-
-If you are connecting to Oracle Database using JDBC, you also need to specify `jdbc_truststore_path`, `jdbc_truststore_type`, and `jdbc_truststore_password` (optional) if there is a password on the truststore. 
-
-**Note**: `SSO` truststores don't require passwords.
-
-```yaml
-    # In the `instances:` section
-    ...
-
-    ## @param jdbc_truststore_path - string - optional
-    ## The JDBC truststore file path.
-    #
-    jdbc_truststore_path: /path/to/truststore
-
-    ## @param jdbc_truststore_type - string - optional
-    ## The JDBC truststore file type. Supported truststore types include JKS, SSO, and PKCS12.
-    #
-    jdbc_truststore_type: SSO
-
-    ## @param jdbc_truststore_password - string - optional
-    ## The password for the truststore when connecting via JDBC.
-    #
-    # jdbc_truststore_password: <JDBC_TRUSTSTORE_PASSWORD>
-```
-
-For more information about connecting to the Oracle Database through TCPS on JDBC, see the official [Oracle whitepaper][15].
-
 <!-- xxz tab xxx -->
-<!-- xxx tab "Containerized" xxx -->
 
-#### Containerized
-
-For containerized environments, see the [Autodiscovery Integration Templates][8] for guidance on applying the parameters below.
-
-| Parameter            | Value                                                                                                     |
-| -------------------- | --------------------------------------------------------------------------------------------------------- |
-| `<INTEGRATION_NAME>` | `oracle`                                                                                                  |
-| `<INIT_CONFIG>`      | blank or `{}`                                                                                             |
-| `<INSTANCE_CONFIG>`  | `{"server": "%%host%%:1521", "service_name":"<SERVICE_NAME>", "username":"datadog", "password":"<PASSWORD>"}` |
-
-
-<!-- xxz tab xxx -->
 <!-- xxz tabs xxx -->
 
 ### Validation
@@ -423,103 +492,20 @@ The Oracle Database check does not include any events.
 
 See [service_checks.json][12] for a list of service checks provided by this integration.
 
-## Troubleshooting
-
-### Common problems
-
-#### Oracle Native Client
-- If you encounter a `DPY-6000: cannot connect to database`:
-  ```text
-  Failed to connect to Oracle DB, error: DPY-6000: cannot connect to database. Listener refused connection. (Similar to ORA-12660)
-  ```
- - Ensure Native Network Encryption or Checksumming are not enabled. If they are enabled, you must use the Instant Client method by setting `use_instant_client: true`.
-
-For more information about setting up the Oracle Instant Client, see the [Oracle integration documentation][3].
-
-#### Oracle Instant Client
-- Verify that both the Oracle Instant Client and SDK files are located in the same directory.
-The structure of the directory should look similar:
-  ```text
-  |___ BASIC_LITE_LICENSE
-  |___ BASIC_LITE_README
-  |___ adrci
-  |___ genezi
-  |___ libclntsh.so -> libclntsh.so.19.1
-  |___ libclntsh.so.10.1 -> libclntsh.so.19.1
-  |___ libclntsh.so.11.1 -> libclntsh.so.19.1
-  |___ libclntsh.so.12.1 -> libclntsh.so.19.1
-  |___ libclntsh.so.18.1 -> libclntsh.so.19.1
-  |___ libclntsh.so.19.1
-  |___ libclntshcore.so.19.1
-  |___ libipc1.so
-  |___ libmql1.so
-  |___ libnnz19.so
-  |___ libocci.so -> libocci.so.19.1
-  |___ libocci.so.10.1 -> libocci.so.19.1
-  |___ libocci.so.11.1 -> libocci.so.19.1
-  |___ libocci.so.12.1 -> libocci.so.19.1
-  |___ libocci.so.18.1 -> libocci.so.19.1
-  |___ libocci.so.19.1
-  |___ libociicus.so
-  |___ libocijdbc19.so
-  |___ liboramysql19.so
-  |___ listener.ora
-  |___ network
-  |   `___ admin
-  |       |___ README
-  |       |___ cwallet.sso
-  |       |___ sqlnet.ora
-  |       `___ tnsnames.ora
-  |___ ojdbc8.jar
-  |___ ucp.jar
-  |___ uidrvci
-  `___ xstreams.jar
-  ```
-
-#### JDBC driver (Linux only)
-- If you encounter a `JVMNotFoundException`:
-
-    ```text
-    JVMNotFoundException("No JVM shared library file ({jpype._jvmfinder.JVMNotFoundException: No JVM shared library file (libjvm.so) found. Try setting up the JAVA_HOME environment variable properly.})"
-    ```
-
-    - Ensure that the `JAVA_HOME` environment variable is set and pointing to the correct directory.
-    - Add the environment variable to `/etc/environment`:
-        ```text
-        JAVA_HOME=/path/to/java
-        ```
-    - Then restart the Agent.
-
-- If you encounter this error `Unsupported major.minor version 52.0` it means that you're running a Java version that
-is too old. You need to either update your system Java or additionally install a newer version and point your `JAVA_HOME`
-variable to the new install as explained above.
-
-- Verify your environment variables are set correctly by running the following command from the Agent.
-Ensure the displayed output matches the correct value.
-
-    ```shell script
-      sudo -u dd-agent -- /opt/datadog-agent/embedded/bin/python -c "import os; print(\"JAVA_HOME:{}\".format(os.environ.get(\"JAVA_HOME\")))"
-    ```
-
 Need help? Contact [Datadog support][14].
 
 [1]: https://raw.githubusercontent.com/DataDog/integrations-core/master/oracle/images/oracle_dashboard.png
-[2]: https://oracle.github.io/python-oracledb/
-[3]: https://github.com/DataDog/integrations-core/tree/7.41.x/oracle#oracle-instant-client
-[4]: https://www.oracle.com/technetwork/database/application-development/jdbc/downloads/index.html
+[2]: https://docs.datadoghq.com/database_monitoring/
+[3]: https://support.microsoft.com/en-us/topic/the-latest-supported-visual-c-downloads-2647da03-1eea-4433-9aff-95f26a218cc0
+[4]: https://www.oracle.com/database/technologies/instant-client/winx64-64-downloads.html#ic_winx64_inst
 [5]: https://github.com/DataDog/integrations-core/blob/master/oracle/datadog_checks/oracle/data/conf.yaml.example
 [6]: https://docs.datadoghq.com/agent/guide/agent-configuration-files/#agent-configuration-directory
 [7]: https://docs.datadoghq.com/agent/guide/agent-commands/#start-stop-and-restart-the-agent
-[8]: https://docs.datadoghq.com/agent/kubernetes/integrations/
+[8]: https://www.oracle.com/ch-de/database/technologies/instant-client/downloads.html
 [9]: https://docs.datadoghq.com/agent/guide/agent-commands/#agent-status-and-information
 [10]: https://docs.datadoghq.com/monitors/monitor_types/metric/?tab=threshold
 [11]: https://github.com/DataDog/integrations-core/blob/master/oracle/metadata.csv
 [12]: https://github.com/DataDog/integrations-core/blob/master/oracle/assets/service_checks.json
 [13]: https://www.oracle.com/database/technologies/instant-client/winx64-64-downloads.html
 [14]: https://docs.datadoghq.com/help/
-[15]: https://www.oracle.com/technetwork/topics/wp-oracle-jdbc-thin-ssl-130128.pdf
-[16]: https://python-oracledb.readthedocs.io/en/latest/user_guide/connection_handling.html#install-the-wallet-and-network-configuration-files
-[17]: https://docs.oracle.com/en/database/oracle/oracle-database/21/lacli/install-instant-client-using-zip.html
-[18]: https://www.oracle.com/technetwork/database/features/instant-client/index.htm
-[19]: https://www.oracle.com/database/technologies/instant-client/winx64-64-downloads.html#ic_winx64_inst
-[20]: https://support.microsoft.com/en-us/topic/the-latest-supported-visual-c-downloads-2647da03-1eea-4433-9aff-95f26a218cc0
+[15]: https://docs.oracle.com/en/database/oracle/oracle-database/19/mxcli/installing-and-removing-oracle-database-client.html
