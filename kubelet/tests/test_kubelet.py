@@ -24,7 +24,16 @@ pytestmark = pytest.mark.skipif(sys.platform == 'win32', reason='tests for linux
 
 # Constants
 HERE = os.path.abspath(os.path.dirname(__file__))
-QUANTITIES = {'12k': 12 * 1000, '12M': 12 * (1000 * 1000), '12Ki': 12.0 * 1024, '12K': 12.0, '12test': 12.0, '1.181116006E9': 1.181116006 * (10 ** 9), '129e6': 129 * (10 ** 6), '12E': 12 * (1000 * 1000 * 1000 * 1000 * 1000 * 1000)}
+QUANTITIES = {
+    '12k': 12 * 1000,
+    '12M': 12 * (1000 * 1000),
+    '12Ki': 12.0 * 1024,
+    '12K': 12.0,
+    '12test': 12.0,
+    '1.181116006E9': 1.181116006 * (10**9),
+    '129e6': 129 * (10**6),
+    '12E': 12 * (1000 * 1000 * 1000 * 1000 * 1000 * 1000),
+}
 
 # Kubernetes versions, used to differentiate cadvisor payloads after the label change
 KUBE_POST_1_16 = '1.16'
