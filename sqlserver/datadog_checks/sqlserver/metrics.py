@@ -371,68 +371,6 @@ class SqlOsMemoryClerksStat(BaseSqlServerMetric):
             self.report_function(metric_name, column_val, tags=metric_tags)
 
 
-# https://docs.microsoft.com/en-us/sql/relational-databases/system-dynamic-management-views/sys-dm-os-schedulers-transact-sql
-class SqlOsSchedulers(BaseSqlServerMetric):
-    TABLE = 'sys.dm_os_schedulers'
-    DEFAULT_METRIC_TYPE = 'gauge'
-    QUERY_BASE = "select * from {table}".format(table=TABLE)
-    OPERATION_NAME = 'os_schedulers_metrics'
-
-    @classmethod
-    def fetch_all_values(cls, cursor, counters_list, logger, databases=None):
-        return cls._fetch_generic_values(cursor, None, logger)
-
-    def fetch_metric(self, rows, columns, values_cache=None):
-        value_column_index = columns.index(self.column)
-        scheduler_index = columns.index("scheduler_id")
-        parent_node_index = columns.index("parent_node_id")
-
-        for row in rows:
-            column_val = row[value_column_index]
-            scheduler_id = row[scheduler_index]
-            parent_node_id = row[parent_node_index]
-
-            metric_tags = ['scheduler_id:{}'.format(str(scheduler_id)), 'parent_node_id:{}'.format(str(parent_node_id))]
-            metric_tags.extend(self.tags)
-            metric_name = '{}'.format(self.metric_name)
-            self.report_function(metric_name, column_val, tags=metric_tags)
-
-
-# https://docs.microsoft.com/en-us/sql/relational-databases/system-dynamic-management-views/sys-dm-os-tasks-transact-sql
-class SqlOsTasks(BaseSqlServerMetric):
-    CUSTOM_QUERIES_AVAILABLE = False
-    TABLE = 'sys.dm_os_tasks'
-    DEFAULT_METRIC_TYPE = 'gauge'
-    QUERY_BASE = """
-    select scheduler_id,
-           SUM(CAST(context_switches_count AS BIGINT)) as context_switches_count,
-           SUM(CAST(pending_io_count AS BIGINT)) as pending_io_count,
-           SUM(pending_io_byte_count) as pending_io_byte_count,
-           AVG(pending_io_byte_average) as pending_io_byte_average
-    from {table} group by scheduler_id;
-    """.format(
-        table=TABLE
-    )
-    OPERATION_NAME = 'os_tasks_metrics'
-
-    @classmethod
-    def fetch_all_values(cls, cursor, counters_list, logger, databases=None):
-        return cls._fetch_generic_values(cursor, None, logger)
-
-    def fetch_metric(self, rows, columns, values_cache=None):
-        scheduler_id_column_index = columns.index("scheduler_id")
-        value_column_index = columns.index(self.column)
-
-        for row in rows:
-            column_val = row[value_column_index]
-            scheduler_id = row[scheduler_id_column_index]
-
-            metric_tags = ['scheduler_id:{}'.format(str(scheduler_id))]
-            metric_tags.extend(self.tags)
-            metric_name = '{}'.format(self.metric_name)
-            self.report_function(metric_name, column_val, tags=metric_tags)
-
-
 # https://docs.microsoft.com/en-us/sql/relational-databases/system-catalog-views/sys-database-files-transact-sql
 class SqlDatabaseFileStats(BaseSqlServerMetric):
     CUSTOM_QUERIES_AVAILABLE = False

@@ -230,7 +230,7 @@ MASTER_FILES_METRICS_QUERY = {
         file_id,
         type,
         physical_name,
-        size * 8 as size,
+        ISNULL(size*8, 0) as size,
         sys.master_files.state as state,
         sys.master_files.state_desc as state_desc
         from sys.master_files
@@ -262,6 +262,48 @@ DATABASE_BACKUP_METRICS_QUERY = {
         {"name": "db", "type": "tag"},
         {"name": "database", "type": "tag"},
         {"name": "database.backup_count", "type": "gauge"},
+    ],
+}
+
+TASK_SCHEDULER_METRICS_QUERY = {
+    "name": "sys.dm_os_schedulers",
+    "query": """SELECT
+        scheduler_id,
+        parent_node_id,
+        current_tasks_count,
+        current_workers_count,
+        active_workers_count,
+        runnable_tasks_count,
+        work_queue_count
+        from sys.dm_os_schedulers
+    """,
+    "columns": [
+        {"name": "scheduler_id", "type": "tag"},
+        {"name": "parent_node_id", "type": "tag"},
+        {"name": "scheduler.current_tasks_count", "type": "gauge"},
+        {"name": "scheduler.current_workers_count", "type": "gauge"},
+        {"name": "scheduler.active_workers_count", "type": "gauge"},
+        {"name": "scheduler.runnable_tasks_count", "type": "gauge"},
+        {"name": "scheduler.work_queue_count", "type": "gauge"},
+    ],
+}
+
+OS_TASK_METRICS_QUERY = {
+    "name": "sys.dm_os_tasks",
+    "query": """select
+        scheduler_id,
+        SUM(CAST(context_switches_count AS BIGINT)) as context_switches_count,
+        SUM(CAST(pending_io_count AS BIGINT)) as pending_io_count,
+        SUM(pending_io_byte_count) as pending_io_byte_count,
+        AVG(pending_io_byte_average) as pending_io_byte_average
+        from sys.dm_os_tasks group by scheduler_id
+    """,
+    "columns": [
+        {"name": "scheduler_id", "type": "tag"},
+        {"name": "task.context_switches_count", "type": "gauge"},
+        {"name": "task.pending_io_count", "type": "gauge"},
+        {"name": "task.pending_io_byte_count", "type": "gauge"},
+        {"name": "task.pending_io_byte_average", "type": "gauge"},
     ],
 }
 

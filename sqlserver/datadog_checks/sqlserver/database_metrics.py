@@ -14,11 +14,13 @@ from datadog_checks.sqlserver.queries import (
     DB_FRAGMENTATION_QUERY,
     INDEX_USAGE_STATS_QUERY,
     MASTER_FILES_METRICS_QUERY,
+    OS_TASK_METRICS_QUERY,
     QUERY_AO_FAILOVER_CLUSTER,
     QUERY_AO_FAILOVER_CLUSTER_MEMBER,
     QUERY_FAILOVER_CLUSTER_INSTANCE,
     QUERY_LOG_SHIPPING_PRIMARY,
     QUERY_LOG_SHIPPING_SECONDARY,
+    TASK_SCHEDULER_METRICS_QUERY,
     TEMPDB_SPACE_USAGE_QUERY,
     get_query_ao_availability_groups,
     get_query_file_stats,
@@ -289,3 +291,17 @@ class SqlserverDatabaseBackupMetrics(SqlserverDatabaseMetricsBase):
     @property
     def queries(self):
         return [DATABASE_BACKUP_METRICS_QUERY]
+
+
+class SqlserverTaskSchedulerMetrics(SqlserverDatabaseMetricsBase):
+    # https://docs.microsoft.com/en-us/sql/relational-databases/system-dynamic-management-views/sys-dm-os-schedulers-transact-sql
+    # https://docs.microsoft.com/en-us/sql/relational-databases/system-dynamic-management-views/sys-dm-os-tasks-transact-sql
+    @property
+    def enabled(self):
+        if not is_affirmative(self.instance_config.get('include_task_scheduler_metrics', False)):
+            return False
+        return True
+
+    @property
+    def queries(self):
+        return [TASK_SCHEDULER_METRICS_QUERY, OS_TASK_METRICS_QUERY]

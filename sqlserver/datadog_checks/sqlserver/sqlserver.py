@@ -27,6 +27,7 @@ from datadog_checks.sqlserver.database_metrics import (
     SqlserverMasterFilesMetrics,
     SqlserverPrimaryLogShippingMetrics,
     SqlserverSecondaryLogShippingMetrics,
+    SqlserverTaskSchedulerMetrics,
     SqlserverTempDBFileSpaceUsageMetrics,
 )
 from datadog_checks.sqlserver.metadata import SqlserverMetadata
@@ -69,7 +70,6 @@ from datadog_checks.sqlserver.const import (
     STATIC_INFO_MAJOR_VERSION,
     STATIC_INFO_VERSION,
     SWITCH_DB_STATEMENT,
-    TASK_SCHEDULER_METRICS,
     VALID_METRIC_TYPES,
     expected_sys_databases_columns,
 )
@@ -491,12 +491,6 @@ class SQLServer(AgentCheck):
                 }
                 metrics_to_collect.append(self.typed_metric(cfg_inst=cfg, table=table, column=column))
 
-        # Load metrics from scheduler and task tables, if enabled
-        if is_affirmative(self.instance.get('include_task_scheduler_metrics', False)):
-            for name, table, column in TASK_SCHEDULER_METRICS:
-                cfg = {'name': name, 'table': table, 'column': column, 'tags': tags}
-                metrics_to_collect.append(self.typed_metric(cfg_inst=cfg, table=table, column=column))
-
         # Load any custom metrics from conf.d/sqlserver.yaml
         for cfg in custom_metrics:
             sql_counter_type = None
@@ -787,6 +781,11 @@ class SQLServer(AgentCheck):
             new_query_executor=self._new_query_executor,
             server_static_info=self.static_info_cache,
         )
+        task_scheduler_metrics = SqlserverTaskSchedulerMetrics(
+            instance_config=self.instance,
+            new_query_executor=self._new_query_executor,
+            server_static_info=self.static_info_cache,
+        )
 
         # metrics that are collected for each database
         tempdb_file_space_usage_metrics = SqlserverTempDBFileSpaceUsageMetrics(
@@ -820,6 +819,7 @@ class SQLServer(AgentCheck):
             secondary_log_shipping_metrics,
             master_files_metrics,
             database_backup_metrics,
+            task_scheduler_metrics,
             # database specific metrics
             tempdb_file_space_usage_metrics,
             index_usage_metrics,
