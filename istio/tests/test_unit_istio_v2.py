@@ -1,6 +1,6 @@
-# (C) Datadog, Inc. 2021-present
+# (C) Datadog, Inc. 2024-present
 # All rights reserved
-# Licensed under Simplified BSD License (see LICENSE)
+# Licensed under a 3-clause BSD style license (see LICENSE)
 import copy
 
 import pytest
