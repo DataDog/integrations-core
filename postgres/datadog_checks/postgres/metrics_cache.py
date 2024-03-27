@@ -18,6 +18,7 @@ from .util import (
     COMMON_METRICS,
     DATABASE_SIZE_METRICS,
     DBM_MIGRATED_METRICS,
+    NEWER_12_METRICS,
     NEWER_14_METRICS,
     NEWER_91_BGW_METRICS,
     NEWER_92_BGW_METRICS,
@@ -27,7 +28,7 @@ from .util import (
     REPLICATION_METRICS_10,
     REPLICATION_STATS_METRICS,
 )
-from .version_utils import V8_3, V9, V9_1, V9_2, V9_4, V9_6, V10, V14
+from .version_utils import V8_3, V9, V9_1, V9_2, V9_4, V9_6, V10, V12, V14
 
 logger = logging.getLogger(__name__)
 
@@ -79,6 +80,8 @@ class PostgresMetricsCache:
             self.instance_metrics = dict(c_metrics)
             if version >= V9_2:
                 self.instance_metrics = dict(self.instance_metrics, **NEWER_92_METRICS)
+            if version >= V12:
+                self.instance_metrics = dict(self.instance_metrics, **NEWER_12_METRICS)
             if version >= V14:
                 self.instance_metrics = dict(self.instance_metrics, **NEWER_14_METRICS)
 
