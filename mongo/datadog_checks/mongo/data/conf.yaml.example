@@ -161,6 +161,11 @@ instances:
     #
     # collections_indexes_stats: false
 
+    ## @param add_node_tag_to_events - boolean - optional - default: true
+    ## Adds the Mongo node to events as a tag rather than creating a seperate host for the event.
+    #
+    # add_node_tag_to_events: true
+
     ## @param custom_queries - list of mappings - optional
     ## Define custom queries to collect custom metrics on your Mongo
     ## Note: Custom queries are ignored by default when the mongo node is a secondary of a replica set.

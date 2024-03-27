@@ -84,18 +84,26 @@ class ReplicaCollector(MongoCollector):
                 'source_type_name': SOURCE_TYPE_NAME,
                 'msg_title': msg_title,
                 'msg_text': msg,
-                'host': self.hostname,
+                'host': node_hostname,
                 'tags': [
                     'action:mongo_replset_member_status_change',
                     'member_status:' + short_state_str,
                     'previous_member_status:' + previous_short_state_str,
                     'replset:' + replset_name,
-                    'node:' + node_hostname,
                 ],
             }
+
+            if self.check._config.add_node_tag_to_events:
+                event_payload['host'] = self.hostname
+                event_payload['tags'].append('node:' + node_hostname)
+
             if node_hostname == 'localhost':
                 # Do not submit events with a 'localhost' hostname.
-                event_payload['tags'][4] = self.hostname
+                if self.check._config.add_node_tag_to_events:
+                    event_payload['tags'][4] = "node:{}".format(self.hostname)
+                else:
+                    event_payload['host'] = self.hostname
+
             self.check.event(event_payload)
 
     def get_votes_config(self, api):

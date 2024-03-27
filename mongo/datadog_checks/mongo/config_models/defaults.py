@@ -8,6 +8,10 @@
 #     ddev -x validate models -s <INTEGRATION_NAME>
 
 
+def instance_add_node_tag_to_events():
+    return True
+
+
 def instance_collections_indexes_stats():
     return False
 
