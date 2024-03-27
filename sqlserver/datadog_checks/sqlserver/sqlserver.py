@@ -332,32 +332,21 @@ class SQLServer(AgentCheck):
     def make_metric_list_to_collect(self):
         # Pre-process the list of metrics to collect
         try:
-            # check to see if the database exists before we try any connections to it
-            db_exists, context = self.connection.check_database()
-            if db_exists:
-                if self.instance.get('stored_procedure') is None:
+            if is_affirmative(self.instance.get("ignore_missing_database", False)):
+                # Do the database exist check that will allow to disable _check as a whole
+                # as otherwise check for non existant DB will be running and throwing SQLConnectionError
+                db_exists, context = self.connection.check_database()
+                if not db_exists:
+                    self.do_check = False
+                    self.log.warning("Database %s does not exist. Disabling checks for this instance.", context)
+                    return 
+            if self.instance.get('stored_procedure') is None:
                     with self.connection.open_managed_default_connection():
                         with self.connection.get_managed_cursor() as cursor:
                             self.autodiscover_databases(cursor)
-                        self._make_metric_list_to_collect(self._config.custom_metrics)
-            else:
-                # How much do we care that the DB doesn't exist?
-                ignore = is_affirmative(self.instance.get("ignore_missing_database", False))
-                if ignore is not None and ignore:
-                    # not much : we expect it. leave checks disabled
-                    self.do_check = False
-                    self.log.warning("Database %s does not exist. Disabling checks for this instance.", context)
-                else:
-                    # yes we do. Keep trying
-                    msg = "Database {} does not exist. Please resolve invalid database and restart agent".format(
-                        context
-                    )
-                    raise ConfigurationError(msg)
-
+                        self._make_metric_list_to_collect(self._config.custom_metric)
         except SQLConnectionError as e:
-            self.log.exception("Error connecting to database: %s", e)
-        except ConfigurationError:
-            raise
+            raise e
         except Exception as e:
             self.log.exception("Initialization exception %s", e)
 
@@ -968,39 +957,34 @@ class SQLServer(AgentCheck):
         custom_tags = self.instance.get("tags", [])
 
         if (guardSql and self.proc_check_guard(guardSql)) or not guardSql:
-            self.connection.open_db_connections(self.connection.DEFAULT_DB_KEY)
-            cursor = self.connection.get_cursor(self.connection.DEFAULT_DB_KEY)
-
-            try:
-                self.log.debug("Calling Stored Procedure : %s", proc)
-                if self.connection.connector == 'adodbapi':
-                    cursor.callproc(proc)
-                else:
-                    # pyodbc does not support callproc; use execute instead.
-                    # Reference: https://github.com/mkleehammer/pyodbc/wiki/Calling-Stored-Procedures
-                    call_proc = '{{CALL {}}}'.format(proc)
-                    cursor.execute(call_proc)
-
-                rows = cursor.fetchall()
-                self.log.debug("Row count (%s) : %s", proc, cursor.rowcount)
-
-                for row in rows:
-                    tags = [] if row.tags is None or row.tags == '' else row.tags.split(',')
-                    tags.extend(custom_tags)
-
-                    if row.type.lower() in self.proc_type_mapping:
-                        self.proc_type_mapping[row.type](row.metric, row.value, tags, raw=True)
-                    else:
-                        self.log.warning(
-                            '%s is not a recognised type from procedure %s, metric %s', row.type, proc, row.metric
-                        )
-
-            except Exception as e:
-                self.log.warning("Could not call procedure %s: %s", proc, e)
-                raise e
-
-            self.connection.close_cursor(cursor)
-            self.connection.close_db_connections(self.connection.DEFAULT_DB_KEY)
+            with self.connection.open_managed_default_connection():
+                with self.connection.get_managed_cursor() as cursor:
+                    try:
+                        self.log.debug("Calling Stored Procedure : %s", proc)
+                        if self.connection.connector == 'adodbapi':
+                            cursor.callproc(proc)
+                        else:
+                            # pyodbc does not support callproc; use execute instead.
+                            # Reference: https://github.com/mkleehammer/pyodbc/wiki/Calling-Stored-Procedures
+                            call_proc = '{{CALL {}}}'.format(proc)
+                            cursor.execute(call_proc)
+        
+                        rows = cursor.fetchall()
+                        self.log.debug("Row count (%s) : %s", proc, cursor.rowcount)
+        
+                        for row in rows:
+                            tags = [] if row.tags is None or row.tags == '' else row.tags.split(',')
+                            tags.extend(custom_tags)
+        
+                            if row.type.lower() in self.proc_type_mapping:
+                                self.proc_type_mapping[row.type](row.metric, row.value, tags, raw=True)
+                            else:
+                                self.log.warning(
+                                    '%s is not a recognised type from procedure %s, metric %s', row.type, proc, row.metric
+                                )
+                    except Exception as e:
+                        self.log.warning("Could not call procedure %s: %s", proc, e)
+                        raise e
         else:
             self.log.info("Skipping call to %s due to only_if", proc)
 

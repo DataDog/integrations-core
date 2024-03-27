@@ -203,6 +203,7 @@ def test_check_index_usage_metrics(
 ):
     instance_docker_metrics['database'] = 'datadog_test'
     instance_docker_metrics['include_index_usage_metrics'] = True
+    instance_docker_metrics['ignore_missing_database'] = True
 
     # Cause an index seek
     bob_conn.execute_with_retries(
@@ -379,6 +380,7 @@ def test_check_incr_fraction_metrics(
     bob_conn_raw,
 ):
     instance_docker_metrics['database'] = 'datadog_test'
+    instance_docker_metrics['ignore_missing_database'] = True
     sqlserver_check = SQLServer(CHECK_NAME, init_config, [instance_docker_metrics])
 
     sqlserver_check.run()
