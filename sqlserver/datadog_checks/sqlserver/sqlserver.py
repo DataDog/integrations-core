@@ -339,12 +339,12 @@ class SQLServer(AgentCheck):
                 if not db_exists:
                     self.do_check = False
                     self.log.warning("Database %s does not exist. Disabling checks for this instance.", context)
-                    return 
+                    return
             if self.instance.get('stored_procedure') is None:
-                    with self.connection.open_managed_default_connection():
-                        with self.connection.get_managed_cursor() as cursor:
-                            self.autodiscover_databases(cursor)
-                        self._make_metric_list_to_collect(self._config.custom_metric)
+                with self.connection.open_managed_default_connection():
+                    with self.connection.get_managed_cursor() as cursor:
+                        self.autodiscover_databases(cursor)
+                    self._make_metric_list_to_collect(self._config.custom_metric)
         except SQLConnectionError as e:
             raise e
         except Exception as e:
@@ -968,19 +968,22 @@ class SQLServer(AgentCheck):
                             # Reference: https://github.com/mkleehammer/pyodbc/wiki/Calling-Stored-Procedures
                             call_proc = '{{CALL {}}}'.format(proc)
                             cursor.execute(call_proc)
-        
+
                         rows = cursor.fetchall()
                         self.log.debug("Row count (%s) : %s", proc, cursor.rowcount)
-        
+
                         for row in rows:
                             tags = [] if row.tags is None or row.tags == '' else row.tags.split(',')
                             tags.extend(custom_tags)
-        
+
                             if row.type.lower() in self.proc_type_mapping:
                                 self.proc_type_mapping[row.type](row.metric, row.value, tags, raw=True)
                             else:
                                 self.log.warning(
-                                    '%s is not a recognised type from procedure %s, metric %s', row.type, proc, row.metric
+                                    '%s is not a recognised type from procedure %s, metric %s',
+                                    row.type,
+                                    proc,
+                                    row.metric,
                                 )
                     except Exception as e:
                         self.log.warning("Could not call procedure %s: %s", proc, e)
