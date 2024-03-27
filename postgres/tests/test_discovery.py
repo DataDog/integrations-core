@@ -183,7 +183,6 @@ def test_autodiscovery_relations_disabled(integration_check, pg_instance):
 
 @pytest.mark.integration
 @pytest.mark.usefixtures('dd_environment')
-@requires_over_12
 def test_autodiscovery_collect_all_metrics(aggregator, integration_check, pg_instance):
     """
     Check that metrics get collected for each database discovered.
