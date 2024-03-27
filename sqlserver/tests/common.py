@@ -238,7 +238,6 @@ INIT_CONFIG_ALT_TABLES = {
 OPERATION_TIME_METRICS = [
     'simple_metrics',
     'fraction_metrics',
-    'database_file_stats_metrics',
     'incr_fraction_metrics',
 ]
 

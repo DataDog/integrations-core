@@ -20,6 +20,7 @@ from datadog_checks.sqlserver.config import SQLServerConfig
 from datadog_checks.sqlserver.database_metrics import (
     SqlserverAoMetrics,
     SqlserverDatabaseBackupMetrics,
+    SqlserverDatabaseFileStatsMetrics,
     SqlserverDatabaseStatsMetrics,
     SqlserverDbFragmentationMetrics,
     SqlserverFciMetrics,
@@ -464,17 +465,17 @@ class SQLServer(AgentCheck):
                         physical_database_name=db.physical_db_name,
                     )
 
-        # Load database statistics
-        db_stats_to_collect = list(DATABASE_FILES_METRICS)
+        # # Load database statistics
+        # db_stats_to_collect = list(DATABASE_FILES_METRICS)
 
-        for name, table, column in db_stats_to_collect:
-            # include database as a filter option
-            db_names = [d.name for d in self.databases] or [
-                self.instance.get('database', self.connection.DEFAULT_DATABASE)
-            ]
-            for db_name in db_names:
-                cfg = {'name': name, 'table': table, 'column': column, 'instance_name': db_name, 'tags': tags}
-                metrics_to_collect.append(self.typed_metric(cfg_inst=cfg, table=table, column=column))
+        # for name, table, column in db_stats_to_collect:
+        #     # include database as a filter option
+        #     db_names = [d.name for d in self.databases] or [
+        #         self.instance.get('database', self.connection.DEFAULT_DATABASE)
+        #     ]
+        #     for db_name in db_names:
+        #         cfg = {'name': name, 'table': table, 'column': column, 'instance_name': db_name, 'tags': tags}
+        #         metrics_to_collect.append(self.typed_metric(cfg_inst=cfg, table=table, column=column))
 
         # Load AlwaysOn metrics
         if is_affirmative(self.instance.get('include_ao_metrics', False)):
@@ -814,6 +815,14 @@ class SQLServer(AgentCheck):
             execute_query_handler=self.execute_query_raw,
             databases=databases,
         )
+        database_files_metrics = SqlserverDatabaseFileStatsMetrics(
+            instance_config=self.instance,
+            new_query_executor=self._new_query_executor,
+            server_static_info=self.static_info_cache,
+            execute_query_handler=self.execute_query_raw,
+            databases=databases,
+        )
+
 
         # create a list of dynamic queries to execute
         self._dynamic_queries = [
@@ -831,6 +840,7 @@ class SQLServer(AgentCheck):
             tempdb_file_space_usage_metrics,
             index_usage_metrics,
             db_fragmentation_metrics,
+            database_files_metrics,
         ]
         self.log.debug("initialized dynamic queries")
         return self._dynamic_queries

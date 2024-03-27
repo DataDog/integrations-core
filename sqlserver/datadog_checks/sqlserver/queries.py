@@ -332,6 +332,37 @@ DATABASE_STATS_METRICS_QUERY = {
     ],
 }
 
+DATABASE_FILE_STATS_METRICS_QUERY = {
+    "name": "sys.database_files",
+    "query": """SELECT
+        file_id,
+        CASE type
+            WHEN 0 THEN 'data'
+            WHEN 1 THEN 'transaction_log'
+            WHEN 2 THEN 'filestream'
+            WHEN 3 THEN 'unknown'
+            WHEN 4 THEN 'full_text'
+            ELSE 'other'
+        END AS file_type,
+        physical_name,
+        name,
+        state_desc,
+        ISNULL(size*8, 0) as size,
+        state,
+        ISNULL(CAST(FILEPROPERTY(name, 'SpaceUsed') as int)*8, 0) as space_used
+        FROM sys.database_files
+    """,
+    "columns": [
+        {"name": "file_id", "type": "tag"},
+        {"name": "file_type", "type": "tag"},
+        {"name": "file_location", "type": "tag"},
+        {"name": "file_name", "type": "tag"},
+        {"name": "database_files_state_desc", "type": "tag"},
+        {"name": "database.files.size", "type": "gauge"},
+        {"name": "database.files.state", "type": "gauge"},
+        {"name": "database.files.space_used", "type": "gauge"},
+    ],
+}
 
 def get_query_ao_availability_groups(sqlserver_major_version):
     """

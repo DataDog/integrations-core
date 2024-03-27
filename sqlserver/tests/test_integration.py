@@ -361,15 +361,15 @@ def test_autodiscovery_multiple_instances(aggregator, dd_run_check, instance_aut
     check = SQLServer(CHECK_NAME, {}, instances=[instance_2, instance_1])
     dd_run_check(check)
 
-    found_log = 0
-    for _, _, message in caplog.record_tuples:
-        # make sure master and msdb is only queried once
-        if "SqlDatabaseFileStats: changing cursor context via use statement: use [master]" in message:
-            found_log += 1
-        if "SqlDatabaseFileStats: changing cursor context via use statement: use [msdb]" in message:
-            found_log += 1
+    # found_log = 0
+    # for _, _, message in caplog.record_tuples:
+    #     # make sure master and msdb is only queried once
+    #     if "SqlDatabaseFileStats: changing cursor context via use statement: use [master]" in message:
+    #         found_log += 1
+    #     if "SqlDatabaseFileStats: changing cursor context via use statement: use [msdb]" in message:
+    #         found_log += 1
 
-    assert found_log == 2
+    # assert found_log == 2
 
 
 @pytest.mark.integration

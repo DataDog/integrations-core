@@ -11,6 +11,7 @@ from datadog_checks.sqlserver.const import (
 )
 from datadog_checks.sqlserver.queries import (
     DATABASE_BACKUP_METRICS_QUERY,
+    DATABASE_FILE_STATS_METRICS_QUERY,
     DATABASE_STATS_METRICS_QUERY,
     DB_FRAGMENTATION_QUERY,
     INDEX_USAGE_STATS_QUERY,
@@ -317,3 +318,38 @@ class SqlserverDatabaseStatsMetrics(SqlserverDatabaseMetricsBase):
     @property
     def queries(self):
         return [DATABASE_STATS_METRICS_QUERY]
+
+
+class SqlserverDatabaseFileStatsMetrics(SqlserverDatabaseMetricsBase):
+    def __init__(
+        self, instance_config, new_query_executor, server_static_info, execute_query_handler=None, databases=None
+    ):
+        super(SqlserverDatabaseFileStatsMetrics, self).__init__(
+            instance_config, new_query_executor, server_static_info, execute_query_handler
+        )
+        self._databases: Optional[List[str]] = databases
+
+    @property
+    def enabled(self):
+        return True
+
+    @property
+    def queries(self):
+        return [DATABASE_FILE_STATS_METRICS_QUERY]
+
+    @property
+    def databases(self):
+        return self._databases or []
+
+    @property
+    def query_executors(self):
+        executors = []
+        for database in self.databases:
+            executor = self.new_query_executor(
+                self.queries,
+                executor=functools.partial(self.execute_query_handler, db=database),
+                extra_tags=['db:{}'.format(database), 'database:{}'.format(database)],
+            )
+            executor.compile_queries()
+            executors.append(executor)
+        return executors
