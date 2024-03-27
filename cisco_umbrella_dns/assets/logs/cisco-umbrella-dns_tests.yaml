@@ -224,6 +224,7 @@ tests:
         "querytype" : "A",
         "timestamp" : 1702288020000
       }
+    service: "dns"
     tags:
      - "source:LOGS_SOURCE"
     timestamp: 1702288020000
@@ -443,6 +444,7 @@ tests:
         "querytype" : "A",
         "timestamp" : 1702990616000
       }
+    service: "dns"
     tags:
      - "source:LOGS_SOURCE"
     timestamp: 1702990616000
@@ -644,6 +646,7 @@ tests:
         "querytype" : "A",
         "timestamp" : 1702990616000
       }
+    service: "dns"
     tags:
      - "source:LOGS_SOURCE"
     timestamp: 1702990616000
@@ -970,6 +973,7 @@ tests:
         "time" : "10:00:41",
         "responsefilename" : ""
       }
+    service: "proxy"
     tags:
      - "source:LOGS_SOURCE"
     timestamp: 1702288841000
@@ -1296,6 +1300,7 @@ tests:
         "time" : "10:00:35",
         "responsefilename" : ""
       }
+    service: "proxy"
     tags:
      - "source:LOGS_SOURCE"
     timestamp: 1701943235000
