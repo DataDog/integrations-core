@@ -114,7 +114,6 @@ def instance_integration(instance_custom_queries):
     instance = copy.deepcopy(instance_custom_queries)
     instance["additional_metrics"] = ["metrics.commands", "tcmalloc", "collection", "top", "jumbo_chunks"]
     instance["collections"] = ["foo", "bar"]
-    instance["collections_indexes_stats"] = True
     return instance
 
 
