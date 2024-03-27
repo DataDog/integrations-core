@@ -2,6 +2,12 @@
 
 <!-- towncrier release notes start -->
 
+## 18.1.0 / 2024-03-27
+
+***Added***:
+
+* Add config option `propagate_agent_tags` to propagate agent tags from `datadog.yaml` to postgres check. By default, the propagation is disabled. ([#17122](https://github.com/DataDog/integrations-core/pull/17122))
+
 ## 18.0.0 / 2024-03-22
 
 ***Changed***:

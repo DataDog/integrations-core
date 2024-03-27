@@ -1,1 +1,0 @@
-Add config option `propagate_agent_tags` to propagate agent tags from `datadog.yaml` to postgres check. By default, the propagation is disabled.
