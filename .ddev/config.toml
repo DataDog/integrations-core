@@ -62,9 +62,6 @@ runners = { windows = ["windows-2019"] }
 [overrides.ci.tcp_check]
 platforms = ["linux", "windows"]
 
-[overrides.ci.tokumx]
-only-py2 = true
-
 [overrides.dependencies.licenses]
 # https://github.com/aerospike/aerospike-client-python/blob/master/LICENSE
 aerospike = ['Apache-2.0']
