@@ -18,7 +18,9 @@ if TYPE_CHECKING:
 @click.pass_obj
 def new(app: Application, entry_type: str | None, targets: tuple[str], message: str | None):
     """
-    This creates new changelog entries. If the entry type is not specified, you will be prompted.
+    This creates new changelog entries in Markdown format.
+
+    If the ENTRY_TYPE is not specified, you will be prompted.
 
     The `--message` option can be used to specify the changelog text. If this is not supplied, an editor
     will be opened for you to manually write the entry. The changelog text that is opened defaults to

@@ -111,7 +111,7 @@ class PostgreSql(AgentCheck):
                 "DEPRECATION NOTICE: The managed_identity option is deprecated and will be removed in a future version."
                 " Please use the new azure.managed_authentication option instead."
             )
-        self._config = PostgresConfig(self.instance)
+        self._config = PostgresConfig(self.instance, self.init_config)
         self.cloud_metadata = self._config.cloud_metadata
         self.tags = self._config.tags
         # Keep a copy of the tags without the internal resource tags so they can be used for paths that don't
@@ -767,8 +767,6 @@ class PostgreSql(AgentCheck):
                 dbname,
                 self._config.application_name,
             )
-            if self._config.query_timeout:
-                connection_string += " options='-c statement_timeout=%s'" % self._config.query_timeout
             conn = psycopg2.connect(connection_string)
         else:
             password = self._config.password
@@ -801,8 +799,6 @@ class PostgreSql(AgentCheck):
             }
             if self._config.port:
                 args['port'] = self._config.port
-            if self._config.query_timeout:
-                args['options'] = '-c statement_timeout=%s' % self._config.query_timeout
             if self._config.ssl_cert:
                 args['sslcert'] = self._config.ssl_cert
             if self._config.ssl_root_cert:
@@ -814,6 +810,10 @@ class PostgreSql(AgentCheck):
             conn = psycopg2.connect(**args)
         # Autocommit is enabled by default for safety for all new connections (to prevent long-lived transactions).
         conn.set_session(autocommit=True, readonly=True)
+        if self._config.query_timeout:
+            # Set the statement_timeout for the session
+            with conn.cursor() as cursor:
+                cursor.execute("SET statement_timeout TO %d" % self._config.query_timeout)
         return conn
 
     def _connect(self):

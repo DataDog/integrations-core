@@ -8,6 +8,10 @@
 #     ddev -x validate models -s <INTEGRATION_NAME>
 
 
+def shared_propagate_agent_tags():
+    return False
+
+
 def instance_activity_metrics_excluded_aggregations():
     return []
 
@@ -110,6 +114,10 @@ def instance_pg_stat_statements_view():
 
 def instance_port():
     return 5432
+
+
+def instance_propagate_agent_tags():
+    return False
 
 
 def instance_query_timeout():

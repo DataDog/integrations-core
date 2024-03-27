@@ -2,7 +2,13 @@
 
 <!-- towncrier release notes start -->
 
-## 4.9.0 / 2024-02-16
+## 4.10.0 / 2024-03-22
+
+***Added***:
+
+* Support new scheduler_pod_scheduling_sli_duration_seconds metric ([#17110](https://github.com/DataDog/integrations-core/pull/17110))
+
+## 4.9.0 / 2024-02-16 / Agent 7.52.0
 
 ***Added***:
 

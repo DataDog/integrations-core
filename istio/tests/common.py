@@ -21,19 +21,14 @@ MOCK_V2_MESH_OVERRIDE_INSTANCE = {
     ],
 }
 
-MOCK_LEGACY_MESH_INSTANCE = {
-    'istio_mesh_endpoint': 'http://localhost:15090/metrics',
-    'use_openmetrics': False,
-}
-
-MOCK_V2_MESH_INSTANCE = {
-    'istio_mesh_endpoint': 'http://localhost:15090/metrics',
-    'use_openmetrics': True,
-}
-
 MOCK_V2_ISTIOD_INSTANCE = {
     'istiod_endpoint': 'http://localhost:8080/metrics',
     'use_openmetrics': True,
+}
+
+MOCK_LEGACY_MESH_INSTANCE = {
+    'istio_mesh_endpoint': 'http://localhost:15090/metrics',
+    'use_openmetrics': False,
 }
 
 MOCK_LEGACY_ISTIOD_INSTANCE = {
@@ -112,6 +107,7 @@ MESH_METRICS_MAPPER = {
 
 ISTIOD_METRICS = [
     'istio.citadel.server.root_cert_expiry_timestamp',
+    'istio.citadel.server.cert_chain_expiry_timestamp',
     'istio.galley.endpoint_no_pod',
     'istio.galley.validation.config_update_error',
     'istio.galley.validation.config_update',
@@ -215,6 +211,7 @@ V2_MESH_COUNTER_GAUGE = [
 ]
 
 ISTIOD_V2_METRICS = [
+    'istio.citadel.server.cert_chain_expiry_timestamp',
     'istio.citadel.server.root_cert_expiry_timestamp',
     'istio.galley.endpoint_no_pod',
     'istio.galley.validation.config_update_error.count',
@@ -392,4 +389,33 @@ MOCK_TEST_METRICS = [
     'istio.galley.istio.networking.destinationrules',
     'istio.galley.istio.networking.gateways',
     'istio.galley.istio.authentication.meshpolicies',
+]
+
+# Tags were previously excluded from agent 7.32.x to 7.52.x or check version 3.15.0 to 5.5.0
+PREVIOUSLY_EXCLUDED_TAGS = [
+    'response_code:1',
+    'reporter:1',
+    'source_workload:1',
+    'source_workload_namespace:1',
+    'source_principal:1',
+    'source_app:1',
+    'source_version:1',
+    'source_cluster:1',
+    'destination_workload:1',
+    'destination_workload_namespace:1',
+    'destination_principal:1',
+    'destination_app:1',
+    'destination_version:1',
+    'destination_service:1',
+    'destination_service_name:1',
+    'destination_service_namespace:1',
+    'destination_cluster:1',
+    'request_protocol:1',
+    'response_flags:1',
+    'grpc_response_status:1',
+    'connection_security_policy:1',
+    'source_canonical_service:1',
+    'destination_canonical_service:1',
+    'source_canonical_revision:1',
+    'destination_canonical_revision:1',
 ]

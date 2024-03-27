@@ -59,6 +59,10 @@ integration/apache:
 - apache/**/*
 integration/arangodb:
 - arangodb/**/*
+integration/argo_rollouts:
+- argo_rollouts/**/*
+integration/argo_workflows:
+- argo_workflows/**/*
 integration/argocd:
 - argocd/**/*
 integration/aspdotnet:
@@ -85,12 +89,16 @@ integration/ceph:
 - ceph/**/*
 integration/cert_manager:
 - cert_manager/**/*
+integration/checkpoint_quantum_firewall:
+- checkpoint_quantum_firewall/**/*
 integration/cilium:
 - cilium/**/*
 integration/cisco_aci:
 - cisco_aci/**/*
 integration/cisco_duo:
 - cisco_duo/**/*
+integration/cisco_secure_firewall:
+- cisco_secure_firewall/**/*
 integration/cisco_umbrella_dns:
 - cisco_umbrella_dns/**/*
 integration/citrix_hypervisor:
@@ -327,6 +335,8 @@ integration/otel:
 - otel/**/*
 integration/pan_firewall:
 - pan_firewall/**/*
+integration/palo_alto_panorama:
+- palo_alto_panorama/**/*
 integration/pdh_check:
 - pdh_check/**/*
 integration/pgbouncer:

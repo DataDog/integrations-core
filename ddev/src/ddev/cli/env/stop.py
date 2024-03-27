@@ -18,7 +18,7 @@ if TYPE_CHECKING:
 @click.pass_obj
 def stop(app: Application, *, intg_name: str, environment: str, ignore_state: bool):
     """
-    Stop an environment.
+    Stop environments. To stop all the running environments, use `all` as the integration name and the environment.
     """
     from ddev.e2e.agent import get_agent_interface
     from ddev.e2e.config import EnvDataStorage
@@ -26,34 +26,52 @@ def stop(app: Application, *, intg_name: str, environment: str, ignore_state: bo
     from ddev.e2e.run import E2EEnvironmentRunner
     from ddev.utils.fs import temp_directory
 
-    integration = app.repo.integrations.get(intg_name)
-    env_data = EnvDataStorage(app.data_dir).get(integration.name, environment)
-    runner = E2EEnvironmentRunner(environment, app.verbosity)
+    env_data_storage = EnvDataStorage(app.data_dir)
 
-    if not env_data.exists():
-        app.abort(f'Environment `{environment}` for integration `{integration.name}` is not running')
-    elif ignore_state:
-        return
+    if intg_name == 'all':
+        integrations = env_data_storage.get_integrations()
+    else:
+        integrations = [intg_name]
 
-    app.display_header(f'Stopping: {environment}')
+    for integration_name in integrations:
+        if environment == 'all':
+            environments = [
+                env
+                for env in env_data_storage.get_environments(integration_name)
+                if env_data_storage.get(integration_name, env).exists()
+            ]
+        else:
+            environments = [environment]
 
-    # TODO: remove this required result file indicator once the E2E migration is complete
-    with temp_directory() as temp_dir:
-        result_file = temp_dir / 'result.json'
-        env_vars = {E2EEnvVars.RESULT_FILE: str(result_file)}
+        for env in environments:
+            integration = app.repo.integrations.get(integration_name)
+            env_data = env_data_storage.get(integration.name, env)
+            runner = E2EEnvironmentRunner(env, app.verbosity)
 
-        metadata = env_data.read_metadata()
-        env_vars.update(metadata.get(E2EMetadata.ENV_VARS, {}))
+            if not env_data.exists():
+                app.abort(f'Environment `{env}` for integration `{integration.name}` is not running')
+            elif ignore_state:
+                continue
 
-        agent_type = metadata.get(E2EMetadata.AGENT_TYPE, DEFAULT_AGENT_TYPE)
-        agent = get_agent_interface(agent_type)(app.platform, integration, environment, metadata, env_data.config_file)
+            app.display_header(f'Stopping: {integration_name}:{env}')
 
-        try:
-            agent.stop()
-        finally:
-            env_data.remove()
+            # TODO: remove this required result file indicator once the E2E migration is complete
+            with temp_directory() as temp_dir:
+                result_file = temp_dir / 'result.json'
+                env_vars = {E2EEnvVars.RESULT_FILE: str(result_file)}
 
-            with integration.path.as_cwd(env_vars=env_vars), runner.stop() as command:
-                process = app.platform.run_command(command)
-                if process.returncode:
-                    app.abort(code=process.returncode)
+                metadata = env_data.read_metadata()
+                env_vars.update(metadata.get(E2EMetadata.ENV_VARS, {}))
+
+                agent_type = metadata.get(E2EMetadata.AGENT_TYPE, DEFAULT_AGENT_TYPE)
+                agent = get_agent_interface(agent_type)(app.platform, integration, env, metadata, env_data.config_file)
+
+                try:
+                    agent.stop()
+                finally:
+                    env_data.remove()
+
+                    with integration.path.as_cwd(env_vars=env_vars), runner.stop() as command:
+                        process = app.platform.run_command(command)
+                        if process.returncode:
+                            app.abort(code=process.returncode)

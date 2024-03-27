@@ -2,7 +2,13 @@
 
 <!-- towncrier release notes start -->
 
-## 2.11.1 / 2024-02-29
+## 3.0.0 / 2024-03-22
+
+***Removed***:
+
+* Removed `admission_webhooks.mutation_errors` metric in the `datadog_cluster_agent` integration ([#17195](https://github.com/DataDog/integrations-core/pull/17195))
+
+## 2.11.1 / 2024-02-29 / Agent 7.52.0
 
 ***Fixed***:
 

@@ -322,7 +322,12 @@ class SQLServer(AgentCheck):
         return self._agent_hostname
 
     def initialize_connection(self):
-        self.connection = Connection(self, self.init_config, self.instance, self.handle_service_check)
+        self.connection = Connection(
+            host=self.resolved_hostname,
+            init_config=self.init_config,
+            instance_config=self.instance,
+            service_check_handler=self.handle_service_check,
+        )
 
     def make_metric_list_to_collect(self):
         # Pre-process the list of metrics to collect
@@ -658,10 +663,12 @@ class SQLServer(AgentCheck):
                 # and PERF_AVERAGE_BULK), we need two metrics: the metrics specified and
                 # a base metrics to get the ratio. There is no unique schema, so we generate
                 # the possible candidates, and we look at which ones exist in the db.
+                counter_name_lowercase = counter_name.lower()
+                # lowercase is used to avoid case sensitivity issues such as base vs. Base or BASE
                 candidates = (
-                    counter_name + " base",
-                    counter_name.replace("(ms)", "base"),
-                    counter_name.replace("Avg ", "") + " base",
+                    counter_name_lowercase + " base",
+                    counter_name_lowercase.replace("(ms)", "base"),
+                    counter_name_lowercase.replace("avg ", "") + " base",
                 )
                 try:
                     cursor.execute(BASE_NAME_QUERY, candidates)
@@ -749,7 +756,7 @@ class SQLServer(AgentCheck):
         engine_edition = self.static_info_cache.get(STATIC_INFO_ENGINE_EDITION)
         if is_azure_sql_database(engine_edition):
             # On Azure, we can't use a less costly approach.
-            self._check_connection_by_connecting_to_db()
+            self._check_connections_by_connecting_to_db()
         else:
             self._check_connections_by_use_db()
 
@@ -966,7 +973,7 @@ class SQLServer(AgentCheck):
 
             try:
                 self.log.debug("Calling Stored Procedure : %s", proc)
-                if self.connection.get_connector() == 'adodbapi':
+                if self.connection.connector == 'adodbapi':
                     cursor.callproc(proc)
                 else:
                     # pyodbc does not support callproc; use execute instead.

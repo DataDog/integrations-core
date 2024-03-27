@@ -394,10 +394,17 @@ _DETAILED_FAMILIES = {
         "rabbitmq_channel_get_empty_total",
     },
     "channel_queue_exchange_metrics": {"rabbitmq_queue_messages_published_total"},
-    # Virtual hosts and exchange metrics
+    # Virtual hosts and exchange metrics.
     "vhost_status": {"rabbitmq_cluster_vhost_status"},
     "exchange_names": {"rabbitmq_cluster_exchange_name"},
     "exchange_bindings": {"rabbitmq_cluster_exchange_bindings"},
+}
+# Most metrics in /metrics/detailed are also found in /metrics/per-object.
+# There are however also a few that don't occur in /metrics/per-object.
+_DETAILED_ONLY_METRICS = {
+    "rabbitmq_cluster_vhost_status",
+    "rabbitmq_cluster_exchange_name",
+    "rabbitmq_cluster_exchange_bindings",
 }
 
 
@@ -408,14 +415,14 @@ def unaggregated_renames_and_exclusions(endpoint):
     and exclude from the aggregated endpoint if we enable it.
     """
     exclude_from_agg = set()
-    metric_renames = {}
     exclude_from_agg = set()
     for metric_fam in re.findall(r"family=([^&\s]+)", endpoint):
         exclude_from_agg |= _DETAILED_FAMILIES.get(metric_fam, set())
-    metric_renames = {
-        (re.sub("^rabbitmq_", "rabbitmq_detailed_", k) if k not in _INFO else k): v
-        for k, v in _RENAME_RABBITMQ_TO_DATADOG.items()
-    }
+    metric_renames = {}
+    for k, v in _RENAME_RABBITMQ_TO_DATADOG.items():
+        keep_prefix = k in (_INFO.keys() | _DETAILED_ONLY_METRICS)
+        k = k if keep_prefix else re.sub("^rabbitmq_", "rabbitmq_detailed_", k)
+        metric_renames[k] = v
     return metric_renames, exclude_from_agg
 
 

@@ -48,6 +48,9 @@ class Nginx(AgentCheck):
         super(Nginx, self).__init__(name, init_config, instances)
         self.custom_tags = self.instance.get('tags', [])
         self.url = self.instance.get('nginx_status_url')
+        parsed_url = urlparse(self.url)
+        self._nginx_hostname = parsed_url.hostname
+        self._nginx_port = parsed_url.port or 80
         self.use_plus_api = self.instance.get("use_plus_api", False)
         self.use_plus_api_stream = self.instance.get("use_plus_api_stream", True)
         self.only_query_enabled_endpoints = self.instance.get("only_query_enabled_endpoints", False)
@@ -69,7 +72,8 @@ class Nginx(AgentCheck):
 
         for row in metrics:
             try:
-                name, value, tags, metric_type = row
+                name, value, row_tags, metric_type = row
+                tags = row_tags + ['nginx_host:%s' % self._nginx_hostname, 'port:%s' % self._nginx_port]
                 if self.use_vts:
                     name, handled, conn = self._translate_from_vts(name, value, tags, handled, conn)
                     if name is None:
@@ -220,12 +224,8 @@ class Nginx(AgentCheck):
 
     def _perform_service_check(self, url):
         # Submit a service check for status page availability.
-        parsed_url = urlparse(url)
-        nginx_host = parsed_url.hostname
-        nginx_port = parsed_url.port or 80
-
         service_check_name = 'nginx.can_connect'
-        service_check_tags = ['host:%s' % nginx_host, 'port:%s' % nginx_port] + self.custom_tags
+        service_check_tags = ['host:%s' % self._nginx_hostname, 'port:%s' % self._nginx_port] + self.custom_tags
         try:
             self.log.debug("Querying URL: %s", url)
             r = self._perform_request(url)

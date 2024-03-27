@@ -80,7 +80,7 @@ def test_stop_on_error(ddev, helpers, data_dir, write_result_file, mocker):
         """
         ─────────────────────────────── Starting: py3.12 ───────────────────────────────
         Unable to start the Agent: foo
-        ─────────────────────────────── Stopping: py3.12 ───────────────────────────────
+        ────────────────────────── Stopping: postgres:py3.12 ───────────────────────────
         """
     )
 
