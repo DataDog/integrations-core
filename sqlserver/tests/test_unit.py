@@ -45,7 +45,10 @@ def test_missing_db(instance_docker, dd_run_check):
     instance['ignore_missing_database'] = False
     import mock
 
-    with mock.patch('datadog_checks.sqlserver.connection.Connection.open_managed_default_connection', side_effect=SQLConnectionError(Exception("couldnt connect"))):
+    with mock.patch(
+        'datadog_checks.sqlserver.connection.Connection.open_managed_default_connection',
+        side_effect=SQLConnectionError(Exception("couldnt connect")),
+    ):
         with pytest.raises(SQLConnectionError):
             check = SQLServer(CHECK_NAME, {}, [instance])
             check.initialize_connection()
@@ -58,6 +61,7 @@ def test_missing_db(instance_docker, dd_run_check):
         check.make_metric_list_to_collect()
         dd_run_check(check)
         assert check.do_check is False
+
 
 @mock.patch('datadog_checks.sqlserver.connection.Connection.open_managed_default_database')
 @mock.patch('datadog_checks.sqlserver.connection.Connection.get_cursor')
@@ -107,10 +111,10 @@ def test_db_exists(get_cursor, mock_connect, instance_docker_defaults, dd_run_ch
     check.initialize_connection()
     check.make_metric_list_to_collect()
     assert check.do_check is True
-    
+
     # check case sensitive but mismatched db
     instance['database'] = 'cASEsENSITIVE2018'
-    check = SQLServer(CHECK_NAME, {}, [instance])    
+    check = SQLServer(CHECK_NAME, {}, [instance])
     check.initialize_connection()
     check.make_metric_list_to_collect()
     assert check.do_check is False
@@ -121,6 +125,7 @@ def test_db_exists(get_cursor, mock_connect, instance_docker_defaults, dd_run_ch
     check.initialize_connection()
     check.make_metric_list_to_collect()
     assert check.do_check is True
+
 
 @mock.patch('datadog_checks.sqlserver.connection.Connection.open_managed_default_database')
 @mock.patch('datadog_checks.sqlserver.connection.Connection.get_cursor')
