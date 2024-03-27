@@ -1,1 +1,1 @@
-feat: add istio citadel_server_cert_chain_expiry_timestamp metric
+Add the citadel_server_cert_chain_expiry_timestamp metric
