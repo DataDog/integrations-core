@@ -10,6 +10,7 @@ from datadog_checks.istio import Istio
 from .common import ISTIOD_METRICS, ISTIOD_V2_METRICS
 
 INTERMITTENT_METRICS = [
+    'istio.citadel.server.cert_chain_expiry_timestamp',
     'istio.mesh.request.count',
     'istio.pilot.mcp_sink.recv_failures_total',
     'istio.galley.validation.passed',
