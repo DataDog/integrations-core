@@ -68,7 +68,6 @@ COUNT_METRICS = {
 }
 
 CHECKSUM_METRICS = {
-    'postgresql.checksums.enabled',
     'postgresql.checksums.checksum_failures',
 }
 
@@ -234,6 +233,8 @@ def test_autodiscovery_collect_all_metrics(aggregator, integration_check, pg_ins
     aggregator.assert_metric(
         'dd.postgres._collect_relations_autodiscovery.time',
     )
+    checksum_metrics_expected_tags = _get_expected_tags(check, pg_instance, with_db=False)
+    aggregator.assert_metric('postgresql.checksums.enabled', value=1, tags=checksum_metrics_expected_tags)
 
 
 @pytest.mark.integration

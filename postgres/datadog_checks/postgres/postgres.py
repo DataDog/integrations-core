@@ -727,7 +727,7 @@ class PostgreSql(AgentCheck):
                     self.gauge(
                         "postgresql.checksums.enabled",
                         enabled == "on",
-                        tags=instance_tags,
+                        tags=self.tags_without_db,
                         hostname=self.resolved_hostname,
                     )
             if self._config.collect_activity_metrics:
