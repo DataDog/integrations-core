@@ -1,0 +1,14 @@
+{
+    "name": "Istio Logs Overview",
+    "query": "source:(pilot OR proxyv2)",
+    "visible_facets": [
+        "source",
+        "host",
+        "service"
+    ],
+    "type": "logs",
+    "timerange": {
+        "interval_ms": 3600000
+    },
+    "page": "patterns"
+}
