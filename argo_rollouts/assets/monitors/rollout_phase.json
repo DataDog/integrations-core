@@ -23,7 +23,7 @@
             }
         },
         "priority": null,
-        "query": "min(last_10m):avg:argo_rollouts.rollout.info{phase:abort or phase:error or phase:timeout or phase:invalidspec} by {phase,argo_rollouts_name,argo_rollouts_namespace,host} >= 1",
+        "query": "min(last_10m):default_zero(avg:argo_rollouts.rollout.info{phase:abort or phase:error or phase:timeout or phase:invalidspec} by {phase,argo_rollouts_name,argo_rollouts_namespace,host}) >= 1",
         "restricted_roles": null,
         "tags": [
             "integration:argo_rollouts"
