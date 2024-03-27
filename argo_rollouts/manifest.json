@@ -51,6 +51,9 @@
     },
     "logs": {
       "source": "argo_rollouts"
+    },
+    "monitors": {
+      "Rollout Phase": "assets/monitors/rollout_phase.yaml"
     }
   },
   "author": {
