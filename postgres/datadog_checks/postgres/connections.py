@@ -202,12 +202,13 @@ class MultiDatabaseConnectionPool(object):
             return None
 
     def _terminate_connection_unsafe(self, dbname: str):
-        db = self._conns.pop(dbname, ConnectionInfo(None, None, None, None, None, None)).connection
-        if db is not None:
-            try:
-                self._stats.connection_closed += 1
-                db.close()
-            except Exception:
-                self._stats.connection_closed_failed += 1
-                return False
+        if dbname not in self._conns:
+            return True
+        db = self._conns.pop(dbname).connection
+        try:
+            self._stats.connection_closed += 1
+            db.close()
+        except Exception:
+            self._stats.connection_closed_failed += 1
+            return False
         return True
