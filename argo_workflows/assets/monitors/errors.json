@@ -1,0 +1,23 @@
+{
+	  "id": 12922557,
+	  "name": "New Errors in your Argo Workflows",
+	  "type": "query alert",
+	  "query": "change(sum(last_5m),last_10m):sum:argo_workflows.error.count{*}.as_count() >= 1",
+	  "message": "Detected some new errors in your Argo Workflows.",
+	  "tags": [
+		    "integration:argo_workflows"
+	  ],
+	  "options": {
+		    "thresholds": {
+			      "critical": 1
+		    },
+		    "notify_audit": false,
+		    "include_tags": false,
+		    "notify_no_data": false,
+		    "avalanche_window": 10,
+		    "new_host_delay": 300,
+		    "silenced": {}
+	  },
+	  "priority": null,
+	  "restricted_roles": null
+}

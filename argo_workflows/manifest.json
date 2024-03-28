@@ -45,6 +45,9 @@
     },
     "dashboards": {
       "Argo Workflows": "assets/dashboards/argo_workflows.json"
+    },
+    "monitors": {
+      "errors": "assets/monitors/errors.json"
     }
   },
   "author": {
