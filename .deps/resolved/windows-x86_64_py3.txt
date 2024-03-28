@@ -28,9 +28,9 @@ deprecated @ https://storage.googleapis.com/dd-agent-int-deps/external/deprecate
 dnspython @ https://storage.googleapis.com/dd-agent-int-deps/external/dnspython/dnspython-2.6.1-py3-none-any.whl#sha256=5ef3b9680161f6fa89daf8ad451b5f1a33b18ae8a1c6778cdf4b43f08c0a6e50
 dogpile-cache @ https://storage.googleapis.com/dd-agent-int-deps/external/dogpile-cache/dogpile.cache-1.3.2-py3-none-any.whl#sha256=c59250e23ddb4c03259c315c3b03d18b0658ec4f30ee665b39b91faf6401ef41
 envier @ https://storage.googleapis.com/dd-agent-int-deps/external/envier/envier-0.5.1-py3-none-any.whl#sha256=b45ef6051fea33d0c32a64e186bff2cfb446e2242d6781216c9bc9ce708c5909
-filelock @ https://storage.googleapis.com/dd-agent-int-deps/external/filelock/filelock-3.13.1-py3-none-any.whl#sha256=57dbda9b35157b05fb3e58ee91448612eb674172fab98ee235ccb0b5bee19a1c
+filelock @ https://storage.googleapis.com/dd-agent-int-deps/external/filelock/filelock-3.13.3-py3-none-any.whl#sha256=5ffa845303983e7a0b7ae17636509bc97997d58afeafa72fb141a17b152284cb
 foundationdb @ https://storage.googleapis.com/dd-agent-int-deps/built/foundationdb/foundationdb-6.3.24-20240314093951-py3-none-win_amd64.whl#sha256=07e8e97e51dc9248d58d60d33076b82380135c31ab3727a33b885cea17e34bc7
-google-auth @ https://storage.googleapis.com/dd-agent-int-deps/external/google-auth/google_auth-2.28.2-py2.py3-none-any.whl#sha256=9fd67bbcd40f16d9d42f950228e9cf02a2ded4ae49198b27432d0cded5a74c38
+google-auth @ https://storage.googleapis.com/dd-agent-int-deps/external/google-auth/google_auth-2.29.0-py2.py3-none-any.whl#sha256=d452ad095688cd52bae0ad6fafe027f6a6d6f560e810fec20914e17a09526415
 idna @ https://storage.googleapis.com/dd-agent-int-deps/external/idna/idna-3.6-py3-none-any.whl#sha256=c05567e9c24a6b9faaa835c4821bad0590fbb9d5779e7caa6e1cc4978e7eb24f
 importlib-metadata @ https://storage.googleapis.com/dd-agent-int-deps/external/importlib-metadata/importlib_metadata-6.11.0-py3-none-any.whl#sha256=f0afba6205ad8f8947c7d338b5342d5db2afbfd82f9cbef7879a9539cc12eb9b
 in-toto @ https://storage.googleapis.com/dd-agent-int-deps/external/in-toto/in_toto-2.0.0-py3-none-any.whl#sha256=eaf71733cdd5b2309b58b24169c13c24701da72baa43b7432d1dffc308e7bf32
@@ -49,7 +49,7 @@ ldap3 @ https://storage.googleapis.com/dd-agent-int-deps/external/ldap3/ldap3-2.
 lxml @ https://storage.googleapis.com/dd-agent-int-deps/external/lxml/lxml-4.9.2-cp311-cp311-win_amd64.whl#sha256=3818b8e2c4b5148567e1b09ce739006acfaa44ce3156f8cbbc11062994b8e8dd
 lz4 @ https://storage.googleapis.com/dd-agent-int-deps/external/lz4/lz4-4.3.3-cp311-cp311-win_amd64.whl#sha256=b14d948e6dce389f9a7afc666d60dd1e35fa2138a8ec5306d30cd2e30d36b40c
 mmh3 @ https://storage.googleapis.com/dd-agent-int-deps/external/mmh3/mmh3-4.1.0-cp311-cp311-win_amd64.whl#sha256=0dc6dc32eb03727467da8e17deffe004fbb65e8b5ee2b502d36250d7a3f4e2ec
-msal @ https://storage.googleapis.com/dd-agent-int-deps/external/msal/msal-1.27.0-py2.py3-none-any.whl#sha256=572d07149b83e7343a85a3bcef8e581167b4ac76befcbbb6eef0c0e19643cdc0
+msal @ https://storage.googleapis.com/dd-agent-int-deps/external/msal/msal-1.28.0-py3-none-any.whl#sha256=3064f80221a21cd535ad8c3fafbb3a3582cd9c7e9af0bb789ae14f726a0ca99b
 msal-extensions @ https://storage.googleapis.com/dd-agent-int-deps/external/msal-extensions/msal_extensions-1.1.0-py3-none-any.whl#sha256=01be9711b4c0b1a151450068eeb2c4f0997df3bba085ac299de3a66f585e382f
 netifaces @ https://storage.googleapis.com/dd-agent-int-deps/built/netifaces/netifaces-0.11.0-20240315142203-cp311-cp311-win_amd64.whl#sha256=27e6ca8db3c4dae48578b672f36daf2185b574514f83f73643b428694e218a95
 oauthlib @ https://storage.googleapis.com/dd-agent-int-deps/external/oauthlib/oauthlib-3.2.2-py3-none-any.whl#sha256=8139f29aac13e25d502680e9e19963e83f16838d48a0d71c287fe40e7067fbca
@@ -93,7 +93,7 @@ pyvmomi @ https://storage.googleapis.com/dd-agent-int-deps/built/pyvmomi/pyvmomi
 pywin32 @ https://storage.googleapis.com/dd-agent-int-deps/external/pywin32/pywin32-306-cp311-cp311-win_amd64.whl#sha256=a7639f51c184c0272e93f244eb24dafca9b1855707d94c192d4a0b4c01e1100e
 pyyaml @ https://storage.googleapis.com/dd-agent-int-deps/external/pyyaml/PyYAML-6.0.1-cp311-cp311-win_amd64.whl#sha256=bf07ee2fef7014951eeb99f56f39c9bb4af143d8aa3c21b1677805985307da34
 redis @ https://storage.googleapis.com/dd-agent-int-deps/external/redis/redis-5.0.1-py3-none-any.whl#sha256=ed4802971884ae19d640775ba3b03aa2e7bd5e8fb8dfaed2decce4d0fc48391f
-referencing @ https://storage.googleapis.com/dd-agent-int-deps/external/referencing/referencing-0.33.0-py3-none-any.whl#sha256=39240f2ecc770258f28b642dd47fd74bc8b02484de54e1882b74b35ebd779bd5
+referencing @ https://storage.googleapis.com/dd-agent-int-deps/external/referencing/referencing-0.34.0-py3-none-any.whl#sha256=d53ae300ceddd3169f1ffa9caf2cb7b769e92657e4fafb23d34b93679116dfd4
 requests @ https://storage.googleapis.com/dd-agent-int-deps/external/requests/requests-2.31.0-py3-none-any.whl#sha256=58cd2187c01e70e6e26505bca751777aa9f2ee0b7f4300988b709f44e013003f
 requests-kerberos @ https://storage.googleapis.com/dd-agent-int-deps/external/requests-kerberos/requests_kerberos-0.14.0-py2.py3-none-any.whl#sha256=da74ea478ccd8584de88092bdcd17a7c29d494374a340d1d8677189903c9ac6a
 requests-ntlm @ https://storage.googleapis.com/dd-agent-int-deps/external/requests-ntlm/requests_ntlm-1.2.0-py3-none-any.whl#sha256=b7781090c647308a88b55fb530c7b3705cef45349e70a83b8d6731e7889272a6

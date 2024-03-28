@@ -51,6 +51,7 @@ CITADEL_METRICS = {
     'citadel_server_csr_count': 'server.csr_count',
     'citadel_server_csr_parsing_err_count': 'server.csr_parsing_err_count',
     'citadel_server_id_extraction_err_count': 'server.id_extraction_err_count',
+    'citadel_server_cert_chain_expiry_timestamp': 'server.cert_chain_expiry_timestamp',
     'citadel_server_success_cert_issuance_count': 'server.success_cert_issuance_count',
     'citadel_server_root_cert_expiry_timestamp': 'server.root_cert_expiry_timestamp',
 }
@@ -379,6 +380,7 @@ ISTIOD_METRICS = {
     'citadel_server_csr_count': 'citadel.server.csr_count',
     'citadel_server_csr_parsing_err_count': 'citadel.server.csr_parsing_err_count',
     'citadel_server_id_extraction_err_count': 'citadel.server.id_extraction_err_count',
+    'citadel_server_cert_chain_expiry_timestamp': 'citadel.server.cert_chain_expiry_timestamp',
     'citadel_server_success_cert_issuance_count': 'citadel.server.success_cert_issuance_count',
     # These metrics supported Istio 1.5
     'galley_validation_config_update_error': 'galley.validation.config_update_error',

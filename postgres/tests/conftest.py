@@ -71,8 +71,8 @@ def check():
 
 @pytest.fixture
 def integration_check():
-    def _check(instance):
-        c = PostgreSql('postgres', {}, [instance])
+    def _check(instance, init_config=None):
+        c = PostgreSql('postgres', init_config or {}, [instance])
         return c
 
     return _check
@@ -106,13 +106,13 @@ def pg_replica_logical():
 
 @pytest.fixture
 def metrics_cache(pg_instance):
-    config = PostgresConfig(instance=pg_instance)
+    config = PostgresConfig(instance=pg_instance, init_config={})
     return PostgresMetricsCache(config)
 
 
 @pytest.fixture
 def metrics_cache_replica(pg_replica_instance):
-    config = PostgresConfig(instance=pg_replica_instance)
+    config = PostgresConfig(instance=pg_replica_instance, init_config={})
     return PostgresMetricsCache(config)
 
 

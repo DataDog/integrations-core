@@ -15,6 +15,8 @@
 * Collect more metrics ([#17183](https://github.com/DataDog/integrations-core/pull/17183))
 * Collect new metrics ([#17192](https://github.com/DataDog/integrations-core/pull/17192))
 
+Special thanks to [sudomateo](https://github.com/sudomateo) for their contributions to this release.
+
 ## 3.2.0 / 2024-02-16 / Agent 7.52.0
 
 ***Added***:

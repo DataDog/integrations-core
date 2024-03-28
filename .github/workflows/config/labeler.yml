@@ -89,6 +89,8 @@ integration/ceph:
 - ceph/**/*
 integration/cert_manager:
 - cert_manager/**/*
+integration/checkpoint_quantum_firewall:
+- checkpoint_quantum_firewall/**/*
 integration/cilium:
 - cilium/**/*
 integration/cisco_aci:
@@ -333,6 +335,8 @@ integration/otel:
 - otel/**/*
 integration/pan_firewall:
 - pan_firewall/**/*
+integration/palo_alto_panorama:
+- palo_alto_panorama/**/*
 integration/pdh_check:
 - pdh_check/**/*
 integration/pgbouncer:

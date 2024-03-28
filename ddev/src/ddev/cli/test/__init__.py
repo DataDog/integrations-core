@@ -80,7 +80,7 @@ def test(
     """
     Run unit and integration tests.
 
-    Please see these docs for to pass TARGET_SPEC and PYTEST_ARGS:
+    Please see these docs to know how to pass TARGET_SPEC and PYTEST_ARGS:
 
     \b
     https://datadoghq.dev/integrations-core/testing/

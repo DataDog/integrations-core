@@ -335,7 +335,7 @@ def get_query_file_stats(sqlserver_major_version, sqlserver_engine_edition):
         "io_stall": {"name": "files.io_stall", "type": "monotonic_count"},
     }
 
-    if sqlserver_major_version <= 2012 or not is_azure_database(sqlserver_engine_edition):
+    if sqlserver_major_version <= 2012 and not is_azure_database(sqlserver_engine_edition):
         column_definitions.pop("io_stall_queued_read_ms")
         column_definitions.pop("io_stall_queued_write_ms")
 

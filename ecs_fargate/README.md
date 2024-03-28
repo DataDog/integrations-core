@@ -18,7 +18,7 @@ The Task Metadata endpoint is only available from within the task definition its
 
 The only configuration required to enable this metrics collection is to set an environment variable `ECS_FARGATE` to `"true"` in the task definition.
 
-**Note**: Network Process Monitoring (NPM) is not supported for ECS Fargate.
+**Note**: Network Performance Monitoring (NPM) is not supported for ECS Fargate.
 
 ## Setup
 

@@ -7,7 +7,7 @@ some are rarely touched (usually indicating feature-completeness).
 
 All releases adhere to [Semantic Versioning][semver-home].
 
-Tags in the form `<INTEGRATION_NAME>-<VERSION>` [are added](../meta/cd.md) to the Git repository. Therefore, it's
+Tags in the form `<INTEGRATION_NAME>-<VERSION>` are added to the Git repository. Therefore, it's
 possible to checkout and build the code for a certain version of a specific check.
 
 ## Setup
@@ -29,7 +29,7 @@ To see all checks that need to be released, run `ddev release show ready`.
     ```
 
     !!! danger "Important"
-        Not using the latest version of `master` may cause errors in the [build pipeline](../meta/cd.md).
+        Not using the latest version of `master` may cause errors in the build pipeline.
 
 2. Review which PRs were merged in between the latest release and the `master` branch.
 
@@ -50,12 +50,12 @@ To see all checks that need to be released, run `ddev release show ready`.
 
 2. Make the release (Third party integrations).
     * Update the version on `datadog_checks/<INTEGRATION>/__about__.py`.
-    
+
     * Update the CHANGELOG.md file This file can be automatically updated by `ddev` using the following command:
-    
+
     ```
     ddev release changelog <INTEGRATION_NAME> <VERSION>
-    ``` 
+    ```
 
     This command will list all merged PRs since the last release and creates a changelog entry based on the pull request labels,
     this means that *the version bump needs to be on a separate PR from the one that included the changes*.
@@ -76,5 +76,5 @@ If you are a contributor a datadog employee will handle this.
 
 ## New integrations (third party integrations)
 
-For first time releases of third party integrations, simply merge the integration to master and a release will be 
+For first time releases of third party integrations, simply merge the integration to master and a release will be
 triggered with the specified version number in the about file.

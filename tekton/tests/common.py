@@ -66,6 +66,13 @@ PIPELINES_METRICS = [
 ]
 assert PIPELINES_METRICS == sorted(PIPELINES_METRICS)
 
+PIPELINES_OPTIONAL_METRICS = [
+    "pipelinerun.taskrun.duration.bucket",
+    "pipelinerun.taskrun.duration.count",
+    "pipelinerun.taskrun.duration.sum",
+]
+assert PIPELINES_OPTIONAL_METRICS == sorted(PIPELINES_OPTIONAL_METRICS)
+
 TRIGGERS_METRICS = [
     "client.latency.bucket",
     "client.latency.count",

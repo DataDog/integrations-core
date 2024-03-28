@@ -1,0 +1,107 @@
+{
+  "manifest_version": "2.0.0",
+  "app_uuid": "4b6b8ef9-e079-4ee4-877e-8f4aafbf8a1d",
+  "app_id": "checkpoint-quantum-firewall",
+  "display_on_public_website": false,
+  "tile": {
+    "overview": "README.md#Overview",
+    "configuration": "README.md#Setup",
+    "support": "README.md#Support",
+    "changelog": "CHANGELOG.md",
+    "description": "Gain insights into Checkpoint Quantum Firewall logs",
+    "title": "Checkpoint Quantum Firewall",
+    "media": [
+      {
+        "caption": "Checkpoint Quantum Firewall - Audit",
+        "image_url": "images/checkpoint_quantum_firewall_audit.png",
+        "media_type": "image"
+      },
+      {
+        "caption": "Checkpoint Quantum Firewall - Application Control",
+        "image_url": "images/checkpoint_quantum_firewall_application_control.png",
+        "media_type": "image"
+      },
+      {
+        "caption": "Checkpoint Quantum Firewall - URL Filtering",
+        "image_url": "images/checkpoint_quantum_firewall_url_filtering.png",
+        "media_type": "image"
+      },
+      {
+        "caption": "Checkpoint Quantum Firewall - Identity Awareness",
+        "image_url": "images/checkpoint_quantum_firewall_identity_awareness.png",
+        "media_type": "image"
+      },
+      {
+        "caption": "Checkpoint Quantum Firewall - IPS",
+        "image_url": "images/checkpoint_quantum_firewall_ips.png",
+        "media_type": "image"
+      },
+      {
+        "caption": "Checkpoint Quantum Firewall - Firewall",
+        "image_url": "images/checkpoint_quantum_firewall_firewall.png",
+        "media_type": "image"
+      },
+      {
+        "caption": "Checkpoint Quantum Firewall - Threat Emulation",
+        "image_url": "images/checkpoint_quantum_firewall_threat_emulation.png",
+        "media_type": "image"
+      },
+      {
+        "caption": "Checkpoint Quantum Firewall - Anti Bot",
+        "image_url": "images/checkpoint_quantum_firewall_anti_bot.png",
+        "media_type": "image"
+      }
+    ],
+    "classifier_tags": [
+      "Supported OS::Windows",
+      "Supported OS::Linux",
+      "Supported OS::macOS",
+      "Category::Security",
+      "Category::Network",
+      "Offering::Integration",
+      "Submitted Data Type::Logs"
+    ]
+  },
+  "assets": {
+    "integration": {
+      "auto_install": true,
+      "source_type_id": 6852689,
+      "configuration": {
+        "spec": "assets/configuration/spec.yaml"
+      },
+      "source_type_name": "checkpoint-quantum-firewall",
+      "events": {
+        "creates_events": false
+      },
+      "service_checks": {
+        "metadata_path": "assets/service_checks.json"
+      }
+    },
+    "dashboards": {
+      "Checkpoint Quantum Firewall: Audit": "assets/dashboards/checkpoint_quantum_firewall_audit.json",
+      "Checkpoint Quantum Firewall: Application Control": "assets/dashboards/checkpoint_quantum_firewall_application_control.json",
+      "Checkpoint Quantum Firewall: URL Filtering": "assets/dashboards/checkpoint_quantum_firewall_url_filtering.json",
+      "Checkpoint Quantum Firewall: Identity Awareness": "assets/dashboards/checkpoint_quantum_firewall_identity_awareness.json",
+      "Checkpoint Quantum Firewall: DLP": "assets/dashboards/checkpoint_quantum_firewall_dlp.json",
+      "Checkpoint Quantum Firewall: IPS": "assets/dashboards/checkpoint_quantum_firewall_ips.json",
+      "Checkpoint Quantum Firewall: Anti Spam & Email Security": "assets/dashboards/checkpoint_quantum_firewall_anti_spam_and_email_security.json",
+      "Checkpoint Quantum Firewall: Anti Exploit": "assets/dashboards/checkpoint_quantum_firewall_anti_exploit.json",
+      "Checkpoint Quantum Firewall: Firewall": "assets/dashboards/checkpoint_quantum_firewall_firewall.json",
+      "Checkpoint Quantum Firewall: Anti Ransomware": "assets/dashboards/checkpoint_quantum_firewall_anti_ransomware.json",
+      "Checkpoint Quantum Firewall: Threat Emulation": "assets/dashboards/checkpoint_quantum_firewall_threat_emulation.json",
+      "Checkpoint Quantum Firewall: Anti Virus": "assets/dashboards/checkpoint_quantum_firewall_anti_virus.json",
+      "Checkpoint Quantum Firewall: HTTPS Inspection": "assets/dashboards/checkpoint_quantum_firewall_https_inspection.json",
+      "Checkpoint Quantum Firewall: Anti Bot": "assets/dashboards/checkpoint_quantum_firewall_anti_bot.json",
+      "Checkpoint Quantum Firewall: Anti Malware": "assets/dashboards/checkpoint_quantum_firewall_anti_malware.json"
+    },
+    "logs": {
+      "source": "checkpoint-quantum-firewall"
+    }
+  },
+  "author": {
+    "support_email": "help@datadoghq.com",
+    "name": "Datadog",
+    "homepage": "https://www.datadoghq.com",
+    "sales_email": "info@datadoghq.com"
+  }
+}

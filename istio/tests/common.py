@@ -107,6 +107,7 @@ MESH_METRICS_MAPPER = {
 
 ISTIOD_METRICS = [
     'istio.citadel.server.root_cert_expiry_timestamp',
+    'istio.citadel.server.cert_chain_expiry_timestamp',
     'istio.galley.endpoint_no_pod',
     'istio.galley.validation.config_update_error',
     'istio.galley.validation.config_update',
@@ -210,6 +211,7 @@ V2_MESH_COUNTER_GAUGE = [
 ]
 
 ISTIOD_V2_METRICS = [
+    'istio.citadel.server.cert_chain_expiry_timestamp',
     'istio.citadel.server.root_cert_expiry_timestamp',
     'istio.galley.endpoint_no_pod',
     'istio.galley.validation.config_update_error.count',

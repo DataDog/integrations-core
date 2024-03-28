@@ -1,0 +1,10 @@
+name: checkpoint-quantum-firewall
+files:
+  - name: checkpoint_quantum_firewall.yaml
+    options:
+      - template: logs
+        example:
+          - type: tcp/udp
+            port: <PORT>
+            service: checkpoint-quantum-firewall
+            source: checkpoint-quantum-firewall
