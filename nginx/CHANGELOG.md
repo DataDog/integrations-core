@@ -2,6 +2,16 @@
 
 <!-- towncrier release notes start -->
 
+## 6.3.0 / 2024-03-22
+
+***Added***:
+
+* Tag metrics with Nginx host and port. ([#17233](https://github.com/DataDog/integrations-core/pull/17233))
+
+***Fixed***:
+
+* Document that disabling generic tags only matters for service checks ([#17173](https://github.com/DataDog/integrations-core/pull/17173))
+
 ## 6.2.0 / 2024-02-16 / Agent 7.52.0
 
 ***Added***:

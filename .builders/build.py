@@ -219,12 +219,19 @@ def build_image():
             final_requirements = mount_dir / 'frozen.txt'
             final_requirements.touch()
 
+            script_args = ['--python', args.python]
+
+            # Assumption: if a digest was provided we're not changing the build image and therefore
+            # we're fine with reusing wheels we've built previously
+            if args.digest or True:
+                script_args.append('--use-built-index')
+
             check_process([
                 'docker', 'run', '--rm',
                 '-v', f'{mount_dir}:{internal_mount_dir}',
                 # Anything created within directories mounted to the container cannot be removed by the host
                 '-e', 'PYTHONDONTWRITEBYTECODE=1',
-                image_name, '--python', args.python,
+                image_name, *script_args,
             ])
 
             output_dir = Path(args.output_dir)

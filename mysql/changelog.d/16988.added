@@ -1,1 +1,0 @@
-Add read_timeout (default to 10s) for reading from the connection in seconds

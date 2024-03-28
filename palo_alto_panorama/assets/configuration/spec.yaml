@@ -1,0 +1,10 @@
+name: palo-alto-panorama
+files:
+- name: palo_alto_panorama.yaml
+  options:
+  - template: logs
+    example:
+      - type: udp/tcp
+        port:  <PORT>
+        service: palo-alto-panorama
+        source: palo-alto-panorama

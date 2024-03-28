@@ -9,7 +9,7 @@ Connect Kafka to Datadog to:
 - Visualize the performance of your cluster in real time.
 - Correlate the performance of Kafka with the rest of your applications.
 
-This check has a limit of 350 metrics per instance. The number of returned metrics is indicated on the info page. Specify the metrics you are interested in by editing the configuration below. To learn how to customize the metrics to collect see the [JMX Checks documentation][2] for more detailed instructions.
+This check has a limit of 350 metrics per instance. The number of returned metrics is indicated in the Agent status output. Specify the metrics you are interested in by editing the configuration below. For more detailed instructions on customizing the metrics to collect, see the [JMX Checks documentation][2].
 
 To collect Kafka consumer metrics, see the [kafka_consumer check][3].
 

@@ -2,6 +2,12 @@
 
 <!-- towncrier release notes start -->
 
+## 5.2.1 / 2024-03-22
+
+***Fixed***:
+
+* Collect metrics that only appear in the detailed endpoint ([#17231](https://github.com/DataDog/integrations-core/pull/17231))
+
 ## 5.2.0 / 2024-02-16 / Agent 7.52.0
 
 ***Added***:

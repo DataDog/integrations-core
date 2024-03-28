@@ -1,1 +1,0 @@
-Set `collect_wal_metrics` to false will disable wal file metrics collection for all pg versions

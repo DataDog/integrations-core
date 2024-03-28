@@ -1,1 +1,0 @@
-Add logic to skip loading Python check in favor of core check based on config variable `DD_KUBELET_CORE_CHECK_ENABLED`

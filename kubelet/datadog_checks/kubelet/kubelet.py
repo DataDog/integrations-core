@@ -674,13 +674,22 @@ class KubeletCheck(
         :param string: str
         :return: float
         """
-        number, unit = '', ''
-        for char in string:
-            if char.isdigit() or char == '.':
-                number += char
-            else:
-                unit += char
-        return float(number) * FACTORS.get(unit, 1)
+        # If the string has an exponent, Python converts it automatically with `float`
+        # A quantity can't have both an exponent and a unit suffix
+        # Quantities must match the regular expression '^([+-]?[0-9.]+)([eEinumkKMGTP]*[-+]?[0-9]*)$'
+        # Ref: https://github.com/kubernetes/apimachinery/blob/d82afe1e363acae0e8c0953b1bc230d65fdb50e2/pkg/api/resource/quantity.go#L144-L148
+        try:
+            converted_value = float(string)
+            return converted_value
+        # The string can't directly be handled by `float` : it has a suffix to parse
+        except ValueError:
+            number, unit = '', ''
+            for char in string:
+                if char.isdigit() or char == '.':
+                    number += char
+                else:
+                    unit += char
+            return float(number) * FACTORS.get(unit, 1)
 
     @staticmethod
     def _should_ignore_pod(name, phase):

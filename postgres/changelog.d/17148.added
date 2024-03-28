@@ -1,3 +1,0 @@
-Added support for collecting total_plan_time, max_plan_time, mean_plan_time , min_plan_time, stddev_plan_time query metrics for PostgreSQL versions 13 and above.
-These new query metrics can now be accessed under postgresql.queries.total_plan_time, postgresql.queries.max_plan_time, postgresql.queries.mean_plan_time, postgresql.queries.min_plan_time, and postgresql.queries.stddev_plan_time.
-To collect these metrics Database monitoring needs to be enabled. You will also need to enable pg_stat_statements.track_planning in your database.

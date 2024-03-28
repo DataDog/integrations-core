@@ -229,6 +229,7 @@ class InstanceConfig(BaseModel):
     password: Optional[str] = None
     pg_stat_statements_view: Optional[str] = None
     port: Optional[int] = None
+    propagate_agent_tags: Optional[bool] = None
     query_activity: Optional[QueryActivity] = None
     query_metrics: Optional[QueryMetrics] = None
     query_samples: Optional[QuerySamples] = None

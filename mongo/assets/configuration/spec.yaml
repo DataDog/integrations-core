@@ -172,6 +172,13 @@ files:
       value:
         type: boolean
         example: false
+    - name: add_node_tag_to_events
+      description: |
+        Adds the Mongo node to events as a tag rather than creating a seperate host for the event.
+      hidden: true
+      value:
+        type: boolean
+        example: true
     - name: custom_queries
       description: |
         Define custom queries to collect custom metrics on your Mongo
