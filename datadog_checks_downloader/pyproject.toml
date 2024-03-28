@@ -31,13 +31,12 @@ classifiers = [
 dynamic = [
     "version",
 ]
-
 license = "BSD-3-Clause"
 
 [project.optional-dependencies]
 deps = [
     "in-toto==2.0.0; python_version > '3.0'",
-    "packaging==23.2; python_version > '3.0'",
+    "packaging==24.0; python_version > '3.0'",
     "securesystemslib[crypto,pynacl]==0.28.0; python_version > '3.0'",
     "tuf==2.0.0; python_version > '3.0'",
 ]
