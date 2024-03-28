@@ -174,6 +174,195 @@ INDEX_USAGE_STATS_QUERY = {
     ],
 }
 
+TEMPDB_SPACE_USAGE_QUERY = {
+    "name": "sys.dm_db_file_space_usage",
+    "query": """SELECT
+        database_id,
+        ISNULL(SUM(unallocated_extent_page_count)*1.0/128, 0) as free_space,
+        ISNULL(SUM(version_store_reserved_page_count)*1.0/128, 0) as used_space_by_version_store,
+        ISNULL(SUM(internal_object_reserved_page_count)*1.0/128, 0) as used_space_by_internal_object,
+        ISNULL(SUM(user_object_reserved_page_count)*1.0/128, 0) as used_space_by_user_object,
+        ISNULL(SUM(mixed_extent_page_count)*1.0/128, 0) as mixed_extent_space
+    FROM sys.dm_db_file_space_usage group by database_id""",
+    "columns": [
+        {"name": "database_id", "type": "tag"},
+        {"name": "tempdb.file_space_usage.free_space", "type": "gauge"},
+        {"name": "tempdb.file_space_usage.version_store_space", "type": "gauge"},
+        {"name": "tempdb.file_space_usage.internal_object_space", "type": "gauge"},
+        {"name": "tempdb.file_space_usage.user_object_space", "type": "gauge"},
+        {"name": "tempdb.file_space_usage.mixed_extent_space", "type": "gauge"},
+    ],
+}
+
+DB_FRAGMENTATION_QUERY = {
+    "name": "sys.dm_db_index_physical_stats",
+    "query": """SELECT
+        DB_NAME(DDIPS.database_id) as database_name,
+        OBJECT_NAME(DDIPS.object_id, DDIPS.database_id) as object_name,
+        DDIPS.index_id as index_id,
+        DDIPS.fragment_count as fragment_count,
+        DDIPS.avg_fragment_size_in_pages as avg_fragment_size_in_pages,
+        DDIPS.page_count as page_count,
+        DDIPS.avg_fragmentation_in_percent as avg_fragmentation_in_percent,
+        I.name as index_name
+        FROM sys.dm_db_index_physical_stats (DB_ID('{db}'),null,null,null,null) as DDIPS
+        INNER JOIN sys.indexes as I ON I.object_id = DDIPS.object_id
+        AND DDIPS.index_id = I.index_id
+        WHERE DDIPS.fragment_count is not null
+    """,
+    "columns": [
+        {"name": "database_name", "type": "tag"},
+        {"name": "object_name", "type": "tag"},
+        {"name": "index_id", "type": "tag"},
+        {"name": "database.fragment_count", "type": "gauge"},
+        {"name": "database.avg_fragment_size_in_pages", "type": "gauge"},
+        {"name": "database.index_page_count", "type": "gauge"},
+        {"name": "database.avg_fragmentation_in_percent", "type": "gauge"},
+        {"name": "index_name", "type": "tag"},
+    ],
+}
+
+MASTER_FILES_METRICS_QUERY = {
+    "name": "sys.master_files",
+    "query": """SELECT
+        sys.databases.name as db,
+        sys.databases.name as database_name,
+        file_id,
+        type,
+        physical_name,
+        ISNULL(size*8, 0) as size,
+        sys.master_files.state as state,
+        sys.master_files.state_desc as state_desc
+        from sys.master_files
+        right outer join sys.databases on sys.master_files.database_id = sys.databases.database_id
+    """,
+    "columns": [
+        {"name": "db", "type": "tag"},
+        {"name": "database", "type": "tag"},
+        {"name": "file_id", "type": "tag"},
+        {"name": "file_type", "type": "tag"},
+        {"name": "file_location", "type": "tag"},
+        {"name": "database.master_files.size", "type": "gauge"},
+        {"name": "database.master_files.state", "type": "gauge"},
+        {"name": "database_files_state_desc", "type": "tag"},
+    ],
+}
+
+DATABASE_BACKUP_METRICS_QUERY = {
+    "name": "msdb.dbo.backupset",
+    "query": """SELECT
+        sys.databases.name as db,
+        sys.databases.name as database_name,
+        count(backup_set_id) as backup_set_id_count
+        from msdb.dbo.backupset right outer join sys.databases
+        on sys.databases.name = msdb.dbo.backupset.database_name
+        group by sys.databases.name
+    """,
+    "columns": [
+        {"name": "db", "type": "tag"},
+        {"name": "database", "type": "tag"},
+        {"name": "database.backup_count", "type": "gauge"},
+    ],
+}
+
+TASK_SCHEDULER_METRICS_QUERY = {
+    "name": "sys.dm_os_schedulers",
+    "query": """SELECT
+        scheduler_id,
+        parent_node_id,
+        current_tasks_count,
+        current_workers_count,
+        active_workers_count,
+        runnable_tasks_count,
+        work_queue_count
+        from sys.dm_os_schedulers
+    """,
+    "columns": [
+        {"name": "scheduler_id", "type": "tag"},
+        {"name": "parent_node_id", "type": "tag"},
+        {"name": "scheduler.current_tasks_count", "type": "gauge"},
+        {"name": "scheduler.current_workers_count", "type": "gauge"},
+        {"name": "scheduler.active_workers_count", "type": "gauge"},
+        {"name": "scheduler.runnable_tasks_count", "type": "gauge"},
+        {"name": "scheduler.work_queue_count", "type": "gauge"},
+    ],
+}
+
+OS_TASK_METRICS_QUERY = {
+    "name": "sys.dm_os_tasks",
+    "query": """select
+        scheduler_id,
+        SUM(CAST(context_switches_count AS BIGINT)) as context_switches_count,
+        SUM(CAST(pending_io_count AS BIGINT)) as pending_io_count,
+        SUM(pending_io_byte_count) as pending_io_byte_count,
+        AVG(pending_io_byte_average) as pending_io_byte_average
+        from sys.dm_os_tasks group by scheduler_id
+    """,
+    "columns": [
+        {"name": "scheduler_id", "type": "tag"},
+        {"name": "task.context_switches_count", "type": "gauge"},
+        {"name": "task.pending_io_count", "type": "gauge"},
+        {"name": "task.pending_io_byte_count", "type": "gauge"},
+        {"name": "task.pending_io_byte_average", "type": "gauge"},
+    ],
+}
+
+DATABASE_STATS_METRICS_QUERY = {
+    "name": "sys.databases",
+    "query": """SELECT
+        name as db,
+        name as database_name,
+        state_desc,
+        recovery_model_desc,
+        state,
+        is_sync_with_backup,
+        is_in_standby,
+        is_read_only
+        from sys.databases
+    """,
+    "columns": [
+        {"name": "db", "type": "tag"},
+        {"name": "database", "type": "tag"},
+        {"name": "database_state_desc", "type": "tag"},
+        {"name": "database_recovery_model_desc", "type": "tag"},
+        {"name": "database.state", "type": "gauge"},
+        {"name": "database.is_sync_with_backup", "type": "gauge"},
+        {"name": "database.is_in_standby", "type": "gauge"},
+        {"name": "database.is_read_only", "type": "gauge"},
+    ],
+}
+
+DATABASE_FILE_STATS_METRICS_QUERY = {
+    "name": "sys.database_files",
+    "query": """SELECT
+        file_id,
+        CASE type
+            WHEN 0 THEN 'data'
+            WHEN 1 THEN 'transaction_log'
+            WHEN 2 THEN 'filestream'
+            WHEN 3 THEN 'unknown'
+            WHEN 4 THEN 'full_text'
+            ELSE 'other'
+        END AS file_type,
+        physical_name,
+        name,
+        state_desc,
+        ISNULL(size*8, 0) as size,
+        state,
+        ISNULL(CAST(FILEPROPERTY(name, 'SpaceUsed') as int)*8, 0) as space_used
+        FROM sys.database_files
+    """,
+    "columns": [
+        {"name": "file_id", "type": "tag"},
+        {"name": "file_type", "type": "tag"},
+        {"name": "file_location", "type": "tag"},
+        {"name": "file_name", "type": "tag"},
+        {"name": "database_files_state_desc", "type": "tag"},
+        {"name": "database.files.size", "type": "gauge"},
+        {"name": "database.files.state", "type": "gauge"},
+        {"name": "database.files.space_used", "type": "gauge"},
+    ],
+}
 
 def get_query_ao_availability_groups(sqlserver_major_version):
     """

@@ -10,6 +10,7 @@ from six import raise_from
 from datadog_checks.base import AgentCheck, ConfigurationError
 from datadog_checks.base.log import get_check_logger
 from datadog_checks.sqlserver.cursor import CommenterCursorWrapper
+from datadog_checks.sqlserver.utils import construct_use_statement
 
 try:
     import adodbapi
@@ -689,3 +690,18 @@ class Connection(object):
                 return "ERROR: {}".format(e.strerror if hasattr(e, 'strerror') else repr(e))
 
         return None
+
+    @contextmanager
+    def restore_current_database(self):
+        """
+        Restores the default database after executing use statements.
+        """
+        with self.get_managed_cursor() as cursor:
+            cursor.execute('select DB_NAME()')
+            data = cursor.fetchall()
+            current_db = data[0][0]
+        try:
+            yield
+        finally:
+            with self.get_managed_cursor() as cursor:
+                cursor.execute(construct_use_statement(current_db))
