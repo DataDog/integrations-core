@@ -212,7 +212,7 @@ def test_autodiscovery_collect_all_metrics(aggregator, integration_check, pg_ins
     for db in databases:
         relation_metrics_expected_tags = _get_expected_tags(check, pg_instance, db=db, table='breed', schema='public')
         count_metrics_expected_tags = _get_expected_tags(check, pg_instance, db=db, schema='public')
-        checksum_metrics_expected_tags = _get_expected_tags(check, pg_instance, db=db, schema='public')
+        checksum_metrics_expected_tags = _get_expected_tags(check, pg_instance, db=db)
         for metric in RELATION_METRICS:
             aggregator.assert_metric(metric, tags=relation_metrics_expected_tags)
         for metric in DYNAMIC_RELATION_METRICS:
