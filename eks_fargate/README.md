@@ -343,6 +343,7 @@ You have two options for this to work properly:
 
 * Use an hardcoded token value (`clusterAgent.token` in Helm, `credentials.token` in the Datadog Operator); convenient, but less secure.
 * Use a manually-created secret (`clusterAgent.tokenExistingSecret` in Helm, not available in the Datadog Operator) and replicate it in all namespaces where Fargate tasks need to be monitored; secure, but requires extra operations.
+**Note**:  The `token` value requires a minimum of 32 characters.
 
 If the EKS cluster runs only Fargate workloads, you need a standalone Cluster Agent deployment. And, as described above, choose one of the two options for making the token reachable.
 
