@@ -11,7 +11,6 @@ from collections import defaultdict
 import six
 from cachetools import TTLCache
 
-from datadog_checks.base import AgentCheck, ConfigurationError
 from datadog_checks.base.config import is_affirmative
 from datadog_checks.base.utils.db import QueryExecutor, QueryManager
 from datadog_checks.base.utils.db.utils import default_json_event_encoding, resolve_db_host, tracked_query
