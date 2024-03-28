@@ -9,7 +9,7 @@
     "support": "README.md#Support",
     "changelog": "CHANGELOG.md",
     "description": "Gain insights into the panorama firewall logs. Connect to Cloud SIEM",
-    "title": "palo-alto-panorama",
+    "title": "Palo Alto Panorama",
     "media": [
       {
         "caption": "Palo Alto Panorama: Traffic",
