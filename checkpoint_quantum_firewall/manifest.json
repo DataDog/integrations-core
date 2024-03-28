@@ -9,7 +9,7 @@
     "support": "README.md#Support",
     "changelog": "CHANGELOG.md",
     "description": "Gain insights into Checkpoint Quantum Firewall logs",
-    "title": "checkpoint_quantum_firewall",
+    "title": "Checkpoint Quantum Firewall",
     "media": [
       {
         "caption": "Checkpoint Quantum Firewall - Audit",
