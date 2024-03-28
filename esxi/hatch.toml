@@ -1,0 +1,9 @@
+[env.collectors.datadog-checks]
+
+[[envs.default.matrix]]
+python = ["3.11"]
+version = ["6.5", "7.0"]
+type = ["vcsim"]
+
+[envs.default.overrides]
+matrix.version.env-vars = "VSPHERE_VERSION"
