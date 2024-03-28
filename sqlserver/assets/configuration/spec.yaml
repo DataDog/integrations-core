@@ -686,7 +686,9 @@ files:
         type: string
         example: master
     - name: ignore_missing_database
-      description: If the DB specified doesn't exist on the server then don't do the check
+      description: |
+        If the DB specified doesn't exist on the server then don't do the check
+        Note: this parameter is deprecated, please use database_autodiscovery in case when database name is uncertain. 
       value:
         type: boolean
         example: false

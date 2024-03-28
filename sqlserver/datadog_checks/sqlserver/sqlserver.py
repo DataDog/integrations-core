@@ -11,8 +11,8 @@ from collections import defaultdict
 import six
 from cachetools import TTLCache
 
-from datadog_checks.base.config import is_affirmative
 from datadog_checks.base import AgentCheck
+from datadog_checks.base.config import is_affirmative
 from datadog_checks.base.utils.db import QueryExecutor, QueryManager
 from datadog_checks.base.utils.db.utils import default_json_event_encoding, resolve_db_host, tracked_query
 from datadog_checks.base.utils.serialization import json
@@ -336,6 +336,10 @@ class SQLServer(AgentCheck):
                 # Do the database exist check that will allow to disable _check as a whole
                 # as otherwise the first call to open_managed_default_connection will throw the
                 # SQLConnectionError.
+                self.warning(
+                    "The parameter 'ignore_missing_database' is deprecated"
+                    "if you are unsure about the database name please use 'database_autodiscovery'"
+                )
                 db_exists, context = self.connection.check_database()
                 if not db_exists:
                     self.do_check = False
@@ -346,7 +350,7 @@ class SQLServer(AgentCheck):
                     with self.connection.get_managed_cursor() as cursor:
                         self.autodiscover_databases(cursor)
                     self._make_metric_list_to_collect(self._config.custom_metric)
-        except SQLConnectionError as e:
+        except SQLConnectionError:
             raise
         except Exception as e:
             self.log.exception("Initialization exception %s", e)
