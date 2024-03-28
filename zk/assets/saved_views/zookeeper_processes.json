@@ -1,5 +1,6 @@
 {
   "name": "ZooKeeper - Updated",
+  "type": "process",
   "page": "process_overview",
   "query": "Filter by: integration:zk",
   "options": {
