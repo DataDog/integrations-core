@@ -402,6 +402,85 @@ def test_integration_replicaset_primary(instance_integration, aggregator, check,
     )
 
 
+def test_integration_replicaset_primary_config(instance_integration, aggregator, check, dd_run_check):
+    instance_integration.update({'add_node_tag_to_events': True})
+    mongo_check = check(instance_integration)
+    mongo_check.last_states_by_server = {0: 2, 1: 1, 2: 7, 3: 2}
+
+    with mock_pymongo("replica-primary"):
+        dd_run_check(mongo_check)
+
+    replica_tags = ['replset_name:replset', 'replset_state:primary']
+    metrics_categories = [
+        'count-dbs',
+        'serverStatus',
+        'custom-queries',
+        'oplog',
+        'replset-primary',
+        'top',
+        'dbstats-local',
+        'fsynclock',
+        'dbstats',
+        'indexes-stats',
+        'collection',
+    ]
+    _assert_metrics(aggregator, metrics_categories, replica_tags)
+    # Lag metrics are tagged with the state of the member and not with the current one.
+    _assert_metrics(aggregator, ['replset-lag-from-primary'])
+
+    aggregator.assert_all_metrics_covered()
+    aggregator.assert_metrics_using_metadata(
+        get_metadata_metrics(),
+        exclude=[
+            'dd.custom.mongo.aggregate.total',
+            'dd.custom.mongo.count',
+            'dd.custom.mongo.query_a.amount',
+            'dd.custom.mongo.query_a.el',
+        ],
+        check_submission_type=True,
+    )
+    assert len(aggregator._events) == 3
+    aggregator.assert_event(
+        "MongoDB replset-data-0.mongo.default.svc.cluster.local:27017 "
+        "(_id: 0, mongodb://testUser2:*****@localhost:27017/test) just reported as Primary (PRIMARY) for "
+        "replset; it was SECONDARY before.",
+        tags=[
+            'action:mongo_replset_member_status_change',
+            'member_status:PRIMARY',
+            'previous_member_status:SECONDARY',
+            'replset:replset',
+            'mongo_node:replset-data-0.mongo.default.svc.cluster.local:27017',
+        ],
+        count=1,
+    )
+    aggregator.assert_event(
+        "MongoDB replset-arbiter-0.mongo.default.svc.cluster.local:27017 "
+        "(_id: 1, mongodb://testUser2:*****@localhost:27017/test) just reported as Arbiter (ARBITER) for "
+        "replset; it was PRIMARY before.",
+        tags=[
+            'action:mongo_replset_member_status_change',
+            'member_status:ARBITER',
+            'previous_member_status:PRIMARY',
+            'replset:replset',
+            'mongo_node:replset-arbiter-0.mongo.default.svc.cluster.local:27017',
+        ],
+        count=1,
+    )
+    aggregator.assert_event(
+        "MongoDB replset-data-1.mongo.default.svc.cluster.local:27017 "
+        "(_id: 2, mongodb://testUser2:*****@localhost:27017/test) just reported as Secondary (SECONDARY) for "
+        "replset; it was ARBITER before.",
+        tags=[
+            'action:mongo_replset_member_status_change',
+            'member_status:SECONDARY',
+            'previous_member_status:ARBITER',
+            'replset:replset',
+            'mongo_node:replset-data-1.mongo.default.svc.cluster.local:27017',
+        ],
+        count=1,
+    )
+
+
 @pytest.mark.parametrize('collect_custom_queries', [True, False])
 def test_integration_replicaset_secondary(
     instance_integration, aggregator, check, collect_custom_queries, dd_run_check
