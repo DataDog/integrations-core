@@ -3,7 +3,3 @@
 ***Changed***:
 
 * Initial Release ([#16522](https://github.com/DataDog/integrations-core/pull/16522))
-
-# CHANGELOG - checkpoint_quantum_firewall
-
-<!-- towncrier release notes start -->
