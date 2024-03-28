@@ -11,6 +11,7 @@ from .common import (
     _get_expected_replication_tags,
     assert_metric_at_least,
     check_bgw_metrics,
+    check_checksum_metrics,
     check_common_metrics,
     check_conflict_metrics,
     check_connection_metrics,
@@ -53,6 +54,7 @@ def test_common_replica_metrics(aggregator, integration_check, metrics_cache_rep
     check_file_wal_metrics(aggregator, expected_tags=expected_tags)
 
     check_performance_metrics(aggregator, expected_tags=check.debug_stats_kwargs()['tags'])
+    check_checksum_metrics(aggregator, expected_tags)
 
     aggregator.assert_all_metrics_covered()
 
