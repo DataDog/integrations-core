@@ -95,14 +95,14 @@ class ReplicaCollector(MongoCollector):
 
             if self.check._config.add_node_tag_to_events:
                 event_payload['host'] = self.hostname
-                event_payload['tags'].append('node:' + node_hostname)
+                event_payload['tags'].append('mongo_node:' + node_hostname)
 
             if node_hostname == 'localhost':
                 # Do not submit events with a 'localhost' hostname.
                 if self.check._config.add_node_tag_to_events:
-                    event_payload['tags'][4] = "node:{}".format(self.hostname)
-                else:
-                    event_payload['host'] = self.hostname
+                    event_payload['tags'][4] = "mongo_node:{}".format(self.hostname)
+
+                event_payload['host'] = self.hostname
 
             self.check.event(event_payload)
 
