@@ -135,6 +135,12 @@ files:
       value:
         type: boolean
         example: false
+    - name: dbstats_tag_dbname
+      description: |
+        Whether or not to include the 'dbname' as a tag for dbstat metrics
+      value:
+        type: boolean
+        example: true
     - name: additional_metrics
       description: |
         By default, the check collects a sample of metrics from MongoDB.

@@ -105,6 +105,11 @@ def instance_authdb():
 
 
 @pytest.fixture
+def instance_dbstats_tag_dbname():
+    return copy.deepcopy(common.INSTANCE_DBSTATS_TAG_DBNAME)
+
+
+@pytest.fixture
 def instance_custom_queries():
     return copy.deepcopy(common.INSTANCE_CUSTOM_QUERIES)
 
