@@ -18,6 +18,14 @@ from datadog_checks.base.utils.db.utils import default_json_event_encoding, reso
 from datadog_checks.base.utils.serialization import json
 from datadog_checks.sqlserver.activity import SqlserverActivity
 from datadog_checks.sqlserver.config import SQLServerConfig
+from datadog_checks.sqlserver.database_metrics import (
+    SqlserverAoMetrics,
+    SqlserverFciMetrics,
+    SqlserverFileStatsMetrics,
+    SqlserverPrimaryLogShippingMetrics,
+    SqlserverSecondaryLogShippingMetrics,
+    SqlserverServerStateMetrics,
+)
 from datadog_checks.sqlserver.metadata import SqlserverMetadata
 from datadog_checks.sqlserver.statements import SqlserverStatementMetrics
 from datadog_checks.sqlserver.stored_procedures import SqlserverProcedureMetrics
@@ -48,7 +56,6 @@ from datadog_checks.sqlserver.const import (
     DATABASE_SERVICE_CHECK_QUERY,
     DBM_MIGRATED_METRICS,
     DEFAULT_INDEX_USAGE_STATS_INTERVAL,
-    ENGINE_EDITION_AZURE_MANAGED_INSTANCE,
     ENGINE_EDITION_SQL_DATABASE,
     INSTANCE_METRICS,
     INSTANCE_METRICS_DATABASE,
@@ -71,17 +78,8 @@ from datadog_checks.sqlserver.const import (
 from datadog_checks.sqlserver.metrics import DEFAULT_PERFORMANCE_TABLE, VALID_TABLES
 from datadog_checks.sqlserver.queries import (
     INDEX_USAGE_STATS_QUERY,
-    QUERY_AO_FAILOVER_CLUSTER,
-    QUERY_AO_FAILOVER_CLUSTER_MEMBER,
-    QUERY_FAILOVER_CLUSTER_INSTANCE,
-    QUERY_LOG_SHIPPING_PRIMARY,
-    QUERY_LOG_SHIPPING_SECONDARY,
-    QUERY_SERVER_STATIC_INFO,
-    get_query_ao_availability_groups,
-    get_query_file_stats,
 )
 from datadog_checks.sqlserver.utils import (
-    is_azure_database,
     is_azure_sql_database,
     set_default_driver_conf,
 )
@@ -154,7 +152,6 @@ class SQLServer(AgentCheck):
         # Query declarations
         self._query_manager = None
         self._dynamic_queries = None
-        self.server_state_queries = None
         self.sqlserver_incr_fraction_metric_previous_values = {}
 
     def cancel(self):
@@ -176,13 +173,15 @@ class SQLServer(AgentCheck):
                 "Autodiscovery is disabled, autodiscovery_include and autodiscovery_exclude will be ignored"
             )
 
-    def _new_query_executor(self, queries):
+    def _new_query_executor(self, queries, executor, extra_tags=None, track_operation_time=False):
+        tags = self.tags + (extra_tags or [])
         return QueryExecutor(
-            self.execute_query_raw,
+            executor,
             self,
             queries=queries,
-            tags=self.tags,
+            tags=tags,
             hostname=self.resolved_hostname,
+            track_operation_time=track_operation_time,
         )
 
     def set_resolved_hostname_metadata(self):
@@ -769,9 +768,6 @@ class SQLServer(AgentCheck):
                     self, self.execute_query_raw, tags=self.tags, hostname=self.resolved_hostname
                 )
                 self._query_manager.compile_queries()
-            if self.server_state_queries is None:
-                self.server_state_queries = self._new_query_executor([QUERY_SERVER_STATIC_INFO])
-                self.server_state_queries.compile_queries()
             if self._config.proc:
                 self.do_stored_procedure_check()
             else:
@@ -795,39 +791,53 @@ class SQLServer(AgentCheck):
         if self._dynamic_queries:
             return self._dynamic_queries
 
-        major_version = self.static_info_cache.get(STATIC_INFO_MAJOR_VERSION)
-        engine_edition = self.static_info_cache.get(STATIC_INFO_ENGINE_EDITION)
-        # need either major_version or engine_edition to generate queries
-        if not major_version and not is_azure_database(engine_edition):
-            self.log.warning("missing major_version, cannot initialize dynamic queries")
-            return None
-        queries = [get_query_file_stats(major_version, engine_edition)]
+        server_state_metrics = SqlserverServerStateMetrics(
+            instance_config=self.instance,
+            new_query_executor=self._new_query_executor,
+            server_static_info=self.static_info_cache,
+            execute_query_handler=self.execute_query_raw,
+        )
 
-        if is_affirmative(self.instance.get('include_ao_metrics', False)):
-            if major_version > 2012 or is_azure_database(engine_edition):
-                queries.extend(
-                    [
-                        get_query_ao_availability_groups(major_version),
-                        QUERY_AO_FAILOVER_CLUSTER,
-                        QUERY_AO_FAILOVER_CLUSTER_MEMBER,
-                    ]
-                )
-            else:
-                self.log_missing_metric("AlwaysOn", major_version, engine_edition)
-        if is_affirmative(self.instance.get('include_fci_metrics', False)):
-            if major_version > 2012 or engine_edition == ENGINE_EDITION_AZURE_MANAGED_INSTANCE:
-                queries.extend([QUERY_FAILOVER_CLUSTER_INSTANCE])
-            else:
-                self.log_missing_metric("Failover Cluster Instance", major_version, engine_edition)
+        file_stats_metrics = SqlserverFileStatsMetrics(
+            instance_config=self.instance,
+            new_query_executor=self._new_query_executor,
+            server_static_info=self.static_info_cache,
+            execute_query_handler=self.execute_query_raw,
+        )
+        ao_metrics = SqlserverAoMetrics(
+            instance_config=self.instance,
+            new_query_executor=self._new_query_executor,
+            server_static_info=self.static_info_cache,
+            execute_query_handler=self.execute_query_raw,
+        )
+        fci_metrics = SqlserverFciMetrics(
+            instance_config=self.instance,
+            new_query_executor=self._new_query_executor,
+            server_static_info=self.static_info_cache,
+            execute_query_handler=self.execute_query_raw,
+        )
+        primary_log_shipping_metrics = SqlserverPrimaryLogShippingMetrics(
+            instance_config=self.instance,
+            new_query_executor=self._new_query_executor,
+            server_static_info=self.static_info_cache,
+            execute_query_handler=self.execute_query_raw,
+        )
+        secondary_log_shipping_metrics = SqlserverSecondaryLogShippingMetrics(
+            instance_config=self.instance,
+            new_query_executor=self._new_query_executor,
+            server_static_info=self.static_info_cache,
+            execute_query_handler=self.execute_query_raw,
+        )
 
-        if is_affirmative(self.instance.get('include_primary_log_shipping_metrics', False)):
-            queries.extend([QUERY_LOG_SHIPPING_PRIMARY])
-
-        if is_affirmative(self.instance.get('include_secondary_log_shipping_metrics', False)):
-            queries.extend([QUERY_LOG_SHIPPING_SECONDARY])
-
-        self._dynamic_queries = self._new_query_executor(queries)
-        self._dynamic_queries.compile_queries()
+        # create a list of dynamic queries to execute
+        self._dynamic_queries = [
+            server_state_metrics,
+            file_stats_metrics,
+            ao_metrics,
+            fci_metrics,
+            primary_log_shipping_metrics,
+            secondary_log_shipping_metrics,
+        ]
         self.log.debug("initialized dynamic queries")
         return self._dynamic_queries
 
@@ -886,15 +896,9 @@ class SQLServer(AgentCheck):
             with self.connection.get_managed_cursor() as cursor:
                 cursor.execute("SET NOCOUNT ON")
             try:
-                # Server state queries require VIEW SERVER STATE permissions, which some managed database
-                # versions do not support.
-                if self.static_info_cache.get(STATIC_INFO_ENGINE_EDITION) not in [
-                    ENGINE_EDITION_SQL_DATABASE,
-                ]:
-                    self.server_state_queries.execute()
-
                 if self.dynamic_queries:
-                    self.dynamic_queries.execute()
+                    for dynamic_query in self.dynamic_queries:
+                        dynamic_query.execute()
 
                 self.collect_index_usage_metrics()
 

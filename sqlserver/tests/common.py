@@ -24,7 +24,6 @@ from datadog_checks.sqlserver.const import (
     TASK_SCHEDULER_METRICS,
     TEMPDB_FILE_SPACE_USAGE_METRICS,
 )
-from datadog_checks.sqlserver.queries import get_query_file_stats
 
 
 def get_local_driver():
@@ -61,12 +60,18 @@ SQLSERVER_MAJOR_VERSION = int(os.environ.get('SQLSERVER_MAJOR_VERSION'))
 SQLSERVER_ENGINE_EDITION = int(os.environ.get('SQLSERVER_ENGINE_EDITION'))
 
 
-def get_expected_file_stats_metrics():
-    query_file_stats = get_query_file_stats(SQLSERVER_MAJOR_VERSION, SQLSERVER_ENGINE_EDITION)
-    return ["sqlserver." + c["name"] for c in query_file_stats["columns"] if c["type"] != "tag"]
-
-
-EXPECTED_FILE_STATS_METRICS = get_expected_file_stats_metrics()
+EXPECTED_FILE_STATS_METRICS = [
+    'sqlserver.files.io_stall',
+    'sqlserver.files.read_io_stall_queued',
+    'sqlserver.files.write_io_stall_queued',
+    'sqlserver.files.read_io_stall',
+    'sqlserver.files.write_io_stall',
+    'sqlserver.files.read_bytes',
+    'sqlserver.files.written_bytes',
+    'sqlserver.files.reads',
+    'sqlserver.files.writes',
+    'sqlserver.files.size_on_disk',
+]
 
 # SQL Server incremental sql fraction metrics require diffs in order to calculate
 # & report the metric, which means this requires a special unit/integration test coverage
