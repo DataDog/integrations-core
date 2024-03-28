@@ -1,0 +1,7 @@
+Migrate following dynamic metrics to database_metrics for better maintainability and testability.
+- SQLServer AlwaysOn metrics
+- SQLServer FCI metrics
+- SQLServer file stats metrics
+- SQLServer primary log shipping metrics
+- SQLServer secondary log shipping metrics
+- SQLServer server state metrics
