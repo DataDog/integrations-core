@@ -1,0 +1,33 @@
+{
+    "version": 2,
+    "created_at": "2024-03-27",
+    "last_updated_at": "2024-03-27",
+    "title": "Argo Rollout is in Non Running or Completed State",
+    "tags": [
+        "integration:argo-rollouts"
+    ],
+    "description": "The Argo Rollout phase is the stage or status of a deployment or rollout process. This monitor tracks the phase of rollouts and alerts when a rollout is in a non running and completed state.",
+    "definition": {
+        "message": "{{#is_alert}}\nArgo Rollout {{argo_rollouts_name.name}} from {{argo_rollouts_namespace.name}} namespace is in a {{phase.name}} state for the last 10 minutes.\n{{/is_alert}}\n\n{{#is_recovery}}\nArgo Rollout {{argo_rollouts_name.name}} from {{argo_rollouts_namespace.name}} namespace is back in a stable state.\n{{/is_recovery}}",
+        "name": "[Argo Rollouts] Rollout Phase State",
+        "options": {
+            "include_tags": true,
+            "new_group_delay": 60,
+            "notify_audit": false,
+            "notify_no_data": false,
+            "renotify_interval": 0,
+            "require_full_window": false,
+            "avalanche_window": 10,
+            "thresholds": {
+                "critical": 1
+            }
+        },
+        "priority": null,
+        "query": "min(last_10m):default_zero(avg:argo_rollouts.rollout.info{phase:abort or phase:error or phase:timeout or phase:invalidspec} by {phase,argo_rollouts_name,argo_rollouts_namespace,host}) >= 1",
+        "restricted_roles": null,
+        "tags": [
+            "integration:argo_rollouts"
+        ],
+        "type": "query alert"
+    }
+}
