@@ -18,7 +18,6 @@ from .util import (
     COMMON_METRICS,
     DATABASE_SIZE_METRICS,
     DBM_MIGRATED_METRICS,
-    NEWER_12_METRICS,
     NEWER_14_METRICS,
     NEWER_91_BGW_METRICS,
     NEWER_92_BGW_METRICS,
@@ -80,8 +79,6 @@ class PostgresMetricsCache:
             self.instance_metrics = dict(c_metrics)
             if version >= V9_2:
                 self.instance_metrics = dict(self.instance_metrics, **NEWER_92_METRICS)
-            if version >= V12:
-                self.instance_metrics = dict(self.instance_metrics, **NEWER_12_METRICS)
             if version >= V14:
                 self.instance_metrics = dict(self.instance_metrics, **NEWER_14_METRICS)
 

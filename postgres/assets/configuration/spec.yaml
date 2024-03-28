@@ -233,7 +233,7 @@ files:
       description: Collect counts of database failed checksums. Only supported on versions >= 12.
       value:
         type: boolean
-        example: true
+        example: false
         display_default: false
     - name: collect_activity_metrics
       description: |
