@@ -31,7 +31,7 @@ pipeline:
         - time="2024-02-20T20:49:32Z" level=info msg="No TrafficRouting Reconcilers found" namespace=default rollout=rollouts-demo
       grok:
         matchRules: |
-          argo_common time="%{_date}" level=%{_level} msg="%{_msg}"? %{data::keyvalue("=","/:")}
+          argo_common time="%{_date}" level=%{_level} msg="%{_msg}" ?%{data::keyvalue("=","/:")}
         supportRules: |
           _date %{date("yyyy-MM-dd'T'HH:mm:ssZ"):timestamp}
           _msg %{data:msg}
