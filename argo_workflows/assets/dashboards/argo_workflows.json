@@ -1,6 +1,6 @@
 {
     "author_name": "Datadog",
-    "description": "[[suggested_dashboards]]",
+    "description": "**This dashboard provides observability for your Argo Workflows deployments with the Argo Workflows Integration.**\n\n# Useful Links\n- [Argo Workflows Integration&nbsp;\u2197](https://docs.datadoghq.com/integrations/argo_workflows)\n- [Argo Workflows Metrics&nbsp;\u2197](https://argo-workflows.readthedocs.io/en/stable/metrics/)\n- [Argo Workflows Documentation&nbsp;\u2197](https://argo-workflows.readthedocs.io/en/stable/)",
     "layout_type": "ordered",
     "template_variables": [],
     "title": "Argo Workflows",
@@ -16,7 +16,7 @@
                     {
                         "definition": {
                             "background_color": "white",
-                            "content": "**This dashboard provides observability for your  Argo Workflows deployments with the Argo Workflows Integration.**\n",
+                            "content": "**This dashboard provides observability for your Argo Workflows deployments with the Argo Workflows Integration.**\n",
                             "font_size": "14",
                             "has_padding": true,
                             "show_tick": false,
@@ -750,6 +750,77 @@
                 "width": 12,
                 "x": 0,
                 "y": 12
+            }
+        },
+        {
+            "definition": {
+                "background_color": "vivid_orange",
+                "layout_type": "ordered",
+                "show_title": true,
+                "title": "Logs",
+                "type": "group",
+                "widgets": [
+                    {
+                        "definition": {
+                            "requests": [
+                                {
+                                    "columns": [
+                                        {
+                                            "field": "status_line",
+                                            "width": "auto"
+                                        },
+                                        {
+                                            "field": "timestamp",
+                                            "width": "auto"
+                                        },
+                                        {
+                                            "field": "host",
+                                            "width": "auto"
+                                        },
+                                        {
+                                            "field": "service",
+                                            "width": "auto"
+                                        },
+                                        {
+                                            "field": "content",
+                                            "width": "compact"
+                                        }
+                                    ],
+                                    "query": {
+                                        "data_source": "logs_stream",
+                                        "indexes": [],
+                                        "query_string": "source:argo_workflows ",
+                                        "sort": {
+                                            "column": "timestamp",
+                                            "order": "desc"
+                                        },
+                                        "storage": "hot"
+                                    },
+                                    "response_format": "event_list"
+                                }
+                            ],
+                            "time": {},
+                            "title": "",
+                            "title_align": "left",
+                            "title_size": "16",
+                            "type": "list_stream"
+                        },
+                        "id": 2489993328338580,
+                        "layout": {
+                            "height": 3,
+                            "width": 12,
+                            "x": 0,
+                            "y": 0
+                        }
+                    }
+                ]
+            },
+            "id": 7174398085271826,
+            "layout": {
+                "height": 4,
+                "width": 12,
+                "x": 0,
+                "y": 17
             }
         }
     ]
