@@ -59,7 +59,7 @@
       }}
     }},
     "dashboards": {{
-      "<fill in dashboard short_name>": "assets/dashboards/<fill in>.json"
+      "<FILL IN DASHBOARD NAME>": "assets/dashboards/<FILL IN>.json"
     }},
     "monitors": {{}},
     "logs": {{}},
