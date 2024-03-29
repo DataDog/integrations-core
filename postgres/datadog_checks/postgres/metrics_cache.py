@@ -27,7 +27,7 @@ from .util import (
     REPLICATION_METRICS_10,
     REPLICATION_STATS_METRICS,
 )
-from .version_utils import V8_3, V9, V9_1, V9_2, V9_4, V9_6, V10, V12, V14
+from .version_utils import V8_3, V9, V9_1, V9_2, V9_4, V9_6, V10, V14
 
 logger = logging.getLogger(__name__)
 
