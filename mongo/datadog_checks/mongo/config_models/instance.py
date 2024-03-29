@@ -57,6 +57,7 @@ class InstanceConfig(BaseModel):
         arbitrary_types_allowed=True,
         frozen=True,
     )
+    add_node_tag_to_events: Optional[bool] = None
     additional_metrics: Optional[tuple[str, ...]] = None
     collections: Optional[tuple[str, ...]] = None
     collections_indexes_stats: Optional[bool] = None

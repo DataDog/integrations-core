@@ -43,6 +43,7 @@ def test_collect_metadata(integration_check, dbm_instance, aggregator):
     assert event['dbms'] == "postgres"
     assert event['kind'] == "pg_settings"
     assert len(event["metadata"]) > 0
+    assert set(event["metadata"][0].keys()) == {'name', 'setting', 'source', 'sourcefile', 'pending_restart'}
     assert all(not k['name'].startswith('max_wal') for k in event['metadata'])
     statement_timeout_setting = next((k for k in event['metadata'] if k['name'] == 'statement_timeout'), None)
     assert statement_timeout_setting is not None
@@ -89,7 +90,7 @@ def test_collect_schemas(integration_check, dbm_instance, aggregator):
         if table['name'] == "persons":
             # check that foreign keys, indexes get reported
             keys = list(table.keys())
-            assert_fields(keys, ["foreign_keys", "columns", "toast_table", "id", "name"])
+            assert_fields(keys, ["foreign_keys", "columns", "toast_table", "id", "name", "owner"])
             assert_fields(list(table['foreign_keys'][0].keys()), ['name', 'definition'])
             assert_fields(
                 list(table['columns'][0].keys()),
@@ -102,7 +103,7 @@ def test_collect_schemas(integration_check, dbm_instance, aggregator):
             )
         if table['name'] == "cities":
             keys = list(table.keys())
-            assert_fields(keys, ["indexes", "columns", "toast_table", "id", "name"])
+            assert_fields(keys, ["indexes", "columns", "toast_table", "id", "name", "owner"])
             assert_fields(list(table['indexes'][0].keys()), ['name', 'definition'])
         if float(POSTGRES_VERSION) >= 11:
             if table['name'] in ('test_part', 'test_part_no_activity'):

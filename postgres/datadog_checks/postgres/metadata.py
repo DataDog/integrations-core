@@ -34,7 +34,10 @@ DEFAULT_SETTINGS_IGNORED_PATTERNS = ["plpgsql%"]
 PG_SETTINGS_QUERY = """
 SELECT
 name,
-case when source = 'session' then reset_val else setting end as setting
+case when source = 'session' then reset_val else setting end as setting,
+source,
+sourcefile,
+pending_restart
 FROM pg_settings
 """
 
@@ -398,8 +401,10 @@ class PostgresMetadata(DBMAsyncJob):
             this_payload = {}
             name = table["name"]
             table_id = table["id"]
+            table_owner = table["owner"]
             this_payload.update({"id": str(table["id"])})
             this_payload.update({"name": name})
+            this_payload.update({"owner": table_owner})
             if table["hasindexes"]:
                 cursor.execute(PG_INDEXES_QUERY.format(tablename=name))
                 rows = cursor.fetchall()
