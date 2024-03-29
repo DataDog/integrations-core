@@ -1,3 +1,7 @@
 # CHANGELOG - {integration_name}
 
-{changelog_body}
+## 1.0.0 / {today}
+
+***Added***:
+
+* Initial Release

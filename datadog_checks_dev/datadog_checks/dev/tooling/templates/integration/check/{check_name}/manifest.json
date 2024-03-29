@@ -2,23 +2,40 @@
   "manifest_version": "2.0.0",
   "app_uuid": "{app_uuid}",
   "app_id": "{integration_id}",
-  "display_on_public_website": false,
+  "display_on_public_website": true,
   "tile": {{
     "overview": "README.md#Overview",
     "configuration": "README.md#Setup",
     "support": "README.md#Support",
     "changelog": "CHANGELOG.md",
-    "description": "",
+    "description": "<fill in>",
     "title": "{integration_name}",
-    "media": [],
-    "classifier_tags": [
+    "media": [
+      {
+        "media_type": "image",
+        "caption": "Image 1",
+        "image_url": ""
+      },
+      {
+        "media_type": "image",
+        "caption": "Image 2",
+        "image_url": ""
+      },
+      {
+        "media_type": "image",
+        "caption": "Image 3",
+        "image_url": ""
+      }
+    ],
+    "classifier_tags": [ 
+      "<refer here https://docs.datadoghq.com/developers/integrations/check_references/#classifier-tags>",
       "Supported OS::Linux",
       "Supported OS::Windows",
       "Supported OS::macOS",
-      "Category::",
-      "Offering::",
-      "Queried Data Type::",
-      "Submitted Data Type::"
+      "Category::<fill in>",
+      "Offering::<fill in>",
+      "Queried Data Type::<fill in>",
+      "Submitted Data Type::<fill in>"
     ]
   }},
   "assets": {{
@@ -41,7 +58,9 @@
         "metadata_path": "assets/service_checks.json"
       }}
     }},
-    "dashboards": {{}},
+    "dashboards": {{
+      "<fill in dashboard short_name>": "assets/dashboards/<fill in>.json"
+    }},
     "monitors": {{}},
     "logs": {{}},
     "saved_views": {{}}
