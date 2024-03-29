@@ -13,17 +13,17 @@
     "media": [
       {
         "media_type": "image",
-        "caption": "Image 1",
+        "caption": "FILL IN Image 1 caption",
         "image_url": ""
       },
       {
         "media_type": "image",
-        "caption": "Image 2",
+        "caption": "FILL IN Image 2 caption",
         "image_url": ""
       },
       {
         "media_type": "image",
-        "caption": "Image 3",
+        "caption": "FILL IN Image 3 caption",
         "image_url": ""
       }
     ],
