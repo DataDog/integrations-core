@@ -716,6 +716,17 @@ class PostgreSql(AgentCheck):
             with conn.cursor(cursor_factory=CommenterCursor) as cursor:
                 self._query_scope(cursor, archiver_instance_metrics, instance_tags, False)
 
+            if self._config.collect_checksum_metrics and self.version >= V12:
+                # SHOW queries need manual cursor execution so can't be bundled with the metrics
+                with conn.cursor(cursor_factory=CommenterCursor) as cursor:
+                    cursor.execute("SHOW data_checksums;")
+                    enabled = cursor.fetchone()[0]
+                    self.count(
+                        "postgresql.checksums.enabled",
+                        1,
+                        tags=self.tags_without_db + ["enabled:" + "true" if enabled == "on" else "false"],
+                        hostname=self.resolved_hostname,
+                    )
             if self._config.collect_activity_metrics:
                 activity_metrics = self.metrics_cache.get_activity_metrics(self.version)
                 with conn.cursor(cursor_factory=CommenterCursor) as cursor:
