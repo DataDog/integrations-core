@@ -4,10 +4,9 @@
 
 import psycopg2
 import pytest
-from flaky import flaky
-
 from datadog_checks.base import ConfigurationError
 from datadog_checks.postgres.relationsmanager import QUERY_PG_CLASS, RelationsManager
+from flaky import flaky
 
 from .common import DB_NAME, HOST, _get_expected_tags, _iterate_metric_name, assert_metric_at_least
 from .utils import _get_superconn, _wait_for_value, requires_over_11

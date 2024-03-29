@@ -5,7 +5,6 @@ from concurrent.futures.thread import ThreadPoolExecutor
 from typing import List
 
 import pytest
-
 from datadog_checks.base.utils.db.utils import DBMAsyncJob
 
 from .common import POSTGRES_VERSION

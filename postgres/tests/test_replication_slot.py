@@ -3,7 +3,6 @@
 # Licensed under a 3-clause BSD style license (see LICENSE)
 import psycopg2
 import pytest
-
 from datadog_checks.postgres.util import QUERY_PG_REPLICATION_SLOTS_STATS
 
 from .common import DB_NAME, HOST, _get_expected_tags, _iterate_metric_name, assert_metric_at_least

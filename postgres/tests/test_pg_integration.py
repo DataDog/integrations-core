@@ -8,13 +8,12 @@ import time
 import mock
 import psycopg2
 import pytest
-from flaky import flaky
-
 from datadog_checks.base.errors import ConfigurationError
 from datadog_checks.base.stubs import datadog_agent
 from datadog_checks.postgres import PostgreSql
 from datadog_checks.postgres.__about__ import __version__
 from datadog_checks.postgres.util import DatabaseHealthCheckError, PartialFormatter, fmt
+from flaky import flaky
 
 from .common import (
     COMMON_METRICS,

@@ -721,10 +721,10 @@ class PostgreSql(AgentCheck):
                 with conn.cursor(cursor_factory=CommenterCursor) as cursor:
                     cursor.execute("SHOW data_checksums;")
                     enabled = cursor.fetchone()[0]
-                    self.gauge(
+                    self.count(
                         "postgresql.checksums.enabled",
-                        enabled == "on",
-                        tags=self.tags_without_db,
+                        1,
+                        tags=self.tags_without_db + ["enabled:" + "true" if enabled == "on" else "false"],
                         hostname=self.resolved_hostname,
                     )
             if self._config.collect_activity_metrics:

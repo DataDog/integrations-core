@@ -2,9 +2,8 @@
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
 import pytest
-from flaky import flaky
-
 from datadog_checks.postgres.util import STAT_SUBSCRIPTION_METRICS
+from flaky import flaky
 
 from .common import (
     _get_expected_tags,
