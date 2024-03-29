@@ -14,17 +14,17 @@
       {
         "media_type": "image",
         "caption": "FILL IN Image 1 caption",
-        "image_url": ""
+        "image_url": "<FILL IN>"
       },
       {
         "media_type": "image",
         "caption": "FILL IN Image 2 caption",
-        "image_url": ""
+        "image_url": "<FILL IN>"
       },
       {
         "media_type": "image",
         "caption": "FILL IN Image 3 caption",
-        "image_url": ""
+        "image_url": "<FILL IN>"
       }
     ],
     "classifier_tags": [ 
