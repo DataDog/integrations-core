@@ -1,6 +1,6 @@
 # CHANGELOG - {integration_name}
 
-## 1.0.0 / {today}
+## 1.0.0 / YYYY-MM-DD
 
 ***Added***:
 
