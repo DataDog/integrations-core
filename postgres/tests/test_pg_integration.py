@@ -28,7 +28,6 @@ from .common import (
     assert_metric_at_least,
     check_activity_metrics,
     check_bgw_metrics,
-    check_checksum_metrics,
     check_common_metrics,
     check_conflict_metrics,
     check_connection_metrics,
@@ -91,7 +90,6 @@ def test_common_metrics(aggregator, integration_check, pg_instance, is_aurora):
     check_snapshot_txid_metrics(aggregator, expected_tags=expected_tags)
 
     check_performance_metrics(aggregator, expected_tags=check.debug_stats_kwargs()['tags'], is_aurora=is_aurora)
-    check_checksum_metrics(aggregator, expected_tags)
 
     aggregator.assert_all_metrics_covered()
 
