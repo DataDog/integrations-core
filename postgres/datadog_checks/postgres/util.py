@@ -152,6 +152,8 @@ NEWER_92_METRICS = {
     'temp_files': ('postgresql.temp_files', AgentCheck.rate),
 }
 
+CHECKSUM_METRICS = {'checksum_failures': ('postgresql.checksums.checksum_failures', AgentCheck.monotonic_count)}
+
 NEWER_14_METRICS = {
     'session_time': ('postgresql.sessions.session_time', AgentCheck.monotonic_count),
     'active_time': ('postgresql.sessions.active_time', AgentCheck.monotonic_count),
@@ -348,21 +350,6 @@ SELECT application_name, state, sync_state, client_addr, {metrics_columns}
 FROM pg_stat_replication
 """,
     'name': 'replication_stats_metrics',
-}
-
-
-CHECKSUM_METRICS = {
-    'descriptors': [('name', 'database_instance')],
-    'metrics': {
-        'checksum_failures': ('postgresql.checksums.checksum_failures', AgentCheck.monotonic_count),
-    },
-    'relation': False,
-    'query': """
-SELECT datname AS name,
-       checksum_failures
-FROM pg_catalog.pg_stat_database;
-""",
-    'name': 'checksum_metrics',
 }
 
 
