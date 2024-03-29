@@ -2,6 +2,7 @@
 # All rights reserved
 # Licensed under Simplified BSD License (see LICENSE)
 import pytest
+
 from datadog_checks.postgres.relationsmanager import (
     ALL_SCHEMAS,
     IDX_METRICS,

@@ -2,8 +2,9 @@
 # All rights reserved
 # Licensed under Simplified BSD License (see LICENSE)
 import pytest
-from datadog_checks.postgres.version_utils import VersionUtils
 from semver import VersionInfo
+
+from datadog_checks.postgres.version_utils import VersionUtils
 
 pytestmark = pytest.mark.unit
 

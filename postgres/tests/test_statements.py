@@ -11,6 +11,10 @@ from concurrent.futures.thread import ThreadPoolExecutor
 import mock
 import psycopg2
 import pytest
+from dateutil import parser
+from semver import VersionInfo
+from six import string_types
+
 from datadog_checks.base.utils.db.sql import compute_sql_signature
 from datadog_checks.base.utils.db.utils import DBMAsyncJob
 from datadog_checks.base.utils.serialization import json
@@ -22,9 +26,6 @@ from datadog_checks.postgres.statement_samples import (
 from datadog_checks.postgres.statements import PG_STAT_STATEMENTS_METRICS_COLUMNS, PG_STAT_STATEMENTS_TIMING_COLUMNS
 from datadog_checks.postgres.util import payload_pg_version
 from datadog_checks.postgres.version_utils import V12
-from dateutil import parser
-from semver import VersionInfo
-from six import string_types
 
 from .common import (
     DB_NAME,

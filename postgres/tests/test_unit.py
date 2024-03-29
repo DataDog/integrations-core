@@ -7,11 +7,12 @@ import copy
 import mock
 import psycopg2
 import pytest
-from datadog_checks.postgres import PostgreSql, util
 from mock import MagicMock
 from pytest import fail
 from semver import VersionInfo
 from six import iteritems
+
+from datadog_checks.postgres import PostgreSql, util
 
 pytestmark = pytest.mark.unit
 

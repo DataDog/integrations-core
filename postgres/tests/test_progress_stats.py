@@ -4,6 +4,7 @@
 
 
 import pytest
+
 from datadog_checks.postgres.util import (
     ANALYZE_PROGRESS_METRICS,
     CLUSTER_VACUUM_PROGRESS_METRICS,

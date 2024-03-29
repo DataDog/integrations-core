@@ -11,6 +11,7 @@ from contextlib import contextmanager
 import psycopg2
 import psycopg2.sql
 import pytest
+
 from datadog_checks.base import ConfigurationError
 
 from .common import HOST, PASSWORD_ADMIN, USER_ADMIN, _get_expected_tags
