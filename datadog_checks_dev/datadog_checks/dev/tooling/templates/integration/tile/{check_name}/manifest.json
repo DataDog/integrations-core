@@ -32,10 +32,10 @@
       "Supported OS::Linux",
       "Supported OS::Windows",
       "Supported OS::macOS",
-      "Category::<fill in>",
-      "Offering::<fill in>",
-      "Queried Data Type::<fill in>",
-      "Submitted Data Type::<fill in>"
+      "Category::<FILL IN>",
+      "Offering::<FILL IN>",
+      "Queried Data Type::<FILL IN>",
+      "Submitted Data Type::<FILL IN>"
     ]
   }},
   "assets": {{
