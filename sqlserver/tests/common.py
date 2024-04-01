@@ -314,6 +314,4 @@ def get_operation_time_metrics(instance):
         operation_time_metrics.append('os_schedulers_metrics')
     if instance.get('include_ao_metrics', False):
         operation_time_metrics.append('availability_groups_metrics')
-    if instance.get('include_master_files_metrics', False):
-        operation_time_metrics.append('master_database_file_stats_metrics')
     return operation_time_metrics

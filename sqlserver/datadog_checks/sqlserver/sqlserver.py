@@ -23,6 +23,7 @@ from datadog_checks.sqlserver.database_metrics import (
     SqlserverFciMetrics,
     SqlserverFileStatsMetrics,
     SqlserverIndexUsageMetrics,
+    SqlserverMasterFilesMetrics,
     SqlserverOsTasksMetrics,
     SqlserverPrimaryLogShippingMetrics,
     SqlserverSecondaryLogShippingMetrics,
@@ -52,7 +53,6 @@ from datadog_checks.sqlserver.const import (
     BASE_NAME_QUERY,
     COUNTER_TYPE_QUERY,
     DATABASE_BACKUP_METRICS,
-    DATABASE_MASTER_FILES,
     DATABASE_METRICS,
     DATABASE_SERVICE_CHECK_NAME,
     DATABASE_SERVICE_CHECK_QUERY,
@@ -501,12 +501,6 @@ class SQLServer(AgentCheck):
                 cfg = {'name': name, 'table': table, 'column': column, 'tags': tags}
                 metrics_to_collect.append(self.typed_metric(cfg_inst=cfg, table=table, column=column))
 
-        # Load sys.master_files metrics
-        if is_affirmative(self.instance.get('include_master_files_metrics', False)):
-            for name, table, column in DATABASE_MASTER_FILES:
-                cfg = {'name': name, 'table': table, 'column': column, 'tags': tags}
-                metrics_to_collect.append(self.typed_metric(cfg_inst=cfg, table=table, column=column))
-
         # Load any custom metrics from conf.d/sqlserver.yaml
         for cfg in custom_metrics:
             sql_counter_type = None
@@ -801,6 +795,12 @@ class SQLServer(AgentCheck):
             server_static_info=self.static_info_cache,
             execute_query_handler=self.execute_query_raw,
         )
+        master_database_file_stats_metrics = SqlserverMasterFilesMetrics(
+            instance_config=self.instance,
+            new_query_executor=self._new_query_executor,
+            server_static_info=self.static_info_cache,
+            execute_query_handler=self.execute_query_raw,
+        )
 
         # database level metrics
         tempdb_file_space_usage_metrics = SqlserverTempDBFileSpaceUsageMetrics(
@@ -834,6 +834,7 @@ class SQLServer(AgentCheck):
             primary_log_shipping_metrics,
             secondary_log_shipping_metrics,
             os_tasks_metrics,
+            master_database_file_stats_metrics,
             # database level metrics
             tempdb_file_space_usage_metrics,
             index_usage_metrics,
@@ -917,7 +918,9 @@ class SQLServer(AgentCheck):
                 self.log.debug("changing cursor context via use statement: %s", ctx)
                 cursor.execute(ctx)
             cursor.execute(query)
-            return cursor.fetchall()
+            rows = cursor.fetchall()
+            print(rows, query, db)
+            return rows
 
     def do_stored_procedure_check(self):
         """

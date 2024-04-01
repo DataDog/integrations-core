@@ -402,59 +402,6 @@ class SqlOsSchedulers(BaseSqlServerMetric):
             self.report_function(metric_name, column_val, tags=metric_tags)
 
 
-# https://docs.microsoft.com/en-us/sql/relational-databases/system-catalog-views/sys-master-files-transact-sql
-class SqlMasterDatabaseFileStats(BaseSqlServerMetric):
-    CUSTOM_QUERIES_AVAILABLE = False
-    TABLE = 'sys.master_files'
-    DEFAULT_METRIC_TYPE = 'gauge'
-    QUERY_BASE = """
-        select sys.databases.name as name, file_id, type, physical_name, size, max_size,
-        sys.master_files.state as state, sys.master_files.state_desc as state_desc from {table}
-        right outer join sys.databases on sys.master_files.database_id = sys.databases.database_id;
-    """.format(
-        table=TABLE
-    )
-    DB_TYPE_MAP = {0: 'data', 1: 'transaction_log', 2: 'filestream', 3: 'unknown', 4: 'full_text'}
-    OPERATION_NAME = 'master_database_file_stats_metrics'
-
-    @classmethod
-    def fetch_all_values(cls, cursor, counters_list, logger, databases=None):
-        return cls._fetch_generic_values(cursor, None, logger)
-
-    def fetch_metric(self, rows, columns, values_cache=None):
-        db_name = columns.index("name")
-        file_id = columns.index("file_id")
-        file_type = columns.index("type")
-        file_location = columns.index("physical_name")
-        db_files_state_desc_index = columns.index("state_desc")
-        value_column_index = columns.index(self.column)
-
-        for row in rows:
-            column_val = row[value_column_index]
-            if column_val is None:
-                continue
-            if self.column in ('size', 'max_size'):
-                column_val *= 8  # size reported in 8 KB pages
-
-            fileid = row[file_id]
-            filetype = self.DB_TYPE_MAP[row[file_type]]
-            location = row[file_location]
-            db_files_state_desc = row[db_files_state_desc_index]
-            dbname = row[db_name]
-
-            metric_tags = [
-                'database:{}'.format(str(dbname)),
-                'db:{}'.format(str(dbname)),
-                'file_id:{}'.format(str(fileid)),
-                'file_type:{}'.format(str(filetype)),
-                'file_location:{}'.format(str(location)),
-                'database_files_state_desc:{}'.format(str(db_files_state_desc)),
-            ]
-            metric_tags.extend(self.tags)
-            metric_name = '{}'.format(self.metric_name)
-            self.report_function(metric_name, column_val, tags=metric_tags)
-
-
 # https://docs.microsoft.com/en-us/sql/relational-databases/system-catalog-views/sys-database-files-transact-sql
 class SqlDatabaseFileStats(BaseSqlServerMetric):
     CUSTOM_QUERIES_AVAILABLE = False

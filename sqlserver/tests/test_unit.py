@@ -13,7 +13,7 @@ from datadog_checks.base.errors import ConfigurationError
 from datadog_checks.dev import EnvVars
 from datadog_checks.sqlserver import SQLServer
 from datadog_checks.sqlserver.connection import split_sqlserver_host_port
-from datadog_checks.sqlserver.metrics import SqlFractionMetric, SqlMasterDatabaseFileStats
+from datadog_checks.sqlserver.metrics import SqlFractionMetric
 from datadog_checks.sqlserver.sqlserver import SQLConnectionError
 from datadog_checks.sqlserver.utils import (
     Database,
@@ -247,42 +247,6 @@ def test_azure_autodiscovery_exclude_override(instance_autodiscovery):
     check = SQLServer(CHECK_NAME, {}, [instance_autodiscovery])
     check.autodiscover_databases(mock_cursor)
     assert check.databases == {Database("tempdb", "tempdb")}
-
-
-@pytest.mark.parametrize(
-    'col_val_row_1, col_val_row_2, col_val_row_3',
-    [
-        pytest.param(256, 1024, 1720, id='Valid column value 0'),
-        pytest.param(0, None, 1024, id='NoneType column value 1, should not raise error'),
-        pytest.param(512, 0, 256, id='Valid column value 2'),
-        pytest.param(None, 256, 0, id='NoneType column value 3, should not raise error'),
-    ],
-)
-def test_SqlMasterDatabaseFileStats_fetch_metric(col_val_row_1, col_val_row_2, col_val_row_3):
-    Row = namedtuple('Row', ['name', 'file_id', 'type', 'physical_name', 'size', 'max_size', 'state', 'state_desc'])
-    mock_rows = [
-        Row('master', 1, 0, '/var/opt/mssql/data/master.mdf', col_val_row_1, -1, 0, 'ONLINE'),
-        Row('tempdb', 1, 0, '/var/opt/mssql/data/tempdb.mdf', col_val_row_2, -1, 0, 'ONLINE'),
-        Row('msdb', 1, 0, '/var/opt/mssql/data/MSDBData.mdf', col_val_row_3, -1, 0, 'ONLINE'),
-    ]
-    mock_cols = ['name', 'file_id', 'type', 'physical_name', 'size', 'max_size', 'state', 'state_desc']
-    mock_metric_obj = SqlMasterDatabaseFileStats(
-        cfg_instance=mock.MagicMock(dict),
-        base_name=None,
-        report_function=mock.MagicMock(),
-        column='size',
-        logger=None,
-    )
-    with mock.patch.object(
-        SqlMasterDatabaseFileStats, 'fetch_metric', wraps=mock_metric_obj.fetch_metric
-    ) as mock_fetch_metric:
-        errors = 0
-        try:
-            mock_fetch_metric(mock_rows, mock_cols)
-        except Exception as e:
-            errors += 1
-            raise AssertionError('{}'.format(e))
-        assert errors < 1
 
 
 @pytest.mark.parametrize(

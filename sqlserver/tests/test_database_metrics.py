@@ -19,6 +19,7 @@ from datadog_checks.sqlserver.database_metrics import (
     SqlserverFciMetrics,
     SqlserverFileStatsMetrics,
     SqlserverIndexUsageMetrics,
+    SqlserverMasterFilesMetrics,
     SqlserverOsTasksMetrics,
     SqlserverPrimaryLogShippingMetrics,
     SqlserverSecondaryLogShippingMetrics,
@@ -694,6 +695,76 @@ def test_sqlserver_os_tasks_metrics(
             metrics = zip(os_tasks_metrics.metric_names()[0], metric_values)
             expected_tags = [
                 f'scheduler_id:{scheduler_id}',
+            ] + tags
+            for metric_name, metric_value in metrics:
+                aggregator.assert_metric(metric_name, value=metric_value, tags=expected_tags)
+
+
+@pytest.mark.integration
+@pytest.mark.usefixtures('dd_environment')
+@pytest.mark.parametrize('include_master_files_metrics', [True, False])
+def test_sqlserver_master_file_metrics(
+    aggregator,
+    dd_run_check,
+    init_config,
+    instance_docker_metrics,
+    include_master_files_metrics,
+):
+    instance_docker_metrics['database_autodiscovery'] = True
+    instance_docker_metrics['include_master_files_metrics'] = include_master_files_metrics
+
+    mocked_results = [
+        ('master', 'master', 1, 'data', '/var/opt/mssql/data/master.mdf', 'ONLINE', 4096, 0),
+        ('master', 'master', 2, 'transaction_log', '/var/opt/mssql/data/mastlog.ldf', 'ONLINE', 512, 0),
+        ('tempdb', 'tempdb', 1, 'data', '/var/opt/mssql/data/tempdb.mdf', 'ONLINE', 8192, 0),
+        ('tempdb', 'tempdb', 2, 'transaction_log', '/var/opt/mssql/data/templog.ldf', 'ONLINE', 8192, 0),
+        ('model', 'model', 1, 'data', '/var/opt/mssql/data/model.mdf', 'ONLINE', 8192, 0),
+        ('model', 'model', 2, 'transaction_log', '/var/opt/mssql/data/modellog.ldf', 'ONLINE', 8192, 0),
+        ('msdb', 'msdb', 1, 'data', '/var/opt/mssql/data/MSDBData.mdf', 'ONLINE', 13696, 0),
+        ('msdb', 'msdb', 2, 'transaction_log', '/var/opt/mssql/data/MSDBLog.ldf', 'ONLINE', 512, 0),
+        ('datadog_test', 'datadog_test', 1, 'data', '/var/opt/mssql/data/datadog_test.mdf', 'ONLINE', 8192, 0),
+        (
+            'datadog_test',
+            'datadog_test',
+            2,
+            'transaction_log',
+            '/var/opt/mssql/data/datadog_test_log.ldf',
+            'ONLINE',
+            8192,
+            0,
+        ),
+    ]
+
+    sqlserver_check = SQLServer(CHECK_NAME, init_config, [instance_docker_metrics])
+
+    def execute_query_handler_mocked(query, db=None):
+        return mocked_results
+
+    master_files_metrics = SqlserverMasterFilesMetrics(
+        instance_config=instance_docker_metrics,
+        new_query_executor=sqlserver_check._new_query_executor,
+        server_static_info=STATIC_SERVER_INFO,
+        execute_query_handler=execute_query_handler_mocked,
+    )
+
+    sqlserver_check._dynamic_queries = [master_files_metrics]
+
+    dd_run_check(sqlserver_check)
+
+    if not include_master_files_metrics:
+        assert master_files_metrics.enabled is False
+    else:
+        tags = instance_docker_metrics.get('tags', [])
+        for result in mocked_results:
+            db, database, file_id, file_type, file_location, database_files_state_desc, *metric_values = result
+            metrics = zip(master_files_metrics.metric_names()[0], metric_values)
+            expected_tags = [
+                f'db:{db}',
+                f'database:{database}',
+                f'file_id:{file_id}',
+                f'file_type:{file_type}',
+                f'file_location:{file_location}',
+                f'database_files_state_desc:{database_files_state_desc}',
             ] + tags
             for metric_name, metric_value in metrics:
                 aggregator.assert_metric(metric_name, value=metric_value, tags=expected_tags)
