@@ -26,6 +26,9 @@ from datadog_checks.sqlserver.database_metrics import (
     SqlserverSecondaryLogShippingMetrics,
     SqlserverServerStateMetrics,
 )
+from datadog_checks.sqlserver.database_metrics.tempdb_file_space_usage_metrics import (
+    SqlserverTempDBFileSpaceUsageMetrics,
+)
 from datadog_checks.sqlserver.metadata import SqlserverMetadata
 from datadog_checks.sqlserver.statements import SqlserverStatementMetrics
 from datadog_checks.sqlserver.stored_procedures import SqlserverProcedureMetrics
@@ -71,7 +74,6 @@ from datadog_checks.sqlserver.const import (
     STATIC_INFO_VERSION,
     SWITCH_DB_STATEMENT,
     TASK_SCHEDULER_METRICS,
-    TEMPDB_FILE_SPACE_USAGE_METRICS,
     VALID_METRIC_TYPES,
     expected_sys_databases_columns,
 )
@@ -536,14 +538,6 @@ class SQLServer(AgentCheck):
                     }
                     metrics_to_collect.append(self.typed_metric(cfg_inst=cfg, table=table, column=column))
 
-        # Load DB File Space Usage metrics
-        if is_affirmative(
-            self.instance.get('include_tempdb_file_space_usage_metrics', True)
-        ) and not is_azure_sql_database(engine_edition):
-            for name, table, column in TEMPDB_FILE_SPACE_USAGE_METRICS:
-                cfg = {'name': name, 'table': table, 'column': column, 'instance_name': 'tempdb', 'tags': tags}
-                metrics_to_collect.append(self.typed_metric(cfg_inst=cfg, table=table, column=column))
-
         # Load any custom metrics from conf.d/sqlserver.yaml
         for cfg in custom_metrics:
             sql_counter_type = None
@@ -791,6 +785,7 @@ class SQLServer(AgentCheck):
         if self._dynamic_queries:
             return self._dynamic_queries
 
+        # instance level metrics
         server_state_metrics = SqlserverServerStateMetrics(
             instance_config=self.instance,
             new_query_executor=self._new_query_executor,
@@ -829,14 +824,25 @@ class SQLServer(AgentCheck):
             execute_query_handler=self.execute_query_raw,
         )
 
+        # database level metrics
+        tempdb_file_space_usage_metrics = SqlserverTempDBFileSpaceUsageMetrics(
+            instance_config=self.instance,
+            new_query_executor=self._new_query_executor,
+            server_static_info=self.static_info_cache,
+            execute_query_handler=self.execute_query_raw,
+        )
+
         # create a list of dynamic queries to execute
         self._dynamic_queries = [
+            # instance level metrics
             server_state_metrics,
             file_stats_metrics,
             ao_metrics,
             fci_metrics,
             primary_log_shipping_metrics,
             secondary_log_shipping_metrics,
+            # database level metrics
+            tempdb_file_space_usage_metrics,  # tempdb
         ]
         self.log.debug("initialized dynamic queries")
         return self._dynamic_queries
@@ -896,9 +902,12 @@ class SQLServer(AgentCheck):
             with self.connection.get_managed_cursor() as cursor:
                 cursor.execute("SET NOCOUNT ON")
             try:
-                if self.dynamic_queries:
-                    for dynamic_query in self.dynamic_queries:
-                        dynamic_query.execute()
+                # restore the current database after executing dynamic queries
+                # this is to ensure the current database context is not changed
+                with self.connection.restore_current_database_context():
+                    if self.dynamic_queries:
+                        for dynamic_query in self.dynamic_queries:
+                            dynamic_query.execute()
 
                 self.collect_index_usage_metrics()
 

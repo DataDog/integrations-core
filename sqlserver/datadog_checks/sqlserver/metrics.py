@@ -954,6 +954,9 @@ class SqlAvailabilityReplicas(BaseSqlServerMetric):
 
 # https://learn.microsoft.com/en-us/sql/relational-databases/system-dynamic-management-views/sys-dm-db-file-space-usage-transact-sql?view=sql-server-ver15
 class SqlDbFileSpaceUsage(BaseSqlServerMetric):
+    '''
+    DEPRECATED: This is deprecated and migrated to database_metrics/tempdb_file_space_usage_metrics.py
+    '''
     CUSTOM_QUERIES_AVAILABLE = False
     TABLE = 'sys.dm_db_file_space_usage'
     DEFAULT_METRIC_TYPE = 'gauge'

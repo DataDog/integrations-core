@@ -3,6 +3,7 @@
 # Licensed under a 3-clause BSD style license (see LICENSE)
 
 
+from decimal import Decimal
 from unittest import mock
 
 import pytest
@@ -19,6 +20,9 @@ from datadog_checks.sqlserver.database_metrics import (
     SqlserverPrimaryLogShippingMetrics,
     SqlserverSecondaryLogShippingMetrics,
     SqlserverServerStateMetrics,
+)
+from datadog_checks.sqlserver.database_metrics.tempdb_file_space_usage_metrics import (
+    SqlserverTempDBFileSpaceUsageMetrics,
 )
 
 from .common import (
@@ -241,7 +245,6 @@ def test_sqlserver_fci_metrics(
         new_query_executor=sqlserver_check._new_query_executor,
         server_static_info=STATIC_SERVER_INFO,
         execute_query_handler=execute_query_handler_mocked,
-        # execute_query_handler=sqlserver_check.execute_query_raw,
     )
 
     sqlserver_check._dynamic_queries = [fci_metrics]
@@ -289,7 +292,6 @@ def test_sqlserver_primary_log_shipping_metrics(
         new_query_executor=sqlserver_check._new_query_executor,
         server_static_info=STATIC_SERVER_INFO,
         execute_query_handler=execute_query_handler_mocked,
-        # execute_query_handler=sqlserver_check.execute_query_raw,
     )
 
     sqlserver_check._dynamic_queries = [primary_log_shipping_metrics]
@@ -406,3 +408,52 @@ def test_sqlserver_server_state_metrics(
         metrics = zip(server_state_metrics.metric_names()[0], result)
         for metric_name, metric_value in metrics:
             aggregator.assert_metric(metric_name, value=metric_value, tags=tags)
+
+
+@pytest.mark.integration
+@pytest.mark.usefixtures('dd_environment')
+@pytest.mark.parametrize('include_tempdb_file_space_usage_metrics', [True, False])
+def test_sqlserver_tempdb_file_space_usage_metrics(
+    aggregator,
+    dd_run_check,
+    init_config,
+    instance_docker_metrics,
+    include_tempdb_file_space_usage_metrics,
+):
+    instance_docker_metrics['database_autodiscovery'] = True
+    instance_docker_metrics['include_tempdb_file_space_usage_metrics'] = include_tempdb_file_space_usage_metrics
+
+    mocked_results = [
+        [(2, Decimal('5.375000'), Decimal('0.000000'), Decimal('0.000000'), Decimal('1.312500'), Decimal('1.312500'))]
+    ]
+
+    sqlserver_check = SQLServer(CHECK_NAME, init_config, [instance_docker_metrics])
+
+    def execute_query_handler_mocked(query, db=None):
+        return mocked_results
+
+    tempdb_file_space_usage_metrics = SqlserverTempDBFileSpaceUsageMetrics(
+        instance_config=instance_docker_metrics,
+        new_query_executor=sqlserver_check._new_query_executor,
+        server_static_info=STATIC_SERVER_INFO,
+        execute_query_handler=execute_query_handler_mocked,
+    )
+
+    sqlserver_check._dynamic_queries = [tempdb_file_space_usage_metrics]
+
+    dd_run_check(sqlserver_check)
+
+    if not include_tempdb_file_space_usage_metrics:
+        assert tempdb_file_space_usage_metrics.enabled is False
+    else:
+        tags = instance_docker_metrics.get('tags', [])
+        for result in mocked_results:
+            database_id, *metric_values = result
+            metrics = zip(tempdb_file_space_usage_metrics.metric_names()[0], metric_values)
+            expected_tags = [
+                f'database_id:{database_id}',
+                'db:tempdb',
+                'database:tempdb',
+            ] + tags
+            for metric_name, metric_value in metrics:
+                aggregator.assert_metric(metric_name, value=metric_value, tags=expected_tags)

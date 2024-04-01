@@ -690,7 +690,7 @@ class Connection(object):
                 return "ERROR: {}".format(e.strerror if hasattr(e, 'strerror') else repr(e))
 
         return None
-    
+
     def _get_current_database_context(self):
         """
         Get the current database name.
