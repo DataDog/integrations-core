@@ -39,6 +39,16 @@ DB_FRAGMENTATION_QUERY = {
 
 
 class SqlserverDBFragmentationMetrics(SqlserverDatabaseMetricsBase):
+    # sys.dm_db_index_physical_stats
+    #
+    # Returns size and fragmentation information for the data and
+    # indexes of the specified table or view in SQL Server.
+    #
+    # There are reports of this query being very slow for large datasets,
+    # so debug query timing are included to help monitor it.
+    # https://dba.stackexchange.com/q/76374
+    #
+    # https://docs.microsoft.com/en-us/sql/relational-databases/system-dynamic-management-views/sys-dm-db-index-physical-stats-transact-sql?view=sql-server-ver15
     @property
     def include_db_fragmentation_metrics(self):
         return is_affirmative(self.instance_config.get('include_db_fragmentation_metrics', False))

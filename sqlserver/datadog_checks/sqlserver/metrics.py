@@ -13,9 +13,7 @@ from __future__ import division
 from collections import defaultdict
 from functools import partial
 
-from datadog_checks.base import ensure_unicode
 from datadog_checks.base.errors import CheckException
-from datadog_checks.base.utils.time import get_precise_time
 
 from .utils import construct_use_statement
 
@@ -673,112 +671,6 @@ class SqlDatabaseBackup(BaseSqlServerMetric):
             self.report_function(metric_name, column_val, tags=metric_tags)
 
 
-# sys.dm_db_index_physical_stats
-#
-# Returns size and fragmentation information for the data and
-# indexes of the specified table or view in SQL Server.
-#
-# There are reports of this query being very slow for large datasets,
-# so debug query timing are included to help monitor it.
-# https://dba.stackexchange.com/q/76374
-#
-# https://docs.microsoft.com/en-us/sql/relational-databases/system-dynamic-management-views/sys-dm-db-index-physical-stats-transact-sql?view=sql-server-ver15
-class SqlDbFragmentation(BaseSqlServerMetric):
-    '''
-    DEPRECATED: This is deprecated and migrated to database_metrics/db_fragmentation_metrics.py
-    '''
-
-    CUSTOM_QUERIES_AVAILABLE = False
-    TABLE = 'sys.dm_db_index_physical_stats'
-    DEFAULT_METRIC_TYPE = 'gauge'
-
-    QUERY_BASE = (
-        "SELECT DB_NAME(DDIPS.database_id) as database_name, "
-        "OBJECT_NAME(DDIPS.object_id, DDIPS.database_id) as object_name, "
-        "DDIPS.index_id as index_id, DDIPS.fragment_count as fragment_count, "
-        "DDIPS.avg_fragment_size_in_pages as avg_fragment_size_in_pages, "
-        "DDIPS.page_count as page_count, "
-        "DDIPS.avg_fragmentation_in_percent as avg_fragmentation_in_percent, I.name as index_name "
-        "FROM {table} (DB_ID('{{db}}'),null,null,null,null) as DDIPS "
-        "INNER JOIN sys.indexes as I ON I.object_id = DDIPS.object_id "
-        "AND DDIPS.index_id = I.index_id "
-        "WHERE DDIPS.fragment_count is not null".format(table=TABLE)
-    )
-    OPERATION_NAME = 'db_fragmentation_metrics'
-
-    def __init__(self, cfg_instance, base_name, report_function, column, logger):
-        super(SqlDbFragmentation, self).__init__(cfg_instance, base_name, report_function, column, logger)
-
-    @classmethod
-    def fetch_all_values(cls, cursor, counters_list, logger, databases=None):
-        # special case to limit this query to specific databases and monitor performance
-        rows = []
-        columns = []
-        if databases is None:
-            databases = []
-
-        logger.debug("%s: gathering fragmentation metrics for these databases: %s", cls.__name__, databases)
-
-        for db in databases:
-            ctx = construct_use_statement(db)
-            query = cls.QUERY_BASE.format(db=db)
-            start = get_precise_time()
-            try:
-                logger.debug("%s: changing cursor context via use statement: %s", cls.__name__, ctx)
-                cursor.execute(ctx)
-                logger.debug("%s: fetch_all executing query: %s", cls.__name__, query)
-                cursor.execute(query)
-                data = cursor.fetchall()
-            except Exception as e:
-                logger.warning("Error when trying to query db %s - skipping.  Error: %s", db, e)
-                continue
-            elapsed = get_precise_time() - start
-
-            query_columns = [i[0] for i in cursor.description]
-            if columns:
-                if columns != query_columns:
-                    raise CheckException('Assertion error: {} != {}'.format(columns, query_columns))
-            else:
-                columns = query_columns
-
-            rows.extend(data)
-            logger.debug("%s: received %d rows for db %s, elapsed time: %.4f sec", cls.__name__, len(data), db, elapsed)
-
-        return rows, columns
-
-    def fetch_metric(self, rows, columns, values_cache=None):
-        value_column_index = columns.index(self.column)
-        database_name = columns.index("database_name")
-        object_name_index = columns.index("object_name")
-        index_id_index = columns.index("index_id")
-        index_name_index = columns.index("index_name")
-
-        for row in rows:
-            if row[database_name] != self.instance:
-                continue
-
-            column_val = row[value_column_index]
-            object_name = row[object_name_index]
-            index_id = row[index_id_index]
-            index_name = row[index_name_index]
-
-            object_list = self.cfg_instance.get('db_fragmentation_object_names')
-
-            if object_list and (object_name not in object_list):
-                continue
-
-            metric_tags = [
-                u'database_name:{}'.format(ensure_unicode(self.instance)),
-                u'db:{}'.format(ensure_unicode(self.instance)),
-                u'object_name:{}'.format(ensure_unicode(object_name)),
-                u'index_id:{}'.format(ensure_unicode(index_id)),
-                u'index_name:{}'.format(ensure_unicode(index_name)),
-            ]
-
-            metric_tags.extend(self.tags)
-            self.report_function(self.metric_name, column_val, tags=metric_tags)
-
-
 # https://docs.microsoft.com/en-us/sql/relational-databases/system-dynamic-management-views/sys-dm-hadr-database-replica-states-transact-sql?view=sql-server-ver15
 class SqlDbReplicaStates(BaseSqlServerMetric):
     TABLE = 'sys.dm_hadr_database_replica_states'
@@ -957,92 +849,6 @@ class SqlAvailabilityReplicas(BaseSqlServerMetric):
             metric_tags.extend(self.tags)
             metric_name = '{}'.format(self.metric_name)
 
-            self.report_function(metric_name, column_val, tags=metric_tags)
-
-
-# https://learn.microsoft.com/en-us/sql/relational-databases/system-dynamic-management-views/sys-dm-db-file-space-usage-transact-sql?view=sql-server-ver15
-class SqlDbFileSpaceUsage(BaseSqlServerMetric):
-    '''
-    DEPRECATED: This is deprecated and migrated to database_metrics/tempdb_file_space_usage_metrics.py
-    '''
-
-    CUSTOM_QUERIES_AVAILABLE = False
-    TABLE = 'sys.dm_db_file_space_usage'
-    DEFAULT_METRIC_TYPE = 'gauge'
-    QUERY_BASE = """SELECT
-            database_id,
-            DB_NAME(database_id) as database_name,
-            ISNULL(SUM(unallocated_extent_page_count)*1.0/128, 0) as free_space,
-            ISNULL(SUM(version_store_reserved_page_count)*1.0/128, 0) as used_space_by_version_store,
-            ISNULL(SUM(internal_object_reserved_page_count)*1.0/128, 0) as used_space_by_internal_object,
-            ISNULL(SUM(user_object_reserved_page_count)*1.0/128, 0) as used_space_by_user_object,
-            ISNULL(SUM(mixed_extent_page_count)*1.0/128, 0) as mixed_extent_space
-        FROM {table} group by database_id""".format(
-        table=TABLE
-    )
-    OPERATION_NAME = 'db_file_space_usage_metrics'
-
-    @classmethod
-    def fetch_all_values(cls, cursor, counters_list, logger, databases=None):
-        rows = []
-        columns = []
-
-        cursor.execute('select DB_NAME()')  # This can return None in some implementations, so it cannot be chained
-        data = cursor.fetchall()
-        current_db = data[0][0]
-        logger.debug("%s: current db is %s", cls.__name__, current_db)
-
-        logger.debug("%s: gathering db file space usage metrics for tempdb", cls.__name__)
-        db = 'tempdb'  # we are only interested in tempdb
-        ctx = construct_use_statement(db)
-        start = get_precise_time()
-        try:
-            logger.debug("%s: changing cursor context via use statement: %s", cls.__name__, ctx)
-            cursor.execute(ctx)
-            logger.debug("%s: fetch_all executing query: %s", cls.__name__, cls.QUERY_BASE)
-            cursor.execute(cls.QUERY_BASE)
-            data = cursor.fetchall()
-        except Exception as e:
-            logger.warning("Error when trying to query db %s - skipping.  Error: %s", db, e)
-        elapsed = get_precise_time() - start
-
-        query_columns = [i[0] for i in cursor.description]
-        if columns:
-            if columns != query_columns:
-                raise CheckException('Assertion error: {} != {}'.format(columns, query_columns))
-        else:
-            columns = query_columns
-
-        rows.extend(data)
-        logger.debug("%s: received %d rows for db %s, elapsed time: %.4f sec", cls.__name__, len(data), db, elapsed)
-
-        # reset back to previous db
-        if current_db:
-            logger.debug("%s: reverting cursor context via use statement to %s", cls.__name__, current_db)
-            cursor.execute(construct_use_statement(current_db))
-
-        return rows, columns
-
-    def fetch_metric(self, rows, columns, values_cache=None):
-        value_column_index = columns.index(self.column)
-        database_id_index = columns.index('database_id')
-        database_name_index = columns.index('database_name')
-
-        for row in rows:
-            database_id = row[database_id_index]
-            database_name = row[database_name_index]
-            column_val = row[value_column_index]
-
-            if database_name != self.instance:
-                continue
-
-            metric_tags = [
-                'database:{}'.format(str(database_name)),
-                'db:{}'.format(str(database_name)),
-                'database_id:{}'.format(str(database_id)),
-            ]
-            metric_tags.extend(self.tags)
-            metric_name = '{}'.format(self.metric_name)
             self.report_function(metric_name, column_val, tags=metric_tags)
 
 
