@@ -49,6 +49,9 @@
     },
     "logs": {
       "source": "argo_workflows"
+    },
+    "monitors": {
+      "errors": "assets/monitors/errors.json"
     }
   },
   "author": {
