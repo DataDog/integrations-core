@@ -5,3 +5,5 @@ Migrate following dynamic metrics to database_metrics for better maintainability
 - SQLServer primary log shipping metrics
 - SQLServer secondary log shipping metrics
 - SQLServer server state metrics
+- SQLServer tempdb file space usage metrics
+- SQLServer index usage metrics
