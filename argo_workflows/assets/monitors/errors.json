@@ -5,7 +5,7 @@
     "title": "New errors in Argo Workflows for host: {{host.name}}",
     "description": "Notify your team when there are new errors in Argo Workflows.",
 	  "tags": [
-		    "integration:argo_workflows"
+		    "integration:argo-workflows"
 	  ],
     "definition": {
 	      "name": "[Argo Workflows] New errors in Argo Workflows for host: {{host.name}}",
@@ -13,7 +13,7 @@
 	      "query": "change(sum(last_5m),last_10m):sum:argo_workflows.error.count{*}.as_count() >= 1",
 	      "message": "Detected some new errors in your Argo Workflows.",
 	      "tags": [
-		        "integration:argo_workflows"
+		        "integration:argo-workflows"
 	      ],
 	      "options": {
 		        "thresholds": {
