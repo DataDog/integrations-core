@@ -4,6 +4,9 @@
     "last_updated_at": "2024-04-01",
     "title": "New errors in Argo Workflows for host: {{host.name}}",
     "description": "Notify your team when there are new errors in Argo Workflows.",
+	  "tags": [
+		    "integration:argo_workflows"
+	  ],
     "definition": {
 	      "name": "[Argo Workflows] New errors in Argo Workflows for host: {{host.name}}",
 	      "type": "query alert",
