@@ -684,6 +684,10 @@ class SqlDatabaseBackup(BaseSqlServerMetric):
 #
 # https://docs.microsoft.com/en-us/sql/relational-databases/system-dynamic-management-views/sys-dm-db-index-physical-stats-transact-sql?view=sql-server-ver15
 class SqlDbFragmentation(BaseSqlServerMetric):
+    '''
+    DEPRECATED: This is deprecated and migrated to database_metrics/db_fragmentation_metrics.py
+    '''
+
     CUSTOM_QUERIES_AVAILABLE = False
     TABLE = 'sys.dm_db_index_physical_stats'
     DEFAULT_METRIC_TYPE = 'gauge'

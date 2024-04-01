@@ -15,6 +15,7 @@ from datadog_checks.sqlserver.const import (
 )
 from datadog_checks.sqlserver.database_metrics import (
     SqlserverAoMetrics,
+    SqlserverDBFragmentationMetrics,
     SqlserverFciMetrics,
     SqlserverFileStatsMetrics,
     SqlserverIndexUsageMetrics,
@@ -544,3 +545,91 @@ def test_sqlserver_index_usage_metrics(
     dd_run_check(sqlserver_check)
     for metric_name in index_usage_metrics.metric_names()[0]:
         aggregator.assert_metric(metric_name, count=0)
+
+
+@pytest.mark.integration
+@pytest.mark.usefixtures('dd_environment')
+@pytest.mark.parametrize('include_db_fragmentation_metrics', [True, False])
+@pytest.mark.parametrize(
+    'db_fragmentation_object_names', [None, ['spt_fallback_db', 'spt_fallback_dev', 'spt_fallback_usg']]
+)
+def test_sqlserver_db_fragmentation_metrics(
+    aggregator,
+    dd_run_check,
+    init_config,
+    instance_docker_metrics,
+    include_db_fragmentation_metrics,
+    db_fragmentation_object_names,
+):
+    instance_docker_metrics['database_autodiscovery'] = True
+    instance_docker_metrics['include_db_fragmentation_metrics'] = include_db_fragmentation_metrics
+
+    mocked_results = [
+        [
+            ('master', 'spt_fallback_db', 0, None, 0, 0.0, 0, 0.0),
+            ('master', 'spt_fallback_dev', 0, None, 0, 0.0, 0, 0.0),
+            ('master', 'spt_fallback_usg', 0, None, 0, 0.0, 0, 0.0),
+            ('master', 'spt_monitor', 0, None, 1, 1.0, 1, 0.0),
+            ('master', 'MSreplication_options', 0, None, 1, 1.0, 1, 0.0),
+        ],
+        [
+            ('msdb', 'syscachedcredentials', 1, 'PK__syscache__F6D56B562DA81DC6', 0, 0.0, 0, 0.0),
+            ('msdb', 'syscollector_blobs_internal', 1, 'PK_syscollector_blobs_internal_paremeter_name', 0, 0.0, 0, 0.0),
+        ],
+        [('datadog_test', 'ϑings', 1, 'thingsindex', 1, 1.0, 1, 0.0)],
+    ]
+
+    if db_fragmentation_object_names:
+        instance_docker_metrics['db_fragmentation_object_names'] = db_fragmentation_object_names
+        mocked_results = [
+            [
+                ('master', 'spt_fallback_db', 0, None, 0, 0.0, 0, 0.0),
+                ('master', 'spt_fallback_dev', 0, None, 0, 0.0, 0, 0.0),
+                ('master', 'spt_fallback_usg', 0, None, 0, 0.0, 0, 0.0),
+            ],
+            [],
+            [],
+        ]
+
+    sqlserver_check = SQLServer(CHECK_NAME, init_config, [instance_docker_metrics])
+
+    execute_query_handler_mocked = mock.MagicMock()
+    execute_query_handler_mocked.side_effect = mocked_results
+
+    db_fragmentation_metrics = SqlserverDBFragmentationMetrics(
+        instance_config=instance_docker_metrics,
+        new_query_executor=sqlserver_check._new_query_executor,
+        server_static_info=STATIC_SERVER_INFO,
+        execute_query_handler=execute_query_handler_mocked,
+        # execute_query_handler=sqlserver_check.execute_query_raw,
+        databases=AUTODISCOVERY_DBS,
+    )
+
+    if db_fragmentation_object_names:
+        assert db_fragmentation_metrics.db_fragmentation_object_names == db_fragmentation_object_names
+
+    sqlserver_check._dynamic_queries = [db_fragmentation_metrics]
+
+    dd_run_check(sqlserver_check)
+
+    if not include_db_fragmentation_metrics:
+        assert db_fragmentation_metrics.enabled is False
+    else:
+        tags = instance_docker_metrics.get('tags', [])
+        for result in mocked_results:
+            for row in result:
+                database_name, object_name, index_id, index_name, *metric_values = row
+                metrics = zip(db_fragmentation_metrics.metric_names()[0], metric_values)
+                expected_tags = [
+                    f'db:{database_name}',
+                    f'database_name:{database_name}',
+                    f'object_name:{object_name}',
+                    f'index_id:{index_id}',
+                    f'index_name:{index_name}',
+                ] + tags
+                for metric_name, metric_value in metrics:
+                    aggregator.assert_metric(metric_name, value=metric_value, tags=expected_tags)
+                    if db_fragmentation_object_names:
+                        for m in aggregator.metrics(metric_name):
+                            tags_by_key = dict([t.split(':') for t in m.tags if not t.startswith('dd.internal')])
+                            assert tags_by_key['object_name'].lower() in db_fragmentation_object_names

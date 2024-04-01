@@ -2,6 +2,7 @@
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
 from .ao_metrics import SqlserverAoMetrics
+from .db_fragmentation_metrics import SqlserverDBFragmentationMetrics
 from .fci_metrics import SqlserverFciMetrics
 from .file_stats_metrics import SqlserverFileStatsMetrics
 from .index_usage_metrics import SqlserverIndexUsageMetrics

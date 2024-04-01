@@ -19,6 +19,7 @@ from datadog_checks.sqlserver.activity import SqlserverActivity
 from datadog_checks.sqlserver.config import SQLServerConfig
 from datadog_checks.sqlserver.database_metrics import (
     SqlserverAoMetrics,
+    SqlserverDBFragmentationMetrics,
     SqlserverFciMetrics,
     SqlserverFileStatsMetrics,
     SqlserverIndexUsageMetrics,
@@ -50,7 +51,6 @@ from datadog_checks.sqlserver.const import (
     BASE_NAME_QUERY,
     COUNTER_TYPE_QUERY,
     DATABASE_BACKUP_METRICS,
-    DATABASE_FRAGMENTATION_METRICS,
     DATABASE_MASTER_FILES,
     DATABASE_METRICS,
     DATABASE_SERVICE_CHECK_NAME,
@@ -506,32 +506,6 @@ class SQLServer(AgentCheck):
                 cfg = {'name': name, 'table': table, 'column': column, 'tags': tags}
                 metrics_to_collect.append(self.typed_metric(cfg_inst=cfg, table=table, column=column))
 
-        # Load DB Fragmentation metrics
-        if is_affirmative(self.instance.get('include_db_fragmentation_metrics', False)):
-            db_fragmentation_object_names = self.instance.get('db_fragmentation_object_names', [])
-            db_names = [d.name for d in self.databases] or [
-                self.instance.get('database', self.connection.DEFAULT_DATABASE)
-            ]
-
-            if not db_fragmentation_object_names:
-                self.log.debug(
-                    "No fragmentation object names specified, will return fragmentation metrics for all "
-                    "object_ids of current database(s): %s",
-                    db_names,
-                )
-
-            for db_name in db_names:
-                for name, table, column in DATABASE_FRAGMENTATION_METRICS:
-                    cfg = {
-                        'name': name,
-                        'table': table,
-                        'column': column,
-                        'instance_name': db_name,
-                        'tags': tags,
-                        'db_fragmentation_object_names': db_fragmentation_object_names,
-                    }
-                    metrics_to_collect.append(self.typed_metric(cfg_inst=cfg, table=table, column=column))
-
         # Load any custom metrics from conf.d/sqlserver.yaml
         for cfg in custom_metrics:
             sql_counter_type = None
@@ -835,6 +809,13 @@ class SQLServer(AgentCheck):
             execute_query_handler=self.execute_query_raw,
             databases=db_names,
         )
+        db_fragmentation_metrics = SqlserverDBFragmentationMetrics(
+            instance_config=self.instance,
+            new_query_executor=self._new_query_executor,
+            server_static_info=self.static_info_cache,
+            execute_query_handler=self.execute_query_raw,
+            databases=db_names,
+        )
 
         # create a list of dynamic queries to execute
         self._dynamic_queries = [
@@ -848,6 +829,7 @@ class SQLServer(AgentCheck):
             # database level metrics
             tempdb_file_space_usage_metrics,
             index_usage_metrics,
+            db_fragmentation_metrics,
         ]
         self.log.debug("initialized dynamic queries")
         return self._dynamic_queries

@@ -29,6 +29,9 @@ QUERY_AO_FAILOVER_CLUSTER = {
     ],
 }
 
+# sys.dm_hadr_cluster does not have a related column to join on, this cross join will add the
+# cluster_name column to every row by multiplying all the rows in the left table against
+# all the rows in the right table. Note, there will only be one row from sys.dm_hadr_cluster.
 QUERY_AO_FAILOVER_CLUSTER_MEMBER = {
     "name": "sys.dm_hadr_cluster_members",
     "query": """
@@ -41,9 +44,6 @@ QUERY_AO_FAILOVER_CLUSTER_MEMBER = {
             1,
             number_of_quorum_votes
         FROM sys.dm_hadr_cluster_members
-        -- `sys.dm_hadr_cluster` does not have a related column to join on, this cross join will add the
-        -- `cluster_name` column to every row by multiplying all the rows in the left table against
-        -- all the rows in the right table. Note, there will only be one row from `sys.dm_hadr_cluster`.
         CROSS JOIN (SELECT TOP 1 cluster_name FROM sys.dm_hadr_cluster) AS FC
     """.strip(),
     "columns": [
