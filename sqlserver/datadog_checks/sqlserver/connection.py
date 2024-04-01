@@ -691,7 +691,7 @@ class Connection(object):
 
         return None
     
-    def _get_current_database(self):
+    def _get_current_database_context(self):
         """
         Get the current database name.
         """
@@ -701,11 +701,11 @@ class Connection(object):
             return data[0][0]
 
     @contextmanager
-    def restore_current_database(self):
+    def restore_current_database_context(self):
         """
         Restores the default database after executing use statements.
         """
-        current_db = self._get_current_database()
+        current_db = self._get_current_database_context()
         try:
             yield
         finally:
