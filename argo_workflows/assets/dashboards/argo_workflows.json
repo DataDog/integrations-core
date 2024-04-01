@@ -100,7 +100,7 @@
                             "count": 50,
                             "display_format": "countsAndList",
                             "hide_zero_counts": true,
-                            "query": "tag:(integration:argo_workflows)",
+                            "query": "tag:(integration:argo-workflows)",
                             "show_last_triggered": false,
                             "show_priority": false,
                             "sort": "status,asc",
