@@ -552,3 +552,17 @@ def test_format_connection_error(
     _, conn_err = format_connection_exception(error_message, driver)
     assert conn_err
     assert conn_err.value == expected_error.value
+
+
+@pytest.mark.integration
+@pytest.mark.usefixtures('dd_environment')
+def test_restore_current_database(instance_docker):
+    check = SQLServer(CHECK_NAME, {}, [instance_docker])
+    check.initialize_connection()
+    with check.connection.open_managed_default_connection():
+        current_db = check.connection._get_current_database()
+        with check.connection.restore_current_database():
+            with check.connection.get_managed_cursor() as cursor:
+                cursor.execute("USE tempdb")
+                assert check.connection._get_current_database() == "tempdb"
+        assert check.connection._get_current_database() == current_db
