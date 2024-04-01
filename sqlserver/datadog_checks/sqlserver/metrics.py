@@ -2,6 +2,10 @@
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
 """
+DEPRECATED:
+This module is considered deprecated and will be removed in a future release.
+DO NOT add new metrics to this module. Instead, use the `database_metrics` module.
+
 Collection of metric classes for specific SQL Server tables.
 """
 from __future__ import division
@@ -957,6 +961,7 @@ class SqlDbFileSpaceUsage(BaseSqlServerMetric):
     '''
     DEPRECATED: This is deprecated and migrated to database_metrics/tempdb_file_space_usage_metrics.py
     '''
+
     CUSTOM_QUERIES_AVAILABLE = False
     TABLE = 'sys.dm_db_file_space_usage'
     DEFAULT_METRIC_TYPE = 'gauge'

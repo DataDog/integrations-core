@@ -564,5 +564,5 @@ def test_restore_current_database_context(instance_docker):
         with check.connection.restore_current_database_context():
             with check.connection.get_managed_cursor() as cursor:
                 cursor.execute("USE tempdb")
-                assert check.connection._get_current_database() == "tempdb"
-        assert check.connection._get_current_database() == current_db
+                assert check.connection._get_current_database_context() == "tempdb"
+        assert check.connection._get_current_database_context() == current_db

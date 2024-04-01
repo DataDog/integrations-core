@@ -17,11 +17,10 @@ from datadog_checks.sqlserver.database_metrics import (
     SqlserverAoMetrics,
     SqlserverFciMetrics,
     SqlserverFileStatsMetrics,
+    SqlserverIndexUsageMetrics,
     SqlserverPrimaryLogShippingMetrics,
     SqlserverSecondaryLogShippingMetrics,
     SqlserverServerStateMetrics,
-)
-from datadog_checks.sqlserver.database_metrics.tempdb_file_space_usage_metrics import (
     SqlserverTempDBFileSpaceUsageMetrics,
 )
 
@@ -457,3 +456,91 @@ def test_sqlserver_tempdb_file_space_usage_metrics(
             ] + tags
             for metric_name, metric_value in metrics:
                 aggregator.assert_metric(metric_name, value=metric_value, tags=expected_tags)
+
+
+@pytest.mark.integration
+@pytest.mark.usefixtures('dd_environment')
+@pytest.mark.parametrize('include_index_usage_metrics', [True, False])
+@pytest.mark.parametrize('include_index_usage_metrics_tempdb', [True, False])
+@pytest.mark.parametrize('index_usage_stats_interval', [None, 600])
+def test_sqlserver_index_usage_metrics(
+    aggregator,
+    dd_run_check,
+    init_config,
+    instance_docker_metrics,
+    include_index_usage_metrics,
+    include_index_usage_metrics_tempdb,
+    index_usage_stats_interval,
+):
+    instance_docker_metrics['database_autodiscovery'] = True
+    instance_docker_metrics['include_index_usage_metrics'] = include_index_usage_metrics
+    instance_docker_metrics['include_index_usage_metrics_tempdb'] = include_index_usage_metrics_tempdb
+    if index_usage_stats_interval:
+        instance_docker_metrics['index_usage_stats_interval'] = index_usage_stats_interval
+
+    mocked_results_non_tempdb = [
+        [
+            ('master', 'PK__patch_ac__09EA1DC2BD2BC49C', 'patch_action_execution_state', 36, 0, 0, 0),
+            ('master', 'PK__rds_comp__2E7CCD4A9E2910C9', 'rds_component_version', 0, 5, 0, 0),
+        ],
+        [
+            ('msdb', 'PK__backupse__21F79AAB9439648C', 'backupset', 0, 1, 0, 0),
+        ],
+        [
+            ('datadog_test', 'idx_something', 'some_table', 10, 60, 12, 18),
+            ('datadog_test', 'idx_something_else', 'some_table', 20, 30, 40, 50),
+        ],
+    ]
+    mocked_results_tempdb = [
+        ('tempdb', 'PK__dmv_view__B5A34EE25D72CBFE', 'dmv_view_run_history', 1500, 0, 0, 49),
+    ]
+    mocked_results = mocked_results_non_tempdb
+    if include_index_usage_metrics_tempdb:
+        mocked_results += [mocked_results_tempdb]
+
+    sqlserver_check = SQLServer(CHECK_NAME, init_config, [instance_docker_metrics])
+
+    execute_query_handler_mocked = mock.MagicMock()
+    execute_query_handler_mocked.side_effect = mocked_results
+
+    index_usage_metrics = SqlserverIndexUsageMetrics(
+        instance_config=instance_docker_metrics,
+        new_query_executor=sqlserver_check._new_query_executor,
+        server_static_info=STATIC_SERVER_INFO,
+        execute_query_handler=execute_query_handler_mocked,
+        databases=AUTODISCOVERY_DBS + ['tempdb'],
+    )
+
+    assert (
+        index_usage_metrics.queries[0]['collection_interval'] == index_usage_stats_interval
+        if index_usage_stats_interval
+        else index_usage_metrics._default_collection_interval
+    )
+
+    sqlserver_check._dynamic_queries = [index_usage_metrics]
+
+    dd_run_check(sqlserver_check)
+
+    if not include_index_usage_metrics:
+        assert index_usage_metrics.enabled is False
+    else:
+        tags = instance_docker_metrics.get('tags', [])
+        for result in mocked_results:
+            for row in result:
+                db, index_name, table, *metric_values = row
+                metrics = zip(index_usage_metrics.metric_names()[0], metric_values)
+                expected_tags = [
+                    f'db:{db}',
+                    f'index_name:{index_name}',
+                    f'table:{table}',
+                ] + tags
+                for metric_name, metric_value in metrics:
+                    aggregator.assert_metric(metric_name, value=metric_value, tags=expected_tags)
+                if not include_index_usage_metrics_tempdb:
+                    assert db != 'tempdb'
+
+    # index_usage_metrics should not be collected because the collection interval is not reached
+    aggregator.reset()
+    dd_run_check(sqlserver_check)
+    for metric_name in index_usage_metrics.metric_names()[0]:
+        aggregator.assert_metric(metric_name, count=0)

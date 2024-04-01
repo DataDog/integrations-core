@@ -12,7 +12,13 @@ from datadog_checks.sqlserver.const import STATIC_INFO_ENGINE_EDITION, STATIC_IN
 
 class SqlserverDatabaseMetricsBase:
     def __init__(
-        self, instance_config, new_query_executor, server_static_info, execute_query_handler, track_operation_time=False
+        self,
+        instance_config,
+        new_query_executor,
+        server_static_info,
+        execute_query_handler,
+        track_operation_time=False,
+        databases=None,
     ):
         self.instance_config: dict = instance_config
         self.server_static_info: dict = server_static_info
@@ -21,6 +27,7 @@ class SqlserverDatabaseMetricsBase:
         ] = new_query_executor
         self.execute_query_handler: Callable[[str, Optional[str]], List[tuple]] = execute_query_handler
         self.track_operation_time: bool = track_operation_time
+        self._databases: Optional[List[str]] = databases
         self.log = get_check_logger()
 
     @property
@@ -40,8 +47,8 @@ class SqlserverDatabaseMetricsBase:
         raise NotImplementedError
 
     @property
-    def databases(self) -> List[str]:
-        raise NotImplementedError
+    def databases(self) -> Optional[List[str]]:
+        return self._databases
 
     @property
     def query_executors(self) -> List[QueryExecutor]:
