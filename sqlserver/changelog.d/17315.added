@@ -8,3 +8,4 @@ Migrate following dynamic metrics to database_metrics for better maintainability
 - SQLServer tempdb file space usage metrics
 - SQLServer index usage metrics
 - SQLServer database fragmentation metrics
+- SQLServer os tasks metrics

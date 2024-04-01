@@ -23,6 +23,7 @@ from datadog_checks.sqlserver.database_metrics import (
     SqlserverFciMetrics,
     SqlserverFileStatsMetrics,
     SqlserverIndexUsageMetrics,
+    SqlserverOsTasksMetrics,
     SqlserverPrimaryLogShippingMetrics,
     SqlserverSecondaryLogShippingMetrics,
     SqlserverServerStateMetrics,
@@ -60,6 +61,7 @@ from datadog_checks.sqlserver.const import (
     INSTANCE_METRICS,
     INSTANCE_METRICS_DATABASE,
     INSTANCE_METRICS_NEWER_2016,
+    OS_SCHEDULER_METRICS,
     PERF_AVERAGE_BULK,
     PERF_COUNTER_BULK_COUNT,
     PERF_COUNTER_LARGE_RAWCOUNT,
@@ -70,7 +72,6 @@ from datadog_checks.sqlserver.const import (
     STATIC_INFO_MAJOR_VERSION,
     STATIC_INFO_VERSION,
     SWITCH_DB_STATEMENT,
-    TASK_SCHEDULER_METRICS,
     VALID_METRIC_TYPES,
     expected_sys_databases_columns,
 )
@@ -496,7 +497,7 @@ class SQLServer(AgentCheck):
 
         # Load metrics from scheduler and task tables, if enabled
         if is_affirmative(self.instance.get('include_task_scheduler_metrics', False)):
-            for name, table, column in TASK_SCHEDULER_METRICS:
+            for name, table, column in OS_SCHEDULER_METRICS:
                 cfg = {'name': name, 'table': table, 'column': column, 'tags': tags}
                 metrics_to_collect.append(self.typed_metric(cfg_inst=cfg, table=table, column=column))
 
@@ -794,6 +795,12 @@ class SQLServer(AgentCheck):
             server_static_info=self.static_info_cache,
             execute_query_handler=self.execute_query_raw,
         )
+        os_tasks_metrics = SqlserverOsTasksMetrics(
+            instance_config=self.instance,
+            new_query_executor=self._new_query_executor,
+            server_static_info=self.static_info_cache,
+            execute_query_handler=self.execute_query_raw,
+        )
 
         # database level metrics
         tempdb_file_space_usage_metrics = SqlserverTempDBFileSpaceUsageMetrics(
@@ -826,6 +833,7 @@ class SQLServer(AgentCheck):
             fci_metrics,
             primary_log_shipping_metrics,
             secondary_log_shipping_metrics,
+            os_tasks_metrics,
             # database level metrics
             tempdb_file_space_usage_metrics,
             index_usage_metrics,
