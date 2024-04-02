@@ -42,7 +42,6 @@ def test_get_cursor(instance_docker):
 def test_missing_db(instance_docker, dd_run_check):
     instance = copy.copy(instance_docker)
     instance['ignore_missing_database'] = False
-    import mock
 
     with mock.patch(
         'datadog_checks.sqlserver.connection.Connection.open_managed_default_connection',
