@@ -29,6 +29,12 @@ class SQLServerConfig:
         self.include_index_usage_metrics_tempdb: bool = is_affirmative(
             instance.get('include_index_usage_metrics_tempdb', False)
         )
+        self.ignore_missing_database = is_affirmative(instance.get("ignore_missing_database", False))
+        if self.ignore_missing_database:
+            self.log.warning(
+                    "The parameter 'ignore_missing_database' is deprecated"
+                    "if you are unsure about the database name please use 'database_autodiscovery'"
+                )
 
         # DBM
         self.dbm_enabled: bool = is_affirmative(instance.get('dbm', False))

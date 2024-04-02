@@ -328,23 +328,23 @@ class SQLServer(AgentCheck):
             instance_config=self.instance,
             service_check_handler=self.handle_service_check,
         )
-
+   
     def make_metric_list_to_collect(self):
         # Pre-process the list of metrics to collect
         try:
-            if is_affirmative(self.instance.get("ignore_missing_database", False)):
-                # Do the database exist check that will allow to disable _check as a whole
-                # as otherwise the first call to open_managed_default_connection will throw the
-                # SQLConnectionError.
-                self.warning(
-                    "The parameter 'ignore_missing_database' is deprecated"
-                    "if you are unsure about the database name please use 'database_autodiscovery'"
-                )
-                db_exists, context = self.connection.check_database()
-                if not db_exists:
-                    self.do_check = False
-                    self.log.warning("Database %s does not exist. Disabling checks for this instance.", context)
-                    return
+            if self._config.ignore_missing_database:
+                # self.connection.check_database() will try to connect to 'master'. On Azure hosted DBs this should throw 
+                # unless the database parameter was explicetly configured to be 'master'. (TODO may be cannot be master and we just skip it)
+                engine_edition = self.static_info_cache.get(STATIC_INFO_ENGINE_EDITION)
+                if not (is_azure_sql_database(engine_edition) and self.instance.get('database', self.connection.DEFAULT_DATABASE) != self.connection.DEFAULT_DATABASE):
+                    # Do the database exist check that will allow to disable _check as a whole
+                    # as otherwise the first call to open_managed_default_connection will throw the
+                    # SQLConnectionError.
+                    db_exists, context = self.connection.check_database()
+                    if not db_exists:
+                        self.do_check = False
+                        self.log.warning("Database %s does not exist. Disabling checks for this instance.", context)
+                        return
             if self.instance.get('stored_procedure') is None:
                 with self.connection.open_managed_default_connection():
                     with self.connection.get_managed_cursor() as cursor:
