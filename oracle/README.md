@@ -419,6 +419,8 @@ The Oracle Database check does not include any events.
 
 See [service_checks.json][12] for a list of service checks provided by this integration.
 
+## Troubleshooting
+
 Need help? Contact [Datadog support][14].
 
 [1]: https://raw.githubusercontent.com/DataDog/integrations-core/master/oracle/images/oracle_dashboard.png
