@@ -10,8 +10,8 @@ from pathlib import Path
 from google.cloud import storage
 from packaging.version import Version
 
-BUCKET_NAME = 'dd-agent-int-deps'
-STORAGE_URL = f'https://storage.googleapis.com/{BUCKET_NAME}'
+BUCKET_NAME = 'deps-agent-int-datadoghq-com'
+STORAGE_URL = 'https://agent-int-packages.datadoghq.com'
 BUILDER_DIR = Path(__file__).parent
 REPO_DIR = BUILDER_DIR.parent
 RESOLUTION_DIR = REPO_DIR / '.deps'
