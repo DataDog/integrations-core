@@ -328,7 +328,7 @@ class SQLServer(AgentCheck):
             instance_config=self.instance,
             service_check_handler=self.handle_service_check,
         )
-   
+
     def make_metric_list_to_collect(self):
         # Pre-process the list of metrics to collect
         try:
