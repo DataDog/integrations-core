@@ -19,7 +19,9 @@ from datadog_checks.sqlserver.activity import SqlserverActivity
 from datadog_checks.sqlserver.config import SQLServerConfig
 from datadog_checks.sqlserver.database_metrics import (
     SqlserverAoMetrics,
+    SqlserverDatabaseBackupMetrics,
     SqlserverDatabaseFilesMetrics,
+    SqlserverDatabaseStatsMetrics,
     SqlserverDBFragmentationMetrics,
     SqlserverFciMetrics,
     SqlserverFileStatsMetrics,
@@ -53,10 +55,8 @@ from datadog_checks.sqlserver.const import (
     AZURE_DEPLOYMENT_TYPE_TO_RESOURCE_TYPES,
     BASE_NAME_QUERY,
     COUNTER_TYPE_QUERY,
-    DATABASE_BACKUP_METRICS,
     DATABASE_SERVICE_CHECK_NAME,
     DATABASE_SERVICE_CHECK_QUERY,
-    DATABASE_STATS_METRICS,
     DBM_MIGRATED_METRICS,
     ENGINE_EDITION_SQL_DATABASE,
     INSTANCE_METRICS,
@@ -465,21 +465,6 @@ class SQLServer(AgentCheck):
                         physical_database_name=db.physical_db_name,
                     )
 
-        # Load database statistics
-        db_stats_to_collect = list(DATABASE_STATS_METRICS)
-        engine_edition = self.static_info_cache.get(STATIC_INFO_ENGINE_EDITION)
-        if not is_azure_sql_database(engine_edition):
-            db_stats_to_collect.extend(DATABASE_BACKUP_METRICS)
-
-        for name, table, column in db_stats_to_collect:
-            # include database as a filter option
-            db_names = [d.name for d in self.databases] or [
-                self.instance.get('database', self.connection.DEFAULT_DATABASE)
-            ]
-            for db_name in db_names:
-                cfg = {'name': name, 'table': table, 'column': column, 'instance_name': db_name, 'tags': tags}
-                metrics_to_collect.append(self.typed_metric(cfg_inst=cfg, table=table, column=column))
-
         # Load AlwaysOn metrics
         if is_affirmative(self.instance.get('include_ao_metrics', False)):
             for name, table, column in AO_METRICS + AO_METRICS_PRIMARY + AO_METRICS_SECONDARY:
@@ -802,6 +787,18 @@ class SQLServer(AgentCheck):
             server_static_info=self.static_info_cache,
             execute_query_handler=self.execute_query_raw,
         )
+        database_stats_metrics = SqlserverDatabaseStatsMetrics(
+            instance_config=self.instance,
+            new_query_executor=self._new_query_executor,
+            server_static_info=self.static_info_cache,
+            execute_query_handler=self.execute_query_raw,
+        )
+        database_backup_metrics = SqlserverDatabaseBackupMetrics(
+            instance_config=self.instance,
+            new_query_executor=self._new_query_executor,
+            server_static_info=self.static_info_cache,
+            execute_query_handler=self.execute_query_raw,
+        )
 
         # database level metrics
         tempdb_file_space_usage_metrics = SqlserverTempDBFileSpaceUsageMetrics(
@@ -843,6 +840,8 @@ class SQLServer(AgentCheck):
             secondary_log_shipping_metrics,
             os_tasks_metrics,
             master_files_metrics,
+            database_stats_metrics,
+            database_backup_metrics,
             # database level metrics
             tempdb_file_space_usage_metrics,
             index_usage_metrics,

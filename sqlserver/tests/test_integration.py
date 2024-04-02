@@ -791,3 +791,18 @@ def test_index_usage_statistics(aggregator, dd_run_check, instance_docker, datab
     ]
     for m in DATABASE_INDEX_METRICS:
         aggregator.assert_metric(m, tags=expected_tags, count=1)
+
+
+@pytest.mark.integration
+@pytest.mark.usefixtures('dd_environment')
+def test_database_state(aggregator, dd_run_check, init_config, instance_docker):
+    instance_docker['database'] = 'master'
+    sqlserver_check = SQLServer(CHECK_NAME, init_config, [instance_docker])
+    dd_run_check(sqlserver_check)
+    expected_tags = instance_docker.get('tags', []) + [
+        'database_recovery_model_desc:SIMPLE',
+        'database_state_desc:ONLINE',
+        'database:{}'.format(instance_docker['database']),
+        'db:{}'.format(instance_docker['database']),
+    ]
+    aggregator.assert_metric('sqlserver.database.state', tags=expected_tags, hostname=sqlserver_check.resolved_hostname)

@@ -15,7 +15,9 @@ from datadog_checks.sqlserver.const import (
 )
 from datadog_checks.sqlserver.database_metrics import (
     SqlserverAoMetrics,
+    SqlserverDatabaseBackupMetrics,
     SqlserverDatabaseFilesMetrics,
+    SqlserverDatabaseStatsMetrics,
     SqlserverDBFragmentationMetrics,
     SqlserverFciMetrics,
     SqlserverFileStatsMetrics,
@@ -840,3 +842,97 @@ def test_sqlserver_database_files_metrics(
             ] + tags
             for metric_name, metric_value in metrics:
                 aggregator.assert_metric(metric_name, value=metric_value, tags=expected_tags)
+
+
+@pytest.mark.integration
+@pytest.mark.usefixtures('dd_environment')
+def test_sqlserver_database_stats_metrics(
+    aggregator,
+    dd_run_check,
+    init_config,
+    instance_docker_metrics,
+):
+    instance_docker_metrics['database_autodiscovery'] = True
+
+    mocked_results = [
+        ('master', 'master', 'ONLINE', 'SIMPLE', 0, False, False, False),
+        ('tempdb', 'tempdb', 'ONLINE', 'SIMPLE', 0, False, False, False),
+        ('model', 'model', 'ONLINE', 'FULL', 0, False, False, False),
+        ('msdb', 'msdb', 'ONLINE', 'SIMPLE', 0, False, False, False),
+        ('datadog_test', 'datadog_test', 'ONLINE', 'FULL', 0, False, False, False),
+    ]
+
+    sqlserver_check = SQLServer(CHECK_NAME, init_config, [instance_docker_metrics])
+
+    def execute_query_handler_mocked(query, db=None):
+        return mocked_results
+
+    database_stats_metrics = SqlserverDatabaseStatsMetrics(
+        instance_config=instance_docker_metrics,
+        new_query_executor=sqlserver_check._new_query_executor,
+        server_static_info=STATIC_SERVER_INFO,
+        execute_query_handler=execute_query_handler_mocked,
+    )
+
+    sqlserver_check._dynamic_queries = [database_stats_metrics]
+
+    dd_run_check(sqlserver_check)
+
+    tags = instance_docker_metrics.get('tags', [])
+    for result in mocked_results:
+        db, database, database_state_desc, database_recovery_model_desc, *metric_values = result
+        metrics = zip(database_stats_metrics.metric_names()[0], metric_values)
+        expected_tags = [
+            f'db:{db}',
+            f'database:{database}',
+            f'database_state_desc:{database_state_desc}',
+            f'database_recovery_model_desc:{database_recovery_model_desc}',
+        ] + tags
+        for metric_name, metric_value in metrics:
+            aggregator.assert_metric(metric_name, value=metric_value, tags=expected_tags)
+
+
+@pytest.mark.integration
+@pytest.mark.usefixtures('dd_environment')
+def test_sqlserver_database_backup_metrics(
+    aggregator,
+    dd_run_check,
+    init_config,
+    instance_docker_metrics,
+):
+    instance_docker_metrics['database_autodiscovery'] = True
+
+    mocked_results = [
+        ('master', 'master', 0),
+        ('model', 'model', 2),
+        ('msdb', 'msdb', 0),
+        ('tempdb', 'tempdb', 0),
+        ('datadog_test', 'datadog_test', 10),
+    ]
+
+    sqlserver_check = SQLServer(CHECK_NAME, init_config, [instance_docker_metrics])
+
+    def execute_query_handler_mocked(query, db=None):
+        return mocked_results
+
+    database_backup_metrics = SqlserverDatabaseBackupMetrics(
+        instance_config=instance_docker_metrics,
+        new_query_executor=sqlserver_check._new_query_executor,
+        server_static_info=STATIC_SERVER_INFO,
+        execute_query_handler=execute_query_handler_mocked,
+    )
+
+    sqlserver_check._dynamic_queries = [database_backup_metrics]
+
+    dd_run_check(sqlserver_check)
+
+    tags = instance_docker_metrics.get('tags', [])
+    for result in mocked_results:
+        db, database, *metric_values = result
+        metrics = zip(database_backup_metrics.metric_names()[0], metric_values)
+        expected_tags = [
+            f'db:{db}',
+            f'database:{database}',
+        ] + tags
+        for metric_name, metric_value in metrics:
+            aggregator.assert_metric(metric_name, value=metric_value, tags=expected_tags)

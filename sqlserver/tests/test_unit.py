@@ -451,19 +451,6 @@ def test_split_sqlserver_host(instance_host, split_host, split_port):
     assert (s_host, s_port) == (split_host, split_port)
 
 
-def test_database_state(aggregator, dd_run_check, init_config, instance_docker):
-    instance_docker['database'] = 'mAsTeR'
-    sqlserver_check = SQLServer(CHECK_NAME, init_config, [instance_docker])
-    dd_run_check(sqlserver_check)
-    expected_tags = instance_docker.get('tags', []) + [
-        'database_recovery_model_desc:SIMPLE',
-        'database_state_desc:ONLINE',
-        'database:{}'.format(instance_docker['database']),
-        'db:{}'.format(instance_docker['database']),
-    ]
-    aggregator.assert_metric('sqlserver.database.state', tags=expected_tags, hostname=sqlserver_check.resolved_hostname)
-
-
 @pytest.mark.parametrize(
     "query,expected_comments,is_proc,expected_name",
     [
