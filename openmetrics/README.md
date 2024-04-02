@@ -68,7 +68,7 @@ By default, the integration skips metrics that come without a type on a Promethe
 
 ```yaml
   metrics:
-    - "metric_without_type":
+    - "<NAME_OF_METRIC_WITHOUT_TYPE>":
         "type": "gauge"
 ```
 
