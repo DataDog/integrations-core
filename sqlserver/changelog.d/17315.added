@@ -11,3 +11,9 @@ Migrate following dynamic metrics to database_metrics for better maintainability
 - SQLServer os tasks metrics
 - SQLServer master files metrics
 - SQLServer database files metrics
+- SQLServer database stats metrics
+- SQLServer database backup metrics
+- SQLServer os schedulers metrics
+- SQLServer database replication stats metrics
+- SQLServer availability replicas metrics
+- SQLServer availability groups metrics

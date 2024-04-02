@@ -2,8 +2,11 @@
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
 from .ao_metrics import SqlserverAoMetrics
+from .availability_groups_metrics import SqlserverAvailabilityGroupsMetrics
+from .availability_replicas_metrics import SqlserverAvailabilityReplicasMetrics
 from .database_backup_metrics import SqlserverDatabaseBackupMetrics
 from .database_files_metrics import SqlserverDatabaseFilesMetrics
+from .database_replication_stats_metrics import SqlserverDatabaseReplicationStatsMetrics
 from .database_stats_metrics import SqlserverDatabaseStatsMetrics
 from .db_fragmentation_metrics import SqlserverDBFragmentationMetrics
 from .fci_metrics import SqlserverFciMetrics

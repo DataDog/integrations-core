@@ -19,8 +19,11 @@ from datadog_checks.sqlserver.activity import SqlserverActivity
 from datadog_checks.sqlserver.config import SQLServerConfig
 from datadog_checks.sqlserver.database_metrics import (
     SqlserverAoMetrics,
+    SqlserverAvailabilityGroupsMetrics,
+    SqlserverAvailabilityReplicasMetrics,
     SqlserverDatabaseBackupMetrics,
     SqlserverDatabaseFilesMetrics,
+    SqlserverDatabaseReplicationStatsMetrics,
     SqlserverDatabaseStatsMetrics,
     SqlserverDBFragmentationMetrics,
     SqlserverFciMetrics,
@@ -48,9 +51,6 @@ from datadog_checks.sqlserver import metrics
 from datadog_checks.sqlserver.__about__ import __version__
 from datadog_checks.sqlserver.connection import Connection, SQLConnectionError, split_sqlserver_host_port
 from datadog_checks.sqlserver.const import (
-    AO_METRICS,
-    AO_METRICS_PRIMARY,
-    AO_METRICS_SECONDARY,
     AUTODISCOVERY_QUERY,
     AWS_RDS_HOSTNAME_SUFFIX,
     AZURE_DEPLOYMENT_TYPE_TO_RESOURCE_TYPES,
@@ -465,22 +465,6 @@ class SQLServer(AgentCheck):
                         physical_database_name=db.physical_db_name,
                     )
 
-        # Load AlwaysOn metrics
-        if is_affirmative(self.instance.get('include_ao_metrics', False)):
-            for name, table, column in AO_METRICS + AO_METRICS_PRIMARY + AO_METRICS_SECONDARY:
-                db_name = 'master'
-                cfg = {
-                    'name': name,
-                    'table': table,
-                    'column': column,
-                    'instance_name': db_name,
-                    'tags': tags,
-                    'ao_database': self.instance.get('ao_database', None),
-                    'availability_group': self.instance.get('availability_group', None),
-                    'only_emit_local': is_affirmative(self.instance.get('only_emit_local', False)),
-                }
-                metrics_to_collect.append(self.typed_metric(cfg_inst=cfg, table=table, column=column))
-
         # Load any custom metrics from conf.d/sqlserver.yaml
         for cfg in custom_metrics:
             sql_counter_type = None
@@ -751,6 +735,24 @@ class SQLServer(AgentCheck):
             server_static_info=self.static_info_cache,
             execute_query_handler=self.execute_query_raw,
         )
+        availability_groups_metrics = SqlserverAvailabilityGroupsMetrics(
+            instance_config=self.instance,
+            new_query_executor=self._new_query_executor,
+            server_static_info=self.static_info_cache,
+            execute_query_handler=self.execute_query_raw,
+        )
+        availability_replicas_metrics = SqlserverAvailabilityReplicasMetrics(
+            instance_config=self.instance,
+            new_query_executor=self._new_query_executor,
+            server_static_info=self.static_info_cache,
+            execute_query_handler=self.execute_query_raw,
+        )
+        database_replication_stats_metrics = SqlserverDatabaseReplicationStatsMetrics(
+            instance_config=self.instance,
+            new_query_executor=self._new_query_executor,
+            server_static_info=self.static_info_cache,
+            execute_query_handler=self.execute_query_raw,
+        )
         fci_metrics = SqlserverFciMetrics(
             instance_config=self.instance,
             new_query_executor=self._new_query_executor,
@@ -835,6 +837,9 @@ class SQLServer(AgentCheck):
             server_state_metrics,
             file_stats_metrics,
             ao_metrics,
+            availability_groups_metrics,
+            availability_replicas_metrics,
+            database_replication_stats_metrics,
             fci_metrics,
             primary_log_shipping_metrics,
             secondary_log_shipping_metrics,

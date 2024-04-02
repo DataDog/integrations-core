@@ -15,8 +15,11 @@ from datadog_checks.sqlserver.const import (
 )
 from datadog_checks.sqlserver.database_metrics import (
     SqlserverAoMetrics,
+    SqlserverAvailabilityGroupsMetrics,
+    SqlserverAvailabilityReplicasMetrics,
     SqlserverDatabaseBackupMetrics,
     SqlserverDatabaseFilesMetrics,
+    SqlserverDatabaseReplicationStatsMetrics,
     SqlserverDatabaseStatsMetrics,
     SqlserverDBFragmentationMetrics,
     SqlserverFciMetrics,
@@ -222,6 +225,310 @@ def test_sqlserver_ao_metrics(
             ] + tags
             for metric_name, metric_value in metrics:
                 aggregator.assert_metric(metric_name, value=metric_value, tags=expected_tags)
+
+
+@pytest.mark.integration
+@pytest.mark.usefixtures('dd_environment')
+@pytest.mark.parametrize('include_ao_metrics', [True, False])
+@pytest.mark.parametrize(
+    'availability_group,mocked_results',
+    [
+        pytest.param(
+            None,
+            [('AG1', 'AG1', 'HEALTHY', 2, 1, None), ('AG2', 'AG2', 'HEALTHY', 2, 1, None)],
+            id='no availability_group',
+        ),
+        pytest.param('AG1', [('AG1', 'AG1', 'HEALTHY', 2, 1, None)], id='availability_group set'),
+    ],
+)
+def test_sqlserver_availability_groups_metrics(
+    aggregator,
+    dd_run_check,
+    init_config,
+    instance_docker_metrics,
+    include_ao_metrics,
+    availability_group,
+    mocked_results,
+):
+    instance_docker_metrics['database_autodiscovery'] = True
+    instance_docker_metrics['include_ao_metrics'] = include_ao_metrics
+    if availability_group:
+        instance_docker_metrics['availability_group'] = availability_group
+
+    sqlserver_check = SQLServer(CHECK_NAME, init_config, [instance_docker_metrics])
+
+    def execute_query_handler_mocked(query, db=None):
+        return mocked_results
+
+    availability_groups_metrics = SqlserverAvailabilityGroupsMetrics(
+        instance_config=instance_docker_metrics,
+        new_query_executor=sqlserver_check._new_query_executor,
+        server_static_info=STATIC_SERVER_INFO,
+        execute_query_handler=execute_query_handler_mocked,
+    )
+
+    if availability_group:
+        assert availability_groups_metrics.queries[0]['query'].endswith(
+            f" where resource_group_id = '{availability_group}'"
+        )
+
+    sqlserver_check._dynamic_queries = [availability_groups_metrics]
+
+    dd_run_check(sqlserver_check)
+
+    if not include_ao_metrics:
+        assert availability_groups_metrics.enabled is False
+    else:
+        tags = instance_docker_metrics.get('tags', [])
+        for result in mocked_results:
+            ag, availability_group_name, synchronization_health_desc, *metric_values = result
+            metrics = zip(availability_groups_metrics.metric_names()[0], metric_values)
+            expected_tags = [
+                f'availability_group:{ag}',
+                f'availability_group_name:{availability_group_name}',
+                f'synchronization_health_desc:{synchronization_health_desc}',
+            ] + tags
+            for metric_name, metric_value in metrics:
+                if metric_value is not None:
+                    aggregator.assert_metric(metric_name, value=metric_value, tags=expected_tags)
+            if availability_group:
+                assert ag == availability_group
+
+
+@pytest.mark.integration
+@pytest.mark.usefixtures('dd_environment')
+@pytest.mark.parametrize('include_ao_metrics', [True, False])
+@pytest.mark.parametrize(
+    'availability_group,only_emit_local,mocked_results',
+    [
+        pytest.param(
+            None,
+            None,
+            [('AG1', 'AG1', 'aoag_secondary', 'SYNCHRONIZED', 2), ('AG1', 'AG1', 'aoag_primary', 'SYNCHRONIZED', 2)],
+            id='no availability_group, no only_emit_local',
+        ),
+        pytest.param(
+            'AG1',
+            None,
+            [('AG1', 'AG1', 'aoag_secondary', 'SYNCHRONIZED', 2), ('AG1', 'AG1', 'aoag_primary', 'SYNCHRONIZED', 2)],
+            id='availability_group set, no only_emit_local',
+        ),
+        pytest.param(
+            None,
+            True,
+            [('AG1', 'AG1', 'aoag_primary', 'SYNCHRONIZED', 2)],
+            id='no availability_group, only_emit_local is True',
+        ),
+        pytest.param(
+            'AG1',
+            True,
+            [('AG1', 'AG1', 'aoag_primary', 'SYNCHRONIZED', 2)],
+            id='availability_group set, only_emit_local is True',
+        ),
+    ],
+)
+def test_sqlserver_database_replication_stats_metrics(
+    aggregator,
+    dd_run_check,
+    init_config,
+    instance_docker_metrics,
+    include_ao_metrics,
+    availability_group,
+    only_emit_local,
+    mocked_results,
+):
+    instance_docker_metrics['database_autodiscovery'] = True
+    instance_docker_metrics['include_ao_metrics'] = include_ao_metrics
+    if availability_group:
+        instance_docker_metrics['availability_group'] = availability_group
+    if only_emit_local:
+        instance_docker_metrics['only_emit_local'] = only_emit_local
+
+    sqlserver_check = SQLServer(CHECK_NAME, init_config, [instance_docker_metrics])
+
+    def execute_query_handler_mocked(query, db=None):
+        return mocked_results
+
+    database_replication_stats_metrics = SqlserverDatabaseReplicationStatsMetrics(
+        instance_config=instance_docker_metrics,
+        new_query_executor=sqlserver_check._new_query_executor,
+        server_static_info=STATIC_SERVER_INFO,
+        execute_query_handler=execute_query_handler_mocked,
+    )
+
+    if availability_group:
+        assert f"resource_group_id = '{availability_group}'" in database_replication_stats_metrics.queries[0]['query']
+    if only_emit_local:
+        assert "is_local = 1" in database_replication_stats_metrics.queries[0]['query']
+
+    sqlserver_check._dynamic_queries = [database_replication_stats_metrics]
+
+    dd_run_check(sqlserver_check)
+
+    if not include_ao_metrics:
+        assert database_replication_stats_metrics.enabled is False
+    else:
+        tags = instance_docker_metrics.get('tags', [])
+        for result in mocked_results:
+            ag, availability_group_name, replica_server_name, synchronization_state_desc, *metric_values = result
+            metrics = zip(database_replication_stats_metrics.metric_names()[0], metric_values)
+            expected_tags = [
+                f'availability_group:{ag}',
+                f'availability_group_name:{availability_group_name}',
+                f'replica_server_name:{replica_server_name}',
+                f'synchronization_state_desc:{synchronization_state_desc}',
+            ] + tags
+            for metric_name, metric_value in metrics:
+                if metric_value is not None:
+                    aggregator.assert_metric(metric_name, value=metric_value, tags=expected_tags)
+            if availability_group:
+                assert ag == availability_group
+
+
+@pytest.mark.integration
+@pytest.mark.usefixtures('dd_environment')
+@pytest.mark.parametrize('include_ao_metrics', [True, False])
+@pytest.mark.parametrize(
+    'availability_group,only_emit_local,ao_database,mocked_results',
+    [
+        pytest.param(
+            None,
+            None,
+            None,
+            [
+                ('datadog_test', 'AG1', 'AG1', 'aoag_primary', 'MANUAL', True, 1, True),
+                ('datadog_test', 'AG1', 'AG1', 'aoag_secondary', 'MANUAL', False, 1, True),
+            ],
+            id='no availability_group, no only_emit_local, no ao_database',
+        ),
+        pytest.param(
+            'AG1',
+            None,
+            None,
+            [
+                ('datadog_test', 'AG1', 'AG1', 'aoag_primary', 'MANUAL', True, 1, True),
+                ('datadog_test', 'AG1', 'AG1', 'aoag_secondary', 'MANUAL', False, 1, True),
+            ],
+            id='availability_group set, no only_emit_local, no ao_database',
+        ),
+        pytest.param(
+            None,
+            True,
+            None,
+            [('datadog_test', 'AG1', 'AG1', 'aoag_primary', 'MANUAL', True, 1, True)],
+            id='no availability_group, only_emit_local is True, no ao_database',
+        ),
+        pytest.param(
+            'AG1',
+            True,
+            None,
+            [('datadog_test', 'AG1', 'AG1', 'aoag_primary', 'MANUAL', True, 1, True)],
+            id='availability_group set, only_emit_local is True, no ao_database',
+        ),
+        pytest.param(
+            None,
+            None,
+            'my_db',
+            [],
+            id='no availability_group, no only_emit_local, ao_database set',
+        ),
+        pytest.param(
+            'AG1',
+            None,
+            'datadog_test',
+            [
+                ('datadog_test', 'AG1', 'AG1', 'aoag_primary', 'MANUAL', True, 1, True),
+                ('datadog_test', 'AG1', 'AG1', 'aoag_secondary', 'MANUAL', False, 1, True),
+            ],
+            id='availability_group set, no only_emit_local, ao_database set',
+        ),
+        pytest.param(
+            None,
+            True,
+            'datadog_test',
+            [('datadog_test', 'AG1', 'AG1', 'aoag_primary', 'MANUAL', True, 1, True)],
+            id='no availability_group, only_emit_local is True, ao_database set',
+        ),
+        pytest.param(
+            'AG1',
+            True,
+            'datadog_test',
+            [('datadog_test', 'AG1', 'AG1', 'aoag_primary', 'MANUAL', True, 1, True)],
+            id='availability_group set, only_emit_local is True, ao_database set',
+        ),
+    ],
+)
+def test_sqlserver_availability_replicas_metrics(
+    aggregator,
+    dd_run_check,
+    init_config,
+    instance_docker_metrics,
+    include_ao_metrics,
+    availability_group,
+    only_emit_local,
+    ao_database,
+    mocked_results,
+):
+    instance_docker_metrics['database_autodiscovery'] = True
+    instance_docker_metrics['include_ao_metrics'] = include_ao_metrics
+    if availability_group:
+        instance_docker_metrics['availability_group'] = availability_group
+    if only_emit_local:
+        instance_docker_metrics['only_emit_local'] = only_emit_local
+    if ao_database:
+        instance_docker_metrics['ao_database'] = ao_database
+
+    sqlserver_check = SQLServer(CHECK_NAME, init_config, [instance_docker_metrics])
+
+    def execute_query_handler_mocked(query, db=None):
+        return mocked_results
+
+    availability_replicas_metrics = SqlserverAvailabilityReplicasMetrics(
+        instance_config=instance_docker_metrics,
+        new_query_executor=sqlserver_check._new_query_executor,
+        server_static_info=STATIC_SERVER_INFO,
+        execute_query_handler=execute_query_handler_mocked,
+    )
+
+    if availability_group:
+        assert f"resource_group_id = '{availability_group}'" in availability_replicas_metrics.queries[0]['query']
+    if only_emit_local:
+        assert "is_local = 1" in availability_replicas_metrics.queries[0]['query']
+    if ao_database:
+        assert f"database_name = '{ao_database}'" in availability_replicas_metrics.queries[0]['query']
+
+    sqlserver_check._dynamic_queries = [availability_replicas_metrics]
+
+    dd_run_check(sqlserver_check)
+
+    if not include_ao_metrics:
+        assert availability_replicas_metrics.enabled is False
+    else:
+        tags = instance_docker_metrics.get('tags', [])
+        for result in mocked_results:
+            (
+                database_name,
+                ag,
+                availability_group_name,
+                replica_server_name,
+                failover_mode_desc,
+                is_primary_replica,
+                *metric_values,
+            ) = result
+            metrics = zip(availability_replicas_metrics.metric_names()[0], metric_values)
+            expected_tags = [
+                f'db:{database_name}',
+                f'availability_group:{ag}',
+                f'availability_group_name:{availability_group_name}',
+                f'replica_server_name:{replica_server_name}',
+                f'failover_mode_desc:{failover_mode_desc}',
+                f'is_primary_replica:{is_primary_replica}',
+            ] + tags
+            for metric_name, metric_value in metrics:
+                if metric_value is not None:
+                    aggregator.assert_metric(metric_name, value=metric_value, tags=expected_tags)
+            if availability_group:
+                assert ag == availability_group
 
 
 @pytest.mark.integration
@@ -682,7 +989,7 @@ def test_sqlserver_os_schedulers_metrics(
         instance_config=instance_docker_metrics,
         new_query_executor=sqlserver_check._new_query_executor,
         server_static_info=STATIC_SERVER_INFO,
-        execute_query_handler=execute_query_handler_mocked, 
+        execute_query_handler=execute_query_handler_mocked,
     )
 
     sqlserver_check._dynamic_queries = [os_schedulers_metrics]
