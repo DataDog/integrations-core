@@ -19,6 +19,7 @@ from datadog_checks.sqlserver.activity import SqlserverActivity
 from datadog_checks.sqlserver.config import SQLServerConfig
 from datadog_checks.sqlserver.database_metrics import (
     SqlserverAoMetrics,
+    SqlserverDatabaseFilesMetrics,
     SqlserverDBFragmentationMetrics,
     SqlserverFciMetrics,
     SqlserverFileStatsMetrics,
@@ -53,9 +54,9 @@ from datadog_checks.sqlserver.const import (
     BASE_NAME_QUERY,
     COUNTER_TYPE_QUERY,
     DATABASE_BACKUP_METRICS,
-    DATABASE_METRICS,
     DATABASE_SERVICE_CHECK_NAME,
     DATABASE_SERVICE_CHECK_QUERY,
+    DATABASE_STATS_METRICS,
     DBM_MIGRATED_METRICS,
     ENGINE_EDITION_SQL_DATABASE,
     INSTANCE_METRICS,
@@ -465,7 +466,7 @@ class SQLServer(AgentCheck):
                     )
 
         # Load database statistics
-        db_stats_to_collect = list(DATABASE_METRICS)
+        db_stats_to_collect = list(DATABASE_STATS_METRICS)
         engine_edition = self.static_info_cache.get(STATIC_INFO_ENGINE_EDITION)
         if not is_azure_sql_database(engine_edition):
             db_stats_to_collect.extend(DATABASE_BACKUP_METRICS)
@@ -795,7 +796,7 @@ class SQLServer(AgentCheck):
             server_static_info=self.static_info_cache,
             execute_query_handler=self.execute_query_raw,
         )
-        master_database_file_stats_metrics = SqlserverMasterFilesMetrics(
+        master_files_metrics = SqlserverMasterFilesMetrics(
             instance_config=self.instance,
             new_query_executor=self._new_query_executor,
             server_static_info=self.static_info_cache,
@@ -823,6 +824,13 @@ class SQLServer(AgentCheck):
             execute_query_handler=self.execute_query_raw,
             databases=db_names,
         )
+        database_files_metrics = SqlserverDatabaseFilesMetrics(
+            instance_config=self.instance,
+            new_query_executor=self._new_query_executor,
+            server_static_info=self.static_info_cache,
+            execute_query_handler=self.execute_query_raw,
+            databases=db_names,
+        )
 
         # create a list of dynamic queries to execute
         self._dynamic_queries = [
@@ -834,11 +842,12 @@ class SQLServer(AgentCheck):
             primary_log_shipping_metrics,
             secondary_log_shipping_metrics,
             os_tasks_metrics,
-            master_database_file_stats_metrics,
+            master_files_metrics,
             # database level metrics
             tempdb_file_space_usage_metrics,
             index_usage_metrics,
             db_fragmentation_metrics,
+            database_files_metrics,
         ]
         self.log.debug("initialized dynamic queries")
         return self._dynamic_queries
@@ -918,9 +927,7 @@ class SQLServer(AgentCheck):
                 self.log.debug("changing cursor context via use statement: %s", ctx)
                 cursor.execute(ctx)
             cursor.execute(query)
-            rows = cursor.fetchall()
-            print(rows, query, db)
-            return rows
+            return cursor.fetchall()
 
     def do_stored_procedure_check(self):
         """

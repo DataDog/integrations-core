@@ -364,9 +364,7 @@ def test_autodiscovery_multiple_instances(aggregator, dd_run_check, instance_aut
     found_log = 0
     for _, _, message in caplog.record_tuples:
         # make sure master and msdb is only queried once
-        if "SqlDatabaseFileStats: changing cursor context via use statement: use [master]" in message:
-            found_log += 1
-        if "SqlDatabaseFileStats: changing cursor context via use statement: use [msdb]" in message:
+        if "Restoring the original database context master" in message:
             found_log += 1
 
     assert found_log == 2

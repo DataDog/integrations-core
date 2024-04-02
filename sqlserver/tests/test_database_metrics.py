@@ -15,6 +15,7 @@ from datadog_checks.sqlserver.const import (
 )
 from datadog_checks.sqlserver.database_metrics import (
     SqlserverAoMetrics,
+    SqlserverDatabaseFilesMetrics,
     SqlserverDBFragmentationMetrics,
     SqlserverFciMetrics,
     SqlserverFileStatsMetrics,
@@ -703,7 +704,7 @@ def test_sqlserver_os_tasks_metrics(
 @pytest.mark.integration
 @pytest.mark.usefixtures('dd_environment')
 @pytest.mark.parametrize('include_master_files_metrics', [True, False])
-def test_sqlserver_master_file_metrics(
+def test_sqlserver_master_files_metrics(
     aggregator,
     dd_run_check,
     init_config,
@@ -764,6 +765,76 @@ def test_sqlserver_master_file_metrics(
                 f'file_id:{file_id}',
                 f'file_type:{file_type}',
                 f'file_location:{file_location}',
+                f'database_files_state_desc:{database_files_state_desc}',
+            ] + tags
+            for metric_name, metric_value in metrics:
+                aggregator.assert_metric(metric_name, value=metric_value, tags=expected_tags)
+
+
+@pytest.mark.integration
+@pytest.mark.usefixtures('dd_environment')
+def test_sqlserver_database_files_metrics(
+    aggregator,
+    dd_run_check,
+    init_config,
+    instance_docker_metrics,
+):
+    instance_docker_metrics['database_autodiscovery'] = True
+
+    mocked_results = [
+        [
+            (1, 'data', '/var/opt/mssql/data/master.mdf', 'master', 'ONLINE', 4096, 0, 4096),
+            (2, 'transaction_log', '/var/opt/mssql/data/mastlog.ldf', 'mastlog', 'ONLINE', 768, 0, 424),
+        ],
+        [
+            (1, 'data', '/var/opt/mssql/data/MSDBData.mdf', 'MSDBData', 'ONLINE', 13696, 0, 13696),
+            (2, 'transaction_log', '/var/opt/mssql/data/MSDBLog.ldf', 'MSDBLog', 'ONLINE', 512, 0, 432),
+        ],
+        [
+            (1, 'data', '/var/opt/mssql/data/datadog_test.mdf', 'datadog_test', 'ONLINE', 8192, 0, 2624),
+            (
+                2,
+                'transaction_log',
+                '/var/opt/mssql/data/datadog_test_log.ldf',
+                'datadog_test_log',
+                'ONLINE',
+                8192,
+                0,
+                488,
+            ),
+        ],
+    ]
+
+    sqlserver_check = SQLServer(CHECK_NAME, init_config, [instance_docker_metrics])
+
+    execute_query_handler_mocked = mock.MagicMock()
+    execute_query_handler_mocked.side_effect = mocked_results
+
+    database_files_metrics = SqlserverDatabaseFilesMetrics(
+        instance_config=instance_docker_metrics,
+        new_query_executor=sqlserver_check._new_query_executor,
+        server_static_info=STATIC_SERVER_INFO,
+        execute_query_handler=execute_query_handler_mocked,
+        # execute_query_handler=sqlserver_check.execute_query_raw,
+        databases=AUTODISCOVERY_DBS,
+    )
+
+    sqlserver_check._dynamic_queries = [database_files_metrics]
+
+    dd_run_check(sqlserver_check)
+
+    tags = instance_docker_metrics.get('tags', [])
+    for db, result in zip(AUTODISCOVERY_DBS, mocked_results):
+        for row in result:
+            file_id, file_type, file_location, file_name, database_files_state_desc, *metric_values = row
+            metrics = zip(database_files_metrics.metric_names()[0], metric_values)
+            expected_tags = [
+                f'db:{db}',
+                f'database:{db}',
+                f'file_id:{file_id}',
+                f'file_type:{file_type}',
+                f'file_location:{file_location}',
+                f'file_name:{file_name}',
                 f'database_files_state_desc:{database_files_state_desc}',
             ] + tags
             for metric_name, metric_value in metrics:

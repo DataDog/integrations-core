@@ -711,7 +711,8 @@ class Connection(object):
         finally:
             if current_db:
                 try:
+                    self.log.debug("Restoring the original database context %s", current_db)
                     with self.get_managed_cursor() as cursor:
                         cursor.execute(construct_use_statement(current_db))
                 except Exception as e:
-                    self.log.error("Failed to switch back to the original database %s: %s", current_db, e)
+                    self.log.error("Failed to switch back to the original database context %s: %s", current_db, e)

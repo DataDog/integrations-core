@@ -10,3 +10,4 @@ Migrate following dynamic metrics to database_metrics for better maintainability
 - SQLServer database fragmentation metrics
 - SQLServer os tasks metrics
 - SQLServer master files metrics
+- SQLServer database files metrics
