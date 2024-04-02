@@ -307,6 +307,4 @@ def get_operation_time_metrics(instance):
     Return a list of all operation time metrics
     """
     operation_time_metrics = deepcopy(OPERATION_TIME_METRICS)
-    if instance.get('include_ao_metrics', False):
-        operation_time_metrics.append('availability_groups_metrics')
     return operation_time_metrics
