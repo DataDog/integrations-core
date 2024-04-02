@@ -604,7 +604,6 @@ def test_sqlserver_db_fragmentation_metrics(
         new_query_executor=sqlserver_check._new_query_executor,
         server_static_info=STATIC_SERVER_INFO,
         execute_query_handler=execute_query_handler_mocked,
-        # execute_query_handler=sqlserver_check.execute_query_raw,
         databases=AUTODISCOVERY_DBS,
     )
 
@@ -757,8 +756,9 @@ def test_sqlserver_master_files_metrics(
     else:
         tags = instance_docker_metrics.get('tags', [])
         for result in mocked_results:
-            db, database, file_id, file_type, file_location, database_files_state_desc, *metric_values = result
-            metrics = zip(master_files_metrics.metric_names()[0], metric_values)
+            db, database, file_id, file_type, file_location, database_files_state_desc, size, state = result
+            size *= 8  # size is in pages, 1 page = 8 KB
+            metrics = zip(master_files_metrics.metric_names()[0], [state, size])
             expected_tags = [
                 f'db:{db}',
                 f'database:{database}',
@@ -815,7 +815,6 @@ def test_sqlserver_database_files_metrics(
         new_query_executor=sqlserver_check._new_query_executor,
         server_static_info=STATIC_SERVER_INFO,
         execute_query_handler=execute_query_handler_mocked,
-        # execute_query_handler=sqlserver_check.execute_query_raw,
         databases=AUTODISCOVERY_DBS,
     )
 
@@ -826,8 +825,10 @@ def test_sqlserver_database_files_metrics(
     tags = instance_docker_metrics.get('tags', [])
     for db, result in zip(AUTODISCOVERY_DBS, mocked_results):
         for row in result:
-            file_id, file_type, file_location, file_name, database_files_state_desc, *metric_values = row
-            metrics = zip(database_files_metrics.metric_names()[0], metric_values)
+            file_id, file_type, file_location, file_name, database_files_state_desc, size, space_used, state = row
+            size *= 8  # size is in pages, 1 page = 8 KB
+            space_used *= 8  # space_used is in pages, 1 page = 8 KB
+            metrics = zip(database_files_metrics.metric_names()[0], [state, size, space_used])
             expected_tags = [
                 f'db:{db}',
                 f'database:{db}',

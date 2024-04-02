@@ -21,9 +21,9 @@ DATABASE_FILES_METRICS_QUERY = {
         physical_name,
         name,
         state_desc,
-        ISNULL(size*8, 0) as size,
-        state,
-        ISNULL(CAST(FILEPROPERTY(name, 'SpaceUsed') as int)*8, 0) as space_used
+        ISNULL(size, 0) as size,
+        ISNULL(CAST(FILEPROPERTY(name, 'SpaceUsed') as int), 0) as space_used,
+        state
         FROM sys.database_files
     """,
     "columns": [
@@ -32,9 +32,14 @@ DATABASE_FILES_METRICS_QUERY = {
         {"name": "file_location", "type": "tag"},
         {"name": "file_name", "type": "tag"},
         {"name": "database_files_state_desc", "type": "tag"},
-        {"name": "database.files.size", "type": "gauge"},
+        {"name": "size", "type": "source"},
+        {"name": "space_used", "type": "source"},
         {"name": "database.files.state", "type": "gauge"},
-        {"name": "database.files.space_used", "type": "gauge"},
+    ],
+    "extras": [
+        # size/space_used are in pages, 1 page = 8 KB. Calculated after the query to avoid int overflow
+        {"name": "database.files.size", "expression": "size*8", "submit_type": "gauge"},
+        {"name": "database.files.space_used", "expression": "space_used*8", "submit_type": "gauge"},
     ],
 }
 

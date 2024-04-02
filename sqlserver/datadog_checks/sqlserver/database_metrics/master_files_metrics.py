@@ -22,7 +22,7 @@ MASTER_FILES_METRICS_QUERY = {
         END AS file_type,
         physical_name,
         sys.master_files.state_desc as state_desc,
-        ISNULL(size*8, 0) as size,
+        ISNULL(size, 0) as size,
         sys.master_files.state as state
         from sys.master_files
         right outer join sys.databases on sys.master_files.database_id = sys.databases.database_id
@@ -34,8 +34,12 @@ MASTER_FILES_METRICS_QUERY = {
         {"name": "file_type", "type": "tag"},
         {"name": "file_location", "type": "tag"},
         {"name": "database_files_state_desc", "type": "tag"},
-        {"name": "database.master_files.size", "type": "gauge"},
+        {"name": "size", "type": "source"},
         {"name": "database.master_files.state", "type": "gauge"},
+    ],
+    "extras": [
+        # size is in pages, 1 page = 8 KB. Calculated after the query to avoid int overflow
+        {"name": "database.master_files.size", "expression": "size*8", "submit_type": "gauge"},
     ],
 }
 

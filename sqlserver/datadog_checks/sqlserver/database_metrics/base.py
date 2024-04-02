@@ -71,7 +71,16 @@ class SqlserverDatabaseMetricsBase:
         '''
         metric_names = []
         for query in self.queries:
-            metric_names.append(["sqlserver." + c["name"] for c in query["columns"] if not c["type"].startswith("tag")])
+            names = [
+                "sqlserver." + c["name"]
+                for c in query["columns"]
+                if not c["type"].startswith("tag") and c["type"] != "source"
+            ]
+            if query.get("extras"):
+                names.extend(
+                    ["sqlserver." + e["name"] for e in query["extras"] if e.get("submit_type") or e.get("type")]
+                )
+            metric_names.append(names)
         return metric_names
 
     def tag_names(self) -> List[str]:

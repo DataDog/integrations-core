@@ -13,10 +13,6 @@ from __future__ import division
 from collections import defaultdict
 from functools import partial
 
-from datadog_checks.base.errors import CheckException
-
-from .utils import construct_use_statement
-
 # Queries
 ALL_INSTANCES = 'ALL'
 
@@ -397,111 +393,6 @@ class SqlOsSchedulers(BaseSqlServerMetric):
             parent_node_id = row[parent_node_index]
 
             metric_tags = ['scheduler_id:{}'.format(str(scheduler_id)), 'parent_node_id:{}'.format(str(parent_node_id))]
-            metric_tags.extend(self.tags)
-            metric_name = '{}'.format(self.metric_name)
-            self.report_function(metric_name, column_val, tags=metric_tags)
-
-
-# https://docs.microsoft.com/en-us/sql/relational-databases/system-catalog-views/sys-database-files-transact-sql
-class SqlDatabaseFileStats(BaseSqlServerMetric):
-    CUSTOM_QUERIES_AVAILABLE = False
-    TABLE = 'sys.database_files'
-    DEFAULT_METRIC_TYPE = 'gauge'
-    QUERY_BASE = "select *, CAST(FILEPROPERTY(name, 'SpaceUsed') as int) as space_used from {table}".format(table=TABLE)
-    OPERATION_NAME = 'database_file_stats_metrics'
-
-    DB_TYPE_MAP = {0: 'data', 1: 'transaction_log', 2: 'filestream', 3: 'unknown', 4: 'full_text'}
-
-    def __init__(self, cfg_instance, base_name, report_function, column, logger):
-        super(SqlDatabaseFileStats, self).__init__(cfg_instance, base_name, report_function, column, logger)
-
-    @classmethod
-    def fetch_all_values(cls, cursor, counters_list, logger, databases=None):
-        # special case since this table is specific to databases, need to run query for each database instance
-        rows = []
-        columns = []
-
-        if databases is None:
-            databases = []
-
-        cursor.execute('select DB_NAME()')  # This can return None in some implementations, so it cannot be chained
-        data = cursor.fetchall()
-        current_db = data[0][0]
-        logger.debug("%s: current db is %s", cls.__name__, current_db)
-
-        for db in databases:
-            # use statements need to be executed separate from select queries
-            ctx = construct_use_statement(db)
-            try:
-                logger.debug("%s: changing cursor context via use statement: %s", cls.__name__, ctx)
-                cursor.execute(ctx)
-                logger.debug("%s: fetch_all executing query: %s", cls.__name__, cls.QUERY_BASE)
-                cursor.execute(cls.QUERY_BASE)
-                data = cursor.fetchall()
-            except Exception as e:
-                logger.warning("Error when trying to query db %s - skipping.  Error: %s", db, e)
-                continue
-
-            query_columns = ['database'] + [i[0] for i in cursor.description]
-            if columns:
-                if columns != query_columns:
-                    raise CheckException('Assertion error: {} != {}'.format(columns, query_columns))
-            else:
-                columns = query_columns
-
-            results = []
-            # insert database name as new column for each row
-            for row in data:
-                r = list(row)
-                r.insert(0, db)
-                results.append(r)
-
-            rows.extend(results)
-
-            logger.debug("%s: received %d rows and %d columns for db %s", cls.__name__, len(data), len(columns), db)
-
-        # reset back to previous db
-        logger.debug("%s: reverting cursor context via use statement to %s", cls.__name__, current_db)
-        cursor.execute(construct_use_statement(current_db))
-
-        return rows, columns
-
-    def fetch_metric(self, rows, columns, values_cache=None):
-        try:
-            db_name = columns.index('database')
-            file_id = columns.index("file_id")
-            file_type = columns.index("type")
-            file_location = columns.index("physical_name")
-            filename_idx = columns.index("name")
-            db_files_state_desc_index = columns.index("state_desc")
-            value_column_index = columns.index(self.column)
-        except ValueError as e:
-            raise CheckException(
-                "Could not fetch all required information from columns {}:\n\t{}".format(str(columns), str(e))
-            )
-
-        for row in rows:
-            if row[db_name] != self.instance:
-                continue
-            column_val = row[value_column_index]
-            if self.column in ('size', 'max_size', 'space_used'):
-                column_val = (column_val or 0) * 8  # size reported in 8 KB pages
-
-            fileid = row[file_id]
-            filetype = self.DB_TYPE_MAP[row[file_type]]
-            location = row[file_location]
-            filename = row[filename_idx]
-            db_files_state_desc = row[db_files_state_desc_index]
-
-            metric_tags = [
-                'database:{}'.format(str(self.instance)),
-                'db:{}'.format(str(self.instance)),
-                'file_id:{}'.format(str(fileid)),
-                'file_type:{}'.format(str(filetype)),
-                'file_location:{}'.format(str(location)),
-                'file_name:{}'.format(str(filename)),
-                'database_files_state_desc:{}'.format(str(db_files_state_desc)),
-            ]
             metric_tags.extend(self.tags)
             metric_name = '{}'.format(self.metric_name)
             self.report_function(metric_name, column_val, tags=metric_tags)
