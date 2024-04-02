@@ -27,6 +27,7 @@ from datadog_checks.sqlserver.database_metrics import (
     SqlserverFileStatsMetrics,
     SqlserverIndexUsageMetrics,
     SqlserverMasterFilesMetrics,
+    SqlserverOsSchedulersMetrics,
     SqlserverOsTasksMetrics,
     SqlserverPrimaryLogShippingMetrics,
     SqlserverSecondaryLogShippingMetrics,
@@ -62,7 +63,6 @@ from datadog_checks.sqlserver.const import (
     INSTANCE_METRICS,
     INSTANCE_METRICS_DATABASE,
     INSTANCE_METRICS_NEWER_2016,
-    OS_SCHEDULER_METRICS,
     PERF_AVERAGE_BULK,
     PERF_COUNTER_BULK_COUNT,
     PERF_COUNTER_LARGE_RAWCOUNT,
@@ -481,12 +481,6 @@ class SQLServer(AgentCheck):
                 }
                 metrics_to_collect.append(self.typed_metric(cfg_inst=cfg, table=table, column=column))
 
-        # Load metrics from scheduler and task tables, if enabled
-        if is_affirmative(self.instance.get('include_task_scheduler_metrics', False)):
-            for name, table, column in OS_SCHEDULER_METRICS:
-                cfg = {'name': name, 'table': table, 'column': column, 'tags': tags}
-                metrics_to_collect.append(self.typed_metric(cfg_inst=cfg, table=table, column=column))
-
         # Load any custom metrics from conf.d/sqlserver.yaml
         for cfg in custom_metrics:
             sql_counter_type = None
@@ -781,6 +775,12 @@ class SQLServer(AgentCheck):
             server_static_info=self.static_info_cache,
             execute_query_handler=self.execute_query_raw,
         )
+        os_schedulers_metrics = SqlserverOsSchedulersMetrics(
+            instance_config=self.instance,
+            new_query_executor=self._new_query_executor,
+            server_static_info=self.static_info_cache,
+            execute_query_handler=self.execute_query_raw,
+        )
         master_files_metrics = SqlserverMasterFilesMetrics(
             instance_config=self.instance,
             new_query_executor=self._new_query_executor,
@@ -839,6 +839,7 @@ class SQLServer(AgentCheck):
             primary_log_shipping_metrics,
             secondary_log_shipping_metrics,
             os_tasks_metrics,
+            os_schedulers_metrics,
             master_files_metrics,
             database_stats_metrics,
             database_backup_metrics,

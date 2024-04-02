@@ -6,7 +6,7 @@ from datadog_checks.base.config import is_affirmative
 
 from .base import SqlserverDatabaseMetricsBase
 
-OS_TASK_METRICS_QUERY = {
+OS_TASKS_METRICS_QUERY = {
     "name": "sys.dm_os_tasks",
     "query": """select
         scheduler_id,
@@ -40,7 +40,7 @@ class SqlserverOsTasksMetrics(SqlserverDatabaseMetricsBase):
 
     @property
     def queries(self):
-        return [OS_TASK_METRICS_QUERY]
+        return [OS_TASKS_METRICS_QUERY]
 
     def __repr__(self) -> str:
         return (

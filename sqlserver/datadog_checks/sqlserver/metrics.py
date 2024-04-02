@@ -371,33 +371,6 @@ class SqlOsMemoryClerksStat(BaseSqlServerMetric):
             self.report_function(metric_name, column_val, tags=metric_tags)
 
 
-# https://docs.microsoft.com/en-us/sql/relational-databases/system-dynamic-management-views/sys-dm-os-schedulers-transact-sql
-class SqlOsSchedulers(BaseSqlServerMetric):
-    TABLE = 'sys.dm_os_schedulers'
-    DEFAULT_METRIC_TYPE = 'gauge'
-    QUERY_BASE = "select * from {table}".format(table=TABLE)
-    OPERATION_NAME = 'os_schedulers_metrics'
-
-    @classmethod
-    def fetch_all_values(cls, cursor, counters_list, logger, databases=None):
-        return cls._fetch_generic_values(cursor, None, logger)
-
-    def fetch_metric(self, rows, columns, values_cache=None):
-        value_column_index = columns.index(self.column)
-        scheduler_index = columns.index("scheduler_id")
-        parent_node_index = columns.index("parent_node_id")
-
-        for row in rows:
-            column_val = row[value_column_index]
-            scheduler_id = row[scheduler_index]
-            parent_node_id = row[parent_node_index]
-
-            metric_tags = ['scheduler_id:{}'.format(str(scheduler_id)), 'parent_node_id:{}'.format(str(parent_node_id))]
-            metric_tags.extend(self.tags)
-            metric_name = '{}'.format(self.metric_name)
-            self.report_function(metric_name, column_val, tags=metric_tags)
-
-
 # https://docs.microsoft.com/en-us/sql/relational-databases/system-dynamic-management-views/sys-dm-hadr-database-replica-states-transact-sql?view=sql-server-ver15
 class SqlDbReplicaStates(BaseSqlServerMetric):
     TABLE = 'sys.dm_hadr_database_replica_states'

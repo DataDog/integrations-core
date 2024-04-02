@@ -23,6 +23,7 @@ from datadog_checks.sqlserver.database_metrics import (
     SqlserverFileStatsMetrics,
     SqlserverIndexUsageMetrics,
     SqlserverMasterFilesMetrics,
+    SqlserverOsSchedulersMetrics,
     SqlserverOsTasksMetrics,
     SqlserverPrimaryLogShippingMetrics,
     SqlserverSecondaryLogShippingMetrics,
@@ -637,6 +638,70 @@ def test_sqlserver_db_fragmentation_metrics(
                         for m in aggregator.metrics(metric_name):
                             tags_by_key = dict([t.split(':') for t in m.tags if not t.startswith('dd.internal')])
                             assert tags_by_key['object_name'].lower() in db_fragmentation_object_names
+
+
+@pytest.mark.integration
+@pytest.mark.usefixtures('dd_environment')
+@pytest.mark.parametrize('include_task_scheduler_metrics', [True, False])
+def test_sqlserver_os_schedulers_metrics(
+    aggregator,
+    dd_run_check,
+    init_config,
+    instance_docker_metrics,
+    include_task_scheduler_metrics,
+):
+    instance_docker_metrics['database_autodiscovery'] = True
+    instance_docker_metrics['include_task_scheduler_metrics'] = include_task_scheduler_metrics
+
+    mocked_results = [
+        (0, 0, 4, 6, 4, 0, 0),
+        (1, 0, 5, 7, 4, 0, 0),
+        (2, 0, 5, 6, 5, 0, 0),
+        (3, 0, 4, 6, 4, 0, 0),
+        (4, 0, 4, 7, 3, 0, 0),
+        (1048578, 0, 1, 1, 1, 0, 0),
+        (5, 1, 5, 7, 4, 0, 0),
+        (6, 1, 4, 6, 3, 0, 0),
+        (7, 1, 4, 7, 4, 0, 0),
+        (8, 1, 3, 5, 3, 0, 0),
+        (9, 1, 4, 7, 3, 0, 0),
+        (1048579, 1, 1, 1, 1, 0, 0),
+        (1048576, 64, 2, 3, 1, 0, 0),
+        (1048580, 0, 1, 1, 1, 0, 0),
+        (1048581, 0, 1, 1, 1, 0, 0),
+        (1048582, 0, 1, 1, 1, 0, 0),
+        (1048583, 0, 1, 1, 1, 0, 0),
+    ]
+
+    sqlserver_check = SQLServer(CHECK_NAME, init_config, [instance_docker_metrics])
+
+    def execute_query_handler_mocked(query, db=None):
+        return mocked_results
+
+    os_schedulers_metrics = SqlserverOsSchedulersMetrics(
+        instance_config=instance_docker_metrics,
+        new_query_executor=sqlserver_check._new_query_executor,
+        server_static_info=STATIC_SERVER_INFO,
+        execute_query_handler=execute_query_handler_mocked, 
+    )
+
+    sqlserver_check._dynamic_queries = [os_schedulers_metrics]
+
+    dd_run_check(sqlserver_check)
+
+    if not include_task_scheduler_metrics:
+        assert os_schedulers_metrics.enabled is False
+    else:
+        tags = instance_docker_metrics.get('tags', [])
+        for result in mocked_results:
+            scheduler_id, parent_node_id, *metric_values = result
+            metrics = zip(os_schedulers_metrics.metric_names()[0], metric_values)
+            expected_tags = [
+                f'scheduler_id:{scheduler_id}',
+                f'parent_node_id:{parent_node_id}',
+            ] + tags
+            for metric_name, metric_value in metrics:
+                aggregator.assert_metric(metric_name, value=metric_value, tags=expected_tags)
 
 
 @pytest.mark.integration
