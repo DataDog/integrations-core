@@ -14,7 +14,7 @@ from google.cloud import storage
 if TYPE_CHECKING:
     from google.cloud.storage.blob import Blob
 
-BUCKET_NAME = 'dd-agent-int-deps'
+BUCKET_NAME = 'deps-agent-int-datadoghq-com'
 CACHE_CONTROL = 'public, max-age=15'
 VALID_PROJECT_NAME = re.compile(r'^([A-Z0-9]|[A-Z0-9][A-Z0-9._-]*[A-Z0-9])$', re.IGNORECASE)
 UNNORMALIZED_PROJECT_NAME_CHARS = re.compile(r'[-_.]+')
