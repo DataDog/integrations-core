@@ -921,7 +921,6 @@ class SQLServer(AgentCheck):
             self._index_usage_last_check_ts = now
             self.log.debug('Collecting index usage statistics')
             # Filter out tempdb as the query might be blocking and it's index usage information is not relevant
-            self.log.error("Boris got to index collection")
             db_names = [d.name for d in self.databases] or [
                 self.instance.get('database', self.connection.DEFAULT_DATABASE)
             ]
@@ -937,7 +936,6 @@ class SQLServer(AgentCheck):
                 self.log.debug("current db is %s", current_db)
                 try:
                     for database in db_names:
-                        self.log.error("Collecting for %s", database)
                         try:
                             executor = QueryExecutor(
                                 functools.partial(self.execute_query_raw, db=database),
