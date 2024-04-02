@@ -333,10 +333,10 @@ class SQLServer(AgentCheck):
         # Pre-process the list of metrics to collect
         try:
             if self._config.ignore_missing_database:
-                # self.connection.check_database() will try to connect to 'master'. On Azure hosted DBs this should throw 
-                # unless the database parameter was explicetly configured to be 'master'. (TODO may be cannot be master and we just skip it)
+                # self.connection.check_database() will try to connect to 'master'. If this is a DB hosted on Azure the function would throw.
+                # For this reason we avoid calling self.connection.check_database() for this config as it will be a false negative.
                 engine_edition = self.static_info_cache.get(STATIC_INFO_ENGINE_EDITION)
-                if not (is_azure_sql_database(engine_edition) and self.instance.get('database', self.connection.DEFAULT_DATABASE) != self.connection.DEFAULT_DATABASE):
+                if not is_azure_sql_database(engine_edition):
                     # Do the database exist check that will allow to disable _check as a whole
                     # as otherwise the first call to open_managed_default_connection will throw the
                     # SQLConnectionError.
