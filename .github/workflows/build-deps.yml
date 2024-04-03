@@ -171,7 +171,7 @@ jobs:
       run: ${DOCKER} push ${{ env.BUILDER_IMAGE }}
 
     - name: Save image digest
-      if: github.event_name == 'push'
+      if: github.event_name == 'push' && steps.changed-files.outputs.builders_any_changed == 'true'
       run: >-
         ${DOCKER} inspect --format "{{index .RepoDigests 0}}" ${{ env.BUILDER_IMAGE }}
         | cut -d '@' -f 2
