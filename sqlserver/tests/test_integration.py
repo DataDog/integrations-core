@@ -14,6 +14,7 @@ from datadog_checks.sqlserver.const import (
     ENGINE_EDITION_SQL_DATABASE,
     ENGINE_EDITION_STANDARD,
     INSTANCE_METRICS_DATABASE,
+    INSTANCE_METRICS_DATABASE_SINGLE,
     STATIC_INFO_ENGINE_EDITION,
     STATIC_INFO_MAJOR_VERSION,
     STATIC_INFO_VERSION,
@@ -28,7 +29,7 @@ from .common import (
     get_operation_time_metrics,
 )
 from .conftest import DEFAULT_TIMEOUT
-from .utils import not_windows_ci, windows_ci
+from .utils import always_on, not_windows_ci, windows_ci
 
 try:
     import pyodbc
@@ -323,12 +324,28 @@ def test_autodiscovery_perf_counters(aggregator, dd_run_check, instance_autodisc
     dd_run_check(check)
     instance_tags = instance_autodiscovery.get('tags', [])
 
-    expected_metrics = [m[0] for m in INSTANCE_METRICS_DATABASE]
+    expected_metrics = [m[0] for m in INSTANCE_METRICS_DATABASE_SINGLE]
     master_tags = ['database:master'] + instance_tags
     msdb_tags = ['database:msdb'] + instance_tags
     for metric in expected_metrics:
         aggregator.assert_metric(metric, tags=master_tags, hostname=check.resolved_hostname)
         aggregator.assert_metric(metric, tags=msdb_tags, hostname=check.resolved_hostname)
+
+
+@pytest.mark.integration
+@pytest.mark.usefixtures('dd_environment')
+@always_on
+def test_autodiscovery_perf_counters_ao(aggregator, dd_run_check, instance_autodiscovery):
+    instance_autodiscovery['autodiscovery_include'] = ['datadog_test']
+    check = SQLServer(CHECK_NAME, {}, [instance_autodiscovery])
+    dd_run_check(check)
+    instance_tags = instance_autodiscovery.get('tags', [])
+
+    expected_metrics = [m[0] for m in INSTANCE_METRICS_DATABASE]
+    tags = ['database:datadog_test'] + instance_tags
+    for metric in expected_metrics:
+        print(aggregator.metrics(metric))
+        aggregator.assert_metric(metric, tags=tags, hostname=check.resolved_hostname)
 
 
 @pytest.mark.integration
