@@ -167,9 +167,9 @@ Metrics like `kubernetes_state.container.memory_limit.total` or `kubernetes_stat
 
 |  Datadog Label        | Tag                |
 |-----------------------|-----------------------------|
-| tags.datadoghq.com/env          | env           |
-| tags.datadoghq.com/service          | service           |
-| tags.datadoghq.com/version          | version           |
+| `tags.datadoghq.com/env`          | `env`           |
+| `tags.datadoghq.com/service`          | `service`           |
+| `tags.datadoghq.com/version`          | `version`           |
 
 ### Legacy check
 
