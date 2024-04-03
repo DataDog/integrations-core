@@ -964,37 +964,39 @@ class SQLServer(AgentCheck):
         custom_tags = self.instance.get("tags", [])
 
         if (guardSql and self.proc_check_guard(guardSql)) or not guardSql:
-            with self.connection.open_managed_default_connection():
-                with self.connection.get_managed_cursor() as cursor:
-                    try:
-                        self.log.debug("Calling Stored Procedure : %s", proc)
-                        if self.connection.connector == 'adodbapi':
-                            cursor.callproc(proc)
-                        else:
-                            # pyodbc does not support callproc; use execute instead.
-                            # Reference: https://github.com/mkleehammer/pyodbc/wiki/Calling-Stored-Procedures
-                            call_proc = '{{CALL {}}}'.format(proc)
-                            cursor.execute(call_proc)
+            self.connection.open_db_connections(self.connection.DEFAULT_DB_KEY)
+            cursor = self.connection.get_cursor(self.connection.DEFAULT_DB_KEY)
 
-                        rows = cursor.fetchall()
-                        self.log.debug("Row count (%s) : %s", proc, cursor.rowcount)
+            try:
+                self.log.debug("Calling Stored Procedure : %s", proc)
+                if self.connection.connector == 'adodbapi':
+                    cursor.callproc(proc)
+                else:
+                    # pyodbc does not support callproc; use execute instead.
+                    # Reference: https://github.com/mkleehammer/pyodbc/wiki/Calling-Stored-Procedures
+                    call_proc = '{{CALL {}}}'.format(proc)
+                    cursor.execute(call_proc)
 
-                        for row in rows:
-                            tags = [] if row.tags is None or row.tags == '' else row.tags.split(',')
-                            tags.extend(custom_tags)
+                rows = cursor.fetchall()
+                self.log.debug("Row count (%s) : %s", proc, cursor.rowcount)
 
-                            if row.type.lower() in self.proc_type_mapping:
-                                self.proc_type_mapping[row.type](row.metric, row.value, tags, raw=True)
-                            else:
-                                self.log.warning(
-                                    '%s is not a recognised type from procedure %s, metric %s',
-                                    row.type,
-                                    proc,
-                                    row.metric,
-                                )
-                    except Exception as e:
-                        self.log.warning("Could not call procedure %s: %s", proc, e)
-                        raise e
+                for row in rows:
+                    tags = [] if row.tags is None or row.tags == '' else row.tags.split(',')
+                    tags.extend(custom_tags)
+
+                    if row.type.lower() in self.proc_type_mapping:
+                        self.proc_type_mapping[row.type](row.metric, row.value, tags, raw=True)
+                    else:
+                        self.log.warning(
+                            '%s is not a recognised type from procedure %s, metric %s', row.type, proc, row.metric
+                        )
+
+            except Exception as e:
+                self.log.warning("Could not call procedure %s: %s", proc, e)
+                raise e
+
+            self.connection.close_cursor(cursor)
+            self.connection.close_db_connections(self.connection.DEFAULT_DB_KEY)
         else:
             self.log.info("Skipping call to %s due to only_if", proc)
 
