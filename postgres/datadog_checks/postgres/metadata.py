@@ -58,7 +58,7 @@ WHERE  datname LIKE '{dbname}';
 PG_TABLES_QUERY_V10_PLUS = """
 SELECT c.oid                 AS id,
        c.relname             AS name,
-       c.relhasindex         AS hasindexes,
+       c.relhasindex         AS has_indexes,
        c.relowner :: regrole AS owner,
        ( CASE
            WHEN c.relkind = 'p' THEN TRUE
@@ -76,7 +76,7 @@ WHERE  c.relkind IN ( 'r', 'p' )
 PG_TABLES_QUERY_V9 = """
 SELECT c.oid                 AS id,
        c.relname             AS name,
-       c.relhasindex         AS hasindexes,
+       c.relhasindex         AS has_indexes,
        c.relowner :: regrole AS owner,
        t.relname             AS toast_table
 FROM   pg_class c
@@ -274,14 +274,12 @@ class PostgresMetadata(DBMAsyncJob):
                 with self.db_pool.get_connection(dbname, self._config.idle_connection_timeout) as conn:
                     with conn.cursor(cursor_factory=psycopg2.extras.DictCursor) as cursor:
                         for schema in database["schemas"]:
-                            tables_info = self._query_tables_for_schema(cursor, schema["id"], dbname)
-                            for table in tables_info:
-                                
+                            tables = self._query_tables_for_schema(cursor, schema["id"], dbname)
+                            for table in tables:
+                                table_info = self._query_table_information(cursor, table)
                                 metadata = {
-                                    "database": database
+                                    "database": {**database, "schemas": [{**schema, "tables": [table_info]}]}
                                 }
-                                metadata["database"]["schemas"] = schema
-                                schema.update({"tables": tables_info})
 
                                 event = {**base_event, metadata: metadata}
 
@@ -396,6 +394,12 @@ class PostgresMetadata(DBMAsyncJob):
         with key/values:
             "id": str
             "name": str
+            "owner": str
+            "has_indexes: bool
+            "has_partitions: bool
+            "toast_table": str (if associated toast table exists)
+            "num_partitions": int (if has partitions)
+
         """
         tables_info = self._get_table_info(cursor, dbname, schema_id)
         table_payloads = []
@@ -403,16 +407,21 @@ class PostgresMetadata(DBMAsyncJob):
             this_payload = {}
             this_payload.update({"id": str(table["id"])})
             this_payload.update({"name": table["name"]})
+            this_payload.update({"owner": table["owner"]})
+            this_payload.update({"has_indexes": table["has_indexes"]})
+            this_payload.update({"has_partitions": table["has_partitions"]})
+            if table["toast_table"] is not None:
+                this_payload.update({"toast_table": table["toast_table"]})
 
             table_payloads.append(this_payload)
 
         return table_payloads
 
-    def _query_table_information_for_schema(
-        self, cursor: psycopg2.extensions.cursor, schema_id: str, dbname: str
+    def _query_table_information(
+        self, cursor: psycopg2.extensions.cursor, table_info: Dict[str, Union[str, bool]]
     ) -> List[Dict[str, Union[str, Dict]]]:
         """
-        Collect table information per schema. Returns a list of dictionaries
+        Collect table information . Returns a dictionary
         with key/values:
             "id": str
             "name": str
@@ -432,55 +441,49 @@ class PostgresMetadata(DBMAsyncJob):
             "partition_key": str (if has partitions)
             "num_partitions": int (if has partitions)
         """
-        tables_info = self._get_table_info(cursor, dbname, schema_id)
-        table_payloads = []
-        for table in tables_info:
-            this_payload = {}
-            name = table["name"]
-            table_id = table["id"]
-            table_owner = table["owner"]
-            this_payload.update({"id": str(table["id"])})
-            this_payload.update({"name": name})
-            this_payload.update({"owner": table_owner})
-            if table["hasindexes"]:
-                cursor.execute(PG_INDEXES_QUERY.format(tablename=name))
-                rows = cursor.fetchall()
-                idxs = [dict(row) for row in rows]
-                this_payload.update({"indexes": idxs})
+        this_payload = {**table_info}
+        name = table_info["name"]
+        table_id = table_info["id"]
+        table_owner = table_info["owner"]
+        this_payload.update({"id": str(table_info["id"])})
+        this_payload.update({"name": name})
+        this_payload.update({"owner": table_owner})
+        if table_info["has_indexes"]:
+            cursor.execute(PG_INDEXES_QUERY.format(tablename=name))
+            rows = cursor.fetchall()
+            idxs = [dict(row) for row in rows]
+            this_payload.update({"indexes": idxs})
 
-            if VersionUtils.transform_version(str(self._check.version))["version.major"] != "9":
-                if table["has_partitions"]:
-                    cursor.execute(PARTITION_KEY_QUERY.format(parent=name))
-                    row = cursor.fetchone()
-                    this_payload.update({"partition_key": row["partition_key"]})
+        if VersionUtils.transform_version(str(self._check.version))["version.major"] != "9":
+            if table_info["has_partitions"]:
+                cursor.execute(PARTITION_KEY_QUERY.format(parent=name))
+                row = cursor.fetchone()
+                this_payload.update({"partition_key": row["partition_key"]})
 
-                    cursor.execute(NUM_PARTITIONS_QUERY.format(parent_oid=table_id))
-                    row = cursor.fetchone()
-                    this_payload.update({"num_partitions": row["num_partitions"]})
+                cursor.execute(NUM_PARTITIONS_QUERY.format(parent_oid=table_id))
+                row = cursor.fetchone()
+                this_payload.update({"num_partitions": row["num_partitions"]})
 
-            if table["toast_table"] is not None:
-                this_payload.update({"toast_table": table["toast_table"]})
 
-            # Get foreign keys
-            cursor.execute(PG_CHECK_FOR_FOREIGN_KEY.format(oid=table_id))
-            row = cursor.fetchone()
-            if row["count"] > 0:
-                cursor.execute(PG_CONSTRAINTS_QUERY.format(oid=table_id))
-                rows = cursor.fetchall()
-                if rows:
-                    fks = [dict(row) for row in rows]
-                    this_payload.update({"foreign_keys": fks})
+        # Get foreign keys
+        cursor.execute(PG_CHECK_FOR_FOREIGN_KEY.format(oid=table_id))
+        row = cursor.fetchone()
+        if row["count"] > 0:
+            cursor.execute(PG_CONSTRAINTS_QUERY.format(oid=table_id))
+            rows = cursor.fetchall()
+            if rows:
+                fks = [dict(row) for row in rows]
+                this_payload.update({"foreign_keys": fks})
 
-            # Get columns
-            cursor.execute(COLUMNS_QUERY.format(oid=table_id))
-            rows = cursor.fetchall()[:]
-            max_columns = self._config.schemas_metadata_config.get("max_columns", 50)
-            columns = [dict(row) for row in rows][:max_columns]
-            this_payload.update({"columns": columns})
+        # Get columns
+        cursor.execute(COLUMNS_QUERY.format(oid=table_id))
+        rows = cursor.fetchall()[:]
+        max_columns = self._config.schemas_metadata_config.get("max_columns", 50)
+        columns = [dict(row) for row in rows][:max_columns]
+        this_payload.update({"columns": columns})
 
-            table_payloads.append(this_payload)
 
-        return table_payloads
+        return this_payload
 
     def _collect_metadata_for_database(self, dbname):
         metadata = {}
