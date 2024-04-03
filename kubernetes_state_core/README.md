@@ -163,7 +163,7 @@ Metrics like `kubernetes_state.container.memory_limit.total` or `kubernetes_stat
 | app.kubernetes.io/managed-by          | kube_app_managed_by           |
 | helm.sh/chart          | helm_chart           |
 
-### Datadog Labels added as Tags (Unified Service Tagging)
+### Datadog labels added as tags (Unified Service Tagging)
 
 |  Datadog Label        | Tag                |
 |-----------------------|-----------------------------|
