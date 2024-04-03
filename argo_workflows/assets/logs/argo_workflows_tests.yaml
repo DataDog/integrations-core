@@ -151,7 +151,7 @@ tests:
       level: "I"
       logger:
         lineno: 248
-        name: " leaderelection.go"
+        name: "leaderelection.go"
         thread_id: 1.0
       timestamp: 31505324902
     message: "attempting to acquire leader lease argo/workflow-controller..."
