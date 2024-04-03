@@ -209,7 +209,7 @@ class PostgresMetadata(DBMAsyncJob):
         self._collect_schemas_enabled = is_affirmative(config.schemas_metadata_config.get("enabled", False))
         self._pg_settings_cached = None
         self._time_since_last_settings_query = 0
-        self._time_since_last_schemas_query = 0
+        self._last_schemas_query_time = 0
         self._conn_ttl_ms = self._config.idle_connection_timeout
         self._tags_no_db = None
         self.tags = None
@@ -253,10 +253,12 @@ class PostgresMetadata(DBMAsyncJob):
         }
         self._check.database_monitoring_metadata(json.dumps(event, default=default_json_event_encoding))
 
-        elapsed_s_schemas = time.time() - self._time_since_last_schemas_query
+        elapsed_s_schemas = time.time() - self._last_schemas_query_time
         if elapsed_s_schemas >= self.schemas_collection_interval and self._collect_schemas_enabled:
-            metadata = self._collect_schema_info()
-            event = {
+            schema_metadata = self._collect_schema_info()
+            # Emit an event for each table to keep size small
+
+            base_event = {
                 "host": self._check.resolved_hostname,
                 "agent_version": datadog_agent.get_version(),
                 "dbms": "postgres",
@@ -265,12 +267,27 @@ class PostgresMetadata(DBMAsyncJob):
                 "dbms_version": self._payload_pg_version(),
                 "tags": self._tags_no_db,
                 "timestamp": time.time() * 1000,
-                "metadata": metadata,
                 "cloud_metadata": self._config.cloud_metadata,
             }
-            json_event = json.dumps(event, default=default_json_event_encoding)
-            self._log.debug("Reporting the following payload for schema collection: {}".format(json_event))
-            self._check.database_monitoring_metadata(json_event)
+            for database in schema_metadata["databases"]:
+                dbname = database["name"]
+                with self.db_pool.get_connection(dbname, self._config.idle_connection_timeout) as conn:
+                    with conn.cursor(cursor_factory=psycopg2.extras.DictCursor) as cursor:
+                        for schema in database["schemas"]:
+                            tables_info = self._query_tables_for_schema(cursor, schema["id"], dbname)
+                            for table in tables_info:
+                                
+                                metadata = {
+                                    "database": database
+                                }
+                                metadata["database"]["schemas"] = schema
+                                schema.update({"tables": tables_info})
+
+                                event = {**base_event, metadata: metadata}
+
+                                json_event = json.dumps(event, default=default_json_event_encoding)
+                                self._log.debug("Reporting the following payload for schema collection: {}".format(json_event))
+                                self._check.database_monitoring_metadata(json_event)
 
     def _payload_pg_version(self):
         version = self._check.version
@@ -289,7 +306,7 @@ class PostgresMetadata(DBMAsyncJob):
         for database in databases:
             metadata.append(self._collect_metadata_for_database(database))
 
-        self._time_since_last_schemas_query = time.time()
+        self._last_schemas_query_time = time.time()
         return metadata
 
     def _query_database_information(
@@ -370,6 +387,26 @@ class PostgresMetadata(DBMAsyncJob):
         # if relation metrics are enabled, sorted based on last activity information
         table_info = sorted(table_info, key=sort_tables, reverse=True)
         return table_info[:limit]
+
+    def _query_tables_for_schema(
+        self, cursor: psycopg2.extensions.cursor, schema_id: str, dbname: str
+    ) -> List[Dict[str, Union[str, Dict]]]:
+        """
+        Collect list of tables for a schema. Returns a list of dictionaries
+        with key/values:
+            "id": str
+            "name": str
+        """
+        tables_info = self._get_table_info(cursor, dbname, schema_id)
+        table_payloads = []
+        for table in tables_info:
+            this_payload = {}
+            this_payload.update({"id": str(table["id"])})
+            this_payload.update({"name": table["name"]})
+
+            table_payloads.append(this_payload)
+
+        return table_payloads
 
     def _query_table_information_for_schema(
         self, cursor: psycopg2.extensions.cursor, schema_id: str, dbname: str
@@ -462,8 +499,8 @@ class PostgresMetadata(DBMAsyncJob):
                 )
                 schema_info = self._query_schema_information(cursor, dbname)
                 for schema in schema_info:
-                    tables_info = self._query_table_information_for_schema(cursor, schema["id"], dbname)
-                    schema.update({"tables": tables_info})
+                    # tables_info = self._query_table_information_for_schema(cursor, schema["id"], dbname)
+                    # schema.update({"tables": tables_info})
                     metadata["schemas"].append(schema)
 
         return metadata
