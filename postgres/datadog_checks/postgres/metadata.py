@@ -7,6 +7,8 @@ from typing import Dict, List, Optional, Tuple, Union  # noqa: F401
 
 import psycopg2
 
+from datadog_checks.postgres.cursor import CommenterDictCursor
+
 try:
     import datadog_agent
 except ImportError:
@@ -25,8 +27,18 @@ DEFAULT_SCHEMAS_COLLECTION_INTERVAL = 600
 DEFAULT_RESOURCES_COLLECTION_INTERVAL = 300
 DEFAULT_SETTINGS_IGNORED_PATTERNS = ["plpgsql%"]
 
+# PG_SETTINGS_QURERY is used to collect all the settings from the pg_settings table
+# Edge case: If source is 'session', it uses reset_val
+# (which represents the value that the setting would revert to on session end or reset),
+# otherwise, it uses the current setting value.
 PG_SETTINGS_QUERY = """
-SELECT name, setting FROM pg_settings
+SELECT
+name,
+case when source = 'session' then reset_val else setting end as setting,
+source,
+sourcefile,
+pending_restart
+FROM pg_settings
 """
 
 DATABASE_INFORMATION_QUERY = """
@@ -139,7 +151,7 @@ WHERE  inhparent = {parent_oid};
 
 PARTITION_ACTIVITY_QUERY = """
 SELECT pi.inhparent :: regclass         AS parent_table_name,
-       SUM(psu.seq_scan + psu.idx_scan) AS total_activity
+       SUM(COALESCE(psu.seq_scan, 0) + COALESCE(psu.idx_scan, 0)) AS total_activity
 FROM   pg_catalog.pg_stat_user_tables psu
        join pg_class pc
          ON psu.relname = pc.relname
@@ -389,8 +401,10 @@ class PostgresMetadata(DBMAsyncJob):
             this_payload = {}
             name = table["name"]
             table_id = table["id"]
+            table_owner = table["owner"]
             this_payload.update({"id": str(table["id"])})
             this_payload.update({"name": name})
+            this_payload.update({"owner": table_owner})
             if table["hasindexes"]:
                 cursor.execute(PG_INDEXES_QUERY.format(tablename=name))
                 rows = cursor.fetchall()
@@ -457,7 +471,7 @@ class PostgresMetadata(DBMAsyncJob):
     @tracked_method(agent_check_getter=agent_check_getter)
     def _collect_postgres_settings(self):
         with self._check._get_main_db() as conn:
-            with conn.cursor(cursor_factory=psycopg2.extras.DictCursor) as cursor:
+            with conn.cursor(cursor_factory=CommenterDictCursor) as cursor:
                 if self.pg_settings_ignored_patterns:
                     query = PG_SETTINGS_QUERY + " WHERE name NOT LIKE ALL(%s)"
                 else:

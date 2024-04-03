@@ -2,15 +2,38 @@
 
 <!-- towncrier release notes start -->
 
+## 12.3.0 / 2024-03-22
+
+***Added***:
+
+* Adding a deadlock metric to MySQL databases. ([#16904](https://github.com/DataDog/integrations-core/pull/16904))
+* Update custom_queries configuration to support optional collection_interval ([#16957](https://github.com/DataDog/integrations-core/pull/16957))
+* Add read_timeout (default to 10s) for reading from the connection in seconds ([#16988](https://github.com/DataDog/integrations-core/pull/16988))
+* Tag MySQL integration queries with service:datadog-agent ([#17158](https://github.com/DataDog/integrations-core/pull/17158))
+
+***Fixed***:
+
+* Exclude events_statements_cpu when checking enabled events_statements consumers ([#16924](https://github.com/DataDog/integrations-core/pull/16924))
+* Proper handle events_statements_* timer_end overflow ([#16936](https://github.com/DataDog/integrations-core/pull/16936))
+* Explicitly activate autocommit mode for monitoring connections ([#17002](https://github.com/DataDog/integrations-core/pull/17002))
+* Use digest_text to compute query signature for collected activities ([#17029](https://github.com/DataDog/integrations-core/pull/17029))
+* Update the configuration to include the `metric_prefix` option ([#17065](https://github.com/DataDog/integrations-core/pull/17065))
+
+## 12.2.0 / 2024-03-07 / Agent 7.52.0
+
+***Security***:
+
+* Bump cryptography to 42.0.5 ([#17054](https://github.com/DataDog/integrations-core/pull/17054))
+
 ## 12.1.0 / 2024-02-16
 
 ***Added***:
 
-* [DBMON-3271] DBM integrations now defaulted to use new go-sqllexer pkg to obfuscate sql statements ([#16681](https://github.com/DataDog/integrations-core/pull/16681))
+* DBM integrations now defaulted to use new go-sqllexer pkg to obfuscate sql statements ([#16681](https://github.com/DataDog/integrations-core/pull/16681))
 
 ***Fixed***:
 
-* [DBMON-3263] Check performance_schema, userstat and events_wait_current status on every check run. Fixes warning "Query Activity and Wait Event Collection not Enabled" on database restart. ([#16669](https://github.com/DataDog/integrations-core/pull/16669))
+* Check performance_schema, userstat and events_wait_current status on every check run. Fixes warning "Query Activity and Wait Event Collection not Enabled" on database restart. ([#16669](https://github.com/DataDog/integrations-core/pull/16669))
 
 ## 12.0.0 / 2024-01-05 / Agent 7.51.0
 
@@ -27,7 +50,7 @@
 
 ***Fixed***:
 
-* Revert "[DBMON-2989] report sql obfuscation error count (#15990)" ([#16439](https://github.com/DataDog/integrations-core/pull/16439))
+* Revert "report sql obfuscation error count (#15990)" ([#16439](https://github.com/DataDog/integrations-core/pull/16439))
 * use single quotes in activity query to fix char set issue ([#16454](https://github.com/DataDog/integrations-core/pull/16454))
 
 ## 11.4.1 / 2023-12-04 / Agent 7.50.0

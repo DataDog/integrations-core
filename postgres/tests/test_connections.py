@@ -355,3 +355,18 @@ def test_conn_terminated_prematurely(pg_instance):
 
     # new check run will re-open connection
     check.check(pg_instance)
+
+
+@pytest.mark.integration
+@pytest.mark.usefixtures('dd_environment')
+def test_conn_statement_timeout(pg_instance):
+    """
+    Test db connection statement timeout is set at the session level
+    """
+    pg_instance["query_timeout"] = 500
+    check = PostgreSql('postgres', {}, [pg_instance])
+    check._connect()
+    with pytest.raises(psycopg2.errors.QueryCanceled):
+        with check.db() as conn:
+            with conn.cursor() as cursor:
+                cursor.execute("SELECT pg_sleep(1)")

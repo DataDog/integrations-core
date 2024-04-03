@@ -2,13 +2,9 @@
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
 
-import pytest
-
 from datadog_checks.dev.utils import get_metadata_metrics
 
 from .common import EXPECTED_METRICS
-
-pytestmark = [pytest.mark.e2e, pytest.mark.usefixtures("dd_environment")]
 
 
 def test_e2e(dd_agent_check, instance):

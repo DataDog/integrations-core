@@ -26,7 +26,7 @@ To configure this check for an Agent running on a host:
    Agent's configuration directory to start collecting your Hazelcast performance data.
    See the [sample hazelcast.d/conf.yaml][3] for all available configuration options.
 
-   This check has a limit of 350 metrics per instance. The number of returned metrics is indicated in the info page.
+   This check has a limit of 350 metrics per instance. The number of returned metrics is indicated in [the status page][12].
    You can specify the metrics you are interested in by editing the configuration below.
    To learn how to customize the metrics to collect, see the [JMX Checks documentation][4] for more detailed instructions.
    If you need to monitor more metrics, contact [Datadog support][5].

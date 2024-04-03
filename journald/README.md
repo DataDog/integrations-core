@@ -105,7 +105,7 @@ In Datadog Agent version `7.37.0`+, you can filter _user-level_ units by using t
 - `include_user_units`: Includes all user-level units specified.
 - `exclude_user_units`: Excludes all user-level units specified.
 
-**Note**: Use the `*` wildcard in `exclude_units` or `exclude_user_units` to specify a particular Journald log.
+**Note**: Use the `*` wildcard in `exclude_units` or `exclude_user_units` to specify a particular Journald log. The `*` wildcard does not work with `include_units`. By default, if there are no units for neither system nor user, and no matches are defined, all journal logs are collected.
 
 Example:
 

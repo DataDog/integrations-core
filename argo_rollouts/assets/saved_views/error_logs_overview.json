@@ -1,0 +1,14 @@
+{
+    "name": "Argo Rollouts Error Logs Overview",
+    "query": "source:argo_rollouts status:error",
+    "visible_facets": [
+        "source",
+        "host",
+        "service"
+    ],
+    "type": "logs",
+    "timerange": {
+        "interval_ms": 3600000
+    },
+    "page": "patterns"
+}

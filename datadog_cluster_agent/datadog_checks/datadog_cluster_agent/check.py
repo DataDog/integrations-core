@@ -9,7 +9,6 @@ DEFAULT_METRICS = {
     'admission_webhooks_library_injection_attempts': 'admission_webhooks.library_injection_attempts',
     'admission_webhooks_library_injection_errors': 'admission_webhooks.library_injection_errors',
     'admission_webhooks_mutation_attempts': 'admission_webhooks.mutation_attempts',
-    'admission_webhooks_mutation_errors': 'admission_webhooks.mutation_errors',
     'admission_webhooks_patcher_attempts': 'admission_webhooks.patcher.attempts',
     'admission_webhooks_patcher_completed': 'admission_webhooks.patcher.completed',
     'admission_webhooks_patcher_errors': 'admission_webhooks.patcher.errors',

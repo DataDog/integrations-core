@@ -152,6 +152,8 @@ NEWER_92_METRICS = {
     'temp_files': ('postgresql.temp_files', AgentCheck.rate),
 }
 
+CHECKSUM_METRICS = {'checksum_failures': ('postgresql.checksums.checksum_failures', AgentCheck.monotonic_count)}
+
 NEWER_14_METRICS = {
     'session_time': ('postgresql.sessions.session_time', AgentCheck.monotonic_count),
     'active_time': ('postgresql.sessions.active_time', AgentCheck.monotonic_count),
@@ -244,22 +246,31 @@ COMMON_ARCHIVER_METRICS = {
 }
 
 
+# We used to use pg_stat_user_tables to count the number of tables and limit using max_relations.
+# This created multiple issues:
+# - pg_stat_user_tables is a view that group pg_class results by C.oid, N.nspname, C.relname. Doing the group by
+#   will generate a sort
+# - pg_stat_user_tables processes elements from pg_class that are dropped like toast tables and system tables
+# - we added another layer of sort (ORDER BY relname, relnamespace) to make the max_relations filter stable
+# Those sorts will eventually spill on temporary blocks if the number of relations is high enough, making this
+# query expensive to run.
+# In the end, we only care about the table count per schema so it's better to process the pg_class table directly.
+# We can filter tuples as much as possibles (we only care about relations and partition tables) and only do the
+# pg_namespace at the end, removing an expensive nested loop.
 COUNT_METRICS = {
     'descriptors': [('schemaname', 'schema')],
-    'metrics': {'pg_stat_user_tables': ('postgresql.table.count', AgentCheck.gauge)},
+    'metrics': {'count (*)': ('postgresql.table.count', AgentCheck.gauge)},
     'relation': False,
     'use_global_db_tag': True,
-    'query': fmt.format(
-        """
-SELECT schemaname, count(*) FROM
-(
-SELECT schemaname
-FROM {metrics_columns}
-ORDER BY schemaname, relname
-LIMIT {table_count_limit}
-) AS subquery GROUP BY schemaname
-    """
-    ),
+    'query': """
+SELECT N.nspname AS schemaname, {metrics_columns} FROM
+    (SELECT C.relnamespace
+    FROM pg_class C
+    WHERE C.relkind IN ('r', 'p')) AS subquery
+LEFT JOIN pg_namespace N ON (N.oid = relnamespace)
+WHERE N.nspname NOT IN ('pg_catalog', 'information_schema')
+GROUP BY N.nspname;
+    """,
     'name': 'count_metrics',
 }
 

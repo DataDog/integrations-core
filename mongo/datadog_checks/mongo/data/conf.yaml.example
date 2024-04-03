@@ -127,6 +127,11 @@ instances:
     #
     # tls_allow_invalid_certificates: false
 
+    ## @param dbstats_tag_dbname - boolean - optional - default: true
+    ## Whether or not to include the 'dbname' as a tag for dbstat metrics
+    #
+    # dbstats_tag_dbname: true
+
     ## @param additional_metrics - list of strings - optional
     ## By default, the check collects a sample of metrics from MongoDB.
     ## This  parameter instructs the check to collect additional metrics on specific topics.

@@ -78,6 +78,9 @@ def serve_openmetrics_payload(
             ],
         }
 
+        if integration == 'openmetrics':
+            check_config['instances'][0]['metrics'] = [".*"]
+
     metadata = {
         "docker_volumes": [
             f"{HERE}/scripts/serve.py:/tmp/serve.py",

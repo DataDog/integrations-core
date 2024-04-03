@@ -38,7 +38,7 @@ metadata:
           "init_config": {},
           "instances": [
             {
-              "openmetrics_endpoint": "http://%%host%%:8000/metrics",
+              "openmetrics_endpoint": "http://%%host%%:8000/metrics"
             }
           ]
         }
@@ -84,6 +84,12 @@ See [service_checks.json][8] for a list of service checks provided by this integ
 
 Need help? Contact [Datadog support][9].
 
+## Further Reading
+
+Additional helpful documentation, links, and articles:
+
+- [Monitoring your container-native technologies][12]
+
 
 [1]: https://karpenter.sh/
 [2]: https://app.datadoghq.com/account/settings/agent/latest
@@ -96,3 +102,4 @@ Need help? Contact [Datadog support][9].
 [9]: https://docs.datadoghq.com/help/
 [10]: https://karpenter.sh/docs/reference/metrics/
 [11]: https://docs.datadoghq.com/agent/kubernetes/log/
+[12]: https://www.datadoghq.com/blog/container-native-integrations/#autoscaling-and-resource-utilization-with-karpenter

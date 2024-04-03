@@ -23,7 +23,7 @@ METRICS = {
     'go_memstats_mallocs': 'go.memstats.mallocs',
     'go_memstats_mcache_inuse_bytes': 'go.memstats.mcache.inuse_bytes',
     'go_memstats_mcache_sys_bytes': 'go.memstats.mcache.sys_bytes',
-    'go_memstats_mspan_inuse_bytes': 'go.memstats.mspan.inuse_use',
+    'go_memstats_mspan_inuse_bytes': 'go.memstats.mspan.inuse_bytes',
     'go_memstats_mspan_sys_bytes': 'go.memstats.mspan.sys_bytes',
     'go_memstats_next_gc_bytes': 'go.memstats.next.gc_bytes',
     'go_memstats_other_sys_bytes': 'go.memstats.other.sys_bytes',

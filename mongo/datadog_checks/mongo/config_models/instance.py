@@ -57,6 +57,7 @@ class InstanceConfig(BaseModel):
         arbitrary_types_allowed=True,
         frozen=True,
     )
+    add_node_tag_to_events: Optional[bool] = None
     additional_metrics: Optional[tuple[str, ...]] = None
     collections: Optional[tuple[str, ...]] = None
     collections_indexes_stats: Optional[bool] = None
@@ -64,6 +65,7 @@ class InstanceConfig(BaseModel):
     custom_queries: Optional[tuple[CustomQuery, ...]] = None
     database: Optional[str] = None
     dbnames: Optional[tuple[str, ...]] = None
+    dbstats_tag_dbname: Optional[bool] = None
     disable_generic_tags: Optional[bool] = None
     empty_default_hostname: Optional[bool] = None
     hosts: Optional[Union[str, tuple[str, ...]]] = None

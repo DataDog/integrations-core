@@ -2,7 +2,13 @@
 
 <!-- towncrier release notes start -->
 
-## 4.2.0 / 2024-02-16
+## 4.3.0 / 2024-03-22
+
+***Added***:
+
+* Adds additional Executor-level memory metrics (https://spark.apache.org/docs/latest/monitoring.html#executor-metrics) ([#17168](https://github.com/DataDog/integrations-core/pull/17168))
+
+## 4.2.0 / 2024-02-16 / Agent 7.52.0
 
 ***Added***:
 

@@ -198,6 +198,7 @@ class InstanceConfig(BaseModel):
     azure: Optional[Azure] = None
     collect_activity_metrics: Optional[bool] = None
     collect_bloat_metrics: Optional[bool] = None
+    collect_checksum_metrics: Optional[bool] = None
     collect_count_metrics: Optional[bool] = None
     collect_database_size_metrics: Optional[bool] = None
     collect_default_database: Optional[bool] = None
@@ -229,6 +230,7 @@ class InstanceConfig(BaseModel):
     password: Optional[str] = None
     pg_stat_statements_view: Optional[str] = None
     port: Optional[int] = None
+    propagate_agent_tags: Optional[bool] = None
     query_activity: Optional[QueryActivity] = None
     query_metrics: Optional[QueryMetrics] = None
     query_samples: Optional[QuerySamples] = None

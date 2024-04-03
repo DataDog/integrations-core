@@ -15,6 +15,7 @@ tests:
         thread: "main"
         user_id: "WLS Kernel"
     message: "Shutdown has completed."
+    status: "info"
     tags:
      - "source:LOGS_SOURCE"
     timestamp: 1638819255191
@@ -33,6 +34,7 @@ tests:
         thread: "[ACTIVE] ExecuteThread: '14' for queue: 'weblogic.kernel.Default (self-tuning)'"
         user_id: "WLS Kernel"
     message: "Closing the socket, as no data read from it on 0:0:0:0:0:0:0:1:63,786 during the configured idle timeout of 5 seconds."
+    status: "warn"
     tags:
      - "source:LOGS_SOURCE"
     timestamp: 1638818898282
@@ -51,6 +53,7 @@ tests:
         thread: "Timer-2"
         user_id: "WLS Kernel"
     message: "Self-tuning thread pool contains 0 running threads, 2 idle threads, and 13 standby threads"
+    status: "info"
     tags:
      - "source:LOGS_SOURCE"
     timestamp: 1638835181324
@@ -69,6 +72,7 @@ tests:
         thread: "weblogic.socket.ServerListenThread"
         user_id: "WLS Kernel"
     message: "Channel \"Default[1]\" is now listening on 127.0.0.1:8001 for protocols iiop, t3, CLUSTER-BROADCAST, ldap, snmp, http."
+    status: "notice"
     tags:
      - "source:LOGS_SOURCE"
     timestamp: 1638833592286
@@ -84,6 +88,7 @@ tests:
         subsystem: "Log Management"
         thread: "[STANDBY] ExecuteThread: '2' for queue: 'weblogic.kernel.Default (self-tuning)'"
     message: "The Server Logging is initialized with Java Logging API implementation."
+    status: "info"
     tags:
      - "source:LOGS_SOURCE"
     timestamp: 1638979146613
@@ -104,6 +109,7 @@ tests:
           ip: "192.168.1.4"
       timestamp: 1638822590000
     message: "192.168.1.4 - weblogic [06/Dec/2021:15:29:50 -0500] \"POST /medrec/index.xhtml HTTP/1.1\" 200 8976"
+    status: "ok"
     tags:
      - "source:LOGS_SOURCE"
     timestamp: 1638822590000
@@ -124,6 +130,7 @@ tests:
           ip: "192.168.1.4"
       timestamp: 1638822535000
     message: "192.168.1.4 - weblogic [06/Dec/2021:15:28:55 -0500] \"POST /medrec/registerPatient.xhtml HTTP/1.1\" 200 3242"
+    status: "ok"
     tags:
      - "source:LOGS_SOURCE"
     timestamp: 1638822535000

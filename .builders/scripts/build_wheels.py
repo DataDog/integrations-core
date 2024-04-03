@@ -10,6 +10,10 @@ from tempfile import TemporaryDirectory
 from dotenv import dotenv_values
 from utils import extract_metadata, normalize_project_name
 
+INDEX_BASE_URL = 'https://agent-int-packages.datadoghq.com'
+CUSTOM_EXTERNAL_INDEX = f'{INDEX_BASE_URL}/external'
+CUSTOM_BUILT_INDEX = f'{INDEX_BASE_URL}/built'
+
 if sys.platform == 'win32':
     PY3_PATH = Path('C:\\py3\\Scripts\\python.exe')
     PY2_PATH = Path('C:\\py2\\Scripts\\python.exe')
@@ -54,6 +58,7 @@ def check_process(*args, **kwargs) -> subprocess.CompletedProcess:
 def main():
     parser = argparse.ArgumentParser(prog='wheel-builder', allow_abbrev=False)
     parser.add_argument('--python', required=True)
+    parser.add_argument('--use-built-index', action='store_true', default=False)
     args = parser.parse_args()
 
     python_version = args.python
@@ -107,7 +112,11 @@ def main():
             str(python_path), '-m', 'pip', 'wheel',
             '-r', str(MOUNT_DIR / 'requirements.in'),
             '--wheel-dir', str(staged_wheel_dir),
+            '--extra-index-url', CUSTOM_EXTERNAL_INDEX,
         ]
+        if args.use_built_index:
+            command_args.extend(['--extra-index-url', CUSTOM_BUILT_INDEX])
+
         check_process(command_args, env=env_vars)
 
         # Repair wheels

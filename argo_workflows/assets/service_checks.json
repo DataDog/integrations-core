@@ -1,0 +1,17 @@
+[
+    {
+        "agent_version": "7.53.0",
+        "integration": "Argo Workflows",
+        "check": "argo_workflows.openmetrics.health",
+        "statuses": [
+            "ok",
+            "critical"
+        ],
+        "groups": [
+            "host",
+            "endpoint"
+        ],
+        "name": "Argo Workflows OpenMetrics endpoint up",
+        "description": "Returns `CRITICAL` if the check cannot access the OpenMetrics metrics endpoint of Argo Workflows."
+    }
+]

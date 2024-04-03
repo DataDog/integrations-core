@@ -2,7 +2,22 @@
 
 <!-- towncrier release notes start -->
 
-## 3.2.0 / 2024-02-16
+## 3.3.0 / 2024-03-22
+
+***Added***:
+
+* Collect changefeed metrics ([#17079](https://github.com/DataDog/integrations-core/pull/17079))
+* Add admission metrics ([#17141](https://github.com/DataDog/integrations-core/pull/17141))
+* Add distsender metrics ([#17155](https://github.com/DataDog/integrations-core/pull/17155))
+* Add jobs metrics ([#17163](https://github.com/DataDog/integrations-core/pull/17163))
+* Add kv metrics ([#17164](https://github.com/DataDog/integrations-core/pull/17164))
+* Add physical replication and queue metrics ([#17166](https://github.com/DataDog/integrations-core/pull/17166))
+* Collect more metrics ([#17183](https://github.com/DataDog/integrations-core/pull/17183))
+* Collect new metrics ([#17192](https://github.com/DataDog/integrations-core/pull/17192))
+
+Special thanks to [sudomateo](https://github.com/sudomateo) for their contributions to this release.
+
+## 3.2.0 / 2024-02-16 / Agent 7.52.0
 
 ***Added***:
 

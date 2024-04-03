@@ -1,6 +1,6 @@
 ARG ORACLE_DATABASE_VERSION
 
-FROM container-registry.oracle.com/database/enterprise:${ORACLE_DATABASE_VERSION}-slim
+FROM datadog/docker-library:oracle-${ORACLE_DATABASE_VERSION}-slim
 COPY ./server/tnsnames.ora /u01/app/oracle/product/12.2.0/dbhome_1/admin/InfraDB/tnsnames.ora
 COPY ./server/listener.ora /u01/app/oracle/product/12.2.0/dbhome_1/admin/InfraDB/listener.ora
 COPY ./server/sqlnet.ora /u01/app/oracle/product/12.2.0/dbhome_1/admin/InfraDB/sqlnet.ora
