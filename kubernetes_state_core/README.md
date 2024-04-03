@@ -165,7 +165,7 @@ Metrics like `kubernetes_state.container.memory_limit.total` or `kubernetes_stat
 
 ### Datadog Labels added as Tags (Unified Service Tagging)
 
-|  Recommended Label        | Tag                |
+|  Datadog Label        | Tag                |
 |-----------------------|-----------------------------|
 | tags.datadoghq.com/env          | env           |
 | tags.datadoghq.com/service          | service           |
