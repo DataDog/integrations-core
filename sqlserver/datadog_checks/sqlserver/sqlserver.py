@@ -732,13 +732,15 @@ class SQLServer(AgentCheck):
         "schema_id": str
         "principal_id": str
         "tables" : dict
-            name: list of columns                  
+            object_id : str
+            name : str
+            columns: list of columns                  
                 "columns": dict
                     name: str
                     data_type: str
                     default: str
-
-
+            indexes : list of indexes
+            foreign_keys : list of foreign keys
     """
     def _query_schema_information(self, cursor):
 
@@ -765,8 +767,20 @@ class SQLServer(AgentCheck):
 
         self.log.debug("fetched schemas len(rows)=%s", len(schemas))
         return schemas_by_name
+    
+#in tables we have modified date !
+    # can be a separate query 
+    
 
-    def _get_table_infos(self, schemas, cursor):
+
+    def _get_table_infos_sys_tables(self, schemas, cursor):
+        print("Hello")
+        TABLE_QUERY = ""
+        
+    # TODO how often ?
+    # TODO put in a class
+    # for big DBs somehow first determine tables we are intereted in and query only for them ?
+    def _get_table_infos_info_schema(self, schemas, cursor):
         #TODO do we need this for sqlserver ? 
         #If any tables are partitioned, only the master paritition table name will be returned, and none of its children.
 
