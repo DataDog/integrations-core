@@ -334,7 +334,7 @@ class SQLServer(AgentCheck):
         try:
             if self._config.ignore_missing_database:
                 # self.connection.check_database() will try to connect to 'master'.
-                # If this is a DB hosted on Azure the function would throw.
+                # If this is an Azure SQL Database this function will throw.
                 # For this reason we avoid calling self.connection.check_database()
                 # for this config as it will be a false negative.
                 engine_edition = self.static_info_cache.get(STATIC_INFO_ENGINE_EDITION)
