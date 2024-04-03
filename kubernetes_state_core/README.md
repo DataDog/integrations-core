@@ -167,7 +167,7 @@ Metrics like `kubernetes_state.container.memory_limit.total` or `kubernetes_stat
 
 |  Recommended Label        | Tag                |
 |-----------------------|-----------------------------|
-| tags.datadoghq.com/env:          | env           |
+| tags.datadoghq.com/env          | env           |
 | tags.datadoghq.com/service          | service           |
 | tags.datadoghq.com/version          | version           |
 
