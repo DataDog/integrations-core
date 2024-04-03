@@ -73,8 +73,8 @@ pyasn1 @ https://agent-int-packages.datadoghq.com/external/pyasn1/pyasn1-0.4.6-p
 pyasn1-modules @ https://agent-int-packages.datadoghq.com/external/pyasn1-modules/pyasn1_modules-0.4.0-py3-none-any.whl#sha256=be04f15b66c206eed667e0bb5ab27e2b1855ea54a842e5037738099e8ca4ae0b
 pycparser @ https://agent-int-packages.datadoghq.com/external/pycparser/pycparser-2.22-py3-none-any.whl#sha256=c3702b6d3dd8c7abc1afa565d7e63d53a1d0bd86cdc24edd75470f4de499cfcc
 pycryptodomex @ https://agent-int-packages.datadoghq.com/external/pycryptodomex/pycryptodomex-3.20.0-cp35-abi3-win_amd64.whl#sha256=2a47bcc478741b71273b917232f521fd5704ab4b25d301669879e7273d3586cc
-pydantic @ https://agent-int-packages.datadoghq.com/external/pydantic/pydantic-2.6.4-py3-none-any.whl#sha256=cc46fce86607580867bdc3361ad462bab9c222ef042d3da86f2fb333e1d916c5
-pydantic-core @ https://agent-int-packages.datadoghq.com/external/pydantic-core/pydantic_core-2.16.3-cp311-none-win_amd64.whl#sha256=d89ca19cdd0dd5f31606a9329e309d4fcbb3df860960acec32630297d61820df
+pydantic @ https://agent-int-packages.datadoghq.com/external/pydantic/pydantic-2.0.2-py3-none-any.whl#sha256=f5581e0c79b2ec2fa25a9d30d766629811cdda022107fa73d022ab5578873ae3
+pydantic-core @ https://agent-int-packages.datadoghq.com/external/pydantic-core/pydantic_core-2.1.2-cp311-none-win_amd64.whl#sha256=ebf583f4d9b52abd15cc59e5f6eeca7e3e9741c6ea62d8711c00ac3acb067875
 pyjwt @ https://agent-int-packages.datadoghq.com/external/pyjwt/PyJWT-2.8.0-py3-none-any.whl#sha256=59127c392cc44c2da5bb3192169a91f429924e17aff6534d70fdc02ab3e04320
 pymongo @ https://agent-int-packages.datadoghq.com/external/pymongo/pymongo-4.6.3-cp311-cp311-win_amd64.whl#sha256=1c2761302b6cbfd12e239ce1b8061d4cf424a361d199dcb32da534985cae9350
 pymqi @ https://agent-int-packages.datadoghq.com/built/pymqi/pymqi-1.12.10-20240402154630-cp311-cp311-win_amd64.whl#sha256=2452a18c9e3f88e2f182049d04925ed3ac89144b9237408ed915012385d26359

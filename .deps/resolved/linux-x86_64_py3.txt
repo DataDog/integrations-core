@@ -76,8 +76,8 @@ pyasn1 @ https://agent-int-packages.datadoghq.com/external/pyasn1/pyasn1-0.4.6-p
 pyasn1-modules @ https://agent-int-packages.datadoghq.com/external/pyasn1-modules/pyasn1_modules-0.4.0-py3-none-any.whl#sha256=be04f15b66c206eed667e0bb5ab27e2b1855ea54a842e5037738099e8ca4ae0b
 pycparser @ https://agent-int-packages.datadoghq.com/external/pycparser/pycparser-2.22-py3-none-any.whl#sha256=c3702b6d3dd8c7abc1afa565d7e63d53a1d0bd86cdc24edd75470f4de499cfcc
 pycryptodomex @ https://agent-int-packages.datadoghq.com/external/pycryptodomex/pycryptodomex-3.20.0-cp35-abi3-manylinux_2_17_x86_64.manylinux2014_x86_64.whl#sha256=bca649483d5ed251d06daf25957f802e44e6bb6df2e8f218ae71968ff8f8edc4
-pydantic @ https://agent-int-packages.datadoghq.com/external/pydantic/pydantic-2.6.4-py3-none-any.whl#sha256=cc46fce86607580867bdc3361ad462bab9c222ef042d3da86f2fb333e1d916c5
-pydantic-core @ https://agent-int-packages.datadoghq.com/external/pydantic-core/pydantic_core-2.16.3-cp311-cp311-manylinux_2_17_x86_64.manylinux2014_x86_64.whl#sha256=a6b1bb0827f56654b4437955555dc3aeeebeddc47c2d7ed575477f082622c49e
+pydantic @ https://agent-int-packages.datadoghq.com/external/pydantic/pydantic-2.0.2-py3-none-any.whl#sha256=f5581e0c79b2ec2fa25a9d30d766629811cdda022107fa73d022ab5578873ae3
+pydantic-core @ https://agent-int-packages.datadoghq.com/external/pydantic-core/pydantic_core-2.1.2-cp311-cp311-manylinux_2_17_x86_64.manylinux2014_x86_64.whl#sha256=818f5cb1b209ab1295087c45717178f4bbbd2bd7eda421f7a119e7b9b736a3cb
 pyjwt @ https://agent-int-packages.datadoghq.com/external/pyjwt/PyJWT-2.8.0-py3-none-any.whl#sha256=59127c392cc44c2da5bb3192169a91f429924e17aff6534d70fdc02ab3e04320
 pymongo @ https://agent-int-packages.datadoghq.com/external/pymongo/pymongo-4.6.3-cp311-cp311-manylinux_2_17_x86_64.manylinux2014_x86_64.whl#sha256=c2ad3e5bfcd345c0bfe9af69a82d720860b5b043c1657ffb513c18a0dee19c19
 pymqi @ https://agent-int-packages.datadoghq.com/built/pymqi/pymqi-1.12.10-20240402233316-cp311-cp311-manylinux2014_x86_64.manylinux_2_17_x86_64.whl#sha256=1009ea6bcb58efc77f1b138be083ee6cc0d23cf5805fce26151de9628c69fb1e

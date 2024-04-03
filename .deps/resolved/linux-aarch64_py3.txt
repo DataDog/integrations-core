@@ -76,8 +76,8 @@ pyasn1 @ https://agent-int-packages.datadoghq.com/external/pyasn1/pyasn1-0.4.6-p
 pyasn1-modules @ https://agent-int-packages.datadoghq.com/external/pyasn1-modules/pyasn1_modules-0.4.0-py3-none-any.whl#sha256=be04f15b66c206eed667e0bb5ab27e2b1855ea54a842e5037738099e8ca4ae0b
 pycparser @ https://agent-int-packages.datadoghq.com/external/pycparser/pycparser-2.22-py3-none-any.whl#sha256=c3702b6d3dd8c7abc1afa565d7e63d53a1d0bd86cdc24edd75470f4de499cfcc
 pycryptodomex @ https://agent-int-packages.datadoghq.com/external/pycryptodomex/pycryptodomex-3.20.0-cp35-abi3-manylinux_2_17_aarch64.manylinux2014_aarch64.whl#sha256=91852d4480a4537d169c29a9d104dda44094c78f1f5b67bca76c29a91042b623
-pydantic @ https://agent-int-packages.datadoghq.com/external/pydantic/pydantic-2.6.4-py3-none-any.whl#sha256=cc46fce86607580867bdc3361ad462bab9c222ef042d3da86f2fb333e1d916c5
-pydantic-core @ https://agent-int-packages.datadoghq.com/external/pydantic-core/pydantic_core-2.16.3-cp311-cp311-manylinux_2_17_aarch64.manylinux2014_aarch64.whl#sha256=8d62da299c6ecb04df729e4b5c52dc0d53f4f8430b4492b93aa8de1f541c4aac
+pydantic @ https://agent-int-packages.datadoghq.com/external/pydantic/pydantic-2.0.2-py3-none-any.whl#sha256=f5581e0c79b2ec2fa25a9d30d766629811cdda022107fa73d022ab5578873ae3
+pydantic-core @ https://agent-int-packages.datadoghq.com/external/pydantic-core/pydantic_core-2.1.2-cp311-cp311-manylinux_2_17_aarch64.manylinux2014_aarch64.whl#sha256=4ac140d54da366672f6b91f9a1e8e2d4e7e72720143353501ae886d3fca03272
 pyjwt @ https://agent-int-packages.datadoghq.com/external/pyjwt/PyJWT-2.8.0-py3-none-any.whl#sha256=59127c392cc44c2da5bb3192169a91f429924e17aff6534d70fdc02ab3e04320
 pymongo @ https://agent-int-packages.datadoghq.com/external/pymongo/pymongo-4.6.3-cp311-cp311-manylinux_2_17_aarch64.manylinux2014_aarch64.whl#sha256=60931b0e07448afe8866ffff764cd5bf4b1a855dc84c7dcb3974c6aa6a377a59
 pymysql @ https://agent-int-packages.datadoghq.com/external/pymysql/PyMySQL-1.1.0-py3-none-any.whl#sha256=8969ec6d763c856f7073c4c64662882675702efcb114b4bcbb955aea3a069fa7
