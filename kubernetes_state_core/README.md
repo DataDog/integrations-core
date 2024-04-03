@@ -151,6 +151,26 @@ spec:
 
 Metrics like `kubernetes_state.container.memory_limit.total` or `kubernetes_state.node.count` are aggregate counts of groups within a cluster, and host or node-level tags are not added.
 
+### Default Kubernetes and Helm (Recommended) Labels as Tags
+
+|  Recommended Label        | Tag                |
+|-----------------------|-----------------------------|
+| app.kubernetes.io/name          | kube_app_name           |
+| app.kubernetes.io/instance          | kube_app_instance           |
+| app.kubernetes.io/version          | kube_app_version           |
+| app.kubernetes.io/component          | kube_app_component           |
+| app.kubernetes.io/part-of          | kube_app_part_of           |
+| app.kubernetes.io/managed-by          | kube_app_managed_by           |
+| helm.sh/chart          | helm_chart           |
+
+### Datadog Labels added as Tags (Unified Service Tagging)
+
+|  Recommended Label        | Tag                |
+|-----------------------|-----------------------------|
+| tags.datadoghq.com/env:          | env           |
+| tags.datadoghq.com/service          | service           |
+| tags.datadoghq.com/version          | version           |
+
 ### Legacy check
 
 <!-- xxx tabs xxx -->
