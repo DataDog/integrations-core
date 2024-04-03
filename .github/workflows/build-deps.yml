@@ -170,11 +170,17 @@ jobs:
       if: github.event_name == 'push' && steps.changed-files.outputs.builders_any_changed == 'true'
       run: ${DOCKER} push ${{ env.BUILDER_IMAGE }}
 
-    - name: Save image digest
+    - name: Save new image digest
       if: github.event_name == 'push' && steps.changed-files.outputs.builders_any_changed == 'true'
       run: >-
         ${DOCKER} inspect --format "{{index .RepoDigests 0}}" ${{ env.BUILDER_IMAGE }}
         | cut -d '@' -f 2
+        > ${{ env.OUT_DIR }}/image_digest
+
+    - name: Persist current image digest
+      if: github.event_name == 'push' && steps.changed-files.outputs.builders_any_changed != 'true'
+      run: >-
+        jq -r '.["${{ matrix.job.image }}"]' .deps/image_digests.json
         > ${{ env.OUT_DIR }}/image_digest
 
     - name: Upload artifacts
