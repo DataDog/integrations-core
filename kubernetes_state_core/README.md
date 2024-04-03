@@ -151,7 +151,7 @@ spec:
 
 Metrics like `kubernetes_state.container.memory_limit.total` or `kubernetes_state.node.count` are aggregate counts of groups within a cluster, and host or node-level tags are not added.
 
-### Default Kubernetes and Helm (Recommended) Labels as Tags
+### Default Kubernetes and Helm recommended labels as tags
 
 |  Recommended Label        | Tag                |
 |-----------------------|-----------------------------|
