@@ -1551,7 +1551,7 @@
                                     "query": {
                                         "data_source": "logs_stream",
                                         "indexes": [],
-                                        "query_string": "source:argo_rollouts $argo_rollouts_namespace ",
+                                        "query_string": "source:argo_rollouts @$argo_rollouts_namespace ",
                                         "sort": {
                                             "column": "timestamp",
                                             "order": "desc"
@@ -1561,6 +1561,7 @@
                                     "response_format": "event_list"
                                 }
                             ],
+                            "time": {},
                             "title": "Argo Rollout Log Overview",
                             "title_align": "left",
                             "title_size": "16",
