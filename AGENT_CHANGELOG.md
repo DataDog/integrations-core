@@ -1,3 +1,7 @@
+## Datadog Agent version [7.52.1](https://github.com/DataDog/datadog-agent/blob/master/CHANGELOG.rst#7521)
+
+* There were no integration updates for this version of the Agent.
+
 ## Datadog Agent version [7.52.0](https://github.com/DataDog/datadog-agent/blob/master/CHANGELOG.rst#7520)
 
 * ActiveMQ XML [3.2.0](https://github.com/DataDog/integrations-core/blob/master/activemq_xml/CHANGELOG.md)

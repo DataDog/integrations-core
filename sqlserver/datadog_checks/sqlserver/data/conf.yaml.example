@@ -644,6 +644,7 @@ instances:
     # proc_only_if_database: master
 
     ## @param ignore_missing_database - boolean - optional - default: false
+    ## DEPRECATED - use `database_autodiscovery` instead, when database name is uncertain.
     ## If the DB specified doesn't exist on the server then don't do the check
     #
     # ignore_missing_database: false
