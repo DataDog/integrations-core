@@ -16,7 +16,7 @@
     "page": "stream",
     "query": "source:fluxcd status:error ",
     "timerange": {
-        "interval": 3600000
+        "interval_ms": 3600000
     },
     "type": "logs",
     "visible_facets": []
