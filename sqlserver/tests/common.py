@@ -14,10 +14,11 @@ from datadog_checks.sqlserver.const import (
     AO_METRICS_PRIMARY,
     AO_METRICS_SECONDARY,
     DATABASE_BACKUP_METRICS,
+    DATABASE_FILES_METRICS,
     DATABASE_FRAGMENTATION_METRICS,
     DATABASE_INDEX_METRICS,
     DATABASE_MASTER_FILES,
-    DATABASE_METRICS,
+    DATABASE_STATS_METRICS,
     DBM_MIGRATED_METRICS,
     INSTANCE_METRICS,
     INSTANCE_METRICS_DATABASE,
@@ -83,7 +84,8 @@ EXPECTED_DEFAULT_METRICS = (
             EXPECTED_INSTANCE_METRICS,
             DBM_MIGRATED_METRICS,
             INSTANCE_METRICS_DATABASE,
-            DATABASE_METRICS,
+            DATABASE_FILES_METRICS,
+            DATABASE_STATS_METRICS,
             DATABASE_BACKUP_METRICS,
             TEMPDB_FILE_SPACE_USAGE_METRICS,
         )
@@ -235,11 +237,7 @@ INIT_CONFIG_ALT_TABLES = {
 
 OPERATION_TIME_METRICS = [
     'simple_metrics',
-    'database_stats_metrics',
     'fraction_metrics',
-    'db_file_space_usage_metrics',
-    'database_backup_metrics',
-    'database_file_stats_metrics',
     'incr_fraction_metrics',
 ]
 
@@ -306,13 +304,6 @@ def get_operation_time_metrics(instance):
     Return a list of all operation time metrics
     """
     operation_time_metrics = deepcopy(OPERATION_TIME_METRICS)
-    if instance.get('include_task_scheduler_metrics', False):
-        operation_time_metrics.append('os_schedulers_metrics')
-        operation_time_metrics.append('os_tasks_metrics')
-    if instance.get('include_db_fragmentation_metrics', False):
-        operation_time_metrics.append('db_fragmentation_metrics')
     if instance.get('include_ao_metrics', False):
         operation_time_metrics.append('availability_groups_metrics')
-    if instance.get('include_master_files_metrics', False):
-        operation_time_metrics.append('master_database_file_stats_metrics')
     return operation_time_metrics

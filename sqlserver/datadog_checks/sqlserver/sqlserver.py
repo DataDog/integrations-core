@@ -4,7 +4,6 @@
 from __future__ import division
 
 import copy
-import functools
 import time
 from collections import defaultdict
 
@@ -18,6 +17,21 @@ from datadog_checks.base.utils.db.utils import default_json_event_encoding, reso
 from datadog_checks.base.utils.serialization import json
 from datadog_checks.sqlserver.activity import SqlserverActivity
 from datadog_checks.sqlserver.config import SQLServerConfig
+from datadog_checks.sqlserver.database_metrics import (
+    SqlserverAoMetrics,
+    SqlserverDatabaseBackupMetrics,
+    SqlserverDatabaseFileStatsMetrics,
+    SqlserverDatabaseStatsMetrics,
+    SqlserverDbFragmentationMetrics,
+    SqlserverFciMetrics,
+    SqlserverFileStatsMetrics,
+    SqlserverIndexUsageMetrics,
+    SqlserverMasterFilesMetrics,
+    SqlserverPrimaryLogShippingMetrics,
+    SqlserverSecondaryLogShippingMetrics,
+    SqlserverTaskSchedulerMetrics,
+    SqlserverTempDBFileSpaceUsageMetrics,
+)
 from datadog_checks.sqlserver.metadata import SqlserverMetadata
 from datadog_checks.sqlserver.statements import SqlserverStatementMetrics
 from datadog_checks.sqlserver.stored_procedures import SqlserverProcedureMetrics
@@ -40,15 +54,10 @@ from datadog_checks.sqlserver.const import (
     AZURE_DEPLOYMENT_TYPE_TO_RESOURCE_TYPES,
     BASE_NAME_QUERY,
     COUNTER_TYPE_QUERY,
-    DATABASE_BACKUP_METRICS,
-    DATABASE_FRAGMENTATION_METRICS,
-    DATABASE_MASTER_FILES,
-    DATABASE_METRICS,
+    DATABASE_FILES_METRICS,
     DATABASE_SERVICE_CHECK_NAME,
     DATABASE_SERVICE_CHECK_QUERY,
     DBM_MIGRATED_METRICS,
-    DEFAULT_INDEX_USAGE_STATS_INTERVAL,
-    ENGINE_EDITION_AZURE_MANAGED_INSTANCE,
     ENGINE_EDITION_SQL_DATABASE,
     INSTANCE_METRICS,
     INSTANCE_METRICS_DATABASE,
@@ -63,25 +72,14 @@ from datadog_checks.sqlserver.const import (
     STATIC_INFO_MAJOR_VERSION,
     STATIC_INFO_VERSION,
     SWITCH_DB_STATEMENT,
-    TASK_SCHEDULER_METRICS,
-    TEMPDB_FILE_SPACE_USAGE_METRICS,
     VALID_METRIC_TYPES,
     expected_sys_databases_columns,
 )
 from datadog_checks.sqlserver.metrics import DEFAULT_PERFORMANCE_TABLE, VALID_TABLES
 from datadog_checks.sqlserver.queries import (
-    INDEX_USAGE_STATS_QUERY,
-    QUERY_AO_FAILOVER_CLUSTER,
-    QUERY_AO_FAILOVER_CLUSTER_MEMBER,
-    QUERY_FAILOVER_CLUSTER_INSTANCE,
-    QUERY_LOG_SHIPPING_PRIMARY,
-    QUERY_LOG_SHIPPING_SECONDARY,
     QUERY_SERVER_STATIC_INFO,
-    get_query_ao_availability_groups,
-    get_query_file_stats,
 )
 from datadog_checks.sqlserver.utils import (
-    is_azure_database,
     is_azure_sql_database,
     set_default_driver_conf,
 )
@@ -176,12 +174,16 @@ class SQLServer(AgentCheck):
                 "Autodiscovery is disabled, autodiscovery_include and autodiscovery_exclude will be ignored"
             )
 
-    def _new_query_executor(self, queries):
+    def _new_query_executor(self, queries, executor=None, extra_tags=None):
+        if executor is None:
+            executor = self.execute_query_raw
+        tags = self.tags + (extra_tags or [])
+
         return QueryExecutor(
-            self.execute_query_raw,
+            executor,
             self,
             queries=queries,
-            tags=self.tags,
+            tags=tags,
             hostname=self.resolved_hostname,
         )
 
@@ -464,20 +466,17 @@ class SQLServer(AgentCheck):
                         physical_database_name=db.physical_db_name,
                     )
 
-        # Load database statistics
-        db_stats_to_collect = list(DATABASE_METRICS)
-        engine_edition = self.static_info_cache.get(STATIC_INFO_ENGINE_EDITION)
-        if not is_azure_sql_database(engine_edition):
-            db_stats_to_collect.extend(DATABASE_BACKUP_METRICS)
+        # # Load database statistics
+        # db_stats_to_collect = list(DATABASE_FILES_METRICS)
 
-        for name, table, column in db_stats_to_collect:
-            # include database as a filter option
-            db_names = [d.name for d in self.databases] or [
-                self.instance.get('database', self.connection.DEFAULT_DATABASE)
-            ]
-            for db_name in db_names:
-                cfg = {'name': name, 'table': table, 'column': column, 'instance_name': db_name, 'tags': tags}
-                metrics_to_collect.append(self.typed_metric(cfg_inst=cfg, table=table, column=column))
+        # for name, table, column in db_stats_to_collect:
+        #     # include database as a filter option
+        #     db_names = [d.name for d in self.databases] or [
+        #         self.instance.get('database', self.connection.DEFAULT_DATABASE)
+        #     ]
+        #     for db_name in db_names:
+        #         cfg = {'name': name, 'table': table, 'column': column, 'instance_name': db_name, 'tags': tags}
+        #         metrics_to_collect.append(self.typed_metric(cfg_inst=cfg, table=table, column=column))
 
         # Load AlwaysOn metrics
         if is_affirmative(self.instance.get('include_ao_metrics', False)):
@@ -493,52 +492,6 @@ class SQLServer(AgentCheck):
                     'availability_group': self.instance.get('availability_group', None),
                     'only_emit_local': is_affirmative(self.instance.get('only_emit_local', False)),
                 }
-                metrics_to_collect.append(self.typed_metric(cfg_inst=cfg, table=table, column=column))
-
-        # Load metrics from scheduler and task tables, if enabled
-        if is_affirmative(self.instance.get('include_task_scheduler_metrics', False)):
-            for name, table, column in TASK_SCHEDULER_METRICS:
-                cfg = {'name': name, 'table': table, 'column': column, 'tags': tags}
-                metrics_to_collect.append(self.typed_metric(cfg_inst=cfg, table=table, column=column))
-
-        # Load sys.master_files metrics
-        if is_affirmative(self.instance.get('include_master_files_metrics', False)):
-            for name, table, column in DATABASE_MASTER_FILES:
-                cfg = {'name': name, 'table': table, 'column': column, 'tags': tags}
-                metrics_to_collect.append(self.typed_metric(cfg_inst=cfg, table=table, column=column))
-
-        # Load DB Fragmentation metrics
-        if is_affirmative(self.instance.get('include_db_fragmentation_metrics', False)):
-            db_fragmentation_object_names = self.instance.get('db_fragmentation_object_names', [])
-            db_names = [d.name for d in self.databases] or [
-                self.instance.get('database', self.connection.DEFAULT_DATABASE)
-            ]
-
-            if not db_fragmentation_object_names:
-                self.log.debug(
-                    "No fragmentation object names specified, will return fragmentation metrics for all "
-                    "object_ids of current database(s): %s",
-                    db_names,
-                )
-
-            for db_name in db_names:
-                for name, table, column in DATABASE_FRAGMENTATION_METRICS:
-                    cfg = {
-                        'name': name,
-                        'table': table,
-                        'column': column,
-                        'instance_name': db_name,
-                        'tags': tags,
-                        'db_fragmentation_object_names': db_fragmentation_object_names,
-                    }
-                    metrics_to_collect.append(self.typed_metric(cfg_inst=cfg, table=table, column=column))
-
-        # Load DB File Space Usage metrics
-        if is_affirmative(
-            self.instance.get('include_tempdb_file_space_usage_metrics', True)
-        ) and not is_azure_sql_database(engine_edition):
-            for name, table, column in TEMPDB_FILE_SPACE_USAGE_METRICS:
-                cfg = {'name': name, 'table': table, 'column': column, 'instance_name': 'tempdb', 'tags': tags}
                 metrics_to_collect.append(self.typed_metric(cfg_inst=cfg, table=table, column=column))
 
         # Load any custom metrics from conf.d/sqlserver.yaml
@@ -791,39 +744,105 @@ class SQLServer(AgentCheck):
         if self._dynamic_queries:
             return self._dynamic_queries
 
-        major_version = self.static_info_cache.get(STATIC_INFO_MAJOR_VERSION)
-        engine_edition = self.static_info_cache.get(STATIC_INFO_ENGINE_EDITION)
-        # need either major_version or engine_edition to generate queries
-        if not major_version and not is_azure_database(engine_edition):
-            self.log.warning("missing major_version, cannot initialize dynamic queries")
-            return None
-        queries = [get_query_file_stats(major_version, engine_edition)]
+        databases = [d.name for d in self.databases] or [
+            self.instance.get('database', self.connection.DEFAULT_DATABASE)
+        ]
 
-        if is_affirmative(self.instance.get('include_ao_metrics', False)):
-            if major_version > 2012 or is_azure_database(engine_edition):
-                queries.extend(
-                    [
-                        get_query_ao_availability_groups(major_version),
-                        QUERY_AO_FAILOVER_CLUSTER,
-                        QUERY_AO_FAILOVER_CLUSTER_MEMBER,
-                    ]
-                )
-            else:
-                self.log_missing_metric("AlwaysOn", major_version, engine_edition)
-        if is_affirmative(self.instance.get('include_fci_metrics', False)):
-            if major_version > 2012 or engine_edition == ENGINE_EDITION_AZURE_MANAGED_INSTANCE:
-                queries.extend([QUERY_FAILOVER_CLUSTER_INSTANCE])
-            else:
-                self.log_missing_metric("Failover Cluster Instance", major_version, engine_edition)
+        # metrics that are collected for the server
+        file_stats_metrics = SqlserverFileStatsMetrics(
+            instance_config=self.instance,
+            new_query_executor=self._new_query_executor,
+            server_static_info=self.static_info_cache,
+        )
+        ao_metrics = SqlserverAoMetrics(
+            instance_config=self.instance,
+            new_query_executor=self._new_query_executor,
+            server_static_info=self.static_info_cache,
+        )
+        fci_metrics = SqlserverFciMetrics(
+            instance_config=self.instance,
+            new_query_executor=self._new_query_executor,
+            server_static_info=self.static_info_cache,
+        )
+        primary_log_shipping_metrics = SqlserverPrimaryLogShippingMetrics(
+            instance_config=self.instance,
+            new_query_executor=self._new_query_executor,
+            server_static_info=self.static_info_cache,
+        )
+        secondary_log_shipping_metrics = SqlserverSecondaryLogShippingMetrics(
+            instance_config=self.instance,
+            new_query_executor=self._new_query_executor,
+            server_static_info=self.static_info_cache,
+        )
+        master_files_metrics = SqlserverMasterFilesMetrics(
+            instance_config=self.instance,
+            new_query_executor=self._new_query_executor,
+            server_static_info=self.static_info_cache,
+        )
+        database_backup_metrics = SqlserverDatabaseBackupMetrics(
+            instance_config=self.instance,
+            new_query_executor=self._new_query_executor,
+            server_static_info=self.static_info_cache,
+        )
+        task_scheduler_metrics = SqlserverTaskSchedulerMetrics(
+            instance_config=self.instance,
+            new_query_executor=self._new_query_executor,
+            server_static_info=self.static_info_cache,
+        )
+        database_stats_metrics = SqlserverDatabaseStatsMetrics(
+            instance_config=self.instance,
+            new_query_executor=self._new_query_executor,
+            server_static_info=self.static_info_cache,
+        )
 
-        if is_affirmative(self.instance.get('include_primary_log_shipping_metrics', False)):
-            queries.extend([QUERY_LOG_SHIPPING_PRIMARY])
+        # metrics that are collected for each database
+        tempdb_file_space_usage_metrics = SqlserverTempDBFileSpaceUsageMetrics(
+            instance_config=self.instance,
+            new_query_executor=self._new_query_executor,
+            server_static_info=self.static_info_cache,
+            execute_query_handler=self.execute_query_raw,
+        )
+        index_usage_metrics = SqlserverIndexUsageMetrics(
+            instance_config=self.instance,
+            new_query_executor=self._new_query_executor,
+            server_static_info=self.static_info_cache,
+            execute_query_handler=self.execute_query_raw,
+            databases=databases,
+        )
+        db_fragmentation_metrics = SqlserverDbFragmentationMetrics(
+            instance_config=self.instance,
+            new_query_executor=self._new_query_executor,
+            server_static_info=self.static_info_cache,
+            execute_query_handler=self.execute_query_raw,
+            databases=databases,
+        )
+        database_files_metrics = SqlserverDatabaseFileStatsMetrics(
+            instance_config=self.instance,
+            new_query_executor=self._new_query_executor,
+            server_static_info=self.static_info_cache,
+            execute_query_handler=self.execute_query_raw,
+            databases=databases,
+        )
 
-        if is_affirmative(self.instance.get('include_secondary_log_shipping_metrics', False)):
-            queries.extend([QUERY_LOG_SHIPPING_SECONDARY])
 
-        self._dynamic_queries = self._new_query_executor(queries)
-        self._dynamic_queries.compile_queries()
+        # create a list of dynamic queries to execute
+        self._dynamic_queries = [
+            # server level metrics
+            file_stats_metrics,
+            ao_metrics,
+            fci_metrics,
+            primary_log_shipping_metrics,
+            secondary_log_shipping_metrics,
+            master_files_metrics,
+            database_backup_metrics,
+            task_scheduler_metrics,
+            database_stats_metrics,
+            # database specific metrics
+            tempdb_file_space_usage_metrics,
+            index_usage_metrics,
+            db_fragmentation_metrics,
+            database_files_metrics,
+        ]
         self.log.debug("initialized dynamic queries")
         return self._dynamic_queries
 
@@ -890,9 +909,9 @@ class SQLServer(AgentCheck):
                     self.server_state_queries.execute()
 
                 if self.dynamic_queries:
-                    self.dynamic_queries.execute()
-
-                self.collect_index_usage_metrics()
+                    with self.connection.restore_current_database():
+                        for dynamic_query in self.dynamic_queries:
+                            dynamic_query.execute()
 
                 # reuse connection for any custom queries
                 self._query_manager.execute()
@@ -908,51 +927,6 @@ class SQLServer(AgentCheck):
                 cursor.execute(ctx)
             cursor.execute(query)
             return cursor.fetchall()
-
-    # https://learn.microsoft.com/en-us/sql/relational-databases/system-dynamic-management-views/sys-dm-db-index-usage-stats-transact-sql?view=sql-server-ver15
-    def collect_index_usage_metrics(self):
-        if not is_affirmative(self.instance.get('include_index_usage_metrics', True)):
-            return
-
-        interval = max(int(self.instance.get('index_usage_stats_interval', DEFAULT_INDEX_USAGE_STATS_INTERVAL)), 10)
-
-        now = time.time()
-        if not self._index_usage_last_check_ts or now - self._index_usage_last_check_ts > interval:
-            self._index_usage_last_check_ts = now
-            self.log.debug('Collecting index usage statistics')
-            # Filter out tempdb as the query might be blocking and it's index usage information is not relevant
-            db_names = [d.name for d in self.databases] or [
-                self.instance.get('database', self.connection.DEFAULT_DATABASE)
-            ]
-            if not self._config.include_index_usage_metrics_tempdb:
-                db_names = [db_name for db_name in db_names if db_name != 'tempdb']
-
-            with self.connection.get_managed_cursor() as cursor:
-                cursor.execute(
-                    'select DB_NAME()'
-                )  # This can return None in some implementations, so it cannot be chained
-                data = cursor.fetchall()
-                current_db = data[0][0]
-                self.log.debug("current db is %s", current_db)
-                try:
-                    for database in db_names:
-                        try:
-                            executor = QueryExecutor(
-                                functools.partial(self.execute_query_raw, db=database),
-                                self,
-                                queries=[INDEX_USAGE_STATS_QUERY],
-                                tags=self.tags,
-                                hostname=self.resolved_hostname,
-                            )
-                            executor.compile_queries()
-                            executor.execute()
-                        except Exception as e:
-                            self.log.error("failed to collect index usage statistics: %s", e)
-                finally:
-                    if current_db:
-                        self.log.debug("reverting cursor context via use statement to %s", current_db)
-                        cursor.execute(construct_use_statement(current_db))
-        return
 
     def do_stored_procedure_check(self):
         """
