@@ -463,11 +463,6 @@ instances:
     ##     client_secret (required): The client secret.
     ##     basic_auth: Whether the provider expects credentials to be transmitted in
     ##                 an HTTP Basic Auth header. The default is: false
-    ##     options: Mapping of additional options to pass to the provider, such as the audience
-    ##              or the scope. For example:
-    ##                 options:
-    ##                   audience: https://example.com
-    ##                   scope: read:example
     ##
     ## The available writers are:
     ##
@@ -680,8 +675,8 @@ instances:
 
     ## @param nodes - list of strings - optional
     ## Use the `nodes` parameters to specify the nodes you'd like to collect metrics on.
-    ## The default maximum number of nodes is 100. Exceeding this limit can cause data loss. 
-    ## To increase the maximum, contact customer support.
+    ## The default maximum number of nodes is 100. Exceeding this limit can cause 
+    ## data loss. To increase the maximum, contact customer support.
     #
     # nodes:
     #   - <NODE_NAME_1>
