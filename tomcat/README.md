@@ -231,17 +231,17 @@ See the [JMX Check documentation][7] for more detailed information.
 The `datadog-agent jmx` command was added in version 4.1.0.
 
 - List attributes that match at least one of your instance configurations:
-  `sudo /etc/init.d/datadog-agent jmx list_matching_attributes`
+  `sudo -u dd-agent datadog-agent jmx list_matching_attributes`
 - List attributes that match one of your instance configurations but that are not collected because it would exceed the number of metrics that can be collected:
-  `sudo /etc/init.d/datadog-agent jmx list_limited_attributes`
+  `sudo -u dd-agent datadog-agent jmx list_limited_attributes`
 - List attributes that are actually collected by your current instance configurations:
-  `sudo /etc/init.d/datadog-agent jmx list_collected_attributes`
+  `sudo -u dd-agent datadog-agent jmx list_collected_attributes`
 - List attributes that don't match any of your instance configurations:
-  `sudo /etc/init.d/datadog-agent jmx list_not_matching_attributes`
+  `sudo -u dd-agent datadog-agent jmx list_not_matching_attributes`
 - List every attribute available that has a type supported by JMXFetch:
-  `sudo /etc/init.d/datadog-agent jmx list_everything`
+  `sudo -u dd-agent datadog-agent jmx list_everything`
 - Start the collection of metrics based on your current configuration and display them in the console:
-  `sudo /etc/init.d/datadog-agent jmx collect`
+  `sudo -u dd-agent datadog-agent jmx collect`
 
 ## Further Reading
 
