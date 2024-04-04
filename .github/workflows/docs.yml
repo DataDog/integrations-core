@@ -16,7 +16,7 @@ on:
     # in the docs virtualenv along with the dependencies of ddev. For example, this PR:
     # https://github.com/DataDog/integrations-core/pull/17319/files#diff-1b02d4258aa29155f48813d2eb55fc87f62abbded6d8a9fa9e3b8f08365d771aR64
     # broke the docs job (pydantic incompatible with ddev's version) but we didn't find out until later.
-    - 'datadog_checks_base/pyproject.toml
+    - 'datadog_checks_base/pyproject.toml'
 
 jobs:
   build:
