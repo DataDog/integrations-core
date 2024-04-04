@@ -42,7 +42,7 @@ def new(app: Application, entry_type: str | None, targets: tuple[str], message: 
         towncrier(check.path, *create_command)
         edited += 1
 
-    if edited == 0:
+    if not edited:
         app.display_info('No changelog entries to create')
     else:
         app.display_success(f'Added {edited} changelog entr{"ies" if edited > 1 else "y"}')
