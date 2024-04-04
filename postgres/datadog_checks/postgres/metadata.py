@@ -269,7 +269,7 @@ class PostgresMetadata(DBMAsyncJob):
                 "timestamp": time.time() * 1000,
                 "cloud_metadata": self._config.cloud_metadata,
             }
-            for database in schema_metadata["databases"]:
+            for database in schema_metadata:
                 dbname = database["name"]
                 with self.db_pool.get_connection(dbname, self._config.idle_connection_timeout) as conn:
                     with conn.cursor(cursor_factory=psycopg2.extras.DictCursor) as cursor:
@@ -277,11 +277,11 @@ class PostgresMetadata(DBMAsyncJob):
                             tables = self._query_tables_for_schema(cursor, schema["id"], dbname)
                             for table in tables:
                                 table_info = self._query_table_information(cursor, table)
-                                metadata = {
-                                    "database": {**database, "schemas": [{**schema, "tables": [table_info]}]}
-                                }
+                                metadata = [
+                                    {**database, "schemas": [{**schema, "tables": [table_info]}]}
+                                ]
 
-                                event = {**base_event, metadata: metadata}
+                                event = {**base_event, "metadata": metadata}
 
                                 json_event = json.dumps(event, default=default_json_event_encoding)
                                 self._log.debug("Reporting the following payload for schema collection: {}".format(json_event))
@@ -408,8 +408,8 @@ class PostgresMetadata(DBMAsyncJob):
             this_payload.update({"id": str(table["id"])})
             this_payload.update({"name": table["name"]})
             this_payload.update({"owner": table["owner"]})
-            this_payload.update({"has_indexes": table["has_indexes"]})
-            this_payload.update({"has_partitions": table["has_partitions"]})
+            this_payload.update({"has_indexes": table["has_indexes"]})            
+            this_payload.update({"has_partitions": table.get("has_partitions", False)})
             if table["toast_table"] is not None:
                 this_payload.update({"toast_table": table["toast_table"]})
 
