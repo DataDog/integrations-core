@@ -174,26 +174,25 @@ class PostgresMetadata(DBMAsyncJob):
     """
 
     def __init__(self, check, config, shutdown_callback):
-        self.pg_settings_collection_interval = config.settings_metadata_config.get(
-            "collection_interval", DEFAULT_SETTINGS_COLLECTION_INTERVAL
-        )
         self.pg_settings_ignored_patterns = config.settings_metadata_config.get(
             "ignored_settings_patterns", DEFAULT_SETTINGS_IGNORED_PATTERNS
+        )
+        self.pg_settings_collection_interval = config.settings_metadata_config.get(
+            "collection_interval", DEFAULT_SETTINGS_COLLECTION_INTERVAL
         )
         self.schemas_collection_interval = config.schemas_metadata_config.get(
             "collection_interval", DEFAULT_SCHEMAS_COLLECTION_INTERVAL
         )
-
-        collection_interval = config.resources_metadata_config.get(
+        resources_collection_interval = config.resources_metadata_config.get(
             "collection_interval", DEFAULT_RESOURCES_COLLECTION_INTERVAL
         )
 
         # by default, send resources every 5 minutes
-        self.collection_interval = min(collection_interval, self.pg_settings_collection_interval)
+        self.collection_interval = min(resources_collection_interval, self.pg_settings_collection_interval, self.schemas_collection_interval)
 
         super(PostgresMetadata, self).__init__(
             check,
-            rate_limit=1 / self.collection_interval,
+            rate_limit=1 / float(self.collection_interval),
             run_sync=is_affirmative(config.settings_metadata_config.get("run_sync", False)),
             enabled=is_affirmative(config.resources_metadata_config.get("enabled", True)),
             dbms="postgres",
@@ -258,6 +257,8 @@ class PostgresMetadata(DBMAsyncJob):
             schema_metadata = self._collect_schema_info()
             # Emit an event for each table to keep size small
 
+            print("Collected schema info", schema_metadata)
+
             base_event = {
                 "host": self._check.resolved_hostname,
                 "agent_version": datadog_agent.get_version(),
@@ -266,7 +267,6 @@ class PostgresMetadata(DBMAsyncJob):
                 "collection_interval": self.schemas_collection_interval,
                 "dbms_version": self._payload_pg_version(),
                 "tags": self._tags_no_db,
-                "timestamp": time.time() * 1000,
                 "cloud_metadata": self._config.cloud_metadata,
             }
             for database in schema_metadata:
@@ -275,17 +275,22 @@ class PostgresMetadata(DBMAsyncJob):
                     with conn.cursor(cursor_factory=psycopg2.extras.DictCursor) as cursor:
                         for schema in database["schemas"]:
                             tables = self._query_tables_for_schema(cursor, schema["id"], dbname)
-                            for table in tables:
+                            # print("Tables found", tables)
+                            tables_buffer = []
+                            for i, table in enumerate(tables):
                                 table_info = self._query_table_information(cursor, table)
-                                metadata = [
-                                    {**database, "schemas": [{**schema, "tables": [table_info]}]}
-                                ]
-
-                                event = {**base_event, "metadata": metadata}
-
-                                json_event = json.dumps(event, default=default_json_event_encoding)
-                                self._log.debug("Reporting the following payload for schema collection: {}".format(json_event))
-                                self._check.database_monitoring_metadata(json_event)
+                                
+                                tables_buffer.append(table_info)
+                                if len(tables_buffer) >= 10 or i == len(tables) - 1:
+                                    metadata = [
+                                        {**database, "schemas": [{**schema, "tables": tables_buffer}], "timestamp": time.time() * 1000,}
+                                    ]
+                                    event = {**base_event, "metadata": metadata}
+                                    # print("Pushing event", event)
+                                    json_event = json.dumps(event, default=default_json_event_encoding)
+                                    self._log.debug("Reporting the following payload for schema collection: {}".format(json_event))
+                                    self._check.database_monitoring_metadata(json_event)
+                                    tables_buffer = []
 
     def _payload_pg_version(self):
         version = self._check.version
@@ -371,7 +376,7 @@ class PostgresMetadata(DBMAsyncJob):
                 or not info["has_partitions"]
             ):
                 # if we don't have metrics in our cache for this table, return 0
-                table_data = cache[dbname].get(
+                table_data = cache.get(dbname, {}).get(
                     info["name"],
                     {"postgresql.index_scans": 0, "postgresql.seq_scans": 0},
                 )
