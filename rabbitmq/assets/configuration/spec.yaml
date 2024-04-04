@@ -86,8 +86,8 @@ files:
       - name: nodes
         description: |
           Use the `nodes` parameters to specify the nodes you'd like to collect metrics on.
-          The default maximum number of nodes is 100. Exceeding this limit can cause data loss. 
-          To increase the maximum, contact customer support.
+          The default maximum number of nodes is 100. Exceeding this limit can cause 
+          data loss. To increase the maximum, contact customer support.
         value:
           type: array
           items:
