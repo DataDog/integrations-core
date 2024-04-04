@@ -283,9 +283,9 @@ class PostgresMetadata(DBMAsyncJob):
                                 tables_buffer.append(table_info)
                                 if len(tables_buffer) >= 10 or i == len(tables) - 1:
                                     metadata = [
-                                        {**database, "schemas": [{**schema, "tables": tables_buffer}], "timestamp": time.time() * 1000,}
+                                        {**database, "schemas": [{**schema, "tables": tables_buffer}], }
                                     ]
-                                    event = {**base_event, "metadata": metadata}
+                                    event = {**base_event, "metadata": metadata, "timestamp": time.time() * 1000}
                                     # print("Pushing event", event)
                                     json_event = json.dumps(event, default=default_json_event_encoding)
                                     self._log.debug("Reporting the following payload for schema collection: {}".format(json_event))
