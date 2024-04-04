@@ -1,0 +1,758 @@
+{
+    "title": "Cisco Secure Firewall - User Authentication",
+    "description": "- This dashboard provides insights into user authentication logs.",
+    "widgets": [
+        {
+            "id": 6804256779433336,
+            "definition": {
+                "type": "image",
+                "url": "https://external-content.duckduckgo.com/iu/?u=https%3A%2F%2F3.bp.blogspot.com%2F-zO5McOTnG10%2FVWY-VxCCKMI%2FAAAAAAAADc8%2FON3fAeUlPUQ%2Fs1600%2FCisco_logo.svg.png&f=1&nofb=1&ipt=7c7c79c2963ca2a0f694a7b1704d207d6e7b7c18078bebc66d6b87f864698569&ipo=images",
+                "sizing": "contain",
+                "margin": "lg",
+                "has_background": true,
+                "has_border": true,
+                "vertical_align": "center",
+                "horizontal_align": "center"
+            },
+            "layout": {
+                "x": 0,
+                "y": 0,
+                "width": 4,
+                "height": 2
+            }
+        },
+        {
+            "id": 6938668808494186,
+            "definition": {
+                "type": "note",
+                "content": "## Overview\n- This dashboard provides insights into user authentication logs.",
+                "background_color": "white",
+                "font_size": "14",
+                "text_align": "left",
+                "vertical_align": "top",
+                "show_tick": false,
+                "tick_pos": "50%",
+                "tick_edge": "left",
+                "has_padding": true
+            },
+            "layout": {
+                "x": 4,
+                "y": 0,
+                "width": 4,
+                "height": 2
+            }
+        },
+        {
+            "id": 6202972007438386,
+            "definition": {
+                "type": "note",
+                "content": "## Widgets\n\n1. Number of Times AAA Session Limit Reached \n2. Events by Severity \n3. Auth Session Elapsed Time Details \n4. Types of Session Disconnected \n5. Excluded Users From ACL \n6. Top 10 Users Without Admin Privileges \n7. Top 10 Locked Out Users \n8. Top 10 Rejected Authentication by Source IP \n9. Top 10 Auth Session Started Users \n10. Bytes Transmitted Over Time \n11. Bytes Received Over Time",
+                "background_color": "white",
+                "font_size": "14",
+                "text_align": "left",
+                "vertical_align": "top",
+                "show_tick": false,
+                "tick_pos": "50%",
+                "tick_edge": "left",
+                "has_padding": true
+            },
+            "layout": {
+                "x": 8,
+                "y": 0,
+                "width": 4,
+                "height": 2
+            }
+        },
+        {
+            "id": 8179676488696652,
+            "definition": {
+                "title": "Number of times AAA Session Limit Reached",
+                "title_size": "16",
+                "title_align": "left",
+                "type": "query_value",
+                "requests": [
+                    {
+                        "formulas": [
+                            {
+                                "formula": "query1"
+                            }
+                        ],
+                        "queries": [
+                            {
+                                "data_source": "logs",
+                                "name": "query1",
+                                "indexes": [
+                                    "*"
+                                ],
+                                "compute": {
+                                    "aggregation": "count"
+                                },
+                                "group_by": [],
+                                "search": {
+                                    "query": "source:cisco-secure-firewall @message_id:113001 $Device-ID $Username $Host"
+                                },
+                                "storage": "hot"
+                            }
+                        ],
+                        "response_format": "scalar"
+                    }
+                ],
+                "autoscale": true,
+                "precision": 2
+            },
+            "layout": {
+                "x": 0,
+                "y": 2,
+                "width": 4,
+                "height": 3
+            }
+        },
+        {
+            "id": 7956003645847102,
+            "definition": {
+                "title": "Events by Severity",
+                "title_size": "16",
+                "title_align": "left",
+                "requests": [
+                    {
+                        "formulas": [
+                            {
+                                "formula": "query1",
+                                "limit": {
+                                    "count": 500,
+                                    "order": "desc"
+                                }
+                            }
+                        ],
+                        "queries": [
+                            {
+                                "data_source": "logs",
+                                "name": "query1",
+                                "indexes": [
+                                    "*"
+                                ],
+                                "compute": {
+                                    "aggregation": "count"
+                                },
+                                "group_by": [
+                                    {
+                                        "facet": "status",
+                                        "limit": 10,
+                                        "sort": {
+                                            "order": "desc",
+                                            "aggregation": "count"
+                                        }
+                                    }
+                                ],
+                                "search": {
+                                    "query": "source:cisco-secure-firewall @message_id:(109* OR 113*) $Device-ID $Username $Host"
+                                },
+                                "storage": "hot"
+                            }
+                        ],
+                        "response_format": "scalar",
+                        "style": {
+                            "palette": "semantic"
+                        }
+                    }
+                ],
+                "type": "sunburst",
+                "legend": {
+                    "type": "table"
+                }
+            },
+            "layout": {
+                "x": 4,
+                "y": 2,
+                "width": 8,
+                "height": 3
+            }
+        },
+        {
+            "id": 1136897228006864,
+            "definition": {
+                "title": "Auth Session Elapsed Time Details",
+                "title_size": "16",
+                "title_align": "left",
+                "type": "query_table",
+                "requests": [
+                    {
+                        "queries": [
+                            {
+                                "data_source": "logs",
+                                "name": "query1",
+                                "indexes": [
+                                    "*"
+                                ],
+                                "compute": {
+                                    "aggregation": "count"
+                                },
+                                "group_by": [
+                                    {
+                                        "facet": "@usr.name",
+                                        "limit": 10,
+                                        "sort": {
+                                            "order": "desc",
+                                            "aggregation": "count"
+                                        }
+                                    },
+                                    {
+                                        "facet": "@elapsed_time",
+                                        "limit": 10,
+                                        "sort": {
+                                            "order": "desc",
+                                            "aggregation": "count"
+                                        }
+                                    }
+                                ],
+                                "search": {
+                                    "query": "source:cisco-secure-firewall @message_id:109012 $Device-ID $Username $Host"
+                                },
+                                "storage": "hot"
+                            }
+                        ],
+                        "response_format": "scalar",
+                        "formulas": [
+                            {
+                                "cell_display_mode": "bar",
+                                "alias": "Count",
+                                "formula": "query1",
+                                "limit": {
+                                    "count": 500,
+                                    "order": "desc"
+                                }
+                            }
+                        ]
+                    }
+                ],
+                "has_search_bar": "auto"
+            },
+            "layout": {
+                "x": 0,
+                "y": 5,
+                "width": 6,
+                "height": 4
+            }
+        },
+        {
+            "id": 4649747565146282,
+            "definition": {
+                "title": "Types of Session Disconnected",
+                "title_size": "16",
+                "title_align": "left",
+                "requests": [
+                    {
+                        "formulas": [
+                            {
+                                "formula": "query1",
+                                "limit": {
+                                    "count": 500,
+                                    "order": "desc"
+                                }
+                            }
+                        ],
+                        "queries": [
+                            {
+                                "data_source": "logs",
+                                "name": "query1",
+                                "indexes": [
+                                    "*"
+                                ],
+                                "compute": {
+                                    "aggregation": "count"
+                                },
+                                "group_by": [
+                                    {
+                                        "facet": "@session_type",
+                                        "limit": 10,
+                                        "sort": {
+                                            "order": "desc",
+                                            "aggregation": "count"
+                                        }
+                                    }
+                                ],
+                                "search": {
+                                    "query": "source:cisco-secure-firewall @message_id:113019 $Device-ID $Username $Host"
+                                },
+                                "storage": "hot"
+                            }
+                        ],
+                        "response_format": "scalar",
+                        "style": {
+                            "palette": "datadog16"
+                        }
+                    }
+                ],
+                "type": "sunburst",
+                "legend": {
+                    "type": "table"
+                }
+            },
+            "layout": {
+                "x": 6,
+                "y": 5,
+                "width": 6,
+                "height": 4
+            }
+        },
+        {
+            "id": 1451584806769304,
+            "definition": {
+                "title": "Excluded Users From ACL",
+                "title_size": "16",
+                "title_align": "left",
+                "type": "query_table",
+                "requests": [
+                    {
+                        "queries": [
+                            {
+                                "data_source": "logs",
+                                "name": "query1",
+                                "indexes": [
+                                    "*"
+                                ],
+                                "compute": {
+                                    "aggregation": "count"
+                                },
+                                "group_by": [
+                                    {
+                                        "facet": "@usr.name",
+                                        "limit": 10,
+                                        "sort": {
+                                            "order": "desc",
+                                            "aggregation": "count"
+                                        }
+                                    },
+                                    {
+                                        "facet": "@acl_id",
+                                        "limit": 10,
+                                        "sort": {
+                                            "order": "desc",
+                                            "aggregation": "count"
+                                        }
+                                    }
+                                ],
+                                "search": {
+                                    "query": "source:cisco-secure-firewall @message_id:109016 $Device-ID $Username $Host"
+                                },
+                                "storage": "hot"
+                            }
+                        ],
+                        "response_format": "scalar",
+                        "formulas": [
+                            {
+                                "cell_display_mode": "bar",
+                                "alias": "Count",
+                                "formula": "query1",
+                                "limit": {
+                                    "count": 500,
+                                    "order": "desc"
+                                }
+                            }
+                        ]
+                    }
+                ],
+                "has_search_bar": "auto"
+            },
+            "layout": {
+                "x": 0,
+                "y": 9,
+                "width": 4,
+                "height": 3
+            }
+        },
+        {
+            "id": 7423528061935160,
+            "definition": {
+                "title": "Top 10 Users Without Admin Privileges",
+                "title_size": "16",
+                "title_align": "left",
+                "time": {},
+                "type": "toplist",
+                "requests": [
+                    {
+                        "formulas": [
+                            {
+                                "formula": "query1",
+                                "limit": {
+                                    "count": 10,
+                                    "order": "desc"
+                                }
+                            }
+                        ],
+                        "queries": [
+                            {
+                                "data_source": "logs",
+                                "name": "query1",
+                                "indexes": [
+                                    "*"
+                                ],
+                                "compute": {
+                                    "aggregation": "count"
+                                },
+                                "group_by": [
+                                    {
+                                        "facet": "@usr.name",
+                                        "limit": 10,
+                                        "sort": {
+                                            "order": "desc",
+                                            "aggregation": "count"
+                                        }
+                                    }
+                                ],
+                                "search": {
+                                    "query": "source:cisco-secure-firewall @message_id:113021 $Device-ID $Username $Host"
+                                },
+                                "storage": "hot"
+                            }
+                        ],
+                        "response_format": "scalar"
+                    }
+                ],
+                "style": {
+                    "display": {
+                        "type": "stacked",
+                        "legend": "automatic"
+                    },
+                    "scaling": "relative"
+                }
+            },
+            "layout": {
+                "x": 4,
+                "y": 9,
+                "width": 8,
+                "height": 3
+            }
+        },
+        {
+            "id": 8322127209651732,
+            "definition": {
+                "title": "Top 10 Locked Out Users",
+                "title_size": "16",
+                "title_align": "left",
+                "time": {},
+                "type": "toplist",
+                "requests": [
+                    {
+                        "formulas": [
+                            {
+                                "formula": "query1",
+                                "limit": {
+                                    "count": 10,
+                                    "order": "desc"
+                                }
+                            }
+                        ],
+                        "queries": [
+                            {
+                                "data_source": "logs",
+                                "name": "query1",
+                                "indexes": [
+                                    "*"
+                                ],
+                                "compute": {
+                                    "aggregation": "count"
+                                },
+                                "group_by": [
+                                    {
+                                        "facet": "@usr.name",
+                                        "limit": 10,
+                                        "sort": {
+                                            "order": "desc",
+                                            "aggregation": "count"
+                                        }
+                                    }
+                                ],
+                                "search": {
+                                    "query": "source:cisco-secure-firewall @message_id:113006 $Device-ID $Username $Host"
+                                },
+                                "storage": "hot"
+                            }
+                        ],
+                        "response_format": "scalar"
+                    }
+                ],
+                "style": {
+                    "display": {
+                        "type": "stacked",
+                        "legend": "none"
+                    },
+                    "scaling": "relative"
+                }
+            },
+            "layout": {
+                "x": 0,
+                "y": 12,
+                "width": 4,
+                "height": 4
+            }
+        },
+        {
+            "id": 6298052137534846,
+            "definition": {
+                "title": "Top 10 Rejected Authentication by Source IP",
+                "title_size": "16",
+                "title_align": "left",
+                "time": {},
+                "type": "toplist",
+                "requests": [
+                    {
+                        "formulas": [
+                            {
+                                "formula": "query1",
+                                "limit": {
+                                    "count": 10,
+                                    "order": "desc"
+                                }
+                            }
+                        ],
+                        "queries": [
+                            {
+                                "data_source": "logs",
+                                "name": "query1",
+                                "indexes": [
+                                    "*"
+                                ],
+                                "compute": {
+                                    "aggregation": "count"
+                                },
+                                "group_by": [
+                                    {
+                                        "facet": "@user_ip",
+                                        "limit": 10,
+                                        "sort": {
+                                            "order": "desc",
+                                            "aggregation": "count"
+                                        }
+                                    }
+                                ],
+                                "search": {
+                                    "query": "source:cisco-secure-firewall @message_id:113005 $Device-ID $Username $Host"
+                                },
+                                "storage": "hot"
+                            }
+                        ],
+                        "response_format": "scalar"
+                    }
+                ],
+                "style": {
+                    "display": {
+                        "type": "stacked",
+                        "legend": "none"
+                    },
+                    "scaling": "relative"
+                }
+            },
+            "layout": {
+                "x": 4,
+                "y": 12,
+                "width": 4,
+                "height": 4
+            }
+        },
+        {
+            "id": 3311934445827822,
+            "definition": {
+                "title": "Top 10 Auth Session Started Users",
+                "title_size": "16",
+                "title_align": "left",
+                "time": {},
+                "type": "toplist",
+                "requests": [
+                    {
+                        "formulas": [
+                            {
+                                "formula": "query1",
+                                "limit": {
+                                    "count": 10,
+                                    "order": "desc"
+                                }
+                            }
+                        ],
+                        "queries": [
+                            {
+                                "data_source": "logs",
+                                "name": "query1",
+                                "indexes": [
+                                    "*"
+                                ],
+                                "compute": {
+                                    "aggregation": "count"
+                                },
+                                "group_by": [
+                                    {
+                                        "facet": "@usr.name",
+                                        "limit": 10,
+                                        "sort": {
+                                            "order": "desc",
+                                            "aggregation": "count"
+                                        }
+                                    }
+                                ],
+                                "search": {
+                                    "query": "source:cisco-secure-firewall @message_id:109011 $Device-ID $Username $Host"
+                                },
+                                "storage": "hot"
+                            }
+                        ],
+                        "response_format": "scalar"
+                    }
+                ],
+                "style": {
+                    "display": {
+                        "type": "stacked",
+                        "legend": "none"
+                    },
+                    "scaling": "relative"
+                }
+            },
+            "layout": {
+                "x": 8,
+                "y": 12,
+                "width": 4,
+                "height": 4
+            }
+        },
+        {
+            "id": 1790800721977134,
+            "definition": {
+                "title": "Bytes Transmitted Over Time",
+                "title_size": "16",
+                "title_align": "left",
+                "show_legend": true,
+                "legend_layout": "auto",
+                "legend_columns": [
+                    "avg",
+                    "min",
+                    "max",
+                    "value",
+                    "sum"
+                ],
+                "type": "timeseries",
+                "requests": [
+                    {
+                        "formulas": [
+                            {
+                                "alias": "Transmitted Bytes",
+                                "formula": "query1"
+                            }
+                        ],
+                        "queries": [
+                            {
+                                "data_source": "logs",
+                                "name": "query1",
+                                "indexes": [
+                                    "*"
+                                ],
+                                "compute": {
+                                    "aggregation": "avg",
+                                    "metric": "@network.bytes_read"
+                                },
+                                "group_by": [],
+                                "search": {
+                                    "query": "source:cisco-secure-firewall @message_id:113019 $Device-ID $Username $Host"
+                                },
+                                "storage": "hot"
+                            }
+                        ],
+                        "response_format": "timeseries",
+                        "style": {
+                            "palette": "dog_classic",
+                            "line_type": "solid",
+                            "line_width": "normal"
+                        },
+                        "display_type": "line"
+                    }
+                ]
+            },
+            "layout": {
+                "x": 0,
+                "y": 16,
+                "width": 12,
+                "height": 4
+            }
+        },
+        {
+            "id": 5805342238068510,
+            "definition": {
+                "title": "Bytes Received Over Time",
+                "title_size": "16",
+                "title_align": "left",
+                "show_legend": true,
+                "legend_layout": "auto",
+                "legend_columns": [
+                    "avg",
+                    "min",
+                    "max",
+                    "value",
+                    "sum"
+                ],
+                "type": "timeseries",
+                "requests": [
+                    {
+                        "formulas": [
+                            {
+                                "alias": "Received Bytes",
+                                "formula": "query1"
+                            }
+                        ],
+                        "queries": [
+                            {
+                                "data_source": "logs",
+                                "name": "query1",
+                                "indexes": [
+                                    "*"
+                                ],
+                                "compute": {
+                                    "aggregation": "avg",
+                                    "metric": "@network.bytes_written"
+                                },
+                                "group_by": [],
+                                "search": {
+                                    "query": "source:cisco-secure-firewall @message_id:113019 $Device-ID $Username $Host"
+                                },
+                                "storage": "hot"
+                            }
+                        ],
+                        "response_format": "timeseries",
+                        "style": {
+                            "palette": "dog_classic",
+                            "line_type": "solid",
+                            "line_width": "normal"
+                        },
+                        "display_type": "line"
+                    }
+                ]
+            },
+            "layout": {
+                "x": 0,
+                "y": 20,
+                "width": 12,
+                "height": 4
+            }
+        }
+    ],
+    "template_variables": [
+        {
+            "name": "Host",
+            "prefix": "host",
+            "available_values": [],
+            "default": "*"
+        },
+        {
+            "name": "Device-ID",
+            "prefix": "@device_id",
+            "available_values": [],
+            "default": "*"
+        },
+        {
+            "name": "Username",
+            "prefix": "@usr.name",
+            "available_values": [],
+            "default": "*"
+        }
+    ],
+    "layout_type": "ordered",
+    "notify_list": [],
+    "reflow_type": "fixed"
+}

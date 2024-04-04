@@ -38,14 +38,14 @@ docker run -d
 2. Install the Datadog APM Python library.
 
 ```shell
-pip install ddtrace>=1.13
+pip install ddtrace
 ```
 
 
 3. Prefix your OpenAI Python application command with `ddtrace-run` and the following environment variables as shown below: 
 
 ```shell
-DD_SERVICE="my-service" DD_ENV="staging" DD_API_KEY=<DATADOG_API_KEY> ddtrace-run python <your-app>.py
+DD_SERVICE="my-service" DD_ENV="staging" ddtrace-run python <your-app>.py
 ```
 
 **Notes**:
@@ -66,7 +66,7 @@ See the [APM Python library documentation][3] for all the available configuratio
 
 #### Log Prompt & Completion Sampling
 
-To enable log prompt and completion sampling, set the `DD_OPENAI_LOGS_ENABLED=1` environment variable. By default, 10% of traced requests will emit logs containing the prompts and completions.
+To enable log prompt and completion sampling, set the `DD_OPENAI_LOGS_ENABLED="true"` environment variable. By default, 10% of traced requests will emit logs containing the prompts and completions.
 
 To adjust the log sample rate, see the [APM library documentation][3].
 

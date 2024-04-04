@@ -11,7 +11,7 @@ from collections import defaultdict
 import six
 from cachetools import TTLCache
 
-from datadog_checks.base import AgentCheck, ConfigurationError
+from datadog_checks.base import AgentCheck
 from datadog_checks.base.config import is_affirmative
 from datadog_checks.base.utils.db import QueryExecutor, QueryManager
 from datadog_checks.base.utils.db.utils import default_json_event_encoding, resolve_db_host, tracked_query
@@ -322,36 +322,37 @@ class SQLServer(AgentCheck):
         return self._agent_hostname
 
     def initialize_connection(self):
-        self.connection = Connection(self, self.init_config, self.instance, self.handle_service_check)
+        self.connection = Connection(
+            host=self.resolved_hostname,
+            init_config=self.init_config,
+            instance_config=self.instance,
+            service_check_handler=self.handle_service_check,
+        )
 
     def make_metric_list_to_collect(self):
         # Pre-process the list of metrics to collect
         try:
-            # check to see if the database exists before we try any connections to it
-            db_exists, context = self.connection.check_database()
-            if db_exists:
-                if self.instance.get('stored_procedure') is None:
-                    with self.connection.open_managed_default_connection():
-                        with self.connection.get_managed_cursor() as cursor:
-                            self.autodiscover_databases(cursor)
-                        self._make_metric_list_to_collect(self._config.custom_metrics)
-            else:
-                # How much do we care that the DB doesn't exist?
-                ignore = is_affirmative(self.instance.get("ignore_missing_database", False))
-                if ignore is not None and ignore:
-                    # not much : we expect it. leave checks disabled
-                    self.do_check = False
-                    self.log.warning("Database %s does not exist. Disabling checks for this instance.", context)
-                else:
-                    # yes we do. Keep trying
-                    msg = "Database {} does not exist. Please resolve invalid database and restart agent".format(
-                        context
-                    )
-                    raise ConfigurationError(msg)
-
-        except SQLConnectionError as e:
-            self.log.exception("Error connecting to database: %s", e)
-        except ConfigurationError:
+            if self._config.ignore_missing_database:
+                # self.connection.check_database() will try to connect to 'master'.
+                # If this is an Azure SQL Database this function will throw.
+                # For this reason we avoid calling self.connection.check_database()
+                # for this config as it will be a false negative.
+                engine_edition = self.static_info_cache.get(STATIC_INFO_ENGINE_EDITION)
+                if not is_azure_sql_database(engine_edition):
+                    # Do the database exist check that will allow to disable _check as a whole
+                    # as otherwise the first call to open_managed_default_connection will throw the
+                    # SQLConnectionError.
+                    db_exists, context = self.connection.check_database()
+                    if not db_exists:
+                        self.do_check = False
+                        self.log.warning("Database %s does not exist. Disabling checks for this instance.", context)
+                        return
+            if self.instance.get('stored_procedure') is None:
+                with self.connection.open_managed_default_connection():
+                    with self.connection.get_managed_cursor() as cursor:
+                        self.autodiscover_databases(cursor)
+                    self._make_metric_list_to_collect(self._config.custom_metrics)
+        except SQLConnectionError:
             raise
         except Exception as e:
             self.log.exception("Initialization exception %s", e)
@@ -658,10 +659,12 @@ class SQLServer(AgentCheck):
                 # and PERF_AVERAGE_BULK), we need two metrics: the metrics specified and
                 # a base metrics to get the ratio. There is no unique schema, so we generate
                 # the possible candidates, and we look at which ones exist in the db.
+                counter_name_lowercase = counter_name.lower()
+                # lowercase is used to avoid case sensitivity issues such as base vs. Base or BASE
                 candidates = (
-                    counter_name + " base",
-                    counter_name.replace("(ms)", "base"),
-                    counter_name.replace("Avg ", "") + " base",
+                    counter_name_lowercase + " base",
+                    counter_name_lowercase.replace("(ms)", "base"),
+                    counter_name_lowercase.replace("avg ", "") + " base",
                 )
                 try:
                     cursor.execute(BASE_NAME_QUERY, candidates)
@@ -749,7 +752,7 @@ class SQLServer(AgentCheck):
         engine_edition = self.static_info_cache.get(STATIC_INFO_ENGINE_EDITION)
         if is_azure_sql_database(engine_edition):
             # On Azure, we can't use a less costly approach.
-            self._check_connection_by_connecting_to_db()
+            self._check_connections_by_connecting_to_db()
         else:
             self._check_connections_by_use_db()
 
@@ -966,7 +969,7 @@ class SQLServer(AgentCheck):
 
             try:
                 self.log.debug("Calling Stored Procedure : %s", proc)
-                if self.connection.get_connector() == 'adodbapi':
+                if self.connection.connector == 'adodbapi':
                     cursor.callproc(proc)
                 else:
                     # pyodbc does not support callproc; use execute instead.

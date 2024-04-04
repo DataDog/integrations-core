@@ -1,0 +1,103 @@
+{
+  "manifest_version": "2.0.0",
+  "app_uuid": "08e3eb08-944f-4f58-94db-b8235b7ebb5e",
+  "app_id": "palo-alto-panorama",
+  "display_on_public_website": false,
+  "tile": {
+    "overview": "README.md#Overview",
+    "configuration": "README.md#Setup",
+    "support": "README.md#Support",
+    "changelog": "CHANGELOG.md",
+    "description": "Gain insights into the panorama firewall logs. Connect to Cloud SIEM",
+    "title": "Palo Alto Panorama",
+    "media": [
+      {
+        "caption": "Palo Alto Panorama: Traffic",
+        "image_url": "images/palo_alto_panorama_traffic.png",
+        "media_type": "image"
+      },
+      {
+        "caption": "Palo Alto Panorama: Threat",
+        "image_url": "images/palo_alto_panorama_threat.png",
+        "media_type": "image"
+      },
+      {
+        "caption": "Palo Alto Panorama: Config",
+        "image_url": "images/palo_alto_panorama_config.png",
+        "media_type": "image"
+      },
+      {
+        "caption": "Palo Alto Panorama: System",
+        "image_url": "images/palo_alto_panorama_system.png",
+        "media_type": "image"
+      },
+      {
+        "caption": "Palo Alto Panorama: Decryption",
+        "image_url": "images/palo_alto_panorama_decryption.png",
+        "media_type": "image"
+      },
+      {
+        "caption": "Palo Alto Panorama: Global Protect",
+        "image_url": "images/palo_alto_panorama_global_protect.png",
+        "media_type": "image"
+      },
+      {
+        "caption": "Palo Alto Panorama: Tunnel Inspection",
+        "image_url": "images/palo_alto_panorama_tunnel_inspection.png",
+        "media_type": "image"
+      },
+      {
+        "caption": "Palo Alto Panorama: Authentication",
+        "image_url": "images/palo_alto_panorama_authentication.png",
+        "media_type": "image"
+      }
+    ],
+    "classifier_tags": [
+      "Supported OS::Linux",
+      "Supported OS::Windows",
+      "Supported OS::macOS",
+      "Category::Security",
+      "Category::Network",
+      "Offering::Integration",
+      "Submitted Data Type::Logs"
+    ]
+  },
+  "assets": {
+    "integration": {
+      "auto_install": true,
+      "source_type_id": 6661801,
+      "source_type_name": "palo-alto-panorama",
+      "configuration": {
+        "spec": "assets/configuration/spec.yaml"
+      },
+      "events": {
+        "creates_events": false
+      },
+      "service_checks": {
+        "metadata_path": "assets/service_checks.json"
+      }
+    },
+    "dashboards": {
+      "Palo Alto Panorama: Traffic": "assets/dashboards/palo_alto_panorama_traffic.json",
+      "Palo Alto Panorama: Threat": "assets/dashboards/palo_alto_panorama_threat.json",
+      "Palo Alto Panorama: Config": "assets/dashboards/palo_alto_panorama_config.json",
+      "Palo Alto Panorama: System": "assets/dashboards/palo_alto_panorama_system.json",
+      "Palo Alto Panorama: Decryption": "assets/dashboards/palo_alto_panorama_decryption.json",
+      "Palo Alto Panorama: Global Protect": "assets/dashboards/palo_alto_panorama_globalprotect.json",
+      "Palo Alto Panorama: Tunnel Inspection": "assets/dashboards/palo_alto_panorama_tunnel_inspection.json",
+      "Palo Alto Panorama: Authentication": "assets/dashboards/palo_alto_panorama_authentication.json",
+      "Palo Alto Panorama: Correlated Events": "assets/dashboards/palo_alto_panorama_correlated_events.json",
+      "Palo Alto Panorama: HIP Match": "assets/dashboards/palo_alto_panorama_hip_match.json",
+      "Palo Alto Panorama: User ID": "assets/dashboards/palo_alto_panorama_user_id.json"
+    },
+    "logs": {
+      "source": "palo-alto-panorama"
+    }
+  },
+  "author": {
+    "support_email": "help@datadoghq.com",
+    "name": "Datadog",
+    "homepage": "https://www.datadoghq.com",
+    "sales_email": "info@datadoghq.com"
+  }
+}

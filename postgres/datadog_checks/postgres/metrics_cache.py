@@ -13,6 +13,7 @@ from .util import (
     ACTIVITY_METRICS_LT_8_3,
     ACTIVITY_QUERY_10,
     ACTIVITY_QUERY_LT_10,
+    CHECKSUM_METRICS,
     COMMON_ARCHIVER_METRICS,
     COMMON_BGW_METRICS,
     COMMON_METRICS,
@@ -27,7 +28,7 @@ from .util import (
     REPLICATION_METRICS_10,
     REPLICATION_STATS_METRICS,
 )
-from .version_utils import V8_3, V9, V9_1, V9_2, V9_4, V9_6, V10, V14
+from .version_utils import V8_3, V9, V9_1, V9_2, V9_4, V9_6, V10, V12, V14
 
 logger = logging.getLogger(__name__)
 
@@ -85,6 +86,9 @@ class PostgresMetricsCache:
             # add size metrics if needed
             if self.config.collect_database_size_metrics:
                 self.instance_metrics.update(DATABASE_SIZE_METRICS)
+
+            if self.config.collect_checksum_metrics and version >= V12:
+                self.instance_metrics = dict(self.instance_metrics, **CHECKSUM_METRICS)
 
             metrics = self.instance_metrics
 

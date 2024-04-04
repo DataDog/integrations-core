@@ -1,0 +1,402 @@
+{
+    "title": "Cisco Secure Firewall - Intrusion Protection System",
+    "description": "- This dashboard provides insights into intrusion prevention system logs.",
+    "widgets": [
+        {
+            "id": 8668255997070972,
+            "definition": {
+                "type": "image",
+                "url": "https://external-content.duckduckgo.com/iu/?u=https%3A%2F%2F3.bp.blogspot.com%2F-zO5McOTnG10%2FVWY-VxCCKMI%2FAAAAAAAADc8%2FON3fAeUlPUQ%2Fs1600%2FCisco_logo.svg.png&f=1&nofb=1&ipt=7c7c79c2963ca2a0f694a7b1704d207d6e7b7c18078bebc66d6b87f864698569&ipo=images",
+                "sizing": "contain",
+                "margin": "lg",
+                "has_background": true,
+                "has_border": true,
+                "vertical_align": "center",
+                "horizontal_align": "center"
+            },
+            "layout": {
+                "x": 0,
+                "y": 0,
+                "width": 4,
+                "height": 2
+            }
+        },
+        {
+            "id": 6932718903430702,
+            "definition": {
+                "type": "note",
+                "content": "## Overview\n- This dashboard provides insights into intrusion protection system logs.",
+                "background_color": "white",
+                "font_size": "14",
+                "text_align": "left",
+                "vertical_align": "top",
+                "show_tick": false,
+                "tick_pos": "50%",
+                "tick_edge": "left",
+                "has_padding": true
+            },
+            "layout": {
+                "x": 4,
+                "y": 0,
+                "width": 4,
+                "height": 2
+            }
+        },
+        {
+            "id": 8805250143698066,
+            "definition": {
+                "type": "note",
+                "content": "## Widgets\n1. Shuns Added Over Time \n2. Shuns Deleted Over Time \n3. Shunned IP Address by Port \n4. Shunned Packet by IP and Interface \n5. Failed Shun Over Time \n\n",
+                "background_color": "white",
+                "font_size": "14",
+                "text_align": "left",
+                "vertical_align": "top",
+                "show_tick": false,
+                "tick_pos": "50%",
+                "tick_edge": "left",
+                "has_padding": true
+            },
+            "layout": {
+                "x": 8,
+                "y": 0,
+                "width": 4,
+                "height": 2
+            }
+        },
+        {
+            "id": 8818017067810984,
+            "definition": {
+                "title": "Shuns Added Over Time",
+                "title_size": "16",
+                "title_align": "left",
+                "show_legend": true,
+                "legend_layout": "horizontal",
+                "legend_columns": [
+                    "avg",
+                    "min",
+                    "max",
+                    "value",
+                    "sum"
+                ],
+                "type": "timeseries",
+                "requests": [
+                    {
+                        "formulas": [
+                            {
+                                "alias": "Shun Added",
+                                "formula": "query1"
+                            }
+                        ],
+                        "queries": [
+                            {
+                                "data_source": "logs",
+                                "name": "query1",
+                                "indexes": [
+                                    "*"
+                                ],
+                                "compute": {
+                                    "aggregation": "count"
+                                },
+                                "group_by": [],
+                                "search": {
+                                    "query": "source:cisco-secure-firewall @message_id:401002 $Device-ID $Host $Shun-IP-Address"
+                                },
+                                "storage": "hot"
+                            }
+                        ],
+                        "response_format": "timeseries",
+                        "style": {
+                            "palette": "semantic",
+                            "line_type": "solid",
+                            "line_width": "normal"
+                        },
+                        "display_type": "line"
+                    }
+                ]
+            },
+            "layout": {
+                "x": 0,
+                "y": 2,
+                "width": 12,
+                "height": 3
+            }
+        },
+        {
+            "id": 1118540462673494,
+            "definition": {
+                "title": "Shuns Deleted Over Time",
+                "title_size": "16",
+                "title_align": "left",
+                "show_legend": true,
+                "legend_layout": "auto",
+                "legend_columns": [
+                    "avg",
+                    "min",
+                    "max",
+                    "value",
+                    "sum"
+                ],
+                "type": "timeseries",
+                "requests": [
+                    {
+                        "formulas": [
+                            {
+                                "alias": "Shun Deleted",
+                                "formula": "query1"
+                            }
+                        ],
+                        "queries": [
+                            {
+                                "data_source": "logs",
+                                "name": "query1",
+                                "indexes": [
+                                    "*"
+                                ],
+                                "compute": {
+                                    "aggregation": "count"
+                                },
+                                "group_by": [],
+                                "search": {
+                                    "query": "source:cisco-secure-firewall @message_id:401003 $Device-ID $Host $Shun-IP-Address"
+                                },
+                                "storage": "hot"
+                            }
+                        ],
+                        "response_format": "timeseries",
+                        "style": {
+                            "palette": "dog_classic",
+                            "line_type": "solid",
+                            "line_width": "normal"
+                        },
+                        "display_type": "line"
+                    }
+                ]
+            },
+            "layout": {
+                "x": 0,
+                "y": 5,
+                "width": 12,
+                "height": 3
+            }
+        },
+        {
+            "id": 2280998146470070,
+            "definition": {
+                "title": "Shunned IP Address by Port",
+                "title_size": "16",
+                "title_align": "left",
+                "requests": [
+                    {
+                        "formulas": [
+                            {
+                                "formula": "query1",
+                                "limit": {
+                                    "count": 500,
+                                    "order": "desc"
+                                }
+                            }
+                        ],
+                        "queries": [
+                            {
+                                "data_source": "logs",
+                                "name": "query1",
+                                "indexes": [
+                                    "*"
+                                ],
+                                "compute": {
+                                    "aggregation": "count"
+                                },
+                                "group_by": [
+                                    {
+                                        "facet": "@shun_ip_address",
+                                        "limit": 10,
+                                        "sort": {
+                                            "order": "desc",
+                                            "aggregation": "count"
+                                        }
+                                    },
+                                    {
+                                        "facet": "@shun_port",
+                                        "limit": 10,
+                                        "sort": {
+                                            "order": "desc",
+                                            "aggregation": "count"
+                                        }
+                                    }
+                                ],
+                                "search": {
+                                    "query": "source:cisco-secure-firewall @message_id:401002 $Device-ID $Host $Shun-IP-Address"
+                                },
+                                "storage": "hot"
+                            }
+                        ],
+                        "response_format": "scalar",
+                        "style": {
+                            "palette": "datadog16"
+                        }
+                    }
+                ],
+                "type": "sunburst",
+                "legend": {
+                    "type": "table"
+                }
+            },
+            "layout": {
+                "x": 0,
+                "y": 8,
+                "width": 6,
+                "height": 4
+            }
+        },
+        {
+            "id": 7370401213933018,
+            "definition": {
+                "title": "Shunned Packet by IP and Interface",
+                "title_size": "16",
+                "title_align": "left",
+                "requests": [
+                    {
+                        "formulas": [
+                            {
+                                "formula": "query1",
+                                "limit": {
+                                    "count": 500,
+                                    "order": "desc"
+                                }
+                            }
+                        ],
+                        "queries": [
+                            {
+                                "data_source": "logs",
+                                "name": "query1",
+                                "indexes": [
+                                    "*"
+                                ],
+                                "compute": {
+                                    "aggregation": "count"
+                                },
+                                "group_by": [
+                                    {
+                                        "facet": "@shun_ip_address",
+                                        "limit": 10,
+                                        "sort": {
+                                            "order": "desc",
+                                            "aggregation": "count"
+                                        }
+                                    },
+                                    {
+                                        "facet": "@interface_name",
+                                        "limit": 10,
+                                        "sort": {
+                                            "order": "desc",
+                                            "aggregation": "count"
+                                        }
+                                    }
+                                ],
+                                "search": {
+                                    "query": "source:cisco-secure-firewall @message_id:401004 $Device-ID $Host $Shun-IP-Address"
+                                },
+                                "storage": "hot"
+                            }
+                        ],
+                        "response_format": "scalar",
+                        "style": {
+                            "palette": "datadog16"
+                        }
+                    }
+                ],
+                "type": "sunburst",
+                "legend": {
+                    "type": "table"
+                }
+            },
+            "layout": {
+                "x": 6,
+                "y": 8,
+                "width": 6,
+                "height": 4
+            }
+        },
+        {
+            "id": 4180240767792454,
+            "definition": {
+                "title": "Failed Shun Over Time",
+                "title_size": "16",
+                "title_align": "left",
+                "show_legend": false,
+                "legend_layout": "auto",
+                "legend_columns": [
+                    "avg",
+                    "min",
+                    "max",
+                    "value",
+                    "sum"
+                ],
+                "time": {},
+                "type": "timeseries",
+                "requests": [
+                    {
+                        "formulas": [
+                            {
+                                "formula": "query1"
+                            }
+                        ],
+                        "queries": [
+                            {
+                                "data_source": "logs",
+                                "name": "query1",
+                                "indexes": [
+                                    "*"
+                                ],
+                                "compute": {
+                                    "aggregation": "count"
+                                },
+                                "group_by": [],
+                                "search": {
+                                    "query": "source:cisco-secure-firewall @message_id:401005 $Device-ID $Host $Shun-IP-Address"
+                                },
+                                "storage": "hot"
+                            }
+                        ],
+                        "response_format": "timeseries",
+                        "style": {
+                            "palette": "dog_classic",
+                            "line_type": "solid",
+                            "line_width": "normal"
+                        },
+                        "display_type": "line"
+                    }
+                ]
+            },
+            "layout": {
+                "x": 0,
+                "y": 12,
+                "width": 12,
+                "height": 4
+            }
+        }
+    ],
+    "template_variables": [
+        {
+            "name": "Host",
+            "prefix": "host",
+            "available_values": [],
+            "default": "*"
+        },
+        {
+            "name": "Device-ID",
+            "prefix": "@device_id",
+            "available_values": [],
+            "default": "*"
+        },
+        {
+            "name": "Shun-IP-Address",
+            "prefix": "@shun_ip_address",
+            "available_values": [],
+            "default": "*"
+        }
+    ],
+    "layout_type": "ordered",
+    "notify_list": [],
+    "reflow_type": "fixed"
+}

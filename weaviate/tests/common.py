@@ -49,7 +49,7 @@ OM_METRICS = [
     'weaviate.go.memstats.mallocs.count',
     'weaviate.go.memstats.mcache.inuse_bytes',
     'weaviate.go.memstats.mcache.sys_bytes',
-    'weaviate.go.memstats.mspan.inuse_use',
+    'weaviate.go.memstats.mspan.inuse_bytes',
     'weaviate.go.memstats.mspan.sys_bytes',
     'weaviate.go.memstats.next.gc_bytes',
     'weaviate.go.memstats.other.sys_bytes',

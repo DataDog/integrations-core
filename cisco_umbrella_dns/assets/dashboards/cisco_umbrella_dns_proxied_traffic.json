@@ -1247,7 +1247,7 @@
                                             ],
                                             "compute": {
                                                 "aggregation": "avg",
-                                                "metric": "@requestsize"
+                                                "metric": "@cisco.umbrella.dns.requestsize"
                                             },
                                             "group_by": [],
                                             "search": {
@@ -1302,7 +1302,7 @@
                                             ],
                                             "compute": {
                                                 "aggregation": "avg",
-                                                "metric": "@responsesize"
+                                                "metric": "@cisco.umbrella.dns.responsesize"
                                             },
                                             "group_by": [],
                                             "search": {

@@ -152,6 +152,9 @@ def mock_http_responses(url, **_params):
         (
             '/metrics/detailed?family=queue_consumer_count' '&family=queue_coarse_metrics'
         ): 'detailed-queue_coarse_metrics-queue_consumer_count.txt',
+        (
+            '/metrics/detailed?family=vhost_status&family=exchange_names&family=exchange_bindings'
+        ): 'detailed-only-metrics.txt',
     }[parsed.path + (f"?{parsed.query}" if parsed.query else "")]
     with open(OM_RESPONSE_FIXTURES / fname) as fh:
         return MockResponse(content=fh.read())
@@ -223,6 +226,33 @@ def test_aggregated_and_unaggregated_endpoints(endpoint, metrics, aggregator, dd
     ):
         aggregator.assert_metric_has_tag(m, tag, count=1)
     _common_assertions(aggregator)
+
+
+def test_detailed_only_metrics(aggregator, dd_run_check, mocker):
+    """Metrics that only appear in detailed endpoint.
+
+    Most metric families have metrics that are both in per-obj and detailed endpoints.
+    A few, however, only expose metrics in the detailed endpoint.
+    This means they show up without a `detailed` prefix.
+    """
+    endpoint = 'detailed?family=vhost_status&family=exchange_names&family=exchange_bindings'
+    check = _rmq_om_check(
+        {
+            'url': "http://localhost:15692",
+            'unaggregated_endpoint': endpoint,
+            'include_aggregated_endpoint': True,
+        }
+    )
+    mocker.patch('requests.get', wraps=mock_http_responses)
+    dd_run_check(check)
+
+    detailed_only_metrics = (
+        'rabbitmq.cluster.vhost_status',
+        'rabbitmq.cluster.exchange_bindings',
+        'rabbitmq.cluster.exchange_name',
+    )
+    for m in detailed_only_metrics:
+        aggregator.assert_metric(m, metric_type=aggregator.GAUGE)
 
 
 @pytest.mark.parametrize(

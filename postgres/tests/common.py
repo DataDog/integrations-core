@@ -10,6 +10,7 @@ from datadog_checks.base.stubs.aggregator import normalize_tags
 from datadog_checks.dev import get_docker_hostname
 from datadog_checks.dev.docker import get_container_ip
 from datadog_checks.postgres.util import (
+    CHECKSUM_METRICS,
     NEWER_14_METRICS,
     QUERY_PG_CONTROL_CHECKPOINT,
     QUERY_PG_REPLICATION_SLOTS,
@@ -208,7 +209,7 @@ def check_db_count(aggregator, expected_tags, count=1):
     table_count = 7
     # We create 2 additional partition tables when partition is available + 2 parent tables
     if float(POSTGRES_VERSION) >= 11.0:
-        table_count = 11
+        table_count = 14
     aggregator.assert_metric(
         'postgresql.table.count',
         value=table_count,
@@ -410,3 +411,10 @@ def check_subscription_stats_metrics(aggregator, expected_tags, count=1):
         return
     for metric_name in _iterate_metric_name(STAT_SUBSCRIPTION_STATS_METRICS):
         aggregator.assert_metric(metric_name, count=count, tags=expected_tags)
+
+
+def check_checksum_metrics(aggregator, expected_tags, count=1):
+    if float(POSTGRES_VERSION) < 12:
+        return
+    for metric_name in _iterate_metric_name(CHECKSUM_METRICS):
+        aggregator.assert_metric(metric_name, count=count, tags=expected_tags + ['db:{}'.format(DB_NAME)])

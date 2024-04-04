@@ -3,12 +3,12 @@
 # Licensed under a 3-clause BSD style license (see LICENSE)
 import copy
 import logging
+from contextlib import nullcontext  # type: ignore
 from urllib.parse import quote_plus
 
 import mock
 import pytest
 from pymongo.errors import ConnectionFailure
-from six import iteritems
 
 from datadog_checks.base import ConfigurationError
 from datadog_checks.mongo import MongoDb, metrics
@@ -21,22 +21,15 @@ from datadog_checks.mongo.utils import parse_mongo_uri
 from . import common
 from .conftest import mock_pymongo
 
-try:
-    from contextlib import nullcontext  # type: ignore
-except ImportError:
-    from contextlib2 import nullcontext
-
 RATE = MongoDb.rate
 GAUGE = MongoDb.gauge
-
-pytestmark = pytest.mark.unit
 
 
 DEFAULT_METRICS_LEN = len(
     {
         m_name: m_type
         for d in [metrics.BASE_METRICS, metrics.DURABILITY_METRICS, metrics.LOCKS_METRICS, metrics.WIREDTIGER_METRICS]
-        for m_name, m_type in iteritems(d)
+        for m_name, m_type in d.items()
     }
 )
 
@@ -261,22 +254,22 @@ def test_server_uri_sanitization(check, instance):
         ("mongodb://user:pass@localhost:27017/admin", "mongodb://user:*****@localhost:27017/admin"),
         # pymongo parses the password as `pass_%2`
         (
-            "mongodb://%s:%s@localhost:27017/admin" % (quote_plus('user'), quote_plus('pass_%2')),
+            f"mongodb://{quote_plus('user')}:{quote_plus('pass_%2')}@localhost:27017/admin",
             "mongodb://user:*****@localhost:27017/admin",
         ),
         # pymongo parses the password as `pass_%` (`%25` is url-decoded to `%`)
         (
-            "mongodb://%s:%s@localhost:27017/admin" % (quote_plus('user'), quote_plus('pass_%25')),
+            f"mongodb://{quote_plus('user')}:{quote_plus('pass_%25')}@localhost:27017/admin",
             "mongodb://user:*****@localhost:27017/admin",
         ),
         # same thing here, parsed username: `user%2`
         (
-            "mongodb://%s@localhost:27017/admin" % (quote_plus('user%2')),
+            f"mongodb://{quote_plus('user%2')}@localhost:27017/admin",
             "mongodb://user%2@localhost:27017/admin",
         ),
         # with the current sanitization approach, we expect the username to be decoded in the clean name
         (
-            "mongodb://%s@localhost:27017/admin" % (quote_plus('user%25')),
+            f"mongodb://{quote_plus('user%25')}@localhost:27017/admin",
             "mongodb://user%25@localhost:27017/admin",
         ),
     )
@@ -290,19 +283,19 @@ def test_server_uri_sanitization(check, instance):
         ("mongodb://localhost:27017/admin", "mongodb://localhost:27017/admin"),
         ("mongodb://user:pass@localhost:27017/admin", "mongodb://*****@localhost:27017/admin"),
         (
-            "mongodb://%s:%s@localhost:27017/admin" % (quote_plus('user'), quote_plus('pass_%2')),
+            f"mongodb://{quote_plus('user')}:{quote_plus('pass_%2')}@localhost:27017/admin",
             "mongodb://*****@localhost:27017/admin",
         ),
         (
-            "mongodb://%s:%s@localhost:27017/admin" % (quote_plus('user'), quote_plus('pass_%25')),
+            f"mongodb://{quote_plus('user')}:{quote_plus('pass_%25')}@localhost:27017/admin",
             "mongodb://*****@localhost:27017/admin",
         ),
         (
-            "mongodb://%s@localhost:27017/admin" % (quote_plus('user%2')),
+            f"mongodb://{quote_plus('user%2')}@localhost:27017/admin",
             "mongodb://localhost:27017/admin",
         ),
         (
-            "mongodb://%s@localhost:27017/admin" % (quote_plus('user%25')),
+            f"mongodb://{quote_plus('user%25')}@localhost:27017/admin",
             "mongodb://localhost:27017/admin",
         ),
     )
