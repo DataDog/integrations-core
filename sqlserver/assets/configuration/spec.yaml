@@ -197,6 +197,17 @@ files:
       value:
         type: boolean
         example: false
+    - name: include_db_fragmentation_metrics_tempdb
+      description: |
+        Configure the collection of database index fragmentation statistics in tempdb database from the
+        `sys.dm_db_index_physical_stats` DMF.
+
+        By default, we do not collect index fragmentation statistics in the tempdb database, as those queries
+        might cause blocking. This configuration parameter allows enabling the collection of this metric.
+        This parameter is ignored if 'include_db_fragmentation_metrics' is set to false.
+      value:
+        type: boolean
+        example: false
     - name: include_index_usage_metrics
       description: |
         Configure the collection of user table index usage statistics from the `sys.dm_db_index_usage_stats` DMV.
