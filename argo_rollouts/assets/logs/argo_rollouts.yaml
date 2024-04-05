@@ -57,11 +57,11 @@ pipeline:
       sourceType: attribute
       targetType: attribute
     - type: attribute-remapper
-      name: Map `namespace` to `argo_rollouts_namespace`
+      name: Map `namespace` to `argo_rollouts.namespace`
       enabled: true
       sources:
         - namespace
-      target: argo_rollouts_namespace
+      target: argo_rollouts.namespace
       preserveSource: false
       overrideOnConflict: false
       sourceType: attribute
