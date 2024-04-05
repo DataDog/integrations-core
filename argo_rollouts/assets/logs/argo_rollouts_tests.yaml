@@ -34,10 +34,10 @@ tests:
     custom:
       argo_rollouts:
         name: "rollouts-demo"
+        namespace: "default"
         resource:
           version: 24435167
       generation: 4
-      argo_rollouts_namespace: "default"
       level: "info"
       timestamp: 1708462172000
     message: "Started syncing rollout"
