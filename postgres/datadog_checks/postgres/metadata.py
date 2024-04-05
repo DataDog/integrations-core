@@ -281,7 +281,7 @@ class PostgresMetadata(DBMAsyncJob):
                                 table_info = self._query_table_information(cursor, table)
                                 
                                 tables_buffer.append(table_info)
-                                if len(tables_buffer) >= 10 or i == len(tables) - 1:
+                                if len(tables_buffer) >= 1000 or i == len(tables) - 1:
                                     metadata = [
                                         {**database, "schemas": [{**schema, "tables": tables_buffer}], }
                                     ]
