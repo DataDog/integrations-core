@@ -28,6 +28,7 @@ class SqlserverDatabaseMetricsBase:
         self.execute_query_handler: Callable[[str, Optional[str]], List[tuple]] = execute_query_handler
         self.track_operation_time: bool = track_operation_time
         self._databases: Optional[List[str]] = databases
+        self._query_executors: List[QueryExecutor] = []
         self.log = get_check_logger()
 
     @property
@@ -52,6 +53,17 @@ class SqlserverDatabaseMetricsBase:
 
     @property
     def query_executors(self) -> List[QueryExecutor]:
+        '''
+        Returns a list of QueryExecutor objects for the database metrics.
+        '''
+        if not self._query_executors:
+            self._query_executors = self._build_query_executors()
+        return self._query_executors
+
+    def _build_query_executors(self) -> List[QueryExecutor]:
+        '''
+        Builds a list of QueryExecutor objects for the database metrics.
+        '''
         executor = self.new_query_executor(self.queries, executor=self.execute_query_handler)
         executor.compile_queries()
         return [executor]

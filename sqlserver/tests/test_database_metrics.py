@@ -825,11 +825,8 @@ def test_sqlserver_index_usage_metrics(
         databases=AUTODISCOVERY_DBS + ['tempdb'],
     )
 
-    assert (
-        index_usage_metrics.queries[0]['collection_interval'] == index_usage_stats_interval
-        if index_usage_stats_interval
-        else index_usage_metrics._default_collection_interval
-    )
+    expected_collection_interval = index_usage_stats_interval or index_usage_metrics._default_collection_interval
+    assert index_usage_metrics.queries[0]['collection_interval'] == expected_collection_interval
 
     sqlserver_check._dynamic_queries = [index_usage_metrics]
 
@@ -1266,13 +1263,17 @@ def test_sqlserver_database_stats_metrics(
 
 @pytest.mark.integration
 @pytest.mark.usefixtures('dd_environment')
+@pytest.mark.parametrize('database_backup_metrics_interval', [None, 600])
 def test_sqlserver_database_backup_metrics(
     aggregator,
     dd_run_check,
     init_config,
     instance_docker_metrics,
+    database_backup_metrics_interval,
 ):
     instance_docker_metrics['database_autodiscovery'] = True
+    if database_backup_metrics_interval:
+        instance_docker_metrics['database_backup_metrics_interval'] = database_backup_metrics_interval
 
     mocked_results = [
         ('master', 'master', 0),
@@ -1294,10 +1295,14 @@ def test_sqlserver_database_backup_metrics(
         execute_query_handler=execute_query_handler_mocked,
     )
 
+    expected_collection_interval = (
+        database_backup_metrics_interval or database_backup_metrics._default_collection_interval
+    )
+    assert database_backup_metrics.queries[0]['collection_interval'] == expected_collection_interval
+
     sqlserver_check._dynamic_queries = [database_backup_metrics]
 
     dd_run_check(sqlserver_check)
-
     tags = instance_docker_metrics.get('tags', [])
     for result in mocked_results:
         db, database, *metric_values = result
@@ -1308,3 +1313,9 @@ def test_sqlserver_database_backup_metrics(
         ] + tags
         for metric_name, metric_value in metrics:
             aggregator.assert_metric(metric_name, value=metric_value, tags=expected_tags)
+
+    # database_backup_metrics should not be collected because the collection interval is not reached
+    aggregator.reset()
+    dd_run_check(sqlserver_check)
+    for metric_name in database_backup_metrics.metric_names()[0]:
+        aggregator.assert_metric(metric_name, count=0)

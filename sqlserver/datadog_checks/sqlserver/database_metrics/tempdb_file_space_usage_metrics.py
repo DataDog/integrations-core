@@ -55,8 +55,7 @@ class SqlserverTempDBFileSpaceUsageMetrics(SqlserverDatabaseMetricsBase):
             f"include_tempdb_file_space_usage_metrics={self.include_tempdb_file_space_usage_metrics})"
         )
 
-    @property
-    def query_executors(self):
+    def _build_query_executors(self):
         executor = self.new_query_executor(
             self.queries,
             executor=functools.partial(self.execute_query_handler, db='tempdb'),

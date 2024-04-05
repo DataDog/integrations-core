@@ -55,10 +55,9 @@ class SqlserverDatabaseFilesMetrics(SqlserverDatabaseMetricsBase):
         return [DATABASE_FILES_METRICS_QUERY]
 
     def __repr__(self) -> str:
-        return f"{self.__class__.__name__}(" f"enabled={self.enabled}"
+        return f"{self.__class__.__name__}("f"enabled={self.enabled})"
 
-    @property
-    def query_executors(self):
+    def _build_query_executors(self):
         executors = []
         for database in self.databases:
             executor = self.new_query_executor(

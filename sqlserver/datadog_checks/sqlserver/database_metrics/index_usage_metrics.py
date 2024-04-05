@@ -101,8 +101,7 @@ class SqlserverIndexUsageMetrics(SqlserverDatabaseMetricsBase):
             f"collection_interval={self.collection_interval}"
         )
 
-    @property
-    def query_executors(self):
+    def _build_query_executors(self):
         executors = []
         for database in self.databases:
             executor = self.new_query_executor(

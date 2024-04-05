@@ -37,8 +37,29 @@ class SqlserverDatabaseBackupMetrics(SqlserverDatabaseMetricsBase):
         return True
 
     @property
+    def _default_collection_interval(self) -> int:
+        '''
+        Returns the default interval in seconds at which to collect database backup metrics.
+        '''
+        return 5 * 60  # 5 minutes
+
+    @property
+    def collection_interval(self) -> int:
+        '''
+        Returns the interval in seconds at which to collect database backup metrics.
+        Note: The database backup metrics query can be expensive, so it is recommended to set a higher interval.
+        '''
+        return int(self.instance_config.get('database_backup_metrics_interval', self._default_collection_interval))
+
+    @property
     def queries(self):
-        return [DATABASE_BACKUP_METRICS_QUERY]
+        # make a copy of the query to avoid modifying the original
+        # in case different instances have different collection intervals
+        query = DATABASE_BACKUP_METRICS_QUERY.copy()
+        query['collection_interval'] = self.collection_interval
+        return [query]
 
     def __repr__(self) -> str:
-        return f"{self.__class__.__name__}(" f"enabled={self.enabled}, " f"engine_edition={self.engine_edition}"
+        return (
+            f"{self.__class__.__name__}("f"enabled={self.enabled}, " f"collection_interval={self.collection_interval})"
+        )

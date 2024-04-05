@@ -17,3 +17,4 @@ Migrate following dynamic metrics to database_metrics for better maintainability
 - SQLServer database replication stats metrics
 - SQLServer availability replicas metrics
 - SQLServer availability groups metrics
+Increase database backup metrics collection interval to 5 mins.

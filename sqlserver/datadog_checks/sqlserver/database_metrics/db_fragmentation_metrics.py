@@ -75,8 +75,7 @@ class SqlserverDBFragmentationMetrics(SqlserverDatabaseMetricsBase):
             f"db_fragmentation_object_names={self.db_fragmentation_object_names})"
         )
 
-    @property
-    def query_executors(self):
+    def _build_query_executors(self):
         executors = []
         for database in self.databases:
             queries = copy.deepcopy(self.queries)
