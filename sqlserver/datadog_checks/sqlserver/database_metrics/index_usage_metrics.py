@@ -89,8 +89,11 @@ class SqlserverIndexUsageMetrics(SqlserverDatabaseMetricsBase):
 
     @property
     def queries(self):
-        INDEX_USAGE_STATS_QUERY['collection_interval'] = self.collection_interval
-        return [INDEX_USAGE_STATS_QUERY]
+        # make a copy of the query to avoid modifying the original
+        # in case different instances have different collection intervals
+        query = INDEX_USAGE_STATS_QUERY.copy()
+        query['collection_interval'] = self.collection_interval
+        return [query]
 
     def __repr__(self) -> str:
         return (

@@ -21,7 +21,7 @@ DB_FRAGMENTATION_QUERY = {
         DDIPS.page_count as page_count,
         DDIPS.avg_fragmentation_in_percent as avg_fragmentation_in_percent
         FROM sys.dm_db_index_physical_stats (DB_ID('{db}'),null,null,null,null) as DDIPS
-        INNER JOIN sys.indexes as I ON I.object_id = DDIPS.object_id
+        INNER JOIN sys.indexes as I WITH (NOLOCK) ON I.object_id = DDIPS.object_id
         AND DDIPS.index_id = I.index_id
         WHERE DDIPS.fragment_count is not null
     """,
@@ -64,8 +64,27 @@ class SqlserverDBFragmentationMetrics(SqlserverDatabaseMetricsBase):
         return True
 
     @property
+    def _default_collection_interval(self) -> int:
+        '''
+        Returns the default interval in seconds at which to collect database index fragmentation metrics.
+        '''
+        return 5 * 60  # 5 minutes
+
+    @property
+    def collection_interval(self) -> int:
+        '''
+        Returns the interval in seconds at which to collect database index fragmentation metrics.
+        Note: The index fragmentation metrics query can be expensive, so it is recommended to set a higher interval.
+        '''
+        return int(self.instance_config.get('db_fragmentation_metrics_interval', self._default_collection_interval))
+
+    @property
     def queries(self):
-        return [DB_FRAGMENTATION_QUERY]
+        # make a copy of the query to avoid modifying the original
+        # in case different instances have different collection intervals
+        query = DB_FRAGMENTATION_QUERY.copy()
+        query['collection_interval'] = self.collection_interval
+        return [query]
 
     def __repr__(self) -> str:
         return (

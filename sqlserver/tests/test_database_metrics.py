@@ -863,6 +863,7 @@ def test_sqlserver_index_usage_metrics(
 @pytest.mark.parametrize(
     'db_fragmentation_object_names', [None, ['spt_fallback_db', 'spt_fallback_dev', 'spt_fallback_usg']]
 )
+@pytest.mark.parametrize('db_fragmentation_metrics_interval', [None, 600])
 def test_sqlserver_db_fragmentation_metrics(
     aggregator,
     dd_run_check,
@@ -870,9 +871,12 @@ def test_sqlserver_db_fragmentation_metrics(
     instance_docker_metrics,
     include_db_fragmentation_metrics,
     db_fragmentation_object_names,
+    db_fragmentation_metrics_interval,
 ):
     instance_docker_metrics['database_autodiscovery'] = True
     instance_docker_metrics['include_db_fragmentation_metrics'] = include_db_fragmentation_metrics
+    if db_fragmentation_metrics_interval:
+        instance_docker_metrics['db_fragmentation_metrics_interval'] = db_fragmentation_metrics_interval
 
     mocked_results = [
         [
@@ -917,6 +921,11 @@ def test_sqlserver_db_fragmentation_metrics(
     if db_fragmentation_object_names:
         assert db_fragmentation_metrics.db_fragmentation_object_names == db_fragmentation_object_names
 
+    expected_collection_interval = (
+        db_fragmentation_metrics_interval or db_fragmentation_metrics._default_collection_interval
+    )
+    assert db_fragmentation_metrics.queries[0]['collection_interval'] == expected_collection_interval
+
     sqlserver_check._dynamic_queries = [db_fragmentation_metrics]
 
     dd_run_check(sqlserver_check)
@@ -942,6 +951,12 @@ def test_sqlserver_db_fragmentation_metrics(
                         for m in aggregator.metrics(metric_name):
                             tags_by_key = dict([t.split(':') for t in m.tags if not t.startswith('dd.internal')])
                             assert tags_by_key['object_name'].lower() in db_fragmentation_object_names
+
+    # db_fragmentation_metrics should not be collected because the collection interval is not reached
+    aggregator.reset()
+    dd_run_check(sqlserver_check)
+    for metric_name in db_fragmentation_metrics.metric_names()[0]:
+        aggregator.assert_metric(metric_name, count=0)
 
 
 @pytest.mark.integration
