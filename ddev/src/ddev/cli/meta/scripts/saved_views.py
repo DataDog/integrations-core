@@ -30,10 +30,6 @@ def _convert_options(api_options):
     return asset_options
 
 
-def _convert_timerange(api_tr):
-    return {"interval_ms": api_tr["interval"]}
-
-
 def convert_to_asset(sv_json):
     """
     Take saved view json from the API and convert it to an asset definition.
@@ -53,7 +49,7 @@ def convert_to_asset(sv_json):
     for old_f, new_f in renames.items():
         asset_def[new_f] = logs_view[old_f]
     asset_def["options"] = _convert_options(logs_view["options"])
-    asset_def["timerange"] = _convert_timerange(logs_view["timerange"])
+    asset_def["timerange"] = {"interval_ms": logs_view["timerange"]["interval"]}
     return asset_def
 
 
@@ -63,6 +59,8 @@ def sv(saved_view_permalink):
     """
     Helper for working with Logs Saved Views.
 
+    Accepts a permalink to a saved view, then guides you towards creating an asset definition in JSON.
+
     VERY EARLY VERSION, MAKE SURE TO CHECK --help FOR CHANGES BEFORE USING.
     """
     parsed_url = urlparse(saved_view_permalink)
@@ -71,6 +69,6 @@ def sv(saved_view_permalink):
     json_url = parsed_url._replace(path=f"/api/v1/logs/views/{sv_id}", query='').geturl()
     input(TIP)
     webbrowser.open(json_url)
-    sv_json = json.loads(click.prompt(text="Paste your JSON here, then hit ENTER", prompt_suffix="> "))
+    sv_json = json.loads(click.prompt(text="Paste your JSON here, then hit ENTER ", prompt_suffix="> "))
 
     click.echo(json.dumps(convert_to_asset(sv_json), indent=2, sort_keys=True))
