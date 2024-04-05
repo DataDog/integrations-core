@@ -246,19 +246,19 @@ def helpers():
 def pytest_runtest_setup(item):
     for marker in item.iter_markers():
         if marker.name == 'requires_ci' and not running_in_ci():  # no cov
-            pytest.skip('Not running in CI')
+            pytest.skip('Only running in CI')
 
         if marker.name == 'requires_windows' and not PLATFORM.windows:
-            pytest.skip('Not running on Windows')
+            pytest.skip('Only running on Windows')
 
         if marker.name == 'requires_macos' and not PLATFORM.macos:
-            pytest.skip('Not running on macOS')
+            pytest.skip('Only running on macOS')
 
         if marker.name == 'requires_linux' and not PLATFORM.linux:
-            pytest.skip('Not running on Linux')
+            pytest.skip('Only running on Linux')
 
         if marker.name == 'requires_unix' and PLATFORM.windows:
-            pytest.skip('Not running on a Linux-based platform')
+            pytest.skip('Only running on a Linux-based platform')
 
 
 def pytest_configure(config):
