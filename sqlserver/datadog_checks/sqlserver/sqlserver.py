@@ -739,6 +739,7 @@ class SQLServer(AgentCheck):
                     name: str
                     data_type: str
                     default: str
+                    is_nullable : str
             indexes : list of indexes
             foreign_keys : list of foreign keys
     """
@@ -769,7 +770,6 @@ class SQLServer(AgentCheck):
     
     # plan lets do per db per schema , get all tables , then (sort or pick first batch), then query columns per batch or table ?
     def _get_table_infos_sys_tables_per_schema(self, schemas, cursor):
-
         for schema in schemas:
             self._get_table_infos_sys_tables(schema, cursor)
 
@@ -839,7 +839,7 @@ class SQLServer(AgentCheck):
         # SELECT name , OBJECT_NAME(parent_object_id) FROM sys.foreign_keys;
         # fk.name AS foreign_key_name, OBJECT_NAME(fk.parent_object_id) AS parent_table, COL_NAME(fkc.parent_object_id, fkc.parent_column_id) AS parent_column, OBJECT_NAME(fk.referenced_object_id) AS referenced_table, COL_NAME(fkc.referenced_object_id, fkc.referenced_column_id) AS referenced_column FROM  sys.foreign_keys fk JOIN  sys.foreign_key_columns fkc ON fk.object_id = fkc.constraint_object_id WHERE  fk.parent_object_id = 'YourTableObjectID' -- Replace 'YourTableObjectID' with the object_id of your table
                                                                                                                                                                             
-        FOREIGN_KEY_QUERY = "SELECT name , OBJECT_NAME(parent_object_id) FROM sys.foreign_keys WHERE object_id={};"
+        FOREIGN_KEY_QUERY = "SELECT name , OBJECT_NAME(parent_object_id) AS parent_table FROM sys.foreign_keys WHERE object_id={};"
         
         # index query:
         for table_object_id, table_value in tables_dict_for_schema.items():
