@@ -71,7 +71,7 @@ def test_collect_schemas(integration_check, dbm_instance, aggregator):
     tables_got = []
 
     for schema_event in (e for e in dbm_metadata if e['kind'] == 'pg_databases'):
-
+        assert schema_event.get("timestamp") is not None
         # there should only be one database, datadog_test
         database_metadata = schema_event['metadata']
         print(database_metadata)
