@@ -94,7 +94,7 @@ def test_mongo_dbstats_tag(aggregator, check, instance_dbstats_tag_dbname, dd_ru
     aggregator.assert_metrics_using_metadata(get_metadata_metrics(), check_submission_type=True)
 
     expected_metrics = {
-        'mongodb.stats.avgobjsize': 0,
+        'mongodb.stats.avgobjsize': None,
         'mongodb.stats.storagesize': 20480.0,
     }
     expected_tags = [
