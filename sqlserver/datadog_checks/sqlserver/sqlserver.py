@@ -773,14 +773,16 @@ class SQLServer(AgentCheck):
         for schema in schemas:
             self._get_table_infos_sys_tables(schema, cursor)
 
+    # TODO how often ?
+    # TODO put in a class
     #TODOTODO do we need this map/list format if we are not dumping in json ??? May be we need to send query results as they are ? 
     def _get_table_infos_sys_tables(self, schema, cursor):
         tables_dict_for_schema = schema['tables']
         
-        # we could get data from sys tables too ...  
-        # can be done by table as well , might be usefull in case if we get too many rows i.e. we could split this query in several 
-        # patches. As for updates we could have a separate mechanism
-        # .
+        # TODO check out sys.partitions in postgres we deliver some data about patitions
+        # "partition_key": str (if has partitions) - equiv ? 
+        # "num_partitions": int (if has partitions) - equiv ? 
+
         # TODO modify_date - there is a modify date !!! 
         # TODO what is principal_id
         # TODO is_replicated - might be interesting ? 
@@ -789,11 +791,7 @@ class SQLServer(AgentCheck):
         cursor.execute(TABLES_IN_SCHEMA_QUERY)
         columns = [str(i[0]).lower() for i in cursor.description]
         rows = [dict(zip(columns, row)) for row in cursor.fetchall()]
-        for row in rows:
-            if len(row) != 2:
-            #TODO some warning ? 
-                print("warning") 
-            
+        for row in rows:            
             tables_dict_for_schema[row['object_id']] = {"name" : row['name'], "columns" : [], "indexes" : [], "foreign_keys" : []}
         #TABLE_SCHEMA, TABLE_NAME, COLUMN_NAME, DATA_TYPE, COLUMN_DEFAULT 
         # in sys.columns I cannot see a data type but there are other things   
@@ -808,7 +806,7 @@ class SQLServer(AgentCheck):
         #if using query 2 we need to figure out user_type_id - its like a user defined type
         # TODO AL in all query 2 will be query 2 faster ? or its just less convinient at the end ... ? object_id is nice
 
-        COLUMN_QUERY2 = "SELECT c.name AS name, t.name AS data_type, dc.definition AS default_value FROM sys.columns c JOIN sys.types t ON c.system_type_id = t.system_type_id LEFT JOIN sys.default_constraints dc ON c.default_object_id = dc.object_id WHERE c.object_id = {}"
+        COLUMN_QUERY2 = "SELECT c.name AS name, t.name AS data_type, c.is_nullable AS is_nullable, dc.definition AS default_value FROM sys.columns c JOIN sys.types t ON c.system_type_id = t.system_type_id LEFT JOIN sys.default_constraints dc ON c.default_object_id = dc.object_id WHERE c.object_id = {}"
        
         # TODO can be a function query and unwrap in dict
         for table_object_id, table_value in tables_dict_for_schema.items():
@@ -850,65 +848,8 @@ class SQLServer(AgentCheck):
             rows = [dict(zip(columns, row)) for row in cursor.fetchall()]
             for row in rows:
                 table_value["foreign_keys"].append(row)
-
         print("the end")
 
-    # TODO how often ?
-    # TODO put in a class
-    # for big DBs somehow first determine tables we are intereted in and query only for them ?
-    def _get_table_infos_info_schema(self, schemas, cursor):
-        #TODO do we need this for sqlserver ? 
-        #If any tables are partitioned, only the master paritition table name will be returned, and none of its children.
-
-        # TODO 
-        #Do we need a limit ? like in postgress , seems not
-        #limit = self._config.schemas_metadata_config.get("max_tables", 300)
-
-        TABLES_QUERY = "SELECT TABLE_SCHEMA, TABLE_NAME, COLUMN_NAME, DATA_TYPE, COLUMN_DEFAULT FROM INFORMATION_SCHEMA.COLUMNS;"
-        cursor.execute(TABLES_QUERY)
-        #TODO
-        #             nullable: bool column ?
-        #TODO
-        #"foreign_keys": dict (if has foreign keys)
-        #    name: str
-        #    definition: str
-        #TODO
-        #        "indexes": dict (if has indexes)
-        #    name: str
-        #    definition: str
-        #TODO
-        #"toast_table": str (if associated toast table exists) - equivalent in sql server
-        
-        # "partition_key": str (if has partitions) - equiv ? 
-
-        # "num_partitions": int (if has partitions) - equiv ? 
-        #apply lower case ? 
-        #this is just to avoid doing something like row[0] , row[1] etc 
-        columns = [str(i[0]).lower() for i in cursor.description]
-        rows = [dict(zip(columns, row)) for row in cursor.fetchall()]
-        
-        for row in rows:
-            if len(row) != 5:
-                #TODO some warning ? 
-                print("warning") 
-
-            #TODO treat not found 
-            schema = schemas[row['table_schema']]
-
-            tables_dict_for_schema = schema['tables']
-
-            #do the same mapping as in postgres for some uniformity otherwise could've just loop and exclude some keys
-            if row['table_name'] not in tables_dict_for_schema:
-                #new table
-                tables_dict_for_schema[row['table_name']] = []
-            column = {}
-            column['name'] = row['column_name']
-            column['data_type'] = row['data_type']
-            column['default'] = row['column_default']
-            #table is an array of column dict for now.
-            tables_dict_for_schema[row['table_name']].append(column)
-            # table dict has a key columns with value arrray of dicts
-    
     #TODO as we do it a second type iterate connection through DB make a function and unite it with _get_table_infos check
     #
     def _collect_schemas_for_non_azure(self):
@@ -922,10 +863,7 @@ class SQLServer(AgentCheck):
                     try:
                         cursor.execute(SWITCH_DB_STATEMENT.format(db))
                         schemas = self._query_schema_information(cursor)
-                        #self._get_table_infos(schemas, cursor)
-
-                        self._get_table_infos_sys_tables_per_schema(schemas, cursor)
-                        
+                        self._get_table_infos_sys_tables_per_schema(schemas, cursor)                        
                         schemas_per_db[db] = schemas
                         pdb.set_trace()
                     except Exception as e:
