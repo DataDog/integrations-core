@@ -98,7 +98,7 @@ class SqlserverIndexUsageMetrics(SqlserverDatabaseMetricsBase):
             f"enabled={self.enabled}, "
             f"include_index_usage_metrics={self.include_index_usage_metrics}), "
             f"include_index_usage_metrics_tempdb={self.include_index_usage_metrics_tempdb}, "
-            f"collection_interval={self.collection_interval}"
+            f"collection_interval={self.collection_interval})"
         )
 
     def _build_query_executors(self):

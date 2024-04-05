@@ -61,6 +61,6 @@ class SqlserverAvailabilityGroupsMetrics(SqlserverDatabaseMetricsBase):
         return (
             f"{self.__class__.__name__}("
             f"enabled={self.enabled}, "
-            f"include_ao_metrics={self.include_ao_metrics}), "
+            f"include_ao_metrics={self.include_ao_metrics}, "
             f"availability_group={self.availability_group})"
         )

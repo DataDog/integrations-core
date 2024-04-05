@@ -42,4 +42,4 @@ class SqlserverDatabaseStatsMetrics(SqlserverDatabaseMetricsBase):
         return [DATABASE_STATS_METRICS_QUERY]
 
     def __repr__(self) -> str:
-        return f"{self.__class__.__name__}(" f"enabled={self.enabled}"
+        return f"{self.__class__.__name__}("f"enabled={self.enabled}"

@@ -87,8 +87,7 @@ class SqlserverAoMetrics(SqlserverDatabaseMetricsBase):
             f"enabled={self.enabled}, "
             f"major_version={self.major_version}, "
             f"engine_edition={self.engine_edition}, "
-            f"include_ao_metrics={self.include_ao_metrics}"
-            ")"
+            f"include_ao_metrics={self.include_ao_metrics})"
         )
 
     def __get_query_ao_availability_groups(self) -> dict:
