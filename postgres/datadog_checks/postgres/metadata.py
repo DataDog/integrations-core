@@ -286,7 +286,6 @@ class PostgresMetadata(DBMAsyncJob):
                                         {**database, "schemas": [{**schema, "tables": tables_buffer}], }
                                     ]
                                     event = {**base_event, "metadata": metadata, "timestamp": time.time() * 1000}
-                                    print("Pushing tables", [t["name"] for t in tables_buffer])
                                     json_event = json.dumps(event, default=default_json_event_encoding)
                                     self._log.debug("Reporting the following payload for schema collection: {}".format(json_event))
                                     self._check.database_monitoring_metadata(json_event)
