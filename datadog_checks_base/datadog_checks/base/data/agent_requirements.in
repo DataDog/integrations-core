@@ -6,10 +6,10 @@ beautifulsoup4==4.12.3; python_version > '3.0'
 beautifulsoup4==4.9.3; python_version < '3.0'
 binary==1.0.0
 boto3==1.17.112; python_version < '3.0'
-boto3==1.34.76; python_version > '3.0'
+boto3==1.34.79; python_version > '3.0'
 boto==2.49.0
 botocore==1.20.112; python_version < '3.0'
-botocore==1.34.76; python_version > '3.0'
+botocore==1.34.79; python_version > '3.0'
 cachetools==3.1.1; python_version < '3.0'
 cachetools==5.3.3; python_version > '3.0'
 clickhouse-cityhash==1.0.2.3; python_version < '3.0'
@@ -61,7 +61,7 @@ psutil==5.9.0
 psycopg2-binary==2.9.9; python_version > '3.0'
 pyasn1==0.4.6
 pycryptodomex==3.20.0
-pydantic==2.0.2; python_version > '3.0'
+pydantic==2.6.4; python_version > '3.0'
 pyjwt==1.7.1; python_version < '3.0'
 pyjwt==2.8.0; python_version > '3.0'
 pymongo[srv]==4.6.3; python_version >= '3.9'
