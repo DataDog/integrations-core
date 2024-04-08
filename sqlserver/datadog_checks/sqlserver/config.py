@@ -29,6 +29,9 @@ class SQLServerConfig:
         self.include_index_usage_metrics_tempdb: bool = is_affirmative(
             instance.get('include_index_usage_metrics_tempdb', False)
         )
+        self.include_db_fragmentation_metrics_tempdb: bool = is_affirmative(
+            instance.get('include_db_fragmentation_metrics_tempdb', False)
+        )
         self.ignore_missing_database = is_affirmative(instance.get("ignore_missing_database", False))
         if self.ignore_missing_database:
             self.log.warning(
