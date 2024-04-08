@@ -206,12 +206,6 @@ class Connection(object):
         except Exception as e:
             self.log.warning("Could not close adodbapi cursor\n%s", e)
 
-    def check_database(self):
-        with self.open_managed_default_database():
-            db_exists, context = self._check_db_exists()
-
-        return db_exists, context
-
     def check_database_conns(self, db_name):
         self.open_db_connections(None, db_name=db_name, is_default=False)
         self.close_db_connections(None, db_name)
@@ -337,47 +331,6 @@ class Connection(object):
             del self._conns[conn_key]
         except Exception as e:
             self.log.warning("Could not close adodbapi db connection\n%s", e)
-
-    def _check_db_exists(self):
-        """
-        Check for existence of a database, but take into consideration whether the db is case-sensitive or not.
-
-        If not case-sensitive, then we normalize the database name to lowercase on both sides and check.
-        If case-sensitive, then we only accept exact-name matches.
-
-        If the check fails, then we won't do any checks if `ignore_missing_database` is enabled, or we will fail
-        with a ConfigurationError otherwise.
-        """
-
-        _, host, _, _, database, _ = self._get_access_info(self.DEFAULT_DB_KEY)
-        context = "{} - {}".format(host, database)
-        if self.existing_databases is None:
-            cursor = self.get_cursor(None, self.DEFAULT_DATABASE)
-
-            try:
-                self.existing_databases = {}
-                cursor.execute(DATABASE_EXISTS_QUERY)
-                for row in cursor.fetchall():
-                    # collation_name can be NULL if db offline, in that case assume its case_insensitive
-                    case_insensitive = not row.collation_name or 'CI' in row.collation_name
-                    self.existing_databases[row.name.lower()] = (
-                        case_insensitive,
-                        row.name,
-                    )
-
-            except Exception as e:
-                self.log.error("Failed to check if database %s exists: %s", database, e)
-                return False, context
-            finally:
-                self.close_cursor(cursor)
-
-        exists = False
-        if database.lower() in self.existing_databases:
-            case_insensitive, cased_name = self.existing_databases[database.lower()]
-            if case_insensitive or database == cased_name:
-                exists = True
-
-        return exists, context
 
     def _get_connector(self, init_config, instance_config):
         '''
