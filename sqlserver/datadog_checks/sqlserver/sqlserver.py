@@ -67,6 +67,8 @@ from datadog_checks.sqlserver.const import (
     TASK_SCHEDULER_METRICS,
     TEMPDB_FILE_SPACE_USAGE_METRICS,
     VALID_METRIC_TYPES,
+    SCHEMA_QUERY,
+    TABLES_IN_SCHEMA_QUERY,
     expected_sys_databases_columns,
 )
 from datadog_checks.sqlserver.metrics import DEFAULT_PERFORMANCE_TABLE, VALID_TABLES
@@ -745,54 +747,57 @@ class SQLServer(AgentCheck):
     """
     def _query_schema_information(self, cursor):
 
-        # principal_id is kind of like an owner
-
-        # Todo put in consts
-        # there is also principal_id not sure if need it.
-        # TODO exclude schemas like INFORMATION_SCHEMA
-        SCHEMA_QUERY = "SELECT name,schema_id,principal_id FROM sys.schemas;"
+        # principal_id is kind of like an owner not sure if need it.
         self.log.debug("collecting db schemas")
         self.log.debug("Running query [%s]", SCHEMA_QUERY)
         cursor.execute(SCHEMA_QUERY)
         schemas = []
         columns = [i[0] for i in cursor.description]
         schemas = [dict(zip(columns, row)) for row in cursor.fetchall()]
-        #add tables
-        
-        for s in schemas:
-            s['tables'] = {}
- 
+        for schema in schemas:
+            schema["tables"] = {}
         self.log.debug("fetched schemas len(rows)=%s", len(schemas))
         return schemas
     
-#in tables we have modified date !
+    # TODO in tables we have modified date !
     # can be a separate query 
     
-    # plan lets do per db per schema , get all tables , then (sort or pick first batch), then query columns per batch or table ?
-    def _get_table_infos_sys_tables_per_schema(self, schemas, cursor):
+
+    def _get_table_data_per_schema(self, schemas, cursor):
         for schema in schemas:
-            self._get_table_infos_sys_tables(schema, cursor)
+            self._get_tables_and_their_data(schema, cursor)
+
+    def _get_tables_and_their_data(self, schema, cursor):
+        self._get_table_infos(schema, cursor)
+        tables_dict_for_schema = schema['tables']
+        pdb.set_trace()
+        for table_object_id, table_value in tables_dict_for_schema.items():
+            table_value["columns"] = self._get_columns_data_per_table(table_object_id, cursor)
+            table_value["partitions"] = self._get_partitions_data_per_table(table_object_id, cursor)
+            table_value["indexes"] = self._get_index_data_per_table(table_object_id, cursor)
+            table_value["foreign_keys"] = self._get_foreign_key_data_per_table(table_object_id, cursor)
 
     # TODO how often ?
     # TODO put in a class
     #TODOTODO do we need this map/list format if we are not dumping in json ??? May be we need to send query results as they are ? 
-    def _get_table_infos_sys_tables(self, schema, cursor):
+    def _get_table_infos(self, schema, cursor):
         tables_dict_for_schema = schema['tables']
         
-        # TODO check out sys.partitions in postgres we deliver some data about patitions
-        # "partition_key": str (if has partitions) - equiv ? 
-        # "num_partitions": int (if has partitions) - equiv ? 
-
         # TODO modify_date - there is a modify date !!! 
         # TODO what is principal_id
         # TODO is_replicated - might be interesting ? 
-        TABLES_IN_SCHEMA_QUERY = "SELECT name, object_id FROM sys.tables WHERE schema_id={}".format(schema["schema_id"])
-
-        cursor.execute(TABLES_IN_SCHEMA_QUERY)
+        
+        cursor.execute(TABLES_IN_SCHEMA_QUERY.format(schema["schema_id"]))
         columns = [str(i[0]).lower() for i in cursor.description]
         rows = [dict(zip(columns, row)) for row in cursor.fetchall()]
         for row in rows:            
-            tables_dict_for_schema[row['object_id']] = {"name" : row['name'], "columns" : [], "indexes" : [], "foreign_keys" : []}
+            tables_dict_for_schema[row['object_id']] = {"name" : row['name'], "columns" : [], "indexes" : [], "partitions" : [], "foreign_keys" : []}
+        return
+
+
+        
+    def _get_columns_data_per_table(self, table_object_id, cursor):
+
         #TABLE_SCHEMA, TABLE_NAME, COLUMN_NAME, DATA_TYPE, COLUMN_DEFAULT 
         # in sys.columns I cannot see a data type but there are other things   
         #object_id   name       
@@ -809,13 +814,26 @@ class SQLServer(AgentCheck):
         COLUMN_QUERY2 = "SELECT c.name AS name, t.name AS data_type, c.is_nullable AS is_nullable, dc.definition AS default_value FROM sys.columns c JOIN sys.types t ON c.system_type_id = t.system_type_id LEFT JOIN sys.default_constraints dc ON c.default_object_id = dc.object_id WHERE c.object_id = {}"
        
         # TODO can be a function query and unwrap in dict
-        for table_object_id, table_value in tables_dict_for_schema.items():
-            cursor.execute(COLUMN_QUERY2.format(table_object_id))
-            columns = [str(i[0]).lower() for i in cursor.description]
-            rows = [dict(zip(columns, row)) for row in cursor.fetchall()]
-            for row in rows:
-                table_value["columns"].append(row)
-        
+        cursor.execute(COLUMN_QUERY2.format(table_object_id))
+        columns = [str(i[0]).lower() for i in cursor.description]
+        rows = [dict(zip(columns, row)) for row in cursor.fetchall()]
+        return rows
+    
+    def _get_partitions_data_per_table(self, table_object_id, cursor):
+
+        # TODO check out sys.partitions in postgres we deliver some data about patitions
+        # "partition_key": str (if has partitions) - equiv ? 
+        # may be use this  https://littlekendra.com/2016/03/15/find-the-partitioning-key-on-an-existing-table-with-partition_ordinal/
+        # for more in depth search, it's not trivial to determine partition key like in Postgres
+        PARTITIONS_QUERY = "SELECT ps.name AS partition_scheme, pf.name AS partition_function FROM sys.tables t INNER JOIN sys.indexes i ON t.object_id = i.object_id INNER JOIN sys.partition_schemes ps ON i.data_space_id = ps.data_space_id INNER JOIN sys.partition_functions pf ON ps.function_id = pf.function_id WHERE t.object_id = {};"
+
+        cursor.execute(PARTITIONS_QUERY.format(table_object_id))
+        columns = [str(i[0]).lower() for i in cursor.description]
+        rows = [dict(zip(columns, row)) for row in cursor.fetchall()]
+        return rows
+
+    def _get_index_data_per_table(self, table_object_id, cursor):           
+
         # object_id   name  index_id    type type_desc is_unique data_space_id ignore_dup_key is_primary_key is_unique_constraint 
         # fill_factor is_padded is_disabled is_hypothetical is_ignored_in_optimization allow_row_locks allow_page_locks has_filter 
         # filter_definition    
@@ -824,12 +842,12 @@ class SQLServer(AgentCheck):
         INDEX_QUERY = "SELECT name, type, is_unique, is_primary_key, is_unique_constraint, is_disabled FROM sys.indexes WHERE object_id={}"
 
         # index query:
-        for table_object_id, table_value in tables_dict_for_schema.items():
-            cursor.execute(INDEX_QUERY.format(table_object_id))
-            columns = [str(i[0]).lower() for i in cursor.description]
-            rows = [dict(zip(columns, row)) for row in cursor.fetchall()]
-            for row in rows:
-                table_value["indexes"].append(row)
+
+        cursor.execute(INDEX_QUERY.format(table_object_id))
+        columns = [str(i[0]).lower() for i in cursor.description]
+        rows = [dict(zip(columns, row)) for row in cursor.fetchall()]
+        return rows
+
         
         # foreign keys
         # name object_id principal_id schema_id parent_object_id type type_desc create_date modify_date is_ms_shipped 
@@ -838,17 +856,14 @@ class SQLServer(AgentCheck):
         # update_referential_action_desc is_system_named compression_delay suppress_dup_key_messages auto_created optimize_for_sequential_key
         # SELECT name , OBJECT_NAME(parent_object_id) FROM sys.foreign_keys;
         # fk.name AS foreign_key_name, OBJECT_NAME(fk.parent_object_id) AS parent_table, COL_NAME(fkc.parent_object_id, fkc.parent_column_id) AS parent_column, OBJECT_NAME(fk.referenced_object_id) AS referenced_table, COL_NAME(fkc.referenced_object_id, fkc.referenced_column_id) AS referenced_column FROM  sys.foreign_keys fk JOIN  sys.foreign_key_columns fkc ON fk.object_id = fkc.constraint_object_id WHERE  fk.parent_object_id = 'YourTableObjectID' -- Replace 'YourTableObjectID' with the object_id of your table
-                                                                                                                                                                            
-        FOREIGN_KEY_QUERY = "SELECT name , OBJECT_NAME(parent_object_id) AS parent_table FROM sys.foreign_keys WHERE object_id={};"
-        
+    def _get_foreign_key_data_per_table(self, table_object_id, cursor):
+        FOREIGN_KEY_QUERY = "SELECT name , OBJECT_NAME(parent_object_id) AS parent_table FROM sys.foreign_keys WHERE object_id={};"    
         # index query:
-        for table_object_id, table_value in tables_dict_for_schema.items():
-            cursor.execute(FOREIGN_KEY_QUERY.format(table_object_id))
-            columns = [str(i[0]).lower() for i in cursor.description]
-            rows = [dict(zip(columns, row)) for row in cursor.fetchall()]
-            for row in rows:
-                table_value["foreign_keys"].append(row)
+        cursor.execute(FOREIGN_KEY_QUERY.format(table_object_id))
+        columns = [str(i[0]).lower() for i in cursor.description]
+        rows = [dict(zip(columns, row)) for row in cursor.fetchall()]
         print("the end")
+        return rows
 
     #TODO as we do it a second type iterate connection through DB make a function and unite it with _get_table_infos check
     #
@@ -863,7 +878,8 @@ class SQLServer(AgentCheck):
                     try:
                         cursor.execute(SWITCH_DB_STATEMENT.format(db))
                         schemas = self._query_schema_information(cursor)
-                        self._get_table_infos_sys_tables_per_schema(schemas, cursor)                        
+                        pdb.set_trace()
+                        self._get_table_data_per_schema(schemas, cursor)                        
                         schemas_per_db[db] = schemas
                         pdb.set_trace()
                     except Exception as e:
