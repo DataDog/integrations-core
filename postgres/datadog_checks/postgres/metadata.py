@@ -276,12 +276,14 @@ class PostgresMetadata(DBMAsyncJob):
                         for schema in database["schemas"]:
                             tables = self._query_tables_for_schema(cursor, schema["id"], dbname)
                             # print("Tables found", tables)
+                            buffer_column_count = 0
                             tables_buffer = []
                             for i, table in enumerate(tables):
                                 table_info = self._query_table_information(cursor, table)
                                 
                                 tables_buffer.append(table_info)
-                                if len(tables_buffer) >= 1000 or i == len(tables) - 1:
+                                buffer_column_count += len(table_info.get("columns", []))
+                                if buffer_column_count >= 100_000 or i == len(tables) - 1:
                                     metadata = [
                                         {**database, "schemas": [{**schema, "tables": tables_buffer}], }
                                     ]
@@ -290,6 +292,7 @@ class PostgresMetadata(DBMAsyncJob):
                                     self._log.debug("Reporting the following payload for schema collection: {}".format(json_event))
                                     self._check.database_monitoring_metadata(json_event)
                                     tables_buffer = []
+                                    buffer_column_count = 0
 
     def _payload_pg_version(self):
         version = self._check.version
@@ -386,6 +389,9 @@ class PostgresMetadata(DBMAsyncJob):
                 row = cursor.fetchone()
                 return row.get("total_activity", 0) if row else 0
 
+        if len(table_info) <= limit:
+            return table_info
+        
         # if relation metrics are enabled, sorted based on last activity information
         table_info = sorted(table_info, key=sort_tables, reverse=True)
         return table_info[:limit]
@@ -423,7 +429,7 @@ class PostgresMetadata(DBMAsyncJob):
 
     def _query_table_information(
         self, cursor: psycopg2.extensions.cursor, table_info: Dict[str, Union[str, bool]]
-    ) -> List[Dict[str, Union[str, Dict]]]:
+    ) -> Dict[str, Union[str, Dict]]:
         """
         Collect table information . Returns a dictionary
         with key/values:
