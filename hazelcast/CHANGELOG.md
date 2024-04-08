@@ -1,5 +1,15 @@
 # CHANGELOG - Hazelcast
 
+## Unreleased
+
+***Added***:
+
+* Added metrics for queues, topics and reliable topics
+
+***Changed***:
+
+* Drop name from excluded tags.
+
 <!-- towncrier release notes start -->
 
 ## 3.2.0 / 2024-02-16 / Agent 7.52.0
