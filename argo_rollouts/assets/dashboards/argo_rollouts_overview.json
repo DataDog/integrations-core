@@ -1321,7 +1321,7 @@
                     {
                         "definition": {
                             "background_color": "green",
-                            "content": "Argo Rollouts is Golang based. The below metrics displays some Go runtime metrics that can help in troubleshooting performance or bottleneck issues.",
+                            "content": "Argo Rollouts is Golang based. The below metrics display Go runtime metrics that can help troubleshoot performance or bottleneck issues.",
                             "font_size": "16",
                             "has_padding": true,
                             "show_tick": false,
