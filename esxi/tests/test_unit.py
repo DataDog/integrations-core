@@ -1,10 +1,9 @@
 # (C) Datadog, Inc. 2024-present
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
-
+import copy
 import logging
 
-import copy
 import pytest
 from mock import MagicMock
 from pyVmomi import vim, vmodl
