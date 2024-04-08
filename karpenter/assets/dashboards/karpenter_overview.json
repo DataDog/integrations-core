@@ -1,6 +1,6 @@
 {
     "author_name": "Datadog",
-    "description": null,
+    "description": "This Karpenter Overview dashboard was created by Datadog. Clone this dashboard to make changes and add your own metrics. (cloned)",
     "layout_type": "ordered",
     "template_variables": [
         {
@@ -30,8 +30,8 @@
         {
             "available_values": [],
             "default": "*",
-            "name": "provisioner",
-            "prefix": "provisioner"
+            "name": "nodepool",
+            "prefix": "nodepool"
         },
         {
             "available_values": [],
@@ -190,7 +190,7 @@
                                             "aggregator": "last",
                                             "data_source": "metrics",
                                             "name": "query1",
-                                            "query": "sum:karpenter.machines_created.count{$cluster_name,$provisioner,$namespace,$host,$zone} by {reason}.as_count()"
+                                            "query": "sum:karpenter.machines_created.count{$cluster_name,$nodepool,$namespace,$host,$zone} by {reason}.as_count()"
                                         }
                                     ],
                                     "response_format": "scalar"
@@ -523,15 +523,18 @@
                                     ],
                                     "queries": [
                                         {
-                                            "aggregator": "avg",
+                                            "aggregator": "last",
                                             "data_source": "metrics",
                                             "name": "query1",
-                                            "query": "max:karpenter.nodes.allocatable{resource_type:cpu,$cluster_name,$zone,$instance_type,$namespace,$host} by {instance_type,host}"
+                                            "query": "max:karpenter.nodes.allocatable{resource_type:cpu,$cluster_name,$zone,$instance_type,$namespace,$host} by {instance_type,host}.fill(null)"
                                         }
                                     ],
                                     "response_format": "scalar"
                                 }
                             ],
+                            "time": {
+                                "live_span": "5m"
+                            },
                             "title": "Allocatable CPU",
                             "title_align": "left",
                             "title_size": "16",
@@ -675,22 +678,25 @@
                                             "cell_display_mode": "number",
                                             "formula": "query1",
                                             "limit": {
-                                                "count": 500,
+                                                "count": 10,
                                                 "order": "desc"
                                             }
                                         }
                                     ],
                                     "queries": [
                                         {
-                                            "aggregator": "avg",
+                                            "aggregator": "last",
                                             "data_source": "metrics",
                                             "name": "query1",
-                                            "query": "avg:karpenter.nodes.allocatable{resource_type:memory,$cluster_name,$zone,$instance_type,$namespace,$host} by {instance_type,host}"
+                                            "query": "avg:karpenter.nodes.allocatable{resource_type:memory,$cluster_name,$zone,$instance_type,$namespace,$host} by {instance_type,host}.fill(null)"
                                         }
                                     ],
                                     "response_format": "scalar"
                                 }
                             ],
+                            "time": {
+                                "live_span": "5m"
+                            },
                             "title": "Allocatable Memory",
                             "title_align": "left",
                             "title_size": "16",
@@ -841,15 +847,18 @@
                                     ],
                                     "queries": [
                                         {
-                                            "aggregator": "avg",
+                                            "aggregator": "last",
                                             "data_source": "metrics",
                                             "name": "query1",
-                                            "query": "avg:karpenter.nodes.allocatable{resource_type:pods,$cluster_name,$zone,$instance_type,$namespace,$host} by {instance_type,host}"
+                                            "query": "avg:karpenter.nodes.allocatable{resource_type:pods,$cluster_name,$zone,$instance_type,$namespace,$host} by {instance_type,host}.fill(null)"
                                         }
                                     ],
                                     "response_format": "scalar"
                                 }
                             ],
+                            "time": {
+                                "live_span": "5m"
+                            },
                             "title": "Allocatable Pods",
                             "title_align": "left",
                             "title_size": "16",
@@ -1174,7 +1183,7 @@
                                         {
                                             "data_source": "metrics",
                                             "name": "query1",
-                                            "query": "avg:karpenter.provisioner.usage.pct{$namespace,$host} by {resource_type,provisioner}"
+                                            "query": "avg:karpenter.provisioner.usage.pct{$namespace,$host} by {resource_type,nodepool}"
                                         }
                                     ],
                                     "response_format": "timeseries",
