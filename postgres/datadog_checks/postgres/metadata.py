@@ -280,7 +280,7 @@ class PostgresMetadata(DBMAsyncJob):
                 for i in range(0, len(lst), n):
                     yield lst[i:i + n]
 
-            chunk_size = 2
+            chunk_size = 50
 
             def flush(metadata):
                 event = {**base_event, "metadata": metadata, "timestamp": time.time() * 1000}
