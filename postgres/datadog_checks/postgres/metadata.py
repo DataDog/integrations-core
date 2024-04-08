@@ -279,7 +279,7 @@ class PostgresMetadata(DBMAsyncJob):
                 for i in range(0, len(lst), n):
                     yield lst[i:i + n]
 
-            chunk_size = 100
+            chunk_size = 50
 
             def flush(metadata):
                 event = {**base_event, "metadata": metadata, "timestamp": time.time() * 1000}
@@ -297,13 +297,22 @@ class PostgresMetadata(DBMAsyncJob):
                             # print("Tables found", tables)
                             buffer_column_count = 0
                             tables_buffer = []
-                            for tables in chunks(tables, chunk_size):
+                            table_chunks = list(chunks(tables, chunk_size))
+                            for tables in table_chunks:
+                                chunk_start = time.time()
                                 table_info = self._query_table_information(cursor, tables)
                                 
                                 tables_buffer = [*tables_buffer,*table_info]
                                 for t in table_info:
                                     buffer_column_count += len(t.get("columns", [])) 
                                 
+                                self._check.gauge(
+                                    "dd.postgresql.agent.metadata.schema_chunk",
+                                    time.time() - chunk_start,
+                                    tags=self.tags
+                                )
+
+
                                 if buffer_column_count >= 100_000:
                                     metadata = [
                                         {**database, "schemas": [{**schema, "tables": tables_buffer}], }
@@ -317,7 +326,7 @@ class PostgresMetadata(DBMAsyncJob):
                                 ]
                                 flush(metadata=metadata)
             self._check.gauge(
-                    "dd.postgresql.agent.metadata.collection_time",
+                    "dd.postgresql.agent.metadata.schema",
                     time.time() - start,
                     tags=self.tags
                 )
