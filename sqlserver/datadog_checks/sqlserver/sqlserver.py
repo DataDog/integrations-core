@@ -770,7 +770,6 @@ class SQLServer(AgentCheck):
     def _get_tables_and_their_data(self, schema, cursor):
         self._get_table_infos(schema, cursor)
         tables_dict_for_schema = schema['tables']
-        pdb.set_trace()
         for table_object_id, table_value in tables_dict_for_schema.items():
             table_value["columns"] = self._get_columns_data_per_table(table_object_id, cursor)
             table_value["partitions"] = self._get_partitions_data_per_table(table_object_id, cursor)
@@ -882,6 +881,7 @@ class SQLServer(AgentCheck):
                         self._get_table_data_per_schema(schemas, cursor)                        
                         schemas_per_db[db] = schemas
                         pdb.set_trace()
+                        print("collected")
                     except Exception as e:
                         pdb.set_trace()
                         print("TODO")
