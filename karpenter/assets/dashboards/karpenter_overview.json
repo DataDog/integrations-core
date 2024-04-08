@@ -1,6 +1,6 @@
 {
     "author_name": "Datadog",
-    "description": "This Karpenter Overview dashboard was created by Datadog. Clone this dashboard to make changes and add your own metrics. (cloned)",
+    "description": "This Karpenter Overview dashboard was created by Datadog. Clone this dashboard to make changes and add your own metrics.",
     "layout_type": "ordered",
     "template_variables": [
         {
