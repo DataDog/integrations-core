@@ -2,13 +2,13 @@
 
 ## Unreleased
 
-***Added***:
-
-* Added metrics for queues, topics and reliable topics
-
 ***Changed***:
 
 * Drop name from excluded tags.
+
+***Added***:
+
+* Added metrics for queues, topics and reliable topics
 
 <!-- towncrier release notes start -->
 
