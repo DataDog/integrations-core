@@ -102,9 +102,10 @@ WHERE  nspname NOT IN ( 'information_schema', 'pg_catalog' )
 
 PG_INDEXES_QUERY = """
 SELECT indexname AS NAME,
-       indexdef  AS definition
+       indexdef  AS definition,
+       tablename
 FROM   pg_indexes
-WHERE  tablename LIKE '{tablename}';
+WHERE  tablename IN ({table_names});
 """
 
 PG_CHECK_FOR_FOREIGN_KEY = """
@@ -116,22 +117,24 @@ WHERE  contype = 'f'
 
 PG_CONSTRAINTS_QUERY = """
 SELECT conname                   AS name,
-       pg_get_constraintdef(oid) AS definition
+       pg_get_constraintdef(oid) AS definition,
+       conrelid AS id
 FROM   pg_constraint
 WHERE  contype = 'f'
-       AND conrelid = {oid};
+       AND conrelid IN ({table_ids});
 """
 
 COLUMNS_QUERY = """
 SELECT attname                          AS name,
        Format_type(atttypid, atttypmod) AS data_type,
        NOT attnotnull                   AS nullable,
-       pg_get_expr(adbin, adrelid)      AS default
+       pg_get_expr(adbin, adrelid)      AS default,
+       attrelid AS id
 FROM   pg_attribute
        LEFT JOIN pg_attrdef ad
               ON adrelid = attrelid
                  AND adnum = attnum
-WHERE  attrelid = {oid}
+WHERE  attrelid IN ({table_ids})
        AND attnum > 0
        AND NOT attisdropped;
 """
@@ -140,13 +143,13 @@ PARTITION_KEY_QUERY = """
 SELECT relname,
        pg_get_partkeydef(oid) AS partition_key
 FROM   pg_class
-WHERE  '{parent}' = relname;
+WHERE  relname in ({table_names});
 """
 
 NUM_PARTITIONS_QUERY = """
-SELECT count(inhrelid :: regclass) AS num_partitions
+SELECT count(inhrelid :: regclass), inhparent as id AS num_partitions
 FROM   pg_inherits
-WHERE  inhparent = {parent_oid};
+WHERE  inhparent = IN ({table_ids});
 """
 
 PARTITION_ACTIVITY_QUERY = """
@@ -270,6 +273,21 @@ class PostgresMetadata(DBMAsyncJob):
                 "tags": self._tags_no_db,
                 "cloud_metadata": self._config.cloud_metadata,
             }
+
+            def chunks(lst, n):
+                """Yield successive n-sized chunks from lst."""
+                for i in range(0, len(lst), n):
+                    yield lst[i:i + n]
+
+            chunk_size = 100
+
+            def flush(metadata):
+                event = {**base_event, "metadata": metadata, "timestamp": time.time() * 1000}
+                json_event = json.dumps(event, default=default_json_event_encoding)
+                self._log.debug("Reporting the following payload for schema collection: {}".format(json_event))
+                self._check.database_monitoring_metadata(json_event)
+                                
+
             for database in schema_metadata:
                 dbname = database["name"]
                 with self.db_pool.get_connection(dbname, self._config.idle_connection_timeout) as conn:
@@ -279,21 +297,25 @@ class PostgresMetadata(DBMAsyncJob):
                             # print("Tables found", tables)
                             buffer_column_count = 0
                             tables_buffer = []
-                            for i, table in enumerate(tables):
-                                table_info = self._query_table_information(cursor, table)
+                            for tables in chunks(tables, chunk_size):
+                                table_info = self._query_table_information(cursor, tables)
                                 
-                                tables_buffer.append(table_info)
-                                buffer_column_count += len(table_info.get("columns", []))
-                                if buffer_column_count >= 100_000 or i == len(tables) - 1:
+                                tables_buffer = [*tables_buffer,*table_info]
+                                for t in table_info:
+                                    buffer_column_count += len(t.get("columns", [])) 
+                                
+                                if buffer_column_count >= 100_000:
                                     metadata = [
                                         {**database, "schemas": [{**schema, "tables": tables_buffer}], }
                                     ]
-                                    event = {**base_event, "metadata": metadata, "timestamp": time.time() * 1000}
-                                    json_event = json.dumps(event, default=default_json_event_encoding)
-                                    self._log.debug("Reporting the following payload for schema collection: {}".format(json_event))
-                                    self._check.database_monitoring_metadata(json_event)
+                                    flush(metadata=metadata)
                                     tables_buffer = []
                                     buffer_column_count = 0
+                            if len(tables_buffer) > 0:
+                                metadata = [
+                                    {**database, "schemas": [{**schema, "tables": tables_buffer}], }
+                                ]
+                                flush(metadata=metadata)
             self._check.gauge(
                     "dd.postgresql.agent.metadata.collection_time",
                     time.time() - start,
@@ -389,18 +411,16 @@ class PostgresMetadata(DBMAsyncJob):
                     info["name"],
                     {"postgresql.index_scans": 0, "postgresql.seq_scans": 0},
                 )
-                print(f"table_data {table_data}")
-                return table_data["postgresql.index_scans"] + table_data["postgresql.seq_scans"]
+                return table_data.get("postgresql.index_scans", 0) + table_data.get("postgresql.seq_scans", 0)
             else:
                 # get activity
                 cursor.execute(PARTITION_ACTIVITY_QUERY.format(parent_oid=info["id"]))
                 row = cursor.fetchone()
-                return row.get("total_activity", 0) if row else 0
+                return row.get("total_activity", 0) if row is not None else 0
 
         if len(table_info) <= limit:
             return table_info
         
-        print(f"Total tables {len(table_info)} > limit {limit}")
         # if relation metrics are enabled, sorted based on last activity information
         table_info = sorted(table_info, key=sort_tables, reverse=True)
         return table_info[:limit]
@@ -437,8 +457,8 @@ class PostgresMetadata(DBMAsyncJob):
         return table_payloads
 
     def _query_table_information(
-        self, cursor: psycopg2.extensions.cursor, table_info: Dict[str, Union[str, bool]]
-    ) -> Dict[str, Union[str, Dict]]:
+        self, cursor: psycopg2.extensions.cursor, table_info: List[Dict[str, Union[str, bool]]]
+    ) -> List[Dict[str, Union[str, Dict]]]:
         """
         Collect table information . Returns a dictionary
         with key/values:
@@ -460,49 +480,51 @@ class PostgresMetadata(DBMAsyncJob):
             "partition_key": str (if has partitions)
             "num_partitions": int (if has partitions)
         """
-        this_payload = {**table_info}
-        name = table_info["name"]
-        table_id = table_info["id"]
-        table_owner = table_info["owner"]
-        this_payload.update({"id": str(table_info["id"])})
-        this_payload.update({"name": name})
-        this_payload.update({"owner": table_owner})
-        if table_info["has_indexes"]:
-            cursor.execute(PG_INDEXES_QUERY.format(tablename=name))
-            rows = cursor.fetchall()
-            idxs = [dict(row) for row in rows]
-            this_payload.update({"indexes": idxs})
+        tables = dict((t.get("name"), {**t}) for t in table_info)
+        table_name_lookup = dict((t.get("id"), t.get("name")) for t in table_info)
+        table_ids = ",".join(["'{}'".format(t.get("id")) for t in table_info])
+        table_names = ",".join(["'{}'".format(t.get("name")) for t in table_info])
+        
+        cursor.execute(PG_INDEXES_QUERY.format(table_names=table_names))
+        rows = cursor.fetchall()
+        for row in rows:
+            tables.get(row.get("tablename"))["indexes"] = tables.get(row.get("tablename")).get("indexes", []) + [dict(row)]
 
         if VersionUtils.transform_version(str(self._check.version))["version.major"] != "9":
             if table_info["has_partitions"]:
-                cursor.execute(PARTITION_KEY_QUERY.format(parent=name))
-                row = cursor.fetchone()
-                this_payload.update({"partition_key": row["partition_key"]})
+                cursor.execute(PARTITION_KEY_QUERY.format(table_names=table_names))
+                rows = cursor.fetchall()
+                for row in rows:
+                    tables.get(row.get("relname"))["partition_key"] = row.get("partition_key")
 
-                cursor.execute(NUM_PARTITIONS_QUERY.format(parent_oid=table_id))
-                row = cursor.fetchone()
-                this_payload.update({"num_partitions": row["num_partitions"]})
+                cursor.execute(NUM_PARTITIONS_QUERY.format(table_ids=table_ids))
+                rows = cursor.fetchall()
+                for row in rows:
+                    table_name = table_name_lookup(row.get("id"))
+                    tables.get(table_name)["num_partitions"] = row.get("num_partitions")
 
 
         # Get foreign keys
-        cursor.execute(PG_CHECK_FOR_FOREIGN_KEY.format(oid=table_id))
-        row = cursor.fetchone()
-        if row["count"] > 0:
-            cursor.execute(PG_CONSTRAINTS_QUERY.format(oid=table_id))
-            rows = cursor.fetchall()
-            if rows:
-                fks = [dict(row) for row in rows]
-                this_payload.update({"foreign_keys": fks})
-
+        # cursor.execute(PG_CHECK_FOR_FOREIGN_KEY.format(oid=table_id))
+        # row = cursor.fetchone()
+        # if row["count"] > 0:
+        cursor.execute(PG_CONSTRAINTS_QUERY.format(table_ids=table_ids))
+        rows = cursor.fetchall()
+        for row in rows:
+            table_name = table_name_lookup.get(str(row.get("id")))
+            tables.get(table_name)["foreign_keys"] = tables.get(table_name).get("foreign_keys", []) + [dict(row)]
+        
         # Get columns
-        cursor.execute(COLUMNS_QUERY.format(oid=table_id))
-        rows = cursor.fetchall()[:]
-        max_columns = self._config.schemas_metadata_config.get("max_columns", 50)
-        columns = [dict(row) for row in rows][:max_columns]
-        this_payload.update({"columns": columns})
+        cursor.execute(COLUMNS_QUERY.format(table_ids=table_ids))
+        rows = cursor.fetchall()
+        # max_columns = self._config.schemas_metadata_config.get("max_columns", 50)
+        # columns = [dict(row) for row in rows][:max_columns]
+        # this_payload.update({"columns": columns})
+        for row in rows:
+            table_name = table_name_lookup.get(str(row.get("id")))
+            tables.get(table_name)["columns"] = tables.get(table_name).get("columns", []) + [dict(row)]
 
-
-        return this_payload
+        return tables.values()
 
     def _collect_metadata_for_database(self, dbname):
         metadata = {}
