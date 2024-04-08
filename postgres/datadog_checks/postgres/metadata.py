@@ -147,9 +147,10 @@ WHERE  relname in ({table_names});
 """
 
 NUM_PARTITIONS_QUERY = """
-SELECT count(inhrelid :: regclass), inhparent as id AS num_partitions
+SELECT count(inhrelid :: regclass) AS num_partitions, inhparent as id 
 FROM   pg_inherits
-WHERE  inhparent = IN ({table_ids});
+WHERE  inhparent IN ({table_ids})
+GROUP BY inhparent;
 """
 
 PARTITION_ACTIVITY_QUERY = """
@@ -279,7 +280,7 @@ class PostgresMetadata(DBMAsyncJob):
                 for i in range(0, len(lst), n):
                     yield lst[i:i + n]
 
-            chunk_size = 50
+            chunk_size = 2
 
             def flush(metadata):
                 event = {**base_event, "metadata": metadata, "timestamp": time.time() * 1000}
@@ -298,6 +299,7 @@ class PostgresMetadata(DBMAsyncJob):
                             buffer_column_count = 0
                             tables_buffer = []
                             table_chunks = list(chunks(tables, chunk_size))
+                            print("Iterating over {} table chunks for schema {}".format(len(table_chunks), schema))
                             for tables in table_chunks:
                                 chunk_start = time.time()
                                 table_info = self._query_table_information(cursor, tables)
@@ -489,7 +491,7 @@ class PostgresMetadata(DBMAsyncJob):
             "partition_key": str (if has partitions)
             "num_partitions": int (if has partitions)
         """
-        tables = dict((t.get("name"), {**t}) for t in table_info)
+        tables = dict((t.get("name"), {**t, "num_partitions": 0}) for t in table_info)
         table_name_lookup = dict((t.get("id"), t.get("name")) for t in table_info)
         table_ids = ",".join(["'{}'".format(t.get("id")) for t in table_info])
         table_names = ",".join(["'{}'".format(t.get("name")) for t in table_info])
@@ -500,17 +502,16 @@ class PostgresMetadata(DBMAsyncJob):
             tables.get(row.get("tablename"))["indexes"] = tables.get(row.get("tablename")).get("indexes", []) + [dict(row)]
 
         if VersionUtils.transform_version(str(self._check.version))["version.major"] != "9":
-            if table_info["has_partitions"]:
-                cursor.execute(PARTITION_KEY_QUERY.format(table_names=table_names))
-                rows = cursor.fetchall()
-                for row in rows:
-                    tables.get(row.get("relname"))["partition_key"] = row.get("partition_key")
+            cursor.execute(PARTITION_KEY_QUERY.format(table_names=table_names))
+            rows = cursor.fetchall()
+            for row in rows:
+                tables.get(row.get("relname"))["partition_key"] = row.get("partition_key")
 
-                cursor.execute(NUM_PARTITIONS_QUERY.format(table_ids=table_ids))
-                rows = cursor.fetchall()
-                for row in rows:
-                    table_name = table_name_lookup(row.get("id"))
-                    tables.get(table_name)["num_partitions"] = row.get("num_partitions")
+            cursor.execute(NUM_PARTITIONS_QUERY.format(table_ids=table_ids))
+            rows = cursor.fetchall()
+            for row in rows:
+                table_name = table_name_lookup.get(str(row.get("id")))
+                tables.get(table_name)["num_partitions"] = row.get("num_partitions", 0)
 
 
         # Get foreign keys
