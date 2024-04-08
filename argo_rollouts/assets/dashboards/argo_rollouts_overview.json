@@ -178,7 +178,7 @@
                     {
                         "definition": {
                             "background_color": "orange",
-                            "content": "The Rollout Overview offers a high-level overview of the progress of rollouts by displaying the current phases in which a rollout is currently.",
+                            "content": "The Rollout Overview offers a high-level summary of the progress of rollouts by displaying the current phases in which a rollout is currently.",
                             "font_size": "16",
                             "has_padding": true,
                             "show_tick": false,
