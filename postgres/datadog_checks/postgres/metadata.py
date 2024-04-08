@@ -254,6 +254,7 @@ class PostgresMetadata(DBMAsyncJob):
 
         elapsed_s_schemas = time.time() - self._last_schemas_query_time
         if elapsed_s_schemas >= self.schemas_collection_interval and self._collect_schemas_enabled:
+            start = time.time()
             schema_metadata = self._collect_schema_info()
             # Emit an event for each table to keep size small
 
@@ -293,6 +294,12 @@ class PostgresMetadata(DBMAsyncJob):
                                     self._check.database_monitoring_metadata(json_event)
                                     tables_buffer = []
                                     buffer_column_count = 0
+            self._check.gauge(
+                    "dd.postgresql.agent.metadata.collection_time",
+                    time.time() - start,
+                    tags=self.tags
+                )
+
 
     def _payload_pg_version(self):
         version = self._check.version
@@ -382,6 +389,7 @@ class PostgresMetadata(DBMAsyncJob):
                     info["name"],
                     {"postgresql.index_scans": 0, "postgresql.seq_scans": 0},
                 )
+                print(f"table_data {table_data}")
                 return table_data["postgresql.index_scans"] + table_data["postgresql.seq_scans"]
             else:
                 # get activity
@@ -392,6 +400,7 @@ class PostgresMetadata(DBMAsyncJob):
         if len(table_info) <= limit:
             return table_info
         
+        print(f"Total tables {len(table_info)} > limit {limit}")
         # if relation metrics are enabled, sorted based on last activity information
         table_info = sorted(table_info, key=sort_tables, reverse=True)
         return table_info[:limit]
