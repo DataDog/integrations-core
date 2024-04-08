@@ -73,7 +73,6 @@ nav:
       - meta/ci/testing.md
       - meta/ci/validation.md
       - meta/ci/labels.md
-    - CD: meta/cd.md
     - Docs: meta/docs.md
     - Config specs: meta/config-specs.md
     - Config models: meta/config-models.md

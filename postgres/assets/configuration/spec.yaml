@@ -229,6 +229,12 @@ files:
       value:
         type: boolean
         example: true
+    - name: collect_checksum_metrics
+      description: Collect counts of database failed checksums. Only supported on versions >= 12.
+      value:
+        type: boolean
+        example: false
+        display_default: false
     - name: collect_activity_metrics
       description: |
         Collect metrics regarding transactions from pg_stat_activity. Please make sure the user

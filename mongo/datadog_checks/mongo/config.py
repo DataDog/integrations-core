@@ -62,7 +62,6 @@ class MongoConfig(object):
                     'Setting the `replicaSet` option is not supported. '
                     'Configure one check instance for each node instead'
                 )
-
             self.auth_source = self.additional_options.get('authSource') or self.db_name or 'admin'
 
         if not self.hosts:
@@ -89,7 +88,9 @@ class MongoConfig(object):
             self.do_auth = False
 
         self.replica_check = is_affirmative(instance.get('replica_check', True))
+        self.dbstats_tag_dbname = is_affirmative(instance.get('dbstats_tag_dbname', True))
 
+        self.add_node_tag_to_events = is_affirmative(instance.get('add_node_tag_to_events', True))
         self.collections_indexes_stats = is_affirmative(instance.get('collections_indexes_stats'))
         self.coll_names = instance.get('collections', [])
         self.custom_queries = instance.get("custom_queries", [])

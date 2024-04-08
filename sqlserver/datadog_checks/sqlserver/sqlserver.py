@@ -10,7 +10,7 @@ from collections import defaultdict
 import six
 from cachetools import TTLCache
 
-from datadog_checks.base import AgentCheck, ConfigurationError
+from datadog_checks.base import AgentCheck
 from datadog_checks.base.config import is_affirmative
 from datadog_checks.base.utils.db import QueryExecutor, QueryManager
 from datadog_checks.base.utils.db.utils import default_json_event_encoding, resolve_db_host, tracked_query
@@ -329,31 +329,27 @@ class SQLServer(AgentCheck):
     def make_metric_list_to_collect(self):
         # Pre-process the list of metrics to collect
         try:
-            # check to see if the database exists before we try any connections to it
-            db_exists, context = self.connection.check_database()
-            if db_exists:
-                if self.instance.get('stored_procedure') is None:
-                    with self.connection.open_managed_default_connection():
-                        with self.connection.get_managed_cursor() as cursor:
-                            self.autodiscover_databases(cursor)
-                        self._make_metric_list_to_collect(self._config.custom_metrics)
-            else:
-                # How much do we care that the DB doesn't exist?
-                ignore = is_affirmative(self.instance.get("ignore_missing_database", False))
-                if ignore is not None and ignore:
-                    # not much : we expect it. leave checks disabled
-                    self.do_check = False
-                    self.log.warning("Database %s does not exist. Disabling checks for this instance.", context)
-                else:
-                    # yes we do. Keep trying
-                    msg = "Database {} does not exist. Please resolve invalid database and restart agent".format(
-                        context
-                    )
-                    raise ConfigurationError(msg)
-
-        except SQLConnectionError as e:
-            self.log.exception("Error connecting to database: %s", e)
-        except ConfigurationError:
+            if self._config.ignore_missing_database:
+                # self.connection.check_database() will try to connect to 'master'.
+                # If this is an Azure SQL Database this function will throw.
+                # For this reason we avoid calling self.connection.check_database()
+                # for this config as it will be a false negative.
+                engine_edition = self.static_info_cache.get(STATIC_INFO_ENGINE_EDITION)
+                if not is_azure_sql_database(engine_edition):
+                    # Do the database exist check that will allow to disable _check as a whole
+                    # as otherwise the first call to open_managed_default_connection will throw the
+                    # SQLConnectionError.
+                    db_exists, context = self.connection.check_database()
+                    if not db_exists:
+                        self.do_check = False
+                        self.log.warning("Database %s does not exist. Disabling checks for this instance.", context)
+                        return
+            if self.instance.get('stored_procedure') is None:
+                with self.connection.open_managed_default_connection():
+                    with self.connection.get_managed_cursor() as cursor:
+                        self.autodiscover_databases(cursor)
+                    self._make_metric_list_to_collect(self._config.custom_metrics)
+        except SQLConnectionError:
             raise
         except Exception as e:
             self.log.exception("Initialization exception %s", e)
@@ -537,13 +533,14 @@ class SQLServer(AgentCheck):
     def _add_performance_counters(self, metrics, metrics_to_collect, tags, db=None, physical_database_name=None):
         if db is not None:
             tags = tags + ['database:{}'.format(db)]
-        for name, counter_name, instance_name in metrics:
+        for name, counter_name, instance_name, object_name in metrics:
             try:
                 sql_counter_type, base_name = self.get_sql_counter_type(counter_name)
                 cfg = {
                     'name': name,
                     'counter_name': counter_name,
                     'instance_name': db or instance_name,
+                    'object_name': object_name,
                     'physical_db_name': physical_database_name,
                     'tags': tags,
                 }

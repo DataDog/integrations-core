@@ -15,7 +15,8 @@
       "Supported OS::Linux",
       "Supported OS::Windows",
       "Supported OS::macOS",
-      "Category::Developer Tools"
+      "Category::Developer Tools",
+      "Category::Log Collection"
     ]
   },
   "assets": {
@@ -42,6 +43,15 @@
       "service_checks": {
         "metadata_path": "assets/service_checks.json"
       }
+    },
+    "dashboards": {
+      "Argo Workflows": "assets/dashboards/argo_workflows.json"
+    },
+    "logs": {
+      "source": "argo_workflows"
+    },
+    "monitors": {
+      "errors": "assets/monitors/errors.json"
     }
   },
   "author": {
