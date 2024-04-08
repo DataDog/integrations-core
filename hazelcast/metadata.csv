@@ -1,3 +1,4 @@
+metric_name,metric_type,interval,unit_name,per_unit_name,description,orientation,integration,short_name,curated_metric
 hazelcast.imap.local_backup_count,gauge,,,,Backup count,0,hazelcast,,
 hazelcast.imap.local_backup_entry_count,gauge,,,,Backup entry count,0,hazelcast,,
 hazelcast.imap.local_backup_entry_memory_cost,gauge,,,,Backup entry cost,0,hazelcast,,
@@ -279,4 +280,3 @@ hazelcast.replicatedmap.size,gauge,,,,Size,0,hazelcast,,
 hazelcast.topic.creation_time,gauge,,second,,Creation Time,0,hazelcast,,
 hazelcast.topic.publish_operation_count,gauge,,,,Publish Count,0,hazelcast,,
 hazelcast.topic.receive_operation_count,gauge,,,,Receive Count,0,hazelcast,,
-metric_name,metric_type,interval,unit_name,per_unit_name,description,orientation,integration,short_name,curated_metric
