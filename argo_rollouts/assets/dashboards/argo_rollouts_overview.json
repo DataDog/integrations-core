@@ -796,7 +796,7 @@
                     {
                         "definition": {
                             "background_color": "purple",
-                            "content": "Argo Rollouts conducts analyses and experiments to facilitate progressive delivery. The Analysis and Experiment metrics provide insights into the outcomes and performance of the analysis and experiments.",
+                            "content": "The Analysis and Experiment metrics provide insights into the outcomes and performance of the analyses and experiments that Argo Rollouts conducts to facilitate progressive delivery."
                             "font_size": "16",
                             "has_padding": true,
                             "show_tick": false,
