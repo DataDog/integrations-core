@@ -173,6 +173,7 @@ class InstanceConfig(BaseModel):
     ignore_missing_database: Optional[bool] = None
     include_ao_metrics: Optional[bool] = None
     include_db_fragmentation_metrics: Optional[bool] = None
+    include_db_fragmentation_metrics_tempdb: Optional[bool] = None
     include_fci_metrics: Optional[bool] = None
     include_index_usage_metrics: Optional[bool] = None
     include_index_usage_metrics_tempdb: Optional[bool] = None
