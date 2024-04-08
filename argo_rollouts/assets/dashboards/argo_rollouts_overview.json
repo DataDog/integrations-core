@@ -1504,7 +1504,7 @@
                     {
                         "definition": {
                             "background_color": "orange",
-                            "content": "Argo Rollouts Logs gives near real-time insight on rollout progresses through Kubernetes Pod logs.",
+                            "content": "Argo Rollouts Logs gives near real-time insight on rollout progression through Kubernetes Pod logs.",
                             "font_size": "16",
                             "has_padding": true,
                             "show_tick": false,
