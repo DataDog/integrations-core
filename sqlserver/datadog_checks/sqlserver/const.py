@@ -268,3 +268,6 @@ TEMPDB_FILE_SPACE_USAGE_METRICS = [
 ]
 
 PROC_CHAR_LIMIT = 500
+
+SCHEMA_QUERY = "SELECT name,schema_id,principal_id FROM sys.schemas WHERE name NOT IN ('sys', 'information_schema');"
+TABLES_IN_SCHEMA_QUERY = "SELECT name, object_id FROM sys.tables WHERE schema_id={}"
