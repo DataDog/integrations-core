@@ -135,6 +135,10 @@ PROPERTIES_EX = vim.PropertyCollector.RetrieveResult(
                     val='vm1',
                 ),
                 vmodl.DynamicProperty(
+                    name='guest.hostName',
+                    val='testing-vm',
+                ),
+                vmodl.DynamicProperty(
                     name='runtime.powerState',
                     val=vim.VirtualMachinePowerState.poweredOn,
                 ),
@@ -154,6 +158,10 @@ PROPERTIES_EX = vim.PropertyCollector.RetrieveResult(
                 vmodl.DynamicProperty(
                     name='name',
                     val='vm2',
+                ),
+                vmodl.DynamicProperty(
+                    name='guest.hostName',
+                    val='test-vm-2',
                 ),
                 vmodl.DynamicProperty(
                     name='parent',

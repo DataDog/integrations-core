@@ -20,6 +20,7 @@ class EsxiCheck(AgentCheck):
         self.host = self.instance.get("host")
         self.username = self.instance.get("username")
         self.password = self.instance.get("password")
+        self.use_guest_hostname = self.instance.get("use_guest_hostname", False)
         self.tags = [f"esxi_url:{self.host}"]
 
     def get_resources(self):
@@ -33,6 +34,7 @@ class EsxiCheck(AgentCheck):
             property_specs.append(property_spec)
             if resource_type == VM_RESOURCE:
                 property_spec.pathSet.append("runtime.host")
+                property_spec.pathSet.append("guest.hostName")
 
         # Specify the attribute of the root object to traverse to obtain all the attributes
         traversal_spec = vmodl.query.PropertyCollector.TraversalSpec()
@@ -169,7 +171,11 @@ class EsxiCheck(AgentCheck):
 
         for resource_obj, resource_props in all_resources_with_metrics.items():
             hostname = resource_props.get("name")
+
             resource_type = RESOURCE_TYPE_TO_NAME[type(resource_obj)]
+            if resource_type == "vm" and self.use_guest_hostname:
+                hostname = resource_props.get("guest.hostName", hostname)
+
             self.log.debug("Collect metrics and host tags for hostname: %s, object: %s", hostname, resource_obj)
 
             tags = []
