@@ -57,6 +57,10 @@
     "monitors": {
       "Active Workers": "assets/monitors/active_workers.json",
       "Error Count": "assets/monitors/error_count.json"
+    },
+    "saved_views": {
+        "flux_overview": "assets/saved_views/overview.json",
+        "flux_errors": "assets/saved_views/errors.json"
     }
   }
 }
