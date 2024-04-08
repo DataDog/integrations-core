@@ -860,6 +860,7 @@ def test_sqlserver_index_usage_metrics(
 @pytest.mark.integration
 @pytest.mark.usefixtures('dd_environment')
 @pytest.mark.parametrize('include_db_fragmentation_metrics', [True, False])
+@pytest.mark.parametrize('include_db_fragmentation_metrics_tempdb', [True, False])
 @pytest.mark.parametrize(
     'db_fragmentation_object_names', [None, ['spt_fallback_db', 'spt_fallback_dev', 'spt_fallback_usg']]
 )
@@ -870,11 +871,13 @@ def test_sqlserver_db_fragmentation_metrics(
     init_config,
     instance_docker_metrics,
     include_db_fragmentation_metrics,
+    include_db_fragmentation_metrics_tempdb,
     db_fragmentation_object_names,
     db_fragmentation_metrics_interval,
 ):
     instance_docker_metrics['database_autodiscovery'] = True
     instance_docker_metrics['include_db_fragmentation_metrics'] = include_db_fragmentation_metrics
+    instance_docker_metrics['include_db_fragmentation_metrics_tempdb'] = include_db_fragmentation_metrics_tempdb
     if db_fragmentation_metrics_interval:
         instance_docker_metrics['db_fragmentation_metrics_interval'] = db_fragmentation_metrics_interval
 
@@ -892,6 +895,9 @@ def test_sqlserver_db_fragmentation_metrics(
         ],
         [('datadog_test', 'ϑings', 1, 'thingsindex', 1, 1.0, 1, 0.0)],
     ]
+    mocked_results_tempdb = [
+        [('tempdb', '#TempExample__000000000008', 1, 'PK__#TempExa__3214EC278A26D67E', 1, 1.0, 1, 0.0)],
+    ]
 
     if db_fragmentation_object_names:
         instance_docker_metrics['db_fragmentation_object_names'] = db_fragmentation_object_names
@@ -904,6 +910,10 @@ def test_sqlserver_db_fragmentation_metrics(
             [],
             [],
         ]
+        mocked_results_tempdb = [[]]
+
+    if include_db_fragmentation_metrics_tempdb:
+        mocked_results += mocked_results_tempdb
 
     sqlserver_check = SQLServer(CHECK_NAME, init_config, [instance_docker_metrics])
 
@@ -915,7 +925,7 @@ def test_sqlserver_db_fragmentation_metrics(
         new_query_executor=sqlserver_check._new_query_executor,
         server_static_info=STATIC_SERVER_INFO,
         execute_query_handler=execute_query_handler_mocked,
-        databases=AUTODISCOVERY_DBS,
+        databases=AUTODISCOVERY_DBS + ['tempdb'],
     )
 
     if db_fragmentation_object_names:
@@ -951,6 +961,8 @@ def test_sqlserver_db_fragmentation_metrics(
                         for m in aggregator.metrics(metric_name):
                             tags_by_key = dict([t.split(':') for t in m.tags if not t.startswith('dd.internal')])
                             assert tags_by_key['object_name'].lower() in db_fragmentation_object_names
+                if not include_db_fragmentation_metrics_tempdb:
+                    assert database_name != 'tempdb'
 
     # db_fragmentation_metrics should not be collected because the collection interval is not reached
     aggregator.reset()

@@ -6,6 +6,7 @@ import copy
 import functools
 
 from datadog_checks.base.config import is_affirmative
+from datadog_checks.base.errors import ConfigurationError
 
 from .base import SqlserverDatabaseMetricsBase
 
@@ -54,6 +55,10 @@ class SqlserverDBFragmentationMetrics(SqlserverDatabaseMetricsBase):
         return is_affirmative(self.instance_config.get('include_db_fragmentation_metrics', False))
 
     @property
+    def include_db_fragmentation_metrics_tempdb(self):
+        return is_affirmative(self.instance_config.get('include_db_fragmentation_metrics_tempdb', False))
+
+    @property
     def db_fragmentation_object_names(self):
         return self.instance_config.get('db_fragmentation_object_names', [])
 
@@ -77,6 +82,21 @@ class SqlserverDBFragmentationMetrics(SqlserverDatabaseMetricsBase):
         Note: The index fragmentation metrics query can be expensive, so it is recommended to set a higher interval.
         '''
         return int(self.instance_config.get('db_fragmentation_metrics_interval', self._default_collection_interval))
+
+    @property
+    def databases(self):
+        '''
+        Returns a list of databases to collect index fragmentation metrics for.
+        By default, tempdb is excluded.
+        '''
+        if not self._databases:
+            raise ConfigurationError("No databases configured for index usage metrics")
+        if not self.include_db_fragmentation_metrics_tempdb:
+            try:
+                self._databases.remove('tempdb')
+            except ValueError:
+                pass
+        return self._databases
 
     @property
     def queries(self):
