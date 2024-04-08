@@ -69,6 +69,10 @@ from datadog_checks.sqlserver.const import (
     VALID_METRIC_TYPES,
     SCHEMA_QUERY,
     TABLES_IN_SCHEMA_QUERY,
+    COLUMN_QUERY,
+    PARTITIONS_QUERY,
+    INDEX_QUERY,
+    FOREIGN_KEY_QUERY,
     expected_sys_databases_columns,
 )
 from datadog_checks.sqlserver.metrics import DEFAULT_PERFORMANCE_TABLE, VALID_TABLES
@@ -86,6 +90,7 @@ from datadog_checks.sqlserver.utils import (
     is_azure_database,
     is_azure_sql_database,
     set_default_driver_conf,
+    execute_query_output_result_as_a_dict,
 )
 
 try:
@@ -809,43 +814,25 @@ class SQLServer(AgentCheck):
         
         #if using query 2 we need to figure out user_type_id - its like a user defined type
         # TODO AL in all query 2 will be query 2 faster ? or its just less convinient at the end ... ? object_id is nice
+        return execute_query_output_result_as_a_dict(COLUMN_QUERY.format(table_object_id), cursor)
 
-        COLUMN_QUERY2 = "SELECT c.name AS name, t.name AS data_type, c.is_nullable AS is_nullable, dc.definition AS default_value FROM sys.columns c JOIN sys.types t ON c.system_type_id = t.system_type_id LEFT JOIN sys.default_constraints dc ON c.default_object_id = dc.object_id WHERE c.object_id = {}"
-       
-        # TODO can be a function query and unwrap in dict
-        cursor.execute(COLUMN_QUERY2.format(table_object_id))
-        columns = [str(i[0]).lower() for i in cursor.description]
-        rows = [dict(zip(columns, row)) for row in cursor.fetchall()]
-        return rows
     
     def _get_partitions_data_per_table(self, table_object_id, cursor):
-
         # TODO check out sys.partitions in postgres we deliver some data about patitions
         # "partition_key": str (if has partitions) - equiv ? 
         # may be use this  https://littlekendra.com/2016/03/15/find-the-partitioning-key-on-an-existing-table-with-partition_ordinal/
         # for more in depth search, it's not trivial to determine partition key like in Postgres
-        PARTITIONS_QUERY = "SELECT ps.name AS partition_scheme, pf.name AS partition_function FROM sys.tables t INNER JOIN sys.indexes i ON t.object_id = i.object_id INNER JOIN sys.partition_schemes ps ON i.data_space_id = ps.data_space_id INNER JOIN sys.partition_functions pf ON ps.function_id = pf.function_id WHERE t.object_id = {};"
-
-        cursor.execute(PARTITIONS_QUERY.format(table_object_id))
-        columns = [str(i[0]).lower() for i in cursor.description]
-        rows = [dict(zip(columns, row)) for row in cursor.fetchall()]
-        return rows
+        
+        return execute_query_output_result_as_a_dict(PARTITIONS_QUERY.format(table_object_id), cursor)
 
     def _get_index_data_per_table(self, table_object_id, cursor):           
-
         # object_id   name  index_id    type type_desc is_unique data_space_id ignore_dup_key is_primary_key is_unique_constraint 
         # fill_factor is_padded is_disabled is_hypothetical is_ignored_in_optimization allow_row_locks allow_page_locks has_filter 
-        # filter_definition    
-        
+        # filter_definition            
         #May be better to query sys.index_columns ?                                                                                                                                                                                                                                            compression_delay suppress_dup_key_messages auto_created optimize_for_sequential_key
-        INDEX_QUERY = "SELECT name, type, is_unique, is_primary_key, is_unique_constraint, is_disabled FROM sys.indexes WHERE object_id={}"
+        #INDEX_QUERY = "SELECT name, type, is_unique, is_primary_key, is_unique_constraint, is_disabled FROM sys.indexes WHERE object_id={}"
+        return execute_query_output_result_as_a_dict(INDEX_QUERY.format(table_object_id), cursor)
 
-        # index query:
-
-        cursor.execute(INDEX_QUERY.format(table_object_id))
-        columns = [str(i[0]).lower() for i in cursor.description]
-        rows = [dict(zip(columns, row)) for row in cursor.fetchall()]
-        return rows
 
         
         # foreign keys
@@ -855,14 +842,9 @@ class SQLServer(AgentCheck):
         # update_referential_action_desc is_system_named compression_delay suppress_dup_key_messages auto_created optimize_for_sequential_key
         # SELECT name , OBJECT_NAME(parent_object_id) FROM sys.foreign_keys;
         # fk.name AS foreign_key_name, OBJECT_NAME(fk.parent_object_id) AS parent_table, COL_NAME(fkc.parent_object_id, fkc.parent_column_id) AS parent_column, OBJECT_NAME(fk.referenced_object_id) AS referenced_table, COL_NAME(fkc.referenced_object_id, fkc.referenced_column_id) AS referenced_column FROM  sys.foreign_keys fk JOIN  sys.foreign_key_columns fkc ON fk.object_id = fkc.constraint_object_id WHERE  fk.parent_object_id = 'YourTableObjectID' -- Replace 'YourTableObjectID' with the object_id of your table
-    def _get_foreign_key_data_per_table(self, table_object_id, cursor):
-        FOREIGN_KEY_QUERY = "SELECT name , OBJECT_NAME(parent_object_id) AS parent_table FROM sys.foreign_keys WHERE object_id={};"    
-        # index query:
-        cursor.execute(FOREIGN_KEY_QUERY.format(table_object_id))
-        columns = [str(i[0]).lower() for i in cursor.description]
-        rows = [dict(zip(columns, row)) for row in cursor.fetchall()]
-        print("the end")
-        return rows
+    def _get_foreign_key_data_per_table(self, table_object_id, cursor):           
+        return execute_query_output_result_as_a_dict(FOREIGN_KEY_QUERY.format(table_object_id), cursor)
+
 
     #TODO as we do it a second type iterate connection through DB make a function and unite it with _get_table_infos check
     #
