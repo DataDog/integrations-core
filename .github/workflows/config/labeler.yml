@@ -333,10 +333,10 @@ integration/oracle:
 - oracle/**/*
 integration/otel:
 - otel/**/*
-integration/pan_firewall:
-- pan_firewall/**/*
 integration/palo_alto_panorama:
 - palo_alto_panorama/**/*
+integration/pan_firewall:
+- pan_firewall/**/*
 integration/pdh_check:
 - pdh_check/**/*
 integration/pgbouncer:
@@ -443,6 +443,8 @@ integration/tcp_queue_length:
 - tcp_queue_length/**/*
 integration/teamcity:
 - teamcity/**/*
+integration/tekton:
+- tekton/**/*
 integration/teleport:
 - teleport/**/*
 integration/temporal:
