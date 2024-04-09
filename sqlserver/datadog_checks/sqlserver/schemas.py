@@ -36,6 +36,24 @@ class Schemas:
     # TODO how often ?
     # TODO put in a class
     #TODOTODO do we need this map/list format if we are not dumping in json ??? May be we need to send query results as they are ? 
+        """schemas data struct is a dictionnary with key being a schema name the value is
+    schema
+    dict:
+        "name": str
+        "schema_id": str
+        "principal_id": str
+        "tables" : dict
+            object_id : str
+            name : str
+            columns: list of columns                  
+                "columns": dict
+                    name: str
+                    data_type: str
+                    default: str
+                    is_nullable : str
+            indexes : list of indexes
+            foreign_keys : list of foreign keys
+    """
     def _query_schema_information(self, cursor):
 
         # principal_id is kind of like an owner not sure if need it.
@@ -63,6 +81,10 @@ class Schemas:
             table_value["indexes"] = self._get_index_data_per_table(table_object_id, cursor)
             table_value["foreign_keys"] = self._get_foreign_key_data_per_table(table_object_id, cursor)
 
+
+    # TODO how often ?
+    # TODO put in a class
+    #TODOTODO do we need this map/list format if we are not dumping in json ??? May be we need to send query results as they are ? 
     def _get_table_infos(self, schema, cursor):
         tables_dict_for_schema = schema['tables']
             
