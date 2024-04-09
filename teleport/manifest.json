@@ -44,7 +44,9 @@
         "metadata_path": "assets/service_checks.json"
       }
     },
-    "dashboards": {},
+    "dashboards": {
+        "teleport-overview": "assets/dashboards/teleport_overview.json"
+    },
     "monitors": {},
     "logs": {},
     "saved_views": {}
