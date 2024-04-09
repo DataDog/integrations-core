@@ -210,6 +210,7 @@ class PostgresMetadata(DBMAsyncJob):
         self.db_pool = self._check.db_pool
         self._collect_pg_settings_enabled = is_affirmative(config.settings_metadata_config.get("enabled", False))
         self._collect_schemas_enabled = is_affirmative(config.schemas_metadata_config.get("enabled", False))
+        self._is_schemas_collection_in_progress = False
         self._pg_settings_cached = None
         self._time_since_last_settings_query = 0
         self._last_schemas_query_time = 0
@@ -257,7 +258,8 @@ class PostgresMetadata(DBMAsyncJob):
         self._check.database_monitoring_metadata(json.dumps(event, default=default_json_event_encoding))
 
         elapsed_s_schemas = time.time() - self._last_schemas_query_time
-        if elapsed_s_schemas >= self.schemas_collection_interval and self._collect_schemas_enabled:
+        if self._collect_schemas_enabled and not self._is_schemas_collection_in_progress and elapsed_s_schemas >= self.schemas_collection_interval:
+            self._is_schemas_collection_in_progress = True
             start = time.time()
             schema_metadata = self._collect_schema_info()
             # Emit an event for each table to keep size small
@@ -332,7 +334,7 @@ class PostgresMetadata(DBMAsyncJob):
                     time.time() - start,
                     tags=self.tags
                 )
-
+            self._is_schemas_collection_in_progress = False
 
     def _payload_pg_version(self):
         version = self._check.version
