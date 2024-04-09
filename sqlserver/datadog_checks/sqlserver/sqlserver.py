@@ -514,6 +514,9 @@ class SQLServer(AgentCheck):
                 self.instance.get('database', self.connection.DEFAULT_DATABASE)
             ]
 
+            if not self._config.include_db_fragmentation_metrics_tempdb:
+                db_names = [db_name for db_name in db_names if db_name != 'tempdb']
+
             if not db_fragmentation_object_names:
                 self.log.debug(
                     "No fragmentation object names specified, will return fragmentation metrics for all "

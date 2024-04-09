@@ -692,7 +692,7 @@ class SqlDbFragmentation(BaseSqlServerMetric):
         "DDIPS.page_count as page_count, "
         "DDIPS.avg_fragmentation_in_percent as avg_fragmentation_in_percent, I.name as index_name "
         "FROM {table} (DB_ID('{{db}}'),null,null,null,null) as DDIPS "
-        "INNER JOIN sys.indexes as I ON I.object_id = DDIPS.object_id "
+        "INNER JOIN sys.indexes as I WITH (nolock) ON I.object_id = DDIPS.object_id "
         "AND DDIPS.index_id = I.index_id "
         "WHERE DDIPS.fragment_count is not null".format(table=TABLE)
     )
@@ -712,6 +712,7 @@ class SqlDbFragmentation(BaseSqlServerMetric):
         logger.debug("%s: gathering fragmentation metrics for these databases: %s", cls.__name__, databases)
 
         for db in databases:
+            print(db)
             ctx = construct_use_statement(db)
             query = cls.QUERY_BASE.format(db=db)
             start = get_precise_time()
@@ -721,6 +722,7 @@ class SqlDbFragmentation(BaseSqlServerMetric):
                 logger.debug("%s: fetch_all executing query: %s", cls.__name__, query)
                 cursor.execute(query)
                 data = cursor.fetchall()
+                print(query, data)
             except Exception as e:
                 logger.warning("Error when trying to query db %s - skipping.  Error: %s", db, e)
                 continue

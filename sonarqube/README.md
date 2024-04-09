@@ -326,7 +326,7 @@ Need help? Contact [Datadog support][8].
 [2]: https://app.datadoghq.com/account/settings/agent/latest
 [3]: https://github.com/DataDog/integrations-core/blob/master/sonarqube/datadog_checks/sonarqube/data/metrics.yaml
 [4]: https://docs.sonarqube.org/latest/instance-administration/monitoring/
-[5]: https://docs.sonarqube.org/latest/instance-administration/monitoring/#header-4
+[5]: https://docs.sonarsource.com/sonarqube/latest/instance-administration/monitoring/instance/#how-do-i-activate-jmx
 [6]: https://docs.datadoghq.com/integrations/java/
 [7]: https://github.com/DataDog/integrations-core/blob/master/sonarqube/datadog_checks/sonarqube/data/conf.yaml.example
 [8]: https://docs.datadoghq.com/help/
