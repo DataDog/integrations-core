@@ -312,29 +312,20 @@ def test_excluded_host_tags(vcsim_instance, dd_run_check, datadog_agent, aggrega
         # any external tags that are filtered, including esxi_url
         return [tag for tag in external_tags if any(excluded in tag for excluded in excluded_tags) or "esxi_url" in tag]
 
-    aggregator.assert_metric("esxi.cpu.usage.avg", value=18, tags=all_tags_for_metrics(vm_1_external_tags), hostname="vm1")
-    aggregator.assert_metric("esxi.cpu.usage.avg", value=19, tags=all_tags_for_metrics(vm_2_external_tags), hostname="vm2")
-    aggregator.assert_metric("esxi.cpu.usage.avg", value=26, tags=all_tags_for_metrics(host_external_tags), hostname="localhost.localdomain")
+    aggregator.assert_metric(
+        "esxi.cpu.usage.avg", value=18, tags=all_tags_for_metrics(vm_1_external_tags), hostname="vm1"
+    )
+    aggregator.assert_metric(
+        "esxi.cpu.usage.avg", value=19, tags=all_tags_for_metrics(vm_2_external_tags), hostname="vm2"
+    )
+    aggregator.assert_metric(
+        "esxi.cpu.usage.avg", value=26, tags=all_tags_for_metrics(host_external_tags), hostname="localhost.localdomain"
+    )
 
     def all_external_tags(external_tags):
         # all external tags that are not excluded
         return [tag for tag in external_tags if not any(excluded in tag for excluded in excluded_tags)]
 
-    datadog_agent.assert_external_tags(
-        'localhost.localdomain',
-        {
-            'esxi': all_external_tags(host_external_tags)
-        }
-     )
-    datadog_agent.assert_external_tags(
-        'vm1',
-        {
-            'esxi': all_external_tags(vm_1_external_tags)
-        }
-     )
-    datadog_agent.assert_external_tags(
-        'vm2',
-        {
-            'esxi': all_external_tags(vm_2_external_tags)
-        }
-     )
+    datadog_agent.assert_external_tags('localhost.localdomain', {'esxi': all_external_tags(host_external_tags)})
+    datadog_agent.assert_external_tags('vm1', {'esxi': all_external_tags(vm_1_external_tags)})
+    datadog_agent.assert_external_tags('vm2', {'esxi': all_external_tags(vm_2_external_tags)})
