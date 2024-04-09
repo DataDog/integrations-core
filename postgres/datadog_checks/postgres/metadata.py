@@ -317,7 +317,7 @@ class PostgresMetadata(DBMAsyncJob):
                                 )
 
 
-                                if buffer_column_count >= 100_000:
+                                if buffer_column_count >= 1_000:
                                     metadata = [
                                         {**database, "schemas": [{**schema, "tables": tables_buffer}], }
                                     ]
