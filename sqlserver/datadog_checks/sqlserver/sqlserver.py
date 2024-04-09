@@ -847,7 +847,6 @@ class SQLServer(AgentCheck):
 
 
     #TODO as we do it a second type iterate connection through DB make a function and unite it with _get_table_infos check
-    #
     def _do_for_databases(self, action):
         engine_edition = self.static_info_cache.get(STATIC_INFO_ENGINE_EDITION)
         db_names = []
