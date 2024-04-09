@@ -170,6 +170,7 @@ class EsxiCheck(AgentCheck):
         }
 
         for resource_obj, resource_props in all_resources_with_metrics.items():
+            hostname = resource_props.get("name")
 
             resource_type = RESOURCE_TYPE_TO_NAME[type(resource_obj)]
             if resource_type == "vm" and self.use_guest_hostname:
