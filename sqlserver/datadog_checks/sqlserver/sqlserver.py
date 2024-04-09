@@ -68,12 +68,6 @@ from datadog_checks.sqlserver.const import (
     TASK_SCHEDULER_METRICS,
     TEMPDB_FILE_SPACE_USAGE_METRICS,
     VALID_METRIC_TYPES,
-    SCHEMA_QUERY,
-    TABLES_IN_SCHEMA_QUERY,
-    COLUMN_QUERY,
-    PARTITIONS_QUERY,
-    INDEX_QUERY,
-    FOREIGN_KEY_QUERY,
     expected_sys_databases_columns,
 )
 from datadog_checks.sqlserver.metrics import DEFAULT_PERFORMANCE_TABLE, VALID_TABLES
@@ -91,7 +85,6 @@ from datadog_checks.sqlserver.utils import (
     is_azure_database,
     is_azure_sql_database,
     set_default_driver_conf,
-    execute_query_output_result_as_a_dict,
 )
 
 try:
