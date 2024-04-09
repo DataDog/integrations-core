@@ -187,7 +187,7 @@ See [metadata.csv][5] for a list of metrics provided by this integration.
 
 The Kubernetes State Metrics Core check does not include any events.
 
-### Default Kubernetes and Helm recommended labels as tags
+### Default recommended Kubernetes and Helm labels as tags
 
 |  Recommended Label        | Tag                |
 |-----------------------|-----------------------------|
