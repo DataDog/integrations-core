@@ -47,9 +47,6 @@
     "dashboards": {
         "teleport-overview": "assets/dashboards/teleport_overview.json"
     },
-    "monitors": {},
-    "logs": {},
-    "saved_views": {}
   },
   "author": {
     "support_email": "help@datadoghq.com",
