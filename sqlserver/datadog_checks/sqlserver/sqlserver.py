@@ -848,27 +848,34 @@ class SQLServer(AgentCheck):
 
     #TODO as we do it a second type iterate connection through DB make a function and unite it with _get_table_infos check
     #
-    def _collect_schemas_for_non_azure(self):
-        #schemas per db
-        schemas_per_db = {}
-        #TODO its copy paste make a function
-        db_names = [d.name for d in self.databases] or [self.instance.get('database', self.connection.DEFAULT_DATABASE)]
+    def _do_for_databases(self, action):
+        engine_edition = self.static_info_cache.get(STATIC_INFO_ENGINE_EDITION)
+        db_names = []
+        if not is_azure_sql_database(engine_edition):
+            db_names = [d.name for d in self.databases] or [self.instance.get('database', self.connection.DEFAULT_DATABASE)]
+        else:
+            db_names = [self.instance.get('database', self.connection.DEFAULT_DATABASE)]
         with self.connection.open_managed_default_connection():
             with self.connection.get_managed_cursor() as cursor:
                 for db in db_names:                    
                     try:
-                        cursor.execute(SWITCH_DB_STATEMENT.format(db))
-                        schemas = self._query_schema_information(cursor)
-                        pdb.set_trace()
-                        self._get_table_data_per_schema(schemas, cursor)                        
-                        schemas_per_db[db] = schemas
-                        pdb.set_trace()
-                        print("collected")
+                        if not is_azure_sql_database(engine_edition):
+                            cursor.execute(SWITCH_DB_STATEMENT.format(db))
+                        action(cursor, db)                      
                     except Exception as e:
-                        pdb.set_trace()
                         print("TODO")
                 # Switch DB back to MASTER
-                cursor.execute(SWITCH_DB_STATEMENT.format(self.connection.DEFAULT_DATABASE))
+                if not is_azure_sql_database(engine_edition):
+                    cursor.execute(SWITCH_DB_STATEMENT.format(self.connection.DEFAULT_DATABASE))
+
+    def _collect_schemas_data(self):
+        #schemas per db
+        schemas_per_db = {}
+        def fetch_schema_data(cursor, db_name):
+            schemas = self._query_schema_information(cursor)
+            self._get_table_data_per_schema(schemas, cursor)
+            schemas_per_db[db_name] = schemas
+        self._do_for_databases(fetch_schema_data)
         pdb.set_trace()
         print(schemas_per_db)
 
@@ -903,7 +910,7 @@ class SQLServer(AgentCheck):
             self._send_database_instance_metadata()
             if self._config.dbm_enabled:
                 #TODO limit this check by some minutes ... 
-                self._collect_schemas_for_non_azure()
+                self._collect_schemas_data()
                 self.statement_metrics.run_job_loop(self.tags)
                 self.procedure_metrics.run_job_loop(self.tags)
                 self.activity.run_job_loop(self.tags)
