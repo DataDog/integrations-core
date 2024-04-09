@@ -79,7 +79,7 @@ services:
       - dd_hazelcast
 
   hazelcast_management_center:
-    image: hazelcast/management-center:${HAZELCAST_VERSION}
+    image: hazelcast/management-center:${HAZELCAST_MANCENTER_VERSION}
     container_name: hazelcast_management_center
     environment:
       MC_CONTEXT_PATH: /
