@@ -1,6 +1,6 @@
 {
     "author_name": "Datadog",
-    "description": "This Karpenter Overview dashboard was created by Datadog. Clone this dashboard to make changes and add your own metrics.",
+    "description": "The Karpenter Overview dashboard provides insight into your Karpenter Nodes, Pods, and Karpenter metrics. Clone this dashboard to make changes and add your own graph widgets.\n\n### Useful Links\n\n- [Datadog Karpenter integration documentation](https://docs.datadoghq.com/integrations/karpenter/)",
     "layout_type": "ordered",
     "template_variables": [
         {
