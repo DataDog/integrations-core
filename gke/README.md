@@ -92,7 +92,7 @@ Because Autopilot does not allow `socket` mode, Datadog recommends using `servic
 
 [101]: https://github.com/DataDog/helm-charts/tree/master/charts/datadog#values
 [102]: https://docs.datadoghq.com/containers/cluster_agent/admission_controller/?tab=operator
-[103]: https://github.com/DataDog/helm-charts/blob/main/charts/datadog/values.yaml#L922
+[103]: https://github.com/DataDog/helm-charts/blob/main/charts/datadog/values.yaml#L1046
 
 
 <!-- xxz tab xxx -->
