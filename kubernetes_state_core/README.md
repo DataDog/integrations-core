@@ -199,6 +199,14 @@ The Kubernetes State Metrics Core check does not include any events.
 | `app.kubernetes.io/managed-by`          | `kube_app_managed_by`           |
 | `helm.sh/chart`          | `helm_chart`           |
 
+#### Default recommended Kubernetes Node's labels.
+
+|  Recommended Label        | Tag                |
+|-----------------------|-----------------------------|
+| `topology.kubernetes.io/region`  | `kube_region`     |
+| `topology.kubernetes.io/zone`    | `kube_zone`       |
+| `failure-domain.beta.kubernetes.io/region`   | `kube_region`   |
+| `failure-domain.beta.kubernetes.io/zone`     | `kube_zone`     |
 ### Datadog labels added as tags (Unified Service Tagging)
 
 |  Datadog Label        | Tag                |
