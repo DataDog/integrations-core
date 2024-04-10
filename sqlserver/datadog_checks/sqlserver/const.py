@@ -277,4 +277,5 @@ COLUMN_QUERY2 = "SELECT c.name AS name, t.name AS data_type, c.is_nullable AS is
 #PARTITIONS_QUERY2 = "SELECT ps.name AS partition_scheme, pf.name AS partition_function FROM sys.tables t INNER JOIN sys.indexes i ON t.object_id = i.object_id INNER JOIN sys.partition_schemes ps ON i.data_space_id = ps.data_space_id INNER JOIN sys.partition_functions pf ON ps.function_id = pf.function_id WHERE t.object_id = {};"
 PARTITIONS_QUERY = "SELECT COUNT(*) FROM sys.partitions WHERE object_id = {};"
 INDEX_QUERY = "SELECT i.name, i.type, i.is_unique, i.is_primary_key, i.is_unique_constraint, i.is_disabled, c.name AS column_name FROM sys.indexes i JOIN sys.index_columns ic ON i.object_id = ic.object_id AND i.index_id = ic.index_id JOIN sys.columns c ON ic.object_id = c.object_id AND ic.column_id = c.column_id WHERE i.object_id = {};"
-FOREIGN_KEY_QUERY = "SELECT name , OBJECT_NAME(parent_object_id) AS parent_table FROM sys.foreign_keys WHERE object_id={};"
+#FOREIGN_KEY_QUERY2 = "SELECT name , OBJECT_NAME(parent_object_id) AS parent_table FROM sys.foreign_keys WHERE object_id={};"
+FOREIGN_KEY_QUERY = "SELECT COUNT(*) FROM sys.foreign_keys WHERE referenced_object_id = {};"
