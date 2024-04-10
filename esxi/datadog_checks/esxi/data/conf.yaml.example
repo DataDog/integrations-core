@@ -43,7 +43,7 @@ instances:
     ## The ESXi integration collects tags for every ESXi host or VM in your environment.
     ## Those tags can be `esxi_url`, esxi_type`, `esxi_host`, `esxi_folder`, `esxi_cluster`
     ## `esxi_compute`, `esxi_datacenter`, `esxi_datastore` and are attached to the ESXi metrics by default.
-    ## By default these tags are submitted as host tags, but you can submit them as metric tags by using
+    ## By default these tags are submitted as host tags, but you can submit them as metric tags instead by using
     ## this configuration option, see: https://docs.datadoghq.com/tagging/using_tags/
     ## You will lose the ability to filter your hosts on the tags you specify but they will appear faster
     ## and will remove spikes from some `count by {TAG}` queries.
