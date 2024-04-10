@@ -62,7 +62,7 @@ Firewall authentication logs provide detailed information on users as they authe
 
 ### Metrics
 
-The Palo Alto Networks Firewall Log Integration submits specified metrics under the `snmp.*` namespace. The metrics collected are determined by the [palo alto configured profile][9]. See the [SNMP Data Collected][10] section for details of monitored metrics.
+The metrics collected for this integration are determined by the [palo alto configured profile][9]. 
 
 ### Logs
 
