@@ -80,6 +80,10 @@ class Schemas:
         for table_object_id, table_value in tables_dict_for_schema.items():
             table_value["columns"] = self._get_columns_data_per_table(table_value["name"], schema["name"], cursor)
             table_value["partitions"] = self._get_partitions_data_per_table(table_object_id, cursor)
+            if str(table_object_id) == "1803153469":
+                pdb.set_trace()
+                print("should have index")
+
             table_value["indexes"] = self._get_index_data_per_table(table_object_id, cursor)
             table_value["foreign_keys"] = self._get_foreign_key_data_per_table(table_object_id, cursor)
 
@@ -101,24 +105,13 @@ class Schemas:
             tables_dict_for_schema[row['object_id']] = {"name" : row['name'], "columns" : [], "indexes" : [], "partitions" : [], "foreign_keys" : []}
         return
 
-    #postgres: name, data_type, nullable, default - same values
     def _get_columns_data_per_table(self, table_name, schema_name, cursor):
-
-        #TABLE_SCHEMA, TABLE_NAME, COLUMN_NAME, DATA_TYPE, COLUMN_DEFAULT 
-        # in sys.columns I cannot see a data type but there are other things   
-        #object_id   name       
-        #column_id   system_type_id user_type_id max_length precision scale collation_name   
-        # is_nullable is_ansi_padded is_rowguidcol is_identity is_computed is_filestream is_replicated 
-        # is_non_sql_subscribed is_merge_published is_dts_replicated is_xml_document xml_collection_id 
-        # default_object_id rule_object_id is_sparse is_column_set generated_always_type generated_always_type_desc                                   encryption_type encryption_type_desc                                             encryption_algorithm_name                                                                                                        column_encryption_key_id column_encryption_key_database_name                                                                                              is_hidden is_masked graph_type  graph_type_desc                                              is_data_deletion_filter_column ledger_view_column_type ledger_view_column_type_desc                                 is_dropped_ledger_column
-        # might be slower then in sys.columns as we cant get data by object_id .... but we get data_type
-        #COLUMN_QUERY = "SELECT COLUMN_NAME, DATA_TYPE, COLUMN_DEFAULT FROM INFORMATION_SCHEMA.COLUMNS WHERE TABLE_SCHEMA={} and TABLE_NAME={};".format(schema_name, )
-        
-        #if using query 2 we need to figure out user_type_id - its like a user defined type
         return execute_query_output_result_as_a_dict(COLUMN_QUERY.format(table_name, schema_name), cursor)
 
-    #SELECT count(inhrelid :: regclass) AS num_partitions
-    #SELECT relname, pg_get_partkeydef(oid) AS partition_key
+    #TODO table 1803153469 is in  sys.indexes but not in sys.index_columns ... shell we do something about it ?
+    def _get_index_data_per_table(self, table_object_id, cursor):           
+        return execute_query_output_result_as_a_dict(INDEX_QUERY.format(table_object_id), cursor)
+
     #its hard to get the partition key
     #!!! better change to number my query
     def _get_partitions_data_per_table(self, table_object_id, cursor):
@@ -126,20 +119,10 @@ class Schemas:
         # "partition_key": str (if has partitions) - equiv ? 
         # may be use this  https://littlekendra.com/2016/03/15/find-the-partitioning-key-on-an-existing-table-with-partition_ordinal/
         # for more in depth search, it's not trivial to determine partition key like in Postgres
-        
-        return execute_query_output_result_as_a_dict(PARTITIONS_QUERY.format(table_object_id), cursor)
-
-
-#!!! INDEX : name, and their columns join by sys.indexes sys.index_columns
-    # postgres  indexname , indexdef
-    # we dont have indexdef , whats the best course of action ? 
-    def _get_index_data_per_table(self, table_object_id, cursor):           
-        # object_id   name  index_id    type type_desc is_unique data_space_id ignore_dup_key is_primary_key is_unique_constraint 
-        # fill_factor is_padded is_disabled is_hypothetical is_ignored_in_optimization allow_row_locks allow_page_locks has_filter 
-        # filter_definition            
-        #May be better to query sys.index_columns ?                                                                                                                                                                                                                                            compression_delay suppress_dup_key_messages auto_created optimize_for_sequential_key
-        #INDEX_QUERY = "SELECT name, type, is_unique, is_primary_key, is_unique_constraint, is_disabled FROM sys.indexes WHERE object_id={}"
-        return execute_query_output_result_as_a_dict(INDEX_QUERY.format(table_object_id), cursor)
+        cursor.execute(PARTITIONS_QUERY.format(table_object_id))
+        columns = ["partition_count" for i in cursor.description]
+        rows = [dict(zip(columns, row)) for row in cursor.fetchall()]
+        return rows
         
         # foreign keys
         # name object_id principal_id schema_id parent_object_id type type_desc create_date modify_date is_ms_shipped 
