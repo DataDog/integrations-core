@@ -15,6 +15,7 @@ tests:
       timestamp: 1646745634092
       updated: "ActiveProfileUpdate"
     message: "update from calculation graph"
+    status: "info"
     tags:
      - "source:LOGS_SOURCE"
     timestamp: 1646745634092
@@ -35,6 +36,7 @@ tests:
       timestamp: 1646745634092
       updated: "ActiveProfileUpdate"
     message: "update from calculation graph"
+    status: "info"
     tags:
      - "source:LOGS_SOURCE"
     timestamp: 1646745634092
@@ -53,6 +55,7 @@ tests:
       status: "INFO"
       timestamp: 1645802923671
     message: "Queueing update of chain"
+    status: "info"
     tags:
      - "source:LOGS_SOURCE"
     timestamp: 1645802923671
@@ -72,6 +75,7 @@ tests:
       status: "INFO"
       timestamp: 1646751042293
     message: "2022-03-08 14:50:42.293 [INFO][642] felix/config_params.go 502: Parsing value for LogSeverityFile:  (from config file)"
+    status: "info"
     tags:
      - "source:LOGS_SOURCE"
     timestamp: 1646751042293
@@ -86,6 +90,7 @@ tests:
       status: "INFO"
       timestamp: 1646751043239
     message: "Dataplane updates no longer throttled"
+    status: "info"
     tags:
      - "source:LOGS_SOURCE"
     timestamp: 1646751043239
@@ -107,6 +112,7 @@ tests:
       timestamp: 1646667772608
       updated: "WorkloadEndpointUpdate"
     message: "update from calculation graph"
+    status: "info"
     tags:
      - "source:LOGS_SOURCE"
     timestamp: 1646667772608
@@ -127,6 +133,7 @@ tests:
       status: "INFO"
       timestamp: 1647353237510
     message: "2022-03-15 14:07:17.510 [INFO][469495] felix/summary.go 100: Summarising 7 dataplane reconciliation loops over 1m3.3s: avg=263ms longest=773ms (resync-ipsets-v4)"
+    status: "info"
     tags:
      - "source:LOGS_SOURCE"
     timestamp: 1647353237510
@@ -147,6 +154,7 @@ tests:
       timestamp: 1647351717352
       updated: "WorkloadEndpointUpdate"
     message: "update from calculation graph"
+    status: "info"
     tags:
      - "source:LOGS_SOURCE"
     timestamp: 1647351717352
@@ -166,6 +174,7 @@ tests:
         OrchestratorId: "k8s"
         WorkloadId: "kube-system/coredns-6d4b75cb6d-62scn"
     message: "Storing endpoint status update "
+    status: "info"
     tags:
      - "source:LOGS_SOURCE"
     timestamp: 1667226919482
@@ -185,6 +194,7 @@ tests:
       status: "INFO"
       timestamp: 1667226918602
     message: "2022-10-31 14:35:18.602 [INFO][262] felix/int_dataplane.go 1695: Received interface update msg=&intdataplane.ifaceUpdate{Name:\"calif1127a92742\", State:\"up\", Index:11}"
+    status: "info"
     tags:
      - "source:LOGS_SOURCE"
     timestamp: 1667226918602
@@ -201,6 +211,7 @@ tests:
       status: "INFO"
       timestamp: 1667447667610
     message: "Interface addrs changed"
+    status: "info"
     tags:
      - "source:LOGS_SOURCE"
     timestamp: 1667447667610
@@ -217,6 +228,7 @@ tests:
       status: "INFO"
       timestamp: 1667447667610
     message: "Applying /proc/sys configuration to interface"
+    status: "info"
     tags:
      - "source:LOGS_SOURCE"
     timestamp: 1667447667610
@@ -231,6 +243,7 @@ tests:
       status: "INFO"
       timestamp: 1670877824884
     message: "Global config update: {{GlobalFelixConfig(name=ClusterType) k8s,bgp,kubeadm,kdd 594 <nil> 0s} 1}"
+    status: "info"
     tags:
      - "source:LOGS_SOURCE"
     timestamp: 1670877824884

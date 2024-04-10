@@ -111,8 +111,9 @@ class MongoDb(AgentCheck):
                     "your mongo version is %s",
                     self._mongo_version,
                 )
+        dbstats_tag_dbname = self._config.dbstats_tag_dbname
         for db_name in all_dbs:
-            potential_collectors.append(DbStatCollector(self, db_name, tags))
+            potential_collectors.append(DbStatCollector(self, db_name, dbstats_tag_dbname, tags))
 
         # Custom queries are always collected except if the node is a secondary or an arbiter in a replica set.
         # It is possible to collect custom queries from secondary nodes as well but this has to be explicitly

@@ -13,7 +13,7 @@ files:
         openmetrics_endpoint.enabled: true
         openmetrics_endpoint.display_priority: 3
         openmetrics_endpoint.value.example: http://%%host%%:9153/metrics
-        openmetrics_endpoint.description: The URL where CodeDNS exposes Prometheus metrics.
+        openmetrics_endpoint.description: The URL where CoreDNS exposes Prometheus metrics.
         tags.display_priority: 1
         tags.value.example:
           - "dns-pod:%%host%%"

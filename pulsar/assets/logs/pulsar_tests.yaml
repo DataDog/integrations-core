@@ -10,6 +10,7 @@ tests:
         thread_name: "main"
       timestamp: 1643154446294
     message: "HTTP Service started at http://0.0.0.0:8080"
+    status: "info"
     tags:
      - "source:LOGS_SOURCE"
     timestamp: 1643154446294
@@ -50,6 +51,7 @@ tests:
           ip: "192.168.240.1"
       timestamp: 1643154529508
     message: "2022-01-25T23:48:49,508+0000 [prometheus-stats-64-1] INFO  org.eclipse.jetty.server.RequestLog - 192.168.240.1 - - [25/Jan/2022:23:48:49 +0000] \"GET /metrics/ HTTP/1.1\" 200 70856 \"-\" \"Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/97.0.4692.71 Safari/537.36\" 13"
+    status: "info"
     tags:
      - "source:LOGS_SOURCE"
     timestamp: 1643154529000

@@ -12,6 +12,7 @@ tests:
         thread_name: "1"
       timestamp: 21732860375
     message: "HMS client filtering is enabled."
+    status: "info"
     tags:
      - "source:LOGS_SOURCE"
     timestamp: 21732860375
@@ -31,6 +32,7 @@ tests:
           port: "28000"
       timestamp: 17484547843
     message: "ThriftServer 'hiveserver2-http-frontend' started on port: 28000"
+    status: "info"
     tags:
      - "source:LOGS_SOURCE"
     timestamp: 17484547843
@@ -51,6 +53,7 @@ tests:
           port: "58642"
       timestamp: 17484544990
     message: "New connection to server CatalogService from client <Host: 172.26.0.5 Port: 58642>"
+    status: "info"
     tags:
      - "source:LOGS_SOURCE"
     timestamp: 17484544990
@@ -74,6 +77,7 @@ tests:
         name: "impala-membership"
         size: "148.00"
     message: "Preparing initial impala-membership topic update for impalad@172.26.0.5:27000. Size = 148.00 B"
+    status: "info"
     tags:
      - "source:LOGS_SOURCE"
     timestamp: 17484548039
@@ -96,6 +100,7 @@ tests:
     message: |-
       Adding backend 5f45a790bd0dc864:ea6f64dd0bdfaab7 to group name: "default"
       min_size: 1
+    status: "info"
     tags:
      - "source:LOGS_SOURCE"
     timestamp: 21456667063

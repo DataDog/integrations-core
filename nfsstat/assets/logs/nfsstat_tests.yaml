@@ -10,6 +10,7 @@ tests:
         time: 3762.965598
       timestamp: 22272521000
     message: "fh_verify(20: 00060001 aa56281d c844aa94 bb77f4bd 39792991 00000000)"
+    service: "nfsd"
     tags:
      - "source:LOGS_SOURCE"
     timestamp: 22272521000
@@ -23,6 +24,7 @@ tests:
         time: 3859.354703
       timestamp: 22272617000
     message: "vers 4 proc 1"
+    service: "nfsd_dispatch"
     tags:
      - "source:LOGS_SOURCE"
     timestamp: 22272617000
@@ -35,6 +37,7 @@ tests:
         hostname: "andrew-nfsiostat"
       timestamp: 24077773000
     message: "laundromat service - starting"
+    service: "NFSD"
     tags:
      - "source:LOGS_SOURCE"
     timestamp: 24077773000
@@ -48,6 +51,7 @@ tests:
         time: 43967.0
       timestamp: 24077896000
     message: "2020-10-06 16:18:16 UTC | CORE | WARN | (pkg/collector/python/datadog_agent.go:119 in LogMessage) | nfsstat:5173c35fbc9f51af | (nfsstat.py:44) | No NFS mount points were found."
+    service: "agent"
     tags:
      - "source:LOGS_SOURCE"
     timestamp: 24077896000

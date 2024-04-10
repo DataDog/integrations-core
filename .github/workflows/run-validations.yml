@@ -151,7 +151,7 @@ jobs:
       if: inputs.ci
       run: ddev validate ci
 
-    - name: Validate every integration has a defined owner
+    - name: Validate the CODEOWNERS file
       if: inputs.codeowners
       run: ddev validate codeowners
 

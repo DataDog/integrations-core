@@ -14,7 +14,7 @@ from google.cloud import storage
 if TYPE_CHECKING:
     from google.cloud.storage.blob import Blob
 
-BUCKET_NAME = 'dd-agent-int-deps'
+BUCKET_NAME = 'deps-agent-int-datadoghq-com'
 CACHE_CONTROL = 'public, max-age=15'
 VALID_PROJECT_NAME = re.compile(r'^([A-Z0-9]|[A-Z0-9][A-Z0-9._-]*[A-Z0-9])$', re.IGNORECASE)
 UNNORMALIZED_PROJECT_NAME_CHARS = re.compile(r'[-_.]+')
@@ -135,7 +135,7 @@ def upload(targets_dir):
                     continue
             else:
                 # https://packaging.python.org/en/latest/specifications/binary-distribution-format/#file-name-convention
-                name, version, python_tag, abi_tag, platform_tag = wheel.stem.split('-')
+                name, version, *_build_tag, python_tag, abi_tag, platform_tag = wheel.stem.split('-')
                 existing_wheels = list(bucket.list_blobs(
                     match_glob=(f'{artifact_type}/{project_name}/'
                                 f'{name}-{version}*-{python_tag}-{abi_tag}-{platform_tag}.whl'),

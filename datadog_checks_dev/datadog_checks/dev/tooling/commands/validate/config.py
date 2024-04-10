@@ -110,7 +110,7 @@ def config(ctx, check, sync, verbose):
 
         if not default_temp:
             message = "Missing default template in init_config or instances section"
-            check_display_queue.append(lambda message=message: echo_failure(message))
+            check_display_queue.append(lambda message=message, **kwargs: echo_failure(message, **kwargs))
             annotate_error(spec_file_path, message)
 
         if spec.errors:

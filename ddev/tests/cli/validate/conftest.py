@@ -2,17 +2,28 @@
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
 import pytest
+from datadog_checks.dev.tooling.constants import set_root
 
 from ddev.repo.core import Repository
 
 
 def _fake_repo(tmp_path_factory, config_file, name):
+    set_root('')  # for dcd compatibility running the tests
     repo_path = tmp_path_factory.mktemp(name)
     repo = Repository(name, str(repo_path))
 
     config_file.model.repos[name] = str(repo.path)
     config_file.model.repo = name
     config_file.save()
+
+    write_file(
+        repo.path / '.github',
+        'CODEOWNERS',
+        """
+/dummy/                                 @DataDog/agent-integrations
+/dummy2/                                 @DataDog/agent-integrations
+""",
+    )
 
     write_file(
         repo_path / ".ddev",

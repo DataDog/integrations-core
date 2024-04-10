@@ -46,8 +46,7 @@ COUNTER_TYPE_QUERY = """select distinct cntr_type
 BASE_NAME_QUERY = (
     """select distinct counter_name
        from sys.dm_os_performance_counters
-       where (counter_name=? or counter_name=?
-       or counter_name=?) and cntr_type=%s;"""
+       where lower(counter_name) IN (?, ?, ?) and cntr_type=%s;"""
     % PERF_LARGE_RAW_BASE
 )
 
@@ -67,60 +66,60 @@ SERVICE_CHECK_NAME = 'sqlserver.can_connect'
 DATABASE_SERVICE_CHECK_NAME = 'sqlserver.database.can_connect'
 
 DBM_MIGRATED_METRICS = [
-    ('sqlserver.stats.connections', 'User Connections', ''),  # LARGE_RAWCOUNT
+    ('sqlserver.stats.connections', 'User Connections', '', ''),  # LARGE_RAWCOUNT
 ]
 
 # Default performance table metrics - Database Instance level
-# datadog metric name, counter name, instance name
+# datadog metric name, counter name, instance name, object name
 INSTANCE_METRICS = [
     # SQLServer:General Statistics
-    ('sqlserver.stats.procs_blocked', 'Processes blocked', ''),  # LARGE_RAWCOUNT
+    ('sqlserver.stats.procs_blocked', 'Processes blocked', '', ''),  # LARGE_RAWCOUNT
     # SQLServer:Access Methods
-    ('sqlserver.access.page_splits', 'Page Splits/sec', ''),  # BULK_COUNT
-    ('sqlserver.access.full_scans', 'Full Scans/sec', ''),  # BULK_COUNT
-    ('sqlserver.access.range_scans', 'Range Scans/sec', ''),  # BULK_COUNT
-    ('sqlserver.access.probe_scans', 'Probe Scans/sec', ''),  # BULK_COUNT
-    ('sqlserver.access.index_searches', 'Index Searches/sec', ''),  # BULK_COUNT
+    ('sqlserver.access.page_splits', 'Page Splits/sec', '', ''),  # BULK_COUNT
+    ('sqlserver.access.full_scans', 'Full Scans/sec', '', ''),  # BULK_COUNT
+    ('sqlserver.access.range_scans', 'Range Scans/sec', '', ''),  # BULK_COUNT
+    ('sqlserver.access.probe_scans', 'Probe Scans/sec', '', ''),  # BULK_COUNT
+    ('sqlserver.access.index_searches', 'Index Searches/sec', '', ''),  # BULK_COUNT
     # SQLServer:Memory Manager
-    ('sqlserver.memory.memory_grants_pending', 'Memory Grants Pending', ''),
-    ('sqlserver.memory.total_server_memory', 'Total Server Memory (KB)', ''),
-    ('sqlserver.memory.sql_cache', 'SQL Cache Memory (KB)', ''),
-    ('sqlserver.memory.grants_outstanding', 'Memory Grants Outstanding', ''),
-    ('sqlserver.memory.database_cache', 'Database Cache Memory (KB)', ''),
-    ('sqlserver.memory.connection', 'Connection Memory (KB)', ''),
-    ('sqlserver.memory.optimizer', 'Optimizer Memory (KB)', ''),
-    ('sqlserver.memory.granted_workspace', 'Granted Workspace Memory (KB)', ''),
-    ('sqlserver.memory.lock', 'Lock Memory (KB)', ''),
-    ('sqlserver.memory.stolen', 'Stolen Server Memory (KB)', ''),
-    ('sqlserver.memory.log_pool_memory', 'Log Pool Memory (KB)', ''),
+    ('sqlserver.memory.memory_grants_pending', 'Memory Grants Pending', '', ''),
+    ('sqlserver.memory.total_server_memory', 'Total Server Memory (KB)', '', ''),
+    ('sqlserver.memory.sql_cache', 'SQL Cache Memory (KB)', '', ''),
+    ('sqlserver.memory.grants_outstanding', 'Memory Grants Outstanding', '', ''),
+    ('sqlserver.memory.database_cache', 'Database Cache Memory (KB)', '', ''),
+    ('sqlserver.memory.connection', 'Connection Memory (KB)', '', ''),
+    ('sqlserver.memory.optimizer', 'Optimizer Memory (KB)', '', ''),
+    ('sqlserver.memory.granted_workspace', 'Granted Workspace Memory (KB)', '', ''),
+    ('sqlserver.memory.lock', 'Lock Memory (KB)', '', ''),
+    ('sqlserver.memory.stolen', 'Stolen Server Memory (KB)', '', ''),
+    ('sqlserver.memory.log_pool_memory', 'Log Pool Memory (KB)', '', ''),
     # SQLServer:Buffer Manager
-    ('sqlserver.buffer.cache_hit_ratio', 'Buffer cache hit ratio', ''),  # RAW_LARGE_FRACTION
-    ('sqlserver.buffer.page_life_expectancy', 'Page life expectancy', ''),  # LARGE_RAWCOUNT
-    ('sqlserver.buffer.page_reads', 'Page reads/sec', ''),  # LARGE_RAWCOUNT
-    ('sqlserver.buffer.page_writes', 'Page writes/sec', ''),  # LARGE_RAWCOUNT
-    ('sqlserver.buffer.checkpoint_pages', 'Checkpoint pages/sec', ''),  # BULK_COUNT
+    ('sqlserver.buffer.cache_hit_ratio', 'Buffer cache hit ratio', '', ''),  # RAW_LARGE_FRACTION
+    ('sqlserver.buffer.page_life_expectancy', 'Page life expectancy', '', ''),  # LARGE_RAWCOUNT
+    ('sqlserver.buffer.page_reads', 'Page reads/sec', '', ''),  # LARGE_RAWCOUNT
+    ('sqlserver.buffer.page_writes', 'Page writes/sec', '', ''),  # LARGE_RAWCOUNT
+    ('sqlserver.buffer.checkpoint_pages', 'Checkpoint pages/sec', '', ''),  # BULK_COUNT
     # SQLServer:SQL Statistics
-    ('sqlserver.stats.auto_param_attempts', 'Auto-Param Attempts/sec', ''),
-    ('sqlserver.stats.failed_auto_param_attempts', 'Failed Auto-Params/sec', ''),
-    ('sqlserver.stats.safe_auto_param_attempts', 'Safe Auto-Params/sec', ''),
-    ('sqlserver.stats.batch_requests', 'Batch Requests/sec', ''),  # BULK_COUNT
-    ('sqlserver.stats.sql_compilations', 'SQL Compilations/sec', ''),  # BULK_COUNT
-    ('sqlserver.stats.sql_recompilations', 'SQL Re-Compilations/sec', ''),  # BULK_COUNT
+    ('sqlserver.stats.auto_param_attempts', 'Auto-Param Attempts/sec', '', ''),
+    ('sqlserver.stats.failed_auto_param_attempts', 'Failed Auto-Params/sec', '', ''),
+    ('sqlserver.stats.safe_auto_param_attempts', 'Safe Auto-Params/sec', '', ''),
+    ('sqlserver.stats.batch_requests', 'Batch Requests/sec', '', ''),  # BULK_COUNT
+    ('sqlserver.stats.sql_compilations', 'SQL Compilations/sec', '', ''),  # BULK_COUNT
+    ('sqlserver.stats.sql_recompilations', 'SQL Re-Compilations/sec', '', ''),  # BULK_COUNT
     # SQLServer:Locks
-    ('sqlserver.stats.lock_waits', 'Lock Waits/sec', '_Total'),  # BULK_COUNT
-    ('sqlserver.latches.latch_waits', 'Latch Waits/sec', ''),  # BULK_COUNT
-    ('sqlserver.locks.deadlocks', 'Number of Deadlocks/sec', '_Total'),  # BULK_COUNT
+    ('sqlserver.stats.lock_waits', 'Lock Waits/sec', '_Total', ''),  # BULK_COUNT
+    ('sqlserver.latches.latch_waits', 'Latch Waits/sec', '', ''),  # BULK_COUNT
+    ('sqlserver.locks.deadlocks', 'Number of Deadlocks/sec', '_Total', ''),  # BULK_COUNT
     # SQLServer:Plan Cache
-    ('sqlserver.cache.object_counts', 'Cache Object Counts', '_Total'),
-    ('sqlserver.cache.pages', 'Cache Pages', '_Total'),
+    ('sqlserver.cache.object_counts', 'Cache Object Counts', '_Total', ''),
+    ('sqlserver.cache.pages', 'Cache Pages', '_Total', ''),
     # SQLServer:Database Replica
-    ('sqlserver.replica.transaction_delay', 'Transaction Delay', '_Total'),
-    ('sqlserver.replica.flow_control_sec', 'Flow Control/sec', '_Total'),
+    ('sqlserver.replica.transaction_delay', 'Transaction Delay', '_Total', 'SQLServer:Database Replica'),
+    ('sqlserver.replica.flow_control_sec', 'Flow Control/sec', '_Total', ''),
     # SQLServer:Transactions
-    ('sqlserver.transactions.version_store_size', 'Version Store Size (KB)', ''),
-    ('sqlserver.transactions.version_cleanup_rate', 'Version Cleanup rate (KB/s)', ''),
-    ('sqlserver.transactions.version_generation_rate', 'Version Generation rate (KB/s)', ''),
-    ('sqlserver.transactions.longest_transaction_running_time', 'Longest Transaction Running Time', ''),
+    ('sqlserver.transactions.version_store_size', 'Version Store Size (KB)', '', ''),
+    ('sqlserver.transactions.version_cleanup_rate', 'Version Cleanup rate (KB/s)', '', ''),
+    ('sqlserver.transactions.version_generation_rate', 'Version Generation rate (KB/s)', '', ''),
+    ('sqlserver.transactions.longest_transaction_running_time', 'Longest Transaction Running Time', '', ''),
 ]
 
 # SQLServer version >= 2016
@@ -129,22 +128,30 @@ INSTANCE_METRICS = [
 INSTANCE_METRICS_NEWER_2016 = [
     # SQLServer:Locks
     # base counter Average Latch Wait Time Base is available starting with SQL Server 2016
-    ('sqlserver.latches.latch_wait_time', 'Average Latch Wait Time (ms)', ''),  # BULK_COUNT
+    ('sqlserver.latches.latch_wait_time', 'Average Latch Wait Time (ms)', '', ''),  # BULK_COUNT
 ]
 
 # Performance table metrics, initially configured to track at instance-level only
 # With auto-discovery enabled, these metrics will be extended accordingly
-# datadog metric name, counter name, instance name
-INSTANCE_METRICS_DATABASE = [
+# datadog metric name, counter name, instance name, object name
+INSTANCE_METRICS_DATABASE_SINGLE = [
     # SQLServer:Databases
-    ('sqlserver.database.backup_restore_throughput', 'Backup/Restore Throughput/sec', '_Total'),
-    ('sqlserver.database.log_bytes_flushed', 'Log Bytes Flushed/sec', '_Total'),
-    ('sqlserver.database.log_flushes', 'Log Flushes/sec', '_Total'),
-    ('sqlserver.database.log_flush_wait', 'Log Flush Wait Time', '_Total'),
-    ('sqlserver.database.transactions', 'Transactions/sec', '_Total'),  # BULK_COUNT
-    ('sqlserver.database.write_transactions', 'Write Transactions/sec', '_Total'),  # BULK_COUNT
-    ('sqlserver.database.active_transactions', 'Active Transactions', '_Total'),  # BULK_COUNT
+    ('sqlserver.database.backup_restore_throughput', 'Backup/Restore Throughput/sec', '_Total', ''),
+    ('sqlserver.database.log_bytes_flushed', 'Log Bytes Flushed/sec', '_Total', ''),
+    ('sqlserver.database.log_flushes', 'Log Flushes/sec', '_Total', ''),
+    ('sqlserver.database.log_flush_wait', 'Log Flush Wait Time', '_Total', ''),
+    ('sqlserver.database.transactions', 'Transactions/sec', '_Total', ''),  # BULK_COUNT
+    ('sqlserver.database.write_transactions', 'Write Transactions/sec', '_Total', ''),  # BULK_COUNT
+    ('sqlserver.database.active_transactions', 'Active Transactions', '_Total', ''),  # BULK_COUNT
 ]
+
+# Performance table metrics when AlwaysOn is enabled
+# datadog metric name, counter name, instance name, object name
+INSTANCE_METRICS_DATABASE_AO = [
+    ('sqlserver.database.replica.transaction_delay', 'Transaction Delay', '', 'SQLServer:Database Replica'),
+]
+
+INSTANCE_METRICS_DATABASE = INSTANCE_METRICS_DATABASE_SINGLE + INSTANCE_METRICS_DATABASE_AO
 
 # AlwaysOn metrics
 # datadog metric name, sql table, column name, tag

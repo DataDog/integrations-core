@@ -51,6 +51,7 @@ tests:
       time: "2020-04-08T07:40:53.1695436Z"
       title: "'Add owner to service principal' resulted in success initiated by  Microsoft.Intune"
     message: "User registered Authenticator App with Code"
+    status: "info"
     tags:
      - "source:LOGS_SOURCE"
     timestamp: 1586331653169

@@ -12,6 +12,7 @@ import pymongo
 import pytest
 from datadog_test_libs.utils.mock_dns import mock_local
 from dateutil.tz import tzutc
+from packaging import version
 
 from datadog_checks.dev import LazyFunction, WaitFor, docker_run, run_command
 from datadog_checks.dev.conditions import WaitForPortListening
@@ -19,6 +20,7 @@ from datadog_checks.mongo import MongoDb
 from tests.mocked_api import MockedPyMongoClient
 
 from . import common
+from .common import MONGODB_VERSION
 
 HOSTNAME_TO_PORT_MAPPING = {
     "shard01a": (
@@ -80,8 +82,7 @@ def dd_environment():
 
 
 def get_custom_hosts():
-    custom_hosts = [(host, '127.0.0.1') for host in HOSTNAME_TO_PORT_MAPPING]
-    return custom_hosts
+    return [(host, '127.0.0.1') for host in HOSTNAME_TO_PORT_MAPPING]
 
 
 @pytest.fixture
@@ -105,6 +106,11 @@ def instance_authdb():
 
 
 @pytest.fixture
+def instance_dbstats_tag_dbname():
+    return copy.deepcopy(common.INSTANCE_DBSTATS_TAG_DBNAME)
+
+
+@pytest.fixture
 def instance_custom_queries():
     return copy.deepcopy(common.INSTANCE_CUSTOM_QUERIES)
 
@@ -115,6 +121,7 @@ def instance_integration(instance_custom_queries):
     instance["additional_metrics"] = ["metrics.commands", "tcmalloc", "collection", "top", "jumbo_chunks"]
     instance["collections"] = ["foo", "bar"]
     instance["collections_indexes_stats"] = True
+    instance["add_node_tag_to_events"] = False
     return instance
 
 
@@ -164,12 +171,13 @@ def check():
 
 
 def setup_sharding(compose_file):
+    command = 'mongo' if version.parse(MONGODB_VERSION) < version.parse('6.0') else 'mongosh'
     service_commands = [
-        ('config01', 'mongo --port 27017 < /scripts/init-configserver.js'),
-        ('shard01a', 'mongo --port 27018 < /scripts/init-shard01.js'),
-        ('shard02a', 'mongo --port 27019 < /scripts/init-shard02.js'),
-        ('shard03a', 'mongo --port 27020 < /scripts/init-shard03.js'),
-        ('router', 'mongo < /scripts/init-router.js'),
+        ('config01', f'{command} --port 27017 < /scripts/init-configserver.js'),
+        ('shard01a', f'{command} --port 27018 < /scripts/init-shard01.js'),
+        ('shard02a', f'{command} --port 27019 < /scripts/init-shard02.js'),
+        ('shard03a', f'{command} --port 27020 < /scripts/init-shard03.js'),
+        ('router', f'{command} < /scripts/init-router.js'),
     ]
 
     for i, (service, command) in enumerate(service_commands, 1):
@@ -183,7 +191,7 @@ def setup_sharding(compose_file):
 class InitializeDB(LazyFunction):
     def __call__(self):
         cli = pymongo.mongo_client.MongoClient(
-            "mongodb://%s:%s" % (common.HOST, common.PORT1),
+            f"mongodb://{common.HOST}:{common.PORT1}",
             socketTimeoutMS=30000,
             read_preference=pymongo.ReadPreference.PRIMARY_PREFERRED,
         )
@@ -233,7 +241,7 @@ class InitializeDB(LazyFunction):
 class InitializeAuthDB(LazyFunction):
     def __call__(self):
         cli = pymongo.mongo_client.MongoClient(
-            "mongodb://root:rootPass@%s:%s" % (common.HOST, common.PORT1),
+            f"mongodb://root:rootPass@{common.HOST}:{common.PORT1}",
             socketTimeoutMS=30000,
             read_preference=pymongo.ReadPreference.PRIMARY_PREFERRED,
         )

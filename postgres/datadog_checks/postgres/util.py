@@ -152,6 +152,8 @@ NEWER_92_METRICS = {
     'temp_files': ('postgresql.temp_files', AgentCheck.rate),
 }
 
+CHECKSUM_METRICS = {'checksum_failures': ('postgresql.checksums.checksum_failures', AgentCheck.monotonic_count)}
+
 NEWER_14_METRICS = {
     'session_time': ('postgresql.sessions.session_time', AgentCheck.monotonic_count),
     'active_time': ('postgresql.sessions.active_time', AgentCheck.monotonic_count),

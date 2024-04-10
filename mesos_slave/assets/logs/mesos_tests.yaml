@@ -11,6 +11,7 @@ tests:
       pid: 89194
       timestamp: 36686866959
     message: "Syncing group operations: queue size (joins, cancels, datas) = (0, 0, 0)"
+    status: "info"
     tags:
      - "source:LOGS_SOURCE"
     timestamp: 36686866959
@@ -25,6 +26,7 @@ tests:
       pid: 16
       timestamp: 36669103015
     message: "Detected a new leader: (id='0')"
+    status: "info"
     tags:
      - "source:LOGS_SOURCE"
     timestamp: 36669103015
@@ -48,6 +50,7 @@ tests:
       pid: 15
       timestamp: 36669321503
     message: "I0301 09:55:21.503362    15 http.cpp:391] HTTP GET for /master/roles.json from 172.28.0.1:59406 with User-Agent='Datadog Agent/7.27.0'"
+    status: "info"
     tags:
      - "source:LOGS_SOURCE"
     timestamp: 36669321503

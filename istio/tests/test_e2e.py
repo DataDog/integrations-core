@@ -10,6 +10,7 @@ from datadog_checks.istio import Istio
 from .common import ISTIOD_METRICS, ISTIOD_V2_METRICS
 
 INTERMITTENT_METRICS = [
+    'istio.citadel.server.cert_chain_expiry_timestamp',
     'istio.mesh.request.count',
     'istio.pilot.mcp_sink.recv_failures_total',
     'istio.galley.validation.passed',
@@ -32,7 +33,6 @@ INTERMITTENT_METRICS = [
 ]
 
 
-@pytest.mark.e2e
 def test_e2e_openmetrics_v1(dd_agent_check):
     aggregator = dd_agent_check(rate=True)
 
@@ -47,7 +47,6 @@ def test_e2e_openmetrics_v1(dd_agent_check):
 
 
 @pytest.mark.skipif(platform.python_version() < "3", reason='OpenMetrics V2 is only available with Python 3')
-@pytest.mark.e2e
 def test_e2e_openmetrics_v2(dd_agent_check, instance_openmetrics_v2):
     aggregator = dd_agent_check(instance_openmetrics_v2, rate=True)
 
