@@ -143,18 +143,16 @@ class EsxiCheck(AgentCheck):
             self.content = connection.content
 
             if self.content.about.apiType != "HostAgent":
-                self.log.error(
-                    "%s is not an ESXi host; please set the `host` config option to an ESXi host "
+                raise Exception(
+                    f"{self.host} is not an ESXi host; please set the `host` config option to an ESXi host "
                     "or use the vSphere integration to collect data from the vCenter",
-                    self.host,
                 )
-                raise
 
             self.log.info("Connected to ESXi host %s: %s", self.host, self.content.about.fullName)
             self.count("host.can_connect", 1, tags=self.tags)
 
         except Exception as e:
-            self.log.warning("Cannot connect to ESXi host %s: %s", self.host, str(e))
+            self.log.error("Cannot connect to ESXi host %s: %s", self.host, str(e))
             self.count("host.can_connect", 0, tags=self.tags)
             return
 
