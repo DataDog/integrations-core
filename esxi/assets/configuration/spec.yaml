@@ -44,6 +44,7 @@ files:
             example: false
         - name: excluded_host_tags
           description: |
+            Use this option to send a subset of host tags as metric tags.
             The ESXi integration collects tags for every ESXi host or VM in your environment.
             Those tags can be `esxi_url`, esxi_type`, `esxi_host`, `esxi_folder`, `esxi_cluster`
             `esxi_compute`, `esxi_datacenter`, `esxi_datastore` and are attached to the ESXi metrics by default.
