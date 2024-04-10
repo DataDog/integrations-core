@@ -42,6 +42,7 @@ class InstanceConfig(BaseModel):
     password: str
     service: Optional[str] = None
     tags: Optional[tuple[str, ...]] = None
+    use_guest_hostname: Optional[bool] = None
     username: str
 
     @model_validator(mode='before')

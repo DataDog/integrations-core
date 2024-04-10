@@ -1,7 +1,7 @@
 # (C) Datadog, Inc. 2024-present
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
-
+import copy
 import logging
 
 import pytest
@@ -274,3 +274,15 @@ def test_external_host_tags_all_resources(vcsim_instance, datadog_agent, dd_run_
             ]
         },
     )
+
+
+@pytest.mark.usefixtures("service_instance")
+def test_use_guest_hostname(vcsim_instance, dd_run_check, aggregator):
+    vcsim_instance = copy.deepcopy(vcsim_instance)
+    vcsim_instance['use_guest_hostname'] = True
+    check = EsxiCheck('esxi', {}, [vcsim_instance])
+    dd_run_check(check)
+
+    aggregator.assert_metric("esxi.cpu.usage.avg", value=18, hostname="testing-vm")
+    aggregator.assert_metric("esxi.cpu.usage.avg", value=19, hostname="test-vm-2")
+    aggregator.assert_metric("esxi.cpu.usage.avg", value=26, hostname="localhost.localdomain")

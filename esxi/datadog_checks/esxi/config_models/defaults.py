@@ -18,3 +18,7 @@ def instance_empty_default_hostname():
 
 def instance_min_collection_interval():
     return 15
+
+
+def instance_use_guest_hostname():
+    return False
