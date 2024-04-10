@@ -44,5 +44,5 @@ AVAILABLE_HOST_TAGS = [
     "esxi_cluster",
     "esxi_compute",
     "esxi_datacenter",
-    "esxi_datastore"
+    "esxi_datastore",
 ]
