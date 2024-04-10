@@ -5,6 +5,7 @@ GRANT SELECT on sys.dm_os_performance_counters to datadog;
 GRANT VIEW SERVER STATE to datadog;
 GRANT CONNECT ANY DATABASE to datadog;
 GRANT VIEW ANY DEFINITION to datadog;
+GRANT CREATE TYPE TO datadog;
 
 -- test users
 CREATE LOGIN bob WITH PASSWORD = 'Password12!';
@@ -22,7 +23,13 @@ GO
 USE datadog_test;
 -- This table is pronounced "things" except we've replaced "th" with the greek lower case "theta" to ensure we
 -- correctly support unicode throughout the integration.
-CREATE TABLE datadog_test.dbo.ϑings (id int, name varchar(255));
+CREATE TYPE MyUDT FROM int;
+CREATE TYPE AnotherINT FROM int;
+
+CREATE TABLE datadog_test.dbo.boris (id int DEFAULT 10);
+
+
+CREATE TABLE datadog_test.dbo.ϑings (id int DEFAULT 0, name varchar(255));
 INSERT INTO datadog_test.dbo.ϑings VALUES (1, 'foo'), (2, 'bar');
 CREATE USER bob FOR LOGIN bob;
 CREATE USER fred FOR LOGIN fred;
