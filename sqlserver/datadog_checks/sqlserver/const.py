@@ -271,7 +271,9 @@ PROC_CHAR_LIMIT = 500
 
 SCHEMA_QUERY = "SELECT name,schema_id,principal_id FROM sys.schemas WHERE name NOT IN ('sys', 'information_schema');"
 TABLES_IN_SCHEMA_QUERY = "SELECT name, object_id FROM sys.tables WHERE schema_id={}"
-COLUMN_QUERY = "SELECT c.name AS name, t.name AS data_type, c.is_nullable AS is_nullable, dc.definition AS default_value FROM sys.columns c JOIN sys.types t ON c.system_type_id = t.system_type_id LEFT JOIN sys.default_constraints dc ON c.default_object_id = dc.object_id WHERE c.object_id = {}"
+COLUMN_QUERY = "SELECT COLUMN_NAME, DATA_TYPE, COLUMN_DEFAULT , IS_NULLABLE FROM INFORMATION_SCHEMA.COLUMNS WHERE TABLE_NAME='{}' and TABLE_SCHEMA='{}';"
+#this query returns several values in case there is an alias for an int ... 
+COLUMN_QUERY2 = "SELECT c.name AS name, t.name AS data_type, c.is_nullable AS is_nullable, dc.definition AS default_value FROM sys.columns c JOIN sys.types t ON c.system_type_id = t.system_type_id OR c.user_type_id = t.user_type_id LEFT JOIN sys.default_constraints dc ON c.default_object_id = dc.object_id WHERE c.object_id = {}"
 PARTITIONS_QUERY = "SELECT ps.name AS partition_scheme, pf.name AS partition_function FROM sys.tables t INNER JOIN sys.indexes i ON t.object_id = i.object_id INNER JOIN sys.partition_schemes ps ON i.data_space_id = ps.data_space_id INNER JOIN sys.partition_functions pf ON ps.function_id = pf.function_id WHERE t.object_id = {};"
 INDEX_QUERY = "SELECT name, type, is_unique, is_primary_key, is_unique_constraint, is_disabled FROM sys.indexes WHERE object_id={}"
 FOREIGN_KEY_QUERY = "SELECT name , OBJECT_NAME(parent_object_id) AS parent_table FROM sys.foreign_keys WHERE object_id={};"
