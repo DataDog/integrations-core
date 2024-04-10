@@ -35,7 +35,7 @@
       },
       "metrics": {
         "prefix": "esxi.",
-        "check": "",
+        "check": "esxi.cpu.usage.avg",
         "metadata_path": "metadata.csv"
       },
       "service_checks": {
