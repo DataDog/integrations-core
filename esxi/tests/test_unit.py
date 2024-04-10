@@ -286,3 +286,33 @@ def test_use_guest_hostname(vcsim_instance, dd_run_check, aggregator):
     aggregator.assert_metric("esxi.cpu.usage.avg", value=18, hostname="testing-vm")
     aggregator.assert_metric("esxi.cpu.usage.avg", value=19, hostname="test-vm-2")
     aggregator.assert_metric("esxi.cpu.usage.avg", value=26, hostname="localhost.localdomain")
+
+
+@pytest.mark.usefixtures("service_instance")
+def test_version_metadata(vcsim_instance, dd_run_check, datadog_agent):
+    check = EsxiCheck('esxi', {}, [vcsim_instance])
+    check.check_id = 'test:123'
+    dd_run_check(check)
+
+    version_metadata = {
+        'version.scheme': 'semver',
+        'version.major': '6',
+        'version.minor': '5',
+        'version.patch': '0',
+        'version.build': '123456789',
+        'version.raw': '6.5.0+123456789',
+    }
+
+    datadog_agent.assert_metadata('test:123', version_metadata)
+
+
+@pytest.mark.usefixtures("service_instance")
+def test_invalid_api_type(vcsim_instance, dd_run_check, caplog, aggregator, service_instance):
+    service_instance.content.about.apiType = "VirtualCenter"
+    check = EsxiCheck('esxi', {}, [vcsim_instance])
+
+    dd_run_check(check)
+    assert "localhost is not an ESXi host; please set the `host` config option to an ESXi host "
+    "or use the vSphere integration to collect data from the vCenter" in caplog.text
+    aggregator.assert_metric("esxi.host.can_connect", 0, tags=['esxi_url:127.0.0.1:8989'])
+    aggregator.assert_all_metrics_covered()
