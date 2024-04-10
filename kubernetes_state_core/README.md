@@ -201,7 +201,7 @@ The Kubernetes State Metrics Core check does not include any events.
 | `app.kubernetes.io/managed-by`          | `kube_app_managed_by`           |
 | `helm.sh/chart`          | `helm_chart`           |
 
-#### Default recommended Kubernetes Node's labels
+#### Default recommended Kubernetes node labels
 
 |  Recommended Label        | Tag                |
 |-----------------------|-----------------------------|
