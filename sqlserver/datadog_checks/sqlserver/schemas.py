@@ -20,6 +20,7 @@ class Schemas:
         self.schemas_per_db = {} 
         self._log = log
 
+   #TODO update this at the very end as it constantly changing
     """schemas data struct is a dictionnary with key being a schema name the value is
     schema
     dict:
@@ -112,27 +113,13 @@ class Schemas:
     def _get_index_data_per_table(self, table_object_id, cursor):           
         return execute_query_output_result_as_a_dict(INDEX_QUERY.format(table_object_id), cursor)
 
-    #its hard to get the partition key
-    #!!! better change to number my query
+    #TODO its hard to get the partition key - for later ? 
     def _get_partitions_data_per_table(self, table_object_id, cursor):
         # TODO check out sys.partitions in postgres we deliver some data about patitions
         # "partition_key": str (if has partitions) - equiv ? 
         # may be use this  https://littlekendra.com/2016/03/15/find-the-partitioning-key-on-an-existing-table-with-partition_ordinal/
         # for more in depth search, it's not trivial to determine partition key like in Postgres
-        cursor.execute(PARTITIONS_QUERY.format(table_object_id))
-        columns = ["partition_count" for i in cursor.description]
-        rows = [dict(zip(columns, row)) for row in cursor.fetchall()]
-        return rows
-        
-        # foreign keys
-        # name object_id principal_id schema_id parent_object_id type type_desc create_date modify_date is_ms_shipped 
-        # is_published is_schema_published referenced_object_id key_index_id is_disabled is_not_for_replication 
-        # is_not_trusted delete_referential_action delete_referential_action_desc update_referential_action 
-        # update_referential_action_desc is_system_named compression_delay suppress_dup_key_messages auto_created optimize_for_sequential_key
-        # SELECT name , OBJECT_NAME(parent_object_id) FROM sys.foreign_keys;
-        # fk.name AS foreign_key_name, OBJECT_NAME(fk.parent_object_id) AS parent_table, COL_NAME(fkc.parent_object_id, fkc.parent_column_id) AS parent_column, OBJECT_NAME(fk.referenced_object_id) AS referenced_table, COL_NAME(fkc.referenced_object_id, fkc.referenced_column_id) AS referenced_column FROM  sys.foreign_keys fk JOIN  sys.foreign_key_columns fkc ON fk.object_id = fkc.constraint_object_id WHERE  fk.parent_object_id = 'YourTableObjectID' -- Replace 'YourTableObjectID' with the object_id of your table
-   
-   #postgres count(conname) 
-#shell we also take only count ?
-    def _get_foreign_key_data_per_table(self, table_object_id, cursor):           
-        return execute_query_output_result_as_a_dict(FOREIGN_KEY_QUERY.format(table_object_id), cursor)
+        return execute_query_output_result_as_a_dict(PARTITIONS_QUERY.format(table_object_id), cursor, "partition_count")
+
+    def _get_foreign_key_data_per_table(self, table_object_id, cursor):  
+        return execute_query_output_result_as_a_dict(FOREIGN_KEY_QUERY.format(table_object_id), cursor, "foreign_key_count")         

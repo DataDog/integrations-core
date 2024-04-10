@@ -138,8 +138,12 @@ def is_azure_sql_database(engine_edition):
     """
     return engine_edition == ENGINE_EDITION_SQL_DATABASE
 
-def execute_query_output_result_as_a_dict(query, cursor):
+def execute_query_output_result_as_a_dict(query, cursor, column_name=None):
     cursor.execute(query)
-    columns = [str(i[0]).lower() for i in cursor.description]
+    columns = []
+    if column_name:
+        columns = [str(column_name).lower() for i in cursor.description]
+    else:
+        columns = [str(i[0]).lower() for i in cursor.description]
     rows = [dict(zip(columns, row)) for row in cursor.fetchall()]
     return rows
