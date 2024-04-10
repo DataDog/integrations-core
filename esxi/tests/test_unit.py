@@ -297,18 +297,20 @@ def test_use_guest_hostname(vcsim_instance, dd_run_check, aggregator):
             ['test'],
             "Unknown host tag `test` cannot be excluded. Available host tags are: `esxi_url`, `esxi_type`, "
             "`esxi_host`, `esxi_folder`, `esxi_cluster` `esxi_compute`, `esxi_datacenter`, and `esxi_datastore`",
-            id="unknown tag"
+            id="unknown tag",
         ),
         pytest.param(
             ['esxi_type', 'esxi_cluster', 'hello'],
             "Unknown host tag `hello` cannot be excluded. Available host tags are: `esxi_url`, `esxi_type`, "
             "`esxi_host`, `esxi_folder`, `esxi_cluster` `esxi_compute`, `esxi_datacenter`, and `esxi_datastore`",
-            id="unknown tag"
+            id="unknown tag",
         ),
     ],
 )
 @pytest.mark.usefixtures("service_instance")
-def test_excluded_host_tags(vcsim_instance, dd_run_check, datadog_agent, aggregator, excluded_tags, expected_warning, caplog):
+def test_excluded_host_tags(
+    vcsim_instance, dd_run_check, datadog_agent, aggregator, excluded_tags, expected_warning, caplog
+):
     vcsim_instance = copy.deepcopy(vcsim_instance)
     vcsim_instance['excluded_host_tags'] = excluded_tags
     check = EsxiCheck('esxi', {}, [vcsim_instance])
