@@ -289,20 +289,34 @@ def test_use_guest_hostname(vcsim_instance, dd_run_check, aggregator):
 
 
 @pytest.mark.parametrize(
-    'excluded_tags',
+    'excluded_tags, expected_warning',
     [
-        pytest.param([], id="No excluded tags"),
-        pytest.param(['esxi_type'], id="type"),
-        pytest.param(['test'], id="unknown tag"),
-        pytest.param(['esxi_type', 'esxi_cluster'], id="multiple tags"),
+        pytest.param([], None, id="No excluded tags"),
+        pytest.param(['esxi_type'], None, id="type"),
+        pytest.param(
+            ['test'],
+            "Unknown host tag `test` cannot be excluded. Available host tags are: `esxi_url`, `esxi_type`, "
+            "`esxi_host`, `esxi_folder`, `esxi_cluster` `esxi_compute`, `esxi_datacenter`, and `esxi_datastore`",
+            id="unknown tag"
+        ),
+        pytest.param(
+            ['esxi_type', 'esxi_cluster', 'hello'],
+            "Unknown host tag `hello` cannot be excluded. Available host tags are: `esxi_url`, `esxi_type`, "
+            "`esxi_host`, `esxi_folder`, `esxi_cluster` `esxi_compute`, `esxi_datacenter`, and `esxi_datastore`",
+            id="unknown tag"
+        ),
     ],
 )
 @pytest.mark.usefixtures("service_instance")
-def test_excluded_host_tags(vcsim_instance, dd_run_check, datadog_agent, aggregator, excluded_tags):
+def test_excluded_host_tags(vcsim_instance, dd_run_check, datadog_agent, aggregator, excluded_tags, expected_warning, caplog):
     vcsim_instance = copy.deepcopy(vcsim_instance)
     vcsim_instance['excluded_host_tags'] = excluded_tags
     check = EsxiCheck('esxi', {}, [vcsim_instance])
+    caplog.set_level(logging.WARNING)
     dd_run_check(check)
+
+    if expected_warning is not None:
+        assert expected_warning in caplog.text
 
     host_external_tags = ['esxi_datacenter:dc2', 'esxi_folder:folder_1', 'esxi_type:host', 'esxi_url:127.0.0.1:8989']
     vm_1_external_tags = ['esxi_datacenter:dc2', 'esxi_folder:folder_1', 'esxi_type:vm', 'esxi_url:127.0.0.1:8989']

@@ -7,7 +7,7 @@ from pyVmomi import vim, vmodl
 
 from datadog_checks.base import AgentCheck  # noqa: F401
 
-from .constants import ALL_RESOURCES, HOST_RESOURCE, MAX_PROPERTIES, RESOURCE_TYPE_TO_NAME, SHORT_ROLLUP, VM_RESOURCE
+from .constants import ALL_RESOURCES, AVAILABLE_HOST_TAGS, HOST_RESOURCE, MAX_PROPERTIES, RESOURCE_TYPE_TO_NAME, SHORT_ROLLUP, VM_RESOURCE
 from .metrics import RESOURCE_NAME_TO_METRICS
 from .utils import get_tags_recursively
 
@@ -21,7 +21,18 @@ class EsxiCheck(AgentCheck):
         self.username = self.instance.get("username")
         self.password = self.instance.get("password")
         self.use_guest_hostname = self.instance.get("use_guest_hostname", False)
-        self.excluded_host_tags = self.instance.get("excluded_host_tags", [])
+        excluded_host_tags = self.instance.get("excluded_host_tags", [])
+        valid_excluded_host_tags = []
+        for excluded_host_tag in excluded_host_tags:
+            if excluded_host_tag not in AVAILABLE_HOST_TAGS:
+                self.log.warning(
+                    "Unknown host tag `%s` cannot be excluded. Available host tags are: `esxi_url`, `esxi_type`, "
+                    "`esxi_host`, `esxi_folder`, `esxi_cluster` `esxi_compute`, `esxi_datacenter`, and `esxi_datastore`",
+                    excluded_host_tag
+                )
+            else:
+                valid_excluded_host_tags.append(excluded_host_tag)
+        self.excluded_host_tags = valid_excluded_host_tags
         self.tags = [f"esxi_url:{self.host}"]
 
     def get_resources(self):
