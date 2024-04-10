@@ -37,6 +37,7 @@ class HazelcastCheck(AgentCheck):
 
         try:
             response = self.http.get(self._mc_health_check_endpoint)
+            print(response.json())
             response.raise_for_status()
             status = response.json()
         except Exception:
@@ -46,5 +47,5 @@ class HazelcastCheck(AgentCheck):
             self.service_check(self.SERVICE_CHECK_CONNECT, AgentCheck.OK, tags=tags)
 
         self.service_check(
-            self.SERVICE_CHECK_MC_CLUSTER_STATE, self._mc_cluster_states.get(status['managementCenterState']), tags=tags
+            self.SERVICE_CHECK_MC_CLUSTER_STATE, self._mc_cluster_states.get(status['status']), tags=tags
         )
