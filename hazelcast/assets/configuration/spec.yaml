@@ -23,11 +23,7 @@ files:
       value:
         type: object
         example:
-          Active: OK
-          No Migration: WARNING
-          Frozen: CRITICAL
-          Passive: CRITICAL
-          In Transition: WARNING
+          UP: OK
     - template: instances/jmx
       overrides:
         host.required: false
