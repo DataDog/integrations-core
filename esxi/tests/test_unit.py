@@ -11,6 +11,15 @@ from pyVmomi import vim, vmodl
 from datadog_checks.esxi import EsxiCheck
 
 
+@pytest.mark.usefixtures("service_instance")
+def test_esxi_metric_up(instance, dd_run_check, aggregator, caplog):
+    check = EsxiCheck('esxi', {}, [instance])
+    caplog.set_level(logging.DEBUG)
+    dd_run_check(check)
+    aggregator.assert_metric('esxi.host.can_connect', 1, count=1, tags=["esxi_url:localhost"])
+    assert "Connected to ESXi host localhost: VMware ESXi 6.5.0 build-123456789" in caplog.text
+
+
 def test_emits_critical_service_check_when_service_is_down(dd_run_check, aggregator, instance, caplog):
     check = EsxiCheck('esxi', {}, [instance])
     caplog.set_level(logging.WARNING)
