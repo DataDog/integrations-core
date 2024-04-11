@@ -111,7 +111,9 @@ class SqlserverDBFragmentationMetrics(SqlserverDatabaseMetricsBase):
             f"{self.__class__.__name__}("
             f"enabled={self.enabled}, "
             f"include_db_fragmentation_metrics={self.include_db_fragmentation_metrics}, "
-            f"db_fragmentation_object_names={self.db_fragmentation_object_names})"
+            f"include_db_fragmentation_metrics_tempdb={self.include_db_fragmentation_metrics_tempdb}, "
+            f"db_fragmentation_object_names={self.db_fragmentation_object_names}, "
+            f"collection_interval={self.collection_interval})"
         )
 
     def _build_query_executors(self):
