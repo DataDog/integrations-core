@@ -196,9 +196,7 @@ class ApiRest(Api):
 
     def get_block_storage_volumes(self, project_id):
         response = self.http.get(
-            '{}/volumes/detail'.format(
-                self._catalog.get_endpoint_by_type(Component.Types.BLOCK_STORAGE.value)
-            )
+            '{}/volumes/detail'.format(self._catalog.get_endpoint_by_type(Component.Types.BLOCK_STORAGE.value))
         )
         response.raise_for_status()
         return response.json().get('volumes', {})

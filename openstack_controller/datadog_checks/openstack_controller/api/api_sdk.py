@@ -155,7 +155,10 @@ class ApiSdk(Api):
         return [limit.to_dict(original_names=True) for limit in self.connection.identity.limits()]
 
     def get_block_storage_volumes(self, project_id):
-        return [volume.to_dict(original_names=True) for volume in self.connection.block_storage.volumes(project_id, details=True)]
+        return [
+            volume.to_dict(original_names=True)
+            for volume in self.connection.block_storage.volumes(project_id, details=True)
+        ]
 
     def get_compute_limits(self, project_id):
         return self.connection.compute.get_limits(tenant_id=project_id).to_dict(original_names=True)

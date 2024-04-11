@@ -243,7 +243,8 @@ def test_block_storage_metrics(aggregator, check, dd_run_check, mock_http_get):
             'volume_size:1',
             'volume_name:',
             'volume_status:in-use',
-            'keystone_server:http://127.0.0.1:8080/identity'],
+            'keystone_server:http://127.0.0.1:8080/identity',
+        ],
     )
     aggregator.assert_metric(
         'openstack.cinder.volume.count',
@@ -256,7 +257,8 @@ def test_block_storage_metrics(aggregator, check, dd_run_check, mock_http_get):
             'volume_size:1',
             'volume_name:',
             'volume_status:in-use',
-            'keystone_server:http://127.0.0.1:8080/identity'],
+            'keystone_server:http://127.0.0.1:8080/identity',
+        ],
     )
     args_list = []
     for call in mock_http_get.call_args_list:
