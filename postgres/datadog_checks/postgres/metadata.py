@@ -106,7 +106,7 @@ SELECT indexname AS NAME,
        indexdef  AS definition,
        tablename
 FROM   pg_indexes
-WHERE  tablename IN ({table_names});
+WHERE  {table_names_like};
 """
 
 PG_CHECK_FOR_FOREIGN_KEY = """
@@ -482,14 +482,18 @@ class PostgresMetadata(DBMAsyncJob):
         table_name_lookup = {t.get("id"): t.get("name") for t in table_info}
         table_ids = ",".join(["'{}'".format(t.get("id")) for t in table_info])
         table_names = ",".join(["'{}'".format(t.get("name")) for t in table_info])
+        table_names_like = " OR ".join(["tablename LIKE '{}%'".format(t.get("name")) for t in table_info])
 
         # Get indexes
-        cursor.execute(PG_INDEXES_QUERY.format(table_names=table_names))
+        cursor.execute(PG_INDEXES_QUERY.format(table_names_like=table_names_like))
         rows = cursor.fetchall()
         for row in rows:
-            tables.get(row.get("tablename"))["indexes"] = tables.get(row.get("tablename")).get("indexes", []) + [
-                dict(row)
-            ]
+            # Partition indexes in some versions of Postgres have appended digits for each partition
+            table_name = row.get("tablename")
+            while tables.get(table_name) is None and len(table_name) > 1 and table_name[-1].isdigit():
+                table_name = table_name[0:-1]
+            if tables.get(table_name) is not None:
+                tables.get(table_name)["indexes"] = tables.get(table_name).get("indexes", []) + [dict(row)]
 
         # Get partitions
         if VersionUtils.transform_version(str(self._check.version))["version.major"] != "9":

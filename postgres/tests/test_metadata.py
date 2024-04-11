@@ -91,7 +91,6 @@ def test_collect_schemas(integration_check, dbm_instance, aggregator):
         assert schema_event.get("timestamp") is not None
         # there should only be one database, datadog_test
         database_metadata = schema_event['metadata']
-        print(database_metadata)
         assert len(database_metadata) == 1
         assert 'datadog_test' == database_metadata[0]['name']
 
@@ -129,7 +128,7 @@ def test_collect_schemas(integration_check, dbm_instance, aggregator):
                         assert table['num_partitions'] == 2
                     elif table['name'] == 'test_part_no_children':
                         keys = list(table.keys())
-                        assert_fields(keys, ["indexes", "num_partitions", "partition_key"])
+                        assert_fields(keys, ["num_partitions", "partition_key"])
                         assert table['num_partitions'] == 0
 
     assert_fields(tables_got, tables_set)
