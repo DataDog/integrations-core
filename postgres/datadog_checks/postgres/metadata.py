@@ -167,10 +167,8 @@ GROUP  BY pi.inhparent;
 """
 
 
-
 def agent_check_getter(self):
     return self._check
-
 
 
 class PostgresMetadata(DBMAsyncJob):
@@ -283,6 +281,7 @@ class PostgresMetadata(DBMAsyncJob):
                 "cloud_metadata": self._config.cloud_metadata,
             }
 
+            # Tuned from experiments on staging, we may want to make this dynamic based on schema size in the future
             chunk_size = 50
 
             for database in schema_metadata:
@@ -311,12 +310,12 @@ class PostgresMetadata(DBMAsyncJob):
                                 )
 
                                 if buffer_column_count >= 100_000:
-                                    self._flush_schema(base_event,database, schema, table_info)
+                                    self._flush_schema(base_event, database, schema, table_info)
                                     tables_buffer = []
                                     buffer_column_count = 0
-                            
+
                             if len(tables_buffer) > 0:
-                                self._flush_schema(base_event,database, schema, table_info)
+                                self._flush_schema(base_event, database, schema, table_info)
             self._check.gauge("dd.postgresql.agent.metadata.schema", time.time() - start, tags=self.tags)
             self._is_schemas_collection_in_progress = False
 
@@ -326,7 +325,6 @@ class PostgresMetadata(DBMAsyncJob):
         json_event = json.dumps(event, default=default_json_event_encoding)
         self._log.debug("Reporting the following payload for schema collection: {}".format(json_event))
         self._check.database_monitoring_metadata(json_event)
-
 
     def _payload_pg_version(self):
         version = self._check.version
