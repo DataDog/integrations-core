@@ -17,6 +17,7 @@ except ImportError:
 from datadog_checks.base import is_affirmative
 from datadog_checks.base.utils.db.utils import DBMAsyncJob, default_json_event_encoding
 from datadog_checks.base.utils.tracking import tracked_method
+from datadog_checks.postgres.util import get_list_chunks
 
 from .util import payload_pg_version
 from .version_utils import VersionUtils
@@ -166,8 +167,10 @@ GROUP  BY pi.inhparent;
 """
 
 
+
 def agent_check_getter(self):
     return self._check
+
 
 
 class PostgresMetadata(DBMAsyncJob):
@@ -268,10 +271,7 @@ class PostgresMetadata(DBMAsyncJob):
             self._is_schemas_collection_in_progress = True
             start = time.time()
             schema_metadata = self._collect_schema_info()
-            # Emit an event for each table to keep size small
-
-            print("Collected schema info", schema_metadata)
-
+            # We emit an event for each batch of tables to reduce total data in memory and keep event size reasonable
             base_event = {
                 "host": self._check.resolved_hostname,
                 "agent_version": datadog_agent.get_version(),
@@ -283,18 +283,7 @@ class PostgresMetadata(DBMAsyncJob):
                 "cloud_metadata": self._config.cloud_metadata,
             }
 
-            def chunks(lst, n):
-                """Yield successive n-sized chunks from lst."""
-                for i in range(0, len(lst), n):
-                    yield lst[i : i + n]
-
             chunk_size = 50
-
-            def flush(metadata):
-                event = {**base_event, "metadata": metadata, "timestamp": time.time() * 1000}
-                json_event = json.dumps(event, default=default_json_event_encoding)
-                self._log.debug("Reporting the following payload for schema collection: {}".format(json_event))
-                self._check.database_monitoring_metadata(json_event)
 
             for database in schema_metadata:
                 dbname = database["name"]
@@ -302,11 +291,11 @@ class PostgresMetadata(DBMAsyncJob):
                     with conn.cursor(cursor_factory=psycopg2.extras.DictCursor) as cursor:
                         for schema in database["schemas"]:
                             tables = self._query_tables_for_schema(cursor, schema["id"], dbname)
-                            # print("Tables found", tables)
+                            table_chunks = list(get_list_chunks(tables, chunk_size))
+
                             buffer_column_count = 0
                             tables_buffer = []
-                            table_chunks = list(chunks(tables, chunk_size))
-                            print("Iterating over {} table chunks for schema {}".format(len(table_chunks), schema))
+
                             for tables in table_chunks:
                                 chunk_start = time.time()
                                 table_info = self._query_table_information(cursor, tables)
@@ -322,25 +311,22 @@ class PostgresMetadata(DBMAsyncJob):
                                 )
 
                                 if buffer_column_count >= 100_000:
-                                    metadata = [
-                                        {
-                                            **database,
-                                            "schemas": [{**schema, "tables": tables_buffer}],
-                                        }
-                                    ]
-                                    flush(metadata=metadata)
+                                    self._flush_schema(base_event,database, schema, table_info)
                                     tables_buffer = []
                                     buffer_column_count = 0
+                            
                             if len(tables_buffer) > 0:
-                                metadata = [
-                                    {
-                                        **database,
-                                        "schemas": [{**schema, "tables": tables_buffer}],
-                                    }
-                                ]
-                                flush(metadata=metadata)
+                                self._flush_schema(base_event,database, schema, table_info)
             self._check.gauge("dd.postgresql.agent.metadata.schema", time.time() - start, tags=self.tags)
             self._is_schemas_collection_in_progress = False
+
+    def _flush_schema(self, base_event, database, schema, tables):
+        metadata = [{**database, "schemas": [{**schema, "tables": tables}]}]
+        event = {**base_event, "metadata": metadata, "timestamp": time.time() * 1000}
+        json_event = json.dumps(event, default=default_json_event_encoding)
+        self._log.debug("Reporting the following payload for schema collection: {}".format(json_event))
+        self._check.database_monitoring_metadata(json_event)
+
 
     def _payload_pg_version(self):
         version = self._check.version
@@ -437,6 +423,7 @@ class PostgresMetadata(DBMAsyncJob):
                 row = cursor.fetchone()
                 return row.get("total_activity", 0) if row is not None else 0
 
+        # We only sort to filter by top so no need to waste resources if we're going to return everything
         if len(table_info) <= limit:
             return table_info
 
@@ -504,6 +491,7 @@ class PostgresMetadata(DBMAsyncJob):
         table_ids = ",".join(["'{}'".format(t.get("id")) for t in table_info])
         table_names = ",".join(["'{}'".format(t.get("name")) for t in table_info])
 
+        # Get indexes
         cursor.execute(PG_INDEXES_QUERY.format(table_names=table_names))
         rows = cursor.fetchall()
         for row in rows:
@@ -511,6 +499,7 @@ class PostgresMetadata(DBMAsyncJob):
                 dict(row)
             ]
 
+        # Get partitions
         if VersionUtils.transform_version(str(self._check.version))["version.major"] != "9":
             cursor.execute(PARTITION_KEY_QUERY.format(table_names=table_names))
             rows = cursor.fetchall()
@@ -524,9 +513,6 @@ class PostgresMetadata(DBMAsyncJob):
                 tables.get(table_name)["num_partitions"] = row.get("num_partitions", 0)
 
         # Get foreign keys
-        # cursor.execute(PG_CHECK_FOR_FOREIGN_KEY.format(oid=table_id))
-        # row = cursor.fetchone()
-        # if row["count"] > 0:
         cursor.execute(PG_CONSTRAINTS_QUERY.format(table_ids=table_ids))
         rows = cursor.fetchall()
         for row in rows:
@@ -536,9 +522,6 @@ class PostgresMetadata(DBMAsyncJob):
         # Get columns
         cursor.execute(COLUMNS_QUERY.format(table_ids=table_ids))
         rows = cursor.fetchall()
-        # max_columns = self._config.schemas_metadata_config.get("max_columns", 50)
-        # columns = [dict(row) for row in rows][:max_columns]
-        # this_payload.update({"columns": columns})
         for row in rows:
             table_name = table_name_lookup.get(str(row.get("id")))
             tables.get(table_name)["columns"] = tables.get(table_name).get("columns", []) + [dict(row)]
@@ -562,8 +545,6 @@ class PostgresMetadata(DBMAsyncJob):
                 )
                 schema_info = self._query_schema_information(cursor, dbname)
                 for schema in schema_info:
-                    # tables_info = self._query_table_information_for_schema(cursor, schema["id"], dbname)
-                    # schema.update({"tables": tables_info})
                     metadata["schemas"].append(schema)
 
         return metadata
