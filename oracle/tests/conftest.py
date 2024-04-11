@@ -86,6 +86,7 @@ def instance():
         'service_name': 'xe',
         'protocol': 'TCP',
         'tags': ['optional:tag1'],
+        'loader': 'python',
     }
 
 
@@ -98,6 +99,7 @@ def tcps_instance():
         'service_name': 'xe',
         'protocol': 'TCP',
         'tags': ['optional:tag1'],
+        'loader': 'python',
     }
 
 
@@ -109,6 +111,7 @@ def dd_environment():
         'password': PASSWORD,
         'service_name': 'InfraDB.us.oracle.com',
         'protocol': 'TCP',
+        'loader': 'python',
     }
 
     use_instant_client = False
@@ -155,6 +158,7 @@ def bad_instance():
         "server": "localhost:1521",
         "service_name": "InfraDB.us.oracle.com",
         "username": "datadog",
+        "loader": "python",
     }
 
 

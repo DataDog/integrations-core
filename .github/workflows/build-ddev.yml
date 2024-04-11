@@ -70,9 +70,6 @@ jobs:
         - target: x86_64-unknown-linux-musl
           os: ubuntu-22.04
           cross: true
-        - target: i686-unknown-linux-gnu
-          os: ubuntu-22.04
-          cross: true
         - target: powerpc64le-unknown-linux-gnu
           os: ubuntu-22.04
           cross: true
@@ -94,7 +91,7 @@ jobs:
       CARGO: cargo
       CARGO_BUILD_TARGET: ${{ matrix.job.target }}
       PYAPP_REPO: pyapp
-      PYAPP_VERSION: "0.11.1"
+      PYAPP_VERSION: "0.15.1"
       PYAPP_PIP_EXTERNAL: "1"
 
     steps:

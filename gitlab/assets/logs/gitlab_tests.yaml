@@ -86,6 +86,7 @@ tests:
         "entity_id" : 2,
         "target_details" : "namespace2/project2"
       }
+    status: "info"
     tags:
      - "source:LOGS_SOURCE"
     timestamp: 1539797902523
@@ -201,6 +202,7 @@ tests:
         "status" : 200,
         "username" : "root"
       }
+    status: "info"
     tags:
      - "source:LOGS_SOURCE"
     timestamp: 1540817382123
@@ -277,6 +279,7 @@ tests:
         "gitaly_duration" : 0,
         "status" : 404
       }
+    status: "info"
     tags:
      - "source:LOGS_SOURCE"
     timestamp: 1560712026633
@@ -358,6 +361,7 @@ tests:
       severity: "ERROR"
       time: "2019-01-17T07:52:42.806Z"
     message: "the server could not find the requested resource"
+    status: "error"
     tags:
      - "source:LOGS_SOURCE"
     timestamp: 1547711562806

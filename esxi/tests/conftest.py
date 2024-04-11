@@ -90,6 +90,10 @@ def service_instance(
     retrieve_properties_ex,
 ):
     mock_si = MagicMock()
+    mock_si.content.about.version = '6.5.0'
+    mock_si.content.about.build = '123456789'
+    mock_si.content.about.apiType = 'HostAgent'
+    mock_si.content.about.fullName = 'VMware ESXi 6.5.0 build-123456789'
     mock_si.content.perfManager.perfCounter = PERF_COUNTER_INFO
     mock_si.content.perfManager.QueryAvailablePerfMetric = MagicMock(side_effect=query_available_perf_metric)
     mock_si.content.perfManager.QueryPerf = MagicMock(side_effect=query_perf)

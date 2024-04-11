@@ -7,6 +7,7 @@ tests:
       level: "INFO"
       timestamp: 1587781838955
     message: "Starting HiveMQ extension system."
+    status: "info"
     tags:
      - "source:LOGS_SOURCE"
     timestamp: 1587781838955
@@ -19,6 +20,7 @@ tests:
       level: "INFO"
       timestamp: 1587781841148
     message: "no members discovered after 2001 ms: creating cluster as first member"
+    status: "info"
     tags:
      - "source:LOGS_SOURCE"
     timestamp: 1587781841148
@@ -43,6 +45,7 @@ tests:
       # For production usage, add an appropriate security extension and remove the hivemq-allow-all extension.       #
       # You can download security extensions from the HiveMQ Marketplace (https://www.hivemq.com/extensions/).       #
       ################################################################################################################
+    status: "warn"
     tags:
      - "source:LOGS_SOURCE"
     timestamp: 1587781839006

@@ -2,6 +2,12 @@
 
 <!-- towncrier release notes start -->
 
+## 1.10.1 / 2024-03-22
+
+***Fixed***:
+
+* Correct spelling error in Kafka Connect Metrics ([#17107](https://github.com/DataDog/integrations-core/pull/17107))
+
 ## 1.10.0 / 2024-01-05 / Agent 7.51.0
 
 ***Added***:

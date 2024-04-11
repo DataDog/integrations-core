@@ -37,24 +37,3 @@ instances:
     ## Wether to include an endpoint tag or not. This only applies if `use openmentrics` is enabled.
     #
     tag_by_endpoint: false
-
-    ## @param exclude_labels - list of strings - optional
-    ## A list of labels to be excluded
-    #
-    exclude_labels:
-      - source_version
-      - destination_version
-      - source_canonical_revision
-      - destination_canonical_revision
-      - source_principal
-      - destination_principal
-      - source_cluster
-      - destination_cluster
-      - source_canonical_service
-      - destination_canonical_service
-      - source_workload_namespace
-      - destination_workload_namespace
-      - request_protocol
-      - connection_security_policy
-      - destination_service
-      - source_workload

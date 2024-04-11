@@ -11,6 +11,15 @@ from pyVmomi import vim, vmodl
 from datadog_checks.esxi import EsxiCheck
 
 
+@pytest.mark.usefixtures("service_instance")
+def test_esxi_metric_up(instance, dd_run_check, aggregator, caplog):
+    check = EsxiCheck('esxi', {}, [instance])
+    caplog.set_level(logging.DEBUG)
+    dd_run_check(check)
+    aggregator.assert_metric('esxi.host.can_connect', 1, count=1, tags=["esxi_url:localhost"])
+    assert "Connected to ESXi host localhost: VMware ESXi 6.5.0 build-123456789" in caplog.text
+
+
 def test_emits_critical_service_check_when_service_is_down(dd_run_check, aggregator, instance, caplog):
     check = EsxiCheck('esxi', {}, [instance])
     caplog.set_level(logging.WARNING)
@@ -345,3 +354,32 @@ def test_excluded_host_tags(
     datadog_agent.assert_external_tags('localhost.localdomain', {'esxi': all_external_tags(host_external_tags)})
     datadog_agent.assert_external_tags('vm1', {'esxi': all_external_tags(vm_1_external_tags)})
     datadog_agent.assert_external_tags('vm2', {'esxi': all_external_tags(vm_2_external_tags)})
+
+@pytest.mark.usefixtures("service_instance")
+def test_version_metadata(vcsim_instance, dd_run_check, datadog_agent):
+    check = EsxiCheck('esxi', {}, [vcsim_instance])
+    check.check_id = 'test:123'
+    dd_run_check(check)
+
+    version_metadata = {
+        'version.scheme': 'semver',
+        'version.major': '6',
+        'version.minor': '5',
+        'version.patch': '0',
+        'version.build': '123456789',
+        'version.raw': '6.5.0+123456789',
+    }
+
+    datadog_agent.assert_metadata('test:123', version_metadata)
+
+
+@pytest.mark.usefixtures("service_instance")
+def test_invalid_api_type(vcsim_instance, dd_run_check, caplog, aggregator, service_instance):
+    service_instance.content.about.apiType = "VirtualCenter"
+    check = EsxiCheck('esxi', {}, [vcsim_instance])
+
+    dd_run_check(check)
+    assert "localhost is not an ESXi host; please set the `host` config option to an ESXi host "
+    "or use the vSphere integration to collect data from the vCenter" in caplog.text
+    aggregator.assert_metric("esxi.host.can_connect", 0, tags=['esxi_url:127.0.0.1:8989'])
+    aggregator.assert_all_metrics_covered()

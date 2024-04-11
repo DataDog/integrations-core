@@ -2,7 +2,17 @@
 
 <!-- towncrier release notes start -->
 
-## 7.4.0 / 2024-02-16
+## 7.5.0 / 2024-03-22
+
+***Added***:
+
+* Collect a new vSphere metric: cpu.usage.vcpus.avg ([#17087](https://github.com/DataDog/integrations-core/pull/17087))
+
+***Fixed***:
+
+* Add `ssl_cafile` config. ([#16903](https://github.com/DataDog/integrations-core/pull/16903))
+
+## 7.4.0 / 2024-02-16 / Agent 7.52.0
 
 ***Added***:
 

@@ -1,12 +1,16 @@
 # HELP admission_webhooks_certificate_expiry Time left before the certificate expires in hours.
 # TYPE admission_webhooks_certificate_expiry gauge
 admission_webhooks_certificate_expiry 11.083180892013889
-# HELP admission_webhooks_mutation_attempts Number of pod mutation attempts by mutation type (agent config, standard tags).
+# HELP admission_webhooks_mutation_attempts Number of pod mutation attempts by mutation type
 # TYPE admission_webhooks_mutation_attempts gauge
-admission_webhooks_mutation_attempts{mutation_type="agent_config"} 100
-# HELP admission_webhooks_mutation_errors Number of mutation failures by mutation type (agent config, standard tags).
-# TYPE admission_webhooks_mutation_errors gauge
-admission_webhooks_mutation_errors{mutation_type="agent_config"} 1
+admission_webhooks_mutation_attempts{error="",injected="false",mutation_type="agent_sidecar",status="success"} 1
+admission_webhooks_mutation_attempts{error="",injected="false",mutation_type="cws_exec_instrumentation",status="success"} 1
+admission_webhooks_mutation_attempts{error="",injected="false",mutation_type="lib_injection",status="success"} 1
+admission_webhooks_mutation_attempts{error="",injected="false",mutation_type="standard_tags",status="success"} 2
+admission_webhooks_mutation_attempts{error="",injected="true",mutation_type="agent_config",status="success"} 2
+admission_webhooks_mutation_attempts{error="",injected="true",mutation_type="agent_sidecar",status="success"} 1
+admission_webhooks_mutation_attempts{error="",injected="true",mutation_type="cws_pod_instrumentation",status="success"} 2
+admission_webhooks_mutation_attempts{error="",injected="true",mutation_type="lib_injection",status="success"} 1
 # HELP admission_webhooks_reconcile_errors Number of reconcile errors per controller.
 # TYPE admission_webhooks_reconcile_errors gauge
 admission_webhooks_reconcile_errors{controller="secrets"} 5

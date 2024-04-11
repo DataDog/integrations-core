@@ -152,20 +152,32 @@ class EsxiCheck(AgentCheck):
                     )
                     self.gauge(metric_name, most_recent_val, hostname=entity_name, tags=metric_tags)
 
+    def set_version_metadata(self):
+        esxi_version = self.content.about.version
+        build_version = self.content.about.build
+        self.set_metadata('version', f'{esxi_version}+{build_version}')
+
     def check(self, _):
         try:
             connection = connect.SmartConnect(host=self.host, user=self.username, pwd=self.password)
             self.conn = connection
-            self.log.info("Connected to ESXi host %s", self.host)
+            self.content = connection.content
+
+            if self.content.about.apiType != "HostAgent":
+                raise Exception(
+                    f"{self.host} is not an ESXi host; please set the `host` config option to an ESXi host "
+                    "or use the vSphere integration to collect data from the vCenter",
+                )
+
+            self.log.info("Connected to ESXi host %s: %s", self.host, self.content.about.fullName)
             self.count("host.can_connect", 1, tags=self.tags)
 
         except Exception as e:
-            self.log.warning("Cannot connect to ESXi host %s: %s", self.host, str(e))
+            self.log.error("Cannot connect to ESXi host %s: %s", self.host, str(e))
             self.count("host.can_connect", 0, tags=self.tags)
             return
 
-        self.content = connection.content
-
+        self.set_version_metadata()
         resources = self.get_resources()
         resource_map = {
             obj_content.obj: {prop.name: prop.val for prop in obj_content.propSet}
