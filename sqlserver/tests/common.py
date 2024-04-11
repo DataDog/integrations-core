@@ -316,8 +316,6 @@ def get_operation_time_metrics(instance):
     if instance.get('include_task_scheduler_metrics', False):
         operation_time_metrics.append('os_schedulers_metrics')
         operation_time_metrics.append('os_tasks_metrics')
-    if instance.get('include_db_fragmentation_metrics', False):
-        operation_time_metrics.append('db_fragmentation_metrics')
     if instance.get('include_ao_metrics', False):
         operation_time_metrics.append('availability_groups_metrics')
     if instance.get('include_master_files_metrics', False):

@@ -4,7 +4,6 @@
 from __future__ import division
 
 import copy
-import functools
 import time
 from collections import defaultdict
 
@@ -18,6 +17,7 @@ from datadog_checks.base.utils.db.utils import default_json_event_encoding, reso
 from datadog_checks.base.utils.serialization import json
 from datadog_checks.sqlserver.activity import SqlserverActivity
 from datadog_checks.sqlserver.config import SQLServerConfig
+from datadog_checks.sqlserver.database_metrics import SqlserverDBFragmentationMetrics, SqlserverIndexUsageMetrics
 from datadog_checks.sqlserver.metadata import SqlserverMetadata
 from datadog_checks.sqlserver.statements import SqlserverStatementMetrics
 from datadog_checks.sqlserver.stored_procedures import SqlserverProcedureMetrics
@@ -41,13 +41,11 @@ from datadog_checks.sqlserver.const import (
     BASE_NAME_QUERY,
     COUNTER_TYPE_QUERY,
     DATABASE_BACKUP_METRICS,
-    DATABASE_FRAGMENTATION_METRICS,
     DATABASE_MASTER_FILES,
     DATABASE_METRICS,
     DATABASE_SERVICE_CHECK_NAME,
     DATABASE_SERVICE_CHECK_QUERY,
     DBM_MIGRATED_METRICS,
-    DEFAULT_INDEX_USAGE_STATS_INTERVAL,
     ENGINE_EDITION_AZURE_MANAGED_INSTANCE,
     ENGINE_EDITION_SQL_DATABASE,
     INSTANCE_METRICS,
@@ -70,7 +68,6 @@ from datadog_checks.sqlserver.const import (
 )
 from datadog_checks.sqlserver.metrics import DEFAULT_PERFORMANCE_TABLE, VALID_TABLES
 from datadog_checks.sqlserver.queries import (
-    INDEX_USAGE_STATS_QUERY,
     QUERY_AO_FAILOVER_CLUSTER,
     QUERY_AO_FAILOVER_CLUSTER_MEMBER,
     QUERY_FAILOVER_CLUSTER_INSTANCE,
@@ -153,9 +150,11 @@ class SQLServer(AgentCheck):
 
         # Query declarations
         self._query_manager = None
-        self._dynamic_queries = None
+        self._dynamic_queries = None  # DEPRECATED, new metrics should use database_metrics
         self.server_state_queries = None
         self.sqlserver_incr_fraction_metric_previous_values = {}
+
+        self._database_metrics = None
 
     def cancel(self):
         self.statement_metrics.cancel()
@@ -176,13 +175,15 @@ class SQLServer(AgentCheck):
                 "Autodiscovery is disabled, autodiscovery_include and autodiscovery_exclude will be ignored"
             )
 
-    def _new_query_executor(self, queries):
+    def _new_query_executor(self, queries, executor, extra_tags=None, track_operation_time=False):
+        tags = self.tags + (extra_tags or [])
         return QueryExecutor(
-            self.execute_query_raw,
+            executor,
             self,
             queries=queries,
-            tags=self.tags,
+            tags=tags,
             hostname=self.resolved_hostname,
+            track_operation_time=track_operation_time,
         )
 
     def set_resolved_hostname_metadata(self):
@@ -507,35 +508,6 @@ class SQLServer(AgentCheck):
                 cfg = {'name': name, 'table': table, 'column': column, 'tags': tags}
                 metrics_to_collect.append(self.typed_metric(cfg_inst=cfg, table=table, column=column))
 
-        # Load DB Fragmentation metrics
-        if is_affirmative(self.instance.get('include_db_fragmentation_metrics', False)):
-            db_fragmentation_object_names = self.instance.get('db_fragmentation_object_names', [])
-            db_names = [d.name for d in self.databases] or [
-                self.instance.get('database', self.connection.DEFAULT_DATABASE)
-            ]
-
-            if not self._config.include_db_fragmentation_metrics_tempdb:
-                db_names = [db_name for db_name in db_names if db_name != 'tempdb']
-
-            if not db_fragmentation_object_names:
-                self.log.debug(
-                    "No fragmentation object names specified, will return fragmentation metrics for all "
-                    "object_ids of current database(s): %s",
-                    db_names,
-                )
-
-            for db_name in db_names:
-                for name, table, column in DATABASE_FRAGMENTATION_METRICS:
-                    cfg = {
-                        'name': name,
-                        'table': table,
-                        'column': column,
-                        'instance_name': db_name,
-                        'tags': tags,
-                        'db_fragmentation_object_names': db_fragmentation_object_names,
-                    }
-                    metrics_to_collect.append(self.typed_metric(cfg_inst=cfg, table=table, column=column))
-
         # Load DB File Space Usage metrics
         if is_affirmative(
             self.instance.get('include_tempdb_file_space_usage_metrics', True)
@@ -770,7 +742,9 @@ class SQLServer(AgentCheck):
                 )
                 self._query_manager.compile_queries()
             if self.server_state_queries is None:
-                self.server_state_queries = self._new_query_executor([QUERY_SERVER_STATIC_INFO])
+                self.server_state_queries = self._new_query_executor(
+                    [QUERY_SERVER_STATIC_INFO], executor=self.execute_query_raw
+                )
                 self.server_state_queries.compile_queries()
             if self._config.proc:
                 self.do_stored_procedure_check()
@@ -826,10 +800,46 @@ class SQLServer(AgentCheck):
         if is_affirmative(self.instance.get('include_secondary_log_shipping_metrics', False)):
             queries.extend([QUERY_LOG_SHIPPING_SECONDARY])
 
-        self._dynamic_queries = self._new_query_executor(queries)
+        self._dynamic_queries = self._new_query_executor(queries, executor=self.execute_query_raw)
         self._dynamic_queries.compile_queries()
         self.log.debug("initialized dynamic queries")
         return self._dynamic_queries
+
+    @property
+    def database_metrics(self):
+        '''
+        Initializes database metrics which depend on static information loaded from the database
+        '''
+        if self._database_metrics:
+            return self._database_metrics
+
+        # list of database names to collect metrics for
+        db_names = [d.name for d in self.databases] or [self.instance.get('database', self.connection.DEFAULT_DATABASE)]
+
+        # database level metrics
+        index_usage_metrics = SqlserverIndexUsageMetrics(
+            instance_config=self.instance,
+            new_query_executor=self._new_query_executor,
+            server_static_info=self.static_info_cache,
+            execute_query_handler=self.execute_query_raw,
+            databases=db_names,
+        )
+        db_fragmentation_metrics = SqlserverDBFragmentationMetrics(
+            instance_config=self.instance,
+            new_query_executor=self._new_query_executor,
+            server_static_info=self.static_info_cache,
+            execute_query_handler=self.execute_query_raw,
+            databases=db_names,
+        )
+
+        # create a list of dynamic queries to execute
+        self._database_metrics = [
+            # database level metrics
+            index_usage_metrics,
+            db_fragmentation_metrics,
+        ]
+        self.log.debug("initialized dynamic queries")
+        return self._database_metrics
 
     def log_missing_metric(self, metric_name, major_version, engine_version):
         if major_version <= 2012:
@@ -896,7 +906,12 @@ class SQLServer(AgentCheck):
                 if self.dynamic_queries:
                     self.dynamic_queries.execute()
 
-                self.collect_index_usage_metrics()
+                # restore the current database after executing dynamic queries
+                # this is to ensure the current database context is not changed
+                with self.connection.restore_current_database_context():
+                    if self.database_metrics:
+                        for database_metric in self.database_metrics:
+                            database_metric.execute()
 
                 # reuse connection for any custom queries
                 self._query_manager.execute()
@@ -912,51 +927,6 @@ class SQLServer(AgentCheck):
                 cursor.execute(ctx)
             cursor.execute(query)
             return cursor.fetchall()
-
-    # https://learn.microsoft.com/en-us/sql/relational-databases/system-dynamic-management-views/sys-dm-db-index-usage-stats-transact-sql?view=sql-server-ver15
-    def collect_index_usage_metrics(self):
-        if not is_affirmative(self.instance.get('include_index_usage_metrics', True)):
-            return
-
-        interval = max(int(self.instance.get('index_usage_stats_interval', DEFAULT_INDEX_USAGE_STATS_INTERVAL)), 10)
-
-        now = time.time()
-        if not self._index_usage_last_check_ts or now - self._index_usage_last_check_ts > interval:
-            self._index_usage_last_check_ts = now
-            self.log.debug('Collecting index usage statistics')
-            # Filter out tempdb as the query might be blocking and it's index usage information is not relevant
-            db_names = [d.name for d in self.databases] or [
-                self.instance.get('database', self.connection.DEFAULT_DATABASE)
-            ]
-            if not self._config.include_index_usage_metrics_tempdb:
-                db_names = [db_name for db_name in db_names if db_name != 'tempdb']
-
-            with self.connection.get_managed_cursor() as cursor:
-                cursor.execute(
-                    'select DB_NAME()'
-                )  # This can return None in some implementations, so it cannot be chained
-                data = cursor.fetchall()
-                current_db = data[0][0]
-                self.log.debug("current db is %s", current_db)
-                try:
-                    for database in db_names:
-                        try:
-                            executor = QueryExecutor(
-                                functools.partial(self.execute_query_raw, db=database),
-                                self,
-                                queries=[INDEX_USAGE_STATS_QUERY],
-                                tags=self.tags,
-                                hostname=self.resolved_hostname,
-                            )
-                            executor.compile_queries()
-                            executor.execute()
-                        except Exception as e:
-                            self.log.error("failed to collect index usage statistics: %s", e)
-                finally:
-                    if current_db:
-                        self.log.debug("reverting cursor context via use statement to %s", current_db)
-                        cursor.execute(construct_use_statement(current_db))
-        return
 
     def do_stored_procedure_check(self):
         """
