@@ -138,14 +138,33 @@ def mock_responses(microversion_headers):
 
     def process_files(dir, response_parent):
         for file in dir.rglob('*'):
-            if file.is_file() and file.stem != ".slash":
+            if file.is_file():
                 relative_dir_path = (
-                    "/" + str(file.parent.relative_to(dir)) + ("/" if (file.parent / ".slash").is_file() else "")
+                    "/"
+                    + str(file.parent.relative_to(dir))
+                    + (
+                        "/"
+                        # /volume/v3/response.json is the only file that needs to be suffixed with "/"
+                        if (
+                            'volume/v3' in str(file.parent.relative_to(dir)) and
+                            'volumes' not in str(file.parent.relative_to(dir))
+                        )
+                        else ""
+                    )
                 )
+                if 'volume/v3' in str(file.parent.relative_to(dir)):
+                    print(file)
+                    print(relative_dir_path)
+                    print(file.is_file())
                 if relative_dir_path not in response_parent:
                     response_parent[relative_dir_path] = {}
                 json_data = get_json_value_from_file(file)
                 response_parent[relative_dir_path][file.stem] = json_data
+                if (
+                    str(file)
+                    == '/Users/rahul.kaukuntla/go/src/github.com/DataDog/integrations-core/openstack_controller/tests/fixtures/GET/volume/v3/1e6e233e637d4d55a50a62b63398ad15/volumes/detail/response.json'
+                ):
+                    print(response_parent[relative_dir_path][file.stem])
 
     def process_dir(dir, response_parent):
         response_parent[dir.name] = {}
@@ -167,6 +186,7 @@ def mock_responses(microversion_headers):
         filename = file
         request_path = url
         request_path = request_path.replace('?', '/')
+        print(request_path)
         if params:
             param_string = '/'.join('{}={}'.format(key, str(val)) for key, val in params.items())
             request_path = '{}/{}'.format(url, param_string)
@@ -370,6 +390,26 @@ def connection_identity(request, mock_responses):
         registered_limits=mock.MagicMock(side_effect=registered_limits),
         limits=mock.MagicMock(side_effect=limits),
     )
+
+
+@pytest.fixture
+def connection_block_storage(request, mock_responses):
+    param = request.param if hasattr(request, 'param') and request.param is not None else {}
+    http_error = param.get('http_error')
+
+    def volumes(project_id, details):
+        if http_error and 'volumes' in http_error:
+            raise requests.exceptions.HTTPError(response=http_error['volumes'])
+        return [
+            mock.MagicMock(
+                to_dict=mock.MagicMock(
+                    return_value=volume,
+                )
+            )
+            for volume in mock_responses('GET', f'/volume/v3/{project_id}/volumes/detail')['volumes']
+        ]
+
+    return mock.MagicMock(volumes=mock.MagicMock(side_effect=volumes))
 
 
 @pytest.fixture
@@ -739,6 +779,7 @@ def openstack_connection(
     connection_compute,
     connection_network,
     connection_baremetal,
+    connection_block_storage,
     connection_load_balancer,
     connection_image,
 ):
@@ -750,6 +791,7 @@ def openstack_connection(
             compute=connection_compute,
             network=connection_network,
             baremetal=connection_baremetal,
+            block_storage=connection_block_storage,
             load_balancer=connection_load_balancer,
             image=connection_image,
         )

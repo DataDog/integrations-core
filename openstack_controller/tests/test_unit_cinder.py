@@ -211,3 +211,55 @@ def test_response_time_volumev3(aggregator, check, dd_run_check, mock_http_get):
         args, kwargs = call
         args_list += list(args)
     assert args_list.count('http://127.0.0.1:8776/volume/v3/') == 1
+
+
+@pytest.mark.parametrize(
+    ('mock_http_get', 'instance'),
+    [
+        pytest.param(
+            None,
+            configs.REST,
+            id='api rest',
+        ),
+        pytest.param(
+            None,
+            configs.SDK,
+            id='api sdk',
+        ),
+    ],
+    indirect=['mock_http_get'],
+)
+@pytest.mark.usefixtures('mock_http_get', 'mock_http_post', 'openstack_connection')
+def test_block_storage_metrics(aggregator, check, dd_run_check, mock_http_get):
+    dd_run_check(check)
+    aggregator.assert_metric(
+        'openstack.cinder.volume.count',
+        count=4,
+        value=1,
+        tags=[
+            'domain_id:default',
+            'project_name:demo',
+            'project_id:1e6e233e637d4d55a50a62b63398ad15',
+            'volume_size:1',
+            'volume_name:',
+            'volume_status:in-use',
+            'keystone_server:http://127.0.0.1:8080/identity'],
+    )
+    aggregator.assert_metric(
+        'openstack.cinder.volume.count',
+        count=0,
+        value=1,
+        tags=[
+            'domain_id:default',
+            'project_name:demo',
+            'project_id:6e39099cccde4f809b003d9e0dd09304',
+            'volume_size:1',
+            'volume_name:',
+            'volume_status:in-use',
+            'keystone_server:http://127.0.0.1:8080/identity'],
+    )
+    args_list = []
+    for call in mock_http_get.call_args_list:
+        args, kwargs = call
+        args_list += list(args)
+    assert args_list.count('http://127.0.0.1:8776/volume/v3/') == 1
