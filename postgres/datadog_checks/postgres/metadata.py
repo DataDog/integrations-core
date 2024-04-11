@@ -267,7 +267,6 @@ class PostgresMetadata(DBMAsyncJob):
             and elapsed_s_schemas >= self.schemas_collection_interval
         ):
             self._is_schemas_collection_in_progress = True
-            start = time.time()
             schema_metadata = self._collect_schema_info()
             # We emit an event for each batch of tables to reduce total data in memory and keep event size reasonable
             base_event = {
@@ -296,32 +295,27 @@ class PostgresMetadata(DBMAsyncJob):
                             tables_buffer = []
 
                             for tables in table_chunks:
-                                chunk_start = time.time()
                                 table_info = self._query_table_information(cursor, tables)
 
                                 tables_buffer = [*tables_buffer, *table_info]
                                 for t in table_info:
                                     buffer_column_count += len(t.get("columns", []))
 
-                                self._check.gauge(
-                                    "dd.postgresql.agent.metadata.schema_chunk",
-                                    time.time() - chunk_start,
-                                    tags=self.tags,
-                                )
-
                                 if buffer_column_count >= 100_000:
-                                    self._flush_schema(base_event, database, schema, table_info)
+                                    self._flush_schema(base_event, database, schema, tables_buffer)
                                     tables_buffer = []
                                     buffer_column_count = 0
 
                             if len(tables_buffer) > 0:
-                                self._flush_schema(base_event, database, schema, table_info)
-            self._check.gauge("dd.postgresql.agent.metadata.schema", time.time() - start, tags=self.tags)
+                                self._flush_schema(base_event, database, schema, tables_buffer)
             self._is_schemas_collection_in_progress = False
 
     def _flush_schema(self, base_event, database, schema, tables):
-        metadata = [{**database, "schemas": [{**schema, "tables": tables}]}]
-        event = {**base_event, "metadata": metadata, "timestamp": time.time() * 1000}
+        event = {
+            **base_event,
+            "metadata": [{**database, "schemas": [{**schema, "tables": tables}]}],
+            "timestamp": time.time() * 1000,
+        }
         json_event = json.dumps(event, default=default_json_event_encoding)
         self._log.debug("Reporting the following payload for schema collection: {}".format(json_event))
         self._check.database_monitoring_metadata(json_event)
