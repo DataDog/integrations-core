@@ -228,7 +228,7 @@ See the [JMX Check documentation][7] for more detailed information.
 
 ### Commands to view the available metrics
 
-The `datadog-agent jmx` command allows you to run troubleshooting commands on JMXFetch integrations. On linux systems, you will need to prepend the command with `sudo -u dd-agent` so that the Datadog Agent runs as the correct user.
+The `datadog-agent jmx` command allows you to run troubleshooting commands on JMXFetch integrations. On Linux systems, you will need to prepend the command with `sudo -u dd-agent` so that the Datadog Agent runs as the correct user.
 
 #### datadog-agent jmx collect
 Running `datadog-agent jmx collect` starts the collection of metrics based on your current configuration and displays them in the console.
