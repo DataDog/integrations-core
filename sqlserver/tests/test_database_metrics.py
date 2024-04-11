@@ -6,6 +6,7 @@
 from unittest import mock
 
 import pytest
+
 from datadog_checks.sqlserver import SQLServer
 from datadog_checks.sqlserver.const import (
     STATIC_INFO_ENGINE_EDITION,
