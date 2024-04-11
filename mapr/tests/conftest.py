@@ -12,8 +12,16 @@ from . import common
 E2E_METADATA = {
     'post_install_commands': [
         'apt-get update',
-        'apt-get install -y gcc',
-        'pip install mapr-streams-python',
+        'apt-get install -y gcc gnupg lsb-release',
+        "sh -c 'curl https://packages.confluent.io/deb/7.0/archive.key "
+        "| gpg --dearmor -o /usr/share/keyrings/confluent.gpg'",
+        "sh -c 'echo "
+        "\"deb [arch=amd64,arm64 signed-by=/usr/share/keyrings/confluent.gpg] "
+        "https://packages.confluent.io/clients/deb $(lsb_release -cs) main\" "
+        "> /etc/apt/sources.list.d/confluent.list'",
+        'apt-get update',
+        'apt-get install -y librdkafka-dev',
+        '/opt/datadog-agent/embedded/bin/pip install mapr-streams-python',
     ]
 }
 
