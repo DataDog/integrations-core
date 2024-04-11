@@ -237,7 +237,7 @@ Running `datadog-agent jmx collect` starts the collection of metrics based on yo
 The `datadog-agent jmx list` has a number of available subcommands:
 - `collected` - List attributes that will actually be collected by your current instance's configuration.
 - `everything` - List every attribute available that has a type supported by JMXFetch.
-- `limited` - List attributes that do match one of your instances' configurations but that are not being collected because it would exceed the number of metrics that can be collected.
+- `limited` - List attributes that match one of your instances' configurations but that are not being collected because it would exceed the number of metrics that can be collected.
 - `matching` - List attributes that match at least one of your instances' configurations.
 - `not-matching` - List attributes that don't match any of your instances' configurations.
 - `with-metrics` - List attributes and metrics data that match at least one of your instances' configurations.
