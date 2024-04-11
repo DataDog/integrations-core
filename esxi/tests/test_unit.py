@@ -355,6 +355,7 @@ def test_excluded_host_tags(
     datadog_agent.assert_external_tags('vm1', {'esxi': all_external_tags(vm_1_external_tags)})
     datadog_agent.assert_external_tags('vm2', {'esxi': all_external_tags(vm_2_external_tags)})
 
+
 @pytest.mark.usefixtures("service_instance")
 def test_version_metadata(vcsim_instance, dd_run_check, datadog_agent):
     check = EsxiCheck('esxi', {}, [vcsim_instance])
