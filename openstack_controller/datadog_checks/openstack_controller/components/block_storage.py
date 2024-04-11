@@ -5,11 +5,11 @@
 
 from datadog_checks.openstack_controller.components.component import Component
 from datadog_checks.openstack_controller.metrics import (
+    CINDER_METRICS_PREFIX,
     CINDER_RESPONSE_TIME,
     CINDER_SERVICE_CHECK,
     CINDER_VOLUME_COUNT,
     CINDER_VOLUME_TAGS,
-    CINDER_METRICS_PREFIX,
     get_metrics_and_tags,
 )
 

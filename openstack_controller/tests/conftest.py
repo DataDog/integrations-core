@@ -152,19 +152,10 @@ def mock_responses(microversion_headers):
                         else ""
                     )
                 )
-                if 'volume/v3' in str(file.parent.relative_to(dir)):
-                    print(file)
-                    print(relative_dir_path)
-                    print(file.is_file())
                 if relative_dir_path not in response_parent:
                     response_parent[relative_dir_path] = {}
                 json_data = get_json_value_from_file(file)
                 response_parent[relative_dir_path][file.stem] = json_data
-                if (
-                    str(file)
-                    == '/Users/rahul.kaukuntla/go/src/github.com/DataDog/integrations-core/openstack_controller/tests/fixtures/GET/volume/v3/1e6e233e637d4d55a50a62b63398ad15/volumes/detail/response.json'
-                ):
-                    print(response_parent[relative_dir_path][file.stem])
 
     def process_dir(dir, response_parent):
         response_parent[dir.name] = {}
@@ -186,7 +177,6 @@ def mock_responses(microversion_headers):
         filename = file
         request_path = url
         request_path = request_path.replace('?', '/')
-        print(request_path)
         if params:
             param_string = '/'.join('{}={}'.format(key, str(val)) for key, val in params.items())
             request_path = '{}/{}'.format(url, param_string)
