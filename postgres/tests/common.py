@@ -206,10 +206,10 @@ def check_common_metrics(aggregator, expected_tags, count=1):
 
 
 def check_db_count(aggregator, expected_tags, count=1):
-    table_count = 7
+    table_count = 18
     # We create 2 additional partition tables when partition is available + 2 parent tables
     if float(POSTGRES_VERSION) >= 11.0:
-        table_count = 14
+        table_count = 25
     aggregator.assert_metric(
         'postgresql.table.count',
         value=table_count,

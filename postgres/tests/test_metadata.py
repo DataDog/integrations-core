@@ -65,6 +65,7 @@ def test_collect_schemas(integration_check, dbm_instance, aggregator):
     tables_set = {
         'persons',
         "personsdup1",
+        "personsdup2",
         "personsdup3",
         "personsdup4",
         "personsdup5",
