@@ -147,7 +147,7 @@ WHERE  relname in ({table_names});
 """
 
 NUM_PARTITIONS_QUERY = """
-SELECT count(inhrelid :: regclass) AS num_partitions, inhparent as id 
+SELECT count(inhrelid :: regclass) AS num_partitions, inhparent as id
 FROM   pg_inherits
 WHERE  inhparent IN ({table_ids})
 GROUP BY inhparent;
@@ -192,7 +192,9 @@ class PostgresMetadata(DBMAsyncJob):
         )
 
         # by default, send resources every 5 minutes
-        self.collection_interval = min(resources_collection_interval, self.pg_settings_collection_interval, self.schemas_collection_interval)
+        self.collection_interval = min(
+            resources_collection_interval, self.pg_settings_collection_interval, self.schemas_collection_interval
+        )
 
         super(PostgresMetadata, self).__init__(
             check,
@@ -258,7 +260,11 @@ class PostgresMetadata(DBMAsyncJob):
         self._check.database_monitoring_metadata(json.dumps(event, default=default_json_event_encoding))
 
         elapsed_s_schemas = time.time() - self._last_schemas_query_time
-        if self._collect_schemas_enabled and not self._is_schemas_collection_in_progress and elapsed_s_schemas >= self.schemas_collection_interval:
+        if (
+            self._collect_schemas_enabled
+            and not self._is_schemas_collection_in_progress
+            and elapsed_s_schemas >= self.schemas_collection_interval
+        ):
             self._is_schemas_collection_in_progress = True
             start = time.time()
             schema_metadata = self._collect_schema_info()
@@ -280,7 +286,7 @@ class PostgresMetadata(DBMAsyncJob):
             def chunks(lst, n):
                 """Yield successive n-sized chunks from lst."""
                 for i in range(0, len(lst), n):
-                    yield lst[i:i + n]
+                    yield lst[i : i + n]
 
             chunk_size = 50
 
@@ -289,7 +295,6 @@ class PostgresMetadata(DBMAsyncJob):
                 json_event = json.dumps(event, default=default_json_event_encoding)
                 self._log.debug("Reporting the following payload for schema collection: {}".format(json_event))
                 self._check.database_monitoring_metadata(json_event)
-                                
 
             for database in schema_metadata:
                 dbname = database["name"]
@@ -305,35 +310,36 @@ class PostgresMetadata(DBMAsyncJob):
                             for tables in table_chunks:
                                 chunk_start = time.time()
                                 table_info = self._query_table_information(cursor, tables)
-                                
-                                tables_buffer = [*tables_buffer,*table_info]
+
+                                tables_buffer = [*tables_buffer, *table_info]
                                 for t in table_info:
-                                    buffer_column_count += len(t.get("columns", [])) 
-                                
+                                    buffer_column_count += len(t.get("columns", []))
+
                                 self._check.gauge(
                                     "dd.postgresql.agent.metadata.schema_chunk",
                                     time.time() - chunk_start,
-                                    tags=self.tags
+                                    tags=self.tags,
                                 )
-
 
                                 if buffer_column_count >= 100_000:
                                     metadata = [
-                                        {**database, "schemas": [{**schema, "tables": tables_buffer}], }
+                                        {
+                                            **database,
+                                            "schemas": [{**schema, "tables": tables_buffer}],
+                                        }
                                     ]
                                     flush(metadata=metadata)
                                     tables_buffer = []
                                     buffer_column_count = 0
                             if len(tables_buffer) > 0:
                                 metadata = [
-                                    {**database, "schemas": [{**schema, "tables": tables_buffer}], }
+                                    {
+                                        **database,
+                                        "schemas": [{**schema, "tables": tables_buffer}],
+                                    }
                                 ]
                                 flush(metadata=metadata)
-            self._check.gauge(
-                    "dd.postgresql.agent.metadata.schema",
-                    time.time() - start,
-                    tags=self.tags
-                )
+            self._check.gauge("dd.postgresql.agent.metadata.schema", time.time() - start, tags=self.tags)
             self._is_schemas_collection_in_progress = False
 
     def _payload_pg_version(self):
@@ -433,7 +439,7 @@ class PostgresMetadata(DBMAsyncJob):
 
         if len(table_info) <= limit:
             return table_info
-        
+
         # if relation metrics are enabled, sorted based on last activity information
         table_info = sorted(table_info, key=sort_tables, reverse=True)
         return table_info[:limit]
@@ -460,7 +466,7 @@ class PostgresMetadata(DBMAsyncJob):
             this_payload.update({"id": str(table["id"])})
             this_payload.update({"name": table["name"]})
             this_payload.update({"owner": table["owner"]})
-            this_payload.update({"has_indexes": table["has_indexes"]})            
+            this_payload.update({"has_indexes": table["has_indexes"]})
             this_payload.update({"has_partitions": table.get("has_partitions", False)})
             if table["toast_table"] is not None:
                 this_payload.update({"toast_table": table["toast_table"]})
@@ -493,15 +499,17 @@ class PostgresMetadata(DBMAsyncJob):
             "partition_key": str (if has partitions)
             "num_partitions": int (if has partitions)
         """
-        tables = dict((t.get("name"), {**t, "num_partitions": 0}) for t in table_info)
-        table_name_lookup = dict((t.get("id"), t.get("name")) for t in table_info)
+        tables = {t.get("name"): {**t, "num_partitions": 0} for t in table_info}
+        table_name_lookup = {t.get("id"): t.get("name") for t in table_info}
         table_ids = ",".join(["'{}'".format(t.get("id")) for t in table_info])
         table_names = ",".join(["'{}'".format(t.get("name")) for t in table_info])
-        
+
         cursor.execute(PG_INDEXES_QUERY.format(table_names=table_names))
         rows = cursor.fetchall()
         for row in rows:
-            tables.get(row.get("tablename"))["indexes"] = tables.get(row.get("tablename")).get("indexes", []) + [dict(row)]
+            tables.get(row.get("tablename"))["indexes"] = tables.get(row.get("tablename")).get("indexes", []) + [
+                dict(row)
+            ]
 
         if VersionUtils.transform_version(str(self._check.version))["version.major"] != "9":
             cursor.execute(PARTITION_KEY_QUERY.format(table_names=table_names))
@@ -515,7 +523,6 @@ class PostgresMetadata(DBMAsyncJob):
                 table_name = table_name_lookup.get(str(row.get("id")))
                 tables.get(table_name)["num_partitions"] = row.get("num_partitions", 0)
 
-
         # Get foreign keys
         # cursor.execute(PG_CHECK_FOR_FOREIGN_KEY.format(oid=table_id))
         # row = cursor.fetchone()
@@ -525,7 +532,7 @@ class PostgresMetadata(DBMAsyncJob):
         for row in rows:
             table_name = table_name_lookup.get(str(row.get("id")))
             tables.get(table_name)["foreign_keys"] = tables.get(table_name).get("foreign_keys", []) + [dict(row)]
-        
+
         # Get columns
         cursor.execute(COLUMNS_QUERY.format(table_ids=table_ids))
         rows = cursor.fetchall()

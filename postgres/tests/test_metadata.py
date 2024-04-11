@@ -62,7 +62,23 @@ def test_collect_schemas(integration_check, dbm_instance, aggregator):
     dbm_metadata = aggregator.get_event_platform_events("dbm-metadata")
 
     # check that all expected tables are present
-    tables_set = {'persons', "personsdup1", "personsdup3","personsdup4","personsdup5","personsdup6","personsdup7","personsdup8","personsdup9","personsdup10","personsdup11","personsdup12", "pgtable", "pg_newtable", "cities"}
+    tables_set = {
+        'persons',
+        "personsdup1",
+        "personsdup3",
+        "personsdup4",
+        "personsdup5",
+        "personsdup6",
+        "personsdup7",
+        "personsdup8",
+        "personsdup9",
+        "personsdup10",
+        "personsdup11",
+        "personsdup12",
+        "pgtable",
+        "pg_newtable",
+        "cities",
+    }
     # if version isn't 9 or 10, check that partition master is in tables
     if float(POSTGRES_VERSION) >= 11:
         tables_set.update({'test_part', 'test_part_no_children', 'test_part_no_activity'})
