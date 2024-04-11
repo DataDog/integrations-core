@@ -312,7 +312,7 @@ def test_use_guest_hostname(vcsim_instance, dd_run_check, aggregator):
             ['esxi_type', 'esxi_cluster', 'hello'],
             "Unknown host tag `hello` cannot be excluded. Available host tags are: `esxi_url`, `esxi_type`, "
             "`esxi_host`, `esxi_folder`, `esxi_cluster` `esxi_compute`, `esxi_datacenter`, and `esxi_datastore`",
-            id="unknown tag",
+            id="known and unknown tags together",
         ),
     ],
 )
