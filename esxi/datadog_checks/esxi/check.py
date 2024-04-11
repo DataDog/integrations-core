@@ -7,7 +7,15 @@ from pyVmomi import vim, vmodl
 
 from datadog_checks.base import AgentCheck  # noqa: F401
 
-from .constants import ALL_RESOURCES, HOST_RESOURCE, MAX_PROPERTIES, RESOURCE_TYPE_TO_NAME, SHORT_ROLLUP, VM_RESOURCE
+from .constants import (
+    ALL_RESOURCES,
+    AVAILABLE_HOST_TAGS,
+    HOST_RESOURCE,
+    MAX_PROPERTIES,
+    RESOURCE_TYPE_TO_NAME,
+    SHORT_ROLLUP,
+    VM_RESOURCE,
+)
 from .metrics import RESOURCE_NAME_TO_METRICS
 from .utils import get_tags_recursively
 
@@ -21,6 +29,19 @@ class EsxiCheck(AgentCheck):
         self.username = self.instance.get("username")
         self.password = self.instance.get("password")
         self.use_guest_hostname = self.instance.get("use_guest_hostname", False)
+        excluded_host_tags = self.instance.get("excluded_host_tags", [])
+        valid_excluded_host_tags = []
+        for excluded_host_tag in excluded_host_tags:
+            if excluded_host_tag not in AVAILABLE_HOST_TAGS:
+                self.log.warning(
+                    "Unknown host tag `%s` cannot be excluded. Available host tags are: "
+                    "`esxi_url`, `esxi_type`, `esxi_host`, `esxi_folder`, `esxi_cluster` "
+                    "`esxi_compute`, `esxi_datacenter`, and `esxi_datastore`",
+                    excluded_host_tag,
+                )
+            else:
+                valid_excluded_host_tags.append(excluded_host_tag)
+        self.excluded_host_tags = valid_excluded_host_tags
         self.tags = [f"esxi_url:{self.host}"]
 
     def get_resources(self):
@@ -90,7 +111,7 @@ class EsxiCheck(AgentCheck):
         metric_ids = [vim.PerformanceManager.MetricId(counterId=counter, instance="") for counter in counter_ids]
         return counter_keys_and_names, metric_ids
 
-    def collect_metrics_for_entity(self, metric_ids, counter_keys_and_names, entity, entity_name):
+    def collect_metrics_for_entity(self, metric_ids, counter_keys_and_names, entity, entity_name, metric_tags):
 
         resource_name = RESOURCE_TYPE_TO_NAME[type(entity)]
         spec = vim.PerformanceManager.QuerySpec(maxSample=1, entity=entity, metricId=metric_ids)
@@ -129,7 +150,7 @@ class EsxiCheck(AgentCheck):
                         entity_name,
                         self.tags,
                     )
-                    self.gauge(metric_name, most_recent_val, hostname=entity_name, tags=self.tags)
+                    self.gauge(metric_name, most_recent_val, hostname=entity_name, tags=metric_tags)
 
     def set_version_metadata(self):
         esxi_version = self.content.about.version
@@ -204,16 +225,23 @@ class EsxiCheck(AgentCheck):
                     )
                 )
             tags.append('esxi_type:{}'.format(resource_type))
+
+            metric_tags = self.tags
+            if self.excluded_host_tags:
+                metric_tags = metric_tags + [t for t in tags if t.split(":", 1)[0] in self.excluded_host_tags]
+
             tags.extend(self.tags)
+
             if hostname is not None:
-                external_host_tags.append((hostname, {self.__NAMESPACE__: tags}))
+                filtered_external_tags = [t for t in tags if t.split(':')[0] not in self.excluded_host_tags]
+                external_host_tags.append((hostname, {self.__NAMESPACE__: filtered_external_tags}))
             else:
                 self.log.debug("No host name found for %s; skipping external tag submission", resource_obj)
 
             self.count(f"{resource_type}.count", 1, tags=tags, hostname=None)
 
             counter_keys_and_names, metric_ids = self.get_available_metric_ids_for_entity(resource_obj)
-            self.collect_metrics_for_entity(metric_ids, counter_keys_and_names, resource_obj, hostname)
+            self.collect_metrics_for_entity(metric_ids, counter_keys_and_names, resource_obj, hostname, metric_tags)
 
         if external_host_tags:
             self.set_external_tags(external_host_tags)
