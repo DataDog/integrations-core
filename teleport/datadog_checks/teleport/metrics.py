@@ -64,19 +64,19 @@ AUTH_SERVICE_METRICS_MAP = {
 }
 
 AUTH_AUDIT_LOG_METRICS_MAP = {
-    "audit_failed_disk_monitoring": "auth.audit_log.failed_disk_monitoring",
-    "audit_failed_emit_events": "auth.audit_log.failed_emit_events",
-    "audit_percentage_disk_space_used": "auth.audit_log.percentage_disk_space_used",
-    "audit_server_open_files": "auth.audit_log.server_open_files",
-    "teleport_audit_emit_events": "auth.audit_log.emit_events",
-    "teleport_audit_parquetlog_batch_processing_seconds": "auth.audit_log.parquetlog.batch_processing_seconds",
-    "teleport_audit_parquetlog_s3_flush_seconds": "auth.audit_log.parquetlog.s3_flush_seconds",
-    "teleport_audit_parquetlog_delete_events_seconds": "auth.audit_log.parquetlog.delete_events_seconds",
-    "teleport_audit_parquetlog_batch_size": "auth.audit_log.parquetlog.batch_size",
-    "teleport_audit_parquetlog_batch_count": "auth.audit_log.parquetlog.batch_count",
-    "teleport_audit_parquetlog_last_processed_timestamp": "auth.audit_log.parquetlog.last_processed_timestamp",
-    "teleport_audit_parquetlog_age_oldest_processed_message": "auth.audit_log.parquetlog.age_oldest_processed_message",
-    "teleport_audit_parquetlog_errors_from_collect_count": "auth.audit_log.parquetlog.errors_from_collect_count",
+    "audit_failed_disk_monitoring": "audit_log.failed_disk_monitoring",
+    "audit_failed_emit_events": "audit_log.failed_emit_events",
+    "audit_percentage_disk_space_used": "audit_log.percentage_disk_space_used",
+    "audit_server_open_files": "audit_log.server_open_files",
+    "teleport_audit_emit_events": "audit_log.emit_events",
+    "teleport_audit_parquetlog_batch_processing_seconds": "audit_log.parquetlog.batch_processing_seconds",
+    "teleport_audit_parquetlog_s3_flush_seconds": "audit_log.parquetlog.s3_flush_seconds",
+    "teleport_audit_parquetlog_delete_events_seconds": "audit_log.parquetlog.delete_events_seconds",
+    "teleport_audit_parquetlog_batch_size": "audit_log.parquetlog.batch_size",
+    "teleport_audit_parquetlog_batch_count": "audit_log.parquetlog.batch_count",
+    "teleport_audit_parquetlog_last_processed_timestamp": "audit_log.parquetlog.last_processed_timestamp",
+    "teleport_audit_parquetlog_age_oldest_processed_message": "audit_log.parquetlog.age_oldest_processed_message",
+    "teleport_audit_parquetlog_errors_from_collect_count": "audit_log.parquetlog.errors_from_collect_count",
 }
 
 AUTH_BACKEND_S3_METRICS_MAP = {
