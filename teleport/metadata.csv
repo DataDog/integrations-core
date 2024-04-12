@@ -1,5 +1,4 @@
 metric_name,metric_type,interval,unit_name,per_unit_name,description,orientation,integration,short_name,curated_metric
-
 teleport.audit_log.failed_disk_monitoring.count,count,,,,Number of audit events emitted,0,teleport,,
 teleport.audit_log.failed_emit_events.count,count,,,,Number of times disk monitoring failed,0,teleport,,
 teleport.audit_log.parquetlog_age_oldest_processed_message,count,,,,Number of times emitting audit event failed,0,teleport,,
