@@ -304,11 +304,17 @@ def test_block_storage_pagination(
             limit = params.get('limit')
             args_list += [(args[0], limit)]
         assert (
-            args_list.count(('http://127.0.0.1:8776/volume/v3/1e6e233e637d4d55a50a62b63398ad15/volumes/detail', paginated_limit))
-            == 2 if paginated_limit==1 else 1
+            args_list.count(
+                ('http://127.0.0.1:8776/volume/v3/1e6e233e637d4d55a50a62b63398ad15/volumes/detail', paginated_limit)
+            )
+            == 2
+            if paginated_limit == 1
+            else 1
         )
         assert (
-            args_list.count(('http://127.0.0.1:8776/volume/v3/6e39099cccde4f809b003d9e0dd09304/volumes/detail', paginated_limit))
+            args_list.count(
+                ('http://127.0.0.1:8776/volume/v3/6e39099cccde4f809b003d9e0dd09304/volumes/detail', paginated_limit)
+            )
             == expected_api_calls
         )
     aggregator.assert_metric(
