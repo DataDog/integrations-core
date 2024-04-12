@@ -138,16 +138,9 @@ def mock_responses(microversion_headers):
 
     def process_files(dir, response_parent):
         for file in dir.rglob('*'):
-            if file.is_file():
+            if file.is_file() and file.stem != ".slash":
                 relative_dir_path = (
-                    "/"
-                    + str(file.parent.relative_to(dir))
-                    + (
-                        "/"
-                        # /volume/v3/response.json is the only file that needs to be suffixed with "/"
-                        if ('volume/v3/response.json' in str(file.relative_to(dir)))
-                        else ""
-                    )
+                    "/" + str(file.parent.relative_to(dir)) + ("/" if (file.parent / ".slash").is_file() else "")
                 )
                 if relative_dir_path not in response_parent:
                     response_parent[relative_dir_path] = {}
