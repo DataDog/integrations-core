@@ -146,8 +146,7 @@ def mock_responses(microversion_headers):
                         "/"
                         # /volume/v3/response.json is the only file that needs to be suffixed with "/"
                         if (
-                            'volume/v3' in str(file.parent.relative_to(dir))
-                            and 'volumes' not in str(file.parent.relative_to(dir))
+                            'volume/v3/response.json' in str(file.relative_to(dir))
                         )
                         else ""
                     )
