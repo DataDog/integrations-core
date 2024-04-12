@@ -195,11 +195,19 @@ class ApiRest(Api):
         return response.json().get('limits', [])
 
     def get_block_storage_volumes(self, project_id):
-        response = self.http.get(
-            '{}/volumes/detail'.format(self._catalog.get_endpoint_by_type(Component.Types.BLOCK_STORAGE.value))
+        params = {}
+        return self.make_paginated_request(
+            '{}/volumes/detail'.format(self._catalog.get_endpoint_by_type(Component.Types.BLOCK_STORAGE.value)),
+            'volumes',
+            'id',
+            next_signifier='volumes_links',
+            params=params,
         )
-        response.raise_for_status()
-        return response.json().get('volumes', {})
+        # response = self.http.get(
+        #     '{}/volumes/detail'.format(self._catalog.get_endpoint_by_type(Component.Types.BLOCK_STORAGE.value))
+        # )
+        # response.raise_for_status()
+        # return response.json().get('volumes', {})
 
     def get_compute_limits(self, project_id):
         params = {'tenant_id': project_id}

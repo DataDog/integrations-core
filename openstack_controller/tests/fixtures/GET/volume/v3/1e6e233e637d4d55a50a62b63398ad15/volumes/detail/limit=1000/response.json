@@ -16,11 +16,11 @@
             "links": [
                 {
                     "rel": "self",
-                    "href": "http://127.0.0.1:8776/volume/v3/1e6e233e637d4d55a50a62b63398ad15/volumes/9c762008-d70f-44d1-af02-98e1da79ee4b"
+                    "href": "http://127.0.0.1:8776/volume/v3/1e6e233e637d4d55a50a62b63398ad15/volumes/9c762008-d70f-44d1-af02-98e1da79ee4b?limit=1000"
                 },
                 {
                     "rel": "bookmark",
-                    "href": "http://127.0.0.1:8776/volume/1e6e233e637d4d55a50a62b63398ad15/volumes/9c762008-d70f-44d1-af02-98e1da79ee4b"
+                    "href": "http://127.0.0.1:8776/volume/1e6e233e637d4d55a50a62b63398ad15/volumes/9c762008-d70f-44d1-af02-98e1da79ee4b?limit=1000"
                 }
             ],
             "user_id": "ec06134b213f4afd965681c99024674a",
@@ -76,11 +76,11 @@
             "links": [
                 {
                     "rel": "self",
-                    "href": "http://127.0.0.1:8776/volume/v3/1e6e233e637d4d55a50a62b63398ad15/volumes/259b16de-727f-4011-8388-84d17a9ae594"
+                    "href": "http://127.0.0.1:8776/volume/v3/1e6e233e637d4d55a50a62b63398ad15/volumes/259b16de-727f-4011-8388-84d17a9ae594?limit=1000"
                 },
                 {
                     "rel": "bookmark",
-                    "href": "http://127.0.0.1:8776/volume/1e6e233e637d4d55a50a62b63398ad15/volumes/259b16de-727f-4011-8388-84d17a9ae594"
+                    "href": "http://127.0.0.1:8776/volume/1e6e233e637d4d55a50a62b63398ad15/volumes/259b16de-727f-4011-8388-84d17a9ae594?limit=1000"
                 }
             ],
             "user_id": "ec06134b213f4afd965681c99024674a",
