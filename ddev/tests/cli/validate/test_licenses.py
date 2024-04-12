@@ -66,9 +66,7 @@ def test_validate_repo(repo, expected_message, ddev, helpers, config_file):
 
 
 def test_error_no_requirements_file(repository, ddev, helpers):
-    agent_requirements_path = (
-        repository.path / 'datadog_checks_base' / 'datadog_checks' / 'base' / 'data' / 'agent_requirements.in'
-    )
+    agent_requirements_path = repository.path / 'agent_requirements.in'
     os.remove(agent_requirements_path)
 
     result = ddev("validate", "licenses")
@@ -78,9 +76,7 @@ def test_error_no_requirements_file(repository, ddev, helpers):
 
 
 def test_invalid_requirement(repository, ddev, helpers):
-    agent_requirements_path = (
-        repository.path / 'datadog_checks_base' / 'datadog_checks' / 'base' / 'data' / 'agent_requirements.in'
-    )
+    agent_requirements_path = repository.path / 'agent_requirements.in'
 
     with agent_requirements_path.open(encoding='utf-8') as file:
         requirements = file.readlines()
