@@ -13,9 +13,6 @@ from datadog_checks.sqlserver.utils import (
 
 import pdb
 
-
-
-
 class Schemas:
 
     def __init__(self, check):
@@ -92,14 +89,14 @@ class Schemas:
                 schemas = self.current_schema_list  
             #ok we have schemas now tables
             if self.current_table_list is None:
-                schemas[0]["tables"] = self._get_tables2(schemas[0], cursor)
+                schemas[0]["tables"] = self._get_tables(schemas[0], cursor)
 
             for index_sh, schema in enumerate(schemas):  
                 if schema["tables"] is not None:
-                    schema["tables"] = self._get_tables2(schema, cursor)
+                    schema["tables"] = self._get_tables(schema, cursor)
                 for index_t,table in enumerate(schema["tables"]):
                     pdb.set_trace()
-                    stop = self._get_table_data2(table, schema, cursor)
+                    stop = self._get_table_data(table, schema, cursor)
                     if stop:
                         self.current_table_list = schema["tables"][index_t:]
                         self.current_schema_list = schemas[index_sh:]
@@ -139,39 +136,19 @@ class Schemas:
         #def execute_time_query():
           # self._last_time_collected_diff_per_db =
 
-    def collect_schema_diffs(self):
-                #schemas per db
-        def fetch_schema_diff_data(cursor, db_name):
-            schemas = self._query_schema_information(cursor)
-            self._get_table_diff_per_schema(schemas, cursor)
-            #self.schemas_per_db[db_name] = schemas[]
-        self._do_for_databases(fetch_schema_diff_data)
-        pdb.set_trace()
-        print(self.schemas_per_db)
 
-
-
-    def _get_table_data_per_schema(self, schemas, cursor):
-        for schema in schemas:
-            self._get_tables(schema, cursor)
-            self._get_table_data(schema, cursor)
     
     #TODO will nedd a separate query for changed indexes
-    def _get_table_diff_per_schema(self, schemas, cursor):
-        for schema in schemas:
-            self._get_changed_tables(schema, cursor)
-        for schema in schemas:
-            self._get_table_data(schema, cursor)
+
 
     # def payload consume , push in data amount 
-    def _get_table_data2(self, table, schema, cursor):
+    def _get_table_data(self, table, schema, cursor):
         #while processing tables we would like to stop after X amount of data in payload.
         table["columns"] = self._get_columns_data_per_table(table["name"], schema["name"], cursor)
         table["partitions"] = self._get_partitions_data_per_table(table["object_id"], cursor)
         if str(table["object_id"]) == "1803153469":
             pdb.set_trace()
             print("should have index")
-
         table["indexes"] = self._get_index_data_per_table(table["object_id"], cursor)
         table["foreign_keys"] = self._get_foreign_key_data_per_table(table["object_id"], cursor)
         return False
@@ -183,8 +160,7 @@ class Schemas:
     # TODO how often ?
     # TODO put in a class
     #TODOTODO do we need this map/list format if we are not dumping in json ??? May be we need to send query results as they are ? 
-    def _get_tables2(self, schema, cursor):
-
+    def _get_tables(self, schema, cursor):
         cursor.execute(TABLES_IN_SCHEMA_QUERY.format(schema["schema_id"]))
         columns = [str(i[0]).lower() for i in cursor.description]
         rows = [dict(zip(columns, row)) for row in cursor.fetchall()] #TODO may be more optimal to patch columns with index etc 
@@ -194,19 +170,13 @@ class Schemas:
     # TODO how often ?
     # TODO put in a class
     #TODOTODO do we need this map/list format if we are not dumping in json ??? May be we need to send query results as they are ? 
-    def _get_tables(self, schema, cursor):
-        tables_dict_for_schema = schema['tables']
+
             
         # TODO modify_date - there is a modify date !!! 
         # TODO what is principal_id
         # TODO is_replicated - might be interesting ? 
         
-        cursor.execute(TABLES_IN_SCHEMA_QUERY.format(schema["schema_id"]))
-        columns = [str(i[0]).lower() for i in cursor.description]
-        rows = [dict(zip(columns, row)) for row in cursor.fetchall()]
-        for row in rows:            
-            tables_dict_for_schema[row['object_id']] = {"name" : row['name'], "columns" : [], "indexes" : [], "partitions" : [], "foreign_keys" : []}
-        return
+
 
     def _get_columns_data_per_table(self, table_name, schema_name, cursor):
         return execute_query_output_result_as_a_dict(COLUMN_QUERY.format(table_name, schema_name), cursor)
