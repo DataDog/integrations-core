@@ -83,7 +83,7 @@ class Schemas:
             return
         
         # dont need an index just always safe the last one.
-        def fetch_schema_data2(cursor, db_name):
+        def fetch_schema_data(cursor, db_name):
             # check if we start from scratch or not 
             if self.current_schema_list is None:
                 # find new schemas:
@@ -107,7 +107,7 @@ class Schemas:
                         return False
             self.schemas_per_db[db_name] = schemas
             return True
-        self._check.do_for_databases(fetch_schema_data2, self.databases[self._index:])
+        self._check.do_for_databases(fetch_schema_data, self.databases[self._index:])
         pdb.set_trace()
         print(self.schemas_per_db)
         
@@ -175,51 +175,10 @@ class Schemas:
         table["indexes"] = self._get_index_data_per_table(table["object_id"], cursor)
         table["foreign_keys"] = self._get_foreign_key_data_per_table(table["object_id"], cursor)
         return False
-
-
-    # def payload consume , push in data amount 
-    def _get_table_data(self, schema, cursor):
-        #while processing tables we would like to stop after X amount of data in payload.
-        tables_dict_for_schema = schema['tables']
-        for table_object_id, table_value in tables_dict_for_schema.items():
-            table_value["columns"] = self._get_columns_data_per_table(table_value["name"], schema["name"], cursor)
-            table_value["partitions"] = self._get_partitions_data_per_table(table_object_id, cursor)
-            if str(table_object_id) == "1803153469":
-                pdb.set_trace()
-                print("should have index")
-
-            table_value["indexes"] = self._get_index_data_per_table(table_object_id, cursor)
-            table_value["foreign_keys"] = self._get_foreign_key_data_per_table(table_object_id, cursor)
-        return False
     
-    
-    def _get_data_for_table(self, schema, table, cursor):
-        #while processing tables we would like to stop after X amount of data in payload.
-        tables_dict_for_schema = schema['tables']
-        for table_object_id, table_value in tables_dict_for_schema.items():
-            table_value["columns"] = self._get_columns_data_per_table(table_value["name"], schema["name"], cursor)
-            table_value["partitions"] = self._get_partitions_data_per_table(table_object_id, cursor)
-            if str(table_object_id) == "1803153469":
-                pdb.set_trace()
-                print("should have index")
-
-            table_value["indexes"] = self._get_index_data_per_table(table_object_id, cursor)
-            table_value["foreign_keys"] = self._get_foreign_key_data_per_table(table_object_id, cursor)
-        return False
     
     #TODO in SQLServer partitioned child tables should have the same object_id might be worth checking with a test.
-    def _get_tables_and_their_data(self, schema, cursor):        
-        self._get_tables(schema, cursor)
-        tables_dict_for_schema = schema['tables']
-        for table_object_id, table_value in tables_dict_for_schema.items():
-            table_value["columns"] = self._get_columns_data_per_table(table_value["name"], schema["name"], cursor)
-            table_value["partitions"] = self._get_partitions_data_per_table(table_object_id, cursor)
-            if str(table_object_id) == "1803153469":
-                pdb.set_trace()
-                print("should have index")
 
-            table_value["indexes"] = self._get_index_data_per_table(table_object_id, cursor)
-            table_value["foreign_keys"] = self._get_foreign_key_data_per_table(table_object_id, cursor)
 
     # TODO how often ?
     # TODO put in a class
