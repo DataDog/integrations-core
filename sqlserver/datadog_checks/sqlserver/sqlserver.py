@@ -127,7 +127,7 @@ class SQLServer(AgentCheck):
         self._sql_counter_types = {}
         self.proc_type_mapping = {"gauge": self.gauge, "rate": self.rate, "histogram": self.histogram}
 
-        self._schemas = Schemas(self._do_for_databases, self.log)
+        self._schemas = Schemas(self)
 
         # DBM
         self.statement_metrics = SqlserverStatementMetrics(self, self._config)
@@ -729,21 +729,23 @@ class SQLServer(AgentCheck):
                 cursor.execute(SWITCH_DB_STATEMENT.format(self.connection.DEFAULT_DATABASE))
     
     #TODO as we do it a second type iterate connection through DB make a function and unite it with _get_table_infos check
-    def _do_for_databases(self, action):
-        pdb.set_trace()
-        engine_edition = self.static_info_cache.get(STATIC_INFO_ENGINE_EDITION)
-        db_names = []
+    def get_databases(self):
         if not is_azure_sql_database(engine_edition):
+            engine_edition = self.static_info_cache.get(STATIC_INFO_ENGINE_EDITION)
             db_names = [d.name for d in self.databases] or [self.instance.get('database', self.connection.DEFAULT_DATABASE)]
         else:
             db_names = [self.instance.get('database', self.connection.DEFAULT_DATABASE)]
+    def do_for_databases(self, action, databases):
+        engine_edition = self.static_info_cache.get(STATIC_INFO_ENGINE_EDITION)
         with self.connection.open_managed_default_connection():
             with self.connection.get_managed_cursor() as cursor:
-                for db in db_names:                    
+                for db in databases:                    
                     try:
                         if not is_azure_sql_database(engine_edition):
                             cursor.execute(SWITCH_DB_STATEMENT.format(db))
-                        action(cursor, db)                      
+                        stop = action(cursor, db)        
+                        if stop:
+                            break;                  
                     except Exception as e:
                         print("TODO")
                 # Switch DB back to MASTER
