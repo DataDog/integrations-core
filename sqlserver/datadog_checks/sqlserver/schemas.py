@@ -13,16 +13,7 @@ from datadog_checks.sqlserver.utils import (
 
 import pdb
 
-class DataForProcessedDB:
-    def __init__(self, db_name, schema_list, table_list):
-        self._db_name = db_name
-        self.schema_list = schema_list
-        self.table_list = table_list
-        self.current_schema_index = 0
-        self.current_table_index = 0
-    def stop_processing(self, schema_index, table_index):
-        self.current_schema_index = schema_index
-        self.current_table_index = table_index
+
 
 
 class Schemas:
@@ -42,67 +33,7 @@ class Schemas:
         self.databases = []
         self.current_table_list = None
         self.current_schema_list = None
-    
-    #intially a,b,c DBs new_db_list say c, d,e old_db_list_with_new old list say a, b, c, d, e.
-    # new_db_list say d,e
-    def _move_index_to_existing_db(self, old_db_list_with_new, new_db_list):
-        if self._index is None:
-            print("error")
-            #self._log.error()
-            return
-        if len(new_db_list) == 0:
-            self._index = None
-            return
-        start = self._index["db"]
-        for i in range(start, len(old_db_list_with_new)):
-            if old_db_list_with_new[self._index["db"]] not in new_db_list:
-                if i != len(old_db_list_with_new) -1:
-                    self._index["db"] = i+1
-                    # if we move index at least ones then schema and table are invalidated
-                    self._index["schema"] = None
-                    self._index["table_object_id_index"] = None
-                    self.current_table_list = None
-                    self.current_schema_list = None
-            else:
-                #we are happy with found DB in index
-                return
-        #if we reached the end of old DBs but there is nothing to take
-        self._index = None
-        return
 
-            #if we reach the end and index is still None than we take the first from the new list its not important
-            # as before we add all new DBs to the old list but like for function consistency
-
-    # outputs db, schema, and table to start with
-    # I did this with the idea that trying to connect to a DB that doesnt exist is bad
-    # but now I re4alize that switch DB will throw and we are happy... I mean it can happen if the DB is 
-    def _init_schema_collection2(self):
-        if len(self.databases) == 0:
-            self.databases = self._check.get_databases()
-            if len(self.databases) == 0:
-                self._index = None
-                return
-            self._index = 0
-            return
-        else:
-            # add new DBs to the end of the list
-            updated_databases = self._check.get_databases()
-            for new_db in updated_databases:
-                if new_db not in self.databases:
-                    self.databases.append(new_db)
-            # move index if it is currently on a DB that is not in a new list
-            self._move_index_to_existing_db(self, self.databases, updated_databases)
-            if self._index is None:
-                return
-            # remove dbs from the list, while updating the index
-            current_db_name = self.databases[self._index["db"]]
-            new_db_list = []
-            for db in self.databases:
-                if db in updated_databases:
-                    new_db_list.append(db)
-            self.databases = new_db_list
-            #this shouldnt throw as we ve chosen it to be in the new list.
-            self._index["db"] = self.databases.index(current_db_name)
                       
     def _init_schema_collection(self):
         if len(self.databases) == 0:
@@ -120,12 +51,6 @@ class Schemas:
                     #we dont move the index as on first use db its gonna throw and continue the loop
                     self.current_schema_list = None
                     self.current_table_list = None
-
-
-
-                
-
-            
 
    #TODO update this at the very end as it constantly changing
     """schemas data struct is a dictionnary with key being a schema name the value is
@@ -150,17 +75,12 @@ class Schemas:
     def collect_schemas_data(self):
         #schemas per db
         # flush previous collection
+        pdb.set_trace()
         self.schemas_per_db = {} 
         # init the index
         self._init_schema_collection()
         if self._index is None:
             return
-        
-        def fetch_schema_data(cursor, db_name):
-            schemas = self._query_schema_information(cursor)
-            self._get_table_data_per_schema(schemas, cursor)
-            self.schemas_per_db[db_name] = schemas
-            return False
         
         # dont need an index just always safe the last one.
         def fetch_schema_data2(cursor, db_name):
@@ -178,33 +98,19 @@ class Schemas:
                 if schema["tables"] is not None:
                     schema["tables"] = self._get_tables2(schema, cursor)
                 for index_t,table in enumerate(schema["tables"]):
-                    stop = self._get_table_data2(self, table, schema, cursor)
+                    pdb.set_trace()
+                    stop = self._get_table_data2(table, schema, cursor)
                     if stop:
                         self.current_table_list = schema["tables"][index_t:]
                         self.current_schema_list = schemas[index_sh:]
+                        self.schemas_per_db[db_name] = schemas
                         return False
+            self.schemas_per_db[db_name] = schemas
             return True
-        self._check._do_for_databases(fetch_schema_data2, self.databases[self.index["db"]:])
+        self._check.do_for_databases(fetch_schema_data2, self.databases[self._index:])
         pdb.set_trace()
         print(self.schemas_per_db)
-    
-    #TODO we need to take care of new DB / removed DB 
-    #def get_current_db_times(cursor):
-        # list of all known DBs
-
-        #def execute_time_query():
-          # self._last_time_collected_diff_per_db =
-
-    def collect_schema_diffs(self):
-                #schemas per db
-        def fetch_schema_diff_data(cursor, db_name):
-            schemas = self._query_schema_information(cursor)
-            self._get_table_diff_per_schema(schemas, cursor)
-            #self.schemas_per_db[db_name] = schemas[]
-        self._do_for_databases(fetch_schema_diff_data)
-        pdb.set_trace()
-        print(self.schemas_per_db)
-
+        
 #per DB per sqhema per tables. 
     # TODO how often ?
     # TODO put in a class
@@ -225,6 +131,25 @@ class Schemas:
             schema["tables"] = []
         self._log.debug("fetched schemas len(rows)=%s", len(schemas))
         return schemas
+        
+    #TODO we need to take care of new DB / removed DB 
+    #def get_current_db_times(cursor):
+        # list of all known DBs
+
+        #def execute_time_query():
+          # self._last_time_collected_diff_per_db =
+
+    def collect_schema_diffs(self):
+                #schemas per db
+        def fetch_schema_diff_data(cursor, db_name):
+            schemas = self._query_schema_information(cursor)
+            self._get_table_diff_per_schema(schemas, cursor)
+            #self.schemas_per_db[db_name] = schemas[]
+        self._do_for_databases(fetch_schema_diff_data)
+        pdb.set_trace()
+        print(self.schemas_per_db)
+
+
 
     def _get_table_data_per_schema(self, schemas, cursor):
         for schema in schemas:
