@@ -730,11 +730,13 @@ class SQLServer(AgentCheck):
     
     #TODO as we do it a second type iterate connection through DB make a function and unite it with _get_table_infos check
     def get_databases(self):
+        engine_edition = self.static_info_cache.get(STATIC_INFO_ENGINE_EDITION)
         if not is_azure_sql_database(engine_edition):
-            engine_edition = self.static_info_cache.get(STATIC_INFO_ENGINE_EDITION)
             db_names = [d.name for d in self.databases] or [self.instance.get('database', self.connection.DEFAULT_DATABASE)]
         else:
             db_names = [self.instance.get('database', self.connection.DEFAULT_DATABASE)]
+        return db_names
+
     def do_for_databases(self, action, databases):
         engine_edition = self.static_info_cache.get(STATIC_INFO_ENGINE_EDITION)
         with self.connection.open_managed_default_connection():
