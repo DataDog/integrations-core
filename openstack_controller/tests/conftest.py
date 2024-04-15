@@ -377,7 +377,7 @@ def connection_block_storage(request, mock_responses):
     param = request.param if hasattr(request, 'param') and request.param is not None else {}
     http_error = param.get('http_error')
 
-    def volumes(project_id, details):
+    def volumes(project_id, limit=None):
         if http_error and 'volumes' in http_error:
             raise requests.exceptions.HTTPError(response=http_error['volumes'])
         return [

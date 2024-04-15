@@ -5,6 +5,7 @@ import copy
 import logging
 import os
 
+import mock
 import pytest
 
 import tests.configs as configs
@@ -279,6 +280,20 @@ def test_block_storage_metrics(aggregator, check, dd_run_check):
             1,
             id='api rest high limit',
         ),
+        pytest.param(
+            configs.SDK,
+            1,
+            ApiType.SDK,
+            1,
+            id='api sdk low limit',
+        ),
+        pytest.param(
+            configs.SDK,
+            1000,
+            ApiType.SDK,
+            1,
+            id='api sdk high limit',
+        ),
     ],
 )
 @pytest.mark.usefixtures('mock_http_get', 'mock_http_post', 'openstack_connection')
@@ -290,6 +305,7 @@ def test_block_storage_pagination(
     expected_api_calls,
     api_type,
     dd_run_check,
+    connection_block_storage,
     mock_http_get,
 ):
     paginated_instance = copy.deepcopy(instance)
@@ -316,6 +332,20 @@ def test_block_storage_pagination(
                 ('http://127.0.0.1:8776/volume/v3/6e39099cccde4f809b003d9e0dd09304/volumes/detail', paginated_limit)
             )
             == expected_api_calls
+        )
+    else:
+        assert connection_block_storage.volumes.call_count == 2
+        assert (
+            connection_block_storage.volumes.call_args_list.count(
+                mock.call(project_id='1e6e233e637d4d55a50a62b63398ad15', limit=paginated_limit)
+            )
+            == 1
+        )
+        assert (
+            connection_block_storage.volumes.call_args_list.count(
+                mock.call(project_id='6e39099cccde4f809b003d9e0dd09304', limit=paginated_limit)
+            )
+            == 1
         )
     aggregator.assert_metric(
         'openstack.cinder.volume.count',
