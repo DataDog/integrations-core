@@ -63,6 +63,7 @@ class BlockStorageItem(BaseModel):
         arbitrary_types_allowed=True,
         frozen=True,
     )
+    transfers: Optional[MappingProxyType[str, Any]] = None
     volumes: Optional[MappingProxyType[str, Any]] = None
 
 

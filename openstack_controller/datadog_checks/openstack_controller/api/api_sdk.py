@@ -162,6 +162,12 @@ class ApiSdk(Api):
             )
         ]
 
+    def get_block_storage_transfers(self, project_id):
+        return [
+            transfer.to_dict(original_names=True)
+            for transfer in self.connection.block_storage.transfers(project_id, details=True)
+        ]
+
     def get_compute_limits(self, project_id):
         return self.connection.compute.get_limits(tenant_id=project_id).to_dict(original_names=True)
 

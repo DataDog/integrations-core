@@ -204,6 +204,15 @@ class ApiRest(Api):
             params=params,
         )
 
+    def get_block_storage_transfers(self, project_id):
+        response = self.http.get(
+            '{}/os-volume-transfer/detail'.format(
+                self._catalog.get_endpoint_by_type(Component.Types.BLOCK_STORAGE.value)
+            )
+        )
+        response.raise_for_status()
+        return response.json().get('transfers', {})
+
     def get_compute_limits(self, project_id):
         params = {'tenant_id': project_id}
         response = self.http.get(

@@ -261,6 +261,20 @@ def test_block_storage_metrics(aggregator, check, dd_run_check):
             'keystone_server:http://127.0.0.1:8080/identity',
         ],
     )
+    aggregator.assert_metric(
+        'openstack.cinder.volume.transfer.count',
+        count=1,
+        value=1,
+        tags=[
+            'domain_id:default',
+            'project_name:demo',
+            'project_id:1e6e233e637d4d55a50a62b63398ad15',
+            'volume_id:acb5a860-3f17-4c35-9484-394a12dd7dfc',
+            'volume_name:first volume',
+            'transfer_id:1b3f7d49-8fd8-41b8-b2a5-859c5fe71a20',
+            'keystone_server:http://127.0.0.1:8080/identity',
+        ],
+    )
 
 
 @pytest.mark.parametrize(
