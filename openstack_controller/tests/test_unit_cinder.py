@@ -264,12 +264,13 @@ def test_block_storage_metrics(aggregator, check, dd_run_check):
 
 
 @pytest.mark.parametrize(
-    ('instance', 'paginated_limit', 'api_type', 'expected_api_calls'),
+    ('instance', 'paginated_limit', 'api_type', 'expected_api_calls_proj_1', 'expected_api_calls_proj_2'),
     [
         pytest.param(
             configs.REST,
             1,
             ApiType.REST,
+            2,
             1,
             id='api rest low limit',
         ),
@@ -278,12 +279,14 @@ def test_block_storage_metrics(aggregator, check, dd_run_check):
             1000,
             ApiType.REST,
             1,
+            1,
             id='api rest high limit',
         ),
         pytest.param(
             configs.SDK,
             1,
             ApiType.SDK,
+            2,
             1,
             id='api sdk low limit',
         ),
@@ -291,6 +294,7 @@ def test_block_storage_metrics(aggregator, check, dd_run_check):
             configs.SDK,
             1000,
             ApiType.SDK,
+            1,
             1,
             id='api sdk high limit',
         ),
@@ -302,7 +306,8 @@ def test_block_storage_pagination(
     instance,
     openstack_controller_check,
     paginated_limit,
-    expected_api_calls,
+    expected_api_calls_proj_1,
+    expected_api_calls_proj_2,
     api_type,
     dd_run_check,
     connection_block_storage,
@@ -323,15 +328,13 @@ def test_block_storage_pagination(
             args_list.count(
                 ('http://127.0.0.1:8776/volume/v3/1e6e233e637d4d55a50a62b63398ad15/volumes/detail', paginated_limit)
             )
-            == 2
-            if paginated_limit == 1
-            else 1
+            == expected_api_calls_proj_1
         )
         assert (
             args_list.count(
                 ('http://127.0.0.1:8776/volume/v3/6e39099cccde4f809b003d9e0dd09304/volumes/detail', paginated_limit)
             )
-            == expected_api_calls
+            == expected_api_calls_proj_2
         )
     else:
         assert connection_block_storage.volumes.call_count == 2
