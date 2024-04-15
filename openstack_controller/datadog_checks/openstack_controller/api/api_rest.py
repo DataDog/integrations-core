@@ -213,6 +213,16 @@ class ApiRest(Api):
         response.raise_for_status()
         return response.json().get('transfers', {})
 
+    def get_block_storage_snapshots(self, project_id):
+        params = {}
+        return self.make_paginated_request(
+            '{}/snapshots/detail'.format(self._catalog.get_endpoint_by_type(Component.Types.BLOCK_STORAGE.value)),
+            'snapshots',
+            'id',
+            next_signifier='snapshots_links',
+            params=params,
+        )
+
     def get_compute_limits(self, project_id):
         params = {'tenant_id': project_id}
         response = self.http.get(

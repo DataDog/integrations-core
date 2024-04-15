@@ -401,7 +401,23 @@ def connection_block_storage(request, mock_responses):
             for transfer in mock_responses('GET', f'/volume/v3/{project_id}/os-volume-transfer/detail')['transfers']
         ]
 
-    return mock.MagicMock(volumes=mock.MagicMock(side_effect=volumes), transfers=mock.MagicMock(side_effect=transfers))
+    def snapshots(project_id, limit=None):
+        if http_error and 'snapshots' in http_error:
+            raise requests.exceptions.HTTPError(response=http_error['snapshots'])
+        return [
+            mock.MagicMock(
+                to_dict=mock.MagicMock(
+                    return_value=snapshot,
+                )
+            )
+            for snapshot in mock_responses('GET', f'/volume/v3/{project_id}/snapshots/detail')['snapshots']
+        ]
+
+    return mock.MagicMock(
+        volumes=mock.MagicMock(side_effect=volumes),
+        transfers=mock.MagicMock(side_effect=transfers),
+        snapshots=mock.MagicMock(side_effect=snapshots),
+    )
 
 
 @pytest.fixture

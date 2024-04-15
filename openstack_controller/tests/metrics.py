@@ -157,20 +157,6 @@ NEUTRON_QUOTA_METRICS = {
 
 NEUTRON_PROJECT_METRICS = NEUTRON_NETWORK_METRICS | NEUTRON_QUOTA_METRICS
 
-VOLUMES_METRICS_CINDER = [
-    {
-        'name': 'openstack.cinder.volume.count',
-        'count': 4,
-        'value': 1,
-        'tags': [
-            'volume_size:1',
-            'volume_name:',
-            'volume_status:in-use',
-            'keystone_server:http://127.0.0.1:8080/identity',
-        ],
-    },
-]
-
 COMPUTE_SERVICES_NOVA_MICROVERSION_DEFAULT = [
     {
         'name': 'openstack.nova.service.count',

@@ -8,6 +8,8 @@ from datadog_checks.openstack_controller.metrics import (
     CINDER_METRICS_PREFIX,
     CINDER_RESPONSE_TIME,
     CINDER_SERVICE_CHECK,
+    CINDER_SNAPSHOT_COUNT,
+    CINDER_SNAPSHOT_TAGS,
     CINDER_TRANSFER_COUNT,
     CINDER_TRANSFER_TAGS,
     CINDER_VOLUME_COUNT,
@@ -63,3 +65,19 @@ class BlockStorage(Component):
                 )
                 self.check.log.debug("transfer: %s", transfer)
                 self.check.gauge(CINDER_TRANSFER_COUNT, 1, tags=tags + transfer['tags'])
+
+    @Component.register_project_metrics(ID)
+    @Component.http_error()
+    def _report_snapshots(self, project_id, tags, config):
+        report_snapshots = config.get('snapshots', True)
+        if report_snapshots:
+            data = self.check.api.get_block_storage_snapshots(project_id)
+            for item in data:
+                snapshot = get_metrics_and_tags(
+                    item,
+                    tags=CINDER_SNAPSHOT_TAGS,
+                    prefix=CINDER_METRICS_PREFIX,
+                    metrics=[CINDER_SNAPSHOT_COUNT],
+                )
+                self.check.log.debug("snapshot: %s", snapshot)
+                self.check.gauge(CINDER_SNAPSHOT_COUNT, 1, tags=tags + snapshot['tags'])
