@@ -9,6 +9,7 @@ from datadog_checks.base import to_string
 
 from .constants import METRIC_TO_INSTANCE_TAG_MAPPING, RESOURCE_TYPE_TO_NAME
 
+
 def get_tags_recursively(mor, infrastructure_data, include_only=None):
     """Go up the resources hierarchy from the given mor. Note that a host running a VM is not considered to be a
     parent of that VM.
