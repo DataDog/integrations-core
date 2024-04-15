@@ -19,6 +19,15 @@ from datadog_checks.base.utils.models import validation
 from . import defaults, validators
 
 
+class CollectPerInstanceFilters(BaseModel):
+    model_config = ConfigDict(
+        arbitrary_types_allowed=True,
+        frozen=True,
+    )
+    host: Optional[tuple[str, ...]] = None
+    vm: Optional[tuple[str, ...]] = None
+
+
 class MetricPatterns(BaseModel):
     model_config = ConfigDict(
         arbitrary_types_allowed=True,
@@ -34,6 +43,7 @@ class InstanceConfig(BaseModel):
         arbitrary_types_allowed=True,
         frozen=True,
     )
+    collect_per_instance_filters: Optional[CollectPerInstanceFilters] = None
     disable_generic_tags: Optional[bool] = None
     empty_default_hostname: Optional[bool] = None
     host: str

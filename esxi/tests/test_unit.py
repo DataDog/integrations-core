@@ -286,3 +286,230 @@ def test_use_guest_hostname(vcsim_instance, dd_run_check, aggregator):
     aggregator.assert_metric("esxi.cpu.usage.avg", value=18, hostname="testing-vm")
     aggregator.assert_metric("esxi.cpu.usage.avg", value=19, hostname="test-vm-2")
     aggregator.assert_metric("esxi.cpu.usage.avg", value=26, hostname="localhost.localdomain")
+
+
+@pytest.mark.usefixtures("service_instance")
+def test_report_vm_instance_metrics(aggregator, dd_run_check, vcsim_instance, service_instance):
+    retrieve_result = vim.PropertyCollector.RetrieveResult(
+        objects=[
+            vim.ObjectContent(
+                obj=vim.VirtualMachine(moId="vm1"),
+                propSet=[
+                    vmodl.DynamicProperty(
+                        name='name',
+                        val='vm1',
+                    ),
+                ],
+            ),
+        ]
+    )
+    service_instance.content.propertyCollector.RetrievePropertiesEx = MagicMock(return_value=retrieve_result)
+
+    service_instance.content.perfManager.QueryPerf = MagicMock(
+        side_effect=[
+            [
+                vim.PerformanceManager.EntityMetric(
+                    entity=vim.VirtualMachine(moId="vm1"),
+                    value=[
+                        vim.PerformanceManager.IntSeries(
+                            value=[47, 52],
+                            id=vim.PerformanceManager.MetricId(counterId=1, instance='test1'),
+                        )
+                    ],
+                ),
+                vim.PerformanceManager.EntityMetric(
+                    entity=vim.VirtualMachine(moId="vm1"),
+                    value=[
+                        vim.PerformanceManager.IntSeries(
+                            value=[30, 11],
+                            id=vim.PerformanceManager.MetricId(counterId=1, instance='test2'),
+                        )
+                    ],
+                ),
+                vim.PerformanceManager.EntityMetric(
+                    entity=vim.VirtualMachine(moId="vm1"),
+                    value=[
+                        vim.PerformanceManager.IntSeries(
+                            value=[47, 60],
+                            id=vim.PerformanceManager.MetricId(counterId=1),
+                        )
+                    ],
+                ),
+            ],
+            [],
+        ]
+    )
+    instance = copy.deepcopy(vcsim_instance)
+
+    instance.update(
+        {
+            'collect_per_instance_filters': {
+                'vm': ['cpu.usage.avg'],
+            }
+        }
+    )
+    check = EsxiCheck('esxi', {}, [instance])
+    dd_run_check(check)
+
+    base_tags = ['esxi_url:127.0.0.1:8989']
+    aggregator.assert_metric(
+        'esxi.cpu.usage.avg',
+        value=52,
+        count=1,
+        hostname='vm1',
+        tags=base_tags + ['cpu_core:test1'],
+    )
+    aggregator.assert_metric(
+        'esxi.cpu.usage.avg',
+        value=11,
+        count=1,
+        hostname='vm1',
+        tags=base_tags + ['cpu_core:test2'],
+    )
+    aggregator.assert_metric(
+        'esxi.cpu.usage.avg',
+        value=60,
+        count=0,
+        hostname='vm1',
+        tags=base_tags,
+    )
+
+
+@pytest.mark.usefixtures("service_instance")
+def test_report_instance_metrics_unknown_key(aggregator, dd_run_check, vcsim_instance, service_instance):
+    retrieve_result = vim.PropertyCollector.RetrieveResult(
+        objects=[
+            vim.ObjectContent(
+                obj=vim.VirtualMachine(moId="vm1"),
+                propSet=[
+                    vmodl.DynamicProperty(
+                        name='name',
+                        val='vm1',
+                    ),
+                ],
+            ),
+        ]
+    )
+    service_instance.content.propertyCollector.RetrievePropertiesEx = MagicMock(return_value=retrieve_result)
+
+    service_instance.content.perfManager.QueryPerf = MagicMock(
+        side_effect=[
+            [
+                vim.PerformanceManager.EntityMetric(
+                    entity=vim.VirtualMachine(moId="vm1"),
+                    value=[
+                        vim.PerformanceManager.IntSeries(
+                            value=[3, 10],
+                            id=vim.PerformanceManager.MetricId(counterId=65541, instance='test1'),
+                        )
+                    ],
+                ),
+            ],
+        ]
+    )
+    instance = copy.deepcopy(vcsim_instance)
+
+    instance.update(
+        {
+            'collect_per_instance_filters': {
+                'vm': ['mem.granted.avg'],
+            }
+        }
+    )
+    check = EsxiCheck('esxi', {}, [instance])
+    dd_run_check(check)
+
+    base_tags = ['esxi_url:127.0.0.1:8989']
+    aggregator.assert_metric(
+        'esxi.mem.granted.avg',
+        value=10,
+        count=1,
+        hostname='vm1',
+        tags=base_tags + ['instance:test1'],
+    )
+
+
+@pytest.mark.usefixtures("service_instance")
+def test_report_instance_metrics_invalid_counter_id(aggregator, dd_run_check, vcsim_instance, service_instance, caplog):
+    retrieve_result = vim.PropertyCollector.RetrieveResult(
+        objects=[
+            vim.ObjectContent(
+                obj=vim.VirtualMachine(moId="vm1"),
+                propSet=[
+                    vmodl.DynamicProperty(
+                        name='name',
+                        val='vm1',
+                    ),
+                ],
+            ),
+        ]
+    )
+    service_instance.content.propertyCollector.RetrievePropertiesEx = MagicMock(return_value=retrieve_result)
+
+    service_instance.content.perfManager.QueryPerf = MagicMock(
+        side_effect=[
+            [
+                vim.PerformanceManager.EntityMetric(
+                    entity=vim.VirtualMachine(moId="vm1"),
+                    value=[
+                        vim.PerformanceManager.IntSeries(
+                            value=[3, 10],
+                            id=vim.PerformanceManager.MetricId(counterId=500, instance='test1'),
+                        )
+                    ],
+                ),
+            ],
+        ]
+    )
+    instance = copy.deepcopy(vcsim_instance)
+
+    instance.update(
+        {
+            'collect_per_instance_filters': {
+                'vm': ['cpu.usage.avg'],
+            }
+        }
+    )
+    check = EsxiCheck('esxi', {}, [instance])
+    caplog.set_level(logging.DEBUG)
+    dd_run_check(check)
+    assert "Skipping value for counter 500, because the integration doesn't have metadata about it" in caplog.text
+
+    aggregator.assert_metric("esxi.vm.count")
+    aggregator.assert_metric("esxi.host.can_connect")
+    aggregator.assert_all_metrics_covered()
+
+
+@pytest.mark.usefixtures("service_instance")
+def test_report_instance_metrics_invalid_metric_name_still_collect_metrics(aggregator, dd_run_check, vcsim_instance):
+    instance = copy.deepcopy(vcsim_instance)
+
+    instance.update(
+        {
+            'collect_per_instance_filters': {
+                'vm': ['metric.name'],
+            }
+        }
+    )
+    check = EsxiCheck('esxi', {}, [instance])
+    dd_run_check(check)
+    base_tags = ["esxi_url:127.0.0.1:8989"]
+    aggregator.assert_metric("esxi.cpu.usage.avg", value=26, tags=base_tags, hostname="localhost.localdomain")
+    aggregator.assert_metric("esxi.mem.granted.avg", value=80, tags=base_tags, hostname="localhost.localdomain")
+    aggregator.assert_metric("esxi.host.can_connect", 1, count=1, tags=base_tags)
+
+
+@pytest.mark.usefixtures("service_instance")
+def test_invalid_instance_filters(dd_run_check, vcsim_instance, caplog):
+    instance = copy.deepcopy(vcsim_instance)
+
+    instance.update(
+        {
+            'collect_per_instance_filters': {
+                'cluster': ['cpu.usage.avg'],
+            }
+        }
+    )
+    check = EsxiCheck('esxi', {}, [instance])
+    dd_run_check(check)
+    assert "Ignoring metric_filter for resource 'cluster'. It should be one of 'host, vm'" in caplog.text

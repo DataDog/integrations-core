@@ -1,9 +1,10 @@
 # (C) Datadog, Inc. 2024-present
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
-
+from six import iteritems
 from pyVmomi import vim
 
+from .constants import METRIC_TO_INSTANCE_TAG_MAPPING, RESOURCE_TYPE_TO_NAME
 from datadog_checks.base import to_string
 
 
@@ -51,3 +52,28 @@ def get_tags_recursively(mor, infrastructure_data, include_only=None):
                 continue
             filtered_tags.append(tag)
     return filtered_tags
+
+
+def match_any_regex(string, regexes):
+    for regex in regexes:
+        if regex.match(string):
+            return True
+    return False
+
+
+def should_collect_per_instance_values(collect_per_instance_filters, metric_name, resource_type):
+    filters = collect_per_instance_filters.get(RESOURCE_TYPE_TO_NAME[resource_type], [])
+    metric_matched = match_any_regex(metric_name, filters)
+    return metric_matched
+
+
+def get_mapped_instance_tag(metric_name):
+    """
+    When collecting per-instance metric, the `instance` tag can mean a lot of different things. The meaning of the
+    tag cannot be guessed by looking at the api results and has to be inferred using documentation or experience.
+    This method acts as a utility to map a metric_name to the meaning of its instance tag.
+    """
+    for prefix, tag_key in iteritems(METRIC_TO_INSTANCE_TAG_MAPPING):
+        if metric_name.startswith(prefix):
+            return tag_key
+    return 'instance'
