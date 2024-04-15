@@ -29,7 +29,10 @@ class EsxiCheck(AgentCheck):
         self.username = self.instance.get("username")
         self.password = self.instance.get("password")
         self.use_guest_hostname = self.instance.get("use_guest_hostname", False)
-        excluded_host_tags = self.instance.get("excluded_host_tags", [])
+        self.excluded_host_tags = self._validate_excluded_host_tags(self.instance.get("excluded_host_tags", []))
+        self.tags = [f"esxi_url:{self.host}"]
+
+    def _validate_excluded_host_tags(self, excluded_host_tags):
         valid_excluded_host_tags = []
         for excluded_host_tag in excluded_host_tags:
             if excluded_host_tag not in AVAILABLE_HOST_TAGS:
@@ -41,8 +44,7 @@ class EsxiCheck(AgentCheck):
                 )
             else:
                 valid_excluded_host_tags.append(excluded_host_tag)
-        self.excluded_host_tags = valid_excluded_host_tags
-        self.tags = [f"esxi_url:{self.host}"]
+        return valid_excluded_host_tags
 
     def get_resources(self):
         self.log.debug("Retrieving resources")
