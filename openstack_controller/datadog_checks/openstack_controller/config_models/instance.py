@@ -58,6 +58,14 @@ class BaremetalItem(BaseModel):
     nodes: Optional[Union[bool, Node]] = None
 
 
+class BlockStorageItem(BaseModel):
+    model_config = ConfigDict(
+        arbitrary_types_allowed=True,
+        frozen=True,
+    )
+    volumes: Optional[MappingProxyType[str, Any]] = None
+
+
 class Hypervisor(BaseModel):
     model_config = ConfigDict(
         arbitrary_types_allowed=True,
@@ -291,7 +299,7 @@ class Components(BaseModel):
         frozen=True,
     )
     baremetal: Optional[Union[bool, BaremetalItem]] = None
-    block_storage: Optional[Union[bool, MappingProxyType[str, Any]]] = Field(None, alias='block-storage')
+    block_storage: Optional[Union[bool, BlockStorageItem]] = Field(None, alias='block-storage')
     compute: Optional[Union[bool, ComputeItem]] = None
     identity: Optional[Union[bool, IdentityItem]] = None
     image: Optional[Union[bool, ImageItem]] = None

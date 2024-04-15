@@ -354,6 +354,8 @@ NEUTRON_PROJECT_METRICS = NEUTRON_NETWORK_METRICS | NEUTRON_QUOTA_METRICS
 CINDER_METRICS_PREFIX = "openstack.cinder"
 CINDER_SERVICE_CHECK = f"{CINDER_METRICS_PREFIX}.api.up"
 CINDER_RESPONSE_TIME = f"{CINDER_METRICS_PREFIX}.response_time"
+CINDER_VOLUME_COUNT = f"{CINDER_METRICS_PREFIX}.volume.count"
+CINDER_VOLUME_TAGS = {'id': 'volume_id', 'name': 'volume_name', 'status': 'volume_status', 'size': 'volume_size'}
 
 IRONIC_METRICS_PREFIX = "openstack.ironic"
 IRONIC_SERVICE_CHECK = f"{IRONIC_METRICS_PREFIX}.api.up"

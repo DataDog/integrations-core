@@ -373,6 +373,26 @@ def connection_identity(request, mock_responses):
 
 
 @pytest.fixture
+def connection_block_storage(request, mock_responses):
+    param = request.param if hasattr(request, 'param') and request.param is not None else {}
+    http_error = param.get('http_error')
+
+    def volumes(project_id, limit=None):
+        if http_error and 'volumes' in http_error:
+            raise requests.exceptions.HTTPError(response=http_error['volumes'])
+        return [
+            mock.MagicMock(
+                to_dict=mock.MagicMock(
+                    return_value=volume,
+                )
+            )
+            for volume in mock_responses('GET', f'/volume/v3/{project_id}/volumes/detail')['volumes']
+        ]
+
+    return mock.MagicMock(volumes=mock.MagicMock(side_effect=volumes))
+
+
+@pytest.fixture
 def connection_compute(request, mock_responses):
     param = request.param if hasattr(request, 'param') and request.param is not None else {}
     http_error = param.get('http_error')
@@ -739,6 +759,7 @@ def openstack_connection(
     connection_compute,
     connection_network,
     connection_baremetal,
+    connection_block_storage,
     connection_load_balancer,
     connection_image,
 ):
@@ -750,6 +771,7 @@ def openstack_connection(
             compute=connection_compute,
             network=connection_network,
             baremetal=connection_baremetal,
+            block_storage=connection_block_storage,
             load_balancer=connection_load_balancer,
             image=connection_image,
         )

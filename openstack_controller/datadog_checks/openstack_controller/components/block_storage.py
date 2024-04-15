@@ -5,8 +5,12 @@
 
 from datadog_checks.openstack_controller.components.component import Component
 from datadog_checks.openstack_controller.metrics import (
+    CINDER_METRICS_PREFIX,
     CINDER_RESPONSE_TIME,
     CINDER_SERVICE_CHECK,
+    CINDER_VOLUME_COUNT,
+    CINDER_VOLUME_TAGS,
+    get_metrics_and_tags,
 )
 
 
@@ -25,3 +29,19 @@ class BlockStorage(Component):
         response_time = self.check.api.get_response_time(BlockStorage.TYPES.value)
         self.check.log.debug("`%s` response time: %s", BlockStorage.ID.value, response_time)
         self.check.gauge(CINDER_RESPONSE_TIME, response_time, tags=tags)
+
+    @Component.register_project_metrics(ID)
+    @Component.http_error()
+    def _report_volumes(self, project_id, tags, config):
+        report_volumes = config.get('volumes', True)
+        if report_volumes:
+            data = self.check.api.get_block_storage_volumes(project_id)
+            for item in data:
+                volume = get_metrics_and_tags(
+                    item,
+                    tags=CINDER_VOLUME_TAGS,
+                    prefix=CINDER_METRICS_PREFIX,
+                    metrics=[CINDER_VOLUME_COUNT],
+                )
+                self.check.log.debug("volume: %s", volume)
+                self.check.gauge(CINDER_VOLUME_COUNT, 1, tags=tags + volume['tags'])

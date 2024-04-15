@@ -394,6 +394,9 @@ files:
                 anyOf:
                   - type: boolean
                   - type: object
+                    properties:
+                      - name: volumes
+                        type: object
               - name: baremetal
                 anyOf:
                   - type: boolean
