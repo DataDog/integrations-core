@@ -203,11 +203,6 @@ class ApiRest(Api):
             next_signifier='volumes_links',
             params=params,
         )
-        # response = self.http.get(
-        #     '{}/volumes/detail'.format(self._catalog.get_endpoint_by_type(Component.Types.BLOCK_STORAGE.value))
-        # )
-        # response.raise_for_status()
-        # return response.json().get('volumes', {})
 
     def get_compute_limits(self, project_id):
         params = {'tenant_id': project_id}
