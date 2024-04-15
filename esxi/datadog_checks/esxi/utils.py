@@ -2,8 +2,8 @@
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
 
-from six import iteritems
 from pyVmomi import vim
+from six import iteritems
 
 from .constants import METRIC_TO_INSTANCE_TAG_MAPPING, RESOURCE_TYPE_TO_NAME
 from datadog_checks.base import to_string
