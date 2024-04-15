@@ -61,9 +61,14 @@ CONNECTION_LIMIT_METRICS = [
 
 CONNECTION_LIMIT_STAT_PREFIX_TAG = ['stat_prefix:ingress_http']
 
-RBAC_METRICS = [
+RBAC_ENFORCE_METRICS = [
     "envoy.http.rbac.allowed",
     "envoy.http.rbac.denied",
+]
+
+RBAC_SHADOW_METRICS = [
     "envoy.http.rbac.shadow_allowed",
     "envoy.http.rbac.shadow_denied",
 ]
+
+RBAC_METRICS = RBAC_ENFORCE_METRICS + RBAC_SHADOW_METRICS
