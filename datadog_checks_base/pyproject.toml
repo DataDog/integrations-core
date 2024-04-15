@@ -55,7 +55,7 @@ deps = [
     "prometheus-client==0.20.0; python_version > '3.0'",
     "protobuf==3.17.3; python_version < '3.0'",
     "protobuf==5.26.1; python_version > '3.0'",
-    "pydantic==2.0.2; python_version > '3.0'",
+    "pydantic==2.7.0; python_version > '3.0'",
     "python-dateutil==2.9.0.post0",
     "pywin32==228; sys_platform == 'win32' and python_version < '3.0'",
     "pywin32==306; sys_platform == 'win32' and python_version > '3.0'",
@@ -75,7 +75,7 @@ deps = [
 http = [
     "aws-requests-auth==0.4.3",
     "botocore==1.20.112; python_version < '3.0'",
-    "botocore==1.34.76; python_version > '3.0'",
+    "botocore==1.34.84; python_version > '3.0'",
     "oauthlib==3.1.0; python_version < '3.0'",
     "oauthlib==3.2.2; python_version > '3.0'",
     "pyjwt==1.7.1; python_version < '3.0'",
