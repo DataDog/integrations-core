@@ -3889,7 +3889,7 @@ METRICS = {
     'http.rbac.shadow_allowed': {
         'tags': (
             ('stat_prefix',),
-            (),
+            ('shadow_rule_prefix',),
             (),
         ),
         'method': 'monotonic_count',
