@@ -140,7 +140,6 @@ class EsxiCheck(AgentCheck):
             if should_collect_per_instance_values(self.collect_per_instance_filters, metric_name, resource_type):
                 metric_id.instance = "*"
 
-
         spec = vim.PerformanceManager.QuerySpec(maxSample=1, entity=entity, metricId=metric_ids)
         result_stats = self.content.perfManager.QueryPerf([spec])
 

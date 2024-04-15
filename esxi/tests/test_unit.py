@@ -523,6 +523,7 @@ def test_invalid_instance_filters(dd_run_check, vcsim_instance, caplog):
     dd_run_check(check)
     assert "Ignoring metric_filter for resource 'cluster'. It should be one of 'host, vm'" in caplog.text
 
+
 @pytest.mark.parametrize(
     'excluded_tags, expected_warning',
     [
