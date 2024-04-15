@@ -17,37 +17,32 @@ class Schemas:
 
     def __init__(self, check):
         self._check = check 
-        #self._index = [db_index, schema_index, table_index] 
-        self.schemas_per_db = {} 
         self._log = check.log
-        #TODO is this class unique per host ?
-        self._start_time_for_host = []
-        #TODO per DB may be ? 
-        self._last_time_collected_diff_per_db = {}
+        self.schemas_per_db = {} 
 
-        self._index = None
-        self._data_for_processed_db = None
-        self.databases = []
-        self.current_table_list = None
-        self.current_schema_list = None
+        # These are fields related to the work to do while doing the initial intake
+        # for diffs there should eb a self._done_db_list which will be used to see if new dbs have appeared/disappeared.
+        self._databases_to_query = []
+        self._current_table_list = None
+        self._current_schema_list = None
+        self._number_of_collected_tables = 0 #TODO later switch to columns
 
-                      
+    def reset_data_collection(self):
+        self._current_table_list = None  
+        self._current_schema_list = None
+        self._number_of_collected_tables = 0
+       
     def _init_schema_collection(self):
-        if len(self.databases) == 0:
-            self.databases = self._check.get_databases()
-            if len(self.databases) == 0:
-                self._index = None
-                return
-            self._index = 0
+        currently_known_databases = self._check.get_databases()
+        if len(self._databases_to_query) == 0:
+            self._databases_to_query = self._check.get_databases()
             return  
         else:
-            if self._index is None:
-                print("error")  
-            #TODO if db dissapeared we invalidate indexes should be done in exception treatment of use DB
-            if self.databases[self._index] not in self._check.get_databases():
-                    #we dont move the index as on first use db its gonna throw and continue the loop
-                    self.current_schema_list = None
-                    self.current_table_list = None
+            if self._databases_to_query[0] not in currently_known_databases:
+                #TODO if db dissapeared we invalidate indexes should be done in exception treatment of use DB ?
+                #if DB is not there the first use db will throw and we continue until we find an existing db or exaust the list
+                # the idea is always finish the existing DB list and then run "diff" logic which will create a new list of "tasks"
+                self.reset_data_collection()
 
    #TODO update this at the very end as it constantly changing
     """schemas data struct is a dictionnary with key being a schema name the value is
@@ -56,7 +51,7 @@ class Schemas:
         "name": str
         "schema_id": str
         "principal_id": str
-        "tables" : dict
+        "tables" : []
             object_id : str
             name : str
             columns: list of columns                  
@@ -76,35 +71,49 @@ class Schemas:
         self.schemas_per_db = {} 
         # init the index
         self._init_schema_collection()
-        if self._index is None:
+        if len(self._databases_to_query) == 0:
             return
         
         # dont need an index just always safe the last one.
         def fetch_schema_data(cursor, db_name):
             # check if we start from scratch or not 
-            if self.current_schema_list is None:
+            pdb.set_trace()
+            if self._current_schema_list is None:
                 # find new schemas:
                 schemas = self._query_schema_information(cursor)
             else:
-                schemas = self.current_schema_list  
-            #ok we have schemas now tables
-            if self.current_table_list is None:
+                schemas = self._current_schema_list  
+
+            if self._current_table_list is None:
                 schemas[0]["tables"] = self._get_tables(schemas[0], cursor)
+            else:
+                schemas[0]["tables"] = self._current_table_list
 
             for index_sh, schema in enumerate(schemas):  
-                if schema["tables"] is not None:
+                if schema["tables"] is None or len(schema["tables"]) == 0:
                     schema["tables"] = self._get_tables(schema, cursor)
                 for index_t,table in enumerate(schema["tables"]):
-                    pdb.set_trace()
+                    
+                    #TODO later can stop after a certain amount of columns
+                    # thus stop
+                    self._number_of_collected_tables+=1
                     stop = self._get_table_data(table, schema, cursor)
-                    if stop:
-                        self.current_table_list = schema["tables"][index_t:]
-                        self.current_schema_list = schemas[index_sh:]
+                    pdb.set_trace()
+                    if stop or self._number_of_collected_tables == 2:
+                        self._number_of_collected_tables = 0
+                        self._current_table_list = schema["tables"][index_t+1:]
+                        self._current_schema_list = schemas[index_sh:]
+                        # TODO this will send not only schemas with tables filled but schemas that are yet empty, not that bad but can be fixed
                         self.schemas_per_db[db_name] = schemas
+                        self._databases_to_query = self._databases_to_query[self._databases_to_query.index(db_name):]
+                        pdb.set_trace()
                         return False
             self.schemas_per_db[db_name] = schemas
+            # if we reached this point means we went through all the list thus we can reset :
+            self.reset_data_collection()
+            self._databases_to_query = []
             return True
-        self._check.do_for_databases(fetch_schema_data, self.databases[self._index:])
+        self._check.do_for_databases(fetch_schema_data, self._databases_to_query)
         pdb.set_trace()
         print(self.schemas_per_db)
         
