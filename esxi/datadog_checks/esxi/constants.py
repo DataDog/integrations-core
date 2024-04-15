@@ -36,7 +36,6 @@ RESOURCE_TYPE_TO_NAME = {
     VM_RESOURCE: 'vm',
 }
 
-
 METRIC_TO_INSTANCE_TAG_MAPPING = {
     # Structure:
     # prefix: tag key used for instance value
@@ -57,3 +56,14 @@ METRIC_TO_INSTANCE_TAG_MAPPING = {
     'virtualDisk.': 'disk',
     # Examples: scsi0:0, scsi0:0
 }
+
+AVAILABLE_HOST_TAGS = [
+    "esxi_url",
+    "esxi_type",
+    "esxi_host",
+    "esxi_folder",
+    "esxi_cluster",
+    "esxi_compute",
+    "esxi_datacenter",
+    "esxi_datastore",
+]

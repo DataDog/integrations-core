@@ -16,6 +16,10 @@ def instance_empty_default_hostname():
     return False
 
 
+def instance_excluded_host_tags():
+    return []
+
+
 def instance_min_collection_interval():
     return 15
 

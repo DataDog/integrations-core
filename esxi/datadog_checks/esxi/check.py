@@ -10,7 +10,15 @@ from pyVmomi import vim, vmodl
 
 from datadog_checks.base import AgentCheck  # noqa: F401
 
-from .constants import ALL_RESOURCES, HOST_RESOURCE, MAX_PROPERTIES, RESOURCE_TYPE_TO_NAME, SHORT_ROLLUP, VM_RESOURCE
+from .constants import (
+    ALL_RESOURCES,
+    AVAILABLE_HOST_TAGS,
+    HOST_RESOURCE,
+    MAX_PROPERTIES,
+    RESOURCE_TYPE_TO_NAME,
+    SHORT_ROLLUP,
+    VM_RESOURCE,
+)
 from .metrics import RESOURCE_NAME_TO_METRICS
 from .utils import get_mapped_instance_tag, get_tags_recursively, should_collect_per_instance_values
 
@@ -27,6 +35,19 @@ class EsxiCheck(AgentCheck):
         self.collect_per_instance_filters = self._parse_metric_regex_filters(
             self.instance.get("collect_per_instance_filters", {})
         )
+        excluded_host_tags = self.instance.get("excluded_host_tags", [])
+        valid_excluded_host_tags = []
+        for excluded_host_tag in excluded_host_tags:
+            if excluded_host_tag not in AVAILABLE_HOST_TAGS:
+                self.log.warning(
+                    "Unknown host tag `%s` cannot be excluded. Available host tags are: "
+                    "`esxi_url`, `esxi_type`, `esxi_host`, `esxi_folder`, `esxi_cluster` "
+                    "`esxi_compute`, `esxi_datacenter`, and `esxi_datastore`",
+                    excluded_host_tag,
+                )
+            else:
+                valid_excluded_host_tags.append(excluded_host_tag)
+        self.excluded_host_tags = valid_excluded_host_tags
         self.tags = [f"esxi_url:{self.host}"]
 
     def _parse_metric_regex_filters(self, all_metric_filters):
@@ -111,13 +132,14 @@ class EsxiCheck(AgentCheck):
         metric_ids = [vim.PerformanceManager.MetricId(counterId=counter, instance="") for counter in counter_ids]
         return counter_keys_and_names, metric_ids
 
-    def collect_metrics_for_entity(self, metric_ids, counter_keys_and_names, entity, entity_name):
+    def collect_metrics_for_entity(self, metric_ids, counter_keys_and_names, entity, entity_name, metric_tags):
         resource_type = type(entity)
         resource_name = RESOURCE_TYPE_TO_NAME[resource_type]
         for metric_id in metric_ids:
             metric_name = counter_keys_and_names.get(metric_id.counterId)
             if should_collect_per_instance_values(self.collect_per_instance_filters, metric_name, resource_type):
                 metric_id.instance = "*"
+
 
         spec = vim.PerformanceManager.QuerySpec(maxSample=1, entity=entity, metricId=metric_ids)
         result_stats = self.content.perfManager.QueryPerf([spec])
@@ -188,7 +210,7 @@ class EsxiCheck(AgentCheck):
                     continue
                 else:
                     most_recent_val = valid_values[-1]
-                    all_tags = self.tags + additional_tags
+                    all_tags = metric_tags + additional_tags
 
                     self.log.debug(
                         "Submit metric: name=`%s`, value=`%s`, hostname=`%s`, tags=`%s`",
@@ -199,20 +221,32 @@ class EsxiCheck(AgentCheck):
                     )
                     self.gauge(metric_name, most_recent_val, hostname=entity_name, tags=all_tags)
 
+    def set_version_metadata(self):
+        esxi_version = self.content.about.version
+        build_version = self.content.about.build
+        self.set_metadata('version', f'{esxi_version}+{build_version}')
+
     def check(self, _):
         try:
             connection = connect.SmartConnect(host=self.host, user=self.username, pwd=self.password)
             self.conn = connection
-            self.log.info("Connected to ESXi host %s", self.host)
+            self.content = connection.content
+
+            if self.content.about.apiType != "HostAgent":
+                raise Exception(
+                    f"{self.host} is not an ESXi host; please set the `host` config option to an ESXi host "
+                    "or use the vSphere integration to collect data from the vCenter",
+                )
+
+            self.log.info("Connected to ESXi host %s: %s", self.host, self.content.about.fullName)
             self.count("host.can_connect", 1, tags=self.tags)
 
         except Exception as e:
-            self.log.warning("Cannot connect to ESXi host %s: %s", self.host, str(e))
+            self.log.error("Cannot connect to ESXi host %s: %s", self.host, str(e))
             self.count("host.can_connect", 0, tags=self.tags)
             return
 
-        self.content = connection.content
-
+        self.set_version_metadata()
         resources = self.get_resources()
         resource_map = {
             obj_content.obj: {prop.name: prop.val for prop in obj_content.propSet}
@@ -260,16 +294,23 @@ class EsxiCheck(AgentCheck):
                     )
                 )
             tags.append('esxi_type:{}'.format(resource_type))
+
+            metric_tags = self.tags
+            if self.excluded_host_tags:
+                metric_tags = metric_tags + [t for t in tags if t.split(":", 1)[0] in self.excluded_host_tags]
+
             tags.extend(self.tags)
+
             if hostname is not None:
-                external_host_tags.append((hostname, {self.__NAMESPACE__: tags}))
+                filtered_external_tags = [t for t in tags if t.split(':')[0] not in self.excluded_host_tags]
+                external_host_tags.append((hostname, {self.__NAMESPACE__: filtered_external_tags}))
             else:
                 self.log.debug("No host name found for %s; skipping external tag submission", resource_obj)
 
             self.count(f"{resource_type}.count", 1, tags=tags, hostname=None)
 
             counter_keys_and_names, metric_ids = self.get_available_metric_ids_for_entity(resource_obj)
-            self.collect_metrics_for_entity(metric_ids, counter_keys_and_names, resource_obj, hostname)
+            self.collect_metrics_for_entity(metric_ids, counter_keys_and_names, resource_obj, hostname, metric_tags)
 
         if external_host_tags:
             self.set_external_tags(external_host_tags)
