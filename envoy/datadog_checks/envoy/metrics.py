@@ -3873,7 +3873,7 @@ METRICS = {
     'http.rbac.allowed': {
         'tags': (
             ('stat_prefix',),
-            (),
+            ('rule_prefix',),
             (),
         ),
         'method': 'monotonic_count',
@@ -3881,7 +3881,7 @@ METRICS = {
     'http.rbac.denied': {
         'tags': (
             ('stat_prefix',),
-            (),
+            ('rule_prefix',),
             (),
         ),
         'method': 'monotonic_count',

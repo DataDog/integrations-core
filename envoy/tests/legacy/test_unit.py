@@ -21,7 +21,8 @@ from .common import (
     INSTANCES,
     LOCAL_RATE_LIMIT_METRICS,
     RATE_LIMIT_STAT_PREFIX_TAG,
-    RBAC_METRICS,
+    RBAC_ENFORCE_METRICS,
+    RBAC_SHADOW_METRICS,
 )
 
 CHECK_NAME = 'envoy'
@@ -265,15 +266,22 @@ def test_metadata_not_collected(datadog_agent, check):
             ['stat_prefix:bar'],
         ),
         (
-            './legacy/rbac_metric.txt',
-            RBAC_METRICS,
-            ['stat_prefix:foo_buz_112'],
+            './legacy/rbac_enforce_metrics.txt',
+            RBAC_ENFORCE_METRICS,
+            ['stat_prefix:foo_buz_enforce'],
+            ['rule_prefix:rule_prefix'],
+        ),
+        (
+            './legacy/rbac_shadow_metrics.txt',
+            RBAC_SHADOW_METRICS,
+            ['stat_prefix:foo_buz_shadow'],
             ['shadow_rule_prefix:shadow_rule_prefix'],
         ),
     ],
     ids=[
         "stats_prefix_ext_auth",
-        "rbac_prefix_shadow",
+        "rbac_enforce_metrics",
+        "rbac_shadow_metrics",
     ],
 )
 def test_stats_prefix_optional_tags(
