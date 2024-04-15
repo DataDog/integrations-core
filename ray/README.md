@@ -70,7 +70,7 @@ metadata:
         "ray": {
           "instances": [
             {
-              "openmetrics_endpoint": "http://%%host%%:8080",
+              "openmetrics_endpoint": "http://%%host%%:8080"
             }
           ]
         }
