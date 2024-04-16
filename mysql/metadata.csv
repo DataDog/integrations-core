@@ -189,7 +189,7 @@ mysql.performance.select_full_range_join,gauge,,operation,second,The number of j
 mysql.performance.select_range,gauge,,operation,second,The number of joins that used ranges on the first table. This is normally not a critical issue even if the value is quite large.,0,mysql,mysql performance select_range,
 mysql.performance.select_range_check,gauge,,operation,second,"The number of joins without keys that check for key usage after each row. If this is not 0, you should carefully check the indexes of your tables.",0,mysql,mysql performance select_range_check,
 mysql.performance.select_scan,gauge,,operation,second,The number of joins that did a full scan of the first table.,0,mysql,mysql performance select_scan,
-mysql.performance.slow_queries,gauge,,query,second,The rate of slow queries.,-1,mysql,slow queries,
+mysql.performance.slow_queries,gauge,,query,second,The rate of slow queries (log queries that exceed a particular execution time).,-1,mysql,slow queries,
 mysql.performance.sort_merge_passes,gauge,,operation,second,"The number of merge passes that the sort algorithm has had to do. If this value is large, you should consider increasing the value of the sort_buffer_size system variable.",0,mysql,mysql performance sort_merge_passes,
 mysql.performance.sort_range,gauge,,operation,second,The number of sorts that were done using ranges.,0,mysql,mysql performance sort_range,
 mysql.performance.sort_rows,gauge,,operation,second,The number of sorted rows.,0,mysql,mysql performance sort_rows,
