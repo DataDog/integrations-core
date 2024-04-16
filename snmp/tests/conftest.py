@@ -105,7 +105,7 @@ def create_datadog_conf_file(tmp_dir):
         # Datadog Agent might not guarantee this behaviour in the future.
         'check_runners': -1,
         'network_devices': {
-            'snmp_listener': {
+            'autodiscovery': {
                 'workers': 4,
                 'discovery_interval': 10,
                 'configs': [
