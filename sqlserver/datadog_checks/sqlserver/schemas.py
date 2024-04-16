@@ -117,9 +117,8 @@ class Schemas:
         pdb.set_trace()
         print(self.schemas_per_db)
         
-#per DB per sqhema per tables. 
     # TODO how often ?
-    # TODO put in a class
+
     #TODOTODO do we need this map/list format if we are not dumping in json ??? May be we need to send query results as they are ? 
 
     #TODO Looks fine similar to Postgres, do we need to do someting with prinicipal_id
@@ -138,21 +137,10 @@ class Schemas:
         self._log.debug("fetched schemas len(rows)=%s", len(schemas))
         return schemas
         
-    #TODO we need to take care of new DB / removed DB 
-    #def get_current_db_times(cursor):
-        # list of all known DBs
+    #TODO collect diffs : we need to take care of new DB / removed DB . schemas new removed
+    # will nedd a separate query for changed indexes
 
-        #def execute_time_query():
-          # self._last_time_collected_diff_per_db =
-
-
-    
-    #TODO will nedd a separate query for changed indexes
-
-
-    # def payload consume , push in data amount 
     def _get_table_data(self, table, schema, cursor):
-        #while processing tables we would like to stop after X amount of data in payload.
         table["columns"] = self._get_columns_data_per_table(table["name"], schema["name"], cursor)
         table["partitions"] = self._get_partitions_data_per_table(table["object_id"], cursor)
         if str(table["object_id"]) == "1803153469":
@@ -160,14 +148,11 @@ class Schemas:
             print("should have index")
         table["indexes"] = self._get_index_data_per_table(table["object_id"], cursor)
         table["foreign_keys"] = self._get_foreign_key_data_per_table(table["object_id"], cursor)
-        return False
-    
-    
+        #TODO probably here decide based on the columns amount
+        return True
+        
     #TODO in SQLServer partitioned child tables should have the same object_id might be worth checking with a test.
 
-
-    # TODO how often ?
-    # TODO put in a class
     #TODOTODO do we need this map/list format if we are not dumping in json ??? May be we need to send query results as they are ? 
     def _get_tables(self, schema, cursor):
         cursor.execute(TABLES_IN_SCHEMA_QUERY.format(schema["schema_id"]))
@@ -175,17 +160,6 @@ class Schemas:
         rows = [dict(zip(columns, row)) for row in cursor.fetchall()] #TODO may be more optimal to patch columns with index etc 
         # rows = [dict(zip(columns + ["columns", "indexes", "partitions", "foreign_keys"], row + [[], [], [], []])) for row in cursor.fetchall()] #TODO may be this works
         return [ {"object_id" : row["object_id"], "name" : row['name'], "columns" : [], "indexes" : [], "partitions" : [], "foreign_keys" : []} for row in rows ]                  
-
-    # TODO how often ?
-    # TODO put in a class
-    #TODOTODO do we need this map/list format if we are not dumping in json ??? May be we need to send query results as they are ? 
-
-            
-        # TODO modify_date - there is a modify date !!! 
-        # TODO what is principal_id
-        # TODO is_replicated - might be interesting ? 
-        
-
 
     def _get_columns_data_per_table(self, table_name, schema_name, cursor):
         return execute_query_output_result_as_a_dict(COLUMN_QUERY.format(table_name, schema_name), cursor)
