@@ -8,7 +8,7 @@
     "configuration": "README.md#Setup",
     "support": "README.md#Support",
     "changelog": "CHANGELOG.md",
-    "description": "Collect key metrics to monitor the health of your Teleport Cluster.",
+    "description": "Collect key metrics to monitor the health of your Teleport instance.",
     "title": "Teleport",
     "media": [],
     "classifier_tags": [
