@@ -109,7 +109,7 @@ def instance_min_collection_interval():
 
 
 def instance_pg_stat_statements_view():
-    return 'show_pg_stat_statements()'
+    return 'pg_stat_statements'
 
 
 def instance_port():
