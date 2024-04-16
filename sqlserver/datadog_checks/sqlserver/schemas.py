@@ -74,6 +74,7 @@ class Schemas:
         # flush previous collection
         pdb.set_trace()
         self.schemas_per_db = {} 
+        self.dbs_metadata = []
         # init the index
         self._init_schema_collection()
         if len(self._databases_to_query) == 0:
@@ -142,25 +143,41 @@ class Schemas:
             coulmn_count  = 0
             for schema in schemas:
                 tables = self._get_tables(schema, cursor)
+
                 # tables_chunk = list(get_list_chunks(tables, chunk_size)) - may be will need to switch to chunks and change queries ... ask Justin
                 start_table_index = 0
-                for index_t, table in enumerate(tables):
+                if len(tables) > 0:
                     pdb.set_trace()
+                    numer_columns,my_tables = self._get_tables_data(tables, schema, cursor)
+                    pdb.set_trace()
+                    print(my_tables, numer_columns)
+
+                for index_t, table in enumerate(tables):
+                    
+                    before = time.time() * 1000
                     coulmn_count += self._get_table_data(table, schema, cursor)
+                    after = time.time() * 1000
+                    total = after - before
+                    pdb.set_trace()
+                    print(total)
+
                     if coulmn_count > self.MAX_COLUMN_COUNT or index_t == len(tables) -1:   # we flush if the last table or columns threshold
-                        #flush data ... 
-                        pdb.set_trace() 
+                        #flush data ...                         
+                        print(total)
                         self._flush_schema(base_event, db_name, schema, tables[start_table_index:index_t+1])
                         start_table_index = index_t+1 if index_t+1 < len(tables) else 0 # 0 if we ve finished the tables anyway
                         coulmn_count = 0
                         # reset column coutnt
-                    #if last      
+                    #if last  
+
             return True
         self._check.do_for_databases(fetch_schema_data, self._check.get_databases())
 
+    # TODO this can be a separate class, we could stack in data on each loop iteration and it decides when to flush 
+
     def _flush_schema(self, base_event, database, schema, tables):
         event = {
-            **base_event,
+            **base_event, 
             "metadata": [{"db_name":database, "schemas": [{**schema, "tables": tables}]}],
             "timestamp": time.time() * 1000,
         }
@@ -190,6 +207,83 @@ class Schemas:
         
     #TODO collect diffs : we need to take care of new DB / removed DB . schemas new removed
     # will nedd a separate query for changed indexes
+    def _get_tables_data(self, table_list, schema, cursor):
+        if len(table_list) == 0:
+            return
+        name_to_id = {}
+        id_to_all = {}
+        table_names = ",".join(["'{}'".format(t.get("name")) for t in table_list])
+        table_ids = ",".join(["{}".format(t.get("object_id")) for t in table_list])
+        for t in table_list:
+            name_to_id[t["name"]] = t["object_id"] 
+            id_to_all[t["object_id"]] = t
+        total_columns_number  = self._populate_with_columns_data(table_names, name_to_id, id_to_all, schema, cursor)
+        self._populate_with_partitions_data(table_ids, id_to_all, cursor)
+        self._populate_with_foreign_keys_data(table_ids, id_to_all, cursor)
+        pdb.set_trace()
+        self._populate_with_index_data(table_ids, id_to_all, cursor)
+        # unwrap id_to_all
+        return total_columns_number, list(id_to_all.values())
+
+    def _populate_with_columns_data(self, table_names, name_to_id, id_to_all, schema, cursor):
+        # get columns if we dont have a dict here unlike postgres
+        cursor.execute(COLUMN_QUERY.format(table_names, schema["name"]))
+        data = cursor.fetchall()
+        columns = [str(i[0]).lower() for i in cursor.description]
+        rows = [dict(zip(columns, row)) for row in data]       
+        for row in rows:
+            table_id = name_to_id.get(str(row.get("table_name")))
+            if table_id is not None:
+                # exclude "table_name" from the row dict
+                row.pop("table_name", None)
+                id_to_all.get(table_id)["columns"] = id_to_all.get(table_id).get("columns",[]) + [row]
+        return len(data)
+    
+    def _populate_with_partitions_data(self, table_ids, id_to_all, cursor):
+        cursor.execute(PARTITIONS_QUERY.format(table_ids))
+        columns = [str(i[0]).lower() for i in cursor.description] 
+        rows = [dict(zip(columns, row)) for row in cursor.fetchall()]
+        for row in rows:
+            id  = row.pop("object_id", None)
+            if id is not None:
+                #TODO what happens if not found ? 
+                id_to_all.get(id)["partitions"] = row
+            else:
+                print("todo error")
+            row.pop("object_id", None)
+        print("end")
+
+    def _populate_with_index_data(self, table_ids, id_to_all, cursor):
+        cursor.execute(INDEX_QUERY.format(table_ids))
+        pdb.set_trace()
+        columns = [str(i[0]).lower() for i in cursor.description] 
+        rows = [dict(zip(columns, row)) for row in cursor.fetchall()]
+        for row in rows:
+            id  = row.pop("object_id", None)
+            if id is not None:
+                id_to_all.get(id)["indexes"] = row
+            else:
+                print("todo error")
+            row.pop("object_id", None)
+            pdb.set_trace()
+        pdb.set_trace()
+        print("end")
+
+    def _populate_with_foreign_keys_data(self, table_ids, id_to_all, cursor):
+            pdb.set_trace()
+            cursor.execute(FOREIGN_KEY_QUERY.format(table_ids))
+            columns = [str(i[0]).lower() for i in cursor.description] 
+            rows = [dict(zip(columns, row)) for row in cursor.fetchall()]
+            for row in rows:
+                id  = row.pop("object_id", None)
+                if id is not None:
+                    id_to_all.get(id)["foreign_keys"] = row
+                else:
+                    print("todo error")  
+            pdb.set_trace()
+            print("end")
+        #return execute_query_output_result_as_a_dict(COLUMN_QUERY.format(table_name, schema_name), cursor)
+    
 
     def _get_table_data(self, table, schema, cursor):
         table["columns"] = self._get_columns_data_per_table(table["name"], schema["name"], cursor)
