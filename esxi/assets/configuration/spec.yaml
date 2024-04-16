@@ -42,6 +42,31 @@ files:
           value:
             type: boolean
             example: false
+        - name: collect_per_instance_filters
+          description: |
+            Use this option to collect metrics tagged with instance values.
+            Some ESXi metrics can be tagged with instance values.
+            For each resource type (vm, host) to collect,
+            you can choose which metrics you want to collect the instance value as tags using a list of regex.
+            See https://github.com/DataDog/integrations-core/blob/master/esxi/datadog_checks/esxi/metrics.py
+            for the list of collected metrics (do not prefix them with `esxi`)
+            /!\ Use with parsimony, collecting per-instance metrics might be very expensive for big environments.
+          value:
+            example:
+              vm:
+                - <VM_REGEX>
+              host:
+                - <HOST_REGEX>
+            type: object
+            properties:
+              - name: vm
+                type: array
+                items:
+                  type: string
+              - name: host
+                type: array
+                items:
+                  type: string
         - name: excluded_host_tags
           description: |
             Use this option to send a subset of host tags as metric tags.
