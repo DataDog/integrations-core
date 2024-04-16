@@ -285,7 +285,6 @@ def test_block_storage_metrics(aggregator, check, dd_run_check):
             'project_id:1e6e233e637d4d55a50a62b63398ad15',
             'snapshot_id:6e099852-b540-48ad-b01b-92fa6daed7ff',
             'volume_id:2c5d27f7-6f96-4913-81f6-3ab9bd755c51',
-            'snapshot_size:1',
             'keystone_server:http://127.0.0.1:8080/identity',
         ],
     )
@@ -299,7 +298,32 @@ def test_block_storage_metrics(aggregator, check, dd_run_check):
             'project_id:1e6e233e637d4d55a50a62b63398ad15',
             'snapshot_id:b6fedd82-b518-4a69-b25f-68a00a6b8492',
             'volume_id:2c5d27f7-6f96-4913-81f6-3ab9bd755c51',
-            'snapshot_size:1',
+            'keystone_server:http://127.0.0.1:8080/identity',
+        ],
+    )
+    aggregator.assert_metric(
+        'openstack.cinder.snapshot.size',
+        count=1,
+        value=1,
+        tags=[
+            'domain_id:default',
+            'project_name:demo',
+            'project_id:1e6e233e637d4d55a50a62b63398ad15',
+            'snapshot_id:6e099852-b540-48ad-b01b-92fa6daed7ff',
+            'volume_id:2c5d27f7-6f96-4913-81f6-3ab9bd755c51',
+            'keystone_server:http://127.0.0.1:8080/identity',
+        ],
+    )
+    aggregator.assert_metric(
+        'openstack.cinder.snapshot.size',
+        count=1,
+        value=1,
+        tags=[
+            'domain_id:default',
+            'project_name:demo',
+            'project_id:1e6e233e637d4d55a50a62b63398ad15',
+            'snapshot_id:b6fedd82-b518-4a69-b25f-68a00a6b8492',
+            'volume_id:2c5d27f7-6f96-4913-81f6-3ab9bd755c51',
             'keystone_server:http://127.0.0.1:8080/identity',
         ],
     )
@@ -521,7 +545,6 @@ def test_block_storage_snapshots_pagination(
             'project_id:1e6e233e637d4d55a50a62b63398ad15',
             'snapshot_id:6e099852-b540-48ad-b01b-92fa6daed7ff',
             'volume_id:2c5d27f7-6f96-4913-81f6-3ab9bd755c51',
-            'snapshot_size:1',
             'keystone_server:http://127.0.0.1:8080/identity',
         ],
     )
@@ -535,7 +558,32 @@ def test_block_storage_snapshots_pagination(
             'project_id:1e6e233e637d4d55a50a62b63398ad15',
             'snapshot_id:b6fedd82-b518-4a69-b25f-68a00a6b8492',
             'volume_id:2c5d27f7-6f96-4913-81f6-3ab9bd755c51',
-            'snapshot_size:1',
+            'keystone_server:http://127.0.0.1:8080/identity',
+        ],
+    )
+    aggregator.assert_metric(
+        'openstack.cinder.snapshot.size',
+        count=1,
+        value=1,
+        tags=[
+            'domain_id:default',
+            'project_name:demo',
+            'project_id:1e6e233e637d4d55a50a62b63398ad15',
+            'snapshot_id:6e099852-b540-48ad-b01b-92fa6daed7ff',
+            'volume_id:2c5d27f7-6f96-4913-81f6-3ab9bd755c51',
+            'keystone_server:http://127.0.0.1:8080/identity',
+        ],
+    )
+    aggregator.assert_metric(
+        'openstack.cinder.snapshot.size',
+        count=1,
+        value=1,
+        tags=[
+            'domain_id:default',
+            'project_name:demo',
+            'project_id:1e6e233e637d4d55a50a62b63398ad15',
+            'snapshot_id:b6fedd82-b518-4a69-b25f-68a00a6b8492',
+            'volume_id:2c5d27f7-6f96-4913-81f6-3ab9bd755c51',
             'keystone_server:http://127.0.0.1:8080/identity',
         ],
     )
