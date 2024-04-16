@@ -138,30 +138,30 @@ class Schemas:
 
         def fetch_schema_data(cursor, db_name):
             schemas = self._query_schema_information(cursor)
-            pdb.set_trace()
+
             coulmn_count  = 0
             for schema in schemas:
                 tables = self._get_tables(schema, cursor)
                 # tables_chunk = list(get_list_chunks(tables, chunk_size)) - may be will need to switch to chunks and change queries ... ask Justin
                 start_table_index = 0
-                for index_t, table in tables:
+                for index_t, table in enumerate(tables):
+                    pdb.set_trace()
                     coulmn_count += self._get_table_data(table, schema, cursor)
                     if coulmn_count > self.MAX_COLUMN_COUNT or index_t == len(tables) -1:   # we flush if the last table or columns threshold
                         #flush data ... 
+                        pdb.set_trace() 
                         self._flush_schema(base_event, db_name, schema, tables[start_table_index:index_t+1])
                         start_table_index = index_t+1 if index_t+1 < len(tables) else 0 # 0 if we ve finished the tables anyway
                         coulmn_count = 0
                         # reset column coutnt
-                    #if last  
-                pdb.set_trace()                           
-                self._flush_schema(base_event, db_name, schema, tables[start_table_index:])
+                    #if last      
             return True
         self._check.do_for_databases(fetch_schema_data, self._check.get_databases())
 
     def _flush_schema(self, base_event, database, schema, tables):
         event = {
             **base_event,
-            "metadata": [{**database, "schemas": [{**schema, "tables": tables}]}],
+            "metadata": [{"db_name":database, "schemas": [{**schema, "tables": tables}]}],
             "timestamp": time.time() * 1000,
         }
         json_event = json.dumps(event, default=default_json_event_encoding)
