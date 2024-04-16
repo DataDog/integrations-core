@@ -8,13 +8,18 @@ from datadog_checks.sqlserver.const import (
 )
 
 from datadog_checks.sqlserver.utils import (
-    execute_query_output_result_as_a_dict,
+    execute_query_output_result_as_a_dict, get_list_chunks
 )
 
 import pdb
 
-class Schemas:
+import time
+import json
+from datadog_checks.base.utils.db.utils import DBMAsyncJob, default_json_event_encoding
 
+class Schemas:
+    
+    MAX_COLUMN_COUNT  = 100_000
     def __init__(self, check):
         self._check = check 
         self._log = check.log
@@ -64,7 +69,7 @@ class Schemas:
             foreign_keys : list of foreign keys
             partitions useful to know the number 
     """
-    def collect_schemas_data(self):
+    def collect_schemas_data2(self):
         #schemas per db
         # flush previous collection
         pdb.set_trace()
@@ -97,9 +102,9 @@ class Schemas:
                     #TODO later can stop after a certain amount of columns
                     # thus stop
                     self._number_of_collected_tables+=1
-                    stop = self._get_table_data(table, schema, cursor)
+                    column_amount = self._get_table_data(table, schema, cursor)
                     pdb.set_trace()
-                    if stop or self._number_of_collected_tables == 2:
+                    if column_amount > 100_000 or self._number_of_collected_tables == 2:
                         self._number_of_collected_tables = 0
                         self._current_table_list = schema["tables"][index_t+1:]
                         self._current_schema_list = schemas[index_sh:]
@@ -116,6 +121,52 @@ class Schemas:
         self._check.do_for_databases(fetch_schema_data, self._databases_to_query)
         pdb.set_trace()
         print(self.schemas_per_db)
+    
+    #sends all the data in one go but split in chunks (like Seth's solution)
+    def collect_schemas_data(self):
+        pdb.set_trace()
+        base_event = {
+                "host": self._check.resolved_hostname,
+                #"agent_version": datadog_agent.get_version(),
+                "dbms": "sqlserver", #TODO ?
+                "kind": "", # TODO ? 
+                #"collection_interval": self.schemas_collection_interval,
+                #"dbms_version": self._payload_pg_version(),
+                #"tags": self._tags_no_db,
+                #"cloud_metadata": self._config.cloud_metadata,
+            }
+
+        def fetch_schema_data(cursor, db_name):
+            schemas = self._query_schema_information(cursor)
+            pdb.set_trace()
+            coulmn_count  = 0
+            for schema in schemas:
+                tables = self._get_tables(schema, cursor)
+                # tables_chunk = list(get_list_chunks(tables, chunk_size)) - may be will need to switch to chunks and change queries ... ask Justin
+                start_table_index = 0
+                for index_t, table in tables:
+                    coulmn_count += self._get_table_data(table, schema, cursor)
+                    if coulmn_count > self.MAX_COLUMN_COUNT or index_t == len(tables) -1:   # we flush if the last table or columns threshold
+                        #flush data ... 
+                        self._flush_schema(base_event, db_name, schema, tables[start_table_index:index_t+1])
+                        start_table_index = index_t+1 if index_t+1 < len(tables) else 0 # 0 if we ve finished the tables anyway
+                        coulmn_count = 0
+                        # reset column coutnt
+                    #if last  
+                pdb.set_trace()                           
+                self._flush_schema(base_event, db_name, schema, tables[start_table_index:])
+            return True
+        self._check.do_for_databases(fetch_schema_data, self._check.get_databases())
+
+    def _flush_schema(self, base_event, database, schema, tables):
+        event = {
+            **base_event,
+            "metadata": [{**database, "schemas": [{**schema, "tables": tables}]}],
+            "timestamp": time.time() * 1000,
+        }
+        json_event = json.dumps(event, default=default_json_event_encoding)
+        self._log.debug("Reporting the following payload for schema collection: {}".format(json_event))
+        self._check.database_monitoring_metadata(json_event)
         
     # TODO how often ?
 
@@ -149,7 +200,7 @@ class Schemas:
         table["indexes"] = self._get_index_data_per_table(table["object_id"], cursor)
         table["foreign_keys"] = self._get_foreign_key_data_per_table(table["object_id"], cursor)
         #TODO probably here decide based on the columns amount
-        return True
+        return len(table["columns"])
         
     #TODO in SQLServer partitioned child tables should have the same object_id might be worth checking with a test.
 
