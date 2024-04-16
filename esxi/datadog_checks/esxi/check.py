@@ -33,10 +33,13 @@ class EsxiCheck(AgentCheck):
         self.username = self.instance.get("username")
         self.password = self.instance.get("password")
         self.use_guest_hostname = self.instance.get("use_guest_hostname", False)
+        self.excluded_host_tags = self._validate_excluded_host_tags(self.instance.get("excluded_host_tags", []))
         self.collect_per_instance_filters = self._parse_metric_regex_filters(
             self.instance.get("collect_per_instance_filters", {})
         )
-        excluded_host_tags = self.instance.get("excluded_host_tags", [])
+        self.tags = [f"esxi_url:{self.host}"]
+
+    def _validate_excluded_host_tags(self, excluded_host_tags):
         valid_excluded_host_tags = []
         for excluded_host_tag in excluded_host_tags:
             if excluded_host_tag not in AVAILABLE_HOST_TAGS:
@@ -48,8 +51,7 @@ class EsxiCheck(AgentCheck):
                 )
             else:
                 valid_excluded_host_tags.append(excluded_host_tag)
-        self.excluded_host_tags = valid_excluded_host_tags
-        self.tags = [f"esxi_url:{self.host}"]
+        return valid_excluded_host_tags
 
     def _parse_metric_regex_filters(self, all_metric_filters):
         allowed_resource_types = RESOURCE_TYPE_TO_NAME.values()
