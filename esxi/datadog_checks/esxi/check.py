@@ -1,9 +1,13 @@
 # (C) Datadog, Inc. 2024-present
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
+import logging
+import re
+from collections import defaultdict
 
 from pyVim import connect
 from pyVmomi import vim, vmodl
+from six import iteritems
 
 from datadog_checks.base import AgentCheck  # noqa: F401
 
@@ -17,7 +21,7 @@ from .constants import (
     VM_RESOURCE,
 )
 from .metrics import RESOURCE_NAME_TO_METRICS
-from .utils import get_tags_recursively
+from .utils import get_mapped_instance_tag, get_tags_recursively, should_collect_per_instance_values
 
 
 class EsxiCheck(AgentCheck):
@@ -29,7 +33,13 @@ class EsxiCheck(AgentCheck):
         self.username = self.instance.get("username")
         self.password = self.instance.get("password")
         self.use_guest_hostname = self.instance.get("use_guest_hostname", False)
-        excluded_host_tags = self.instance.get("excluded_host_tags", [])
+        self.excluded_host_tags = self._validate_excluded_host_tags(self.instance.get("excluded_host_tags", []))
+        self.collect_per_instance_filters = self._parse_metric_regex_filters(
+            self.instance.get("collect_per_instance_filters", {})
+        )
+        self.tags = [f"esxi_url:{self.host}"]
+
+    def _validate_excluded_host_tags(self, excluded_host_tags):
         valid_excluded_host_tags = []
         for excluded_host_tag in excluded_host_tags:
             if excluded_host_tag not in AVAILABLE_HOST_TAGS:
@@ -41,8 +51,22 @@ class EsxiCheck(AgentCheck):
                 )
             else:
                 valid_excluded_host_tags.append(excluded_host_tag)
-        self.excluded_host_tags = valid_excluded_host_tags
-        self.tags = [f"esxi_url:{self.host}"]
+        return valid_excluded_host_tags
+
+    def _parse_metric_regex_filters(self, all_metric_filters):
+        allowed_resource_types = RESOURCE_TYPE_TO_NAME.values()
+        metric_filters = {}
+        for resource_type, filters in iteritems(all_metric_filters):
+            if resource_type not in allowed_resource_types:
+                self.log.warning(
+                    "Ignoring metric_filter for resource '%s'. It should be one of '%s'",
+                    resource_type,
+                    ", ".join(allowed_resource_types),
+                )
+                continue
+            metric_filters[resource_type] = filters
+
+        return {k: [re.compile(r) for r in v] for k, v in iteritems(metric_filters)}
 
     def get_resources(self):
         self.log.debug("Retrieving resources")
@@ -112,16 +136,62 @@ class EsxiCheck(AgentCheck):
         return counter_keys_and_names, metric_ids
 
     def collect_metrics_for_entity(self, metric_ids, counter_keys_and_names, entity, entity_name, metric_tags):
+        resource_type = type(entity)
+        resource_name = RESOURCE_TYPE_TO_NAME[resource_type]
+        for metric_id in metric_ids:
+            metric_name = counter_keys_and_names.get(metric_id.counterId)
+            if should_collect_per_instance_values(self.collect_per_instance_filters, metric_name, resource_type):
+                metric_id.instance = "*"
 
-        resource_name = RESOURCE_TYPE_TO_NAME[type(entity)]
         spec = vim.PerformanceManager.QuerySpec(maxSample=1, entity=entity, metricId=metric_ids)
         result_stats = self.content.perfManager.QueryPerf([spec])
+
+        # `have_instance_value` is used later to avoid collecting aggregated metrics
+        # when instance metrics are collected.
+        have_instance_value = defaultdict(set)
+        if self.collect_per_instance_filters:
+            for results_for_entity in result_stats:
+                metric_resource_type = type(results_for_entity.entity)
+                for metric_result in results_for_entity.value:
+                    if metric_result.id.instance:
+                        counter_id = counter_keys_and_names.get(metric_result.id.counterId)
+                        if counter_id:
+                            have_instance_value[metric_resource_type].add(counter_id)
 
         for results_for_entity in result_stats:
             for metric_result in results_for_entity.value:
                 metric_name = counter_keys_and_names.get(metric_result.id.counterId)
-                if len(metric_result.value) == 0:
+                if self.log.isEnabledFor(logging.DEBUG):
+                    # Use isEnabledFor to avoid unnecessary processing
                     self.log.debug(
+                        "Processing metric `%s`: resource_type=`%s`, result=`%s`",
+                        metric_name,
+                        resource_type,
+                        str(metric_result).replace("\n", "\\n"),
+                    )
+
+                if not metric_name:
+                    # Fail-safe
+                    self.log.debug(
+                        "Skipping value for counter %s, because the integration doesn't have metadata about it",
+                        metric_result.id.counterId,
+                    )
+                    continue
+
+                additional_tags = []
+                if should_collect_per_instance_values(
+                    self.collect_per_instance_filters, metric_name, resource_type
+                ) and (metric_name in have_instance_value[resource_type]):
+                    instance_value = metric_result.id.instance
+                    # When collecting per instance values, it's possible that both aggregated metric and per instance
+                    # metrics are received. In that case, the metric with no instance value is skipped.
+                    if not instance_value:
+                        continue
+                    instance_tag_key = get_mapped_instance_tag(metric_name)
+                    additional_tags.append(f'{instance_tag_key}:{instance_value}')
+
+                if len(metric_result.value) == 0:
+                    self.log.warning(
                         "Skipping metric %s for %s because no value was returned by the %s",
                         metric_name,
                         entity_name,
@@ -142,15 +212,16 @@ class EsxiCheck(AgentCheck):
                     continue
                 else:
                     most_recent_val = valid_values[-1]
+                    all_tags = metric_tags + additional_tags
 
                     self.log.debug(
                         "Submit metric: name=`%s`, value=`%s`, hostname=`%s`, tags=`%s`",
                         metric_name,
                         most_recent_val,
                         entity_name,
-                        self.tags,
+                        all_tags,
                     )
-                    self.gauge(metric_name, most_recent_val, hostname=entity_name, tags=metric_tags)
+                    self.gauge(metric_name, most_recent_val, hostname=entity_name, tags=all_tags)
 
     def set_version_metadata(self):
         esxi_version = self.content.about.version
