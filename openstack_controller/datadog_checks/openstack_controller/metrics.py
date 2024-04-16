@@ -356,8 +356,10 @@ CINDER_SERVICE_CHECK = f"{CINDER_METRICS_PREFIX}.api.up"
 CINDER_RESPONSE_TIME = f"{CINDER_METRICS_PREFIX}.response_time"
 CINDER_TRANSFER_COUNT = f"{CINDER_METRICS_PREFIX}.volume.transfer.count"
 CINDER_TRANSFER_TAGS = {'id': 'transfer_id', 'volume_id': 'volume_id', 'name': 'volume_name'}
-CINDER_VOLUME_COUNT = f"{CINDER_METRICS_PREFIX}.volume.count"
-CINDER_VOLUME_TAGS = {'id': 'volume_id', 'name': 'volume_name', 'status': 'volume_status', 'size': 'volume_size'}
+CINDER_VOLUME_PREFIX = f"{CINDER_METRICS_PREFIX}.volume"
+CINDER_VOLUME_COUNT = f"{CINDER_VOLUME_PREFIX}.count"
+CINDER_VOLUME_METRICS = {f"{CINDER_VOLUME_PREFIX}.size": {}}
+CINDER_VOLUME_TAGS = {'id': 'volume_id', 'name': 'volume_name', 'status': 'volume_status'}
 
 IRONIC_METRICS_PREFIX = "openstack.ironic"
 IRONIC_SERVICE_CHECK = f"{IRONIC_METRICS_PREFIX}.api.up"
