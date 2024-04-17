@@ -399,6 +399,8 @@ files:
                         type: object
                       - name: transfers
                         type: object
+                      - name: pools
+                        type: object
               - name: baremetal
                 anyOf:
                   - type: boolean
