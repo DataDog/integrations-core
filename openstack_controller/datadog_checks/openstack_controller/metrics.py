@@ -356,8 +356,8 @@ CINDER_SERVICE_CHECK = f"{CINDER_METRICS_PREFIX}.api.up"
 CINDER_POOL_PREFIX = f"{CINDER_METRICS_PREFIX}.pool"
 CINDER_POOL_COUNT = f"{CINDER_POOL_PREFIX}.count"
 CINDER_POOL_METRICS = {
-    f"{CINDER_POOL_PREFIX}.capabilities.total_capacity_gb":{},
-    f"{CINDER_POOL_PREFIX}.capabilities.free_capacity_gb":{},
+    f"{CINDER_POOL_PREFIX}.capabilities.total_capacity_gb": {},
+    f"{CINDER_POOL_PREFIX}.capabilities.free_capacity_gb": {},
 }
 CINDER_POOL_TAGS = {
     'name': 'pool_name',
