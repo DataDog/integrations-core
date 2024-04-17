@@ -552,3 +552,5 @@ files:
       - template: instances/default
         overrides:
           service.hidden: true
+      - name: collect_topology
+        description: Enable the collection of topology (LLDP/CDP) data
