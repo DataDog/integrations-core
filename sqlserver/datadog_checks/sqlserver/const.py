@@ -21,8 +21,6 @@ ENGINE_EDITION_AZURE_MANAGED_INSTANCE = 8
 ENGINE_EDITION_AZURE_SQL_EDGE = 9
 ENGINE_EDITION_AZURE_SYNAPSE_SERVERLESS_POOL = 11
 
-DEFAULT_INDEX_USAGE_STATS_INTERVAL = 5 * 60  # 5 minutes
-
 # Keys of the static info cache, used to cache server info which does not change
 STATIC_INFO_VERSION = 'version'
 STATIC_INFO_MAJOR_VERSION = 'major_version'
