@@ -6,8 +6,6 @@ This check monitors [IBM ACE][1] through the Datadog Agent.
 
 ## Setup
 
-Follow the instructions below to install and configure this check for an Agent running on a host. For containerized environments, see the [Autodiscovery Integration Templates][3] for guidance on applying these instructions.
-
 ### IBM MQ
 
 An [IBM MQ][10] server is required for consuming metric messages from IBM ACE.
@@ -72,10 +70,32 @@ The IBM ACE check is included in the [Datadog Agent][2] package.
 No additional installation is needed on your server.
 
 ### Configuration
+<!-- xxx tabs xxx -->
+<!-- xxx tab "Host" xxx -->
+
+#### Host
+
+To configure this check for an Agent running on a host:
 
 1. Edit the `ibm_ace.d/conf.yaml` file, in the `conf.d/` folder at the root of your Agent's configuration directory to start collecting your ibm_ace performance data. See the [sample ibm_ace.d/conf.yaml][4] for all available configuration options.
 
 2. [Restart the Agent][5].
+
+<!-- xxz tab xxx -->
+<!-- xxx tab "Containerized" xxx -->
+
+#### Containerized
+
+For containerized environments, see the [Autodiscovery Integration Templates][3] for guidance on applying the parameters below.
+
+| Parameter            | Value                                                                                                                           |
+| -------------------- | ------------------------------------------------------------------------------------------------------------------------------- |
+| `<INTEGRATION_NAME>` | `ibm_ace`                                                                                                                       |
+| `<INIT_CONFIG>`      | blank or `{}`                                                                                                                   |
+| `<INSTANCE_CONFIG>`  | `{"channel": "<CHANNEL>", "queue_manager": "<QUEUE_MANAGER>", "mq_server":"<MQ_SERVER>", "port":"%%port%%"}`                    |
+
+<!-- xxz tab xxx -->
+<!-- xxz tabs xxx -->
 
 ### Validation
 
