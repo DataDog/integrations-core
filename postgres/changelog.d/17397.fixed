@@ -1,3 +1,0 @@
-Revert Postgres Optimization (#17187).
-
-This appears to lead to inflated metrics in certain cases. Removing this optimization while we fix the inflated metrics.
