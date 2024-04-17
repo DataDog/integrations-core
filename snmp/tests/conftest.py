@@ -166,7 +166,6 @@ def create_datadog_conf_file(tmp_dir):
                 ],
             }
         },
-        'listeners': [{'name': 'snmp'}],
     }
     datadog_conf_file = os.path.join(tmp_dir, 'datadog.yaml')
     with open(datadog_conf_file, 'wb') as file:
