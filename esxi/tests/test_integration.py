@@ -101,6 +101,7 @@ def test_vcsim_external_host_tags(vcsim_instance, datadog_agent, dd_run_check):
                 'esxi_folder:ha-folder-root',
                 'esxi_folder:vm',
                 'esxi_type:vm',
+                'esxi_host:localhost.localdomain',
                 'esxi_url:127.0.0.1:8989',
             ]
         },
@@ -113,6 +114,7 @@ def test_vcsim_external_host_tags(vcsim_instance, datadog_agent, dd_run_check):
                 'esxi_folder:ha-folder-root',
                 'esxi_folder:vm',
                 'esxi_type:vm',
+                'esxi_host:localhost.localdomain',
                 'esxi_url:127.0.0.1:8989',
             ]
         },
@@ -138,6 +140,7 @@ def test_esxi_resource_count_metrics(vcsim_instance, dd_run_check, aggregator):
         'esxi_folder:ha-folder-root',
         'esxi_folder:vm',
         'esxi_type:vm',
+        'esxi_host:localhost.localdomain',
         'esxi_url:127.0.0.1:8989',
     ]
 
