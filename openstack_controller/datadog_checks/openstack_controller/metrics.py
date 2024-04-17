@@ -355,10 +355,12 @@ CINDER_METRICS_PREFIX = "openstack.cinder"
 CINDER_SERVICE_CHECK = f"{CINDER_METRICS_PREFIX}.api.up"
 CINDER_POOL_PREFIX = f"{CINDER_METRICS_PREFIX}.pool"
 CINDER_POOL_COUNT = f"{CINDER_POOL_PREFIX}.count"
+CINDER_POOL_METRICS = {
+    f"{CINDER_POOL_PREFIX}.capabilities.total_capacity_gb":{},
+    f"{CINDER_POOL_PREFIX}.capabilities.free_capacity_gb":{},
+}
 CINDER_POOL_TAGS = {
     'name': 'pool_name',
-    'capabilities.total_capacity_gb': 'total_capacity',
-    'capabilities.free_capacity_gb': 'free_capacity',
 }
 CINDER_RESPONSE_TIME = f"{CINDER_METRICS_PREFIX}.response_time"
 CINDER_TRANSFER_COUNT = f"{CINDER_METRICS_PREFIX}.volume.transfer.count"

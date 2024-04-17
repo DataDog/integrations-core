@@ -1,5 +1,7 @@
 metric_name,metric_type,interval,unit_name,per_unit_name,description,orientation,integration,short_name,curated_metric
 openstack.cinder.pool.count,gauge,,,,Number of cinder pools,0,openstack_controller,cinder pool ct,
+openstack.cinder.pool.capabilities.free_capacity_gb,gauge,,,,Free capacity for a backend volume,0,openstack_controller,cinder pool free capacity,
+openstack.cinder.pool.capabilities.total_capacity_gb,gauge,,,,Total capacity for a backend volume,0,openstack_controller,cinder total capacity,
 openstack.cinder.response_time,gauge,,millisecond,,Duration that an HTTP request takes to complete when making a request to cinder endpoint,0,openstack_controller,cinder response time,
 openstack.cinder.volume.count,gauge,,,,Number of cinder volumes,0,openstack_controller,cinder volume ct,
 openstack.cinder.volume.transfer.count,gauge,,,,Number of cinder volume transfers,0,openstack_controller,cinder volume transfer ct,

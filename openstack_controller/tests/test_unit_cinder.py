@@ -284,8 +284,6 @@ def test_block_storage_metrics(aggregator, check, dd_run_check):
             'project_name:demo',
             'project_id:1e6e233e637d4d55a50a62b63398ad15',
             'pool_name:pool1',
-            'total_capacity:1024',
-            'free_capacity:100',
             'keystone_server:http://127.0.0.1:8080/identity',
         ],
     )
@@ -298,8 +296,54 @@ def test_block_storage_metrics(aggregator, check, dd_run_check):
             'project_name:demo',
             'project_id:1e6e233e637d4d55a50a62b63398ad15',
             'pool_name:pool2',
-            'total_capacity:512',
-            'free_capacity:200',
+            'keystone_server:http://127.0.0.1:8080/identity',
+        ],
+    )
+    aggregator.assert_metric(
+        'openstack.cinder.pool.capabilities.free_capacity_gb',
+        count=1,
+        value=100,
+        tags=[
+            'domain_id:default',
+            'project_name:demo',
+            'project_id:1e6e233e637d4d55a50a62b63398ad15',
+            'pool_name:pool1',
+            'keystone_server:http://127.0.0.1:8080/identity',
+        ],
+    )
+    aggregator.assert_metric(
+        'openstack.cinder.pool.capabilities.total_capacity_gb',
+        count=1,
+        value=1024,
+        tags=[
+            'domain_id:default',
+            'project_name:demo',
+            'project_id:1e6e233e637d4d55a50a62b63398ad15',
+            'pool_name:pool1',
+            'keystone_server:http://127.0.0.1:8080/identity',
+        ],
+    )
+    aggregator.assert_metric(
+        'openstack.cinder.pool.capabilities.free_capacity_gb',
+        count=1,
+        value=200,
+        tags=[
+            'domain_id:default',
+            'project_name:demo',
+            'project_id:1e6e233e637d4d55a50a62b63398ad15',
+            'pool_name:pool2',
+            'keystone_server:http://127.0.0.1:8080/identity',
+        ],
+    )
+    aggregator.assert_metric(
+        'openstack.cinder.pool.capabilities.total_capacity_gb',
+        count=1,
+        value=512,
+        tags=[
+            'domain_id:default',
+            'project_name:demo',
+            'project_id:1e6e233e637d4d55a50a62b63398ad15',
+            'pool_name:pool2',
             'keystone_server:http://127.0.0.1:8080/identity',
         ],
     )

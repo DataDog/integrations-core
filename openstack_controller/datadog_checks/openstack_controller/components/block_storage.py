@@ -7,6 +7,7 @@ from datadog_checks.openstack_controller.components.component import Component
 from datadog_checks.openstack_controller.metrics import (
     CINDER_METRICS_PREFIX,
     CINDER_POOL_COUNT,
+    CINDER_POOL_METRICS,
     CINDER_POOL_PREFIX,
     CINDER_POOL_TAGS,
     CINDER_RESPONSE_TIME,
@@ -78,7 +79,9 @@ class BlockStorage(Component):
                     item,
                     tags=CINDER_POOL_TAGS,
                     prefix=CINDER_POOL_PREFIX,
-                    metrics=[CINDER_POOL_COUNT],
+                    metrics=CINDER_POOL_METRICS,
                 )
                 self.check.log.debug("pool: %s", pool)
                 self.check.gauge(CINDER_POOL_COUNT, 1, tags=tags + pool['tags'])
+                for metric, value in pool['metrics'].items():
+                    self.check.gauge(metric, value, tags=tags + pool['tags'])
