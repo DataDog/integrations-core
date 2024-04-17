@@ -2,6 +2,14 @@
 
 <!-- towncrier release notes start -->
 
+## 18.1.1 / 2024-04-17
+
+***Fixed***:
+
+* Revert Postgres Optimization (#17187).
+
+  This appears to lead to inflated metrics in certain cases. Removing this optimization while we fix the inflated metrics. ([#17397](https://github.com/DataDog/integrations-core/pull/17397))
+
 ## 18.1.0 / 2024-03-27
 
 ***Added***:
