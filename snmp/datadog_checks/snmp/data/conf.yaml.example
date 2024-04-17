@@ -478,3 +478,8 @@ instances:
     #   - <INCLUDE_REGEX>
     #   exclude:
     #   - <EXCLUDE_REGEX>
+
+    ## @param collect_topology - boolean - optional - default: true
+    ## Enable the collection of topology (LLDP/CDP) data
+    #
+    # collect_topology: true
