@@ -421,7 +421,7 @@ def test_block_storage_metrics(aggregator, check, dd_run_check):
     ],
 )
 @pytest.mark.usefixtures('mock_http_get', 'mock_http_post', 'openstack_connection')
-def test_block_storage_metrics(aggregator, check, dd_run_check):
+def test_block_storage_metrics_microversion_3_70(aggregator, check, dd_run_check):
     dd_run_check(check)
     aggregator.assert_metric(
         'openstack.cinder.cluster.count',
