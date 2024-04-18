@@ -11,6 +11,8 @@ from datadog_checks.openstack_controller.metrics import (
     CINDER_TRANSFER_COUNT,
     CINDER_TRANSFER_TAGS,
     CINDER_VOLUME_COUNT,
+    CINDER_VOLUME_METRICS,
+    CINDER_VOLUME_PREFIX,
     CINDER_VOLUME_TAGS,
     get_metrics_and_tags,
 )
@@ -42,11 +44,13 @@ class BlockStorage(Component):
                 volume = get_metrics_and_tags(
                     item,
                     tags=CINDER_VOLUME_TAGS,
-                    prefix=CINDER_METRICS_PREFIX,
-                    metrics=[CINDER_VOLUME_COUNT],
+                    prefix=CINDER_VOLUME_PREFIX,
+                    metrics=CINDER_VOLUME_METRICS,
                 )
                 self.check.log.debug("volume: %s", volume)
                 self.check.gauge(CINDER_VOLUME_COUNT, 1, tags=tags + volume['tags'])
+                for metric, value in volume['metrics'].items():
+                    self.check.gauge(metric, value, tags=tags + volume['tags'])
 
     @Component.register_project_metrics(ID)
     @Component.http_error()

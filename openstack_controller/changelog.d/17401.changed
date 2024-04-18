@@ -1,0 +1,1 @@
+Changed volume size from a tag to a metric openstack.cinder.volume.size
