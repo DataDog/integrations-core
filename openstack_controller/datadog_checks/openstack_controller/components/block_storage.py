@@ -6,6 +6,10 @@
 from datadog_checks.openstack_controller.components.component import Component
 from datadog_checks.openstack_controller.metrics import (
     CINDER_METRICS_PREFIX,
+    CINDER_POOL_COUNT,
+    CINDER_POOL_METRICS,
+    CINDER_POOL_PREFIX,
+    CINDER_POOL_TAGS,
     CINDER_RESPONSE_TIME,
     CINDER_SERVICE_CHECK,
     CINDER_SNAPSHOT_COUNT,
@@ -15,6 +19,8 @@ from datadog_checks.openstack_controller.metrics import (
     CINDER_TRANSFER_COUNT,
     CINDER_TRANSFER_TAGS,
     CINDER_VOLUME_COUNT,
+    CINDER_VOLUME_METRICS,
+    CINDER_VOLUME_PREFIX,
     CINDER_VOLUME_TAGS,
     get_metrics_and_tags,
 )
@@ -46,11 +52,13 @@ class BlockStorage(Component):
                 volume = get_metrics_and_tags(
                     item,
                     tags=CINDER_VOLUME_TAGS,
-                    prefix=CINDER_METRICS_PREFIX,
-                    metrics=[CINDER_VOLUME_COUNT],
+                    prefix=CINDER_VOLUME_PREFIX,
+                    metrics=CINDER_VOLUME_METRICS,
                 )
                 self.check.log.debug("volume: %s", volume)
                 self.check.gauge(CINDER_VOLUME_COUNT, 1, tags=tags + volume['tags'])
+                for metric, value in volume['metrics'].items():
+                    self.check.gauge(metric, value, tags=tags + volume['tags'])
 
     @Component.register_project_metrics(ID)
     @Component.http_error()
@@ -85,3 +93,21 @@ class BlockStorage(Component):
                 self.check.gauge(CINDER_SNAPSHOT_COUNT, 1, tags=tags + snapshot['tags'])
                 for metric, value in snapshot['metrics'].items():
                     self.check.gauge(metric, value, tags=tags + snapshot['tags'])
+
+    @Component.register_project_metrics(ID)
+    @Component.http_error()
+    def _report_pools(self, project_id, tags, config):
+        report_pools = config.get('pools', True)
+        if report_pools:
+            data = self.check.api.get_block_storage_pools(project_id)
+            for item in data:
+                pool = get_metrics_and_tags(
+                    item,
+                    tags=CINDER_POOL_TAGS,
+                    prefix=CINDER_POOL_PREFIX,
+                    metrics=CINDER_POOL_METRICS,
+                )
+                self.check.log.debug("pool: %s", pool)
+                self.check.gauge(CINDER_POOL_COUNT, 1, tags=tags + pool['tags'])
+                for metric, value in pool['metrics'].items():
+                    self.check.gauge(metric, value, tags=tags + pool['tags'])

@@ -240,8 +240,7 @@ def test_block_storage_metrics(aggregator, check, dd_run_check):
             'project_name:demo',
             'project_id:1e6e233e637d4d55a50a62b63398ad15',
             'volume_id:9c762008-d70f-44d1-af02-98e1da79ee4b',
-            'volume_size:1',
-            'volume_name:',
+            'volume_name:first_volume',
             'volume_status:in-use',
             'keystone_server:http://127.0.0.1:8080/identity',
         ],
@@ -255,7 +254,34 @@ def test_block_storage_metrics(aggregator, check, dd_run_check):
             'project_name:demo',
             'project_id:1e6e233e637d4d55a50a62b63398ad15',
             'volume_id:259b16de-727f-4011-8388-84d17a9ae594',
-            'volume_size:1',
+            'volume_name:',
+            'volume_status:in-use',
+            'keystone_server:http://127.0.0.1:8080/identity',
+        ],
+    )
+    aggregator.assert_metric(
+        'openstack.cinder.volume.size',
+        count=1,
+        value=1,
+        tags=[
+            'domain_id:default',
+            'project_name:demo',
+            'project_id:1e6e233e637d4d55a50a62b63398ad15',
+            'volume_id:9c762008-d70f-44d1-af02-98e1da79ee4b',
+            'volume_name:first_volume',
+            'volume_status:in-use',
+            'keystone_server:http://127.0.0.1:8080/identity',
+        ],
+    )
+    aggregator.assert_metric(
+        'openstack.cinder.volume.size',
+        count=1,
+        value=1,
+        tags=[
+            'domain_id:default',
+            'project_name:demo',
+            'project_id:1e6e233e637d4d55a50a62b63398ad15',
+            'volume_id:259b16de-727f-4011-8388-84d17a9ae594',
             'volume_name:',
             'volume_status:in-use',
             'keystone_server:http://127.0.0.1:8080/identity',
@@ -324,6 +350,110 @@ def test_block_storage_metrics(aggregator, check, dd_run_check):
             'project_id:1e6e233e637d4d55a50a62b63398ad15',
             'snapshot_id:b6fedd82-b518-4a69-b25f-68a00a6b8492',
             'volume_id:2c5d27f7-6f96-4913-81f6-3ab9bd755c51',
+            'keystone_server:http://127.0.0.1:8080/identity',
+        ],
+    )
+    aggregator.assert_metric(
+        'openstack.cinder.pool.count',
+        count=1,
+        value=1,
+        tags=[
+            'domain_id:default',
+            'project_name:demo',
+            'project_id:1e6e233e637d4d55a50a62b63398ad15',
+            'pool_name:pool1',
+            'pool_volume_backend_name:volume_pool1',
+            'keystone_server:http://127.0.0.1:8080/identity',
+        ],
+    )
+    aggregator.assert_metric(
+        'openstack.cinder.pool.count',
+        count=1,
+        value=1,
+        tags=[
+            'domain_id:default',
+            'project_name:demo',
+            'project_id:1e6e233e637d4d55a50a62b63398ad15',
+            'pool_name:pool2',
+            'pool_volume_backend_name:volume_pool2',
+            'keystone_server:http://127.0.0.1:8080/identity',
+        ],
+    )
+    aggregator.assert_metric(
+        'openstack.cinder.pool.capabilities.free_capacity_gb',
+        count=1,
+        value=100,
+        tags=[
+            'domain_id:default',
+            'project_name:demo',
+            'project_id:1e6e233e637d4d55a50a62b63398ad15',
+            'pool_name:pool1',
+            'pool_volume_backend_name:volume_pool1',
+            'keystone_server:http://127.0.0.1:8080/identity',
+        ],
+    )
+    aggregator.assert_metric(
+        'openstack.cinder.pool.capabilities.total_capacity_gb',
+        count=1,
+        value=1024,
+        tags=[
+            'domain_id:default',
+            'project_name:demo',
+            'project_id:1e6e233e637d4d55a50a62b63398ad15',
+            'pool_name:pool1',
+            'pool_volume_backend_name:volume_pool1',
+            'keystone_server:http://127.0.0.1:8080/identity',
+        ],
+    )
+    aggregator.assert_metric(
+        'openstack.cinder.pool.capabilities.free_capacity_gb',
+        count=1,
+        value=200,
+        tags=[
+            'domain_id:default',
+            'project_name:demo',
+            'project_id:1e6e233e637d4d55a50a62b63398ad15',
+            'pool_name:pool2',
+            'pool_volume_backend_name:volume_pool2',
+            'keystone_server:http://127.0.0.1:8080/identity',
+        ],
+    )
+    aggregator.assert_metric(
+        'openstack.cinder.pool.capabilities.total_capacity_gb',
+        count=1,
+        value=512,
+        tags=[
+            'domain_id:default',
+            'project_name:demo',
+            'project_id:1e6e233e637d4d55a50a62b63398ad15',
+            'pool_name:pool2',
+            'pool_volume_backend_name:volume_pool2',
+            'keystone_server:http://127.0.0.1:8080/identity',
+        ],
+    )
+    aggregator.assert_metric(
+        'openstack.cinder.pool.capabilities.reserved_percentage',
+        count=1,
+        value=0,
+        tags=[
+            'domain_id:default',
+            'project_name:demo',
+            'project_id:1e6e233e637d4d55a50a62b63398ad15',
+            'pool_name:pool1',
+            'pool_volume_backend_name:volume_pool1',
+            'keystone_server:http://127.0.0.1:8080/identity',
+        ],
+    )
+    aggregator.assert_metric(
+        'openstack.cinder.pool.capabilities.reserved_percentage',
+        count=1,
+        value=0,
+        tags=[
+            'domain_id:default',
+            'project_name:demo',
+            'project_id:1e6e233e637d4d55a50a62b63398ad15',
+            'pool_name:pool2',
+            'pool_volume_backend_name:volume_pool2',
             'keystone_server:http://127.0.0.1:8080/identity',
         ],
     )
@@ -425,8 +555,7 @@ def test_block_storage_volumes_pagination(
             'project_name:demo',
             'project_id:1e6e233e637d4d55a50a62b63398ad15',
             'volume_id:9c762008-d70f-44d1-af02-98e1da79ee4b',
-            'volume_size:1',
-            'volume_name:',
+            'volume_name:first_volume',
             'volume_status:in-use',
             'keystone_server:http://127.0.0.1:8080/identity',
         ],
@@ -440,7 +569,34 @@ def test_block_storage_volumes_pagination(
             'project_name:demo',
             'project_id:1e6e233e637d4d55a50a62b63398ad15',
             'volume_id:259b16de-727f-4011-8388-84d17a9ae594',
-            'volume_size:1',
+            'volume_name:',
+            'volume_status:in-use',
+            'keystone_server:http://127.0.0.1:8080/identity',
+        ],
+    )
+    aggregator.assert_metric(
+        'openstack.cinder.volume.size',
+        count=1,
+        value=1,
+        tags=[
+            'domain_id:default',
+            'project_name:demo',
+            'project_id:1e6e233e637d4d55a50a62b63398ad15',
+            'volume_id:9c762008-d70f-44d1-af02-98e1da79ee4b',
+            'volume_name:first_volume',
+            'volume_status:in-use',
+            'keystone_server:http://127.0.0.1:8080/identity',
+        ],
+    )
+    aggregator.assert_metric(
+        'openstack.cinder.volume.size',
+        count=1,
+        value=1,
+        tags=[
+            'domain_id:default',
+            'project_name:demo',
+            'project_id:1e6e233e637d4d55a50a62b63398ad15',
+            'volume_id:259b16de-727f-4011-8388-84d17a9ae594',
             'volume_name:',
             'volume_status:in-use',
             'keystone_server:http://127.0.0.1:8080/identity',

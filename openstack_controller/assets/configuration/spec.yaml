@@ -401,6 +401,8 @@ files:
                         type: object
                       - name: snapshots
                         type: object
+                      - name: pools
+                        type: object
               - name: baremetal
                 anyOf:
                   - type: boolean

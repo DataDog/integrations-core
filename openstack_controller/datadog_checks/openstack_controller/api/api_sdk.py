@@ -176,6 +176,11 @@ class ApiSdk(Api):
             )
         ]
 
+    def get_block_storage_pools(self, project_id):
+        return [
+            pool.to_dict(original_names=True) for pool in self.connection.block_storage.pools(project_id, details=True)
+        ]
+
     def get_compute_limits(self, project_id):
         return self.connection.compute.get_limits(tenant_id=project_id).to_dict(original_names=True)
 
