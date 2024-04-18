@@ -228,20 +228,20 @@ See the [JMX Check documentation][7] for more detailed information.
 
 ### Commands to view the available metrics
 
-The `datadog-agent jmx` command was added in version 4.1.0.
+The `datadog-agent jmx` command allows you to run troubleshooting commands on JMXFetch integrations. On Linux systems, you will need to prepend the command with `sudo -u dd-agent` so that the Datadog Agent runs as the correct user.
 
-- List attributes that match at least one of your instance configurations:
-  `sudo /etc/init.d/datadog-agent jmx list_matching_attributes`
-- List attributes that match one of your instance configurations but that are not collected because it would exceed the number of metrics that can be collected:
-  `sudo /etc/init.d/datadog-agent jmx list_limited_attributes`
-- List attributes that are actually collected by your current instance configurations:
-  `sudo /etc/init.d/datadog-agent jmx list_collected_attributes`
-- List attributes that don't match any of your instance configurations:
-  `sudo /etc/init.d/datadog-agent jmx list_not_matching_attributes`
-- List every attribute available that has a type supported by JMXFetch:
-  `sudo /etc/init.d/datadog-agent jmx list_everything`
-- Start the collection of metrics based on your current configuration and display them in the console:
-  `sudo /etc/init.d/datadog-agent jmx collect`
+#### datadog-agent jmx collect
+Running `datadog-agent jmx collect` starts the collection of metrics based on your current configuration and displays them in the console.
+
+#### datadog-agent jmx list
+The `datadog-agent jmx list` has a number of available subcommands:
+- `collected` - List attributes that will actually be collected by your current instance's configuration.
+- `everything` - List every attribute available that has a type supported by JMXFetch.
+- `limited` - List attributes that match one of your instances' configurations but that are not being collected because it would exceed the number of metrics that can be collected.
+- `matching` - List attributes that match at least one of your instances' configurations.
+- `not-matching` - List attributes that don't match any of your instances' configurations.
+- `with-metrics` - List attributes and metrics data that match at least one of your instances' configurations.
+- `with-rate-metrics` - List attributes and metrics data that match at least one of your instances' configurations, including rates and counters.
 
 ## Further Reading
 

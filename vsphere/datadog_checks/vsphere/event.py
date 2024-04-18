@@ -11,7 +11,7 @@ from pyVmomi import vim
 
 from datadog_checks.base import ensure_unicode
 
-from .constants import MOR_TYPE_AS_STRING, SOURCE_TYPE
+from .constants import DEFAULT_EVENT_RESOURCES, MOR_TYPE_AS_STRING, SOURCE_TYPE
 
 EXCLUDE_FILTERS = {
     'AlarmStatusChangedEvent': [r'Gray to Green', r'Green to Gray'],
@@ -193,6 +193,16 @@ class VSphereEvent(object):
         )
         if host_name is not None:
             self.payload['host'] = host_name
+
+        # VMs and hosts submit these as host tags
+        if self.host_type.lower() not in DEFAULT_EVENT_RESOURCES:
+            self.payload['tags'].extend(
+                [
+                    'vsphere_type:{}'.format(self.host_type),
+                    'vsphere_resource:{}'.format(entity_name),
+                ]
+            )
+
         return self.payload
 
     def transform_vmmessageevent(self):
