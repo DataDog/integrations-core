@@ -1,7 +1,7 @@
 metric_name,metric_type,interval,unit_name,per_unit_name,description,orientation,integration,short_name,curated_metric
 openstack.cinder.cluster.count,gauge,,,,Number of cinder clusters,0,openstack_controller,cinder cluster ct,
-openstack.cinder.cluster.num_hosts,gauge,,,,Number of cinder cluster hosts,0,openstack_controller,cinder cluster host ct,
 openstack.cinder.cluster.num_down_hosts,gauge,,,,Number of cinder cluster hosts down,0,openstack_controller,cinder cluster host down ct,
+openstack.cinder.cluster.num_hosts,gauge,,,,Number of cinder cluster hosts,0,openstack_controller,cinder cluster host ct,
 openstack.cinder.pool.capabilities.free_capacity_gb,gauge,,,,Free capacity for a backend volume,0,openstack_controller,cinder pool free capacity,
 openstack.cinder.pool.capabilities.reserved_percentage,gauge,,percent,,Percentage of CPU use reserved for internal use,0,openstack_controller,cinder pool reserved percentage,
 openstack.cinder.pool.capabilities.total_capacity_gb,gauge,,,,Total capacity for a backend volume,0,openstack_controller,cinder pool total capacity,
