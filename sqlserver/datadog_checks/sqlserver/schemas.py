@@ -1,3 +1,8 @@
+try:
+    import datadog_agent
+except ImportError:
+    from ..stubs import datadog_agent
+
 from datadog_checks.sqlserver.const import (
     TABLES_IN_SCHEMA_QUERY,
     COLUMN_QUERY,
@@ -63,16 +68,29 @@ class Schemas:
         self._check = check 
         self._log = check.log
         self.schemas_per_db = {} 
+        """
         base_event = {
                 "host": self._check.resolved_hostname,
-                #"agent_version": datadog_agent.get_version(),
+                "agent_version": datadog_agent.get_version(),
                 "dbms": "sqlserver", #TODO ?
-                "kind": "", # TODO ? 
+                "kind": "", # TODO 
                 #"collection_interval": self.schemas_collection_interval,
                 #"dbms_version": self._payload_pg_version(),
                 #"tags": self._tags_no_db,
                 #"cloud_metadata": self._config.cloud_metadata,
             }
+        """
+        base_event = {
+            "host": self._check.resolved_hostname,
+            "agent_version": datadog_agent.get_version(),
+            "dbms": "postgres", #TODO fake it until you make it - trying to pass this data as postgres for now
+            "kind": "pg_databases", # TODO pg_databases - will result in KindPgDatabases and so processor would thing its postgres 
+            "collection_interval": 100, #dummy
+            "dbms_version": 1, #dummy
+            #"tags": self._tags_no_db,
+            #"cloud_metadata": self._config.cloud_metadata,
+        }
+
         self._dataSubmitter = SubmitData(self._check.database_monitoring_metadata, base_event, self._log)
 
         # These are fields related to the work to do while doing the initial intake
@@ -192,6 +210,7 @@ class Schemas:
         # unwrap id_to_all
         return total_columns_number, list(id_to_all.values())
 
+    # TODO refactor the next 3 to have a base function when everythng is settled.
     def _populate_with_columns_data(self, table_names, name_to_id, id_to_all, schema, cursor):
         # get columns if we dont have a dict here unlike postgres
         cursor.execute(COLUMN_QUERY.format(table_names, schema["name"]))
