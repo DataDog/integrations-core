@@ -1,4 +1,5 @@
 metric_name,metric_type,interval,unit_name,per_unit_name,description,orientation,integration,short_name,curated_metric
+openstack.cinder.cluster.count,gauge,,,,Number of cinder clusters,0,openstack_controller,cinder cluster ct,
 openstack.cinder.response_time,gauge,,millisecond,,Duration that an HTTP request takes to complete when making a request to cinder endpoint,0,openstack_controller,cinder response time,
 openstack.cinder.volume.count,gauge,,,,Number of cinder volumes,0,openstack_controller,cinder volume ct,
 openstack.cinder.volume.transfer.count,gauge,,,,Number of cinder volume transfers,0,openstack_controller,cinder volume transfer ct,

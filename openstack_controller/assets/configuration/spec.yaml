@@ -182,6 +182,18 @@ files:
             example: "2.93"
             type: string
             display_default: null
+        - name: cinder_microversion
+          description: |
+           The microversion of the Rest API to call.
+           It is recommended to set this parameter to the latest microversion supported by your Openstack version.
+
+           View this page for more about microvoersion compatibility:
+              https://docs.openstack.org/cinder/latest/contributor/api_microversion_history.html
+          enabled: true
+          value:
+            example: "volume 3.70"
+            type: string
+            display_default: null
         - name: collect_hypervisor_load
           hidden: true
           description: |
@@ -398,6 +410,8 @@ files:
                       - name: volumes
                         type: object
                       - name: transfers
+                        type: object
+                      - name: clusters
                         type: object
               - name: baremetal
                 anyOf:

@@ -131,6 +131,10 @@ class ApiRest(Api):
             self.log.debug("adding X-OpenStack-Ironic-API-Version header to `%s`", self.config.ironic_microversion)
             self.http.options['headers']['X-OpenStack-Ironic-API-Version'] = self.config.ironic_microversion
 
+        if self.config.cinder_microversion:
+            self.log.debug("adding OpenStack-API-Version header to `%s`", self.config.cinder_microversion)
+            self.http.options['headers']['OpenStack-API-Version'] = self.config.cinder_microversion
+
     def get_identity_regions(self):
         response = self.http.get(
             '{}/v3/regions'.format(self._catalog.get_endpoint_by_type(Component.Types.IDENTITY.value))
@@ -212,6 +216,13 @@ class ApiRest(Api):
         )
         response.raise_for_status()
         return response.json().get('transfers', {})
+
+    def get_block_storage_clusters(self, project_id):
+        response = self.http.get(
+            '{}/clusters/detail'.format(self._catalog.get_endpoint_by_type(Component.Types.BLOCK_STORAGE.value))
+        )
+        response.raise_for_status()
+        return response.json().get('clusters', {})
 
     def get_compute_limits(self, project_id):
         params = {'tenant_id': project_id}

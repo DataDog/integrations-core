@@ -63,6 +63,7 @@ class BlockStorageItem(BaseModel):
         arbitrary_types_allowed=True,
         frozen=True,
     )
+    clusters: Optional[MappingProxyType[str, Any]] = None
     transfers: Optional[MappingProxyType[str, Any]] = None
     volumes: Optional[MappingProxyType[str, Any]] = None
 
@@ -351,6 +352,7 @@ class InstanceConfig(BaseModel):
     aws_region: Optional[str] = None
     aws_service: Optional[str] = None
     blacklist_project_names: Optional[tuple[str, ...]] = None
+    cinder_microversion: Optional[str] = None
     collect_hypervisor_load: Optional[bool] = None
     collect_hypervisor_metrics: Optional[bool] = None
     collect_network_metrics: Optional[bool] = None

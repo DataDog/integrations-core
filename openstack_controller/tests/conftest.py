@@ -138,6 +138,10 @@ def mock_responses(microversion_headers):
 
     def process_files(dir, response_parent):
         for file in dir.rglob('*'):
+            if 'clusters' in str(file.relative_to(dir)):
+                print(str(file.relative_to(dir)))
+                if 'response.json' in str(file.relative_to(dir)):
+                    print(get_json_value_from_file(file))
             if file.is_file() and file.stem != ".slash":
                 relative_dir_path = (
                     "/" + str(file.parent.relative_to(dir)) + ("/" if (file.parent / ".slash").is_file() else "")
@@ -167,6 +171,7 @@ def mock_responses(microversion_headers):
         filename = file
         request_path = url
         request_path = request_path.replace('?', '/')
+        print(request_path)
         if params:
             param_string = '/'.join('{}={}'.format(key, str(val)) for key, val in params.items())
             request_path = '{}/{}'.format(url, param_string)
@@ -401,7 +406,23 @@ def connection_block_storage(request, mock_responses):
             for transfer in mock_responses('GET', f'/volume/v3/{project_id}/os-volume-transfer/detail')['transfers']
         ]
 
-    return mock.MagicMock(volumes=mock.MagicMock(side_effect=volumes), transfers=mock.MagicMock(side_effect=transfers))
+    def clusters(project_id, details):
+        if http_error and 'clusters' in http_error:
+            raise requests.exceptions.HTTPError(response=http_error['clusters'])
+        return [
+            mock.MagicMock(
+                to_dict=mock.MagicMock(
+                    return_value=cluster,
+                )
+            )
+            for cluster in mock_responses('GET', f'/volume/v3/{project_id}/clusters/detail')['clusters']
+        ]
+
+    return mock.MagicMock(
+        volumes=mock.MagicMock(side_effect=volumes),
+        transfers=mock.MagicMock(side_effect=transfers),
+        clusters=mock.MagicMock(side_effect=clusters),
+    )
 
 
 @pytest.fixture
