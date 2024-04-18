@@ -6,9 +6,9 @@
 from datadog_checks.openstack_controller.components.component import Component
 from datadog_checks.openstack_controller.metrics import (
     CINDER_CLUSTER_COUNT,
-    CINDER_CLUSTER_TAGS,
     CINDER_CLUSTER_METRICS,
     CINDER_CLUSTER_PREFIX,
+    CINDER_CLUSTER_TAGS,
     CINDER_METRICS_PREFIX,
     CINDER_POOL_COUNT,
     CINDER_POOL_METRICS,
