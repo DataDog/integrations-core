@@ -217,6 +217,15 @@ class ApiRest(Api):
         response.raise_for_status()
         return response.json().get('transfers', {})
 
+    def get_block_storage_pools(self, project_id):
+        response = self.http.get(
+            '{}/scheduler-stats/get_pools'.format(
+                self._catalog.get_endpoint_by_type(Component.Types.BLOCK_STORAGE.value)
+            )
+        )
+        response.raise_for_status()
+        return response.json().get('pools', {})
+
     def get_block_storage_clusters(self, project_id):
         response = self.http.get(
             '{}/clusters/detail'.format(self._catalog.get_endpoint_by_type(Component.Types.BLOCK_STORAGE.value))

@@ -7,7 +7,7 @@
             "availability_zone": "nova",
             "created_at": "2023-10-18T15:21:10.000000",
             "updated_at": "2023-10-18T15:21:38.000000",
-            "name": "",
+            "name": "first_volume",
             "description": "",
             "volume_type": "lvmdriver-1",
             "snapshot_id": null,

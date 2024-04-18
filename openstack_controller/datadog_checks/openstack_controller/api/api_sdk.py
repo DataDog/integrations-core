@@ -172,6 +172,11 @@ class ApiSdk(Api):
             for transfer in self.connection.block_storage.transfers(project_id, details=True)
         ]
 
+    def get_block_storage_pools(self, project_id):
+        return [
+            pool.to_dict(original_names=True) for pool in self.connection.block_storage.pools(project_id, details=True)
+        ]
+
     def get_block_storage_clusters(self, project_id):
         return [
             cluster.to_dict(original_names=True)
