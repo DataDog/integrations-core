@@ -365,7 +365,12 @@ CINDER_POOL_TAGS = {
     'capabilities.volume_backend_name': 'pool_volume_backend_name',
 }
 CINDER_RESPONSE_TIME = f"{CINDER_METRICS_PREFIX}.response_time"
-CINDER_CLUSTER_COUNT = f"{CINDER_METRICS_PREFIX}.cluster.count"
+CINDER_CLUSTER_PREFIX = f"{CINDER_METRICS_PREFIX}.cluster"
+CINDER_CLUSTER_COUNT = f"{CINDER_CLUSTER_PREFIX}.count"
+CINDER_CLUSTER_METRICS = {
+    f"{CINDER_CLUSTER_PREFIX}.num_hosts": {},
+    f"{CINDER_CLUSTER_PREFIX}.num_down_hosts": {}
+}
 CINDER_CLUSTER_TAGS = {'name': 'cluster-name'}
 CINDER_TRANSFER_COUNT = f"{CINDER_METRICS_PREFIX}.volume.transfer.count"
 CINDER_TRANSFER_TAGS = {'id': 'transfer_id', 'volume_id': 'volume_id', 'name': 'volume_name'}

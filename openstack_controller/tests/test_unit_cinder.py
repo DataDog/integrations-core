@@ -435,6 +435,30 @@ def test_block_storage_metrics_microversion_3_70(aggregator, check, dd_run_check
             'keystone_server:http://127.0.0.1:8080/identity',
         ],
     )
+    aggregator.assert_metric(
+        'openstack.cinder.cluster.num_hosts',
+        count=1,
+        value=0,
+        tags=[
+            'domain_id:default',
+            'project_name:demo',
+            'project_id:1e6e233e637d4d55a50a62b63398ad15',
+            'cluster-name:first_cluster',
+            'keystone_server:http://127.0.0.1:8080/identity',
+        ],
+    )
+    aggregator.assert_metric(
+        'openstack.cinder.cluster.num_down_hosts',
+        count=1,
+        value=0,
+        tags=[
+            'domain_id:default',
+            'project_name:demo',
+            'project_id:1e6e233e637d4d55a50a62b63398ad15',
+            'cluster-name:first_cluster',
+            'keystone_server:http://127.0.0.1:8080/identity',
+        ],
+    )
 
 
 @pytest.mark.parametrize(
