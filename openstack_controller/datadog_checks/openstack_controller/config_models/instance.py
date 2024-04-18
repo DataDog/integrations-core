@@ -63,8 +63,8 @@ class BlockStorageItem(BaseModel):
         arbitrary_types_allowed=True,
         frozen=True,
     )
-    snapshots: Optional[MappingProxyType[str, Any]] = None
     pools: Optional[MappingProxyType[str, Any]] = None
+    snapshots: Optional[MappingProxyType[str, Any]] = None
     transfers: Optional[MappingProxyType[str, Any]] = None
     volumes: Optional[MappingProxyType[str, Any]] = None
 
