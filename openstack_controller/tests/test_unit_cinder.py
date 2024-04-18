@@ -283,7 +283,8 @@ def test_block_storage_metrics(aggregator, check, dd_run_check):
             'domain_id:default',
             'project_name:demo',
             'project_id:1e6e233e637d4d55a50a62b63398ad15',
-            'volume_backend_name:pool1',
+            'pool_name:pool1',
+            'pool_volume_backend_name:volume_pool1',
             'keystone_server:http://127.0.0.1:8080/identity',
         ],
     )
@@ -295,7 +296,8 @@ def test_block_storage_metrics(aggregator, check, dd_run_check):
             'domain_id:default',
             'project_name:demo',
             'project_id:1e6e233e637d4d55a50a62b63398ad15',
-            'volume_backend_name:pool2',
+            'pool_name:pool2',
+            'pool_volume_backend_name:volume_pool2',
             'keystone_server:http://127.0.0.1:8080/identity',
         ],
     )
@@ -307,7 +309,8 @@ def test_block_storage_metrics(aggregator, check, dd_run_check):
             'domain_id:default',
             'project_name:demo',
             'project_id:1e6e233e637d4d55a50a62b63398ad15',
-            'volume_backend_name:pool1',
+            'pool_name:pool1',
+            'pool_volume_backend_name:volume_pool1',
             'keystone_server:http://127.0.0.1:8080/identity',
         ],
     )
@@ -319,7 +322,8 @@ def test_block_storage_metrics(aggregator, check, dd_run_check):
             'domain_id:default',
             'project_name:demo',
             'project_id:1e6e233e637d4d55a50a62b63398ad15',
-            'volume_backend_name:pool1',
+            'pool_name:pool1',
+            'pool_volume_backend_name:volume_pool1',
             'keystone_server:http://127.0.0.1:8080/identity',
         ],
     )
@@ -331,7 +335,8 @@ def test_block_storage_metrics(aggregator, check, dd_run_check):
             'domain_id:default',
             'project_name:demo',
             'project_id:1e6e233e637d4d55a50a62b63398ad15',
-            'volume_backend_name:pool2',
+            'pool_name:pool2',
+            'pool_volume_backend_name:volume_pool2',
             'keystone_server:http://127.0.0.1:8080/identity',
         ],
     )
@@ -343,7 +348,8 @@ def test_block_storage_metrics(aggregator, check, dd_run_check):
             'domain_id:default',
             'project_name:demo',
             'project_id:1e6e233e637d4d55a50a62b63398ad15',
-            'volume_backend_name:pool2',
+            'pool_name:pool2',
+            'pool_volume_backend_name:volume_pool2',
             'keystone_server:http://127.0.0.1:8080/identity',
         ],
     )
@@ -355,7 +361,8 @@ def test_block_storage_metrics(aggregator, check, dd_run_check):
             'domain_id:default',
             'project_name:demo',
             'project_id:1e6e233e637d4d55a50a62b63398ad15',
-            'volume_backend_name:pool1',
+            'pool_name:pool1',
+            'pool_volume_backend_name:volume_pool1',
             'keystone_server:http://127.0.0.1:8080/identity',
         ],
     )
@@ -367,7 +374,8 @@ def test_block_storage_metrics(aggregator, check, dd_run_check):
             'domain_id:default',
             'project_name:demo',
             'project_id:1e6e233e637d4d55a50a62b63398ad15',
-            'volume_backend_name:pool2',
+            'pool_name:pool2',
+            'pool_volume_backend_name:volume_pool2',
             'keystone_server:http://127.0.0.1:8080/identity',
         ],
     )

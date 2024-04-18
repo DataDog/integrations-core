@@ -361,7 +361,8 @@ CINDER_POOL_METRICS = {
     f"{CINDER_POOL_PREFIX}.capabilities.reserved_percentage": {},
 }
 CINDER_POOL_TAGS = {
-    'name': 'volume_backend_name',
+    'name': 'pool_name',
+    'capabilities.volume_backend_name': 'pool_volume_backend_name',
 }
 CINDER_RESPONSE_TIME = f"{CINDER_METRICS_PREFIX}.response_time"
 CINDER_TRANSFER_COUNT = f"{CINDER_METRICS_PREFIX}.volume.transfer.count"
