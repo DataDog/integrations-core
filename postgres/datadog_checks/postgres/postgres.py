@@ -57,6 +57,7 @@ from .util import (
     SLRU_METRICS,
     SNAPSHOT_TXID_METRICS,
     SNAPSHOT_TXID_METRICS_LT_13,
+    STAT_IO_METRICS,
     STAT_SUBSCRIPTION_METRICS,
     STAT_SUBSCRIPTION_STATS_METRICS,
     STAT_WAL_METRICS,
@@ -70,7 +71,7 @@ from .util import (
     payload_pg_version,
     warning_with_tags,
 )
-from .version_utils import V9, V9_2, V10, V12, V13, V14, V15, VersionUtils
+from .version_utils import V9, V9_2, V10, V12, V13, V14, V15, V16, VersionUtils
 
 try:
     import datadog_agent
@@ -320,6 +321,9 @@ class PostgreSql(AgentCheck):
             queries.append(SUBSCRIPTION_STATE_METRICS)
         if self.version >= V15:
             queries.append(STAT_SUBSCRIPTION_STATS_METRICS)
+        if self.version >= V16:
+            if self._config.dbm_enabled:
+                queries.append(STAT_IO_METRICS)
 
         if not queries:
             self.log.debug("no dynamic queries defined")

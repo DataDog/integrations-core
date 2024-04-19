@@ -841,3 +841,35 @@ FROM pg_stat_subscription_stats
         {'name': 'postgresql.subscription.sync_error', 'type': 'monotonic_count'},
     ],
 }
+
+# Requires PG16+
+STAT_IO_METRICS = {
+    'name': 'stat_io_metrics',
+    'query': """
+SELECT backend_type,
+       object,
+       context,
+       reads,
+       read_time,
+       writes,
+       write_time,
+       extends,
+       extend_time,
+       fsyncs,
+       fsync_time
+FROM pg_stat_io
+""",
+    'columns': [
+        {'name': 'backend_type', 'type': 'tag'},
+        {'name': 'object', 'type': 'tag'},
+        {'name': 'context', 'type': 'tag'},
+        {'name': 'postgresql.io.reads', 'type': 'monotonic_count'},
+        {'name': 'postgresql.io.read_time', 'type': 'gauge'},
+        {'name': 'postgresql.io.writes', 'type': 'monotonic_count'},
+        {'name': 'postgresql.io.write_time', 'type': 'gauge'},
+        {'name': 'postgresql.io.extends', 'type': 'monotonic_count'},
+        {'name': 'postgresql.io.extend_time', 'type': 'gauge'},
+        {'name': 'postgresql.io.fsyncs', 'type': 'monotonic_count'},
+        {'name': 'postgresql.io.fsync_time', 'type': 'gauge'},
+    ],
+}
