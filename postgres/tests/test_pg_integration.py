@@ -1136,6 +1136,7 @@ def test_propagate_agent_tags(
                 'postgres.can_connect', count=1, status=PostgreSql.OK, tags=expected_tags + agent_tags
             )
 
+
 @requires_over_16
 @pytest.mark.parametrize(
     'dbm_enabled',
