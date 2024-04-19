@@ -113,7 +113,7 @@ jobs:
         # Enable disk performance counters
         diskperf -y
 
-    - uses: actions/checkout@v3
+    - uses: actions/checkout@v4
 
     - name: Set up Python 2.7
       if: inputs.test-py2
