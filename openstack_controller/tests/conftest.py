@@ -138,10 +138,6 @@ def mock_responses(microversion_headers):
 
     def process_files(dir, response_parent):
         for file in dir.rglob('*'):
-            if 'clusters' in str(file.relative_to(dir)):
-                print(str(file.relative_to(dir)))
-                if 'response.json' in str(file.relative_to(dir)):
-                    print(get_json_value_from_file(file))
             if file.is_file() and file.stem != ".slash":
                 relative_dir_path = (
                     "/" + str(file.parent.relative_to(dir)) + ("/" if (file.parent / ".slash").is_file() else "")
@@ -171,7 +167,6 @@ def mock_responses(microversion_headers):
         filename = file
         request_path = url
         request_path = request_path.replace('?', '/')
-        print(request_path)
         if params:
             param_string = '/'.join('{}={}'.format(key, str(val)) for key, val in params.items())
             request_path = '{}/{}'.format(url, param_string)
