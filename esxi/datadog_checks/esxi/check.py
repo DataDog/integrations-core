@@ -10,6 +10,7 @@ from pyVmomi import vim, vmodl
 from six import iteritems
 
 from datadog_checks.base import AgentCheck  # noqa: F401
+from datadog_checks.base.utils.common import to_string
 
 from .constants import (
     ALL_RESOURCES,
@@ -296,17 +297,31 @@ class EsxiCheck(AgentCheck):
 
             tags = []
             parent = resource_props.get('parent')
-            runtime_host = resource_props.get('runtime.host')
+
+            if resource_type == "vm":
+                runtime_host = resource_props.get('runtime.host')
+                runtime_host_props = {}
+                if runtime_host:
+                    if runtime_host in all_resources_with_metrics:
+                        runtime_host_props = all_resources_with_metrics.get(runtime_host, {})
+                    else:
+                        self.log.debug("Missing runtime.host details for VM %s", hostname)
+
+                runtime_hostname = to_string(runtime_host_props.get("name", "unknown"))
+                tags.append('esxi_host:{}'.format(runtime_hostname))
+
+                if runtime_host is not None:
+                    tags.extend(
+                        get_tags_recursively(
+                            runtime_host,
+                            resource_map,
+                            include_only=['esxi_cluster'],
+                        )
+                    )
+
             if parent is not None:
                 tags.extend(get_tags_recursively(parent, resource_map))
-            if runtime_host is not None:
-                tags.extend(
-                    get_tags_recursively(
-                        runtime_host,
-                        resource_map,
-                        include_only=['esxi_cluster'],
-                    )
-                )
+
             tags.append('esxi_type:{}'.format(resource_type))
 
             metric_tags = self.tags

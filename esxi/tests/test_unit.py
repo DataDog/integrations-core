@@ -167,13 +167,22 @@ def test_external_host_tags(vcsim_instance, datadog_agent, dd_run_check):
                 'esxi_datacenter:dc2',
                 'esxi_folder:folder_1',
                 'esxi_type:vm',
+                'esxi_host:localhost.localdomain',
                 'esxi_url:127.0.0.1:8989',
             ]
         },
     )
     datadog_agent.assert_external_tags(
         'vm2',
-        {'esxi': ['esxi_cluster:c1', 'esxi_compute:c1', 'esxi_type:vm', 'esxi_url:127.0.0.1:8989']},
+        {
+            'esxi': [
+                'esxi_cluster:c1',
+                'esxi_compute:c1',
+                'esxi_type:vm',
+                'esxi_url:127.0.0.1:8989',
+                'esxi_host:unknown',
+            ]
+        },
     )
 
 
@@ -280,6 +289,7 @@ def test_external_host_tags_all_resources(vcsim_instance, datadog_agent, dd_run_
             'esxi': [
                 'esxi_type:vm',
                 'esxi_cluster:c1',
+                'esxi_host:hostname',
                 'esxi_url:127.0.0.1:8989',
             ]
         },
@@ -558,8 +568,20 @@ def test_excluded_host_tags(
         assert expected_warning in caplog.text
 
     host_external_tags = ['esxi_datacenter:dc2', 'esxi_folder:folder_1', 'esxi_type:host', 'esxi_url:127.0.0.1:8989']
-    vm_1_external_tags = ['esxi_datacenter:dc2', 'esxi_folder:folder_1', 'esxi_type:vm', 'esxi_url:127.0.0.1:8989']
-    vm_2_external_tags = ['esxi_cluster:c1', 'esxi_compute:c1', 'esxi_type:vm', 'esxi_url:127.0.0.1:8989']
+    vm_1_external_tags = [
+        'esxi_datacenter:dc2',
+        'esxi_folder:folder_1',
+        'esxi_type:vm',
+        'esxi_url:127.0.0.1:8989',
+        'esxi_host:localhost.localdomain',
+    ]
+    vm_2_external_tags = [
+        'esxi_cluster:c1',
+        'esxi_compute:c1',
+        'esxi_type:vm',
+        'esxi_url:127.0.0.1:8989',
+        'esxi_host:unknown',
+    ]
 
     def all_tags_for_metrics(external_tags):
         # any external tags that are filtered, including esxi_url
@@ -623,3 +645,30 @@ def test_long_lived_connection(vcsim_instance, dd_run_check):
         check.check(vcsim_instance)
 
         assert mock_connect.call_count == 1
+
+        
+@pytest.mark.usefixtures("service_instance")        
+def test_runtime_host_not_found(vcsim_instance, dd_run_check, caplog, service_instance):
+    retrieve_result = vim.PropertyCollector.RetrieveResult(
+        objects=[
+            vim.ObjectContent(
+                obj=vim.VirtualMachine(moId="vm1"),
+                propSet=[
+                    vmodl.DynamicProperty(
+                        name='runtime.host',
+                        val='test',
+                    ),
+                    vmodl.DynamicProperty(
+                        name='name',
+                        val='vm1',
+                    ),
+                ],
+            )
+        ]
+    )
+    service_instance.content.propertyCollector.RetrievePropertiesEx = MagicMock(return_value=retrieve_result)
+    caplog.set_level(logging.DEBUG)
+    check = EsxiCheck('esxi', {}, [vcsim_instance])
+
+    dd_run_check(check)
+    assert "Missing runtime.host details for VM vm1" in caplog.text
