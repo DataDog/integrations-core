@@ -10,6 +10,7 @@ from datadog_checks.sqlserver.const import (
     INDEX_QUERY,
     FOREIGN_KEY_QUERY,
     SCHEMA_QUERY,
+    DB_QUERY
 )
 
 from datadog_checks.sqlserver.utils import (
@@ -28,26 +29,35 @@ class SubmitData:
     MAX_COLUMN_COUNT  = 100_000
 
     def __init__(self, submit_data_function, base_event, logger):
-        self._submit = submit_data_function
+        self._submit_to_agent_queue = submit_data_function
         self._columns_count  = 0
         self.db_to_schemas = {} # dbname : { id : schema }
+        self.db_info = {} # name to info
         self._base_event = base_event
         self._log = logger
+    
+    def store_db_info(self, db_name, db_info):
+        self.db_info[db_name] = db_info
 
     def store(self, db_name, schema, tables, columns_count):
         self._columns_count += columns_count
         schemas = self.db_to_schemas.setdefault(db_name, {})
-        if schema["schema_id"] in schemas:
-            known_tables = schemas[schema["schema_id"]].setdefault("tables",[])
+        if schema["id"] in schemas:
+            known_tables = schemas[schema["id"]].setdefault("tables",[])
             known_tables = known_tables + tables
         else:
-            schemas[schema["schema_id"]] = copy.deepcopy(schema) # TODO a deep copy ? kind of costs not much to be safe
-            schemas[schema["schema_id"]]["tables"] = tables
+            schemas[schema["id"]] = copy.deepcopy(schema) # TODO a deep copy ? kind of costs not much to be safe
+            schemas[schema["id"]]["tables"] = tables
         if self._columns_count > self.MAX_COLUMN_COUNT:
             self._submit()
 
+    #TODO P - disable for p.
+    def tmp_modify_to_fit_in_postgres(self, db_info):
+        if "collation" in db_info:
+            del db_info["collation"]
+        return db_info
+
     def submit(self):
-        pdb.set_trace()
         if not bool(self.db_to_schemas):
             return
         self._columns_count  = 0
@@ -56,10 +66,17 @@ class SubmitData:
                  "timestamp": time.time() * 1000
                  }
         for db, schemas_by_id in self.db_to_schemas.items():
-            event["metadata"] =  event["metadata"] + [{"db_name":db, "schemas": list(schemas_by_id.values()) }]
+            db_info = {}
+            if db not in self.db_info:
+                #TODO log error
+                db_info["name"] = db
+            else:
+                db_info = self.db_info[db]
+            event["metadata"] =  event["metadata"] + [{**(self.tmp_modify_to_fit_in_postgres(db_info)), "schemas": list(schemas_by_id.values())}]
         json_event = json.dumps(event, default=default_json_event_encoding)
         self._log.debug("Reporting the following payload for schema collection: {}".format(json_event))
-        self._submit(json_event)
+        pdb.set_trace()
+        self._submit_to_agent_queue(json_event)
         self.db_to_schemas = {}
 
 #TODO Introduce total max for data
@@ -67,6 +84,8 @@ class Schemas:
     def __init__(self, check):
         self._check = check 
         self._log = check.log
+        self._tags = [t for t in check.tags if not t.startswith('dd.internal')]
+        self._tags.append("boris:data")
         self.schemas_per_db = {} 
         """
         base_event = {
@@ -85,10 +104,10 @@ class Schemas:
             "agent_version": datadog_agent.get_version(),
             "dbms": "postgres", #TODO fake it until you make it - trying to pass this data as postgres for now
             "kind": "pg_databases", # TODO pg_databases - will result in KindPgDatabases and so processor would thing its postgres 
-            "collection_interval": 100, #dummy
+            "collection_interval": 0.5, #dummy
             "dbms_version": 1, #dummy
-            #"tags": self._tags_no_db,
-            #"cloud_metadata": self._config.cloud_metadata,
+            "tags": self._tags, #in postgres it's no DB.
+            "cloud_metadata": self._check._config.cloud_metadata,
         }
 
         self._dataSubmitter = SubmitData(self._check.database_monitoring_metadata, base_event, self._log)
@@ -122,10 +141,10 @@ class Schemas:
     schema
     dict:
         "name": str
-        "schema_id": str
+        "id": str
         "principal_id": str
         "tables" : []
-            object_id : str
+            id : str
             name : str
             columns: list of columns                  
                 "columns": dict
@@ -149,19 +168,21 @@ class Schemas:
                 #"collection_interval": self.schemas_collection_interval,
                 #"dbms_version": self._payload_pg_version(),
                 #"tags": self._tags_no_db,
-                #"cloud_metadata": self._config.cloud_metadata,
+                "cloud_metadata": self._check._config.cloud_metadata,
             }
 
         def fetch_schema_data(cursor, db_name):
+            db_info  = self._query_db_information(db_name, cursor)
             schemas = self._query_schema_information(cursor)
+            self._dataSubmitter.store_db_info(db_name, db_info)
             chunk_size = 50
             for schema in schemas:
                 tables = self._get_tables(schema, cursor)            
                 tables_chunk = list(get_list_chunks(tables, chunk_size))
                 for tables_chunk in tables_chunk:
-                    columns_count, tables = self._get_tables_data(tables_chunk, schema, cursor)
-                    self._dataSubmitter.store(db_name, schema, tables, columns_count)  
-                #self._dataSubmitter.submit() # we force submit when we reach the end of schema, it's like in Seths solution
+                    columns_count, tables_info = self._get_tables_data(tables_chunk, schema, cursor)
+                    self._dataSubmitter.store(db_name, schema, tables_info, columns_count)  
+                    self._dataSubmitter.submit() # we force submit when we reach the end of schema, it's like in Seths solution
                 if len(tables) == 0:
                     self._dataSubmitter.store(db_name, schema, [], 0)
                 # to ask him if this is needed or we can submit only on 100 000 column
@@ -170,7 +191,14 @@ class Schemas:
         self._check.do_for_databases(fetch_schema_data, self._check.get_databases())
         # submit the last chunk of data if any
         self._dataSubmitter.submit()
-        
+
+
+    def _query_db_information(self, db_name, cursor):
+        db_info = execute_query_output_result_as_a_dict(DB_QUERY.format(db_name), cursor)
+        if len(db_info) == 1:
+            return db_info[0]
+        else:
+            return None
     # TODO how often ?
 
     #TODOTODO do we need this map/list format if we are not dumping in json ??? May be we need to send query results as they are ? 
@@ -199,14 +227,14 @@ class Schemas:
         name_to_id = {}
         id_to_all = {}
         table_names = ",".join(["'{}'".format(t.get("name")) for t in table_list])
-        table_ids = ",".join(["{}".format(t.get("object_id")) for t in table_list])
+        table_ids = ",".join(["{}".format(t.get("id")) for t in table_list])
         for t in table_list:
-            name_to_id[t["name"]] = t["object_id"] 
-            id_to_all[t["object_id"]] = t
+            name_to_id[t["name"]] = t["id"] 
+            id_to_all[t["id"]] = t
         total_columns_number  = self._populate_with_columns_data(table_names, name_to_id, id_to_all, schema, cursor)
-        self._populate_with_partitions_data(table_ids, id_to_all, cursor)
-        self._populate_with_foreign_keys_data(table_ids, id_to_all, cursor)
-        self._populate_with_index_data(table_ids, id_to_all, cursor)
+        #self._populate_with_partitions_data(table_ids, id_to_all, cursor) #TODO P DISABLED as postgrss backend accepts different data model
+        #self._populate_with_foreign_keys_data(table_ids, id_to_all, cursor) #TODO P DISABLED as postgrss backend accepts different data model
+        #self._populate_with_index_data(table_ids, id_to_all, cursor) #TODO P DISABLED as postgrss backend accepts different data model
         # unwrap id_to_all
         return total_columns_number, list(id_to_all.values())
 
@@ -215,13 +243,27 @@ class Schemas:
         # get columns if we dont have a dict here unlike postgres
         cursor.execute(COLUMN_QUERY.format(table_names, schema["name"]))
         data = cursor.fetchall()
-        columns = [str(i[0]).lower() for i in cursor.description]
+        columns = []
+        #TODO we need it cause if I put AS default its a forbidden key word and to be inline with postgres we need it
+        for i in cursor.description:
+            if str(i[0]).lower() == "column_default":
+                columns.append("default")
+            else:
+                columns.append(str(i[0]).lower())
+        
+
         rows = [dict(zip(columns, row)) for row in data]       
         for row in rows:
             table_id = name_to_id.get(str(row.get("table_name")))
             if table_id is not None:
                 # exclude "table_name" from the row dict
                 row.pop("table_name", None)
+                if "nullable" in row:
+                    if row["nullable"].lower() == "no" or row["nullable"].lower() == "false":
+                        #to make compatible with postgres 
+                        row["nullable"] = "false"
+                    else:
+                        row["nullable"] = "true"
                 id_to_all.get(table_id)["columns"] = id_to_all.get(table_id).get("columns",[]) + [row]
         return len(data)
     
@@ -230,13 +272,13 @@ class Schemas:
         columns = [str(i[0]).lower() for i in cursor.description] 
         rows = [dict(zip(columns, row)) for row in cursor.fetchall()]
         for row in rows:
-            id  = row.pop("object_id", None)
+            id  = row.pop("id", None)
             if id is not None:
                 #TODO what happens if not found ? 
                 id_to_all.get(id)["partitions"] = row
             else:
                 print("todo error")
-            row.pop("object_id", None)
+            row.pop("id", None)
         print("end")
 
     def _populate_with_index_data(self, table_ids, id_to_all, cursor):
@@ -244,12 +286,12 @@ class Schemas:
         columns = [str(i[0]).lower() for i in cursor.description] 
         rows = [dict(zip(columns, row)) for row in cursor.fetchall()]
         for row in rows:
-            id  = row.pop("object_id", None)
+            id  = row.pop("id", None)
             if id is not None:
                 id_to_all.get(id)["indexes"] = row
             else:
                 print("todo error")
-            row.pop("object_id", None)
+            row.pop("id", None)
         print("end")
 
     def _populate_with_foreign_keys_data(self, table_ids, id_to_all, cursor):
@@ -257,7 +299,7 @@ class Schemas:
             columns = [str(i[0]).lower() for i in cursor.description] 
             rows = [dict(zip(columns, row)) for row in cursor.fetchall()]
             for row in rows:
-                id  = row.pop("object_id", None)
+                id  = row.pop("id", None)
                 if id is not None:
                     id_to_all.get(id)["foreign_keys"] = row
                 else:
@@ -270,12 +312,12 @@ class Schemas:
 
     #TODOTODO do we need this map/list format if we are not dumping in json ??? May be we need to send query results as they are ? 
     def _get_tables(self, schema, cursor):
-        cursor.execute(TABLES_IN_SCHEMA_QUERY.format(schema["schema_id"]))
+        cursor.execute(TABLES_IN_SCHEMA_QUERY.format(schema["id"]))
         columns = [str(i[0]).lower() for i in cursor.description]
         rows = [dict(zip(columns, row)) for row in cursor.fetchall()] #TODO may be more optimal to patch columns with index etc 
         # rows = [dict(zip(columns + ["columns", "indexes", "partitions", "foreign_keys"], row + [[], [], [], []])) for row in cursor.fetchall()] #TODO may be this works
-        return [ {"object_id" : row["object_id"], "name" : row['name'], "columns" : [], "indexes" : [], "partitions" : [], "foreign_keys" : []} for row in rows ]                  
-
+        #return [ {"id" : row["object_id"], "name" : row['name'], "columns" : [], "indexes" : [], "partitions" : [], "foreign_keys" : []} for row in rows ]     # TODO P disabled because of postgres later enable             
+        return [ {"id" : row["object_id"], "name" : row['name'], "columns" : []} for row in rows ]  
 
     #TODO table 1803153469 is in  sys.indexes but not in sys.index_columns ... shell we do something about it ?
 
