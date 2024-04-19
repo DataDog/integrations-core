@@ -302,6 +302,58 @@ def test_block_storage_metrics(aggregator, check, dd_run_check):
         ],
     )
     aggregator.assert_metric(
+        'openstack.cinder.snapshot.count',
+        count=1,
+        value=1,
+        tags=[
+            'domain_id:default',
+            'project_name:demo',
+            'project_id:1e6e233e637d4d55a50a62b63398ad15',
+            'snapshot_id:6e099852-b540-48ad-b01b-92fa6daed7ff',
+            'volume_id:2c5d27f7-6f96-4913-81f6-3ab9bd755c51',
+            'keystone_server:http://127.0.0.1:8080/identity',
+        ],
+    )
+    aggregator.assert_metric(
+        'openstack.cinder.snapshot.count',
+        count=1,
+        value=1,
+        tags=[
+            'domain_id:default',
+            'project_name:demo',
+            'project_id:1e6e233e637d4d55a50a62b63398ad15',
+            'snapshot_id:b6fedd82-b518-4a69-b25f-68a00a6b8492',
+            'volume_id:2c5d27f7-6f96-4913-81f6-3ab9bd755c51',
+            'keystone_server:http://127.0.0.1:8080/identity',
+        ],
+    )
+    aggregator.assert_metric(
+        'openstack.cinder.snapshot.size',
+        count=1,
+        value=1,
+        tags=[
+            'domain_id:default',
+            'project_name:demo',
+            'project_id:1e6e233e637d4d55a50a62b63398ad15',
+            'snapshot_id:6e099852-b540-48ad-b01b-92fa6daed7ff',
+            'volume_id:2c5d27f7-6f96-4913-81f6-3ab9bd755c51',
+            'keystone_server:http://127.0.0.1:8080/identity',
+        ],
+    )
+    aggregator.assert_metric(
+        'openstack.cinder.snapshot.size',
+        count=1,
+        value=1,
+        tags=[
+            'domain_id:default',
+            'project_name:demo',
+            'project_id:1e6e233e637d4d55a50a62b63398ad15',
+            'snapshot_id:b6fedd82-b518-4a69-b25f-68a00a6b8492',
+            'volume_id:2c5d27f7-6f96-4913-81f6-3ab9bd755c51',
+            'keystone_server:http://127.0.0.1:8080/identity',
+        ],
+    )
+    aggregator.assert_metric(
         'openstack.cinder.pool.count',
         count=1,
         value=1,
@@ -445,7 +497,7 @@ def test_block_storage_metrics(aggregator, check, dd_run_check):
     ],
 )
 @pytest.mark.usefixtures('mock_http_get', 'mock_http_post', 'openstack_connection')
-def test_block_storage_pagination(
+def test_block_storage_volumes_pagination(
     aggregator,
     instance,
     openstack_controller_check,
@@ -547,6 +599,147 @@ def test_block_storage_pagination(
             'volume_id:259b16de-727f-4011-8388-84d17a9ae594',
             'volume_name:',
             'volume_status:in-use',
+            'keystone_server:http://127.0.0.1:8080/identity',
+        ],
+    )
+
+
+@pytest.mark.parametrize(
+    ('instance', 'paginated_limit', 'api_type', 'expected_api_calls_proj_1', 'expected_api_calls_proj_2'),
+    [
+        pytest.param(
+            configs.REST,
+            1,
+            ApiType.REST,
+            2,
+            1,
+            id='api rest low limit',
+        ),
+        pytest.param(
+            configs.REST,
+            1000,
+            ApiType.REST,
+            1,
+            1,
+            id='api rest high limit',
+        ),
+        pytest.param(
+            configs.SDK,
+            1,
+            ApiType.SDK,
+            2,
+            1,
+            id='api sdk low limit',
+        ),
+        pytest.param(
+            configs.SDK,
+            1000,
+            ApiType.SDK,
+            1,
+            1,
+            id='api sdk high limit',
+        ),
+    ],
+)
+@pytest.mark.usefixtures('mock_http_get', 'mock_http_post', 'openstack_connection')
+def test_block_storage_snapshots_pagination(
+    aggregator,
+    instance,
+    openstack_controller_check,
+    paginated_limit,
+    expected_api_calls_proj_1,
+    expected_api_calls_proj_2,
+    api_type,
+    dd_run_check,
+    connection_block_storage,
+    mock_http_get,
+):
+    paginated_instance = copy.deepcopy(instance)
+    paginated_instance['paginated_limit'] = paginated_limit
+    dd_run_check(openstack_controller_check(paginated_instance))
+    if api_type == ApiType.REST:
+        args_list = []
+        for call in mock_http_get.call_args_list:
+            args, kwargs = call
+            args_list += list(args)
+            params = kwargs.get('params', {})
+            limit = params.get('limit')
+            args_list += [(args[0], limit)]
+        assert (
+            args_list.count(
+                ('http://127.0.0.1:8776/volume/v3/1e6e233e637d4d55a50a62b63398ad15/snapshots/detail', paginated_limit)
+            )
+            == expected_api_calls_proj_1
+        )
+        assert (
+            args_list.count(
+                ('http://127.0.0.1:8776/volume/v3/6e39099cccde4f809b003d9e0dd09304/snapshots/detail', paginated_limit)
+            )
+            == expected_api_calls_proj_2
+        )
+    else:
+        assert connection_block_storage.snapshots.call_count == 2
+        assert (
+            connection_block_storage.snapshots.call_args_list.count(
+                mock.call(project_id='1e6e233e637d4d55a50a62b63398ad15', limit=paginated_limit)
+            )
+            == 1
+        )
+        assert (
+            connection_block_storage.snapshots.call_args_list.count(
+                mock.call(project_id='6e39099cccde4f809b003d9e0dd09304', limit=paginated_limit)
+            )
+            == 1
+        )
+    aggregator.assert_metric(
+        'openstack.cinder.snapshot.count',
+        count=1,
+        value=1,
+        tags=[
+            'domain_id:default',
+            'project_name:demo',
+            'project_id:1e6e233e637d4d55a50a62b63398ad15',
+            'snapshot_id:6e099852-b540-48ad-b01b-92fa6daed7ff',
+            'volume_id:2c5d27f7-6f96-4913-81f6-3ab9bd755c51',
+            'keystone_server:http://127.0.0.1:8080/identity',
+        ],
+    )
+    aggregator.assert_metric(
+        'openstack.cinder.snapshot.count',
+        count=1,
+        value=1,
+        tags=[
+            'domain_id:default',
+            'project_name:demo',
+            'project_id:1e6e233e637d4d55a50a62b63398ad15',
+            'snapshot_id:b6fedd82-b518-4a69-b25f-68a00a6b8492',
+            'volume_id:2c5d27f7-6f96-4913-81f6-3ab9bd755c51',
+            'keystone_server:http://127.0.0.1:8080/identity',
+        ],
+    )
+    aggregator.assert_metric(
+        'openstack.cinder.snapshot.size',
+        count=1,
+        value=1,
+        tags=[
+            'domain_id:default',
+            'project_name:demo',
+            'project_id:1e6e233e637d4d55a50a62b63398ad15',
+            'snapshot_id:6e099852-b540-48ad-b01b-92fa6daed7ff',
+            'volume_id:2c5d27f7-6f96-4913-81f6-3ab9bd755c51',
+            'keystone_server:http://127.0.0.1:8080/identity',
+        ],
+    )
+    aggregator.assert_metric(
+        'openstack.cinder.snapshot.size',
+        count=1,
+        value=1,
+        tags=[
+            'domain_id:default',
+            'project_name:demo',
+            'project_id:1e6e233e637d4d55a50a62b63398ad15',
+            'snapshot_id:b6fedd82-b518-4a69-b25f-68a00a6b8492',
+            'volume_id:2c5d27f7-6f96-4913-81f6-3ab9bd755c51',
             'keystone_server:http://127.0.0.1:8080/identity',
         ],
     )

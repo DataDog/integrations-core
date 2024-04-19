@@ -168,6 +168,14 @@ class ApiSdk(Api):
             for transfer in self.connection.block_storage.transfers(project_id, details=True)
         ]
 
+    def get_block_storage_snapshots(self, project_id):
+        return [
+            snapshot.to_dict(original_names=True)
+            for snapshot in self.call_paginated_api(
+                self.connection.block_storage.snapshots, project_id=project_id, limit=self.config.paginated_limit
+            )
+        ]
+
     def get_block_storage_pools(self, project_id):
         return [
             pool.to_dict(original_names=True) for pool in self.connection.block_storage.pools(project_id, details=True)
