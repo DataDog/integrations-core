@@ -38,6 +38,27 @@ class EsxiCheck(AgentCheck):
             self.instance.get("collect_per_instance_filters", {})
         )
         self.tags = [f"esxi_url:{self.host}"]
+        self.conn = None
+        self.check_initializations.append(self.connect)
+
+    def connect(self):
+        try:
+            connection = connect.SmartConnect(host=self.host, user=self.username, pwd=self.password)
+            conn = connection
+
+            if conn.content.about.apiType != "HostAgent":
+                raise Exception(
+                    f"{self.host} is not an ESXi host; please set the `host` config option to an ESXi host "
+                    "or use the vSphere integration to collect data from the vCenter",
+                )
+
+            self.log.info("Connected to ESXi host %s: %s", self.host, conn.content.about.fullName)
+
+        except Exception as e:
+            self.log.error("Cannot connect to ESXi host %s: %s", self.host, str(e))
+            return
+
+        self.conn = conn
 
     def _validate_excluded_host_tags(self, excluded_host_tags):
         valid_excluded_host_tags = []
@@ -99,14 +120,14 @@ class EsxiCheck(AgentCheck):
         filter_spec = vmodl.query.PropertyCollector.FilterSpec()
         filter_spec.propSet = property_specs
 
-        view_ref = self.content.viewManager.CreateContainerView(self.content.rootFolder, ALL_RESOURCES, True)
+        view_ref = self.conn.content.viewManager.CreateContainerView(self.conn.content.rootFolder, ALL_RESOURCES, True)
 
         try:
             obj_spec.obj = view_ref
             filter_spec.objectSet = [obj_spec]
 
             # Collect the object and its properties
-            res = self.content.propertyCollector.RetrievePropertiesEx([filter_spec], retr_opts)
+            res = self.conn.content.propertyCollector.RetrievePropertiesEx([filter_spec], retr_opts)
             if res is None:
                 obj_content_list = []
             else:
@@ -121,14 +142,16 @@ class EsxiCheck(AgentCheck):
         avaliable_metrics = RESOURCE_NAME_TO_METRICS[resource_name]
 
         counter_keys_and_names = {}
-        for counter in self.content.perfManager.perfCounter:
+        for counter in self.conn.content.perfManager.perfCounter:
             full_name = f"{counter.groupInfo.key}.{counter.nameInfo.key}.{SHORT_ROLLUP[counter.rollupType]}"
             if full_name in avaliable_metrics:
                 counter_keys_and_names[counter.key] = full_name
             else:
                 self.log.trace("Skipping metric %s as it is not recognized", full_name)
 
-        available_counter_ids = [m.counterId for m in self.content.perfManager.QueryAvailablePerfMetric(entity=entity)]
+        available_counter_ids = [
+            m.counterId for m in self.conn.content.perfManager.QueryAvailablePerfMetric(entity=entity)
+        ]
         counter_ids = [
             counter_id for counter_id in available_counter_ids if counter_id in counter_keys_and_names.keys()
         ]
@@ -144,7 +167,7 @@ class EsxiCheck(AgentCheck):
                 metric_id.instance = "*"
 
         spec = vim.PerformanceManager.QuerySpec(maxSample=1, entity=entity, metricId=metric_ids)
-        result_stats = self.content.perfManager.QueryPerf([spec])
+        result_stats = self.conn.content.perfManager.QueryPerf([spec])
 
         # `have_instance_value` is used later to avoid collecting aggregated metrics
         # when instance metrics are collected.
@@ -224,32 +247,21 @@ class EsxiCheck(AgentCheck):
                     self.gauge(metric_name, most_recent_val, hostname=entity_name, tags=all_tags)
 
     def set_version_metadata(self):
-        esxi_version = self.content.about.version
-        build_version = self.content.about.build
+        esxi_version = self.conn.content.about.version
+        build_version = self.conn.content.about.build
         self.set_metadata('version', f'{esxi_version}+{build_version}')
 
     def check(self, _):
         try:
-            connection = connect.SmartConnect(host=self.host, user=self.username, pwd=self.password)
-            self.conn = connection
-            self.content = connection.content
-
-            if self.content.about.apiType != "HostAgent":
-                raise Exception(
-                    f"{self.host} is not an ESXi host; please set the `host` config option to an ESXi host "
-                    "or use the vSphere integration to collect data from the vCenter",
-                )
-
-            self.log.info("Connected to ESXi host %s: %s", self.host, self.content.about.fullName)
+            self.set_version_metadata()
             self.count("host.can_connect", 1, tags=self.tags)
-
-        except Exception as e:
-            self.log.error("Cannot connect to ESXi host %s: %s", self.host, str(e))
+        except:
+            self.log.exception("The ESXi host is not responding. The check will not run.")
             self.count("host.can_connect", 0, tags=self.tags)
             return
 
-        self.set_version_metadata()
         resources = self.get_resources()
+
         resource_map = {
             obj_content.obj: {prop.name: prop.val for prop in obj_content.propSet}
             for obj_content in resources
@@ -261,7 +273,7 @@ class EsxiCheck(AgentCheck):
             return
 
         # Add the root folder entity as it can't be fetched from the previous api calls.
-        root_folder = self.content.rootFolder
+        root_folder = self.conn.content.rootFolder
         resource_map[root_folder] = {"name": root_folder.name, "parent": None}
         self.log.debug("All resources: %s", resource_map)
 

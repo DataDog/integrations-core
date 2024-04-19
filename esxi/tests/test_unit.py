@@ -4,6 +4,7 @@
 import copy
 import logging
 
+import mock
 import pytest
 from mock import MagicMock
 from pyVmomi import vim, vmodl
@@ -611,3 +612,14 @@ def test_invalid_api_type(vcsim_instance, dd_run_check, caplog, aggregator, serv
     "or use the vSphere integration to collect data from the vCenter" in caplog.text
     aggregator.assert_metric("esxi.host.can_connect", 0, tags=['esxi_url:127.0.0.1:8989'])
     aggregator.assert_all_metrics_covered()
+
+
+@pytest.mark.usefixtures("service_instance")
+def test_long_lived_connection(vcsim_instance, dd_run_check):
+    with mock.patch("pyVim.connect.SmartConnect") as mock_connect:
+        check = EsxiCheck('esxi', {}, [vcsim_instance])
+
+        dd_run_check(check)
+        check.check(vcsim_instance)
+
+        assert mock_connect.call_count == 1
