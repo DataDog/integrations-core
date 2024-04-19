@@ -92,7 +92,6 @@ def test_common_metrics(aggregator, integration_check, pg_instance, is_aurora):
     check_snapshot_txid_metrics(aggregator, expected_tags=expected_tags)
 
     check_performance_metrics(aggregator, expected_tags=check.debug_stats_kwargs()['tags'], is_aurora=is_aurora)
-    # check_stat_io_metrics(aggregator, expected_tags)
 
     aggregator.assert_all_metrics_covered()
 
