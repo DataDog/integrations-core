@@ -83,7 +83,11 @@ class OpenstackConfig:
             is_float = float(microversion)
         except Exception:
             pass
-        if not is_latest and not is_float and 'volume' not in microversion:
+        if (
+            not is_latest
+            and not is_float
+            and (service != 'cinder' or (service == 'cinder' and 'volume' not in microversion))
+        ):
             raise ConfigurationError(
                 "Invalid `{}_microversion`: {}; please specify a valid version, see the Openstack documentation"
                 "for more details: https://docs.openstack.org/api-guide/compute/microversions.html".format(
