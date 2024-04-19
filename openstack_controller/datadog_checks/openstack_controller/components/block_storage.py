@@ -5,6 +5,10 @@
 
 from datadog_checks.openstack_controller.components.component import Component
 from datadog_checks.openstack_controller.metrics import (
+    CINDER_CLUSTER_COUNT,
+    CINDER_CLUSTER_METRICS,
+    CINDER_CLUSTER_PREFIX,
+    CINDER_CLUSTER_TAGS,
     CINDER_METRICS_PREFIX,
     CINDER_POOL_COUNT,
     CINDER_POOL_METRICS,
@@ -111,3 +115,21 @@ class BlockStorage(Component):
                 self.check.gauge(CINDER_POOL_COUNT, 1, tags=tags + pool['tags'])
                 for metric, value in pool['metrics'].items():
                     self.check.gauge(metric, value, tags=tags + pool['tags'])
+
+    @Component.register_project_metrics(ID)
+    @Component.http_error()
+    def _report_clusters(self, project_id, tags, config):
+        report_clusters = config.get('clusters', True)
+        if report_clusters:
+            data = self.check.api.get_block_storage_clusters(project_id)
+            for item in data:
+                cluster = get_metrics_and_tags(
+                    item,
+                    tags=CINDER_CLUSTER_TAGS,
+                    prefix=CINDER_CLUSTER_PREFIX,
+                    metrics=CINDER_CLUSTER_METRICS,
+                )
+                self.check.log.debug("cluster: %s", cluster)
+                self.check.gauge(CINDER_CLUSTER_COUNT, 1, tags=tags + cluster['tags'])
+                for metric, value in cluster['metrics'].items():
+                    self.check.gauge(metric, value, tags=tags + cluster['tags'])

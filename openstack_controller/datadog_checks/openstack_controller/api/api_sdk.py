@@ -51,6 +51,10 @@ class ApiSdk(Api):
             self.log.debug("adding X-OpenStack-Ironic-API-Version header to `%s`", self.config.ironic_microversion)
             self.http.options['headers']['X-OpenStack-Ironic-API-Version'] = self.config.ironic_microversion
 
+        if self.config.cinder_microversion:
+            self.log.debug("adding OpenStack-API-Version header to `%s`", self.config.cinder_microversion)
+            self.http.options['headers']['OpenStack-API-Version'] = self.config.cinder_microversion
+
     def auth_url(self):
         return self.cloud_config.get_auth_args().get('auth_url')
 
@@ -179,6 +183,12 @@ class ApiSdk(Api):
     def get_block_storage_pools(self, project_id):
         return [
             pool.to_dict(original_names=True) for pool in self.connection.block_storage.pools(project_id, details=True)
+        ]
+
+    def get_block_storage_clusters(self, project_id):
+        return [
+            cluster.to_dict(original_names=True)
+            for cluster in self.connection.block_storage.clusters(project_id, details=True)
         ]
 
     def get_compute_limits(self, project_id):

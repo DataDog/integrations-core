@@ -425,11 +425,24 @@ def connection_block_storage(request, mock_responses):
             for pool in mock_responses('GET', f'/volume/v3/{project_id}/scheduler-stats/get_pools')['pools']
         ]
 
+    def clusters(project_id, details):
+        if http_error and 'clusters' in http_error:
+            raise requests.exceptions.HTTPError(response=http_error['clusters'])
+        return [
+            mock.MagicMock(
+                to_dict=mock.MagicMock(
+                    return_value=cluster,
+                )
+            )
+            for cluster in mock_responses('GET', f'/volume/v3/{project_id}/clusters/detail')['clusters']
+        ]
+
     return mock.MagicMock(
         volumes=mock.MagicMock(side_effect=volumes),
         transfers=mock.MagicMock(side_effect=transfers),
         snapshots=mock.MagicMock(side_effect=snapshots),
         pools=mock.MagicMock(side_effect=pools),
+        clusters=mock.MagicMock(side_effect=clusters),
     )
 
 
