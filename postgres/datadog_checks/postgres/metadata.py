@@ -4,7 +4,7 @@
 import json
 import time
 from typing import Dict, List, Optional, Tuple, Union  # noqa: F401
-
+import pdb
 import psycopg2
 
 from datadog_checks.postgres.cursor import CommenterDictCursor
@@ -312,6 +312,7 @@ class PostgresMetadata(DBMAsyncJob):
             self._is_schemas_collection_in_progress = False
 
     def _flush_schema(self, base_event, database, schema, tables):
+        pdb.set_trace()
         event = {
             **base_event,
             "metadata": [{**database, "schemas": [{**schema, "tables": tables}]}],
