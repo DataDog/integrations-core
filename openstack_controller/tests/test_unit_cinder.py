@@ -55,6 +55,42 @@ def test_disable_block_storage_metrics(aggregator, dd_run_check, instance, opens
 
 
 @pytest.mark.parametrize(
+    ('instance'),
+    [
+        pytest.param(
+            configs.REST,
+            id='api rest no microversion',
+        ),
+        pytest.param(
+            configs.SDK,
+            id='api sdk no microversion',
+        ),
+    ],
+)
+@pytest.mark.usefixtures('mock_http_get', 'mock_http_post', 'openstack_connection')
+def test_disable_block_storage_components_metrics(aggregator, dd_run_check, instance, openstack_controller_check):
+    instance = instance | {
+        "components": {
+            "block-storage": {
+                "volumes": False,
+                "transfers": False,
+                "snapshots": False,
+                "pools": False,
+                "clusters": False
+            },
+        },
+    }
+    check = openstack_controller_check(instance)
+    dd_run_check(check)
+    for metric in aggregator.metric_names:
+        assert not metric.startswith('openstack.cinder.volume.count')
+        assert not metric.startswith('openstack.cinder.volume.transfer.count')
+        assert not metric.startswith('openstack.cinder.snapshot.count')
+        assert not metric.startswith('openstack.cinder.pool.count')
+        assert not metric.startswith('openstack.cinder.cluster.count')
+
+
+@pytest.mark.parametrize(
     ('mock_http_post', 'session_auth', 'instance', 'api_type'),
     [
         pytest.param(

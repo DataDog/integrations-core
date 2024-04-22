@@ -408,15 +408,15 @@ files:
                   - type: object
                     properties:
                       - name: volumes
-                        type: object
+                        type: boolean
                       - name: transfers
-                        type: object
+                        type: boolean
                       - name: snapshots
-                        type: object
+                        type: boolean
                       - name: pools
-                        type: object
+                        type: boolean
                       - name: clusters
-                        type: object
+                        type: boolean
               - name: baremetal
                 anyOf:
                   - type: boolean

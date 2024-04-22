@@ -63,11 +63,11 @@ class BlockStorageItem(BaseModel):
         arbitrary_types_allowed=True,
         frozen=True,
     )
-    clusters: Optional[MappingProxyType[str, Any]] = None
-    pools: Optional[MappingProxyType[str, Any]] = None
-    snapshots: Optional[MappingProxyType[str, Any]] = None
-    transfers: Optional[MappingProxyType[str, Any]] = None
-    volumes: Optional[MappingProxyType[str, Any]] = None
+    clusters: Optional[bool] = None
+    pools: Optional[bool] = None
+    snapshots: Optional[bool] = None
+    transfers: Optional[bool] = None
+    volumes: Optional[bool] = None
 
 
 class Hypervisor(BaseModel):
