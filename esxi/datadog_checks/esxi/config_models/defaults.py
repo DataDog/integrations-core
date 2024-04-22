@@ -24,5 +24,9 @@ def instance_min_collection_interval():
     return 15
 
 
+def instance_ssl_verify():
+    return True
+
+
 def instance_use_guest_hostname():
     return False

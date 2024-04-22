@@ -3,9 +3,10 @@
 # Licensed under a 3-clause BSD style license (see LICENSE)
 import copy
 import logging
+import ssl
 
 import pytest
-from mock import MagicMock
+from mock import MagicMock, patch
 from pyVmomi import vim, vmodl
 
 from datadog_checks.esxi import EsxiCheck
@@ -660,3 +661,113 @@ def test_runtime_host_not_found(vcsim_instance, dd_run_check, caplog, service_in
 
     dd_run_check(check)
     assert "Missing runtime.host details for VM vm1" in caplog.text
+
+
+@pytest.mark.usefixtures("service_instance")
+def test_ssl_default(vcsim_instance, dd_run_check):
+    instance = copy.deepcopy(vcsim_instance)
+    instance['ssl_verify'] = False
+
+    with patch("pyVim.connect.SmartConnect") as smart_connect, patch(
+        'ssl.SSLContext.load_verify_locations'
+    ) as load_verify_locations, patch('ssl.SSLContext.load_default_certs') as load_default_certs:
+        check = EsxiCheck('esxi', {}, [instance])
+        dd_run_check(check)
+        context = smart_connect.call_args.kwargs['sslContext']
+        assert context.protocol == ssl.PROTOCOL_TLS_CLIENT
+        assert context.verify_mode == ssl.CERT_NONE
+        assert not context.check_hostname
+        load_verify_locations.assert_not_called()
+        load_default_certs.assert_not_called()
+
+
+@pytest.mark.usefixtures("service_instance")
+def test_ssl_enabled(vcsim_instance, dd_run_check):
+    instance = copy.deepcopy(vcsim_instance)
+    instance['ssl_verify'] = True
+
+    with patch("pyVim.connect.SmartConnect") as smart_connect, patch(
+        'ssl.SSLContext.load_default_certs'
+    ) as load_default_certs:
+        check = EsxiCheck('esxi', {}, [instance])
+        dd_run_check(check)
+        context = smart_connect.call_args.kwargs['sslContext']
+        assert context.protocol == ssl.PROTOCOL_TLS_CLIENT
+        assert context.verify_mode == ssl.CERT_REQUIRED
+        assert context.check_hostname
+        load_default_certs.assert_called_with(ssl.Purpose.SERVER_AUTH)
+
+
+@pytest.mark.usefixtures("service_instance")
+def test_ssl_enabled_capath(vcsim_instance, dd_run_check):
+    instance = copy.deepcopy(vcsim_instance)
+    instance['ssl_verify'] = True
+    instance['ssl_capath'] = '/test/path'
+
+    with patch("pyVim.connect.SmartConnect") as smart_connect, patch(
+        'ssl.SSLContext.load_verify_locations'
+    ) as load_verify_locations:
+        check = EsxiCheck('esxi', {}, [instance])
+        dd_run_check(check)
+        context = smart_connect.call_args.kwargs['sslContext']
+        assert context.protocol == ssl.PROTOCOL_TLS_CLIENT
+        assert context.verify_mode == ssl.CERT_REQUIRED
+        assert context.check_hostname
+        load_verify_locations.assert_called_with(cafile=None, capath='/test/path', cadata=None)
+
+
+@pytest.mark.usefixtures("service_instance")
+def test_ssl_enabled_cafile(vcsim_instance, dd_run_check):
+    instance = copy.deepcopy(vcsim_instance)
+    instance['ssl_verify'] = True
+    instance['ssl_cafile'] = '/test/path/file.pem'
+
+    with patch("pyVim.connect.SmartConnect") as smart_connect, patch(
+        'ssl.SSLContext.load_verify_locations'
+    ) as load_verify_locations:
+        check = EsxiCheck('esxi', {}, [instance])
+        dd_run_check(check)
+        context = smart_connect.call_args.kwargs['sslContext']
+        assert context.protocol == ssl.PROTOCOL_TLS_CLIENT
+        assert context.verify_mode == ssl.CERT_REQUIRED
+        assert context.check_hostname
+        load_verify_locations.assert_called_with(cafile='/test/path/file.pem', capath=None, cadata=None)
+
+
+@pytest.mark.usefixtures("service_instance")
+def test_ssl_enabled_cafile_ssl_capath(vcsim_instance, dd_run_check):
+    instance = copy.deepcopy(vcsim_instance)
+    instance['ssl_verify'] = True
+    instance['ssl_cafile'] = '/test/path/file.pem'
+    instance['ssl_capath'] = '/test/path'
+
+    with patch("pyVim.connect.SmartConnect") as smart_connect, patch(
+        'ssl.SSLContext.load_verify_locations'
+    ) as load_verify_locations:
+        check = EsxiCheck('esxi', {}, [instance])
+        dd_run_check(check)
+        context = smart_connect.call_args.kwargs['sslContext']
+        assert context.protocol == ssl.PROTOCOL_TLS_CLIENT
+        assert context.verify_mode == ssl.CERT_REQUIRED
+        assert context.check_hostname
+        load_verify_locations.assert_called_with(cafile=None, capath='/test/path', cadata=None)
+
+
+@pytest.mark.usefixtures("service_instance")
+def test_ssl_disabled_cafile_ssl_capath(vcsim_instance, dd_run_check):
+    instance = copy.deepcopy(vcsim_instance)
+    instance['ssl_verify'] = False
+    instance['ssl_cafile'] = '/test/path/file.pem'
+    instance['ssl_capath'] = '/test/path'
+
+    with patch("pyVim.connect.SmartConnect") as smart_connect, patch(
+        'ssl.SSLContext.load_verify_locations'
+    ) as load_verify_locations, patch('ssl.SSLContext.load_default_certs') as load_default_certs:
+        check = EsxiCheck('esxi', {}, [instance])
+        dd_run_check(check)
+        context = smart_connect.call_args.kwargs['sslContext']
+        assert context.protocol == ssl.PROTOCOL_TLS_CLIENT
+        assert context.verify_mode == ssl.CERT_NONE
+        assert not context.check_hostname
+        load_verify_locations.assert_not_called()
+        load_default_certs.assert_not_called()

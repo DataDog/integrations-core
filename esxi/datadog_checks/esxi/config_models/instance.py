@@ -52,6 +52,9 @@ class InstanceConfig(BaseModel):
     min_collection_interval: Optional[float] = None
     password: str
     service: Optional[str] = None
+    ssl_cafile: Optional[str] = None
+    ssl_capath: Optional[str] = None
+    ssl_verify: Optional[bool] = None
     tags: Optional[tuple[str, ...]] = None
     use_guest_hostname: Optional[bool] = None
     username: str
