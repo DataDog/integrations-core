@@ -75,7 +75,6 @@ class SubmitData:
             event["metadata"] =  event["metadata"] + [{**(self.tmp_modify_to_fit_in_postgres(db_info)), "schemas": list(schemas_by_id.values())}]
         json_event = json.dumps(event, default=default_json_event_encoding)
         self._log.debug("Reporting the following payload for schema collection: {}".format(json_event))
-        pdb.set_trace()
         self._submit_to_agent_queue(json_event)
         self.db_to_schemas = {}
 
