@@ -76,7 +76,7 @@ def test_disable_block_storage_components_metrics(aggregator, dd_run_check, inst
                 "transfers": False,
                 "snapshots": False,
                 "pools": False,
-                "clusters": False
+                "clusters": False,
             },
         },
     }
