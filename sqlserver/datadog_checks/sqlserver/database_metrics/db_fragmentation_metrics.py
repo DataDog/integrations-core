@@ -60,7 +60,7 @@ class SqlserverDBFragmentationMetrics(SqlserverDatabaseMetricsBase):
 
     @property
     def db_fragmentation_object_names(self):
-        return self.instance_config.get('db_fragmentation_object_names', [])
+        return self.instance_config.get('db_fragmentation_object_names', []) or []
 
     @property
     def enabled(self):
