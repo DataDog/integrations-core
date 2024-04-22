@@ -239,13 +239,12 @@ class EsxiCheck(AgentCheck):
             context.check_hostname = True if self.ssl_verify else False
             context.verify_mode = ssl.CERT_REQUIRED if self.ssl_verify else ssl.CERT_NONE
 
-            if self.ssl_verify:
-                if self.ssl_capath:
-                    context.load_verify_locations(cafile=None, capath=self.ssl_capath, cadata=None)
-                elif self.ssl_cafile:
-                    context.load_verify_locations(cafile=self.ssl_cafile, capath=None, cadata=None)
-                else:
-                    context.load_default_certs(ssl.Purpose.SERVER_AUTH)
+            if self.ssl_capath:
+                context.load_verify_locations(cafile=None, capath=self.ssl_capath, cadata=None)
+            elif self.ssl_cafile:
+                context.load_verify_locations(cafile=self.ssl_cafile, capath=None, cadata=None)
+            else:
+                context.load_default_certs(ssl.Purpose.SERVER_AUTH)
 
             connection = connect.SmartConnect(host=self.host, user=self.username, pwd=self.password, sslContext=context)
             self.conn = connection

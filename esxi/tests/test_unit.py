@@ -677,8 +677,8 @@ def test_ssl_default(vcsim_instance, dd_run_check):
         assert context.protocol == ssl.PROTOCOL_TLS_CLIENT
         assert context.verify_mode == ssl.CERT_NONE
         assert not context.check_hostname
+        load_default_certs.assert_called_with(ssl.Purpose.SERVER_AUTH)
         load_verify_locations.assert_not_called()
-        load_default_certs.assert_not_called()
 
 
 @pytest.mark.usefixtures("service_instance")
@@ -688,7 +688,7 @@ def test_ssl_enabled(vcsim_instance, dd_run_check):
 
     with patch("pyVim.connect.SmartConnect") as smart_connect, patch(
         'ssl.SSLContext.load_default_certs'
-    ) as load_default_certs:
+    ) as load_default_certs, patch('ssl.SSLContext.load_verify_locations') as load_verify_locations:
         check = EsxiCheck('esxi', {}, [instance])
         dd_run_check(check)
         context = smart_connect.call_args.kwargs['sslContext']
@@ -696,6 +696,7 @@ def test_ssl_enabled(vcsim_instance, dd_run_check):
         assert context.verify_mode == ssl.CERT_REQUIRED
         assert context.check_hostname
         load_default_certs.assert_called_with(ssl.Purpose.SERVER_AUTH)
+        load_verify_locations.assert_not_called()
 
 
 @pytest.mark.usefixtures("service_instance")
@@ -705,8 +706,8 @@ def test_ssl_enabled_capath(vcsim_instance, dd_run_check):
     instance['ssl_capath'] = '/test/path'
 
     with patch("pyVim.connect.SmartConnect") as smart_connect, patch(
-        'ssl.SSLContext.load_verify_locations'
-    ) as load_verify_locations:
+        'ssl.SSLContext.load_default_certs'
+    ) as load_default_certs, patch('ssl.SSLContext.load_verify_locations') as load_verify_locations:
         check = EsxiCheck('esxi', {}, [instance])
         dd_run_check(check)
         context = smart_connect.call_args.kwargs['sslContext']
@@ -714,6 +715,7 @@ def test_ssl_enabled_capath(vcsim_instance, dd_run_check):
         assert context.verify_mode == ssl.CERT_REQUIRED
         assert context.check_hostname
         load_verify_locations.assert_called_with(cafile=None, capath='/test/path', cadata=None)
+        load_default_certs.assert_not_called()
 
 
 @pytest.mark.usefixtures("service_instance")
@@ -723,8 +725,8 @@ def test_ssl_enabled_cafile(vcsim_instance, dd_run_check):
     instance['ssl_cafile'] = '/test/path/file.pem'
 
     with patch("pyVim.connect.SmartConnect") as smart_connect, patch(
-        'ssl.SSLContext.load_verify_locations'
-    ) as load_verify_locations:
+        'ssl.SSLContext.load_default_certs'
+    ) as load_default_certs, patch('ssl.SSLContext.load_verify_locations') as load_verify_locations:
         check = EsxiCheck('esxi', {}, [instance])
         dd_run_check(check)
         context = smart_connect.call_args.kwargs['sslContext']
@@ -732,6 +734,7 @@ def test_ssl_enabled_cafile(vcsim_instance, dd_run_check):
         assert context.verify_mode == ssl.CERT_REQUIRED
         assert context.check_hostname
         load_verify_locations.assert_called_with(cafile='/test/path/file.pem', capath=None, cadata=None)
+        load_default_certs.assert_not_called()
 
 
 @pytest.mark.usefixtures("service_instance")
@@ -743,7 +746,7 @@ def test_ssl_enabled_cafile_ssl_capath(vcsim_instance, dd_run_check):
 
     with patch("pyVim.connect.SmartConnect") as smart_connect, patch(
         'ssl.SSLContext.load_verify_locations'
-    ) as load_verify_locations:
+    ) as load_verify_locations, patch('ssl.SSLContext.load_default_certs') as load_default_certs:
         check = EsxiCheck('esxi', {}, [instance])
         dd_run_check(check)
         context = smart_connect.call_args.kwargs['sslContext']
@@ -751,6 +754,7 @@ def test_ssl_enabled_cafile_ssl_capath(vcsim_instance, dd_run_check):
         assert context.verify_mode == ssl.CERT_REQUIRED
         assert context.check_hostname
         load_verify_locations.assert_called_with(cafile=None, capath='/test/path', cadata=None)
+        load_default_certs.assert_not_called()
 
 
 @pytest.mark.usefixtures("service_instance")
@@ -769,5 +773,5 @@ def test_ssl_disabled_cafile_ssl_capath(vcsim_instance, dd_run_check):
         assert context.protocol == ssl.PROTOCOL_TLS_CLIENT
         assert context.verify_mode == ssl.CERT_NONE
         assert not context.check_hostname
-        load_verify_locations.assert_not_called()
+        load_verify_locations.assert_called_with(cafile=None, capath='/test/path', cadata=None)
         load_default_certs.assert_not_called()
