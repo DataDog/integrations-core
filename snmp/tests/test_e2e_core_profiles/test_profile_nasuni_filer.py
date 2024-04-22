@@ -31,6 +31,8 @@ def test_e2e_profile_nasuni_filer(dd_agent_check):
         'snmp_host:nasuni-filer.device.name',
         'device_namespace:default',
         'snmp_device:' + ip_address,
+        'device_ip:' + ip_address,
+        'device_id:default:' + ip_address,
     ] + [
         'filer_bios_version:quaintly zombies zombies but',
         'filer_cpu_arch:their zombies',

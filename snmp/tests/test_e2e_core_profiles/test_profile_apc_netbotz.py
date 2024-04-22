@@ -29,6 +29,8 @@ def test_e2e_profile_apc_netbotz(dd_agent_check):
         'snmp_host:apc-netbotz.device.name',
         'device_namespace:default',
         'snmp_device:' + ip_address,
+        'device_ip:' + ip_address,
+        'device_id:default:' + ip_address,
     ]
 
     # --- TEST METRICS ---

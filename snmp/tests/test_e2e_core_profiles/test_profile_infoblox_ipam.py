@@ -32,6 +32,8 @@ def test_e2e_profile_infoblox_ipam(dd_agent_check):
         'snmp_host:infoblox-ipam.device.name',
         'device_namespace:default',
         'snmp_device:' + ip_address,
+        'device_ip:' + ip_address,
+        'device_id:default:' + ip_address,
     ] + [
         'ib_hardware_type:Jaded oxen Jaded forward but zombies forward their',
         'ib_nios_version:zombies driving forward oxen but acted oxen',

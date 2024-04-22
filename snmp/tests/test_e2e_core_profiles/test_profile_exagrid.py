@@ -31,6 +31,8 @@ def test_e2e_profile_exagrid(dd_agent_check):
         'snmp_host:exagrid.device.name',
         'device_namespace:default',
         'snmp_device:' + ip_address,
+        'device_ip:' + ip_address,
+        'device_id:default:' + ip_address,
     ]
 
     # --- TEST EXTENDED METRICS ---

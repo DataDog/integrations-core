@@ -32,6 +32,8 @@ def test_e2e_profile_avaya_media_gateway(dd_agent_check):
         'snmp_host:avaya-media-gateway.device.name',
         'device_namespace:default',
         'snmp_device:' + ip_address,
+        'device_id:default:' + ip_address,
+        'device_ip:' + ip_address,
     ] + [
         'avaya_cmg_active_controller_address:112.163.176.135',
         'avaya_cmg_hw_type:avaya_g250-a14',

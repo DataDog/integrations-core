@@ -30,6 +30,8 @@ def test_e2e_profile_fortinet_appliance(dd_agent_check):
         'snmp_host:fortinet.appliance.example',
         'device_namespace:default',
         'snmp_device:' + ip_address,
+        'device_ip:' + ip_address,
+        'device_id:default:' + ip_address,
     ] + []
 
     # --- TEST EXTENDED METRICS ---

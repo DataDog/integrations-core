@@ -30,6 +30,8 @@ def test_e2e_profile_avaya_nortel_ethernet_routing_switch(dd_agent_check):
         'snmp_host:avaya-nortel-ethernet-routing-switch.device.name',
         'device_namespace:default',
         'snmp_device:' + ip_address,
+        'device_ip:' + ip_address,
+        'device_id:default:' + ip_address,
     ] + ['avaya_s5_chas_ser_num:oxen', 'avaya_s5_chas_ver:Jaded driving']
 
     # --- TEST EXTENDED METRICS ---

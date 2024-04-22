@@ -30,6 +30,8 @@ def test_e2e_profile_sophos_xgs_firewall(dd_agent_check):
         'snmp_host:sophos-xgs-firewall.device.name',
         'device_namespace:default',
         'snmp_device:' + ip_address,
+        'device_ip:' + ip_address,
+        'device_id:default:' + ip_address,
     ] + [
         'sfos_device_fw_version:forward zombies zombies oxen their',
         'sfos_device_type:Jaded forward kept acted but quaintly but',

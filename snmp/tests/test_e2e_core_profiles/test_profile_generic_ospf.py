@@ -29,6 +29,8 @@ def test_e2e_profile_generic_ospf(dd_agent_check):
         'snmp_host:_generic-ospf.device.name',
         'device_namespace:default',
         'snmp_device:' + ip_address,
+        'device_ip:' + ip_address,
+        'device_id:default:' + ip_address,
     ]
 
     # --- TEST METRICS ---

@@ -30,6 +30,8 @@ def test_e2e_profile_generic_ups(dd_agent_check):
         'snmp_host:generic-ups.device.name',
         'device_namespace:default',
         'snmp_device:' + ip_address,
+        'device_ip:' + ip_address,
+        'device_id:default:' + ip_address,
     ]
 
     # --- TEST EXTENDED METRICS ---

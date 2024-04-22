@@ -6,7 +6,7 @@ from copy import deepcopy
 
 import pytest
 
-from datadog_checks.base.stubs.common import MetricStub
+from datadog_checks.base.stubs.common import MetricStub, ServiceCheckStub
 
 from . import common
 
@@ -72,7 +72,7 @@ SKIPPED_CORE_ONLY_METRICS = [
     'snmp.dell.memoryDevice',  # Dell constant metric
 ]
 
-DEFAULT_TAGS_TO_SKIP = ['loader']
+DEFAULT_TAGS_TO_SKIP = ['loader', 'device_id', 'device_ip']
 
 CORE_ONLY_TAGS = ['device_namespace:default']
 
@@ -742,6 +742,15 @@ def assert_python_vs_core(
 
     aggregator.assert_all_metrics_covered()
 
+    # Removed skipped tags from core aggregator
+    aggregator_servicechecks = aggregator._service_checks
+    aggregator._service_checks = defaultdict(list)
+    for servicecheck_name in aggregator_servicechecks:
+        for stub in aggregator_servicechecks[servicecheck_name]:
+            if stub.name in metrics_to_skip:
+                continue
+            aggregator._service_checks[servicecheck_name].append(normalize_stub_servicecheck(stub, tags_to_skip))
+
     for (name, status, tags, message), stubs in python_service_checks.items():
         count = len(stubs) if assert_count else None
         aggregator.assert_service_check(name, status, tags, count=count, message=message)
@@ -763,6 +772,18 @@ def normalize_stub_metric(stub, tags_to_skip):
         tags,
         stub.hostname,
         stub.device,
+    )
+
+
+def normalize_stub_servicecheck(stub, tags_to_skip):
+    tags = [t for t in stub.tags if not is_skipped_tag(t, tags_to_skip)]  # Remove skipped tag
+    return ServiceCheckStub(
+        stub.check_id,
+        stub.name,
+        stub.status,
+        tags,
+        stub.hostname,
+        stub.message,
     )
 
 

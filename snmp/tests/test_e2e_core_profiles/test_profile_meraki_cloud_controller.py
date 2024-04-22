@@ -38,6 +38,8 @@ def test_e2e_profile_meraki_cloud_controller(dd_agent_check):
         'snmp_host:dashboard.meraki.com',
         'device_namespace:default',
         'snmp_device:' + ip_address,
+        'device_ip:' + ip_address,
+        'device_id:default:' + ip_address,
         'device_vendor:meraki',
     ] + []
 

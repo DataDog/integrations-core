@@ -29,6 +29,8 @@ def test_e2e_profile_netgear_switch(dd_agent_check):
         'snmp_host:netgear-switch.device.name',
         'device_namespace:default',
         'snmp_device:' + ip_address,
+        'device_ip:' + ip_address,
+        'device_id:default:' + ip_address,
     ] + [
         'agent_inventory_machine_model:their quaintly but acted oxen oxen their Jaded acted',
         'agent_inventory_software_version:kept but their zombies quaintly but driving',

@@ -30,6 +30,8 @@ def test_e2e_profile_alcatel_lucent_ind(dd_agent_check):
         'snmp_host:alcatel-lucent-ind.device.name',
         'device_namespace:default',
         'snmp_device:' + ip_address,
+        'device_ip:' + ip_address,
+        'device_id:default:' + ip_address,
     ]
 
     # --- TEST EXTENDED METRICS ---

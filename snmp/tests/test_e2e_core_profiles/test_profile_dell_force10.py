@@ -30,6 +30,8 @@ def test_e2e_profile_dell_force10(dd_agent_check):
         'snmp_host:dell-force10.device.name',
         'device_namespace:default',
         'snmp_device:' + ip_address,
+        'device_ip:' + ip_address,
+        'device_id:default:' + ip_address,
     ] + []
 
     # --- TEST EXTENDED METRICS ---

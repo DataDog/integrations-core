@@ -32,6 +32,8 @@ def test_e2e_profile_juniper_pulse_secure(dd_agent_check):
         'snmp_host:juniper-pulse-secure.device.name',
         'device_namespace:default',
         'snmp_device:' + ip_address,
+        'device_ip:' + ip_address,
+        'device_id:default:' + ip_address,
     ] + [
         'juniper_ive_esap_version:but Jaded acted quaintly forward oxen acted kept',
         'juniper_ive_product_name:kept their Jaded oxen but acted quaintly',

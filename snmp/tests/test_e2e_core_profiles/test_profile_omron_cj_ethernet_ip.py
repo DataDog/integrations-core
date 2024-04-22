@@ -30,6 +30,8 @@ def test_e2e_profile_omron_cj_ethernet_ip(dd_agent_check):
         'snmp_host:omron-cj-ethernet-ip.device.name',
         'device_namespace:default',
         'snmp_device:' + ip_address,
+        'device_ip:' + ip_address,
+        'device_id:default:' + ip_address,
     ] + []
 
     # --- TEST EXTENDED METRICS ---
