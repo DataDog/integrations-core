@@ -105,7 +105,7 @@ class Schemas:
             "dbms": "postgres", #TODO fake it until you make it - trying to pass this data as postgres for now
             "kind": "pg_databases", # TODO pg_databases - will result in KindPgDatabases and so processor would thing its postgres 
             "collection_interval": 0.5, #dummy
-            "dbms_version": 1, #dummy
+            "dbms_version": "v14.2", #dummy but may be format i v11 is important ?
             "tags": self._tags, #in postgres it's no DB.
             "cloud_metadata": self._check._config.cloud_metadata,
         }
@@ -213,7 +213,8 @@ class Schemas:
         cursor.execute(SCHEMA_QUERY)
         schemas = []
         columns = [i[0] for i in cursor.description]
-        schemas = [dict(zip(columns, row)) for row in cursor.fetchall()]
+        schemas = [dict(zip(columns, [str(item) for item in row])) for row in cursor.fetchall()]
+        #TODO we can refactor it , doesnt have to have a tables :[] if there is nothing. 
         for schema in schemas:
             schema["tables"] = []
         self._log.debug("fetched schemas len(rows)=%s", len(schemas))
@@ -252,7 +253,7 @@ class Schemas:
                 columns.append(str(i[0]).lower())
         
 
-        rows = [dict(zip(columns, row)) for row in data]       
+        rows = [dict(zip(columns, [str(item) for item in row])) for row in data]       
         for row in rows:
             table_id = name_to_id.get(str(row.get("table_name")))
             if table_id is not None:
@@ -261,9 +262,9 @@ class Schemas:
                 if "nullable" in row:
                     if row["nullable"].lower() == "no" or row["nullable"].lower() == "false":
                         #to make compatible with postgres 
-                        row["nullable"] = "false"
+                        row["nullable"] = False
                     else:
-                        row["nullable"] = "true"
+                        row["nullable"] = True
                 id_to_all.get(table_id)["columns"] = id_to_all.get(table_id).get("columns",[]) + [row]
         return len(data)
     
@@ -317,7 +318,7 @@ class Schemas:
         rows = [dict(zip(columns, row)) for row in cursor.fetchall()] #TODO may be more optimal to patch columns with index etc 
         # rows = [dict(zip(columns + ["columns", "indexes", "partitions", "foreign_keys"], row + [[], [], [], []])) for row in cursor.fetchall()] #TODO may be this works
         #return [ {"id" : row["object_id"], "name" : row['name'], "columns" : [], "indexes" : [], "partitions" : [], "foreign_keys" : []} for row in rows ]     # TODO P disabled because of postgres later enable             
-        return [ {"id" : row["object_id"], "name" : row['name'], "columns" : []} for row in rows ]  
+        return [ {"id" : str(row["object_id"]), "name" : row['name'], "columns" : []} for row in rows ]  
 
     #TODO table 1803153469 is in  sys.indexes but not in sys.index_columns ... shell we do something about it ?
 
