@@ -245,6 +245,12 @@ METRICS_MAP = {
 OPENMETRICS_V2_TYPE_OVERRIDES = {
     "gitlab_transaction_rails_queue_duration_total": "gauge",
     "ruby_process_cpu_seconds_total": "gauge",
+    "geo_group_wiki_repositories_checksum_total": "gauge",
+    "geo_group_wiki_repositories_verification_total": "gauge",
+    "geo_project_repositories_checksum_total": "gauge",
+    "geo_project_repositories_verification_total": "gauge",
+    "geo_project_wiki_repositories_checksum_total": "gauge",
+    "geo_project_wiki_repositories_verification_total": "gauge",
 }
 
 
