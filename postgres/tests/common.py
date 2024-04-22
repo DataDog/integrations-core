@@ -424,10 +424,10 @@ def check_checksum_metrics(aggregator, expected_tags, count=1):
 def check_stat_io_metrics(aggregator, expected_tags, count=1):
     if float(POSTGRES_VERSION) < 16:
         return
-    expeceted_stat_io_tags = expected_tags + [
+    expected_stat_io_tags = expected_tags + [
         'backend_type:walsender',
         'context:normal',
         'object:relation',
     ]
     for metric_name in _iterate_metric_name(STAT_IO_METRICS):
-        aggregator.assert_metric(metric_name, count=count, tags=expeceted_stat_io_tags)
+        aggregator.assert_metric(metric_name, count=count, tags=expected_stat_io_tags)

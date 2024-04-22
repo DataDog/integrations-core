@@ -1148,7 +1148,7 @@ def test_pg_stat_io_metrics(aggregator, integration_check, pg_instance, dbm_enab
     # unless the collection_interval is set to a short amount of time
     pg_instance['collect_resources'] = {'collection_interval': 0.1}
 
-    check = PostgreSql('test_instance', {}, [pg_instance])
+    check = integration_check(pg_instance)
     run_one_check(check, pg_instance)
 
     expected_tags = _get_expected_tags(check, pg_instance)
