@@ -14,7 +14,10 @@ from datadog_checks.base.utils.common import to_string
 
 from .constants import (
     ALL_RESOURCES,
+    ALLOWED_FILTER_PROPERTIES,
+    ALLOWED_FILTER_TYPES,
     AVAILABLE_HOST_TAGS,
+    EXTRA_FILTER_PROPERTIES_FOR_VMS,
     HOST_RESOURCE,
     MAX_PROPERTIES,
     RESOURCE_TYPE_TO_NAME,
@@ -22,7 +25,13 @@ from .constants import (
     VM_RESOURCE,
 )
 from .metrics import RESOURCE_NAME_TO_METRICS
-from .utils import get_mapped_instance_tag, get_tags_recursively, should_collect_per_instance_values
+from .resource_filters import create_resource_filter
+from .utils import (
+    get_mapped_instance_tag,
+    get_tags_recursively,
+    is_resource_collected_by_filters,
+    should_collect_per_instance_values,
+)
 
 
 class EsxiCheck(AgentCheck):
@@ -38,6 +47,7 @@ class EsxiCheck(AgentCheck):
         self.collect_per_instance_filters = self._parse_metric_regex_filters(
             self.instance.get("collect_per_instance_filters", {})
         )
+        self.resource_filters = self._parse_resource_filters(self.instance.get("resource_filters", []))
         self.tags = [f"esxi_url:{self.host}"]
 
     def _validate_excluded_host_tags(self, excluded_host_tags):
@@ -68,6 +78,90 @@ class EsxiCheck(AgentCheck):
             metric_filters[resource_type] = filters
 
         return {k: [re.compile(r) for r in v] for k, v in iteritems(metric_filters)}
+
+    def _parse_resource_filters(self, all_resource_filters):
+        # Keep a list of resource filters ids (tuple of resource, property and type) that are already registered.
+        # This is to prevent users to define the same filter twice with different patterns.
+        resource_filters_ids = []
+        formatted_resource_filters = []
+        allowed_resource_types = RESOURCE_TYPE_TO_NAME.values()
+
+        for resource_filter in all_resource_filters:
+            self.log.debug("processing filter %s", resource_filter)
+            # Optional fields:
+            if 'type' not in resource_filter:
+                resource_filter['type'] = 'include'
+            if 'property' not in resource_filter:
+                resource_filter['property'] = 'name'
+
+            missing_fields = False
+            # Check required fields
+            for field in ['resource', 'property', 'type', 'patterns']:
+                if field not in resource_filter:
+                    self.log.warning(
+                        "Ignoring filter %r because it doesn't contain a %s field.", resource_filter, field
+                    )
+                    missing_fields = True
+                    continue
+
+            if missing_fields:
+                continue
+
+            # Check `resource` validity
+            if resource_filter['resource'] not in allowed_resource_types:
+                self.log.warning(
+                    "Ignoring filter %r because resource %s is not a supported resource",
+                    resource_filter,
+                    resource_filter['resource'],
+                )
+                continue
+
+            # Check `property` validity
+            allowed_prop_names = []
+            allowed_prop_names.extend(ALLOWED_FILTER_PROPERTIES)
+            if resource_filter['resource'] == RESOURCE_TYPE_TO_NAME[vim.VirtualMachine]:
+                allowed_prop_names.extend(EXTRA_FILTER_PROPERTIES_FOR_VMS)
+
+            if resource_filter['property'] not in allowed_prop_names:
+                self.log.warning(
+                    "Ignoring filter %r because property '%s' is not valid "
+                    "for resource type %s. Should be one of %r.",
+                    resource_filter,
+                    resource_filter['property'],
+                    resource_filter['resource'],
+                    allowed_prop_names,
+                )
+                continue
+
+            # Check `type` validity
+            if resource_filter['type'] not in ALLOWED_FILTER_TYPES:
+                self.log.warning(
+                    "Ignoring filter %r because type '%s' is not valid. Should be one of %r.",
+                    resource_filter,
+                    resource_filter['type'],
+                    ALLOWED_FILTER_TYPES,
+                )
+            patterns = [re.compile(r) for r in resource_filter['patterns']]
+            filter_instance = create_resource_filter(
+                resource_filter['resource'],
+                resource_filter['property'],
+                patterns,
+                is_include=(resource_filter['type'] == 'include'),
+            )
+            if filter_instance.unique_key() in resource_filters_ids:
+                self.log.warning(
+                    "Ignoring filter %r because you already have a `%s` filter for resource type %s and property %s.",
+                    resource_filter,
+                    resource_filter['type'],
+                    resource_filter['resource'],
+                    resource_filter['property'],
+                )
+                continue
+
+            formatted_resource_filters.append(filter_instance)
+            resource_filters_ids.append(filter_instance.unique_key())
+
+        return formatted_resource_filters
 
     def get_resources(self):
         self.log.debug("Retrieving resources")
@@ -275,6 +369,13 @@ class EsxiCheck(AgentCheck):
         }
 
         for resource_obj, resource_props in all_resources_with_metrics.items():
+
+            if not is_resource_collected_by_filters(resource_obj, all_resources_with_metrics, self.resource_filters):
+                self.log.debug(
+                    "Skipping metric collection for resource %s as it is not matched by filters", resource_obj
+                )
+                continue
+
             hostname = resource_props.get("name")
 
             resource_type = RESOURCE_TYPE_TO_NAME[type(resource_obj)]
