@@ -70,7 +70,7 @@ instances:
     #   - <HOST_TAG>
 
     ## @param ssl_verify - boolean - optional - default: true
-    ## Set to false to disable SSL verification, when connecting to vCenter
+    ## Set to false to disable SSL verification when connecting to the ESXi host
     #
     # ssl_verify: true
 
