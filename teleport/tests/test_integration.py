@@ -14,8 +14,7 @@ pytestmark = [pytest.mark.integration, pytest.mark.usefixtures("dd_environment")
 def test_connect_ok(aggregator, instance, dd_run_check):
     check = TeleportCheck("teleport", {}, [instance])
     dd_run_check(check)
-    aggregator.assert_service_check("teleport.health.up", status=TeleportCheck.OK, count=1)
-    aggregator.assert_service_check("teleport.health.up", status=TeleportCheck.CRITICAL, count=0)
+    aggregator.assert_metric("teleport.health.up", value=1, count=1, tags="teleport_status:ok")
 
 
 def test_check_collects_teleport_common_metrics(aggregator, instance, dd_run_check):
