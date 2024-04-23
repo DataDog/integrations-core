@@ -20,10 +20,11 @@ def test_esxi_metric_up(instance, dd_run_check, aggregator, caplog):
     assert "Connected to ESXi host localhost: VMware ESXi 6.5.0 build-123456789" in caplog.text
 
 
-def test_emits_critical_service_check_when_service_is_down(dd_run_check, aggregator, instance, caplog):
+def test_emits_critical_service_check_when_service_is_down(dd_run_check, aggregator, caplog, instance):
     check = EsxiCheck('esxi', {}, [instance])
     caplog.set_level(logging.WARNING)
-    dd_run_check(check)
+    with pytest.raises(Exception, match="Connection refused"):
+        dd_run_check(check)
 
     aggregator.assert_metric('esxi.host.can_connect', value=0, tags=["esxi_url:localhost"])
     assert "Cannot connect to ESXi host" in caplog.text
@@ -624,13 +625,17 @@ def test_version_metadata(vcsim_instance, dd_run_check, datadog_agent):
 
 
 @pytest.mark.usefixtures("service_instance")
-def test_invalid_api_type(vcsim_instance, dd_run_check, caplog, aggregator, service_instance):
+def test_invalid_api_type(vcsim_instance, dd_run_check, aggregator, service_instance):
     service_instance.content.about.apiType = "VirtualCenter"
     check = EsxiCheck('esxi', {}, [vcsim_instance])
 
-    dd_run_check(check)
-    assert "localhost is not an ESXi host; please set the `host` config option to an ESXi host "
-    "or use the vSphere integration to collect data from the vCenter" in caplog.text
+    with pytest.raises(
+        Exception,
+        match="127.0.0.1:8989 is not an ESXi host; please set the `host` config option to an ESXi host "
+        "or use the vSphere integration to collect data from the vCenter",
+    ):
+        dd_run_check(check)
+
     aggregator.assert_metric("esxi.host.can_connect", 0, tags=['esxi_url:127.0.0.1:8989'])
     aggregator.assert_all_metrics_covered()
 
