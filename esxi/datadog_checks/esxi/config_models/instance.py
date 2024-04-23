@@ -37,6 +37,17 @@ class MetricPatterns(BaseModel):
     include: Optional[tuple[str, ...]] = None
 
 
+class ResourceFilter(BaseModel):
+    model_config = ConfigDict(
+        arbitrary_types_allowed=True,
+        frozen=True,
+    )
+    patterns: Optional[tuple[str, ...]] = None
+    property: Optional[str] = None
+    resource: Optional[str] = None
+    type: Optional[str] = None
+
+
 class InstanceConfig(BaseModel):
     model_config = ConfigDict(
         validate_default=True,
@@ -51,6 +62,7 @@ class InstanceConfig(BaseModel):
     metric_patterns: Optional[MetricPatterns] = None
     min_collection_interval: Optional[float] = None
     password: str
+    resource_filters: Optional[tuple[ResourceFilter, ...]] = None
     service: Optional[str] = None
     tags: Optional[tuple[str, ...]] = None
     use_guest_hostname: Optional[bool] = None

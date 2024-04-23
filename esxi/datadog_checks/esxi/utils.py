@@ -79,3 +79,30 @@ def get_mapped_instance_tag(metric_name):
         if metric_name.startswith(prefix):
             return tag_key
     return 'instance'
+
+
+def is_resource_collected_by_filters(mor, infrastructure_data, resource_filters):
+    resource_type = RESOURCE_TYPE_TO_NAME[type(mor)]
+
+    # Limit filters to those for the resource_type of the mor
+    resource_filters = [f for f in resource_filters if f.resource_type == resource_type]
+
+    include_filters = [f for f in resource_filters if f.is_include]
+    exclude_filters = [f for f in resource_filters if not f.is_include]
+
+    # First check if the resource match any exclude filter, if so do not collect it.
+    for resource_filter in exclude_filters:
+        if resource_filter.match(mor, infrastructure_data):
+            return False
+
+    # Extra logic to consider that no include filters means "collect everything"
+    if not include_filters:
+        return True
+
+    # Finally check if the resource match any include filter, if so collect it
+    for resource_filter in include_filters:
+        if resource_filter.match(mor, infrastructure_data):
+            return True
+
+    # Otherwise, do not collect it
+    return False

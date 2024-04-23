@@ -660,3 +660,341 @@ def test_runtime_host_not_found(vcsim_instance, dd_run_check, caplog, service_in
 
     dd_run_check(check)
     assert "Missing runtime.host details for VM vm1" in caplog.text
+
+
+@pytest.mark.parametrize(
+    "resource_filters, expected_vms",
+    [
+        pytest.param(
+            [
+                {
+                    'type': 'include',
+                    'resource': 'vm',
+                    'property': 'name',
+                    'patterns': [
+                        'vm1.*',
+                    ],
+                }
+            ],
+            ["vm1"],
+            id="include list- name",
+        ),
+        pytest.param(
+            [
+                {
+                    'type': 'exclude',
+                    'resource': 'vm',
+                    'patterns': [
+                        'vm1.*',
+                    ],
+                }
+            ],
+            ["vm2"],
+            id="exclude list- name",
+        ),
+        pytest.param(
+            [
+                {
+                    'type': 'exclude',
+                    'resource': 'vm',
+                    'property': 'name',
+                    'patterns': [
+                        'vm.*',
+                    ],
+                }
+            ],
+            [],
+            id="all excluded- name",
+        ),
+        pytest.param(
+            [
+                {
+                    'type': 'exclude',
+                    'resource': 'vm',
+                    'property': 'name',
+                    'patterns': [
+                        'test.*',
+                    ],
+                }
+            ],
+            ["vm1", "vm2"],
+            id="none excluded- name",
+        ),
+        pytest.param(
+            [
+                {
+                    'type': 'include',
+                    'resource': 'vm',
+                    'property': 'name',
+                    'patterns': [
+                        'test.*',
+                    ],
+                },
+            ],
+            [],
+            id="unrecognized pattern- name",
+        ),
+        pytest.param(
+            [
+                {
+                    'type': 'include',
+                    'resource': 'vm',
+                    'property': 'hostname',
+                    'patterns': [
+                        'localhost.*',
+                    ],
+                }
+            ],
+            ["vm1"],
+            id="include on hostname",
+        ),
+        pytest.param(
+            [
+                {
+                    'type': 'exclude',
+                    'resource': 'vm',
+                    'property': 'hostname',
+                    'patterns': [
+                        'localhost.*',
+                    ],
+                }
+            ],
+            ["vm2"],
+            id="exclude on hostname",
+        ),
+        pytest.param(
+            [
+                {
+                    'type': 'exclude',
+                    'resource': 'vm',
+                    'property': 'hostname',
+                    'patterns': [
+                        'hostname.*',
+                    ],
+                }
+            ],
+            ["vm1", "vm2"],
+            id="hostname not valid",
+        ),
+        pytest.param(
+            [
+                {
+                    'type': 'exclude',
+                    'resource': 'vm',
+                    'property': 'guest_hostname',
+                    'patterns': [
+                        'testing.*',
+                    ],
+                }
+            ],
+            ["vm2"],
+            id="exclude on guest_hostname",
+        ),
+        pytest.param(
+            [
+                {
+                    'resource': 'vm',
+                    'property': 'guest_hostname',
+                    'patterns': [
+                        'hey.*',
+                    ],
+                }
+            ],
+            [],
+            id="include on guest_hostname",
+        ),
+    ],
+)
+@pytest.mark.usefixtures("service_instance")
+def test_resource_filters_vm(vcsim_instance, dd_run_check, resource_filters, expected_vms, aggregator):
+    instance = copy.deepcopy(vcsim_instance)
+    instance['resource_filters'] = resource_filters
+    all_vms = ["vm1", "vm2"]
+    check = EsxiCheck('esxi', {}, [instance])
+    dd_run_check(check)
+
+    for vm in all_vms:
+        expected_count = 1 if vm in expected_vms else 0
+        aggregator.assert_metric("esxi.cpu.usage.avg", count=expected_count, hostname=vm)
+
+
+@pytest.mark.parametrize(
+    "resource_filters, expected_host",
+    [
+        pytest.param(
+            [
+                {
+                    'type': 'include',
+                    'resource': 'host',
+                    'property': 'name',
+                    'patterns': [
+                        'vm1.*',
+                    ],
+                }
+            ],
+            0,
+            id="include list invalid",
+        ),
+        pytest.param(
+            [
+                {
+                    'type': 'include',
+                    'resource': 'host',
+                    'property': 'name',
+                    'patterns': [
+                        '.*',
+                    ],
+                }
+            ],
+            1,
+            id="include list valid",
+        ),
+        pytest.param(
+            [
+                {
+                    'type': 'exclude',
+                    'resource': 'host',
+                    'property': 'name',
+                    'patterns': [
+                        '.*',
+                    ],
+                }
+            ],
+            0,
+            id="exclude list valid",
+        ),
+        pytest.param(
+            [
+                {
+                    'type': 'exclude',
+                    'resource': 'host',
+                    'property': 'name',
+                    'patterns': [
+                        '.*',
+                    ],
+                },
+                {
+                    'type': 'include',
+                    'resource': 'host',
+                    'property': 'name',
+                    'patterns': [
+                        '.*',
+                    ],
+                },
+            ],
+            0,
+            id="exclude and include list",
+        ),
+    ],
+)
+@pytest.mark.usefixtures("service_instance")
+def test_resource_filters_host(vcsim_instance, dd_run_check, resource_filters, expected_host, aggregator):
+    instance = copy.deepcopy(vcsim_instance)
+    instance['resource_filters'] = resource_filters
+    check = EsxiCheck('esxi', {}, [instance])
+    dd_run_check(check)
+
+    aggregator.assert_metric("esxi.cpu.usage.avg", count=expected_host, hostname="localhost.localdomain")
+
+
+@pytest.mark.parametrize(
+    "resource_filters, expected_error",
+    [
+        pytest.param(
+            [
+                {
+                    'type': 'include',
+                    'property': 'name',
+                    'patterns': [
+                        'vm1.*',
+                    ],
+                }
+            ],
+            "Ignoring filter {'type': 'include', 'property': 'name', 'patterns': ['vm1.*']} "
+            "because it doesn't contain a resource field.",
+            id="no resource",
+        ),
+        pytest.param(
+            [{}],
+            "Ignoring filter {'type': 'include', 'property': 'name'} because it doesn't contain a resource field.",
+            id="empty filter",
+        ),
+        pytest.param(
+            [
+                {
+                    'type': 'include',
+                    'resource': 'cluster',
+                    'property': 'name',
+                    'patterns': [
+                        'vm1.*',
+                    ],
+                }
+            ],
+            "Ignoring filter {'type': 'include', 'resource': 'cluster', 'property': 'name', 'patterns': ['vm1.*']} "
+            "because resource cluster is not a supported resource",
+            id="invalid resource",
+        ),
+        pytest.param(
+            [
+                {
+                    'type': 'include',
+                    'resource': 'host',
+                    'property': 'hostname',
+                    'patterns': [
+                        'vm1.*',
+                    ],
+                }
+            ],
+            "Ignoring filter {'type': 'include', 'resource': 'host', 'property': 'hostname', 'patterns': ['vm1.*']} "
+            "because property 'hostname' is not valid for resource type host. Should be one of ['name'].",
+            id="invalid property",
+        ),
+        pytest.param(
+            [
+                {
+                    'type': 'included',
+                    'resource': 'host',
+                    'property': 'name',
+                    'patterns': [
+                        'vm1.*',
+                    ],
+                }
+            ],
+            "Ignoring filter {'type': 'included', 'resource': 'host', 'property': 'name', 'patterns': ['vm1.*']} "
+            "because type 'included' is not valid. Should be one of ['include', 'exclude'].",
+            id="invalid type",
+        ),
+        pytest.param(
+            [
+                {
+                    'type': 'include',
+                    'resource': 'vm',
+                    'property': 'name',
+                    'patterns': [
+                        'vm1.*',
+                    ],
+                },
+                {
+                    'type': 'include',
+                    'resource': 'vm',
+                    'property': 'name',
+                    'patterns': [
+                        'vm.*',
+                    ],
+                },
+            ],
+            "Ignoring filter {'type': 'include', 'resource': 'vm', 'property': 'name', 'patterns': ['vm.*']} "
+            "because you already have a `include` filter for resource type vm and property name.",
+            id="duplicate filters",
+        ),
+    ],
+)
+@pytest.mark.usefixtures("service_instance")
+def test_resource_filters_invalid(vcsim_instance, dd_run_check, resource_filters, expected_error, caplog):
+    caplog.set_level(logging.WARNING)
+    instance = copy.deepcopy(vcsim_instance)
+    instance['resource_filters'] = resource_filters
+    check = EsxiCheck('esxi', {}, [instance])
+
+    dd_run_check(check)
+    assert expected_error in caplog.text
