@@ -1648,7 +1648,12 @@ def test_hp_ilo4(aggregator):
     temperature_sensors = [1, 13, 28]
     batteries = [1, 3, 4, 5]
 
-    common_tags = common.CHECK_TAGS + ['snmp_profile:' + profile, 'device_vendor:hp', 'snmp_host:hp-ilo4.example', 'device_hostname:hp-ilo4.example']
+    common_tags = common.CHECK_TAGS + [
+        'snmp_profile:' + profile,
+        'device_vendor:hp',
+        'snmp_host:hp-ilo4.example',
+        'device_hostname:hp-ilo4.example',
+    ]
 
     common.assert_common_metrics(aggregator, common_tags)
 
@@ -2327,7 +2332,12 @@ def test_checkpoint_firewall(aggregator):
 def test_arista(aggregator):
     run_profile_check('arista')
 
-    common_tags = common.CHECK_TAGS + ['snmp_profile:arista', 'device_vendor:arista', 'snmp_host:DCS-7504-name', 'device_hostname:DCS-7504-name']
+    common_tags = common.CHECK_TAGS + [
+        'snmp_profile:arista',
+        'device_vendor:arista',
+        'snmp_host:DCS-7504-name',
+        'device_hostname:DCS-7504-name',
+    ]
 
     common.assert_common_metrics(aggregator, common_tags)
 
