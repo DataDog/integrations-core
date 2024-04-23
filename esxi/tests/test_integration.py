@@ -158,7 +158,7 @@ def test_ssl_verify(vcsim_instance, dd_run_check, aggregator, caplog):
     dd_run_check(check)
     assert (
         "Cannot connect to ESXi host 127.0.0.1:8989: [SSL: CERTIFICATE_VERIFY_FAILED] "
-        "certificate verify failed (_ssl.c:992)" in caplog.text
+        "certificate verify failed" in caplog.text
     )
     aggregator.assert_metric('esxi.host.can_connect', 0, count=1, tags=["esxi_url:127.0.0.1:8989"])
 
