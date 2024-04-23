@@ -22,10 +22,9 @@ class TeleportCheck(OpenMetricsBaseCheckV2):
         try:
             response = self.http.get("{}/healthz".format(self.diag_addr))
             response.raise_for_status()
-            self.service_check("health.up", self.OK)
+            self.count("health.up", 1)
         except Exception as e:
-            self.service_check("health.up", self.CRITICAL, message=str(e))
-
+            self.count("health.up", 0, message=str(e))
         super().check(_)
 
     def _parse_config(self):
