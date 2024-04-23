@@ -3,16 +3,13 @@
 # Licensed under a 3-clause BSD style license (see LICENSE)
 
 
-from datadog_checks.base.utils.discovery import Discovery
 from datadog_checks.openstack_controller.components.component import Component
-from datadog_checks.openstack_controller.config import normalize_discover_config_include
 from datadog_checks.openstack_controller.metrics import (
     GLANCE_IMAGE_TAGS,
     GLANCE_IMAGE_UP,
     GLANCE_IMAGES_COUNT,
     GLANCE_IMAGES_PREFIX,
     GLANCE_IMAGES_TAGS,
-    GLANCE_METRICS_PREFIX,
     GLANCE_RESPONSE_TIME,
     GLANCE_SERVICE_CHECK,
     get_metrics_and_tags,
