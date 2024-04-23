@@ -2,6 +2,8 @@
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
 
+import json
+
 from datadog_checks.base import OpenMetricsBaseCheckV2
 from datadog_checks.base.checks.openmetrics.v2.transform import get_native_dynamic_transformer
 
@@ -22,9 +24,9 @@ class TeleportCheck(OpenMetricsBaseCheckV2):
         try:
             response = self.http.get("{}/healthz".format(self.diag_addr))
             response.raise_for_status()
-            self.count("health.up", 1)
+            self.count("health.up", 1, tags=["teleport_status:ok"])
         except Exception as e:
-            self.count("health.up", 0, message=str(e))
+            self.count("health.up", 0, tags=["teleport_status:unreachable"])
             raise
 
         super().check(_)
