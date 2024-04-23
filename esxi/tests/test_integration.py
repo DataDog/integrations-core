@@ -1,7 +1,7 @@
 # (C) Datadog, Inc. 2024-present
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
-
+import copy
 import logging
 
 import pytest
@@ -146,3 +146,31 @@ def test_esxi_resource_count_metrics(vcsim_instance, dd_run_check, aggregator):
 
     aggregator.assert_metric("esxi.host.count", 1, tags=host_tags, hostname=None)
     aggregator.assert_metric("esxi.vm.count", 2, tags=vm_tags, hostname=None)
+
+
+@pytest.mark.integration
+@pytest.mark.usefixtures("dd_environment")
+def test_ssl_verify(vcsim_instance, dd_run_check, aggregator, caplog):
+    instance = copy.deepcopy(vcsim_instance)
+    instance['ssl_verify'] = True
+    check = EsxiCheck('esxi', {}, [instance])
+    caplog.set_level(logging.ERROR)
+    dd_run_check(check)
+    assert (
+        "Cannot connect to ESXi host 127.0.0.1:8989: [SSL: CERTIFICATE_VERIFY_FAILED] "
+        "certificate verify failed (_ssl.c:992)" in caplog.text
+    )
+    aggregator.assert_metric('esxi.host.can_connect', 0, count=1, tags=["esxi_url:127.0.0.1:8989"])
+
+
+@pytest.mark.integration
+@pytest.mark.usefixtures("dd_environment")
+def test_ssl_verify_cafile(vcsim_instance, dd_run_check, aggregator, caplog):
+    instance = copy.deepcopy(vcsim_instance)
+    instance['ssl_verify'] = True
+    instance['ssl_cafile'] = '/test/path/file.pem'
+    check = EsxiCheck('esxi', {}, [instance])
+    caplog.set_level(logging.ERROR)
+    dd_run_check(check)
+    assert "Cannot connect to ESXi host 127.0.0.1:8989: [Errno 2] No such file or directory" in caplog.text
+    aggregator.assert_metric('esxi.host.can_connect', 0, count=1, tags=["esxi_url:127.0.0.1:8989"])
