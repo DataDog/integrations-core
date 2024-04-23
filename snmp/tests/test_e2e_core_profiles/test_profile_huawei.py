@@ -29,6 +29,8 @@ def test_e2e_profile_huawei(dd_agent_check):
         'snmp_host:huawei.device.name',
         'device_namespace:default',
         'snmp_device:' + ip_address,
+        'device_ip:' + ip_address,
+        'device_id:default:' + ip_address,
     ] + ['huawei_hw_entity_system_model:Jaded but Jaded']
 
     # --- TEST EXTENDED METRICS ---

@@ -31,6 +31,8 @@ def test_e2e_profile_peplink(dd_agent_check):
         'snmp_host:peplink.device.name',
         'device_namespace:default',
         'snmp_device:' + ip_address,
+        'device_ip:' + ip_address,
+        'device_id:default:' + ip_address,
     ] + [
         'peplink_bal_firmware:driving their acted',
         'peplink_bal_serial_number:zombies their',

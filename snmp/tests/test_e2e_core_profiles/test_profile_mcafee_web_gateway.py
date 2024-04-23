@@ -30,6 +30,8 @@ def test_e2e_profile_mcafee_web_gateway(dd_agent_check):
         'snmp_host:mcafee-web-gateway.device.name',
         'device_namespace:default',
         'snmp_device:' + ip_address,
+        'device_ip:' + ip_address,
+        'device_id:default:' + ip_address,
     ] + [
         'mcafee_mwg_k_build_number:9',
         'mcafee_mwg_k_company_name:driving zombies kept',

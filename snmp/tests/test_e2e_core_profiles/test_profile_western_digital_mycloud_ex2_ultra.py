@@ -31,6 +31,8 @@ def test_e2e_profile_western_digital_mycloud_ex2_ultra(dd_agent_check):
         'snmp_host:western-digital-mycloud-ex2-ultra.device.name',
         'device_namespace:default',
         'snmp_device:' + ip_address,
+        'device_ip:' + ip_address,
+        'device_id:default:' + ip_address,
     ] + [
         'wdmycloudex2_agent_ver:oxen quaintly zombies driving oxen their oxen',
         'wdmycloudex2_host_name:but oxen quaintly but Jaded',

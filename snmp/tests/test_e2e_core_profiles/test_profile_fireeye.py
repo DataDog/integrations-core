@@ -30,6 +30,8 @@ def test_e2e_profile_fireeye(dd_agent_check):
         'snmp_host:fireeye.device.name',
         'device_namespace:default',
         'snmp_device:' + ip_address,
+        'device_ip:' + ip_address,
+        'device_id:default:' + ip_address,
     ] + [
         'fe_hardware_model:but but their driving acted forward forward their zombies',
         'fe_serial_number:zombies driving quaintly Jaded their zombies driving but ' 'Jaded',

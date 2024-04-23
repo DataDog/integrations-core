@@ -30,6 +30,8 @@ def test_e2e_profile_cisco_ironport_email(dd_agent_check):
         'snmp_host:cisco-ironport-email.device.name',
         'device_namespace:default',
         'snmp_device:' + ip_address,
+        'device_ip:' + ip_address,
+        'device_id:default:' + ip_address,
     ] + [
         'ironport_cache_admin:forward Jaded Jaded oxen',
         'ironport_cache_software:but driving Jaded but kept but Jaded',

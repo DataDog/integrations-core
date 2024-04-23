@@ -29,6 +29,8 @@ def test_e2e_profile__dell_rac(dd_agent_check):
         'snmp_host:_dell-rac.device.name',
         'device_namespace:default',
         'snmp_device:' + ip_address,
+        'device_ip:' + ip_address,
+        'device_id:default:' + ip_address,
     ] + []
 
     # --- TEST EXTENDED METRICS ---

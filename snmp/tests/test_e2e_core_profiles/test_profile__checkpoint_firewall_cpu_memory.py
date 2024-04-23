@@ -29,6 +29,8 @@ def test_e2e_profile__checkpoint_firewall_cpu_memory(dd_agent_check):
         'snmp_host:_checkpoint-firewall-cpu-memory.device.name',
         'device_namespace:default',
         'snmp_device:' + ip_address,
+        'device_ip:' + ip_address,
+        'device_id:default:' + ip_address,
     ] + []
 
     # --- TEST EXTENDED METRICS ---

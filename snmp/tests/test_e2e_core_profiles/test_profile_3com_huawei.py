@@ -30,6 +30,8 @@ def test_e2e_profile_3com_huawei(dd_agent_check):
         'snmp_host:3com-huawei.device.name',
         'device_namespace:default',
         'snmp_device:' + ip_address,
+        'device_ip:' + ip_address,
+        'device_id:default:' + ip_address,
     ]
 
     # --- TEST METRICS ---
@@ -77,6 +79,8 @@ def test_e2e_profile_3com_huawei(dd_agent_check):
         'status': 1,
         'sys_object_id': '1.3.6.1.4.1.43.45.1.2.999',
         'tags': [
+            'device_id:default:' + ip_address,
+            'device_ip:' + ip_address,
             'device_namespace:default',
             'snmp_device:' + ip_address,
             'snmp_host:3com-huawei.device.name',
