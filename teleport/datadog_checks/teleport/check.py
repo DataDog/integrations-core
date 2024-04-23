@@ -26,7 +26,7 @@ class TeleportCheck(OpenMetricsBaseCheckV2):
         except Exception as e:
             self.count("health.up", 0, message=str(e))
             raise
-        
+
         super().check(_)
 
     def _parse_config(self):
