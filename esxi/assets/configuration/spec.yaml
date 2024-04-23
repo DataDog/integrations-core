@@ -67,6 +67,50 @@ files:
                 type: array
                 items:
                   type: string
+        - name: resource_filters
+          description: |
+            Each filter in the list is composed of three parameters.
+            'resource' is one of vm/host on which to apply the filter
+            'patterns' is a list of matching regex, if any of those matches, the resource will be monitored.
+            'type' is either include list (default) or exclude list. If a resource is both included and excluded it will be
+                  considered excluded.
+            'property' is the kind of property on which to apply the filter and must be one of those values:
+              - name (default) to filter on the resource name (defined by vCenter)
+              - hostname to filter on the ESXi Host name (only valid for if 'resource' equals 'vm')
+              - guest_hostname to filter on the VM hostname (only valid for if 'resource' equals 'vm' and
+                if VMware tools are installed)
+          value:
+            example:
+              - resource: vm
+                property: name
+                type: include
+                patterns:
+                  - <VM_REGEX_1>
+                  - <VM_REGEX_2>
+              - resource: vm
+                type: exclude
+                property: hostname
+                patterns:
+                  - <HOSTNAME_REGEX>
+              - resource: vm
+                type: exclude
+                property: guest_hostname
+                patterns:
+                  - <GUEST_HOSTNAME_REGEX>
+            type: array
+            items:
+              type: object
+              properties:
+                - name: resource
+                  type: string
+                - name: patterns
+                  type: array
+                  items:
+                    type: string
+                - name: type
+                  type: string
+                - name: property
+                  type: string
         - name: excluded_host_tags
           description: |
             Use this option to send a subset of host tags as metric tags.

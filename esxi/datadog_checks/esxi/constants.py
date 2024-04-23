@@ -67,3 +67,7 @@ AVAILABLE_HOST_TAGS = [
     "esxi_datacenter",
     "esxi_datastore",
 ]
+
+ALLOWED_FILTER_TYPES = ['include', 'exclude']
+ALLOWED_FILTER_PROPERTIES = ['name']
+EXTRA_FILTER_PROPERTIES_FOR_VMS = ['hostname', 'guest_hostname']
