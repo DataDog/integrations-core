@@ -55,6 +55,8 @@ def test_e2e_snmp_listener(dd_agent_check, container_ip, autodiscovery_ready):
     common_tags = [
         'snmp_profile:generic-device',
         'snmp_device:{}'.format(snmp_device),
+        'device_ip:{}'.format(snmp_device),
+        'device_id:default:{}'.format(snmp_device),
         'autodiscovery_subnet:{}.0/29'.format(subnet_prefix),
         'tag1:val1',
         'tag2:val2',
@@ -130,6 +132,8 @@ def test_e2e_snmp_listener(dd_agent_check, container_ip, autodiscovery_ready):
     for auth_proto in ['sha', 'sha256']:
         common_tags = [
             'snmp_device:{}'.format(snmp_device),
+            'device_ip:{}'.format(snmp_device),
+            'device_id:test-auth-proto-{}:{}'.format(auth_proto,snmp_device),
             'autodiscovery_subnet:{}.0/27'.format(subnet_prefix),
             'snmp_host:41ba948911b9',
             'snmp_profile:generic-device',
