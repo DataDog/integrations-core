@@ -4,8 +4,6 @@
 
 import pytest
 
-from datadog_checks.teleport import TeleportCheck
-
 from .common import COMMON_METRICS, INSTANCE
 
 pytestmark = pytest.mark.e2e

@@ -2,8 +2,6 @@
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
 
-import json
-
 from datadog_checks.base import OpenMetricsBaseCheckV2
 from datadog_checks.base.checks.openmetrics.v2.transform import get_native_dynamic_transformer
 
@@ -28,7 +26,7 @@ class TeleportCheck(OpenMetricsBaseCheckV2):
             self.count("health.up", 1, tags=["teleport_status:ok"])
         except Exception as e:
             self.log.error(
-                "Cannot connect to Teleport HTTP diagnostic health endpoint '%s': %s.\nPlease make sure to enable Teleport's diagnostic HTTP endpoints.",
+                "Cannot connect to Teleport HTTP diagnostic health endpoint '%s': %s.\nPlease make sure to enable Teleport's diagnostic HTTP endpoints.",  # noqa: E501
                 health_endpoint,
                 str(e),
             )  # noqa: E501
