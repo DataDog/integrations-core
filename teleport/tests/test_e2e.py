@@ -18,5 +18,5 @@ CONFIG = {
 
 def test_teleport_e2e(dd_agent_check):
     aggregator = dd_agent_check(CONFIG)
-    aggregator.assert_service_check('teleport.health.up', status=TeleportCheck.OK, count=1)
+    aggregator.assert_metric("teleport.health.up", value=1, count=1, tags=["teleport_status:ok"])
     aggregator.assert_metric(f"teleport.{COMMON_METRICS[0]}")
