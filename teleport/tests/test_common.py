@@ -11,10 +11,12 @@ from .common import BAD_HOSTNAME_INSTANCE, COMMON_METRICS
 pytestmark = [pytest.mark.unit]
 
 
-def test_connect_exception(dd_run_check):
+def test_connect_exception(dd_run_check, caplog):
     with pytest.raises(Exception):
         check = TeleportCheck("teleport", {}, [BAD_HOSTNAME_INSTANCE])
         dd_run_check(check)
+
+    assert "Cannot connect to Teleport HTTP diagnostic health endpoint" in caplog.text
 
 
 def test_common_teleport_metrics(dd_run_check, aggregator, instance, mock_http_response, metrics_path):

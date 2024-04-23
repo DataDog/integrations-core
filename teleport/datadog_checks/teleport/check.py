@@ -22,10 +22,16 @@ class TeleportCheck(OpenMetricsBaseCheckV2):
 
     def check(self, _):
         try:
-            response = self.http.get("{}/healthz".format(self.diag_addr))
+            health_endpoint = f"{self.diag_addr}/healthz"
+            response = self.http.get(health_endpoint)
             response.raise_for_status()
             self.count("health.up", 1, tags=["teleport_status:ok"])
         except Exception as e:
+            self.log.error(
+                "Cannot connect to Teleport HTTP diagnostic health endpoint '%s': %s.\nPlease make sure to enable Teleport's diagnostic HTTP endpoints.",
+                health_endpoint,
+                str(e),
+            )  # noqa: E501
             self.count("health.up", 0, tags=["teleport_status:unreachable"])
             raise
 
