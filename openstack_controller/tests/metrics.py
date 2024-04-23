@@ -4561,3 +4561,19 @@ IMAGES_METRICS_GLANCE = [
         ],
     },
 ]
+
+IMAGE_METRICS_GLANCE = [
+    {
+        'name': 'openstack.glance.image.up',
+        'count': 1,
+        'value': 1,
+        'hostname': '',
+        'tags': [
+            'container_format:bare',
+            'image_name:cirros-1.5.2-x86_64-disk',
+            'image_id:a4dcf3f7-e4d6-45d5-be2b-a939f2bbedfc',
+            'status:active',
+            'keystone_server:http://127.0.0.1:8080/identity',
+        ],
+    },
+]

@@ -299,3 +299,6 @@ class ApiSdk(Api):
             image.to_dict(original_names=True)
             for image in self.call_paginated_api(self.connection.image.images, limit=self.config.paginated_limit)
         ]
+
+    def get_glance_image(self, image_id):
+        return [image.to_dict(original_names=True) for image in self.connection.image.image(image_id)][0]

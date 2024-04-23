@@ -535,12 +535,15 @@ OCTAVIA_AMPHORA_STATS_METRICS = {
 GLANCE_METRICS_PREFIX = "openstack.glance"
 GLANCE_SERVICE_CHECK = f"{GLANCE_METRICS_PREFIX}.api.up"
 GLANCE_RESPONSE_TIME = f"{GLANCE_METRICS_PREFIX}.response_time"
-GLANCE_IMAGE_COUNT = f"{GLANCE_METRICS_PREFIX}.image.count"
-GLANCE_IMAGE_TAGS = {
+GLANCE_IMAGES_PREFIX = f"{GLANCE_METRICS_PREFIX}.image"
+GLANCE_IMAGES_COUNT = f"{GLANCE_IMAGES_PREFIX}.count"
+GLANCE_IMAGES_TAGS = {
     'name': 'image_name',
     'status': 'status',
     'container_format': 'container_format',
 }
+GLANCE_IMAGE_UP = f"{GLANCE_IMAGES_PREFIX}.up"
+GLANCE_IMAGE_TAGS = {'status': 'status', 'id': 'image_id', 'name': 'image_name', 'container_format': 'container_format'}
 
 
 def is_interface_metric(label):

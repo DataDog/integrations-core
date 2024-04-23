@@ -6,6 +6,7 @@
 from datadog_checks.openstack_controller.api.api import Api
 from datadog_checks.openstack_controller.api.catalog import Catalog
 from datadog_checks.openstack_controller.components.component import Component
+import json
 
 
 class ApiRest(Api):
@@ -493,3 +494,10 @@ class ApiRest(Api):
             'id',
             next_signifier='next',
         )
+
+    def get_glance_image(self, image_id):
+        response = self.http.get(
+            '{}/v2/images/{}'.format(self._catalog.get_endpoint_by_type(Component.Types.IMAGE.value), image_id)
+        )
+        response.raise_for_status()
+        return json.loads(response.content.decode("utf-8"))
