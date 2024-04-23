@@ -133,7 +133,7 @@ def test_e2e_snmp_listener(dd_agent_check, container_ip, autodiscovery_ready):
         common_tags = [
             'snmp_device:{}'.format(snmp_device),
             'device_ip:{}'.format(snmp_device),
-            'device_id:test-auth-proto-{}:{}'.format(auth_proto,snmp_device),
+            'device_id:test-auth-proto-{}:{}'.format(auth_proto, snmp_device),
             'autodiscovery_subnet:{}.0/27'.format(subnet_prefix),
             'snmp_host:41ba948911b9',
             'snmp_profile:generic-device',
