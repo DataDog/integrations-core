@@ -727,19 +727,11 @@ def test_runtime_host_not_found(vcsim_instance, dd_run_check, caplog, service_in
                     'resource': 'vm',
                     'property': 'name',
                     'patterns': [
-                        'vm1.*',
-                    ],
-                },
-                {
-                    'type': 'include',
-                    'resource': 'vm',
-                    'property': 'name',
-                    'patterns': [
                         'test.*',
                     ],
                 },
             ],
-            ["vm1"],
+            [],
             id="unrecognized pattern- name",
         ),
         pytest.param(
@@ -971,6 +963,29 @@ def test_resource_filters_host(vcsim_instance, dd_run_check, resource_filters, e
             "Ignoring filter {'type': 'included', 'resource': 'host', 'property': 'name', 'patterns': ['vm1.*']} "
             "because type 'included' is not valid. Should be one of ['include', 'exclude'].",
             id="invalid type",
+        ),
+        pytest.param(
+            [
+                {
+                    'type': 'include',
+                    'resource': 'vm',
+                    'property': 'name',
+                    'patterns': [
+                        'vm1.*',
+                    ],
+                },
+                {
+                    'type': 'include',
+                    'resource': 'vm',
+                    'property': 'name',
+                    'patterns': [
+                        'vm.*',
+                    ],
+                },
+            ],
+            "Ignoring filter {'type': 'include', 'resource': 'vm', 'property': 'name', 'patterns': ['vm.*']} "
+            "because you already have a `include` filter for resource type vm and property name.",
+            id="duplicate filters",
         ),
     ],
 )
