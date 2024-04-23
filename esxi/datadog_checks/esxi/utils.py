@@ -8,6 +8,7 @@ from six import iteritems
 from datadog_checks.base import to_string
 
 from .constants import METRIC_TO_INSTANCE_TAG_MAPPING, RESOURCE_TYPE_TO_NAME
+from .metrics import REFERENCE_METRIC
 
 
 def get_tags_recursively(mor, infrastructure_data, include_only=None):
@@ -106,3 +107,17 @@ def is_resource_collected_by_filters(mor, infrastructure_data, resource_filters)
 
     # Otherwise, do not collect it
     return False
+
+
+def is_metric_excluded_by_filters(metric_name, mor_type, metric_filters):
+    if metric_name.startswith(REFERENCE_METRIC):
+        # Always collect at least one metric for reference
+        return False
+    filters = metric_filters.get(RESOURCE_TYPE_TO_NAME[mor_type])
+    if not filters:
+        # No filters means collect everything
+        return False
+    if match_any_regex(metric_name, filters):
+        return False
+
+    return True

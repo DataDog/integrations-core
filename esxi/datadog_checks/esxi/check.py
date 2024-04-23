@@ -29,6 +29,7 @@ from .resource_filters import create_resource_filter
 from .utils import (
     get_mapped_instance_tag,
     get_tags_recursively,
+    is_metric_excluded_by_filters,
     is_resource_collected_by_filters,
     should_collect_per_instance_values,
 )
@@ -48,6 +49,7 @@ class EsxiCheck(AgentCheck):
             self.instance.get("collect_per_instance_filters", {})
         )
         self.resource_filters = self._parse_resource_filters(self.instance.get("resource_filters", []))
+        self.metric_filters = self._parse_metric_regex_filters(self.instance.get("metric_filters", {}))
         self.tags = [f"esxi_url:{self.host}"]
 
     def _validate_excluded_host_tags(self, excluded_host_tags):
@@ -218,10 +220,12 @@ class EsxiCheck(AgentCheck):
         counter_keys_and_names = {}
         for counter in self.content.perfManager.perfCounter:
             full_name = f"{counter.groupInfo.key}.{counter.nameInfo.key}.{SHORT_ROLLUP[counter.rollupType]}"
-            if full_name in avaliable_metrics:
+            if full_name in avaliable_metrics and not is_metric_excluded_by_filters(
+                full_name, type(entity), self.metric_filters
+            ):
                 counter_keys_and_names[counter.key] = full_name
             else:
-                self.log.trace("Skipping metric %s as it is not recognized", full_name)
+                self.log.trace("Skipping metric %s as it is not recognized or filtered", full_name)
 
         available_counter_ids = [m.counterId for m in self.content.perfManager.QueryAvailablePerfMetric(entity=entity)]
         counter_ids = [

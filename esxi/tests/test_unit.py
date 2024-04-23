@@ -998,3 +998,77 @@ def test_resource_filters_invalid(vcsim_instance, dd_run_check, resource_filters
 
     dd_run_check(check)
     assert expected_error in caplog.text
+
+
+@pytest.mark.parametrize(
+    "metric_filters, expected_metrics",
+    [
+        pytest.param(
+            {},
+            [
+                ('esxi.cpu.usage.avg', 'vm1'),
+                ('esxi.cpu.usage.avg', 'vm2'),
+                ('esxi.cpu.usage.avg', 'localhost.localdomain'),
+                ('esxi.mem.granted.avg', 'localhost.localdomain'),
+                ('esxi.net.droppedRx.sum', 'vm1'),
+            ],
+            id="no filters",
+        ),
+        pytest.param(
+            {'vm': ['net.droppedRx.sum']},
+            [
+                ('esxi.cpu.usage.avg', 'vm1'),
+                ('esxi.cpu.usage.avg', 'vm2'),
+                ('esxi.net.droppedRx.sum', 'vm1'),
+                ('esxi.mem.granted.avg', 'localhost.localdomain'),
+                ('esxi.cpu.usage.avg', 'localhost.localdomain'),
+            ],
+            id="vm filters",
+        ),
+        pytest.param(
+            {'host': ['cpu.usage.avg']},
+            [
+                ('esxi.cpu.usage.avg', 'vm1'),
+                ('esxi.cpu.usage.avg', 'vm2'),
+                ('esxi.net.droppedRx.sum', 'vm1'),
+                ('esxi.cpu.usage.avg', 'localhost.localdomain'),
+            ],
+            id="host filters",
+        ),
+        pytest.param(
+            {'host': ['test']},
+            [
+                ('esxi.cpu.usage.avg', 'vm1'),
+                ('esxi.cpu.usage.avg', 'vm2'),
+                ('esxi.net.droppedRx.sum', 'vm1'),
+                ('esxi.cpu.usage.avg', 'localhost.localdomain'),
+            ],
+            id="host no matching filters",
+        ),
+        pytest.param(
+            {'host': ['mem.granted.avg', 'test'], 'vm': ['test']},
+            [
+                ('esxi.cpu.usage.avg', 'vm1'),
+                ('esxi.cpu.usage.avg', 'vm2'),
+                ('esxi.cpu.usage.avg', 'localhost.localdomain'),
+                ('esxi.mem.granted.avg', 'localhost.localdomain'),
+            ],
+            id="both filters",
+        ),
+    ],
+)
+@pytest.mark.usefixtures("service_instance")
+def test_vm_metrics_filters(vcsim_instance, dd_run_check, metric_filters, expected_metrics, aggregator):
+    instance = copy.deepcopy(vcsim_instance)
+    instance['metric_filters'] = metric_filters
+    check = EsxiCheck('esxi', {}, [instance])
+
+    dd_run_check(check)
+
+    for metric_name, hostname in expected_metrics:
+        aggregator.assert_metric(metric_name, hostname=hostname, count=1)
+
+    aggregator.assert_metric('esxi.host.can_connect')
+    aggregator.assert_metric('esxi.host.count')
+    aggregator.assert_metric('esxi.vm.count')
+    aggregator.assert_all_metrics_covered()

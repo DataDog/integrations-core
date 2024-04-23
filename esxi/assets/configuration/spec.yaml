@@ -111,6 +111,30 @@ files:
                   type: string
                 - name: property
                   type: string
+        - name: metric_filters
+          description: |
+            Use this option to control what metrics to submit for each resource type
+            For each resource type (vm, host) collected,
+            you can choose which metric you want to collect using a list of regex.
+            If you do not specify a regex for the resource, all metrics will be collected.
+            See https://github.com/DataDog/integrations-core/blob/master/esxi/datadog_checks/esxi/metrics.py
+            for the list of collected metrics (do not prefix them with `esxi`)
+          value:
+            example:
+              vm:
+                - <VM_REGEX>
+              host:
+                - <HOST_REGEX>
+            type: object
+            properties:
+              - name: vm
+                type: array
+                items:
+                  type: string
+              - name: host
+                type: array
+                items:
+                  type: string
         - name: excluded_host_tags
           description: |
             Use this option to send a subset of host tags as metric tags.
