@@ -28,6 +28,7 @@ def test_e2e_profile_a10_thunder(dd_agent_check):
     common_tags = [
         'snmp_profile:a10-thunder',
         'snmp_host:a10-thunder.device.name',
+        'device_hostname:a10-thunder.device.name',
         'device_namespace:default',
         'snmp_device:' + ip_address,
         'device_ip:' + ip_address,

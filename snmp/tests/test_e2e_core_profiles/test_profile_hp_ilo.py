@@ -27,6 +27,7 @@ def test_e2e_profile_hp_ilo(dd_agent_check):
     common_tags = [
         'snmp_profile:hp-ilo',
         'snmp_host:hp-ilo.device.name',
+        'device_hostname:hp-ilo.device.name',
         'device_namespace:default',
         'snmp_device:' + ip_address,
         'device_ip:' + ip_address,
@@ -179,6 +180,7 @@ def test_e2e_profile_hp_ilo(dd_agent_check):
             'device_namespace:default',
             'snmp_device:' + ip_address,
             'snmp_host:hp-ilo.device.name',
+            'device_hostname:hp-ilo.device.name',
             'snmp_profile:hp-ilo',
         ],
         'vendor': 'hp',

@@ -27,6 +27,7 @@ def test_e2e_profile__checkpoint_firewall_cpu_memory(dd_agent_check):
     common_tags = [
         'snmp_profile:checkpoint-firewall-cpu-memory',
         'snmp_host:_checkpoint-firewall-cpu-memory.device.name',
+        'device_hostname:_checkpoint-firewall-cpu-memory.device.name',
         'device_namespace:default',
         'snmp_device:' + ip_address,
         'device_ip:' + ip_address,

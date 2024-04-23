@@ -30,6 +30,7 @@ def test_e2e_profile_avaya_media_gateway(dd_agent_check):
     common_tags = [
         'snmp_profile:avaya-media-gateway',
         'snmp_host:avaya-media-gateway.device.name',
+        'device_hostname:avaya-media-gateway.device.name',
         'device_namespace:default',
         'snmp_device:' + ip_address,
         'device_id:default:' + ip_address,

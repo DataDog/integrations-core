@@ -32,6 +32,7 @@ def test_e2e_profile_meraki(dd_agent_check):
         'device_ip:' + ip_address,
         'device_id:default:' + ip_address,
         'snmp_host:dashboard.meraki.com',
+        'device_hostname:dashboard.meraki.com',
         'snmp_profile:meraki',
     ]
 
@@ -59,6 +60,7 @@ def test_e2e_profile_meraki(dd_agent_check):
             'device_vendor:meraki',
             'snmp_device:' + ip_address,
             'snmp_host:dashboard.meraki.com',
+            'device_hostname:dashboard.meraki.com',
             'snmp_profile:meraki',
         ],
         'vendor': 'meraki',

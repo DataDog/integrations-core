@@ -29,6 +29,7 @@ def test_e2e_profile_western_digital_mycloud_ex2_ultra(dd_agent_check):
     common_tags = [
         'snmp_profile:western-digital-mycloud-ex2-ultra',
         'snmp_host:western-digital-mycloud-ex2-ultra.device.name',
+        'device_hostname:western-digital-mycloud-ex2-ultra.device.name',
         'device_namespace:default',
         'snmp_device:' + ip_address,
         'device_ip:' + ip_address,

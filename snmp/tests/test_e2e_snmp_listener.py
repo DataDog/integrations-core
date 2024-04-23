@@ -132,6 +132,7 @@ def test_e2e_snmp_listener(dd_agent_check, container_ip, autodiscovery_ready):
             'snmp_device:{}'.format(snmp_device),
             'autodiscovery_subnet:{}.0/27'.format(subnet_prefix),
             'snmp_host:41ba948911b9',
+            'device_hostname:41ba948911b9',
             'snmp_profile:generic-device',
             'device_namespace:test-auth-proto-{}'.format(auth_proto),
         ]
@@ -146,6 +147,7 @@ def test_e2e_snmp_listener(dd_agent_check, container_ip, autodiscovery_ready):
         'snmp_device:{}'.format(_build_device_ip(container_ip, '2')),
         'autodiscovery_subnet:{}.0/27'.format(subnet_prefix),
         'snmp_host:41ba948911b9',
+        'device_hostname:41ba948911b9',
         'snmp_profile:generic-device',
     ]
     aggregator.assert_metric('snmp.devices_monitored', count=0, tags=tags)

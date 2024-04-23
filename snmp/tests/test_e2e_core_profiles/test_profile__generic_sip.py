@@ -25,6 +25,7 @@ def test_e2e_profile__generic_sip(dd_agent_check):
     common_tags = [
         'snmp_profile:generic-sip',
         'snmp_host:_generic-sip.device.name',
+        'device_hostname:_generic-sip.device.name',
         'device_namespace:default',
         'snmp_device:' + ip_address,
         'device_ip:' + ip_address,

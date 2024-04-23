@@ -28,6 +28,7 @@ def test_e2e_profile_audiocodes_mediant_sbc(dd_agent_check):
     common_tags = [
         'snmp_profile:audiocodes-mediant-sbc',
         'snmp_host:audiocodes-mediant-sbc.device.name',
+        'device_hostname:audiocodes-mediant-sbc.device.name',
         'device_namespace:default',
         'snmp_device:' + ip_address,
         'device_ip:' + ip_address,

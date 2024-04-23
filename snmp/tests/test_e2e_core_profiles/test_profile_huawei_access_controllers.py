@@ -28,6 +28,7 @@ def test_e2e_profile_huawei_access_controllers(dd_agent_check):
     common_tags = [
         'snmp_profile:huawei-access-controllers',
         'snmp_host:huawei-access-controllers.device.name',
+        'device_hostname:huawei-access-controllers.device.name',
         'device_namespace:default',
         'snmp_device:' + ip_address,
         'device_ip:' + ip_address,

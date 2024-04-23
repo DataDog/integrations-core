@@ -28,6 +28,7 @@ def test_e2e_profile_hpe_msa(dd_agent_check):
     common_tags = [
         'snmp_profile:hpe-msa',
         'snmp_host:hpe-msa.device.name',
+        'device_hostname:hpe-msa.device.name',
         'device_namespace:default',
         'snmp_device:' + ip_address,
         'device_ip:' + ip_address,
