@@ -2,6 +2,12 @@
 
 <!-- towncrier release notes start -->
 
+## 7.5.1 / 2024-04-17
+
+***Fixed***:
+
+* Add additional tags on events for non-host resources. ([#17403](https://github.com/DataDog/integrations-core/pull/17403))
+
 ## 7.5.0 / 2024-03-22
 
 ***Added***:
