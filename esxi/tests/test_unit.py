@@ -776,7 +776,7 @@ def test_ssl_disabled_cafile_ssl_capath(vcsim_instance, dd_run_check):
         load_verify_locations.assert_called_with(cafile=None, capath='/test/path', cadata=None)
         load_default_certs.assert_not_called()
 
-        
+
 @pytest.mark.parametrize(
     "resource_filters, expected_vms",
     [
