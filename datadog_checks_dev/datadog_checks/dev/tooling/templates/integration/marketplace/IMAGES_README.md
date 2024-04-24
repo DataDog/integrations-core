@@ -15,7 +15,7 @@ added to your /images directory and referenced in the manifest.json file.
 ```
 File type       : .jpg or .png
 File size       : ~500 KB per image, with a max of 1 MB per image
-File dimensions : The image must be between 1440px and 2880px width, with a 16:9 aspect ratio (eg: 1440x810)
+File dimensions : The image must be between 1440px and 2880px width, with a 16:9 aspect ratio (for example: 1440x810)
 File name       : Use only letters, numbers, underscores, and hyphens
 Color mode      : RGB
 Color profile   : sRGB
