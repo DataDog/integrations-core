@@ -282,8 +282,10 @@ COLUMN_QUERY3 = "SELECT COLUMN_NAME, DATA_TYPE, COLUMN_DEFAULT , IS_NULLABLE FRO
 COLUMN_QUERY2 = "SELECT c.name AS name, t.name AS data_type, c.is_nullable AS is_nullable, dc.definition AS default_value FROM sys.columns c JOIN sys.types t ON c.system_type_id = t.system_type_id OR c.user_type_id = t.user_type_id LEFT JOIN sys.default_constraints dc ON c.default_object_id = dc.object_id WHERE c.object_id = {}"
 
 #WHERE  attrelid IN ({table_ids})
+COLUMN_QUERY3 = "SELECT COLUMN_NAME AS name, DATA_TYPE AS data_type, COLUMN_DEFAULT, IS_NULLABLE AS nullable , TABLE_NAME FROM INFORMATION_SCHEMA.COLUMNS WHERE TABLE_NAME IN ({}) and TABLE_SCHEMA='{}';"
 COLUMN_QUERY = "SELECT COLUMN_NAME AS name, DATA_TYPE AS data_type, COLUMN_DEFAULT, IS_NULLABLE AS nullable , TABLE_NAME FROM INFORMATION_SCHEMA.COLUMNS WHERE TABLE_NAME IN ({}) and TABLE_SCHEMA='{}';"
-
+#TODO add ORDER BY ORDINAL_POSITION; ? 
+#"SELECT * FROM INFORMATION_SCHEMA.COLUMNS WHERE TABLE_NAME IN ('boris', OBJECT_NAME(917578307))
 
 #PARTITIONS_QUERY2 = "SELECT ps.name AS partition_scheme, pf.name AS partition_function FROM sys.tables t INNER JOIN sys.indexes i ON t.object_id = i.object_id INNER JOIN sys.partition_schemes ps ON i.data_space_id = ps.data_space_id INNER JOIN sys.partition_functions pf ON ps.function_id = pf.function_id WHERE t.object_id = {};"
 PARTITIONS_QUERY2 = "SELECT COUNT(*) FROM sys.partitions WHERE object_id = {};"

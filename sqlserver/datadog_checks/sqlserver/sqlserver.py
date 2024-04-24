@@ -109,7 +109,7 @@ class SQLServer(AgentCheck):
     def __init__(self, name, init_config, instances):
         super(SQLServer, self).__init__(name, init_config, instances)
 
-        self._resolved_hostname = None
+        self.resolved_hostname = None
         self._agent_hostname = None
         self.connection = None
         self.failed_connections = {}
@@ -209,10 +209,10 @@ class SQLServer(AgentCheck):
                     self._config.cloud_metadata.get("aws")["instance_endpoint"],
                 )
             )
-        elif AWS_RDS_HOSTNAME_SUFFIX in self._resolved_hostname:
+        elif AWS_RDS_HOSTNAME_SUFFIX in self.resolved_hostname:
             # allow for detecting if the host is an RDS host, and emit
             # the resource properly even if the `aws` config is unset
-            self.tags.append("dd.internal.resource:aws_rds_instance:{}".format(self._resolved_hostname))
+            self.tags.append("dd.internal.resource:aws_rds_instance:{}".format(self.resolved_hostname))
         if self._config.cloud_metadata.get("azure") is not None:
             deployment_type = self._config.cloud_metadata.get("azure")["deployment_type"]
             name = self._config.cloud_metadata.get("azure")["name"]
@@ -221,7 +221,7 @@ class SQLServer(AgentCheck):
                 # azure sql databases have a special format, which is set for DBM
                 # customers in the resolved_hostname.
                 # If user is not DBM customer, the resource_name should just be set to the `name`
-                db_instance = self._resolved_hostname
+                db_instance = self.resolved_hostname
             # some `deployment_type`s map to multiple `resource_type`s
             resource_types = AZURE_DEPLOYMENT_TYPE_TO_RESOURCE_TYPES.get(deployment_type).split(",")
             for r_type in resource_types:
@@ -232,19 +232,19 @@ class SQLServer(AgentCheck):
         # finally, emit a `database_instance` resource for this instance
         self.tags.append(
             "dd.internal.resource:database_instance:{}".format(
-                self._resolved_hostname,
+                self.resolved_hostname,
             )
         )
 
     def set_resolved_hostname(self):
         # load static information cache
         self.load_static_information()
-        if self._resolved_hostname is None:
+        if self.resolved_hostname is None:
             if self._config.reported_hostname:
-                self._resolved_hostname = self._config.reported_hostname
+                self.resolved_hostname = self._config.reported_hostname
             else:
                 host, _ = split_sqlserver_host_port(self.instance.get("host"))
-                self._resolved_hostname = resolve_db_host(host)
+                self.resolved_hostname = resolve_db_host(host)
                 engine_edition = self.static_info_cache.get(STATIC_INFO_ENGINE_EDITION)
                 if engine_edition == ENGINE_EDITION_SQL_DATABASE:
                     configured_database = self.instance.get("database", None)
@@ -317,7 +317,7 @@ class SQLServer(AgentCheck):
         tags = tags if tags else []
         return {
             "tags": self.debug_tags() + tags,
-            "hostname": self.resolved_hostname,
+            "hostname": self._resolved_hostname,
             "raw": True,
         }
 
@@ -330,7 +330,7 @@ class SQLServer(AgentCheck):
 
     def initialize_connection(self):
         self.connection = Connection(
-            host=self.resolved_hostname,
+            host=self._resolved_hostname,
             init_config=self.init_config,
             instance_config=self.instance,
             service_check_handler=self.handle_service_check,
@@ -368,12 +368,12 @@ class SQLServer(AgentCheck):
         custom_tags = self.instance.get("tags", [])
         disable_generic_tags = self.instance.get("disable_generic_tags", False)
         service_check_tags = [
-            "sqlserver_host:{}".format(self.resolved_hostname),
+            "sqlserver_host:{}".format(self._resolved_hostname),
             "db:{}".format(database),
             "connection_host:{}".format(connection_host),
         ]
         if not disable_generic_tags:
-            service_check_tags.append("host:{}".format(self.resolved_hostname))
+            service_check_tags.append("host:{}".format(self._resolved_hostname))
         if custom_tags is not None:
             service_check_tags.extend(custom_tags)
         service_check_tags = list(set(service_check_tags))
@@ -692,7 +692,7 @@ class SQLServer(AgentCheck):
             metric_type_str, cls = metrics.TABLE_MAPPING[table]
             metric_type = getattr(self, metric_type_str)
 
-        cfg_inst["hostname"] = self.resolved_hostname
+        cfg_inst["hostname"] = self._resolved_hostname
 
         return cls(cfg_inst, base_name, metric_type, column, self.log)
 
@@ -768,7 +768,7 @@ class SQLServer(AgentCheck):
             if self._query_manager is None:
                 # use QueryManager to process custom queries
                 self._query_manager = QueryManager(
-                    self, self.execute_query_raw, tags=self.tags, hostname=self.resolved_hostname
+                    self, self.execute_query_raw, tags=self.tags, hostname=self._resolved_hostname
                 )
                 self._query_manager.compile_queries()
             if self.server_state_queries is None:
@@ -783,9 +783,14 @@ class SQLServer(AgentCheck):
             if self._config.autodiscovery and self._config.autodiscovery_db_service_check:
                 self._check_database_conns()
             self._send_database_instance_metadata()
+
+            #TODO limit this check by some minutes ...
+            self._schemas.collect_schemas_data() 
+
+            
             if self._config.dbm_enabled:
-                #TODO limit this check by some minutes ...
-                self._schemas.collect_schemas_data() 
+                
+                
                 self.statement_metrics.run_job_loop(self.tags)
                 self.procedure_metrics.run_job_loop(self.tags)
                 self.activity.run_job_loop(self.tags)
@@ -1042,9 +1047,9 @@ class SQLServer(AgentCheck):
         return should_run
 
     def _send_database_instance_metadata(self):
-        if self.resolved_hostname not in self._database_instance_emitted:
+        if self._resolved_hostname not in self._database_instance_emitted:
             event = {
-                "host": self.resolved_hostname,
+                "host": self._resolved_hostname,
                 "agent_version": datadog_agent.get_version(),
                 "dbms": "sqlserver",
                 "kind": "database_instance",
@@ -1062,5 +1067,5 @@ class SQLServer(AgentCheck):
                     "connection_host": self._config.connection_host,
                 },
             }
-            self._database_instance_emitted[self.resolved_hostname] = event
+            self._database_instance_emitted[self._resolved_hostname] = event
             self.database_monitoring_metadata(json.dumps(event, default=default_json_event_encoding))

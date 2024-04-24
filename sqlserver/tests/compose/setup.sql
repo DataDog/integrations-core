@@ -16,18 +16,23 @@ CREATE USER fred FOR LOGIN fred;
 GRANT CONNECT ANY DATABASE to fred;
 GO
 
+
+CREATE DATABASE datadog_test_schemas;
+GO
+USE datadog_test_schemas;
+GO
+
+CREATE SCHEMA test_schema;
+GO
 -- Create test database for integration tests
 -- only bob and fred have read/write access to this database
 CREATE DATABASE datadog_test;
 GO
 USE datadog_test;
+GO
+
 -- This table is pronounced "things" except we've replaced "th" with the greek lower case "theta" to ensure we
 -- correctly support unicode throughout the integration.
-CREATE TYPE MyUDT FROM int;
-CREATE TYPE AnotherINT FROM int;
-
-CREATE TABLE datadog_test.dbo.boris (id int DEFAULT 10);
-
 
 CREATE TABLE datadog_test.dbo.ϑings (id int DEFAULT 0, name varchar(255));
 INSERT INTO datadog_test.dbo.ϑings VALUES (1, 'foo'), (2, 'bar');
@@ -35,6 +40,8 @@ CREATE USER bob FOR LOGIN bob;
 CREATE USER fred FOR LOGIN fred;
 CREATE CLUSTERED INDEX thingsindex ON datadog_test.dbo.ϑings (name);
 GO
+
+
 
 EXEC sp_addrolemember 'db_datareader', 'bob'
 EXEC sp_addrolemember 'db_datareader', 'fred'
