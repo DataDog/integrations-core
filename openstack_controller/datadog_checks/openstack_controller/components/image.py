@@ -5,10 +5,10 @@
 
 from datadog_checks.openstack_controller.components.component import Component
 from datadog_checks.openstack_controller.metrics import (
+    GLANCE_IMAGE_PREFIX,
     GLANCE_IMAGE_TAGS,
     GLANCE_IMAGE_UP,
     GLANCE_IMAGES_COUNT,
-    GLANCE_IMAGES_PREFIX,
     GLANCE_IMAGES_TAGS,
     GLANCE_RESPONSE_TIME,
     GLANCE_SERVICE_CHECK,
@@ -43,7 +43,7 @@ class Image(Component):
                 images = get_metrics_and_tags(
                     item,
                     tags=GLANCE_IMAGES_TAGS,
-                    prefix=GLANCE_IMAGES_PREFIX,
+                    prefix=GLANCE_IMAGE_PREFIX,
                     metrics=[GLANCE_IMAGES_COUNT],
                 )
                 self.check.log.debug("images: %s", images)
@@ -57,7 +57,7 @@ class Image(Component):
         image = get_metrics_and_tags(
             image_data,
             tags=GLANCE_IMAGE_TAGS,
-            prefix=GLANCE_IMAGES_PREFIX,
+            prefix=GLANCE_IMAGE_PREFIX,
             metrics=[GLANCE_IMAGE_UP],
         )
         is_active = 1 if image_data['status'] == 'active' else 0
