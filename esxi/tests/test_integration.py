@@ -150,27 +150,26 @@ def test_esxi_resource_count_metrics(vcsim_instance, dd_run_check, aggregator):
 
 @pytest.mark.integration
 @pytest.mark.usefixtures("dd_environment")
-def test_ssl_verify(vcsim_instance, dd_run_check, aggregator, caplog):
+def test_ssl_verify(vcsim_instance, dd_run_check, aggregator):
     instance = copy.deepcopy(vcsim_instance)
     instance['ssl_verify'] = True
     check = EsxiCheck('esxi', {}, [instance])
-    caplog.set_level(logging.ERROR)
-    dd_run_check(check)
-    assert (
-        "Cannot connect to ESXi host 127.0.0.1:8989: [SSL: CERTIFICATE_VERIFY_FAILED] "
-        "certificate verify failed" in caplog.text
-    )
+    with pytest.raises(
+        Exception,
+        match=r"\[SSL: CERTIFICATE_VERIFY_FAILED\] certificate verify failed",
+    ):
+        dd_run_check(check)
+
     aggregator.assert_metric('esxi.host.can_connect', 0, count=1, tags=["esxi_url:127.0.0.1:8989"])
 
 
 @pytest.mark.integration
 @pytest.mark.usefixtures("dd_environment")
-def test_ssl_verify_cafile(vcsim_instance, dd_run_check, aggregator, caplog):
+def test_ssl_verify_cafile(vcsim_instance, dd_run_check, aggregator):
     instance = copy.deepcopy(vcsim_instance)
     instance['ssl_verify'] = True
     instance['ssl_cafile'] = '/test/path/file.pem'
     check = EsxiCheck('esxi', {}, [instance])
-    caplog.set_level(logging.ERROR)
-    dd_run_check(check)
-    assert "Cannot connect to ESXi host 127.0.0.1:8989: [Errno 2] No such file or directory" in caplog.text
+    with pytest.raises(Exception, match=r"FileNotFoundError: \[Errno 2\] No such file or directory"):
+        dd_run_check(check)
     aggregator.assert_metric('esxi.host.can_connect', 0, count=1, tags=["esxi_url:127.0.0.1:8989"])

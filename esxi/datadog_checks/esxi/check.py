@@ -354,7 +354,7 @@ class EsxiCheck(AgentCheck):
             self.count("host.can_connect", 1, tags=self.tags)
 
         except Exception as e:
-            self.log.error("Cannot connect to ESXi host %s: %s", self.host, str(e))
+            self.log.exception("Cannot connect to ESXi host %s: %s", self.host, str(e))
             self.count("host.can_connect", 0, tags=self.tags)
             raise
 

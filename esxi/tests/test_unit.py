@@ -669,13 +669,14 @@ def test_runtime_host_not_found(vcsim_instance, dd_run_check, caplog, service_in
 
 
 @pytest.mark.usefixtures("service_instance")
-def test_ssl_default(vcsim_instance, dd_run_check):
+def test_ssl_default(vcsim_instance, dd_run_check, service_instance):
     instance = copy.deepcopy(vcsim_instance)
     instance['ssl_verify'] = False
 
     with patch("pyVim.connect.SmartConnect") as smart_connect, patch(
         'ssl.SSLContext.load_verify_locations'
     ) as load_verify_locations, patch('ssl.SSLContext.load_default_certs') as load_default_certs:
+        smart_connect.return_value.content.about.apiType = 'HostAgent'
         check = EsxiCheck('esxi', {}, [instance])
         dd_run_check(check)
         context = smart_connect.call_args.kwargs['sslContext']
@@ -694,6 +695,7 @@ def test_ssl_enabled(vcsim_instance, dd_run_check):
     with patch("pyVim.connect.SmartConnect") as smart_connect, patch(
         'ssl.SSLContext.load_default_certs'
     ) as load_default_certs, patch('ssl.SSLContext.load_verify_locations') as load_verify_locations:
+        smart_connect.return_value.content.about.apiType = 'HostAgent'
         check = EsxiCheck('esxi', {}, [instance])
         dd_run_check(check)
         context = smart_connect.call_args.kwargs['sslContext']
@@ -713,6 +715,7 @@ def test_ssl_enabled_capath(vcsim_instance, dd_run_check):
     with patch("pyVim.connect.SmartConnect") as smart_connect, patch(
         'ssl.SSLContext.load_default_certs'
     ) as load_default_certs, patch('ssl.SSLContext.load_verify_locations') as load_verify_locations:
+        smart_connect.return_value.content.about.apiType = 'HostAgent'
         check = EsxiCheck('esxi', {}, [instance])
         dd_run_check(check)
         context = smart_connect.call_args.kwargs['sslContext']
@@ -732,6 +735,7 @@ def test_ssl_enabled_cafile(vcsim_instance, dd_run_check):
     with patch("pyVim.connect.SmartConnect") as smart_connect, patch(
         'ssl.SSLContext.load_default_certs'
     ) as load_default_certs, patch('ssl.SSLContext.load_verify_locations') as load_verify_locations:
+        smart_connect.return_value.content.about.apiType = 'HostAgent'
         check = EsxiCheck('esxi', {}, [instance])
         dd_run_check(check)
         context = smart_connect.call_args.kwargs['sslContext']
@@ -752,6 +756,7 @@ def test_ssl_enabled_cafile_ssl_capath(vcsim_instance, dd_run_check):
     with patch("pyVim.connect.SmartConnect") as smart_connect, patch(
         'ssl.SSLContext.load_verify_locations'
     ) as load_verify_locations, patch('ssl.SSLContext.load_default_certs') as load_default_certs:
+        smart_connect.return_value.content.about.apiType = 'HostAgent'
         check = EsxiCheck('esxi', {}, [instance])
         dd_run_check(check)
         context = smart_connect.call_args.kwargs['sslContext']
@@ -772,6 +777,7 @@ def test_ssl_disabled_cafile_ssl_capath(vcsim_instance, dd_run_check):
     with patch("pyVim.connect.SmartConnect") as smart_connect, patch(
         'ssl.SSLContext.load_verify_locations'
     ) as load_verify_locations, patch('ssl.SSLContext.load_default_certs') as load_default_certs:
+        smart_connect.return_value.content.about.apiType = 'HostAgent'
         check = EsxiCheck('esxi', {}, [instance])
         dd_run_check(check)
         context = smart_connect.call_args.kwargs['sslContext']
