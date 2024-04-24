@@ -218,3 +218,22 @@ class HighCardinalityQueries:
     @staticmethod
     def _create_rand_string(length=5):
         return ''.join(choice(string.ascii_lowercase + string.digits) for _ in range(length))
+
+def delete_if_found(my_list, value):
+    try:
+        index = my_list.index(value)
+        del my_list[index]
+        return True
+    except ValueError:
+        return None
+    
+def compare_coumns_in_tables(expected_data_for_db, actual_data_for_db):
+    for schema in expected_data_for_db['schemas']:
+        actual_schema = next(filter(lambda x: x['id'] == schema['id'], actual_data_for_db['schemas']))
+        for table in schema['tables']:
+            #find a table and then finally compare columns
+            actual_table = next(filter(lambda x: x['id'] == table['id'], actual_schema['tables']))
+            if actual_table['columns'] == table['columns']:
+                return True
+            else:
+                return False
