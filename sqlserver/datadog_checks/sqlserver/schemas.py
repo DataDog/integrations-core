@@ -185,8 +185,8 @@ class Schemas:
                 if len(tables) == 0:
                     self._dataSubmitter.store(db_name, schema, [], 0)
                 # to ask him if this is needed or we can submit only on 100 000 column
-            # tells if we want to move to the next DB or stop
-            return True
+            # tells if we want to move to the next DB or stop, stop == TRUE
+            return False
         self._check.do_for_databases(fetch_schema_data, self._check.get_databases())
         # submit the last chunk of data if any
         self._dataSubmitter.submit()
@@ -226,12 +226,14 @@ class Schemas:
             return
         name_to_id = {}
         id_to_all = {}
-        table_names = ",".join(["'{}'".format(t.get("name")) for t in table_list])
-        table_ids = ",".join(["{}".format(t.get("id")) for t in table_list])
+        #table_names = ",".join(["'{}'".format(t.get("name")) for t in table_list])
+        #OBJECT_NAME is needed to make it work for special characters 
+        table_ids = ",".join(["OBJECT_NAME({})".format(t.get("id")) for t in table_list])
+        #pdb.set_trace()
         for t in table_list:
             name_to_id[t["name"]] = t["id"] 
             id_to_all[t["id"]] = t
-        total_columns_number  = self._populate_with_columns_data(table_names, name_to_id, id_to_all, schema, cursor)
+        total_columns_number  = self._populate_with_columns_data(table_ids, name_to_id, id_to_all, schema, cursor)
         #self._populate_with_partitions_data(table_ids, id_to_all, cursor) #TODO P DISABLED as postgrss backend accepts different data model
         #self._populate_with_foreign_keys_data(table_ids, id_to_all, cursor) #TODO P DISABLED as postgrss backend accepts different data model
         #self._populate_with_index_data(table_ids, id_to_all, cursor) #TODO P DISABLED as postgrss backend accepts different data model
@@ -239,9 +241,9 @@ class Schemas:
         return total_columns_number, list(id_to_all.values())
 
     # TODO refactor the next 3 to have a base function when everythng is settled.
-    def _populate_with_columns_data(self, table_names, name_to_id, id_to_all, schema, cursor):
+    def _populate_with_columns_data(self, table_ids, name_to_id, id_to_all, schema, cursor):
         # get columns if we dont have a dict here unlike postgres
-        cursor.execute(COLUMN_QUERY.format(table_names, schema["name"]))
+        cursor.execute(COLUMN_QUERY.format(table_ids, schema["name"]))
         data = cursor.fetchall()
         columns = []
         #TODO we need it cause if I put AS default its a forbidden key word and to be inline with postgres we need it

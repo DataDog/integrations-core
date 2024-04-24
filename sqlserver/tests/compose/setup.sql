@@ -16,6 +16,14 @@ CREATE USER fred FOR LOGIN fred;
 GRANT CONNECT ANY DATABASE to fred;
 GO
 
+
+CREATE DATABASE datadog_test_schemas;
+GO
+USE datadog_test_schemas;
+GO
+
+CREATE SCHEMA test_schema;
+GO
 -- Create test database for integration tests
 -- only bob and fred have read/write access to this database
 CREATE DATABASE [datadog_test-1];
@@ -29,6 +37,8 @@ CREATE USER bob FOR LOGIN bob;
 CREATE USER fred FOR LOGIN fred;
 CREATE CLUSTERED INDEX thingsindex ON [datadog_test-1].dbo.ϑings (name);
 GO
+
+
 
 EXEC sp_addrolemember 'db_datareader', 'bob'
 EXEC sp_addrolemember 'db_datareader', 'fred'
