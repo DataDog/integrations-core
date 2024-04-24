@@ -232,19 +232,19 @@ class SQLServer(AgentCheck):
         # finally, emit a `database_instance` resource for this instance
         self.tags.append(
             "dd.internal.resource:database_instance:{}".format(
-                self.resolved_hostname,
+                self._resolved_hostname,
             )
         )
 
     def set_resolved_hostname(self):
         # load static information cache
         self.load_static_information()
-        if self.resolved_hostname is None:
+        if self._resolved_hostname is None:
             if self._config.reported_hostname:
-                self.resolved_hostname = self._config.reported_hostname
+                self._resolved_hostname = self._config.reported_hostname
             else:
                 host, _ = split_sqlserver_host_port(self.instance.get("host"))
-                self.resolved_hostname = resolve_db_host(host)
+                self._resolved_hostname = resolve_db_host(host)
                 engine_edition = self.static_info_cache.get(STATIC_INFO_ENGINE_EDITION)
                 if engine_edition == ENGINE_EDITION_SQL_DATABASE:
                     configured_database = self.instance.get("database", None)
@@ -317,7 +317,7 @@ class SQLServer(AgentCheck):
         tags = tags if tags else []
         return {
             "tags": self.debug_tags() + tags,
-            "hostname": self._resolved_hostname,
+            "hostname": self.resolved_hostname,
             "raw": True,
         }
 
@@ -330,7 +330,7 @@ class SQLServer(AgentCheck):
 
     def initialize_connection(self):
         self.connection = Connection(
-            host=self._resolved_hostname,
+            host=self.resolved_hostname,
             init_config=self.init_config,
             instance_config=self.instance,
             service_check_handler=self.handle_service_check,
@@ -368,12 +368,12 @@ class SQLServer(AgentCheck):
         custom_tags = self.instance.get("tags", [])
         disable_generic_tags = self.instance.get("disable_generic_tags", False)
         service_check_tags = [
-            "sqlserver_host:{}".format(self._resolved_hostname),
+            "sqlserver_host:{}".format(self.resolved_hostname),
             "db:{}".format(database),
             "connection_host:{}".format(connection_host),
         ]
         if not disable_generic_tags:
-            service_check_tags.append("host:{}".format(self._resolved_hostname))
+            service_check_tags.append("host:{}".format(self.resolved_hostname))
         if custom_tags is not None:
             service_check_tags.extend(custom_tags)
         service_check_tags = list(set(service_check_tags))
