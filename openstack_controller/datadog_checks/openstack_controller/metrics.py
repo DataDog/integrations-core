@@ -542,7 +542,7 @@ GLANCE_IMAGES_TAGS = {
     'status': 'status',
     'container_format': 'container_format',
 }
-GLANCE_IMAGE_UP = f"{GLANCE_IMAGE_PREFIX}.up"
+GLANCE_IMAGE_METRICS = {f"{GLANCE_IMAGE_PREFIX}.up": {}}
 GLANCE_IMAGE_TAGS = {'status': 'status', 'id': 'image_id', 'name': 'image_name', 'container_format': 'container_format'}
 
 

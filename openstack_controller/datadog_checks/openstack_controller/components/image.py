@@ -5,9 +5,9 @@
 
 from datadog_checks.openstack_controller.components.component import Component
 from datadog_checks.openstack_controller.metrics import (
+    GLANCE_IMAGE_METRICS,
     GLANCE_IMAGE_PREFIX,
     GLANCE_IMAGE_TAGS,
-    GLANCE_IMAGE_UP,
     GLANCE_IMAGES_COUNT,
     GLANCE_IMAGES_TAGS,
     GLANCE_RESPONSE_TIME,
@@ -58,7 +58,11 @@ class Image(Component):
             image_data,
             tags=GLANCE_IMAGE_TAGS,
             prefix=GLANCE_IMAGE_PREFIX,
-            metrics=[GLANCE_IMAGE_UP],
+            metrics=GLANCE_IMAGE_METRICS,
+            lambda_name=lambda key: 'up' if key == 'status' else key,
+            lambda_value=lambda key, value, image_data=image_data: (
+                image_data['status'] == 'active' if key == 'status' else value
+            ),
         )
-        is_active = 1 if image_data['status'] == 'active' else 0
-        self.check.gauge(GLANCE_IMAGE_UP, is_active, tags=tags + image['tags'])
+        for metric, value in image['metrics'].items():
+            self.check.gauge(metric, value, tags=tags + image['tags'])
