@@ -606,7 +606,7 @@ class SqlDatabaseStats(BaseSqlServerMetric):
     OPERATION_NAME = 'database_stats_metrics'
 
     @classmethod
-    def fetch_all_values(cls, cursor, counters_list, logger, databases=None):
+    def fetch_all_values(cls, cursor, counters_list, logger, databases=None, engine_edition=None):
         return cls._fetch_generic_values(cursor, None, logger)
 
     def fetch_metric(self, rows, columns, values_cache=None):
@@ -652,7 +652,7 @@ class SqlDatabaseBackup(BaseSqlServerMetric):
     OPERATION_NAME = 'database_backup_metrics'
 
     @classmethod
-    def fetch_all_values(cls, cursor, counters_list, logger, databases=None):
+    def fetch_all_values(cls, cursor, counters_list, logger, databases=None, engine_edition=None):
         return cls._fetch_generic_values(cursor, None, logger)
 
     def fetch_metric(self, rows, columns, values_cache=None):
