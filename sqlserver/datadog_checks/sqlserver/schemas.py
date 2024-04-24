@@ -98,8 +98,12 @@ class Schemas:
                 #"cloud_metadata": self._config.cloud_metadata,
             }
         """
+        #TODO remove : hosts were null onstaging /....
+        hostname = "boris"
+        if self._check.resolved_hostname is not None:
+            hostname = self._check.resolved_hostname
         base_event = {
-            "host": self._check.resolved_hostname,
+            "host": hostname,
             "agent_version": datadog_agent.get_version(),
             "dbms": "postgres", #TODO fake it until you make it - trying to pass this data as postgres for now
             "kind": "pg_databases", # TODO pg_databases - will result in KindPgDatabases and so processor would thing its postgres 

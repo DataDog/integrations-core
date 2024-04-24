@@ -13,13 +13,14 @@ from datadog_checks.sqlserver import SQLServer
 #from deepdiff import DeepDiff - not clear how to add it to ddev
 
 from .common import CHECK_NAME
-
+from .utils import delete_if_found, compare_coumns_in_tables
 try:
     import pyodbc
 except ImportError:
     pyodbc = None
 
 import pdb
+import json
 
 @pytest.fixture
 def dbm_instance(instance_docker):
@@ -97,35 +98,46 @@ def test_sqlserver_collect_settings(aggregator, dd_run_check, dbm_instance):
     assert len(event["metadata"]) > 0
 
 def test_collect_schemas(aggregator, dd_run_check, dbm_instance):
+
+    databases_to_find  = ['datadog_test_schemas','datadog_test']
+    exp_datadog_test =  {'id': '6', 'name': 'datadog_test', 'owner': 'dbo', 'schemas': [ {'name': 'dbo', 'id': '1', 'owner': '1', 'tables': [{'id': '885578193', 'name': 'ϑings', 'columns': [{'name': 'id', 'data_type': 'int', 'default': '((0))', 'nullable': True}, {'name': 'name', 'data_type': 'varchar', 'default': 'None', 'nullable': True}]}]}]}
+    exp_datadog_test_schemas = {'id': '5', 'name': 'datadog_test_schemas', 'owner': 'dbo', 'schemas': [{'name': 'test_schema', 'id': '5', 'owner': '1', 'tables': []}]}
+    expected_data_for_db = {'datadog_test' : exp_datadog_test, 'datadog_test_schemas' : exp_datadog_test_schemas}
+
     pdb.set_trace()
     dbm_instance['database_autodiscovery'] = True
     dbm_instance['autodiscovery_include'] = ['datadog_test_schemas','datadog_test']
 
     check = SQLServer(CHECK_NAME, {}, [dbm_instance])
     dd_run_check(check)
-    #check.initialize_connection()
-    #check.check(dbm_instance)
 
     #extracting events.
     dbm_metadata = aggregator.get_event_platform_events("dbm-metadata")
-
-    # check that all expected tables are present
-    tables_set = {
-        "cities"
-    }
     
-    #result = 
-    tables_got = []
+
     #TODO later modify kind
     for schema_event in (e for e in dbm_metadata if e['kind'] == 'pg_databases'):
+        if len(databases_to_find) == 0:
+            # we may see the correct payload for the database several times in events
+            return
 
-        #First should be equal without order:
-        #diff = DeepDiff(r1, r2, ignore_order=True)
-        ##assert not diff, f"difference in response: {diff}"
-        # For tables order is important pick up these tables and check with order:
         assert schema_event.get("timestamp") is not None
         # there should only be one database, datadog_test
         pdb.set_trace()
         database_metadata = schema_event['metadata']
         assert len(database_metadata) == 1
-        assert 'datadog_test' == database_metadata[0]['name']
+        db_name = database_metadata[0]['name']
+        assert delete_if_found(databases_to_find, db_name)
+
+        # TODO enable when we add the package 
+        #difference = DeepDiff(database_metadata[0], expected_data_for_db[db_name], ignore_order=True)
+        difference = []
+        diff_keys = list(difference.keys())
+        if len(diff_keys) > 0 and list(diff_keys.keys()) is not ['iterable_item_removed']:
+            logging.debug("found the following diffs %s", json.dumps(difference))
+            assert False
+
+        # we need a special comparison as order of columns matter
+        assert compare_coumns_in_tables(expected_data_for_db[db_name], database_metadata[0])
+        
+    assert len(databases_to_find) == 0
