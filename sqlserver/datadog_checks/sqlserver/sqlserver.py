@@ -109,7 +109,7 @@ class SQLServer(AgentCheck):
     def __init__(self, name, init_config, instances):
         super(SQLServer, self).__init__(name, init_config, instances)
 
-        self.resolved_hostname = None
+        self._resolved_hostname = None
         self._agent_hostname = None
         self.connection = None
         self.failed_connections = {}
@@ -209,10 +209,10 @@ class SQLServer(AgentCheck):
                     self._config.cloud_metadata.get("aws")["instance_endpoint"],
                 )
             )
-        elif AWS_RDS_HOSTNAME_SUFFIX in self.resolved_hostname:
+        elif AWS_RDS_HOSTNAME_SUFFIX in self._resolved_hostname:
             # allow for detecting if the host is an RDS host, and emit
             # the resource properly even if the `aws` config is unset
-            self.tags.append("dd.internal.resource:aws_rds_instance:{}".format(self.resolved_hostname))
+            self.tags.append("dd.internal.resource:aws_rds_instance:{}".format(self._resolved_hostname))
         if self._config.cloud_metadata.get("azure") is not None:
             deployment_type = self._config.cloud_metadata.get("azure")["deployment_type"]
             name = self._config.cloud_metadata.get("azure")["name"]
@@ -221,7 +221,7 @@ class SQLServer(AgentCheck):
                 # azure sql databases have a special format, which is set for DBM
                 # customers in the resolved_hostname.
                 # If user is not DBM customer, the resource_name should just be set to the `name`
-                db_instance = self.resolved_hostname
+                db_instance = self._resolved_hostname
             # some `deployment_type`s map to multiple `resource_type`s
             resource_types = AZURE_DEPLOYMENT_TYPE_TO_RESOURCE_TYPES.get(deployment_type).split(",")
             for r_type in resource_types:
