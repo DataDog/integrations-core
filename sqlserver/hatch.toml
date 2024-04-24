@@ -1,3 +1,7 @@
+post-install-commands = [
+  "python -m pip install deepdiff",
+]
+
 [env.collectors.datadog-checks]
 base-package-features = ["deps", "db", "json"]
 
@@ -65,3 +69,4 @@ matrix.driver.env-vars = [
 name.linux-odbc-2019-high-cardinality.env-vars = "COMPOSE_FOLDER=compose-high-cardinality"
 name.linux-odbc-2022-high-cardinality.env-vars = "COMPOSE_FOLDER=compose-high-cardinality"
 name.windows-odbc-2019-high-cardinality.env-vars = "COMPOSE_FOLDER=compose-high-cardinality-windows"
+
