@@ -84,6 +84,20 @@ instances:
     #     patterns:
     #     - <GUEST_HOSTNAME_REGEX>
 
+    ## @param metric_filters - mapping - optional
+    ## Use this option to control what metrics to submit for each resource type
+    ## For each resource type (vm, host) collected,
+    ## you can choose which metric you want to collect using a list of regex.
+    ## If you do not specify a regex for the resource, all metrics will be collected.
+    ## See https://github.com/DataDog/integrations-core/blob/master/esxi/datadog_checks/esxi/metrics.py
+    ## for the list of collected metrics (do not prefix them with `esxi`)
+    #
+    # metric_filters:
+    #   vm:
+    #   - <VM_REGEX>
+    #   host:
+    #   - <HOST_REGEX>
+
     ## @param excluded_host_tags - list of strings - optional - default: []
     ## Use this option to send a subset of host tags as metric tags.
     ## The ESXi integration collects tags for every ESXi host or VM in your environment.

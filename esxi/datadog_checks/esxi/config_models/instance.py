@@ -28,6 +28,15 @@ class CollectPerInstanceFilters(BaseModel):
     vm: Optional[tuple[str, ...]] = None
 
 
+class MetricFilters(BaseModel):
+    model_config = ConfigDict(
+        arbitrary_types_allowed=True,
+        frozen=True,
+    )
+    host: Optional[tuple[str, ...]] = None
+    vm: Optional[tuple[str, ...]] = None
+
+
 class MetricPatterns(BaseModel):
     model_config = ConfigDict(
         arbitrary_types_allowed=True,
@@ -59,6 +68,7 @@ class InstanceConfig(BaseModel):
     empty_default_hostname: Optional[bool] = None
     excluded_host_tags: Optional[tuple[str, ...]] = None
     host: str
+    metric_filters: Optional[MetricFilters] = None
     metric_patterns: Optional[MetricPatterns] = None
     min_collection_interval: Optional[float] = None
     password: str

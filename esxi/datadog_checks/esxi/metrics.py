@@ -404,3 +404,6 @@ RESOURCE_NAME_TO_METRICS = {
     "vm": VM_METRICS,
     "host": HOST_METRICS,
 }
+
+
+REFERENCE_METRIC = "cpu.usage.avg"
