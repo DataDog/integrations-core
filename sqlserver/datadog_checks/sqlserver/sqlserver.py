@@ -868,6 +868,7 @@ class SQLServer(AgentCheck):
                     self._make_metric_list_to_collect(self._config.custom_metrics)
 
                 instance_results = {}
+                engine_edition = self.static_info_cache.get(STATIC_INFO_ENGINE_EDITION, "")
                 # Execute the `fetch_all` operations first to minimize the database calls
                 for cls, metric_names in six.iteritems(self.instance_per_type_metrics):
                     if not metric_names:
@@ -880,7 +881,8 @@ class SQLServer(AgentCheck):
                             metric_cls = getattr(metrics, cls)
                             with tracked_query(self, operation=metric_cls.OPERATION_NAME):
                                 rows, cols = metric_cls.fetch_all_values(
-                                    cursor, list(metric_names), self.log, databases=db_names
+                                    cursor, list(metric_names), self.log, databases=db_names,
+                                    engine_edition=engine_edition
                                 )
                         except Exception as e:
                             self.log.error("Error running `fetch_all` for metrics %s - skipping.  Error: %s", cls, e)
