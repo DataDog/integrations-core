@@ -3,13 +3,14 @@
 # Licensed under a 3-clause BSD style license (see LICENSE)
 import logging
 import re
+import ssl
 from collections import defaultdict
 
 from pyVim import connect
 from pyVmomi import vim, vmodl
 from six import iteritems
 
-from datadog_checks.base import AgentCheck  # noqa: F401
+from datadog_checks.base import AgentCheck, is_affirmative
 from datadog_checks.base.utils.common import to_string
 
 from .constants import (
@@ -48,6 +49,9 @@ class EsxiCheck(AgentCheck):
             self.instance.get("collect_per_instance_filters", {})
         )
         self.resource_filters = self._parse_resource_filters(self.instance.get("resource_filters", []))
+        self.ssl_verify = is_affirmative(self.instance.get('ssl_verify', True))
+        self.ssl_capath = self.instance.get("ssl_capath")
+        self.ssl_cafile = self.instance.get("ssl_cafile")
         self.tags = [f"esxi_url:{self.host}"]
 
     def _validate_excluded_host_tags(self, excluded_host_tags):
@@ -325,7 +329,18 @@ class EsxiCheck(AgentCheck):
 
     def check(self, _):
         try:
-            connection = connect.SmartConnect(host=self.host, user=self.username, pwd=self.password)
+            context = ssl.SSLContext(protocol=ssl.PROTOCOL_TLS_CLIENT)
+            context.check_hostname = True if self.ssl_verify else False
+            context.verify_mode = ssl.CERT_REQUIRED if self.ssl_verify else ssl.CERT_NONE
+
+            if self.ssl_capath:
+                context.load_verify_locations(cafile=None, capath=self.ssl_capath, cadata=None)
+            elif self.ssl_cafile:
+                context.load_verify_locations(cafile=self.ssl_cafile, capath=None, cadata=None)
+            else:
+                context.load_default_certs(ssl.Purpose.SERVER_AUTH)
+
+            connection = connect.SmartConnect(host=self.host, user=self.username, pwd=self.password, sslContext=context)
             self.conn = connection
             self.content = connection.content
 
