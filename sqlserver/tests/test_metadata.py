@@ -9,7 +9,7 @@ from copy import copy
 
 import pytest
 
-from deepdiff import DeepDiff
+#from deepdiff import DeepDiff
 
 from datadog_checks.sqlserver import SQLServer
 #from deepdiff import DeepDiff - not clear how to add it to ddev
@@ -117,9 +117,11 @@ def test_collect_schemas(aggregator, dd_run_check, dbm_instance):
     dd_run_check(check)
 
     #extracting events.
-    pdb.set_trace()
+
     dbm_metadata = aggregator.get_event_platform_events("dbm-metadata")
     
+    actual_payloads = {}
+
     #TODO later modify kind
     for schema_event in (e for e in dbm_metadata if e['kind'] == 'pg_databases'):
         if len(databases_to_find) == 0:
@@ -132,18 +134,31 @@ def test_collect_schemas(aggregator, dd_run_check, dbm_instance):
         database_metadata = schema_event['metadata']
         assert len(database_metadata) == 1
         db_name = database_metadata[0]['name']
-        assert delete_if_found(databases_to_find, db_name)
+
+        if db_name in actual_payloads:
+            actual_payloads[db_name]['schemas'] = actual_payloads[db_name]['schemas'] + database_metadata[0]['schemas']
+        else:
+            actual_payloads[db_name] = database_metadata[0]
+
+    assert len(actual_payloads) == len(expected_data_for_db)    
+
+    for db_name, actual_payload in actual_payloads.items():
+
+        #assert delete_if_found(databases_to_find, db_name)
+        assert db_name in databases_to_find
+        # we need to accumulate all data ... as payloads may differ 
 
         # TODO enable when we add the package 
-        difference = DeepDiff(database_metadata[0], expected_data_for_db[db_name], ignore_order=True)
-        pdb.set_trace()
-        #difference = {}
+        #difference = DeepDiff(actual_payload, expected_data_for_db[db_name], ignore_order=True)
+
+        difference = {}
         diff_keys = list(difference.keys())
         if len(diff_keys) > 0 and list(diff_keys.keys()) is not ['iterable_item_removed']:
             logging.debug("found the following diffs %s", json.dumps(difference))
             assert False
 
         # we need a special comparison as order of columns matter
-        assert compare_coumns_in_tables(expected_data_for_db[db_name], database_metadata[0])
-        
-    assert len(databases_to_find) == 0
+        pdb.set_trace()
+        assert compare_coumns_in_tables(expected_data_for_db[db_name], actual_payload)
+        pdb.set_trace()
+        print("ok")
