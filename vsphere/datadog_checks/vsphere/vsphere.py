@@ -889,7 +889,7 @@ class VSphereCheck(AgentCheck):
 
         all_properties = mor_props.get('properties', None)
         if not all_properties:
-            self.log.warning('Could not retrieve properties for resource %s hostname=%s', mor_name, hostname)
+            self.log.debug('Could not retrieve properties for resource %s hostname=%s', mor_name, hostname)
             return
 
         base_tags = self._config.base_tags + resource_tags
