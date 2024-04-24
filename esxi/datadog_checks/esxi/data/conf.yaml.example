@@ -113,6 +113,22 @@ instances:
     # excluded_host_tags:
     #   - <HOST_TAG>
 
+    ## @param ssl_verify - boolean - optional - default: true
+    ## Set to false to disable SSL verification when connecting to the ESXi host
+    #
+    # ssl_verify: true
+
+    ## @param ssl_cafile - string - optional
+    ## Set to the absolute file path of CA certificates in PEM format
+    #
+    # ssl_cafile: <FILE_PATH>
+
+    ## @param ssl_capath - string - optional
+    ## Set to the absolute file path of a directory containing CA certificates
+    ## in PEM format
+    #
+    # ssl_capath: <DIRECTORY_PATH>
+
     ## @param tags - list of strings - optional
     ## A list of tags to attach to every metric and service check emitted by this instance.
     ##

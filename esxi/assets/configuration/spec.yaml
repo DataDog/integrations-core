@@ -154,4 +154,22 @@ files:
             display_default: []
             example:
               - <HOST_TAG>
+        - name: ssl_verify
+          description: Set to false to disable SSL verification when connecting to the ESXi host
+          value:
+            type: boolean
+            example: true
+        - name: ssl_cafile
+          description: |
+            Set to the absolute file path of CA certificates in PEM format
+          value:
+            type: string
+            example: "<FILE_PATH>"
+        - name: ssl_capath
+          description: |
+            Set to the absolute file path of a directory containing CA certificates
+            in PEM format
+          value:
+            type: string
+            example: "<DIRECTORY_PATH>"
         - template: instances/default

@@ -5,9 +5,9 @@ from pyVmomi import vim, vmodl
 
 HOST = "127.0.0.1"
 PORT = 8989
-VCSIM_INSTANCE = {'host': f"{HOST}:{str(PORT)}", 'username': 'test', 'password': 'test'}
+VCSIM_INSTANCE = {'host': f"{HOST}:{str(PORT)}", 'username': 'test', 'password': 'test', 'ssl_verify': False}
 
-BASE_INSTANCE = {'host': 'localhost', 'username': 'test', 'password': 'test'}
+BASE_INSTANCE = {'host': 'localhost', 'username': 'test', 'password': 'test', 'ssl_verify': False}
 
 
 PERF_COUNTER_INFO = [

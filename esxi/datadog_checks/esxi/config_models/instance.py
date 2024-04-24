@@ -74,6 +74,9 @@ class InstanceConfig(BaseModel):
     password: str
     resource_filters: Optional[tuple[ResourceFilter, ...]] = None
     service: Optional[str] = None
+    ssl_cafile: Optional[str] = None
+    ssl_capath: Optional[str] = None
+    ssl_verify: Optional[bool] = None
     tags: Optional[tuple[str, ...]] = None
     use_guest_hostname: Optional[bool] = None
     username: str
