@@ -881,8 +881,11 @@ class SQLServer(AgentCheck):
                             metric_cls = getattr(metrics, cls)
                             with tracked_query(self, operation=metric_cls.OPERATION_NAME):
                                 rows, cols = metric_cls.fetch_all_values(
-                                    cursor, list(metric_names), self.log, databases=db_names,
-                                    engine_edition=engine_edition
+                                    cursor,
+                                    list(metric_names),
+                                    self.log,
+                                    databases=db_names,
+                                    engine_edition=engine_edition,
                                 )
                         except Exception as e:
                             self.log.error("Error running `fetch_all` for metrics %s - skipping.  Error: %s", cls, e)
