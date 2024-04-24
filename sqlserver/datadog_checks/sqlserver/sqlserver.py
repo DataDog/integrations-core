@@ -785,6 +785,7 @@ class SQLServer(AgentCheck):
             self._send_database_instance_metadata()
 
             #TODO limit this check by some minutes ...
+            pdb.set_trace()
             self._schemas.collect_schemas_data() 
 
             

@@ -190,6 +190,8 @@ class Schemas:
                     self._dataSubmitter.store(db_name, schema, [], 0)
                 # to ask him if this is needed or we can submit only on 100 000 column
             # tells if we want to move to the next DB or stop, stop == TRUE
+            # we want to submit for each DB for clarity
+            self._dataSubmitter.submit()
             return False
         self._check.do_for_databases(fetch_schema_data, self._check.get_databases())
         # submit the last chunk of data if any
