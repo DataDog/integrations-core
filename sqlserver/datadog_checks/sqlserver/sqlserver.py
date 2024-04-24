@@ -692,7 +692,7 @@ class SQLServer(AgentCheck):
             metric_type_str, cls = metrics.TABLE_MAPPING[table]
             metric_type = getattr(self, metric_type_str)
 
-        cfg_inst["hostname"] = self._resolved_hostname
+        cfg_inst["hostname"] = self.resolved_hostname
 
         return cls(cfg_inst, base_name, metric_type, column, self.log)
 
@@ -768,7 +768,7 @@ class SQLServer(AgentCheck):
             if self._query_manager is None:
                 # use QueryManager to process custom queries
                 self._query_manager = QueryManager(
-                    self, self.execute_query_raw, tags=self.tags, hostname=self._resolved_hostname
+                    self, self.execute_query_raw, tags=self.tags, hostname=self.resolved_hostname
                 )
                 self._query_manager.compile_queries()
             if self.server_state_queries is None:
@@ -1047,9 +1047,9 @@ class SQLServer(AgentCheck):
         return should_run
 
     def _send_database_instance_metadata(self):
-        if self._resolved_hostname not in self._database_instance_emitted:
+        if self.resolved_hostname not in self._database_instance_emitted:
             event = {
-                "host": self._resolved_hostname,
+                "host": self.resolved_hostname,
                 "agent_version": datadog_agent.get_version(),
                 "dbms": "sqlserver",
                 "kind": "database_instance",
@@ -1067,5 +1067,5 @@ class SQLServer(AgentCheck):
                     "connection_host": self._config.connection_host,
                 },
             }
-            self._database_instance_emitted[self._resolved_hostname] = event
+            self._database_instance_emitted[self.resolved_hostname] = event
             self.database_monitoring_metadata(json.dumps(event, default=default_json_event_encoding))
