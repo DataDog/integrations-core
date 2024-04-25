@@ -539,6 +539,7 @@ GLANCE_IMAGE_PREFIX = f"{GLANCE_METRICS_PREFIX}.image"
 GLANCE_IMAGE_COUNT = f"{GLANCE_IMAGE_PREFIX}.count"
 GLANCE_IMAGE_METRICS = {f"{GLANCE_IMAGE_PREFIX}.up": {}, f"{GLANCE_IMAGE_PREFIX}.bytes": {}}
 GLANCE_IMAGE_TAGS = {
+    'id': 'image_id',
     'name': 'image_name',
     'status': 'status',
     'container_format': 'container_format',
