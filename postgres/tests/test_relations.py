@@ -282,6 +282,7 @@ def test_vacuum_age(aggregator, integration_check, pg_instance):
                 'lock_mode:AccessExclusiveLock',
                 'lock_type:relation',
                 'granted:True',
+                'fastpath:False',
                 'table:persons',
                 'schema:public',
             ],
