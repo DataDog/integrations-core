@@ -47,9 +47,7 @@ class Image(Component):
                     lambda_value=lambda key, value, item=item: (
                         item['status'] == 'active'
                         if key == 'status'
-                        else len(bytes(str(item), 'utf-8'))
-                        if key == 'name'
-                        else value
+                        else len(bytes(str(item), 'utf-8')) if key == 'name' else value
                     ),
                 )
                 self.check.log.debug("image: %s", image)
