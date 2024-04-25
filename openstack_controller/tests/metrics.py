@@ -4560,4 +4560,16 @@ IMAGES_METRICS_GLANCE = [
             'keystone_server:http://127.0.0.1:8080/identity',
         ],
     },
+    {
+        'name': 'openstack.glance.image.up',
+        'count': 1,
+        'value': 1,
+        'hostname': '',
+        'tags': [
+            'container_format:bare',
+            'image_name:cirros-1.5.2-x86_64-disk',
+            'status:active',
+            'keystone_server:http://127.0.0.1:8080/identity',
+        ],
+    },
 ]
