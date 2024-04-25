@@ -27,6 +27,7 @@ def test_e2e_profile_netgear_switch(dd_agent_check):
     common_tags = [
         'snmp_profile:netgear-switch',
         'snmp_host:netgear-switch.device.name',
+        'device_hostname:netgear-switch.device.name',
         'device_namespace:default',
         'snmp_device:' + ip_address,
         'device_ip:' + ip_address,

@@ -30,6 +30,7 @@ def test_e2e_profile_bluecat_server(dd_agent_check):
     common_tags = [
         'snmp_profile:bluecat-server',
         'snmp_host:bluecat-server.device.name',
+        'device_hostname:bluecat-server.device.name',
         'device_namespace:default',
         'snmp_device:' + ip_address,
         'device_ip:' + ip_address,

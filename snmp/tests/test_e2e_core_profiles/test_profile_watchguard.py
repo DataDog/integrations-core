@@ -29,6 +29,7 @@ def test_e2e_profile_watchguard(dd_agent_check):
     common_tags = [
         'snmp_profile:watchguard',
         'snmp_host:watchguard.device.name',
+        'device_hostname:watchguard.device.name',
         'device_namespace:default',
         'snmp_device:' + ip_address,
         'device_ip:' + ip_address,

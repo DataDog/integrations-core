@@ -27,6 +27,7 @@ def test_e2e_profile_avaya_cajun_switch(dd_agent_check):
     common_tags = [
         'snmp_profile:avaya-cajun-switch',
         'snmp_host:avaya-cajun-switch.device.name',
+        'device_hostname:avaya-cajun-switch.device.name',
         'device_namespace:default',
         'snmp_device:' + ip_address,
         'device_ip:' + ip_address,

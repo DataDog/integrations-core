@@ -29,6 +29,7 @@ def test_e2e_profile_peplink(dd_agent_check):
     common_tags = [
         'snmp_profile:peplink',
         'snmp_host:peplink.device.name',
+        'device_hostname:peplink.device.name',
         'device_namespace:default',
         'snmp_device:' + ip_address,
         'device_ip:' + ip_address,

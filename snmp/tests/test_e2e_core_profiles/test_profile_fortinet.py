@@ -28,6 +28,7 @@ def test_e2e_profile_fortinet(dd_agent_check):
     common_tags = [
         "snmp_profile:fortinet",
         "snmp_host:fortinet.example",
+        "device_hostname:fortinet.example",
         "device_namespace:default",
         "snmp_device:" + ip_address,
         'device_ip:' + ip_address,
@@ -54,6 +55,7 @@ def test_e2e_profile_fortinet(dd_agent_check):
             "device_namespace:default",
             "snmp_device:" + ip_address,
             "snmp_host:fortinet.example",
+            "device_hostname:fortinet.example",
             "snmp_profile:fortinet",
         ],
         "vendor": "fortinet",

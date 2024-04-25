@@ -29,6 +29,7 @@ def test_e2e_profile_aruba_clearpass(dd_agent_check):
     common_tags = [
         'snmp_profile:aruba-clearpass',
         'snmp_host:aruba-clearpass.device.name',
+        'device_hostname:aruba-clearpass.device.name',
         'device_namespace:default',
         'snmp_device:' + ip_address,
         'device_ip:' + ip_address,
