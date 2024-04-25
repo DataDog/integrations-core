@@ -19,10 +19,10 @@ jobs:
       PYTHON_VERSION: "3.11"
 
     steps:
-    - uses: actions/checkout@v3
+    - uses: actions/checkout@v4
 
     - name: Set up Python ${{ env.PYTHON_VERSION }}
-      uses: actions/setup-python@v4
+      uses: actions/setup-python@v5
       id: python
       with:
         python-version: "${{ env.PYTHON_VERSION }}"
@@ -48,7 +48,7 @@ jobs:
         pip install ./ddev
         pip install ./datadog_checks_dev[cli]
         pip install ./datadog_checks_base[deps]
-      
+
     - name: Set up Python 2.7
       if: steps.cache.outputs.cache-hit != 'true'
       run: |

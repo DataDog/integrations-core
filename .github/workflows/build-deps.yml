@@ -7,13 +7,13 @@ on:
     paths:
     - .github/workflows/build-deps.yml
     - .builders/**
-    - datadog_checks_base/datadog_checks/base/data/agent_requirements.in
+    - agent_requirements.in
   push:
     branches:
     - master
     paths:
     - .builders/**
-    - datadog_checks_base/datadog_checks/base/data/agent_requirements.in
+    - agent_requirements.in
 
 concurrency:
   group: ${{ github.workflow }}-${{ github.event.pull_request.number || github.ref }}
@@ -26,7 +26,7 @@ defaults:
 env:
   PYTHONUNBUFFERED: "1"
   PYTHON_VERSION: "3.11"
-  DIRECT_DEPENDENCY_FILE: datadog_checks_base/datadog_checks/base/data/agent_requirements.in
+  DIRECT_DEPENDENCY_FILE: agent_requirements.in
   # https://reproducible-builds.org/specs/source-date-epoch/
   SOURCE_DATE_EPOCH: "1580601600"
 

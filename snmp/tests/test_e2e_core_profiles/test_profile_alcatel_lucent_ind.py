@@ -28,8 +28,11 @@ def test_e2e_profile_alcatel_lucent_ind(dd_agent_check):
     common_tags = [
         'snmp_profile:alcatel-lucent-ind',
         'snmp_host:alcatel-lucent-ind.device.name',
+        'device_hostname:alcatel-lucent-ind.device.name',
         'device_namespace:default',
         'snmp_device:' + ip_address,
+        'device_ip:' + ip_address,
+        'device_id:default:' + ip_address,
     ]
 
     # --- TEST EXTENDED METRICS ---

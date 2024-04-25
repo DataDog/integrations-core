@@ -29,8 +29,11 @@ def test_e2e_profile_chrysalis_luna_hsm(dd_agent_check):
     common_tags = [
         'snmp_profile:chrysalis-luna-hsm',
         'snmp_host:chrysalis-luna-hsm.device.name',
+        'device_hostname:chrysalis-luna-hsm.device.name',
         'device_namespace:default',
         'snmp_device:' + ip_address,
+        'device_ip:' + ip_address,
+        'device_id:default:' + ip_address,
     ] + []
 
     # --- TEST EXTENDED METRICS ---

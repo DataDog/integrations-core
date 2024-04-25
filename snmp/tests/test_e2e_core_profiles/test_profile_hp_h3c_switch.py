@@ -28,8 +28,11 @@ def test_e2e_profile_hp_h3c_switch(dd_agent_check):
     common_tags = [
         'snmp_profile:hp-h3c-switch',
         'snmp_host:hp-h3c-switch.device.name',
+        'device_hostname:hp-h3c-switch.device.name',
         'device_namespace:default',
         'snmp_device:' + ip_address,
+        'device_ip:' + ip_address,
+        'device_id:default:' + ip_address,
     ]
 
     # --- TEST EXTENDED METRICS ---

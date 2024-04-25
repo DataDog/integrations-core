@@ -402,6 +402,7 @@ files:
       value:
         type: string
         example: show_pg_stat_statements()
+        display_default: pg_stat_statements
     - name: query_metrics
       description: Configure collection of query metrics
       options:

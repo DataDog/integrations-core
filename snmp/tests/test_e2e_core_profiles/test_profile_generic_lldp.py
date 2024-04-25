@@ -27,8 +27,11 @@ def test_e2e_profile_generic_lldp(dd_agent_check):
     common_tags = [
         'snmp_profile:generic-lldp',
         'snmp_host:_generic-lldp-mib.device.name',
+        'device_hostname:_generic-lldp-mib.device.name',
         'device_namespace:default',
         'snmp_device:' + ip_address,
+        'device_ip:' + ip_address,
+        'device_id:default:' + ip_address,
     ]
 
     # --- TEST METRICS ---

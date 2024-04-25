@@ -8,6 +8,17 @@ psql -v ON_ERROR_STOP=1 --username "$POSTGRES_USER" datadog_test <<-EOSQL
     INSERT INTO persons (lastname, firstname, address, city) VALUES ('Cavaille', 'Leo', 'Midtown', 'New York'), ('Someveryveryveryveryveryveryveryveryveryverylongname', 'something', 'Avenue des Champs Elysees', 'Beautiful city of lights');
     CREATE TABLE personsdup1 AS TABLE persons;
     CREATE TABLE personsdup2 AS TABLE persons;
+    CREATE TABLE personsdup3 AS TABLE persons;
+    CREATE TABLE personsdup4 AS TABLE persons;
+    CREATE TABLE personsdup5 AS TABLE persons;
+    CREATE TABLE personsdup6 AS TABLE persons;
+    CREATE TABLE personsdup7 AS TABLE persons;
+    CREATE TABLE personsdup8 AS TABLE persons;
+    CREATE TABLE personsdup9 AS TABLE persons;
+    CREATE TABLE personsdup10 AS TABLE persons;
+    CREATE TABLE personsdup11 AS TABLE persons;
+    CREATE TABLE personsdup12 AS TABLE persons;
+    CREATE TABLE personsdup13 AS TABLE persons;
     CREATE TABLE persons_indexed AS TABLE persons;
     ALTER TABLE persons_indexed ADD PRIMARY KEY (personid);
     CREATE TABLE pgtable (personid SERIAL, lastname VARCHAR(255), firstname VARCHAR(255), address VARCHAR(255), city VARCHAR(255));

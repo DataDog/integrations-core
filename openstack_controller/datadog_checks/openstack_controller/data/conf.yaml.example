@@ -104,6 +104,15 @@ instances:
     #
     nova_microversion: '2.93'
 
+    ## @param cinder_microversion - string - optional
+    ## The microversion of the Rest API to call.
+    ## It is recommended to set this parameter to the latest microversion supported by your Openstack version.
+    ##
+    ## View this page for more about microvoersion compatibility:
+    ##    https://docs.openstack.org/cinder/latest/contributor/api_microversion_history.html
+    #
+    cinder_microversion: volume 3.70
+
     ## @param use_shortname - boolean - optional - default: false
     ## In some OpenStack environments, the hostname registered to Nova is the shortname.
     ## Enabling this enforces the check to split the hostname up to the first period when

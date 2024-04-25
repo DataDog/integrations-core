@@ -28,8 +28,11 @@ def test_e2e_profile_silverpeak_edgeconnect(dd_agent_check):
     common_tags = [
         'snmp_profile:silverpeak-edgeconnect',
         'snmp_host:silverpeak-edgeconnect.device.name',
+        'device_hostname:silverpeak-edgeconnect.device.name',
         'device_namespace:default',
         'snmp_device:' + ip_address,
+        'device_ip:' + ip_address,
+        'device_id:default:' + ip_address,
     ] + []
 
     # --- TEST EXTENDED METRICS ---

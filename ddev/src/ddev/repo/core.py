@@ -51,7 +51,7 @@ class Repository:
 
     @cached_property
     def agent_requirements(self) -> Path:
-        return self.path / 'datadog_checks_base' / 'datadog_checks' / 'base' / 'data' / 'agent_requirements.in'
+        return self.path / 'agent_requirements.in'
 
     @cached_property
     def agent_release_requirements(self) -> Path:

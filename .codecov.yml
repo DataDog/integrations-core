@@ -182,6 +182,10 @@ coverage:
         target: 75
         flags:
         - eks_fargate
+      ESXi:
+        target: 75
+        flags:
+        - esxi
       Elasticsearch:
         target: 75
         flags:
@@ -912,6 +916,11 @@ flags:
     paths:
     - envoy/datadog_checks/envoy
     - envoy/tests
+  esxi:
+    carryforward: true
+    paths:
+    - esxi/datadog_checks/esxi
+    - esxi/tests
   etcd:
     carryforward: true
     paths:
