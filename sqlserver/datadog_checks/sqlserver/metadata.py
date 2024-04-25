@@ -2,7 +2,6 @@
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
 import time
-import pdb
 from datadog_checks.base import is_affirmative
 from datadog_checks.base.utils.db.utils import (
     DBMAsyncJob,

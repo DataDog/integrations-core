@@ -21,7 +21,7 @@ try:
 except ImportError:
     pyodbc = None
 
-import pdb
+
 import json
 
 @pytest.fixture
@@ -106,7 +106,7 @@ def test_collect_schemas(aggregator, dd_run_check, dbm_instance):
     
     databases_to_find  = ['datadog_test_schemas','datadog_test']
     exp_datadog_test =  {'id': '6', 'name': 'datadog_test', 'owner': 'dbo', 'schemas': [ {'name': 'dbo', 'id': '1', 'owner': '1', 'tables': [{'id': '885578193', 'name': 'ϑings', 'columns': [{'name': 'id', 'data_type': 'int', 'default': '((0))', 'nullable': True}, {'name': 'name', 'data_type': 'varchar', 'default': 'None', 'nullable': True}]}]}]}
-    exp_datadog_test_schemas = {'id': '5', 'name': 'datadog_test_schemas', 'owner': 'dbo', 'schemas': [{'name': 'test_schema', 'id': '5', 'owner': '1', 'tables': []}]}
+    exp_datadog_test_schemas = {'id': '5', 'name': 'datadog_test_schemas', 'owner': 'dbo', 'schemas': [{'name': 'test_schema', 'id': '5', 'owner': '1', 'tables': [{'id': '885578193', 'name': 'cities', 'columns': [{'name': 'id', 'data_type': 'int', 'default': '((0))', 'nullable': True}, {'name': 'name', 'data_type': 'varchar', 'default': 'None', 'nullable': True}]}]}]}
     expected_data_for_db = {'datadog_test' : exp_datadog_test, 'datadog_test_schemas' : exp_datadog_test_schemas}
 
 
@@ -149,16 +149,16 @@ def test_collect_schemas(aggregator, dd_run_check, dbm_instance):
         # we need to accumulate all data ... as payloads may differ 
 
         # TODO enable when we add the package 
-        #difference = DeepDiff(actual_payload, expected_data_for_db[db_name], ignore_order=True)
+        difference = DeepDiff(actual_payload, expected_data_for_db[db_name], ignore_order=True)
 
-        difference = {}
+        #difference = {}
         diff_keys = list(difference.keys())
-        if len(diff_keys) > 0 and list(diff_keys.keys()) is not ['iterable_item_removed']:
+        if len(diff_keys) > 0 and diff_keys != ['iterable_item_removed']:
             logging.debug("found the following diffs %s", json.dumps(difference))
             assert False
 
         # we need a special comparison as order of columns matter
-        pdb.set_trace()
+
         assert compare_coumns_in_tables(expected_data_for_db[db_name], actual_payload)
-        pdb.set_trace()
+
         print("ok")
