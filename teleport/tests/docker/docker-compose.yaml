@@ -1,4 +1,3 @@
-version: '3'
 services:
   teleport:
     image: public.ecr.aws/gravitational/teleport:14.3

@@ -128,3 +128,4 @@ teleport.db.messages_from_client.count,count,,,,Time to fetch TLS configuration 
 teleport.db.messages_from_server.count,gauge,,,,Number of reverse SSH tunnels connected to the Teleport Proxy Service by Teleport instances,0,teleport,,
 teleport.db.method_call_count.count,gauge,,,,Number of outbound connections to leaf clusters,0,teleport,,
 teleport.db.method_call_latency_seconds.bucket,count,,,,Number of times a user exceeded their max concurrent ssh connections,0,teleport,,
+teleport.health.up,count,,,,Status of the Teleport instance,0,teleport,,
