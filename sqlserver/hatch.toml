@@ -2,6 +2,10 @@ post-install-commands = [
   "python -m pip install deepdiff",
 ]
 
+dependencies = [
+  "deepdiff",
+]
+
 [env.collectors.datadog-checks]
 base-package-features = ["deps", "db", "json"]
 
