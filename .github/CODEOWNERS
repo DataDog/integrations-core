@@ -20,7 +20,6 @@ manifest.json         @DataDog/documentation @DataDog/agent-integrations
 /.builders/                        @DataDog/agent-build-and-releases
 /.builders/images/                 @DataDog/agent-integrations @DataDog/agent-build-and-releases
 /.builders/patches/                @DataDog/agent-integrations @DataDog/agent-build-and-releases
-/.github/workflows/build-deps.yml  @DataDog/agent-build-and-releases
 
 # Checks base
 /datadog_checks_base/                                          @DataDog/agent-integrations
@@ -295,6 +294,7 @@ datadog_checks_base/datadog_checks/base/checks/windows/              @DataDog/wi
 docs/developer/process/integration-release.md                         @DataDog/software-integrity-and-trust @DataDog/agent-integrations @trishankatdatadog
 # As well as the pipelines.
 /.github/workflows/                                                   @DataDog/agent-integrations
+/.github/workflows/build-deps.yml                                     @DataDog/agent-build-and-releases
 /.gitlab-ci.yml                                                       @DataDog/agent-integrations
 /.gitlab/software_composition_analysis.yaml                           @DataDog/software-integrity-and-trust
 # Dev container
