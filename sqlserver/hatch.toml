@@ -1,19 +1,19 @@
-post-install-commands = [
-  "python -m pip install deepdiff",
-]
-
-dependencies = [
-  "deepdiff",
-]
-
 [env.collectors.datadog-checks]
 base-package-features = ["deps", "db", "json"]
+
+[envs.default]
+pre-install-commands = [
+  "python -m pip install deepdiff",
+]
 
 [[envs.default.matrix]]
 python = ["3.11"]
 os = ["linux"]
 version = ["2017", "2019", "2022"]
 setup = ["single", "ha"]
+dependencies = [
+  "deepdiff"
+]
 
 # test the full combination of python-version/driver against a the latest sql server version
 # ideally we'd test this against all sql server versions but that makes the test take too long and time out.
@@ -25,6 +25,7 @@ os = ["windows"]
 driver = ["SQLOLEDB", "SQLNCLI11", "MSOLEDBSQL", "odbc"]
 version = ["2019", "2022"]
 setup = ["single"]
+
 
 # The high cardinality environment is meant to be used for local dev/testing
 # for example, when we want to do performance testing on local changes to the metrics

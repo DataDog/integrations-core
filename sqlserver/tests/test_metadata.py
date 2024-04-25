@@ -9,7 +9,7 @@ from copy import copy
 
 import pytest
 
-#from deepdiff import DeepDiff
+from deepdiff import DeepDiff
 
 from datadog_checks.sqlserver import SQLServer
 #from deepdiff import DeepDiff - not clear how to add it to ddev
