@@ -29,4 +29,4 @@ oracle.tablespace.offline,gauge,,,,tablespace offline,0,oracle_database,tablespa
 oracle.tablespace.size,gauge,,byte,,tablespace size,0,oracle_database,tablespace size,
 oracle.tablespace.used,gauge,,byte,,tablespace used,0,oracle_database,tablespace used,
 oracle.temp_space_used,gauge,,byte,,temp space used,0,oracle_database,temp space used,
-oracle.user_rollbacks,gauge,,operation,,number of user rollbacks,0,oracle_database,user rollbacks,
+oracle.user_rollbacks,gauge,,operation,,number of users rollbacks,0,oracle_database,user rollbacks,
