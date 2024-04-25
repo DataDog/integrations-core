@@ -13,6 +13,14 @@ Follow the instructions below to install and configure this check for an Agent r
 The Teleport check is included in the [Datadog Agent][2] package.
 No additional installation is needed on your server.
 
+### Prerequisites
+
+The Teleport check gathers Teleport's metrics and performance data using two distinct endpoints:
+   - The [Health endpoint](https://goteleport.com/docs/management/diagnostics/monitoring/#healthz) provides the overall health status of your Teleport instance.
+   - The [OpenMetrics endpoint](https://goteleport.com/docs/reference/metrics/#auth-service-and-backends) extracts metrics on the Teleport instance and the various services operating within that instance.
+
+These endpoints aren't activated by default. To enable the diagnostic HTTP endpoints in your Teleport instance, please refer to the public Teleport [documentation](https://goteleport.com/docs/management/diagnostics/monitoring/#enable-health-monitoring).
+
 ### Configuration
 
 1. Edit the `teleport.d/conf.yaml` file, in the `conf.d/` folder at the root of your Agent's configuration directory to start collecting your teleport performance data. See the [sample teleport.d/conf.yaml][4] for all available configuration options.
