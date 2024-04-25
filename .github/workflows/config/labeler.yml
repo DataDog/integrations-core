@@ -163,6 +163,8 @@ integration/elastic:
 - elastic/**/*
 integration/envoy:
 - envoy/**/*
+integration/esxi:
+- esxi/**/*
 integration/etcd:
 - etcd/**/*
 integration/exchange_server:

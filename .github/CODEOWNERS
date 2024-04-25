@@ -155,6 +155,9 @@ manifest.json         @DataDog/documentation @DataDog/agent-integrations
 /cloud_foundry_api/manifest.json        @DataDog/platform-integrations @DataDog/agent-integrations @DataDog/documentation
 /cloud_foundry_api/*.md                 @DataDog/platform-integrations @DataDog/agent-integrations @DataDog/documentation
 /cloud_foundry_api/assets/logs/         @DataDog/platform-integrations @DataDog/agent-integrations @DataDog/documentation @DataDog/logs-backend
+/esxi/                                  @DataDog/platform-integrations @DataDog/agent-integrations
+/esxi/manifest.json                     @DataDog/platform-integrations @DataDog/agent-integrations @DataDog/documentation
+/esxi/*.md                              @DataDog/platform-integrations @DataDog/agent-integrations @DataDog/documentation
 /openstack/                             @DataDog/platform-integrations @DataDog/agent-integrations
 /openstack/*.md                         @DataDog/platform-integrations @DataDog/agent-integrations @DataDog/documentation
 /openstack/manifest.json                @DataDog/platform-integrations @DataDog/agent-integrations @DataDog/documentation
