@@ -226,10 +226,8 @@ def delete_if_found(my_list, value):
         return True
     except ValueError:
         return None
-    
-import pdb    
+      
 def compare_coumns_in_tables(expected_data_for_db, actual_data_for_db):
-    pdb.set_trace()
     for schema in expected_data_for_db['schemas']:
         actual_schema = next(filter(lambda x: x['id'] == schema['id'], actual_data_for_db['schemas']))
         for table in schema['tables']:

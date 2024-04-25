@@ -17,7 +17,7 @@ from datadog_checks.sqlserver.utils import (
     execute_query_output_result_as_a_dict, get_list_chunks
 )
 
-import pdb
+
 
 import time
 import json
@@ -163,16 +163,6 @@ class Schemas:
     #sends all the data in one go but split in chunks (like Seth's solution)
     def collect_schemas_data(self):
         
-        base_event = {
-                "host": self._check.resolved_hostname,
-                #"agent_version": datadog_agent.get_version(),
-                "dbms": "sqlserver", #TODO ?
-                "kind": "", # TODO ? 
-                #"collection_interval": self.schemas_collection_interval,
-                #"dbms_version": self._payload_pg_version(),
-                #"tags": self._tags_no_db,
-                "cloud_metadata": self._check._config.cloud_metadata,
-            }
 
         def fetch_schema_data(cursor, db_name):
             db_info  = self._query_db_information(db_name, cursor)
@@ -234,12 +224,12 @@ class Schemas:
         id_to_all = {}
         #table_names = ",".join(["'{}'".format(t.get("name")) for t in table_list])
         #OBJECT_NAME is needed to make it work for special characters 
-        table_ids = ",".join(["OBJECT_NAME({})".format(t.get("id")) for t in table_list])
-        #pdb.set_trace()
+        table_ids_object = ",".join(["OBJECT_NAME({})".format(t.get("id")) for t in table_list])
+        table_ids = ",".join(["{}".format(t.get("id")) for t in table_list])
         for t in table_list:
             name_to_id[t["name"]] = t["id"] 
             id_to_all[t["id"]] = t
-        total_columns_number  = self._populate_with_columns_data(table_ids, name_to_id, id_to_all, schema, cursor)
+        total_columns_number  = self._populate_with_columns_data(table_ids_object, name_to_id, id_to_all, schema, cursor)
         #self._populate_with_partitions_data(table_ids, id_to_all, cursor) #TODO P DISABLED as postgrss backend accepts different data model
         #self._populate_with_foreign_keys_data(table_ids, id_to_all, cursor) #TODO P DISABLED as postgrss backend accepts different data model
         #self._populate_with_index_data(table_ids, id_to_all, cursor) #TODO P DISABLED as postgrss backend accepts different data model

@@ -24,12 +24,18 @@ GO
 
 CREATE SCHEMA test_schema;
 GO
+
+CREATE TABLE datadog_test_schemas.test_schema.cities (id int DEFAULT 0, name varchar(255));
+CREATE INDEX one_column_index ON datadog_test_schemas.test_schema.cities (id);
+CREATE INDEX two_columns_index ON datadog_test_schemas.test_schema.cities (id, name);
+INSERT INTO datadog_test_schemas.test_schema.cities  VALUES (1, 'yey'), (2, 'bar');
 -- Create test database for integration tests
 -- only bob and fred have read/write access to this database
 CREATE DATABASE datadog_test;
 GO
 USE datadog_test;
 GO
+
 
 -- This table is pronounced "things" except we've replaced "th" with the greek lower case "theta" to ensure we
 -- correctly support unicode throughout the integration.

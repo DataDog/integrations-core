@@ -2,7 +2,6 @@
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
 from __future__ import division
-import pdb
 import copy
 import time
 from collections import defaultdict
@@ -785,7 +784,6 @@ class SQLServer(AgentCheck):
             self._send_database_instance_metadata()
 
             #TODO limit this check by some minutes ...
-            pdb.set_trace()
             self._schemas.collect_schemas_data() 
 
             
