@@ -4549,6 +4549,18 @@ CONDUCTORS_METRICS_IRONIC_MICROVERSION_1_80 = [
 
 IMAGES_METRICS_GLANCE = [
     {
+        'name': 'openstack.glance.image.bytes',
+        'count': 1,
+        'value': 976,
+        'hostname': '',
+        'tags': [
+            'container_format:bare',
+            'image_name:cirros-1.5.2-x86_64-disk',
+            'status:active',
+            'keystone_server:http://127.0.0.1:8080/identity',
+        ],
+    },
+    {
         'name': 'openstack.glance.image.count',
         'count': 1,
         'value': 1,
@@ -4568,6 +4580,42 @@ IMAGES_METRICS_GLANCE = [
         'tags': [
             'container_format:bare',
             'image_name:cirros-1.5.2-x86_64-disk',
+            'status:active',
+            'keystone_server:http://127.0.0.1:8080/identity',
+        ],
+    },
+        {
+        'name': 'openstack.glance.image.bytes',
+        'count': 1,
+        'value': 976,
+        'hostname': '',
+        'tags': [
+            'container_format:bare',
+            'image_name:cirros-0.5.2-x86_64-disk',
+            'status:active',
+            'keystone_server:http://127.0.0.1:8080/identity',
+        ],
+    },
+    {
+        'name': 'openstack.glance.image.count',
+        'count': 1,
+        'value': 1,
+        'hostname': '',
+        'tags': [
+            'container_format:bare',
+            'image_name:cirros-0.5.2-x86_64-disk',
+            'status:active',
+            'keystone_server:http://127.0.0.1:8080/identity',
+        ],
+    },
+    {
+        'name': 'openstack.glance.image.up',
+        'count': 1,
+        'value': 1,
+        'hostname': '',
+        'tags': [
+            'container_format:bare',
+            'image_name:cirros-0.5.2-x86_64-disk',
             'status:active',
             'keystone_server:http://127.0.0.1:8080/identity',
         ],

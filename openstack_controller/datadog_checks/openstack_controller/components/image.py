@@ -43,9 +43,13 @@ class Image(Component):
                     tags=GLANCE_IMAGE_TAGS,
                     prefix=GLANCE_IMAGE_PREFIX,
                     metrics=GLANCE_IMAGE_METRICS,
-                    lambda_name=lambda key: 'up' if key == 'status' else key,
+                    lambda_name=lambda key: 'up' if key == 'status' else 'bytes' if key == 'name' else key,
                     lambda_value=lambda key, value, item=item: (
-                        item['status'] == 'active' if key == 'status' else value
+                        item['status'] == 'active'
+                        if key == 'status'
+                        else len(bytes(str(item), 'utf-8'))
+                        if key == 'name'
+                        else value
                     ),
                 )
                 self.check.log.debug("image: %s", image)
