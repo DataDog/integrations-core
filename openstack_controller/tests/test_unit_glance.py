@@ -362,4 +362,5 @@ def test_disable_glance_image_metrics(aggregator, dd_run_check, instance, openst
     dd_run_check(check)
     for metric in aggregator.metric_names:
         assert not metric.startswith('openstack.cinder.image.count')
+        assert not metric.startswith('openstack.cinder.image.size')
         assert not metric.startswith('openstack.cinder.image.up')
