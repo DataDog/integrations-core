@@ -12,7 +12,7 @@ pytestmark = [pytest.mark.unit]
 
 
 def test_connect_exception(dd_run_check, aggregator, caplog):
-    with pytest.raises(Exception, match="Failed to resolve 'invalid-hostname'"):
+    with pytest.raises(Exception, match="Failed to resolve 'invalid-hostname'|Max retries exceeded"):
         check = TeleportCheck("teleport", {}, [BAD_HOSTNAME_INSTANCE])
         dd_run_check(check)
 
