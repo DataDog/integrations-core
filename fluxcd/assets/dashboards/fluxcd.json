@@ -1,6 +1,6 @@
 {
     "author_name": "Datadog",
-    "description": "This dashboard provides an overview of your Flux CD instance. It monitors the performance of your continuous delivery and deployment processes for your containerized applications.\n\n### Useful Links\n- [Flux CD Integration&nbsp;\u2197](https://docs.datadoghq.com/integrations/fluxcd)\n- [Blog on Flux CD and other Container-native Integrations&nbsp;\u2197](https://www.datadoghq.com/blog/container-native-integrations/#cicd-with-flux)\n- [Flux CD Metrics&nbsp;\u2197](https://docs.datadoghq.com/integrations/fluxcd/#metrics)\n- [Flux CD Documentation&nbsp;\u2197](https://fluxcd.io/flux/#flux-in-short) (cloned)",
+    "description": "This dashboard provides an overview of your Flux CD instance. It monitors the performance of your continuous delivery and deployment processes for your containerized applications.\n\n### Useful Links\n- [Flux CD Integration&nbsp;\u2197](https://docs.datadoghq.com/integrations/fluxcd)\n- [Blog on Flux CD and other Container-native Integrations&nbsp;\u2197](https://www.datadoghq.com/blog/container-native-integrations/#cicd-with-flux)\n- [Flux CD Metrics&nbsp;\u2197](https://docs.datadoghq.com/integrations/fluxcd/#metrics)\n- [Flux CD Documentation&nbsp;\u2197](https://fluxcd.io/flux/#flux-in-short)",
     "layout_type": "ordered",
     "template_variables": [
         {
@@ -28,7 +28,7 @@
             "prefix": "kind"
         }
     ],
-    "title": "Flux CD Out-of-the-box Overview Dashboard ",
+    "title": "Flux CD Overview",
     "widgets": [
         {
             "definition": {
@@ -119,7 +119,7 @@
                     {
                         "definition": {
                             "background_color": "blue",
-                            "content": "This section provides you with an overview of your system activity.  The monitor summary notifies you of Flux CD alerts. ",
+                            "content": "This section provides you with an overview of your system activity. The monitor summary notifies you of Flux CD alerts. ",
                             "font_size": "14",
                             "has_padding": true,
                             "show_tick": false,
