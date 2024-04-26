@@ -142,7 +142,7 @@ jobs:
 
     - name: Download Python artifacts
       if: ${{ !startsWith(github.event.ref, 'refs/tags') }}
-      uses: actions/download-artifact@v3
+      uses: actions/download-artifact@v4
       with:
         name: python-artifacts
         path: ddev/dist
@@ -304,7 +304,7 @@ jobs:
         OUTER
 
     - name: Download staged standalone binaries
-      uses: actions/download-artifact@v3
+      uses: actions/download-artifact@v4
       with:
         name: staged-standalone-${{ runner.os }}
         path: ddev/archives
@@ -326,7 +326,7 @@ jobs:
       run: rm -rf archives bin targets
 
     - name: Download staged managed binaries
-      uses: actions/download-artifact@v3
+      uses: actions/download-artifact@v4
       with:
         name: staged-managed-${{ runner.os }}
         path: ddev/archives
@@ -382,7 +382,7 @@ jobs:
     # We use the artifact from the latest scheduled nightly job because installing
     # with Cargo from scratch takes ~10 minutes
     - name: Install rcodesign
-      uses: dawidd6/action-download-artifact@v2
+      uses: dawidd6/action-download-artifact@v4
       with:
         repo: indygreg/apple-platform-rs
         workflow: rcodesign.yml
@@ -473,7 +473,7 @@ jobs:
         OUTER
 
     - name: Download staged standalone binaries
-      uses: actions/download-artifact@v3
+      uses: actions/download-artifact@v4
       with:
         name: staged-standalone-${{ runner.os }}
         path: ddev/archives
@@ -507,7 +507,7 @@ jobs:
       run: rm -rf archives bin notarize-bin
 
     - name: Download staged managed binaries
-      uses: actions/download-artifact@v3
+      uses: actions/download-artifact@v4
       with:
         name: staged-managed-${{ runner.os }}
         path: ddev/archives
@@ -593,19 +593,19 @@ jobs:
 
     steps:
     - name: Download Python artifacts
-      uses: actions/download-artifact@v3
+      uses: actions/download-artifact@v4
       with:
         name: python-artifacts
         path: dist
 
     - name: Download binaries
-      uses: actions/download-artifact@v3
+      uses: actions/download-artifact@v4
       with:
         name: standalone
         path: archives
 
     - name: Download installers
-      uses: actions/download-artifact@v3
+      uses: actions/download-artifact@v4
       with:
         name: installers
         path: installers
