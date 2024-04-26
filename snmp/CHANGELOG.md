@@ -2,6 +2,12 @@
 
 <!-- towncrier release notes start -->
 
+## 7.3.0 / 2024-04-26
+
+***Added***:
+
+* [SNMP] Add device_hostname tag ([#17433](https://github.com/DataDog/integrations-core/pull/17433))
+
 ## 7.2.0 / 2024-02-16 / Agent 7.52.0
 
 ***Added***:
