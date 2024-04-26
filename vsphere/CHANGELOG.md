@@ -2,6 +2,12 @@
 
 <!-- towncrier release notes start -->
 
+## 7.5.2 / 2024-04-26
+
+***Fixed***:
+
+* Only collect property metrics for resources that support it and lower level for log line ([#17446](https://github.com/DataDog/integrations-core/pull/17446))
+
 ## 7.5.1 / 2024-04-17
 
 ***Fixed***:

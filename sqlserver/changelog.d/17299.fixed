@@ -1,1 +1,0 @@
-Fix missing file stats metrics `sqlserver.files.write_io_stall_queued` and `sqlserver.files.read_io_stall_queued` for sqlserver newer than 2012 and not Azure SQL Database/Azure SQL Managed Instance

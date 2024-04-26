@@ -2,6 +2,13 @@
 
 <!-- towncrier release notes start -->
 
+## 4.7.0 / 2024-04-26
+
+***Added***:
+
+* Update dependencies ([#17319](https://github.com/DataDog/integrations-core/pull/17319))
+* Upgrade boto dependencies ([#17332](https://github.com/DataDog/integrations-core/pull/17332))
+
 ## 4.6.0 / 2024-03-22
 
 ***Added***:
