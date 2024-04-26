@@ -1,0 +1,10 @@
+name: Kubernetes Autoscaler
+files:
+- name: kubernetes_autoscaler.yaml
+  options:
+  - template: init_config
+    options:
+    - template: init_config/default
+  - template: instances
+    options:
+    - template: instances/default
