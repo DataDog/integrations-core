@@ -45,7 +45,7 @@ jobs:
       run: python -m build
 
     - name: Upload artifacts
-      uses: actions/upload-artifact@v3
+      uses: actions/upload-artifact@v4
       with:
         name: python-artifacts
         path: ddev/dist/*
@@ -214,7 +214,7 @@ jobs:
 
     - name: Upload staged managed archive
       if: runner.os != 'Linux'
-      uses: actions/upload-artifact@v3
+      uses: actions/upload-artifact@v4
       with:
         name: staged-managed-${{ runner.os }}
         path: ddev/packaging/*
@@ -235,7 +235,7 @@ jobs:
 
     - name: Upload staged standalone archive
       if: runner.os != 'Linux'
-      uses: actions/upload-artifact@v3
+      uses: actions/upload-artifact@v4
       with:
         name: staged-standalone-${{ runner.os }}
         path: ddev/packaging/*
@@ -245,7 +245,7 @@ jobs:
     # can upload directly at this point
     - name: Upload standalone archive
       if: runner.os == 'Linux'
-      uses: actions/upload-artifact@v3
+      uses: actions/upload-artifact@v4
       with:
         name: standalone
         path: ddev/packaging/*
@@ -316,7 +316,7 @@ jobs:
       run: ${{ steps.script-prepare.outputs.script }}
 
     - name: Upload standalone binaries
-      uses: actions/upload-artifact@v3
+      uses: actions/upload-artifact@v4
       with:
         name: standalone
         path: ddev/archives/*
@@ -349,7 +349,7 @@ jobs:
         mv build/*/release/*/*.{exe,msi} installers
 
     - name: Upload installers
-      uses: actions/upload-artifact@v3
+      uses: actions/upload-artifact@v4
       with:
         name: installers
         path: ddev/installers/*
@@ -497,7 +497,7 @@ jobs:
         done
 
     - name: Upload standalone binaries
-      uses: actions/upload-artifact@v3
+      uses: actions/upload-artifact@v4
       with:
         name: standalone
         path: ddev/archives/*
@@ -576,7 +576,7 @@ jobs:
         "signed/${{ steps.pkg.outputs.path }}"
 
     - name: Upload installer
-      uses: actions/upload-artifact@v3
+      uses: actions/upload-artifact@v4
       with:
         name: installers
         path: ddev/signed/${{ steps.pkg.outputs.path }}
