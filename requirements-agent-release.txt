@@ -118,7 +118,7 @@ datadog-nginx==6.3.0
 datadog-nvidia-triton==1.2.0
 datadog-openldap==1.12.0
 datadog-openmetrics==4.2.0
-datadog-openstack-controller==6.4.0
+datadog-openstack-controller==6.5.0
 datadog-openstack==2.0.0
 datadog-oracle==5.2.0
 datadog-palo-alto-panorama==1.0.0
