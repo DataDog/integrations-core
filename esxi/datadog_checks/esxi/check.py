@@ -294,7 +294,7 @@ class EsxiCheck(AgentCheck):
                     additional_tags.append(f'{instance_tag_key}:{instance_value}')
 
                 if len(metric_result.value) == 0:
-                    self.log.warning(
+                    self.log.debug(
                         "Skipping metric %s for %s because no value was returned by the %s",
                         metric_name,
                         entity_name,
