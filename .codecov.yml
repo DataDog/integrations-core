@@ -570,6 +570,10 @@ coverage:
         target: 75
         flags:
         - teamcity
+      Teleport:
+        target: 75
+        flags:
+        - teleport
       Tekton:
         target: 75
         flags:
@@ -1392,6 +1396,11 @@ flags:
     paths:
     - teamcity/datadog_checks/teamcity
     - teamcity/tests
+  teleport:
+    carryforward: true
+    paths:
+    - teleport/datadog_checks/teleport
+    - teleport/tests
   tekton:
     carryforward: true
     paths:
