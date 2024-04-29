@@ -537,13 +537,24 @@ GLANCE_SERVICE_CHECK = f"{GLANCE_METRICS_PREFIX}.api.up"
 GLANCE_RESPONSE_TIME = f"{GLANCE_METRICS_PREFIX}.response_time"
 GLANCE_IMAGE_PREFIX = f"{GLANCE_METRICS_PREFIX}.image"
 GLANCE_IMAGE_COUNT = f"{GLANCE_IMAGE_PREFIX}.count"
-GLANCE_IMAGE_METRICS = {f"{GLANCE_IMAGE_PREFIX}.up": {}, f"{GLANCE_IMAGE_PREFIX}.size": {}}
+GLANCE_IMAGE_METRICS = {
+    f"{GLANCE_IMAGE_PREFIX}.up": {},
+    f"{GLANCE_IMAGE_PREFIX}.size": {},
+}
 GLANCE_IMAGE_TAGS = {
     'id': 'image_id',
     'name': 'image_name',
     'status': 'status',
     'size': 'size',
     'container_format': 'container_format',
+}
+GLANCE_TASK_PREFIX = f"{GLANCE_IMAGE_PREFIX}.task"
+GLANCE_TASK_COUNT = f"{GLANCE_TASK_PREFIX}.count"
+GLANCE_TASK_TAGS = {
+    'id': 'task_id',
+    'image_id': 'image_id',
+    'type': 'type',
+    'status': 'status',
 }
 
 

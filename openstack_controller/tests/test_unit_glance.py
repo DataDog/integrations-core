@@ -16,6 +16,7 @@ from datadog_checks.openstack_controller.api.type import ApiType
 from tests.common import remove_service_from_catalog
 from tests.metrics import (
     IMAGES_METRICS_GLANCE,
+    TASKS_METRICS_GLANCE,
 )
 
 pytestmark = [
@@ -337,30 +338,28 @@ def test_images_pagination(
 
 
 @pytest.mark.parametrize(
-    ('instance'),
+    ('instance', 'metrics'),
     [
         pytest.param(
             configs.REST,
-            id='api rest no microversion',
+            TASKS_METRICS_GLANCE,
+            id='api rest',
         ),
         pytest.param(
             configs.SDK,
-            id='api sdk no microversion',
+            TASKS_METRICS_GLANCE,
+            id='api sdk',
         ),
     ],
 )
 @pytest.mark.usefixtures('mock_http_get', 'mock_http_post', 'openstack_connection')
-def test_disable_glance_image_metrics(aggregator, dd_run_check, instance, openstack_controller_check):
-    instance = instance | {
-        "components": {
-            "image": {
-                "images": False,
-            },
-        },
-    }
-    check = openstack_controller_check(instance)
+def test_images_tasks_metrics(aggregator, check, dd_run_check, metrics):
     dd_run_check(check)
-    for metric in aggregator.metric_names:
-        assert not metric.startswith('openstack.cinder.image.count')
-        assert not metric.startswith('openstack.cinder.image.size')
-        assert not metric.startswith('openstack.cinder.image.up')
+    for metric in metrics:
+        aggregator.assert_metric(
+            metric['name'],
+            count=metric['count'],
+            value=metric['value'],
+            tags=metric['tags'],
+            hostname=metric.get('hostname'),
+        )

@@ -590,7 +590,19 @@ def connection_image(request, mock_responses):
             for node in mock_responses('GET', '/image/v2/images')['images']
         ]
 
-    return mock.MagicMock(images=mock.MagicMock(side_effect=images))
+    def tasks(image_id):
+        if http_error and 'tasks' in http_error:
+            raise requests.exceptions.HTTPError(response=http_error['tasks'])
+        return [
+            mock.MagicMock(
+                to_dict=mock.MagicMock(
+                    return_value=node,
+                )
+            )
+            for node in mock_responses('GET', f'/image/v2/images/{image_id}/tasks')['tasks']
+        ]
+
+    return mock.MagicMock(images=mock.MagicMock(side_effect=images), tasks=mock.MagicMock(side_effect=tasks))
 
 
 @pytest.fixture
