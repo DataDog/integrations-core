@@ -17,8 +17,6 @@ from datadog_checks.sqlserver.utils import (
     execute_query_output_result_as_a_dict, get_list_chunks
 )
 
-
-
 import time
 import json
 import copy
@@ -28,9 +26,13 @@ from datadog_checks.base.utils.db.utils import default_json_event_encoding
 class SubmitData: 
     MAX_COLUMN_COUNT  = 100_000
 
+    # REDAPL has a 3MB limit per resource
+    MAX_TOTAL_COLUMN_COUNT = 250_000
+
     def __init__(self, submit_data_function, base_event, logger):
         self._submit_to_agent_queue = submit_data_function
         self._columns_count  = 0
+        self._total_columns_count = 0
         self.db_to_schemas = {} # dbname : { id : schema }
         self.db_info = {} # name to info
         self._base_event = base_event
@@ -41,6 +43,7 @@ class SubmitData:
 
     def store(self, db_name, schema, tables, columns_count):
         self._columns_count += columns_count
+        self._total_columns_count += columns_count
         schemas = self.db_to_schemas.setdefault(db_name, {})
         if schema["id"] in schemas:
             known_tables = schemas[schema["id"]].setdefault("tables",[])
@@ -56,6 +59,9 @@ class SubmitData:
         if "collation" in db_info:
             del db_info["collation"]
         return db_info
+    
+    def exceeded_total_columns_number(self):
+        return self._total_columns_count > self.MAX_TOTAL_COLUMN_COUNT
 
     def submit(self):
         if not bool(self.db_to_schemas):
@@ -73,6 +79,13 @@ class SubmitData:
             else:
                 db_info = self.db_info[db]
             event["metadata"] =  event["metadata"] + [{**(self.tmp_modify_to_fit_in_postgres(db_info)), "schemas": list(schemas_by_id.values())}]
+        #TODO Remove Debug Code, calculate tables and schemas sent : 
+        schemas_debug  = list(schemas_by_id.values())
+        t_count = 0
+        for schema in schemas_debug:
+            t_count += len(schema['tables'])
+        self._log.error("Boris Adding event to Agent queue with : {} schemas and {} tables.".format(len(schemas_debug), t_count))
+        #END debug code
         json_event = json.dumps(event, default=default_json_event_encoding)
         self._log.debug("Reporting the following payload for schema collection: {}".format(json_event))
         self._submit_to_agent_queue(json_event)
@@ -163,24 +176,25 @@ class Schemas:
     #sends all the data in one go but split in chunks (like Seth's solution)
     def collect_schemas_data(self):
         
-
+        #returns Stop, Stop == True.
         def fetch_schema_data(cursor, db_name):
             db_info  = self._query_db_information(db_name, cursor)
             schemas = self._query_schema_information(cursor)
             self._dataSubmitter.store_db_info(db_name, db_info)
             chunk_size = 50
             for schema in schemas:
+                if self._dataSubmitter.exceeded_total_columns_number():
+                    self._log.warning("Truncated data due to the max limit")
+                    return True
                 tables = self._get_tables(schema, cursor)            
                 tables_chunk = list(get_list_chunks(tables, chunk_size))
                 for tables_chunk in tables_chunk:
                     columns_count, tables_info = self._get_tables_data(tables_chunk, schema, cursor)
                     self._dataSubmitter.store(db_name, schema, tables_info, columns_count)  
-                    self._dataSubmitter.submit() # we force submit when we reach the end of schema, it's like in Seths solution
+                    self._dataSubmitter.submit() # we force submit after each 50 tables chunk
                 if len(tables) == 0:
                     self._dataSubmitter.store(db_name, schema, [], 0)
-                # to ask him if this is needed or we can submit only on 100 000 column
-            # tells if we want to move to the next DB or stop, stop == TRUE
-            # we want to submit for each DB for clarity
+            # we want to submit for each DB separetly for clarity
             self._dataSubmitter.submit()
             return False
         self._check.do_for_databases(fetch_schema_data, self._check.get_databases())
