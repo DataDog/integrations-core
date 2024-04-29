@@ -748,7 +748,7 @@ class SQLServer(AgentCheck):
                         if stop:
                             break;                  
                     except Exception as e:
-                        print("TODO")
+                        print("An exception occurred during do_for_databases in db - {}: {}".format(db, e))
                 # Switch DB back to MASTER
                 if not is_azure_sql_database(engine_edition):
                     cursor.execute(SWITCH_DB_STATEMENT.format(self.connection.DEFAULT_DATABASE))

@@ -148,7 +148,6 @@ def test_collect_schemas(aggregator, dd_run_check, dbm_instance):
         assert db_name in databases_to_find
         # we need to accumulate all data ... as payloads may differ 
 
-        # TODO enable when we add the package 
         difference = DeepDiff(actual_payload, expected_data_for_db[db_name], ignore_order=True)
 
         #difference = {}
