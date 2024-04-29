@@ -545,7 +545,6 @@ GLANCE_IMAGE_TAGS = {
     'id': 'image_id',
     'name': 'image_name',
     'status': 'status',
-    'size': 'size',
     'container_format': 'container_format',
 }
 GLANCE_TASK_PREFIX = f"{GLANCE_IMAGE_PREFIX}.task"
