@@ -5,8 +5,8 @@ requires = [
 build-backend = "hatchling.build"
 
 [project]
-name = "datadog-kubernetes-autoscaler"
-description = "The Kubernetes Autoscaler check"
+name = "datadog-kubernetes-cluster-autoscaler"
+description = "The Kubernetes Cluster Autoscaler check"
 readme = "README.md"
 license = "BSD-3-Clause"
 requires-python = ">=3.9"
@@ -14,7 +14,7 @@ keywords = [
     "datadog",
     "datadog agent",
     "datadog check",
-    "kubernetes_autoscaler",
+    "kubernetes_cluster_autoscaler",
 ]
 authors = [
     { name = "Datadog", email = "packages@datadoghq.com" },
@@ -42,7 +42,7 @@ deps = []
 Source = "https://github.com/DataDog/integrations-core"
 
 [tool.hatch.version]
-path = "datadog_checks/kubernetes_autoscaler/__about__.py"
+path = "datadog_checks/kubernetes_cluster_autoscaler/__about__.py"
 
 [tool.hatch.build.targets.sdist]
 include = [
@@ -53,7 +53,7 @@ include = [
 
 [tool.hatch.build.targets.wheel]
 include = [
-    "/datadog_checks/kubernetes_autoscaler",
+    "/datadog_checks/kubernetes_cluster_autoscaler",
 ]
 dev-mode-dirs = [
     ".",

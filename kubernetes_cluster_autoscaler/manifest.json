@@ -1,7 +1,7 @@
 {
   "manifest_version": "2.0.0",
-  "app_uuid": "418344df-6f42-4f5e-b0cd-04b703d0316b",
-  "app_id": "kubernetes-autoscaler",
+  "app_uuid": "3a3fc186-af02-48e5-8b68-ee9ef37ea566",
+  "app_id": "kubernetes-cluster-autoscaler",
   "display_on_public_website": false,
   "tile": {
     "overview": "README.md#Overview",
@@ -9,7 +9,7 @@
     "support": "README.md#Support",
     "changelog": "CHANGELOG.md",
     "description": "",
-    "title": "Kubernetes Autoscaler",
+    "title": "Kubernetes Cluster Autoscaler",
     "media": [],
     "classifier_tags": [
       "Supported OS::Linux",
@@ -24,8 +24,8 @@
   "assets": {
     "integration": {
       "auto_install": true,
-      "source_type_id": 14114642,
-      "source_type_name": "Kubernetes Autoscaler",
+      "source_type_id": 14391189,
+      "source_type_name": "Kubernetes Cluster Autoscaler",
       "configuration": {
         "spec": "assets/configuration/spec.yaml"
       },
@@ -33,7 +33,7 @@
         "creates_events": false
       },
       "metrics": {
-        "prefix": "kubernetes_autoscaler.",
+        "prefix": "kubernetes_cluster_autoscaler.",
         "check": "",
         "metadata_path": "metadata.csv"
       },

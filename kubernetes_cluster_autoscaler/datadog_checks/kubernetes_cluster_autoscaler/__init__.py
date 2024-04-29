@@ -2,6 +2,6 @@
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
 from .__about__ import __version__
-from .check import KubernetesAutoscalerCheck
+from .check import KubernetesClusterAutoscalerCheck
 
-__all__ = ['__version__', 'KubernetesAutoscalerCheck']
+__all__ = ['__version__', 'KubernetesClusterAutoscalerCheck']
