@@ -184,7 +184,7 @@ class Schemas:
             chunk_size = 50
             for schema in schemas:
                 if self._dataSubmitter.exceeded_total_columns_number():
-                    self._log.warning("Truncated data due to the max limit")
+                    self._log.warning("Truncated data due to the max limit, stopped on db - {} on schema {}".format(db_name, schema["name"]))
                     return True
                 tables = self._get_tables(schema, cursor)            
                 tables_chunk = list(get_list_chunks(tables, chunk_size))
