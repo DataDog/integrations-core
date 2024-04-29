@@ -97,7 +97,7 @@ def test_collect_schemas(integration_check, dbm_instance, aggregator):
         # there should only two schemas, 'public' and 'datadog'. datadog is empty
         schema = database_metadata[0]['schemas'][0]
         schema_name = schema['name']
-        assert schema_name in ['public', 'datadog']
+        assert schema_name in ['public', 'public2', 'datadog']
         if schema_name == 'public':
             for table in schema['tables']:
                 tables_got.append(table['name'])
@@ -120,6 +120,7 @@ def test_collect_schemas(integration_check, dbm_instance, aggregator):
                 if table['name'] == "cities":
                     keys = list(table.keys())
                     assert_fields(keys, ["indexes", "columns", "toast_table", "id", "name", "owner"])
+                    assert len(table['indexes']) == 1
                     assert_fields(list(table['indexes'][0].keys()), ['name', 'definition'])
                 if float(POSTGRES_VERSION) >= 11:
                     if table['name'] in ('test_part', 'test_part_no_activity'):
