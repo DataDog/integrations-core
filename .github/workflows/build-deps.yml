@@ -229,7 +229,7 @@ jobs:
 
     - name: Cache builder root
       id: cache-builder-root
-      uses: actions/cache@v3.3.3
+      uses: actions/cache@v4
       with:
         path: |
           ~/builder_root

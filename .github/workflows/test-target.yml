@@ -137,7 +137,7 @@ jobs:
 
     - name: Restore cache
       if: inputs.repo == 'core'
-      uses: actions/cache/restore@v3
+      uses: actions/cache/restore@v4
       with:
         path: ${{ runner.os == 'Windows' && '~\AppData\Local\pip\Cache' || runner.os == 'macOS' && '~/Library/Caches/pip' || '~/.cache/pip' }}
         key: >-
