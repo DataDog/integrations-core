@@ -31,12 +31,24 @@ class SubmitData:
 
     def __init__(self, submit_data_function, base_event, logger):
         self._submit_to_agent_queue = submit_data_function
+        self._base_event = base_event
+        self._log = logger
+
         self._columns_count  = 0
         self._total_columns_count = 0
         self.db_to_schemas = {} # dbname : { id : schema }
         self.db_info = {} # name to info
-        self._base_event = base_event
-        self._log = logger
+
+    def set_base_event_data(self, hostname, tags, cloud_metadata):
+        self._base_event["host"] = hostname
+        self._base_event["tags"] = tags
+        self._base_event["cloud_metadata"] = cloud_metadata
+
+    def reset(self):
+        self._columns_count = 0
+        self._total_columns_count = 0
+        self.db_to_schemas = {}
+        self.db_info = {}
     
     def store_db_info(self, db_name, db_info):
         self.db_info[db_name] = db_info
@@ -80,11 +92,16 @@ class SubmitData:
                 db_info = self.db_info[db]
             event["metadata"] =  event["metadata"] + [{**(self.tmp_modify_to_fit_in_postgres(db_info)), "schemas": list(schemas_by_id.values())}]
         #TODO Remove Debug Code, calculate tables and schemas sent : 
-        schemas_debug  = list(schemas_by_id.values())
+        schemas_debug = list(schemas_by_id.values())
         t_count = 0
+        printed_first = False
         for schema in schemas_debug:
             t_count += len(schema['tables'])
-        self._log.error("Boris Adding event to Agent queue with : {} schemas and {} tables.".format(len(schemas_debug), t_count))
+            if not printed_first and len(schema['tables']) >0:
+                printed_first = True
+                self._log.warning("One of tables db {} schema {} table {}".format( list(schemas_by_id.keys()), schema['name'], schema['tables'][0]["name"]))
+
+        self._log.warning("Boris Adding event to Agent queue with : {} schemas and {} tables.".format(len(schemas_debug), t_count))
         #END debug code
         json_event = json.dumps(event, default=default_json_event_encoding)
         self._log.debug("Reporting the following payload for schema collection: {}".format(json_event))
@@ -111,8 +128,8 @@ class Schemas:
                 #"cloud_metadata": self._config.cloud_metadata,
             }
         """
-        #TODO remove : hosts were null onstaging /....
-        hostname = "boris"
+        #TODO error is just so that payload passes, shoud be removed
+        hostname = "error"
         if self._check.resolved_hostname is not None:
             hostname = self._check.resolved_hostname
         base_event = {
@@ -175,7 +192,9 @@ class Schemas:
     
     #sends all the data in one go but split in chunks (like Seth's solution)
     def collect_schemas_data(self):
-        
+        self._dataSubmitter.reset()
+        # for now only setting host and tags and metada
+        self._dataSubmitter.set_base_event_data(self._check.resolved_hostname, self._tags, self._check._config.cloud_metadata)
         #returns Stop, Stop == True.
         def fetch_schema_data(cursor, db_name):
             db_info  = self._query_db_information(db_name, cursor)
