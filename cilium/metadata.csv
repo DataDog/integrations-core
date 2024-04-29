@@ -17,7 +17,7 @@ cilium.bpf.map_ops.total,count,,operation,,[OpenMetrics V1] Total BPF map operat
 cilium.bpf.map_pressure,gauge,,,,[OpenMetrics V1 and V2] Map pressure defined as a ratio of the map usage compared to it,0,cilium,bpf map pressure,
 cilium.bpf.maps.virtual_memory.max.bytes,gauge,,byte,,[OpenMetrics V1 and V2] Max memory used by eBPF maps installed in the system,0,cilium,bpf map maps memory,
 cilium.bpf.progs.virtual_memory.max.bytes,gauge,,byte,,[OpenMetrics V1 and V2] Max memory used by eBPF programs installed in the system,0,cilium,bpf map progs memory,
-cilium.cidrgroup.policies,gauge,,unit,,[OpenMetrics V1 and V2] Number of CNPs and CCNPs referencing at least one CiliumCIDRGroup,0,cilium,cidrgroup policies
+cilium.cidrgroup.policies,gauge,,unit,,[OpenMetrics V1 and V2] Number of CNPs and CCNPs referencing at least one CiliumCIDRGroup,0,cilium,cidrgroup policies,
 cilium.controllers.failing.count,gauge,,error,,[OpenMetrics V1 and V2] Number of failing controllers,-1,cilium, fail controllers,
 cilium.controllers.runs.count,count,,event,,[OpenMetrics V2] Total number of controller runs,0,cilium,controller runs,
 cilium.controllers.runs.total,count,,event,,[OpenMetrics V1] Total number of controller runs,0,cilium,controller runs,
@@ -41,7 +41,7 @@ cilium.drop_bytes.total,count,,byte,,[OpenMetrics V1] Total dropped bytes,-1,cil
 cilium.drop_count.count,count,,packet,,[OpenMetrics V2] Total dropped packets,-1,cilium,drop packets,
 cilium.drop_count.total,count,,packet,,[OpenMetrics V1] Total dropped packets,-1,cilium,drop packets,
 cilium.endpoint.count,gauge,,unit,,[OpenMetrics V1 and V2] Total ready endpoints managed by agent,0,cilium,total endpoints,
-cilium.endpoint.max_ifindex,gauge,,unit,,[OpenMetrics V1 and V2] Maximum interface index observed for existing endpoints,0,cilium,endpoint max interface index
+cilium.endpoint.max_ifindex,gauge,,unit,,[OpenMetrics V1 and V2] Maximum interface index observed for existing endpoints,0,cilium,endpoint max interface index,
 cilium.endpoint.regeneration_time_stats.seconds.bucket,count,,second,,[OpenMetrics V2] Sample of endpoint regeneration time stats,0,cilium,endpoint regen time bucket,
 cilium.endpoint.regeneration_time_stats.seconds.count,count,,operation,,[OpenMetrics V1 and V2] Count of endpoint regeneration time stats,0,cilium,endpoint regen time count,
 cilium.endpoint.regeneration_time_stats.seconds.sum,count,,second,,[OpenMetrics V1 and V2] Sum of endpoint regeneration time stats,0,cilium,endpoint regen time sum,
@@ -102,7 +102,7 @@ cilium.operator.azure.api.rate_limit.duration.seconds.sum,count,,second,,[OpenMe
 cilium.operator.ces.queueing_delay.seconds.bucket,count,,second,,[OpenMetrics V2] Sample of CiliumEndpointSlice queueing delay in seconds. Available in Cilium v1.11+,0,cilium,ces queue delay sample,
 cilium.operator.ces.queueing_delay.seconds.count,count,,unit,,[OpenMetrics V1 and V2] Count of CiliumEndpointSlice queueing delay in seconds. Available in Cilium v1.11+,0,cilium,ces queue delay count,
 cilium.operator.ces.queueing_delay.seconds.sum,count,,second,,[OpenMetrics V1 and V2] Sum of CiliumEndpointSlice queueing delay in seconds. Available in Cilium v1.11+,0,cilium,ces queue delay sum,
-cilium.operator.ces.sync.total,count,,unit,,[OpenMetrics V1 and V2] Number of completed CES syncs by outcome,0,cilium,ces syncs
+cilium.operator.ces.sync.total,count,,unit,,[OpenMetrics V1 and V2] Number of completed CES syncs by outcome,0,cilium,ces syncs,
 cilium.operator.ces.sync_errors.count,count,,error,,[OpenMetrics V2] Number of CES sync errors. Available in Cilium v1.11+,0,cilium,ces sync errors count,
 cilium.operator.ces.sync_errors.total,count,,error,,[OpenMetrics V1] Number of CES sync errors. Available in Cilium v1.11+,0,cilium,ces sync errors count,
 cilium.operator.ec2.api.duration.seconds.bucket,count,,second,,[OpenMetrics V2] Sample of duration of interactions with the AWS EC2 API. Available in Cilium v1.9+,0,cilium,aws ec2 api duration sample,
@@ -165,7 +165,7 @@ cilium.operator.ipam.api.rate_limit.duration.seconds.count,count,,request,,[Open
 cilium.operator.ipam.api.rate_limit.duration.seconds.sum,count,,second,,[OpenMetricsV1 and V2] Sum of duration of rate limiting while accessing external IPAM API. Available in Cilium v1.9+,0,cilium,ipam api rate limit duration sum,
 cilium.operator.ipam.available,gauge,,unit,,[OpenMetrics V1 and V2] Number of interfaces with addresses available. Available in Cilium v1.8+,0,cilium,available ips,
 cilium.operator.ipam.available.ips_per_subnet,gauge,,unit,,[OpenMetrics V1 and V2] Number of available IPs per subnet ID. Available in Cilium v1.8+,0,cilium,available ips/subnet,
-cilium.operator.ipam.available_interfaces,gauge,,unit,,[OpenMetrics V1 and V2] Number of interfaces with addresses available,0,cilium,available interfaces
+cilium.operator.ipam.available_interfaces,gauge,,unit,,[OpenMetrics V1 and V2] Number of interfaces with addresses available,0,cilium,available interfaces,
 cilium.operator.ipam.available_ips,gauge,,unit,,[OpenMetrics V1 and V2] Total available IPs on Node for IPAM allocation,0,cilium,available ips,
 cilium.operator.ipam.deficit_resolver.duration.seconds.bucket,count,,second,,[OpenMetrics V2] Sample of duration of deficit resolver trigger runs. Available in Cilium v1.8+,0,cilium,deficit resolver duration sample,
 cilium.operator.ipam.deficit_resolver.duration.seconds.count,count,,request,,[OpenMetrics V1 and V2] Count of duration of deficit resolver trigger runs. Available in Cilium v1.8+,0,cilium,deficit resolver duration count,
@@ -184,7 +184,7 @@ cilium.operator.ipam.interface_creation_ops,count,,operation,,[OpenMetrics V1] C
 cilium.operator.ipam.interface_creation_ops.count,count,,operation,,[OpenMetrics V2] Count of interfaces allocated. Available in Cilium v1.8+,0,cilium,ipam creation ops,
 cilium.operator.ipam.ip_allocation_ops,count,,,,[OpenMetrics V1] Number of IP allocation operations. Available in Cilium v1.13+,0,cilium,ipam ip allocation ops,
 cilium.operator.ipam.ip_allocation_ops.count,count,,,,[OpenMetrics V2] Number of IP allocation operations. Available in Cilium v1.13+,0,cilium,ipam ip allocation ops,
-cilium.operator.ipam.ip_release_ops,count,,operator,,[OpenMetrics V1 and V2] Number of IP release operations,0,cilium,ipam ip release ops,
+cilium.operator.ipam.ip_release_ops,count,,operation,,[OpenMetrics V1 and V2] Number of IP release operations,0,cilium,ipam ip release ops,
 cilium.operator.ipam.ips,gauge,,unit,,[OpenMetrics V1 and V2] Number of IPs allocated. Available in Cilium v1.8+,0,cilium,ipam ips,
 cilium.operator.ipam.k8s_sync.duration.seconds.bucket,count,,second,,[OpenMetrics V2] Sample of duration of K8s sync trigger runs. Available in Cilium v1.8+,0,cilium,k8s sync duration sample,
 cilium.operator.ipam.k8s_sync.duration.seconds.count,count,,request,,[OpenMetrics V1 and V2] Count of duration of K8s sync trigger runs. Available in Cilium v1.8+,0,cilium,k8s sync duration count,
@@ -260,7 +260,7 @@ cilium.proxy.redirects,gauge,,,,Number of redirects installed for endpoints by p
 cilium.proxy.upstream_reply.seconds.bucket,count,,second,,"[OpenMetrics V2] Seconds waited for upstream server to reply to a request labeled by error, protocol and span time",-1,cilium,proxy upstream reply seconds,
 cilium.proxy.upstream_reply.seconds.count,count,,second,,"[OpenMetrics V1 and V2] Seconds waited for upstream server to reply to a request labeled by error, protocol and span time",-1,cilium,proxy upstream reply seconds,
 cilium.proxy.upstream_reply.seconds.sum,count,,second,,"[OpenMetrics V1 and V2] Seconds waited for upstream server to reply to a request labeled by error, protocol and span time",-1,cilium,proxy upstream reply seconds,
-cilium.services.events.total,count,,events,,"[OpenMetrics V1 and V2] Number of services events labeled by action type",0,cilium,service events,
+cilium.services.events.total,count,,event,,"[OpenMetrics V1 and V2] Number of services events labeled by action type",0,cilium,service events,
 cilium.subprocess.start.count,count,,unit,,[OpenMetrics V2] Number of times that Cilium has started a subprocess,0,cilium,subproc start,
 cilium.subprocess.start.total,count,,unit,,[OpenMetrics V1] Number of times that Cilium has started a subprocess,0,cilium,subproc start,
 cilium.triggers_policy.update.count,count,,unit,,[OpenMetrics V2] Total number of policy update trigger invocations,0,cilium,policy update trigger count,
