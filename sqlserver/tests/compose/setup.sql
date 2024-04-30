@@ -26,9 +26,40 @@ CREATE SCHEMA test_schema;
 GO
 
 CREATE TABLE datadog_test_schemas.test_schema.cities (id int DEFAULT 0, name varchar(255));
-CREATE INDEX one_column_index ON datadog_test_schemas.test_schema.cities (id);
+GO
+ALTER TABLE datadog_test_schemas.test_schema.cities
+ALTER COLUMN id INT NOT NULL;
+GO
 CREATE INDEX two_columns_index ON datadog_test_schemas.test_schema.cities (id, name);
+ALTER TABLE datadog_test_schemas.test_schema.cities
+ADD CONSTRAINT PK_Cities PRIMARY KEY (id);
+GO
 INSERT INTO datadog_test_schemas.test_schema.cities  VALUES (1, 'yey'), (2, 'bar');
+GO
+CREATE TABLE datadog_test_schemas.test_schema.landmarks (name varchar(255), city_id int DEFAULT 0);
+GO
+ALTER TABLE datadog_test_schemas.test_schema.landmarks ADD CONSTRAINT FK_CityId FOREIGN KEY (city_id) REFERENCES datadog_test_schemas.test_schema.cities(id);
+GO
+
+--------------------------------------------------
+CREATE TABLE datadog_test_schemas.test_schema.Restaurants (
+    RestaurantName VARCHAR(255),
+    District VARCHAR(100),
+    Cuisine VARCHAR(100),
+    CONSTRAINT UC_RestaurantNameDistrict UNIQUE (RestaurantName, District)
+);
+GO
+
+CREATE TABLE datadog_test_schemas.test_schema.RestaurantReviews (
+    RestaurantName VARCHAR(255),
+    District VARCHAR(100),
+    Review VARCHAR(MAX),
+    CONSTRAINT FK_RestaurantNameDistrict FOREIGN KEY (RestaurantName, District) REFERENCES datadog_test_schemas.test_schema.Restaurants(RestaurantName, District)
+);
+GO
+
+
+
 -- Create test database for integration tests
 -- only bob and fred have read/write access to this database
 CREATE DATABASE datadog_test;

@@ -20,6 +20,7 @@ from datadog_checks.sqlserver.utils import (
 import time
 import json
 import copy
+import pdb
 
 from datadog_checks.base.utils.db.utils import default_json_event_encoding
 
@@ -27,6 +28,7 @@ class SubmitData:
     MAX_COLUMN_COUNT  = 100_000
 
     # REDAPL has a 3MB limit per resource
+    #TODO Report truncation to the backend
     MAX_TOTAL_COLUMN_COUNT = 250_000
 
     def __init__(self, submit_data_function, base_event, logger):
@@ -99,7 +101,7 @@ class SubmitData:
             t_count += len(schema['tables'])
             if not printed_first and len(schema['tables']) >0:
                 printed_first = True
-                self._log.warning("One of tables db {} schema {} table {}".format( list(schemas_by_id.keys()), schema['name'], schema['tables'][0]["name"]))
+                self._log.warning("One of tables db {} schema {} table {}".format( list(self.db_to_schemas.keys()), schema['name'], schema['tables'][0]["name"]))
 
         self._log.warning("Boris Adding event to Agent queue with : {} schemas and {} tables.".format(len(schemas_debug), t_count))
         #END debug code
@@ -264,7 +266,9 @@ class Schemas:
             id_to_all[t["id"]] = t
         total_columns_number  = self._populate_with_columns_data(table_ids_object, name_to_id, id_to_all, schema, cursor)
         #self._populate_with_partitions_data(table_ids, id_to_all, cursor) #TODO P DISABLED as postgrss backend accepts different data model
-        #self._populate_with_foreign_keys_data(table_ids, id_to_all, cursor) #TODO P DISABLED as postgrss backend accepts different data model
+        pdb.set_trace()
+        self._populate_with_foreign_keys_data(table_ids, id_to_all, cursor) #TODO P DISABLED as postgrss backend accepts different data model
+        pdb.set_trace()
         #self._populate_with_index_data(table_ids, id_to_all, cursor) #TODO P DISABLED as postgrss backend accepts different data model
         # unwrap id_to_all
         return total_columns_number, list(id_to_all.values())
@@ -306,7 +310,7 @@ class Schemas:
             id  = row.pop("id", None)
             if id is not None:
                 #TODO what happens if not found ? 
-                id_to_all.get(id)["partitions"] = row
+                id_to_all.get(str(id))["partitions"] = row
             else:
                 print("todo error")
             row.pop("id", None)
@@ -319,7 +323,7 @@ class Schemas:
         for row in rows:
             id  = row.pop("id", None)
             if id is not None:
-                id_to_all.get(id)["indexes"] = row
+                id_to_all.get(str(id))["indexes"] = row
             else:
                 print("todo error")
             row.pop("id", None)
@@ -332,7 +336,7 @@ class Schemas:
             for row in rows:
                 id  = row.pop("id", None)
                 if id is not None:
-                    id_to_all.get(id)["foreign_keys"] = row
+                    id_to_all.get(str(id))["foreign_keys"] = row
                 else:
                     print("todo error")  
             print("end")
