@@ -25,15 +25,24 @@ GO
 CREATE SCHEMA test_schema;
 GO
 
-CREATE TABLE datadog_test_schemas.test_schema.cities (id int DEFAULT 0, name varchar(255));
-GO
-ALTER TABLE datadog_test_schemas.test_schema.cities
-ALTER COLUMN id INT NOT NULL;
-GO
+--CREATE TABLE datadog_test_schemas.test_schema.cities (id int DEFAULT 0, name varchar(255));
+--GO
+--ALTER TABLE datadog_test_schemas.test_schema.cities
+--ALTER COLUMN id INT NOT NULL;
+--GO
+--CREATE INDEX two_columns_index ON datadog_test_schemas.test_schema.cities (id, name);
+--ALTER TABLE datadog_test_schemas.test_schema.cities
+--ADD CONSTRAINT PK_Cities PRIMARY KEY (id);
+--GO
+
+CREATE TABLE datadog_test_schemas.test_schema.cities (
+    id INT NOT NULL DEFAULT 0,
+    name VARCHAR(255),
+    CONSTRAINT PK_Cities PRIMARY KEY (id)
+);
+
 CREATE INDEX two_columns_index ON datadog_test_schemas.test_schema.cities (id, name);
-ALTER TABLE datadog_test_schemas.test_schema.cities
-ADD CONSTRAINT PK_Cities PRIMARY KEY (id);
-GO
+
 INSERT INTO datadog_test_schemas.test_schema.cities  VALUES (1, 'yey'), (2, 'bar');
 GO
 CREATE TABLE datadog_test_schemas.test_schema.landmarks (name varchar(255), city_id int DEFAULT 0);
