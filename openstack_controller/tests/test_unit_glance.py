@@ -367,6 +367,34 @@ def test_disable_glance_members_metrics(aggregator, dd_run_check, instance, open
 
 
 @pytest.mark.parametrize(
+    ('instance', 'metrics'),
+    [
+        pytest.param(
+            configs.REST,
+            MEMBERS_METRICS_GLANCE,
+            id='api rest',
+        ),
+        pytest.param(
+            configs.SDK,
+            MEMBERS_METRICS_GLANCE,
+            id='api sdk',
+        ),
+    ],
+)
+@pytest.mark.usefixtures('mock_http_get', 'mock_http_post', 'openstack_connection')
+def test_images_members_metrics(aggregator, check, dd_run_check, metrics):
+    dd_run_check(check)
+    for metric in metrics:
+        aggregator.assert_metric(
+            metric['name'],
+            count=metric['count'],
+            value=metric['value'],
+            tags=metric['tags'],
+            hostname=metric.get('hostname'),
+        )
+
+
+@pytest.mark.parametrize(
     ('instance'),
     [
         pytest.param(
