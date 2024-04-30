@@ -17,6 +17,7 @@ from tests.common import remove_service_from_catalog
 from tests.metrics import (
     IMAGES_METRICS_GLANCE,
     MEMBERS_METRICS_GLANCE,
+    TASKS_METRICS_GLANCE,
 )
 
 pytestmark = [
@@ -366,16 +367,44 @@ def test_disable_glance_members_metrics(aggregator, dd_run_check, instance, open
 
 
 @pytest.mark.parametrize(
-    ('instance', 'metrics'),
+    ('instance'),
     [
         pytest.param(
             configs.REST,
-            MEMBERS_METRICS_GLANCE,
             id='api rest',
         ),
         pytest.param(
             configs.SDK,
-            MEMBERS_METRICS_GLANCE,
+            id='api sdk',
+        ),
+    ],
+)
+@pytest.mark.usefixtures('mock_http_get', 'mock_http_post', 'openstack_connection')
+def test_disable_glance_tasks_metrics(aggregator, dd_run_check, instance, openstack_controller_check):
+    instance = instance | {
+        "components": {
+            "image": {
+                "tasks": False,
+            }
+        },
+    }
+    check = openstack_controller_check(instance)
+    dd_run_check(check)
+    for metric in aggregator.metric_names:
+        assert not metric.startswith('openstack.glance.image.task')
+
+
+@pytest.mark.parametrize(
+    ('instance', 'metrics'),
+    [
+        pytest.param(
+            configs.REST,
+            TASKS_METRICS_GLANCE,
+            id='api rest',
+        ),
+        pytest.param(
+            configs.SDK,
+            TASKS_METRICS_GLANCE,
             id='api sdk',
         ),
     ],
