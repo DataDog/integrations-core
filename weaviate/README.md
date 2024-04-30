@@ -1,5 +1,7 @@
 # Agent Check: Weaviate
 
+![Weaviate Overview Dashboard][16]
+
 ## Overview
 
 Weaviate is an open source, AI-native vector database that helps create AI-powered applications. With Datadog’s Weaviate integration, you can:
@@ -119,3 +121,4 @@ Additional helpful documentation, links, and articles:
 [13]: https://github.com/DataDog/integrations-core/blob/7.46.x/openmetrics/datadog_checks/openmetrics/data/conf.yaml.example#L544-L546
 [14]: https://github.com/weaviate/weaviate-helm/blob/576f613bad3f8e25015c61a7143800123ab378d3/weaviate/values.yaml#L1196
 [15]: https://www.datadoghq.com/blog/ai-integrations/
+[16]: https://raw.githubusercontent.com/DataDog/integrations-core/master/weaviate/images/weaviate_dashboard.png
