@@ -104,9 +104,10 @@ WHERE  nspname NOT IN ( 'information_schema', 'pg_catalog' )
 PG_INDEXES_QUERY = """
 SELECT indexname AS NAME,
        indexdef  AS definition,
+       schemaname,
        tablename
 FROM   pg_indexes
-WHERE  {table_names_like};
+WHERE  schemaname='{schema_name}' AND ({table_names_like});
 """
 
 PG_CHECK_FOR_FOREIGN_KEY = """
@@ -144,7 +145,7 @@ PARTITION_KEY_QUERY = """
 SELECT relname,
        pg_get_partkeydef(oid) AS partition_key
 FROM   pg_class
-WHERE  relname in ({table_names});
+WHERE  oid in ({table_ids});
 """
 
 NUM_PARTITIONS_QUERY = """
@@ -295,7 +296,7 @@ class PostgresMetadata(DBMAsyncJob):
                             tables_buffer = []
 
                             for tables in table_chunks:
-                                table_info = self._query_table_information(cursor, tables)
+                                table_info = self._query_table_information(cursor, schema['name'], tables)
 
                                 tables_buffer = [*tables_buffer, *table_info]
                                 for t in table_info:
@@ -455,7 +456,7 @@ class PostgresMetadata(DBMAsyncJob):
         return table_payloads
 
     def _query_table_information(
-        self, cursor: psycopg2.extensions.cursor, table_info: List[Dict[str, Union[str, bool]]]
+        self, cursor: psycopg2.extensions.cursor, schema_name: str, table_info: List[Dict[str, Union[str, bool]]]
     ) -> List[Dict[str, Union[str, Dict]]]:
         """
         Collect table information . Returns a dictionary
@@ -481,11 +482,10 @@ class PostgresMetadata(DBMAsyncJob):
         tables = {t.get("name"): {**t, "num_partitions": 0} for t in table_info}
         table_name_lookup = {t.get("id"): t.get("name") for t in table_info}
         table_ids = ",".join(["'{}'".format(t.get("id")) for t in table_info])
-        table_names = ",".join(["'{}'".format(t.get("name")) for t in table_info])
         table_names_like = " OR ".join(["tablename LIKE '{}%'".format(t.get("name")) for t in table_info])
 
         # Get indexes
-        cursor.execute(PG_INDEXES_QUERY.format(table_names_like=table_names_like))
+        cursor.execute(PG_INDEXES_QUERY.format(schema_name=schema_name, table_names_like=table_names_like))
         rows = cursor.fetchall()
         for row in rows:
             # Partition indexes in some versions of Postgres have appended digits for each partition
@@ -497,7 +497,7 @@ class PostgresMetadata(DBMAsyncJob):
 
         # Get partitions
         if VersionUtils.transform_version(str(self._check.version))["version.major"] != "9":
-            cursor.execute(PARTITION_KEY_QUERY.format(table_names=table_names))
+            cursor.execute(PARTITION_KEY_QUERY.format(table_ids=table_ids))
             rows = cursor.fetchall()
             for row in rows:
                 tables.get(row.get("relname"))["partition_key"] = row.get("partition_key")
