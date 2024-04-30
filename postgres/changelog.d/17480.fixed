@@ -1,1 +1,0 @@
-Fixed a bug where schemas with tables of the same name were incorrectly reporting indexes of those tables multiple times
