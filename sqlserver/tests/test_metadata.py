@@ -21,7 +21,6 @@ try:
 except ImportError:
     pyodbc = None
 
-
 import json
 
 @pytest.fixture
@@ -38,8 +37,6 @@ def dbm_instance(instance_docker):
         'collection_interval': 0.1,
     }
     return copy(instance_docker)
-
-
 
 
 @pytest.mark.integration
