@@ -8,17 +8,16 @@
     "configuration": "README.md#Setup",
     "support": "README.md#Support",
     "changelog": "CHANGELOG.md",
-    "description": "",
+    "description": "Integration for Kubernetes Cluster Autoscaler",
     "title": "Kubernetes Cluster Autoscaler",
     "media": [],
     "classifier_tags": [
       "Supported OS::Linux",
       "Supported OS::Windows",
       "Supported OS::macOS",
-      "Category::",
-      "Offering::",
-      "Queried Data Type::",
-      "Submitted Data Type::"
+      "Category::Metrics",
+      "Category::Kubernetes",
+      "Submitted Data Type::Metrics"
     ]
   },
   "assets": {
@@ -33,18 +32,16 @@
         "creates_events": false
       },
       "metrics": {
-        "prefix": "kubernetes_cluster_autoscaler.",
-        "check": "",
+        "prefix": "kubernetes_ca.",
+        "check": "kubernetes_ca.cluster_autoscaler.node.count",
         "metadata_path": "metadata.csv"
       },
       "service_checks": {
         "metadata_path": "assets/service_checks.json"
       }
     },
-    "dashboards": {},
-    "monitors": {},
-    "logs": {},
-    "saved_views": {}
+    "dashboards": {"kubernetes_cluster_autoscaler_overview": "assets/dashboards/kubernetes_cluster_autoscaler_overview.json"},
+    "logs": {"source": "kubernetes_ca.cluster_autoscaler"}
   },
   "author": {
     "support_email": "help@datadoghq.com",

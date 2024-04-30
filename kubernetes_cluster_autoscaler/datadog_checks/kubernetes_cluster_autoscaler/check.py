@@ -13,7 +13,7 @@ from datadog_checks.base import AgentCheck  # noqa: F401
 class KubernetesClusterAutoscalerCheck(AgentCheck):
 
     # This will be the prefix of every metric and service check the integration sends
-    __NAMESPACE__ = 'kubernetes_cluster_autoscaler'
+    __NAMESPACE__ = 'kubernetes_ca'
 
     def __init__(self, name, init_config, instances):
         super(KubernetesClusterAutoscalerCheck, self).__init__(name, init_config, instances)
