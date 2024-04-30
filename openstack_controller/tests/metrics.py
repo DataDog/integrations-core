@@ -4627,3 +4627,30 @@ IMAGES_METRICS_GLANCE = [
         ],
     },
 ]
+
+MEMBERS_METRICS_GLANCE = [
+    {
+        'name': 'openstack.glance.image.member.count',
+        'count': 1,
+        'value': 1,
+        'hostname': '',
+        'tags': [
+            'member_id:123456789',
+            'image_id:28c293db-48c5-4c8b-a711-09b2c11fa8e5',
+            'status:pending',
+            'keystone_server:http://127.0.0.1:8080/identity',
+        ],
+    },
+    {
+        'name': 'openstack.glance.image.member.count',
+        'count': 1,
+        'value': 1,
+        'hostname': '',
+        'tags': [
+            'member_id:987654321',
+            'image_id:28c293db-48c5-4c8b-a711-09b2c11fa8e5',
+            'status:accepted',
+            'keystone_server:http://127.0.0.1:8080/identity',
+        ],
+    },
+]

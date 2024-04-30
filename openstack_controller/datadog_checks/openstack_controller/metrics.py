@@ -547,6 +547,13 @@ GLANCE_IMAGE_TAGS = {
     'status': 'status',
     'container_format': 'container_format',
 }
+GLANCE_MEMBER_PREFIX = f"{GLANCE_IMAGE_PREFIX}.member"
+GLANCE_MEMBER_COUNT = f"{GLANCE_MEMBER_PREFIX}.count"
+GLANCE_MEMBER_TAGS = {
+    'member_id': 'member_id',
+    'image_id': 'image_id',
+    'status': 'status',
+}
 
 
 def is_interface_metric(label):
