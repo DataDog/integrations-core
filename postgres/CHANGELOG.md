@@ -2,9 +2,6 @@
 
 <!-- towncrier release notes start -->
 
-<<<<<<< HEAD
-## 18.1.1 / 2024-04-17 / Agent 7.53.0
-=======
 ## 18.2.1 / 2024-04-30
 
 ***Fixed***:
@@ -32,7 +29,6 @@
 * Fix default value for pg_stat_statements_view ([#17400](https://github.com/DataDog/integrations-core/pull/17400))
 
 ## 18.1.1 / 2024-04-17
->>>>>>> d132aa30f8 ([Release] [Backport 7.54.x] Include schema in filter for indexes (#17486))
 
 ***Fixed***:
 
