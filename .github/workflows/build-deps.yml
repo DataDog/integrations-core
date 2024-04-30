@@ -4,6 +4,7 @@ on:
   pull_request:
     branches:
     - master
+    - 7.*.*
     paths:
     - .github/workflows/build-deps.yml
     - .builders/**
@@ -11,6 +12,7 @@ on:
   push:
     branches:
     - master
+    - 7.*.*
     paths:
     - .builders/**
     - agent_requirements.in
