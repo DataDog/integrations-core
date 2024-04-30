@@ -4,7 +4,7 @@
 
 ## Overview
 
-Weaviate is an open source, AI-native vector database that helps create AI-powered applications. With Datadog’s Weaviate integration, you can:
+Weaviate is an open source, AI-native vector database that helps create AI-powered applications. With Datadog's Weaviate integration, you can:
 
 - Monitor usage statistics (such as duration of insert, delete, and maintenance operations) to identify potential storage issues, bottlenecks, and assess the impact of data modifications on system responsiveness.
 - Track query latency, rate, and concurrent read/write requests to gain insight into the vector database's overall responsiveness and load handling capabilities.
