@@ -28,6 +28,7 @@ def test_e2e_profile_riverbed_steelhead(dd_agent_check):
     common_tags = [
         'snmp_profile:riverbed-steelhead',
         'snmp_host:riverbed-steelhead.device.name',
+        'device_hostname:riverbed-steelhead.device.name',
         'device_namespace:default',
         'snmp_device:' + ip_address,
         'device_ip:' + ip_address,

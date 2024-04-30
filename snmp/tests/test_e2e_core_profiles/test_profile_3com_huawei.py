@@ -28,6 +28,7 @@ def test_e2e_profile_3com_huawei(dd_agent_check):
     common_tags = [
         'snmp_profile:3com-huawei',
         'snmp_host:3com-huawei.device.name',
+        'device_hostname:3com-huawei.device.name',
         'device_namespace:default',
         'snmp_device:' + ip_address,
         'device_ip:' + ip_address,
@@ -84,6 +85,7 @@ def test_e2e_profile_3com_huawei(dd_agent_check):
             'device_namespace:default',
             'snmp_device:' + ip_address,
             'snmp_host:3com-huawei.device.name',
+            'device_hostname:3com-huawei.device.name',
             'snmp_profile:3com-huawei',
         ],
         'vendor': '3com',

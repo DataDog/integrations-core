@@ -30,6 +30,7 @@ def test_e2e_profile_ibm_lenovo_server(dd_agent_check):
     common_tags = [
         'snmp_profile:ibm-lenovo-server',
         'snmp_host:ibm-lenovo-server.device.name',
+        'device_hostname:ibm-lenovo-server.device.name',
         'device_namespace:default',
         'snmp_device:' + ip_address,
         'device_ip:' + ip_address,

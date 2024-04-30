@@ -28,6 +28,7 @@ def test_e2e_profile_avaya_nortel_ethernet_routing_switch(dd_agent_check):
     common_tags = [
         'snmp_profile:avaya-nortel-ethernet-routing-switch',
         'snmp_host:avaya-nortel-ethernet-routing-switch.device.name',
+        'device_hostname:avaya-nortel-ethernet-routing-switch.device.name',
         'device_namespace:default',
         'snmp_device:' + ip_address,
         'device_ip:' + ip_address,

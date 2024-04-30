@@ -1,0 +1,1 @@
+Update the description for the tls_ca_cert config option to use openssl rehash instead of c_rehash

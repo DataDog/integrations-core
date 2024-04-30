@@ -28,6 +28,7 @@ def test_e2e_profile_tripplite_ups(dd_agent_check):
     common_tags = [
         'snmp_profile:tripplite-ups',
         'snmp_host:tripplite-ups.device.name',
+        'device_hostname:tripplite-ups.device.name',
         'device_namespace:default',
         'snmp_device:' + ip_address,
         'device_ip:' + ip_address,

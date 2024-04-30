@@ -27,6 +27,7 @@ def test_e2e_profile__generic_ups(dd_agent_check):
     common_tags = [
         'snmp_profile:abstract-generic-ups',
         'snmp_host:_generic-ups.device.name',
+        'device_hostname:_generic-ups.device.name',
         'device_namespace:default',
         'snmp_device:' + ip_address,
         'device_ip:' + ip_address,

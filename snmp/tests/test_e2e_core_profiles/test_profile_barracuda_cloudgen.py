@@ -29,6 +29,7 @@ def test_e2e_profile_barracuda_cloudgen(dd_agent_check):
     common_tags = [
         'snmp_profile:barracuda-cloudgen',
         'snmp_host:barracuda-cloudgen.device.name',
+        'device_hostname:barracuda-cloudgen.device.name',
         'device_namespace:default',
         'snmp_device:' + ip_address,
         'device_ip:' + ip_address,

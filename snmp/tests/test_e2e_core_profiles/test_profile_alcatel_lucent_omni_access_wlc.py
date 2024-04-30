@@ -28,6 +28,7 @@ def test_e2e_profile_alcatel_lucent_omni_access_wlc(dd_agent_check):
     common_tags = [
         'snmp_profile:alcatel-lucent-omni-access-wlc',
         'snmp_host:alcatel-lucent-omni-access-wlc.device.name',
+        'device_hostname:alcatel-lucent-omni-access-wlc.device.name',
         'device_namespace:default',
         'snmp_device:' + ip_address,
         'device_ip:' + ip_address,

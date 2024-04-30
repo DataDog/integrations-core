@@ -27,6 +27,7 @@ def test_e2e_profile_servertech_pdu4(dd_agent_check):
     common_tags = [
         'snmp_profile:servertech-pdu4',
         'snmp_host:servertech-pdu4.device.name',
+        'device_hostname:servertech-pdu4.device.name',
         'device_namespace:default',
         'snmp_device:' + ip_address,
         'device_ip:' + ip_address,

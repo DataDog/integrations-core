@@ -2764,9 +2764,11 @@ def test_host_property_metrics(aggregator, realtime_instance, dd_run_check, capl
     aggregator.assert_metric('vsphere.cpu.costop.sum', count=1, hostname='host2')
 
 
-def test_cluster_property_metrics(aggregator, historical_instance, dd_run_check, service_instance, vm_properties_ex):
+def test_cluster_property_metrics(
+    aggregator, historical_instance, dd_run_check, service_instance, vm_properties_ex, caplog
+):
     historical_instance['collect_property_metrics'] = True
-
+    caplog.set_level(logging.DEBUG)
     service_instance.content.propertyCollector.RetrievePropertiesEx = vm_properties_ex
     base_tags = ['vcenter_server:FAKE', 'vsphere_type:cluster']
     base_tags_cluster_1 = base_tags + ['vsphere_cluster:c1']
@@ -2814,6 +2816,7 @@ def test_cluster_property_metrics(aggregator, historical_instance, dd_run_check,
     aggregator.assert_metric(
         'vsphere.cluster.configuration.drsConfig.vmotionRate', count=1, value=1, tags=base_tags_cluster_2
     )
+    assert "Could not retrieve properties" not in caplog.text
 
 
 def test_datastore_property_metrics(aggregator, historical_instance, dd_run_check, service_instance, vm_properties_ex):
@@ -3016,8 +3019,10 @@ def test_property_metrics_metric_filters(
     aggregator.assert_metric('datadog.vsphere.refresh_infrastructure_cache.time')
     aggregator.assert_metric('datadog.vsphere.refresh_metrics_metadata_cache.time')
     aggregator.assert_metric('datadog.vsphere.query_metrics.time')
+    aggregator.assert_metric('vsphere.datacenter.count')
     aggregator.assert_metric('vsphere.cpu.totalmhz.avg')
     aggregator.assert_metric('vsphere.datastore.busResets.sum')
+    aggregator.assert_metric('vsphere.vmop.numChangeDS.latest')
     aggregator.assert_all_metrics_covered()
 
 

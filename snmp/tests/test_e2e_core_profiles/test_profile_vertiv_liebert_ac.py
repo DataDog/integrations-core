@@ -27,6 +27,7 @@ def test_e2e_profile_vertiv_liebert_ac(dd_agent_check):
     common_tags = [
         'snmp_profile:vertiv-liebert-ac',
         'snmp_host:vertiv-liebert-ac.device.name',
+        'device_hostname:vertiv-liebert-ac.device.name',
         'device_namespace:default',
         'snmp_device:' + ip_address,
         'device_ip:' + ip_address,

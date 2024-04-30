@@ -29,6 +29,7 @@ def test_e2e_profile_vmware_esx(dd_agent_check):
     common_tags = [
         'snmp_profile:vmware-esx',
         'snmp_host:vmware-esx.device.name',
+        'device_hostname:vmware-esx.device.name',
         'device_namespace:default',
         'snmp_device:' + ip_address,
         'device_ip:' + ip_address,

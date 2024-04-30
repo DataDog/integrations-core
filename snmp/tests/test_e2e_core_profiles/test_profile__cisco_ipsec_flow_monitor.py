@@ -25,6 +25,7 @@ def test_e2e_profile__cisco_ipsec_flow_monitor(dd_agent_check):
     common_tags = [
         'snmp_profile:cisco-ipsec-flow-monitor',
         'snmp_host:_cisco-ipsec-flow-monitor.device.name',
+        'device_hostname:_cisco-ipsec-flow-monitor.device.name',
         'device_namespace:default',
         'snmp_device:' + ip_address,
         'device_ip:' + ip_address,

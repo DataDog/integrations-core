@@ -30,6 +30,7 @@ def test_e2e_profile_juniper_pulse_secure(dd_agent_check):
     common_tags = [
         'snmp_profile:juniper-pulse-secure',
         'snmp_host:juniper-pulse-secure.device.name',
+        'device_hostname:juniper-pulse-secure.device.name',
         'device_namespace:default',
         'snmp_device:' + ip_address,
         'device_ip:' + ip_address,
