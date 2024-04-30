@@ -47,6 +47,7 @@ instances:
 
     ## @param openmetrics_endpoint - string - required
     ## Endpoint exposing the Kubernetes Cluster Autoscaler's Prometheus metrics. For more information refer to:
+    ## https://github.com/kubernetes/autoscaler/blob/master/cluster-autoscaler/proposals/metrics.md
     #
   - openmetrics_endpoint: http://localhost:8085/metrics
 
