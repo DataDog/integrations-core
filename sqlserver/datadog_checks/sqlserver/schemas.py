@@ -266,9 +266,7 @@ class Schemas:
             id_to_all[t["id"]] = t
         total_columns_number  = self._populate_with_columns_data(table_ids_object, name_to_id, id_to_all, schema, cursor)
         #self._populate_with_partitions_data(table_ids, id_to_all, cursor) #TODO P DISABLED as postgrss backend accepts different data model
-        pdb.set_trace()
-        self._populate_with_foreign_keys_data(table_ids, id_to_all, cursor) #TODO P DISABLED as postgrss backend accepts different data model
-        pdb.set_trace()
+        #self._populate_with_foreign_keys_data(table_ids, id_to_all, cursor) #TODO P DISABLED as postgrss backend accepts different data model
         #self._populate_with_index_data(table_ids, id_to_all, cursor) #TODO P DISABLED as postgrss backend accepts different data model
         # unwrap id_to_all
         return total_columns_number, list(id_to_all.values())
