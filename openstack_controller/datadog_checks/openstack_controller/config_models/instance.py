@@ -122,6 +122,7 @@ class Image(BaseModel):
         arbitrary_types_allowed=True,
         frozen=True,
     )
+    members: Optional[bool] = None
     tasks: Optional[bool] = None
 
 

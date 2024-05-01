@@ -300,5 +300,8 @@ class ApiSdk(Api):
             for image in self.call_paginated_api(self.connection.image.images, limit=self.config.paginated_limit)
         ]
 
+    def get_glance_members(self, image_id):
+        return [member.to_dict(original_names=True) for member in self.connection.image.members(image_id)]
+
     def get_glance_tasks(self, image_id):
         return [task.to_dict(original_names=True) for task in self.connection.image.tasks(image_id)]

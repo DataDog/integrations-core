@@ -494,6 +494,13 @@ class ApiRest(Api):
             next_signifier='next',
         )
 
+    def get_glance_members(self, image_id):
+        response = self.http.get(
+            '{}/v2/images/{}/members'.format(self._catalog.get_endpoint_by_type(Component.Types.IMAGE.value), image_id)
+        )
+        response.raise_for_status()
+        return response.json().get('members', [])
+
     def get_glance_tasks(self, image_id):
         response = self.http.get(
             '{}/v2/images/{}/tasks'.format(self._catalog.get_endpoint_by_type(Component.Types.IMAGE.value), image_id)

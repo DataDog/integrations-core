@@ -610,6 +610,8 @@ files:
                           - type: boolean
                           - type: object
                             properties:
+                              - name: members
+                                type: boolean
                               - name: tasks
                                 type: boolean
             example:

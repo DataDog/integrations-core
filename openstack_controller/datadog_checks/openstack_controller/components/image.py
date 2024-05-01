@@ -9,6 +9,9 @@ from datadog_checks.openstack_controller.metrics import (
     GLANCE_IMAGE_METRICS,
     GLANCE_IMAGE_PREFIX,
     GLANCE_IMAGE_TAGS,
+    GLANCE_MEMBER_COUNT,
+    GLANCE_MEMBER_PREFIX,
+    GLANCE_MEMBER_TAGS,
     GLANCE_RESPONSE_TIME,
     GLANCE_SERVICE_CHECK,
     GLANCE_TASK_COUNT,
@@ -55,8 +58,23 @@ class Image(Component):
                 self.check.gauge(GLANCE_IMAGE_COUNT, 1, tags=tags + image['tags'])
                 for metric, value in image['metrics'].items():
                     self.check.gauge(metric, value, tags=tags + image['tags'])
-                self.check.log.debug("reporting tasks for image: %s", item['id'])
+                self.check.log.debug("reporting tasks and members for image: %s", item['id'])
+                self._report_members(config, tags, item['id'])
                 self._report_tasks(config, tags, item['id'])
+
+    @Component.http_error()
+    def _report_members(self, config, tags, image_id):
+        report_members = config.get('members', True)
+        if report_members:
+            data = self.check.api.get_glance_members(image_id)
+            for item in data:
+                member = get_metrics_and_tags(
+                    item,
+                    tags=GLANCE_MEMBER_TAGS,
+                    prefix=GLANCE_MEMBER_PREFIX,
+                    metrics=[GLANCE_MEMBER_COUNT],
+                )
+                self.check.gauge(GLANCE_MEMBER_COUNT, 1, tags=tags + member['tags'])
 
     @Component.http_error()
     def _report_tasks(self, config, tags, image_id):
