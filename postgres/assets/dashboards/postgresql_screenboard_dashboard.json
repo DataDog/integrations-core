@@ -1,15 +1,15 @@
 {
   "title": "Postgres - Overview",
-  "description": "This dashboard provides a high-level overview of your PostgreSQL databases, so you can track throughput, replication, locks, and other metrics from all your servers and spot potential issues. Further reading on PostgreSQL monitoring:\n\n- [Datadog's guide to key PostgreSQL metrics](https://www.datadoghq.com/blog/postgresql-monitoring/)\n\n- [Collecting metrics with PostgreSQL monitoring tools](https://www.datadoghq.com/blog/postgresql-monitoring-tools/)\n\n- [How to monitor PostgreSQL with Datadog](https://www.datadoghq.com/blog/collect-postgresql-data-with-datadog/)\n\n- [Datadog's PostgreSQL integration docs](https://docs.datadoghq.com/integrations/postgres/)\n\nClone this template dashboard to make changes and add your own graph widgets. (cloned)",
+  "description": "This dashboard provides a high-level overview of your PostgreSQL databases, so you can track throughput, replication, locks, and other metrics from all your servers and spot potential issues. Further reading on PostgreSQL monitoring:\n\n- [Datadog's guide to key PostgreSQL metrics](https://www.datadoghq.com/blog/postgresql-monitoring/)\n\n- [Collecting metrics with PostgreSQL monitoring tools](https://www.datadoghq.com/blog/postgresql-monitoring-tools/)\n\n- [How to monitor PostgreSQL with Datadog](https://www.datadoghq.com/blog/collect-postgresql-data-with-datadog/)\n\n- [Datadog's PostgreSQL integration docs](https://docs.datadoghq.com/integrations/postgres/)\n\nClone this template dashboard to make changes and add your own graph widgets. (cloned) (cloned)",
   "widgets": [
     {
       "id": 8450562588885112,
       "definition": {
         "title": "About Postgres",
         "title_align": "center",
-        "type": "group",
         "banner_img": "/static/images/integration_dashboard/postgres_hero_2.jpg",
         "show_title": false,
+        "type": "group",
         "layout_type": "ordered",
         "widgets": [
           {
@@ -63,9 +63,9 @@
       "id": 7975775563990214,
       "definition": {
         "title": "Current Activity",
-        "type": "group",
         "background_color": "white",
         "show_title": true,
+        "type": "group",
         "layout_type": "ordered",
         "widgets": [
           {
@@ -77,8 +77,6 @@
               "type": "query_value",
               "requests": [
                 {
-                  "q": "max:postgresql.percent_usage_connections{$scope}*100",
-                  "aggregator": "last",
                   "conditional_formats": [
                     {
                       "comparator": ">",
@@ -94,6 +92,20 @@
                       "comparator": "<=",
                       "palette": "white_on_green",
                       "value": 50
+                    }
+                  ],
+                  "response_format": "scalar",
+                  "queries": [
+                    {
+                      "data_source": "metrics",
+                      "name": "query1",
+                      "query": "max:postgresql.percent_usage_connections{$scope,$host}",
+                      "aggregator": "last"
+                    }
+                  ],
+                  "formulas": [
+                    {
+                      "formula": "query1 * 100"
                     }
                   ]
                 }
@@ -127,13 +139,13 @@
                   "response_format": "scalar",
                   "queries": [
                     {
-                      "query": "sum:postgresql.rows_fetched{$scope}",
+                      "query": "sum:postgresql.rows_fetched{$scope,$host}",
                       "data_source": "metrics",
                       "name": "query1",
                       "aggregator": "avg"
                     },
                     {
-                      "query": "sum:postgresql.rows_returned{$scope}",
+                      "query": "sum:postgresql.rows_returned{$scope,$host}",
                       "data_source": "metrics",
                       "name": "query2",
                       "aggregator": "avg"
@@ -166,8 +178,8 @@
       "definition": {
         "title": "Resource Utilization",
         "title_align": "center",
-        "type": "group",
         "background_color": "vivid_blue",
+        "type": "group",
         "layout_type": "ordered",
         "widgets": [
           {
@@ -178,13 +190,7 @@
               "title_align": "left",
               "show_legend": false,
               "legend_layout": "horizontal",
-              "legend_columns": [
-                "avg",
-                "min",
-                "max",
-                "value",
-                "sum"
-              ],
+              "legend_columns": ["avg", "min", "max", "value", "sum"],
               "type": "timeseries",
               "requests": [
                 {
@@ -198,7 +204,7 @@
                   "on_right_yaxis": false,
                   "queries": [
                     {
-                      "query": "sum:postgresql.dead_rows{$scope,$db,$table}",
+                      "query": "sum:postgresql.dead_rows{$scope,$db,$table,$host}",
                       "data_source": "metrics",
                       "name": "query1"
                     }
@@ -231,41 +237,63 @@
               "title": "Resources by table",
               "title_size": "16",
               "title_align": "left",
+              "time": {},
               "type": "query_table",
               "requests": [
                 {
-                  "aggregator": "avg",
-                  "cell_display_mode": [
-                    "bar"
+                  "response_format": "scalar",
+                  "queries": [
+                    {
+                      "data_source": "metrics",
+                      "name": "query1",
+                      "query": "avg:postgresql.total_size{$scope,$db,$table,$host} by {table}",
+                      "aggregator": "avg"
+                    },
+                    {
+                      "data_source": "metrics",
+                      "name": "query2",
+                      "query": "avg:postgresql.index_scans{$scope,$db,$table,$host} by {table}",
+                      "aggregator": "avg"
+                    },
+                    {
+                      "data_source": "metrics",
+                      "name": "query3",
+                      "query": "avg:postgresql.live_rows{$scope,$db,$table,$host} by {table}",
+                      "aggregator": "avg"
+                    },
+                    {
+                      "data_source": "metrics",
+                      "name": "query4",
+                      "query": "avg:postgresql.dead_rows{$scope,$db,$table,$host} by {table}",
+                      "aggregator": "avg"
+                    }
                   ],
-                  "q": "avg:postgresql.total_size{$scope,$db,$table} by {table}",
-                  "alias": "Disk Usage",
-                  "limit": 50,
-                  "order": "desc"
-                },
-                {
-                  "q": "avg:postgresql.index_scans{$scope,$db,$table} by {table}",
-                  "alias": "Index Scans",
-                  "cell_display_mode": [
-                    "bar"
-                  ],
-                  "aggregator": "avg"
-                },
-                {
-                  "q": "avg:postgresql.live_rows{$scope,$db,$table} by {table}",
-                  "alias": "Live Rows",
-                  "cell_display_mode": [
-                    "bar"
-                  ],
-                  "aggregator": "avg"
-                },
-                {
-                  "q": "avg:postgresql.dead_rows{$scope,$db,$table} by {table}",
-                  "alias": "Dead Rows",
-                  "cell_display_mode": [
-                    "bar"
-                  ],
-                  "aggregator": "avg"
+                  "formulas": [
+                    {
+                      "alias": "Disk Usage",
+                      "cell_display_mode": "bar",
+                      "formula": "query1",
+                      "limit": {
+                        "count": 50,
+                        "order": "desc"
+                      }
+                    },
+                    {
+                      "alias": "Index Scans",
+                      "cell_display_mode": "bar",
+                      "formula": "query2"
+                    },
+                    {
+                      "alias": "Live Rows",
+                      "cell_display_mode": "bar",
+                      "formula": "query3"
+                    },
+                    {
+                      "alias": "Dead Rows",
+                      "cell_display_mode": "bar",
+                      "formula": "query4"
+                    }
+                  ]
                 }
               ],
               "has_search_bar": "auto"
@@ -285,13 +313,7 @@
               "title_align": "left",
               "show_legend": false,
               "legend_layout": "horizontal",
-              "legend_columns": [
-                "avg",
-                "min",
-                "max",
-                "value",
-                "sum"
-              ],
+              "legend_columns": ["avg", "min", "max", "value", "sum"],
               "type": "timeseries",
               "requests": [
                 {
@@ -304,7 +326,7 @@
                   "response_format": "timeseries",
                   "queries": [
                     {
-                      "query": "sum:postgresql.temp_bytes{$scope,$db,$table}",
+                      "query": "sum:postgresql.temp_bytes{$scope,$db,$table,$host}",
                       "data_source": "metrics",
                       "name": "query1"
                     }
@@ -352,7 +374,7 @@
                   "response_format": "scalar",
                   "queries": [
                     {
-                      "query": "avg:postgresql.index_scans{$scope,$db} by {index}",
+                      "query": "avg:postgresql.index_scans{$scope,$db,$host} by {index}",
                       "data_source": "metrics",
                       "name": "query1",
                       "aggregator": "avg"
@@ -389,7 +411,7 @@
                   "response_format": "scalar",
                   "queries": [
                     {
-                      "query": "avg:postgresql.index_scans{$scope,$db} by {index}",
+                      "query": "avg:postgresql.index_scans{$scope,$db,$host} by {index}",
                       "data_source": "metrics",
                       "name": "query1",
                       "aggregator": "avg"
@@ -426,7 +448,7 @@
                   "response_format": "scalar",
                   "queries": [
                     {
-                      "query": "avg:postgresql.total_size{$scope,$table} by {table}",
+                      "query": "avg:postgresql.total_size{$scope,$table,$host} by {table}",
                       "data_source": "metrics",
                       "name": "query1",
                       "aggregator": "avg"
@@ -463,7 +485,7 @@
                   "response_format": "scalar",
                   "queries": [
                     {
-                      "query": "avg:postgresql.live_rows{$scope,$table} by {table}",
+                      "query": "avg:postgresql.live_rows{$scope,$table,$host} by {table}",
                       "data_source": "metrics",
                       "name": "query1",
                       "aggregator": "avg"
@@ -480,6 +502,12 @@
             }
           }
         ]
+      },
+      "layout": {
+        "x": 0,
+        "y": 5,
+        "width": 12,
+        "height": 8
       }
     },
     {
@@ -487,8 +515,8 @@
       "definition": {
         "title": "Locks",
         "title_align": "center",
-        "type": "group",
         "background_color": "vivid_orange",
+        "type": "group",
         "layout_type": "ordered",
         "widgets": [
           {
@@ -499,13 +527,7 @@
               "title_align": "left",
               "show_legend": true,
               "legend_layout": "horizontal",
-              "legend_columns": [
-                "avg",
-                "min",
-                "max",
-                "value",
-                "sum"
-              ],
+              "legend_columns": ["avg", "min", "max", "value", "sum"],
               "type": "timeseries",
               "requests": [
                 {
@@ -519,7 +541,7 @@
                   "on_right_yaxis": false,
                   "queries": [
                     {
-                      "query": "sum:postgresql.locks{$scope} by {lock_mode,table}",
+                      "query": "sum:postgresql.locks{$scope,$host} by {lock_mode,table}",
                       "data_source": "metrics",
                       "name": "query1"
                     }
@@ -567,7 +589,7 @@
                   "response_format": "scalar",
                   "queries": [
                     {
-                      "query": "sum:postgresql.locks{$scope} by {lock_mode,table}",
+                      "query": "sum:postgresql.locks{$scope,$host} by {lock_mode,table}",
                       "data_source": "metrics",
                       "name": "query1",
                       "aggregator": "max"
@@ -591,13 +613,7 @@
               "title_align": "left",
               "show_legend": false,
               "legend_layout": "auto",
-              "legend_columns": [
-                "avg",
-                "min",
-                "max",
-                "value",
-                "sum"
-              ],
+              "legend_columns": ["avg", "min", "max", "value", "sum"],
               "type": "timeseries",
               "requests": [
                 {
@@ -610,7 +626,7 @@
                   "response_format": "timeseries",
                   "queries": [
                     {
-                      "query": "max:postgresql.deadlocks.count{$scope} by {db}.as_count()",
+                      "query": "max:postgresql.deadlocks.count{$scope,$host} by {db}.as_count()",
                       "data_source": "metrics",
                       "name": "query1"
                     }
@@ -638,15 +654,21 @@
             }
           }
         ]
+      },
+      "layout": {
+        "x": 0,
+        "y": 13,
+        "width": 12,
+        "height": 4
       }
     },
     {
       "id": 2399955077694968,
       "definition": {
         "title": "Rows",
-        "type": "group",
         "background_color": "vivid_purple",
         "show_title": true,
+        "type": "group",
         "layout_type": "ordered",
         "widgets": [
           {
@@ -657,13 +679,7 @@
               "title_align": "left",
               "show_legend": true,
               "legend_layout": "horizontal",
-              "legend_columns": [
-                "avg",
-                "min",
-                "max",
-                "value",
-                "sum"
-              ],
+              "legend_columns": ["avg", "min", "max", "value", "sum"],
               "type": "timeseries",
               "requests": [
                 {
@@ -676,7 +692,7 @@
                   "response_format": "timeseries",
                   "queries": [
                     {
-                      "query": "avg:postgresql.rows_inserted{$scope,$db} by {db}",
+                      "query": "avg:postgresql.rows_inserted{$scope,$db,$host} by {db}",
                       "data_source": "metrics",
                       "name": "query3"
                     }
@@ -711,13 +727,7 @@
               "title_align": "left",
               "show_legend": true,
               "legend_layout": "horizontal",
-              "legend_columns": [
-                "avg",
-                "min",
-                "max",
-                "value",
-                "sum"
-              ],
+              "legend_columns": ["avg", "min", "max", "value", "sum"],
               "type": "timeseries",
               "requests": [
                 {
@@ -730,7 +740,7 @@
                   "response_format": "timeseries",
                   "queries": [
                     {
-                      "query": "avg:postgresql.rows_updated{$scope,$db} by {db}",
+                      "query": "avg:postgresql.rows_updated{$scope,$db,$host} by {db}",
                       "data_source": "metrics",
                       "name": "query1"
                     }
@@ -766,30 +776,48 @@
               "type": "query_table",
               "requests": [
                 {
-                  "aggregator": "sum",
-                  "cell_display_mode": [
-                    "bar"
+                  "response_format": "scalar",
+                  "queries": [
+                    {
+                      "data_source": "metrics",
+                      "name": "query1",
+                      "query": "avg:postgresql.rows_inserted{$db,$scope,$host} by {db}",
+                      "aggregator": "sum"
+                    },
+                    {
+                      "data_source": "metrics",
+                      "name": "query2",
+                      "query": "avg:postgresql.rows_updated{$db,$scope,$host} by {db}",
+                      "aggregator": "sum"
+                    },
+                    {
+                      "data_source": "metrics",
+                      "name": "query3",
+                      "query": "avg:postgresql.rows_deleted{$db,$scope,$host} by {db}",
+                      "aggregator": "sum"
+                    }
                   ],
-                  "q": "avg:postgresql.rows_inserted{$db,$scope} by {db}",
-                  "alias": "Inserted",
-                  "limit": 50,
-                  "order": "desc"
-                },
-                {
-                  "q": "avg:postgresql.rows_updated{$db,$scope} by {db}",
-                  "alias": "Updated",
-                  "cell_display_mode": [
-                    "bar"
-                  ],
-                  "aggregator": "sum"
-                },
-                {
-                  "q": "avg:postgresql.rows_deleted{$db,$scope} by {db}",
-                  "alias": "Deleted",
-                  "cell_display_mode": [
-                    "bar"
-                  ],
-                  "aggregator": "sum"
+                  "formulas": [
+                    {
+                      "formula": "query1",
+                      "alias": "Inserted",
+                      "limit": {
+                        "count": 50,
+                        "order": "desc"
+                      },
+                      "cell_display_mode": "bar"
+                    },
+                    {
+                      "formula": "query2",
+                      "alias": "Updated",
+                      "cell_display_mode": "bar"
+                    },
+                    {
+                      "formula": "query3",
+                      "alias": "Deleted",
+                      "cell_display_mode": "bar"
+                    }
+                  ]
                 }
               ],
               "has_search_bar": "auto"
@@ -809,13 +837,7 @@
               "title_align": "left",
               "show_legend": true,
               "legend_layout": "horizontal",
-              "legend_columns": [
-                "avg",
-                "min",
-                "max",
-                "value",
-                "sum"
-              ],
+              "legend_columns": ["avg", "min", "max", "value", "sum"],
               "type": "timeseries",
               "requests": [
                 {
@@ -828,7 +850,7 @@
                   "response_format": "timeseries",
                   "queries": [
                     {
-                      "query": "avg:postgresql.rows_deleted{$scope,$db} by {db}",
+                      "query": "avg:postgresql.rows_deleted{$scope,$db,$host} by {db}",
                       "data_source": "metrics",
                       "name": "query2"
                     }
@@ -863,13 +885,7 @@
               "title_align": "left",
               "show_legend": true,
               "legend_layout": "horizontal",
-              "legend_columns": [
-                "avg",
-                "min",
-                "max",
-                "value",
-                "sum"
-              ],
+              "legend_columns": ["avg", "min", "max", "value", "sum"],
               "type": "timeseries",
               "requests": [
                 {
@@ -882,7 +898,7 @@
                   "response_format": "timeseries",
                   "queries": [
                     {
-                      "query": "avg:postgresql.rows_hot_updated{$scope,$db} by {db}",
+                      "query": "avg:postgresql.rows_hot_updated{$scope,$db,$host} by {db}",
                       "data_source": "metrics",
                       "name": "query1"
                     }
@@ -910,6 +926,12 @@
             }
           }
         ]
+      },
+      "layout": {
+        "x": 0,
+        "y": 17,
+        "width": 12,
+        "height": 5
       }
     },
     {
@@ -917,9 +939,9 @@
       "definition": {
         "title": "Connections Monitor",
         "title_align": "center",
-        "type": "group",
         "background_color": "vivid_pink",
         "show_title": true,
+        "type": "group",
         "layout_type": "ordered",
         "widgets": [
           {
@@ -930,13 +952,7 @@
               "title_align": "left",
               "show_legend": true,
               "legend_layout": "horizontal",
-              "legend_columns": [
-                "avg",
-                "min",
-                "max",
-                "value",
-                "sum"
-              ],
+              "legend_columns": ["avg", "min", "max", "value", "sum"],
               "type": "timeseries",
               "requests": [
                 {
@@ -950,7 +966,7 @@
                   "on_right_yaxis": false,
                   "queries": [
                     {
-                      "query": "avg:postgresql.connections{$scope,$db} by {db}.rollup(max)",
+                      "query": "avg:postgresql.connections{$scope,$db,$host} by {db}.rollup(max)",
                       "data_source": "metrics",
                       "name": "query1"
                     }
@@ -971,7 +987,7 @@
                   "on_right_yaxis": false,
                   "queries": [
                     {
-                      "query": "min:postgresql.max_connections{$scope,$db} by {db}",
+                      "query": "min:postgresql.max_connections{$scope,$db,$host} by {db}",
                       "data_source": "metrics",
                       "name": "query1"
                     }
@@ -1017,7 +1033,7 @@
                   "response_format": "scalar",
                   "queries": [
                     {
-                      "query": "max:postgresql.connections{$scope,$db} by {db}",
+                      "query": "max:postgresql.connections{$scope,$db,$host} by {db}",
                       "data_source": "metrics",
                       "name": "query1",
                       "aggregator": "avg"
@@ -1058,7 +1074,7 @@
       },
       "layout": {
         "x": 0,
-        "y": 22,
+        "y": 0,
         "width": 12,
         "height": 5,
         "is_column_break": true
@@ -1069,9 +1085,9 @@
       "definition": {
         "title": "Throughput",
         "title_align": "center",
-        "type": "group",
         "background_color": "vivid_green",
         "show_title": true,
+        "type": "group",
         "layout_type": "ordered",
         "widgets": [
           {
@@ -1082,13 +1098,7 @@
               "title_align": "left",
               "show_legend": true,
               "legend_layout": "horizontal",
-              "legend_columns": [
-                "avg",
-                "min",
-                "max",
-                "value",
-                "sum"
-              ],
+              "legend_columns": ["avg", "min", "max", "value", "sum"],
               "type": "timeseries",
               "requests": [
                 {
@@ -1106,12 +1116,12 @@
                   "on_right_yaxis": false,
                   "queries": [
                     {
-                      "query": "avg:postgresql.index_scans{$scope,$db} by {db}",
+                      "query": "avg:postgresql.index_scans{$scope,$db,$host} by {db}",
                       "data_source": "metrics",
                       "name": "query1"
                     },
                     {
-                      "query": "avg:postgresql.seq_scans{$scope,$db} by {db}",
+                      "query": "avg:postgresql.seq_scans{$scope,$db,$host} by {db}",
                       "data_source": "metrics",
                       "name": "query2"
                     }
@@ -1147,22 +1157,37 @@
               "type": "query_table",
               "requests": [
                 {
-                  "aggregator": "avg",
-                  "cell_display_mode": [
-                    "bar"
+                  "response_format": "scalar",
+                  "queries": [
+                    {
+                      "data_source": "metrics",
+                      "name": "query1",
+                      "query": "avg:postgresql.index_scans{$scope,$db,$table,$host} by {db}",
+                      "aggregator": "avg"
+                    },
+                    {
+                      "data_source": "metrics",
+                      "name": "query2",
+                      "query": "avg:postgresql.seq_scans{$scope,$db,$table,$host} by {db}",
+                      "aggregator": "avg"
+                    }
                   ],
-                  "q": "avg:postgresql.index_scans{$scope,$db,$table} by {db}",
-                  "alias": "Index Scans",
-                  "limit": 50,
-                  "order": "desc"
-                },
-                {
-                  "q": "avg:postgresql.seq_scans{$scope,$db,$table} by {db}",
-                  "alias": "Sequential Scans",
-                  "cell_display_mode": [
-                    "bar"
-                  ],
-                  "aggregator": "avg"
+                  "formulas": [
+                    {
+                      "formula": "query1",
+                      "alias": "Index Scans",
+                      "limit": {
+                        "count": 50,
+                        "order": "desc"
+                      },
+                      "cell_display_mode": "bar"
+                    },
+                    {
+                      "formula": "query2",
+                      "alias": "Sequential Scans",
+                      "cell_display_mode": "bar"
+                    }
+                  ]
                 }
               ],
               "has_search_bar": "auto"
@@ -1182,13 +1207,7 @@
               "title_align": "left",
               "show_legend": true,
               "legend_layout": "horizontal",
-              "legend_columns": [
-                "avg",
-                "min",
-                "max",
-                "value",
-                "sum"
-              ],
+              "legend_columns": ["avg", "min", "max", "value", "sum"],
               "type": "timeseries",
               "requests": [
                 {
@@ -1202,7 +1221,7 @@
                   "on_right_yaxis": false,
                   "queries": [
                     {
-                      "query": "sum:postgresql.seq_scans{$scope,$db,$table}",
+                      "query": "sum:postgresql.seq_scans{$scope,$db,$table,$host}",
                       "data_source": "metrics",
                       "name": "query1"
                     }
@@ -1223,7 +1242,7 @@
                   "on_right_yaxis": false,
                   "queries": [
                     {
-                      "query": "sum:postgresql.seq_scans{$scope,$db,$table}",
+                      "query": "sum:postgresql.seq_scans{$scope,$db,$table,$host}",
                       "data_source": "metrics",
                       "name": "query1"
                     }
@@ -1272,7 +1291,7 @@
                   "response_format": "scalar",
                   "queries": [
                     {
-                      "query": "avg:postgresql.function.calls{$scope,$db,$table} by {function}",
+                      "query": "avg:postgresql.function.calls{$scope,$db,$table,$host} by {function}",
                       "data_source": "metrics",
                       "name": "query1",
                       "aggregator": "avg"
@@ -1289,6 +1308,12 @@
             }
           }
         ]
+      },
+      "layout": {
+        "x": 0,
+        "y": 5,
+        "width": 12,
+        "height": 7
       }
     },
     {
@@ -1296,8 +1321,8 @@
       "definition": {
         "title": "Replication",
         "title_align": "center",
-        "type": "group",
         "background_color": "vivid_orange",
+        "type": "group",
         "layout_type": "ordered",
         "widgets": [
           {
@@ -1308,13 +1333,7 @@
               "title_align": "left",
               "show_legend": false,
               "legend_layout": "auto",
-              "legend_columns": [
-                "avg",
-                "min",
-                "max",
-                "value",
-                "sum"
-              ],
+              "legend_columns": ["avg", "min", "max", "value", "sum"],
               "type": "timeseries",
               "requests": [
                 {
@@ -1392,6 +1411,12 @@
             }
           }
         ]
+      },
+      "layout": {
+        "x": 0,
+        "y": 12,
+        "width": 12,
+        "height": 4
       }
     },
     {
@@ -1399,8 +1424,8 @@
       "definition": {
         "title": "Checkpoints",
         "title_align": "center",
-        "type": "group",
         "background_color": "blue",
+        "type": "group",
         "layout_type": "ordered",
         "widgets": [
           {
@@ -1411,13 +1436,7 @@
               "title_align": "left",
               "show_legend": true,
               "legend_layout": "auto",
-              "legend_columns": [
-                "avg",
-                "min",
-                "max",
-                "value",
-                "sum"
-              ],
+              "legend_columns": ["avg", "min", "max", "value", "sum"],
               "type": "timeseries",
               "requests": [
                 {
@@ -1434,12 +1453,12 @@
                   "response_format": "timeseries",
                   "queries": [
                     {
-                      "query": "sum:postgresql.bgwriter.checkpoints_timed{$scope,$db}.as_count()",
+                      "query": "sum:postgresql.bgwriter.checkpoints_timed{$scope,$db,$host}.as_count()",
                       "data_source": "metrics",
                       "name": "query1"
                     },
                     {
-                      "query": "sum:postgresql.bgwriter.checkpoints_requested{$scope,$db}.as_count()",
+                      "query": "sum:postgresql.bgwriter.checkpoints_requested{$scope,$db,$host}.as_count()",
                       "data_source": "metrics",
                       "name": "query2"
                     }
@@ -1459,7 +1478,7 @@
                   "response_format": "timeseries",
                   "queries": [
                     {
-                      "query": "sum:postgresql.bgwriter.checkpoints_requested{$scope,$db}.as_count()",
+                      "query": "sum:postgresql.bgwriter.checkpoints_requested{$scope,$db,$host}.as_count()",
                       "data_source": "metrics",
                       "name": "query1"
                     }
@@ -1500,8 +1519,8 @@
       "definition": {
         "title": "Logs",
         "title_align": "center",
-        "type": "group",
         "background_color": "blue",
+        "type": "group",
         "layout_type": "ordered",
         "widgets": [
           {
@@ -1510,20 +1529,44 @@
               "title": "",
               "title_size": "16",
               "title_align": "left",
-              "type": "log_stream",
-              "indexes": [],
-              "query": "source:postgresql",
-              "sort": {
-                "column": "time",
-                "order": "desc"
-              },
-              "columns": [
-                "core_host",
-                "core_service"
+              "requests": [
+                {
+                  "response_format": "event_list",
+                  "query": {
+                    "data_source": "logs_stream",
+                    "query_string": "source:postgresql",
+                    "indexes": [],
+                    "storage": "hot",
+                    "sort": {
+                      "order": "desc",
+                      "column": "timestamp"
+                    }
+                  },
+                  "columns": [
+                    {
+                      "field": "status_line",
+                      "width": "auto"
+                    },
+                    {
+                      "field": "timestamp",
+                      "width": "auto"
+                    },
+                    {
+                      "field": "host",
+                      "width": "auto"
+                    },
+                    {
+                      "field": "service",
+                      "width": "auto"
+                    },
+                    {
+                      "field": "content",
+                      "width": "compact"
+                    }
+                  ]
+                }
               ],
-              "show_date_column": true,
-              "show_message_column": true,
-              "message_display": "expanded-md"
+              "type": "list_stream"
             },
             "layout": {
               "x": 0,
@@ -1545,27 +1588,29 @@
   "template_variables": [
     {
       "name": "scope",
-      "default": "*",
-      "prefix": null
+      "available_values": [],
+      "default": "*"
     },
     {
       "name": "table",
-      "default": "*",
-      "prefix": "table"
+      "prefix": "table",
+      "available_values": [],
+      "default": "*"
     },
     {
       "name": "db",
-      "default": "*",
-      "prefix": "db"
+      "prefix": "db",
+      "available_values": [],
+      "default": "*"
     },
     {
       "name": "host",
-      "default": "*",
-      "prefix": "host"
+      "prefix": "host",
+      "available_values": [],
+      "default": "*"
     }
   ],
   "layout_type": "ordered",
-  "is_read_only": true,
   "notify_list": [],
   "reflow_type": "fixed"
 }
