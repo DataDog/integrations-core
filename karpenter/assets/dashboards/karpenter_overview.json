@@ -184,7 +184,7 @@
                                             "aggregator": "last",
                                             "data_source": "metrics",
                                             "name": "query1",
-                                            "query": "sum:karpenter.machines_created.count{$kube_cluster_name,$nodepool,$zone} by {reason,kube_cluster_name}.as_count()"
+                                            "query": "sum:karpenter.nodeclaims_created.count{$kube_cluster_name,$nodepool,$zone} by {reason,kube_cluster_name}.as_count()"
                                         }
                                     ],
                                     "response_format": "scalar"
@@ -228,7 +228,7 @@
                                             "aggregator": "last",
                                             "data_source": "metrics",
                                             "name": "query1",
-                                            "query": "sum:karpenter.machines_terminated.count{$kube_cluster_name,$zone} by {reason,kube_cluster_name}.as_count()"
+                                            "query": "sum:karpenter.nodeclaims_terminated.count{$kube_cluster_name,$zone} by {reason,kube_cluster_name}.as_count()"
                                         }
                                     ],
                                     "response_format": "scalar"
