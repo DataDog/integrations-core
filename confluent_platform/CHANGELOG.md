@@ -2,6 +2,12 @@
 
 <!-- towncrier release notes start -->
 
+## 1.10.2 / 2024-05-01 / Agent 7.53.0
+
+***Fixed***:
+
+* Correct Mbean regex stream thread metric ([#17490](https://github.com/DataDog/integrations-core/pull/17490))
+
 ## 1.10.1 / 2024-03-22 / Agent 7.53.0
 
 ***Fixed***:
