@@ -8,7 +8,7 @@
 
 * Add additional tags on events for non-host resources. ([#17403](https://github.com/DataDog/integrations-core/pull/17403))
 
-## 7.5.0 / 2024-03-22
+## 7.5.0 / 2024-03-22 / Agent 7.53.0
 
 ***Added***:
 
