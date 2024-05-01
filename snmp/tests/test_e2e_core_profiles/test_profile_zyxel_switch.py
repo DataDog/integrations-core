@@ -28,8 +28,11 @@ def test_e2e_profile_zyxel_switch(dd_agent_check):
     common_tags = [
         'snmp_profile:zyxel-switch',
         'snmp_host:zyxel-switch.device.name',
+        'device_hostname:zyxel-switch.device.name',
         'device_namespace:default',
         'snmp_device:' + ip_address,
+        'device_ip:' + ip_address,
+        'device_id:default:' + ip_address,
     ] + [
         'zyxel_sys_product_model:but Jaded acted but acted Jaded zombies',
         'zyxel_sys_product_serial_number:oxen quaintly Jaded their oxen',

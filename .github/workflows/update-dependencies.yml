@@ -15,7 +15,7 @@ jobs:
       with:
         fetch-depth: 0
     - name: Set up Python
-      uses: actions/setup-python@v4
+      uses: actions/setup-python@v5
       with:
         python-version: "3.11"
     - name: Install ddev from local folder
@@ -53,12 +53,12 @@ jobs:
           Update the dependencies
 
           ### Motivation
-          
+
           Some of the dependencies are outdated
 
           ### Additional Notes
           <!-- Anything else we should know when reviewing? -->
-          
+
           This PR was automatically generated.
 
           ### Review checklist (to be filled by reviewers)

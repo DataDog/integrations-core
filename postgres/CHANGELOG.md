@@ -2,6 +2,32 @@
 
 <!-- towncrier release notes start -->
 
+## 18.2.1 / 2024-04-30
+
+***Fixed***:
+
+* Fixed a bug where schemas with tables of the same name were incorrectly reporting indexes of those tables multiple times ([#17480](https://github.com/DataDog/integrations-core/pull/17480))
+
+## 18.2.0 / 2024-04-26
+
+***Added***:
+
+* Added collect_checksum_metrics option to collect Postgres failed checksum counts for databases with it enabled. ([#17203](https://github.com/DataDog/integrations-core/pull/17203))
+* Collect postgres setting parameter `source`, `sourcefile` and `pending_restart` from pg_settings ([#17250](https://github.com/DataDog/integrations-core/pull/17250))
+* Collect the postgres table owner field in postgres schema payloads, which will be displayed in the database-monitoring schemas feature. ([#17314](https://github.com/DataDog/integrations-core/pull/17314))
+* Update dependencies ([#17319](https://github.com/DataDog/integrations-core/pull/17319))
+* Upgrade boto dependencies ([#17332](https://github.com/DataDog/integrations-core/pull/17332))
+* Add new postgresql.running metric ([#17418](https://github.com/DataDog/integrations-core/pull/17418))
+* Add fastpath tag to lock metrics ([#17451](https://github.com/DataDog/integrations-core/pull/17451))
+
+***Fixed***:
+
+* Fixed bug where `statement_timeout` setting incorrectly reflected integration connection value instead of database level
+  - Adjusted `statement_timeout` to apply at the session level post-database connection.
+  - Modified the `pg_settings` query to select `reset_val` when sourced from 'session', guaranteeing the retrieval of the accurate server-level setting. ([#17264](https://github.com/DataDog/integrations-core/pull/17264))
+* Improved performance of database schema collection. ([#17381](https://github.com/DataDog/integrations-core/pull/17381))
+* Fix default value for pg_stat_statements_view ([#17400](https://github.com/DataDog/integrations-core/pull/17400))
+
 ## 18.1.1 / 2024-04-17
 
 ***Fixed***:
