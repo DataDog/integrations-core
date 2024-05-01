@@ -7,9 +7,9 @@
       "definition": {
         "title": "About Postgres",
         "title_align": "center",
+        "type": "group",
         "banner_img": "/static/images/integration_dashboard/postgres_hero_2.jpg",
         "show_title": false,
-        "type": "group",
         "layout_type": "ordered",
         "widgets": [
           {
@@ -63,9 +63,9 @@
       "id": 7975775563990214,
       "definition": {
         "title": "Current Activity",
+        "type": "group",
         "background_color": "white",
         "show_title": true,
-        "type": "group",
         "layout_type": "ordered",
         "widgets": [
           {
@@ -77,6 +77,8 @@
               "type": "query_value",
               "requests": [
                 {
+                  "q": "max:postgresql.percent_usage_connections{$scope}*100",
+                  "aggregator": "last",
                   "conditional_formats": [
                     {
                       "comparator": ">",
@@ -92,20 +94,6 @@
                       "comparator": "<=",
                       "palette": "white_on_green",
                       "value": 50
-                    }
-                  ],
-                  "response_format": "scalar",
-                  "queries": [
-                    {
-                      "data_source": "metrics",
-                      "name": "query1",
-                      "query": "max:postgresql.percent_usage_connections{$scope,$host}",
-                      "aggregator": "last"
-                    }
-                  ],
-                  "formulas": [
-                    {
-                      "formula": "query1 * 100"
                     }
                   ]
                 }
@@ -178,8 +166,8 @@
       "definition": {
         "title": "Resource Utilization",
         "title_align": "center",
-        "background_color": "vivid_blue",
         "type": "group",
+        "background_color": "vivid_blue",
         "layout_type": "ordered",
         "widgets": [
           {
@@ -237,63 +225,33 @@
               "title": "Resources by table",
               "title_size": "16",
               "title_align": "left",
-              "time": {},
               "type": "query_table",
               "requests": [
                 {
-                  "response_format": "scalar",
-                  "queries": [
-                    {
-                      "data_source": "metrics",
-                      "name": "query1",
-                      "query": "avg:postgresql.total_size{$scope,$db,$table,$host} by {table}",
-                      "aggregator": "avg"
-                    },
-                    {
-                      "data_source": "metrics",
-                      "name": "query2",
-                      "query": "avg:postgresql.index_scans{$scope,$db,$table,$host} by {table}",
-                      "aggregator": "avg"
-                    },
-                    {
-                      "data_source": "metrics",
-                      "name": "query3",
-                      "query": "avg:postgresql.live_rows{$scope,$db,$table,$host} by {table}",
-                      "aggregator": "avg"
-                    },
-                    {
-                      "data_source": "metrics",
-                      "name": "query4",
-                      "query": "avg:postgresql.dead_rows{$scope,$db,$table,$host} by {table}",
-                      "aggregator": "avg"
-                    }
-                  ],
-                  "formulas": [
-                    {
-                      "alias": "Disk Usage",
-                      "cell_display_mode": "bar",
-                      "formula": "query1",
-                      "limit": {
-                        "count": 50,
-                        "order": "desc"
-                      }
-                    },
-                    {
-                      "alias": "Index Scans",
-                      "cell_display_mode": "bar",
-                      "formula": "query2"
-                    },
-                    {
-                      "alias": "Live Rows",
-                      "cell_display_mode": "bar",
-                      "formula": "query3"
-                    },
-                    {
-                      "alias": "Dead Rows",
-                      "cell_display_mode": "bar",
-                      "formula": "query4"
-                    }
-                  ]
+                  "aggregator": "avg",
+                  "cell_display_mode": ["bar"],
+                  "q": "avg:postgresql.total_size{$scope,$db,$table} by {table}",
+                  "alias": "Disk Usage",
+                  "limit": 50,
+                  "order": "desc"
+                },
+                {
+                  "q": "avg:postgresql.index_scans{$scope,$db,$table} by {table}",
+                  "alias": "Index Scans",
+                  "cell_display_mode": ["bar"],
+                  "aggregator": "avg"
+                },
+                {
+                  "q": "avg:postgresql.live_rows{$scope,$db,$table} by {table}",
+                  "alias": "Live Rows",
+                  "cell_display_mode": ["bar"],
+                  "aggregator": "avg"
+                },
+                {
+                  "q": "avg:postgresql.dead_rows{$scope,$db,$table} by {table}",
+                  "alias": "Dead Rows",
+                  "cell_display_mode": ["bar"],
+                  "aggregator": "avg"
                 }
               ],
               "has_search_bar": "auto"
@@ -502,12 +460,6 @@
             }
           }
         ]
-      },
-      "layout": {
-        "x": 0,
-        "y": 5,
-        "width": 12,
-        "height": 8
       }
     },
     {
@@ -515,8 +467,8 @@
       "definition": {
         "title": "Locks",
         "title_align": "center",
-        "background_color": "vivid_orange",
         "type": "group",
+        "background_color": "vivid_orange",
         "layout_type": "ordered",
         "widgets": [
           {
@@ -654,21 +606,15 @@
             }
           }
         ]
-      },
-      "layout": {
-        "x": 0,
-        "y": 13,
-        "width": 12,
-        "height": 4
       }
     },
     {
       "id": 2399955077694968,
       "definition": {
         "title": "Rows",
+        "type": "group",
         "background_color": "vivid_purple",
         "show_title": true,
-        "type": "group",
         "layout_type": "ordered",
         "widgets": [
           {
@@ -776,48 +722,24 @@
               "type": "query_table",
               "requests": [
                 {
-                  "response_format": "scalar",
-                  "queries": [
-                    {
-                      "data_source": "metrics",
-                      "name": "query1",
-                      "query": "avg:postgresql.rows_inserted{$db,$scope,$host} by {db}",
-                      "aggregator": "sum"
-                    },
-                    {
-                      "data_source": "metrics",
-                      "name": "query2",
-                      "query": "avg:postgresql.rows_updated{$db,$scope,$host} by {db}",
-                      "aggregator": "sum"
-                    },
-                    {
-                      "data_source": "metrics",
-                      "name": "query3",
-                      "query": "avg:postgresql.rows_deleted{$db,$scope,$host} by {db}",
-                      "aggregator": "sum"
-                    }
-                  ],
-                  "formulas": [
-                    {
-                      "formula": "query1",
-                      "alias": "Inserted",
-                      "limit": {
-                        "count": 50,
-                        "order": "desc"
-                      },
-                      "cell_display_mode": "bar"
-                    },
-                    {
-                      "formula": "query2",
-                      "alias": "Updated",
-                      "cell_display_mode": "bar"
-                    },
-                    {
-                      "formula": "query3",
-                      "alias": "Deleted",
-                      "cell_display_mode": "bar"
-                    }
-                  ]
+                  "aggregator": "sum",
+                  "cell_display_mode": ["bar"],
+                  "q": "avg:postgresql.rows_inserted{$db,$scope} by {db}",
+                  "alias": "Inserted",
+                  "limit": 50,
+                  "order": "desc"
+                },
+                {
+                  "q": "avg:postgresql.rows_updated{$db,$scope} by {db}",
+                  "alias": "Updated",
+                  "cell_display_mode": ["bar"],
+                  "aggregator": "sum"
+                },
+                {
+                  "q": "avg:postgresql.rows_deleted{$db,$scope} by {db}",
+                  "alias": "Deleted",
+                  "cell_display_mode": ["bar"],
+                  "aggregator": "sum"
                 }
               ],
               "has_search_bar": "auto"
@@ -926,12 +848,6 @@
             }
           }
         ]
-      },
-      "layout": {
-        "x": 0,
-        "y": 17,
-        "width": 12,
-        "height": 5
       }
     },
     {
@@ -939,9 +855,9 @@
       "definition": {
         "title": "Connections Monitor",
         "title_align": "center",
+        "type": "group",
         "background_color": "vivid_pink",
         "show_title": true,
-        "type": "group",
         "layout_type": "ordered",
         "widgets": [
           {
@@ -1074,7 +990,7 @@
       },
       "layout": {
         "x": 0,
-        "y": 0,
+        "y": 22,
         "width": 12,
         "height": 5,
         "is_column_break": true
@@ -1085,9 +1001,9 @@
       "definition": {
         "title": "Throughput",
         "title_align": "center",
+        "type": "group",
         "background_color": "vivid_green",
         "show_title": true,
-        "type": "group",
         "layout_type": "ordered",
         "widgets": [
           {
@@ -1157,37 +1073,18 @@
               "type": "query_table",
               "requests": [
                 {
-                  "response_format": "scalar",
-                  "queries": [
-                    {
-                      "data_source": "metrics",
-                      "name": "query1",
-                      "query": "avg:postgresql.index_scans{$scope,$db,$table,$host} by {db}",
-                      "aggregator": "avg"
-                    },
-                    {
-                      "data_source": "metrics",
-                      "name": "query2",
-                      "query": "avg:postgresql.seq_scans{$scope,$db,$table,$host} by {db}",
-                      "aggregator": "avg"
-                    }
-                  ],
-                  "formulas": [
-                    {
-                      "formula": "query1",
-                      "alias": "Index Scans",
-                      "limit": {
-                        "count": 50,
-                        "order": "desc"
-                      },
-                      "cell_display_mode": "bar"
-                    },
-                    {
-                      "formula": "query2",
-                      "alias": "Sequential Scans",
-                      "cell_display_mode": "bar"
-                    }
-                  ]
+                  "aggregator": "avg",
+                  "cell_display_mode": ["bar"],
+                  "q": "avg:postgresql.index_scans{$scope,$db,$table} by {db}",
+                  "alias": "Index Scans",
+                  "limit": 50,
+                  "order": "desc"
+                },
+                {
+                  "q": "avg:postgresql.seq_scans{$scope,$db,$table} by {db}",
+                  "alias": "Sequential Scans",
+                  "cell_display_mode": ["bar"],
+                  "aggregator": "avg"
                 }
               ],
               "has_search_bar": "auto"
@@ -1308,12 +1205,6 @@
             }
           }
         ]
-      },
-      "layout": {
-        "x": 0,
-        "y": 5,
-        "width": 12,
-        "height": 7
       }
     },
     {
@@ -1321,8 +1212,8 @@
       "definition": {
         "title": "Replication",
         "title_align": "center",
-        "background_color": "vivid_orange",
         "type": "group",
+        "background_color": "vivid_orange",
         "layout_type": "ordered",
         "widgets": [
           {
@@ -1411,12 +1302,6 @@
             }
           }
         ]
-      },
-      "layout": {
-        "x": 0,
-        "y": 12,
-        "width": 12,
-        "height": 4
       }
     },
     {
@@ -1424,8 +1309,8 @@
       "definition": {
         "title": "Checkpoints",
         "title_align": "center",
-        "background_color": "blue",
         "type": "group",
+        "background_color": "blue",
         "layout_type": "ordered",
         "widgets": [
           {
@@ -1519,8 +1404,8 @@
       "definition": {
         "title": "Logs",
         "title_align": "center",
-        "background_color": "blue",
         "type": "group",
+        "background_color": "blue",
         "layout_type": "ordered",
         "widgets": [
           {
@@ -1529,44 +1414,17 @@
               "title": "",
               "title_size": "16",
               "title_align": "left",
-              "requests": [
-                {
-                  "response_format": "event_list",
-                  "query": {
-                    "data_source": "logs_stream",
-                    "query_string": "source:postgresql",
-                    "indexes": [],
-                    "storage": "hot",
-                    "sort": {
-                      "order": "desc",
-                      "column": "timestamp"
-                    }
-                  },
-                  "columns": [
-                    {
-                      "field": "status_line",
-                      "width": "auto"
-                    },
-                    {
-                      "field": "timestamp",
-                      "width": "auto"
-                    },
-                    {
-                      "field": "host",
-                      "width": "auto"
-                    },
-                    {
-                      "field": "service",
-                      "width": "auto"
-                    },
-                    {
-                      "field": "content",
-                      "width": "compact"
-                    }
-                  ]
-                }
-              ],
-              "type": "list_stream"
+              "type": "log_stream",
+              "indexes": [],
+              "query": "source:postgresql",
+              "sort": {
+                "column": "time",
+                "order": "desc"
+              },
+              "columns": ["core_host", "core_service"],
+              "show_date_column": true,
+              "show_message_column": true,
+              "message_display": "expanded-md"
             },
             "layout": {
               "x": 0,
@@ -1588,30 +1446,27 @@
   "template_variables": [
     {
       "name": "scope",
-      "available_values": [],
-      "default": "*"
+      "default": "*",
+      "prefix": null
     },
     {
       "name": "table",
-      "prefix": "table",
-      "available_values": [],
-      "default": "*"
+      "default": "*",
+      "prefix": "table"
     },
     {
       "name": "db",
-      "prefix": "db",
-      "available_values": [],
-      "default": "*"
+      "default": "*",
+      "prefix": "db"
     },
     {
       "name": "host",
-      "prefix": "host",
-      "available_values": [],
-      "default": "*"
+      "default": "*",
+      "prefix": "host"
     }
   ],
   "layout_type": "ordered",
-	"is_read_only": true,
+  "is_read_only": true,
   "notify_list": [],
   "reflow_type": "fixed"
 }
