@@ -632,6 +632,18 @@ def connection_baremetal(request, mock_responses):
             for node in mock_responses('GET', '/baremetal/v1/nodes/detail')['nodes']
         ]
 
+    def portgroups(node_id):
+        if http_error and 'portgroups' in http_error:
+            raise requests.exceptions.HTTPError(response=http_error['portgroups'])
+        return [
+            mock.MagicMock(
+                to_dict=mock.MagicMock(
+                    return_value=node,
+                )
+            )
+            for node in mock_responses('GET', f'/baremetal/v1/nodes/{node_id}/portgroups/detail')['portgroups']
+        ]
+
     def conductors(limit=None):
         if http_error and 'conductors' in http_error:
             raise requests.exceptions.HTTPError(response=http_error['conductors'])
@@ -644,7 +656,11 @@ def connection_baremetal(request, mock_responses):
             for node in mock_responses('GET', '/baremetal/v1/conductors')['conductors']
         ]
 
-    return mock.MagicMock(nodes=mock.MagicMock(side_effect=nodes), conductors=mock.MagicMock(side_effect=conductors))
+    return mock.MagicMock(
+        nodes=mock.MagicMock(side_effect=nodes),
+        conductors=mock.MagicMock(side_effect=conductors),
+        portgroups=mock.MagicMock(side_effect=portgroups),
+    )
 
 
 @pytest.fixture

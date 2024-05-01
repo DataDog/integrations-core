@@ -21,6 +21,7 @@ openstack.glance.response_time,gauge,,millisecond,,Duration that an HTTP request
 openstack.ironic.conductor.count,gauge,,,,Number of ironic conductors,0,openstack_controller,ironic conductor ct,
 openstack.ironic.conductor.up,gauge,,,,Whether an ironic conductor is up,0,openstack_controller,ironic conductor up,
 openstack.ironic.node.count,gauge,,,,Number of ironic nodes,0,openstack_controller,ironic node ct,
+openstack.ironic.node.portgroup.count,gauge,,,,Number of portgroups associated with a node,0,openstack_controller,ironic node portgroup ct,
 openstack.ironic.node.up,gauge,,,,Whether an ironic node is up,0,openstack_controller,ironic node up,
 openstack.ironic.response_time,gauge,,millisecond,,Duration that an HTTP request takes to complete when making a request to ironic endpoint,0,openstack_controller,ironic response time,
 openstack.keystone.domain.count,gauge,,,,Number of domains of the Openstack deployment,0,openstack_controller,keystone domains count,

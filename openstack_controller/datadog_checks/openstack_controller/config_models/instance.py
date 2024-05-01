@@ -47,6 +47,7 @@ class Node(BaseModel):
     include: Optional[tuple[Union[str, IncludeItem], ...]] = None
     interval: Optional[int] = None
     limit: Optional[int] = Field(None, description='Maximum number of nodes to be processed.\n')
+    portgroups: Optional[Union[bool, MappingProxyType[str, Any]]] = None
 
 
 class BaremetalItem(BaseModel):

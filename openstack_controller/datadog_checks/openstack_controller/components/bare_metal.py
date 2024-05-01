@@ -13,6 +13,9 @@ from datadog_checks.openstack_controller.metrics import (
     IRONIC_NODE_COUNT,
     IRONIC_NODE_METRICS,
     IRONIC_NODE_METRICS_PREFIX,
+    IRONIC_NODE_PORTGROUP_COUNT,
+    IRONIC_NODE_PORTGROUP_PREFIX,
+    IRONIC_NODE_PORTGROUP_TAGS,
     IRONIC_NODE_TAGS,
     IRONIC_RESPONSE_TIME,
     IRONIC_SERVICE_CHECK,
@@ -84,6 +87,26 @@ class BareMetal(Component):
             for metric, value in node['metrics'].items():
                 self.check.gauge(metric, value, tags=tags + node['tags'], hostname=item['uuid'])
             self.check.external_tags.append((item['uuid'], {'openstack': ['host_type:baremetal']}))
+            self._report_portgroups(config, tags, item['uuid'])
+
+    @Component.http_error()
+    def _report_portgroups(self, config, tags, node_id):
+        if 'portgroups' not in config:
+            report_portgroups = config.get('nodes', {}).get('portgroups', True)
+        else:
+            report_portgroups = config.get('portgroups', True)
+        if report_portgroups:
+            self.check.log.debug("reporting portgroups for node: %s", node_id)
+            data = self.check.api.get_baremetal_portgroups(node_id)
+            for item in data:
+                portgroup = get_metrics_and_tags(
+                    item,
+                    tags=IRONIC_NODE_PORTGROUP_TAGS,
+                    prefix=IRONIC_NODE_PORTGROUP_PREFIX,
+                    metrics=[IRONIC_NODE_PORTGROUP_COUNT],
+                )
+                self.check.log.debug("portgroup: %s", portgroup)
+                self.check.gauge(IRONIC_NODE_PORTGROUP_COUNT, 1, tags=tags + portgroup['tags'], hostname=item['uuid'])
 
     @Component.register_global_metrics(ID)
     @Component.http_error()

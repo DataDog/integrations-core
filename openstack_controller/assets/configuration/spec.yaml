@@ -448,6 +448,10 @@ files:
                                   type: string
                               - name: interval
                                 type: integer
+                              - name: portgroups
+                                anyOf:
+                                  - type: boolean
+                                  - type: object
                       - name: conductors
                         type: boolean
               - name: load-balancer
