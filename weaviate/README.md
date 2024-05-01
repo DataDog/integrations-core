@@ -1,8 +1,17 @@
 # Agent Check: Weaviate
 
+![Weaviate Overview Dashboard][16]
+
 ## Overview
 
-This check monitors [Weaviate][1] through the Datadog Agent. For more information, see [Weaviate monitoring][10].
+Weaviate is an open source, AI-native vector database that helps create AI-powered applications. With Datadog's Weaviate integration, you can:
+
+- Monitor usage statistics (such as duration of insert, delete, and maintenance operations) to identify potential storage issues, bottlenecks, and assess the impact of data modifications on system responsiveness.
+- Track query latency, rate, and concurrent read/write requests to gain insight into the vector database's overall responsiveness and load handling capabilities.
+- Optimize write-heavy workloads with object statistics, like the average time taken for "put" (write) operations.
+- Ensure smooth and efficient data ingestion with import-related metrics that offer insights into operations like data loading process. 
+
+This check monitors [Weaviate][1] through the Datadog Agent. For more information, see [Weaviate monitoring][2]. To learn more about Datadog's suite of AI integrations, see this [blog][15].
 
 ## Setup
 
@@ -90,6 +99,12 @@ See [service_checks.json][8] for a list of service checks provided by this integ
 
 Need help? Contact [Datadog support][9].
 
+## Further Reading
+
+Additional helpful documentation, links, and articles:
+
+- [Integration roundup: Monitoring your AI stack][15]
+
 
 [1]: https://weaviate.io/developers/weaviate
 [2]: https://app.datadoghq.com/account/settings/agent/latest
@@ -105,3 +120,5 @@ Need help? Contact [Datadog support][9].
 [12]: https://docs.datadoghq.com/integrations/openmetrics/
 [13]: https://github.com/DataDog/integrations-core/blob/7.46.x/openmetrics/datadog_checks/openmetrics/data/conf.yaml.example#L544-L546
 [14]: https://github.com/weaviate/weaviate-helm/blob/576f613bad3f8e25015c61a7143800123ab378d3/weaviate/values.yaml#L1196
+[15]: https://www.datadoghq.com/blog/ai-integrations/
+[16]: https://raw.githubusercontent.com/DataDog/integrations-core/master/weaviate/images/weaviate_dashboard.png

@@ -2,6 +2,12 @@
 
 <!-- towncrier release notes start -->
 
+## 18.2.1 / 2024-04-30
+
+***Fixed***:
+
+* Fixed a bug where schemas with tables of the same name were incorrectly reporting indexes of those tables multiple times ([#17480](https://github.com/DataDog/integrations-core/pull/17480))
+
 ## 18.2.0 / 2024-04-26
 
 ***Added***:
