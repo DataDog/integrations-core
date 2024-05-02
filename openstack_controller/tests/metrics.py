@@ -4521,7 +4521,7 @@ NODES_METRICS_IRONIC_MICROVERSION_1_80 = [
     },
 ]
 
-PORT_METRICS = [
+PORT_METRICS_IRONIC_MICROVERSION_DEFAULT = [
     {
         'name': 'openstack.ironic.port.count',
         'count': 1,

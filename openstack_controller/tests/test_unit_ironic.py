@@ -19,7 +19,7 @@ from tests.metrics import (
     IRONIC_NODE_COUNT,
     NODES_METRICS_IRONIC_MICROVERSION_1_80,
     NODES_METRICS_IRONIC_MICROVERSION_DEFAULT,
-    PORT_METRICS,
+    PORT_METRICS_IRONIC_MICROVERSION_DEFAULT,
     PORTGROUPS_METRICS_IRONIC_MICROVERSION_1_80,
 )
 
@@ -170,22 +170,22 @@ def test_disable_ironic_ports_metrics(aggregator, dd_run_check, instance, openst
     [
         pytest.param(
             configs.REST,
-            PORT_METRICS,
+            PORT_METRICS_IRONIC_MICROVERSION_DEFAULT,
             id='api rest no microversion',
         ),
         pytest.param(
             configs.REST_IRONIC_MICROVERSION_1_80,
-            PORT_METRICS,
+            PORT_METRICS_IRONIC_MICROVERSION_DEFAULT,
             id='api rest microversion 1.80',
         ),
         pytest.param(
             configs.SDK,
-            PORT_METRICS,
+            PORT_METRICS_IRONIC_MICROVERSION_DEFAULT,
             id='api sdk no microversion',
         ),
         pytest.param(
             configs.SDK_IRONIC_MICROVERSION_1_80,
-            PORT_METRICS,
+            PORT_METRICS_IRONIC_MICROVERSION_DEFAULT,
             id='api sdk microversion 1.80',
         ),
     ],
