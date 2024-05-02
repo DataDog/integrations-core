@@ -1,1 +1,0 @@
-Added collect_checksum_metrics option to collect Postgres failed checksum counts for databases with it enabled.

@@ -629,7 +629,14 @@ files:
                   - type: object
                     properties:
                       - name: images
-                        type: boolean
+                        anyOf:
+                          - type: boolean
+                          - type: object
+                            properties:
+                              - name: members
+                                type: boolean
+                              - name: tasks
+                                type: boolean
             example:
               compute: false
         - name: projects

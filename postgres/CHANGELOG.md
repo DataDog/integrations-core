@@ -28,7 +28,7 @@
 * Improved performance of database schema collection. ([#17381](https://github.com/DataDog/integrations-core/pull/17381))
 * Fix default value for pg_stat_statements_view ([#17400](https://github.com/DataDog/integrations-core/pull/17400))
 
-## 18.1.1 / 2024-04-17
+## 18.1.1 / 2024-04-17 / Agent 7.53.0
 
 ***Fixed***:
 

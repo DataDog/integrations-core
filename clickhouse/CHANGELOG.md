@@ -2,6 +2,12 @@
 
 <!-- towncrier release notes start -->
 
+## 3.5.0 / 2024-04-26
+
+***Added***:
+
+* Add new ClickHouse metrics ([#17218](https://github.com/DataDog/integrations-core/pull/17218))
+
 ## 3.4.0 / 2024-03-22 / Agent 7.53.0
 
 ***Added***:
