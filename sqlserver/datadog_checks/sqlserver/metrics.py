@@ -891,7 +891,7 @@ class SqlAvailabilityReplicas(BaseSqlServerMetric):
                     inner join sys.dm_hadr_database_replica_cluster_states as dhdrcs
                     on ar.replica_id = dhdrcs.replica_id
                     inner join sys.dm_hadr_database_replica_states as dhdrs
-                    on ar.replica_id = dhdrs.replica_id
+                    on ar.replica_id = dhdrs.replica_id and dhdrcs.group_database_id = dhdrs.group_database_id
                     inner join sys.availability_groups as ag
                     on ag.group_id = ar.group_id""".format(
         table=TABLE
