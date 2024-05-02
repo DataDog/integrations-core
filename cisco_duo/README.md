@@ -20,8 +20,9 @@ The Cisco Duo integration seamlessly collects multi-factor authentication (MFA) 
 1. Sign up for a [**Duo account**][2].
 2. Log in to the [**Duo Admin Panel**][3].
 3. Navigate to **Applications**.
-4. Click **Protect an Application** and locate the entry for _Auth API_ in the applications list.
-5. Click **Protect** to the far-right to configure the application and get your `integration key`, `secret key`, and `API hostname`. This information will be used during next step to configure Cisco Duo integration.
+4. Click **Protect an Application** and locate the entry for _Admin API_ in the applications list.
+6. Click **Protect** to configure the application and retrieve your `integration key`, `secret key`, and `API hostname`. This information will be used to configure the Cisco Duo integration.
+7. Ensure the _Grant read log_ permission is selected and click **Save Changes**.
 
 #### Cisco Duo DataDog Integration Configuration
 
