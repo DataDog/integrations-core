@@ -401,11 +401,11 @@ IRONIC_NODE_METRICS = {
 IRONIC_NODE_PORTGROUP_PREFIX = f"{IRONIC_NODE_METRICS_PREFIX}.portgroup"
 IRONIC_NODE_PORTGROUP_COUNT = f"{IRONIC_NODE_PORTGROUP_PREFIX}.count"
 IRONIC_NODE_PORTGROUP_TAGS = {
-    'uuid': 'uuid',
+    'uuid': 'portgroup_uuid',
     'node_uuid': 'node_uuid',
-    'address': 'address',
-    'mode': 'mode',
-    'name': 'name',
+    'address': 'portgroup_address',
+    'mode': 'portgroup_mode',
+    'name': 'portgroup_name',
 }
 
 IRONIC_CONDUCTOR_METRICS_PREFIX = f"{IRONIC_METRICS_PREFIX}.conductor"
