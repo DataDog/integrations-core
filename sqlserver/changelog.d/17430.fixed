@@ -1,1 +1,0 @@
-Fixed a bug where specifying `null` for `custom_metrics` would cause the SQL Server integration to crash

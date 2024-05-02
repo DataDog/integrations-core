@@ -29,6 +29,7 @@ def test_e2e_profile_server_iron_switch(dd_agent_check):
     common_tags = [
         'snmp_profile:server-iron-switch',
         'snmp_host:server-iron-switch.device.name',
+        'device_hostname:server-iron-switch.device.name',
         'device_namespace:default',
         'snmp_device:' + ip_address,
         'device_ip:' + ip_address,

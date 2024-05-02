@@ -253,6 +253,7 @@ def test_e2e_memory_cpu_f5_big_ip(dd_agent_check):
         'device_namespace:default',
         'device_vendor:f5',
         'snmp_host:f5-big-ip-adc-good-byol-1-vm.c.datadog-integrations-lab.internal',
+        'device_hostname:f5-big-ip-adc-good-byol-1-vm.c.datadog-integrations-lab.internal',
         'snmp_profile:f5-big-ip',
     ]
     device_ip = instance['ip_address']
@@ -417,6 +418,7 @@ def test_e2e_meraki_cloud_controller(dd_agent_check):
     common_tags = [
         'snmp_profile:meraki-cloud-controller',
         'snmp_host:dashboard.meraki.com',
+        'device_hostname:dashboard.meraki.com',
         'device_vendor:meraki',
         'device_namespace:default',
         'snmp_device:' + ip_address,
@@ -515,6 +517,7 @@ def test_e2e_core_detect_metrics_using_apc_ups_metrics(dd_agent_check):
         'ups_name:testIdentName',
         # metric_tags from _base.yaml
         'snmp_host:APC_UPS_NAME',
+        'device_hostname:APC_UPS_NAME',
     ]
     device_ip = instance['ip_address']
 
@@ -620,6 +623,7 @@ def test_e2e_cisco_nexus(dd_agent_check):
         "device_ip:{}".format(device_ip),
         "device_id:default:{}".format(device_ip),
         'snmp_host:Nexus-eu1.companyname.managed',
+        'device_hostname:Nexus-eu1.companyname.managed',
     ]
 
     common.assert_common_metrics(aggregator, common_tags, is_e2e=True, loader='core')
@@ -828,6 +832,7 @@ def test_e2e_cisco_legacy_wlc(dd_agent_check):
         'snmp_profile:cisco-legacy-wlc',
         'device_vendor:cisco',
         'snmp_host:DDOGWLC',
+        'device_hostname:DDOGWLC',
         'snmp_device:' + ip_address,
         "device_ip:" + ip_address,
         "device_id:default:" + ip_address,

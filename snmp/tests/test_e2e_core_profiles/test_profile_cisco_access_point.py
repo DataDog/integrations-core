@@ -29,6 +29,7 @@ def test_e2e_profile_cisco_access_point(dd_agent_check):
     common_tags = [
         'snmp_profile:cisco-access-point',
         'snmp_host:cisco-access-point.device.name',
+        'device_hostname:cisco-access-point.device.name',
         'device_namespace:default',
         'snmp_device:' + ip_address,
         'device_ip:' + ip_address,

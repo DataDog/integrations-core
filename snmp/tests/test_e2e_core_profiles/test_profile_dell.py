@@ -30,6 +30,7 @@ def test_e2e_profile_dell(dd_agent_check):
     common_tags = [
         "snmp_profile:dell",
         "snmp_host:dell.example",
+        "device_hostname:dell.example",
         "device_namespace:default",
         "snmp_device:" + ip_address,
         'device_ip:' + ip_address,
@@ -58,6 +59,7 @@ def test_e2e_profile_dell(dd_agent_check):
             "device_namespace:default",
             "snmp_device:" + ip_address,
             "snmp_host:dell.example",
+            "device_hostname:dell.example",
             "snmp_profile:dell",
         ],
         "vendor": "dell",

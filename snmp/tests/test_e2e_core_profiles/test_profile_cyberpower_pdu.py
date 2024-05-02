@@ -27,6 +27,7 @@ def test_e2e_profile_cyberpower_pdu(dd_agent_check):
     common_tags = [
         'snmp_profile:cyberpower-pdu',
         'snmp_host:cyberpower-pdu.device.name',
+        'device_hostname:cyberpower-pdu.device.name',
         'device_namespace:default',
         'snmp_device:' + ip_address,
         'device_ip:' + ip_address,

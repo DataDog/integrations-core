@@ -28,6 +28,7 @@ def test_e2e_profile_aruba_wireless_controller(dd_agent_check):
     common_tags = [
         'snmp_profile:aruba-wireless-controller',
         'snmp_host:aruba-wireless-controller.device.name',
+        'device_hostname:aruba-wireless-controller.device.name',
         'device_namespace:default',
         'snmp_device:' + ip_address,
         'device_ip:' + ip_address,

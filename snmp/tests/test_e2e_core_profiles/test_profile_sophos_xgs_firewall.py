@@ -28,6 +28,7 @@ def test_e2e_profile_sophos_xgs_firewall(dd_agent_check):
     common_tags = [
         'snmp_profile:sophos-xgs-firewall',
         'snmp_host:sophos-xgs-firewall.device.name',
+        'device_hostname:sophos-xgs-firewall.device.name',
         'device_namespace:default',
         'snmp_device:' + ip_address,
         'device_ip:' + ip_address,

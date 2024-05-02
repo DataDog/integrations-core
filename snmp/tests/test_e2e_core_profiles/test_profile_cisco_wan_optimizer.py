@@ -29,6 +29,7 @@ def test_e2e_profile_cisco_wan_optimizer(dd_agent_check):
     common_tags = [
         'snmp_profile:cisco-wan-optimizer',
         'snmp_host:cisco-wan-optimizer.device.name',
+        'device_hostname:cisco-wan-optimizer.device.name',
         'device_namespace:default',
         'snmp_device:' + ip_address,
         'device_ip:' + ip_address,

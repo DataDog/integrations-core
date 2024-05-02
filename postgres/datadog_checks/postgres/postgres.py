@@ -650,6 +650,9 @@ class PostgreSql(AgentCheck):
             )
             self._dynamic_queries.append(self._new_query_executor(queries, db=db))
 
+    def _emit_running_metric(self):
+        self.gauge("postgresql.running", 1, tags=self.tags_without_db, hostname=self.resolved_hostname)
+
     def _collect_stats(self, instance_tags):
         """Query pg_stat_* for various metrics
         If relations is not an empty list, gather per-relation metrics
@@ -1027,6 +1030,7 @@ class PostgreSql(AgentCheck):
                 self.tags_without_db.append(replication_role_tag)
 
             self.log.debug("Running check against version %s: is_aurora: %s", str(self.version), str(self.is_aurora))
+            self._emit_running_metric()
             self._collect_stats(tags)
             self._collect_custom_queries(tags)
             if self._config.dbm_enabled:

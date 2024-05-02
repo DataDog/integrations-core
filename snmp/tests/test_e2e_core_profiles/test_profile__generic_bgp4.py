@@ -27,6 +27,7 @@ def test_e2e_profile__generic_bgp4(dd_agent_check):
     common_tags = [
         'snmp_profile:generic-bgp4',
         'snmp_host:_generic-bgp4.device.name',
+        'device_hostname:_generic-bgp4.device.name',
         'device_namespace:default',
         'snmp_device:' + ip_address,
         'device_ip:' + ip_address,

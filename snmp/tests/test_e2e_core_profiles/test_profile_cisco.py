@@ -35,6 +35,7 @@ def test_e2e_profile_cisco(dd_agent_check):
     common_tags = [
         "snmp_profile:cisco",
         "snmp_host:cisco3620",
+        "device_hostname:cisco3620",
         "device_namespace:default",
         "snmp_device:" + ip_address,
         'device_ip:' + ip_address,
@@ -69,6 +70,7 @@ def test_e2e_profile_cisco(dd_agent_check):
             "device_namespace:default",
             "snmp_device:" + ip_address,
             "snmp_host:cisco3620",
+            "device_hostname:cisco3620",
             "snmp_profile:cisco",
         ],
         "vendor": "cisco",

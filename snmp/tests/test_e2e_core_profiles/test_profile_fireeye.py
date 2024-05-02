@@ -28,6 +28,7 @@ def test_e2e_profile_fireeye(dd_agent_check):
     common_tags = [
         'snmp_profile:fireeye',
         'snmp_host:fireeye.device.name',
+        'device_hostname:fireeye.device.name',
         'device_namespace:default',
         'snmp_device:' + ip_address,
         'device_ip:' + ip_address,

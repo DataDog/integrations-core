@@ -33,6 +33,7 @@ def test_e2e_profile_juniper(dd_agent_check):
     common_tags = [
         "snmp_profile:juniper",
         "snmp_host:jnxM40",
+        "device_hostname:jnxM40",
         "device_namespace:default",
         "snmp_device:" + ip_address,
         'device_ip:' + ip_address,
@@ -66,6 +67,7 @@ def test_e2e_profile_juniper(dd_agent_check):
             "device_namespace:default",
             "snmp_device:" + ip_address,
             "snmp_host:jnxM40",
+            "device_hostname:jnxM40",
             "snmp_profile:juniper",
         ],
         "vendor": "juniper-networks",
@@ -83,6 +85,7 @@ def test_e2e_profile_juniper_variation(dd_agent_check):
     common_tags = [
         "snmp_profile:juniper",
         "snmp_host:jnxVariationM40",
+        "device_hostname:jnxVariationM40",
         "device_namespace:default",
         "snmp_device:" + ip_address,
         "device_ip:" + ip_address,
@@ -116,6 +119,7 @@ def test_e2e_profile_juniper_variation(dd_agent_check):
             "device_namespace:default",
             "snmp_device:" + ip_address,
             "snmp_host:jnxVariationM40",
+            "device_hostname:jnxVariationM40",
             "snmp_profile:juniper",
         ],
         "vendor": "juniper-networks",
