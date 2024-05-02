@@ -1,0 +1,1 @@
+Fix Always-On metrics query for replica_failover_mode and replica_failover_readiness
