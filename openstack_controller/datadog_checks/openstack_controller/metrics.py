@@ -398,6 +398,15 @@ IRONIC_NODE_TAGS = {
 IRONIC_NODE_METRICS = {
     f"{IRONIC_NODE_METRICS_PREFIX}.up": {},
 }
+IRONIC_NODE_PORTGROUP_PREFIX = f"{IRONIC_NODE_METRICS_PREFIX}.portgroup"
+IRONIC_NODE_PORTGROUP_COUNT = f"{IRONIC_NODE_PORTGROUP_PREFIX}.count"
+IRONIC_NODE_PORTGROUP_TAGS = {
+    'uuid': 'portgroup_uuid',
+    'node_uuid': 'node_uuid',
+    'address': 'portgroup_address',
+    'mode': 'portgroup_mode',
+    'name': 'portgroup_name',
+}
 
 IRONIC_CONDUCTOR_METRICS_PREFIX = f"{IRONIC_METRICS_PREFIX}.conductor"
 IRONIC_CONDUCTOR_COUNT = f"{IRONIC_CONDUCTOR_METRICS_PREFIX}.count"
