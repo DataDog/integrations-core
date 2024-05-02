@@ -843,6 +843,7 @@ FROM pg_stat_subscription_stats
 }
 
 # Requires PG16+
+# Capping at 200 rows for caution. This should always return less data points than that. Adjust if needed
 STAT_IO_METRICS = {
     'name': 'stat_io_metrics',
     'query': """
@@ -860,6 +861,7 @@ SELECT backend_type,
        write_time,
        writes
 FROM pg_stat_io
+LIMIT 200
 """,
     'columns': [
         {'name': 'backend_type', 'type': 'tag'},

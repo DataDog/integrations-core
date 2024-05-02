@@ -1,1 +1,1 @@
-Add pg_stat_io metrics
+Added `postgresql.io.*` metrics from `pg_stat_io` when DBM is enabled. Only available with PostgreSQL 16 and newer
