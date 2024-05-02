@@ -30,8 +30,7 @@ RUN yum install -y openssl-devel && \
  && yum remove -y openssl-devel
 
 # Set up virtual environment for Python 2
-RUN export LD_LIBRARY_PATH="/opt/python/${PYTHON2_VERSION}/lib:${LD_LIBRARY_PATH}"; \
- /opt/python/${PYTHON2_VERSION}/bin/python2.7 -m pip install --no-warn-script-location virtualenv \
+RUN /opt/python/${PYTHON2_VERSION}/bin/python2.7 -m pip install --no-warn-script-location virtualenv \
  && /opt/python/${PYTHON2_VERSION}/bin/python2.7 -m virtualenv /py2
 
 # openssl
@@ -54,11 +53,11 @@ RUN yum install -y perl-IPC-Cmd && \
  ldconfig
 
 # Compile and install Python 3
-ENV PYTHON3_VERSION=3.11.5
+ENV PYTHON3_VERSION=3.11.8
 RUN yum install -y libffi-devel && \
  DOWNLOAD_URL="https://python.org/ftp/python/{{version}}/Python-{{version}}.tgz" \
  VERSION="${PYTHON3_VERSION}" \
- SHA256="a12a0a013a30b846c786c010f2c19dd36b7298d888f7c4bd1581d90ce18b5e58" \
+ SHA256="d3019a613b9e8761d260d9ebe3bd4df63976de30464e5c0189566e1ae3f61889" \
  RELATIVE_PATH="Python-{{version}}" \
  bash install-from-source.sh \
  --prefix=/opt/python/${PYTHON_VERSION} \
@@ -177,14 +176,6 @@ RUN \
     --without-libssh2 \
     --with-ssl=/usr/local \
  && rm /usr/local/bin/curl
-
-# https://doc.rust-lang.org/cargo/reference/config.html#netgit-fetch-with-cli
-# https://github.com/rust-lang/cargo/issues/10762
-ENV CARGO_NET_GIT_FETCH_WITH_CLI="true"
-
-# Environment variables to help openssl crate find OpenSSL
-ENV OPENSSL_LIB_DIR="/usr/local/lib64"
-ENV OPENSSL_INCLUDE_DIR="/usr/local/include"
 
 # Set up runner
 COPY runner_dependencies.txt /runner_dependencies.txt
