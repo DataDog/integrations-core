@@ -57,6 +57,7 @@ class BaremetalItem(BaseModel):
     )
     conductors: Optional[bool] = None
     nodes: Optional[Union[bool, Node]] = None
+    ports: Optional[bool] = None
 
 
 class BlockStorageItem(BaseModel):

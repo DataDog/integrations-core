@@ -4521,6 +4521,22 @@ NODES_METRICS_IRONIC_MICROVERSION_1_80 = [
     },
 ]
 
+PORT_METRICS = [
+    {
+        'name': 'openstack.ironic.port.count',
+        'count': 1,
+        'value': 1,
+        'tags': [
+            'keystone_server:http://127.0.0.1:8080/identity',
+            'portgroup_uuid:e43c722c-248e-4c6e-8ce8-0d8ff129387a',
+            'port_uuid:d2b30520-907d-46c8-bfee-c5586e6fb3a1',
+            'port_address:11:11:11:11:11:11',
+            'node_uuid:6d85703a-565d-469a-96ce-30b6de53079d',
+            'port_name:port1',
+        ],
+    },
+]
+
 PORTGROUPS_METRICS_IRONIC_MICROVERSION_1_80 = [
     {
         'name': 'openstack.ironic.node.portgroup.count',
