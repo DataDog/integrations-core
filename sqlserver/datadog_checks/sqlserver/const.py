@@ -289,7 +289,7 @@ COLUMN_QUERY = "SELECT COLUMN_NAME AS name, DATA_TYPE AS data_type, COLUMN_DEFAU
 
 #PARTITIONS_QUERY2 = "SELECT ps.name AS partition_scheme, pf.name AS partition_function FROM sys.tables t INNER JOIN sys.indexes i ON t.object_id = i.object_id INNER JOIN sys.partition_schemes ps ON i.data_space_id = ps.data_space_id INNER JOIN sys.partition_functions pf ON ps.function_id = pf.function_id WHERE t.object_id = {};"
 PARTITIONS_QUERY2 = "SELECT COUNT(*) FROM sys.partitions WHERE object_id = {};"
-PARTITIONS_QUERY = "SELECT object_id, COUNT(*) AS partition_count FROM sys.partitions WHERE object_id IN ({}) GROUP BY object_id;"
+PARTITIONS_QUERY = "SELECT object_id AS id, COUNT(*) AS partition_count FROM sys.partitions WHERE object_id IN ({}) GROUP BY object_id;"
 #parent_object_id - is the one of the parent table.
 FOREIGN_KEY_QUERY3 = "SELECT referenced_object_id, COUNT(*) AS foreign_key_count FROM sys.foreign_keys WHERE referenced_object_id IN ({}) GROUP BY referenced_object_id;"
 INDEX_QUERY2 = "SELECT i.name, i.type, i.is_unique, i.is_primary_key, i.is_unique_constraint, i.is_disabled, c.name AS column_name FROM sys.indexes i JOIN sys.index_columns ic ON i.object_id = ic.object_id AND i.index_id = ic.index_id JOIN sys.columns c ON ic.object_id = c.object_id AND ic.column_id = c.column_id WHERE i.object_id = {};"

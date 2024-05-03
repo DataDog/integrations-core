@@ -35,11 +35,27 @@ GO
 --ADD CONSTRAINT PK_Cities PRIMARY KEY (id);
 --GO
 
+--CREATE TABLE datadog_test_schemas.test_schema.cities (
+--    id INT NOT NULL DEFAULT 0,
+--    name VARCHAR(255),
+--    CONSTRAINT PK_Cities PRIMARY KEY (id)
+--);
+
+-- Create the partition function
+CREATE PARTITION FUNCTION CityPartitionFunction (INT)
+AS RANGE LEFT FOR VALUES (100, 200, 300); -- Define your partition boundaries here
+
+-- Create the partition scheme
+CREATE PARTITION SCHEME CityPartitionScheme
+AS PARTITION CityPartitionFunction ALL TO ([PRIMARY]); -- Assign partitions to filegroups
+
+-- Create the partitioned table
 CREATE TABLE datadog_test_schemas.test_schema.cities (
     id INT NOT NULL DEFAULT 0,
     name VARCHAR(255),
     CONSTRAINT PK_Cities PRIMARY KEY (id)
-);
+) ON CityPartitionScheme(id); -- Assign the partition scheme to the table
+
 
 CREATE INDEX two_columns_index ON datadog_test_schemas.test_schema.cities (id, name);
 
@@ -67,7 +83,80 @@ CREATE TABLE datadog_test_schemas.test_schema.RestaurantReviews (
 );
 GO
 
+-- Start of populate.sql
+DECLARE @TableNamePrefix NVARCHAR(100) = 'dbm_employee_boris';
+DECLARE @Index INT = 1;
+DECLARE @MaxTables INT = 10000;
 
+WHILE @Index <= @MaxTables
+BEGIN
+    DECLARE @TableName NVARCHAR(200) = @TableNamePrefix + '_' + CAST(@Index AS NVARCHAR(10));
+    DECLARE @SQL NVARCHAR(MAX);
+
+    SET @SQL = '
+        CREATE TABLE ' + QUOTENAME(@TableName) + ' (
+            id INT NOT NULL IDENTITY PRIMARY KEY,
+            username VARCHAR(200),
+            nickname VARCHAR(200),
+            email VARCHAR(200),
+            created_at DATETIME DEFAULT GETDATE(),
+            updated_at DATETIME DEFAULT GETDATE(),
+            username2 VARCHAR(200),
+username3 VARCHAR(200),
+username4 VARCHAR(200),
+username5 VARCHAR(200),
+username6 VARCHAR(200),
+username7 VARCHAR(200),
+username8 VARCHAR(200),
+username9 VARCHAR(200),
+username10 VARCHAR(200),
+username11 VARCHAR(200),
+username12 VARCHAR(200),
+username13 VARCHAR(200),
+username14 VARCHAR(200),
+username15 VARCHAR(200),
+username16 VARCHAR(200),
+username17 VARCHAR(200),
+username18 VARCHAR(200),
+username19 VARCHAR(200),
+username20 VARCHAR(200),
+username21 VARCHAR(200),
+username22 VARCHAR(200),
+username23 VARCHAR(200),
+username24 VARCHAR(200),
+username25 VARCHAR(200),
+username26 VARCHAR(200),
+username27 VARCHAR(200),
+username28 VARCHAR(200),
+username29 VARCHAR(200),
+username30 VARCHAR(200),
+username31 VARCHAR(200),
+username32 VARCHAR(200),
+username33 VARCHAR(200),
+username34 VARCHAR(200),
+username35 VARCHAR(200),
+username36 VARCHAR(200),
+username37 VARCHAR(200),
+username38 VARCHAR(200),
+username39 VARCHAR(200),
+username40 VARCHAR(200),
+username41 VARCHAR(200),
+username42 VARCHAR(200),
+username43 VARCHAR(200),
+username44 VARCHAR(200),
+username45 VARCHAR(200),
+username46 VARCHAR(200),
+username47 VARCHAR(200),
+username48 VARCHAR(200),
+username49 VARCHAR(200),
+username50 VARCHAR(200)
+        );';
+
+    EXEC sp_executesql @SQL, N'@TableNamePrefix NVARCHAR(100)', @TableNamePrefix;
+
+    SET @Index = @Index + 1;
+END;
+-- End of populate.sql
 
 -- Create test database for integration tests
 -- only bob and fred have read/write access to this database

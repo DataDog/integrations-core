@@ -5,7 +5,6 @@ from __future__ import division
 import copy
 import time
 from collections import defaultdict
-
 import six
 from cachetools import TTLCache
 
