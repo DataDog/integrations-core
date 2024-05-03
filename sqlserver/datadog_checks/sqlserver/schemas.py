@@ -281,7 +281,9 @@ class Schemas:
     # TODO refactor the next 3 to have a base function when everythng is settled.
     def _populate_with_columns_data(self, table_ids, name_to_id, id_to_all, schema, cursor):
         # get columns if we dont have a dict here unlike postgres
+        start_time = time.time()
         cursor.execute(COLUMN_QUERY.format(table_ids, schema["name"]))
+        self._log.warning("Executed columns query for {} seconds".format(time.time() - start_time))
         data = cursor.fetchall()
         columns = []
         #TODO we need it cause if I put AS default its a forbidden key word and to be inline with postgres we need it
