@@ -1,10 +1,10 @@
 {
-  "version": 1,
+  "version": 2,
   "created_at": "2024-04-05",
   "last_updated_at": "2024-04-05",
   "title": "Cisco SD-WAN device has rebooted several times",
   "tags": [
-    "integration:cisco_sdwan"
+    "integration:cisco-sdwan"
   ],
   "description": "This monitor alerts when a Cisco SD-WAN device has rebooted more than 5 times within the last 10 minutes.",
   "definition": {

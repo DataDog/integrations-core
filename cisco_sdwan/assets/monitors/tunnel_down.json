@@ -1,10 +1,10 @@
 {
-	"version": 1,
+	"version": 2,
 	"created_at": "2024-04-05",
 	"last_updated_at": "2024-04-05",
 	"title": "Cisco SD-WAN Tunnel is down",
 	"tags": [
-		"integration:cisco_sdwan"
+		"integration:cisco-sdwan"
 	],
 	"description": "This monitor detects when a Cisco SD-WAN tunnel becomes unavailable between two devices. It tracks the status of tunnels within a specified namespace and triggers an alert if a tunnel goes down, indicating potential connectivity issues.",
 	"definition": {

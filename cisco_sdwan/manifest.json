@@ -29,7 +29,7 @@
       },
       "metrics": {
         "prefix": "cisco_sdwan.",
-        "check": "",
+        "check": "cisco_sdwan.device.reachable",
         "metadata_path": "metadata.csv"
       },
       "service_checks": {
