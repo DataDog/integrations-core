@@ -39,9 +39,11 @@
     "dashboards": {
       "Cisco SD-WAN": "assets/dashboards/cisco_sd-wan.json"
     },
-    "monitors": {},
-    "logs": {},
-    "saved_views": {}
+    "monitors": {
+      "[Cisco SD-WAN] Device Unreachable Alert": "assets/monitors/device_unreachable.json",
+      "[Cisco SD-WAN] Tunnel Down Alert": "assets/monitors/tunnel_down.json",
+      "[Cisco SD-WAN] Device Reboot Alert": "assets/monitors/device_reboot.json"
+    }
   },
   "author": {
     "support_email": "help@datadoghq.com",
