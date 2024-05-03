@@ -2,6 +2,19 @@
 
 <!-- towncrier release notes start -->
 
+## 32.1.0 / 2024-05-03
+
+***Added***:
+
+* Update the default dashboard template file to include directions for contributors. ([#17286](https://github.com/DataDog/integrations-core/pull/17286))
+* Add a new column to metadata.csv templates called `sample_tags` ([#17491](https://github.com/DataDog/integrations-core/pull/17491))
+
+***Fixed***:
+
+* Update the description for the `tls_ca_cert` config option to use `openssl rehash` instead of `c_rehash` ([#16981](https://github.com/DataDog/integrations-core/pull/16981))
+* Bump pytest and require flaky minimum version ([#17269](https://github.com/DataDog/integrations-core/pull/17269))
+* Remove trailing new line in template file ([#17513](https://github.com/DataDog/integrations-core/pull/17513))
+
 ## 32.0.0 / 2024-03-21
 
 ***Removed***:
