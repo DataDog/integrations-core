@@ -265,6 +265,9 @@ class ApiSdk(Api):
             )
         ]
 
+    def get_baremetal_volume_connectors(self):
+        return [connector.to_dict(original_names=True) for connector in self.connection.baremetal.volume_connectors()]
+
     def get_auth_projects(self):
         response = self.http.get('{}/v3/auth/projects'.format(self.cloud_config.get_auth_args().get('auth_url')))
         response.raise_for_status()

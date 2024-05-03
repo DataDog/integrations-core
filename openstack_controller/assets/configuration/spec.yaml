@@ -454,6 +454,13 @@ files:
                                   - type: object
                       - name: conductors
                         type: boolean
+                      - name: volumes
+                        anyOf:
+                          - type: boolean
+                          - type: object
+                            properties:
+                              - name: connectors
+                                type: boolean
               - name: load-balancer
                 anyOf:
                   - type: boolean

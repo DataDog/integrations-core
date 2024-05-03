@@ -50,6 +50,14 @@ class Node(BaseModel):
     portgroups: Optional[Union[bool, MappingProxyType[str, Any]]] = None
 
 
+class Volume(BaseModel):
+    model_config = ConfigDict(
+        arbitrary_types_allowed=True,
+        frozen=True,
+    )
+    connectors: Optional[bool] = None
+
+
 class BaremetalItem(BaseModel):
     model_config = ConfigDict(
         arbitrary_types_allowed=True,
@@ -57,6 +65,7 @@ class BaremetalItem(BaseModel):
     )
     conductors: Optional[bool] = None
     nodes: Optional[Union[bool, Node]] = None
+    volumes: Optional[Union[bool, Volume]] = None
 
 
 class BlockStorageItem(BaseModel):

@@ -24,6 +24,7 @@ openstack.ironic.node.count,gauge,,,,Number of ironic nodes,0,openstack_controll
 openstack.ironic.node.portgroup.count,gauge,,,,Number of portgroups associated with a node,0,openstack_controller,ironic node portgroup ct,
 openstack.ironic.node.up,gauge,,,,Whether an ironic node is up,0,openstack_controller,ironic node up,
 openstack.ironic.response_time,gauge,,millisecond,,Duration that an HTTP request takes to complete when making a request to ironic endpoint,0,openstack_controller,ironic response time,
+openstack.ironic.volume.connector.count,gauge,,,,Number of volume connectors,0,openstack_controller,ironic volume connector ct,
 openstack.keystone.domain.count,gauge,,,,Number of domains of the Openstack deployment,0,openstack_controller,keystone domains count,
 openstack.keystone.domain.enabled,gauge,,,,If set to 1 domain is enabled. If set to 0 domain is disabled,0,openstack_controller,keystone domain enabled,
 openstack.keystone.group.count,gauge,,,,Number of groups of the Openstack deployment,0,openstack_controller,keystone groups count,

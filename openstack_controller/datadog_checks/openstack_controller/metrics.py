@@ -418,6 +418,16 @@ IRONIC_CONDUCTOR_METRICS = {
     f"{IRONIC_CONDUCTOR_METRICS_PREFIX}.up": {},
 }
 
+IRONIC_VOLUME_PREFIX = f"{IRONIC_METRICS_PREFIX}.volume"
+IRONIC_VOLUME_CONNECTOR_PREFIX = f"{IRONIC_VOLUME_PREFIX}.connector"
+IRONIC_VOLUME_CONNECTOR_TAGS = {
+    'uuid': 'connector_uuid',
+    'node_uuid': 'node_uuid',
+    'connector_id': 'connector_id',
+    'type': 'connector_type',
+}
+IRONIC_VOLUME_CONNECTOR_COUNT = f"{IRONIC_VOLUME_CONNECTOR_PREFIX}.count"
+
 OCTAVIA_METRICS_PREFIX = "openstack.octavia"
 OCTAVIA_SERVICE_CHECK = f"{OCTAVIA_METRICS_PREFIX}.api.up"
 OCTAVIA_RESPONSE_TIME = f"{OCTAVIA_METRICS_PREFIX}.response_time"
