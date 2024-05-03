@@ -223,10 +223,11 @@ class Schemas:
                     self._dataSubmitter.store(db_name, schema, [], 0)
             # we want to submit for each DB separetly for clarity
             self._dataSubmitter.submit()
-            self._log.error("Finished collecting for DB elapsed time {}".format(time.time() - start_time))
+            self._log.error("Finished collecting for DB - {} elapsed time {}".format(db_name, time.time() - start_time))
             return False
         self._check.do_for_databases(fetch_schema_data, self._check.get_databases())
         # submit the last chunk of data if any
+        self._log.error("Finished collect_schemas_data")
         self._dataSubmitter.submit()
 
 
