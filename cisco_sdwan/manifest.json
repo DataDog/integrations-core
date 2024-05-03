@@ -8,17 +8,14 @@
     "configuration": "README.md#Setup",
     "support": "README.md#Support",
     "changelog": "CHANGELOG.md",
-    "description": "",
+    "description": "Monitor your Cisco SD-WAN environment with Datadog.",
     "title": "Cisco SD-WAN",
     "media": [],
     "classifier_tags": [
       "Supported OS::Linux",
       "Supported OS::Windows",
       "Supported OS::macOS",
-      "Category::",
-      "Offering::",
-      "Queried Data Type::",
-      "Submitted Data Type::"
+      "Category::Network"
     ]
   },
   "assets": {
