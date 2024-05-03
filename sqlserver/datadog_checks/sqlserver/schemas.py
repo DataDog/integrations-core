@@ -2,6 +2,7 @@ try:
     import datadog_agent
 except ImportError:
     from ..stubs import datadog_agent
+import time
 
 from datadog_checks.sqlserver.const import (
     TABLES_IN_SCHEMA_QUERY,
@@ -20,7 +21,6 @@ from datadog_checks.sqlserver.utils import (
 import time
 import json
 import copy
-import pdb
 
 from datadog_checks.base.utils.db.utils import default_json_event_encoding
 
@@ -106,7 +106,7 @@ class SubmitData:
         self._log.warning("Boris Adding event to Agent queue with : {} schemas and {} tables.".format(len(schemas_debug), t_count))
         #END debug code
         json_event = json.dumps(event, default=default_json_event_encoding)
-        self._log.debug("Reporting the following payload for schema collection: {}".format(json_event))
+        #self._log.debug("Reporting the following payload for schema collection: {}".format(json_event))
         self._submit_to_agent_queue(json_event)
         self.db_to_schemas = {}
 
@@ -195,6 +195,8 @@ class Schemas:
     #sends all the data in one go but split in chunks (like Seth's solution)
     def collect_schemas_data(self):
         self._dataSubmitter.reset()
+        start_time = time.time()
+        self._log.warning("Starting schema collection {}".format(start_time))
         # for now only setting host and tags and metada
         self._dataSubmitter.set_base_event_data(self._check.resolved_hostname, self._tags, self._check._config.cloud_metadata)
         #returns Stop, Stop == True.
@@ -204,12 +206,16 @@ class Schemas:
             self._dataSubmitter.store_db_info(db_name, db_info)
             chunk_size = 50
             for schema in schemas:
-                if self._dataSubmitter.exceeded_total_columns_number():
-                    self._log.warning("Truncated data due to the max limit, stopped on db - {} on schema {}".format(db_name, schema["name"]))
-                    return True
-                tables = self._get_tables(schema, cursor)            
-                tables_chunk = list(get_list_chunks(tables, chunk_size))
+
+                tables = self._get_tables(schema, cursor)  
+                #TODO sorting is purely for testing
+                sorted_tables = sorted(tables, key=lambda x: x['name'])          
+                tables_chunk = list(get_list_chunks(sorted_tables, chunk_size))
                 for tables_chunk in tables_chunk:
+                    if self._dataSubmitter.exceeded_total_columns_number():
+                        self._log.warning("Truncated data due to the max limit, stopped on db - {} on schema {}".format(db_name, schema["name"]))
+                        return True
+                    self._log.warning("elapsed time {}".format(time.time() - start_time))
                     columns_count, tables_info = self._get_tables_data(tables_chunk, schema, cursor)
                     self._dataSubmitter.store(db_name, schema, tables_info, columns_count)  
                     self._dataSubmitter.submit() # we force submit after each 50 tables chunk
@@ -217,6 +223,7 @@ class Schemas:
                     self._dataSubmitter.store(db_name, schema, [], 0)
             # we want to submit for each DB separetly for clarity
             self._dataSubmitter.submit()
+            self._log.error("Finished collecting for DB elapsed time {}".format(time.time() - start_time))
             return False
         self._check.do_for_databases(fetch_schema_data, self._check.get_databases())
         # submit the last chunk of data if any

@@ -5,7 +5,6 @@ from __future__ import division
 import copy
 import time
 from collections import defaultdict
-
 import six
 from cachetools import TTLCache
 
@@ -784,9 +783,10 @@ class SQLServer(AgentCheck):
             self._send_database_instance_metadata()
 
             #TODO limit this check by some minutes ...
+            start_time = time.time()
             self._schemas.collect_schemas_data() 
-
-            
+            elapsed_time = time.time() - start_time
+            print("Elapsed time:", elapsed_time, "seconds")
             if self._config.dbm_enabled:
                 
                 
