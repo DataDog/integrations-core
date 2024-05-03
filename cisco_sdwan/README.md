@@ -2,7 +2,7 @@
 
 ## Overview
 
-The Cisco SD-WAN integration lets you monitor your Cisco SD-WAN environment within Network Device Monitoring][1]. Gain comprehensive insights into the performance and health of your SD-WAN infrastructure, including sites, tunnels, and devices.
+The Cisco SD-WAN integration lets you monitor your Cisco SD-WAN environment within [Network Device Monitoring][1]. Gain comprehensive insights into the performance and health of your SD-WAN infrastructure, including sites, tunnels, and devices.
 
 ## Setup
 
