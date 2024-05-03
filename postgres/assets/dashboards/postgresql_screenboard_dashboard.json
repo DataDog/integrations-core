@@ -1416,7 +1416,7 @@
               "title_align": "left",
               "type": "log_stream",
               "indexes": [],
-              "query": "source:postgresql",
+              "query": "source:postgresql host:$host.value",
               "sort": {
                 "column": "time",
                 "order": "desc"
