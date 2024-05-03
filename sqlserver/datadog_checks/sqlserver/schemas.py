@@ -216,9 +216,18 @@ class Schemas:
                         self._log.warning("Truncated data due to the max limit, stopped on db - {} on schema {}".format(db_name, schema["name"]))
                         return True
                     self._log.warning("elapsed time {}".format(time.time() - start_time))
+
+                    start_get_tables_time = time.time()
                     columns_count, tables_info = self._get_tables_data(tables_chunk, schema, cursor)
+                    self._log.warning("_get_tables_data time {}".format(time.time() - start_get_tables_time))
+
+                    start_store_time = time.time()
                     self._dataSubmitter.store(db_name, schema, tables_info, columns_count)  
+                    self._log.warning("store time {}".format(time.time() - start_store_time))
+
+                    start_submit_time = time.time()
                     self._dataSubmitter.submit() # we force submit after each 50 tables chunk
+                    self._log.warning("submit time {}".format(time.time() - start_submit_time))
                 if len(tables) == 0:
                     self._dataSubmitter.store(db_name, schema, [], 0)
             # we want to submit for each DB separetly for clarity
