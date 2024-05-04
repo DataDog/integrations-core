@@ -294,7 +294,10 @@ class Schemas:
         start_time = time.time()
         cursor.execute(COLUMN_QUERY.format(table_ids, schema["name"]))
         self._log.warning("Executed columns query for {} seconds".format(time.time() - start_time))
+        start_time_fetch = time.time()
         data = cursor.fetchall()
+        self._log.warning("Executed cursor.fetchall()for {} seconds".format(time.time() - start_time_fetch))
+        start_time_rest = time.time()
         columns = []
         #TODO we need it cause if I put AS default its a forbidden key word and to be inline with postgres we need it
         for i in cursor.description:
@@ -317,6 +320,7 @@ class Schemas:
                     else:
                         row["nullable"] = True
                 id_to_all.get(table_id)["columns"] = id_to_all.get(table_id).get("columns",[]) + [row]
+        self._log.warning("Executed loops for {} seconds".format(time.time() - start_time_rest))
         return len(data)
     
     def _populate_with_partitions_data(self, table_ids, id_to_all, cursor):
