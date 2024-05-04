@@ -66,7 +66,7 @@ class MongoConfig(object):
 
         if not self.hosts:
             raise ConfigurationError('No `hosts` specified')
-        
+
         self.clean_server_name = self._get_clean_server_name()
         if self.password and not self.username:
             raise ConfigurationError('`username` must be set when a `password` is specified')

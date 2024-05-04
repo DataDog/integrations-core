@@ -11,7 +11,13 @@ from pymongo.errors import (
     ServerSelectionTimeoutError,
 )
 
-from datadog_checks.mongo.common import PRIMARY_STATE_ID, SECONDARY_STATE_ID, MongosDeployment, ReplicaSetDeployment, StandaloneDeployment
+from datadog_checks.mongo.common import (
+    PRIMARY_STATE_ID,
+    SECONDARY_STATE_ID,
+    MongosDeployment,
+    ReplicaSetDeployment,
+    StandaloneDeployment,
+)
 
 # The name of the application that created this MongoClient instance. MongoDB 3.4 and newer will print this value in
 # the server log upon establishing each connection. It is also recorded in the slow query log and profile collections.
@@ -108,7 +114,9 @@ class MongoApi(object):
         )
 
         hosts = is_master_payload.get('hosts', [])
-        return ReplicaSetDeployment(self._hostname, replset_name, replset_state, replset_key, hosts, cluster_role=cluster_role)
+        return ReplicaSetDeployment(
+            self._hostname, replset_name, replset_state, replset_key, hosts, cluster_role=cluster_role
+        )
 
     def refresh_deployment_type(self):
         # getCmdLineOpts is the runtime configuration of the mongo instance. Helpful to know whether the node is
@@ -175,7 +183,7 @@ class MongoApi(object):
 
     def _get_server_status(self):
         return self['admin'].command('serverStatus')
-    
+
     @property
     def hostname(self):
         if self._hostname:

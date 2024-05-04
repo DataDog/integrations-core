@@ -77,11 +77,11 @@ class MongosDeployment(Deployment):
     @property
     def shards(self):
         return list(self.shard_map.get('map', {}).values())
-    
+
     @property
     def hosts(self):
         return list(self.shard_map.get('hosts', {}).keys())
-    
+
     @property
     def cluster_type(self):
         return "sharded"
@@ -110,7 +110,7 @@ class ReplicaSetDeployment(Deployment):
         # There is only ever one primary node in a replica set.
         # In case sharding is disabled, the primary can be considered the master.
         return not self.use_shards and self.is_primary
-    
+
     @property
     def cluster_type(self):
         return "sharded" if self.use_shards else "replica_set"

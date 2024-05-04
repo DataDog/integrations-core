@@ -330,5 +330,7 @@ class MongoDb(AgentCheck):
                 "kind": "mongodb_instance",
             }
             self._database_instance_emitted[deployment.hostname] = (database_instance, mongodb_instance)
-            self.log.debug("Emitting database instance and mongodb instance metadata, %s, %s", database_instance, mongodb_instance)
+            self.log.debug(
+                "Emitting database instance and mongodb instance metadata, %s, %s", database_instance, mongodb_instance
+            )
             # self.database_monitoring_metadata(json.dumps(event, default=default_json_event_encoding))
