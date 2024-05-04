@@ -5,10 +5,15 @@ from __future__ import division
 
 from copy import deepcopy
 from functools import cached_property
+import json
+import time
 
+from cachetools import TTLCache
 from packaging.version import Version
 
 from datadog_checks.base import AgentCheck, is_affirmative
+from datadog_checks.base.utils.db.utils import default_json_event_encoding
+from datadog_checks.mongo.__about__ import __version__
 from datadog_checks.mongo.api import CRITICAL_FAILURE, MongoApi
 from datadog_checks.mongo.collectors import (
     CollStatsCollector,
@@ -28,6 +33,11 @@ from datadog_checks.mongo.common import SERVICE_CHECK_NAME, MongosDeployment, Re
 from datadog_checks.mongo.config import MongoConfig
 
 from . import metrics
+
+try:
+    import datadog_agent
+except ImportError:
+    from ..stubs import datadog_agent
 
 long = int
 
@@ -74,6 +84,12 @@ class MongoDb(AgentCheck):
 
         self._api_client = None
         self._mongo_version = None
+
+        # _database_instance_emitted: limit the collection and transmission of the database instance metadata
+        self._database_instance_emitted = TTLCache(
+            maxsize=1,
+            ttl=self._config.database_instance_collection_interval,
+        )  # type: TTLCache
 
         self.diagnosis.register(self._diagnose_tls)
 
@@ -169,10 +185,27 @@ class MongoDb(AgentCheck):
             self.log.debug("Refreshing deployment type")
             self.api_client.refresh_deployment_type()
 
+    def _get_deployment_tags(self, deployment):
+        tags = deepcopy(self._config.metric_tags)
+        if isinstance(deployment, ReplicaSetDeployment):
+            tags.extend(
+                [
+                    "replset_name:{}".format(deployment.replset_name),
+                    "replset_state:{}".format(deployment.replset_state_name),
+                ]
+            )
+            if deployment.use_shards:
+                tags.append('sharding_cluster_role:{}'.format(deployment.cluster_role))
+        elif isinstance(deployment, MongosDeployment):
+            tags.append('sharding_cluster_role:mongos')
+        return tags
+
     def check(self, _):
         try:
             self._refresh_metadata()
+            self._refresh_replica_role()
             self._collect_metrics()
+            self._send_database_instance_metadata()
         except CRITICAL_FAILURE as e:
             self.service_check(SERVICE_CHECK_NAME, AgentCheck.CRITICAL, tags=self._config.service_check_tags)
             self._unset_metadata()
@@ -193,20 +226,8 @@ class MongoDb(AgentCheck):
         self._mongo_version = None
 
     def _collect_metrics(self):
-        self._refresh_replica_role()
-        tags = deepcopy(self._config.metric_tags)
         deployment = self.api_client.deployment_type
-        if isinstance(deployment, ReplicaSetDeployment):
-            tags.extend(
-                [
-                    "replset_name:{}".format(deployment.replset_name),
-                    "replset_state:{}".format(deployment.replset_state_name),
-                ]
-            )
-            if deployment.use_shards:
-                tags.append('sharding_cluster_role:{}'.format(deployment.cluster_role))
-        elif isinstance(deployment, MongosDeployment):
-            tags.append('sharding_cluster_role:mongos')
+        tags = self._get_deployment_tags(deployment)
 
         dbnames = self._get_db_names(self.api_client, deployment, tags)
         self.refresh_collectors(deployment, dbnames, tags)
@@ -277,3 +298,37 @@ class MongoDb(AgentCheck):
                 name,
                 f"file `{path}` provided as the `{option_name}` exists and is readable",
             )
+
+    def _send_database_instance_metadata(self):
+        deployment = self.api_client.deployment_type
+        if deployment.hostname not in self._database_instance_emitted:
+            tags = self._get_deployment_tags(deployment)
+            database_instance = {
+                "host": deployment.hostname,
+                "agent_version": datadog_agent.get_version(),
+                "dbms": "mongodb",
+                "kind": "database_instance",
+                "collection_interval": self._config.database_instance_collection_interval,
+                'dbms_version': self._mongo_version,
+                'integration_version': __version__,
+                "tags": tags,
+                "timestamp": time.time() * 1000,
+                "metadata": {
+                    "dbm": self._config.dbm_enabled,
+                    "connection_host": self._config.clean_server_name,
+                },
+            }
+            mongodb_instance = {
+                "host": deployment.hostname,
+                "replset_name": getattr(deployment, 'replset_name', None),
+                "replset_state": getattr(deployment, 'replset_state_name', None),
+                "replset_key": getattr(deployment, 'replset_key', None),
+                "sharding_cluster_role": getattr(deployment, 'cluster_role', None),
+                "hosts": getattr(deployment, 'hosts', None),
+                "shards": getattr(deployment, 'shards', None),
+                "cluster_type": getattr(deployment, 'cluster_type', None),
+                "kind": "mongodb_instance",
+            }
+            self._database_instance_emitted[deployment.hostname] = (database_instance, mongodb_instance)
+            self.log.debug("Emitting database instance and mongodb instance metadata, %s, %s", database_instance, mongodb_instance)
+            # self.database_monitoring_metadata(json.dumps(event, default=default_json_event_encoding))

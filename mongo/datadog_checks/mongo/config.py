@@ -66,7 +66,7 @@ class MongoConfig(object):
 
         if not self.hosts:
             raise ConfigurationError('No `hosts` specified')
-
+        
         self.clean_server_name = self._get_clean_server_name()
         if self.password and not self.username:
             raise ConfigurationError('`username` must be set when a `password` is specified')
@@ -98,6 +98,10 @@ class MongoConfig(object):
         self._base_tags = list(set(instance.get('tags', [])))
         self.service_check_tags = self._compute_service_check_tags()
         self.metric_tags = self._compute_metric_tags()
+
+        # DBM config options
+        self.dbm_enabled = is_affirmative(instance.get('dbm', False))
+        self.database_instance_collection_interval = instance.get('database_instance_collection_interval', 1800)
 
     def _get_clean_server_name(self):
         try:
