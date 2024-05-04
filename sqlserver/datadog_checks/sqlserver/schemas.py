@@ -204,7 +204,7 @@ class Schemas:
             db_info  = self._query_db_information(db_name, cursor)
             schemas = self._query_schema_information(cursor)
             self._dataSubmitter.store_db_info(db_name, db_info)
-            chunk_size = 50
+            chunk_size = 500
             for schema in schemas:
 
                 tables = self._get_tables(schema, cursor)  
