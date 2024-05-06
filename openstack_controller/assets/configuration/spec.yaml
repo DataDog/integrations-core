@@ -454,6 +454,8 @@ files:
                                   - type: object
                       - name: conductors
                         type: boolean
+                      - name: drivers
+                        type: boolean
               - name: load-balancer
                 anyOf:
                   - type: boolean

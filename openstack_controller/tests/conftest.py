@@ -656,10 +656,23 @@ def connection_baremetal(request, mock_responses):
             for node in mock_responses('GET', '/baremetal/v1/conductors')['conductors']
         ]
 
+    def drivers():
+        if http_error and 'drivers' in http_error:
+            raise requests.exceptions.HTTPError(response=http_error['drivers'])
+        return [
+            mock.MagicMock(
+                to_dict=mock.MagicMock(
+                    return_value=node,
+                )
+            )
+            for node in mock_responses('GET', '/baremetal/v1/drivers')['drivers']
+        ]
+
     return mock.MagicMock(
         nodes=mock.MagicMock(side_effect=nodes),
         conductors=mock.MagicMock(side_effect=conductors),
         portgroups=mock.MagicMock(side_effect=portgroups),
+        drivers=mock.MagicMock(side_effect=drivers),
     )
 
 

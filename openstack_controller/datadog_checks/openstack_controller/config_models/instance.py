@@ -56,6 +56,7 @@ class BaremetalItem(BaseModel):
         frozen=True,
     )
     conductors: Optional[bool] = None
+    drivers: Optional[bool] = None
     nodes: Optional[Union[bool, Node]] = None
 
 

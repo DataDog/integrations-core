@@ -4563,6 +4563,14 @@ CONDUCTORS_METRICS_IRONIC_MICROVERSION_1_80 = [
     },
 ]
 
+DRIVERS_METRICS_IRONIC_MICROVERSION_1_80 = [
+    {
+        'name': 'openstack.ironic.driver.count',
+        'count': 1,
+        'value': 1,
+        'tags': ['keystone_server:http://127.0.0.1:8080/identity', 'driver_name:agent_ipmitool', 'driver_type:classic'],
+    },
+]
 
 IMAGES_METRICS_GLANCE = [
     {

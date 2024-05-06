@@ -10,6 +10,9 @@ from datadog_checks.openstack_controller.metrics import (
     IRONIC_CONDUCTOR_METRICS,
     IRONIC_CONDUCTOR_METRICS_PREFIX,
     IRONIC_CONDUCTOR_TAGS,
+    IRONIC_DRIVER_COUNT,
+    IRONIC_DRIVER_PREFIX,
+    IRONIC_DRIVER_TAGS,
     IRONIC_NODE_COUNT,
     IRONIC_NODE_METRICS,
     IRONIC_NODE_METRICS_PREFIX,
@@ -126,3 +129,20 @@ class BareMetal(Component):
                 self.check.gauge(IRONIC_CONDUCTOR_COUNT, 1, tags=tags + conductor['tags'])
                 for metric, value in conductor['metrics'].items():
                     self.check.gauge(metric, value, tags=tags + conductor['tags'])
+
+    @Component.register_global_metrics(ID)
+    @Component.http_error()
+    def _report_drivers(self, config, tags):
+        if 'drivers' not in config:
+            report_drivers = config.get('drivers', True)
+        if report_drivers:
+            data = self.check.api.get_baremetal_drivers()
+            for item in data:
+                driver = get_metrics_and_tags(
+                    item,
+                    tags=IRONIC_DRIVER_TAGS,
+                    prefix=IRONIC_DRIVER_PREFIX,
+                    metrics={},
+                )
+                self.check.log.debug("driver: %s", driver)
+                self.check.gauge(IRONIC_DRIVER_COUNT, 1, tags=tags + driver['tags'])
