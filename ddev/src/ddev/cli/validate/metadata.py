@@ -135,7 +135,9 @@ def metadata(app: Application, integrations: tuple[str, ...], check_duplicates: 
                     errors = True
 
                     error_message += f"{current_check.name}:{line} Missing columns {missing_headers}.\n"
-                continue
+                    
+                if errors:
+                    continue
 
             # check duplicate metric name
             duplicate_metric_name = check_duplicate_values(
@@ -153,7 +155,7 @@ def metadata(app: Application, integrations: tuple[str, ...], check_duplicates: 
                 warning_message += check_duplicate_values(
                     current_check, line, row, 'description', duplicate_description_set
                 )[1]
-
+            
             normalized_metric_name = normalize_metric_name(row['metric_name'])
             if row['metric_name'] != normalized_metric_name:
                 errors = True
