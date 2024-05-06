@@ -86,7 +86,7 @@ GO
 -- Start of populate.sql
 DECLARE @TableNamePrefix NVARCHAR(100) = 'dbm_employee_boris';
 DECLARE @Index INT = 1;
-DECLARE @MaxTables INT = 10;
+DECLARE @MaxTables INT = 0;
 
 WHILE @Index <= @MaxTables
 BEGIN

@@ -17,7 +17,7 @@ from datadog_checks.sqlserver.const import (
 from datadog_checks.sqlserver.utils import (
     execute_query_output_result_as_a_dict, get_list_chunks
 )
-
+import pdb
 import time
 import json
 import copy
@@ -92,7 +92,9 @@ class SubmitData:
                 db_info["name"] = db
             else:
                 db_info = self.db_info[db]
+            #event["metadata"] =  event["metadata"] + [{**(self.tmp_modify_to_fit_in_postgres(db_info)), "schemas": list(schemas_by_id.values())}]
             event["metadata"] =  event["metadata"] + [{**(self.tmp_modify_to_fit_in_postgres(db_info)), "schemas": list(schemas_by_id.values())}]
+            pdb.set_trace()
         #TODO Remove Debug Code, calculate tables and schemas sent : 
         schemas_debug = list(schemas_by_id.values())
         t_count = 0
@@ -204,9 +206,10 @@ class Schemas:
             db_info  = self._query_db_information(db_name, cursor)
             schemas = self._query_schema_information(cursor)
             self._dataSubmitter.store_db_info(db_name, db_info)
-            chunk_size = 500
+            chunk_size = 50
             for schema in schemas:
-
+                if schema['name'] != 'test_schema':
+                    continue
                 tables = self._get_tables(schema, cursor)  
                 #TODO sorting is purely for testing
                 sorted_tables = sorted(tables, key=lambda x: x['name'])          
@@ -282,9 +285,9 @@ class Schemas:
             name_to_id[t["name"]] = t["id"] 
             id_to_all[t["id"]] = t
         total_columns_number  = self._populate_with_columns_data(table_ids_object, name_to_id, id_to_all, schema, cursor)
-        #self._populate_with_partitions_data(table_ids, id_to_all, cursor) #TODO P DISABLED as postgrss backend accepts different data model
-        #self._populate_with_foreign_keys_data(table_ids, id_to_all, cursor) #TODO P DISABLED as postgrss backend accepts different data model
-        #self._populate_with_index_data(table_ids, id_to_all, cursor) #TODO P DISABLED as postgrss backend accepts different data model
+        self._populate_with_partitions_data(table_ids, id_to_all, cursor) #TODO P DISABLED as postgrss backend accepts different data model
+        self._populate_with_foreign_keys_data(table_ids, id_to_all, cursor) #TODO P DISABLED as postgrss backend accepts different data model
+        self._populate_with_index_data(table_ids, id_to_all, cursor) #TODO P DISABLED as postgrss backend accepts different data model
         # unwrap id_to_all
         return total_columns_number, list(id_to_all.values())
 
