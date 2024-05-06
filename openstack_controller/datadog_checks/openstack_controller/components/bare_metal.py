@@ -122,7 +122,7 @@ class BareMetal(Component):
                     item,
                     tags=IRONIC_PORT_TAGS,
                     prefix=IRONIC_PORT_PREFIX,
-                    metrics=[IRONIC_PORT_COUNT],
+                    metrics={},
                 )
                 self.check.log.debug("port: %s", port)
                 self.check.gauge(IRONIC_PORT_COUNT, 1, tags=tags + port['tags'])
