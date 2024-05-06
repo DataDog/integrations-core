@@ -147,7 +147,7 @@ class BareMetal(Component):
                     item,
                     tags=IRONIC_VOLUME_CONNECTOR_TAGS,
                     prefix=IRONIC_VOLUME_CONNECTOR_PREFIX,
-                    metrics=[IRONIC_VOLUME_CONNECTOR_COUNT],
+                    metrics={},
                 )
                 self.check.log.debug("connector: %s", connector)
                 self.check.gauge(IRONIC_VOLUME_CONNECTOR_COUNT, 1, tags=tags + connector['tags'])
@@ -166,7 +166,7 @@ class BareMetal(Component):
                     item,
                     tags=IRONIC_VOLUME_TARGET_TAGS,
                     prefix=IRONIC_VOLUME_TARGET_PREFIX,
-                    metrics=[IRONIC_VOLUME_TARGET_COUNT],
+                    metrics={},
                 )
                 self.check.log.debug("target: %s", target)
                 self.check.gauge(IRONIC_VOLUME_TARGET_COUNT, 1, tags=tags + target['tags'])
