@@ -135,7 +135,6 @@ class Image(BaseModel):
         frozen=True,
     )
     members: Optional[bool] = None
-    tasks: Optional[bool] = None
 
 
 class ImageItem(BaseModel):
