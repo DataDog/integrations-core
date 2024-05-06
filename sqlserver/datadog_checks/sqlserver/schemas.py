@@ -213,9 +213,6 @@ class Schemas:
         rows = [dict(zip(columns, row)) for row in cursor.fetchall()]
         return [ {"id" : str(row["id"]), "name" : row['name'], "columns" : []} for row in rows ] 
 
-
-    # TODO how often ?
-
     """schemas data struct is a dictionnary with key being a schema name the value is
     schema
     dict:
@@ -323,71 +320,75 @@ class Schemas:
         self._populate_with_index_data(table_ids, id_to_table_data, cursor)
         return total_columns_number, list(id_to_table_data.values())
 
-    def _populate_with_columns_data(self, table_ids, name_to_id, id_to_all, schema, cursor):
-        # get columns if we dont have a dict here unlike postgres
+
+    """ 
+    adds columns list data to each table in a provided list
+    """
+    def _populate_with_columns_data(self, table_ids, name_to_id, id_to_table_data, schema, cursor):
         cursor.execute(COLUMN_QUERY.format(table_ids, schema["name"]))
         data = cursor.fetchall()
         columns = []
-        #TODO we need it cause if I put AS default its a forbidden key word and to be inline with postgres we need it
-        for i in cursor.description:
-            if str(i[0]).lower() == "column_default":
-                columns.append("default")
-            else:
-                columns.append(str(i[0]).lower())
-        
-
+        # AS default - cannot be used in sqlserver query as this word is reserved
+        columns = ["default" if str(i[0]).lower() == "column_default" else str(i[0]).lower() for i in cursor.description]
         rows = [dict(zip(columns, [str(item) for item in row])) for row in data]       
         for row in rows:
             table_id = name_to_id.get(str(row.get("table_name")))
             if table_id is not None:
-                # exclude "table_name" from the row dict
                 row.pop("table_name", None)
                 if "nullable" in row:
                     if row["nullable"].lower() == "no" or row["nullable"].lower() == "false":
-                        #to make compatible with postgres 
                         row["nullable"] = False
                     else:
                         row["nullable"] = True
-                id_to_all.get(table_id)["columns"] = id_to_all.get(table_id).get("columns",[]) + [row]
+                if table_id in id_to_table_data:        
+                    id_to_table_data.get(table_id)["columns"] = id_to_table_data.get(table_id).get("columns",[]) + [row]
+                else:
+                    self._log.error("Columns found for an unkown table with the object_id: %s", table_id)
+            else:
+                self._log.error("Couldn't find id of a table: %s", table_id)
         return len(data)
     
-    def _populate_with_partitions_data(self, table_ids, id_to_all, cursor):
+    """ 
+    adds partitions dict to each table in a provided list
+    """
+    def _populate_with_partitions_data(self, table_ids, id_to_table_data, cursor):
         cursor.execute(PARTITIONS_QUERY.format(table_ids))
         columns = [str(i[0]).lower() for i in cursor.description] 
         rows = [dict(zip(columns, row)) for row in cursor.fetchall()]
         for row in rows:
             id  = row.pop("id", None)
-            if id is not None:
-                #TODO what happens if not found ? 
-                id_to_all.get(str(id))["partitions"] = row
+            if id is not None: 
+                id_str = str(id)
+                if id_str in id_to_table_data:
+                    id_to_table_data[id_str]["partitions"] = row
+                else:
+                    self._log.error("Partition found for an unkown table with the object_id: %s", id_str)
             else:
-                print("todo error")
-            row.pop("id", None)
-        print("end")
+                self._log.error("Return rows of [%s] query should have id column", PARTITIONS_QUERY)
 
-    def _populate_with_index_data(self, table_ids, id_to_all, cursor):
+    def _populate_with_index_data(self, table_ids, id_to_table_data, cursor):
         cursor.execute(INDEX_QUERY.format(table_ids))
         columns = [str(i[0]).lower() for i in cursor.description] 
         rows = [dict(zip(columns, row)) for row in cursor.fetchall()]
         for row in rows:
             id  = row.pop("id", None)
             if id is not None:
-                id_to_all.get(str(id)).setdefault("indexes", [])
-                id_to_all.get(str(id))["indexes"].append(row)
+                id_to_table_data.get(str(id)).setdefault("indexes", [])
+                id_to_table_data.get(str(id))["indexes"].append(row)
             else:
                 print("todo error")
             row.pop("id", None)
         print("end")
 
-    def _populate_with_foreign_keys_data(self, table_ids, id_to_all, cursor):
+    def _populate_with_foreign_keys_data(self, table_ids, id_to_table_data, cursor):
             cursor.execute(FOREIGN_KEY_QUERY.format(table_ids))
             columns = [str(i[0]).lower() for i in cursor.description] 
             rows = [dict(zip(columns, row)) for row in cursor.fetchall()]
             for row in rows:
                 id  = row.pop("id", None)
                 if id is not None:
-                    id_to_all.get(str(id)).setdefault("foreign_keys", [])
-                    id_to_all.get(str(id))["foreign_keys"].append(row)
+                    id_to_table_data.get(str(id)).setdefault("foreign_keys", [])
+                    id_to_table_data.get(str(id))["foreign_keys"].append(row)
                 else:
                     print("todo error")  
             print("end")
