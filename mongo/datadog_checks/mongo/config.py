@@ -102,6 +102,7 @@ class MongoConfig(object):
         # DBM config options
         self.dbm_enabled = is_affirmative(instance.get('dbm', False))
         self.database_instance_collection_interval = instance.get('database_instance_collection_interval', 1800)
+        self.cluster_name = instance.get('cluster_name', None)
 
     def _get_clean_server_name(self):
         try:
