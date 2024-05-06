@@ -193,13 +193,27 @@ class Schemas:
         self._log.debug("Finished collect_schemas_data")
         self._dataSubmitter.submit()
 
-
     def _query_db_information(self, db_name, cursor):
         db_info = execute_query_output_result_as_a_dict(DB_QUERY.format(db_name), cursor)
         if len(db_info) == 1:
             return db_info[0]
         else:
-            return None
+            self._log.error("Couldnt query database information for %s", db_name)
+            return None        
+
+    """ returns a list of tables for schema with their names and empty column array
+    list of table dicts
+    "id": str
+    "name": str
+    "columns": [] 
+    """
+    def _get_tables(self, schema, cursor):
+        cursor.execute(TABLES_IN_SCHEMA_QUERY.format(schema["id"]))
+        columns = [str(i[0]).lower() for i in cursor.description]
+        rows = [dict(zip(columns, row)) for row in cursor.fetchall()]
+        return [ {"id" : str(row["id"]), "name" : row['name'], "columns" : []} for row in rows ] 
+
+
     # TODO how often ?
 
     """schemas data struct is a dictionnary with key being a schema name the value is
@@ -251,12 +265,10 @@ class Schemas:
         "id": str
         "owner_name": str"""
     def _query_schema_information(self, cursor):
-        self._log.debug("Running query [%s]", SCHEMA_QUERY)
         cursor.execute(SCHEMA_QUERY)
         schemas = []
         columns = [i[0] for i in cursor.description]
         schemas = [dict(zip(columns, [str(item) for item in row])) for row in cursor.fetchall()]
-        self._log.debug("fetched schemas len(rows)=%s", len(schemas))
         return schemas
     
     """ returns extracted column numbers and a list of tables
@@ -311,7 +323,6 @@ class Schemas:
         self._populate_with_index_data(table_ids, id_to_table_data, cursor)
         return total_columns_number, list(id_to_table_data.values())
 
-    # TODO refactor the next 3 to have a base function when everythng is settled.
     def _populate_with_columns_data(self, table_ids, name_to_id, id_to_all, schema, cursor):
         # get columns if we dont have a dict here unlike postgres
         cursor.execute(COLUMN_QUERY.format(table_ids, schema["name"]))
@@ -361,7 +372,8 @@ class Schemas:
         for row in rows:
             id  = row.pop("id", None)
             if id is not None:
-                id_to_all.get(str(id))["indexes"] = row
+                id_to_all.get(str(id)).setdefault("indexes", [])
+                id_to_all.get(str(id))["indexes"].append(row)
             else:
                 print("todo error")
             row.pop("id", None)
@@ -374,17 +386,14 @@ class Schemas:
             for row in rows:
                 id  = row.pop("id", None)
                 if id is not None:
-                    id_to_all.get(str(id))["foreign_keys"] = row
+                    id_to_all.get(str(id)).setdefault("foreign_keys", [])
+                    id_to_all.get(str(id))["foreign_keys"].append(row)
                 else:
                     print("todo error")  
             print("end")
         #return execute_query_output_result_as_a_dict(COLUMN_QUERY.format(table_name, schema_name), cursor)
 
-    def _get_tables(self, schema, cursor):
-        cursor.execute(TABLES_IN_SCHEMA_QUERY.format(schema["id"]))
-        columns = [str(i[0]).lower() for i in cursor.description]
-        rows = [dict(zip(columns, row)) for row in cursor.fetchall()]
-        return [ {"id" : str(row["id"]), "name" : row['name'], "columns" : []} for row in rows ] 
+
 
     #TODO its hard to get the partition key - for later ? 
 

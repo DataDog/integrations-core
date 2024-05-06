@@ -53,13 +53,15 @@ AS PARTITION CityPartitionFunction ALL TO ([PRIMARY]); -- Assign partitions to f
 CREATE TABLE datadog_test_schemas.test_schema.cities (
     id INT NOT NULL DEFAULT 0,
     name VARCHAR(255),
+    population INT NOT NULL DEFAULT 0,
     CONSTRAINT PK_Cities PRIMARY KEY (id)
 ) ON CityPartitionScheme(id); -- Assign the partition scheme to the table
 
 
 CREATE INDEX two_columns_index ON datadog_test_schemas.test_schema.cities (id, name);
+CREATE INDEX single_column_index ON datadog_test_schemas.test_schema.cities (population);
 
-INSERT INTO datadog_test_schemas.test_schema.cities  VALUES (1, 'yey'), (2, 'bar');
+INSERT INTO datadog_test_schemas.test_schema.cities  VALUES (1, 'yey', 100), (2, 'bar', 200);
 GO
 CREATE TABLE datadog_test_schemas.test_schema.landmarks (name varchar(255), city_id int DEFAULT 0);
 GO
