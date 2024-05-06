@@ -22,6 +22,9 @@ from datadog_checks.openstack_controller.metrics import (
     IRONIC_VOLUME_CONNECTOR_COUNT,
     IRONIC_VOLUME_CONNECTOR_PREFIX,
     IRONIC_VOLUME_CONNECTOR_TAGS,
+    IRONIC_VOLUME_TARGET_COUNT,
+    IRONIC_VOLUME_TARGET_PREFIX,
+    IRONIC_VOLUME_TARGET_TAGS,
     get_metrics_and_tags,
 )
 
@@ -148,3 +151,22 @@ class BareMetal(Component):
                 )
                 self.check.log.debug("connector: %s", connector)
                 self.check.gauge(IRONIC_VOLUME_CONNECTOR_COUNT, 1, tags=tags + connector['tags'])
+
+    @Component.register_global_metrics(ID)
+    @Component.http_error()
+    def _report_volume_targets(self, config, tags):
+        if 'targets' not in config:
+            report_targets = config.get('volumes', {}).get('targets', True)
+        else:
+            report_targets = config.get('targets', True)
+        if report_targets:
+            data = self.check.api.get_baremetal_volume_targets()
+            for item in data:
+                target = get_metrics_and_tags(
+                    item,
+                    tags=IRONIC_VOLUME_TARGET_TAGS,
+                    prefix=IRONIC_VOLUME_TARGET_PREFIX,
+                    metrics=[IRONIC_VOLUME_TARGET_COUNT],
+                )
+                self.check.log.debug("target: %s", target)
+                self.check.gauge(IRONIC_VOLUME_TARGET_COUNT, 1, tags=tags + target['tags'])

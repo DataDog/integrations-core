@@ -20,7 +20,7 @@ from tests.metrics import (
     NODES_METRICS_IRONIC_MICROVERSION_1_80,
     NODES_METRICS_IRONIC_MICROVERSION_DEFAULT,
     PORTGROUPS_METRICS_IRONIC_MICROVERSION_1_80,
-    VOLUME_CONNECTORS_METRICS_IRONIC_MICROVERSION_1_80,
+    VOLUME_METRICS_IRONIC_MICROVERSION_1_80,
 )
 
 pytestmark = [
@@ -404,12 +404,13 @@ def test_nodes_metrics(aggregator, check, dd_run_check, metrics):
     ],
 )
 @pytest.mark.usefixtures('mock_http_get', 'mock_http_post', 'openstack_connection')
-def test_disable_ironic_volume_connector_metrics(aggregator, dd_run_check, instance, openstack_controller_check):
+def test_disable_ironic_volume_metrics(aggregator, dd_run_check, instance, openstack_controller_check):
     instance = instance | {
         "components": {
             "baremetal": {
                 "volumes": {
                     "connectors": False,
+                    "targets": False,
                 },
             },
         },
@@ -418,6 +419,7 @@ def test_disable_ironic_volume_connector_metrics(aggregator, dd_run_check, insta
     dd_run_check(check)
     for metric in aggregator.metric_names:
         assert not metric.startswith('openstack.ironic.volume.connector.')
+        assert not metric.startswith('openstack.ironic.volume.target.')
 
 
 @pytest.mark.parametrize(
@@ -425,18 +427,18 @@ def test_disable_ironic_volume_connector_metrics(aggregator, dd_run_check, insta
     [
         pytest.param(
             configs.REST_IRONIC_MICROVERSION_1_80,
-            VOLUME_CONNECTORS_METRICS_IRONIC_MICROVERSION_1_80,
+            VOLUME_METRICS_IRONIC_MICROVERSION_1_80,
             id='api rest microversion 1.80',
         ),
         pytest.param(
             configs.SDK_IRONIC_MICROVERSION_1_80,
-            VOLUME_CONNECTORS_METRICS_IRONIC_MICROVERSION_1_80,
+            VOLUME_METRICS_IRONIC_MICROVERSION_1_80,
             id='api sdk microversion 1.80',
         ),
     ],
 )
 @pytest.mark.usefixtures('mock_http_get', 'mock_http_post', 'openstack_connection')
-def test_volumes_connectors_metrics(aggregator, check, dd_run_check, metrics):
+def test_volumes_metrics(aggregator, check, dd_run_check, metrics):
     dd_run_check(check)
     for metric in metrics:
         aggregator.assert_metric(

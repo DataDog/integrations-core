@@ -461,6 +461,8 @@ files:
                             properties:
                               - name: connectors
                                 type: boolean
+                              - name: targets
+                                type: boolean
               - name: load-balancer
                 anyOf:
                   - type: boolean

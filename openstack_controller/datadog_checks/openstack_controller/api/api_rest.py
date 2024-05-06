@@ -453,6 +453,13 @@ class ApiRest(Api):
         response.raise_for_status()
         return response.json().get('connectors', [])
 
+    def get_baremetal_volume_targets(self):
+        response = self.http.get(
+            '{}/v1/volume/targets'.format(self._catalog.get_endpoint_by_type(Component.Types.BAREMETAL.value))
+        )
+        response.raise_for_status()
+        return response.json().get('targets', [])
+
     def get_load_balancer_loadbalancers(self, project_id):
         params = {'project_id': project_id}
         return self.make_paginated_request(
