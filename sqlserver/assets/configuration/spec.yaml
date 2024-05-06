@@ -713,6 +713,14 @@ files:
         type: number
         example: 1800
         display_default: false
+    - name: schemas_collection_interval 
+      description: |
+        The database schema collection interval (in seconds).
+        Defaults to 1200 seconds to include everything.
+      value:
+        type: number
+        example: 600
+        display_default: false
     - template: instances/default
   - template: logs
     example:

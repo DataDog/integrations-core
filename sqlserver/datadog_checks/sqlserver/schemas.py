@@ -11,7 +11,9 @@ from datadog_checks.sqlserver.const import (
     INDEX_QUERY,
     FOREIGN_KEY_QUERY,
     SCHEMA_QUERY,
-    DB_QUERY
+    DB_QUERY,
+    STATIC_INFO_VERSION,
+    STATIC_INFO_ENGINE_EDITION
 )
 
 from datadog_checks.sqlserver.utils import (
@@ -41,10 +43,11 @@ class SubmitData:
         self.db_to_schemas = {} # dbname : { id : schema }
         self.db_info = {} # name to info
 
-    def set_base_event_data(self, hostname, tags, cloud_metadata):
+    def set_base_event_data(self, hostname, tags, cloud_metadata, dbms_version):
         self._base_event["host"] = hostname
         self._base_event["tags"] = tags
         self._base_event["cloud_metadata"] = cloud_metadata
+        self._base_event["dbms_version"] = dbms_version        
 
     def reset(self):
         self._columns_count = 0
@@ -92,119 +95,102 @@ class SubmitData:
         self._submit_to_agent_queue(json_event)
         self.db_to_schemas = {}
 
-#TODO Introduce total max for data
 class Schemas:
-    def __init__(self, check):
+
+    # Requests for infromation about tables are done for a certain amount of tables at the time
+    # This number of tables doesnt slow down performance by much (15% compared to 500 tables)
+    # but allows the queue to be stable.
+    TABLES_CHUNK_SIZE = 50
+
+    def __init__(self, check, schemas_collection_interval):
         self._check = check 
         self._log = check.log
         self._tags = [t for t in check.tags if not t.startswith('dd.internal')]
         self._tags.append("boris:data")
         self.schemas_per_db = {} 
-        """
+
         base_event = {
-                "host": self._check.resolved_hostname,
-                "agent_version": datadog_agent.get_version(),
-                "dbms": "sqlserver", #TODO ?
-                "kind": "", # TODO 
-                #"collection_interval": self.schemas_collection_interval,
-                #"dbms_version": self._payload_pg_version(),
-                #"tags": self._tags_no_db,
-                #"cloud_metadata": self._config.cloud_metadata,
-            }
-        """
-        #TODO error is just so that payload passes, shoud be removed
-        hostname = "error"
-        if self._check.resolved_hostname is not None:
-            hostname = self._check.resolved_hostname
-        base_event = {
-            "host": hostname,
+            "host": None,
             "agent_version": datadog_agent.get_version(),
-            "dbms": "sqlserver", #TODO fake it until you make it - trying to pass this data as postgres for now
-            "kind": "sqlserver_databases", # TODO pg_databases - will result in KindPgDatabases and so processor would thing its postgres 
-            "collection_interval": 0.5, #dummy
-            "dbms_version": "v14.2", #dummy but may be format i v11 is important ?
-            "tags": self._tags, #in postgres it's no DB.
+            "dbms": "sqlserver",
+            "kind": "sqlserver_databases",
+            "collection_interval": schemas_collection_interval,
+            "dbms_version": None,
+            "tags": self._tags, #in postgres it's no DB ?
             "cloud_metadata": self._check._config.cloud_metadata,
         }
         self._dataSubmitter = SubmitData(self._check.database_monitoring_metadata, base_event, self._log)
-       
-    def _init_schema_collection(self):
-        currently_known_databases = self._check.get_databases()
-        if len(self._databases_to_query) == 0:
-            self._databases_to_query = self._check.get_databases()
-            return  
-        else:
-            if self._databases_to_query[0] not in currently_known_databases:
-                #TODO if db dissapeared we invalidate indexes should be done in exception treatment of use DB ?
-                #if DB is not there the first use db will throw and we continue until we find an existing db or exaust the list
-                # the idea is always finish the existing DB list and then run "diff" logic which will create a new list of "tasks"
-                self.reset_data_collection()
 
-   #TODO update this at the very end as it constantly changing
     """schemas data struct is a dictionnary with key being a schema name the value is
     schema
     dict:
         "name": str
         "id": str
-        "principal_id": str
-        "tables" : []
-            id : str
-            name : str
-            columns: list of columns                  
-                "columns": dict
-                    name: str
-                    data_type: str
-                    default: str
-                    is_nullable : str
-            indexes : list of indexes - important
-            foreign_keys : list of foreign keys
+        "owner_name": str
+        "tables" : list of tables dicts
+            table 
+            dict:
+                "id" : str
+                "name" : str
+                columns: list of columns dicts                 
+                    columns 
+                    dict:
+                        "name": str
+                        "data_type": str
+                        "default": str
+                        "nullable": bool
+            indexes : list of index dicts
+                index
+                dict:
+                    "name": str
+                    "type": str
+                    "is_unique": bool
+                    "is_primary_key": bool
+                    "is_unique_constraint": bool
+                    "is_disabled": bool,
+                    "column_names": str
+            foreign_keys : list of foreign key dicts
+                foreign_key
+                dict:
+                    "foreign_key_name": str
+                    "referencing_table": str
+                    "referencing_column": str
+                    "referenced_table": str
+                    "referenced_column": str
+            partitions: list of partitions dict
+                partition
+                dict:
+                    "partition_count": int
             partitions useful to know the number 
     """
-    
-    #sends all the data in one go but split in chunks (like Seth's solution)
     def collect_schemas_data(self):
         self._dataSubmitter.reset()
-        start_time = time.time()
-        self._log.warning("Starting schema collection {}".format(start_time))
-        # for now only setting host and tags and metada
-        self._dataSubmitter.set_base_event_data(self._check.resolved_hostname, self._tags, self._check._config.cloud_metadata)
-        #returns Stop, Stop == True.
+        self._dataSubmitter.set_base_event_data(self._check.resolved_hostname, self._tags, self._check._config.cloud_metadata, 
+                                                "{},{}".format(
+                                                self._check.static_info_cache.get(STATIC_INFO_VERSION, ""),
+                                                self._check.static_info_cache.get(STATIC_INFO_ENGINE_EDITION, ""),)
+        )
+        #returns if to stop, True means stop iterating.
         def fetch_schema_data(cursor, db_name):
             db_info  = self._query_db_information(db_name, cursor)
             schemas = self._query_schema_information(cursor)
             self._dataSubmitter.store_db_info(db_name, db_info)
-            chunk_size = 50
             for schema in schemas:
-                tables = self._get_tables(schema, cursor)  
-                #TODO sorting is purely for testing
-                #sorted_tables = sorted(tables, key=lambda x: x['name'])          
-                tables_chunk = list(get_list_chunks(tables, chunk_size))
+                tables = self._get_tables(schema, cursor)         
+                tables_chunk = list(get_list_chunks(tables, self.TABLES_CHUNK_SIZE))
                 for tables_chunk in tables_chunk:
                     if self._dataSubmitter.exceeded_total_columns_number():
                         self._log.warning("Truncated data due to the max limit, stopped on db - {} on schema {}".format(db_name, schema["name"]))
-                        return True
-                    self._log.warning("elapsed time {}".format(time.time() - start_time))
-
-                    start_get_tables_time = time.time()
+                        return True                    
                     columns_count, tables_info = self._get_tables_data(tables_chunk, schema, cursor)
-                    self._log.warning("_get_tables_data time {}".format(time.time() - start_get_tables_time))
-
-                    start_store_time = time.time()
                     self._dataSubmitter.store(db_name, schema, tables_info, columns_count)  
-                    self._log.warning("store time {}".format(time.time() - start_store_time))
-
-                    start_submit_time = time.time()
-                    self._dataSubmitter.submit() # we force submit after each 50 tables chunk
-                    self._log.warning("submit time {}".format(time.time() - start_submit_time))
+                    self._dataSubmitter.submit() # Submit is forced after each 50 tables chunk
                 if len(tables) == 0:
                     self._dataSubmitter.store(db_name, schema, [], 0)
-            # we want to submit for each DB separetly for clarity
             self._dataSubmitter.submit()
-            self._log.error("Finished collecting for DB - {} elapsed time {}".format(db_name, time.time() - start_time))
             return False
         self._check.do_for_databases(fetch_schema_data, self._check.get_databases())
-        # submit the last chunk of data if any
-        self._log.error("Finished collect_schemas_data")
+        self._log.debug("Finished collect_schemas_data")
         self._dataSubmitter.submit()
 
 
@@ -216,56 +202,120 @@ class Schemas:
             return None
     # TODO how often ?
 
-    #TODOTODO do we need this map/list format if we are not dumping in json ??? May be we need to send query results as they are ? 
-
-    #TODO Looks fine similar to Postgres, do we need to do someting with prinicipal_id
-    # or reporting principal_id is ok
+    """schemas data struct is a dictionnary with key being a schema name the value is
+    schema
+    dict:
+        "name": str
+        "id": str
+        "owner_name": str
+        "tables" : list of tables dicts
+            table 
+            dict:
+                "id" : str
+                "name" : str
+                columns: list of columns dicts                 
+                    columns 
+                    dict:
+                        "name": str
+                        "data_type": str
+                        "default": str
+                        "nullable": bool
+            indexes : list of index dicts
+                index
+                dict:
+                    "name": str
+                    "type": str
+                    "is_unique": bool
+                    "is_primary_key": bool
+                    "is_unique_constraint": bool
+                    "is_disabled": bool,
+                    "column_names": str
+            foreign_keys : list of foreign key dicts
+                foreign_key
+                dict:
+                    "foreign_key_name": str
+                    "referencing_table": str
+                    "referencing_column": str
+                    "referenced_table": str
+                    "referenced_column": str
+            partitions: list of partitions dict
+                partition
+                dict:
+                    "partition_count": int
+            partitions useful to know the number 
+    """    
+    """fetches schemas dict 
+    schema
+    dict:
+        "name": str
+        "id": str
+        "owner_name": str"""
     def _query_schema_information(self, cursor):
-
-        # principal_id is kind of like an owner not sure if need it.
-        self._log.debug("collecting db schemas")
         self._log.debug("Running query [%s]", SCHEMA_QUERY)
         cursor.execute(SCHEMA_QUERY)
         schemas = []
         columns = [i[0] for i in cursor.description]
         schemas = [dict(zip(columns, [str(item) for item in row])) for row in cursor.fetchall()]
-        #TODO we can refactor it , doesnt have to have a tables :[] if there is nothing. 
-        for schema in schemas:
-            schema["tables"] = []
         self._log.debug("fetched schemas len(rows)=%s", len(schemas))
         return schemas
-        
-    #TODO collect diffs : we need to take care of new DB / removed DB . schemas new removed
-    # will nedd a separate query for changed indexes
+    
+    """ returns extracted column numbers and a list of tables
+        "tables" : list of tables dicts
+        table 
+        dict:
+            "id" : str
+            "name" : str
+            columns: list of columns dicts                 
+                columns 
+                dict:
+                    "name": str
+                    "data_type": str
+                    "default": str
+                    "nullable": bool
+            indexes : list of index dicts
+                index
+                dict:
+                    "name": str
+                    "type": str
+                    "is_unique": bool
+                    "is_primary_key": bool
+                    "is_unique_constraint": bool
+                    "is_disabled": bool,
+                    "column_names": str
+            foreign_keys : list of foreign key dicts
+                foreign_key
+                dict:
+                    "foreign_key_name": str
+                    "referencing_table": str
+                    "referencing_column": str
+                    "referenced_table": str
+                    "referenced_column": str
+            partitions: list of partitions dict
+                partition
+                dict:
+                    "partition_count": int
+    """
     def _get_tables_data(self, table_list, schema, cursor):
         if len(table_list) == 0:
             return
         name_to_id = {}
-        id_to_all = {}
-        #table_names = ",".join(["'{}'".format(t.get("name")) for t in table_list])
-        #OBJECT_NAME is needed to make it work for special characters 
+        id_to_table_data = {}
         table_ids_object = ",".join(["OBJECT_NAME({})".format(t.get("id")) for t in table_list])
         table_ids = ",".join(["{}".format(t.get("id")) for t in table_list])
         for t in table_list:
             name_to_id[t["name"]] = t["id"] 
-            id_to_all[t["id"]] = t
-        total_columns_number  = self._populate_with_columns_data(table_ids_object, name_to_id, id_to_all, schema, cursor)
-        self._populate_with_partitions_data(table_ids, id_to_all, cursor) #TODO P DISABLED as postgrss backend accepts different data model
-        self._populate_with_foreign_keys_data(table_ids, id_to_all, cursor) #TODO P DISABLED as postgrss backend accepts different data model
-        self._populate_with_index_data(table_ids, id_to_all, cursor) #TODO P DISABLED as postgrss backend accepts different data model
-        # unwrap id_to_all
-        return total_columns_number, list(id_to_all.values())
+            id_to_table_data[t["id"]] = t
+        total_columns_number  = self._populate_with_columns_data(table_ids_object, name_to_id, id_to_table_data, schema, cursor)
+        self._populate_with_partitions_data(table_ids, id_to_table_data, cursor)
+        self._populate_with_foreign_keys_data(table_ids, id_to_table_data, cursor)
+        self._populate_with_index_data(table_ids, id_to_table_data, cursor)
+        return total_columns_number, list(id_to_table_data.values())
 
     # TODO refactor the next 3 to have a base function when everythng is settled.
     def _populate_with_columns_data(self, table_ids, name_to_id, id_to_all, schema, cursor):
         # get columns if we dont have a dict here unlike postgres
-        start_time = time.time()
         cursor.execute(COLUMN_QUERY.format(table_ids, schema["name"]))
-        self._log.warning("Executed columns query for {} seconds".format(time.time() - start_time))
-        start_time_fetch = time.time()
         data = cursor.fetchall()
-        self._log.warning("Executed cursor.fetchall()for {} seconds".format(time.time() - start_time_fetch))
-        start_time_rest = time.time()
         columns = []
         #TODO we need it cause if I put AS default its a forbidden key word and to be inline with postgres we need it
         for i in cursor.description:
@@ -288,7 +338,6 @@ class Schemas:
                     else:
                         row["nullable"] = True
                 id_to_all.get(table_id)["columns"] = id_to_all.get(table_id).get("columns",[]) + [row]
-        self._log.warning("Executed loops for {} seconds".format(time.time() - start_time_rest))
         return len(data)
     
     def _populate_with_partitions_data(self, table_ids, id_to_all, cursor):
@@ -330,21 +379,12 @@ class Schemas:
                     print("todo error")  
             print("end")
         #return execute_query_output_result_as_a_dict(COLUMN_QUERY.format(table_name, schema_name), cursor)
-    
-        
-    #TODO in SQLServer partitioned child tables should have the same object_id might be worth checking with a test.
 
-    #TODOTODO do we need this map/list format if we are not dumping in json ??? May be we need to send query results as they are ? 
     def _get_tables(self, schema, cursor):
         cursor.execute(TABLES_IN_SCHEMA_QUERY.format(schema["id"]))
         columns = [str(i[0]).lower() for i in cursor.description]
-        rows = [dict(zip(columns, row)) for row in cursor.fetchall()] #TODO may be more optimal to patch columns with index etc 
-        # rows = [dict(zip(columns + ["columns", "indexes", "partitions", "foreign_keys"], row + [[], [], [], []])) for row in cursor.fetchall()] #TODO may be this works
-        #return [ {"id" : row["object_id"], "name" : row['name'], "columns" : [], "indexes" : [], "partitions" : [], "foreign_keys" : []} for row in rows ]     # TODO P disabled because of postgres later enable             
-        return [ {"id" : str(row["object_id"]), "name" : row['name'], "columns" : []} for row in rows ]  
-
-    #TODO table 1803153469 is in  sys.indexes but not in sys.index_columns ... shell we do something about it ?
-
+        rows = [dict(zip(columns, row)) for row in cursor.fetchall()]
+        return [ {"id" : str(row["id"]), "name" : row['name'], "columns" : []} for row in rows ] 
 
     #TODO its hard to get the partition key - for later ? 
 

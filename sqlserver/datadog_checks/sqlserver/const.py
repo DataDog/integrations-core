@@ -269,14 +269,17 @@ TEMPDB_FILE_SPACE_USAGE_METRICS = [
 
 PROC_CHAR_LIMIT = 500
 
+#Schemas
+DEFAULT_SCHEMAS_COLLECTION_INTERVAL = 1200
+
 #for now description results in ('ODBC SQL type -150 is not yet supported.  column-index=4  type=-150', 'HY106')
 DB_QUERY2 = "SELECT db.database_id AS id, db.name AS NAME, db.collation_name AS collation, dp.name AS owner, ep.value AS description FROM sys.databases db LEFT JOIN sys.database_principals dp ON db.owner_sid = dp.sid LEFT JOIN sys.extended_properties ep ON ep.major_id = db.database_id AND ep.minor_id = 0 AND ep.class = 0 AND ep.name = 'MS_Description' WHERE db.name = '{}';"
 DB_QUERY = "SELECT db.database_id AS id, db.name AS NAME, db.collation_name AS collation, dp.name AS owner FROM sys.databases db LEFT JOIN sys.database_principals dp ON db.owner_sid = dp.sid WHERE db.name = '{}';"
 
 #TODO as owner for the postgresbackend 
-SCHEMA_QUERY = "SELECT name,schema_id AS id,principal_id AS owner FROM sys.schemas WHERE name NOT IN ('sys', 'information_schema');"
-
-TABLES_IN_SCHEMA_QUERY = "SELECT name, object_id FROM sys.tables WHERE schema_id={}"
+SCHEMA_QUERY = "SELECT name,schema_id AS id, dp.name AS OwnerName, FROM sys.schemas AS s LEFT JOIN sys.database_principals dp ON s.principal_id = dp.principal_id WHERE s.name NOT IN ('sys', 'information_schema');"
+SCHEMA_QUERY = "SELECT s.name AS name ,s.schema_id AS id, dp.name AS owner_name FROM sys.schemas AS s LEFT JOIN sys.database_principals dp ON s.principal_id = dp.principal_id WHERE s.name NOT IN ('sys', 'information_schema')";
+TABLES_IN_SCHEMA_QUERY = "SELECT name, object_id AS id FROM sys.tables WHERE schema_id={}"
 COLUMN_QUERY3 = "SELECT COLUMN_NAME, DATA_TYPE, COLUMN_DEFAULT , IS_NULLABLE FROM INFORMATION_SCHEMA.COLUMNS WHERE TABLE_NAME='{}' and TABLE_SCHEMA='{}';"
 #this query returns several values in case there is an alias for an int ... 
 COLUMN_QUERY2 = "SELECT c.name AS name, t.name AS data_type, c.is_nullable AS is_nullable, dc.definition AS default_value FROM sys.columns c JOIN sys.types t ON c.system_type_id = t.system_type_id OR c.user_type_id = t.user_type_id LEFT JOIN sys.default_constraints dc ON c.default_object_id = dc.object_id WHERE c.object_id = {}"

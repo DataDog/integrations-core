@@ -84,7 +84,7 @@ from datadog_checks.sqlserver.utils import (
     is_azure_sql_database,
     set_default_driver_conf,
 )
-
+import pdb
 try:
     import adodbapi
 except ImportError:
@@ -125,7 +125,7 @@ class SQLServer(AgentCheck):
         self._sql_counter_types = {}
         self.proc_type_mapping = {"gauge": self.gauge, "rate": self.rate, "histogram": self.histogram}
 
-        self._schemas = Schemas(self)
+        self._schemas = Schemas(self, self._config.schemas_collection_interval)
 
         # DBM
         self.statement_metrics = SqlserverStatementMetrics(self, self._config)
@@ -159,6 +159,7 @@ class SQLServer(AgentCheck):
         self.sqlserver_incr_fraction_metric_previous_values = {}
 
         self._database_metrics = None
+        self._last_schemas_collect_time = None
 
     def cancel(self):
         self.statement_metrics.cancel()
@@ -746,6 +747,7 @@ class SQLServer(AgentCheck):
                         if stop:
                             break;                  
                     except Exception as e:
+                        pdb.set_trace()
                         print("An exception occurred during do_for_databases in db - {}: {}".format(db, e))
                 # Switch DB back to MASTER
                 if not is_azure_sql_database(engine_edition):

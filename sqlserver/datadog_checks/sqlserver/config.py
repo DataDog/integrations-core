@@ -7,7 +7,7 @@ import re
 
 from datadog_checks.base.config import is_affirmative
 from datadog_checks.base.utils.common import to_native_string
-from datadog_checks.sqlserver.const import DEFAULT_AUTODISCOVERY_INTERVAL, PROC_CHAR_LIMIT
+from datadog_checks.sqlserver.const import DEFAULT_AUTODISCOVERY_INTERVAL, PROC_CHAR_LIMIT, DEFAULT_SCHEMAS_COLLECTION_INTERVAL
 
 
 class SQLServerConfig:
@@ -23,6 +23,7 @@ class SQLServerConfig:
         self.autodiscovery_interval: int = instance.get('autodiscovery_interval', DEFAULT_AUTODISCOVERY_INTERVAL)
         self._include_patterns = self._compile_valid_patterns(self.autodiscovery_include)
         self._exclude_patterns = self._compile_valid_patterns(self.autodiscovery_exclude)
+        self.schemas_collection_interval: int = instance.get('schemas_collection_interval', DEFAULT_SCHEMAS_COLLECTION_INTERVAL)
 
         self.proc: str = instance.get('stored_procedure')
         self.custom_metrics: list[dict] = init_config.get('custom_metrics', []) or []
