@@ -125,8 +125,6 @@ class SQLServer(AgentCheck):
         self._sql_counter_types = {}
         self.proc_type_mapping = {"gauge": self.gauge, "rate": self.rate, "histogram": self.histogram}
 
-        self._schemas = Schemas(self, self._config.schemas_collection_interval)
-
         # DBM
         self.statement_metrics = SqlserverStatementMetrics(self, self._config)
         self.procedure_metrics = SqlserverProcedureMetrics(self, self._config)
@@ -145,7 +143,7 @@ class SQLServer(AgentCheck):
         )  # type: TTLCache
         # Keep a copy of the tags before the internal resource tags are set so they can be used for paths that don't
         # go through the agent internal metrics submission processing those tags
-        self._non_internal_tags = copy.deepcopy(self.tags)
+        self.non_internal_tags = copy.deepcopy(self.tags)
         self.check_initializations.append(self.initialize_connection)
         self.check_initializations.append(self.set_resolved_hostname)
         self.check_initializations.append(self.set_resolved_hostname_metadata)
@@ -159,7 +157,9 @@ class SQLServer(AgentCheck):
         self.sqlserver_incr_fraction_metric_previous_values = {}
 
         self._database_metrics = None
+
         self._last_schemas_collect_time = None
+        self._schemas = Schemas(self, self._config.schemas_collection_interval)
 
     def cancel(self):
         self.statement_metrics.cancel()
@@ -1053,7 +1053,7 @@ class SQLServer(AgentCheck):
                     self.static_info_cache.get(STATIC_INFO_ENGINE_EDITION, ""),
                 ),
                 "integration_version": __version__,
-                "tags": self._non_internal_tags,
+                "tags": self.non_internal_tags,
                 "timestamp": time.time() * 1000,
                 "cloud_metadata": self._config.cloud_metadata,
                 "metadata": {

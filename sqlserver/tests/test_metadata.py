@@ -146,9 +146,11 @@ def test_collect_schemas(aggregator, dd_run_check, dbm_instance):
         difference = DeepDiff(actual_payload, expected_data_for_db[db_name], ignore_order=True)
 
         #difference = {}
+
         diff_keys = list(difference.keys())
         if len(diff_keys) > 0 and diff_keys != ['iterable_item_removed']:
-            logging.debug("found the following diffs %s", json.dumps(difference))
+            pdb.set_trace()
+            logging.debug("found the following diffs %s", str(difference))
             assert False
 
         # we need a special comparison as order of columns matter

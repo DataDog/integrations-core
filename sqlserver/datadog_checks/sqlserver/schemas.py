@@ -30,7 +30,6 @@ class SubmitData:
     MAX_COLUMN_COUNT  = 10_000
 
     # REDAPL has a 3MB limit per resource
-    #TODO Report truncation to the backend
     MAX_TOTAL_COLUMN_COUNT = 100_000 
 
     def __init__(self, submit_data_function, base_event, logger):
@@ -66,7 +65,7 @@ class SubmitData:
             known_tables = schemas[schema["id"]].setdefault("tables",[])
             known_tables = known_tables + tables
         else:
-            schemas[schema["id"]] = copy.deepcopy(schema) # TODO a deep copy ? kind of costs not much to be safe
+            schemas[schema["id"]] = copy.deepcopy(schema)
             schemas[schema["id"]]["tables"] = tables
         if self._columns_count > self.MAX_COLUMN_COUNT:
             self._submit()
@@ -85,7 +84,7 @@ class SubmitData:
         for db, schemas_by_id in self.db_to_schemas.items():
             db_info = {}
             if db not in self.db_info:
-                #TODO log error
+                self._log.error("Couldn't find database info for %s", db)
                 db_info["name"] = db
             else:
                 db_info = self.db_info[db]
@@ -105,8 +104,6 @@ class Schemas:
     def __init__(self, check, schemas_collection_interval):
         self._check = check 
         self._log = check.log
-        self._tags = [t for t in check.tags if not t.startswith('dd.internal')]
-        self._tags.append("boris:data")
         self.schemas_per_db = {} 
 
         base_event = {
@@ -116,7 +113,7 @@ class Schemas:
             "kind": "sqlserver_databases",
             "collection_interval": schemas_collection_interval,
             "dbms_version": None,
-            "tags": self._tags, #in postgres it's no DB ?
+            "tags": self._check.non_internal_tags,
             "cloud_metadata": self._check._config.cloud_metadata,
         }
         self._dataSubmitter = SubmitData(self._check.database_monitoring_metadata, base_event, self._log)
@@ -165,7 +162,7 @@ class Schemas:
     """
     def collect_schemas_data(self):
         self._dataSubmitter.reset()
-        self._dataSubmitter.set_base_event_data(self._check.resolved_hostname, self._tags, self._check._config.cloud_metadata, 
+        self._dataSubmitter.set_base_event_data(self._check.resolved_hostname, self._check.non_internal_tags, self._check._config.cloud_metadata, 
                                                 "{},{}".format(
                                                 self._check.static_info_cache.get(STATIC_INFO_VERSION, ""),
                                                 self._check.static_info_cache.get(STATIC_INFO_ENGINE_EDITION, ""),)
@@ -180,6 +177,7 @@ class Schemas:
                 tables_chunk = list(get_list_chunks(tables, self.TABLES_CHUNK_SIZE))
                 for tables_chunk in tables_chunk:
                     if self._dataSubmitter.exceeded_total_columns_number():
+                        #TODO Report truncation to the backend
                         self._log.warning("Truncated data due to the max limit, stopped on db - {} on schema {}".format(db_name, schema["name"]))
                         return True                    
                     columns_count, tables_info = self._get_tables_data(tables_chunk, schema, cursor)
@@ -320,7 +318,6 @@ class Schemas:
         self._populate_with_index_data(table_ids, id_to_table_data, cursor)
         return total_columns_number, list(id_to_table_data.values())
 
-
     """ 
     adds columns list data to each table in a provided list
     """
@@ -373,12 +370,14 @@ class Schemas:
         for row in rows:
             id  = row.pop("id", None)
             if id is not None:
-                id_to_table_data.get(str(id)).setdefault("indexes", [])
-                id_to_table_data.get(str(id))["indexes"].append(row)
+                id_str = str(id)
+                if id_str in id_to_table_data:
+                    id_to_table_data[id_str].setdefault("indexes", [])
+                    id_to_table_data[id_str]["indexes"].append(row)
+                else:
+                    self._log.error("Index found for an unkown table with the object_id: %s", id_str)
             else:
-                print("todo error")
-            row.pop("id", None)
-        print("end")
+                self._log.error("Return rows of [%s] query should have id column", INDEX_QUERY)
 
     def _populate_with_foreign_keys_data(self, table_ids, id_to_table_data, cursor):
             cursor.execute(FOREIGN_KEY_QUERY.format(table_ids))
@@ -387,19 +386,12 @@ class Schemas:
             for row in rows:
                 id  = row.pop("id", None)
                 if id is not None:
-                    id_to_table_data.get(str(id)).setdefault("foreign_keys", [])
-                    id_to_table_data.get(str(id))["foreign_keys"].append(row)
+                    id_str = str(id)
+                    if id_str in id_to_table_data:
+                        id_to_table_data.get(str(id)).setdefault("foreign_keys", [])
+                        id_to_table_data.get(str(id))["foreign_keys"].append(row)
+                    else:
+                        self._log.error("Foreign key found for an unkown table with the object_id: %s", id_str)
                 else:
-                    print("todo error")  
-            print("end")
-        #return execute_query_output_result_as_a_dict(COLUMN_QUERY.format(table_name, schema_name), cursor)
-
-
-
-    #TODO its hard to get the partition key - for later ? 
-
-        # TODO check out sys.partitions in postgres we deliver some data about patitions
-        # "partition_key": str (if has partitions) - equiv ? 
-        # may be use this  https://littlekendra.com/2016/03/15/find-the-partitioning-key-on-an-existing-table-with-partition_ordinal/
-        # for more in depth search, it's not trivial to determine partition key like in Postgres
+                    self._log.error("Return rows of [%s] query should have id column", FOREIGN_KEY_QUERY)  
        

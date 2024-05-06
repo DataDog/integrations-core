@@ -272,35 +272,55 @@ PROC_CHAR_LIMIT = 500
 #Schemas
 DEFAULT_SCHEMAS_COLLECTION_INTERVAL = 1200
 
-#for now description results in ('ODBC SQL type -150 is not yet supported.  column-index=4  type=-150', 'HY106')
-DB_QUERY2 = "SELECT db.database_id AS id, db.name AS NAME, db.collation_name AS collation, dp.name AS owner, ep.value AS description FROM sys.databases db LEFT JOIN sys.database_principals dp ON db.owner_sid = dp.sid LEFT JOIN sys.extended_properties ep ON ep.major_id = db.database_id AND ep.minor_id = 0 AND ep.class = 0 AND ep.name = 'MS_Description' WHERE db.name = '{}';"
-DB_QUERY = "SELECT db.database_id AS id, db.name AS NAME, db.collation_name AS collation, dp.name AS owner FROM sys.databases db LEFT JOIN sys.database_principals dp ON db.owner_sid = dp.sid WHERE db.name = '{}';"
+DB_QUERY = """SELECT 
+                  db.database_id AS id, db.name AS name, db.collation_name AS collation, dp.name AS owner 
+              FROM 
+                  sys.databases db LEFT JOIN sys.database_principals dp ON db.owner_sid = dp.sid 
+              WHERE db.name = '{}';"""
 
-#TODO as owner for the postgresbackend 
-SCHEMA_QUERY = "SELECT name,schema_id AS id, dp.name AS OwnerName, FROM sys.schemas AS s LEFT JOIN sys.database_principals dp ON s.principal_id = dp.principal_id WHERE s.name NOT IN ('sys', 'information_schema');"
-SCHEMA_QUERY = "SELECT s.name AS name ,s.schema_id AS id, dp.name AS owner_name FROM sys.schemas AS s LEFT JOIN sys.database_principals dp ON s.principal_id = dp.principal_id WHERE s.name NOT IN ('sys', 'information_schema')";
-TABLES_IN_SCHEMA_QUERY = "SELECT name, object_id AS id FROM sys.tables WHERE schema_id={}"
-COLUMN_QUERY3 = "SELECT COLUMN_NAME, DATA_TYPE, COLUMN_DEFAULT , IS_NULLABLE FROM INFORMATION_SCHEMA.COLUMNS WHERE TABLE_NAME='{}' and TABLE_SCHEMA='{}';"
-#this query returns several values in case there is an alias for an int ... 
-COLUMN_QUERY2 = "SELECT c.name AS name, t.name AS data_type, c.is_nullable AS is_nullable, dc.definition AS default_value FROM sys.columns c JOIN sys.types t ON c.system_type_id = t.system_type_id OR c.user_type_id = t.user_type_id LEFT JOIN sys.default_constraints dc ON c.default_object_id = dc.object_id WHERE c.object_id = {}"
+SCHEMA_QUERY = """SELECT 
+                      s.name AS name, s.schema_id AS id, dp.name AS owner_name 
+                  FROM
+                      sys.schemas AS s JOIN sys.database_principals dp ON s.principal_id = dp.principal_id 
+                  WHERE s.name NOT IN ('sys', 'information_schema')""";
 
-#WHERE  attrelid IN ({table_ids})
-COLUMN_QUERY3 = "SELECT COLUMN_NAME AS name, DATA_TYPE AS data_type, COLUMN_DEFAULT, IS_NULLABLE AS nullable , TABLE_NAME FROM INFORMATION_SCHEMA.COLUMNS WHERE TABLE_NAME IN ({}) and TABLE_SCHEMA='{}';"
-COLUMN_QUERY = "SELECT COLUMN_NAME AS name, DATA_TYPE AS data_type, COLUMN_DEFAULT, IS_NULLABLE AS nullable , TABLE_NAME, ORDINAL_POSITION FROM INFORMATION_SCHEMA.COLUMNS WHERE TABLE_NAME IN ({}) and TABLE_SCHEMA='{}';"
-#TODO add ORDER BY ORDINAL_POSITION; ? 
-#"SELECT * FROM INFORMATION_SCHEMA.COLUMNS WHERE TABLE_NAME IN ('boris', OBJECT_NAME(917578307))
+TABLES_IN_SCHEMA_QUERY = """SELECT 
+                                name, object_id AS id
+                            FROM 
+                                sys.tables 
+                            WHERE schema_id={}"""
 
-#PARTITIONS_QUERY2 = "SELECT ps.name AS partition_scheme, pf.name AS partition_function FROM sys.tables t INNER JOIN sys.indexes i ON t.object_id = i.object_id INNER JOIN sys.partition_schemes ps ON i.data_space_id = ps.data_space_id INNER JOIN sys.partition_functions pf ON ps.function_id = pf.function_id WHERE t.object_id = {};"
-PARTITIONS_QUERY2 = "SELECT COUNT(*) FROM sys.partitions WHERE object_id = {};"
-PARTITIONS_QUERY = "SELECT object_id AS id, COUNT(*) AS partition_count FROM sys.partitions WHERE object_id IN ({}) GROUP BY object_id;"
-#parent_object_id - is the one of the parent table.
-FOREIGN_KEY_QUERY3 = "SELECT referenced_object_id, COUNT(*) AS foreign_key_count FROM sys.foreign_keys WHERE referenced_object_id IN ({}) GROUP BY referenced_object_id;"
-INDEX_QUERY2 = "SELECT i.name, i.type, i.is_unique, i.is_primary_key, i.is_unique_constraint, i.is_disabled, c.name AS column_name FROM sys.indexes i JOIN sys.index_columns ic ON i.object_id = ic.object_id AND i.index_id = ic.index_id JOIN sys.columns c ON ic.object_id = c.object_id AND ic.column_id = c.column_id WHERE i.object_id = {};"
-# May be this query is wrong like what if index is build on 2 columns will this work ? to test ? 
-INDEX_QUERY = "SELECT i.object_id AS id, i.name, i.type, i.is_unique, i.is_primary_key, i.is_unique_constraint, i.is_disabled, STRING_AGG(c.name, ',') AS column_names FROM sys.indexes i JOIN sys.index_columns ic ON i.object_id = ic.object_id AND i.index_id = ic.index_id JOIN sys.columns c ON ic.object_id = c.object_id AND ic.column_id = c.column_id WHERE i.object_id IN ({}) GROUP BY i.object_id, i.name, i.type, i.is_unique, i.is_primary_key, i.is_unique_constraint, i.is_disabled;"
-#INDEX_QUERY = "SELECT i.object_id AS object_id, i.name, i.type, i.is_unique, i.is_primary_key, i.is_unique_constraint, i.is_disabled, STRING_AGG(c.name, ',') AS column_names FROM sys.indexes i JOIN sys.index_columns ic ON i.object_id = ic.object_id AND i.index_id = ic.index_id JOIN sys.columns c ON ic.object_id = c.object_id AND ic.column_id = c.column_id WHERE i.object_id IN ({}) GROUP BY i.object_id, i.name;"
+COLUMN_QUERY = """SELECT 
+                      column_name AS name, data_type, column_default, is_nullable AS nullable , table_name, ordinal_position 
+                  FROM 
+                      information_schema.columns 
+                  WHERE 
+                      table_name IN ({}) and table_schema='{}';"""
 
-#FOREIGN_KEY_QUERY2 = "SELECT name , OBJECT_NAME(parent_object_id) AS parent_table FROM sys.foreign_keys WHERE object_id={};"
-FOREIGN_KEY_QUERY2 = "SELECT COUNT(*) FROM sys.foreign_keys WHERE referenced_object_id = {};"
+PARTITIONS_QUERY = """SELECT 
+                          object_id AS id, COUNT(*) AS partition_count 
+                      FROM 
+                          sys.partitions 
+                      WHERE 
+                          object_id IN ({}) GROUP BY object_id;"""
 
-FOREIGN_KEY_QUERY="SELECT FK.referenced_object_id AS id, FK.name AS foreign_key_name, OBJECT_NAME(FK.parent_object_id) AS referencing_table,  STRING_AGG(COL_NAME(FKC.parent_object_id, FKC.parent_column_id),',') AS referencing_column, OBJECT_NAME(FK.referenced_object_id) AS referenced_table, STRING_AGG(COL_NAME(FKC.referenced_object_id, FKC.referenced_column_id),',') AS referenced_column FROM sys.foreign_keys AS FK JOIN sys.foreign_key_columns AS FKC ON FK.object_id = FKC.constraint_object_id WHERE  FK.referenced_object_id IN ({}) GROUP BY FK.name, FK.parent_object_id, FK.referenced_object_id;"
+INDEX_QUERY = """SELECT 
+                     i.object_id AS id, i.name, i.type, i.is_unique, i.is_primary_key, i.is_unique_constraint, 
+                     i.is_disabled, STRING_AGG(c.name, ',') AS column_names 
+                 FROM 
+                     sys.indexes i JOIN sys.index_columns ic ON i.object_id = ic.object_id 
+                     AND i.index_id = ic.index_id JOIN sys.columns c ON ic.object_id = c.object_id AND ic.column_id = c.column_id 
+                 WHERE 
+                     i.object_id IN ({}) GROUP BY i.object_id, i.name, i.type, 
+                     i.is_unique, i.is_primary_key, i.is_unique_constraint, i.is_disabled;"""
+
+FOREIGN_KEY_QUERY="""SELECT 
+                         FK.referenced_object_id AS id, FK.name AS foreign_key_name, 
+                         OBJECT_NAME(FK.parent_object_id) AS referencing_table,  
+                         STRING_AGG(COL_NAME(FKC.parent_object_id, FKC.parent_column_id),',') AS referencing_column, 
+                         OBJECT_NAME(FK.referenced_object_id) AS referenced_table, 
+                         STRING_AGG(COL_NAME(FKC.referenced_object_id, FKC.referenced_column_id),',') AS referenced_column 
+                     FROM 
+                         sys.foreign_keys AS FK JOIN sys.foreign_key_columns AS FKC ON FK.object_id = FKC.constraint_object_id 
+                     WHERE 
+                         FK.referenced_object_id IN ({}) GROUP BY FK.name, FK.parent_object_id, FK.referenced_object_id;"""
