@@ -15,7 +15,6 @@ openstack.cinder.volume.transfer.count,gauge,,,,Number of cinder volume transfer
 openstack.glance.image.count,gauge,,,,Number of public virtual machine images,0,openstack_controller,glance image ct,
 openstack.glance.image.member.count,gauge,,,,Number of members associated with an image,0,openstack_controller,glance image member ct,
 openstack.glance.image.size,gauge,,,,Size of image file in bytes,0,openstack_controller,glance image size,
-openstack.glance.image.task.count,gauge,,,,Number of tasks associated with an image,0,openstack_controller,glance image task ct,
 openstack.glance.image.up,gauge,,,,Whether a glance image is up,0,openstack_controller,glance image up,
 openstack.glance.response_time,gauge,,millisecond,,Duration that an HTTP request takes to complete when making a request to glance endpoint,0,openstack_controller,glance response time,
 openstack.ironic.conductor.count,gauge,,,,Number of ironic conductors,0,openstack_controller,ironic conductor ct,
