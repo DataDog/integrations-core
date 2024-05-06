@@ -20,7 +20,7 @@ try:
     import pyodbc
 except ImportError:
     pyodbc = None
-
+import pdb
 import json
 
 @pytest.fixture
@@ -106,7 +106,6 @@ def test_collect_schemas(aggregator, dd_run_check, dbm_instance):
     exp_datadog_test_schemas = {'id': '5', 'name': 'datadog_test_schemas', 'owner': 'dbo', 'schemas': [{'name': 'test_schema', 'id': '5', 'owner': '1', 'tables': [{'id': '885578193', 'name': 'cities', 'columns': [{'name': 'id', 'data_type': 'int', 'default': '((0))', 'nullable': True}, {'name': 'name', 'data_type': 'varchar', 'default': 'None', 'nullable': True}]}]}]}
     expected_data_for_db = {'datadog_test' : exp_datadog_test, 'datadog_test_schemas' : exp_datadog_test_schemas}
 
-
     dbm_instance['database_autodiscovery'] = True
     dbm_instance['autodiscovery_include'] = ['datadog_test_schemas','datadog_test']
 
@@ -119,8 +118,7 @@ def test_collect_schemas(aggregator, dd_run_check, dbm_instance):
     
     actual_payloads = {}
 
-    #TODO later modify kind
-    for schema_event in (e for e in dbm_metadata if e['kind'] == 'pg_databases'):
+    for schema_event in (e for e in dbm_metadata if e['kind'] == 'sqlserver_databases'):
         if len(databases_to_find) == 0:
             # we may see the correct payload for the database several times in events
             return
@@ -136,7 +134,7 @@ def test_collect_schemas(aggregator, dd_run_check, dbm_instance):
             actual_payloads[db_name]['schemas'] = actual_payloads[db_name]['schemas'] + database_metadata[0]['schemas']
         else:
             actual_payloads[db_name] = database_metadata[0]
-
+    pdb.set_trace()
     assert len(actual_payloads) == len(expected_data_for_db)    
 
     for db_name, actual_payload in actual_payloads.items():

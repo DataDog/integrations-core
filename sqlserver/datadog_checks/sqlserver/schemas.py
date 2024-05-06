@@ -25,11 +25,11 @@ import copy
 from datadog_checks.base.utils.db.utils import default_json_event_encoding
 
 class SubmitData: 
-    MAX_COLUMN_COUNT  = 100_000
+    MAX_COLUMN_COUNT  = 10_000
 
     # REDAPL has a 3MB limit per resource
     #TODO Report truncation to the backend
-    MAX_TOTAL_COLUMN_COUNT = 250_000
+    MAX_TOTAL_COLUMN_COUNT = 100_000 
 
     def __init__(self, submit_data_function, base_event, logger):
         self._submit_to_agent_queue = submit_data_function
@@ -68,12 +68,6 @@ class SubmitData:
         if self._columns_count > self.MAX_COLUMN_COUNT:
             self._submit()
 
-    #TODO P - disable for p.
-    def tmp_modify_to_fit_in_postgres(self, db_info):
-        if "collation" in db_info:
-            del db_info["collation"]
-        return db_info
-    
     def exceeded_total_columns_number(self):
         return self._total_columns_count > self.MAX_TOTAL_COLUMN_COUNT
 
@@ -92,23 +86,9 @@ class SubmitData:
                 db_info["name"] = db
             else:
                 db_info = self.db_info[db]
-            #event["metadata"] =  event["metadata"] + [{**(self.tmp_modify_to_fit_in_postgres(db_info)), "schemas": list(schemas_by_id.values())}]
-            event["metadata"] =  event["metadata"] + [{**(self.tmp_modify_to_fit_in_postgres(db_info)), "schemas": list(schemas_by_id.values())}]
-            pdb.set_trace()
-        #TODO Remove Debug Code, calculate tables and schemas sent : 
-        schemas_debug = list(schemas_by_id.values())
-        t_count = 0
-        printed_first = False
-        for schema in schemas_debug:
-            t_count += len(schema['tables'])
-            if not printed_first and len(schema['tables']) >0:
-                printed_first = True
-                self._log.warning("One of tables db {} schema {} table {}".format( list(self.db_to_schemas.keys()), schema['name'], schema['tables'][0]["name"]))
-
-        self._log.warning("Boris Adding event to Agent queue with : {} schemas and {} tables.".format(len(schemas_debug), t_count))
-        #END debug code
+            event["metadata"] =  event["metadata"] + [{**(db_info), "schemas": list(schemas_by_id.values())}]
         json_event = json.dumps(event, default=default_json_event_encoding)
-        #self._log.debug("Reporting the following payload for schema collection: {}".format(json_event))
+        self._log.debug("Reporting the following payload for schema collection: {}".format(json_event))
         self._submit_to_agent_queue(json_event)
         self.db_to_schemas = {}
 
@@ -139,27 +119,14 @@ class Schemas:
         base_event = {
             "host": hostname,
             "agent_version": datadog_agent.get_version(),
-            "dbms": "postgres", #TODO fake it until you make it - trying to pass this data as postgres for now
-            "kind": "pg_databases", # TODO pg_databases - will result in KindPgDatabases and so processor would thing its postgres 
+            "dbms": "sqlserver", #TODO fake it until you make it - trying to pass this data as postgres for now
+            "kind": "sqlserver_databases", # TODO pg_databases - will result in KindPgDatabases and so processor would thing its postgres 
             "collection_interval": 0.5, #dummy
             "dbms_version": "v14.2", #dummy but may be format i v11 is important ?
             "tags": self._tags, #in postgres it's no DB.
             "cloud_metadata": self._check._config.cloud_metadata,
         }
-
         self._dataSubmitter = SubmitData(self._check.database_monitoring_metadata, base_event, self._log)
-
-        # These are fields related to the work to do while doing the initial intake
-        # for diffs there should eb a self._done_db_list which will be used to see if new dbs have appeared/disappeared.
-        self._databases_to_query = []
-        self._current_table_list = None
-        self._current_schema_list = None
-        self._number_of_collected_tables = 0 #TODO later switch to columns
-
-    def reset_data_collection(self):
-        self._current_table_list = None  
-        self._current_schema_list = None
-        self._number_of_collected_tables = 0
        
     def _init_schema_collection(self):
         currently_known_databases = self._check.get_databases()
@@ -208,12 +175,10 @@ class Schemas:
             self._dataSubmitter.store_db_info(db_name, db_info)
             chunk_size = 50
             for schema in schemas:
-                if schema['name'] != 'test_schema':
-                    continue
                 tables = self._get_tables(schema, cursor)  
                 #TODO sorting is purely for testing
-                sorted_tables = sorted(tables, key=lambda x: x['name'])          
-                tables_chunk = list(get_list_chunks(sorted_tables, chunk_size))
+                #sorted_tables = sorted(tables, key=lambda x: x['name'])          
+                tables_chunk = list(get_list_chunks(tables, chunk_size))
                 for tables_chunk in tables_chunk:
                     if self._dataSubmitter.exceeded_total_columns_number():
                         self._log.warning("Truncated data due to the max limit, stopped on db - {} on schema {}".format(db_name, schema["name"]))
