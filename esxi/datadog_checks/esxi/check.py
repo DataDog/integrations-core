@@ -13,6 +13,11 @@ from six import iteritems
 from datadog_checks.base import AgentCheck, is_affirmative
 from datadog_checks.base.utils.common import to_string
 
+try:
+    import datadog_agent
+except ImportError:
+    from datadog_checks.base.stubs import datadog_agent
+
 from .constants import (
     ALL_RESOURCES,
     ALLOWED_FILTER_PROPERTIES,
@@ -55,6 +60,9 @@ class EsxiCheck(AgentCheck):
         self.ssl_capath = self.instance.get("ssl_capath")
         self.ssl_cafile = self.instance.get("ssl_cafile")
         self.tags = [f"esxi_url:{self.host}"]
+        self.proxy = datadog_agent.get_config('proxy').get('http')
+        self.proxy_host = self.instance.get("proxy_host")
+        self.proxy_port = self.instance.get("proxy_port")
 
     def _validate_excluded_host_tags(self, excluded_host_tags):
         valid_excluded_host_tags = []
@@ -344,7 +352,7 @@ class EsxiCheck(AgentCheck):
             else:
                 context.load_default_certs(ssl.Purpose.SERVER_AUTH)
 
-            connection = connect.SmartConnect(host=self.host, user=self.username, pwd=self.password, sslContext=context)
+            connection = connect.SmartConnect(host=self.host, user=self.username, pwd=self.password, sslContext=context) #, httpProxyHost=self.proxy_host, httpProxyPort=self.proxy_port)
             self.conn = connection
             self.content = connection.content
 
