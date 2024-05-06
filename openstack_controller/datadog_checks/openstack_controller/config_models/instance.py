@@ -56,6 +56,7 @@ class Volume(BaseModel):
         frozen=True,
     )
     connectors: Optional[bool] = None
+    targets: Optional[bool] = None
 
 
 class BaremetalItem(BaseModel):
