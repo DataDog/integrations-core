@@ -130,7 +130,7 @@ def metadata(app: Application, integrations: tuple[str, ...], check_duplicates: 
 
                     error_message += f"{current_check.name}:{line} Invalid column {invalid_headers}.\n"
 
-                missing_headers = metadata_utils.ALL_HEADERS.difference(all_keys)
+                missing_headers = metadata_utils.HEADERS_TO_CHECK.difference(all_keys)
                 if missing_headers:
                     errors = True
 
