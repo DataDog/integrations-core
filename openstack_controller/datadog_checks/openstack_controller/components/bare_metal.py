@@ -126,8 +126,6 @@ class BareMetal(Component):
                 )
                 self.check.log.debug("port: %s", port)
                 self.check.gauge(IRONIC_PORT_COUNT, 1, tags=tags + port['tags'])
-                for metric, value in port['metrics'].items():
-                    self.check.gauge(metric, value, tags=tags + port['tags'])
 
     @Component.register_global_metrics(ID)
     @Component.http_error()
