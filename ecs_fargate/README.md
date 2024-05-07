@@ -265,7 +265,7 @@ The instructions below show you how to configure the job using the [Amazon Web C
         5. Add another environment variable using the **Key** `ECS_FARGATE` and the value `true`. Click **Add** to add the container.
         6. Add another environment variable using the **Key** `DD_SITE` and the value {{< region-param key="dd_site" code="true" >}}. This defaults to `datadoghq.com` if you don't set it.
     7. Add your other application containers to the job definition.
-    6. Click **Create job definition** to create the job definition.
+    8. Click **Create job definition** to create the job definition.
 
 {{< /site-region >}}
 partial -->
@@ -287,6 +287,52 @@ partial -->
 
 ```bash
 aws batch register-job-definition --cli-input-json file://<PATH_TO_FILE>/datadog-agent-aws-batch-ecs-fargate.json
+```
+
+#### Submit the job to your job queue
+
+The Datadog Agent runs in the same job definition as your application and integration containers.
+
+<!-- xxx tabs xxx -->
+<!-- xxx tab "Web UI" xxx -->
+
+##### Web UI Job
+
+1. Log in to your [AWS Web Console][4] and navigate to the AWS Batch section. If needed, create a [compute environment][59] and/or [job queue][60] associated with a compute environment.
+2. On the **Jobs** tab, click the **Submit new job** button.
+3. Enter a **Job name**.
+4. For **Job Definition**, select the job created in the previous steps.
+5. Choose the job queue to run the Datadog Agent on.
+6. **Container overrides** are optional based on your preference.
+7. Click the **Next** button, then click the **Create job** button.
+
+<!-- xxz tab xxx -->
+
+<!-- xxx tab "AWS CLI" xxx -->
+##### AWS CLI Job
+
+Run the following commands using the [AWS CLI tools][5].
+
+If needed, create a compute environment:
+
+```bash
+aws batch create-compute-environment --compute-environment-name <COMPUTE_ENVIRONMENT_NAME> \
+--type MANAGED --compute-resources "type=FARGATE,subnets=<PRIVATE_SUBNET>,securityGroupIds=<SECURITY_GROUP>"
+```
+
+If needed, create a job queue associated with a compute environment:
+
+```bash
+aws bash  create-job-queue --job-queue-name <JOB_QUEUE_NAME> \
+--priority <INT> \
+--compute-environment-order "order=<INT>,computeEnvironment=<COMPUTE_ENVIRONMENT_ARN>"
+```
+
+Run the job in your job queue:
+
+```bash
+aws batch submit-job --job-name <JOB_NAME> \
+--job-queue <JOB_QUEUE_NAME> --job-definition <JOB_DEFINITION_NAME>:1
 ```
 
 <!-- xxz tab xxx -->
@@ -944,3 +990,5 @@ Need help? Contact [Datadog support][18].
 [56]: https://app.datadoghq.com/process
 [57]: https://docs.aws.amazon.com/AmazonECS/latest/developerguide/task_definition_parameters.html#other_task_definition_params
 [58]: https://www.datadoghq.com/blog/monitor-fargate-processes/
+[59]: https://docs.aws.amazon.com/batch/latest/userguide/create-compute-environment.html
+[60]: https://docs.aws.amazon.com/batch/latest/userguide/create-job-queue-fargate.html
