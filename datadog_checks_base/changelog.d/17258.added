@@ -1,1 +1,3 @@
-Adding schema collection to sqlserver
+Added schema collection to the SQL Server integration. 
+Schema data includes information about the tables, their columns, indexes, foreign keys, and partitions.
+The total amount of fetched columns is limited to 100_000.
