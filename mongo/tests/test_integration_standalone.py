@@ -223,4 +223,5 @@ def test_metadata(check, instance, datadog_agent):
 
     check.check(instance)
     datadog_agent.assert_metadata('test:123', version_metadata)
-    datadog_agent.assert_metadata_count(len(version_metadata) + 2)
+    datadog_agent.assert_metadata('test:123', {'resolved_hostname': check._resolved_hostname})
+    datadog_agent.assert_metadata_count(len(version_metadata) + 3)

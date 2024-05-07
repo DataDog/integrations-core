@@ -84,6 +84,7 @@ class MongoDb(AgentCheck):
 
         self._api_client = None
         self._mongo_version = None
+        self._resolved_hostname = None
 
         # _database_instance_emitted: limit the collection and transmission of the database instance metadata
         self._database_instance_emitted = TTLCache(
@@ -215,15 +216,20 @@ class MongoDb(AgentCheck):
 
     def _refresh_metadata(self):
         if self._mongo_version is None:
-            self.log.debug('No metadata present, refreshing it.')
+            self.log.debug('No mongo_version metadata present, refreshing it.')
             self._mongo_version = self.api_client.server_info().get('version', '0.0')
             self._mongo_version_parsed = Version(self._mongo_version.split("-")[0])
             self.set_metadata('version', self._mongo_version)
             self.log.debug('version: %s', self._mongo_version)
+        if self._resolved_hostname is None:
+            self._resolved_hostname = self.api_client.hostname
+            self.set_metadata('resolved_hostname', self._resolved_hostname)
+            self.log.debug('resolved_hostname: %s', self._resolved_hostname)
 
     def _unset_metadata(self):
         self.log.debug('Due to connection failure we will need to reset the metadata.')
         self._mongo_version = None
+        self._resolved_hostname = None
 
     def _collect_metrics(self):
         deployment = self.api_client.deployment_type
@@ -301,13 +307,23 @@ class MongoDb(AgentCheck):
 
     def _send_database_instance_metadata(self):
         deployment = self.api_client.deployment_type
-        if deployment.hostname not in self._database_instance_emitted:
+        if self._resolved_hostname not in self._database_instance_emitted:
             tags = self._get_deployment_tags(deployment)
+            mongodb_instance = {
+                "replset_name": getattr(deployment, 'replset_name', None),
+                "replset_state": getattr(deployment, 'replset_state_name', None),
+                "replset_key": getattr(deployment, 'replset_key', None),
+                "sharding_cluster_role": getattr(deployment, 'cluster_role', None),
+                "hosts": getattr(deployment, 'hosts', None),
+                "shards": getattr(deployment, 'shards', None),
+                "cluster_type": getattr(deployment, 'cluster_type', None),
+                "cluster_name": self._config.cluster_name,
+            }
             database_instance = {
-                "host": deployment.hostname,
+                "host": self._resolved_hostname,
                 "agent_version": datadog_agent.get_version(),
                 "dbms": "mongodb",
-                "kind": "database_instance",
+                "kind": "mongodb_instance",
                 "collection_interval": self._config.database_instance_collection_interval,
                 'dbms_version': self._mongo_version,
                 'integration_version': __version__,
@@ -316,21 +332,9 @@ class MongoDb(AgentCheck):
                 "metadata": {
                     "dbm": self._config.dbm_enabled,
                     "connection_host": self._config.clean_server_name,
+                    "mongodb_instance": mongodb_instance,
                 },
             }
-            mongodb_instance = {
-                "host": deployment.hostname,
-                "replset_name": getattr(deployment, 'replset_name', None),
-                "replset_state": getattr(deployment, 'replset_state_name', None),
-                "replset_key": getattr(deployment, 'replset_key', None),
-                "sharding_cluster_role": getattr(deployment, 'cluster_role', None),
-                "hosts": getattr(deployment, 'hosts', None),
-                "shards": getattr(deployment, 'shards', None),
-                "cluster_type": getattr(deployment, 'cluster_type', None),
-                "kind": "mongodb_instance",
-            }
-            self._database_instance_emitted[deployment.hostname] = (database_instance, mongodb_instance)
-            self.log.debug(
-                "Emitting database instance and mongodb instance metadata, %s, %s", database_instance, mongodb_instance
-            )
-            # self.database_monitoring_metadata(json.dumps(event, default=default_json_event_encoding))
+            self._database_instance_emitted[self._resolved_hostname] = database_instance
+            self.log.debug("Emitting database instance  metadata, %s", database_instance)
+            self.database_monitoring_metadata(json.dumps(database_instance, default=default_json_event_encoding))

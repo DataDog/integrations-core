@@ -96,7 +96,7 @@ class MongoApi(object):
         is_master_payload = cli['admin'].command('isMaster')
         return is_master_payload.get('arbiterOnly', False)
 
-    def _get_rs_deployment_from_status_payload(self, repl_set_payload, is_master_payload, cluster_role):
+    def _get_rs_deployment_from_status_payload(self, repl_set_payload, cluster_role):
         replset_name = repl_set_payload["set"]
         replset_state = repl_set_payload["myState"]
 
@@ -113,10 +113,8 @@ class MongoApi(object):
             ),
         )
 
-        hosts = is_master_payload.get('hosts', [])
-        return ReplicaSetDeployment(
-            self._hostname, replset_name, replset_state, replset_key, hosts, cluster_role=cluster_role
-        )
+        hosts = [m['name'] for m in repl_set_payload.get("members", [])]
+        return ReplicaSetDeployment(replset_name, replset_state, replset_key, hosts, cluster_role=cluster_role)
 
     def refresh_deployment_type(self):
         # getCmdLineOpts is the runtime configuration of the mongo instance. Helpful to know whether the node is
@@ -134,7 +132,7 @@ class MongoApi(object):
         if 'sharding' in options:
             if 'configDB' in options['sharding']:
                 self._log.debug("Detected MongosDeployment. Node is principal.")
-                self.deployment_type = MongosDeployment(hostname=self._hostname, shard_map=self.refresh_shards())
+                self.deployment_type = MongosDeployment(shard_map=self.refresh_shards())
                 return
             elif 'clusterRole' in options['sharding']:
                 cluster_role = options['sharding']['clusterRole']
@@ -142,10 +140,7 @@ class MongoApi(object):
         replication_options = options.get('replication', {})
         if 'replSetName' in replication_options or 'replSet' in replication_options:
             repl_set_payload = self['admin'].command("replSetGetStatus")
-            is_master_payload = self['admin'].command('isMaster')
-            replica_set_deployment = self._get_rs_deployment_from_status_payload(
-                repl_set_payload, is_master_payload, cluster_role
-            )
+            replica_set_deployment = self._get_rs_deployment_from_status_payload(repl_set_payload, cluster_role)
             is_principal = replica_set_deployment.is_principal()
             is_principal_log = "" if is_principal else "not "
             self._log.debug("Detected ReplicaSetDeployment. Node is %sprincipal.", is_principal_log)
@@ -153,12 +148,12 @@ class MongoApi(object):
             return
 
         self._log.debug("Detected StandaloneDeployment. Node is principal.")
-        self.deployment_type = StandaloneDeployment(self._hostname)
+        self.deployment_type = StandaloneDeployment()
 
     def _get_alibaba_deployment_type(self):
         is_master_payload = self['admin'].command('isMaster')
         if is_master_payload.get('msg') == 'isdbgrid':
-            return MongosDeployment(self._hostname, shard_map=self.refresh_shards())
+            return MongosDeployment(shard_map=self.refresh_shards())
 
         # On alibaba cloud, a mongo node is either a mongos or part of a replica set.
         repl_set_payload = self['admin'].command("replSetGetStatus")
@@ -170,7 +165,7 @@ class MongoApi(object):
             cluster_role = 'shardsvr'
         else:
             cluster_role = None
-        return self._get_rs_deployment_from_status_payload(repl_set_payload, is_master_payload, cluster_role)
+        return self._get_rs_deployment_from_status_payload(repl_set_payload, cluster_role)
 
     def refresh_shards(self):
         try:
@@ -181,15 +176,13 @@ class MongoApi(object):
             self._log.error('Unable to get shard map for mongos: %s', e)
             return {}
 
-    def _get_server_status(self):
+    def server_status(self):
         return self['admin'].command('serverStatus')
 
     @property
     def hostname(self):
-        if self._hostname:
-            return self._hostname
         try:
-            hostname = self._get_server_status()['host'].split(':')
+            hostname = self.server_status()['host'].split(':')
             if len(hostname) == 1:
                 # If there is no port, we assume the default port
                 self._hostname = "{}:27017".format(hostname[0])

@@ -53,8 +53,7 @@ def get_long_state_name(state):
 
 
 class Deployment(object):
-    def __init__(self, hostname):
-        self.hostname = hostname
+    def __init__(self):
         self.use_shards = False
 
     def is_principal(self):
@@ -69,8 +68,8 @@ class Deployment(object):
 
 
 class MongosDeployment(Deployment):
-    def __init__(self, hostname, shard_map):
-        super(MongosDeployment, self).__init__(hostname)
+    def __init__(self, shard_map):
+        super(MongosDeployment, self).__init__()
         self.use_shards = True
         self.shard_map = shard_map
 
@@ -84,7 +83,11 @@ class MongosDeployment(Deployment):
 
     @property
     def cluster_type(self):
-        return "sharded"
+        return "sharded_cluster"
+
+    @property
+    def cluster_role(self):
+        return "mongos"
 
     def is_principal(self):
         # A mongos has full visibility on the data, Datadog agents should only communicate
@@ -93,8 +96,8 @@ class MongosDeployment(Deployment):
 
 
 class ReplicaSetDeployment(Deployment):
-    def __init__(self, hostname, replset_name, replset_state, replset_key, hosts, cluster_role=None):
-        super(ReplicaSetDeployment, self).__init__(hostname)
+    def __init__(self, replset_name, replset_state, replset_key, hosts, cluster_role=None):
+        super(ReplicaSetDeployment, self).__init__()
         self.replset_name = replset_name
         self.replset_state = replset_state
         self.replset_state_name = get_state_name(replset_state).lower()
@@ -113,7 +116,7 @@ class ReplicaSetDeployment(Deployment):
 
     @property
     def cluster_type(self):
-        return "sharded" if self.use_shards else "replica_set"
+        return "sharded_cluster" if self.use_shards else "replica_set"
 
 
 class StandaloneDeployment(Deployment):
