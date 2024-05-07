@@ -5,7 +5,6 @@ GRANT SELECT on sys.dm_os_performance_counters to datadog;
 GRANT VIEW SERVER STATE to datadog;
 GRANT CONNECT ANY DATABASE to datadog;
 GRANT VIEW ANY DEFINITION to datadog;
-GRANT CREATE TYPE TO datadog;
 
 -- test users
 CREATE LOGIN bob WITH PASSWORD = 'Password12!';
@@ -85,8 +84,6 @@ CREATE USER bob FOR LOGIN bob;
 CREATE USER fred FOR LOGIN fred;
 CREATE CLUSTERED INDEX thingsindex ON [datadog_test-1].dbo.ϑings (name);
 GO
-
-
 
 EXEC sp_addrolemember 'db_datareader', 'bob'
 EXEC sp_addrolemember 'db_datareader', 'fred'
