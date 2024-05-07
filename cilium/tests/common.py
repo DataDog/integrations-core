@@ -227,6 +227,8 @@ AGENT_V1_METRICS = [
     'cilium.cidrgroup.policies',
     'cilium.k8s_client.rate_limiter_duration.seconds.count',
     'cilium.k8s_client.rate_limiter_duration.seconds.sum',
+    'cilium.policy.change.total',
+    'cilium.services.events.total',
 ]
 
 # Some types changed moving from v1 to v2. We keep v2 in the metadata.csv file.
