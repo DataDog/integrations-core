@@ -47,6 +47,7 @@ SELECT {cols}
   {extra_clauses}
 """
 
+
 # Use pg_stat_statements(false) when available as an optimization to avoid pulling SQL text from disk
 PG_STAT_STATEMENTS_COUNT_QUERY = "SELECT COUNT(*) FROM pg_stat_statements(false)"
 PG_STAT_STATEMENTS_COUNT_QUERY_LT_9_4 = "SELECT COUNT(*) FROM pg_stat_statements"
@@ -205,7 +206,7 @@ class PostgresStatementMetrics(DBMAsyncJob):
             # allows the engine to avoid retrieving the potentially large amount of text data.
             # The query count query does not depend on the statement text, so it's safe for this use case.
             # For more info: https://www.postgresql.org/docs/current/pgstatstatements.html#PGSTATSTATEMENTS-FUNCS
-            pgss_view_without_query_text = "pg_stat_statements(false)"
+            pgss_view_without_query_text = "pg_stat_statements(false)" 
 
         with self._check._get_main_db() as conn:
             with conn.cursor(cursor_factory=CommenterCursor) as cursor:
@@ -218,6 +219,7 @@ class PostgresStatementMetrics(DBMAsyncJob):
                         continue
 
                     calls = row[1]
+                    print("[AMW] queryid: " + str(queryid) + " | calls: " + str(calls))
                     calls_changed = self._query_calls_cache.set_calls(queryid, calls)
                     if calls_changed:
                         called_queryids.append(queryid)
@@ -268,6 +270,7 @@ class PostgresStatementMetrics(DBMAsyncJob):
     def _load_pg_stat_statements(self):
         try:
             called_queryids = self._check_called_queries()
+#            print("[AMW] called queries: " + str(called_queryids))
             available_columns = set(self._get_pg_stat_statements_columns())
             missing_columns = PG_STAT_STATEMENTS_REQUIRED_COLUMNS - available_columns
             if len(missing_columns) > 0:
@@ -345,7 +348,7 @@ class PostgresStatementMetrics(DBMAsyncJob):
                             called_queryids=', '.join([str(i) for i in called_queryids]),
                         ),
                         params=params,
-                    )
+                    )                    
         except psycopg2.Error as e:
             error_tag = "error:database-{}".format(type(e).__name__)
 
@@ -461,17 +464,26 @@ class PostgresStatementMetrics(DBMAsyncJob):
 
         rows = self._normalize_queries(rows)
         if not rows:
+            print("[AMW] no normalized rows, returning")
             return []
 
         available_columns = set(rows[0].keys())
         metric_columns = available_columns & PG_STAT_STATEMENTS_METRICS_COLUMNS
         rows = self._state.compute_derivative_rows(rows, metric_columns, key=_row_key)
+#        print("[AMW] sending dd.postgres.queries.query_rows_raw - " + str(len(rows)))
         self._check.gauge(
             'dd.postgres.queries.query_rows_raw',
             len(rows),
             tags=self.tags + self._check._get_debug_tags(),
             hostname=self._check.resolved_hostname,
         )
+        print("[AMW] called queries")
+        for row in rows:
+            if "pg_" in row['query']:
+                continue
+            print("QueryId: " + str(row['queryid']) + " | Query: " + str(row['query']) + " | Calls: " + str(row['calls']))
+        print("-------------------\n")
+
         return rows
 
     def _normalize_queries(self, rows):

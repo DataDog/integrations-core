@@ -29,6 +29,10 @@ class QueryCallsCache:
             # and replaced with a new call count. Both cases should count as a call
             # change.
             calls_changed = diff != 0
+
+            if calls_changed:
+                print("[AMW] detected called query" + str(queryid) + " with " + str(calls) + " calls")
+
         else:
             calls_changed = True
 
