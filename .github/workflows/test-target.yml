@@ -113,7 +113,7 @@ jobs:
         # Enable disk performance counters
         diskperf -y
 
-    - uses: actions/checkout@v3
+    - uses: actions/checkout@v4
 
     - name: Set up Python 2.7
       if: inputs.test-py2
@@ -131,13 +131,13 @@ jobs:
       shell: bash
 
     - name: Set up Python ${{ env.PYTHON_VERSION }}
-      uses: actions/setup-python@v4
+      uses: actions/setup-python@v5
       with:
         python-version: "${{ env.PYTHON_VERSION }}"
 
     - name: Restore cache
       if: inputs.repo == 'core'
-      uses: actions/cache/restore@v3
+      uses: actions/cache/restore@v4
       with:
         path: ${{ runner.os == 'Windows' && '~\AppData\Local\pip\Cache' || runner.os == 'macOS' && '~/Library/Caches/pip' || '~/.cache/pip' }}
         key: >-
@@ -266,7 +266,7 @@ jobs:
 
     - name: Upload coverage data
       if: inputs.standard && !github.event.repository.private && always()
-      uses: codecov/codecov-action@v3
+      uses: codecov/codecov-action@v4
       with:
         files: "${{ inputs.target }}/coverage.xml"
         flags: "${{ inputs.target }}"

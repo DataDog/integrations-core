@@ -204,6 +204,7 @@ def check_common_metrics(aggregator, expected_tags, count=1):
         if POSTGRES_VERSION is None or float(POSTGRES_VERSION) >= 14.0:
             for metric_name, _ in NEWER_14_METRICS.values():
                 aggregator.assert_metric(metric_name, count=count, tags=db_tags)
+    aggregator.assert_metric('postgresql.running', count=count, value=1, tags=expected_tags)
 
 
 def check_db_count(aggregator, expected_tags, count=1):

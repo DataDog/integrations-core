@@ -131,6 +131,10 @@ class ApiRest(Api):
             self.log.debug("adding X-OpenStack-Ironic-API-Version header to `%s`", self.config.ironic_microversion)
             self.http.options['headers']['X-OpenStack-Ironic-API-Version'] = self.config.ironic_microversion
 
+        if self.config.cinder_microversion:
+            self.log.debug("adding OpenStack-API-Version header to `%s`", self.config.cinder_microversion)
+            self.http.options['headers']['OpenStack-API-Version'] = self.config.cinder_microversion
+
     def get_identity_regions(self):
         response = self.http.get(
             '{}/v3/regions'.format(self._catalog.get_endpoint_by_type(Component.Types.IDENTITY.value))
@@ -193,6 +197,51 @@ class ApiRest(Api):
         )
         response.raise_for_status()
         return response.json().get('limits', [])
+
+    def get_block_storage_volumes(self, project_id):
+        params = {}
+        return self.make_paginated_request(
+            '{}/volumes/detail'.format(self._catalog.get_endpoint_by_type(Component.Types.BLOCK_STORAGE.value)),
+            'volumes',
+            'id',
+            next_signifier='volumes_links',
+            params=params,
+        )
+
+    def get_block_storage_transfers(self, project_id):
+        response = self.http.get(
+            '{}/os-volume-transfer/detail'.format(
+                self._catalog.get_endpoint_by_type(Component.Types.BLOCK_STORAGE.value)
+            )
+        )
+        response.raise_for_status()
+        return response.json().get('transfers', {})
+
+    def get_block_storage_snapshots(self, project_id):
+        params = {}
+        return self.make_paginated_request(
+            '{}/snapshots/detail'.format(self._catalog.get_endpoint_by_type(Component.Types.BLOCK_STORAGE.value)),
+            'snapshots',
+            'id',
+            next_signifier='snapshots_links',
+            params=params,
+        )
+
+    def get_block_storage_pools(self, project_id):
+        response = self.http.get(
+            '{}/scheduler-stats/get_pools'.format(
+                self._catalog.get_endpoint_by_type(Component.Types.BLOCK_STORAGE.value)
+            )
+        )
+        response.raise_for_status()
+        return response.json().get('pools', {})
+
+    def get_block_storage_clusters(self, project_id):
+        response = self.http.get(
+            '{}/clusters/detail'.format(self._catalog.get_endpoint_by_type(Component.Types.BLOCK_STORAGE.value))
+        )
+        response.raise_for_status()
+        return response.json().get('clusters', {})
 
     def get_compute_limits(self, project_id):
         params = {'tenant_id': project_id}
@@ -493,3 +542,10 @@ class ApiRest(Api):
             'id',
             next_signifier='next',
         )
+
+    def get_glance_members(self, image_id):
+        response = self.http.get(
+            '{}/v2/images/{}/members'.format(self._catalog.get_endpoint_by_type(Component.Types.IMAGE.value), image_id)
+        )
+        response.raise_for_status()
+        return response.json().get('members', [])

@@ -35,8 +35,8 @@ RUN /opt/python/${PYTHON2_VERSION}/bin/python -m pip install --no-warn-script-lo
 # openssl
 RUN yum install -y perl-IPC-Cmd && \
  DOWNLOAD_URL="https://www.openssl.org/source/openssl-{{version}}.tar.gz" \
- VERSION="3.0.12" \
- SHA256="f93c9e8edde5e9166119de31755fc87b4aa34863662f67ddfcba14d0b6b69b61" \
+ VERSION="3.0.13" \
+ SHA256="88525753f79d3bec27d2fa7c66aa0b92b3aa9498dafd93d7cfa4b3780cdae313" \
  RELATIVE_PATH="openssl-{{version}}" \
  # https://docs.python.org/3/using/unix.html#custom-openssl
  INSTALL_COMMAND="make install_sw" \

@@ -28,8 +28,11 @@ def test_e2e_profile_cisco_ucs(dd_agent_check):
     common_tags = [
         'snmp_profile:cisco-ucs',
         'snmp_host:cisco-ucs.device.name',
+        'device_hostname:cisco-ucs.device.name',
         'device_namespace:default',
         'snmp_device:' + ip_address,
+        'device_ip:' + ip_address,
+        'device_id:default:' + ip_address,
     ] + []
 
     # --- TEST EXTENDED METRICS ---

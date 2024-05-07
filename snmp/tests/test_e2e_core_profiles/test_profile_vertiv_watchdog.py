@@ -27,8 +27,11 @@ def test_e2e_profile_vertiv_watchdog(dd_agent_check):
     common_tags = [
         'snmp_profile:vertiv-watchdog',
         'snmp_host:vertiv-watchdog.device.name',
+        'device_hostname:vertiv-watchdog.device.name',
         'device_namespace:default',
         'snmp_device:' + ip_address,
+        'device_ip:' + ip_address,
+        'device_id:default:' + ip_address,
     ] + [
         'vertiv_product_friendly_name:forward zombies zombies',
         'vertiv_product_mac_address:acted but forward',

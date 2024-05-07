@@ -353,7 +353,32 @@ NEUTRON_PROJECT_METRICS = NEUTRON_NETWORK_METRICS | NEUTRON_QUOTA_METRICS
 
 CINDER_METRICS_PREFIX = "openstack.cinder"
 CINDER_SERVICE_CHECK = f"{CINDER_METRICS_PREFIX}.api.up"
+CINDER_POOL_PREFIX = f"{CINDER_METRICS_PREFIX}.pool"
+CINDER_POOL_COUNT = f"{CINDER_POOL_PREFIX}.count"
+CINDER_POOL_METRICS = {
+    f"{CINDER_POOL_PREFIX}.capabilities.total_capacity_gb": {},
+    f"{CINDER_POOL_PREFIX}.capabilities.free_capacity_gb": {},
+    f"{CINDER_POOL_PREFIX}.capabilities.reserved_percentage": {},
+}
+CINDER_POOL_TAGS = {
+    'name': 'pool_name',
+    'capabilities.volume_backend_name': 'pool_volume_backend_name',
+}
 CINDER_RESPONSE_TIME = f"{CINDER_METRICS_PREFIX}.response_time"
+CINDER_CLUSTER_PREFIX = f"{CINDER_METRICS_PREFIX}.cluster"
+CINDER_CLUSTER_COUNT = f"{CINDER_CLUSTER_PREFIX}.count"
+CINDER_CLUSTER_METRICS = {f"{CINDER_CLUSTER_PREFIX}.num_hosts": {}, f"{CINDER_CLUSTER_PREFIX}.num_down_hosts": {}}
+CINDER_CLUSTER_TAGS = {'name': 'cluster-name'}
+CINDER_SNAPSHOT_PREFIX = f"{CINDER_METRICS_PREFIX}.snapshot"
+CINDER_SNAPSHOT_COUNT = f"{CINDER_SNAPSHOT_PREFIX}.count"
+CINDER_SNAPSHOT_METRICS = {f"{CINDER_SNAPSHOT_PREFIX}.size": {}}
+CINDER_SNAPSHOT_TAGS = {'id': 'snapshot_id', 'volume_id': 'volume_id'}
+CINDER_TRANSFER_COUNT = f"{CINDER_METRICS_PREFIX}.volume.transfer.count"
+CINDER_TRANSFER_TAGS = {'id': 'transfer_id', 'volume_id': 'volume_id', 'name': 'volume_name'}
+CINDER_VOLUME_PREFIX = f"{CINDER_METRICS_PREFIX}.volume"
+CINDER_VOLUME_COUNT = f"{CINDER_VOLUME_PREFIX}.count"
+CINDER_VOLUME_METRICS = {f"{CINDER_VOLUME_PREFIX}.size": {}}
+CINDER_VOLUME_TAGS = {'id': 'volume_id', 'name': 'volume_name', 'status': 'volume_status'}
 
 IRONIC_METRICS_PREFIX = "openstack.ironic"
 IRONIC_SERVICE_CHECK = f"{IRONIC_METRICS_PREFIX}.api.up"
@@ -535,11 +560,24 @@ OCTAVIA_AMPHORA_STATS_METRICS = {
 GLANCE_METRICS_PREFIX = "openstack.glance"
 GLANCE_SERVICE_CHECK = f"{GLANCE_METRICS_PREFIX}.api.up"
 GLANCE_RESPONSE_TIME = f"{GLANCE_METRICS_PREFIX}.response_time"
-GLANCE_IMAGE_COUNT = f"{GLANCE_METRICS_PREFIX}.image.count"
+GLANCE_IMAGE_PREFIX = f"{GLANCE_METRICS_PREFIX}.image"
+GLANCE_IMAGE_COUNT = f"{GLANCE_IMAGE_PREFIX}.count"
+GLANCE_IMAGE_METRICS = {
+    f"{GLANCE_IMAGE_PREFIX}.up": {},
+    f"{GLANCE_IMAGE_PREFIX}.size": {},
+}
 GLANCE_IMAGE_TAGS = {
+    'id': 'image_id',
     'name': 'image_name',
     'status': 'status',
     'container_format': 'container_format',
+}
+GLANCE_MEMBER_PREFIX = f"{GLANCE_IMAGE_PREFIX}.member"
+GLANCE_MEMBER_COUNT = f"{GLANCE_MEMBER_PREFIX}.count"
+GLANCE_MEMBER_TAGS = {
+    'member_id': 'member_id',
+    'image_id': 'image_id',
+    'status': 'status',
 }
 
 

@@ -2,7 +2,15 @@
 
 <!-- towncrier release notes start -->
 
-## 6.3.0 / 2024-03-22
+## 6.4.0 / 2024-04-26
+
+***Added***:
+
+* Add flag to exclude `db` tag from dbstats metrics ([#17276](https://github.com/DataDog/integrations-core/pull/17276))
+* Add host tags triggered events ([#17287](https://github.com/DataDog/integrations-core/pull/17287))
+* Update dependencies ([#17319](https://github.com/DataDog/integrations-core/pull/17319))
+
+## 6.3.0 / 2024-03-22 / Agent 7.53.0
 
 ***Added***:
 

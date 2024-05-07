@@ -27,8 +27,11 @@ def test_e2e_profile_huawei_routers(dd_agent_check):
     common_tags = [
         'snmp_profile:huawei-routers',
         'snmp_host:huawei-routers.device.name',
+        'device_hostname:huawei-routers.device.name',
         'device_namespace:default',
         'snmp_device:' + ip_address,
+        'device_ip:' + ip_address,
+        'device_id:default:' + ip_address,
     ] + []
 
     # --- TEST EXTENDED METRICS ---
