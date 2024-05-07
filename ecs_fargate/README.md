@@ -317,22 +317,24 @@ If needed, create a compute environment:
 
 ```bash
 aws batch create-compute-environment --compute-environment-name <COMPUTE_ENVIRONMENT_NAME> \
---type MANAGED --compute-resources "type=FARGATE,subnets=<PRIVATE_SUBNET>,securityGroupIds=<SECURITY_GROUP>"
+--type MANAGED \
+--compute-resources "type=FARGATE,maxvCpus=2,subnets=<PRIVATE_SUBNET>,securityGroupIds=<SECURITY_GROUP>"
 ```
 
 If needed, create a job queue associated with a compute environment:
 
 ```bash
-aws bash  create-job-queue --job-queue-name <JOB_QUEUE_NAME> \
+aws batch  create-job-queue --job-queue-name <JOB_QUEUE_NAME> \
 --priority <INT> \
---compute-environment-order "order=<INT>,computeEnvironment=<COMPUTE_ENVIRONMENT_ARN>"
+--compute-environment-order "order=<INT>,computeEnvironment=<COMPUTE_ENVIRONMENT_NAME>"
 ```
 
 Run the job in your job queue:
 
 ```bash
 aws batch submit-job --job-name <JOB_NAME> \
---job-queue <JOB_QUEUE_NAME> --job-definition <JOB_DEFINITION_NAME>:1
+--job-queue <JOB_QUEUE_NAME> \
+--job-definition <JOB_DEFINITION_NAME>:1
 ```
 
 <!-- xxz tab xxx -->
