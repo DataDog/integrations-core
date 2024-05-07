@@ -6,7 +6,7 @@
   "tags": [
     "integration:cisco-sdwan"
   ],
-  "description": "This monitor alerts when a Cisco SD-WAN device has rebooted more than 5 times within the last 10 minutes.",
+  "description": "This monitor detects instances of repeated reboots, serving as an indicator for potential issues like software-related glitches, low memory conditions, corrupt software images, hardware faults, or software bugs. By identifying these concerns, it ensures network stability and reliability, minimizing downtime and optimizing performance.",
   "definition": {
 	"name": "[Cisco SD-WAN] Device {{hostname.name}} ({{system_ip.name}}) rebooted more than 5 times in the last 10 minutes",
 	"type": "query alert",
