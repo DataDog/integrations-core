@@ -2,6 +2,12 @@
 
 <!-- towncrier release notes start -->
 
+## 5.3.0 / 2024-04-26
+
+***Added***:
+
+* Add details on default node/queue/exchange maximums to the configuration example ([#17344](https://github.com/DataDog/integrations-core/pull/17344))
+
 ## 5.2.1 / 2024-03-22 / Agent 7.53.0
 
 ***Fixed***:
