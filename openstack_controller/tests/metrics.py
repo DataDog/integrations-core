@@ -4615,6 +4615,21 @@ DRIVERS_METRICS_IRONIC_MICROVERSION_1_80 = [
     },
 ]
 
+ALLOCATIONS_METRICS_IRONIC_MICROVERSION_1_80 = [
+    {
+        'name': 'openstack.ironic.allocation.count',
+        'count': 1,
+        'value': 1,
+        'tags': [
+            'keystone_server:http://127.0.0.1:8080/identity',
+            'allocation_uuid:5344a3e2-978a-444e-990a-cbf47c62ef88',
+            'node_uuid:6d85703a-565d-469a-96ce-30b6de53079d',
+            'allocation_name:allocation-1',
+            'allocation_state:active',
+        ],
+    },
+]
+
 IMAGES_METRICS_GLANCE = [
     {
         'name': 'openstack.glance.image.count',

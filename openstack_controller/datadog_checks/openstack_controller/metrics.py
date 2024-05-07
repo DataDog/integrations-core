@@ -425,6 +425,15 @@ IRONIC_DRIVER_TAGS = {
 }
 IRONIC_DRIVER_COUNT = f"{IRONIC_DRIVER_PREFIX}.count"
 
+IRONIC_ALLOCATION_PREFIX = f"{IRONIC_METRICS_PREFIX}.allocation"
+IRONIC_ALLOCATION_TAGS = {
+    'uuid': 'allocation_uuid',
+    'node_uuid': 'node_uuid',
+    'name': 'allocation_name',
+    'state': 'allocation_state',
+}
+IRONIC_ALLOCATION_COUNT = f"{IRONIC_ALLOCATION_PREFIX}.count"
+
 IRONIC_CONDUCTOR_METRICS_PREFIX = f"{IRONIC_METRICS_PREFIX}.conductor"
 IRONIC_CONDUCTOR_COUNT = f"{IRONIC_CONDUCTOR_METRICS_PREFIX}.count"
 IRONIC_CONDUCTOR_TAGS = {

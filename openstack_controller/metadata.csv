@@ -18,6 +18,7 @@ openstack.glance.image.size,gauge,,,,Size of image file in bytes,0,openstack_con
 openstack.glance.image.task.count,gauge,,,,Number of tasks associated with an image,0,openstack_controller,glance image task ct,
 openstack.glance.image.up,gauge,,,,Whether a glance image is up,0,openstack_controller,glance image up,
 openstack.glance.response_time,gauge,,millisecond,,Duration that an HTTP request takes to complete when making a request to glance endpoint,0,openstack_controller,glance response time,
+openstack.ironic.allocation.count,gauge,,,,Number of ironic allocations,0,openstack_controller,ironic allocation ct,
 openstack.ironic.conductor.count,gauge,,,,Number of ironic conductors,0,openstack_controller,ironic conductor ct,
 openstack.ironic.conductor.up,gauge,,,,Whether an ironic conductor is up,0,openstack_controller,ironic conductor up,
 openstack.ironic.driver.count,gauge,,,,Number of ironic drivers,0,openstack_controller,ironic driver ct,
