@@ -2,7 +2,13 @@
 
 <!-- towncrier release notes start -->
 
-## 3.0.0 / 2024-03-22 / Agent 7.53.0
+## 3.1.0 / 2024-05-07
+
+***Added***:
+
+* [datadog-cluster-agent] Add CWS Instrumentation metrics ([#17530](https://github.com/DataDog/integrations-core/pull/17530))
+
+## 3.0.0 / 2024-03-22
 
 ***Removed***:
 
