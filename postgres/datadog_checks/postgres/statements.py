@@ -479,10 +479,8 @@ class PostgresStatementMetrics(DBMAsyncJob):
         )
         print("[AMW] called queries")
         for row in rows:
-            if row['queryid'] != '-4540465645740005644':
-                continue
-
-            print("QueryId: " + str(row['queryid']) + " | Query: " + str(row['query']) + " | Calls: " + str(row['calls']))
+            if 'pg_' not in row['query']:
+                print("QueryId: " + str(row['queryid']) + " | Query: " + str(row['query']) + " | Calls: " + str(row['calls']))
         print("-------------------\n")
 
         return rows

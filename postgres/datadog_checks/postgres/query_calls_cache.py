@@ -22,10 +22,10 @@ class QueryCallsCache:
         does not count as a change in values since that would result
         in an inflated value."""
         calls_changed = False
-        if queryid == '-4540465645740005644':
-            print("[AMW] In query calls cache for " + str(queryid) + " | cached calls:  " + str(self.cache[queryid]) + " | new calls: " + str(calls))
 
         if queryid in self.cache:
+            print("[AMW] Query in cache " + str(queryid) + " | cached calls:  " + str(self.cache[queryid]) + " | new calls: " + str(calls))
+
             diff = calls - self.cache[queryid]
             # Positive deltas mean the statement remained in pg_stat_statements
             # between check calls. Negative deltas mean the statement was evicted
@@ -33,6 +33,7 @@ class QueryCallsCache:
             # change.
             calls_changed = diff != 0
         else:
+            print("[AMW] Query not in cache " + str(queryid) + " | new calls: " + str(calls))
             calls_changed = True
 
         self.next_cache[queryid] = calls
