@@ -777,8 +777,6 @@ Monitor Fargate logs by using the `awslogs` log driver and a Lambda function to 
 
 2. This configures your Fargate tasks or jobs to send log information to Amazon CloudWatch Logs. The following shows a snippet of a task/job definition where the awslogs log driver is configured:
 
-**Task/Job Definition**
-
    ```json
    {
      "logConfiguration": {
