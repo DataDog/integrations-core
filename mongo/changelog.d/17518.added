@@ -1,0 +1,1 @@
+Emit mongodb_instance metadata event to for sharded cluster, replica-set and standalone deployment types.
