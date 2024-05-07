@@ -660,7 +660,9 @@ instances:
     # ignore_missing_database: false
     
     # @param schemas_collection_interval - int - optional - dafault: 1200
-    # Schema collection interval in seconds.
+    # Frequency in seconds of schema collections.  Defaults to `1200`.
+    #
+    # schemas_collection_interval: 1200
 
     ## @param tags - list of strings - optional
     ## A list of tags to attach to every metric and service check emitted by this instance.
