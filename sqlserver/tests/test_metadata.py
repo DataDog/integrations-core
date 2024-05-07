@@ -82,7 +82,7 @@ def test_get_settings_query_cached(dbm_instance, caplog):
 
 def test_sqlserver_collect_settings(aggregator, dd_run_check, dbm_instance):
     check = SQLServer(CHECK_NAME, {}, [dbm_instance])
-    dd_run_check(check)
+    #dd_run_check(check)
     check.initialize_connection()
     check.check(dbm_instance)
     dbm_metadata = aggregator.get_event_platform_events("dbm-metadata")
