@@ -21,7 +21,7 @@ cisco_sdwan.interface.tx_errors,count,,packet,,The number of outbound packets th
 cisco_sdwan.memory.usage,gauge,,percent,,The percentage of memory currently being used.,0,cisco_sdwan,,
 cisco_sdwan.omp_peer.status,gauge,,,,The status of the OMP Peer connection.,0,cisco_sdwan,,
 cisco_sdwan.reboot.count,count,,,,The number of reboots.,0,cisco_sdwan,,
-cisco_sdwan.tunnel.jitter,gauge,,,,The jitter of the tunnel.,0,cisco_sdwan,,
+cisco_sdwan.tunnel.jitter,gauge,,millisecond,,The jitter of the tunnel.,0,cisco_sdwan,,
 cisco_sdwan.tunnel.latency,gauge,,millisecond,,The latency in milliseconds of the tunnel.,0,cisco_sdwan,,
 cisco_sdwan.tunnel.loss,gauge,,percent,,The packet loss of the tunnel.,0,cisco_sdwan,,
 cisco_sdwan.tunnel.qoe,gauge,,,,The QOE score of the tunnel.,0,cisco_sdwan,,
