@@ -25,22 +25,6 @@ GO
 CREATE SCHEMA test_schema;
 GO
 
---CREATE TABLE datadog_test_schemas.test_schema.cities (id int DEFAULT 0, name varchar(255));
---GO
---ALTER TABLE datadog_test_schemas.test_schema.cities
---ALTER COLUMN id INT NOT NULL;
---GO
---CREATE INDEX two_columns_index ON datadog_test_schemas.test_schema.cities (id, name);
---ALTER TABLE datadog_test_schemas.test_schema.cities
---ADD CONSTRAINT PK_Cities PRIMARY KEY (id);
---GO
-
---CREATE TABLE datadog_test_schemas.test_schema.cities (
---    id INT NOT NULL DEFAULT 0,
---    name VARCHAR(255),
---    CONSTRAINT PK_Cities PRIMARY KEY (id)
---);
-
 -- Create the partition function
 CREATE PARTITION FUNCTION CityPartitionFunction (INT)
 AS RANGE LEFT FOR VALUES (100, 200, 300); -- Define your partition boundaries here
@@ -57,18 +41,20 @@ CREATE TABLE datadog_test_schemas.test_schema.cities (
     CONSTRAINT PK_Cities PRIMARY KEY (id)
 ) ON CityPartitionScheme(id); -- Assign the partition scheme to the table
 
-
+-- Create indexes
 CREATE INDEX two_columns_index ON datadog_test_schemas.test_schema.cities (id, name);
 CREATE INDEX single_column_index ON datadog_test_schemas.test_schema.cities (population);
 
 INSERT INTO datadog_test_schemas.test_schema.cities  VALUES (1, 'yey', 100), (2, 'bar', 200);
 GO
+
+-- Create table with a foreign key
 CREATE TABLE datadog_test_schemas.test_schema.landmarks (name varchar(255), city_id int DEFAULT 0);
 GO
 ALTER TABLE datadog_test_schemas.test_schema.landmarks ADD CONSTRAINT FK_CityId FOREIGN KEY (city_id) REFERENCES datadog_test_schemas.test_schema.cities(id);
 GO
 
---------------------------------------------------
+-- Create table with unique constraint
 CREATE TABLE datadog_test_schemas.test_schema.Restaurants (
     RestaurantName VARCHAR(255),
     District VARCHAR(100),
@@ -77,6 +63,7 @@ CREATE TABLE datadog_test_schemas.test_schema.Restaurants (
 );
 GO
 
+-- Create table with a foreign key on two columns
 CREATE TABLE datadog_test_schemas.test_schema.RestaurantReviews (
     RestaurantName VARCHAR(255),
     District VARCHAR(100),
