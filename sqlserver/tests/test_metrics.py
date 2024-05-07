@@ -212,7 +212,6 @@ def test_check_index_usage_metrics(
 ):
     instance_docker_metrics['database'] = 'datadog_test-1'
     instance_docker_metrics['include_index_usage_metrics'] = True
-
     instance_docker_metrics['ignore_missing_database'] = True
 
     # Cause an index seek
