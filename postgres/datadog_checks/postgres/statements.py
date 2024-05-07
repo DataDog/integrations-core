@@ -42,10 +42,12 @@ SELECT {cols}
   LEFT JOIN pg_database
          ON pg_stat_statements.dbid = pg_database.oid
   WHERE query NOT LIKE 'EXPLAIN %%'
-  AND queryid = ANY('{{ {called_queryids} }}'::bigint[])
   {filters}
   {extra_clauses}
 """
+
+#  AND queryid = ANY('{{ {called_queryids} }}'::bigint[])
+
 
 
 # Use pg_stat_statements(false) when available as an optimization to avoid pulling SQL text from disk
