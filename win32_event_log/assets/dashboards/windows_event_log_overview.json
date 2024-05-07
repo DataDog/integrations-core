@@ -825,7 +825,6 @@
                                     "response_format": "scalar"
                                 }
                             ],
-                            "time": {},
                             "title": "Top Hosts",
                             "type": "query_table"
                         },
@@ -1035,109 +1034,605 @@
                 "is_column_break": true,
                 "width": 12,
                 "x": 0,
-                "y": 0
+                "y": 14
             }
         },
         {
             "definition": {
                 "background_color": "vivid_blue",
-                "powerpack_id": "49258faa-0665-11ef-8762-da7ad0900002",
+                "layout_type": "ordered",
                 "show_title": true,
-                "template_variables": {
-                    "controlled_by_powerpack": [
-                        {
-                            "name": "source",
-                            "prefix": "source",
-                            "values": [
-                                "windows.events"
-                            ]
-                        },
-                        {
-                            "name": "Event.System.Channel",
-                            "prefix": "@Event.System.Channel",
-                            "values": [
-                                "System"
-                            ]
-                        }
-                    ],
-                    "controlled_externally": [
-                        {
-                            "name": "env",
-                            "prefix": "env",
-                            "values": [
-                                "*"
-                            ]
-                        },
-                        {
-                            "name": "host",
-                            "prefix": "host",
-                            "values": [
-                                "*"
-                            ]
-                        }
-                    ]
-                },
                 "title": "System Event Logs",
                 "title_align": "center",
-                "type": "powerpack"
+                "type": "group",
+                "widgets": [
+                    {
+                        "definition": {
+                            "legend": {
+                                "type": "automatic"
+                            },
+                            "requests": [
+                                {
+                                    "formulas": [
+                                        {
+                                            "formula": "query1",
+                                            "limit": {
+                                                "count": 500,
+                                                "order": "desc"
+                                            }
+                                        }
+                                    ],
+                                    "queries": [
+                                        {
+                                            "compute": {
+                                                "aggregation": "count"
+                                            },
+                                            "data_source": "logs",
+                                            "group_by": [
+                                                {
+                                                    "facet": "@Event.System.Provider.Name",
+                                                    "limit": 10,
+                                                    "sort": {
+                                                        "aggregation": "count",
+                                                        "order": "desc"
+                                                    }
+                                                }
+                                            ],
+                                            "indexes": [
+                                                "*"
+                                            ],
+                                            "name": "query1",
+                                            "search": {
+                                                "query": "source:windows.events $host $env $service @Event.System.Channel:System"
+                                            },
+                                            "storage": "hot"
+                                        }
+                                    ],
+                                    "response_format": "scalar",
+                                    "style": {
+                                        "palette": "datadog16"
+                                    }
+                                }
+                            ],
+                            "title": "Most Common Provider Names (Sources)",
+                            "type": "sunburst"
+                        },
+                        "id": 319981246838411,
+                        "layout": {
+                            "height": 4,
+                            "width": 6,
+                            "x": 0,
+                            "y": 0
+                        }
+                    },
+                    {
+                        "definition": {
+                            "requests": [
+                                {
+                                    "formulas": [
+                                        {
+                                            "formula": "query1",
+                                            "limit": {
+                                                "count": 10,
+                                                "order": "desc"
+                                            }
+                                        }
+                                    ],
+                                    "queries": [
+                                        {
+                                            "compute": {
+                                                "aggregation": "count"
+                                            },
+                                            "data_source": "logs",
+                                            "group_by": [
+                                                {
+                                                    "facet": "@Event.System.Computer",
+                                                    "limit": 10,
+                                                    "sort": {
+                                                        "aggregation": "count",
+                                                        "order": "desc"
+                                                    }
+                                                }
+                                            ],
+                                            "indexes": [
+                                                "*"
+                                            ],
+                                            "name": "query1",
+                                            "search": {
+                                                "query": "source:windows.events @Event.System.Channel:System $host $env $service"
+                                            },
+                                            "storage": "hot"
+                                        }
+                                    ],
+                                    "response_format": "scalar"
+                                }
+                            ],
+                            "title": "Top Hosts",
+                            "type": "query_table"
+                        },
+                        "id": 5643316335707016,
+                        "layout": {
+                            "height": 4,
+                            "width": 6,
+                            "x": 6,
+                            "y": 0
+                        }
+                    },
+                    {
+                        "definition": {
+                            "legend_columns": [
+                                "avg",
+                                "min",
+                                "max",
+                                "value",
+                                "sum"
+                            ],
+                            "legend_layout": "auto",
+                            "requests": [
+                                {
+                                    "display_type": "bars",
+                                    "formulas": [
+                                        {
+                                            "formula": "query1"
+                                        }
+                                    ],
+                                    "queries": [
+                                        {
+                                            "compute": {
+                                                "aggregation": "count"
+                                            },
+                                            "data_source": "logs",
+                                            "group_by": [
+                                                {
+                                                    "facet": "status",
+                                                    "limit": 10,
+                                                    "sort": {
+                                                        "aggregation": "count",
+                                                        "order": "desc"
+                                                    }
+                                                }
+                                            ],
+                                            "indexes": [
+                                                "*"
+                                            ],
+                                            "name": "query1",
+                                            "search": {
+                                                "query": "source:windows.events status:(warn OR error) $host $env @Event.System.Channel:System $service"
+                                            },
+                                            "storage": "hot"
+                                        }
+                                    ],
+                                    "response_format": "timeseries",
+                                    "style": {
+                                        "line_type": "solid",
+                                        "line_width": "normal",
+                                        "palette": "semantic"
+                                    }
+                                }
+                            ],
+                            "show_legend": false,
+                            "title": "Warning and Error Count",
+                            "type": "timeseries"
+                        },
+                        "id": 1839419293486954,
+                        "layout": {
+                            "height": 3,
+                            "width": 6,
+                            "x": 0,
+                            "y": 4
+                        }
+                    },
+                    {
+                        "definition": {
+                            "requests": [
+                                {
+                                    "formulas": [
+                                        {
+                                            "formula": "query1",
+                                            "limit": {
+                                                "count": 10,
+                                                "order": "desc"
+                                            }
+                                        }
+                                    ],
+                                    "queries": [
+                                        {
+                                            "compute": {
+                                                "aggregation": "count"
+                                            },
+                                            "data_source": "logs",
+                                            "group_by": [
+                                                {
+                                                    "facet": "@evt.id",
+                                                    "limit": 10,
+                                                    "sort": {
+                                                        "aggregation": "count",
+                                                        "order": "desc"
+                                                    }
+                                                }
+                                            ],
+                                            "indexes": [
+                                                "*"
+                                            ],
+                                            "name": "query1",
+                                            "search": {
+                                                "query": "source:windows.events $host $env @Event.System.Channel:System"
+                                            },
+                                            "storage": "hot"
+                                        }
+                                    ],
+                                    "response_format": "scalar"
+                                }
+                            ],
+                            "style": {},
+                            "title": "Most Common Events",
+                            "title_align": "left",
+                            "title_size": "16",
+                            "type": "toplist"
+                        },
+                        "id": 1527530873655371,
+                        "layout": {
+                            "height": 3,
+                            "width": 6,
+                            "x": 6,
+                            "y": 4
+                        }
+                    },
+                    {
+                        "definition": {
+                            "requests": [
+                                {
+                                    "columns": [
+                                        {
+                                            "field": "status_line",
+                                            "width": "auto"
+                                        },
+                                        {
+                                            "field": "timestamp",
+                                            "width": "auto"
+                                        },
+                                        {
+                                            "field": "host",
+                                            "width": "auto"
+                                        },
+                                        {
+                                            "field": "service",
+                                            "width": "auto"
+                                        },
+                                        {
+                                            "field": "content",
+                                            "width": "compact"
+                                        }
+                                    ],
+                                    "query": {
+                                        "data_source": "logs_stream",
+                                        "indexes": [],
+                                        "query_string": "source:windows.events status:(warn OR error) $env $host $service @Event.System.Channel:System",
+                                        "storage": "hot"
+                                    },
+                                    "response_format": "event_list"
+                                }
+                            ],
+                            "title": "Warning and Error Logs",
+                            "title_align": "left",
+                            "title_size": "16",
+                            "type": "list_stream"
+                        },
+                        "id": 5667495057819291,
+                        "layout": {
+                            "height": 4,
+                            "width": 12,
+                            "x": 0,
+                            "y": 7
+                        }
+                    }
+                ]
             },
             "id": 4413598443382000,
             "layout": {
                 "height": 12,
                 "width": 12,
                 "x": 0,
-                "y": 13
+                "y": 27
             }
         },
         {
             "definition": {
                 "background_color": "vivid_blue",
-                "powerpack_id": "49258faa-0665-11ef-8762-da7ad0900002",
+                "layout_type": "ordered",
                 "show_title": true,
-                "template_variables": {
-                    "controlled_by_powerpack": [
-                        {
-                            "name": "source",
-                            "prefix": "source",
-                            "values": [
-                                "windows.events"
-                            ]
-                        },
-                        {
-                            "name": "Event.System.Channel",
-                            "prefix": "@Event.System.Channel",
-                            "values": [
-                                "Application"
-                            ]
-                        }
-                    ],
-                    "controlled_externally": [
-                        {
-                            "name": "env",
-                            "prefix": "env",
-                            "values": [
-                                "*"
-                            ]
-                        },
-                        {
-                            "name": "host",
-                            "prefix": "host",
-                            "values": [
-                                "*"
-                            ]
-                        }
-                    ]
-                },
                 "title": "Application Event Logs",
                 "title_align": "center",
-                "type": "powerpack"
+                "type": "group",
+                "widgets": [
+                    {
+                        "definition": {
+                            "legend": {
+                                "type": "automatic"
+                            },
+                            "requests": [
+                                {
+                                    "formulas": [
+                                        {
+                                            "formula": "query1",
+                                            "limit": {
+                                                "count": 500,
+                                                "order": "desc"
+                                            }
+                                        }
+                                    ],
+                                    "queries": [
+                                        {
+                                            "compute": {
+                                                "aggregation": "count"
+                                            },
+                                            "data_source": "logs",
+                                            "group_by": [
+                                                {
+                                                    "facet": "@Event.System.Provider.Name",
+                                                    "limit": 10,
+                                                    "sort": {
+                                                        "aggregation": "count",
+                                                        "order": "desc"
+                                                    }
+                                                }
+                                            ],
+                                            "indexes": [
+                                                "*"
+                                            ],
+                                            "name": "query1",
+                                            "search": {
+                                                "query": "source:windows.events $host $env $service @Event.System.Channel:Application"
+                                            },
+                                            "storage": "hot"
+                                        }
+                                    ],
+                                    "response_format": "scalar",
+                                    "style": {
+                                        "palette": "datadog16"
+                                    }
+                                }
+                            ],
+                            "title": "Most Common Provider Names (Sources)",
+                            "type": "sunburst"
+                        },
+                        "id": 6783723329816561,
+                        "layout": {
+                            "height": 4,
+                            "width": 6,
+                            "x": 0,
+                            "y": 0
+                        }
+                    },
+                    {
+                        "definition": {
+                            "requests": [
+                                {
+                                    "formulas": [
+                                        {
+                                            "formula": "query1",
+                                            "limit": {
+                                                "count": 10,
+                                                "order": "desc"
+                                            }
+                                        }
+                                    ],
+                                    "queries": [
+                                        {
+                                            "compute": {
+                                                "aggregation": "count"
+                                            },
+                                            "data_source": "logs",
+                                            "group_by": [
+                                                {
+                                                    "facet": "@Event.System.Computer",
+                                                    "limit": 10,
+                                                    "sort": {
+                                                        "aggregation": "count",
+                                                        "order": "desc"
+                                                    }
+                                                }
+                                            ],
+                                            "indexes": [
+                                                "*"
+                                            ],
+                                            "name": "query1",
+                                            "search": {
+                                                "query": "source:windows.events @Event.System.Channel:Application $host $env $service"
+                                            },
+                                            "storage": "hot"
+                                        }
+                                    ],
+                                    "response_format": "scalar"
+                                }
+                            ],
+                            "title": "Top Hosts",
+                            "type": "query_table"
+                        },
+                        "id": 8451750030541317,
+                        "layout": {
+                            "height": 4,
+                            "width": 6,
+                            "x": 6,
+                            "y": 0
+                        }
+                    },
+                    {
+                        "definition": {
+                            "legend_columns": [
+                                "avg",
+                                "min",
+                                "max",
+                                "value",
+                                "sum"
+                            ],
+                            "legend_layout": "auto",
+                            "requests": [
+                                {
+                                    "display_type": "bars",
+                                    "formulas": [
+                                        {
+                                            "formula": "query1"
+                                        }
+                                    ],
+                                    "queries": [
+                                        {
+                                            "compute": {
+                                                "aggregation": "count"
+                                            },
+                                            "data_source": "logs",
+                                            "group_by": [
+                                                {
+                                                    "facet": "status",
+                                                    "limit": 10,
+                                                    "sort": {
+                                                        "aggregation": "count",
+                                                        "order": "desc"
+                                                    }
+                                                }
+                                            ],
+                                            "indexes": [
+                                                "*"
+                                            ],
+                                            "name": "query1",
+                                            "search": {
+                                                "query": "source:windows.events status:(warn OR error) $host $env @Event.System.Channel:Application $service"
+                                            },
+                                            "storage": "hot"
+                                        }
+                                    ],
+                                    "response_format": "timeseries",
+                                    "style": {
+                                        "line_type": "solid",
+                                        "line_width": "normal",
+                                        "palette": "semantic"
+                                    }
+                                }
+                            ],
+                            "show_legend": false,
+                            "title": "Warning and Error Count",
+                            "type": "timeseries"
+                        },
+                        "id": 5264285283168018,
+                        "layout": {
+                            "height": 3,
+                            "width": 6,
+                            "x": 0,
+                            "y": 4
+                        }
+                    },
+                    {
+                        "definition": {
+                            "requests": [
+                                {
+                                    "formulas": [
+                                        {
+                                            "formula": "query1",
+                                            "limit": {
+                                                "count": 10,
+                                                "order": "desc"
+                                            }
+                                        }
+                                    ],
+                                    "queries": [
+                                        {
+                                            "compute": {
+                                                "aggregation": "count"
+                                            },
+                                            "data_source": "logs",
+                                            "group_by": [
+                                                {
+                                                    "facet": "@evt.id",
+                                                    "limit": 10,
+                                                    "sort": {
+                                                        "aggregation": "count",
+                                                        "order": "desc"
+                                                    }
+                                                }
+                                            ],
+                                            "indexes": [
+                                                "*"
+                                            ],
+                                            "name": "query1",
+                                            "search": {
+                                                "query": "source:windows.events $host $env @Event.System.Channel:Application"
+                                            },
+                                            "storage": "hot"
+                                        }
+                                    ],
+                                    "response_format": "scalar"
+                                }
+                            ],
+                            "style": {},
+                            "title": "Most Common Events",
+                            "title_align": "left",
+                            "title_size": "16",
+                            "type": "toplist"
+                        },
+                        "id": 8631235450310344,
+                        "layout": {
+                            "height": 3,
+                            "width": 6,
+                            "x": 6,
+                            "y": 4
+                        }
+                    },
+                    {
+                        "definition": {
+                            "requests": [
+                                {
+                                    "columns": [
+                                        {
+                                            "field": "status_line",
+                                            "width": "auto"
+                                        },
+                                        {
+                                            "field": "timestamp",
+                                            "width": "auto"
+                                        },
+                                        {
+                                            "field": "host",
+                                            "width": "auto"
+                                        },
+                                        {
+                                            "field": "service",
+                                            "width": "auto"
+                                        },
+                                        {
+                                            "field": "content",
+                                            "width": "compact"
+                                        }
+                                    ],
+                                    "query": {
+                                        "data_source": "logs_stream",
+                                        "indexes": [],
+                                        "query_string": "source:windows.events status:(warn OR error) $env $host $service @Event.System.Channel:Application",
+                                        "storage": "hot"
+                                    },
+                                    "response_format": "event_list"
+                                }
+                            ],
+                            "title": "Warning and Error Logs",
+                            "title_align": "left",
+                            "title_size": "16",
+                            "type": "list_stream"
+                        },
+                        "id": 1436209518835681,
+                        "layout": {
+                            "height": 4,
+                            "width": 12,
+                            "x": 0,
+                            "y": 7
+                        }
+                    }
+                ]
             },
             "id": 1013286856666266,
             "layout": {
                 "height": 12,
                 "width": 12,
                 "x": 0,
-                "y": 25
+                "y": 39
             }
         }
     ]
