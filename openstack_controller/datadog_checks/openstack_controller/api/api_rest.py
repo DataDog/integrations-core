@@ -438,6 +438,13 @@ class ApiRest(Api):
         response.raise_for_status()
         return response.json().get('portgroups', [])
 
+    def get_baremetal_ports(self):
+        response = self.http.get(
+            '{}/v1/ports/detail'.format(self._catalog.get_endpoint_by_type(Component.Types.BAREMETAL.value))
+        )
+        response.raise_for_status()
+        return response.json().get('ports', [])
+
     def get_baremetal_conductors(self):
 
         ironic_endpoint = self._catalog.get_endpoint_by_type(Component.Types.BAREMETAL.value)

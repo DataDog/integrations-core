@@ -257,6 +257,9 @@ class ApiSdk(Api):
     def get_baremetal_portgroups(self, node_id):
         return [portgroup.to_dict(original_names=True) for portgroup in self.connection.baremetal.portgroups(node_id)]
 
+    def get_baremetal_ports(self):
+        return [port.to_dict(original_names=True) for port in self.connection.baremetal.ports()]
+
     def get_baremetal_conductors(self):
         return [
             conductor.to_dict(original_names=True)

@@ -408,6 +408,16 @@ IRONIC_NODE_PORTGROUP_TAGS = {
     'name': 'portgroup_name',
 }
 
+IRONIC_PORT_PREFIX = f"{IRONIC_METRICS_PREFIX}.port"
+IRONIC_PORT_COUNT = f"{IRONIC_PORT_PREFIX}.count"
+IRONIC_PORT_TAGS = {
+    'uuid': 'port_uuid',
+    'node_uuid': 'node_uuid',
+    'portgroup_uuid': 'portgroup_uuid',
+    'address': 'port_address',
+    'name': 'port_name',
+}
+
 IRONIC_CONDUCTOR_METRICS_PREFIX = f"{IRONIC_METRICS_PREFIX}.conductor"
 IRONIC_CONDUCTOR_COUNT = f"{IRONIC_CONDUCTOR_METRICS_PREFIX}.count"
 IRONIC_CONDUCTOR_TAGS = {

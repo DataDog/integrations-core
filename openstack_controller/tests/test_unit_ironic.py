@@ -19,6 +19,7 @@ from tests.metrics import (
     IRONIC_NODE_COUNT,
     NODES_METRICS_IRONIC_MICROVERSION_1_80,
     NODES_METRICS_IRONIC_MICROVERSION_DEFAULT,
+    PORT_METRICS_IRONIC_MICROVERSION_DEFAULT,
     PORTGROUPS_METRICS_IRONIC_MICROVERSION_1_80,
     VOLUME_METRICS_IRONIC_MICROVERSION_1_80,
 )
@@ -127,6 +128,80 @@ def test_disable_ironic_node_portgroup_metrics(aggregator, dd_run_check, instanc
     dd_run_check(check)
     for metric in aggregator.metric_names:
         assert not metric.startswith('openstack.ironic.node.portgroup.')
+
+
+@pytest.mark.parametrize(
+    ('instance'),
+    [
+        pytest.param(
+            configs.REST,
+            id='api rest no microversion',
+        ),
+        pytest.param(
+            configs.REST_IRONIC_MICROVERSION_1_80,
+            id='api rest microversion 1.80',
+        ),
+        pytest.param(
+            configs.SDK,
+            id='api sdk no microversion',
+        ),
+        pytest.param(
+            configs.SDK_IRONIC_MICROVERSION_1_80,
+            id='api sdk microversion 1.80',
+        ),
+    ],
+)
+@pytest.mark.usefixtures('mock_http_get', 'mock_http_post', 'openstack_connection')
+def test_disable_ironic_ports_metrics(aggregator, dd_run_check, instance, openstack_controller_check):
+    instance = instance | {
+        "components": {
+            "baremetal": {
+                "ports": False,
+            },
+        },
+    }
+    check = openstack_controller_check(instance)
+    dd_run_check(check)
+    for metric in aggregator.metric_names:
+        assert not metric.startswith('openstack.ironic.port.')
+
+
+@pytest.mark.parametrize(
+    ('instance', 'metrics'),
+    [
+        pytest.param(
+            configs.REST,
+            PORT_METRICS_IRONIC_MICROVERSION_DEFAULT,
+            id='api rest no microversion',
+        ),
+        pytest.param(
+            configs.REST_IRONIC_MICROVERSION_1_80,
+            PORT_METRICS_IRONIC_MICROVERSION_DEFAULT,
+            id='api rest microversion 1.80',
+        ),
+        pytest.param(
+            configs.SDK,
+            PORT_METRICS_IRONIC_MICROVERSION_DEFAULT,
+            id='api sdk no microversion',
+        ),
+        pytest.param(
+            configs.SDK_IRONIC_MICROVERSION_1_80,
+            PORT_METRICS_IRONIC_MICROVERSION_DEFAULT,
+            id='api sdk microversion 1.80',
+        ),
+    ],
+)
+@pytest.mark.usefixtures('mock_http_get', 'mock_http_post', 'openstack_connection')
+def test_ports_metrics(aggregator, check, dd_run_check, metrics):
+    dd_run_check(check)
+    for metric in metrics:
+        aggregator.assert_metric(
+            metric['name'],
+            count=metric['count'],
+            value=metric['value'],
+            tags=metric['tags'],
+            hostname=metric.get('hostname'),
+        )
 
 
 @pytest.mark.parametrize(

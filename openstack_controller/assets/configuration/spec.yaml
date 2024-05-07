@@ -463,6 +463,8 @@ files:
                                 type: boolean
                               - name: targets
                                 type: boolean
+                      - name: ports
+                        type: boolean  
               - name: load-balancer
                 anyOf:
                   - type: boolean

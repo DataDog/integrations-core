@@ -17,6 +17,9 @@ from datadog_checks.openstack_controller.metrics import (
     IRONIC_NODE_PORTGROUP_PREFIX,
     IRONIC_NODE_PORTGROUP_TAGS,
     IRONIC_NODE_TAGS,
+    IRONIC_PORT_COUNT,
+    IRONIC_PORT_PREFIX,
+    IRONIC_PORT_TAGS,
     IRONIC_RESPONSE_TIME,
     IRONIC_SERVICE_CHECK,
     IRONIC_VOLUME_CONNECTOR_COUNT,
@@ -113,6 +116,22 @@ class BareMetal(Component):
                 )
                 self.check.log.debug("portgroup: %s", portgroup)
                 self.check.gauge(IRONIC_NODE_PORTGROUP_COUNT, 1, tags=tags + portgroup['tags'], hostname=item['uuid'])
+
+    @Component.register_global_metrics(ID)
+    @Component.http_error()
+    def _report_ports(self, config, tags):
+        report_ports = config.get('ports', True)
+        if report_ports:
+            data = self.check.api.get_baremetal_ports()
+            for item in data:
+                port = get_metrics_and_tags(
+                    item,
+                    tags=IRONIC_PORT_TAGS,
+                    prefix=IRONIC_PORT_PREFIX,
+                    metrics={},
+                )
+                self.check.log.debug("port: %s", port)
+                self.check.gauge(IRONIC_PORT_COUNT, 1, tags=tags + port['tags'])
 
     @Component.register_global_metrics(ID)
     @Component.http_error()
