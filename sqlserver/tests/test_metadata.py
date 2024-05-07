@@ -12,9 +12,7 @@ from deepdiff import DeepDiff
 
 from datadog_checks.sqlserver import SQLServer
 
-# from deepdiff import DeepDiff - not clear how to add it to ddev
 from .common import CHECK_NAME
-from .utils import compare_coumns_in_tables
 
 try:
     import pyodbc
@@ -99,26 +97,50 @@ def test_sqlserver_collect_settings(aggregator, dd_run_check, dbm_instance):
     # assert len(event["metadata"]) > 0
 
 
-
 def test_collect_schemas(aggregator, dd_run_check, dbm_instance):
 
     databases_to_find = ['datadog_test_schemas', 'datadog_test']
     exp_datadog_test = {
         'id': '6',
         'name': 'datadog_test',
+        "collation":"SQL_Latin1_General_CP1_CI_AS",
         'owner': 'dbo',
         'schemas': [
             {
                 'name': 'dbo',
                 'id': '1',
-                'owner': '1',
+                'owner_name': 'dbo',
                 'tables': [
                     {
                         'id': '885578193',
                         'name': 'ϑings',
                         'columns': [
-                            {'name': 'id', 'data_type': 'int', 'default': '((0))', 'nullable': True},
-                            {'name': 'name', 'data_type': 'varchar', 'default': 'None', 'nullable': True},
+                            {
+                                'name': 'id',
+                                'data_type': 'int',
+                                'default': '((0))',
+                                'nullable': True,
+                                'ordinal_position': '1',
+                            },
+                            {
+                                'name': 'name',
+                                'data_type': 'varchar',
+                                'default': 'None',
+                                'nullable': True,
+                                'ordinal_position': '2',
+                            },
+                        ],
+                        'partitions': {'partition_count': 1},
+                        'indexes': [
+                            {
+                                'name': 'thingsindex',
+                                'type': 1,
+                                'is_unique': False,
+                                'is_primary_key': False,
+                                'is_unique_constraint': False,
+                                'is_disabled': False,
+                                'column_names': 'name',
+                            }
                         ],
                     }
                 ],
@@ -128,21 +150,177 @@ def test_collect_schemas(aggregator, dd_run_check, dbm_instance):
     exp_datadog_test_schemas = {
         'id': '5',
         'name': 'datadog_test_schemas',
+        "collation":"SQL_Latin1_General_CP1_CI_AS",
         'owner': 'dbo',
         'schemas': [
             {
                 'name': 'test_schema',
                 'id': '5',
-                'owner': '1',
+                'owner_name': 'dbo',
                 'tables': [
                     {
                         'id': '885578193',
                         'name': 'cities',
                         'columns': [
-                            {'name': 'id', 'data_type': 'int', 'default': '((0))', 'nullable': True},
-                            {'name': 'name', 'data_type': 'varchar', 'default': 'None', 'nullable': True},
+                            {
+                                'name': 'id',
+                                'data_type': 'int',
+                                'default': '((0))',
+                                'nullable': False,
+                                'ordinal_position': '1',
+                            },
+                            {
+                                'name': 'name',
+                                'data_type': 'varchar',
+                                'default': 'None',
+                                'nullable': True,
+                                'ordinal_position': '2',
+                            },
+                            {
+                                'name': 'population',
+                                'data_type': 'int',
+                                'default': '((0))',
+                                'nullable': False,
+                                'ordinal_position': '3',
+                            },
                         ],
-                    }
+                        'partitions': {'partition_count': 12},
+                        'foreign_keys': [
+                            {
+                                'foreign_key_name': 'FK_CityId',
+                                'referencing_table': 'landmarks',
+                                'referencing_column': 'city_id',
+                                'referenced_table': 'cities',
+                                'referenced_column': 'id',
+                            }
+                        ],
+                        'indexes': [
+                            {
+                                'name': 'PK_Cities',
+                                'type': 1,
+                                'is_unique': True,
+                                'is_primary_key': True,
+                                'is_unique_constraint': False,
+                                'is_disabled': False,
+                                'column_names': 'id',
+                            },
+                            {
+                                'name': 'single_column_index',
+                                'type': 2,
+                                'is_unique': False,
+                                'is_primary_key': False,
+                                'is_unique_constraint': False,
+                                'is_disabled': False,
+                                'column_names': 'population,id',
+                            },
+                            {
+                                'name': 'two_columns_index',
+                                'type': 2,
+                                'is_unique': False,
+                                'is_primary_key': False,
+                                'is_unique_constraint': False,
+                                'is_disabled': False,
+                                'column_names': 'id,name',
+                            },
+                        ],
+                    },
+                    {
+                        'id': '949578421',
+                        'name': 'landmarks',
+                        'columns': [
+                            {
+                                'name': 'name',
+                                'data_type': 'varchar',
+                                'default': 'None',
+                                'nullable': True,
+                                'ordinal_position': '1',
+                            },
+                            {
+                                'name': 'city_id',
+                                'data_type': 'int',
+                                'default': '((0))',
+                                'nullable': True,
+                                'ordinal_position': '2',
+                            },
+                        ],
+                        'partitions': {'partition_count': 1},
+                    },
+                    {
+                        'id': '1029578706',
+                        'name': 'RestaurantReviews',
+                        'columns': [
+                            {
+                                'name': 'RestaurantName',
+                                'data_type': 'varchar',
+                                'default': 'None',
+                                'nullable': True,
+                                'ordinal_position': '1',
+                            },
+                            {
+                                'name': 'District',
+                                'data_type': 'varchar',
+                                'default': 'None',
+                                'nullable': True,
+                                'ordinal_position': '2',
+                            },
+                            {
+                                'name': 'Review',
+                                'data_type': 'varchar',
+                                'default': 'None',
+                                'nullable': True,
+                                'ordinal_position': '3',
+                            },
+                        ],
+                        'partitions': {'partition_count': 1},
+                    },
+                    {
+                        'id': '997578592',
+                        'name': 'Restaurants',
+                        'columns': [
+                            {
+                                'name': 'RestaurantName',
+                                'data_type': 'varchar',
+                                'default': 'None',
+                                'nullable': True,
+                                'ordinal_position': '1',
+                            },
+                            {
+                                'name': 'District',
+                                'data_type': 'varchar',
+                                'default': 'None',
+                                'nullable': True,
+                                'ordinal_position': '2',
+                            },
+                            {
+                                'name': 'Cuisine',
+                                'data_type': 'varchar',
+                                'default': 'None',
+                                'nullable': True,
+                                'ordinal_position': '3',
+                            },
+                        ],
+                        'partitions': {'partition_count': 2},
+                        'foreign_keys': [
+                            {
+                                'foreign_key_name': 'FK_RestaurantNameDistrict',
+                                'referencing_table': 'RestaurantReviews',
+                                'referencing_column': 'RestaurantName,District',
+                                'referenced_table': 'Restaurants',
+                                'referenced_column': 'RestaurantName,District',
+                            }
+                        ],
+                        'indexes': [
+                            {
+                                'name': 'UC_RestaurantNameDistrict',
+                                'type': 2,
+                                'is_unique': True,
+                                'is_primary_key': False,
+                                'is_unique_constraint': True,
+                                'is_disabled': False,
+                                'column_names': 'RestaurantName,District',
+                            }
+                        ],
+                    },
                 ],
             }
         ],
@@ -167,7 +345,6 @@ def test_collect_schemas(aggregator, dd_run_check, dbm_instance):
             return
 
         assert schema_event.get("timestamp") is not None
-        # there should only be one database, datadog_test
 
         database_metadata = schema_event['metadata']
         assert len(database_metadata) == 1
@@ -187,9 +364,8 @@ def test_collect_schemas(aggregator, dd_run_check, dbm_instance):
         difference = DeepDiff(actual_payload, expected_data_for_db[db_name], ignore_order=True)
 
         diff_keys = list(difference.keys())
+        # schema data also collects certain built in schemas which are ignored in the test
         if len(diff_keys) > 0 and diff_keys != ['iterable_item_removed']:
-            pdb.set_trace()
             raise AssertionError(Exception("found the following diffs: " + str(difference)))
-
-        # we need a special comparison as order of columns matter
-        assert compare_coumns_in_tables(expected_data_for_db[db_name], actual_payload)
+    pdb.set_trace()
+    print("end")

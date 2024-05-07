@@ -335,7 +335,6 @@ class Schemas:
             else:
                 self._log.error("Return rows of [%s] query should have id column", PARTITIONS_QUERY)
 
-    # TODO update example , apply linter
     @tracked_method(agent_check_getter=agent_check_getter)
     def _populate_with_index_data(self, table_ids, id_to_table_data, cursor):
         rows = execute_query_output_result_as_a_dict(INDEX_QUERY.format(table_ids), cursor)
