@@ -99,7 +99,7 @@ def test_collect_schemas(aggregator, dd_run_check, dbm_instance):
     exp_datadog_test = {
         'id': '6',
         'name': 'datadog_test',
-        "collation":"SQL_Latin1_General_CP1_CI_AS",
+        "collation": "SQL_Latin1_General_CP1_CI_AS",
         'owner': 'dbo',
         'schemas': [
             {
@@ -146,7 +146,7 @@ def test_collect_schemas(aggregator, dd_run_check, dbm_instance):
     exp_datadog_test_schemas = {
         'id': '5',
         'name': 'datadog_test_schemas',
-        "collation":"SQL_Latin1_General_CP1_CI_AS",
+        "collation": "SQL_Latin1_General_CP1_CI_AS",
         'owner': 'dbo',
         'schemas': [
             {
@@ -335,7 +335,7 @@ def test_collect_schemas(aggregator, dd_run_check, dbm_instance):
 
     for schema_event in (e for e in dbm_metadata if e['kind'] == 'sqlserver_databases'):
         assert schema_event.get("timestamp") is not None
-        assert schema_event["host"] == "stubbed.hostname" 
+        assert schema_event["host"] == "stubbed.hostname"
         assert schema_event["agent_version"] == "0.0.0"
         assert schema_event["dbms"] == "sqlserver"
         assert schema_event.get("collection_interval") is not None
