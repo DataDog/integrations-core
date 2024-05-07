@@ -21,6 +21,7 @@ from tests.metrics import (
     NODES_METRICS_IRONIC_MICROVERSION_DEFAULT,
     PORT_METRICS_IRONIC_MICROVERSION_DEFAULT,
     PORTGROUPS_METRICS_IRONIC_MICROVERSION_1_80,
+    VOLUME_METRICS_IRONIC_MICROVERSION_1_80,
 )
 
 pytestmark = [
@@ -453,6 +454,66 @@ def test_nodes_exception(aggregator, check, dd_run_check, mock_http_get, connect
 )
 @pytest.mark.usefixtures('mock_http_get', 'mock_http_post', 'openstack_connection')
 def test_nodes_metrics(aggregator, check, dd_run_check, metrics):
+    dd_run_check(check)
+    for metric in metrics:
+        aggregator.assert_metric(
+            metric['name'],
+            count=metric['count'],
+            value=metric['value'],
+            tags=metric['tags'],
+            hostname=metric.get('hostname'),
+        )
+
+
+@pytest.mark.parametrize(
+    ('instance'),
+    [
+        pytest.param(
+            configs.REST_IRONIC_MICROVERSION_1_80,
+            id='api rest microversion 1.80',
+        ),
+        pytest.param(
+            configs.SDK_IRONIC_MICROVERSION_1_80,
+            id='api sdk microversion 1.80',
+        ),
+    ],
+)
+@pytest.mark.usefixtures('mock_http_get', 'mock_http_post', 'openstack_connection')
+def test_disable_ironic_volume_metrics(aggregator, dd_run_check, instance, openstack_controller_check):
+    instance = instance | {
+        "components": {
+            "baremetal": {
+                "volumes": {
+                    "connectors": False,
+                    "targets": False,
+                },
+            },
+        },
+    }
+    check = openstack_controller_check(instance)
+    dd_run_check(check)
+    for metric in aggregator.metric_names:
+        assert not metric.startswith('openstack.ironic.volume.connector.')
+        assert not metric.startswith('openstack.ironic.volume.target.')
+
+
+@pytest.mark.parametrize(
+    ('instance', 'metrics'),
+    [
+        pytest.param(
+            configs.REST_IRONIC_MICROVERSION_1_80,
+            VOLUME_METRICS_IRONIC_MICROVERSION_1_80,
+            id='api rest microversion 1.80',
+        ),
+        pytest.param(
+            configs.SDK_IRONIC_MICROVERSION_1_80,
+            VOLUME_METRICS_IRONIC_MICROVERSION_1_80,
+            id='api sdk microversion 1.80',
+        ),
+    ],
+)
+@pytest.mark.usefixtures('mock_http_get', 'mock_http_post', 'openstack_connection')
+def test_volumes_metrics(aggregator, check, dd_run_check, metrics):
     dd_run_check(check)
     for metric in metrics:
         aggregator.assert_metric(
