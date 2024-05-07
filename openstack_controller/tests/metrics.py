@@ -4654,32 +4654,3 @@ MEMBERS_METRICS_GLANCE = [
         ],
     },
 ]
-
-TASKS_METRICS_GLANCE = [
-    {
-        'name': 'openstack.glance.image.task.count',
-        'count': 1,
-        'value': 1,
-        'hostname': '',
-        'tags': [
-            'task_id:ee22890e-8948-4ea6-9668-831f973c84f5',
-            'image_id:28c293db-48c5-4c8b-a711-09b2c11fa8e5',
-            'type:api_image_import',
-            'status:processing',
-            'keystone_server:http://127.0.0.1:8080/identity',
-        ],
-    },
-    {
-        'name': 'openstack.glance.image.task.count',
-        'count': 1,
-        'value': 1,
-        'hostname': '',
-        'tags': [
-            'task_id:de22890e-8948-4ea6-9668-831f973c84f5',
-            'image_id:38c293db-48c5-4c8b-a711-09b2c11fa8e5',
-            'type:api_image_import',
-            'status:processing',
-            'keystone_server:http://127.0.0.1:8080/identity',
-        ],
-    },
-]

@@ -579,14 +579,6 @@ GLANCE_MEMBER_TAGS = {
     'image_id': 'image_id',
     'status': 'status',
 }
-GLANCE_TASK_PREFIX = f"{GLANCE_IMAGE_PREFIX}.task"
-GLANCE_TASK_COUNT = f"{GLANCE_TASK_PREFIX}.count"
-GLANCE_TASK_TAGS = {
-    'id': 'task_id',
-    'image_id': 'image_id',
-    'type': 'type',
-    'status': 'status',
-}
 
 
 def is_interface_metric(label):
