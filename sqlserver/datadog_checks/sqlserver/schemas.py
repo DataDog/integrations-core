@@ -129,7 +129,7 @@ class Schemas:
             key/value:
                 "id" : str
                 "name" : str
-                columns: list of columns dicts                
+                columns: list of columns dicts
                     columns
                     key/value:
                         "name": str
@@ -180,8 +180,8 @@ class Schemas:
             self._dataSubmitter.store_db_info(db_name, db_info)
             for schema in schemas:
                 tables = self._get_tables(schema, cursor)
-                tables_chunk = list(get_list_chunks(tables, self.TABLES_CHUNK_SIZE))
-                for tables_chunk in tables_chunk:
+                tables_chunks = list(get_list_chunks(tables, self.TABLES_CHUNK_SIZE))
+                for tables_chunk in tables_chunks:
                     if self._dataSubmitter.exceeded_total_columns_number():
                         # TODO Report truncation to the backend
                         self._log.warning(
@@ -243,7 +243,7 @@ class Schemas:
         key/value:
             "id" : str
             "name" : str
-            columns: list of columns dicts             
+            columns: list of columns dicts
                 columns
                 key/value:
                     "name": str

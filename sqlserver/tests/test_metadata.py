@@ -99,8 +99,7 @@ def test_sqlserver_collect_settings(aggregator, dd_run_check, dbm_instance):
     # assert len(event["metadata"]) > 0
 
 
-# TODO this test relies on a certain granularity
-# later we need to upgrade it to accumulate data for each DB before checking.
+
 def test_collect_schemas(aggregator, dd_run_check, dbm_instance):
 
     databases_to_find = ['datadog_test_schemas', 'datadog_test']
@@ -183,22 +182,14 @@ def test_collect_schemas(aggregator, dd_run_check, dbm_instance):
 
     for db_name, actual_payload in actual_payloads.items():
 
-        # assert delete_if_found(databases_to_find, db_name)
         assert db_name in databases_to_find
-        # we need to accumulate all data ... as payloads may differ
 
         difference = DeepDiff(actual_payload, expected_data_for_db[db_name], ignore_order=True)
-
-        # difference = {}
 
         diff_keys = list(difference.keys())
         if len(diff_keys) > 0 and diff_keys != ['iterable_item_removed']:
             pdb.set_trace()
-            logging.debug("found the following diffs %s", str(difference))
-            assert False
+            raise AssertionError(Exception("found the following diffs: " + str(difference)))
 
         # we need a special comparison as order of columns matter
-
         assert compare_coumns_in_tables(expected_data_for_db[db_name], actual_payload)
-
-        print("ok")
