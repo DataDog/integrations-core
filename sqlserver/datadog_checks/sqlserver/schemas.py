@@ -5,7 +5,6 @@ except ImportError:
 
 import copy
 import json
-import pdb
 import time
 
 from datadog_checks.base.utils.db.utils import default_json_event_encoding

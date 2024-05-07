@@ -33,8 +33,6 @@ try:
 except ImportError:
     from ..stubs import datadog_agent
 
-import pdb
-
 from datadog_checks.sqlserver import metrics
 from datadog_checks.sqlserver.__about__ import __version__
 from datadog_checks.sqlserver.connection import Connection, SQLConnectionError, split_sqlserver_host_port
@@ -752,8 +750,7 @@ class SQLServer(AgentCheck):
                         if stop:
                             break
                     except Exception as e:
-                        pdb.set_trace()
-                        print("An exception occurred during do_for_databases in db - {}: {}".format(db, e))
+                        self.log.error("An exception occurred during do_for_databases in db - %s: %s", db, e)
                 # Switch DB back to MASTER
                 if not is_azure_sql_database(engine_edition):
                     cursor.execute(SWITCH_DB_STATEMENT.format(self.connection.DEFAULT_DATABASE))

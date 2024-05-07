@@ -18,8 +18,6 @@ try:
     import pyodbc
 except ImportError:
     pyodbc = None
-import json
-import pdb
 
 
 @pytest.fixture
@@ -54,14 +52,13 @@ def dbm_instance(instance_docker):
     ],
 )
 def test_get_available_settings_columns(dbm_instance, expected_columns, available_columns):
-    pass
-    # check = SQLServer(CHECK_NAME, {}, [dbm_instance])
-    # check.initialize_connection()
-    # _conn_key_prefix = "dbm-metadata-"
-    # with check.connection.open_managed_default_connection(key_prefix=_conn_key_prefix):
-    # with check.connection.get_managed_cursor(key_prefix=_conn_key_prefix) as cursor:
-    # result_available_columns = check.sql_metadata._get_available_settings_columns(cursor, expected_columns)
-    # assert result_available_columns == available_columns
+    check = SQLServer(CHECK_NAME, {}, [dbm_instance])
+    check.initialize_connection()
+    _conn_key_prefix = "dbm-metadata-"
+    with check.connection.open_managed_default_connection(key_prefix=_conn_key_prefix):
+        with check.connection.get_managed_cursor(key_prefix=_conn_key_prefix) as cursor:
+            result_available_columns = check.sql_metadata._get_available_settings_columns(cursor, expected_columns)
+            assert result_available_columns == available_columns
 
 
 @pytest.mark.integration
@@ -84,17 +81,16 @@ def test_get_settings_query_cached(dbm_instance, caplog):
 
 
 def test_sqlserver_collect_settings(aggregator, dd_run_check, dbm_instance):
-    pass
-    # check = SQLServer(CHECK_NAME, {}, [dbm_instance])
-    # dd_run_check(check)
-    # check.initialize_connection()
-    # check.check(dbm_instance)
-    # dbm_metadata = aggregator.get_event_platform_events("dbm-metadata")
-    # event = next((e for e in dbm_metadata if e['kind'] == 'sqlserver_configs'), None)
-    # assert event is not None
-    # assert event['dbms'] == "sqlserver"
-    # assert event['kind'] == "sqlserver_configs"
-    # assert len(event["metadata"]) > 0
+    check = SQLServer(CHECK_NAME, {}, [dbm_instance])
+    dd_run_check(check)
+    check.initialize_connection()
+    check.check(dbm_instance)
+    dbm_metadata = aggregator.get_event_platform_events("dbm-metadata")
+    event = next((e for e in dbm_metadata if e['kind'] == 'sqlserver_configs'), None)
+    assert event is not None
+    assert event['dbms'] == "sqlserver"
+    assert event['kind'] == "sqlserver_configs"
+    assert len(event["metadata"]) > 0
 
 
 def test_collect_schemas(aggregator, dd_run_check, dbm_instance):
@@ -333,18 +329,17 @@ def test_collect_schemas(aggregator, dd_run_check, dbm_instance):
     check = SQLServer(CHECK_NAME, {}, [dbm_instance])
     dd_run_check(check)
 
-    # extracting events.
-
     dbm_metadata = aggregator.get_event_platform_events("dbm-metadata")
 
     actual_payloads = {}
 
     for schema_event in (e for e in dbm_metadata if e['kind'] == 'sqlserver_databases'):
-        if len(databases_to_find) == 0:
-            # we may see the correct payload for the database several times in events
-            return
-
         assert schema_event.get("timestamp") is not None
+        assert schema_event["host"] == "stubbed.hostname" 
+        assert schema_event["agent_version"] == "0.0.0"
+        assert schema_event["dbms"] == "sqlserver"
+        assert schema_event.get("collection_interval") is not None
+        assert schema_event.get("dbms_version") is not None
 
         database_metadata = schema_event['metadata']
         assert len(database_metadata) == 1
@@ -354,7 +349,6 @@ def test_collect_schemas(aggregator, dd_run_check, dbm_instance):
             actual_payloads[db_name]['schemas'] = actual_payloads[db_name]['schemas'] + database_metadata[0]['schemas']
         else:
             actual_payloads[db_name] = database_metadata[0]
-    pdb.set_trace()
     assert len(actual_payloads) == len(expected_data_for_db)
 
     for db_name, actual_payload in actual_payloads.items():
@@ -364,8 +358,6 @@ def test_collect_schemas(aggregator, dd_run_check, dbm_instance):
         difference = DeepDiff(actual_payload, expected_data_for_db[db_name], ignore_order=True)
 
         diff_keys = list(difference.keys())
-        # schema data also collects certain built in schemas which are ignored in the test
+        # schema data also collects certain built default schemas which are ignored in the test
         if len(diff_keys) > 0 and diff_keys != ['iterable_item_removed']:
             raise AssertionError(Exception("found the following diffs: " + str(difference)))
-    pdb.set_trace()
-    print("end")
