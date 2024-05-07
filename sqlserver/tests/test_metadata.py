@@ -358,6 +358,6 @@ def test_collect_schemas(aggregator, dd_run_check, dbm_instance):
         difference = DeepDiff(actual_payload, expected_data_for_db[db_name], ignore_order=True)
 
         diff_keys = list(difference.keys())
-        # schema data also collects certain built default schemas which are ignored in the test
+        # schema data also collects certain builtin default schemas which are ignored in the test
         if len(diff_keys) > 0 and diff_keys != ['iterable_item_removed']:
             raise AssertionError(Exception("found the following diffs: " + str(difference)))
