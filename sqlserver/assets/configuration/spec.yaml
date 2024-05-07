@@ -719,7 +719,7 @@ files:
         Defaults to 1200 seconds to include everything.
       value:
         type: number
-        example: 600
+        example: 1200
         display_default: false
     - template: instances/default
   - template: logs

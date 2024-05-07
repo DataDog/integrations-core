@@ -658,6 +658,9 @@ instances:
     ## If the DB specified doesn't exist on the server then don't do the check
     #
     # ignore_missing_database: false
+    
+    # @param schemas_collection_interval - int - optional - dafault: 1200
+    # Schema collection interval in seconds.
 
     ## @param tags - list of strings - optional
     ## A list of tags to attach to every metric and service check emitted by this instance.
