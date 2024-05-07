@@ -96,7 +96,7 @@ class MongosDeployment(Deployment):
 
 
 class ReplicaSetDeployment(Deployment):
-    def __init__(self, replset_name, replset_state, replset_key, hosts, cluster_role=None):
+    def __init__(self, replset_name, replset_state, hosts, cluster_role=None):
         super(ReplicaSetDeployment, self).__init__()
         self.replset_name = replset_name
         self.replset_state = replset_state
@@ -106,7 +106,6 @@ class ReplicaSetDeployment(Deployment):
         self.is_primary = replset_state == PRIMARY_STATE_ID
         self.is_secondary = replset_state == SECONDARY_STATE_ID
         self.is_arbiter = replset_state == ARBITER_STATE_ID
-        self.replset_key = replset_key
         self.hosts = hosts
 
     def is_principal(self):

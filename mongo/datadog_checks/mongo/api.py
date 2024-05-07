@@ -12,8 +12,6 @@ from pymongo.errors import (
 )
 
 from datadog_checks.mongo.common import (
-    PRIMARY_STATE_ID,
-    SECONDARY_STATE_ID,
     MongosDeployment,
     ReplicaSetDeployment,
     StandaloneDeployment,
@@ -99,22 +97,8 @@ class MongoApi(object):
     def _get_rs_deployment_from_status_payload(self, repl_set_payload, cluster_role):
         replset_name = repl_set_payload["set"]
         replset_state = repl_set_payload["myState"]
-
-        # The replset_key is a unique identifier for the replica set. It is used to identify the replica set from mongos shard map
-        # It is a combination of the replica set name and the list of non-arbiter and non-hidden members from the replica set config.
-        replset_key = "{}/{}".format(
-            replset_name,
-            ','.join(
-                [
-                    m['name']
-                    for m in repl_set_payload.get("members", [])
-                    if m['state'] in (PRIMARY_STATE_ID, SECONDARY_STATE_ID)
-                ]
-            ),
-        )
-
         hosts = [m['name'] for m in repl_set_payload.get("members", [])]
-        return ReplicaSetDeployment(replset_name, replset_state, replset_key, hosts, cluster_role=cluster_role)
+        return ReplicaSetDeployment(replset_name, replset_state, hosts, cluster_role=cluster_role)
 
     def refresh_deployment_type(self):
         # getCmdLineOpts is the runtime configuration of the mongo instance. Helpful to know whether the node is

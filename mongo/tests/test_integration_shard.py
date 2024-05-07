@@ -81,7 +81,6 @@ def test_refresh_role(instance_shard, aggregator, check, dd_run_check):
         mock_deployment_type = ReplicaSetDeployment(
             "sharding01",
             9,
-            "sharding01/sharding01a:27017,sharding01b:27017,sharding01c:27017",
             ["sharding01a:27017", "sharding01b:27017", "sharding01c:27017"],
             cluster_role="TEST",
         )

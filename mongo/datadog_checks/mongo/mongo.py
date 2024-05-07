@@ -309,10 +309,9 @@ class MongoDb(AgentCheck):
         deployment = self.api_client.deployment_type
         if self._resolved_hostname not in self._database_instance_emitted:
             tags = self._get_deployment_tags(deployment)
-            mongodb_instance = {
+            mongodb_instance_metadata = {
                 "replset_name": getattr(deployment, 'replset_name', None),
                 "replset_state": getattr(deployment, 'replset_state_name', None),
-                "replset_key": getattr(deployment, 'replset_key', None),
                 "sharding_cluster_role": getattr(deployment, 'cluster_role', None),
                 "hosts": getattr(deployment, 'hosts', None),
                 "shards": getattr(deployment, 'shards', None),
@@ -332,7 +331,7 @@ class MongoDb(AgentCheck):
                 "metadata": {
                     "dbm": self._config.dbm_enabled,
                     "connection_host": self._config.clean_server_name,
-                    "mongodb_instance": mongodb_instance,
+                    "instance_metadata": {k: v for k, v in mongodb_instance_metadata.items() if v is not None},
                 },
             }
             self._database_instance_emitted[self._resolved_hostname] = database_instance

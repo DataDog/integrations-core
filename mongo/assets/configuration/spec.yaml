@@ -100,6 +100,10 @@ files:
     - name: cluster_name
       description: |
         The name of the cluster to which the monitored MongoDB belongs.
+        Used to group MongoDB instances in a MongoDB cluster.
+        Please note that the cluster name must be unique for each MongoDB cluster.
+        
+        Required when `dbm` is enabled.
       value:
         type: string
     - name: database_instance_collection_interval

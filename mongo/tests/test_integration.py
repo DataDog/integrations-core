@@ -36,7 +36,6 @@ def _assert_mongodb_instance_event(
     dbm,
     replset_name,
     replset_state,
-    replset_key,
     sharding_cluster_role,
     hosts,
     shards,
@@ -54,24 +53,27 @@ def _assert_mongodb_instance_event(
     assert mongodb_instance_event['host'] == check._resolved_hostname
     assert mongodb_instance_event['dbms'] == "mongodb"
     assert mongodb_instance_event['tags'].sort() == expected_tags.sort()
+
+    expected_instance_metadata = {
+        "replset_name": replset_name,
+        "replset_state": replset_state,
+        "sharding_cluster_role": sharding_cluster_role,
+        "hosts": hosts,
+        "shards": shards,
+        "cluster_type": cluster_type,
+        "cluster_name": cluster_name,
+    }
     assert mongodb_instance_event['metadata'] == {
         'dbm': dbm,
         'connection_host': check._config.clean_server_name,
-        "mongodb_instance": {
-            "replset_name": replset_name,
-            "replset_state": replset_state,
-            "replset_key": replset_key,
-            "sharding_cluster_role": sharding_cluster_role,
-            "hosts": hosts,
-            "shards": shards,
-            "cluster_type": cluster_type,
-            "cluster_name": cluster_name,
-        },
+        "instance_metadata": {k: v for k, v in expected_instance_metadata.items() if v is not None},
     }
 
 
-def test_integration_mongos(instance_integration, aggregator, check, dd_run_check):
-    mongos_check = check(instance_integration)
+@pytest.mark.parametrize("dbm", [True, False])
+def test_integration_mongos(instance_integration_cluster, aggregator, check, dd_run_check, dbm):
+    instance_integration_cluster['dbm'] = dbm
+    mongos_check = check(instance_integration_cluster)
     mongos_check._last_states_by_server = {0: 1, 1: 2, 2: 2}
 
     with mock_pymongo("mongos"):
@@ -111,10 +113,9 @@ def test_integration_mongos(instance_integration, aggregator, check, dd_run_chec
         aggregator,
         mongos_check,
         expected_tags=expected_tags,
-        dbm=False,
+        dbm=dbm,
         replset_name=None,
         replset_state=None,
-        replset_key=None,
         sharding_cluster_role='mongos',
         hosts=[
             'shard01a:27018',
@@ -135,7 +136,7 @@ def test_integration_mongos(instance_integration, aggregator, check, dd_run_chec
             'configserver/config01:27017,config02:27017,config03:27017',
         ],
         cluster_type='sharded_cluster',
-        cluster_name=None,
+        cluster_name='my_cluster',
     )
 
 
@@ -222,11 +223,6 @@ def test_integration_replicaset_primary_in_shard(instance_integration, aggregato
         dbm=False,
         replset_name='mongo-mongodb-sharded-shard-0',
         replset_state='primary',
-        replset_key=(
-            'mongo-mongodb-sharded-shard-0/mongo-mongodb-sharded-shard0-data-0.mongo-mongodb-sharded-headless.default.svc.cluster.local:27017,'
-            'mongo-mongodb-sharded-shard0-data-1.mongo-mongodb-sharded-headless.default.svc.cluster.local:27017,'
-            'mongo-mongodb-sharded-shard0-data-2.mongo-mongodb-sharded-headless.default.svc.cluster.local:27017'
-        ),
         sharding_cluster_role='shardsvr',
         hosts=[
             'mongo-mongodb-sharded-shard0-data-0.mongo-mongodb-sharded-headless.default.svc.cluster.local:27017',
@@ -286,11 +282,6 @@ def test_integration_replicaset_secondary_in_shard(instance_integration, aggrega
         dbm=False,
         replset_name='mongo-mongodb-sharded-shard-0',
         replset_state='secondary',
-        replset_key=(
-            'mongo-mongodb-sharded-shard-0/mongo-mongodb-sharded-shard0-data-0.mongo-mongodb-sharded-headless.default.svc.cluster.local:27017,'
-            'mongo-mongodb-sharded-shard0-data-1.mongo-mongodb-sharded-headless.default.svc.cluster.local:27017,'
-            'mongo-mongodb-sharded-shard0-data-2.mongo-mongodb-sharded-headless.default.svc.cluster.local:27017'
-        ),
         sharding_cluster_role='shardsvr',
         hosts=[
             'mongo-mongodb-sharded-shard0-data-0.mongo-mongodb-sharded-headless.default.svc.cluster.local:27017',
@@ -344,11 +335,6 @@ def test_integration_replicaset_arbiter_in_shard(instance_integration, aggregato
         dbm=False,
         replset_name='mongo-mongodb-sharded-shard-0',
         replset_state='arbiter',
-        replset_key=(
-            'mongo-mongodb-sharded-shard-0/mongo-mongodb-sharded-shard0-data-0.mongo-mongodb-sharded-headless.default.svc.cluster.local:27017,'
-            'mongo-mongodb-sharded-shard0-data-1.mongo-mongodb-sharded-headless.default.svc.cluster.local:27017,'
-            'mongo-mongodb-sharded-shard0-data-2.mongo-mongodb-sharded-headless.default.svc.cluster.local:27017'
-        ),
         sharding_cluster_role='shardsvr',
         hosts=[
             'mongo-mongodb-sharded-shard0-data-0.mongo-mongodb-sharded-headless.default.svc.cluster.local:27017',
@@ -445,11 +431,6 @@ def test_integration_configsvr_primary(instance_integration, aggregator, check, 
         dbm=False,
         replset_name='mongo-mongodb-sharded-configsvr',
         replset_state='primary',
-        replset_key=(
-            'mongo-mongodb-sharded-configsvr/mongo-mongodb-sharded-configsvr-0.mongo-mongodb-sharded-headless.default.svc.cluster.local:27017,'
-            'mongo-mongodb-sharded-configsvr-1.mongo-mongodb-sharded-headless.default.svc.cluster.local:27017,'
-            'mongo-mongodb-sharded-configsvr-2.mongo-mongodb-sharded-headless.default.svc.cluster.local:27017'
-        ),
         sharding_cluster_role='configsvr',
         hosts=[
             'mongo-mongodb-sharded-configsvr-0.mongo-mongodb-sharded-headless.default.svc.cluster.local:27017',
@@ -507,11 +488,6 @@ def test_integration_configsvr_secondary(instance_integration, aggregator, check
         dbm=False,
         replset_name='mongo-mongodb-sharded-configsvr',
         replset_state='secondary',
-        replset_key=(
-            'mongo-mongodb-sharded-configsvr/mongo-mongodb-sharded-configsvr-0.mongo-mongodb-sharded-headless.default.svc.cluster.local:27017,'
-            'mongo-mongodb-sharded-configsvr-1.mongo-mongodb-sharded-headless.default.svc.cluster.local:27017,'
-            'mongo-mongodb-sharded-configsvr-2.mongo-mongodb-sharded-headless.default.svc.cluster.local:27017'
-        ),
         sharding_cluster_role='configsvr',
         hosts=[
             'mongo-mongodb-sharded-configsvr-0.mongo-mongodb-sharded-headless.default.svc.cluster.local:27017',
@@ -606,11 +582,6 @@ def test_integration_replicaset_primary(instance_integration, aggregator, check,
         dbm=False,
         replset_name='replset',
         replset_state='primary',
-        replset_key=(
-            'replset/replset-data-0.mongo.default.svc.cluster.local:27017,'
-            'replset-data-1.mongo.default.svc.cluster.local:27017,'
-            'replset-data-2.mongo.default.svc.cluster.local:27017'
-        ),
         sharding_cluster_role=None,
         hosts=[
             'replset-data-0.mongo.default.svc.cluster.local:27017',
@@ -710,11 +681,6 @@ def test_integration_replicaset_primary_config(instance_integration, aggregator,
         dbm=False,
         replset_name='replset',
         replset_state='primary',
-        replset_key=(
-            'replset/replset-data-0.mongo.default.svc.cluster.local:27017,'
-            'replset-data-1.mongo.default.svc.cluster.local:27017,'
-            'replset-data-2.mongo.default.svc.cluster.local:27017'
-        ),
         sharding_cluster_role=None,
         hosts=[
             'replset-data-0.mongo.default.svc.cluster.local:27017',
@@ -777,11 +743,6 @@ def test_integration_replicaset_secondary(
         dbm=False,
         replset_name='replset',
         replset_state='secondary',
-        replset_key=(
-            'replset/replset-data-0.mongo.default.svc.cluster.local:27017,'
-            'replset-data-1.mongo.default.svc.cluster.local:27017,'
-            'replset-data-2.mongo.default.svc.cluster.local:27017'
-        ),
         sharding_cluster_role=None,
         hosts=[
             'replset-data-0.mongo.default.svc.cluster.local:27017',
@@ -831,11 +792,6 @@ def test_integration_replicaset_arbiter(instance_integration, aggregator, check,
         dbm=False,
         replset_name='replset',
         replset_state='arbiter',
-        replset_key=(
-            'replset/replset-data-0.mongo.default.svc.cluster.local:27017,'
-            'replset-data-1.mongo.default.svc.cluster.local:27017,'
-            'replset-data-2.mongo.default.svc.cluster.local:27017'
-        ),
         sharding_cluster_role=None,
         hosts=[
             'replset-data-0.mongo.default.svc.cluster.local:27017',
@@ -890,7 +846,6 @@ def test_standalone(instance_integration, aggregator, check, dd_run_check):
         dbm=False,
         replset_name=None,
         replset_state=None,
-        replset_key=None,
         sharding_cluster_role=None,
         hosts=None,
         shards=None,
