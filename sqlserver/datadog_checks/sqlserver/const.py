@@ -290,7 +290,7 @@ SCHEMA_QUERY = """
 
 TABLES_IN_SCHEMA_QUERY = """
                             SELECT 
-                                name, object_id AS id
+                                object_id AS id, name
                             FROM 
                                 sys.tables 
                             WHERE schema_id={}

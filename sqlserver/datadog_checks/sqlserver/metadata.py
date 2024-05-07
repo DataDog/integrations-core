@@ -246,13 +246,3 @@ class SqlserverMetadata(DBMAsyncJob):
                     "metadata": settings_rows,
                 }
                 self._check.database_monitoring_metadata(json.dumps(event, default=default_json_event_encoding))
-
-                #TODO split in functions
-                #NEXT BIg thing whats with different DBS , filtering , partitions 
-                #Trade off dict vs normal data structure ? 
-
-                #TODO do it per DB if not Azure otherwise connect , kind of bad main thread ?
-                #schemas = self._query_schema_information(cursor)
-                #self._get_table_infos(schemas, cursor)
-                #print(schemas)
-                #pdb.set_trace()

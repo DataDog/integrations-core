@@ -2,7 +2,6 @@ try:
     import datadog_agent
 except ImportError:
     from ..stubs import datadog_agent
-import time
 
 from datadog_checks.sqlserver.const import (
     TABLES_IN_SCHEMA_QUERY,
@@ -19,6 +18,9 @@ from datadog_checks.sqlserver.const import (
 from datadog_checks.sqlserver.utils import (
     execute_query_output_result_as_a_dict, get_list_chunks
 )
+
+from datadog_checks.base.utils.tracking import tracked_method
+
 import pdb
 import time
 import json
@@ -94,6 +96,9 @@ class SubmitData:
         self._submit_to_agent_queue(json_event)
         self.db_to_schemas = {}
 
+def agent_check_getter(self):
+    return self._check
+
 class Schemas:
 
     # Requests for infromation about tables are done for a certain amount of tables at the time
@@ -118,27 +123,27 @@ class Schemas:
         }
         self._dataSubmitter = SubmitData(self._check.database_monitoring_metadata, base_event, self._log)
 
-    """schemas data struct is a dictionnary with key being a schema name the value is
-    schema
-    dict:
+    """Collects database information and schemas and submits to the agent's queue as dictionaries
+    schema dict
+    key/value:
         "name": str
         "id": str
         "owner_name": str
         "tables" : list of tables dicts
             table 
-            dict:
+            key/value:
                 "id" : str
                 "name" : str
                 columns: list of columns dicts                 
                     columns 
-                    dict:
+                    key/value:
                         "name": str
                         "data_type": str
                         "default": str
                         "nullable": bool
             indexes : list of index dicts
                 index
-                dict:
+                key/value:
                     "name": str
                     "type": str
                     "is_unique": bool
@@ -148,18 +153,18 @@ class Schemas:
                     "column_names": str
             foreign_keys : list of foreign key dicts
                 foreign_key
-                dict:
+                key/value:
                     "foreign_key_name": str
                     "referencing_table": str
                     "referencing_column": str
                     "referenced_table": str
                     "referenced_column": str
-            partitions: list of partitions dict
+            partitions: partition dict
                 partition
-                dict:
-                    "partition_count": int
-            partitions useful to know the number 
+                key/value:
+                    "partition_count": int 
     """
+    @tracked_method(agent_check_getter=agent_check_getter)
     def collect_schemas_data(self):
         self._dataSubmitter.reset()
         self._dataSubmitter.set_base_event_data(self._check.resolved_hostname, self._check.non_internal_tags, self._check._config.cloud_metadata, 
@@ -205,83 +210,39 @@ class Schemas:
     "name": str
     "columns": [] 
     """
+    @tracked_method(agent_check_getter=agent_check_getter, track_result_length=True)
     def _get_tables(self, schema, cursor):
-        cursor.execute(TABLES_IN_SCHEMA_QUERY.format(schema["id"]))
-        columns = [str(i[0]).lower() for i in cursor.description]
-        rows = [dict(zip(columns, row)) for row in cursor.fetchall()]
-        return [ {"id" : str(row["id"]), "name" : row['name'], "columns" : []} for row in rows ] 
-
-    """schemas data struct is a dictionnary with key being a schema name the value is
-    schema
-    dict:
-        "name": str
-        "id": str
-        "owner_name": str
-        "tables" : list of tables dicts
-            table 
-            dict:
-                "id" : str
-                "name" : str
-                columns: list of columns dicts                 
-                    columns 
-                    dict:
-                        "name": str
-                        "data_type": str
-                        "default": str
-                        "nullable": bool
-            indexes : list of index dicts
-                index
-                dict:
-                    "name": str
-                    "type": str
-                    "is_unique": bool
-                    "is_primary_key": bool
-                    "is_unique_constraint": bool
-                    "is_disabled": bool,
-                    "column_names": str
-            foreign_keys : list of foreign key dicts
-                foreign_key
-                dict:
-                    "foreign_key_name": str
-                    "referencing_table": str
-                    "referencing_column": str
-                    "referenced_table": str
-                    "referenced_column": str
-            partitions: list of partitions dict
-                partition
-                dict:
-                    "partition_count": int
-            partitions useful to know the number 
-    """    
-    """fetches schemas dict 
+        tables_info = execute_query_output_result_as_a_dict(TABLES_IN_SCHEMA_QUERY.format(schema["id"]), cursor)
+        for t in tables_info:
+            t.setdefault("columns", [])
+        return tables_info
+    
+    """ returns a list of schema dicts
     schema
     dict:
         "name": str
         "id": str
         "owner_name": str"""
+    @tracked_method(agent_check_getter=agent_check_getter, track_result_length=True)
     def _query_schema_information(self, cursor):
-        cursor.execute(SCHEMA_QUERY)
-        schemas = []
-        columns = [i[0] for i in cursor.description]
-        schemas = [dict(zip(columns, [str(item) for item in row])) for row in cursor.fetchall()]
-        return schemas
+        return execute_query_output_result_as_a_dict(SCHEMA_QUERY, cursor)
     
     """ returns extracted column numbers and a list of tables
         "tables" : list of tables dicts
         table 
-        dict:
+        key/value:
             "id" : str
             "name" : str
             columns: list of columns dicts                 
                 columns 
-                dict:
+                key/value:
                     "name": str
                     "data_type": str
                     "default": str
                     "nullable": bool
             indexes : list of index dicts
                 index
-                dict:
+                key/value:
                     "name": str
                     "type": str
                     "is_unique": bool
@@ -291,17 +252,18 @@ class Schemas:
                     "column_names": str
             foreign_keys : list of foreign key dicts
                 foreign_key
-                dict:
+                key/value:
                     "foreign_key_name": str
                     "referencing_table": str
                     "referencing_column": str
                     "referenced_table": str
                     "referenced_column": str
-            partitions: list of partitions dict
+            partitions: partition dict
                 partition
-                dict:
+                key/value:
                     "partition_count": int
     """
+    @tracked_method(agent_check_getter=agent_check_getter, track_result_length=True)
     def _get_tables_data(self, table_list, schema, cursor):
         if len(table_list) == 0:
             return
@@ -321,10 +283,10 @@ class Schemas:
     """ 
     adds columns list data to each table in a provided list
     """
+    @tracked_method(agent_check_getter=agent_check_getter)
     def _populate_with_columns_data(self, table_ids, name_to_id, id_to_table_data, schema, cursor):
         cursor.execute(COLUMN_QUERY.format(table_ids, schema["name"]))
         data = cursor.fetchall()
-        columns = []
         # AS default - cannot be used in sqlserver query as this word is reserved
         columns = ["default" if str(i[0]).lower() == "column_default" else str(i[0]).lower() for i in cursor.description]
         rows = [dict(zip(columns, [str(item) for item in row])) for row in data]       
@@ -348,6 +310,7 @@ class Schemas:
     """ 
     adds partitions dict to each table in a provided list
     """
+    @tracked_method(agent_check_getter=agent_check_getter)
     def _populate_with_partitions_data(self, table_ids, id_to_table_data, cursor):
         cursor.execute(PARTITIONS_QUERY.format(table_ids))
         columns = [str(i[0]).lower() for i in cursor.description] 
@@ -363,6 +326,7 @@ class Schemas:
             else:
                 self._log.error("Return rows of [%s] query should have id column", PARTITIONS_QUERY)
 
+    @tracked_method(agent_check_getter=agent_check_getter)
     def _populate_with_index_data(self, table_ids, id_to_table_data, cursor):
         cursor.execute(INDEX_QUERY.format(table_ids))
         columns = [str(i[0]).lower() for i in cursor.description] 
@@ -379,6 +343,7 @@ class Schemas:
             else:
                 self._log.error("Return rows of [%s] query should have id column", INDEX_QUERY)
 
+    @tracked_method(agent_check_getter=agent_check_getter, track_result_length=True)
     def _populate_with_foreign_keys_data(self, table_ids, id_to_table_data, cursor):
             cursor.execute(FOREIGN_KEY_QUERY.format(table_ids))
             columns = [str(i[0]).lower() for i in cursor.description] 
