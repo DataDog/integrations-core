@@ -272,39 +272,50 @@ PROC_CHAR_LIMIT = 500
 #Schemas
 DEFAULT_SCHEMAS_COLLECTION_INTERVAL = 1200
 
-DB_QUERY = """SELECT 
+DB_QUERY = """
+              SELECT 
                   db.database_id AS id, db.name AS name, db.collation_name AS collation, dp.name AS owner 
               FROM 
                   sys.databases db LEFT JOIN sys.database_principals dp ON db.owner_sid = dp.sid 
-              WHERE db.name = '{}';"""
+              WHERE db.name = '{}';
+           """
 
-SCHEMA_QUERY = """SELECT 
+SCHEMA_QUERY = """
+                  SELECT 
                       s.name AS name, s.schema_id AS id, dp.name AS owner_name 
                   FROM
                       sys.schemas AS s JOIN sys.database_principals dp ON s.principal_id = dp.principal_id 
-                  WHERE s.name NOT IN ('sys', 'information_schema')""";
+                  WHERE s.name NOT IN ('sys', 'information_schema')
+               """;
 
-TABLES_IN_SCHEMA_QUERY = """SELECT 
+TABLES_IN_SCHEMA_QUERY = """
+                            SELECT 
                                 name, object_id AS id
                             FROM 
                                 sys.tables 
-                            WHERE schema_id={}"""
+                            WHERE schema_id={}
+                         """
 
-COLUMN_QUERY = """SELECT 
+COLUMN_QUERY = """
+                  SELECT 
                       column_name AS name, data_type, column_default, is_nullable AS nullable , table_name, ordinal_position 
                   FROM 
                       information_schema.columns 
                   WHERE 
-                      table_name IN ({}) and table_schema='{}';"""
+                      table_name IN ({}) and table_schema='{}';
+               """
 
-PARTITIONS_QUERY = """SELECT 
+PARTITIONS_QUERY = """
+                      SELECT 
                           object_id AS id, COUNT(*) AS partition_count 
                       FROM 
                           sys.partitions 
                       WHERE 
-                          object_id IN ({}) GROUP BY object_id;"""
+                          object_id IN ({}) GROUP BY object_id;
+                   """
 
-INDEX_QUERY = """SELECT 
+INDEX_QUERY = """
+                 SELECT 
                      i.object_id AS id, i.name, i.type, i.is_unique, i.is_primary_key, i.is_unique_constraint, 
                      i.is_disabled, STRING_AGG(c.name, ',') AS column_names 
                  FROM 
@@ -312,9 +323,11 @@ INDEX_QUERY = """SELECT
                      AND i.index_id = ic.index_id JOIN sys.columns c ON ic.object_id = c.object_id AND ic.column_id = c.column_id 
                  WHERE 
                      i.object_id IN ({}) GROUP BY i.object_id, i.name, i.type, 
-                     i.is_unique, i.is_primary_key, i.is_unique_constraint, i.is_disabled;"""
+                     i.is_unique, i.is_primary_key, i.is_unique_constraint, i.is_disabled;
+                 """
 
-FOREIGN_KEY_QUERY="""SELECT 
+FOREIGN_KEY_QUERY="""
+                     SELECT 
                          FK.referenced_object_id AS id, FK.name AS foreign_key_name, 
                          OBJECT_NAME(FK.parent_object_id) AS referencing_table,  
                          STRING_AGG(COL_NAME(FKC.parent_object_id, FKC.parent_column_id),',') AS referencing_column, 
@@ -323,4 +336,5 @@ FOREIGN_KEY_QUERY="""SELECT
                      FROM 
                          sys.foreign_keys AS FK JOIN sys.foreign_key_columns AS FKC ON FK.object_id = FKC.constraint_object_id 
                      WHERE 
-                         FK.referenced_object_id IN ({}) GROUP BY FK.name, FK.parent_object_id, FK.referenced_object_id;"""
+                         FK.referenced_object_id IN ({}) GROUP BY FK.name, FK.parent_object_id, FK.referenced_object_id;
+                  """
