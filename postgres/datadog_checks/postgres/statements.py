@@ -219,7 +219,7 @@ class PostgresStatementMetrics(DBMAsyncJob):
                         continue
 
                     calls = row[1]
-                    print("[AMW] queryid: " + str(queryid) + " | calls: " + str(calls))
+                    # print("[AMW] queryid: " + str(queryid) + " | calls: " + str(calls))
                     calls_changed = self._query_calls_cache.set_calls(queryid, calls)
                     if calls_changed:
                         called_queryids.append(queryid)
@@ -479,8 +479,9 @@ class PostgresStatementMetrics(DBMAsyncJob):
         )
         print("[AMW] called queries")
         for row in rows:
-            if "pg_" in row['query']:
+            if row['queryid'] != '-4540465645740005644':
                 continue
+
             print("QueryId: " + str(row['queryid']) + " | Query: " + str(row['query']) + " | Calls: " + str(row['calls']))
         print("-------------------\n")
 

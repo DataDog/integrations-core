@@ -22,6 +22,9 @@ class QueryCallsCache:
         does not count as a change in values since that would result
         in an inflated value."""
         calls_changed = False
+        if queryid == '-4540465645740005644':
+            print("[AMW] In query calls cache for " + str(queryid) + " | cached calls:  " + str(self.cache[queryid]) + " | new calls: " + str(calls))
+
         if queryid in self.cache:
             diff = calls - self.cache[queryid]
             # Positive deltas mean the statement remained in pg_stat_statements
@@ -29,10 +32,6 @@ class QueryCallsCache:
             # and replaced with a new call count. Both cases should count as a call
             # change.
             calls_changed = diff != 0
-
-            if calls_changed:
-                print("[AMW] detected called query" + str(queryid) + " with " + str(calls) + " calls")
-
         else:
             calls_changed = True
 
