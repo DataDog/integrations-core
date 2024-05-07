@@ -126,6 +126,12 @@ AGENT_V2_METRICS = [
     "cilium.kvstore.quorum_errors.count",
     "cilium.kvstore.sync_queue_size",
     "cilium.kvstore.initial_sync_completed",
+    'cilium.cidrgroup.policies',
+    'cilium.k8s_client.rate_limiter_duration.seconds.bucket',
+    'cilium.k8s_client.rate_limiter_duration.seconds.count',
+    'cilium.k8s_client.rate_limiter_duration.seconds.sum',
+    'cilium.policy.change.count',
+    'cilium.services.events.count',
 ]
 
 AGENT_V1_METRICS = [
@@ -218,6 +224,9 @@ AGENT_V1_METRICS = [
     "cilium.kvstore.quorum_errors.total",
     "cilium.kvstore.sync_queue_size",
     "cilium.kvstore.initial_sync_completed",
+    'cilium.cidrgroup.policies',
+    'cilium.k8s_client.rate_limiter_duration.seconds.count',
+    'cilium.k8s_client.rate_limiter_duration.seconds.sum',
 ]
 
 # Some types changed moving from v1 to v2. We keep v2 in the metadata.csv file.
@@ -243,6 +252,8 @@ AGENT_V1_METRICS_EXCLUDE_METADATA_CHECK = [
     "cilium.policy.implementation_delay.sum",
     "cilium.proxy.upstream_reply.seconds.count",
     "cilium.proxy.upstream_reply.seconds.sum",
+    'cilium.k8s_client.rate_limiter_duration.seconds.count',
+    'cilium.k8s_client.rate_limiter_duration.seconds.sum',
 ]
 
 OPERATOR_V2_PROCESS_METRICS = [
@@ -333,6 +344,17 @@ OPERATOR_V2_METRICS = [
     "cilium.operator.ipam.empty_interface_slots.count",
     "cilium.operator.ipam.interface_candidates.count",
     "cilium.operator.ipam.ip_allocation_ops.count",
+    "cilium.operator.ipam.allocation.duration.seconds.bucket",
+    "cilium.operator.ipam.allocation.duration.seconds.sum",
+    "cilium.operator.ipam.allocation.duration.seconds.count",
+    "cilium.operator.ipam.available_interfaces",
+    "cilium.operator.ipam.available_ips",
+    "cilium.operator.ipam.ip_release_ops.count",
+    "cilium.operator.ipam.needed_ips",
+    "cilium.operator.ipam.release.duration.seconds.bucket",
+    "cilium.operator.ipam.release.duration.seconds.sum",
+    "cilium.operator.ipam.release.duration.seconds.count",
+    "cilium.operator.ipam.used_ips",
 ] + OPERATOR_V2_PROCESS_METRICS
 
 # Not available in test metric fixtures

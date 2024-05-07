@@ -49,7 +49,7 @@ AGENT_METRICS = {
     'cilium_process_start_time_seconds': 'process.start_time.seconds',
     'cilium_process_virtual_memory_bytes': 'process.virtual_memory.bytes',
     'cilium_process_virtual_memory_max_bytes': 'process.virtual_memory.max.bytes',
-    'cilium_services_events_total': 'services.events.total',
+    'cilium_services_events': 'services.events',
     'cilium_subprocess_start_total': 'subprocess.start.total',
     'cilium_triggers_policy_update_call_duration_seconds': 'triggers_policy.update_call_duration.seconds',
     'cilium_triggers_policy_update_folds': 'triggers_policy.update_folds',
@@ -100,12 +100,13 @@ AGENT_METRICS = {
     'cilium_fqdn_active_ips': 'fqdn.active_ips',
     'cilium_fqdn_alive_zombie_connections': 'fqdn.alive_zombie_connections',
     # Cilium 1.14+
+    'cilium_endpoint': 'endpoint.count',
     'cilium_endpoint_max_ifindex': 'endpoint.max_ifindex',
     'cilium_cidrgroup_policies': 'cidrgroup.policies',
     'cilium_kvstore_sync_queue_size': 'kvstore.sync_queue_size',
     'cilium_kvstore_initial_sync_completed': 'kvstore.initial_sync_completed',
     'cilium_k8s_client_rate_limiter_duration_seconds': 'k8s_client.rate_limiter_duration.seconds',
-    'cilium_policy_change_total': 'policy.change.total',
+    'cilium_policy_change': 'policy.change',
 }
 
 OPERATOR_V2_OVERRIDES = {
