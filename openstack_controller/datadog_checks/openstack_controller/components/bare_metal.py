@@ -20,8 +20,17 @@ from datadog_checks.openstack_controller.metrics import (
     IRONIC_NODE_PORTGROUP_PREFIX,
     IRONIC_NODE_PORTGROUP_TAGS,
     IRONIC_NODE_TAGS,
+    IRONIC_PORT_COUNT,
+    IRONIC_PORT_PREFIX,
+    IRONIC_PORT_TAGS,
     IRONIC_RESPONSE_TIME,
     IRONIC_SERVICE_CHECK,
+    IRONIC_VOLUME_CONNECTOR_COUNT,
+    IRONIC_VOLUME_CONNECTOR_PREFIX,
+    IRONIC_VOLUME_CONNECTOR_TAGS,
+    IRONIC_VOLUME_TARGET_COUNT,
+    IRONIC_VOLUME_TARGET_PREFIX,
+    IRONIC_VOLUME_TARGET_TAGS,
     get_metrics_and_tags,
 )
 
@@ -113,6 +122,22 @@ class BareMetal(Component):
 
     @Component.register_global_metrics(ID)
     @Component.http_error()
+    def _report_ports(self, config, tags):
+        report_ports = config.get('ports', True)
+        if report_ports:
+            data = self.check.api.get_baremetal_ports()
+            for item in data:
+                port = get_metrics_and_tags(
+                    item,
+                    tags=IRONIC_PORT_TAGS,
+                    prefix=IRONIC_PORT_PREFIX,
+                    metrics={},
+                )
+                self.check.log.debug("port: %s", port)
+                self.check.gauge(IRONIC_PORT_COUNT, 1, tags=tags + port['tags'])
+
+    @Component.register_global_metrics(ID)
+    @Component.http_error()
     def _report_conductors(self, config, tags):
         report_conductors = config.get('conductors', True)
         if report_conductors:
@@ -129,6 +154,44 @@ class BareMetal(Component):
                 self.check.gauge(IRONIC_CONDUCTOR_COUNT, 1, tags=tags + conductor['tags'])
                 for metric, value in conductor['metrics'].items():
                     self.check.gauge(metric, value, tags=tags + conductor['tags'])
+
+    @Component.register_global_metrics(ID)
+    @Component.http_error()
+    def _report_volume_connectors(self, config, tags):
+        if 'connectors' not in config:
+            report_connectors = config.get('volumes', {}).get('connectors', True)
+        else:
+            report_connectors = config.get('connectors', True)
+        if report_connectors:
+            data = self.check.api.get_baremetal_volume_connectors()
+            for item in data:
+                connector = get_metrics_and_tags(
+                    item,
+                    tags=IRONIC_VOLUME_CONNECTOR_TAGS,
+                    prefix=IRONIC_VOLUME_CONNECTOR_PREFIX,
+                    metrics={},
+                )
+                self.check.log.debug("connector: %s", connector)
+                self.check.gauge(IRONIC_VOLUME_CONNECTOR_COUNT, 1, tags=tags + connector['tags'])
+
+    @Component.register_global_metrics(ID)
+    @Component.http_error()
+    def _report_volume_targets(self, config, tags):
+        if 'targets' not in config:
+            report_targets = config.get('volumes', {}).get('targets', True)
+        else:
+            report_targets = config.get('targets', True)
+        if report_targets:
+            data = self.check.api.get_baremetal_volume_targets()
+            for item in data:
+                target = get_metrics_and_tags(
+                    item,
+                    tags=IRONIC_VOLUME_TARGET_TAGS,
+                    prefix=IRONIC_VOLUME_TARGET_PREFIX,
+                    metrics={},
+                )
+                self.check.log.debug("target: %s", target)
+                self.check.gauge(IRONIC_VOLUME_TARGET_COUNT, 1, tags=tags + target['tags'])
 
     @Component.register_global_metrics(ID)
     @Component.http_error()

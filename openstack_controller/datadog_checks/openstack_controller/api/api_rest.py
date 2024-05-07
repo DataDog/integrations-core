@@ -438,6 +438,13 @@ class ApiRest(Api):
         response.raise_for_status()
         return response.json().get('portgroups', [])
 
+    def get_baremetal_ports(self):
+        response = self.http.get(
+            '{}/v1/ports/detail'.format(self._catalog.get_endpoint_by_type(Component.Types.BAREMETAL.value))
+        )
+        response.raise_for_status()
+        return response.json().get('ports', [])
+
     def get_baremetal_conductors(self):
 
         ironic_endpoint = self._catalog.get_endpoint_by_type(Component.Types.BAREMETAL.value)
@@ -445,6 +452,20 @@ class ApiRest(Api):
         url = '{}/v1/conductors'.format(ironic_endpoint)
 
         return self.make_paginated_request(url, 'conductors', 'hostname', params={})
+
+    def get_baremetal_volume_connectors(self):
+        response = self.http.get(
+            '{}/v1/volume/connectors'.format(self._catalog.get_endpoint_by_type(Component.Types.BAREMETAL.value))
+        )
+        response.raise_for_status()
+        return response.json().get('connectors', [])
+
+    def get_baremetal_volume_targets(self):
+        response = self.http.get(
+            '{}/v1/volume/targets'.format(self._catalog.get_endpoint_by_type(Component.Types.BAREMETAL.value))
+        )
+        response.raise_for_status()
+        return response.json().get('targets', [])
 
     def get_baremetal_drivers(self):
         response = self.http.get(
