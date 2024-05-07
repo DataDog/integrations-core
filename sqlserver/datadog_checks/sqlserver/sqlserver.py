@@ -2,9 +2,11 @@
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
 from __future__ import division
+
 import copy
 import time
 from collections import defaultdict
+
 import six
 from cachetools import TTLCache
 
@@ -21,15 +23,17 @@ from datadog_checks.sqlserver.database_metrics import (
     SqlserverIndexUsageMetrics,
 )
 from datadog_checks.sqlserver.metadata import SqlserverMetadata
+from datadog_checks.sqlserver.schemas import Schemas
 from datadog_checks.sqlserver.statements import SqlserverStatementMetrics
 from datadog_checks.sqlserver.stored_procedures import SqlserverProcedureMetrics
 from datadog_checks.sqlserver.utils import Database, construct_use_statement, parse_sqlserver_major_version
-from datadog_checks.sqlserver.schemas import Schemas
 
 try:
     import datadog_agent
 except ImportError:
     from ..stubs import datadog_agent
+
+import pdb
 
 from datadog_checks.sqlserver import metrics
 from datadog_checks.sqlserver.__about__ import __version__
@@ -84,7 +88,7 @@ from datadog_checks.sqlserver.utils import (
     is_azure_sql_database,
     set_default_driver_conf,
 )
-import pdb
+
 try:
     import adodbapi
 except ImportError:
@@ -725,12 +729,14 @@ class SQLServer(AgentCheck):
                         continue
                 # Switch DB back to MASTER
                 cursor.execute(SWITCH_DB_STATEMENT.format(self.connection.DEFAULT_DATABASE))
-    
-    #TODO as we do it a second type iterate connection through DB make a function and unite it with _get_table_infos check
+
+    # TODO as we do it a second type iterate connection through DB make a function and unite it with _get_table_infos check
     def get_databases(self):
         engine_edition = self.static_info_cache.get(STATIC_INFO_ENGINE_EDITION)
         if not is_azure_sql_database(engine_edition):
-            db_names = [d.name for d in self.databases] or [self.instance.get('database', self.connection.DEFAULT_DATABASE)]
+            db_names = [d.name for d in self.databases] or [
+                self.instance.get('database', self.connection.DEFAULT_DATABASE)
+            ]
         else:
             db_names = [self.instance.get('database', self.connection.DEFAULT_DATABASE)]
         return db_names
@@ -739,13 +745,13 @@ class SQLServer(AgentCheck):
         engine_edition = self.static_info_cache.get(STATIC_INFO_ENGINE_EDITION)
         with self.connection.open_managed_default_connection():
             with self.connection.get_managed_cursor() as cursor:
-                for db in databases:                    
+                for db in databases:
                     try:
                         if not is_azure_sql_database(engine_edition):
                             cursor.execute(SWITCH_DB_STATEMENT.format(db))
-                        stop = action(cursor, db)        
+                        stop = action(cursor, db)
                         if stop:
-                            break;                  
+                            break
                     except Exception as e:
                         pdb.set_trace()
                         print("An exception occurred during do_for_databases in db - {}: {}".format(db, e))

@@ -8,20 +8,21 @@ import logging
 from copy import copy
 
 import pytest
-
 from deepdiff import DeepDiff
 
 from datadog_checks.sqlserver import SQLServer
-#from deepdiff import DeepDiff - not clear how to add it to ddev
 
+# from deepdiff import DeepDiff - not clear how to add it to ddev
 from .common import CHECK_NAME
-from .utils import delete_if_found, compare_coumns_in_tables
+from .utils import compare_coumns_in_tables
+
 try:
     import pyodbc
 except ImportError:
     pyodbc = None
-import pdb
 import json
+import pdb
+
 
 @pytest.fixture
 def dbm_instance(instance_docker):
@@ -56,13 +57,13 @@ def dbm_instance(instance_docker):
 )
 def test_get_available_settings_columns(dbm_instance, expected_columns, available_columns):
     pass
-    #check = SQLServer(CHECK_NAME, {}, [dbm_instance])
-    #check.initialize_connection()
-    #_conn_key_prefix = "dbm-metadata-"
-    #with check.connection.open_managed_default_connection(key_prefix=_conn_key_prefix):
-        #with check.connection.get_managed_cursor(key_prefix=_conn_key_prefix) as cursor:
-            #result_available_columns = check.sql_metadata._get_available_settings_columns(cursor, expected_columns)
-            #assert result_available_columns == available_columns
+    # check = SQLServer(CHECK_NAME, {}, [dbm_instance])
+    # check.initialize_connection()
+    # _conn_key_prefix = "dbm-metadata-"
+    # with check.connection.open_managed_default_connection(key_prefix=_conn_key_prefix):
+    # with check.connection.get_managed_cursor(key_prefix=_conn_key_prefix) as cursor:
+    # result_available_columns = check.sql_metadata._get_available_settings_columns(cursor, expected_columns)
+    # assert result_available_columns == available_columns
 
 
 @pytest.mark.integration
@@ -86,36 +87,79 @@ def test_get_settings_query_cached(dbm_instance, caplog):
 
 def test_sqlserver_collect_settings(aggregator, dd_run_check, dbm_instance):
     pass
-    #check = SQLServer(CHECK_NAME, {}, [dbm_instance])
+    # check = SQLServer(CHECK_NAME, {}, [dbm_instance])
     # dd_run_check(check)
-    #check.initialize_connection()
-    #check.check(dbm_instance)
-    #dbm_metadata = aggregator.get_event_platform_events("dbm-metadata")
-    #event = next((e for e in dbm_metadata if e['kind'] == 'sqlserver_configs'), None)
-    #assert event is not None
-    #assert event['dbms'] == "sqlserver"
-    #assert event['kind'] == "sqlserver_configs"
-    #assert len(event["metadata"]) > 0
+    # check.initialize_connection()
+    # check.check(dbm_instance)
+    # dbm_metadata = aggregator.get_event_platform_events("dbm-metadata")
+    # event = next((e for e in dbm_metadata if e['kind'] == 'sqlserver_configs'), None)
+    # assert event is not None
+    # assert event['dbms'] == "sqlserver"
+    # assert event['kind'] == "sqlserver_configs"
+    # assert len(event["metadata"]) > 0
 
-#TODO this test relies on a certain granularity
-#later we need to upgrade it to accumulate data for each DB before checking.
+
+# TODO this test relies on a certain granularity
+# later we need to upgrade it to accumulate data for each DB before checking.
 def test_collect_schemas(aggregator, dd_run_check, dbm_instance):
-    
-    databases_to_find  = ['datadog_test_schemas','datadog_test']
-    exp_datadog_test =  {'id': '6', 'name': 'datadog_test', 'owner': 'dbo', 'schemas': [ {'name': 'dbo', 'id': '1', 'owner': '1', 'tables': [{'id': '885578193', 'name': 'ϑings', 'columns': [{'name': 'id', 'data_type': 'int', 'default': '((0))', 'nullable': True}, {'name': 'name', 'data_type': 'varchar', 'default': 'None', 'nullable': True}]}]}]}
-    exp_datadog_test_schemas = {'id': '5', 'name': 'datadog_test_schemas', 'owner': 'dbo', 'schemas': [{'name': 'test_schema', 'id': '5', 'owner': '1', 'tables': [{'id': '885578193', 'name': 'cities', 'columns': [{'name': 'id', 'data_type': 'int', 'default': '((0))', 'nullable': True}, {'name': 'name', 'data_type': 'varchar', 'default': 'None', 'nullable': True}]}]}]}
-    expected_data_for_db = {'datadog_test' : exp_datadog_test, 'datadog_test_schemas' : exp_datadog_test_schemas}
+
+    databases_to_find = ['datadog_test_schemas', 'datadog_test']
+    exp_datadog_test = {
+        'id': '6',
+        'name': 'datadog_test',
+        'owner': 'dbo',
+        'schemas': [
+            {
+                'name': 'dbo',
+                'id': '1',
+                'owner': '1',
+                'tables': [
+                    {
+                        'id': '885578193',
+                        'name': 'ϑings',
+                        'columns': [
+                            {'name': 'id', 'data_type': 'int', 'default': '((0))', 'nullable': True},
+                            {'name': 'name', 'data_type': 'varchar', 'default': 'None', 'nullable': True},
+                        ],
+                    }
+                ],
+            }
+        ],
+    }
+    exp_datadog_test_schemas = {
+        'id': '5',
+        'name': 'datadog_test_schemas',
+        'owner': 'dbo',
+        'schemas': [
+            {
+                'name': 'test_schema',
+                'id': '5',
+                'owner': '1',
+                'tables': [
+                    {
+                        'id': '885578193',
+                        'name': 'cities',
+                        'columns': [
+                            {'name': 'id', 'data_type': 'int', 'default': '((0))', 'nullable': True},
+                            {'name': 'name', 'data_type': 'varchar', 'default': 'None', 'nullable': True},
+                        ],
+                    }
+                ],
+            }
+        ],
+    }
+    expected_data_for_db = {'datadog_test': exp_datadog_test, 'datadog_test_schemas': exp_datadog_test_schemas}
 
     dbm_instance['database_autodiscovery'] = True
-    dbm_instance['autodiscovery_include'] = ['datadog_test_schemas','datadog_test']
+    dbm_instance['autodiscovery_include'] = ['datadog_test_schemas', 'datadog_test']
 
     check = SQLServer(CHECK_NAME, {}, [dbm_instance])
     dd_run_check(check)
 
-    #extracting events.
+    # extracting events.
 
     dbm_metadata = aggregator.get_event_platform_events("dbm-metadata")
-    
+
     actual_payloads = {}
 
     for schema_event in (e for e in dbm_metadata if e['kind'] == 'sqlserver_databases'):
@@ -125,7 +169,7 @@ def test_collect_schemas(aggregator, dd_run_check, dbm_instance):
 
         assert schema_event.get("timestamp") is not None
         # there should only be one database, datadog_test
-        
+
         database_metadata = schema_event['metadata']
         assert len(database_metadata) == 1
         db_name = database_metadata[0]['name']
@@ -135,17 +179,17 @@ def test_collect_schemas(aggregator, dd_run_check, dbm_instance):
         else:
             actual_payloads[db_name] = database_metadata[0]
     pdb.set_trace()
-    assert len(actual_payloads) == len(expected_data_for_db)    
+    assert len(actual_payloads) == len(expected_data_for_db)
 
     for db_name, actual_payload in actual_payloads.items():
 
-        #assert delete_if_found(databases_to_find, db_name)
+        # assert delete_if_found(databases_to_find, db_name)
         assert db_name in databases_to_find
-        # we need to accumulate all data ... as payloads may differ 
+        # we need to accumulate all data ... as payloads may differ
 
         difference = DeepDiff(actual_payload, expected_data_for_db[db_name], ignore_order=True)
 
-        #difference = {}
+        # difference = {}
 
         diff_keys = list(difference.keys())
         if len(diff_keys) > 0 and diff_keys != ['iterable_item_removed']:

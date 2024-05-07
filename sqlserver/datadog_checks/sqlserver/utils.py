@@ -138,15 +138,17 @@ def is_azure_sql_database(engine_edition):
     """
     return engine_edition == ENGINE_EDITION_SQL_DATABASE
 
-def execute_query_output_result_as_a_dict(query, cursor, modify_columns=None):
+
+def execute_query_output_result_as_a_dict(query, cursor, convert_results_to_str=False):
     cursor.execute(query)
-    columns = []
-    if modify_columns:
-        columns = modify_columns(cursor.description)
+    columns = [str(column[0]).lower() for column in cursor.description]
+    rows = []
+    if convert_results_to_str:
+        rows = [dict(zip(columns, [str(item) for item in row])) for row in cursor.fetchall()]
     else:
-        columns = [str(column[0]).lower() for column in cursor.description]
-    rows = [dict(zip(columns, [str(item) for item in row])) for row in cursor.fetchall()]
+        rows = [dict(zip(columns, row)) for row in cursor.fetchall()]
     return rows
+
 
 def get_list_chunks(lst, n):
     """Yield successive n-sized chunks from lst."""

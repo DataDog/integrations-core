@@ -2,6 +2,7 @@
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
 import time
+
 from datadog_checks.base import is_affirmative
 from datadog_checks.base.utils.db.utils import (
     DBMAsyncJob,
@@ -127,104 +128,7 @@ class SqlserverMetadata(DBMAsyncJob):
         rows = [dict(zip(columns, row)) for row in cursor.fetchall()]
         self.log.debug("loaded sql server settings len(rows)=%s", len(rows))
         return rows
-    
-    """schemas data struct is a dictionnary with key being a schema name the value is
-    schema
-    dict:
-        "name": str
-        "schema_id": str
-        "principal_id": str
-        "tables" : dict
-            name: list of columns                  
-                "columns": dict
-                    name: str
-                    data_type: str
-                    default: str
 
-
-    """
-    @tracked_method(agent_check_getter=agent_check_getter, track_result_length=True)
-    def _query_schema_information(self, cursor):
-
-        # principal_id is kind of like an owner
-
-        # Todo put in consts
-        # there is also principal_id not sure if need it.
-        SCHEMA_QUERY = "SELECT name,schema_id,principal_id FROM sys.schemas;"
-        self.log.debug("collecting db schemas")
-        self.log.debug("Running query [%s]", SCHEMA_QUERY)
-        cursor.execute(SCHEMA_QUERY)
-        schemas = []
-        columns = [i[0] for i in cursor.description]
-        schemas = [dict(zip(columns, row)) for row in cursor.fetchall()]
-        schemas_by_name = {}
-
-        schemas_by_name = {}
-
-        for schema in schemas:
-            name = schema['name'].lower()
-            #add tables
-            schema['tables'] = {}
-            schemas_by_name[name] = schema
-
-        self.log.debug("fetched schemas len(rows)=%s", len(schemas))
-        return schemas_by_name
-
-    def _get_table_infos(self, schemas, cursor):
-        #TODO do we need this for sqlserver ? 
-        #If any tables are partitioned, only the master paritition table name will be returned, and none of its children.
-
-        # TODO 
-        #Do we need a limit ? like in postgress , seems not
-        #limit = self._config.schemas_metadata_config.get("max_tables", 300)
-
-        TABLES_QUERY = "SELECT TABLE_SCHEMA, TABLE_NAME, COLUMN_NAME, DATA_TYPE, COLUMN_DEFAULT FROM INFORMATION_SCHEMA.COLUMNS;"
-        cursor.execute(TABLES_QUERY)
-        #TODO
-        #             nullable: bool column ?
-        #TODO
-        #"foreign_keys": dict (if has foreign keys)
-        #    name: str
-        #    definition: str
-        #TODO
-        #        "indexes": dict (if has indexes)
-        #    name: str
-        #    definition: str
-        #TODO
-        #"toast_table": str (if associated toast table exists) - equivalent in sql server
-        
-        # "partition_key": str (if has partitions) - equiv ? 
-
-        # "num_partitions": int (if has partitions) - equiv ? 
-        #apply lower case ? 
-        #this is just to avoid doing something like row[0] , row[1] etc 
-        columns = [str(i[0]).lower() for i in cursor.description]
-        rows = [dict(zip(columns, row)) for row in cursor.fetchall()]
-        
-        for row in rows:
-            if len(row) != 5:
-                #TODO some warning ? 
-                print("warning") 
-
-            #TODO treat not found 
-            schema = schemas[row['table_schema']]
-
-            tables_dict_for_schema = schema['tables']
-
-            #do the same mapping as in postgres for some uniformity otherwise could've just loop and exclude some keys
-            if row['table_name'] not in tables_dict_for_schema:
-                #new table
-                tables_dict_for_schema[row['table_name']] = []
-            column = {}
-            column['name'] = row['column_name']
-            column['data_type'] = row['data_type']
-            column['default'] = row['column_default']
-            #table is an array of column dict for now.
-            tables_dict_for_schema[row['table_name']].append(column)
-            # table dict has a key columns with value arrray of dicts
-
-#self._sort_and_limit_table_info(cursor, dbname, table_info, limit)
-# for now not sort and limit
     @tracked_method(agent_check_getter=agent_check_getter)
     def report_sqlserver_metadata(self):
         with self._check.connection.open_managed_default_connection(key_prefix=self._conn_key_prefix):
