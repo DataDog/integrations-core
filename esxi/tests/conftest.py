@@ -55,8 +55,6 @@ def dd_environment():
             instance['username'] = os.environ.get('ESXI_HOST_USERNAME')
             instance['password'] = os.environ.get('ESXI_HOST_PASSWORD')
             instance['ssl_verify'] = 'false'
-            instance['proxy_host'] = f'socks5://{socks_ip}'
-            instance['proxy_port'] = socks_port
             agent_config = {'proxy': {'http': 'socks5://{}:{}'.format(socks_ip, socks_port)}}
             yield instance, agent_config
 
