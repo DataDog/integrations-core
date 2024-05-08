@@ -644,7 +644,7 @@ def connection_baremetal(request, mock_responses):
             for node in mock_responses('GET', f'/baremetal/v1/nodes/{node_id}/portgroups/detail')['portgroups']
         ]
 
-    def ports():
+    def ports(limit=None):
         if http_error and 'ports' in http_error:
             raise requests.exceptions.HTTPError(response=http_error['ports'])
         return [
