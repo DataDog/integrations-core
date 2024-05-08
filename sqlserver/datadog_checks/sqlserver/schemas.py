@@ -26,7 +26,10 @@ from datadog_checks.sqlserver.utils import execute_query_output_result_as_a_dict
 class SubmitData:
     MAX_COLUMN_COUNT = 10_000
 
-    # REDAPL has a 3MB limit per resource
+    # TBD - REDAPL has a 3MB limit per resource
+    # If a column payload is ~ 10bytes : name, type, default , if nullable nullable
+    # then the limit should be only 25_000.
+
     MAX_TOTAL_COLUMN_COUNT = 100_000
 
     def __init__(self, submit_data_function, base_event, logger):
