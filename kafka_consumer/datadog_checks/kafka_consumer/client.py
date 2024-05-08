@@ -254,6 +254,15 @@ class KafkaClient:
         else:
             return self.config._consumer_groups
 
+    def get_message(self, topic, partition, offset):
+        consumer = self.__create_consumer('datadog')
+        consumer.assign([TopicPartition(topic, partition, offset)])
+        message = consumer.poll(timeout=1)
+        consumer.close()
+        if message is None:
+            return None
+        return message.value()
+
     def _list_consumer_group_offsets(self, cg_tp):
         return self.kafka_client.list_consumer_group_offsets([cg_tp])
 

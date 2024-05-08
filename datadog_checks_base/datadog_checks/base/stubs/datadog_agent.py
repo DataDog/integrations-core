@@ -87,6 +87,9 @@ class DatadogAgentStub(object):
     def get_version(self):
         return '0.0.0'
 
+    def get_remote_config(self, key):
+        return {'public_key': 'key', 'topic': "test", "offset": 0, "partition": 0}
+
     def log(self, *args, **kwargs):
         pass
 
