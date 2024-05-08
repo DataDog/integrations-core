@@ -61,7 +61,7 @@ services:
   # mysql serving valid.mysql.mock
   starttls-mysql:
     container_name: mysql-valid
-    image: mysql
+    image: mysql:8.0.29
     volumes:
       - certs:/var/lib/certs/:ro
     ports:
