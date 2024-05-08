@@ -2,6 +2,12 @@
 
 <!-- towncrier release notes start -->
 
+## 6.5.0 / 2024-04-26
+
+***Added***:
+
+* Added new cinder metrics ([#17422](https://github.com/DataDog/integrations-core/pull/17422))
+
 ## 6.4.0 / 2024-03-22 / Agent 7.53.0
 
 ***Added***:

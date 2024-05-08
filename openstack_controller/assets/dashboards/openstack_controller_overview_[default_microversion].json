@@ -5626,6 +5626,117 @@
                 "width": 12,
                 "height": 3
             }
+        },
+        {
+            "definition": {
+                "title": "Image",
+                "background_color": "pink",
+                "show_title": true,
+                "type": "group",
+                "layout_type": "ordered",
+                "widgets": [
+                    {
+                        "id": 8937254505229470,
+                        "definition": {
+                            "title": "Image Status",
+                            "title_size": "16",
+                            "title_align": "left",
+                            "type": "query_table",
+                            "requests": [
+                                {
+                                    "queries": [
+                                        {
+                                            "aggregator": "last",
+                                            "data_source": "metrics",
+                                            "name": "query1",
+                                            "query": "sum:openstack.glance.image.up{$Keystone_Server_URL,$RegionId,$Domain,$Project} by {image_id}"
+                                        },
+                                        {
+                                            "aggregator": "last",
+                                            "data_source": "metrics",
+                                            "name": "query2",
+                                            "query": "sum:openstack.glance.image.size{$Keystone_Server_URL,$RegionId,$Domain,$Project} by {image_id}"
+                                        }
+                                    ],
+                                    "response_format": "scalar",
+                                    "text_formats": [],
+                                    "formulas": [
+                                        {
+                                            "cell_display_mode": "number",
+                                            "alias": "is_up",
+                                            "formula": "exclude_null(query1)",
+                                            "limit": {
+                                                "count": 500,
+                                                "order": "desc"
+                                            }
+                                        },
+                                        {
+                                            "cell_display_mode": "number",
+                                            "alias": "size",
+                                            "formula": "exclude_null(query2)"
+                                        }
+                                    ]
+                                }
+                            ],
+                            "has_search_bar": "auto"
+                        },
+                        "layout": {
+                            "x": 0,
+                            "y": 0,
+                            "width": 7,
+                            "height": 2
+                        }
+                    },
+                    {
+                        "id": 8363428068576700,
+                        "definition": {
+                            "title": "Member Count",
+                            "title_size": "16",
+                            "title_align": "left",
+                            "type": "query_table",
+                            "requests": [
+                                {
+                                    "queries": [
+                                        {
+                                            "aggregator": "last",
+                                            "data_source": "metrics",
+                                            "name": "query1",
+                                            "query": "sum:openstack.glance.image.member.count{$Keystone_Server_URL,$RegionId,$Domain,$Project} by {image_id}"
+                                        }
+                                    ],
+                                    "response_format": "scalar",
+                                    "text_formats": [],
+                                    "formulas": [
+                                        {
+                                            "cell_display_mode": "number",
+                                            "alias": "count",
+                                            "formula": "exclude_null(query1)",
+                                            "limit": {
+                                                "count": 500,
+                                                "order": "desc"
+                                            }
+                                        }
+                                    ]
+                                }
+                            ],
+                            "has_search_bar": "auto"
+                        },
+                        "layout": {
+                            "x": 7,
+                            "y": 0,
+                            "width": 5,
+                            "height": 2
+                        }
+                    }
+                ]
+            },
+            "id": 5947627096590494,
+            "layout": {
+                "x": 0,
+                "y": 27,
+                "width": 12,
+                "height": 3
+            }
         }
     ]
 }

@@ -475,7 +475,7 @@ The check does not collect all metrics by default. Set the following boolean con
 | mysql.innodb.ibuf_merges                    | RATE        |
 | mysql.innodb.ibuf_segment_size              | GAUGE       |
 | mysql.innodb.ibuf_size                      | GAUGE       |
-| mysql.innodb.lock_structs                   | RATE        |
+| mysql.innodb.lock_structs                   | GAUGE       |
 | mysql.innodb.locked_tables                  | GAUGE       |
 | mysql.innodb.locked_transactions            | GAUGE       |
 | mysql.innodb.log_waits                      | RATE        |

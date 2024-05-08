@@ -2,6 +2,12 @@
 
 <!-- towncrier release notes start -->
 
+## 6.1.0 / 2024-04-26
+
+***Added***:
+
+* Add the citadel_server_cert_chain_expiry_timestamp metric ([#17268](https://github.com/DataDog/integrations-core/pull/17268))
+
 ## 6.0.0 / 2024-03-22 / Agent 7.53.0
 
 ***Changed***:

@@ -560,11 +560,24 @@ OCTAVIA_AMPHORA_STATS_METRICS = {
 GLANCE_METRICS_PREFIX = "openstack.glance"
 GLANCE_SERVICE_CHECK = f"{GLANCE_METRICS_PREFIX}.api.up"
 GLANCE_RESPONSE_TIME = f"{GLANCE_METRICS_PREFIX}.response_time"
-GLANCE_IMAGE_COUNT = f"{GLANCE_METRICS_PREFIX}.image.count"
+GLANCE_IMAGE_PREFIX = f"{GLANCE_METRICS_PREFIX}.image"
+GLANCE_IMAGE_COUNT = f"{GLANCE_IMAGE_PREFIX}.count"
+GLANCE_IMAGE_METRICS = {
+    f"{GLANCE_IMAGE_PREFIX}.up": {},
+    f"{GLANCE_IMAGE_PREFIX}.size": {},
+}
 GLANCE_IMAGE_TAGS = {
+    'id': 'image_id',
     'name': 'image_name',
     'status': 'status',
     'container_format': 'container_format',
+}
+GLANCE_MEMBER_PREFIX = f"{GLANCE_IMAGE_PREFIX}.member"
+GLANCE_MEMBER_COUNT = f"{GLANCE_MEMBER_PREFIX}.count"
+GLANCE_MEMBER_TAGS = {
+    'member_id': 'member_id',
+    'image_id': 'image_id',
+    'status': 'status',
 }
 
 
