@@ -274,6 +274,12 @@ class ApiSdk(Api):
     def get_baremetal_volume_targets(self):
         return [target.to_dict(original_names=True) for target in self.connection.baremetal.volume_targets()]
 
+    def get_baremetal_drivers(self):
+        return [driver.to_dict(original_names=True) for driver in self.connection.baremetal.drivers()]
+
+    def get_baremetal_allocations(self):
+        return [allocation.to_dict(original_names=True) for allocation in self.connection.baremetal.allocations()]
+
     def get_auth_projects(self):
         response = self.http.get('{}/v3/auth/projects'.format(self.cloud_config.get_auth_args().get('auth_url')))
         response.raise_for_status()

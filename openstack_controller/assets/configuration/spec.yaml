@@ -465,6 +465,10 @@ files:
                                 type: boolean
                       - name: ports
                         type: boolean  
+                      - name: drivers
+                        type: boolean
+                      - name: allocations
+                        type: boolean
               - name: load-balancer
                 anyOf:
                   - type: boolean

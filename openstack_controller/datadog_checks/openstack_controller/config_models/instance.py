@@ -64,7 +64,9 @@ class BaremetalItem(BaseModel):
         arbitrary_types_allowed=True,
         frozen=True,
     )
+    allocations: Optional[bool] = None
     conductors: Optional[bool] = None
+    drivers: Optional[bool] = None
     nodes: Optional[Union[bool, Node]] = None
     ports: Optional[bool] = None
     volumes: Optional[Union[bool, Volume]] = None

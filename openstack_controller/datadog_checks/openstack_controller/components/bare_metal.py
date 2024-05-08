@@ -6,10 +6,16 @@ from datadog_checks.base.utils.discovery import Discovery
 from datadog_checks.openstack_controller.components.component import Component
 from datadog_checks.openstack_controller.config import normalize_discover_config_include
 from datadog_checks.openstack_controller.metrics import (
+    IRONIC_ALLOCATION_COUNT,
+    IRONIC_ALLOCATION_PREFIX,
+    IRONIC_ALLOCATION_TAGS,
     IRONIC_CONDUCTOR_COUNT,
     IRONIC_CONDUCTOR_METRICS,
     IRONIC_CONDUCTOR_METRICS_PREFIX,
     IRONIC_CONDUCTOR_TAGS,
+    IRONIC_DRIVER_COUNT,
+    IRONIC_DRIVER_PREFIX,
+    IRONIC_DRIVER_TAGS,
     IRONIC_NODE_COUNT,
     IRONIC_NODE_METRICS,
     IRONIC_NODE_METRICS_PREFIX,
@@ -189,3 +195,37 @@ class BareMetal(Component):
                 )
                 self.check.log.debug("target: %s", target)
                 self.check.gauge(IRONIC_VOLUME_TARGET_COUNT, 1, tags=tags + target['tags'])
+
+    @Component.register_global_metrics(ID)
+    @Component.http_error()
+    def _report_drivers(self, config, tags):
+        if 'drivers' not in config:
+            report_drivers = config.get('drivers', True)
+        if report_drivers:
+            data = self.check.api.get_baremetal_drivers()
+            for item in data:
+                driver = get_metrics_and_tags(
+                    item,
+                    tags=IRONIC_DRIVER_TAGS,
+                    prefix=IRONIC_DRIVER_PREFIX,
+                    metrics={},
+                )
+                self.check.log.debug("driver: %s", driver)
+                self.check.gauge(IRONIC_DRIVER_COUNT, 1, tags=tags + driver['tags'])
+
+    @Component.register_global_metrics(ID)
+    @Component.http_error()
+    def _report_allocations(self, config, tags):
+        if 'allocations' not in config:
+            report_allocations = config.get('allocations', True)
+        if report_allocations:
+            data = self.check.api.get_baremetal_allocations()
+            for item in data:
+                allocation = get_metrics_and_tags(
+                    item,
+                    tags=IRONIC_ALLOCATION_TAGS,
+                    prefix=IRONIC_ALLOCATION_PREFIX,
+                    metrics={},
+                )
+                self.check.log.debug("allocation: %s", allocation)
+                self.check.gauge(IRONIC_ALLOCATION_COUNT, 1, tags=tags + allocation['tags'])
