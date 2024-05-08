@@ -4,11 +4,17 @@
 import json
 from collections import defaultdict
 from time import time
+import yaml
 
 from datadog_checks.base import AgentCheck, is_affirmative
 from datadog_checks.kafka_consumer.client import KafkaClient
 from datadog_checks.kafka_consumer.config import KafkaConfig
 from datadog_checks.kafka_consumer.constants import KAFKA_INTERNAL_TOPICS, OFFSET_INVALID
+
+try:
+    import datadog_agent
+except ImportError:
+    from ..stubs import datadog_agent
 
 MAX_TIMESTAMPS = 1000
 
@@ -25,6 +31,29 @@ class KafkaCheck(AgentCheck):
         self.client = KafkaClient(self.config, self.log)
         self.topic_partition_cache = {}
         self.check_initializations.insert(0, self.config.validate_config)
+
+
+    def log_message(self):
+        print("logging message")
+        yamlConfig = datadog_agent.get_remote_config("test changed")
+        print("yaml config  ", yamlConfig, type(yamlConfig))
+        parsedConfig = yaml.safe_load(str(yamlConfig))
+        print("parsed config is ", parsedConfig)
+        for cfg in parsedConfig.get("configs", []):
+            print("config is ", cfg)
+            topic = cfg.get("topic", None)
+            partition = cfg.get("partition", None)
+            offset = cfg.get("offset", None)
+            print("topic is ", topic, "partition is ", partition, "offset is ", offset)
+            if topic is None or partition is None or offset is None:
+                continue
+            message = self.client.get_message(topic, partition, offset)
+            self.send_event("Kafka message", message, ["topic:{}".format(topic), "partition:{}".format(partition), "offset:{}".format(offset)], 'kafka', "", severity="info")
+            print("message is ", message)
+        # print("now the last message")
+        # message = self.client.get_message('marvel', 0, 75)
+        # self.send_event("Kafka message", message, ["topic:marvel","partition:0","offset:75"], 'kafka', "", severity="info")
+        # print("message is ", message)
 
     def check(self, _):
         """The main entrypoint of the check."""
@@ -94,6 +123,13 @@ class KafkaCheck(AgentCheck):
             broker_timestamps,
             cluster_id,
         )
+
+        try:
+            self.log_message()
+        except Exception as e:
+            print("oops", e)
+            self.log.exception("Error retrieving payload from Kafka for Data Streams %s", str(e))
+
         if self.config._close_admin_client:
             self.client.close_admin_client()
 
