@@ -15,6 +15,12 @@ manifest.json         @DataDog/documentation @DataDog/agent-integrations
 **/assets             @DataDog/documentation @DataDog/agent-integrations
 **/assets/logs        @DataDog/logs-backend @DataDog/documentation @DataDog/agent-integrations
 
+# Dependencies
+/.deps/                            @DataDog/agent-integrations @DataDog/agent-build-and-releases
+/.builders/                        @DataDog/agent-build-and-releases
+/.builders/images/                 @DataDog/agent-integrations @DataDog/agent-build-and-releases
+/.builders/patches/                @DataDog/agent-integrations @DataDog/agent-build-and-releases
+
 # Checks base
 /datadog_checks_base/                                          @DataDog/agent-integrations
 /datadog_checks_base/datadog_checks/base/checks/openmetrics/   @DataDog/agent-integrations @DataDog/container-integrations
@@ -148,6 +154,9 @@ manifest.json         @DataDog/documentation @DataDog/agent-integrations
 /cloud_foundry_api/manifest.json        @DataDog/platform-integrations @DataDog/agent-integrations @DataDog/documentation
 /cloud_foundry_api/*.md                 @DataDog/platform-integrations @DataDog/agent-integrations @DataDog/documentation
 /cloud_foundry_api/assets/logs/         @DataDog/platform-integrations @DataDog/agent-integrations @DataDog/documentation @DataDog/logs-backend
+/esxi/                                  @DataDog/platform-integrations @DataDog/agent-integrations
+/esxi/manifest.json                     @DataDog/platform-integrations @DataDog/agent-integrations @DataDog/documentation
+/esxi/*.md                              @DataDog/platform-integrations @DataDog/agent-integrations @DataDog/documentation
 /openstack/                             @DataDog/platform-integrations @DataDog/agent-integrations
 /openstack/*.md                         @DataDog/platform-integrations @DataDog/agent-integrations @DataDog/documentation
 /openstack/manifest.json                @DataDog/platform-integrations @DataDog/agent-integrations @DataDog/documentation
@@ -156,6 +165,9 @@ manifest.json         @DataDog/documentation @DataDog/agent-integrations
 /openstack_controller/manifest.json     @DataDog/platform-integrations @DataDog/agent-integrations @DataDog/documentation
 /openstack_controller/*.md              @DataDog/platform-integrations @DataDog/agent-integrations @DataDog/documentation
 /openstack_controller/assets/logs/      @DataDog/platform-integrations @DataDog/agent-integrations @DataDog/documentation @DataDog/logs-backend
+/teleport/                              @DataDog/platform-integrations @DataDog/agent-integrations
+/teleport/manifest.json                 @DataDog/platform-integrations @DataDog/agent-integrations @DataDog/documentation
+/teleport/*.md                          @DataDog/platform-integrations @DataDog/agent-integrations @DataDog/documentation
 /vsphere/                               @DataDog/platform-integrations @DataDog/agent-integrations
 /vsphere/manifest.json                  @DataDog/platform-integrations @DataDog/agent-integrations @DataDog/documentation
 /vsphere/*.md                           @DataDog/platform-integrations @DataDog/agent-integrations @DataDog/documentation
@@ -288,6 +300,7 @@ datadog_checks_base/datadog_checks/base/checks/windows/              @DataDog/wi
 docs/developer/process/integration-release.md                         @DataDog/software-integrity-and-trust @DataDog/agent-integrations @trishankatdatadog
 # As well as the pipelines.
 /.github/workflows/                                                   @DataDog/agent-integrations
+/.github/workflows/build-deps.yml                                     @DataDog/agent-build-and-releases
 /.gitlab-ci.yml                                                       @DataDog/agent-integrations
 /.gitlab/software_composition_analysis.yaml                           @DataDog/software-integrity-and-trust
 # Dev container

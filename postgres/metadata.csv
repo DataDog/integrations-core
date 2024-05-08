@@ -124,6 +124,7 @@ postgresql.rows_hot_updated,gauge,,row,second,"Enabled with `relations`. The num
 postgresql.rows_inserted,gauge,,row,second,Enabled with `relations`. The number of rows inserted by queries in this database. This metric is tagged with db.,0,postgres,rows insrt,
 postgresql.rows_returned,gauge,,row,second,The number of rows returned by queries in this database. This metric is tagged with db.,0,postgres,rows ret,
 postgresql.rows_updated,gauge,,row,second,Enabled with `relations`. The number of rows updated by queries in this database. This metric is tagged with db.,0,postgres,rows updt,
+postgresql.running,gauge,,,,The number of instances running.,0,postgres,running,
 postgresql.seq_rows_read,gauge,,row,second,"Enabled with `relations`. The number of live rows fetched by sequential scans. This metric is tagged with db, schema, table.",0,postgres,seq rows rd,
 postgresql.seq_scans,gauge,,scan,second,"Enabled with `relations`. The number of sequential scans initiated on this table. This metric is tagged with db, schema, table.",0,postgres,seq scans,
 postgresql.sessions.abandoned,count,,session,,Number of database sessions to this database that were terminated because connection to the client was lost. This metric is tagged with db.,-1,postgres,postgres sessions abandoned,

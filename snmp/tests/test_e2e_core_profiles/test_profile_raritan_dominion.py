@@ -28,8 +28,11 @@ def test_e2e_profile_raritan_dominion(dd_agent_check):
     common_tags = [
         'snmp_profile:raritan-dominion',
         'snmp_host:raritan-dominion.device.name',
+        'device_hostname:raritan-dominion.device.name',
         'device_namespace:default',
         'snmp_device:' + ip_address,
+        'device_ip:' + ip_address,
+        'device_id:default:' + ip_address,
     ] + []
 
     # --- TEST EXTENDED METRICS ---

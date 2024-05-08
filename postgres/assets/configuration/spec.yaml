@@ -402,6 +402,7 @@ files:
       value:
         type: string
         example: show_pg_stat_statements()
+        display_default: pg_stat_statements
     - name: query_metrics
       description: Configure collection of query metrics
       options:
@@ -875,7 +876,7 @@ files:
         This collection does not involve any additional queries to the database.
       value:
         type: number
-        example: 1800
+        example: 300
         display_default: false
     - name: propagate_agent_tags
       description: |

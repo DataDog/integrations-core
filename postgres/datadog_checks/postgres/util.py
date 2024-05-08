@@ -116,6 +116,12 @@ def payload_pg_version(version):
     return 'v{major}.{minor}.{patch}'.format(major=version.major, minor=version.minor, patch=version.patch)
 
 
+def get_list_chunks(lst, n):
+    """Yield successive n-sized chunks from lst."""
+    for i in range(0, len(lst), n):
+        yield lst[i : i + n]
+
+
 fmt = PartialFormatter()
 
 AWS_RDS_HOSTNAME_SUFFIX = ".rds.amazonaws.com"

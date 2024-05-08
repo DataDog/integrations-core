@@ -546,8 +546,8 @@ instances:
     ## @param tls_ca_cert - string - optional
     ## The path to a file of concatenated CA certificates in PEM format or a directory
     ## containing several CA certificates in PEM format. If a directory, the directory
-    ## must have been processed using the c_rehash utility supplied with OpenSSL. See:
-    ## https://www.openssl.org/docs/manmaster/man3/SSL_CTX_load_verify_locations.html
+    ## must have been processed using the `openssl rehash` command. See:
+    ## https://www.openssl.org/docs/man3.2/man1/c_rehash.html
     #
     # tls_ca_cert: <CA_CERT_PATH>
 
@@ -679,7 +679,9 @@ instances:
     # collect_node_metrics: true
 
     ## @param nodes - list of strings - optional
-    ## Use the `nodes` parameters to specify the nodes you'd like to collect metrics on (up to 100 nodes).
+    ## Use the `nodes` parameters to specify the nodes you'd like to collect metrics on.
+    ## The default maximum number of nodes is 100. Exceeding this limit can cause 
+    ## data loss. To increase the maximum, contact customer support.
     #
     # nodes:
     #   - <NODE_NAME_1>
@@ -696,7 +698,9 @@ instances:
     #   - <REGEX>
 
     ## @param queues - list of strings - optional
-    ## Use the `queues` parameters to specify the queues you'd like to collect metrics on (up to 200 queues).
+    ## Use the `queues` parameters to specify the queues you'd like to collect metrics on.
+    ## The default maximum number of queues is 200. Exceeding this limit can cause 
+    ## data loss. To increase the maximum, contact customer support.
     #
     # queues:
     #   - <QUEUE_NAME_1>
@@ -720,7 +724,9 @@ instances:
     #   - <REGEX>
 
     ## @param exchanges - list of strings - optional
-    ## Use the `exchanges` parameters to specify the exchanges you'd like to collect metrics on (up to 50 exchanges).
+    ## Use the `exchanges` parameters to specify the exchanges you'd like to collect metrics on.
+    ## The default maximum number of exchanges is 50. Exceeding this limit can cause 
+    ## data loss. To increase the maximum, contact customer support.
     #
     # exchanges:
     #   - <EXCHANGE_1>
