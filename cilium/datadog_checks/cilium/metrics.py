@@ -100,6 +100,7 @@ AGENT_METRICS = {
     'cilium_fqdn_active_ips': 'fqdn.active_ips',
     'cilium_fqdn_alive_zombie_connections': 'fqdn.alive_zombie_connections',
     # Cilium 1.14+
+    'cilium_endpoint': 'endpoint.count',
     'cilium_endpoint_max_ifindex': 'endpoint.max_ifindex',
     'cilium_cidrgroup_policies': 'cidrgroup.policies',
     'cilium_kvstore_sync_queue_size': 'kvstore.sync_queue_size',
