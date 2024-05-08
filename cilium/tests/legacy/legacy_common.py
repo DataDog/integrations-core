@@ -41,6 +41,10 @@ AGENT_DEFAULT_METRICS = [
     'cilium.unreachable.health_endpoints',
     'cilium.unreachable.nodes',
     'cilium.kvstore.quorum_errors.total',
+]
+
+AGENT_METRICS_1_14 = [
+    # E2E not updated yet to 1.14+ of Cilium
     'cilium.cidrgroup.policies',
     'cilium.k8s_client.rate_limiter_duration.seconds.count',
     'cilium.k8s_client.rate_limiter_duration.seconds.sum',
@@ -114,6 +118,19 @@ OPERATOR_METRICS = [
     'cilium.operator.process.start_time.seconds',
     'cilium.operator.process.virtual_memory.bytes',
     'cilium.operator.process.virtual_memory_max.bytes',
+    'cilium.operator.ipam.allocation.duration.seconds.count',
+    'cilium.operator.ipam.allocation.duration.seconds.sum',
+    'cilium.operator.ipam.available_interfaces',
+    'cilium.operator.ipam.available_ips',
+    'cilium.operator.ipam.ip_release_ops',
+    'cilium.operator.ipam.needed_ips',
+    'cilium.operator.ipam.release.duration.seconds.sum',
+    'cilium.operator.ipam.release.duration.seconds.count',
+    'cilium.operator.ipam.used_ips',
+]
+
+OPERATOR_METRICS_1_14 = [
+    # E2E not updated yet to 1.14+ of Cilium
     'cilium.operator.ipam.allocation.duration.seconds.count',
     'cilium.operator.ipam.allocation.duration.seconds.sum',
     'cilium.operator.ipam.available_interfaces',

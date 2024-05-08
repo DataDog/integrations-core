@@ -126,6 +126,10 @@ AGENT_V2_METRICS = [
     "cilium.kvstore.quorum_errors.count",
     "cilium.kvstore.sync_queue_size",
     "cilium.kvstore.initial_sync_completed",
+]
+
+AGENT_V2_METRICS_1_14 = [
+    # E2E not updated yet to 1.14+ of Cilium
     'cilium.cidrgroup.policies',
     'cilium.k8s_client.rate_limiter_duration.seconds.bucket',
     'cilium.k8s_client.rate_limiter_duration.seconds.count',
@@ -224,6 +228,10 @@ AGENT_V1_METRICS = [
     "cilium.kvstore.quorum_errors.total",
     "cilium.kvstore.sync_queue_size",
     "cilium.kvstore.initial_sync_completed",
+]
+
+AGENT_V1_METRICS_1_14 = [
+    # E2E not updated yet to 1.14+ of Cilium
     'cilium.cidrgroup.policies',
     'cilium.k8s_client.rate_limiter_duration.seconds.count',
     'cilium.k8s_client.rate_limiter_duration.seconds.sum',
@@ -346,6 +354,10 @@ OPERATOR_V2_METRICS = [
     "cilium.operator.ipam.empty_interface_slots.count",
     "cilium.operator.ipam.interface_candidates.count",
     "cilium.operator.ipam.ip_allocation_ops.count",
+] + OPERATOR_V2_PROCESS_METRICS
+
+OPERATOR_V2_METRICS_1_14 = [
+    # E2E not updated yet to 1.14+ of Cilium
     "cilium.operator.ipam.allocation.duration.seconds.bucket",
     "cilium.operator.ipam.allocation.duration.seconds.sum",
     "cilium.operator.ipam.allocation.duration.seconds.count",
@@ -357,7 +369,7 @@ OPERATOR_V2_METRICS = [
     "cilium.operator.ipam.release.duration.seconds.sum",
     "cilium.operator.ipam.release.duration.seconds.count",
     "cilium.operator.ipam.used_ips",
-] + OPERATOR_V2_PROCESS_METRICS
+]
 
 # Not available in test metric fixtures
 ADDL_OPERATOR_AWS_METRICS = [
