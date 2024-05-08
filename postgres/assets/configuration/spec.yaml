@@ -876,7 +876,7 @@ files:
         This collection does not involve any additional queries to the database.
       value:
         type: number
-        example: 1800
+        example: 300
         display_default: false
     - name: propagate_agent_tags
       description: |

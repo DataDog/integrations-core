@@ -745,7 +745,7 @@ def test_database_instance_metadata(aggregator, pg_instance, dbm_enabled, report
     assert event['dbms'] == "postgres"
     assert event['tags'].sort() == expected_tags.sort()
     assert event['integration_version'] == __version__
-    assert event['collection_interval'] == 1800
+    assert event['collection_interval'] == 300
     assert event['metadata'] == {
         'dbm': dbm_enabled,
         'connection_host': pg_instance['host'],
