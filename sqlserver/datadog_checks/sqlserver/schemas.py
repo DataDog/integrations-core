@@ -73,6 +73,7 @@ class SubmitData:
     def exceeded_total_columns_number(self):
         return self._total_columns_count > self.MAX_TOTAL_COLUMN_COUNT
 
+    #NOTE: DB with no schemas is never submitted
     def submit(self):
         if not bool(self.db_to_schemas):
             return
