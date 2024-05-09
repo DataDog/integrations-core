@@ -3,10 +3,10 @@
 # Licensed under a 3-clause BSD style license (see LICENSE)
 from __future__ import division
 
-from copy import deepcopy
-from functools import cached_property
 import json
 import time
+from copy import deepcopy
+from functools import cached_property
 
 from cachetools import TTLCache
 from packaging.version import Version
