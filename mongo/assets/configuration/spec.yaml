@@ -99,7 +99,7 @@ files:
         display_default: false
     - name: cluster_name
       description: |
-        The name of the cluster to which the monitored MongoDB belongs.
+        The name of the cluster to which the monitored MongoDB instance belongs.
         Used to group MongoDB instances in a MongoDB cluster.
         Please note that the cluster name must be unique for each MongoDB cluster.
         
