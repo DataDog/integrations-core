@@ -62,8 +62,7 @@ class EsxiCheck(AgentCheck):
             if excluded_host_tag not in AVAILABLE_HOST_TAGS:
                 self.log.warning(
                     "Unknown host tag `%s` cannot be excluded. Available host tags are: "
-                    "`esxi_url`, `esxi_type`, `esxi_host`, `esxi_folder`, `esxi_cluster` "
-                    "`esxi_compute`, `esxi_datacenter`, and `esxi_datastore`",
+                    "`esxi_url`, `esxi_type`, `esxi_host`, `esxi_compute`, and `esxi_datastore`",
                     excluded_host_tag,
                 )
             else:

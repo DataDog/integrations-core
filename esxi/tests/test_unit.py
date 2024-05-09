@@ -536,13 +536,13 @@ def test_invalid_instance_filters(dd_run_check, vcsim_instance, caplog):
         pytest.param(
             ['test'],
             "Unknown host tag `test` cannot be excluded. Available host tags are: `esxi_url`, `esxi_type`, "
-            "`esxi_host`, `esxi_folder`, `esxi_cluster` `esxi_compute`, `esxi_datacenter`, and `esxi_datastore`",
+            "`esxi_host`, `esxi_compute`, and `esxi_datastore`",
             id="unknown tag",
         ),
         pytest.param(
             ['esxi_type', 'hello'],
             "Unknown host tag `hello` cannot be excluded. Available host tags are: `esxi_url`, `esxi_type`, "
-            "`esxi_host`, `esxi_folder`, `esxi_cluster` `esxi_compute`, `esxi_datacenter`, and `esxi_datastore`",
+            "`esxi_host`, `esxi_compute`, and `esxi_datastore`",
             id="known and unknown tags together",
         ),
     ],
