@@ -42,6 +42,14 @@ files:
           value:
             type: boolean
             example: false
+        - name: use_configured_hostname
+          description: |
+            If true, the check will use the configured `host` parameter for ESXi hostnames instead of the Host name.
+            You may need to use this if you install both the vSphere check and ESXi check to avoid duplicate entries
+            for hosts in the web application UI.
+          value:
+            type: boolean
+            example: true
         - name: collect_per_instance_filters
           description: |
             Use this option to collect metrics tagged with instance values.

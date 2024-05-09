@@ -39,6 +39,13 @@ instances:
     #
     # use_guest_hostname: false
 
+    ## @param use_configured_hostname - boolean - optional - default: true
+    ## If true, the check will use the configured `host` parameter for ESXi hostnames instead of the Host name.
+    ## You may need to use this if you install both the vSphere check and ESXi check to avoid duplicate entries
+    ## for hosts in the web application UI.
+    #
+    # use_configured_hostname: true
+
     ## @param collect_per_instance_filters - mapping - optional
     ## Use this option to collect metrics tagged with instance values.
     ## Some ESXi metrics can be tagged with instance values.

@@ -44,7 +44,8 @@ class EsxiCheck(AgentCheck):
         self.host = self.instance.get("host")
         self.username = self.instance.get("username")
         self.password = self.instance.get("password")
-        self.use_guest_hostname = self.instance.get("use_guest_hostname", False)
+        self.use_guest_hostname = is_affirmative(self.instance.get("use_guest_hostname", False))
+        self.use_configured_hostname = is_affirmative(self.instance.get("use_configured_hostname", False))
         self.excluded_host_tags = self._validate_excluded_host_tags(self.instance.get("excluded_host_tags", []))
         self.collect_per_instance_filters = self._parse_metric_regex_filters(
             self.instance.get("collect_per_instance_filters", {})
@@ -240,6 +241,9 @@ class EsxiCheck(AgentCheck):
 
     def collect_metrics_for_entity(self, metric_ids, counter_keys_and_names, entity, entity_name, metric_tags):
         resource_type = type(entity)
+        hostname = entity_name
+        if self.use_configured_hostname and resource_type == HOST_RESOURCE:
+            hostname = self.host
         resource_name = RESOURCE_TYPE_TO_NAME[resource_type]
         for metric_id in metric_ids:
             metric_name = counter_keys_and_names.get(metric_id.counterId)
@@ -297,7 +301,7 @@ class EsxiCheck(AgentCheck):
                     self.log.debug(
                         "Skipping metric %s for %s because no value was returned by the %s",
                         metric_name,
-                        entity_name,
+                        hostname,
                         resource_name,
                     )
                     continue
@@ -308,7 +312,7 @@ class EsxiCheck(AgentCheck):
                         "Skipping metric %s for %s, because the value returned by the %s"
                         " is negative (i.e. the metric is not yet available). values: %s",
                         metric_name,
-                        entity_name,
+                        hostname,
                         resource_name,
                         list(metric_result.value),
                     )
@@ -321,10 +325,10 @@ class EsxiCheck(AgentCheck):
                         "Submit metric: name=`%s`, value=`%s`, hostname=`%s`, tags=`%s`",
                         metric_name,
                         most_recent_val,
-                        entity_name,
+                        hostname,
                         all_tags,
                     )
-                    self.gauge(metric_name, most_recent_val, hostname=entity_name, tags=all_tags)
+                    self.gauge(metric_name, most_recent_val, hostname=hostname, tags=all_tags)
 
     def set_version_metadata(self):
         esxi_version = self.content.about.version
