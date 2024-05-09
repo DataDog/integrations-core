@@ -4567,7 +4567,7 @@ PORTGROUPS_METRICS_IRONIC_MICROVERSION_1_80 = [
     },
 ]
 
-VOLUME_METRICS_IRONIC_MICROVERSION_1_80 = [
+VOLUME_CONNECTOR_METRICS_IRONIC_MICROVERSION_1_80 = [
     {
         'name': 'openstack.ironic.volume.connector.count',
         'count': 1,
@@ -4580,6 +4580,21 @@ VOLUME_METRICS_IRONIC_MICROVERSION_1_80 = [
             'connector_type:iqn',
         ],
     },
+    {
+        'name': 'openstack.ironic.volume.connector.count',
+        'count': 1,
+        'value': 1,
+        'tags': [
+            'keystone_server:http://127.0.0.1:8080/identity',
+            'connector_uuid:4e7b162e-0241-40dd-8069-345e751f8708',
+            'node_uuid:a27588a6-518d-49b4-a23c-3d51255a7e8b',
+            'connector_id:iqn.2017-07.org.openstack:01:d9a51732c3f',
+            'connector_type:iqn',
+        ],
+    },
+]
+
+VOLUME_TARGET_METRICS_IRONIC_MICROVERSION_1_80 = [
     {
         'name': 'openstack.ironic.volume.target.count',
         'count': 1,

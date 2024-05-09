@@ -454,11 +454,11 @@ class ApiRest(Api):
         return self.make_paginated_request(url, 'conductors', 'hostname', params={})
 
     def get_baremetal_volume_connectors(self):
-        response = self.http.get(
-            '{}/v1/volume/connectors'.format(self._catalog.get_endpoint_by_type(Component.Types.BAREMETAL.value))
+        return self.make_paginated_request(
+            '{}/v1/volume/connectors'.format(self._catalog.get_endpoint_by_type(Component.Types.BAREMETAL.value)),
+            'connectors',
+            'uuid',
         )
-        response.raise_for_status()
-        return response.json().get('connectors', [])
 
     def get_baremetal_volume_targets(self):
         response = self.http.get(

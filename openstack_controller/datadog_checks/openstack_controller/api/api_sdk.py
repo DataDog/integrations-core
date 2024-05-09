@@ -272,7 +272,12 @@ class ApiSdk(Api):
         ]
 
     def get_baremetal_volume_connectors(self):
-        return [connector.to_dict(original_names=True) for connector in self.connection.baremetal.volume_connectors()]
+        return [
+            connector.to_dict(original_names=True)
+            for connector in self.call_paginated_api(
+                self.connection.baremetal.volume_connectors, limit=self.config.paginated_limit
+            )
+        ]
 
     def get_baremetal_volume_targets(self):
         return [target.to_dict(original_names=True) for target in self.connection.baremetal.volume_targets()]
