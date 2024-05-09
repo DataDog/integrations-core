@@ -418,17 +418,12 @@ class EsxiCheck(AgentCheck):
                 runtime_hostname = to_string(runtime_host_props.get("name", "unknown"))
                 tags.append('esxi_host:{}'.format(runtime_hostname))
 
-                if runtime_host is not None:
-                    tags.extend(
-                        get_tags_recursively(
-                            runtime_host,
-                            resource_map,
-                            include_only=['esxi_cluster'],
-                        )
-                    )
-
             if parent is not None:
-                tags.extend(get_tags_recursively(parent, resource_map))
+                tags.extend(
+                    get_tags_recursively(
+                        parent, resource_map, include_only=["esxi_compute", "esxi_host", "esxi_datastore"]
+                    )
+                )
 
             tags.append('esxi_type:{}'.format(resource_type))
 
