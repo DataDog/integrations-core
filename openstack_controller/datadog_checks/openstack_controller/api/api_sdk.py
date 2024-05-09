@@ -291,7 +291,17 @@ class ApiSdk(Api):
         return [driver.to_dict(original_names=True) for driver in self.connection.baremetal.drivers()]
 
     def get_baremetal_allocations(self):
-        return [allocation.to_dict(original_names=True) for allocation in self.connection.baremetal.allocations()]
+        if float(self.config.ironic_microversion) < 1.52:
+            self.log.info(
+                "Ironic microversion is below 1.52 and set to %s, cannot collect allocations",
+                self.config.ironic_microversion,
+            )
+        return [
+            allocation.to_dict(original_names=True)
+            for allocation in self.call_paginated_api(
+                self.connection.baremetal.allocations, limit=self.config.paginated_limit
+            )
+        ]
 
     def get_auth_projects(self):
         response = self.http.get('{}/v3/auth/projects'.format(self.cloud_config.get_auth_args().get('auth_url')))

@@ -475,11 +475,16 @@ class ApiRest(Api):
         return response.json().get('drivers', [])
 
     def get_baremetal_allocations(self):
-        response = self.http.get(
-            '{}/v1/allocations'.format(self._catalog.get_endpoint_by_type(Component.Types.BAREMETAL.value))
+        if float(self.config.ironic_microversion) < 1.52:
+            self.log.info(
+                "Ironic microversion is below 1.52 and set to %s, cannot collect allocations",
+                self.config.ironic_microversion,
+            )
+        return self.make_paginated_request(
+            '{}/v1/allocations'.format(self._catalog.get_endpoint_by_type(Component.Types.BAREMETAL.value)),
+            'allocations',
+            'uuid',
         )
-        response.raise_for_status()
-        return response.json().get('allocations', [])
 
     def get_load_balancer_loadbalancers(self, project_id):
         params = {'project_id': project_id}

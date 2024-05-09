@@ -704,7 +704,7 @@ def connection_baremetal(request, mock_responses):
             for node in mock_responses('GET', '/baremetal/v1/drivers')['drivers']
         ]
 
-    def allocations():
+    def allocations(limit=None):
         if http_error and 'allocations' in http_error:
             raise requests.exceptions.HTTPError(response=http_error['allocations'])
         return [

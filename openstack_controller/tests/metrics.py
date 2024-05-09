@@ -4668,6 +4668,18 @@ ALLOCATIONS_METRICS_IRONIC_MICROVERSION_1_80 = [
             'allocation_state:active',
         ],
     },
+    {
+        'name': 'openstack.ironic.allocation.count',
+        'count': 1,
+        'value': 1,
+        'tags': [
+            'keystone_server:http://127.0.0.1:8080/identity',
+            'allocation_uuid:2c9eb88e-cb83-4125-9e82-6fc0312818a7',
+            'node_uuid:5344a3e2-978a-444e-990a-cbf47c62ef88',
+            'allocation_name:allocation-2',
+            'allocation_state:error',
+        ],
+    },
 ]
 
 IMAGES_METRICS_GLANCE = [
