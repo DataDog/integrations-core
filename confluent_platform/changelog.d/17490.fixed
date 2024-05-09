@@ -1,2 +1,2 @@
 
-Fix correct Mbean regex stream thread metric. Previously, because Bean Regex was set to Client metrics, Stream Thread Metrics were not collected. also added one useful attribute for debugging Stream Thread performance.
+Fix correct Mbean regex stream thread metric(after version 5.5.0 of confluent platform). Previously, because Bean Regex was set to Client metrics, Stream Thread Metrics were not collected. also added one useful attribute for debugging Stream Thread performance.
