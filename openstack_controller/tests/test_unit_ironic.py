@@ -752,7 +752,8 @@ def test_volume_connector_pagination(
             limit = params.get('limit')
             args_list += [(args[0], limit)]
         assert (
-            args_list.count(('http://127.0.0.1:6385/baremetal/v1/volume/connectors', paginated_limit)) == expected_api_calls
+            args_list.count(('http://127.0.0.1:6385/baremetal/v1/volume/connectors', paginated_limit))
+            == expected_api_calls
         )
     else:
         assert connection_baremetal.volume_connectors.call_count == 1
