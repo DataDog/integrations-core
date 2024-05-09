@@ -280,7 +280,12 @@ class ApiSdk(Api):
         ]
 
     def get_baremetal_volume_targets(self):
-        return [target.to_dict(original_names=True) for target in self.connection.baremetal.volume_targets()]
+        return [
+            target.to_dict(original_names=True)
+            for target in self.call_paginated_api(
+                self.connection.baremetal.volume_targets, limit=self.config.paginated_limit
+            )
+        ]
 
     def get_baremetal_drivers(self):
         return [driver.to_dict(original_names=True) for driver in self.connection.baremetal.drivers()]

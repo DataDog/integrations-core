@@ -769,6 +769,84 @@ def test_volume_connector_pagination(
 
 
 @pytest.mark.parametrize(
+    ('connection_baremetal', 'instance', 'paginated_limit', 'api_type', 'expected_api_calls'),
+    [
+        pytest.param(
+            None,
+            configs.REST,
+            1,
+            ApiType.REST,
+            2,
+            id='api rest small limit',
+        ),
+        pytest.param(
+            None,
+            configs.REST,
+            1000,
+            ApiType.REST,
+            1,
+            id='api rest high limit',
+        ),
+        pytest.param(
+            None,
+            configs.SDK,
+            1,
+            ApiType.SDK,
+            1,
+            id='api sdk small limit',
+        ),
+        pytest.param(
+            None,
+            configs.SDK,
+            1000,
+            ApiType.SDK,
+            1,
+            id='api sdk high limit',
+        ),
+    ],
+    indirect=['connection_baremetal'],
+)
+@pytest.mark.usefixtures('mock_http_get', 'mock_http_post', 'openstack_connection')
+def test_volume_target_pagination(
+    aggregator,
+    instance,
+    openstack_controller_check,
+    paginated_limit,
+    expected_api_calls,
+    api_type,
+    dd_run_check,
+    mock_http_get,
+    connection_baremetal,
+):
+    paginated_instance = copy.deepcopy(instance)
+    paginated_instance['paginated_limit'] = paginated_limit
+    dd_run_check(openstack_controller_check(paginated_instance))
+    if api_type == ApiType.REST:
+        args_list = []
+        for call in mock_http_get.call_args_list:
+            args, kwargs = call
+            args_list += list(args)
+            params = kwargs.get('params', {})
+            limit = params.get('limit')
+            args_list += [(args[0], limit)]
+        assert (
+            args_list.count(('http://127.0.0.1:6385/baremetal/v1/volume/targets', paginated_limit))
+            == expected_api_calls
+        )
+    else:
+        assert connection_baremetal.volume_connectors.call_count == 1
+        assert connection_baremetal.volume_connectors.call_args_list.count(mock.call(limit=paginated_limit)) == 1
+    for metric in VOLUME_TARGET_METRICS_IRONIC_MICROVERSION_1_80:
+        aggregator.assert_metric(
+            metric['name'],
+            count=metric['count'],
+            value=metric['value'],
+            tags=metric['tags'],
+            hostname=metric.get('hostname'),
+        )
+
+
+@pytest.mark.parametrize(
     ('instance', 'metrics'),
     [
         pytest.param(

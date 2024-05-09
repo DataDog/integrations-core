@@ -4607,6 +4607,18 @@ VOLUME_TARGET_METRICS_IRONIC_MICROVERSION_1_80 = [
             'volume_type:iscsi',
         ],
     },
+    {
+        'name': 'openstack.ironic.volume.target.count',
+        'count': 1,
+        'value': 1,
+        'tags': [
+            'keystone_server:http://127.0.0.1:8080/identity',
+            'target_uuid:8fea1a69-3e0d-4825-9776-a10bf2815b75',
+            'node_uuid:a27588a6-518d-49b4-a23c-3d51255a7e8b',
+            'volume_id:04452bed-5367-4202-8bf5-de4335ac56d2',
+            'volume_type:iscsi',
+        ],
+    },
 ]
 
 CONDUCTORS_METRICS_IRONIC_MICROVERSION_DEFAULT = []

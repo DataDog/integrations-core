@@ -461,11 +461,11 @@ class ApiRest(Api):
         )
 
     def get_baremetal_volume_targets(self):
-        response = self.http.get(
-            '{}/v1/volume/targets'.format(self._catalog.get_endpoint_by_type(Component.Types.BAREMETAL.value))
+        return self.make_paginated_request(
+            '{}/v1/volume/targets'.format(self._catalog.get_endpoint_by_type(Component.Types.BAREMETAL.value)),
+            'targets',
+            'uuid',
         )
-        response.raise_for_status()
-        return response.json().get('targets', [])
 
     def get_baremetal_drivers(self):
         response = self.http.get(

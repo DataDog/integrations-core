@@ -680,7 +680,7 @@ def connection_baremetal(request, mock_responses):
             for node in mock_responses('GET', '/baremetal/v1/volume/connectors')['connectors']
         ]
 
-    def volume_targets():
+    def volume_targets(limit=None):
         if http_error and 'targets' in http_error:
             raise requests.exceptions.HTTPError(response=http_error['targets'])
         return [
