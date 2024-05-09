@@ -209,19 +209,23 @@ datadog_checks_base/tests/**/test_db_statements.py  @DataDog/database-monitoring
 /postgres/                                          @DataDog/database-monitoring-agent @DataDog/agent-integrations
 /postgres/*.md                                      @DataDog/database-monitoring @DataDog/agent-integrations @DataDog/documentation
 /postgres/manifest.json                             @DataDog/database-monitoring @DataDog/agent-integrations @DataDog/documentation
-/postgres/assets/logs/                                @DataDog/database-monitoring @DataDog/agent-integrations @DataDog/documentation @DataDog/logs-backend
+/postgres/assets/logs/                              @DataDog/database-monitoring @DataDog/agent-integrations @DataDog/documentation @DataDog/logs-backend
 /mysql/                                             @DataDog/database-monitoring-agent @DataDog/agent-integrations
 /mysql/*.md                                         @DataDog/database-monitoring @DataDog/agent-integrations @DataDog/documentation
 /mysql/manifest.json                                @DataDog/database-monitoring @DataDog/agent-integrations @DataDog/documentation
-/mysql/assets/logs/                                @DataDog/database-monitoring @DataDog/agent-integrations @DataDog/documentation @DataDog/logs-backend
+/mysql/assets/logs/                                 @DataDog/database-monitoring @DataDog/agent-integrations @DataDog/documentation @DataDog/logs-backend
 /sqlserver/                                         @DataDog/database-monitoring-agent @DataDog/agent-integrations
 /sqlserver/*.md                                     @DataDog/database-monitoring @DataDog/agent-integrations @DataDog/documentation
 /sqlserver/manifest.json                            @DataDog/database-monitoring @DataDog/agent-integrations @DataDog/documentation
-/sqlserver/assets/logs/                                @DataDog/database-monitoring @DataDog/agent-integrations @DataDog/documentation @DataDog/logs-backend
+/sqlserver/assets/logs/                             @DataDog/database-monitoring @DataDog/agent-integrations @DataDog/documentation @DataDog/logs-backend
 /oracle/                                            @DataDog/database-monitoring-agent @DataDog/agent-integrations
 /oracle/*.md                                        @DataDog/database-monitoring @DataDog/agent-integrations @DataDog/documentation
 /oracle/manifest.json                               @DataDog/database-monitoring @DataDog/agent-integrations @DataDog/documentation
 /oracle/assets/logs/                                @DataDog/database-monitoring @DataDog/agent-integrations @DataDog/documentation @DataDog/logs-backend
+/mongo/                                             @DataDog/database-monitoring-agent @DataDog/agent-integrations
+/mongo/*.md                                         @DataDog/database-monitoring @DataDog/agent-integrations @DataDog/documentation
+/mongo/manifest.json                                @DataDog/database-monitoring @DataDog/agent-integrations @DataDog/documentation
+/mongo/assets/logs/                                 @DataDog/database-monitoring @DataDog/agent-integrations @DataDog/documentation @DataDog/logs-backend
 
 # APM Integrations
 /langchain/         @DataDog/ml-observability @DataDog/agent-integrations @DataDog/documentation
