@@ -58,7 +58,7 @@ class StatementMetrics:
                 continue
 
             if 'pg_' not in row['query']:
-                print("[AMW] computing derivative values, prev calls is: " + str(prev['calls']) + " | current calls is: " + str(row['calls']) + " | diff is: " + str(row['calls'] - prev['calls']) + " | prev row: " + str(prev) + " | current row: " + str(row) + " | prev row key: " + str(key(prev)) + " | current row key: " + str(key(row)) + " | prev row key == current row key: " + str(key(prev) == key(row)) + " | prev row key == row key: " + str(key(prev) == row_key) + " | current row key == row key: " + str(key(row) == row_key) + " | prev row key == row key == current row key: " + str(key(prev) == row_key == key(row)))
+                print("[AMW] computing derivative values" + " | prev query " + prev['query'] + " | curr query " + row['query'] + " | prev queryid " + str(prev['queryid']) + " | curr queryid " + str(row['queryid']) + " | prev query_sig: " + prev['query_signature'] + " | cur query sig: " + row['query_signature'] + " | prev calls is: " + str(prev['calls']) + " | current calls is: " + str(row['calls']) + " | diff is: " + str(row['calls'] - prev['calls']))
 
             metric_columns = metrics & set(row.keys())
 

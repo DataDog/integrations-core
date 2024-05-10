@@ -42,13 +42,10 @@ SELECT {cols}
   LEFT JOIN pg_database
          ON pg_stat_statements.dbid = pg_database.oid
   WHERE query NOT LIKE 'EXPLAIN %%'
+  AND queryid = ANY('{{ {called_queryids} }}'::bigint[])
   {filters}
   {extra_clauses}
 """
-
-#  AND queryid = ANY('{{ {called_queryids} }}'::bigint[])
-
-
 
 # Use pg_stat_statements(false) when available as an optimization to avoid pulling SQL text from disk
 PG_STAT_STATEMENTS_COUNT_QUERY = "SELECT COUNT(*) FROM pg_stat_statements(false)"
@@ -215,6 +212,7 @@ class PostgresStatementMetrics(DBMAsyncJob):
                 called_queryids = []
                 query = QUERYID_TO_CALLS_QUERY.format(pg_stat_statements_view=pgss_view_without_query_text)
                 rows = self._execute_query(cursor, query, params=(self._config.dbname,))
+                
                 for row in rows:
                     queryid = row[0]
                     if queryid is None:
@@ -272,7 +270,7 @@ class PostgresStatementMetrics(DBMAsyncJob):
     def _load_pg_stat_statements(self):
         try:
             called_queryids = self._check_called_queries()
-#            print("[AMW] called queries: " + str(called_queryids))
+            print("[AMW] called queries: " + str(called_queryids))
             available_columns = set(self._get_pg_stat_statements_columns())
             missing_columns = PG_STAT_STATEMENTS_REQUIRED_COLUMNS - available_columns
             if len(missing_columns) > 0:
@@ -352,6 +350,7 @@ class PostgresStatementMetrics(DBMAsyncJob):
                         params=params,
                     )                    
         except psycopg2.Error as e:
+            print("_load_pg_stat_statements error")
             error_tag = "error:database-{}".format(type(e).__name__)
 
             if (
@@ -464,10 +463,17 @@ class PostgresStatementMetrics(DBMAsyncJob):
         self._emit_pg_stat_statements_dealloc()
         rows = self._load_pg_stat_statements()
 
+        for row in rows:
+            if 'pg_' not in row['query']:
+                print('[AMW] query from load_pg_stat_statments | ' + str(row['queryid']))
         rows = self._normalize_queries(rows)
         if not rows:
             print("[AMW] no normalized rows, returning")
             return []
+
+        for row in rows:
+            if 'pg_' not in row['query']:
+                print('[AMW] rows after normalize_queries | ' + str(row['queryid']))
 
         available_columns = set(rows[0].keys())
         metric_columns = available_columns & PG_STAT_STATEMENTS_METRICS_COLUMNS
@@ -488,6 +494,7 @@ class PostgresStatementMetrics(DBMAsyncJob):
         return rows
 
     def _normalize_queries(self, rows):
+        print("Normalizing queries")
         normalized_rows = []
         for row in rows:
             normalized_row = dict(copy.copy(row))
@@ -501,6 +508,8 @@ class PostgresStatementMetrics(DBMAsyncJob):
                 continue
 
             obfuscated_query = statement['query']
+            # print("Obfuscated query: " + statement['query'] + " | query_signature: " + compute_sql_signature(obfuscated_query))
+
             normalized_row['query'] = obfuscated_query
             normalized_row['query_signature'] = compute_sql_signature(obfuscated_query)
             metadata = statement['metadata']
@@ -509,6 +518,7 @@ class PostgresStatementMetrics(DBMAsyncJob):
             normalized_row['dd_comments'] = metadata.get('comments', None)
             normalized_rows.append(normalized_row)
 
+        print("\n\n")
         return normalized_rows
 
     def _rows_to_fqt_events(self, rows):
