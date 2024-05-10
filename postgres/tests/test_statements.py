@@ -210,11 +210,6 @@ def test_statement_metrics_multiple_pgss_rows_single_query_signature(
     with mock.patch.object(datadog_agent, 'obfuscate_sql', passthrough=True) as mock_agent:
         mock_agent.side_effect = obfuscate_sql
         
-        # Reset pgss
-        postgres_conn = _get_superconn(dbm_instance)
-        with postgres_conn.cursor() as cur:
-            cur.execute("SELECT pg_stat_statements_reset();")
-
         check = integration_check(dbm_instance)
         check._connect()
 
@@ -225,7 +220,6 @@ def test_statement_metrics_multiple_pgss_rows_single_query_signature(
         _run_query(0)
         run_one_check(check, dbm_instance, cancel=False)
         
-        print("[AMW] clear previous statements")
         run_one_check(check, dbm_instance, cancel=False)
 
         # Call one query
@@ -234,11 +228,9 @@ def test_statement_metrics_multiple_pgss_rows_single_query_signature(
         aggregator.reset()
 
         # Call other query
-        print('[AMW] Call other query')
         _run_query(1)
         run_one_check(check, dbm_instance, cancel=False)
 
-        # obfuscated_param = '?' if POSTGRES_VERSION.split('.')[0] == "9" else '$1'
         obfuscated_param = '?'
         query0 = queries[0] % (obfuscated_param,)
         query_signature = compute_sql_signature(query0)
