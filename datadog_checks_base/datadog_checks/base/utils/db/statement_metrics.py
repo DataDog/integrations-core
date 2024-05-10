@@ -57,9 +57,6 @@ class StatementMetrics:
             if prev is None:
                 continue
 
-            if 'pg_' not in row['query']:
-                print("[AMW] computing derivative values" + " | prev query " + prev['query'] + " | curr query " + row['query'] + " | prev queryid " + str(prev['queryid']) + " | curr queryid " + str(row['queryid']) + " | prev query_sig: " + prev['query_signature'] + " | cur query sig: " + row['query_signature'] + " | prev calls is: " + str(prev['calls']) + " | current calls is: " + str(row['calls']) + " | diff is: " + str(row['calls'] - prev['calls']))
-
             metric_columns = metrics & set(row.keys())
 
             # Take the diff of all metric values between the current row and the previous run's row.

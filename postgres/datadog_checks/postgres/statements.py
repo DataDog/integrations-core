@@ -270,7 +270,6 @@ class PostgresStatementMetrics(DBMAsyncJob):
     def _load_pg_stat_statements(self):
         try:
             called_queryids = self._check_called_queries()
-            print("[AMW] called queries: " + str(called_queryids))
             available_columns = set(self._get_pg_stat_statements_columns())
             missing_columns = PG_STAT_STATEMENTS_REQUIRED_COLUMNS - available_columns
             if len(missing_columns) > 0:
@@ -350,7 +349,6 @@ class PostgresStatementMetrics(DBMAsyncJob):
                         params=params,
                     )                    
         except psycopg2.Error as e:
-            print("_load_pg_stat_statements error")
             error_tag = "error:database-{}".format(type(e).__name__)
 
             if (
@@ -508,11 +506,6 @@ class PostgresStatementMetrics(DBMAsyncJob):
             tags=self.tags + self._check._get_debug_tags(),
             hostname=self._check.resolved_hostname,
         )
-        print("[AMW] called queries")
-        for row in rows:
-            if 'pg_' not in row['query']:
-                print("QueryId: " + str(row['queryid']) + " | Query: " + str(row['query']) + " | Calls: " + str(row['calls']))
-        print("-------------------\n")
 
         return rows
 
