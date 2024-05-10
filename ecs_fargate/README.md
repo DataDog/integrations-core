@@ -225,6 +225,8 @@ For more information on CloudFormation templating and syntax, see the [AWS Cloud
 
 <!-- xxz tabs xxx -->
 
+To provide your Datadog API key as a secret, see [Using secrets](#using-secrets).
+
 ### Installation for AWS Batch
 
 To monitor your AWS Batch jobs with Datadog, run the Agent as a container in **same job definition** as your application container. To collect metrics with Datadog, each job definition should include a Datadog Agent container in addition to the application containers. Follow these setup steps:
@@ -289,6 +291,9 @@ aws batch register-job-definition --cli-input-json file://<PATH_TO_FILE>/datadog
 ```
 <!-- xxz tab xxx -->
 <!-- xxz tabs xxx -->
+
+To provide your Datadog API key as a secret, see [Using secrets](#using-secrets).
+
 #### Submit the job to your job queue
 
 The Datadog Agent runs in the same job definition as your application and integration containers.
@@ -340,8 +345,6 @@ aws batch submit-job --job-name <JOB_NAME> \
 <!-- xxz tab xxx -->
 <!-- xxz tabs xxx -->
 
-For all of these examples, you can alternatively populate the `DD_API_KEY` environment variable by referencing the [ARN of a plaintext secret stored in AWS Secrets Manager][7]. Place the `DD_API_KEY` environment variable under the `containerDefinitions.secrets` section of the job definition file. Ensure that the task execution role has the necessary permission to fetch secrets from AWS Secrets Manager.
-
 #### Create or modify your IAM policy
 
 Add the following permissions to your [Datadog IAM policy][8] to collect ECS Fargate metrics. For more information, see the [ECS policies][9] on the AWS website.
@@ -351,6 +354,9 @@ Add the following permissions to your [Datadog IAM policy][8] to collect ECS Far
 | `ecs:ListClusters`               | List available clusters.                                          |
 | `ecs:ListContainerInstances`     | List instances of a cluster.                                      |
 | `ecs:DescribeContainerInstances` | Describe instances to add metrics on resources and tasks running. |
+
+#### Using secrets
+As an alternative to populating the `DD_API_KEY` environment variable with your API key in plaintext, you can instead reference the [ARN of a plaintext secret stored in AWS Secrets Manager][7]. Place the `DD_API_KEY` environment variable under the `containerDefinitions.secrets` section of the task or job definition file. Ensure that the task/job execution role has the necessary permission to fetch secrets from AWS Secrets Manager.
 
 ### Metric collection
 
