@@ -89,7 +89,7 @@ def test_statement_metrics_multiple_pgss_rows_single_query_signature(
     # very low collection interval for test purposes
     dbm_instance['query_metrics'] = {'enabled': True, 'run_sync': True, 'collection_interval': 0.1}
     connections = {}
-    
+
     def normalize_query(q):
         # Remove the quotes from below:
         normalized = ""
@@ -97,19 +97,16 @@ def test_statement_metrics_multiple_pgss_rows_single_query_signature(
             if s in q:
                 normalized = q.replace(s, "?")
                 break
-    
+
         return normalized
 
     def obfuscate_sql(query, options=None):
         if query.startswith('SET application_name'):
             return json.dumps({'query': normalize_query(query), 'metadata': {}})
         return json.dumps({'query': query, 'metadata': {}})
-    
-    queries = [
-        "SET application_name = %s",
-        "SET application_name = %s"
-    ]
-    # These queries will have the same query signature but different queryids in pg_stat_statements    
+
+    queries = ["SET application_name = %s", "SET application_name = %s"]
+    # These queries will have the same query signature but different queryids in pg_stat_statements
     def _run_query(idx):
         query = queries[idx]
         user = "bob"
@@ -117,7 +114,7 @@ def test_statement_metrics_multiple_pgss_rows_single_query_signature(
         dbname = "datadog_test"
         if dbname not in connections:
             connections[dbname] = psycopg2.connect(host=HOST, dbname=dbname, user=user, password=password)
-        
+
         args = ('two',)
         if idx == 1:
             args = ('one',)
@@ -129,7 +126,7 @@ def test_statement_metrics_multiple_pgss_rows_single_query_signature(
     # Execute the query with the mocked obfuscate_sql. The result should produce an event payload with the metadata.
     with mock.patch.object(datadog_agent, 'obfuscate_sql', passthrough=True) as mock_agent:
         mock_agent.side_effect = obfuscate_sql
-        
+
         check = integration_check(dbm_instance)
         check._connect()
 
@@ -139,7 +136,7 @@ def test_statement_metrics_multiple_pgss_rows_single_query_signature(
 
         _run_query(0)
         run_one_check(check, dbm_instance, cancel=False)
-        
+
         run_one_check(check, dbm_instance, cancel=False)
 
         # Call one query
@@ -157,7 +154,7 @@ def test_statement_metrics_multiple_pgss_rows_single_query_signature(
         events = aggregator.get_event_platform_events("dbm-metrics")
 
         assert len(events) > 0
-        
+
         matching_rows = [r for r in events[0]['postgres_rows'] if r['query_signature'] == query_signature]
 
         assert len(matching_rows) == 1
@@ -165,10 +162,11 @@ def test_statement_metrics_multiple_pgss_rows_single_query_signature(
         assert matching_rows[0]['calls'] == 1
 
     for conn in connections.values():
-        conn.close()  
+        conn.close()
 
 
 statement_samples_keys = ["query_samples", "statement_samples"]
+
 
 @pytest.mark.parametrize("statement_samples_key", statement_samples_keys)
 @pytest.mark.parametrize("statement_samples_enabled", [True, False])

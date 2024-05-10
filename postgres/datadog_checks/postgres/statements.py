@@ -47,6 +47,8 @@ SELECT {cols}
   {extra_clauses}
 """
 
+BASELINE_METRICS_EXPIRY = 60 * 10 # 10 minutes
+
 # Use pg_stat_statements(false) when available as an optimization to avoid pulling SQL text from disk
 PG_STAT_STATEMENTS_COUNT_QUERY = "SELECT COUNT(*) FROM pg_stat_statements(false)"
 PG_STAT_STATEMENTS_COUNT_QUERY_LT_9_4 = "SELECT COUNT(*) FROM pg_stat_statements"
@@ -155,6 +157,7 @@ class PostgresStatementMetrics(DBMAsyncJob):
         self._stat_column_cache = []
         self._query_calls_cache = QueryCallsCache()
         self._baseline_metrics = {}
+        self._last_baseline_metrics_expiry = None
         self._track_io_timing_cache = None
         self._obfuscate_options = to_native_string(json.dumps(self._config.obfuscator_options))
         # full_statement_text_cache: limit the ingestion rate of full statement text events per query_signature
@@ -206,14 +209,14 @@ class PostgresStatementMetrics(DBMAsyncJob):
             # allows the engine to avoid retrieving the potentially large amount of text data.
             # The query count query does not depend on the statement text, so it's safe for this use case.
             # For more info: https://www.postgresql.org/docs/current/pgstatstatements.html#PGSTATSTATEMENTS-FUNCS
-            pgss_view_without_query_text = "pg_stat_statements(false)" 
+            pgss_view_without_query_text = "pg_stat_statements(false)"
 
         with self._check._get_main_db() as conn:
             with conn.cursor(cursor_factory=CommenterCursor) as cursor:
                 called_queryids = []
                 query = QUERYID_TO_CALLS_QUERY.format(pg_stat_statements_view=pgss_view_without_query_text)
                 rows = self._execute_query(cursor, query, params=(self._config.dbname,))
-                
+
                 for row in rows:
                     queryid = row[0]
                     if queryid is None:
@@ -347,7 +350,7 @@ class PostgresStatementMetrics(DBMAsyncJob):
                             called_queryids=', '.join([str(i) for i in called_queryids]),
                         ),
                         params=params,
-                    )                    
+                    )
         except psycopg2.Error as e:
             error_tag = "error:database-{}".format(type(e).__name__)
 
@@ -464,9 +467,7 @@ class PostgresStatementMetrics(DBMAsyncJob):
             query_signature = row['query_signature']
             queryid = row['queryid']
             if query_signature not in self._baseline_metrics:
-                self._baseline_metrics[query_signature] = {
-                    queryid: copy.copy(row)
-                }
+                self._baseline_metrics[query_signature] = {queryid: copy.copy(row)}
             else:
                 self._baseline_metrics[query_signature][queryid] = copy.copy(row)
 
@@ -486,10 +487,20 @@ class PostgresStatementMetrics(DBMAsyncJob):
 
         return aggregated_rows
 
+    # To prevent the baseline metrics cache from growing indefinitely (as can happen) because of
+    # pg_stat_statements eviction), we clear it out periodically to force a full refetch.
+    def _check_baseline_metrics_expiry(self):
+        if self._last_baseline_metrics_expiry == None or self._last_baseline_metrics_expiry + BASELINE_METRICS_EXPIRY < time.time():
+            self._baseline_metrics = {}
+            self._query_calls_cache = QueryCallsCache()
+            self._last_baseline_metrics_expiry = time.time()
+
+
     @tracked_method(agent_check_getter=agent_check_getter, track_result_length=True)
     def _collect_metrics_rows(self):
         self._emit_pg_stat_statements_metrics()
         self._emit_pg_stat_statements_dealloc()
+        self._check_baseline_metrics_expiry()
         rows = self._load_pg_stat_statements()
         rows = self._normalize_queries(rows)
         if not rows:
