@@ -79,8 +79,11 @@ class CheckDefinition(object):
             self.log_collection: bool = 'Category::Log Collection' in content.get('tile', {}).get('classifier_tags', [])
             # boolean: whether or not the integration has public facing docs
             self.is_public: bool = content['display_on_public_website']
-            # Log source defined in the manifest.json of the integration
-            self.log_source: Optional[str] = content.get("assets", {}).get("logs", {}).get("source")
+
+        with open(os.path.join(INTEGRATIONS_CORE, dir_name, f'assets/logs/{dir_name}.yaml'), 'r') as logs_file:
+            content = yaml.load(logs_file)
+            # Log source defined in the assets/logs/dir_name.yaml of the integration
+            self.log_source: Optional[str] = content["id"]
 
         # Whether or not this check has a log to metrics mapping defined in web-ui
         self.is_defined_in_web_ui: bool = False
