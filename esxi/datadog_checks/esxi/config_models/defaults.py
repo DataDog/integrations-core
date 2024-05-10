@@ -28,5 +28,9 @@ def instance_ssl_verify():
     return True
 
 
+def instance_use_configured_hostname():
+    return True
+
+
 def instance_use_guest_hostname():
     return False

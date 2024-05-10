@@ -78,7 +78,12 @@ def test_refresh_role(instance_shard, aggregator, check, dd_run_check):
     mongo_check = check(instance_shard)
     dd_run_check(mongo_check)
     with mock.patch('datadog_checks.mongo.api.MongoApi._get_rs_deployment_from_status_payload') as get_deployment:
-        mock_deployment_type = ReplicaSetDeployment("sharding01", 9, cluster_role="TEST")
+        mock_deployment_type = ReplicaSetDeployment(
+            "sharding01",
+            9,
+            ["sharding01a:27017", "sharding01b:27017", "sharding01c:27017"],
+            cluster_role="TEST",
+        )
         get_deployment.return_value = mock_deployment_type
         dd_run_check(mongo_check)
         assert get_deployment.call_count == 1
