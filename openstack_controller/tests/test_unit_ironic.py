@@ -525,6 +525,10 @@ def test_allocations_low_microversion(aggregator, check, dd_run_check, caplog):
     caplog.set_level(logging.INFO)
     dd_run_check(check)
     assert 'Ironic microversion is below 1.52 and set to 1.10, cannot collect allocations' in caplog.text
+    aggregator.assert_metric(
+        'openstack.ironic.allocation.count',
+        count=0,
+    )
 
 
 @pytest.mark.parametrize(
