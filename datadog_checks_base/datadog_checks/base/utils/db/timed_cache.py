@@ -62,7 +62,3 @@ class TimedCache:
         """Clear the entire cache and reset the last refresh time."""
         self.__cache = {}
         self.__last_refresh_time = time.time()
-
-    def __bool__(self):
-        """Return True if the cache has any items and is not expired, False otherwise."""
-        return bool(self.__cache) and not self.is_expired()

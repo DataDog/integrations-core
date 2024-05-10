@@ -32,7 +32,6 @@ class TestTimedCache:
         cache['test_key'] = 'test_value'
         assert cache, "The cache should not be empty immediately after setting an item."
         time.sleep(2)  # Wait enough time for the cache to clear itself
-        assert not cache, "The cache should be expired after the interval has passed."
         assert cache.is_expired() is True, "The cache should be expired after the interval has passed."
         cache.clear()
         cache['test_key'] = 'test_value'
