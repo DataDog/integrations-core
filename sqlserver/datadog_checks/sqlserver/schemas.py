@@ -19,6 +19,7 @@ from datadog_checks.sqlserver.const import (
     STATIC_INFO_ENGINE_EDITION,
     STATIC_INFO_VERSION,
     TABLES_IN_SCHEMA_QUERY,
+    DEFAULT_SCHEMAS_COLLECTION_INTERVAL
 )
 from datadog_checks.sqlserver.utils import execute_query_output_result_as_a_dict, get_list_chunks
 
@@ -104,17 +105,22 @@ class Schemas:
     # but allows the queue to be stable.
     TABLES_CHUNK_SIZE = 50
 
-    def __init__(self, check, schemas_collection_interval):
+    def __init__(self, check, config):
         self._check = check
         self._log = check.log
         self.schemas_per_db = {}
-
+        collection_interval = config.schema_config.get(
+            'collection_interval', DEFAULT_SCHEMAS_COLLECTION_INTERVAL
+        )
+        self._collection_interval = collection_interval if collection_interval > 0 else DEFAULT_SCHEMAS_COLLECTION_INTERVAL
+        self._enabled = config.schema_config.get('enabled', False)
+       
         base_event = {
             "host": None,
             "agent_version": datadog_agent.get_version(),
             "dbms": "sqlserver",
             "kind": "sqlserver_databases",
-            "collection_interval": schemas_collection_interval,
+            "collection_interval":  self._collection_interval,
             "dbms_version": None,
             "tags": self._check.non_internal_tags,
             "cloud_metadata": self._check._config.cloud_metadata,
@@ -165,6 +171,8 @@ class Schemas:
 
     @tracked_method(agent_check_getter=agent_check_getter)
     def collect_schemas_data(self):
+        if not self._enabled:
+            return
         self._dataSubmitter.reset()
         self._dataSubmitter.set_base_event_data(
             self._check.resolved_hostname,

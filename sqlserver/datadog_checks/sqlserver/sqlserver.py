@@ -161,7 +161,7 @@ class SQLServer(AgentCheck):
         self._database_metrics = None
 
         self._last_schemas_collect_time = None
-        self._schemas = Schemas(self, self._config.schemas_collection_interval)
+        self._schemas = Schemas(self, self._config)
 
     def cancel(self):
         self.statement_metrics.cancel()
@@ -791,6 +791,7 @@ class SQLServer(AgentCheck):
                 self.procedure_metrics.run_job_loop(self.tags)
                 self.activity.run_job_loop(self.tags)
                 self.sql_metadata.run_job_loop(self.tags)
+                self._schemas.collect_schemas_data()
         else:
             self.log.debug("Skipping check")
 

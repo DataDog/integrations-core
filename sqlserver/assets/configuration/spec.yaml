@@ -713,10 +713,22 @@ files:
         type: number
         example: 1800
         display_default: false
-    - name: schemas_collection_interval 
+    - name: schemas_collection 
       description: |
-        The database schema collection interval (in seconds).
-        Defaults to 1200 seconds to include everything.
+        Configure collection of schemas.
+      options:
+        - name: enabled
+          description: |
+            Enable schema collection. Requires `dbm: true`.
+          value:
+            type: boolean
+            example: false
+        - name: collection_interval
+          description: |
+            Set the database schema collection interval (in seconds). Defaults to 600 seconds
+          value:
+            type: number
+            example: 600
       value:
         type: number
         example: 1200

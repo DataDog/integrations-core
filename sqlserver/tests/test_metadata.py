@@ -325,6 +325,8 @@ def test_collect_schemas(aggregator, dd_run_check, dbm_instance):
 
     dbm_instance['database_autodiscovery'] = True
     dbm_instance['autodiscovery_include'] = ['datadog_test_schemas', 'datadog_test']
+    dbm_instance['dbm'] = True
+    dbm_instance['schemas_collection'] = {"enabled" : True}
 
     check = SQLServer(CHECK_NAME, {}, [dbm_instance])
     dd_run_check(check)

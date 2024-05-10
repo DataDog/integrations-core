@@ -9,7 +9,6 @@ from datadog_checks.base.config import is_affirmative
 from datadog_checks.base.utils.common import to_native_string
 from datadog_checks.sqlserver.const import (
     DEFAULT_AUTODISCOVERY_INTERVAL,
-    DEFAULT_SCHEMAS_COLLECTION_INTERVAL,
     PROC_CHAR_LIMIT,
 )
 
@@ -27,10 +26,6 @@ class SQLServerConfig:
         self.autodiscovery_interval: int = instance.get('autodiscovery_interval', DEFAULT_AUTODISCOVERY_INTERVAL)
         self._include_patterns = self._compile_valid_patterns(self.autodiscovery_include)
         self._exclude_patterns = self._compile_valid_patterns(self.autodiscovery_exclude)
-        self.schemas_collection_interval: int = instance.get(
-            'schemas_collection_interval', DEFAULT_SCHEMAS_COLLECTION_INTERVAL
-        )
-
         self.proc: str = instance.get('stored_procedure')
         self.custom_metrics: list[dict] = init_config.get('custom_metrics', []) or []
         self.include_index_usage_metrics_tempdb: bool = is_affirmative(
@@ -52,6 +47,7 @@ class SQLServerConfig:
         self.procedure_metrics_config: dict = instance.get('procedure_metrics', {}) or {}
         self.settings_config: dict = instance.get('collect_settings', {}) or {}
         self.activity_config: dict = instance.get('query_activity', {}) or {}
+        self.schema_config: dict = instance.get('schemas_collection', {}) or {}
         self.cloud_metadata: dict = {}
         aws: dict = instance.get('aws', {}) or {}
         gcp: dict = instance.get('gcp', {}) or {}
