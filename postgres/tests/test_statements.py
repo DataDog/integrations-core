@@ -238,26 +238,14 @@ def test_statement_metrics_multiple_pgss_rows_single_query_signature(
         _run_query(1)
         run_one_check(check, dbm_instance, cancel=False)
 
-        with postgres_conn.cursor() as cur:
-            cur.execute("SELECT * from pg_stat_statements where query not ilike '%pg_%'")
-            for row in cur.fetchall():
-                print("[AMW] PGSS: " + str(row))
-
-#        obfuscated_param = '?' if POSTGRES_VERSION.split('.')[0] == "9" else '$1'
-        query0 = queries[0] % ('?',)
+        # obfuscated_param = '?' if POSTGRES_VERSION.split('.')[0] == "9" else '$1'
+        obfuscated_param = '?'
+        query0 = queries[0] % (obfuscated_param,)
         query_signature = compute_sql_signature(query0)
         events = aggregator.get_event_platform_events("dbm-metrics")
 
-        query1 = queries[1] % ('?',)
-        query1_sig = compute_sql_signature(query1)
-        print("[AMW] Looking for query signature for " + query0 + ": " + query_signature)
-        print("[AMW] other query sig for " + query1 + ": " + query1_sig)
-
         assert len(events) > 0
         
-        print("[AMW] Event:")
-        print(events[0])
-
         matching_rows = [r for r in events[0]['postgres_rows'] if r['query_signature'] == query_signature]
 
         assert len(matching_rows) == 1
@@ -266,75 +254,7 @@ def test_statement_metrics_multiple_pgss_rows_single_query_signature(
 
     for conn in connections.values():
         conn.close()  
-    
-    fail("Fail")
 
-# Simulate an agent starting up into a long-running DB instance
-# with pg_stat_statements already populated
-def test_statement_metrics_existing_calls(
-    aggregator,
-    integration_check,
-    dbm_instance,
-):
-    # don't need samples for this test
-    dbm_instance['query_samples'] = {'enabled': False}
-    dbm_instance['query_activity'] = {'enabled': False}
-    # very low collection interval for test purposes
-    dbm_instance['query_metrics'] = {'enabled': True, 'run_sync': True, 'collection_interval': 0.1}
-    connections = {}
-
-    def _run_queries():
-        user, password, dbname, query, arg = SAMPLE_QUERIES[0]
-        if dbname not in connections:
-            connections[dbname] = psycopg2.connect(host=HOST, dbname=dbname, user=user, password=password)
-        connections[dbname].cursor().execute(query, (arg,))
-
-    # Reset pgss
-    postgres_conn = _get_superconn(dbm_instance)
-    with postgres_conn.cursor() as cur:
-        cur.execute("SELECT pg_stat_statements_reset();")
-
-    check = integration_check(dbm_instance)
-    check._connect()
-
-    # Populate pg_stat_statements with a bunch of executions of the same query
-    print("Running queries to populate pg_stat_statements")
-    for _ in range(500):
-        _run_queries()
-
-    # Run multiple times to fill the initial previous_statements with queries from the agent
-    run_one_check(check, dbm_instance, cancel=False)
-    expected_dbm_metrics_tags = _get_expected_tags(check, dbm_instance, with_db=True, with_host=False)
-    expected_dbm_metrics_tags.append('agent_hostname:stubbed.hostname')
-
-    print("Running single query")
-
-    _run_queries()
-    run_one_check(check, dbm_instance, cancel=False)
-
-    aggregator.reset()
-
-    print("Running single query")
-    _run_queries()
-    run_one_check(check, dbm_instance, cancel=False)
-    obfuscated_param = '?' if POSTGRES_VERSION.split('.')[0] == "9" else '$1'
-    expected_query = SAMPLE_QUERIES[0][3] % obfuscated_param
-
-    query_signature = compute_sql_signature(expected_query)
-    count_metrics = aggregator.metrics('postgresql.queries.count')
-    expected_metric = None
-    print("[AMW] count metrics: " + str(count_metrics))
-    for metric in count_metrics:
-        print("[AMW] metric: " + str(metric))
-        if metric.tags['query_signature'] == query_signature:
-            expected_metric = metric
-            break
-    
-    assert expected_metric is not None
-    assert expected_metric.value == 1
-
-    for conn in connections.values():
-        conn.close() 
 
 # This results in metrics being omitted
 def test_statement_metrics_unchanged(

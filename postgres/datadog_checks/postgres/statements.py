@@ -467,27 +467,18 @@ class PostgresStatementMetrics(DBMAsyncJob):
             queryid = row['queryid']
             if query_signature not in self._baseline_metrics:
                 self._baseline_metrics[query_signature] = {
-                    queryid: row
+                    queryid: copy.copy(row)
                 }
             else:
-                query_sig_metrics = self._baseline_metrics[query_signature]
-                if queryid not in query_sig_metrics:
-                    query_sig_metrics[queryid] = row
-                else:
-                    # Test this case
-                    baseline_row = query_sig_metrics[queryid]
-                    for metric in metrics:
-                        if metric in row:
-                            baseline_row[metric] += row[metric]
+                self._baseline_metrics[query_signature][queryid] = copy.copy(row)
 
-        print("Built baseline: " + str(self._baseline_metrics))
         # Aggregate multiple queryids into one row per query_signature
         aggregated_rows = []
         for query_signature, query_sig_metrics in self._baseline_metrics.items():
             aggregated_row = {}
             for queryid, row in query_sig_metrics.items():
                 if 'query_signature' not in aggregated_row:
-                    aggregated_row = row
+                    aggregated_row = copy.copy(row)
                 else:
                     for metric in metrics:
                         if metric in row:
