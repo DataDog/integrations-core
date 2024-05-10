@@ -10,6 +10,7 @@ from datadog_checks.base.stubs.aggregator import normalize_tags
 from datadog_checks.dev import get_docker_hostname
 from datadog_checks.dev.docker import get_container_ip
 from datadog_checks.postgres.util import (
+    CHECKSUM_METRICS,
     NEWER_14_METRICS,
     QUERY_PG_CONTROL_CHECKPOINT,
     QUERY_PG_REPLICATION_SLOTS,
@@ -19,6 +20,7 @@ from datadog_checks.postgres.util import (
     REPLICATION_STATS_METRICS,
     SLRU_METRICS,
     SNAPSHOT_TXID_METRICS,
+    STAT_IO_METRICS,
     STAT_SUBSCRIPTION_METRICS,
     STAT_SUBSCRIPTION_STATS_METRICS,
     STAT_WAL_METRICS,
@@ -202,16 +204,14 @@ def check_common_metrics(aggregator, expected_tags, count=1):
         if POSTGRES_VERSION is None or float(POSTGRES_VERSION) >= 14.0:
             for metric_name, _ in NEWER_14_METRICS.values():
                 aggregator.assert_metric(metric_name, count=count, tags=db_tags)
+    aggregator.assert_metric('postgresql.running', count=count, value=1, tags=expected_tags)
 
 
 def check_db_count(aggregator, expected_tags, count=1):
-    table_count = 7
-    # We create 2 additional partition tables when partition is available
+    table_count = 18
+    # We create 2 additional partition tables when partition is available + 2 parent tables
     if float(POSTGRES_VERSION) >= 11.0:
-        table_count = 9
-    # And PG >= 14 will also report the parent table
-    if float(POSTGRES_VERSION) >= 14.0:
-        table_count = 11
+        table_count = 25
     aggregator.assert_metric(
         'postgresql.table.count',
         value=table_count,
@@ -413,3 +413,22 @@ def check_subscription_stats_metrics(aggregator, expected_tags, count=1):
         return
     for metric_name in _iterate_metric_name(STAT_SUBSCRIPTION_STATS_METRICS):
         aggregator.assert_metric(metric_name, count=count, tags=expected_tags)
+
+
+def check_checksum_metrics(aggregator, expected_tags, count=1):
+    if float(POSTGRES_VERSION) < 12:
+        return
+    for metric_name in _iterate_metric_name(CHECKSUM_METRICS):
+        aggregator.assert_metric(metric_name, count=count, tags=expected_tags + ['db:{}'.format(DB_NAME)])
+
+
+def check_stat_io_metrics(aggregator, expected_tags, count=1):
+    if float(POSTGRES_VERSION) < 16:
+        return
+    expected_stat_io_tags = expected_tags + [
+        'backend_type:walsender',
+        'context:normal',
+        'object:relation',
+    ]
+    for metric_name in _iterate_metric_name(STAT_IO_METRICS):
+        aggregator.assert_metric(metric_name, count=count, tags=expected_stat_io_tags)

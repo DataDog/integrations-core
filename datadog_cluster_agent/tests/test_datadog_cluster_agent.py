@@ -14,10 +14,13 @@ NAMESPACE = 'datadog.cluster_agent'
 
 METRICS = [
     'admission_webhooks.certificate_expiry',
+    'admission_webhooks.cws_exec_instrumentation_attempts.count',
+    'admission_webhooks.cws_exec_instrumentation_attempts.sum',
+    'admission_webhooks.cws_pod_instrumentation_attempts.count',
+    'admission_webhooks.cws_pod_instrumentation_attempts.sum',
     'admission_webhooks.library_injection_attempts',
     'admission_webhooks.library_injection_errors',
     'admission_webhooks.mutation_attempts',
-    'admission_webhooks.mutation_errors',
     'admission_webhooks.patcher.attempts',
     'admission_webhooks.patcher.completed',
     'admission_webhooks.patcher.errors',

@@ -1,0 +1,69 @@
+{
+  "manifest_version": "2.0.0",
+  "app_uuid": "28d531ac-954c-4c5a-8769-589589f793e0",
+  "app_id": "argo-rollouts",
+  "display_on_public_website": false,
+  "tile": {
+    "overview": "README.md#Overview",
+    "configuration": "README.md#Setup",
+    "support": "README.md#Support",
+    "changelog": "CHANGELOG.md",
+    "description": "Monitor the health and performance of Argo Rollouts",
+    "title": "Argo Rollouts",
+    "media": [],
+    "classifier_tags": [
+      "Supported OS::Linux",
+      "Supported OS::Windows",
+      "Supported OS::macOS",
+      "Category::Metrics",
+      "Category::Kubernetes",
+      "Category::Developer Tools",
+      "Category::Log Collection",
+      "Submitted Data Type::Metrics",
+      "Submitted Data Type::Logs"
+    ]
+  },
+  "assets": {
+    "integration": {
+      "auto_install": true,
+      "source_type_id": 8465752,
+      "source_type_name": "Argo Rollouts",
+      "configuration": {
+        "spec": "assets/configuration/spec.yaml"
+      },
+      "process_signatures": [
+        "rollouts-controller"
+      ],
+      "events": {
+        "creates_events": false
+      },
+      "metrics": {
+        "prefix": "argo_rollouts.",
+        "check": "argo_rollouts.go.threads",
+        "metadata_path": "metadata.csv"
+      },
+      "service_checks": {
+        "metadata_path": "assets/service_checks.json"
+      }
+    },
+    "dashboards": {
+      "Argo Rollouts Overview": "assets/dashboards/argo_rollouts_overview.json"
+    },
+    "logs": {
+      "source": "argo_rollouts"
+    },
+    "monitors": {
+      "Rollout Phase": "assets/monitors/rollout_phase.json"
+    },
+    "saved_views": {
+      "Argo Rollouts Logs Overview": "assets/saved_views/logs_overview.json",
+      "Argo Rollouts Error Logs Overview": "assets/saved_views/error_logs_overview.json"
+    }
+  },
+  "author": {
+    "support_email": "help@datadoghq.com",
+    "name": "Datadog",
+    "homepage": "https://www.datadoghq.com",
+    "sales_email": "info@datadoghq.com"
+  }
+}

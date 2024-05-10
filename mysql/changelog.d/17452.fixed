@@ -1,0 +1,1 @@
+Changing the mysql.innodb.lock_structs metric type to gauge

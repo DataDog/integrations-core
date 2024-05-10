@@ -117,12 +117,12 @@ jobs:
       TARGET: ${{ github.event_name == 'pull_request' && 'changed' || '' }}
 
     steps:
-    - uses: actions/checkout@v3
+    - uses: actions/checkout@v4
       with:
         fetch-depth: "0"
 
     - name: Set up Python ${{ env.PYTHON_VERSION }}
-      uses: actions/setup-python@v4
+      uses: actions/setup-python@v5
       with:
         python-version: "${{ env.PYTHON_VERSION }}"
 
@@ -151,7 +151,7 @@ jobs:
       if: inputs.ci
       run: ddev validate ci
 
-    - name: Validate every integration has a defined owner
+    - name: Validate the CODEOWNERS file
       if: inputs.codeowners
       run: ddev validate codeowners
 

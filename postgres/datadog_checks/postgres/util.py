@@ -116,6 +116,12 @@ def payload_pg_version(version):
     return 'v{major}.{minor}.{patch}'.format(major=version.major, minor=version.minor, patch=version.patch)
 
 
+def get_list_chunks(lst, n):
+    """Yield successive n-sized chunks from lst."""
+    for i in range(0, len(lst), n):
+        yield lst[i : i + n]
+
+
 fmt = PartialFormatter()
 
 AWS_RDS_HOSTNAME_SUFFIX = ".rds.amazonaws.com"
@@ -151,6 +157,8 @@ NEWER_92_METRICS = {
     'temp_bytes': ('postgresql.temp_bytes', AgentCheck.rate),
     'temp_files': ('postgresql.temp_files', AgentCheck.rate),
 }
+
+CHECKSUM_METRICS = {'checksum_failures': ('postgresql.checksums.checksum_failures', AgentCheck.monotonic_count)}
 
 NEWER_14_METRICS = {
     'session_time': ('postgresql.sessions.session_time', AgentCheck.monotonic_count),
@@ -244,22 +252,31 @@ COMMON_ARCHIVER_METRICS = {
 }
 
 
+# We used to use pg_stat_user_tables to count the number of tables and limit using max_relations.
+# This created multiple issues:
+# - pg_stat_user_tables is a view that group pg_class results by C.oid, N.nspname, C.relname. Doing the group by
+#   will generate a sort
+# - pg_stat_user_tables processes elements from pg_class that are dropped like toast tables and system tables
+# - we added another layer of sort (ORDER BY relname, relnamespace) to make the max_relations filter stable
+# Those sorts will eventually spill on temporary blocks if the number of relations is high enough, making this
+# query expensive to run.
+# In the end, we only care about the table count per schema so it's better to process the pg_class table directly.
+# We can filter tuples as much as possibles (we only care about relations and partition tables) and only do the
+# pg_namespace at the end, removing an expensive nested loop.
 COUNT_METRICS = {
     'descriptors': [('schemaname', 'schema')],
-    'metrics': {'pg_stat_user_tables': ('postgresql.table.count', AgentCheck.gauge)},
+    'metrics': {'count (*)': ('postgresql.table.count', AgentCheck.gauge)},
     'relation': False,
     'use_global_db_tag': True,
-    'query': fmt.format(
-        """
-SELECT schemaname, count(*) FROM
-(
-SELECT schemaname
-FROM {metrics_columns}
-ORDER BY schemaname, relname
-LIMIT {table_count_limit}
-) AS subquery GROUP BY schemaname
-    """
-    ),
+    'query': """
+SELECT N.nspname AS schemaname, {metrics_columns} FROM
+    (SELECT C.relnamespace
+    FROM pg_class C
+    WHERE C.relkind IN ('r', 'p')) AS subquery
+LEFT JOIN pg_namespace N ON (N.oid = relnamespace)
+WHERE N.nspname NOT IN ('pg_catalog', 'information_schema')
+GROUP BY N.nspname;
+    """,
     'name': 'count_metrics',
 }
 
@@ -822,5 +839,43 @@ FROM pg_stat_subscription_stats
         {'name': 'subscription_name', 'type': 'tag'},
         {'name': 'postgresql.subscription.apply_error', 'type': 'monotonic_count'},
         {'name': 'postgresql.subscription.sync_error', 'type': 'monotonic_count'},
+    ],
+}
+
+# Requires PG16+
+# Capping at 200 rows for caution. This should always return less data points than that. Adjust if needed
+STAT_IO_METRICS = {
+    'name': 'stat_io_metrics',
+    'query': """
+SELECT backend_type,
+       object,
+       context,
+       evictions,
+       extend_time,
+       extends,
+       fsync_time,
+       fsyncs,
+       hits,
+       read_time,
+       reads,
+       write_time,
+       writes
+FROM pg_stat_io
+LIMIT 200
+""",
+    'columns': [
+        {'name': 'backend_type', 'type': 'tag'},
+        {'name': 'object', 'type': 'tag'},
+        {'name': 'context', 'type': 'tag'},
+        {'name': 'postgresql.io.evictions', 'type': 'monotonic_count'},
+        {'name': 'postgresql.io.extend_time', 'type': 'monotonic_count'},
+        {'name': 'postgresql.io.extends', 'type': 'monotonic_count'},
+        {'name': 'postgresql.io.fsync_time', 'type': 'monotonic_count'},
+        {'name': 'postgresql.io.fsyncs', 'type': 'monotonic_count'},
+        {'name': 'postgresql.io.hits', 'type': 'monotonic_count'},
+        {'name': 'postgresql.io.read_time', 'type': 'monotonic_count'},
+        {'name': 'postgresql.io.reads', 'type': 'monotonic_count'},
+        {'name': 'postgresql.io.write_time', 'type': 'monotonic_count'},
+        {'name': 'postgresql.io.writes', 'type': 'monotonic_count'},
     ],
 }

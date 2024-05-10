@@ -12,7 +12,7 @@ The JBoss/WildFly check is included in the [Datadog Agent][3] package so you don
 
 ### Configuration
 
-This check has a limit of 350 metrics per instance. The number of returned metrics is indicated in the info page. You can specify the metrics you are interested in by editing the configuration below. To learn how to customize the collected metrics, see the [JMX Checks documentation][4] for more detailed instructions. If you need to monitor more metrics, contact [Datadog support][5].
+This check has a limit of 350 metrics per instance. The number of returned metrics is indicated in [the status page][11]. You can specify the metrics you are interested in by editing the configuration below. To learn how to customize the collected metrics, see the [JMX Checks documentation][4] for more detailed instructions. If you need to monitor more metrics, contact [Datadog support][5].
 
 <!-- xxx tabs xxx -->
 <!-- xxx tab "Host" xxx -->
@@ -98,6 +98,11 @@ The JBoss/WildFly integration does not include any events.
 
 See [service_checks.json][13] for a list of service checks provided by this integration.
 
+### Collecting metrics with JMXFetch
+
+You can configure the Datadog Agent to collect Java application metrics through [JMXFetch][14]. To collect the default metrics configured for the JBoss/Wildfly Datadog integration, set the system property
+`Ddd.jmxfetch.jboss_wildfly.enabled=true`. 
+
 ## Troubleshooting
 
 Need help? Contact [Datadog support][5].
@@ -116,3 +121,4 @@ Need help? Contact [Datadog support][5].
 [11]: https://docs.datadoghq.com/agent/guide/agent-commands/#agent-status-and-information
 [12]: https://github.com/DataDog/integrations-core/blob/master/jboss_wildfly/metadata.csv
 [13]: https://github.com/DataDog/integrations-core/blob/master/jboss_wildfly/assets/service_checks.json
+[14]: https://docs.datadoghq.com/integrations/java

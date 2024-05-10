@@ -8,6 +8,7 @@ tests:
       timestamp: 1582278564426
       uptime: 0.017351
     message: "Loading data from directory /data/rethinkdb_data"
+    status: "notice"
     tags:
      - "source:LOGS_SOURCE"
     timestamp: 1582278564426
@@ -19,6 +20,7 @@ tests:
       timestamp: 1582278564463
       uptime: 0.054301
     message: "Cache size is very low and may impact performance."
+    status: "warn"
     tags:
      - "source:LOGS_SOURCE"
     timestamp: 1582278564463
@@ -34,6 +36,7 @@ tests:
       timestamp: 1582278564468
       uptime: 0.058977
     message: "Server ready, \"server0\" c79e1284-c542-429d-babf-627447e86318"
+    status: "notice"
     tags:
      - "source:LOGS_SOURCE"
     timestamp: 1582278564468
@@ -48,6 +51,7 @@ tests:
       timestamp: 1585240457108
       uptime: 0.637269
     message: "Connected to proxy proxy-1e80aed3-898c-49d0-8774-8fb95f773c42"
+    status: "notice"
     tags:
      - "source:LOGS_SOURCE"
     timestamp: 1585240457108
@@ -61,6 +65,7 @@ tests:
       timestamp: 1585240457668
       uptime: 80.346005
     message: "Table de8766a5-5147-4e64-b624-862028cb5572: Added replica on this server."
+    status: "info"
     tags:
      - "source:LOGS_SOURCE"
     timestamp: 1585240457668
@@ -76,6 +81,7 @@ tests:
       timestamp: 1582278685666
       uptime: 121.39275
     message: "Connected to server \"server1\" 03bd7126-5d09-48ed-8074-d0a7101dc58c"
+    status: "notice"
     tags:
      - "source:LOGS_SOURCE"
     timestamp: 1582278685666

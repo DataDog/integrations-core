@@ -68,9 +68,26 @@ class Deployment(object):
 
 
 class MongosDeployment(Deployment):
-    def __init__(self):
+    def __init__(self, shard_map):
         super(MongosDeployment, self).__init__()
         self.use_shards = True
+        self.shard_map = shard_map
+
+    @property
+    def shards(self):
+        return list(self.shard_map.get('map', {}).values())
+
+    @property
+    def hosts(self):
+        return list(self.shard_map.get('hosts', {}).keys())
+
+    @property
+    def cluster_type(self):
+        return "sharded_cluster"
+
+    @property
+    def cluster_role(self):
+        return "mongos"
 
     def is_principal(self):
         # A mongos has full visibility on the data, Datadog agents should only communicate
@@ -79,7 +96,7 @@ class MongosDeployment(Deployment):
 
 
 class ReplicaSetDeployment(Deployment):
-    def __init__(self, replset_name, replset_state, cluster_role=None):
+    def __init__(self, replset_name, replset_state, hosts, cluster_role=None):
         super(ReplicaSetDeployment, self).__init__()
         self.replset_name = replset_name
         self.replset_state = replset_state
@@ -89,11 +106,16 @@ class ReplicaSetDeployment(Deployment):
         self.is_primary = replset_state == PRIMARY_STATE_ID
         self.is_secondary = replset_state == SECONDARY_STATE_ID
         self.is_arbiter = replset_state == ARBITER_STATE_ID
+        self.hosts = hosts
 
     def is_principal(self):
         # There is only ever one primary node in a replica set.
         # In case sharding is disabled, the primary can be considered the master.
         return not self.use_shards and self.is_primary
+
+    @property
+    def cluster_type(self):
+        return "sharded_cluster" if self.use_shards else "replica_set"
 
 
 class StandaloneDeployment(Deployment):

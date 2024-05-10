@@ -15,46 +15,18 @@ Starting from Agent release 7.51.0, the Fluxcd check is included in the [Datadog
 For older versions of the Agent, [use these steps to install][10] the integration.
 
 
-<!-- xxx tabs xxx -->
-<!-- xxx tab "Host" xxx -->
+### Configuration
 
-#### Host
+This integration supports collecting metrics and logs from the following Flux services:
 
-##### Metric collection
+- `helm-controller`
+- `kustomize-controller`
+- `notification-controller`
+- `source-controller`
 
-1. Edit the `fluxcd.d/conf.yaml` file, in the `conf.d/` folder at the root of your Agent's configuration directory to start collecting your Fluxcd performance data. See the [sample configuration file][4] for all available configuration options.
+You can pick and choose which services you monitor depending on your needs.
 
-    This is an example configuration:
-
-    ```yaml
-    init_config:
-      ...
-    instances:
-      - openmetrics_endpoint: http://<FLUXCD_ADDRESS>:8080/metrics
-    ```
-
-2. [Restart the Agent][5] after modifying the configuration.
-
-<!-- xxz tab xxx -->
-<!-- xxx tab "Docker" xxx -->
-
-#### Docker
-
-##### Metric collection
-
-This is an example configuration of a Docker label inside `docker-compose.yml`. See the [sample configuration file][4] for all available configuration options.
-
-```yaml
-labels:
-  com.datadoghq.ad.checks: '{"fluxcd":{"instances":[{"openmetrics_endpoint":"http://%%host%%:8080/metrics"}]}}'
-```
-
-<!-- xxz tab xxx -->
-<!-- xxx tab "Kubernetes" xxx -->
-
-#### Kubernetes
-
-##### Metric collection
+#### Metric collection
 
 This is an example configuration with Kubernetes annotations on your Flux pods. See the [sample configuration file][4] for all available configuration options.
 
@@ -81,8 +53,17 @@ spec:
 # (...)
 ```
 
-<!-- xxz tab xxx -->
-<!-- xxz tabs xxx -->
+#### Log collection
+
+_Available for Agent versions >6.0_
+
+Flux logs can be collected from the different Flux pods through Kubernetes. Collecting logs is disabled by default in the Datadog Agent. To enable it, see [Kubernetes Log Collection][12].
+
+See the [Autodiscovery Integration Templates][3] for guidance on applying the parameters below.
+
+| Parameter      | Value                                                   |
+| -------------- | ------------------------------------------------------- |
+| `<LOG_CONFIG>` | `{"source": "fluxcd", "service": "<SERVICE_NAME>"}`  |
 
 ### Validation
 
@@ -106,6 +87,12 @@ See [service_checks.json][8] for a list of service checks provided by this integ
 
 Need help? Contact [Datadog support][9].
 
+## Further Reading
+
+Additional helpful documentation, links, and articles:
+
+- [Monitoring your container-native technologies][11]
+
 
 [1]: https://fluxcd.io/
 [2]: https://app.datadoghq.com/account/settings/agent/latest
@@ -117,3 +104,5 @@ Need help? Contact [Datadog support][9].
 [8]: https://github.com/DataDog/integrations-core/blob/master/fluxcd/assets/service_checks.json
 [9]: https://docs.datadoghq.com/help/
 [10]: https://docs.datadoghq.com/agent/guide/use-community-integrations/?tab=agentv721v621#installation
+[11]: https://www.datadoghq.com/blog/container-native-integrations/#cicd-with-flux
+[12]: https://docs.datadoghq.com/agent/kubernetes/log/

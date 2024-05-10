@@ -3,12 +3,12 @@
 # Licensed under a 3-clause BSD style license (see LICENSE)
 import copy
 import logging
+from contextlib import nullcontext  # type: ignore
 from urllib.parse import quote_plus
 
 import mock
 import pytest
 from pymongo.errors import ConnectionFailure
-from six import iteritems
 
 from datadog_checks.base import ConfigurationError
 from datadog_checks.mongo import MongoDb, metrics
@@ -21,22 +21,15 @@ from datadog_checks.mongo.utils import parse_mongo_uri
 from . import common
 from .conftest import mock_pymongo
 
-try:
-    from contextlib import nullcontext  # type: ignore
-except ImportError:
-    from contextlib2 import nullcontext
-
 RATE = MongoDb.rate
 GAUGE = MongoDb.gauge
-
-pytestmark = pytest.mark.unit
 
 
 DEFAULT_METRICS_LEN = len(
     {
         m_name: m_type
         for d in [metrics.BASE_METRICS, metrics.DURABILITY_METRICS, metrics.LOCKS_METRICS, metrics.WIREDTIGER_METRICS]
-        for m_name, m_type in iteritems(d)
+        for m_name, m_type in d.items()
     }
 )
 
@@ -52,7 +45,13 @@ def test_emits_critical_service_check_when_service_is_not_available(mock_command
     aggregator.assert_service_check('mongodb.can_connect', MongoDb.CRITICAL)
 
 
-@mock.patch('pymongo.database.Database.command', side_effect=[{'parsed': {}}])
+@mock.patch(
+    'pymongo.database.Database.command',
+    side_effect=[
+        {'host': 'test-hostname:27018'},  # serverStatus
+        {'parsed': {}},  # getCmdLineOpts
+    ],
+)
 @mock.patch('pymongo.mongo_client.MongoClient.server_info', return_value={'version': '5.0.0'})
 @mock.patch('pymongo.mongo_client.MongoClient.list_database_names', return_value=[])
 def test_emits_ok_service_check_when_service_is_available(
@@ -65,9 +64,16 @@ def test_emits_ok_service_check_when_service_is_available(
     dd_run_check(check)
     # Then
     aggregator.assert_service_check('mongodb.can_connect', MongoDb.OK)
+    assert check._resolved_hostname == 'test-hostname:27018'
 
 
-@mock.patch('pymongo.database.Database.command', side_effect=[{'parsed': {}}])
+@mock.patch(
+    'pymongo.database.Database.command',
+    side_effect=[
+        {'host': 'test-hostname:27018'},  # serverStatus
+        {'parsed': {}},  # getCmdLineOpts
+    ],
+)
 @mock.patch('pymongo.mongo_client.MongoClient.server_info', return_value={'version': '5.0.0'})
 @mock.patch('pymongo.mongo_client.MongoClient.list_database_names', return_value=[])
 def test_emits_ok_service_check_each_run_when_service_is_available(
@@ -81,9 +87,16 @@ def test_emits_ok_service_check_each_run_when_service_is_available(
     dd_run_check(check)
     # Then
     aggregator.assert_service_check('mongodb.can_connect', MongoDb.OK, count=2)
+    assert check._resolved_hostname == 'test-hostname:27018'
 
 
-@mock.patch('pymongo.database.Database.command', side_effect=[{'parsed': {}}])
+@mock.patch(
+    'pymongo.database.Database.command',
+    side_effect=[
+        {'host': 'test-hostname'},  # serverStatus
+        {'parsed': {}},  # getCmdLineOpts
+    ],
+)
 @mock.patch('pymongo.mongo_client.MongoClient.server_info', return_value={'version': '5.0.0'})
 @mock.patch('pymongo.mongo_client.MongoClient.list_database_names', return_value=[])
 def test_version_metadata(
@@ -104,13 +117,18 @@ def test_version_metadata(
             'version.minor': '0',
             'version.patch': '0',
             'version.raw': '5.0.0',
+            'resolved_hostname': 'test-hostname:27017',
         },
     )
 
 
 @mock.patch(
     'pymongo.database.Database.command',
-    side_effect=[Exception('getCmdLineOpts exception'), {'msg': 'isdbgrid'}],
+    side_effect=[
+        {'host': 'test-hostname'},  # serverStatus
+        Exception('getCmdLineOpts exception'),  # getCmdLineOpts
+        {'msg': 'isdbgrid'},  # isMaster
+    ],
 )
 @mock.patch('pymongo.mongo_client.MongoClient.server_info', return_value={'version': '5.0.0'})
 @mock.patch('pymongo.mongo_client.MongoClient.list_database_names', return_value=[])
@@ -124,17 +142,19 @@ def test_emits_ok_service_check_when_alibaba_mongos_deployment(
     dd_run_check(check)
     # Then
     aggregator.assert_service_check('mongodb.can_connect', MongoDb.OK)
-    mock_command.assert_has_calls([mock.call('getCmdLineOpts'), mock.call('isMaster')])
+    mock_command.assert_has_calls([mock.call('serverStatus'), mock.call('getCmdLineOpts'), mock.call('isMaster')])
     mock_server_info.assert_called_once()
     mock_list_database_names.assert_called_once()
+    assert check._resolved_hostname == 'test-hostname:27017'
 
 
 @mock.patch(
     'pymongo.database.Database.command',
     side_effect=[
-        Exception('getCmdLineOpts exception'),
-        {},
-        {'configsvr': True, 'set': 'replset', "myState": 1},
+        {'host': 'test-hostname'},  # serverStatus
+        Exception('getCmdLineOpts exception'),  # getCmdLineOpts
+        {},  # isMaster
+        {'configsvr': True, 'set': 'replset', "myState": 1},  # replSetGetStatus
     ],
 )
 @mock.patch('pymongo.mongo_client.MongoClient.server_info', return_value={'version': '5.0.0'})
@@ -149,7 +169,14 @@ def test_emits_ok_service_check_when_alibaba_replicaset_role_configsvr_deploymen
     dd_run_check(check)
     # Then
     aggregator.assert_service_check('mongodb.can_connect', MongoDb.OK)
-    mock_command.assert_has_calls([mock.call('getCmdLineOpts'), mock.call('isMaster'), mock.call('replSetGetStatus')])
+    mock_command.assert_has_calls(
+        [
+            mock.call('serverStatus'),
+            mock.call('getCmdLineOpts'),
+            mock.call('isMaster'),
+            mock.call('replSetGetStatus'),
+        ]
+    )
     mock_server_info.assert_called_once()
     mock_list_database_names.assert_called_once()
 
@@ -157,9 +184,10 @@ def test_emits_ok_service_check_when_alibaba_replicaset_role_configsvr_deploymen
 @mock.patch(
     'pymongo.database.Database.command',
     side_effect=[
-        Exception('getCmdLineOpts exception'),
-        {},
-        {'configsvr': True, 'set': 'replset', "myState": 3},
+        {'host': 'test-hostname'},  # serverStatus
+        Exception('getCmdLineOpts exception'),  # getCmdLineOpts
+        {},  # isMaster
+        {'configsvr': True, 'set': 'replset', "myState": 3},  # replSetGetStatus
     ],
 )
 @mock.patch('pymongo.mongo_client.MongoClient.server_info', return_value={'version': '5.0.0'})
@@ -174,7 +202,14 @@ def test_when_replicaset_state_recovering_then_database_names_not_called(
     dd_run_check(check)
     # Then
     aggregator.assert_service_check('mongodb.can_connect', MongoDb.OK)
-    mock_command.assert_has_calls([mock.call('getCmdLineOpts'), mock.call('isMaster'), mock.call('replSetGetStatus')])
+    mock_command.assert_has_calls(
+        [
+            mock.call('serverStatus'),
+            mock.call('getCmdLineOpts'),
+            mock.call('isMaster'),
+            mock.call('replSetGetStatus'),
+        ]
+    )
     mock_server_info.assert_called_once()
     mock_list_database_names.assert_not_called()
 
@@ -261,22 +296,22 @@ def test_server_uri_sanitization(check, instance):
         ("mongodb://user:pass@localhost:27017/admin", "mongodb://user:*****@localhost:27017/admin"),
         # pymongo parses the password as `pass_%2`
         (
-            "mongodb://%s:%s@localhost:27017/admin" % (quote_plus('user'), quote_plus('pass_%2')),
+            f"mongodb://{quote_plus('user')}:{quote_plus('pass_%2')}@localhost:27017/admin",
             "mongodb://user:*****@localhost:27017/admin",
         ),
         # pymongo parses the password as `pass_%` (`%25` is url-decoded to `%`)
         (
-            "mongodb://%s:%s@localhost:27017/admin" % (quote_plus('user'), quote_plus('pass_%25')),
+            f"mongodb://{quote_plus('user')}:{quote_plus('pass_%25')}@localhost:27017/admin",
             "mongodb://user:*****@localhost:27017/admin",
         ),
         # same thing here, parsed username: `user%2`
         (
-            "mongodb://%s@localhost:27017/admin" % (quote_plus('user%2')),
+            f"mongodb://{quote_plus('user%2')}@localhost:27017/admin",
             "mongodb://user%2@localhost:27017/admin",
         ),
         # with the current sanitization approach, we expect the username to be decoded in the clean name
         (
-            "mongodb://%s@localhost:27017/admin" % (quote_plus('user%25')),
+            f"mongodb://{quote_plus('user%25')}@localhost:27017/admin",
             "mongodb://user%25@localhost:27017/admin",
         ),
     )
@@ -290,19 +325,19 @@ def test_server_uri_sanitization(check, instance):
         ("mongodb://localhost:27017/admin", "mongodb://localhost:27017/admin"),
         ("mongodb://user:pass@localhost:27017/admin", "mongodb://*****@localhost:27017/admin"),
         (
-            "mongodb://%s:%s@localhost:27017/admin" % (quote_plus('user'), quote_plus('pass_%2')),
+            f"mongodb://{quote_plus('user')}:{quote_plus('pass_%2')}@localhost:27017/admin",
             "mongodb://*****@localhost:27017/admin",
         ),
         (
-            "mongodb://%s:%s@localhost:27017/admin" % (quote_plus('user'), quote_plus('pass_%25')),
+            f"mongodb://{quote_plus('user')}:{quote_plus('pass_%25')}@localhost:27017/admin",
             "mongodb://*****@localhost:27017/admin",
         ),
         (
-            "mongodb://%s@localhost:27017/admin" % (quote_plus('user%2')),
+            f"mongodb://{quote_plus('user%2')}@localhost:27017/admin",
             "mongodb://localhost:27017/admin",
         ),
         (
-            "mongodb://%s@localhost:27017/admin" % (quote_plus('user%25')),
+            f"mongodb://{quote_plus('user%25')}@localhost:27017/admin",
             "mongodb://localhost:27017/admin",
         ),
     )

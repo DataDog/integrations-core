@@ -9,7 +9,7 @@ import time
 from functools import cache
 from hashlib import sha256
 from pathlib import Path
-from typing import Iterator
+from typing import Iterator, NamedTuple
 
 import urllib3
 from utils import extract_metadata, normalize_project_name
@@ -64,6 +64,29 @@ def wheel_was_built(wheel: Path) -> bool:
     return file_hash != wheel_hashes[wheel.name]
 
 
+class WheelName(NamedTuple):
+    """Helper class to manipulate wheel names."""
+    # Note: this implementation ignores build tags (it drops them on parsing)
+    name: str
+    version: str
+    python_tag: str
+    abi_tag: str
+    platform_tag: str
+
+    @classmethod
+    def parse(cls, wheel_name: str):
+        name, _ext = os.path.splitext(wheel_name)
+        parts = name.split('-')
+        if len(parts) == 6:
+            parts.pop(2)
+        return cls(*parts)
+
+    def __str__(self):
+        return '-'.join([
+            self.name, self.version, self.python_tag, self.abi_tag, self.platform_tag
+        ]) + '.whl'
+
+
 def repair_linux(source_dir: str, built_dir: str, external_dir: str) -> None:
     from auditwheel.patcher import Patchelf
     from auditwheel.policy import WheelPolicies
@@ -104,7 +127,9 @@ def repair_linux(source_dir: str, built_dir: str, external_dir: str) -> None:
             )
         except NonPlatformWheel:
             print('Using non-platform wheel without repair')
-            shutil.move(wheel, built_dir)
+            # Platform independent wheels: move and rename to make platform specific
+            new_name = str(WheelName.parse(wheel.name)._replace(platform_tag=os.environ['MANYLINUX_POLICY']))
+            shutil.move(wheel, Path(built_dir) / new_name)
             continue
         else:
             print('Repaired wheel')
@@ -117,9 +142,17 @@ def repair_windows(source_dir: str, built_dir: str, external_dir: str) -> None:
 
     for wheel in iter_wheels(source_dir):
         print(f'--> {wheel.name}')
+
         if not wheel_was_built(wheel):
             print('Using existing wheel')
             shutil.move(wheel, external_dir)
+            continue
+
+        # Platform independent wheels: move and rename to make platform specific
+        wheel_name = WheelName.parse(wheel.name)
+        if wheel_name.platform_tag == 'any':
+            dest = str(wheel_name._replace(platform_tag='win_amd64'))
+            shutil.move(wheel, Path(built_dir) / dest)
             continue
 
         process = subprocess.run([
@@ -176,9 +209,16 @@ def repair_darwin(source_dir: str, built_dir: str, external_dir: str) -> None:
             shutil.move(wheel, external_dir)
             continue
 
+        # Platform independent wheels: move and rename to make platform specific
+        wheel_name = WheelName.parse(wheel.name)
+        if wheel_name.platform_tag == 'any':
+            dest = str(wheel_name._replace(platform_tag='macosx_10_12_universal2'))
+            shutil.move(wheel, Path(built_dir) / dest)
+            continue
+
         copied_libs = delocate_wheel(
             str(wheel),
-            os.path.join(built_dir, os.path.basename(wheel)),
+            os.path.join(built_dir, wheel.name),
             copy_filt_func=copy_filt_func,
         )
         print('Repaired wheel')

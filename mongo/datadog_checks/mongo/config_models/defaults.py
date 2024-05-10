@@ -8,12 +8,28 @@
 #     ddev -x validate models -s <INTEGRATION_NAME>
 
 
+def instance_add_node_tag_to_events():
+    return True
+
+
 def instance_collections_indexes_stats():
     return False
 
 
 def instance_connection_scheme():
     return 'mongodb'
+
+
+def instance_database_instance_collection_interval():
+    return False
+
+
+def instance_dbm():
+    return False
+
+
+def instance_dbstats_tag_dbname():
+    return True
 
 
 def instance_disable_generic_tags():

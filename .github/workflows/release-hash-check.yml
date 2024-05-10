@@ -12,12 +12,12 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-    - uses: actions/checkout@v2
+    - uses: actions/checkout@v4
       with:
         fetch-depth: 0
 
     - name: Set up Python
-      uses: actions/setup-python@v2
+      uses: actions/setup-python@v5
       with:
         python-version: '3.11'
 
@@ -26,7 +26,7 @@ jobs:
         git fetch origin master
         LAST_COMMON_COMMIT=$(git merge-base HEAD origin/master)
         FILES=$(git --no-pager diff --name-only $LAST_COMMON_COMMIT -- .in-toto | xargs echo)
-        echo "::set-output name=all::$FILES"
+        echo "all=$FILES" >> "$GITHUB_OUTPUT"
 
     - id: merge
       name: Merge branch into latest master

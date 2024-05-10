@@ -372,6 +372,44 @@ jobs:
       test-py3: ${{ inputs.test-py3 }}
       minimum-base-package: ${{ inputs.minimum-base-package }}
     secrets: inherit
+  j3650884:
+    uses: ./.github/workflows/test-target.yml
+    with:
+      job-name: Argo Rollouts
+      target: argo_rollouts
+      platform: linux
+      runner: '["ubuntu-22.04"]'
+      repo: "${{ inputs.repo }}"
+      python-version: "${{ inputs.python-version }}"
+      standard: ${{ inputs.standard }}
+      latest: ${{ inputs.latest }}
+      agent-image: "${{ inputs.agent-image }}"
+      agent-image-py2: "${{ inputs.agent-image-py2 }}"
+      agent-image-windows: "${{ inputs.agent-image-windows }}"
+      agent-image-windows-py2: "${{ inputs.agent-image-windows-py2 }}"
+      test-py2: ${{ inputs.test-py2 }}
+      test-py3: ${{ inputs.test-py3 }}
+      minimum-base-package: ${{ inputs.minimum-base-package }}
+    secrets: inherit
+  j14e797c:
+    uses: ./.github/workflows/test-target.yml
+    with:
+      job-name: Argo Workflows
+      target: argo_workflows
+      platform: linux
+      runner: '["ubuntu-22.04"]'
+      repo: "${{ inputs.repo }}"
+      python-version: "${{ inputs.python-version }}"
+      standard: ${{ inputs.standard }}
+      latest: ${{ inputs.latest }}
+      agent-image: "${{ inputs.agent-image }}"
+      agent-image-py2: "${{ inputs.agent-image-py2 }}"
+      agent-image-windows: "${{ inputs.agent-image-windows }}"
+      agent-image-windows-py2: "${{ inputs.agent-image-windows-py2 }}"
+      test-py2: ${{ inputs.test-py2 }}
+      test-py3: ${{ inputs.test-py3 }}
+      minimum-base-package: ${{ inputs.minimum-base-package }}
+    secrets: inherit
   j92d42de:
     uses: ./.github/workflows/test-target.yml
     with:
@@ -1080,6 +1118,25 @@ jobs:
     with:
       job-name: Envoy
       target: envoy
+      platform: linux
+      runner: '["ubuntu-22.04"]'
+      repo: "${{ inputs.repo }}"
+      python-version: "${{ inputs.python-version }}"
+      standard: ${{ inputs.standard }}
+      latest: ${{ inputs.latest }}
+      agent-image: "${{ inputs.agent-image }}"
+      agent-image-py2: "${{ inputs.agent-image-py2 }}"
+      agent-image-windows: "${{ inputs.agent-image-windows }}"
+      agent-image-windows-py2: "${{ inputs.agent-image-windows-py2 }}"
+      test-py2: ${{ inputs.test-py2 }}
+      test-py3: ${{ inputs.test-py3 }}
+      minimum-base-package: ${{ inputs.minimum-base-package }}
+    secrets: inherit
+  jc4fef15:
+    uses: ./.github/workflows/test-target.yml
+    with:
+      job-name: ESXi
+      target: esxi
       platform: linux
       runner: '["ubuntu-22.04"]'
       repo: "${{ inputs.repo }}"
@@ -3113,6 +3170,44 @@ jobs:
     with:
       job-name: TeamCity
       target: teamcity
+      platform: linux
+      runner: '["ubuntu-22.04"]'
+      repo: "${{ inputs.repo }}"
+      python-version: "${{ inputs.python-version }}"
+      standard: ${{ inputs.standard }}
+      latest: ${{ inputs.latest }}
+      agent-image: "${{ inputs.agent-image }}"
+      agent-image-py2: "${{ inputs.agent-image-py2 }}"
+      agent-image-windows: "${{ inputs.agent-image-windows }}"
+      agent-image-windows-py2: "${{ inputs.agent-image-windows-py2 }}"
+      test-py2: ${{ inputs.test-py2 }}
+      test-py3: ${{ inputs.test-py3 }}
+      minimum-base-package: ${{ inputs.minimum-base-package }}
+    secrets: inherit
+  jf4a7e97:
+    uses: ./.github/workflows/test-target.yml
+    with:
+      job-name: Tekton
+      target: tekton
+      platform: linux
+      runner: '["ubuntu-22.04"]'
+      repo: "${{ inputs.repo }}"
+      python-version: "${{ inputs.python-version }}"
+      standard: ${{ inputs.standard }}
+      latest: ${{ inputs.latest }}
+      agent-image: "${{ inputs.agent-image }}"
+      agent-image-py2: "${{ inputs.agent-image-py2 }}"
+      agent-image-windows: "${{ inputs.agent-image-windows }}"
+      agent-image-windows-py2: "${{ inputs.agent-image-windows-py2 }}"
+      test-py2: ${{ inputs.test-py2 }}
+      test-py3: ${{ inputs.test-py3 }}
+      minimum-base-package: ${{ inputs.minimum-base-package }}
+    secrets: inherit
+  je68b3b9:
+    uses: ./.github/workflows/test-target.yml
+    with:
+      job-name: Teleport
+      target: teleport
       platform: linux
       runner: '["ubuntu-22.04"]'
       repo: "${{ inputs.repo }}"

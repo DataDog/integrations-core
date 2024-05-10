@@ -1,0 +1,62 @@
+# TYPE rabbitmq_cluster_vhost_status gauge
+# HELP rabbitmq_cluster_vhost_status Whether a given vhost is running
+rabbitmq_cluster_vhost_status{vhost="myvhost"} 1
+rabbitmq_cluster_vhost_status{vhost="/"} 1
+rabbitmq_cluster_vhost_status{vhost="myothervhost"} 1
+# TYPE rabbitmq_cluster_exchange_bindings gauge
+# HELP rabbitmq_cluster_exchange_bindings Number of bindings for an exchange. This value is cluster-wide.
+rabbitmq_cluster_exchange_bindings{vhost="myvhost",exchange="amq.topic",type="topic"} 0
+rabbitmq_cluster_exchange_bindings{vhost="myvhost",exchange="amq.match",type="headers"} 0
+rabbitmq_cluster_exchange_bindings{vhost="myvhost",exchange="amq.headers",type="headers"} 0
+rabbitmq_cluster_exchange_bindings{vhost="myvhost",exchange="amq.fanout",type="fanout"} 0
+rabbitmq_cluster_exchange_bindings{vhost="myvhost",exchange="amq.direct",type="direct"} 0
+rabbitmq_cluster_exchange_bindings{vhost="myothervhost",exchange="amq.topic",type="topic"} 0
+rabbitmq_cluster_exchange_bindings{vhost="myothervhost",exchange="amq.match",type="headers"} 0
+rabbitmq_cluster_exchange_bindings{vhost="myothervhost",exchange="amq.headers",type="headers"} 0
+rabbitmq_cluster_exchange_bindings{vhost="myothervhost",exchange="amq.fanout",type="fanout"} 0
+rabbitmq_cluster_exchange_bindings{vhost="myothervhost",exchange="amq.direct",type="direct"} 0
+rabbitmq_cluster_exchange_bindings{vhost="/",exchange="tralala",type="topic"} 1
+rabbitmq_cluster_exchange_bindings{vhost="/",exchange="test5",type="topic"} 1
+rabbitmq_cluster_exchange_bindings{vhost="/",exchange="test1",type="topic"} 1
+rabbitmq_cluster_exchange_bindings{vhost="/",exchange="amq.topic",type="topic"} 0
+rabbitmq_cluster_exchange_bindings{vhost="/",exchange="amq.match",type="headers"} 0
+rabbitmq_cluster_exchange_bindings{vhost="/",exchange="amq.headers",type="headers"} 0
+rabbitmq_cluster_exchange_bindings{vhost="/",exchange="amq.fanout",type="fanout"} 0
+rabbitmq_cluster_exchange_bindings{vhost="/",exchange="amq.direct",type="direct"} 0
+# TYPE rabbitmq_cluster_exchange_name gauge
+# HELP rabbitmq_cluster_exchange_name Enumerates exchanges without any additional info. This value is cluster-wide. A cheaper alternative to `exchange_bindings`
+rabbitmq_cluster_exchange_name{vhost="myothervhost",exchange="amq.topic",type="topic"} 1
+rabbitmq_cluster_exchange_name{vhost="/",exchange="amq.match",type="headers"} 1
+rabbitmq_cluster_exchange_name{vhost="/",exchange="test5",type="topic"} 1
+rabbitmq_cluster_exchange_name{vhost="/",exchange="amq.fanout",type="fanout"} 1
+rabbitmq_cluster_exchange_name{vhost="myothervhost",exchange="amq.headers",type="headers"} 1
+rabbitmq_cluster_exchange_name{vhost="myothervhost",exchange="amq.fanout",type="fanout"} 1
+rabbitmq_cluster_exchange_name{vhost="myvhost",exchange="amq.direct",type="direct"} 1
+rabbitmq_cluster_exchange_name{vhost="/",exchange="amq.topic",type="topic"} 1
+rabbitmq_cluster_exchange_name{vhost="myvhost",exchange="amq.match",type="headers"} 1
+rabbitmq_cluster_exchange_name{vhost="/",exchange="test1",type="topic"} 1
+rabbitmq_cluster_exchange_name{vhost="/",exchange="tralala",type="topic"} 1
+rabbitmq_cluster_exchange_name{vhost="myothervhost",exchange="amq.match",type="headers"} 1
+rabbitmq_cluster_exchange_name{vhost="/",exchange="amq.headers",type="headers"} 1
+rabbitmq_cluster_exchange_name{vhost="myothervhost",exchange="amq.direct",type="direct"} 1
+rabbitmq_cluster_exchange_name{vhost="myvhost",exchange="amq.fanout",type="fanout"} 1
+rabbitmq_cluster_exchange_name{vhost="myvhost",exchange="amq.topic",type="topic"} 1
+rabbitmq_cluster_exchange_name{vhost="myvhost",exchange="amq.headers",type="headers"} 1
+rabbitmq_cluster_exchange_name{vhost="/",exchange="amq.direct",type="direct"} 1
+# TYPE rabbitmq_build_info untyped
+# HELP rabbitmq_build_info RabbitMQ & Erlang/OTP version info
+rabbitmq_build_info{rabbitmq_version="3.11.3",prometheus_plugin_version="3.11.3",prometheus_client_version="4.9.1",erlang_version="25.1.2"} 1
+# TYPE rabbitmq_identity_info untyped
+# HELP rabbitmq_identity_info RabbitMQ node & cluster identity info
+rabbitmq_identity_info{rabbitmq_node="rabbit@13e567fb6712",rabbitmq_cluster="rabbitmqtest",rabbitmq_cluster_permanent_id="rabbitmq-cluster-id-tk2G7AFj1B2Fb0O0reG4Cw"} 1
+# TYPE telemetry_scrape_encoded_size_bytes summary
+# HELP telemetry_scrape_encoded_size_bytes Scrape size, encoded
+# TYPE telemetry_scrape_duration_seconds summary
+# HELP telemetry_scrape_duration_seconds Scrape duration
+telemetry_scrape_duration_seconds_count{registry="detailed",content_type="text/plain; version=0.0.4"} 1
+telemetry_scrape_duration_seconds_sum{registry="detailed",content_type="text/plain; version=0.0.4"} 8.0375e-4
+# TYPE telemetry_scrape_size_bytes summary
+# HELP telemetry_scrape_size_bytes Scrape size, not encoded
+telemetry_scrape_size_bytes_count{registry="detailed",content_type="text/plain; version=0.0.4"} 1
+telemetry_scrape_size_bytes_sum{registry="detailed",content_type="text/plain; version=0.0.4"} 4547
+

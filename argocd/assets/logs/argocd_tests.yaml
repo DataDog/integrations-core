@@ -11,6 +11,7 @@ tests:
         thread_id: 1.0
       timestamp: 30417533299
     message: "pkg/mod/k8s.io/client-go@v0.24.2/tools/cache/reflector.go:167: Failed to watch *v1.ConfigMap: failed to list *v1.ConfigMap: Get \"https://10.12.32.1:443/api/v1/namespaces/default/configmaps?labelSelector=app.kubernetes.io%2Fpart-of%3Dargocd&resourceVersion=26616193\": dial tcp 10.12.32.1:443: i/o timeout"
+    status: "error"
     tags:
      - "source:LOGS_SOURCE"
     timestamp: 30417533299
@@ -22,6 +23,7 @@ tests:
       argocd_trace_id: "79767753"
       level: "error"
     message: "Get \"https://10.12.32.1:443/apis/argoproj.io/v1alpha1/namespaces/default/applications?resourceVersion=26616507\": dial tcp 10.12.32.1:443: i/o timeout 30001ms (01:19:41.462)"
+    status: "error"
     tags:
      - "source:LOGS_SOURCE"
     timestamp: 1
@@ -49,6 +51,7 @@ tests:
       level: "info"
       timestamp: 1671229662000
     message: "Alloc=10469 TotalAlloc=9306163 Sys=29009 NumGC=4180 Goroutines=18"
+    status: "info"
     tags:
      - "source:LOGS_SOURCE"
     timestamp: 1671229662000
@@ -68,6 +71,7 @@ tests:
       system: "grpc"
       timestamp: 1671218090000
     message: "finished unary call with code OK"
+    status: "info"
     tags:
      - "source:LOGS_SOURCE"
     timestamp: 1671218090000
@@ -80,6 +84,7 @@ tests:
       level: "info"
       timestamp: 1673395704000
     message: "appResyncPeriod=3m0s, appHardResyncPeriod=0s"
+    status: "info"
     tags:
      - "source:LOGS_SOURCE"
     timestamp: 1673395704000
@@ -90,6 +95,7 @@ tests:
       level: "info"
       timestamp: 1673449708000
     message: "Enabled application namespace patterns: default"
+    status: "info"
     tags:
      - "source:LOGS_SOURCE"
     timestamp: 1673449708000

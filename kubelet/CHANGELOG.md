@@ -2,7 +2,25 @@
 
 <!-- towncrier release notes start -->
 
-## 7.12.0 / 2024-02-16
+## 7.13.1 / 2024-04-26
+
+***Fixed***:
+
+* Fixes pod resources requests/limits with exponent notation correctly, e.g. `129e6` for memory is `129M` / `123Mi` ([#17280](https://github.com/DataDog/integrations-core/pull/17280))
+
+## 7.13.0 / 2024-03-22 / Agent 7.53.0
+
+***Added***:
+
+* Add logic to skip loading Python check in favor of core check based on config variable `DD_KUBELET_CORE_CHECK_ENABLED` ([#16856](https://github.com/DataDog/integrations-core/pull/16856))
+* Emit kubelet metrics for init containers and pending pods ([#17035](https://github.com/DataDog/integrations-core/pull/17035))
+* Bump the min base check version to 34.2.0 ([#17196](https://github.com/DataDog/integrations-core/pull/17196))
+
+***Fixed***:
+
+* Fix SSL error on kubelet check startup when talking to probes endpoint ([#16987](https://github.com/DataDog/integrations-core/pull/16987))
+
+## 7.12.0 / 2024-02-16 / Agent 7.52.0
 
 ***Added***:
 

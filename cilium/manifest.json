@@ -53,7 +53,8 @@
       "auto_install": true
     },
     "dashboards": {
-      "Cilium Overview": "assets/dashboards/overview.json"
+      "Cilium Overview": "assets/dashboards/overview.json",
+      "Cilium Overview v2": "assets/dashboards/overview_v2.json"
     }
   }
 }

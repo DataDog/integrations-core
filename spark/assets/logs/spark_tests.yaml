@@ -10,6 +10,7 @@ tests:
         name: "JobScheduler"
       timestamp: 1594263682000
     message: "Started JobScheduler"
+    status: "info"
     tags:
      - "source:LOGS_SOURCE"
     timestamp: 1594263682000
@@ -23,6 +24,7 @@ tests:
         name: "Master"
       timestamp: 1594263673000
     message: "Starting Spark master at spark://spark-master:7077"
+    status: "info"
     tags:
      - "source:LOGS_SOURCE"
     timestamp: 1594263673000
@@ -36,6 +38,7 @@ tests:
         name: "Worker"
       timestamp: 1594264944000
     message: "Executor app-20200709030119-0000/379 finished with state EXITED message Command exited with code 1 exitStatus 1"
+    status: "info"
     tags:
      - "source:LOGS_SOURCE"
     timestamp: 1594264944000
@@ -49,6 +52,7 @@ tests:
         name: "TaskSchedulerImpl"
       timestamp: 1594263698000
     message: "Initial job has not accepted any resources; check your cluster UI to ensure that workers are registered and have sufficient resources"
+    status: "warn"
     tags:
      - "source:LOGS_SOURCE"
     timestamp: 1594263698000

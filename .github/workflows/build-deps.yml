@@ -4,16 +4,18 @@ on:
   pull_request:
     branches:
     - master
+    - 7.*.*
     paths:
     - .github/workflows/build-deps.yml
     - .builders/**
-    - datadog_checks_base/datadog_checks/base/data/agent_requirements.in
+    - agent_requirements.in
   push:
     branches:
     - master
+    - 7.*.*
     paths:
     - .builders/**
-    - datadog_checks_base/datadog_checks/base/data/agent_requirements.in
+    - agent_requirements.in
 
 concurrency:
   group: ${{ github.workflow }}-${{ github.event.pull_request.number || github.ref }}
@@ -26,7 +28,7 @@ defaults:
 env:
   PYTHONUNBUFFERED: "1"
   PYTHON_VERSION: "3.11"
-  DIRECT_DEPENDENCY_FILE: datadog_checks_base/datadog_checks/base/data/agent_requirements.in
+  DIRECT_DEPENDENCY_FILE: agent_requirements.in
   # https://reproducible-builds.org/specs/source-date-epoch/
   SOURCE_DATE_EPOCH: "1580601600"
 
@@ -57,7 +59,7 @@ jobs:
       fail-fast: false
       matrix:
         job:
-        - os: ubuntu-22.04
+        - os: arm-4core-linux
           image: linux-aarch64
         - os: ubuntu-22.04
           image: linux-x86_64
@@ -70,6 +72,7 @@ jobs:
     env:
       OUT_DIR: output/${{ matrix.job.image }}
       BUILDER_IMAGE: ghcr.io/datadog/agent-int-builder:${{ matrix.job.image }}
+      DOCKER: docker
 
     steps:
     - name: Checkout code
@@ -95,34 +98,71 @@ jobs:
       uses: actions/checkout@v4
 
     - name: Set up Python ${{ env.PYTHON_VERSION }}
+      if: matrix.job.image != 'linux-aarch64'
       uses: actions/setup-python@v5
       with:
         python-version: ${{ env.PYTHON_VERSION }}
 
+    - name: Set up Python (with miniconda) and other aarch64 requirements
+      if: matrix.job.image == 'linux-aarch64'
+      run: |
+        mkdir -p ~/miniconda3
+        wget https://repo.anaconda.com/miniconda/Miniconda3-py311_24.1.2-0-Linux-aarch64.sh -O ~/miniconda3/miniconda.sh
+        bash ~/miniconda3/miniconda.sh -b -u -p ~/miniconda3
+        rm -rf ~/miniconda3/miniconda.sh
+        ~/miniconda3/bin/conda init bash
+
+        # jq
+        wget https://github.com/jqlang/jq/releases/download/jq-1.7.1/jq-linux-arm64 -O ~/miniconda3/bin/jq
+        chmod +x ~/miniconda3/bin/jq
+
+        echo "PATH=~/miniconda3/bin/:${PATH}" >> "$GITHUB_ENV"
+        echo DOCKER="sudo docker" >> "$GITHUB_ENV"
+
     - name: Install management dependencies
-      run: pip install -r .builders/deps/host_dependencies.txt
+      run: |
+        pip install -r .builders/deps/host_dependencies.txt
+
+    - name: Install docker and log in (arm64)
+      if: matrix.job.image == 'linux-aarch64'
+      run: |
+        curl -fsSL https://get.docker.com -o get-docker.sh
+        sudo sh get-docker.sh
+
+        # Logging in with sudo is necessary to get authorized with the registry when running docker under sudo
+        echo ${{ secrets.GITHUB_TOKEN }} | sudo docker login --username ${{ github.actor }} --password-stdin ghcr.io
 
     - name: Log in to GitHub Packages
+      if: matrix.job.image != 'linux-aarch64'
       uses: docker/login-action@v3
       with:
         registry: ghcr.io
         username: ${{ github.actor }}
         password: ${{ secrets.GITHUB_TOKEN }}
 
-    - name: Set up QEMU
-      if: matrix.job.image == 'linux-aarch64'
-      uses: docker/setup-qemu-action@v3
-      with:
-        platforms: arm64
+    - name: Build image and wheels (arm64)
+      if: steps.changed-files.outputs.builders_any_changed == 'true' && matrix.job.image == 'linux-aarch64'
+      run: |-
+        sudo /home/runner/miniconda3/bin/python .builders/build.py ${{ matrix.job.image }} --python 3 ${{ env.OUT_DIR }}/py3
+        sudo /home/runner/miniconda3/bin/python .builders/build.py ${{ matrix.job.image }} --python 2 ${{ env.OUT_DIR }}/py2
+        # Give ownership of the output back to the user
+        sudo chown ${USER} ${{ env.OUT_DIR }}
+
+    - name: Pull image and build wheels (arm64)
+      if: steps.changed-files.outputs.builders_any_changed != 'true' && matrix.job.image == 'linux-aarch64'
+      run: |-
+        digest=$(jq -r '.["${{ matrix.job.image }}"]' .deps/image_digests.json)
+        sudo /home/runner/miniconda3/bin/python .builders/build.py ${{ matrix.job.image }} --python 3 ${{ env.OUT_DIR }}/py3 --digest $digest
+        sudo /home/runner/miniconda3/bin/python .builders/build.py ${{ matrix.job.image }} --python 2 ${{ env.OUT_DIR }}/py2 --digest $digest
 
     - name: Build image and wheels
-      if: steps.changed-files.outputs.builders_any_changed == 'true'
+      if: steps.changed-files.outputs.builders_any_changed == 'true' && matrix.job.image != 'linux-aarch64'
       run: |-
         python .builders/build.py ${{ matrix.job.image }} --python 3 ${{ env.OUT_DIR }}/py3
         python .builders/build.py ${{ matrix.job.image }} --python 2 ${{ env.OUT_DIR }}/py2
 
     - name: Pull image and build wheels
-      if: steps.changed-files.outputs.builders_any_changed != 'true'
+      if: steps.changed-files.outputs.builders_any_changed != 'true' && matrix.job.image != 'linux-aarch64'
       run: |-
         digest=$(jq -r '.["${{ matrix.job.image }}"]' .deps/image_digests.json)
         python .builders/build.py ${{ matrix.job.image }} --python 3 ${{ env.OUT_DIR }}/py3 --digest $digest
@@ -130,13 +170,19 @@ jobs:
 
     - name: Publish image
       if: github.event_name == 'push' && steps.changed-files.outputs.builders_any_changed == 'true'
-      run: docker push ${{ env.BUILDER_IMAGE }}
+      run: ${DOCKER} push ${{ env.BUILDER_IMAGE }}
 
-    - name: Save image digest
-      if: github.event_name == 'push'
+    - name: Save new image digest
+      if: github.event_name == 'push' && steps.changed-files.outputs.builders_any_changed == 'true'
       run: >-
-        docker inspect --format "{{index .RepoDigests 0}}" ${{ env.BUILDER_IMAGE }}
+        ${DOCKER} inspect --format "{{index .RepoDigests 0}}" ${{ env.BUILDER_IMAGE }}
         | cut -d '@' -f 2
+        > ${{ env.OUT_DIR }}/image_digest
+
+    - name: Persist current image digest
+      if: github.event_name == 'push' && steps.changed-files.outputs.builders_any_changed != 'true'
+      run: >-
+        jq -r '.["${{ matrix.job.image }}"]' .deps/image_digests.json
         > ${{ env.OUT_DIR }}/image_digest
 
     - name: Upload artifacts
@@ -185,7 +231,7 @@ jobs:
 
     - name: Cache builder root
       id: cache-builder-root
-      uses: actions/cache@v3.3.3
+      uses: actions/cache@v4
       with:
         path: |
           ~/builder_root

@@ -254,10 +254,10 @@ class TestNew:
         mocker.patch(
             'ddev.utils.git.GitManager.capture',
             side_effect=[
-                '0000000000000000000000000000000000000000\nFoo',
                 'M ddev/pyproject.toml',
                 '',
                 '',
+                '0000000000000000000000000000000000000000\nFoo',
             ],
         )
         return repo_with_towncrier.path / 'ddev' / 'changelog.d'
@@ -307,6 +307,28 @@ class TestNew:
             '''
         )
         assert fragment_file.read_text() == "Foo"
+
+    def test_start_no_changelog(self, ddev, fragments_dir, helpers, mocker):
+        mocker.patch(
+            'ddev.utils.git.GitManager.capture',
+            side_effect=[
+                'M tests/conftest.py',
+                '',
+                '',
+                '0000000000000000000000000000000000000000\nFoo',
+            ],
+        )
+        edit_patch = mocker.patch('click.edit', return_value=None)
+        result = ddev('release', 'changelog', 'new', 'added')
+
+        assert result.exit_code == 0, result.output
+        assert helpers.remove_trailing_spaces(result.output) == helpers.dedent(
+            '''
+            No changelog entries to create
+            '''
+        )
+        assert not (fragments_dir / '15476.added').exists()
+        edit_patch.assert_not_called()
 
     def test_edit_entry(self, ddev, fragments_dir, helpers, mocker):
         message = 'Foo \n\n    Bar'

@@ -60,8 +60,8 @@ def dd_environment():
                 'ssl_verify': False,
                 'nova_microversion': '2.93',
                 'ironic_microversion': '1.80',
-                'openstack_cloud_name': 'test_cloud',
-                'openstack_config_file_path': '/home/openstack_controller/tests/config/openstack_config_updated.yaml',
+                '#openstack_cloud_name': 'test_cloud',
+                '#openstack_config_file_path': '/home/openstack_controller/tests/config/openstack_config_updated.yaml',
                 'endpoint_region_id': 'RegionOne',
                 'use_legacy_check_version': False,
             }
@@ -373,6 +373,80 @@ def connection_identity(request, mock_responses):
 
 
 @pytest.fixture
+def connection_block_storage(request, mock_responses):
+    param = request.param if hasattr(request, 'param') and request.param is not None else {}
+    http_error = param.get('http_error')
+
+    def volumes(project_id, limit=None):
+        if http_error and 'volumes' in http_error:
+            raise requests.exceptions.HTTPError(response=http_error['volumes'])
+        return [
+            mock.MagicMock(
+                to_dict=mock.MagicMock(
+                    return_value=volume,
+                )
+            )
+            for volume in mock_responses('GET', f'/volume/v3/{project_id}/volumes/detail')['volumes']
+        ]
+
+    def transfers(project_id, details):
+        if http_error and 'transfers' in http_error:
+            raise requests.exceptions.HTTPError(response=http_error['transfers'])
+        return [
+            mock.MagicMock(
+                to_dict=mock.MagicMock(
+                    return_value=transfer,
+                )
+            )
+            for transfer in mock_responses('GET', f'/volume/v3/{project_id}/os-volume-transfer/detail')['transfers']
+        ]
+
+    def snapshots(project_id, limit=None):
+        if http_error and 'snapshots' in http_error:
+            raise requests.exceptions.HTTPError(response=http_error['snapshots'])
+        return [
+            mock.MagicMock(
+                to_dict=mock.MagicMock(
+                    return_value=snapshot,
+                )
+            )
+            for snapshot in mock_responses('GET', f'/volume/v3/{project_id}/snapshots/detail')['snapshots']
+        ]
+
+    def pools(project_id, details):
+        if http_error and 'pools' in http_error:
+            raise requests.exceptions.HTTPError(response=http_error['pools'])
+        return [
+            mock.MagicMock(
+                to_dict=mock.MagicMock(
+                    return_value=pool,
+                )
+            )
+            for pool in mock_responses('GET', f'/volume/v3/{project_id}/scheduler-stats/get_pools')['pools']
+        ]
+
+    def clusters(project_id, details):
+        if http_error and 'clusters' in http_error:
+            raise requests.exceptions.HTTPError(response=http_error['clusters'])
+        return [
+            mock.MagicMock(
+                to_dict=mock.MagicMock(
+                    return_value=cluster,
+                )
+            )
+            for cluster in mock_responses('GET', f'/volume/v3/{project_id}/clusters/detail')['clusters']
+        ]
+
+    return mock.MagicMock(
+        volumes=mock.MagicMock(side_effect=volumes),
+        transfers=mock.MagicMock(side_effect=transfers),
+        snapshots=mock.MagicMock(side_effect=snapshots),
+        pools=mock.MagicMock(side_effect=pools),
+        clusters=mock.MagicMock(side_effect=clusters),
+    )
+
+
+@pytest.fixture
 def connection_compute(request, mock_responses):
     param = request.param if hasattr(request, 'param') and request.param is not None else {}
     http_error = param.get('http_error')
@@ -558,7 +632,7 @@ def connection_baremetal(request, mock_responses):
             for node in mock_responses('GET', '/baremetal/v1/nodes/detail')['nodes']
         ]
 
-    def conductors():
+    def conductors(limit=None):
         if http_error and 'conductors' in http_error:
             raise requests.exceptions.HTTPError(response=http_error['conductors'])
         return [
@@ -590,7 +664,22 @@ def connection_image(request, mock_responses):
             for node in mock_responses('GET', '/image/v2/images')['images']
         ]
 
-    return mock.MagicMock(images=mock.MagicMock(side_effect=images))
+    def members(image_id):
+        if http_error and 'members' in http_error:
+            raise requests.exceptions.HTTPError(response=http_error['members'])
+        return [
+            mock.MagicMock(
+                to_dict=mock.MagicMock(
+                    return_value=node,
+                )
+            )
+            for node in mock_responses('GET', f'/image/v2/images/{image_id}/members')['members']
+        ]
+
+    return mock.MagicMock(
+        images=mock.MagicMock(side_effect=images),
+        members=mock.MagicMock(side_effect=members),
+    )
 
 
 @pytest.fixture
@@ -598,7 +687,7 @@ def connection_load_balancer(request, mock_responses):
     param = request.param if hasattr(request, 'param') and request.param is not None else {}
     http_error = param.get('http_error')
 
-    def load_balancers(project_id):
+    def load_balancers(project_id, limit=None):
         if http_error and 'load_balancers' in http_error and project_id in http_error['load_balancers']:
             raise requests.exceptions.HTTPError(response=http_error['load_balancers'][project_id])
         return [
@@ -627,7 +716,7 @@ def connection_load_balancer(request, mock_responses):
             )
         )
 
-    def listeners(project_id):
+    def listeners(project_id, limit=None):
         if http_error and 'listeners' in http_error and project_id in http_error['listeners']:
             raise requests.exceptions.HTTPError(response=http_error['listeners'][project_id])
         return [
@@ -652,7 +741,7 @@ def connection_load_balancer(request, mock_responses):
             )
         )
 
-    def pools(project_id):
+    def pools(project_id, limit=None):
         if http_error and 'pools' in http_error and project_id in http_error['pools']:
             raise requests.exceptions.HTTPError(response=http_error['pools'][project_id])
         return [
@@ -704,7 +793,7 @@ def connection_load_balancer(request, mock_responses):
             for pool in mock_responses('GET', f'/load-balancer/v2/lbaas/quotas?project_id={project_id}')['quotas']
         ]
 
-    def amphorae(project_id):
+    def amphorae(project_id, limit=None):
         if http_error and 'amphorae' in http_error and project_id in http_error['amphorae']:
             raise requests.exceptions.HTTPError(response=http_error['amphorae'][project_id])
         return [
@@ -739,6 +828,7 @@ def openstack_connection(
     connection_compute,
     connection_network,
     connection_baremetal,
+    connection_block_storage,
     connection_load_balancer,
     connection_image,
 ):
@@ -750,6 +840,7 @@ def openstack_connection(
             compute=connection_compute,
             network=connection_network,
             baremetal=connection_baremetal,
+            block_storage=connection_block_storage,
             load_balancer=connection_load_balancer,
             image=connection_image,
         )

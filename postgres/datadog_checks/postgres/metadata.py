@@ -7,6 +7,8 @@ from typing import Dict, List, Optional, Tuple, Union  # noqa: F401
 
 import psycopg2
 
+from datadog_checks.postgres.cursor import CommenterDictCursor
+
 try:
     import datadog_agent
 except ImportError:
@@ -15,6 +17,7 @@ except ImportError:
 from datadog_checks.base import is_affirmative
 from datadog_checks.base.utils.db.utils import DBMAsyncJob, default_json_event_encoding
 from datadog_checks.base.utils.tracking import tracked_method
+from datadog_checks.postgres.util import get_list_chunks
 
 from .util import payload_pg_version
 from .version_utils import VersionUtils
@@ -25,8 +28,18 @@ DEFAULT_SCHEMAS_COLLECTION_INTERVAL = 600
 DEFAULT_RESOURCES_COLLECTION_INTERVAL = 300
 DEFAULT_SETTINGS_IGNORED_PATTERNS = ["plpgsql%"]
 
+# PG_SETTINGS_QURERY is used to collect all the settings from the pg_settings table
+# Edge case: If source is 'session', it uses reset_val
+# (which represents the value that the setting would revert to on session end or reset),
+# otherwise, it uses the current setting value.
 PG_SETTINGS_QUERY = """
-SELECT name, setting FROM pg_settings
+SELECT
+name,
+case when source = 'session' then reset_val else setting end as setting,
+source,
+sourcefile,
+pending_restart
+FROM pg_settings
 """
 
 DATABASE_INFORMATION_QUERY = """
@@ -46,7 +59,7 @@ WHERE  datname LIKE '{dbname}';
 PG_TABLES_QUERY_V10_PLUS = """
 SELECT c.oid                 AS id,
        c.relname             AS name,
-       c.relhasindex         AS hasindexes,
+       c.relhasindex         AS has_indexes,
        c.relowner :: regrole AS owner,
        ( CASE
            WHEN c.relkind = 'p' THEN TRUE
@@ -64,7 +77,7 @@ WHERE  c.relkind IN ( 'r', 'p' )
 PG_TABLES_QUERY_V9 = """
 SELECT c.oid                 AS id,
        c.relname             AS name,
-       c.relhasindex         AS hasindexes,
+       c.relhasindex         AS has_indexes,
        c.relowner :: regrole AS owner,
        t.relname             AS toast_table
 FROM   pg_class c
@@ -90,9 +103,11 @@ WHERE  nspname NOT IN ( 'information_schema', 'pg_catalog' )
 
 PG_INDEXES_QUERY = """
 SELECT indexname AS NAME,
-       indexdef  AS definition
+       indexdef  AS definition,
+       schemaname,
+       tablename
 FROM   pg_indexes
-WHERE  tablename LIKE '{tablename}';
+WHERE  schemaname='{schema_name}' AND ({table_names_like});
 """
 
 PG_CHECK_FOR_FOREIGN_KEY = """
@@ -104,22 +119,24 @@ WHERE  contype = 'f'
 
 PG_CONSTRAINTS_QUERY = """
 SELECT conname                   AS name,
-       pg_get_constraintdef(oid) AS definition
+       pg_get_constraintdef(oid) AS definition,
+       conrelid AS id
 FROM   pg_constraint
 WHERE  contype = 'f'
-       AND conrelid = {oid};
+       AND conrelid IN ({table_ids});
 """
 
 COLUMNS_QUERY = """
 SELECT attname                          AS name,
        Format_type(atttypid, atttypmod) AS data_type,
        NOT attnotnull                   AS nullable,
-       pg_get_expr(adbin, adrelid)      AS default
+       pg_get_expr(adbin, adrelid)      AS default,
+       attrelid AS id
 FROM   pg_attribute
        LEFT JOIN pg_attrdef ad
               ON adrelid = attrelid
                  AND adnum = attnum
-WHERE  attrelid = {oid}
+WHERE  attrelid IN ({table_ids})
        AND attnum > 0
        AND NOT attisdropped;
 """
@@ -128,18 +145,19 @@ PARTITION_KEY_QUERY = """
 SELECT relname,
        pg_get_partkeydef(oid) AS partition_key
 FROM   pg_class
-WHERE  '{parent}' = relname;
+WHERE  oid in ({table_ids});
 """
 
 NUM_PARTITIONS_QUERY = """
-SELECT count(inhrelid :: regclass) AS num_partitions
+SELECT count(inhrelid :: regclass) AS num_partitions, inhparent as id
 FROM   pg_inherits
-WHERE  inhparent = {parent_oid};
+WHERE  inhparent IN ({table_ids})
+GROUP BY inhparent;
 """
 
 PARTITION_ACTIVITY_QUERY = """
 SELECT pi.inhparent :: regclass         AS parent_table_name,
-       SUM(psu.seq_scan + psu.idx_scan) AS total_activity
+       SUM(COALESCE(psu.seq_scan, 0) + COALESCE(psu.idx_scan, 0)) AS total_activity
 FROM   pg_catalog.pg_stat_user_tables psu
        join pg_class pc
          ON psu.relname = pc.relname
@@ -162,26 +180,27 @@ class PostgresMetadata(DBMAsyncJob):
     """
 
     def __init__(self, check, config, shutdown_callback):
-        self.pg_settings_collection_interval = config.settings_metadata_config.get(
-            "collection_interval", DEFAULT_SETTINGS_COLLECTION_INTERVAL
-        )
         self.pg_settings_ignored_patterns = config.settings_metadata_config.get(
             "ignored_settings_patterns", DEFAULT_SETTINGS_IGNORED_PATTERNS
+        )
+        self.pg_settings_collection_interval = config.settings_metadata_config.get(
+            "collection_interval", DEFAULT_SETTINGS_COLLECTION_INTERVAL
         )
         self.schemas_collection_interval = config.schemas_metadata_config.get(
             "collection_interval", DEFAULT_SCHEMAS_COLLECTION_INTERVAL
         )
-
-        collection_interval = config.resources_metadata_config.get(
+        resources_collection_interval = config.resources_metadata_config.get(
             "collection_interval", DEFAULT_RESOURCES_COLLECTION_INTERVAL
         )
 
         # by default, send resources every 5 minutes
-        self.collection_interval = min(collection_interval, self.pg_settings_collection_interval)
+        self.collection_interval = min(
+            resources_collection_interval, self.pg_settings_collection_interval, self.schemas_collection_interval
+        )
 
         super(PostgresMetadata, self).__init__(
             check,
-            rate_limit=1 / self.collection_interval,
+            rate_limit=1 / float(self.collection_interval),
             run_sync=is_affirmative(config.settings_metadata_config.get("run_sync", False)),
             enabled=is_affirmative(config.resources_metadata_config.get("enabled", True)),
             dbms="postgres",
@@ -195,9 +214,10 @@ class PostgresMetadata(DBMAsyncJob):
         self.db_pool = self._check.db_pool
         self._collect_pg_settings_enabled = is_affirmative(config.settings_metadata_config.get("enabled", False))
         self._collect_schemas_enabled = is_affirmative(config.schemas_metadata_config.get("enabled", False))
+        self._is_schemas_collection_in_progress = False
         self._pg_settings_cached = None
         self._time_since_last_settings_query = 0
-        self._time_since_last_schemas_query = 0
+        self._last_schemas_query_time = 0
         self._conn_ttl_ms = self._config.idle_connection_timeout
         self._tags_no_db = None
         self.tags = None
@@ -241,10 +261,16 @@ class PostgresMetadata(DBMAsyncJob):
         }
         self._check.database_monitoring_metadata(json.dumps(event, default=default_json_event_encoding))
 
-        elapsed_s_schemas = time.time() - self._time_since_last_schemas_query
-        if elapsed_s_schemas >= self.schemas_collection_interval and self._collect_schemas_enabled:
-            metadata = self._collect_schema_info()
-            event = {
+        elapsed_s_schemas = time.time() - self._last_schemas_query_time
+        if (
+            self._collect_schemas_enabled
+            and not self._is_schemas_collection_in_progress
+            and elapsed_s_schemas >= self.schemas_collection_interval
+        ):
+            self._is_schemas_collection_in_progress = True
+            schema_metadata = self._collect_schema_info()
+            # We emit an event for each batch of tables to reduce total data in memory and keep event size reasonable
+            base_event = {
                 "host": self._check.resolved_hostname,
                 "agent_version": datadog_agent.get_version(),
                 "dbms": "postgres",
@@ -252,13 +278,48 @@ class PostgresMetadata(DBMAsyncJob):
                 "collection_interval": self.schemas_collection_interval,
                 "dbms_version": self._payload_pg_version(),
                 "tags": self._tags_no_db,
-                "timestamp": time.time() * 1000,
-                "metadata": metadata,
                 "cloud_metadata": self._config.cloud_metadata,
             }
-            json_event = json.dumps(event, default=default_json_event_encoding)
-            self._log.debug("Reporting the following payload for schema collection: {}".format(json_event))
-            self._check.database_monitoring_metadata(json_event)
+
+            # Tuned from experiments on staging, we may want to make this dynamic based on schema size in the future
+            chunk_size = 50
+
+            for database in schema_metadata:
+                dbname = database["name"]
+                with self.db_pool.get_connection(dbname, self._config.idle_connection_timeout) as conn:
+                    with conn.cursor(cursor_factory=psycopg2.extras.DictCursor) as cursor:
+                        for schema in database["schemas"]:
+                            tables = self._query_tables_for_schema(cursor, schema["id"], dbname)
+                            table_chunks = list(get_list_chunks(tables, chunk_size))
+
+                            buffer_column_count = 0
+                            tables_buffer = []
+
+                            for tables in table_chunks:
+                                table_info = self._query_table_information(cursor, schema['name'], tables)
+
+                                tables_buffer = [*tables_buffer, *table_info]
+                                for t in table_info:
+                                    buffer_column_count += len(t.get("columns", []))
+
+                                if buffer_column_count >= 100_000:
+                                    self._flush_schema(base_event, database, schema, tables_buffer)
+                                    tables_buffer = []
+                                    buffer_column_count = 0
+
+                            if len(tables_buffer) > 0:
+                                self._flush_schema(base_event, database, schema, tables_buffer)
+            self._is_schemas_collection_in_progress = False
+
+    def _flush_schema(self, base_event, database, schema, tables):
+        event = {
+            **base_event,
+            "metadata": [{**database, "schemas": [{**schema, "tables": tables}]}],
+            "timestamp": time.time() * 1000,
+        }
+        json_event = json.dumps(event, default=default_json_event_encoding)
+        self._log.debug("Reporting the following payload for schema collection: {}".format(json_event))
+        self._check.database_monitoring_metadata(json_event)
 
     def _payload_pg_version(self):
         version = self._check.version
@@ -277,7 +338,7 @@ class PostgresMetadata(DBMAsyncJob):
         for database in databases:
             metadata.append(self._collect_metadata_for_database(database))
 
-        self._time_since_last_schemas_query = time.time()
+        self._last_schemas_query_time = time.time()
         return metadata
 
     def _query_database_information(
@@ -344,26 +405,61 @@ class PostgresMetadata(DBMAsyncJob):
                 or not info["has_partitions"]
             ):
                 # if we don't have metrics in our cache for this table, return 0
-                table_data = cache[dbname].get(
+                table_data = cache.get(dbname, {}).get(
                     info["name"],
                     {"postgresql.index_scans": 0, "postgresql.seq_scans": 0},
                 )
-                return table_data["postgresql.index_scans"] + table_data["postgresql.seq_scans"]
+                return table_data.get("postgresql.index_scans", 0) + table_data.get("postgresql.seq_scans", 0)
             else:
                 # get activity
                 cursor.execute(PARTITION_ACTIVITY_QUERY.format(parent_oid=info["id"]))
                 row = cursor.fetchone()
-                return row.get("total_activity", 0) if row else 0
+                return row.get("total_activity", 0) if row is not None else 0
+
+        # We only sort to filter by top so no need to waste resources if we're going to return everything
+        if len(table_info) <= limit:
+            return table_info
 
         # if relation metrics are enabled, sorted based on last activity information
         table_info = sorted(table_info, key=sort_tables, reverse=True)
         return table_info[:limit]
 
-    def _query_table_information_for_schema(
+    def _query_tables_for_schema(
         self, cursor: psycopg2.extensions.cursor, schema_id: str, dbname: str
     ) -> List[Dict[str, Union[str, Dict]]]:
         """
-        Collect table information per schema. Returns a list of dictionaries
+        Collect list of tables for a schema. Returns a list of dictionaries
+        with key/values:
+            "id": str
+            "name": str
+            "owner": str
+            "has_indexes: bool
+            "has_partitions: bool
+            "toast_table": str (if associated toast table exists)
+            "num_partitions": int (if has partitions)
+
+        """
+        tables_info = self._get_table_info(cursor, dbname, schema_id)
+        table_payloads = []
+        for table in tables_info:
+            this_payload = {}
+            this_payload.update({"id": str(table["id"])})
+            this_payload.update({"name": table["name"]})
+            this_payload.update({"owner": table["owner"]})
+            this_payload.update({"has_indexes": table["has_indexes"]})
+            this_payload.update({"has_partitions": table.get("has_partitions", False)})
+            if table["toast_table"] is not None:
+                this_payload.update({"toast_table": table["toast_table"]})
+
+            table_payloads.append(this_payload)
+
+        return table_payloads
+
+    def _query_table_information(
+        self, cursor: psycopg2.extensions.cursor, schema_name: str, table_info: List[Dict[str, Union[str, bool]]]
+    ) -> List[Dict[str, Union[str, Dict]]]:
+        """
+        Collect table information . Returns a dictionary
         with key/values:
             "id": str
             "name": str
@@ -383,53 +479,50 @@ class PostgresMetadata(DBMAsyncJob):
             "partition_key": str (if has partitions)
             "num_partitions": int (if has partitions)
         """
-        tables_info = self._get_table_info(cursor, dbname, schema_id)
-        table_payloads = []
-        for table in tables_info:
-            this_payload = {}
-            name = table["name"]
-            table_id = table["id"]
-            this_payload.update({"id": str(table["id"])})
-            this_payload.update({"name": name})
-            if table["hasindexes"]:
-                cursor.execute(PG_INDEXES_QUERY.format(tablename=name))
-                rows = cursor.fetchall()
-                idxs = [dict(row) for row in rows]
-                this_payload.update({"indexes": idxs})
+        tables = {t.get("name"): {**t, "num_partitions": 0} for t in table_info}
+        table_name_lookup = {t.get("id"): t.get("name") for t in table_info}
+        table_ids = ",".join(["'{}'".format(t.get("id")) for t in table_info])
+        table_names_like = " OR ".join(["tablename LIKE '{}%'".format(t.get("name")) for t in table_info])
 
-            if VersionUtils.transform_version(str(self._check.version))["version.major"] != "9":
-                if table["has_partitions"]:
-                    cursor.execute(PARTITION_KEY_QUERY.format(parent=name))
-                    row = cursor.fetchone()
-                    this_payload.update({"partition_key": row["partition_key"]})
+        # Get indexes
+        cursor.execute(PG_INDEXES_QUERY.format(schema_name=schema_name, table_names_like=table_names_like))
+        rows = cursor.fetchall()
+        for row in rows:
+            # Partition indexes in some versions of Postgres have appended digits for each partition
+            table_name = row.get("tablename")
+            while tables.get(table_name) is None and len(table_name) > 1 and table_name[-1].isdigit():
+                table_name = table_name[0:-1]
+            if tables.get(table_name) is not None:
+                tables.get(table_name)["indexes"] = tables.get(table_name).get("indexes", []) + [dict(row)]
 
-                    cursor.execute(NUM_PARTITIONS_QUERY.format(parent_oid=table_id))
-                    row = cursor.fetchone()
-                    this_payload.update({"num_partitions": row["num_partitions"]})
+        # Get partitions
+        if VersionUtils.transform_version(str(self._check.version))["version.major"] != "9":
+            cursor.execute(PARTITION_KEY_QUERY.format(table_ids=table_ids))
+            rows = cursor.fetchall()
+            for row in rows:
+                tables.get(row.get("relname"))["partition_key"] = row.get("partition_key")
 
-            if table["toast_table"] is not None:
-                this_payload.update({"toast_table": table["toast_table"]})
+            cursor.execute(NUM_PARTITIONS_QUERY.format(table_ids=table_ids))
+            rows = cursor.fetchall()
+            for row in rows:
+                table_name = table_name_lookup.get(str(row.get("id")))
+                tables.get(table_name)["num_partitions"] = row.get("num_partitions", 0)
 
-            # Get foreign keys
-            cursor.execute(PG_CHECK_FOR_FOREIGN_KEY.format(oid=table_id))
-            row = cursor.fetchone()
-            if row["count"] > 0:
-                cursor.execute(PG_CONSTRAINTS_QUERY.format(oid=table_id))
-                rows = cursor.fetchall()
-                if rows:
-                    fks = [dict(row) for row in rows]
-                    this_payload.update({"foreign_keys": fks})
+        # Get foreign keys
+        cursor.execute(PG_CONSTRAINTS_QUERY.format(table_ids=table_ids))
+        rows = cursor.fetchall()
+        for row in rows:
+            table_name = table_name_lookup.get(str(row.get("id")))
+            tables.get(table_name)["foreign_keys"] = tables.get(table_name).get("foreign_keys", []) + [dict(row)]
 
-            # Get columns
-            cursor.execute(COLUMNS_QUERY.format(oid=table_id))
-            rows = cursor.fetchall()[:]
-            max_columns = self._config.schemas_metadata_config.get("max_columns", 50)
-            columns = [dict(row) for row in rows][:max_columns]
-            this_payload.update({"columns": columns})
+        # Get columns
+        cursor.execute(COLUMNS_QUERY.format(table_ids=table_ids))
+        rows = cursor.fetchall()
+        for row in rows:
+            table_name = table_name_lookup.get(str(row.get("id")))
+            tables.get(table_name)["columns"] = tables.get(table_name).get("columns", []) + [dict(row)]
 
-            table_payloads.append(this_payload)
-
-        return table_payloads
+        return tables.values()
 
     def _collect_metadata_for_database(self, dbname):
         metadata = {}
@@ -448,8 +541,6 @@ class PostgresMetadata(DBMAsyncJob):
                 )
                 schema_info = self._query_schema_information(cursor, dbname)
                 for schema in schema_info:
-                    tables_info = self._query_table_information_for_schema(cursor, schema["id"], dbname)
-                    schema.update({"tables": tables_info})
                     metadata["schemas"].append(schema)
 
         return metadata
@@ -457,7 +548,7 @@ class PostgresMetadata(DBMAsyncJob):
     @tracked_method(agent_check_getter=agent_check_getter)
     def _collect_postgres_settings(self):
         with self._check._get_main_db() as conn:
-            with conn.cursor(cursor_factory=psycopg2.extras.DictCursor) as cursor:
+            with conn.cursor(cursor_factory=CommenterDictCursor) as cursor:
                 if self.pg_settings_ignored_patterns:
                     query = PG_SETTINGS_QUERY + " WHERE name NOT LIKE ALL(%s)"
                 else:

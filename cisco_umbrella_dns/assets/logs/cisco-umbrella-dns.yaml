@@ -160,29 +160,15 @@ facets:
   - facetType: list
     groups:
       - Cisco Umbrella DNS
-    name: Category
-    path: categories.label
-    source: log
-    type: string
-  - facetType: list
-    groups:
-      - Cisco Umbrella DNS
     name: Client Country Code
-    path: external.geoip.country.iso_code
-    source: log
-    type: string
-  - facetType: list
-    groups:
-      - Cisco Umbrella DNS
-    name: Isolated State
-    path: isolated.state
+    path: cisco.umbrella.dns.external.geoip.country.iso_code
     source: log
     type: string
   - facetType: range
     groups:
       - Cisco Umbrella DNS
     name: Request Size
-    path: requestsize
+    path: cisco.umbrella.dns.requestsize
     source: log
     type: integer
     unit:
@@ -192,33 +178,12 @@ facets:
     groups:
       - Cisco Umbrella DNS
     name: Response Size
-    path: responsesize
+    path: cisco.umbrella.dns.responsesize
     source: log
     type: integer
     unit:
       family: bytes
       name: byte
-  - facetType: list
-    groups:
-      - Cisco Umbrella DNS
-    name: Return Message
-    path: returnmessage
-    source: log
-    type: string
-  - facetType: list
-    groups:
-      - Cisco Umbrella DNS
-    name: Verdict
-    path: verdict
-    source: log
-    type: string
-  - facetType: list
-    groups:
-      - Cisco Umbrella DNS
-    name: Warn Status
-    path: warnstatus
-    source: log
-    type: string
 pipeline:
   type: pipeline
   name: Cisco Umbrella DNS
@@ -229,23 +194,11 @@ pipeline:
     - type: date-remapper
       name: Define `timestamp` as the official date of the log
       enabled: true
-      meta:
-        last_update:
-          timestamp: 1704090436181
-          user_name: Darshil Surti
-          user_email: darshil.surti@crestdatasys.com
-        tags: []
       sources:
         - timestamp
     - type: service-remapper
       name: Define `type` as the official service of the log
       enabled: true
-      meta:
-        last_update:
-          timestamp: 1704090104316
-          user_name: Darshil Surti
-          user_email: darshil.surti@crestdatasys.com
-        tags: []
       sources:
         - type
     - type: pipeline
@@ -257,11 +210,6 @@ pipeline:
         - type: attribute-remapper
           name: Map `querytype` to `dns.answer.type`
           enabled: true
-          meta:
-            last_update:
-              user_id: "5795822"
-              timestamp: 1704087996572
-            tags: []
           sources:
             - querytype
           sourceType: attribute
@@ -272,11 +220,6 @@ pipeline:
         - type: attribute-remapper
           name: Map `returncode` to `dns.flags.rcode`
           enabled: true
-          meta:
-            last_update:
-              user_id: "5795822"
-              timestamp: 1704088010451
-            tags: []
           sources:
             - returncode
           sourceType: attribute
@@ -287,11 +230,6 @@ pipeline:
         - type: attribute-remapper
           name: Map `domain` to `dns.question.name`
           enabled: true
-          meta:
-            last_update:
-              user_id: "5795822"
-              timestamp: 1704088022304
-            tags: []
           sources:
             - domain
           sourceType: attribute
@@ -302,22 +240,12 @@ pipeline:
         - type: geo-ip-parser
           name: GeoIP Parser for External IP
           enabled: true
-          meta:
-            last_update:
-              user_id: "5191598"
-              timestamp: 1702622526430
-            tags: []
           sources:
             - externalip
           target: external.geoip
           ip_processing_behavior: do-nothing
         - name: Lookup on `dns.flags.rcode` (returncode) to `returnmessage` field
           enabled: true
-          meta:
-            last_update:
-              user_id: "5191598"
-              timestamp: 1702622640141
-            tags: []
           source: dns.flags.rcode
           target: returnmessage
           lookupTable: |-
@@ -332,6 +260,17 @@ pipeline:
             8, NOTAUTH
             9, NOTZONE
           type: lookup-processor
+        - type: attribute-remapper
+          name: Map `external.geoip.country.iso_code` to
+            `cisco.umbrella.dns.external.geoip.country.iso_code`
+          enabled: true
+          sources:
+            - external.geoip.country.iso_code
+          sourceType: attribute
+          target: cisco.umbrella.dns.external.geoip.country.iso_code
+          targetType: attribute
+          preserveSource: false
+          overrideOnConflict: false
     - type: pipeline
       name: Cisco Umbrella Proxy logs
       enabled: true
@@ -341,11 +280,6 @@ pipeline:
         - type: attribute-remapper
           name: Map `externalip` to `network.client.ip`
           enabled: true
-          meta:
-            last_update:
-              user_id: "5795822"
-              timestamp: 1704108982693
-            tags: []
           sources:
             - externalip
           sourceType: attribute
@@ -356,11 +290,6 @@ pipeline:
         - type: attribute-remapper
           name: Map `destinationip` to `network.destination.ip`
           enabled: true
-          meta:
-            last_update:
-              user_id: "5795822"
-              timestamp: 1704088066314
-            tags: []
           sources:
             - destinationip
           sourceType: attribute
@@ -371,11 +300,6 @@ pipeline:
         - type: attribute-remapper
           name: Map `url` to `http.url`
           enabled: true
-          meta:
-            last_update:
-              user_id: "5795822"
-              timestamp: 1704088075739
-            tags: []
           sources:
             - url
           sourceType: attribute
@@ -386,11 +310,6 @@ pipeline:
         - type: attribute-remapper
           name: Map `statuscode` to `http.status_code`
           enabled: true
-          meta:
-            last_update:
-              user_id: "5795822"
-              timestamp: 1704088084552
-            tags: []
           sources:
             - statuscode
           sourceType: attribute
@@ -401,11 +320,6 @@ pipeline:
         - type: attribute-remapper
           name: Map `referer` to `http.referer`
           enabled: true
-          meta:
-            last_update:
-              user_id: "5795822"
-              timestamp: 1704088093347
-            tags: []
           sources:
             - referer
           sourceType: attribute
@@ -416,11 +330,6 @@ pipeline:
         - type: attribute-remapper
           name: Map `useragent` to `http.useragent`
           enabled: true
-          meta:
-            last_update:
-              user_id: "5795822"
-              timestamp: 1704088102993
-            tags: []
           sources:
             - useragent
           sourceType: attribute
@@ -431,11 +340,6 @@ pipeline:
         - type: attribute-remapper
           name: Map `requestmethod` to `http.method`
           enabled: true
-          meta:
-            last_update:
-              user_id: "5795822"
-              timestamp: 1704088112370
-            tags: []
           sources:
             - requestmethod
           sourceType: attribute
@@ -446,11 +350,6 @@ pipeline:
         - type: attribute-remapper
           name: Map `requestsize` to `network.bytes_read`
           enabled: true
-          meta:
-            last_update:
-              user_id: "5191598"
-              timestamp: 1704098151264
-            tags: []
           sources:
             - requestsize
           sourceType: attribute
@@ -461,11 +360,6 @@ pipeline:
         - type: attribute-remapper
           name: Map `responsesize` to `network.bytes_written`
           enabled: true
-          meta:
-            last_update:
-              user_id: "5191598"
-              timestamp: 1704098160175
-            tags: []
           sources:
             - responsesize
           sourceType: attribute
@@ -476,11 +370,6 @@ pipeline:
         - type: user-agent-parser
           name: Extract details from `http.useragent`
           enabled: true
-          meta:
-            last_update:
-              user_id: "5191598"
-              timestamp: 1704102529700
-            tags: []
           sources:
             - http.useragent
           target: http.useragent_details
@@ -489,11 +378,6 @@ pipeline:
         - type: url-parser
           name: Extract details from `http.url`
           enabled: true
-          meta:
-            last_update:
-              user_id: "5191598"
-              timestamp: 1702622703663
-            tags: []
           sources:
             - http.url
           target: http.url_details
@@ -501,11 +385,6 @@ pipeline:
         - type: geo-ip-parser
           name: GeoIP Parser for `network.client.ip`  (externalip)
           enabled: true
-          meta:
-            last_update:
-              user_id: "5191598"
-              timestamp: 1702623732699
-            tags: []
           sources:
             - network.client.ip
           target: network.client.geoip
@@ -513,12 +392,28 @@ pipeline:
         - type: geo-ip-parser
           name: GeoIP Parser for `network.destination.ip` (destinationip)
           enabled: true
-          meta:
-            last_update:
-              user_id: "5191598"
-              timestamp: 1702623702414
-            tags: []
           sources:
             - network.destination.ip
           target: network.destination.geoip
           ip_processing_behavior: do-nothing
+          overrideOnConflict: false
+        - type: attribute-remapper
+          name: Map `requestsize` to `cisco.umbrella.dns.requestsize`
+          enabled: true
+          sources:
+            - requestsize
+          sourceType: attribute
+          target: cisco.umbrella.dns.requestsize
+          targetType: attribute
+          preserveSource: false
+          overrideOnConflict: false
+        - type: attribute-remapper
+          name: Map `responsesize` to `cisco.umbrella.dns.responsesize`
+          enabled: true
+          sources:
+            - responsesize
+          sourceType: attribute
+          target: cisco.umbrella.dns.responsesize
+          targetType: attribute
+          preserveSource: false
+          overrideOnConflict: false

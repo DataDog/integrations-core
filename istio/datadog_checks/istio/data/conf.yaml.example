@@ -161,23 +161,23 @@ instances:
     ##
     ## Note: Label filtering happens before `rename_labels`.
     #
-    exclude_labels:
-      - source_version
-      - destination_version
-      - source_canonical_revision
-      - destination_canonical_revision
-      - source_principal
-      - destination_principal
-      - source_cluster
-      - destination_cluster
-      - source_canonical_service
-      - destination_canonical_service
-      - source_workload_namespace
-      - destination_workload_namespace
-      - request_protocol
-      - connection_security_policy
-      - destination_service
-      - source_workload
+    # exclude_labels:
+    #   - source_version
+    #   - destination_version
+    #   - source_canonical_revision
+    #   - destination_canonical_revision
+    #   - source_principal
+    #   - destination_principal
+    #   - source_cluster
+    #   - destination_cluster
+    #   - source_canonical_service
+    #   - destination_canonical_service
+    #   - source_workload_namespace
+    #   - destination_workload_namespace
+    #   - request_protocol
+    #   - connection_security_policy
+    #   - destination_service
+    #   - source_workload
 
     ## @param include_labels - list of strings - optional
     ## A list of labels to include. May be used in conjunction with `exclude_labels`.
@@ -550,8 +550,8 @@ instances:
     ## @param tls_ca_cert - string - optional
     ## The path to a file of concatenated CA certificates in PEM format or a directory
     ## containing several CA certificates in PEM format. If a directory, the directory
-    ## must have been processed using the c_rehash utility supplied with OpenSSL. See:
-    ## https://www.openssl.org/docs/manmaster/man3/SSL_CTX_load_verify_locations.html
+    ## must have been processed using the `openssl rehash` command. See:
+    ## https://www.openssl.org/docs/man3.2/man1/c_rehash.html
     #
     # tls_ca_cert: <CA_CERT_PATH>
 

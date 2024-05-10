@@ -51,7 +51,7 @@ class Repository:
 
     @cached_property
     def agent_requirements(self) -> Path:
-        return self.path / 'datadog_checks_base' / 'datadog_checks' / 'base' / 'data' / 'agent_requirements.in'
+        return self.path / 'agent_requirements.in'
 
     @cached_property
     def agent_release_requirements(self) -> Path:
@@ -192,12 +192,13 @@ class IntegrationRegistry:
         return integration
 
     def __finalize_selection(self, selection: Iterable[str]) -> set[str] | None:
-        if not selection:
+        if not selection or 'changed' in selection:
             return self.__get_changed_root_entries() or None
-        elif 'all' in selection:
+
+        if 'all' in selection:
             return set()
-        else:
-            return set(selection)
+
+        return set(selection)
 
     def __get_changed_root_entries(self) -> set[str]:
         return {relative_path.split('/', 1)[0] for relative_path in self.repo.git.changed_files}

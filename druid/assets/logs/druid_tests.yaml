@@ -10,6 +10,7 @@ tests:
         thread_name: "Coordinator-Exec--0"
       timestamp: 1568108420909
     message: "Starting coordination. Getting available segments."
+    status: "info"
     tags:
      - "source:LOGS_SOURCE"
     timestamp: 1568108420909
@@ -32,6 +33,7 @@ tests:
         thread_name: "main"
       timestamp: 1564085522335
     message: "Adding monitor[org.apache.druid.java.util.metrics.JvmMonitor@2fd954f]"
+    status: "info"
     tags:
      - "source:LOGS_SOURCE"
     timestamp: 1564085522335
@@ -58,6 +60,7 @@ tests:
         thread_name: "main"
       timestamp: 1564086416776
     message: "Unable to parse [druid.monitoring.monitors]=[[\"org.apache.druid.client.cache.CacheMonitor\",\"org.apache.druid.java.util.metrics.SysMonitor\",\"org.apache.druid.server.metrics.HistoricalMetricsMonitor\",\"org.apache.druid.java.util.metrics.JvmMonitor\",\"org.apache.druid.java.util.metrics.JvmCpuMonitor\",\"org.apache.druid.java.util.metrics.CpuAcctDeltaMonitor\",\"org.apache.druid.java.util.metrics.JvmThreadsMonitor\"] as a json object, using as is."
+    status: "info"
     tags:
      - "source:LOGS_SOURCE"
     timestamp: 1564086416776
@@ -73,6 +76,7 @@ tests:
         thread_name: "Coordinator-Exec--0"
       timestamp: 1568108420909
     message: "Starting coordination. Getting available segments."
+    status: "info"
     tags:
      - "source:LOGS_SOURCE"
     timestamp: 1568108420909
@@ -87,6 +91,7 @@ tests:
         thread_name: "main"
       timestamp: 968335661508
     message: "Entering application."
+    status: "info"
     tags:
      - "source:LOGS_SOURCE"
     timestamp: 968335661508
@@ -100,6 +105,7 @@ tests:
         name: "MyApp.foo.bar"
         thread_name: "main"
     message: "Entering application."
+    status: "info"
     tags:
      - "source:LOGS_SOURCE"
     timestamp: 1
@@ -113,6 +119,7 @@ tests:
         name: "org.foo.bar"
       timestamp: 968335664000
     message: "Entering application."
+    status: "info"
     tags:
      - "source:LOGS_SOURCE"
     timestamp: 968335664000
@@ -126,6 +133,7 @@ tests:
         thread_name: "main"
       timestamp: 968335664452
     message: "Entering application."
+    status: "info"
     tags:
      - "source:LOGS_SOURCE"
     timestamp: 968335664452
@@ -141,6 +149,7 @@ tests:
         thread_name: "main"
       timestamp: 968335661508
     message: "Entering application."
+    status: "info"
     tags:
      - "source:LOGS_SOURCE"
     timestamp: 968335661508
@@ -157,6 +166,7 @@ tests:
         name: "MyApp.foo.bar"
         thread_name: "main"
     message: "Entering application."
+    status: "info"
     tags:
      - "source:LOGS_SOURCE"
     timestamp: 1
@@ -173,6 +183,7 @@ tests:
         name: "org.foo.bar"
       timestamp: 968335664000
     message: "Entering application."
+    status: "info"
     tags:
      - "source:LOGS_SOURCE"
     timestamp: 968335664000
@@ -189,6 +200,7 @@ tests:
         thread_name: "main"
       timestamp: 968335664452
     message: "Entering application."
+    status: "info"
     tags:
      - "source:LOGS_SOURCE"
     timestamp: 968335664452

@@ -9,7 +9,6 @@ from collections import namedtuple
 import mock
 import pytest
 
-from datadog_checks.base.errors import ConfigurationError
 from datadog_checks.dev import EnvVars
 from datadog_checks.sqlserver import SQLServer
 from datadog_checks.sqlserver.connection import split_sqlserver_host_port
@@ -43,8 +42,12 @@ def test_get_cursor(instance_docker):
 def test_missing_db(instance_docker, dd_run_check):
     instance = copy.copy(instance_docker)
     instance['ignore_missing_database'] = False
-    with mock.patch('datadog_checks.sqlserver.connection.Connection.check_database', return_value=(False, 'db')):
-        with pytest.raises(ConfigurationError):
+
+    with mock.patch(
+        'datadog_checks.sqlserver.connection.Connection.open_managed_default_connection',
+        side_effect=SQLConnectionError(Exception("couldnt connect")),
+    ):
+        with pytest.raises(SQLConnectionError):
             check = SQLServer(CHECK_NAME, {}, [instance])
             check.initialize_connection()
             check.make_metric_list_to_collect()
@@ -73,19 +76,19 @@ def test_db_exists(get_cursor, mock_connect, instance_docker_defaults, dd_run_ch
     mock_connect.__enter__ = mock.Mock(return_value='foo')
 
     mock_results = mock.MagicMock()
-    mock_results.__iter__.return_value = db_results
+    mock_results.fetchall.return_value = db_results
     get_cursor.return_value = mock_results
 
     instance = copy.copy(instance_docker_defaults)
     # make sure check doesn't try to add metrics
     instance['stored_procedure'] = 'fake_proc'
+    instance['ignore_missing_database'] = True
 
     # check base case of lowercase for lowercase and case-insensitive db
     check = SQLServer(CHECK_NAME, {}, [instance])
     check.initialize_connection()
     check.make_metric_list_to_collect()
     assert check.do_check is True
-
     # check all caps for case insensitive db
     instance['database'] = 'MASTER'
     check = SQLServer(CHECK_NAME, {}, [instance])
@@ -110,9 +113,9 @@ def test_db_exists(get_cursor, mock_connect, instance_docker_defaults, dd_run_ch
     # check case sensitive but mismatched db
     instance['database'] = 'cASEsENSITIVE2018'
     check = SQLServer(CHECK_NAME, {}, [instance])
-    with pytest.raises(ConfigurationError):
-        check.initialize_connection()
-        check.make_metric_list_to_collect()
+    check.initialize_connection()
+    check.make_metric_list_to_collect()
+    assert check.do_check is False
 
     # check offline but exists db
     instance['database'] = 'Offlinedb'
@@ -137,7 +140,7 @@ def test_azure_cross_database_queries_excluded(get_cursor, mock_connect, instanc
     mock_connect.__enter__ = mock.Mock(return_value='foo')
 
     mock_results = mock.MagicMock()
-    mock_results.__iter__.return_value = db_results
+    mock_results.fetchall.return_value = db_results
     get_cursor.return_value = mock_results
 
     instance = copy.copy(instance_docker_defaults)

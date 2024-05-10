@@ -10,17 +10,17 @@ from pathlib import Path
 from google.cloud import storage
 from packaging.version import Version
 
-BUCKET_NAME = 'dd-agent-int-deps'
-STORAGE_URL = f'https://storage.googleapis.com/{BUCKET_NAME}'
+BUCKET_NAME = 'deps-agent-int-datadoghq-com'
+STORAGE_URL = 'https://agent-int-packages.datadoghq.com'
 BUILDER_DIR = Path(__file__).parent
 REPO_DIR = BUILDER_DIR.parent
 RESOLUTION_DIR = REPO_DIR / '.deps'
 LOCK_FILE_DIR = RESOLUTION_DIR / 'resolved'
-DIRECT_DEP_FILE = REPO_DIR / 'datadog_checks_base' / 'datadog_checks' / 'base' / 'data' / 'agent_requirements.in'
+DIRECT_DEP_FILE = REPO_DIR / 'agent_requirements.in'
 CONSTANTS_FILE = REPO_DIR / 'ddev' / 'src' / 'ddev' / 'repo' / 'constants.py'
 TARGET_TAG_PATTERNS = {
     'linux-x86_64': 'manylinux.*_x86_64|linux_x86_64',
-    'linux-aarch64': 'manylinux.*_aarch64',
+    'linux-aarch64': 'manylinux.*_aarch64|linux_aarch64',
     'windows-x86_64': 'win_amd64',
     'macos-x86_64': 'macosx.*_(x86_64|intel|universal2)',
 }

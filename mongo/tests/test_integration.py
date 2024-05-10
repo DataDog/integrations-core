@@ -18,7 +18,7 @@ def _assert_metrics(aggregator, metrics_categories, additional_tags=None):
     if additional_tags is None:
         additional_tags = []
     for cat in metrics_categories:
-        with open(os.path.join(HERE, "results", "metrics-{}.json".format(cat)), 'r') as f:
+        with open(os.path.join(HERE, "results", f"metrics-{cat}.json"), 'r') as f:
             for metric in json.load(f):
                 aggregator.assert_metric(
                     metric['name'],
@@ -29,8 +29,51 @@ def _assert_metrics(aggregator, metrics_categories, additional_tags=None):
                 )
 
 
-def test_integration_mongos(instance_integration, aggregator, check, dd_run_check):
-    mongos_check = check(instance_integration)
+def _assert_mongodb_instance_event(
+    aggregator,
+    check,
+    expected_tags,
+    dbm,
+    replset_name,
+    replset_state,
+    sharding_cluster_role,
+    hosts,
+    shards,
+    cluster_type,
+    cluster_name,
+):
+    # Gather dbm-metadata events
+    dbm_metadata = aggregator.get_event_platform_events("dbm-metadata")
+
+    # Assert that the mongodb_instance events are present with the correct metadata
+    mongodb_instance_event = next((e for e in dbm_metadata if e['kind'] == 'mongodb_instance'), None)
+    assert mongodb_instance_event is not None
+    assert mongodb_instance_event['host'] == check._resolved_hostname
+    assert mongodb_instance_event is not None
+    assert mongodb_instance_event['host'] == check._resolved_hostname
+    assert mongodb_instance_event['dbms'] == "mongodb"
+    assert mongodb_instance_event['tags'].sort() == expected_tags.sort()
+
+    expected_instance_metadata = {
+        "replset_name": replset_name,
+        "replset_state": replset_state,
+        "sharding_cluster_role": sharding_cluster_role,
+        "hosts": hosts,
+        "shards": shards,
+        "cluster_type": cluster_type,
+        "cluster_name": cluster_name,
+    }
+    assert mongodb_instance_event['metadata'] == {
+        'dbm': dbm,
+        'connection_host': check._config.clean_server_name,
+        "instance_metadata": {k: v for k, v in expected_instance_metadata.items() if v is not None},
+    }
+
+
+@pytest.mark.parametrize("dbm", [True, False])
+def test_integration_mongos(instance_integration_cluster, aggregator, check, dd_run_check, dbm):
+    instance_integration_cluster['dbm'] = dbm
+    mongos_check = check(instance_integration_cluster)
     mongos_check._last_states_by_server = {0: 1, 1: 2, 2: 2}
 
     with mock_pymongo("mongos"):
@@ -64,6 +107,37 @@ def test_integration_mongos(instance_integration, aggregator, check, dd_run_chec
         check_submission_type=True,
     )
     assert len(aggregator._events) == 0
+
+    expected_tags = ['server:mongodb://localhost:27017/', 'sharding_cluster_role:mongos']
+    _assert_mongodb_instance_event(
+        aggregator,
+        mongos_check,
+        expected_tags=expected_tags,
+        dbm=dbm,
+        replset_name=None,
+        replset_state=None,
+        sharding_cluster_role='mongos',
+        hosts=[
+            'shard01a:27018',
+            'shard01b:27019',
+            'shard01c:27020',
+            'shard03b:27020',
+            'shard03a:27020',
+            'shard02a:27019',
+            'shard02b:27019',
+            'config02:27017',
+            'config01:27017',
+            'config03:27017',
+        ],
+        shards=[
+            'shard01/shard01a:27018,shard01b:27019',
+            'shard02/shard02a:27019,shard02b:27019',
+            'shard03/shard03a:27020,shard03b:27020',
+            'configserver/config01:27017,config02:27017,config03:27017',
+        ],
+        cluster_type='sharded_cluster',
+        cluster_name='my_cluster',
+    )
 
 
 def test_integration_replicaset_primary_in_shard(instance_integration, aggregator, check, dd_run_check):
@@ -141,6 +215,27 @@ def test_integration_replicaset_primary_in_shard(instance_integration, aggregato
         count=1,
     )
 
+    expected_tags = replica_tags + [f'server:{mongo_check._config.clean_server_name}']
+    _assert_mongodb_instance_event(
+        aggregator,
+        mongo_check,
+        expected_tags=expected_tags,
+        dbm=False,
+        replset_name='mongo-mongodb-sharded-shard-0',
+        replset_state='primary',
+        sharding_cluster_role='shardsvr',
+        hosts=[
+            'mongo-mongodb-sharded-shard0-data-0.mongo-mongodb-sharded-headless.default.svc.cluster.local:27017',
+            'mongo-mongodb-sharded-shard0-arbiter-0.mongo-mongodb-sharded-headless.default.svc.cluster.local:27017',
+            'mongo-mongodb-sharded-shard0-data-1.mongo-mongodb-sharded-headless.default.svc.cluster.local:27017',
+            'mongo-mongodb-sharded-shard0-data-2.mongo-mongodb-sharded-headless.default.svc.cluster.local:27017',
+            'mongo-mongodb-sharded-shard0-data-3.mongo-mongodb-sharded-headless.default.svc.cluster.local:27017',
+        ],
+        shards=None,
+        cluster_type='sharded_cluster',
+        cluster_name=None,
+    )
+
 
 def test_integration_replicaset_secondary_in_shard(instance_integration, aggregator, check, dd_run_check):
     mongo_check = check(instance_integration)
@@ -179,6 +274,26 @@ def test_integration_replicaset_secondary_in_shard(instance_integration, aggrega
     )
     assert len(aggregator._events) == 0
 
+    expected_tags = replica_tags + [f'server:{mongo_check._config.clean_server_name}']
+    _assert_mongodb_instance_event(
+        aggregator,
+        mongo_check,
+        expected_tags=expected_tags,
+        dbm=False,
+        replset_name='mongo-mongodb-sharded-shard-0',
+        replset_state='secondary',
+        sharding_cluster_role='shardsvr',
+        hosts=[
+            'mongo-mongodb-sharded-shard0-data-0.mongo-mongodb-sharded-headless.default.svc.cluster.local:27017',
+            'mongo-mongodb-sharded-shard0-arbiter-0.mongo-mongodb-sharded-headless.default.svc.cluster.local:27017',
+            'mongo-mongodb-sharded-shard0-data-1.mongo-mongodb-sharded-headless.default.svc.cluster.local:27017',
+            'mongo-mongodb-sharded-shard0-data-2.mongo-mongodb-sharded-headless.default.svc.cluster.local:27017',
+        ],
+        shards=None,
+        cluster_type='sharded_cluster',
+        cluster_name=None,
+    )
+
 
 def test_integration_replicaset_arbiter_in_shard(instance_integration, aggregator, check, dd_run_check):
     for query in instance_integration['custom_queries']:
@@ -211,6 +326,26 @@ def test_integration_replicaset_arbiter_in_shard(instance_integration, aggregato
         check_submission_type=True,
     )
     assert len(aggregator._events) == 0
+
+    expected_tags = replica_tags + [f'server:{mongo_check._config.clean_server_name}']
+    _assert_mongodb_instance_event(
+        aggregator,
+        mongo_check,
+        expected_tags=expected_tags,
+        dbm=False,
+        replset_name='mongo-mongodb-sharded-shard-0',
+        replset_state='arbiter',
+        sharding_cluster_role='shardsvr',
+        hosts=[
+            'mongo-mongodb-sharded-shard0-data-0.mongo-mongodb-sharded-headless.default.svc.cluster.local:27017',
+            'mongo-mongodb-sharded-shard0-arbiter-0.mongo-mongodb-sharded-headless.default.svc.cluster.local:27017',
+            'mongo-mongodb-sharded-shard0-data-1.mongo-mongodb-sharded-headless.default.svc.cluster.local:27017',
+            'mongo-mongodb-sharded-shard0-data-2.mongo-mongodb-sharded-headless.default.svc.cluster.local:27017',
+        ],
+        shards=None,
+        cluster_type='sharded_cluster',
+        cluster_name=None,
+    )
 
 
 def test_integration_configsvr_primary(instance_integration, aggregator, check, dd_run_check):
@@ -288,6 +423,25 @@ def test_integration_configsvr_primary(instance_integration, aggregator, check, 
         count=1,
     )
 
+    expected_tags = replica_tags + [f'server:{mongo_check._config.clean_server_name}']
+    _assert_mongodb_instance_event(
+        aggregator,
+        mongo_check,
+        expected_tags=expected_tags,
+        dbm=False,
+        replset_name='mongo-mongodb-sharded-configsvr',
+        replset_state='primary',
+        sharding_cluster_role='configsvr',
+        hosts=[
+            'mongo-mongodb-sharded-configsvr-0.mongo-mongodb-sharded-headless.default.svc.cluster.local:27017',
+            'mongo-mongodb-sharded-configsvr-1.mongo-mongodb-sharded-headless.default.svc.cluster.local:27017',
+            'mongo-mongodb-sharded-configsvr-2.mongo-mongodb-sharded-headless.default.svc.cluster.local:27017',
+        ],
+        shards=None,
+        cluster_type='sharded_cluster',
+        cluster_name=None,
+    )
+
 
 def test_integration_configsvr_secondary(instance_integration, aggregator, check, dd_run_check):
     mongo_check = check(instance_integration)
@@ -325,6 +479,25 @@ def test_integration_configsvr_secondary(instance_integration, aggregator, check
         check_submission_type=True,
     )
     assert len(aggregator._events) == 0
+
+    expected_tags = replica_tags + [f'server:{mongo_check._config.clean_server_name}']
+    _assert_mongodb_instance_event(
+        aggregator,
+        mongo_check,
+        expected_tags=expected_tags,
+        dbm=False,
+        replset_name='mongo-mongodb-sharded-configsvr',
+        replset_state='secondary',
+        sharding_cluster_role='configsvr',
+        hosts=[
+            'mongo-mongodb-sharded-configsvr-0.mongo-mongodb-sharded-headless.default.svc.cluster.local:27017',
+            'mongo-mongodb-sharded-configsvr-1.mongo-mongodb-sharded-headless.default.svc.cluster.local:27017',
+            'mongo-mongodb-sharded-configsvr-2.mongo-mongodb-sharded-headless.default.svc.cluster.local:27017',
+        ],
+        shards=None,
+        cluster_type='sharded_cluster',
+        cluster_name=None,
+    )
 
 
 def test_integration_replicaset_primary(instance_integration, aggregator, check, dd_run_check):
@@ -401,6 +574,125 @@ def test_integration_replicaset_primary(instance_integration, aggregator, check,
         count=1,
     )
 
+    expected_tags = replica_tags + [f'server:{mongo_check._config.clean_server_name}']
+    _assert_mongodb_instance_event(
+        aggregator,
+        mongo_check,
+        expected_tags=expected_tags,
+        dbm=False,
+        replset_name='replset',
+        replset_state='primary',
+        sharding_cluster_role=None,
+        hosts=[
+            'replset-data-0.mongo.default.svc.cluster.local:27017',
+            'replset-arbiter-0.mongo.default.svc.cluster.local:27017',
+            'replset-data-1.mongo.default.svc.cluster.local:27017',
+            'replset-data-2.mongo.default.svc.cluster.local:27017',
+        ],
+        shards=None,
+        cluster_type='replica_set',
+        cluster_name=None,
+    )
+
+
+def test_integration_replicaset_primary_config(instance_integration, aggregator, check, dd_run_check):
+    instance_integration.update({'add_node_tag_to_events': True})
+    mongo_check = check(instance_integration)
+    mongo_check.last_states_by_server = {0: 2, 1: 1, 2: 7, 3: 2}
+
+    with mock_pymongo("replica-primary"):
+        dd_run_check(mongo_check)
+
+    replica_tags = ['replset_name:replset', 'replset_state:primary']
+    metrics_categories = [
+        'count-dbs',
+        'serverStatus',
+        'custom-queries',
+        'oplog',
+        'replset-primary',
+        'top',
+        'dbstats-local',
+        'fsynclock',
+        'dbstats',
+        'indexes-stats',
+        'collection',
+    ]
+    _assert_metrics(aggregator, metrics_categories, replica_tags)
+    # Lag metrics are tagged with the state of the member and not with the current one.
+    _assert_metrics(aggregator, ['replset-lag-from-primary'])
+
+    aggregator.assert_all_metrics_covered()
+    aggregator.assert_metrics_using_metadata(
+        get_metadata_metrics(),
+        exclude=[
+            'dd.custom.mongo.aggregate.total',
+            'dd.custom.mongo.count',
+            'dd.custom.mongo.query_a.amount',
+            'dd.custom.mongo.query_a.el',
+        ],
+        check_submission_type=True,
+    )
+    assert len(aggregator._events) == 3
+    aggregator.assert_event(
+        "MongoDB replset-data-0.mongo.default.svc.cluster.local:27017 "
+        "(_id: 0, mongodb://testUser2:*****@localhost:27017/test) just reported as Primary (PRIMARY) for "
+        "replset; it was SECONDARY before.",
+        tags=[
+            'action:mongo_replset_member_status_change',
+            'member_status:PRIMARY',
+            'previous_member_status:SECONDARY',
+            'replset:replset',
+            'mongo_node:replset-data-0.mongo.default.svc.cluster.local:27017',
+        ],
+        count=1,
+    )
+    aggregator.assert_event(
+        "MongoDB replset-arbiter-0.mongo.default.svc.cluster.local:27017 "
+        "(_id: 1, mongodb://testUser2:*****@localhost:27017/test) just reported as Arbiter (ARBITER) for "
+        "replset; it was PRIMARY before.",
+        tags=[
+            'action:mongo_replset_member_status_change',
+            'member_status:ARBITER',
+            'previous_member_status:PRIMARY',
+            'replset:replset',
+            'mongo_node:replset-arbiter-0.mongo.default.svc.cluster.local:27017',
+        ],
+        count=1,
+    )
+    aggregator.assert_event(
+        "MongoDB replset-data-1.mongo.default.svc.cluster.local:27017 "
+        "(_id: 2, mongodb://testUser2:*****@localhost:27017/test) just reported as Secondary (SECONDARY) for "
+        "replset; it was ARBITER before.",
+        tags=[
+            'action:mongo_replset_member_status_change',
+            'member_status:SECONDARY',
+            'previous_member_status:ARBITER',
+            'replset:replset',
+            'mongo_node:replset-data-1.mongo.default.svc.cluster.local:27017',
+        ],
+        count=1,
+    )
+
+    expected_tags = replica_tags + [f'server:{mongo_check._config.clean_server_name}']
+    _assert_mongodb_instance_event(
+        aggregator,
+        mongo_check,
+        expected_tags=expected_tags,
+        dbm=False,
+        replset_name='replset',
+        replset_state='primary',
+        sharding_cluster_role=None,
+        hosts=[
+            'replset-data-0.mongo.default.svc.cluster.local:27017',
+            'replset-arbiter-0.mongo.default.svc.cluster.local:27017',
+            'replset-data-1.mongo.default.svc.cluster.local:27017',
+            'replset-data-2.mongo.default.svc.cluster.local:27017',
+        ],
+        shards=None,
+        cluster_type='replica_set',
+        cluster_name=None,
+    )
+
 
 @pytest.mark.parametrize('collect_custom_queries', [True, False])
 def test_integration_replicaset_secondary(
@@ -443,6 +735,26 @@ def test_integration_replicaset_secondary(
     )
     assert len(aggregator._events) == 0
 
+    expected_tags = replica_tags + [f'server:{mongo_check._config.clean_server_name}']
+    _assert_mongodb_instance_event(
+        aggregator,
+        mongo_check,
+        expected_tags=expected_tags,
+        dbm=False,
+        replset_name='replset',
+        replset_state='secondary',
+        sharding_cluster_role=None,
+        hosts=[
+            'replset-data-0.mongo.default.svc.cluster.local:27017',
+            'replset-arbiter-0.mongo.default.svc.cluster.local:27017',
+            'replset-data-1.mongo.default.svc.cluster.local:27017',
+            'replset-data-2.mongo.default.svc.cluster.local:27017',
+        ],
+        shards=None,
+        cluster_type='replica_set',
+        cluster_name=None,
+    )
+
 
 def test_integration_replicaset_arbiter(instance_integration, aggregator, check, dd_run_check):
     for query in instance_integration['custom_queries']:
@@ -471,6 +783,26 @@ def test_integration_replicaset_arbiter(instance_integration, aggregator, check,
         check_submission_type=True,
     )
     assert len(aggregator._events) == 0
+
+    expected_tags = replica_tags + [f'server:{mongo_check._config.clean_server_name}']
+    _assert_mongodb_instance_event(
+        aggregator,
+        mongo_check,
+        expected_tags=expected_tags,
+        dbm=False,
+        replset_name='replset',
+        replset_state='arbiter',
+        sharding_cluster_role=None,
+        hosts=[
+            'replset-data-0.mongo.default.svc.cluster.local:27017',
+            'replset-arbiter-0.mongo.default.svc.cluster.local:27017',
+            'replset-data-1.mongo.default.svc.cluster.local:27017',
+            'replset-data-2.mongo.default.svc.cluster.local:27017',
+        ],
+        shards=None,
+        cluster_type='replica_set',
+        cluster_name=None,
+    )
 
 
 def test_standalone(instance_integration, aggregator, check, dd_run_check):
@@ -505,6 +837,21 @@ def test_standalone(instance_integration, aggregator, check, dd_run_check):
         check_submission_type=True,
     )
     assert len(aggregator._events) == 0
+
+    expected_tags = [f'server:{mongo_check._config.clean_server_name}']
+    _assert_mongodb_instance_event(
+        aggregator,
+        mongo_check,
+        expected_tags=expected_tags,
+        dbm=False,
+        replset_name=None,
+        replset_state=None,
+        sharding_cluster_role=None,
+        hosts=None,
+        shards=None,
+        cluster_type=None,
+        cluster_name=None,
+    )
 
 
 def test_user_pass_options(check, instance_user, dd_run_check):
@@ -594,7 +941,7 @@ def test_db_names_missing_existent_database(check, instance_integration, aggrega
 @pytest.mark.usefixtures('dd_environment')
 def test_mongod_auth_ok(check, dd_run_check, aggregator):
     instance = {
-        'hosts': ['{}:{}'.format(HOST, PORT1)],
+        'hosts': [f'{HOST}:{PORT1}'],
         'username': 'testUser',
         'password': 'testPass',
         'options': {'authSource': 'authDB'},
@@ -615,7 +962,7 @@ def test_mongod_auth_ok(check, dd_run_check, aggregator):
 )
 def test_mongod_bad_auth(check, dd_run_check, aggregator, username, password):
     instance = {
-        'hosts': ['{}:{}'.format(HOST, PORT1)],
+        'hosts': [f'{HOST}:{PORT1}'],
         'username': username,
         'password': password,
         'options': {'authSource': 'authDB'},
@@ -630,11 +977,11 @@ def test_mongod_bad_auth(check, dd_run_check, aggregator, username, password):
 @pytest.mark.usefixtures('dd_environment')
 def test_mongod_tls_ok(check, dd_run_check, aggregator):
     instance = {
-        'hosts': ['{}:{}'.format(HOST, PORT1)],
+        'hosts': [f'{HOST}:{PORT1}'],
         'tls': True,
         'tls_allow_invalid_certificates': True,
-        'tls_certificate_key_file': '{}/client1.pem'.format(TLS_CERTS_FOLDER),
-        'tls_ca_file': '{}/ca.pem'.format(TLS_CERTS_FOLDER),
+        'tls_certificate_key_file': f'{TLS_CERTS_FOLDER}/client1.pem',
+        'tls_ca_file': f'{TLS_CERTS_FOLDER}/ca.pem',
     }
     mongo_check = check(instance)
     dd_run_check(mongo_check)
@@ -645,11 +992,11 @@ def test_mongod_tls_ok(check, dd_run_check, aggregator):
 @pytest.mark.usefixtures('dd_environment')
 def test_mongod_tls_fail(check, dd_run_check, aggregator):
     instance = {
-        'hosts': ['{}:{}'.format(HOST, PORT1)],
+        'hosts': [f'{HOST}:{PORT1}'],
         'tls': True,
         'tls_allow_invalid_certificates': True,
-        'tls_certificate_key_file': '{}/fail.pem'.format(TLS_CERTS_FOLDER),
-        'tls_ca_file': '{}/ca.pem'.format(TLS_CERTS_FOLDER),
+        'tls_certificate_key_file': f'{TLS_CERTS_FOLDER}/fail.pem',
+        'tls_ca_file': f'{TLS_CERTS_FOLDER}/ca.pem',
     }
     mongo_check = check(instance)
     with pytest.raises(Exception, match=("pymongo.errors.ConfigurationError: Private key doesn't match certificate")):

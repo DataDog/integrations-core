@@ -1,0 +1,15 @@
+name: Argo Workflows
+files:
+- name: argo_workflows.yaml
+  options:
+  - template: init_config
+    options:
+    - template: init_config/openmetrics
+  - template: instances
+    options:
+    - template: instances/openmetrics
+      overrides:
+        openmetrics_endpoint.value.example: http://localhost:9090/metrics
+        openmetrics_endpoint.description: |
+          Endpoint exposing the Workflow Controller's Prometheus metrics. For more information refer to:
+          https://argo-workflows.readthedocs.io/en/latest/metrics/

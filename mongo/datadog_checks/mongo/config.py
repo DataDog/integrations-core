@@ -62,7 +62,6 @@ class MongoConfig(object):
                     'Setting the `replicaSet` option is not supported. '
                     'Configure one check instance for each node instead'
                 )
-
             self.auth_source = self.additional_options.get('authSource') or self.db_name or 'admin'
 
         if not self.hosts:
@@ -89,7 +88,9 @@ class MongoConfig(object):
             self.do_auth = False
 
         self.replica_check = is_affirmative(instance.get('replica_check', True))
+        self.dbstats_tag_dbname = is_affirmative(instance.get('dbstats_tag_dbname', True))
 
+        self.add_node_tag_to_events = is_affirmative(instance.get('add_node_tag_to_events', True))
         self.collections_indexes_stats = is_affirmative(instance.get('collections_indexes_stats'))
         self.coll_names = instance.get('collections', [])
         self.custom_queries = instance.get("custom_queries", [])
@@ -97,6 +98,14 @@ class MongoConfig(object):
         self._base_tags = list(set(instance.get('tags', [])))
         self.service_check_tags = self._compute_service_check_tags()
         self.metric_tags = self._compute_metric_tags()
+
+        # DBM config options
+        self.dbm_enabled = is_affirmative(instance.get('dbm', False))
+        self.database_instance_collection_interval = instance.get('database_instance_collection_interval', 1800)
+        self.cluster_name = instance.get('cluster_name', None)
+
+        if self.dbm_enabled and not self.cluster_name:
+            raise ConfigurationError('`cluster_name` must be set when `dbm` is enabled')
 
     def _get_clean_server_name(self):
         try:

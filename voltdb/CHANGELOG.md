@@ -2,6 +2,16 @@
 
 <!-- towncrier release notes start -->
 
+## 3.2.0 / 2024-03-22 / Agent 7.53.0
+
+***Added***:
+
+* Update custom_queries configuration to support optional collection_interval ([#16957](https://github.com/DataDog/integrations-core/pull/16957))
+
+***Fixed***:
+
+* Update the configuration to include the `metric_prefix` option ([#17065](https://github.com/DataDog/integrations-core/pull/17065))
+
 ## 3.1.0 / 2024-01-05 / Agent 7.51.0
 
 ***Added***:

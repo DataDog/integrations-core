@@ -1,0 +1,55 @@
+{
+  "manifest_version": "2.0.0",
+  "app_uuid": "e47d5541-de7d-4ce6-8105-03c6dac5852a",
+  "app_id": "teleport",
+  "display_on_public_website": false,
+  "tile": {
+    "overview": "README.md#Overview",
+    "configuration": "README.md#Setup",
+    "support": "README.md#Support",
+    "changelog": "CHANGELOG.md",
+    "description": "Collect key metrics to monitor the health of your Teleport instance.",
+    "title": "Teleport",
+    "media": [],
+    "classifier_tags": [
+      "Supported OS::Linux",
+      "Supported OS::Windows",
+      "Supported OS::macOS",
+      "Category::Cloud",
+      "Category::Security"
+    ]
+  },
+  "assets": {
+    "integration": {
+      "auto_install": true,
+      "source_type_id": 7291105,
+      "source_type_name": "Teleport",
+      "configuration": {
+        "spec": "assets/configuration/spec.yaml"
+      },
+      "events": {
+        "creates_events": false
+      },
+      "metrics": {
+        "prefix": "teleport.",
+        "check": [
+            "teleport.common.process_state",
+            "teleport.common.rx",
+            "teleport.common.tx",
+            "teleport.common.teleport_build_info"
+        ],
+        "metadata_path": "metadata.csv"
+      },
+      "service_checks": {
+        "metadata_path": "assets/service_checks.json"
+      }
+    }
+  },
+  "author": {
+    "support_email": "help@datadoghq.com",
+    "name": "Datadog",
+    "homepage": "https://www.datadoghq.com",
+    "sales_email": "info@datadoghq.com"
+  },
+  "oauth": {}
+}

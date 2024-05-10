@@ -2,7 +2,13 @@
 
 <!-- towncrier release notes start -->
 
-## 3.2.0 / 2024-02-16
+## 3.2.1 / 2024-03-22 / Agent 7.53.0
+
+***Fixed***:
+
+* Fix a typo in the configuration file ([#17227](https://github.com/DataDog/integrations-core/pull/17227))
+
+## 3.2.0 / 2024-02-16 / Agent 7.52.0
 
 ***Added***:
 

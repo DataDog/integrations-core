@@ -1,3 +1,6 @@
+# HELP citadel_server_cert_chain_expiry_timestamp The unix timestamp, in seconds, when Citadel cert chain will expire. A negative time indicates the cert is expired.
+# TYPE citadel_server_cert_chain_expiry_timestamp gauge
+citadel_server_cert_chain_expiry_timestamp 2.310923901e+09
 # HELP citadel_server_root_cert_expiry_timestamp The unix timestamp, in seconds, when Citadel root cert will expire. We set it to negative in case of internal error.
 # TYPE citadel_server_root_cert_expiry_timestamp gauge
 citadel_server_root_cert_expiry_timestamp 1.900963606e+09

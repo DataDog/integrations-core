@@ -126,6 +126,16 @@ pytestmark = [
             {
                 'keystone_server_url': 'http://localhost',
                 'user': {'name': 'my_name', 'password': 'my_password', 'domain': {'id': 'my_domain_id'}},
+                'cinder_microversion': 'tests',
+                'use_legacy_check_version': False,
+            },
+            'Invalid `cinder_microversion`: tests; please specify a valid version',
+            id='invalid cinder_microversion',
+        ),
+        pytest.param(
+            {
+                'keystone_server_url': 'http://localhost',
+                'user': {'name': 'my_name', 'password': 'my_password', 'domain': {'id': 'my_domain_id'}},
                 'ironic_microversion': 'tests',
                 'nova_microversion': 'tests',
                 'use_legacy_check_version': False,

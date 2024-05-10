@@ -31,12 +31,12 @@ MONGODB_VERSION = os.environ['MONGO_VERSION']
 
 ROOT = os.path.dirname(os.path.dirname(HERE))
 
-INSTANCE_BASIC = {'hosts': ['{}:{}'.format(HOST, PORT1)]}
-INSTANCE_BASIC_SHARD = {'hosts': ['{}:{}'.format(HOST, PORT2)]}
-INSTANCE_BASIC_LEGACY_CONFIG = {'server': "mongodb://%s:%s/test" % (HOST, PORT1)}
+INSTANCE_BASIC = {'hosts': [f'{HOST}:{PORT1}']}
+INSTANCE_BASIC_SHARD = {'hosts': [f'{HOST}:{PORT2}']}
+INSTANCE_BASIC_LEGACY_CONFIG = {'server': f"mongodb://{HOST}:{PORT1}/test"}
 
 INSTANCE_AUTHDB = {
-    'hosts': ['{}:{}'.format(HOST, PORT1)],
+    'hosts': [f'{HOST}:{PORT1}'],
     'database': 'test',
     'username': 'testUser',
     'password': 'testPass',
@@ -50,29 +50,31 @@ INSTANCE_AUTHDB_ALT = {
     'password': 's3\\kr@t',
     'options': {'authSource': 'authDB'},
 }
-INSTANCE_AUTHDB_LEGACY_CONFIG = {
-    'server': 'mongodb://testUser:testPass@{}:{}/test?authSource=authDB'.format(HOST, PORT1)
-}
+INSTANCE_AUTHDB_LEGACY_CONFIG = {'server': f'mongodb://testUser:testPass@{HOST}:{PORT1}/test?authSource=authDB'}
 
 INSTANCE_USER = {
-    'hosts': ['{}:{}'.format(HOST, PORT1)],
+    'hosts': [f'{HOST}:{PORT1}'],
     'database': 'test',
     'username': 'testUser2',
     'password': 'testPass2',
 }
-INSTANCE_USER_LEGACY_CONFIG = {'server': 'mongodb://testUser2:testPass2@{}:{}/test'.format(HOST, PORT1)}
+INSTANCE_USER_LEGACY_CONFIG = {'server': f'mongodb://testUser2:testPass2@{HOST}:{PORT1}/test'}
 
-INSTANCE_ARBITER = {'hosts': ['{}:{}'.format(HOST, PORT_ARBITER)]}
+INSTANCE_ARBITER = {'hosts': [f'{HOST}:{PORT_ARBITER}']}
 
 INSTANCE_CUSTOM_QUERIES = {
-    'hosts': ['{}:{}'.format(HOST, PORT1)],
+    'hosts': [f'{HOST}:{PORT1}'],
     'database': 'test',
     'username': 'testUser2',
     'password': 'testPass2',
     'custom_queries': [
         {
             'metric_prefix': 'dd.custom.mongo.query_a',
-            'query': {'find': 'orders', 'filter': {'amount': {'$gt': 25}}, 'sort': {'amount': -1}},
+            'query': {
+                'find': 'orders',
+                'filter': {'amount': {'$gt': 25}},
+                'sort': {'amount': -1},
+            },
             'fields': [
                 {'field_name': 'cust_id', 'name': 'cluster_id', 'type': 'tag'},
                 {'field_name': 'status', 'name': 'status_tag', 'type': 'tag'},
@@ -93,7 +95,12 @@ INSTANCE_CUSTOM_QUERIES = {
                 'aggregate': 'orders',
                 'pipeline': [
                     {'$match': {'status': 'A'}},
-                    {'$group': {'_id': '$cust_id', 'total': {'$sum': '$amount'}}},
+                    {
+                        '$group': {
+                            '_id': '$cust_id',
+                            'total': {'$sum': '$amount'},
+                        }
+                    },
                     {'$sort': {'total': -1}},
                 ],
                 'cursor': {},
@@ -116,9 +123,17 @@ INSTANCE_CUSTOM_QUERIES = {
             },
             'database': 'admin',
             'fields': [
-                {'field_name': 'secs_running', 'name': 'secs_running', 'type': 'gauge'},
+                {
+                    'field_name': 'secs_running',
+                    'name': 'secs_running',
+                    'type': 'gauge',
+                },
                 {'field_name': 'appName', 'name': 'app_name', 'type': 'tag'},
-                {'field_name': 'ns', 'name': 'mongo_op_namespace', 'type': 'tag'},
+                {
+                    'field_name': 'ns',
+                    'name': 'mongo_op_namespace',
+                    'type': 'tag',
+                },
             ],
             'metric_prefix': 'dd.mongodb.custom.queries_slower_than_60sec',
             'tags': ['tag1:val1', 'tag2:val2'],
@@ -127,7 +142,7 @@ INSTANCE_CUSTOM_QUERIES = {
 }
 
 INSTANCE_CUSTOM_QUERIES_WITH_DATE = {
-    'hosts': ['{}:{}'.format(HOST, PORT1)],
+    'hosts': [f'{HOST}:{PORT1}'],
     'database': 'test',
     'username': 'testUser2',
     'password': 'testPass2',
@@ -145,7 +160,12 @@ INSTANCE_CUSTOM_QUERIES_WITH_DATE = {
                             },
                         }
                     },
-                    {'$group': {'_id': '$cust_id', 'total': {'$sum': '$amount'}}},
+                    {
+                        '$group': {
+                            '_id': '$cust_id',
+                            'total': {'$sum': '$amount'},
+                        }
+                    },
                     {'$sort': {'total': -1}},
                 ],
                 'cursor': {},
@@ -162,7 +182,7 @@ INSTANCE_CUSTOM_QUERIES_WITH_DATE = {
 }
 
 INSTANCE_CUSTOM_QUERIES_WITH_DATE_AND_OPERATION = {
-    'hosts': ['{}:{}'.format(HOST, PORT1)],
+    'hosts': [f'{HOST}:{PORT1}'],
     'database': 'test',
     'username': 'testUser2',
     'password': 'testPass2',
@@ -180,7 +200,12 @@ INSTANCE_CUSTOM_QUERIES_WITH_DATE_AND_OPERATION = {
                             },
                         }
                     },
-                    {'$group': {'_id': '$cust_id', 'total': {'$sum': '$amount'}}},
+                    {
+                        '$group': {
+                            '_id': '$cust_id',
+                            'total': {'$sum': '$amount'},
+                        }
+                    },
                     {'$sort': {'total': -1}},
                 ],
                 'cursor': {},
@@ -197,7 +222,7 @@ INSTANCE_CUSTOM_QUERIES_WITH_DATE_AND_OPERATION = {
 }
 
 INSTANCE_CUSTOM_QUERIES_WITH_ISODATE = {
-    'hosts': ['{}:{}'.format(HOST, PORT1)],
+    'hosts': [f'{HOST}:{PORT1}'],
     'database': 'test',
     'username': 'testUser2',
     'password': 'testPass2',
@@ -232,7 +257,7 @@ INSTANCE_CUSTOM_QUERIES_WITH_ISODATE = {
 }
 
 INSTANCE_CUSTOM_QUERIES_WITH_STRING_LIST = {
-    'hosts': ['{}:{}'.format(HOST, PORT1)],
+    'hosts': [f'{HOST}:{PORT1}'],
     'database': 'test',
     'username': 'testUser2',
     'password': 'testPass2',
@@ -254,6 +279,38 @@ INSTANCE_CUSTOM_QUERIES_WITH_STRING_LIST = {
 
 TLS_METADATA = {
     'docker_volumes': [
-        '{}:/certs'.format(TLS_CERTS_FOLDER),
+        f'{TLS_CERTS_FOLDER}:/certs',
     ],
+}
+
+INSTANCE_DBSTATS_TAG_DBNAME = {
+    'hosts': [f'{HOST}:{PORT1}'],
+    'dbstats_tag_dbname': False,
+}
+
+METRIC_VAL_CHECKS = {
+    'mongodb.asserts.msgps': lambda x: x >= 0,
+    'mongodb.fsynclocked': lambda x: x >= 0,
+    'mongodb.globallock.activeclients.readers': lambda x: x >= 0,
+    'mongodb.metrics.cursor.open.notimeout': lambda x: x >= 0,
+    'mongodb.metrics.document.deletedps': lambda x: x >= 0,
+    'mongodb.metrics.getlasterror.wtime.numps': lambda x: x >= 0,
+    'mongodb.metrics.repl.apply.batches.numps': lambda x: x >= 0,
+    'mongodb.metrics.ttl.deleteddocumentsps': lambda x: x >= 0,
+    'mongodb.network.bytesinps': lambda x: x >= 1,
+    'mongodb.network.numrequestsps': lambda x: x >= 1,
+    'mongodb.opcounters.commandps': lambda x: x >= 1,
+    'mongodb.opcountersrepl.commandps': lambda x: x >= 0,
+    'mongodb.oplog.logsizemb': lambda x: x >= 1,
+    'mongodb.oplog.timediff': lambda x: x >= 1,
+    'mongodb.oplog.usedsizemb': lambda x: x >= 0,
+    'mongodb.replset.health': lambda x: x >= 1,
+    'mongodb.replset.state': lambda x: x >= 1,
+    'mongodb.stats.avgobjsize': lambda x: x >= 0,
+    'mongodb.stats.storagesize': lambda x: x >= 0,
+    'mongodb.connections.current': lambda x: x >= 1,
+    'mongodb.connections.available': lambda x: x >= 1,
+    'mongodb.uptime': lambda x: x >= 0,
+    'mongodb.mem.resident': lambda x: x > 0,
+    'mongodb.mem.virtual': lambda x: x > 0,
 }

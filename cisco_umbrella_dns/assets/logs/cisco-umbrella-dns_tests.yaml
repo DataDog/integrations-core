@@ -95,6 +95,13 @@ tests:
         id: 190
         label: "Search Engines and Portals"
         type: "content"
+      cisco:
+        umbrella:
+          dns:
+            external:
+              geoip:
+                country:
+                  iso_code: "FR"
       date: "2023-12-11"
       dns:
         answer:
@@ -111,7 +118,6 @@ tests:
             code: "EU"
             name: "Europe"
           country:
-            iso_code: "FR"
             name: "France"
           ipAddress: "185.64.148.0"
           location:
@@ -218,6 +224,7 @@ tests:
         "querytype" : "A",
         "timestamp" : 1702288020000
       }
+    service: "dns"
     tags:
      - "source:LOGS_SOURCE"
     timestamp: 1702288020000
@@ -319,6 +326,13 @@ tests:
         id: 194
         label: "Streaming Video"
         type: "content"
+      cisco:
+        umbrella:
+          dns:
+            external:
+              geoip:
+                country:
+                  iso_code: "FR"
       date: "2023-12-19"
       dns:
         answer:
@@ -335,7 +349,6 @@ tests:
             code: "EU"
             name: "Europe"
           country:
-            iso_code: "FR"
             name: "France"
           ipAddress: "185.64.148.0"
           location:
@@ -431,6 +444,7 @@ tests:
         "querytype" : "A",
         "timestamp" : 1702990616000
       }
+    service: "dns"
     tags:
      - "source:LOGS_SOURCE"
     timestamp: 1702990616000
@@ -520,6 +534,13 @@ tests:
         id: 148
         label: "Application"
         type: "application"
+      cisco:
+        umbrella:
+          dns:
+            external:
+              geoip:
+                country:
+                  iso_code: "FR"
       date: "2023-12-19"
       dns:
         answer:
@@ -536,7 +557,6 @@ tests:
             code: "EU"
             name: "Europe"
           country:
-            iso_code: "FR"
             name: "France"
           ipAddress: "185.64.148.0"
           location:
@@ -626,6 +646,7 @@ tests:
         "querytype" : "A",
         "timestamp" : 1702990616000
       }
+    service: "dns"
     tags:
      - "source:LOGS_SOURCE"
     timestamp: 1702990616000
@@ -753,6 +774,11 @@ tests:
         id: 190
         label: "Search Engines and Portals"
         type: "content"
+      cisco:
+        umbrella:
+          dns:
+            requestsize: 517
+            responsesize: 746
       contenttype: "text/html"
       datacenter:
         id: "SIN"
@@ -842,9 +868,7 @@ tests:
         label: "Search Engines and Portals"
         type: "content"
       port: 443
-      requestsize: 517
       responsefilename: ""
-      responsesize: 746
       securityoverridden: false
       sha256: ""
       tenantcontrols: false
@@ -949,6 +973,7 @@ tests:
         "time" : "10:00:41",
         "responsefilename" : ""
       }
+    service: "proxy"
     tags:
      - "source:LOGS_SOURCE"
     timestamp: 1702288841000
@@ -1076,6 +1101,11 @@ tests:
         id: 190
         label: "Search Engines and Portals"
         type: "content"
+      cisco:
+        umbrella:
+          dns:
+            requestsize: 517
+            responsesize: 746
       contenttype: "text/html"
       datacenter:
         id: "SIN"
@@ -1165,9 +1195,7 @@ tests:
         label: "Search Engines and Portals"
         type: "content"
       port: 443
-      requestsize: 517
       responsefilename: ""
-      responsesize: 746
       securityoverridden: false
       sha256: ""
       tenantcontrols: false
@@ -1272,6 +1300,7 @@ tests:
         "time" : "10:00:35",
         "responsefilename" : ""
       }
+    service: "proxy"
     tags:
      - "source:LOGS_SOURCE"
     timestamp: 1701943235000

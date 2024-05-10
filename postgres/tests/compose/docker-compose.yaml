@@ -15,4 +15,5 @@ services:
       - ./etc/postgresql:/etc/postgresql/
     environment:
       POSTGRES_PASSWORD: datad0g
+      POSTGRES_INITDB_ARGS: --data-checksums
     command: postgres -c 'config_file=/etc/postgresql/postgresql.conf' -c 'hba_file=/etc/postgresql/pg_hba.conf'

@@ -58,6 +58,18 @@ class BaremetalItem(BaseModel):
     nodes: Optional[Union[bool, Node]] = None
 
 
+class BlockStorageItem(BaseModel):
+    model_config = ConfigDict(
+        arbitrary_types_allowed=True,
+        frozen=True,
+    )
+    clusters: Optional[bool] = None
+    pools: Optional[bool] = None
+    snapshots: Optional[bool] = None
+    transfers: Optional[bool] = None
+    volumes: Optional[bool] = None
+
+
 class Hypervisor(BaseModel):
     model_config = ConfigDict(
         arbitrary_types_allowed=True,
@@ -117,12 +129,20 @@ class IdentityItem(BaseModel):
     users: Optional[bool] = None
 
 
+class Image(BaseModel):
+    model_config = ConfigDict(
+        arbitrary_types_allowed=True,
+        frozen=True,
+    )
+    members: Optional[bool] = None
+
+
 class ImageItem(BaseModel):
     model_config = ConfigDict(
         arbitrary_types_allowed=True,
         frozen=True,
     )
-    images: Optional[bool] = None
+    images: Optional[Union[bool, Image]] = None
 
 
 class IncludeItem3(BaseModel):
@@ -291,7 +311,7 @@ class Components(BaseModel):
         frozen=True,
     )
     baremetal: Optional[Union[bool, BaremetalItem]] = None
-    block_storage: Optional[Union[bool, MappingProxyType[str, Any]]] = Field(None, alias='block-storage')
+    block_storage: Optional[Union[bool, BlockStorageItem]] = Field(None, alias='block-storage')
     compute: Optional[Union[bool, ComputeItem]] = None
     identity: Optional[Union[bool, IdentityItem]] = None
     image: Optional[Union[bool, ImageItem]] = None
@@ -342,6 +362,7 @@ class InstanceConfig(BaseModel):
     aws_region: Optional[str] = None
     aws_service: Optional[str] = None
     blacklist_project_names: Optional[tuple[str, ...]] = None
+    cinder_microversion: Optional[str] = None
     collect_hypervisor_load: Optional[bool] = None
     collect_hypervisor_metrics: Optional[bool] = None
     collect_network_metrics: Optional[bool] = None

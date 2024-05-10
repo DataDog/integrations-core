@@ -9,9 +9,11 @@ ENV SOURCE_DATE_EPOCH=${SOURCE_DATE_EPOCH}
 COPY install-from-source.sh /
 
 ENV CFLAGS="-O2"
+ENV CXXFLAGS="${CFLAGS}"
 # Auditwheel will only set RPATH's for copied libs if an existing RPATH is found,
 # so we may as well set it to origin here anyway.
-ENV LDFLAGS="-Wl,-rpath,'\$\$ORIGIN'"
+# --strip-debug reduces binary sizes and improves reproducibility
+ENV LDFLAGS="-Wl,-rpath,'\$\$ORIGIN' -Wl,--strip-debug"
 
 # For Python 2, we get openssl(1) via yum just to get the necessary headers,
 # and we remove the package after compilation to prevent it from interfering
@@ -28,24 +30,20 @@ RUN yum install -y openssl-devel && \
  && yum remove -y openssl-devel
 
 # Set up virtual environment for Python 2
-RUN export LD_LIBRARY_PATH="/opt/python/${PYTHON2_VERSION}/lib:${LD_LIBRARY_PATH}"; \
- /opt/python/${PYTHON2_VERSION}/bin/python2.7 -m pip install --no-warn-script-location virtualenv \
+RUN /opt/python/${PYTHON2_VERSION}/bin/python2.7 -m pip install --no-warn-script-location virtualenv \
  && /opt/python/${PYTHON2_VERSION}/bin/python2.7 -m virtualenv /py2
 
 # openssl
 RUN yum install -y perl-IPC-Cmd && \
  DOWNLOAD_URL="https://www.openssl.org/source/openssl-{{version}}.tar.gz" \
- VERSION="3.0.12" \
- SHA256="f93c9e8edde5e9166119de31755fc87b4aa34863662f67ddfcba14d0b6b69b61" \
+ VERSION="3.0.13" \
+ SHA256="88525753f79d3bec27d2fa7c66aa0b92b3aa9498dafd93d7cfa4b3780cdae313" \
  RELATIVE_PATH="openssl-{{version}}" \
  # https://docs.python.org/3/using/unix.html#custom-openssl
  INSTALL_COMMAND="make install_sw" \
- # no-module prevents the creation of dynamically loaded modules that would be problematic to bundle into Python wheels
  CONFIGURE_SCRIPT="./config" \
  bash install-from-source.sh \
- --prefix=/usr/local/ssl \
  --openssldir=/etc/pki/tls \
- --libdir=lib \
  -fPIC shared \
  # This prevents the creation of dynamically loaded modules that would be problematic to bundle into Python wheels
  no-module \
@@ -55,38 +53,22 @@ RUN yum install -y perl-IPC-Cmd && \
  ldconfig
 
 # Compile and install Python 3
-ENV PYTHON3_VERSION=3.11.5
+ENV PYTHON3_VERSION=3.11.8
 RUN yum install -y libffi-devel && \
  DOWNLOAD_URL="https://python.org/ftp/python/{{version}}/Python-{{version}}.tgz" \
  VERSION="${PYTHON3_VERSION}" \
- SHA256="a12a0a013a30b846c786c010f2c19dd36b7298d888f7c4bd1581d90ce18b5e58" \
+ SHA256="d3019a613b9e8761d260d9ebe3bd4df63976de30464e5c0189566e1ae3f61889" \
  RELATIVE_PATH="Python-{{version}}" \
  bash install-from-source.sh \
  --prefix=/opt/python/${PYTHON_VERSION} \
- --with-openssl=/usr/local/ssl \
- --with-openssl-rpath=auto \
  --with-ensurepip=yes \
  --enable-ipv6 \
  --with-dbmliborder=
 ENV PATH="/opt/python/${PYTHON_VERSION}/bin:${PATH}"
 # Set up virtual environment for Python 3
-RUN export LD_LIBRARY_PATH="/opt/python/${PYTHON_VERSION}/lib:${LD_LIBRARY_PATH}"; \
- /opt/python/${PYTHON_VERSION}/bin/python3 -m pip install --no-warn-script-location --upgrade pip \
+RUN /opt/python/${PYTHON_VERSION}/bin/python3 -m pip install --no-warn-script-location --upgrade pip \
  && /opt/python/${PYTHON_VERSION}/bin/python3 -m pip install --no-warn-script-location virtualenv \
  && /opt/python/${PYTHON_VERSION}/bin/python3 -m virtualenv /py3
-
-# Rust toolchain
-ENV RUST_VERSION="nightly-2022-05-15"
-ENV RUSTC_SHA256="32a1532f7cef072a667bac53f1a5542c99666c4071af0c9549795bbdb2069ec1"
-ENV RUSTUP_VERSION="1.24.3"
-ENV RUSTUP_SHA256="32a1532f7cef072a667bac53f1a5542c99666c4071af0c9549795bbdb2069ec1"
-RUN curl -sSL -o rustup-init "https://static.rust-lang.org/rustup/archive/${RUSTUP_VERSION}/aarch64-unknown-linux-gnu/rustup-init" \
- && echo "${RUSTUP_SHA256}  rustup-init" | sha256sum --check \
- && chmod +x ./rustup-init \
- && ./rustup-init -y --profile minimal --default-toolchain "${RUST_VERSION}" \
- && echo "${RUSTC_SHA256}  $HOME/.cargo/bin/rustc" | sha256sum --check \
- && rm ./rustup-init
-ENV PATH="/root/.cargo/bin:${PATH}"
 
 # krb5 for dependencies that require kerberos support
 RUN \
@@ -98,9 +80,9 @@ RUN \
 
 # libxml & libxslt for lxml
 RUN \
- DOWNLOAD_URL="https://download.gnome.org/sources/libxml2/2.10/libxml2-{{version}}.tar.xz" \
- VERSION="2.10.3" \
- SHA256="5d2cc3d78bec3dbe212a9d7fa629ada25a7da928af432c93060ff5c17ee28a9c" \
+ DOWNLOAD_URL="https://download.gnome.org/sources/libxml2/2.12/libxml2-{{version}}.tar.xz" \
+ VERSION="2.12.6" \
+ SHA256="889c593a881a3db5fdd96cc9318c87df34eb648edfc458272ad46fd607353fbb" \
  RELATIVE_PATH="libxml2-{{version}}" \
  bash install-from-source.sh \
  --without-iconv \
@@ -116,8 +98,8 @@ RUN \
 
 RUN \
  DOWNLOAD_URL="https://download.gnome.org/sources/libxslt/1.1/libxslt-{{version}}.tar.xz" \
- VERSION="1.1.37" \
- SHA256="3a4b27dc8027ccd6146725950336f1ec520928f320f144eb5fa7990ae6123ab4" \
+ VERSION="1.1.39" \
+ SHA256="2a20ad621148339b0759c4d4e96719362dee64c9a096dbba625ba053846349f0" \
  RELATIVE_PATH="libxslt-{{version}}" \
  bash install-from-source.sh \
  --without-python \
@@ -127,7 +109,6 @@ RUN \
  --disable-static
 
 # libpq and pg_config as needed by psycopg2
-RUN yum install openssl-devel -y
 RUN \
  DOWNLOAD_URL="https://ftp.postgresql.org/pub/source/v{{version}}/postgresql-{{version}}.tar.bz2" \
  VERSION="16.0" \
@@ -193,16 +174,8 @@ RUN \
     --without-gnutls \
     --without-librtmp \
     --without-libssh2 \
-    --with-ssl=/usr/local/ssl \
+    --with-ssl=/usr/local \
  && rm /usr/local/bin/curl
-
-# https://doc.rust-lang.org/cargo/reference/config.html#netgit-fetch-with-cli
-# https://github.com/rust-lang/cargo/issues/10762
-ENV CARGO_NET_GIT_FETCH_WITH_CLI="true"
-
-# Environment variables to help openssl crate find OpenSSL
-ENV OPENSSL_LIB_DIR="/usr/local/lib64"
-ENV OPENSSL_INCLUDE_DIR="/usr/local/include"
 
 # Set up runner
 COPY runner_dependencies.txt /runner_dependencies.txt

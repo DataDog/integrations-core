@@ -1,1 +1,0 @@
-support custom metric_prefix in QueryExecutor and remove manual fix of metric_prefix

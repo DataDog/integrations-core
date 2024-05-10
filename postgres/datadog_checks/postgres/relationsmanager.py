@@ -36,6 +36,7 @@ LOCK_METRICS = {
         ('datname', 'db'),
         ('relname', 'table'),
         ('granted', 'granted'),
+        ('fastpath', 'fastpath'),
     ],
     'metrics': {'lock_count': ('postgresql.locks', AgentCheck.gauge)},
     'query': """
@@ -45,6 +46,7 @@ SELECT mode,
        pd.datname,
        pc.relname,
        granted,
+       fastpath,
        count(*) AS {metrics_columns}
   FROM pg_locks l
   JOIN pg_database pd ON (l.database = pd.oid)
@@ -53,7 +55,7 @@ SELECT mode,
  WHERE {relations}
    AND l.mode IS NOT NULL
    AND pc.relname NOT LIKE 'pg^_%%' ESCAPE '^'
- GROUP BY pd.datname, pc.relname, pn.nspname, locktype, mode, granted""",
+ GROUP BY pd.datname, pc.relname, pn.nspname, locktype, mode, granted, fastpath""",
     'relation': True,
     'name': 'lock_metrics',
 }
@@ -140,6 +142,8 @@ SELECT relname,
 #
 # Previous version filtered on nspname !~ '^pg_toast'. Since pg_toast namespace only
 # contains index and toast table, the filter was redundant with relkind = 'r'
+#
+# We also filter out tables with an AccessExclusiveLock to avoid query timeouts.
 QUERY_PG_CLASS = {
     'name': 'pg_class',
     'query': """
@@ -163,7 +167,9 @@ FROM
     FROM pg_class C
     LEFT JOIN pg_namespace N ON (N.oid = C.relnamespace)
     LEFT JOIN pg_inherits I ON (I.inhrelid = C.oid)
+    LEFT JOIN pg_locks L ON C.oid = L.relation AND L.locktype = 'relation'
     WHERE NOT (nspname = ANY('{{pg_catalog,information_schema}}')) AND
+      (L.relation IS NULL OR L.mode <> 'AccessExclusiveLock' OR NOT L.granted) AND
       relkind = 'r' AND
       {relations} {limits}) as s""",
     'columns': [

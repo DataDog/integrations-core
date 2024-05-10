@@ -6,10 +6,11 @@ from datadog_checks.base import OpenMetricsBaseCheck
 
 DEFAULT_METRICS = {
     'admission_webhooks_certificate_expiry': 'admission_webhooks.certificate_expiry',
+    'admission_webhooks_cws_exec_instrumentation_attempts': 'admission_webhooks.cws_exec_instrumentation_attempts',
+    'admission_webhooks_cws_pod_instrumentation_attempts': 'admission_webhooks.cws_pod_instrumentation_attempts',
     'admission_webhooks_library_injection_attempts': 'admission_webhooks.library_injection_attempts',
     'admission_webhooks_library_injection_errors': 'admission_webhooks.library_injection_errors',
     'admission_webhooks_mutation_attempts': 'admission_webhooks.mutation_attempts',
-    'admission_webhooks_mutation_errors': 'admission_webhooks.mutation_errors',
     'admission_webhooks_patcher_attempts': 'admission_webhooks.patcher.attempts',
     'admission_webhooks_patcher_completed': 'admission_webhooks.patcher.completed',
     'admission_webhooks_patcher_errors': 'admission_webhooks.patcher.errors',

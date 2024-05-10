@@ -178,8 +178,8 @@ instances:
     ## @param tls_ca_cert - string - optional
     ## The path to a file of concatenated CA certificates in PEM format or a directory
     ## containing several CA certificates in PEM format. If a directory, the directory
-    ## must have been processed using the c_rehash utility supplied with OpenSSL. See:
-    ## https://www.openssl.org/docs/manmaster/man3/SSL_CTX_load_verify_locations.html
+    ## must have been processed using the `openssl rehash` command. See:
+    ## https://www.openssl.org/docs/man3.2/man1/c_rehash.html
     #
     # tls_ca_cert: <CA_CERT_PATH>
 
@@ -317,6 +317,7 @@ instances:
     ##     If the collection interval is greater than check collection interval, 
     ##     the query will NOT BE RUN exactly at the collection interval.
     ##     The query will be run at the next check run after the collection interval has passed.
+    ## 5. metric_prefix (optional) - The prefix to apply to each metric.
     #
     # custom_queries:
     #   - query: SELECT foo, COUNT(*) FROM table.events GROUP BY foo
@@ -328,6 +329,7 @@ instances:
     #     tags:
     #     - test:<INTEGRATION>
     #     collection_interval: 30
+    #     metric_prefix: foo_prefix
 
     ## @param tags - list of strings - optional
     ## A list of tags to attach to every metric and service check emitted by this instance.

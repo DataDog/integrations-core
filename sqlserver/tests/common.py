@@ -20,11 +20,14 @@ from datadog_checks.sqlserver.const import (
     DATABASE_METRICS,
     DBM_MIGRATED_METRICS,
     INSTANCE_METRICS,
-    INSTANCE_METRICS_DATABASE,
+    INSTANCE_METRICS_DATABASE_AO,
+    INSTANCE_METRICS_DATABASE_SINGLE,
     TASK_SCHEDULER_METRICS,
     TEMPDB_FILE_SPACE_USAGE_METRICS,
 )
 from datadog_checks.sqlserver.queries import get_query_file_stats
+
+from .utils import is_always_on
 
 
 def get_local_driver():
@@ -82,7 +85,7 @@ EXPECTED_DEFAULT_METRICS = (
         for m in chain(
             EXPECTED_INSTANCE_METRICS,
             DBM_MIGRATED_METRICS,
-            INSTANCE_METRICS_DATABASE,
+            INSTANCE_METRICS_DATABASE_SINGLE,
             DATABASE_METRICS,
             DATABASE_BACKUP_METRICS,
             TEMPDB_FILE_SPACE_USAGE_METRICS,
@@ -107,7 +110,8 @@ EXPECTED_METRICS = (
 
 DBM_MIGRATED_METRICS_NAMES = {m[0] for m in DBM_MIGRATED_METRICS}
 EXPECTED_METRICS_DBM_ENABLED = [m for m in EXPECTED_METRICS if m not in DBM_MIGRATED_METRICS_NAMES]
-DB_PERF_COUNT_METRICS_NAMES = {m[0] for m in INSTANCE_METRICS_DATABASE}
+DB_PERF_COUNT_METRICS_NAMES_SINGLE = {m[0] for m in INSTANCE_METRICS_DATABASE_SINGLE}
+DB_PERF_COUNT_METRICS_NAMES_AO = {m[0] for m in INSTANCE_METRICS_DATABASE_AO}
 
 # These AO metrics are collected using the new QueryExecutor API instead of BaseSqlServerMetric.
 EXPECTED_QUERY_EXECUTOR_AO_METRICS_PRIMARY = [
@@ -238,7 +242,6 @@ OPERATION_TIME_METRICS = [
     'database_stats_metrics',
     'fraction_metrics',
     'db_file_space_usage_metrics',
-    'database_backup_metrics',
     'database_file_stats_metrics',
     'incr_fraction_metrics',
 ]
@@ -274,12 +277,15 @@ def assert_metrics(
     if database_autodiscovery:
         # when autodiscovery is enabled, we should not double emit metrics,
         # so we should assert for these separately with the proper tags
-        expected_metrics = [m for m in expected_metrics if m not in DB_PERF_COUNT_METRICS_NAMES]
+        expected_metrics = [m for m in expected_metrics if m not in DB_PERF_COUNT_METRICS_NAMES_SINGLE]
 
         for dbname in dbs:
             tags = check_tags + ['database:{}'.format(dbname)]
-            for mname in DB_PERF_COUNT_METRICS_NAMES:
+            for mname in DB_PERF_COUNT_METRICS_NAMES_SINGLE:
                 aggregator.assert_metric(mname, hostname=hostname, tags=tags)
+            if dbname == 'datadog_test' and is_always_on():
+                for mname in DB_PERF_COUNT_METRICS_NAMES_AO:
+                    aggregator.assert_metric(mname, hostname=hostname, tags=tags)
     else:
         # master does not have indexes so none of these metrics will be emitted
         expected_metrics = [m for m in expected_metrics if m not in DATABASE_INDEX_METRICS]
@@ -309,8 +315,6 @@ def get_operation_time_metrics(instance):
     if instance.get('include_task_scheduler_metrics', False):
         operation_time_metrics.append('os_schedulers_metrics')
         operation_time_metrics.append('os_tasks_metrics')
-    if instance.get('include_db_fragmentation_metrics', False):
-        operation_time_metrics.append('db_fragmentation_metrics')
     if instance.get('include_ao_metrics', False):
         operation_time_metrics.append('availability_groups_metrics')
     if instance.get('include_master_files_metrics', False):

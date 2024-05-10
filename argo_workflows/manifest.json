@@ -1,0 +1,67 @@
+{
+  "manifest_version": "2.0.0",
+  "app_uuid": "f96fd144-a3c0-4fed-adcc-53f11f80ec04",
+  "app_id": "argo-workflows",
+  "display_on_public_website": true,
+  "tile": {
+    "overview": "README.md#Overview",
+    "configuration": "README.md#Setup",
+    "support": "README.md#Support",
+    "changelog": "CHANGELOG.md",
+    "description": "Monitor the health and performance of Argo Workflows",
+    "title": "Argo Workflows",
+    "media": [],
+    "classifier_tags": [
+      "Supported OS::Linux",
+      "Supported OS::Windows",
+      "Supported OS::macOS",
+      "Category::Developer Tools",
+      "Category::Log Collection"
+    ]
+  },
+  "assets": {
+    "integration": {
+      "auto_install": true,
+      "source_type_id": 8511369,
+      "source_type_name": "Argo Workflows",
+      "configuration": {
+        "spec": "assets/configuration/spec.yaml"
+      },
+      "process_signatures": [
+        "workflow-controller"
+      ],
+      "events": {
+        "creates_events": false
+      },
+      "metrics": {
+        "prefix": "argo_workflows.",
+        "check": [
+          "argo_workflows.go.info"
+        ],
+        "metadata_path": "metadata.csv"
+      },
+      "service_checks": {
+        "metadata_path": "assets/service_checks.json"
+      }
+    },
+    "dashboards": {
+      "Argo Workflows": "assets/dashboards/argo_workflows.json"
+    },
+    "logs": {
+      "source": "argo_workflows"
+    },
+    "monitors": {
+      "errors": "assets/monitors/errors.json"
+    },
+      "saved_views": {
+          "overview": "assets/saved_views/overview.json",
+          "errors": "assets/saved_views/errors.json"
+      }
+  },
+  "author": {
+    "support_email": "help@datadoghq.com",
+    "name": "Datadog",
+    "homepage": "https://www.datadoghq.com",
+    "sales_email": "info@datadoghq.com"
+  }
+}

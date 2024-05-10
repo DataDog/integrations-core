@@ -2,7 +2,13 @@
 
 <!-- towncrier release notes start -->
 
-## 7.2.0 / 2024-02-16
+## 7.3.0 / 2024-04-26
+
+***Added***:
+
+* Adds additional Geo metrics. *Note: Some metrics are only available depending on your Gitlab version: refer to the Metrics sub-section in Data Collected available in our [documentation](https://docs.datadoghq.com/integrations/gitlab/) to see the minimum required version (indicated within brackets). For instance, `gitlab.geo.group.wiki.repositories` requires at least `13.10`.* ([#17420](https://github.com/DataDog/integrations-core/pull/17420))
+
+## 7.2.0 / 2024-02-16 / Agent 7.52.0
 
 ***Added***:
 

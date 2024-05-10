@@ -11,6 +11,7 @@ import pytest
 from flaky import flaky
 
 from datadog_checks.base.errors import ConfigurationError
+from datadog_checks.base.stubs import datadog_agent
 from datadog_checks.postgres import PostgreSql
 from datadog_checks.postgres.__about__ import __version__
 from datadog_checks.postgres.util import DatabaseHealthCheckError, PartialFormatter, fmt
@@ -38,6 +39,7 @@ from .common import (
     check_physical_replication_slots,
     check_slru_metrics,
     check_snapshot_txid_metrics,
+    check_stat_io_metrics,
     check_stat_replication,
     check_stat_wal_metrics,
     check_uptime_metrics,
@@ -51,6 +53,7 @@ from .utils import (
     kill_vacuum,
     requires_over_10,
     requires_over_14,
+    requires_over_16,
     run_one_check,
     run_vacuum_thread,
 )
@@ -323,16 +326,6 @@ def test_can_connect_service_check(aggregator, integration_check, pg_instance):
         check.check(pg_instance)
     aggregator.assert_service_check('postgres.can_connect', count=1, status=PostgreSql.CRITICAL, tags=tags_without_role)
     aggregator.reset()
-
-
-def test_schema_metrics(aggregator, integration_check, pg_instance):
-    pg_instance['table_count_limit'] = 1
-    check = integration_check(pg_instance)
-    check.check(pg_instance)
-
-    expected_tags = _get_expected_tags(check, pg_instance, db=DB_NAME, schema='public')
-    aggregator.assert_metric('postgresql.table.count', value=1, count=1, tags=expected_tags)
-    aggregator.assert_metric('postgresql.db.count', value=106, count=1)
 
 
 def test_connections_metrics(aggregator, integration_check, pg_instance):
@@ -754,7 +747,7 @@ def test_database_instance_metadata(aggregator, pg_instance, dbm_enabled, report
     assert event['dbms'] == "postgres"
     assert event['tags'].sort() == expected_tags.sort()
     assert event['integration_version'] == __version__
-    assert event['collection_interval'] == 1800
+    assert event['collection_interval'] == 300
     assert event['metadata'] == {
         'dbm': dbm_enabled,
         'connection_host': pg_instance['host'],
@@ -1099,3 +1092,65 @@ def test_collect_wal_metrics_metrics(aggregator, integration_check, pg_instance,
     # if collect_wal_metrics is not set, wal metrics are collected on pg >= 10 by default
     expected_count = 0 if collect_wal_metrics is False else 1
     check_file_wal_metrics(aggregator, expected_tags=expected_tags, count=expected_count)
+
+
+@pytest.mark.parametrize(
+    'instance_propagate_agent_tags,init_config_propagate_agent_tags,should_propagate_agent_tags',
+    [
+        pytest.param(True, True, True, id="both true"),
+        pytest.param(True, False, True, id="instance config true prevails"),
+        pytest.param(False, True, False, id="instance config false prevails"),
+        pytest.param(False, False, False, id="both false"),
+        pytest.param(None, True, True, id="init_config true applies to all instances"),
+        pytest.param(None, False, False, id="init_config false applies to all instances"),
+        pytest.param(None, None, False, id="default to false"),
+        pytest.param(True, None, True, id="instance config true prevails, init_config is None"),
+        pytest.param(False, None, False, id="instance config false prevails, init_config is None"),
+    ],
+)
+def test_propagate_agent_tags(
+    aggregator,
+    integration_check,
+    pg_instance,
+    instance_propagate_agent_tags,
+    init_config_propagate_agent_tags,
+    should_propagate_agent_tags,
+):
+    init_config = {}
+    if instance_propagate_agent_tags is not None:
+        pg_instance['propagate_agent_tags'] = instance_propagate_agent_tags
+    if init_config_propagate_agent_tags is not None:
+        init_config['propagate_agent_tags'] = init_config_propagate_agent_tags
+
+    agent_tags = ["my-env:test-env", "random:tag", "bar:foo"]
+
+    with mock.patch.object(datadog_agent, 'get_config', passthrough=True) as mock_agent:
+        mock_agent.side_effect = lambda option: agent_tags
+        check = integration_check(pg_instance, init_config)
+        assert check._config._should_propagate_agent_tags(pg_instance, init_config) == should_propagate_agent_tags
+        if should_propagate_agent_tags:
+            assert all(tag in check.tags for tag in agent_tags)
+            check.check(pg_instance)
+            expected_tags = _get_expected_tags(check, pg_instance, with_db=True)
+            aggregator.assert_service_check(
+                'postgres.can_connect', count=1, status=PostgreSql.OK, tags=expected_tags + agent_tags
+            )
+
+
+@requires_over_16
+@pytest.mark.parametrize(
+    'dbm_enabled',
+    [True, False],
+)
+def test_pg_stat_io_metrics(aggregator, integration_check, pg_instance, dbm_enabled):
+    pg_instance['dbm'] = dbm_enabled
+    # this will block on cancel and wait for the coll interval of 600 seconds,
+    # unless the collection_interval is set to a short amount of time
+    pg_instance['collect_resources'] = {'collection_interval': 0.1}
+
+    check = integration_check(pg_instance)
+    run_one_check(check, pg_instance)
+
+    expected_tags = _get_expected_tags(check, pg_instance)
+    expected_count = 0 if dbm_enabled is False else 1
+    check_stat_io_metrics(aggregator, expected_tags, count=expected_count)

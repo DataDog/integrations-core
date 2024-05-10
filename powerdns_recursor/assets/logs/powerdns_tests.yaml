@@ -10,6 +10,7 @@ tests:
         appname: "pdns_recursor"
       timestamp: 24246533000
     message: "Only allowing queries from: 127.0.0.0/8, 10.0.0.0/8, 100.64.0.0/10, 169.254.0.0/16, 192.168.0.0/16, 172.16.0.0/12, ::1/128, fc00::/7, fe80::/10"
+    service: "pdns_recursor"
     tags:
      - "source:LOGS_SOURCE"
     timestamp: 24246533000
@@ -23,6 +24,7 @@ tests:
         appname: "pdns_recursor"
       timestamp: 24246533000
     message: "Inserting rfc 1918 private space zones"
+    service: "pdns_recursor"
     tags:
      - "source:LOGS_SOURCE"
     timestamp: 24246533000

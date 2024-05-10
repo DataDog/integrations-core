@@ -7,19 +7,30 @@ on:
   pull_request:
     branches:
     - master
+    paths:
+    - '.github/workflows/docs.yml'
+    - 'docs/**'
+    - 'ddev/**'
+    - 'datadog_checks_dev/**'
+    - 'mkdocs.yml'
+    # We care about changes to base package dependencies because they get installed
+    # in the docs virtualenv along with the dependencies of ddev. For example, this PR:
+    # https://github.com/DataDog/integrations-core/pull/17319/files#diff-1b02d4258aa29155f48813d2eb55fc87f62abbded6d8a9fa9e3b8f08365d771aR64
+    # broke the docs job (pydantic incompatible with ddev's version) but we didn't find out until later.
+    - 'datadog_checks_base/pyproject.toml'
 
 jobs:
   build:
     runs-on: ubuntu-latest
 
     steps:
-    - uses: actions/checkout@v2
+    - uses: actions/checkout@v4
       with:
         # Fetch all history for applying timestamps to every page
         fetch-depth: 0
 
     - name: Set up Python
-      uses: actions/setup-python@v2
+      uses: actions/setup-python@v5
       with:
         python-version: '3.11'
         cache: 'pip'

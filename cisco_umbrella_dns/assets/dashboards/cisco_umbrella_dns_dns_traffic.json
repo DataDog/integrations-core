@@ -865,7 +865,7 @@
                                             },
                                             "group_by": [
                                                 {
-                                                    "facet": "@external.geoip.country.iso_code",
+                                                    "facet": "@cisco.umbrella.dns.external.geoip.country.iso_code",
                                                     "limit": 250,
                                                     "sort": {
                                                         "order": "desc",

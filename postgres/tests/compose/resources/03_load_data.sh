@@ -8,6 +8,17 @@ psql -v ON_ERROR_STOP=1 --username "$POSTGRES_USER" datadog_test <<-EOSQL
     INSERT INTO persons (lastname, firstname, address, city) VALUES ('Cavaille', 'Leo', 'Midtown', 'New York'), ('Someveryveryveryveryveryveryveryveryveryverylongname', 'something', 'Avenue des Champs Elysees', 'Beautiful city of lights');
     CREATE TABLE personsdup1 AS TABLE persons;
     CREATE TABLE personsdup2 AS TABLE persons;
+    CREATE TABLE personsdup3 AS TABLE persons;
+    CREATE TABLE personsdup4 AS TABLE persons;
+    CREATE TABLE personsdup5 AS TABLE persons;
+    CREATE TABLE personsdup6 AS TABLE persons;
+    CREATE TABLE personsdup7 AS TABLE persons;
+    CREATE TABLE personsdup8 AS TABLE persons;
+    CREATE TABLE personsdup9 AS TABLE persons;
+    CREATE TABLE personsdup10 AS TABLE persons;
+    CREATE TABLE personsdup11 AS TABLE persons;
+    CREATE TABLE personsdup12 AS TABLE persons;
+    CREATE TABLE personsdup13 AS TABLE persons;
     CREATE TABLE persons_indexed AS TABLE persons;
     ALTER TABLE persons_indexed ADD PRIMARY KEY (personid);
     CREATE TABLE pgtable (personid SERIAL, lastname VARCHAR(255), firstname VARCHAR(255), address VARCHAR(255), city VARCHAR(255));
@@ -17,6 +28,8 @@ psql -v ON_ERROR_STOP=1 --username "$POSTGRES_USER" datadog_test <<-EOSQL
     SELECT * FROM persons;
     SELECT * FROM persons;
     SELECT * FROM persons;
+    CREATE SCHEMA public2;
+    CREATE TABLE public2.cities (city VARCHAR(255), country VARCHAR(255), PRIMARY KEY(city));
     GRANT ALL PRIVILEGES ON ALL TABLES IN SCHEMA public TO bob;
     GRANT ALL PRIVILEGES ON ALL TABLES IN SCHEMA public TO blocking_bob;
 EOSQL
@@ -40,6 +53,9 @@ psql -v ON_ERROR_STOP=1 --username "$POSTGRES_USER" datadog_test <<-EOSQL
     INSERT INTO test_part (filler) SELECT array_to_string(ARRAY(SELECT chr((65 + round(random() * 50)) :: integer) FROM generate_series(1,3000)), '');
     VACUUM ANALYZE test_part;
     CREATE TABLE test_part_no_children (id SERIAL PRIMARY KEY, filler text) PARTITION BY RANGE (id);
+    CREATE TABLE test_part_no_activity (id SERIAL PRIMARY KEY, filler text) PARTITION BY RANGE (id);
+    CREATE TABLE test_part_no_activity1 PARTITION OF test_part_no_activity FOR VALUES FROM (MINVALUE) TO (500);
+    CREATE TABLE test_part_no_activity2 PARTITION OF test_part_no_activity FOR VALUES FROM (500) TO (MAXVALUE);
 EOSQL
 fi
 
