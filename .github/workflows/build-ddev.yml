@@ -247,7 +247,7 @@ jobs:
       if: runner.os == 'Linux'
       uses: actions/upload-artifact@v4
       with:
-        name: standalone
+        name: standalone-${{ runner.os }}-${{ matrix.job.target }}
         path: ddev/packaging/*
         if-no-files-found: error
 
