@@ -216,7 +216,7 @@ jobs:
       if: runner.os != 'Linux'
       uses: actions/upload-artifact@v4
       with:
-        name: staged-managed-${{ runner.os }}
+        name: staged-managed-${{ runner.os }}-${{ matrix.job.target }}
         path: ddev/packaging/*
         if-no-files-found: error
 
@@ -237,7 +237,7 @@ jobs:
       if: runner.os != 'Linux'
       uses: actions/upload-artifact@v4
       with:
-        name: staged-standalone-${{ runner.os }}
+        name: staged-standalone-${{ runner.os }}-${{ matrix.job.target }}
         path: ddev/packaging/*
         if-no-files-found: error
 
@@ -306,7 +306,7 @@ jobs:
     - name: Download staged standalone binaries
       uses: actions/download-artifact@v4
       with:
-        name: staged-standalone-${{ runner.os }}
+        name: staged-standalone-${{ runner.os }}-*
         path: ddev/archives
 
     - name: Extract staged standalone binaries
@@ -328,7 +328,7 @@ jobs:
     - name: Download staged managed binaries
       uses: actions/download-artifact@v4
       with:
-        name: staged-managed-${{ runner.os }}
+        name: staged-managed-${{ runner.os }}-*
         path: ddev/archives
 
     - name: Extract staged managed binaries
@@ -475,7 +475,7 @@ jobs:
     - name: Download staged standalone binaries
       uses: actions/download-artifact@v4
       with:
-        name: staged-standalone-${{ runner.os }}
+        name: staged-standalone-${{ runner.os }}-*
         path: ddev/archives
 
     - name: Extract staged standalone binaries
@@ -509,7 +509,7 @@ jobs:
     - name: Download staged managed binaries
       uses: actions/download-artifact@v4
       with:
-        name: staged-managed-${{ runner.os }}
+        name: staged-managed-${{ runner.os }}-*
         path: ddev/archives
 
     - name: Extract staged managed binaries
@@ -601,14 +601,18 @@ jobs:
     - name: Download binaries
       uses: actions/download-artifact@v4
       with:
+        pattern: standalone-*
         name: standalone
         path: archives
+        merge_multiple: true
 
     - name: Download installers
       uses: actions/download-artifact@v4
       with:
+        pattern: installers-*
         name: installers
         path: installers
+        merge_multiple: true
 
     - name: Push Python artifacts to PyPI
       uses: pypa/gh-action-pypi-publish@v1.8.6
