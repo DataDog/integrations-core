@@ -28,6 +28,9 @@ Tasks that do not have the Datadog Agent still report metrics with Cloudwatch, h
 
 ### Installation
 
+<div class="alert alert-info">You can also monitor AWS Batch jobs on ECS Fargate. See <a href="#installation-for-aws-batch">Installation for AWS Batch</a>.
+</div>
+
 To monitor your ECS Fargate tasks with Datadog, run the Agent as a container in **same task definition** as your application container. To collect metrics with Datadog, each task definition should include a Datadog Agent container in addition to the application containers. Follow these setup steps:
 
 1. **Create an ECS Fargate task**
@@ -222,18 +225,12 @@ For more information on CloudFormation templating and syntax, see the [AWS Cloud
 
 <!-- xxz tabs xxx -->
 
-## AWS Batch on ECS Fargate
-
-The following steps cover setup of the Datadog Container Agent within AWS Batch on AWS ECS Fargate. **Note**: Datadog Agent version 6.1.1 or higher is needed to take full advantage of the Fargate integration.
-
-Jobs that do not have the Datadog Agent still report metrics with Cloudwatch, however the Agent is needed for detailed container metrics, tracing, and more. Additionally, Cloudwatch metrics are less granular, and have more latency in reporting than metrics shipped directly through the Datadog Agent.
-
-### Installation
+### Installation for AWS Batch
 
 To monitor your AWS Batch jobs with Datadog, run the Agent as a container in **same job definition** as your application container. To collect metrics with Datadog, each job definition should include a Datadog Agent container in addition to the application containers. Follow these setup steps:
 
 1. **Create an AWS Batch job definition**
-2. **Create or Modify your IAM Policy**
+2. **Create or modify your IAM policy**
 3. **Submit the job to your job queue**
 
 #### Create an AWS Batch job definition
@@ -244,51 +241,54 @@ The instructions below show you how to configure the job using the [Amazon Web C
 
 <!-- xxx tabs xxx -->
 <!-- xxx tab "Web UI" xxx -->
-##### Web UI Job Definition
+##### Web UI job definition
 
 <!-- partial
 {{< site-region region="us,us3,us5,eu,ap1,gov" >}}
 
 1. Log in to your [AWS Web Console][4] and navigate to the AWS Batch section.
-2. Click on **Job Definitions** in the left menu, then click the **Create** button or choose an existing AWS Batch job definition.
+2. Click on **Job Definitions** in the left menu. Then, click the **Create** button or choose an existing AWS Batch job definition.
 3. For new job definitions:
     1. Select **Fargate** as the orchestration type.
-    2. Unselect **Use legacy containerProperties structure** option. 
+    2. Unselect the **Use legacy containerProperties structure** option. 
     3. Enter a **Job Definition Name**, such as `my-app-and-datadog`.
-    4. Select an execution IAM role. See permission requirements in the [Create or Modify your IAM Policy](#create-or-modify-your-iam-policy) section below.
-    5. Enable **Assign public IP** to allow outbound network access, then click the **Next** button.
+    4. Select an execution IAM role. See permission requirements in the [Create or modify your IAM policy](#create-or-modify-your-iam-policy) section.
+    5. Enable **Assign public IP** to allow outbound network access. Then, click the **Next** button.
     6. Configure the Datadog Agent container.
-        1. For **Container name** enter `datadog-agent`.
-        2. For **Image** enter `public.ecr.aws/datadog/agent:latest`.
+        1. For **Container name**, enter `datadog-agent`.
+        2. For **Image**, enter `public.ecr.aws/datadog/agent:latest`.
         3. Configure **CPU** and **Memory** resource requirements based on your needs.
-        4. For **Env Variables**, add the **Key** `DD_API_KEY` and enter your [Datadog API Key][41] as the value.
-        5. Add another environment variable using the **Key** `ECS_FARGATE` and the value `true`. Click **Add** to add the container.
-        6. Add another environment variable using the **Key** `DD_SITE` and the value {{< region-param key="dd_site" code="true" >}}. This defaults to `datadoghq.com` if you don't set it.
+        4. For **Env Variables**, add the **Key** `DD_API_KEY` and enter your [Datadog API key][41] as the value.
+        5. Add another environment variable using the **Key** `ECS_FARGATE` and the value `true`. Click **Add**.
+        6. Add another environment variable using the **Key** `DD_SITE` and the value {{< region-param key="dd_site" code="true" >}}. This defaults to `datadoghq.com` if you don't set it. Click **Add**.
     7. Add your other application containers to the job definition.
     8. Click **Create job definition** to create the job definition.
 
+[4]: https://aws.amazon.com/console
+[41]: https://app.datadoghq.com/organization-settings/api-keys
 {{< /site-region >}}
 partial -->
 
 <!-- xxz tab xxx -->
 <!-- xxx tab "AWS CLI" xxx -->
-##### AWS CLI Job Definition
+##### AWS CLI job definition
 
-1. Download [datadog-agent-aws-batch-ecs-fargate.json][42]. **Note**: If you are using Internet Explorer, this may download as a gzip file, which contains the JSON file mentioned below.
+1. Download [datadog-agent-aws-batch-ecs-fargate.json][42]. **Note**: If you are using Internet Explorer, this may download as a gzip file, which contains a JSON file.
 <!-- partial
 {{< site-region region="us,us3,us5,eu,ap1,gov" >}}
-2. Update the JSON with a `JOB_DEFINITION_NAME`, your [Datadog API Key][41], and the appropriate `DD_SITE` ({{< region-param key="dd_site" code="true" >}}). **Note**: The environment variable `ECS_FARGATE` is already set to `"true"`.
+2. Update the JSON file with a `JOB_DEFINITION_NAME`, your [Datadog API Key][41], and the appropriate `DD_SITE` ({{< region-param key="dd_site" code="true" >}}). **Note**: The environment variable `ECS_FARGATE` is already set to `"true"`.
 
 [41]: https://app.datadoghq.com/organization-settings/api-keys
 {{< /site-region >}}
 partial -->
 3. Add your other application containers to the job definition. 
-4. Execute the following command to register the ECS task definition:
+4. Execute the following command to register the job definition:
 
 ```bash
 aws batch register-job-definition --cli-input-json file://<PATH_TO_FILE>/datadog-agent-aws-batch-ecs-fargate.json
 ```
-
+<!-- xxz tab xxx -->
+<!-- xxz tabs xxx -->
 #### Submit the job to your job queue
 
 The Datadog Agent runs in the same job definition as your application and integration containers.
@@ -296,7 +296,7 @@ The Datadog Agent runs in the same job definition as your application and integr
 <!-- xxx tabs xxx -->
 <!-- xxx tab "Web UI" xxx -->
 
-##### Web UI Job
+##### Web UI job
 
 1. Log in to your [AWS Web Console][4] and navigate to the AWS Batch section. If needed, create a [compute environment][59] and/or [job queue][60] associated with a compute environment.
 2. On the **Jobs** tab, click the **Submit new job** button.
@@ -309,7 +309,7 @@ The Datadog Agent runs in the same job definition as your application and integr
 <!-- xxz tab xxx -->
 
 <!-- xxx tab "AWS CLI" xxx -->
-##### AWS CLI Job
+##### AWS CLI job
 
 Run the following commands using the [AWS CLI tools][5].
 
@@ -340,7 +340,7 @@ aws batch submit-job --job-name <JOB_NAME> \
 <!-- xxz tab xxx -->
 <!-- xxz tabs xxx -->
 
-For all of these examples, you can alternatively populate the `DD_API_KEY` environment variable by referencing the [ARN of a plaintext secret stored in AWS Secrets Manager][7]. Place the `DD_API_KEY` environment variable under the `containerDefinitions.secrets` section of the task definition file. Ensure that the task execution role has the necessary permission to fetch secrets from AWS Secrets Manager.
+For all of these examples, you can alternatively populate the `DD_API_KEY` environment variable by referencing the [ARN of a plaintext secret stored in AWS Secrets Manager][7]. Place the `DD_API_KEY` environment variable under the `containerDefinitions.secrets` section of the job definition file. Ensure that the task execution role has the necessary permission to fetch secrets from AWS Secrets Manager.
 
 #### Create or modify your IAM policy
 
@@ -870,16 +870,7 @@ partial -->
 
 3. Ensure your application is running in the same task or job definition as the Datadog Agent container.
 
-### Process collection
 
-<div class="alert alert-warning">You can view your ECS Fargate processes in Datadog. To see their relationship to ECS Fargate containers, use the Datadog Agent v7.50.0 or later.</div>
-
-You can monitor processes in ECS Fargate in Datadog by using the [Live Processes page][56]. To enable process collection, add the [`PidMode` parameter][57] in the Task Definition and set it to `task` as follows:
-
-```text
-"pidMode": "task"
-```
-To filter processes by ECS, use the `AWS Fargate` Containers facet or enter `fargate:ecs` in the search query on the Live Processes page.
 
 ## Out-of-the-box tags
 
