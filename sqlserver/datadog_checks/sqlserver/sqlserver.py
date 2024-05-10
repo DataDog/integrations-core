@@ -160,7 +160,6 @@ class SQLServer(AgentCheck):
 
         self._database_metrics = None
 
-        self._last_schemas_collect_time = None
         self._schemas = Schemas(self, self._config)
 
     def cancel(self):

@@ -277,7 +277,7 @@ SELECT
     db.database_id AS id, db.name AS name, db.collation_name AS collation, dp.name AS owner
 FROM
     sys.databases db LEFT JOIN sys.database_principals dp ON db.owner_sid = dp.sid
-WHERE db.name = '{}';
+WHERE db.name IN ({});
 """
 
 SCHEMA_QUERY = """
@@ -293,7 +293,7 @@ SELECT
     object_id AS id, name
 FROM
     sys.tables
-WHERE schema_id={}
+WHERE schema_id=?
 """
 
 COLUMN_QUERY = """

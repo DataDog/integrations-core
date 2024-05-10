@@ -6,7 +6,7 @@ except ImportError:
 import copy
 import json
 import time
-
+import pdb
 from datadog_checks.base.utils.db.utils import default_json_event_encoding
 from datadog_checks.base.utils.tracking import tracked_method
 from datadog_checks.sqlserver.const import (
@@ -21,7 +21,7 @@ from datadog_checks.sqlserver.const import (
     TABLES_IN_SCHEMA_QUERY,
     DEFAULT_SCHEMAS_COLLECTION_INTERVAL
 )
-from datadog_checks.sqlserver.utils import execute_query_output_result_as_a_dict, get_list_chunks
+from datadog_checks.sqlserver.utils import execute_query_output_result_as_dicts, get_list_chunks
 
 
 class SubmitData:
@@ -55,8 +55,9 @@ class SubmitData:
         self.db_to_schemas = {}
         self.db_info = {}
 
-    def store_db_info(self, db_name, db_info):
-        self.db_info[db_name] = db_info
+    def store_db_infos(self, db_infos):
+        for db_info in db_infos:
+            self.db_info[db_info['name']] = db_info
 
     def store(self, db_name, schema, tables, columns_count):
         self._columns_count += columns_count
@@ -109,6 +110,7 @@ class Schemas:
         self._check = check
         self._log = check.log
         self.schemas_per_db = {}
+        self._last_schemas_collect_time = None
         collection_interval = config.schema_config.get(
             'collection_interval', DEFAULT_SCHEMAS_COLLECTION_INTERVAL
         )
@@ -169,10 +171,22 @@ class Schemas:
                     "partition_count": int
     """
 
-    @tracked_method(agent_check_getter=agent_check_getter)
     def collect_schemas_data(self):
         if not self._enabled:
             return
+        if (
+                self._last_schemas_collect_time is None
+                or time.time() - self._last_schemas_collect_time > self._config.schemas_collection_interval
+            ):
+            try:
+                self._collect_schemas_data()
+            except:
+                raise
+            finally:
+                self._last_schemas_collect_time = time.time()
+
+    @tracked_method(agent_check_getter=agent_check_getter)
+    def _collect_schemas_data(self):
         self._dataSubmitter.reset()
         self._dataSubmitter.set_base_event_data(
             self._check.resolved_hostname,
@@ -184,11 +198,12 @@ class Schemas:
             ),
         )
 
+        databases = self._check.get_databases()
+        db_infos = self._query_db_informations(databases)
+        self._dataSubmitter.store_db_infos(db_infos)
         # returns if to stop, True means stop iterating.
         def fetch_schema_data(cursor, db_name):
-            db_info = self._query_db_information(db_name, cursor)
             schemas = self._query_schema_information(cursor)
-            self._dataSubmitter.store_db_info(db_name, db_info)
             for schema in schemas:
                 tables = self._get_tables(schema, cursor)
                 tables_chunks = list(get_list_chunks(tables, self.TABLES_CHUNK_SIZE))
@@ -213,13 +228,11 @@ class Schemas:
         self._log.debug("Finished collect_schemas_data")
         self._dataSubmitter.submit()
 
-    def _query_db_information(self, db_name, cursor):
-        db_info = execute_query_output_result_as_a_dict(DB_QUERY.format(db_name), cursor, convert_results_to_str=True)
-        if len(db_info) == 1:
-            return db_info[0]
-        else:
-            self._log.error("Couldnt query database information for %s", db_name)
-            return None
+    def _query_db_informations(self, db_names):
+        with self._check.connection.open_managed_default_connection():
+            with self._check.connection.get_managed_cursor() as cursor:
+                db_names_formatted = ",".join(["'{}'".format(t) for t in db_names])
+                return execute_query_output_result_as_dicts(DB_QUERY.format(db_names_formatted), cursor, convert_results_to_str=True)
 
     """ returns a list of tables for schema with their names and empty column array
     list of table dicts
@@ -230,8 +243,8 @@ class Schemas:
 
     @tracked_method(agent_check_getter=agent_check_getter, track_result_length=True)
     def _get_tables(self, schema, cursor):
-        tables_info = execute_query_output_result_as_a_dict(
-            TABLES_IN_SCHEMA_QUERY.format(schema["id"]), cursor, convert_results_to_str=True
+        tables_info = execute_query_output_result_as_dicts(
+            TABLES_IN_SCHEMA_QUERY, cursor, convert_results_to_str=True, parameter=schema["id"]
         )
         for t in tables_info:
             t.setdefault("columns", [])
@@ -246,7 +259,7 @@ class Schemas:
 
     @tracked_method(agent_check_getter=agent_check_getter, track_result_length=True)
     def _query_schema_information(self, cursor):
-        return execute_query_output_result_as_a_dict(SCHEMA_QUERY, cursor, convert_results_to_str=True)
+        return execute_query_output_result_as_dicts(SCHEMA_QUERY, cursor, convert_results_to_str=True)
 
     """ returns extracted column numbers and a list of tables
         "tables" : list of tables dicts
@@ -334,7 +347,7 @@ class Schemas:
 
     @tracked_method(agent_check_getter=agent_check_getter)
     def _populate_with_partitions_data(self, table_ids, id_to_table_data, cursor):
-        rows = execute_query_output_result_as_a_dict(PARTITIONS_QUERY.format(table_ids), cursor)
+        rows = execute_query_output_result_as_dicts(PARTITIONS_QUERY.format(table_ids), cursor)
         for row in rows:
             id = row.pop("id", None)
             if id is not None:
@@ -348,7 +361,7 @@ class Schemas:
 
     @tracked_method(agent_check_getter=agent_check_getter)
     def _populate_with_index_data(self, table_ids, id_to_table_data, cursor):
-        rows = execute_query_output_result_as_a_dict(INDEX_QUERY.format(table_ids), cursor)
+        rows = execute_query_output_result_as_dicts(INDEX_QUERY.format(table_ids), cursor)
         for row in rows:
             id = row.pop("id", None)
             if id is not None:
@@ -363,7 +376,7 @@ class Schemas:
 
     @tracked_method(agent_check_getter=agent_check_getter, track_result_length=True)
     def _populate_with_foreign_keys_data(self, table_ids, id_to_table_data, cursor):
-        rows = execute_query_output_result_as_a_dict(FOREIGN_KEY_QUERY.format(table_ids), cursor)
+        rows = execute_query_output_result_as_dicts(FOREIGN_KEY_QUERY.format(table_ids), cursor)
         for row in rows:
             id = row.pop("id", None)
             if id is not None:
