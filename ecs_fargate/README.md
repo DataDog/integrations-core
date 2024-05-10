@@ -275,7 +275,7 @@ partial -->
 <!-- xxx tab "AWS CLI" xxx -->
 ##### AWS CLI job definition
 
-1. Download [datadog-agent-aws-batch-ecs-fargate.json][42]. **Note**: If you are using Internet Explorer, this may download as a gzip file, which contains a JSON file.
+1. Download [datadog-agent-aws-batch-ecs-fargate.json][61]. **Note**: If you are using Internet Explorer, this may download as a gzip file, which contains a JSON file.
 <!-- partial
 {{< site-region region="us,us3,us5,eu,ap1,gov" >}}
 2. Update the JSON file with a `JOB_DEFINITION_NAME`, your [Datadog API Key][41], and the appropriate `DD_SITE` ({{< region-param key="dd_site" code="true" >}}). **Note**: The environment variable `ECS_FARGATE` is already set to `"true"`.
@@ -1000,3 +1000,4 @@ Need help? Contact [Datadog support][18].
 [58]: https://www.datadoghq.com/blog/monitor-fargate-processes/
 [59]: https://docs.aws.amazon.com/batch/latest/userguide/create-compute-environment.html
 [60]: https://docs.aws.amazon.com/batch/latest/userguide/create-job-queue-fargate.html
+[61]: https://docs.datadoghq.com/resources/json/datadog-agent-aws-batch-ecs-fargate.json
