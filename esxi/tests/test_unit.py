@@ -1205,8 +1205,6 @@ def test_use_configured_hostname(vcsim_instance, dd_run_check, aggregator, datad
         '127.0.0.1:8989',
         {
             'esxi': [
-                'esxi_datacenter:dc2',
-                'esxi_folder:folder_1',
                 'esxi_type:host',
                 'esxi_url:127.0.0.1:8989',
             ]
