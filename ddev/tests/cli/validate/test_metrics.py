@@ -738,8 +738,9 @@ metadata_integration.metric_b,gauge,,,,My metric B,0,metadata_integration,,,
     )
 
 
-def test_passing_fail_experimental_column(fake_repo, ddev, helpers):
-    # Testing to ensure that experimental header sample_tags is allowed
+def test_passing_invalid_experimental_column(fake_repo, ddev, helpers):
+    # Testing to ensure that experimental header sample_tags is allowed. But if other tags are added,
+    # it will be flagged as an error
     write_file(
         fake_repo.path / "metadata_integration",
         'metadata.csv',
