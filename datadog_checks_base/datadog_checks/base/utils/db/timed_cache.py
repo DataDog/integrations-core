@@ -1,49 +1,55 @@
 # (C) Datadog, Inc. 2024-present
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
-import threading
+import time
 
 
 class TimedCache:
-    """A simple cache that clears itself every interval seconds."""
+    """
+    A cache that expires after a given TTL. The cache can be used as a dictionary.
 
-    def __init__(self, interval):
-        """
-        Initialize the cache with an interval in seconds.
+    Note: The cache DOES NOT automatically clear itself.
+    It is up to the user to check if the cache is expired and clear it if needed.
+    This is to avoid clearing the cache while it is being used in the middle of a check run.
+    """
 
-        :param interval (int): The interval in seconds to clear the cache.
-        """
+    def __init__(self, ttl):
+        """Initialize the cache with a TTL for the entire cache."""
         self.__cache = {}
-        self.__interval = interval
-        self.__timer = threading.Timer(self.__interval, self.__clear_cache)
-        self.__timer.start()
+        self.__ttl = ttl
+        self.__last_refresh_time = time.time()
 
     def __setitem__(self, key, value):
-        """Set an item in the cache like dict[key] = value."""
+        """Set an item in the cache."""
         self.__cache[key] = value
 
     def __getitem__(self, key):
-        """Get an item from the cache like value = dict[key]."""
+        """
+        Get an item from the cache.
+        Raise KeyError if the key is not found.
+        """
         return self.__cache[key]
 
     def __delitem__(self, key):
-        """Delete an item from the cache like del dict[key]."""
+        """Delete an item from the cache."""
         del self.__cache[key]
 
-    def __bool__(self):
-        """Return True if the cache has any items, False otherwise."""
-        return bool(self.__cache)
-
     def get(self, key, default=None):
-        """Retrieve an item from the cache, returning default if key is not found."""
-        return self.__cache.get(key, default)
+        """Retrieve an item from the cache, returning default if the key is not found."""
+        try:
+            return self.__getitem__(key)
+        except KeyError:
+            return default
 
-    def __clear_cache(self):
-        """Clear the cache and reset the timer."""
-        self.__cache.clear()
-        self.__timer = threading.Timer(self.__interval, self.__clear_cache)
-        self.__timer.start()
+    def is_expired(self):
+        """Check if the cache is expired based on the TTL."""
+        return (time.time() - self.__last_refresh_time) >= self.__ttl
 
-    def stop(self):
-        """Stop the timer if it's still running."""
-        self.__timer.cancel()
+    def clear(self):
+        """Clear the entire cache and reset the last refresh time."""
+        self.__cache = {}
+        self.__last_refresh_time = time.time()
+
+    def __bool__(self):
+        """Return True if the cache has any items and is not expired, False otherwise."""
+        return bool(self.__cache) and not self.is_expired()
