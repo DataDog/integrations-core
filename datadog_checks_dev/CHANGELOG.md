@@ -2,6 +2,12 @@
 
 <!-- towncrier release notes start -->
 
+## 32.1.1 / 2024-05-09
+
+***Fixed***:
+
+* Fix trailing `,` in manifest.json generation template ([#17538](https://github.com/DataDog/integrations-core/pull/17538))
+
 ## 32.1.0 / 2024-05-03
 
 ***Added***:

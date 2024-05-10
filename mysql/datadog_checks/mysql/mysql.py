@@ -282,14 +282,18 @@ class MySql(AgentCheck):
             try:
                 self._conn = db
 
+                # Update tag set with relevant information
+                if self._get_is_aurora(db):
+                    aurora_tags = self._get_runtime_aurora_tags(db)
+                    self.tags = tags + aurora_tags
+                    self._non_internal_tags = self._set_database_instance_tags(aurora_tags)
+
                 # version collection
                 self.version = get_version(db)
                 self._send_metadata()
                 self._send_database_instance_metadata()
 
                 self.is_mariadb = self.version.flavor == "MariaDB"
-                if self._get_is_aurora(db):
-                    tags = tags + self._get_runtime_aurora_tags(db)
 
                 self._check_database_configuration(db)
 
@@ -322,6 +326,13 @@ class MySql(AgentCheck):
             finally:
                 self._conn = None
                 self._report_warnings()
+
+    # _set_database_instance_tags sets the tag list for the `database_instance` resource
+    # based on metadata that is collected on check start. This ensures that we see tags such as
+    # `replication_role` appear on the database_instance as a host tag.
+    def _set_database_instance_tags(self, aurora_tags):
+        tags = copy.deepcopy(self._non_internal_tags)
+        return list(set(tags) | set(aurora_tags))
 
     def cancel(self):
         self._statement_samples.cancel()
