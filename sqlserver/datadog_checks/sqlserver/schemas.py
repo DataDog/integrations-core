@@ -6,7 +6,7 @@ except ImportError:
 import copy
 import json
 import time
-import pdb
+
 from datadog_checks.base.utils.db.utils import default_json_event_encoding
 from datadog_checks.base.utils.tracking import tracked_method
 from datadog_checks.sqlserver.const import (
@@ -74,10 +74,17 @@ class SubmitData:
 
     def exceeded_total_columns_number(self):
         return self._total_columns_count > self.MAX_TOTAL_COLUMN_COUNT
+    
+    def truncate(self, json_event):
+        max_length = 1000
+        if len(json_event) > max_length:
+            return json_event[:max_length] + " ... (truncated)"
+        else:
+            return json_event
 
     #NOTE: DB with no schemas is never submitted
     def submit(self):
-        if not bool(self.db_to_schemas):
+        if not self.db_to_schemas:
             return
         self._columns_count = 0
         event = {**self._base_event, "metadata": [], "timestamp": time.time() * 1000}
@@ -90,7 +97,7 @@ class SubmitData:
                 db_info = self.db_info[db]
             event["metadata"] = event["metadata"] + [{**(db_info), "schemas": list(schemas_by_id.values())}]
         json_event = json.dumps(event, default=default_json_event_encoding)
-        self._log.debug("Reporting the following payload for schema collection: {}".format(json_event))
+        self._log.debug("Reporting the following payload for schema collection: {}".format(self.truncate(json_event)))
         self._submit_to_agent_queue(json_event)
         self.db_to_schemas = {}
 
@@ -202,6 +209,7 @@ class Schemas:
         db_infos = self._query_db_informations(databases)
         self._dataSubmitter.store_db_infos(db_infos)
         # returns if to stop, True means stop iterating.
+        @tracked_method(agent_check_getter=agent_check_getter)
         def fetch_schema_data(cursor, db_name):
             schemas = self._query_schema_information(cursor)
             for schema in schemas:
