@@ -876,7 +876,16 @@ partial -->
 
 3. Ensure your application is running in the same task or job definition as the Datadog Agent container.
 
+### Process collection
 
+<div class="alert alert-warning">You can view your ECS Fargate processes in Datadog. To see their relationship to ECS Fargate containers, use the Datadog Agent v7.50.0 or later.</div>
+
+You can monitor processes in ECS Fargate in Datadog by using the [Live Processes page][56]. To enable process collection, add the [`PidMode` parameter][57] in the Task Definition and set it to `task` as follows:
+
+```text
+"pidMode": "task"
+```
+To filter processes by ECS, use the `AWS Fargate` Containers facet or enter `fargate:ecs` in the search query on the Live Processes page.
 
 ## Out-of-the-box tags
 
