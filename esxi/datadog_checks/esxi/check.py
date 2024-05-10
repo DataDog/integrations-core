@@ -239,11 +239,8 @@ class EsxiCheck(AgentCheck):
         metric_ids = [vim.PerformanceManager.MetricId(counterId=counter, instance="") for counter in counter_ids]
         return counter_keys_and_names, metric_ids
 
-    def collect_metrics_for_entity(self, metric_ids, counter_keys_and_names, entity, entity_name, metric_tags):
+    def collect_metrics_for_entity(self, metric_ids, counter_keys_and_names, entity, hostname, metric_tags):
         resource_type = type(entity)
-        hostname = entity_name
-        if self.use_configured_hostname and resource_type == HOST_RESOURCE:
-            hostname = self.host
         resource_name = RESOURCE_TYPE_TO_NAME[resource_type]
         for metric_id in metric_ids:
             metric_name = counter_keys_and_names.get(metric_id.counterId)
@@ -392,6 +389,8 @@ class EsxiCheck(AgentCheck):
         }
 
         for resource_obj, resource_props in all_resources_with_metrics.items():
+            resource_type = type(resource_obj)
+            resource_type_name = RESOURCE_TYPE_TO_NAME[resource_type]
 
             if not is_resource_collected_by_filters(resource_obj, all_resources_with_metrics, self.resource_filters):
                 self.log.debug(
@@ -401,16 +400,18 @@ class EsxiCheck(AgentCheck):
 
             hostname = resource_props.get("name")
 
-            resource_type = RESOURCE_TYPE_TO_NAME[type(resource_obj)]
-            if resource_type == "vm" and self.use_guest_hostname:
+            if resource_type == VM_RESOURCE and self.use_guest_hostname:
                 hostname = resource_props.get("guest.hostName", hostname)
+
+            if resource_type == HOST_RESOURCE and self.use_configured_hostname:
+                hostname = self.host
 
             self.log.debug("Collect metrics and host tags for hostname: %s, object: %s", hostname, resource_obj)
 
             tags = []
             parent = resource_props.get('parent')
 
-            if resource_type == "vm":
+            if resource_type == VM_RESOURCE:
                 runtime_host = resource_props.get('runtime.host')
                 runtime_host_props = {}
                 if runtime_host:
@@ -434,7 +435,7 @@ class EsxiCheck(AgentCheck):
             if parent is not None:
                 tags.extend(get_tags_recursively(parent, resource_map))
 
-            tags.append('esxi_type:{}'.format(resource_type))
+            tags.append('esxi_type:{}'.format(resource_type_name))
 
             metric_tags = self.tags
             if self.excluded_host_tags:
@@ -448,7 +449,7 @@ class EsxiCheck(AgentCheck):
             else:
                 self.log.debug("No host name found for %s; skipping external tag submission", resource_obj)
 
-            self.count(f"{resource_type}.count", 1, tags=tags, hostname=None)
+            self.count(f"{resource_type_name}.count", 1, tags=tags, hostname=None)
 
             counter_keys_and_names, metric_ids = self.get_available_metric_ids_for_entity(resource_obj)
             self.collect_metrics_for_entity(metric_ids, counter_keys_and_names, resource_obj, hostname, metric_tags)

@@ -1201,7 +1201,7 @@ def test_vm_metrics_filters(vcsim_instance, dd_run_check, metric_filters, expect
 
 
 @pytest.mark.usefixtures("service_instance")
-def test_use_configured_hostname(vcsim_instance, dd_run_check, aggregator):
+def test_use_configured_hostname(vcsim_instance, dd_run_check, aggregator, datadog_agent):
     instance = copy.deepcopy(vcsim_instance)
     instance['use_configured_hostname'] = True
     check = EsxiCheck('esxi', {}, [instance])
@@ -1211,3 +1211,15 @@ def test_use_configured_hostname(vcsim_instance, dd_run_check, aggregator):
     aggregator.assert_metric("esxi.cpu.usage.avg", value=26, tags=base_tags, hostname="127.0.0.1:8989")
     aggregator.assert_metric("esxi.mem.granted.avg", value=80, tags=base_tags, hostname="127.0.0.1:8989")
     aggregator.assert_metric("esxi.host.can_connect", 1, count=1, tags=base_tags)
+
+    datadog_agent.assert_external_tags(
+        '127.0.0.1:8989',
+        {
+            'esxi': [
+                'esxi_datacenter:dc2',
+                'esxi_folder:folder_1',
+                'esxi_type:host',
+                'esxi_url:127.0.0.1:8989',
+            ]
+        },
+    )
