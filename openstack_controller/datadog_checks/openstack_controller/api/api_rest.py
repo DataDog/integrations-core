@@ -430,13 +430,13 @@ class ApiRest(Api):
         return self.make_paginated_request(url, 'nodes', 'uuid', params=params)
 
     def get_baremetal_portgroups(self, node_id):
-        response = self.http.get(
+        return self.make_paginated_request(
             '{}/v1/nodes/{}/portgroups/detail'.format(
                 self._catalog.get_endpoint_by_type(Component.Types.BAREMETAL.value), node_id
-            )
+            ),
+            'portgroups',
+            'uuid',
         )
-        response.raise_for_status()
-        return response.json().get('portgroups', [])
 
     def get_baremetal_ports(self):
         return self.make_paginated_request(
