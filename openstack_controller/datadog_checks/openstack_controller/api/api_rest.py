@@ -480,6 +480,7 @@ class ApiRest(Api):
                 "Ironic microversion is below 1.52 and set to %s, cannot collect allocations",
                 self.config.ironic_microversion,
             )
+            return []
         return self.make_paginated_request(
             '{}/v1/allocations'.format(self._catalog.get_endpoint_by_type(Component.Types.BAREMETAL.value)),
             'allocations',

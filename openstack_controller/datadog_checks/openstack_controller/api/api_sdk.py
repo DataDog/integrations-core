@@ -301,6 +301,7 @@ class ApiSdk(Api):
                 "Ironic microversion is below 1.52 and set to %s, cannot collect allocations",
                 self.config.ironic_microversion,
             )
+            return []
         return [
             allocation.to_dict(original_names=True)
             for allocation in self.call_paginated_api(

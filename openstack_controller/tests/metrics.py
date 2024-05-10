@@ -4550,7 +4550,7 @@ PORT_METRICS_IRONIC_MICROVERSION_DEFAULT = [
     },
 ]
 
-PORTGROUPS_METRICS_IRONIC_MICROVERSION_1_80 = [
+PORTGROUPS_METRICS_IRONIC = [
     {
         'name': 'openstack.ironic.node.portgroup.count',
         'count': 1,

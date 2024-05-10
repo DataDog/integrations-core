@@ -23,7 +23,7 @@ from tests.metrics import (
     NODES_METRICS_IRONIC_MICROVERSION_1_80,
     NODES_METRICS_IRONIC_MICROVERSION_DEFAULT,
     PORT_METRICS_IRONIC_MICROVERSION_DEFAULT,
-    PORTGROUPS_METRICS_IRONIC_MICROVERSION_1_80,
+    PORTGROUPS_METRICS_IRONIC,
     VOLUME_CONNECTOR_METRICS_IRONIC_MICROVERSION_1_80,
     VOLUME_TARGET_METRICS_IRONIC_MICROVERSION_1_80,
 )
@@ -273,8 +273,8 @@ def test_ports_pagination(
             args_list.count(('http://127.0.0.1:6385/baremetal/v1/ports/detail', paginated_limit)) == expected_api_calls
         )
     else:
-        assert connection_baremetal.ports.call_count == 1
-        assert connection_baremetal.ports.call_args_list.count(mock.call(limit=paginated_limit)) == 1
+        assert connection_baremetal.ports.call_count == expected_api_calls
+        assert connection_baremetal.ports.call_args_list.count(mock.call(limit=paginated_limit)) == expected_api_calls
     for metric in PORT_METRICS_IRONIC_MICROVERSION_DEFAULT:
         aggregator.assert_metric(
             metric['name'],
@@ -290,12 +290,12 @@ def test_ports_pagination(
     [
         pytest.param(
             configs.REST_IRONIC_MICROVERSION_1_80,
-            PORTGROUPS_METRICS_IRONIC_MICROVERSION_1_80,
+            PORTGROUPS_METRICS_IRONIC,
             id='api rest microversion 1.80',
         ),
         pytest.param(
             configs.SDK_IRONIC_MICROVERSION_1_80,
-            PORTGROUPS_METRICS_IRONIC_MICROVERSION_1_80,
+            PORTGROUPS_METRICS_IRONIC,
             id='api sdk microversion 1.80',
         ),
     ],
@@ -383,9 +383,9 @@ def test_portgroups_pagination(
                 count += 1
         assert count == expected_api_calls
     else:
-        assert connection_baremetal.ports.call_count == 1
-        assert connection_baremetal.ports.call_args_list.count(mock.call(limit=paginated_limit)) == 1
-    for metric in PORTGROUPS_METRICS_IRONIC_MICROVERSION_1_80:
+        assert connection_baremetal.ports.call_count == expected_api_calls
+        assert connection_baremetal.ports.call_args_list.count(mock.call(limit=paginated_limit)) == expected_api_calls
+    for metric in PORTGROUPS_METRICS_IRONIC:
         aggregator.assert_metric(
             metric['name'],
             count=metric['count'],
@@ -508,6 +508,26 @@ def test_allocations_metrics(aggregator, check, dd_run_check, metrics):
 
 
 @pytest.mark.parametrize(
+    ('instance'),
+    [
+        pytest.param(
+            configs.REST_IRONIC_MICROVERSION_1_10,
+            id='api rest microversion default',
+        ),
+        pytest.param(
+            configs.SDK_IRONIC_MICROVERSION_1_10,
+            id='api sdk microversion default',
+        ),
+    ],
+)
+@pytest.mark.usefixtures('mock_http_get', 'mock_http_post', 'openstack_connection')
+def test_allocations_low_microversion(aggregator, check, dd_run_check, caplog):
+    caplog.set_level(logging.INFO)
+    dd_run_check(check)
+    assert 'Ironic microversion is below 1.52 and set to 1.10, cannot collect allocations' in caplog.text
+
+
+@pytest.mark.parametrize(
     ('connection_baremetal', 'instance', 'paginated_limit', 'api_type', 'expected_api_calls'),
     [
         pytest.param(
@@ -572,8 +592,11 @@ def test_allocation_pagination(
             args_list.count(('http://127.0.0.1:6385/baremetal/v1/allocations', paginated_limit)) == expected_api_calls
         )
     else:
-        assert connection_baremetal.allocations.call_count == 1
-        assert connection_baremetal.allocations.call_args_list.count(mock.call(limit=paginated_limit)) == 1
+        assert connection_baremetal.allocations.call_count == expected_api_calls
+        assert (
+            connection_baremetal.allocations.call_args_list.count(mock.call(limit=paginated_limit))
+            == expected_api_calls
+        )
     for metric in ALLOCATIONS_METRICS_IRONIC_MICROVERSION_1_80:
         aggregator.assert_metric(
             metric['name'],
@@ -915,8 +938,11 @@ def test_volume_connector_pagination(
             == expected_api_calls
         )
     else:
-        assert connection_baremetal.volume_connectors.call_count == 1
-        assert connection_baremetal.volume_connectors.call_args_list.count(mock.call(limit=paginated_limit)) == 1
+        assert connection_baremetal.volume_connectors.call_count == expected_api_calls
+        assert (
+            connection_baremetal.volume_connectors.call_args_list.count(mock.call(limit=paginated_limit))
+            == expected_api_calls
+        )
     for metric in VOLUME_CONNECTOR_METRICS_IRONIC_MICROVERSION_1_80:
         aggregator.assert_metric(
             metric['name'],
@@ -993,8 +1019,11 @@ def test_volume_target_pagination(
             == expected_api_calls
         )
     else:
-        assert connection_baremetal.volume_connectors.call_count == 1
-        assert connection_baremetal.volume_connectors.call_args_list.count(mock.call(limit=paginated_limit)) == 1
+        assert connection_baremetal.volume_connectors.call_count == expected_api_calls
+        assert (
+            connection_baremetal.volume_connectors.call_args_list.count(mock.call(limit=paginated_limit))
+            == expected_api_calls
+        )
     for metric in VOLUME_TARGET_METRICS_IRONIC_MICROVERSION_1_80:
         aggregator.assert_metric(
             metric['name'],
