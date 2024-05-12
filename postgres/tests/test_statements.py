@@ -86,8 +86,6 @@ def test_statement_metrics_multiple_pgss_rows_single_query_signature(
     # don't need samples for this test
     dbm_instance['query_samples'] = {'enabled': False}
     dbm_instance['query_activity'] = {'enabled': False}
-    # very low collection interval for test purposes
-    dbm_instance['query_metrics'] = {'enabled': True, 'run_sync': True, 'collection_interval': 0.1}
     connections = {}
 
     def normalize_query(q):
@@ -144,7 +142,7 @@ def test_statement_metrics_multiple_pgss_rows_single_query_signature(
         run_one_check(check, dbm_instance, cancel=False)
         aggregator.reset()
 
-        # Call other query
+        # Call other query that maps to same query signature
         _run_query(1)
         run_one_check(check, dbm_instance, cancel=False)
 

@@ -459,33 +459,33 @@ class PostgresStatementMetrics(DBMAsyncJob):
             self._log.warning("Failed to query for pg_stat_statements count: %s", e)
 
     # _apply_deltas expects normalized rows before any merging of duplicates.
-    # It takes the partial rows from pg_stat_statements and aggregates metric values
-    # for queryids that map to the same query_signature
-    def _apply_deltas(self, rows, metrics):
+    # It takes the incremental pg_stat_statements rows and constructs the full set of rows
+    # by adding the existing values in the baseline_metrics cache. This is equivalent to
+    # fetching the full set of rows from pg_stat_statements, but we avoid paying the price of
+    # actually querying the rows.
+    def _apply_deltas(self, rows):
+
         # Apply called queries to baseline_metrics
         for row in rows:
             query_signature = row['query_signature']
             queryid = row['queryid']
+            baseline_row = copy.copy(row)
             if query_signature not in self._baseline_metrics:
-                self._baseline_metrics[query_signature] = {queryid: copy.copy(row)}
+                self._baseline_metrics[query_signature] = {queryid: baseline_row}
             else:
-                self._baseline_metrics[query_signature][queryid] = copy.copy(row)
+                self._baseline_metrics[query_signature][queryid] = baseline_row
 
-        # Aggregate multiple queryids into one row per query_signature
-        aggregated_rows = []
+        # Apply query text, so it doesn't have to be cached.
+        query_text = {row['query_signature']: row['query'] for row in rows}
+        applied_rows = []
         for query_signature, query_sig_metrics in self._baseline_metrics.items():
-            aggregated_row = {}
             for queryid, row in query_sig_metrics.items():
-                if 'query_signature' not in aggregated_row:
-                    aggregated_row = copy.copy(row)
+                if query_signature in query_text:
+                    applied_rows.append({**row, 'query': query_text[query_signature]})
                 else:
-                    for metric in metrics:
-                        if metric in row:
-                            aggregated_row[metric] += row[metric]
+                    applied_rows.append(row)
 
-            aggregated_rows.append(aggregated_row)
-
-        return aggregated_rows
+        return applied_rows
 
     # To prevent the baseline metrics cache from growing indefinitely (as can happen) because of
     # pg_stat_statements eviction), we clear it out periodically to force a full refetch.
@@ -503,12 +503,13 @@ class PostgresStatementMetrics(DBMAsyncJob):
         self._check_baseline_metrics_expiry()
         rows = self._load_pg_stat_statements()
         rows = self._normalize_queries(rows)
+        rows = self._apply_deltas(rows)
+
         if not rows:
             return []
 
         available_columns = set(rows[0].keys())
         metric_columns = available_columns & PG_STAT_STATEMENTS_METRICS_COLUMNS
-        rows = self._apply_deltas(rows, metric_columns)
 
         rows = self._state.compute_derivative_rows(rows, metric_columns, key=_row_key)
         self._check.gauge(
