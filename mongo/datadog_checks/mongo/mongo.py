@@ -187,7 +187,7 @@ class MongoDb(AgentCheck):
             or isinstance(
                 self.api_client.deployment_type, ReplicaSetDeployment
             )  # Replica set members and state can change
-            or isinstance(self.api_client.deployment_type, MongosDeployment)  # Mongos shards can change
+            or isinstance(self.api_client.deployment_type, MongosDeployment)  # Mongos shard map can change
         ):
             deployment_type_before = self.api_client.deployment_type
             self.log.debug("Refreshing deployment type")
@@ -196,7 +196,8 @@ class MongoDb(AgentCheck):
                 self.log.debug(
                     "Deployment type has changed from %s to %s", deployment_type_before, self.api_client.deployment_type
                 )
-                # database_instance metadata is tied to the deployment type, so we need to reset it when the deployment type changes
+                # database_instance metadata is tied to the deployment type
+                # so we need to reset it when the deployment type changes
                 # this way new metadata will be emitted
                 self._database_instance_emitted.clear()
 
@@ -212,8 +213,7 @@ class MongoDb(AgentCheck):
     def _get_tags(self, include_deployment_tags=False, include_internal_resource_tags=False):
         tags = deepcopy(self._config.metric_tags)
         if include_deployment_tags:
-            deployment = self.api_client.deployment_type
-            tags.extend(deployment.deployment_tags)
+            tags.extend(self.api_client.deployment_type.deployment_tags)
         if include_internal_resource_tags:
             tags.extend(self.internal_resource_tags)
         return tags
