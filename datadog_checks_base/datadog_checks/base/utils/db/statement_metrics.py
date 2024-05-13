@@ -83,6 +83,15 @@ class StatementMetrics:
             if all(diffed_row[k] == 0 for k in metric_columns):
                 continue
 
+            if diffed_row['calls'] > 10000:
+                print("[AMW] cur queryid: " + str(row['queryid']))
+                print("[AMW] prev queryid: " + str(prev['queryid']))
+                print("[AMW] cur calls: " + str(row['calls']))
+                print("[AMW] prev calls: " + str(prev['calls']))
+                print("[AMW] query: " + row['query'])
+                print("[AMW] query_signature: " + row['query_signature'])
+                print("")
+
             result.append(diffed_row)
 
         self._previous_statements.clear()
@@ -114,5 +123,11 @@ def _merge_duplicate_rows(rows, metrics, key):
                     dropped_metrics.add(metric)
         else:
             queries_by_key[query_key] = row
+
+        if row['query_signature'] in ['7bf8f124e953d206', '524374cff025d947', 'f944c89168db9394']:
+            print("[AMW] merging duplicates - to merge: " + str(dict((k, row[k]) for k in ['queryid', 'query_signature', 'calls', 'query'])))
+            print("[AMW] merging duplicates - dest:     " + str(dict((k, queries_by_key[query_key][k]) for k in ['queryid', 'query_signature', 'calls', 'query'])))
+            print("[AMW] merged calls: " + str(queries_by_key[query_key]['calls']) + " query: " + queries_by_key[query_key]['query'])
+            print("")
 
     return queries_by_key, dropped_metrics
