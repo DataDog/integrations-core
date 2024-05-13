@@ -32,8 +32,8 @@
         "creates_events": false
       },
       "metrics": {
-        "prefix": "kubernetes_ca.",
-        "check": "kubernetes_ca.cluster_autoscaler.node.count",
+        "prefix": "kubernetes_cluster_autoscaler.",
+        "check": "kubernetes_cluster_autoscaler.node.count",
         "metadata_path": "metadata.csv"
       },
       "service_checks": {
@@ -41,7 +41,7 @@
       }
     },
     "dashboards": {"kubernetes_cluster_autoscaler_overview": "assets/dashboards/kubernetes_cluster_autoscaler_overview.json"},
-    "logs": {"source": "kubernetes_ca.cluster_autoscaler"}
+    "logs": {"source": "kubernetes_cluster_autoscaler"}
   },
   "author": {
     "support_email": "help@datadoghq.com",
