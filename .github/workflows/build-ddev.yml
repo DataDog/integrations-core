@@ -560,8 +560,9 @@ jobs:
     - name: Upload installer
       uses: actions/upload-artifact@v4
       with:
-        name: installers
+        name: installers-${{ runner.os }}
         path: ddev/signed/${{ steps.pkg.outputs.path }}
+        if-no-files-found: error
 
   publish:
     name: Publish release
