@@ -306,8 +306,9 @@ jobs:
     - name: Download staged standalone binaries
       uses: actions/download-artifact@v4
       with:
-        name: staged-standalone-${{ runner.os }}-*
+        pattern: staged-standalone-${{ runner.os }}-*
         path: ddev/archives
+        merge-multiple: true
 
     - name: Extract staged standalone binaries
       run: ${{ steps.script-extract.outputs.script }}
@@ -328,8 +329,9 @@ jobs:
     - name: Download staged managed binaries
       uses: actions/download-artifact@v4
       with:
-        name: staged-managed-${{ runner.os }}-*
+        pattern: staged-managed-${{ runner.os }}-*
         path: ddev/archives
+        merge-multiple: true
 
     - name: Extract staged managed binaries
       run: ${{ steps.script-extract.outputs.script }}
@@ -475,8 +477,9 @@ jobs:
     - name: Download staged standalone binaries
       uses: actions/download-artifact@v4
       with:
-        name: staged-standalone-${{ runner.os }}-*
+        pattern: staged-standalone-${{ runner.os }}-*
         path: ddev/archives
+        merge-multiple: true
 
     - name: Extract staged standalone binaries
       run: ${{ steps.script-extract.outputs.script }}
@@ -509,8 +512,9 @@ jobs:
     - name: Download staged managed binaries
       uses: actions/download-artifact@v4
       with:
-        name: staged-managed-${{ runner.os }}-*
+        pattern: staged-managed-${{ runner.os }}-*
         path: ddev/archives
+        merge-multiple: true
 
     - name: Extract staged managed binaries
       run: ${{ steps.script-extract.outputs.script }}
@@ -610,7 +614,6 @@ jobs:
       uses: actions/download-artifact@v4
       with:
         pattern: installers-*
-        name: installers
         path: installers
         merge_multiple: true
 
