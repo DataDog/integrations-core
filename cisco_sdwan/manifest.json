@@ -22,7 +22,7 @@
     "integration": {
       "auto_install": true,
       "source_type_id": 12300976,
-      "source_type_name": "Cisco SD-WAN",
+      "source_type_name": "Cisco SDWAN",
       "configuration": {},
       "events": {
         "creates_events": false
