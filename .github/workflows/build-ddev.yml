@@ -377,36 +377,14 @@ jobs:
     - name: Install PyOxidizer ${{ env.PYOXIDIZER_VERSION }}
       run: pip install pyoxidizer==${{ env.PYOXIDIZER_VERSION }}
 
-    # TODO: Use the next official release after 0.22.0 by removing these 2 blocks, uncommenting
-    # the following one, and changing the artifact name to reflect the next version. See:
-    # https://github.com/indygreg/apple-platform-rs/issues/82
-    #
-    # We use the artifact from the latest scheduled nightly job because installing
-    # with Cargo from scratch takes ~10 minutes
     - name: Install rcodesign
-      uses: dawidd6/action-download-artifact@v4
-      with:
-        repo: indygreg/apple-platform-rs
-        workflow: rcodesign.yml
-        event: schedule
-        workflow_conclusion: success
-        name: exe-rcodesign-x86_64-apple-darwin
-        path: /usr/local/bin
-        search_artifacts: true
-        check_artifacts: true
-        github_token: ${{ secrets.GITHUB_TOKEN }}
-
-    - name: Finalize rcodesign
-      run: chmod +x /usr/local/bin/rcodesign
-
-    # - name: Install rcodesign
-    #   env:
-    #     ARCHIVE_NAME: "apple-codesign-0.22.0-x86_64-apple-darwin"
-    #   run: >-
-    #     curl -L
-    #     "https://github.com/indygreg/apple-platform-rs/releases/download/apple-codesign%2F0.22.0/$ARCHIVE_NAME.tar.gz"
-    #     |
-    #     tar --strip-components=1 -xzf - -C /usr/local/bin "$ARCHIVE_NAME/rcodesign"
+      env:
+        ARCHIVE_NAME: "apple-codesign-0.27.0-x86_64-apple-darwin"
+      run: >-
+        curl -L
+        "https://github.com/indygreg/apple-platform-rs/releases/download/apple-codesign%2F0.27.0/$ARCHIVE_NAME.tar.gz"
+        |
+        tar --strip-components=1 -xzf - -C /usr/local/bin "$ARCHIVE_NAME/rcodesign"
 
     - name: Write credentials
       env:
