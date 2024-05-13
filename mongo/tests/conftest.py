@@ -125,6 +125,13 @@ def instance_integration(instance_custom_queries):
     return instance
 
 
+@pytest.fixture
+def instance_integration_cluster(instance_integration):
+    instance = copy.deepcopy(instance_integration)
+    instance["cluster_name"] = "my_cluster"
+    return instance
+
+
 @pytest.fixture(scope='session', autouse=True)
 def mock_local_tls_dns():
     with mock_local(HOSTNAME_TO_PORT_MAPPING):

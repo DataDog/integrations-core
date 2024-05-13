@@ -8,7 +8,7 @@
     "configuration": "README.md#Setup",
     "support": "README.md#Support",
     "changelog": "CHANGELOG.md",
-    "description": "Argo Rollouts Integration",
+    "description": "Monitor the health and performance of Argo Rollouts",
     "title": "Argo Rollouts",
     "media": [],
     "classifier_tags": [

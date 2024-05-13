@@ -424,6 +424,30 @@ admission_webhooks_library_injection_attempts{injected="true",language="java"} 4
 # HELP admission_webhooks_library_injection_errors Number of library injection failures by language
 # TYPE admission_webhooks_library_injection_errors counter
 admission_webhooks_library_injection_errors{language="java"} 1
+# HELP admission_webhooks_cws_exec_instrumentation_attempts Distribution of exec requests instrumentation attempts by CWS Instrumentation mode
+# TYPE admission_webhooks_cws_exec_instrumentation_attempts histogram
+admission_webhooks_cws_exec_instrumentation_attempts_bucket{injected="false",mode="init_container",reason="already_instrumented",le="0"} 0
+admission_webhooks_cws_exec_instrumentation_attempts_bucket{injected="false",mode="init_container",reason="already_instrumented",le="+Inf"} 1
+admission_webhooks_cws_exec_instrumentation_attempts_sum{injected="false",mode="init_container",reason="already_instrumented"} 1
+admission_webhooks_cws_exec_instrumentation_attempts_count{injected="false",mode="init_container",reason="already_instrumented"} 1
+admission_webhooks_cws_exec_instrumentation_attempts_bucket{injected="false",mode="init_container",reason="pod_not_instrumented",le="0"} 0
+admission_webhooks_cws_exec_instrumentation_attempts_bucket{injected="false",mode="init_container",reason="pod_not_instrumented",le="+Inf"} 2
+admission_webhooks_cws_exec_instrumentation_attempts_sum{injected="false",mode="init_container",reason="pod_not_instrumented"} 2
+admission_webhooks_cws_exec_instrumentation_attempts_count{injected="false",mode="init_container",reason="pod_not_instrumented"} 2
+admission_webhooks_cws_exec_instrumentation_attempts_bucket{injected="true",mode="init_container",reason="",le="0"} 0
+admission_webhooks_cws_exec_instrumentation_attempts_bucket{injected="true",mode="init_container",reason="",le="+Inf"} 1
+admission_webhooks_cws_exec_instrumentation_attempts_sum{injected="true",mode="init_container",reason=""} 1
+admission_webhooks_cws_exec_instrumentation_attempts_count{injected="true",mode="init_container",reason=""} 1
+# HELP admission_webhooks_cws_pod_instrumentation_attempts Distribution of pod requests instrumentation attempts by CWS Instrumentation mode
+# TYPE admission_webhooks_cws_pod_instrumentation_attempts histogram
+admission_webhooks_cws_pod_instrumentation_attempts_bucket{injected="false",mode="init_container",reason="already_instrumented",le="0"} 0
+admission_webhooks_cws_pod_instrumentation_attempts_bucket{injected="false",mode="init_container",reason="already_instrumented",le="+Inf"} 1
+admission_webhooks_cws_pod_instrumentation_attempts_sum{injected="false",mode="init_container",reason="already_instrumented"} 1
+admission_webhooks_cws_pod_instrumentation_attempts_count{injected="false",mode="init_container",reason="already_instrumented"} 1
+admission_webhooks_cws_pod_instrumentation_attempts_bucket{injected="true",mode="init_container",reason="",le="0"} 0
+admission_webhooks_cws_pod_instrumentation_attempts_bucket{injected="true",mode="init_container",reason="",le="+Inf"} 1
+admission_webhooks_cws_pod_instrumentation_attempts_sum{injected="true",mode="init_container",reason=""} 1
+admission_webhooks_cws_pod_instrumentation_attempts_count{injected="true",mode="init_container",reason=""} 1
 # HELP kubernetes_apiserver_emitted_events Number of events emitted by the check.
 # TYPE kubernetes_apiserver_emitted_events counter
 kubernetes_apiserver_emitted_events{kind="ConfigMap",type="Normal"} 7

@@ -129,12 +129,20 @@ class IdentityItem(BaseModel):
     users: Optional[bool] = None
 
 
+class Image(BaseModel):
+    model_config = ConfigDict(
+        arbitrary_types_allowed=True,
+        frozen=True,
+    )
+    members: Optional[bool] = None
+
+
 class ImageItem(BaseModel):
     model_config = ConfigDict(
         arbitrary_types_allowed=True,
         frozen=True,
     )
-    images: Optional[bool] = None
+    images: Optional[Union[bool, Image]] = None
 
 
 class IncludeItem3(BaseModel):

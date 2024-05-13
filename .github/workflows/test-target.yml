@@ -137,7 +137,7 @@ jobs:
 
     - name: Restore cache
       if: inputs.repo == 'core'
-      uses: actions/cache/restore@v3
+      uses: actions/cache/restore@v4
       with:
         path: ${{ runner.os == 'Windows' && '~\AppData\Local\pip\Cache' || runner.os == 'macOS' && '~/Library/Caches/pip' || '~/.cache/pip' }}
         key: >-
@@ -266,7 +266,7 @@ jobs:
 
     - name: Upload coverage data
       if: inputs.standard && !github.event.repository.private && always()
-      uses: codecov/codecov-action@v3
+      uses: codecov/codecov-action@v4
       with:
         files: "${{ inputs.target }}/coverage.xml"
         flags: "${{ inputs.target }}"

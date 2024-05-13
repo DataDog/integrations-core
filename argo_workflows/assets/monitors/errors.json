@@ -2,8 +2,8 @@
     "version": 2,
     "created_at": "2024-04-01",
     "last_updated_at": "2024-04-01",
-    "title": "New errors in Argo Workflows for host: {{host.name}}",
-    "description": "Notify your team when there are new errors in Argo Workflows.",
+    "title": "New errors detected in Argo Workflows",
+    "description": "This monitor will alert you of any new errors in the last 10 minutes coming from Argo Workflows.",
 	  "tags": [
 		    "integration:argo-workflows"
 	  ],
