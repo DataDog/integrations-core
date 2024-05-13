@@ -34,7 +34,7 @@ init_config:
 instances:
 
   -
-    ## @param use_legacy_check_version - boolean - optional - default: false
+    ## @param use_legacy_check_version - boolean - optional - default: true
     ## For backward compatibility reasons, it is possible to use a deprecated version of the Openstack Controller
     ## integration by setting this field to "true".
     #
