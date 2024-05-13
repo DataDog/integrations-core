@@ -7,12 +7,16 @@ class QueryCallsCache:
     def __init__(self):
         self.cache = {}
         self.next_cache = {}
+        self.called_queryids = []
+        self.next_called_queryids = set()
 
     def end_query_call_snapshot(self):
         """To prevent evicted statements from building up in the cache we
         replace the cache outright after each sampling of pg_stat_statements."""
         self.cache = self.next_cache
         self.next_cache = {}
+        self.called_queryids = self.next_called_queryids
+        self.next_called_queryids = set()
 
     def set_calls(self, queryid, calls):
         """Updates the cache of calls per query id.
@@ -34,5 +38,5 @@ class QueryCallsCache:
             calls_changed = True
 
         self.next_cache[queryid] = calls
-
-        return calls_changed
+        if calls_changed:
+            self.next_called_queryids.add(queryid)

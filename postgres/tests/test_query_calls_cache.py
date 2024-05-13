@@ -12,27 +12,28 @@ def test_statement_queryid_cache_same_calls_does_not_change():
     cache = QueryCallsCache()
     cache.set_calls(123, 1)
     cache.end_query_call_snapshot()
-    changed = cache.set_calls(123, 1)
+    cache.set_calls(123, 1)
+    cache.end_query_call_snapshot()
 
-    assert changed is False
+    assert cache.called_queryids == set()
 
 
 def test_statement_queryid_cache_multiple_calls_change():
     cache = QueryCallsCache()
     cache.set_calls(123, 1)
     cache.end_query_call_snapshot()
-    changed = cache.set_calls(123, 2)
+    cache.set_calls(123, 2)
 
-    assert changed is True
+    assert cache.called_queryids == {123}
 
 
 def test_statement_queryid_cache_after_pg_stat_statement_eviction():
     cache = QueryCallsCache()
     cache.set_calls(123, 100)
     cache.end_query_call_snapshot()
-    changed = cache.set_calls(123, 5)
+    cache.set_calls(123, 5)
 
-    assert changed is True
+    assert cache.called_queryids == {123}
 
 
 def test_statement_queryid_cache_snapshot_eviction():
