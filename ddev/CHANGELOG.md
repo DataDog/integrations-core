@@ -19,7 +19,7 @@
 * Add a command to create the release branch ([#16905](https://github.com/DataDog/integrations-core/pull/16905))
 * Do not return an error when running test with `changed` if no integrations were modified ([#17030](https://github.com/DataDog/integrations-core/pull/17030))
 * Enforce `metadata.csv` to be sorted by metric names in integrations-core ([#17176](https://github.com/DataDog/integrations-core/pull/17176))
-* Allow to stop all running environments at once ([#17215](https://github.com/DataDog/integrations-core/pull/17215))
+* Allow stopping all running environments at once ([#17215](https://github.com/DataDog/integrations-core/pull/17215))
 * Bump ruff to 0.3.3 ([#17244](https://github.com/DataDog/integrations-core/pull/17244))
 * Collect all metrics by default for the OpenMetrics integration in the serve payload script ([#17316](https://github.com/DataDog/integrations-core/pull/17316))
 * Add sample_tags to metadata validation ([#17521](https://github.com/DataDog/integrations-core/pull/17521))
