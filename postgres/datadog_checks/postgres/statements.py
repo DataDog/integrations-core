@@ -464,15 +464,6 @@ class PostgresStatementMetrics(DBMAsyncJob):
     # fetching the full set of rows from pg_stat_statements, but we avoid paying the price of
     # actually querying the rows.
     def _apply_deltas(self, rows):
-        print("[AMW] Baseline cache")
-        for query_sig, query_sig_metrics in self._baseline_metrics.items():
-            for queryid, baseline_row in query_sig_metrics.items():
-                if query_sig in ['7bf8f124e953d206', '524374cff025d947', 'f944c89168db9394']:
-                    print("[AMW] baseline - queryid: " + str(baseline_row['queryid']))
-                    print("[AMW] baseline - query: " + baseline_row['query'])
-                    print("[AMW] baseline - calls: " + str(baseline_row['calls']))
-                    
-        print("")
         # Apply called queries to baseline_metrics
         for row in rows:
             query_signature = row['query_signature']
