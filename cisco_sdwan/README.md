@@ -2,12 +2,11 @@
 
 ## Overview
 
-> This integration is currently in beta.
-
 The Cisco SD-WAN integration lets you monitor your Cisco SD-WAN environment within [Network Device Monitoring][1]. Gain comprehensive insights into the performance and health of your SD-WAN infrastructure, including sites, tunnels, and devices.
 
 ## Setup
 
+The Cisco SD-WAN NDM integration is currently in **Beta** and will not be billed until it is Generally Available.
 Follow the instructions below to install and configure this check for an Agent running on a host. For containerized environments, see the [Autodiscovery Integration Templates][3] for guidance on applying these instructions.
 
 ### Installation
