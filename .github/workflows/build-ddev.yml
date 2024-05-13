@@ -247,7 +247,7 @@ jobs:
       if: runner.os == 'Linux'
       uses: actions/upload-artifact@v4
       with:
-        name: standalone-${{ runner.os }}-${{ matrix.job.target }}
+        name: standalone-${{ matrix.job.target }}
         path: ddev/packaging/*
         if-no-files-found: error
 
@@ -353,8 +353,9 @@ jobs:
     - name: Upload installers
       uses: actions/upload-artifact@v4
       with:
-        name: installers
+        name: installers-${{ runner.os }}
         path: ddev/installers/*
+        if-no-files-found: error
 
   macos-packaging:
     name: Build macOS installer and sign/notarize artifacts
@@ -587,14 +588,14 @@ jobs:
         pattern: standalone-*
         name: standalone
         path: archives
-        merge_multiple: true
+        merge-multiple: true
 
     - name: Download installers
       uses: actions/download-artifact@v4
       with:
         pattern: installers-*
         path: installers
-        merge_multiple: true
+        merge-multiple: true
 
     - name: Push Python artifacts to PyPI
       uses: pypa/gh-action-pypi-publish@v1.8.6
