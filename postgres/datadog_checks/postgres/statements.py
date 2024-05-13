@@ -491,7 +491,7 @@ class PostgresStatementMetrics(DBMAsyncJob):
                 if query_signature in query_text:
                     applied_rows.append({**row, 'query': query_text[query_signature]})
                 else:
-                    applied_rows.append(row)
+                    applied_rows.append(copy.copy(row))
 
         return applied_rows
 
