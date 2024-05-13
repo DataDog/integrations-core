@@ -223,7 +223,7 @@ class Schemas:
                                 db_name, schema["name"]
                             )
                         )
-                        return True
+                        raise StopIteration
                     columns_count, tables_info = self._get_tables_data(tables_chunk, schema, cursor)
                     self._dataSubmitter.store(db_name, schema, tables_info, columns_count)
                     self._dataSubmitter.submit()  # Submit is forced after each 50 tables chunk
@@ -232,7 +232,10 @@ class Schemas:
             self._dataSubmitter.submit()
             return False
 
-        self._check.do_for_databases(fetch_schema_data, self._check.get_databases())
+        errors = self._check.do_for_databases(fetch_schema_data, self._check.get_databases())
+        if errors:
+            for e in errors:
+                self._log.error("While executing fetch schemas for databse - %s, the following exception occured - %s", e[0], e[1])
         self._log.debug("Finished collect_schemas_data")
         self._dataSubmitter.submit()
 

@@ -738,6 +738,7 @@ class SQLServer(AgentCheck):
         return db_names
 
     def do_for_databases(self, action, databases):
+        exceptions = []
         engine_edition = self.static_info_cache.get(STATIC_INFO_ENGINE_EDITION)
         with self.connection.open_managed_default_connection():
             with self.connection.get_managed_cursor() as cursor:
@@ -745,10 +746,12 @@ class SQLServer(AgentCheck):
                     try:
                         if not is_azure_sql_database(engine_edition):
                             cursor.execute(SWITCH_DB_STATEMENT.format(db))
-                        stop = action(cursor, db)
-                        if stop:
-                            break
+                        action(cursor, db)
+                    except StopIteration as e:
+                        exceptions.append((db, "StopIteration"))
+                        return exceptions    
                     except Exception as e:
+                        exceptions.append((db, e))
                         self.log.error("An exception occurred during do_for_databases in db - %s: %s", db, e)
                 # Switch DB back to MASTER
                 if not is_azure_sql_database(engine_edition):
