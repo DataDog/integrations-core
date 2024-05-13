@@ -18,7 +18,7 @@ def test_apply_deltas_base_case(pg_instance, integration_check):
 
     assert rows == [
         {'queryid': 1, 'query_signature': 'abc', 'calls': 1, 'query': 'query 123'},
-        {'queryid': 2, 'query_signature': 'abc', 'calls': 2, 'query': 'query 123'}
+        {'queryid': 2, 'query_signature': 'abc', 'calls': 2, 'query': 'query 123'},
     ]
 
 
@@ -39,5 +39,5 @@ def test_apply_deltas_multiple_runs(pg_instance, integration_check):
 
     assert rows == [
         {'queryid': 1, 'query_signature': 'abc', 'calls': 1, 'query': 'query 123'},
-        {'queryid': 2, 'query_signature': 'abc', 'calls': 3, 'query': 'query 123'}
+        {'queryid': 2, 'query_signature': 'abc', 'calls': 3, 'query': 'query 123'},
     ]

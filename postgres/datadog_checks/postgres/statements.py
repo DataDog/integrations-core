@@ -47,7 +47,7 @@ SELECT {cols}
   {extra_clauses}
 """
 
-BASELINE_METRICS_EXPIRY = 60 * 10 # 10 minutes
+BASELINE_METRICS_EXPIRY = 60 * 10  # 10 minutes
 
 # Use pg_stat_statements(false) when available as an optimization to avoid pulling SQL text from disk
 PG_STAT_STATEMENTS_COUNT_QUERY = "SELECT COUNT(*) FROM pg_stat_statements(false)"
@@ -489,11 +489,13 @@ class PostgresStatementMetrics(DBMAsyncJob):
     # To prevent the baseline metrics cache from growing indefinitely (as can happen) because of
     # pg_stat_statements eviction), we clear it out periodically to force a full refetch.
     def _check_baseline_metrics_expiry(self):
-        if self._last_baseline_metrics_expiry == None or self._last_baseline_metrics_expiry + BASELINE_METRICS_EXPIRY < time.time():
+        if (
+            self._last_baseline_metrics_expiry == None
+            or self._last_baseline_metrics_expiry + BASELINE_METRICS_EXPIRY < time.time()
+        ):
             self._baseline_metrics = {}
             self._query_calls_cache = QueryCallsCache()
             self._last_baseline_metrics_expiry = time.time()
-
 
     @tracked_method(agent_check_getter=agent_check_getter, track_result_length=True)
     def _collect_metrics_rows(self):

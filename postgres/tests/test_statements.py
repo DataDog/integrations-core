@@ -104,6 +104,7 @@ def test_statement_metrics_multiple_pgss_rows_single_query_signature(
         return json.dumps({'query': query, 'metadata': {}})
 
     queries = ["SET application_name = %s", "SET application_name = %s"]
+
     # These queries will have the same query signature but different queryids in pg_stat_statements
     def _run_query(idx):
         query = queries[idx]
@@ -133,8 +134,6 @@ def test_statement_metrics_multiple_pgss_rows_single_query_signature(
             _run_query(1)
 
         _run_query(0)
-        run_one_check(check, dbm_instance, cancel=False)
-
         run_one_check(check, dbm_instance, cancel=False)
 
         # Call one query
