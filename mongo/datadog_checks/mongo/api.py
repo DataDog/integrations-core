@@ -70,7 +70,6 @@ class MongoApi(object):
         self._log.debug("options: %s", options)
         self._cli = MongoClient(**options)
         self.deployment_type = None
-        self._hostname = None
 
     def __getitem__(self, item):
         return self._cli[item]
@@ -169,10 +168,9 @@ class MongoApi(object):
             hostname = self.server_status()['host'].split(':')
             if len(hostname) == 1:
                 # If there is no port, we assume the default port
-                self._hostname = "{}:27017".format(hostname[0])
+                return "{}:27017".format(hostname[0])
             else:
-                self._hostname = "{}:{}".format(hostname[0], hostname[1])
-            return self._hostname
+                return "{}:{}".format(hostname[0], hostname[1])
         except Exception as e:
             self._log.error('Unable to get hostname: %s', e)
             return None

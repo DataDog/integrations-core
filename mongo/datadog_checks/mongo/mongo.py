@@ -181,30 +181,47 @@ class MongoDb(AgentCheck):
 
         return metrics_to_collect
 
-    def _refresh_replica_role(self):
-        if self.api_client.deployment_type is None or isinstance(self.api_client.deployment_type, ReplicaSetDeployment):
+    def _refresh_deployment(self):
+        if (
+            self.api_client.deployment_type is None  # First run
+            or isinstance(
+                self.api_client.deployment_type, ReplicaSetDeployment
+            )  # Replica set members and state can change
+            or isinstance(self.api_client.deployment_type, MongosDeployment)  # Mongos shard map can change
+        ):
+            deployment_type_before = self.api_client.deployment_type
             self.log.debug("Refreshing deployment type")
             self.api_client.refresh_deployment_type()
+            if self.api_client.deployment_type != deployment_type_before:
+                self.log.debug(
+                    "Deployment type has changed from %s to %s", deployment_type_before, self.api_client.deployment_type
+                )
+                # database_instance metadata is tied to the deployment type
+                # so we need to reset it when the deployment type changes
+                # this way new metadata will be emitted
+                self._database_instance_emitted.clear()
 
-    def _get_deployment_tags(self, deployment):
+    @property
+    def internal_resource_tags(self):
+        '''
+        Return the internal resource tags for the database instance.
+        '''
+        if not self._resolved_hostname:
+            return []
+        return [f"dd.internal.resource:database_instance:{self._resolved_hostname}"]
+
+    def _get_tags(self, include_deployment_tags=False, include_internal_resource_tags=False):
         tags = deepcopy(self._config.metric_tags)
-        if isinstance(deployment, ReplicaSetDeployment):
-            tags.extend(
-                [
-                    "replset_name:{}".format(deployment.replset_name),
-                    "replset_state:{}".format(deployment.replset_state_name),
-                ]
-            )
-            if deployment.use_shards:
-                tags.append('sharding_cluster_role:{}'.format(deployment.cluster_role))
-        elif isinstance(deployment, MongosDeployment):
-            tags.append('sharding_cluster_role:mongos')
+        if include_deployment_tags:
+            tags.extend(self.api_client.deployment_type.deployment_tags)
+        if include_internal_resource_tags:
+            tags.extend(self.internal_resource_tags)
         return tags
 
     def check(self, _):
         try:
             self._refresh_metadata()
-            self._refresh_replica_role()
+            self._refresh_deployment()
             self._collect_metrics()
             self._send_database_instance_metadata()
         except CRITICAL_FAILURE as e:
@@ -233,7 +250,7 @@ class MongoDb(AgentCheck):
 
     def _collect_metrics(self):
         deployment = self.api_client.deployment_type
-        tags = self._get_deployment_tags(deployment)
+        tags = self._get_tags(include_deployment_tags=True, include_internal_resource_tags=True)
 
         dbnames = self._get_db_names(self.api_client, deployment, tags)
         self.refresh_collectors(deployment, dbnames, tags)
@@ -308,16 +325,9 @@ class MongoDb(AgentCheck):
     def _send_database_instance_metadata(self):
         deployment = self.api_client.deployment_type
         if self._resolved_hostname not in self._database_instance_emitted:
-            tags = self._get_deployment_tags(deployment)
-            mongodb_instance_metadata = {
-                "replset_name": getattr(deployment, 'replset_name', None),
-                "replset_state": getattr(deployment, 'replset_state_name', None),
-                "sharding_cluster_role": getattr(deployment, 'cluster_role', None),
-                "hosts": getattr(deployment, 'hosts', None),
-                "shards": getattr(deployment, 'shards', None),
-                "cluster_type": getattr(deployment, 'cluster_type', None),
-                "cluster_name": self._config.cluster_name,
-            }
+            # DO NOT emit with internal resource tags, as the metadata event is used to CREATE the databse instance
+            tags = self._get_tags(include_deployment_tags=True, include_internal_resource_tags=False)
+            mongodb_instance_metadata = {"cluster_name": self._config.cluster_name} | deployment.instance_metadata
             database_instance = {
                 "host": self._resolved_hostname,
                 "agent_version": datadog_agent.get_version(),
