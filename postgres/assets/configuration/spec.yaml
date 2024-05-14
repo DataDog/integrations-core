@@ -435,7 +435,8 @@ files:
             when calculating query metrics. This option is only available for PostgreSQL 10.0 and above.
           value:
             type: boolean
-            example: true
+            display_default: false
+            example: false
     - name: query_samples
       description: Configure collection of query samples
       options:
