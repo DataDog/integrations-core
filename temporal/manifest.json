@@ -15,7 +15,10 @@
       "Supported OS::Linux",
       "Supported OS::Windows",
       "Supported OS::macOS",
-      "Category::Log Collection"
+      "Category::Log Collection",
+      "Category::Developer Tools",
+      "Submitted Data Type::Metrics",
+      "Submitted Data Type::Logs"
     ]
   },
   "assets": {
