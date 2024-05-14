@@ -23,7 +23,6 @@ cluster_autoscaler_unschedulable_pods_count{cluster="testing", namespace="defaul
 cluster_autoscaler_unschedulable_pods_count{cluster="testing", namespace="kube-system"} 0
 cluster_autoscaler_unschedulable_pods_count{cluster="experiment", namespace="default"} 1
 cluster_autoscaler_unschedulable_pods_count{cluster="experiment", namespace="kube-system"} 2
-cluster_autoscaler_
 # HELP cluster_autoscaler_node_groups_count Number of node groups in the cluster
 # TYPE cluster_autoscaler_node_groups_count gauge
 cluster_autoscaler_node_groups_count{cluster="production"} 3
