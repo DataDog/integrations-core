@@ -467,6 +467,7 @@ class PostgresStatementMetrics(DBMAsyncJob):
             query_signature = row['query_signature']
             queryid = row['queryid']
             baseline_row = copy.copy(row)
+            del baseline_row['query']
             if query_signature not in self._baseline_metrics:
                 self._baseline_metrics[query_signature] = {queryid: baseline_row}
             else:
