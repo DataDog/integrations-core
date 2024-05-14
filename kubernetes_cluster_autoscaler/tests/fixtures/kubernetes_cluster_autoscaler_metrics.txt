@@ -10,7 +10,6 @@ cluster_autoscaler_cluster_safe_to_autoscale{cluster="sandbox", region="ap-north
 cluster_autoscaler_cluster_safe_to_autoscale{cluster="performance", region="sa-east-1"} 1
 cluster_autoscaler_cluster_safe_to_autoscale{cluster="backup", region="ca-central-1"} 0
 cluster_autoscaler_cluster_safe_to_autoscale{cluster="monitoring", region="ap-south-1"} 1
-cluster_autoscaler_
 # HELP cluster_autoscaler_unschedulable_pods_count Number of unschedulable pods in the cluster
 # TYPE cluster_autoscaler_unschedulable_pods_count gauge
 cluster_autoscaler_unschedulable_pods_count{cluster="production", namespace="default"} 5
@@ -108,17 +107,15 @@ cluster_autoscaler_last_activity{cluster="performance"} 1656789900
 cluster_autoscaler_last_activity{cluster="backup"} 1656790000
 cluster_autoscaler_last_activity{cluster="monitoring"} 1656790100
 # HELP cluster_autoscaler_function_duration_seconds Duration of a specific function in the cluster
-# TYPE cluster_autoscaler_function_duration_seconds gauge
-cluster_autoscaler_function_duration_seconds{name="scaling", cluster="production"} 5
-cluster_autoscaler_function_duration_seconds{name="scaling", cluster="staging"} 8
-cluster_autoscaler_function_duration_seconds{name="scaling", cluster="development"} 3
-cluster_autoscaler_function_duration_seconds{name="scaling", cluster="testing"} 7
-cluster_autoscaler_function_duration_seconds{name="scaling", cluster="experiment"} 4
-cluster_autoscaler_function_duration_seconds{name="scaling", cluster="demo"} 6
-cluster_autoscaler_function_duration_seconds{name="scaling", cluster="sandbox"} 9
-cluster_autoscaler_function_duration_seconds{name="scaling", cluster="performance"} 2
-cluster_autoscaler_function_duration_seconds{name="scaling", cluster="backup"} 5
-cluster_autoscaler_function_duration_seconds{name="scaling", cluster="monitoring"} 3
+# TYPE cluster_autoscaler_function_duration_seconds histogram
+cluster_autoscaler_function_duration_seconds_bucket{name="scaling",namespace="default",cluster="production",le="0.01"} 93
+cluster_autoscaler_function_duration_seconds_bucket{name="scaling",namespace="default",cluster="production",le="0.15"} 94
+cluster_autoscaler_function_duration_seconds_bucket{name="scaling",namespace="default",cluster="production",le="0.25"} 94
+cluster_autoscaler_function_duration_seconds_bucket{name="scaling",namespace="default",cluster="production",le="0.5"} 94
+cluster_autoscaler_function_duration_seconds_bucket{name="scaling",namespace="default",cluster="production",le="1"} 94
+cluster_autoscaler_function_duration_seconds_bucket{name="scaling",namespace="default",cluster="production",le="+Inf"} 94
+cluster_autoscaler_function_duration_seconds_sum{name="scaling",namespace="default",cluster="production"} 0.029117867
+cluster_autoscaler_function_duration_seconds_count{name="scaling",namespace="default",cluster="production"} 94
 # HELP cluster_autoscaler_errors_total Total count of errors occurred in the cluster
 # TYPE cluster_autoscaler_errors_total counter
 cluster_autoscaler_errors_total{cluster="production"} 20
@@ -204,7 +201,7 @@ cluster_autoscaler_evicted_pods_total{cluster="performance"} 12
 cluster_autoscaler_evicted_pods_total{cluster="backup"} 4
 cluster_autoscaler_evicted_pods_total{cluster="monitoring"} 1
 # HELP cluster_autoscaler_unneeded_nodes_count Total count of unneeded nodes in the cluster
-# TYPEcluster_autoscaler_ unneeded_nodes_count gauge
+# TYPE cluster_autoscaler_unneeded_nodes_count gauge
 cluster_autoscaler_unneeded_nodes_count{cluster="production"} 2
 cluster_autoscaler_unneeded_nodes_count{cluster="staging"} 1
 cluster_autoscaler_unneeded_nodes_count{cluster="development"} 3
