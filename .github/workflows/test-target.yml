@@ -246,7 +246,7 @@ jobs:
       if: inputs.repo == 'core' && always()
       uses: actions/upload-artifact@v4
       with:
-        name: "${{ inputs.traces-artifact-name }}"
+        name: "${{ inputs.traces-artifact-name }}-${{ inputs.target }}"
         path: "${{ env.TRACE_CAPTURE_FILE }}"
 
     - name: Finalize test results
@@ -261,7 +261,7 @@ jobs:
       if: always()
       uses: actions/upload-artifact@v4
       with:
-        name: test-results-${{ inputs.target }}
+        name: "test-results-${{ inputs.target }}"
         path: "${{ env.TEST_RESULTS_BASE_DIR }}"
 
     - name: Upload coverage data
