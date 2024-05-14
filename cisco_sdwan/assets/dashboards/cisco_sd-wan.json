@@ -20,6 +20,18 @@
             "default": "*",
             "name": "hostname",
             "prefix": "hostname"
+        },
+        {
+            "available_values": [],
+            "default": "*",
+            "name": "system_ip",
+            "prefix": "system_ip"
+        },
+        {
+            "available_values": [],
+            "default": "*",
+            "name": "interface",
+            "prefix": "interface"
         }
     ],
     "title": "Cisco SD-WAN",
@@ -45,7 +57,7 @@
                         "id": 4619350414909276,
                         "layout": {
                             "height": 3,
-                            "width": 3,
+                            "width": 6,
                             "x": 0,
                             "y": 0
                         }
@@ -53,7 +65,7 @@
                     {
                         "definition": {
                             "background_color": "white",
-                            "content": "**Cisco SD-WAN Overview Dashboard**\n\nThis dashboard provides a comprehensive overview of your SD-WAN environment, allowing you to effortlessly monitor the status of your sites, tunnels, and devices. Stay informed about network performance, traffic patterns, and potential issues, to ensure optimal network efficiency and reliability.",
+                            "content": "**Cisco SD-WAN Overview Dashboard**\n\nThis dashboard provides a comprehensive overview of your SD-WAN environment, allowing you to effortlessly monitor the status of your sites, tunnels, and devices. Stay informed about network performance, traffic patterns, and potential issues, to ensure optimal network efficiency and reliability.\n\n**Further reading on NDM**\n\n- Our blog post on [Monitoring Datacenters and network devices with Datadog](https://www.datadoghq.com/blog/datacenter-monitoring-dashboards/)\n- Network Device Monitoring [docs](https://docs.datadoghq.com/network_performance_monitoring/devices) ",
                             "font_size": "14",
                             "has_padding": true,
                             "show_tick": false,
@@ -66,16 +78,16 @@
                         "id": 7609936259716352,
                         "layout": {
                             "height": 3,
-                            "width": 3,
-                            "x": 3,
-                            "y": 0
+                            "width": 6,
+                            "x": 0,
+                            "y": 3
                         }
                     }
                 ]
             },
             "id": 935293438892236,
             "layout": {
-                "height": 4,
+                "height": 7,
                 "width": 6,
                 "x": 0,
                 "y": 0
@@ -115,11 +127,7 @@
                                                     "value": 1
                                                 }
                                             ],
-                                            "formula": "query1",
-                                            "limit": {
-                                                "count": 500,
-                                                "order": "asc"
-                                            }
+                                            "formula": "query1"
                                         },
                                         {
                                             "alias": "Avg latency",
@@ -148,6 +156,16 @@
                                         }
                                     ],
                                     "response_format": "scalar",
+                                    "sort": {
+                                        "count": 500,
+                                        "order_by": [
+                                            {
+                                                "index": 0,
+                                                "order": "asc",
+                                                "type": "formula"
+                                            }
+                                        ]
+                                    },
                                     "text_formats": [
                                         [],
                                         [
@@ -216,12 +234,35 @@
                             "x": 3,
                             "y": 0
                         }
+                    },
+                    {
+                        "definition": {
+                            "color_preference": "text",
+                            "count": 50,
+                            "display_format": "countsAndList",
+                            "hide_zero_counts": true,
+                            "query": "cisco sd-wan",
+                            "show_last_triggered": false,
+                            "show_priority": false,
+                            "sort": "status,asc",
+                            "start": 0,
+                            "summary_type": "monitors",
+                            "title": "Monitors overview",
+                            "type": "manage_status"
+                        },
+                        "id": 1431607488305134,
+                        "layout": {
+                            "height": 3,
+                            "width": 6,
+                            "x": 0,
+                            "y": 3
+                        }
                     }
                 ]
             },
             "id": 4105254245177532,
             "layout": {
-                "height": 4,
+                "height": 7,
                 "width": 6,
                 "x": 6,
                 "y": 0
@@ -241,9 +282,16 @@
                             "precision": 2,
                             "requests": [
                                 {
+                                    "conditional_formats": [
+                                        {
+                                            "comparator": ">",
+                                            "palette": "green_on_white",
+                                            "value": 0
+                                        }
+                                    ],
                                     "formulas": [
                                         {
-                                            "formula": "count_not_null(query1)"
+                                            "formula": "count_nonzero(query1)"
                                         }
                                     ],
                                     "queries": [
@@ -251,27 +299,26 @@
                                             "aggregator": "last",
                                             "data_source": "metrics",
                                             "name": "query1",
-                                            "query": "avg:cisco_sdwan.device.reachable{type:vbond,$device_namespace} by {system_ip}"
+                                            "query": "avg:cisco_sdwan.device.reachable{type:vbond,$device_namespace,$system_ip}"
                                         }
                                     ],
                                     "response_format": "scalar"
                                 }
                             ],
+                            "time": {},
                             "timeseries_background": {
-                                "type": "area",
-                                "yaxis": {
-                                    "include_zero": true
-                                }
+                                "type": "bars",
+                                "yaxis": {}
                             },
-                            "title": "Validators",
+                            "title": "Validators up",
                             "title_align": "left",
                             "title_size": "16",
                             "type": "query_value"
                         },
-                        "id": 2984469459443936,
+                        "id": 3671177390268672,
                         "layout": {
                             "height": 2,
-                            "width": 4,
+                            "width": 2,
                             "x": 0,
                             "y": 0
                         }
@@ -282,6 +329,60 @@
                             "precision": 2,
                             "requests": [
                                 {
+                                    "conditional_formats": [
+                                        {
+                                            "comparator": ">",
+                                            "palette": "red_on_white",
+                                            "value": 0
+                                        }
+                                    ],
+                                    "formulas": [
+                                        {
+                                            "formula": "count_not_null(cutoff_max(query1, 0.5))"
+                                        }
+                                    ],
+                                    "queries": [
+                                        {
+                                            "aggregator": "last",
+                                            "data_source": "metrics",
+                                            "name": "query1",
+                                            "query": "avg:cisco_sdwan.device.reachable{type:vbond,$device_namespace,$system_ip} by {system_ip}"
+                                        }
+                                    ],
+                                    "response_format": "scalar"
+                                }
+                            ],
+                            "time": {},
+                            "timeseries_background": {
+                                "type": "bars",
+                                "yaxis": {}
+                            },
+                            "title": "Validators down",
+                            "title_align": "left",
+                            "title_size": "16",
+                            "type": "query_value"
+                        },
+                        "id": 2984469459443936,
+                        "layout": {
+                            "height": 2,
+                            "width": 2,
+                            "x": 2,
+                            "y": 0
+                        }
+                    },
+                    {
+                        "definition": {
+                            "autoscale": true,
+                            "precision": 2,
+                            "requests": [
+                                {
+                                    "conditional_formats": [
+                                        {
+                                            "comparator": ">",
+                                            "palette": "green_on_white",
+                                            "value": 0
+                                        }
+                                    ],
                                     "formulas": [
                                         {
                                             "formula": "count_not_null(query1)"
@@ -292,19 +393,18 @@
                                             "aggregator": "last",
                                             "data_source": "metrics",
                                             "name": "query1",
-                                            "query": "avg:cisco_sdwan.device.reachable{type:vsmart,$device_namespace} by {system_ip}"
+                                            "query": "avg:cisco_sdwan.device.reachable{type:vsmart,$device_namespace,$system_ip} by {system_ip}"
                                         }
                                     ],
                                     "response_format": "scalar"
                                 }
                             ],
+                            "time": {},
                             "timeseries_background": {
-                                "type": "area",
-                                "yaxis": {
-                                    "include_zero": true
-                                }
+                                "type": "bars",
+                                "yaxis": {}
                             },
-                            "title": "Controllers",
+                            "title": "Controllers up",
                             "title_align": "left",
                             "title_size": "16",
                             "type": "query_value"
@@ -312,7 +412,7 @@
                         "id": 4826237700518540,
                         "layout": {
                             "height": 2,
-                            "width": 4,
+                            "width": 2,
                             "x": 4,
                             "y": 0
                         }
@@ -323,6 +423,60 @@
                             "precision": 2,
                             "requests": [
                                 {
+                                    "conditional_formats": [
+                                        {
+                                            "comparator": ">",
+                                            "palette": "black_on_light_green",
+                                            "value": 0
+                                        }
+                                    ],
+                                    "formulas": [
+                                        {
+                                            "formula": "count_not_null(cutoff_max(query1, 0.5))"
+                                        }
+                                    ],
+                                    "queries": [
+                                        {
+                                            "aggregator": "last",
+                                            "data_source": "metrics",
+                                            "name": "query1",
+                                            "query": "avg:cisco_sdwan.device.reachable{type:vsmart,$device_namespace,$system_ip} by {system_ip}"
+                                        }
+                                    ],
+                                    "response_format": "scalar"
+                                }
+                            ],
+                            "time": {},
+                            "timeseries_background": {
+                                "type": "bars",
+                                "yaxis": {}
+                            },
+                            "title": "Controllers down",
+                            "title_align": "left",
+                            "title_size": "16",
+                            "type": "query_value"
+                        },
+                        "id": 322242489397432,
+                        "layout": {
+                            "height": 2,
+                            "width": 2,
+                            "x": 6,
+                            "y": 0
+                        }
+                    },
+                    {
+                        "definition": {
+                            "autoscale": true,
+                            "precision": 2,
+                            "requests": [
+                                {
+                                    "conditional_formats": [
+                                        {
+                                            "comparator": ">",
+                                            "palette": "green_on_white",
+                                            "value": 0
+                                        }
+                                    ],
                                     "formulas": [
                                         {
                                             "formula": "count_not_null(query1)"
@@ -333,19 +487,18 @@
                                             "aggregator": "last",
                                             "data_source": "metrics",
                                             "name": "query1",
-                                            "query": "avg:cisco_sdwan.device.reachable{type:vmanage,$device_namespace} by {system_ip}"
+                                            "query": "avg:cisco_sdwan.device.reachable{type:vmanage,$device_namespace,$system_ip} by {system_ip}"
                                         }
                                     ],
                                     "response_format": "scalar"
                                 }
                             ],
+                            "time": {},
                             "timeseries_background": {
-                                "type": "area",
-                                "yaxis": {
-                                    "include_zero": true
-                                }
+                                "type": "bars",
+                                "yaxis": {}
                             },
-                            "title": "Managers",
+                            "title": "Managers up",
                             "title_align": "left",
                             "title_size": "16",
                             "type": "query_value"
@@ -353,8 +506,55 @@
                         "id": 4218621438666410,
                         "layout": {
                             "height": 2,
-                            "width": 4,
+                            "width": 2,
                             "x": 8,
+                            "y": 0
+                        }
+                    },
+                    {
+                        "definition": {
+                            "autoscale": true,
+                            "precision": 2,
+                            "requests": [
+                                {
+                                    "conditional_formats": [
+                                        {
+                                            "comparator": ">",
+                                            "palette": "black_on_light_green",
+                                            "value": 0
+                                        }
+                                    ],
+                                    "formulas": [
+                                        {
+                                            "formula": "count_not_null(cutoff_max(query1, 0.5))"
+                                        }
+                                    ],
+                                    "queries": [
+                                        {
+                                            "aggregator": "last",
+                                            "data_source": "metrics",
+                                            "name": "query1",
+                                            "query": "avg:cisco_sdwan.device.reachable{type:vmanage,$device_namespace,$system_ip} by {system_ip}"
+                                        }
+                                    ],
+                                    "response_format": "scalar"
+                                }
+                            ],
+                            "time": {},
+                            "timeseries_background": {
+                                "type": "bars",
+                                "yaxis": {}
+                            },
+                            "title": "Managers down",
+                            "title_align": "left",
+                            "title_size": "16",
+                            "type": "query_value"
+                        },
+                        "id": 1470058880191572,
+                        "layout": {
+                            "height": 2,
+                            "width": 2,
+                            "x": 10,
                             "y": 0
                         }
                     },
@@ -380,7 +580,7 @@
                                         {
                                             "data_source": "metrics",
                                             "name": "query1",
-                                            "query": "avg:cisco_sdwan.cpu.usage{(type:vsmart OR type:vbond OR type:vmanage) AND $hostname AND $site_id AND $device_namespace} by {hostname,system_ip,type}"
+                                            "query": "avg:cisco_sdwan.cpu.usage{(type:vsmart OR type:vbond OR type:vmanage) AND $hostname AND $site_id AND $device_namespace AND $system_ip} by {hostname,system_ip,type}"
                                         }
                                     ],
                                     "response_format": "timeseries",
@@ -427,7 +627,7 @@
                                         {
                                             "data_source": "metrics",
                                             "name": "query1",
-                                            "query": "avg:cisco_sdwan.memory.usage{(type:vsmart OR type:vbond OR type:vmanage) AND $hostname AND $site_id AND $device_namespace} by {hostname,system_ip,type}"
+                                            "query": "avg:cisco_sdwan.memory.usage{(type:vsmart OR type:vbond OR type:vmanage) AND $hostname AND $site_id AND $device_namespace AND $system_ip} by {hostname,system_ip,type}"
                                         }
                                     ],
                                     "response_format": "timeseries",
@@ -480,7 +680,7 @@
                                         {
                                             "data_source": "metrics",
                                             "name": "query1",
-                                            "query": "avg:cisco_sdwan.disk.usage{(type:vsmart OR type:vbond OR type:vmanage) AND $hostname AND $site_id AND $device_namespace} by {hostname,system_ip,type}"
+                                            "query": "avg:cisco_sdwan.disk.usage{(type:vsmart OR type:vbond OR type:vmanage) AND $hostname AND $site_id AND $device_namespace AND $system_ip} by {hostname,system_ip,type}"
                                         }
                                     ],
                                     "response_format": "timeseries",
@@ -521,11 +721,7 @@
                                                     "value": 0
                                                 }
                                             ],
-                                            "formula": "query1",
-                                            "limit": {
-                                                "count": 50,
-                                                "order": "desc"
-                                            }
+                                            "formula": "query1"
                                         }
                                     ],
                                     "queries": [
@@ -533,10 +729,20 @@
                                             "aggregator": "avg",
                                             "data_source": "metrics",
                                             "name": "query1",
-                                            "query": "avg:cisco_sdwan.omp_peer.status{$hostname,$site_id,$device_namespace, type:vsmart} by {site_id,hostname,system_ip,remote_site_id,remote_hostname,remote_type,legit,state}"
+                                            "query": "avg:cisco_sdwan.omp_peer.status{$hostname,$site_id,$device_namespace,type:vsmart,$system_ip} by {site_id,hostname,system_ip,remote_site_id,remote_hostname,remote_type,legit,state}"
                                         }
                                     ],
-                                    "response_format": "scalar"
+                                    "response_format": "scalar",
+                                    "sort": {
+                                        "count": 50,
+                                        "order_by": [
+                                            {
+                                                "index": 0,
+                                                "order": "desc",
+                                                "type": "formula"
+                                            }
+                                        ]
+                                    }
                                 }
                             ],
                             "title": "OMP Peers",
@@ -559,7 +765,7 @@
                 "height": 10,
                 "width": 12,
                 "x": 0,
-                "y": 4
+                "y": 7
             }
         },
         {
@@ -576,9 +782,16 @@
                             "precision": 2,
                             "requests": [
                                 {
+                                    "conditional_formats": [
+                                        {
+                                            "comparator": ">",
+                                            "palette": "green_on_white",
+                                            "value": 0
+                                        }
+                                    ],
                                     "formulas": [
                                         {
-                                            "formula": "count_nonzero(query1)"
+                                            "formula": "default_zero(count_nonzero(query1))"
                                         }
                                     ],
                                     "queries": [
@@ -586,22 +799,66 @@
                                             "aggregator": "last",
                                             "data_source": "metrics",
                                             "name": "query1",
-                                            "query": "avg:cisco_sdwan.tunnel.status{$hostname,$site_id,$device_namespace} by {system_ip,local_color,remote_color,remote_system_ip}"
+                                            "query": "avg:cisco_sdwan.tunnel.status{$hostname,$site_id,$device_namespace,state:up,$system_ip} by {system_ip,local_color,remote_color,remote_system_ip}"
                                         }
                                     ],
                                     "response_format": "scalar"
                                 }
                             ],
-                            "title": "Tunnels",
+                            "time": {},
+                            "title": "Tunnels up",
                             "title_align": "left",
                             "title_size": "16",
                             "type": "query_value"
                         },
-                        "id": 5173602150056666,
+                        "id": 5110325776178276,
                         "layout": {
                             "height": 2,
-                            "width": 4,
+                            "width": 2,
                             "x": 0,
+                            "y": 0
+                        }
+                    },
+                    {
+                        "definition": {
+                            "autoscale": true,
+                            "precision": 2,
+                            "requests": [
+                                {
+                                    "conditional_formats": [
+                                        {
+                                            "comparator": ">",
+                                            "palette": "red_on_white",
+                                            "value": 0
+                                        }
+                                    ],
+                                    "formulas": [
+                                        {
+                                            "formula": "default_zero(count_nonzero(query1))"
+                                        }
+                                    ],
+                                    "queries": [
+                                        {
+                                            "aggregator": "last",
+                                            "data_source": "metrics",
+                                            "name": "query1",
+                                            "query": "avg:cisco_sdwan.tunnel.status{$hostname,$site_id,$device_namespace,state:down,$system_ip} by {system_ip,local_color,remote_color,remote_system_ip}"
+                                        }
+                                    ],
+                                    "response_format": "scalar"
+                                }
+                            ],
+                            "time": {},
+                            "title": "Tunnels down",
+                            "title_align": "left",
+                            "title_size": "16",
+                            "type": "query_value"
+                        },
+                        "id": 5580645444956250,
+                        "layout": {
+                            "height": 2,
+                            "width": 2,
+                            "x": 2,
                             "y": 0
                         }
                     },
@@ -633,7 +890,7 @@
                                         {
                                             "data_source": "metrics",
                                             "name": "query2",
-                                            "query": "avg:cisco_sdwan.tunnel.latency{$hostname,$site_id,$device_namespace} by {hostname,system_ip,site_id,local_color,remote_hostname,remote_system_ip,remote_site_id,remote_color}"
+                                            "query": "avg:cisco_sdwan.tunnel.latency{$hostname,$site_id,$device_namespace,$system_ip} by {hostname,system_ip,site_id,local_color,remote_hostname,remote_system_ip,remote_site_id,remote_color}"
                                         }
                                     ],
                                     "response_format": "timeseries",
@@ -695,12 +952,12 @@
                                         {
                                             "data_source": "metrics",
                                             "name": "query2",
-                                            "query": "sum:cisco_sdwan.tunnel.tx_bits{$hostname,$site_id,$device_namespace} by {hostname,system_ip,site_id,local_color,remote_hostname,remote_system_ip,remote_site_id,remote_color}.as_count()"
+                                            "query": "sum:cisco_sdwan.tunnel.tx_bits{$hostname,$site_id,$device_namespace,$system_ip} by {hostname,system_ip,site_id,local_color,remote_hostname,remote_system_ip,remote_site_id,remote_color}.as_count()"
                                         },
                                         {
                                             "data_source": "metrics",
                                             "name": "query1",
-                                            "query": "sum:cisco_sdwan.tunnel.rx_bits{$hostname,$site_id,$device_namespace} by {hostname,system_ip,site_id,local_color,remote_hostname,remote_system_ip,remote_site_id,remote_color}.as_count()"
+                                            "query": "sum:cisco_sdwan.tunnel.rx_bits{$hostname,$site_id,$device_namespace,$system_ip} by {hostname,system_ip,site_id,local_color,remote_hostname,remote_system_ip,remote_site_id,remote_color}.as_count()"
                                         }
                                     ],
                                     "response_format": "timeseries",
@@ -752,10 +1009,6 @@
                                                 }
                                             ],
                                             "formula": "query1",
-                                            "limit": {
-                                                "count": 500,
-                                                "order": "desc"
-                                            },
                                             "number_format": {
                                                 "unit": {
                                                     "type": "canonical_unit",
@@ -858,34 +1111,44 @@
                                             "aggregator": "avg",
                                             "data_source": "metrics",
                                             "name": "query1",
-                                            "query": "avg:cisco_sdwan.tunnel.latency{$hostname,$site_id,$device_namespace} by {system_ip,hostname,site_id,local_color,remote_system_ip,remote_hostname,remote_site_id,remote_color}"
+                                            "query": "avg:cisco_sdwan.tunnel.latency{$hostname,$site_id,$device_namespace,$system_ip} by {system_ip,hostname,site_id,local_color,remote_system_ip,remote_hostname,remote_site_id,remote_color}"
                                         },
                                         {
                                             "aggregator": "avg",
                                             "data_source": "metrics",
                                             "name": "query2",
-                                            "query": "avg:cisco_sdwan.tunnel.jitter{$hostname,$site_id,$device_namespace} by {system_ip,hostname,site_id,local_color,remote_system_ip,remote_hostname,remote_site_id,remote_color}"
+                                            "query": "avg:cisco_sdwan.tunnel.jitter{$hostname,$site_id,$device_namespace,$system_ip} by {system_ip,hostname,site_id,local_color,remote_system_ip,remote_hostname,remote_site_id,remote_color}"
                                         },
                                         {
                                             "aggregator": "avg",
                                             "data_source": "metrics",
                                             "name": "query3",
-                                            "query": "avg:cisco_sdwan.tunnel.loss{$hostname,$site_id,$device_namespace} by {system_ip,hostname,site_id,local_color,remote_system_ip,remote_hostname,remote_site_id,remote_color}"
+                                            "query": "avg:cisco_sdwan.tunnel.loss{$hostname,$site_id,$device_namespace,$system_ip} by {system_ip,hostname,site_id,local_color,remote_system_ip,remote_hostname,remote_site_id,remote_color}"
                                         },
                                         {
                                             "aggregator": "avg",
                                             "data_source": "metrics",
                                             "name": "query4",
-                                            "query": "avg:cisco_sdwan.tunnel.qoe{$hostname,$site_id,$device_namespace} by {system_ip,hostname,site_id,local_color,remote_system_ip,remote_hostname,remote_site_id,remote_color}"
+                                            "query": "avg:cisco_sdwan.tunnel.qoe{$hostname,$site_id,$device_namespace,$system_ip} by {system_ip,hostname,site_id,local_color,remote_system_ip,remote_hostname,remote_site_id,remote_color}"
                                         },
                                         {
                                             "aggregator": "last",
                                             "data_source": "metrics",
                                             "name": "query5",
-                                            "query": "min:cisco_sdwan.tunnel.status{$hostname,$site_id,$device_namespace} by {system_ip,hostname,site_id,local_color,remote_system_ip,remote_hostname,remote_site_id,remote_color}"
+                                            "query": "min:cisco_sdwan.tunnel.status{$hostname,$site_id,$device_namespace,$system_ip} by {system_ip,hostname,site_id,local_color,remote_system_ip,remote_hostname,remote_site_id,remote_color}"
                                         }
                                     ],
-                                    "response_format": "scalar"
+                                    "response_format": "scalar",
+                                    "sort": {
+                                        "count": 500,
+                                        "order_by": [
+                                            {
+                                                "index": 0,
+                                                "order": "desc",
+                                                "type": "formula"
+                                            }
+                                        ]
+                                    }
                                 }
                             ],
                             "title": "Tunnels",
@@ -908,7 +1171,7 @@
                 "height": 9,
                 "width": 12,
                 "x": 0,
-                "y": 14
+                "y": 17
             }
         },
         {
@@ -925,9 +1188,16 @@
                             "precision": 2,
                             "requests": [
                                 {
+                                    "conditional_formats": [
+                                        {
+                                            "comparator": ">",
+                                            "palette": "green_on_white",
+                                            "value": 0
+                                        }
+                                    ],
                                     "formulas": [
                                         {
-                                            "formula": "count_not_null(query1)"
+                                            "formula": "count_nonzero(query1)"
                                         }
                                     ],
                                     "queries": [
@@ -935,19 +1205,18 @@
                                             "aggregator": "last",
                                             "data_source": "metrics",
                                             "name": "query1",
-                                            "query": "avg:cisco_sdwan.device.reachable{type:vedge,$device_namespace} by {system_ip}"
+                                            "query": "avg:cisco_sdwan.device.reachable{type:vedge,$device_namespace,$site_id,$system_ip} by {system_ip}"
                                         }
                                     ],
                                     "response_format": "scalar"
                                 }
                             ],
+                            "time": {},
                             "timeseries_background": {
-                                "type": "area",
-                                "yaxis": {
-                                    "include_zero": true
-                                }
+                                "type": "bars",
+                                "yaxis": {}
                             },
-                            "title": "Edges",
+                            "title": "Edges up",
                             "title_align": "left",
                             "title_size": "16",
                             "type": "query_value"
@@ -955,8 +1224,55 @@
                         "id": 6469093578730180,
                         "layout": {
                             "height": 2,
-                            "width": 4,
+                            "width": 2,
                             "x": 0,
+                            "y": 0
+                        }
+                    },
+                    {
+                        "definition": {
+                            "autoscale": true,
+                            "precision": 2,
+                            "requests": [
+                                {
+                                    "conditional_formats": [
+                                        {
+                                            "comparator": ">",
+                                            "palette": "red_on_white",
+                                            "value": 0
+                                        }
+                                    ],
+                                    "formulas": [
+                                        {
+                                            "formula": "count_not_null(cutoff_max(query1, 0.5))"
+                                        }
+                                    ],
+                                    "queries": [
+                                        {
+                                            "aggregator": "last",
+                                            "data_source": "metrics",
+                                            "name": "query1",
+                                            "query": "avg:cisco_sdwan.device.reachable{type:vedge,$device_namespace,$site_id,$system_ip} by {system_ip}"
+                                        }
+                                    ],
+                                    "response_format": "scalar"
+                                }
+                            ],
+                            "time": {},
+                            "timeseries_background": {
+                                "type": "bars",
+                                "yaxis": {}
+                            },
+                            "title": "Edges down",
+                            "title_align": "left",
+                            "title_size": "16",
+                            "type": "query_value"
+                        },
+                        "id": 2484984471821140,
+                        "layout": {
+                            "height": 2,
+                            "width": 2,
+                            "x": 2,
                             "y": 0
                         }
                     },
@@ -982,7 +1298,7 @@
                                         {
                                             "data_source": "metrics",
                                             "name": "query1",
-                                            "query": "avg:cisco_sdwan.cpu.usage{type:vedge,$hostname,$site_id,$device_namespace} by {hostname,system_ip,site_id}"
+                                            "query": "avg:cisco_sdwan.cpu.usage{type:vedge,$hostname,$site_id,$device_namespace,$system_ip} by {hostname,system_ip,site_id}"
                                         }
                                     ],
                                     "response_format": "timeseries",
@@ -1029,7 +1345,7 @@
                                         {
                                             "data_source": "metrics",
                                             "name": "query1",
-                                            "query": "avg:cisco_sdwan.memory.usage{type:vedge,$hostname,$site_id,$device_namespace} by {hostname,system_ip,site_id}"
+                                            "query": "avg:cisco_sdwan.memory.usage{type:vedge,$hostname,$site_id,$device_namespace,$system_ip} by {hostname,system_ip,site_id}"
                                         }
                                     ],
                                     "response_format": "timeseries",
@@ -1075,7 +1391,7 @@
                                             "aggregator": "last",
                                             "data_source": "metrics",
                                             "name": "query1",
-                                            "query": "avg:cisco_sdwan.control_connection.status{$hostname,$site_id,$device_namespace} by {hostname,peer_type,local_color,state}"
+                                            "query": "avg:cisco_sdwan.control_connection.status{$hostname,$site_id,$device_namespace,$system_ip} by {hostname,peer_type,local_color,state}"
                                         }
                                     ],
                                     "response_format": "scalar",
@@ -1119,7 +1435,7 @@
                                         {
                                             "data_source": "metrics",
                                             "name": "query1",
-                                            "query": "sum:cisco_sdwan.reboot.count{type:vedge,$hostname,$site_id,$device_namespace} by {hostname,system_ip,site_id}.as_count()"
+                                            "query": "sum:cisco_sdwan.reboot.count{type:vedge,$hostname,$site_id,$device_namespace,$system_ip} by {hostname,system_ip,site_id}.as_count()"
                                         }
                                     ],
                                     "response_format": "timeseries",
@@ -1172,7 +1488,7 @@
                                         {
                                             "data_source": "metrics",
                                             "name": "query1",
-                                            "query": "avg:cisco_sdwan.disk.usage{type:vedge,$hostname,$site_id,$device_namespace} by {hostname,system_ip,site_id}"
+                                            "query": "avg:cisco_sdwan.disk.usage{type:vedge,$hostname,$site_id,$device_namespace,$system_ip} by {hostname,system_ip,site_id}"
                                         }
                                     ],
                                     "response_format": "timeseries",
@@ -1219,7 +1535,7 @@
                                         {
                                             "data_source": "metrics",
                                             "name": "query1",
-                                            "query": "sum:cisco_sdwan.crash.count{type:vedge,$hostname,$site_id,$device_namespace} by {hostname,system_ip,site_id}.as_count()"
+                                            "query": "sum:cisco_sdwan.crash.count{type:vedge,$hostname,$site_id,$device_namespace,$system_ip} by {hostname,system_ip,site_id}.as_count()"
                                         }
                                     ],
                                     "response_format": "timeseries",
@@ -1272,7 +1588,7 @@
                                         {
                                             "data_source": "metrics",
                                             "name": "query2",
-                                            "query": "sum:cisco_sdwan.device.uptime{type:vedge,$hostname,$site_id,$device_namespace} by {hostname,system_ip,site_id}"
+                                            "query": "sum:cisco_sdwan.device.uptime{type:vedge,$hostname,$site_id,$device_namespace,$system_ip} by {hostname,system_ip,site_id}"
                                         }
                                     ],
                                     "response_format": "timeseries",
@@ -1324,12 +1640,12 @@
                                         {
                                             "data_source": "metrics",
                                             "name": "query1",
-                                            "query": "sum:cisco_sdwan.interface.tx_bits{type:vedge,$hostname,$site_id,$device_namespace} by {hostname,system_ip,site_id}.as_count()"
+                                            "query": "sum:cisco_sdwan.interface.tx_bits{type:vedge,$hostname,$site_id,$device_namespace,$system_ip} by {hostname,system_ip,site_id}.as_count()"
                                         },
                                         {
                                             "data_source": "metrics",
                                             "name": "query2",
-                                            "query": "sum:cisco_sdwan.interface.rx_bits{type:vedge,$hostname,$site_id,$device_namespace} by {hostname,system_ip,site_id}.as_count()"
+                                            "query": "sum:cisco_sdwan.interface.rx_bits{type:vedge,$hostname,$site_id,$device_namespace,$system_ip} by {hostname,system_ip,site_id}.as_count()"
                                         }
                                     ],
                                     "response_format": "timeseries",
@@ -1381,12 +1697,12 @@
                                         {
                                             "data_source": "metrics",
                                             "name": "query1",
-                                            "query": "sum:cisco_sdwan.interface.tx_bps{type:vedge,$hostname,$site_id,$device_namespace} by {hostname,system_ip,site_id}"
+                                            "query": "sum:cisco_sdwan.interface.tx_bps{type:vedge,$hostname,$site_id,$device_namespace,$system_ip} by {hostname,system_ip,site_id}"
                                         },
                                         {
                                             "data_source": "metrics",
                                             "name": "query2",
-                                            "query": "sum:cisco_sdwan.interface.rx_bps{type:vedge,$hostname,$site_id,$device_namespace} by {hostname,system_ip,site_id}"
+                                            "query": "sum:cisco_sdwan.interface.rx_bps{type:vedge,$hostname,$site_id,$device_namespace,$system_ip} by {hostname,system_ip,site_id}"
                                         }
                                     ],
                                     "response_format": "timeseries",
@@ -1398,7 +1714,6 @@
                                 }
                             ],
                             "show_legend": false,
-                            "time": {},
                             "title": "Traffic (Bits per second)",
                             "title_align": "left",
                             "title_size": "16",
@@ -1422,10 +1737,6 @@
                                             "alias": "In Bandwidth Usage",
                                             "cell_display_mode": "bar",
                                             "formula": "query1",
-                                            "limit": {
-                                                "count": 50,
-                                                "order": "desc"
-                                            },
                                             "number_format": {
                                                 "unit": {
                                                     "type": "canonical_unit",
@@ -1472,46 +1783,56 @@
                                             "aggregator": "avg",
                                             "data_source": "metrics",
                                             "name": "query1",
-                                            "query": "avg:cisco_sdwan.interface.rx_bandwidth_usage{$hostname,$site_id,$device_namespace} by {site_id,hostname,interface,vpn_id}"
+                                            "query": "avg:cisco_sdwan.interface.rx_bandwidth_usage{$hostname,$site_id,$device_namespace,$system_ip,$interface} by {site_id,hostname,interface,vpn_id}"
                                         },
                                         {
                                             "aggregator": "avg",
                                             "data_source": "metrics",
                                             "name": "query2",
-                                            "query": "avg:cisco_sdwan.interface.tx_bandwidth_usage{$hostname,$site_id,$device_namespace} by {site_id,hostname,interface,vpn_id}"
+                                            "query": "avg:cisco_sdwan.interface.tx_bandwidth_usage{$hostname,$site_id,$device_namespace,$system_ip,$interface} by {site_id,hostname,interface,vpn_id}"
                                         },
                                         {
                                             "aggregator": "avg",
                                             "data_source": "metrics",
                                             "name": "query4",
-                                            "query": "sum:cisco_sdwan.interface.rx_errors{$hostname,$site_id,$device_namespace} by {site_id,hostname,interface,vpn_id}.as_count()"
+                                            "query": "sum:cisco_sdwan.interface.rx_errors{$hostname,$site_id,$device_namespace,$system_ip,$interface} by {site_id,hostname,interface,vpn_id}.as_count()"
                                         },
                                         {
                                             "aggregator": "avg",
                                             "data_source": "metrics",
                                             "name": "query5",
-                                            "query": "sum:cisco_sdwan.interface.tx_errors{$hostname,$site_id,$device_namespace} by {site_id,hostname,interface,vpn_id}.as_count()"
+                                            "query": "sum:cisco_sdwan.interface.tx_errors{$hostname,$site_id,$device_namespace,$system_ip,$interface} by {site_id,hostname,interface,vpn_id}.as_count()"
                                         },
                                         {
                                             "aggregator": "avg",
                                             "data_source": "metrics",
                                             "name": "query6",
-                                            "query": "sum:cisco_sdwan.interface.tx_bits{$hostname,$site_id,$device_namespace} by {site_id,hostname,interface,vpn_id}.as_count()"
+                                            "query": "sum:cisco_sdwan.interface.tx_bits{$hostname,$site_id,$device_namespace,$system_ip,$interface} by {site_id,hostname,interface,vpn_id}.as_count()"
                                         },
                                         {
                                             "aggregator": "avg",
                                             "data_source": "metrics",
                                             "name": "query7",
-                                            "query": "sum:cisco_sdwan.interface.rx_bits{$hostname,$site_id,$device_namespace} by {site_id,hostname,interface,vpn_id}.as_count()"
+                                            "query": "sum:cisco_sdwan.interface.rx_bits{$hostname,$site_id,$device_namespace,$system_ip,$interface} by {site_id,hostname,interface,vpn_id}.as_count()"
                                         },
                                         {
                                             "aggregator": "last",
                                             "data_source": "metrics",
                                             "name": "query3",
-                                            "query": "avg:cisco_sdwan.interface.speed{$hostname,$site_id,$device_namespace} by {site_id,hostname,interface,vpn_id}"
+                                            "query": "avg:cisco_sdwan.interface.speed{$hostname,$site_id,$device_namespace,$system_ip,$interface} by {site_id,hostname,interface,vpn_id}"
                                         }
                                     ],
-                                    "response_format": "scalar"
+                                    "response_format": "scalar",
+                                    "sort": {
+                                        "count": 50,
+                                        "order_by": [
+                                            {
+                                                "index": 0,
+                                                "order": "desc",
+                                                "type": "formula"
+                                            }
+                                        ]
+                                    }
                                 }
                             ],
                             "title": "Interfaces",
@@ -1535,7 +1856,7 @@
                 "is_column_break": true,
                 "width": 12,
                 "x": 0,
-                "y": 23
+                "y": 26
             }
         }
     ]
