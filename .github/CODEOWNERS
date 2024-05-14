@@ -222,10 +222,10 @@ datadog_checks_base/tests/**/test_db_statements.py  @DataDog/database-monitoring
 /oracle/*.md                                        @DataDog/database-monitoring @DataDog/agent-integrations @DataDog/documentation
 /oracle/manifest.json                               @DataDog/database-monitoring @DataDog/agent-integrations @DataDog/documentation
 /oracle/assets/logs/                                @DataDog/database-monitoring @DataDog/agent-integrations @DataDog/documentation @DataDog/logs-backend
-/mongo/                                             @DataDog/database-monitoring-agent @DataDog/agent-integrations
-/mongo/*.md                                         @DataDog/database-monitoring @DataDog/agent-integrations @DataDog/documentation
-/mongo/manifest.json                                @DataDog/database-monitoring @DataDog/agent-integrations @DataDog/documentation
-/mongo/assets/logs/                                 @DataDog/database-monitoring @DataDog/agent-integrations @DataDog/documentation @DataDog/logs-backend
+/mongo/                                             @DataDog/agent-integrations @DataDog/database-monitoring-agent
+/mongo/*.md                                         @DataDog/agent-integrations @DataDog/database-monitoring @DataDog/documentation
+/mongo/manifest.json                                @DataDog/agent-integrations @DataDog/database-monitoring @DataDog/documentation
+/mongo/assets/logs/                                 @DataDog/agent-integrations @DataDog/database-monitoring @DataDog/documentation @DataDog/logs-backend
 
 # APM Integrations
 /langchain/         @DataDog/ml-observability @DataDog/agent-integrations @DataDog/documentation
