@@ -228,6 +228,9 @@ class MongoDb(AgentCheck):
             self._refresh_deployment()
             self._collect_metrics()
             self._send_database_instance_metadata()
+
+            # DBM
+            self._operation_samples.run()
         except CRITICAL_FAILURE as e:
             self.service_check(SERVICE_CHECK_NAME, AgentCheck.CRITICAL, tags=self._config.service_check_tags)
             self._unset_metadata()
