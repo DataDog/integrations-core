@@ -3,9 +3,9 @@
 # Licensed under a 3-clause BSD style license (see LICENSE)
 
 
+from bson import json_util
 from collections import defaultdict
 from enum import Enum
-import json
 import time
 
 try:
@@ -86,7 +86,7 @@ class MongoOperationSamples(object):
                 "definition": explain_plan,
                 "query_hash": explain_plan.get('queryPlanner', {}).get('queryHash'),
                 'plan_cache_key': explain_plan.get('queryPlanner', {}).get('planCacheKey'),
-                "signature": compute_exec_plan_signature(json.dumps(explain_plan)),
+                "signature": compute_exec_plan_signature(json_util.dumps(explain_plan)),
             },
         except Exception as e:
             self._check.log.error("Could not explain command %s: %s", command, e)
@@ -161,7 +161,7 @@ class MongoOperationSamples(object):
         return formatted
 
     def _get_query_signature(self, command):
-        obfuscated_command = datadog_agent.obfuscate_mongodb_string(json.dumps(command))
+        obfuscated_command = datadog_agent.obfuscate_mongodb_string(json_util.dumps(command))
         return compute_exec_plan_signature(obfuscated_command)
 
     def _create_operation_sample_payload(self, operation, operation_metadata, query_signature, explain_plan):
@@ -182,7 +182,7 @@ class MongoOperationSamples(object):
                 "resource_hash": query_signature,
                 "application": operation_metadata['application'],
                 "user": operation_metadata['user'],
-                "statement": json.dumps(operation['command']),
+                "statement": json_util.dumps(operation['command']),
                 "metadata": {
                     "operation": operation_metadata['operation'],
                     "shard": operation_metadata['shard'],
