@@ -6,7 +6,7 @@
   "tags": [
     "integration:cisco-sdwan"
   ],
-  "description": "This monitor detects instances of repeated reboots, serving as an indicator for potential issues like software-related glitches, low memory conditions, corrupt software images, hardware faults, or software bugs. By identifying these concerns, it ensures network stability and optimized performance.",
+  "description": "Repeated reboots are an indication of potential issues like software-related glitches, low memory conditions, corrupt software images, hardware faults, or software bugs. By identifying these concerns, this monitor ensures network stability and optimized performance.",
   "definition": {
 	"name": "[Cisco SD-WAN] Device {{hostname.name}} ({{system_ip.name}}) rebooted more than 3 times in the last 10 minutes",
 	"type": "query alert",
