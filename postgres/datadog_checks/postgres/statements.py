@@ -218,9 +218,6 @@ class PostgresStatementMetrics(DBMAsyncJob):
 
                 for row in rows:
                     queryid = row[0]
-                    if queryid is None:
-                        continue
-
                     calls = row[1]
                     self._query_calls_cache.set_calls(queryid, calls)
 
