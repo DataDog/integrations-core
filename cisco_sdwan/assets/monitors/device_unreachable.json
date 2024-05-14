@@ -20,11 +20,7 @@
 		"notify_audit": false,
 		"include_tags": true,
 		"new_group_delay": 60,
-		"notify_no_data": false,
-		"silenced": {},
-		"avalanche_window": 10
-	},
-	"priority": null,
-	"restricted_roles": null
+		"notify_no_data": false
+	}
   }
 }

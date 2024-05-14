@@ -19,7 +19,8 @@
 		},
 		"notify_audit": false,
 		"include_tags": true,
-		"new_group_delay": 60
+		"new_group_delay": 60,
+		"notify_no_data": false
 	}
   }
 }

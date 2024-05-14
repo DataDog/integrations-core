@@ -21,11 +21,8 @@
 			"include_tags": true,
 			"new_group_delay": 60,
 			"notify_no_data": false,
-			"silenced": {},
 			"avalanche_window": 10,
 			"evaluation_delay": 1200
-		},
-		"priority": null,
-		"restricted_roles": null
+		}
 	}
 }
