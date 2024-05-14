@@ -47,6 +47,7 @@ SELECT {cols}
   {extra_clauses}
 """
 
+
 def statements_query(**kwargs):
     pg_stat_statements_view = kwargs.get('pg_stat_statements_view', 'pg_stat_statements')
     cols = kwargs.get('cols', '*')
@@ -66,6 +67,7 @@ def statements_query(**kwargs):
         queryid_filter=queryid_filter,
         called_queryids=called_queryids,
     )
+
 
 BASELINE_METRICS_EXPIRY = 60 * 10  # 10 minutes
 
@@ -527,7 +529,7 @@ class PostgresStatementMetrics(DBMAsyncJob):
             rows = self._load_pg_stat_statements()
             rows = self._normalize_queries(rows)
         elif len(self._baseline_metrics) == 0:
-            # When we don't have baseline metrics (either on the first run or after cache expiry), 
+            # When we don't have baseline metrics (either on the first run or after cache expiry),
             # we fetch all rows from pg_stat_statements, and update the initial state of relevant
             # caches.
             rows = self._load_pg_stat_statements()

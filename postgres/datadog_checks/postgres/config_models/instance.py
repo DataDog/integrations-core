@@ -156,6 +156,7 @@ class QueryMetrics(BaseModel):
     )
     collection_interval: Optional[float] = None
     enabled: Optional[bool] = None
+    incremental_query_metrics: Optional[bool] = None
     pg_stat_statements_max_warning_threshold: Optional[float] = None
 
 
