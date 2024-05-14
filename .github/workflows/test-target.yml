@@ -246,7 +246,7 @@ jobs:
       if: inputs.repo == 'core' && always()
       uses: actions/upload-artifact@v4
       with:
-        name: "${{ inputs.traces-artifact-name }}-${{ inputs.target }}"
+        name: "${{ inputs.traces-artifact-name }}-${{ inputs.target }}-${{ inputs.platform }}"
         path: "${{ env.TRACE_CAPTURE_FILE }}"
 
     - name: Finalize test results
