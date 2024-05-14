@@ -42,8 +42,7 @@ def test_statement_queryid_cache_snapshot_eviction():
 
 def test_statement_queryid_multiple_inserts():
     cache = QueryCallsCache()
-    cache.set_calls([{'queryid': 123, 'calls': 100}])
-    cache.set_calls([{'queryid': 124, 'calls': 5}])
+    cache.set_calls([{'queryid': 123, 'calls': 100}, {'queryid': 124, 'calls': 5}])
 
     assert cache.cache[123] == 100
     assert cache.cache[124] == 5
