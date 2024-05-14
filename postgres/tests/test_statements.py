@@ -77,6 +77,7 @@ def test_dbm_enabled_config(integration_check, dbm_instance, dbm_enabled_key, db
     assert check._config.dbm_enabled == dbm_enabled
 
 
+@requires_over_10
 def test_statement_metrics_multiple_pgss_rows_single_query_signature(
     aggregator,
     integration_check,
