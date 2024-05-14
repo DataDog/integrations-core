@@ -31,6 +31,7 @@ from datadog_checks.mongo.collectors.jumbo_stats import JumboStatsCollector
 from datadog_checks.mongo.collectors.session_stats import SessionStatsCollector
 from datadog_checks.mongo.common import SERVICE_CHECK_NAME, MongosDeployment, ReplicaSetDeployment
 from datadog_checks.mongo.config import MongoConfig
+from datadog_checks.mongo.dbm.operation_samples import MongoOperationSamples
 
 from . import metrics
 
@@ -93,6 +94,9 @@ class MongoDb(AgentCheck):
         )  # type: TTLCache
 
         self.diagnosis.register(self._diagnose_tls)
+
+        # DBM
+        self._operation_samples = MongoOperationSamples(check=self)
 
     @cached_property
     def api_client(self):
