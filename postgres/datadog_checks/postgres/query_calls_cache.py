@@ -18,25 +18,30 @@ class QueryCallsCache:
         self.called_queryids = self.next_called_queryids
         self.next_called_queryids = set()
 
-    def set_calls(self, queryid, calls):
+    def set_calls(self, rows):
         """Updates the cache of calls per query id.
 
         Returns whether or not the number of calls changed based on
         the newly updated value. The first seen update for a queryid
         does not count as a change in values since that would result
         in an inflated value."""
-        calls_changed = False
+        for row in rows:
+            queryid = row['queryid']
+            calls = row['calls']
+            calls_changed = False
 
-        if queryid in self.cache:
-            diff = calls - self.cache[queryid]
-            # Positive deltas mean the statement remained in pg_stat_statements
-            # between check calls. Negative deltas mean the statement was evicted
-            # and replaced with a new call count. Both cases should count as a call
-            # change.
-            calls_changed = diff != 0
-        else:
-            calls_changed = True
+            if queryid in self.cache:
+                diff = calls - self.cache[queryid]
+                # Positive deltas mean the statement remained in pg_stat_statements
+                # between check calls. Negative deltas mean the statement was evicted
+                # and replaced with a new call count. Both cases should count as a call
+                # change.
+                calls_changed = diff != 0
+            else:
+                calls_changed = True
 
-        self.next_cache[queryid] = calls
-        if calls_changed:
-            self.next_called_queryids.add(queryid)
+            self.next_cache[queryid] = calls
+            if calls_changed:
+                self.next_called_queryids.add(queryid)
+
+        self.end_query_call_snapshot()
