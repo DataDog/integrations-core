@@ -72,17 +72,13 @@ class MongoOperationSamples(object):
             for operation in operations:
                 yield operation
     
-    def _get_explain_plan(self, command, dbnames):
+    def _get_explain_plan(self, command):
         if command.get("$db") == "admin":
             # Skip system operations
             self._check.log.debug("Skipping system operation: %s", command)
             return
 
         dbname = command.pop("$db")
-        if not dbname or dbname not in dbnames:
-            # Skip operations on databases we don't monitor
-            self._check.log.debug("Skipping operation on database %s: %s", dbname, command)
-            return
         try:
             explain_plan = self._check.api_client[dbname].command("explain", command)
             explain_plan.pop('command')  # Remove the original command from the explain plan
@@ -200,7 +196,6 @@ class MongoOperationSamples(object):
         return event
             
     def _get_operation_samples(self, now, active_connections, activities):
-        dbnames = set(self._check._get_db_names())
         for operation in self._get_current_op():
             command = operation.get("command")
             if not command:
@@ -213,7 +208,7 @@ class MongoOperationSamples(object):
             self._record_active_connection(operation, operation_metadata, active_connections)
             self._record_activity(now, operation, operation_metadata, query_signature, activities)
 
-            explain_plan = self._get_explain_plan(command, dbnames)
+            explain_plan = self._get_explain_plan(command)
             yield self._create_operation_sample_payload(operation, operation_metadata, query_signature, explain_plan)
 
     def _record_active_connection(self, operation, operation_metadata, active_connections):
