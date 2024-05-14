@@ -155,7 +155,7 @@ class MongoOperationSamples(object):
         for key, value in metric_dict.items():
             key = self._check.convert_to_underscore_separated(key)
             if isinstance(value, dict):
-                formatted[key] = self._format_metric_name(value)
+                formatted[key] = self._format_key_name(value)
             else:
                 formatted[key] = value
         return formatted
