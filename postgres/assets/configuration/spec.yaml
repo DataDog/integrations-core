@@ -428,6 +428,14 @@ files:
           value:
             type: number
             example: 10000
+        - name: incremental_query_metrics
+          hidden: true
+          description: |
+            Enable an experimental performance optimization that reduces the amount of data queried from `pg_stat_statements`
+            when calculating query metrics. This option is only available for PostgreSQL 10.0 and above.
+          value:
+            type: boolean
+            example: true
     - name: query_samples
       description: Configure collection of query samples
       options:

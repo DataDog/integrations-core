@@ -523,7 +523,7 @@ class PostgresStatementMetrics(DBMAsyncJob):
         self._emit_pg_stat_statements_dealloc()
 
         rows = []
-        if self._check.version < V10:
+        if (not self._config.incremental_query_metrics) or self._check.version < V10:
             rows = self._load_pg_stat_statements()
             rows = self._normalize_queries(rows)
         elif len(self._baseline_metrics) == 0:
