@@ -27,6 +27,6 @@ cisco_sdwan.tunnel.loss,gauge,,percent,,The packet loss of the tunnel.,0,cisco_s
 cisco_sdwan.tunnel.qoe,gauge,,,,The QOE score of the tunnel.,0,cisco_sdwan,,
 cisco_sdwan.tunnel.rx_bits,count,,bit,,The total number of bits received through the tunnel.,0,cisco_sdwan,,
 cisco_sdwan.tunnel.rx_packets,count,,packet,,The total number of packets received through the tunnel.,0,cisco_sdwan,,
-cisco_sdwan.tunnel.status,gauge,,,,"The status of the tunnel. The value is 1 if the session is up, 0 otherwise.",0,cisco_sdwan,,
+cisco_sdwan.tunnel.status,gauge,,,,"The status of the tunnel. The value is 1 if the tunnel is up, 0 otherwise.",0,cisco_sdwan,,
 cisco_sdwan.tunnel.tx_bits,count,,bit,,The total number of bits transmitted out through the tunnel.,0,cisco_sdwan,,
 cisco_sdwan.tunnel.tx_packets,count,,packet,,The total number of packets transmitted out through the tunnel.,0,cisco_sdwan,,
