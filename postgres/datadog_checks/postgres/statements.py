@@ -520,14 +520,15 @@ class PostgresStatementMetrics(DBMAsyncJob):
     @tracked_method(agent_check_getter=agent_check_getter, track_result_length=True)
     def _collect_metrics_rows(self):
         self._emit_pg_stat_statements_metrics()
-        self._emit_pg_stat_statements_dealloc()
-
+        self._emit_pg_stat_sta
         self._check_baseline_metrics_expiry()
         rows = []
         if (not self._config.incremental_query_metrics) or self._check.version < V10:
+            print("[AMW] feature flag off branch")
             rows = self._load_pg_stat_statements()
             rows = self._normalize_queries(rows)
         elif len(self._baseline_metrics) == 0:
+            print("[AMW] baseline queries")
             # When we don't have baseline metrics (either on the first run or after cache expiry),
             # we fetch all rows from pg_stat_statements, and update the initial state of relevant
             # caches.
@@ -536,6 +537,7 @@ class PostgresStatementMetrics(DBMAsyncJob):
             self._query_calls_cache.set_calls(rows)
             self._apply_called_queries(rows)
         else:
+            print("[AMW] incremental queries")
             # When we do have baseline metrics, use them to construct the full set of rows
             # so that compute_derivative_rows can merge duplicates and calculate deltas.
             self._check_called_queries()
