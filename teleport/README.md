@@ -1,17 +1,17 @@
 # Agent Check: Teleport
 
-## Overview
+<div class="alert alert-warning">
+Please note, this integration is in public beta and should be enabled on production workloads with caution.
+</div>
 
+## Overview
 This check monitors [Teleport][1] through the Datadog Agent.
 
 ## Setup
-
 Follow the instructions below to install and configure this check for an Agent running on a host. For containerized environments, see the [Autodiscovery Integration Templates][3] for guidance on applying these instructions.
 
 ### Installation
-
-The Teleport check is included in the [Datadog Agent][2] package.
-No additional installation is needed on your server.
+To install the Teleport integration, run the following command on a host with a running Agent: `datadog-agent integration install datadog-teleport==1.0.0`
 
 ### Prerequisites
 
