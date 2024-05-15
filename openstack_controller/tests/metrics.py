@@ -4833,4 +4833,32 @@ STACKS_METRICS_HEAT = [
             'project_name:demo',
         ],
     },
+    {
+        'name': 'openstack.heat.stack.up',
+        'count': 1,
+        'value': False,
+        'tags': [
+            'stack_id:36004d0b-715c-442b-a0b9-605111f381c2',
+            'stack_name:teststack',
+            'stack_status:CREATE_FAILED',
+            'keystone_server:http://127.0.0.1:8080/identity',
+            'domain_id:default',
+            'project_id:1e6e233e637d4d55a50a62b63398ad15',
+            'project_name:demo',
+        ],
+    },
+    {
+        'name': 'openstack.heat.stack.up',
+        'count': 1,
+        'value': False,
+        'tags': [
+            'stack_id:0a90fd9f-b411-440d-9e75-960c0bc88c54',
+            'stack_name:teststack1',
+            'stack_status:CREATE_FAILED',
+            'keystone_server:http://127.0.0.1:8080/identity',
+            'domain_id:default',
+            'project_id:1e6e233e637d4d55a50a62b63398ad15',
+            'project_name:demo',
+        ],
+    },
 ]

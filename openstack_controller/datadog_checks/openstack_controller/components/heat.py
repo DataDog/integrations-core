@@ -5,11 +5,11 @@
 
 from datadog_checks.openstack_controller.components.component import Component
 from datadog_checks.openstack_controller.metrics import (
-    HEAT_METRICS_PREFIX,
     HEAT_RESPONSE_TIME,
     HEAT_SERVICE_CHECK,
     HEAT_STACK_COUNT,
     HEAT_STACK_METRICS,
+    HEAT_STACK_PREFIX,
     HEAT_STACK_TAGS,
     get_metrics_and_tags,
 )
@@ -42,14 +42,14 @@ class Heat(Component):
                 stack = get_metrics_and_tags(
                     item,
                     tags=HEAT_STACK_TAGS,
-                    prefix=HEAT_METRICS_PREFIX,
+                    prefix=HEAT_STACK_PREFIX,
                     metrics=HEAT_STACK_METRICS,
                     lambda_name=lambda key: 'up' if key == 'stack_status' else key,
                     lambda_value=lambda key, value, item=item: (
                         item['stack_status'] == 'CREATE_COMPLETE' if key == 'stack_status' else value
                     ),
                 )
-                self.check.log.debug("stack: %s", stack)
                 self.check.gauge(HEAT_STACK_COUNT, 1, tags=tags + stack['tags'])
+                self.check.log.debug("stack: %s", stack)
                 for metric, value in stack['metrics'].items():
                     self.check.gauge(metric, value, tags=tags + stack['tags'])
