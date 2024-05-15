@@ -25,7 +25,9 @@
   },
   "assets": {
     "integration": {
-      "source_type_name": "Win32",
+      "source_type_id": 47,
+      "source_type_name": "Event Viewer",
+      "auto_install": true,
       "configuration": {
         "spec": "assets/configuration/spec.yaml"
       },
