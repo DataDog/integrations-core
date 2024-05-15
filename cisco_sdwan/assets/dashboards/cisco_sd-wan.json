@@ -216,7 +216,7 @@
                                             "aggregator": "last",
                                             "data_source": "metrics",
                                             "name": "query1",
-                                            "query": "sum:cisco_sdwan.tunnel.status{$device_namespace} by {site_id}"
+                                            "query": "sum:cisco_sdwan.tunnel.status{$device_namespace} by {site_id,device_namespace}"
                                         }
                                     ],
                                     "response_format": "scalar"
@@ -299,7 +299,7 @@
                                             "aggregator": "last",
                                             "data_source": "metrics",
                                             "name": "query1",
-                                            "query": "avg:cisco_sdwan.device.reachable{type:vbond,$device_namespace,$system_ip}"
+                                            "query": "avg:cisco_sdwan.device.reachable{type:vbond,$device_namespace,$system_ip} by {device_namespace,system_ip}"
                                         }
                                     ],
                                     "response_format": "scalar"
@@ -346,7 +346,7 @@
                                             "aggregator": "last",
                                             "data_source": "metrics",
                                             "name": "query1",
-                                            "query": "avg:cisco_sdwan.device.reachable{type:vbond,$device_namespace,$system_ip} by {system_ip}"
+                                            "query": "avg:cisco_sdwan.device.reachable{type:vbond,$device_namespace,$system_ip} by {system_ip,device_namespace}"
                                         }
                                     ],
                                     "response_format": "scalar"
@@ -393,7 +393,7 @@
                                             "aggregator": "last",
                                             "data_source": "metrics",
                                             "name": "query1",
-                                            "query": "avg:cisco_sdwan.device.reachable{type:vsmart,$device_namespace,$system_ip} by {system_ip}"
+                                            "query": "avg:cisco_sdwan.device.reachable{type:vsmart,$device_namespace,$system_ip} by {system_ip,device_hostname}"
                                         }
                                     ],
                                     "response_format": "scalar"
@@ -440,7 +440,7 @@
                                             "aggregator": "last",
                                             "data_source": "metrics",
                                             "name": "query1",
-                                            "query": "avg:cisco_sdwan.device.reachable{type:vsmart,$device_namespace,$system_ip} by {system_ip}"
+                                            "query": "avg:cisco_sdwan.device.reachable{type:vsmart,$device_namespace,$system_ip} by {system_ip,device_namespace}"
                                         }
                                     ],
                                     "response_format": "scalar"
@@ -487,7 +487,7 @@
                                             "aggregator": "last",
                                             "data_source": "metrics",
                                             "name": "query1",
-                                            "query": "avg:cisco_sdwan.device.reachable{type:vmanage,$device_namespace,$system_ip} by {system_ip}"
+                                            "query": "avg:cisco_sdwan.device.reachable{type:vmanage,$device_namespace,$system_ip} by {system_ip,device_namespace}"
                                         }
                                     ],
                                     "response_format": "scalar"
@@ -534,7 +534,7 @@
                                             "aggregator": "last",
                                             "data_source": "metrics",
                                             "name": "query1",
-                                            "query": "avg:cisco_sdwan.device.reachable{type:vmanage,$device_namespace,$system_ip} by {system_ip}"
+                                            "query": "avg:cisco_sdwan.device.reachable{type:vmanage,$device_namespace,$system_ip} by {system_ip,device_namespace}"
                                         }
                                     ],
                                     "response_format": "scalar"
@@ -799,7 +799,7 @@
                                             "aggregator": "last",
                                             "data_source": "metrics",
                                             "name": "query1",
-                                            "query": "avg:cisco_sdwan.tunnel.status{$hostname,$site_id,$device_namespace,state:up,$system_ip} by {system_ip,local_color,remote_color,remote_system_ip}"
+                                            "query": "avg:cisco_sdwan.tunnel.status{$hostname,$site_id,$device_namespace,state:up,$system_ip} by {system_ip,local_color,remote_color,remote_system_ip,device_namespace}"
                                         }
                                     ],
                                     "response_format": "scalar"
@@ -842,7 +842,7 @@
                                             "aggregator": "last",
                                             "data_source": "metrics",
                                             "name": "query1",
-                                            "query": "avg:cisco_sdwan.tunnel.status{$hostname,$site_id,$device_namespace,state:down,$system_ip} by {system_ip,local_color,remote_color,remote_system_ip}"
+                                            "query": "avg:cisco_sdwan.tunnel.status{$hostname,$site_id,$device_namespace,state:down,$system_ip} by {system_ip,local_color,remote_color,remote_system_ip,device_namespace}"
                                         }
                                     ],
                                     "response_format": "scalar"
@@ -1205,7 +1205,7 @@
                                             "aggregator": "last",
                                             "data_source": "metrics",
                                             "name": "query1",
-                                            "query": "avg:cisco_sdwan.device.reachable{type:vedge,$device_namespace,$site_id,$system_ip} by {system_ip}"
+                                            "query": "avg:cisco_sdwan.device.reachable{type:vedge,$device_namespace,$site_id,$system_ip} by {system_ip,device_namespace}"
                                         }
                                     ],
                                     "response_format": "scalar"
@@ -1252,7 +1252,7 @@
                                             "aggregator": "last",
                                             "data_source": "metrics",
                                             "name": "query1",
-                                            "query": "avg:cisco_sdwan.device.reachable{type:vedge,$device_namespace,$site_id,$system_ip} by {system_ip}"
+                                            "query": "avg:cisco_sdwan.device.reachable{type:vedge,$device_namespace,$site_id,$system_ip} by {system_ip,device_namespace}"
                                         }
                                     ],
                                     "response_format": "scalar"
