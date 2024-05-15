@@ -1,7 +1,7 @@
 # Agent Check: Teleport
 
 <div class="alert alert-warning">
-Please note, this integration is in public beta and should be enabled on production workloads with caution.
+This integration is in public beta and should be enabled on production workloads with caution.
 </div>
 
 ## Overview
