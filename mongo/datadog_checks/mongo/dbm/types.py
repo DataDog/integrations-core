@@ -36,7 +36,7 @@ class OperationSampleEventNetwork(TypedDict, total=False):
 
 
 class OperationSampleEventDatabaseMetadata(TypedDict, total=False):
-    operation: Optional[str]
+    op: Optional[str]
     shard: Optional[str]  # only available when sampling mongos
     collection: Optional[str]
     comment: Optional[str]

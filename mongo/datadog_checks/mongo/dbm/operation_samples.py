@@ -246,7 +246,7 @@ class MongoOperationSamples(DBMAsyncJob):
                 "user": operation_metadata['user'],
                 "statement": json_util.dumps(obfuscated_command),
                 "metadata": {
-                    "operation": operation_metadata['operation'],
+                    "op": operation_metadata['op'],
                     "shard": operation_metadata['shard'],
                     "collection": operation_metadata['collection'],
                     "comment": operation_metadata['comment'],
