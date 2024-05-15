@@ -16,7 +16,10 @@
       "Category::Log Collection",
       "Supported OS::Linux",
       "Supported OS::Windows",
-      "Supported OS::macOS"
+      "Supported OS::macOS",
+      "Category::Network",
+      "Submitted Data Type::Metrics",
+      "Submitted Data Type::Logs"
     ]
   },
   "author": {

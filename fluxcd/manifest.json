@@ -16,7 +16,9 @@
       "Category::Developer Tools",
       "Supported OS::Linux",
       "Supported OS::Windows",
-      "Supported OS::macOS"
+      "Supported OS::macOS",
+      "Submitted Data Type::Metrics",
+      "Submitted Data Type::Logs"
     ]
   },
   "author": {
