@@ -28,7 +28,6 @@ class OperationSampleClient(TypedDict, total=False):
     driver: Optional[OperationSampleClientDriver]
     os: Optional[OperationSampleClientOs]
     platform: Optional[str]
-    mongos: Optional[OperationSampleClientMongos]
 
 
 class OperationSampleEventNetwork(TypedDict, total=False):
@@ -121,6 +120,7 @@ class OperationSampleOperationStats(TypedDict, total=False):
     opid: str
     ns: Optional[str]
     plan_summary: Optional[str]
+    current_op_time: str
     microsecs_running: Optional[int]
     prepare_read_conflicts: Optional[int]
     write_conflicts: Optional[int]

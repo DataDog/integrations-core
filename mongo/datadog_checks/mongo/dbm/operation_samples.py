@@ -46,10 +46,11 @@ SAMPLE_EXCLUDE_KEYS = {
 class MongoOperationSamples(DBMAsyncJob):
     def __init__(self, check):
         self._operation_samples_config = check._config.operation_samples
+        self._collection_interval = self._operation_samples_config['collection_interval']
 
         super(MongoOperationSamples, self).__init__(
             check,
-            rate_limit=1 / self._operation_samples_config['collection_interval'],
+            rate_limit=1 / self._collection_interval,
             run_sync=self._operation_samples_config.get('run_sync', True),  # Default to running sync
             enabled=self._operation_samples_config['enabled'],
             dbms="mongodb",
@@ -84,7 +85,7 @@ class MongoOperationSamples(DBMAsyncJob):
 
             obfuscated_command = datadog_agent.obfuscate_mongodb_string(json_util.dumps(command))
             query_signature = self._get_query_signature(obfuscated_command)
-            operation_metadata = self._get_operation_metadata(command)
+            operation_metadata = self._get_operation_metadata(operation)
 
             self._record_active_connection(operation, operation_metadata, active_connections)
             activity_record = self._create_activity(
@@ -107,7 +108,8 @@ class MongoOperationSamples(DBMAsyncJob):
                 yield operation
 
     def _should_explain(self, op: Optional[str], command: dict) -> bool:
-        if command.get("$db") == "admin":
+        dbname = command.get("$db")
+        if not dbname or dbname == "admin":
             # Skip system operations
             self._check.log.debug("Skipping explain system operation: %s", command)
             return False
@@ -117,7 +119,7 @@ class MongoOperationSamples(DBMAsyncJob):
             self._check.log.debug("Skipping explain operation without operation type: %s", command)
             return False
 
-        if op in ('getMore', 'insert', 'update', 'getmore', 'killcursors'):
+        if op in ('getMore', 'insert', 'update', 'getmore', 'killcursors', 'remove'):
             # Skip operations that are not queries
             self._check.log.debug("Skipping explain operation type %s: %s", op, command)
             return False
@@ -152,7 +154,7 @@ class MongoOperationSamples(DBMAsyncJob):
     def _get_command_collection(self, command: dict) -> Optional[str]:
         for key in ('collection', 'find', 'aggregate', 'update', 'insert', 'delete', 'findAndModify'):
             collection = command.get(key)
-            if collection:
+            if collection and isinstance(collection, str):  # edge case like {'aggregate': 1}
                 return collection
 
     def _get_operation_client(self, operation: dict) -> OperationSampleClient:
@@ -163,7 +165,6 @@ class MongoOperationSamples(DBMAsyncJob):
             'driver': client_metadata.get('driver'),
             'os': client_metadata.get('os'),
             'platform': client_metadata.get('platform'),
-            'mongos': client_metadata.get('mongos'),
         }
 
     def _get_operation_user(self, operation: dict) -> Optional[str]:
@@ -199,6 +200,7 @@ class MongoOperationSamples(DBMAsyncJob):
             'opid': operation.get('opid'),  # str
             'ns': operation.get('ns'),  # str
             'plan_summary': operation.get('planSummary'),  # str
+            'current_op_time': operation.get('currentOpTime'),  # str  start time of the operation
             'microsecs_running': operation.get('microsecs_running'),  # int
             # Conflicts
             'prepare_read_conflicts': operation.get('prepareReadConflicts', 0),  # int
@@ -253,7 +255,14 @@ class MongoOperationSamples(DBMAsyncJob):
                 },
                 "query_truncated": operation_metadata['truncated'],
             },
-            'mongodb': self._create_activity(now, operation, operation_metadata, query_signature),
+            'mongodb': self._create_activity(
+                now,
+                operation,
+                operation_metadata,
+                obfuscated_command,
+                query_signature,
+                exclude_keys=SAMPLE_EXCLUDE_KEYS,
+            ),
         }
         return event
 
@@ -305,7 +314,7 @@ class MongoOperationSamples(DBMAsyncJob):
             "ddagentversion": datadog_agent.get_version(),
             "ddsource": "mongodb",
             "dbm_type": "activity",
-            "collection_interval": self.collection_interval,
+            "collection_interval": self._collection_interval,
             "ddtags": ",".join(self._check._get_tags(include_deployment_tags=True)),
             "timestamp": now * 1000,
             "mongodb_activity": activities,
