@@ -1,4 +1,4 @@
-id: argo_rollouts
+id: argo-rollouts
 metric_id: argo-rollouts
 backend_only: false
 facets:
@@ -17,7 +17,7 @@ pipeline:
   name: Argo Rollouts
   enabled: true
   filter:
-    query: source:argo_rollouts OR source:argo-rollouts
+    query: source:argo-rollouts
   processors:
     - type: grok-parser
       name: Parsing Argo Rollouts logs
