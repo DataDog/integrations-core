@@ -634,6 +634,18 @@ GLANCE_MEMBER_TAGS = {
     'status': 'status',
 }
 
+HEAT_METRICS_PREFIX = "openstack.heat"
+HEAT_SERVICE_CHECK = f"{HEAT_METRICS_PREFIX}.api.up"
+HEAT_RESPONSE_TIME = f"{HEAT_METRICS_PREFIX}.response_time"
+HEAT_STACK_PREFIX = f"{HEAT_METRICS_PREFIX}.stack"
+HEAT_STACK_COUNT = f"{HEAT_STACK_PREFIX}.count"
+HEAT_STACK_METRICS = {f"{HEAT_STACK_PREFIX}.up": {}}
+HEAT_STACK_TAGS = {
+    'id': 'stack_id',
+    'stack_name': 'stack_name',
+    'stack_status': 'stack_status',
+}
+
 
 def is_interface_metric(label):
     return any(seg in label for seg in ['_rx', '_tx'])

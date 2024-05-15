@@ -654,6 +654,13 @@ files:
                             properties:
                               - name: members
                                 type: boolean
+              - name: heat
+                anyOf:
+                  - type: boolean
+                  - type: object
+                    properties:
+                      - name: stacks
+                        type: boolean
             example:
               compute: false
         - name: projects
