@@ -154,6 +154,7 @@ class QueryMetrics(BaseModel):
         arbitrary_types_allowed=True,
         frozen=True,
     )
+    baseline_metrics_expiry: Optional[float] = None
     collection_interval: Optional[float] = None
     enabled: Optional[bool] = None
     incremental_query_metrics: Optional[bool] = None

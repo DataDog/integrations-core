@@ -69,8 +69,6 @@ def statements_query(**kwargs):
     )
 
 
-BASELINE_METRICS_EXPIRY = 60 * 10  # 10 minutes
-
 # Use pg_stat_statements(false) when available as an optimization to avoid pulling SQL text from disk
 PG_STAT_STATEMENTS_COUNT_QUERY = "SELECT COUNT(*) FROM pg_stat_statements(false)"
 PG_STAT_STATEMENTS_COUNT_QUERY_LT_9_4 = "SELECT COUNT(*) FROM pg_stat_statements"
@@ -513,7 +511,7 @@ class PostgresStatementMetrics(DBMAsyncJob):
     def _check_baseline_metrics_expiry(self):
         if (
             self._last_baseline_metrics_expiry is None
-            or self._last_baseline_metrics_expiry + BASELINE_METRICS_EXPIRY < time.time()
+            or self._last_baseline_metrics_expiry + self._config.baseline_metrics_expiry < time.time()
         ):
             self._baseline_metrics = {}
             self._query_calls_cache = QueryCallsCache()
@@ -524,6 +522,7 @@ class PostgresStatementMetrics(DBMAsyncJob):
         self._emit_pg_stat_statements_metrics()
         self._emit_pg_stat_statements_dealloc()
 
+        self._check_baseline_metrics_expiry()
         rows = []
         if (not self._config.incremental_query_metrics) or self._check.version < V10:
             rows = self._load_pg_stat_statements()
@@ -539,7 +538,6 @@ class PostgresStatementMetrics(DBMAsyncJob):
         else:
             # When we do have baseline metrics, use them to construct the full set of rows
             # so that compute_derivative_rows can merge duplicates and calculate deltas.
-            self._check_baseline_metrics_expiry()
             self._check_called_queries()
             rows = self._load_pg_stat_statements()
             rows = self._normalize_queries(rows)

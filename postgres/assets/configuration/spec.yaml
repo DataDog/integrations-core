@@ -437,6 +437,15 @@ files:
             type: boolean
             display_default: false
             example: false
+        - name: baseline_metrics_expiry
+          hidden: true
+          description: |
+            Set the cache expiry time (in seconds) for the baseline for query metrics. This option is only available when
+            `incremental_query_metrics` is enabled.
+          value:
+            type: number
+            display_default: 300
+            example: 300
     - name: query_samples
       description: Configure collection of query samples
       options:
