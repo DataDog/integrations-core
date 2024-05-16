@@ -10,9 +10,6 @@
         "type": "query alert",
         "query": "max(last_5m):avg:cluster_autoscaler.cluster_autoscaler_cluster_safe_to_autoscale{*} by {kube_cluster_name,env} < 0.5",
         "message": "Safe to autoscale metric is failing for a long time.\nThat's a generic, wide reaching metric that indicates the Kubernetes Cluster Autoscaler is not (yet?) healthy on that cluster. First things to check:\n\n* Is there an ongoing roll out\n* Look for errors in cluster-autoscaler logs and dashboard",
-        "tags": [
-            "integration:kubernetes_cluster_autoscaler"
-        ],
         "options": {
             "thresholds": {
                 "critical": 0.5
@@ -30,5 +27,8 @@
         "restriction_policy": {
             "bindings": []
         }
-    }
+    },
+    "tags": [
+        "integration:kubernetes_cluster_autoscaler"
+    ]
 }

@@ -10,9 +10,6 @@
         "type": "query alert",
         "query": "min(last_30m):sum:cluster_autoscaler.cluster_autoscaler_errors_total{*} by {env,kube_cluster_name} > 0",
         "message": "Kubernetes Cluster autoscaler reports errors.\nThat could be an IAM drop or a cloud provider rate limit.\n\nNote that if there is no data, this may be due to no errors having occurred since the process last started. This metric is not emitted by the server process until there is an error.",
-        "tags": [
-            "integration:kubernetes_cluster_autoscaler"
-        ],
         "options": {
             "thresholds": {
                 "critical": 0
@@ -30,5 +27,8 @@
         "restriction_policy": {
             "bindings": []
         }
-    }
+    },
+    "tags": [
+        "integration:kubernetes_cluster_autoscaler"
+    ]
 }

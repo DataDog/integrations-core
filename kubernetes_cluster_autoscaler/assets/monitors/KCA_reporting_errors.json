@@ -10,9 +10,6 @@
         "type": "query alert",
         "query": "max(next_12h):forecast(avg:cluster_autoscaler.cluster_autoscaler_unneeded_nodes_count{*} by {kube_cluster_name,env}, 'linear', 1, model='reactive', interval='30m', history='1mo') >= 500",
         "message": "The cluster autoscaler reports too many unused nodes.\n\nCheck if the cluster autoscaler is in cooldown for scale down.\n\nCheck if there is any pending pod waiting for upcoming node.\n\nCheck if there is any pending pod causing an infinite scale up.",
-        "tags": [
-            "integration:kubernetes_cluster_autoscaler"
-        ],
         "options": {
             "thresholds": {
                 "critical": 500,
@@ -33,5 +30,8 @@
         "restriction_policy": {
             "bindings": []
         }
-    }
+    },
+    "tags": [
+        "integration:kubernetes_cluster_autoscaler"
+    ]
 }
