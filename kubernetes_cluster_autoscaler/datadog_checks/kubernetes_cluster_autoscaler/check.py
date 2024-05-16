@@ -2,9 +2,9 @@
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
 
-from datadog_checks.base import OpenMetricsBaseCheckV2  
+from datadog_checks.base import OpenMetricsBaseCheckV2
 
-from .metrics import METRIC_MAP , RENAME_LABELS_MAP
+from .metrics import METRIC_MAP, RENAME_LABELS_MAP
 
 
 class KubernetesClusterAutoscalerCheck(OpenMetricsBaseCheckV2):
@@ -19,5 +19,4 @@ class KubernetesClusterAutoscalerCheck(OpenMetricsBaseCheckV2):
         return {
             'metrics': [METRIC_MAP],
             "rename_labels": RENAME_LABELS_MAP,
-
         }
