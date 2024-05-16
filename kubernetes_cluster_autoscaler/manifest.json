@@ -33,7 +33,7 @@
       },
       "metrics": {
         "prefix": "kubernetes_cluster_autoscaler.",
-        "check": "kubernetes_cluster_autoscaler.node.count",
+        "check": "kubernetes_cluster_autoscaler.nodes.count",
         "metadata_path": "metadata.csv"
       },
       "service_checks": {
