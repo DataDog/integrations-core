@@ -4,6 +4,8 @@
 import os
 
 from ..config import is_affirmative
+from profiling import Profiling
+
 
 try:
     import datadog_agent
@@ -19,10 +21,7 @@ try:
             patch(logging=True, requests=True)
 
     if is_affirmative(datadog_agent.get_config('integration_profiling')):
-        from ddtrace.profiling import Profiler
-
-        prof = Profiler(service='datadog-agent-integrations')
-        prof.start()
+        Profiling().start()
 
 except ImportError:
     # Tracing & profiling Integrations is only available with Agent 6
