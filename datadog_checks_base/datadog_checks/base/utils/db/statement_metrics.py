@@ -24,7 +24,7 @@ class StatementMetrics:
     def __init__(self):
         self._previous_statements = {}
 
-    def compute_derivative_rows(self, rows, metrics, log, key):
+    def compute_derivative_rows(self, rows, metrics, key):
         """
         Compute the first derivative of column-based metrics for a given set of rows. This function
         takes the difference of the previous check run's values and the current check run's values
@@ -82,11 +82,6 @@ class StatementMetrics:
             # No changes to the query; no metric needed
             if all(diffed_row[k] == 0 for k in metric_columns):
                 continue
-
-            if 'begin' in row['query']:
-                log.info("[AMW] metrics calc")
-                log.info("[AMW]     prev: " + str({k: prev[k] for k in ['query', 'queryid', 'query_signature', 'datname', 'rolname', 'calls' ]}))
-                log.info("[AMW]     curr: " + str({k: row[k] for k in ['query', 'queryid', 'query_signature', 'datname', 'rolname', 'calls' ]}))
 
             result.append(diffed_row)
 
