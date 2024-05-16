@@ -632,6 +632,30 @@ def connection_baremetal(request, mock_responses):
             for node in mock_responses('GET', '/baremetal/v1/nodes/detail')['nodes']
         ]
 
+    def portgroups(node_id, limit=None):
+        if http_error and 'portgroups' in http_error:
+            raise requests.exceptions.HTTPError(response=http_error['portgroups'])
+        return [
+            mock.MagicMock(
+                to_dict=mock.MagicMock(
+                    return_value=node,
+                )
+            )
+            for node in mock_responses('GET', f'/baremetal/v1/nodes/{node_id}/portgroups/detail')['portgroups']
+        ]
+
+    def ports(limit=None):
+        if http_error and 'ports' in http_error:
+            raise requests.exceptions.HTTPError(response=http_error['ports'])
+        return [
+            mock.MagicMock(
+                to_dict=mock.MagicMock(
+                    return_value=node,
+                )
+            )
+            for node in mock_responses('GET', '/baremetal/v1/ports/detail')['ports']
+        ]
+
     def conductors(limit=None):
         if http_error and 'conductors' in http_error:
             raise requests.exceptions.HTTPError(response=http_error['conductors'])
@@ -644,7 +668,64 @@ def connection_baremetal(request, mock_responses):
             for node in mock_responses('GET', '/baremetal/v1/conductors')['conductors']
         ]
 
-    return mock.MagicMock(nodes=mock.MagicMock(side_effect=nodes), conductors=mock.MagicMock(side_effect=conductors))
+    def volume_connectors(limit=None):
+        if http_error and 'connectors' in http_error:
+            raise requests.exceptions.HTTPError(response=http_error['connectors'])
+        return [
+            mock.MagicMock(
+                to_dict=mock.MagicMock(
+                    return_value=node,
+                )
+            )
+            for node in mock_responses('GET', '/baremetal/v1/volume/connectors')['connectors']
+        ]
+
+    def volume_targets(limit=None):
+        if http_error and 'targets' in http_error:
+            raise requests.exceptions.HTTPError(response=http_error['targets'])
+        return [
+            mock.MagicMock(
+                to_dict=mock.MagicMock(
+                    return_value=node,
+                )
+            )
+            for node in mock_responses('GET', '/baremetal/v1/volume/targets')['targets']
+        ]
+
+    def drivers():
+        if http_error and 'drivers' in http_error:
+            raise requests.exceptions.HTTPError(response=http_error['drivers'])
+        return [
+            mock.MagicMock(
+                to_dict=mock.MagicMock(
+                    return_value=node,
+                )
+            )
+            for node in mock_responses('GET', '/baremetal/v1/drivers')['drivers']
+        ]
+
+    def allocations(limit=None):
+        if http_error and 'allocations' in http_error:
+            raise requests.exceptions.HTTPError(response=http_error['allocations'])
+        return [
+            mock.MagicMock(
+                to_dict=mock.MagicMock(
+                    return_value=node,
+                )
+            )
+            for node in mock_responses('GET', '/baremetal/v1/allocations')['allocations']
+        ]
+
+    return mock.MagicMock(
+        nodes=mock.MagicMock(side_effect=nodes),
+        conductors=mock.MagicMock(side_effect=conductors),
+        portgroups=mock.MagicMock(side_effect=portgroups),
+        ports=mock.MagicMock(side_effect=ports),
+        volume_connectors=mock.MagicMock(side_effect=volume_connectors),
+        volume_targets=mock.MagicMock(side_effect=volume_targets),
+        drivers=mock.MagicMock(side_effect=drivers),
+        allocations=mock.MagicMock(side_effect=allocations),
+    )
 
 
 @pytest.fixture

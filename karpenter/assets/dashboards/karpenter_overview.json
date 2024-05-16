@@ -1,25 +1,13 @@
 {
     "author_name": "Datadog",
-    "description": null,
+    "description": "The Karpenter Overview dashboard provides insight into your Karpenter Nodes, Pods, and Karpenter metrics. Clone this dashboard to make changes and add your own graph widgets.\n\n### Useful Links\n\n- [Datadog Karpenter integration documentation](https://docs.datadoghq.com/integrations/karpenter/)",
     "layout_type": "ordered",
     "template_variables": [
         {
             "available_values": [],
             "default": "*",
-            "name": "cluster_name",
+            "name": "kube_cluster_name",
             "prefix": "kube_cluster_name"
-        },
-        {
-            "available_values": [],
-            "default": "*",
-            "name": "zone",
-            "prefix": "zone"
-        },
-        {
-            "available_values": [],
-            "default": "*",
-            "name": "instance_type",
-            "prefix": "instance_type"
         },
         {
             "available_values": [],
@@ -30,14 +18,20 @@
         {
             "available_values": [],
             "default": "*",
-            "name": "provisioner",
-            "prefix": "provisioner"
+            "name": "instance_type",
+            "prefix": "instance_type"
         },
         {
             "available_values": [],
             "default": "*",
-            "name": "host",
-            "prefix": "host"
+            "name": "nodepool",
+            "prefix": "nodepool"
+        },
+        {
+            "available_values": [],
+            "default": "*",
+            "name": "zone",
+            "prefix": "zone"
         }
     ],
     "title": "Karpenter Overview",
@@ -190,7 +184,7 @@
                                             "aggregator": "last",
                                             "data_source": "metrics",
                                             "name": "query1",
-                                            "query": "sum:karpenter.machines_created.count{$cluster_name,$provisioner,$namespace,$host,$zone} by {reason}.as_count()"
+                                            "query": "sum:karpenter.nodeclaims_created.count{$kube_cluster_name,$nodepool,$zone} by {reason,kube_cluster_name}.as_count()"
                                         }
                                     ],
                                     "response_format": "scalar"
@@ -202,6 +196,7 @@
                                     "type": "stacked"
                                 }
                             },
+                            "time": {},
                             "title": "Nodes Created by Karpenter by Reason",
                             "title_align": "left",
                             "title_size": "16",
@@ -233,7 +228,7 @@
                                             "aggregator": "last",
                                             "data_source": "metrics",
                                             "name": "query1",
-                                            "query": "sum:karpenter.machines_terminated.count{$cluster_name,$namespace,$host,$zone} by {reason}.as_count()"
+                                            "query": "sum:karpenter.nodeclaims_terminated.count{$kube_cluster_name,$zone} by {reason,kube_cluster_name}.as_count()"
                                         }
                                     ],
                                     "response_format": "scalar"
@@ -245,6 +240,7 @@
                                     "type": "stacked"
                                 }
                             },
+                            "time": {},
                             "title": "Nodes Deleted by Karpenter by Reason",
                             "title_align": "left",
                             "title_size": "16",
@@ -274,7 +270,7 @@
                                             "aggregator": "sum",
                                             "data_source": "metrics",
                                             "name": "query1",
-                                            "query": "sum:karpenter.nodes.created.count{$cluster_name,$zone,$instance_type,$namespace,$host}.as_count()"
+                                            "query": "sum:karpenter.nodes.created.count{$kube_cluster_name,$zone,$instance_type}.as_count()"
                                         }
                                     ],
                                     "response_format": "scalar"
@@ -309,7 +305,7 @@
                                             "aggregator": "sum",
                                             "data_source": "metrics",
                                             "name": "query1",
-                                            "query": "sum:karpenter.nodes.terminated.count{$cluster_name,$zone,$instance_type,$namespace,$host}.as_count()"
+                                            "query": "sum:karpenter.nodes.terminated.count{$kube_cluster_name,$zone,$instance_type}.as_count()"
                                         }
                                     ],
                                     "response_format": "scalar"
@@ -417,12 +413,12 @@
                                         {
                                             "data_source": "metrics",
                                             "name": "query1",
-                                            "query": "avg:karpenter.nodes.total.pod_requests{resource_type:cpu,$cluster_name,$zone,$instance_type,$namespace,$host} by {host}"
+                                            "query": "avg:karpenter.nodes.total.pod_requests{resource_type:cpu,$kube_cluster_name,$zone,$instance_type} by {instance_type,kube_cluster_name}"
                                         },
                                         {
                                             "data_source": "metrics",
                                             "name": "query2",
-                                            "query": "avg:karpenter.nodes.total.daemon_requests{resource_type:cpu,$cluster_name,$zone,$instance_type,$namespace,$host} by {host}"
+                                            "query": "avg:karpenter.nodes.total.daemon_requests{resource_type:cpu,$kube_cluster_name,$zone,$instance_type} by {instance_type,kube_cluster_name}"
                                         }
                                     ],
                                     "response_format": "timeseries",
@@ -434,6 +430,7 @@
                                 }
                             ],
                             "show_legend": true,
+                            "time": {},
                             "title": "CPU Requested",
                             "title_align": "left",
                             "title_size": "16",
@@ -470,17 +467,17 @@
                                         {
                                             "data_source": "metrics",
                                             "name": "query1",
-                                            "query": "avg:karpenter.nodes.total.pod_requests{resource_type:cpu,$cluster_name,$zone,$instance_type,$namespace,$host} by {host,instance_type}"
+                                            "query": "avg:karpenter.nodes.total.pod_requests{resource_type:cpu,$kube_cluster_name,$zone,$instance_type} by {instance_type,kube_cluster_name}"
                                         },
                                         {
                                             "data_source": "metrics",
                                             "name": "query2",
-                                            "query": "avg:karpenter.nodes.total.daemon_requests{resource_type:cpu,$cluster_name,$zone,$instance_type,$namespace,$host} by {host,instance_type}"
+                                            "query": "avg:karpenter.nodes.total.daemon_requests{resource_type:cpu,$kube_cluster_name,$zone,$instance_type} by {instance_type,kube_cluster_name}"
                                         },
                                         {
                                             "data_source": "metrics",
                                             "name": "query3",
-                                            "query": "avg:karpenter.nodes.allocatable{resource_type:cpu,$cluster_name,$zone,$instance_type,$namespace,$host} by {host,instance_type}"
+                                            "query": "avg:karpenter.nodes.allocatable{resource_type:cpu,$kube_cluster_name,$zone,$instance_type} by {instance_type,kube_cluster_name}"
                                         }
                                     ],
                                     "response_format": "timeseries",
@@ -492,6 +489,7 @@
                                 }
                             ],
                             "show_legend": true,
+                            "time": {},
                             "title": "% CPU Requested",
                             "title_align": "left",
                             "title_size": "16",
@@ -523,15 +521,18 @@
                                     ],
                                     "queries": [
                                         {
-                                            "aggregator": "avg",
+                                            "aggregator": "last",
                                             "data_source": "metrics",
                                             "name": "query1",
-                                            "query": "max:karpenter.nodes.allocatable{resource_type:cpu,$cluster_name,$zone,$instance_type,$namespace,$host} by {instance_type,host}"
+                                            "query": "max:karpenter.nodes.allocatable{resource_type:cpu,$kube_cluster_name,$zone,$instance_type} by {instance_type,kube_cluster_name}.fill(null)"
                                         }
                                     ],
                                     "response_format": "scalar"
                                 }
                             ],
+                            "time": {
+                                "live_span": "5m"
+                            },
                             "title": "Allocatable CPU",
                             "title_align": "left",
                             "title_size": "16",
@@ -576,12 +577,12 @@
                                         {
                                             "data_source": "metrics",
                                             "name": "query1",
-                                            "query": "avg:karpenter.nodes.total.pod_requests{resource_type:memory,$cluster_name,$zone,$instance_type,$namespace,$host} by {host,instance_type}"
+                                            "query": "avg:karpenter.nodes.total.pod_requests{resource_type:memory,$kube_cluster_name,$zone,$instance_type} by {kube_cluster_name,instance_type}"
                                         },
                                         {
                                             "data_source": "metrics",
                                             "name": "query2",
-                                            "query": "avg:karpenter.nodes.total.daemon_requests{resource_type:memory,$cluster_name,$zone,$instance_type,$namespace,$host} by {host,instance_type}"
+                                            "query": "avg:karpenter.nodes.total.daemon_requests{resource_type:memory,$kube_cluster_name,$zone,$instance_type} by {kube_cluster_name,instance_type}"
                                         }
                                     ],
                                     "response_format": "timeseries",
@@ -593,6 +594,7 @@
                                 }
                             ],
                             "show_legend": true,
+                            "time": {},
                             "title": "Memory Requested",
                             "title_align": "left",
                             "title_size": "16",
@@ -629,17 +631,17 @@
                                         {
                                             "data_source": "metrics",
                                             "name": "query1",
-                                            "query": "avg:karpenter.nodes.total.pod_requests{resource_type:memory,$cluster_name,$zone,$instance_type,$namespace,$host} by {host,instance_type}"
+                                            "query": "avg:karpenter.nodes.total.pod_requests{resource_type:memory,$kube_cluster_name,$zone,$instance_type} by {instance_type,kube_cluster_name}"
                                         },
                                         {
                                             "data_source": "metrics",
                                             "name": "query2",
-                                            "query": "avg:karpenter.nodes.total.daemon_requests{resource_type:memory,$cluster_name,$zone,$instance_type,$namespace,$host} by {host,instance_type}"
+                                            "query": "avg:karpenter.nodes.total.daemon_requests{resource_type:memory,$kube_cluster_name,$zone,$instance_type} by {instance_type,kube_cluster_name}"
                                         },
                                         {
                                             "data_source": "metrics",
                                             "name": "query3",
-                                            "query": "avg:karpenter.nodes.allocatable{resource_type:memory,$cluster_name,$zone,$instance_type,$namespace,$host} by {host,instance_type}"
+                                            "query": "avg:karpenter.nodes.allocatable{resource_type:memory,$kube_cluster_name,$zone,$instance_type} by {instance_type,kube_cluster_name}"
                                         }
                                     ],
                                     "response_format": "timeseries",
@@ -651,6 +653,7 @@
                                 }
                             ],
                             "show_legend": true,
+                            "time": {},
                             "title": "% Memory Requested",
                             "title_align": "left",
                             "title_size": "16",
@@ -675,22 +678,25 @@
                                             "cell_display_mode": "number",
                                             "formula": "query1",
                                             "limit": {
-                                                "count": 500,
+                                                "count": 10,
                                                 "order": "desc"
                                             }
                                         }
                                     ],
                                     "queries": [
                                         {
-                                            "aggregator": "avg",
+                                            "aggregator": "last",
                                             "data_source": "metrics",
                                             "name": "query1",
-                                            "query": "avg:karpenter.nodes.allocatable{resource_type:memory,$cluster_name,$zone,$instance_type,$namespace,$host} by {instance_type,host}"
+                                            "query": "avg:karpenter.nodes.allocatable{resource_type:memory,$kube_cluster_name,$zone,$instance_type} by {instance_type,kube_cluster_name}.fill(null)"
                                         }
                                     ],
                                     "response_format": "scalar"
                                 }
                             ],
+                            "time": {
+                                "live_span": "5m"
+                            },
                             "title": "Allocatable Memory",
                             "title_align": "left",
                             "title_size": "16",
@@ -735,12 +741,12 @@
                                         {
                                             "data_source": "metrics",
                                             "name": "query1",
-                                            "query": "avg:karpenter.nodes.total.pod_requests{resource_type:pods,$cluster_name,$zone,$instance_type,$namespace,$host} by {host}"
+                                            "query": "avg:karpenter.nodes.total.pod_requests{resource_type:pods,$kube_cluster_name,$zone,$instance_type} by {kube_cluster_name,instance_type}"
                                         },
                                         {
                                             "data_source": "metrics",
                                             "name": "query2",
-                                            "query": "avg:karpenter.nodes.total.daemon_requests{resource_type:pods,$cluster_name,$zone,$instance_type,$namespace,$host} by {host}"
+                                            "query": "avg:karpenter.nodes.total.daemon_requests{resource_type:pods,$kube_cluster_name,$zone,$instance_type} by {kube_cluster_name,instance_type}"
                                         }
                                     ],
                                     "response_format": "timeseries",
@@ -752,6 +758,7 @@
                                 }
                             ],
                             "show_legend": true,
+                            "time": {},
                             "title": "Pods Requested",
                             "title_align": "left",
                             "title_size": "16",
@@ -788,17 +795,17 @@
                                         {
                                             "data_source": "metrics",
                                             "name": "query1",
-                                            "query": "avg:karpenter.nodes.total.pod_requests{resource_type:pods,$cluster_name,$zone,$instance_type,$namespace,$host} by {host,instance_type}"
+                                            "query": "avg:karpenter.nodes.total.pod_requests{resource_type:pods,$kube_cluster_name,$zone,$instance_type} by {kube_cluster_name,instance_type}"
                                         },
                                         {
                                             "data_source": "metrics",
                                             "name": "query2",
-                                            "query": "avg:karpenter.nodes.total.daemon_requests{resource_type:pods,$cluster_name,$zone,$instance_type,$namespace,$host} by {host,instance_type}"
+                                            "query": "avg:karpenter.nodes.total.daemon_requests{resource_type:pods,$kube_cluster_name,$zone,$instance_type} by {kube_cluster_name,instance_type}"
                                         },
                                         {
                                             "data_source": "metrics",
                                             "name": "query3",
-                                            "query": "avg:karpenter.nodes.allocatable{resource_type:pods,$cluster_name,$zone,$instance_type,$namespace,$host} by {host,instance_type}"
+                                            "query": "avg:karpenter.nodes.allocatable{resource_type:pods,$kube_cluster_name,$zone,$instance_type} by {kube_cluster_name,instance_type}"
                                         }
                                     ],
                                     "response_format": "timeseries",
@@ -810,6 +817,7 @@
                                 }
                             ],
                             "show_legend": true,
+                            "time": {},
                             "title": "% Pods Requested",
                             "title_align": "left",
                             "title_size": "16",
@@ -841,15 +849,18 @@
                                     ],
                                     "queries": [
                                         {
-                                            "aggregator": "avg",
+                                            "aggregator": "last",
                                             "data_source": "metrics",
                                             "name": "query1",
-                                            "query": "avg:karpenter.nodes.allocatable{resource_type:pods,$cluster_name,$zone,$instance_type,$namespace,$host} by {instance_type,host}"
+                                            "query": "avg:karpenter.nodes.allocatable{resource_type:pods,$kube_cluster_name,$zone,$instance_type} by {instance_type,kube_cluster_name}.fill(null)"
                                         }
                                     ],
                                     "response_format": "scalar"
                                 }
                             ],
+                            "time": {
+                                "live_span": "5m"
+                            },
                             "title": "Allocatable Pods",
                             "title_align": "left",
                             "title_size": "16",
@@ -923,7 +934,7 @@
                                             "aggregator": "last",
                                             "data_source": "metrics",
                                             "name": "query1",
-                                            "query": "count:karpenter.pods.state{$cluster_name,$zone,$instance_type,$namespace,$host} by {zone,instance_type,namespace,phase}"
+                                            "query": "count:karpenter.pods.state{$kube_cluster_name,$zone,$instance_type} by {zone,instance_type,namespace,phase}"
                                         }
                                     ],
                                     "response_format": "scalar",
@@ -968,12 +979,12 @@
                                         {
                                             "data_source": "metrics",
                                             "name": "query1",
-                                            "query": "sum:karpenter.pods.startup.time_seconds.sum{$namespace,$host} by {host}.as_count()"
+                                            "query": "sum:karpenter.pods.startup.time_seconds.sum{$kube_cluster_name} by {kube_cluster_name}.as_count()"
                                         },
                                         {
                                             "data_source": "metrics",
                                             "name": "query2",
-                                            "query": "sum:karpenter.pods.startup.time_seconds.count{$namespace,$host} by {host}.as_count()"
+                                            "query": "sum:karpenter.pods.startup.time_seconds.count{$kube_cluster_name} by {kube_cluster_name}.as_count()"
                                         }
                                     ],
                                     "response_format": "timeseries",
@@ -985,6 +996,7 @@
                                 }
                             ],
                             "show_legend": true,
+                            "time": {},
                             "title": "Average pod Startup Time by Node",
                             "title_align": "left",
                             "title_size": "16",
@@ -1031,7 +1043,7 @@
                                             "cell_display_mode": "number",
                                             "formula": "query3",
                                             "limit": {
-                                                "count": 500,
+                                                "count": 25,
                                                 "order": "desc"
                                             },
                                             "number_format": {
@@ -1047,24 +1059,27 @@
                                             "aggregator": "last",
                                             "data_source": "metrics",
                                             "name": "query1",
-                                            "query": "avg:karpenter.cloudprovider.instance.type.cpu_cores{$cluster_name,$zone,$instance_type,$namespace,$host} by {instance_type}"
+                                            "query": "avg:karpenter.cloudprovider.instance.type.cpu_cores{$kube_cluster_name,$zone,$instance_type} by {instance_type}"
                                         },
                                         {
                                             "aggregator": "last",
                                             "data_source": "metrics",
                                             "name": "query2",
-                                            "query": "avg:karpenter.cloudprovider.instance.type.memory_bytes{$cluster_name,$zone,$instance_type,$namespace,$host} by {instance_type}"
+                                            "query": "avg:karpenter.cloudprovider.instance.type.memory_bytes{$kube_cluster_name,$zone,$instance_type} by {instance_type}"
                                         },
                                         {
                                             "aggregator": "last",
                                             "data_source": "metrics",
                                             "name": "query3",
-                                            "query": "avg:karpenter.cloudprovider.instance.type.price_estimate{$cluster_name,$zone,$instance_type,$namespace,$host} by {instance_type}"
+                                            "query": "avg:karpenter.cloudprovider.instance.type.price_estimate{$kube_cluster_name,$zone,$instance_type} by {instance_type}"
                                         }
                                     ],
                                     "response_format": "scalar"
                                 }
                             ],
+                            "time": {
+                                "live_span": "5m"
+                            },
                             "title": "Instance Type Overview",
                             "title_align": "left",
                             "title_size": "16",
@@ -1092,7 +1107,7 @@
                                             "aggregator": "avg",
                                             "data_source": "metrics",
                                             "name": "query1",
-                                            "query": "avg:karpenter.pods.state{$cluster_name,$zone,$instance_type,$namespace,$host} by {zone,instance_type,node,namespace,phase,name}"
+                                            "query": "avg:karpenter.pods.state{$kube_cluster_name,$zone,$instance_type,$namespace} by {zone,instance_type,node,namespace,phase,name}"
                                         }
                                     ],
                                     "response_format": "scalar",
@@ -1101,6 +1116,7 @@
                                     }
                                 }
                             ],
+                            "time": {},
                             "title": "Pod Overview by Zone, Instance Type, Node, Namespace and Phase",
                             "type": "treemap"
                         },
@@ -1174,7 +1190,7 @@
                                         {
                                             "data_source": "metrics",
                                             "name": "query1",
-                                            "query": "avg:karpenter.provisioner.usage.pct{$namespace,$host} by {resource_type,provisioner}"
+                                            "query": "avg:karpenter.provisioner.usage.pct{$kube_cluster_name} by {resource_type,nodepool,kube_cluster_name}"
                                         }
                                     ],
                                     "response_format": "timeseries",
@@ -1186,6 +1202,7 @@
                                 }
                             ],
                             "show_legend": true,
+                            "time": {},
                             "title": "Provisioner Usage Percentage by Type",
                             "title_align": "left",
                             "title_size": "16",
@@ -1222,12 +1239,12 @@
                                         {
                                             "data_source": "metrics",
                                             "name": "query1",
-                                            "query": "sum:karpenter.provisioner.scheduling.duration_seconds.sum{$namespace,$host} by {resource_type}.as_count()"
+                                            "query": "sum:karpenter.provisioner.scheduling.duration_seconds.sum{$kube_cluster_name} by {resource_type,kube_cluster_name}.as_count()"
                                         },
                                         {
                                             "data_source": "metrics",
                                             "name": "query2",
-                                            "query": "sum:karpenter.provisioner.scheduling.duration_seconds.count{$namespace,$host} by {resource_type}.as_count()"
+                                            "query": "sum:karpenter.provisioner.scheduling.duration_seconds.count{$kube_cluster_name} by {resource_type,kube_cluster_name}.as_count()"
                                         }
                                     ],
                                     "response_format": "timeseries",
@@ -1239,6 +1256,7 @@
                                 }
                             ],
                             "show_legend": true,
+                            "time": {},
                             "title": "Provisioner Scheduling Latency",
                             "title_align": "left",
                             "title_size": "16",
@@ -1275,12 +1293,12 @@
                                         {
                                             "data_source": "metrics",
                                             "name": "query1",
-                                            "query": "sum:karpenter.provisioner.scheduling.simulation.duration_seconds.sum{$namespace,$host} by {resource_type}.as_count()"
+                                            "query": "sum:karpenter.provisioner.scheduling.simulation.duration_seconds.sum{$kube_cluster_name} by {resource_type,kube_cluster_name}.as_count()"
                                         },
                                         {
                                             "data_source": "metrics",
                                             "name": "query2",
-                                            "query": "sum:karpenter.provisioner.scheduling.simulation.duration_seconds.count{$namespace,$host} by {resource_type}.as_count()"
+                                            "query": "sum:karpenter.provisioner.scheduling.simulation.duration_seconds.count{$kube_cluster_name} by {resource_type,kube_cluster_name}.as_count()"
                                         }
                                     ],
                                     "response_format": "timeseries",
@@ -1292,6 +1310,7 @@
                                 }
                             ],
                             "show_legend": true,
+                            "time": {},
                             "title": "Provisioner Simulation Latency",
                             "title_align": "left",
                             "title_size": "16",
@@ -1367,7 +1386,7 @@
                                         {
                                             "data_source": "metrics",
                                             "name": "query1",
-                                            "query": "sum:karpenter.deprovisioning.actions_performed.count{$namespace,$host} by {action,deprovisioner}.as_count()"
+                                            "query": "sum:karpenter.deprovisioning.actions_performed.count{$kube_cluster_name} by {action,deprovisioner,kube_cluster_name}.as_count()"
                                         }
                                     ],
                                     "response_format": "timeseries",
@@ -1379,6 +1398,7 @@
                                 }
                             ],
                             "show_legend": true,
+                            "time": {},
                             "title": "Deprovisioning Actions Performed by Action and Deprovisioner",
                             "title_align": "left",
                             "title_size": "16",
@@ -1415,12 +1435,12 @@
                                         {
                                             "data_source": "metrics",
                                             "name": "query1",
-                                            "query": "sum:karpenter.deprovisioning.evaluation.duration_seconds.sum{$namespace,$host} by {method}.as_count()"
+                                            "query": "sum:karpenter.deprovisioning.evaluation.duration_seconds.sum{$kube_cluster_name} by {method,kube_cluster_name}.as_count()"
                                         },
                                         {
                                             "data_source": "metrics",
                                             "name": "query2",
-                                            "query": "sum:karpenter.deprovisioning.evaluation.duration_seconds.count{$namespace,$host} by {method}.as_count()"
+                                            "query": "sum:karpenter.deprovisioning.evaluation.duration_seconds.count{$kube_cluster_name} by {method,kube_cluster_name}.as_count()"
                                         }
                                     ],
                                     "response_format": "timeseries",
@@ -1432,6 +1452,7 @@
                                 }
                             ],
                             "show_legend": true,
+                            "time": {},
                             "title": "Deprovisioning Evaluation Latency by Method",
                             "title_align": "left",
                             "title_size": "16",
@@ -1468,12 +1489,12 @@
                                         {
                                             "data_source": "metrics",
                                             "name": "query1",
-                                            "query": "sum:karpenter.deprovisioning.replacement.machine.initialized_seconds.sum{$namespace,$host}.as_count()"
+                                            "query": "sum:karpenter.deprovisioning.replacement.machine.initialized_seconds.sum{$kube_cluster_name} by {kube_cluster_name}.as_count()"
                                         },
                                         {
                                             "data_source": "metrics",
                                             "name": "query2",
-                                            "query": "sum:karpenter.deprovisioning.replacement.machine.initialized_seconds.count{$namespace,$host}.as_count()"
+                                            "query": "sum:karpenter.deprovisioning.replacement.machine.initialized_seconds.count{$kube_cluster_name} by {kube_cluster_name}.as_count()"
                                         }
                                     ],
                                     "response_format": "timeseries",
@@ -1485,6 +1506,7 @@
                                 }
                             ],
                             "show_legend": true,
+                            "time": {},
                             "title": "Deprovisioning Replacement Latency",
                             "title_align": "left",
                             "title_size": "16",
@@ -1560,7 +1582,7 @@
                                         {
                                             "data_source": "metrics",
                                             "name": "query1",
-                                            "query": "sum:karpenter.interruption.actions_performed.count{$namespace,$host} by {action_type}.as_count()"
+                                            "query": "sum:karpenter.interruption.actions_performed.count{$kube_cluster_name} by {action_type,kube_cluster_name}.as_count()"
                                         }
                                     ],
                                     "response_format": "timeseries",
@@ -1572,6 +1594,7 @@
                                 }
                             ],
                             "show_legend": true,
+                            "time": {},
                             "title": "Interrupt Actions Count by Action Type",
                             "title_align": "left",
                             "title_size": "16",
@@ -1615,12 +1638,12 @@
                                         {
                                             "data_source": "metrics",
                                             "name": "query1",
-                                            "query": "sum:karpenter.interruption.received_messages.count{$namespace,$host} by {message_type}.as_count()"
+                                            "query": "sum:karpenter.interruption.received_messages.count{$kube_cluster_name} by {message_type,kube_cluster_name}.as_count()"
                                         },
                                         {
                                             "data_source": "metrics",
                                             "name": "query2",
-                                            "query": "sum:karpenter.interruption.deleted_messages.count{$namespace,$host}.as_count()"
+                                            "query": "sum:karpenter.interruption.deleted_messages.count{$kube_cluster_name} by {kube_cluster_name}.as_count()"
                                         }
                                     ],
                                     "response_format": "timeseries",
@@ -1632,6 +1655,7 @@
                                 }
                             ],
                             "show_legend": true,
+                            "time": {},
                             "title": "Count of Messages by Type",
                             "title_align": "left",
                             "title_size": "16",
@@ -1668,12 +1692,12 @@
                                         {
                                             "data_source": "metrics",
                                             "name": "query1",
-                                            "query": "sum:karpenter.interruption.message.latency.time_seconds.sum{$namespace,$host}.as_count()"
+                                            "query": "sum:karpenter.interruption.message.latency.time_seconds.sum{$kube_cluster_name} by {kube_cluster_name}.as_count()"
                                         },
                                         {
                                             "data_source": "metrics",
                                             "name": "query2",
-                                            "query": "sum:karpenter.interruption.message.latency.time_seconds.count{$namespace,$host}.as_count()"
+                                            "query": "sum:karpenter.interruption.message.latency.time_seconds.count{$kube_cluster_name} by {kube_cluster_name}.as_count()"
                                         }
                                     ],
                                     "response_format": "timeseries",
@@ -1685,6 +1709,7 @@
                                 }
                             ],
                             "show_legend": true,
+                            "time": {},
                             "title": "Average Interruption Latency",
                             "title_align": "left",
                             "title_size": "16",
@@ -1760,7 +1785,7 @@
                                         {
                                             "data_source": "metrics",
                                             "name": "query1",
-                                            "query": "avg:karpenter.controller.runtime.active_workers{$namespace,$host} by {controller,host}"
+                                            "query": "avg:karpenter.controller.runtime.active_workers{$kube_cluster_name} by {controller,kube_cluster_name}"
                                         }
                                     ],
                                     "response_format": "timeseries",
@@ -1772,6 +1797,7 @@
                                 }
                             ],
                             "show_legend": true,
+                            "time": {},
                             "title": "Runtime Active Workers",
                             "title_align": "left",
                             "title_size": "16",
@@ -1808,12 +1834,12 @@
                                         {
                                             "data_source": "metrics",
                                             "name": "query2",
-                                            "query": "sum:karpenter.controller.runtime.reconcile_errors.count{$namespace,$host} by {controller,host}.as_count()"
+                                            "query": "sum:karpenter.controller.runtime.reconcile_errors.count{$kube_cluster_name} by {controller,kube_cluster_name}.as_count()"
                                         },
                                         {
                                             "data_source": "metrics",
                                             "name": "query1",
-                                            "query": "sum:karpenter.controller.runtime.reconcile.count{$namespace,$host} by {controller,host}.as_count()"
+                                            "query": "sum:karpenter.controller.runtime.reconcile.count{$kube_cluster_name} by {controller,kube_cluster_name}.as_count()"
                                         }
                                     ],
                                     "response_format": "timeseries",
@@ -1825,6 +1851,7 @@
                                 }
                             ],
                             "show_legend": true,
+                            "time": {},
                             "title": "Reconciliation Error Rate",
                             "title_align": "left",
                             "title_size": "16",
@@ -1861,12 +1888,12 @@
                                         {
                                             "data_source": "metrics",
                                             "name": "query1",
-                                            "query": "sum:karpenter.controller.runtime.reconcile.time_seconds.sum{$namespace,$host} by {controller,host}.as_count()"
+                                            "query": "sum:karpenter.controller.runtime.reconcile.time_seconds.sum{$kube_cluster_name} by {controller,kube_cluster_name}.as_count()"
                                         },
                                         {
                                             "data_source": "metrics",
                                             "name": "query2",
-                                            "query": "sum:karpenter.controller.runtime.reconcile.time_seconds.count{$namespace,$host} by {controller,host}.as_count()"
+                                            "query": "sum:karpenter.controller.runtime.reconcile.time_seconds.count{$kube_cluster_name} by {controller,kube_cluster_name}.as_count()"
                                         }
                                     ],
                                     "response_format": "timeseries",
@@ -1878,6 +1905,7 @@
                                 }
                             ],
                             "show_legend": true,
+                            "time": {},
                             "title": "Reconciliation Latency",
                             "title_align": "left",
                             "title_size": "16",
@@ -1953,7 +1981,7 @@
                                         {
                                             "data_source": "metrics",
                                             "name": "query1",
-                                            "query": "avg:karpenter.go_goroutines{$cluster_name,$namespace,$host} by {host}"
+                                            "query": "avg:karpenter.go_goroutines{$kube_cluster_name} by {kube_cluster_name}"
                                         }
                                     ],
                                     "response_format": "timeseries",
@@ -1965,6 +1993,7 @@
                                 }
                             ],
                             "show_legend": true,
+                            "time": {},
                             "title": "Number of Go Routines",
                             "title_align": "left",
                             "title_size": "16",
@@ -2001,7 +2030,7 @@
                                         {
                                             "data_source": "metrics",
                                             "name": "query1",
-                                            "query": "avg:karpenter.go.memstats.alloc_bytes{$cluster_name,$namespace,$host} by {host}"
+                                            "query": "avg:karpenter.go.memstats.alloc_bytes{$kube_cluster_name} by {kube_cluster_name}"
                                         }
                                     ],
                                     "response_format": "timeseries",
@@ -2013,6 +2042,7 @@
                                 }
                             ],
                             "show_legend": true,
+                            "time": {},
                             "title": "Memory Allocated",
                             "title_align": "left",
                             "title_size": "16",
@@ -2049,7 +2079,7 @@
                                         {
                                             "data_source": "metrics",
                                             "name": "query1",
-                                            "query": "sum:karpenter.process.cpu_seconds.count{$cluster_name,$namespace,$host} by {host}.as_count()"
+                                            "query": "sum:karpenter.process.cpu_seconds.count{$kube_cluster_name} by {kube_cluster_name}.as_count()"
                                         }
                                     ],
                                     "response_format": "timeseries",
@@ -2061,6 +2091,7 @@
                                 }
                             ],
                             "show_legend": true,
+                            "time": {},
                             "title": "CPU Time in Seconds",
                             "title_align": "left",
                             "title_size": "16",

@@ -47,6 +47,16 @@ class Node(BaseModel):
     include: Optional[tuple[Union[str, IncludeItem], ...]] = None
     interval: Optional[int] = None
     limit: Optional[int] = Field(None, description='Maximum number of nodes to be processed.\n')
+    portgroups: Optional[Union[bool, MappingProxyType[str, Any]]] = None
+
+
+class Volume(BaseModel):
+    model_config = ConfigDict(
+        arbitrary_types_allowed=True,
+        frozen=True,
+    )
+    connectors: Optional[bool] = None
+    targets: Optional[bool] = None
 
 
 class BaremetalItem(BaseModel):
@@ -54,8 +64,12 @@ class BaremetalItem(BaseModel):
         arbitrary_types_allowed=True,
         frozen=True,
     )
+    allocations: Optional[bool] = None
     conductors: Optional[bool] = None
+    drivers: Optional[bool] = None
     nodes: Optional[Union[bool, Node]] = None
+    ports: Optional[bool] = None
+    volumes: Optional[Union[bool, Volume]] = None
 
 
 class BlockStorageItem(BaseModel):

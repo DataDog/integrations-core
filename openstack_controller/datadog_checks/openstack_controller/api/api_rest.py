@@ -429,6 +429,22 @@ class ApiRest(Api):
 
         return self.make_paginated_request(url, 'nodes', 'uuid', params=params)
 
+    def get_baremetal_portgroups(self, node_id):
+        return self.make_paginated_request(
+            '{}/v1/nodes/{}/portgroups/detail'.format(
+                self._catalog.get_endpoint_by_type(Component.Types.BAREMETAL.value), node_id
+            ),
+            'portgroups',
+            'uuid',
+        )
+
+    def get_baremetal_ports(self):
+        return self.make_paginated_request(
+            '{}/v1/ports/detail'.format(self._catalog.get_endpoint_by_type(Component.Types.BAREMETAL.value)),
+            'ports',
+            'uuid',
+        )
+
     def get_baremetal_conductors(self):
 
         ironic_endpoint = self._catalog.get_endpoint_by_type(Component.Types.BAREMETAL.value)
@@ -436,6 +452,40 @@ class ApiRest(Api):
         url = '{}/v1/conductors'.format(ironic_endpoint)
 
         return self.make_paginated_request(url, 'conductors', 'hostname', params={})
+
+    def get_baremetal_volume_connectors(self):
+        return self.make_paginated_request(
+            '{}/v1/volume/connectors'.format(self._catalog.get_endpoint_by_type(Component.Types.BAREMETAL.value)),
+            'connectors',
+            'uuid',
+        )
+
+    def get_baremetal_volume_targets(self):
+        return self.make_paginated_request(
+            '{}/v1/volume/targets'.format(self._catalog.get_endpoint_by_type(Component.Types.BAREMETAL.value)),
+            'targets',
+            'uuid',
+        )
+
+    def get_baremetal_drivers(self):
+        response = self.http.get(
+            '{}/v1/drivers'.format(self._catalog.get_endpoint_by_type(Component.Types.BAREMETAL.value))
+        )
+        response.raise_for_status()
+        return response.json().get('drivers', [])
+
+    def get_baremetal_allocations(self):
+        if float(self.config.ironic_microversion) < 1.52:
+            self.log.info(
+                "Ironic microversion is below 1.52 and set to %s, cannot collect allocations",
+                self.config.ironic_microversion,
+            )
+            return []
+        return self.make_paginated_request(
+            '{}/v1/allocations'.format(self._catalog.get_endpoint_by_type(Component.Types.BAREMETAL.value)),
+            'allocations',
+            'uuid',
+        )
 
     def get_load_balancer_loadbalancers(self, project_id):
         params = {'project_id': project_id}

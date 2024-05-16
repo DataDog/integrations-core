@@ -95,3 +95,9 @@ def test_custom_replicaSet_is_not_allowed(instance):
     instance['options'] = {'replicaSet': 'foo'}
     with pytest.raises(ConfigurationError, match='replicaSet'):
         MongoConfig(instance, mock.Mock())
+
+
+def test_dbm_cluster_name(instance):
+    instance['dbm'] = True
+    with pytest.raises(ConfigurationError, match='`cluster_name` must be set when `dbm` is enabled'):
+        MongoConfig(instance, mock.Mock())

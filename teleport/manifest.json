@@ -43,6 +43,9 @@
       "service_checks": {
         "metadata_path": "assets/service_checks.json"
       }
+    },
+    "dashboards": {
+      "Teleport Overview": "assets/dashboards/teleport_overview.json"
     }
   },
   "author": {

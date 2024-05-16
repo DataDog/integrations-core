@@ -78,6 +78,7 @@ class InstanceConfig(BaseModel):
     ssl_capath: Optional[str] = None
     ssl_verify: Optional[bool] = None
     tags: Optional[tuple[str, ...]] = None
+    use_configured_hostname: Optional[bool] = None
     use_guest_hostname: Optional[bool] = None
     username: str
 

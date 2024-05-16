@@ -13,6 +13,8 @@
     "media": [],
     "classifier_tags": [
       "Category::AI/ML",
+      "Category::Developer Tools",
+      "Category::Cost Management",
       "Submitted Data Type::Metrics",
       "Submitted Data Type::Logs",
       "Submitted Data Type::Traces",
