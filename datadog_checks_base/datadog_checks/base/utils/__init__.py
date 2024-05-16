@@ -4,7 +4,7 @@
 import os
 
 from ..config import is_affirmative
-from profiling import Profiling
+from .profiling import Profiling
 
 
 try:
