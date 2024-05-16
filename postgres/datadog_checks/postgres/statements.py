@@ -41,7 +41,8 @@ SELECT {cols}
          ON pg_stat_statements.userid = pg_roles.oid
   LEFT JOIN pg_database
          ON pg_stat_statements.dbid = pg_database.oid
-  WHERE query NOT LIKE 'EXPLAIN %%'
+  WHERE query != '<insufficient privilege>'
+  AND query NOT LIKE 'EXPLAIN %%'
   {queryid_filter}
   {filters}
   {extra_clauses}
@@ -255,6 +256,7 @@ class PostgresStatementMetrics(DBMAsyncJob):
         # all databases on the host. For metrics the "db" tag is added during ingestion based on which database
         # each query came from.
         try:
+            self._log.info("[AMW] check running")
             rows = self._collect_metrics_rows()
             if not rows:
                 return
@@ -347,6 +349,7 @@ class PostgresStatementMetrics(DBMAsyncJob):
             with self._check._get_main_db() as conn:
                 with conn.cursor(cursor_factory=CommenterDictCursor) as cursor:
                     if len(self._query_calls_cache.cache) > 0:
+                        self._log.info("[AMW] fetching incremental queries")
                         return self._execute_query(
                             cursor,
                             statements_query(
@@ -358,6 +361,7 @@ class PostgresStatementMetrics(DBMAsyncJob):
                             params=params,
                         )
                     else:
+                        self._log.info("[AMW] fetching all queries")
                         return self._execute_query(
                             cursor,
                             statements_query(
@@ -486,23 +490,21 @@ class PostgresStatementMetrics(DBMAsyncJob):
             queryid = row['queryid']
             baseline_row = copy.copy(row)
 
+            key = _row_key(baseline_row) + (queryid, )
+
             # To avoid high memory usage, don't cache the query text since it can be large.
             del baseline_row['query']
-            if query_signature not in self._baseline_metrics:
-                self._baseline_metrics[query_signature] = {queryid: baseline_row}
-            else:
-                self._baseline_metrics[query_signature][queryid] = baseline_row
+            self._baseline_metrics[key] = baseline_row
 
         # Apply query text for called queries since it is not cached and uncalled queries won't get result
         # in sent metrics.
         query_text = {row['query_signature']: row['query'] for row in rows}
         applied_rows = []
-        for query_signature, query_sig_metrics in self._baseline_metrics.items():
-            for row in query_sig_metrics.values():
-                if query_signature in query_text:
-                    applied_rows.append({**row, 'query': query_text[query_signature]})
-                else:
-                    applied_rows.append(copy.copy(row))
+        for row in self._baseline_metrics.values():
+            if query_signature in query_text:
+                applied_rows.append({**row, 'query': query_text[query_signature]})
+            else:
+                applied_rows.append(copy.copy(row))
 
         return applied_rows
 
@@ -513,37 +515,60 @@ class PostgresStatementMetrics(DBMAsyncJob):
             self._last_baseline_metrics_expiry is None
             or self._last_baseline_metrics_expiry + self._config.baseline_metrics_expiry < time.time()
         ):
+            self._log.info("[AMW] last_baseline_metrics_expiry" + str(self._last_baseline_metrics_expiry))
+            self._log.info("[AMW] baseline_metrics_expiry" + str(self._config.baseline_metrics_expiry))
+            self._log.info("[AMW] resetting baseline cachce")
             self._baseline_metrics = {}
             self._query_calls_cache = QueryCallsCache()
             self._last_baseline_metrics_expiry = time.time()
 
+    def log_rows(self, rows):
+        self._log.info("[AMW] logging frame")
+        columns = ['query', 'queryid', 'query_signature', 'datname', 'rolname', 'calls']
+        for row in rows:
+            if 'query' in row and 'begin' in row['query']:
+                self._log.info("[AMW] pgss row: " + str({k: row[k] for k in columns}))
+
+        self._log.info("")
+
+        for row_key, prev in self._state._previous_statements.items():
+            if 'fc747ae36f14c50d' in row_key:
+                self._log.info("[AMW] prev row: " + str({k: prev[k] for k in columns}))
+
+        self._log.info("[AMW] done logging rows")
+
     @tracked_method(agent_check_getter=agent_check_getter, track_result_length=True)
     def _collect_metrics_rows(self):
         self._emit_pg_stat_statements_metrics()
-        self._emit_pg_stat_sta
+        self._emit_pg_stat_statements_dealloc()
+        
+        # This leads to inflated metrics
         self._check_baseline_metrics_expiry()
+
         rows = []
         if (not self._config.incremental_query_metrics) or self._check.version < V10:
-            print("[AMW] feature flag off branch")
+            self._log.info("[AMW] feature flag off branch")
             rows = self._load_pg_stat_statements()
             rows = self._normalize_queries(rows)
         elif len(self._baseline_metrics) == 0:
-            print("[AMW] baseline queries")
+            self._log.info("[AMW] baseline queries")
             # When we don't have baseline metrics (either on the first run or after cache expiry),
             # we fetch all rows from pg_stat_statements, and update the initial state of relevant
             # caches.
             rows = self._load_pg_stat_statements()
             rows = self._normalize_queries(rows)
+            self.log_rows(rows)
             self._query_calls_cache.set_calls(rows)
             self._apply_called_queries(rows)
         else:
-            print("[AMW] incremental queries")
+            self._log.info("[AMW] incremental queries")
             # When we do have baseline metrics, use them to construct the full set of rows
             # so that compute_derivative_rows can merge duplicates and calculate deltas.
             self._check_called_queries()
             rows = self._load_pg_stat_statements()
             rows = self._normalize_queries(rows)
             rows = self._apply_called_queries(rows)
+            self.log_rows(rows)
 
         if not rows:
             return []
@@ -551,7 +576,7 @@ class PostgresStatementMetrics(DBMAsyncJob):
         available_columns = set(rows[0].keys())
         metric_columns = available_columns & PG_STAT_STATEMENTS_METRICS_COLUMNS
 
-        rows = self._state.compute_derivative_rows(rows, metric_columns, key=_row_key)
+        rows = self._state.compute_derivative_rows(rows, metric_columns, self._log, key=_row_key)
         self._check.gauge(
             'dd.postgres.queries.query_rows_raw',
             len(rows),

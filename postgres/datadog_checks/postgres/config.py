@@ -168,7 +168,7 @@ class PostgresConfig:
         self.incremental_query_metrics = is_affirmative(
             self.statement_metrics_config.get('incremental_query_metrics', False)
         )
-        self.baseline_metrics_expiry = self.statement_metrics_config.get('incremental_query_metrics', 300)
+        self.baseline_metrics_expiry = self.statement_metrics_config.get('baseline_metrics_expiry', 300)
 
     def _build_tags(self, custom_tags, agent_tags, propagate_agent_tags=True):
         # Clean up tags in case there was a None entry in the instance
