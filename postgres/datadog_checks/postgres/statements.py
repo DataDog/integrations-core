@@ -478,6 +478,9 @@ class PostgresStatementMetrics(DBMAsyncJob):
         except psycopg2.Error as e:
             self._log.warning("Failed to query for pg_stat_statements count: %s", e)
 
+    def _baseline_metrics_query_key(self, row):
+        return _row_key(row) + (row['queryid'], )
+
     # _apply_called_queries expects normalized rows before any merging of duplicates.
     # It takes the incremental pg_stat_statements rows and constructs the full set of rows
     # by adding the existing values in the baseline_metrics cache. This is equivalent to
@@ -486,11 +489,8 @@ class PostgresStatementMetrics(DBMAsyncJob):
     def _apply_called_queries(self, rows):
         # Apply called queries to baseline_metrics
         for row in rows:
-            query_signature = row['query_signature']
-            queryid = row['queryid']
             baseline_row = copy.copy(row)
-
-            key = _row_key(baseline_row) + (queryid, )
+            key = self._baseline_metrics_query_key(row)
 
             # To avoid high memory usage, don't cache the query text since it can be large.
             del baseline_row['query']
@@ -501,6 +501,7 @@ class PostgresStatementMetrics(DBMAsyncJob):
         query_text = {row['query_signature']: row['query'] for row in rows}
         applied_rows = []
         for row in self._baseline_metrics.values():
+            query_signature = row['query_signature']
             if query_signature in query_text:
                 applied_rows.append({**row, 'query': query_text[query_signature]})
             else:
@@ -542,14 +543,13 @@ class PostgresStatementMetrics(DBMAsyncJob):
         self._emit_pg_stat_statements_metrics()
         self._emit_pg_stat_statements_dealloc()
         
-        # This leads to inflated metrics
         self._check_baseline_metrics_expiry()
-
         rows = []
         if (not self._config.incremental_query_metrics) or self._check.version < V10:
             self._log.info("[AMW] feature flag off branch")
             rows = self._load_pg_stat_statements()
             rows = self._normalize_queries(rows)
+            self.log_rows(rows)
         elif len(self._baseline_metrics) == 0:
             self._log.info("[AMW] baseline queries")
             # When we don't have baseline metrics (either on the first run or after cache expiry),
