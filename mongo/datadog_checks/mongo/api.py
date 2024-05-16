@@ -88,6 +88,17 @@ class MongoApi(object):
     def list_database_names(self, session=None):
         return self._cli.list_database_names(session)
 
+    def current_op(self, session=None):
+        # Use $currentOp stage to get all users and idle sessions.
+        # Note: Why not use the `currentOp` command?
+        # Because the currentOp command and db.currentOp() helper method return the results in a single document,
+        # the total size of the currentOp result set is subject to the maximum 16MB BSON size limit for documents.
+        # The $currentOp stage returns a cursor over a stream of documents, each of which reports a single operation.
+        return self["admin"].aggregate(
+            [{'$currentOp': {'allUsers': True, 'idleSessions': True}}],
+            session=session,
+        )
+
     def _is_arbiter(self, options):
         cli = MongoClient(**options)
         is_master_payload = cli['admin'].command('isMaster')

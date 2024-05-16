@@ -22,8 +22,6 @@ from .types import (
     OperationSampleActivityRecord,
     OperationSampleClient,
     OperationSampleEvent,
-    OperationSampleEventDatabase,
-    OperationSampleEventNetwork,
     OperationSampleOperationMetadata,
     OperationSampleOperationStats,
     OperationSamplePlan,
@@ -78,6 +76,7 @@ class MongoOperationSamples(DBMAsyncJob):
         self, now: float, active_connections: Dict[set, int], activities: List[OperationSampleActivityRecord]
     ):
         for operation in self._get_current_op():
+            print(operation)
             command = operation.get("command")
             if not command:
                 self._check.log.debug("Skipping operation without command: %s", operation)
@@ -100,12 +99,10 @@ class MongoOperationSamples(DBMAsyncJob):
             )
 
     def _get_current_op(self):
-        with self._check.api_client['admin'].aggregate(
-            [{'$currentOp': {'allUsers': True, 'idleSessions': True}}]
-        ) as operations:
-            for operation in operations:
-                self._check.log.debug("Found operation: %s", operation)
-                yield operation
+        operations = self._check.api_client.current_op()
+        for operation in operations:
+            self._check.log.debug("Found operation: %s", operation)
+            yield operation
 
     def _should_explain(self, op: Optional[str], command: dict) -> bool:
         dbname = command.get("$db")

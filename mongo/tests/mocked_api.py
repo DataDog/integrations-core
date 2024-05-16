@@ -63,6 +63,13 @@ class MockedDB(object):
         with open(os.path.join(HERE, "fixtures", filename), 'r') as f:
             return json.load(f, object_hook=json_util.object_hook)
 
+    def aggregate(self, pipeline, session=None, **kwargs):
+        if pipeline[0] == {'$currentOp': {'allUsers': True, 'idleSessions': True}}:
+            # mock the $currentOp aggregation used for operation sampling
+            with open(os.path.join(HERE, "fixtures", "$currentOp"), 'r') as f:
+                return json.load(f, object_hook=json_util.object_hook)
+        return []
+
 
 class MockedPyMongoClient(object):
     def __init__(self, deployment):
