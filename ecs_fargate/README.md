@@ -252,7 +252,7 @@ The instructions below show you how to configure the job using the [Amazon Web C
 2. Click on **Job Definitions** in the left menu. Then, click the **Create** button or choose an existing AWS Batch job definition.
 3. For new job definitions:
     1. Select **Fargate** as the orchestration type.
-    2. Unselect the **Use legacy containerProperties structure** option. 
+    2. Unselect the **Use legacy containerProperties structure** option. Click **Next**.
     3. Enter a **Job Definition Name**, such as `my-app-and-datadog`.
     4. Select an execution IAM role. See permission requirements in the [Create or modify your IAM policy](#create-or-modify-your-iam-policy) section.
     5. Enable **Assign public IP** to allow outbound network access. Then, click the **Next** button.
