@@ -40,8 +40,17 @@
         "metadata_path": "assets/service_checks.json"
       }
     },
-    "dashboards": {"kubernetes_cluster_autoscaler_overview": "assets/dashboards/kubernetes_cluster_autoscaler_overview.json"},
-    "logs": {"source": "kubernetes_cluster_autoscaler"}
+    "dashboards": {
+      "Kubernetes Cluster Autoscaler Overview": "assets/dashboards/kubernetes_cluster_autoscaler_overview.json"
+    },
+    "logs": {
+      "source": "kubernetes_cluster_autoscaler"
+    },
+    "monitors": {
+      "Not safe to autoscale": "assets/monitors/KCA_not_safe_to_autosclae.json",
+      "Reporting Errors": "assets/monitors/KCA_reporting_errors.json",
+      "Unused Nodes Forcast": "assets/monitors/KCA_unused_nodes_forecast.json"
+    }
   },
   "author": {
     "support_email": "help@datadoghq.com",
