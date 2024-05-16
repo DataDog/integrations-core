@@ -334,7 +334,7 @@ class MongoOperationSamples(DBMAsyncJob):
         # convert camelCase to snake_case
         formatted = {}
         for key, value in metric_dict.items():
-            formatted_key = self._check.convert_to_underscore_separated(key)
+            formatted_key = str(self._check.convert_to_underscore_separated(key))
             if formatted_key in metric_dict:
                 # If the formatted_key already exists (conflict), use the original key
                 formatted_key = key
