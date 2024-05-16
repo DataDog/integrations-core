@@ -24,8 +24,8 @@ jobs:
       with:
         python-version: 3.11
 
-    - name: Install Build
-      run: pip install -U build[virtualenv]
+    - name: Install Build Deps
+      run: pip install -U build[virtualenv] hatchling
 
     - name: Build Packages
       run: |
