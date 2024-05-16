@@ -96,7 +96,7 @@ def test_integration_mongos(instance_integration_cluster, aggregator, check, dd_
             'jumbo',
             'sessions',
         ],
-        ['sharding_cluster_role:mongos'],
+        ['sharding_cluster_role:mongos', 'cluster_name:my_cluster'],
     )
 
     aggregator.assert_all_metrics_covered()
@@ -112,7 +112,7 @@ def test_integration_mongos(instance_integration_cluster, aggregator, check, dd_
     )
     assert len(aggregator._events) == 0
 
-    expected_tags = ['server:mongodb://localhost:27017/', 'sharding_cluster_role:mongos']
+    expected_tags = ['server:mongodb://localhost:27017/', 'sharding_cluster_role:mongos', 'cluster_name:my_cluster']
     _assert_mongodb_instance_event(
         aggregator,
         mongos_check,
