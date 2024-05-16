@@ -132,6 +132,7 @@ manifest.json         @DataDog/documentation @DataDog/agent-integrations
 /tcp_queue_length/assets/logs/            @DataDog/container-integrations @DataDog/agent-integrations @DataDog/documentation @DataDog/logs-backend
 
 # NDM
+/cisco_sdwan/                                                             @DataDog/network-device-monitoring @DataDog/agent-integrations
 /snmp/                                                             @DataDog/network-device-monitoring @DataDog/agent-integrations
 /snmp/*.md                                                         @DataDog/network-device-monitoring @DataDog/agent-integrations @DataDog/documentation
 /snmp_*/                                                           @DataDog/network-device-monitoring @DataDog/agent-integrations
