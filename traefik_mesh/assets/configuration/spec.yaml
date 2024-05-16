@@ -1,0 +1,23 @@
+name: traefik_mesh
+files:
+  - name: traefik_mesh.yaml
+    options:
+    - template: init_config
+      options:
+      - template: init_config/openmetrics
+    - template: instances
+      options:
+      - template: instances/openmetrics
+        overrides:
+          openmetrics_endpoint.required: true
+          openmetrics_endpoint.value.example: http://<PROXY_ENDPOINT>:<PROXY_PORT>
+          openmetrics_endpoint.description: |
+            Endpoint exposing the Traefic Proxy Prometheus metrics. For more information refer to:
+            https://doc.traefik.io/traefik/observability/metrics/prometheus/
+      - name: traefik_controller_api_endpoint
+        required: false
+        description: URL of the Traefik Mesh controller to query.
+        value:
+          example: http://<CONTROLLER_ENDPOINT>:<CONTROLLER_PORT>
+          pattern: \w+
+          type: string
