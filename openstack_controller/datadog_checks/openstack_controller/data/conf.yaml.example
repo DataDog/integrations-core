@@ -33,13 +33,6 @@ init_config:
 #
 instances:
 
-  -
-    ## @param use_legacy_check_version - boolean - optional - default: false
-    ## For backward compatibility reasons, it is possible to use a deprecated version of the Openstack Controller
-    ## integration by setting this field to "true".
-    #
-    # use_legacy_check_version: false
-
     ## @param username - string - optional
     ## The User name used to connect to Openstack.
     #
@@ -55,6 +48,12 @@ instances:
     ## use the "default" Domain ID
     #
     # domain_id: default
+
+    ## @param use_legacy_check_version - boolean - optional - default: false
+    ## For backward compatibility reasons, it is possible to use a deprecated version of the Openstack Controller
+    ## integration by setting this field to "true".
+    #
+    use_legacy_check_version: false
 
     ## @param use_agent_proxy - boolean - optional - default: true
     ## Whether the dd-agent proxy should also be used for openstack API requests (if set).

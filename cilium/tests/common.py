@@ -128,6 +128,16 @@ AGENT_V2_METRICS = [
     "cilium.kvstore.initial_sync_completed",
 ]
 
+AGENT_V2_METRICS_1_14 = [
+    # E2E not updated yet to 1.14+ of Cilium
+    'cilium.cidrgroup.policies',
+    'cilium.k8s_client.rate_limiter_duration.seconds.bucket',
+    'cilium.k8s_client.rate_limiter_duration.seconds.count',
+    'cilium.k8s_client.rate_limiter_duration.seconds.sum',
+    'cilium.policy.change.count',
+    'cilium.services.events.count',
+]
+
 AGENT_V1_METRICS = [
     "cilium.agent.api_process_time.seconds.count",
     "cilium.agent.api_process_time.seconds.sum",
@@ -220,6 +230,15 @@ AGENT_V1_METRICS = [
     "cilium.kvstore.initial_sync_completed",
 ]
 
+AGENT_V1_METRICS_1_14 = [
+    # E2E not updated yet to 1.14+ of Cilium
+    'cilium.cidrgroup.policies',
+    'cilium.k8s_client.rate_limiter_duration.seconds.count',
+    'cilium.k8s_client.rate_limiter_duration.seconds.sum',
+    'cilium.policy.change.total',
+    'cilium.services.events.total',
+]
+
 # Some types changed moving from v1 to v2. We keep v2 in the metadata.csv file.
 AGENT_V1_METRICS_EXCLUDE_METADATA_CHECK = [
     "cilium.agent.api_process_time.seconds.count",
@@ -243,6 +262,8 @@ AGENT_V1_METRICS_EXCLUDE_METADATA_CHECK = [
     "cilium.policy.implementation_delay.sum",
     "cilium.proxy.upstream_reply.seconds.count",
     "cilium.proxy.upstream_reply.seconds.sum",
+    'cilium.k8s_client.rate_limiter_duration.seconds.count',
+    'cilium.k8s_client.rate_limiter_duration.seconds.sum',
 ]
 
 OPERATOR_V2_PROCESS_METRICS = [
@@ -334,6 +355,21 @@ OPERATOR_V2_METRICS = [
     "cilium.operator.ipam.interface_candidates.count",
     "cilium.operator.ipam.ip_allocation_ops.count",
 ] + OPERATOR_V2_PROCESS_METRICS
+
+OPERATOR_V2_METRICS_1_14 = [
+    # E2E not updated yet to 1.14+ of Cilium
+    "cilium.operator.ipam.allocation.duration.seconds.bucket",
+    "cilium.operator.ipam.allocation.duration.seconds.sum",
+    "cilium.operator.ipam.allocation.duration.seconds.count",
+    "cilium.operator.ipam.available_interfaces",
+    "cilium.operator.ipam.available_ips",
+    "cilium.operator.ipam.ip_release_ops.count",
+    "cilium.operator.ipam.needed_ips",
+    "cilium.operator.ipam.release.duration.seconds.bucket",
+    "cilium.operator.ipam.release.duration.seconds.sum",
+    "cilium.operator.ipam.release.duration.seconds.count",
+    "cilium.operator.ipam.used_ips",
+]
 
 # Not available in test metric fixtures
 ADDL_OPERATOR_AWS_METRICS = [
