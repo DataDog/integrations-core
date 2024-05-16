@@ -1,0 +1,39 @@
+name: build ddev
+
+on:
+  pull_request:
+    branches:
+    - master
+
+defaults:
+  run:
+    shell: bash
+
+
+jobs:
+  python-artifacts:
+    name: Build wheel and source distribution
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+
+    - name: Set up Python 3.11
+      uses: actions/setup-python@v5
+      with:
+        python-version: 3.11
+
+    - name: Install Build
+      run: pip install -U build[virtualenv]
+
+    - name: build packages
+      run: |
+        bash .github/workflows/scripts/build.sh
+
+    # - name: Push Python artifacts to PyPI
+    #   uses: pypa/gh-action-pypi-publish@v1.8.14
+    #   with:
+    #     skip-existing: true
+    #     user: __token__
+    #     password: ${{ secrets.INTEGRATIONS_PYPI_NAME_CLAIM }}
