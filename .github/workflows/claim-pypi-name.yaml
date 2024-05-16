@@ -31,9 +31,9 @@ jobs:
       run: |
         bash .github/workflows/scripts/build_placeholders.sh
 
-    # - name: Push Python artifacts to PyPI
-    #   uses: pypa/gh-action-pypi-publish@v1.8.14
-    #   with:
-    #     skip-existing: true
-    #     user: __token__
-    #     password: ${{ secrets.INTEGRATIONS_PYPI_NAME_CLAIM }}
+    - name: Push Python artifacts to PyPI
+      uses: pypa/gh-action-pypi-publish@v1.8.14
+      with:
+        skip-existing: true
+        user: __token__
+        password: ${{ secrets.INTEGRATIONS_PYPI_NAME_CLAIM }}
