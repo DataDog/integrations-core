@@ -22,7 +22,10 @@ version = "0.0.1"
 [tool.hatch.build.targets.wheel]
 bypass-selection = true
 EOF
-            python -m build --wheel pkg_placeholder
+            # We only want wheels.
+            # We don't need build isolation because we'll trash the env anyway in CI.
+            # Skipping isolation speeds up the job.
+            python -m build --no-isolation --wheel pkg_placeholder
             mv pkg_placeholder/dist/* dist/
         fi
     fi
