@@ -23,7 +23,6 @@
             "renotify_interval": 60,
             "avalanche_window": 20,
             "escalation_message": "",
-            "on_missing_data": "default",
             "new_group_delay": 0,
             "silenced": {}
         },
@@ -31,8 +30,5 @@
         "restriction_policy": {
             "bindings": []
         }
-    },
-    "tags": [
-        "integration:kubernetes_cluster_autoscaler"
-    ]
+    }
 }

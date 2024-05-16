@@ -24,7 +24,6 @@
             "include_tags": true,
             "escalation_message": "",
             "avalanche_window": 20,
-            "on_missing_data": "default",
             "new_group_delay": 60,
             "silenced": {
                 "*": null
@@ -34,8 +33,5 @@
         "restriction_policy": {
             "bindings": []
         }
-    },
-    "tags": [
-        "integration:kubernetes_cluster_autoscaler"
-    ]
+    }
 }
