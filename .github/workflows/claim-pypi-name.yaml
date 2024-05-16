@@ -34,6 +34,9 @@ jobs:
     - name: Push Python artifacts to PyPI
       uses: pypa/gh-action-pypi-publish@v1.8.14
       with:
+        # We don't mind invalid metadata, we only want to claim the package name.
+        verify-metadata: false
+        verbose: true
         skip-existing: true
         user: __token__
         password: ${{ secrets.INTEGRATIONS_PYPI_NAME_CLAIM }}
