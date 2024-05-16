@@ -1,4 +1,4 @@
-name: build ddev
+name: Build Placeholder PyPI Packages
 
 on:
   pull_request:
@@ -27,9 +27,9 @@ jobs:
     - name: Install Build
       run: pip install -U build[virtualenv]
 
-    - name: build packages
+    - name: Build Packages
       run: |
-        bash .github/workflows/scripts/build.sh
+        bash .github/workflows/scripts/build_placeholders.sh
 
     # - name: Push Python artifacts to PyPI
     #   uses: pypa/gh-action-pypi-publish@v1.8.14
