@@ -29,6 +29,6 @@
         }
     },
     "tags": [
-        "integration:kubernetes_cluster_autoscaler"
+        "integration:kubernetes-cluster-autoscaler"
     ]
 }
