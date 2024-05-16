@@ -2,7 +2,7 @@
     {
         "agent_version": "7.55.0",
         "integration": "Kubernetes Cluster Autoscaler",
-        "check": "kubernetes_ca.openmetrics.health",
+        "check": "kubernetes_cluster_autoscaler.openmetrics.health",
         "statuses": [
             "ok",
             "critical"
