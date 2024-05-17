@@ -42,6 +42,7 @@ def test_apply_called_queries_multiple_runs(pg_instance, integration_check):
         {'queryid': 2, 'query_signature': 'abc', 'calls': 3, 'query': 'query 123', 'datname': 'db', 'rolname': 'user'},
     ]
 
+
 def test_apply_called_queries_multiple_dbs(pg_instance, integration_check):
     check = integration_check(pg_instance)
 

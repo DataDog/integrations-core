@@ -476,7 +476,7 @@ class PostgresStatementMetrics(DBMAsyncJob):
             self._log.warning("Failed to query for pg_stat_statements count: %s", e)
 
     def _baseline_metrics_query_key(self, row):
-        return _row_key(row) + (row['queryid'], )
+        return _row_key(row) + (row['queryid'],)
 
     # _apply_called_queries expects normalized rows before any merging of duplicates.
     # It takes the incremental pg_stat_statements rows and constructs the full set of rows
@@ -521,7 +521,7 @@ class PostgresStatementMetrics(DBMAsyncJob):
     def _collect_metrics_rows(self):
         self._emit_pg_stat_statements_metrics()
         self._emit_pg_stat_statements_dealloc()
-        
+
         self._check_baseline_metrics_expiry()
         rows = []
         if (not self._config.incremental_query_metrics) or self._check.version < V10:
