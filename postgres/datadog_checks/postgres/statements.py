@@ -527,14 +527,12 @@ class PostgresStatementMetrics(DBMAsyncJob):
         if (not self._config.incremental_query_metrics) or self._check.version < V10:
             rows = self._load_pg_stat_statements()
             rows = self._normalize_queries(rows)
-            self.log_rows(rows)
         elif len(self._baseline_metrics) == 0:
             # When we don't have baseline metrics (either on the first run or after cache expiry),
             # we fetch all rows from pg_stat_statements, and update the initial state of relevant
             # caches.
             rows = self._load_pg_stat_statements()
             rows = self._normalize_queries(rows)
-            self.log_rows(rows)
             self._query_calls_cache.set_calls(rows)
             self._apply_called_queries(rows)
         else:
@@ -544,7 +542,6 @@ class PostgresStatementMetrics(DBMAsyncJob):
             rows = self._load_pg_stat_statements()
             rows = self._normalize_queries(rows)
             rows = self._apply_called_queries(rows)
-            self.log_rows(rows)
 
         if not rows:
             return []
