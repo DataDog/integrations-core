@@ -3,6 +3,7 @@ traefik_mesh.config.last_reload.failure,gauge,,,,The timestamp of the last confi
 traefik_mesh.config.last_reload.success,gauge,,,,The timestamp of the last configuration reload success,
 traefik_mesh.config.reloads.count,count,,,,The total count of configuration reloads,
 traefik_mesh.config.reloads.failure.count,count,,,,The total count of configuration reload failures,
+traefik_mesh.controller.node.ready,gauge,,,,The current count of ready nodes in the Traefik Mesh instance,
 traefik_mesh.tls.certs.not_after,gauge,,,,The expiration date of certificates,
 traefik_mesh.entrypoint.open_connections,gauge,,,,The current count of open connections on an entrypoint,
 traefik_mesh.entrypoint.request.duration.seconds.bucket,count,,second,,Request processing duration histogram on an entrypoint,

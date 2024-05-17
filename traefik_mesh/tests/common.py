@@ -1,6 +1,7 @@
 # (C) Datadog, Inc. 2024-present
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
+import json
 import os
 
 from datadog_checks.dev import get_here
@@ -88,6 +89,12 @@ OM_MOCKED_INSTANCE = {
     'tags': ['test:traefik_mesh'],
 }
 
+OM_MOCKED_INSTANCE_CONTROLLER = {
+    'openmetrics_endpoint': 'http://localhost:8080/metrics',
+    'traefik_controller_api_endpoint': 'http://localhost:8081',
+    'tags': ['test:traefik_mesh'],
+}
+
 OPTIONAL_METRICS = {
     'traefik_mesh.tls.certs.not_after',
     'traefik_mesh.entrypoint.requests.bytes.count',
@@ -116,3 +123,8 @@ OPTIONAL_METRICS = {
 
 def get_fixture_path(filename):
     return os.path.join(HERE, 'fixtures', filename)
+
+
+def read_json_fixture(filename):
+    with open(get_fixture_path(filename), 'r') as f:
+        return json.load(f)

@@ -63,10 +63,12 @@ def dd_environment(dd_save_state):
             )
 
             traefik_proxy_endpoint = f'http://{traefik_proxy_url}:{traefik_proxy_port}/metrics'
-            traefik_proxy_api_endpoint = f'http://{traefik_proxy_url}:{traefik_proxy_port}'
             traefik_controller_api_endpoint = f'http://{traefik_controller_api_url}:{traefik_controller_api_port}'
 
-            instance = {'openmetrics_endpoints': traefik_proxy_endpoint}
+            instance = {
+                'openmetrics_endpoint': traefik_proxy_endpoint,
+                'traefik_controller_api_endpoint': traefik_controller_api_endpoint,
+            }
 
             dd_save_state("traefik_instance", instance)
 

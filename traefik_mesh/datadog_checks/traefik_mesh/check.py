@@ -4,9 +4,9 @@
 from copy import copy
 from typing import Any  # noqa: F401
 
-from six import PY2
+import requests
 
-from datadog_checks.base import AgentCheck, OpenMetricsBaseCheckV2, is_affirmative
+from datadog_checks.base import AgentCheck, OpenMetricsBaseCheckV2
 from datadog_checks.traefik_mesh.config_models import ConfigMixin
 from datadog_checks.traefik_mesh.metrics import METRIC_MAP, RENAME_LABELS
 
@@ -19,7 +19,6 @@ class TraefikMeshCheck(OpenMetricsBaseCheckV2, ConfigMixin):
     def __init__(self, name, init_config, instances):
         super().__init__(name, init_config, instances)
 
-        self.traefik_proxy_api_endpoint = f"{self.instance.get('openmetrics_endpoint')}/api"
         self.traefik_controller_api_endpoint = self.instance.get('traefik_controller_api_endpoint')
         self.tags = self.instance.get('tags', [])
         self.tags = self.tags + [f'controller_endpoint:{self.traefik_controller_api_endpoint}']
@@ -36,39 +35,39 @@ class TraefikMeshCheck(OpenMetricsBaseCheckV2, ConfigMixin):
 
         finally:
             if self.traefik_controller_api_endpoint:
-                statuses = self.controller_get_node_status(self.traefik_controller_api_endpoint)
-                self.node_ready_status(statuses, self.tags)
+                traefik_node_status = self.get_mesh_ready_status(self.traefik_controller_api_endpoint)
+                self.submit_mesh_ready_status(traefik_node_status, self.tags)
 
             self._submit_version()
 
-    def submit_mesh_ready_status(self, node_status, tags):
+    def submit_mesh_ready_status(self, nodes, tags):
         """Submits Traefik Mesh readiness status from the Traefik Controller"""
 
-        if not node_status:
+        if not nodes:
             return
 
-        for node in node_status:
+        for node in nodes:
             node_tags = copy(tags)
             node_name = node.get('Name')
+            node_ip = node.get('IP')
             status = node.get('Ready')
+            # Set the node name and IP as tags
+            node_tags.append(f'node_name:{node_name}')
+            node_tags.append(f'node_ip:{node_ip}')
 
-            node_tags.append(f'node:{node_name}')
-            self.log.debug('Node %s Ready: %s', node_name, status)
-            self.gauge('node.ready', 1 if status == 'true' else 0, tags=node_tags)
+            self.log.debug("Node %s Ready: %s", node_name, status)
+            self.gauge('controller.node.ready', 1 if status == 'true' else 0, tags=node_tags)
 
     def get_mesh_ready_status(self, url):
         """Fetches Traefik Mesh node status from the Controller"""
 
         node_status_url = f'{url}/api/status/nodes'
-        try:
-            response = self.http.get(node_status_url)
-            response.raise_for_status()
-            response = response.json()
-        except Exception as e:
-            self.log.warning('Unable to fetch Traefik Mesh node status: %s', e)
-        else:
-            node_status = response
-            self.log.info('Node status: %s', node_status)
+        node_status = self._get_json(node_status_url)
+        if not node_status:
+            self.log.warning("Unable to fetch Traefik Mesh node status")
+            return None
+
+        self.log.info("Node status: %s", node_status)
 
         return node_status
 
@@ -76,24 +75,35 @@ class TraefikMeshCheck(OpenMetricsBaseCheckV2, ConfigMixin):
         """Fetches Traefik Proxy version from the Proxy API"""
 
         version_url = f'{url}/version'
-        try:
-            response = self.http.get(version_url)
-            response.raise_for_status()
-            response = response.json()
-        except Exception as e:
-            self.log.warning('Unable to fetch Traefik Proxy version: %s', e)
-        else:
-            version = response.get('Version')
+        response = self._get_json(version_url)
+        if not response:
+            self.log.warning("Unable to fetch Traefik Proxy version")
+            return None
 
+        version = response.get('Version')
         return version
 
     @AgentCheck.metadata_entrypoint
     def _submit_version(self):
         """Submit the version metadata for the Traefik Proxy instance"""
 
+        traefik_proxy_api_endpoint = self.instance.get('openmetrics_endpoint').replace('/metrics', '/api')
         try:
-            if version := self.get_version(self.traefik_proxy_api_endpoint):
+            if version := self.get_version(traefik_proxy_api_endpoint):
                 self.log.debug("Set version %s for Traefik Proxy", version)
                 self.set_metadata("version", version)
         except Exception as e:
             self.log.debug("Could not determine Traefik Proxy version: %s", str(e))
+
+    def _get_json(self, url):
+        try:
+            resp = self.http.get(url)
+            resp.raise_for_status()
+            return resp.json()
+        except (requests.exceptions.HTTPError, requests.exceptions.ConnectionError) as e:
+            self.warning(
+                "Couldn't connect to URL: %s with exception: %s. Please verify the address is reachable", url, e
+            )
+        except requests.exceptions.Timeout as e:
+            self.warning("Connection timeout when connecting to %s: %s", url, e)
+        return None
