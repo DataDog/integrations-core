@@ -11,6 +11,11 @@ for file_or_subdir in *; do
         pyproject="${file_or_subdir}/pyproject.toml"
         if [[ -f "${pyproject}" ]]; then
             pypi_pkg_name=$(python -c "import tomllib, pathlib; contents = pathlib.Path('${pyproject}').read_text(); data = tomllib.loads(contents); print(data['project']['name'])")
+            # Remove these clauses when they become unblocked.
+            if [[ "${pypi_pkg_name}" = "datadog-cert-manager"]]; then
+                echo "Skipping ${pypi_pkg_name} until it gets unblocked on PyPI"
+                continue
+            fi
             # multiline strings are sensitive to indentation, so we must unindent the following command
 cat <<EOF > pkg_placeholder/pyproject.toml
 [build-system]
