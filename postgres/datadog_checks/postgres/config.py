@@ -165,6 +165,10 @@ class PostgresConfig:
         self.log_unobfuscated_queries = is_affirmative(instance.get('log_unobfuscated_queries', False))
         self.log_unobfuscated_plans = is_affirmative(instance.get('log_unobfuscated_plans', False))
         self.database_instance_collection_interval = instance.get('database_instance_collection_interval', 300)
+        self.incremental_query_metrics = is_affirmative(
+            self.statement_metrics_config.get('incremental_query_metrics', False)
+        )
+        self.baseline_metrics_expiry = self.statement_metrics_config.get('baseline_metrics_expiry', 300)
 
     def _build_tags(self, custom_tags, agent_tags, propagate_agent_tags=True):
         # Clean up tags in case there was a None entry in the instance
