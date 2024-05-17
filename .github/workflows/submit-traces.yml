@@ -2,11 +2,6 @@ name: Submit traces
 
 on:
   workflow_call:
-    inputs:
-      artifact-name:
-        required: false
-        default: "traces"
-        type: string
 
 defaults:
   run:
@@ -34,7 +29,7 @@ jobs:
     - uses: actions/download-artifact@v4
       id: download
       with:
-        name: "${{ inputs.artifact-name }}"
+        pattern: "traces-*"
         path: captured-traces
       continue-on-error: true
 
