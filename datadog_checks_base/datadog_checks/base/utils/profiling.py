@@ -14,17 +14,13 @@ class Profiling(object):
             cls._instance._running = False
             cls._instance._profiler = None
             cls._instance._mutex = Lock()
-            cls._instance._profiling_imported = False
 
         return cls._instance
 
     def start(self):
         with self._mutex:
             if not self._running and self._profiler is None:
-                if not self._profiling_imported:
-                    from ddtrace.profiling import Profiler
-
-                    self._profiling_imported = True
+                from ddtrace.profiling import Profiler
 
                 self._profiler = Profiler(service="datadog-agent-integrations")
                 self._profiler.start()
