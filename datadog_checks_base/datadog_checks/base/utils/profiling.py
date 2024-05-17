@@ -2,8 +2,6 @@
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
 
-from ddtrace.profiling import Profiler
-
 
 class Profiling(object):
     _instance = None
@@ -19,6 +17,8 @@ class Profiling(object):
     # TODO: Double check if we need to use any concurrency control mechanism
     def start(self):
         if not self._running and self._profiler is None:
+            from ddtrace.profiling import Profiler
+
             self._profiler = Profiler(service="datadog-agent-integrations")
             self._profiler.start()
             self._running = True
