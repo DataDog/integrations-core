@@ -1,5 +1,6 @@
 {
-    "title": "Kubernetes Cluster Autoscaler Overview - Hadhemi's copy",
+    "author_name": "Datadog",
+    "title": "Kubernetes Cluster Autoscaler Overview",
     "description": "This dashboard provides insights into your Kubernetes Cluster Autoscaler.\nYou can use this dashbaord to check the cluster autoscaler state and resource consumption.\nYou can also use it to check for downsacaling and upscaling.",
     "widgets": [
         {
@@ -33,7 +34,7 @@
                         "id": 8366490141273904,
                         "definition": {
                             "type": "note",
-                            "content": "# Kubernetes Cluster Autoscaler\n\nThis dashboard provides an overview of your Kubernetes Cluster Autoscaler metrics describing its own operations as well as some metrics related to general state of the cluster.\n\nIt monitors Cluster state, Cluster Autoscaler execution, Cluster Autoscaler operations and Node Autoprovisioning operations.",
+                            "content": "# Kubernetes Cluster Autoscaler\n\nThis dashboard provides an overview of your Kubernetes Cluster Autoscaler metrics describing its own operations as well as some metrics related to general state of the cluster.\nIt monitors Cluster state, execution, operations and Node Autoprovisioning operations.\n\n**Useful Links**\n- [Kubernetes Cluster Autoscaler Integration doc](https://docs.datadoghq.com/integrations/kubernetes_kubernetes_cluster_autoscaler/?tab=host)\n- [Kubernetes Cluster Autoscaler metrics list](https://github.com/kubernetes/autoscaler/blob/master/cluster-autoscaler/proposals/metrics.md) ",
                             "background_color": "white",
                             "font_size": "14",
                             "text_align": "left",
@@ -47,7 +48,7 @@
                             "x": 0,
                             "y": 2,
                             "width": 5,
-                            "height": 5
+                            "height": 6
                         }
                     }
                 ]
@@ -56,7 +57,7 @@
                 "x": 0,
                 "y": 0,
                 "width": 5,
-                "height": 8
+                "height": 9
             }
         },
         {
@@ -95,9 +96,8 @@
                             "title": "OpenMetrics",
                             "title_size": "16",
                             "title_align": "left",
-                            "time": {},
                             "type": "check_status",
-                            "check": "kubernetes_cluster_autoscaler.prometheus.health",
+                            "check": "kubernetes_cluster_autoscaler.openmetrics.health",
                             "grouping": "check",
                             "group_by": [],
                             "tags": []
@@ -129,7 +129,7 @@
                             "x": 0,
                             "y": 4,
                             "width": 7,
-                            "height": 3
+                            "height": 4
                         }
                     }
                 ]
@@ -138,7 +138,504 @@
                 "x": 5,
                 "y": 0,
                 "width": 7,
+                "height": 9
+            }
+        },
+        {
+            "id": 1140994815971286,
+            "definition": {
+                "title": "Cluster Ressources",
+                "background_color": "vivid_blue",
+                "show_title": true,
+                "type": "group",
+                "layout_type": "ordered",
+                "widgets": [
+                    {
+                        "id": 3082143674816138,
+                        "definition": {
+                            "type": "note",
+                            "content": "The Cluster used resources such as cpu and memory vs the allocated (limit) ressources.",
+                            "background_color": "purple",
+                            "font_size": "14",
+                            "text_align": "left",
+                            "vertical_align": "center",
+                            "show_tick": true,
+                            "tick_pos": "50%",
+                            "tick_edge": "left",
+                            "has_padding": true
+                        },
+                        "layout": {
+                            "x": 0,
+                            "y": 0,
+                            "width": 12,
+                            "height": 1
+                        }
+                    },
+                    {
+                        "id": 1259367181324766,
+                        "definition": {
+                            "title": "CPU Current Cores",
+                            "title_size": "16",
+                            "title_align": "left",
+                            "type": "query_value",
+                            "requests": [
+                                {
+                                    "response_format": "scalar",
+                                    "queries": [
+                                        {
+                                            "name": "query1",
+                                            "data_source": "metrics",
+                                            "query": "avg:kubernetes_cluster_autoscaler.cluster_cpu_current_cores{$kube_cluster_name,$env}",
+                                            "aggregator": "avg"
+                                        }
+                                    ],
+                                    "conditional_formats": [
+                                        {
+                                            "comparator": ">",
+                                            "value": 0,
+                                            "palette": "custom_text",
+                                            "custom_fg_color": "#3a38b2"
+                                        }
+                                    ],
+                                    "formulas": [
+                                        {
+                                            "formula": "query1"
+                                        }
+                                    ]
+                                }
+                            ],
+                            "autoscale": true,
+                            "precision": 2,
+                            "timeseries_background": {
+                                "type": "area",
+                                "yaxis": {
+                                    "include_zero": true
+                                }
+                            }
+                        },
+                        "layout": {
+                            "x": 0,
+                            "y": 1,
+                            "width": 5,
+                            "height": 3
+                        }
+                    },
+                    {
+                        "id": 4589465821381692,
+                        "definition": {
+                            "title": "CPU Percentage Usage (current cores vs limit)",
+                            "title_size": "16",
+                            "title_align": "left",
+                            "type": "query_table",
+                            "requests": [
+                                {
+                                    "queries": [
+                                        {
+                                            "name": "query1",
+                                            "data_source": "metrics",
+                                            "query": "avg:kubernetes_cluster_autoscaler.cluster_cpu_current_cores{$kube_cluster_name,$env} by {kube_cluster_name}",
+                                            "aggregator": "avg"
+                                        },
+                                        {
+                                            "name": "query2",
+                                            "data_source": "metrics",
+                                            "query": "avg:kubernetes_cluster_autoscaler.cpu_limits_cores{$kube_cluster_name,$env} by {kube_cluster_name}",
+                                            "aggregator": "avg"
+                                        }
+                                    ],
+                                    "response_format": "scalar",
+                                    "sort": {
+                                        "count": 500,
+                                        "order_by": [
+                                            {
+                                                "type": "formula",
+                                                "index": 0,
+                                                "order": "desc"
+                                            }
+                                        ]
+                                    },
+                                    "formulas": [
+                                        {
+                                            "formula": "query1 / query2 * 100",
+                                            "cell_display_mode": "trend",
+                                            "number_format": {
+                                                "unit": {
+                                                    "type": "canonical_unit",
+                                                    "unit_name": "percent"
+                                                }
+                                            }
+                                        }
+                                    ]
+                                }
+                            ],
+                            "has_search_bar": "auto"
+                        },
+                        "layout": {
+                            "x": 5,
+                            "y": 1,
+                            "width": 7,
+                            "height": 3
+                        }
+                    },
+                    {
+                        "id": 6694311141159310,
+                        "definition": {
+                            "title": "Memory Percentage Usage (current bytes vs limit)",
+                            "title_size": "16",
+                            "title_align": "left",
+                            "type": "query_table",
+                            "requests": [
+                                {
+                                    "queries": [
+                                        {
+                                            "name": "query1",
+                                            "data_source": "metrics",
+                                            "query": "avg:kubernetes_cluster_autoscaler.cluster_memory_current_bytes{$kube_cluster_name,$env} by {kube_cluster_name}",
+                                            "aggregator": "avg"
+                                        },
+                                        {
+                                            "name": "query2",
+                                            "data_source": "metrics",
+                                            "query": "avg:kubernetes_cluster_autoscaler.memory_limits_bytes{$kube_cluster_name,$env} by {kube_cluster_name}",
+                                            "aggregator": "avg"
+                                        }
+                                    ],
+                                    "response_format": "scalar",
+                                    "sort": {
+                                        "count": 500,
+                                        "order_by": [
+                                            {
+                                                "type": "formula",
+                                                "index": 0,
+                                                "order": "desc"
+                                            }
+                                        ]
+                                    },
+                                    "formulas": [
+                                        {
+                                            "formula": "query1 / query2 * 100",
+                                            "cell_display_mode": "bar",
+                                            "number_format": {
+                                                "unit": {
+                                                    "type": "canonical_unit",
+                                                    "unit_name": "percent"
+                                                }
+                                            }
+                                        }
+                                    ]
+                                }
+                            ],
+                            "has_search_bar": "auto"
+                        },
+                        "layout": {
+                            "x": 0,
+                            "y": 4,
+                            "width": 7,
+                            "height": 3
+                        }
+                    },
+                    {
+                        "id": 4801670516193584,
+                        "definition": {
+                            "title": "Memory Current Bytes",
+                            "title_size": "16",
+                            "title_align": "left",
+                            "type": "query_value",
+                            "requests": [
+                                {
+                                    "response_format": "scalar",
+                                    "queries": [
+                                        {
+                                            "name": "query1",
+                                            "data_source": "metrics",
+                                            "query": "avg:kubernetes_cluster_autoscaler.cluster_memory_current_bytes{$kube_cluster_name,$env}",
+                                            "aggregator": "avg"
+                                        }
+                                    ],
+                                    "conditional_formats": [
+                                        {
+                                            "comparator": ">",
+                                            "value": 0,
+                                            "palette": "custom_text",
+                                            "custom_fg_color": "#110de3"
+                                        }
+                                    ],
+                                    "formulas": [
+                                        {
+                                            "formula": "query1"
+                                        }
+                                    ]
+                                }
+                            ],
+                            "autoscale": true,
+                            "precision": 2,
+                            "timeseries_background": {
+                                "yaxis": {
+                                    "include_zero": true
+                                },
+                                "type": "area"
+                            }
+                        },
+                        "layout": {
+                            "x": 7,
+                            "y": 4,
+                            "width": 5,
+                            "height": 3
+                        }
+                    }
+                ]
+            },
+            "layout": {
+                "x": 0,
+                "y": 9,
+                "width": 12,
                 "height": 8
+            }
+        },
+        {
+            "id": 658734543335480,
+            "definition": {
+                "title": "Downscales",
+                "background_color": "vivid_blue",
+                "show_title": true,
+                "type": "group",
+                "layout_type": "ordered",
+                "widgets": [
+                    {
+                        "id": 6526790518632674,
+                        "definition": {
+                            "type": "note",
+                            "content": "The number of nodes removed by the cluster autoscaler.",
+                            "background_color": "purple",
+                            "font_size": "14",
+                            "text_align": "center",
+                            "vertical_align": "center",
+                            "show_tick": true,
+                            "tick_pos": "50%",
+                            "tick_edge": "left",
+                            "has_padding": true
+                        },
+                        "layout": {
+                            "x": 0,
+                            "y": 0,
+                            "width": 12,
+                            "height": 1
+                        }
+                    },
+                    {
+                        "id": 2226441701659918,
+                        "definition": {
+                            "title": "Unneeded nodes",
+                            "requests": [
+                                {
+                                    "formulas": [
+                                        {
+                                            "formula": "query1",
+                                            "limit": {
+                                                "order": "desc"
+                                            }
+                                        }
+                                    ],
+                                    "queries": [
+                                        {
+                                            "query": "max:kubernetes_cluster_autoscaler.unneeded_nodes_count{$env,$kube_cluster_name} by {kubernetes_cluster}",
+                                            "data_source": "metrics",
+                                            "name": "query1",
+                                            "aggregator": "max"
+                                        }
+                                    ],
+                                    "response_format": "scalar",
+                                    "style": {
+                                        "palette": "datadog16"
+                                    }
+                                }
+                            ],
+                            "type": "sunburst",
+                            "legend": {
+                                "type": "table"
+                            }
+                        },
+                        "layout": {
+                            "x": 0,
+                            "y": 1,
+                            "width": 12,
+                            "height": 3
+                        }
+                    },
+                    {
+                        "id": 326382984,
+                        "definition": {
+                            "title": "Pods evicted by autoscaler",
+                            "show_legend": true,
+                            "legend_layout": "horizontal",
+                            "legend_columns": [
+                                "avg",
+                                "min",
+                                "max",
+                                "value",
+                                "sum"
+                            ],
+                            "type": "timeseries",
+                            "requests": [
+                                {
+                                    "formulas": [
+                                        {
+                                            "formula": "query1"
+                                        }
+                                    ],
+                                    "queries": [
+                                        {
+                                            "query": "sum:kubernetes_cluster_autoscaler.evicted_pods_total{$env,$kube_cluster_name} by {kubernetes_cluster}.as_count()",
+                                            "data_source": "metrics",
+                                            "name": "query1"
+                                        }
+                                    ],
+                                    "response_format": "timeseries",
+                                    "style": {
+                                        "palette": "dog_classic",
+                                        "line_type": "solid",
+                                        "line_width": "normal"
+                                    },
+                                    "display_type": "bars"
+                                }
+                            ]
+                        },
+                        "layout": {
+                            "x": 0,
+                            "y": 4,
+                            "width": 6,
+                            "height": 2
+                        }
+                    },
+                    {
+                        "id": 4019431988755622,
+                        "definition": {
+                            "title": "Unneeded nodes as a percentage",
+                            "show_legend": true,
+                            "legend_layout": "auto",
+                            "legend_columns": [
+                                "avg",
+                                "min",
+                                "max",
+                                "value",
+                                "sum"
+                            ],
+                            "type": "timeseries",
+                            "requests": [
+                                {
+                                    "formulas": [
+                                        {
+                                            "number_format": {
+                                                "unit": {
+                                                    "type": "canonical_unit",
+                                                    "unit_name": "percent"
+                                                }
+                                            },
+                                            "formula": "query1 / query2 * 100"
+                                        }
+                                    ],
+                                    "queries": [
+                                        {
+                                            "query": "sum:kubernetes_cluster_autoscaler.unneeded_nodes_count{$kube_cluster_name,$env} by {kube_cluster_name}",
+                                            "data_source": "metrics",
+                                            "name": "query1"
+                                        },
+                                        {
+                                            "query": "sum:kubernetes_cluster_autoscaler.nodes_count{$kube_cluster_name,$env}",
+                                            "data_source": "metrics",
+                                            "name": "query2"
+                                        }
+                                    ],
+                                    "response_format": "timeseries",
+                                    "style": {
+                                        "palette": "dog_classic",
+                                        "line_type": "solid",
+                                        "line_width": "normal"
+                                    },
+                                    "display_type": "area"
+                                }
+                            ],
+                            "yaxis": {
+                                "include_zero": true,
+                                "scale": "linear",
+                                "label": "",
+                                "min": "auto",
+                                "max": "auto"
+                            },
+                            "markers": []
+                        },
+                        "layout": {
+                            "x": 6,
+                            "y": 4,
+                            "width": 6,
+                            "height": 2
+                        }
+                    },
+                    {
+                        "id": 8920421773134230,
+                        "definition": {
+                            "title": "Scale down ",
+                            "show_legend": true,
+                            "legend_layout": "horizontal",
+                            "legend_columns": [
+                                "avg",
+                                "min",
+                                "max",
+                                "value",
+                                "sum"
+                            ],
+                            "type": "timeseries",
+                            "requests": [
+                                {
+                                    "formulas": [
+                                        {
+                                            "formula": "query3"
+                                        }
+                                    ],
+                                    "queries": [
+                                        {
+                                            "query": "sum:kubernetes_cluster_autoscaler.scaled_down_nodes_total{$kube_cluster_name,$env}.as_count()",
+                                            "data_source": "metrics",
+                                            "name": "query3"
+                                        }
+                                    ],
+                                    "response_format": "timeseries",
+                                    "style": {
+                                        "palette": "red",
+                                        "line_type": "solid",
+                                        "line_width": "normal"
+                                    },
+                                    "display_type": "bars"
+                                }
+                            ],
+                            "yaxis": {
+                                "include_zero": true,
+                                "scale": "linear",
+                                "label": "",
+                                "min": "auto",
+                                "max": "auto"
+                            },
+                            "markers": [
+                                {
+                                    "value": "y = 0",
+                                    "display_type": "info bold"
+                                }
+                            ]
+                        },
+                        "layout": {
+                            "x": 0,
+                            "y": 6,
+                            "width": 12,
+                            "height": 2
+                        }
+                    }
+                ]
+            },
+            "layout": {
+                "x": 0,
+                "y": 17,
+                "width": 12,
+                "height": 9
             }
         },
         {
@@ -154,8 +651,8 @@
                         "id": 6401772224224004,
                         "definition": {
                             "type": "note",
-                            "content": "Cluster State",
-                            "background_color": "blue",
+                            "content": "The cluster state indicates whether the cluster is healthy enough for autoscaling, along with the number of managed nodes groups and the nodes count.",
+                            "background_color": "purple",
                             "font_size": "14",
                             "text_align": "center",
                             "vertical_align": "center",
@@ -200,7 +697,11 @@
                                     ]
                                 }
                             ],
-                            "precision": 0
+                            "precision": 0,
+                            "timeseries_background": {
+                                "type": "bars",
+                                "yaxis": {}
+                            }
                         },
                         "layout": {
                             "x": 0,
@@ -258,8 +759,8 @@
                         "id": 4464777686516648,
                         "definition": {
                             "title": "Nodes count",
-                            "show_legend": false,
-                            "legend_layout": "auto",
+                            "show_legend": true,
+                            "legend_layout": "horizontal",
                             "legend_columns": [
                                 "avg",
                                 "min",
@@ -308,7 +809,7 @@
                         "definition": {
                             "title": "Node count by nodegroup - dd-agent",
                             "show_legend": true,
-                            "legend_layout": "auto",
+                            "legend_layout": "horizontal",
                             "legend_columns": [
                                 "avg",
                                 "min",
@@ -360,16 +861,6 @@
                         "id": 3571237355566568,
                         "definition": {
                             "title": "Non ready node by state",
-                            "show_legend": true,
-                            "legend_layout": "auto",
-                            "legend_columns": [
-                                "avg",
-                                "min",
-                                "max",
-                                "value",
-                                "sum"
-                            ],
-                            "type": "timeseries",
                             "requests": [
                                 {
                                     "formulas": [
@@ -379,20 +870,32 @@
                                     ],
                                     "queries": [
                                         {
-                                            "query": "avg:kubernetes_cluster_autoscaler.nodes_count{$env,!state:ready,$kube_cluster_name}",
+                                            "query": "avg:kubernetes_cluster_autoscaler.nodes_count{$env,!state:ready,$kube_cluster_name} by {state}",
                                             "data_source": "metrics",
-                                            "name": "query1"
+                                            "name": "query1",
+                                            "aggregator": "sum"
                                         }
                                     ],
-                                    "response_format": "timeseries",
-                                    "style": {
-                                        "palette": "dog_classic",
-                                        "line_type": "solid",
-                                        "line_width": "normal"
+                                    "response_format": "scalar",
+                                    "sort": {
+                                        "count": 500,
+                                        "order_by": [
+                                            {
+                                                "type": "formula",
+                                                "index": 0,
+                                                "order": "desc"
+                                            }
+                                        ]
                                     },
-                                    "display_type": "bars"
+                                    "style": {
+                                        "palette": "datadog16"
+                                    }
                                 }
-                            ]
+                            ],
+                            "type": "sunburst",
+                            "legend": {
+                                "type": "automatic"
+                            }
                         },
                         "layout": {
                             "x": 4,
@@ -519,7 +1022,7 @@
                             "x": 0,
                             "y": 5,
                             "width": 4,
-                            "height": 2
+                            "height": 3
                         }
                     },
                     {
@@ -527,7 +1030,7 @@
                         "definition": {
                             "title": "Autoscaler Errors",
                             "show_legend": true,
-                            "legend_layout": "auto",
+                            "legend_layout": "horizontal",
                             "legend_columns": [
                                 "avg",
                                 "min",
@@ -570,14 +1073,184 @@
                             "x": 4,
                             "y": 5,
                             "width": 8,
-                            "height": 2
+                            "height": 3
                         }
                     }
                 ]
             },
             "layout": {
                 "x": 0,
-                "y": 8,
+                "y": 0,
+                "width": 12,
+                "height": 9,
+                "is_column_break": true
+            }
+        },
+        {
+            "id": 2025066630493162,
+            "definition": {
+                "title": "Cluster Execution",
+                "background_color": "vivid_blue",
+                "show_title": true,
+                "type": "group",
+                "layout_type": "ordered",
+                "widgets": [
+                    {
+                        "id": 7897543527680040,
+                        "definition": {
+                            "type": "note",
+                            "content": "The record of the last time certain part of cluster autoscaler logic executed and time taken by different functions executed in main Cluster Autoscaler goroutine.",
+                            "background_color": "purple",
+                            "font_size": "14",
+                            "text_align": "center",
+                            "vertical_align": "center",
+                            "show_tick": true,
+                            "tick_pos": "50%",
+                            "tick_edge": "left",
+                            "has_padding": true
+                        },
+                        "layout": {
+                            "x": 0,
+                            "y": 0,
+                            "width": 12,
+                            "height": 1
+                        }
+                    },
+                    {
+                        "id": 5696485262509014,
+                        "definition": {
+                            "title": "Memory Percentage Usage (current bytes vs limit)",
+                            "title_size": "16",
+                            "title_align": "left",
+                            "requests": [
+                                {
+                                    "formulas": [
+                                        {
+                                            "formula": "query1",
+                                            "limit": {
+                                                "order": "desc"
+                                            }
+                                        }
+                                    ],
+                                    "queries": [
+                                        {
+                                            "name": "query1",
+                                            "data_source": "metrics",
+                                            "query": "sum:kubernetes_cluster_autoscaler.function_duration_seconds.count{$kube_cluster_name,$env} by {kube_cluster_name}.as_count()",
+                                            "aggregator": "avg"
+                                        }
+                                    ],
+                                    "response_format": "scalar",
+                                    "style": {
+                                        "palette": "datadog16"
+                                    }
+                                }
+                            ],
+                            "type": "sunburst",
+                            "legend": {
+                                "type": "inline"
+                            }
+                        },
+                        "layout": {
+                            "x": 0,
+                            "y": 1,
+                            "width": 5,
+                            "height": 6
+                        }
+                    },
+                    {
+                        "id": 1737738481962266,
+                        "definition": {
+                            "title": "Last Time the cluster autoscaler logic executed",
+                            "title_size": "16",
+                            "title_align": "left",
+                            "type": "change",
+                            "requests": [
+                                {
+                                    "increase_good": true,
+                                    "order_by": "change",
+                                    "change_type": "absolute",
+                                    "order_dir": "desc",
+                                    "response_format": "scalar",
+                                    "formulas": [
+                                        {
+                                            "formula": "day_before(query1)"
+                                        },
+                                        {
+                                            "formula": "query1"
+                                        }
+                                    ],
+                                    "queries": [
+                                        {
+                                            "name": "query1",
+                                            "data_source": "metrics",
+                                            "query": "avg:kubernetes_cluster_autoscaler.last_activity{$kube_cluster_name,$env} by {kube_cluster_name}",
+                                            "aggregator": "avg"
+                                        }
+                                    ]
+                                }
+                            ]
+                        },
+                        "layout": {
+                            "x": 5,
+                            "y": 1,
+                            "width": 7,
+                            "height": 3
+                        }
+                    },
+                    {
+                        "id": 4207857738656584,
+                        "definition": {
+                            "title": "Memory Current Bytes",
+                            "title_size": "16",
+                            "title_align": "left",
+                            "show_legend": true,
+                            "legend_layout": "horizontal",
+                            "legend_columns": [
+                                "avg",
+                                "min",
+                                "max",
+                                "value",
+                                "sum"
+                            ],
+                            "type": "timeseries",
+                            "requests": [
+                                {
+                                    "formulas": [
+                                        {
+                                            "formula": "query1"
+                                        }
+                                    ],
+                                    "queries": [
+                                        {
+                                            "name": "query1",
+                                            "data_source": "metrics",
+                                            "query": "sum:kubernetes_cluster_autoscaler.function_duration_seconds.sum{$kube_cluster_name,$env} by {service}.as_count()"
+                                        }
+                                    ],
+                                    "response_format": "timeseries",
+                                    "style": {
+                                        "palette": "warm",
+                                        "order_by": "values",
+                                        "line_type": "solid",
+                                        "line_width": "normal"
+                                    },
+                                    "display_type": "line"
+                                }
+                            ]
+                        },
+                        "layout": {
+                            "x": 5,
+                            "y": 4,
+                            "width": 7,
+                            "height": 3
+                        }
+                    }
+                ]
+            },
+            "layout": {
+                "x": 0,
+                "y": 9,
                 "width": 12,
                 "height": 8
             }
@@ -586,11 +1259,32 @@
             "id": 5580063079033594,
             "definition": {
                 "title": "Upscales",
-                "background_color": "vivid_purple",
+                "background_color": "vivid_blue",
                 "show_title": true,
                 "type": "group",
                 "layout_type": "ordered",
                 "widgets": [
+                    {
+                        "id": 538462932573560,
+                        "definition": {
+                            "type": "note",
+                            "content": "The number of nodes successfully added by the cluster autoscaler, and the number of unsuccessful scale-up operations.",
+                            "background_color": "purple",
+                            "font_size": "14",
+                            "text_align": "center",
+                            "vertical_align": "center",
+                            "show_tick": true,
+                            "tick_pos": "50%",
+                            "tick_edge": "left",
+                            "has_padding": true
+                        },
+                        "layout": {
+                            "x": 0,
+                            "y": 0,
+                            "width": 12,
+                            "height": 1
+                        }
+                    },
                     {
                         "id": 6358727233842944,
                         "definition": {
@@ -665,8 +1359,8 @@
                         },
                         "layout": {
                             "x": 0,
-                            "y": 0,
-                            "width": 4,
+                            "y": 1,
+                            "width": 7,
                             "height": 2
                         }
                     },
@@ -675,7 +1369,7 @@
                         "definition": {
                             "title": "Unschedulable pods",
                             "show_legend": true,
-                            "legend_layout": "auto",
+                            "legend_layout": "horizontal",
                             "legend_columns": [
                                 "avg",
                                 "min",
@@ -716,55 +1410,9 @@
                             }
                         },
                         "layout": {
-                            "x": 4,
-                            "y": 0,
-                            "width": 4,
-                            "height": 2
-                        }
-                    },
-                    {
-                        "id": 7549909059204310,
-                        "definition": {
-                            "title": "Pending pods",
-                            "show_legend": true,
-                            "legend_layout": "auto",
-                            "legend_columns": [
-                                "avg",
-                                "min",
-                                "max",
-                                "value",
-                                "sum"
-                            ],
-                            "type": "timeseries",
-                            "requests": [
-                                {
-                                    "formulas": [
-                                        {
-                                            "alias": "n",
-                                            "formula": "default_zero(query1)"
-                                        }
-                                    ],
-                                    "queries": [
-                                        {
-                                            "query": "sum:kubernetes_state.pod.status_phase{pod_phase:pending,$kube_cluster_name,$env,!kube_daemon_set:*,!kube_replica_set:extendeddaemonset-*}",
-                                            "data_source": "metrics",
-                                            "name": "query1"
-                                        }
-                                    ],
-                                    "response_format": "timeseries",
-                                    "style": {
-                                        "palette": "dog_classic",
-                                        "line_type": "solid",
-                                        "line_width": "normal"
-                                    },
-                                    "display_type": "line"
-                                }
-                            ]
-                        },
-                        "layout": {
-                            "x": 8,
-                            "y": 0,
-                            "width": 4,
+                            "x": 7,
+                            "y": 1,
+                            "width": 5,
                             "height": 2
                         }
                     },
@@ -773,7 +1421,7 @@
                         "definition": {
                             "title": "Failed scale up errors",
                             "show_legend": true,
-                            "legend_layout": "auto",
+                            "legend_layout": "horizontal",
                             "legend_columns": [
                                 "avg",
                                 "min",
@@ -814,9 +1462,56 @@
                         },
                         "layout": {
                             "x": 0,
-                            "y": 2,
-                            "width": 4,
-                            "height": 2
+                            "y": 3,
+                            "width": 6,
+                            "height": 3
+                        }
+                    },
+                    {
+                        "id": 5148042452139874,
+                        "definition": {
+                            "title": "Nodes missing node-role.kubernetes.io label",
+                            "title_size": "16",
+                            "title_align": "left",
+                            "show_legend": true,
+                            "legend_layout": "horizontal",
+                            "legend_columns": [
+                                "avg",
+                                "min",
+                                "max",
+                                "value",
+                                "sum"
+                            ],
+                            "type": "timeseries",
+                            "requests": [
+                                {
+                                    "formulas": [
+                                        {
+                                            "formula": "exclude_null(query1)"
+                                        }
+                                    ],
+                                    "queries": [
+                                        {
+                                            "name": "query1",
+                                            "data_source": "metrics",
+                                            "query": "sum:datadog.agent.running{!kube_node_role:*,service:datadog-agent,$kube_cluster_name,$env} by {kube_cluster_name}"
+                                        }
+                                    ],
+                                    "response_format": "timeseries",
+                                    "style": {
+                                        "palette": "warm",
+                                        "line_type": "solid",
+                                        "line_width": "normal"
+                                    },
+                                    "display_type": "line"
+                                }
+                            ]
+                        },
+                        "layout": {
+                            "x": 6,
+                            "y": 3,
+                            "width": 6,
+                            "height": 3
                         }
                     },
                     {
@@ -889,18 +1584,16 @@
                             "markers": []
                         },
                         "layout": {
-                            "x": 4,
-                            "y": 2,
-                            "width": 4,
+                            "x": 0,
+                            "y": 6,
+                            "width": 6,
                             "height": 2
                         }
                     },
                     {
-                        "id": 5148042452139874,
+                        "id": 7549909059204310,
                         "definition": {
-                            "title": "Nodes missing node-role.kubernetes.io label",
-                            "title_size": "16",
-                            "title_align": "left",
+                            "title": "Pending pods",
                             "show_legend": true,
                             "legend_layout": "auto",
                             "legend_columns": [
@@ -915,76 +1608,12 @@
                                 {
                                     "formulas": [
                                         {
-                                            "formula": "exclude_null(query1)"
+                                            "formula": "default_zero(query1)"
                                         }
                                     ],
                                     "queries": [
                                         {
-                                            "name": "query1",
-                                            "data_source": "metrics",
-                                            "query": "sum:datadog.agent.running{!kube_node_role:*,service:datadog-agent,$kube_cluster_name,$env}"
-                                        }
-                                    ],
-                                    "response_format": "timeseries",
-                                    "style": {
-                                        "palette": "warm",
-                                        "line_type": "solid",
-                                        "line_width": "normal"
-                                    },
-                                    "display_type": "line"
-                                }
-                            ]
-                        },
-                        "layout": {
-                            "x": 8,
-                            "y": 2,
-                            "width": 4,
-                            "height": 2
-                        }
-                    }
-                ]
-            },
-            "layout": {
-                "x": 0,
-                "y": 0,
-                "width": 12,
-                "height": 5,
-                "is_column_break": true
-            }
-        },
-        {
-            "id": 658734543335480,
-            "definition": {
-                "title": "Downscales",
-                "background_color": "purple",
-                "show_title": true,
-                "type": "group",
-                "layout_type": "ordered",
-                "widgets": [
-                    {
-                        "id": 2226441701659918,
-                        "definition": {
-                            "title": "Unneeded nodes",
-                            "show_legend": true,
-                            "legend_layout": "auto",
-                            "legend_columns": [
-                                "avg",
-                                "min",
-                                "max",
-                                "value",
-                                "sum"
-                            ],
-                            "type": "timeseries",
-                            "requests": [
-                                {
-                                    "formulas": [
-                                        {
-                                            "formula": "query1"
-                                        }
-                                    ],
-                                    "queries": [
-                                        {
-                                            "query": "max:kubernetes_cluster_autoscaler.unneeded_nodes_count{$env,$kube_cluster_name} by {kubernetes_cluster}",
+                                            "query": "sum:kubernetes_state.pod.status_phase{pod_phase:pending,$kube_cluster_name,$env,!kube_daemon_set:*,!kube_replica_set:extendeddaemonset-*}",
                                             "data_source": "metrics",
                                             "name": "query1"
                                         }
@@ -997,196 +1626,12 @@
                                     },
                                     "display_type": "line"
                                 }
-                            ],
-                            "yaxis": {
-                                "include_zero": true,
-                                "scale": "linear",
-                                "label": "",
-                                "min": "auto",
-                                "max": "auto"
-                            },
-                            "markers": [
-                                {
-                                    "value": "100 < y < 200",
-                                    "display_type": "warning dashed"
-                                },
-                                {
-                                    "value": "y > 200",
-                                    "display_type": "error dashed"
-                                }
                             ]
                         },
                         "layout": {
-                            "x": 0,
-                            "y": 0,
-                            "width": 4,
-                            "height": 2
-                        }
-                    },
-                    {
-                        "id": 326382984,
-                        "definition": {
-                            "title": "Pods evicted by autoscaler",
-                            "show_legend": true,
-                            "legend_layout": "auto",
-                            "legend_columns": [
-                                "avg",
-                                "min",
-                                "max",
-                                "value",
-                                "sum"
-                            ],
-                            "type": "timeseries",
-                            "requests": [
-                                {
-                                    "formulas": [
-                                        {
-                                            "formula": "query1"
-                                        }
-                                    ],
-                                    "queries": [
-                                        {
-                                            "query": "sum:kubernetes_cluster_autoscaler.evicted_pods_total{$env,$kube_cluster_name} by {kubernetes_cluster}.as_count()",
-                                            "data_source": "metrics",
-                                            "name": "query1"
-                                        }
-                                    ],
-                                    "response_format": "timeseries",
-                                    "style": {
-                                        "palette": "dog_classic",
-                                        "line_type": "solid",
-                                        "line_width": "normal"
-                                    },
-                                    "display_type": "bars"
-                                }
-                            ]
-                        },
-                        "layout": {
-                            "x": 4,
-                            "y": 0,
-                            "width": 4,
-                            "height": 2
-                        }
-                    },
-                    {
-                        "id": 4019431988755622,
-                        "definition": {
-                            "title": "Unneeded nodes as a percentage",
-                            "show_legend": true,
-                            "legend_layout": "auto",
-                            "legend_columns": [
-                                "avg",
-                                "min",
-                                "max",
-                                "value",
-                                "sum"
-                            ],
-                            "type": "timeseries",
-                            "requests": [
-                                {
-                                    "formulas": [
-                                        {
-                                            "number_format": {
-                                                "unit": {
-                                                    "type": "canonical_unit",
-                                                    "unit_name": "percent"
-                                                }
-                                            },
-                                            "formula": "query1 / query2 * 100"
-                                        }
-                                    ],
-                                    "queries": [
-                                        {
-                                            "query": "sum:kubernetes_cluster_autoscaler.unneeded_nodes_count{$kube_cluster_name,$env} by {kube_cluster_name}",
-                                            "data_source": "metrics",
-                                            "name": "query1"
-                                        },
-                                        {
-                                            "query": "sum:kubernetes_cluster_autoscaler.nodes_count{$kube_cluster_name,$env}",
-                                            "data_source": "metrics",
-                                            "name": "query2"
-                                        }
-                                    ],
-                                    "response_format": "timeseries",
-                                    "style": {
-                                        "palette": "dog_classic",
-                                        "line_type": "solid",
-                                        "line_width": "normal"
-                                    },
-                                    "display_type": "area"
-                                }
-                            ],
-                            "yaxis": {
-                                "include_zero": true,
-                                "scale": "linear",
-                                "label": "",
-                                "min": "auto",
-                                "max": "auto"
-                            },
-                            "markers": []
-                        },
-                        "layout": {
-                            "x": 8,
-                            "y": 0,
-                            "width": 4,
-                            "height": 2
-                        }
-                    },
-                    {
-                        "id": 8920421773134230,
-                        "definition": {
-                            "title": "Scale down ",
-                            "show_legend": false,
-                            "legend_layout": "auto",
-                            "legend_columns": [
-                                "avg",
-                                "min",
-                                "max",
-                                "value",
-                                "sum"
-                            ],
-                            "type": "timeseries",
-                            "requests": [
-                                {
-                                    "formulas": [
-                                        {
-                                            "formula": "query3"
-                                        }
-                                    ],
-                                    "queries": [
-                                        {
-                                            "query": "sum:kubernetes_cluster_autoscaler.scaled_down_nodes_total{$kube_cluster_name,$env}.as_count()",
-                                            "data_source": "metrics",
-                                            "name": "query3"
-                                        }
-                                    ],
-                                    "response_format": "timeseries",
-                                    "style": {
-                                        "palette": "red",
-                                        "line_type": "solid",
-                                        "line_width": "normal"
-                                    },
-                                    "display_type": "bars"
-                                }
-                            ],
-                            "yaxis": {
-                                "include_zero": true,
-                                "scale": "linear",
-                                "label": "",
-                                "min": "auto",
-                                "max": "auto"
-                            },
-                            "markers": [
-                                {
-                                    "value": "y = 0",
-                                    "display_type": "info bold"
-                                }
-                            ]
-                        },
-                        "layout": {
-                            "x": 0,
-                            "y": 2,
-                            "width": 12,
+                            "x": 6,
+                            "y": 6,
+                            "width": 6,
                             "height": 2
                         }
                     }
@@ -1194,260 +1639,9 @@
             },
             "layout": {
                 "x": 0,
-                "y": 5,
+                "y": 17,
                 "width": 12,
-                "height": 5
-            }
-        },
-        {
-            "id": 1140994815971286,
-            "definition": {
-                "title": "Cluster Ressources",
-                "background_color": "vivid_blue",
-                "show_title": true,
-                "type": "group",
-                "layout_type": "ordered",
-                "widgets": [
-                    {
-                        "id": 3082143674816138,
-                        "definition": {
-                            "type": "note",
-                            "content": "Cluster Resources",
-                            "background_color": "blue",
-                            "font_size": "14",
-                            "text_align": "center",
-                            "vertical_align": "center",
-                            "show_tick": true,
-                            "tick_pos": "50%",
-                            "tick_edge": "left",
-                            "has_padding": true
-                        },
-                        "layout": {
-                            "x": 0,
-                            "y": 0,
-                            "width": 12,
-                            "height": 1
-                        }
-                    },
-                    {
-                        "id": 1259367181324766,
-                        "definition": {
-                            "title": "CPU Current Cores",
-                            "title_size": "16",
-                            "title_align": "left",
-                            "type": "query_value",
-                            "requests": [
-                                {
-                                    "response_format": "scalar",
-                                    "queries": [
-                                        {
-                                            "name": "query1",
-                                            "data_source": "metrics",
-                                            "query": "avg:kubernetes_cluster_autoscaler.cluster_cpu_current_cores{$kube_cluster_name,$env}",
-                                            "aggregator": "avg"
-                                        }
-                                    ],
-                                    "conditional_formats": [
-                                        {
-                                            "comparator": ">",
-                                            "value": 0,
-                                            "palette": "custom_text",
-                                            "custom_fg_color": "#3a38b2"
-                                        }
-                                    ],
-                                    "formulas": [
-                                        {
-                                            "formula": "query1"
-                                        }
-                                    ]
-                                }
-                            ],
-                            "autoscale": true,
-                            "precision": 2,
-                            "timeseries_background": {
-                                "type": "area",
-                                "yaxis": {
-                                    "include_zero": true
-                                }
-                            }
-                        },
-                        "layout": {
-                            "x": 0,
-                            "y": 1,
-                            "width": 5,
-                            "height": 2
-                        }
-                    },
-                    {
-                        "id": 4589465821381692,
-                        "definition": {
-                            "title": "CPU Percentage Usage (current cores vs limit)",
-                            "title_size": "16",
-                            "title_align": "left",
-                            "type": "query_table",
-                            "requests": [
-                                {
-                                    "queries": [
-                                        {
-                                            "name": "query1",
-                                            "data_source": "metrics",
-                                            "query": "avg:kubernetes_cluster_autoscaler.cluster_cpu_current_cores{$kube_cluster_name,$env} by {kube_cluster_name}",
-                                            "aggregator": "avg"
-                                        },
-                                        {
-                                            "name": "query2",
-                                            "data_source": "metrics",
-                                            "query": "avg:kubernetes_cluster_autoscaler.cpu_limits_cores{$kube_cluster_name,$env} by {kube_cluster_name}",
-                                            "aggregator": "avg"
-                                        }
-                                    ],
-                                    "response_format": "scalar",
-                                    "sort": {
-                                        "count": 500,
-                                        "order_by": [
-                                            {
-                                                "type": "formula",
-                                                "index": 0,
-                                                "order": "desc"
-                                            }
-                                        ]
-                                    },
-                                    "formulas": [
-                                        {
-                                            "formula": "query1 / query2 * 100",
-                                            "cell_display_mode": "trend",
-                                            "number_format": {
-                                                "unit": {
-                                                    "type": "canonical_unit",
-                                                    "unit_name": "percent"
-                                                }
-                                            }
-                                        }
-                                    ]
-                                }
-                            ],
-                            "has_search_bar": "auto"
-                        },
-                        "layout": {
-                            "x": 5,
-                            "y": 1,
-                            "width": 7,
-                            "height": 2
-                        }
-                    },
-                    {
-                        "id": 6694311141159310,
-                        "definition": {
-                            "title": "Memory Percentage Usage (current bytes vs limit)",
-                            "title_size": "16",
-                            "title_align": "left",
-                            "type": "query_table",
-                            "requests": [
-                                {
-                                    "queries": [
-                                        {
-                                            "name": "query1",
-                                            "data_source": "metrics",
-                                            "query": "avg:kubernetes_cluster_autoscaler.cluster_memory_current_bytes{$kube_cluster_name,$env} by {kube_cluster_name}",
-                                            "aggregator": "avg"
-                                        },
-                                        {
-                                            "name": "query2",
-                                            "data_source": "metrics",
-                                            "query": "avg:kubernetes_cluster_autoscaler.memory_limits_bytes{$kube_cluster_name,$env} by {kube_cluster_name}",
-                                            "aggregator": "avg"
-                                        }
-                                    ],
-                                    "response_format": "scalar",
-                                    "sort": {
-                                        "count": 500,
-                                        "order_by": [
-                                            {
-                                                "type": "formula",
-                                                "index": 0,
-                                                "order": "desc"
-                                            }
-                                        ]
-                                    },
-                                    "formulas": [
-                                        {
-                                            "formula": "query1 / query2 * 100",
-                                            "cell_display_mode": "bar",
-                                            "number_format": {
-                                                "unit": {
-                                                    "type": "canonical_unit",
-                                                    "unit_name": "percent"
-                                                }
-                                            }
-                                        }
-                                    ]
-                                }
-                            ],
-                            "has_search_bar": "auto"
-                        },
-                        "layout": {
-                            "x": 0,
-                            "y": 3,
-                            "width": 7,
-                            "height": 2
-                        }
-                    },
-                    {
-                        "id": 4801670516193584,
-                        "definition": {
-                            "title": "Memory Current Bytes",
-                            "title_size": "16",
-                            "title_align": "left",
-                            "type": "query_value",
-                            "requests": [
-                                {
-                                    "response_format": "scalar",
-                                    "queries": [
-                                        {
-                                            "name": "query1",
-                                            "data_source": "metrics",
-                                            "query": "avg:kubernetes_cluster_autoscaler.cluster_memory_current_bytes{$kube_cluster_name,$env}",
-                                            "aggregator": "avg"
-                                        }
-                                    ],
-                                    "conditional_formats": [
-                                        {
-                                            "comparator": ">",
-                                            "value": 0,
-                                            "palette": "custom_text",
-                                            "custom_fg_color": "#110de3"
-                                        }
-                                    ],
-                                    "formulas": [
-                                        {
-                                            "formula": "query1"
-                                        }
-                                    ]
-                                }
-                            ],
-                            "autoscale": true,
-                            "precision": 2,
-                            "timeseries_background": {
-                                "yaxis": {
-                                    "include_zero": true
-                                },
-                                "type": "area"
-                            }
-                        },
-                        "layout": {
-                            "x": 7,
-                            "y": 3,
-                            "width": 5,
-                            "height": 2
-                        }
-                    }
-                ]
-            },
-            "layout": {
-                "x": 0,
-                "y": 10,
-                "width": 12,
-                "height": 6
+                "height": 9
             }
         }
     ],
