@@ -44,7 +44,7 @@ class Heat(Component):
                     tags=HEAT_STACK_TAGS,
                     prefix=HEAT_STACK_PREFIX,
                     metrics=HEAT_STACK_METRICS,
-                    lambda_name=lambda key: 'up' if key == 'stack_status' else key,
+                    lambda_name=lambda key: 'completed' if key == 'stack_status' else key,
                     lambda_value=lambda key, value, item=item: (
                         item['stack_status'] == 'CREATE_COMPLETE' if key == 'stack_status' else value
                     ),
