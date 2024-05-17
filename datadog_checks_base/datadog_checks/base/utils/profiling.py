@@ -11,13 +11,17 @@ class Profiling(object):
             cls._instance = super(Profiling, cls).__new__(cls)
             cls._instance._running = False
             cls._instance._profiler = None
+            cls._instance._profiling_imported = False
 
         return cls._instance
 
     # TODO: Double check if we need to use any concurrency control mechanism
     def start(self):
         if not self._running and self._profiler is None:
-            from ddtrace.profiling import Profiler
+            if not self._profiling_imported:
+                from ddtrace.profiling import Profiler
+
+                self._profiling_imported = True
 
             self._profiler = Profiler(service="datadog-agent-integrations")
             self._profiler.start()
