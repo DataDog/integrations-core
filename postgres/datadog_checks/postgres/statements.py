@@ -512,10 +512,18 @@ class PostgresStatementMetrics(DBMAsyncJob):
         if (
             self._last_baseline_metrics_expiry is None
             or self._last_baseline_metrics_expiry + self._config.baseline_metrics_expiry < time.time()
+            or len(self._baseline_metrics) > 3 * int(self._check.pg_settings.get("pg_stat_statements.max"))
         ):
             self._baseline_metrics = {}
             self._query_calls_cache = QueryCallsCache()
             self._last_baseline_metrics_expiry = time.time()
+
+            self._check.count(
+                "dd.postgres.statement_metrics.baseline_metrics_cache_reset",
+                1,
+                tags=self.tags + self._check._get_debug_tags(),
+                hostname=self._check.resolved_hostname,
+            )
 
     @tracked_method(agent_check_getter=agent_check_getter, track_result_length=True)
     def _collect_metrics_rows(self):
