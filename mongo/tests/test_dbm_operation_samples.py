@@ -68,3 +68,19 @@ def test_mongo_operation_samples_mongos(aggregator, instance_integration_cluster
         assert len(dbm_activities) == len(expected_activities)
         for i, activity in enumerate(dbm_activities):
             assert activity == expected_activities[i]
+
+
+@common.shard
+def test_mongo_operation_samples_arbiter(aggregator, instance_arbiter, check, dd_run_check):
+    instance_arbiter['dbm'] = True
+    instance_arbiter['cluster_name'] = 'my_cluster'
+
+    mongo_check = check(instance_arbiter)
+    with mock_pymongo("replica-arbiter"):
+        dd_run_check(mongo_check)
+
+    dbm_samples = aggregator.get_event_platform_events("dbm-samples")
+    dbm_activities = aggregator.get_event_platform_events("dbm-activity")
+
+    assert len(dbm_samples) == 0
+    assert len(dbm_activities) == 0

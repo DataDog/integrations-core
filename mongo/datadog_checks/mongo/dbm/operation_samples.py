@@ -17,6 +17,7 @@ except ImportError:
 from datadog_checks.base.utils.db.sql import compute_exec_plan_signature
 from datadog_checks.base.utils.db.utils import DBMAsyncJob
 from datadog_checks.base.utils.tracking import tracked_method
+from datadog_checks.mongo.common import ReplicaSetDeployment
 
 from .types import (
     OperationActivityEvent,
@@ -66,6 +67,9 @@ class MongoOperationSamples(DBMAsyncJob):
 
     @tracked_method(agent_check_getter=agent_check_getter)
     def collect_operation_samples(self):
+        if not self._should_collect_operation_samples():
+            return
+
         now = time.time()
 
         activities = []
@@ -80,9 +84,14 @@ class MongoOperationSamples(DBMAsyncJob):
         # Emit activities event
         self._check.database_monitoring_query_activity(json_util.dumps(activities_payload))
 
-    def _get_operation_samples(
-        self, now: float, activities: List[OperationSampleActivityRecord]
-    ):
+    def _should_collect_operation_samples(self) -> bool:
+        deployment = self._check.api_client.deployment_type
+        if isinstance(deployment, ReplicaSetDeployment) and deployment.is_arbiter:
+            self._check.log.debug("Skipping operation samples collection on arbiter node")
+            return False
+        return True
+
+    def _get_operation_samples(self, now: float, activities: List[OperationSampleActivityRecord]):
         for operation in self._get_current_op():
             command = operation.get("command")
             if not self._should_include_operation(operation):
@@ -322,7 +331,9 @@ class MongoOperationSamples(DBMAsyncJob):
 
         return activity
 
-    def _create_activities_payload(self, now: float, activities: List[OperationSampleActivityRecord]) -> OperationActivityEvent:
+    def _create_activities_payload(
+        self, now: float, activities: List[OperationSampleActivityRecord]
+    ) -> OperationActivityEvent:
         return {
             "host": self._check._resolved_hostname,
             "ddagentversion": datadog_agent.get_version(),
