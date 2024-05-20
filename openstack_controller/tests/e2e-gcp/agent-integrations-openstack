@@ -6,6 +6,7 @@
 VM_TYPE=${1:-default}
 
 export TF_VAR_credentials_file="${GCP_SERVICE_ACCOUNT_PATH:-$HOME/service_accounts/agent-integrations-openstack.json}"
+export TF_VAR_local_conf_path="$(realpath ./tests/e2e-gcp/${VM_TYPE}/local.conf)"
 export TF_VAR_instance_name="agent-integrations-openstack-${VM_TYPE}"
 export TF_VAR_user=$(gcloud auth list --filter=status:ACTIVE --format="value(account)")
 export TF_VAR_desired_status="RUNNING"

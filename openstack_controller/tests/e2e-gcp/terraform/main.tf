@@ -26,8 +26,15 @@ resource "google_compute_instance" "openstack" {
     private_key = "${tls_private_key.ssh-key.private_key_pem}"
     host = "${google_compute_instance.openstack.network_interface.0.access_config.0.nat_ip}"
   }
+  provisioner "file" {
+    source      = var.local_conf_path
+    destination = "/tmp/local.conf"
+  }
   provisioner "remote-exec" {
     script = "script.sh"
+    connection {
+      timeout  = "2h"  # Adjust the timeout value as needed
+    }
   }
 }
 

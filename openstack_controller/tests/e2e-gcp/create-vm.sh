@@ -10,10 +10,9 @@ TEMP_DIR=$(mktemp -d)
 
 source "$DIR_OF_SCRIPT/agent-integrations-openstack" $VM_TYPE
 
-echo $TEMP_DIR
-
-cp -r "$DIR_OF_SCRIPT/$VM_TYPE" "$TEMP_DIR"
-cd "$TEMP_DIR/$VM_TYPE"
+cp -a "$DIR_OF_SCRIPT/terraform/." "$TEMP_DIR"
+cp "$DIR_OF_SCRIPT/script.sh" "$TEMP_DIR"
+cd "$TEMP_DIR"
 
 terraform init
 terraform apply -auto-approve -input=false
