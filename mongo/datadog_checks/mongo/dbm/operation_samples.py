@@ -68,21 +68,20 @@ class MongoOperationSamples(DBMAsyncJob):
     def collect_operation_samples(self):
         now = time.time()
 
-        active_connections = defaultdict(int)
         activities = []
 
-        for sample in self._get_operation_samples(now, active_connections, activities):
+        for sample in self._get_operation_samples(now, activities):
             self._check.log.debug("Sending operation sample: %s", sample)
             # Emit operation sample event
             self._check.database_monitoring_query_sample(json_util.dumps(sample))
 
-        activities_payload = self._create_activities_payload(now, activities, active_connections)
+        activities_payload = self._create_activities_payload(now, activities)
         self._check.log.debug("Sending activities payload: %s", activities_payload)
         # Emit activities event
         self._check.database_monitoring_query_activity(json_util.dumps(activities_payload))
 
     def _get_operation_samples(
-        self, now: float, active_connections: Dict[set, int], activities: List[OperationSampleActivityRecord]
+        self, now: float, activities: List[OperationSampleActivityRecord]
     ):
         for operation in self._get_current_op():
             command = operation.get("command")
@@ -94,7 +93,6 @@ class MongoOperationSamples(DBMAsyncJob):
             query_signature = self._get_query_signature(obfuscated_command)
             operation_metadata = self._get_operation_metadata(operation)
 
-            self._record_active_connection(operation, operation_metadata, active_connections)
             activity_record = self._create_activity(
                 now, operation, operation_metadata, obfuscated_command, query_signature
             )
@@ -285,19 +283,6 @@ class MongoOperationSamples(DBMAsyncJob):
         }
         return event
 
-    def _record_active_connection(
-        self, operation: dict, operation_metadata: OperationSampleOperationMetadata, active_connections: Dict[set, int]
-    ):
-        if not operation.get('active'):
-            return
-        key = (
-            operation_metadata['application'],
-            operation_metadata['dbname'],
-            operation.get('type'),
-            operation_metadata['user'],
-        )
-        active_connections[key] += 1
-
     def _create_activity(
         self,
         now: float,
@@ -325,9 +310,7 @@ class MongoOperationSamples(DBMAsyncJob):
 
         return activity
 
-    def _create_activities_payload(
-        self, now: float, activities: List[OperationSampleActivityRecord], active_connections: Dict[set, int]
-    ) -> OperationActivityEvent:
+    def _create_activities_payload(self, now: float, activities: List[OperationSampleActivityRecord]) -> OperationActivityEvent:
         return {
             "host": self._check._resolved_hostname,
             "ddagentversion": datadog_agent.get_version(),
@@ -337,16 +320,6 @@ class MongoOperationSamples(DBMAsyncJob):
             "ddtags": self._check._get_tags(include_deployment_tags=True),
             "timestamp": now * 1000,
             "mongodb_activity": activities,
-            "mongodb_connections": [
-                {
-                    'application': app,
-                    'dbname': dbname,
-                    'type': type,
-                    'user': user,
-                    'count': count,
-                }
-                for (app, dbname, type, user), count in active_connections.items()
-            ],
         }
 
     def _format_key_name(self, metric_dict: Dict) -> dict:

@@ -158,14 +158,6 @@ class OperationSampleActivityRecord(
     pass
 
 
-class OperationSampleConnectionRecord(TypedDict, total=False):
-    application: Optional[str]
-    dbname: Optional[str]
-    type: str
-    user: Optional[str]
-    count: int
-
-
 class OperationSampleEvent(TypedDict, total=False):
     host: str
     dbm_type: str
@@ -186,4 +178,3 @@ class OperationActivityEvent(TypedDict, total=False):
     ddtags: str
     timestamp: int
     mongodb_activity: List[OperationSampleActivityRecord]
-    mongodb_connections: List[OperationSampleConnectionRecord]

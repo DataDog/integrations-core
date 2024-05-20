@@ -74,15 +74,6 @@
                 },
                 "user": "test"
             }
-        ],
-        "mongodb_connections": [
-            {
-                "application": null,
-                "dbname": "integration",
-                "type": "op",
-                "user": "test",
-                "count": 1
-            }
         ]
     }
 ]
