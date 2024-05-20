@@ -54,7 +54,7 @@ class MongoOperationSamples(DBMAsyncJob):
         super(MongoOperationSamples, self).__init__(
             check,
             rate_limit=1 / self._collection_interval,
-            run_sync=self._operation_samples_config.get('run_sync', True),  # Default to running sync
+            run_sync=not self._operation_samples_config.get('async', False),  # Default to running sync
             enabled=self._operation_samples_config['enabled'],
             dbms="mongodb",
             min_collection_interval=check._config.min_collection_interval,

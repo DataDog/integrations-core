@@ -153,4 +153,5 @@ class MongoConfig(object):
             'collection_interval': self._operation_samples_config.get(
                 'collection_interval', self.min_collection_interval
             ),
+            'async': is_affirmative(self._operation_samples_config.get('async', False)),
         }
