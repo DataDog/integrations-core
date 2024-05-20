@@ -599,3 +599,11 @@ class ApiRest(Api):
         )
         response.raise_for_status()
         return response.json().get('members', [])
+
+    def get_heat_stacks(self, project_id):
+        return self.make_paginated_request(
+            '{}/v1/{}/stacks'.format(self._catalog.get_endpoint_by_type(Component.Types.HEAT.value), project_id),
+            'stacks',
+            'id',
+            next_signifier='links',
+        )

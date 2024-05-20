@@ -386,3 +386,11 @@ class ApiSdk(Api):
 
     def get_glance_members(self, image_id):
         return [member.to_dict(original_names=True) for member in self.connection.image.members(image_id)]
+
+    def get_heat_stacks(self, project_id):
+        return [
+            stack.to_dict(original_names=True)
+            for stack in self.call_paginated_api(
+                self.connection.heat.stacks, project_id=project_id, limit=self.config.paginated_limit
+            )
+        ]
