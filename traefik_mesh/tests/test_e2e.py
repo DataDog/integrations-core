@@ -6,7 +6,8 @@ from datadog_checks.dev.utils import assert_service_checks
 
 
 def test_e2e_openmetrics_v2(dd_agent_check):
-    aggregator = dd_agent_check()
+    aggregator = dd_agent_check(rate=True)
 
     aggregator.assert_service_check('traefik_mesh.openmetrics.health', ServiceCheck.OK, count=1)
+    aggregator.assert_service_check('traefik_mesh.controller.ready', ServiceCheck.OK)
     assert_service_checks(aggregator)

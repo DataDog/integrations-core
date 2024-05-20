@@ -56,14 +56,13 @@ def test_empty_instance(dd_run_check):
 
 
 def test_submit_node_ready_status(aggregator, dd_run_check, mock_http_response):
-    check = TraefikMeshCheck('traefik_mesh', {}, [OM_MOCKED_INSTANCE_CONTROLLER])
     mock_http_response(file_path=get_fixture_path('traefik_proxy.txt'))
+    check = TraefikMeshCheck('traefik_mesh', {}, [OM_MOCKED_INSTANCE_CONTROLLER])
 
     with mock.patch(
         'datadog_checks.traefik_mesh.TraefikMeshCheck.get_mesh_ready_status',
         return_value=read_json_fixture('controller_node_status.json'),
     ):
-        check.check_id = 'test:123'
         dd_run_check(check)
 
     tags = [
@@ -72,8 +71,24 @@ def test_submit_node_ready_status(aggregator, dd_run_check, mock_http_response):
         'node_name:traefik-mesh-proxy-jgh7x',
         'node_ip:10.68.1.20',
     ]
-    aggregator.assert_metric('traefik_mesh.controller.node.ready', value=0, tags=tags)
-    aggregator.assert_metric('traefik_mesh.controller.node.ready', count=3)
+    aggregator.assert_metric('traefik_mesh.node.ready', value=0, tags=tags)
+    aggregator.assert_metric('traefik_mesh.node.ready', count=3)
+
+
+def test_valid_controller_service_check(aggregator, mock_http_response):
+    mock_http_response(status_code=200)
+    check = TraefikMeshCheck('traefik_mesh', {}, [OM_MOCKED_INSTANCE_CONTROLLER])
+
+    check.submit_controller_readiness_service_check()
+    aggregator.assert_service_check('traefik_mesh.controller.ready', ServiceCheck.OK)
+
+
+def test_invalid_controller_service_check(aggregator, mock_http_response):
+    mock_http_response(status_code=500)
+    check = TraefikMeshCheck('traefik_mesh', {}, [OM_MOCKED_INSTANCE_CONTROLLER])
+
+    check.submit_controller_readiness_service_check()
+    aggregator.assert_service_check('traefik_mesh.controller.ready', ServiceCheck.CRITICAL)
 
 
 def test_submit_version(datadog_agent, dd_run_check, mock_http_response):

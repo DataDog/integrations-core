@@ -41,10 +41,18 @@
         "metadata_path": "assets/service_checks.json"
       }
     },
-    "dashboards": {},
-    "monitors": {},
-    "logs": {},
-    "saved_views": {}
+    "dashboards": {
+      "Traefik Mesh Overview": "assets/dashboards/traefik_mesh_overview.json"
+    },
+    "monitors": {
+      "High Request Count": "assets/monitors/high_request_count.json"
+    },
+    "logs": {
+      "source": "traefik_mesh"
+    },
+    "saved_views": {
+      "Traefik Mesh Overview": "assets/saved_views/traefik_mesh_overview.json"
+    }
   },
   "author": {
     "support_email": "help@datadoghq.com",

@@ -40,8 +40,6 @@ METRIC_MAP = {
     'process_virtual_memory_bytes': 'process.virtual_memory.bytes',
     'process_virtual_memory_max_bytes': 'process.virtual_memory.max_bytes',
     # https://doc.traefik.io/traefik/v2.11/observability/metrics/overview/#global-metrics
-    'traefik_config_last_reload_failure': 'config.last_reload.failure',
-    'traefik_config_last_reload_success': 'config.last_reload.success',
     'traefik_config_reloads': 'config.reloads',
     'traefik_config_reloads_failure': 'config.reloads.failure',
     'traefik_tls_certs_not_after': 'tls.certs.not_after',
