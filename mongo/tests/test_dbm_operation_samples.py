@@ -2,16 +2,10 @@
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
 
-import functools
 import json
 import os
-import mock
-import pytest
-import time
 
-from datadog_checks.dev.utils import get_metadata_metrics
-from datadog_checks.mongo import MongoDb
-from datadog_checks.mongo.common import ReplicaSetDeployment
+import pytest
 
 from . import common
 from .common import HERE

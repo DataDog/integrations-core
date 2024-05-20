@@ -3,11 +3,11 @@
 # Licensed under a 3-clause BSD style license (see LICENSE)
 
 
-from typing import Dict, List, Optional
-from bson import json_util
-from collections import defaultdict
-from enum import Enum
 import time
+from collections import defaultdict
+from typing import Dict, List, Optional
+
+from bson import json_util
 
 try:
     import datadog_agent

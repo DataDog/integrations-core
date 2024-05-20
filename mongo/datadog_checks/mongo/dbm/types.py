@@ -2,7 +2,7 @@
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
 
-from typing import Any, Dict, List, Optional, Tuple, TypedDict
+from typing import List, Optional, TypedDict
 
 
 class OperationSampleClientDriver(TypedDict, total=False):
