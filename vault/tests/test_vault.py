@@ -37,7 +37,6 @@ class TestVault:
         instance = {'use_openmetrics': True}
         instance.update(INSTANCES['main'])
         instance.pop('tags')
-        # breakpoint()
 
         c = Vault(Vault.CHECK_NAME, {}, [instance])
 
