@@ -307,7 +307,7 @@ def test_stacks_pagination(
             == expected_api_calls
         )
     else:
-        assert connection_heat.stacks.call_count == 2
+        assert connection_heat.stacks.call_count == expected_api_calls
         assert (
             connection_heat.stacks.call_args_list.count(
                 mock.call(project_id='1e6e233e637d4d55a50a62b63398ad15', limit=paginated_limit)
