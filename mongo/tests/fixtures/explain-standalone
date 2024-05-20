@@ -1,0 +1,107 @@
+{
+    "explainVersion": "1",
+    "queryPlanner": {
+      "namespace": "integration.products",
+      "indexFilterSet": false,
+      "parsedQuery": {
+        "$and": [
+          { "data": { "$gt": 0.6283678507530881 } },
+          { "message": { "$regex": "log" } }
+        ]
+      },
+      "queryHash": "C30F916C",
+      "planCacheKey": "C30F916C",
+      "maxIndexedOrSolutionsReached": false,
+      "maxIndexedAndSolutionsReached": false,
+      "maxScansToExplodeReached": false,
+      "winningPlan": {
+        "stage": "COLLSCAN",
+        "filter": {
+          "$and": [
+            {
+              "data": { "$gt": 0.6283678507530881 }
+            },
+            { "message": { "$regex": "log" } }
+          ]
+        },
+        "direction": "forward"
+      },
+      "rejectedPlans": []
+    },
+    "executionStats": {
+      "executionSuccess": true,
+      "nReturned": 0,
+      "executionTimeMillis": 14,
+      "totalKeysExamined": 0,
+      "totalDocsExamined": 721,
+      "executionStages": {
+        "stage": "COLLSCAN",
+        "filter": {
+          "$and": [
+            {
+              "data": { "$gt": 0.6283678507530881 }
+            },
+            { "message": { "$regex": "log" } }
+          ]
+        },
+        "nReturned": 0,
+        "executionTimeMillisEstimate": 13,
+        "works": 722,
+        "advanced": 0,
+        "needTime": 721,
+        "needYield": 0,
+        "saveState": 1,
+        "restoreState": 1,
+        "isEOF": 1,
+        "direction": "forward",
+        "docsExamined": 721
+      },
+      "allPlansExecution": []
+    },
+    "command": {
+      "find": "products",
+      "filter": {
+        "data": { "$gt": 0.6283678507530881 },
+        "message": { "$regex": "log" }
+      },
+      "skip": 0,
+      "limit": 0,
+      "maxTimeMS": 60000,
+      "$db": "integration"
+    },
+    "serverInfo": {
+      "host": "6a77c2b11cf6",
+      "port": 27017,
+      "version": "6.0.15",
+      "gitVersion": "7494119c41ca4e13b493e9f048df4032164e860e"
+    },
+    "serverParameters": {
+      "internalQueryFacetBufferSizeBytes": 104857600,
+      "internalQueryFacetMaxOutputDocSizeBytes": 104857600,
+      "internalLookupStageIntermediateDocumentMaxSizeBytes": 104857600,
+      "internalDocumentSourceGroupMaxMemoryBytes": 104857600,
+      "internalQueryMaxBlockingSortMemoryUsageBytes": 104857600,
+      "internalQueryProhibitBlockingMergeOnMongoS": 0,
+      "internalQueryMaxAddToSetBytes": 104857600,
+      "internalDocumentSourceSetWindowFieldsMaxMemoryBytes": 104857600
+    },
+    "ok": 1,
+    "$clusterTime": {
+      "clusterTime": {
+        "$timestamp": {
+            "t": 1715910352,
+            "i": 1
+        }
+      },
+      "signature": {
+        "hash": "AAAAAAAAAAAAAAAAAAAAAAAAAAA=",
+        "keyId": 0
+      }
+    },
+    "operationTime": {
+      "$timestamp": {
+            "t": 1715910352,
+            "i": 1
+        }
+    }
+  }

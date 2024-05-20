@@ -1,0 +1,216 @@
+[
+    {
+        "host": "d4c6071697ea:27017",
+        "dbm_type": "plan",
+        "ddagentversion": "0.0.0",
+        "ddsource": "mongodb",
+        "ddtags": "server:mongodb://testUser2:*****@localhost:27017/test,cluster_name:my_cluster",
+        "timestamp": 1715911398111.2722,
+        "network": {
+            "client": {
+                "hostname": "192.168.65.1:39517",
+                "driver": {
+                    "name": "PyMongo",
+                    "version": "4.7.2"
+                },
+                "os": {
+                    "type": "Darwin",
+                    "name": "Darwin",
+                    "architecture": "arm64",
+                    "version": "14.4.1"
+                },
+                "platform": "CPython 3.9.16.final.0"
+            }
+        },
+        "db": {
+            "instance": "integration",
+            "plan": {
+                "definition": {
+                    "explainVersion": "1",
+                    "queryPlanner": {
+                        "namespace": "integration.products",
+                        "indexFilterSet": false,
+                        "parsedQuery": {
+                            "$and": [
+                                {
+                                    "data": {
+                                        "$gt": 0.6283678507530881
+                                    }
+                                },
+                                {
+                                    "message": {
+                                        "$regularExpression": {
+                                            "pattern": "log",
+                                            "options": ""
+                                        }
+                                    }
+                                }
+                            ]
+                        },
+                        "queryHash": "C30F916C",
+                        "planCacheKey": "C30F916C",
+                        "maxIndexedOrSolutionsReached": false,
+                        "maxIndexedAndSolutionsReached": false,
+                        "maxScansToExplodeReached": false,
+                        "winningPlan": {
+                            "stage": "COLLSCAN",
+                            "filter": {
+                                "$and": [
+                                    {
+                                        "data": {
+                                            "$gt": 0.6283678507530881
+                                        }
+                                    },
+                                    {
+                                        "message": {
+                                            "$regularExpression": {
+                                                "pattern": "log",
+                                                "options": ""
+                                            }
+                                        }
+                                    }
+                                ]
+                            },
+                            "direction": "forward"
+                        },
+                        "rejectedPlans": []
+                    },
+                    "executionStats": {
+                        "executionSuccess": true,
+                        "nReturned": 0,
+                        "executionTimeMillis": 14,
+                        "totalKeysExamined": 0,
+                        "totalDocsExamined": 721,
+                        "executionStages": {
+                            "stage": "COLLSCAN",
+                            "filter": {
+                                "$and": [
+                                    {
+                                        "data": {
+                                            "$gt": 0.6283678507530881
+                                        }
+                                    },
+                                    {
+                                        "message": {
+                                            "$regularExpression": {
+                                                "pattern": "log",
+                                                "options": ""
+                                            }
+                                        }
+                                    }
+                                ]
+                            },
+                            "nReturned": 0,
+                            "executionTimeMillisEstimate": 13,
+                            "works": 722,
+                            "advanced": 0,
+                            "needTime": 721,
+                            "needYield": 0,
+                            "saveState": 1,
+                            "restoreState": 1,
+                            "isEOF": 1,
+                            "direction": "forward",
+                            "docsExamined": 721
+                        },
+                        "allPlansExecution": []
+                    },
+                    "serverInfo": {
+                        "host": "6a77c2b11cf6",
+                        "port": 27017,
+                        "version": "6.0.15",
+                        "gitVersion": "7494119c41ca4e13b493e9f048df4032164e860e"
+                    },
+                    "serverParameters": {
+                        "internalQueryFacetBufferSizeBytes": 104857600,
+                        "internalQueryFacetMaxOutputDocSizeBytes": 104857600,
+                        "internalLookupStageIntermediateDocumentMaxSizeBytes": 104857600,
+                        "internalDocumentSourceGroupMaxMemoryBytes": 104857600,
+                        "internalQueryMaxBlockingSortMemoryUsageBytes": 104857600,
+                        "internalQueryProhibitBlockingMergeOnMongoS": 0,
+                        "internalQueryMaxAddToSetBytes": 104857600,
+                        "internalDocumentSourceSetWindowFieldsMaxMemoryBytes": 104857600
+                    },
+                    "ok": 1,
+                    "$clusterTime": {
+                        "clusterTime": {
+                            "$timestamp": {
+                                "t": 1715910352,
+                                "i": 1
+                            }
+                        },
+                        "signature": {
+                            "hash": "AAAAAAAAAAAAAAAAAAAAAAAAAAA=",
+                            "keyId": 0
+                        }
+                    },
+                    "operationTime": {
+                        "$timestamp": {
+                            "t": 1715910352,
+                            "i": 1
+                        }
+                    }
+                },
+                "query_hash": "C30F916C",
+                "plan_cache_key": "C30F916C",
+                "signature": "3c095a5d55cfdfa4"
+            },
+            "query_signature": "4dbd60784e36b560",
+            "resource_hash": "4dbd60784e36b560",
+            "application": null,
+            "user": "test",
+            "statement": "{\"find\": \"products\", \"filter\": {\"$and\": [{\"data\": {\"$gt\": 0.6283678507530881}}, {\"message\": {\"$regularExpression\": {\"pattern\": \"log\", \"options\": \"\"}}}]}, \"comment\": \"find\", \"lsid\": {\"id\": {\"$binary\": {\"base64\": \"/n9kUpUhR1ymJjEwvCySbg==\", \"subType\": \"04\"}}}, \"$clusterTime\": {\"clusterTime\": {\"$timestamp\": {\"t\": 1715882797, \"i\": 5}}, \"signature\": {\"hash\": {\"$binary\": {\"base64\": \"AAAAAAAAAAAAAAAAAAAAAAAAAAA=\", \"subType\": \"00\"}}, \"keyId\": 0}}, \"$db\": \"integration\", \"$readPreference\": {\"mode\": \"primaryPreferred\"}}",
+            "metadata": {
+                "op": "query",
+                "shard": null,
+                "collection": "products",
+                "comment": "find"
+            },
+            "query_truncated": "not_truncated"
+        },
+        "mongodb": {
+            "now": 1715911398.1112723,
+            "query_signature": "4dbd60784e36b560",
+            "active": true,
+            "desc": "conn104",
+            "opid": 1538838,
+            "ns": "integration.products",
+            "plan_summary": "COLLSCAN",
+            "current_op_time": "2024-05-16T18:06:38.419+00:00",
+            "microsecs_running": 167,
+            "prepare_read_conflicts": 0,
+            "write_conflicts": 0,
+            "num_yields": 0,
+            "waiting_for_lock": false,
+            "locks": {
+                "b'feature_compatibility_version'": "r",
+                "b'global'": "r"
+            },
+            "lock_stats": {
+                "b'feature_compatibility_version'": {
+                    "b'acquire_count'": {
+                        "b'r'": 1
+                    }
+                },
+                "b'global'": {
+                    "b'acquire_count'": {
+                        "b'r'": 1
+                    }
+                },
+                "b'mutex'": {
+                    "b'acquire_count'": {
+                        "b'r'": 1
+                    }
+                }
+            },
+            "waiting_for_flow_control": false,
+            "flow_control_stats": {},
+            "waiting_for_latch": false,
+            "type": "op",
+            "op": "query",
+            "shard": null,
+            "collection": "products",
+            "comment": "find",
+            "truncated": "not_truncated"
+        }
+    }
+]

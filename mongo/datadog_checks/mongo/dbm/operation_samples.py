@@ -16,6 +16,7 @@ except ImportError:
 
 from datadog_checks.base.utils.db.sql import compute_exec_plan_signature
 from datadog_checks.base.utils.db.utils import DBMAsyncJob
+from datadog_checks.base.utils.tracking import tracked_method
 
 from .types import (
     OperationActivityEvent,
@@ -41,6 +42,10 @@ SAMPLE_EXCLUDE_KEYS = {
 }
 
 
+def agent_check_getter(self):
+    return self._check
+
+
 class MongoOperationSamples(DBMAsyncJob):
     def __init__(self, check):
         self._operation_samples_config = check._config.operation_samples
@@ -57,6 +62,10 @@ class MongoOperationSamples(DBMAsyncJob):
         )
 
     def run_job(self):
+        self.collect_operation_samples()
+
+    @tracked_method(agent_check_getter=agent_check_getter)
+    def collect_operation_samples(self):
         now = time.time()
 
         active_connections = defaultdict(int)
@@ -65,18 +74,17 @@ class MongoOperationSamples(DBMAsyncJob):
         for sample in self._get_operation_samples(now, active_connections, activities):
             self._check.log.debug("Sending operation sample: %s", sample)
             # Emit operation sample event
-            # self._check.database_monitoring_query_sample(json_util.dumps(sample))
+            self._check.database_monitoring_query_sample(json_util.dumps(sample))
 
         activities_payload = self._create_activities_payload(now, activities, active_connections)
         self._check.log.debug("Sending activities payload: %s", activities_payload)
         # Emit activities event
-        # self._check.database_monitoring_query_activity(json_util.dumps(activities_payload))
+        self._check.database_monitoring_query_activity(json_util.dumps(activities_payload))
 
     def _get_operation_samples(
         self, now: float, active_connections: Dict[set, int], activities: List[OperationSampleActivityRecord]
     ):
         for operation in self._get_current_op():
-            print(operation)
             command = operation.get("command")
             if not command:
                 self._check.log.debug("Skipping operation without command: %s", operation)
@@ -130,11 +138,13 @@ class MongoOperationSamples(DBMAsyncJob):
         dbname = command.pop("$db")
         try:
             explain_plan = self._check.api_client[dbname].command("explain", command)
-            explain_plan.pop('command')  # Remove the original command from the explain plan
+            if 'command' in explain_plan:
+                explain_plan.pop('command')  # Remove the original command from the explain plan
+            query_planner = self._get_query_planner(explain_plan)
             return {
                 "definition": explain_plan,
-                "query_hash": explain_plan.get('queryPlanner', {}).get('queryHash'),
-                'plan_cache_key': explain_plan.get('queryPlanner', {}).get('planCacheKey'),
+                "query_hash": query_planner.get('queryHash'),
+                'plan_cache_key': query_planner.get('planCacheKey'),
                 "signature": compute_exec_plan_signature(json_util.dumps(explain_plan)),
             }
         except Exception as e:
@@ -147,6 +157,18 @@ class MongoOperationSamples(DBMAsyncJob):
                     }
                 ],
             }
+
+    def _get_query_planner(self, explain_plan: dict) -> dict:
+        if not explain_plan:
+            return {}
+
+        if 'stage' in explain_plan:
+            # The explain plan is nested under the $cursor key
+            # usually when the command is a aggregation pipeline
+            cursor = explain_plan.get('$cursor', {})
+            return cursor.get('queryPlanner', {})
+        else:
+            return explain_plan.get('queryPlanner', {})
 
     def _get_command_collection(self, command: dict) -> Optional[str]:
         for key in ('collection', 'find', 'aggregate', 'update', 'insert', 'delete', 'findAndModify'):
@@ -312,7 +334,7 @@ class MongoOperationSamples(DBMAsyncJob):
             "ddsource": "mongodb",
             "dbm_type": "activity",
             "collection_interval": self._collection_interval,
-            "ddtags": ",".join(self._check._get_tags(include_deployment_tags=True)),
+            "ddtags": self._check._get_tags(include_deployment_tags=True),
             "timestamp": now * 1000,
             "mongodb_activity": activities,
             "mongodb_connections": [
