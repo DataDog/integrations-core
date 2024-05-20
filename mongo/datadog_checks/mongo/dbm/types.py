@@ -122,6 +122,7 @@ class OperationSampleOperationStats(TypedDict, total=False):
     plan_summary: Optional[str]
     current_op_time: str
     microsecs_running: Optional[int]
+    transaction_time_open_micros: Optional[int]
     prepare_read_conflicts: Optional[int]
     write_conflicts: Optional[int]
     num_yields: Optional[int]

@@ -761,6 +761,7 @@
             "plan_summary": null,
             "current_op_time": "2024-05-20T14:36:56.231+00:00",
             "microsecs_running": 29232,
+            "transaction_time_open_micros": null,
             "prepare_read_conflicts": 0,
             "write_conflicts": 0,
             "num_yields": 0,

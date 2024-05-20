@@ -19,6 +19,7 @@
                 "plan_summary": "COLLSCAN",
                 "current_op_time": "2024-05-16T18:06:38.419+00:00",
                 "microsecs_running": 167,
+                "transaction_time_open_micros": null,
                 "prepare_read_conflicts": 0,
                 "write_conflicts": 0,
                 "num_yields": 0,

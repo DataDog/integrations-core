@@ -85,8 +85,7 @@ class MongoOperationSamples(DBMAsyncJob):
     ):
         for operation in self._get_current_op():
             command = operation.get("command")
-            if not command:
-                self._check.log.debug("Skipping operation without command: %s", operation)
+            if not self._should_include_operation(operation):
                 continue
 
             obfuscated_command = datadog_agent.obfuscate_mongodb_string(json_util.dumps(command))
@@ -109,6 +108,18 @@ class MongoOperationSamples(DBMAsyncJob):
         for operation in operations:
             self._check.log.debug("Found operation: %s", operation)
             yield operation
+
+    def _should_include_operation(self, operation: dict) -> bool:
+        command = operation.get("command")
+        if not command:
+            self._check.log.debug("Skipping operation without command: %s", operation)
+            return False
+        if 'hello' in command and operation.get('op') == 'command':
+            # MongoDB drivers and clients use hello to determine the state of
+            # the replica set members and to discover additional members of a replica set.
+            self._check.log.debug("Skipping hello operation: %s", operation)
+            return False
+        return True
 
     def _should_explain(self, op: Optional[str], command: dict) -> bool:
         dbname = command.get("$db")
@@ -219,6 +230,7 @@ class MongoOperationSamples(DBMAsyncJob):
             'plan_summary': operation.get('planSummary'),  # str
             'current_op_time': operation.get('currentOpTime'),  # str  start time of the operation
             'microsecs_running': operation.get('microsecs_running'),  # int
+            'transaction_time_open_micros': operation.get('transaction', {}).get('timeOpenMicros'),  # int
             # Conflicts
             'prepare_read_conflicts': operation.get('prepareReadConflicts', 0),  # int
             'write_conflicts': operation.get('writeConflicts', 0),  # int
