@@ -128,5 +128,6 @@ class DatadogAgentStub(object):
         # Passthrough stub: obfuscation implementation is in Go code.
         return command
 
+
 # Use the stub as a singleton
 datadog_agent = DatadogAgentStub()
