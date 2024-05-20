@@ -43,10 +43,6 @@ class Heat(Component):
                     tags=HEAT_STACK_TAGS,
                     prefix=HEAT_STACK_PREFIX,
                     metrics={},
-                    lambda_name=lambda key: 'completed' if key == 'stack_status' else key,
-                    lambda_value=lambda key, value, item=item: (
-                        item['stack_status'] == 'CREATE_COMPLETE' if key == 'stack_status' else value
-                    ),
                 )
                 self.check.gauge(HEAT_STACK_COUNT, 1, tags=tags + stack['tags'])
                 self.check.log.debug("stack: %s", stack)
