@@ -902,6 +902,26 @@ def connection_load_balancer(request, mock_responses):
 
 
 @pytest.fixture
+def connection_heat(request, mock_responses):
+    param = request.param if hasattr(request, 'param') and request.param is not None else {}
+    http_error = param.get('http_error')
+
+    def stacks(project_id, limit=None):
+        if http_error and 'stacks' in http_error and project_id in http_error['stacks']:
+            raise requests.exceptions.HTTPError(response=http_error['stacks'])
+        return [
+            mock.MagicMock(
+                to_dict=mock.MagicMock(
+                    return_value=node,
+                )
+            )
+            for node in mock_responses('GET', f'/heat-api/v1/{project_id}/stacks')['stacks']
+        ]
+
+    return mock.MagicMock(stacks=mock.MagicMock(side_effect=stacks))
+
+
+@pytest.fixture
 def openstack_connection(
     openstack_session,
     connection_authorize,
@@ -912,6 +932,7 @@ def openstack_connection(
     connection_block_storage,
     connection_load_balancer,
     connection_image,
+    connection_heat,
 ):
     def connection(cloud, session, region_name):
         return mock.MagicMock(
@@ -924,6 +945,7 @@ def openstack_connection(
             block_storage=connection_block_storage,
             load_balancer=connection_load_balancer,
             image=connection_image,
+            heat=connection_heat,
         )
 
     with mock.patch('openstack.connection.Connection', side_effect=connection) as mock_connection:

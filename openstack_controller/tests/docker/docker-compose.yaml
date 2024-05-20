@@ -58,3 +58,11 @@ services:
       - ./etc/caddy/glance:/etc/caddy/
     ports:
       - "9292:80"
+  openstack-heat:
+    image: caddy:2.6.2-alpine
+    container_name: openstack-heat
+    volumes:
+      - ../fixtures:/usr/share/caddy
+      - ./etc/caddy/glance:/etc/caddy/
+    ports:
+      - "8004:80"
