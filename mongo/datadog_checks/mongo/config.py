@@ -140,7 +140,7 @@ class MongoConfig(object):
         return service_check_tags
 
     def _compute_metric_tags(self):
-        return  self._base_tags + ['server:%s' % self.clean_server_name]
+        return self._base_tags + ['server:%s' % self.clean_server_name]
 
     @property
     def operation_samples(self):

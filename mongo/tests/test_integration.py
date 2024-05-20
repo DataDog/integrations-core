@@ -29,6 +29,7 @@ def _assert_metrics(check_instance, aggregator, metrics_categories, additional_t
                     metric_type=metric['type'],
                 )
 
+
 def _assert_internal_metrics(check_instance, aggregator):
     if check_instance._config.dbm_enabled:
         aggregator.assert_metric('dd.mongo.operation.time', count=1, tags=['operation:collect_operation_samples'])
