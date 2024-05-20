@@ -17,7 +17,7 @@ pipeline:
   name: Argo Rollouts
   enabled: true
   filter:
-    query: source:argo-rollouts
+    query: source:(argo-rollouts OR argo_rollouts)
   processors:
     - type: grok-parser
       name: Parsing Argo Rollouts logs
