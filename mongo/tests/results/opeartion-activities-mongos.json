@@ -7,7 +7,6 @@
         "collection_interval": 15,
         "ddtags": [
             "server:mongodb://testUser2:*****@localhost:27017/test",
-            "cluster_name:my_cluster",
             "sharding_cluster_role:mongos"
         ],
         "timestamp": 1715911398111.2722,

@@ -4,7 +4,7 @@
         "dbm_type": "plan",
         "ddagentversion": "0.0.0",
         "ddsource": "mongodb",
-        "ddtags": "server:mongodb://testUser2:*****@localhost:27017/test,cluster_name:my_cluster",
+        "ddtags": "server:mongodb://testUser2:*****@localhost:27017/test",
         "timestamp": 1715911398111.2722,
         "network": {
             "client": {

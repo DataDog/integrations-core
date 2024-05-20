@@ -29,6 +29,10 @@ def _assert_metrics(check_instance, aggregator, metrics_categories, additional_t
                     metric_type=metric['type'],
                 )
 
+def _assert_internal_metrics(check_instance, aggregator):
+    if check_instance._config.dbm_enabled:
+        aggregator.assert_metric('dd.mongo.operation.time', count=1, tags=['operation:collect_operation_samples'])
+
 
 def _get_mongodb_instance_event(aggregator):
     dbm_metadata = aggregator.get_event_platform_events("dbm-metadata")
@@ -99,6 +103,8 @@ def test_integration_mongos(instance_integration_cluster, aggregator, check, dd_
         ['sharding_cluster_role:mongos'],
     )
 
+    _assert_internal_metrics(mongos_check, aggregator)
+
     aggregator.assert_all_metrics_covered()
     aggregator.assert_metrics_using_metadata(
         get_metadata_metrics(),
@@ -107,6 +113,7 @@ def test_integration_mongos(instance_integration_cluster, aggregator, check, dd_
             'dd.custom.mongo.count',
             'dd.custom.mongo.query_a.amount',
             'dd.custom.mongo.query_a.el',
+            'dd.mongo.operation.time',
         ],
         check_submission_type=True,
     )

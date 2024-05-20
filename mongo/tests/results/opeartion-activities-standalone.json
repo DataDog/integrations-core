@@ -5,7 +5,7 @@
         "ddsource": "mongodb",
         "dbm_type": "activity",
         "collection_interval": 15,
-        "ddtags": ["server:mongodb://testUser2:*****@localhost:27017/test","cluster_name:my_cluster"],
+        "ddtags": ["server:mongodb://testUser2:*****@localhost:27017/test"],
         "timestamp": 1715911398111.2722,
         "mongodb_activity": [
             {
