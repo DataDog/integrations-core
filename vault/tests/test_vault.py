@@ -33,7 +33,7 @@ class TestVault:
 
         aggregator.assert_service_check(Vault.SERVICE_CHECK_CONNECT, count=0)
 
-    @pytest.mark.parametrize('use_openmetrics', [True], indirect=True)
+    @pytest.mark.parametrize('use_openmetrics', [False, True], indirect=True)
     def test_no_extra_tags(self, aggregator, dd_run_check, use_openmetrics):
         instance = {'use_openmetrics': use_openmetrics}
         instance.update(INSTANCES['main'])
