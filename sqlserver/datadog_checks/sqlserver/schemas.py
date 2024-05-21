@@ -7,7 +7,12 @@ import copy
 import json
 import time
 
-from datadog_checks.base.utils.db.utils import default_json_event_encoding
+from datadog_checks.base import is_affirmative
+from datadog_checks.base.utils.db.utils import (
+    default_json_event_encoding,
+    DBMAsyncJob
+)
+
 from datadog_checks.base.utils.tracking import tracked_method
 from datadog_checks.sqlserver.const import (
     COLUMN_QUERY,
@@ -23,15 +28,13 @@ from datadog_checks.sqlserver.const import (
 )
 from datadog_checks.sqlserver.utils import execute_query_output_result_as_dicts, get_list_chunks
 
+#TODO 
+# make it a subclass of async but set sync
+# remove total amount of columns and put total exec time
+# pull out stop logic - submit tables one by one ? and control columns number for payload ? 
+# I can do a timer but in case of multithreading how to ensure ??? disable ? as kiiled by the 
 
 class SubmitData:
-    MAX_COLUMN_COUNT = 10_000
-
-    # TBD - REDAPL has a 3MB limit per resource
-    # If a column payload is ~ 10bytes : name, type, default , if nullable nullable
-    # then the limit should be only 25_000.
-
-    MAX_TOTAL_COLUMN_COUNT = 100_000
 
     def __init__(self, submit_data_function, base_event, logger):
         self._submit_to_agent_queue = submit_data_function
@@ -39,7 +42,6 @@ class SubmitData:
         self._log = logger
 
         self._columns_count = 0
-        self._total_columns_count = 0
         self.db_to_schemas = {}  # dbname : { id : schema }
         self.db_info = {}  # name to info
 
@@ -51,7 +53,6 @@ class SubmitData:
 
     def reset(self):
         self._columns_count = 0
-        self._total_columns_count = 0
         self.db_to_schemas = {}
         self.db_info = {}
 
@@ -61,7 +62,6 @@ class SubmitData:
 
     def store(self, db_name, schema, tables, columns_count):
         self._columns_count += columns_count
-        self._total_columns_count += columns_count
         schemas = self.db_to_schemas.setdefault(db_name, {})
         if schema["id"] in schemas:
             known_tables = schemas[schema["id"]].setdefault("tables", [])
@@ -69,11 +69,9 @@ class SubmitData:
         else:
             schemas[schema["id"]] = copy.deepcopy(schema)
             schemas[schema["id"]]["tables"] = tables
-        if self._columns_count > self.MAX_COLUMN_COUNT:
-            self._submit()
 
-    def exceeded_total_columns_number(self):
-        return self._total_columns_count > self.MAX_TOTAL_COLUMN_COUNT
+    def columns_since_last_submit(self):
+        return self._columns_count
     
     def truncate(self, json_event):
         max_length = 1000
@@ -106,35 +104,55 @@ def agent_check_getter(self):
     return self._check
 
 
-class Schemas:
+class Schemas(DBMAsyncJob):
 
     # Requests for infromation about tables are done for a certain amount of tables at the time
     # This number of tables doesnt slow down performance by much (15% compared to 500 tables)
     # but allows the queue to be stable.
     TABLES_CHUNK_SIZE = 50
+    # Note: in async mode execution time also cannot exceed 2 checks.
+    MAX_EXECUTION_TIME = 10
+    MAX_COLUMNS_PER_EVENT = 100_000
 
     def __init__(self, check, config):
         self._check = check
         self._log = check.log
         self.schemas_per_db = {}
+        #TODO to add
+        self._max_execution_time = config.schema_config.get('max_execution_time', self.MAX_EXECUTION_TIME)
         self._last_schemas_collect_time = None
         collection_interval = config.schema_config.get(
             'collection_interval', DEFAULT_SCHEMAS_COLLECTION_INTERVAL
         )
-        self._collection_interval = collection_interval if collection_interval > 0 else DEFAULT_SCHEMAS_COLLECTION_INTERVAL
-        self._enabled = config.schema_config.get('enabled', False)
-       
+        super(Schemas, self).__init__(
+            check,
+            run_sync=is_affirmative(config.schema_config.get('run_sync', True)),
+            enabled=is_affirmative(config.schema_config.get('enabled', False)),
+            expected_db_exceptions=(),
+            # min collection interval is a desired collection interval for a check as a whole.
+            min_collection_interval=config.min_collection_interval,
+            dbms="sqlserver",
+            rate_limit=1 / float(collection_interval),
+            job_name="query-schemas",
+            shutdown_callback=self.shut_down,
+        )
         base_event = {
             "host": None,
             "agent_version": datadog_agent.get_version(),
             "dbms": "sqlserver",
             "kind": "sqlserver_databases",
-            "collection_interval":  self._collection_interval,
+            "collection_interval":  collection_interval,
             "dbms_version": None,
             "tags": self._check.non_internal_tags,
             "cloud_metadata": self._check._config.cloud_metadata,
         }
         self._dataSubmitter = SubmitData(self._check.database_monitoring_metadata, base_event, self._log)
+
+    def run_job(self):
+        self._collect_schemas_data()
+
+    def shut_down(self):
+        self._dataSubmitter.submit()
 
     """Collects database information and schemas and submits to the agent's queue as dictionaries
     schema dict
@@ -177,23 +195,9 @@ class Schemas:
                 key/value:
                     "partition_count": int
     """
-
-    def collect_schemas_data(self):
-        if not self._enabled:
-            return
-        if (
-                self._last_schemas_collect_time is None
-                or time.time() - self._last_schemas_collect_time > self._config.schemas_collection_interval
-            ):
-            try:
-                self._collect_schemas_data()
-            except:
-                raise
-            finally:
-                self._last_schemas_collect_time = time.time()
-
     @tracked_method(agent_check_getter=agent_check_getter)
     def _collect_schemas_data(self):
+        start_time = time.thread_time()
         self._dataSubmitter.reset()
         self._dataSubmitter.set_base_event_data(
             self._check.resolved_hostname,
@@ -216,19 +220,20 @@ class Schemas:
                 tables = self._get_tables(schema, cursor)
                 tables_chunks = list(get_list_chunks(tables, self.TABLES_CHUNK_SIZE))
                 for tables_chunk in tables_chunks:
-                    if self._dataSubmitter.exceeded_total_columns_number():
+                    if time.thread_time() -  start_time > self.MAX_EXECUTION_TIME:
                         # TODO Report truncation to the backend
                         self._log.warning(
-                            "Truncated data due to the max limit, stopped on db - {} on schema {}".format(
-                                db_name, schema["name"]
+                            "Truncated data due to the effective execution time reaching {}, stopped on db - {} on schema {}".format(
+                                self.MAX_EXECUTION_TIME, db_name, schema["name"]
                             )
                         )
                         raise StopIteration
+
                     columns_count, tables_info = self._get_tables_data(tables_chunk, schema, cursor)
+
                     self._dataSubmitter.store(db_name, schema, tables_info, columns_count)
-                    self._dataSubmitter.submit()  # Submit is forced after each 50 tables chunk
-                if len(tables) == 0:
-                    self._dataSubmitter.store(db_name, schema, [], 0)
+                    if self._dataSubmitter.columns_since_last_submit() > self.MAX_COLUMNS_PER_EVENT:
+                        self._dataSubmitter.submit()
             self._dataSubmitter.submit()
             return False
 

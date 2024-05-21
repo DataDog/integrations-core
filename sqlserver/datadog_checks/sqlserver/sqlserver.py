@@ -167,6 +167,7 @@ class SQLServer(AgentCheck):
         self.procedure_metrics.cancel()
         self.activity.cancel()
         self.sql_metadata.cancel()
+        self._schemas.cancel()
 
     def config_checks(self):
         if self._config.autodiscovery and self.instance.get("database"):
@@ -793,7 +794,7 @@ class SQLServer(AgentCheck):
                 self.procedure_metrics.run_job_loop(self.tags)
                 self.activity.run_job_loop(self.tags)
                 self.sql_metadata.run_job_loop(self.tags)
-                self._schemas.collect_schemas_data()
+                self._schemas.run_job_loop(self.tags)
         else:
             self.log.debug("Skipping check")
 
