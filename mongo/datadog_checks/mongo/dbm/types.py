@@ -61,7 +61,7 @@ class OperationSampleEventDatabase(TypedDict, total=False):
     application: Optional[str]
     user: Optional[str]
     statement: Optional[str]
-    metadata: OperationSampleEventDatabaseMetadata
+    operation_metadata: OperationSampleEventDatabaseMetadata
     query_truncated: Optional[str]
 
 

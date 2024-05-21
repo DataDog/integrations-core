@@ -158,7 +158,7 @@
             "application": null,
             "user": "test",
             "statement": "{\"find\": \"products\", \"filter\": {\"$and\": [{\"data\": {\"$gt\": 0.6283678507530881}}, {\"message\": {\"$regularExpression\": {\"pattern\": \"log\", \"options\": \"\"}}}]}, \"comment\": \"find\", \"lsid\": {\"id\": {\"$binary\": {\"base64\": \"/n9kUpUhR1ymJjEwvCySbg==\", \"subType\": \"04\"}}}, \"$clusterTime\": {\"clusterTime\": {\"$timestamp\": {\"t\": 1715882797, \"i\": 5}}, \"signature\": {\"hash\": {\"$binary\": {\"base64\": \"AAAAAAAAAAAAAAAAAAAAAAAAAAA=\", \"subType\": \"00\"}}, \"keyId\": 0}}, \"$db\": \"integration\", \"$readPreference\": {\"mode\": \"primaryPreferred\"}}",
-            "metadata": {
+            "operation_metadata": {
                 "op": "query",
                 "shard": null,
                 "collection": "products",

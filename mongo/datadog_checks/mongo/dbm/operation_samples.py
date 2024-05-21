@@ -285,7 +285,7 @@ class MongoOperationSamples(DBMAsyncJob):
                 "application": operation_metadata["application"],
                 "user": operation_metadata["user"],
                 "statement": obfuscated_command,
-                "metadata": {
+                "operation_metadata": {
                     "op": operation_metadata["op"],
                     "shard": operation_metadata["shard"],
                     "collection": operation_metadata["collection"],
