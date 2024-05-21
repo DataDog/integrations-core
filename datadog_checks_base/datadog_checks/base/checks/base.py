@@ -48,7 +48,7 @@ from ..utils.diagnose import Diagnosis
 from ..utils.http import RequestsWrapper
 from ..utils.limiter import Limiter
 from ..utils.metadata import MetadataManager
-from ..utils.profiling import Profiling
+from ..utils.profiling import PROFILING
 from ..utils.secrets import SecretsSanitizer
 from ..utils.tagging import GENERIC_TAGS
 from ..utils.tls import TlsContextWrapper
@@ -1200,9 +1200,9 @@ class AgentCheck(object):
         try:
             self.diagnosis.clear()
             if is_affirmative(datadog_agent.get_config("integration_profiling")):
-                Profiling().start()
+                PROFILING.start()
             else:
-                Profiling().stop()
+                PROFILING.stop()
 
             # Ignore check initializations if running in a separate process
             if is_affirmative(self.instance.get('process_isolation', self.init_config.get('process_isolation', False))):

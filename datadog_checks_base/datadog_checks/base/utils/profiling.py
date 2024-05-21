@@ -6,16 +6,10 @@ from threading import Lock
 
 
 class Profiling(object):
-    _instance = None
-
-    def __new__(cls):
-        if cls._instance is None:
-            cls._instance = super(Profiling, cls).__new__(cls)
-            cls._instance._running = False
-            cls._instance._profiler = None
-            cls._instance._mutex = Lock()
-
-        return cls._instance
+    def __init__(self):
+        self._profiler = None
+        self._running = False
+        self._mutex = Lock()
 
     def start(self):
         with self._mutex:
@@ -32,7 +26,13 @@ class Profiling(object):
                     self._running = True
 
     def stop(self):
+        if not self._running:
+            return
+
         with self._mutex:
             if self._running:
                 self._profiler.stop()
                 self._running = False
+
+
+PROFILING = Profiling()
