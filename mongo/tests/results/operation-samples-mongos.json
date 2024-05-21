@@ -692,51 +692,9 @@
                                 "allPlans": []
                             }
                         ]
-                    },
-                    "serverInfo": {
-                        "host": "7203110cbd0b",
-                        "port": 27017,
-                        "version": "6.0.15",
-                        "gitVersion": "***********************************e860e"
-                    },
-                    "serverParameters": {
-                        "internalQueryFacetBufferSizeBytes": 104857600,
-                        "internalQueryFacetMaxOutputDocSizeBytes": 104857600,
-                        "internalLookupStageIntermediateDocumentMaxSizeBytes": 104857600,
-                        "internalDocumentSourceGroupMaxMemoryBytes": 104857600,
-                        "internalQueryMaxBlockingSortMemoryUsageBytes": 104857600,
-                        "internalQueryProhibitBlockingMergeOnMongoS": 0,
-                        "internalQueryMaxAddToSetBytes": 104857600,
-                        "internalDocumentSourceSetWindowFieldsMaxMemoryBytes": 104857600
-                    },
-                    "ok": 1.0,
-                    "$clusterTime": {
-                        "clusterTime": {
-                            "$timestamp": {
-                                "t": 1716215816,
-                                "i": 8
-                            }
-                        },
-                        "signature": {
-                            "hash": {
-                                "$binary": {
-                                    "base64": "AAAAAAAAAAAAAAAAAAAAAAAAAAA=",
-                                    "subType": "00"
-                                }
-                            },
-                            "keyId": 0
-                        }
-                    },
-                    "operationTime": {
-                        "$timestamp": {
-                            "t": 1716215816,
-                            "i": 2
-                        }
                     }
                 },
-                "query_hash": null,
-                "plan_cache_key": null,
-                "signature": "481bd8558e586570"
+                "signature": "5991253f621eccd0"
             },
             "query_signature": "533ce47f560d78d8",
             "application": null,

@@ -48,8 +48,6 @@ class OperationSamplePlanCollectionError(TypedDict, total=False):
 
 class OperationSamplePlan(TypedDict, total=False):
     definition: dict
-    query_hash: Optional[str]
-    plan_cache_key: Optional[str]
     signature: str
     collection_errors: Optional[List[OperationSamplePlanCollectionError]]
 

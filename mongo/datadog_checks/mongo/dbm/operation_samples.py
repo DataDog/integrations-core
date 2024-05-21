@@ -156,14 +156,10 @@ class MongoOperationSamples(DBMAsyncJob):
 
         dbname = command.pop("$db")
         try:
-            explain_plan = self._check.api_client[dbname].command("explain", command)
-            if "command" in explain_plan:
-                explain_plan.pop("command")  # Remove the original command from the explain plan
-            query_planner = self._get_query_planner(explain_plan)
+            explain_plan = self._check.api_client[dbname].command("explain", command, verbosity="executionStats")
+            explain_plan = self._format_explain_plan(explain_plan)
             return {
                 "definition": explain_plan,
-                "query_hash": query_planner.get("queryHash"),
-                "plan_cache_key": query_planner.get("planCacheKey"),
                 "signature": compute_exec_plan_signature(json_util.dumps(explain_plan)),
             }
         except Exception as e:
@@ -171,23 +167,21 @@ class MongoOperationSamples(DBMAsyncJob):
             return {
                 "collection_errors": [
                     {
-                        "code": str(type(e).__name__),  # str
-                        "message": str(e),  # str
+                        "code": str(type(e).__name__),
+                        "message": str(e),
                     }
                 ],
             }
 
-    def _get_query_planner(self, explain_plan: dict) -> dict:
+    def _format_explain_plan(self, explain_plan: dict) -> dict:
         if not explain_plan:
-            return {}
+            return None
 
-        if "stage" in explain_plan:
-            # The explain plan is nested under the $cursor key
-            # usually when the command is a aggregation pipeline
-            cursor = explain_plan.get("$cursor", {})
-            return cursor.get("queryPlanner", {})
-        else:
-            return explain_plan.get("queryPlanner", {})
+        return {
+            key: value
+            for key, value in explain_plan.items()
+            if key not in ("serverInfo", "serverParameters", "command", "ok", "$clusterTime", "operationTime")
+        }
 
     def _get_command_collection(self, command: dict) -> Optional[str]:
         for key in ("collection", "find", "aggregate", "update", "insert", "delete", "findAndModify"):
