@@ -3953,6 +3953,8 @@ METRICS = {
 # fmt: on
 
 LEGACY_TAG_OVERWRITE = {
+    # The legacy approach gave very little ability for modifications to be done to tags.
+    # This dict allows us to fine tune and replace tags as needed.
     'http.rbac.shadow_denied': ['rule_prefix', 'shadow_rule_prefix'],
     'http.rbac.shadow_allowed': ['rule_prefix', 'shadow_rule_prefix'],
 }
