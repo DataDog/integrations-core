@@ -60,8 +60,6 @@ def ci(app: Application, sync: bool):
         if app.repo.name == 'core'
         else 'DataDog/integrations-core/.github/workflows/test-target.yml@master'
     )
-    jobs_workflow_path = app.repo.path / '.github' / 'workflows' / 'test-all.yml'
-    original_jobs_workflow = jobs_workflow_path.read_text() if jobs_workflow_path.is_file() else ''
 
     jobs = {}
     for data in construct_job_matrix(app.repo.path, get_all_targets(app.repo.path)):
@@ -120,14 +118,46 @@ def ci(app: Application, sync: bool):
     ):
         jobs_component = jobs_component.replace(f'${{{{ inputs.{field} }}}}', f'"${{{{ inputs.{field} }}}}"')
 
-    manual_component = original_jobs_workflow.split('jobs:')[0].strip()
-    expected_jobs_workflow = f'{manual_component}\n\n{jobs_component}'
+    jobs_workflow_files = [
+        'test-common.yml',
+        'test-dbm.yml',
+        'test-all.yml',
+    ]
+    workflow_job_data = {}
+    derived_jobs = {}
+    missing_jobs = {}
+    invalid_jobs = {}
+    for jobs_workflow_file in jobs_workflow_files:
+        jobs_workflow_path = app.repo.path / '.github' / 'workflows' / 'tests' / jobs_workflow_file
+        with jobs_workflow_path.open() as workflow_file:
+            original_jobs_workflow = yaml.safe_load(workflow_file)
+            workflow_job_data[jobs_workflow_file] = {
+                'name': original_jobs_workflow.get('name', ''),
+                'triggers': original_jobs_workflow.get('on', {}),
+                'jobs': original_jobs_workflow.get('jobs', {}),
+            }
+            derived_jobs[jobs_workflow_file] = original_jobs_workflow.get('jobs', {})
 
-    if original_jobs_workflow != expected_jobs_workflow:
-        if sync:
-            jobs_workflow_path.write_text(expected_jobs_workflow)
-        else:
-            app.abort('CI configuration is not in sync, try again with the `--sync` flag')
+    for job, job_data in jobs.items():
+        job_found = False
+        for workflow_file_name, derived_jobs_in_workflow in derived_jobs.items():
+            if job in derived_jobs_in_workflow:
+                job_found = True
+                if derived_jobs_in_workflow[job] != job_data:
+                    print(f'Job {job} is invalid in {workflow_file_name}')
+                    print(f'Expected: {job_data}')
+                    print(f'Actual: {derived_jobs_in_workflow[job]}')
+                    invalid_jobs[job] = derived_jobs_in_workflow[job]
+                break
+        if not job_found:
+            print(
+                f'Job {job} with data {job_data} is missing, \
+please add it to one of the relevant workflow files {jobs_workflow_files}'
+            )
+            missing_jobs[job] = job_data
+
+    if missing_jobs or invalid_jobs:
+        app.abort('CI configuration is not in sync, please correct it manually based on output logs')
 
     validation_tracker = app.create_validation_tracker('CI configuration validation')
     error_message = ''

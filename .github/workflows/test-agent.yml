@@ -35,8 +35,38 @@ on:
         type: string
 
 jobs:
-  test:
-    uses: ./.github/workflows/test-all.yml
+  test-common:
+    uses: ./.github/workflows/tests/test-common.yml
+    with:
+      repo: core
+
+      # Options
+      standard: true
+      test-py2: ${{ inputs.test-py2 }}
+      test-py3: ${{ inputs.test-py3 }}
+      agent-image: "${{ inputs.agent-image }}"
+      agent-image-py2: "${{ inputs.agent-image-py2 }}"
+      agent-image-windows: "${{ inputs.agent-image-windows }}"
+      agent-image-windows-py2: "${{ inputs.agent-image-windows-py2 }}"
+    secrets: inherit
+  
+  test-dbm:
+    uses: ./.github/workflows/tests/test-dbm.yml
+    with:
+      repo: core
+
+      # Options
+      standard: true
+      test-py2: ${{ inputs.test-py2 }}
+      test-py3: ${{ inputs.test-py3 }}
+      agent-image: "${{ inputs.agent-image }}"
+      agent-image-py2: "${{ inputs.agent-image-py2 }}"
+      agent-image-windows: "${{ inputs.agent-image-windows }}"
+      agent-image-windows-py2: "${{ inputs.agent-image-windows-py2 }}"
+    secrets: inherit
+  
+  test-integrations:
+    uses: ./.github/workflows/tests/test-all.yml
     with:
       repo: core
 
@@ -52,7 +82,8 @@ jobs:
 
   submit-traces:
     needs:
-    - test
+    - test-common
+    - test-integrations
     if: success() || failure()
 
     uses: ./.github/workflows/submit-traces.yml

@@ -9,11 +9,35 @@ jobs:
   cache:
     uses: ./.github/workflows/cache-shared-deps.yml
 
-  test:
+  test-common:
     needs:
     - cache
 
-    uses: ./.github/workflows/test-all.yml
+    uses: ./.github/workflows/tests/test-common.yml
+    with:
+      repo: core
+
+      # Options
+      standard: true
+    secrets: inherit
+
+  test-dbm:
+    needs:
+    - cache
+
+    uses: ./.github/workflows/tests/test-dbm.yml
+    with:
+      repo: core
+
+      # Options
+      standard: true
+    secrets: inherit
+      
+  test-integrations:
+    needs:
+    - cache
+
+    uses: ./.github/workflows/tests/test-all.yml
     with:
       repo: core
 
@@ -23,7 +47,8 @@ jobs:
 
   publish-test-results:
     needs:
-    - test
+    - test-common
+    - test-integrations
     if: success() || failure()
     concurrency:
       group: test-results
@@ -33,7 +58,8 @@ jobs:
 
   submit-traces:
     needs:
-    - test
+    - test-common
+    - test-integrations
     if: success() || failure()
 
     uses: ./.github/workflows/submit-traces.yml

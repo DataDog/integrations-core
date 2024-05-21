@@ -6,8 +6,26 @@ on:
   - cron: "0 5 * * 1"
 
 jobs:
-  test:
-    uses: ./.github/workflows/test-all.yml
+  test-common:
+    uses: ./.github/workflows/tests/test-common.yml
+    with:
+      repo: core
+
+      # Options
+      latest: true
+    secrets: inherit
+
+  test-dbm:
+    uses: ./.github/workflows/tests/test-dbm.yml
+    with:
+      repo: core
+
+      # Options
+      latest: true
+    secrets: inherit
+  
+  test-integrations:
+    uses: ./.github/workflows/tests/test-all.yml
     with:
       repo: core
 
@@ -17,7 +35,8 @@ jobs:
 
   submit-traces:
     needs:
-    - test
+    - test-common
+    - test-integrations
     if: success() || failure()
 
     uses: ./.github/workflows/submit-traces.yml

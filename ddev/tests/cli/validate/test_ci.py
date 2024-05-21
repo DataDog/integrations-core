@@ -194,7 +194,7 @@ def test_minimum_base_package(ddev, repository, helpers, repo_name, config_file)
     result = ddev('validate', 'ci', '--sync')
     assert result.exit_code == 0, result.output
 
-    test_all = repository.path / '.github' / 'workflows' / 'test-all.yml'
+    test_all = repository.path / '.github' / 'workflows' / 'tests' / 'test-all.yml'
     with test_all.open(encoding='utf-8') as file:
         test_all_yaml_info = yaml.safe_load(file)
 
