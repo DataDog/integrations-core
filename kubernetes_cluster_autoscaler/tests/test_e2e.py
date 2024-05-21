@@ -4,7 +4,7 @@
 import pytest
 
 from datadog_checks.base.constants import ServiceCheck
-from datadog_checks.dev.utils import get_metadata_metrics
+from datadog_checks.dev.utils import assert_service_checks
 
 from . import common
 
@@ -12,11 +12,6 @@ from . import common
 @pytest.mark.e2e
 def test_check_kubernetes_cluster_autoscaler_e2e(dd_agent_check, instance):
     aggregator = dd_agent_check(instance, rate=True)
-    metrics = common.METRICS_MOCK
-
-    for metric in metrics:
-        aggregator.assert_metric(name=metric)
-
-    aggregator.assert_all_metrics_covered()
-    aggregator.assert_metrics_using_metadata(get_metadata_metrics())
     aggregator.assert_service_check('kubernetes_cluster_autoscaler.openmetrics.health', ServiceCheck.OK, count=2)
+    assert_service_checks(aggregator)
+
