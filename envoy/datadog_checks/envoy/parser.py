@@ -9,7 +9,7 @@ from typing import Any, Dict, List, Tuple  # noqa: F401
 from six.moves import range, zip
 
 from .errors import UnknownMetric, UnknownTags
-from .metrics import METRIC_PREFIX, METRIC_TREE, MOD_METRICS
+from .metrics import LEGACY_TAG_OVERWRITE, METRIC_PREFIX, METRIC_TREE, MOD_METRICS
 
 HISTOGRAM = re.compile(r'([P0-9.]+)\(([^,]+)')
 PERCENTILE_SUFFIX = {
@@ -135,6 +135,11 @@ def parse_metric(metric, retry=False, metric_mapping=METRIC_TREE, disable_legacy
                 tag_values.append(tag_values[pos])
             except ValueError:
                 pass
+    
+    # Check to see if this metric has a tag that needs to be overwritten
+    if parsed_metric in LEGACY_TAG_OVERWRITE and LEGACY_TAG_OVERWRITE[parsed_metric][0] in tag_names:
+        index = tag_names.index(LEGACY_TAG_OVERWRITE[parsed_metric][0])
+        tag_names[index] = LEGACY_TAG_OVERWRITE[parsed_metric][1]
 
     tags = ['{}:{}'.format(tag_name, tag_value) for tag_name, tag_value in zip(tag_names, tag_values)]
 

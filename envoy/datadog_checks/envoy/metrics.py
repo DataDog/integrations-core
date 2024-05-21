@@ -3881,7 +3881,7 @@ METRICS = {
     'http.rbac.denied': {
         'tags': (
             ('stat_prefix',),
-            ('rule_prefix',),
+            (),
             (),
         ),
         'method': 'monotonic_count',
@@ -3889,7 +3889,7 @@ METRICS = {
     'http.rbac.shadow_allowed': {
         'tags': (
             ('stat_prefix',),
-            ('shadow_rule_prefix',),
+            (),
             (),
         ),
         'method': 'monotonic_count',
@@ -3897,7 +3897,7 @@ METRICS = {
     'http.rbac.shadow_denied': {
         'tags': (
             ('stat_prefix',),
-            ('shadow_rule_prefix',),
+            (),
             (),
         ),
         'method': 'monotonic_count',
@@ -3951,6 +3951,13 @@ METRICS = {
     },
 }
 # fmt: on
+
+LEGACY_TAG_OVERWRITE = {
+    # The legacy approach gave very little ability for modifications to be done to tags.
+    # This dict allows us to fine tune and replace tags as needed.
+    'http.rbac.shadow_denied': ['rule_prefix', 'shadow_rule_prefix'],
+    'http.rbac.shadow_allowed': ['rule_prefix', 'shadow_rule_prefix'],
+}
 
 MOD_METRICS = modify_metrics_dict(METRICS)
 METRIC_TREE = make_metric_tree(METRICS)
