@@ -322,10 +322,6 @@ coverage:
         target: 75
         flags:
         - kube_apiserver_metrics
-      Kubernetes_Cluster_Autoscaler:
-        target: 75
-        flags:
-        - kubernetes_cluster_autoscaler
       Kubernetes_Controller_Manager:
         target: 75
         flags:
@@ -1105,11 +1101,6 @@ flags:
     paths:
     - kubelet/datadog_checks/kubelet
     - kubelet/tests
-  kubernetes_cluster_autoscaler:
-    carryforward: true
-    paths:
-    - kubernetes_cluster_autoscaler/datadog_checks/kubernetes_cluster_autoscaler
-    - kubernetes_cluster_autoscaler/tests
   kubernetes_state:
     carryforward: true
     paths:
