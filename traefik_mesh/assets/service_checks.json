@@ -1,7 +1,7 @@
 [
     {
         "agent_version": "7.55.0",
-        "integration": "traefik_mesh",
+        "integration": "Traefik Mesh",
         "check": "traefik_mesh.openmetrics.health",
         "statuses": [
             "ok",
@@ -16,7 +16,7 @@
     },
     {
         "agent_version": "7.55.0",
-        "integration": "traefik_mesh",
+        "integration": "Traefik Mesh",
         "check": "traefik_mesh.controller.ready",
         "statuses": [
             "ok",

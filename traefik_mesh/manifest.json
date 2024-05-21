@@ -9,23 +9,24 @@
     "support": "README.md#Support",
     "changelog": "CHANGELOG.md",
     "description": "",
-    "title": "traefik_mesh",
+    "title": "Traefik Mesh",
     "media": [],
     "classifier_tags": [
+      "Category::Log Collection",
+      "Category::Network",
       "Supported OS::Linux",
       "Supported OS::Windows",
       "Supported OS::macOS",
-      "Category::",
-      "Offering::",
-      "Queried Data Type::",
-      "Submitted Data Type::"
+      "Submitted Data Type::Metrics",
+      "Submitted Data Type::Logs",
+      "Submitted Data Type::Traces"
     ]
   },
   "assets": {
     "integration": {
       "auto_install": true,
       "source_type_id": 15633073,
-      "source_type_name": "traefik_mesh",
+      "source_type_name": "Traefik Mesh",
       "configuration": {
         "spec": "assets/configuration/spec.yaml"
       },

@@ -1,4 +1,4 @@
-name: traefik_mesh
+name: Traefik Mesh
 files:
   - name: traefik_mesh.yaml
     options:
