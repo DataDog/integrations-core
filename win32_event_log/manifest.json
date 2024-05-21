@@ -40,6 +40,9 @@
     },
     "logs": {
       "source": "windows.events"
+    },
+    "dashboards": {
+      "windows_event_log_overview": "assets/dashboards/windows_event_log_overview.json"
     }
   }
 }
