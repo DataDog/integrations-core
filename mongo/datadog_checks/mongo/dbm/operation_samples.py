@@ -3,6 +3,7 @@
 # Licensed under a 3-clause BSD style license (see LICENSE)
 
 
+from datetime import datetime
 import time
 from typing import Dict, List, Optional
 
@@ -61,6 +62,8 @@ class MongoOperationSamples(DBMAsyncJob):
             job_name="operation-samples",
         )
 
+        self._last_sampled_timestamp = None
+
     def run_job(self):
         self.collect_operation_samples()
 
@@ -81,6 +84,8 @@ class MongoOperationSamples(DBMAsyncJob):
         activities_payload = self._create_activities_payload(now, activities)
         self._check.log.debug("Sending activities payload: %s", activities_payload)
         self._check.database_monitoring_query_activity(json_util.dumps(activities_payload))
+
+        self._last_sampled_timestamp = now
 
     def _should_collect_operation_samples(self) -> bool:
         deployment = self._check.api_client.deployment_type
@@ -129,6 +134,18 @@ class MongoOperationSamples(DBMAsyncJob):
             # the replica set members and to discover additional members of a replica set.
             self._check.log.debug("Skipping hello operation: %s", operation)
             return False
+
+        # Skip sampled operations that are older than the last sampled timestamp
+        current_op_time = operation.get("currentOpTime")
+        if not current_op_time:
+            self._check.log.debug("Skipping operation without currentOpTime: %s", operation)
+            return False
+
+        current_op_time_ts = datetime.strptime(current_op_time, "%Y-%m-%dT%H:%M:%S.%f%z").timestamp()
+        if self._last_sampled_timestamp and current_op_time_ts <= self._last_sampled_timestamp:
+            self._check.log.debug("Skipping operation older than last sampled timestamp: %s", operation)
+            return False
+
         return True
 
     def _should_explain(self, op: Optional[str], command: dict) -> bool:
