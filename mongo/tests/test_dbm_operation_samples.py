@@ -14,6 +14,14 @@ from .conftest import mock_now, mock_pymongo
 pytestmark = [pytest.mark.usefixtures('dd_environment'), pytest.mark.integration]
 
 
+def run_check_once(mongo_check, dd_run_check, cancel=True):
+    dd_run_check(mongo_check)
+    if cancel:
+        mongo_check.cancel()
+    if mongo_check._operation_samples._job_loop_future is not None:
+        mongo_check._operation_samples._job_loop_future.result()
+
+
 @mock_now(1715911398.1112723)
 @common.standalone
 def test_mongo_operation_samples_standalone(aggregator, instance_integration_cluster, check, dd_run_check):
@@ -21,7 +29,7 @@ def test_mongo_operation_samples_standalone(aggregator, instance_integration_clu
 
     mongo_check = check(instance_integration_cluster)
     with mock_pymongo("standalone"):
-        dd_run_check(mongo_check)
+        run_check_once(mongo_check, dd_run_check)
 
     # we will not assert the metrics, as they are already tested in test_integration.py
     # we will only assert the operation sample and activity events
@@ -51,7 +59,7 @@ def test_mongo_operation_samples_mongos(aggregator, instance_integration_cluster
 
     mongo_check = check(instance_integration_cluster)
     with mock_pymongo("mongos"):
-        dd_run_check(mongo_check)
+        run_check_once(mongo_check, dd_run_check)
 
     dbm_samples = aggregator.get_event_platform_events("dbm-samples")
     dbm_activities = aggregator.get_event_platform_events("dbm-activity")

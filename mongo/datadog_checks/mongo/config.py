@@ -150,8 +150,6 @@ class MongoConfig(object):
             enabled = True
         return {
             'enabled': enabled,
-            'collection_interval': self._operation_samples_config.get(
-                'collection_interval', self.min_collection_interval
-            ),
-            'async': is_affirmative(self._operation_samples_config.get('async', False)),
+            'collection_interval': self._operation_samples_config.get('collection_interval', 10),
+            'run_sync': is_affirmative(self._operation_samples_config.get('run_sync', False)),
         }

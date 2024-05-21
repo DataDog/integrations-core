@@ -4,7 +4,7 @@
         "ddagentversion": "0.0.0",
         "ddsource": "mongodb",
         "dbm_type": "activity",
-        "collection_interval": 15,
+        "collection_interval": 10,
         "ddtags": ["server:mongodb://testUser2:*****@localhost:27017/test"],
         "timestamp": 1715911398111.2722,
         "mongodb_activity": [

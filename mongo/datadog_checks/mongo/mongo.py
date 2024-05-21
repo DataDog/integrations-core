@@ -355,3 +355,7 @@ class MongoDb(AgentCheck):
             self._database_instance_emitted[self._resolved_hostname] = database_instance
             self.log.debug("Emitting database instance  metadata, %s", database_instance)
             self.database_monitoring_metadata(json.dumps(database_instance, default=default_json_event_encoding))
+
+    def cancel(self):
+        if self._config.dbm_enabled:
+            self._operation_samples.cancel()
