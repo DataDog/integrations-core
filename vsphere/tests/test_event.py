@@ -126,10 +126,14 @@ def test_events_collection(aggregator, realtime_instance):
 
     check.api.mock_events = [event2, event3, event3, event4]
     check.check(None)
-    for from_status, to_status, count in [('yellow', 'red', 1), ('red', 'red', 2), ('red', 'green', 1)]:
+    for from_status, to_status, count, additional_tags in [
+        ('yellow', 'red', 1, []),
+        ('red', 'red', 2, []),
+        ('red', 'green', 1, ['vsphere_type:cluster', 'vsphere_resource:c1']),
+    ]:
         aggregator.assert_event(
             "vCenter monitor status changed on this alarm, it was {} and it's now {}.".format(from_status, to_status),
-            tags=['vcenter_server:FAKE'],
+            tags=additional_tags + ['vcenter_server:FAKE'],
             count=count,
         )
     assert len(aggregator.events) == 4
@@ -142,10 +146,12 @@ def test_events_collection(aggregator, realtime_instance):
 
     check.api.mock_events = [event2, event3, event3, event4]
     check.check(None)
-    for from_status, to_status, count in [('red', 'green', 1)]:
+    for from_status, to_status, count, additional_tags in [
+        ('red', 'green', 1, ['vsphere_type:cluster', 'vsphere_resource:c1'])
+    ]:
         aggregator.assert_event(
             "vCenter monitor status changed on this alarm, it was {} and it's now {}.".format(from_status, to_status),
-            tags=['vcenter_server:FAKE'],
+            tags=additional_tags + ['vcenter_server:FAKE'],
             count=count,
         )
     assert len(aggregator.events) == 1

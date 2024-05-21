@@ -36,6 +36,7 @@ LOCK_METRICS = {
         ('datname', 'db'),
         ('relname', 'table'),
         ('granted', 'granted'),
+        ('fastpath', 'fastpath'),
     ],
     'metrics': {'lock_count': ('postgresql.locks', AgentCheck.gauge)},
     'query': """
@@ -45,6 +46,7 @@ SELECT mode,
        pd.datname,
        pc.relname,
        granted,
+       fastpath,
        count(*) AS {metrics_columns}
   FROM pg_locks l
   JOIN pg_database pd ON (l.database = pd.oid)
@@ -53,7 +55,7 @@ SELECT mode,
  WHERE {relations}
    AND l.mode IS NOT NULL
    AND pc.relname NOT LIKE 'pg^_%%' ESCAPE '^'
- GROUP BY pd.datname, pc.relname, pn.nspname, locktype, mode, granted""",
+ GROUP BY pd.datname, pc.relname, pn.nspname, locktype, mode, granted, fastpath""",
     'relation': True,
     'name': 'lock_metrics',
 }

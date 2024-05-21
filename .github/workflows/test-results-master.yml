@@ -17,14 +17,15 @@ jobs:
       BADGE_PATH: test-results.svg
 
     steps:
-    - uses: actions/checkout@v3
+    - uses: actions/checkout@v4
       with:
         ref: "${{ env.BADGES_BRANCH }}"
 
-    - uses: actions/download-artifact@v3
+    - uses: actions/download-artifact@v4
       with:
-        name: test-results
+        pattern: test-results-*
         path: test-results
+        merge-multiple: true
 
     - name: Publish test results
       uses: EnricoMi/publish-unit-test-result-action@v2

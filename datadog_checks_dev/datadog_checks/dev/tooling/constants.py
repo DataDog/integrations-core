@@ -200,7 +200,7 @@ def get_agent_requirements():
     Return the full path to the requirements file listing all the dependencies
     needed by the embedded Python environment
     """
-    return os.path.join(get_root(), 'datadog_checks_base', 'datadog_checks', 'base', 'data', 'agent_requirements.in')
+    return os.path.join(get_root(), 'agent_requirements.in')
 
 
 def get_agent_integrations_file():

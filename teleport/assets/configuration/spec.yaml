@@ -1,0 +1,23 @@
+name: Teleport
+files:
+- name: teleport.yaml
+  options:
+  - template: init_config
+    options:
+    - template: init_config/default
+  - template: instances
+    options:
+    - name: "teleport_url"
+      required: true
+      description: "The Teleport URL to connect to."
+      value:
+        type: string
+        example: "http://127.0.0.1"
+    - name: "diag_port"
+      description: "The Teleport Diagnostic Port."
+      value:
+        type: integer
+        example: 3000
+      
+
+    - template: instances/default

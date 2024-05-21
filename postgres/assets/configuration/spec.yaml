@@ -402,6 +402,7 @@ files:
       value:
         type: string
         example: show_pg_stat_statements()
+        display_default: pg_stat_statements
     - name: query_metrics
       description: Configure collection of query metrics
       options:
@@ -427,6 +428,24 @@ files:
           value:
             type: number
             example: 10000
+        - name: incremental_query_metrics
+          hidden: true
+          description: |
+            Enable an experimental performance optimization that reduces the amount of data queried from `pg_stat_statements`
+            when calculating query metrics. This option is only available for PostgreSQL 10.0 and above.
+          value:
+            type: boolean
+            display_default: false
+            example: false
+        - name: baseline_metrics_expiry
+          hidden: true
+          description: |
+            Set the cache expiry time (in seconds) for the baseline for query metrics. This option is only available when
+            `incremental_query_metrics` is enabled.
+          value:
+            type: number
+            display_default: 300
+            example: 300
     - name: query_samples
       description: Configure collection of query samples
       options:
@@ -875,7 +894,7 @@ files:
         This collection does not involve any additional queries to the database.
       value:
         type: number
-        example: 1800
+        example: 300
         display_default: false
     - name: propagate_agent_tags
       description: |
