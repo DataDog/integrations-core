@@ -102,7 +102,7 @@ if adodbapi is None and pyodbc is None:
 
 set_default_driver_conf()
 
-
+import pdb
 class SQLServer(AgentCheck):
     __NAMESPACE__ = "sqlserver"
 
@@ -116,7 +116,7 @@ class SQLServer(AgentCheck):
         self.instance_metrics = []
         self.instance_per_type_metrics = defaultdict(set)
         self.do_check = True
-
+        #pdb.set_trace()
         self._config = SQLServerConfig(self.init_config, self.instance, self.log)
         self.tags = self._config.tags
 

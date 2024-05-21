@@ -118,12 +118,11 @@ class Schemas(DBMAsyncJob):
         self._check = check
         self._log = check.log
         self.schemas_per_db = {}
-        #TODO to add
-        self._max_execution_time = config.schema_config.get('max_execution_time', self.MAX_EXECUTION_TIME)
         self._last_schemas_collect_time = None
         collection_interval = config.schema_config.get(
             'collection_interval', DEFAULT_SCHEMAS_COLLECTION_INTERVAL
         )
+        self._max_execution_time = min(config.schema_config.get('max_execution_time', self.MAX_EXECUTION_TIME), collection_interval)
         super(Schemas, self).__init__(
             check,
             run_sync=is_affirmative(config.schema_config.get('run_sync', True)),

@@ -725,14 +725,22 @@ files:
             example: false
         - name: collection_interval
           description: |
-            Set the database schema collection interval (in seconds). Defaults to 600 seconds
+            Set the database schema collection interval (in seconds). Defaults to 600 seconds.
           value:
             type: number
             example: 600
-      value:
-        type: number
-        example: 1200
-        display_default: false
+        - name: max_execution_time
+          description: |
+            Set the maximum time for schema collection (in seconds). Defaults to 10 seconds. Capped by `collection_interval`
+          value:
+            type: number
+            example: 10   
+        - name: run_sync
+          description: |
+            Configures if schema collection is ran on the main thread.
+          value:
+            type: boolean
+            example: false
     - template: instances/default
   - template: logs
     example:

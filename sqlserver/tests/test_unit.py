@@ -766,7 +766,7 @@ def set_up_submitter_unit_test():
     
     dataSubmitter = SubmitData(submitData, base_event, DummyLogger())
     return dataSubmitter, submitted_data    
-
+#TODO simplidy this test partly moves to schema
 def test_submit_data():
 
     dataSubmitter, submitted_data = set_up_submitter_unit_test()
