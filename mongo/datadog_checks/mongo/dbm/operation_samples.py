@@ -282,7 +282,6 @@ class MongoOperationSamples(DBMAsyncJob):
                 "instance": operation_metadata["dbname"],
                 "plan": explain_plan,
                 "query_signature": query_signature,
-                "resource_hash": query_signature,
                 "application": operation_metadata["application"],
                 "user": operation_metadata["user"],
                 "statement": obfuscated_command,

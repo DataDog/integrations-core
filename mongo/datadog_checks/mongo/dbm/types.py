@@ -58,7 +58,6 @@ class OperationSampleEventDatabase(TypedDict, total=False):
     instance: Optional[str]
     plan: Optional[OperationSamplePlan]
     query_signature: Optional[str]  # idle session does not have this
-    resource_hash: Optional[str]
     application: Optional[str]
     user: Optional[str]
     statement: Optional[str]
