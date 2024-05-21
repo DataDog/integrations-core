@@ -150,7 +150,7 @@ class MongoOperationSamples(DBMAsyncJob):
 
     def _should_explain(self, op: Optional[str], command: dict) -> bool:
         dbname = command.get("$db")
-        if not dbname or dbname == "admin":
+        if not dbname or dbname in ("admin", "local"):
             # Skip system operations
             self._check.log.debug("Skipping explain system operation: %s", command)
             return False
