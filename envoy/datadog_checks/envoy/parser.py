@@ -135,7 +135,8 @@ def parse_metric(metric, retry=False, metric_mapping=METRIC_TREE, disable_legacy
                 tag_values.append(tag_values[pos])
             except ValueError:
                 pass
-
+    
+    # Check to see if this metric has a tag that needs to be overwritten
     if parsed_metric in LEGACY_TAG_OVERWRITE and LEGACY_TAG_OVERWRITE[parsed_metric][0] in tag_names:
         index = tag_names.index(LEGACY_TAG_OVERWRITE[parsed_metric][0])
         tag_names[index] = LEGACY_TAG_OVERWRITE[parsed_metric][1]
