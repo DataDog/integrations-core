@@ -1,12 +1,12 @@
 {
     "title": "Traefik Mesh Overview",
-    "description": "## Traefik Mesh\n\nThis dashboard provides a high-level overview of your Traefik Mesh instances so you can monitor related metrics.\n\nFor further reading on monitoring Traefik Mesh, see:\n\n- [Official Traefik Mesh integration docs](https://docs.datadoghq.com/integrations/traefik_mesh/#data-collected)\n  \nClone this template to make changes and add your own graphs and widgets.",
+    "description": "## Traefik Mesh\n\nThis dashboard provides a high-level overview of your Traefik Mesh instances so you can monitor related metrics\n\nFor further reading on monitoring Traefik Mesh, see:\n\n- [Official Traefik Mesh integration docs](https://docs.datadoghq.com/integrations/traefik_mesh/#data-collected)\n  \nClone this template to make changes and add your own graphs and widgets.",
     "widgets": [
         {
             "definition": {
                 "title": "About Traefik Mesh",
                 "title_align": "left",
-                "banner_img": "/static/images/logos/airflow_small.svg",
+                "banner_img": "/static/images/logos/small_traefik_mesh.svg",
                 "show_title": false,
                 "type": "group",
                 "layout_type": "ordered",
@@ -116,7 +116,7 @@
                     {
                         "id": 7605881108562756,
                         "definition": {
-                            "title": "Healthy",
+                            "title": "OpenMetrics Health",
                             "title_size": "16",
                             "title_align": "center",
                             "type": "check_status",
@@ -166,592 +166,6 @@
             }
         },
         {
-            "id": 1981869392155182,
-            "definition": {
-                "title": "Router Metrics",
-                "background_color": "vivid_purple",
-                "show_title": true,
-                "type": "group",
-                "layout_type": "ordered",
-                "widgets": [
-                    {
-                        "id": 149823049978716,
-                        "definition": {
-                            "type": "note",
-                            "content": "",
-                            "background_color": "purple",
-                            "font_size": "14",
-                            "text_align": "center",
-                            "vertical_align": "center",
-                            "show_tick": false,
-                            "tick_pos": "50%",
-                            "tick_edge": "left",
-                            "has_padding": true
-                        },
-                        "layout": {
-                            "x": 0,
-                            "y": 0,
-                            "width": 12,
-                            "height": 1
-                        }
-                    },
-                    {
-                        "id": 4581477236147096,
-                        "definition": {
-                            "title": "Total count of HTTP requests",
-                            "title_size": "16",
-                            "title_align": "left",
-                            "show_legend": false,
-                            "legend_layout": "auto",
-                            "legend_columns": [
-                                "avg",
-                                "min",
-                                "max",
-                                "value",
-                                "sum"
-                            ],
-                            "type": "timeseries",
-                            "requests": [
-                                {
-                                    "formulas": [
-                                        {
-                                            "alias": "requests",
-                                            "formula": "query1"
-                                        },
-                                        {
-                                            "alias": "TLS requests",
-                                            "formula": "query2"
-                                        }
-                                    ],
-                                    "queries": [
-                                        {
-                                            "data_source": "metrics",
-                                            "name": "query1",
-                                            "query": "sum:traefik_mesh.router.requests.count{*} by {host,entrypoint,protocol,code}"
-                                        },
-                                        {
-                                            "data_source": "metrics",
-                                            "name": "query2",
-                                            "query": "sum:traefik_mesh.router.requests.tls.count{*} by {host,entrypoint,protocol,code}"
-                                        }
-                                    ],
-                                    "response_format": "timeseries",
-                                    "style": {
-                                        "palette": "purple",
-                                        "line_type": "solid",
-                                        "line_width": "normal"
-                                    },
-                                    "display_type": "line"
-                                }
-                            ],
-                            "custom_links": []
-                        },
-                        "layout": {
-                            "x": 0,
-                            "y": 1,
-                            "width": 6,
-                            "height": 4
-                        }
-                    },
-                    {
-                        "id": 4250019988176572,
-                        "definition": {
-                            "title": "Requests by entrypoint and protocol",
-                            "title_size": "16",
-                            "title_align": "left",
-                            "requests": [
-                                {
-                                    "formulas": [
-                                        {
-                                            "formula": "query1"
-                                        }
-                                    ],
-                                    "queries": [
-                                        {
-                                            "name": "query1",
-                                            "data_source": "metrics",
-                                            "query": "sum:traefik_mesh.router.requests.count{*} by {protocol,endpoint,router.service}",
-                                            "aggregator": "sum"
-                                        }
-                                    ],
-                                    "response_format": "scalar",
-                                    "sort": {
-                                        "count": 500,
-                                        "order_by": [
-                                            {
-                                                "type": "formula",
-                                                "index": 0,
-                                                "order": "desc"
-                                            }
-                                        ]
-                                    },
-                                    "style": {
-                                        "palette": "datadog16"
-                                    }
-                                }
-                            ],
-                            "type": "sunburst",
-                            "legend": {
-                                "type": "table"
-                            }
-                        },
-                        "layout": {
-                            "x": 6,
-                            "y": 1,
-                            "width": 6,
-                            "height": 4
-                        }
-                    },
-                    {
-                        "id": 7695476903166772,
-                        "definition": {
-                            "title": "Total size of HTTP responses",
-                            "title_size": "16",
-                            "title_align": "left",
-                            "show_legend": false,
-                            "legend_layout": "auto",
-                            "legend_columns": [
-                                "avg",
-                                "min",
-                                "max",
-                                "value",
-                                "sum"
-                            ],
-                            "type": "timeseries",
-                            "requests": [
-                                {
-                                    "formulas": [
-                                        {
-                                            "alias": "bytes",
-                                            "formula": "query1"
-                                        }
-                                    ],
-                                    "queries": [
-                                        {
-                                            "data_source": "metrics",
-                                            "name": "query1",
-                                            "query": "sum:traefik_mesh.router.responses.bytes.count{*}"
-                                        }
-                                    ],
-                                    "response_format": "timeseries",
-                                    "style": {
-                                        "palette": "blue",
-                                        "line_type": "solid",
-                                        "line_width": "normal"
-                                    },
-                                    "display_type": "line"
-                                }
-                            ],
-                            "custom_links": []
-                        },
-                        "layout": {
-                            "x": 0,
-                            "y": 5,
-                            "width": 4,
-                            "height": 3
-                        }
-                    },
-                    {
-                        "id": 8090843006989946,
-                        "definition": {
-                            "title": "Total size of HTTP requests",
-                            "title_size": "16",
-                            "title_align": "left",
-                            "show_legend": false,
-                            "legend_layout": "auto",
-                            "legend_columns": [
-                                "avg",
-                                "min",
-                                "max",
-                                "value",
-                                "sum"
-                            ],
-                            "type": "timeseries",
-                            "requests": [
-                                {
-                                    "formulas": [
-                                        {
-                                            "alias": "bytes",
-                                            "formula": "query1"
-                                        }
-                                    ],
-                                    "queries": [
-                                        {
-                                            "data_source": "metrics",
-                                            "name": "query1",
-                                            "query": "sum:traefik_mesh.router.requests.bytes.count{*}"
-                                        }
-                                    ],
-                                    "response_format": "timeseries",
-                                    "style": {
-                                        "palette": "blue",
-                                        "line_type": "solid",
-                                        "line_width": "normal"
-                                    },
-                                    "display_type": "line"
-                                }
-                            ],
-                            "custom_links": []
-                        },
-                        "layout": {
-                            "x": 4,
-                            "y": 5,
-                            "width": 4,
-                            "height": 3
-                        }
-                    },
-                    {
-                        "id": 6003453963207612,
-                        "definition": {
-                            "title": "Current count of open connections",
-                            "title_size": "16",
-                            "title_align": "left",
-                            "show_legend": false,
-                            "legend_layout": "auto",
-                            "legend_columns": [
-                                "avg",
-                                "min",
-                                "max",
-                                "value",
-                                "sum"
-                            ],
-                            "type": "timeseries",
-                            "requests": [
-                                {
-                                    "formulas": [
-                                        {
-                                            "alias": "connections",
-                                            "formula": "query1"
-                                        }
-                                    ],
-                                    "queries": [
-                                        {
-                                            "data_source": "metrics",
-                                            "name": "query1",
-                                            "query": "sum:traefik_mesh.router.open_connections{*} by {endpoint,entrypoint,host,method,protocol}"
-                                        }
-                                    ],
-                                    "response_format": "timeseries",
-                                    "style": {
-                                        "palette": "dog_classic",
-                                        "order_by": "values",
-                                        "line_type": "solid",
-                                        "line_width": "normal"
-                                    },
-                                    "display_type": "line"
-                                }
-                            ]
-                        },
-                        "layout": {
-                            "x": 8,
-                            "y": 5,
-                            "width": 4,
-                            "height": 3
-                        }
-                    }
-                ]
-            },
-            "layout": {
-                "x": 0,
-                "y": 6,
-                "width": 12,
-                "height": 1
-            }
-        },
-        {
-            "id": 5659329396241164,
-            "definition": {
-                "title": "Service Metrics",
-                "background_color": "vivid_purple",
-                "show_title": true,
-                "type": "group",
-                "layout_type": "ordered",
-                "widgets": [
-                    {
-                        "id": 953793942520232,
-                        "definition": {
-                            "type": "note",
-                            "content": "",
-                            "background_color": "purple",
-                            "font_size": "14",
-                            "text_align": "center",
-                            "vertical_align": "center",
-                            "show_tick": false,
-                            "tick_pos": "50%",
-                            "tick_edge": "left",
-                            "has_padding": true
-                        },
-                        "layout": {
-                            "x": 0,
-                            "y": 0,
-                            "width": 12,
-                            "height": 1
-                        }
-                    },
-                    {
-                        "id": 2951317815873402,
-                        "definition": {
-                            "title": "Total count of HTTP requests",
-                            "title_size": "16",
-                            "title_align": "left",
-                            "show_legend": false,
-                            "legend_layout": "auto",
-                            "legend_columns": [
-                                "avg",
-                                "min",
-                                "max",
-                                "value",
-                                "sum"
-                            ],
-                            "type": "timeseries",
-                            "requests": [
-                                {
-                                    "formulas": [
-                                        {
-                                            "alias": "requests",
-                                            "formula": "query1"
-                                        },
-                                        {
-                                            "alias": "TLS requests",
-                                            "formula": "query2"
-                                        }
-                                    ],
-                                    "queries": [
-                                        {
-                                            "data_source": "metrics",
-                                            "name": "query1",
-                                            "query": "sum:traefik_mesh.service.requests.count{*} by {entrypoint,protocol,code}"
-                                        },
-                                        {
-                                            "data_source": "metrics",
-                                            "name": "query2",
-                                            "query": "sum:traefik_mesh.service.requests.tls.count{*} by {entrypoint,protocol,code}"
-                                        }
-                                    ],
-                                    "response_format": "timeseries",
-                                    "style": {
-                                        "palette": "purple",
-                                        "line_type": "solid",
-                                        "line_width": "normal"
-                                    },
-                                    "display_type": "line"
-                                }
-                            ],
-                            "custom_links": []
-                        },
-                        "layout": {
-                            "x": 0,
-                            "y": 1,
-                            "width": 6,
-                            "height": 4
-                        }
-                    },
-                    {
-                        "id": 5876575151282368,
-                        "definition": {
-                            "title": "Requests by entrypoint and protocol",
-                            "title_size": "16",
-                            "title_align": "left",
-                            "requests": [
-                                {
-                                    "formulas": [
-                                        {
-                                            "formula": "query1"
-                                        }
-                                    ],
-                                    "queries": [
-                                        {
-                                            "name": "query1",
-                                            "data_source": "metrics",
-                                            "query": "avg:traefik_mesh.service.requests.count{*} by {protocol,endpoint,service}",
-                                            "aggregator": "sum"
-                                        }
-                                    ],
-                                    "response_format": "scalar",
-                                    "sort": {
-                                        "count": 500,
-                                        "order_by": [
-                                            {
-                                                "type": "formula",
-                                                "index": 0,
-                                                "order": "desc"
-                                            }
-                                        ]
-                                    },
-                                    "style": {
-                                        "palette": "datadog16"
-                                    }
-                                }
-                            ],
-                            "type": "sunburst",
-                            "legend": {
-                                "type": "table"
-                            }
-                        },
-                        "layout": {
-                            "x": 6,
-                            "y": 1,
-                            "width": 6,
-                            "height": 4
-                        }
-                    },
-                    {
-                        "id": 4132306479403788,
-                        "definition": {
-                            "title": "Total size of HTTP responses",
-                            "title_size": "16",
-                            "title_align": "left",
-                            "show_legend": false,
-                            "legend_layout": "auto",
-                            "legend_columns": [
-                                "avg",
-                                "min",
-                                "max",
-                                "value",
-                                "sum"
-                            ],
-                            "type": "timeseries",
-                            "requests": [
-                                {
-                                    "formulas": [
-                                        {
-                                            "alias": "bytes",
-                                            "formula": "query1"
-                                        }
-                                    ],
-                                    "queries": [
-                                        {
-                                            "data_source": "metrics",
-                                            "name": "query1",
-                                            "query": "sum:traefik_mesh.service.responses.bytes.count{*}"
-                                        }
-                                    ],
-                                    "response_format": "timeseries",
-                                    "style": {
-                                        "palette": "blue",
-                                        "line_type": "solid",
-                                        "line_width": "normal"
-                                    },
-                                    "display_type": "line"
-                                }
-                            ],
-                            "custom_links": []
-                        },
-                        "layout": {
-                            "x": 0,
-                            "y": 5,
-                            "width": 4,
-                            "height": 3
-                        }
-                    },
-                    {
-                        "id": 1617736145311922,
-                        "definition": {
-                            "title": "Total size of HTTP requests",
-                            "title_size": "16",
-                            "title_align": "left",
-                            "show_legend": false,
-                            "legend_layout": "auto",
-                            "legend_columns": [
-                                "avg",
-                                "min",
-                                "max",
-                                "value",
-                                "sum"
-                            ],
-                            "type": "timeseries",
-                            "requests": [
-                                {
-                                    "formulas": [
-                                        {
-                                            "alias": "bytes",
-                                            "formula": "query1"
-                                        }
-                                    ],
-                                    "queries": [
-                                        {
-                                            "data_source": "metrics",
-                                            "name": "query1",
-                                            "query": "sum:traefik_mesh.service.requests.bytes.count{*} by {host}"
-                                        }
-                                    ],
-                                    "response_format": "timeseries",
-                                    "style": {
-                                        "palette": "blue",
-                                        "line_type": "solid",
-                                        "line_width": "normal"
-                                    },
-                                    "display_type": "line"
-                                }
-                            ],
-                            "custom_links": []
-                        },
-                        "layout": {
-                            "x": 4,
-                            "y": 5,
-                            "width": 4,
-                            "height": 3
-                        }
-                    },
-                    {
-                        "id": 3717519820239508,
-                        "definition": {
-                            "title": "Current count of open connections",
-                            "title_size": "16",
-                            "title_align": "left",
-                            "show_legend": false,
-                            "legend_layout": "auto",
-                            "legend_columns": [
-                                "avg",
-                                "min",
-                                "max",
-                                "value",
-                                "sum"
-                            ],
-                            "type": "timeseries",
-                            "requests": [
-                                {
-                                    "formulas": [
-                                        {
-                                            "alias": "connections",
-                                            "formula": "query1"
-                                        }
-                                    ],
-                                    "queries": [
-                                        {
-                                            "data_source": "metrics",
-                                            "name": "query1",
-                                            "query": "sum:traefik_mesh.service.open_connections{*} by {endpoint,entrypoint,host,method,protocol}"
-                                        }
-                                    ],
-                                    "response_format": "timeseries",
-                                    "style": {
-                                        "palette": "dog_classic",
-                                        "order_by": "values",
-                                        "line_type": "solid",
-                                        "line_width": "normal"
-                                    },
-                                    "display_type": "line"
-                                }
-                            ]
-                        },
-                        "layout": {
-                            "x": 8,
-                            "y": 5,
-                            "width": 4,
-                            "height": 3
-                        }
-                    }
-                ]
-            },
-            "layout": {
-                "x": 0,
-                "y": 7,
-                "width": 12,
-                "height": 1
-            }
-        },
-        {
             "id": 5340440168093318,
             "definition": {
                 "title": "Entrypoint Metrics",
@@ -764,7 +178,7 @@
                         "id": 2038656367341306,
                         "definition": {
                             "type": "note",
-                            "content": "",
+                            "content": "Traefik Entrypoint metrics provide visibility into the traffic entering your service mesh and can help you monitor, analyze, and optimize the performance and reliability of your applications.",
                             "background_color": "purple",
                             "font_size": "14",
                             "text_align": "center",
@@ -802,23 +216,41 @@
                                     "formulas": [
                                         {
                                             "alias": "requests",
+                                            "style": {
+                                                "palette": "green"
+                                            },
                                             "formula": "query1"
                                         },
                                         {
-                                            "alias": "TLS requests",
+                                            "alias": "requests",
+                                            "style": {
+                                                "palette": "red"
+                                            },
                                             "formula": "query2"
+                                        },
+                                        {
+                                            "alias": "requests",
+                                            "style": {
+                                                "palette": "grey"
+                                            },
+                                            "formula": "query3"
                                         }
                                     ],
                                     "queries": [
                                         {
                                             "data_source": "metrics",
                                             "name": "query1",
-                                            "query": "sum:traefik_mesh.entrypoint.requests.count{*} by {host,entrypoint,protocol,code}"
+                                            "query": "sum:traefik_mesh.entrypoint.requests.count{$host,$entrypoint,$endpoint,code:2*} by {entrypoint,protocol,code,method}.as_count()"
                                         },
                                         {
                                             "data_source": "metrics",
                                             "name": "query2",
-                                            "query": "sum:traefik_mesh.entrypoint.requests.tls.count{*} by {host,entrypoint,protocol,code}"
+                                            "query": "sum:traefik_mesh.entrypoint.requests.count{$host AND $entrypoint AND $endpoint AND code:4* OR code:5*} by {entrypoint,protocol,code,method}.as_count()"
+                                        },
+                                        {
+                                            "data_source": "metrics",
+                                            "name": "query3",
+                                            "query": "sum:traefik_mesh.entrypoint.requests.count{$host,$entrypoint,$endpoint,code:3*} by {entrypoint,protocol,code,method}.as_count()"
                                         }
                                     ],
                                     "response_format": "timeseries",
@@ -827,7 +259,7 @@
                                         "line_type": "solid",
                                         "line_width": "normal"
                                     },
-                                    "display_type": "line"
+                                    "display_type": "bars"
                                 }
                             ],
                             "custom_links": []
@@ -840,9 +272,9 @@
                         }
                     },
                     {
-                        "id": 4312867992260676,
+                        "id": 8667290873533734,
                         "definition": {
-                            "title": "Total count of TLS requests",
+                            "title": "Total count of HTTPS requests",
                             "title_size": "16",
                             "title_align": "left",
                             "show_legend": false,
@@ -854,29 +286,57 @@
                                 "value",
                                 "sum"
                             ],
+                            "time": {},
                             "type": "timeseries",
                             "requests": [
                                 {
                                     "formulas": [
                                         {
-                                            "alias": "TLS requests",
+                                            "alias": "requests",
+                                            "style": {
+                                                "palette": "green"
+                                            },
                                             "formula": "query1"
+                                        },
+                                        {
+                                            "alias": "requests",
+                                            "style": {
+                                                "palette": "red"
+                                            },
+                                            "formula": "query2"
+                                        },
+                                        {
+                                            "alias": "requests",
+                                            "style": {
+                                                "palette": "grey"
+                                            },
+                                            "formula": "query3"
                                         }
                                     ],
                                     "queries": [
                                         {
                                             "data_source": "metrics",
                                             "name": "query1",
-                                            "query": "sum:traefik_mesh.entrypoint.requests.tls.count{*} by {host,entrypoint,protocol,code}"
+                                            "query": "sum:traefik_mesh.entrypoint.requests.tls.count{$host,$protocol ,$entrypoint ,code:2*} by {entrypoint,protocol,code}.as_count()"
+                                        },
+                                        {
+                                            "data_source": "metrics",
+                                            "name": "query2",
+                                            "query": "sum:traefik_mesh.entrypoint.requests.tls.count{$host AND $endpoint AND $entrypoint AND code:4* OR code:5*} by {entrypoint,protocol,code}.as_count()"
+                                        },
+                                        {
+                                            "data_source": "metrics",
+                                            "name": "query3",
+                                            "query": "sum:traefik_mesh.entrypoint.requests.tls.count{$host,$endpoint ,$entrypoint,code:3*} by {entrypoint,protocol,code}.as_count()"
                                         }
                                     ],
                                     "response_format": "timeseries",
                                     "style": {
-                                        "palette": "blue",
+                                        "palette": "purple",
                                         "line_type": "solid",
                                         "line_width": "normal"
                                     },
-                                    "display_type": "line"
+                                    "display_type": "bars"
                                 }
                             ],
                             "custom_links": []
@@ -894,6 +354,7 @@
                             "title": "Requests by entrypoint and protocol",
                             "title_size": "16",
                             "title_align": "left",
+                            "time": {},
                             "requests": [
                                 {
                                     "formulas": [
@@ -905,7 +366,7 @@
                                         {
                                             "name": "query1",
                                             "data_source": "metrics",
-                                            "query": "avg:traefik_mesh.entrypoint.requests.count{*} by {entrypoint,protocol,endpoint}.as_count()",
+                                            "query": "avg:traefik_mesh.entrypoint.requests.count{$host,$entrypoint,$protocol,$endpoint} by {entrypoint,protocol,endpoint}.as_count()",
                                             "aggregator": "sum"
                                         }
                                     ],
@@ -921,7 +382,7 @@
                                         ]
                                     },
                                     "style": {
-                                        "palette": "datadog16"
+                                        "palette": "semantic"
                                     }
                                 }
                             ],
@@ -952,6 +413,7 @@
                                 "value",
                                 "sum"
                             ],
+                            "time": {},
                             "type": "timeseries",
                             "requests": [
                                 {
@@ -965,17 +427,17 @@
                                         {
                                             "data_source": "metrics",
                                             "name": "query1",
-                                            "query": "sum:traefik_mesh.entrypoint.open_connections{*} by {endpoint,entrypoint,host,method,protocol}"
+                                            "query": "sum:traefik_mesh.entrypoint.open_connections{$host,$entrypoint,$protocol} by {endpoint,entrypoint,method,protocol}"
                                         }
                                     ],
                                     "response_format": "timeseries",
                                     "style": {
-                                        "palette": "dog_classic",
+                                        "palette": "purple",
                                         "order_by": "values",
                                         "line_type": "solid",
                                         "line_width": "normal"
                                     },
-                                    "display_type": "line"
+                                    "display_type": "bars"
                                 }
                             ]
                         },
@@ -1001,6 +463,7 @@
                                 "value",
                                 "sum"
                             ],
+                            "time": {},
                             "type": "timeseries",
                             "requests": [
                                 {
@@ -1014,16 +477,16 @@
                                         {
                                             "data_source": "metrics",
                                             "name": "query1",
-                                            "query": "sum:traefik_mesh.entrypoint.responses.bytes.count{*}"
+                                            "query": "sum:traefik_mesh.entrypoint.responses.bytes.count{$host,$entrypoint,$endpoint} by {method,entrypoint,endpoint}"
                                         }
                                     ],
                                     "response_format": "timeseries",
                                     "style": {
-                                        "palette": "blue",
+                                        "palette": "purple",
                                         "line_type": "solid",
                                         "line_width": "normal"
                                     },
-                                    "display_type": "line"
+                                    "display_type": "area"
                                 }
                             ],
                             "custom_links": []
@@ -1039,10 +502,630 @@
             },
             "layout": {
                 "x": 0,
-                "y": 0,
+                "y": 6,
                 "width": 12,
-                "height": 1,
+                "height": 11,
                 "is_column_break": true
+            }
+        },
+        {
+            "id": 1981869392155182,
+            "definition": {
+                "title": "Router Metrics",
+                "background_color": "vivid_purple",
+                "show_title": true,
+                "type": "group",
+                "layout_type": "ordered",
+                "widgets": [
+                    {
+                        "id": 149823049978716,
+                        "definition": {
+                            "type": "note",
+                            "content": "Traefik Router metrics help you monitor and optimize the internal traffic flows between services, ensuring that your service mesh operates efficiently and reliably.",
+                            "background_color": "purple",
+                            "font_size": "14",
+                            "text_align": "center",
+                            "vertical_align": "center",
+                            "show_tick": false,
+                            "tick_pos": "50%",
+                            "tick_edge": "left",
+                            "has_padding": true
+                        },
+                        "layout": {
+                            "x": 0,
+                            "y": 0,
+                            "width": 12,
+                            "height": 1
+                        }
+                    },
+                    {
+                        "id": 3492778997521656,
+                        "definition": {
+                            "title": "Total count of HTTP requests",
+                            "title_size": "16",
+                            "title_align": "left",
+                            "show_legend": false,
+                            "legend_layout": "auto",
+                            "legend_columns": [
+                                "avg",
+                                "min",
+                                "max",
+                                "value",
+                                "sum"
+                            ],
+                            "time": {},
+                            "type": "timeseries",
+                            "requests": [
+                                {
+                                    "formulas": [
+                                        {
+                                            "alias": "requests",
+                                            "style": {
+                                                "palette": "green"
+                                            },
+                                            "formula": "query1"
+                                        },
+                                        {
+                                            "alias": "requests",
+                                            "style": {
+                                                "palette": "red"
+                                            },
+                                            "formula": "query2"
+                                        },
+                                        {
+                                            "alias": "requests",
+                                            "style": {
+                                                "palette": "grey"
+                                            },
+                                            "formula": "query3"
+                                        }
+                                    ],
+                                    "queries": [
+                                        {
+                                            "data_source": "metrics",
+                                            "name": "query1",
+                                            "query": "sum:traefik_mesh.router.requests.count{$host,$service,$router,code:2*} by {code,router,service}.as_count()"
+                                        },
+                                        {
+                                            "data_source": "metrics",
+                                            "name": "query2",
+                                            "query": "sum:traefik_mesh.router.requests.count{$host AND $service AND $router AND code:4* OR code:5*} by {code,router,service}.as_count()"
+                                        },
+                                        {
+                                            "data_source": "metrics",
+                                            "name": "query3",
+                                            "query": "sum:traefik_mesh.router.requests.count{$host,$service,$routercode:3*} by {code,router,service}.as_count()"
+                                        }
+                                    ],
+                                    "response_format": "timeseries",
+                                    "style": {
+                                        "palette": "purple",
+                                        "line_type": "solid",
+                                        "line_width": "normal"
+                                    },
+                                    "display_type": "bars"
+                                }
+                            ],
+                            "custom_links": []
+                        },
+                        "layout": {
+                            "x": 0,
+                            "y": 1,
+                            "width": 6,
+                            "height": 4
+                        }
+                    },
+                    {
+                        "id": 4250019988176572,
+                        "definition": {
+                            "title": "Requests by service",
+                            "title_size": "16",
+                            "title_align": "left",
+                            "time": {},
+                            "requests": [
+                                {
+                                    "formulas": [
+                                        {
+                                            "formula": "query1"
+                                        }
+                                    ],
+                                    "queries": [
+                                        {
+                                            "name": "query1",
+                                            "data_source": "metrics",
+                                            "query": "sum:traefik_mesh.router.requests.count{$router, $endpoint} by {protocol,service}",
+                                            "aggregator": "sum"
+                                        }
+                                    ],
+                                    "response_format": "scalar",
+                                    "sort": {
+                                        "count": 500,
+                                        "order_by": [
+                                            {
+                                                "type": "formula",
+                                                "index": 0,
+                                                "order": "desc"
+                                            }
+                                        ]
+                                    },
+                                    "style": {
+                                        "palette": "classic"
+                                    }
+                                }
+                            ],
+                            "type": "sunburst",
+                            "legend": {
+                                "type": "table"
+                            }
+                        },
+                        "layout": {
+                            "x": 6,
+                            "y": 1,
+                            "width": 6,
+                            "height": 4
+                        }
+                    },
+                    {
+                        "id": 7695476903166772,
+                        "definition": {
+                            "title": "Total size of HTTP responses",
+                            "title_size": "16",
+                            "title_align": "left",
+                            "show_legend": false,
+                            "legend_layout": "auto",
+                            "legend_columns": [
+                                "avg",
+                                "min",
+                                "max",
+                                "value",
+                                "sum"
+                            ],
+                            "time": {},
+                            "type": "timeseries",
+                            "requests": [
+                                {
+                                    "formulas": [
+                                        {
+                                            "alias": "bytes",
+                                            "formula": "query1"
+                                        }
+                                    ],
+                                    "queries": [
+                                        {
+                                            "data_source": "metrics",
+                                            "name": "query1",
+                                            "query": "sum:traefik_mesh.router.responses.bytes.count{$service, $router, $host} by {service,router,host,protocol}"
+                                        }
+                                    ],
+                                    "response_format": "timeseries",
+                                    "style": {
+                                        "palette": "purple",
+                                        "line_type": "solid",
+                                        "line_width": "normal"
+                                    },
+                                    "display_type": "line"
+                                }
+                            ],
+                            "custom_links": []
+                        },
+                        "layout": {
+                            "x": 0,
+                            "y": 5,
+                            "width": 4,
+                            "height": 3
+                        }
+                    },
+                    {
+                        "id": 8090843006989946,
+                        "definition": {
+                            "title": "Total size of HTTP requests",
+                            "title_size": "16",
+                            "title_align": "left",
+                            "show_legend": false,
+                            "legend_layout": "auto",
+                            "legend_columns": [
+                                "avg",
+                                "min",
+                                "max",
+                                "value",
+                                "sum"
+                            ],
+                            "time": {},
+                            "type": "timeseries",
+                            "requests": [
+                                {
+                                    "formulas": [
+                                        {
+                                            "alias": "bytes",
+                                            "formula": "query1"
+                                        }
+                                    ],
+                                    "queries": [
+                                        {
+                                            "data_source": "metrics",
+                                            "name": "query1",
+                                            "query": "sum:traefik_mesh.router.requests.bytes.count{$host, $endpoint, $protocol} by {host,endpoint,protocol}"
+                                        }
+                                    ],
+                                    "response_format": "timeseries",
+                                    "style": {
+                                        "palette": "purple",
+                                        "line_type": "solid",
+                                        "line_width": "normal"
+                                    },
+                                    "display_type": "line"
+                                }
+                            ],
+                            "custom_links": []
+                        },
+                        "layout": {
+                            "x": 4,
+                            "y": 5,
+                            "width": 4,
+                            "height": 3
+                        }
+                    },
+                    {
+                        "id": 6003453963207612,
+                        "definition": {
+                            "title": "Current count of open connections",
+                            "title_size": "16",
+                            "title_align": "left",
+                            "show_legend": false,
+                            "legend_layout": "auto",
+                            "legend_columns": [
+                                "avg",
+                                "min",
+                                "max",
+                                "value",
+                                "sum"
+                            ],
+                            "time": {},
+                            "type": "timeseries",
+                            "requests": [
+                                {
+                                    "formulas": [
+                                        {
+                                            "alias": "connections",
+                                            "formula": "query1"
+                                        }
+                                    ],
+                                    "queries": [
+                                        {
+                                            "data_source": "metrics",
+                                            "name": "query1",
+                                            "query": "sum:traefik_mesh.router.open_connections{$host, $router} by {endpoint,method,protocol}"
+                                        }
+                                    ],
+                                    "response_format": "timeseries",
+                                    "style": {
+                                        "palette": "purple",
+                                        "order_by": "values",
+                                        "line_type": "solid",
+                                        "line_width": "normal"
+                                    },
+                                    "display_type": "line"
+                                }
+                            ]
+                        },
+                        "layout": {
+                            "x": 8,
+                            "y": 5,
+                            "width": 4,
+                            "height": 3
+                        }
+                    }
+                ]
+            },
+            "layout": {
+                "x": 0,
+                "y": 17,
+                "width": 12,
+                "height": 9
+            }
+        },
+        {
+            "id": 5659329396241164,
+            "definition": {
+                "title": "Service Metrics",
+                "background_color": "vivid_purple",
+                "show_title": true,
+                "type": "group",
+                "layout_type": "ordered",
+                "widgets": [
+                    {
+                        "id": 953793942520232,
+                        "definition": {
+                            "type": "note",
+                            "content": "Traefik Service metrics provide insights into how services are performing, how they interact with each other, and how they handle traffic. ",
+                            "background_color": "purple",
+                            "font_size": "14",
+                            "text_align": "center",
+                            "vertical_align": "center",
+                            "show_tick": false,
+                            "tick_pos": "50%",
+                            "tick_edge": "left",
+                            "has_padding": true
+                        },
+                        "layout": {
+                            "x": 0,
+                            "y": 0,
+                            "width": 12,
+                            "height": 1
+                        }
+                    },
+                    {
+                        "id": 8021076143389612,
+                        "definition": {
+                            "title": "Total count of HTTP requests",
+                            "title_size": "16",
+                            "title_align": "left",
+                            "show_legend": false,
+                            "legend_layout": "auto",
+                            "legend_columns": [
+                                "avg",
+                                "min",
+                                "max",
+                                "value",
+                                "sum"
+                            ],
+                            "time": {},
+                            "type": "timeseries",
+                            "requests": [
+                                {
+                                    "formulas": [
+                                        {
+                                            "alias": "requests",
+                                            "style": {
+                                                "palette": "green"
+                                            },
+                                            "formula": "query1"
+                                        },
+                                        {
+                                            "alias": "requests",
+                                            "style": {
+                                                "palette": "red"
+                                            },
+                                            "formula": "query2"
+                                        },
+                                        {
+                                            "alias": "requests",
+                                            "style": {
+                                                "palette": "grey"
+                                            },
+                                            "formula": "query3"
+                                        }
+                                    ],
+                                    "queries": [
+                                        {
+                                            "data_source": "metrics",
+                                            "name": "query1",
+                                            "query": "sum:traefik_mesh.service.requests.count{$host,$service,$endpoint,code:2*} by {protocol,code,method}.as_count()"
+                                        },
+                                        {
+                                            "data_source": "metrics",
+                                            "name": "query2",
+                                            "query": "sum:traefik_mesh.service.requests.count{$host AND $service AND $endpoint AND code:4* OR code:5*} by {protocol,code,method}.as_count()"
+                                        },
+                                        {
+                                            "data_source": "metrics",
+                                            "name": "query3",
+                                            "query": "sum:traefik_mesh.service.requests.count{$host,$service ,$endpoint,code:3*} by {protocol,code,method}.as_count()"
+                                        }
+                                    ],
+                                    "response_format": "timeseries",
+                                    "style": {
+                                        "palette": "purple",
+                                        "line_type": "solid",
+                                        "line_width": "normal"
+                                    },
+                                    "display_type": "bars"
+                                }
+                            ],
+                            "custom_links": []
+                        },
+                        "layout": {
+                            "x": 0,
+                            "y": 1,
+                            "width": 6,
+                            "height": 4
+                        }
+                    },
+                    {
+                        "id": 5876575151282368,
+                        "definition": {
+                            "title": "Requests by service and router",
+                            "title_size": "16",
+                            "title_align": "left",
+                            "requests": [
+                                {
+                                    "formulas": [
+                                        {
+                                            "formula": "query1"
+                                        }
+                                    ],
+                                    "queries": [
+                                        {
+                                            "name": "query1",
+                                            "data_source": "metrics",
+                                            "query": "avg:traefik_mesh.service.requests.count{$host} by {protocol,service,router}",
+                                            "aggregator": "sum"
+                                        }
+                                    ],
+                                    "response_format": "scalar",
+                                    "sort": {
+                                        "count": 500,
+                                        "order_by": [
+                                            {
+                                                "type": "formula",
+                                                "index": 0,
+                                                "order": "desc"
+                                            }
+                                        ]
+                                    },
+                                    "style": {
+                                        "palette": "classic"
+                                    }
+                                }
+                            ],
+                            "type": "sunburst",
+                            "legend": {
+                                "type": "table"
+                            }
+                        },
+                        "layout": {
+                            "x": 6,
+                            "y": 1,
+                            "width": 6,
+                            "height": 4
+                        }
+                    },
+                    {
+                        "id": 4132306479403788,
+                        "definition": {
+                            "title": "Total size of HTTP responses",
+                            "title_size": "16",
+                            "title_align": "left",
+                            "show_legend": false,
+                            "legend_layout": "auto",
+                            "legend_columns": [
+                                "avg",
+                                "min",
+                                "max",
+                                "value",
+                                "sum"
+                            ],
+                            "time": {},
+                            "type": "timeseries",
+                            "requests": [
+                                {
+                                    "formulas": [
+                                        {
+                                            "alias": "bytes",
+                                            "formula": "query1"
+                                        }
+                                    ],
+                                    "queries": [
+                                        {
+                                            "data_source": "metrics",
+                                            "name": "query1",
+                                            "query": "sum:traefik_mesh.service.responses.bytes.count{$host, $service, $endpoint} by {host,service,endpoint}"
+                                        }
+                                    ],
+                                    "response_format": "timeseries",
+                                    "style": {
+                                        "palette": "purple",
+                                        "line_type": "solid",
+                                        "line_width": "normal"
+                                    },
+                                    "display_type": "line"
+                                }
+                            ],
+                            "custom_links": []
+                        },
+                        "layout": {
+                            "x": 0,
+                            "y": 5,
+                            "width": 4,
+                            "height": 3
+                        }
+                    },
+                    {
+                        "id": 1617736145311922,
+                        "definition": {
+                            "title": "Total size of HTTP requests",
+                            "title_size": "16",
+                            "title_align": "left",
+                            "show_legend": false,
+                            "legend_layout": "auto",
+                            "legend_columns": [
+                                "avg",
+                                "min",
+                                "max",
+                                "value",
+                                "sum"
+                            ],
+                            "time": {},
+                            "type": "timeseries",
+                            "requests": [
+                                {
+                                    "formulas": [
+                                        {
+                                            "formula": "query1"
+                                        }
+                                    ],
+                                    "queries": [
+                                        {
+                                            "data_source": "metrics",
+                                            "name": "query1",
+                                            "query": "sum:traefik_mesh.service.server.up{$host, $service, $endpoint} by {service}"
+                                        }
+                                    ],
+                                    "response_format": "timeseries",
+                                    "style": {
+                                        "palette": "purple",
+                                        "line_type": "solid",
+                                        "line_width": "normal"
+                                    },
+                                    "display_type": "bars"
+                                }
+                            ],
+                            "custom_links": []
+                        },
+                        "layout": {
+                            "x": 4,
+                            "y": 5,
+                            "width": 4,
+                            "height": 3
+                        }
+                    },
+                    {
+                        "id": 3717519820239508,
+                        "definition": {
+                            "title": "Average request duration",
+                            "title_size": "16",
+                            "title_align": "left",
+                            "time": {},
+                            "type": "timeseries",
+                            "requests": [
+                                {
+                                    "formulas": [
+                                        {
+                                            "formula": "query1"
+                                        }
+                                    ],
+                                    "queries": [
+                                        {
+                                            "data_source": "metrics",
+                                            "name": "query1",
+                                            "query": "sum:traefik_mesh.service.request.duration.seconds.sum{$host, $service, $endpoint} by {service,endpoint}"
+                                        }
+                                    ],
+                                    "response_format": "timeseries",
+                                    "style": {
+                                        "palette": "dog_classic",
+                                        "order_by": "values",
+                                        "line_type": "solid",
+                                        "line_width": "normal"
+                                    },
+                                    "display_type": "line"
+                                }
+                            ]
+                        },
+                        "layout": {
+                            "x": 8,
+                            "y": 5,
+                            "width": 4,
+                            "height": 3
+                        }
+                    }
+                ]
+            },
+            "layout": {
+                "x": 0,
+                "y": 26,
+                "width": 12,
+                "height": 9
             }
         },
         {
@@ -1090,6 +1173,7 @@
                                 "value",
                                 "sum"
                             ],
+                            "time": {},
                             "type": "timeseries",
                             "requests": [
                                 {
@@ -1103,16 +1187,16 @@
                                         {
                                             "data_source": "metrics",
                                             "name": "query1",
-                                            "query": "avg:traefik_mesh.go.goroutines{*}"
+                                            "query": "avg:traefik_mesh.go.goroutines{$host} by {host}"
                                         }
                                     ],
                                     "response_format": "timeseries",
                                     "style": {
-                                        "palette": "dog_classic",
+                                        "palette": "purple",
                                         "line_type": "solid",
                                         "line_width": "normal"
                                     },
-                                    "display_type": "line"
+                                    "display_type": "area"
                                 }
                             ]
                         },
@@ -1138,6 +1222,7 @@
                                 "value",
                                 "sum"
                             ],
+                            "time": {},
                             "type": "timeseries",
                             "requests": [
                                 {
@@ -1151,12 +1236,12 @@
                                         {
                                             "data_source": "metrics",
                                             "name": "query1",
-                                            "query": "avg:karpenter.go.memstats.alloc_bytes{*} by {kube_cluster_name}"
+                                            "query": "avg:traefik_mesh.go.memstats.alloc_bytes{$host} by {host}"
                                         }
                                     ],
                                     "response_format": "timeseries",
                                     "style": {
-                                        "palette": "dog_classic",
+                                        "palette": "purple",
                                         "line_type": "solid",
                                         "line_width": "normal"
                                     },
@@ -1186,6 +1271,7 @@
                                 "value",
                                 "sum"
                             ],
+                            "time": {},
                             "type": "timeseries",
                             "requests": [
                                 {
@@ -1199,12 +1285,12 @@
                                         {
                                             "data_source": "metrics",
                                             "name": "query1",
-                                            "query": "sum:traefik_mesh.process.cpu.seconds.count{*}.as_count()"
+                                            "query": "sum:traefik_mesh.process.cpu.seconds.count{$host} by {host}.as_count()"
                                         }
                                     ],
                                     "response_format": "timeseries",
                                     "style": {
-                                        "palette": "dog_classic",
+                                        "palette": "purple",
                                         "line_type": "solid",
                                         "line_width": "normal"
                                     },
@@ -1223,9 +1309,9 @@
             },
             "layout": {
                 "x": 0,
-                "y": 1,
+                "y": 35,
                 "width": 12,
-                "height": 1
+                "height": 5
             }
         },
         {
@@ -1273,6 +1359,7 @@
                                 "value",
                                 "sum"
                             ],
+                            "time": {},
                             "type": "timeseries",
                             "requests": [
                                 {
@@ -1286,7 +1373,7 @@
                                         {
                                             "data_source": "metrics",
                                             "name": "query1",
-                                            "query": "sum:traefik_mesh.config.reloads.failure.count{*}.as_count()"
+                                            "query": "sum:traefik_mesh.config.reloads.failure.count{$host, $entrypoint} by {host,endpoint}.as_count()"
                                         }
                                     ],
                                     "response_format": "timeseries",
@@ -1296,7 +1383,7 @@
                                         "line_type": "solid",
                                         "line_width": "normal"
                                     },
-                                    "display_type": "line"
+                                    "display_type": "bars"
                                 }
                             ]
                         },
@@ -1313,21 +1400,12 @@
                             "title": "Total Configuration Reloads",
                             "title_size": "16",
                             "title_align": "left",
-                            "show_legend": true,
-                            "legend_layout": "auto",
-                            "legend_columns": [
-                                "avg",
-                                "min",
-                                "max",
-                                "value",
-                                "sum"
-                            ],
+                            "time": {},
                             "type": "timeseries",
                             "requests": [
                                 {
                                     "formulas": [
                                         {
-                                            "alias": "Reloads",
                                             "formula": "query1"
                                         }
                                     ],
@@ -1335,17 +1413,17 @@
                                         {
                                             "name": "query1",
                                             "data_source": "metrics",
-                                            "query": "sum:traefik_mesh.config.reloads.count{$host} by {host,endpoint}.as_count()"
+                                            "query": "sum:traefik_mesh.config.reloads.count{$host, $endpoint} by {host,endpoint}.as_count()"
                                         }
                                     ],
                                     "response_format": "timeseries",
                                     "style": {
-                                        "palette": "purple",
+                                        "palette": "dog_classic",
                                         "order_by": "values",
                                         "line_type": "solid",
                                         "line_width": "normal"
                                     },
-                                    "display_type": "line"
+                                    "display_type": "bars"
                                 }
                             ]
                         },
@@ -1360,9 +1438,9 @@
             },
             "layout": {
                 "x": 0,
-                "y": 2,
+                "y": 40,
                 "width": 12,
-                "height": 1
+                "height": 5
             }
         }
     ],
@@ -1370,6 +1448,36 @@
         {
             "name": "host",
             "prefix": "@host",
+            "available_values": [],
+            "default": "*"
+        },
+        {
+            "name": "service",
+            "prefix": "service",
+            "available_values": [],
+            "default": "*"
+        },
+        {
+            "name": "entrypoint",
+            "prefix": "entrypoint",
+            "available_values": [],
+            "default": "*"
+        },
+        {
+            "name": "protocol",
+            "prefix": "protocol",
+            "available_values": [],
+            "default": "*"
+        },
+        {
+            "name": "endpoint",
+            "prefix": "endpoint",
+            "available_values": [],
+            "default": "*"
+        },
+        {
+            "name": "router",
+            "prefix": "router",
             "available_values": [],
             "default": "*"
         }

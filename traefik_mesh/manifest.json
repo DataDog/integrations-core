@@ -8,7 +8,7 @@
     "configuration": "README.md#Setup",
     "support": "README.md#Support",
     "changelog": "CHANGELOG.md",
-    "description": "",
+    "description": "Tracks metrics related to Traefik Mesh",
     "title": "Traefik Mesh",
     "media": [],
     "classifier_tags": [

@@ -22,7 +22,7 @@ opj = os.path.join
 
 @pytest.fixture
 def instance_openmetrics_v2(dd_get_state):
-    openmetrics_v2 = deepcopy(dd_get_state('istio_instance', default={}))
+    openmetrics_v2 = deepcopy(dd_get_state('traefik_instance', default={}))
     openmetrics_v2['use_openmetrics'] = 'true'
     return openmetrics_v2
 
