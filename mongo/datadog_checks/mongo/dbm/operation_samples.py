@@ -201,7 +201,17 @@ class MongoOperationSamples(DBMAsyncJob):
         }
 
     def _get_command_collection(self, command: dict) -> Optional[str]:
-        for key in ("collection", "find", "aggregate", "update", "insert", "delete", "findAndModify"):
+        for key in (
+            "collection",
+            "find",
+            "aggregate",
+            "update",
+            "insert",
+            "delete",
+            "findAndModify",
+            "distinct",
+            "count",
+        ):
             collection = command.get(key)
             if collection and isinstance(collection, str):  # edge case like {"aggregate": 1}
                 return collection
