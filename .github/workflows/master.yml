@@ -85,7 +85,31 @@ jobs:
     needs:
     - cache
 
-    uses: ./.github/workflows/test-all.yml
+    uses: ./.github/workflows/tests/test-common.yml
+    with:
+      repo: core
+
+      # Options
+      standard: true
+    secrets: inherit
+
+  test-dbm:
+    needs:
+    - cache
+
+    uses: ./.github/workflows/tests/test-dbm.yml
+    with:
+      repo: core
+
+      # Options
+      standard: true
+    secrets: inherit
+      
+  test-integrations:
+    needs:
+    - cache
+
+    uses: ./.github/workflows/tests/test-all.yml
     with:
       repo: core
 

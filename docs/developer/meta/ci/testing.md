@@ -144,7 +144,7 @@ exclude = true
 
 ## Target enumeration
 
-The [list](https://github.com/DataDog/integrations-core/blob/master/.github/workflows/test-all.yml) of all jobs is [generated](validation.md#ci-configuration) as the `/.github/workflows/test-all.yml` file.
+The [list](https://github.com/DataDog/integrations-core/blob/master/.github/workflows/tests/test-all.yml) of all jobs is [generated](validation.md#ci-configuration) as the `/.github/workflows/tests/test-all.yml` file.
 
 This reusable workflow is called by workflows that need to test everything.
 
