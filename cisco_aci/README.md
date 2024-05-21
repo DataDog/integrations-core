@@ -10,6 +10,10 @@ The Cisco ACI Integration lets you:
 
 ## Setup
 
+## Vendor profiles
+
+Specific supported vendor profiles for this integration can be found on the [network vendors][10] page.
+
 ### Installation
 
 The Cisco ACI check is packaged with the Agent, so simply [install the Agent][1] on a server within your network.
@@ -130,3 +134,4 @@ Need help? Contact [Datadog support][9].
 [7]: https://github.com/DataDog/integrations-core/blob/master/cisco_aci/metadata.csv
 [8]: https://github.com/DataDog/integrations-core/blob/master/cisco_aci/assets/service_checks.json
 [9]: https://docs.datadoghq.com/help/
+[10]: /network_monitoring/devices/#vendor-profiles
