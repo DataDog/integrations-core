@@ -97,7 +97,6 @@ class SubmitData:
 def agent_check_getter(self):
     return self._check
 
-import pdb
 class Schemas(DBMAsyncJob):
 
     # Requests for infromation about tables are done for a certain amount of tables at the time
@@ -116,7 +115,6 @@ class Schemas(DBMAsyncJob):
         collection_interval = config.schema_config.get(
             'collection_interval', DEFAULT_SCHEMAS_COLLECTION_INTERVAL
         )
-        pdb.set_trace()
         self._max_execution_time = min(config.schema_config.get('max_execution_time', self.MAX_EXECUTION_TIME), collection_interval)
         e = is_affirmative(config.schema_config.get('enabled', True))
         print(e)
