@@ -35,7 +35,7 @@
       },
       "metrics": {
         "prefix": "traefik_mesh.",
-        "check": "",
+        "check": "traefik_mesh.entrypoint.open_connections",
         "metadata_path": "metadata.csv"
       },
       "service_checks": {

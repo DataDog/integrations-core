@@ -1,4 +1,6 @@
 metric_name,metric_type,interval,unit_name,per_unit_name,description,orientation,integration,short_name,curated_metric,sample_tags
+traefik_mesh.config.last_reload.failure,gauge,,,,The last config reload failure,0,traefik_mesh,,,
+traefik_mesh.config.last_reload.success,gauge,,,,The last config reload success,0,traefik_mesh,,,
 traefik_mesh.config.reloads.count,count,,,,The total count of configuration reloads,0,traefik_mesh,,,
 traefik_mesh.config.reloads.failure.count,count,,,,The total count of configuration reload failures,0,traefik_mesh,,,
 traefik_mesh.entrypoint.open_connections,gauge,,,,The current count of open connections on an entrypoint,0,traefik_mesh,,,
