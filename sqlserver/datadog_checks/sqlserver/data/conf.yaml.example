@@ -361,6 +361,28 @@ instances:
         #
         # collection_interval: 10
 
+    ## Configure collection of database schemas
+    #
+    ## schemas_collection
+
+        ## @param enabled - boolean - optional - default: true
+        ## Enable collection of active sessions. Requires `dbm: true`.
+        #
+        # enabled: true
+
+        ## @param collection_interval - number - optional - default: 600
+        ## Set the database schema collection interval (in seconds).        
+        ## If a non-default value is chosen, then that exact same value must be used for *every* check instance. TODO ?
+        ## Running different instances with different collection intervals is not supported.
+        #
+        # collection_interval: 600
+
+        ## @param max_execution_time - number - optional - default: 10
+        ## Set the maximum time for schema collection (in seconds).
+        ## Capped by `collection_interval`.
+        #
+        # max_execution_time: 10
+
     ## @param stored_procedure_characters_limit - integer - optional - default: 500
     ## Limit the number of characters of the text of a stored procedure that is collected.
     ## The characters limit is applicable to both query metrics and query samples.
@@ -659,11 +681,6 @@ instances:
     #
     # ignore_missing_database: false
     
-    # @param schemas_collection_interval - int - optional - dafault: 1200
-    # Frequency in seconds of schema collections.  Defaults to `1200`.
-    #
-    # schemas_collection_interval: 1200
-
     ## @param tags - list of strings - optional
     ## A list of tags to attach to every metric and service check emitted by this instance.
     ##
