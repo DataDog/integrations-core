@@ -136,10 +136,14 @@ def parse_metric(metric, retry=False, metric_mapping=METRIC_TREE, disable_legacy
             except ValueError:
                 pass
 
-    # Check to see if this metric has a tag that needs to be overwritten
-    if parsed_metric in LEGACY_TAG_OVERWRITE and LEGACY_TAG_OVERWRITE[parsed_metric][0] in tag_names:
-        index = tag_names.index(LEGACY_TAG_OVERWRITE[parsed_metric][0])
-        tag_names[index] = LEGACY_TAG_OVERWRITE[parsed_metric][1]
+    # Check to see if parsed_metric is in the LEGACY_TAG_OVERWRITE dict and if it has a tag that needs to be
+    # overwritten. Iterate over the key-value pairs in the corresponding dictionary and if the key exists in
+    # tag_names, replace it with the value:
+    if parsed_metric in LEGACY_TAG_OVERWRITE:
+        for k, v in LEGACY_TAG_OVERWRITE[parsed_metric].items():
+            if k in tag_names:
+                idx = tag_names.index(k)
+                tag_names[idx] = v
 
     tags = ['{}:{}'.format(tag_name, tag_value) for tag_name, tag_value in zip(tag_names, tag_values)]
 
