@@ -26,6 +26,7 @@ class SQLServerConfig:
         self.autodiscovery_interval: int = instance.get('autodiscovery_interval', DEFAULT_AUTODISCOVERY_INTERVAL)
         self._include_patterns = self._compile_valid_patterns(self.autodiscovery_include)
         self._exclude_patterns = self._compile_valid_patterns(self.autodiscovery_exclude)
+
         self.proc: str = instance.get('stored_procedure')
         self.custom_metrics: list[dict] = init_config.get('custom_metrics', []) or []
         self.include_index_usage_metrics_tempdb: bool = is_affirmative(

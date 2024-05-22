@@ -28,12 +28,6 @@ from datadog_checks.sqlserver.const import (
 )
 from datadog_checks.sqlserver.utils import execute_query_output_result_as_dicts, get_list_chunks
 
-#TODO 
-# make it a subclass of async but set sync
-# remove total amount of columns and put total exec time
-# pull out stop logic - submit tables one by one ? and control columns number for payload ? 
-# I can do a timer but in case of multithreading how to ensure ??? disable ? as kiiled by the 
-
 class SubmitData:
 
     def __init__(self, submit_data_function, base_event, logger):
@@ -109,7 +103,7 @@ class Schemas(DBMAsyncJob):
     # Requests for infromation about tables are done for a certain amount of tables at the time
     # This number of tables doesnt slow down performance by much (15% compared to 500 tables)
     # but allows the queue to be stable.
-    TABLES_CHUNK_SIZE = 50
+    TABLES_CHUNK_SIZE = 500
     # Note: in async mode execution time also cannot exceed 2 checks.
     MAX_EXECUTION_TIME = 10
     MAX_COLUMNS_PER_EVENT = 100_000
@@ -145,60 +139,60 @@ class Schemas(DBMAsyncJob):
             "tags": self._check.non_internal_tags,
             "cloud_metadata": self._check._config.cloud_metadata,
         }
-        self._dataSubmitter = SubmitData(self._check.database_monitoring_metadata, base_event, self._log)
+        self._data_submitter = SubmitData(self._check.database_monitoring_metadata, base_event, self._log)
 
     def run_job(self):
         self._collect_schemas_data()
 
     def shut_down(self):
-        self._dataSubmitter.submit()
+        self._data_submitter.submit()
 
-    """Collects database information and schemas and submits to the agent's queue as dictionaries
-    schema dict
-    key/value:
-        "name": str
-        "id": str
-        "owner_name": str
-        "tables" : list of tables dicts
-            table
-            key/value:
-                "id" : str
-                "name" : str
-                columns: list of columns dicts
-                    columns
-                    key/value:
-                        "name": str
-                        "data_type": str
-                        "default": str
-                        "nullable": bool
-            indexes : list of index dicts
-                index
-                key/value:
-                    "name": str
-                    "type": str
-                    "is_unique": bool
-                    "is_primary_key": bool
-                    "is_unique_constraint": bool
-                    "is_disabled": bool,
-                    "column_names": str
-            foreign_keys : list of foreign key dicts
-                foreign_key
-                key/value:
-                    "foreign_key_name": str
-                    "referencing_table": str
-                    "referencing_column": str
-                    "referenced_table": str
-                    "referenced_column": str
-            partitions: partition dict
-                partition
-                key/value:
-                    "partition_count": int
-    """
     @tracked_method(agent_check_getter=agent_check_getter)
     def _collect_schemas_data(self):
+        """Collects database information and schemas and submits to the agent's queue as dictionaries
+        schema dict
+        key/value:
+            "name": str
+            "id": str
+            "owner_name": str
+            "tables" : list of tables dicts
+                table
+                key/value:
+                    "id" : str
+                    "name" : str
+                    columns: list of columns dicts
+                        columns
+                        key/value:
+                            "name": str
+                            "data_type": str
+                            "default": str
+                            "nullable": bool
+                indexes : list of index dicts
+                    index
+                    key/value:
+                        "name": str
+                        "type": str
+                        "is_unique": bool
+                        "is_primary_key": bool
+                        "is_unique_constraint": bool
+                        "is_disabled": bool,
+                        "column_names": str
+                foreign_keys : list of foreign key dicts
+                    foreign_key
+                    key/value:
+                        "foreign_key_name": str
+                        "referencing_table": str
+                        "referencing_column": str
+                        "referenced_table": str
+                        "referenced_column": str
+                partitions: partition dict
+                    partition
+                    key/value:
+                        "partition_count": int
+        """
         start_time = time.thread_time()
-        self._dataSubmitter.reset()
-        self._dataSubmitter.set_base_event_data(
+        self._data_submitter.reset()
+        self._data_submitter.set_base_event_data(
             self._check.resolved_hostname,
             self._check.non_internal_tags,
             self._check._config.cloud_metadata,
@@ -210,7 +204,7 @@ class Schemas(DBMAsyncJob):
 
         databases = self._check.get_databases()
         db_infos = self._query_db_informations(databases)
-        self._dataSubmitter.store_db_infos(db_infos)
+        self._data_submitter.store_db_infos(db_infos)
 
         @tracked_method(agent_check_getter=agent_check_getter)
         def fetch_schema_data(cursor, db_name):
@@ -230,10 +224,10 @@ class Schemas(DBMAsyncJob):
 
                     columns_count, tables_info = self._get_tables_data(tables_chunk, schema, cursor)
 
-                    self._dataSubmitter.store(db_name, schema, tables_info, columns_count)
-                    if self._dataSubmitter.columns_since_last_submit() > self.MAX_COLUMNS_PER_EVENT:
-                        self._dataSubmitter.submit()
-            self._dataSubmitter.submit()
+                    self._data_submitter.store(db_name, schema, tables_info, columns_count)
+                    if self._data_submitter.columns_since_last_submit() > self.MAX_COLUMNS_PER_EVENT:
+                        self._data_submitter.submit()
+            self._data_submitter.submit()
             return False
 
         errors = self._check.do_for_databases(fetch_schema_data, self._check.get_databases())
@@ -241,7 +235,7 @@ class Schemas(DBMAsyncJob):
             for e in errors:
                 self._log.error("While executing fetch schemas for databse - %s, the following exception occured - %s", e[0], e[1])
         self._log.debug("Finished collect_schemas_data")
-        self._dataSubmitter.submit()
+        self._data_submitter.submit()
 
     def _query_db_informations(self, db_names):
         with self._check.connection.open_managed_default_connection():
@@ -249,15 +243,16 @@ class Schemas(DBMAsyncJob):
                 db_names_formatted = ",".join(["'{}'".format(t) for t in db_names])
                 return execute_query_output_result_as_dicts(DB_QUERY.format(db_names_formatted), cursor, convert_results_to_str=True)
 
-    """ returns a list of tables for schema with their names and empty column array
-    list of table dicts
-    "id": str
-    "name": str
-    "columns": []
-    """
+
 
     @tracked_method(agent_check_getter=agent_check_getter, track_result_length=True)
     def _get_tables(self, schema, cursor):
+        """ returns a list of tables for schema with their names and empty column array
+        list of table dicts
+        "id": str
+        "name": str
+        "columns": []
+        """
         tables_info = execute_query_output_result_as_dicts(
             TABLES_IN_SCHEMA_QUERY, cursor, convert_results_to_str=True, parameter=schema["id"]
         )
@@ -265,56 +260,55 @@ class Schemas(DBMAsyncJob):
             t.setdefault("columns", [])
         return tables_info
 
-    """ returns a list of schema dicts
-    schema
-    dict:
-        "name": str
-        "id": str
-        "owner_name": str"""
-
     @tracked_method(agent_check_getter=agent_check_getter, track_result_length=True)
     def _query_schema_information(self, cursor):
+        """ returns a list of schema dicts
+            schema
+            dict:
+                "name": str
+                "id": str
+                "owner_name": str
+        """
         return execute_query_output_result_as_dicts(SCHEMA_QUERY, cursor, convert_results_to_str=True)
-
-    """ returns extracted column numbers and a list of tables
-        "tables" : list of tables dicts
-        table
-        key/value:
-            "id" : str
-            "name" : str
-            columns: list of columns dicts
-                columns
-                key/value:
-                    "name": str
-                    "data_type": str
-                    "default": str
-                    "nullable": bool
-            indexes : list of index dicts
-                index
-                key/value:
-                    "name": str
-                    "type": str
-                    "is_unique": bool
-                    "is_primary_key": bool
-                    "is_unique_constraint": bool
-                    "is_disabled": bool,
-                    "column_names": str
-            foreign_keys : list of foreign key dicts
-                foreign_key
-                key/value:
-                    "foreign_key_name": str
-                    "referencing_table": str
-                    "referencing_column": str
-                    "referenced_table": str
-                    "referenced_column": str
-            partitions: partition dict
-                partition
-                key/value:
-                    "partition_count": int
-    """
 
     @tracked_method(agent_check_getter=agent_check_getter, track_result_length=True)
     def _get_tables_data(self, table_list, schema, cursor):
+        """ returns extracted column numbers and a list of tables
+            "tables" : list of tables dicts
+            table
+            key/value:
+                "id" : str
+                "name" : str
+                columns: list of columns dicts
+                    columns
+                    key/value:
+                        "name": str
+                        "data_type": str
+                        "default": str
+                        "nullable": bool
+                indexes : list of index dicts
+                    index
+                    key/value:
+                        "name": str
+                        "type": str
+                        "is_unique": bool
+                        "is_primary_key": bool
+                        "is_unique_constraint": bool
+                        "is_disabled": bool,
+                        "column_names": str
+                foreign_keys : list of foreign key dicts
+                    foreign_key
+                    key/value:
+                        "foreign_key_name": str
+                        "referencing_table": str
+                        "referencing_column": str
+                        "referenced_table": str
+                        "referenced_column": str
+                partitions: partition dict
+                    partition
+                    key/value:
+                        "partition_count": int
+        """
         if len(table_list) == 0:
             return
         name_to_id = {}
