@@ -33,10 +33,10 @@ METRIC_MAP = {
     'cluster_autoscaler_skipped_scale_events_count': 'skipped.scale.events',
     'cluster_autoscaler_unneeded_nodes_count': 'unneeded.nodes.count',
     'cluster_autoscaler_unschedulable_pods_count': 'unschedulable.pods.count',
-    #GO metrics
+    # GO metrics
     'go_gc_duration_seconds': 'go.gc.duration.seconds',
     'go_goroutines': 'go.goroutines',
-    'go_info': "go.info",
+    'go_info': 'go.info',
     'go_memstats_alloc_bytes': {'name': 'go.memstats.alloc_bytes', 'type': 'native_dynamic'},
     'go_memstats_buck_hash_sys_bytes': 'go.memstats.buck_hash.sys_bytes',
     'go_memstats_frees': 'go.memstats.frees',
@@ -64,4 +64,7 @@ METRIC_MAP = {
 RENAME_LABELS_MAP = {
     'cluster': 'kubernetes_cluster_autoscaler_cluster',
     'namespace': 'kubernetes_cluster_autoscaler_namespace',
+    'version': 'go_version',
+    'name': 'kubernetes_cluster_autoscaler_name'
+
 }
