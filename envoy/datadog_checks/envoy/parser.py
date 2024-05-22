@@ -136,9 +136,7 @@ def parse_metric(metric, retry=False, metric_mapping=METRIC_TREE, disable_legacy
             except ValueError:
                 pass
 
-    # Check to see if parsed_metric is in the LEGACY_TAG_OVERWRITE dict and if it has a tag that needs to be
-    # overwritten. Iterate over the key-value pairs in the corresponding dictionary and if the key exists in
-    # tag_names, replace it with the value:
+    # Check to see if parsed_metric is in the LEGACY_TAG_OVERWRITE dict and replace the tag name if it is
     if parsed_metric in LEGACY_TAG_OVERWRITE:
         for k, v in LEGACY_TAG_OVERWRITE[parsed_metric].items():
             if k in tag_names:
