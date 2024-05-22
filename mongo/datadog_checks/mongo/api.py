@@ -94,10 +94,7 @@ class MongoApi(object):
         # Because the currentOp command and db.currentOp() helper method return the results in a single document,
         # the total size of the currentOp result set is subject to the maximum 16MB BSON size limit for documents.
         # The $currentOp stage returns a cursor over a stream of documents, each of which reports a single operation.
-        return self["admin"].aggregate(
-            [{'$currentOp': {'allUsers': True, 'idleSessions': True}}],
-            session=session,
-        )
+        return self["admin"].aggregate([{'$currentOp': {'allUsers': True}}], session=session)
 
     def _is_arbiter(self, options):
         cli = MongoClient(**options)
