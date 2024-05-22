@@ -65,6 +65,5 @@ RENAME_LABELS_MAP = {
     'cluster': 'kubernetes_cluster_autoscaler_cluster',
     'namespace': 'kubernetes_cluster_autoscaler_namespace',
     'version': 'go_version',
-    'name': 'kubernetes_cluster_autoscaler_name'
-
+    'name': 'kubernetes_cluster_autoscaler_name',
 }
