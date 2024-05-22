@@ -184,7 +184,10 @@
         "lockStats": {
             "FeatureCompatibilityVersion": {
                 "acquireCount": {
-                    "r": 1
+                    "r": 1,
+                    "R": 1,
+                    "w": 1,
+                    "W": 1
                 }
             },
             "Global": {
