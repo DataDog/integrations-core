@@ -50,9 +50,6 @@
     },
     "logs": {
       "source": "traefik_mesh"
-    },
-    "saved_views": {
-      "Traefik Mesh Overview": "assets/saved_views/traefik_mesh_overview.json"
     }
   },
   "author": {
