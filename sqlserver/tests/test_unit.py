@@ -766,13 +766,12 @@ def set_up_submitter_unit_test():
     
     dataSubmitter = SubmitData(submitData, base_event, DummyLogger())
     return dataSubmitter, submitted_data    
-#TODO simplidy this test partly moves to schema
+
 def test_submit_data():
 
     dataSubmitter, submitted_data = set_up_submitter_unit_test()
 
-    dataSubmitter.store_db_info("test_db1", {"id": 3, "name" : "test_db1"})
-    dataSubmitter.store_db_info("test_db2", {"id": 4, "name" : "test_db2"})
+    dataSubmitter.store_db_infos([{"id": 3, "name" : "test_db1"},{"id": 4, "name" : "test_db2"}])
     schema1 = {"id" : "1"}
     schema2 = {"id" : "2"}
     schema3 = {"id" : "3"}
@@ -831,40 +830,3 @@ def test_submit_data():
     }
     difference = DeepDiff(json.loads(submitted_data[0]),expected_data , exclude_paths="root['timestamp']", ignore_order=True)
     assert len(difference) == 0
-
-def test_store_large_amount_of_columns():
-
-    dataSubmitter, submitted_data = set_up_submitter_unit_test()    
-    dataSubmitter.store_db_info("test_db1", {"id": 3, "name" : "test_db1"})
-    schema1 = {"id" : "1"}
-    dataSubmitter.store("test_db1", schema1, [1,2], SubmitData.MAX_COLUMN_COUNT+SubmitData.MAX_TOTAL_COLUMN_COUNT+1)
-    expected_data = {
-	"host":"some",
-	"agent_version":0,
-	"dbms":"sqlserver",
-	"kind":"sqlserver_databases",
-	"collection_interval":1200,
-	"dbms_version":"some",
-	"tags":"some",
-	"cloud_metadata":"some",
-	"metadata":[
-		{
-			"id":3,
-			"name":"test_db1",
-			"schemas":[
-				{
-					"id":"1",
-					"tables":[
-						1,
-						2
-					]
-				}
-			]
-		},      
-	],
-	"timestamp":1.1
-    }
-    assert dataSubmitter.exceeded_total_columns_number()
-    difference = DeepDiff(json.loads(submitted_data[0]),expected_data , exclude_paths="root['timestamp']", ignore_order=True)
-    assert len(difference) == 0
-

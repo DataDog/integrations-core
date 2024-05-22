@@ -211,7 +211,7 @@ class Schemas(DBMAsyncJob):
         databases = self._check.get_databases()
         db_infos = self._query_db_informations(databases)
         self._dataSubmitter.store_db_infos(db_infos)
-        # returns if to stop, True means stop iterating.
+
         @tracked_method(agent_check_getter=agent_check_getter)
         def fetch_schema_data(cursor, db_name):
             schemas = self._query_schema_information(cursor)
