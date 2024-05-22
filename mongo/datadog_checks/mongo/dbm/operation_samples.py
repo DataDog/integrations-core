@@ -14,6 +14,7 @@ try:
 except ImportError:
     from datadog_checks.base.stubs import datadog_agent
 
+from datadog_checks.base.utils.common import to_native_string
 from datadog_checks.base.utils.db.sql import compute_exec_plan_signature
 from datadog_checks.base.utils.db.utils import DBMAsyncJob
 from datadog_checks.base.utils.tracking import tracked_method
@@ -356,7 +357,7 @@ class MongoOperationSamples(DBMAsyncJob):
         # convert camelCase to snake_case
         formatted = {}
         for key, value in metric_dict.items():
-            formatted_key = str(self._check.convert_to_underscore_separated(key))
+            formatted_key = to_native_string(self._check.convert_to_underscore_separated(key))
             if formatted_key in metric_dict:
                 # If the formatted_key already exists (conflict), use the original key
                 formatted_key = key
