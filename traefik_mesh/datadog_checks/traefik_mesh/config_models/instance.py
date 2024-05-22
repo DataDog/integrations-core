@@ -147,6 +147,7 @@ class InstanceConfig(BaseModel):
     tls_use_host_header: Optional[bool] = None
     tls_verify: Optional[bool] = None
     traefik_controller_api_endpoint: Optional[str] = Field(None, pattern='\\w+')
+    traefik_proxy_api_endpoint: Optional[str] = Field(None, pattern='\\w+')
     use_latest_spec: Optional[bool] = None
     use_legacy_auth_encoding: Optional[bool] = None
     use_process_start_time: Optional[bool] = None

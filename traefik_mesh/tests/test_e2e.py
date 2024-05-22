@@ -2,7 +2,6 @@
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
 from datadog_checks.base.constants import ServiceCheck
-from datadog_checks.dev.utils import assert_service_checks
 
 
 def test_e2e_openmetrics_v2(dd_agent_check):

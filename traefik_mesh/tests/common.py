@@ -48,6 +48,8 @@ OM_METRICS = [
     'traefik_mesh.process.virtual_memory.bytes',
     'traefik_mesh.process.virtual_memory.max_bytes',
     # https://doc.traefik.io/traefik/v2.11/observability/metrics/overview/#global-metrics
+    'traefik_mesh.config.last_reload.failure',
+    'traefik_mesh.config.last_reload.success',
     'traefik_mesh.config.reloads.count',
     'traefik_mesh.config.reloads.failure.count',
     'traefik_mesh.tls.certs.not_after',

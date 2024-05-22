@@ -25,6 +25,7 @@ class TraefikMeshCheck(OpenMetricsBaseCheckV2, ConfigMixin):
         super().__init__(name, init_config, instances)
 
         self.traefik_controller_api_endpoint = self.instance.get('traefik_controller_api_endpoint')
+        self.traefik_proxy_api_endpoint = self.instance.get('traefik_proxy_api_endpoint')
         self.tags = self.instance.get('tags', [])
         self.tags = self.tags + [f'controller_endpoint:{self.traefik_controller_api_endpoint}']
 
@@ -87,7 +88,7 @@ class TraefikMeshCheck(OpenMetricsBaseCheckV2, ConfigMixin):
     def get_version(self, url):
         """Fetches Traefik Proxy version from the Proxy API"""
 
-        version_url = urljoin(url, PROXY_VERSION)
+        version_url = urljoin(self.traefik_proxy_api_endpoint, PROXY_VERSION)
         response = self._get_json(version_url)
         if not response:
             self.log.warning("Unable to fetch Traefik Proxy version")
@@ -100,9 +101,8 @@ class TraefikMeshCheck(OpenMetricsBaseCheckV2, ConfigMixin):
     def _submit_version(self):
         """Submit the version metadata for the Traefik Proxy instance"""
 
-        traefik_proxy_api_endpoint = self.instance.get('openmetrics_endpoint')
         try:
-            if version := self.get_version(traefik_proxy_api_endpoint):
+            if version := self.get_version():
                 self.log.debug("Set version %s for Traefik Proxy", version)
                 self.set_metadata("version", version)
         except Exception as e:

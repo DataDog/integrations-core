@@ -121,7 +121,11 @@ def instance_tls_verify():
 
 
 def instance_traefik_controller_api_endpoint():
-    return 'http://<CONTROLLER_ENDPOINT>:<CONTROLLER_PORT>'
+    return 'http://<CONTROLLER_ENDPOINT>:<API_PORT>'
+
+
+def instance_traefik_proxy_api_endpoint():
+    return 'http://<PROXY_ENDPOINT>:<API_PORT>'
 
 
 def instance_use_latest_spec():

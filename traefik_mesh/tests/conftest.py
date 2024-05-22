@@ -67,6 +67,7 @@ def dd_environment(dd_save_state):
 
             instance = {
                 'openmetrics_endpoint': traefik_proxy_endpoint,
+                'traefik_proxy_api_endpoint': traefik_proxy_endpoint,
                 'traefik_controller_api_endpoint': traefik_controller_api_endpoint,
             }
 
