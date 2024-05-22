@@ -37,7 +37,6 @@ jobs:
     - name: Replay
       if: steps.download.outcome == 'success'
       run: |-
-        ls -R
         cd captured-traces
         for request in *; do
           # The file could be empty if there were no traces, i.e. no Agent
