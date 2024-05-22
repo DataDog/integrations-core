@@ -97,7 +97,7 @@ class SubmitData:
 def agent_check_getter(self):
     return self._check
 
-
+import pdb
 class Schemas(DBMAsyncJob):
 
     # Requests for infromation about tables are done for a certain amount of tables at the time
@@ -116,11 +116,14 @@ class Schemas(DBMAsyncJob):
         collection_interval = config.schema_config.get(
             'collection_interval', DEFAULT_SCHEMAS_COLLECTION_INTERVAL
         )
+        pdb.set_trace()
         self._max_execution_time = min(config.schema_config.get('max_execution_time', self.MAX_EXECUTION_TIME), collection_interval)
+        e = is_affirmative(config.schema_config.get('enabled', True))
+        print(e)
         super(Schemas, self).__init__(
             check,
-            run_sync=is_affirmative(config.schema_config.get('run_sync', True)),
-            enabled=is_affirmative(config.schema_config.get('enabled', False)),
+            run_sync=True,
+            enabled=is_affirmative(config.schema_config.get('enabled', True)),
             expected_db_exceptions=(),
             # min collection interval is a desired collection interval for a check as a whole.
             min_collection_interval=config.min_collection_interval,

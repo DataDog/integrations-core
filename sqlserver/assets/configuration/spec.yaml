@@ -719,10 +719,10 @@ files:
       options:
         - name: enabled
           description: |
-            Enable schema collection. Requires `dbm: true`.
+            Enable schema collection. Requires `dbm: true`. Defaults to true.
           value:
             type: boolean
-            example: false
+            example: true
         - name: collection_interval
           description: |
             Set the database schema collection interval (in seconds). Defaults to 600 seconds.
@@ -734,13 +734,7 @@ files:
             Set the maximum time for schema collection (in seconds). Defaults to 10 seconds. Capped by `collection_interval`
           value:
             type: number
-            example: 10   
-        - name: run_sync
-          description: |
-            Configures if schema collection is ran on the main thread.
-          value:
-            type: boolean
-            example: false
+            example: 10
     - template: instances/default
   - template: logs
     example:
