@@ -27,14 +27,14 @@
             "name": "Custom_Tag"
         }
     ],
-    "title": "Datadog NDM Environment",
+    "title": "NDM Troubleshooting",
     "widgets": [
         {
             "definition": {
                 "background_color": "white",
                 "layout_type": "ordered",
                 "show_title": true,
-                "title": "Datadog NDM Environment",
+                "title": "NDM Troubleshooting",
                 "type": "group",
                 "widgets": [
                     {
