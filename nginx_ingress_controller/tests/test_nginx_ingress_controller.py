@@ -70,6 +70,10 @@ def test_nginx_ingress_controller(aggregator, instance, mock_data):
     aggregator.assert_metric(NAMESPACE + '.controller.response.duration.sum', count=0)
     aggregator.assert_metric(NAMESPACE + '.controller.request.duration.count', count=0)
     aggregator.assert_metric(NAMESPACE + '.controller.request.duration.sum', count=0)
+    aggregator.assert_metric(NAMESPACE + '.controller.response.size.count', count=0)
+    aggregator.assert_metric(NAMESPACE + '.controller.response.size.sum', count=0)
+    aggregator.assert_metric(NAMESPACE + '.controller.request.size.count', count=0)
+    aggregator.assert_metric(NAMESPACE + '.controller.request.size.sum', count=0)
 
     aggregator.assert_all_metrics_covered()
     aggregator.assert_metrics_using_metadata(get_metadata_metrics(), check_submission_type=True)
@@ -89,6 +93,10 @@ def test_with_histograms(aggregator, mock_data):
     aggregator.assert_metric(NAMESPACE + '.controller.response.duration.sum')
     aggregator.assert_metric(NAMESPACE + '.controller.request.duration.count')
     aggregator.assert_metric(NAMESPACE + '.controller.request.duration.sum')
+    aggregator.assert_metric(NAMESPACE + '.controller.response.size.count')
+    aggregator.assert_metric(NAMESPACE + '.controller.response.size.sum')
+    aggregator.assert_metric(NAMESPACE + '.controller.request.size.count')
+    aggregator.assert_metric(NAMESPACE + '.controller.request.size.sum')
 
     aggregator.assert_all_metrics_covered()
     aggregator.assert_metrics_using_metadata(get_metadata_metrics(), check_submission_type=True)
