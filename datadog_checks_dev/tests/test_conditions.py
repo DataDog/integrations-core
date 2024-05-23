@@ -3,7 +3,6 @@
 # Licensed under a 3-clause BSD style license (see LICENSE)
 import os
 import sys
-from unittest import mock
 
 import pytest
 from six.http_client import HTTPResponse
@@ -13,6 +12,11 @@ from datadog_checks.dev.errors import RetryError
 from datadog_checks.dev.subprocess import run_command
 
 from .common import not_windows_ci
+
+try:
+    from unittest import mock  # Python 3
+except ImportError:
+    import mock  # Python 2
 
 HERE = os.path.dirname(os.path.abspath(__file__))
 DOCKER_DIR = os.path.join(HERE, 'docker')
