@@ -7,7 +7,7 @@ on:
 
 jobs:
   test-common:
-    uses: ./.github/workflows/tests/test-common.yml
+    uses: ./.github/workflows/test-common.yml
     with:
       repo: core
 
@@ -18,7 +18,7 @@ jobs:
     secrets: inherit
   
   test-dbm:
-    uses: ./.github/workflows/tests/test-dbm.yml
+    uses: ./.github/workflows/test-dbm.yml
     with:
       repo: core
 
@@ -29,7 +29,7 @@ jobs:
     secrets: inherit
   
   test-integrations:
-    uses: ./.github/workflows/tests/test-all.yml
+    uses: ./.github/workflows/test-all.yml
     with:
       repo: core
 

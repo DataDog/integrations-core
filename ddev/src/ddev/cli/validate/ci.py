@@ -128,7 +128,7 @@ def ci(app: Application, sync: bool):
     missing_jobs = {}
     invalid_jobs = {}
     for jobs_workflow_file in jobs_workflow_files:
-        jobs_workflow_path = app.repo.path / '.github' / 'workflows' / 'tests' / jobs_workflow_file
+        jobs_workflow_path = app.repo.path / '.github' / 'workflows' / jobs_workflow_file
         with jobs_workflow_path.open() as workflow_file:
             original_jobs_workflow = yaml.safe_load(workflow_file)
             workflow_job_data[jobs_workflow_file] = {

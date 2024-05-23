@@ -36,6 +36,9 @@ jobs:
         path: captured-traces
         merge-multiple: true
 
+    - name: Create captured-traces directory
+      run: mkdir -p captured-traces
+      
     - name: Replay
       if: ${{ hashFiles('captured-traces') != '' }}
       run: |-
