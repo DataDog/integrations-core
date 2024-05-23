@@ -7,7 +7,7 @@
 ***Fixed***:
 
 * Update the description for the `tls_ca_cert` config option to use `openssl rehash` instead of `c_rehash` ([#16981](https://github.com/DataDog/integrations-core/pull/16981))
-* check for auth_token key and skip adding guestAuth or httpAuth to url if present ([#17478](https://github.com/DataDog/integrations-core/pull/17478))
+* Check for auth_token key and skip adding guestAuth or httpAuth to url if present ([#17478](https://github.com/DataDog/integrations-core/pull/17478))
 
 ## 4.2.0 / 2024-02-16 / Agent 7.52.0
 
