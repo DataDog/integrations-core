@@ -5,7 +5,7 @@ import os
 import sys
 
 import pytest
-from six.http_client import HTTPResponse
+from six.moves.http_client import HTTPResponse
 
 from datadog_checks.dev.conditions import CheckCommandOutput, CheckDockerLogs, CheckEndpoints, WaitFor
 from datadog_checks.dev.errors import RetryError
