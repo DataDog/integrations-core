@@ -3,6 +3,8 @@
 # Licensed under a 3-clause BSD style license (see LICENSE)
 import os
 import sys
+from http.client import HTTPResponse
+from unittest import mock
 
 import pytest
 
@@ -97,6 +99,8 @@ class TestCheckEndpoints:
             check_endpoints()
 
     def test_success(self):
-        check_endpoints = CheckEndpoints(['https://google.com', 'https://bing.com'])
+        mock_resp = mock.create_autospec(HTTPResponse)
+        mock_resp.getcode.return_value = 200
+        check_endpoints = CheckEndpoints(['https://test.com'], send_request=lambda *args, **kwargs: mock_resp)
 
         check_endpoints()
