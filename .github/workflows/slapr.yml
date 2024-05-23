@@ -24,9 +24,7 @@ jobs:
     - name: Get reviewer's team
       id: teams
       run: |
-        REVIEWER_ID=$(echo "${{ github.event.review.user.login }}")
-        TEAMS=$(gh api graphql --paginate -f query='{organization(login: "DataDog") {teams(first: 100, userLogins: ["$REVIEWER_ID"]) { edges {node {name}}}}}' | jq -r '[.data.organization.teams.edges[].node.name] | join(",")')
-        echo "teams=$TEAMS\n" >> $GITHUB_OUTPUT
+        gh api graphql --paginate -f query='{organization(login: "DataDog") {teams(first: 100, userLogins: ["$REVIEWER_ID"]) { edges {node {name}}}}}' | jq -r '[.data.organization.teams.edges[].node.name] | join(",")'
       env:
         GITHUB_TOKEN: "${{ steps.token-generator.outputs.token }}"
     - uses: DataDog/slapr@master
@@ -41,5 +39,3 @@ jobs:
         SLAPR_EMOJI_CHANGES_REQUESTED: "changes_requested"
         SLAPR_EMOJI_MERGED: "merged"
         SLAPR_EMOJI_CLOSED: "closed"
-        TEAMS: "${{ steps.teams.outputs.teams }}"
-        TEAM: "${{ matrix.slack_channels.team_name }}"
