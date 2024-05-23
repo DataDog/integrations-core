@@ -12,7 +12,13 @@ jobs:
     runs-on: ubuntu-latest
     strategy:
       matrix:
-        slack_channels: [ { channel_id: SLACK_CHANNEL_ID, team_name: "fake"}, { channel_id: SLACK_CHANNEL_ID_AGENT_INTEGRATIONS_REVIEWS, team_name: "agent-integrations"}, { channel_id: SLACK_CHANNEL_ID_INFRA_INTEGRATIONS, team_name: "Network Device Monitoring"} ]
+        slack_channels:
+        - channel_id: SLACK_CHANNEL_ID
+          team_name: fake
+        - channel_id: SLACK_CHANNEL_ID_AGENT_INTEGRATIONS_REVIEWS
+          team_name: agent-integrations
+        - channel_id: SLACK_CHANNEL_ID_INFRA_INTEGRATIONS
+          team_name: Network Device Monitoring
     steps:
     - name: Create token
       uses: actions/create-github-app-token@v1
