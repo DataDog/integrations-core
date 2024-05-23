@@ -28,6 +28,14 @@ instances:
     #
     password: <PASSWORD>
 
+    ## @param empty_default_hostname - boolean - required
+    ## The ESXi integration is a check where metrics are usually unrelated to the host
+    ## on which the Agent runs. Setting this parameter to true, prevents the Agent from attaching the hostname
+    ## (and the host tags) to the metrics. It is especially important to leave this parameter to "true" when you are
+    ## running the agent inside a vSphere VM as the VM tags are going to be unrelated to other metrics.
+    #
+    empty_default_hostname: true
+
     ## @param use_guest_hostname - boolean - optional - default: false
     ## If true, the check will use the guest hostname for VMs instead of the VM name.
     ## This requires the VM to have VMware tools installed. If the guest hostname is
@@ -157,13 +165,6 @@ instances:
     ## https://docs.datadoghq.com/developers/write_agent_check/#collection-interval
     #
     # min_collection_interval: 15
-
-    ## @param empty_default_hostname - boolean - optional - default: false
-    ## This forces the check to send metrics with no hostname.
-    ##
-    ## This is useful for cluster-level checks.
-    #
-    # empty_default_hostname: false
 
     ## @param metric_patterns - mapping - optional
     ## A mapping of metrics to include or exclude, with each entry being a regular expression.
