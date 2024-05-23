@@ -17,8 +17,19 @@ jobs:
       test-py2: true
     secrets: inherit
   
-  test-dbm:
-    uses: ./.github/workflows/test-dbm.yml
+  test-dbm-integrations:
+    uses: ./.github/workflows/test-dbm-integrations.yml
+    with:
+      repo: core
+
+      # Options
+      standard: true
+      minimum-base-package: true
+      test-py2: true
+    secrets: inherit
+  
+  test-container-integrations:
+    uses: ./.github/workflows/test-container-integrations.yml
     with:
       repo: core
 

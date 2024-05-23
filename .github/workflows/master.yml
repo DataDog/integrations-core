@@ -21,11 +21,23 @@ jobs:
       standard: true
     secrets: inherit
 
-  test-dbm:
+  test-dbm-integrations:
     needs:
     - cache
 
-    uses: ./.github/workflows/test-dbm.yml
+    uses: ./.github/workflows/test-dbm-integrations.yml
+    with:
+      repo: core
+
+      # Options
+      standard: true
+    secrets: inherit
+
+  test-container-integrations:
+    needs:
+    - cache
+
+    uses: ./.github/workflows/test-container-integrations.yml
     with:
       repo: core
 

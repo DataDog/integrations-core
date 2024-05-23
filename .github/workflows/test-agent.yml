@@ -50,8 +50,23 @@ jobs:
       agent-image-windows-py2: "${{ inputs.agent-image-windows-py2 }}"
     secrets: inherit
   
-  test-dbm:
-    uses: ./.github/workflows/test-dbm.yml
+  test-dbm-integrations:
+    uses: ./.github/workflows/test-dbm-integrations.yml
+    with:
+      repo: core
+
+      # Options
+      standard: true
+      test-py2: ${{ inputs.test-py2 }}
+      test-py3: ${{ inputs.test-py3 }}
+      agent-image: "${{ inputs.agent-image }}"
+      agent-image-py2: "${{ inputs.agent-image-py2 }}"
+      agent-image-windows: "${{ inputs.agent-image-windows }}"
+      agent-image-windows-py2: "${{ inputs.agent-image-windows-py2 }}"
+    secrets: inherit
+  
+  test-container-integrations:
+    uses: ./.github/workflows/test-container-integrations.yml
     with:
       repo: core
 
