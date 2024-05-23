@@ -2,6 +2,12 @@
 
 <!-- towncrier release notes start -->
 
+## 18.2.2 / 2024-05-09
+
+***Fixed***:
+
+* Decreased database instance collection interval from 1800 seconds to 300 seconds to improve reliability ([#17535](https://github.com/DataDog/integrations-core/pull/17535))
+
 ## 18.2.1 / 2024-04-30
 
 ***Fixed***:

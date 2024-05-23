@@ -99,6 +99,14 @@ class MongoConfig(object):
         self.service_check_tags = self._compute_service_check_tags()
         self.metric_tags = self._compute_metric_tags()
 
+        # DBM config options
+        self.dbm_enabled = is_affirmative(instance.get('dbm', False))
+        self.database_instance_collection_interval = instance.get('database_instance_collection_interval', 1800)
+        self.cluster_name = instance.get('cluster_name', None)
+
+        if self.dbm_enabled and not self.cluster_name:
+            raise ConfigurationError('`cluster_name` must be set when `dbm` is enabled')
+
     def _get_clean_server_name(self):
         try:
             if not self.server:

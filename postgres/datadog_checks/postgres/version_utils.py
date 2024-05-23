@@ -20,6 +20,7 @@ V12 = VersionInfo.parse("12.0.0")
 V13 = VersionInfo.parse("13.0.0")
 V14 = VersionInfo.parse("14.0.0")
 V15 = VersionInfo.parse("15.0.0")
+V16 = VersionInfo.parse("16.0.0")
 
 
 class VersionUtils(object):

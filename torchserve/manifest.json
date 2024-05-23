@@ -12,11 +12,14 @@
     "title": "TorchServe",
     "media": [],
     "classifier_tags": [
+      "Category::Configuration & Deployment",
+      "Category::Log Collection",
       "Supported OS::Linux",
       "Supported OS::Windows",
       "Supported OS::macOS",
-      "Category::Log Collection",
-      "Category::AI/ML"
+      "Category::AI/ML",
+      "Submitted Data Type::Metrics",
+      "Submitted Data Type::Logs"
     ]
   },
   "assets": {
