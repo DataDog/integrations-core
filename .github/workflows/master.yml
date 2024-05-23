@@ -32,6 +32,18 @@ jobs:
       # Options
       standard: true
     secrets: inherit
+
+  test-windows-integrations:
+    needs:
+    - cache
+
+    uses: ./.github/workflows/test-windows-integrations.yml
+    with:
+      repo: core
+
+      # Options
+      standard: true
+    secrets: inherit
       
   test-integrations:
     needs:

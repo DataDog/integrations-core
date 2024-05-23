@@ -23,6 +23,15 @@ jobs:
       # Options
       latest: true
     secrets: inherit
+
+  test-windows-integrations:
+    uses: ./.github/workflows/test-windows-integrations.yml
+    with:
+      repo: core
+
+      # Options
+      latest: true
+    secrets: inherit
   
   test-integrations:
     uses: ./.github/workflows/test-all.yml

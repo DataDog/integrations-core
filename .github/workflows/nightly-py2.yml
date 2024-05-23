@@ -28,6 +28,17 @@ jobs:
       test-py3: false
     secrets: inherit
   
+  test-windows-integrations:
+    uses: ./.github/workflows/test-windows-integrations.yml
+    with:
+      repo: core
+
+      # Options
+      standard: true
+      test-py2: true
+      test-py3: false
+    secrets: inherit
+  
   test-integrations:
     uses: ./.github/workflows/test-all.yml
     with:
