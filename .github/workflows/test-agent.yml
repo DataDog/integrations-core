@@ -125,6 +125,21 @@ jobs:
       agent-image-windows-py2: "${{ inputs.agent-image-windows-py2 }}"
     secrets: inherit
   
+  test-windows-integrations:
+    uses: ./.github/workflows/test-windows-integrations.yml
+    with:
+      repo: core
+
+      # Options
+      standard: true
+      test-py2: ${{ inputs.test-py2 }}
+      test-py3: ${{ inputs.test-py3 }}
+      agent-image: "${{ inputs.agent-image }}"
+      agent-image-py2: "${{ inputs.agent-image-py2 }}"
+      agent-image-windows: "${{ inputs.agent-image-windows }}"
+      agent-image-windows-py2: "${{ inputs.agent-image-windows-py2 }}"
+    secrets: inherit
+  
   test-integrations:
     uses: ./.github/workflows/test-all.yml
     with:

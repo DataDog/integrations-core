@@ -72,6 +72,17 @@ jobs:
       test-py2: true
     secrets: inherit
   
+  test-windows-integrations:
+    uses: ./.github/workflows/test-windows-integrations.yml
+    with:
+      repo: core
+
+      # Options
+      standard: true
+      minimum-base-package: true
+      test-py2: true
+    secrets: inherit
+  
   test-integrations:
     uses: ./.github/workflows/test-all.yml
     with:
