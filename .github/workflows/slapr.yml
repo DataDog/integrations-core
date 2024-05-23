@@ -24,8 +24,8 @@ jobs:
     - name: Get reviewer's team
       id: teams
       run: |
-        REVIEWER_ID=$(echo "${{ github.event.review.user.login }}")
-        TEAMS=$(gh api graphql --paginate -f query='{organization(login: "DataDog") {teams(first: 100, userLogins: ["FlorentClarret"]) { edges {node {name}}}}}' | jq -r '[.data.organization.teams.edges[].node.name] | join(",")')
+        REVIEWER_ID="${{ github.event.review.user.login }}"
+        TEAMS=$(gh api graphql --paginate -f query='{organization(login: "DataDog") {teams(first: 100, userLogins: ["$REVIEWER_ID"]) { edges {node {name}}}}}' | jq -r '[.data.organization.teams.edges[].node.name] | join(",")')
         echo "teams=$TEAMS\n" >> $GITHUB_OUTPUT
       env:
         GITHUB_TOKEN: "${{ steps.token-generator.outputs.token }}"
