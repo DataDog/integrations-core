@@ -5,7 +5,7 @@
 
 import time
 from datetime import datetime
-from typing import Dict, List, Optional
+from typing import Dict, List, Optional, Tuple
 
 from bson import json_util
 
@@ -16,7 +16,7 @@ except ImportError:
 
 from datadog_checks.base.utils.common import to_native_string
 from datadog_checks.base.utils.db.sql import compute_exec_plan_signature
-from datadog_checks.base.utils.db.utils import DBMAsyncJob
+from datadog_checks.base.utils.db.utils import DBMAsyncJob, RateLimitingTTLCache
 from datadog_checks.base.utils.tracking import tracked_method
 from datadog_checks.mongo.common import ReplicaSetDeployment
 
@@ -56,6 +56,12 @@ class MongoOperationSamples(DBMAsyncJob):
         self._collection_interval = self._operation_samples_config["collection_interval"]
         self._max_time_ms = self._operation_samples_config["max_time_ms"]
 
+        # _explained_operations_ratelimiter: limit how often we try to re-explain the same query
+        self._explained_operations_ratelimiter = RateLimitingTTLCache(
+            maxsize=self._operation_samples_config['explained_operations_cache_maxsize'],
+            ttl=45 * 60 / self._operation_samples_config['explained_operations_per_hour_per_query'],
+        )
+
         super(MongoOperationSamples, self).__init__(
             check,
             rate_limit=1 / self._collection_interval,
@@ -81,8 +87,9 @@ class MongoOperationSamples(DBMAsyncJob):
         activities = []
 
         for activity, sample in self._get_operation_samples(now):
-            self._check.log.debug("Sending operation sample: %s", sample)
-            self._check.database_monitoring_query_sample(json_util.dumps(sample))
+            if sample:
+                self._check.log.debug("Sending operation sample: %s", sample)
+                self._check.database_monitoring_query_sample(json_util.dumps(sample))
             activities.append(activity)
 
         activities_payload = self._create_activities_payload(now, activities)
@@ -113,9 +120,12 @@ class MongoOperationSamples(DBMAsyncJob):
                     now, operation, operation_metadata, obfuscated_command, query_signature
                 )
 
-                explain_plan = self._get_explain_plan(
-                    op=operation.get("op"), command=command, dbname=operation_metadata["dbname"]
-                )
+                if not self._should_explain(
+                    op=operation.get("op"), command=command, explain_plan_cache_key=(operation_metadata["dbname"], query_signature)
+                ):
+                    yield activity, None
+
+                explain_plan = self._get_explain_plan(op=operation.get("op"), command=command, dbname=operation_metadata["dbname"])
                 sample = self._create_operation_sample_payload(
                     now, operation_metadata, obfuscated_command, query_signature, explain_plan, activity
                 )
@@ -177,7 +187,7 @@ class MongoOperationSamples(DBMAsyncJob):
 
         return True
 
-    def _should_explain(self, op: Optional[str], command: dict) -> bool:
+    def _should_explain(self, op: Optional[str], command: dict, explain_plan_cache_key: Tuple[str, str]) -> bool:
         if not op or op == "none":
             # Skip operations that are not queries
             self._check.log.debug("Skipping explain operation without operation type: %s", command)
@@ -187,13 +197,15 @@ class MongoOperationSamples(DBMAsyncJob):
             # Skip operations that are not queries
             self._check.log.debug("Skipping explain operation type %s: %s", op, command)
             return False
+        
+        if not self._explained_operations_ratelimiter.acquire(explain_plan_cache_key):
+            # Skip operations that have been explained recently
+            self._check.log.debug("Skipping explain operation that was recently explained: %s", command)
+            return False
 
         return True
 
     def _get_explain_plan(self, op: Optional[str], command: dict, dbname: str) -> OperationSamplePlan:
-        if not self._should_explain(op, command):
-            return
-
         dbname = command.pop("$db", dbname)
         try:
             explain_plan = self._check.api_client[dbname].command(
