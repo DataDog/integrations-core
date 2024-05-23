@@ -97,7 +97,7 @@ jobs:
     needs:
     - cache
 
-    uses: ./.github/workflows/tests/test-dbm.yml
+    uses: ./.github/workflows/test-dbm.yml
     with:
       repo: core
 
@@ -109,7 +109,7 @@ jobs:
     needs:
     - cache
 
-    uses: ./.github/workflows/tests/test-all.yml
+    uses: ./.github/workflows/test-all.yml
     with:
       repo: core
 
