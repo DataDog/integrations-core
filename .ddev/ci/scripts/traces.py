@@ -9,6 +9,7 @@ from base64 import b64decode, b64encode
 from contextlib import closing
 from http.client import HTTPConnection
 from http.server import BaseHTTPRequestHandler, HTTPServer
+import os
 
 
 def capture(*, record_file: str, port: int) -> None:
@@ -33,18 +34,25 @@ def capture(*, record_file: str, port: int) -> None:
     httpd = HTTPServer(('', port), RequestHandler)
     httpd.serve_forever()
 
-
 def replay(*, record_file: str, port: int) -> None:
-    with closing(HTTPConnection('localhost', port)) as conn, open(record_file, 'r', encoding='utf-8') as f:
-        for line in f:
-            record = json.loads(line)
-            path = record['path']
-            body = b64decode(record['body'])
+    with closing(HTTPConnection('localhost', port)) as conn:
+        if os.path.isfile(record_file):
+            files = [record_file]
+        elif os.path.isdir(record_file):
+            files = [os.path.join(record_file, f) for f in os.listdir(record_file)]
+        else:
+            raise ValueError(f"{record_file} is neither a file nor a directory")
 
-            print(f'PUT {path} {len(body)} bytes: ', end='')
-            conn.request('PUT', path, body=body, headers=record['headers'])
-            print(conn.getresponse().read().decode('utf-8'))
+        for file in files:
+            with open(file, 'r', encoding='utf-8') as f:
+                for line in f:
+                    record = json.loads(line)
+                    path = record['path']
+                    body = b64decode(record['body'])
 
+                    print(f'PUT {path} {len(body)} bytes: ', end='')
+                    conn.request('PUT', path, body=body, headers=record['headers'])
+                    print(conn.getresponse().read().decode('utf-8'))
 
 def main():
     parser = argparse.ArgumentParser(allow_abbrev=False)
