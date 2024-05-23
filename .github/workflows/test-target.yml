@@ -1,3 +1,5 @@
+# "target" refers to the integration (a.k.a. check) that we want to test.
+# This action is a template that we reuse in other actions such as test-all or pr-test.
 name: Test target
 
 on:

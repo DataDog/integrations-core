@@ -48,6 +48,7 @@ class Component:
         BAREMETAL = 'baremetal'
         LOAD_BALANCER = 'load-balancer'
         IMAGE = 'image'
+        HEAT = 'heat'
 
     @unique
     class Types(list, Enum):
@@ -58,6 +59,7 @@ class Component:
         BAREMETAL = ['baremetal']
         LOAD_BALANCER = ['load-balancer']
         IMAGE = ['image']
+        HEAT = ['orchestration']
 
     def http_error(report_service_check=False):
         def decorator_http_error(func):
