@@ -54,6 +54,7 @@ class MongoOperationSamples(DBMAsyncJob):
     def __init__(self, check):
         self._operation_samples_config = check._config.operation_samples
         self._collection_interval = self._operation_samples_config["collection_interval"]
+        self._max_time_ms = self._operation_samples_config["max_time_ms"]
 
         super(MongoOperationSamples, self).__init__(
             check,
@@ -195,7 +196,9 @@ class MongoOperationSamples(DBMAsyncJob):
 
         dbname = command.pop("$db", dbname)
         try:
-            explain_plan = self._check.api_client[dbname].command("explain", command, verbosity="executionStats")
+            explain_plan = self._check.api_client[dbname].command(
+                "explain", command, verbosity="executionStats", max_time_ms=self._max_time_ms
+            )
             explain_plan = self._format_explain_plan(explain_plan)
             return {
                 "definition": explain_plan,
