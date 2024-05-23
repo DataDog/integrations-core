@@ -8,15 +8,12 @@ import json
 import time
 
 from datadog_checks.base import is_affirmative
-from datadog_checks.base.utils.db.utils import (
-    default_json_event_encoding,
-    DBMAsyncJob
-)
-
+from datadog_checks.base.utils.db.utils import DBMAsyncJob, default_json_event_encoding
 from datadog_checks.base.utils.tracking import tracked_method
 from datadog_checks.sqlserver.const import (
     COLUMN_QUERY,
     DB_QUERY,
+    DEFAULT_SCHEMAS_COLLECTION_INTERVAL,
     FOREIGN_KEY_QUERY,
     INDEX_QUERY,
     PARTITIONS_QUERY,
@@ -24,9 +21,9 @@ from datadog_checks.sqlserver.const import (
     STATIC_INFO_ENGINE_EDITION,
     STATIC_INFO_VERSION,
     TABLES_IN_SCHEMA_QUERY,
-    DEFAULT_SCHEMAS_COLLECTION_INTERVAL
 )
 from datadog_checks.sqlserver.utils import execute_query_output_result_as_dicts, get_list_chunks
+
 
 class SubmitData:
 
@@ -66,7 +63,7 @@ class SubmitData:
 
     def columns_since_last_submit(self):
         return self._columns_count
-    
+
     def truncate(self, json_event):
         max_length = 1000
         if len(json_event) > max_length:
@@ -74,7 +71,7 @@ class SubmitData:
         else:
             return json_event
 
-    #NOTE: DB with no schemas is never submitted
+    # NOTE: DB with no schemas is never submitted
     def submit(self):
         if not self.db_to_schemas:
             return
@@ -97,6 +94,7 @@ class SubmitData:
 def agent_check_getter(self):
     return self._check
 
+
 class Schemas(DBMAsyncJob):
 
     # Requests for infromation about tables are done for a certain amount of tables at the time
@@ -112,10 +110,10 @@ class Schemas(DBMAsyncJob):
         self._log = check.log
         self.schemas_per_db = {}
         self._last_schemas_collect_time = None
-        collection_interval = config.schema_config.get(
-            'collection_interval', DEFAULT_SCHEMAS_COLLECTION_INTERVAL
+        collection_interval = config.schema_config.get('collection_interval', DEFAULT_SCHEMAS_COLLECTION_INTERVAL)
+        self._max_execution_time = min(
+            config.schema_config.get('max_execution_time', self.MAX_EXECUTION_TIME), collection_interval
         )
-        self._max_execution_time = min(config.schema_config.get('max_execution_time', self.MAX_EXECUTION_TIME), collection_interval)
         e = is_affirmative(config.schema_config.get('enabled', True))
         print(e)
         super(Schemas, self).__init__(
@@ -135,7 +133,7 @@ class Schemas(DBMAsyncJob):
             "agent_version": datadog_agent.get_version(),
             "dbms": "sqlserver",
             "kind": "sqlserver_databases",
-            "collection_interval":  collection_interval,
+            "collection_interval": collection_interval,
             "dbms_version": None,
             "tags": self._check.non_internal_tags,
             "cloud_metadata": self._check._config.cloud_metadata,
@@ -214,10 +212,11 @@ class Schemas(DBMAsyncJob):
                 tables = self._get_tables(schema, cursor)
                 tables_chunks = list(get_list_chunks(tables, self.TABLES_CHUNK_SIZE))
                 for tables_chunk in tables_chunks:
-                    if time.thread_time() -  start_time > self.MAX_EXECUTION_TIME:
+                    if time.thread_time() - start_time > self.MAX_EXECUTION_TIME:
                         # TODO Report truncation to the backend
                         self._log.warning(
-                            "Truncated data due to the effective execution time reaching {}, stopped on db - {} on schema {}".format(
+                            """Truncated data due to the effective execution time reaching {},
+                             stopped on db - {} on schema {}""".format(
                                 self.MAX_EXECUTION_TIME, db_name, schema["name"]
                             )
                         )
@@ -234,7 +233,9 @@ class Schemas(DBMAsyncJob):
         errors = self._check.do_for_databases(fetch_schema_data, self._check.get_databases())
         if errors:
             for e in errors:
-                self._log.error("While executing fetch schemas for databse - %s, the following exception occured - %s", e[0], e[1])
+                self._log.error(
+                    "While executing fetch schemas for databse - %s, the following exception occured - %s", e[0], e[1]
+                )
         self._log.debug("Finished collect_schemas_data")
         self._data_submitter.submit()
 
@@ -242,13 +243,13 @@ class Schemas(DBMAsyncJob):
         with self._check.connection.open_managed_default_connection():
             with self._check.connection.get_managed_cursor() as cursor:
                 db_names_formatted = ",".join(["'{}'".format(t) for t in db_names])
-                return execute_query_output_result_as_dicts(DB_QUERY.format(db_names_formatted), cursor, convert_results_to_str=True)
-
-
+                return execute_query_output_result_as_dicts(
+                    DB_QUERY.format(db_names_formatted), cursor, convert_results_to_str=True
+                )
 
     @tracked_method(agent_check_getter=agent_check_getter, track_result_length=True)
     def _get_tables(self, schema, cursor):
-        """ returns a list of tables for schema with their names and empty column array
+        """returns a list of tables for schema with their names and empty column array
         list of table dicts
         "id": str
         "name": str
@@ -263,52 +264,52 @@ class Schemas(DBMAsyncJob):
 
     @tracked_method(agent_check_getter=agent_check_getter, track_result_length=True)
     def _query_schema_information(self, cursor):
-        """ returns a list of schema dicts
-            schema
-            dict:
-                "name": str
-                "id": str
-                "owner_name": str
+        """returns a list of schema dicts
+        schema
+        dict:
+            "name": str
+            "id": str
+            "owner_name": str
         """
         return execute_query_output_result_as_dicts(SCHEMA_QUERY, cursor, convert_results_to_str=True)
 
     @tracked_method(agent_check_getter=agent_check_getter, track_result_length=True)
     def _get_tables_data(self, table_list, schema, cursor):
-        """ returns extracted column numbers and a list of tables
-            "tables" : list of tables dicts
-            table
-            key/value:
-                "id" : str
-                "name" : str
-                columns: list of columns dicts
-                    columns
-                    key/value:
-                        "name": str
-                        "data_type": str
-                        "default": str
-                        "nullable": bool
-                indexes : list of index dicts
-                    index
-                    key/value:
-                        "name": str
-                        "type": str
-                        "is_unique": bool
-                        "is_primary_key": bool
-                        "is_unique_constraint": bool
-                        "is_disabled": bool,
-                        "column_names": str
-                foreign_keys : list of foreign key dicts
-                    foreign_key
-                    key/value:
-                        "foreign_key_name": str
-                        "referencing_table": str
-                        "referencing_column": str
-                        "referenced_table": str
-                        "referenced_column": str
-                partitions: partition dict
-                    partition
-                    key/value:
-                        "partition_count": int
+        """returns extracted column numbers and a list of tables
+        "tables" : list of tables dicts
+        table
+        key/value:
+            "id" : str
+            "name" : str
+            columns: list of columns dicts
+                columns
+                key/value:
+                    "name": str
+                    "data_type": str
+                    "default": str
+                    "nullable": bool
+            indexes : list of index dicts
+                index
+                key/value:
+                    "name": str
+                    "type": str
+                    "is_unique": bool
+                    "is_primary_key": bool
+                    "is_unique_constraint": bool
+                    "is_disabled": bool,
+                    "column_names": str
+            foreign_keys : list of foreign key dicts
+                foreign_key
+                key/value:
+                    "foreign_key_name": str
+                    "referencing_table": str
+                    "referencing_column": str
+                    "referenced_table": str
+                    "referenced_column": str
+            partitions: partition dict
+                partition
+                key/value:
+                    "partition_count": int
         """
         if len(table_list) == 0:
             return

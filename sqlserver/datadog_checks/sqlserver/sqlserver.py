@@ -102,6 +102,7 @@ if adodbapi is None and pyodbc is None:
 
 set_default_driver_conf()
 
+
 class SQLServer(AgentCheck):
     __NAMESPACE__ = "sqlserver"
 
@@ -746,9 +747,9 @@ class SQLServer(AgentCheck):
                         if not is_azure_sql_database(engine_edition):
                             cursor.execute(SWITCH_DB_STATEMENT.format(db))
                         action(cursor, db)
-                    except StopIteration as e:
+                    except StopIteration:
                         exceptions.append((db, "StopIteration"))
-                        return exceptions    
+                        return exceptions
                     except Exception as e:
                         exceptions.append((db, e))
                         self.log.error("An exception occurred during do_for_databases in db - %s: %s", db, e)

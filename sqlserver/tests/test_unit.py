@@ -2,18 +2,20 @@
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
 import copy
+import json
 import os
 import re
 from collections import namedtuple
 
 import mock
 import pytest
-import json
+from deepdiff import DeepDiff
 
 from datadog_checks.dev import EnvVars
 from datadog_checks.sqlserver import SQLServer
 from datadog_checks.sqlserver.connection import split_sqlserver_host_port
 from datadog_checks.sqlserver.metrics import SqlFractionMetric, SqlMasterDatabaseFileStats
+from datadog_checks.sqlserver.schemas import SubmitData
 from datadog_checks.sqlserver.sqlserver import SQLConnectionError
 from datadog_checks.sqlserver.utils import (
     Database,
@@ -22,11 +24,6 @@ from datadog_checks.sqlserver.utils import (
     set_default_driver_conf,
 )
 
-from datadog_checks.sqlserver.schemas import SubmitData
-from deepdiff import DeepDiff
-from datadog_checks.base.utils.db.utils import default_json_event_encoding
-
-import pdb
 from .common import CHECK_NAME, DOCKER_SERVER, assert_metrics
 from .utils import windows_ci
 
@@ -746,9 +743,11 @@ def test_extract_sql_comments_and_procedure_name(query, expected_comments, is_pr
 class DummyLogger:
     def debug(*args):
         pass
+
     def error(*args):
         pass
-    
+
+
 def set_up_submitter_unit_test():
     submitted_data = []
     base_event = {
@@ -761,72 +760,45 @@ def set_up_submitter_unit_test():
         "tags": "some",
         "cloud_metadata": "some",
     }
+
     def submitData(data):
-       submitted_data.append(data)
-    
+        submitted_data.append(data)
+
     dataSubmitter = SubmitData(submitData, base_event, DummyLogger())
-    return dataSubmitter, submitted_data    
+    return dataSubmitter, submitted_data
+
 
 def test_submit_data():
 
     dataSubmitter, submitted_data = set_up_submitter_unit_test()
 
-    dataSubmitter.store_db_infos([{"id": 3, "name" : "test_db1"},{"id": 4, "name" : "test_db2"}])
-    schema1 = {"id" : "1"}
-    schema2 = {"id" : "2"}
-    schema3 = {"id" : "3"}
+    dataSubmitter.store_db_infos([{"id": 3, "name": "test_db1"}, {"id": 4, "name": "test_db2"}])
+    schema1 = {"id": "1"}
+    schema2 = {"id": "2"}
+    schema3 = {"id": "3"}
 
-    dataSubmitter.store("test_db1", schema1, [1,2], 5)
-    dataSubmitter.store("test_db2", schema3, [1,2], 5)
-    dataSubmitter.store("test_db1", schema2, [1,2], 10)
-    
+    dataSubmitter.store("test_db1", schema1, [1, 2], 5)
+    dataSubmitter.store("test_db2", schema3, [1, 2], 5)
+    dataSubmitter.store("test_db1", schema2, [1, 2], 10)
+
     dataSubmitter.submit()
 
     expected_data = {
-	"host":"some",
-	"agent_version":0,
-	"dbms":"sqlserver",
-	"kind":"sqlserver_databases",
-	"collection_interval":1200,
-	"dbms_version":"some",
-	"tags":"some",
-	"cloud_metadata":"some",
-	"metadata":[
-		{
-			"id":3,
-			"name":"test_db1",
-			"schemas":[
-				{
-					"id":"1",
-					"tables":[
-						1,
-						2
-					]
-				},
-				{
-					"id":"2",
-					"tables":[
-						1,
-						2
-					]
-				}
-			]
-		},
-		{
-			"id":4,
-			"name":"test_db2",
-			"schemas":[
-				{
-					"id":"3",
-					"tables":[
-						1,
-						2
-					]
-				}
-			]
-		},        
-	],
-	"timestamp":1.1
+        "host": "some",
+        "agent_version": 0,
+        "dbms": "sqlserver",
+        "kind": "sqlserver_databases",
+        "collection_interval": 1200,
+        "dbms_version": "some",
+        "tags": "some",
+        "cloud_metadata": "some",
+        "metadata": [
+            {"id": 3, "name": "test_db1", "schemas": [{"id": "1", "tables": [1, 2]}, {"id": "2", "tables": [1, 2]}]},
+            {"id": 4, "name": "test_db2", "schemas": [{"id": "3", "tables": [1, 2]}]},
+        ],
+        "timestamp": 1.1,
     }
-    difference = DeepDiff(json.loads(submitted_data[0]),expected_data , exclude_paths="root['timestamp']", ignore_order=True)
+    difference = DeepDiff(
+        json.loads(submitted_data[0]), expected_data, exclude_paths="root['timestamp']", ignore_order=True
+    )
     assert len(difference) == 0
