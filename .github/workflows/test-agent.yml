@@ -80,6 +80,36 @@ jobs:
       agent-image-windows-py2: "${{ inputs.agent-image-windows-py2 }}"
     secrets: inherit
   
+  test-ndm-integrations:
+    uses: ./.github/workflows/test-ndm-integrations.yml
+    with:
+      repo: core
+
+      # Options
+      standard: true
+      test-py2: ${{ inputs.test-py2 }}
+      test-py3: ${{ inputs.test-py3 }}
+      agent-image: "${{ inputs.agent-image }}"
+      agent-image-py2: "${{ inputs.agent-image-py2 }}"
+      agent-image-windows: "${{ inputs.agent-image-windows }}"
+      agent-image-windows-py2: "${{ inputs.agent-image-windows-py2 }}"
+    secrets: inherit
+  
+  test-platform-integrations:
+    uses: ./.github/workflows/test-platform-integrations.yml
+    with:
+      repo: core
+
+      # Options
+      standard: true
+      test-py2: ${{ inputs.test-py2 }}
+      test-py3: ${{ inputs.test-py3 }}
+      agent-image: "${{ inputs.agent-image }}"
+      agent-image-py2: "${{ inputs.agent-image-py2 }}"
+      agent-image-windows: "${{ inputs.agent-image-windows }}"
+      agent-image-windows-py2: "${{ inputs.agent-image-windows-py2 }}"
+    secrets: inherit
+  
   test-windows-integrations:
     uses: ./.github/workflows/test-windows-integrations.yml
     with:
@@ -113,6 +143,11 @@ jobs:
   submit-traces:
     needs:
     - test-common
+    - test-dbm-integrations
+    - test-container-integrations
+    - test-ndm-integrations
+    - test-platform-integrations
+    - test-windows-integrations
     - test-integrations
     if: success() || failure()
 

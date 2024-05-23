@@ -39,6 +39,28 @@ jobs:
       test-py3: false
     secrets: inherit
   
+  test-ndm-integrations:
+    uses: ./.github/workflows/test-ndm-integrations.yml
+    with:
+      repo: core
+
+      # Options
+      standard: true
+      test-py2: true
+      test-py3: false
+    secrets: inherit
+  
+  test-platform-integrations:
+    uses: ./.github/workflows/test-platform-integrations.yml
+    with:
+      repo: core
+
+      # Options
+      standard: true
+      test-py2: true
+      test-py3: false
+    secrets: inherit
+  
   test-windows-integrations:
     uses: ./.github/workflows/test-windows-integrations.yml
     with:
@@ -64,6 +86,11 @@ jobs:
   submit-traces:
     needs:
     - test-common
+    - test-dbm-integrations
+    - test-container-integrations
+    - test-ndm-integrations
+    - test-platform-integrations
+    - test-windows-integrations
     - test-integrations
     if: success() || failure()
 

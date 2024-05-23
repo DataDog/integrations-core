@@ -120,8 +120,10 @@ def ci(app: Application, sync: bool):
 
     jobs_workflow_files = [
         'test-common.yml',
-        'test-dbm.yml',
+        'test-dbm-integrations.yml',
         'test-container-integrations.yml',
+        'test-ndm-integrations.yml',
+        'test-platform-integrations.yml',
         'test-windows-integrations.yml',
         'test-all.yml',
     ]

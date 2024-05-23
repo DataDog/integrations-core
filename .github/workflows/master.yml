@@ -45,6 +45,30 @@ jobs:
       standard: true
     secrets: inherit
 
+  test-ndm-integrations:
+    needs:
+    - cache
+
+    uses: ./.github/workflows/test-ndm-integrations.yml
+    with:
+      repo: core
+
+      # Options
+      standard: true
+    secrets: inherit
+
+  test-platform-integrations:
+    needs:
+    - cache
+
+    uses: ./.github/workflows/test-platform-integrations.yml
+    with:
+      repo: core
+
+      # Options
+      standard: true
+    secrets: inherit
+
   test-windows-integrations:
     needs:
     - cache
@@ -72,6 +96,11 @@ jobs:
   publish-test-results:
     needs:
     - test-common
+    - test-dbm-integrations
+    - test-container-integrations
+    - test-ndm-integrations
+    - test-platform-integrations
+    - test-windows-integrations
     - test-integrations
     if: success() || failure()
     concurrency:
@@ -83,6 +112,11 @@ jobs:
   submit-traces:
     needs:
     - test-common
+    - test-dbm-integrations
+    - test-container-integrations
+    - test-ndm-integrations
+    - test-platform-integrations
+    - test-windows-integrations
     - test-integrations
     if: success() || failure()
 
