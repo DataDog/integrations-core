@@ -1417,6 +1417,7 @@ jobs:
       test-py3: ${{ inputs.test-py3 }}
       minimum-base-package: ${{ inputs.minimum-base-package }}
     secrets: inherit
+<<<<<<< HEAD
   j92491f1:
     uses: ./.github/workflows/test-target.yml
     with:
@@ -1588,6 +1589,8 @@ jobs:
       test-py3: ${{ inputs.test-py3 }}
       minimum-base-package: ${{ inputs.minimum-base-package }}
     secrets: inherit
+=======
+>>>>>>> d262fb582d (Separate container integrations)
   j61e565f:
     uses: ./.github/workflows/test-target.yml
     with:
