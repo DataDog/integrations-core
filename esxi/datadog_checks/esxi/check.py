@@ -51,7 +51,8 @@ class EsxiCheck(AgentCheck):
         self.host = self.instance.get("host")
         self.username = self.instance.get("username")
         self.password = self.instance.get("password")
-        self.use_guest_hostname = self.instance.get("use_guest_hostname", False)
+        self.use_guest_hostname = is_affirmative(self.instance.get("use_guest_hostname", False))
+        self.use_configured_hostname = is_affirmative(self.instance.get("use_configured_hostname", False))
         self.excluded_host_tags = self._validate_excluded_host_tags(self.instance.get("excluded_host_tags", []))
         self.collect_per_instance_filters = self._parse_metric_regex_filters(
             self.instance.get("collect_per_instance_filters", {})
@@ -80,8 +81,7 @@ class EsxiCheck(AgentCheck):
             if excluded_host_tag not in AVAILABLE_HOST_TAGS:
                 self.log.warning(
                     "Unknown host tag `%s` cannot be excluded. Available host tags are: "
-                    "`esxi_url`, `esxi_type`, `esxi_host`, `esxi_folder`, `esxi_cluster` "
-                    "`esxi_compute`, `esxi_datacenter`, and `esxi_datastore`",
+                    "`esxi_url`, `esxi_type`, `esxi_host`, `esxi_compute`, and `esxi_datastore`",
                     excluded_host_tag,
                 )
             else:
@@ -256,7 +256,7 @@ class EsxiCheck(AgentCheck):
         metric_ids = [vim.PerformanceManager.MetricId(counterId=counter, instance="") for counter in counter_ids]
         return counter_keys_and_names, metric_ids
 
-    def collect_metrics_for_entity(self, metric_ids, counter_keys_and_names, entity, entity_name, metric_tags):
+    def collect_metrics_for_entity(self, metric_ids, counter_keys_and_names, entity, hostname, metric_tags):
         resource_type = type(entity)
         resource_name = RESOURCE_TYPE_TO_NAME[resource_type]
         for metric_id in metric_ids:
@@ -315,7 +315,7 @@ class EsxiCheck(AgentCheck):
                     self.log.debug(
                         "Skipping metric %s for %s because no value was returned by the %s",
                         metric_name,
-                        entity_name,
+                        hostname,
                         resource_name,
                     )
                     continue
@@ -326,7 +326,7 @@ class EsxiCheck(AgentCheck):
                         "Skipping metric %s for %s, because the value returned by the %s"
                         " is negative (i.e. the metric is not yet available). values: %s",
                         metric_name,
-                        entity_name,
+                        hostname,
                         resource_name,
                         list(metric_result.value),
                     )
@@ -339,10 +339,10 @@ class EsxiCheck(AgentCheck):
                         "Submit metric: name=`%s`, value=`%s`, hostname=`%s`, tags=`%s`",
                         metric_name,
                         most_recent_val,
-                        entity_name,
+                        hostname,
                         all_tags,
                     )
-                    self.gauge(metric_name, most_recent_val, hostname=entity_name, tags=all_tags)
+                    self.gauge(metric_name, most_recent_val, hostname=hostname, tags=all_tags)
 
     def set_version_metadata(self):
         esxi_version = self.content.about.version
@@ -414,6 +414,8 @@ class EsxiCheck(AgentCheck):
         }
 
         for resource_obj, resource_props in all_resources_with_metrics.items():
+            resource_type = type(resource_obj)
+            resource_type_name = RESOURCE_TYPE_TO_NAME[resource_type]
 
             if not is_resource_collected_by_filters(resource_obj, all_resources_with_metrics, self.resource_filters):
                 self.log.debug(
@@ -423,16 +425,18 @@ class EsxiCheck(AgentCheck):
 
             hostname = resource_props.get("name")
 
-            resource_type = RESOURCE_TYPE_TO_NAME[type(resource_obj)]
-            if resource_type == "vm" and self.use_guest_hostname:
+            if resource_type == VM_RESOURCE and self.use_guest_hostname:
                 hostname = resource_props.get("guest.hostName", hostname)
+
+            if resource_type == HOST_RESOURCE and self.use_configured_hostname:
+                hostname = self.host
 
             self.log.debug("Collect metrics and host tags for hostname: %s, object: %s", hostname, resource_obj)
 
             tags = []
             parent = resource_props.get('parent')
 
-            if resource_type == "vm":
+            if resource_type == VM_RESOURCE:
                 runtime_host = resource_props.get('runtime.host')
                 runtime_host_props = {}
                 if runtime_host:
@@ -444,19 +448,14 @@ class EsxiCheck(AgentCheck):
                 runtime_hostname = to_string(runtime_host_props.get("name", "unknown"))
                 tags.append('esxi_host:{}'.format(runtime_hostname))
 
-                if runtime_host is not None:
-                    tags.extend(
-                        get_tags_recursively(
-                            runtime_host,
-                            resource_map,
-                            include_only=['esxi_cluster'],
-                        )
-                    )
-
             if parent is not None:
-                tags.extend(get_tags_recursively(parent, resource_map))
+                tags.extend(
+                    get_tags_recursively(
+                        parent, resource_map, include_only=["esxi_compute", "esxi_host", "esxi_datastore"]
+                    )
+                )
 
-            tags.append('esxi_type:{}'.format(resource_type))
+            tags.append('esxi_type:{}'.format(resource_type_name))
 
             metric_tags = self.tags
             if self.excluded_host_tags:
@@ -470,7 +469,7 @@ class EsxiCheck(AgentCheck):
             else:
                 self.log.debug("No host name found for %s; skipping external tag submission", resource_obj)
 
-            self.count(f"{resource_type}.count", 1, tags=tags, hostname=None)
+            self.count(f"{resource_type_name}.count", 1, tags=tags, hostname=None)
 
             counter_keys_and_names, metric_ids = self.get_available_metric_ids_for_entity(resource_obj)
             self.collect_metrics_for_entity(metric_ids, counter_keys_and_names, resource_obj, hostname, metric_tags)

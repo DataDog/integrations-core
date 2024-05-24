@@ -34,6 +34,19 @@ class TestVault:
         aggregator.assert_service_check(Vault.SERVICE_CHECK_CONNECT, count=0)
 
     @pytest.mark.parametrize('use_openmetrics', [False, True], indirect=True)
+    def test_no_extra_tags(self, aggregator, dd_run_check, use_openmetrics):
+        instance = {'use_openmetrics': use_openmetrics}
+        instance.update(INSTANCES['main'])
+        instance.pop('tags')
+
+        c = Vault(Vault.CHECK_NAME, {}, [instance])
+
+        tag = ['api_url:{}'.format(INSTANCES['main']['api_url'])]
+        dd_run_check(c)
+
+        aggregator.assert_service_check(Vault.SERVICE_CHECK_CONNECT, status=Vault.OK, count=1, tags=tag)
+
+    @pytest.mark.parametrize('use_openmetrics', [False, True], indirect=True)
     def test_unsupported_api_version_fallback(self, aggregator, dd_run_check, use_openmetrics):
         instance = {'use_openmetrics': use_openmetrics}
         instance.update(INSTANCES['unsupported_api'])

@@ -47,6 +47,16 @@ class Node(BaseModel):
     include: Optional[tuple[Union[str, IncludeItem], ...]] = None
     interval: Optional[int] = None
     limit: Optional[int] = Field(None, description='Maximum number of nodes to be processed.\n')
+    portgroups: Optional[Union[bool, MappingProxyType[str, Any]]] = None
+
+
+class Volume(BaseModel):
+    model_config = ConfigDict(
+        arbitrary_types_allowed=True,
+        frozen=True,
+    )
+    connectors: Optional[bool] = None
+    targets: Optional[bool] = None
 
 
 class BaremetalItem(BaseModel):
@@ -54,8 +64,12 @@ class BaremetalItem(BaseModel):
         arbitrary_types_allowed=True,
         frozen=True,
     )
+    allocations: Optional[bool] = None
     conductors: Optional[bool] = None
+    drivers: Optional[bool] = None
     nodes: Optional[Union[bool, Node]] = None
+    ports: Optional[bool] = None
+    volumes: Optional[Union[bool, Volume]] = None
 
 
 class BlockStorageItem(BaseModel):
@@ -115,6 +129,14 @@ class ComputeItem(BaseModel):
     services: Optional[bool] = None
 
 
+class HeatItem(BaseModel):
+    model_config = ConfigDict(
+        arbitrary_types_allowed=True,
+        frozen=True,
+    )
+    stacks: Optional[bool] = None
+
+
 class IdentityItem(BaseModel):
     model_config = ConfigDict(
         arbitrary_types_allowed=True,
@@ -129,12 +151,20 @@ class IdentityItem(BaseModel):
     users: Optional[bool] = None
 
 
+class Image(BaseModel):
+    model_config = ConfigDict(
+        arbitrary_types_allowed=True,
+        frozen=True,
+    )
+    members: Optional[bool] = None
+
+
 class ImageItem(BaseModel):
     model_config = ConfigDict(
         arbitrary_types_allowed=True,
         frozen=True,
     )
-    images: Optional[bool] = None
+    images: Optional[Union[bool, Image]] = None
 
 
 class IncludeItem3(BaseModel):
@@ -305,6 +335,7 @@ class Components(BaseModel):
     baremetal: Optional[Union[bool, BaremetalItem]] = None
     block_storage: Optional[Union[bool, BlockStorageItem]] = Field(None, alias='block-storage')
     compute: Optional[Union[bool, ComputeItem]] = None
+    heat: Optional[Union[bool, HeatItem]] = None
     identity: Optional[Union[bool, IdentityItem]] = None
     image: Optional[Union[bool, ImageItem]] = None
     load_balancer: Optional[Union[bool, LoadBalancerItem]] = Field(None, alias='load-balancer')

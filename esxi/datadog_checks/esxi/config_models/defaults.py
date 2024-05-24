@@ -12,10 +12,6 @@ def instance_disable_generic_tags():
     return False
 
 
-def instance_empty_default_hostname():
-    return False
-
-
 def instance_excluded_host_tags():
     return []
 
@@ -29,6 +25,10 @@ def instance_proxy():
 
 
 def instance_ssl_verify():
+    return True
+
+
+def instance_use_configured_hostname():
     return True
 
 

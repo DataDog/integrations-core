@@ -2,13 +2,19 @@
 
 <!-- towncrier release notes start -->
 
+## 7.5.2 / 2024-04-26
+
+***Fixed***:
+
+* Only collect property metrics for resources that support it and lower level for log line ([#17446](https://github.com/DataDog/integrations-core/pull/17446))
+
 ## 7.5.1 / 2024-04-17
 
 ***Fixed***:
 
 * Add additional tags on events for non-host resources. ([#17403](https://github.com/DataDog/integrations-core/pull/17403))
 
-## 7.5.0 / 2024-03-22
+## 7.5.0 / 2024-03-22 / Agent 7.53.0
 
 ***Added***:
 
@@ -50,6 +56,7 @@
 ***Added***:
 
 * Decouple resource groups and collection type ([#15670](https://github.com/DataDog/integrations-core/pull/15670))
+    * _Note:_ When updating to this version, note that VMs are now considered historical entities. If you are using an instance to only collect historical entities, review your configuration to ensure you are handling VMs.
 
 ***Fixed***:
 
