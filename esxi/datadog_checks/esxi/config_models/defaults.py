@@ -8,6 +8,10 @@
 #     ddev -x validate models -s <INTEGRATION_NAME>
 
 
+def shared_proxy():
+    return ''
+
+
 def instance_disable_generic_tags():
     return False
 
@@ -21,7 +25,7 @@ def instance_min_collection_interval():
 
 
 def instance_proxy():
-    return 'http://<PROXY_SERVER_FOR_HTTP>:<PORT>'
+    return ''
 
 
 def instance_ssl_verify():

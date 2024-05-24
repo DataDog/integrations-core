@@ -8,9 +8,10 @@ import ssl
 import pytest
 from mock import MagicMock, patch
 from pyVmomi import vim, vmodl
-
+from .common import USE_VSPHERE_LAB
 from datadog_checks.esxi import EsxiCheck
 
+pytestmark = [pytest.mark.skipif(not USE_VSPHERE_LAB, reason='Only run tests on one environment')]
 
 @pytest.mark.usefixtures("service_instance")
 def test_esxi_metric_up(instance, dd_run_check, aggregator, caplog):

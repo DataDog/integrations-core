@@ -65,7 +65,7 @@ class EsxiCheck(AgentCheck):
         self.tags = [f"esxi_url:{self.host}"]
         self.proxy_host = None
         self.proxy_port = None
-        proxy = self.instance.get('proxy')
+        proxy = self.instance.get('proxy', init_config.get('proxy'))
         if proxy:
             parsed_proxy = urlparse(proxy)
             proxy_scheme = parsed_proxy.scheme

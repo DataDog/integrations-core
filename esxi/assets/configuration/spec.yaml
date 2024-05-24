@@ -5,6 +5,13 @@ files:
   - template: init_config
     options:
     - template: init_config/default
+    - name: proxy
+      value:
+        example: socks5://<PROXY_SERVER>:<PORT>
+        display_default: ""
+        type: string
+      description: |
+        SOCKS Proxy to use for all instances.
   - template: instances
     options:
         - name: host
@@ -164,10 +171,11 @@ files:
               - <HOST_TAG>
         - name: proxy
           value:
-            example: http://<PROXY_SERVER_FOR_HTTP>:<PORT>
+            example: socks5://<PROXY_SERVER>:<PORT>
+            display_default: ""
             type: string
           description: |
-            SOCKS Proxy to use for this instance.
+            SOCKS Proxy to use for this instance. Overrides the `proxy` setting in `init_config`.
         - name: ssl_verify
           description: Set to false to disable SSL verification when connecting to the ESXi host
           value:
