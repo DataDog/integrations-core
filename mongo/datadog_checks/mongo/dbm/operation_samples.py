@@ -201,7 +201,7 @@ class MongoOperationSamples(DBMAsyncJob):
             self._check.log.debug("Skipping explain operation type %s: %s", op, command)
             return False
 
-        if 'getMore' in command or 'insert' in command or 'delete' in command:
+        if "getMore" in command or "insert" in command or "delete" in command or "update" in command:
             # Skip operations as they are not queries
             self._check.log.debug("Skipping operations that are not queries: %s", op, command)
             return False
