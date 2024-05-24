@@ -398,6 +398,41 @@ IRONIC_NODE_TAGS = {
 IRONIC_NODE_METRICS = {
     f"{IRONIC_NODE_METRICS_PREFIX}.up": {},
 }
+IRONIC_NODE_PORTGROUP_PREFIX = f"{IRONIC_NODE_METRICS_PREFIX}.portgroup"
+IRONIC_NODE_PORTGROUP_COUNT = f"{IRONIC_NODE_PORTGROUP_PREFIX}.count"
+IRONIC_NODE_PORTGROUP_TAGS = {
+    'uuid': 'portgroup_uuid',
+    'node_uuid': 'node_uuid',
+    'address': 'portgroup_address',
+    'mode': 'portgroup_mode',
+    'name': 'portgroup_name',
+}
+
+IRONIC_PORT_PREFIX = f"{IRONIC_METRICS_PREFIX}.port"
+IRONIC_PORT_COUNT = f"{IRONIC_PORT_PREFIX}.count"
+IRONIC_PORT_TAGS = {
+    'uuid': 'port_uuid',
+    'node_uuid': 'node_uuid',
+    'portgroup_uuid': 'portgroup_uuid',
+    'address': 'port_address',
+    'name': 'port_name',
+}
+
+IRONIC_DRIVER_PREFIX = f"{IRONIC_METRICS_PREFIX}.driver"
+IRONIC_DRIVER_TAGS = {
+    'name': 'driver_name',
+    'type': 'driver_type',
+}
+IRONIC_DRIVER_COUNT = f"{IRONIC_DRIVER_PREFIX}.count"
+
+IRONIC_ALLOCATION_PREFIX = f"{IRONIC_METRICS_PREFIX}.allocation"
+IRONIC_ALLOCATION_TAGS = {
+    'uuid': 'allocation_uuid',
+    'node_uuid': 'node_uuid',
+    'name': 'allocation_name',
+    'state': 'allocation_state',
+}
+IRONIC_ALLOCATION_COUNT = f"{IRONIC_ALLOCATION_PREFIX}.count"
 
 IRONIC_CONDUCTOR_METRICS_PREFIX = f"{IRONIC_METRICS_PREFIX}.conductor"
 IRONIC_CONDUCTOR_COUNT = f"{IRONIC_CONDUCTOR_METRICS_PREFIX}.count"
@@ -408,6 +443,25 @@ IRONIC_CONDUCTOR_TAGS = {
 IRONIC_CONDUCTOR_METRICS = {
     f"{IRONIC_CONDUCTOR_METRICS_PREFIX}.up": {},
 }
+
+IRONIC_VOLUME_PREFIX = f"{IRONIC_METRICS_PREFIX}.volume"
+IRONIC_VOLUME_CONNECTOR_PREFIX = f"{IRONIC_VOLUME_PREFIX}.connector"
+IRONIC_VOLUME_CONNECTOR_TAGS = {
+    'uuid': 'connector_uuid',
+    'node_uuid': 'node_uuid',
+    'connector_id': 'connector_id',
+    'type': 'connector_type',
+}
+IRONIC_VOLUME_CONNECTOR_COUNT = f"{IRONIC_VOLUME_CONNECTOR_PREFIX}.count"
+
+IRONIC_VOLUME_TARGET_PREFIX = f"{IRONIC_VOLUME_PREFIX}.target"
+IRONIC_VOLUME_TARGET_TAGS = {
+    'uuid': 'target_uuid',
+    'node_uuid': 'node_uuid',
+    'volume_id': 'volume_id',
+    'volume_type': 'volume_type',
+}
+IRONIC_VOLUME_TARGET_COUNT = f"{IRONIC_VOLUME_TARGET_PREFIX}.count"
 
 OCTAVIA_METRICS_PREFIX = "openstack.octavia"
 OCTAVIA_SERVICE_CHECK = f"{OCTAVIA_METRICS_PREFIX}.api.up"
@@ -578,6 +632,17 @@ GLANCE_MEMBER_TAGS = {
     'member_id': 'member_id',
     'image_id': 'image_id',
     'status': 'status',
+}
+
+HEAT_METRICS_PREFIX = "openstack.heat"
+HEAT_SERVICE_CHECK = f"{HEAT_METRICS_PREFIX}.api.up"
+HEAT_RESPONSE_TIME = f"{HEAT_METRICS_PREFIX}.response_time"
+HEAT_STACK_PREFIX = f"{HEAT_METRICS_PREFIX}.stack"
+HEAT_STACK_COUNT = f"{HEAT_STACK_PREFIX}.count"
+HEAT_STACK_TAGS = {
+    'id': 'stack_id',
+    'stack_name': 'stack_name',
+    'stack_status': 'stack_status',
 }
 
 

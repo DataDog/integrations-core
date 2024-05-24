@@ -92,6 +92,9 @@ files:
     - name: dbm
       description: |
         Set to `true` enable Database Monitoring.
+        
+        NOTE: Database Monitoring for MongoDB is currently in private beta.
+        If you are interested in participating, please reach out to your Datadog Customer Success Manager.
       enabled: false
       value:
         type: boolean

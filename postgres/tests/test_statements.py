@@ -77,6 +77,93 @@ def test_dbm_enabled_config(integration_check, dbm_instance, dbm_enabled_key, db
     assert check._config.dbm_enabled == dbm_enabled
 
 
+@requires_over_10
+def test_statement_metrics_multiple_pgss_rows_single_query_signature(
+    aggregator,
+    integration_check,
+    dbm_instance,
+    datadog_agent,
+):
+    # don't need samples for this test
+    dbm_instance['query_samples'] = {'enabled': False}
+    dbm_instance['query_activity'] = {'enabled': False}
+    dbm_instance['query_metrics'] = {'enabled': True, 'run_sync': True, 'incremental_query_metrics': True}
+    connections = {}
+
+    def normalize_query(q):
+        # Remove the quotes from below:
+        normalized = ""
+        for s in ["'one'", "'two'"]:
+            if s in q:
+                normalized = q.replace(s, "?")
+                break
+
+        return normalized
+
+    def obfuscate_sql(query, options=None):
+        if query.startswith('SET application_name'):
+            return json.dumps({'query': normalize_query(query), 'metadata': {}})
+        return json.dumps({'query': query, 'metadata': {}})
+
+    queries = ["SET application_name = %s", "SET application_name = %s"]
+
+    # These queries will have the same query signature but different queryids in pg_stat_statements
+    def _run_query(idx):
+        query = queries[idx]
+        user = "bob"
+        password = "bob"
+        dbname = "datadog_test"
+        if dbname not in connections:
+            connections[dbname] = psycopg2.connect(host=HOST, dbname=dbname, user=user, password=password)
+
+        args = ('two',)
+        if idx == 1:
+            args = ('one',)
+
+        connections[dbname].cursor().execute(query, args)
+
+    check = integration_check(dbm_instance)
+    check._connect()
+    # Execute the query with the mocked obfuscate_sql. The result should produce an event payload with the metadata.
+    with mock.patch.object(datadog_agent, 'obfuscate_sql', passthrough=True) as mock_agent:
+        mock_agent.side_effect = obfuscate_sql
+
+        check = integration_check(dbm_instance)
+        check._connect()
+
+        # Seed a bunch of calls into pg_stat_statements
+        for _ in range(10):
+            _run_query(1)
+
+        _run_query(0)
+        run_one_check(check, dbm_instance, cancel=False)
+
+        # Call one query
+        _run_query(0)
+        run_one_check(check, dbm_instance, cancel=False)
+        aggregator.reset()
+
+        # Call other query that maps to same query signature
+        _run_query(1)
+        run_one_check(check, dbm_instance, cancel=False)
+
+        obfuscated_param = '?'
+        query0 = queries[0] % (obfuscated_param,)
+        query_signature = compute_sql_signature(query0)
+        events = aggregator.get_event_platform_events("dbm-metrics")
+
+        assert len(events) > 0
+
+        matching_rows = [r for r in events[0]['postgres_rows'] if r['query_signature'] == query_signature]
+
+        assert len(matching_rows) == 1
+
+        assert matching_rows[0]['calls'] == 1
+
+    for conn in connections.values():
+        conn.close()
+
+
 statement_samples_keys = ["query_samples", "statement_samples"]
 
 

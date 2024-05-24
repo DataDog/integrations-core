@@ -65,7 +65,7 @@ class InstanceConfig(BaseModel):
     )
     collect_per_instance_filters: Optional[CollectPerInstanceFilters] = None
     disable_generic_tags: Optional[bool] = None
-    empty_default_hostname: Optional[bool] = None
+    empty_default_hostname: bool
     excluded_host_tags: Optional[tuple[str, ...]] = None
     host: str
     metric_filters: Optional[MetricFilters] = None

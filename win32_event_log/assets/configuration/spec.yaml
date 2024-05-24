@@ -1,4 +1,4 @@
-name: Win32
+name: Event Viewer
 files:
 - name: win32_event_log.yaml
   options:

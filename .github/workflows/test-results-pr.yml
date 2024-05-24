@@ -43,5 +43,5 @@ jobs:
         commit: ${{ github.event.workflow_run.head_sha }}
         event_file: artifacts/github-event/event.json
         event_name: ${{ github.event.workflow_run.event }}
-        files: "artifacts/test-results/*/*.xml"
+        files: "artifacts/test-results-*/*/*.xml"
         compare_to_earlier_commit: false

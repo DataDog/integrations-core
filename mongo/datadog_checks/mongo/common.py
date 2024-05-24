@@ -66,6 +66,22 @@ class Deployment(object):
         and indexes."""
         raise NotImplementedError
 
+    @property
+    def deployment_tags(self):
+        """
+        Returns a list of tags related to the deployment type.
+        The tags are subject to change in the event of a deployment type update,
+        such as a replica set member state change.
+        """
+        return []
+
+    @property
+    def instance_metadata(self):
+        """
+        Returns a dictionary of metadata related to the deployment type.
+        """
+        return {}
+
 
 class MongosDeployment(Deployment):
     def __init__(self, shard_map):
@@ -89,10 +105,36 @@ class MongosDeployment(Deployment):
     def cluster_role(self):
         return "mongos"
 
+    @property
+    def deployment_tags(self):
+        return ["sharding_cluster_role:mongos"]
+
+    @property
+    def instance_metadata(self):
+        return {
+            "sharding_cluster_role": self.cluster_role,
+            "hosts": self.hosts,
+            "shards": self.shards,
+            "cluster_type": self.cluster_type,
+        }
+
     def is_principal(self):
         # A mongos has full visibility on the data, Datadog agents should only communicate
         # with one mongos.
         return True
+
+    def __eq__(self, value: object) -> bool:
+        # MongosDeployment instances are equal if they have the same shards and hosts.
+        # The order of the shards and hosts is not important as long as the sets are equal.
+        # Do not compare the shard_map as it is not used for equality.
+        return (
+            isinstance(value, MongosDeployment)
+            and set(self.shards) == set(value.shards)
+            and set(self.hosts) == set(value.hosts)
+        )
+
+    def __repr__(self) -> str:
+        return super().__repr__() + f"({self.hosts}, {self.shards})"
 
 
 class ReplicaSetDeployment(Deployment):
@@ -117,8 +159,43 @@ class ReplicaSetDeployment(Deployment):
     def cluster_type(self):
         return "sharded_cluster" if self.use_shards else "replica_set"
 
+    @property
+    def deployment_tags(self):
+        tags = [
+            "replset_name:{}".format(self.replset_name),
+            "replset_state:{}".format(self.replset_state_name),
+        ]
+        if self.use_shards:
+            tags.append('sharding_cluster_role:{}'.format(self.cluster_role))
+        return tags
+
+    @property
+    def instance_metadata(self):
+        return {
+            "replset_name": self.replset_name,
+            "replset_state": self.replset_state_name,
+            "sharding_cluster_role": self.cluster_role,
+            "hosts": self.hosts,
+            "cluster_type": self.cluster_type,
+        }
+
+    def __eq__(self, value: object) -> bool:
+        return (
+            isinstance(value, ReplicaSetDeployment)
+            and self.replset_name == value.replset_name
+            and self.replset_state == value.replset_state
+            and set(self.hosts) == set(value.hosts)
+            and self.cluster_role == value.cluster_role
+        )
+
+    def __repr__(self) -> str:
+        return super().__repr__() + f"({self.replset_name}, {self.replset_state}, {self.hosts}, {self.cluster_role})"
+
 
 class StandaloneDeployment(Deployment):
     def is_principal(self):
         # A standalone always have full visibility.
         return True
+
+    def __eq__(self, value: object) -> bool:
+        return isinstance(value, StandaloneDeployment)
