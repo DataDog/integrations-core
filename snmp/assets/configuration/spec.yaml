@@ -461,6 +461,13 @@ files:
         value:
           type: boolean
           example: true
+      - name: collect_topology
+        description: Enable the collection of topology (LLDP/CDP) data
+        value:
+          type: boolean
+          example: true
+          display_default: true
+
       - name: interface_configs
         description: |
           This option is used to override interface inbound/outbound speed and add interface tags.
@@ -552,3 +559,4 @@ files:
       - template: instances/default
         overrides:
           service.hidden: true
+          metric_patterns.hidden: true

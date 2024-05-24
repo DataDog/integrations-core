@@ -182,6 +182,10 @@ coverage:
         target: 75
         flags:
         - eks_fargate
+      ESXi:
+        target: 75
+        flags:
+        - esxi
       Elasticsearch:
         target: 75
         flags:
@@ -318,6 +322,10 @@ coverage:
         target: 75
         flags:
         - kube_apiserver_metrics
+      Kubernetes_Cluster_Autoscaler:
+        target: 75
+        flags:
+        - kubernetes_cluster_autoscaler
       Kubernetes_Controller_Manager:
         target: 75
         flags:
@@ -566,6 +574,10 @@ coverage:
         target: 75
         flags:
         - teamcity
+      Teleport:
+        target: 75
+        flags:
+        - teleport
       Tekton:
         target: 75
         flags:
@@ -908,6 +920,11 @@ flags:
     paths:
     - envoy/datadog_checks/envoy
     - envoy/tests
+  esxi:
+    carryforward: true
+    paths:
+    - esxi/datadog_checks/esxi
+    - esxi/tests
   etcd:
     carryforward: true
     paths:
@@ -1088,6 +1105,11 @@ flags:
     paths:
     - kubelet/datadog_checks/kubelet
     - kubelet/tests
+  kubernetes_cluster_autoscaler:
+    carryforward: true
+    paths:
+    - kubernetes_cluster_autoscaler/datadog_checks/kubernetes_cluster_autoscaler
+    - kubernetes_cluster_autoscaler/tests
   kubernetes_state:
     carryforward: true
     paths:
@@ -1383,6 +1405,11 @@ flags:
     paths:
     - teamcity/datadog_checks/teamcity
     - teamcity/tests
+  teleport:
+    carryforward: true
+    paths:
+    - teleport/datadog_checks/teleport
+    - teleport/tests
   tekton:
     carryforward: true
     paths:

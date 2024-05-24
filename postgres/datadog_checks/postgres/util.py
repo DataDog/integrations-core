@@ -841,3 +841,41 @@ FROM pg_stat_subscription_stats
         {'name': 'postgresql.subscription.sync_error', 'type': 'monotonic_count'},
     ],
 }
+
+# Requires PG16+
+# Capping at 200 rows for caution. This should always return less data points than that. Adjust if needed
+STAT_IO_METRICS = {
+    'name': 'stat_io_metrics',
+    'query': """
+SELECT backend_type,
+       object,
+       context,
+       evictions,
+       extend_time,
+       extends,
+       fsync_time,
+       fsyncs,
+       hits,
+       read_time,
+       reads,
+       write_time,
+       writes
+FROM pg_stat_io
+LIMIT 200
+""",
+    'columns': [
+        {'name': 'backend_type', 'type': 'tag'},
+        {'name': 'object', 'type': 'tag'},
+        {'name': 'context', 'type': 'tag'},
+        {'name': 'postgresql.io.evictions', 'type': 'monotonic_count'},
+        {'name': 'postgresql.io.extend_time', 'type': 'monotonic_count'},
+        {'name': 'postgresql.io.extends', 'type': 'monotonic_count'},
+        {'name': 'postgresql.io.fsync_time', 'type': 'monotonic_count'},
+        {'name': 'postgresql.io.fsyncs', 'type': 'monotonic_count'},
+        {'name': 'postgresql.io.hits', 'type': 'monotonic_count'},
+        {'name': 'postgresql.io.read_time', 'type': 'monotonic_count'},
+        {'name': 'postgresql.io.reads', 'type': 'monotonic_count'},
+        {'name': 'postgresql.io.write_time', 'type': 'monotonic_count'},
+        {'name': 'postgresql.io.writes', 'type': 'monotonic_count'},
+    ],
+}

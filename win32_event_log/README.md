@@ -2,7 +2,7 @@
 
 ## Overview
 
-This integration watches for Windows Event Logs and forwards them to Datadog. 
+This integration watches for Windows Event Logs and forwards them to Datadog.
 
 Enable this integration to:
 

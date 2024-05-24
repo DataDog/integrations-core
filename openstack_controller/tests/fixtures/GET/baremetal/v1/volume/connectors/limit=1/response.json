@@ -1,0 +1,21 @@
+{
+    "connectors": [
+        {
+            "connector_id": "iqn.2017-07.org.openstack:01:d9a51732c3f",
+            "links": [
+                {
+                    "href": "http://127.0.0.1:6385/v1/volume/connectors/9bf93e01-d728-47a3-ad4b-5e66a835037c",
+                    "rel": "self"
+                },
+                {
+                    "href": "http://127.0.0.1:6385/volume/connectors/9bf93e01-d728-47a3-ad4b-5e66a835037c",
+                    "rel": "bookmark"
+                }
+            ],
+            "node_uuid": "6d85703a-565d-469a-96ce-30b6de53079d",
+            "type": "iqn",
+            "uuid": "9bf93e01-d728-47a3-ad4b-5e66a835037c"
+        }
+    ],
+    "next": "http://127.0.0.1/baremetal/v1/volume/connectors?limit=1&marker=9bf93e01-d728-47a3-ad4b-5e66a835037c"
+}
