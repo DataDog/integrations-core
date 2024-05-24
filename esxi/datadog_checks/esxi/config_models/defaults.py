@@ -12,10 +12,6 @@ def instance_disable_generic_tags():
     return False
 
 
-def instance_empty_default_hostname():
-    return False
-
-
 def instance_excluded_host_tags():
     return []
 

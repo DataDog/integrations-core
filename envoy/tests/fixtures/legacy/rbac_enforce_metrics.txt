@@ -1,0 +1,4 @@
+http.foo_buz_enforce.rbac.allowed: 0
+http.foo_buz_enforce.rbac.denied: 1
+http.foo_buz_enforce.rbac.rule_prefix.allowed: 2
+http.foo_buz_enforce.rbac.rule_prefix.denied: 3
