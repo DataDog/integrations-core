@@ -152,7 +152,6 @@ class MongoConfig(object):
             'enabled': enabled,
             'collection_interval': self._operation_samples_config.get('collection_interval', 10),
             'run_sync': is_affirmative(self._operation_samples_config.get('run_sync', False)),
-            'max_time_ms': int(self._operation_samples_config.get('max_time_ms', 5000)),  # timeout for the operation
             'explained_operations_cache_maxsize': int(
                 self._operation_samples_config.get('explained_operations_cache_maxsize', 5000)
             ),

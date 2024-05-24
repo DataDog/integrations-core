@@ -54,7 +54,6 @@ class MongoOperationSamples(DBMAsyncJob):
     def __init__(self, check):
         self._operation_samples_config = check._config.operation_samples
         self._collection_interval = self._operation_samples_config["collection_interval"]
-        self._max_time_ms = self._operation_samples_config["max_time_ms"]
 
         # _explained_operations_ratelimiter: limit how often we try to re-explain the same query
         self._explained_operations_ratelimiter = RateLimitingTTLCache(
@@ -121,11 +120,15 @@ class MongoOperationSamples(DBMAsyncJob):
                 )
 
                 if not self._should_explain(
-                    op=operation.get("op"), command=command, explain_plan_cache_key=(operation_metadata["dbname"], query_signature)
+                    op=operation.get("op"),
+                    command=command,
+                    explain_plan_cache_key=(operation_metadata["dbname"], query_signature),
                 ):
                     yield activity, None
 
-                explain_plan = self._get_explain_plan(op=operation.get("op"), command=command, dbname=operation_metadata["dbname"])
+                explain_plan = self._get_explain_plan(
+                    op=operation.get("op"), command=command, dbname=operation_metadata["dbname"]
+                )
                 sample = self._create_operation_sample_payload(
                     now, operation_metadata, obfuscated_command, query_signature, explain_plan, activity
                 )
@@ -197,7 +200,7 @@ class MongoOperationSamples(DBMAsyncJob):
             # Skip operations that are not queries
             self._check.log.debug("Skipping explain operation type %s: %s", op, command)
             return False
-        
+
         if not self._explained_operations_ratelimiter.acquire(explain_plan_cache_key):
             # Skip operations that have been explained recently
             self._check.log.debug("Skipping explain operation that was recently explained: %s", command)
@@ -208,9 +211,7 @@ class MongoOperationSamples(DBMAsyncJob):
     def _get_explain_plan(self, op: Optional[str], command: dict, dbname: str) -> OperationSamplePlan:
         dbname = command.pop("$db", dbname)
         try:
-            explain_plan = self._check.api_client[dbname].command(
-                "explain", command, verbosity="executionStats", max_time_ms=self._max_time_ms
-            )
+            explain_plan = self._check.api_client[dbname].command("explain", command, verbosity="executionStats")
             explain_plan = self._format_explain_plan(explain_plan)
             return {
                 "definition": explain_plan,
