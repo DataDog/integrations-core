@@ -5,9 +5,32 @@ import re
 
 REQUIRED_HEADERS = {'metric_name', 'metric_type', 'orientation', 'integration'}
 
-OPTIONAL_HEADERS = {'description', 'interval', 'unit_name', 'per_unit_name', 'short_name', 'curated_metric'}
+OPTIONAL_HEADERS = {
+    'description',
+    'interval',
+    'unit_name',
+    'per_unit_name',
+    'short_name',
+    'curated_metric',
+}
 
-ALL_HEADERS = REQUIRED_HEADERS | OPTIONAL_HEADERS
+EXPERIMENTAL_HEADER = {"sample_tags"}
+ALL_HEADERS = REQUIRED_HEADERS | OPTIONAL_HEADERS | EXPERIMENTAL_HEADER
+HEADERS_TO_CHECK = REQUIRED_HEADERS | OPTIONAL_HEADERS
+
+ORDERED_HEADERS = [
+    "metric_name",
+    "metric_type",
+    "interval",
+    "unit_name",
+    "per_unit_name",
+    "description",
+    "orientation",
+    "integration",
+    "short_name",
+    "curated_metric",
+    "sample_tags",
+]
 
 VALID_METRIC_TYPE = {'count', 'gauge', 'rate'}
 

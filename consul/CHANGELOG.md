@@ -2,7 +2,13 @@
 
 <!-- towncrier release notes start -->
 
-## 2.5.0 / 2024-02-16
+## 2.6.0 / 2024-03-22 / Agent 7.53.0
+
+***Added***:
+
+* Add configuration option to disable hosts from being created by `consul.net.node.*` metrics ([#17004](https://github.com/DataDog/integrations-core/pull/17004))
+
+## 2.5.0 / 2024-02-16 / Agent 7.52.0
 
 ***Added***:
 

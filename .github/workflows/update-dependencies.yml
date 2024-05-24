@@ -15,7 +15,7 @@ jobs:
       with:
         fetch-depth: 0
     - name: Set up Python
-      uses: actions/setup-python@v4
+      uses: actions/setup-python@v5
       with:
         python-version: "3.11"
     - name: Install ddev from local folder
@@ -53,12 +53,12 @@ jobs:
           Update the dependencies
 
           ### Motivation
-          
+
           Some of the dependencies are outdated
 
           ### Additional Notes
           <!-- Anything else we should know when reviewing? -->
-          
+
           This PR was automatically generated.
 
           ### Review checklist (to be filled by reviewers)
@@ -71,7 +71,7 @@ jobs:
         branch-suffix: timestamp
         delete-branch: true
         base: master
-        labels: bot
+        labels: bot,qa/skip-qa
         draft: false
     # We generate the changelog if and only if the PR was created
     - name: Update changelogs
@@ -85,5 +85,5 @@ jobs:
         git config --global user.email "agent-integrations-dependency-bot@datadoghq.com"
         git config --global user.name "Agent Integrations Dependency Bot"
         git add .
-        git commit -am "Update changelogs"
-        git push origin HEAD
+        git commit --amend
+        git push origin HEAD --force

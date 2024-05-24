@@ -2,6 +2,22 @@
 
 <!-- towncrier release notes start -->
 
+## 5.2.0 / 2024-03-22 / Agent 7.53.0
+
+***Deprecated***:
+
+* Automatically load Oracle core check instead of Python integration. Deprecating Oracle Python integration and replacing it with the core check. ([#17248](https://github.com/DataDog/integrations-core/pull/17248))
+
+***Added***:
+
+* Update custom_queries configuration to support optional collection_interval ([#16957](https://github.com/DataDog/integrations-core/pull/16957))
+* Bump the min base check version to 36.5.0 ([#17197](https://github.com/DataDog/integrations-core/pull/17197))
+
+***Fixed***:
+
+* Support custom metric_prefix in QueryExecutor and remove manual fix of metric_prefix ([#16958](https://github.com/DataDog/integrations-core/pull/16958))
+* Update the configuration to include the `metric_prefix` option ([#17065](https://github.com/DataDog/integrations-core/pull/17065))
+
 ## 5.1.1 / 2024-01-10 / Agent 7.51.0
 
 ***Fixed***:

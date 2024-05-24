@@ -197,6 +197,17 @@ files:
       value:
         type: boolean
         example: false
+    - name: include_db_fragmentation_metrics_tempdb
+      description: |
+        Configure the collection of database index fragmentation statistics in tempdb database from the
+        `sys.dm_db_index_physical_stats` DMF.
+
+        By default, we do not collect index fragmentation statistics in the tempdb database, as those queries
+        might cause blocking. This configuration parameter allows enabling the collection of this metric.
+        This parameter is ignored if 'include_db_fragmentation_metrics' is set to false.
+      value:
+        type: boolean
+        example: false
     - name: include_index_usage_metrics
       description: |
         Configure the collection of user table index usage statistics from the `sys.dm_db_index_usage_stats` DMV.
@@ -206,6 +217,17 @@ files:
       value:
         type: boolean
         example: true
+    - name: include_index_usage_metrics_tempdb
+      description: |
+        Configure the collection of user table index usage statistics in tempdb database from the
+        `sys.dm_db_index_usage_stats` DMV.
+
+        By default, we do not collect index usage statistics in the tempdb database, as those queries
+        might cause blocking. This configuration parameter allows enabling the collection of this metric.
+        This parameter is ignored if 'include_index_usage_metrics' is set to false.
+      value:
+        type: boolean
+        example: false
     - name: index_usage_metrics_interval
       description: |
         Configure the interval (in seconds) for the collection of index usage statistics from the 
@@ -675,7 +697,9 @@ files:
         type: string
         example: master
     - name: ignore_missing_database
-      description: If the DB specified doesn't exist on the server then don't do the check
+      description: |
+        DEPRECATED - use `database_autodiscovery` instead, when database name is uncertain.
+        If the DB specified doesn't exist on the server then don't do the check
       value:
         type: boolean
         example: false

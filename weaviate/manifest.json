@@ -8,14 +8,16 @@
     "configuration": "README.md#Setup",
     "support": "README.md#Support",
     "changelog": "CHANGELOG.md",
-    "description": "Weaviate",
+    "description": "Open-source vector database for building AI-powered applications.",
     "title": "Weaviate",
     "media": [],
     "classifier_tags": [
       "Category::AI/ML",
+      "Category::Data Stores",
       "Supported OS::Linux",
       "Supported OS::Windows",
-      "Supported OS::macOS"
+      "Supported OS::macOS",
+      "Submitted Data Type::Metrics"
     ]
   },
   "assets": {
@@ -36,6 +38,7 @@
         "metadata_path": "assets/service_checks.json"
       },
       "process_signatures": [
+        "weaviate",
         "/bin/weaviate"
       ],
       "source_type_id": 10371,

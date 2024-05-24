@@ -1,9 +1,9 @@
 metric_name,metric_type,interval,unit_name,per_unit_name,description,orientation,integration,short_name,curated_metric
+system.entropy.available,gauge,,,,system entropy,0,linux_proc_extras,entropy,
 system.inodes.total,gauge,,,,number of inodes the system has allocated,0,linux_proc_extras,nr_inodes,
 system.inodes.used,gauge,,,,number of used inodes,0,linux_proc_extras,used_inodes,
 system.linux.context_switches,count,,,,count of the number of context switches,1,linux_proc_extras,context switches,
-system.linux.processes_created,count,,,,count of the number of created processes,1,linux_proc_extras,reated processes,
 system.linux.interrupts,count,,,,count of the number of interrupts,1,linux_proc_extras,interrupts,
-system.entropy.available,gauge,,,,system entropy,0,linux_proc_extras,entropy,
-system.processes.states,gauge,,,,Number of processes per process state,0,linux_proc_extras,proc state,
+system.linux.processes_created,count,,,,count of the number of created processes,1,linux_proc_extras,reated processes,
 system.processes.priorities,gauge,,,,Number of processes per priority,0,linux_proc_extras,proc priority,
+system.processes.states,gauge,,,,Number of processes per process state,0,linux_proc_extras,proc state,

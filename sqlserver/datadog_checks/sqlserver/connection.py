@@ -9,6 +9,8 @@ from six import raise_from
 
 from datadog_checks.base import AgentCheck, ConfigurationError
 from datadog_checks.base.log import get_check_logger
+from datadog_checks.sqlserver.cursor import CommenterCursorWrapper
+from datadog_checks.sqlserver.utils import construct_use_statement
 
 try:
     import adodbapi
@@ -136,18 +138,19 @@ class Connection(object):
 
     DEFAULT_COMMAND_TIMEOUT = 10
     DEFAULT_DATABASE = 'master'
-    DEFAULT_DRIVER = '{ODBC Driver 18 for SQL Server}'
+    DEFAULT_ADOPROVIDER = 'MSOLEDBSQL'
+    DEFAULT_CONNECTOR = 'adodbapi'
+    DEFAULT_ODBC_DRIVER = '{ODBC Driver 18 for SQL Server}'
     DEFAULT_DB_KEY = 'database'
     DEFAULT_SQLSERVER_VERSION = 1e9
     SQLSERVER_2014 = 2014
     PROC_GUARD_DB_KEY = 'proc_only_if_database'
 
-    valid_adoproviders = ['SQLOLEDB', 'MSOLEDBSQL', 'MSOLEDBSQL19', 'SQLNCLI11']
-    default_adoprovider = 'MSOLEDBSQL'
+    VALID_ADOPROVIDERS = ['SQLOLEDB', 'MSOLEDBSQL', 'MSOLEDBSQL19', 'SQLNCLI11']
 
-    def __init__(self, check, init_config, instance_config, service_check_handler):
+    def __init__(self, host, init_config, instance_config, service_check_handler):
+        self.host = host
         self.instance = instance_config
-        self._check = check
         self.service_check_handler = service_check_handler
         self.log = get_check_logger()
 
@@ -165,35 +168,8 @@ class Connection(object):
         self.timeout = int(self.instance.get('command_timeout', self.DEFAULT_COMMAND_TIMEOUT))
         self.existing_databases = None
         self.server_version = int(self.instance.get('server_version', self.DEFAULT_SQLSERVER_VERSION))
-
-        self.adoprovider = self.default_adoprovider
-
-        self.valid_connectors = []
-        if adodbapi is not None:
-            self.valid_connectors.append('adodbapi')
-        if pyodbc is not None:
-            self.valid_connectors.append('odbc')
-
-        connector = init_config.get('connector')
-        if connector is None or connector.lower() not in self.valid_connectors:
-            if connector is None:
-                self.log.debug("`connector` config value was not set, defaulting to adodbapi")
-            else:
-                self.log.error("Invalid database connector %s, defaulting to adodbapi", connector)
-            self.default_connector = 'adodbapi'
-        else:
-            self.default_connector = connector
-
-        self.connector = self.get_connector()
-
-        self.adoprovider = init_config.get('adoprovider', self.default_adoprovider)
-        if self.adoprovider.upper() not in self.valid_adoproviders:
-            self.log.error(
-                "Invalid ADODB provider string %s, defaulting to %s",
-                self.adoprovider,
-                self.default_adoprovider,
-            )
-            self.adoprovider = self.default_adoprovider
+        self.connector = self._get_connector(init_config, instance_config)
+        self.adoprovider = self._get_adoprovider(init_config, instance_config)
 
         self.log.debug('Connection initialized.')
 
@@ -218,7 +194,7 @@ class Connection(object):
             # FIXME: we should find a better way to compute unique keys to map opened connections other than
             # using auth info in clear text!
             raise SQLConnectionError("Cannot find an opened connection for host: {}".format(self.instance.get('host')))
-        return conn.cursor()
+        return CommenterCursorWrapper(conn.cursor())
 
     def close_cursor(self, cursor):
         """
@@ -323,7 +299,7 @@ class Connection(object):
                 conn_warn_msg.value,
                 tcp_connection_status,
                 exception_msg,
-                host=self._check.resolved_hostname,
+                host=host,
                 connection_host=host,
                 database=database,
                 code=conn_warn_msg.value,
@@ -382,7 +358,7 @@ class Connection(object):
             try:
                 self.existing_databases = {}
                 cursor.execute(DATABASE_EXISTS_QUERY)
-                for row in cursor:
+                for row in cursor.fetchall():
                     # collation_name can be NULL if db offline, in that case assume its case_insensitive
                     case_insensitive = not row.collation_name or 'CI' in row.collation_name
                     self.existing_databases[row.name.lower()] = (
@@ -404,41 +380,78 @@ class Connection(object):
 
         return exists, context
 
-    def get_connector(self):
-        connector = self.instance.get('connector', self.default_connector)
-        if connector != self.default_connector:
-            if connector.lower() not in self.valid_connectors:
-                self.log.warning(
-                    "Invalid database connector %s using default %s",
-                    connector,
-                    self.default_connector,
-                )
-                connector = self.default_connector
-            else:
-                self.log.debug(
-                    "Overriding default connector for %s with %s",
-                    self.instance['host'],
-                    connector,
-                )
-        return connector
+    def _get_connector(self, init_config, instance_config):
+        '''
+        Get the connector to use for the instance.
+        The connector config value takes precedence in the following order:
+        - instance_config
+        - init_config
+        - DEFAULT_CONNECTOR
+        '''
+        # First we check the valid connectors available. i.e. adodbapi, odbc
+        valid_connectors = []
+        if adodbapi is not None:
+            valid_connectors.append('adodbapi')
+        if pyodbc is not None:
+            valid_connectors.append('odbc')
 
-    def _get_adoprovider(self):
-        provider = self.instance.get('adoprovider', self.default_adoprovider)
-        if provider != self.adoprovider:
-            if provider.upper() not in self.valid_adoproviders:
-                self.log.warning(
-                    "Invalid ADO provider %s using default %s",
-                    provider,
-                    self.adoprovider,
-                )
-                provider = self.adoprovider
-            else:
-                self.log.debug(
-                    "Overriding default ADO provider for %s with %s",
-                    self.instance['host'],
-                    provider,
-                )
-        return provider
+        # Then we check the connector value from the init_config and instance_config
+        connector_from_init_config = init_config.get('connector')
+        if connector_from_init_config is not None and connector_from_init_config.lower() not in valid_connectors:
+            self.log.warning(
+                "Invalid database connector %s set in init_config, falling back to default %s",
+                connector_from_init_config,
+                self.DEFAULT_CONNECTOR,
+            )
+            connector_from_init_config = None
+
+        connector_from_instance_config = instance_config.get('connector')
+        if (
+            connector_from_instance_config is not None
+            and connector_from_instance_config.lower() not in valid_connectors
+        ):
+            self.log.warning(
+                "Invalid database connector %s set in instance_config, falling back to default %s",
+                connector_from_instance_config,
+                self.DEFAULT_CONNECTOR,
+            )
+            connector_from_instance_config = None
+
+        return connector_from_instance_config or connector_from_init_config or self.DEFAULT_CONNECTOR
+
+    def _get_adoprovider(self, init_config, instance_config):
+        '''
+        Get the adoprovider to use for the instance.
+        The adoprovider config value takes precedence in the following order:
+        - instance_config
+        - init_config
+        - DEFAULT_ADOPROVIDER
+        '''
+        adoprovider_from_init_config = init_config.get('adoprovider')
+        if (
+            adoprovider_from_init_config is not None
+            and adoprovider_from_init_config.upper() not in self.VALID_ADOPROVIDERS
+        ):
+            self.log.warning(
+                "Invalid ADODB provider set in init_config %s, falling back to default %s",
+                adoprovider_from_init_config,
+                self.DEFAULT_ADOPROVIDER,
+            )
+            adoprovider_from_init_config = None
+
+        adoprovider_from_instance_config = instance_config.get('adoprovider')
+        if (
+            adoprovider_from_instance_config is not None
+            and adoprovider_from_instance_config.upper() not in self.VALID_ADOPROVIDERS
+        ):
+            self.log.warning(
+                "Invalid ADODB provider set in instance_config %s, falling back to default %s",
+                adoprovider_from_instance_config,
+                self.DEFAULT_ADOPROVIDER,
+            )
+            adoprovider_from_instance_config = None
+
+        return adoprovider_from_instance_config or adoprovider_from_init_config or self.DEFAULT_ADOPROVIDER
 
     def _get_access_info(self, db_key, db_name=None):
         """Convenience method to extract info from instance"""
@@ -447,7 +460,7 @@ class Connection(object):
         password = self.instance.get('password')
         database = self.instance.get(db_key) if db_name is None else db_name
         driver = self.instance.get('driver')
-        host = self._get_host_with_port()
+        host = self.get_host_with_port()
 
         if not dsn:
             if not host:
@@ -459,15 +472,15 @@ class Connection(object):
                     self.DEFAULT_DATABASE,
                 )
                 database = self.DEFAULT_DATABASE
-            if not driver:
+            if not driver and self.connector == 'odbc':
                 self.log.debug(
-                    "No driver provided, falling back to default: %s",
-                    self.DEFAULT_DRIVER,
+                    "No odbc driver provided, falling back to default: %s",
+                    self.DEFAULT_ODBC_DRIVER,
                 )
-                driver = self.DEFAULT_DRIVER
+                driver = self.DEFAULT_ODBC_DRIVER
         return dsn, host, username, password, database, driver
 
-    def _get_host_with_port(self):
+    def get_host_with_port(self):
         """Return a string with correctly formatted host and, if necessary, port.
         If the host string in the config contains a port, that port is used.
         If not, any port provided as a separate port config option is used.
@@ -634,11 +647,12 @@ class Connection(object):
         else:
             _, host, username, password, database, _ = self._get_access_info(db_key, db_name)
 
-        provider = self._get_adoprovider()
         retry_conn_count = ''
         if self.server_version >= self.SQLSERVER_2014:
             retry_conn_count = 'ConnectRetryCount=2;'
-        conn_str = '{}Provider={};Data Source={};Initial Catalog={};'.format(retry_conn_count, provider, host, database)
+        conn_str = '{}Provider={};Data Source={};Initial Catalog={};'.format(
+            retry_conn_count, self.adoprovider, host, database
+        )
 
         if username:
             conn_str += 'User ID={};'.format(username)
@@ -676,3 +690,29 @@ class Connection(object):
                 return "ERROR: {}".format(e.strerror if hasattr(e, 'strerror') else repr(e))
 
         return None
+
+    def _get_current_database_context(self):
+        """
+        Get the current database name.
+        """
+        with self.get_managed_cursor() as cursor:
+            cursor.execute('select DB_NAME()')
+            data = cursor.fetchall()
+            return data[0][0]
+
+    @contextmanager
+    def restore_current_database_context(self):
+        """
+        Restores the default database after executing use statements.
+        """
+        current_db = self._get_current_database_context()
+        try:
+            yield
+        finally:
+            if current_db:
+                try:
+                    self.log.debug("Restoring the original database context %s", current_db)
+                    with self.get_managed_cursor() as cursor:
+                        cursor.execute(construct_use_statement(current_db))
+                except Exception as e:
+                    self.log.error("Failed to switch back to the original database context %s: %s", current_db, e)

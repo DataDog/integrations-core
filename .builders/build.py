@@ -14,7 +14,7 @@ from typing import Generator
 from packaging.requirements import InvalidRequirement, Requirement
 
 HERE = Path(__file__).parent
-REQUIREMENTS_FILE = HERE.parent / 'datadog_checks_base' / 'datadog_checks' / 'base' / 'data' / 'agent_requirements.in'
+REQUIREMENTS_FILE = HERE.parent / 'agent_requirements.in'
 
 if sys.platform == 'win32':
 
@@ -70,6 +70,7 @@ def read_dependencies() -> dict[str, list[str]]:
 
 def build_macos():
     parser = argparse.ArgumentParser(prog='builder', allow_abbrev=False)
+    parser.add_argument('image')
     parser.add_argument('output_dir')
     parser.add_argument('--python', default='3')
     parser.add_argument('--builder-root', required=True,
@@ -78,7 +79,8 @@ def build_macos():
                         help='Skip builder setup, assuming it has already been set up.')
     args = parser.parse_args()
 
-    context_path = HERE / 'images' / 'macos'
+    image: str = args.image
+    context_path = HERE / 'images' / image
     builder_root = Path(args.builder_root).absolute()
     builder_root.mkdir(exist_ok=True)
 
@@ -119,13 +121,14 @@ def build_macos():
             # Common compilation flags
             'LDFLAGS': f'-L{prefix_path}/lib',
             'CFLAGS': f'-I{prefix_path}/include -O2',
+            'CXXFLAGS': f'-I{prefix_path}/include -O2',
             # Build command for extra platform-specific build steps
             'DD_BUILD_COMMAND': f'bash {build_context_dir}/extra_build.sh'
         }
 
         if not args.skip_setup:
             check_process(
-                ['bash', str(HERE / 'images' / 'macos' / 'builder_setup.sh')],
+                ['bash', str(HERE / 'images' / image / 'builder_setup.sh')],
                 env=env,
                 cwd=builder_root,
             )
@@ -216,12 +219,19 @@ def build_image():
             final_requirements = mount_dir / 'frozen.txt'
             final_requirements.touch()
 
+            script_args = ['--python', args.python]
+
+            # Assumption: if a digest was provided we're not changing the build image and therefore
+            # we're fine with reusing wheels we've built previously
+            if args.digest or True:
+                script_args.append('--use-built-index')
+
             check_process([
                 'docker', 'run', '--rm',
                 '-v', f'{mount_dir}:{internal_mount_dir}',
                 # Anything created within directories mounted to the container cannot be removed by the host
                 '-e', 'PYTHONDONTWRITEBYTECODE=1',
-                image_name, '--python', args.python,
+                image_name, *script_args,
             ])
 
             output_dir = Path(args.output_dir)

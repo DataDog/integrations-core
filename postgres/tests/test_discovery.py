@@ -3,6 +3,7 @@
 # Licensed under a 3-clause BSD style license (see LICENSE)
 
 import copy
+import os
 import re
 import time
 from contextlib import contextmanager
@@ -21,6 +22,9 @@ DISCOVERY_CONFIG = {
     "include": ["dogs_([0-9]|[1-9][0-9]|10[0-9])"],
     "exclude": ["dogs_5$", "dogs_50$"],
 }
+
+POSTGRES_VERSION = os.environ.get('POSTGRES_VERSION', None)
+
 
 # the number of test databases that exist from [dogs_0, dogs_100]
 NUM_DOGS_DATABASES = 101
@@ -61,6 +65,10 @@ FUNCTION_METRICS = {
 
 COUNT_METRICS = {
     'postgresql.table.count',
+}
+
+CHECKSUM_METRICS = {
+    'postgresql.checksums.checksum_failures',
 }
 
 
@@ -185,6 +193,7 @@ def test_autodiscovery_collect_all_metrics(aggregator, integration_check, pg_ins
     ]
     pg_instance['collect_function_metrics'] = True
     pg_instance['collect_count_metrics'] = True
+    pg_instance['collect_checksum_metrics'] = True
     del pg_instance['dbname']
 
     # execute dummy_function to populate pg_stat_user_functions for dogs_nofunc database
@@ -203,12 +212,16 @@ def test_autodiscovery_collect_all_metrics(aggregator, integration_check, pg_ins
     for db in databases:
         relation_metrics_expected_tags = _get_expected_tags(check, pg_instance, db=db, table='breed', schema='public')
         count_metrics_expected_tags = _get_expected_tags(check, pg_instance, db=db, schema='public')
+        checksum_metrics_expected_tags = _get_expected_tags(check, pg_instance, db=db)
         for metric in RELATION_METRICS:
             aggregator.assert_metric(metric, tags=relation_metrics_expected_tags)
         for metric in DYNAMIC_RELATION_METRICS:
             aggregator.assert_metric(metric, tags=relation_metrics_expected_tags)
         for metric in COUNT_METRICS:
             aggregator.assert_metric(metric, tags=count_metrics_expected_tags)
+        if float(POSTGRES_VERSION) >= 12:
+            for metric in CHECKSUM_METRICS:
+                aggregator.assert_metric(metric, tags=checksum_metrics_expected_tags)
 
     # we only created and executed the dummy_function in dogs_nofunc database
     for metric in FUNCTION_METRICS:
@@ -220,6 +233,9 @@ def test_autodiscovery_collect_all_metrics(aggregator, integration_check, pg_ins
     aggregator.assert_metric(
         'dd.postgres._collect_relations_autodiscovery.time',
     )
+    if float(POSTGRES_VERSION) >= 12:
+        checksum_metrics_expected_tags = _get_expected_tags(check, pg_instance, with_db=False, enabled="true")
+        aggregator.assert_metric('postgresql.checksums.enabled', value=1, tags=checksum_metrics_expected_tags)
 
 
 @pytest.mark.integration

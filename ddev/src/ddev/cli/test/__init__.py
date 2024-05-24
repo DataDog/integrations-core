@@ -80,7 +80,7 @@ def test(
     """
     Run unit and integration tests.
 
-    Please see these docs for to pass TARGET_SPEC and PYTEST_ARGS:
+    Please see these docs to know how to pass TARGET_SPEC and PYTEST_ARGS:
 
     \b
     https://datadoghq.dev/integrations-core/testing/
@@ -118,7 +118,11 @@ def test(
             targets[integration.name] = integration
 
     if not targets:
-        app.abort('No testable targets found')
+        if target_name == 'changed':
+            app.display_info('No changed testable targets found')
+            return
+        else:
+            app.abort('No testable targets found')
 
     if list_envs:
         multiple_targets = len(targets) > 1

@@ -1,7 +1,6 @@
 # (C) Datadog, Inc. 2018-present
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
-import itertools
 import threading
 from contextlib import closing
 
@@ -9,6 +8,7 @@ import oracledb
 from six import PY2
 
 from datadog_checks.base import AgentCheck, ConfigurationError, is_affirmative
+from datadog_checks.base.errors import SkipInstanceError
 from datadog_checks.base.utils.db import QueryManager
 
 from . import queries
@@ -49,6 +49,19 @@ class Oracle(AgentCheck):
     SERVICE_CHECK_NAME = 'can_connect'
     SERVICE_CHECK_CAN_QUERY = "can_query"
 
+    def __new__(cls, name, init_config, instances):
+        init_config_loader = init_config.get("loader", "core")
+        instance = instances[0]
+        instance_loader = instance.get("loader", init_config_loader)
+        if instance_loader != "python":
+            raise SkipInstanceError(
+                'Oracle integration written in Python is deprecated. '
+                'Set `loader = core` in the configuration file to avoid this error. '
+                'Loading the latest Oracle check now.'
+            )
+
+        return super(Oracle, cls).__new__(cls)
+
     def __init__(self, name, init_config, instances):
         if PY2:
             raise ConfigurationError(
@@ -77,8 +90,6 @@ class Oracle(AgentCheck):
         if not self.instance.get('only_custom_queries', False):
             manager_queries.extend([queries.ProcessMetrics, queries.SystemMetrics, queries.TableSpaceMetrics])
 
-        self._fix_custom_queries()
-
         self._query_manager = QueryManager(
             self,
             self.execute_query_raw,
@@ -91,22 +102,6 @@ class Oracle(AgentCheck):
 
         self._query_errors = 0
         self._connection_errors = 0
-
-    def _fix_custom_queries(self):
-        """
-        For backward compatibility reasons, if a custom query specifies a
-        `metric_prefix`, change the submission name to contain it.
-        """
-        custom_queries = self.instance.get('custom_queries', [])
-        global_custom_queries = self.init_config.get('global_custom_queries', [])
-        for query in itertools.chain(custom_queries, global_custom_queries):
-            prefix = query.get('metric_prefix')
-            if prefix and prefix != self.__NAMESPACE__:
-                if prefix.startswith(self.__NAMESPACE__ + '.'):
-                    prefix = prefix[len(self.__NAMESPACE__) + 1 :]
-                for column in query.get('columns', []):
-                    if column.get('type') != 'tag' and column.get('name'):
-                        column['name'] = '{}.{}'.format(prefix, column['name'])
 
     def execute_query_raw(self, query):
         with closing(self._connection.cursor()) as cursor:

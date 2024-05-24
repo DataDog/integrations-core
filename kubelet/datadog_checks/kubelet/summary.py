@@ -48,7 +48,7 @@ class SummaryScraperMixin(object):
         # avoid calling the tagger for pods that aren't running, as these are
         # never stored
         pod_phase = pod_list_utils.pods.get(pod_uid, {}).get('status', {}).get('phase', None)
-        if pod_phase != 'Running':
+        if pod_phase != 'Running' and pod_phase != 'Pending':
             return
 
         pod_tags = tags_for_pod(pod_uid, tagger.ORCHESTRATOR)

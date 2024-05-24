@@ -13,9 +13,12 @@
     "media": [],
     "classifier_tags": [
       "Category::Kubernetes",
+      "Category::Developer Tools",
       "Supported OS::Linux",
       "Supported OS::Windows",
-      "Supported OS::macOS"
+      "Supported OS::macOS",
+      "Submitted Data Type::Metrics",
+      "Submitted Data Type::Logs"
     ]
   },
   "author": {
@@ -41,6 +44,12 @@
       "service_checks": {
         "metadata_path": "assets/service_checks.json"
       },
+      "process_signatures": [
+        "helm-controller",
+        "kustomize-controller",
+        "notification-controller",
+        "source-controller"
+      ],
       "source_type_id": 10302,
       "auto_install": true
     },
@@ -50,6 +59,10 @@
     "monitors": {
       "Active Workers": "assets/monitors/active_workers.json",
       "Error Count": "assets/monitors/error_count.json"
+    },
+    "saved_views": {
+        "flux_overview": "assets/saved_views/overview.json",
+        "flux_errors": "assets/saved_views/errors.json"
     }
   }
 }

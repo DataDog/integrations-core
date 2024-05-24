@@ -1,6 +1,7 @@
 # (C) Datadog, Inc. 2010-present
 # All rights reserved
 # Licensed under Simplified BSD License (see LICENSE)
+
 import psycopg2
 import pytest
 from flaky import flaky
@@ -60,6 +61,48 @@ def test_relations_metrics(aggregator, integration_check, pg_instance):
         aggregator.assert_metric(name, count=0, tags=expected_tags)
     for name in _iterate_metric_name(QUERY_PG_CLASS):
         aggregator.assert_metric(name, count=1, tags=expected_tags)
+
+
+@pytest.mark.integration
+@pytest.mark.usefixtures('dd_environment')
+def test_relations_metrics_access_exclusive_lock(aggregator, integration_check, pg_instance):
+    '''
+    This test is an edge case where we want to make sure that relations metrics query does
+    not timeout when a relation is locked with an AccessExclusiveLock.
+    To do so, we lock the `persons` table with an AccessExclusiveLock and then run the check.
+    '''
+    pg_instance['relations'] = ['persons']
+    check = integration_check(pg_instance)
+
+    conn = _get_superconn(pg_instance)
+    cursor = conn.cursor()
+    # Lock the persons table with an AccessExclusiveLock
+    cursor.execute('BEGIN')  # must be in a transaction to lock a table
+    cursor.execute('LOCK persons IN ACCESS EXCLUSIVE MODE')
+
+    # verify that the lock is in place
+    cursor.execute(
+        '''
+        SELECT mode, locktype, granted FROM pg_locks
+        WHERE relation = (SELECT oid FROM pg_class WHERE relname = 'persons')
+        '''
+    )
+    row = cursor.fetchone()
+    assert row is not None
+    assert row == ('AccessExclusiveLock', 'relation', True)
+
+    check.check(pg_instance)
+    expected_tags = _get_expected_tags(check, pg_instance, db=pg_instance['dbname'], table='persons', schema='public')
+
+    for name in _iterate_metric_name(QUERY_PG_CLASS):
+        # Expect no relation metrics to be collected for persons table
+        # because locked relations are skipped in the query
+        aggregator.assert_metric(name, count=0, tags=expected_tags)
+
+    # Release the lock
+    cursor.execute('COMMIT')
+    cursor.close()
+    conn.close()
 
 
 @pytest.mark.integration
@@ -239,6 +282,7 @@ def test_vacuum_age(aggregator, integration_check, pg_instance):
                 'lock_mode:AccessExclusiveLock',
                 'lock_type:relation',
                 'granted:True',
+                'fastpath:False',
                 'table:persons',
                 'schema:public',
             ],

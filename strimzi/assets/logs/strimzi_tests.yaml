@@ -12,6 +12,7 @@ tests:
       stream_type: "stdout"
       timestamp: 1695284727000
     message: "Reconciliation #55(timer) Kafka(kafka/my-cluster): reconciled"
+    status: "info"
     tags:
      - "source:LOGS_SOURCE"
     timestamp: 1695284727000
@@ -25,6 +26,7 @@ tests:
         name: "Main"
       timestamp: 1682588799000
     message: "ClusterOperator 0.34.0 is starting"
+    status: "info"
     tags:
      - "source:LOGS_SOURCE"
     timestamp: 1682588799000
@@ -38,6 +40,7 @@ tests:
         name: "LeaderElector"
       timestamp: 1695286744000
     message: "Exception occurred while releasing lock 'LeaseLock: kafka - strimzi-cluster-operator (strimzi-cluster-operator-675749c788-7x546)'"
+    status: "error"
     tags:
      - "source:LOGS_SOURCE"
     timestamp: 1695286744000
@@ -50,6 +53,7 @@ tests:
         name: "vertx-blocked-thread-checker"
       timestamp: 1695753488495
     message: "BlockedThreadChecker: - Thread Thread[blocking-startup-ops-0,5,main] has been blocked for 323364 ms, time limit is 60000 ms"
+    status: "warn"
     tags:
      - "source:LOGS_SOURCE"
     timestamp: 1695753488495
@@ -63,6 +67,7 @@ tests:
         name: "Main"
       timestamp: 1682588861484
     message: "TopicOperator 0.34.0 is starting"
+    status: "info"
     tags:
      - "source:LOGS_SOURCE"
     timestamp: 1682588861484
@@ -76,6 +81,7 @@ tests:
         name: "CommitProcessor"
       timestamp: 1695753506499
     message: "Committing global session 0x1001486b1980009 (org.apache.zookeeper.server.quorum.LeaderSessionTracker)"
+    status: "info"
     tags:
      - "source:LOGS_SOURCE"
     timestamp: 1695753506499
@@ -88,6 +94,8 @@ tests:
         name: "main"
       timestamp: 1695967177261
     message: "Added plugin 'org.apache.kafka.connect.connector.policy.PrincipalConnectorClientConfigOverridePolicy' (org.apache.kafka.connect.runtime.isolation.DelegatingClassLoader)"
+    status: "info"
     tags:
      - "source:LOGS_SOURCE"
     timestamp: 1695967177261
+

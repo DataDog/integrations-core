@@ -15,7 +15,7 @@ Get metrics from Cassandra in real time to:
 
 The Cassandra check is included in the [Datadog Agent][2] package, so you don't need to install anything else on your Cassandra nodes. It's recommended to use Oracle's JDK for this integration.
 
-**Note**: This check has a limit of 350 metrics per instance. The number of returned metrics is indicated in the info page. You can specify the metrics you are interested in by editing the configuration below. To learn how to customize the metrics to collect see the [JMX documentation][3] for detailed instructions. If you need to monitor more metrics, contact [Datadog support][4].
+**Note**: This check has a limit of 350 metrics per instance. The number of returned metrics is indicated in [the status page][11]. You can specify the metrics you are interested in by editing the configuration below. To learn how to customize the metrics to collect see the [JMX documentation][3] for detailed instructions. If you need to monitor more metrics, contact [Datadog support][4].
 
 ### Configuration
 
@@ -86,7 +86,7 @@ Need help? Contact [Datadog support][4].
 - [How to collect Cassandra metrics][15]
 - [Monitoring Cassandra with Datadog][16]
 
-[1]: https://raw.githubusercontent.com/DataDog/integrations-core/master/cassandra/images/cassandra_dashboard.png
+[1]: https://raw.githubusercontent.com/DataDog/integrations-core/master/cassandra/images/cassandra_dashboard_2.png
 [2]: https://app.datadoghq.com/account/settings/agent/latest
 [3]: https://docs.datadoghq.com/integrations/java/
 [4]: https://docs.datadoghq.com/help/

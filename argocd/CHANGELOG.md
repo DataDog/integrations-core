@@ -2,7 +2,17 @@
 
 <!-- towncrier release notes start -->
 
-## 2.3.0 / 2024-02-16
+## 2.4.0 / 2024-03-22 / Agent 7.53.0
+
+***Added***:
+
+* Collect 'argocd_app_labels' for ArgoCD metric ([#16897](https://github.com/DataDog/integrations-core/pull/16897))
+
+***Fixed***:
+
+* Rename Go inuse_use metric to the correct inuse_bytes name ([#17252](https://github.com/DataDog/integrations-core/pull/17252))
+
+## 2.3.0 / 2024-02-16 / Agent 7.52.0
 
 ***Added***:
 
@@ -18,7 +28,7 @@
 
 ***Added***:
 
-* Collect metrics for ArgoCD ApplicationSet ([#15308](https://github.com/DataDog/integrations-core/pull/15308))
+* Collect metrics for ArgoCD ApplicationSet ([#15308](https://github.com/DataDog/integrations-core/pull/15308)) Thanks [smartfin](https://github.com/smartfin).
 
 ## 2.0.0 / 2023-08-10 / Agent 7.48.0
 

@@ -71,10 +71,19 @@ NEW_1_19_HISTOGRAMS = {
 NEW_1_23_HISTOGRAMS = {
     # (from 1.23) Number of attempts to successfully schedule a pod.
     'scheduler_pod_scheduling_attempts': 'scheduling.pod.scheduling_attempts',
-    # (from 1.23) E2e latency for a pod being scheduled which may include multiple scheduling attempts.
+    # (from 1.23 and deprecated in 1.29.0) E2e latency for a pod being scheduled
+    # which may include multiple scheduling attempts.
     'scheduler_pod_scheduling_duration_seconds': 'scheduling.pod.scheduling_duration',
     # (from 1.23) Scheduling attempt latency in seconds (scheduling algorithm + binding).
     'scheduler_scheduling_attempt_duration_seconds': 'scheduling.attempt_duration',
+}
+
+NEW_1_29_HISTOGRAMS = {
+    # (from 1.29) E2e latency for a pod being scheduled, from the time the pod
+    # enters the scheduling queue and might involve multiple scheduling
+    # attempts.
+    # This replaces the deprecated "scheduler_pod_scheduling_duration_seconds".
+    'scheduler_pod_scheduling_sli_duration_seconds': 'scheduling.pod.scheduling_duration',
 }
 
 TRANSFORM_VALUE_HISTOGRAMS = {
@@ -168,6 +177,7 @@ class KubeSchedulerCheck(KubeLeaderElectionMixin, SliMetricsScraperMixin, OpenMe
                         NEW_1_26_GAUGES,
                         DEPRECARED_SUMMARIES,
                         NEW_1_23_HISTOGRAMS,
+                        NEW_1_29_HISTOGRAMS,
                     ],
                     'ignore_metrics': IGNORE_METRICS,
                 }

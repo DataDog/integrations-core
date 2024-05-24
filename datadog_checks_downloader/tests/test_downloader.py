@@ -12,9 +12,10 @@ import shutil
 import string
 import subprocess
 import sys
+import time
 from collections import defaultdict, namedtuple
 from contextlib import contextmanager
-from datetime import datetime, time
+from datetime import datetime
 from urllib.parse import urljoin
 
 import pytest

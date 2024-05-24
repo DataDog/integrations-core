@@ -26,6 +26,12 @@
             "default": "*",
             "name": "listener_address",
             "prefix": "address"
+        },
+        {
+            "available_values": [],
+            "default": "*",
+            "name": "log_service",
+            "prefix": "service"
         }
     ],
     "title": "Envoy Openmetrics",
@@ -43,16 +49,17 @@
                         "definition": {
                             "background_color": "transparent",
                             "content": "This dashboard provides a high-level overview of your Envoy cluster, allowing you to monitor its performance and resource usage, thus making it easier to identify upstream and downstream errors and bottlenecks.\n",
-                            "font_size": "14",
+                            "font_size": "16",
                             "show_tick": false,
                             "text_align": "left",
                             "tick_edge": "left",
                             "tick_pos": "50%",
-                            "type": "note"
+                            "type": "note",
+                            "vertical_align": "center"
                         },
                         "id": 4619428141584150,
                         "layout": {
-                            "height": 2,
+                            "height": 4,
                             "width": 3,
                             "x": 0,
                             "y": 0
@@ -62,16 +69,17 @@
                         "definition": {
                             "background_color": "transparent",
                             "content": "**Refer to the following resources for more information**\n\n- [Datadog Envoy documentation](https://www.envoyproxy.io/docs/envoy/latest/)\n\n- [Available Envoy metrics](https://docs.datadoghq.com/integrations/envoy/?tab=host#data-collected) \n\n- [How to monitor Envoy using AWS App Mesh](https://www.datadoghq.com/blog/envoy-app-mesh-monitoring/)",
-                            "font_size": "12",
+                            "font_size": "16",
                             "show_tick": false,
                             "text_align": "left",
                             "tick_edge": "left",
                             "tick_pos": "50%",
-                            "type": "note"
+                            "type": "note",
+                            "vertical_align": "center"
                         },
                         "id": 6628811856452136,
                         "layout": {
-                            "height": 2,
+                            "height": 4,
                             "width": 3,
                             "x": 3,
                             "y": 0
@@ -81,7 +89,7 @@
             },
             "id": 1156418925779600,
             "layout": {
-                "height": 5,
+                "height": 7,
                 "width": 6,
                 "x": 0,
                 "y": 0
@@ -95,6 +103,84 @@
                 "title": "Overview",
                 "type": "group",
                 "widgets": [
+                    {
+                        "definition": {
+                            "background_color": "pink",
+                            "content": "Overview of recent Envoy requests, Prometheus endpoints, and monitor statuses.",
+                            "font_size": "16",
+                            "has_padding": true,
+                            "show_tick": false,
+                            "text_align": "center",
+                            "tick_edge": "left",
+                            "tick_pos": "50%",
+                            "type": "note",
+                            "vertical_align": "top"
+                        },
+                        "id": 5070255822309936,
+                        "layout": {
+                            "height": 1,
+                            "width": 6,
+                            "x": 0,
+                            "y": 0
+                        }
+                    },
+                    {
+                        "definition": {
+                            "check": "envoy.openmetrics.health",
+                            "group": "$host",
+                            "group_by": [],
+                            "grouping": "cluster",
+                            "tags": [
+                                "$host"
+                            ],
+                            "title": "Envoy Metrics Endpoint Connected",
+                            "title_align": "left",
+                            "title_size": "16",
+                            "type": "check_status"
+                        },
+                        "id": 5224087274828330,
+                        "layout": {
+                            "height": 2,
+                            "width": 3,
+                            "x": 0,
+                            "y": 1
+                        }
+                    },
+                    {
+                        "definition": {
+                            "autoscale": true,
+                            "precision": 2,
+                            "requests": [
+                                {
+                                    "formulas": [
+                                        {
+                                            "formula": "query1"
+                                        }
+                                    ],
+                                    "queries": [
+                                        {
+                                            "aggregator": "sum",
+                                            "data_source": "metrics",
+                                            "name": "query1",
+                                            "query": "sum:envoy.cluster.upstream_rq.count{$envoy_cluster,$host}.as_count()"
+                                        }
+                                    ],
+                                    "response_format": "scalar"
+                                }
+                            ],
+                            "title": "Incoming Requests Volume in Timeframe",
+                            "title_align": "left",
+                            "title_size": "16",
+                            "type": "query_value"
+                        },
+                        "id": 1627660160110622,
+                        "layout": {
+                            "height": 1,
+                            "width": 3,
+                            "x": 3,
+                            "y": 1
+                        }
+                    },
                     {
                         "definition": {
                             "autoscale": true,
@@ -146,43 +232,8 @@
                         "layout": {
                             "height": 1,
                             "width": 3,
-                            "x": 0,
-                            "y": 0
-                        }
-                    },
-                    {
-                        "definition": {
-                            "autoscale": true,
-                            "precision": 2,
-                            "requests": [
-                                {
-                                    "formulas": [
-                                        {
-                                            "formula": "query1"
-                                        }
-                                    ],
-                                    "queries": [
-                                        {
-                                            "aggregator": "sum",
-                                            "data_source": "metrics",
-                                            "name": "query1",
-                                            "query": "sum:envoy.cluster.upstream_rq.count{$envoy_cluster,$host}.as_count()"
-                                        }
-                                    ],
-                                    "response_format": "scalar"
-                                }
-                            ],
-                            "title": "Incoming Requests Volume in Timeframe",
-                            "title_align": "left",
-                            "title_size": "16",
-                            "type": "query_value"
-                        },
-                        "id": 1627660160110622,
-                        "layout": {
-                            "height": 1,
-                            "width": 3,
                             "x": 3,
-                            "y": 0
+                            "y": 2
                         }
                     },
                     {
@@ -191,7 +242,7 @@
                             "count": 50,
                             "display_format": "countsAndList",
                             "hide_zero_counts": true,
-                            "query": "Envoy instance disconnected from control plane $envoy_cluster $stat_prefix $host",
+                            "query": "tag:integration:envoy",
                             "show_last_triggered": false,
                             "show_priority": false,
                             "sort": "status,asc",
@@ -205,14 +256,14 @@
                             "height": 3,
                             "width": 6,
                             "x": 0,
-                            "y": 1
+                            "y": 3
                         }
                     }
                 ]
             },
             "id": 77976023640490,
             "layout": {
-                "height": 5,
+                "height": 7,
                 "width": 6,
                 "x": 6,
                 "y": 0
@@ -226,6 +277,27 @@
                 "title": "Clusters and Server Stats",
                 "type": "group",
                 "widgets": [
+                    {
+                        "definition": {
+                            "background_color": "purple",
+                            "content": "Cluster and Server stats give a quick overview of the liveliness and performance of Envoy clusters and servers.",
+                            "font_size": "16",
+                            "has_padding": true,
+                            "show_tick": false,
+                            "text_align": "center",
+                            "tick_edge": "left",
+                            "tick_pos": "50%",
+                            "type": "note",
+                            "vertical_align": "top"
+                        },
+                        "id": 7402532067479482,
+                        "layout": {
+                            "height": 1,
+                            "width": 12,
+                            "x": 0,
+                            "y": 0
+                        }
+                    },
                     {
                         "definition": {
                             "has_search_bar": "auto",
@@ -262,7 +334,7 @@
                             "height": 4,
                             "width": 6,
                             "x": 0,
-                            "y": 0
+                            "y": 1
                         }
                     },
                     {
@@ -295,7 +367,7 @@
                             "height": 4,
                             "width": 6,
                             "x": 6,
-                            "y": 0
+                            "y": 1
                         }
                     },
                     {
@@ -343,7 +415,7 @@
                             "height": 3,
                             "width": 4,
                             "x": 0,
-                            "y": 4
+                            "y": 5
                         }
                     },
                     {
@@ -391,7 +463,7 @@
                             "height": 3,
                             "width": 4,
                             "x": 4,
-                            "y": 4
+                            "y": 5
                         }
                     },
                     {
@@ -430,17 +502,17 @@
                             "height": 3,
                             "width": 4,
                             "x": 8,
-                            "y": 4
+                            "y": 5
                         }
                     }
                 ]
             },
             "id": 464064220295152,
             "layout": {
-                "height": 8,
+                "height": 9,
                 "width": 12,
                 "x": 0,
-                "y": 5
+                "y": 7
             }
         },
         {
@@ -1092,7 +1164,7 @@
                 "height": 14,
                 "width": 12,
                 "x": 0,
-                "y": 13
+                "y": 16
             }
         },
         {
@@ -1742,7 +1814,7 @@
                 "is_column_break": true,
                 "width": 12,
                 "x": 0,
-                "y": 27
+                "y": 30
             }
         },
         {
@@ -2252,7 +2324,7 @@
                 "height": 11,
                 "width": 12,
                 "x": 0,
-                "y": 41
+                "y": 44
             }
         },
         {
@@ -2469,7 +2541,6 @@
                                 }
                             ],
                             "show_legend": true,
-                            "time": {},
                             "title": "Deprecate Feature Usage",
                             "title_align": "left",
                             "title_size": "16",
@@ -2586,7 +2657,112 @@
                 "height": 8,
                 "width": 12,
                 "x": 0,
-                "y": 52
+                "y": 55
+            }
+        },
+        {
+            "definition": {
+                "background_color": "vivid_pink",
+                "layout_type": "ordered",
+                "show_title": true,
+                "title": "Envoy Logs",
+                "type": "group",
+                "widgets": [
+                    {
+                        "definition": {
+                            "background_color": "pink",
+                            "content": "Envoy logs are aggregated based on patterns.",
+                            "font_size": "16",
+                            "has_padding": true,
+                            "show_tick": false,
+                            "text_align": "center",
+                            "tick_edge": "left",
+                            "tick_pos": "50%",
+                            "type": "note",
+                            "vertical_align": "top"
+                        },
+                        "id": 8476296512139710,
+                        "layout": {
+                            "height": 1,
+                            "width": 12,
+                            "x": 0,
+                            "y": 0
+                        }
+                    },
+                    {
+                        "definition": {
+                            "requests": [
+                                {
+                                    "columns": [
+                                        {
+                                            "field": "status_line",
+                                            "width": "auto"
+                                        },
+                                        {
+                                            "field": "matches",
+                                            "width": "auto"
+                                        },
+                                        {
+                                            "field": "volume",
+                                            "width": "auto"
+                                        },
+                                        {
+                                            "field": "service",
+                                            "width": "auto"
+                                        },
+                                        {
+                                            "field": "status",
+                                            "width": "auto"
+                                        },
+                                        {
+                                            "field": "@http.status_code",
+                                            "width": "auto"
+                                        },
+                                        {
+                                            "field": "message",
+                                            "width": "auto"
+                                        }
+                                    ],
+                                    "query": {
+                                        "data_source": "logs_pattern_stream",
+                                        "group_by": [
+                                            {
+                                                "facet": "service"
+                                            },
+                                            {
+                                                "facet": "status"
+                                            },
+                                            {
+                                                "facet": "@http.status_code"
+                                            }
+                                        ],
+                                        "indexes": [],
+                                        "query_string": "source:envoy $log_service $host "
+                                    },
+                                    "response_format": "event_list"
+                                }
+                            ],
+                            "title": "Envoy Logs",
+                            "title_align": "left",
+                            "title_size": "16",
+                            "type": "list_stream"
+                        },
+                        "id": 1144868225656048,
+                        "layout": {
+                            "height": 7,
+                            "width": 12,
+                            "x": 0,
+                            "y": 1
+                        }
+                    }
+                ]
+            },
+            "id": 7041784249560904,
+            "layout": {
+                "height": 9,
+                "width": 12,
+                "x": 0,
+                "y": 63
             }
         }
     ]

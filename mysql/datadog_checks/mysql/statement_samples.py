@@ -12,6 +12,8 @@ from operator import attrgetter
 import pymysql
 from cachetools import TTLCache
 
+from datadog_checks.mysql.cursor import CommenterCursor, CommenterDictCursor
+
 try:
     import datadog_agent
 except ImportError:
@@ -29,7 +31,13 @@ from datadog_checks.base.utils.db.utils import (
 from datadog_checks.base.utils.serialization import json
 from datadog_checks.base.utils.tracking import tracked_method
 
-from .util import DatabaseConfigurationError, StatementTruncationState, get_truncation_state, warning_with_tags
+from .util import (
+    DatabaseConfigurationError,
+    StatementTruncationState,
+    connect_with_autocommit,
+    get_truncation_state,
+    warning_with_tags,
+)
 
 SUPPORTED_EXPLAIN_STATEMENTS = frozenset({'select', 'table', 'delete', 'insert', 'replace', 'update', 'with'})
 
@@ -146,8 +154,8 @@ PYMYSQL_MISSING_EXPLAIN_STATEMENT_PROC_ERRORS = frozenset(
     }
 )
 
-# the max value of signed BIGINT type column
-BIGINT_MAX = 2**63 - 1
+# the max value of unsigned BIGINT type column
+BIGINT_MAX = 2**64 - 1
 
 
 class DBExplainErrorCode(Enum):
@@ -270,7 +278,7 @@ class MySQLStatementSamples(DBMAsyncJob):
         :return:
         """
         if not self._db:
-            self._db = pymysql.connect(**self._connection_args)
+            self._db = connect_with_autocommit(**self._connection_args)
         return self._db
 
     def _close_db_conn(self):
@@ -328,7 +336,7 @@ class MySQLStatementSamples(DBMAsyncJob):
     @tracked_method(agent_check_getter=attrgetter('_check'))
     def _get_new_events_statements_current(self):
         start = time.time()
-        with closing(self._get_db_connection().cursor(pymysql.cursors.DictCursor)) as cursor:
+        with closing(self._get_db_connection().cursor(CommenterDictCursor)) as cursor:
             self._cursor_run(
                 cursor,
                 "set @uptime = {}".format(UPTIME_SUBQUERY.format(global_status_table=self._global_status_table)),
@@ -396,7 +404,7 @@ class MySQLStatementSamples(DBMAsyncJob):
         if not self._explained_statements_ratelimiter.acquire(query_cache_key):
             return None
 
-        with closing(self._get_db_connection().cursor()) as cursor:
+        with closing(self._get_db_connection().cursor(CommenterCursor)) as cursor:
             plan, error_states = self._explain_statement(
                 cursor, row['sql_text'], row['current_schema'], obfuscated_statement, query_signature
             )
@@ -488,7 +496,7 @@ class MySQLStatementSamples(DBMAsyncJob):
         I.e. (events_statements_current, events_statements_history)
         :return:
         """
-        with closing(self._get_db_connection().cursor()) as cursor:
+        with closing(self._get_db_connection().cursor(CommenterCursor)) as cursor:
             self._cursor_run(cursor, ENABLED_STATEMENTS_CONSUMERS_QUERY)
             return {r[0] for r in cursor.fetchall()}
 
@@ -498,7 +506,7 @@ class MySQLStatementSamples(DBMAsyncJob):
         :return:
         """
         try:
-            with closing(self._get_db_connection().cursor()) as cursor:
+            with closing(self._get_db_connection().cursor(CommenterCursor)) as cursor:
                 self._cursor_run(cursor, 'CALL {}()'.format(self._events_statements_enable_procedure))
         except pymysql.err.DatabaseError as e:
             self._log.debug(

@@ -2,24 +2,100 @@
 
 <!-- towncrier release notes start -->
 
-## 17.0.0 / 2024-02-16
+## 18.2.2 / 2024-05-09
 
-***Changed***:
+***Fixed***:
 
-* postgres schemas: don't exclude tables without metrics from schema collection ([#16834](https://github.com/DataDog/integrations-core/pull/16834))
-* don't require relation metrics to be enabled to collect schemas ([#16870](https://github.com/DataDog/integrations-core/pull/16870))
+* Decreased database instance collection interval from 1800 seconds to 300 seconds to improve reliability ([#17535](https://github.com/DataDog/integrations-core/pull/17535))
+
+## 18.2.1 / 2024-04-30
+
+***Fixed***:
+
+* Fixed a bug where schemas with tables of the same name were incorrectly reporting indexes of those tables multiple times ([#17480](https://github.com/DataDog/integrations-core/pull/17480))
+
+## 18.2.0 / 2024-04-26
 
 ***Added***:
 
-* [DBMON-3300] collect function & count metrics for auto discovered databases ([#16530](https://github.com/DataDog/integrations-core/pull/16530))
-* [Postgres] - Allow configuration of ignored patterns for settings collection, under the `ignored_settings_patterns` key ([#16634](https://github.com/DataDog/integrations-core/pull/16634))
-* [DBMON-3271] DBM integrations now defaulted to use new go-sqllexer pkg to obfuscate sql statements ([#16681](https://github.com/DataDog/integrations-core/pull/16681))
+* Added collect_checksum_metrics option to collect Postgres failed checksum counts for databases with it enabled. ([#17203](https://github.com/DataDog/integrations-core/pull/17203))
+* Collect postgres setting parameter `source`, `sourcefile` and `pending_restart` from pg_settings ([#17250](https://github.com/DataDog/integrations-core/pull/17250))
+* Collect the postgres table owner field in postgres schema payloads, which will be displayed in the database-monitoring schemas feature. ([#17314](https://github.com/DataDog/integrations-core/pull/17314))
+* Update dependencies ([#17319](https://github.com/DataDog/integrations-core/pull/17319))
+* Upgrade boto dependencies ([#17332](https://github.com/DataDog/integrations-core/pull/17332))
+* Add new postgresql.running metric ([#17418](https://github.com/DataDog/integrations-core/pull/17418))
+* Add fastpath tag to lock metrics ([#17451](https://github.com/DataDog/integrations-core/pull/17451))
+
+***Fixed***:
+
+* Fixed bug where `statement_timeout` setting incorrectly reflected integration connection value instead of database level
+  - Adjusted `statement_timeout` to apply at the session level post-database connection.
+  - Modified the `pg_settings` query to select `reset_val` when sourced from 'session', guaranteeing the retrieval of the accurate server-level setting. ([#17264](https://github.com/DataDog/integrations-core/pull/17264))
+* Improved performance of database schema collection. ([#17381](https://github.com/DataDog/integrations-core/pull/17381))
+* Fix default value for pg_stat_statements_view ([#17400](https://github.com/DataDog/integrations-core/pull/17400))
+
+## 18.1.1 / 2024-04-17 / Agent 7.53.0
+
+***Fixed***:
+
+* Revert Postgres Optimization (#17187).
+
+  This appears to lead to inflated metrics in certain cases. Removing this optimization while we fix the inflated metrics. ([#17397](https://github.com/DataDog/integrations-core/pull/17397))
+
+## 18.1.0 / 2024-03-27
+
+***Added***:
+
+* Add config option `propagate_agent_tags` to propagate agent tags from `datadog.yaml` to postgres check. By default, the propagation is disabled. ([#17122](https://github.com/DataDog/integrations-core/pull/17122))
+
+## 18.0.0 / 2024-03-22
+
+***Changed***:
+
+* PostgreSQL: Enable replication role tag by default ([#16895](https://github.com/DataDog/integrations-core/pull/16895))
+* PostgreSQL: Optimise table count query. postgresql.table.count metric doesn't use max_relations parameter anymore and will always yield the total number of tables per schema. Parent table of partitions tables will also be included in the table count for PG 11, 12 and 13. All versions after PG 14 already included parent table. ([#17109](https://github.com/DataDog/integrations-core/pull/17109))
+
+***Added***:
+
+* Update dependencies ([#16899](https://github.com/DataDog/integrations-core/pull/16899)), ([#16963](https://github.com/DataDog/integrations-core/pull/16963))
+* PostgreSQL: Add PostgreSQL server version as a tag ([#16900](https://github.com/DataDog/integrations-core/pull/16900))
+* PostgreSQL: Add system_identifier as a metric tag ([#16911](https://github.com/DataDog/integrations-core/pull/16911))
+* Set `collect_wal_metrics` to false will disable wal file metrics collection for all pg versions ([#16990](https://github.com/DataDog/integrations-core/pull/16990))
+* Perform database connection health check at the start of check run ([#17007](https://github.com/DataDog/integrations-core/pull/17007))
+* Added support for new query metrics wal_bytes, wal_records, and wal_fpi for PG versions >= 13. These metrics can now be accessed under postgresql.queries.wal_bytes, postgresql.queries.wal_records, and postgresql.queries.wal_fpi. In order to collect these metrics Database Monitoring must be enabled. ([#17144](https://github.com/DataDog/integrations-core/pull/17144))
+* Added support for collecting total_plan_time, max_plan_time, mean_plan_time , min_plan_time, stddev_plan_time query metrics for PostgreSQL versions 13 and above.
+  These new query metrics can now be accessed under postgresql.queries.total_plan_time, postgresql.queries.max_plan_time, postgresql.queries.mean_plan_time, postgresql.queries.min_plan_time, and postgresql.queries.stddev_plan_time.
+  To collect these metrics Database monitoring needs to be enabled. You will also need to enable pg_stat_statements.track_planning in your database. ([#17148](https://github.com/DataDog/integrations-core/pull/17148))
+* Tag postgres integration queries with service:datadog-agent ([#17156](https://github.com/DataDog/integrations-core/pull/17156))
+
+***Fixed***:
+
+* Performance optimization: Limit how many records are pulled from pg_stat_statements.
+
+  There's no need to send a metric if no calls of a query have occurred since the last check. So this makes an additional up-front query to pg_stat_statements that pulls just enough data to create a mapping from queryid to calls which we cache in between runs. We then use that to determine what has been executed since the last check, and only query full metrics data for queries that have been executed.
+
+  In the benchmark environment, this led to a 98% reduction in how many queries need to be returned to the Agent, which reduces Agent processing time, memory consumption, and network ingress. ([#17187](https://github.com/DataDog/integrations-core/pull/17187))
+* Skip relations with granted AccessExclusiveLock to avoid relations metrics query timeout ([#17234](https://github.com/DataDog/integrations-core/pull/17234))
+* Fix NoneType error in schema collection when partition tables have no activities ([#17235](https://github.com/DataDog/integrations-core/pull/17235))
+
+## 17.0.0 / 2024-02-16 / Agent 7.52.0
+
+***Changed***:
+
+* Postgres schemas: don't exclude tables without metrics from schema collection ([#16834](https://github.com/DataDog/integrations-core/pull/16834))
+* Don't require relation metrics to be enabled to collect schemas ([#16870](https://github.com/DataDog/integrations-core/pull/16870))
+
+***Added***:
+
+* Collect function & count metrics for auto discovered databases ([#16530](https://github.com/DataDog/integrations-core/pull/16530))
+* Allow configuration of ignored patterns for settings collection, under the `ignored_settings_patterns` key ([#16634](https://github.com/DataDog/integrations-core/pull/16634))
+* DBM integrations now defaulted to use new go-sqllexer pkg to obfuscate sql statements ([#16681](https://github.com/DataDog/integrations-core/pull/16681))
 * Update dependencies ([#16788](https://github.com/DataDog/integrations-core/pull/16788))
 * Bump dependencies ([#16858](https://github.com/DataDog/integrations-core/pull/16858))
 
 ***Fixed***:
 
-* update default table schema collection limit to 300 ([#16880](https://github.com/DataDog/integrations-core/pull/16880))
+* Update default table schema collection limit to 300 ([#16880](https://github.com/DataDog/integrations-core/pull/16880))
 
 ## 16.1.1 / 2024-01-15 / Agent 7.51.0
 
@@ -49,27 +125,27 @@
 * Bump the Python version from py3.9 to py3.11 ([#15997](https://github.com/DataDog/integrations-core/pull/15997))
 * PostgreSQL: Add metrics for logical replication subscriptions ([#16191](https://github.com/DataDog/integrations-core/pull/16191))
 * PostgreSQL: Add replication slots stats metric from pg_stat_replication_slots ([#16197](https://github.com/DataDog/integrations-core/pull/16197))
-* [DBMON-3147] Add managed_authentication config option to explicitly enable or disable AWS IAM Authentication and Azure Managed Identity Authentication ([#16221](https://github.com/DataDog/integrations-core/pull/16221))
+* Add managed_authentication config option to explicitly enable or disable AWS IAM Authentication and Azure Managed Identity Authentication ([#16221](https://github.com/DataDog/integrations-core/pull/16221))
 * Add metrics tracking vacuum, analyze and cluster progress ([#16236](https://github.com/DataDog/integrations-core/pull/16236))
 * PostgreSQL: Add granted tag to `postgresql.locks` metric ([#16268](https://github.com/DataDog/integrations-core/pull/16268))
 * Add metrics tracking vacuum and analyze age ([#16272](https://github.com/DataDog/integrations-core/pull/16272))
 * Create `postgresql.create_index.*` metrics tracking progress of index creation ([#16330](https://github.com/DataDog/integrations-core/pull/16330))
 * Update dependencies ([#16394](https://github.com/DataDog/integrations-core/pull/16394)), ([#16448](https://github.com/DataDog/integrations-core/pull/16448)), ([#16502](https://github.com/DataDog/integrations-core/pull/16502))
-* add new obfuscator options to customize SQL obfuscation and normaliza… ([#16429](https://github.com/DataDog/integrations-core/pull/16429))
+* Add new obfuscator options to customize SQL obfuscation and normaliza… ([#16429](https://github.com/DataDog/integrations-core/pull/16429))
 
 ***Fixed***:
 
 * PostgreSQL: Exclude manually launched vacuum from pg_stat_activity metrics ([#16206](https://github.com/DataDog/integrations-core/pull/16206))
 * Exclude manual vacuum from reported xid and xmin age ([#16290](https://github.com/DataDog/integrations-core/pull/16290))
-* add rdsadmin to autodiscovery exclusion list ([#16396](https://github.com/DataDog/integrations-core/pull/16396))
-* [DBMON-3302] emit correct error message when explain parameterized query fails ([#16516](https://github.com/DataDog/integrations-core/pull/16516))
-* [DBMON-3299] Improve edge case handling on partitioned table activity query  when a partitioned table has no children (partitioned sub-tables) ([#16517](https://github.com/DataDog/integrations-core/pull/16517))
+* Add rdsadmin to autodiscovery exclusion list ([#16396](https://github.com/DataDog/integrations-core/pull/16396))
+* Emit correct error message when explain parameterized query fails ([#16516](https://github.com/DataDog/integrations-core/pull/16516))
+* Improve edge case handling on partitioned table activity query  when a partitioned table has no children (partitioned sub-tables) ([#16517](https://github.com/DataDog/integrations-core/pull/16517))
 
 ## 15.3.1 / 2023-12-28 / Agent 7.50.2
 
 ***Fixed***:
 
-* Revert "[DBMON-2989] report sql obfuscation error count (#15990)" ([#16439](https://github.com/DataDog/integrations-core/pull/16439))
+* Revert "report sql obfuscation error count (#15990)" ([#16439](https://github.com/DataDog/integrations-core/pull/16439))
 
 ## 15.3.0 / 2023-11-10 / Agent 7.50.0
 

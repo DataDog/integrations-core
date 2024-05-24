@@ -35,7 +35,7 @@ from .common import (
     _get_expected_replication_tags,
     _get_expected_tags,
 )
-from .utils import _get_conn, _get_superconn, requires_over_10, run_one_check
+from .utils import _get_conn, _get_superconn, requires_over_10, requires_over_13, run_one_check
 
 pytestmark = [pytest.mark.integration, pytest.mark.usefixtures('dd_environment')]
 
@@ -75,6 +75,93 @@ def test_dbm_enabled_config(integration_check, dbm_instance, dbm_enabled_key, db
     dbm_instance[dbm_enabled_key] = dbm_enabled
     check = integration_check(dbm_instance)
     assert check._config.dbm_enabled == dbm_enabled
+
+
+@requires_over_10
+def test_statement_metrics_multiple_pgss_rows_single_query_signature(
+    aggregator,
+    integration_check,
+    dbm_instance,
+    datadog_agent,
+):
+    # don't need samples for this test
+    dbm_instance['query_samples'] = {'enabled': False}
+    dbm_instance['query_activity'] = {'enabled': False}
+    dbm_instance['query_metrics'] = {'enabled': True, 'run_sync': True, 'incremental_query_metrics': True}
+    connections = {}
+
+    def normalize_query(q):
+        # Remove the quotes from below:
+        normalized = ""
+        for s in ["'one'", "'two'"]:
+            if s in q:
+                normalized = q.replace(s, "?")
+                break
+
+        return normalized
+
+    def obfuscate_sql(query, options=None):
+        if query.startswith('SET application_name'):
+            return json.dumps({'query': normalize_query(query), 'metadata': {}})
+        return json.dumps({'query': query, 'metadata': {}})
+
+    queries = ["SET application_name = %s", "SET application_name = %s"]
+
+    # These queries will have the same query signature but different queryids in pg_stat_statements
+    def _run_query(idx):
+        query = queries[idx]
+        user = "bob"
+        password = "bob"
+        dbname = "datadog_test"
+        if dbname not in connections:
+            connections[dbname] = psycopg2.connect(host=HOST, dbname=dbname, user=user, password=password)
+
+        args = ('two',)
+        if idx == 1:
+            args = ('one',)
+
+        connections[dbname].cursor().execute(query, args)
+
+    check = integration_check(dbm_instance)
+    check._connect()
+    # Execute the query with the mocked obfuscate_sql. The result should produce an event payload with the metadata.
+    with mock.patch.object(datadog_agent, 'obfuscate_sql', passthrough=True) as mock_agent:
+        mock_agent.side_effect = obfuscate_sql
+
+        check = integration_check(dbm_instance)
+        check._connect()
+
+        # Seed a bunch of calls into pg_stat_statements
+        for _ in range(10):
+            _run_query(1)
+
+        _run_query(0)
+        run_one_check(check, dbm_instance, cancel=False)
+
+        # Call one query
+        _run_query(0)
+        run_one_check(check, dbm_instance, cancel=False)
+        aggregator.reset()
+
+        # Call other query that maps to same query signature
+        _run_query(1)
+        run_one_check(check, dbm_instance, cancel=False)
+
+        obfuscated_param = '?'
+        query0 = queries[0] % (obfuscated_param,)
+        query_signature = compute_sql_signature(query0)
+        events = aggregator.get_event_platform_events("dbm-metrics")
+
+        assert len(events) > 0
+
+        matching_rows = [r for r in events[0]['postgres_rows'] if r['query_signature'] == query_signature]
+
+        assert len(matching_rows) == 1
+
+        assert matching_rows[0]['calls'] == 1
+
+    for conn in connections.values():
+        conn.close()
 
 
 statement_samples_keys = ["query_samples", "statement_samples"]
@@ -349,6 +436,43 @@ def test_statement_metrics_cloud_metadata(
         conn.close()
 
 
+@requires_over_13
+def test_wal_metrics(aggregator, integration_check, dbm_instance):
+    dbm_instance['pg_stat_statements_view'] = "pg_stat_statements"
+    # don't need samples for this test
+    dbm_instance['query_samples'] = {'enabled': False}
+    dbm_instance['query_activity'] = {'enabled': False}
+    # very low collection interval for test purposes
+    dbm_instance['query_metrics'] = {'enabled': True, 'run_sync': True, 'collection_interval': 0.1}
+
+    connections = {}
+
+    def _run_queries():
+        for user, password, dbname, query, arg in SAMPLE_QUERIES:
+            if dbname not in connections:
+                connections[dbname] = psycopg2.connect(host=HOST, dbname=dbname, user=user, password=password)
+            connections[dbname].cursor().execute(query, (arg,))
+
+    check = integration_check(dbm_instance)
+    check._connect()
+
+    _run_queries()
+    run_one_check(check, dbm_instance)
+    _run_queries()
+    run_one_check(check, dbm_instance)
+
+    events = aggregator.get_event_platform_events("dbm-metrics")
+    assert len(events) == 1, "should capture exactly one metrics payload"
+    event = events[0]
+
+    assert all('wal_bytes' in entry for entry in event['postgres_rows'])
+    assert all('wal_fpi' in entry for entry in event['postgres_rows'])
+    assert all('wal_bytes' in entry for entry in event['postgres_rows'])
+
+    for conn in connections.values():
+        conn.close()
+
+
 def test_statement_metrics_with_duplicates(aggregator, integration_check, dbm_instance, datadog_agent):
     # don't need samples for this test
     dbm_instance['query_samples'] = {'enabled': False}
@@ -594,16 +718,14 @@ def test_failed_explain_handling(
             [{'code': 'failed_function', 'message': "<class 'psycopg2.errors.UndefinedFunction'>"}],
             StatementTruncationState.not_truncated.value,
             [
-                'Unable to collect execution plans in dbname=dogs_nofunc. Check that the '
-                'function datadog.explain_statement exists in the database. See '
-                'https://docs.datadoghq.com/database_monitoring/setup_postgres/'
-                'troubleshooting#undefined-explain-function for more details: function '
-                'datadog.explain_statement(unknown) does not exist\nLINE 1: SELECT '
-                'datadog.explain_statement($stmt$SELECT * FROM pg_stat...\n               '
-                '^\nHINT:  No function matches the given name and argument types. You might need to add '
-                'explicit type casts.\n'
-                '\n'
-                'code=undefined-explain-function dbname=dogs_nofunc host=stubbed.hostname',
+                "Unable to collect execution plans in dbname=dogs_nofunc. Check that the function "
+                "datadog.explain_statement exists in the database. See "
+                "https://docs.datadoghq.com/database_monitoring/setup_postgres/troubleshooting#undefined-explain-function"
+                " for more details: function datadog.explain_statement(unknown) does not exist\nLINE 1: "
+                "/* service='datadog-agent' */ SELECT datadog.explain_stateme...\n"
+                "                                             ^\nHINT:  No function matches the given name"
+                " and argument types. You might need to add explicit type casts.\n\ncode=undefined-explain-function "
+                "dbname=dogs_nofunc host=stubbed.hostname",
             ],
         ),
         (
@@ -1841,7 +1963,7 @@ def test_pg_stat_statements_dealloc(aggregator, integration_check, dbm_instance_
     with conn.cursor() as cur:
         # pg_stat_statements_reset should be tracked
         # Do enough queries to reach the maximum
-        for i in range(101 - count_statements):
+        for i in range(102 - count_statements):
             parameters = ','.join([str(a) for a in range(i)])
             cur.execute("select {};".format(parameters))
 
@@ -1851,3 +1973,42 @@ def test_pg_stat_statements_dealloc(aggregator, integration_check, dbm_instance_
     if float(POSTGRES_VERSION) >= 14.0:
         aggregator.assert_metric("postgresql.pg_stat_statements.dealloc", value=1, tags=expected_tags)
     aggregator.assert_metric("postgresql.pg_stat_statements.count", tags=expected_tags)
+
+
+@requires_over_13
+def test_plan_time_metrics(aggregator, integration_check, dbm_instance):
+    dbm_instance['pg_stat_statements_view'] = "pg_stat_statements"
+    # don't need samples for this test
+    dbm_instance['query_samples'] = {'enabled': False}
+    dbm_instance['query_activity'] = {'enabled': False}
+    # very low collection interval for test purposes
+    dbm_instance['query_metrics'] = {'enabled': True, 'run_sync': True, 'collection_interval': 0.1}
+
+    connections = {}
+
+    def _run_queries():
+        for user, password, dbname, query, arg in SAMPLE_QUERIES:
+            if dbname not in connections:
+                connections[dbname] = psycopg2.connect(host=HOST, dbname=dbname, user=user, password=password)
+            connections[dbname].cursor().execute(query, (arg,))
+
+    check = integration_check(dbm_instance)
+    check._connect()
+
+    _run_queries()
+    run_one_check(check, dbm_instance)
+    _run_queries()
+    run_one_check(check, dbm_instance)
+
+    events = aggregator.get_event_platform_events("dbm-metrics")
+    assert len(events) == 1, "should capture exactly one metrics payload"
+    event = events[0]
+
+    assert all('total_plan_time' in entry for entry in event['postgres_rows'])
+    assert all('min_plan_time' in entry for entry in event['postgres_rows'])
+    assert all('max_plan_time' in entry for entry in event['postgres_rows'])
+    assert all('mean_plan_time' in entry for entry in event['postgres_rows'])
+    assert all('stddev_plan_time' in entry for entry in event['postgres_rows'])
+
+    for conn in connections.values():
+        conn.close()

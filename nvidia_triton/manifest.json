@@ -15,7 +15,9 @@
       "Supported OS::Linux",
       "Supported OS::Windows",
       "Supported OS::macOS",
-      "Category::Log Collection"
+      "Category::Log Collection",
+      "Category::AI/ML",
+      "Submitted Data Type::Metrics"
     ]
   },
   "assets": {
@@ -42,7 +44,7 @@
       "auto_install": true
     },
     "dashboards": {
-      "nvidia_triton": "assets/dashboards/nvidia_triton_overview.json"
+      "Nvidia Triton Overview": "assets/dashboards/nvidia_triton_overview.json"
     },
     "monitors": {
       "[Nvidia Triton] GPU utilization is high": "assets/monitors/gpu_utilization.json",

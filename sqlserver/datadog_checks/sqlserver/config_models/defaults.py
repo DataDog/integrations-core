@@ -68,12 +68,20 @@ def instance_include_db_fragmentation_metrics():
     return False
 
 
+def instance_include_db_fragmentation_metrics_tempdb():
+    return False
+
+
 def instance_include_fci_metrics():
     return False
 
 
 def instance_include_index_usage_metrics():
     return True
+
+
+def instance_include_index_usage_metrics_tempdb():
+    return False
 
 
 def instance_include_instance_metrics():

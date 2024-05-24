@@ -3,12 +3,17 @@
 # Licensed under a 3-clause BSD style license (see LICENSE)
 from __future__ import division
 
+import json
+import time
 from copy import deepcopy
 from functools import cached_property
 
+from cachetools import TTLCache
 from packaging.version import Version
 
 from datadog_checks.base import AgentCheck, is_affirmative
+from datadog_checks.base.utils.db.utils import default_json_event_encoding
+from datadog_checks.mongo.__about__ import __version__
 from datadog_checks.mongo.api import CRITICAL_FAILURE, MongoApi
 from datadog_checks.mongo.collectors import (
     CollStatsCollector,
@@ -28,6 +33,11 @@ from datadog_checks.mongo.common import SERVICE_CHECK_NAME, MongosDeployment, Re
 from datadog_checks.mongo.config import MongoConfig
 
 from . import metrics
+
+try:
+    import datadog_agent
+except ImportError:
+    from ..stubs import datadog_agent
 
 long = int
 
@@ -74,6 +84,13 @@ class MongoDb(AgentCheck):
 
         self._api_client = None
         self._mongo_version = None
+        self._resolved_hostname = None
+
+        # _database_instance_emitted: limit the collection and transmission of the database instance metadata
+        self._database_instance_emitted = TTLCache(
+            maxsize=1,
+            ttl=self._config.database_instance_collection_interval,
+        )  # type: TTLCache
 
         self.diagnosis.register(self._diagnose_tls)
 
@@ -111,8 +128,9 @@ class MongoDb(AgentCheck):
                     "your mongo version is %s",
                     self._mongo_version,
                 )
+        dbstats_tag_dbname = self._config.dbstats_tag_dbname
         for db_name in all_dbs:
-            potential_collectors.append(DbStatCollector(self, db_name, tags))
+            potential_collectors.append(DbStatCollector(self, db_name, dbstats_tag_dbname, tags))
 
         # Custom queries are always collected except if the node is a secondary or an arbiter in a replica set.
         # It is possible to collect custom queries from secondary nodes as well but this has to be explicitly
@@ -163,15 +181,49 @@ class MongoDb(AgentCheck):
 
         return metrics_to_collect
 
-    def _refresh_replica_role(self):
-        if self.api_client.deployment_type is None or isinstance(self.api_client.deployment_type, ReplicaSetDeployment):
+    def _refresh_deployment(self):
+        if (
+            self.api_client.deployment_type is None  # First run
+            or isinstance(
+                self.api_client.deployment_type, ReplicaSetDeployment
+            )  # Replica set members and state can change
+            or isinstance(self.api_client.deployment_type, MongosDeployment)  # Mongos shard map can change
+        ):
+            deployment_type_before = self.api_client.deployment_type
             self.log.debug("Refreshing deployment type")
             self.api_client.refresh_deployment_type()
+            if self.api_client.deployment_type != deployment_type_before:
+                self.log.debug(
+                    "Deployment type has changed from %s to %s", deployment_type_before, self.api_client.deployment_type
+                )
+                # database_instance metadata is tied to the deployment type
+                # so we need to reset it when the deployment type changes
+                # this way new metadata will be emitted
+                self._database_instance_emitted.clear()
+
+    @property
+    def internal_resource_tags(self):
+        '''
+        Return the internal resource tags for the database instance.
+        '''
+        if not self._resolved_hostname:
+            return []
+        return [f"dd.internal.resource:database_instance:{self._resolved_hostname}"]
+
+    def _get_tags(self, include_deployment_tags=False, include_internal_resource_tags=False):
+        tags = deepcopy(self._config.metric_tags)
+        if include_deployment_tags:
+            tags.extend(self.api_client.deployment_type.deployment_tags)
+        if include_internal_resource_tags:
+            tags.extend(self.internal_resource_tags)
+        return tags
 
     def check(self, _):
         try:
             self._refresh_metadata()
+            self._refresh_deployment()
             self._collect_metrics()
+            self._send_database_instance_metadata()
         except CRITICAL_FAILURE as e:
             self.service_check(SERVICE_CHECK_NAME, AgentCheck.CRITICAL, tags=self._config.service_check_tags)
             self._unset_metadata()
@@ -181,31 +233,24 @@ class MongoDb(AgentCheck):
 
     def _refresh_metadata(self):
         if self._mongo_version is None:
-            self.log.debug('No metadata present, refreshing it.')
+            self.log.debug('No mongo_version metadata present, refreshing it.')
             self._mongo_version = self.api_client.server_info().get('version', '0.0')
             self._mongo_version_parsed = Version(self._mongo_version.split("-")[0])
             self.set_metadata('version', self._mongo_version)
             self.log.debug('version: %s', self._mongo_version)
+        if self._resolved_hostname is None:
+            self._resolved_hostname = self.api_client.hostname
+            self.set_metadata('resolved_hostname', self._resolved_hostname)
+            self.log.debug('resolved_hostname: %s', self._resolved_hostname)
 
     def _unset_metadata(self):
         self.log.debug('Due to connection failure we will need to reset the metadata.')
         self._mongo_version = None
+        self._resolved_hostname = None
 
     def _collect_metrics(self):
-        self._refresh_replica_role()
-        tags = deepcopy(self._config.metric_tags)
         deployment = self.api_client.deployment_type
-        if isinstance(deployment, ReplicaSetDeployment):
-            tags.extend(
-                [
-                    "replset_name:{}".format(deployment.replset_name),
-                    "replset_state:{}".format(deployment.replset_state_name),
-                ]
-            )
-            if deployment.use_shards:
-                tags.append('sharding_cluster_role:{}'.format(deployment.cluster_role))
-        elif isinstance(deployment, MongosDeployment):
-            tags.append('sharding_cluster_role:mongos')
+        tags = self._get_tags(include_deployment_tags=True, include_internal_resource_tags=True)
 
         dbnames = self._get_db_names(self.api_client, deployment, tags)
         self.refresh_collectors(deployment, dbnames, tags)
@@ -276,3 +321,29 @@ class MongoDb(AgentCheck):
                 name,
                 f"file `{path}` provided as the `{option_name}` exists and is readable",
             )
+
+    def _send_database_instance_metadata(self):
+        deployment = self.api_client.deployment_type
+        if self._resolved_hostname not in self._database_instance_emitted:
+            # DO NOT emit with internal resource tags, as the metadata event is used to CREATE the databse instance
+            tags = self._get_tags(include_deployment_tags=True, include_internal_resource_tags=False)
+            mongodb_instance_metadata = {"cluster_name": self._config.cluster_name} | deployment.instance_metadata
+            database_instance = {
+                "host": self._resolved_hostname,
+                "agent_version": datadog_agent.get_version(),
+                "dbms": "mongodb",
+                "kind": "mongodb_instance",
+                "collection_interval": self._config.database_instance_collection_interval,
+                'dbms_version': self._mongo_version,
+                'integration_version': __version__,
+                "tags": tags,
+                "timestamp": time.time() * 1000,
+                "metadata": {
+                    "dbm": self._config.dbm_enabled,
+                    "connection_host": self._config.clean_server_name,
+                    "instance_metadata": {k: v for k, v in mongodb_instance_metadata.items() if v is not None},
+                },
+            }
+            self._database_instance_emitted[self._resolved_hostname] = database_instance
+            self.log.debug("Emitting database instance  metadata, %s", database_instance)
+            self.database_monitoring_metadata(json.dumps(database_instance, default=default_json_event_encoding))

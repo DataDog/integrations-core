@@ -2,9 +2,11 @@
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
 
+import copy
 import logging
 import os
 
+import mock
 import pytest
 
 import tests.configs as configs
@@ -14,6 +16,7 @@ from datadog_checks.openstack_controller.api.type import ApiType
 from tests.common import remove_service_from_catalog
 from tests.metrics import (
     IMAGES_METRICS_GLANCE,
+    MEMBERS_METRICS_GLANCE,
 )
 
 pytestmark = [
@@ -248,6 +251,137 @@ def test_images_exception(aggregator, check, dd_run_check, mock_http_get, connec
 )
 @pytest.mark.usefixtures('mock_http_get', 'mock_http_post', 'openstack_connection')
 def test_images_metrics(aggregator, check, dd_run_check, metrics):
+    dd_run_check(check)
+    for metric in metrics:
+        aggregator.assert_metric(
+            metric['name'],
+            count=metric['count'],
+            value=metric['value'],
+            tags=metric['tags'],
+            hostname=metric.get('hostname'),
+        )
+
+
+@pytest.mark.parametrize(
+    ('instance', 'paginated_limit', 'api_type', 'expected_api_calls', 'metrics'),
+    [
+        pytest.param(
+            configs.REST,
+            1,
+            ApiType.REST,
+            2,
+            IMAGES_METRICS_GLANCE,
+            id='api rest small limit',
+        ),
+        pytest.param(
+            configs.REST,
+            1000,
+            ApiType.REST,
+            1,
+            IMAGES_METRICS_GLANCE,
+            id='api rest high limit',
+        ),
+        pytest.param(
+            configs.SDK,
+            1,
+            ApiType.SDK,
+            1,
+            IMAGES_METRICS_GLANCE,
+            id='api sdk small limit',
+        ),
+        pytest.param(
+            configs.SDK,
+            1000,
+            ApiType.SDK,
+            1,
+            IMAGES_METRICS_GLANCE,
+            id='api sdk high limit',
+        ),
+    ],
+)
+@pytest.mark.usefixtures('mock_http_get', 'connection_image', 'mock_http_post', 'openstack_connection')
+def test_images_pagination(
+    aggregator,
+    instance,
+    openstack_controller_check,
+    paginated_limit,
+    expected_api_calls,
+    api_type,
+    dd_run_check,
+    mock_http_get,
+    connection_image,
+    metrics,
+):
+    paginated_instance = copy.deepcopy(instance)
+    paginated_instance['paginated_limit'] = paginated_limit
+    dd_run_check(openstack_controller_check(paginated_instance))
+    if api_type == ApiType.REST:
+        args_list = []
+        for call in mock_http_get.call_args_list:
+            args, kwargs = call
+            args_list += list(args)
+            params = kwargs.get('params', {})
+            limit = params.get('limit')
+            args_list += [(args[0], limit)]
+        assert args_list.count(('http://127.0.0.1:9292/image/v2/images', paginated_limit)) == expected_api_calls
+    else:
+        assert connection_image.images.call_count == 1
+        assert connection_image.images.call_args_list.count(mock.call(limit=paginated_limit)) == 1
+    for metric in metrics:
+        aggregator.assert_metric(
+            metric['name'],
+            count=metric['count'],
+            value=metric['value'],
+            tags=metric['tags'],
+            hostname=metric.get('hostname'),
+        )
+
+
+@pytest.mark.parametrize(
+    ('instance'),
+    [
+        pytest.param(
+            configs.REST,
+            id='api rest',
+        ),
+        pytest.param(
+            configs.SDK,
+            id='api sdk',
+        ),
+    ],
+)
+@pytest.mark.usefixtures('mock_http_get', 'mock_http_post', 'openstack_connection')
+def test_disable_glance_members_metrics(aggregator, dd_run_check, instance, openstack_controller_check):
+    instance = instance | {
+        "components": {
+            "image": {
+                "members": False,
+            }
+        },
+    }
+    check = openstack_controller_check(instance)
+    dd_run_check(check)
+    for metric in aggregator.metric_names:
+        assert not metric.startswith('openstack.glance.image.member')
+
+
+@pytest.mark.parametrize(
+    ('instance', 'metrics'),
+    [
+        pytest.param(
+            configs.REST,
+            MEMBERS_METRICS_GLANCE,
+            id='api rest',
+        ),
+        pytest.param(
+            configs.SDK,
+            MEMBERS_METRICS_GLANCE,
+            id='api sdk',
+        ),
+    ],
+)
+@pytest.mark.usefixtures('mock_http_get', 'mock_http_post', 'openstack_connection')
+def test_images_members_metrics(aggregator, check, dd_run_check, metrics):
     dd_run_check(check)
     for metric in metrics:
         aggregator.assert_metric(

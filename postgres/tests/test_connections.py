@@ -12,6 +12,7 @@ import pytest
 
 from datadog_checks.postgres import PostgreSql
 from datadog_checks.postgres.connections import ConnectionPoolFullError, MultiDatabaseConnectionPool
+from datadog_checks.postgres.util import DatabaseHealthCheckError
 
 from .common import HOST, PASSWORD_ADMIN, USER_ADMIN
 from .utils import _get_superconn
@@ -326,7 +327,6 @@ def test_conn_terminated_prematurely(pg_instance):
     def _terminate_connection(conn, dbname):
         # function to abruptly terminate a connection
         with conn.cursor() as cursor:
-            print(dbname)
             cursor.execute(
                 "SELECT pg_terminate_backend(pid) FROM pg_stat_activity WHERE pid <> pg_backend_pid() AND datname = %s",
                 (dbname,),
@@ -346,7 +346,7 @@ def test_conn_terminated_prematurely(pg_instance):
 
     # the connection is terminated on the server, psycopg has no way of knowing
     # this check run will fail but the connection status should be updated
-    with pytest.raises(psycopg2.Error):
+    with pytest.raises(DatabaseHealthCheckError):
         check.check(pg_instance)
 
     # connection status is updated to closed
@@ -355,3 +355,18 @@ def test_conn_terminated_prematurely(pg_instance):
 
     # new check run will re-open connection
     check.check(pg_instance)
+
+
+@pytest.mark.integration
+@pytest.mark.usefixtures('dd_environment')
+def test_conn_statement_timeout(pg_instance):
+    """
+    Test db connection statement timeout is set at the session level
+    """
+    pg_instance["query_timeout"] = 500
+    check = PostgreSql('postgres', {}, [pg_instance])
+    check._connect()
+    with pytest.raises(psycopg2.errors.QueryCanceled):
+        with check.db() as conn:
+            with conn.cursor() as cursor:
+                cursor.execute("SELECT pg_sleep(1)")

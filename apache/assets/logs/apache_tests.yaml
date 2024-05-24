@@ -19,6 +19,7 @@ tests:
         client:
           ip: "127.0.0.1"
     message: "127.0.0.1 - frank [13/Jul/2016:10:55:36 +0000] \"GET /apache_pb.gif HTTP/1.0\" 200 2326"
+    status: "ok"
     tags:
      - "source:LOGS_SOURCE"
     timestamp: 1468407336000
@@ -54,6 +55,7 @@ tests:
         client:
           ip: "192.0.2.1"
     message: "192.0.2.1 - Ultan [07/Mar/2004:16:43:54 -0800] \"GET /unencrypted_password_list?foo=bar HTTP/1.1\" 404 9001 \"http://passwords.hackz0r\" \"Mozilla/4.08 [en] (Win95)\""
+    status: "warn"
     tags:
      - "source:LOGS_SOURCE"
     timestamp: 1078706634000

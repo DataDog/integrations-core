@@ -89,6 +89,36 @@ files:
           type: string
         example:
           [ one_database, other_database ]
+    - name: dbm
+      description: |
+        Set to `true` enable Database Monitoring.
+        
+        NOTE: Database Monitoring for MongoDB is currently in private beta.
+        If you are interested in participating, please reach out to your Datadog Customer Success Manager.
+      enabled: false
+      value:
+        type: boolean
+        example: false
+        display_default: false
+    - name: cluster_name
+      description: |
+        The name of the cluster to which the monitored MongoDB instance belongs.
+        Used to group MongoDB instances in a MongoDB cluster.
+        Please note that the cluster name must be unique for each MongoDB cluster.
+        
+        Required when `dbm` is enabled.
+      value:
+        type: string
+    - name: database_instance_collection_interval
+      hidden: true
+      description: |
+        Set the database instance collection interval (in seconds). The database instance collection sends
+        basic information about the database instance along with a signal that it still exists.
+        This collection does not involve any additional queries to the database.
+      value:
+        type: number
+        example: 1800
+        display_default: false
     - name: replica_check
       description: |
         Whether or not to read from available replicas.
@@ -135,6 +165,12 @@ files:
       value:
         type: boolean
         example: false
+    - name: dbstats_tag_dbname
+      description: |
+        Whether or not to include the 'dbname' as a tag for dbstat metrics
+      value:
+        type: boolean
+        example: true
     - name: additional_metrics
       description: |
         By default, the check collects a sample of metrics from MongoDB.
@@ -172,6 +208,13 @@ files:
       value:
         type: boolean
         example: false
+    - name: add_node_tag_to_events
+      description: |
+        Adds the Mongo node to events as a tag rather than creating a seperate host for the event.
+      hidden: true
+      value:
+        type: boolean
+        example: true
     - name: custom_queries
       description: |
         Define custom queries to collect custom metrics on your Mongo

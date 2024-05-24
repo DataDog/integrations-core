@@ -29,6 +29,7 @@ tests:
         status: "MISS"
       timestamp: 1.570784654576E12
     message: "1570784654.576    111 127.0.0.1 TCP_MISS/301 491 GET http://www.datadog.com - HIER_DIRECT/99.86.88.89 - [http_request_headers] [http_response_headers]"
+    status: "notice"
     tags:
      - "source:LOGS_SOURCE"
     timestamp: 1570784654576
@@ -61,6 +62,7 @@ tests:
         status: "MISS"
       timestamp: 1.570784663985E12
     message: "1570784663.985    120 127.0.0.1 TCP_MISS/301 491 GET http://datadog.com/test/?queryParam1=1&queryParam2=queryParam2 - HIER_DIRECT/99.86.88.128 -"
+    status: "notice"
     tags:
      - "source:LOGS_SOURCE"
     timestamp: 1570784663985
@@ -90,6 +92,7 @@ tests:
         status: "MISS"
       timestamp: 1.570784659019E12
     message: "1570784659.019    114 127.0.0.1 TCP_MISS/503 4114 GET http://www.data/ - HIER_NONE/- text/html"
+    status: "error"
     tags:
      - "source:LOGS_SOURCE"
     timestamp: 1570784659019
@@ -148,6 +151,7 @@ tests:
         status: "MISS"
       timestamp: 1.570784685245E12
     message: "1570784685.245     62 127.0.0.1 TCP_MISS/403 1380 GET http://99.86.88.128 - HIER_DIRECT/99.86.88.128 text/html"
+    status: "warn"
     tags:
      - "source:LOGS_SOURCE"
     timestamp: 1570784685245
@@ -179,6 +183,7 @@ tests:
         status: "MISS"
       timestamp: 1.57078472261E12
     message: "1570784722.610    196 127.0.0.1 TCP_MISS/200 12712 GET http://www.google.com/ - HIER_DIRECT/172.217.20.68 text/html"
+    status: "ok"
     tags:
      - "source:LOGS_SOURCE"
     timestamp: 1570784722610
@@ -205,6 +210,7 @@ tests:
         status: "TUNNEL"
       timestamp: 1.570787584006E12
     message: "1570787584.006    400 127.0.0.1 TCP_TUNNEL/200 15851 CONNECT www.google.com:443 - HIER_DIRECT/172.217.20.68 -"
+    status: "ok"
     tags:
      - "source:LOGS_SOURCE"
     timestamp: 1570787584006
@@ -231,6 +237,7 @@ tests:
         status: "TUNNEL"
       timestamp: 1.57079603963E12
     message: "1570796039.630    217 127.0.0.1 TCP_TUNNEL/200 4094 CONNECT 8.8.8.8:443/ - HIER_DIRECT/8.8.8.8 -"
+    status: "ok"
     tags:
      - "source:LOGS_SOURCE"
     timestamp: 1570796039630
@@ -263,6 +270,7 @@ tests:
         status: "MISS"
       timestamp: 1.570788669732E12
     message: "1570788669.732     95 127.0.0.1 TCP_MISS/502 4006 GET http://www.google.com:443/ - HIER_DIRECT/172.217.20.68 text/html"
+    status: "error"
     tags:
      - "source:LOGS_SOURCE"
     timestamp: 1570788669732
@@ -293,6 +301,7 @@ tests:
         status: "DENIED"
       timestamp: 1.570797241241E12
     message: "1570797241.241      0 127.0.0.1 TCP_DENIED/403 3903 GET http://http:8/ - HIER_NONE/- text/html"
+    status: "warn"
     tags:
      - "source:LOGS_SOURCE"
     timestamp: 1570797241241

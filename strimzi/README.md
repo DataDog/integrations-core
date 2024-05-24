@@ -223,6 +223,12 @@ See [service_checks.json][8] for a list of service checks provided by this integ
 
 Need help? Contact [Datadog support][9].
 
+## Further Reading
+
+Additional helpful documentation, links, and articles:
+
+- [Monitoring your container-native technologies][18]
+
 
 [1]: https://strimzi.io/
 [2]: https://app.datadoghq.com/account/settings/agent/latest
@@ -241,3 +247,4 @@ Need help? Contact [Datadog support][9].
 [15]: https://strimzi.io/docs/operators/0.20.0/full/using.html#assembly-jmx-options-deployment-configuration-kafka
 [16]: https://docs.datadoghq.com/agent/kubernetes/log/
 [17]: https://docs.datadoghq.com/integrations/kafka/?tab=host#kafka-consumer-integration
+[18]: https://www.datadoghq.com/blog/container-native-integrations/#messaging-and-streaming-with-strimzi

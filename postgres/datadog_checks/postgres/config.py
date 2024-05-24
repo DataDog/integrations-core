@@ -2,7 +2,14 @@
 # All rights reserved
 # Licensed under Simplified BSD License (see LICENSE)
 # https://www.postgresql.org/docs/current/libpq-connect.html#LIBPQ-PARAMKEYWORDS
+from typing import Optional
+
 from six import PY2, PY3, iteritems
+
+try:
+    import datadog_agent
+except ImportError:
+    from ..stubs import datadog_agent
 
 from datadog_checks.base import AgentCheck, ConfigurationError, is_affirmative
 from datadog_checks.base.utils.aws import rds_parse_tags_from_endpoint
@@ -24,17 +31,15 @@ class PostgresConfig:
     GAUGE = AgentCheck.gauge
     MONOTONIC = AgentCheck.monotonic_count
 
-    def __init__(self, init_config, instance):
-        autodiscover_config = init_config.get('autodiscover_hosts', {})
-        self.host_autodiscovery_enabled = is_affirmative(autodiscover_config.get('enabled', False))
+    def __init__(self, instance, init_config):
         self.host = instance.get('host', '')
-        if not self.host and not self.host_autodiscovery_enabled:
+        if not self.host:
             raise ConfigurationError('Specify a Postgres host to connect to.')
         self.port = instance.get('port', '')
         if self.port != '':
             self.port = int(self.port)
         self.user = instance.get('username', '')
-        if not self.user and not self.host_autodiscovery_enabled:
+        if not self.user:
             raise ConfigurationError('Please specify a user to connect to Postgres.')
         self.password = instance.get('password', '')
         self.dbname = instance.get('dbname', 'postgres')
@@ -61,7 +66,11 @@ class PostgresConfig:
                 '"dbname" parameter must be set OR autodiscovery must be enabled when using the "relations" parameter.'
             )
         self.max_connections = instance.get('max_connections', 30)
-        self.tags = self._build_tags(instance.get('tags', []))
+        self.tags = self._build_tags(
+            custom_tags=instance.get('tags', []),
+            agent_tags=datadog_agent.get_config('tags') or [],
+            propagate_agent_tags=self._should_propagate_agent_tags(instance, init_config),
+        )
 
         ssl = instance.get('ssl', "allow")
         if ssl in SSL_MODES:
@@ -76,9 +85,10 @@ class PostgresConfig:
         # Default value for `count_metrics` is True for backward compatibility
         self.collect_count_metrics = is_affirmative(instance.get('collect_count_metrics', True))
         self.collect_activity_metrics = is_affirmative(instance.get('collect_activity_metrics', False))
+        self.collect_checksum_metrics = is_affirmative(instance.get('collect_checksum_metrics', False))
         self.activity_metrics_excluded_aggregations = instance.get('activity_metrics_excluded_aggregations', [])
         self.collect_database_size_metrics = is_affirmative(instance.get('collect_database_size_metrics', True))
-        self.collect_wal_metrics = is_affirmative(instance.get('collect_wal_metrics', False))
+        self.collect_wal_metrics = self._should_collect_wal_metrics(instance.get('collect_wal_metrics'))
         self.collect_bloat_metrics = is_affirmative(instance.get('collect_bloat_metrics', False))
         self.data_directory = instance.get('data_directory', None)
         self.ignore_databases = instance.get('ignore_databases', DEFAULT_IGNORE_DATABASES)
@@ -154,9 +164,13 @@ class PostgresConfig:
         }
         self.log_unobfuscated_queries = is_affirmative(instance.get('log_unobfuscated_queries', False))
         self.log_unobfuscated_plans = is_affirmative(instance.get('log_unobfuscated_plans', False))
-        self.database_instance_collection_interval = instance.get('database_instance_collection_interval', 1800)
+        self.database_instance_collection_interval = instance.get('database_instance_collection_interval', 300)
+        self.incremental_query_metrics = is_affirmative(
+            self.statement_metrics_config.get('incremental_query_metrics', False)
+        )
+        self.baseline_metrics_expiry = self.statement_metrics_config.get('baseline_metrics_expiry', 300)
 
-    def _build_tags(self, custom_tags):
+    def _build_tags(self, custom_tags, agent_tags, propagate_agent_tags=True):
         # Clean up tags in case there was a None entry in the instance
         # e.g. if the yaml contains tags: but no actual tags
         if custom_tags is None:
@@ -178,6 +192,9 @@ class PostgresConfig:
         rds_tags = rds_parse_tags_from_endpoint(self.host)
         if rds_tags:
             tags.extend(rds_tags)
+
+        if propagate_agent_tags and agent_tags:
+            tags.extend(agent_tags)
         return tags
 
     @staticmethod
@@ -257,3 +274,28 @@ class PostgresConfig:
                 raise ConfigurationError('Azure client_id must be set when using Azure managed authentication')
             managed_authentication['enabled'] = enabled
         return managed_authentication
+
+    @staticmethod
+    def _should_collect_wal_metrics(collect_wal_metrics) -> Optional[bool]:
+        if collect_wal_metrics is not None:
+            # if the user has explicitly set the value, return the boolean
+            return is_affirmative(collect_wal_metrics)
+
+        return None
+
+    @staticmethod
+    def _should_propagate_agent_tags(instance, init_config) -> bool:
+        '''
+        return True if the agent tags should be propagated to the check
+        '''
+        instance_propagate_agent_tags = instance.get('propagate_agent_tags')
+        init_config_propagate_agent_tags = init_config.get('propagate_agent_tags')
+
+        if instance_propagate_agent_tags is not None:
+            # if the instance has explicitly set the value, return the boolean
+            return instance_propagate_agent_tags
+        if init_config_propagate_agent_tags is not None:
+            # if the init_config has explicitly set the value, return the boolean
+            return init_config_propagate_agent_tags
+        # if neither the instance nor the init_config has set the value, return False
+        return False

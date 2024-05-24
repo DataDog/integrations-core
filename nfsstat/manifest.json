@@ -1,7 +1,7 @@
 {
   "manifest_version": "2.0.0",
   "app_uuid": "423f4b03-ce99-4ffc-a553-e522ebd451be",
-  "app_id": "system",
+  "app_id": "nfsstat",
   "display_on_public_website": true,
   "tile": {
     "overview": "README.md#Overview",
@@ -25,6 +25,8 @@
   },
   "assets": {
     "integration": {
+      "auto_install": false,
+      "source_type_id": 9164582,
       "source_type_name": "Nfsstat",
       "configuration": {
         "spec": "assets/configuration/spec.yaml"

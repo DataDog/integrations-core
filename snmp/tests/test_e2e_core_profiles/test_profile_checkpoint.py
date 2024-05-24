@@ -32,8 +32,11 @@ def test_e2e_profile_checkpoint(dd_agent_check):
     common_tags = [
         'snmp_profile:checkpoint',
         'snmp_host:checkpoint.device.name',
+        'device_hostname:checkpoint.device.name',
         'device_namespace:default',
         'snmp_device:' + ip_address,
+        'device_ip:' + ip_address,
+        'device_id:default:' + ip_address,
         'device_vendor:checkpoint',
     ] + []
 

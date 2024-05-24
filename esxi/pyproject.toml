@@ -1,0 +1,62 @@
+[build-system]
+requires = [
+    "hatchling>=0.13.0",
+]
+build-backend = "hatchling.build"
+
+[project]
+name = "datadog-esxi"
+description = "The ESXi check"
+readme = "README.md"
+license = "BSD-3-Clause"
+requires-python = ">=3.9"
+keywords = [
+    "datadog",
+    "datadog agent",
+    "datadog check",
+    "esxi",
+]
+authors = [
+    { name = "Datadog", email = "packages@datadoghq.com" },
+]
+classifiers = [
+    "Development Status :: 5 - Production/Stable",
+    "Intended Audience :: Developers",
+    "Intended Audience :: System Administrators",
+    "License :: OSI Approved :: BSD License",
+    "Private :: Do Not Upload",
+    "Programming Language :: Python :: 3.11",
+    "Topic :: System :: Monitoring",
+]
+dependencies = [
+    "datadog-checks-base>=34.1.2",
+]
+dynamic = [
+    "version",
+]
+
+[project.optional-dependencies]
+deps = [
+    "pyvmomi==8.0.2.0.1; python_version > '3.0'",
+]
+
+[project.urls]
+Source = "https://github.com/DataDog/integrations-core"
+
+[tool.hatch.version]
+path = "datadog_checks/esxi/__about__.py"
+
+[tool.hatch.build.targets.sdist]
+include = [
+    "/datadog_checks",
+    "/tests",
+    "/manifest.json",
+]
+
+[tool.hatch.build.targets.wheel]
+include = [
+    "/datadog_checks/esxi",
+]
+dev-mode-dirs = [
+    ".",
+]

@@ -2,7 +2,13 @@
 
 <!-- towncrier release notes start -->
 
-## 3.2.0 / 2024-02-16
+## 3.2.1 / 2024-04-26
+
+***Fixed***:
+
+* Declare the integration as  Python 2 compatible ([#17323](https://github.com/DataDog/integrations-core/pull/17323))
+
+## 3.2.0 / 2024-02-16 / Agent 7.52.0
 
 ***Added***:
 

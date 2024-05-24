@@ -61,18 +61,22 @@ def check_duplicate_values(current_check, line, row, header_name, duplicates, fa
     '--check-duplicates', is_flag=True, help='Output warnings if there are duplicate short names and descriptions'
 )
 @click.option('--show-warnings', '-w', is_flag=True, help='Show warnings in addition to failures')
+@click.option('--sync', is_flag=True, help='Update the file')
 @click.pass_obj
-def metadata(app: Application, integrations: tuple[str, ...], check_duplicates: bool, show_warnings: bool):
+def metadata(app: Application, integrations: tuple[str, ...], check_duplicates: bool, show_warnings: bool, sync: bool):
     """
     Validate `metadata.csv` files
 
-    If `check` is specified, only the check will be validated, if check value is
-    'changed' will only apply to changed checks, an 'all' or empty `check` value
-    will validate all README files.
+    If `integrations` is specified, only the check will be validated, an 'all' or empty value will validate all
+    metadata.csv files, a `changed` value will validate changed integrations.
     """
     from ddev.cli.validate import metadata_utils
 
+    is_core = app.repo.name == 'core'
     validation_tracker = app.create_validation_tracker('Metrics validation')
+
+    if not integrations:
+        integrations = ('all',)
 
     excluded = set(app.repo.config.get('/overrides/validate/metrics/exclude', []))
     for current_check in app.repo.integrations.iter(integrations):
@@ -105,7 +109,10 @@ def metadata(app: Application, integrations: tuple[str, ...], check_duplicates: 
                 f"{current_check.name} metadata file is empty. This file needs the header row at the minimum.\n"
             )
 
+        rows = []
+
         for line, row in read_metadata_rows(metadata_file):
+            rows.append(row)
             # determine if number of columns is complete by checking for None values
             # DictReader populates missing columns with None https://docs.python.org/3.8/library/csv.html#csv.DictReader
             if None in row.values():
@@ -123,12 +130,17 @@ def metadata(app: Application, integrations: tuple[str, ...], check_duplicates: 
 
                     error_message += f"{current_check.name}:{line} Invalid column {invalid_headers}.\n"
 
-                missing_headers = metadata_utils.ALL_HEADERS.difference(all_keys)
+                missing_headers = metadata_utils.HEADERS_TO_CHECK.difference(all_keys)
                 if missing_headers:
                     errors = True
 
                     error_message += f"{current_check.name}:{line} Missing columns {missing_headers}.\n"
-                continue
+
+                if errors:
+                    # There's now an optional sample_tag column that isn't added yet to the existing metadata.csv
+                    # all_keys will not be same as ALL_HEADERS. But since that sample_tag column is optional and not
+                    # inside HEADERS_TO_CHECK, we should only continue if there's an invalid header or missing_header.
+                    continue
 
             # check duplicate metric name
             duplicate_metric_name = check_duplicate_values(
@@ -273,6 +285,23 @@ def metadata(app: Application, integrations: tuple[str, ...], check_duplicates: 
                 f"{current_check.name}: `{prefix}` appears {count} time(s) and does not match metric_prefix "
             )
             error_message += "defined in the manifest.\n"
+
+        unsorted = set(app.repo.config.get('/overrides/validate/metrics/unsorted', []))
+
+        if is_core and current_check.name not in unsorted:
+            sorted_rows = sorted(rows, key=lambda x: x['metric_name'])
+            if sorted_rows != rows:
+                error_message = f"{current_check.name}: metadata.csv is not sorted by metric name.\n"
+
+                if not sync:
+                    errors = True
+                    error_message += f"Run `ddev validate metadata {current_check.name} --sync` to sort it.\n"
+                else:
+                    error_message += f"Sorting {metadata_file.relative_to(app.repo.path)} by metric names."
+                    with metadata_file.open(mode='w', encoding='utf-8') as f:
+                        writer = csv.DictWriter(f, fieldnames=metadata_utils.ORDERED_HEADERS)
+                        writer.writeheader()
+                        writer.writerows(sorted_rows)
 
         error_message = error_message[:-1]
         if errors:

@@ -6,7 +6,7 @@ import pytest
 from datadog_checks.dev.utils import get_metadata_metrics
 from datadog_checks.nginx import VTS_METRIC_MAP
 
-from .common import TAGS, USING_VTS, VTS_MOCKED_METRICS, mock_http_responses
+from .common import TAGS_WITH_HOST_AND_PORT, USING_VTS, VTS_MOCKED_METRICS, mock_http_responses
 
 pytestmark = [pytest.mark.skipif(not USING_VTS, reason='Not using VTS')]
 
@@ -44,7 +44,7 @@ def test_vts(check, instance_vts, aggregator):
     for mapped in VTS_METRIC_MAP.values():
         if mapped in skip_metrics:
             continue
-        aggregator.assert_metric(mapped, tags=TAGS)
+        aggregator.assert_metric(mapped, tags=TAGS_WITH_HOST_AND_PORT)
 
 
 @pytest.mark.unit
@@ -55,7 +55,7 @@ def test_vts_unit(dd_run_check, aggregator, mocked_instance_vts, check, mocker):
 
     for mapped in VTS_MOCKED_METRICS:
         aggregator.assert_metric(mapped)
-        for tag in TAGS:
+        for tag in TAGS_WITH_HOST_AND_PORT:
             aggregator.assert_metric_has_tag(mapped, tag)
 
     aggregator.assert_metrics_using_metadata(

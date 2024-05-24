@@ -2,6 +2,30 @@
 
 <!-- towncrier release notes start -->
 
+## 3.1.0 / 2024-05-07
+
+***Added***:
+
+* [datadog-cluster-agent] Add CWS Instrumentation metrics ([#17530](https://github.com/DataDog/integrations-core/pull/17530))
+
+## 3.0.0 / 2024-03-22
+
+***Removed***:
+
+* Removed `admission_webhooks.mutation_errors` metric in the `datadog_cluster_agent` integration ([#17195](https://github.com/DataDog/integrations-core/pull/17195))
+
+## 2.11.1 / 2024-02-29 / Agent 7.52.0
+
+***Fixed***:
+
+* Fix process language detection metrics ([#17001](https://github.com/DataDog/integrations-core/pull/17001))
+
+## 2.11.0 / 2024-02-26
+
+***Added***:
+
+* Collect language detection metrics ([#16928](https://github.com/DataDog/integrations-core/pull/16928))
+
 ## 2.10.0 / 2024-02-16
 
 ***Added***:

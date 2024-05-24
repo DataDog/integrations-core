@@ -2,6 +2,51 @@
 
 <!-- towncrier release notes start -->
 
+## 32.1.1 / 2024-05-09
+
+***Fixed***:
+
+* Fix trailing `,` in manifest.json generation template ([#17538](https://github.com/DataDog/integrations-core/pull/17538))
+
+## 32.1.0 / 2024-05-03
+
+***Added***:
+
+* Update the default dashboard template file to include directions for contributors. ([#17286](https://github.com/DataDog/integrations-core/pull/17286))
+* Add a new column to metadata.csv templates called `sample_tags` ([#17491](https://github.com/DataDog/integrations-core/pull/17491))
+
+***Fixed***:
+
+* Update the description for the `tls_ca_cert` config option to use `openssl rehash` instead of `c_rehash` ([#16981](https://github.com/DataDog/integrations-core/pull/16981))
+* Bump pytest and require flaky minimum version ([#17269](https://github.com/DataDog/integrations-core/pull/17269))
+* Remove trailing new line in template file ([#17513](https://github.com/DataDog/integrations-core/pull/17513))
+
+## 32.0.0 / 2024-03-21
+
+***Removed***:
+
+* Remove commands that are migrated to the new `ddev` CLI. ([#17008](https://github.com/DataDog/integrations-core/pull/17008)), ([#16995](https://github.com/DataDog/integrations-core/pull/16995))
+
+***Added***:
+
+* Update the configuration file to include the new oauth options parameter. ([#16835](https://github.com/DataDog/integrations-core/pull/16835))
+* Add a method to get the service check defined in the `service_checks.json` file for an integration. ([#16916](https://github.com/DataDog/integrations-core/pull/16916))
+* update custom_queries configuration to support optional collection_interval. ([#16957](https://github.com/DataDog/integrations-core/pull/16957))
+* Add utility function to assert service checks. ([#17071](https://github.com/DataDog/integrations-core/pull/17071))
+* Added a check to the `ddev validate codeowners` to make sure that logs assets are owned by `@DatadDog/logs-backend`. ([#17185](https://github.com/DataDog/integrations-core/pull/17185))
+* Allow the codeowners validation in integrations-core. ([#17199](https://github.com/DataDog/integrations-core/pull/17199))
+
+***Fixed***:
+
+* [ecos 1214] Remove old unused oauth manifest field. ([#16873](https://github.com/DataDog/integrations-core/pull/16873))
+* Starting version in templates aligns with changelog type. ([#16917](https://github.com/DataDog/integrations-core/pull/16917))
+* Bump the required python version in the integration templates. ([#16972](https://github.com/DataDog/integrations-core/pull/16972))
+* Explicitly list `localhost` as the address when port-forwarding with kind to avoid opening a pop-up. ([#17016](https://github.com/DataDog/integrations-core/pull/17016))
+* Pin pytest to fix `flaky` issues. ([#17042](https://github.com/DataDog/integrations-core/pull/17042))
+* Update the configuration to include the `metric_prefix` option. ([#17065](https://github.com/DataDog/integrations-core/pull/17065))
+* Print the info logs in the correct order in the `validate models -s` command. ([#17066](https://github.com/DataDog/integrations-core/pull/17066))
+* Don't crash when integration configuration spec is missing default templates. ([#17214](https://github.com/DataDog/integrations-core/pull/17214))
+
 ## 31.0.0 / 2024-02-06
 
 ***Changed***:

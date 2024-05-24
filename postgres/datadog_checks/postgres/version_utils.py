@@ -6,6 +6,7 @@ import re
 from semver import VersionInfo
 
 from datadog_checks.base.log import get_check_logger
+from datadog_checks.postgres.cursor import CommenterCursor
 
 V8_3 = VersionInfo.parse("8.3.0")
 V9 = VersionInfo.parse("9.0.0")
@@ -19,6 +20,7 @@ V12 = VersionInfo.parse("12.0.0")
 V13 = VersionInfo.parse("13.0.0")
 V14 = VersionInfo.parse("14.0.0")
 V15 = VersionInfo.parse("15.0.0")
+V16 = VersionInfo.parse("16.0.0")
 
 
 class VersionUtils(object):
@@ -29,7 +31,7 @@ class VersionUtils(object):
     @staticmethod
     def get_raw_version(db):
         with db as conn:
-            with conn.cursor() as cursor:
+            with conn.cursor(cursor_factory=CommenterCursor) as cursor:
                 cursor.execute('SHOW SERVER_VERSION;')
                 raw_version = cursor.fetchone()[0]
                 return raw_version
@@ -38,7 +40,7 @@ class VersionUtils(object):
         if self._seen_aurora_exception:
             return False
         with db as conn:
-            with conn.cursor() as cursor:
+            with conn.cursor(cursor_factory=CommenterCursor) as cursor:
                 # This query will pollute PG logs in non aurora versions,
                 # but is the only reliable way to detect aurora
                 try:
