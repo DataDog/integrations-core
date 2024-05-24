@@ -25,11 +25,11 @@ import copy
 from datadog_checks.base.utils.db.utils import default_json_event_encoding
 
 class SubmitData: 
-    MAX_COLUMN_COUNT  = 100_000
+    MAX_COLUMN_COUNT  = 100_0000000
 
     # REDAPL has a 3MB limit per resource
     #TODO Report truncation to the backend
-    MAX_TOTAL_COLUMN_COUNT = 250_000
+    MAX_TOTAL_COLUMN_COUNT = 250_0000000
 
     def __init__(self, submit_data_function, base_event, logger):
         self._submit_to_agent_queue = submit_data_function
