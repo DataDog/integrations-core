@@ -4,8 +4,8 @@
 
 Traefik Mesh is a lightweight and easy-to-deploy service mesh that offers advanced traffic management, security, and observability features for microservices applications, leveraging the capabilities of Traefik Proxy. With Datadog's Traefik integration, you can:
 - Obtain insights into the traffic entering your service mesh.
-- Gain critical insights into the performance, reliability, and security of individual services within your mesh which ensure your services are operating efficiently while also helping to identify and resolve issues quickly.
-- Gain detailed insights into the internal traffic flows within your service mesh which help monitor performance, ensure reliability.
+- Gain critical insights into the performance, reliability, and security of individual services within your mesh which ensures your services are operating efficiently while also helping to identify and resolve issues quickly.
+- Gain detailed insights into the internal traffic flows within your service mesh which helps monitor performance and ensure reliability.
 
 This check monitors [Traefik Mesh][1] through the Datadog Agent.
 
@@ -21,12 +21,12 @@ Starting from Agent release v7.55.0, the Traefik Mesh check is included in the [
 
 ### Configuration
 
-Traefik Mesh can be configured to expose Prometheus-formatted metrics. The Datadog Agent can collect these metrics using the integration described below. Follow the instructions to configure data collection for your Traefik Mesh instances. For the required configurations to expose the Prometheus metrics, see the [Observability][10] page in the Traefik Mesh documentation.
+Traefik Mesh can be configured to expose Prometheus-formatted metrics. The Datadog Agent can collect these metrics using the integration described below. Follow the instructions to configure data collection for your Traefik Mesh instances. For the required configurations to expose the Prometheus metrics, see the [Observability page in the official Traefik Mesh documentation][10].
 
 In addition, a small subset of metrics can be collected by communicating with different API endpoints. Specifically:
-- `/api/version`: Version information on the Traefik proxy
-- `/api/status/nodes`: Ready status of nodes visible by the Traefik [controller][12]
-- `/api/status/readiness`: Ready status of the Traefik controller
+- `/api/version`: Version information on the Traefik proxy.
+- `/api/status/nodes`: Ready status of nodes visible by the Traefik [controller][12].
+- `/api/status/readiness`: Ready status of the Traefik controller.
 
 **Note**: This check uses [OpenMetrics][11] for metric collection, which requires Python 3.
 
