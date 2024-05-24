@@ -64,7 +64,7 @@ deps = [
     "requests-toolbelt==1.0.0",
     "requests-unixsocket==0.3.0",
     "requests==2.27.1; python_version < '3.0'",
-    "requests==2.31.0; python_version > '3.0'",
+    "requests==2.32.2; python_version > '3.0'",
     "simplejson==3.19.2",
     "six==1.16.0",
     "typing==3.10.0.0; python_version < '3.0'",
