@@ -180,7 +180,7 @@ OPTIONAL_INNODB_VARS = {
     'Innodb_ibuf_merges': ('mysql.innodb.ibuf_merges', RATE),
     'Innodb_ibuf_segment_size': ('mysql.innodb.ibuf_segment_size', GAUGE),
     'Innodb_ibuf_size': ('mysql.innodb.ibuf_size', GAUGE),
-    'Innodb_lock_structs': ('mysql.innodb.lock_structs', RATE),
+    'Innodb_lock_structs': ('mysql.innodb.lock_structs', GAUGE),
     'Innodb_locked_tables': ('mysql.innodb.locked_tables', GAUGE),
     'Innodb_locked_transactions': ('mysql.innodb.locked_transactions', GAUGE),
     'Innodb_log_waits': ('mysql.innodb.log_waits', RATE),

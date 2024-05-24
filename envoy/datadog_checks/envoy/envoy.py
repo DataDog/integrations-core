@@ -149,7 +149,6 @@ class Envoy(AgentCheck):
                 continue
 
             tags.extend(self.custom_tags)
-
             try:
                 value = int(value)
                 get_method(self, method)(metric, value, tags=tags)

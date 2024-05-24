@@ -39,6 +39,7 @@ from .common import (
     check_physical_replication_slots,
     check_slru_metrics,
     check_snapshot_txid_metrics,
+    check_stat_io_metrics,
     check_stat_replication,
     check_stat_wal_metrics,
     check_uptime_metrics,
@@ -52,6 +53,7 @@ from .utils import (
     kill_vacuum,
     requires_over_10,
     requires_over_14,
+    requires_over_16,
     run_one_check,
     run_vacuum_thread,
 )
@@ -745,7 +747,7 @@ def test_database_instance_metadata(aggregator, pg_instance, dbm_enabled, report
     assert event['dbms'] == "postgres"
     assert event['tags'].sort() == expected_tags.sort()
     assert event['integration_version'] == __version__
-    assert event['collection_interval'] == 1800
+    assert event['collection_interval'] == 300
     assert event['metadata'] == {
         'dbm': dbm_enabled,
         'connection_host': pg_instance['host'],
@@ -1133,3 +1135,22 @@ def test_propagate_agent_tags(
             aggregator.assert_service_check(
                 'postgres.can_connect', count=1, status=PostgreSql.OK, tags=expected_tags + agent_tags
             )
+
+
+@requires_over_16
+@pytest.mark.parametrize(
+    'dbm_enabled',
+    [True, False],
+)
+def test_pg_stat_io_metrics(aggregator, integration_check, pg_instance, dbm_enabled):
+    pg_instance['dbm'] = dbm_enabled
+    # this will block on cancel and wait for the coll interval of 600 seconds,
+    # unless the collection_interval is set to a short amount of time
+    pg_instance['collect_resources'] = {'collection_interval': 0.1}
+
+    check = integration_check(pg_instance)
+    run_one_check(check, pg_instance)
+
+    expected_tags = _get_expected_tags(check, pg_instance)
+    expected_count = 0 if dbm_enabled is False else 1
+    check_stat_io_metrics(aggregator, expected_tags, count=expected_count)

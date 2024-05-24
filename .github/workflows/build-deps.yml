@@ -4,6 +4,7 @@ on:
   pull_request:
     branches:
     - master
+    - 7.*.*
     paths:
     - .github/workflows/build-deps.yml
     - .builders/**
@@ -11,6 +12,7 @@ on:
   push:
     branches:
     - master
+    - 7.*.*
     paths:
     - .builders/**
     - agent_requirements.in
@@ -229,7 +231,7 @@ jobs:
 
     - name: Cache builder root
       id: cache-builder-root
-      uses: actions/cache@v3.3.3
+      uses: actions/cache@v4
       with:
         path: |
           ~/builder_root

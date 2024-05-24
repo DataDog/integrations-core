@@ -42,6 +42,14 @@ files:
           value:
             type: boolean
             example: false
+        - name: use_configured_hostname
+          description: |
+            If true, the check will use the configured `host` parameter for ESXi hostnames instead of the Host name.
+            You may need to use this if you install both the vSphere check and ESXi check to avoid duplicate entries
+            for hosts in the web application UI.
+          value:
+            type: boolean
+            example: true
         - name: collect_per_instance_filters
           description: |
             Use this option to collect metrics tagged with instance values.
@@ -139,8 +147,8 @@ files:
           description: |
             Use this option to send a subset of host tags as metric tags.
             The ESXi integration collects tags for every ESXi host or VM in your environment.
-            Those tags can be `esxi_url`, esxi_type`, `esxi_host`, `esxi_folder`, `esxi_cluster`
-            `esxi_compute`, `esxi_datacenter`, `esxi_datastore` and are attached to the ESXi metrics by default.
+            Those tags can be `esxi_url`, esxi_type`, `esxi_host`, and `esxi_datastore`
+            and are attached to the ESXi metrics by default.
             By default these tags are submitted as host tags, but you can submit them as metric tags instead by using
             this configuration option, see: https://docs.datadoghq.com/tagging/using_tags/
             You will lose the ability to filter your hosts on the tags you specify but they will appear faster
@@ -173,3 +181,13 @@ files:
             type: string
             example: "<DIRECTORY_PATH>"
         - template: instances/default
+          overrides:
+            empty_default_hostname.display_priority: 1
+            empty_default_hostname.required: true
+            empty_default_hostname.value.example: true
+            empty_default_hostname.description: |
+              The ESXi integration is a check where metrics are usually unrelated to the host
+              on which the Agent runs. Setting this parameter to true, prevents the Agent from attaching the hostname
+              (and the host tags) to the metrics. It is especially important to leave this parameter to "true" when you are
+              running the agent inside a vSphere VM as the VM tags are going to be unrelated to other metrics.
+

@@ -715,6 +715,58 @@ metadata_integration.metric_b,gauge,,,,My metric B,0,metadata_integration,,
     )
 
 
+def test_passing_with_experimental_column(fake_repo, ddev, helpers):
+    # Testing to ensure that experimental header sample_tags is allowed
+    write_file(
+        fake_repo.path / "metadata_integration",
+        'metadata.csv',
+        """metric_name,metric_type,interval,unit_name,per_unit_name,description,orientation,integration,short_name,curated_metric,sample_tags
+metadata_integration.metric_a,gauge,,,,My metric A,0,metadata_integration,,,
+metadata_integration.metric_b,gauge,,,,My metric B,0,metadata_integration,,,
+""",
+    )
+
+    result = ddev('validate', 'metadata', 'metadata_integration')
+
+    assert result.exit_code == 0, result.output
+    assert helpers.remove_trailing_spaces(result.output) == helpers.dedent(
+        """
+        Metrics validation
+
+        Passed: 1
+        """
+    )
+
+
+def test_passing_invalid_experimental_column(fake_repo, ddev, helpers):
+    # Testing to ensure that experimental header sample_tags is allowed. But if other tags are added,
+    # it will be flagged as an error
+    write_file(
+        fake_repo.path / "metadata_integration",
+        'metadata.csv',
+        """metric_name,metric_type,interval,unit_name,per_unit_name,description,orientation,integration,short_name,curated_metric,sample_tags,foo
+metadata_integration.metric_a,gauge,,,,My metric A,0,metadata_integration,,,,
+metadata_integration.metric_b,gauge,,,,My metric B,0,metadata_integration,,,,
+""",
+    )
+    outfile = os.path.join('metadata_integration', 'metadata.csv')
+    result = ddev('validate', 'metadata', 'metadata_integration')
+
+    assert result.exit_code == 1, result.output
+    assert helpers.remove_trailing_spaces(result.output) == helpers.dedent(
+        f"""
+        Metrics validation
+        └── metadata_integration
+            └── {outfile}
+
+                metadata_integration:2 Invalid column {{'foo'}}.
+                metadata_integration:3 Invalid column {{'foo'}}.
+
+        Errors: 1
+        """
+    )
+
+
 def test_metrics_not_ordered(fake_repo, ddev, helpers):
     outfile = os.path.join('metadata_integration', 'metadata.csv')
     result = ddev('validate', 'metadata', 'metadata_integration')
