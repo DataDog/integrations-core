@@ -80,7 +80,7 @@ Need help? Contact [Datadog support][11].
 - [How to collect Cassandra metrics][13]
 - [Monitoring Cassandra with Datadog][14]
 
-[1]: https://raw.githubusercontent.com/DataDog/integrations-core/master/cassandra_nodetool/images/cassandra_dashboard.png
+[1]: https://raw.githubusercontent.com/DataDog/integrations-core/master/cassandra_nodetool/images/cassandra_dashboard_2.png
 [2]: https://github.com/DataDog/integrations-core/tree/master/cassandra
 [3]: https://app.datadoghq.com/account/settings/agent/latest
 [4]: https://docs.datadoghq.com/agent/guide/agent-configuration-files/#agent-configuration-directory
