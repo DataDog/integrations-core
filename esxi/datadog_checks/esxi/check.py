@@ -70,7 +70,7 @@ class EsxiCheck(AgentCheck):
             parsed_proxy = urlparse(proxy)
             proxy_scheme = parsed_proxy.scheme
             if proxy_scheme != 'socks5':
-                self.log.warning('Proxy scheme {} not supported; ignoring', proxy_scheme)
+                self.log.warning('Proxy scheme %s not supported; ignoring', proxy_scheme)
             else:
                 self.proxy_host = parsed_proxy.hostname
                 self.proxy_port = parsed_proxy.port

@@ -5,12 +5,9 @@ import os
 
 from pyVmomi import vim, vmodl
 
-from datadog_checks.dev.ci import running_on_ci
-
 HOST = "127.0.0.1"
 PORT = 8989
 USE_VSPHERE_LAB = os.environ.get('USE_VSPHERE_LAB')
-ON_CI = running_on_ci()
 
 VCSIM_INSTANCE = {
     'host': f"{HOST}:{str(PORT)}",

@@ -20,11 +20,10 @@ from .common import (
     PERF_METRIC_ID,
     PORT,
     PROPERTIES_EX,
+    USE_VSPHERE_LAB,
     VCSIM_INSTANCE,
 )
 from .ssh_tunnel import socks_proxy
-
-USE_VSPHERE_LAB = os.environ.get('USE_VSPHERE_LAB')
 
 
 @pytest.fixture(scope='session')
