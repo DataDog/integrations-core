@@ -33,11 +33,11 @@ In addition, a small subset of metrics can be collected by communicating with di
 #### Containerized
 ##### Metric collection
 
-Make sure that the Prometheus-formatted metrics are exposed in your Traefik Mesh cluster. You can configure and customize this by following the instructions on the [Observability][10] page in the Traefik Mesh documentation. For the Agent to start collecting metrics, the Traefik Mesh pods need to be annotated. For more information about annotations, refer to the [Autodiscovery Integration Templates][3] for guidance. You can find additional configuration options by reviewing the [sample traefik_mesh.d/conf.yaml][4]
+Make sure that the Prometheus-formatted metrics are exposed in your Traefik Mesh cluster. You can configure and customize this by following the instructions on the [Observability page in the official Traefik Mesh documentation][10]. In order for the Agent to start collecting metrics, the Traefik Mesh pods need to be annotated. For more information about annotations, refer to the [Autodiscovery Integration Templates][3] for guidance. You can find additional configuration options by reviewing the [`traefik_mesh.d/conf.yaml` sample][4].
 
-**Note**: The listed metrics can only be collected if they are available. Some metrics are generated only when certain actions are performed.
+**Note**: The following metrics can only be collected if they are available. Some metrics are generated only when certain actions are performed.
 
-The two most important parameters for configuring the Traefik Mesh check are as follows:
+When configuring the Traefik Mesh check, you can use the following parameters:
 - `openmetrics_endpoint`: This parameter should be set to the location where the Prometheus-formatted metrics are exposed. The default port is `8082`, but it can be configured using the `--entryPoints.metrics.address`. In containerized environments, `%%host%%` can be used for [host autodetection][3].
 - `traefik_proxy_api_endpooint:` This parameter is optional. The default port is `8080` and can be configured using `--entryPoints.traefik.address`. In containerized environments, `%%host%%` can be used for [host autodetection][3].
 - `traefik_controller_api_endpoint`: This parameter is optional. The default port is set to `9000`. 
