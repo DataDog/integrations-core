@@ -3,23 +3,18 @@
 # Licensed under a 3-clause BSD style license (see LICENSE)
 import logging
 import re
+import socket
 import ssl
 from collections import defaultdict
-import socket
 from urllib.parse import urlparse
-import socks
 
+import socks
 from pyVim import connect
 from pyVmomi import vim, vmodl
 from six import iteritems
 
 from datadog_checks.base import AgentCheck, is_affirmative
 from datadog_checks.base.utils.common import to_string
-
-try:
-    import datadog_agent
-except ImportError:
-    from datadog_checks.base.stubs import datadog_agent
 
 from .constants import (
     ALL_RESOURCES,
@@ -44,9 +39,9 @@ from .utils import (
 )
 
 
-
 def create_connection(address, timeout, source_address, proxy_host, proxy_port):
     return socks.create_connection(address, timeout, source_address, socks.SOCKS5, proxy_host, proxy_port)
+
 
 class EsxiCheck(AgentCheck):
     __NAMESPACE__ = 'esxi'
@@ -67,10 +62,15 @@ class EsxiCheck(AgentCheck):
         self.ssl_capath = self.instance.get("ssl_capath")
         self.ssl_cafile = self.instance.get("ssl_cafile")
         self.tags = [f"esxi_url:{self.host}"]
-        proxy_http = datadog_agent.get_config('proxy').get('http')
-        if proxy_http:
-            parsed_proxy = urlparse(proxy_http)
-            if parsed_proxy.scheme == 'socks5':
+        self.proxy_host = None
+        self.proxy_port = None
+        proxy = self.instance.get('proxy')
+        if proxy:
+            parsed_proxy = urlparse(proxy)
+            proxy_scheme = parsed_proxy.scheme
+            if proxy_scheme != 'socks5':
+                self.log.warning('Proxy scheme {} not supported; ignoring', proxy_scheme)
+            else:
                 self.proxy_host = parsed_proxy.hostname
                 self.proxy_port = parsed_proxy.port
 
@@ -364,10 +364,13 @@ class EsxiCheck(AgentCheck):
 
             create_connection_method = socket.create_connection
             if self.proxy_host:
-                socket.create_connection = lambda address, timeout, source_address, **kwargs: create_connection(address, timeout, source_address, self.proxy_host, self.proxy_port)
+                socket.create_connection = lambda address, timeout, source_address, **kwargs: create_connection(
+                    address, timeout, source_address, self.proxy_host, self.proxy_port
+                )
+
             connection = connect.SmartConnect(host=self.host, user=self.username, pwd=self.password, sslContext=context)
             socket.create_connection = create_connection_method
-        
+
             self.conn = connection
             self.content = connection.content
 

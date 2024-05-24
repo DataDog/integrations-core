@@ -113,6 +113,11 @@ instances:
     # excluded_host_tags:
     #   - <HOST_TAG>
 
+    ## @param proxy - string - optional - default: http://<PROXY_SERVER_FOR_HTTP>:<PORT>
+    ## SOCKS Proxy to use for this instance.
+    #
+    # proxy: http://<PROXY_SERVER_FOR_HTTP>:<PORT>
+
     ## @param ssl_verify - boolean - optional - default: true
     ## Set to false to disable SSL verification when connecting to the ESXi host
     #

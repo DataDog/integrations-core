@@ -154,6 +154,12 @@ files:
             display_default: []
             example:
               - <HOST_TAG>
+        - name: proxy
+          value:
+            example: http://<PROXY_SERVER_FOR_HTTP>:<PORT>
+            type: string
+          description: |
+            SOCKS Proxy to use for this instance.
         - name: ssl_verify
           description: Set to false to disable SSL verification when connecting to the ESXi host
           value:

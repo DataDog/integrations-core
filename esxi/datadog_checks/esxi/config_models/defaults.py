@@ -24,6 +24,10 @@ def instance_min_collection_interval():
     return 15
 
 
+def instance_proxy():
+    return 'http://<PROXY_SERVER_FOR_HTTP>:<PORT>'
+
+
 def instance_ssl_verify():
     return True
 
