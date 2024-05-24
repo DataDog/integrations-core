@@ -11,6 +11,7 @@ from datadog_checks.openstack_controller.api.factory import make_api
 from datadog_checks.openstack_controller.components.bare_metal import BareMetal
 from datadog_checks.openstack_controller.components.block_storage import BlockStorage
 from datadog_checks.openstack_controller.components.compute import Compute
+from datadog_checks.openstack_controller.components.heat import Heat
 from datadog_checks.openstack_controller.components.identity import Identity
 from datadog_checks.openstack_controller.components.image import Image
 from datadog_checks.openstack_controller.components.load_balancer import LoadBalancer
@@ -51,6 +52,7 @@ class OpenStackControllerCheck(AgentCheck, ConfigMixin):
             BareMetal(self),
             LoadBalancer(self),
             Image(self),
+            Heat(self),
         ]
         self.projects_discovery = None
         if self.config.projects:

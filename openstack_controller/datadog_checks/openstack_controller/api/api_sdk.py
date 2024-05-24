@@ -254,11 +254,58 @@ class ApiSdk(Api):
             )
         ]
 
+    def get_baremetal_portgroups(self, node_id):
+        return [
+            portgroup.to_dict(original_names=True)
+            for portgroup in self.call_paginated_api(
+                self.connection.baremetal.portgroups, node_id, limit=self.config.paginated_limit
+            )
+        ]
+
+    def get_baremetal_ports(self):
+        return [
+            port.to_dict(original_names=True)
+            for port in self.call_paginated_api(self.connection.baremetal.ports, limit=self.config.paginated_limit)
+        ]
+
     def get_baremetal_conductors(self):
         return [
             conductor.to_dict(original_names=True)
             for conductor in self.call_paginated_api(
                 self.connection.baremetal.conductors, limit=self.config.paginated_limit
+            )
+        ]
+
+    def get_baremetal_volume_connectors(self):
+        return [
+            connector.to_dict(original_names=True)
+            for connector in self.call_paginated_api(
+                self.connection.baremetal.volume_connectors, limit=self.config.paginated_limit
+            )
+        ]
+
+    def get_baremetal_volume_targets(self):
+        return [
+            target.to_dict(original_names=True)
+            for target in self.call_paginated_api(
+                self.connection.baremetal.volume_targets, limit=self.config.paginated_limit
+            )
+        ]
+
+    def get_baremetal_drivers(self):
+        return [driver.to_dict(original_names=True) for driver in self.connection.baremetal.drivers()]
+
+    def get_baremetal_allocations(self):
+        if float(self.config.ironic_microversion) < 1.52:
+            self.log.info(
+                "Ironic microversion is below 1.52 and set to %s, cannot collect allocations",
+                self.config.ironic_microversion,
+            )
+            return []
+        return [
+            allocation.to_dict(original_names=True)
+            for allocation in self.call_paginated_api(
+                self.connection.baremetal.allocations, limit=self.config.paginated_limit
             )
         ]
 
@@ -340,5 +387,10 @@ class ApiSdk(Api):
     def get_glance_members(self, image_id):
         return [member.to_dict(original_names=True) for member in self.connection.image.members(image_id)]
 
-    def get_glance_tasks(self, image_id):
-        return [task.to_dict(original_names=True) for task in self.connection.image.tasks(image_id)]
+    def get_heat_stacks(self, project_id):
+        return [
+            stack.to_dict(original_names=True)
+            for stack in self.call_paginated_api(
+                self.connection.heat.stacks, project_id=project_id, limit=self.config.paginated_limit
+            )
+        ]

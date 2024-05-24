@@ -1,0 +1,14 @@
+{
+    "versions": [
+        {
+            "id": "v1.0",
+            "status": "CURRENT",
+            "links": [
+                {
+                    "rel": "self",
+                    "href": "http://openstack.example.com/heat-api//v1/"
+                }
+            ]
+        }
+    ]
+}

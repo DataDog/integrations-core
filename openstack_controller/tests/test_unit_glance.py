@@ -17,7 +17,6 @@ from tests.common import remove_service_from_catalog
 from tests.metrics import (
     IMAGES_METRICS_GLANCE,
     MEMBERS_METRICS_GLANCE,
-    TASKS_METRICS_GLANCE,
 )
 
 pytestmark = [
@@ -383,62 +382,6 @@ def test_disable_glance_members_metrics(aggregator, dd_run_check, instance, open
 )
 @pytest.mark.usefixtures('mock_http_get', 'mock_http_post', 'openstack_connection')
 def test_images_members_metrics(aggregator, check, dd_run_check, metrics):
-    dd_run_check(check)
-    for metric in metrics:
-        aggregator.assert_metric(
-            metric['name'],
-            count=metric['count'],
-            value=metric['value'],
-            tags=metric['tags'],
-            hostname=metric.get('hostname'),
-        )
-
-
-@pytest.mark.parametrize(
-    ('instance'),
-    [
-        pytest.param(
-            configs.REST,
-            id='api rest',
-        ),
-        pytest.param(
-            configs.SDK,
-            id='api sdk',
-        ),
-    ],
-)
-@pytest.mark.usefixtures('mock_http_get', 'mock_http_post', 'openstack_connection')
-def test_disable_glance_tasks_metrics(aggregator, dd_run_check, instance, openstack_controller_check):
-    instance = instance | {
-        "components": {
-            "image": {
-                "tasks": False,
-            }
-        },
-    }
-    check = openstack_controller_check(instance)
-    dd_run_check(check)
-    for metric in aggregator.metric_names:
-        assert not metric.startswith('openstack.glance.image.task')
-
-
-@pytest.mark.parametrize(
-    ('instance', 'metrics'),
-    [
-        pytest.param(
-            configs.REST,
-            TASKS_METRICS_GLANCE,
-            id='api rest',
-        ),
-        pytest.param(
-            configs.SDK,
-            TASKS_METRICS_GLANCE,
-            id='api sdk',
-        ),
-    ],
-)
-@pytest.mark.usefixtures('mock_http_get', 'mock_http_post', 'openstack_connection')
-def test_images_tasks_metrics(aggregator, check, dd_run_check, metrics):
     dd_run_check(check)
     for metric in metrics:
         aggregator.assert_metric(

@@ -46,6 +46,7 @@ class TeamCityRest(AgentCheck):
         self.basic_http_auth = is_affirmative(
             self.instance.get('basic_http_authentication', bool(self.instance.get('password', False)))
         )
+        self.token_auth = is_affirmative(self.instance.get('auth_token'))
 
         self.monitored_projects = self.instance.get('projects', {})
         self.default_build_configs_limit = self.instance.get('default_build_configs_limit', DEFAULT_BUILD_CONFIGS_LIMIT)
@@ -67,7 +68,9 @@ class TeamCityRest(AgentCheck):
 
         server = self.instance.get('server')
         self.server_url = normalize_server_url(server)
-        self.base_url = "{}/{}".format(self.server_url, self.auth_type)
+        self.base_url = self.server_url
+        if not self.token_auth:
+            self.base_url = "{}/{}".format(self.server_url, self.auth_type)
 
         instance_tags = [
             'server:{}'.format(sanitize_server_url(self.server_url)),
