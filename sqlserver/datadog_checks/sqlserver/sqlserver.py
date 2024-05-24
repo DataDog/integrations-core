@@ -786,14 +786,12 @@ class SQLServer(AgentCheck):
             start_time = time.time()
             self._schemas.collect_schemas_data() 
             elapsed_time = time.time() - start_time
-            print("Elapsed time:", elapsed_time, "seconds")
-            #if self._config.dbm_enabled:
-                
-                
-                #self.statement_metrics.run_job_loop(self.tags)
-                #self.procedure_metrics.run_job_loop(self.tags)
-                #self.activity.run_job_loop(self.tags)
-                #self.sql_metadata.run_job_loop(self.tags)
+            print("TOTAL Elapsed time for collect_schemas_data:", elapsed_time, "seconds")
+            if self._config.dbm_enabled:
+                self.statement_metrics.run_job_loop(self.tags)
+                self.procedure_metrics.run_job_loop(self.tags)
+                self.activity.run_job_loop(self.tags)
+                self.sql_metadata.run_job_loop(self.tags)
         else:
             self.log.debug("Skipping check")
 
