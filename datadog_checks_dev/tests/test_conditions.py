@@ -5,7 +5,7 @@ import os
 import sys
 
 import pytest
-from six.moves.http_client import HTTPResponse
+from six.moves.urllib.response import addinfourl
 
 from datadog_checks.dev.conditions import CheckCommandOutput, CheckDockerLogs, CheckEndpoints, WaitFor
 from datadog_checks.dev.errors import RetryError
@@ -103,7 +103,7 @@ class TestCheckEndpoints:
             check_endpoints()
 
     def test_success(self):
-        mock_resp = mock.create_autospec(HTTPResponse)
+        mock_resp = mock.create_autospec(addinfourl)
         mock_resp.getcode.return_value = 200
         check_endpoints = CheckEndpoints(['https://test.com'], send_request=lambda *args, **kwargs: mock_resp)
 
