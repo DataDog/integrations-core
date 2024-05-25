@@ -4,6 +4,7 @@ on:
   schedule:
   # At 2AM on Monday (UTC)
   - cron: "0 2 * * 1"
+  pull_request:
 
 jobs:
   update_dependencies:
@@ -26,15 +27,6 @@ jobs:
       run: |-
         ddev config set repos.core .
         ddev config set repo core
-    - name: Update dependencies
-      run: |-
-        ddev dep updates --sync
-    - name: Update licenses
-      run: |-
-        ddev validate licenses --sync
-      env:
-        DD_GITHUB_USER: "${{ github.actor }}"
-        DD_GITHUB_TOKEN: "${{ secrets.GITHUB_TOKEN }}"
     - name: Create token
       uses: actions/create-github-app-token@v1
       id: token-generator
@@ -73,6 +65,15 @@ jobs:
         base: master
         labels: bot,qa/skip-qa
         draft: false
+    - name: Update dependencies
+      run: |-
+        ddev dep updates --sync
+    - name: Update licenses
+      run: |-
+        ddev validate licenses --sync
+      env:
+        DD_GITHUB_USER: "${{ github.actor }}"
+        DD_GITHUB_TOKEN: "${{ secrets.GITHUB_TOKEN }}"
     # We generate the changelog if and only if the PR was created
     - name: Update changelogs
       if: ${{ steps.cpr.outputs.pull-request-number }}
