@@ -78,12 +78,12 @@ jobs:
       if: ${{ steps.cpr.outputs.pull-request-number }}
       env:
         GH_TOKEN:
-          ${{ github.token }}
+          ${{ steps.token-generator.outputs.token }}
       run: |-
         gh pr checkout ${{ steps.cpr.outputs.pull-request-number }}
         ddev release changelog new added -m "Update dependencies"
         git config --global user.email "agent-integrations-dependency-bot@datadoghq.com"
         git config --global user.name "Agent Integrations Dependency Bot"
         git add .
-        git commit --amend --no-edit
-        git push origin HEAD --force
+        git commit -m "Update Changelog"
+        git push origin HEAD
