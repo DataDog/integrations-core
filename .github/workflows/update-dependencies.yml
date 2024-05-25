@@ -85,6 +85,7 @@ jobs:
       env:
         GH_TOKEN:
           ${{ github.token }}
+        GH_USER: "${{ github.actor }}"
       run: |-
         gh pr checkout ${{ steps.cpr.outputs.pull-request-number }}
         git rm trigger-commit
