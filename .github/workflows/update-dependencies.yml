@@ -34,6 +34,12 @@ jobs:
         app-id: ${{ secrets.DD_AGENT_INTEGRATIONS_BOT_APP_ID }}
         private-key: ${{ secrets.DD_AGENT_INTEGRATIONS_BOT_PRIVATE_KEY }}
         repositories: integrations-core
+    - name: Create trigger commit
+      id: trigger-commit
+      run: |-
+        git config --global user.email "agent-integrations-dependency-bot@datadoghq.com"
+        git config --global user.name "Agent Integrations Dependency Bot"
+        git commit --allow-empty -m "trigger commit"
     - name: Create Pull Request
       id: cpr
       uses: peter-evans/create-pull-request@v5
