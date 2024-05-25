@@ -83,8 +83,6 @@ jobs:
       run: |-
         gh pr checkout ${{ steps.cpr.outputs.pull-request-number }}
         ddev release changelog new added -m "Update dependencies"
-        git config --global user.email "agent-integrations-dependency-bot@datadoghq.com"
-        git config --global user.name "Agent Integrations Dependency Bot"
         git add .
         git commit -m "Update Changelog"
         git push origin HEAD
