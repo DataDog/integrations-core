@@ -297,11 +297,10 @@ class Schemas:
         messages = cursor.messages
         
         # Extract CPU and elapsed time from the messages
-        cpu_time = 0
-        elapsed_time = 0
-
         for message in messages:
-            self._log.warning("Executed columns query message -  {}".format(str(message)))     
+            self._log.warning("Executed columns query message -  {}".format(str(message)))  
+        else:
+            self._log.warning("Executed columns query NO MESSAGES")  
 
 
         start_time_fetch = time.time()
