@@ -294,6 +294,16 @@ class Schemas:
         start_time = time.time()
         cursor.execute(COLUMN_QUERY.format(table_ids, schema["name"]))
         self._log.warning("Executed columns query for {} seconds".format(time.time() - start_time))
+        messages = cursor.messages
+        
+        # Extract CPU and elapsed time from the messages
+        cpu_time = 0
+        elapsed_time = 0
+
+        for message in messages:
+            self._log.warning("Executed columns query message -  {}".format(str(message)))     
+
+
         start_time_fetch = time.time()
         data = cursor.fetchall()
         self._log.warning("Executed cursor.fetchall()for {} seconds".format(time.time() - start_time_fetch))
