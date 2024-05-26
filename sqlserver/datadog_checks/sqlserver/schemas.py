@@ -300,7 +300,7 @@ class Schemas:
         for message in messages:
             self._log.warning("Executed columns query message -  {}".format(str(message)))  
         else:
-            self._log.warning("Executed columns query NO MESSAGES")  
+            self._log.warning("Executed columns query NO MESSAGES 1")  
 
 
         start_time_fetch = time.time()
