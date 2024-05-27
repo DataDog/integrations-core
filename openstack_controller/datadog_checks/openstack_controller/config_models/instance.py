@@ -129,6 +129,14 @@ class ComputeItem(BaseModel):
     services: Optional[bool] = None
 
 
+class HeatItem(BaseModel):
+    model_config = ConfigDict(
+        arbitrary_types_allowed=True,
+        frozen=True,
+    )
+    stacks: Optional[bool] = None
+
+
 class IdentityItem(BaseModel):
     model_config = ConfigDict(
         arbitrary_types_allowed=True,
@@ -327,6 +335,7 @@ class Components(BaseModel):
     baremetal: Optional[Union[bool, BaremetalItem]] = None
     block_storage: Optional[Union[bool, BlockStorageItem]] = Field(None, alias='block-storage')
     compute: Optional[Union[bool, ComputeItem]] = None
+    heat: Optional[Union[bool, HeatItem]] = None
     identity: Optional[Union[bool, IdentityItem]] = None
     image: Optional[Union[bool, ImageItem]] = None
     load_balancer: Optional[Union[bool, LoadBalancerItem]] = Field(None, alias='load-balancer')

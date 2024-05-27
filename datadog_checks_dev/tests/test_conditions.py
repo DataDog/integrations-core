@@ -5,12 +5,18 @@ import os
 import sys
 
 import pytest
+from six.moves.urllib.response import addinfourl
 
 from datadog_checks.dev.conditions import CheckCommandOutput, CheckDockerLogs, CheckEndpoints, WaitFor
 from datadog_checks.dev.errors import RetryError
 from datadog_checks.dev.subprocess import run_command
 
 from .common import not_windows_ci
+
+try:
+    from unittest import mock  # Python 3
+except ImportError:
+    import mock  # Python 2
 
 HERE = os.path.dirname(os.path.abspath(__file__))
 DOCKER_DIR = os.path.join(HERE, 'docker')
@@ -97,6 +103,8 @@ class TestCheckEndpoints:
             check_endpoints()
 
     def test_success(self):
-        check_endpoints = CheckEndpoints(['https://google.com', 'https://bing.com'])
+        mock_resp = mock.create_autospec(addinfourl)
+        mock_resp.getcode.return_value = 200
+        check_endpoints = CheckEndpoints(['https://test.com'], send_request=lambda *args, **kwargs: mock_resp)
 
         check_endpoints()
