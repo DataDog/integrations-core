@@ -34,5 +34,8 @@ class Profiling(object):
                 self._profiler.stop()
                 self._running = False
 
+    def status(self):
+        return "running" if self._running else "stopped"
+
 
 PROFILING = Profiling()
