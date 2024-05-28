@@ -441,9 +441,7 @@ class SqlserverStatementMetrics(DBMAsyncJob):
         with self._check.connection.open_managed_default_connection(key_prefix=self._conn_key_prefix):
             with self._check.connection.get_managed_cursor(key_prefix=self._conn_key_prefix) as cursor:
                 rows = self._collect_metrics_rows(cursor)
-                #self.log.warning("ROWS {}".format(rows))
                 if not rows:
-                    #self.log.warning("ERROR couldnt find rows ")
                     return
                 for event in self._rows_to_fqt_events(rows):
                     self._check.database_monitoring_query_sample(json.dumps(event, default=default_json_event_encoding))

@@ -2,6 +2,7 @@
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
 import time
+
 from datadog_checks.base import is_affirmative
 from datadog_checks.base.utils.db.utils import (
     DBMAsyncJob,
@@ -128,7 +129,6 @@ class SqlserverMetadata(DBMAsyncJob):
         self.log.debug("loaded sql server settings len(rows)=%s", len(rows))
         return rows
 
-# for now not sort and limit
     @tracked_method(agent_check_getter=agent_check_getter)
     def report_sqlserver_metadata(self):
         with self._check.connection.open_managed_default_connection(key_prefix=self._conn_key_prefix):
