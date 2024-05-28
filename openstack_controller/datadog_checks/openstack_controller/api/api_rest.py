@@ -38,6 +38,7 @@ class ApiRest(Api):
             if self._current_project_id and 'AUTH' not in self._catalog.get_endpoint_by_type(endpoint_types)
             else self._catalog.get_endpoint_by_type(endpoint_types)
         )
+        self.log.debug("getting response time for `%s`", endpoint)
         response = self.http.get(endpoint)
         response.raise_for_status()
         return response.elapsed.total_seconds() * 1000
@@ -348,17 +349,9 @@ class ApiRest(Api):
 
     def make_paginated_request(self, url, resource_name, marker_name, next_signifier='next', params=None):
         def make_request(url, params):
-            if 'AUTH' in url and self.config.paginated_limit is not None:
-                params['format=json&limit'] = self.config.paginated_limit
-                params.pop('limit')
-                url = url.split('?')[0]
-            try:
-                resp = self.http.get(url, params=params)
-                resp.raise_for_status()
-                response_json = resp.json()
-            except requests.HTTPError as e:
-                self.log.info("Failed to make request to %s: %s", url, e)
-                response_json = {}
+            resp = self.http.get(url, params=params)
+            resp.raise_for_status()
+            response_json = resp.json()
             return response_json
 
         marker = None
@@ -381,6 +374,8 @@ class ApiRest(Api):
             )
 
             params['limit'] = self.config.paginated_limit
+            if 'AUTH' in url:
+                params['format'] = 'json'
             if marker is not None:
                 params['marker'] = marker
 
