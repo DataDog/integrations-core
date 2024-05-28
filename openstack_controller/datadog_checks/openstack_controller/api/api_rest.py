@@ -2,8 +2,6 @@
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
 
-import requests
-
 from datadog_checks.openstack_controller.api.api import Api
 from datadog_checks.openstack_controller.api.catalog import Catalog
 from datadog_checks.openstack_controller.components.component import Component
