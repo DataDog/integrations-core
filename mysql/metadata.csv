@@ -204,9 +204,9 @@ mysql.performance.table_open_cache,gauge,,,,The number of open tables for all th
 mysql.performance.thread_cache_size,gauge,,byte,,"How many threads the server should cache for reuse. When a client disconnects, the client's threads are put in the cache if there are fewer than thread_cache_size threads there.",0,mysql,mysql performance thread_cache_size,memory
 mysql.performance.threads_cached,gauge,,thread,,The number of threads in the thread cache.,0,mysql,mysql performance threads_cached,
 mysql.performance.threads_connected,gauge,,connection,,The number of currently open connections.,0,mysql,threads connected,cpu
-mysql.performance.threads_created,count,,thread,,"The number of threads created to handle connections. If Threads_created is big, you may want to increase the thread_cache_size value.",0,mysql,mysql performance threads_created,memory
+mysql.performance.threads_created,count,,thread,,"The number of threads created to handle connections. If `threads_created` is big, you may want to increase the `thread_cache_size` value.",0,mysql,mysql performance threads_created,memory
 mysql.performance.threads_running,gauge,,thread,,The number of threads that are not sleeping.,0,mysql,threads running,
-mysql.performance.user_connections,gauge,,connection,,"The number of user connections. Tags: processlist_db, processlist_host, processlist_state, processlist_user",0,mysql,user conns,
+mysql.performance.user_connections,gauge,,connection,,"The number of user connections. Tags: `processlist_db`, `processlist_host`, `processlist_state`, `processlist_user`",0,mysql,user conns,
 mysql.performance.user_time,gauge,,percent,,Percentage of CPU time spent in user space by MySQL.,-1,mysql,cpu user,
 mysql.queries.count,count,,query,,The total count of executed queries per normalized query and schema. (DBM only),0,mysql,mysql queries count,cpu
 mysql.queries.errors,count,,error,,The total count of queries run with an error per normalized query and schema. (DBM only),0,mysql,mysql query errors,
