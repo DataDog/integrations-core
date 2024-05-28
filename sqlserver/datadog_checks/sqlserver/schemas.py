@@ -21,7 +21,6 @@ from datadog_checks.sqlserver.utils import (
 import time
 import json
 import copy
-
 from datadog_checks.base.utils.db.utils import default_json_event_encoding
 
 class SubmitData: 
@@ -117,7 +116,7 @@ class Schemas:
         self._log = check.log
         self._tags = [t for t in check.tags if not t.startswith('dd.internal')]
         self._tags.append("boris:data")
-        self.schemas_per_db = {} 
+        self.schemas_per_db = {}
         """
         base_event = {
                 "host": self._check.resolved_hostname,
@@ -201,6 +200,7 @@ class Schemas:
         self._dataSubmitter.set_base_event_data(self._check.resolved_hostname, self._tags, self._check._config.cloud_metadata)
         #returns Stop, Stop == True.
         def fetch_schema_data(cursor, db_name):
+            start_time_db = time.time()
             db_info  = self._query_db_information(db_name, cursor)
             schemas = self._query_schema_information(cursor)
             self._dataSubmitter.store_db_info(db_name, db_info)
@@ -215,7 +215,6 @@ class Schemas:
                     if self._dataSubmitter.exceeded_total_columns_number():
                         self._log.warning("Truncated data due to the max limit, stopped on db - {} on schema {}".format(db_name, schema["name"]))
                         return True
-                    self._log.warning("elapsed time {}".format(time.time() - start_time))
 
                     start_get_tables_time = time.time()
                     columns_count, tables_info = self._get_tables_data(tables_chunk, schema, cursor)
@@ -232,12 +231,13 @@ class Schemas:
                     self._dataSubmitter.store(db_name, schema, [], 0)
             # we want to submit for each DB separetly for clarity
             self._dataSubmitter.submit()
-            self._log.error("Finished collecting for DB - {} elapsed time {}".format(db_name, time.time() - start_time))
+            self._log.error("Finished collecting for DB - {} elapsed time {}".format(db_name, time.time() - start_time_db))
             return False
         self._check.do_for_databases(fetch_schema_data, self._check.get_databases())
         # submit the last chunk of data if any
-        self._log.error("Finished collect_schemas_data")
         self._dataSubmitter.submit()
+        self._log.error("Finished collect_schemas_data spent {}".format(time.time() - start_time))
+        
 
 
     def _query_db_information(self, db_name, cursor):
@@ -297,10 +297,10 @@ class Schemas:
         messages = cursor.messages
         
         # Extract CPU and elapsed time from the messages
-        for message in messages:
-            self._log.warning("Executed columns query message -  {}".format(str(message)))  
-        else:
-            self._log.warning("Executed columns query NO MESSAGES 1")  
+        for index, message in enumerate(messages):
+            self._log.warning("Executed columns query message_{} -  {}".format(index, str(message)))  
+        if len(messages) == 0:
+            self._log.warning("Executed columns query NO MESSAGES Received")  
 
 
         start_time_fetch = time.time()
