@@ -83,7 +83,7 @@ class CheckDefinition(object):
         with open(os.path.join(INTEGRATIONS_CORE, dir_name, f'assets/logs/{dir_name}.yaml'), 'r') as logs_file:
             content = yaml.load(logs_file)
             # Log source defined in the assets/logs/dir_name.yaml of the integration
-            self.log_source: Optional[str] = content["id"]
+            self.log_source: Optional[str] = content.get("id")
 
         # Whether or not this check has a log to metrics mapping defined in web-ui
         self.is_defined_in_web_ui: bool = False
