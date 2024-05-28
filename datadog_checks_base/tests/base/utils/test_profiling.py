@@ -4,7 +4,6 @@
 # Licensed under a 3-clause BSD style license (see LICENSE)
 
 import mock
-import os
 
 from datadog_checks.base.utils.profiling import PROFILING
 
