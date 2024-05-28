@@ -293,7 +293,7 @@ class Schemas:
         # get columns if we dont have a dict here unlike postgres
         start_time = time.time()
         cursor.execute(COLUMN_QUERY.format(table_ids, schema["name"]))
-        self._log.warning("Executed columns query for {} seconds".format(time.time() - start_time))
+        self._log.warning("Executed columns query for {} seconds for {} tables".format(time.time() - start_time, len(table_ids)))
         messages = cursor.messages
         
         # Extract CPU and elapsed time from the messages
