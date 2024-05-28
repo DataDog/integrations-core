@@ -281,7 +281,7 @@ class Schemas:
         for t in table_list:
             name_to_id[t["name"]] = t["id"] 
             id_to_all[t["id"]] = t
-        total_columns_number  = self._populate_with_columns_data(table_ids_object, name_to_id, id_to_all, schema, cursor)
+        total_columns_number  = self._populate_with_columns_data(table_ids_object, name_to_id, id_to_all, schema, cursor, len(table_list))
         #self._populate_with_partitions_data(table_ids, id_to_all, cursor) #TODO P DISABLED as postgrss backend accepts different data model
         #self._populate_with_foreign_keys_data(table_ids, id_to_all, cursor) #TODO P DISABLED as postgrss backend accepts different data model
         #self._populate_with_index_data(table_ids, id_to_all, cursor) #TODO P DISABLED as postgrss backend accepts different data model
@@ -289,11 +289,11 @@ class Schemas:
         return total_columns_number, list(id_to_all.values())
 
     # TODO refactor the next 3 to have a base function when everythng is settled.
-    def _populate_with_columns_data(self, table_ids, name_to_id, id_to_all, schema, cursor):
+    def _populate_with_columns_data(self, table_ids, name_to_id, id_to_all, schema, cursor, table_len):
         # get columns if we dont have a dict here unlike postgres
         start_time = time.time()
         cursor.execute(COLUMN_QUERY.format(table_ids, schema["name"]))
-        self._log.warning("Executed columns query for {} seconds for {} tables".format(time.time() - start_time, len(table_ids)))
+        self._log.warning("Executed columns query for {} seconds for {} tables".format(time.time() - start_time, table_len))
         messages = cursor.messages
         
         # Extract CPU and elapsed time from the messages
