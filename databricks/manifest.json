@@ -37,9 +37,6 @@
       },
       "source_type_id": 10152,
       "auto_install": true
-    },
-    "logs": {
-      "source": "spark"
     }
   }
 }

@@ -54,9 +54,6 @@
     },
     "saved_views": {
       "couchbase_processes": "assets/saved_views/couchbase_processes.json"
-    },
-    "logs": {
-      "source": "couchdb"
     }
   }
 }

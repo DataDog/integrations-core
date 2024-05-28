@@ -44,9 +44,6 @@
       },
       "source_type_id": 10240,
       "auto_install": true
-    },
-    "logs": {
-      "source": "activemq"
     }
   }
 }

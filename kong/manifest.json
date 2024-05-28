@@ -58,9 +58,6 @@
       "status_code_overview": "assets/saved_views/status_code_overview.json",
       "bot_errors": "assets/saved_views/bot_errors.json",
       "kong_processes": "assets/saved_views/kong_processes.json"
-    },
-    "logs": {
-      "source": "kong"
     }
   }
 }

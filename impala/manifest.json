@@ -43,9 +43,6 @@
       "source_type_id": 10301,
       "auto_install": true
     },
-    "logs": {
-      "source": "impala"
-    },
     "dashboards": {
       "Impala - Overview": "assets/dashboards/impala_overview.json",
       "Impala - Statestore - Overview": "assets/dashboards/impala_statestore_overview.json",

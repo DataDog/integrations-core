@@ -60,9 +60,6 @@
     },
     "dashboards": {
       "Gitlab Overview": "assets/dashboards/overview.json"
-    },
-    "logs": {
-      "source": "gitlab"
     }
   }
 }

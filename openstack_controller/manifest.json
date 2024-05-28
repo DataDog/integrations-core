@@ -53,9 +53,6 @@
     "dashboards": {
       "OpenStack Controller Overview": "assets/dashboards/openstack-controller.json",
       "OpenStack Controller Overview [Default Microversion]": "assets/dashboards/openstack_controller_overview_[default_microversion].json"
-    },
-    "logs": {
-      "source": "openstack"
     }
   }
 }

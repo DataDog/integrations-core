@@ -55,9 +55,6 @@
     },
     "saved_views": {
       "powerdns_processes": "assets/saved_views/powerdns_processes.json"
-    },
-    "logs": {
-      "source": "powerdns"
     }
   }
 }
