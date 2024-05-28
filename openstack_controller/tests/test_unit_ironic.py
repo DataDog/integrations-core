@@ -801,7 +801,7 @@ def test_nodes_exception(aggregator, check, dd_run_check, mock_http_get, connect
         for call in mock_http_get.call_args_list:
             args, _ = call
             args_list += list(args)
-        assert args_list.count('http://127.0.0.1:6385/baremetal/v1/nodes/detail') == 2
+        assert args_list.count('http://127.0.0.1:6385/baremetal/v1/nodes/detail') == 1
     if api_type == ApiType.SDK:
         assert connection_baremetal.nodes.call_count == 2
 
@@ -1263,7 +1263,7 @@ def test_conductors_exception(aggregator, check, dd_run_check, mock_http_get, co
         for call in mock_http_get.call_args_list:
             args, _ = call
             args_list += list(args)
-        assert args_list.count('http://127.0.0.1:6385/baremetal/v1/conductors') == 2
+        assert args_list.count('http://127.0.0.1:6385/baremetal/v1/conductors') == 1
     if api_type == ApiType.SDK:
         assert connection_baremetal.conductors.call_count == 2
 
