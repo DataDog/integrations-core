@@ -127,7 +127,7 @@ mysql.myisam.key_buffer_bytes_unflushed,gauge,,byte,,MyISAM key buffer bytes unf
 mysql.myisam.key_buffer_bytes_used,gauge,,byte,,MyISAM key buffer bytes used.,0,mysql,mysql myisam key buffer bytes used,
 mysql.myisam.key_buffer_size,gauge,,byte,,Size of the buffer used for index blocks.,0,mysql,mysql myisam key_buffer_size,memory
 mysql.myisam.key_read_requests,gauge,,read,second,The number of requests to read a key block from the MyISAM key cache.,0,mysql,mysql myisam key_read_requests,
-mysql.myisam.key_reads,gauge,,read,second,"The number of physical reads of a key block from disk into the MyISAM key cache. If Key_reads is large, then your key_buffer_size value is probably too small. The cache miss rate can be calculated as Key_reads/Key_read_requests.",0,mysql,mysql myisam key_reads,
+mysql.myisam.key_reads,gauge,,read,second,"The number of physical reads of a key block from disk into the MyISAM key cache. If `key_reads` is large, then your key_buffer_size value is probably too small. The cache miss rate can be calculated as `key_reads`/`key_read_requests`.",0,mysql,mysql myisam key_reads,
 mysql.myisam.key_write_requests,gauge,,write,second,The number of requests to write a key block to the MyISAM key cache.,0,mysql,mysql myisam key_write_requests,
 mysql.myisam.key_writes,gauge,,write,second,The number of physical writes of a key block from the MyISAM key cache to disk.,0,mysql,mysql myisam key_writes,
 mysql.net.aborted_clients,gauge,,connection,second,The number of connections that were aborted because the client died without closing the connection properly.,0,mysql,mysql net aborted_clients,
