@@ -88,7 +88,7 @@ def test_not_in_catalog(aggregator, check, dd_run_check, caplog, mock_http_post,
     for call in mock_http_post.call_args_list:
         args, kwargs = call
         args_list += list(args)
-    assert args_list.count('http://127.0.0.1:8080/v1') == 0
+    assert args_list.count('http://127.0.0.1:6002/v1') == 0
     if api_type == ApiType.REST:
         args_list = []
         for call in mock_http_post.call_args_list:
@@ -132,7 +132,7 @@ def test_response_time_exception(aggregator, check, dd_run_check, mock_http_get)
     for call in mock_http_get.call_args_list:
         args, kwargs = call
         args_list += list(args)
-    assert args_list.count('http://127.0.0.1:8080/v1') == 0
+    assert args_list.count('http://127.0.0.1:6002/v1') == 0
 
 
 @pytest.mark.parametrize(
@@ -168,9 +168,9 @@ def test_response_time(aggregator, check, dd_run_check, mock_http_get, api_type)
         args, kwargs = call
         args_list += list(args)
     if api_type == ApiType.REST:
-        assert args_list.count('http://127.0.0.1:8080/v1/AUTH_1e6e233e637d4d55a50a62b63398ad15?format=json') == 2
+        assert args_list.count('http://127.0.0.1:6002/v1/AUTH_1e6e233e637d4d55a50a62b63398ad15?format=json') == 2
     else:
-        assert args_list.count('http://127.0.0.1:8080/v1/AUTH_1e6e233e637d4d55a50a62b63398ad15?format=json') == 1
+        assert args_list.count('http://127.0.0.1:6002/v1/AUTH_1e6e233e637d4d55a50a62b63398ad15?format=json') == 1
 
 
 @pytest.mark.parametrize(
@@ -211,7 +211,7 @@ def test_containers_exception(aggregator, check, dd_run_check, mock_http_get, co
         for call in mock_http_get.call_args_list:
             args, _ = call
             args_list += list(args)
-        assert args_list.count('http://127.0.0.1:8080/v1/AUTH_1e6e233e637d4d55a50a62b63398ad15?format=json') == 2
+        assert args_list.count('http://127.0.0.1:6002/v1/AUTH_1e6e233e637d4d55a50a62b63398ad15?format=json') == 2
     if api_type == ApiType.SDK:
         assert connection_swift.containers.call_count == 1
 
@@ -306,7 +306,7 @@ def test_containers_pagination(
             limit = params.get('limit')
             args_list += [(args[0], limit)]
         assert (
-            args_list.count(('http://127.0.0.1:8080/v1/AUTH_1e6e233e637d4d55a50a62b63398ad15', None))
+            args_list.count(('http://127.0.0.1:6002/v1/AUTH_1e6e233e637d4d55a50a62b63398ad15', None))
             == expected_api_calls
         )
     else:

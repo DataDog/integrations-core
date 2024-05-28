@@ -201,7 +201,7 @@
             "id": "c30ed0931098498d97f20500bf1351e1",
             "interface": "public",
             "region_id": "RegionOne",
-            "url": "http://127.0.0.1:8080/v1/AUTH_1e6e233e637d4d55a50a62b63398ad15?format=json",
+            "url": "http://127.0.0.1:6002/v1/AUTH_1e6e233e637d4d55a50a62b63398ad15?format=json",
             "region": "RegionOne"
           }
         ],
