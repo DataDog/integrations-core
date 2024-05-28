@@ -104,12 +104,12 @@ def test_not_in_catalog(aggregator, check, dd_run_check, caplog, mock_http_post,
     ('mock_http_get', 'instance'),
     [
         pytest.param(
-            {'http_error': {'/v1/AUTH_1e6e233e637d4d55a50a62b63398ad15?format=json': MockResponse(status_code=500)}},
+            {'http_error': {'/v1/AUTH_1e6e233e637d4d55a50a62b63398ad15': MockResponse(status_code=500)}},
             configs.REST,
             id='api rest',
         ),
         pytest.param(
-            {'http_error': {'/v1/AUTH_1e6e233e637d4d55a50a62b63398ad15?format=json': MockResponse(status_code=500)}},
+            {'http_error': {'/v1/AUTH_1e6e233e637d4d55a50a62b63398ad15': MockResponse(status_code=500)}},
             configs.SDK,
             id='api sdk',
         ),
@@ -168,9 +168,9 @@ def test_response_time(aggregator, check, dd_run_check, mock_http_get, api_type)
         args, kwargs = call
         args_list += list(args)
     if api_type == ApiType.REST:
-        assert args_list.count('http://127.0.0.1:6002/v1/AUTH_1e6e233e637d4d55a50a62b63398ad15?format=json') == 2
+        assert args_list.count('http://127.0.0.1:6002/v1/AUTH_1e6e233e637d4d55a50a62b63398ad15') == 2
     else:
-        assert args_list.count('http://127.0.0.1:6002/v1/AUTH_1e6e233e637d4d55a50a62b63398ad15?format=json') == 1
+        assert args_list.count('http://127.0.0.1:6002/v1/AUTH_1e6e233e637d4d55a50a62b63398ad15') == 1
 
 
 @pytest.mark.parametrize(

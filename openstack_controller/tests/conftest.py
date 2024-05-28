@@ -188,7 +188,7 @@ def mock_responses(microversion_headers):
 def mock_http_call(mock_responses):
     def call(method, url, file='response', headers=None, params=None):
         response = mock_responses(method, url, file=file, headers=headers, params=params)
-        if response:
+        if response is not None:
             return response
         http_response = requests.models.Response()
         http_response.status_code = 404
