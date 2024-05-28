@@ -359,12 +359,10 @@ class ApiRest(Api):
         params = {} if params is None else params
 
         if self.config.paginated_limit is None:
+            if 'AUTH' in url:
+                params['format'] = 'json'
             response_json = make_request(url, params)
-            if resource_name == 'No Resource Name Provided':
-                objects = response_json
-            else:
-                objects = response_json.get(resource_name, [])
-            return objects
+            return response_json if resource_name is None else response_json.get(resource_name, [])
 
         while True:
             self.log.debug(
@@ -373,17 +371,14 @@ class ApiRest(Api):
                 marker,
             )
 
-            params['limit'] = self.config.paginated_limit
             if 'AUTH' in url:
                 params['format'] = 'json'
+            params['limit'] = self.config.paginated_limit
             if marker is not None:
                 params['marker'] = marker
 
             response_json = make_request(url, params)
-            if resource_name == 'No Resource Name Provided':
-                resources = response_json
-            else:
-                resources = response_json.get(resource_name, [])
+            resources = response_json if resource_name is None else response_json.get(resource_name, [])
             if len(resources) > 0:
                 last_item = resources[-1]
                 item_list.extend(resources)
@@ -399,10 +394,11 @@ class ApiRest(Api):
                     if not has_next_link:
                         break
                 else:
-                    if resource_name == 'No Resource Name Provided':
-                        next_item = response_json[0].get(next_signifier)
-                    else:
-                        next_item = response_json.get(next_signifier)
+                    next_item = (
+                        response_json[-1].get(next_signifier)
+                        if resource_name is None
+                        else response_json.get(next_signifier)
+                    )
                     if next_item is None:
                         break
 
@@ -624,7 +620,7 @@ class ApiRest(Api):
     def get_swift_containers(self, account_id):
         return self.make_paginated_request(
             '{}'.format(self._catalog.get_endpoint_by_type(Component.Types.SWIFT.value)),
-            'No Resource Name Provided',
+            None,
             'name',
             next_signifier='name',
         )

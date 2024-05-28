@@ -177,7 +177,7 @@ def test_response_time(aggregator, check, dd_run_check, mock_http_get, api_type)
     ('mock_http_get', 'connection_swift', 'instance', 'api_type'),
     [
         pytest.param(
-            {'http_error': {'/v1/AUTH_1e6e233e637d4d55a50a62b63398ad15?format=json': MockResponse(status_code=500)}},
+            {'http_error': {'/v1/AUTH_1e6e233e637d4d55a50a62b63398ad15': MockResponse(status_code=500)}},
             None,
             configs.REST,
             ApiType.REST,
@@ -211,7 +211,7 @@ def test_containers_exception(aggregator, check, dd_run_check, mock_http_get, co
         for call in mock_http_get.call_args_list:
             args, _ = call
             args_list += list(args)
-        assert args_list.count('http://127.0.0.1:6002/v1/AUTH_1e6e233e637d4d55a50a62b63398ad15?format=json') == 2
+        assert args_list.count('http://127.0.0.1:6002/v1/AUTH_1e6e233e637d4d55a50a62b63398ad15') == 2
     if api_type == ApiType.SDK:
         assert connection_swift.containers.call_count == 1
 
@@ -251,7 +251,7 @@ def test_containers_metrics(aggregator, check, dd_run_check, metrics):
             configs.REST,
             1,
             ApiType.REST,
-            3,
+            1,
             CONTAINERS_METRICS_SWIFT,
             id='api rest small limit',
         ),
@@ -259,7 +259,7 @@ def test_containers_metrics(aggregator, check, dd_run_check, metrics):
             configs.REST,
             1000,
             ApiType.REST,
-            2,
+            1,
             CONTAINERS_METRICS_SWIFT,
             id='api rest high limit',
         ),

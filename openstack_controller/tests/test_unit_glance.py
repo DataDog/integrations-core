@@ -229,7 +229,7 @@ def test_images_exception(aggregator, check, dd_run_check, mock_http_get, connec
         for call in mock_http_get.call_args_list:
             args, _ = call
             args_list += list(args)
-        assert args_list.count('http://127.0.0.1:9292/image/v2/images') == 1
+        assert args_list.count('http://127.0.0.1:9292/image/v2/images') == 2
     if api_type == ApiType.SDK:
         assert connection_image.images.call_count == 2
 
