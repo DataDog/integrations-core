@@ -2,6 +2,7 @@
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
 
+import requests
 
 from datadog_checks.openstack_controller.api.api import Api
 from datadog_checks.openstack_controller.api.catalog import Catalog
@@ -34,7 +35,7 @@ class ApiRest(Api):
     def get_response_time(self, endpoint_types):
         endpoint = (
             self._catalog.get_endpoint_by_type(endpoint_types).replace(self._current_project_id, "")
-            if self._current_project_id
+            if self._current_project_id and 'AUTH' not in self._catalog.get_endpoint_by_type(endpoint_types)
             else self._catalog.get_endpoint_by_type(endpoint_types)
         )
         response = self.http.get(endpoint)
@@ -347,9 +348,17 @@ class ApiRest(Api):
 
     def make_paginated_request(self, url, resource_name, marker_name, next_signifier='next', params=None):
         def make_request(url, params):
-            resp = self.http.get(url, params=params)
-            resp.raise_for_status()
-            response_json = resp.json()
+            if 'AUTH' in url and self.config.paginated_limit is not None:
+                params['format=json&limit'] = self.config.paginated_limit
+                params.pop('limit')
+                url = url.split('?')[0]
+            try:
+                resp = self.http.get(url, params=params)
+                resp.raise_for_status()
+                response_json = resp.json()
+            except requests.HTTPError as e:
+                self.log.info("Failed to make request to %s: %s", url, e)
+                response_json = {}
             return response_json
 
         marker = None
@@ -358,7 +367,10 @@ class ApiRest(Api):
 
         if self.config.paginated_limit is None:
             response_json = make_request(url, params)
-            objects = response_json.get(resource_name, [])
+            if resource_name == 'No Resource Name Provided':
+                objects = response_json
+            else:
+                objects = response_json.get(resource_name, [])
             return objects
 
         while True:
@@ -373,7 +385,10 @@ class ApiRest(Api):
                 params['marker'] = marker
 
             response_json = make_request(url, params)
-            resources = response_json.get(resource_name, [])
+            if resource_name == 'No Resource Name Provided':
+                resources = response_json
+            else:
+                resources = response_json.get(resource_name, [])
             if len(resources) > 0:
                 last_item = resources[-1]
                 item_list.extend(resources)
@@ -389,7 +404,10 @@ class ApiRest(Api):
                     if not has_next_link:
                         break
                 else:
-                    next_item = response_json.get(next_signifier)
+                    if resource_name == 'No Resource Name Provided':
+                        next_item = response_json[0].get(next_signifier)
+                    else:
+                        next_item = response_json.get(next_signifier)
                     if next_item is None:
                         break
 
@@ -606,4 +624,12 @@ class ApiRest(Api):
             'stacks',
             'id',
             next_signifier='links',
+        )
+
+    def get_swift_containers(self, account_id):
+        return self.make_paginated_request(
+            '{}'.format(self._catalog.get_endpoint_by_type(Component.Types.SWIFT.value)),
+            'No Resource Name Provided',
+            'name',
+            next_signifier='name',
         )

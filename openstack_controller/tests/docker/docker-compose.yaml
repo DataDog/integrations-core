@@ -66,3 +66,11 @@ services:
       - ./etc/caddy/glance:/etc/caddy/
     ports:
       - "8004:80"
+  openstack-swift:
+    image: caddy:2.6.2-alpine
+    container_name: openstack-swift
+    volumes:
+      - ../fixtures:/usr/share/caddy
+      - ./etc/caddy/glance:/etc/caddy/
+    ports:
+      - "8080:80"

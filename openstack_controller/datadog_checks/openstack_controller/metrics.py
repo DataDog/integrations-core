@@ -645,6 +645,18 @@ HEAT_STACK_TAGS = {
     'stack_status': 'stack_status',
 }
 
+SWIFT_METRICS_PREFIX = "openstack.swift"
+SWIFT_SERVICE_CHECK = f"{SWIFT_METRICS_PREFIX}.api.up"
+SWIFT_RESPONSE_TIME = f"{SWIFT_METRICS_PREFIX}.response_time"
+SWIFT_CONTAINER_PREFIX = f"{SWIFT_METRICS_PREFIX}.container"
+SWIFT_CONTAINER_COUNT = f"{SWIFT_CONTAINER_PREFIX}.count"
+SWIFT_CONTAINER_METRICS = {
+    f"{SWIFT_CONTAINER_PREFIX}.bytes": {},
+}
+SWIFT_CONTAINER_TAGS = {
+    'name': 'container_name',
+}
+
 
 def is_interface_metric(label):
     return any(seg in label for seg in ['_rx', '_tx'])
