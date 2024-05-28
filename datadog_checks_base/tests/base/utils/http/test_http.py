@@ -83,6 +83,7 @@ class TestUnixDomainSocket:
         assert isinstance(adapter, requests_unixsocket.UnixAdapter)
 
     @flaky(max_runs=3, rerun_filter=lambda err, name, test, plugin: PY2)
+    @pytest.mark.skipif(PY2, reason='request-unixsocket2 does not support Python 2')
     @pytest.mark.skipif(ON_WINDOWS, reason='AF_UNIX not supported by Python on Windows yet')
     def test_uds_request(self, uds_path):
         # type: (str) -> None
