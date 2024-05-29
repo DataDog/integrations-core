@@ -61,9 +61,6 @@
     },
     "saved_views": {
       "activemq_processes": "assets/saved_views/activemq_processes.json"
-    },
-    "logs": {
-      "source": "activemq"
     }
   }
 }

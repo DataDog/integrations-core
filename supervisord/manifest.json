@@ -51,9 +51,6 @@
     },
     "saved_views": {
       "supervisord_processes": "assets/saved_views/supervisord_processes.json"
-    },
-    "logs": {
-      "source": "supervisord"
     }
   }
 }

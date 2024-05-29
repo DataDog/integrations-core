@@ -56,9 +56,6 @@
     },
     "dashboards": {
       "strimzi": "assets/dashboards/overview.json"
-    },
-    "logs": {
-      "source": "strimzi"
     }
   },
   "author": {
