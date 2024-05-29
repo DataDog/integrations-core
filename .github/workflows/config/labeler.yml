@@ -269,6 +269,8 @@ integration/kubelet:
 - kubelet/**/*
 integration/kubernetes:
 - kubernetes/**/*
+integration/kubernetes_cluster_autoscaler:
+- kubernetes_cluster_autoscaler/**/*
 integration/kubernetes_state:
 - kubernetes_state/**/*
 integration/kubernetes_state_core:
