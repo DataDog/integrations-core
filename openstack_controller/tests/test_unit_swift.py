@@ -167,8 +167,6 @@ def test_response_time(aggregator, check, dd_run_check, mock_http_get, api_type)
     for call in mock_http_get.call_args_list:
         args, kwargs = call
         args_list += [(list(args), kwargs.get('params', None))]
-        if 'http://127.0.0.1:6002/v1/AUTH_1e6e233e637d4d55a50a62b63398ad15' in args:
-            print([(list(args), kwargs.get('params', None))])
     assert args_list.count((['http://127.0.0.1:6002/v1/AUTH_1e6e233e637d4d55a50a62b63398ad15'], None)) == 1
 
 
