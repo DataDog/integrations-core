@@ -203,14 +203,11 @@ def test_containers_exception(aggregator, check, dd_run_check, mock_http_get, co
         'openstack.swift.container.count',
         count=0,
     )
-    if api_type == ApiType.REST:
-        args_list = []
-        for call in mock_http_get.call_args_list:
-            args, _ = call
-            args_list += list(args)
-        assert args_list.count('http://127.0.0.1:6002/v1/AUTH_1e6e233e637d4d55a50a62b63398ad15') == 2
-    if api_type == ApiType.SDK:
-        assert connection_swift.containers.call_count == 1
+    args_list = []
+    for call in mock_http_get.call_args_list:
+        args, kwargs = call
+        args_list += [(list(args), kwargs.get('params', None))]
+    assert args_list.count((['http://127.0.0.1:6002/v1/AUTH_1e6e233e637d4d55a50a62b63398ad15'], None)) == 1
 
 
 @pytest.mark.parametrize(
