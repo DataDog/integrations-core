@@ -2,7 +2,6 @@
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
 
-
 from datadog_checks.openstack_controller.api.api import Api
 from datadog_checks.openstack_controller.api.catalog import Catalog
 from datadog_checks.openstack_controller.components.component import Component
@@ -31,12 +30,13 @@ class ApiRest(Api):
     def component_in_catalog(self, component_types):
         return self._catalog.has_component(component_types)
 
-    def get_response_time(self, endpoint_types):
+    def get_response_time(self, endpoint_types, remove_project_id=True):
         endpoint = (
             self._catalog.get_endpoint_by_type(endpoint_types).replace(self._current_project_id, "")
-            if self._current_project_id
+            if self._current_project_id and remove_project_id
             else self._catalog.get_endpoint_by_type(endpoint_types)
         )
+        self.log.debug("getting response time for `%s`", endpoint)
         response = self.http.get(endpoint)
         response.raise_for_status()
         return response.elapsed.total_seconds() * 1000
@@ -199,13 +199,11 @@ class ApiRest(Api):
         return response.json().get('limits', [])
 
     def get_block_storage_volumes(self, project_id):
-        params = {}
         return self.make_paginated_request(
             '{}/volumes/detail'.format(self._catalog.get_endpoint_by_type(Component.Types.BLOCK_STORAGE.value)),
             'volumes',
             'id',
             next_signifier='volumes_links',
-            params=params,
         )
 
     def get_block_storage_transfers(self, project_id):
@@ -218,13 +216,11 @@ class ApiRest(Api):
         return response.json().get('transfers', {})
 
     def get_block_storage_snapshots(self, project_id):
-        params = {}
         return self.make_paginated_request(
             '{}/snapshots/detail'.format(self._catalog.get_endpoint_by_type(Component.Types.BLOCK_STORAGE.value)),
             'snapshots',
             'id',
             next_signifier='snapshots_links',
-            params=params,
         )
 
     def get_block_storage_pools(self, project_id):
@@ -358,27 +354,25 @@ class ApiRest(Api):
 
         if self.config.paginated_limit is None:
             response_json = make_request(url, params)
-            objects = response_json.get(resource_name, [])
-            return objects
+            return response_json if resource_name is None else response_json.get(resource_name, [])
 
+        params['limit'] = self.config.paginated_limit
         while True:
             self.log.debug(
                 "making paginated request [limit=%s, marker=%s]",
                 self.config.paginated_limit,
                 marker,
             )
-
-            params['limit'] = self.config.paginated_limit
             if marker is not None:
                 params['marker'] = marker
 
             response_json = make_request(url, params)
-            resources = response_json.get(resource_name, [])
+            resources = response_json if resource_name is None else response_json.get(resource_name, [])
             if len(resources) > 0:
                 last_item = resources[-1]
                 item_list.extend(resources)
 
-                if next_signifier == '{}_links'.format(resource_name):
+                if next_signifier == f'{resource_name}_links':
                     has_next_link = False
                     links = response_json.get(next_signifier, [])
                     for link in links:
@@ -389,7 +383,11 @@ class ApiRest(Api):
                     if not has_next_link:
                         break
                 else:
-                    next_item = response_json.get(next_signifier)
+                    next_item = (
+                        response_json[-1].get(next_signifier)
+                        if resource_name is None
+                        else response_json.get(next_signifier)
+                    )
                     if next_item is None:
                         break
 
@@ -606,4 +604,14 @@ class ApiRest(Api):
             'stacks',
             'id',
             next_signifier='links',
+        )
+
+    def get_swift_containers(self, account_id):
+        params = {'format': 'json'}
+        return self.make_paginated_request(
+            '{}'.format(self._catalog.get_endpoint_by_type(Component.Types.SWIFT.value)),
+            None,
+            'name',
+            next_signifier='name',
+            params=params,
         )
