@@ -355,23 +355,20 @@ class ApiRest(Api):
         marker = None
         item_list = []
         params = {} if params is None else params
+        if 'AUTH' in url:
+            params['format'] = 'json'
 
         if self.config.paginated_limit is None:
-            if 'AUTH' in url:
-                params['format'] = 'json'
             response_json = make_request(url, params)
             return response_json if resource_name is None else response_json.get(resource_name, [])
 
+        params['limit'] = self.config.paginated_limit
         while True:
             self.log.debug(
                 "making paginated request [limit=%s, marker=%s]",
                 self.config.paginated_limit,
                 marker,
             )
-
-            if 'AUTH' in url:
-                params['format'] = 'json'
-            params['limit'] = self.config.paginated_limit
             if marker is not None:
                 params['marker'] = marker
 
@@ -381,7 +378,7 @@ class ApiRest(Api):
                 last_item = resources[-1]
                 item_list.extend(resources)
 
-                if next_signifier == '{}_links'.format(resource_name):
+                if next_signifier == f'{resource_name}_links':
                     has_next_link = False
                     links = response_json.get(next_signifier, [])
                     for link in links:
