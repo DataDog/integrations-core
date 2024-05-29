@@ -49,6 +49,7 @@ class Component:
         LOAD_BALANCER = 'load-balancer'
         IMAGE = 'image'
         HEAT = 'heat'
+        SWIFT = 'swift'
 
     @unique
     class Types(list, Enum):
@@ -60,6 +61,7 @@ class Component:
         LOAD_BALANCER = ['load-balancer']
         IMAGE = ['image']
         HEAT = ['orchestration']
+        SWIFT = ['object-store']
 
     def http_error(report_service_check=False):
         def decorator_http_error(func):

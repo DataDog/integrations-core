@@ -101,3 +101,25 @@ def test_dbm_cluster_name(instance):
     instance['dbm'] = True
     with pytest.raises(ConfigurationError, match='`cluster_name` must be set when `dbm` is enabled'):
         MongoConfig(instance, mock.Mock())
+
+
+@pytest.mark.parametrize(
+    'dbm_enabled, operation_samples_config, operation_samples_enabled',
+    [
+        pytest.param(True, None, True, id='dbm_enabled_default'),
+        pytest.param(True, {'enabled': True}, True, id='operation_samples_enabled'),
+        pytest.param(True, {'enabled': False}, False, id='operation_samples_disabled'),
+        pytest.param(False, None, False, id='dbm_disabled_default'),
+        pytest.param(False, {'enabled': True}, False, id='operation_samples_enabled_dbm_disabled'),
+        pytest.param(False, {'enabled': False}, False, id='operation_samples_disabled_dbm_disabled'),
+    ],
+)
+def test_mongo_operation_samples_enabled(
+    instance_integration_cluster, check, dbm_enabled, operation_samples_config, operation_samples_enabled
+):
+    instance_integration_cluster['dbm'] = dbm_enabled
+    if operation_samples_config:
+        instance_integration_cluster['operation_samples'] = operation_samples_config
+
+    mongo_check = check(instance_integration_cluster)
+    assert mongo_check._config.operation_samples.get('enabled') == operation_samples_enabled

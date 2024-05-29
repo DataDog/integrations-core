@@ -90,6 +90,7 @@ files:
         example:
           [ one_database, other_database ]
     - name: dbm
+      hidden: true
       description: |
         Set to `true` enable Database Monitoring.
         
@@ -101,6 +102,7 @@ files:
         example: false
         display_default: false
     - name: cluster_name
+      hidden: true
       description: |
         The name of the cluster to which the monitored MongoDB instance belongs.
         Used to group MongoDB instances in a MongoDB cluster.
