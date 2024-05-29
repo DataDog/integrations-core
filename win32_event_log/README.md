@@ -475,8 +475,8 @@ Starting with Agent 7.54, you can automatically send Security Events to Datadog 
 
 2. In the integration configuration file, (`win32_event_log.d/conf.yaml`) set the `dd_security_events` flag to `low` or `high` to start sending Security Events to Datadog.
 
-   - `low`: sends only the most important and critical Security events, including 1102 (Audit log cleared), 4649 (Replay attack detected), and 4719 (System audit policy was changed).
-   - `high`: sends a higher volume of Security events, including 4714 (Encrypted data recovery policy was changed), 4739 (Domain policy was changed), and 4764 (Security-disabled group was deleted).
+   - `low`: sends only the most important and critical Security events, including Audit log cleared (1102), Replay attack detected (4649), and System audit policy was changed (4719). For a full list of events collected on the `low` setting, [see here][30]. 
+   - `high`: sends a higher volume of Security events, including Encrypted data recovery policy was changed (4714), Domain policy was changed (4739), and Security-disabled group was deleted (4764). For a full list of events collected on the `high` setting, [see here][31]. 
 
 
 3. [Restart the Agent][4].
@@ -558,3 +558,5 @@ Additional helpful documentation, links, and articles:
 [27]: https://www.datadoghq.com/blog/monitor-windows-event-logs-with-datadog/
 [28]: https://docs.datadoghq.com/integrations/guide/add-event-log-files-to-the-win32-ntlogevent-wmi-class/
 [29]: https://docs.datadoghq.com/security/cloud_siem/
+[30]: https://github.com/DataDog/datadog-agent/blob/main/cmd/agent/dist/conf.d/win32_event_log.d/profiles/dd_security_events_low.yaml.example
+[31]: https://github.com/DataDog/datadog-agent/blob/main/cmd/agent/dist/conf.d/win32_event_log.d/profiles/dd_security_events_high.yaml.example
