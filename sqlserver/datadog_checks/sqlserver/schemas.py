@@ -214,7 +214,7 @@ class Schemas:
                 i = 0
                 for tables_chunk in tables_chunk:
                     i = i+1
-                    if i > 10:
+                    if i > 2:
                         break
                     if self._dataSubmitter.exceeded_total_columns_number():
                         self._log.warning("Truncated data due to the max limit, stopped on db - {} on schema {}".format(db_name, schema["name"]))
