@@ -206,17 +206,18 @@ class Schemas:
             self._dataSubmitter.store_db_info(db_name, db_info)
             chunk_size = 50
             for schema in schemas:
-                if time.time() - start_time_db > 30:
+                if time.time() - start_time_db > 10:
                     self._log.warning("Already spent {}seconds".format(time.time() - start_time_db))
                 tables = self._get_tables(schema, cursor)  
                 #TODO sorting is purely for testing
                 sorted_tables = sorted(tables, key=lambda x: x['name'])          
                 tables_chunk = list(get_list_chunks(sorted_tables, chunk_size))
-                i = 0
+                did_once = False
                 for tables_chunk in tables_chunk:
-                    i = i+1
-                    if i > 2:
+                    if did_once:
                         break
+                    else:
+                        did_once = True
                     if self._dataSubmitter.exceeded_total_columns_number():
                         self._log.warning("Truncated data due to the max limit, stopped on db - {} on schema {}".format(db_name, schema["name"]))
                         return True
