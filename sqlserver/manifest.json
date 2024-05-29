@@ -56,6 +56,9 @@
       "SQLServer high failed auto param": "assets/monitors/sqlserver_high_number_failed_auto_param.json",
       "SQLServer db not online": "assets/monitors/sqlserver_db_not_online.json",
       "SQLServer db not in sync": "assets/monitors/sqlserver_db_not_sync.json"
+    },
+    "logs": {
+      "source": "sqlserver"
     }
   }
 }

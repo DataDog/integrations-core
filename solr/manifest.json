@@ -54,6 +54,9 @@
     },
     "saved_views": {
       "solr_processes": "assets/saved_views/solr_processes.json"
+    },
+    "logs": {
+      "source": "solr"
     }
   }
 }

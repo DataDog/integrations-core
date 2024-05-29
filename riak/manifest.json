@@ -47,6 +47,9 @@
     },
     "dashboards": {
       "riak": "assets/dashboards/riak_dashboard.json"
+    },
+    "logs": {
+      "source": "riak"
     }
   }
 }

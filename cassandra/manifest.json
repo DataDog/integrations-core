@@ -58,6 +58,9 @@
     },
     "saved_views": {
       "cassandra_processes": "assets/saved_views/cassandra_processes.json"
+    },
+    "logs": {
+      "source": "cassandra"
     }
   }
 }

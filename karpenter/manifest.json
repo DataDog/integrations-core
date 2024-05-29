@@ -46,6 +46,9 @@
     "dashboards": {
       "Karpenter Overview": "assets/dashboards/karpenter_overview.json"
     },
+    "logs": {
+      "source": "karpenter"
+    },
     "monitors": {
       "pod states": "assets/monitors/pod_state.json"
     },

@@ -49,6 +49,9 @@
     "dashboards": {
       "Argo Rollouts Overview": "assets/dashboards/argo_rollouts_overview.json"
     },
+    "logs": {
+      "source": "argo_rollouts"
+    },
     "monitors": {
       "Rollout Phase": "assets/monitors/rollout_phase.json"
     },

@@ -64,6 +64,9 @@
       "consul_processes": "assets/saved_views/consul_processes.json",
       "consul_errors": "assets/saved_views/consul_errors.json",
       "consul_overview": "assets/saved_views/consul_overview.json"
+    },
+    "logs": {
+      "source": "consul"
     }
   }
 }

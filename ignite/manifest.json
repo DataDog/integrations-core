@@ -49,6 +49,9 @@
     },
     "dashboards": {
       "Ignite Overview": "assets/dashboards/ignite_overview.json"
+    },
+    "logs": {
+      "source": "ignite"
     }
   }
 }

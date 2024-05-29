@@ -42,6 +42,7 @@
         "metadata_path": "assets/service_checks.json"
       }
     },
+    "logs": {},
     "dashboards": {
       "ESXi Overview": "assets/dashboards/overview.json"
     }

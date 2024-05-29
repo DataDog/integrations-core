@@ -46,6 +46,9 @@
     },
     "dashboards": {
       "Twemproxy - Overview": "assets/dashboards/twemproxy_overview.json"
+    },
+    "logs": {
+      "source": "twemproxy"
     }
   }
 }

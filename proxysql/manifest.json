@@ -48,6 +48,9 @@
     },
     "dashboards": {
       "ProxySQL Overview": "assets/dashboards/overview.json"
+    },
+    "logs": {
+      "source": "proxysql"
     }
   }
 }

@@ -49,6 +49,9 @@
     },
     "dashboards": {
       "mesos": "assets/dashboards/mesos_overview.json"
+    },
+    "logs": {
+      "source": "mesos"
     }
   }
 }

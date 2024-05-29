@@ -47,6 +47,9 @@
     },
     "dashboards": {
       "OpenLDAP Overview": "assets/dashboards/openldap_overview.json"
+    },
+    "logs": {
+      "source": "openldap"
     }
   }
 }

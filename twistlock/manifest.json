@@ -50,6 +50,9 @@
     },
     "dashboards": {
       "Twistlock": "assets/dashboards/overview.json"
+    },
+    "logs": {
+      "source": "twistlock"
     }
   }
 }

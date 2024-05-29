@@ -33,10 +33,10 @@
       "metrics": {
         "prefix": "teleport.",
         "check": [
-          "teleport.common.process_state",
-          "teleport.common.rx",
-          "teleport.common.tx",
-          "teleport.common.teleport_build_info"
+            "teleport.common.process_state",
+            "teleport.common.rx",
+            "teleport.common.tx",
+            "teleport.common.teleport_build_info"
         ],
         "metadata_path": "metadata.csv"
       },

@@ -53,6 +53,9 @@
     },
     "saved_views": {
       "rethinkdb_processes": "assets/saved_views/rethinkdb_processes.json"
+    },
+    "logs": {
+      "source": "rethinkdb"
     }
   }
 }

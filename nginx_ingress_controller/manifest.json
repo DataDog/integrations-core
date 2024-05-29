@@ -56,6 +56,9 @@
       "5xx_errors": "assets/saved_views/5xx_errors.json",
       "status_code_overview": "assets/saved_views/status_code_overview.json",
       "bot_errors": "assets/saved_views/bot_errors.json"
+    },
+    "logs": {
+      "source": "nginx-ingress-controller"
     }
   }
 }

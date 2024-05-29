@@ -46,6 +46,9 @@
     },
     "dashboards": {
       "JBoss WildFly": "assets/dashboards/jboss_wildfly.json"
+    },
+    "logs": {
+      "source": "jboss_wildfly"
     }
   }
 }

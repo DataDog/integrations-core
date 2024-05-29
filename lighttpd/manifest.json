@@ -52,6 +52,9 @@
     },
     "saved_views": {
       "lighttpd_processes": "assets/saved_views/lighttpd_processes.json"
+    },
+    "logs": {
+      "source": "lighttpd"
     }
   }
 }

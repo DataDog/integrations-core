@@ -55,6 +55,9 @@
       "status_code_overview": "assets/saved_views/status_code_overview.json",
       "bot_errors": "assets/saved_views/bot_errors.json",
       "gunicorn_processes": "assets/saved_views/gunicorn_processes.json"
+    },
+    "logs": {
+      "source": "gunicorn"
     }
   }
 }

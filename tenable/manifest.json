@@ -38,6 +38,9 @@
       },
       "source_type_id": 10089,
       "auto_install": true
+    },
+    "logs": {
+      "source": "tenable"
     }
   }
 }

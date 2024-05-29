@@ -53,6 +53,9 @@
     },
     "saved_views": {
       "marathon_processes": "assets/saved_views/marathon_processes.json"
+    },
+    "logs": {
+      "source": "marathon"
     }
   }
 }

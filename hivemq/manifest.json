@@ -48,6 +48,9 @@
     },
     "dashboards": {
       "HiveMQ": "assets/dashboards/hivemq.json"
+    },
+    "logs": {
+      "source": "hivemq"
     }
   }
 }

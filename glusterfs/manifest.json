@@ -55,6 +55,9 @@
     },
     "saved_views": {
       "glusterfs_processes": "assets/saved_views/glusterfs_processes.json"
+    },
+    "logs": {
+      "source": "glusterfs"
     }
   }
 }

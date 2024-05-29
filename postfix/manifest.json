@@ -52,6 +52,9 @@
     },
     "saved_views": {
       "postfix_processes": "assets/saved_views/postfix_processes.json"
+    },
+    "logs": {
+      "source": "postfix"
     }
   }
 }

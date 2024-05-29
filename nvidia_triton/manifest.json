@@ -49,6 +49,9 @@
     "monitors": {
       "[Nvidia Triton] GPU utilization is high": "assets/monitors/gpu_utilization.json",
       "[Nvidia Triton] CPU Memory Usage is high": "assets/monitors/cpu_memory.json"
+    },
+    "logs": {
+      "source": "nvidia_triton"
     }
   },
   "author": {

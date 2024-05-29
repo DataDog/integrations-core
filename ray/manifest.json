@@ -52,6 +52,9 @@
       "high memory utilization": "assets/monitors/mem_utilization.json",
       "high failed tasks": "assets/monitors/failed_task.json"
     },
+    "logs": {
+      "source": "ray"
+    },
     "dashboards": {
       "Ray Overview Dashboard": "assets/dashboards/overview_dashboard.json"
     }

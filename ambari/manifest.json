@@ -46,6 +46,9 @@
     },
     "dashboards": {
       "Ambari base dashboard": "assets/dashboards/base_dashboard.json"
+    },
+    "logs": {
+      "source": "ambari"
     }
   }
 }

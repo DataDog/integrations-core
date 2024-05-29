@@ -49,6 +49,9 @@
     },
     "dashboards": {
       "kube_scheduler": "assets/dashboards/overview.json"
+    },
+    "logs": {
+      "source": "kube_scheduler"
     }
   }
 }

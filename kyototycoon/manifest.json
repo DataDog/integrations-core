@@ -53,6 +53,9 @@
     },
     "saved_views": {
       "kyoto-tycoon_processes": "assets/saved_views/kyoto-tycoon_processes.json"
+    },
+    "logs": {
+      "source": "kyototycoon"
     }
   }
 }

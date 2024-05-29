@@ -58,6 +58,9 @@
     },
     "saved_views": {
       "openstack_processes": "assets/saved_views/openstack_processes.json"
+    },
+    "logs": {
+      "source": "openstack"
     }
   }
 }

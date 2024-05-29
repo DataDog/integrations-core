@@ -45,6 +45,9 @@
     },
     "dashboards": {
       "JMeter Overview": "assets/dashboards/JMeterOverview.json"
+    },
+    "logs": {
+      "source": "jmeter"
     }
   }
 }

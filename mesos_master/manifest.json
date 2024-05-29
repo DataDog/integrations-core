@@ -52,6 +52,9 @@
     },
     "saved_views": {
       "mesos-master_processes": "assets/saved_views/mesos-master_processes.json"
+    },
+    "logs": {
+      "source": "mesos"
     }
   }
 }

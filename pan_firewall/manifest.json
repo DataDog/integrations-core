@@ -48,6 +48,9 @@
     "saved_views": {
       "High Severity Issues": "assets/saved_views/all_high_severity_issues.json",
       "Authentication Protocol": "assets/saved_views/top_ips_flagged_in_high_severity_threats.json"
+    },
+    "logs": {
+      "source": "pan.firewall"
     }
   }
 }

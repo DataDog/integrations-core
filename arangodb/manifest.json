@@ -52,6 +52,9 @@
     "monitors": {
       "[ArangoDB] High server Kernel mode percentage usage": "assets/monitors/high_server_kernel_mode.json",
       "[ArangoDB] High server User mode percentage usage": "assets/monitors/high_server_user_mode.json"
+    },
+    "logs": {
+      "source": "arangodb"
     }
   }
 }

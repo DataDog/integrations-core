@@ -50,6 +50,9 @@
     },
     "dashboards": {
       "Boundary Overview": "assets/dashboards/boundary_overview.json"
+    },
+    "logs": {
+      "source": "boundary"
     }
   }
 }

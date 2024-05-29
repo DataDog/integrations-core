@@ -66,6 +66,9 @@
       "kafka_patterns": "assets/saved_views/kafka_patterns.json",
       "logger_overview": "assets/saved_views/logger_overview.json",
       "kafka_processes": "assets/saved_views/kafka_processes.json"
+    },
+    "logs": {
+      "source": "kafka"
     }
   }
 }

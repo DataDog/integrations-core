@@ -50,6 +50,9 @@
       "[Tekton] Increasing number of failed TaskRuns": "assets/monitors/increasing_failed_taskruns.json",
       "[Tekton] Increasing number of failed PieplineRuns": "assets/monitors/increasing_failed_pipelineruns.json"
     },
+    "logs": {
+      "source": "tekton"
+    },
     "saved_views": {
       "tekton_overview": "assets/saved_views/tekton_overview.json",
       "tekton_errors": "assets/saved_views/tekton_errors.json"

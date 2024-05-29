@@ -56,6 +56,9 @@
       "[SingleStore] License expiration": "assets/monitors/license_expiration.json",
       "[SingleStore] Read failures rate": "assets/monitors/read_failures.json",
       "[SingleStore] Write failures rate": "assets/monitors/write_failures.json"
+    },
+    "logs": {
+      "source": "singlestore"
     }
   }
 }

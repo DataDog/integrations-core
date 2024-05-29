@@ -48,6 +48,9 @@
     },
     "dashboards": {
       "IBM MQ": "assets/dashboards/overview.json"
+    },
+    "logs": {
+      "source": "ibm_mq"
     }
   }
 }

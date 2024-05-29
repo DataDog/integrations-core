@@ -52,6 +52,9 @@
     "dashboards": {
       "spark": "assets/dashboards/spark_dashboard.json",
       "Databricks Spark Overview": "assets/dashboards/databricks_overview.json"
+    },
+    "logs": {
+      "source": "spark"
     }
   }
 }

@@ -45,6 +45,9 @@
     },
     "dashboards": {
       "MapR - Overview": "assets/dashboards/mapr_overview.json"
+    },
+    "logs": {
+      "source": "mapr"
     }
   }
 }

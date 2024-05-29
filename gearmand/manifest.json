@@ -52,6 +52,9 @@
     },
     "saved_views": {
       "gearman_processes": "assets/saved_views/gearman_processes.json"
+    },
+    "logs": {
+      "source": "gearman"
     }
   }
 }

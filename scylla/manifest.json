@@ -51,6 +51,9 @@
     },
     "monitors": {
       "[Scylla] Server is shutting down": "assets/monitors/instance_down.json"
+    },
+    "logs": {
+      "source": "scylla"
     }
   }
 }

@@ -38,6 +38,9 @@
       },
       "source_type_id": 10174,
       "auto_install": true
+    },
+    "logs": {
+      "source": "envoy"
     }
   }
 }
