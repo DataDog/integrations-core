@@ -85,5 +85,5 @@ jobs:
         git config --global user.email "agent-integrations-dependency-bot@datadoghq.com"
         git config --global user.name "Agent Integrations Dependency Bot"
         git add .
-        git commit -am "Update changelogs"
-        git push origin HEAD
+        git commit --amend --no-edit
+        git push origin HEAD --force
