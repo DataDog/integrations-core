@@ -203,7 +203,7 @@ class ApiRest(Api):
             '{}/volumes/detail'.format(self._catalog.get_endpoint_by_type(Component.Types.BLOCK_STORAGE.value)),
             'volumes',
             'id',
-            next_signifier='volumes_links'
+            next_signifier='volumes_links',
         )
 
     def get_block_storage_transfers(self, project_id):
@@ -220,7 +220,7 @@ class ApiRest(Api):
             '{}/snapshots/detail'.format(self._catalog.get_endpoint_by_type(Component.Types.BLOCK_STORAGE.value)),
             'snapshots',
             'id',
-            next_signifier='snapshots_links'
+            next_signifier='snapshots_links',
         )
 
     def get_block_storage_pools(self, project_id):
@@ -613,5 +613,5 @@ class ApiRest(Api):
             None,
             'name',
             next_signifier='name',
-            params=params
+            params=params,
         )

@@ -118,9 +118,7 @@ class ApiSdk(Api):
     def get_response_time(self, endpoint_types, remove_project_id=True):
         endpoint = self._catalog.get_endpoint_by_type(endpoint_types)
         endpoint = (
-            endpoint.replace(self._access.project_id, "")
-            if self._access.project_id and remove_project_id
-            else endpoint
+            endpoint.replace(self._access.project_id, "") if self._access.project_id and remove_project_id else endpoint
         )
         response = self.http.get(endpoint)
         response.raise_for_status()

@@ -275,7 +275,9 @@ class Compute(Component):
                     lambda_name=lambda key, item=item: (
                         'active'
                         if key == 'status' and item['status'] == 'ACTIVE'
-                        else 'error' if key == 'status' and item['status'] == 'ERROR' else key
+                        else 'error'
+                        if key == 'status' and item['status'] == 'ERROR'
+                        else key
                     ),
                     lambda_value=lambda key, value, item=item: (
                         1 if key == 'status' and (item['status'] == 'ACTIVE' or item['status'] == 'ERROR') else value
