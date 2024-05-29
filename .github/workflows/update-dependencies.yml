@@ -91,5 +91,5 @@ jobs:
     - name: Push changes
       uses: ad-m/github-push-action@master
       with:
-        github_token: ${{ steps.token-generator.outputs.token }}
+        github_token: ${{ secrets.IK_TESTING_GH_PA_TOKEN }}
         branch: ${{ env.BRANCH_NAME }}
