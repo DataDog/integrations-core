@@ -557,4 +557,4 @@ Additional helpful documentation, links, and articles:
 [26]: https://docs.datadoghq.com/agent/logs/advanced_log_collection/?tab=configurationfile
 [27]: https://www.datadoghq.com/blog/monitor-windows-event-logs-with-datadog/
 [28]: https://docs.datadoghq.com/integrations/guide/add-event-log-files-to-the-win32-ntlogevent-wmi-class/
-[29]: https://www.datadoghq.com/product/cloud-siem/
+[29]: https://docs.datadoghq.com/security/cloud_siem/
