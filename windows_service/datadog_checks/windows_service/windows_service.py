@@ -259,7 +259,7 @@ class WindowsService(AgentCheck):
         # See test_name_regex_order()
         service_filters = sorted(service_filters, reverse=True, key=lambda x: len(x.name or ""))
 
-        for short_name, _, service_status in service_statuses:
+        for short_name, display_name, service_status in service_statuses:
             service_view = ServiceView(scm_handle, short_name)
 
             if 'ALL' not in services:
@@ -284,6 +284,9 @@ class WindowsService(AgentCheck):
 
             tags = ['windows_service:{}'.format(short_name)]
             tags.extend(custom_tags)
+
+            if instance.get('collect_display_name_as_tag', False):
+                tags.append('display_name:{}'.format(display_name))
 
             if instance.get('windows_service_startup_type_tag', False):
                 try:
@@ -313,6 +316,9 @@ class WindowsService(AgentCheck):
 
                 if instance.get('windows_service_startup_type_tag', False):
                     tags.append('windows_service_startup_type:{}'.format(startup_type_string))
+                
+                if instance.get('collect_display_name_as_tag', False):
+                    tags.append('display_name:{}'.format(service))
 
                 if not instance.get('disable_legacy_service_tag', False):
                     self._log_deprecation('service_tag', 'windows_service')

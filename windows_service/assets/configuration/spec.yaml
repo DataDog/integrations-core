@@ -64,4 +64,10 @@ files:
             value:
               type: boolean
               example: false
+          - name: collect_display_name_as_tag
+            description: |
+              Whether or not to submit the Windows Service Display Name as the `display_name` tag.
+            value:
+              type: boolean
+              example: false
           - template: instances/default
