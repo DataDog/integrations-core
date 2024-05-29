@@ -4,6 +4,7 @@ on:
   schedule:
   # At 2AM on Monday (UTC)
   - cron: "0 2 * * 1"
+  pull_request:
 
 jobs:
   update_dependencies:
