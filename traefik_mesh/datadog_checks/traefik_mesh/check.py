@@ -8,8 +8,8 @@ from urllib.parse import urljoin
 import requests
 
 from datadog_checks.base import AgentCheck, OpenMetricsBaseCheckV2
-from datadog_checks.traefik_mesh.config_models import ConfigMixin
-from datadog_checks.traefik_mesh.metrics import METRIC_MAP, RENAME_LABELS
+from .config_models import ConfigMixin
+from .metrics import METRIC_MAP, RENAME_LABELS
 
 PROXY_VERSION = '/api/version'
 MESH_READY_STATUS = '/api/status/nodes'
