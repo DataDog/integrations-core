@@ -1,3 +1,38 @@
+resource "null_resource" "install_deps" {
+  count = fileexists("${var.install_deps_script_path}") ? 1 : 0
+  connection {
+    type = "ssh"
+    user = "ubuntu"
+    private_key = "${tls_private_key.ssh-key.private_key_pem}"
+    host = "${google_compute_instance.openstack.network_interface.0.access_config.0.nat_ip}"
+    timeout  = "2h"  # Adjust the timeout value as needed
+  }
+  provisioner "remote-exec" {
+    script = "${var.install_deps_script_path}"
+  }
+
+  depends_on = [google_compute_instance.openstack]
+}
+
+resource "null_resource" "install" {
+  connection {
+    type = "ssh"
+    user = "ubuntu"
+    private_key = "${tls_private_key.ssh-key.private_key_pem}"
+    host = "${google_compute_instance.openstack.network_interface.0.access_config.0.nat_ip}"
+    timeout  = "2h"  # Adjust the timeout value as needed
+  }
+  provisioner "file" {
+    source      = "${var.local_conf_path}"
+    destination = "/tmp/local.conf"
+  }
+  provisioner "remote-exec" {
+    script = "${var.main_script_path}"
+  }
+
+  depends_on = [null_resource.install_deps]
+}
+
 resource "google_compute_instance" "openstack" {
   desired_status = var.desired_status
   name = var.instance_name
@@ -25,9 +60,7 @@ resource "google_compute_instance" "openstack" {
     user = "ubuntu"
     private_key = "${tls_private_key.ssh-key.private_key_pem}"
     host = "${google_compute_instance.openstack.network_interface.0.access_config.0.nat_ip}"
-  }
-  provisioner "remote-exec" {
-    script = "script.sh"
+    timeout  = "2h"  # Adjust the timeout value as needed
   }
 }
 
