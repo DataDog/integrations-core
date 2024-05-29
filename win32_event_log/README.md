@@ -26,7 +26,6 @@ Windows Event Logs can be collected as one or both of the following methods.
 
 Both methods are configured in `win32_event_log.d/conf.yaml` in the `conf.d/` folder at the root of your [Agent's configuration directory][2]. See the [sample win32_event_log.d/conf.yaml][3] for all available configuration options.
 
-
 #### List Windows Event channels
 
 First, identify the Windows Event Log channels you want to monitor. 
@@ -464,6 +463,25 @@ Checks
 <!-- xxz tab xxx -->
 <!-- xxz tabs xxx -->
 
+## Send Default Security Logs
+
+Starting with Agent 7.54, you can automatically send Security Events to Datadog as Logs by using the `dd_security_events` flag. These Logs can be used with [Datadog's Cloud SIEM][29] to automatically detect threats and suspicious activity in real-time. These default security events are compatible with Datadog's out-of-the-box Windows detection rules to create security signals when a user clears the Security Logs, disables the Windows firewall, changes the Directory Services Restore Mode (DSRM) password, and more.
+
+1. Collecting logs is disabled by default in the Datadog Agent. Enable it in your `datadog.yaml` file:
+
+   ```yaml
+   logs_enabled: true
+   ```
+
+2. In the integration configuration file (`win32_event_log.d/conf.yaml`) set the `dd_security_events` flag to `low` or `high` to start sending Security Events to Datadog.
+
+   - `low`: sends only the most important and crtical Security events, including 1102 (Audit log cleared), 4649 (Replay attack detected), and 4719 (System audit policy was changed).
+   - `high`: sends a higher volume of Security events, including 4714 (Encrypted data recovery policy was changed), 4739 (Domain policy was changed), and 4764 (Security-disabled group was deleted).
+
+
+3. [Restart the Agent][4].
+
+
 ## Data Collected
 
 ### Metrics
@@ -539,3 +557,4 @@ Additional helpful documentation, links, and articles:
 [26]: https://docs.datadoghq.com/agent/logs/advanced_log_collection/?tab=configurationfile
 [27]: https://www.datadoghq.com/blog/monitor-windows-event-logs-with-datadog/
 [28]: https://docs.datadoghq.com/integrations/guide/add-event-log-files-to-the-win32-ntlogevent-wmi-class/
+[29]: https://www.datadoghq.com/product/cloud-siem/
