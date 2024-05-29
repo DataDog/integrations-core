@@ -1214,3 +1214,25 @@ def test_detect_typos_configuration_models(
         assert "Detected potential typo in configuration option" not in caplog.text
 
     assert typos == set(unknown_options)
+
+
+@pytest.mark.parametrize(
+    "integration_profiling",
+    ["true", "false"],
+)
+@mock.patch("datadog_checks.base.checks.base.PROFILING")
+def test_profiling(profiling, integration_profiling, mocker):
+    class ProfilingCheck(AgentCheck):
+        def check(self, _):
+            pass
+
+    check = ProfilingCheck()
+    with mock.patch("datadog_checks.base.checks.base.datadog_agent.get_config") as get_config:
+        get_config.return_value = integration_profiling
+
+        check.run()
+
+        if integration_profiling == "true":
+            profiling.start.assert_called_once()
+        else:
+            profiling.stop.assert_called_once()
