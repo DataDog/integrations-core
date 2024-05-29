@@ -86,7 +86,6 @@ class TestUnixDomainSocket:
     @pytest.mark.skipif(ON_WINDOWS, reason='AF_UNIX not supported by Python on Windows yet')
     def test_uds_request(self, uds_path):
         # type: (str) -> None
-        breakpoint()
         http = RequestsWrapper({}, {})
         url = 'unix://{}'.format(uds_path)
         response = http.get(url)
