@@ -475,7 +475,7 @@ Starting with Agent 7.54, you can automatically send Security Events to Datadog 
 
 2. In the integration configuration file, (`win32_event_log.d/conf.yaml`) set the `dd_security_events` flag to `low` or `high` to start sending Security Events to Datadog.
 
-   - `low`: sends only the most important and crtical Security events, including 1102 (Audit log cleared), 4649 (Replay attack detected), and 4719 (System audit policy was changed).
+   - `low`: sends only the most important and critical Security events, including 1102 (Audit log cleared), 4649 (Replay attack detected), and 4719 (System audit policy was changed).
    - `high`: sends a higher volume of Security events, including 4714 (Encrypted data recovery policy was changed), 4739 (Domain policy was changed), and 4764 (Security-disabled group was deleted).
 
 
