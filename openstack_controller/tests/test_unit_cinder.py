@@ -278,6 +278,7 @@ def test_block_storage_metrics(aggregator, check, dd_run_check):
             'volume_id:9c762008-d70f-44d1-af02-98e1da79ee4b',
             'volume_name:first_volume',
             'volume_status:in-use',
+            'volume_type:lvmdriver-1',
             'keystone_server:http://127.0.0.1:8080/identity',
         ],
     )
@@ -292,6 +293,7 @@ def test_block_storage_metrics(aggregator, check, dd_run_check):
             'volume_id:259b16de-727f-4011-8388-84d17a9ae594',
             'volume_name:',
             'volume_status:in-use',
+            'volume_type:lvmdriver-1',
             'keystone_server:http://127.0.0.1:8080/identity',
         ],
     )
@@ -306,6 +308,7 @@ def test_block_storage_metrics(aggregator, check, dd_run_check):
             'volume_id:9c762008-d70f-44d1-af02-98e1da79ee4b',
             'volume_name:first_volume',
             'volume_status:in-use',
+            'volume_type:lvmdriver-1',
             'keystone_server:http://127.0.0.1:8080/identity',
         ],
     )
@@ -320,6 +323,7 @@ def test_block_storage_metrics(aggregator, check, dd_run_check):
             'volume_id:259b16de-727f-4011-8388-84d17a9ae594',
             'volume_name:',
             'volume_status:in-use',
+            'volume_type:lvmdriver-1',
             'keystone_server:http://127.0.0.1:8080/identity',
         ],
     )
@@ -647,6 +651,7 @@ def test_block_storage_volumes_pagination(
             'volume_id:9c762008-d70f-44d1-af02-98e1da79ee4b',
             'volume_name:first_volume',
             'volume_status:in-use',
+            'volume_type:lvmdriver-1',
             'keystone_server:http://127.0.0.1:8080/identity',
         ],
     )
@@ -661,6 +666,7 @@ def test_block_storage_volumes_pagination(
             'volume_id:259b16de-727f-4011-8388-84d17a9ae594',
             'volume_name:',
             'volume_status:in-use',
+            'volume_type:lvmdriver-1',
             'keystone_server:http://127.0.0.1:8080/identity',
         ],
     )
@@ -675,6 +681,7 @@ def test_block_storage_volumes_pagination(
             'volume_id:9c762008-d70f-44d1-af02-98e1da79ee4b',
             'volume_name:first_volume',
             'volume_status:in-use',
+            'volume_type:lvmdriver-1',
             'keystone_server:http://127.0.0.1:8080/identity',
         ],
     )
@@ -689,6 +696,7 @@ def test_block_storage_volumes_pagination(
             'volume_id:259b16de-727f-4011-8388-84d17a9ae594',
             'volume_name:',
             'volume_status:in-use',
+            'volume_type:lvmdriver-1',
             'keystone_server:http://127.0.0.1:8080/identity',
         ],
     )

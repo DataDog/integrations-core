@@ -16,6 +16,7 @@ from datadog_checks.openstack_controller.components.identity import Identity
 from datadog_checks.openstack_controller.components.image import Image
 from datadog_checks.openstack_controller.components.load_balancer import LoadBalancer
 from datadog_checks.openstack_controller.components.network import Network
+from datadog_checks.openstack_controller.components.swift import Swift
 from datadog_checks.openstack_controller.config import OpenstackConfig, normalize_discover_config_include
 
 from .config_models import ConfigMixin
@@ -53,6 +54,7 @@ class OpenStackControllerCheck(AgentCheck, ConfigMixin):
             LoadBalancer(self),
             Image(self),
             Heat(self),
+            Swift(self),
         ]
         self.projects_discovery = None
         if self.config.projects:
