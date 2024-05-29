@@ -1,4 +1,4 @@
-# Agent Check: traefik_mesh
+# Agent Check: traefik_meshh
 
 ## Overview
 
@@ -33,7 +33,7 @@ In addition, a small subset of metrics can be collected by communicating with di
 #### Containerized
 ##### Metric collection
 
-Make sure that the Prometheus-formatted metrics are exposed in your Traefik Mesh cluster. You can configure and customize this by following the instructions on the [Observability page in the official Traefik Mesh documentation][10]. In order for the Agent to start collecting metrics, the Traefik Mesh pods need to be annotated. For more information about annotations, refer to the [Autodiscovery Integration Templates][3] for guidance. You can find additional configuration options by reviewing the [`traefik_mesh.d/conf.yaml` sample][4].
+Make sure that the Prometheus-formatted metrics are exposed in your Traefik Mesh cluster. You can configure and customize this by following the instructions on the [Observability page in the official Traefik Mesh documentation][10]. In order for the Agent to start collecting metrics, the Traefik Mesh pods need to be annotated. For more information about annotations, refer to the [Autodiscovery Integration Templates][3] for guidance. You can find additional configuration options by reviewing the [`traefik_meshh.d/conf.yaml` sample][4].
 
 **Note**: The following metrics can only be collected if they are available. Some metrics are generated only when certain actions are performed.
 
@@ -44,7 +44,7 @@ When configuring the Traefik Mesh check, you can use the following parameters:
 
 ### Validation
 
-[Run the Agent's status subcommand][6] and look for `traefik_mesh` under the Checks section.
+[Run the Agent's status subcommand][6] and look for `traefik_meshh` under the Checks section.
 
 ## Data Collected
 
@@ -68,11 +68,11 @@ Need help? Contact [Datadog support][9].
 [1]: https://traefik.io/
 [2]: https://app.datadoghq.com/account/settings/agent/latest
 [3]: https://docs.datadoghq.com/agent/kubernetes/integrations/
-[4]: https://github.com/DataDog/integrations-core/blob/master/traefik_mesh/datadog_checks/traefik_mesh/data/conf.yaml.example
+[4]: https://github.com/DataDog/integrations-core/blob/master/traefik_meshh/datadog_checks/traefik_meshh/data/conf.yaml.example
 [5]: https://docs.datadoghq.com/agent/guide/agent-commands/#start-stop-and-restart-the-agent
 [6]: https://docs.datadoghq.com/agent/guide/agent-commands/#agent-status-and-information
-[7]: https://github.com/DataDog/integrations-core/blob/master/traefik_mesh/metadata.csv
-[8]: https://github.com/DataDog/integrations-core/blob/master/traefik_mesh/assets/service_checks.json
+[7]: https://github.com/DataDog/integrations-core/blob/master/traefik_meshh/metadata.csv
+[8]: https://github.com/DataDog/integrations-core/blob/master/traefik_meshh/assets/service_checks.json
 [9]: https://docs.datadoghq.com/help/
 [10]: https://doc.traefik.io/traefik/observability/metrics/overview/
 [11]: https://docs.datadoghq.com/integrations/openmetrics/

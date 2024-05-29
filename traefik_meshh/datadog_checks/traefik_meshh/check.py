@@ -8,6 +8,7 @@ from urllib.parse import urljoin
 import requests
 
 from datadog_checks.base import AgentCheck, OpenMetricsBaseCheckV2
+
 from .config_models import ConfigMixin
 from .metrics import METRIC_MAP, RENAME_LABELS
 
@@ -19,7 +20,7 @@ CONTROLLER_READINESS = '/api/status/readiness'
 class TraefikMeshCheck(OpenMetricsBaseCheckV2, ConfigMixin):
 
     DEFAULT_METRIC_LIMIT = 0
-    __NAMESPACE__ = 'traefik_mesh'
+    __NAMESPACE__ = 'traefik_meshh'
 
     def __init__(self, name, init_config, instances):
         super().__init__(name, init_config, instances)

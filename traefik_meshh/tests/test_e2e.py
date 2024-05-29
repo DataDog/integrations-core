@@ -6,5 +6,5 @@
 def test_e2e_openmetrics_v2(dd_agent_check):
     aggregator = dd_agent_check()
 
-    aggregator.assert_service_check('traefik_mesh.openmetrics.health')
-    aggregator.assert_service_check('traefik_mesh.controller.ready')
+    aggregator.assert_service_check('traefik_meshh.openmetrics.health')
+    aggregator.assert_service_check('traefik_meshh.controller.ready')

@@ -27,7 +27,7 @@ def instance_openmetrics_v2(dd_get_state):
     return openmetrics_v2
 
 
-def setup_traefik_mesh():
+def setup_traefik_meshh():
     run_command(["kubectl", "create", "namespace", "traefik-mesh"])
     # SMI CRDs are not installed by the Helm chart, so we need to install them manually
     run_command(
@@ -42,7 +42,7 @@ def setup_traefik_mesh():
             "traefik-mesh",
         ]
     )
-    run_command(["kubectl", "apply", "-f", opj(HERE, "kind", "traefik_mesh.yaml"), "-n", "traefik-mesh"])
+    run_command(["kubectl", "apply", "-f", opj(HERE, "kind", "traefik_meshh.yaml"), "-n", "traefik-mesh"])
     run_command(
         ["kubectl", "wait", "deployments", "--all", "--for=condition=Available", "-n", "traefik-mesh", "--timeout=90s"]
     )
@@ -51,7 +51,7 @@ def setup_traefik_mesh():
 
 @pytest.fixture(scope='session')
 def dd_environment(dd_save_state):
-    with kind_run(conditions=[setup_traefik_mesh]) as kubeconfig:
+    with kind_run(conditions=[setup_traefik_meshh]) as kubeconfig:
         with ExitStack() as stack:
 
             traefik_controller_api_url, traefik_controller_api_port = stack.enter_context(

@@ -6,7 +6,7 @@ import pytest
 
 from datadog_checks.base.constants import ServiceCheck
 from datadog_checks.dev.utils import assert_service_checks, get_metadata_metrics
-from datadog_checks.traefik_mesh import TraefikMeshCheck
+from datadog_checks.traefik_meshh import TraefikMeshCheck
 
 from .common import (
     OM_METRICS,
@@ -18,29 +18,29 @@ from .common import (
 )
 
 
-def test_check_mock_traefik_mesh_openmetrics(dd_run_check, aggregator, mock_http_response):
+def test_check_mock_traefik_meshh_openmetrics(dd_run_check, aggregator, mock_http_response):
     mock_http_response(file_path=get_fixture_path('traefik_proxy.txt'))
-    check = TraefikMeshCheck('traefik_mesh', {}, [OM_MOCKED_INSTANCE])
+    check = TraefikMeshCheck('traefik_meshh', {}, [OM_MOCKED_INSTANCE])
     dd_run_check(check)
 
     for metric in OM_METRICS:
         if metric not in OPTIONAL_METRICS:
             aggregator.assert_metric(metric)
-            aggregator.assert_metric_has_tag(metric, 'test:traefik_mesh')
+            aggregator.assert_metric_has_tag(metric, 'test:traefik_meshh')
 
     aggregator.assert_all_metrics_covered()
     aggregator.assert_metrics_using_metadata(get_metadata_metrics())
-    aggregator.assert_service_check('traefik_mesh.openmetrics.health', ServiceCheck.OK)
+    aggregator.assert_service_check('traefik_meshh.openmetrics.health', ServiceCheck.OK)
     assert_service_checks(aggregator)
 
 
-def test_check_mock_invalid_traefik_mesh_openmetrics(dd_run_check, aggregator, mock_http_response):
+def test_check_mock_invalid_traefik_meshh_openmetrics(dd_run_check, aggregator, mock_http_response):
     mock_http_response(status_code=503)
-    check = TraefikMeshCheck('traefik_mesh', {}, [OM_MOCKED_INSTANCE])
+    check = TraefikMeshCheck('traefik_meshh', {}, [OM_MOCKED_INSTANCE])
     with pytest.raises(Exception):
         dd_run_check(check)
 
-    aggregator.assert_service_check('traefik_mesh.openmetrics.health', ServiceCheck.CRITICAL)
+    aggregator.assert_service_check('traefik_meshh.openmetrics.health', ServiceCheck.CRITICAL)
     assert_service_checks(aggregator)
 
 
@@ -49,51 +49,51 @@ def test_empty_instance(dd_run_check):
         Exception,
         match='InstanceConfig`:\nopenmetrics_endpoint\n  Field required',
     ):
-        check = TraefikMeshCheck('traefik_mesh', {}, [{}])
+        check = TraefikMeshCheck('traefik_meshh', {}, [{}])
         dd_run_check(check)
 
 
 def test_submit_node_ready_status(aggregator, dd_run_check, mock_http_response):
     mock_http_response(file_path=get_fixture_path('traefik_proxy.txt'))
-    check = TraefikMeshCheck('traefik_mesh', {}, [OM_MOCKED_INSTANCE_CONTROLLER])
+    check = TraefikMeshCheck('traefik_meshh', {}, [OM_MOCKED_INSTANCE_CONTROLLER])
 
     with mock.patch(
-        'datadog_checks.traefik_mesh.TraefikMeshCheck.get_mesh_ready_status',
+        'datadog_checks.traefik_meshh.TraefikMeshCheck.get_mesh_ready_status',
         return_value=read_json_fixture('controller_node_status.json'),
     ):
         dd_run_check(check)
 
     tags = [
         'controller_endpoint:http://localhost:8081',
-        'test:traefik_mesh',
+        'test:traefik_meshh',
         'node_name:traefik-mesh-proxy-jgh7x',
         'node_ip:10.68.1.20',
     ]
-    aggregator.assert_metric('traefik_mesh.node.ready', value=0, tags=tags)
-    aggregator.assert_metric('traefik_mesh.node.ready', count=3)
+    aggregator.assert_metric('traefik_meshh.node.ready', value=0, tags=tags)
+    aggregator.assert_metric('traefik_meshh.node.ready', count=3)
 
 
 def test_valid_controller_service_check(aggregator, mock_http_response):
     mock_http_response(status_code=200)
-    check = TraefikMeshCheck('traefik_mesh', {}, [OM_MOCKED_INSTANCE_CONTROLLER])
+    check = TraefikMeshCheck('traefik_meshh', {}, [OM_MOCKED_INSTANCE_CONTROLLER])
 
     check.submit_controller_readiness_service_check()
-    aggregator.assert_service_check('traefik_mesh.controller.ready', ServiceCheck.OK)
+    aggregator.assert_service_check('traefik_meshh.controller.ready', ServiceCheck.OK)
 
 
 def test_invalid_controller_service_check(aggregator, mock_http_response):
     mock_http_response(status_code=500)
-    check = TraefikMeshCheck('traefik_mesh', {}, [OM_MOCKED_INSTANCE_CONTROLLER])
+    check = TraefikMeshCheck('traefik_meshh', {}, [OM_MOCKED_INSTANCE_CONTROLLER])
 
     check.submit_controller_readiness_service_check()
-    aggregator.assert_service_check('traefik_mesh.controller.ready', ServiceCheck.CRITICAL)
+    aggregator.assert_service_check('traefik_meshh.controller.ready', ServiceCheck.CRITICAL)
 
 
 def test_submit_version(datadog_agent, dd_run_check, mock_http_response):
-    check = TraefikMeshCheck('traefik_mesh', {}, [OM_MOCKED_INSTANCE])
+    check = TraefikMeshCheck('traefik_meshh', {}, [OM_MOCKED_INSTANCE])
     mock_http_response(file_path=get_fixture_path('traefik_proxy.txt'))
 
-    with mock.patch('datadog_checks.traefik_mesh.TraefikMeshCheck.get_version', return_value='2.6.7'):
+    with mock.patch('datadog_checks.traefik_meshh.TraefikMeshCheck.get_version', return_value='2.6.7'):
         check.check_id = 'test:123'
         dd_run_check(check)
 

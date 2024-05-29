@@ -1,6 +1,6 @@
 name: Traefik Mesh
 files:
-  - name: traefik_mesh.yaml
+  - name: traefik_meshh.yaml
     options:
     - template: init_config
       options:

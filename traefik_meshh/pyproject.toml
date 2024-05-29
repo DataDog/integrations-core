@@ -14,7 +14,7 @@ keywords = [
     "datadog",
     "datadog agent",
     "datadog check",
-    "traefik_mesh",
+    "traefik_meshh",
 ]
 authors = [
     { name = "Datadog", email = "packages@datadoghq.com" },
@@ -42,7 +42,7 @@ deps = []
 Source = "https://github.com/DataDog/integrations-core"
 
 [tool.hatch.version]
-path = "datadog_checks/traefik_mesh/__about__.py"
+path = "datadog_checks/traefik_meshh/__about__.py"
 
 [tool.hatch.build.targets.sdist]
 include = [
@@ -53,7 +53,7 @@ include = [
 
 [tool.hatch.build.targets.wheel]
 include = [
-    "/datadog_checks/traefik_mesh",
+    "/datadog_checks/traefik_meshh",
 ]
 dev-mode-dirs = [
     ".",
