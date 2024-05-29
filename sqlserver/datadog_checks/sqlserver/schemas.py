@@ -206,7 +206,8 @@ class Schemas:
             self._dataSubmitter.store_db_info(db_name, db_info)
             chunk_size = 50
             for schema in schemas:
-
+                if time.time() - start_time_db > 30:
+                    self._log.warning("Already spent {}seconds".format(time.time() - start_time_db))
                 tables = self._get_tables(schema, cursor)  
                 #TODO sorting is purely for testing
                 sorted_tables = sorted(tables, key=lambda x: x['name'])          
