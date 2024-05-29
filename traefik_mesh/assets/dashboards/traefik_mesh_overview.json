@@ -6,7 +6,7 @@
             "definition": {
                 "title": "About Traefik Mesh",
                 "title_align": "left",
-                "banner_img": "/static/images/logos/small_traefik_mesh.svg",
+                "banner_img": "/static/images/logos/traefik-mesh_large.svg",
                 "show_title": false,
                 "type": "group",
                 "layout_type": "ordered",

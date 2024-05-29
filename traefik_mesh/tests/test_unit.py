@@ -24,9 +24,7 @@ def test_check_mock_traefik_mesh_openmetrics(dd_run_check, aggregator, mock_http
     dd_run_check(check)
 
     for metric in OM_METRICS:
-        if metric in OPTIONAL_METRICS:
-            aggregator.assert_metric(metric, at_least=0)
-        else:
+        if metric not in OPTIONAL_METRICS:
             aggregator.assert_metric(metric)
             aggregator.assert_metric_has_tag(metric, 'test:traefik_mesh')
 
