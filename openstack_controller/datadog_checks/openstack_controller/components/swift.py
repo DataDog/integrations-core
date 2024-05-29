@@ -27,7 +27,7 @@ class Swift(Component):
     @Component.http_error(report_service_check=True)
     def _report_response_time(self, global_components_config, tags):
         self.check.log.debug("reporting `%s` response time", Swift.ID.value)
-        response_time = self.check.api.get_response_time(Swift.TYPES.value)
+        response_time = self.check.api.get_response_time(Swift.TYPES.value, remove_project_id=False)
         self.check.log.debug("`%s` response time: %s", Swift.ID.value, response_time)
         self.check.gauge(SWIFT_RESPONSE_TIME, response_time, tags=tags)
 

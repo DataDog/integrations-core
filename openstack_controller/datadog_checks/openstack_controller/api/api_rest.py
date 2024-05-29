@@ -30,10 +30,10 @@ class ApiRest(Api):
     def component_in_catalog(self, component_types):
         return self._catalog.has_component(component_types)
 
-    def get_response_time(self, endpoint_types):
+    def get_response_time(self, endpoint_types, remove_project_id=True):
         endpoint = (
             self._catalog.get_endpoint_by_type(endpoint_types).replace(self._current_project_id, "")
-            if self._current_project_id and 'AUTH' not in self._catalog.get_endpoint_by_type(endpoint_types)
+            if self._current_project_id and remove_project_id
             else self._catalog.get_endpoint_by_type(endpoint_types)
         )
         self.log.debug("getting response time for `%s`", endpoint)
@@ -199,13 +199,11 @@ class ApiRest(Api):
         return response.json().get('limits', [])
 
     def get_block_storage_volumes(self, project_id):
-        params = {}
         return self.make_paginated_request(
             '{}/volumes/detail'.format(self._catalog.get_endpoint_by_type(Component.Types.BLOCK_STORAGE.value)),
             'volumes',
             'id',
-            next_signifier='volumes_links',
-            params=params,
+            next_signifier='volumes_links'
         )
 
     def get_block_storage_transfers(self, project_id):
@@ -218,13 +216,11 @@ class ApiRest(Api):
         return response.json().get('transfers', {})
 
     def get_block_storage_snapshots(self, project_id):
-        params = {}
         return self.make_paginated_request(
             '{}/snapshots/detail'.format(self._catalog.get_endpoint_by_type(Component.Types.BLOCK_STORAGE.value)),
             'snapshots',
             'id',
-            next_signifier='snapshots_links',
-            params=params,
+            next_signifier='snapshots_links'
         )
 
     def get_block_storage_pools(self, project_id):
@@ -355,8 +351,6 @@ class ApiRest(Api):
         marker = None
         item_list = []
         params = {} if params is None else params
-        if 'AUTH' in url:
-            params['format'] = 'json'
 
         if self.config.paginated_limit is None:
             response_json = make_request(url, params)
@@ -613,9 +607,11 @@ class ApiRest(Api):
         )
 
     def get_swift_containers(self, account_id):
+        params = {'format': 'json'}
         return self.make_paginated_request(
             '{}'.format(self._catalog.get_endpoint_by_type(Component.Types.SWIFT.value)),
             None,
             'name',
             next_signifier='name',
+            params=params
         )
