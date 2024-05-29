@@ -6,7 +6,7 @@
     "tags": [
         "integration:rabbitmq"
     ],
-    "description": "Notify your team when messages are ready in your RabbitMQ queue",
+    "description": "Notify your team when messages are ready in your RabbitMQ queue.",
     "definition":{
         "message": "Messages are ready in {{rabbitmq_queue.name}} on {{host.name}}. With messages ready in your queue, ensure you have consumers to consume these messages.",
         "name": "[RabbitMQ] Queue message(s) ready in {{rabbitmq_queue.name}} ",
