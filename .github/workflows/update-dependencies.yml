@@ -79,7 +79,7 @@ jobs:
       if: ${{ steps.cpr.outputs.pull-request-number }}
       env:
         GH_TOKEN:
-          ${{ secrets.IK_TESTING_GH_PA_TOKEN }}
+          ${{ github.token }}
       run: |-
         gh pr checkout ${{ steps.cpr.outputs.pull-request-number }}
         ddev release changelog new added -m "Update dependencies"
