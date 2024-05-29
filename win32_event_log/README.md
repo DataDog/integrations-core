@@ -467,7 +467,7 @@ Checks
 
 Starting with Agent 7.54, you can automatically send Security Events to Datadog as Logs by using the `dd_security_events` flag. These Logs can be used with [Datadog's Cloud SIEM][29] to automatically detect threats and suspicious activity in real-time. These default security events are compatible with Datadog's out-of-the-box Windows detection rules to create security signals when a user clears the Security Logs, disables the Windows firewall, changes the Directory Services Restore Mode (DSRM) password, and more.
 
-1. Collecting logs is disabled by default in the Datadog Agent. Enable it in your `datadog.yaml` file:
+1. Enable collecting logs in your `datadog.yaml` file. It is disabled by default in the Datadog Agent.
 
    ```yaml
    logs_enabled: true
