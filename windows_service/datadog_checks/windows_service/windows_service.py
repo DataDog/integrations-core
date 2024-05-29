@@ -316,7 +316,7 @@ class WindowsService(AgentCheck):
 
                 if instance.get('windows_service_startup_type_tag', False):
                     tags.append('windows_service_startup_type:{}'.format(startup_type_string))
-                
+
                 if instance.get('collect_display_name_as_tag', False):
                     tags.append('display_name:{}'.format(service))
 
