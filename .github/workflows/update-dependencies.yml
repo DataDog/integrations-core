@@ -15,6 +15,8 @@ jobs:
       uses: actions/checkout@v4
       with:
         fetch-depth: 0
+    - name: Generate Branch Name
+      run: echo "BRANCH_NAME=bot/update-dependencies-$(date +%Y-%m-%dT%H-%M-%S)" >> $GITHUB_ENV
     - name: Set up Python
       uses: actions/setup-python@v5
       with:
@@ -68,8 +70,7 @@ jobs:
           - [ ] [Changelog entries](https://datadoghq.dev/integrations-core/guidelines/pr/#changelog-entries) must be created for modifications to shipped code
           - [ ] Add the `qa/skip-qa` label if the PR doesn't need to be tested during QA.
         title: Update dependencies
-        branch: bot/update-dependencies
-        branch-suffix: timestamp
+        branch: ${{ env.BRANCH_NAME }}
         delete-branch: true
         base: master
         labels: bot,qa/skip-qa
@@ -87,4 +88,8 @@ jobs:
         git config --global user.name "Agent Integrations Dependency Bot"
         git add .
         git commit -m "Update changelogs"
-        git push origin HEAD
+    - name: Push changes
+      uses: ad-m/github-push-action@master
+      with:
+        github_token: ${{ steps.token-generator.outputs.token }}
+        branch: ${{ env.BRANCH_NAME }}
