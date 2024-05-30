@@ -136,6 +136,7 @@ DM_EXEC_REQUESTS_COLS = [
     "row_count",
     "query_hash",
     "query_plan_hash",
+    "context_info",
 ]
 
 
@@ -333,6 +334,10 @@ class SqlserverActivity(DBMAsyncJob):
         # remove deobfuscated sql text from event
         if 'statement_text' in row:
             del row['statement_text']
+        # convert `context_info` to string, since the default decoding format
+        # for json is utf-8, and `context_info` need not comply to utf-8
+        if 'context_info' in row:
+            row['context_info'] = row['context_info'].hex()
         return row
 
     @staticmethod

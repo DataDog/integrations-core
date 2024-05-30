@@ -226,8 +226,8 @@ class MongoDb(AgentCheck):
         try:
             self._refresh_metadata()
             self._refresh_deployment()
-            self._collect_metrics()
             self._send_database_instance_metadata()
+            self._collect_metrics()
 
             # DBM
             if self._config.dbm_enabled:
