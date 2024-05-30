@@ -1,1 +1,2 @@
 Emit database_instance metadata before collecting metrics
+Decreased database instance collection interval from 1800 seconds to 300 seconds to improve reliability
