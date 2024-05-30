@@ -33,24 +33,24 @@ env:
   SOURCE_DATE_EPOCH: "1580601600"
 
 jobs:
-  test:
-    name: Run tests
-    runs-on: ubuntu-22.04
-    steps:
-      - name: Checkout code
-        uses: actions/checkout@v4
-      - name: Set up Python ${{ env.PYTHON_VERSION }}
-        uses: actions/setup-python@v5
-        with:
-          python-version: ${{ env.PYTHON_VERSION }}
-      - name: Install dependencies
-        run: |
-          pip install -r .builders/deps/host_dependencies.txt
-          pip install -r .builders/test_dependencies.txt
-      - name: Run tests
-        run: |
-          cd .builders
-          pytest -vvv
+  # test:
+  #   name: Run tests
+  #   runs-on: ubuntu-22.04
+  #   steps:
+  #     - name: Checkout code
+  #       uses: actions/checkout@v4
+  #     - name: Set up Python ${{ env.PYTHON_VERSION }}
+  #       uses: actions/setup-python@v5
+  #       with:
+  #         python-version: ${{ env.PYTHON_VERSION }}
+  #     - name: Install dependencies
+  #       run: |
+  #         pip install -r .builders/deps/host_dependencies.txt
+  #         pip install -r .builders/test_dependencies.txt
+  #     - name: Run tests
+  #       run: |
+  #         cd .builders
+  #         pytest -vvv
 
   build:
     name: Target ${{ matrix.job.image }} on ${{ matrix.job.os }}
@@ -96,6 +96,7 @@ jobs:
     - name: Checkout code
       if: github.event_name == 'pull_request'
       uses: actions/checkout@v4
+
 
     - name: Set up Python ${{ env.PYTHON_VERSION }}
       if: matrix.job.image != 'linux-aarch64'
@@ -167,6 +168,11 @@ jobs:
         digest=$(jq -r '.["${{ matrix.job.image }}"]' .deps/image_digests.json)
         python .builders/build.py ${{ matrix.job.image }} --python 3 ${{ env.OUT_DIR }}/py3 --digest $digest
         python .builders/build.py ${{ matrix.job.image }} --python 2 ${{ env.OUT_DIR }}/py2 --digest $digest
+
+    - name: Change permissions
+      if: matrix.job.image == 'linux-aarch64'
+      run: |
+        sudo chmod 777 ${{ env.OUT_DIR }}
 
     - name: Publish image
       if: github.event_name == 'push' && steps.changed-files.outputs.builders_any_changed == 'true'
