@@ -378,7 +378,7 @@ CINDER_TRANSFER_TAGS = {'id': 'transfer_id', 'volume_id': 'volume_id', 'name': '
 CINDER_VOLUME_PREFIX = f"{CINDER_METRICS_PREFIX}.volume"
 CINDER_VOLUME_COUNT = f"{CINDER_VOLUME_PREFIX}.count"
 CINDER_VOLUME_METRICS = {f"{CINDER_VOLUME_PREFIX}.size": {}}
-CINDER_VOLUME_TAGS = {'id': 'volume_id', 'name': 'volume_name', 'status': 'volume_status'}
+CINDER_VOLUME_TAGS = {'id': 'volume_id', 'name': 'volume_name', 'status': 'volume_status', 'volume_type': 'volume_type'}
 
 IRONIC_METRICS_PREFIX = "openstack.ironic"
 IRONIC_SERVICE_CHECK = f"{IRONIC_METRICS_PREFIX}.api.up"
@@ -643,6 +643,18 @@ HEAT_STACK_TAGS = {
     'id': 'stack_id',
     'stack_name': 'stack_name',
     'stack_status': 'stack_status',
+}
+
+SWIFT_METRICS_PREFIX = "openstack.swift"
+SWIFT_SERVICE_CHECK = f"{SWIFT_METRICS_PREFIX}.api.up"
+SWIFT_RESPONSE_TIME = f"{SWIFT_METRICS_PREFIX}.response_time"
+SWIFT_CONTAINER_PREFIX = f"{SWIFT_METRICS_PREFIX}.container"
+SWIFT_CONTAINER_COUNT = f"{SWIFT_CONTAINER_PREFIX}.count"
+SWIFT_CONTAINER_METRICS = {
+    f"{SWIFT_CONTAINER_PREFIX}.bytes": {},
+}
+SWIFT_CONTAINER_TAGS = {
+    'name': 'container_name',
 }
 
 

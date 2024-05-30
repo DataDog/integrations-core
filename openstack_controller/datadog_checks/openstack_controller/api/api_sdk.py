@@ -115,9 +115,11 @@ class ApiSdk(Api):
         self.connection.authorize()
         self.http.options['headers']['X-Auth-Token'] = self.connection.session.auth.get_token(self.connection.session)
 
-    def get_response_time(self, endpoint_types):
+    def get_response_time(self, endpoint_types, remove_project_id=True):
         endpoint = self._catalog.get_endpoint_by_type(endpoint_types)
-        endpoint = endpoint.replace(self._access.project_id, "") if self._access.project_id else endpoint
+        endpoint = (
+            endpoint.replace(self._access.project_id, "") if self._access.project_id and remove_project_id else endpoint
+        )
         response = self.http.get(endpoint)
         response.raise_for_status()
         return response.elapsed.total_seconds() * 1000
@@ -392,5 +394,13 @@ class ApiSdk(Api):
             stack.to_dict(original_names=True)
             for stack in self.call_paginated_api(
                 self.connection.heat.stacks, project_id=project_id, limit=self.config.paginated_limit
+            )
+        ]
+
+    def get_swift_containers(self, account_id):
+        return [
+            container.to_dict(original_names=True)
+            for container in self.call_paginated_api(
+                self.connection.swift.containers, account_id=account_id, limit=self.config.paginated_limit
             )
         ]

@@ -188,7 +188,7 @@ def mock_responses(microversion_headers):
 def mock_http_call(mock_responses):
     def call(method, url, file='response', headers=None, params=None):
         response = mock_responses(method, url, file=file, headers=headers, params=params)
-        if response:
+        if response is not None:
             return response
         http_response = requests.models.Response()
         http_response.status_code = 404
@@ -922,6 +922,26 @@ def connection_heat(request, mock_responses):
 
 
 @pytest.fixture
+def connection_swift(request, mock_responses):
+    param = request.param if hasattr(request, 'param') and request.param is not None else {}
+    http_error = param.get('http_error')
+
+    def containers(account_id, limit=None):
+        if http_error and 'containers' in http_error and account_id in http_error['containers']:
+            raise requests.exceptions.HTTPError(response=http_error['containers'])
+        return [
+            mock.MagicMock(
+                to_dict=mock.MagicMock(
+                    return_value=node,
+                )
+            )
+            for node in mock_responses('GET', f'/v1/AUTH_{account_id}/format=json')
+        ]
+
+    return mock.MagicMock(containers=mock.MagicMock(side_effect=containers))
+
+
+@pytest.fixture
 def openstack_connection(
     openstack_session,
     connection_authorize,
@@ -933,6 +953,7 @@ def openstack_connection(
     connection_load_balancer,
     connection_image,
     connection_heat,
+    connection_swift,
 ):
     def connection(cloud, session, region_name):
         return mock.MagicMock(
@@ -946,6 +967,7 @@ def openstack_connection(
             load_balancer=connection_load_balancer,
             image=connection_image,
             heat=connection_heat,
+            swift=connection_swift,
         )
 
     with mock.patch('openstack.connection.Connection', side_effect=connection) as mock_connection:

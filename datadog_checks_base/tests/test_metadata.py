@@ -27,7 +27,7 @@ class TestAttribute:
     def test_no_check_id_error(self):
         check = AgentCheck('test', {}, [{}])
 
-        with mock.patch('datadog_checks.base.checks.base.using_stub_aggregator', False):
+        with mock.patch('datadog_checks.base.checks.base.AGENT_RUNNING', True):
             with pytest.raises(RuntimeError):
                 check.set_metadata('foo', 'bar')
 

@@ -31,6 +31,7 @@ from datadog_checks.mongo.collectors.jumbo_stats import JumboStatsCollector
 from datadog_checks.mongo.collectors.session_stats import SessionStatsCollector
 from datadog_checks.mongo.common import SERVICE_CHECK_NAME, MongosDeployment, ReplicaSetDeployment
 from datadog_checks.mongo.config import MongoConfig
+from datadog_checks.mongo.dbm.operation_samples import MongoOperationSamples
 
 from . import metrics
 
@@ -93,6 +94,9 @@ class MongoDb(AgentCheck):
         )  # type: TTLCache
 
         self.diagnosis.register(self._diagnose_tls)
+
+        # DBM
+        self._operation_samples = MongoOperationSamples(check=self)
 
     @cached_property
     def api_client(self):
@@ -222,8 +226,12 @@ class MongoDb(AgentCheck):
         try:
             self._refresh_metadata()
             self._refresh_deployment()
-            self._collect_metrics()
             self._send_database_instance_metadata()
+            self._collect_metrics()
+
+            # DBM
+            if self._config.dbm_enabled:
+                self._operation_samples.run_job_loop(tags=self._get_tags(include_deployment_tags=True))
         except CRITICAL_FAILURE as e:
             self.service_check(SERVICE_CHECK_NAME, AgentCheck.CRITICAL, tags=self._config.service_check_tags)
             self._unset_metadata()
@@ -347,3 +355,7 @@ class MongoDb(AgentCheck):
             self._database_instance_emitted[self._resolved_hostname] = database_instance
             self.log.debug("Emitting database instance  metadata, %s", database_instance)
             self.database_monitoring_metadata(json.dumps(database_instance, default=default_json_event_encoding))
+
+    def cancel(self):
+        if self._config.dbm_enabled:
+            self._operation_samples.cancel()
