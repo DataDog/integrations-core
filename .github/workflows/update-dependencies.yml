@@ -45,7 +45,6 @@ jobs:
         DD_GITHUB_TOKEN: "${{ secrets.GITHUB_TOKEN }}"
     # We generate the changelog hoping we guess the PR number correctly.
     - name: Update changelogs
-      if: ${{ steps.cpr.outputs.pull-request-number }}
       env:
         GH_TOKEN:
           ${{ github.token }}
@@ -69,7 +68,7 @@ jobs:
           <!-- Anything else we should know when reviewing? -->
 
           This PR was automatically generated. Here's the url for the job:
-          ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
+          ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}/job/${{ github.job }}
 
 
           ### Review checklist (to be filled by reviewers)
