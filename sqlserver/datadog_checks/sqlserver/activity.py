@@ -2,7 +2,6 @@
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
 
-import base64
 import binascii
 import datetime
 import re
@@ -335,7 +334,7 @@ class SqlserverActivity(DBMAsyncJob):
         # remove deobfuscated sql text from event
         if 'statement_text' in row:
             del row['statement_text']
-        # convert `context_info` to string, since the default decoding format 
+        # convert `context_info` to string, since the default decoding format
         # for json is utf-8, and `context_info` need not comply to utf-8
         if 'context_info' in row:
             row['context_info'] = row['context_info'].hex()

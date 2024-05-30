@@ -99,7 +99,7 @@ def test_collect_load_activity(
     def run_test_query(c, q):
         cur = c.cursor()
         cur.execute("USE {}".format(database))
-        # 0xFF can't be decoded to Unicode, which makes it good test data, 
+        # 0xFF can't be decoded to Unicode, which makes it good test data,
         # since Unicode is a default format
         cur.execute("SET CONTEXT_INFO 0xff")
         cur.execute(q)
