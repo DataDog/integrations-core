@@ -97,11 +97,6 @@ jobs:
       if: github.event_name == 'pull_request'
       uses: actions/checkout@v4
 
-    - name: Test permissions
-      run: |
-        echo "Permissions are correct" > ${{ env.OUT_DIR }}/image_digest
-        namei -l ${{ env.OUT_DIR }}/image_digest
-        ls -la ${{ env.OUT_DIR }}/image_digest
 
     - name: Set up Python ${{ env.PYTHON_VERSION }}
       if: matrix.job.image != 'linux-aarch64'
@@ -173,6 +168,12 @@ jobs:
         digest=$(jq -r '.["${{ matrix.job.image }}"]' .deps/image_digests.json)
         python .builders/build.py ${{ matrix.job.image }} --python 3 ${{ env.OUT_DIR }}/py3 --digest $digest
         python .builders/build.py ${{ matrix.job.image }} --python 2 ${{ env.OUT_DIR }}/py2 --digest $digest
+
+    - name: Test permissions
+      run: |
+        echo "Permissions are correct" > ${{ env.OUT_DIR }}/image_digest || sudo echo "Permissions are correct" > ${{ env.OUT_DIR }}/image_digest 
+        ls -la ${{ env.OUT_DIR }}/
+        ls -la ${{ env.OUT_DIR }}/image_digest
 
     - name: Publish image
       if: github.event_name == 'push' && steps.changed-files.outputs.builders_any_changed == 'true'
