@@ -309,6 +309,7 @@ class WindowsService(AgentCheck):
                 # if a name doesn't match anything (wrong name or no permission to access the service), report UNKNOWN
                 status = self.UNKNOWN
                 startup_type_string = ServiceView.STARTUP_TYPE_UNKNOWN
+                display_name = "Not_Found"
 
                 tags = ['windows_service:{}'.format(service)]
 
@@ -318,7 +319,7 @@ class WindowsService(AgentCheck):
                     tags.append('windows_service_startup_type:{}'.format(startup_type_string))
 
                 if instance.get('collect_display_name_as_tag', False):
-                    tags.append('display_name:{}'.format(service))
+                    tags.append('display_name:{}'.format(display_name))
 
                 if not instance.get('disable_legacy_service_tag', False):
                     self._log_deprecation('service_tag', 'windows_service')

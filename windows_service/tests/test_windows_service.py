@@ -253,7 +253,7 @@ def test_display_name_tag(aggregator, check, instance_basic):
         tags=[
             'service:NonExistentService',
             'windows_service:NonExistentService',
-            'display_name:NonExistentService',
+            'display_name:Not_Found',
             'optional:tag1',
         ],
         count=1,
