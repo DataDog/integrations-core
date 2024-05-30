@@ -11,6 +11,10 @@ from pyVmomi import vim, vmodl
 
 from datadog_checks.esxi import EsxiCheck
 
+from .common import USE_VSPHERE_LAB
+
+pytestmark = [pytest.mark.skipif(not USE_VSPHERE_LAB, reason='Only run tests on one environment')]
+
 
 @pytest.mark.usefixtures("service_instance")
 def test_esxi_metric_up(instance, dd_run_check, aggregator, caplog):
@@ -1210,3 +1214,37 @@ def test_use_configured_hostname(vcsim_instance, dd_run_check, aggregator, datad
             ]
         },
     )
+
+
+@pytest.mark.usefixtures("service_instance")
+def test_use_non_socks_proxy(vcsim_instance, dd_run_check, caplog):
+    instance = copy.deepcopy(vcsim_instance)
+    instance['proxy'] = "http://localhost"
+    caplog.set_level(logging.WARNING)
+    check = EsxiCheck('esxi', {}, [instance])
+    dd_run_check(check)
+    assert "Proxy scheme http not supported; ignoring" in caplog.text
+
+
+@pytest.mark.usefixtures("service_instance")
+def test_use_socks_proxy(vcsim_instance, dd_run_check, caplog, aggregator):
+    instance = copy.deepcopy(vcsim_instance)
+    instance['proxy'] = "socks5://test"
+    caplog.set_level(logging.WARNING)
+    check = EsxiCheck('esxi', {}, [instance])
+    dd_run_check(check)
+    assert "Proxy scheme socks5 not supported; ignoring" not in caplog.text
+    aggregator.assert_metric("esxi.host.can_connect", 1, count=1)
+
+
+def test_use_socks_proxy_mocked(vcsim_instance, dd_run_check, caplog, aggregator):
+    instance = copy.deepcopy(vcsim_instance)
+    instance['proxy'] = "socks5://test"
+    caplog.set_level(logging.WARNING)
+    with patch('socks.create_connection', side_effect=Exception()) as socks_connect:
+        with pytest.raises(Exception):
+            check = EsxiCheck('esxi', {}, [instance])
+            dd_run_check(check)
+            assert "Proxy scheme socks5 not supported; ignoring" not in caplog.text
+            assert socks_connect.call_count == 1
+            aggregator.assert_metric("esxi.host.can_connect", 0, count=1)
