@@ -4834,3 +4834,54 @@ STACKS_METRICS_HEAT = [
         ],
     },
 ]
+
+CONTAINERS_METRICS_SWIFT = [
+    {
+        'name': 'openstack.swift.container.count',
+        'count': 1,
+        'value': 1,
+        'tags': [
+            'container_name:container_1',
+            'keystone_server:http://127.0.0.1:8080/identity',
+            'domain_id:default',
+            'project_id:1e6e233e637d4d55a50a62b63398ad15',
+            'project_name:demo',
+        ],
+    },
+    {
+        'name': 'openstack.swift.container.count',
+        'count': 1,
+        'value': 1,
+        'tags': [
+            'container_name:container_2',
+            'keystone_server:http://127.0.0.1:8080/identity',
+            'domain_id:default',
+            'project_id:1e6e233e637d4d55a50a62b63398ad15',
+            'project_name:demo',
+        ],
+    },
+    {
+        'name': 'openstack.swift.container.bytes',
+        'count': 1,
+        'value': 490,
+        'tags': [
+            'container_name:container_1',
+            'keystone_server:http://127.0.0.1:8080/identity',
+            'domain_id:default',
+            'project_id:1e6e233e637d4d55a50a62b63398ad15',
+            'project_name:demo',
+        ],
+    },
+    {
+        'name': 'openstack.swift.container.bytes',
+        'count': 1,
+        'value': 0,
+        'tags': [
+            'container_name:container_2',
+            'keystone_server:http://127.0.0.1:8080/identity',
+            'domain_id:default',
+            'project_id:1e6e233e637d4d55a50a62b63398ad15',
+            'project_name:demo',
+        ],
+    },
+]

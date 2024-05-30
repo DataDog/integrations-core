@@ -662,6 +662,13 @@ files:
                     properties:
                       - name: stacks
                         type: boolean
+              - name: swift
+                anyOf:
+                  - type: boolean
+                  - type: object
+                    properties:
+                      - name: containers
+                        type: boolean
             example:
               compute: false
         - name: projects
