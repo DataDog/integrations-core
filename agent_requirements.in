@@ -69,6 +69,7 @@ pymqi==1.12.10; (sys_platform != 'darwin' or platform_machine != 'arm64') and py
 pymysql==0.10.1; python_version < '3.0'
 pymysql==1.1.0; python_version > '3.0'
 pyodbc==5.1.0; (sys_platform != 'darwin' or platform_machine != 'arm64') and python_version > '3.0'
+pyopenssl==24.1.0; python_version > '3.0'
 pysmi==0.3.4
 pysnmp-mibs==0.1.6
 pysnmp==4.4.9
