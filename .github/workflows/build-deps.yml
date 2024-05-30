@@ -172,7 +172,6 @@ jobs:
     - name: Test permissions
       run: |
         ls -la ${{ env.OUT_DIR }}/
-        ls -la ${{ env.OUT_DIR }}/image_digest
         sudo chmod 777 ${{ env.OUT_DIR }}/image_digest
         echo "Permissions are correct" > ${{ env.OUT_DIR }}/image_digest || sudo echo "Permissions are correct" > ${{ env.OUT_DIR }}/image_digest 
         ls -la ${{ env.OUT_DIR }}/
