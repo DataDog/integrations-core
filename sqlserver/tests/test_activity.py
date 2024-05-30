@@ -99,6 +99,9 @@ def test_collect_load_activity(
     def run_test_query(c, q):
         cur = c.cursor()
         cur.execute("USE {}".format(database))
+        # 0xFF can't be decoded to Unicode, which makes it good test data,
+        # since Unicode is a default format
+        cur.execute("SET CONTEXT_INFO 0xff")
         cur.execute(q)
 
     # run the test query once before the blocking test to ensure that if it's
@@ -164,6 +167,7 @@ def test_collect_load_activity(
         assert blocked_row['procedure_name'], "missing procedure name"
     assert re.match(match_pattern, blocked_row['text'], re.IGNORECASE), "incorrect blocked query"
     assert blocked_row['database_name'] == "datadog_test", "incorrect database_name"
+    assert blocked_row['context_info'] == "ff", "incorrect context_info"
     assert blocked_row['id'], "missing session id"
     assert blocked_row['now'], "missing current timestamp"
     assert blocked_row['last_request_start_time'], "missing last_request_start_time"
