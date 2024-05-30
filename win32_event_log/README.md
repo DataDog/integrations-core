@@ -24,7 +24,7 @@ Windows Event Logs can be collected as one or both of the following methods.
 - As [Datadog Events][16]
 - As [Datadog Logs][17]
 
-Both methods are configured in `win32_event_log.d/conf.yaml` in the `conf.d/` folder at the root of your [Agent's configuration directory][2]. See the [sample win32_event_log.d/conf.yaml][3] for all available configuration options.
+Both methods are configured in `win32_event_log.d/conf.yaml` in the `conf.d/` folder at the root of your [Agent's configuration directory][2]. See the [sample win32_event_log.d/conf.yaml][3] for all available configuration options. For a quickstart option to send Security event logs, see [Send default Security logs](#send-default-security-logs).
 
 #### List Windows Event channels
 
