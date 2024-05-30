@@ -35,6 +35,7 @@ class InstanceConfig(BaseModel):
         arbitrary_types_allowed=True,
         frozen=True,
     )
+    collect_display_name_as_tag: Optional[bool] = None
     disable_generic_tags: Optional[bool] = None
     disable_legacy_service_tag: Optional[bool] = None
     empty_default_hostname: Optional[bool] = None
