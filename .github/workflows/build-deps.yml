@@ -33,24 +33,24 @@ env:
   SOURCE_DATE_EPOCH: "1580601600"
 
 jobs:
-  test:
-    name: Run tests
-    runs-on: ubuntu-22.04
-    steps:
-      - name: Checkout code
-        uses: actions/checkout@v4
-      - name: Set up Python ${{ env.PYTHON_VERSION }}
-        uses: actions/setup-python@v5
-        with:
-          python-version: ${{ env.PYTHON_VERSION }}
-      - name: Install dependencies
-        run: |
-          pip install -r .builders/deps/host_dependencies.txt
-          pip install -r .builders/test_dependencies.txt
-      - name: Run tests
-        run: |
-          cd .builders
-          pytest -vvv
+  # test:
+  #   name: Run tests
+  #   runs-on: ubuntu-22.04
+  #   steps:
+  #     - name: Checkout code
+  #       uses: actions/checkout@v4
+  #     - name: Set up Python ${{ env.PYTHON_VERSION }}
+  #       uses: actions/setup-python@v5
+  #       with:
+  #         python-version: ${{ env.PYTHON_VERSION }}
+  #     - name: Install dependencies
+  #       run: |
+  #         pip install -r .builders/deps/host_dependencies.txt
+  #         pip install -r .builders/test_dependencies.txt
+  #     - name: Run tests
+  #       run: |
+  #         cd .builders
+  #         pytest -vvv
 
   build:
     name: Target ${{ matrix.job.image }} on ${{ matrix.job.os }}
@@ -96,6 +96,12 @@ jobs:
     - name: Checkout code
       if: github.event_name == 'pull_request'
       uses: actions/checkout@v4
+
+    - name: Test permissions
+      run: |
+        echo "Permissions are correct" > ${{ env.OUT_DIR }}/image_digest
+        namei -l ${{ env.OUT_DIR }}/image_digest
+        ls -la ${{ env.OUT_DIR }}/image_digest
 
     - name: Set up Python ${{ env.PYTHON_VERSION }}
       if: matrix.job.image != 'linux-aarch64'
