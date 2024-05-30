@@ -1,9 +1,10 @@
 name: Build Placeholder PyPI Packages
 
 on:
-  pull_request:
-    branches:
-    - master
+  schedule:
+  # At 3AM UTC
+  # Running this every night strikes a good balance between claiming names fast without spamming PyPI with requests.
+  - cron: "0 3 * * *"
 
 defaults:
   run:
@@ -37,6 +38,7 @@ jobs:
         # We don't mind invalid metadata, we only want to claim the package name.
         verify-metadata: false
         verbose: true
+        # Only uploading the missing wheels makes this job idempotent and reduces its complexity.
         skip-existing: true
         user: __token__
         password: ${{ secrets.INTEGRATIONS_PYPI_NAME_CLAIM }}
