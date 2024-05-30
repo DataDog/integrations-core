@@ -37,7 +37,7 @@ def test_check_mock_traefik_mesh_openmetrics(dd_run_check, aggregator, mock_http
 def test_check_mock_invalid_traefik_mesh_openmetrics(dd_run_check, aggregator, mock_http_response):
     mock_http_response(status_code=503)
     check = TraefikMeshCheck('traefik_mesh', {}, [OM_MOCKED_INSTANCE])
-    with pytest.raises(Exception):
+    with pytest.raises(Exception, match='There was an error scraping endpoint http://localhost:8080/metrics'):
         dd_run_check(check)
 
     aggregator.assert_service_check('traefik_mesh.openmetrics.health', ServiceCheck.CRITICAL)
@@ -93,9 +93,9 @@ def test_submit_version(datadog_agent, dd_run_check, mock_http_response):
     check = TraefikMeshCheck('traefik_mesh', {}, [OM_MOCKED_INSTANCE])
     mock_http_response(file_path=get_fixture_path('traefik_proxy.txt'))
 
-    with mock.patch('datadog_checks.traefik_mesh.TraefikMeshCheck.get_version', return_value='2.6.7'):
-        check.check_id = 'test:123'
-        dd_run_check(check)
+    check.get_version = mock.MagicMock(return_value='2.6.7')
+    check.check_id = 'test:123'
+    dd_run_check(check)
 
     version_metadata = {
         'version.raw': '2.6.7',
