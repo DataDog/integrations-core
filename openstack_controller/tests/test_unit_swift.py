@@ -215,9 +215,7 @@ def test_containers_exception(aggregator, check, dd_run_check, mock_http_get, co
     else:
         assert connection_swift.containers.call_count == 1
         assert (
-            connection_swift.containers.call_args_list.count(
-                mock.call(account_id='1e6e233e637d4d55a50a62b63398ad15')
-            )
+            connection_swift.containers.call_args_list.count(mock.call(account_id='1e6e233e637d4d55a50a62b63398ad15'))
             == 1
         )
     assert args_list.count((['http://127.0.0.1:6002/v1/AUTH_1e6e233e637d4d55a50a62b63398ad15'], None)) == 1
