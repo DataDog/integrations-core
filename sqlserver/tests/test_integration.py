@@ -758,7 +758,7 @@ def test_database_instance_metadata(aggregator, dd_run_check, instance_docker, d
     assert event['dbms'] == "sqlserver"
     assert event['tags'] == ['optional:tag1']
     assert event['integration_version'] == __version__
-    assert event['collection_interval'] == 1800
+    assert event['collection_interval'] == 300
     assert event['metadata'] == {
         'dbm': dbm_enabled,
         'connection_host': instance_docker['host'],
