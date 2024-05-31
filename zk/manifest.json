@@ -54,9 +54,6 @@
     },
     "saved_views": {
       "zookeeper_processes": "assets/saved_views/zookeeper_processes.json"
-    },
-    "logs": {
-      "source": "zookeeper"
     }
   }
 }

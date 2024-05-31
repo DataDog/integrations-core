@@ -61,9 +61,6 @@
     },
     "saved_views": {
       "teamcity_processes": "assets/saved_views/teamcity_processes.json"
-    },
-    "logs": {
-      "source": "teamcity"
     }
   }
 }

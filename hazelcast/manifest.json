@@ -51,9 +51,6 @@
     },
     "dashboards": {
       "Hazelcast Overview": "assets/dashboards/overview.json"
-    },
-    "logs": {
-      "source": "hazelcast"
     }
   }
 }

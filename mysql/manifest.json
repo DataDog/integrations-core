@@ -61,9 +61,6 @@
       "operations_overview": "assets/saved_views/operations_overview.json",
       "slow_operations": "assets/saved_views/slow_operations.json",
       "mysql_processes": "assets/saved_views/mysql_processes.json"
-    },
-    "logs": {
-      "source": "mysql"
     }
   }
 }

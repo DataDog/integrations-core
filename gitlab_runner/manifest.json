@@ -50,9 +50,6 @@
       ],
       "source_type_id": 10028,
       "auto_install": true
-    },
-    "logs": {
-      "source": "gitlab_runner"
     }
   }
 }

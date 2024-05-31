@@ -89,9 +89,6 @@
       "Palo Alto Panorama: Correlated Events": "assets/dashboards/palo_alto_panorama_correlated_events.json",
       "Palo Alto Panorama: HIP Match": "assets/dashboards/palo_alto_panorama_hip_match.json",
       "Palo Alto Panorama: User ID": "assets/dashboards/palo_alto_panorama_user_id.json"
-    },
-    "logs": {
-      "source": "palo-alto-panorama"
     }
   },
   "author": {

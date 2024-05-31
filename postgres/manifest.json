@@ -69,9 +69,6 @@
       "postgres_pattern": "assets/saved_views/postgres_pattern.json",
       "sessions_by_host": "assets/saved_views/sessions_by_host.json",
       "postgres_processes": "assets/saved_views/postgres_processes.json"
-    },
-    "logs": {
-      "source": "postgresql"
     }
   }
 }

@@ -48,9 +48,6 @@
     },
     "dashboards": {
       "Druid Overview": "assets/dashboards/overview.json"
-    },
-    "logs": {
-      "source": "druid"
     }
   }
 }
