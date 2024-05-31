@@ -2,6 +2,20 @@
 
 <!-- towncrier release notes start -->
 
+## 36.7.0 / 2024-05-31
+
+***Added***:
+
+* Update dependencies ([#17424](https://github.com/DataDog/integrations-core/pull/17424)), ([#17519](https://github.com/DataDog/integrations-core/pull/17519))
+* Add TimedCache for controlled cache expiration. The TimedCache sets TTL on initialization and expires when TTL is reached. ([#17557](https://github.com/DataDog/integrations-core/pull/17557))
+* Add `obfuscate_mongodb_string` to datadog_agent stub ([#17597](https://github.com/DataDog/integrations-core/pull/17597))
+* Add dedicated module for the Agent interface ([#17667](https://github.com/DataDog/integrations-core/pull/17667))
+* Add option to use BoringSSL for all network requests ([#17669](https://github.com/DataDog/integrations-core/pull/17669))
+
+***Fixed***:
+
+* Revert pydantic bump to keep compatibility ([#17660](https://github.com/DataDog/integrations-core/pull/17660))
+
 ## 36.6.0 / 2024-04-26 / Agent 7.54.0
 
 ***Added***:
