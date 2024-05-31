@@ -106,7 +106,7 @@ datadog-lighttpd==3.5.1
 datadog-linkerd==4.2.1
 datadog-linux-proc-extras==2.5.0; sys_platform == 'linux2'
 datadog-mapr==1.11.0; sys_platform == 'linux2'
-datadog-mapreduce==4.2.0
+datadog-mapreduce==4.2.1
 datadog-marathon==2.3.0; sys_platform != 'win32'
 datadog-marklogic==4.2.0
 datadog-mcache==4.1.0; sys_platform != 'win32'
