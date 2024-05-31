@@ -253,9 +253,38 @@ class KafkaClient:
             return consumer_groups
         else:
             return self.config._consumer_groups
+        
+    def get_consumer_group_state(self, consumer_group):
+        consumer_group_state = ""
+        #Get the consumer group state if present
+        consumer_groups_future = self._describe_consumer_groups(consumer_group)
+        try:
+            consumer_groups_result = consumer_groups_future.result()
+            self.log.debug("Discovered consumer group: %s in state %s", consumer_groups_result.group_id, consumer_groups_result.state)
+            consumer_group_state = consumer_groups_result.state
+
+        except Exception as e:
+            self.log.error("Failed to collect consumer group: %s", e)
+        return consumer_group_state
 
     def _list_consumer_group_offsets(self, cg_tp):
+        """
+        :returns: A dict of futures for each group, keyed by the group id.
+                  The future result() method returns :class:`ConsumerGroupTopicPartitions`.
+
+        :rtype: dict[str, future]
+        """
         return self.kafka_client.list_consumer_group_offsets([cg_tp])
+
+    def _describe_consumer_groups(self, consumer_group):
+        """
+        :returns: A dict of futures for each group, keyed by the group_id.
+                  The future result() method returns :class:`ConsumerGroupDescription`.
+
+        :rtype: dict[str, future]
+        """
+        return self.kafka_client.describe_consumer_groups([consumer_group])
+
 
     def close_admin_client(self):
         self._kafka_client = None
