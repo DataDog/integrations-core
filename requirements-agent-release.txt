@@ -95,7 +95,7 @@ datadog-kong==3.2.1
 datadog-kube-apiserver-metrics==4.3.1
 datadog-kube-controller-manager==5.1.1
 datadog-kube-dns==4.4.1
-datadog-kube-metrics-server==3.3.0
+datadog-kube-metrics-server==3.3.1
 datadog-kube-proxy==6.3.0
 datadog-kube-scheduler==4.10.0
 datadog-kubelet==7.13.1
