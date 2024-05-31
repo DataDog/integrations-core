@@ -50,9 +50,12 @@ def _assert_mongodb_instance_event(
     cluster_name,
 ):
     mongodb_instance_event = _get_mongodb_instance_event(aggregator)
+    if not dbm:
+        assert mongodb_instance_event is None
+        return
+
     assert mongodb_instance_event is not None
     assert mongodb_instance_event['host'] == check._resolved_hostname
-    assert mongodb_instance_event is not None
     assert mongodb_instance_event['host'] == check._resolved_hostname
     assert mongodb_instance_event['dbms'] == "mongodb"
     assert mongodb_instance_event['tags'].sort() == expected_tags.sort()
@@ -1011,9 +1014,10 @@ def test_mongod_tls_fail(check, dd_run_check, aggregator):
 
 
 def test_integration_reemit_mongodb_instance_on_deployment_change(
-    instance_integration, aggregator, check, dd_run_check
+    instance_integration_cluster, aggregator, check, dd_run_check
 ):
-    mongo_check = check(instance_integration)
+    instance_integration_cluster['dbm'] = True
+    mongo_check = check(instance_integration_cluster)
 
     with mock_pymongo("replica-primary-in-shard"):
         dd_run_check(mongo_check)
@@ -1029,7 +1033,7 @@ def test_integration_reemit_mongodb_instance_on_deployment_change(
         aggregator,
         mongo_check,
         expected_tags=expected_tags,
-        dbm=False,
+        dbm=True,
         replset_name='mongo-mongodb-sharded-shard-0',
         replset_state='primary',
         sharding_cluster_role='shardsvr',
@@ -1042,7 +1046,7 @@ def test_integration_reemit_mongodb_instance_on_deployment_change(
         ],
         shards=None,
         cluster_type='sharded_cluster',
-        cluster_name=None,
+        cluster_name='my_cluster',
     )
     aggregator.reset()
 
