@@ -2,6 +2,16 @@
 
 <!-- towncrier release notes start -->
 
+## 3.5.0 / 2024-05-31
+
+***Added***:
+
+* Add shadow_rule_prefix tag for shadow_allowed RBAC metric and rule_prefix tag for allowed and denied RBAC metric ([#17392](https://github.com/DataDog/integrations-core/pull/17392))
+
+***Fixed***:
+
+* Update the description for the `tls_ca_cert` config option to use `openssl rehash` instead of `c_rehash` ([#16981](https://github.com/DataDog/integrations-core/pull/16981))
+
 ## 3.4.0 / 2024-02-16 / Agent 7.52.0
 
 ***Added***:
