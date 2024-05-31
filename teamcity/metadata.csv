@@ -1,4 +1,4 @@
-metric_name,metric_type,interval,unit_name,per_unit_name,description,orientation,integration,short_name,curated_metric,
+metric_name,metric_type,interval,unit_name,per_unit_name,description,orientation,integration,short_name,curated_metric
 teamcity.agents.cloud.starting,gauge,,,,[OpenMetrics] Number of starting and not yet connected cloud agents.,0,teamcity,agents cloud starting,
 teamcity.agents.connected.authorized,gauge,,,,[OpenMetrics] Number of connected and authorized build agents.,0,teamcity,agents connected auth,
 teamcity.agents.running.builds,gauge,,,,[OpenMetrics] Number of build agents which are running builds.,0,teamcity,agents running builds,
