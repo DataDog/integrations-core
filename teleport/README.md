@@ -14,7 +14,7 @@ Follow the instructions below to install and configure this check for an Agent r
 
 ### Installation
 
-To install the Teleport integration, run the following command on a host with a running Agent: `datadog-agent integration install datadog-teleport==1.0.0`
+The Teleport integration is included in the Datadog Agent package. No additional installation is needed on your server.
 
 ### Prerequisites
 
