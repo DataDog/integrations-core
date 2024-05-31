@@ -200,6 +200,8 @@ class Schemas:
         self._dataSubmitter.set_base_event_data(self._check.resolved_hostname, self._tags, self._check._config.cloud_metadata)
         #returns Stop, Stop == True.
         def fetch_schema_data(cursor, db_name):
+            if db_name != "dbmorders_1":
+                return
             start_time_db = time.time()
             db_info  = self._query_db_information(db_name, cursor)
             schemas = self._query_schema_information(cursor)
