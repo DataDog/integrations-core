@@ -15,7 +15,7 @@ For more information, see the [Windows Event Logging documentation][13].
 
 ### Installation
 
-The Windows Event Log check is included in the [Datadog Agent][1] package. There is no additional installation required.
+The Windows Event Log check is included in the [Datadog Agent][1] package. There is no additional installation required. 
 
 ### Configuration
 
@@ -25,6 +25,11 @@ Windows Event Logs can be collected as one or both of the following methods.
 - As [Datadog Logs][17]
 
 Both methods are configured in `win32_event_log.d/conf.yaml` in the `conf.d/` folder at the root of your [Agent's configuration directory][2]. See the [sample win32_event_log.d/conf.yaml][3] for all available configuration options. For a quickstart option to send Security event logs, see [Send default Security logs](#send-default-security-logs).
+
+This integration also comes with an out-of-the-box [Windows Event Log Overview][32] dashbaord available in-app.
+
+
+. The Datadog integration also comes with an out-of-the-box dashboard and monitors for each version, as labeled by the Dashboard and Monitor titles.
 
 #### List Windows Event channels
 
@@ -560,3 +565,4 @@ Additional helpful documentation, links, and articles:
 [29]: https://docs.datadoghq.com/security/cloud_siem/
 [30]: https://github.com/DataDog/datadog-agent/blob/main/cmd/agent/dist/conf.d/win32_event_log.d/profiles/dd_security_events_low.yaml.example
 [31]: https://github.com/DataDog/datadog-agent/blob/main/cmd/agent/dist/conf.d/win32_event_log.d/profiles/dd_security_events_high.yaml.example
+[32]: https://app.datadoghq.com/integrations?integrationId=event-viewer
