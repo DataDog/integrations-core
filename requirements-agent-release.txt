@@ -153,7 +153,7 @@ datadog-snmp==7.3.0
 datadog-snowflake==5.6.0
 datadog-solr==1.13.0
 datadog-sonarqube==3.2.2
-datadog-spark==4.3.0
+datadog-spark==4.3.1
 datadog-sqlserver==17.2.0
 datadog-squid==2.5.0
 datadog-ssh-check==2.8.0
