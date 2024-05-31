@@ -179,7 +179,7 @@ teamcity.queuedBuild.waitingTime.milliseconds.sum,count,,millisecond,,[OpenMetri
 teamcity.runningBuilds.UnprocessedMessages,gauge,,,,[OpenMetrics] The number of build log messages received from the build agents but not yet processed.,0,teamcity,running builds unproc msgs,
 teamcity.server.cleanup.lastFinished.finishTimestamp.milliseconds,gauge,,millisecond,,[OpenMetrics] When the last finished cleanup was finished.,0,teamcity,server cleanup last finished ms,
 teamcity.server.cleanup.lastFinished.startTimestamp.milliseconds,gauge,,millisecond,,[OpenMetrics] When the last finished cleanup was started.,0,teamcity,server last finished cleanup start time ms,
-teamcity.server.cleanup.lastStarted.startTimestamp.milliseconds,gauge,,millisecond,,[OpenMetrics] When the last cleanup was started.,0,teamcity,last cleanup start time
+teamcity.server.cleanup.lastStarted.startTimestamp.milliseconds,gauge,,millisecond,,[OpenMetrics] When the last cleanup was started.,0,teamcity,last cleanup start time,
 teamcity.server.uptime.milliseconds,gauge,,millisecond,,[OpenMetrics] Time since the server process started initializing.,0,teamcity,server uptime ms,
 teamcity.server_side_build_finishing,gauge,,,,[OpenMetrics] The duration of server side build finishing.,0,teamcity,server build finishing,
 teamcity.startingBuild.buildStartDelay.milliseconds.bucket,count,,millisecond,,[OpenMetrics - TeamCity v2022.10+] Time passed after the build was removed from the queue but before the start of the checking for changes operation (bucket).,0,teamcity,starting build start delay ms bucket,
