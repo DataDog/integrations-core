@@ -1,2 +1,0 @@
-
-Add a Bean regex for stream thread metrics for Confluent version >=5.5.0. Previously, Stream Thread Metrics were not collected. Also added one useful attribute for debugging stream thread performance.
