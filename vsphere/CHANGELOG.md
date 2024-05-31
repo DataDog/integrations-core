@@ -2,7 +2,7 @@
 
 <!-- towncrier release notes start -->
 
-## 7.5.2 / 2024-04-26
+## 7.5.2 / 2024-04-26 / Agent 7.54.0
 
 ***Fixed***:
 
@@ -56,6 +56,7 @@
 ***Added***:
 
 * Decouple resource groups and collection type ([#15670](https://github.com/DataDog/integrations-core/pull/15670))
+    * _Note:_ When updating to this version, note that VMs are now considered historical entities. If you are using an instance to only collect historical entities, review your configuration to ensure you are handling VMs.
 
 ***Fixed***:
 

@@ -747,13 +747,14 @@ class SQLServer(AgentCheck):
                     [QUERY_SERVER_STATIC_INFO], executor=self.execute_query_raw
                 )
                 self.server_state_queries.compile_queries()
+
+            self._send_database_instance_metadata()
             if self._config.proc:
                 self.do_stored_procedure_check()
             else:
                 self.collect_metrics()
             if self._config.autodiscovery and self._config.autodiscovery_db_service_check:
                 self._check_database_conns()
-            self._send_database_instance_metadata()
             if self._config.dbm_enabled:
                 self.statement_metrics.run_job_loop(self.tags)
                 self.procedure_metrics.run_job_loop(self.tags)

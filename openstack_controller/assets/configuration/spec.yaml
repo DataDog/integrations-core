@@ -14,14 +14,6 @@ files:
             service.hidden: true
     - template: instances
       options:
-        - name: use_legacy_check_version
-          display_priority: 1
-          description: |
-            For backward compatibility reasons, it is possible to use a deprecated version of the Openstack Controller
-            integration by setting this field to "true".
-          value:
-              type: boolean
-              example: false
         - name: name
           hidden: true
           description: |
@@ -42,6 +34,7 @@ files:
           value:
             example: <PASSWORD>
             type: string
+
         - name: domain_id
           description: |
            The domain ID used to connect to Openstack. If not specified, the check will
@@ -65,6 +58,14 @@ files:
                 id: <DOMAIN_ID>
             type: object
           enabled: true
+        - name: use_legacy_check_version
+          description: |
+            For backward compatibility reasons, it is possible to use a deprecated version of the Openstack Controller
+            integration by setting this field to "true".
+          enabled: true
+          value:
+              type: boolean
+              example: false
         - name: whitelist_project_names
           hidden: true
           description: |
@@ -448,7 +449,26 @@ files:
                                   type: string
                               - name: interval
                                 type: integer
+                              - name: portgroups
+                                anyOf:
+                                  - type: boolean
+                                  - type: object
                       - name: conductors
+                        type: boolean
+                      - name: volumes
+                        anyOf:
+                          - type: boolean
+                          - type: object
+                            properties:
+                              - name: connectors
+                                type: boolean
+                              - name: targets
+                                type: boolean
+                      - name: ports
+                        type: boolean  
+                      - name: drivers
+                        type: boolean
+                      - name: allocations
                         type: boolean
               - name: load-balancer
                 anyOf:
@@ -635,6 +655,20 @@ files:
                             properties:
                               - name: members
                                 type: boolean
+              - name: heat
+                anyOf:
+                  - type: boolean
+                  - type: object
+                    properties:
+                      - name: stacks
+                        type: boolean
+              - name: swift
+                anyOf:
+                  - type: boolean
+                  - type: object
+                    properties:
+                      - name: containers
+                        type: boolean
             example:
               compute: false
         - name: projects

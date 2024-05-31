@@ -44,10 +44,7 @@
       "auto_install": true
     },
     "dashboards": {
-      "karpenter_overview": "assets/dashboards/karpenter_overview.json"
-    },
-    "logs": {
-      "source": "karpenter"
+      "Karpenter Overview": "assets/dashboards/karpenter_overview.json"
     },
     "monitors": {
       "pod states": "assets/monitors/pod_state.json"

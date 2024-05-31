@@ -25,7 +25,9 @@ kafka.producer.available_buffer_bytes,gauge,10,byte,,The total amount of buffer 
 kafka.producer.batch_size_avg,gauge,10,byte,,The average number of bytes sent per partition per-request.,0,kafka,avg batch size,cpu
 kafka.producer.batch_size_max,gauge,10,byte,,The max number of bytes sent per partition per-request.,0,kafka,max batch size,
 kafka.producer.buffer_bytes_total,gauge,10,byte,,The maximum amount of buffer memory the client can use (whether or not it is currently used).,1,kafka,buffer bytes,
+kafka.producer.bufferpool_wait_ratio,gauge,10,,,The fraction of time an appender waits for space allocation.,-1,kafka,bufferpool wait ratio,
 kafka.producer.bufferpool_wait_time,gauge,10,,,The fraction of time an appender waits for space allocation.,-1,kafka,bufferpool wait time,
+kafka.producer.bufferpool_wait_time_ns_total,gauge,10,nanosecond,,The total time in nanoseconds an appender waits for space allocation.,0,kafka,bufferpool wait time ns total,
 kafka.producer.bytes_out,gauge,10,byte,second,Producer bytes out rate.,1,kafka,prod bytes out,
 kafka.producer.compression_rate,gauge,10,fraction,,The average compression rate of record batches for a topic,1,kafka,compression rate,
 kafka.producer.compression_rate_avg,rate,10,fraction,,The average compression rate of record batches.,0,kafka,avg compression rate,

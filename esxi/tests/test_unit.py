@@ -11,6 +11,10 @@ from pyVmomi import vim, vmodl
 
 from datadog_checks.esxi import EsxiCheck
 
+from .common import USE_VSPHERE_LAB
+
+pytestmark = [pytest.mark.skipif(not USE_VSPHERE_LAB, reason='Only run tests on one environment')]
+
 
 @pytest.mark.usefixtures("service_instance")
 def test_esxi_metric_up(instance, dd_run_check, aggregator, caplog):
@@ -154,8 +158,6 @@ def test_external_host_tags(vcsim_instance, datadog_agent, dd_run_check):
         'localhost.localdomain',
         {
             'esxi': [
-                'esxi_datacenter:dc2',
-                'esxi_folder:folder_1',
                 'esxi_type:host',
                 'esxi_url:127.0.0.1:8989',
             ]
@@ -165,8 +167,6 @@ def test_external_host_tags(vcsim_instance, datadog_agent, dd_run_check):
         'vm1',
         {
             'esxi': [
-                'esxi_datacenter:dc2',
-                'esxi_folder:folder_1',
                 'esxi_type:vm',
                 'esxi_host:localhost.localdomain',
                 'esxi_url:127.0.0.1:8989',
@@ -177,7 +177,6 @@ def test_external_host_tags(vcsim_instance, datadog_agent, dd_run_check):
         'vm2',
         {
             'esxi': [
-                'esxi_cluster:c1',
                 'esxi_compute:c1',
                 'esxi_type:vm',
                 'esxi_url:127.0.0.1:8989',
@@ -275,10 +274,8 @@ def test_external_host_tags_all_resources(vcsim_instance, datadog_agent, dd_run_
         'hostname',
         {
             'esxi': [
-                'esxi_cluster:c1',
                 'esxi_compute:c1',
                 'esxi_datastore:ds1',
-                'esxi_datastore_cluster:pod1',
                 'esxi_type:host',
                 'esxi_url:127.0.0.1:8989',
             ]
@@ -289,7 +286,6 @@ def test_external_host_tags_all_resources(vcsim_instance, datadog_agent, dd_run_
         {
             'esxi': [
                 'esxi_type:vm',
-                'esxi_cluster:c1',
                 'esxi_host:hostname',
                 'esxi_url:127.0.0.1:8989',
             ]
@@ -544,13 +540,13 @@ def test_invalid_instance_filters(dd_run_check, vcsim_instance, caplog):
         pytest.param(
             ['test'],
             "Unknown host tag `test` cannot be excluded. Available host tags are: `esxi_url`, `esxi_type`, "
-            "`esxi_host`, `esxi_folder`, `esxi_cluster` `esxi_compute`, `esxi_datacenter`, and `esxi_datastore`",
+            "`esxi_host`, `esxi_compute`, and `esxi_datastore`",
             id="unknown tag",
         ),
         pytest.param(
-            ['esxi_type', 'esxi_cluster', 'hello'],
+            ['esxi_type', 'hello'],
             "Unknown host tag `hello` cannot be excluded. Available host tags are: `esxi_url`, `esxi_type`, "
-            "`esxi_host`, `esxi_folder`, `esxi_cluster` `esxi_compute`, `esxi_datacenter`, and `esxi_datastore`",
+            "`esxi_host`, `esxi_compute`, and `esxi_datastore`",
             id="known and unknown tags together",
         ),
     ],
@@ -568,16 +564,13 @@ def test_excluded_host_tags(
     if expected_warning is not None:
         assert expected_warning in caplog.text
 
-    host_external_tags = ['esxi_datacenter:dc2', 'esxi_folder:folder_1', 'esxi_type:host', 'esxi_url:127.0.0.1:8989']
+    host_external_tags = ['esxi_type:host', 'esxi_url:127.0.0.1:8989']
     vm_1_external_tags = [
-        'esxi_datacenter:dc2',
-        'esxi_folder:folder_1',
         'esxi_type:vm',
         'esxi_url:127.0.0.1:8989',
         'esxi_host:localhost.localdomain',
     ]
     vm_2_external_tags = [
-        'esxi_cluster:c1',
         'esxi_compute:c1',
         'esxi_type:vm',
         'esxi_url:127.0.0.1:8989',
@@ -1198,3 +1191,60 @@ def test_vm_metrics_filters(vcsim_instance, dd_run_check, metric_filters, expect
     aggregator.assert_metric('esxi.host.count')
     aggregator.assert_metric('esxi.vm.count')
     aggregator.assert_all_metrics_covered()
+
+
+@pytest.mark.usefixtures("service_instance")
+def test_use_configured_hostname(vcsim_instance, dd_run_check, aggregator, datadog_agent):
+    instance = copy.deepcopy(vcsim_instance)
+    instance['use_configured_hostname'] = True
+    check = EsxiCheck('esxi', {}, [instance])
+    dd_run_check(check)
+
+    base_tags = ["esxi_url:127.0.0.1:8989"]
+    aggregator.assert_metric("esxi.cpu.usage.avg", value=26, tags=base_tags, hostname="127.0.0.1:8989")
+    aggregator.assert_metric("esxi.mem.granted.avg", value=80, tags=base_tags, hostname="127.0.0.1:8989")
+    aggregator.assert_metric("esxi.host.can_connect", 1, count=1, tags=base_tags)
+
+    datadog_agent.assert_external_tags(
+        '127.0.0.1:8989',
+        {
+            'esxi': [
+                'esxi_type:host',
+                'esxi_url:127.0.0.1:8989',
+            ]
+        },
+    )
+
+
+@pytest.mark.usefixtures("service_instance")
+def test_use_non_socks_proxy(vcsim_instance, dd_run_check, caplog):
+    instance = copy.deepcopy(vcsim_instance)
+    instance['proxy'] = "http://localhost"
+    caplog.set_level(logging.WARNING)
+    check = EsxiCheck('esxi', {}, [instance])
+    dd_run_check(check)
+    assert "Proxy scheme http not supported; ignoring" in caplog.text
+
+
+@pytest.mark.usefixtures("service_instance")
+def test_use_socks_proxy(vcsim_instance, dd_run_check, caplog, aggregator):
+    instance = copy.deepcopy(vcsim_instance)
+    instance['proxy'] = "socks5://test"
+    caplog.set_level(logging.WARNING)
+    check = EsxiCheck('esxi', {}, [instance])
+    dd_run_check(check)
+    assert "Proxy scheme socks5 not supported; ignoring" not in caplog.text
+    aggregator.assert_metric("esxi.host.can_connect", 1, count=1)
+
+
+def test_use_socks_proxy_mocked(vcsim_instance, dd_run_check, caplog, aggregator):
+    instance = copy.deepcopy(vcsim_instance)
+    instance['proxy'] = "socks5://test"
+    caplog.set_level(logging.WARNING)
+    with patch('socks.create_connection', side_effect=Exception()) as socks_connect:
+        with pytest.raises(Exception):
+            check = EsxiCheck('esxi', {}, [instance])
+            dd_run_check(check)
+            assert "Proxy scheme socks5 not supported; ignoring" not in caplog.text
+            assert socks_connect.call_count == 1
+            aggregator.assert_metric("esxi.host.can_connect", 0, count=1)

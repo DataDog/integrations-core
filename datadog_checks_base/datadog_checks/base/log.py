@@ -9,13 +9,10 @@ from typing import Callable  # noqa: F401
 from six import PY2, text_type
 from urllib3.exceptions import InsecureRequestWarning
 
+from datadog_checks.base.agent import datadog_agent
+
 from .utils.common import to_native_string
 from .utils.tracing import tracing_enabled
-
-try:
-    import datadog_agent
-except ImportError:
-    from .stubs import datadog_agent
 
 # Arbitrary number less than 10 (DEBUG)
 TRACE_LEVEL = 7

@@ -50,7 +50,7 @@
       "Interface Performance": "assets/dashboards/interface_performance.json",
       "Datacenter Overview": "assets/dashboards/datacenter_overview.json",
       "Netflow Monitoring": "assets/dashboards/netflow_monitoring.json",
-      "Datadog NDM Environment": "assets/dashboards/datadog_ndm_environment.json",
+      "Datadog NDM Environment": "assets/dashboards/ndm_troubleshooting.json",
       "BGP & OSPF Overview": "assets/dashboards/bgp_ospf_overview.json"
     },
     "monitors": {
