@@ -1,0 +1,1 @@
+Only emit database_instance metadata when dbm is enabled
