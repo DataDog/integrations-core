@@ -100,6 +100,7 @@ class TestKubeAPIServerMetrics:
         NAMESPACE + '.apiserver_request_total.count',
         NAMESPACE + '.apiserver_request_terminations_total.count',
         NAMESPACE + '.apiserver_admission_webhook_fail_open_count.count',
+        NAMESPACE + '.apiserver_admission_webhook_request_total',
     ]
 
     def test_check(self, dd_run_check, aggregator, mock_get):
