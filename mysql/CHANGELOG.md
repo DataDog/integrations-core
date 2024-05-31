@@ -2,6 +2,17 @@
 
 <!-- towncrier release notes start -->
 
+## 12.5.0 / 2024-05-30
+
+***Added***:
+
+* Update dependencies ([#17519](https://github.com/DataDog/integrations-core/pull/17519))
+
+***Fixed***:
+
+* Changing the mysql.innodb.lock_structs metric type to gauge ([#17452](https://github.com/DataDog/integrations-core/pull/17452))
+* Fix tag propagation of aurora `replication_role` tag. Prior to this change, the replication_role tag was not added as a host tag for mysql aurora instances. ([#17555](https://github.com/DataDog/integrations-core/pull/17555))
+
 ## 12.4.0 / 2024-04-26 / Agent 7.54.0
 
 ***Added***:

@@ -2,6 +2,16 @@
 
 <!-- towncrier release notes start -->
 
+## 3.5.0 / 2024-05-30
+
+***Added***:
+
+* Add support for Cilumn v1.14 metrics ([#17447](https://github.com/DataDog/integrations-core/pull/17447))
+
+***Fixed***:
+
+* Update the description for the `tls_ca_cert` config option to use `openssl rehash` instead of `c_rehash` ([#16981](https://github.com/DataDog/integrations-core/pull/16981))
+
 ## 3.4.0 / 2024-02-16 / Agent 7.52.0
 
 ***Added***:

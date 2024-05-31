@@ -2,6 +2,18 @@
 
 <!-- towncrier release notes start -->
 
+## 17.3.0 / 2024-05-30
+
+***Added***:
+
+* Update dependencies ([#17424](https://github.com/DataDog/integrations-core/pull/17424))
+
+***Fixed***:
+
+* Fix Always-On metrics query for replica_failover_mode and replica_failover_readiness. Previously the query returned a cartesian product of rows which could result in incorrect metrics in some cases. ([#17503](https://github.com/DataDog/integrations-core/pull/17503))
+* Emit database_instance metadata before collecting metrics
+  Decreased database instance collection interval from 1800 seconds to 300 seconds to improve reliability ([#17675](https://github.com/DataDog/integrations-core/pull/17675))
+
 ## 17.2.0 / 2024-04-26 / Agent 7.54.0
 
 ***Added***:

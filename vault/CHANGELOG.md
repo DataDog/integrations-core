@@ -2,6 +2,17 @@
 
 <!-- towncrier release notes start -->
 
+## 4.2.0 / 2024-05-30
+
+***Added***:
+
+* Add additional documented Vault metrics ([#17654](https://github.com/DataDog/integrations-core/pull/17654))
+
+***Fixed***:
+
+* Update the description for the `tls_ca_cert` config option to use `openssl rehash` instead of `c_rehash` ([#16981](https://github.com/DataDog/integrations-core/pull/16981))
+* Do not fail if no tags are provided in the config ([#17598](https://github.com/DataDog/integrations-core/pull/17598))
+
 ## 4.1.0 / 2024-01-05 / Agent 7.51.0
 
 ***Added***:

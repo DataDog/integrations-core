@@ -2,6 +2,31 @@
 
 <!-- towncrier release notes start -->
 
+## 6.5.0 / 2024-05-30
+
+***Added***:
+
+* Emit mongodb_instance metadata event to for sharded cluster, replica-set and standalone deployment types. The metadata includes
+  - mongodb hostname
+  - mongodb version
+  - replica set name
+  - replica set state
+  - sharding cluster role
+  - cluster type
+  - hosts (list of mongodb instances this mongodb connects to)
+  - shards (list of shards this mongos instance connects to)
+  - cluster name ([#17518](https://github.com/DataDog/integrations-core/pull/17518))
+* Update dependencies ([#17519](https://github.com/DataDog/integrations-core/pull/17519))
+* Emit updated mongodb_instance event when mongo deployment type is refreshed with updates. The mongo deployment type is considered to be updated when
+  - replica set name is changed
+  - member role is updated in a replica set, i.e. primary step down/secondary step up or new member joins the replica set
+  - new shard joins a sharded cluster or new member joins a shard results in mongos shard map updated ([#17564](https://github.com/DataDog/integrations-core/pull/17564))
+* Samples MongoDB operations and collect explain plans for the sampled operations when DBM is enabled. ([#17596](https://github.com/DataDog/integrations-core/pull/17596))
+
+***Fixed***:
+
+* Emit database_instance metadata before collecting metrics ([#17665](https://github.com/DataDog/integrations-core/pull/17665))
+
 ## 6.4.0 / 2024-04-26 / Agent 7.54.0
 
 ***Added***:

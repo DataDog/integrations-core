@@ -2,6 +2,21 @@
 
 <!-- towncrier release notes start -->
 
+## 6.6.0 / 2024-05-30
+
+***Added***:
+
+* Update dependencies ([#17424](https://github.com/DataDog/integrations-core/pull/17424))
+* Adding new glance image metrics ([#17492](https://github.com/DataDog/integrations-core/pull/17492))
+* Adding new Ironic metrics ([#17541](https://github.com/DataDog/integrations-core/pull/17541))
+* Added Heat Component ([#17573](https://github.com/DataDog/integrations-core/pull/17573))
+* Added Swift component ([#17640](https://github.com/DataDog/integrations-core/pull/17640))
+* Added volume_type tag to cinder volumes for ceph monitoring ([#17643](https://github.com/DataDog/integrations-core/pull/17643))
+
+***Fixed***:
+
+* Update the description for the `tls_ca_cert` config option to use `openssl rehash` instead of `c_rehash` ([#16981](https://github.com/DataDog/integrations-core/pull/16981))
+
 ## 6.5.0 / 2024-04-26 / Agent 7.54.0
 
 ***Added***:

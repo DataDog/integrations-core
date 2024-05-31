@@ -2,6 +2,16 @@
 
 <!-- towncrier release notes start -->
 
+## 2.8.0 / 2024-05-30
+
+***Added***:
+
+* Update dependencies ([#17519](https://github.com/DataDog/integrations-core/pull/17519))
+
+***Fixed***:
+
+* Update the description for the `tls_ca_cert` config option to use `openssl rehash` instead of `c_rehash` ([#16981](https://github.com/DataDog/integrations-core/pull/16981))
+
 ## 2.7.0 / 2024-03-07 / Agent 7.52.0
 
 ***Security***:
