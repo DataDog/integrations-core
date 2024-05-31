@@ -55,9 +55,6 @@
     },
     "saved_views": {
       "ceph_processes": "assets/saved_views/ceph_processes.json"
-    },
-    "logs": {
-      "source": "ceph"
     }
   }
 }

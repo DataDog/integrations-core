@@ -51,9 +51,6 @@
     "dashboards": {
       "yarn": "assets/dashboards/yarn_dashboard.json",
       "hadoop": "assets/dashboards/hadoop_dashboard.json"
-    },
-    "logs": {
-      "source": "yarn"
     }
   }
 }

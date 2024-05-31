@@ -61,9 +61,6 @@
     },
     "dashboards": {
       "Flink Overview": "assets/dashboards/overview.json"
-    },
-    "logs": {
-      "source": "flink"
     }
   }
 }

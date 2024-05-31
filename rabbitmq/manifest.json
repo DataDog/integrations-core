@@ -65,9 +65,6 @@
       "pid_overview": "assets/saved_views/status_overview.json",
       "rabbitmq_pattern": "assets/saved_views/rabbitmq_pattern.json",
       "rabbitmq_processes": "assets/saved_views/rabbitmq_processes.json"
-    },
-    "logs": {
-      "source": "rabbitmq"
     }
   }
 }

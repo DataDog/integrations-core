@@ -62,9 +62,6 @@
       "status_code_overview": "assets/saved_views/status_code_overview.json",
       "bot_errors": "assets/saved_views/bot_errors.json",
       "apache_processes": "assets/saved_views/apache_processes.json"
-    },
-    "logs": {
-      "source": "apache"
     }
   }
 }

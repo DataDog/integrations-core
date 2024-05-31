@@ -91,9 +91,6 @@
       "Zeek - Syslog": "assets/dashboards/zeek_syslog.json",
       "Zeek - Datared": "assets/dashboards/zeek_datared.json",
       "Corelight Suricata": "assets/dashboards/corelight_suricata.json"
-    },
-    "logs": {
-      "source": "zeek"
     }
   },
   "author": {

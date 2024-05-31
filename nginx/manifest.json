@@ -67,9 +67,6 @@
       "status_code_overview": "assets/saved_views/status_code_overview.json",
       "bot_errors": "assets/saved_views/bot_errors.json",
       "nginx_processes": "assets/saved_views/nginx_processes.json"
-    },
-    "logs": {
-      "source": "nginx"
     }
   }
 }
