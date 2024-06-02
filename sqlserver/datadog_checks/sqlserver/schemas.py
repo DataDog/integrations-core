@@ -202,6 +202,7 @@ class Schemas:
         def fetch_schema_data(cursor, db_name):
             if db_name != "dbmorders_1":
                 return
+            times_dict = {"execute" : 0, "fetch_all": 0 }
             start_time_db = time.time()
             db_info  = self._query_db_information(db_name, cursor)
             schemas = self._query_schema_information(cursor)
@@ -223,9 +224,9 @@ class Schemas:
                     if self._dataSubmitter.exceeded_total_columns_number():
                         self._log.warning("Truncated data due to the max limit, stopped on db - {} on schema {}".format(db_name, schema["name"]))
                         return True
-
+                    
                     start_get_tables_time = time.time()
-                    columns_count, tables_info = self._get_tables_data(tables_chunk, schema, cursor)
+                    columns_count, tables_info = self._get_tables_data(tables_chunk, schema, cursor, times_dict)
                     self._log.warning("_get_tables_data time {}".format(time.time() - start_get_tables_time))
 
                     start_store_time = time.time()
@@ -240,6 +241,7 @@ class Schemas:
             # we want to submit for each DB separetly for clarity
             self._dataSubmitter.submit()
             self._log.error("Finished collecting for DB - {} elapsed time {}".format(db_name, time.time() - start_time_db))
+            self._log.error("From this time execute took - {} fetch_all took {}".format(times_dict["execute"], times_dict["fetch_all"]))
             return False
         self._check.do_for_databases(fetch_schema_data, self._check.get_databases())
         # submit the last chunk of data if any
@@ -277,7 +279,7 @@ class Schemas:
         
     #TODO collect diffs : we need to take care of new DB / removed DB . schemas new removed
     # will nedd a separate query for changed indexes
-    def _get_tables_data(self, table_list, schema, cursor):
+    def _get_tables_data(self, table_list, schema, cursor, times_dict):
         if len(table_list) == 0:
             return
         name_to_id = {}
@@ -289,7 +291,7 @@ class Schemas:
         for t in table_list:
             name_to_id[t["name"]] = t["id"] 
             id_to_all[t["id"]] = t
-        total_columns_number  = self._populate_with_columns_data(table_ids_object, name_to_id, id_to_all, schema, cursor, len(table_list))
+        total_columns_number  = self._populate_with_columns_data(table_ids_object, name_to_id, id_to_all, schema, cursor, len(table_list), times_dict)
         #self._populate_with_partitions_data(table_ids, id_to_all, cursor) #TODO P DISABLED as postgrss backend accepts different data model
         #self._populate_with_foreign_keys_data(table_ids, id_to_all, cursor) #TODO P DISABLED as postgrss backend accepts different data model
         #self._populate_with_index_data(table_ids, id_to_all, cursor) #TODO P DISABLED as postgrss backend accepts different data model
@@ -297,11 +299,12 @@ class Schemas:
         return total_columns_number, list(id_to_all.values())
 
     # TODO refactor the next 3 to have a base function when everythng is settled.
-    def _populate_with_columns_data(self, table_ids, name_to_id, id_to_all, schema, cursor, table_len):
+    def _populate_with_columns_data(self, table_ids, name_to_id, id_to_all, schema, cursor, table_len, times_dict):
         # get columns if we dont have a dict here unlike postgres
         start_time = time.time()
         cursor.execute(COLUMN_QUERY.format(table_ids, schema["name"]))
         self._log.warning("Executed columns query for {} seconds for {} tables".format(time.time() - start_time, table_len))
+        times_dict["execute"] = times_dict["execute"] + (time.time() - start_time)
         messages = cursor.messages
         
         # Extract CPU and elapsed time from the messages
@@ -314,6 +317,9 @@ class Schemas:
         start_time_fetch = time.time()
         data = cursor.fetchall()
         self._log.warning("Executed cursor.fetchall()for {} seconds".format(time.time() - start_time_fetch))
+        times_dict["fetch_all"] = times_dict["fetch_all"] + (time.time() - start_time_fetch)
+
+
         start_time_rest = time.time()
         columns = []
         #TODO we need it cause if I put AS default its a forbidden key word and to be inline with postgres we need it
