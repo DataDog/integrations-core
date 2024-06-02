@@ -2,6 +2,29 @@
 
 <!-- towncrier release notes start -->
 
+## 18.3.0 / 2024-05-31
+
+***Added***:
+
+* Added the following metrics from `pg_stat_io` when DBM is enabled. Only available with PostgreSQL 16 and newer
+  - postgresql.io.evictions
+  - postgresql.io.extends
+  - postgresql.io.extend_time
+  - postgresql.io.fsyncs
+  - postgresql.io.fsync_time
+  - postgresql.io.hits
+  - postgresql.io.reads
+  - postgresql.io.read_time
+  - postgresql.io.writes
+  - postgresql.io.write_time ([#17423](https://github.com/DataDog/integrations-core/pull/17423))
+* Update dependencies ([#17424](https://github.com/DataDog/integrations-core/pull/17424)), ([#17519](https://github.com/DataDog/integrations-core/pull/17519))
+
+***Fixed***:
+
+* This un-reverts https://github.com/DataDog/integrations-core/pull/17187, which was reverted due to a flaw in the logic that could result in improper metric counts. The fixed version caches an initial state of pg_stat_statements and updates it with incremental partial query data. This allows the agent to only fetch full rows for queries that were called between check runs, while also accounting for queryids that can map to the same query_signature. ([#17554](https://github.com/DataDog/integrations-core/pull/17554))
+* Send database instance metadata prior to check queries. This prevents a scenario where exceptions thrown during check execution can cause the database_instance resource to not be emitted. When the resource is not emitted, this can cause flapping in host tags. For example, a customer might see dbms:N/A for a period of time until a new database_instance resource is created. Moving this means it will always be sent, even if an unexepected exception is thrown during check execution. ([#17590](https://github.com/DataDog/integrations-core/pull/17590))
+* Adds debug info for exceptions in custom queries and preserves running of the remaining queries ([#17679](https://github.com/DataDog/integrations-core/pull/17679))
+
 ## 18.2.2 / 2024-05-09 / Agent 7.54.0
 
 ***Fixed***:

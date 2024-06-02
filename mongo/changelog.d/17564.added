@@ -1,4 +1,0 @@
-Emit updated mongodb_instance event when mongo deployment type is refreshed with updates. The mongo deployment type is considered to be updated when
-- replica set name is changed
-- member role is updated in a replica set, i.e. primary step down/secondary step up or new member joins the replica set
-- new shard joins a sharded cluster or new member joins a shard results in mongos shard map updated
