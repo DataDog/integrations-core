@@ -16,6 +16,12 @@
       "Supported OS::macOS",
       "Supported OS::Windows",
       "Category::Network"
+    ],
+    "resources": [
+      {
+        "resource_type": "documentation",
+        "url": "https://docs.datadoghq.com/monitors/monitor_types/network/"
+      }
     ]
   },
   "author": {

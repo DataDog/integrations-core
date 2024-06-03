@@ -22,6 +22,12 @@
       "Submitted Data Type::Logs",
       "Submitted Data Type::Traces",
       "Submitted Data Type::Events"
+    ],
+    "resources": [
+      {
+        "resource_type": "blog",
+        "url": "https://www.datadoghq.com/blog/monitor-elasticsearch-performance-metrics"
+      }
     ]
   },
   "author": {

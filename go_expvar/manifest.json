@@ -16,6 +16,12 @@
       "Supported OS::macOS",
       "Supported OS::Windows",
       "Category::Languages"
+    ],
+    "resources": [
+      {
+        "resource_type": "blog",
+        "url": "https://www.datadoghq.com/blog/instrument-go-apps-expvar-datadog"
+      }
     ]
   },
   "author": {

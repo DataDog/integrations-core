@@ -16,6 +16,16 @@
       "Supported OS::Linux",
       "Supported OS::Windows",
       "Supported OS::macOS"
+    ],
+    "resources": [
+      {
+        "resource_type": "blog",
+        "url": "https://www.datadoghq.com/blog/monitoring-spark"
+      },
+      {
+        "resource_type": "blog",
+        "url": "https://www.datadoghq.com/blog/spark-emr-monitoring/ "
+      }
     ]
   },
   "author": {

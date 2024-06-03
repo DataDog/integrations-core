@@ -17,6 +17,12 @@
       "Supported OS::Windows",
       "Category::OS & System",
       "Category::Log Collection"
+    ],
+    "resources": [
+      {
+        "resource_type": "blog",
+        "url": "https://www.datadoghq.com/blog/supervisor-monitors-your-processes-datadog-monitors-supervisor"
+      }
     ]
   },
   "author": {

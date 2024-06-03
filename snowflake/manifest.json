@@ -18,6 +18,12 @@
       "Category::Cloud",
       "Category::Data Stores",
       "Category::Cost Management"
+    ],
+    "resources": [
+      {
+        "resource_type": "blog",
+        "url": "https://www.datadoghq.com/blog/snowflake-monitoring-datadog/"
+      }
     ]
   },
   "author": {
