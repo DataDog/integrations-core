@@ -1,5 +1,5 @@
 id: traefik_mesh
-metric_id: traefik_mesh
+metric_id: traefik-mesh
 backend_only: false
 facets:
   - facetType: range
