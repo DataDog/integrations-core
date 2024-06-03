@@ -125,7 +125,7 @@ class Schemas(DBMAsyncJob):
             min_collection_interval=config.min_collection_interval,
             dbms="sqlserver",
             rate_limit=1 / float(collection_interval),
-            job_name="query-schemas",
+            job_name="schemas",
             shutdown_callback=self.shut_down,
         )
         base_event = {
@@ -146,6 +146,31 @@ class Schemas(DBMAsyncJob):
     def shut_down(self):
         self._data_submitter.submit()
 
+    @tracked_method(agent_check_getter=agent_check_getter)
+    def __fetch_schema_data(self, cursor, db_name):
+        start_time = time.time()
+        schemas = self._query_schema_information(cursor)
+        for schema in schemas:
+            tables = self._get_tables(schema, cursor)
+            tables_chunks = list(get_list_chunks(tables, self.TABLES_CHUNK_SIZE))
+            for tables_chunk in tables_chunks:
+                schema_collection_elapsed_time = time.time() - start_time
+                if schema_collection_elapsed_time > self.MAX_EXECUTION_TIME:
+                    # TODO Report truncation to the backend
+                    self._log.warning(
+                        """Truncated data due to the effective execution time reaching {},
+                         stopped on db - {} on schema {}""".format(
+                            self.MAX_EXECUTION_TIME, db_name, schema["name"]
+                        )
+                    )
+                    raise StopIteration("Schema collections took {} which is longer than allowed limit {}".format(schema_collection_elapsed_time, self.MAX_EXECUTION_TIME))
+                columns_count, tables_info = self._get_tables_data(tables_chunk, schema, cursor)
+                self._data_submitter.store(db_name, schema, tables_info, columns_count)
+                if self._data_submitter.columns_since_last_submit() > self.MAX_COLUMNS_PER_EVENT:
+                    self._data_submitter.submit()
+        self._data_submitter.submit()
+        return False     
+   
     @tracked_method(agent_check_getter=agent_check_getter)
     def _collect_schemas_data(self):
         """Collects database information and schemas and submits to the agent's queue as dictionaries
@@ -189,7 +214,6 @@ class Schemas(DBMAsyncJob):
                     key/value:
                         "partition_count": int
         """
-        start_time = time.thread_time()
         self._data_submitter.reset()
         self._data_submitter.set_base_event_data(
             self._check.resolved_hostname,
@@ -204,33 +228,7 @@ class Schemas(DBMAsyncJob):
         databases = self._check.get_databases()
         db_infos = self._query_db_informations(databases)
         self._data_submitter.store_db_infos(db_infos)
-
-        @tracked_method(agent_check_getter=agent_check_getter)
-        def fetch_schema_data(cursor, db_name):
-            schemas = self._query_schema_information(cursor)
-            for schema in schemas:
-                tables = self._get_tables(schema, cursor)
-                tables_chunks = list(get_list_chunks(tables, self.TABLES_CHUNK_SIZE))
-                for tables_chunk in tables_chunks:
-                    if time.thread_time() - start_time > self.MAX_EXECUTION_TIME:
-                        # TODO Report truncation to the backend
-                        self._log.warning(
-                            """Truncated data due to the effective execution time reaching {},
-                             stopped on db - {} on schema {}""".format(
-                                self.MAX_EXECUTION_TIME, db_name, schema["name"]
-                            )
-                        )
-                        raise StopIteration
-
-                    columns_count, tables_info = self._get_tables_data(tables_chunk, schema, cursor)
-
-                    self._data_submitter.store(db_name, schema, tables_info, columns_count)
-                    if self._data_submitter.columns_since_last_submit() > self.MAX_COLUMNS_PER_EVENT:
-                        self._data_submitter.submit()
-            self._data_submitter.submit()
-            return False
-
-        errors = self._check.do_for_databases(fetch_schema_data, self._check.get_databases())
+        errors = self._check.do_for_databases(self.__fetch_schema_data, self._check.get_databases())
         if errors:
             for e in errors:
                 self._log.error(

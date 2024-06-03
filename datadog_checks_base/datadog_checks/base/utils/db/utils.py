@@ -367,7 +367,7 @@ class DBMAsyncJob(object):
             self._rate_limiter = ConstantRateLimiter(rate_limit)
     
     def _run_sync_job_rate_limited(self):
-        if self._rate_limiter.shell_execute():
+        if self._rate_limiter.shall_execute():
             try:
                 self._run_job_traced()
             except:
