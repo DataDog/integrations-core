@@ -426,3 +426,4 @@ def tracked_query(check, operation, tags=None):
     yield
     elapsed_ms = (time.time() - start_time) * 1000
     check.histogram("dd.{}.operation.time".format(check.name), elapsed_ms, **stats_kwargs)
+    
