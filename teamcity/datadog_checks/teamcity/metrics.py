@@ -128,8 +128,7 @@ STANDARD_PROMETHEUS_METRICS = {
     'vcsRootInstances_active_number': 'vcsRootInstances.active',
     'vcsRoots_number': 'vcsRoots',
     'vcs_get_current_state_calls_number': 'vcs.get.current.state.calls',
-
-    #Compatibility for TeamCity 2023.05.4
+    # Compatibility for TeamCity 2023.05.4
     'agents_cloud_starting': 'agents.cloud.starting',
     'agents_connected_authorized': 'agents.connected.authorized',
     'agents_running_builds': 'agents.running.builds',
@@ -229,19 +228,21 @@ STANDARD_PROMETHEUS_METRICS = {
     'projects_active': 'projects.active',
     'projects': 'projects',
     'runningBuilds_numberOfUnprocessedMessages': 'runningBuilds.UnprocessedMessages',
-    'server_cleanup_lastFinished_finishTimestamp_milliseconds': 'server.cleanup.lastFinished.finishTimestamp.milliseconds',
-    'server_cleanup_lastFinished_startTimestamp_milliseconds': 'server.cleanup.lastFinished.startTimestamp.milliseconds',
-    'server_cleanup_lastStarted_startTimestamp_milliseconds':  'server.cleanup.lastStarted.startTimestamp.milliseconds',
-    'server_uptime_milliseconds': 'server.uptime.milliseconds',
+    'server_cleanup_lastFinished_finishTimestamp_milliseconds': (
+        'server.cleanup.lastFinished.finishTimestamp.milliseconds'
+    ),
+    'server_cleanup_lastFinished_startTimestamp_milliseconds': (
+        'server.cleanup.lastFinished.startTimestamp.milliseconds'
+    ),
+    'server_cleanup_lastStarted_startTimestamp_milliseconds': 'server.cleanup.lastStarted.startTimestamp.milliseconds',
     'system_load_average_1m': 'system.load.average.1m',
-    'teamcity_cache_InvestigationTestRunsHolder_projectScopes': 'cache.InvestigationTestRunsHolder'
-    '.projectScopes',
+    'teamcity_cache_InvestigationTestRunsHolder_projectScopes': 'cache.InvestigationTestRunsHolder' '.projectScopes',
     'teamcity_cache_InvestigationTestRunsHolder_testNames': 'cache.InvestigationTestRunsHolder.testNames',
     'teamcity_cache_InvestigationTestRunsHolder_testRuns': 'cache.InvestigationTestRunsHolder.testRuns',
     'users_active': 'users.active',
     'vcsRootInstances_active': 'vcsRootInstances.active',
     'vcsRoots': 'vcsRoots',
-    'vcs_get_current_state_calls': 'vcs.get.current.state.calls'
+    'vcs_get_current_state_calls': 'vcs.get.current.state.calls',
 }
 
 HISTOGRAM_METRICS = {'http_requests_duration_milliseconds': 'http.requests.duration.milliseconds'}
