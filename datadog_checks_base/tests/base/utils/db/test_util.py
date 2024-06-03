@@ -53,10 +53,21 @@ def test_constant_rate_limiter():
     start = time.time()
     sleep_count = 0
     while time.time() - start < test_duration_s:
-        ratelimiter.sleep()
+        ratelimiter.update_last_time_and_sleep()
         sleep_count += 1
     max_expected_count = rate_limit * test_duration_s
     assert max_expected_count - 1 <= sleep_count <= max_expected_count + 1
+
+
+def test_constant_rate_limiter_shell_execute():
+    rate_limit = 1
+    test_duration_s = 0.1
+    ratelimiter = ConstantRateLimiter(rate_limit)
+    assert ratelimiter.shall_execute()
+    ratelimiter.update_last_time()
+    assert not ratelimiter.shall_execute()
+    time.sleep(1)
+    assert ratelimiter.shall_execute()
 
 
 def test_ratelimiting_ttl_cache():
