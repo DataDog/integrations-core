@@ -69,11 +69,7 @@ See [service_checks.json][9] for a list of service checks provided by this integ
 
 Need help? Contact [Datadog support][10].
 
-## Further reading
-
-Additional helpful documentation, links, and articles:
-
-- [Monitor Citrix Hypervisor performance with Datadog][11]
+{{< partial name="whats-next/whats-next.html" >}}
 
 [1]: https://www.citrix.com/products/citrix-hypervisor/
 [2]: https://docs.datadoghq.com/agent/kubernetes/integrations/
