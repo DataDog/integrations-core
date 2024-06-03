@@ -205,6 +205,8 @@ instances:
 
 Need help? Contact [Datadog support][17].
 
+{{< partial name="whats-next/whats-next.html" >}}
+
 [1]: https://www.datadoghq.com/blog/monitor-istio-with-npm/
 [2]: https://docs.datadoghq.com/tracing/setup_overview/proxy_setup/?tab=istio
 [3]: https://www.datadoghq.com/blog/istio-datadog/

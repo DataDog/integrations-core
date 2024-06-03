@@ -40,6 +40,8 @@ Hyper-V does not include any events.
 
 Need help? Contact [Datadog support][7].
 
+{{< partial name="whats-next/whats-next.html" >}}
+
 [1]: https://docs.microsoft.com/en-us/windows-server/virtualization/hyper-v/hyper-v-on-windows-server
 [2]: https://app.datadoghq.com/account/settings/agent/latest
 [3]: https://github.com/DataDog/integrations-core/blob/master/hyperv/datadog_checks/hyperv/data/conf.yaml.example

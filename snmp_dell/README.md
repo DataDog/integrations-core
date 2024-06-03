@@ -32,6 +32,8 @@ The Dell integration does not include any service checks.
 
 The Dell integration does not include any events.
 
+{{< partial name="whats-next/whats-next.html" >}}
+
 ## Troubleshooting
 
 Need help? Contact [Datadog support][4].

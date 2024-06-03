@@ -161,6 +161,8 @@ See [service_checks.json][8] for a list of service checks provided by this integ
 
 Need help? Contact [Datadog support][9].
 
+{{< partial name="whats-next/whats-next.html" >}}
+
 [1]: https://raw.githubusercontent.com/DataDog/integrations-core/master/mesos_slave/images/mesos_dashboard.png
 [2]: https://www.datadoghq.com/blog/deploy-datadog-dcos
 [3]: https://hub.docker.com/r/datadog/agent/tags

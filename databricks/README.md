@@ -453,6 +453,8 @@ You can troubleshoot issues yourself by enabling the [Databricks web terminal][1
 
 Need help? Contact [Datadog support][10].
 
+{{< partial name="whats-next/whats-next.html" >}}
+
 [1]: https://databricks.com/
 [2]: https://docs.datadoghq.com/integrations/spark/?tab=host
 [3]: https://app.datadoghq.com/integrations/spark

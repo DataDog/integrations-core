@@ -483,6 +483,8 @@ See [service_checks.json][24] for a list of service checks provided by this inte
 
 Need help? Contact [Datadog support][25].
 
+{{< partial name="whats-next/whats-next.html" >}}
+
 [1]: https://raw.githubusercontent.com/DataDog/integrations-core/master/mongo/images/mongo_dashboard.png
 [2]: https://app.datadoghq.com/account/settings/agent/latest
 [3]: https://docs.mongodb.com/manual/core/replica-set-arbiter/#authentication

@@ -119,6 +119,8 @@ See [service_checks.json][13] for a list of service checks provided by this inte
 
 Need help? Contact [Datadog support][14].
 
+{{< partial name="whats-next/whats-next.html" >}}
+
 [1]: https://github.com/DataDog/integrations-core/blob/master/activemq/metadata.csv
 [2]: https://raw.githubusercontent.com/DataDog/dd-agent/5.10.1/conf.d/activemq.yaml.example
 [3]: https://app.datadoghq.com/account/settings/agent/latest

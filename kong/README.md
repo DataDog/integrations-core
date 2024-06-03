@@ -123,6 +123,8 @@ See [service_checks.json][9] for a list of service checks provided by this integ
 
 Need help? Contact [Datadog support][10].
 
+{{< partial name="whats-next/whats-next.html" >}}
+
 [1]: https://app.datadoghq.com/account/settings/agent/latest
 [2]: https://docs.datadoghq.com/agent/guide/agent-configuration-files/#agent-configuration-directory
 [3]: https://github.com/DataDog/integrations-core/blob/master/kong/datadog_checks/kong/data/conf.yaml.example

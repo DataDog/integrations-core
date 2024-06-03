@@ -812,6 +812,8 @@ See [service_checks.json][45] for a list of service checks provided by this inte
 
 Need help? Contact [Datadog support][18].
 
+{{< partial name="whats-next/whats-next.html" >}}
+
 [1]: http://docs.datadoghq.com/integrations/eks_fargate
 [2]: https://docs.aws.amazon.com/AmazonECS/latest/developerguide/task-metadata-endpoint.html
 [3]: https://docs.docker.com/engine/api/v1.30/#operation/ContainerStats

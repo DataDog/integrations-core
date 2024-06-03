@@ -80,6 +80,8 @@ See [service_checks.json][13] for a list of service checks provided by this inte
 
 Need help? Contact [Datadog support][4].
 
+{{< partial name="whats-next/whats-next.html" >}}
+
 [1]: https://raw.githubusercontent.com/DataDog/integrations-core/master/cassandra/images/cassandra_dashboard_2.png
 [2]: https://app.datadoghq.com/account/settings/agent/latest
 [3]: https://docs.datadoghq.com/integrations/java/

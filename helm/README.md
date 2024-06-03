@@ -132,6 +132,8 @@ See [service_checks.json][5] for a list of service checks provided by this integ
 
 Need help? Contact [Datadog support][6].
 
+{{< partial name="whats-next/whats-next.html" >}}
+
 [1]: https://docs.datadoghq.com/agent/kubernetes/integrations/
 [2]: https://docs.datadoghq.com/agent/cluster_agent/clusterchecks/
 [3]: https://docs.datadoghq.com/agent/guide/agent-commands/#agent-status-and-information

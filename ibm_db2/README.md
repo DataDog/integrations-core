@@ -252,6 +252,8 @@ You may need to install `gcc`.
 
 Need help? Contact [Datadog support][12].
 
+{{< partial name="whats-next/whats-next.html" >}}
+
 [1]: https://raw.githubusercontent.com/DataDog/integrations-core/master/ibm_db2/images/dashboard_overview.png
 [2]: https://www.ibm.com/analytics/us/en/db2
 [3]: https://app.datadoghq.com/account/settings/agent/latest

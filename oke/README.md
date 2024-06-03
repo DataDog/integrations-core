@@ -15,5 +15,7 @@ Additionally, OKE node pools are supported.
 
 Need help? Contact [Datadog support][1].
 
+{{< partial name="whats-next/whats-next.html" >}}
+
 [1]: https://docs.datadoghq.com/help/
 [2]: https://www.datadoghq.com/blog/monitor-oracle-kubernetes-engine/

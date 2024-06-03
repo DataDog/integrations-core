@@ -72,6 +72,8 @@ The Temporal integration can collect logs from the Temporal Cluster and forward 
 
 Need help? Contact [Datadog support][9].
 
+{{< partial name="whats-next/whats-next.html" >}}
+
 [1]: https://temporal.io/
 [2]: https://app.datadoghq.com/account/settings/agent/latest
 [3]: https://docs.datadoghq.com/agent/kubernetes/integrations/

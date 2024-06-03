@@ -247,6 +247,8 @@ See [service_checks.json][15] for a list of service checks provided by this inte
 
 Need help? Contact [Datadog support][16].
 
+{{< partial name="whats-next/whats-next.html" >}}
+
 [1]: https://app.datadoghq.com/account/settings/agent/latest
 [2]: http://docs.datadoghq.com/agent/docker/integrations/?tab=docker
 [3]: https://docs.datadoghq.com/agent/docker/log/?tab=containerinstallation

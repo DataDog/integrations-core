@@ -116,6 +116,8 @@ The CockroachDB check does not include any events.
 
 Need help? Contact [Datadog support][10].
 
+{{< partial name="whats-next/whats-next.html" >}}
+
 [1]: https://www.cockroachlabs.com/product/cockroachdb
 [2]: https://app.datadoghq.com/account/settings/agent/latest
 [3]: https://docs.datadoghq.com/agent/guide/agent-configuration-files/

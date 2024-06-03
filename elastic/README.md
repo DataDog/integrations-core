@@ -428,6 +428,8 @@ See [service_checks.json][26] for a list of service checks provided by this inte
 - [Agent can't connect][27]
 - [Why isn't Elasticsearch sending all my metrics?][11]
 
+{{< partial name="whats-next/whats-next.html" >}}
+
 [1]: https://raw.githubusercontent.com/DataDog/integrations-core/master/elastic/images/elasticsearch-dash.png
 [2]: https://app.datadoghq.com/account/settings/agent/latest
 [3]: https://docs.datadoghq.com/agent/guide/agent-configuration-files/#agent-configuration-directory

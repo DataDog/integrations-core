@@ -116,6 +116,8 @@ See [service_checks.json][9] for a list of service checks provided by this integ
 
 Need help? Contact [Datadog support][10].
 
+{{< partial name="whats-next/whats-next.html" >}}
+
 [1]: https://azure.microsoft.com/en-us/services/iot-edge/
 [2]: https://app.datadoghq.com/account/settings/agent/latest
 [3]: https://docs.microsoft.com/en-us/azure/iot-edge/how-to-deploy-modules-portal

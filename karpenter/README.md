@@ -84,6 +84,8 @@ See [service_checks.json][8] for a list of service checks provided by this integ
 
 Need help? Contact [Datadog support][9].
 
+{{< partial name="whats-next/whats-next.html" >}}
+
 [1]: https://karpenter.sh/
 [2]: https://app.datadoghq.com/account/settings/agent/latest
 [3]: https://docs.datadoghq.com/containers/kubernetes/integrations/

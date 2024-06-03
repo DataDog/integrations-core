@@ -76,6 +76,8 @@ The PANOS integration does not send any events.
 
 The PANOS integration does not include any service checks.
 
+{{< partial name="whats-next/whats-next.html" >}}
+
 ## Troubleshooting
 
 Need help? Contact [Datadog support][7].

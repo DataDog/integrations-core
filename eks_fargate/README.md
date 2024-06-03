@@ -650,6 +650,8 @@ eks_fargate does not include any events.
 
 Need help? Contact [Datadog support][20].
 
+{{< partial name="whats-next/whats-next.html" >}}
+
 [1]: http://docs.datadoghq.com/integrations/ecs_fargate/
 [2]: http://docs.datadoghq.com/integrations/amazon_eks/
 [3]: http://docs.datadoghq.com/integrations/system

@@ -63,6 +63,8 @@ Because Autopilot does not allow `socket` mode, Datadog recommends using `servic
 <!-- xxz tab xxx -->
 <!-- xxz tabs xxx -->
 
+{{< partial name="whats-next/whats-next.html" >}}
+
 [1]: https://cloud.google.com/resource-manager/docs/creating-managing-projects
 [2]: https://console.cloud.google.com/apis/api/container.googleapis.com
 [3]: https://cloud.google.com/sdk/docs/

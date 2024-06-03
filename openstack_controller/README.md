@@ -80,6 +80,8 @@ See [service_checks.json][8] for a list of service checks provided by this integ
 
 Need help? Contact [Datadog support][9].
 
+{{< partial name="whats-next/whats-next.html" >}}
+
 [1]: https://docs.datadoghq.com/integrations/openstack/
 [2]: https://www.openstack.org
 [3]: https://app.datadoghq.com/account/settings/agent/latest

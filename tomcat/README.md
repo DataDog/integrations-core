@@ -243,6 +243,8 @@ The `datadog-agent jmx list` has a number of available subcommands:
 - `with-metrics` - List attributes and metrics data that match at least one of your instances' configurations.
 - `with-rate-metrics` - List attributes and metrics data that match at least one of your instances' configurations, including rates and counters.
 
+{{< partial name="whats-next/whats-next.html" >}}
+
 [1]: https://raw.githubusercontent.com/DataDog/integrations-core/master/tomcat/images/tomcat_dashboard_2.png
 [2]: https://app.datadoghq.com/account/settings/agent/latest
 [3]: https://tomcat.apache.org/tomcat-10.1-doc/monitoring.html

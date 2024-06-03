@@ -216,6 +216,8 @@ See [service_checks.json][15] for a list of service checks provided by this inte
 
 Need help? Contact [Datadog support][12].
 
+{{< partial name="whats-next/whats-next.html" >}}
+
 [1]: https://app.datadoghq.com/account/settings/agent/latest
 [2]: https://www.jetbrains.com/help/teamcity/enabling-guest-login.html
 [3]: https://docs.datadoghq.com/agent/guide/agent-configuration-files/#agent-configuration-directory

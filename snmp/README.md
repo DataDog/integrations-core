@@ -15,6 +15,8 @@ A MIB (Management Information Base) acts as a translator between OIDs and human 
 
 To install and configure the SNMP integration, see the [Network Device Monitoring][1] documentation.
 
+{{< partial name="whats-next/whats-next.html" >}}
+
 ## Troubleshooting
 
 Need help? Contact [Datadog support][4].

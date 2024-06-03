@@ -98,6 +98,8 @@ instances:
 
 Need help? Contact [Datadog support][8].
 
+{{< partial name="whats-next/whats-next.html" >}}
+
 [1]: https://docs.datadoghq.com/agent/kubernetes/integrations/
 [2]: https://docs.datadoghq.com/getting_started/integrations/prometheus/?tab=docker#configuration
 [3]: https://docs.datadoghq.com/agent/guide/agent-configuration-files/#agent-configuration-directory

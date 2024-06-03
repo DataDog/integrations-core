@@ -139,6 +139,8 @@ See [service_checks.json][7] for a list of service checks provided by this integ
 
 Need help? Contact [Datadog support][8].
 
+{{< partial name="whats-next/whats-next.html" >}}
+
 [1]: https://www.tigera.io/project-calico/
 [2]: https://app.datadoghq.com/account/settings/agent/latest
 [3]: https://github.com/DataDog/integrations-core/blob/master/calico/datadog_checks/calico/data/conf.yaml.example

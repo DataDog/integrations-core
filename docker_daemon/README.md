@@ -153,6 +153,8 @@ See [service_checks.json][20] for a list of service checks provided by this inte
 
 Need help? Contact [Datadog support][22].
 
+{{< partial name="whats-next/whats-next.html" >}}
+
 [1]: https://raw.githubusercontent.com/DataDog/integrations-core/master/docker_daemon/images/docker.png
 [2]: https://github.com/DataDog/docker-dd-agent
 [3]: https://github.com/DataDog/docker-dd-agent#cgroups

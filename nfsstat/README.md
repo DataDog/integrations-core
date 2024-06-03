@@ -56,6 +56,8 @@ The Nfsstat check does not include any service checks.
 ## Troubleshooting
 Need help? Contact [Datadog support][8].
 
+{{< partial name="whats-next/whats-next.html" >}}
+
 [1]: http://man7.org/linux/man-pages/man8/nfsiostat.8.html
 [2]: https://app.datadoghq.com/account/settings/agent/latest
 [3]: https://docs.datadoghq.com/agent/guide/agent-configuration-files/#agent-configuration-directory

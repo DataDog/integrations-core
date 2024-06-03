@@ -221,6 +221,8 @@ The OpenAI integration does not include any service checks.
 
 Need help? Contact [Datadog support][5].
 
+{{< partial name="whats-next/whats-next.html" >}}
+
 [1]: https://openai.com/
 [2]: https://ddtrace.readthedocs.io/en/stable/installation_quickstart.html
 [3]: https://ddtrace.readthedocs.io/en/stable/integrations.html#openai

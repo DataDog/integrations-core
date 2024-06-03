@@ -36,6 +36,8 @@ Snmp Cisco does not include any service checks.
 
 Snmp Cisco does not include any events.
 
+{{< partial name="whats-next/whats-next.html" >}}
+
 ## Troubleshooting
 
 Need help? Contact [Datadog support][5].

@@ -298,6 +298,8 @@ you can potentially reduce the scope of the check by trying the following:
 Need help? Contact [Datadog support][12].
 
 
+{{< partial name="whats-next/whats-next.html" >}}
+
 [1]: https://www.ibm.com/products/mq
 [2]: https://app.datadoghq.com/account/settings/agent/latest
 [3]: https://www.ibm.com/docs/en/ibm-mq/9.3?topic=roadmap-mq-downloads#mq_downloads_admins__familyraclients__title__1

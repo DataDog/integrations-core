@@ -24,6 +24,8 @@ For details of monitored metrics see the [SNMP Data Collected][1] section.
 
 Need help? Contact [Datadog support][4].
 
+{{< partial name="whats-next/whats-next.html" >}}
+
 [1]: https://docs.datadoghq.com/network_performance_monitoring/devices/data
 [2]: https://docs.datadoghq.com/network_performance_monitoring/devices/setup
 [3]: https://github.com/DataDog/integrations-core/blob/master/snmp_aruba/assets/service_checks.json

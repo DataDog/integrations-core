@@ -32,6 +32,8 @@ Juniper does not include any service checks.
 
 Juniper does not include any events.
 
+{{< partial name="whats-next/whats-next.html" >}}
+
 ## Troubleshooting
 
 Need help? Contact [Datadog support][5].

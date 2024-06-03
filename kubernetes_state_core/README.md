@@ -299,6 +299,8 @@ helm upgrade -f datadog-values.yaml <RELEASE_NAME> datadog/datadog
 
 Need help? Contact [Datadog support][9].
 
+{{< partial name="whats-next/whats-next.html" >}}
+
 [1]: https://kubernetes.io/blog/2021/04/13/kube-state-metrics-v-2-0/
 [2]: #migration-from-kubernetes_state-to-kubernetes_state_core
 [3]: #data-collected
