@@ -163,7 +163,7 @@ class Schemas(DBMAsyncJob):
                             self.MAX_EXECUTION_TIME, db_name, schema["name"]
                         )
                     )
-                    raise StopIteration("Schema collections took {} which is longer than allowed limit {}".format(schema_collection_elapsed_time, self.MAX_EXECUTION_TIME))
+                    raise StopIteration("Schema collection took {} which is longer than allowed limit {}".format(schema_collection_elapsed_time, self.MAX_EXECUTION_TIME))
                 columns_count, tables_info = self._get_tables_data(tables_chunk, schema, cursor)
                 self._data_submitter.store(db_name, schema, tables_info, columns_count)
                 if self._data_submitter.columns_since_last_submit() > self.MAX_COLUMNS_PER_EVENT:
