@@ -18,9 +18,16 @@ from .common import PROMETHEUS_METRICS, PROMETHEUS_METRICS_2023_05_04, get_fixtu
         ('metrics2023.05.4.txt', PROMETHEUS_METRICS_2023_05_04, 'nodeId:MAIN_SERVER'),
     ],
 )
-def test_omv2_check(aggregator, openmetrics_instance, mock_http_response,
-                    dd_run_check, teamcity_om_check, fixture_path, metrics_set, node_id
-                    ):
+def test_omv2_check(
+    aggregator,
+    openmetrics_instance,
+    mock_http_response,
+    dd_run_check,
+    teamcity_om_check,
+    fixture_path,
+    metrics_set,
+    node_id,
+):
     mock_http_response(file_path=get_fixture_path(fixture_path))
     check = teamcity_om_check(openmetrics_instance)
     dd_run_check(check)
