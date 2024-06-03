@@ -126,7 +126,9 @@ RUN \
  VERSION="2.3.9" \
  SHA256="52833eac3d681c8b0c9a5a65f2ebd745b3a964f208fc748f977e44015a31b207" \
  RELATIVE_PATH=unixODBC-{{version}} \
- bash install-from-source.sh --disable-readline --with-included-ltdl --enable-ltdl-install
+ bash install-from-source.sh --disable-readline --with-included-ltdl --enable-ltdl-install \
+ # This is the folder where unixODBC searches for driver config and where we ask customers to copy their config to
+ --sysconfdir=/opt/datadog-agent/embedded/etc
 
 # Dependencies needed to build librdkafka (and thus, confluent-kafka) with kerberos support
 RUN \
