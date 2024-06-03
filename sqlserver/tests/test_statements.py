@@ -1014,3 +1014,60 @@ def test_metrics_lookback_multiplier(instance_docker):
 
     check.statement_metrics._load_raw_query_metrics_rows(mock_cursor)
     mock_cursor.execute.assert_called_with(ANY, (6,))
+
+
+@pytest.mark.integration
+@pytest.mark.usefixtures('dd_environment')
+@pytest.mark.parametrize(
+    "configured_database,database_autodiscovery,filter_to_configured_database",
+    [
+        pytest.param(None, False, False, id="no_database_configured"),  # should default to master
+        pytest.param(
+            "datadog_test", False, True, id="configured_database_datadog_test"
+        ),  # should use configured database datadog_test
+        pytest.param("master", False, False, id="configured_database_master"),  # should use configured database master
+        pytest.param(None, True, False, id="autodiscovered_database"),  # should use autodiscovered database
+    ],
+)
+def test_statement_with_metrics_filtered_to_configured_database(
+    aggregator,
+    dd_run_check,
+    dbm_instance,
+    bob_conn,
+    configured_database,
+    database_autodiscovery,
+    filter_to_configured_database,
+):
+    if configured_database:
+        dbm_instance['database'] = configured_database
+    dbm_instance['database_autodiscovery'] = database_autodiscovery
+    check = SQLServer(CHECK_NAME, {}, [dbm_instance])
+
+    def _execute_queries():
+        bob_conn.execute_with_retries("SELECT * FROM ϑings", (), database="datadog_test")
+        bob_conn.execute_with_retries("SELECT count(*) from sys.databases", (), database="master")
+
+    dd_run_check(check)
+    _execute_queries()
+    dd_run_check(check)
+    aggregator.reset()
+    _execute_queries()
+    dd_run_check(check)
+
+    # dbm-metrics
+    dbm_metrics = aggregator.get_event_platform_events("dbm-metrics")
+    assert len(dbm_metrics) == 1, "should have collected exactly one dbm-metrics payload"
+    payload = dbm_metrics[0]
+    # metrics rows
+    sqlserver_rows = payload.get('sqlserver_rows', [])
+    assert sqlserver_rows, "should have collected some sqlserver query metrics rows"
+    if filter_to_configured_database:
+        assert all(
+            row['database_name'] == configured_database for row in sqlserver_rows
+        ), "should have only collected metrics for configured database"
+    else:
+        # {"master", "datadog_test"} should be present in the metrics database names
+        assert {row['database_name'] for row in sqlserver_rows} - {
+            "master",
+            "datadog_test",
+        }, "should have collected metrics for master and datadog_test databases"

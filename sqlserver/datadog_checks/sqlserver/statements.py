@@ -304,10 +304,27 @@ class SqlserverStatementMetrics(DBMAsyncJob):
         self.log.debug("loaded sql server statement metrics len(rows)=%s", len(rows))
         return rows
 
+    def _should_include_query_metrics_row(self, row):
+        if 'database_name' not in row:
+            # Unaggregated query metrics row without a database name
+            return True
+
+        configured_database = self._check.instance.get('database')
+        if self._config.autodiscovery or not configured_database or configured_database == 'master':
+            # If autodiscovery is enabled or the configured database is master, include all rows
+            return True
+        if not row['database_name'] or str(row['database_name']).lower() != configured_database.lower():
+            # If the row's database name does not match the configured database, exclude the row
+            return False
+
+        return True
+
     def _normalize_queries(self, rows):
         normalized_rows = []
 
         for row in rows:
+            if not self._should_include_query_metrics_row(row):
+                continue
             # Attempt to obfuscate SQL statement with metadata
             procedure_statement = None
             try:
