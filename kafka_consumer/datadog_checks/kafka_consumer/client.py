@@ -259,9 +259,10 @@ class KafkaClient:
         #Get the consumer group state if present
         consumer_groups_future = self._describe_consumer_groups(consumer_group)
         try:
-            consumer_groups_result = consumer_groups_future.result()
+            consumer_groups_result = consumer_groups_future[consumer_group].result()
             self.log.debug("Discovered consumer group: %s in state %s", consumer_groups_result.group_id, consumer_groups_result.state)
-            consumer_group_state = consumer_groups_result.state
+            consumer_group_result_state = str(consumer_groups_result.state)
+            consumer_group_state = consumer_group_result_state.split('.')[1]
 
         except Exception as e:
             self.log.error("Failed to collect consumer group: %s", e)
