@@ -317,11 +317,6 @@ See [service_checks.json][15] for a list of service checks provided by this inte
 
 Need help? Contact [Datadog support][8].
 
-## Further Reading
-
-{{< partial name="whats-next/whats-next.html" >}}
-
-
 [1]: https://www.sonarqube.org
 [2]: https://app.datadoghq.com/account/settings/agent/latest
 [3]: https://github.com/DataDog/integrations-core/blob/master/sonarqube/datadog_checks/sonarqube/data/metrics.yaml

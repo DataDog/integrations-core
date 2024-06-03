@@ -118,10 +118,6 @@ See [service_checks.json][10] for a list of service checks provided by this inte
 
 Need help? Contact [Datadog support][11].
 
-## Further Reading
-
-- [Monitoring CouchDB performance with Datadog][12]
-
 [1]: https://raw.githubusercontent.com/DataDog/integrations-core/master/couch/images/couchdb_dashboard.png
 [2]: https://app.datadoghq.com/account/settings/agent/latest
 [3]: https://docs.datadoghq.com/agent/guide/agent-configuration-files/#agent-configuration-directory

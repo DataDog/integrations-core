@@ -123,13 +123,6 @@ See [service_checks.json][10] for a list of service checks provided by this inte
 
 Need help? Contact [Datadog support][11].
 
-## Further Reading
-
-- [Hadoop architectural overview][12]
-- [How to monitor Hadoop metrics][13]
-- [How to collect Hadoop metrics][14]
-- [How to monitor Hadoop with Datadog][15]
-
 [1]: https://raw.githubusercontent.com/DataDog/integrations-core/master/yarn/images/yarn_dashboard.png
 [2]: https://app.datadoghq.com/account/settings/agent/latest
 [3]: https://docs.datadoghq.com/agent/guide/agent-configuration-files/#agent-configuration-directory

@@ -247,15 +247,6 @@ See [service_checks.json][15] for a list of service checks provided by this inte
 
 Need help? Contact [Datadog support][16].
 
-## Further Reading
-
-Additional helpful documentation, links, and articles:
-
-- [Key metrics for CoreDNS monitoring][21]
-- [Tools for collecting metrics and logs from CoreDNS][22]
-- [How to monitor CoreDNS with Datadog][23]
-
-
 [1]: https://app.datadoghq.com/account/settings/agent/latest
 [2]: http://docs.datadoghq.com/agent/docker/integrations/?tab=docker
 [3]: https://docs.datadoghq.com/agent/docker/log/?tab=containerinstallation

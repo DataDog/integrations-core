@@ -650,14 +650,6 @@ eks_fargate does not include any events.
 
 Need help? Contact [Datadog support][20].
 
-## Further Reading
-
-Additional helpful documentation, links, and articles:
-
-- [Key metrics for monitoring AWS Fargate][32]
-- [How to collect metrics and logs from AWS Fargate workloads][27]
-- [AWS Fargate monitoring with Datadog][28]
-
 [1]: http://docs.datadoghq.com/integrations/ecs_fargate/
 [2]: http://docs.datadoghq.com/integrations/amazon_eks/
 [3]: http://docs.datadoghq.com/integrations/system

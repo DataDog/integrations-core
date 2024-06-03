@@ -188,16 +188,6 @@ Loading Errors
 
 This is fixed in version 15.2.0 of the check and in Agent versions 7.49.1 and above.
 
-## Further Reading
-
-- [Monitor your Azure SQL Databases with Datadog][18]
-- [Key metrics for SQL Server monitoring][19]
-- [SQL Server monitoring tools][20]
-- [Monitor SQL Server performance with Datadog][21]
-- [Custom SQL Server metrics for detailed monitoring][22]
-- [Strategize your Azure migration for SQL workloads with Datadog][23]
-- [Optimize SQL Server performance with Datadog Database Monitoring][24]
-
 [1]: https://raw.githubusercontent.com/DataDog/integrations-core/master/sqlserver/images/sqlserver_dashboard_02_2024.png
 [2]: https://app.datadoghq.com/account/settings/agent/latest
 [3]: https://docs.microsoft.com/en-us/sql/t-sql/statements/grant-server-permissions-transact-sql?view=sql-server-ver15

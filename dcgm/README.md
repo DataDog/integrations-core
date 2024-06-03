@@ -382,10 +382,6 @@ In some cases, the `DCGM_FI_DEV_GPU_UTIL` metric can cause heavier resource cons
 
 Contact [Datadog support][8].
 
-## Further Reading
-
-Additional helpful documentation, links, and articles:
-
 [1]: https://app.datadoghq.com/account/settings/agent/latest
 [2]: https://docs.datadoghq.com/agent/kubernetes/integrations/
 [3]: https://github.com/DataDog/integrations-core/blob/master/dcgm/datadog_checks/dcgm/data/conf.yaml.example

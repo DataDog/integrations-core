@@ -124,13 +124,6 @@ For Agent v6/7, create the `/etc/datadog-agent/conf.d/spark.d/conf.yaml` configu
 
 The Spark integration only collects metrics about running apps. If you have no currently running apps, the check will just submit a health check.
 
-## Further Reading
-
-Additional helpful documentation, links, and articles:
-
-- [Hadoop and Spark monitoring with Datadog][15]
-- [Monitoring Apache Spark applications running on Amazon EMR][16]
-
 [1]: https://raw.githubusercontent.com/DataDog/integrations-core/master/spark/images/sparkgraph.png
 [2]: https://spark.apache.org/
 [3]: https://app.datadoghq.com/account/settings/agent/latest

@@ -252,12 +252,6 @@ You may need to install `gcc`.
 
 Need help? Contact [Datadog support][12].
 
-## Further Reading
-
-Additional helpful documentation, links, and articles:
-
-- [Monitor IBM DB2 with Datadog][13]
-
 [1]: https://raw.githubusercontent.com/DataDog/integrations-core/master/ibm_db2/images/dashboard_overview.png
 [2]: https://www.ibm.com/analytics/us/en/db2
 [3]: https://app.datadoghq.com/account/settings/agent/latest

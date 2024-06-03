@@ -210,15 +210,6 @@ See [service_checks.json][15] for a list of service checks provided by this inte
 
 Need help? Contact [Datadog support][16].
 
-## Further Reading
-
-Additional helpful documentation, links, and articles:
-
-- [Monitor HashiCorp Vault with Datadog][17]
-- [Monitor HashiCorp Vault metrics and logs][18]
-- [Tools for HashiCorp Vault monitoring][19]
-- [How to monitor HashiCorp Vault with Datadog][20]
-
 [1]: https://www.vaultproject.io
 [2]: https://app.datadoghq.com/account/settings/agent/latest
 [3]: https://www.vaultproject.io/docs/configuration/telemetry#prometheus

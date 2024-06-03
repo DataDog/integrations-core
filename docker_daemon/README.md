@@ -153,19 +153,6 @@ See [service_checks.json][20] for a list of service checks provided by this inte
 
 Need help? Contact [Datadog support][22].
 
-## Further Reading
-
-* [Compose and the Datadog Agent][23]
-* [DogStatsD and Docker][24]
-* [The Docker Monitoring Problem][25] (series)
-* [How to Monitor Docker Resource Metrics][26]
-* [How to Collect Docker Metrics][27]
-* [8 Surprising Facts about Real Docker Adoption][28]
-* [Monitor Docker on AWS ECS][29]
-* [Dockerize Datadog][30]
-* [Monitor Docker with Datadog][31]
-
-
 [1]: https://raw.githubusercontent.com/DataDog/integrations-core/master/docker_daemon/images/docker.png
 [2]: https://github.com/DataDog/docker-dd-agent
 [3]: https://github.com/DataDog/docker-dd-agent#cgroups

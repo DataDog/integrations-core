@@ -531,16 +531,6 @@ To troubleshoot your log processing rules:
 2. Restart the Agent.
 3. Send a test log that includes the values you're attempting to catch. If the log appears in Datadog, there is probably an issue with your regex. Compare your regex against the log file to make sure you're capturing the right phrases.
 
-## Further Reading
-
-Additional helpful documentation, links, and articles:
-
-- [Advanced Log Collection][26]
-- [Monitoring Windows Server 2012][9]
-- [How to collect Windows Server 2012 metrics][10]
-- [Monitoring Windows Server 2012 with Datadog][11]
-- [Monitor Windows event logs with Datadog][27]
-
 [1]: https://app.datadoghq.com/account/settings/agent/latest?platform=windows
 [2]: https://docs.datadoghq.com/agent/guide/agent-configuration-files/#agent-configuration-directory
 [3]: https://github.com/DataDog/integrations-core/blob/master/win32_event_log/datadog_checks/win32_event_log/data/conf.yaml.example

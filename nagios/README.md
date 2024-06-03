@@ -107,10 +107,6 @@ The Nagios check does not include any service checks.
 
 Need help? Contact [Datadog support][9].
 
-## Further Reading
-
-- [Understand your Nagios alerts with Datadog][10]
-
 [1]: https://app.datadoghq.com/account/settings/agent/latest
 [2]: https://docs.datadoghq.com/agent/guide/agent-configuration-files/#agent-configuration-directory
 [3]: https://github.com/DataDog/integrations-core/blob/master/nagios/datadog_checks/nagios/data/conf.yaml.example

@@ -99,13 +99,6 @@ See [service_checks.json][8] for a list of service checks provided by this integ
 
 Need help? Contact [Datadog support][9].
 
-## Further Reading
-
-Additional helpful documentation, links, and articles:
-
-- [Integration roundup: Monitoring your AI stack][15]
-
-
 [1]: https://weaviate.io/developers/weaviate
 [2]: https://app.datadoghq.com/account/settings/agent/latest
 [3]: https://docs.datadoghq.com/agent/kubernetes/integrations/

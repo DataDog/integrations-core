@@ -26,13 +26,6 @@ There are no service checks included with the F5 integration.
 
 No additional events are sent to Datadog from any component of the F5 platform.
 
-## Further Reading
-
-Additional helpful documentation, links, and articles:
-
-* [Monitoring Datacenters and Network Devices with Datadog][4]
-* [SNMP Monitoring with Datadog][3]
-
 ## Troubleshooting
 
 Need help? Contact [Datadog support][5].

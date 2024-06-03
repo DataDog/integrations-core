@@ -184,14 +184,6 @@ For more information, see [Tagging RabbitMQ queues by tag family][18].
 
 Need help? Contact [Datadog support][13].
 
-## Further Reading
-
-Additional helpful documentation, links, and articles:
-
-- [Key metrics for RabbitMQ monitoring][15]
-- [Collecting metrics with RabbitMQ monitoring tools][16]
-- [Monitoring RabbitMQ performance with Datadog][17]
-
 [1]: https://raw.githubusercontent.com/DataDog/integrations-core/master/rabbitmq/images/rabbitmq_dashboard.png
 [2]: https://www.rabbitmq.com
 [3]: https://app.datadoghq.com/account/settings/agent/latest

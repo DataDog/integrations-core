@@ -396,13 +396,6 @@ This is happening because, by default, syslog is listening on port 514. To resol
 
 Need help? Contact [Datadog support][20].
 
-## Further Reading
-
-- [Monitoring HAProxy performance metrics][21]
-- [How to collect HAProxy metrics][22]
-- [Monitor HAProxy with Datadog][23]
-- [HA Proxy Multi Process Configuration][24]
-
 [1]: https://raw.githubusercontent.com/DataDog/integrations-core/master/haproxy/images/haproxy-dash.png
 [2]: https://app.datadoghq.com/account/settings/agent/latest
 [3]: https://github.com/prometheus/haproxy_exporter

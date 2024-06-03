@@ -203,12 +203,6 @@ You need to change the ownership of the `conf.yaml` to `dd-agent`:
 
 Need help? Contact [Datadog support][9].
 
-## Further Reading
-
-Additional helpful documentation, links, and articles:
-
-- [Gain visibility into your Cloudera clusters with Datadog][15]
-
 [1]: https://www.cloudera.com/products/cloudera-data-platform.html
 [2]: https://app.datadoghq.com/account/settings/agent/latest
 [3]: https://docs.datadoghq.com/agent/kubernetes/integrations/

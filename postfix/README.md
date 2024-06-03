@@ -173,12 +173,6 @@ The Postfix check does not include any service checks.
 
 Need help? Contact [Datadog support][9].
 
-## Further Reading
-
-Additional helpful documentation, links, and articles:
-
-- [Monitor Postfix queue performance][10]
-
 [1]: https://raw.githubusercontent.com/DataDog/integrations-core/master/postfix/images/postfixgraph.png
 [2]: https://app.datadoghq.com/account/settings/agent/latest
 [3]: https://docs.datadoghq.com/agent/guide/agent-configuration-files/#agent-configuration-directory

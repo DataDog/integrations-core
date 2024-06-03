@@ -57,12 +57,6 @@ Follow the [container log collection instructions][10] to learn more about envir
 
 Need help? Contact [Datadog support][11].
 
-## Further Reading
-
-- [Monitor Amazon EKS with Datadog][12]
-- [Key metrics for Amazon EKS monitoring][13]
-- [Amazon EKS on AWS Fargate][14]
-
 [1]: https://raw.githubusercontent.com/DataDog/integrations-core/master/amazon_eks/images/amazon_eks_dashboard.png
 [2]: https://docs.aws.amazon.com/eks/latest/userguide/managed-node-groups.html
 [3]: https://docs.aws.amazon.com/eks/latest/userguide/eks-on-outposts.html

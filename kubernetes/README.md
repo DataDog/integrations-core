@@ -104,10 +104,6 @@ These are pause containers (`docker_image:gcr.io/google_containers/pause.*`) tha
 
 The docker_daemon check ignores them through a default exclusion list, but they do show up for K8s metrics like `kubernetes.cpu.usage.total` and `kubernetes.filesystem.usage`.
 
-## Further Reading
-
-- [Monitoring in the Kubernetes era][10]
-
 [1]: https://raw.githubusercontent.com/DataDog/integrations-core/master/kubernetes/images/kubernetes_dashboard.png
 [2]: https://docs.datadoghq.com/integrations/kubelet
 [3]: https://app.datadoghq.com/account/settings/agent/latest

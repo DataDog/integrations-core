@@ -98,11 +98,6 @@ instances:
 
 Need help? Contact [Datadog support][8].
 
-## Further Reading
-
-- [Configuring a OpenMetrics Check][9]
-- [Writing a custom OpenMetrics Check][10]
-
 [1]: https://docs.datadoghq.com/agent/kubernetes/integrations/
 [2]: https://docs.datadoghq.com/getting_started/integrations/prometheus/?tab=docker#configuration
 [3]: https://docs.datadoghq.com/agent/guide/agent-configuration-files/#agent-configuration-directory

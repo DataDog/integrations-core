@@ -93,14 +93,6 @@ See [service_checks.json][8] for a list of service checks provided by this integ
 
 Need help? Contact [Datadog support][9].
 
-## Further Reading
-
-Additional helpful documentation, links, and articles:
-
-- [StatsD, what it is and how it can help you][10]
-- [Visualize StatsD metrics with Counts Graphing][11]
-
-
 [1]: https://app.datadoghq.com/account/settings/agent/latest
 [2]: https://docs.datadoghq.com/agent/guide/agent-configuration-files/#agent-configuration-directory
 [3]: https://github.com/DataDog/integrations-core/blob/master/statsd/datadog_checks/statsd/data/conf.yaml.example

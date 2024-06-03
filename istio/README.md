@@ -205,14 +205,6 @@ instances:
 
 Need help? Contact [Datadog support][17].
 
-## Further Reading
-
-Additional helpful documentation, links, and articles:
-
-- [Monitor your Istio service mesh with Datadog][18]
-- [Learn how Datadog collects key metrics to monitor Istio][19]
-- [How to monitor Istio with Datadog][3]
-
 [1]: https://www.datadoghq.com/blog/monitor-istio-with-npm/
 [2]: https://docs.datadoghq.com/tracing/setup_overview/proxy_setup/?tab=istio
 [3]: https://www.datadoghq.com/blog/istio-datadog/

@@ -111,12 +111,6 @@ If a service is present and matches the configuration, but the Datadog Agent doe
 ```
 If the service is present in the output, permissions are the issue. To give the Datadog Agent permission [grant `Read` access on the service][14] to the [Datadog Agent User][15]. We recommend [granting `Read` access with Group Policy][16] to ensure the permissions persist through Windows Updates.
 
-## Further Reading
-
-- [Monitoring Windows Server 2012][8]
-- [How to collect Windows Server 2012 metrics][9]
-- [Monitoring Windows Server 2012 with Datadog][10]
-
 [1]: https://app.datadoghq.com/account/settings/agent/latest
 [2]: https://docs.datadoghq.com/agent/guide/agent-configuration-files/#agent-configuration-directory
 [3]: https://github.com/DataDog/integrations-core/blob/master/windows_service/datadog_checks/windows_service/data/conf.yaml.example

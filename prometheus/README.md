@@ -92,12 +92,6 @@ sudo systemctl restart prometheus.service alertmanager.service
 
 Need help? Contact [Datadog support][7].
 
-## Further Reading
-
-- [Introducing Prometheus support for Datadog Agent 6][8]
-- [Configuring a Prometheus Check][9]
-- [Writing a custom Prometheus Check][10]
-
 [1]: https://docs.datadoghq.com/integrations/openmetrics/
 [2]: https://docs.datadoghq.com/getting_started/integrations/prometheus/
 [3]: https://docs.datadoghq.com/getting_started/integrations/prometheus?tab=docker#configuration

@@ -292,13 +292,6 @@ See [service_checks.json][16] for a list of service checks provided by this inte
 
 Need help? Contact [Datadog support][17].
 
-## Further Reading
-
-Additional helpful documentation, links, and articles:
-
-- [Monitor Snowflake with Datadog][18]
-
-
 [1]: https://www.snowflake.com/
 [2]: https://app.datadoghq.com/account/settings/agent/latest
 [3]: https://docs.datadoghq.com/agent/guide/agent-v6-python-3/?tab=hostagent

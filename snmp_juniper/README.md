@@ -32,13 +32,6 @@ Juniper does not include any service checks.
 
 Juniper does not include any events.
 
-## Further Reading
-
-Additional helpful documentation, links, and articles:
-
-- [Monitor SNMP with Datadog][3]
-- [Monitor Juniper network devices with Datadog][4]
-
 ## Troubleshooting
 
 Need help? Contact [Datadog support][5].

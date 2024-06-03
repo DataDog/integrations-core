@@ -232,18 +232,6 @@ See [service_checks.json][15] for a list of service checks provided by this inte
 
 Need help? Contact [Datadog support][16].
 
-## Further Reading
-
-Additional helpful documentation, links, and articles:
-
-- [Monitoring HCP Consul with Datadog][17]
-- [Monitor Consul health and performance with Datadog][18]
-- [Consul at Datadog][19]
-- [Key metrics for monitoring Consul][20]
-- [Consul monitoring tools][21]
-- [How to monitor Consul with Datadog][22]
-- [Datadog NPM now supports Consul networking][23]
-
 [1]: https://raw.githubusercontent.com/DataDog/integrations-core/master/consul/images/consul-dash.png
 [2]: https://app.datadoghq.com/account/settings/agent/latest
 [3]: https://docs.datadoghq.com/agent/guide/agent-configuration-files/#agent-configuration-directory

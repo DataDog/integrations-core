@@ -76,13 +76,6 @@ The PANOS integration does not send any events.
 
 The PANOS integration does not include any service checks.
 
-## Further Reading
-
-Additional helpful documentation, links, and articles:
-
-- [Log types and fields][5]
-- [Logs Collection documentation][6]
-
 ## Troubleshooting
 
 Need help? Contact [Datadog support][7].

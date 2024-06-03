@@ -155,14 +155,6 @@ See [service_checks.json][9] for a list of service checks provided by this integ
 
 Need help? Contact [Datadog support][10].
 
-## Further Reading
-
-Additional helpful documentation, links, and articles:
-
-- [Monitoring OpenStack Nova][11]
-- [Install OpenStack in two commands for dev and test][12]
-- [OpenStack: host aggregates, flavors, and availability zones][13]
-
 [1]: https://raw.githubusercontent.com/DataDog/integrations-core/master/openstack/images/openstack_dashboard.png
 [2]: https://docs.datadoghq.com/integrations/openstack_controller
 [3]: https://app.datadoghq.com/account/settings/agent/latest

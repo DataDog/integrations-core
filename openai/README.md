@@ -221,14 +221,6 @@ The OpenAI integration does not include any service checks.
 
 Need help? Contact [Datadog support][5].
 
-## Further Reading
-
-Additional helpful documentation, links, and articles:
-
-- [Monitor your OpenAI usage with Datadog][6]
-- [Monitor Azure OpenAI with Datadog][7]
-- [OpenAI Monitor Templates][12]
-
 [1]: https://openai.com/
 [2]: https://ddtrace.readthedocs.io/en/stable/installation_quickstart.html
 [3]: https://ddtrace.readthedocs.io/en/stable/integrations.html#openai

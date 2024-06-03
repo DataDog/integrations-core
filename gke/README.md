@@ -63,13 +63,6 @@ Because Autopilot does not allow `socket` mode, Datadog recommends using `servic
 <!-- xxz tab xxx -->
 <!-- xxz tabs xxx -->
 
-## Further Reading
-
-- [Monitor GKE Autopilot with Datadog][10]
-- [Monitor GKE with Datadog][11]
-- [Monitor your T2A-powered GKE workloads with Datadog][12]
-- [New GKE dashboards and metrics provide deeper visibility into your environment][13]
-
 [1]: https://cloud.google.com/resource-manager/docs/creating-managing-projects
 [2]: https://console.cloud.google.com/apis/api/container.googleapis.com
 [3]: https://cloud.google.com/sdk/docs/

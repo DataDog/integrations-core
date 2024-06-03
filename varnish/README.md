@@ -114,14 +114,6 @@ See [service_checks.json][10] for a list of service checks provided by this inte
 
 Need help? Contact [Datadog support][11].
 
-## Further Reading
-
-Additional helpful documentation, links, and articles:
-
-- [Top Varnish performance metrics][12]
-- [How to collect Varnish metrics][13]
-- [Monitor Varnish using Datadog][14]
-
 [1]: https://raw.githubusercontent.com/DataDog/integrations-core/master/varnish/images/varnish.png
 [2]: https://app.datadoghq.com/account/settings/agent/latest
 [3]: https://docs.datadoghq.com/agent/guide/agent-configuration-files/#agent-configuration-directory

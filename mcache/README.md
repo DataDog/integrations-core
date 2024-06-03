@@ -120,12 +120,6 @@ See [service_checks.json][12] for a list of service checks provided by this inte
 
 Need help? Contact [Datadog support][13].
 
-## Further Reading
-
-- [Speed up your web applications with Memcached monitoring][14]
-- [Instrument Memcached performance metrics with DogStatsD][15]
-- [Monitoring ElastiCache performance metrics with Redis or Memcached][16]
-
 [1]: https://app.datadoghq.com/account/settings/agent/latest
 [2]: https://docs.datadoghq.com/agent/guide/agent-configuration-files/#agent-configuration-directory
 [3]: https://github.com/DataDog/integrations-core/blob/master/mcache/datadog_checks/mcache/data/conf.yaml.example

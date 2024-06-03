@@ -102,15 +102,6 @@ See [service_checks.json][10] for a list of service checks provided by this inte
 
 Need help? Contact [Datadog support][11].
 
-## Further Reading
-
-- [Kubernetes Control Plane Monitoring][13]
-- [Monitor etcd performance to ensure consistent Docker configuration][12]
-- [How to monitor etcd with Datadog][14]
-- [Tools for collecting etcd metrics and logs][15]
-- [Key metrics for monitoring etcd][16]
-
-
 [1]: https://raw.githubusercontent.com/DataDog/integrations-core/master/etcd/images/etcd_dashboard.png
 [2]: https://app.datadoghq.com/account/settings/agent/latest
 [3]: https://docs.datadoghq.com/agent/guide/agent-configuration-files/#agent-configuration-directory

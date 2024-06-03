@@ -151,10 +151,6 @@ ubuntu   18462 18457  0 20:26 pts/0    00:00:00 gunicorn: worker [my_app]
 ubuntu   18463 18457  0 20:26 pts/0    00:00:00 gunicorn: worker [my_app]
 ```
 
-## Further Reading
-
-- [Monitor Gunicorn performance with Datadog][14]
-
 [1]: https://raw.githubusercontent.com/DataDog/integrations-core/master/gunicorn/images/gunicorn-dash.png
 [2]: https://app.datadoghq.com/account/settings/agent/latest
 [3]: https://pypi.python.org/pypi/setproctitle

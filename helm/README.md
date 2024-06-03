@@ -132,13 +132,6 @@ See [service_checks.json][5] for a list of service checks provided by this integ
 
 Need help? Contact [Datadog support][6].
 
-## Further Reading
-
-Additional helpful documentation, links, and articles:
-
-- [Blog: Monitor your Helm-managed Kubernetes applications with Datadog][7]
-
-
 [1]: https://docs.datadoghq.com/agent/kubernetes/integrations/
 [2]: https://docs.datadoghq.com/agent/cluster_agent/clusterchecks/
 [3]: https://docs.datadoghq.com/agent/guide/agent-commands/#agent-status-and-information

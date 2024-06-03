@@ -812,19 +812,6 @@ See [service_checks.json][45] for a list of service checks provided by this inte
 
 Need help? Contact [Datadog support][18].
 
-## Further Reading
-
-- Blog post: [Monitor AWS Fargate applications with Datadog][34]
-- FAQ: [Integration Setup for ECS Fargate][12]
-- Blog post: [Monitor your Fargate container logs with FireLens and Datadog][35]
-- Blog post: [Key metrics for monitoring AWS Fargate][36]
-- Blog post: [How to collect metrics and logs from AWS Fargate workloads][37]
-- Blog post: [AWS Fargate monitoring with Datadog][38]
-- Blog post: [Graviton2-powered AWS Fargate deployments][39]
-- Blog post: [Monitor AWS Fargate for Windows containerized apps][40]
-- Blog post: [Monitor processes running on AWS Fargate with Datadog][58]
-- Blog post: [Monitor AWS Batch on Fargate with Datadog][63]
-
 [1]: http://docs.datadoghq.com/integrations/eks_fargate
 [2]: https://docs.aws.amazon.com/AmazonECS/latest/developerguide/task-metadata-endpoint.html
 [3]: https://docs.docker.com/engine/api/v1.30/#operation/ContainerStats

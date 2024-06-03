@@ -146,13 +146,6 @@ See [service_checks.json][15] for a list of service checks provided by this inte
 - [Troubleshooting and Deep Dive for Kafka][16]
 - [Agent failed to retrieve RMIServer stub][17]
 
-## Further Reading
-
-- [Monitoring Kafka performance metrics][19]
-- [Collecting Kafka performance metrics][20]
-- [Monitoring Kafka with Datadog][21]
-- [Kafka Overview on the Knowledge Center][23]
-
 [1]: https://raw.githubusercontent.com/DataDog/integrations-core/master/kafka/images/kafka_dashboard.png
 [2]: https://docs.datadoghq.com/integrations/java/
 [3]: https://docs.datadoghq.com/integrations/kafka/?tab=host#kafka-consumer-integration

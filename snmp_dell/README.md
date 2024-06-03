@@ -32,12 +32,6 @@ The Dell integration does not include any service checks.
 
 The Dell integration does not include any events.
 
-## Further Reading
-
-Additional helpful documentation, links, and articles:
-
-* [Monitor SNMP with Datadog][3]
-
 ## Troubleshooting
 
 Need help? Contact [Datadog support][4].

@@ -109,13 +109,6 @@ See [service_checks.json][9] for a list of service checks provided by this integ
 
 Need help? Contact [Datadog support][10].
 
-## Further Reading
-
-- [Hadoop architectural overview][11]
-- [How to monitor Hadoop metrics][12]
-- [How to collect Hadoop metrics][13]
-- [How to monitor Hadoop with Datadog][14]
-
 [1]: https://raw.githubusercontent.com/DataDog/integrations-core/master/hdfs_datanode/images/hadoop_dashboard.png
 [2]: https://docs.datadoghq.com/agent/kubernetes/integrations/
 [3]: https://app.datadoghq.com/account/settings/agent/latest

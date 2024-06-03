@@ -119,13 +119,6 @@ See [service_checks.json][13] for a list of service checks provided by this inte
 
 Need help? Contact [Datadog support][14].
 
-## Further Reading
-
-Additional helpful documentation, links, and articles:
-
-- [ActiveMQ architecture and key metrics][15]
-- [Monitor ActiveMQ metrics and performance][16]
-
 [1]: https://github.com/DataDog/integrations-core/blob/master/activemq/metadata.csv
 [2]: https://raw.githubusercontent.com/DataDog/dd-agent/5.10.1/conf.d/activemq.yaml.example
 [3]: https://app.datadoghq.com/account/settings/agent/latest
@@ -140,5 +133,3 @@ Additional helpful documentation, links, and articles:
 [12]: https://docs.datadoghq.com/agent/guide/agent-commands/#agent-status-and-information
 [13]: https://github.com/DataDog/integrations-core/blob/master/activemq/assets/service_checks.json
 [14]: https://docs.datadoghq.com/help/
-[15]: https://www.datadoghq.com/blog/activemq-architecture-and-metrics
-[16]: https://www.datadoghq.com/blog/monitor-activemq-metrics-performance

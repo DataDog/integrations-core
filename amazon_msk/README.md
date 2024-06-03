@@ -59,12 +59,6 @@ See [service_checks.json][14] for a list of service checks provided by this inte
 
 Need help? Contact [Datadog support][15].
 
-## Further Reading
-
-Additional helpful documentation, links, and articles:
-
-- [Monitor Amazon Managed Streaming for Apache Kafka with Datadog][16]
-
 [1]: https://aws.amazon.com/msk
 [2]: https://docs.datadoghq.com/agent/kubernetes/integrations/
 [3]: https://docs.aws.amazon.com/msk/latest/developerguide/create-client-machine.html
