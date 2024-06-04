@@ -107,3 +107,4 @@ Need help? Contact [Datadog support][9].
 [7]: https://github.com/DataDog/integrations-core/blob/master/kubernetes_cluster_autoscaler/metadata.csv
 [8]: https://github.com/DataDog/integrations-core/blob/master/kubernetes_cluster_autoscaler/assets/service_checks.json
 [9]: https://docs.datadoghq.com/help/
+[10]: https://kubernetes.io/docs/tasks/inject-data-application/define-environment-variable-container/
