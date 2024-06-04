@@ -89,10 +89,21 @@ def get_cluster_id():
     client = AdminClient(config)
     return client.list_topics(timeout=5).cluster_id
 
+def get_consumer_group_state(consumer_group):
+    config = {
+        "bootstrap.servers": INSTANCE['kafka_connect_str'],
+    }
+    config.update(get_authentication_configuration(INSTANCE))
+    client = AdminClient(config)
+    consumer_groups_future = client.describe_consumer_groups([consumer_group])
+    consumer_gp_state = consumer_groups_future[consumer_group].result()
+    consumer_group_result_state = str(consumer_gp_state.state).split('.')[1]
+    return consumer_group_result_state
 
 def assert_check_kafka(aggregator, consumer_groups):
     cluster_id = get_cluster_id()
     for name, consumer_group in consumer_groups.items():
+        consumer_group_state = get_consumer_group_state(name)
         for topic, partitions in consumer_group.items():
             for partition in partitions:
                 tags = [f"topic:{topic}", f"partition:{partition}", "kafka_cluster_id:" + cluster_id] + [
@@ -104,7 +115,7 @@ def assert_check_kafka(aggregator, consumer_groups):
                 for mname in CONSUMER_METRICS:
                     aggregator.assert_metric(
                         mname,
-                        tags=tags + [f"consumer_group:{name}"],
+                        tags=tags + [f"consumer_group:{name}"] + [f"consumer_group_state:{consumer_group_state}"],
                         count=1,
                     )
 

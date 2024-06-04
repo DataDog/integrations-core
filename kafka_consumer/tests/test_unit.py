@@ -162,6 +162,7 @@ def test_when_consumer_lag_less_than_zero_then_emit_event(
     mock_client.get_consumer_offsets.return_value = consumer_offset
     mock_client.get_highwater_offsets.return_value = (highwater_offset, "cluster_id")
     mock_client.get_partitions_for_topic.return_value = ['partition1']
+    mock_client.get_consumer_group_state.return_value = "STABLE"
     mock_generic_client.return_value = mock_client
 
     # When
@@ -183,6 +184,7 @@ def test_when_consumer_lag_less_than_zero_then_emit_event(
             'partition:partition1',
             'topic:topic1',
             'kafka_cluster_id:cluster_id',
+            'consumer_group_state:STABLE',
         ],
     )
     aggregator.assert_metric(
@@ -194,6 +196,7 @@ def test_when_consumer_lag_less_than_zero_then_emit_event(
             'partition:partition1',
             'topic:topic1',
             'kafka_cluster_id:cluster_id',
+            'consumer_group_state:STABLE',
         ],
     )
     aggregator.assert_event(
@@ -208,6 +211,7 @@ def test_when_consumer_lag_less_than_zero_then_emit_event(
             'partition:partition1',
             'topic:topic1',
             'kafka_cluster_id:cluster_id',
+            'consumer_group_state:STABLE',
         ],
     )
 
