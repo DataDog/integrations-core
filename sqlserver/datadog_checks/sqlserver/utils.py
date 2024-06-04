@@ -59,8 +59,8 @@ def set_default_driver_conf():
             # If ODBCSYSINI is already set, don't override it
             return
         
-        if pyodbc.drivers():
-            # If there are already drivers installed, don't override the ODBCSYSINI
+        if pyodbc.drivers() or pyodbc.dataSources():
+            # If there are already drivers or dataSources installed, don't override the ODBCSYSINI
             # This means user has copied odbcinst.ini and odbc.ini to the unixODBC sysconfig location
             return
         
