@@ -1,0 +1,1 @@
+Use a forced metric type of gauge for ccmRejectedPhones and ccmUnregisteredPhones so they are not incorrectly inferred to be rate types.
