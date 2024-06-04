@@ -1141,6 +1141,7 @@
               "title": "Disk Usage",
               "title_size": "16",
               "title_align": "left",
+              "time": {},
               "type": "query_value",
               "requests": [
                 {
@@ -1159,7 +1160,7 @@
                     {
                       "data_source": "metrics",
                       "name": "query1",
-                      "query": "sum:teleport.auth.audit_log.failed_disk_monitoring.count{$teleport_service,$host,$teleport_version}.as_count()",
+                      "query": "sum:teleport.auth.audit_log.percentage_disk_space_used{$teleport_service,$host,$teleport_version}",
                       "aggregator": "avg"
                     }
                   ],
