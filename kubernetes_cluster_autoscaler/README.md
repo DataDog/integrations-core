@@ -24,7 +24,9 @@ No additional installation is needed on your server.
 Make sure that the Prometheus-formatted metrics are exposed in your kubernetes_cluster_autoscaler cluster. 
 For the Agent to start collecting metrics, the kubernetes_cluster_autoscaler pods need to be annotated.
 
-Kubernetes Cluster Autoscaler has metrics and livenessProbe endpoints that can be accessed on port 8085 (you can change that using the --address flag). These endpoints are located under `/metrics` and `/health-check` and provide valuable information about the state of your cluster during scaling operations.
+Kubernetes Cluster Autoscaler has metrics and livenessProbe endpoints that can be accessed on port `8085`. These endpoints are located under `/metrics` and `/health-check` and provide valuable information about the state of your cluster during scaling operations.
+
+**Note**: To change the default port, use the `--address` flag.
 
 To configure the Cluster Autoscaler to expose metrics, do the following:
 
