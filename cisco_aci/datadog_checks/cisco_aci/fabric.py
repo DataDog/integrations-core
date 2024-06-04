@@ -4,6 +4,8 @@
 
 from six import iteritems
 
+from datadog_checks.base.utils.serialization import json
+from datadog_checks.cisco_aci.models import DeviceMetadata, Node
 from . import aci_metrics, exceptions, helpers
 
 
@@ -25,6 +27,7 @@ class Fabric:
         self.submit_metrics = check.submit_metrics
         self.tagger = self.check.tagger
         self.external_host_tags = self.check.external_host_tags
+        self.ndm_metadata = check.ndm_metadata
 
     def collect(self):
         fabric_pods = self.api.get_fabric_pods()
@@ -70,6 +73,7 @@ class Fabric:
                 continue
             self.log.info("processing node %s on pod %s", node_id, pod_id)
             try:
+                self.submit_node_metadata(node_attrs, tags)
                 self.submit_process_metric(n, tags + self.check_tags + user_tags, hostname=hostname)
             except (exceptions.APIConnectionException, exceptions.APIParsingException):
                 pass
@@ -209,3 +213,34 @@ class Fabric:
             return 'pod'
         if obj_type == 'l1PhysIf':
             return 'port'
+
+    def submit_node_metadata(self, node_attrs, tags):
+        vendor = 'cisco_aci'
+        namespace='default'
+        node = Node(attributes=node_attrs)
+        id_tags = [
+            f'namespace:{namespace}',
+            f'system_ip:{node.attributes.address}'
+        ]
+        device_tags = [
+            f'device_vendor:{vendor}',
+            f'device_namespace:{namespace}',
+            f'device_hostname:{node.attributes.dn}',
+            f'hostname:{node.attributes.dn}',
+            f'system_ip:{node.attributes.address}',
+            f'device_ip:{node.attributes.address}',
+            f'device_id:{namespace}:{node.attributes.address}',
+        ]
+        device = DeviceMetadata(
+            device_id=f'{namespace}:{node.attributes.address}',
+            id_tags=id_tags,
+            tags=device_tags + tags,
+            name=node.attributes.dn,
+            ip_address=node.attributes.address,
+            model=node.attributes.model,
+            adSt=node.attributes.adSt,
+            vendor=vendor,
+            version=node.attributes.version,
+            serial_number=node.attributes.serial
+        )
+        self.ndm_metadata(json.dumps(device.model_dump()))
