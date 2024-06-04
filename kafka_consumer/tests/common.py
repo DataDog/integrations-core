@@ -89,6 +89,7 @@ def get_cluster_id():
     client = AdminClient(config)
     return client.list_topics(timeout=5).cluster_id
 
+
 def get_consumer_group_state(consumer_group):
     config = {
         "bootstrap.servers": INSTANCE['kafka_connect_str'],
@@ -99,6 +100,7 @@ def get_consumer_group_state(consumer_group):
     consumer_gp_state = consumer_groups_future[consumer_group].result()
     consumer_group_result_state = str(consumer_gp_state.state).split('.')[1]
     return consumer_group_result_state
+
 
 def assert_check_kafka(aggregator, consumer_groups):
     cluster_id = get_cluster_id()

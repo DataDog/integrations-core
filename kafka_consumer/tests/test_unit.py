@@ -383,8 +383,6 @@ def test_when_empty_string_consumer_group_then_skip(kafka_instance):
         kafka_consumer_check = KafkaCheck('kafka_consumer', {}, [kafka_instance])
         assert kafka_consumer_check.client._get_consumer_groups() == ["my_consumer"]
 
-#def test_consumer_group_state_collection():
-
 
 def test_get_interpolated_timestamp():
     assert _get_interpolated_timestamp({0: 100, 10: 200}, 5) == 150
