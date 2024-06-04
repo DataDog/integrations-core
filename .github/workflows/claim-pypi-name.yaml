@@ -18,7 +18,7 @@ defaults:
 
 jobs:
   python-artifacts:
-    name: Build wheel and source distribution
+    name: Build wheel
     runs-on: ubuntu-latest
 
     steps:
