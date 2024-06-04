@@ -38,7 +38,7 @@ jobs:
         bash .github/workflows/scripts/build_placeholders.sh
 
     - name: Push Python artifacts to PyPI
-      uses: pypa/gh-action-pypi-publish@v1.8.14
+      uses: pypa/gh-action-pypi-publish@release/v1
       with:
         # We don't mind invalid metadata, we only want to claim the package name.
         verify-metadata: false
