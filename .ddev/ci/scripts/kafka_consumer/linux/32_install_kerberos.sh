@@ -9,7 +9,7 @@ sudo apt install -y --no-install-recommends build-essential libkrb5-dev wget sof
 git clone https://github.com/confluentinc/librdkafka
 cd librdkafka
 git checkout v2.4.0
-sudo ./configure --install-deps --prefix=/usr --enable-ssl
+sudo ./configure --install-deps --prefix=/usr --enable-ssl --enable-sasl
 make
 sudo make install
 
