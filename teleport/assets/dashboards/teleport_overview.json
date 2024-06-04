@@ -96,6 +96,7 @@
               "title": "Process State",
               "title_size": "16",
               "title_align": "left",
+              "time": {},
               "type": "query_value",
               "requests": [
                 {
@@ -108,8 +109,8 @@
                     {
                       "data_source": "metrics",
                       "name": "query1",
-                      "query": "avg:teleport.common.process_state{$teleport_service,$host,$teleport_version}",
-                      "aggregator": "avg"
+                      "query": "avg:teleport.common.process_state{$teleport_service,$host}",
+                      "aggregator": "last"
                     }
                   ],
                   "response_format": "scalar",
@@ -153,6 +154,7 @@
               "title": "Certificate Mismatches SSH Failures",
               "title_size": "16",
               "title_align": "left",
+              "time": {},
               "type": "query_value",
               "requests": [
                 {
@@ -165,8 +167,8 @@
                     {
                       "data_source": "metrics",
                       "name": "query1",
-                      "query": "sum:teleport.common.certificate_mismatch.count{$teleport_service,$host,$teleport_version}.as_count()",
-                      "aggregator": "avg"
+                      "query": "sum:teleport.common.certificate_mismatch.count{$teleport_service,$host}.as_count()",
+                      "aggregator": "last"
                     }
                   ],
                   "response_format": "scalar",
@@ -213,7 +215,7 @@
                     {
                       "data_source": "metrics",
                       "name": "query1",
-                      "query": "sum:teleport.common.tx.count{$teleport_service,$host,$teleport_version}.as_count()",
+                      "query": "sum:teleport.common.tx.count{$teleport_service,$host}.as_count()",
                       "aggregator": "avg"
                     }
                   ],
@@ -254,7 +256,7 @@
                     {
                       "data_source": "metrics",
                       "name": "query1",
-                      "query": "sum:teleport.common.rx.count{$teleport_service,$host,$teleport_version}.as_count()",
+                      "query": "sum:teleport.common.rx.count{$teleport_service,$host}.as_count()",
                       "aggregator": "avg"
                     }
                   ],
@@ -317,7 +319,7 @@
                     {
                       "data_source": "metrics",
                       "name": "query1",
-                      "query": "sum:teleport.auth.user_login.count{$teleport_service,$host,$teleport_version}.as_count()"
+                      "query": "sum:teleport.auth.user_login.count{$teleport_service,$host}.as_count()"
                     }
                   ],
                   "response_format": "timeseries",
@@ -364,7 +366,7 @@
                     {
                       "data_source": "metrics",
                       "name": "query1",
-                      "query": "sum:teleport.auth.registered_servers{$teleport_service,$host,$teleport_version}"
+                      "query": "sum:teleport.auth.registered_servers{$teleport_service,$host}"
                     }
                   ],
                   "response_format": "timeseries",
@@ -411,7 +413,7 @@
                     {
                       "data_source": "metrics",
                       "name": "query1",
-                      "query": "sum:teleport.auth.generate_requests.count{$teleport_service,$host,$teleport_version}.as_count()"
+                      "query": "sum:teleport.auth.generate_requests.count{$teleport_service,$host}.as_count()"
                     }
                   ],
                   "response_format": "timeseries",
@@ -458,7 +460,7 @@
                     {
                       "data_source": "metrics",
                       "name": "query1",
-                      "query": "sum:teleport.auth.generate_seconds.count{$teleport_service,$host,$teleport_version}.as_count()"
+                      "query": "sum:teleport.auth.generate_seconds.count{$teleport_service,$host}.as_count()"
                     }
                   ],
                   "response_format": "timeseries",
@@ -523,7 +525,7 @@
                     {
                       "data_source": "metrics",
                       "name": "query1",
-                      "query": "sum:teleport.ssh.user_max_concurrent_sessions_hit.count{$teleport_service,$host,$teleport_version}.as_count()"
+                      "query": "sum:teleport.ssh.user_max_concurrent_sessions_hit.count{$teleport_service,$host}.as_count()"
                     }
                   ],
                   "response_format": "timeseries",
@@ -579,7 +581,7 @@
                     {
                       "data_source": "metrics",
                       "name": "query1",
-                      "query": "sum:teleport.db.initialized_connections.count{$teleport_service,$host,$teleport_version}.as_count()",
+                      "query": "sum:teleport.db.initialized_connections.count{$teleport_service,$host}.as_count()",
                       "aggregator": "last"
                     }
                   ],
@@ -617,7 +619,7 @@
                     {
                       "data_source": "metrics",
                       "name": "query1",
-                      "query": "sum:teleport.db.active_connections_total{$teleport_service,$host,$teleport_version}",
+                      "query": "sum:teleport.db.active_connections_total{$teleport_service,$host}",
                       "aggregator": "avg"
                     }
                   ],
@@ -664,7 +666,7 @@
                     {
                       "data_source": "metrics",
                       "name": "query1",
-                      "query": "sum:teleport.db.method_call_latency_seconds.count{$teleport_service,$host,$teleport_version}.as_count()"
+                      "query": "sum:teleport.db.method_call_latency_seconds.count{$teleport_service,$host}.as_count()"
                     }
                   ],
                   "response_format": "timeseries",
@@ -711,7 +713,7 @@
                     {
                       "data_source": "metrics",
                       "name": "query1",
-                      "query": "sum:teleport.db.connection_durations_seconds.count{$teleport_service,$host,$teleport_version}.as_count()"
+                      "query": "sum:teleport.db.connection_durations_seconds.count{$teleport_service,$host}.as_count()"
                     }
                   ],
                   "response_format": "timeseries",
@@ -776,7 +778,7 @@
                     {
                       "data_source": "metrics",
                       "name": "query1",
-                      "query": "sum:teleport.proxy.connection_limit_exceeded.count{$teleport_service,$host,$teleport_version}.as_count()"
+                      "query": "sum:teleport.proxy.connection_limit_exceeded.count{$teleport_service,$host}.as_count()"
                     }
                   ],
                   "response_format": "timeseries",
@@ -823,7 +825,7 @@
                     {
                       "data_source": "metrics",
                       "name": "query1",
-                      "query": "sum:teleport.proxy.missing_ssh_tunnels{$teleport_service,$host,$teleport_version}"
+                      "query": "sum:teleport.proxy.missing_ssh_tunnels{$teleport_service,$host}"
                     }
                   ],
                   "response_format": "timeseries",
@@ -870,7 +872,7 @@
                     {
                       "data_source": "metrics",
                       "name": "query1",
-                      "query": "sum:teleport.proxy.remote_clusters{$teleport_service,$host,$teleport_version}"
+                      "query": "sum:teleport.proxy.remote_clusters{$teleport_service,$host}"
                     }
                   ],
                   "response_format": "timeseries",
@@ -917,7 +919,7 @@
                     {
                       "data_source": "metrics",
                       "name": "query1",
-                      "query": "sum:teleport.proxy.trusted_clusters{$teleport_service,$host,$teleport_version}"
+                      "query": "sum:teleport.proxy.trusted_clusters{$teleport_service,$host}"
                     }
                   ],
                   "response_format": "timeseries",
@@ -964,7 +966,7 @@
                     {
                       "data_source": "metrics",
                       "name": "query1",
-                      "query": "sum:teleport.proxy.teleport_connect_to_node_attempts.count{$teleport_service,$host,$teleport_version}.as_count()"
+                      "query": "sum:teleport.proxy.teleport_connect_to_node_attempts.count{$teleport_service,$host}.as_count()"
                     }
                   ],
                   "response_format": "timeseries",
@@ -1011,7 +1013,7 @@
                     {
                       "data_source": "metrics",
                       "name": "query1",
-                      "query": "sum:teleport.proxy.teleport_connect_to_node_attempts.count{$teleport_service,$host,$teleport_version}.as_count()"
+                      "query": "sum:teleport.proxy.teleport_connect_to_node_attempts.count{$teleport_service,$host}.as_count()"
                     }
                   ],
                   "response_format": "timeseries",
@@ -1050,7 +1052,7 @@
                     {
                       "data_source": "metrics",
                       "name": "query1",
-                      "query": "avg:teleport.proxy.ssh_sessions_total{$teleport_service,$host,$teleport_version}"
+                      "query": "avg:teleport.proxy.ssh_sessions_total{$teleport_service,$host}"
                     }
                   ],
                   "response_format": "timeseries",
@@ -1097,7 +1099,7 @@
                     {
                       "data_source": "metrics",
                       "name": "query1",
-                      "query": "sum:teleport.proxy.failed_login_attempts.count{$teleport_service,$host,$teleport_version}.as_count()"
+                      "query": "sum:teleport.proxy.failed_login_attempts.count{$teleport_service,$host}.as_count()"
                     }
                   ],
                   "response_format": "timeseries",
@@ -1160,7 +1162,7 @@
                     {
                       "data_source": "metrics",
                       "name": "query1",
-                      "query": "sum:teleport.auth.audit_log.percentage_disk_space_used{$teleport_service,$host,$teleport_version}",
+                      "query": "sum:teleport.auth.audit_log.percentage_disk_space_used{$teleport_service,$host}",
                       "aggregator": "avg"
                     }
                   ],
@@ -1207,7 +1209,7 @@
                     {
                       "data_source": "metrics",
                       "name": "query1",
-                      "query": "sum:teleport.auth.audit_log.emit_events.count{$teleport_service,$host,$teleport_version} by {host}.as_count()"
+                      "query": "sum:teleport.auth.audit_log.emit_events.count{$teleport_service,$host} by {host}.as_count()"
                     }
                   ],
                   "response_format": "timeseries",
@@ -1245,7 +1247,7 @@
                     {
                       "data_source": "metrics",
                       "name": "query1",
-                      "query": "sum:teleport.auth.audit_log.failed_disk_monitoring.count{$teleport_service,$host,$teleport_version}.as_count()",
+                      "query": "sum:teleport.auth.audit_log.failed_disk_monitoring.count{$teleport_service,$host}.as_count()",
                       "aggregator": "avg"
                     }
                   ],
@@ -1301,7 +1303,7 @@
                     {
                       "data_source": "metrics",
                       "name": "query1",
-                      "query": "sum:teleport.auth.audit_log.failed_emit_events.count{$teleport_service,$host,$teleport_version} by {teleport_version}.as_count()"
+                      "query": "sum:teleport.auth.audit_log.failed_emit_events.count{$teleport_service,$host} by {teleport_version}.as_count()"
                     }
                   ],
                   "response_format": "timeseries",
@@ -1366,7 +1368,7 @@
                     {
                       "data_source": "metrics",
                       "name": "query1",
-                      "query": "sum:teleport.kubernetes.server_in_flight_requests{$teleport_service,$host,$teleport_version}"
+                      "query": "sum:teleport.kubernetes.server_in_flight_requests{$teleport_service,$host}"
                     }
                   ],
                   "response_format": "timeseries",
@@ -1413,7 +1415,7 @@
                     {
                       "data_source": "metrics",
                       "name": "query1",
-                      "query": "sum:teleport.kubernetes.server_api_requests.count{$teleport_service,$host,$teleport_version}.as_count()"
+                      "query": "sum:teleport.kubernetes.server_api_requests.count{$teleport_service,$host}.as_count()"
                     }
                   ],
                   "response_format": "timeseries",
@@ -1460,7 +1462,7 @@
                     {
                       "data_source": "metrics",
                       "name": "query1",
-                      "query": "avg:teleport.kubernetes.client_in_flight_requests{$teleport_service,$host,$teleport_version}"
+                      "query": "avg:teleport.kubernetes.client_in_flight_requests{$teleport_service,$host}"
                     }
                   ],
                   "response_format": "timeseries",
@@ -1507,7 +1509,7 @@
                     {
                       "data_source": "metrics",
                       "name": "query1",
-                      "query": "sum:teleport.kubernetes.client_requests.count{$teleport_service,$host,$teleport_version}.as_count()"
+                      "query": "sum:teleport.kubernetes.client_requests.count{$teleport_service,$host}.as_count()"
                     }
                   ],
                   "response_format": "timeseries",
@@ -1554,7 +1556,7 @@
                     {
                       "data_source": "metrics",
                       "name": "query1",
-                      "query": "sum:teleport.kubernetes.server_exec_in_flight_sessions{$teleport_service,$host,$teleport_version}"
+                      "query": "sum:teleport.kubernetes.server_exec_in_flight_sessions{$teleport_service,$host}"
                     }
                   ],
                   "response_format": "timeseries",
@@ -1601,7 +1603,7 @@
                     {
                       "data_source": "metrics",
                       "name": "query1",
-                      "query": "sum:teleport.kubernetes.server_exec_sessions.count{$teleport_service,$host,$teleport_version}.as_count()"
+                      "query": "sum:teleport.kubernetes.server_exec_sessions.count{$teleport_service,$host}.as_count()"
                     }
                   ],
                   "response_format": "timeseries",
@@ -1648,7 +1650,7 @@
                     {
                       "data_source": "metrics",
                       "name": "query1",
-                      "query": "sum:teleport.kubernetes.server_join_sessions.count{$teleport_service,$host,$teleport_version}.as_count()"
+                      "query": "sum:teleport.kubernetes.server_join_sessions.count{$teleport_service,$host}.as_count()"
                     }
                   ],
                   "response_format": "timeseries",
@@ -1695,7 +1697,7 @@
                     {
                       "data_source": "metrics",
                       "name": "query1",
-                      "query": "avg:teleport.kubernetes.server_join_in_flight_sessions{$teleport_service,$host,$teleport_version}"
+                      "query": "avg:teleport.kubernetes.server_join_in_flight_sessions{$teleport_service,$host}"
                     }
                   ],
                   "response_format": "timeseries",
@@ -1735,12 +1737,6 @@
     {
       "name": "teleport_service",
       "prefix": "teleport_service",
-      "available_values": [],
-      "default": "*"
-    },
-    {
-      "name": "teleport_version",
-      "prefix": "teleport_version",
       "available_values": [],
       "default": "*"
     }
