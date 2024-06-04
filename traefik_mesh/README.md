@@ -40,7 +40,70 @@ Make sure that the Prometheus-formatted metrics are exposed in your Traefik Mesh
 When configuring the Traefik Mesh check, you can use the following parameters:
 - `openmetrics_endpoint`: This parameter should be set to the location where the Prometheus-formatted metrics are exposed. The default port is `8082`, but it can be configured using the `--entryPoints.metrics.address`. In containerized environments, `%%host%%` can be used for [host autodetection][3].
 - `traefik_proxy_api_endpooint:` This parameter is optional. The default port is `8080` and can be configured using `--entryPoints.traefik.address`. In containerized environments, `%%host%%` can be used for [host autodetection][3].
-- `traefik_controller_api_endpoint`: This parameter is optional. The default port is set to `9000`. 
+- `traefik_controller_api_endpoint`: This parameter is optional. The default port is set to `9000`.
+
+#### Traefik Proxy
+```yaml
+# (...)
+metadata:
+  name: '<POD_NAME>'
+  annotations:
+    ad.datadoghq.com/<CONTAINER_NAME>.checks: |
+      {
+        "traefik_mesh": {
+          "init_config": {},
+          "instances": [
+            {
+              "openmetrics_endpoint": "http://%%host%%:8082/metrics",
+              "traefik_proxy_api_endpoint": "http://%%host%%:8080"
+            }
+          ]
+        }
+      }
+    # (...)
+spec:
+  containers:
+    - name: <CONTAINER_NAME>
+# (...)
+```
+
+#### Traefik Controller
+```yaml
+# (...)
+metadata:
+  name: '<POD_NAME>'
+  annotations:
+    ad.datadoghq.com/<CONTAINER_NAME>.checks: |
+      {
+        "traefik_mesh": {
+          "init_config": {},
+          "instances": [
+            {
+              "traefik_controller_api_endpoint": "http://%%host%%:9000"
+            }
+          ]
+        }
+      }
+    # (...)
+spec:
+  containers:
+    - name: <CONTAINER_NAME>
+# (...)
+```
+
+See the [sample traefik_mesh.d/conf.yaml][4] for all available configuration options.
+
+### Log collection
+
+_Available for Agent versions >6.0_
+
+Traefik Mesh logs can be collected from the different Traefik Mesh pods through Kubernetes. Collecting logs is disabled by default in the Datadog Agent. To enable it, see [Kubernetes Log Collection][16].
+
+See the [Autodiscovery Integration Templates][3] for guidance on applying the parameters below.
+
+| Parameter      | Value                                                |
+| -------------- | ---------------------------------------------------- |
+| `<LOG_CONFIG>` | `{"source": "traefik_mesh", "service": "<SERVICE_NAME>"}` |
 
 ### Validation
 
