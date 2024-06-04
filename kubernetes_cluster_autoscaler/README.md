@@ -28,7 +28,7 @@ Kubernetes Cluster Autoscaler has metrics and livenessProbe endpoints that can b
 
 To get the Cluster Autoscaler to expose some metrics for you. It's pretty simple, you have to: 
 
-a) enable access to the `/metrics` route, expose port 8085 for your Cluster Autoscaler deployment:
+1. Enable access to the `/metrics` route and expose port `8085` for your Cluster Autoscaler deployment:
 
 ```
 ports:
