@@ -38,7 +38,7 @@ containerPort: 8085
 
 b) instruct your Prometheus to scrape it, by adding the following annotation to your Cluster Autoscaler service:
 ```
-prometheus.io/scrape: ‘true’
+prometheus.io/scrape: true
 ```
 
 **Note**: The listed metrics can only be collected if they are available. Some metrics are generated only when certain actions are performed. 
