@@ -1,4 +1,4 @@
-id: "traefik"
+id: "traefik_mesh"
 tests:
  -
   sample: "10.32.0.1 - - [07/Dec/2018:06:07:03 +0000] \"GET / HTTP/1.1\" 302 5 \"-\" \"Mozilla/5.0 (Windows NT 10.0; WOW64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/51.0.2704.103 Safari/537.36\" 132170 \"entrypoint redirect for http\" \"/“ 0ms"
@@ -33,7 +33,7 @@ tests:
         bytes_written: 5
         client:
           ip: "10.32.0.1"
-      traefik:
+      traefik_mesh:
         backend_url: "/"
         name: "entrypoint redirect for http"
         request_total: 132170.0
@@ -72,7 +72,7 @@ tests:
         bytes_written: 5
         client:
           ip: "10.32.0.1"
-      traefik:
+      traefik_mesh:
         backend_url: "/"
         name: "entrypoint redirect for http"
         request_total: 132167.0
@@ -233,7 +233,7 @@ tests:
         bytes_written: 2
         client:
           ip: "127.0.0.1"
-      traefik:
+      traefik_mesh:
         backend_url: "-"
         name: "-"
         request_total: 1.0

@@ -77,10 +77,10 @@ pipeline:
   name: Traefik Mesh
   enabled: true
   filter:
-    query: source:traefik_mesh
+    query: source:traefik_mesh OR source:traefik
   processors:
     - type: grok-parser
-      name: Parsing Traefik Mesh logs
+      name: Parsing Traefik logs
       enabled: true
       source: message
       samples:
@@ -89,9 +89,9 @@ pipeline:
       grok:
         supportRules: |
           _duration %{number:duration:scale(1000000)}
-          _traefik_backend_url %{regex("[^\\\"“]*"):traefik_mesh.backend_url}
-          _traefik_name %{regex("[^\\\"]*"):traefik_mesh.name}
-          _total_request %{number:traefik_mesh.request_total}
+          _traefik_backend_url %{regex("[^\\\"“]*"):traefik.backend_url}
+          _traefik_name %{regex("[^\\\"]*"):traefik.name}
+          _total_request %{number:traefik.request_total}
           _auth %{notSpace:http.auth:nullIf("-")}
           _bytes_written %{integer:network.bytes_written}
           _client_ip %{ipOrHost:network.client.ip}
