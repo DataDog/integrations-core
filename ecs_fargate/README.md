@@ -887,4 +887,4 @@ Need help? Contact [Datadog support][18].
 [59]: https://docs.aws.amazon.com/batch/latest/userguide/create-compute-environment.html
 [60]: https://docs.aws.amazon.com/batch/latest/userguide/create-job-queue-fargate.html
 [61]: https://docs.datadoghq.com/resources/json/datadog-agent-aws-batch-ecs-fargate.json
-[62]: /containers/guide/aws-batch-ecs-fargate
+[62]: https://docs.datadoghq.com/containers/guide/aws-batch-ecs-fargate
