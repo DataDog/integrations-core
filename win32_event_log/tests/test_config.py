@@ -25,3 +25,9 @@ def test_legacy_v2_params_notice(dd_run_check, new_check, instance):
     assert (
         'dd_security_events config option is ignored when running legacy_mode_v2. Please remove it'
     ) in check.get_warnings()
+
+
+def test_legacy_v2_params_defaults_dont_notice(dd_run_check, new_check, instance):
+    check = new_check(instance)
+    dd_run_check(check)
+    assert not check.get_warnings()

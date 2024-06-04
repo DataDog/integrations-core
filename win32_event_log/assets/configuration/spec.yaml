@@ -96,7 +96,7 @@ files:
         The `dd_security_events` option cannot be used with the `path` option.
       value:
         type: string
-        display_default: None
+        display_default:
         example: high
         enum:
         - high
