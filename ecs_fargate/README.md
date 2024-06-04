@@ -229,121 +229,7 @@ To provide your Datadog API key as a secret, see [Using secrets](#using-secrets)
 
 ### Installation for AWS Batch
 
-To monitor your AWS Batch jobs with Datadog, run the Agent as a container in **same job definition** as your application container. To collect metrics with Datadog, each job definition should include a Datadog Agent container in addition to the application containers. Follow these setup steps:
-
-1. **Create an AWS Batch job definition**
-2. **Create or modify your IAM policy**
-3. **Submit the job to your job queue**
-
-#### Create an AWS Batch job definition
-
-The primary unit of work in AWS Batch is the job, which is configured in the job definition. A job definition is comparable to a pod in Kubernetes. A job definition must contain one or more containers. In order to run the Datadog Agent, create your job definition to run your application container(s), as well as the Datadog Agent container. 
-
-The instructions below show you how to configure the job using the [Amazon Web Console][4] or [AWS CLI tools][5].
-
-<!-- xxx tabs xxx -->
-<!-- xxx tab "Web UI" xxx -->
-##### Web UI job definition
-
-<!-- partial
-{{< site-region region="us,us3,us5,eu,ap1,gov" >}}
-
-1. Log in to your [AWS Web Console][4] and navigate to the AWS Batch section.
-2. Click on **Job Definitions** in the left menu. Then, click the **Create** button or choose an existing AWS Batch job definition.
-3. For new job definitions:
-    1. Select **Fargate** as the orchestration type.
-    2. Unselect the **Use legacy containerProperties structure** option. Click **Next**.
-    3. Enter a **Job Definition Name**, such as `my-app-and-datadog`.
-    4. Select an execution IAM role. See permission requirements in the [Create or modify your IAM policy](#create-or-modify-your-iam-policy) section.
-    5. Enable **Assign public IP** to allow outbound network access. Then, click the **Next** button.
-    6. Configure the Datadog Agent container.
-        1. For **Container name**, enter `datadog-agent`.
-        2. For **Image**, enter `public.ecr.aws/datadog/agent:latest`.
-        3. Configure **CPU** and **Memory** resource requirements based on your needs.
-        4. For **Env Variables**, add the **Key** `DD_API_KEY` and enter your [Datadog API key][41] as the value.
-        5. Add another environment variable using the **Key** `ECS_FARGATE` and the value `true`. Click **Add**.
-        6. Add another environment variable using the **Key** `DD_SITE` and the value {{< region-param key="dd_site" code="true" >}}. This defaults to `datadoghq.com` if you don't set it. Click **Add**.
-    7. Add your other application containers to the job definition.
-    8. Click **Create job definition** to create the job definition.
-
-[4]: https://aws.amazon.com/console
-[41]: https://app.datadoghq.com/organization-settings/api-keys
-{{< /site-region >}}
-partial -->
-
-<!-- xxz tab xxx -->
-<!-- xxx tab "AWS CLI" xxx -->
-##### AWS CLI job definition
-
-1. Download [datadog-agent-aws-batch-ecs-fargate.json][61]. **Note**: If you are using Internet Explorer, this may download as a gzip file, which contains a JSON file.
-<!-- partial
-{{< site-region region="us,us3,us5,eu,ap1,gov" >}}
-2. Update the JSON file with a `JOB_DEFINITION_NAME`, your [Datadog API Key][41], and the appropriate `DD_SITE` ({{< region-param key="dd_site" code="true" >}}). **Note**: The environment variable `ECS_FARGATE` is already set to `"true"`.
-
-[41]: https://app.datadoghq.com/organization-settings/api-keys
-{{< /site-region >}}
-partial -->
-3. Add your other application containers to the job definition. 
-4. Execute the following command to register the job definition:
-
-```bash
-aws batch register-job-definition --cli-input-json file://<PATH_TO_FILE>/datadog-agent-aws-batch-ecs-fargate.json
-```
-<!-- xxz tab xxx -->
-<!-- xxz tabs xxx -->
-
-To provide your Datadog API key as a secret, see [Using secrets](#using-secrets).
-
-#### Submit the job to your job queue
-
-The Datadog Agent runs in the same job definition as your application and integration containers.
-
-<!-- xxx tabs xxx -->
-<!-- xxx tab "Web UI" xxx -->
-
-##### Web UI job
-
-1. Log in to your [AWS Web Console][4] and navigate to the AWS Batch section. If needed, create a [compute environment][59] and/or [job queue][60] associated with a compute environment.
-2. On the **Jobs** tab, click the **Submit new job** button.
-3. Enter a **Job name**.
-4. For **Job Definition**, select the job created in the previous steps.
-5. Choose the job queue to run the Datadog Agent on.
-6. **Container overrides** are optional based on your preference.
-7. Click the **Next** button, then click the **Create job** button.
-
-<!-- xxz tab xxx -->
-
-<!-- xxx tab "AWS CLI" xxx -->
-##### AWS CLI job
-
-Run the following commands using the [AWS CLI tools][5].
-
-If needed, create a compute environment:
-
-```bash
-aws batch create-compute-environment --compute-environment-name <COMPUTE_ENVIRONMENT_NAME> \
---type MANAGED \
---compute-resources "type=FARGATE,maxvCpus=2,subnets=<PRIVATE_SUBNET>,securityGroupIds=<SECURITY_GROUP>"
-```
-
-If needed, create a job queue associated with a compute environment:
-
-```bash
-aws batch  create-job-queue --job-queue-name <JOB_QUEUE_NAME> \
---priority <INT> \
---compute-environment-order "order=<INT>,computeEnvironment=<COMPUTE_ENVIRONMENT_NAME>"
-```
-
-Run the job in your job queue:
-
-```bash
-aws batch submit-job --job-name <JOB_NAME> \
---job-queue <JOB_QUEUE_NAME> \
---job-definition <JOB_DEFINITION_NAME>:1
-```
-
-<!-- xxz tab xxx -->
-<!-- xxz tabs xxx -->
+To monitor your AWS Batch jobs with Datadog, see [AWS Batch with ECS Fargate and the Datadog Agent][63]
 
 #### Create or modify your IAM policy
 
@@ -1001,3 +887,4 @@ Need help? Contact [Datadog support][18].
 [59]: https://docs.aws.amazon.com/batch/latest/userguide/create-compute-environment.html
 [60]: https://docs.aws.amazon.com/batch/latest/userguide/create-job-queue-fargate.html
 [61]: https://docs.datadoghq.com/resources/json/datadog-agent-aws-batch-ecs-fargate.json
+[62]: /containers/guide/aws-batch-ecs-fargate
