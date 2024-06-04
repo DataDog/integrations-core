@@ -40,6 +40,10 @@ def instance_auth_type():
     return 'default'
 
 
+def instance_dd_security_events():
+    return 'None'
+
+
 def instance_disable_generic_tags():
     return False
 
