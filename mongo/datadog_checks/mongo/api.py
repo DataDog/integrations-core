@@ -114,10 +114,15 @@ class MongoApi(object):
             self.deployment_type = self._get_default_deployment_type()
         except Exception as e:
             self._log.debug(
-                "Unable to run `getCmdLineOpts`, got: %s. Assuming this is an Alibaba ApsaraDB instance.", str(e)
+                "Unable to run `getCmdLineOpts`, got: %s. Treating this is an Alibaba ApsaraDB instance.", str(e)
             )
-            # `getCmdLineOpts` is forbidden on Alibaba ApsaraDB
-            self.deployment_type = self._get_alibaba_deployment_type()
+            try:
+                self.deployment_type = self._get_alibaba_deployment_type()
+            except Exception as e:
+                self._log.debug(
+                    "Unable to detect Alibaba AsparaDB so switching to AWS DocumentDB, got error %s", str(e)
+                )
+                self.deployment_type = self._get_documentdb_deployment_type()
 
     def _get_default_deployment_type(self):
         options = self['admin'].command("getCmdLineOpts")['parsed']
@@ -157,6 +162,15 @@ class MongoApi(object):
         else:
             cluster_role = None
         return self._get_rs_deployment_from_status_payload(repl_set_payload, cluster_role)
+
+    def _get_documentdb_deployment_type(self):
+        """
+        Deployment type for AWS DocumentDB.
+
+        We connect to "Instance Based Clusters". In MongoDB terms these are unsharded replicasets.
+        """
+        repl_set_payload = self['admin'].command("replSetGetStatus")
+        return self._get_rs_deployment_from_status_payload(repl_set_payload, cluster_role=None)
 
     def refresh_shards(self):
         try:
