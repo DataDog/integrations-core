@@ -6,35 +6,16 @@
       "id": 8821438356580436,
       "definition": {
         "title": "Introduction",
-        "background_color": "vivid_purple",
-        "show_title": true,
+        "banner_img": "https://goteleport.com/blog/_next/image/?url=%2Fblog%2F_next%2Fstatic%2Fmedia%2Fgravitational-is-teleport-header.6fdf3a52.png&w=3840&q=75",
+        "show_title": false,
         "type": "group",
         "layout_type": "ordered",
         "widgets": [
           {
-            "id": 6789124480362062,
-            "definition": {
-              "type": "image",
-              "url": "https://avatars.githubusercontent.com/u/10781132?s=200&v=4",
-              "sizing": "contain",
-              "margin": "md",
-              "has_background": false,
-              "has_border": false,
-              "vertical_align": "center",
-              "horizontal_align": "center"
-            },
-            "layout": {
-              "x": 0,
-              "y": 0,
-              "width": 2,
-              "height": 2
-            }
-          },
-          {
             "id": 961616527714708,
             "definition": {
               "type": "note",
-              "content": "This dashboard provides an overview of your Teleport deployment.\n\nUse this dashboard to:\n\n- Monitor the health of your Teleport Cluster\n\n- Track the performance of different services (Proxy, Auth, SSH, Kubernetes, Database)\n",
+              "content": "This dashboard provides an overview of your Teleport deployment. You can use this dashboard to:\n\n- Monitor the health of your Teleport Cluster\n\n- Track the performance of different services (Proxy, Auth, SSH, Kubernetes, Database)\n",
               "background_color": "white",
               "font_size": "14",
               "text_align": "left",
@@ -45,9 +26,9 @@
               "has_padding": true
             },
             "layout": {
-              "x": 2,
+              "x": 0,
               "y": 0,
-              "width": 6,
+              "width": 3,
               "height": 3
             }
           },
@@ -55,7 +36,7 @@
             "id": 6942437579739040,
             "definition": {
               "type": "note",
-              "content": "Resources:\n\n- [Documentation for Teleport Integration](https://docs.datadoghq.com/integrations/teleport)\n  \n- [Teleport Health Monitoring](https://goteleport.com/docs/management/diagnostics/monitoring/)\n  \n- [Teleport metrics](https://goteleport.com/docs/management/diagnostics/monitoring/)\n",
+              "content": "Tips and Resources:\n\n- __Please note that some widgets are better viewed when filtered by `host`.__\n\n- [Documentation for Teleport Integration](https://docs.datadoghq.com/integrations/teleport)\n  \n- [Teleport Health Monitoring](https://goteleport.com/docs/management/diagnostics/monitoring/)\n  \n- [Teleport metrics](https://goteleport.com/docs/management/diagnostics/monitoring/)\n",
               "background_color": "white",
               "font_size": "14",
               "text_align": "left",
@@ -66,9 +47,9 @@
               "has_padding": true
             },
             "layout": {
-              "x": 8,
+              "x": 3,
               "y": 0,
-              "width": 4,
+              "width": 3,
               "height": 3
             }
           }
@@ -77,8 +58,9 @@
       "layout": {
         "x": 0,
         "y": 0,
-        "width": 12,
-        "height": 4
+        "width": 6,
+        "height": 6,
+        "is_column_break": true
       }
     },
     {
@@ -91,12 +73,32 @@
         "layout_type": "ordered",
         "widgets": [
           {
+            "id": 7456593460361802,
+            "definition": {
+              "type": "note",
+              "content": "Monitoring the process state is essential to understand the status of the Teleport process, where the states are defined as follows: 0 - OK, 1 - Recovering, 2 - Degraded, 3 - Starting.",
+              "background_color": "gray",
+              "font_size": "12",
+              "text_align": "left",
+              "vertical_align": "center",
+              "show_tick": true,
+              "tick_pos": "50%",
+              "tick_edge": "bottom",
+              "has_padding": true
+            },
+            "layout": {
+              "x": 0,
+              "y": 0,
+              "width": 6,
+              "height": 1
+            }
+          },
+          {
             "id": 4046242726958760,
             "definition": {
               "title": "Process State",
               "title_size": "16",
               "title_align": "left",
-              "time": {},
               "type": "query_value",
               "requests": [
                 {
@@ -109,7 +111,7 @@
                     {
                       "data_source": "metrics",
                       "name": "query1",
-                      "query": "avg:teleport.common.process_state{$teleport_service,$host}",
+                      "query": "sum:teleport.common.process_state{$teleport_service,$host}.fill(null)",
                       "aggregator": "last"
                     }
                   ],
@@ -133,28 +135,77 @@
                     {
                       "comparator": "=",
                       "value": 3,
-                      "palette": "black_on_light_yellow"
+                      "palette": "custom_bg",
+                      "custom_bg_color": "#a3a3a3"
                     }
                   ]
                 }
               ],
               "autoscale": true,
-              "precision": 2
+              "precision": 2,
+              "timeseries_background": {
+                "type": "bars",
+                "yaxis": {}
+              }
             },
             "layout": {
               "x": 0,
-              "y": 0,
+              "y": 1,
               "width": 3,
-              "height": 1
+              "height": 2
             }
           },
           {
             "id": 4566601828907332,
             "definition": {
-              "title": "Certificate Mismatches SSH Failures",
+              "title": "Active Sessions",
               "title_size": "16",
               "title_align": "left",
-              "time": {},
+              "type": "query_value",
+              "requests": [
+                {
+                  "formulas": [
+                    {
+                      "number_format": {
+                        "unit": {
+                          "type": "canonical_unit",
+                          "unit_name": "session"
+                        }
+                      },
+                      "formula": "query1"
+                    }
+                  ],
+                  "queries": [
+                    {
+                      "data_source": "metrics",
+                      "name": "query1",
+                      "query": "sum:teleport.common.server_interactive_sessions_total{$teleport_service,$host}",
+                      "aggregator": "last"
+                    }
+                  ],
+                  "response_format": "scalar"
+                }
+              ],
+              "autoscale": true,
+              "precision": 2,
+              "timeseries_background": {
+                "yaxis": {},
+                "type": "bars"
+              }
+            },
+            "layout": {
+              "x": 3,
+              "y": 1,
+              "width": 3,
+              "height": 2
+            }
+          },
+          {
+            "id": 4172927211877460,
+            "definition": {
+              "title": "User Logins",
+              "title_size": "16",
+              "title_align": "left",
               "type": "query_value",
               "requests": [
                 {
@@ -167,7 +218,53 @@
                     {
                       "data_source": "metrics",
                       "name": "query1",
-                      "query": "sum:teleport.common.certificate_mismatch.count{$teleport_service,$host}.as_count()",
+                      "query": "sum:teleport.auth.user_login.count{$teleport_service,$host}.as_count()",
+                      "aggregator": "last"
+                    }
+                  ],
+                  "response_format": "scalar"
+                }
+              ],
+              "autoscale": true,
+              "precision": 2,
+              "timeseries_background": {
+                "yaxis": {},
+                "type": "bars"
+              }
+            },
+            "layout": {
+              "x": 0,
+              "y": 3,
+              "width": 3,
+              "height": 2
+            }
+          },
+          {
+            "id": 2674339761718342,
+            "definition": {
+              "title": "Failed Login Attempts",
+              "title_size": "16",
+              "title_align": "left",
+              "time": {},
+              "type": "query_value",
+              "requests": [
+                {
+                  "formulas": [
+                    {
+                      "number_format": {
+                        "unit": {
+                          "type": "canonical_unit",
+                          "unit_name": "attempt"
+                        }
+                      },
+                      "formula": "query1"
+                    }
+                  ],
+                  "queries": [
+                    {
+                      "data_source": "metrics",
+                      "name": "query1",
+                      "query": "sum:teleport.proxy.failed_login_attempts.count{$teleport_service,$host}.as_count()",
                       "aggregator": "last"
                     }
                   ],
@@ -177,316 +274,36 @@
                       "comparator": ">",
                       "value": 0,
                       "palette": "white_on_red"
+                    },
+                    {
+                      "comparator": "=",
+                      "value": 0,
+                      "palette": "white_on_green"
                     }
                   ]
                 }
               ],
               "autoscale": true,
-              "precision": 2
+              "precision": 2,
+              "timeseries_background": {
+                "yaxis": {},
+                "type": "bars"
+              }
             },
             "layout": {
               "x": 3,
-              "y": 0,
+              "y": 3,
               "width": 3,
-              "height": 1
-            }
-          },
-          {
-            "id": 4172927211877460,
-            "definition": {
-              "title": "Bytes TX during SSH connections",
-              "title_size": "16",
-              "title_align": "left",
-              "type": "query_value",
-              "requests": [
-                {
-                  "formulas": [
-                    {
-                      "formula": "query1",
-                      "number_format": {
-                        "unit": {
-                          "type": "canonical_unit",
-                          "unit_name": "byte"
-                        }
-                      }
-                    }
-                  ],
-                  "queries": [
-                    {
-                      "data_source": "metrics",
-                      "name": "query1",
-                      "query": "sum:teleport.common.tx.count{$teleport_service,$host}.as_count()",
-                      "aggregator": "avg"
-                    }
-                  ],
-                  "response_format": "scalar"
-                }
-              ],
-              "autoscale": true,
-              "precision": 2
-            },
-            "layout": {
-              "x": 6,
-              "y": 0,
-              "width": 3,
-              "height": 1
-            }
-          },
-          {
-            "id": 2674339761718342,
-            "definition": {
-              "title": "Bytes RX during SSH connection",
-              "title_size": "16",
-              "title_align": "left",
-              "type": "query_value",
-              "requests": [
-                {
-                  "formulas": [
-                    {
-                      "formula": "query1",
-                      "number_format": {
-                        "unit": {
-                          "type": "canonical_unit",
-                          "unit_name": "byte"
-                        }
-                      }
-                    }
-                  ],
-                  "queries": [
-                    {
-                      "data_source": "metrics",
-                      "name": "query1",
-                      "query": "sum:teleport.common.rx.count{$teleport_service,$host}.as_count()",
-                      "aggregator": "avg"
-                    }
-                  ],
-                  "response_format": "scalar"
-                }
-              ],
-              "autoscale": true,
-              "precision": 2
-            },
-            "layout": {
-              "x": 9,
-              "y": 0,
-              "width": 3,
-              "height": 1
+              "height": 2
             }
           }
         ]
       },
       "layout": {
-        "x": 0,
-        "y": 4,
-        "width": 12,
-        "height": 2,
-        "is_column_break": true
-      }
-    },
-    {
-      "id": 5949428905688286,
-      "definition": {
-        "title": "Auth",
-        "background_color": "vivid_purple",
-        "show_title": true,
-        "type": "group",
-        "layout_type": "ordered",
-        "widgets": [
-          {
-            "id": 4158482909323100,
-            "definition": {
-              "title": "User Logins",
-              "title_size": "16",
-              "title_align": "left",
-              "show_legend": false,
-              "legend_layout": "auto",
-              "legend_columns": [
-                "avg",
-                "min",
-                "max",
-                "value",
-                "sum"
-              ],
-              "type": "timeseries",
-              "requests": [
-                {
-                  "formulas": [
-                    {
-                      "formula": "query1"
-                    }
-                  ],
-                  "queries": [
-                    {
-                      "data_source": "metrics",
-                      "name": "query1",
-                      "query": "sum:teleport.auth.user_login.count{$teleport_service,$host}.as_count()"
-                    }
-                  ],
-                  "response_format": "timeseries",
-                  "style": {
-                    "palette": "dog_classic",
-                    "line_type": "solid",
-                    "line_width": "normal"
-                  },
-                  "display_type": "line"
-                }
-              ]
-            },
-            "layout": {
-              "x": 0,
-              "y": 0,
-              "width": 6,
-              "height": 3
-            }
-          },
-          {
-            "id": 1583656407390244,
-            "definition": {
-              "title": "Registered Teleport services",
-              "title_size": "16",
-              "title_align": "left",
-              "show_legend": false,
-              "legend_layout": "auto",
-              "legend_columns": [
-                "avg",
-                "min",
-                "max",
-                "value",
-                "sum"
-              ],
-              "type": "timeseries",
-              "requests": [
-                {
-                  "formulas": [
-                    {
-                      "formula": "query1"
-                    }
-                  ],
-                  "queries": [
-                    {
-                      "data_source": "metrics",
-                      "name": "query1",
-                      "query": "sum:teleport.auth.registered_servers{$teleport_service,$host}"
-                    }
-                  ],
-                  "response_format": "timeseries",
-                  "style": {
-                    "palette": "dog_classic",
-                    "line_type": "solid",
-                    "line_width": "normal"
-                  },
-                  "display_type": "line"
-                }
-              ]
-            },
-            "layout": {
-              "x": 6,
-              "y": 0,
-              "width": 6,
-              "height": 3
-            }
-          },
-          {
-            "id": 7968364411767144,
-            "definition": {
-              "title": "Generate Requests",
-              "title_size": "16",
-              "title_align": "left",
-              "show_legend": false,
-              "legend_layout": "auto",
-              "legend_columns": [
-                "avg",
-                "min",
-                "max",
-                "value",
-                "sum"
-              ],
-              "type": "timeseries",
-              "requests": [
-                {
-                  "formulas": [
-                    {
-                      "formula": "query1"
-                    }
-                  ],
-                  "queries": [
-                    {
-                      "data_source": "metrics",
-                      "name": "query1",
-                      "query": "sum:teleport.auth.generate_requests.count{$teleport_service,$host}.as_count()"
-                    }
-                  ],
-                  "response_format": "timeseries",
-                  "style": {
-                    "palette": "dog_classic",
-                    "line_type": "solid",
-                    "line_width": "normal"
-                  },
-                  "display_type": "line"
-                }
-              ]
-            },
-            "layout": {
-              "x": 0,
-              "y": 3,
-              "width": 6,
-              "height": 3
-            }
-          },
-          {
-            "id": 166041243538698,
-            "definition": {
-              "title": "Generate Requests Latency",
-              "title_size": "16",
-              "title_align": "left",
-              "show_legend": false,
-              "legend_layout": "auto",
-              "legend_columns": [
-                "avg",
-                "min",
-                "max",
-                "value",
-                "sum"
-              ],
-              "type": "timeseries",
-              "requests": [
-                {
-                  "formulas": [
-                    {
-                      "formula": "query1"
-                    }
-                  ],
-                  "queries": [
-                    {
-                      "data_source": "metrics",
-                      "name": "query1",
-                      "query": "sum:teleport.auth.generate_seconds.count{$teleport_service,$host}.as_count()"
-                    }
-                  ],
-                  "response_format": "timeseries",
-                  "style": {
-                    "palette": "dog_classic",
-                    "line_type": "solid",
-                    "line_width": "normal"
-                  },
-                  "display_type": "line"
-                }
-              ]
-            },
-            "layout": {
-              "x": 6,
-              "y": 3,
-              "width": 6,
-              "height": 3
-            }
-          }
-        ]
-      },
-      "layout": {
-        "x": 0,
-        "y": 6,
-        "width": 12,
-        "height": 7
+        "x": 6,
+        "y": 0,
+        "width": 6,
+        "height": 6
       }
     },
     {
@@ -513,6 +330,7 @@
                 "value",
                 "sum"
               ],
+              "time": {},
               "type": "timeseries",
               "requests": [
                 {
@@ -525,7 +343,7 @@
                     {
                       "data_source": "metrics",
                       "name": "query1",
-                      "query": "sum:teleport.ssh.user_max_concurrent_sessions_hit.count{$teleport_service,$host}.as_count()"
+                      "query": "sum:teleport.ssh.user_max_concurrent_sessions_hit.count{$teleport_service,$host} by {host}.as_count()"
                     }
                   ],
                   "response_format": "timeseries",
@@ -542,7 +360,7 @@
               "x": 0,
               "y": 0,
               "width": 6,
-              "height": 3
+              "height": 4
             }
           }
         ]
@@ -551,7 +369,7 @@
         "x": 0,
         "y": 0,
         "width": 6,
-        "height": 4
+        "height": 5
       }
     },
     {
@@ -569,6 +387,7 @@
               "title": "Initialized DB connections",
               "title_size": "16",
               "title_align": "left",
+              "time": {},
               "type": "query_value",
               "requests": [
                 {
@@ -591,14 +410,15 @@
               "autoscale": true,
               "precision": 2,
               "timeseries_background": {
-                "type": "area"
+                "type": "bars",
+                "yaxis": {}
               }
             },
             "layout": {
               "x": 0,
               "y": 0,
               "width": 3,
-              "height": 1
+              "height": 2
             }
           },
           {
@@ -607,6 +427,7 @@
               "title": "Active DB connections",
               "title_size": "16",
               "title_align": "left",
+              "time": {},
               "type": "query_value",
               "requests": [
                 {
@@ -620,7 +441,7 @@
                       "data_source": "metrics",
                       "name": "query1",
                       "query": "sum:teleport.db.active_connections_total{$teleport_service,$host}",
-                      "aggregator": "avg"
+                      "aggregator": "last"
                     }
                   ],
                   "response_format": "scalar"
@@ -629,14 +450,15 @@
               "autoscale": true,
               "precision": 2,
               "timeseries_background": {
-                "type": "area"
+                "type": "bars",
+                "yaxis": {}
               }
             },
             "layout": {
               "x": 3,
               "y": 0,
               "width": 3,
-              "height": 1
+              "height": 2
             }
           },
           {
@@ -654,6 +476,7 @@
                 "value",
                 "sum"
               ],
+              "time": {},
               "type": "timeseries",
               "requests": [
                 {
@@ -666,7 +489,7 @@
                     {
                       "data_source": "metrics",
                       "name": "query1",
-                      "query": "sum:teleport.db.method_call_latency_seconds.count{$teleport_service,$host}.as_count()"
+                      "query": "sum:teleport.db.method_call_latency_seconds.count{$teleport_service,$host} by {host}.as_count()"
                     }
                   ],
                   "response_format": "timeseries",
@@ -681,7 +504,7 @@
             },
             "layout": {
               "x": 0,
-              "y": 1,
+              "y": 2,
               "width": 3,
               "height": 2
             }
@@ -701,6 +524,7 @@
                 "value",
                 "sum"
               ],
+              "time": {},
               "type": "timeseries",
               "requests": [
                 {
@@ -713,7 +537,7 @@
                     {
                       "data_source": "metrics",
                       "name": "query1",
-                      "query": "sum:teleport.db.connection_durations_seconds.count{$teleport_service,$host}.as_count()"
+                      "query": "sum:teleport.db.connection_durations_seconds.count{$teleport_service,$host} by {host}.as_count()"
                     }
                   ],
                   "response_format": "timeseries",
@@ -728,7 +552,7 @@
             },
             "layout": {
               "x": 3,
-              "y": 1,
+              "y": 2,
               "width": 3,
               "height": 2
             }
@@ -739,7 +563,7 @@
         "x": 6,
         "y": 0,
         "width": 6,
-        "height": 4
+        "height": 5
       }
     },
     {
@@ -766,6 +590,7 @@
                 "value",
                 "sum"
               ],
+              "time": {},
               "type": "timeseries",
               "requests": [
                 {
@@ -778,7 +603,7 @@
                     {
                       "data_source": "metrics",
                       "name": "query1",
-                      "query": "sum:teleport.proxy.connection_limit_exceeded.count{$teleport_service,$host}.as_count()"
+                      "query": "sum:teleport.proxy.connection_limit_exceeded.count{$teleport_service,$host} by {host}.as_count()"
                     }
                   ],
                   "response_format": "timeseries",
@@ -813,6 +638,7 @@
                 "value",
                 "sum"
               ],
+              "time": {},
               "type": "timeseries",
               "requests": [
                 {
@@ -825,7 +651,7 @@
                     {
                       "data_source": "metrics",
                       "name": "query1",
-                      "query": "sum:teleport.proxy.missing_ssh_tunnels{$teleport_service,$host}"
+                      "query": "sum:teleport.proxy.missing_ssh_tunnels{$teleport_service,$host} by {host}"
                     }
                   ],
                   "response_format": "timeseries",
@@ -860,6 +686,7 @@
                 "value",
                 "sum"
               ],
+              "time": {},
               "type": "timeseries",
               "requests": [
                 {
@@ -872,7 +699,7 @@
                     {
                       "data_source": "metrics",
                       "name": "query1",
-                      "query": "sum:teleport.proxy.remote_clusters{$teleport_service,$host}"
+                      "query": "sum:teleport.proxy.remote_clusters{$teleport_service,$host} by {host}"
                     }
                   ],
                   "response_format": "timeseries",
@@ -907,6 +734,7 @@
                 "value",
                 "sum"
               ],
+              "time": {},
               "type": "timeseries",
               "requests": [
                 {
@@ -919,7 +747,7 @@
                     {
                       "data_source": "metrics",
                       "name": "query1",
-                      "query": "sum:teleport.proxy.trusted_clusters{$teleport_service,$host}"
+                      "query": "sum:teleport.proxy.trusted_clusters{$teleport_service,$host} by {host}"
                     }
                   ],
                   "response_format": "timeseries",
@@ -954,6 +782,7 @@
                 "value",
                 "sum"
               ],
+              "time": {},
               "type": "timeseries",
               "requests": [
                 {
@@ -966,7 +795,7 @@
                     {
                       "data_source": "metrics",
                       "name": "query1",
-                      "query": "sum:teleport.proxy.teleport_connect_to_node_attempts.count{$teleport_service,$host}.as_count()"
+                      "query": "sum:teleport.proxy.teleport_connect_to_node_attempts.count{$teleport_service,$host} by {host}.as_count()"
                     }
                   ],
                   "response_format": "timeseries",
@@ -1001,6 +830,7 @@
                 "value",
                 "sum"
               ],
+              "time": {},
               "type": "timeseries",
               "requests": [
                 {
@@ -1013,7 +843,7 @@
                     {
                       "data_source": "metrics",
                       "name": "query1",
-                      "query": "sum:teleport.proxy.teleport_connect_to_node_attempts.count{$teleport_service,$host}.as_count()"
+                      "query": "sum:teleport.proxy.teleport_connect_to_node_attempts.count{$teleport_service,$host} by {host}.as_count()"
                     }
                   ],
                   "response_format": "timeseries",
@@ -1040,6 +870,15 @@
               "title_size": "16",
               "title_align": "left",
               "show_legend": false,
+              "legend_layout": "auto",
+              "legend_columns": [
+                "avg",
+                "min",
+                "max",
+                "value",
+                "sum"
+              ],
+              "time": {},
               "type": "timeseries",
               "requests": [
                 {
@@ -1052,7 +891,7 @@
                     {
                       "data_source": "metrics",
                       "name": "query1",
-                      "query": "avg:teleport.proxy.ssh_sessions_total{$teleport_service,$host}"
+                      "query": "avg:teleport.proxy.ssh_sessions_total{$teleport_service,$host} by {host}"
                     }
                   ],
                   "response_format": "timeseries",
@@ -1087,6 +926,7 @@
                 "value",
                 "sum"
               ],
+              "time": {},
               "type": "timeseries",
               "requests": [
                 {
@@ -1099,7 +939,7 @@
                     {
                       "data_source": "metrics",
                       "name": "query1",
-                      "query": "sum:teleport.proxy.failed_login_attempts.count{$teleport_service,$host}.as_count()"
+                      "query": "sum:teleport.proxy.failed_login_attempts.count{$teleport_service,$host} by {host}.as_count()"
                     }
                   ],
                   "response_format": "timeseries",
@@ -1123,9 +963,219 @@
       },
       "layout": {
         "x": 0,
-        "y": 17,
+        "y": 11,
         "width": 12,
         "height": 5
+      }
+    },
+    {
+      "id": 5949428905688286,
+      "definition": {
+        "title": "Auth",
+        "background_color": "vivid_purple",
+        "show_title": true,
+        "type": "group",
+        "layout_type": "ordered",
+        "widgets": [
+          {
+            "id": 4158482909323100,
+            "definition": {
+              "title": "User Logins",
+              "title_size": "16",
+              "title_align": "left",
+              "show_legend": false,
+              "legend_layout": "auto",
+              "legend_columns": [
+                "avg",
+                "min",
+                "max",
+                "value",
+                "sum"
+              ],
+              "time": {},
+              "type": "timeseries",
+              "requests": [
+                {
+                  "formulas": [
+                    {
+                      "formula": "query1"
+                    }
+                  ],
+                  "queries": [
+                    {
+                      "data_source": "metrics",
+                      "name": "query1",
+                      "query": "sum:teleport.auth.user_login.count{$teleport_service,$host} by {host}.as_count()"
+                    }
+                  ],
+                  "response_format": "timeseries",
+                  "style": {
+                    "palette": "dog_classic",
+                    "line_type": "solid",
+                    "line_width": "normal"
+                  },
+                  "display_type": "line"
+                }
+              ]
+            },
+            "layout": {
+              "x": 0,
+              "y": 0,
+              "width": 6,
+              "height": 3
+            }
+          },
+          {
+            "id": 1583656407390244,
+            "definition": {
+              "title": "Registered Teleport services",
+              "title_size": "16",
+              "title_align": "left",
+              "show_legend": false,
+              "legend_layout": "auto",
+              "legend_columns": [
+                "avg",
+                "min",
+                "max",
+                "value",
+                "sum"
+              ],
+              "time": {},
+              "type": "timeseries",
+              "requests": [
+                {
+                  "formulas": [
+                    {
+                      "formula": "query1"
+                    }
+                  ],
+                  "queries": [
+                    {
+                      "data_source": "metrics",
+                      "name": "query1",
+                      "query": "sum:teleport.auth.registered_servers{$teleport_service,$host} by {host}"
+                    }
+                  ],
+                  "response_format": "timeseries",
+                  "style": {
+                    "palette": "dog_classic",
+                    "line_type": "solid",
+                    "line_width": "normal"
+                  },
+                  "display_type": "line"
+                }
+              ]
+            },
+            "layout": {
+              "x": 6,
+              "y": 0,
+              "width": 6,
+              "height": 3
+            }
+          },
+          {
+            "id": 7968364411767144,
+            "definition": {
+              "title": "Generate Requests",
+              "title_size": "16",
+              "title_align": "left",
+              "show_legend": false,
+              "legend_layout": "auto",
+              "legend_columns": [
+                "avg",
+                "min",
+                "max",
+                "value",
+                "sum"
+              ],
+              "time": {},
+              "type": "timeseries",
+              "requests": [
+                {
+                  "formulas": [
+                    {
+                      "formula": "query1"
+                    }
+                  ],
+                  "queries": [
+                    {
+                      "data_source": "metrics",
+                      "name": "query1",
+                      "query": "sum:teleport.auth.generate_requests.count{$teleport_service,$host} by {host}.as_count()"
+                    }
+                  ],
+                  "response_format": "timeseries",
+                  "style": {
+                    "palette": "dog_classic",
+                    "line_type": "solid",
+                    "line_width": "normal"
+                  },
+                  "display_type": "line"
+                }
+              ]
+            },
+            "layout": {
+              "x": 0,
+              "y": 3,
+              "width": 6,
+              "height": 3
+            }
+          },
+          {
+            "id": 166041243538698,
+            "definition": {
+              "title": "Generate Requests Latency",
+              "title_size": "16",
+              "title_align": "left",
+              "show_legend": false,
+              "legend_layout": "auto",
+              "legend_columns": [
+                "avg",
+                "min",
+                "max",
+                "value",
+                "sum"
+              ],
+              "time": {},
+              "type": "timeseries",
+              "requests": [
+                {
+                  "formulas": [
+                    {
+                      "formula": "query1"
+                    }
+                  ],
+                  "queries": [
+                    {
+                      "data_source": "metrics",
+                      "name": "query1",
+                      "query": "sum:teleport.auth.generate_seconds.count{$teleport_service,$host} by {host}.as_count()"
+                    }
+                  ],
+                  "response_format": "timeseries",
+                  "style": {
+                    "palette": "dog_classic",
+                    "line_type": "solid",
+                    "line_width": "normal"
+                  },
+                  "display_type": "line"
+                }
+              ]
+            },
+            "layout": {
+              "x": 6,
+              "y": 3,
+              "width": 6,
+              "height": 3
+            }
+          }
+        ]
+      },
+      "layout": {
+        "x": 0,
+        "y": 16,
+        "width": 12,
+        "height": 7
       }
     },
     {
@@ -1143,7 +1193,6 @@
               "title": "Disk Usage",
               "title_size": "16",
               "title_align": "left",
-              "time": {},
               "type": "query_value",
               "requests": [
                 {
@@ -1197,6 +1246,7 @@
                 "value",
                 "sum"
               ],
+              "time": {},
               "type": "timeseries",
               "requests": [
                 {
@@ -1235,6 +1285,7 @@
               "title": "Disk Monitoring Failures",
               "title_size": "16",
               "title_align": "left",
+              "time": {},
               "type": "query_value",
               "requests": [
                 {
@@ -1248,7 +1299,7 @@
                       "data_source": "metrics",
                       "name": "query1",
                       "query": "sum:teleport.auth.audit_log.failed_disk_monitoring.count{$teleport_service,$host}.as_count()",
-                      "aggregator": "avg"
+                      "aggregator": "last"
                     }
                   ],
                   "response_format": "scalar",
@@ -1256,7 +1307,7 @@
                     {
                       "comparator": ">",
                       "value": 0,
-                      "palette": "white_on_yellow"
+                      "palette": "white_on_red"
                     },
                     {
                       "comparator": "=",
@@ -1267,7 +1318,11 @@
                 }
               ],
               "autoscale": true,
-              "precision": 2
+              "precision": 2,
+              "timeseries_background": {
+                "type": "bars",
+                "yaxis": {}
+              }
             },
             "layout": {
               "x": 0,
@@ -1291,6 +1346,7 @@
                 "value",
                 "sum"
               ],
+              "time": {},
               "type": "timeseries",
               "requests": [
                 {
@@ -1303,7 +1359,7 @@
                     {
                       "data_source": "metrics",
                       "name": "query1",
-                      "query": "sum:teleport.auth.audit_log.failed_emit_events.count{$teleport_service,$host} by {teleport_version}.as_count()"
+                      "query": "sum:teleport.auth.audit_log.failed_emit_events.count{$teleport_service,$host} by {host}.as_count()"
                     }
                   ],
                   "response_format": "timeseries",
@@ -1327,7 +1383,7 @@
       },
       "layout": {
         "x": 0,
-        "y": 22,
+        "y": 23,
         "width": 12,
         "height": 5
       }
@@ -1356,6 +1412,7 @@
                 "value",
                 "sum"
               ],
+              "time": {},
               "type": "timeseries",
               "requests": [
                 {
@@ -1368,7 +1425,7 @@
                     {
                       "data_source": "metrics",
                       "name": "query1",
-                      "query": "sum:teleport.kubernetes.server_in_flight_requests{$teleport_service,$host}"
+                      "query": "sum:teleport.kubernetes.server_in_flight_requests{$teleport_service,$host} by {host}"
                     }
                   ],
                   "response_format": "timeseries",
@@ -1391,7 +1448,7 @@
           {
             "id": 6005047996579690,
             "definition": {
-              "title": "Tota Server requests",
+              "title": "Total Server requests",
               "title_size": "16",
               "title_align": "left",
               "show_legend": false,
@@ -1403,6 +1460,7 @@
                 "value",
                 "sum"
               ],
+              "time": {},
               "type": "timeseries",
               "requests": [
                 {
@@ -1415,7 +1473,7 @@
                     {
                       "data_source": "metrics",
                       "name": "query1",
-                      "query": "sum:teleport.kubernetes.server_api_requests.count{$teleport_service,$host}.as_count()"
+                      "query": "sum:teleport.kubernetes.server_api_requests.count{$teleport_service,$host} by {host}.as_count()"
                     }
                   ],
                   "response_format": "timeseries",
@@ -1450,6 +1508,7 @@
                 "value",
                 "sum"
               ],
+              "time": {},
               "type": "timeseries",
               "requests": [
                 {
@@ -1462,7 +1521,7 @@
                     {
                       "data_source": "metrics",
                       "name": "query1",
-                      "query": "avg:teleport.kubernetes.client_in_flight_requests{$teleport_service,$host}"
+                      "query": "sum:teleport.kubernetes.client_in_flight_requests{$teleport_service,$host} by {host}"
                     }
                   ],
                   "response_format": "timeseries",
@@ -1497,6 +1556,7 @@
                 "value",
                 "sum"
               ],
+              "time": {},
               "type": "timeseries",
               "requests": [
                 {
@@ -1509,7 +1569,7 @@
                     {
                       "data_source": "metrics",
                       "name": "query1",
-                      "query": "sum:teleport.kubernetes.client_requests.count{$teleport_service,$host}.as_count()"
+                      "query": "sum:teleport.kubernetes.client_requests.count{$teleport_service,$host} by {host}.as_count()"
                     }
                   ],
                   "response_format": "timeseries",
@@ -1544,6 +1604,7 @@
                 "value",
                 "sum"
               ],
+              "time": {},
               "type": "timeseries",
               "requests": [
                 {
@@ -1556,7 +1617,7 @@
                     {
                       "data_source": "metrics",
                       "name": "query1",
-                      "query": "sum:teleport.kubernetes.server_exec_in_flight_sessions{$teleport_service,$host}"
+                      "query": "sum:teleport.kubernetes.server_exec_in_flight_sessions{$teleport_service,$host} by {host}"
                     }
                   ],
                   "response_format": "timeseries",
@@ -1591,6 +1652,7 @@
                 "value",
                 "sum"
               ],
+              "time": {},
               "type": "timeseries",
               "requests": [
                 {
@@ -1603,7 +1665,7 @@
                     {
                       "data_source": "metrics",
                       "name": "query1",
-                      "query": "sum:teleport.kubernetes.server_exec_sessions.count{$teleport_service,$host}.as_count()"
+                      "query": "sum:teleport.kubernetes.server_exec_sessions.count{$teleport_service,$host} by {host}.as_count()"
                     }
                   ],
                   "response_format": "timeseries",
@@ -1638,6 +1700,7 @@
                 "value",
                 "sum"
               ],
+              "time": {},
               "type": "timeseries",
               "requests": [
                 {
@@ -1650,7 +1713,7 @@
                     {
                       "data_source": "metrics",
                       "name": "query1",
-                      "query": "sum:teleport.kubernetes.server_join_sessions.count{$teleport_service,$host}.as_count()"
+                      "query": "sum:teleport.kubernetes.server_join_sessions.count{$teleport_service,$host} by {host}.as_count()"
                     }
                   ],
                   "response_format": "timeseries",
@@ -1685,6 +1748,7 @@
                 "value",
                 "sum"
               ],
+              "time": {},
               "type": "timeseries",
               "requests": [
                 {
@@ -1697,7 +1761,7 @@
                     {
                       "data_source": "metrics",
                       "name": "query1",
-                      "query": "avg:teleport.kubernetes.server_join_in_flight_sessions{$teleport_service,$host}"
+                      "query": "sum:teleport.kubernetes.server_join_in_flight_sessions{$teleport_service,$host} by {host}"
                     }
                   ],
                   "response_format": "timeseries",
@@ -1721,7 +1785,7 @@
       },
       "layout": {
         "x": 0,
-        "y": 27,
+        "y": 28,
         "width": 12,
         "height": 5
       }
