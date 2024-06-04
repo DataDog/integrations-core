@@ -4,6 +4,7 @@
 
 from pydantic import BaseModel, Field, computed_field
 
+
 class NodeAttributes(BaseModel):
     address: str | None = None
     adSt: str | None = None
@@ -15,14 +16,16 @@ class NodeAttributes(BaseModel):
     vendor: str | None = Field(default='cisco_aci')
     namespace: str | None = Field(default='default')
 
+
 class Node(BaseModel):
     attributes: NodeAttributes
+
 
 class DeviceMetadata(BaseModel):
     device_id: str | None = Field(default=None)
     id_tags: list = Field(default_factory=list)
     tags: list = Field(default_factory=list)
-    name: str | None = Field(default=None) 
+    name: str | None = Field(default=None)
     ip_address: str | None = Field(default=None)
     model: str | None = Field(default=None)
     adSt: str | None = Field(default=None, exclude=True)
@@ -33,7 +36,8 @@ class DeviceMetadata(BaseModel):
     @computed_field
     @property
     def status(self) -> int:
-        return 1 if self.adSt=='on' else 2
+        return 1 if self.adSt == 'on' else 2
+
 
 class DeviceMetadataList(BaseModel):
     device_metadata: list = Field(default_factory=list)

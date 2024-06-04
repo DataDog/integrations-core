@@ -6,6 +6,7 @@ from six import iteritems
 
 from datadog_checks.base.utils.serialization import json
 from datadog_checks.cisco_aci.models import DeviceMetadata, Node
+
 from . import aci_metrics, exceptions, helpers
 
 
@@ -216,12 +217,9 @@ class Fabric:
 
     def submit_node_metadata(self, node_attrs, tags):
         vendor = 'cisco_aci'
-        namespace='default'
+        namespace = 'default'
         node = Node(attributes=node_attrs)
-        id_tags = [
-            f'namespace:{namespace}',
-            f'system_ip:{node.attributes.address}'
-        ]
+        id_tags = [f'namespace:{namespace}', f'system_ip:{node.attributes.address}']
         device_tags = [
             f'device_vendor:{vendor}',
             f'device_namespace:{namespace}',
@@ -241,6 +239,6 @@ class Fabric:
             adSt=node.attributes.adSt,
             vendor=vendor,
             version=node.attributes.version,
-            serial_number=node.attributes.serial
+            serial_number=node.attributes.serial,
         )
         self.ndm_metadata(json.dumps(device.model_dump()))
