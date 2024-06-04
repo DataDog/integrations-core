@@ -26,7 +26,9 @@ from datadog_checks.sqlserver.const import (
     ENGINE_EDITION_ENTERPRISE,
     ENGINE_EDITION_EXPRESS,
     ENGINE_EDITION_PERSONAL,
+    ENGINE_EDITION_SQL_DATABASE,
     ENGINE_EDITION_STANDARD,
+    STATIC_INFO_ENGINE_EDITION,
 )
 from datadog_checks.sqlserver.statements import SQL_SERVER_QUERY_METRICS_COLUMNS, obfuscate_xml_plan
 
@@ -1019,29 +1021,35 @@ def test_metrics_lookback_multiplier(instance_docker):
 @pytest.mark.integration
 @pytest.mark.usefixtures('dd_environment')
 @pytest.mark.parametrize(
-    "configured_database,database_autodiscovery,filter_to_configured_database",
+    "configured_database,engine_edition,filter_to_configured_database",
     [
-        pytest.param(None, False, False, id="no_database_configured"),  # should default to master
+        pytest.param(None, None, False, id="no_database_configured_not_azure_sql"),  # should default to master
         pytest.param(
-            "datadog_test", False, True, id="configured_database_datadog_test"
-        ),  # should use configured database datadog_test
-        pytest.param("master", False, False, id="configured_database_master"),  # should use configured database master
-        pytest.param(None, True, False, id="autodiscovered_database"),  # should use autodiscovered database
+            "datadog_test", None, False, id="configured_database_datadog_test_not_azure_sql"
+        ),  # should not filter to configured database datadog_test
+        pytest.param(
+            "master", None, False, id="configured_database_master_not_azure_sql"
+        ),  # should use configured database master
+        pytest.param(
+            "datadog_test", ENGINE_EDITION_SQL_DATABASE, True, id="configured_database_datadog_test_azure_sql"
+        ),  # should filter to configured database datadog_test
     ],
 )
-def test_statement_with_metrics_filtered_to_configured_database(
+def test_statement_with_metrics_azure_sql_filtered_to_configured_database(
     aggregator,
     dd_run_check,
     dbm_instance,
     bob_conn,
     configured_database,
-    database_autodiscovery,
+    engine_edition,
     filter_to_configured_database,
 ):
     if configured_database:
         dbm_instance['database'] = configured_database
-    dbm_instance['database_autodiscovery'] = database_autodiscovery
     check = SQLServer(CHECK_NAME, {}, [dbm_instance])
+
+    if engine_edition:
+        check.static_info_cache[STATIC_INFO_ENGINE_EDITION] = engine_edition
 
     def _execute_queries():
         bob_conn.execute_with_retries("SELECT * FROM ϑings", (), database="datadog_test")
@@ -1066,8 +1074,6 @@ def test_statement_with_metrics_filtered_to_configured_database(
             row['database_name'] == configured_database for row in sqlserver_rows
         ), "should have only collected metrics for configured database"
     else:
-        # {"master", "datadog_test"} should be present in the metrics database names
-        assert {row['database_name'] for row in sqlserver_rows} - {
-            "master",
-            "datadog_test",
-        }, "should have collected metrics for master and datadog_test databases"
+        database_names = {row['database_name'] for row in sqlserver_rows}
+        assert 'datadog_test' in database_names, "should have collected metrics for datadog_test databases"
+        assert 'master' in database_names, "should have collected metrics for master databases"

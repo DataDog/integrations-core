@@ -22,7 +22,7 @@ from datadog_checks.base.utils.db.utils import (
 from datadog_checks.base.utils.serialization import json
 from datadog_checks.base.utils.tracking import tracked_method
 from datadog_checks.sqlserver.config import SQLServerConfig
-from datadog_checks.sqlserver.utils import extract_sql_comments_and_procedure_name
+from datadog_checks.sqlserver.utils import extract_sql_comments_and_procedure_name, is_azure_sql_database
 
 try:
     import datadog_agent
@@ -309,13 +309,15 @@ class SqlserverStatementMetrics(DBMAsyncJob):
             # Unaggregated query metrics row without a database name
             return True
 
-        configured_database = self._check.instance.get('database')
-        if self._config.autodiscovery or not configured_database or configured_database == 'master':
-            # If autodiscovery is enabled or the configured database is master, include all rows
-            return True
-        if not row['database_name'] or str(row['database_name']).lower() != configured_database.lower():
-            # If the row's database name does not match the configured database, exclude the row
-            return False
+        engine_edition = self._check.static_info_cache.get(STATIC_INFO_ENGINE_EDITION, "")
+        if is_azure_sql_database(engine_edition):
+            configured_database = self._check.instance.get('database')
+            if not configured_database or configured_database == 'master':
+                # If no database configured or the configured database is master, include all rows
+                return True
+            if not row['database_name'] or str(row['database_name']).lower() != configured_database.lower():
+                # If the row's database name does not match the configured database, exclude the row
+                return False
 
         return True
 
