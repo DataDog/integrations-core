@@ -26,7 +26,7 @@ For the Agent to start collecting metrics, the kubernetes_cluster_autoscaler pod
 
 Kubernetes Cluster Autoscaler has metrics and livenessProbe endpoints that can be accessed on port 8085 (you can change that using the --address flag). These endpoints are located under `/metrics` and `/health-check` and provide valuable information about the state of your cluster during scaling operations.
 
-To get the Cluster Autoscaler to expose some metrics for you. It's pretty simple, you have to: 
+To configure the Cluster Autoscaler to expose metrics, do the following:
 
 1. Enable access to the `/metrics` route and expose port `8085` for your Cluster Autoscaler deployment:
 
