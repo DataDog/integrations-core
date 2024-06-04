@@ -227,9 +227,9 @@ For more information on CloudFormation templating and syntax, see the [AWS Cloud
 
 To provide your Datadog API key as a secret, see [Using secrets](#using-secrets).
 
-### Installation for AWS Batch
+#### Installation for AWS Batch
 
-To monitor your AWS Batch jobs with Datadog, see [AWS Batch with ECS Fargate and the Datadog Agent][63]
+To monitor your AWS Batch jobs with Datadog, see [AWS Batch with ECS Fargate and the Datadog Agent][62]
 
 #### Create or modify your IAM policy
 
