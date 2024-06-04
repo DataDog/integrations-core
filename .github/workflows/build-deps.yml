@@ -16,6 +16,7 @@ on:
     paths:
     - .builders/**
     - agent_requirements.in
+    - .github/workflows/build-deps.yml
 
 concurrency:
   group: ${{ github.workflow }}-${{ github.event.pull_request.number || github.ref }}
