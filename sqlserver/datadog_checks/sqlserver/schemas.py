@@ -21,8 +21,9 @@ from datadog_checks.sqlserver.const import (
     STATIC_INFO_ENGINE_EDITION,
     STATIC_INFO_VERSION,
     TABLES_IN_SCHEMA_QUERY,
+    SWITCH_DB_STATEMENT,
 )
-from datadog_checks.sqlserver.utils import execute_query_output_result_as_dicts, get_list_chunks
+from datadog_checks.sqlserver.utils import execute_query_output_result_as_dicts, get_list_chunks, is_azure_sql_database
 
 
 class SubmitData:
@@ -44,8 +45,8 @@ class SubmitData:
 
     def reset(self):
         self._columns_count = 0
-        self.db_to_schemas = {}
-        self.db_info = {}
+        self.db_to_schemas.clear()
+        self.db_info.clear()
 
     def store_db_infos(self, db_infos):
         for db_info in db_infos:
@@ -56,9 +57,9 @@ class SubmitData:
         schemas = self.db_to_schemas.setdefault(db_name, {})
         if schema["id"] in schemas:
             known_tables = schemas[schema["id"]].setdefault("tables", [])
-            known_tables = known_tables + tables
+            known_tables = known_tables.extend(tables)
         else:
-            schemas[schema["id"]] = copy.deepcopy(schema)
+            schemas[schema["id"]] = schema
             schemas[schema["id"]]["tables"] = tables
 
     def columns_since_last_submit(self):
@@ -88,7 +89,7 @@ class SubmitData:
         json_event = json.dumps(event, default=default_json_event_encoding)
         self._log.debug("Reporting the following payload for schema collection: {}".format(self.truncate(json_event)))
         self._submit_to_agent_queue(json_event)
-        self.db_to_schemas = {}
+        self.db_to_schemas.clear()
 
 
 def agent_check_getter(self):
@@ -147,7 +148,7 @@ class Schemas(DBMAsyncJob):
         self._data_submitter.submit()
 
     @tracked_method(agent_check_getter=agent_check_getter)
-    def __fetch_schema_data(self, cursor, db_name):
+    def _fetch_schema_data(self, cursor, db_name):
         start_time = time.time()
         schemas = self._query_schema_information(cursor)
         for schema in schemas:
@@ -169,7 +170,26 @@ class Schemas(DBMAsyncJob):
                 if self._data_submitter.columns_since_last_submit() > self.MAX_COLUMNS_PER_EVENT:
                     self._data_submitter.submit()
         self._data_submitter.submit()
-        return False     
+        return False
+     
+    def _fetch_for_databases(self):
+        databases  = self._check.get_databases()
+        engine_edition = self._check.static_info_cache.get(STATIC_INFO_ENGINE_EDITION)
+        with self._check.connection.open_managed_default_connection():
+            with self._check.connection.get_managed_cursor() as cursor:
+                for db_name in databases:
+                    try:
+                        if not is_azure_sql_database(engine_edition):
+                            cursor.execute(SWITCH_DB_STATEMENT.format(db_name))
+                        self._fetch_schema_data(cursor, db_name)
+                    except StopIteration:
+                        self._log.error("While executing fetch schemas for databse - %s, the following exception occured - %s", db_name, e)
+                        return
+                    except Exception as e:
+                        self._log.error("While executing fetch schemas for databse - %s, the following exception occured - %s", db_name, e)
+                # Switch DB back to MASTER
+                if not is_azure_sql_database(engine_edition):
+                    cursor.execute(SWITCH_DB_STATEMENT.format(self._check.connection.DEFAULT_DATABASE))
    
     @tracked_method(agent_check_getter=agent_check_getter)
     def _collect_schemas_data(self):
@@ -228,12 +248,7 @@ class Schemas(DBMAsyncJob):
         databases = self._check.get_databases()
         db_infos = self._query_db_informations(databases)
         self._data_submitter.store_db_infos(db_infos)
-        errors = self._check.do_for_databases(self.__fetch_schema_data, self._check.get_databases())
-        if errors:
-            for e in errors:
-                self._log.error(
-                    "While executing fetch schemas for databse - %s, the following exception occured - %s", e[0], e[1]
-                )
+        self._fetch_for_databases()
         self._log.debug("Finished collect_schemas_data")
         self._data_submitter.submit()
 
