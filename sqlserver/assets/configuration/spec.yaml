@@ -719,7 +719,7 @@ files:
       options:
         - name: enabled
           description: |
-            Enable schema collection. Requires `dbm: true`. Defaults to true.
+            Enable schema collection. Requires `dbm: true`. Defaults to false.
           value:
             type: boolean
             example: true

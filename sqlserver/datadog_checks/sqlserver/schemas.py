@@ -116,12 +116,10 @@ class Schemas(DBMAsyncJob):
         self._max_execution_time = min(
             config.schema_config.get('max_execution_time', self.MAX_EXECUTION_TIME), collection_interval
         )
-        e = is_affirmative(config.schema_config.get('enabled', True))
-        print(e)
         super(Schemas, self).__init__(
             check,
             run_sync=True,
-            enabled=is_affirmative(config.schema_config.get('enabled', True)),
+            enabled=is_affirmative(config.schema_config.get('enabled', False)),
             expected_db_exceptions=(),
             # min collection interval is a desired collection interval for a check as a whole.
             min_collection_interval=config.min_collection_interval,
