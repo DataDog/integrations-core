@@ -5,186 +5,9 @@
 from datadog_checks.base.utils.containers import hash_mutable
 from datadog_checks.cisco_aci import CiscoACICheck
 from datadog_checks.cisco_aci.api import Api
-from datadog_checks.cisco_aci.models import DeviceMetadataList
 
 from . import common
-
-DATA = [
-    {
-        'device_id': 'default:10.0.200.0',
-        'id_tags': ['namespace:default', 'system_ip:10.0.200.0'],
-        'tags': [
-            'device_vendor:cisco_aci',
-            'device_namespace:default',
-            'device_hostname:topology/pod-1/node-101',
-            'hostname:topology/pod-1/node-101',
-            'system_ip:10.0.200.0',
-            'device_ip:10.0.200.0',
-            'device_id:default:10.0.200.0',
-            'switch_role:leaf',
-            'apic_role:leaf',
-            'node_id:101',
-            'fabric_state:active',
-            'fabric_pod_id:1',
-        ],
-        'ip_address': '10.0.200.0',
-        'model': 'N9K-C93180YC-FX',
-        'name': 'topology/pod-1/node-101',
-        'serial_number': 'FDO20440TS1',
-        'status': 1,
-        'vendor': 'cisco_aci',
-        'version': '',
-    },
-    {
-        'device_id': 'default:10.0.200.1',
-        'id_tags': ['namespace:default', 'system_ip:10.0.200.1'],
-        'tags': [
-            'device_vendor:cisco_aci',
-            'device_namespace:default',
-            'device_hostname:topology/pod-1/node-102',
-            'hostname:topology/pod-1/node-102',
-            'system_ip:10.0.200.1',
-            'device_ip:10.0.200.1',
-            'device_id:default:10.0.200.1',
-            'switch_role:leaf',
-            'apic_role:leaf',
-            'node_id:102',
-            'fabric_state:active',
-            'fabric_pod_id:1',
-        ],
-        'ip_address': '10.0.200.1',
-        'model': 'N9K-C93180YC-FX',
-        'name': 'topology/pod-1/node-102',
-        'serial_number': 'FDO20510HCA',
-        'status': 1,
-        'vendor': 'cisco_aci',
-        'version': '',
-    },
-    {
-        'device_id': 'default:10.0.200.2',
-        'id_tags': ['namespace:default', 'system_ip:10.0.200.2'],
-        'tags': [
-            'device_vendor:cisco_aci',
-            'device_namespace:default',
-            'device_hostname:topology/pod-1/node-202',
-            'hostname:topology/pod-1/node-202',
-            'system_ip:10.0.200.2',
-            'device_ip:10.0.200.2',
-            'device_id:default:10.0.200.2',
-            'switch_role:spine',
-            'apic_role:spine',
-            'node_id:202',
-            'fabric_state:active',
-            'fabric_pod_id:1',
-        ],
-        'ip_address': '10.0.200.2',
-        'model': 'N9K-C9336PQ',
-        'name': 'topology/pod-1/node-202',
-        'serial_number': 'SAL2014N5T7',
-        'status': 1,
-        'vendor': 'cisco_aci',
-        'version': '',
-    },
-    {
-        'device_id': 'default:10.0.200.3',
-        'id_tags': ['namespace:default', 'system_ip:10.0.200.3'],
-        'tags': [
-            'device_vendor:cisco_aci',
-            'device_namespace:default',
-            'device_hostname:topology/pod-1/node-3',
-            'hostname:topology/pod-1/node-3',
-            'system_ip:10.0.200.3',
-            'device_ip:10.0.200.3',
-            'device_id:default:10.0.200.3',
-            'apic_role:controller',
-            'node_id:3',
-            'fabric_state:unknown',
-            'fabric_pod_id:1',
-        ],
-        'ip_address': '10.0.200.3',
-        'model': 'APIC-SERVER-M1',
-        'name': 'topology/pod-1/node-3',
-        'serial_number': 'FCH1927V11T',
-        'status': 1,
-        'vendor': 'cisco_aci',
-        'version': 'A',
-    },
-    {
-        'device_id': 'default:10.0.200.4',
-        'id_tags': ['namespace:default', 'system_ip:10.0.200.4'],
-        'tags': [
-            'device_vendor:cisco_aci',
-            'device_namespace:default',
-            'device_hostname:topology/pod-1/node-1',
-            'hostname:topology/pod-1/node-1',
-            'system_ip:10.0.200.4',
-            'device_ip:10.0.200.4',
-            'device_id:default:10.0.200.4',
-            'apic_role:controller',
-            'node_id:1',
-            'fabric_state:unknown',
-            'fabric_pod_id:1',
-        ],
-        'ip_address': '10.0.200.4',
-        'model': 'APIC-SERVER-M1',
-        'name': 'topology/pod-1/node-1',
-        'serial_number': 'FCH1928V0SL',
-        'status': 1,
-        'vendor': 'cisco_aci',
-        'version': 'A',
-    },
-    {
-        'device_id': 'default:10.0.200.5',
-        'id_tags': ['namespace:default', 'system_ip:10.0.200.5'],
-        'tags': [
-            'device_vendor:cisco_aci',
-            'device_namespace:default',
-            'device_hostname:topology/pod-1/node-201',
-            'hostname:topology/pod-1/node-201',
-            'system_ip:10.0.200.5',
-            'device_ip:10.0.200.5',
-            'device_id:default:10.0.200.5',
-            'switch_role:spine',
-            'apic_role:spine',
-            'node_id:201',
-            'fabric_state:active',
-            'fabric_pod_id:1',
-        ],
-        'ip_address': '10.0.200.5',
-        'model': 'N9K-C9336PQ',
-        'name': 'topology/pod-1/node-201',
-        'serial_number': 'SAL2014N5U4',
-        'status': 1,
-        'vendor': 'cisco_aci',
-        'version': '',
-    },
-    {
-        'device_id': 'default:10.0.200.6',
-        'id_tags': ['namespace:default', 'system_ip:10.0.200.6'],
-        'tags': [
-            'device_vendor:cisco_aci',
-            'device_namespace:default',
-            'device_hostname:topology/pod-1/node-2',
-            'hostname:topology/pod-1/node-2',
-            'system_ip:10.0.200.6',
-            'device_ip:10.0.200.6',
-            'device_id:default:10.0.200.6',
-            'apic_role:controller',
-            'node_id:2',
-            'fabric_state:unknown',
-            'fabric_pod_id:1',
-        ],
-        'ip_address': '10.0.200.6',
-        'model': 'APIC-SERVER-M1',
-        'name': 'topology/pod-1/node-2',
-        'serial_number': 'FCH1928V06Q',
-        'status': 1,
-        'vendor': 'cisco_aci',
-        'version': 'A',
-    },
-]
-
-EXPECTED_RESULT = DeviceMetadataList(device_metadata=DATA)
+from .fixtures.metadata import EXPECTED_DEVICE_METADATA_RESULT, EXPECTED_INTERFACE_METADATA_RESULT
 
 
 def test_fabric_mocked(aggregator):
@@ -196,7 +19,10 @@ def test_fabric_mocked(aggregator):
     check.check({})
 
     ndm_metadata = aggregator.get_event_platform_events("ndm")
-    assert ndm_metadata == EXPECTED_RESULT.device_metadata
+    device_metadata = [dm for dm in ndm_metadata if 'serial_number' in dm]
+    interface_metadata = [im for im in ndm_metadata if 'serial_number' not in im]
+    assert device_metadata == EXPECTED_DEVICE_METADATA_RESULT.device_metadata
+    assert interface_metadata == EXPECTED_INTERFACE_METADATA_RESULT.interface_metadata
 
     tags000 = ['cisco', 'project:cisco_aci', 'medium:broadcast', 'snmpTrapSt:enable', 'fabric_pod_id:1']
     tags101 = tags000 + ['node_id:101']

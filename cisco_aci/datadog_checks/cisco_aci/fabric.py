@@ -5,7 +5,7 @@
 from six import iteritems
 
 from datadog_checks.base.utils.serialization import json
-from datadog_checks.cisco_aci.models import DeviceMetadata, Node
+from datadog_checks.cisco_aci.models import DeviceMetadata, Eth, InterfaceMetadata, Node
 
 from . import aci_metrics, exceptions, helpers
 
@@ -99,6 +99,7 @@ class Fabric:
             eth_attrs = helpers.get_attributes(e)
             eth_id = eth_attrs['id']
             tags = self.tagger.get_fabric_tags(e, 'l1PhysIf')
+            self.submit_interface_metadata(eth_attrs, node['address'], tags)
             try:
                 stats = self.api.get_eth_stats(pod_id, node['id'], eth_id)
                 self.submit_fabric_metric(stats, tags, 'l1PhysIf', hostname=hostname)
@@ -236,9 +237,23 @@ class Fabric:
             name=node.attributes.dn,
             ip_address=node.attributes.address,
             model=node.attributes.model,
-            adSt=node.attributes.adSt,
+            ad_st=node.attributes.ad_st,
             vendor=vendor,
             version=node.attributes.version,
             serial_number=node.attributes.serial,
         )
         self.ndm_metadata(json.dumps(device.model_dump()))
+
+    def submit_interface_metadata(self, eth_attr, address, tags):
+        eth = Eth(attributes=eth_attr)
+        namespace = 'default'
+        interface = InterfaceMetadata(
+            device_id=f'{namespace}:{address}',
+            id_tags=tags,
+            index=f'{eth.attributes.id}',
+            name=f'{eth.attributes.name}',
+            description=f'{eth.attributes.desc}',
+            mac_address=f'{eth.attributes.router_mac}',
+            admin_status=f'{eth.attributes.admin_st}',
+        )
+        self.ndm_metadata(json.dumps(interface.model_dump()))
