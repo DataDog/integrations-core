@@ -210,6 +210,7 @@ WHERE
     FK.referenced_object_id IN ({}) GROUP BY FK.name, FK.parent_object_id, FK.referenced_object_id;
 """
 
+
 def get_query_ao_availability_groups(sqlserver_major_version):
     """
     Construct the sys.availability_groups QueryExecutor configuration based on the SQL Server major version

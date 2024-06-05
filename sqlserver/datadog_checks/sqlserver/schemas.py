@@ -23,9 +23,7 @@ from datadog_checks.sqlserver.queries import (
     PARTITIONS_QUERY,
     SCHEMA_QUERY,
     TABLES_IN_SCHEMA_QUERY,
-) 
-
-
+)
 from datadog_checks.sqlserver.utils import execute_query_output_result_as_dicts, get_list_chunks, is_azure_sql_database
 
 
@@ -159,7 +157,7 @@ class Schemas(DBMAsyncJob):
             tables_chunks = list(get_list_chunks(tables, self.TABLES_CHUNK_SIZE))
             for tables_chunk in tables_chunks:
                 schema_collection_elapsed_time = time.time() - start_time
-                if schema_collection_elapsed_time > self.MAX_EXECUTION_TIME:
+                if schema_collection_elapsed_time > self._max_execution_time:
                     # TODO Report truncation to the backend
                     self._log.warning(
                         """Truncated data due to the effective execution time reaching {},
@@ -167,16 +165,20 @@ class Schemas(DBMAsyncJob):
                             self.MAX_EXECUTION_TIME, db_name, schema["name"]
                         )
                     )
-                    raise StopIteration("Schema collection took {}s which is longer than allowed limit of {}s".format(schema_collection_elapsed_time, self.MAX_EXECUTION_TIME))
+                    raise StopIteration(
+                        "Schema collection took {}s which is longer than allowed limit of {}s".format(
+                            schema_collection_elapsed_time, self.MAX_EXECUTION_TIME
+                        )
+                    )
                 columns_count, tables_info = self._get_tables_data(tables_chunk, schema, cursor)
                 self._data_submitter.store(db_name, schema, tables_info, columns_count)
                 if self._data_submitter.columns_since_last_submit() > self.MAX_COLUMNS_PER_EVENT:
                     self._data_submitter.submit()
         self._data_submitter.submit()
         return False
-     
+
     def _fetch_for_databases(self):
-        databases  = self._check.get_databases()
+        databases = self._check.get_databases()
         engine_edition = self._check.static_info_cache.get(STATIC_INFO_ENGINE_EDITION)
         with self._check.connection.open_managed_default_connection():
             with self._check.connection.get_managed_cursor() as cursor:
@@ -185,15 +187,23 @@ class Schemas(DBMAsyncJob):
                         if not is_azure_sql_database(engine_edition):
                             cursor.execute(SWITCH_DB_STATEMENT.format(db_name))
                         self._fetch_schema_data(cursor, db_name)
-                    except StopIteration:
-                        self._log.error("While executing fetch schemas for databse - %s, the following exception occured - %s", db_name, e)
+                    except StopIteration as e:
+                        self._log.error(
+                            "While executing fetch schemas for databse - %s, the following exception occured - %s",
+                            db_name,
+                            e,
+                        )
                         return
                     except Exception as e:
-                        self._log.error("While executing fetch schemas for databse - %s, the following exception occured - %s", db_name, e)
+                        self._log.error(
+                            "While executing fetch schemas for databse - %s, the following exception occured - %s",
+                            db_name,
+                            e,
+                        )
                 # Switch DB back to MASTER
                 if not is_azure_sql_database(engine_edition):
                     cursor.execute(SWITCH_DB_STATEMENT.format(self._check.connection.DEFAULT_DATABASE))
-   
+
     @tracked_method(agent_check_getter=agent_check_getter)
     def _collect_schemas_data(self):
         """Collects database information and schemas and submits to the agent's queue as dictionaries
