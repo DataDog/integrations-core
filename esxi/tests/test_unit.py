@@ -127,7 +127,7 @@ def test_esxi_perf_metrics(vcsim_instance, dd_run_check, aggregator, caplog):
     dd_run_check(check)
 
     base_tags = ["esxi_url:127.0.0.1:8989"]
-    aggregator.assert_metric("esxi.cpu.usage.avg", value=26, tags=base_tags, hostname="localhost.localdomain")
+    aggregator.assert_metric("esxi.cpu.usage.avg", value=0.26, tags=base_tags, hostname="localhost.localdomain")
     aggregator.assert_metric("esxi.mem.granted.avg", value=80, tags=base_tags, hostname="localhost.localdomain")
     aggregator.assert_metric("esxi.host.can_connect", 1, count=1, tags=base_tags)
 
@@ -145,8 +145,8 @@ def test_vm_perf_metrics(vcsim_instance, dd_run_check, aggregator):
     dd_run_check(check)
 
     base_tags = ["esxi_url:127.0.0.1:8989"]
-    aggregator.assert_metric("esxi.cpu.usage.avg", value=18, tags=base_tags, hostname="vm1")
-    aggregator.assert_metric("esxi.cpu.usage.avg", value=19, tags=base_tags, hostname="vm2")
+    aggregator.assert_metric("esxi.cpu.usage.avg", 0.18, tags=base_tags, hostname="vm1")
+    aggregator.assert_metric("esxi.cpu.usage.avg", value=0.19, tags=base_tags, hostname="vm2")
     aggregator.assert_metric("esxi.net.droppedRx.sum", value=28, tags=base_tags, hostname="vm1")
 
 
@@ -300,9 +300,9 @@ def test_use_guest_hostname(vcsim_instance, dd_run_check, aggregator):
     check = EsxiCheck('esxi', {}, [vcsim_instance])
     dd_run_check(check)
 
-    aggregator.assert_metric("esxi.cpu.usage.avg", value=18, hostname="testing-vm")
-    aggregator.assert_metric("esxi.cpu.usage.avg", value=19, hostname="test-vm-2")
-    aggregator.assert_metric("esxi.cpu.usage.avg", value=26, hostname="localhost.localdomain")
+    aggregator.assert_metric("esxi.cpu.usage.avg", value=0.18, hostname="testing-vm")
+    aggregator.assert_metric("esxi.cpu.usage.avg", value=0.19, hostname="test-vm-2")
+    aggregator.assert_metric("esxi.cpu.usage.avg", value=0.26, hostname="localhost.localdomain")
 
 
 @pytest.mark.usefixtures("service_instance")
@@ -371,21 +371,21 @@ def test_report_vm_instance_metrics(aggregator, dd_run_check, vcsim_instance, se
     base_tags = ['esxi_url:127.0.0.1:8989']
     aggregator.assert_metric(
         'esxi.cpu.usage.avg',
-        value=52,
+        value=0.52,
         count=1,
         hostname='vm1',
         tags=base_tags + ['cpu_core:test1'],
     )
     aggregator.assert_metric(
         'esxi.cpu.usage.avg',
-        value=11,
+        value=0.11,
         count=1,
         hostname='vm1',
         tags=base_tags + ['cpu_core:test2'],
     )
     aggregator.assert_metric(
         'esxi.cpu.usage.avg',
-        value=60,
+        value=0.60,
         count=0,
         hostname='vm1',
         tags=base_tags,
@@ -511,7 +511,7 @@ def test_report_instance_metrics_invalid_metric_name_still_collect_metrics(aggre
     check = EsxiCheck('esxi', {}, [instance])
     dd_run_check(check)
     base_tags = ["esxi_url:127.0.0.1:8989"]
-    aggregator.assert_metric("esxi.cpu.usage.avg", value=26, tags=base_tags, hostname="localhost.localdomain")
+    aggregator.assert_metric("esxi.cpu.usage.avg", value=0.26, tags=base_tags, hostname="localhost.localdomain")
     aggregator.assert_metric("esxi.mem.granted.avg", value=80, tags=base_tags, hostname="localhost.localdomain")
     aggregator.assert_metric("esxi.host.can_connect", 1, count=1, tags=base_tags)
 
@@ -582,13 +582,16 @@ def test_excluded_host_tags(
         return [tag for tag in external_tags if any(excluded in tag for excluded in excluded_tags) or "esxi_url" in tag]
 
     aggregator.assert_metric(
-        "esxi.cpu.usage.avg", value=18, tags=all_tags_for_metrics(vm_1_external_tags), hostname="vm1"
+        "esxi.cpu.usage.avg", value=0.18, tags=all_tags_for_metrics(vm_1_external_tags), hostname="vm1"
     )
     aggregator.assert_metric(
-        "esxi.cpu.usage.avg", value=19, tags=all_tags_for_metrics(vm_2_external_tags), hostname="vm2"
+        "esxi.cpu.usage.avg", value=0.19, tags=all_tags_for_metrics(vm_2_external_tags), hostname="vm2"
     )
     aggregator.assert_metric(
-        "esxi.cpu.usage.avg", value=26, tags=all_tags_for_metrics(host_external_tags), hostname="localhost.localdomain"
+        "esxi.cpu.usage.avg",
+        value=0.26,
+        tags=all_tags_for_metrics(host_external_tags),
+        hostname="localhost.localdomain",
     )
 
     def all_external_tags(external_tags):
@@ -1201,7 +1204,7 @@ def test_use_configured_hostname(vcsim_instance, dd_run_check, aggregator, datad
     dd_run_check(check)
 
     base_tags = ["esxi_url:127.0.0.1:8989"]
-    aggregator.assert_metric("esxi.cpu.usage.avg", value=26, tags=base_tags, hostname="127.0.0.1:8989")
+    aggregator.assert_metric("esxi.cpu.usage.avg", value=0.26, tags=base_tags, hostname="127.0.0.1:8989")
     aggregator.assert_metric("esxi.mem.granted.avg", value=80, tags=base_tags, hostname="127.0.0.1:8989")
     aggregator.assert_metric("esxi.host.can_connect", 1, count=1, tags=base_tags)
 
