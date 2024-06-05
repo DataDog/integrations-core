@@ -6,6 +6,7 @@
 post-install-commands = [
   "python -m pip uninstall -y confluent-kafka",
   "python -m pip install --no-binary confluent-kafka confluent-kafka==2.3.0",
+  "python -c 'import confluent_kafka; print(confluent_kafka.version())'",
 ]
 
 [envs.default.env-vars]
