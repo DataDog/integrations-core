@@ -97,7 +97,7 @@ See the [sample traefik_mesh.d/conf.yaml][4] for all available configuration opt
 
 _Available for Agent versions >6.0_
 
-Traefik Mesh logs can be collected from the different Traefik Mesh pods through Kubernetes. Collecting logs is disabled by default in the Datadog Agent. To enable it, see [Kubernetes Log Collection][16].
+Traefik Mesh logs can be collected from the different Traefik Mesh pods through Kubernetes. Collecting logs is disabled by default in the Datadog Agent. To enable it, see [Kubernetes Log Collection][12].
 
 See the [Autodiscovery Integration Templates][3] for guidance on applying the parameters below.
 
@@ -139,3 +139,4 @@ Need help? Contact [Datadog support][9].
 [9]: https://docs.datadoghq.com/help/
 [10]: https://doc.traefik.io/traefik/observability/metrics/overview/
 [11]: https://docs.datadoghq.com/integrations/openmetrics/
+[12]: https://docs.datadoghq.com/containers/kubernetes/log/
