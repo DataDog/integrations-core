@@ -704,7 +704,8 @@
                 "op": "query",
                 "shard": "shard04",
                 "collection": "users",
-                "comment": "sort"
+                "comment": "sort",
+                "ns": "integration.$cmd"
             },
             "query_truncated": "not_truncated"
         },
