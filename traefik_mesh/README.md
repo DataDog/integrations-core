@@ -25,7 +25,7 @@ Traefik Mesh can be configured to expose Prometheus-formatted metrics. The Datad
 
 In addition, a small subset of metrics can be collected by communicating with different API endpoints. Specifically:
 - `/api/version`: Version information on the Traefik proxy.
-- `/api/status/nodes`: Ready status of nodes visible by the Traefik [controller][12].
+- `/api/status/nodes`: Ready status of nodes visible by the Traefik [controller][5].
 - `/api/status/readiness`: Ready status of the Traefik controller.
 
 **Note**: This check uses [OpenMetrics][11] for metric collection, which requires Python 3.
@@ -132,11 +132,10 @@ Need help? Contact [Datadog support][9].
 [2]: https://app.datadoghq.com/account/settings/agent/latest
 [3]: https://docs.datadoghq.com/agent/kubernetes/integrations/
 [4]: https://github.com/DataDog/integrations-core/blob/master/traefik_mesh/datadog_checks/traefik_mesh/data/conf.yaml.example
-[5]: https://docs.datadoghq.com/agent/guide/agent-commands/#start-stop-and-restart-the-agent
+[5]: https://doc.traefik.io/traefik-mesh/api/
 [6]: https://docs.datadoghq.com/agent/guide/agent-commands/#agent-status-and-information
 [7]: https://github.com/DataDog/integrations-core/blob/master/traefik_mesh/metadata.csv
 [8]: https://github.com/DataDog/integrations-core/blob/master/traefik_mesh/assets/service_checks.json
 [9]: https://docs.datadoghq.com/help/
 [10]: https://doc.traefik.io/traefik/observability/metrics/overview/
 [11]: https://docs.datadoghq.com/integrations/openmetrics/
-[12]: https://doc.traefik.io/traefik-mesh/api/
