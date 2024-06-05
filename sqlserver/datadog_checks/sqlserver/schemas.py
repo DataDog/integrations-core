@@ -3,7 +3,6 @@ try:
 except ImportError:
     from ..stubs import datadog_agent
 
-import copy
 import json
 import time
 
@@ -11,18 +10,22 @@ from datadog_checks.base import is_affirmative
 from datadog_checks.base.utils.db.utils import DBMAsyncJob, default_json_event_encoding
 from datadog_checks.base.utils.tracking import tracked_method
 from datadog_checks.sqlserver.const import (
+    DEFAULT_SCHEMAS_COLLECTION_INTERVAL,
+    STATIC_INFO_ENGINE_EDITION,
+    STATIC_INFO_VERSION,
+    SWITCH_DB_STATEMENT,
+)
+from datadog_checks.sqlserver.queries import (
     COLUMN_QUERY,
     DB_QUERY,
-    DEFAULT_SCHEMAS_COLLECTION_INTERVAL,
     FOREIGN_KEY_QUERY,
     INDEX_QUERY,
     PARTITIONS_QUERY,
     SCHEMA_QUERY,
-    STATIC_INFO_ENGINE_EDITION,
-    STATIC_INFO_VERSION,
     TABLES_IN_SCHEMA_QUERY,
-    SWITCH_DB_STATEMENT,
-)
+) 
+
+
 from datadog_checks.sqlserver.utils import execute_query_output_result_as_dicts, get_list_chunks, is_azure_sql_database
 
 
@@ -164,7 +167,7 @@ class Schemas(DBMAsyncJob):
                             self.MAX_EXECUTION_TIME, db_name, schema["name"]
                         )
                     )
-                    raise StopIteration("Schema collection took {} which is longer than allowed limit {}".format(schema_collection_elapsed_time, self.MAX_EXECUTION_TIME))
+                    raise StopIteration("Schema collection took {}s which is longer than allowed limit of {}s".format(schema_collection_elapsed_time, self.MAX_EXECUTION_TIME))
                 columns_count, tables_info = self._get_tables_data(tables_chunk, schema, cursor)
                 self._data_submitter.store(db_name, schema, tables_info, columns_count)
                 if self._data_submitter.columns_since_last_submit() > self.MAX_COLUMNS_PER_EVENT:
