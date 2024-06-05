@@ -33,7 +33,7 @@ tests:
         bytes_written: 5
         client:
           ip: "10.32.0.1"
-      traefik_mesh:
+      traefik:
         backend_url: "/"
         name: "entrypoint redirect for http"
         request_total: 132170.0
@@ -72,7 +72,7 @@ tests:
         bytes_written: 5
         client:
           ip: "10.32.0.1"
-      traefik_mesh:
+      traefik:
         backend_url: "/"
         name: "entrypoint redirect for http"
         request_total: 132167.0
@@ -233,7 +233,7 @@ tests:
         bytes_written: 2
         client:
           ip: "127.0.0.1"
-      traefik_mesh:
+      traefik:
         backend_url: "-"
         name: "-"
         request_total: 1.0

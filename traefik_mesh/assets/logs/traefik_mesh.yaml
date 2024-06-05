@@ -77,7 +77,7 @@ pipeline:
   name: Traefik Mesh
   enabled: true
   filter:
-    query: source:traefik_mesh OR source:traefik
+    query: source:traefik_mesh
   processors:
     - type: grok-parser
       name: Parsing Traefik logs
