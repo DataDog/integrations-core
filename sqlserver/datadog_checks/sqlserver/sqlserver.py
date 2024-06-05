@@ -135,7 +135,7 @@ class SQLServer(AgentCheck):
         self.static_info_cache = TTLCache(
             maxsize=100,
             # cache these for a full day
-            ttl=60 * 5,
+            ttl=60 * 60 * 24,
         )
         # _database_instance_emitted: limit the collection and transmission of the database instance metadata
         self._database_instance_emitted = TTLCache(
@@ -234,7 +234,6 @@ class SQLServer(AgentCheck):
         )
 
     def set_resolved_hostname(self):
-        # load static information cache
         self.load_static_information()
         if self._resolved_hostname is None:
             if self._config.reported_hostname:
@@ -735,6 +734,7 @@ class SQLServer(AgentCheck):
 
     def check(self, _):
         if self.do_check:
+            self.load_static_information()
             # configure custom queries for the check
             if self._query_manager is None:
                 # use QueryManager to process custom queries
