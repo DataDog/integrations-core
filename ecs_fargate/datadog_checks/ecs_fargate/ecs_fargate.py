@@ -4,6 +4,7 @@
 from __future__ import division
 
 import os
+from datetime import datetime, timezone
 
 import requests
 from dateutil import parser
@@ -176,6 +177,10 @@ class FargateCheck(AgentCheck):
 
             if container.get('Limits', {}).get('CPU', 0) > 0:
                 self.gauge('ecs.fargate.cpu.limit', container['Limits']['CPU'], container_tags[c_id])
+
+            if container.get('StartedAt', '') != '' and container.get('FinishedAt', '') == '':
+                uptime = int((datetime.now(timezone.utc) - parser.isoparse(container['StartedAt'])).total_seconds())
+                self.gauge('ecs.fargate.uptime', uptime, container_tags[c_id])
 
         # Create task tags
         task_tags = get_tags(TASK_TAGGER_ENTITY_ID, True) or []
