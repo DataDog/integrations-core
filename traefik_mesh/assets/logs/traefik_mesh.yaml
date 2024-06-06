@@ -2,8 +2,8 @@ id: traefik_mesh
 metric_id: traefik-mesh
 backend_only: false
 installation_sources:
-  - traefik
   - traefik_mesh
+  - traefik
 facets:
   - facetType: range
     groups:
