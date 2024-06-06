@@ -205,8 +205,8 @@ def session_auth(request, mock_responses):
     catalog = param.get('catalog')
 
     def get_access(session):
-        project_id = session.return_value.project_id if session.return_value.project_id else 'unscoped'
-        token = mock_responses('POST', '/identity/v3/auth/tokens', project_id)['token']
+        file = session.return_value.x_auth_type
+        token = mock_responses('POST', '/identity/v3/auth/tokens', file)['token']
         return mock.MagicMock(
             service_catalog=mock.MagicMock(catalog=catalog if catalog is not None else token.get('catalog', [])),
             project_id=token.get('project', {}).get('id'),
@@ -222,7 +222,7 @@ def openstack_session(session_auth, microversion_headers):
         microversion_headers[0] = session.headers.get('X-OpenStack-Nova-API-Version')
         microversion_headers[1] = session.headers.get('X-OpenStack-Ironic-API-Version')
         return mock.MagicMock(
-            return_value=mock.MagicMock(project_id=auth.project_id),
+            return_value=mock.MagicMock(x_auth_type=session.headers.get('X-Auth-Type')),
             auth=session_auth,
         )
 
@@ -241,7 +241,6 @@ def connection_authorize(request, mock_responses):
             raise exception
         if http_error is not None:
             raise requests.exceptions.HTTPError(response=http_error)
-        return mock.MagicMock(return_value=["test_token"])
 
     return mock.MagicMock(side_effect=authorize)
 
@@ -1017,12 +1016,9 @@ def mock_http_post(request, monkeypatch, mock_http_call):
         if http_error and url in http_error:
             raise requests.exceptions.HTTPError(response=http_error[url])
         if url == '/identity/v3/auth/tokens':
-            data = kwargs['json']
-            scope = data.get('auth', {}).get('scope', 'unscoped')
-            if isinstance(scope, dict):
-                scope = scope.get('project', {}).get('id')
-            json_data = mock_http_call(method, url, scope, headers=kwargs.get('headers'))
-            headers = {'X-Subject-Token': f'token_{scope}'}
+            file = kwargs.get('headers', {}).get('X-Auth-Type')
+            json_data = mock_http_call(method, url, file, headers=kwargs.get('headers'))
+            headers = {'X-Subject-Token': f'token_{file}'}
         else:
             json_data = mock_http_call(method, url)
         if replace and url in replace:

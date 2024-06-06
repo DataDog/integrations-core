@@ -62,6 +62,7 @@ class BareMetal(Component):
         if isinstance(config_nodes, bool):
             report_nodes = config_nodes
             config_nodes = {}
+        discovered_nodes = []
         if report_nodes:
             nodes_discovery = None
             if config_nodes:
@@ -82,6 +83,7 @@ class BareMetal(Component):
                 discovered_nodes = [
                     (None, node.get('name'), node, None) for node in self.check.api.get_baremetal_nodes()
                 ]
+        self.check.log.debug("discovered_nodes: %s", discovered_nodes)
         for _pattern, _item_name, item, item_config in discovered_nodes:
             self.check.log.debug("item: %s", item)
             self.check.log.debug("item_config: %s", item_config)

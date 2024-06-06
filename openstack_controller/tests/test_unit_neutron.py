@@ -209,7 +209,7 @@ def test_response_time_exception(aggregator, check, dd_run_check, mock_http_get)
     for call in mock_http_get.call_args_list:
         args, kwargs = call
         args_list += list(args)
-    assert args_list.count('http://127.0.0.1:9696/networking') == 2
+    assert args_list.count('http://127.0.0.1:9696/networking') == 3
 
 
 @pytest.mark.parametrize(
@@ -277,9 +277,9 @@ def test_agents_exception(aggregator, check, dd_run_check, mock_http_get, connec
         for call in mock_http_get.call_args_list:
             args, _ = call
             args_list += list(args)
-        assert args_list.count('http://127.0.0.1:9696/networking/v2.0/agents') == 2
+        assert args_list.count('http://127.0.0.1:9696/networking/v2.0/agents') == 3
     if api_type == ApiType.SDK:
-        assert connection_network.agents.call_count == 2
+        assert connection_network.agents.call_count == 3
 
 
 @pytest.mark.parametrize(

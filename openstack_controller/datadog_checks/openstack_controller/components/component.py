@@ -9,6 +9,7 @@ from functools import wraps
 from requests.exceptions import HTTPError
 
 from datadog_checks.base import AgentCheck
+from datadog_checks.openstack_controller.api.catalog import CatalogEndPointFailure
 
 
 def argument_value(arg_name, func, *args, **kwargs):
@@ -76,9 +77,11 @@ class Component:
                         self.check.service_check(self.SERVICE_CHECK, AgentCheck.OK, tags=tags)
                     return result if result is not None else True
                 except HTTPError as e:
-                    self.check.log.error("HTTPError: %s", e.response)
+                    self.check.log.debug("HTTPError: %s", e.response)
                     if report_service_check:
                         self.check.service_check(self.SERVICE_CHECK, AgentCheck.CRITICAL, tags=tags)
+                except CatalogEndPointFailure as e:
+                    self.check.log.debug("CatalogEndPointFailure: %s", e)
                 except Exception as e:
                     self.check.log.error("Exception: %s", e)
                 return None

@@ -109,8 +109,8 @@ class ApiRest(Api):
         self._current_project_id = project_id
 
     def _authorize_data(self, data):
-        self.log.debug("creating auth token")
-        response = self.http.post('{}/v3/auth/tokens'.format(self.config.keystone_server_url), json=data)
+        endpoint = '{}/v3/auth/tokens'.format(self.config.keystone_server_url)
+        response = self.http.post(endpoint, json=data)
         response.raise_for_status()
         response_json = response.json()
         self.log.debug("response: %s", response_json)
@@ -473,7 +473,7 @@ class ApiRest(Api):
         return response.json().get('drivers', [])
 
     def get_baremetal_allocations(self):
-        if float(self.config.ironic_microversion) < 1.52:
+        if self.config.ironic_microversion and float(self.config.ironic_microversion) < 1.52:
             self.log.info(
                 "Ironic microversion is below 1.52 and set to %s, cannot collect allocations",
                 self.config.ironic_microversion,

@@ -65,6 +65,7 @@ class ApiSdk(Api):
         return self._catalog.has_component(component_types)
 
     def authorize_user(self):
+        self.http.options['headers']['X-Auth-Type'] = "unscoped"
         v3_auth = v3.Password(
             auth_url=self.cloud_config.get_auth_args().get('auth_url'),
             username=self.cloud_config.get_auth_args().get('username'),
@@ -81,6 +82,7 @@ class ApiSdk(Api):
         self.http.options['headers']['X-Auth-Token'] = self.connection.session.auth.get_token(self.connection.session)
 
     def authorize_system(self):
+        self.http.options['headers']['X-Auth-Type'] = "system"
         v3_auth = v3.Password(
             auth_url=self.cloud_config.get_auth_args().get('auth_url'),
             username=self.cloud_config.get_auth_args().get('username'),
@@ -98,6 +100,7 @@ class ApiSdk(Api):
         self.http.options['headers']['X-Auth-Token'] = self.connection.session.auth.get_token(self.connection.session)
 
     def authorize_project(self, project_id):
+        self.http.options['headers']['X-Auth-Type'] = project_id
         v3_auth = v3.Password(
             auth_url=self.cloud_config.get_auth_args().get('auth_url'),
             username=self.cloud_config.get_auth_args().get('username'),
@@ -298,7 +301,7 @@ class ApiSdk(Api):
         return [driver.to_dict(original_names=True) for driver in self.connection.baremetal.drivers()]
 
     def get_baremetal_allocations(self):
-        if float(self.config.ironic_microversion) < 1.52:
+        if self.config.ironic_microversion and float(self.config.ironic_microversion) < 1.52:
             self.log.info(
                 "Ironic microversion is below 1.52 and set to %s, cannot collect allocations",
                 self.config.ironic_microversion,

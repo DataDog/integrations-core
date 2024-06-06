@@ -469,7 +469,7 @@ def test_response_time_exception(aggregator, check, dd_run_check, mock_http_get)
     for call in mock_http_get.call_args_list:
         args, _ = call
         args_list += list(args)
-    assert args_list.count('http://127.0.0.1:8774/compute/v2.1') == 2
+    assert args_list.count('http://127.0.0.1:8774/compute/v2.1') == 3
 
 
 @pytest.mark.parametrize(
@@ -857,9 +857,9 @@ def test_services_exception(aggregator, check, dd_run_check, mock_http_get, conn
         for call in mock_http_get.call_args_list:
             args, _ = call
             args_list += list(args)
-        assert args_list.count('http://127.0.0.1:8774/compute/v2.1/os-services') == 2
+        assert args_list.count('http://127.0.0.1:8774/compute/v2.1/os-services') == 3
     if api_type == ApiType.SDK:
-        assert connection_compute.services.call_count == 2
+        assert connection_compute.services.call_count == 3
 
 
 @pytest.mark.parametrize(
@@ -931,9 +931,9 @@ def test_flavors_exception(aggregator, check, dd_run_check, mock_http_get, conne
         for call in mock_http_get.call_args_list:
             args, _ = call
             args_list += list(args)
-        assert args_list.count('http://127.0.0.1:8774/compute/v2.1/flavors/detail') == 2
+        assert args_list.count('http://127.0.0.1:8774/compute/v2.1/flavors/detail') == 3
     if api_type == ApiType.SDK:
-        assert connection_compute.flavors.call_count == 2
+        assert connection_compute.flavors.call_count == 3
 
 
 @pytest.mark.parametrize(
@@ -1210,9 +1210,9 @@ def test_hypervisors_exception(aggregator, check, dd_run_check, mock_http_get, c
         for call in mock_http_get.call_args_list:
             args, _ = call
             args_list += list(args)
-        assert args_list.count('http://127.0.0.1:8774/compute/v2.1/os-hypervisors/detail') == 2
+        assert args_list.count('http://127.0.0.1:8774/compute/v2.1/os-hypervisors/detail') == 3
     if api_type == ApiType.SDK:
-        assert connection_compute.hypervisors.call_count == 2
+        assert connection_compute.hypervisors.call_count == 3
 
 
 @pytest.mark.parametrize(
@@ -1268,6 +1268,7 @@ def test_hypervisor_uptime_exception(aggregator, check, dd_run_check, mock_http_
         for call in mock_http_get.call_args_list:
             args, _ = call
             args_list += list(args)
+        print(args_list)
         assert args_list.count('http://127.0.0.1:8774/compute/v2.1/os-hypervisors/1/uptime') == 1
     if api_type == ApiType.SDK:
         assert connection_compute.get_hypervisor_uptime.call_count == 1
