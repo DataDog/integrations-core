@@ -715,7 +715,8 @@ files:
         display_default: false
     - name: schemas_collection 
       description: |
-        Configure collection of schemas.
+        Configure collection of schemas. "\If database_autodiscovery is not enabled, data is collected 
+        only for the database configured with database."\
       options:
         - name: enabled
           description: |

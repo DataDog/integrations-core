@@ -116,6 +116,7 @@ class SQLServer(AgentCheck):
         self.instance_metrics = []
         self.instance_per_type_metrics = defaultdict(set)
         self.do_check = True
+
         self._config = SQLServerConfig(self.init_config, self.instance, self.log)
         self.tags = self._config.tags
 
