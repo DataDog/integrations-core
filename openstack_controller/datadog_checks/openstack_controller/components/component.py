@@ -82,8 +82,8 @@ class Component:
                         self.check.service_check(self.SERVICE_CHECK, AgentCheck.CRITICAL, tags=tags)
                 except CatalogEndPointFailure as e:
                     self.check.log.debug("CatalogEndPointFailure: %s", e)
-                # except Exception as e:
-                #     self.check.log.error("Exception: %s", e)
+                except Exception as e:
+                    self.check.log.error("Exception: %s", e)
                 return None
 
             return wrapper
