@@ -272,3 +272,5 @@ jobs:
       with:
         files: "${{ inputs.target }}/coverage.xml"
         flags: "${{ inputs.target }}"
+      env:
+        CODECOV_TOKEN: ${{ secrets.CODECOV_TOKEN }}
