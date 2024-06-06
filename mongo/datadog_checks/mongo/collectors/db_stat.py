@@ -3,7 +3,7 @@
 # Licensed under a 3-clause BSD style license (see LICENSE)
 
 from datadog_checks.mongo.collectors.base import MongoCollector
-from datadog_checks.mongo.common import MongosDeployment, ReplicaSetDeployment
+from datadog_checks.mongo.common import MongosDeployment, ReplicaSetDeployment, StandaloneDeployment
 
 
 class DbStatCollector(MongoCollector):
@@ -21,16 +21,16 @@ class DbStatCollector(MongoCollector):
     def compatible_with(self, deployment):
         # Can theoretically be run on any node as long as it contains data.
         # i.e Arbiters are ruled out
+        if isinstance(deployment, MongosDeployment):
+            self.log.debug("DbStatCollector can only be run on mongod nodes, mongos deployment detected.")
+            return False
         if self.db_name == 'local':
             if isinstance(deployment, ReplicaSetDeployment) and deployment.is_arbiter:
-                self.log.debug("DbStatCollector can only be run on mongod nodes, arbiter node detected.")
-                return False
-            if isinstance(deployment, MongosDeployment):
-                self.log.debug("DbStatCollector can only be run on mongod nodes, mongos deployment detected.")
+                self.log.debug("DbStatCollector can not be run on arbiter nodes.")
                 return False
             return True
         else:
-            return deployment.is_principal()
+            return isinstance(deployment, StandaloneDeployment) or deployment.is_primary
 
     def collect(self, api):
         db = api[self.db_name]

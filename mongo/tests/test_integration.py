@@ -93,7 +93,6 @@ def test_integration_mongos(instance_integration_cluster, aggregator, check, dd_
             'count-dbs',
             'serverStatus',
             'custom-queries',
-            'dbstats',
             'indexes-stats',
             'collection',
             'connection-pool',
@@ -170,6 +169,7 @@ def test_integration_replicaset_primary_in_shard(instance_integration, aggregato
         'top',
         'connection-pool',
         'dbstats-local',
+        'dbstats',
         'fsynclock',
     ]
     _assert_metrics(mongo_check, aggregator, metrics_categories, replica_tags)
@@ -378,6 +378,7 @@ def test_integration_configsvr_primary(instance_integration, aggregator, check, 
         'top',
         'connection-pool',
         'dbstats-local',
+        'dbstats',
         'fsynclock',
     ]
     _assert_metrics(mongo_check, aggregator, metrics_categories, replica_tags)
