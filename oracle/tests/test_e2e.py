@@ -47,13 +47,13 @@ SERVICE_CHECKS = ('oracle.can_connect', 'oracle.can_query')
 
 
 @pytest.mark.e2e
+@pytest.mark.skip(reason="Test disabled due to DBMON-4147"")
 def test_check(dd_agent_check):
-    # aggregator = dd_agent_check()
-    # for metric in METRICS:
-    #     aggregator.assert_metric(metric)
+    aggregator = dd_agent_check()
+    for metric in METRICS:
+        aggregator.assert_metric(metric)
 
-    # for service_check in SERVICE_CHECKS:
-    #     aggregator.assert_service_check(service_check)
-    # aggregator.assert_all_metrics_covered()
-    # aggregator.assert_metrics_using_metadata(get_metadata_metrics())
-    print("Test disabled due to DBMON-4147")
+    for service_check in SERVICE_CHECKS:
+        aggregator.assert_service_check(service_check)
+    aggregator.assert_all_metrics_covered()
+    aggregator.assert_metrics_using_metadata(get_metadata_metrics())
