@@ -125,7 +125,8 @@
                 "op": "query",
                 "shard": null,
                 "collection": "products",
-                "comment": "find"
+                "comment": "find",
+                "ns": "integration.products"
             },
             "query_truncated": "not_truncated"
         },
