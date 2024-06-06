@@ -99,9 +99,6 @@ def agent_check_getter(self):
 
 class Schemas(DBMAsyncJob):
 
-    # Requests for infromation about tables are done for a certain amount of tables at the time
-    # This number of tables doesnt slow down performance by much (15% compared to 500 tables)
-    # but allows the queue to be stable.
     TABLES_CHUNK_SIZE = 500
     # Note: in async mode execution time also cannot exceed 2 checks.
     MAX_EXECUTION_TIME = 10
@@ -160,12 +157,12 @@ class Schemas(DBMAsyncJob):
                     self._log.warning(
                         """Truncated data due to the effective execution time reaching {},
                          stopped on db - {} on schema {}""".format(
-                            self.MAX_EXECUTION_TIME, db_name, schema["name"]
+                            self._max_execution_time, db_name, schema["name"]
                         )
                     )
                     raise StopIteration(
-                        "Schema collection took {}s which is longer than allowed limit of {}s".format(
-                            schema_collection_elapsed_time, self.MAX_EXECUTION_TIME
+                        "Schema collection took {}s which is longer than allowed limit of {}s, stopped while collecting for db - {}".format(
+                            schema_collection_elapsed_time, self._max_execution_time, db_name
                         )
                     )
                 columns_count, tables_info = self._get_tables_data(tables_chunk, schema, cursor)
