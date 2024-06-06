@@ -45,6 +45,17 @@ class MockProcess(object):
     def children(self, recursive=False):
         return []
 
+    # https://stackoverflow.com/questions/5093382/object-becomes-none-when-using-a-context-manager
+    def oneshot(self):
+        class MockOneShot(object):
+            def __enter__(self):
+                return self
+
+            def __exit__(self, type, value, traceback):
+                pass
+
+        return MockOneShot()
+
 
 class NamedMockProcess(object):
     def __init__(self, name):
@@ -209,6 +220,14 @@ def test_check_filter_user(mock_process, reset_process_list_cache, aggregator, d
         dd_run_check(process)
 
     aggregator.assert_metric('system.processes.number', value=2, tags=generate_expected_tags(instance))
+
+
+@patch('psutil.Process', return_value=MockProcess())
+def test_use_oneshot(mock_process, reset_process_list_cache, aggregator, dd_run_check):
+    instance = {'name': 'foo', 'pid': 1, 'use_oneshot': True}
+    process = ProcessCheck(common.CHECK_NAME, {}, [instance])
+    dd_run_check(process)
+    aggregator.assert_metric('system.processes.number', value=1, tags=generate_expected_tags(instance))
 
 
 def test_check_missing_pid(aggregator, dd_run_check):
