@@ -4558,7 +4558,7 @@ PORTGROUPS_METRICS_IRONIC = [
         'tags': [
             'keystone_server:http://127.0.0.1:8080/identity',
             'portgroup_uuid:9d72cf53-19c8-4942-9314-005fa5d2a6a0',
-            'node_uuid:6d85703a-565d-469a-96ce-30b6de53079d',
+            'node_uuid:9d72cf53-19c8-4942-9314-005fa5d2a6a0',
             'portgroup_address:22:22:22:22:22:22',
             'portgroup_mode:active-backup',
             'portgroup_name:test_portgroup',
@@ -4572,7 +4572,7 @@ PORTGROUPS_METRICS_IRONIC = [
         'tags': [
             'keystone_server:http://127.0.0.1:8080/identity',
             'portgroup_uuid:032ce3fb-8181-4d6f-8b8e-f2adaa913f28',
-            'node_uuid:a27588a6-518d-49b4-a23c-3d51255a7e8b',
+            'node_uuid:bd7a61bb-5fe0-4c93-9628-55e312f9ef0e',
             'portgroup_address:11:11:11:11:11:11',
             'portgroup_mode:active-backup',
             'portgroup_name:portgroup-1',
