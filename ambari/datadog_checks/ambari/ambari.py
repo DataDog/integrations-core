@@ -30,6 +30,7 @@ class AmbariCheck(AgentCheck):
         self.base_url = self.instance.get("url", "")
         self.base_tags = self.instance.get("tags", [])
         self.included_services = self.instance.get("services", [])
+        self.log.debug("AmbariCheck initialized with base_url: %s", self.base_url)
 
     def check(self, _):
         clusters = self.get_clusters()
