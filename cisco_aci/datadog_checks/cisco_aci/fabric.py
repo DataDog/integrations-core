@@ -220,18 +220,18 @@ class Fabric:
         vendor = 'cisco_aci'
         namespace = 'default'
         node = Node(attributes=node_attrs)
-        id_tags = [f'namespace:{namespace}', f'system_ip:{node.attributes.address}']
+        id_tags = ['namespace:{}'.format(namespace), 'system_ip:{}'.format(node.attributes.address)]
         device_tags = [
-            f'device_vendor:{vendor}',
-            f'device_namespace:{namespace}',
-            f'device_hostname:{node.attributes.dn}',
-            f'hostname:{node.attributes.dn}',
-            f'system_ip:{node.attributes.address}',
-            f'device_ip:{node.attributes.address}',
-            f'device_id:{namespace}:{node.attributes.address}',
+            'device_vendor:{}'.format(vendor),
+            'device_namespace:{}'.format(namespace),
+            'device_hostname:{}'.format(node.attributes.dn),
+            'hostname:{}'.format(node.attributes.dn),
+            'system_ip:{}'.format(node.attributes.address),
+            'device_ip:{}'.format(node.attributes.address),
+            'device_id:{}:{}'.format(namespace, node.attributes.address),
         ]
         device = DeviceMetadata(
-            device_id=f'{namespace}:{node.attributes.address}',
+            device_id='{}:{}'.format(namespace, node.attributes.address),
             id_tags=id_tags,
             tags=device_tags + tags,
             name=node.attributes.dn,
@@ -248,12 +248,12 @@ class Fabric:
         eth = Eth(attributes=eth_attr)
         namespace = 'default'
         interface = InterfaceMetadata(
-            device_id=f'{namespace}:{address}',
+            device_id='{}:{}'.format(namespace, address),
             id_tags=tags,
-            index=f'{eth.attributes.id}',
-            name=f'{eth.attributes.name}',
-            description=f'{eth.attributes.desc}',
-            mac_address=f'{eth.attributes.router_mac}',
-            admin_status=f'{eth.attributes.admin_st}',
+            index=eth.attributes.id,
+            name=eth.attributes.name,
+            description=eth.attributes.desc,
+            mac_address=eth.attributes.router_mac,
+            admin_status=eth.attributes.admin_st,
         )
         self.ndm_metadata(json.dumps(interface.model_dump()))
