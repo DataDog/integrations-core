@@ -4,7 +4,7 @@
 
 import pytest
 
-# from datadog_checks.dev.utils import get_metadata_metrics
+from datadog_checks.dev.utils import get_metadata_metrics
 
 METRICS = (
     'oracle.tablespace.used',
@@ -47,7 +47,7 @@ SERVICE_CHECKS = ('oracle.can_connect', 'oracle.can_query')
 
 
 @pytest.mark.e2e
-@pytest.mark.skip(reason="Test disabled due to DBMON-4147"")
+@pytest.mark.skip(reason="Test disabled due to DBMON-4147")
 def test_check(dd_agent_check):
     aggregator = dd_agent_check()
     for metric in METRICS:
