@@ -6,6 +6,7 @@ import logging
 import os
 
 import pytest
+import requests
 
 import tests.configs as configs
 from datadog_checks.dev.http import MockResponse
@@ -20,14 +21,14 @@ pytestmark = [
     ('mock_http_post', 'connection_authorize', 'instance'),
     [
         pytest.param(
-            {'exception': {'/identity/v3/auth/tokens': Exception()}},
+            {'http_error': {'/identity/v3/auth/tokens': requests.HTTPError()}},
             None,
             configs.REST,
             id='api rest',
         ),
         pytest.param(
             None,
-            {'exception': Exception()},
+            {'http_error': requests.HTTPError()},
             configs.SDK,
             id='api sdk',
         ),

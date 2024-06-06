@@ -473,12 +473,6 @@ class ApiRest(Api):
         return response.json().get('drivers', [])
 
     def get_baremetal_allocations(self):
-        if self.config.ironic_microversion and float(self.config.ironic_microversion) < 1.52:
-            self.log.info(
-                "Ironic microversion is below 1.52 and set to %s, cannot collect allocations",
-                self.config.ironic_microversion,
-            )
-            return []
         return self.make_paginated_request(
             '{}/v1/allocations'.format(self._catalog.get_endpoint_by_type(Component.Types.BAREMETAL.value)),
             'allocations',

@@ -234,11 +234,8 @@ def openstack_session(session_auth, microversion_headers):
 def connection_authorize(request, mock_responses):
     param = request.param if hasattr(request, 'param') and request.param is not None else {}
     http_error = param.get('http_error')
-    exception = param.get('exception')
 
     def authorize():
-        if exception is not None:
-            raise exception
         if http_error is not None:
             raise requests.exceptions.HTTPError(response=http_error)
 
@@ -1005,14 +1002,11 @@ def mock_http_get(request, monkeypatch, mock_http_call):
 def mock_http_post(request, monkeypatch, mock_http_call):
     param = request.param if hasattr(request, 'param') and request.param is not None else {}
     replace = param.get('replace')
-    exception = param.get('exception')
     http_error = param.get('http_error')
 
     def post(url, *args, **kwargs):
         method = 'POST'
         url = get_url_path(url)
-        if exception and url in exception:
-            raise exception[url]
         if http_error and url in http_error:
             raise requests.exceptions.HTTPError(response=http_error[url])
         if url == '/identity/v3/auth/tokens':

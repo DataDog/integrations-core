@@ -201,8 +201,7 @@ class BareMetal(Component):
     @Component.register_global_metrics(ID)
     @Component.http_error()
     def _report_drivers(self, config, tags):
-        if 'drivers' not in config:
-            report_drivers = config.get('drivers', True)
+        report_drivers = config.get('drivers', True)
         if report_drivers:
             data = self.check.api.get_baremetal_drivers()
             for item in data:
@@ -218,8 +217,7 @@ class BareMetal(Component):
     @Component.register_global_metrics(ID)
     @Component.http_error()
     def _report_allocations(self, config, tags):
-        if 'allocations' not in config:
-            report_allocations = config.get('allocations', True)
+        report_allocations = config.get('allocations', True)
         if report_allocations:
             data = self.check.api.get_baremetal_allocations()
             for item in data:

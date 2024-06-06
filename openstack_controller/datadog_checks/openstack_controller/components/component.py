@@ -6,7 +6,7 @@ import inspect
 from enum import Enum, unique
 from functools import wraps
 
-from requests.exceptions import HTTPError
+import requests
 
 from datadog_checks.base import AgentCheck
 from datadog_checks.openstack_controller.api.catalog import CatalogEndPointFailure
@@ -76,14 +76,14 @@ class Component:
                         tags = argument_value('tags', func, *args, **kwargs)
                         self.check.service_check(self.SERVICE_CHECK, AgentCheck.OK, tags=tags)
                     return result if result is not None else True
-                except HTTPError as e:
+                except (requests.HTTPError, requests.ConnectionError, requests.Timeout, requests.RequestException) as e:
                     self.check.log.debug("HTTPError: %s", e.response)
                     if report_service_check:
                         self.check.service_check(self.SERVICE_CHECK, AgentCheck.CRITICAL, tags=tags)
                 except CatalogEndPointFailure as e:
                     self.check.log.debug("CatalogEndPointFailure: %s", e)
-                except Exception as e:
-                    self.check.log.error("Exception: %s", e)
+                # except Exception as e:
+                #     self.check.log.error("Exception: %s", e)
                 return None
 
             return wrapper
