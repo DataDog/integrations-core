@@ -91,7 +91,7 @@ requests-ntlm,PyPI,ISC,Copyright (c) 2013 Ben Toews
 requests-oauthlib,PyPI,BSD-3-Clause,Copyright (c) 2014 Kenneth Reitz.
 requests-oauthlib,PyPI,ISC,Copyright (c) 2014 Kenneth Reitz.
 requests-toolbelt,PyPI,Apache-2.0,"Copyright 2014 Ian Cordasco, Cory Benfield"
-requests-unixsocket2,PyPI,Apache-2.0,Copyright 2014 Marc Abramowitz
+requests-unixsocket2,PyPI,Apache-2.0,Copyright (c) 2024 - 2024 thelab
 rethinkdb,PyPI,Apache-2.0,Copyright 2018 RethinkDB.
 scandir,PyPI,BSD-3-Clause,"Copyright (c) 2012, Ben Hoyt"
 securesystemslib,PyPI,MIT,Copyright (c) 2016 Santiago Torres
