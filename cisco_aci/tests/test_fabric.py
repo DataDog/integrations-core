@@ -2,12 +2,19 @@
 # All rights reserved
 # Licensed under Simplified BSD License (see LICENSE)
 
+import six
+
 from datadog_checks.base.utils.containers import hash_mutable
 from datadog_checks.cisco_aci import CiscoACICheck
 from datadog_checks.cisco_aci.api import Api
 
+if six.PY3:
+    from .fixtures.metadata import EXPECTED_DEVICE_METADATA_RESULT, EXPECTED_INTERFACE_METADATA_RESULT
+else:
+    EXPECTED_DEVICE_METADATA_RESULT = None
+    EXPECTED_INTERFACE_METADATA_RESULT = None
+
 from . import common
-from .fixtures.metadata import EXPECTED_DEVICE_METADATA_RESULT, EXPECTED_INTERFACE_METADATA_RESULT
 
 
 def test_fabric_mocked(aggregator):
@@ -18,11 +25,12 @@ def test_fabric_mocked(aggregator):
 
     check.check({})
 
-    ndm_metadata = aggregator.get_event_platform_events("ndm")
-    device_metadata = [dm for dm in ndm_metadata if 'serial_number' in dm]
-    interface_metadata = [im for im in ndm_metadata if 'serial_number' not in im]
-    assert device_metadata == EXPECTED_DEVICE_METADATA_RESULT.device_metadata
-    assert interface_metadata == EXPECTED_INTERFACE_METADATA_RESULT.interface_metadata
+    if six.PY3:
+        ndm_metadata = aggregator.get_event_platform_events("ndm")
+        device_metadata = [dm for dm in ndm_metadata if 'serial_number' in dm]
+        interface_metadata = [im for im in ndm_metadata if 'serial_number' not in im]
+        assert device_metadata == EXPECTED_DEVICE_METADATA_RESULT.device_metadata
+        assert interface_metadata == EXPECTED_INTERFACE_METADATA_RESULT.interface_metadata
 
     tags000 = ['cisco', 'project:cisco_aci', 'medium:broadcast', 'snmpTrapSt:enable', 'fabric_pod_id:1']
     tags101 = tags000 + ['node_id:101']

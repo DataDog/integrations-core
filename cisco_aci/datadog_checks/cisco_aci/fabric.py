@@ -2,10 +2,17 @@
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
 
-from six import iteritems
+from six import PY3, iteritems
 
 from datadog_checks.base.utils.serialization import json
-from datadog_checks.cisco_aci.models import DeviceMetadata, Eth, InterfaceMetadata, Node
+
+if PY3:
+    from datadog_checks.cisco_aci.models import DeviceMetadata, Eth, InterfaceMetadata, Node
+else:
+    DeviceMetadata = None
+    Eth = None
+    InterfaceMetadata = None
+    Node = None
 
 from . import aci_metrics, exceptions, helpers
 
@@ -74,7 +81,8 @@ class Fabric:
                 continue
             self.log.info("processing node %s on pod %s", node_id, pod_id)
             try:
-                self.submit_node_metadata(node_attrs, tags)
+                if PY3:
+                    self.submit_node_metadata(node_attrs, tags)
                 self.submit_process_metric(n, tags + self.check_tags + user_tags, hostname=hostname)
             except (exceptions.APIConnectionException, exceptions.APIParsingException):
                 pass
@@ -99,7 +107,8 @@ class Fabric:
             eth_attrs = helpers.get_attributes(e)
             eth_id = eth_attrs['id']
             tags = self.tagger.get_fabric_tags(e, 'l1PhysIf')
-            self.submit_interface_metadata(eth_attrs, node['address'], tags)
+            if PY3:
+                self.submit_interface_metadata(eth_attrs, node['address'], tags)
             try:
                 stats = self.api.get_eth_stats(pod_id, node['id'], eth_id)
                 self.submit_fabric_metric(stats, tags, 'l1PhysIf', hostname=hostname)
@@ -256,4 +265,4 @@ class Fabric:
             mac_address=eth.attributes.router_mac,
             admin_status=eth.attributes.admin_st,
         )
-        self.ndm_metadata(json.dumps(interface.model_dump()))
+        self.ndm_metadata(json.dumps(interface.model_dump(exclude_none=True)))

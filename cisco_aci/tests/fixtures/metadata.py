@@ -2,7 +2,13 @@
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
 
-from datadog_checks.cisco_aci.models import DeviceMetadataList, InterfaceMetadataList
+import six
+
+if six.PY3:
+    from datadog_checks.cisco_aci.models import DeviceMetadataList, InterfaceMetadataList
+else:
+    DeviceMetadataList = None
+    InterfaceMetadataList = None
 
 DEVICE_METADATA = [
     {
@@ -182,7 +188,6 @@ DEVICE_METADATA = [
 
 INTERFACE_METADATA = [
     {
-        'description': 'None',
         'device_id': 'default:10.0.200.0',
         'id_tags': [
             'port:eth101/1/43',
@@ -197,7 +202,6 @@ INTERFACE_METADATA = [
         'status': 1,
     },
     {
-        'description': 'None',
         'device_id': 'default:10.0.200.0',
         'id_tags': [
             'port:eth101/1/44',
@@ -212,7 +216,6 @@ INTERFACE_METADATA = [
         'status': 1,
     },
     {
-        'description': 'None',
         'device_id': 'default:10.0.200.0',
         'id_tags': [
             'port:eth101/1/45',
@@ -227,7 +230,6 @@ INTERFACE_METADATA = [
         'status': 1,
     },
     {
-        'description': 'None',
         'device_id': 'default:10.0.200.0',
         'id_tags': [
             'port:eth101/1/46',
@@ -242,7 +244,6 @@ INTERFACE_METADATA = [
         'status': 1,
     },
     {
-        'description': 'None',
         'device_id': 'default:10.0.200.0',
         'id_tags': [
             'port:eth101/1/47',
@@ -257,7 +258,6 @@ INTERFACE_METADATA = [
         'status': 1,
     },
     {
-        'description': 'None',
         'device_id': 'default:10.0.200.0',
         'id_tags': [
             'port:eth101/1/48',
@@ -272,7 +272,6 @@ INTERFACE_METADATA = [
         'status': 1,
     },
     {
-        'description': 'None',
         'device_id': 'default:10.0.200.0',
         'id_tags': [
             'port:eth1/1',
@@ -287,7 +286,6 @@ INTERFACE_METADATA = [
         'status': 1,
     },
     {
-        'description': 'None',
         'device_id': 'default:10.0.200.0',
         'id_tags': [
             'port:eth1/2',
@@ -302,7 +300,6 @@ INTERFACE_METADATA = [
         'status': 1,
     },
     {
-        'description': 'None',
         'device_id': 'default:10.0.200.0',
         'id_tags': [
             'port:eth1/3',
@@ -317,7 +314,6 @@ INTERFACE_METADATA = [
         'status': 1,
     },
     {
-        'description': 'None',
         'device_id': 'default:10.0.200.0',
         'id_tags': [
             'port:eth1/4',
@@ -332,7 +328,6 @@ INTERFACE_METADATA = [
         'status': 1,
     },
     {
-        'description': 'None',
         'device_id': 'default:10.0.200.0',
         'id_tags': [
             'port:eth1/5',
@@ -347,7 +342,6 @@ INTERFACE_METADATA = [
         'status': 1,
     },
     {
-        'description': 'None',
         'device_id': 'default:10.0.200.0',
         'id_tags': [
             'port:eth1/6',
@@ -362,7 +356,6 @@ INTERFACE_METADATA = [
         'status': 1,
     },
     {
-        'description': 'None',
         'device_id': 'default:10.0.200.0',
         'id_tags': [
             'port:eth1/7',
@@ -377,7 +370,6 @@ INTERFACE_METADATA = [
         'status': 1,
     },
     {
-        'description': 'None',
         'device_id': 'default:10.0.200.0',
         'id_tags': [
             'port:eth1/9',
@@ -392,7 +384,6 @@ INTERFACE_METADATA = [
         'status': 1,
     },
     {
-        'description': 'None',
         'device_id': 'default:10.0.200.0',
         'id_tags': [
             'port:eth1/8',
@@ -407,7 +398,6 @@ INTERFACE_METADATA = [
         'status': 1,
     },
     {
-        'description': 'None',
         'device_id': 'default:10.0.200.0',
         'id_tags': [
             'port:eth1/10',
@@ -422,7 +412,6 @@ INTERFACE_METADATA = [
         'status': 1,
     },
     {
-        'description': 'None',
         'device_id': 'default:10.0.200.0',
         'id_tags': [
             'port:eth1/11',
@@ -437,7 +426,6 @@ INTERFACE_METADATA = [
         'status': 1,
     },
     {
-        'description': 'None',
         'device_id': 'default:10.0.200.0',
         'id_tags': [
             'port:eth1/12',
@@ -452,7 +440,6 @@ INTERFACE_METADATA = [
         'status': 1,
     },
     {
-        'description': 'None',
         'device_id': 'default:10.0.200.0',
         'id_tags': [
             'port:eth1/13',
@@ -467,7 +454,6 @@ INTERFACE_METADATA = [
         'status': 1,
     },
     {
-        'description': 'None',
         'device_id': 'default:10.0.200.0',
         'id_tags': [
             'port:eth1/14',
@@ -482,7 +468,6 @@ INTERFACE_METADATA = [
         'status': 1,
     },
     {
-        'description': 'None',
         'device_id': 'default:10.0.200.0',
         'id_tags': [
             'port:eth1/15',
@@ -497,7 +482,6 @@ INTERFACE_METADATA = [
         'status': 1,
     },
     {
-        'description': 'None',
         'device_id': 'default:10.0.200.0',
         'id_tags': [
             'port:eth1/16',
@@ -512,7 +496,6 @@ INTERFACE_METADATA = [
         'status': 1,
     },
     {
-        'description': 'None',
         'device_id': 'default:10.0.200.0',
         'id_tags': [
             'port:eth1/17',
@@ -527,7 +510,6 @@ INTERFACE_METADATA = [
         'status': 1,
     },
     {
-        'description': 'None',
         'device_id': 'default:10.0.200.0',
         'id_tags': [
             'port:eth1/18',
@@ -542,7 +524,6 @@ INTERFACE_METADATA = [
         'status': 1,
     },
     {
-        'description': 'None',
         'device_id': 'default:10.0.200.0',
         'id_tags': [
             'port:eth1/19',
@@ -557,7 +538,6 @@ INTERFACE_METADATA = [
         'status': 1,
     },
     {
-        'description': 'None',
         'device_id': 'default:10.0.200.0',
         'id_tags': [
             'port:eth1/20',
@@ -572,7 +552,6 @@ INTERFACE_METADATA = [
         'status': 2,
     },
     {
-        'description': 'None',
         'device_id': 'default:10.0.200.0',
         'id_tags': [
             'port:eth1/21',
@@ -587,7 +566,6 @@ INTERFACE_METADATA = [
         'status': 1,
     },
     {
-        'description': 'None',
         'device_id': 'default:10.0.200.0',
         'id_tags': [
             'port:eth1/22',
@@ -602,7 +580,6 @@ INTERFACE_METADATA = [
         'status': 1,
     },
     {
-        'description': 'None',
         'device_id': 'default:10.0.200.0',
         'id_tags': [
             'port:eth1/23',
@@ -617,7 +594,6 @@ INTERFACE_METADATA = [
         'status': 1,
     },
     {
-        'description': 'None',
         'device_id': 'default:10.0.200.0',
         'id_tags': [
             'port:eth1/24',
@@ -632,7 +608,6 @@ INTERFACE_METADATA = [
         'status': 1,
     },
     {
-        'description': 'None',
         'device_id': 'default:10.0.200.0',
         'id_tags': [
             'port:eth1/25',
@@ -647,7 +622,6 @@ INTERFACE_METADATA = [
         'status': 1,
     },
     {
-        'description': 'None',
         'device_id': 'default:10.0.200.0',
         'id_tags': [
             'port:eth1/26',
@@ -662,7 +636,6 @@ INTERFACE_METADATA = [
         'status': 1,
     },
     {
-        'description': 'None',
         'device_id': 'default:10.0.200.0',
         'id_tags': [
             'port:eth1/27',
@@ -677,7 +650,6 @@ INTERFACE_METADATA = [
         'status': 1,
     },
     {
-        'description': 'None',
         'device_id': 'default:10.0.200.0',
         'id_tags': [
             'port:eth1/28',
@@ -692,7 +664,6 @@ INTERFACE_METADATA = [
         'status': 1,
     },
     {
-        'description': 'None',
         'device_id': 'default:10.0.200.0',
         'id_tags': [
             'port:eth1/29',
@@ -707,7 +678,6 @@ INTERFACE_METADATA = [
         'status': 1,
     },
     {
-        'description': 'None',
         'device_id': 'default:10.0.200.0',
         'id_tags': [
             'port:eth1/30',
@@ -722,7 +692,6 @@ INTERFACE_METADATA = [
         'status': 1,
     },
     {
-        'description': 'None',
         'device_id': 'default:10.0.200.0',
         'id_tags': [
             'port:eth1/31',
@@ -737,7 +706,6 @@ INTERFACE_METADATA = [
         'status': 1,
     },
     {
-        'description': 'None',
         'device_id': 'default:10.0.200.0',
         'id_tags': [
             'port:eth1/32',
@@ -752,7 +720,6 @@ INTERFACE_METADATA = [
         'status': 1,
     },
     {
-        'description': 'None',
         'device_id': 'default:10.0.200.0',
         'id_tags': [
             'port:eth1/33',
@@ -767,7 +734,6 @@ INTERFACE_METADATA = [
         'status': 1,
     },
     {
-        'description': 'None',
         'device_id': 'default:10.0.200.0',
         'id_tags': [
             'port:eth1/34',
@@ -782,7 +748,6 @@ INTERFACE_METADATA = [
         'status': 1,
     },
     {
-        'description': 'None',
         'device_id': 'default:10.0.200.0',
         'id_tags': [
             'port:eth1/35',
@@ -797,7 +762,6 @@ INTERFACE_METADATA = [
         'status': 1,
     },
     {
-        'description': 'None',
         'device_id': 'default:10.0.200.0',
         'id_tags': [
             'port:eth1/36',
@@ -812,7 +776,6 @@ INTERFACE_METADATA = [
         'status': 1,
     },
     {
-        'description': 'None',
         'device_id': 'default:10.0.200.0',
         'id_tags': [
             'port:eth1/37',
@@ -827,7 +790,6 @@ INTERFACE_METADATA = [
         'status': 1,
     },
     {
-        'description': 'None',
         'device_id': 'default:10.0.200.0',
         'id_tags': [
             'port:eth1/38',
@@ -842,7 +804,6 @@ INTERFACE_METADATA = [
         'status': 1,
     },
     {
-        'description': 'None',
         'device_id': 'default:10.0.200.0',
         'id_tags': [
             'port:eth1/39',
@@ -857,7 +818,6 @@ INTERFACE_METADATA = [
         'status': 1,
     },
     {
-        'description': 'None',
         'device_id': 'default:10.0.200.0',
         'id_tags': [
             'port:eth1/40',
@@ -872,7 +832,6 @@ INTERFACE_METADATA = [
         'status': 1,
     },
     {
-        'description': 'None',
         'device_id': 'default:10.0.200.0',
         'id_tags': [
             'port:eth1/41',
@@ -887,7 +846,6 @@ INTERFACE_METADATA = [
         'status': 1,
     },
     {
-        'description': 'None',
         'device_id': 'default:10.0.200.0',
         'id_tags': [
             'port:eth1/42',
@@ -902,7 +860,6 @@ INTERFACE_METADATA = [
         'status': 1,
     },
     {
-        'description': 'None',
         'device_id': 'default:10.0.200.0',
         'id_tags': [
             'port:eth1/43',
@@ -917,7 +874,6 @@ INTERFACE_METADATA = [
         'status': 1,
     },
     {
-        'description': 'None',
         'device_id': 'default:10.0.200.0',
         'id_tags': [
             'port:eth1/44',
@@ -932,7 +888,6 @@ INTERFACE_METADATA = [
         'status': 1,
     },
     {
-        'description': 'None',
         'device_id': 'default:10.0.200.0',
         'id_tags': [
             'port:eth1/45',
@@ -947,7 +902,6 @@ INTERFACE_METADATA = [
         'status': 1,
     },
     {
-        'description': 'None',
         'device_id': 'default:10.0.200.0',
         'id_tags': [
             'port:eth1/46',
@@ -962,7 +916,6 @@ INTERFACE_METADATA = [
         'status': 1,
     },
     {
-        'description': 'None',
         'device_id': 'default:10.0.200.0',
         'id_tags': [
             'port:eth1/47',
@@ -977,7 +930,6 @@ INTERFACE_METADATA = [
         'status': 1,
     },
     {
-        'description': 'None',
         'device_id': 'default:10.0.200.0',
         'id_tags': [
             'port:eth1/48',
@@ -992,7 +944,6 @@ INTERFACE_METADATA = [
         'status': 1,
     },
     {
-        'description': 'None',
         'device_id': 'default:10.0.200.0',
         'id_tags': [
             'port:eth1/49',
@@ -1007,7 +958,6 @@ INTERFACE_METADATA = [
         'status': 1,
     },
     {
-        'description': 'None',
         'device_id': 'default:10.0.200.0',
         'id_tags': [
             'port:eth1/50',
@@ -1022,7 +972,6 @@ INTERFACE_METADATA = [
         'status': 1,
     },
     {
-        'description': 'None',
         'device_id': 'default:10.0.200.0',
         'id_tags': [
             'port:eth1/51',
@@ -1037,7 +986,6 @@ INTERFACE_METADATA = [
         'status': 1,
     },
     {
-        'description': 'None',
         'device_id': 'default:10.0.200.0',
         'id_tags': [
             'port:eth1/52',
@@ -1052,7 +1000,6 @@ INTERFACE_METADATA = [
         'status': 1,
     },
     {
-        'description': 'None',
         'device_id': 'default:10.0.200.0',
         'id_tags': [
             'port:eth1/53',
@@ -1067,7 +1014,6 @@ INTERFACE_METADATA = [
         'status': 1,
     },
     {
-        'description': 'None',
         'device_id': 'default:10.0.200.0',
         'id_tags': [
             'port:eth1/54',
@@ -1082,7 +1028,6 @@ INTERFACE_METADATA = [
         'status': 1,
     },
     {
-        'description': 'None',
         'device_id': 'default:10.0.200.0',
         'id_tags': [
             'port:eth101/1/1',
@@ -1097,7 +1042,6 @@ INTERFACE_METADATA = [
         'status': 1,
     },
     {
-        'description': 'None',
         'device_id': 'default:10.0.200.0',
         'id_tags': [
             'port:eth101/1/2',
@@ -1112,7 +1056,6 @@ INTERFACE_METADATA = [
         'status': 1,
     },
     {
-        'description': 'None',
         'device_id': 'default:10.0.200.0',
         'id_tags': [
             'port:eth101/1/3',
@@ -1127,7 +1070,6 @@ INTERFACE_METADATA = [
         'status': 1,
     },
     {
-        'description': 'None',
         'device_id': 'default:10.0.200.0',
         'id_tags': [
             'port:eth101/1/4',
@@ -1142,7 +1084,6 @@ INTERFACE_METADATA = [
         'status': 1,
     },
     {
-        'description': 'None',
         'device_id': 'default:10.0.200.0',
         'id_tags': [
             'port:eth101/1/5',
@@ -1157,7 +1098,6 @@ INTERFACE_METADATA = [
         'status': 1,
     },
     {
-        'description': 'None',
         'device_id': 'default:10.0.200.0',
         'id_tags': [
             'port:eth101/1/6',
@@ -1172,7 +1112,6 @@ INTERFACE_METADATA = [
         'status': 1,
     },
     {
-        'description': 'None',
         'device_id': 'default:10.0.200.0',
         'id_tags': [
             'port:eth101/1/7',
@@ -1187,7 +1126,6 @@ INTERFACE_METADATA = [
         'status': 1,
     },
     {
-        'description': 'None',
         'device_id': 'default:10.0.200.0',
         'id_tags': [
             'port:eth101/1/8',
@@ -1202,7 +1140,6 @@ INTERFACE_METADATA = [
         'status': 1,
     },
     {
-        'description': 'None',
         'device_id': 'default:10.0.200.0',
         'id_tags': [
             'port:eth101/1/9',
@@ -1217,7 +1154,6 @@ INTERFACE_METADATA = [
         'status': 1,
     },
     {
-        'description': 'None',
         'device_id': 'default:10.0.200.0',
         'id_tags': [
             'port:eth101/1/10',
@@ -1232,7 +1168,6 @@ INTERFACE_METADATA = [
         'status': 1,
     },
     {
-        'description': 'None',
         'device_id': 'default:10.0.200.0',
         'id_tags': [
             'port:eth101/1/11',
@@ -1247,7 +1182,6 @@ INTERFACE_METADATA = [
         'status': 1,
     },
     {
-        'description': 'None',
         'device_id': 'default:10.0.200.0',
         'id_tags': [
             'port:eth101/1/12',
@@ -1262,7 +1196,6 @@ INTERFACE_METADATA = [
         'status': 1,
     },
     {
-        'description': 'None',
         'device_id': 'default:10.0.200.0',
         'id_tags': [
             'port:eth101/1/13',
@@ -1277,7 +1210,6 @@ INTERFACE_METADATA = [
         'status': 1,
     },
     {
-        'description': 'None',
         'device_id': 'default:10.0.200.0',
         'id_tags': [
             'port:eth101/1/14',
@@ -1292,7 +1224,6 @@ INTERFACE_METADATA = [
         'status': 1,
     },
     {
-        'description': 'None',
         'device_id': 'default:10.0.200.0',
         'id_tags': [
             'port:eth101/1/15',
@@ -1307,7 +1238,6 @@ INTERFACE_METADATA = [
         'status': 1,
     },
     {
-        'description': 'None',
         'device_id': 'default:10.0.200.0',
         'id_tags': [
             'port:eth101/1/16',
@@ -1322,7 +1252,6 @@ INTERFACE_METADATA = [
         'status': 1,
     },
     {
-        'description': 'None',
         'device_id': 'default:10.0.200.0',
         'id_tags': [
             'port:eth101/1/17',
@@ -1337,7 +1266,6 @@ INTERFACE_METADATA = [
         'status': 1,
     },
     {
-        'description': 'None',
         'device_id': 'default:10.0.200.0',
         'id_tags': [
             'port:eth101/1/18',
@@ -1352,7 +1280,6 @@ INTERFACE_METADATA = [
         'status': 1,
     },
     {
-        'description': 'None',
         'device_id': 'default:10.0.200.0',
         'id_tags': [
             'port:eth101/1/19',
@@ -1367,7 +1294,6 @@ INTERFACE_METADATA = [
         'status': 1,
     },
     {
-        'description': 'None',
         'device_id': 'default:10.0.200.0',
         'id_tags': [
             'port:eth101/1/20',
@@ -1382,7 +1308,6 @@ INTERFACE_METADATA = [
         'status': 1,
     },
     {
-        'description': 'None',
         'device_id': 'default:10.0.200.0',
         'id_tags': [
             'port:eth101/1/21',
@@ -1397,7 +1322,6 @@ INTERFACE_METADATA = [
         'status': 1,
     },
     {
-        'description': 'None',
         'device_id': 'default:10.0.200.0',
         'id_tags': [
             'port:eth101/1/22',
@@ -1412,7 +1336,6 @@ INTERFACE_METADATA = [
         'status': 1,
     },
     {
-        'description': 'None',
         'device_id': 'default:10.0.200.0',
         'id_tags': [
             'port:eth101/1/23',
@@ -1427,7 +1350,6 @@ INTERFACE_METADATA = [
         'status': 1,
     },
     {
-        'description': 'None',
         'device_id': 'default:10.0.200.0',
         'id_tags': [
             'port:eth101/1/24',
@@ -1442,7 +1364,6 @@ INTERFACE_METADATA = [
         'status': 1,
     },
     {
-        'description': 'None',
         'device_id': 'default:10.0.200.0',
         'id_tags': [
             'port:eth101/1/25',
@@ -1457,7 +1378,6 @@ INTERFACE_METADATA = [
         'status': 1,
     },
     {
-        'description': 'None',
         'device_id': 'default:10.0.200.0',
         'id_tags': [
             'port:eth101/1/26',
@@ -1472,7 +1392,6 @@ INTERFACE_METADATA = [
         'status': 1,
     },
     {
-        'description': 'None',
         'device_id': 'default:10.0.200.0',
         'id_tags': [
             'port:eth101/1/27',
@@ -1487,7 +1406,6 @@ INTERFACE_METADATA = [
         'status': 1,
     },
     {
-        'description': 'None',
         'device_id': 'default:10.0.200.0',
         'id_tags': [
             'port:eth101/1/28',
@@ -1502,7 +1420,6 @@ INTERFACE_METADATA = [
         'status': 1,
     },
     {
-        'description': 'None',
         'device_id': 'default:10.0.200.0',
         'id_tags': [
             'port:eth101/1/29',
@@ -1517,7 +1434,6 @@ INTERFACE_METADATA = [
         'status': 1,
     },
     {
-        'description': 'None',
         'device_id': 'default:10.0.200.0',
         'id_tags': [
             'port:eth101/1/30',
@@ -1532,7 +1448,6 @@ INTERFACE_METADATA = [
         'status': 1,
     },
     {
-        'description': 'None',
         'device_id': 'default:10.0.200.0',
         'id_tags': [
             'port:eth101/1/31',
@@ -1547,7 +1462,6 @@ INTERFACE_METADATA = [
         'status': 1,
     },
     {
-        'description': 'None',
         'device_id': 'default:10.0.200.0',
         'id_tags': [
             'port:eth101/1/32',
@@ -1562,7 +1476,6 @@ INTERFACE_METADATA = [
         'status': 1,
     },
     {
-        'description': 'None',
         'device_id': 'default:10.0.200.0',
         'id_tags': [
             'port:eth101/1/33',
@@ -1577,7 +1490,6 @@ INTERFACE_METADATA = [
         'status': 1,
     },
     {
-        'description': 'None',
         'device_id': 'default:10.0.200.0',
         'id_tags': [
             'port:eth101/1/34',
@@ -1592,7 +1504,6 @@ INTERFACE_METADATA = [
         'status': 1,
     },
     {
-        'description': 'None',
         'device_id': 'default:10.0.200.0',
         'id_tags': [
             'port:eth101/1/35',
@@ -1607,7 +1518,6 @@ INTERFACE_METADATA = [
         'status': 1,
     },
     {
-        'description': 'None',
         'device_id': 'default:10.0.200.0',
         'id_tags': [
             'port:eth101/1/36',
@@ -1622,7 +1532,6 @@ INTERFACE_METADATA = [
         'status': 1,
     },
     {
-        'description': 'None',
         'device_id': 'default:10.0.200.0',
         'id_tags': [
             'port:eth101/1/37',
@@ -1637,7 +1546,6 @@ INTERFACE_METADATA = [
         'status': 1,
     },
     {
-        'description': 'None',
         'device_id': 'default:10.0.200.0',
         'id_tags': [
             'port:eth101/1/38',
@@ -1652,7 +1560,6 @@ INTERFACE_METADATA = [
         'status': 1,
     },
     {
-        'description': 'None',
         'device_id': 'default:10.0.200.0',
         'id_tags': [
             'port:eth101/1/39',
@@ -1667,7 +1574,6 @@ INTERFACE_METADATA = [
         'status': 1,
     },
     {
-        'description': 'None',
         'device_id': 'default:10.0.200.0',
         'id_tags': [
             'port:eth101/1/40',
@@ -1682,7 +1588,6 @@ INTERFACE_METADATA = [
         'status': 1,
     },
     {
-        'description': 'None',
         'device_id': 'default:10.0.200.0',
         'id_tags': [
             'port:eth101/1/41',
@@ -1697,7 +1602,6 @@ INTERFACE_METADATA = [
         'status': 1,
     },
     {
-        'description': 'None',
         'device_id': 'default:10.0.200.0',
         'id_tags': [
             'port:eth101/1/42',
@@ -1712,7 +1616,6 @@ INTERFACE_METADATA = [
         'status': 1,
     },
     {
-        'description': 'None',
         'device_id': 'default:10.0.200.1',
         'id_tags': [
             'port:eth1/33',
@@ -1727,7 +1630,6 @@ INTERFACE_METADATA = [
         'status': 1,
     },
     {
-        'description': 'None',
         'device_id': 'default:10.0.200.1',
         'id_tags': [
             'port:eth1/34',
@@ -1742,7 +1644,6 @@ INTERFACE_METADATA = [
         'status': 1,
     },
     {
-        'description': 'None',
         'device_id': 'default:10.0.200.1',
         'id_tags': [
             'port:eth1/35',
@@ -1757,7 +1658,6 @@ INTERFACE_METADATA = [
         'status': 1,
     },
     {
-        'description': 'None',
         'device_id': 'default:10.0.200.1',
         'id_tags': [
             'port:eth1/36',
@@ -1772,7 +1672,6 @@ INTERFACE_METADATA = [
         'status': 1,
     },
     {
-        'description': 'None',
         'device_id': 'default:10.0.200.1',
         'id_tags': [
             'port:eth1/37',
@@ -1787,7 +1686,6 @@ INTERFACE_METADATA = [
         'status': 1,
     },
     {
-        'description': 'None',
         'device_id': 'default:10.0.200.1',
         'id_tags': [
             'port:eth1/38',
@@ -1802,7 +1700,6 @@ INTERFACE_METADATA = [
         'status': 1,
     },
     {
-        'description': 'None',
         'device_id': 'default:10.0.200.1',
         'id_tags': [
             'port:eth1/39',
@@ -1817,7 +1714,6 @@ INTERFACE_METADATA = [
         'status': 1,
     },
     {
-        'description': 'None',
         'device_id': 'default:10.0.200.1',
         'id_tags': [
             'port:eth1/40',
@@ -1832,7 +1728,6 @@ INTERFACE_METADATA = [
         'status': 1,
     },
     {
-        'description': 'None',
         'device_id': 'default:10.0.200.1',
         'id_tags': [
             'port:eth1/41',
@@ -1847,7 +1742,6 @@ INTERFACE_METADATA = [
         'status': 1,
     },
     {
-        'description': 'None',
         'device_id': 'default:10.0.200.1',
         'id_tags': [
             'port:eth1/42',
@@ -1862,7 +1756,6 @@ INTERFACE_METADATA = [
         'status': 1,
     },
     {
-        'description': 'None',
         'device_id': 'default:10.0.200.1',
         'id_tags': [
             'port:eth1/43',
@@ -1877,7 +1770,6 @@ INTERFACE_METADATA = [
         'status': 1,
     },
     {
-        'description': 'None',
         'device_id': 'default:10.0.200.1',
         'id_tags': [
             'port:eth1/44',
@@ -1892,7 +1784,6 @@ INTERFACE_METADATA = [
         'status': 1,
     },
     {
-        'description': 'None',
         'device_id': 'default:10.0.200.1',
         'id_tags': [
             'port:eth1/45',
@@ -1907,7 +1798,6 @@ INTERFACE_METADATA = [
         'status': 1,
     },
     {
-        'description': 'None',
         'device_id': 'default:10.0.200.1',
         'id_tags': [
             'port:eth1/46',
@@ -1922,7 +1812,6 @@ INTERFACE_METADATA = [
         'status': 1,
     },
     {
-        'description': 'None',
         'device_id': 'default:10.0.200.1',
         'id_tags': [
             'port:eth1/47',
@@ -1937,7 +1826,6 @@ INTERFACE_METADATA = [
         'status': 1,
     },
     {
-        'description': 'None',
         'device_id': 'default:10.0.200.1',
         'id_tags': [
             'port:eth1/48',
@@ -1952,7 +1840,6 @@ INTERFACE_METADATA = [
         'status': 1,
     },
     {
-        'description': 'None',
         'device_id': 'default:10.0.200.1',
         'id_tags': [
             'port:eth1/49',
@@ -1967,7 +1854,6 @@ INTERFACE_METADATA = [
         'status': 1,
     },
     {
-        'description': 'None',
         'device_id': 'default:10.0.200.1',
         'id_tags': [
             'port:eth1/50',
@@ -1982,7 +1868,6 @@ INTERFACE_METADATA = [
         'status': 1,
     },
     {
-        'description': 'None',
         'device_id': 'default:10.0.200.1',
         'id_tags': [
             'port:eth1/51',
@@ -1997,7 +1882,6 @@ INTERFACE_METADATA = [
         'status': 1,
     },
     {
-        'description': 'None',
         'device_id': 'default:10.0.200.1',
         'id_tags': [
             'port:eth1/52',
@@ -2012,7 +1896,6 @@ INTERFACE_METADATA = [
         'status': 1,
     },
     {
-        'description': 'None',
         'device_id': 'default:10.0.200.1',
         'id_tags': [
             'port:eth1/53',
@@ -2027,7 +1910,6 @@ INTERFACE_METADATA = [
         'status': 1,
     },
     {
-        'description': 'None',
         'device_id': 'default:10.0.200.1',
         'id_tags': [
             'port:eth1/54',
@@ -2042,7 +1924,6 @@ INTERFACE_METADATA = [
         'status': 1,
     },
     {
-        'description': 'None',
         'device_id': 'default:10.0.200.1',
         'id_tags': [
             'port:eth1/1',
@@ -2057,7 +1938,6 @@ INTERFACE_METADATA = [
         'status': 1,
     },
     {
-        'description': 'None',
         'device_id': 'default:10.0.200.1',
         'id_tags': [
             'port:eth1/2',
@@ -2072,7 +1952,6 @@ INTERFACE_METADATA = [
         'status': 1,
     },
     {
-        'description': 'None',
         'device_id': 'default:10.0.200.1',
         'id_tags': [
             'port:eth1/3',
@@ -2087,7 +1966,6 @@ INTERFACE_METADATA = [
         'status': 1,
     },
     {
-        'description': 'None',
         'device_id': 'default:10.0.200.1',
         'id_tags': [
             'port:eth1/4',
@@ -2102,7 +1980,6 @@ INTERFACE_METADATA = [
         'status': 1,
     },
     {
-        'description': 'None',
         'device_id': 'default:10.0.200.1',
         'id_tags': [
             'port:eth1/15',
@@ -2117,7 +1994,6 @@ INTERFACE_METADATA = [
         'status': 1,
     },
     {
-        'description': 'None',
         'device_id': 'default:10.0.200.1',
         'id_tags': [
             'port:eth1/16',
@@ -2132,7 +2008,6 @@ INTERFACE_METADATA = [
         'status': 1,
     },
     {
-        'description': 'None',
         'device_id': 'default:10.0.200.1',
         'id_tags': [
             'port:eth1/17',
@@ -2147,7 +2022,6 @@ INTERFACE_METADATA = [
         'status': 1,
     },
     {
-        'description': 'None',
         'device_id': 'default:10.0.200.1',
         'id_tags': [
             'port:eth1/18',
@@ -2162,7 +2036,6 @@ INTERFACE_METADATA = [
         'status': 1,
     },
     {
-        'description': 'None',
         'device_id': 'default:10.0.200.1',
         'id_tags': [
             'port:eth1/5',
@@ -2177,7 +2050,6 @@ INTERFACE_METADATA = [
         'status': 1,
     },
     {
-        'description': 'None',
         'device_id': 'default:10.0.200.1',
         'id_tags': [
             'port:eth1/6',
@@ -2192,7 +2064,6 @@ INTERFACE_METADATA = [
         'status': 1,
     },
     {
-        'description': 'None',
         'device_id': 'default:10.0.200.1',
         'id_tags': [
             'port:eth1/7',
@@ -2207,7 +2078,6 @@ INTERFACE_METADATA = [
         'status': 1,
     },
     {
-        'description': 'None',
         'device_id': 'default:10.0.200.1',
         'id_tags': [
             'port:eth1/8',
@@ -2222,7 +2092,6 @@ INTERFACE_METADATA = [
         'status': 1,
     },
     {
-        'description': 'None',
         'device_id': 'default:10.0.200.1',
         'id_tags': [
             'port:eth1/9',
@@ -2237,7 +2106,6 @@ INTERFACE_METADATA = [
         'status': 1,
     },
     {
-        'description': 'None',
         'device_id': 'default:10.0.200.1',
         'id_tags': [
             'port:eth1/10',
@@ -2252,7 +2120,6 @@ INTERFACE_METADATA = [
         'status': 1,
     },
     {
-        'description': 'None',
         'device_id': 'default:10.0.200.1',
         'id_tags': [
             'port:eth1/11',
@@ -2267,7 +2134,6 @@ INTERFACE_METADATA = [
         'status': 1,
     },
     {
-        'description': 'None',
         'device_id': 'default:10.0.200.1',
         'id_tags': [
             'port:eth1/12',
@@ -2282,7 +2148,6 @@ INTERFACE_METADATA = [
         'status': 1,
     },
     {
-        'description': 'None',
         'device_id': 'default:10.0.200.1',
         'id_tags': [
             'port:eth1/13',
@@ -2297,7 +2162,6 @@ INTERFACE_METADATA = [
         'status': 1,
     },
     {
-        'description': 'None',
         'device_id': 'default:10.0.200.1',
         'id_tags': [
             'port:eth1/14',
@@ -2312,7 +2176,6 @@ INTERFACE_METADATA = [
         'status': 1,
     },
     {
-        'description': 'None',
         'device_id': 'default:10.0.200.1',
         'id_tags': [
             'port:eth1/20',
@@ -2327,7 +2190,6 @@ INTERFACE_METADATA = [
         'status': 1,
     },
     {
-        'description': 'None',
         'device_id': 'default:10.0.200.1',
         'id_tags': [
             'port:eth1/19',
@@ -2342,7 +2204,6 @@ INTERFACE_METADATA = [
         'status': 1,
     },
     {
-        'description': 'None',
         'device_id': 'default:10.0.200.1',
         'id_tags': [
             'port:eth1/21',
@@ -2357,7 +2218,6 @@ INTERFACE_METADATA = [
         'status': 1,
     },
     {
-        'description': 'None',
         'device_id': 'default:10.0.200.1',
         'id_tags': [
             'port:eth1/22',
@@ -2372,7 +2232,6 @@ INTERFACE_METADATA = [
         'status': 1,
     },
     {
-        'description': 'None',
         'device_id': 'default:10.0.200.1',
         'id_tags': [
             'port:eth1/23',
@@ -2387,7 +2246,6 @@ INTERFACE_METADATA = [
         'status': 1,
     },
     {
-        'description': 'None',
         'device_id': 'default:10.0.200.1',
         'id_tags': [
             'port:eth1/24',
@@ -2402,7 +2260,6 @@ INTERFACE_METADATA = [
         'status': 1,
     },
     {
-        'description': 'None',
         'device_id': 'default:10.0.200.1',
         'id_tags': [
             'port:eth1/25',
@@ -2417,7 +2274,6 @@ INTERFACE_METADATA = [
         'status': 1,
     },
     {
-        'description': 'None',
         'device_id': 'default:10.0.200.1',
         'id_tags': [
             'port:eth1/26',
@@ -2432,7 +2288,6 @@ INTERFACE_METADATA = [
         'status': 1,
     },
     {
-        'description': 'None',
         'device_id': 'default:10.0.200.1',
         'id_tags': [
             'port:eth1/27',
@@ -2447,7 +2302,6 @@ INTERFACE_METADATA = [
         'status': 1,
     },
     {
-        'description': 'None',
         'device_id': 'default:10.0.200.1',
         'id_tags': [
             'port:eth1/28',
@@ -2462,7 +2316,6 @@ INTERFACE_METADATA = [
         'status': 1,
     },
     {
-        'description': 'None',
         'device_id': 'default:10.0.200.1',
         'id_tags': [
             'port:eth1/29',
@@ -2477,7 +2330,6 @@ INTERFACE_METADATA = [
         'status': 1,
     },
     {
-        'description': 'None',
         'device_id': 'default:10.0.200.1',
         'id_tags': [
             'port:eth1/30',
@@ -2492,7 +2344,6 @@ INTERFACE_METADATA = [
         'status': 1,
     },
     {
-        'description': 'None',
         'device_id': 'default:10.0.200.1',
         'id_tags': [
             'port:eth1/31',
@@ -2507,7 +2358,6 @@ INTERFACE_METADATA = [
         'status': 1,
     },
     {
-        'description': 'None',
         'device_id': 'default:10.0.200.1',
         'id_tags': [
             'port:eth1/32',
@@ -2522,7 +2372,6 @@ INTERFACE_METADATA = [
         'status': 1,
     },
     {
-        'description': 'None',
         'device_id': 'default:10.0.200.2',
         'id_tags': [
             'port:eth1/33',
@@ -2537,7 +2386,6 @@ INTERFACE_METADATA = [
         'status': 1,
     },
     {
-        'description': 'None',
         'device_id': 'default:10.0.200.2',
         'id_tags': [
             'port:eth1/34',
@@ -2552,7 +2400,6 @@ INTERFACE_METADATA = [
         'status': 1,
     },
     {
-        'description': 'None',
         'device_id': 'default:10.0.200.2',
         'id_tags': [
             'port:eth1/35',
@@ -2567,7 +2414,6 @@ INTERFACE_METADATA = [
         'status': 1,
     },
     {
-        'description': 'None',
         'device_id': 'default:10.0.200.2',
         'id_tags': [
             'port:eth1/36',
@@ -2582,7 +2428,6 @@ INTERFACE_METADATA = [
         'status': 1,
     },
     {
-        'description': 'None',
         'device_id': 'default:10.0.200.2',
         'id_tags': [
             'port:eth1/1',
@@ -2597,7 +2442,6 @@ INTERFACE_METADATA = [
         'status': 1,
     },
     {
-        'description': 'None',
         'device_id': 'default:10.0.200.2',
         'id_tags': [
             'port:eth1/2',
@@ -2612,7 +2456,6 @@ INTERFACE_METADATA = [
         'status': 1,
     },
     {
-        'description': 'None',
         'device_id': 'default:10.0.200.2',
         'id_tags': [
             'port:eth1/3',
@@ -2627,7 +2470,6 @@ INTERFACE_METADATA = [
         'status': 1,
     },
     {
-        'description': 'None',
         'device_id': 'default:10.0.200.2',
         'id_tags': [
             'port:eth1/4',
@@ -2642,7 +2484,6 @@ INTERFACE_METADATA = [
         'status': 1,
     },
     {
-        'description': 'None',
         'device_id': 'default:10.0.200.2',
         'id_tags': [
             'port:eth1/5',
@@ -2657,7 +2498,6 @@ INTERFACE_METADATA = [
         'status': 1,
     },
     {
-        'description': 'None',
         'device_id': 'default:10.0.200.2',
         'id_tags': [
             'port:eth1/6',
@@ -2672,7 +2512,6 @@ INTERFACE_METADATA = [
         'status': 1,
     },
     {
-        'description': 'None',
         'device_id': 'default:10.0.200.2',
         'id_tags': [
             'port:eth1/7',
@@ -2687,7 +2526,6 @@ INTERFACE_METADATA = [
         'status': 1,
     },
     {
-        'description': 'None',
         'device_id': 'default:10.0.200.2',
         'id_tags': [
             'port:eth1/8',
@@ -2702,7 +2540,6 @@ INTERFACE_METADATA = [
         'status': 1,
     },
     {
-        'description': 'None',
         'device_id': 'default:10.0.200.2',
         'id_tags': [
             'port:eth1/9',
@@ -2717,7 +2554,6 @@ INTERFACE_METADATA = [
         'status': 1,
     },
     {
-        'description': 'None',
         'device_id': 'default:10.0.200.2',
         'id_tags': [
             'port:eth1/10',
@@ -2732,7 +2568,6 @@ INTERFACE_METADATA = [
         'status': 1,
     },
     {
-        'description': 'None',
         'device_id': 'default:10.0.200.2',
         'id_tags': [
             'port:eth1/11',
@@ -2747,7 +2582,6 @@ INTERFACE_METADATA = [
         'status': 1,
     },
     {
-        'description': 'None',
         'device_id': 'default:10.0.200.2',
         'id_tags': [
             'port:eth1/12',
@@ -2762,7 +2596,6 @@ INTERFACE_METADATA = [
         'status': 1,
     },
     {
-        'description': 'None',
         'device_id': 'default:10.0.200.2',
         'id_tags': [
             'port:eth1/13',
@@ -2777,7 +2610,6 @@ INTERFACE_METADATA = [
         'status': 1,
     },
     {
-        'description': 'None',
         'device_id': 'default:10.0.200.2',
         'id_tags': [
             'port:eth1/14',
@@ -2792,7 +2624,6 @@ INTERFACE_METADATA = [
         'status': 1,
     },
     {
-        'description': 'None',
         'device_id': 'default:10.0.200.2',
         'id_tags': [
             'port:eth1/15',
@@ -2807,7 +2638,6 @@ INTERFACE_METADATA = [
         'status': 1,
     },
     {
-        'description': 'None',
         'device_id': 'default:10.0.200.2',
         'id_tags': [
             'port:eth1/16',
@@ -2822,7 +2652,6 @@ INTERFACE_METADATA = [
         'status': 1,
     },
     {
-        'description': 'None',
         'device_id': 'default:10.0.200.2',
         'id_tags': [
             'port:eth1/17',
@@ -2837,7 +2666,6 @@ INTERFACE_METADATA = [
         'status': 1,
     },
     {
-        'description': 'None',
         'device_id': 'default:10.0.200.2',
         'id_tags': [
             'port:eth1/18',
@@ -2852,7 +2680,6 @@ INTERFACE_METADATA = [
         'status': 1,
     },
     {
-        'description': 'None',
         'device_id': 'default:10.0.200.2',
         'id_tags': [
             'port:eth1/19',
@@ -2867,7 +2694,6 @@ INTERFACE_METADATA = [
         'status': 1,
     },
     {
-        'description': 'None',
         'device_id': 'default:10.0.200.2',
         'id_tags': [
             'port:eth1/20',
@@ -2882,7 +2708,6 @@ INTERFACE_METADATA = [
         'status': 1,
     },
     {
-        'description': 'None',
         'device_id': 'default:10.0.200.2',
         'id_tags': [
             'port:eth1/21',
@@ -2897,7 +2722,6 @@ INTERFACE_METADATA = [
         'status': 1,
     },
     {
-        'description': 'None',
         'device_id': 'default:10.0.200.2',
         'id_tags': [
             'port:eth1/22',
@@ -2912,7 +2736,6 @@ INTERFACE_METADATA = [
         'status': 1,
     },
     {
-        'description': 'None',
         'device_id': 'default:10.0.200.2',
         'id_tags': [
             'port:eth1/23',
@@ -2927,7 +2750,6 @@ INTERFACE_METADATA = [
         'status': 1,
     },
     {
-        'description': 'None',
         'device_id': 'default:10.0.200.2',
         'id_tags': [
             'port:eth1/24',
@@ -2942,7 +2764,6 @@ INTERFACE_METADATA = [
         'status': 1,
     },
     {
-        'description': 'None',
         'device_id': 'default:10.0.200.2',
         'id_tags': [
             'port:eth1/25',
@@ -2957,7 +2778,6 @@ INTERFACE_METADATA = [
         'status': 1,
     },
     {
-        'description': 'None',
         'device_id': 'default:10.0.200.2',
         'id_tags': [
             'port:eth1/26',
@@ -2972,7 +2792,6 @@ INTERFACE_METADATA = [
         'status': 1,
     },
     {
-        'description': 'None',
         'device_id': 'default:10.0.200.2',
         'id_tags': [
             'port:eth1/27',
@@ -2987,7 +2806,6 @@ INTERFACE_METADATA = [
         'status': 1,
     },
     {
-        'description': 'None',
         'device_id': 'default:10.0.200.2',
         'id_tags': [
             'port:eth1/28',
@@ -3002,7 +2820,6 @@ INTERFACE_METADATA = [
         'status': 1,
     },
     {
-        'description': 'None',
         'device_id': 'default:10.0.200.2',
         'id_tags': [
             'port:eth1/29',
@@ -3017,7 +2834,6 @@ INTERFACE_METADATA = [
         'status': 1,
     },
     {
-        'description': 'None',
         'device_id': 'default:10.0.200.2',
         'id_tags': [
             'port:eth1/30',
@@ -3032,7 +2848,6 @@ INTERFACE_METADATA = [
         'status': 1,
     },
     {
-        'description': 'None',
         'device_id': 'default:10.0.200.2',
         'id_tags': [
             'port:eth1/31',
@@ -3047,7 +2862,6 @@ INTERFACE_METADATA = [
         'status': 1,
     },
     {
-        'description': 'None',
         'device_id': 'default:10.0.200.2',
         'id_tags': [
             'port:eth1/32',
@@ -3062,7 +2876,6 @@ INTERFACE_METADATA = [
         'status': 1,
     },
     {
-        'description': 'None',
         'device_id': 'default:10.0.200.5',
         'id_tags': [
             'port:eth1/33',
@@ -3077,7 +2890,6 @@ INTERFACE_METADATA = [
         'status': 1,
     },
     {
-        'description': 'None',
         'device_id': 'default:10.0.200.5',
         'id_tags': [
             'port:eth1/34',
@@ -3092,7 +2904,6 @@ INTERFACE_METADATA = [
         'status': 1,
     },
     {
-        'description': 'None',
         'device_id': 'default:10.0.200.5',
         'id_tags': [
             'port:eth1/35',
@@ -3107,7 +2918,6 @@ INTERFACE_METADATA = [
         'status': 1,
     },
     {
-        'description': 'None',
         'device_id': 'default:10.0.200.5',
         'id_tags': [
             'port:eth1/36',
@@ -3122,7 +2932,6 @@ INTERFACE_METADATA = [
         'status': 1,
     },
     {
-        'description': 'None',
         'device_id': 'default:10.0.200.5',
         'id_tags': [
             'port:eth1/1',
@@ -3137,7 +2946,6 @@ INTERFACE_METADATA = [
         'status': 1,
     },
     {
-        'description': 'None',
         'device_id': 'default:10.0.200.5',
         'id_tags': [
             'port:eth1/2',
@@ -3152,7 +2960,6 @@ INTERFACE_METADATA = [
         'status': 1,
     },
     {
-        'description': 'None',
         'device_id': 'default:10.0.200.5',
         'id_tags': [
             'port:eth1/3',
@@ -3167,7 +2974,6 @@ INTERFACE_METADATA = [
         'status': 1,
     },
     {
-        'description': 'None',
         'device_id': 'default:10.0.200.5',
         'id_tags': [
             'port:eth1/4',
@@ -3182,7 +2988,6 @@ INTERFACE_METADATA = [
         'status': 1,
     },
     {
-        'description': 'None',
         'device_id': 'default:10.0.200.5',
         'id_tags': [
             'port:eth1/5',
@@ -3197,7 +3002,6 @@ INTERFACE_METADATA = [
         'status': 1,
     },
     {
-        'description': 'None',
         'device_id': 'default:10.0.200.5',
         'id_tags': [
             'port:eth1/6',
@@ -3212,7 +3016,6 @@ INTERFACE_METADATA = [
         'status': 1,
     },
     {
-        'description': 'None',
         'device_id': 'default:10.0.200.5',
         'id_tags': [
             'port:eth1/7',
@@ -3227,7 +3030,6 @@ INTERFACE_METADATA = [
         'status': 1,
     },
     {
-        'description': 'None',
         'device_id': 'default:10.0.200.5',
         'id_tags': [
             'port:eth1/8',
@@ -3242,7 +3044,6 @@ INTERFACE_METADATA = [
         'status': 1,
     },
     {
-        'description': 'None',
         'device_id': 'default:10.0.200.5',
         'id_tags': [
             'port:eth1/9',
@@ -3257,7 +3058,6 @@ INTERFACE_METADATA = [
         'status': 1,
     },
     {
-        'description': 'None',
         'device_id': 'default:10.0.200.5',
         'id_tags': [
             'port:eth1/10',
@@ -3272,7 +3072,6 @@ INTERFACE_METADATA = [
         'status': 1,
     },
     {
-        'description': 'None',
         'device_id': 'default:10.0.200.5',
         'id_tags': [
             'port:eth1/11',
@@ -3287,7 +3086,6 @@ INTERFACE_METADATA = [
         'status': 1,
     },
     {
-        'description': 'None',
         'device_id': 'default:10.0.200.5',
         'id_tags': [
             'port:eth1/12',
@@ -3302,7 +3100,6 @@ INTERFACE_METADATA = [
         'status': 1,
     },
     {
-        'description': 'None',
         'device_id': 'default:10.0.200.5',
         'id_tags': [
             'port:eth1/13',
@@ -3317,7 +3114,6 @@ INTERFACE_METADATA = [
         'status': 1,
     },
     {
-        'description': 'None',
         'device_id': 'default:10.0.200.5',
         'id_tags': [
             'port:eth1/14',
@@ -3332,7 +3128,6 @@ INTERFACE_METADATA = [
         'status': 1,
     },
     {
-        'description': 'None',
         'device_id': 'default:10.0.200.5',
         'id_tags': [
             'port:eth1/15',
@@ -3347,7 +3142,6 @@ INTERFACE_METADATA = [
         'status': 1,
     },
     {
-        'description': 'None',
         'device_id': 'default:10.0.200.5',
         'id_tags': [
             'port:eth1/16',
@@ -3362,7 +3156,6 @@ INTERFACE_METADATA = [
         'status': 1,
     },
     {
-        'description': 'None',
         'device_id': 'default:10.0.200.5',
         'id_tags': [
             'port:eth1/17',
@@ -3377,7 +3170,6 @@ INTERFACE_METADATA = [
         'status': 1,
     },
     {
-        'description': 'None',
         'device_id': 'default:10.0.200.5',
         'id_tags': [
             'port:eth1/18',
@@ -3392,7 +3184,6 @@ INTERFACE_METADATA = [
         'status': 1,
     },
     {
-        'description': 'None',
         'device_id': 'default:10.0.200.5',
         'id_tags': [
             'port:eth1/19',
@@ -3407,7 +3198,6 @@ INTERFACE_METADATA = [
         'status': 1,
     },
     {
-        'description': 'None',
         'device_id': 'default:10.0.200.5',
         'id_tags': [
             'port:eth1/20',
@@ -3422,7 +3212,6 @@ INTERFACE_METADATA = [
         'status': 1,
     },
     {
-        'description': 'None',
         'device_id': 'default:10.0.200.5',
         'id_tags': [
             'port:eth1/21',
@@ -3437,7 +3226,6 @@ INTERFACE_METADATA = [
         'status': 1,
     },
     {
-        'description': 'None',
         'device_id': 'default:10.0.200.5',
         'id_tags': [
             'port:eth1/22',
@@ -3452,7 +3240,6 @@ INTERFACE_METADATA = [
         'status': 1,
     },
     {
-        'description': 'None',
         'device_id': 'default:10.0.200.5',
         'id_tags': [
             'port:eth1/23',
@@ -3467,7 +3254,6 @@ INTERFACE_METADATA = [
         'status': 1,
     },
     {
-        'description': 'None',
         'device_id': 'default:10.0.200.5',
         'id_tags': [
             'port:eth1/24',
@@ -3482,7 +3268,6 @@ INTERFACE_METADATA = [
         'status': 1,
     },
     {
-        'description': 'None',
         'device_id': 'default:10.0.200.5',
         'id_tags': [
             'port:eth1/25',
@@ -3497,7 +3282,6 @@ INTERFACE_METADATA = [
         'status': 1,
     },
     {
-        'description': 'None',
         'device_id': 'default:10.0.200.5',
         'id_tags': [
             'port:eth1/26',
@@ -3512,7 +3296,6 @@ INTERFACE_METADATA = [
         'status': 1,
     },
     {
-        'description': 'None',
         'device_id': 'default:10.0.200.5',
         'id_tags': [
             'port:eth1/27',
@@ -3527,7 +3310,6 @@ INTERFACE_METADATA = [
         'status': 1,
     },
     {
-        'description': 'None',
         'device_id': 'default:10.0.200.5',
         'id_tags': [
             'port:eth1/28',
@@ -3542,7 +3324,6 @@ INTERFACE_METADATA = [
         'status': 1,
     },
     {
-        'description': 'None',
         'device_id': 'default:10.0.200.5',
         'id_tags': [
             'port:eth1/29',
@@ -3557,7 +3338,6 @@ INTERFACE_METADATA = [
         'status': 1,
     },
     {
-        'description': 'None',
         'device_id': 'default:10.0.200.5',
         'id_tags': [
             'port:eth1/30',
@@ -3572,7 +3352,6 @@ INTERFACE_METADATA = [
         'status': 1,
     },
     {
-        'description': 'None',
         'device_id': 'default:10.0.200.5',
         'id_tags': [
             'port:eth1/31',
@@ -3587,7 +3366,6 @@ INTERFACE_METADATA = [
         'status': 1,
     },
     {
-        'description': 'None',
         'device_id': 'default:10.0.200.5',
         'id_tags': [
             'port:eth1/32',

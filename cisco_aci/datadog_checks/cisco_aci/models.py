@@ -1,75 +1,71 @@
 # (C) Datadog, Inc. 2024-present
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
-from typing import Optional
 
-from pydantic import BaseModel, Field, computed_field
+import six
 
+if six.PY3:
+    from typing import Optional
 
-class NodeAttributes(BaseModel):
-    address: Optional[str] = None
-    ad_st: Optional[str] = Field(default=None, alias="adSt")
-    role: Optional[str] = None
-    dn: Optional[str] = None
-    model: Optional[str] = None
-    version: Optional[str] = None
-    serial: Optional[str] = None
-    vendor: Optional[str] = Field(default='cisco_aci')
-    namespace: Optional[str] = Field(default='default')
+    from pydantic import BaseModel, Field, computed_field
 
+    class NodeAttributes(BaseModel):
+        address: Optional[str] = None
+        ad_st: Optional[str] = Field(default=None, alias="adSt")
+        role: Optional[str] = None
+        dn: Optional[str] = None
+        model: Optional[str] = None
+        version: Optional[str] = None
+        serial: Optional[str] = None
+        vendor: Optional[str] = Field(default='cisco_aci')
+        namespace: Optional[str] = Field(default='default')
 
-class Node(BaseModel):
-    attributes: NodeAttributes
+    class Node(BaseModel):
+        attributes: NodeAttributes
 
+    class EthAttributes(BaseModel):
+        admin_st: Optional[str] = Field(default=None, alias="adminSt")
+        id: Optional[str] = None
+        name: Optional[str] = None
+        desc: Optional[str] = None
+        router_mac: Optional[str] = Field(default=None, alias="routerMac")
 
-class EthAttributes(BaseModel):
-    admin_st: Optional[str] = Field(default=None, alias="adminSt")
-    id: Optional[str] = None
-    name: Optional[str] = None
-    desc: Optional[str] = None
-    router_mac: Optional[str] = Field(default=None, alias="routerMac")
+    class Eth(BaseModel):
+        attributes: EthAttributes
 
+    class DeviceMetadata(BaseModel):
+        device_id: Optional[str] = Field(default=None)
+        id_tags: list = Field(default_factory=list)
+        tags: list = Field(default_factory=list)
+        name: Optional[str] = Field(default=None)
+        ip_address: Optional[str] = Field(default=None)
+        model: Optional[str] = Field(default=None)
+        ad_st: Optional[str] = Field(default=None, exclude=True)
+        vendor: Optional[str] = Field(default=None)
+        version: Optional[str] = Field(default=None)
+        serial_number: Optional[str] = Field(default=None)
 
-class Eth(BaseModel):
-    attributes: EthAttributes
+        @computed_field
+        @property
+        def status(self) -> int:
+            return 1 if self.ad_st == 'on' else 2
 
+    class DeviceMetadataList(BaseModel):
+        device_metadata: list = Field(default_factory=list)
 
-class DeviceMetadata(BaseModel):
-    device_id: Optional[str] = Field(default=None)
-    id_tags: list = Field(default_factory=list)
-    tags: list = Field(default_factory=list)
-    name: Optional[str] = Field(default=None)
-    ip_address: Optional[str] = Field(default=None)
-    model: Optional[str] = Field(default=None)
-    ad_st: Optional[str] = Field(default=None, exclude=True)
-    vendor: Optional[str] = Field(default=None)
-    version: Optional[str] = Field(default=None)
-    serial_number: Optional[str] = Field(default=None)
+    class InterfaceMetadata(BaseModel):
+        device_id: Optional[str] = Field(default=None)
+        id_tags: list = Field(default_factory=list)
+        index: Optional[str] = Field(default=None)
+        name: Optional[str] = Field(default=None)
+        description: Optional[str] = Field(default=None)
+        mac_address: Optional[str] = Field(default=None)
+        admin_status: Optional[str] = Field(default=None, exclude=True)
 
-    @computed_field
-    @property
-    def status(self) -> int:
-        return 1 if self.ad_st == 'on' else 2
+        @computed_field
+        @property
+        def status(self) -> int:
+            return 1 if self.admin_status == 'up' else 2
 
-
-class DeviceMetadataList(BaseModel):
-    device_metadata: list = Field(default_factory=list)
-
-
-class InterfaceMetadata(BaseModel):
-    device_id: Optional[str] = Field(default=None)
-    id_tags: list = Field(default_factory=list)
-    index: Optional[str] = Field(default=None)
-    name: Optional[str] = Field(default=None)
-    description: Optional[str] = Field(default=None)
-    mac_address: Optional[str] = Field(default=None)
-    admin_status: Optional[str] = Field(default=None, exclude=True)
-
-    @computed_field
-    @property
-    def status(self) -> int:
-        return 1 if self.admin_status == 'up' else 2
-
-
-class InterfaceMetadataList(BaseModel):
-    interface_metadata: list = Field(default_factory=list)
+    class InterfaceMetadataList(BaseModel):
+        interface_metadata: list = Field(default_factory=list)
