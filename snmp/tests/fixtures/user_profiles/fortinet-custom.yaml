@@ -1,0 +1,37 @@
+# Profile for Fortinet FortiGate devices
+#
+# For Fortinet FortiGate devices, the sysDescr is not a reliable source of info.
+
+extends:
+  - _base.yaml
+  - _generic-if.yaml
+  - _fortinet-fortigate-cpu-memory.yaml
+  - _fortinet-fortigate-vpn-tunnel.yaml
+
+device:
+  vendor: "fortinet"
+
+sysobjectid: 1.3.6.1.4.1.12356.101.1.9999
+
+metadata:
+  device:
+    fields:
+      vendor:
+        value: "fortinet"
+
+metrics:
+
+  - MIB: FORTINET-FORTIGATE-MIB
+    metric_tags:
+    - symbol:
+        OID: 1.3.6.1.4.1.12356.101.4.9.2.1.2
+        name: gateway
+      tag: gateway
+    symbols:
+    - OID: 1.3.6.1.4.1.12356.101.4.9.2.1.5
+      name: fgVWLHealthCheckLinkLatency
+    - OID: 1.3.6.1.4.1.12356.101.4.9.2.1.6
+      name: fgVWLHealthCheckLinkJitter
+    table:
+      OID: 1.3.6.1.4.1.12356.101.4.9.2
+      name: fgVWLHealthCheckLinkTable
