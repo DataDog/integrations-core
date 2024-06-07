@@ -17,6 +17,7 @@ from datadog_checks.base.utils.db.utils import default_json_event_encoding, reso
 from datadog_checks.base.utils.serialization import json
 from datadog_checks.sqlserver.activity import SqlserverActivity
 from datadog_checks.sqlserver.config import SQLServerConfig
+from datadog_checks.sqlserver.agent_activity import SqlserverAgentActivity
 from datadog_checks.sqlserver.database_metrics import (
     SqlserverDatabaseBackupMetrics,
     SqlserverDBFragmentationMetrics,
@@ -132,6 +133,7 @@ class SQLServer(AgentCheck):
         self.procedure_metrics = SqlserverProcedureMetrics(self, self._config)
         self.sql_metadata = SqlserverMetadata(self, self._config)
         self.activity = SqlserverActivity(self, self._config)
+        self.agent_activity = SqlserverAgentActivity(self, self._config)
 
         self.static_info_cache = TTLCache(
             maxsize=100,
@@ -770,6 +772,8 @@ class SQLServer(AgentCheck):
             if self._config.autodiscovery and self._config.autodiscovery_db_service_check:
                 self._check_database_conns()
             if self._config.dbm_enabled:
+                if is_affirmative(self.instance.get("TODO create config change", False)):
+                    self.agent_activity.run_job_loop(self.tags)
                 self.statement_metrics.run_job_loop(self.tags)
                 self.procedure_metrics.run_job_loop(self.tags)
                 self.activity.run_job_loop(self.tags)
