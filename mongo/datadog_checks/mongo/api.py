@@ -111,20 +111,21 @@ class MongoApi(object):
         # getCmdLineOpts is the runtime configuration of the mongo instance. Helpful to know whether the node is
         # a mongos or mongod, if the mongod is in a shard, if it's in a replica set, etc.
         try:
-            options = self['admin'].command("getCmdLineOpts")['parsed']
+            self.deployment_type = self._get_default_deployment_type()
         except Exception as e:
             self._log.debug(
                 "Unable to run `getCmdLineOpts`, got: %s. Assuming this is an Alibaba ApsaraDB instance.", str(e)
             )
             # `getCmdLineOpts` is forbidden on Alibaba ApsaraDB
             self.deployment_type = self._get_alibaba_deployment_type()
-            return
+
+    def _get_default_deployment_type(self):
+        options = self['admin'].command("getCmdLineOpts")['parsed']
         cluster_role = None
         if 'sharding' in options:
             if 'configDB' in options['sharding']:
                 self._log.debug("Detected MongosDeployment. Node is principal.")
-                self.deployment_type = MongosDeployment(shard_map=self.refresh_shards())
-                return
+                return MongosDeployment(shard_map=self.refresh_shards())
             elif 'clusterRole' in options['sharding']:
                 cluster_role = options['sharding']['clusterRole']
 
@@ -135,11 +136,10 @@ class MongoApi(object):
             is_principal = replica_set_deployment.is_principal()
             is_principal_log = "" if is_principal else "not "
             self._log.debug("Detected ReplicaSetDeployment. Node is %sprincipal.", is_principal_log)
-            self.deployment_type = replica_set_deployment
-            return
+            return replica_set_deployment
 
         self._log.debug("Detected StandaloneDeployment. Node is principal.")
-        self.deployment_type = StandaloneDeployment()
+        return StandaloneDeployment()
 
     def _get_alibaba_deployment_type(self):
         is_master_payload = self['admin'].command('isMaster')
