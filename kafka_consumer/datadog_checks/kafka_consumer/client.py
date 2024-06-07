@@ -261,7 +261,7 @@ class KafkaClient:
         try:
             consumer_groups_result = consumer_groups_future[consumer_group].result()
             self.log.debug(
-                "Discovered consumer group: %s in state %s",
+                "Consumer group: %s in state %s",
                 consumer_groups_result.group_id,
                 consumer_groups_result.state,
             )
@@ -269,7 +269,7 @@ class KafkaClient:
             consumer_group_state = consumer_group_result_state.split('.')[1]
 
         except Exception as e:
-            self.log.error("Failed to collect consumer group: %s", e)
+            self.log.error("Failed to collect consumer group state: %s for consumer group %s ", e, consumer_group)
         return consumer_group_state
 
     def _list_consumer_group_offsets(self, cg_tp):
