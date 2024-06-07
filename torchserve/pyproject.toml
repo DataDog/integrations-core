@@ -30,7 +30,7 @@ classifiers = [
     "Topic :: System :: Monitoring",
 ]
 dependencies = [
-    "datadog-checks-base>=32.6.0",
+    "datadog-checks-base>=37.0.0",
 ]
 dynamic = [
     "version",
