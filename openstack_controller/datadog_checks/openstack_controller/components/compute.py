@@ -301,6 +301,7 @@ class Compute(Component):
     def _report_server_flavor(self, server, tags):
         server_id = server.get('id')
         if server_id is None:
+            self.check.log.debug("'id' field not found in server [%s]", server)
             return
         flavor_id = server.get('flavor', {}).get('id')
         flavor_original_name = server.get('flavor', {}).get('original_name')
@@ -324,6 +325,7 @@ class Compute(Component):
     def _report_server_diagnostics(self, server, tags):
         server_id = server.get('id')
         if server_id is None:
+            self.check.log.debug("'id' field not found in server [%s]", server)
             return
         item_diagnostic = self.check.api.get_compute_server_diagnostics(server_id)
         self.check.log.debug("server_diagnostics: %s", item_diagnostic)
@@ -396,6 +398,7 @@ class Compute(Component):
     def _report_external_tags(self, server, aggregates):
         server_id = server.get('id')
         if server_id is None:
+            self.check.log.debug("'id' field not found in server [%s]", server)
             return
         external_tags = ['host_type:server']
         availability_zone = server.get('OS-EXT-AZ:availability_zone')
