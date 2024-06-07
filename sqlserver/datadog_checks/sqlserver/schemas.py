@@ -375,31 +375,31 @@ class Schemas(DBMAsyncJob):
         return len(data)
 
     @tracked_method(agent_check_getter=agent_check_getter)
-    def _populate_with_partitions_data(self, table_ids, id_to_table_data, cursor):
+    def _populate_with_partitions_data(self, table_ids, table_id_to_table_data, cursor):
         rows = execute_query(PARTITIONS_QUERY.format(table_ids), cursor)
         for row in rows:
-            id = row.pop("id", None)
-            if id is not None:
-                id_str = str(id)
-                if id_str in id_to_table_data:
-                    id_to_table_data[id_str]["partitions"] = row
+            table_id = row.pop("id", None)
+            if table_id is not None:
+                table_id_str = str(table_id)
+                if table_id_str in table_id_to_table_data:
+                    table_id_to_table_data[table_id_str]["partitions"] = row
                 else:
-                    self._log.debug("Partition found for an unkown table with the object_id: {}".format(id_str))
+                    self._log.debug("Partition found for an unkown table with the object_id: {}".format(table_id_str))
             else:
                 self._log.debug("Return rows of [{}] query should have id column".format(PARTITIONS_QUERY))
 
     @tracked_method(agent_check_getter=agent_check_getter)
-    def _populate_with_index_data(self, table_ids, id_to_table_data, cursor):
+    def _populate_with_index_data(self, table_ids, table_id_to_table_data, cursor):
         rows = execute_query(INDEX_QUERY.format(table_ids), cursor)
         for row in rows:
-            id = row.pop("id", None)
-            if id is not None:
-                id_str = str(id)
-                if id_str in id_to_table_data:
-                    id_to_table_data[id_str].setdefault("indexes", [])
-                    id_to_table_data[id_str]["indexes"].append(row)
+            table_id = row.pop("id", None)
+            if table_id is not None:
+                table_id_str = str(table_id)
+                if table_id_str in table_id_to_table_data:
+                    table_id_to_table_data[table_id_str].setdefault("indexes", [])
+                    table_id_to_table_data[table_id_str]["indexes"].append(row)
                 else:
-                    self._log.debug("Index found for an unkown table with the object_id: {}".format(id_str))
+                    self._log.debug("Index found for an unkown table with the object_id: {}".format(table_id_str))
             else:
                 self._log.debug("Return rows of [{}] query should have id column".format(INDEX_QUERY))
 
