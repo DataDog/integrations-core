@@ -3,11 +3,10 @@
 # Licensed under a 3-clause BSD style license (see LICENSE)
 import os
 import re
+from typing import Dict
 
 from datadog_checks.base.utils.platform import Platform
 from datadog_checks.sqlserver.const import ENGINE_EDITION_AZURE_MANAGED_INSTANCE, ENGINE_EDITION_SQL_DATABASE
-
-from typing import Dict
 
 CURRENT_DIR = os.path.dirname(os.path.abspath(__file__))
 DRIVER_CONFIG_DIR = os.path.join(CURRENT_DIR, 'data', 'driver_config')

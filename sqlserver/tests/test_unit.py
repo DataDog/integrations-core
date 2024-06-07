@@ -15,8 +15,7 @@ from datadog_checks.dev import EnvVars
 from datadog_checks.sqlserver import SQLServer
 from datadog_checks.sqlserver.connection import split_sqlserver_host_port
 from datadog_checks.sqlserver.metrics import SqlFractionMetric, SqlMasterDatabaseFileStats
-from datadog_checks.sqlserver.schemas import SubmitData
-from datadog_checks.sqlserver.schemas import Schemas
+from datadog_checks.sqlserver.schemas import Schemas, SubmitData
 from datadog_checks.sqlserver.sqlserver import SQLConnectionError
 from datadog_checks.sqlserver.utils import (
     Database,
@@ -24,8 +23,6 @@ from datadog_checks.sqlserver.utils import (
     parse_sqlserver_major_version,
     set_default_driver_conf,
 )
-
-from cachetools import TTLCache
 
 from .common import CHECK_NAME, DOCKER_SERVER, assert_metrics
 from .utils import windows_ci
@@ -809,13 +806,14 @@ def test_submit_data():
     )
     assert len(difference) == 0
 
+
 def test_submit_data_for_db_without_info():
 
     dataSubmitter, submitted_data = set_up_submitter_unit_test()
 
     schema1 = {"id": "1"}
     dataSubmitter.store("test_db1", schema1, [1, 2], 5)
-    
+
     dataSubmitter.submit()
     expected_data = {
         "host": "some",
@@ -837,36 +835,46 @@ def test_submit_data_for_db_without_info():
     )
     assert len(difference) == 0
 
+
 def test_fetch_throws(instance_docker):
     check = SQLServer(CHECK_NAME, {}, [instance_docker])
     schemas = Schemas(check, check._config)
-    with mock.patch('time.time', side_effect=[0, 9999999]), \
-        mock.patch('datadog_checks.sqlserver.schemas.Schemas._query_schema_information', return_value = {"id" :1}), \
-        mock.patch('datadog_checks.sqlserver.schemas.Schemas._get_tables', return_value = [1,2]):
+    with mock.patch('time.time', side_effect=[0, 9999999]), mock.patch(
+        'datadog_checks.sqlserver.schemas.Schemas._query_schema_information', return_value={"id": 1}
+    ), mock.patch('datadog_checks.sqlserver.schemas.Schemas._get_tables', return_value=[1, 2]):
         with pytest.raises(StopIteration):
             schemas._fetch_schema_data("dummy_cursor", "my_db")
+
 
 def test_submit_is_called_if_too_many_columns(instance_docker):
     check = SQLServer(CHECK_NAME, {}, [instance_docker])
     schemas = Schemas(check, check._config)
-    with mock.patch('time.time', side_effect=[0, 0]), \
-        mock.patch('datadog_checks.sqlserver.schemas.Schemas._query_schema_information', return_value = {"id" :1}), \
-        mock.patch('datadog_checks.sqlserver.schemas.Schemas._get_tables', return_value = [1,2]), \
-        mock.patch('datadog_checks.sqlserver.schemas.SubmitData.submit') as mocked_submit, \
-        mock.patch('datadog_checks.sqlserver.schemas.Schemas._get_tables_data', return_value = (1000_000, {"id" : 1})):
+    with mock.patch('time.time', side_effect=[0, 0]), mock.patch(
+        'datadog_checks.sqlserver.schemas.Schemas._query_schema_information', return_value={"id": 1}
+    ), mock.patch('datadog_checks.sqlserver.schemas.Schemas._get_tables', return_value=[1, 2]), mock.patch(
+        'datadog_checks.sqlserver.schemas.SubmitData.submit'
+    ) as mocked_submit, mock.patch(
+        'datadog_checks.sqlserver.schemas.Schemas._get_tables_data', return_value=(1000_000, {"id": 1})
+    ):
         with pytest.raises(StopIteration):
             schemas._fetch_schema_data("dummy_cursor", "my_db")
             mocked_submit.called_once()
+
 
 def test_exception_handling_by_do_for_dbs(instance_docker):
     check = SQLServer(CHECK_NAME, {}, [instance_docker])
     check.initialize_connection()
     schemas = Schemas(check, check._config)
     mock_cursor = mock.MagicMock()
-    with mock.patch('datadog_checks.sqlserver.schemas.Schemas._fetch_schema_data', side_effect=Exception("Can't connect to DB")), \
-        mock.patch('datadog_checks.sqlserver.sqlserver.SQLServer.get_databases', return_value = ["db1"]), \
-        mock.patch('cachetools.TTLCache.get', return_value = "dummy"), \
-        mock.patch('datadog_checks.sqlserver.connection.Connection.open_managed_default_connection'), \
-        mock.patch('datadog_checks.sqlserver.connection.Connection.get_managed_cursor', return_value = mock_cursor), \
-        mock.patch('datadog_checks.sqlserver.utils.is_azure_sql_database', return_value = {}):
-            schemas._fetch_for_databases()
+    with mock.patch(
+        'datadog_checks.sqlserver.schemas.Schemas._fetch_schema_data', side_effect=Exception("Can't connect to DB")
+    ), mock.patch('datadog_checks.sqlserver.sqlserver.SQLServer.get_databases', return_value=["db1"]), mock.patch(
+        'cachetools.TTLCache.get', return_value="dummy"
+    ), mock.patch(
+        'datadog_checks.sqlserver.connection.Connection.open_managed_default_connection'
+    ), mock.patch(
+        'datadog_checks.sqlserver.connection.Connection.get_managed_cursor', return_value=mock_cursor
+    ), mock.patch(
+        'datadog_checks.sqlserver.utils.is_azure_sql_database', return_value={}
+    ):
+        schemas._fetch_for_databases()

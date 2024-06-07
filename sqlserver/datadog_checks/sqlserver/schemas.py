@@ -160,7 +160,8 @@ class Schemas(DBMAsyncJob):
                         )
                     )
                     raise StopIteration(
-                        "Schema collection took {}s which is longer than allowed limit of {}s, stopped while collecting for db - {}".format(
+                        """Schema collection took {}s which is longer than allowed limit of {}s,
+                        stopped while collecting for db - {}""".format(
                             schema_collection_elapsed_time, self._max_execution_time, db_name
                         )
                     )
@@ -183,12 +184,16 @@ class Schemas(DBMAsyncJob):
                         self._fetch_schema_data(cursor, db_name)
                     except StopIteration as e:
                         self._log.error(
-                            "While executing fetch schemas for databse {}, the following exception occured {}".format(db_name, e)
+                            "While executing fetch schemas for databse {}, the following exception occured {}".format(
+                                db_name, e
+                            )
                         )
                         return
                     except Exception as e:
                         self._log.error(
-                            "While executing fetch schemas for databse {}, the following exception occured {}".format(db_name, e)
+                            "While executing fetch schemas for databse {}, the following exception occured {}".format(
+                                db_name, e
+                            )
                         )
                 # Switch DB back to MASTER
                 if not is_azure_sql_database(engine_edition):
@@ -259,9 +264,7 @@ class Schemas(DBMAsyncJob):
         with self._check.connection.open_managed_default_connection():
             with self._check.connection.get_managed_cursor() as cursor:
                 db_names_formatted = ",".join(["'{}'".format(t) for t in db_names])
-                return execute_query(
-                    DB_QUERY.format(db_names_formatted), cursor, convert_results_to_str=True
-                )
+                return execute_query(DB_QUERY.format(db_names_formatted), cursor, convert_results_to_str=True)
 
     @tracked_method(agent_check_getter=agent_check_getter, track_result_length=True)
     def _get_tables(self, schema, cursor):
@@ -271,9 +274,7 @@ class Schemas(DBMAsyncJob):
         "name": str
         "columns": []
         """
-        tables_info = execute_query(
-            TABLES_IN_SCHEMA_QUERY, cursor, convert_results_to_str=True, parameter=schema["id"]
-        )
+        tables_info = execute_query(TABLES_IN_SCHEMA_QUERY, cursor, convert_results_to_str=True, parameter=schema["id"])
         for t in tables_info:
             t.setdefault("columns", [])
         return tables_info
