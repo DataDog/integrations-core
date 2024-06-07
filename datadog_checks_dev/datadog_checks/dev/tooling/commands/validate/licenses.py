@@ -63,7 +63,9 @@ EXPLICIT_LICENSES = {
     # https://github.com/requests/requests-ntlm/blob/master/LICENSE
     'requests-ntlm': ['ISC'],
     # https://gitlab.com/thelabnyc/requests-unixsocket2/-/blob/master/LICENSE
-    'requests-unixsocket2': ['Apache-2.0'],
+    # For of the original. The license on PyPI is incorrect. Issue filed here:
+    # https://gitlab.com/thelabnyc/requests-unixsocket2/-/issues/4
+    'requests-unixsocket2': ['ISC'],
     # https://github.com/rethinkdb/rethinkdb-python/blob/master/LICENSE
     'rethinkdb': ['Apache-2.0'],
     # https://github.com/simplejson/simplejson/blob/master/LICENSE.txt
