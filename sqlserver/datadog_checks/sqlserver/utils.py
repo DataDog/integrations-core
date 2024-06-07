@@ -7,6 +7,8 @@ import re
 from datadog_checks.base.utils.platform import Platform
 from datadog_checks.sqlserver.const import ENGINE_EDITION_AZURE_MANAGED_INSTANCE, ENGINE_EDITION_SQL_DATABASE
 
+from typing import Dict
+
 CURRENT_DIR = os.path.dirname(os.path.abspath(__file__))
 DRIVER_CONFIG_DIR = os.path.join(CURRENT_DIR, 'data', 'driver_config')
 
@@ -139,7 +141,7 @@ def is_azure_sql_database(engine_edition):
     return engine_edition == ENGINE_EDITION_SQL_DATABASE
 
 
-def execute_query_output_result_as_dicts(query, cursor, convert_results_to_str=False, parameter=None):
+def execute_query(query, cursor, convert_results_to_str=False, parameter=None) -> Dict[str, str]:
     if parameter is not None:
         cursor.execute(query, (parameter,))
     else:

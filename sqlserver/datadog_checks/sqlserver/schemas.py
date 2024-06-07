@@ -24,7 +24,7 @@ from datadog_checks.sqlserver.queries import (
     SCHEMA_QUERY,
     TABLES_IN_SCHEMA_QUERY,
 )
-from datadog_checks.sqlserver.utils import execute_query_output_result_as_dicts, get_list_chunks, is_azure_sql_database
+from datadog_checks.sqlserver.utils import execute_query, get_list_chunks, is_azure_sql_database
 
 
 class SubmitData:
@@ -73,7 +73,6 @@ class SubmitData:
         else:
             return json_event
 
-    # NOTE: DB with no schemas is never submitted
     def submit(self):
         if not self.db_to_schemas:
             return
@@ -82,7 +81,7 @@ class SubmitData:
         for db, schemas_by_id in self.db_to_schemas.items():
             db_info = {}
             if db not in self.db_info:
-                self._log.error("Couldn't find database info for %s", db)
+                self._log.error("Couldn't find database info for {}".format(db))
                 db_info["name"] = db
             else:
                 db_info = self.db_info[db]
@@ -101,7 +100,7 @@ class Schemas(DBMAsyncJob):
 
     TABLES_CHUNK_SIZE = 500
     # Note: in async mode execution time also cannot exceed 2 checks.
-    MAX_EXECUTION_TIME = 10
+    DEFAULT_MAX_EXECUTION_TIME = 10
     MAX_COLUMNS_PER_EVENT = 100_000
 
     def __init__(self, check, config):
@@ -111,7 +110,7 @@ class Schemas(DBMAsyncJob):
         self._last_schemas_collect_time = None
         collection_interval = config.schema_config.get('collection_interval', DEFAULT_SCHEMAS_COLLECTION_INTERVAL)
         self._max_execution_time = min(
-            config.schema_config.get('max_execution_time', self.MAX_EXECUTION_TIME), collection_interval
+            config.schema_config.get('max_execution_time', self.DEFAULT_MAX_EXECUTION_TIME), collection_interval
         )
         super(Schemas, self).__init__(
             check,
@@ -155,8 +154,8 @@ class Schemas(DBMAsyncJob):
                 if schema_collection_elapsed_time > self._max_execution_time:
                     # TODO Report truncation to the backend
                     self._log.warning(
-                        """Truncated data due to the effective execution time reaching {},
-                         stopped on db - {} on schema {}""".format(
+                        """Truncated data due to the execution time reaching {}s,
+                         stopped on db {} on schema {}""".format(
                             self._max_execution_time, db_name, schema["name"]
                         )
                     )
@@ -184,16 +183,12 @@ class Schemas(DBMAsyncJob):
                         self._fetch_schema_data(cursor, db_name)
                     except StopIteration as e:
                         self._log.error(
-                            "While executing fetch schemas for databse - %s, the following exception occured - %s",
-                            db_name,
-                            e,
+                            "While executing fetch schemas for databse {}, the following exception occured {}".format(db_name, e)
                         )
                         return
                     except Exception as e:
                         self._log.error(
-                            "While executing fetch schemas for databse - %s, the following exception occured - %s",
-                            db_name,
-                            e,
+                            "While executing fetch schemas for databse {}, the following exception occured {}".format(db_name, e)
                         )
                 # Switch DB back to MASTER
                 if not is_azure_sql_database(engine_edition):
@@ -254,17 +249,17 @@ class Schemas(DBMAsyncJob):
         )
 
         databases = self._check.get_databases()
-        db_infos = self._query_db_informations(databases)
+        db_infos = self._query_db_information(databases)
         self._data_submitter.store_db_infos(db_infos)
         self._fetch_for_databases()
-        self._log.debug("Finished collect_schemas_data")
         self._data_submitter.submit()
+        self._log.debug("Finished collect_schemas_data")
 
-    def _query_db_informations(self, db_names):
+    def _query_db_information(self, db_names):
         with self._check.connection.open_managed_default_connection():
             with self._check.connection.get_managed_cursor() as cursor:
                 db_names_formatted = ",".join(["'{}'".format(t) for t in db_names])
-                return execute_query_output_result_as_dicts(
+                return execute_query(
                     DB_QUERY.format(db_names_formatted), cursor, convert_results_to_str=True
                 )
 
@@ -276,7 +271,7 @@ class Schemas(DBMAsyncJob):
         "name": str
         "columns": []
         """
-        tables_info = execute_query_output_result_as_dicts(
+        tables_info = execute_query(
             TABLES_IN_SCHEMA_QUERY, cursor, convert_results_to_str=True, parameter=schema["id"]
         )
         for t in tables_info:
@@ -292,7 +287,7 @@ class Schemas(DBMAsyncJob):
             "id": str
             "owner_name": str
         """
-        return execute_query_output_result_as_dicts(SCHEMA_QUERY, cursor, convert_results_to_str=True)
+        return execute_query(SCHEMA_QUERY, cursor, convert_results_to_str=True)
 
     @tracked_method(agent_check_getter=agent_check_getter, track_result_length=True)
     def _get_tables_data(self, table_list, schema, cursor):
@@ -359,7 +354,8 @@ class Schemas(DBMAsyncJob):
         ]
         rows = [dict(zip(columns, [str(item) for item in row])) for row in data]
         for row in rows:
-            table_id = name_to_id.get(str(row.get("table_name")))
+            table_name = str(row.get("table_name"))
+            table_id = name_to_id.get(table_name)
             if table_id is not None:
                 row.pop("table_name", None)
                 if "nullable" in row:
@@ -372,14 +368,14 @@ class Schemas(DBMAsyncJob):
                         row
                     ]
                 else:
-                    self._log.error("Columns found for an unkown table with the object_id: %s", table_id)
+                    self._log.debug("Columns found for an unkown table with the object_id: {}".format(table_id))
             else:
-                self._log.error("Couldn't find id of a table: %s", table_id)
+                self._log.debug("Couldn't find id of a table: {}".format(table_name))
         return len(data)
 
     @tracked_method(agent_check_getter=agent_check_getter)
     def _populate_with_partitions_data(self, table_ids, id_to_table_data, cursor):
-        rows = execute_query_output_result_as_dicts(PARTITIONS_QUERY.format(table_ids), cursor)
+        rows = execute_query(PARTITIONS_QUERY.format(table_ids), cursor)
         for row in rows:
             id = row.pop("id", None)
             if id is not None:
@@ -387,13 +383,13 @@ class Schemas(DBMAsyncJob):
                 if id_str in id_to_table_data:
                     id_to_table_data[id_str]["partitions"] = row
                 else:
-                    self._log.error("Partition found for an unkown table with the object_id: %s", id_str)
+                    self._log.debug("Partition found for an unkown table with the object_id: {}".format(id_str))
             else:
-                self._log.error("Return rows of [%s] query should have id column", PARTITIONS_QUERY)
+                self._log.debug("Return rows of [{}] query should have id column".format(PARTITIONS_QUERY))
 
     @tracked_method(agent_check_getter=agent_check_getter)
     def _populate_with_index_data(self, table_ids, id_to_table_data, cursor):
-        rows = execute_query_output_result_as_dicts(INDEX_QUERY.format(table_ids), cursor)
+        rows = execute_query(INDEX_QUERY.format(table_ids), cursor)
         for row in rows:
             id = row.pop("id", None)
             if id is not None:
@@ -402,21 +398,21 @@ class Schemas(DBMAsyncJob):
                     id_to_table_data[id_str].setdefault("indexes", [])
                     id_to_table_data[id_str]["indexes"].append(row)
                 else:
-                    self._log.error("Index found for an unkown table with the object_id: %s", id_str)
+                    self._log.debug("Index found for an unkown table with the object_id: {}".format(id_str))
             else:
-                self._log.error("Return rows of [%s] query should have id column", INDEX_QUERY)
+                self._log.debug("Return rows of [{}] query should have id column".format(INDEX_QUERY))
 
     @tracked_method(agent_check_getter=agent_check_getter, track_result_length=True)
-    def _populate_with_foreign_keys_data(self, table_ids, id_to_table_data, cursor):
-        rows = execute_query_output_result_as_dicts(FOREIGN_KEY_QUERY.format(table_ids), cursor)
+    def _populate_with_foreign_keys_data(self, table_ids, table_id_to_table_data, cursor):
+        rows = execute_query(FOREIGN_KEY_QUERY.format(table_ids), cursor)
         for row in rows:
-            id = row.pop("id", None)
+            table_id = row.pop("id", None)
             if id is not None:
-                id_str = str(id)
-                if id_str in id_to_table_data:
-                    id_to_table_data.get(str(id)).setdefault("foreign_keys", [])
-                    id_to_table_data.get(str(id))["foreign_keys"].append(row)
+                table_id_str = str(table_id)
+                if table_id_str in table_id_to_table_data:
+                    table_id_to_table_data.get(table_id_str).setdefault("foreign_keys", [])
+                    table_id_to_table_data.get(table_id_str)["foreign_keys"].append(row)
                 else:
-                    self._log.error("Foreign key found for an unkown table with the object_id: %s", id_str)
+                    self._log.debug("Foreign key found for an unkown table with the object_id: {}".format(table_id_str))
             else:
-                self._log.error("Return rows of [%s] query should have id column", FOREIGN_KEY_QUERY)
+                self._log.debug("Return rows of [{}] query should have id column".format(FOREIGN_KEY_QUERY))
