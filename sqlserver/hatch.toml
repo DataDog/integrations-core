@@ -1,6 +1,9 @@
 [env.collectors.datadog-checks]
 base-package-features = ["deps", "db", "json"]
 
+[envs.default]
+dependencies = ["deepdiff"]
+
 [[envs.default.matrix]]
 python = ["3.11"]
 os = ["linux"]
@@ -17,6 +20,7 @@ os = ["windows"]
 driver = ["SQLOLEDB", "SQLNCLI11", "MSOLEDBSQL", "odbc"]
 version = ["2019", "2022"]
 setup = ["single"]
+
 
 # The high cardinality environment is meant to be used for local dev/testing
 # for example, when we want to do performance testing on local changes to the metrics
@@ -65,3 +69,4 @@ matrix.driver.env-vars = [
 name.linux-odbc-2019-high-cardinality.env-vars = "COMPOSE_FOLDER=compose-high-cardinality"
 name.linux-odbc-2022-high-cardinality.env-vars = "COMPOSE_FOLDER=compose-high-cardinality"
 name.windows-odbc-2019-high-cardinality.env-vars = "COMPOSE_FOLDER=compose-high-cardinality-windows"
+

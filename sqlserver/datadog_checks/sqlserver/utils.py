@@ -137,3 +137,18 @@ def is_azure_sql_database(engine_edition):
     :return: bool
     """
     return engine_edition == ENGINE_EDITION_SQL_DATABASE
+
+def execute_query_output_result_as_a_dict(query, cursor, column_name=None):
+    cursor.execute(query)
+    columns = []
+    if column_name:
+        columns = [str(column_name).lower() for i in cursor.description]
+    else:
+        columns = [str(i[0]).lower() for i in cursor.description]
+    rows = [dict(zip(columns, [str(item) for item in row])) for row in cursor.fetchall()]
+    return rows
+
+def get_list_chunks(lst, n):
+    """Yield successive n-sized chunks from lst."""
+    for i in range(0, len(lst), n):
+        yield lst[i : i + n]
