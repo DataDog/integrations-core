@@ -65,9 +65,6 @@
     "monitors": {
       "Failed sidecar injections": "assets/monitors/failed_sidecar_injection.json"
     },
-    "logs": {
-      "source": "istio"
-    },
     "saved_views": {
       "Istio Overview": "assets/saved_views/istio_overview.json",
       "Istio Error Overview": "assets/saved_views/istio_error_overview.json",

@@ -44,9 +44,6 @@
       "source_type_id": 10337,
       "auto_install": true
     },
-    "logs": {
-      "source": "temporal"
-    },
     "dashboards": {
       "Temporal Server Overview": "assets/dashboards/server_overview.json"
     },

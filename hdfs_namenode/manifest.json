@@ -46,9 +46,6 @@
     },
     "dashboards": {
       "hdfs_namenode": "assets/dashboards/hdfs_namenode_dashboard.json"
-    },
-    "logs": {
-      "source": "hdfs_namenode"
     }
   }
 }

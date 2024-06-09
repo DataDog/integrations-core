@@ -39,9 +39,6 @@
       },
       "source_type_id": 10106,
       "auto_install": true
-    },
-    "logs": {
-      "source": "azure.active_directory"
     }
   }
 }

@@ -28,7 +28,7 @@ from .constants import (
     SHORT_ROLLUP,
     VM_RESOURCE,
 )
-from .metrics import RESOURCE_NAME_TO_METRICS
+from .metrics import PERCENT_METRICS, RESOURCE_NAME_TO_METRICS
 from .resource_filters import create_resource_filter
 from .utils import (
     get_mapped_instance_tag,
@@ -333,6 +333,9 @@ class EsxiCheck(AgentCheck):
                     continue
                 else:
                     most_recent_val = valid_values[-1]
+                    if metric_name in PERCENT_METRICS:
+                        # Convert the percentage to a float.
+                        most_recent_val /= 100.0
                     all_tags = metric_tags + additional_tags
 
                     self.log.debug(

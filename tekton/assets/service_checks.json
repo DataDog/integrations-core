@@ -12,7 +12,7 @@
       "endpoint"
     ],
     "name": "Tekton Pipelines openmetrics endpoint up",
-    "description": "Returns `CRITICAL` if the check cannot access the openmetrics metrics endpoint of Tekton Pipelines."
+    "description": "Returns `CRITICAL` if the check cannot access the OpenMetrics metrics endpoint of Tekton Pipelines."
   },
   {
     "agent_version": "7.53.0",
@@ -27,6 +27,6 @@
       "endpoint"
     ],
     "name": "Tekton Triggers openmetrics endpoint up",
-    "description": "Returns `CRITICAL` if the check cannot access the openmetrics metrics endpoint of Tekton Triggers."
+    "description": "Returns `CRITICAL` if the check cannot access the OpenMetrics metrics endpoint of Tekton Triggers."
   }
 ]

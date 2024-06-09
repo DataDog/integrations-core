@@ -148,6 +148,7 @@ class OperationSampleOperationMetadata(TypedDict, total=False):
     truncated: Optional[str]
     client: OperationSampleClient
     user: Optional[str]
+    ns: Optional[str]
 
 
 class OperationSampleActivityRecord(

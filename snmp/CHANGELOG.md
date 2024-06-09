@@ -2,6 +2,12 @@
 
 <!-- towncrier release notes start -->
 
+## 7.3.1 / 2024-06-05
+
+***Fixed***:
+
+* Use a forced metric type of gauge for ccmRejectedPhones and ccmUnregisteredPhones so they are not incorrectly inferred to be rate types. ([#17722](https://github.com/DataDog/integrations-core/pull/17722))
+
 ## 7.3.0 / 2024-04-26 / Agent 7.54.0
 
 ***Added***:

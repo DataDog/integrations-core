@@ -93,9 +93,6 @@
       "Checkpoint Quantum Firewall: HTTPS Inspection": "assets/dashboards/checkpoint_quantum_firewall_https_inspection.json",
       "Checkpoint Quantum Firewall: Anti Bot": "assets/dashboards/checkpoint_quantum_firewall_anti_bot.json",
       "Checkpoint Quantum Firewall: Anti Malware": "assets/dashboards/checkpoint_quantum_firewall_anti_malware.json"
-    },
-    "logs": {
-      "source": "checkpoint-quantum-firewall"
     }
   },
   "author": {

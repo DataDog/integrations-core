@@ -598,6 +598,10 @@ coverage:
         target: 75
         flags:
         - torchserve
+      Traefik_Mesh:
+        target: 75
+        flags:
+        - traefik_mesh
       Traffic_Server:
         target: 75
         flags:
@@ -1440,6 +1444,11 @@ flags:
     paths:
     - torchserve/datadog_checks/torchserve
     - torchserve/tests
+  traefik_mesh:
+    carryforward: true
+    paths:
+    - traefik_mesh/datadog_checks/traefik_mesh
+    - traefik_mesh/tests
   traffic_server:
     carryforward: true
     paths:

@@ -101,6 +101,7 @@ TEST_METRICS = [
     'karpenter.interruption.message.latency.time_seconds.count',
     'karpenter.interruption.message.latency.time_seconds.sum',
     'karpenter.interruption.received_messages.count',
+    'karpenter.leader_election.master_status',
     'karpenter.machines_created.count',
     'karpenter.machines_initialized.count',
     'karpenter.machines_launched.count',

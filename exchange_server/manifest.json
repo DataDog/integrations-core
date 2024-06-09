@@ -44,9 +44,6 @@
     },
     "dashboards": {
       "Exchange Server Overview": "assets/dashboards/overview.json"
-    },
-    "logs": {
-      "source": "exchange_server"
     }
   }
 }

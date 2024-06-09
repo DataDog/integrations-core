@@ -270,5 +270,6 @@ jobs:
       if: inputs.standard && !github.event.repository.private && always()
       uses: codecov/codecov-action@v4
       with:
+        token: ${{ secrets.CODECOV_TOKEN }}
         files: "${{ inputs.target }}/coverage.xml"
         flags: "${{ inputs.target }}"
