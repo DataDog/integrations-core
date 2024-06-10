@@ -15,23 +15,34 @@ except ImportError:
 DEFAULT_COLLECTION_INTERVAL = 10
 
 AGENT_ACTIVITY_QUERY = """\
-DECLARE @max_session AS INT
-SELECT @max_session = MAX(session_id) FROM msdb.dbo.syssessions;
-
 SELECT
     sj.name AS Name,
     sa.job_id AS JobID,
     sa.start_execution_date AS StartTime,
-    sa.last_executed_step_id AS StepID,
-    sa.last_executed_step_date AS StepTime,
-    sa.stop_execution_date AS StopTime,
-    sa.job_history_id AS HistoryID,
-    sa.next_scheduled_run_date AS NextTime
+    sa.last_executed_step_id AS LastFinishedStep,
+    sa.last_executed_step_date AS LastFinishedStepStartTime,
+    sa.stop_execution_date AS StopTime
 FROM (msdb.dbo.sysjobs sj
 INNER JOIN msdb.dbo.sysjobactivity sa ON sj.job_id = sa.job_id)
-WHERE sa.session_id = @max_session
+WHERE  sa.start_execution_date is not NULL AND sa.stop_execution_date is NULL
 """
 
+AGENT_HISTORY_QUERY = """\
+SELECT
+    sj.name AS Name,
+    sj.job_id AS JobID,
+    sh.run_status AS Status,
+    sh.run_date AS StartDate,
+    sh.run_time AS StartTime,
+    sh.step_name AS StepName,
+    sh.step_id AS StepID,
+    sh.run_duration AS Duration,
+    sh.instance_id AS Instance,
+    sh.message AS Message
+FROM msdb.dbo.sysjobhistory sh
+INNER JOIN msdb.dbo.sysjobs sj ON sj.job_id = sh.job_id{last_instance_id_filter}
+GO
+"""
 def agent_check_getter(self):
     return self._check
 
@@ -47,6 +58,7 @@ class SqlserverAgentActivity(DBMAsyncJob):
         if collection_interval <= 0:
             collection_interval = DEFAULT_COLLECTION_INTERVAL
         self.collection_interval = collection_interval
+        self._last_history_id = None
         super(SqlserverAgentActivity, self).__init__(
             check,
             run_sync=True,
@@ -61,7 +73,6 @@ class SqlserverAgentActivity(DBMAsyncJob):
         )
         # same questions as job_name
         self._conn_key_prefix = "dbm-activity-"
-        self._agent_activity_payload_max_bytes = MAX_PAYLOAD_BYTES
 
     def _close_db_conn(self):
         pass
@@ -71,15 +82,30 @@ class SqlserverAgentActivity(DBMAsyncJob):
 
     @tracked_method(agent_check_getter=agent_check_getter)
     def _get_active_jobs(self, cursor):
-        self.log.debug("collecting sql server current connections")
+        self.log.debug("collecting sql server active agent jobs")
         self.log.debug("Running query [%s]", AGENT_ACTIVITY_QUERY)
         cursor.execute(AGENT_ACTIVITY_QUERY)
         columns = [i[0] for i in cursor.description]
         # construct row dicts manually as there's no DictCursor for pyodbc
         rows = [dict(zip(columns, row)) for row in cursor.fetchall()]
-        self.log.debug("loaded sql server current connections len(rows)=%s", len(rows))
+        self.log.debug("loaded sql server active agent jobs len(rows)=%s", len(rows))
         return rows
     
+    @tracked_method(agent_check_getter=agent_check_getter)
+    def _get_new_agent_job_history(self, cursor):
+        last_instance_id_filter = ""
+        if self._last_history_id:
+            last_instance_id_filter = "\nWHERE sh.instance_id > {last_history_id}".format(last_history_id = self._last_history_id)
+        query = AGENT_HISTORY_QUERY.format(last_instance_id_filter=last_instance_id_filter)
+        self.log.debug("collecting sql server agent jobs history")
+        self.log.debug("Running query [%s]", query)
+        cursor.execute(query)
+        columns = [i[0] for i in cursor.description]
+        # construct row dicts manually as there's no DictCursor for pyodbc
+        rows = [dict(zip(columns, row)) for row in cursor.fetchall()]
+        self.log.debug("loaded sql server agent jobs history len(rows)=%s", len(rows))
+        return rows
+
     def _create_active_agent_jobs_event(self, active_jobs):
         event = {
             "host": self._check.resolved_hostname,
@@ -95,6 +121,9 @@ class SqlserverAgentActivity(DBMAsyncJob):
             "sqlserver_active_jobs": active_jobs
         }
         return event
+    
+    def _create_agent_jobs_history_event(self, jobs_history):
+        pass
 
     @tracked_method(agent_check_getter=agent_check_getter)
     def collect_agent_activity(self):
@@ -104,7 +133,8 @@ class SqlserverAgentActivity(DBMAsyncJob):
         """
         with self._check.connection.open_managed_default_connection(key_prefix=self._conn_key_prefix):
             with self._check.connection.get_managed_cursor(key_prefix=self._conn_key_prefix) as cursor:
-                rows = self._get_active_jobs
-                event = self._create_active_agent_jobs_event(self, rows)
+                rows = self._get_active_jobs(cursor)
+                event = self._create_active_agent_jobs_event(rows)
                 payload = json.dumps(event, default=default_json_event_encoding)
+                # TODO see what topic is best for this
                 self._check.database_monitoring_query_activity(payload)
