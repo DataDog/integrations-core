@@ -127,8 +127,21 @@ class SqlserverAgentActivity(DBMAsyncJob):
         }
         return event
     
-    def _create_agent_jobs_history_event(self, jobs_history):
-        pass
+    def _create_agent_jobs_history_event(self, jobs_history_row):
+        event = {
+            "host": self._check.resolved_hostname,
+            "ddagentversion": datadog_agent.get_version(),
+            "ddsource": "sqlserver",
+            "dbm_type": "activity",
+            "collection_interval": self.collection_interval,
+            "ddtags": self.tags,
+            "timestamp": time.time() * 1000,
+            'sqlserver_version': self._check.static_info_cache.get(STATIC_INFO_VERSION, ""),
+            'sqlserver_engine_edition': self._check.static_info_cache.get(STATIC_INFO_ENGINE_EDITION, ""),
+            "cloud_metadata": self._config.cloud_metadata,
+            "sqlserver_job_history": jobs_history_row
+        }
+        return event
 
     @tracked_method(agent_check_getter=agent_check_getter)
     def collect_agent_activity(self):
@@ -138,8 +151,15 @@ class SqlserverAgentActivity(DBMAsyncJob):
         """
         with self._check.connection.open_managed_default_connection(key_prefix=self._conn_key_prefix):
             with self._check.connection.get_managed_cursor(key_prefix=self._conn_key_prefix) as cursor:
-                rows = self._get_active_jobs(cursor)
-                event = self._create_active_agent_jobs_event(rows)
-                payload = json.dumps(event, default=default_json_event_encoding)
+                activity_rows = self._get_active_jobs(cursor)
+                activity_event = self._create_active_agent_jobs_event(activity_rows)
+                activity_payload = json.dumps(activity_event, default=default_json_event_encoding)
                 # TODO see what topic is best for this
-                self._check.database_monitoring_query_activity(payload)
+                self._check.database_monitoring_query_activity(activity_payload)
+                history_rows = self._get_new_agent_job_history(cursor)
+                for history_row in history_rows:
+                    history_event = self._create_agent_jobs_history_event(history_row)
+                    history_payload = json.dumps(history_event, default=default_json_event_encoding)
+                    # TODO see what topic is best for this
+                    self._check.database_monitoring_query_activity(history_payload)
+
