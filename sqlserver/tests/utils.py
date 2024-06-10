@@ -157,8 +157,10 @@ class HighCardinalityQueries:
         """Creates a slow running query by trying to match a pattern that may or may not exist."""
         columns = copy(self.columns)
         shuffle(columns)
-        return 'SELECT TOP 10 {col} FROM datadog_test-1.dbo.high_cardinality WHERE col2_txt LIKE \'%{pattern}%\''.format(
-            col={columns[0]}, pattern=self._create_rand_string()
+        return (
+            'SELECT TOP 10 {col} FROM datadog_test-1.dbo.high_cardinality WHERE col2_txt LIKE \'%{pattern}%\''.format(
+                col={columns[0]}, pattern=self._create_rand_string()
+            )
         )
 
     def create_complex_query(self):
