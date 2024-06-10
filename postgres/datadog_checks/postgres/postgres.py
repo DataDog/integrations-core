@@ -18,6 +18,7 @@ from datadog_checks.base.utils.db.utils import (
     tracked_query,
 )
 from datadog_checks.base.utils.db.utils import resolve_db_host as agent_host_resolver
+from datadog_checks.base.utils.db.telemetry import Telemetry
 from datadog_checks.base.utils.serialization import json
 from datadog_checks.postgres import aws, azure
 from datadog_checks.postgres.connections import MultiDatabaseConnectionPool
@@ -140,6 +141,7 @@ class PostgreSql(AgentCheck):
             maxsize=1,
             ttl=self._config.database_instance_collection_interval,
         )  # type: TTLCache
+        self._telemetry = Telemetry()
 
     def _build_autodiscovery(self):
         if not self._config.discovery_config['enabled']:
