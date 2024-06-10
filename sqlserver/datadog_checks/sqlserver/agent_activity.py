@@ -103,6 +103,11 @@ class SqlserverAgentActivity(DBMAsyncJob):
         columns = [i[0] for i in cursor.description]
         # construct row dicts manually as there's no DictCursor for pyodbc
         rows = [dict(zip(columns, row)) for row in cursor.fetchall()]
+        for row in rows:
+            if self._last_history_id is None or (
+                row['Instance'] and row['Instance'] > self._last_history_id 
+            ):
+                self._last_history_id = row['Instance']
         self.log.debug("loaded sql server agent jobs history len(rows)=%s", len(rows))
         return rows
 
