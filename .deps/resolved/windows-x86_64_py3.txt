@@ -19,7 +19,7 @@ charset-normalizer @ https://agent-int-packages.datadoghq.com/external/charset-n
 clickhouse-cityhash @ https://agent-int-packages.datadoghq.com/external/clickhouse-cityhash/clickhouse_cityhash-1.0.2.4-cp311-cp311-win_amd64.whl#sha256=0ee99f5952f3e9f859b42e66110e36554ac4df17b6219634b47eda11cbfb1b64
 clickhouse-driver @ https://agent-int-packages.datadoghq.com/external/clickhouse-driver/clickhouse_driver-0.2.7-cp311-cp311-win_amd64.whl#sha256=5166643683584bc53fcadda73c65f6a9077feb472f3d167ecef1a1a7024973aa
 cm-client @ https://agent-int-packages.datadoghq.com/built/cm-client/cm_client-45.0.4-20240402154627-py3-none-win_amd64.whl#sha256=1743b32a221d2a0804b4e425ffd53468e8f1754da217fe1e7bd9ff7800fd90f8
-confluent-kafka @ https://agent-int-packages.datadoghq.com/external/confluent-kafka/confluent_kafka-2.3.0-cp311-cp311-win_amd64.whl#sha256=1c6b29d57df99dabd45e67fd0aa46f17f195b057734ad84cf9cfdc2542855c10
+confluent-kafka @ https://agent-int-packages.datadoghq.com/external/confluent-kafka/confluent_kafka-2.4.0-cp311-cp311-win_amd64.whl#sha256=0c1b89e1bd790dd82b64a4dd746e7a0ce3ebed7f17b0642d488c1bb0056ba763
 cryptography @ https://agent-int-packages.datadoghq.com/external/cryptography/cryptography-42.0.6-cp39-abi3-win_amd64.whl#sha256=9f1a3bc2747166b0643b00e0b56cd9b661afc9d5ff963acaac7a9c7b2b1ef638
 ddsketch @ https://agent-int-packages.datadoghq.com/external/ddsketch/ddsketch-3.0.1-py3-none-any.whl#sha256=6d047b455fe2837c43d366ff1ae6ba0c3166e15499de8688437a75cea914224e
 ddtrace @ https://agent-int-packages.datadoghq.com/external/ddtrace/ddtrace-1.11.2-cp311-cp311-win_amd64.whl#sha256=d11e12ba60969d9b2bf068772f73d94ec884ee097a0008da71a37188f2a34554
@@ -40,7 +40,7 @@ jellyfish @ https://agent-int-packages.datadoghq.com/external/jellyfish/jellyfis
 jmespath @ https://agent-int-packages.datadoghq.com/external/jmespath/jmespath-1.0.1-py3-none-any.whl#sha256=02e2e4cc71b5bcab88332eebf907519190dd9e6e82107fa7f83b1003a6252980
 jpype1 @ https://agent-int-packages.datadoghq.com/external/jpype1/JPype1-1.5.0-cp311-cp311-win_amd64.whl#sha256=2bc987205ff8d2d8e36dfbef05430e0638e85d4fee1166ba58ebfa6f7a67cdf8
 jsonpatch @ https://agent-int-packages.datadoghq.com/external/jsonpatch/jsonpatch-1.33-py2.py3-none-any.whl#sha256=0ae28c0cd062bbd8b8ecc26d7d164fbbea9652a1a3693f3b956c1eae5145dade
-jsonpointer @ https://agent-int-packages.datadoghq.com/external/jsonpointer/jsonpointer-2.4-py2.py3-none-any.whl#sha256=15d51bba20eea3165644553647711d150376234112651b4f1811022aecad7d7a
+jsonpointer @ https://agent-int-packages.datadoghq.com/external/jsonpointer/jsonpointer-3.0.0-py2.py3-none-any.whl#sha256=13e088adc14fca8b6aa8177c044e12701e6ad4b28ff10e65f2267a90109c9942
 jsonschema @ https://agent-int-packages.datadoghq.com/external/jsonschema/jsonschema-4.22.0-py3-none-any.whl#sha256=ff4cfd6b1367a40e7bc6411caec72effadd3db0bbe5017de188f2d6108335802
 jsonschema-specifications @ https://agent-int-packages.datadoghq.com/external/jsonschema-specifications/jsonschema_specifications-2023.12.1-py3-none-any.whl#sha256=87e4fdf3a94858b8a2ba2778d9ba57d8a9cafca7c7489c46ba0d30a8bc6a9c3c
 keystoneauth1 @ https://agent-int-packages.datadoghq.com/external/keystoneauth1/keystoneauth1-5.6.0-py3-none-any.whl#sha256=d740843afcf9c159fb929004eee1eecf46573236901e9d8ca2dca5694733a379
