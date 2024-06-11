@@ -32,6 +32,7 @@ class Telemetry:
     def __init__(self, log):
         self._buffer = {}
         self._log = log
+        self._log.warn("CREATED TELEMETRY")
 
     def add(self, integration:str, operation:str, elapsed: Optional[float], count: Optional[int]):
         """
@@ -54,7 +55,7 @@ class Telemetry:
         :param force (_bool_): Send events even if less than FLUSH_INTERVAL has elapsed. Only used for testing.
         """
         elapsed_s = time() - self._last_flush 
-        self._log.info("telemetry flush after $d", elapsed_s)
+        self._log.warn("telemetry flush after $d", elapsed_s)
         if not force and elapsed_s < FLUSH_INTERVAL:
             return
         for op in self._buffer.values():
@@ -69,5 +70,5 @@ class Telemetry:
             }
 
             json_event = json.dumps(event, default=default_json_event_encoding)
-            self._log.info("Reporting the following payload for telemetry collection: {}".format(json_event))
+            self._log.warn("Reporting the following payload for telemetry collection: {}".format(json_event))
             submit(json_event)

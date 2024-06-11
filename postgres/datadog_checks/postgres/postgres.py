@@ -141,6 +141,7 @@ class PostgreSql(AgentCheck):
             maxsize=1,
             ttl=self._config.database_instance_collection_interval,
         )  # type: TTLCache
+        self._log.warn("CREATING TELEMETRY")
         self._telemetry = Telemetry(self.log)
 
     def _build_autodiscovery(self):
@@ -1037,7 +1038,7 @@ class PostgreSql(AgentCheck):
             self._update_tag_sets(tags_to_add)
             self._send_database_instance_metadata()
 
-            self.log.info("Running check against version %s: is_aurora: %s", str(self.version), str(self.is_aurora))
+            self.log.warn("Running check against version %s: is_aurora: %s", str(self.version), str(self.is_aurora))
             self._emit_running_metric()
             self._collect_stats(tags)
             self._collect_custom_queries(tags)
@@ -1048,7 +1049,7 @@ class PostgreSql(AgentCheck):
             if self._config.collect_wal_metrics:
                 # collect wal metrics for pg < 10, disabled by enabled
                 self._collect_wal_metrics()
-            self.log.info("about to flush telemetry")
+            self.log.warn("about to flush telemetry")
             self._telemetry.flush(self.database_monitoring_query_metrics)
         except Exception as e:
             self.log.exception("Unable to collect postgres metrics.")
