@@ -200,30 +200,42 @@ def mock_http_call(mock_responses):
 
 
 @pytest.fixture
-def session_auth(request, mock_responses):
+def openstack_v3_password(request, mock_responses):
     param = request.param if hasattr(request, 'param') and request.param is not None else {}
     catalog = param.get('catalog')
+    password_project_id = None
+    password_system_scope = None
 
     def get_access(session):
-        project_id = session.return_value.project_id if session.return_value.project_id else 'unscoped'
+        project_id = password_project_id if password_project_id else 'system' if password_system_scope else 'unscoped'
         token = mock_responses('POST', '/identity/v3/auth/tokens', project_id)['token']
         return mock.MagicMock(
             service_catalog=mock.MagicMock(catalog=catalog if catalog is not None else token.get('catalog', [])),
             project_id=token.get('project', {}).get('id'),
-            role_names=[role.get('name') for role in token.get('roles', [])],
         )
 
-    return mock.MagicMock(get_access=mock.MagicMock(side_effect=get_access))
+    def password(
+        auth_url, username, password, user_domain_name, system_scope=None, project_id=None, project_domain_name=None
+    ):
+        nonlocal password_system_scope, password_project_id
+        password_system_scope = system_scope
+        password_project_id = project_id
+        return mock.MagicMock(
+            get_access=mock.MagicMock(side_effect=get_access),
+        )
+
+    with mock.patch('keystoneauth1.identity.v3.Password', side_effect=password) as mock_password:
+        yield mock_password
 
 
 @pytest.fixture
-def openstack_session(session_auth, microversion_headers):
+def openstack_session(openstack_v3_password, microversion_headers):
     def session(auth, session):
         microversion_headers[0] = session.headers.get('X-OpenStack-Nova-API-Version')
         microversion_headers[1] = session.headers.get('X-OpenStack-Ironic-API-Version')
         return mock.MagicMock(
-            return_value=mock.MagicMock(project_id=auth.project_id),
-            auth=session_auth,
+            project_id=auth.project_id,
+            auth=auth,
         )
 
     with mock.patch('keystoneauth1.session.Session', side_effect=session) as mock_session:
@@ -1018,11 +1030,14 @@ def mock_http_post(request, monkeypatch, mock_http_call):
             return http_error[url]
         if url == '/identity/v3/auth/tokens':
             data = kwargs['json']
-            scope = data.get('auth', {}).get('scope', 'unscoped')
-            if isinstance(scope, dict):
-                scope = scope.get('project', {}).get('id')
-            json_data = mock_http_call(method, url, scope, headers=kwargs.get('headers'))
-            headers = {'X-Subject-Token': f'token_{scope}'}
+            file = data.get('auth', {}).get('scope', 'unscoped')
+            if isinstance(file, dict):
+                if 'system' in file:
+                    file = 'system'
+                else:
+                    file = file.get('project', {}).get('id')
+            json_data = mock_http_call(method, url, file, headers=kwargs.get('headers'))
+            headers = {'X-Subject-Token': f'token_{file}'}
         else:
             json_data = mock_http_call(method, url)
         if replace and url in replace:
