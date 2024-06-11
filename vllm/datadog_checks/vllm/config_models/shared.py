@@ -7,7 +7,6 @@
 #     ddev -x validate config -s <INTEGRATION_NAME>
 #     ddev -x validate models -s <INTEGRATION_NAME>
 
-
 from __future__ import annotations
 
 from typing import Optional
@@ -20,13 +19,26 @@ from datadog_checks.base.utils.models import validation
 from . import defaults, validators
 
 
+class Proxy(BaseModel):
+    model_config = ConfigDict(
+        arbitrary_types_allowed=True,
+        frozen=True,
+    )
+    http: Optional[str] = None
+    https: Optional[str] = None
+    no_proxy: Optional[tuple[str, ...]] = None
+
+
 class SharedConfig(BaseModel):
     model_config = ConfigDict(
         validate_default=True,
         arbitrary_types_allowed=True,
         frozen=True,
     )
+    proxy: Optional[Proxy] = None
     service: Optional[str] = None
+    skip_proxy: Optional[bool] = None
+    timeout: Optional[float] = None
 
     @model_validator(mode='before')
     def _initial_validation(cls, values):
