@@ -1,5 +1,5 @@
-# THIS FILE IS AUTO-GENERATED, DO NOT EDIT BY HAND
 # DO NOT PASS THIS TO PIP DIRECTLY
+# THIS FILE IS AUTO-GENERATED, DO NOT EDIT BY HAND
 --no-index
 datadog-active-directory==2.1.0; sys_platform == 'win32'
 datadog-activemq-xml==3.2.0
@@ -18,7 +18,7 @@ datadog-avi-vantage==4.2.0
 datadog-azure-iot-edge==4.2.0
 datadog-boundary==2.2.1
 datadog-btrfs==2.3.0; sys_platform != 'win32'
-datadog-cacti==2.1.0; sys_platform == 'linux2'
+datadog-cacti==2.1.1; sys_platform == 'linux2'
 datadog-calico==2.2.0
 datadog-cassandra-nodetool==1.13.0
 datadog-cassandra==1.18.0
@@ -112,7 +112,7 @@ datadog-mcache==4.1.0; sys_platform != 'win32'
 datadog-mesos-master==3.3.0; sys_platform != 'win32'
 datadog-mesos-slave==3.3.0; sys_platform != 'win32'
 datadog-mongo==6.4.0
-datadog-mysql==12.4.0
+datadog-mysql==12.4.1
 datadog-nagios==1.13.0
 datadog-network==3.3.0
 datadog-nfsstat==1.13.0; sys_platform == 'linux2'
@@ -135,7 +135,7 @@ datadog-powerdns-recursor==2.5.0
 datadog-presto==2.8.0
 datadog-process==3.3.0
 datadog-prometheus==3.6.0
-datadog-proxysql==5.1.0
+datadog-proxysql==5.1.1
 datadog-pulsar==2.2.0
 datadog-rabbitmq==5.3.0
 datadog-ray==1.2.0
@@ -147,7 +147,7 @@ datadog-sap-hana==3.2.0
 datadog-scylla==2.7.0
 datadog-sidekiq==1.4.0
 datadog-silk==2.2.0
-datadog-singlestore==2.2.0
+datadog-singlestore==2.2.1
 datadog-snmp==7.3.0
 datadog-snowflake==5.5.0
 datadog-solr==1.13.0
