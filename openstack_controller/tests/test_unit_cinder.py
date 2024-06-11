@@ -115,9 +115,7 @@ def test_disable_block_storage_components_metrics(aggregator, dd_run_check, inst
     indirect=['mock_http_post', 'openstack_v3_password'],
 )
 @pytest.mark.usefixtures('mock_http_get', 'mock_http_post', 'openstack_connection')
-def test_not_in_catalog(
-    aggregator, check, dd_run_check, caplog, mock_http_post, openstack_connection, api_type
-):
+def test_not_in_catalog(aggregator, check, dd_run_check, caplog, mock_http_post, openstack_connection, api_type):
     with caplog.at_level(logging.DEBUG):
         dd_run_check(check)
 
