@@ -109,8 +109,8 @@ class ApiRest(Api):
         self._current_project_id = project_id
 
     def _authorize_data(self, data):
-        endpoint = f'{self.config.keystone_server_url}/v3/auth/tokens'
-        response = self.http.post(endpoint, json=data)
+        self.log.debug("creating auth token")
+        response = self.http.post('{}/v3/auth/tokens'.format(self.config.keystone_server_url), json=data)
         response.raise_for_status()
         response_json = response.json()
         self.log.debug("response: %s", response_json)
