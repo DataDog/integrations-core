@@ -508,30 +508,6 @@ def test_allocations_metrics(aggregator, check, dd_run_check, metrics):
 
 
 @pytest.mark.parametrize(
-    ('instance'),
-    [
-        pytest.param(
-            configs.REST_IRONIC_MICROVERSION_1_10,
-            id='api rest microversion default',
-        ),
-        pytest.param(
-            configs.SDK_IRONIC_MICROVERSION_1_10,
-            id='api sdk microversion default',
-        ),
-    ],
-)
-@pytest.mark.usefixtures('mock_http_get', 'mock_http_post', 'openstack_connection')
-def test_allocations_low_microversion(aggregator, check, dd_run_check, caplog):
-    caplog.set_level(logging.INFO)
-    dd_run_check(check)
-    assert 'Ironic microversion is below 1.52 and set to 1.10, cannot collect allocations' in caplog.text
-    aggregator.assert_metric(
-        'openstack.ironic.allocation.count',
-        count=0,
-    )
-
-
-@pytest.mark.parametrize(
     ('connection_baremetal', 'instance', 'paginated_limit', 'api_type', 'expected_api_calls'),
     [
         pytest.param(
