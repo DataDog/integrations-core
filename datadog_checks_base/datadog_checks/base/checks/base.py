@@ -646,7 +646,7 @@ class AgentCheck(object):
         if raw_event is None:
             return
 
-        self.log.info("submitting event {}".format(raw_event))
+        self.log.info("{} submitting event {}".format(self.check_id, raw_event))
         aggregator.submit_event_platform_event(self, self.check_id, to_native_string(raw_event), "dbm-metrics")
 
     def database_monitoring_query_activity(self, raw_event):
