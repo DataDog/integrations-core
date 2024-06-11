@@ -108,7 +108,7 @@ class CiscoACICheck(AgentCheck):
             raise
 
         try:
-            fabric = Fabric(self, api, self.instance)
+            fabric = Fabric(self, api, self.instance, self.instance.get('namespace', 'default'))
             fabric.collect()
         except Exception as e:
             self.log.error('fabric collection failed: %s', e)

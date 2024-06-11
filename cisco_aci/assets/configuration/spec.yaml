@@ -92,6 +92,12 @@ files:
       value:
         type: boolean
         example: False
+    - name: namespace
+      description: |
+        Namespace to be used for devices, interfaces, metrics. If none is specified, will use 'default'.
+      value:
+        type: string
+        example: default
     - template: instances/http
       overrides:
         username.display_priority: 9

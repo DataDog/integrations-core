@@ -16,17 +16,19 @@ else:
 
 from . import aci_metrics, exceptions, helpers
 
+VENDOR_CISCO = 'cisco_aci'
 
 class Fabric:
     """
     Collect fabric metrics from the APIC
     """
 
-    def __init__(self, check, api, instance):
+    def __init__(self, check, api, instance, namespace):
         self.check = check
         self.api = api
         self.instance = instance
         self.check_tags = check.check_tags
+        self.namespace = namespace
 
         # grab some functions from the check
         self.gauge = check.gauge
@@ -226,28 +228,26 @@ class Fabric:
             return 'port'
 
     def submit_node_metadata(self, node_attrs, tags):
-        vendor = 'cisco_aci'
-        namespace = 'default'
         node = Node(attributes=node_attrs)
-        id_tags = ['namespace:{}'.format(namespace), 'system_ip:{}'.format(node.attributes.address)]
+        id_tags = ['namespace:{}'.format(self.namespace), 'system_ip:{}'.format(node.attributes.address)]
         device_tags = [
-            'device_vendor:{}'.format(vendor),
-            'device_namespace:{}'.format(namespace),
+            'device_vendor:{}'.format(VENDOR_CISCO),
+            'device_namespace:{}'.format(self.namespace),
             'device_hostname:{}'.format(node.attributes.dn),
             'hostname:{}'.format(node.attributes.dn),
             'system_ip:{}'.format(node.attributes.address),
             'device_ip:{}'.format(node.attributes.address),
-            'device_id:{}:{}'.format(namespace, node.attributes.address),
+            'device_id:{}:{}'.format(self.namespace, node.attributes.address),
         ]
         device = DeviceMetadata(
-            device_id='{}:{}'.format(namespace, node.attributes.address),
+            device_id='{}:{}'.format(self.namespace, node.attributes.address),
             id_tags=id_tags,
             tags=device_tags + tags,
             name=node.attributes.dn,
             ip_address=node.attributes.address,
             model=node.attributes.model,
             ad_st=node.attributes.ad_st,
-            vendor=vendor,
+            vendor=VENDOR_CISCO,
             version=node.attributes.version,
             serial_number=node.attributes.serial,
         )
@@ -255,9 +255,8 @@ class Fabric:
 
     def submit_interface_metadata(self, eth_attr, address, tags):
         eth = Eth(attributes=eth_attr)
-        namespace = 'default'
         interface = InterfaceMetadata(
-            device_id='{}:{}'.format(namespace, address),
+            device_id='{}:{}'.format(self.namespace, address),
             id_tags=tags,
             index=eth.attributes.id,
             name=eth.attributes.name,
