@@ -460,13 +460,6 @@ SDK_IRONIC_MICROVERSION_1_80 = {
     'use_legacy_check_version': False,
 }
 
-SDK_IRONIC_MICROVERSION_1_10 = {
-    'openstack_cloud_name': 'test_cloud',
-    'openstack_config_file_path': TEST_OPENSTACK_CONFIG_UNIT_TESTS_PATH,
-    'ironic_microversion': '1.10',
-    'use_legacy_check_version': False,
-}
-
 SDK_MICROVERSION_3_70 = {
     'openstack_cloud_name': 'test_cloud',
     'openstack_config_file_path': TEST_OPENSTACK_CONFIG_UNIT_TESTS_PATH,
