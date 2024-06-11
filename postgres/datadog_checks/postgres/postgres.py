@@ -1048,6 +1048,7 @@ class PostgreSql(AgentCheck):
             if self._config.collect_wal_metrics:
                 # collect wal metrics for pg < 10, disabled by enabled
                 self._collect_wal_metrics()
+            self.log.info("about to flush telemetry")
             self._telemetry.flush(self.database_monitoring_query_metrics)
         except Exception as e:
             self.log.exception("Unable to collect postgres metrics.")

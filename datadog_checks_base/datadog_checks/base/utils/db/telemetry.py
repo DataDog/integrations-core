@@ -54,7 +54,7 @@ class Telemetry:
         :param force (_bool_): Send events even if less than FLUSH_INTERVAL has elapsed. Only used for testing.
         """
         elapsed_s = time() - self._last_flush 
-        self._log.info("flushing telemetry after $d", elapsed_s)
+        self._log.info("telemetry flush after $d", elapsed_s)
         if not force and elapsed_s < FLUSH_INTERVAL:
             return
         for op in self._buffer.values():
