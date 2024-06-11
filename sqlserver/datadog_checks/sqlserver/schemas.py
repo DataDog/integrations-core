@@ -35,6 +35,7 @@ class SubmitData:
         self._log = logger
 
         self._columns_count = 0
+        self._total_columns_sent = 0
         self.db_to_schemas = {}  # dbname : { id : schema }
         self.db_info = {}  # name to info
 
@@ -45,6 +46,7 @@ class SubmitData:
         self._base_event["dbms_version"] = dbms_version
 
     def reset(self):
+        self._total_columns_sent = 0
         self._columns_count = 0
         self.db_to_schemas.clear()
         self.db_info.clear()
@@ -73,9 +75,25 @@ class SubmitData:
         else:
             return json_event
 
+    def send_truncated_msg(self, db_name, time_spent):
+        event = {**self._base_event, "metadata": [], "timestamp": time.time() * 1000}
+        db_info = {}
+        if db_name not in self.db_to_schemas:
+            db_info = self.db_info[db_name]
+        else:
+            db_info = {"name": db_name}
+        db_info["truncated"] = "Truncated after fetching {} columns, elapsed time is {}s".format(
+            self._total_columns_sent, time_spent
+        )
+        event["metadata"] = [{**(db_info)}]
+        json_event = json.dumps(event, default=default_json_event_encoding)
+        self._log.debug("Reporting truncation of schema collection: {}".format(self.truncate(json_event)))
+        self._submit_to_agent_queue(json_event)
+
     def submit(self):
         if not self.db_to_schemas:
             return
+        self._total_columns_sent += self._columns_count
         self._columns_count = 0
         event = {**self._base_event, "metadata": [], "timestamp": time.time() * 1000}
         for db, schemas_by_id in self.db_to_schemas.items():
@@ -143,8 +161,7 @@ class Schemas(DBMAsyncJob):
         self._data_submitter.submit()
 
     @tracked_method(agent_check_getter=agent_check_getter)
-    def _fetch_schema_data(self, cursor, db_name):
-        start_time = time.time()
+    def _fetch_schema_data(self, cursor, start_time, db_name):
         schemas = self._query_schema_information(cursor)
         for schema in schemas:
             tables = self._get_tables(schema, cursor)
@@ -152,13 +169,8 @@ class Schemas(DBMAsyncJob):
             for tables_chunk in tables_chunks:
                 schema_collection_elapsed_time = time.time() - start_time
                 if schema_collection_elapsed_time > self._max_execution_time:
-                    # TODO Report truncation to the backend
-                    self._log.warning(
-                        """Truncated data due to the execution time reaching {}s,
-                         stopped on db {} on schema {}""".format(
-                            self._max_execution_time, db_name, schema["name"]
-                        )
-                    )
+                    self._data_submitter.submit()
+                    self._data_submitter.send_truncated_msg(db_name, schema_collection_elapsed_time)
                     raise StopIteration(
                         """Schema collection took {}s which is longer than allowed limit of {}s,
                         stopped while collecting for db - {}""".format(
@@ -173,6 +185,7 @@ class Schemas(DBMAsyncJob):
         return False
 
     def _fetch_for_databases(self):
+        start_time = time.time()
         databases = self._check.get_databases()
         engine_edition = self._check.static_info_cache.get(STATIC_INFO_ENGINE_EDITION)
         with self._check.connection.open_managed_default_connection():
@@ -181,7 +194,7 @@ class Schemas(DBMAsyncJob):
                     try:
                         if not is_azure_sql_database(engine_edition):
                             cursor.execute(SWITCH_DB_STATEMENT.format(db_name))
-                        self._fetch_schema_data(cursor, db_name)
+                        self._fetch_schema_data(cursor, start_time, db_name)
                     except StopIteration as e:
                         self._log.error(
                             "While executing fetch schemas for databse {}, the following exception occured {}".format(

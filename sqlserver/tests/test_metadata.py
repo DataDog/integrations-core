@@ -5,6 +5,7 @@
 from __future__ import unicode_literals
 
 import logging
+import re
 from copy import copy
 
 import pytest
@@ -363,3 +364,25 @@ def test_collect_schemas(aggregator, dd_run_check, dbm_instance):
         # schema data also collects certain builtin default schemas which are ignored in the test
         if len(diff_keys) > 0 and diff_keys != ['iterable_item_removed']:
             raise AssertionError(Exception("found the following diffs: " + str(difference)))
+
+
+def test_schemas_collection_truncated(aggregator, dd_run_check, dbm_instance):
+    dbm_instance['database_autodiscovery'] = True
+    dbm_instance['autodiscovery_include'] = ['datadog_test_schemas']
+    dbm_instance['dbm'] = True
+    dbm_instance['schemas_collection'] = {"enabled": True, "max_execution_time": 0}
+    expected_pattern = r"^Truncated after fetching \d+ columns, elapsed time is \d+(\.\d+)?s$"
+
+    check = SQLServer(CHECK_NAME, {}, [dbm_instance])
+    dd_run_check(check)
+    dbm_metadata = aggregator.get_event_platform_events("dbm-metadata")
+    found = False
+    for schema_event in (e for e in dbm_metadata if e['kind'] == 'sqlserver_databases'):
+        for database_metadata in schema_event['metadata']:
+            if (
+                "truncated" in database_metadata
+                and database_metadata['name'] == 'datadog_test_schemas'
+                and re.fullmatch(expected_pattern, database_metadata["truncated"])
+            ):
+                found = True
+    assert found

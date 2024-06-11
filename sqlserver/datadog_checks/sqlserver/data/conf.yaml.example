@@ -365,14 +365,15 @@ instances:
     #
     ## schemas_collection
 
-        ## @param enabled - boolean - optional - default: true
-        ## Enable collection of active sessions. Requires `dbm: true`.
+        ## @param enabled - boolean - optional - default: true 
+        ## Enable collection of schemas. Requires `dbm: true`. If `database_autodiscovery` is not enabled,
+        ## data is collected only for the database configured with `database` parameter.
         #
-        # enabled: true
+        # enabled: false
 
         ## @param collection_interval - number - optional - default: 600
         ## Set the database schema collection interval (in seconds).        
-        ## If a non-default value is chosen, then that exact same value must be used for *every* check instance. TODO ?
+        ## If a non-default value is chosen, then that exact same value must be used for *every* check instance.
         ## Running different instances with different collection intervals is not supported.
         #
         # collection_interval: 600

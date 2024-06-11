@@ -723,7 +723,7 @@ files:
             Enable schema collection. Requires `dbm: true`. Defaults to false.
           value:
             type: boolean
-            example: true
+            example: false
         - name: collection_interval
           description: |
             Set the database schema collection interval (in seconds). Defaults to 600 seconds.
@@ -732,7 +732,8 @@ files:
             example: 600
         - name: max_execution_time
           description: |
-            Set the maximum time for schema collection (in seconds). Defaults to 10 seconds. Capped by `schemas_collection.collection_interval`
+            Set the maximum time for schema collection (in seconds). Defaults to 10 seconds. 
+            Capped by `schemas_collection.collection_interval`
           value:
             type: number
             example: 10
