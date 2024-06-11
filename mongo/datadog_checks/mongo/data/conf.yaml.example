@@ -84,6 +84,13 @@ instances:
     #   - one_database
     #   - other_database
 
+    ## @param reported_hostname - string - optional
+    ## Set the reported hostname for the connected mongodb instance. This value overrides the mongodb hostname 
+    ## detected by the Agent from mongodb admin command serverStatus. It can be useful to set a custom hostname
+    ## when connecting to a remote database through a proxy.
+    #
+    # reported_hostname: <REPORTED_HOSTNAME>
+
     ## @param replica_check - boolean - optional - default: true
     ## Whether or not to read from available replicas.
     ## Disable this if any replicas are inaccessible to the Agent. This option is not supported for sharded clusters.

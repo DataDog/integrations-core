@@ -109,6 +109,9 @@ class MongoConfig(object):
         if self.dbm_enabled and not self.cluster_name:
             raise ConfigurationError('`cluster_name` must be set when `dbm` is enabled')
 
+        # MongoDB instance hostname override
+        self.reported_hostname = instance.get('reported_hostname', None)
+
     def _get_clean_server_name(self):
         try:
             if not self.server:

@@ -111,6 +111,13 @@ files:
         Required when `dbm` is enabled.
       value:
         type: string
+    - name: reported_hostname
+      description: |
+        Set the reported hostname for the connected mongodb instance. This value overrides the mongodb hostname 
+        detected by the Agent from mongodb admin command serverStatus. It can be useful to set a custom hostname
+        when connecting to a remote database through a proxy.
+      value:
+        type: string
     - name: database_instance_collection_interval
       hidden: true
       description: |
