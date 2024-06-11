@@ -1,7 +1,7 @@
 # (C) Datadog, Inc. 2024-present
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
-import json
+from datadog_checks.base.utils.serialization import json
 import logging
 from time import time
 from typing import Callable, Dict, NamedTuple, Optional
@@ -71,5 +71,5 @@ class Telemetry:
 
             json_event = json.dumps(event, default=default_json_event_encoding)
             self._log.warn("aq: Reporting the following payload for telemetry collection: {}".format(json_event))
-            submit(bytearray(json_event, 'utf8'))
+            submit(json_event)
         self._last_flush = time()
