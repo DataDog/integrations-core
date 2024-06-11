@@ -43,7 +43,7 @@ class Telemetry:
         :param elapsed (_Optional[float]_): Time elapsed for the operation in milliseconds. Example: 20ms to query for list of tables in schema collection
         :param count (_Optional[int]_): Count of relevant resources. Example: 5 tables collected as part of schema collection        
         """
-        self._buffer[f'{integration}.{operation}'] = {integration, operation, elapsed, count}
+        self._buffer[f'{integration}.{operation}'] = TelemetryOperation(integration, operation, elapsed, count)
         self._last_flush = 0
     
     def flush(self, submit: Callable[[str], None], force = False):
