@@ -4,7 +4,7 @@
 import json
 import logging
 from time import time
-from typing import Dict, NamedTuple, Optional
+from typing import Callable, Dict, NamedTuple, Optional
 from .utils import default_json_event_encoding
 from datadog_checks.base.utils.common import to_native_string
 from datadog_checks.base.agent import datadog_agent
@@ -46,7 +46,7 @@ class Telemetry:
         self._buffer[f'{integration}.{operation}'] = {integration, operation, elapsed, count}
         self._last_flush = 0
     
-    def flush(self, submit: function, force = False):
+    def flush(self, submit: Callable[[str], None], force = False):
         """
         Flushes any buffered events. The Telemetry instance tracks the time since last flush and will skip executions less than FLUSH_INTERVAL
         since the last events sent.
