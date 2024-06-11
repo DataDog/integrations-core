@@ -82,8 +82,8 @@ class SubmitData:
             db_info = self.db_info[db_name]
         else:
             db_info = {"name": db_name}
-        db_info["truncated"] = "Truncated after fetching {} columns, elapsed time is {}s".format(
-            self._total_columns_sent, time_spent
+        db_info["truncated"] = "Truncated after fetching {} columns, elapsed time is {}s, database is {}".format(
+            self._total_columns_sent, time_spent, db_name
         )
         event["metadata"] = [{**(db_info)}]
         json_event = json.dumps(event, default=default_json_event_encoding)

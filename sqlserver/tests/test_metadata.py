@@ -371,8 +371,7 @@ def test_schemas_collection_truncated(aggregator, dd_run_check, dbm_instance):
     dbm_instance['autodiscovery_include'] = ['datadog_test_schemas']
     dbm_instance['dbm'] = True
     dbm_instance['schemas_collection'] = {"enabled": True, "max_execution_time": 0}
-    expected_pattern = r"^Truncated after fetching \d+ columns, elapsed time is \d+(\.\d+)?s$"
-
+    expected_pattern = r"^Truncated after fetching \d+ columns, elapsed time is \d+(\.\d+)?s, database is .*"
     check = SQLServer(CHECK_NAME, {}, [dbm_instance])
     dd_run_check(check)
     dbm_metadata = aggregator.get_event_platform_events("dbm-metadata")
