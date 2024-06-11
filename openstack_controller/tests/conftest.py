@@ -989,7 +989,7 @@ def mock_http_get(request, monkeypatch, mock_http_call):
         method = 'GET'
         url = get_url_path(url)
         if http_error and url in http_error:
-            raise requests.exceptions.HTTPError(response=http_error[url])
+            return http_error[url]
 
         if data and url in data:
             return MockResponse(json_data=data[url], status_code=200)
@@ -1015,7 +1015,7 @@ def mock_http_post(request, monkeypatch, mock_http_call):
         if exception and url in exception:
             raise exception[url]
         if http_error and url in http_error:
-            raise requests.exceptions.HTTPError(response=http_error[url])
+            return http_error[url]
         if url == '/identity/v3/auth/tokens':
             data = kwargs['json']
             scope = data.get('auth', {}).get('scope', 'unscoped')
