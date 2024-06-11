@@ -8,17 +8,16 @@
     "configuration": "README.md#Setup",
     "support": "README.md#Support",
     "changelog": "CHANGELOG.md",
-    "description": "",
+    "description": "vLLM is a fast and easy-to-use library for LLM inference and serving",
     "title": "vLLM",
     "media": [],
     "classifier_tags": [
       "Supported OS::Linux",
       "Supported OS::Windows",
       "Supported OS::macOS",
-      "Category::",
-      "Offering::",
-      "Queried Data Type::",
-      "Submitted Data Type::"
+      "Category::Log Collection",
+      "Category::AI/ML",
+      "Submitted Data Type::Metrics"
     ]
   },
   "assets": {
@@ -41,7 +40,9 @@
         "metadata_path": "assets/service_checks.json"
       }
     },
-    "dashboards": {},
+    "dashboards": {
+
+    },
     "monitors": {},
     "saved_views": {}
   },
