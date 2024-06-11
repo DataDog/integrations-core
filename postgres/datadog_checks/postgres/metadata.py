@@ -268,6 +268,7 @@ class PostgresMetadata(DBMAsyncJob):
             and elapsed_s_schemas >= self.schemas_collection_interval
         ):
             self._is_schemas_collection_in_progress = True
+            start = time.time()
             schema_metadata = self._collect_schema_info()
             # We emit an event for each batch of tables to reduce total data in memory and keep event size reasonable
             base_event = {
@@ -310,6 +311,7 @@ class PostgresMetadata(DBMAsyncJob):
                             if len(tables_buffer) > 0:
                                 self._flush_schema(base_event, database, schema, tables_buffer)
             self._is_schemas_collection_in_progress = False
+            self._check._telemetry.add("postgres", "collect_schemas", time() - start)
 
     def _flush_schema(self, base_event, database, schema, tables):
         event = {

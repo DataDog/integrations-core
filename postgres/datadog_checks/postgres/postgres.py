@@ -665,6 +665,7 @@ class PostgreSql(AgentCheck):
         on top of that.
         If custom_metrics is not an empty list, gather custom metrics defined in postgres.yaml
         """
+        start = time()
         db_instance_metrics = self.metrics_cache.get_instance_metrics(self.version)
         bgw_instance_metrics = self.metrics_cache.get_bgw_metrics(self.version)
         archiver_instance_metrics = self.metrics_cache.get_archiver_metrics(self.version)
@@ -764,7 +765,7 @@ class PostgreSql(AgentCheck):
         if self.dynamic_queries:
             for dynamic_query in self.dynamic_queries:
                 dynamic_query.execute()
-
+        self._telemetry.add("postgres", "collect_stats", time() - start)
     def _new_connection(self, dbname):
         if self._config.host == 'localhost' and self._config.password == '':
             # Use ident method
@@ -1047,6 +1048,7 @@ class PostgreSql(AgentCheck):
             if self._config.collect_wal_metrics:
                 # collect wal metrics for pg < 10, disabled by enabled
                 self._collect_wal_metrics()
+            self._telemetry.flush(self.database_monitoring_query_metrics)
         except Exception as e:
             self.log.exception("Unable to collect postgres metrics.")
             self._clean_state()

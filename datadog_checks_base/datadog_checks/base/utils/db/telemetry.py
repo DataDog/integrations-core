@@ -7,7 +7,7 @@ from time import time
 from typing import Dict, NamedTuple, Optional
 from .utils import default_json_event_encoding
 from datadog_checks.base.utils.common import to_native_string
-from datadog_checks.base.agent import aggregator
+from datadog_checks.base.agent import datadog_agent
 
 
 logger = logging.getLogger(__name__)
@@ -44,12 +44,12 @@ class Telemetry:
         self._buffer[f'{integration}.{operation}'] = {integration, operation, elapsed, count}
         self._last_flush = 0
     
-    def _flush(self, check_id: str, force = False):
+    def flush(self, submit: function, force = False):
         """
         Flushes any buffered events. The Telemetry instance tracks the time since last flush and will skip executions less than FLUSH_INTERVAL
         since the last events sent.
 
-        :param check_id (_str_): Parent check_id is set by the agent after initialization and should be provided on each flush.
+        :param submit (_function_): Submission function for the event. Typically this would be self.database_monitoring_query_metrics.
         :param force (_bool_): Send events even if less than FLUSH_INTERVAL has elapsed. Only used for testing.
         """
         elapsed_s = time() - self._last_flush 
@@ -57,13 +57,15 @@ class Telemetry:
             return
         for op in self._buffer.values():
             event = {
+                "ddagentversion": datadog_agent.get_version(),
+                "timestamp": time() * 1000,
+                "kind": "agent_metrics",
                 "integration": op.integration,
                 "operation": op.operation,
                 "elapsed": op.elapsed,
                 "count": op.count,
-                "timestamp": time() * 1000,
             }
 
             json_event = json.dumps(event, default=default_json_event_encoding)
             self._log.debug("Reporting the following payload for schema collection: {}".format(json_event))
-            aggregator.submit_event_platform_event(self, check_id, to_native_string(json_event), "dbm-events")
+            submit(json_event)
