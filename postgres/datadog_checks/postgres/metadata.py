@@ -284,6 +284,7 @@ class PostgresMetadata(DBMAsyncJob):
 
             # Tuned from experiments on staging, we may want to make this dynamic based on schema size in the future
             chunk_size = 50
+            total_tables = 0
 
             for database in schema_metadata:
                 dbname = database["name"]
@@ -310,8 +311,9 @@ class PostgresMetadata(DBMAsyncJob):
 
                             if len(tables_buffer) > 0:
                                 self._flush_schema(base_event, database, schema, tables_buffer)
+                                total_tables += len(tables_buffer)
             self._is_schemas_collection_in_progress = False
-            self._check._telemetry.add("postgres", "collect_schemas", time() - start)
+            self._check._telemetry.add("postgres", "collect_schemas", time() - start, total_tables)
 
     def _flush_schema(self, base_event, database, schema, tables):
         event = {

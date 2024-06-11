@@ -766,7 +766,7 @@ class PostgreSql(AgentCheck):
         if self.dynamic_queries:
             for dynamic_query in self.dynamic_queries:
                 dynamic_query.execute()
-        self._telemetry.add("postgres", "collect_stats", time() - start)
+        self._telemetry.add("postgres", "collect_stats", time() - start, None)
     def _new_connection(self, dbname):
         if self._config.host == 'localhost' and self._config.password == '':
             # Use ident method
