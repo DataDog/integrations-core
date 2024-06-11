@@ -25,6 +25,10 @@ class CmClient(Client):
         cm_client.configuration.username = kwargs.get('workload_username')
         cm_client.configuration.password = kwargs.get('workload_password')
         self._client = cm_client.ApiClient(kwargs.get('api_url'))
+        cm_client.configuration.verify_ssl = kwargs.get('verify_ssl')
+        cm_client.configuration.ssl_ca_cert = kwargs.get('ssl_ca_cert')
+        cm_client.configuration.cert_file = kwargs.get('cert_file')
+        cm_client.configuration.key_file = kwargs.get('key_file')
         self._client.rest_client = RESTClientObject(maxsize=kwargs.get('max_parallel_requests'))
 
     def get_version(self) -> Version:

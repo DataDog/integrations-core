@@ -156,7 +156,7 @@ test_procedure_metrics_parametrized = (
             ],
         ],
         [
-            "datadog_test",  # database
+            "datadog_test-1",  # database
             "EXEC bobProc",  # query
             ((),),
             1,
@@ -164,13 +164,13 @@ test_procedure_metrics_parametrized = (
                 {
                     'schema_name': 'dbo',
                     'procedure_name': 'bobProc',
-                    'database_name': 'datadog_test',
+                    'database_name': 'datadog_test-1',
                     'execution_count': 1,
                 }
             ],
         ],
         [
-            "datadog_test",  # database
+            "datadog_test-1",  # database
             "EXEC bobProc",  # query
             ((),),
             10,
@@ -178,13 +178,13 @@ test_procedure_metrics_parametrized = (
                 {
                     'schema_name': 'dbo',
                     'procedure_name': 'bobProc',
-                    'database_name': 'datadog_test',
+                    'database_name': 'datadog_test-1',
                     'execution_count': 10,
                 }
             ],
         ],
         [
-            "datadog_test",  # database
+            "datadog_test-1",  # database
             "EXEC bobProcParams @P1 = ?, @P2 = ?",  # query
             (
                 (1, "foo"),
@@ -195,7 +195,7 @@ test_procedure_metrics_parametrized = (
                 {
                     'schema_name': 'dbo',
                     'procedure_name': 'bobProcParams',
-                    'database_name': 'datadog_test',
+                    'database_name': 'datadog_test-1',
                     'execution_count': 2,
                 }
             ],
@@ -299,12 +299,12 @@ def test_procedure_metrics_limit(aggregator, dd_run_check, dbm_instance, bob_con
     dd_run_check(check)
     bob_conn.execute_with_retries('EXEC multiQueryProc', (), database='master')
     bob_conn.execute_with_retries('EXEC encryptedProc', (), database='master')
-    bob_conn.execute_with_retries('EXEC bobProc', (), database='datadog_test')
+    bob_conn.execute_with_retries('EXEC bobProc', (), database='datadog_test-1')
     dd_run_check(check)
     aggregator.reset()
     bob_conn.execute_with_retries('EXEC multiQueryProc', (), database='master')
     bob_conn.execute_with_retries('EXEC encryptedProc', (), database='master')
-    bob_conn.execute_with_retries('EXEC bobProc', (), database='datadog_test')
+    bob_conn.execute_with_retries('EXEC bobProc', (), database='datadog_test-1')
     dd_run_check(check)
 
     # dbm-metrics

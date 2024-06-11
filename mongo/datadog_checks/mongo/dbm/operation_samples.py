@@ -125,6 +125,7 @@ class MongoOperationSamples(DBMAsyncJob):
                     explain_plan_cache_key=(operation_metadata["dbname"], query_signature),
                 ):
                     yield activity, None
+                    continue
 
                 explain_plan = self._get_explain_plan(
                     op=operation.get("op"), command=command, dbname=operation_metadata["dbname"]
