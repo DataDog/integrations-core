@@ -71,5 +71,5 @@ class Telemetry:
 
             json_event = json.dumps(event, default=default_json_event_encoding)
             self._log.warn("aq: Reporting the following payload for telemetry collection: {}".format(json_event))
-            submit(json_event)
+            submit(bytearray(json_event, 'utf8'))
         self._last_flush = time()
