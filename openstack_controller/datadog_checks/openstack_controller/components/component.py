@@ -9,7 +9,6 @@ from functools import wraps
 import requests
 
 from datadog_checks.base import AgentCheck
-from datadog_checks.openstack_controller.api.catalog import CatalogEndPointFailure
 
 
 def argument_value(arg_name, func, *args, **kwargs):
@@ -80,8 +79,6 @@ class Component:
                     self.check.log.debug("RequestException [%s]: %s", type(e), e)
                     if report_service_check:
                         self.check.service_check(self.SERVICE_CHECK, AgentCheck.CRITICAL, tags=tags)
-                except CatalogEndPointFailure as e:
-                    self.check.log.debug("CatalogEndPointFailure: %s", e)
                 except Exception as e:
                     self.check.log.error("Exception: %s", e)
                 return None
