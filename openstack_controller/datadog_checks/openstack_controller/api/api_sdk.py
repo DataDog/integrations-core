@@ -65,7 +65,6 @@ class ApiSdk(Api):
         return self._catalog.has_component(component_types)
 
     def authorize_user(self):
-        self.http.options['headers']['X-Auth-Type'] = "unscoped"
         v3_auth = v3.Password(
             auth_url=self.cloud_config.get_auth_args().get('auth_url'),
             username=self.cloud_config.get_auth_args().get('username'),
@@ -82,7 +81,6 @@ class ApiSdk(Api):
         self.http.options['headers']['X-Auth-Token'] = self.connection.session.auth.get_token(self.connection.session)
 
     def authorize_system(self):
-        self.http.options['headers']['X-Auth-Type'] = "system"
         v3_auth = v3.Password(
             auth_url=self.cloud_config.get_auth_args().get('auth_url'),
             username=self.cloud_config.get_auth_args().get('username'),
@@ -100,7 +98,6 @@ class ApiSdk(Api):
         self.http.options['headers']['X-Auth-Token'] = self.connection.session.auth.get_token(self.connection.session)
 
     def authorize_project(self, project_id):
-        self.http.options['headers']['X-Auth-Type'] = project_id
         v3_auth = v3.Password(
             auth_url=self.cloud_config.get_auth_args().get('auth_url'),
             username=self.cloud_config.get_auth_args().get('username'),
