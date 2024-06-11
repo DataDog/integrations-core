@@ -33,16 +33,16 @@ GO
 -- Create test database for integration tests
 -- only bob and fred have read/write access to this database
 -- the datadog user has only connect access but can't read any objects
-CREATE DATABASE datadog_test;
+CREATE DATABASE [datadog_test-1];
 GO
-USE datadog_test;
+USE [datadog_test-1];
 GO
 
 -- This table is pronounced "things" except we've replaced "th" with the greek lower case "theta" to ensure we
 -- correctly support unicode throughout the integration.
-CREATE TABLE datadog_test.dbo.ϑings (id int, name varchar(255));
-INSERT INTO datadog_test.dbo.ϑings VALUES (1, 'foo'), (2, 'bar');
-CREATE CLUSTERED INDEX thingsindex ON datadog_test.dbo.ϑings (name);
+CREATE TABLE [datadog_test-1].dbo.ϑings (id int, name varchar(255));
+INSERT INTO [datadog_test-1].dbo.ϑings VALUES (1, 'foo'), (2, 'bar');
+CREATE CLUSTERED INDEX thingsindex ON [datadog_test-1].dbo.ϑings (name);
 CREATE USER bob FOR LOGIN bob;
 CREATE USER fred FOR LOGIN fred;
 -- we don't need to recreate the datadog user in this new DB because it already exists in the model
@@ -196,7 +196,7 @@ GO
 ------------------------------ HIGH CARDINALITY ENV SETUP ------------------------------
 
 -- Table variables
-DECLARE @table_prefix VARCHAR(100) = 'CREATE TABLE datadog_test.dbo.'
+DECLARE @table_prefix VARCHAR(100) = 'CREATE TABLE [datadog_test-1].dbo.'
 DECLARE @table_columns VARCHAR(500) = ' (id INT NOT NULL IDENTITY, col1_txt TEXT, col2_txt TEXT, col3_txt TEXT, col4_txt TEXT, col5_txt TEXT, col6_txt TEXT, col7_txt TEXT, col8_txt TEXT, col9_txt TEXT, col10_txt TEXT, col11_float FLOAT, col12_float FLOAT, col13_float FLOAT, col14_int INT, col15_int INT, col16_int INT, col17_date DATE, PRIMARY KEY(id));';
 
 -- Create a main table which contains high cardinality data for testing.
@@ -227,7 +227,7 @@ BEGIN
     DECLARE @col16_int INT = FLOOR(RAND() * 2500);
     DECLARE @col17_date DATE = CAST(CAST(RAND()*100000 AS INT) AS DATETIME);
 
-    INSERT INTO datadog_test.dbo.high_cardinality (col1_txt, col2_txt, col3_txt, col4_txt, col5_txt, col6_txt, col7_txt, col8_txt, col9_txt, col10_txt, col11_float, col12_float, col13_float, col14_int, col15_int, col16_int, col17_date) VALUES (@col1_txt, @col2_txt, @col3_txt, @col4_txt, @col5_txt, @col6_txt, @col7_txt, @col8_txt, @col9_txt, @col10_txt, @col11_float, @col12_float, @col13_float, @col14_int, @col15_int, @col16_int, @col17_date);
+    INSERT INTO [datadog_test-1].dbo.high_cardinality (col1_txt, col2_txt, col3_txt, col4_txt, col5_txt, col6_txt, col7_txt, col8_txt, col9_txt, col10_txt, col11_float, col12_float, col13_float, col14_int, col15_int, col16_int, col17_date) VALUES (@col1_txt, @col2_txt, @col3_txt, @col4_txt, @col5_txt, @col6_txt, @col7_txt, @col8_txt, @col9_txt, @col10_txt, @col11_float, @col12_float, @col13_float, @col14_int, @col15_int, @col16_int, @col17_date);
 
     SET @row_count = @row_count + 1
 END;
