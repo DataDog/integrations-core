@@ -159,7 +159,7 @@ test_statement_metrics_and_plans_parameterized = (
             True,
         ],
         [
-            "datadog_test",
+            "datadog_test-1",
             "SELECT * FROM ϑings",
             [r"SELECT \* FROM ϑings"],
             ((),),
@@ -169,7 +169,7 @@ test_statement_metrics_and_plans_parameterized = (
             False,
         ],
         [
-            "datadog_test",
+            "datadog_test-1",
             "SELECT * FROM ϑings where id = ?",
             [r"SELECT \* FROM ϑings where id = @P1"],
             (
@@ -183,7 +183,7 @@ test_statement_metrics_and_plans_parameterized = (
             False,
         ],
         [
-            "datadog_test",
+            "datadog_test-1",
             "EXEC bobProc",
             [r"SELECT \* FROM ϑings"],
             ((),),
@@ -193,7 +193,7 @@ test_statement_metrics_and_plans_parameterized = (
             True,
         ],
         [
-            "datadog_test",
+            "datadog_test-1",
             "EXEC bobProc",
             [r"SELECT \* FROM ϑings"],
             ((),),
@@ -204,8 +204,8 @@ test_statement_metrics_and_plans_parameterized = (
         ],
         [
             "master",
-            "SELECT * FROM datadog_test.dbo.ϑings where id = ?",
-            [r"SELECT \* FROM datadog_test.dbo.ϑings where id = @P1"],
+            "SELECT * FROM [datadog_test-1].dbo.ϑings where id = ?",
+            [r"SELECT \* FROM \[datadog_test-1\].dbo.ϑings where id = @P1"],
             (
                 (1,),
                 (2,),
@@ -217,7 +217,7 @@ test_statement_metrics_and_plans_parameterized = (
             False,
         ],
         [
-            "datadog_test",
+            "datadog_test-1",
             "SELECT * FROM ϑings where id = ? and name = ?",
             [r"SELECT \* FROM ϑings where id = @P1 and name = @P2"],
             (
@@ -231,7 +231,7 @@ test_statement_metrics_and_plans_parameterized = (
             False,
         ],
         [
-            "datadog_test",
+            "datadog_test-1",
             "SELECT * FROM ϑings where id = ?",
             [r"SELECT \* FROM ϑings where id = @P1"],
             (
@@ -245,7 +245,7 @@ test_statement_metrics_and_plans_parameterized = (
             True,
         ],
         [
-            "datadog_test",
+            "datadog_test-1",
             "EXEC bobProcParams @P1 = ?, @P2 = ?",
             [
                 r"SELECT \* FROM ϑings WHERE id = @P1",
@@ -261,7 +261,7 @@ test_statement_metrics_and_plans_parameterized = (
             True,
         ],
         [
-            "datadog_test",
+            "datadog_test-1",
             "EXEC bobProcParams @P1 = ?, @P2 = ?",
             [
                 r"SELECT \* FROM ϑings WHERE id = @P1",
@@ -635,7 +635,7 @@ def test_statement_cloud_metadata(
     query = 'SELECT * FROM ϑings'
 
     def _run_query():
-        bob_conn.execute_with_retries(query, (), database="datadog_test")
+        bob_conn.execute_with_retries(query, (), database="datadog_test-1")
 
     # the check must be run three times:
     # 1) set _last_stats_query_time (this needs to happen before the 1st test queries to ensure the query time
@@ -938,10 +938,10 @@ def test_statement_stored_procedure_characters_limit(
     with mock.patch.object(datadog_agent, 'obfuscate_sql', passthrough=True) as mock_agent:
         mock_agent.side_effect = _obfuscate_sql
         dd_run_check(check)
-        bob_conn.execute_with_retries(query, (), database="datadog_test")
+        bob_conn.execute_with_retries(query, (), database="datadog_test-1")
         dd_run_check(check)
         aggregator.reset()
-        bob_conn.execute_with_retries(query, (), database="datadog_test")
+        bob_conn.execute_with_retries(query, (), database="datadog_test-1")
         dd_run_check(check)
 
     # dbm-metrics
@@ -971,10 +971,10 @@ def test_statement_with_embedded_characters(aggregator, datadog_agent, dd_run_ch
     with mock.patch.object(datadog_agent, 'obfuscate_sql', passthrough=True) as mock_agent:
         mock_agent.side_effect = _obfuscate_sql
         dd_run_check(check)
-        bob_conn.execute_with_retries(query, (), database="datadog_test")
+        bob_conn.execute_with_retries(query, (), database="datadog_test-1")
         dd_run_check(check)
         aggregator.reset()
-        bob_conn.execute_with_retries(query, (), database="datadog_test")
+        bob_conn.execute_with_retries(query, (), database="datadog_test-1")
         dd_run_check(check)
 
     # dbm-metrics
@@ -1025,14 +1025,14 @@ def test_metrics_lookback_multiplier(instance_docker):
     [
         pytest.param(None, None, False, id="no_database_configured_not_azure_sql"),  # should default to master
         pytest.param(
-            "datadog_test", None, False, id="configured_database_datadog_test_not_azure_sql"
-        ),  # should not filter to configured database datadog_test
+            "datadog_test-1", None, False, id="configured_database_datadog_test-1_not_azure_sql"
+        ),  # should not filter to configured database datadog_test-1
         pytest.param(
             "master", None, False, id="configured_database_master_not_azure_sql"
         ),  # should use configured database master
         pytest.param(
-            "datadog_test", ENGINE_EDITION_SQL_DATABASE, True, id="configured_database_datadog_test_azure_sql"
-        ),  # should filter to configured database datadog_test
+            "datadog_test-1", ENGINE_EDITION_SQL_DATABASE, True, id="configured_database_datadog_test-1_azure_sql"
+        ),  # should filter to configured database datadog_test-1
     ],
 )
 def test_statement_with_metrics_azure_sql_filtered_to_configured_database(
@@ -1052,7 +1052,7 @@ def test_statement_with_metrics_azure_sql_filtered_to_configured_database(
         check.static_info_cache[STATIC_INFO_ENGINE_EDITION] = engine_edition
 
     def _execute_queries():
-        bob_conn.execute_with_retries("SELECT * FROM ϑings", (), database="datadog_test")
+        bob_conn.execute_with_retries("SELECT * FROM ϑings", (), database="datadog_test-1")
         bob_conn.execute_with_retries("SELECT count(*) from sys.databases", (), database="master")
 
     dd_run_check(check)
@@ -1075,5 +1075,5 @@ def test_statement_with_metrics_azure_sql_filtered_to_configured_database(
         ), "should have only collected metrics for configured database"
     else:
         database_names = {row['database_name'] for row in sqlserver_rows}
-        assert 'datadog_test' in database_names, "should have collected metrics for datadog_test databases"
+        assert 'datadog_test-1' in database_names, "should have collected metrics for datadog_test-1 databases"
         assert 'master' in database_names, "should have collected metrics for master databases"
