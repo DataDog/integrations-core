@@ -6,7 +6,6 @@ import logging
 import os
 
 import pytest
-import requests
 
 import tests.configs as configs
 from datadog_checks.dev.http import MockResponse
