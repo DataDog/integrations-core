@@ -124,6 +124,11 @@ instances:
     #
     # appcenter: false
 
+    ## @param namespace - string - optional - default: default
+    ## Namespace to be used for devices, interfaces, metrics. If none is specified, will use 'default'.
+    #
+    # namespace: default
+
     ## @param proxy - mapping - optional
     ## This overrides the `proxy` setting in `init_config`.
     ##

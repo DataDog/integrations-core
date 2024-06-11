@@ -18,6 +18,7 @@ from . import aci_metrics, exceptions, helpers
 
 VENDOR_CISCO = 'cisco_aci'
 
+
 class Fabric:
     """
     Collect fabric metrics from the APIC
