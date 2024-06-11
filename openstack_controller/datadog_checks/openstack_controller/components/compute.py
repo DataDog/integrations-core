@@ -282,27 +282,21 @@ class Compute(Component):
                     ),
                 )
                 self.check.log.debug("server: %s", server)
-                item_id = item.get('id')
-                if item_id:
-                    self.check.gauge(NOVA_SERVER_COUNT, 1, tags=tags + server['tags'], hostname=item['id'])
-                    for metric, value in server['metrics'].items():
-                        self.check.gauge(metric, value, tags=tags + server['tags'], hostname=item['id'])
-                    collect_flavors = item_config.get('flavors', True) if item_config else True
-                    if collect_flavors:
-                        self._report_server_flavor(item, tags + server['tags'])
-                    collect_diagnostics = item_config.get('diagnostics', True) if item_config else True
-                    if collect_diagnostics:
-                        self._report_server_diagnostics(item, tags + server['tags'])
-                    report_external_tags = item_config.get('external_tags', True) if item_config else True
-                    if report_external_tags:
-                        self._report_external_tags(item, aggregates)
+                self.check.gauge(NOVA_SERVER_COUNT, 1, tags=tags + server['tags'], hostname=item['id'])
+                for metric, value in server['metrics'].items():
+                    self.check.gauge(metric, value, tags=tags + server['tags'], hostname=item['id'])
+                collect_flavors = item_config.get('flavors', True) if item_config else True
+                if collect_flavors:
+                    self._report_server_flavor(item, tags + server['tags'])
+                collect_diagnostics = item_config.get('diagnostics', True) if item_config else True
+                if collect_diagnostics:
+                    self._report_server_diagnostics(item, tags + server['tags'])
+                report_external_tags = item_config.get('external_tags', True) if item_config else True
+                if report_external_tags:
+                    self._report_external_tags(item, aggregates)
 
     @Component.http_error()
     def _report_server_flavor(self, server, tags):
-        server_id = server.get('id')
-        if server_id is None:
-            self.check.log.debug("'id' field not found in server [%s]", server)
-            return
         flavor_id = server.get('flavor', {}).get('id')
         flavor_original_name = server.get('flavor', {}).get('original_name')
         flavor_metrics = {}
@@ -319,14 +313,11 @@ class Compute(Component):
         )
         self.check.log.debug("flavor_metrics_and_tags: %s", flavor_metrics_and_tags)
         for metric, value in flavor_metrics_and_tags['metrics'].items():
-            self.check.gauge(metric, value, tags=tags + flavor_metrics_and_tags['tags'], hostname=server_id)
+            self.check.gauge(metric, value, tags=tags + flavor_metrics_and_tags['tags'], hostname=server['id'])
 
     @Component.http_error()
     def _report_server_diagnostics(self, server, tags):
-        server_id = server.get('id')
-        if server_id is None:
-            self.check.log.debug("'id' field not found in server [%s]", server)
-            return
+        server_id = server['id']
         item_diagnostic = self.check.api.get_compute_server_diagnostics(server_id)
         self.check.log.debug("server_diagnostics: %s", item_diagnostic)
         diagnostic = get_metrics_and_tags(
@@ -348,10 +339,10 @@ class Compute(Component):
                     ),
                     value,
                     tags=tags + diagnostic['tags'] + [interface],
-                    hostname=server_id,
+                    hostname=server['id'],
                 )
             else:
-                self.check.gauge(metric, value, tags=tags + diagnostic['tags'], hostname=server_id)
+                self.check.gauge(metric, value, tags=tags + diagnostic['tags'], hostname=server['id'])
         for item_disk_details in item_diagnostic.get('disk_details', []):
             disk_detail = get_metrics_and_tags(
                 item_disk_details,
@@ -364,7 +355,7 @@ class Compute(Component):
                     metric,
                     value,
                     tags=tags + diagnostic['tags'] + disk_detail['tags'],
-                    hostname=server_id,
+                    hostname=server['id'],
                 )
         for item_cpu_details in item_diagnostic.get('cpu_details', []):
             cpu_detail = get_metrics_and_tags(
@@ -378,7 +369,7 @@ class Compute(Component):
                     metric,
                     value,
                     tags=tags + diagnostic['tags'] + cpu_detail['tags'],
-                    hostname=server_id,
+                    hostname=server['id'],
                 )
         for item_nic_details in item_diagnostic.get('nic_details', []):
             nic_detail = get_metrics_and_tags(
@@ -392,19 +383,13 @@ class Compute(Component):
                     metric,
                     value,
                     tags=tags + diagnostic['tags'] + nic_detail['tags'],
-                    hostname=server_id,
+                    hostname=server['id'],
                 )
 
     def _report_external_tags(self, server, aggregates):
-        server_id = server.get('id')
-        if server_id is None:
-            self.check.log.debug("'id' field not found in server [%s]", server)
-            return
         external_tags = ['host_type:server']
-        availability_zone = server.get('OS-EXT-AZ:availability_zone')
-        if availability_zone:
-            external_tags.append(f"availability_zone:{availability_zone}")
         hypervisor_hostname = server.get('OS-EXT-SRV-ATTR:hypervisor_hostname')
+        external_tags.append(f"availability_zone:{server['OS-EXT-AZ:availability_zone']}")
         if hypervisor_hostname:
             for aggregate in aggregates:
                 self.check.log.debug("aggregate: %s", aggregate)
@@ -413,4 +398,4 @@ class Compute(Component):
                     availability_zone_tag = f"availability_zone:{aggregate['availability_zone']}"
                     if availability_zone_tag not in external_tags:
                         external_tags.append(availability_zone_tag)
-        self.check.external_tags.append((server_id, {'openstack': external_tags}))
+        self.check.external_tags.append((server['id'], {'openstack': external_tags}))
