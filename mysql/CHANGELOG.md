@@ -19,7 +19,7 @@
 
 * Bump the `pymysql` version to 1.1.1 on Python 3 ([#17696](https://github.com/DataDog/integrations-core/pull/17696))
 
-## 12.4.0 / 2024-04-26
+## 12.4.0 / 2024-04-26 / Agent 7.54.0
 
 ***Added***:
 
