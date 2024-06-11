@@ -114,7 +114,7 @@ class MongoApi(object):
             self.deployment_type = self._get_default_deployment_type()
         except Exception as e:
             self._log.debug(
-                "Unable to run `getCmdLineOpts`, got: %s. Treating this is an Alibaba ApsaraDB instance.", str(e)
+                "Unable to run `getCmdLineOpts`, got: %s. Treating this as an Alibaba ApsaraDB instance.", str(e)
             )
             try:
                 self.deployment_type = self._get_alibaba_deployment_type()
