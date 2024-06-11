@@ -73,14 +73,14 @@ class HighCardinalityQueries:
         """
         cursor = self.get_conn().cursor()
         cursor.execute(
-            'SELECT COUNT(*) FROM datadog_test.sys.database_principals WHERE name LIKE \'high_cardinality_user_%\''
+            'SELECT COUNT(*) FROM datadog_test-1.sys.database_principals WHERE name LIKE \'high_cardinality_user_%\''
         )
         user_count = cursor.fetchone()[0]
-        cursor.execute('SELECT COUNT(*) FROM datadog_test.sys.schemas WHERE name LIKE \'high_cardinality_schema%\'')
+        cursor.execute('SELECT COUNT(*) FROM datadog_test-1.sys.schemas WHERE name LIKE \'high_cardinality_schema%\'')
         schema_count = cursor.fetchone()[0]
-        cursor.execute('SELECT COUNT(*) FROM datadog_test.sys.tables')
+        cursor.execute('SELECT COUNT(*) FROM datadog_test-1.sys.tables')
         table_count = cursor.fetchone()[0]
-        cursor.execute('SELECT COUNT(*) FROM datadog_test.dbo.high_cardinality')
+        cursor.execute('SELECT COUNT(*) FROM datadog_test-1.dbo.high_cardinality')
         row_count = cursor.fetchone()[0]
         return (
             user_count >= HighCardinalityQueries.EXPECTED_OBJ_COUNT
@@ -91,7 +91,7 @@ class HighCardinalityQueries:
 
     def start_background(self, config=None):
         """
-        Run a set of queries against the table `datadog_test.dbo.high_cardinality` in the background
+        Run a set of queries against the table `datadog_test-1.dbo.high_cardinality` in the background
 
         Args:
             config (dict, optional): Configure how many threads will spin off for each kind of query.
@@ -149,7 +149,7 @@ class HighCardinalityQueries:
         """Creates a high cardinality query by shuffling the columns."""
         columns = copy(self.columns)
         shuffle(columns)
-        return 'SELECT {col} FROM datadog_test.dbo.high_cardinality WHERE id = {id}'.format(
+        return 'SELECT {col} FROM datadog_test-1.dbo.high_cardinality WHERE id = {id}'.format(
             col=','.join(columns), id=randint(1, HighCardinalityQueries.EXPECTED_ROW_COUNT)
         )
 
@@ -157,8 +157,10 @@ class HighCardinalityQueries:
         """Creates a slow running query by trying to match a pattern that may or may not exist."""
         columns = copy(self.columns)
         shuffle(columns)
-        return 'SELECT TOP 10 {col} FROM datadog_test.dbo.high_cardinality WHERE col2_txt LIKE \'%{pattern}%\''.format(
-            col={columns[0]}, pattern=self._create_rand_string()
+        return (
+            'SELECT TOP 10 {col} FROM datadog_test-1.dbo.high_cardinality WHERE col2_txt LIKE \'%{pattern}%\''.format(
+                col={columns[0]}, pattern=self._create_rand_string()
+            )
         )
 
     def create_complex_query(self):
@@ -169,23 +171,23 @@ class HighCardinalityQueries:
         SELECT
             {col}
         FROM
-            datadog_test.dbo.high_cardinality AS hc1
+            datadog_test-1.dbo.high_cardinality AS hc1
             JOIN (
                 SELECT
                     id,
                     COUNT(*) col12_float
                 FROM
-                    datadog_test.dbo.high_cardinality AS hc2
+                    datadog_test-1.dbo.high_cardinality AS hc2
                 WHERE
                     hc2.col1_txt LIKE '%-%'
                     AND hc2.col14_int > (
                         SELECT
                             AVG(hc3.col15_int)
                         FROM
-                            datadog_test.dbo.high_cardinality AS hc3)
+                            datadog_test-1.dbo.high_cardinality AS hc3)
                     GROUP BY
                         hc2.id) AS hc4 ON hc4.id = hc1.id
-            JOIN datadog_test.dbo.high_cardinality AS hc5 ON hc5.id = hc1.id
+            JOIN datadog_test-1.dbo.high_cardinality AS hc5 ON hc5.id = hc1.id
         WHERE
             CAST(hc5.col17_date AS VARCHAR)
             IN('2003-04-23', '2043-09-10', '1996-08-08')
