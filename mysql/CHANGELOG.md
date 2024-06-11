@@ -2,6 +2,12 @@
 
 <!-- towncrier release notes start -->
 
+## 12.5.1 / 2024-06-11
+
+***Fixed***:
+
+* Bump the `pymysql` version to 1.1.1 on Python 3 ([#17696](https://github.com/DataDog/integrations-core/pull/17696))
+
 ## 12.5.0 / 2024-05-31
 
 ***Added***:
