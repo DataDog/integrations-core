@@ -34,7 +34,7 @@ if six.PY3:
         attributes: EthAttributes
 
     class DeviceMetadata(BaseModel):
-        device_id: Optional[str] = Field(default=None)
+        id: Optional[str] = Field(default=None)
         id_tags: list = Field(default_factory=list)
         tags: list = Field(default_factory=list)
         name: Optional[str] = Field(default=None)
@@ -69,3 +69,10 @@ if six.PY3:
 
     class InterfaceMetadataList(BaseModel):
         interface_metadata: list = Field(default_factory=list)
+
+    class NetworkDevicesMetadata(BaseModel):
+        subnet: Optional[str] = None
+        namespace: str = None
+        devices: Optional[list[DeviceMetadata]] = Field(default_factory=list)
+        interfaces: Optional[list[InterfaceMetadata]] = Field(default_factory=list)
+        collect_timestamp: Optional[float] = None
