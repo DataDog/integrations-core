@@ -119,9 +119,7 @@ class MongoApi(object):
             try:
                 self.deployment_type = self._get_alibaba_deployment_type()
             except Exception as e:
-                self._log.debug(
-                    "Unable to detect Alibaba AsparaDB so switching to AWS DocumentDB, got error %s", str(e)
-                )
+                self._log.debug("Unable to run `shardingState`, so switching to AWS DocumentDB, got error %s", str(e))
                 self.deployment_type = self._get_documentdb_deployment_type()
 
     def _get_default_deployment_type(self):
