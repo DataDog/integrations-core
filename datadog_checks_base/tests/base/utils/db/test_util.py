@@ -61,7 +61,6 @@ def test_constant_rate_limiter():
 
 def test_constant_rate_limiter_shell_execute():
     rate_limit = 1
-    test_duration_s = 0.1
     ratelimiter = ConstantRateLimiter(rate_limit)
     assert ratelimiter.shall_execute()
     ratelimiter.update_last_time()
