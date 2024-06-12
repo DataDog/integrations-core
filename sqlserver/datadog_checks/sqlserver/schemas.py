@@ -98,11 +98,7 @@ class SubmitData:
         event = {**self._base_event, "metadata": [], "timestamp": time.time() * 1000}
         for db, schemas_by_id in self.db_to_schemas.items():
             db_info = {}
-            if db not in self.db_info:
-                self._log.error("Couldn't find database info for {}".format(db))
-                db_info["name"] = db
-            else:
-                db_info = self.db_info[db]
+            db_info = self.db_info[db]
             event["metadata"] = event["metadata"] + [{**(db_info), "schemas": list(schemas_by_id.values())}]
         json_event = json.dumps(event, default=default_json_event_encoding)
         self._log.debug("Reporting the following payload for schema collection: {}".format(self.truncate(json_event)))
@@ -370,21 +366,13 @@ class Schemas(DBMAsyncJob):
         for row in rows:
             table_name = str(row.get("table_name"))
             table_id = name_to_id.get(table_name)
-            if table_id is not None:
-                row.pop("table_name", None)
-                if "nullable" in row:
-                    if row["nullable"].lower() == "no" or row["nullable"].lower() == "false":
-                        row["nullable"] = False
-                    else:
-                        row["nullable"] = True
-                if table_id in id_to_table_data:
-                    id_to_table_data.get(table_id)["columns"] = id_to_table_data.get(table_id).get("columns", []) + [
-                        row
-                    ]
+            row.pop("table_name", None)
+            if "nullable" in row:
+                if row["nullable"].lower() == "no" or row["nullable"].lower() == "false":
+                    row["nullable"] = False
                 else:
-                    self._log.debug("Columns found for an unkown table with the object_id: {}".format(table_id))
-            else:
-                self._log.debug("Couldn't find id of a table: {}".format(table_name))
+                    row["nullable"] = True
+            id_to_table_data.get(table_id)["columns"] = id_to_table_data.get(table_id).get("columns", []) + [row]
         return len(data)
 
     @tracked_method(agent_check_getter=agent_check_getter)
@@ -392,41 +380,23 @@ class Schemas(DBMAsyncJob):
         rows = execute_query(PARTITIONS_QUERY.format(table_ids), cursor)
         for row in rows:
             table_id = row.pop("id", None)
-            if table_id is not None:
-                table_id_str = str(table_id)
-                if table_id_str in table_id_to_table_data:
-                    table_id_to_table_data[table_id_str]["partitions"] = row
-                else:
-                    self._log.debug("Partition found for an unkown table with the object_id: {}".format(table_id_str))
-            else:
-                self._log.debug("Return rows of [{}] query should have id column".format(PARTITIONS_QUERY))
+            table_id_str = str(table_id)
+            table_id_to_table_data[table_id_str]["partitions"] = row
 
     @tracked_method(agent_check_getter=agent_check_getter)
     def _populate_with_index_data(self, table_ids, table_id_to_table_data, cursor):
         rows = execute_query(INDEX_QUERY.format(table_ids), cursor)
         for row in rows:
             table_id = row.pop("id", None)
-            if table_id is not None:
-                table_id_str = str(table_id)
-                if table_id_str in table_id_to_table_data:
-                    table_id_to_table_data[table_id_str].setdefault("indexes", [])
-                    table_id_to_table_data[table_id_str]["indexes"].append(row)
-                else:
-                    self._log.debug("Index found for an unkown table with the object_id: {}".format(table_id_str))
-            else:
-                self._log.debug("Return rows of [{}] query should have id column".format(INDEX_QUERY))
+            table_id_str = str(table_id)
+            table_id_to_table_data[table_id_str].setdefault("indexes", [])
+            table_id_to_table_data[table_id_str]["indexes"].append(row)
 
     @tracked_method(agent_check_getter=agent_check_getter, track_result_length=True)
     def _populate_with_foreign_keys_data(self, table_ids, table_id_to_table_data, cursor):
         rows = execute_query(FOREIGN_KEY_QUERY.format(table_ids), cursor)
         for row in rows:
             table_id = row.pop("id", None)
-            if id is not None:
-                table_id_str = str(table_id)
-                if table_id_str in table_id_to_table_data:
-                    table_id_to_table_data.get(table_id_str).setdefault("foreign_keys", [])
-                    table_id_to_table_data.get(table_id_str)["foreign_keys"].append(row)
-                else:
-                    self._log.debug("Foreign key found for an unkown table with the object_id: {}".format(table_id_str))
-            else:
-                self._log.debug("Return rows of [{}] query should have id column".format(FOREIGN_KEY_QUERY))
+            table_id_str = str(table_id)
+            table_id_to_table_data.get(table_id_str).setdefault("foreign_keys", [])
+            table_id_to_table_data.get(table_id_str)["foreign_keys"].append(row)

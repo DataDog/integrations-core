@@ -808,35 +808,6 @@ def test_submit_data():
     assert len(difference) == 0
 
 
-def test_submit_data_for_db_without_info():
-
-    dataSubmitter, submitted_data = set_up_submitter_unit_test()
-
-    schema1 = {"id": "1"}
-    dataSubmitter.store("test_db1", schema1, [1, 2], 5)
-
-    dataSubmitter.submit()
-    expected_data = {
-        "host": "some",
-        "agent_version": 0,
-        "dbms": "sqlserver",
-        "kind": "sqlserver_databases",
-        "collection_interval": 1200,
-        "dbms_version": "some",
-        "tags": "some",
-        "cloud_metadata": "some",
-        "metadata": [
-            {"name": "test_db1", "schemas": [{"id": "1", "tables": [1, 2]}]},
-        ],
-        "timestamp": 1.1,
-    }
-
-    difference = DeepDiff(
-        json.loads(submitted_data[0]), expected_data, exclude_paths="root['timestamp']", ignore_order=True
-    )
-    assert len(difference) == 0
-
-
 def test_fetch_throws(instance_docker):
     check = SQLServer(CHECK_NAME, {}, [instance_docker])
     schemas = Schemas(check, check._config)
