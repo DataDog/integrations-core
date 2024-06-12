@@ -1,12 +1,12 @@
 # (C) Datadog, Inc. 2024-present
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
+from datadog_checks.base.checks.base import AgentCheck
 from datadog_checks.base.utils.serialization import json
 import logging
 from time import time
-from typing import Callable, Dict, NamedTuple, Optional
+from typing import Dict, NamedTuple, Optional
 from .utils import default_json_event_encoding
-from datadog_checks.base.utils.common import to_native_string
 from datadog_checks.base.agent import datadog_agent
 
 
@@ -15,7 +15,6 @@ logger = logging.getLogger(__name__)
 FLUSH_INTERVAL = 60
 
 class TelemetryOperation(NamedTuple):
-    integration: str
     operation: str
     elapsed: Optional[float]
     count: Optional[int]
@@ -29,12 +28,14 @@ class Telemetry:
 
     _buffer: Dict[str, TelemetryOperation]
 
-    def __init__(self, log):
+    def __init__(self, check: AgentCheck):
         self._buffer = {}
-        self._log = log
-        self._log.warn("aq: CREATED TELEMETRY")
+        self._timers = {}
+        self._check = check
+        print("initing telemetry for", self._check.__class__.__name__) 
+        self._last_flush = time()
 
-    def add(self, integration:str, operation:str, elapsed: Optional[float], count: Optional[int]):
+    def add(self, operation:str, elapsed: Optional[float], count: Optional[int]):
         """
         Add a telemetry event for a given integration and operation. Events can have a count and/or an elapsed time.
 
@@ -43,10 +44,29 @@ class Telemetry:
         :param elapsed (_Optional[float]_): Time elapsed for the operation in milliseconds. Example: 20ms to query for list of tables in schema collection
         :param count (_Optional[int]_): Count of relevant resources. Example: 5 tables collected as part of schema collection        
         """
-        self._buffer[f'{integration}.{operation}'] = TelemetryOperation(integration, operation, elapsed, count)
-        self._last_flush = 0
+        self._buffer[operation] = TelemetryOperation(operation, elapsed, count)
+        self.flush()
+
+    def start(self, operation):
+        """
+        Start a telemetry timer for a given operation.
+
+        :param operation (_str_): Name of the event operation. Examples: collect_schema, collect_query_metrics
+        """
+        self._timers[operation] = time()
     
-    def flush(self, submit: Callable[[str], None], force = False):
+    def end(self, operation:str, count: Optional[int]):
+        """
+        Finish a telemetry timer for a given operation and add the event with an optional count
+
+        :param operation (_str_): Name of the event operation. Examples: collect_schema, collect_query_metrics
+        :param count (_Optional[int]_): Count of relevant resources. Example: 5 tables collected as part of schema collection        
+        """
+        self.add(operation, time() - self._timers[operation], count)
+        del self._timers[operation] 
+
+    
+    def flush(self, force = False):
         """
         Flushes any buffered events. The Telemetry instance tracks the time since last flush and will skip executions less than FLUSH_INTERVAL
         since the last events sent.
@@ -55,7 +75,6 @@ class Telemetry:
         :param force (_bool_): Send events even if less than FLUSH_INTERVAL has elapsed. Only used for testing.
         """
         elapsed_s = time() - self._last_flush 
-        self._log.warn("aq: telemetry flush after %d", elapsed_s)
         if not force and elapsed_s < FLUSH_INTERVAL:
             return
         for op in self._buffer.values():
@@ -63,13 +82,13 @@ class Telemetry:
                 "ddagentversion": datadog_agent.get_version(),
                 "timestamp": time() * 1000,
                 "kind": "agent_metrics",
-                "integration": op.integration,
+                "integration": self._check.convert_to_underscore_separated(self._check.__class__.__name__),
                 "operation": op.operation,
                 "elapsed": op.elapsed,
                 "count": op.count,
             }
 
             json_event = json.dumps(event, default=default_json_event_encoding)
-            self._log.warn("aq: Reporting the following payload for telemetry collection: {}".format(json_event))
-            submit(json_event)
+            self._check.database_monitoring_query_metrics(json_event)
+        self._buffer = {}
         self._last_flush = time()
