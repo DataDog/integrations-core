@@ -23,6 +23,6 @@ def test_check(dd_run_check, aggregator, instance, mock_http_response, caplog):
     for metric in MOCKED_METRICS:
         aggregator.assert_metric(metric, at_least=1, hostname="708725eaa12297")
         aggregator.assert_metric(metric, at_least=1, hostname="20976671ha2292")
-        aggregator.assert_metric(metric, at_least=1, hostname="119dc024cbf534s")
+        aggregator.assert_metric(metric, at_least=1, hostname="119dc024cbf534")
 
     aggregator.assert_all_metrics_covered()
