@@ -3,7 +3,7 @@ annotated-types @ https://agent-int-packages.datadoghq.com/external/annotated-ty
 asn1crypto @ https://agent-int-packages.datadoghq.com/external/asn1crypto/asn1crypto-1.5.1-py2.py3-none-any.whl#sha256=db4e40728b728508912cbb3d44f19ce188f218e9eba635821bb4b68564f8fd67
 attrs @ https://agent-int-packages.datadoghq.com/external/attrs/attrs-23.2.0-py3-none-any.whl#sha256=99b87a485a5820b23b879f04c2305b44b951b502fd64be915879d77a7e8fc6f1
 aws-requests-auth @ https://agent-int-packages.datadoghq.com/external/aws-requests-auth/aws_requests_auth-0.4.3-py2.py3-none-any.whl#sha256=646bc37d62140ea1c709d20148f5d43197e6bd2d63909eb36fa4bb2345759977
-azure-core @ https://agent-int-packages.datadoghq.com/external/azure-core/azure_core-1.30.1-py3-none-any.whl#sha256=7c5ee397e48f281ec4dd773d67a0a47a0962ed6fa833036057f9ea067f688e74
+azure-core @ https://agent-int-packages.datadoghq.com/external/azure-core/azure_core-1.30.2-py3-none-any.whl#sha256=cf019c1ca832e96274ae85abd3d9f752397194d9fea3b41487290562ac8abe4a
 azure-identity @ https://agent-int-packages.datadoghq.com/external/azure-identity/azure_identity-1.15.0-py3-none-any.whl#sha256=a14b1f01c7036f11f148f22cd8c16e05035293d714458d6b44ddf534d93eb912
 bcrypt @ https://agent-int-packages.datadoghq.com/external/bcrypt/bcrypt-4.1.3-cp39-abi3-manylinux_2_17_x86_64.manylinux2014_x86_64.whl#sha256=ec3c2e1ca3e5c4b9edb94290b356d082b721f3f50758bce7cce11d8a7c89ce84
 beautifulsoup4 @ https://agent-int-packages.datadoghq.com/external/beautifulsoup4/beautifulsoup4-4.12.3-py3-none-any.whl#sha256=b80878c9f40111313e55da8ba20bdba06d8fa3969fc68304167741bbf9e082ed
@@ -31,7 +31,7 @@ dogpile-cache @ https://agent-int-packages.datadoghq.com/external/dogpile-cache/
 envier @ https://agent-int-packages.datadoghq.com/external/envier/envier-0.5.1-py3-none-any.whl#sha256=b45ef6051fea33d0c32a64e186bff2cfb446e2242d6781216c9bc9ce708c5909
 filelock @ https://agent-int-packages.datadoghq.com/external/filelock/filelock-3.14.0-py3-none-any.whl#sha256=43339835842f110ca7ae60f1e1c160714c5a6afd15a2873419ab185334975c0f
 foundationdb @ https://agent-int-packages.datadoghq.com/built/foundationdb/foundationdb-6.3.24-20240402154840-py3-none-manylinux2014_x86_64.whl#sha256=14259f824080062cc890965747597ff00a9d6c76a1eb926673fed68a45860ccd
-google-auth @ https://agent-int-packages.datadoghq.com/external/google-auth/google_auth-2.29.0-py2.py3-none-any.whl#sha256=d452ad095688cd52bae0ad6fafe027f6a6d6f560e810fec20914e17a09526415
+google-auth @ https://agent-int-packages.datadoghq.com/external/google-auth/google_auth-2.30.0-py2.py3-none-any.whl#sha256=8df7da660f62757388b8a7f249df13549b3373f24388cb5d2f1dd91cc18180b5
 gssapi @ https://agent-int-packages.datadoghq.com/built/gssapi/gssapi-1.8.3-20240530234023-cp311-cp311-manylinux2014_x86_64.manylinux_2_17_x86_64.whl#sha256=197abcb0d52ea5d500f58921455ffd7887937be6fe9fdee82220f04335c22650
 idna @ https://agent-int-packages.datadoghq.com/external/idna/idna-3.7-py3-none-any.whl#sha256=82fee1fc78add43492d3a1898bfa6d8a904cc97d8427f683ed8e798d07761aa0
 importlib-metadata @ https://agent-int-packages.datadoghq.com/external/importlib-metadata/importlib_metadata-7.1.0-py3-none-any.whl#sha256=30962b96c0c223483ed6cc7280e7f0199feb01a0e40cfae4d4450fc6fab1f570
@@ -42,7 +42,7 @@ jellyfish @ https://agent-int-packages.datadoghq.com/external/jellyfish/jellyfis
 jmespath @ https://agent-int-packages.datadoghq.com/external/jmespath/jmespath-1.0.1-py3-none-any.whl#sha256=02e2e4cc71b5bcab88332eebf907519190dd9e6e82107fa7f83b1003a6252980
 jpype1 @ https://agent-int-packages.datadoghq.com/external/jpype1/JPype1-1.5.0-cp311-cp311-manylinux_2_17_x86_64.manylinux2014_x86_64.whl#sha256=5ef976e0f3b2e9604469f449f30bb2031941a159a0637f4c16adb2c5076f3e81
 jsonpatch @ https://agent-int-packages.datadoghq.com/external/jsonpatch/jsonpatch-1.33-py2.py3-none-any.whl#sha256=0ae28c0cd062bbd8b8ecc26d7d164fbbea9652a1a3693f3b956c1eae5145dade
-jsonpointer @ https://agent-int-packages.datadoghq.com/external/jsonpointer/jsonpointer-2.4-py2.py3-none-any.whl#sha256=15d51bba20eea3165644553647711d150376234112651b4f1811022aecad7d7a
+jsonpointer @ https://agent-int-packages.datadoghq.com/external/jsonpointer/jsonpointer-3.0.0-py2.py3-none-any.whl#sha256=13e088adc14fca8b6aa8177c044e12701e6ad4b28ff10e65f2267a90109c9942
 jsonschema @ https://agent-int-packages.datadoghq.com/external/jsonschema/jsonschema-4.22.0-py3-none-any.whl#sha256=ff4cfd6b1367a40e7bc6411caec72effadd3db0bbe5017de188f2d6108335802
 jsonschema-specifications @ https://agent-int-packages.datadoghq.com/external/jsonschema-specifications/jsonschema_specifications-2023.12.1-py3-none-any.whl#sha256=87e4fdf3a94858b8a2ba2778d9ba57d8a9cafca7c7489c46ba0d30a8bc6a9c3c
 keystoneauth1 @ https://agent-int-packages.datadoghq.com/external/keystoneauth1/keystoneauth1-5.6.0-py3-none-any.whl#sha256=d740843afcf9c159fb929004eee1eecf46573236901e9d8ca2dca5694733a379
@@ -52,7 +52,7 @@ ldap3 @ https://agent-int-packages.datadoghq.com/external/ldap3/ldap3-2.9.1-py2.
 lxml @ https://agent-int-packages.datadoghq.com/external/lxml/lxml-4.9.2-cp311-cp311-manylinux_2_17_x86_64.manylinux2014_x86_64.manylinux_2_24_x86_64.whl#sha256=d6b430a9938a5a5d85fc107d852262ddcd48602c120e3dbb02137c83d212b380
 lz4 @ https://agent-int-packages.datadoghq.com/external/lz4/lz4-4.3.3-cp311-cp311-manylinux_2_17_x86_64.manylinux2014_x86_64.whl#sha256=0e9c410b11a31dbdc94c05ac3c480cb4b222460faf9231f12538d0074e56c563
 mmh3 @ https://agent-int-packages.datadoghq.com/external/mmh3/mmh3-4.1.0-cp311-cp311-manylinux_2_5_x86_64.manylinux1_x86_64.manylinux_2_17_x86_64.manylinux2014_x86_64.whl#sha256=f6f02576a4d106d7830ca90278868bf0983554dd69183b7bbe09f2fcd51cf54f
-msal @ https://agent-int-packages.datadoghq.com/external/msal/msal-1.28.0-py3-none-any.whl#sha256=3064f80221a21cd535ad8c3fafbb3a3582cd9c7e9af0bb789ae14f726a0ca99b
+msal @ https://agent-int-packages.datadoghq.com/external/msal/msal-1.28.1-py3-none-any.whl#sha256=563c2d70de77a2ca9786aab84cb4e133a38a6897e6676774edc23d610bfc9e7b
 msal-extensions @ https://agent-int-packages.datadoghq.com/external/msal-extensions/msal_extensions-1.1.0-py3-none-any.whl#sha256=01be9711b4c0b1a151450068eeb2c4f0997df3bba085ac299de3a66f585e382f
 netifaces @ https://agent-int-packages.datadoghq.com/built/netifaces/netifaces-0.11.0-20240530234024-cp311-cp311-manylinux2014_x86_64.manylinux_2_17_x86_64.whl#sha256=c14c341901db58fc94047538a20340513bd3271ec8a4d4c5bf3a35e453583cb1
 oauthlib @ https://agent-int-packages.datadoghq.com/external/oauthlib/oauthlib-3.2.2-py3-none-any.whl#sha256=8139f29aac13e25d502680e9e19963e83f16838d48a0d71c287fe40e7067fbca
@@ -83,13 +83,13 @@ pymongo @ https://agent-int-packages.datadoghq.com/external/pymongo/pymongo-4.6.
 pymqi @ https://agent-int-packages.datadoghq.com/built/pymqi/pymqi-1.12.10-20240530234025-cp311-cp311-manylinux2014_x86_64.manylinux_2_17_x86_64.whl#sha256=86473c83da91cf3347c86be13b239e53dffd9521f00e00093254a2737c9c7756
 pymysql @ https://agent-int-packages.datadoghq.com/external/pymysql/PyMySQL-1.1.1-py3-none-any.whl#sha256=4de15da4c61dc132f4fb9ab763063e693d521a80fd0e87943b9a453dd4c19d6c
 pynacl @ https://agent-int-packages.datadoghq.com/external/pynacl/PyNaCl-1.5.0-cp36-abi3-manylinux_2_17_x86_64.manylinux2014_x86_64.whl#sha256=06b8f6fa7f5de8d5d2f7573fe8c863c051225a27b61e6860fd047b1775807858
-pyodbc @ https://agent-int-packages.datadoghq.com/built/pyodbc/pyodbc-5.1.0-20240603181248-cp311-cp311-manylinux_2_17_x86_64.manylinux2014_x86_64.whl#sha256=2dad2e169e297edd824699646bbe90aa0b823ae7e22daf97daf4db75a7104198
+pyodbc @ https://agent-int-packages.datadoghq.com/built/pyodbc/pyodbc-5.1.0-20240606182337-cp311-cp311-manylinux_2_17_x86_64.manylinux2014_x86_64.whl#sha256=a441fa9d05ed933827a17c7ebd910c6f5d52017fcaaa1a5b449f31c372fa02d3
 pyopenssl @ https://agent-int-packages.datadoghq.com/external/pyopenssl/pyOpenSSL-24.1.0-py3-none-any.whl#sha256=17ed5be5936449c5418d1cd269a1a9e9081bc54c17aed272b45856a3d3dc86ad
 pysmi @ https://agent-int-packages.datadoghq.com/external/pysmi/pysmi-0.3.4-py2.py3-none-any.whl#sha256=2ec6ebd41aaef562695e7d0058763c6e1e8c1fbf8710804c11ef3a857fc9cad7
 pysnmp @ https://agent-int-packages.datadoghq.com/external/pysnmp/pysnmp-4.4.9-py2.py3-none-any.whl#sha256=128a4832ce170213a59b82e7eeb886fc07d4b2e6eb638db8049af03f1014b0f8
 pysnmp-mibs @ https://agent-int-packages.datadoghq.com/external/pysnmp-mibs/pysnmp_mibs-0.1.6-py2.py3-none-any.whl#sha256=5e153ebe8e767c07940cea435f866c623ff6b2376155c7da75085b08d3774d48
 pysocks @ https://agent-int-packages.datadoghq.com/external/pysocks/PySocks-1.7.1-py3-none-any.whl#sha256=2725bd0a9925919b9b51739eea5f9e2bae91e83288108a9ad338b2e3a4435ee5
-pyspnego @ https://agent-int-packages.datadoghq.com/external/pyspnego/pyspnego-0.10.2-py3-none-any.whl#sha256=3d5c5c28dbd0cd6a679acf45219630254db3c0e5ad4a16de521caa0585b088c0
+pyspnego @ https://agent-int-packages.datadoghq.com/external/pyspnego/pyspnego-0.11.0-py3-none-any.whl#sha256=cdfe9af7b19749d692e02fd4bd1b4b71d44ecb8dd9b2474abb0f3d90f6154e7e
 python-binary-memcached @ https://agent-int-packages.datadoghq.com/external/python-binary-memcached/python_binary_memcached-0.31.2-py3-none-any.whl#sha256=e5b93d54429e835cab7d5b33988649f9748344aa49adaed8eed94b37e714d562
 python-dateutil @ https://agent-int-packages.datadoghq.com/external/python-dateutil/python_dateutil-2.9.0.post0-py2.py3-none-any.whl#sha256=a8b2bc7bffae282281c8140a97d3aa9c14da0b136dfe83f850eea9a5f7470427
 python3-gearman @ https://agent-int-packages.datadoghq.com/external/python3-gearman/python3_gearman-0.1.0-py3-none-any.whl#sha256=4a5808d3a0bfc6c243548ad57e7aab4bee62c9cba2b1c3a860fdd292d46a112d
@@ -123,7 +123,7 @@ supervisor @ https://agent-int-packages.datadoghq.com/external/supervisor/superv
 tenacity @ https://agent-int-packages.datadoghq.com/external/tenacity/tenacity-8.3.0-py3-none-any.whl#sha256=3649f6443dbc0d9b01b9d8020a9c4ec7a1ff5f6f3c6c8a036ef371f573fe9185
 tomlkit @ https://agent-int-packages.datadoghq.com/external/tomlkit/tomlkit-0.12.5-py3-none-any.whl#sha256=af914f5a9c59ed9d0762c7b64d3b5d5df007448eb9cd2edc8a46b1eafead172f
 tuf @ https://agent-int-packages.datadoghq.com/external/tuf/tuf-2.0.0-py3-none-any.whl#sha256=1524b0fbd8504245f600f121daf86b8fdcb30df74410acc9655944c4868e461c
-typing-extensions @ https://agent-int-packages.datadoghq.com/external/typing-extensions/typing_extensions-4.12.1-py3-none-any.whl#sha256=6024b58b69089e5a89c347397254e35f1bf02a907728ec7fee9bf0fe837d203a
+typing-extensions @ https://agent-int-packages.datadoghq.com/external/typing-extensions/typing_extensions-4.12.2-py3-none-any.whl#sha256=04e5ca0351e0f3f85c6853954072df659d0d13fac324d0072316b67d7794700d
 tzlocal @ https://agent-int-packages.datadoghq.com/external/tzlocal/tzlocal-5.2-py3-none-any.whl#sha256=49816ef2fe65ea8ac19d19aa7a1ae0551c834303d5014c6d5a62e4cbda8047b8
 uhashring @ https://agent-int-packages.datadoghq.com/external/uhashring/uhashring-2.3-py3-none-any.whl#sha256=7ee8a25ca495a97effad10bd563c83b4054a6d7606d9530757049a04edab9297
 uptime @ https://agent-int-packages.datadoghq.com/built/uptime/uptime-3.0.1-20240530234025-cp311-cp311-manylinux2014_x86_64.manylinux_2_17_x86_64.whl#sha256=12f02c89a44079dad837ea49e6d0aa24513b713c305a35668a94c46deadb2171
