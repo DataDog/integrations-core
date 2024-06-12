@@ -2,6 +2,12 @@
 
 <!-- towncrier release notes start -->
 
+## 2.2.0 / 2024-06-12
+
+***Added***:
+
+* Add Cloudera ssl config parameters and functionality ([#17649](https://github.com/DataDog/integrations-core/pull/17649))
+
 ## 2.1.0 / 2024-01-05 / Agent 7.51.0
 
 ***Added***:

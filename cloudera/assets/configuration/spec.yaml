@@ -34,11 +34,33 @@ files:
 
       value:
         type: string
+    - name: verify_ssl
+      description: Enable SSL/TLS encryption for the check.
+      value:
+        default: true
+        type: boolean
+        example: true
+    - name: ssl_ca_cert
+      description: Path to the file containing the CA certificates to trust.
+      value:
+        example: <CERT_PATH>
+        type: string
+    - name: cert_file
+      description: Path to the file from which the local certificates can be loaded.
+      value:
+        example: <CERT_FILE_PATH>
+        type: string
+    - name: key_file
+      description: Path to the file from which to load the private key.
+      value:
+        example: <KEY_FILE_PATH>
+        type: string
     - name: max_parallel_requests
       description: |
         The maximum number of requests to Cloudera Manager that are allowed in parallel.
       hidden: true
       value:
+        default: 4
         type: integer
         example: 100
     - name: clusters

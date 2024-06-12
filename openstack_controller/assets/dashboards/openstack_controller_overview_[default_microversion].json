@@ -6116,68 +6116,58 @@
             }
         },
         {
-            "id": 1234539355810956,
+            "id": 76561407326878,
             "definition": {
-                "title": "Heat and Swift",
-                "background_color": "orange",
+                "title": "Object Store (Swift)",
+                "background_color": "blue",
                 "show_title": true,
                 "type": "group",
                 "layout_type": "ordered",
                 "widgets": [
                     {
-                        "id": 5691134749980884,
+                        "id": 8697010273840392,
                         "definition": {
-                            "title": "Heat Stack Count",
+                            "title": "Swift Container Count",
                             "title_size": "16",
                             "title_align": "left",
-                            "time": {},
-                            "type": "query_table",
+                            "type": "query_value",
                             "requests": [
                                 {
+                                    "formulas": [
+                                        {
+                                            "formula": "exclude_null(query1)"
+                                        }
+                                    ],
                                     "queries": [
                                         {
                                             "aggregator": "avg",
                                             "data_source": "metrics",
                                             "name": "query1",
-                                            "query": "avg:openstack.heat.stack.count{$Keystone_Server_URL,$Domain,$Project,$RegionId} by {stack_id}"
+                                            "query": "avg:openstack.swift.container.count{$Keystone_Server_URL,$Domain,$Project,$RegionId}"
                                         }
                                     ],
-                                    "response_format": "scalar",
-                                    "sort": {
-                                        "count": 500,
-                                        "order_by": [
-                                            {
-                                                "type": "formula",
-                                                "index": 0,
-                                                "order": "desc"
-                                            }
-                                        ]
-                                    },
-                                    "formulas": [
-                                        {
-                                            "alias": "Stacks",
-                                            "cell_display_mode": "number",
-                                            "formula": "exclude_null(query1)"
-                                        }
-                                    ]
+                                    "response_format": "scalar"
                                 }
                             ],
-                            "has_search_bar": "auto"
+                            "autoscale": true,
+                            "precision": 2,
+                            "timeseries_background": {
+                                "type": "area"
+                            }
                         },
                         "layout": {
                             "x": 0,
                             "y": 0,
-                            "width": 6,
+                            "width": 3,
                             "height": 2
                         }
                     },
                     {
-                        "id": 8697010273840392,
+                        "id": 5230591956606796,
                         "definition": {
-                            "title": "Swift Container and Byte Count",
+                            "title": "Swift Containers",
                             "title_size": "16",
                             "title_align": "left",
-                            "time": {},
                             "type": "query_table",
                             "requests": [
                                 {
@@ -6223,9 +6213,9 @@
                             "has_search_bar": "auto"
                         },
                         "layout": {
-                            "x": 6,
+                            "x": 3,
                             "y": 0,
-                            "width": 6,
+                            "width": 9,
                             "height": 2
                         }
                     }
@@ -6235,6 +6225,62 @@
                 "x": 0,
                 "y": 102,
                 "width": 12,
+                "height": 3
+            }
+        },
+        {
+            "id": 1234539355810956,
+            "definition": {
+                "title": "Orchestration (Heat)",
+                "background_color": "orange",
+                "show_title": true,
+                "type": "group",
+                "layout_type": "ordered",
+                "widgets": [
+                    {
+                        "id": 5691134749980884,
+                        "definition": {
+                            "title": "Heat Stack Count",
+                            "title_size": "16",
+                            "title_align": "left",
+                            "type": "query_value",
+                            "requests": [
+                                {
+                                    "formulas": [
+                                        {
+                                            "formula": "exclude_null(query1)"
+                                        }
+                                    ],
+                                    "queries": [
+                                        {
+                                            "aggregator": "avg",
+                                            "data_source": "metrics",
+                                            "name": "query1",
+                                            "query": "avg:openstack.heat.stack.count{$Keystone_Server_URL,$Domain,$Project,$RegionId}"
+                                        }
+                                    ],
+                                    "response_format": "scalar"
+                                }
+                            ],
+                            "autoscale": true,
+                            "precision": 2,
+                            "timeseries_background": {
+                                "type": "area"
+                            }
+                        },
+                        "layout": {
+                            "x": 0,
+                            "y": 0,
+                            "width": 3,
+                            "height": 2
+                        }
+                    }
+                ]
+            },
+            "layout": {
+                "x": 0,
+                "y": 0,
+                "width": 4,
                 "height": 3
             }
         }

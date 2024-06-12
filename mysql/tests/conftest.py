@@ -513,7 +513,7 @@ def _mysql_docker_repo():
         # https://github.com/DataDog/integrations-core/pull/4669)
         if MYSQL_VERSION in ('5.6', '5.7'):
             return 'bergerx/mysql-replication'
-        elif MYSQL_VERSION == '8.0' or MYSQL_VERSION == 'latest':
+        elif MYSQL_VERSION.startswith('8') or MYSQL_VERSION == 'latest':
             return 'bitnami/mysql'
     elif MYSQL_FLAVOR == 'mariadb':
         return 'bitnami/mariadb'
