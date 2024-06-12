@@ -25,7 +25,6 @@ from .ssh_tunnel import socks_proxy
 from .terraform import terraform_run
 
 USE_OPENSTACK_GCP = os.environ.get('USE_OPENSTACK_GCP')
-OPENSTACK_E2E_LEGACY = os.environ.get('OPENSTACK_E2E_LEGACY')
 
 
 @pytest.fixture(scope='session')
@@ -74,22 +73,6 @@ def dd_environment():
                 socks_ip, socks_port = socks
                 agent_config = {'proxy': {'http': 'socks5://{}:{}'.format(socks_ip, socks_port)}}
                 yield instance, agent_config
-    elif OPENSTACK_E2E_LEGACY:
-        compose_file = os.path.join(get_here(), 'legacy', 'docker', 'docker-compose.yaml')
-        conditions = [
-            CheckDockerLogs(identifier='openstack-keystone', patterns=['server running']),
-            CheckDockerLogs(identifier='openstack-nova', patterns=['server running']),
-            CheckDockerLogs(identifier='openstack-neutron', patterns=['server running']),
-            CheckDockerLogs(identifier='openstack-ironic', patterns=['server running']),
-        ]
-        with docker_run(compose_file, conditions=conditions):
-            instance = {
-                'name': 'test',
-                'keystone_server_url': 'http://127.0.0.1:8080/identity/v3',
-                'user': {'name': 'admin', 'password': 'labstack', 'domain': {'id': 'default'}},
-                'ssl_verify': False,
-            }
-            yield instance
     else:
         compose_file = os.path.join(get_here(), 'docker', 'docker-compose.yaml')
         conditions = [
@@ -246,14 +229,10 @@ def openstack_session(openstack_v3_password, microversion_headers):
 def connection_authorize(request, mock_responses):
     param = request.param if hasattr(request, 'param') and request.param is not None else {}
     http_error = param.get('http_error')
-    exception = param.get('exception')
 
     def authorize():
-        if exception is not None:
-            raise exception
         if http_error is not None:
             raise requests.exceptions.HTTPError(response=http_error)
-        return mock.MagicMock(return_value=["test_token"])
 
     return mock.MagicMock(side_effect=authorize)
 
@@ -1018,14 +997,11 @@ def mock_http_get(request, monkeypatch, mock_http_call):
 def mock_http_post(request, monkeypatch, mock_http_call):
     param = request.param if hasattr(request, 'param') and request.param is not None else {}
     replace = param.get('replace')
-    exception = param.get('exception')
     http_error = param.get('http_error')
 
     def post(url, *args, **kwargs):
         method = 'POST'
         url = get_url_path(url)
-        if exception and url in exception:
-            raise exception[url]
         if http_error and url in http_error:
             return http_error[url]
         if url == '/identity/v3/auth/tokens':

@@ -17,7 +17,7 @@
             ],
             "mode": "active-backup",
             "name": "test_portgroup",
-            "node_uuid": "6d85703a-565d-469a-96ce-30b6de53079d",
+            "node_uuid": "9d72cf53-19c8-4942-9314-005fa5d2a6a0",
             "ports": [
                 {
                     "href": "http://127.0.0.1/v1/portgroups/9d72cf53-19c8-4942-9314-005fa5d2a6a0/ports",
