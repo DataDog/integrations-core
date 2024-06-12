@@ -48,9 +48,6 @@
     },
     "dashboards": {
       "ClickHouse Overview": "assets/dashboards/overview.json"
-    },
-    "logs": {
-      "source": "clickhouse"
     }
   }
 }

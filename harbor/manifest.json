@@ -47,9 +47,6 @@
     },
     "dashboards": {
       "Harbor Overview": "assets/dashboards/overview.json"
-    },
-    "logs": {
-      "source": "harbor"
     }
   }
 }

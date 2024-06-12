@@ -2,6 +2,12 @@
 
 <!-- towncrier release notes start -->
 
+## 4.9.0 / 2024-05-31
+
+***Added***:
+
+* Add optional display_name tag ([#17657](https://github.com/DataDog/integrations-core/pull/17657))
+
 ## 4.8.0 / 2024-01-05 / Agent 7.51.0
 
 ***Added***:

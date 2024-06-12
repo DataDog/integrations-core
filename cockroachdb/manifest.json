@@ -54,9 +54,6 @@
     },
     "dashboards": {
       "CockroachDB Overview": "assets/dashboards/overview.json"
-    },
-    "logs": {
-      "source": "cockroachdb"
     }
   }
 }

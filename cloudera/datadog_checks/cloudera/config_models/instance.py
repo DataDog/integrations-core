@@ -56,16 +56,20 @@ class InstanceConfig(BaseModel):
         frozen=True,
     )
     api_url: str
+    cert_file: Optional[str] = None
     cloudera_client: Optional[str] = None
     clusters: Optional[Clusters] = None
     custom_queries: Optional[tuple[CustomQuery, ...]] = None
     disable_generic_tags: Optional[bool] = None
     empty_default_hostname: Optional[bool] = None
+    key_file: Optional[str] = None
     max_parallel_requests: Optional[int] = None
     metric_patterns: Optional[MetricPatterns] = None
     min_collection_interval: Optional[float] = None
     service: Optional[str] = None
+    ssl_ca_cert: Optional[str] = None
     tags: Optional[tuple[str, ...]] = None
+    verify_ssl: Optional[bool] = None
 
     @model_validator(mode='before')
     def _initial_validation(cls, values):

@@ -66,9 +66,6 @@
       "tomcat_4xx": "assets/saved_views/tomcat_4xx.json",
       "tomcat_5xx": "assets/saved_views/tomcat_5xx.json",
       "tomcat_status_code_overview": "assets/saved_views/tomcat_status_code_overview.json"
-    },
-    "logs": {
-      "source": "tomcat"
     }
   }
 }

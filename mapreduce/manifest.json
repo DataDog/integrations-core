@@ -46,9 +46,6 @@
     },
     "dashboards": {
       "mapreduce": "assets/dashboards/mapreduce_dashboard.json"
-    },
-    "logs": {
-      "source": "mapreduce"
     }
   }
 }

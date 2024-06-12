@@ -48,7 +48,9 @@ ddev test postgres:py3.11-9.6,py3.11-16.0 -- -k test_my_special_test
 @click.option('--bench', '-b', is_flag=True, help='Run only benchmarks')
 @click.option('--latest', is_flag=True, help='Only verify support of new product versions')
 @click.option('--cov', '-c', 'coverage', is_flag=True, help='Measure code coverage')
-@click.option('--compat', is_flag=True, help='Check compatibility with the minimum allowed Agent version')
+@click.option(
+    '--compat', is_flag=True, help='Check compatibility with the minimum allowed Agent version. Implies --recreate.'
+)
 @click.option('--ddtrace', is_flag=True, envvar='DDEV_TEST_ENABLE_TRACING', help='Enable tracing during test execution')
 @click.option('--memray', is_flag=True, help='Measure memory usage during test execution')
 @click.option('--recreate', '-r', is_flag=True, help='Recreate environments from scratch')

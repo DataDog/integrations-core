@@ -1,0 +1,370 @@
+# HELP cluster_autoscaler_cluster_safe_to_autoscale Indicates whether the cluster is safe to autoscale
+# TYPE cluster_autoscaler_cluster_safe_to_autoscale gauge
+cluster_autoscaler_cluster_safe_to_autoscale{cluster="production", region="us-east-1"} 1
+cluster_autoscaler_cluster_safe_to_autoscale{cluster="staging", region="us-west-2"} 0
+cluster_autoscaler_cluster_safe_to_autoscale{cluster="development", region="eu-west-1"} 1
+cluster_autoscaler_cluster_safe_to_autoscale{cluster="testing", region="ap-southeast-1"} 1
+cluster_autoscaler_cluster_safe_to_autoscale{cluster="experiment", region="us-central-1"} 0
+cluster_autoscaler_cluster_safe_to_autoscale{cluster="demo", region="eu-central-1"} 1
+cluster_autoscaler_cluster_safe_to_autoscale{cluster="sandbox", region="ap-northeast-2"} 0
+cluster_autoscaler_cluster_safe_to_autoscale{cluster="performance", region="sa-east-1"} 1
+cluster_autoscaler_cluster_safe_to_autoscale{cluster="backup", region="ca-central-1"} 0
+cluster_autoscaler_cluster_safe_to_autoscale{cluster="monitoring", region="ap-south-1"} 1
+# HELP cluster_autoscaler_unschedulable_pods_count Number of unschedulable pods in the cluster
+# TYPE cluster_autoscaler_unschedulable_pods_count gauge
+cluster_autoscaler_unschedulable_pods_count{cluster="production", namespace="default"} 5
+cluster_autoscaler_unschedulable_pods_count{cluster="production", namespace="kube-system"} 3
+cluster_autoscaler_unschedulable_pods_count{cluster="staging", namespace="default"} 0
+cluster_autoscaler_unschedulable_pods_count{cluster="staging", namespace="kube-system"} 1
+cluster_autoscaler_unschedulable_pods_count{cluster="development", namespace="default"} 2
+cluster_autoscaler_unschedulable_pods_count{cluster="development", namespace="kube-system"} 0
+cluster_autoscaler_unschedulable_pods_count{cluster="testing", namespace="default"} 0
+cluster_autoscaler_unschedulable_pods_count{cluster="testing", namespace="kube-system"} 0
+cluster_autoscaler_unschedulable_pods_count{cluster="experiment", namespace="default"} 1
+cluster_autoscaler_unschedulable_pods_count{cluster="experiment", namespace="kube-system"} 2
+# HELP cluster_autoscaler_node_groups_count Number of node groups in the cluster
+# TYPE cluster_autoscaler_node_groups_count gauge
+cluster_autoscaler_node_groups_count{cluster="production"} 3
+cluster_autoscaler_node_groups_count{cluster="staging"} 2
+cluster_autoscaler_node_groups_count{cluster="development"} 4
+cluster_autoscaler_node_groups_count{cluster="testing"} 1
+cluster_autoscaler_node_groups_count{cluster="experiment"} 2
+cluster_autoscaler_node_groups_count{cluster="demo"} 3
+cluster_autoscaler_node_groups_count{cluster="sandbox"} 1
+cluster_autoscaler_node_groups_count{cluster="performance"} 2
+cluster_autoscaler_node_groups_count{cluster="backup"} 1
+cluster_autoscaler_node_groups_count{cluster="monitoring"} 2
+# HELP cluster_autoscaler_max_nodes_count Maximum number of nodes allowed in the cluster
+# TYPE cluster_autoscaler_max_nodes_count gauge
+cluster_autoscaler_max_nodes_count{cluster="production"} 100
+cluster_autoscaler_max_nodes_count{cluster="staging"} 50
+cluster_autoscaler_max_nodes_count{cluster="development"} 200
+cluster_autoscaler_max_nodes_count{cluster="testing"} 30
+cluster_autoscaler_max_nodes_count{cluster="experiment"} 80
+cluster_autoscaler_max_nodes_count{cluster="demo"} 150
+cluster_autoscaler_max_nodes_count{cluster="sandbox"} 40
+cluster_autoscaler_max_nodes_count{cluster="performance"} 120
+cluster_autoscaler_max_nodes_count{cluster="backup"} 60
+cluster_autoscaler_max_nodes_count{cluster="monitoring"} 100
+# HELP cluster_autoscaler_cluster_cpu_current_cores Current CPU cores usage in the cluster
+# TYPE cluster_autoscaler_cluster_cpu_current_cores gauge
+cluster_autoscaler_cluster_cpu_current_cores{cluster="production"} 80
+cluster_autoscaler_cluster_cpu_current_cores{cluster="staging"} 60
+cluster_autoscaler_cluster_cpu_current_cores{cluster="development"} 40
+cluster_autoscaler_cluster_cpu_current_cores{cluster="testing"} 20
+cluster_autoscaler_cluster_cpu_current_cores{cluster="experiment"} 70
+cluster_autoscaler_cluster_cpu_current_cores{cluster="demo"} 30
+cluster_autoscaler_cluster_cpu_current_cores{cluster="sandbox"} 50
+cluster_autoscaler_cluster_cpu_current_cores{cluster="performance"} 90
+cluster_autoscaler_cluster_cpu_current_cores{cluster="backup"} 70
+cluster_autoscaler_cluster_cpu_current_cores{cluster="monitoring"} 50
+# HELP cluster_autoscaler_cpu_limits_cores Total CPU cores limits set for pods in the cluster
+# TYPE cluster_autoscaler_cpu_limits_cores gauge
+cluster_autoscaler_cpu_limits_cores{cluster="production"} 200
+cluster_autoscaler_cpu_limits_cores{cluster="staging"} 150
+cluster_autoscaler_cpu_limits_cores{cluster="development"} 100
+cluster_autoscaler_cpu_limits_cores{cluster="testing"} 50
+cluster_autoscaler_cpu_limits_cores{cluster="experiment"} 180
+cluster_autoscaler_cpu_limits_cores{cluster="demo"} 80
+cluster_autoscaler_cpu_limits_cores{cluster="sandbox"} 120
+cluster_autoscaler_cpu_limits_cores{cluster="performance"} 220
+cluster_autoscaler_cpu_limits_cores{cluster="backup"} 150
+cluster_autoscaler_cpu_limits_cores{cluster="monitoring"} 100
+# HELP cluster_autoscaler_cluster_memory_current_bytes Current memory usage in bytes in the cluster
+# TYPE cluster_autoscaler_cluster_memory_current_bytes gauge
+cluster_autoscaler_cluster_memory_current_bytes{cluster="production"} 10000000000
+cluster_autoscaler_cluster_memory_current_bytes{cluster="staging"} 5000000000
+cluster_autoscaler_cluster_memory_current_bytes{cluster="development"} 20000000000
+cluster_autoscaler_cluster_memory_current_bytes{cluster="testing"} 3000000000
+cluster_autoscaler_cluster_memory_current_bytes{cluster="experiment"} 8000000000
+cluster_autoscaler_cluster_memory_current_bytes{cluster="demo"} 4000000000
+cluster_autoscaler_cluster_memory_current_bytes{cluster="sandbox"} 6000000000
+cluster_autoscaler_cluster_memory_current_bytes{cluster="performance"} 12000000000
+cluster_autoscaler_cluster_memory_current_bytes{cluster="backup"} 7000000000
+cluster_autoscaler_cluster_memory_current_bytes{cluster="monitoring"} 8000000000
+# HELP cluster_autoscaler_memory_limits_bytes Total memory limits set for pods in the cluster
+# TYPE cluster_autoscaler_memory_limits_bytes gauge
+cluster_autoscaler_memory_limits_bytes{cluster="production"} 30000000000
+cluster_autoscaler_memory_limits_bytes{cluster="staging"} 15000000000
+cluster_autoscaler_memory_limits_bytes{cluster="development"} 50000000000
+cluster_autoscaler_memory_limits_bytes{cluster="testing"} 8000000000
+cluster_autoscaler_memory_limits_bytes{cluster="experiment"} 25000000000
+cluster_autoscaler_memory_limits_bytes{cluster="demo"} 10000000000
+cluster_autoscaler_memory_limits_bytes{cluster="sandbox"} 18000000000
+cluster_autoscaler_memory_limits_bytes{cluster="performance"} 40000000000
+cluster_autoscaler_memory_limits_bytes{cluster="backup"} 20000000000
+cluster_autoscaler_memory_limits_bytes{cluster="monitoring"} 25000000000
+# HELP cluster_autoscaler_last_activity Timestamp of the last activity in the cluster
+# TYPE cluster_autoscaler_last_activity gauge
+cluster_autoscaler_last_activity{cluster="production"} 1656789200
+cluster_autoscaler_last_activity{cluster="staging"} 1656789300
+cluster_autoscaler_last_activity{cluster="development"} 1656789400
+cluster_autoscaler_last_activity{cluster="testing"} 1656789500
+cluster_autoscaler_last_activity{cluster="experiment"} 1656789600
+cluster_autoscaler_last_activity{cluster="demo"} 1656789700
+cluster_autoscaler_last_activity{cluster="sandbox"} 1656789800
+cluster_autoscaler_last_activity{cluster="performance"} 1656789900
+cluster_autoscaler_last_activity{cluster="backup"} 1656790000
+cluster_autoscaler_last_activity{cluster="monitoring"} 1656790100
+# HELP cluster_autoscaler_function_duration_seconds Duration of a specific function in the cluster
+# TYPE cluster_autoscaler_function_duration_seconds histogram
+cluster_autoscaler_function_duration_seconds_bucket{name="scaling",namespace="default",cluster="production",le="0.01"} 93
+cluster_autoscaler_function_duration_seconds_bucket{name="scaling",namespace="default",cluster="production",le="0.15"} 94
+cluster_autoscaler_function_duration_seconds_bucket{name="scaling",namespace="default",cluster="production",le="0.25"} 94
+cluster_autoscaler_function_duration_seconds_bucket{name="scaling",namespace="default",cluster="production",le="0.5"} 94
+cluster_autoscaler_function_duration_seconds_bucket{name="scaling",namespace="default",cluster="production",le="1"} 94
+cluster_autoscaler_function_duration_seconds_bucket{name="scaling",namespace="default",cluster="production",le="+Inf"} 94
+cluster_autoscaler_function_duration_seconds_sum{name="scaling",namespace="default",cluster="production"} 0.029117867
+cluster_autoscaler_function_duration_seconds_count{name="scaling",namespace="default",cluster="production"} 94
+# HELP cluster_autoscaler_errors_total Total count of errors occurred in the cluster
+# TYPE cluster_autoscaler_errors_total counter
+cluster_autoscaler_errors_total{cluster="production"} 20
+cluster_autoscaler_errors_total{cluster="staging"} 15
+cluster_autoscaler_errors_total{cluster="development"} 10
+cluster_autoscaler_errors_total{cluster="testing"} 5
+cluster_autoscaler_errors_total{cluster="experiment"} 25
+cluster_autoscaler_errors_total{cluster="demo"} 12
+cluster_autoscaler_errors_total{cluster="sandbox"} 8
+cluster_autoscaler_errors_total{cluster="performance"} 18
+cluster_autoscaler_errors_total{cluster="backup"} 9
+cluster_autoscaler_errors_total{cluster="monitoring"} 7
+# HELP cluster_autoscaler_scaled_up_nodes_total Total count of nodes scaled up in the cluster
+# TYPE cluster_autoscaler_scaled_up_nodes_total counter
+cluster_autoscaler_scaled_up_nodes_total{cluster="production"} 50
+cluster_autoscaler_scaled_up_nodes_total{cluster="staging"} 30
+cluster_autoscaler_scaled_up_nodes_total{cluster="development"} 70
+cluster_autoscaler_scaled_up_nodes_total{cluster="testing"} 20
+cluster_autoscaler_scaled_up_nodes_total{cluster="experiment"} 40
+cluster_autoscaler_scaled_up_nodes_total{cluster="demo"} 35
+cluster_autoscaler_scaled_up_nodes_total{cluster="sandbox"} 15
+cluster_autoscaler_scaled_up_nodes_total{cluster="performance"} 45
+cluster_autoscaler_scaled_up_nodes_total{cluster="backup"} 25
+cluster_autoscaler_scaled_up_nodes_total{cluster="monitoring"} 10
+# HELP cluster_autoscaler_scaled_down_nodes_total Total count of nodes scaled down in the cluster
+# TYPE cluster_autoscaler_scaled_down_nodes_total counter
+cluster_autoscaler_scaled_down_nodes_total{cluster="production"} 10
+cluster_autoscaler_scaled_down_nodes_total{cluster="staging"} 5
+cluster_autoscaler_scaled_down_nodes_total{cluster="development"} 15
+cluster_autoscaler_scaled_down_nodes_total{cluster="testing"} 2
+cluster_autoscaler_scaled_down_nodes_total{cluster="experiment"} 8
+cluster_autoscaler_scaled_down_nodes_total{cluster="demo"} 6
+cluster_autoscaler_scaled_down_nodes_total{cluster="sandbox"} 3
+cluster_autoscaler_scaled_down_nodes_total{cluster="performance"} 12
+cluster_autoscaler_scaled_down_nodes_total{cluster="backup"} 4
+cluster_autoscaler_scaled_down_nodes_total{cluster="monitoring"} 1
+# HELP cluster_autoscaler_scaled_up_gpu_nodes_total Total count of GPU nodes scaled up in the cluster
+# TYPE cluster_autoscaler_scaled_up_gpu_nodes_total counter
+cluster_autoscaler_scaled_up_gpu_nodes_total{cluster="production"} 5
+cluster_autoscaler_scaled_up_gpu_nodes_total{cluster="staging"} 2
+cluster_autoscaler_scaled_up_gpu_nodes_total{cluster="development"} 10
+cluster_autoscaler_scaled_up_gpu_nodes_total{cluster="testing"} 1
+cluster_autoscaler_scaled_up_gpu_nodes_total{cluster="experiment"} 3
+cluster_autoscaler_scaled_up_gpu_nodes_total{cluster="demo"} 4
+cluster_autoscaler_scaled_up_gpu_nodes_total{cluster="sandbox"} 1
+cluster_autoscaler_scaled_up_gpu_nodes_total{cluster="performance"} 6
+cluster_autoscaler_scaled_up_gpu_nodes_total{cluster="backup"} 3
+cluster_autoscaler_scaled_up_gpu_nodes_total{cluster="monitoring"} 0
+# HELP cluster_autoscaler_scaled_down_gpu_nodes_total Total count of GPU nodes scaled down in the cluster
+# TYPE cluster_autoscaler_scaled_down_gpu_nodes_total counter
+cluster_autoscaler_scaled_down_gpu_nodes_total{cluster="production"} 2
+cluster_autoscaler_scaled_down_gpu_nodes_total{cluster="staging"} 1
+cluster_autoscaler_scaled_down_gpu_nodes_total{cluster="development"} 3
+cluster_autoscaler_scaled_down_gpu_nodes_total{cluster="testing"} 0
+cluster_autoscaler_scaled_down_gpu_nodes_total{cluster="experiment"} 1
+cluster_autoscaler_scaled_down_gpu_nodes_total{cluster="demo"} 2
+cluster_autoscaler_scaled_down_gpu_nodes_total{cluster="sandbox"} 0
+cluster_autoscaler_scaled_down_gpu_nodes_total{cluster="performance"} 2
+cluster_autoscaler_scaled_down_gpu_nodes_total{cluster="backup"} 1
+cluster_autoscaler_scaled_down_gpu_nodes_total{cluster="monitoring"} 0
+# HELP cluster_autoscaler_failed_scale_ups_total Total count of failed scale-up operations in the cluster
+# TYPE cluster_autoscaler_failed_scale_ups_total counter
+cluster_autoscaler_failed_scale_ups_total{cluster="production"} 3
+cluster_autoscaler_failed_scale_ups_total{cluster="staging"} 1
+cluster_autoscaler_failed_scale_ups_total{cluster="development"} 5
+cluster_autoscaler_failed_scale_ups_total{cluster="testing"} 0
+cluster_autoscaler_failed_scale_ups_total{cluster="experiment"} 2
+cluster_autoscaler_failed_scale_ups_total{cluster="demo"} 4
+cluster_autoscaler_failed_scale_ups_total{cluster="sandbox"} 1
+cluster_autoscaler_failed_scale_ups_total{cluster="performance"} 3
+cluster_autoscaler_failed_scale_ups_total{cluster="backup"} 2
+cluster_autoscaler_failed_scale_ups_total{cluster="monitoring"} 0
+# HELP cluster_autoscaler_evicted_pods_total Total count of evicted pods in the cluster
+# TYPE cluster_autoscaler_evicted_pods_total counter
+cluster_autoscaler_evicted_pods_total{cluster="production"} 10
+cluster_autoscaler_evicted_pods_total{cluster="staging"} 5
+cluster_autoscaler_evicted_pods_total{cluster="development"} 15
+cluster_autoscaler_evicted_pods_total{cluster="testing"} 2
+cluster_autoscaler_evicted_pods_total{cluster="experiment"} 8
+cluster_autoscaler_evicted_pods_total{cluster="demo"} 6
+cluster_autoscaler_evicted_pods_total{cluster="sandbox"} 3
+cluster_autoscaler_evicted_pods_total{cluster="performance"} 12
+cluster_autoscaler_evicted_pods_total{cluster="backup"} 4
+cluster_autoscaler_evicted_pods_total{cluster="monitoring"} 1
+# HELP cluster_autoscaler_unneeded_nodes_count Total count of unneeded nodes in the cluster
+# TYPE cluster_autoscaler_unneeded_nodes_count gauge
+cluster_autoscaler_unneeded_nodes_count{cluster="production"} 2
+cluster_autoscaler_unneeded_nodes_count{cluster="staging"} 1
+cluster_autoscaler_unneeded_nodes_count{cluster="development"} 3
+cluster_autoscaler_unneeded_nodes_count{cluster="testing"} 0
+cluster_autoscaler_unneeded_nodes_count{cluster="experiment"} 1
+cluster_autoscaler_unneeded_nodes_count{cluster="demo"} 2
+cluster_autoscaler_unneeded_nodes_count{cluster="sandbox"} 0
+cluster_autoscaler_unneeded_nodes_count{cluster="performance"} 2
+cluster_autoscaler_unneeded_nodes_count{cluster="backup"} 1
+cluster_autoscaler_unneeded_nodes_count{cluster="monitoring"} 0
+# HELP cluster_autoscaler_skipped_scale_events_count Total count of skipped scale events in the cluster
+# TYPE cluster_autoscaler_skipped_scale_events_count counter
+cluster_autoscaler_skipped_scale_events_count{cluster="production"} 2
+cluster_autoscaler_skipped_scale_events_count{cluster="staging"} 1
+cluster_autoscaler_skipped_scale_events_count{cluster="development"} 3
+cluster_autoscaler_skipped_scale_events_count{cluster="testing"} 0
+cluster_autoscaler_skipped_scale_events_count{cluster="experiment"} 1
+cluster_autoscaler_skipped_scale_events_count{cluster="demo"} 2
+cluster_autoscaler_skipped_scale_events_count{cluster="sandbox"} 0
+cluster_autoscaler_skipped_scale_events_count{cluster="performance"} 2
+cluster_autoscaler_skipped_scale_events_count{cluster="backup"} 1
+cluster_autoscaler_skipped_scale_events_count{cluster="monitoring"} 0
+# HELP cluster_autoscaler_nap_enabled Indicates whether Node Auto-Provisioning (NAP) is enabled in the cluster
+# TYPE cluster_autoscaler_nap_enabled gauge
+cluster_autoscaler_nap_enabled{cluster="production"} 1
+cluster_autoscaler_nap_enabled{cluster="staging"} 0
+cluster_autoscaler_nap_enabled{cluster="development"} 1
+cluster_autoscaler_nap_enabled{cluster="testing"} 1
+cluster_autoscaler_nap_enabled{cluster="experiment"} 0
+cluster_autoscaler_nap_enabled{cluster="demo"} 1
+cluster_autoscaler_nap_enabled{cluster="sandbox"} 0
+cluster_autoscaler_nap_enabled{cluster="performance"} 1
+cluster_autoscaler_nap_enabled{cluster="backup"} 0
+cluster_autoscaler_nap_enabled{cluster="monitoring"} 1
+# HELP cluster_autoscaler_created_node_groups_total Total count of node groups created in the cluster
+# TYPE cluster_autoscaler_created_node_groups_total counter
+cluster_autoscaler_created_node_groups_total{cluster="production"} 8
+cluster_autoscaler_created_node_groups_total{cluster="staging"} 5
+cluster_autoscaler_created_node_groups_total{cluster="development"} 10
+cluster_autoscaler_created_node_groups_total{cluster="testing"} 3
+cluster_autoscaler_created_node_groups_total{cluster="experiment"} 6
+cluster_autoscaler_created_node_groups_total{cluster="demo"} 7
+cluster_autoscaler_created_node_groups_total{cluster="sandbox"} 2
+cluster_autoscaler_created_node_groups_total{cluster="performance"} 9
+cluster_autoscaler_created_node_groups_total{cluster="backup"} 4
+cluster_autoscaler_created_node_groups_total{cluster="monitoring"} 7
+# HELP cluster_autoscaler_deleted_node_groups_total Total count of node groups deleted in the cluster
+# TYPE cluster_autoscaler_deleted_node_groups_total counter
+cluster_autoscaler_deleted_node_groups_total{cluster="production"} 5
+cluster_autoscaler_deleted_node_groups_total{cluster="staging"} 3
+cluster_autoscaler_deleted_node_groups_total{cluster="development"} 7
+cluster_autoscaler_deleted_node_groups_total{cluster="testing"} 1
+cluster_autoscaler_deleted_node_groups_total{cluster="experiment"} 4
+cluster_autoscaler_deleted_node_groups_total{cluster="demo"} 6
+cluster_autoscaler_deleted_node_groups_total{cluster="sandbox"} 2
+cluster_autoscaler_deleted_node_groups_total{cluster="performance"} 8
+cluster_autoscaler_deleted_node_groups_total{cluster="backup"} 3
+cluster_autoscaler_deleted_node_groups_total{cluster="monitoring"} 2
+# HELP cluster_autoscaler_old_unregistered_nodes_removed_count Total count of old unregistered nodes removed from the cluster
+# TYPE cluster_autoscaler_old_unregistered_nodes_removed_count counter
+cluster_autoscaler_old_unregistered_nodes_removed_count{cluster="production"} 5
+cluster_autoscaler_old_unregistered_nodes_removed_count{cluster="staging"} 3
+cluster_autoscaler_old_unregistered_nodes_removed_count{cluster="development"} 7
+cluster_autoscaler_old_unregistered_nodes_removed_count{cluster="testing"} 1
+cluster_autoscaler_old_unregistered_nodes_removed_count{cluster="experiment"} 4
+cluster_autoscaler_old_unregistered_nodes_removed_count{cluster="demo"} 6
+cluster_autoscaler_old_unregistered_nodes_removed_count{cluster="sandbox"} 2
+cluster_autoscaler_old_unregistered_nodes_removed_count{cluster="performance"} 8
+cluster_autoscaler_old_unregistered_nodes_removed_count{cluster="backup"} 3
+cluster_autoscaler_old_unregistered_nodes_removed_count{cluster="monitoring"} 2
+# HELP cluster_autoscaler_nodes_count Number of nodes in cluster
+# TYPE cluster_autoscaler_nodes_count gauge
+cluster_autoscaler_nodes_count{cluster="production"} 10
+cluster_autoscaler_nodes_count{cluster="staging"} 5
+cluster_autoscaler_nodes_count{cluster="development"} 20
+cluster_autoscaler_nodes_count{cluster="testing"} 3
+cluster_autoscaler_nodes_count{cluster="experiment"} 8
+cluster_autoscaler_nodes_count{cluster="demo"} 15
+cluster_autoscaler_nodes_count{cluster="sandbox"} 4
+cluster_autoscaler_nodes_count{cluster="performance"} 12
+cluster_autoscaler_nodes_count{cluster="backup"} 6
+cluster_autoscaler_nodes_count{cluster="monitoring"} 10
+# HELP go_gc_duration_seconds A summary of the pause duration of garbage collection cycles.
+# TYPE go_gc_duration_seconds summary
+go_gc_duration_seconds{quantile="0"} 7.4559e-05
+go_gc_duration_seconds{quantile="0.25"} 0.000204717
+go_gc_duration_seconds{quantile="0.5"} 0.000229263
+go_gc_duration_seconds{quantile="0.75"} 0.000265064
+go_gc_duration_seconds{quantile="1"} 0.002896558
+go_gc_duration_seconds_sum 4.163291925
+go_gc_duration_seconds_count 16072
+# HELP go_goroutines Number of goroutines that currently exist.
+# TYPE go_goroutines gauge
+go_goroutines 220
+# HELP go_info Information about the Go environment.
+# TYPE go_info gauge
+go_info{version="go1.19.7"} 1
+# HELP go_memstats_alloc_bytes Number of bytes allocated and still in use.
+# TYPE go_memstats_alloc_bytes gauge
+go_memstats_alloc_bytes 1.3780744e+07
+# HELP go_memstats_alloc_bytes_total Total number of bytes allocated, even if freed.
+# TYPE go_memstats_alloc_bytes_total counter
+go_memstats_alloc_bytes_total 1.18245779288e+11
+# HELP go_memstats_buck_hash_sys_bytes Number of bytes used by the profiling bucket hash table.
+# TYPE go_memstats_buck_hash_sys_bytes gauge
+go_memstats_buck_hash_sys_bytes 6673
+# HELP go_memstats_frees_total Total number of frees.
+# TYPE go_memstats_frees_total counter
+go_memstats_frees_total 1.211516296e+09
+# HELP go_memstats_gc_sys_bytes Number of bytes used for garbage collection system metadata.
+# TYPE go_memstats_gc_sys_bytes gauge
+go_memstats_gc_sys_bytes 9.169072e+06
+# HELP go_memstats_heap_alloc_bytes Number of heap bytes allocated and still in use.
+# TYPE go_memstats_heap_alloc_bytes gauge
+go_memstats_heap_alloc_bytes 1.3780744e+07
+# HELP go_memstats_heap_idle_bytes Number of heap bytes waiting to be used.
+# TYPE go_memstats_heap_idle_bytes gauge
+go_memstats_heap_idle_bytes 5.988352e+06
+# HELP go_memstats_heap_inuse_bytes Number of heap bytes that are in use.
+# TYPE go_memstats_heap_inuse_bytes gauge
+go_memstats_heap_inuse_bytes 1.7440768e+07
+# HELP go_memstats_heap_objects Number of allocated objects.
+# TYPE go_memstats_heap_objects gauge
+go_memstats_heap_objects 109750
+# HELP go_memstats_heap_released_bytes Number of heap bytes released to OS.
+# TYPE go_memstats_heap_released_bytes gauge
+go_memstats_heap_released_bytes 3.661824e+06
+# HELP go_memstats_heap_sys_bytes Number of heap bytes obtained from system.
+# TYPE go_memstats_heap_sys_bytes gauge
+go_memstats_heap_sys_bytes 2.342912e+07
+# HELP go_memstats_lookups_total Total number of pointer lookups.
+# TYPE go_memstats_lookups_total counter
+go_memstats_lookups_total 0
+# HELP go_memstats_mallocs_total Total number of mallocs.
+# TYPE go_memstats_mallocs_total counter
+go_memstats_mallocs_total 1.211626046e+09
+# HELP go_memstats_mcache_inuse_bytes Number of bytes in use by mcache structures.
+# TYPE go_memstats_mcache_inuse_bytes gauge
+go_memstats_mcache_inuse_bytes 2400
+# HELP go_memstats_mcache_sys_bytes Number of bytes used for mcache structures obtained from system.
+# TYPE go_memstats_mcache_sys_bytes gauge
+go_memstats_mcache_sys_bytes 15600
+# HELP go_memstats_mspan_inuse_bytes Number of bytes in use by mspan structures.
+# TYPE go_memstats_mspan_inuse_bytes gauge
+go_memstats_mspan_inuse_bytes 284160
+# HELP go_memstats_mspan_sys_bytes Number of bytes used for mspan structures obtained from system.
+# TYPE go_memstats_mspan_sys_bytes gauge
+go_memstats_mspan_sys_bytes 342720
+# HELP go_memstats_next_gc_bytes Number of heap bytes when next garbage collection will take place.
+# TYPE go_memstats_next_gc_bytes gauge
+go_memstats_next_gc_bytes 1.8044152e+07
+# HELP go_memstats_other_sys_bytes Number of bytes used for other system allocations.
+# TYPE go_memstats_other_sys_bytes gauge
+go_memstats_other_sys_bytes 688543
+# HELP go_memstats_stack_inuse_bytes Number of bytes in use by the stack allocator.
+# TYPE go_memstats_stack_inuse_bytes gauge
+go_memstats_stack_inuse_bytes 1.736704e+06
+# HELP go_memstats_stack_sys_bytes Number of bytes obtained from system for stack allocator.
+# TYPE go_memstats_stack_sys_bytes gauge
+go_memstats_stack_sys_bytes 1.736704e+06
+# HELP go_memstats_sys_bytes Number of bytes obtained from system.
+# TYPE go_memstats_sys_bytes gauge
+go_memstats_sys_bytes 3.5388432e+07
+# HELP go_threads Number of OS threads created.
+# TYPE go_threads gauge
+go_threads 9

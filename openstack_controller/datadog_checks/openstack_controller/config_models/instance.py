@@ -327,6 +327,14 @@ class NetworkItem(BaseModel):
     quotas: Optional[bool] = None
 
 
+class SwiftItem(BaseModel):
+    model_config = ConfigDict(
+        arbitrary_types_allowed=True,
+        frozen=True,
+    )
+    containers: Optional[bool] = None
+
+
 class Components(BaseModel):
     model_config = ConfigDict(
         arbitrary_types_allowed=True,
@@ -340,6 +348,7 @@ class Components(BaseModel):
     image: Optional[Union[bool, ImageItem]] = None
     load_balancer: Optional[Union[bool, LoadBalancerItem]] = Field(None, alias='load-balancer')
     network: Optional[Union[bool, NetworkItem]] = None
+    swift: Optional[Union[bool, SwiftItem]] = None
 
 
 class MetricPatterns(BaseModel):

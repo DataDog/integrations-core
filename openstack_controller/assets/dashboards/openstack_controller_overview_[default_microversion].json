@@ -140,109 +140,90 @@
         },
         {
             "definition": {
+                "title": "Overview of Components",
                 "background_color": "white",
-                "layout_type": "ordered",
                 "show_title": true,
-                "title": "Overview",
                 "type": "group",
+                "layout_type": "ordered",
                 "widgets": [
                     {
-                        "definition": {
-                            "background_color": "gray",
-                            "content": "Components",
-                            "font_size": "36",
-                            "has_padding": true,
-                            "show_tick": true,
-                            "text_align": "center",
-                            "tick_edge": "bottom",
-                            "tick_pos": "50%",
-                            "type": "note",
-                            "vertical_align": "center"
-                        },
-                        "id": 6076858181941086,
-                        "layout": {
-                            "height": 1,
-                            "width": 6,
-                            "x": 0,
-                            "y": 0
-                        }
-                    },
-                    {
-                        "definition": {
-                            "check": "openstack.keystone.api.up",
-                            "group_by": [
-                                "keystone_server"
-                            ],
-                            "grouping": "cluster",
-                            "tags": [
-                                "$Keystone_Server_URL"
-                            ],
-                            "time": {},
-                            "title": "Keystone",
-                            "title_align": "left",
-                            "title_size": "16",
-                            "type": "check_status"
-                        },
                         "id": 5012464578391900,
+                        "definition": {
+                            "title": "Keystone",
+                            "title_size": "16",
+                            "title_align": "left",
+                            "type": "check_status",
+                            "check": "openstack.keystone.api.up",
+                            "grouping": "cluster",
+                            "group_by": [
+                                "keystone_server"
+                            ],
+                            "tags": [
+                                "$Keystone_Server_URL"
+                            ]
+                        },
                         "layout": {
-                            "height": 1,
-                            "width": 2,
                             "x": 0,
-                            "y": 1
+                            "y": 0,
+                            "width": 2,
+                            "height": 1
                         }
                     },
                     {
-                        "definition": {
-                            "check": "openstack.nova.api.up",
-                            "group": "$Project",
-                            "group_by": [
-                                "keystone_server"
-                            ],
-                            "grouping": "cluster",
-                            "tags": [
-                                "$Keystone_Server_URL"
-                            ],
-                            "title": "Nova",
-                            "title_align": "left",
-                            "title_size": "16",
-                            "type": "check_status"
-                        },
                         "id": 7127932884759874,
-                        "layout": {
-                            "height": 1,
-                            "width": 2,
-                            "x": 2,
-                            "y": 1
-                        }
-                    },
-                    {
                         "definition": {
-                            "check": "openstack.neutron.api.up",
+                            "title": "Nova",
+                            "title_size": "16",
+                            "title_align": "left",
+                            "type": "check_status",
+                            "check": "openstack.nova.api.up",
+                            "grouping": "cluster",
                             "group": "$Project",
                             "group_by": [
                                 "keystone_server"
                             ],
-                            "grouping": "cluster",
                             "tags": [
                                 "$Keystone_Server_URL"
-                            ],
-                            "title": "Neutron",
-                            "title_align": "left",
-                            "title_size": "16",
-                            "type": "check_status"
+                            ]
                         },
-                        "id": 7813309804115824,
                         "layout": {
-                            "height": 1,
+                            "x": 2,
+                            "y": 0,
                             "width": 2,
-                            "x": 4,
-                            "y": 1
+                            "height": 1
                         }
                     },
                     {
+                        "id": 7813309804115824,
                         "definition": {
-                            "autoscale": false,
-                            "precision": 2,
+                            "title": "Neutron",
+                            "title_size": "16",
+                            "title_align": "left",
+                            "type": "check_status",
+                            "check": "openstack.neutron.api.up",
+                            "grouping": "cluster",
+                            "group": "$Project",
+                            "group_by": [
+                                "keystone_server"
+                            ],
+                            "tags": [
+                                "$Keystone_Server_URL"
+                            ]
+                        },
+                        "layout": {
+                            "x": 4,
+                            "y": 0,
+                            "width": 2,
+                            "height": 1
+                        }
+                    },
+                    {
+                        "id": 5893131258645472,
+                        "definition": {
+                            "title": "Response Time",
+                            "title_size": "16",
+                            "title_align": "left",
+                            "type": "query_value",
                             "requests": [
                                 {
                                     "formulas": [
@@ -261,26 +242,26 @@
                                     "response_format": "scalar"
                                 }
                             ],
+                            "autoscale": false,
+                            "precision": 2,
                             "timeseries_background": {
                                 "type": "area"
-                            },
-                            "title": "Response Time",
-                            "title_align": "left",
-                            "title_size": "16",
-                            "type": "query_value"
+                            }
                         },
-                        "id": 5893131258645472,
                         "layout": {
-                            "height": 2,
-                            "width": 2,
                             "x": 0,
-                            "y": 2
+                            "y": 1,
+                            "width": 2,
+                            "height": 2
                         }
                     },
                     {
+                        "id": 2275586178175996,
                         "definition": {
-                            "autoscale": false,
-                            "precision": 2,
+                            "title": "Response Time",
+                            "title_size": "16",
+                            "title_align": "left",
+                            "type": "query_value",
                             "requests": [
                                 {
                                     "formulas": [
@@ -299,27 +280,26 @@
                                     "response_format": "scalar"
                                 }
                             ],
-                            "time": {},
+                            "autoscale": false,
+                            "precision": 2,
                             "timeseries_background": {
                                 "type": "area"
-                            },
-                            "title": "Response Time",
-                            "title_align": "left",
-                            "title_size": "16",
-                            "type": "query_value"
+                            }
                         },
-                        "id": 2275586178175996,
                         "layout": {
-                            "height": 2,
-                            "width": 2,
                             "x": 2,
-                            "y": 2
+                            "y": 1,
+                            "width": 2,
+                            "height": 2
                         }
                     },
                     {
+                        "id": 7927320907633026,
                         "definition": {
-                            "autoscale": false,
-                            "precision": 2,
+                            "title": "Response Time",
+                            "title_size": "16",
+                            "title_align": "left",
+                            "type": "query_value",
                             "requests": [
                                 {
                                     "formulas": [
@@ -338,96 +318,93 @@
                                     "response_format": "scalar"
                                 }
                             ],
-                            "time": {},
+                            "autoscale": false,
+                            "precision": 2,
                             "timeseries_background": {
                                 "type": "area"
-                            },
-                            "title": "Response Time",
-                            "title_align": "left",
-                            "title_size": "16",
-                            "type": "query_value"
+                            }
                         },
-                        "id": 7927320907633026,
                         "layout": {
-                            "height": 2,
-                            "width": 2,
                             "x": 4,
-                            "y": 2
+                            "y": 1,
+                            "width": 2,
+                            "height": 2
                         }
                     },
                     {
+                        "id": 435440859398038,
                         "definition": {
+                            "title": "Cinder",
+                            "title_size": "16",
+                            "title_align": "left",
+                            "type": "check_status",
                             "check": "openstack.cinder.api.up",
+                            "grouping": "cluster",
                             "group_by": [
                                 "keystone_server"
                             ],
-                            "grouping": "cluster",
                             "tags": [
                                 "$Keystone_Server_URL"
-                            ],
-                            "title": "Cinder",
-                            "title_align": "left",
-                            "title_size": "16",
-                            "type": "check_status"
+                            ]
                         },
-                        "id": 435440859398038,
                         "layout": {
-                            "height": 1,
-                            "width": 2,
                             "x": 0,
-                            "y": 4
+                            "y": 3,
+                            "width": 2,
+                            "height": 1
                         }
                     },
                     {
-                        "definition": {
-                            "check": "openstack.ironic.api.up",
-                            "group": "$Project",
-                            "group_by": [],
-                            "grouping": "cluster",
-                            "tags": [
-                                "$Keystone_Server_URL"
-                            ],
-                            "time": {},
-                            "title": "Ironic",
-                            "title_align": "left",
-                            "title_size": "16",
-                            "type": "check_status"
-                        },
                         "id": 5227104244716420,
-                        "layout": {
-                            "height": 1,
-                            "width": 2,
-                            "x": 2,
-                            "y": 4
-                        }
-                    },
-                    {
                         "definition": {
-                            "check": "openstack.octavia.api.up",
+                            "title": "Ironic",
+                            "title_size": "16",
+                            "title_align": "left",
+                            "type": "check_status",
+                            "check": "openstack.ironic.api.up",
+                            "grouping": "cluster",
                             "group": "$Project",
                             "group_by": [],
-                            "grouping": "cluster",
                             "tags": [
                                 "$Keystone_Server_URL"
-                            ],
-                            "time": {},
-                            "title": "Octavia",
-                            "title_align": "left",
-                            "title_size": "16",
-                            "type": "check_status"
+                            ]
                         },
-                        "id": 1294662051798076,
                         "layout": {
-                            "height": 1,
+                            "x": 2,
+                            "y": 3,
                             "width": 2,
-                            "x": 4,
-                            "y": 4
+                            "height": 1
                         }
                     },
                     {
+                        "id": 1294662051798076,
                         "definition": {
-                            "autoscale": false,
-                            "precision": 2,
+                            "title": "Octavia",
+                            "title_size": "16",
+                            "title_align": "left",
+                            "type": "check_status",
+                            "check": "openstack.octavia.api.up",
+                            "grouping": "cluster",
+                            "group": "$Project",
+                            "group_by": [],
+                            "tags": [
+                                "$Keystone_Server_URL"
+                            ]
+                        },
+                        "layout": {
+                            "x": 4,
+                            "y": 3,
+                            "width": 2,
+                            "height": 1
+                        }
+                    },
+                    {
+                        "id": 5218774259137714,
+                        "definition": {
+                            "title": "Response Time",
+                            "title_size": "16",
+                            "title_align": "left",
+                            "type": "query_value",
                             "requests": [
                                 {
                                     "formulas": [
@@ -446,27 +423,26 @@
                                     "response_format": "scalar"
                                 }
                             ],
-                            "time": {},
+                            "autoscale": false,
+                            "precision": 2,
                             "timeseries_background": {
                                 "type": "area"
-                            },
-                            "title": "Response Time",
-                            "title_align": "left",
-                            "title_size": "16",
-                            "type": "query_value"
+                            }
                         },
-                        "id": 5218774259137714,
                         "layout": {
-                            "height": 2,
-                            "width": 2,
                             "x": 0,
-                            "y": 5
+                            "y": 4,
+                            "width": 2,
+                            "height": 2
                         }
                     },
                     {
+                        "id": 7244495661221860,
                         "definition": {
-                            "autoscale": false,
-                            "precision": 2,
+                            "title": "Response Time",
+                            "title_size": "16",
+                            "title_align": "left",
+                            "type": "query_value",
                             "requests": [
                                 {
                                     "formulas": [
@@ -485,27 +461,26 @@
                                     "response_format": "scalar"
                                 }
                             ],
-                            "time": {},
+                            "autoscale": false,
+                            "precision": 2,
                             "timeseries_background": {
                                 "type": "area"
-                            },
-                            "title": "Response Time",
-                            "title_align": "left",
-                            "title_size": "16",
-                            "type": "query_value"
+                            }
                         },
-                        "id": 7244495661221860,
                         "layout": {
-                            "height": 2,
-                            "width": 2,
                             "x": 2,
-                            "y": 5
+                            "y": 4,
+                            "width": 2,
+                            "height": 2
                         }
                     },
                     {
+                        "id": 4992704165041010,
                         "definition": {
-                            "autoscale": false,
-                            "precision": 2,
+                            "title": "Response Time",
+                            "title_size": "16",
+                            "title_align": "left",
+                            "type": "query_value",
                             "requests": [
                                 {
                                     "formulas": [
@@ -524,31 +499,143 @@
                                     "response_format": "scalar"
                                 }
                             ],
-                            "time": {},
+                            "autoscale": false,
+                            "precision": 2,
                             "timeseries_background": {
                                 "type": "area"
-                            },
-                            "title": "Response Time",
-                            "title_align": "left",
-                            "title_size": "16",
-                            "type": "query_value"
+                            }
                         },
-                        "id": 4992704165041010,
                         "layout": {
-                            "height": 2,
-                            "width": 2,
                             "x": 4,
-                            "y": 5
+                            "y": 4,
+                            "width": 2,
+                            "height": 2
+                        }
+                    },
+                    {
+                        "id": 1800206064244062,
+                        "definition": {
+                            "title": "Heat",
+                            "title_size": "16",
+                            "title_align": "left",
+                            "time": {},
+                            "type": "check_status",
+                            "check": "openstack.heat.api.up",
+                            "grouping": "cluster",
+                            "group_by": [],
+                            "tags": []
+                        },
+                        "layout": {
+                            "x": 0,
+                            "y": 6,
+                            "width": 3,
+                            "height": 1
+                        }
+                    },
+                    {
+                        "id": 2060821998866274,
+                        "definition": {
+                            "title": "Swift",
+                            "title_size": "16",
+                            "title_align": "left",
+                            "time": {},
+                            "type": "check_status",
+                            "check": "openstack.swift.api.up",
+                            "grouping": "cluster",
+                            "group_by": [],
+                            "tags": []
+                        },
+                        "layout": {
+                            "x": 3,
+                            "y": 6,
+                            "width": 3,
+                            "height": 1
+                        }
+                    },
+                    {
+                        "id": 6783606117013650,
+                        "definition": {
+                            "title": "Response Time",
+                            "title_size": "16",
+                            "title_align": "left",
+                            "type": "query_value",
+                            "requests": [
+                                {
+                                    "formulas": [
+                                        {
+                                            "formula": "query1"
+                                        }
+                                    ],
+                                    "queries": [
+                                        {
+                                            "aggregator": "avg",
+                                            "data_source": "metrics",
+                                            "name": "query1",
+                                            "query": "avg:openstack.heat.response_time{$Keystone_Server_URL,$RegionId}"
+                                        }
+                                    ],
+                                    "response_format": "scalar"
+                                }
+                            ],
+                            "autoscale": false,
+                            "precision": 2,
+                            "timeseries_background": {
+                                "type": "area"
+                            }
+                        },
+                        "layout": {
+                            "x": 0,
+                            "y": 7,
+                            "width": 3,
+                            "height": 2
+                        }
+                    },
+                    {
+                        "id": 4625537111948438,
+                        "definition": {
+                            "title": "Response Time",
+                            "title_size": "16",
+                            "title_align": "left",
+                            "type": "query_value",
+                            "requests": [
+                                {
+                                    "formulas": [
+                                        {
+                                            "formula": "query1"
+                                        }
+                                    ],
+                                    "queries": [
+                                        {
+                                            "aggregator": "avg",
+                                            "data_source": "metrics",
+                                            "name": "query1",
+                                            "query": "avg:openstack.swift.response_time{$Keystone_Server_URL,$RegionId}"
+                                        }
+                                    ],
+                                    "response_format": "scalar"
+                                }
+                            ],
+                            "autoscale": false,
+                            "precision": 2,
+                            "timeseries_background": {
+                                "type": "area"
+                            }
+                        },
+                        "layout": {
+                            "x": 3,
+                            "y": 7,
+                            "width": 3,
+                            "height": 2
                         }
                     }
                 ]
             },
             "id": 1149578833829744,
             "layout": {
-                "height": 8,
-                "width": 6,
                 "x": 6,
-                "y": 0
+                "y": 0,
+                "width": 6,
+                "height": 10
             }
         },
         {
@@ -6025,6 +6112,175 @@
                 "x": 0,
                 "y": 27,
                 "width": 12,
+                "height": 3
+            }
+        },
+        {
+            "id": 76561407326878,
+            "definition": {
+                "title": "Object Store (Swift)",
+                "background_color": "blue",
+                "show_title": true,
+                "type": "group",
+                "layout_type": "ordered",
+                "widgets": [
+                    {
+                        "id": 8697010273840392,
+                        "definition": {
+                            "title": "Swift Container Count",
+                            "title_size": "16",
+                            "title_align": "left",
+                            "type": "query_value",
+                            "requests": [
+                                {
+                                    "formulas": [
+                                        {
+                                            "formula": "exclude_null(query1)"
+                                        }
+                                    ],
+                                    "queries": [
+                                        {
+                                            "aggregator": "avg",
+                                            "data_source": "metrics",
+                                            "name": "query1",
+                                            "query": "avg:openstack.swift.container.count{$Keystone_Server_URL,$Domain,$Project,$RegionId}"
+                                        }
+                                    ],
+                                    "response_format": "scalar"
+                                }
+                            ],
+                            "autoscale": true,
+                            "precision": 2,
+                            "timeseries_background": {
+                                "type": "area"
+                            }
+                        },
+                        "layout": {
+                            "x": 0,
+                            "y": 0,
+                            "width": 3,
+                            "height": 2
+                        }
+                    },
+                    {
+                        "id": 5230591956606796,
+                        "definition": {
+                            "title": "Swift Containers",
+                            "title_size": "16",
+                            "title_align": "left",
+                            "type": "query_table",
+                            "requests": [
+                                {
+                                    "queries": [
+                                        {
+                                            "aggregator": "avg",
+                                            "data_source": "metrics",
+                                            "name": "query1",
+                                            "query": "avg:openstack.swift.container.count{$Keystone_Server_URL,$Domain,$Project,$RegionId} by {container_name}"
+                                        },
+                                        {
+                                            "aggregator": "avg",
+                                            "data_source": "metrics",
+                                            "name": "query2",
+                                            "query": "avg:openstack.swift.container.bytes{$Keystone_Server_URL,$Domain,$Project,$RegionId} by {container_name}"
+                                        }
+                                    ],
+                                    "response_format": "scalar",
+                                    "sort": {
+                                        "count": 500,
+                                        "order_by": [
+                                            {
+                                                "type": "formula",
+                                                "index": 0,
+                                                "order": "desc"
+                                            }
+                                        ]
+                                    },
+                                    "formulas": [
+                                        {
+                                            "alias": "container count",
+                                            "cell_display_mode": "number",
+                                            "formula": "exclude_null(query1)"
+                                        },
+                                        {
+                                            "alias": "byte count",
+                                            "cell_display_mode": "number",
+                                            "formula": "exclude_null(query2)"
+                                        }
+                                    ]
+                                }
+                            ],
+                            "has_search_bar": "auto"
+                        },
+                        "layout": {
+                            "x": 3,
+                            "y": 0,
+                            "width": 9,
+                            "height": 2
+                        }
+                    }
+                ]
+            },
+            "layout": {
+                "x": 0,
+                "y": 102,
+                "width": 12,
+                "height": 3
+            }
+        },
+        {
+            "id": 1234539355810956,
+            "definition": {
+                "title": "Orchestration (Heat)",
+                "background_color": "orange",
+                "show_title": true,
+                "type": "group",
+                "layout_type": "ordered",
+                "widgets": [
+                    {
+                        "id": 5691134749980884,
+                        "definition": {
+                            "title": "Heat Stack Count",
+                            "title_size": "16",
+                            "title_align": "left",
+                            "type": "query_value",
+                            "requests": [
+                                {
+                                    "formulas": [
+                                        {
+                                            "formula": "exclude_null(query1)"
+                                        }
+                                    ],
+                                    "queries": [
+                                        {
+                                            "aggregator": "avg",
+                                            "data_source": "metrics",
+                                            "name": "query1",
+                                            "query": "avg:openstack.heat.stack.count{$Keystone_Server_URL,$Domain,$Project,$RegionId}"
+                                        }
+                                    ],
+                                    "response_format": "scalar"
+                                }
+                            ],
+                            "autoscale": true,
+                            "precision": 2,
+                            "timeseries_background": {
+                                "type": "area"
+                            }
+                        },
+                        "layout": {
+                            "x": 0,
+                            "y": 0,
+                            "width": 3,
+                            "height": 2
+                        }
+                    }
+                ]
+            },
+            "layout": {
+                "x": 0,
+                "y": 0,
+                "width": 4,
                 "height": 3
             }
         }

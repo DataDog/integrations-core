@@ -46,9 +46,6 @@
     },
     "dashboards": {
       "IBM ACE Overview": "assets/dashboards/overview.json"
-    },
-    "logs": {
-      "source": "ibm_ace"
     }
   }
 }
