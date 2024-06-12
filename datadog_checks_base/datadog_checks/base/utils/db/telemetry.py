@@ -62,7 +62,7 @@ class Telemetry:
         :param operation (_str_): Name of the event operation. Examples: collect_schema, collect_query_metrics
         :param count (_Optional[int]_): Count of relevant resources. Example: 5 tables collected as part of schema collection        
         """
-        self.add(operation, time() - self._timers[operation], count)
+        self.add(operation, (time() - self._timers[operation]) * 1000, count)
         del self._timers[operation] 
 
     
