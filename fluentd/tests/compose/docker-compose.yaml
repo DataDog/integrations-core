@@ -1,6 +1,5 @@
 services:
   fluentd:
-    platform: linux/x86_64
     image: fluent/fluentd:${FLUENTD_IMAGE_TAG}
     container_name: ${FLUENTD_CONTAINER_NAME}
     ports:
