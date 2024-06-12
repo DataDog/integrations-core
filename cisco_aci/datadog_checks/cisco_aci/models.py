@@ -7,7 +7,7 @@ import six
 if six.PY3:
     from typing import Optional
 
-    from pydantic import BaseModel, Field, computed_field
+    from pydantic import BaseModel, Field, computed_field, field_validator
 
     class NodeAttributes(BaseModel):
         address: Optional[str] = None
@@ -71,12 +71,28 @@ if six.PY3:
         name: Optional[str] = Field(default=None)
         description: Optional[str] = Field(default=None)
         mac_address: Optional[str] = Field(default=None)
-        admin_status: Optional[str] = Field(default=None, exclude=True)
+        admin_status: Optional[int] = Field(default=None)
+        oper_status: Optional[int] = Field(default=None)
 
-        @computed_field
-        @property
-        def status(self) -> int:
-            return 1 if self.admin_status == 'up' else 2
+        @field_validator("admin_status", mode="before")
+        @classmethod
+        def parse_admin_status(cls, admin_status: int | None) -> int | None:
+            if not admin_status:
+                return None
+
+            if admin_status == "up":
+                return 1
+            return 2
+
+        @field_validator("oper_status", mode="before")
+        @classmethod
+        def parse_oper_status(cls, oper_status: int | None) -> int | None:
+            if not oper_status:
+                return None
+
+            if oper_status == "up":
+                return 1
+            return 2
 
     class InterfaceMetadataList(BaseModel):
         interface_metadata: list = Field(default_factory=list)
