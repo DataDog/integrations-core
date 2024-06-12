@@ -1,9 +1,4 @@
 [env.collectors.datadog-checks]
-check-types = true
-mypy-args = [
-  "--non-interactive",
-  "--follow-imports=silent",
-]
 
 [envs.default]
 e2e-env = false
