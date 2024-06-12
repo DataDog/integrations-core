@@ -76,16 +76,12 @@ class SubmitData:
             return json_event
 
     def send_truncated_msg(self, db_name, time_spent):
-        event = {**self._base_event, "metadata": [], "timestamp": time.time() * 1000}
-        db_info = {}
-        if db_name not in self.db_to_schemas:
-            db_info = self.db_info[db_name]
-        else:
-            db_info = {"name": db_name}
-        db_info["truncated"] = "Truncated after fetching {} columns, elapsed time is {}s, database is {}".format(
+        event = {**self._base_event, "metadata": [], "timestamp": time.time() * 1000, "collection_errors" : {"error" : "truncated", "message" : ""}}
+        db_info = self.db_info[db_name]
+        event["metadata"] = [{**(db_info)}]
+        event["collection_errors"]["message"] = "Truncated after fetching {} columns, elapsed time is {}s, database is {}".format(
             self._total_columns_sent, time_spent, db_name
         )
-        event["metadata"] = [{**(db_info)}]
         json_event = json.dumps(event, default=default_json_event_encoding)
         self._log.debug("Reporting truncation of schema collection: {}".format(self.truncate(json_event)))
         self._submit_to_agent_queue(json_event)

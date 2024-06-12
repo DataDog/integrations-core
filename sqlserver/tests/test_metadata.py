@@ -377,11 +377,7 @@ def test_schemas_collection_truncated(aggregator, dd_run_check, dbm_instance):
     dbm_metadata = aggregator.get_event_platform_events("dbm-metadata")
     found = False
     for schema_event in (e for e in dbm_metadata if e['kind'] == 'sqlserver_databases'):
-        for database_metadata in schema_event['metadata']:
-            if (
-                "truncated" in database_metadata
-                and database_metadata['name'] == 'datadog_test_schemas'
-                and re.fullmatch(expected_pattern, database_metadata["truncated"])
-            ):
+        if "collection_errors" in schema_event:
+            if schema_event["collection_errors"]["error"] == "truncated" and re.fullmatch(expected_pattern, schema_event["collection_errors"]["message"]):
                 found = True
     assert found
