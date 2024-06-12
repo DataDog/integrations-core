@@ -144,7 +144,7 @@ class MySql(AgentCheck):
         self._non_internal_tags = copy.deepcopy(self.tags)
         self.set_resource_tags()
         self._is_innodb_engine_enabled_cached = None
-        self._telemetry = Telemetry(self, self._config.telemetry_enabled)
+        self._telemetry = Telemetry(self, self._config.enable_telemetry)
 
     def execute_query_raw(self, query):
         with closing(self._conn.cursor(CommenterSSCursor)) as cursor:
