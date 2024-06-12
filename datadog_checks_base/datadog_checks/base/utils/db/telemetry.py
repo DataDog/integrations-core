@@ -25,9 +25,6 @@ class TelemetryOperation(NamedTuple):
     elapsed: Optional[float] = None
     count: Optional[int] = None
 
-    def __init__(self):
-        self
-
 
 class Telemetry:
     """
