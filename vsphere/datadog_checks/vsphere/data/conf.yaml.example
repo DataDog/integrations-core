@@ -259,6 +259,25 @@ instances:
     #   - datacenter
     #   - cluster
 
+    ## @param include_events - list of mappings - optional - default: [['AlarmStatusChangedEvent', ["r'Gray to Green'", "r'Green to Gray'"]], ['TaskEvent', ["r'Initialize powering On'", "r'Power Off virtual machine'", "r'Power On virtual machine'", "r'Reconfigure virtual machine'", "r'Relocate virtual machine'", "r'Suspend virtual machine'", "r'Migrate virtual machine'"]], ['VmBeingHotMigratedEvent', []], ['VmMessageEvent', []], ['VmMigratedEvent', []], ['VmPoweredOnEvent', []], ['VmPoweredOffEvent', []], ['VmReconfiguredEvent', []], ['VmSuspendedEvent', []]]
+    ## The events that should be collected by the vSphere integration.
+    ##
+    ## Each event is an object represented with the event name itself as a key.
+    ## However, while the keys should be events to include, the value should be an
+    ## array of event option regexes to exclude/filter out. For example, if the key
+    ## is 'AlarmStatusChangedEvent' and the values for this key are 'Gray to Green' and 'Green to Gray',
+    ## then all events name 'AlarmStatusChangedEvent' that don't have the option of 'Gray to Green'
+    ## and 'Green to Gray' will be included.
+    ##
+    ## Currently, events can only be collected from the following resources:
+    ## VMs, hosts, datacenters, datastores, and clusters.
+    #
+    # include_events:
+    #   - event: <EVENT_NAME_TO_INCLUDE>
+    #   - messages:
+    #     - <EVENT_OPTION_REGEX_CORRESPONDING_TO_EVENT_NAME_TO_EXCLUDE_1>
+    #     - <EVENT_OPTION_REGEX_CORRESPONDING_TO_EVENT_NAME_TO_EXCLUDE_2>
+
     ## @param collect_tags - boolean - optional - default: false
     ## If true, the vSphere Tags will be collected.
     ## The final tag sent to Datadog is composed of the vSphere tags prefix + vSphere tag category as key and

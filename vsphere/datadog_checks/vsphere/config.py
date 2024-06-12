@@ -125,6 +125,7 @@ class VSphereConfig(object):
         self.event_resource_filters = self._normalize_event_resource_filters(
             instance.get("event_resource_filters", DEFAULT_EVENT_RESOURCES)
         )
+        self.include_events = instance.get("include_events", {})
 
         # Since `collect_per_instance_filters` have the same structure as `metric_filters` we use the same parser
         self.collect_per_instance_filters = self._parse_metric_regex_filters(

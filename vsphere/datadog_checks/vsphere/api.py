@@ -19,7 +19,6 @@ from datadog_checks.vsphere.constants import (
     MOR_TYPE_AS_STRING,
     UNLIMITED_HIST_METRICS_PER_QUERY,
 )
-from datadog_checks.vsphere.event import ALLOWED_EVENTS
 from datadog_checks.vsphere.types import InfrastructureData
 from datadog_checks.vsphere.utils import properties_to_collect
 
@@ -325,13 +324,47 @@ class VSphereAPI(object):
         return values
 
     @smart_retry
+    def get_allowed_events(self):
+        if (
+            not isinstance(self.config, VSphereConfig)
+            or not self.config.include_events
+            or 'event' not in self.config.include_events
+            or 'options' not in self.config.include_events
+        ):
+            exclude_filters = {
+                'AlarmStatusChangedEvent': [r'Gray to Green', r'Green to Gray'],
+                'TaskEvent': [
+                    r'Initialize powering On',
+                    r'Power Off virtual machine',
+                    r'Power On virtual machine',
+                    r'Reconfigure virtual machine',
+                    r'Relocate virtual machine',
+                    r'Suspend virtual machine',
+                    r'Migrate virtual machine',
+                ],
+                'VmBeingHotMigratedEvent': [],
+                'VmMessageEvent': [],
+                'VmMigratedEvent': [],
+                'VmPoweredOnEvent': [],
+                'VmPoweredOffEvent': [],
+                'VmReconfiguredEvent': [],
+                'VmSuspendedEvent': [],
+            }
+        else:
+            exclude_filters = {
+                event_object['event']: [r'{}'.format(elt) for elt in event_object['options']]
+                for event_object in self.config.include_events
+            }
+        return [getattr(vim.event, event_type) for event_type in exclude_filters.keys()]
+
+    @smart_retry
     def get_new_events(self, start_time):
         # type: (dt.datetime) -> List[vim.event.Event]
         event_manager = self._conn.content.eventManager
         query_filter = vim.event.EventFilterSpec()
         time_filter = vim.event.EventFilterSpec.ByTime(beginTime=start_time)
         query_filter.time = time_filter
-        query_filter.type = ALLOWED_EVENTS
+        query_filter.type = self.get_allowed_events()
         try:
             events = event_manager.QueryEvents(query_filter)
         except KeyError as e:

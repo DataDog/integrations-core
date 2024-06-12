@@ -8,7 +8,6 @@ import pytest
 from pyVmomi import vim
 
 from datadog_checks.vsphere import VSphereCheck
-from datadog_checks.vsphere.event import ALLOWED_EVENTS
 
 
 def test_allowed_event_list():
@@ -23,7 +22,27 @@ def test_allowed_event_list():
         vim.event.VmReconfiguredEvent,
         vim.event.VmSuspendedEvent,
     ]
-    assert sorted(str(e) for e in expected_events) == sorted(str(e) for e in ALLOWED_EVENTS)
+    EXCLUDE_FILTERS = {
+        'AlarmStatusChangedEvent': [r'Gray to Green', r'Green to Gray'],
+        'TaskEvent': [
+            r'Initialize powering On',
+            r'Power Off virtual machine',
+            r'Power On virtual machine',
+            r'Reconfigure virtual machine',
+            r'Relocate virtual machine',
+            r'Suspend virtual machine',
+            r'Migrate virtual machine',
+        ],
+        'VmBeingHotMigratedEvent': [],
+        'VmMessageEvent': [],
+        'VmMigratedEvent': [],
+        'VmPoweredOnEvent': [],
+        'VmPoweredOffEvent': [],
+        'VmReconfiguredEvent': [],
+        'VmSuspendedEvent': [],
+    }
+    allowed_events = [getattr(vim.event, event_type) for event_type in EXCLUDE_FILTERS.keys()]
+    assert sorted(str(e) for e in expected_events) == sorted(str(e) for e in allowed_events)
 
 
 @pytest.mark.usefixtures('mock_type', 'mock_threadpool', 'mock_api', 'mock_rest_api')

@@ -33,8 +33,6 @@ EXCLUDE_FILTERS = {
     'VmSuspendedEvent': [],
 }
 
-ALLOWED_EVENTS = [getattr(vim.event, event_type) for event_type in EXCLUDE_FILTERS.keys()]
-
 
 class VSphereEvent(object):
     UNKNOWN = 'unknown'
@@ -57,7 +55,19 @@ class VSphereEvent(object):
             self.event_config = {}
         else:
             self.event_config = event_config
-
+        if (
+            'include_events' not in self.event_config
+            or not self.event_config.include_events
+            or 'event' not in self.event_config.include_events
+            or 'options' not in self.event_config.include_events
+        ):
+            self.exclude_filters = EXCLUDE_FILTERS
+        else:
+            self.exclude_filters = {
+                event_object['event']: [r'{}'.format(elt) for elt in event_object['options']]
+                for event_object in self.event_config.include_events
+            }
+        self.allowed_events = [getattr(vim.event, event_type) for event_type in self.exclude_filters.keys()]
         self.event_resource_filters = event_resource_filters
 
     def _is_filtered(self):
@@ -70,10 +80,10 @@ class VSphereEvent(object):
             if self.host_type not in self.event_resource_filters:
                 return True
 
-        if self.event_type not in EXCLUDE_FILTERS:
+        if self.event_type not in self.exclude_filters:
             return True
 
-        filters = EXCLUDE_FILTERS[self.event_type]
+        filters = self.exclude_filters[self.event_type]
         for f in filters:
             if re.search(f, self.raw_event.fullFormattedMessage):
                 return True
