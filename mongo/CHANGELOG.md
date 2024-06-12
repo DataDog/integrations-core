@@ -2,6 +2,18 @@
 
 <!-- towncrier release notes start -->
 
+## 6.6.0 / 2024-06-12
+
+***Added***:
+
+* Include namespace in DBM samples operation_metadata ([#17730](https://github.com/DataDog/integrations-core/pull/17730))
+* Add support for AWS DocumentDB Instance-Based Clusters ([#17779](https://github.com/DataDog/integrations-core/pull/17779))
+* Always collect database stats from replicaset primaries ([#17798](https://github.com/DataDog/integrations-core/pull/17798))
+
+***Fixed***:
+
+* Skip emitting mongodb samples on unexplainable operations ([#17785](https://github.com/DataDog/integrations-core/pull/17785))
+
 ## 6.5.0 / 2024-05-31
 
 ***Added***:
