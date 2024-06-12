@@ -1,7 +1,6 @@
 [env.collectors.datadog-checks]
 check-types = true
 mypy-args = [
-  "--install-types",
   "--non-interactive",
   "--follow-imports=silent",
 ]
