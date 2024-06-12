@@ -247,7 +247,7 @@ class Fabric:
             name=node.attributes.dn,
             ip_address=node.attributes.address,
             model=node.attributes.model,
-            ad_st=node.attributes.ad_st,
+            fabric_st=node.attributes.fabric_st,
             vendor=VENDOR_CISCO,
             version=node.attributes.version,
             serial_number=node.attributes.serial,

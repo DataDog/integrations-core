@@ -11,7 +11,7 @@ if six.PY3:
 
     class NodeAttributes(BaseModel):
         address: Optional[str] = None
-        ad_st: Optional[str] = Field(default=None, alias="adSt")
+        fabric_st: Optional[str] = Field(default=None, alias="fabricSt")
         role: Optional[str] = None
         dn: Optional[str] = None
         model: Optional[str] = None
@@ -49,7 +49,7 @@ if six.PY3:
         name: Optional[str] = Field(default=None)
         ip_address: Optional[str] = Field(default=None)
         model: Optional[str] = Field(default=None)
-        ad_st: Optional[str] = Field(default=None, exclude=True)
+        fabric_st: Optional[str] = Field(default=None, exclude=True)
         vendor: Optional[str] = Field(default=None)
         version: Optional[str] = Field(default=None)
         serial_number: Optional[str] = Field(default=None)
@@ -59,7 +59,16 @@ if six.PY3:
         @computed_field
         @property
         def status(self) -> int:
-            return 1 if self.ad_st == 'on' else 2
+            mapping = {
+                'active': 1,
+                'inactive': 2,
+                'disabled': 5,
+                'discovering': 2,
+                'undiscovered': 2,
+                'unsupported': 2,
+                'unknown': 4,
+            }
+            return mapping.get(self.fabric_st, 7)
 
     class DeviceMetadataList(BaseModel):
         device_metadata: list = Field(default_factory=list)
