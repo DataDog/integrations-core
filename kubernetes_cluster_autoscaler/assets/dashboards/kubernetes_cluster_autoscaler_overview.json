@@ -485,7 +485,7 @@
                                     ],
                                     "queries": [
                                         {
-                                            "query": "sum:kubernetes_cluster_autoscaler.evicted.pods.total{$env,$kube_cluster_name} by {kubernetes_cluster}.as_count()",
+                                            "query": "sum:kubernetes_cluster_autoscaler.evicted.pods.count{$env,$kube_cluster_name} by {kubernetes_cluster}.as_count()",
                                             "data_source": "metrics",
                                             "name": "query1"
                                         }
@@ -594,7 +594,7 @@
                                     ],
                                     "queries": [
                                         {
-                                            "query": "sum:kubernetes_cluster_autoscaler.scaled.down.nodes.total{$kube_cluster_name,$env}.as_count()",
+                                            "query": "sum:kubernetes_cluster_autoscaler.scaled.down.nodes.count{$kube_cluster_name,$env}.as_count()",
                                             "data_source": "metrics",
                                             "name": "query3"
                                         }
@@ -1048,7 +1048,7 @@
                                     ],
                                     "queries": [
                                         {
-                                            "query": "sum:kubernetes_cluster_autoscaler.errors.total{$env,$kube_cluster_name} by {type,kubernetes_cluster}.as_count()",
+                                            "query": "sum:kubernetes_cluster_autoscaler.errors.count{$env,$kube_cluster_name} by {type,kubernetes_cluster}.as_count()",
                                             "data_source": "metrics",
                                             "name": "query1"
                                         }
@@ -1308,7 +1308,7 @@
                                     ],
                                     "queries": [
                                         {
-                                            "query": "sum:kubernetes_cluster_autoscaler.scaled.up.nodes.total{$kube_cluster_name,$env}.as_count()",
+                                            "query": "sum:kubernetes_cluster_autoscaler.scaled.up.nodes.count{$kube_cluster_name,$env}.as_count()",
                                             "data_source": "metrics",
                                             "name": "query3"
                                         }
@@ -1329,7 +1329,7 @@
                                     ],
                                     "queries": [
                                         {
-                                            "query": "sum:kubernetes_cluster_autoscaler.scaled.down.nodes.total{$kube_cluster_name,$env}.as_count()",
+                                            "query": "sum:kubernetes_cluster_autoscaler.scaled.down.nodes.count{$kube_cluster_name,$env}.as_count()",
                                             "data_source": "metrics",
                                             "name": "query3"
                                         }
@@ -1439,7 +1439,7 @@
                                     ],
                                     "queries": [
                                         {
-                                            "query": "sum:kubernetes_cluster_autoscaler.failed.scale.ups.total{$env,$kube_cluster_name}.as_count()",
+                                            "query": "sum:kubernetes_cluster_autoscaler.failed.scale.ups.count{$env,$kube_cluster_name}.as_count()",
                                             "data_source": "metrics",
                                             "name": "query1"
                                         }
