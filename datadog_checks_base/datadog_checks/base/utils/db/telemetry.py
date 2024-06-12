@@ -28,11 +28,15 @@ class Telemetry:
 
     _buffer: Dict[str, TelemetryOperation]
 
-    def __init__(self, check: AgentCheck):
+    def __init__(self, check: AgentCheck, enabled = True):
         self._buffer = {}
         self._timers = {}
         self._check = check
-        print("initing telemetry for", self._check.__class__.__name__) 
+
+        # Enabled allows seamless disabling of telemetry without updates to calling code
+        self._enabled = enabled
+        if not self._enabled:
+            self._check.log.warning("Telemetry disabled for ", self._check.__class__.__name__)
         self._last_flush = time()
 
     def add(self, operation:str, elapsed: Optional[float], count: Optional[int]):
@@ -44,6 +48,8 @@ class Telemetry:
         :param elapsed (_Optional[float]_): Time elapsed for the operation in milliseconds. Example: 20ms to query for list of tables in schema collection
         :param count (_Optional[int]_): Count of relevant resources. Example: 5 tables collected as part of schema collection        
         """
+        if not self._enabled:
+            return
         self._buffer[operation] = TelemetryOperation(operation, elapsed, count)
         self.flush()
 
@@ -53,6 +59,8 @@ class Telemetry:
 
         :param operation (_str_): Name of the event operation. Examples: collect_schema, collect_query_metrics
         """
+        if not self._enabled:
+            return
         self._timers[operation] = time()
     
     def end(self, operation:str, count: Optional[int] = None):
@@ -62,6 +70,8 @@ class Telemetry:
         :param operation (_str_): Name of the event operation. Examples: collect_schema, collect_query_metrics
         :param count (_Optional[int]_): Count of relevant resources. Example: 5 tables collected as part of schema collection        
         """
+        if not self._enabled:
+            return
         self.add(operation, (time() - self._timers[operation]) * 1000, count)
         del self._timers[operation] 
 
@@ -74,9 +84,13 @@ class Telemetry:
         :param submit (_function_): Submission function for the event. Typically this would be self.database_monitoring_query_metrics.
         :param force (_bool_): Send events even if less than FLUSH_INTERVAL has elapsed. Only used for testing.
         """
+        if not self._enabled:
+            return
+
         elapsed_s = time() - self._last_flush 
         if not force and elapsed_s < FLUSH_INTERVAL:
             return
+        
         for op in self._buffer.values():
             event = {
                 "ddagentversion": datadog_agent.get_version(),
@@ -90,5 +104,13 @@ class Telemetry:
 
             json_event = json.dumps(event, default=default_json_event_encoding)
             self._check.database_monitoring_query_metrics(json_event)
+        # Emit an internal metric for potential debugging
+        self._check.count(
+            "dd.internal.telemetry.submitted.count",
+            len(self._buffer),
+            tags=self._check._get_debug_tags(),
+            hostname=self._check.resolved_hostname,
+        )
+
         self._buffer = {}
         self._last_flush = time()

@@ -141,8 +141,7 @@ class PostgreSql(AgentCheck):
             maxsize=1,
             ttl=self._config.database_instance_collection_interval,
         )  # type: TTLCache
-        self.log.warn("CREATING TELEMETRY")
-        self._telemetry = Telemetry(self)
+        self._telemetry = Telemetry(self, self._config.enable_telemetry)
 
     def _build_autodiscovery(self):
         if not self._config.discovery_config['enabled']:

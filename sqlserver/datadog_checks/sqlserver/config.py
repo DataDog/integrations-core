@@ -101,6 +101,9 @@ class SQLServerConfig:
         self.database_instance_collection_interval: int = instance.get('database_instance_collection_interval', 300)
         self.stored_procedure_characters_limit: int = instance.get('stored_procedure_characters_limit', PROC_CHAR_LIMIT)
         self.connection_host: str = instance['host']
+        # Non-documented option for disabling if customers detect unexpected problems
+        self.enable_telemetry = instance.get('enable_telemetry', True)
+
 
     def _compile_valid_patterns(self, patterns: list[str]) -> re.Pattern:
         valid_patterns = []

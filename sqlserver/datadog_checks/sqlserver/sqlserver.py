@@ -160,7 +160,7 @@ class SQLServer(AgentCheck):
 
         self._database_metrics = None
 
-        self._telemetry = Telemetry(self)
+        self._telemetry = Telemetry(self, self._config.telemetry_enabled)
 
     def cancel(self):
         self.statement_metrics.cancel()
