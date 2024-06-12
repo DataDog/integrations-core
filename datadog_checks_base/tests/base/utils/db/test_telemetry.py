@@ -1,7 +1,7 @@
-
 import json
 from datadog_checks.base.checks.base import AgentCheck
 from datadog_checks.base.utils.db.telemetry import Telemetry
+
 
 class MockCheck(AgentCheck):
     def __init__(self):

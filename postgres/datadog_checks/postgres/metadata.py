@@ -315,7 +315,7 @@ class PostgresMetadata(DBMAsyncJob):
                                 total_tables += len(tables_buffer)
             self._is_schemas_collection_in_progress = False
             self._check._telemetry.end("collect_schemas", total_tables)
-            self._check.gauge('dd.dbm.postgres.collect_schemas', (time.time() - start)*1000)
+            self._check.gauge('dd.dbm.postgres.collect_schemas', (time.time() - start) * 1000)
 
     def _flush_schema(self, base_event, database, schema, tables):
         event = {

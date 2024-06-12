@@ -104,7 +104,6 @@ class SQLServerConfig:
         # Non-documented option for disabling if customers detect unexpected problems
         self.enable_telemetry = instance.get('enable_telemetry', True)
 
-
     def _compile_valid_patterns(self, patterns: list[str]) -> re.Pattern:
         valid_patterns = []
 
