@@ -17,9 +17,15 @@ FLUSH_INTERVAL = 60
 
 
 class TelemetryOperation(NamedTuple):
+    """
+    Simple wrapper for telemetry operation data.
+    """
     operation: str
     elapsed: Optional[float]
     count: Optional[int]
+    
+    def __init__(self):
+        self        
 
 
 class Telemetry:
