@@ -18,7 +18,7 @@ datadog-avi-vantage==4.2.1
 datadog-azure-iot-edge==4.2.1
 datadog-boundary==2.2.2
 datadog-btrfs==2.3.0; sys_platform != 'win32'
-datadog-cacti==2.1.0; sys_platform == 'linux2'
+datadog-cacti==2.1.1; sys_platform == 'linux2'
 datadog-calico==2.2.1
 datadog-cassandra-nodetool==1.13.0
 datadog-cassandra==1.18.0
@@ -34,7 +34,7 @@ datadog-cisco-secure-firewall==1.0.0
 datadog-citrix-hypervisor==3.2.1
 datadog-clickhouse==3.5.0
 datadog-cloud-foundry-api==3.3.1
-datadog-cloudera==2.1.0
+datadog-cloudera==2.2.0
 datadog-cockroachdb==3.3.1
 datadog-confluent-platform==1.10.2
 datadog-consul==2.6.1
@@ -136,7 +136,7 @@ datadog-powerdns-recursor==2.5.1
 datadog-presto==2.8.0
 datadog-process==3.3.0
 datadog-prometheus==3.6.0
-datadog-proxysql==5.1.0
+datadog-proxysql==5.1.1
 datadog-pulsar==2.2.1
 datadog-rabbitmq==5.3.1
 datadog-ray==1.2.1
@@ -148,7 +148,7 @@ datadog-sap-hana==3.2.0
 datadog-scylla==2.7.1
 datadog-sidekiq==1.4.0
 datadog-silk==2.2.1
-datadog-singlestore==2.2.0
+datadog-singlestore==2.2.1
 datadog-snmp==7.3.1
 datadog-snowflake==5.6.0
 datadog-solr==1.13.0
