@@ -172,7 +172,12 @@ def test_response_time(aggregator, check, dd_run_check, mock_http_get):
     ('mock_http_get', 'connection_heat', 'instance', 'api_type'),
     [
         pytest.param(
-            {'http_error': {'/heat-api/v1/1e6e233e637d4d55a50a62b63398ad15/stacks': MockResponse(status_code=500)}},
+            {
+                'http_error': {
+                    '/heat-api/v1/1e6e233e637d4d55a50a62b63398ad15/stacks': MockResponse(status_code=500),
+                    '/heat-api/v1/6e39099cccde4f809b003d9e0dd09304/stacks': MockResponse(status_code=500),
+                }
+            },
             None,
             configs.REST,
             ApiType.REST,
@@ -184,6 +189,7 @@ def test_response_time(aggregator, check, dd_run_check, mock_http_get):
                 'http_error': {
                     'stacks': {
                         '1e6e233e637d4d55a50a62b63398ad15': MockResponse(status_code=500),
+                        '6e39099cccde4f809b003d9e0dd09304': MockResponse(status_code=500),
                     }
                 }
             },
