@@ -378,6 +378,8 @@ def test_schemas_collection_truncated(aggregator, dd_run_check, dbm_instance):
     found = False
     for schema_event in (e for e in dbm_metadata if e['kind'] == 'sqlserver_databases'):
         if "collection_errors" in schema_event:
-            if schema_event["collection_errors"]["error"] == "truncated" and re.fullmatch(expected_pattern, schema_event["collection_errors"]["message"]):
+            if schema_event["collection_errors"]["error"] == "truncated" and re.fullmatch(
+                expected_pattern, schema_event["collection_errors"]["message"]
+            ):
                 found = True
     assert found
