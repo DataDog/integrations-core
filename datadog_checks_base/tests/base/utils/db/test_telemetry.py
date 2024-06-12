@@ -17,7 +17,7 @@ def test_telemetry():
     telemetry._last_flush = 0
     telemetry.add("test", 1, None)
     assert len(mock.events) == 1
-    assert mock.events[0]["integration"] == "mock_check"
+    assert mock.events[0]["integration"] == "mockcheck"
     assert mock.events[0]["operation"] == "test"
     assert mock.events[0]["elapsed"] == 1
     assert mock.events[0]["count"] == None

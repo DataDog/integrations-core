@@ -96,7 +96,7 @@ class Telemetry:
                 "ddagentversion": datadog_agent.get_version(),
                 "timestamp": time() * 1000,
                 "kind": "agent_metrics",
-                "integration": self._check.convert_to_underscore_separated(self._check.__class__.__name__),
+                "integration": self._check.__class__.__name__.lower(),
                 "operation": op.operation,
                 "elapsed": op.elapsed,
                 "count": op.count,
