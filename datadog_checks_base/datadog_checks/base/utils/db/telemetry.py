@@ -1,14 +1,15 @@
 # (C) Datadog, Inc. 2024-present
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
-from datadog_checks.base.checks.base import AgentCheck
-from datadog_checks.base.utils.serialization import json
 import logging
 from time import time
 from typing import Dict, NamedTuple, Optional
-from .utils import default_json_event_encoding
-from datadog_checks.base.agent import datadog_agent
 
+from datadog_checks.base.agent import datadog_agent
+from datadog_checks.base.checks.base import AgentCheck
+from datadog_checks.base.utils.serialization import json
+
+from .utils import default_json_event_encoding
 
 logger = logging.getLogger(__name__)
 
@@ -45,10 +46,12 @@ class Telemetry:
         """
         Add a telemetry event for a given integration and operation. Events can have a count and/or an elapsed time.
 
-        :param integration (_str_): Name of the calling integration. Examples: postgres, mysql
-        :param operation (_str_): Name of the event operation. Examples: collect_schema, collect_query_metrics
-        :param elapsed (_Optional[float]_): Time elapsed for the operation in milliseconds. Example: 20ms to query for list of tables in schema collection
-        :param count (_Optional[int]_): Count of relevant resources. Example: 5 tables collected as part of schema collection
+        :param operation (_str_): Name of the event operation.
+            Examples: collect_schema, collect_query_metrics
+        :param elapsed (_Optional[float]_): Time elapsed for the operation in milliseconds.
+            Example: 20ms to query for list of tables in schema collection
+        :param count (_Optional[int]_): Count of relevant resources.
+            Example: 5 tables collected as part of schema collection
         """
         if not self._enabled:
             return
@@ -69,8 +72,10 @@ class Telemetry:
         """
         Finish a telemetry timer for a given operation and add the event with an optional count
 
-        :param operation (_str_): Name of the event operation. Examples: collect_schema, collect_query_metrics
-        :param count (_Optional[int]_): Count of relevant resources. Example: 5 tables collected as part of schema collection
+        :param operation (_str_): Name of the event operation.
+            Examples: collect_schema, collect_query_metrics
+        :param count (_Optional[int]_): Count of relevant resources.
+            Example: 5 tables collected as part of schema collection
         """
         if not self._enabled:
             return
@@ -79,10 +84,9 @@ class Telemetry:
 
     def flush(self, force=False):
         """
-        Flushes any buffered events. The Telemetry instance tracks the time since last flush and will skip executions less than FLUSH_INTERVAL
-        since the last events sent.
+        Flushes any buffered events. The Telemetry instance tracks the time since last flush
+        and will skip executions less than FLUSH_INTERVAL since the last events sent.
 
-        :param submit (_function_): Submission function for the event. Typically this would be self.database_monitoring_query_metrics.
         :param force (_bool_): Send events even if less than FLUSH_INTERVAL has elapsed. Only used for testing.
         """
         if not self._enabled:

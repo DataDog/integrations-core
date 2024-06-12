@@ -1,4 +1,5 @@
 import json
+
 from datadog_checks.base.checks.base import AgentCheck
 from datadog_checks.base.utils.db.telemetry import Telemetry
 
@@ -20,4 +21,4 @@ def test_telemetry():
     assert mock.events[0]["integration"] == "mockcheck"
     assert mock.events[0]["operation"] == "test"
     assert mock.events[0]["elapsed"] == 1
-    assert mock.events[0]["count"] == None
+    assert mock.events[0]["count"] is None
