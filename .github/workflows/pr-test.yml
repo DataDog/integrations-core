@@ -41,7 +41,6 @@ jobs:
 
       # Options
       standard: true
-      minimum-base-package: true
       test-py2: ${{ !matrix.python-support || contains(matrix.python-support, '2') }}
       test-py3: ${{ !matrix.python-support || contains(matrix.python-support, '3') }}
 
