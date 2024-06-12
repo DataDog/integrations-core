@@ -20,12 +20,13 @@ class TelemetryOperation(NamedTuple):
     """
     Simple wrapper for telemetry operation data.
     """
-    operation: str
-    elapsed: Optional[float]
-    count: Optional[int]
-    
+
+    operation: str = ""
+    elapsed: Optional[float] = None
+    count: Optional[int] = None
+
     def __init__(self):
-        self        
+        self
 
 
 class Telemetry:
