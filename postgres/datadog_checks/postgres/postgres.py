@@ -1038,7 +1038,7 @@ class PostgreSql(AgentCheck):
             self._update_tag_sets(tags_to_add)
             self._send_database_instance_metadata()
 
-            self.log.warn("Running check against version %s: is_aurora: %s", str(self.version), str(self.is_aurora))
+            self.log.debug("Running check against version %s: is_aurora: %s", str(self.version), str(self.is_aurora))
             self._emit_running_metric()
             self._collect_stats(tags)
             self._collect_custom_queries(tags)
