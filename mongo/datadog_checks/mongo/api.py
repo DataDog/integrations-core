@@ -165,7 +165,7 @@ class MongoApi(object):
         """
         Deployment type for AWS DocumentDB.
 
-        We connect to "Instance Based Clusters". In MongoDB terms these are unsharded replicasets.
+        We connect to "Instance Based Clusters". In MongoDB terms, these are unsharded replicasets.
         """
         repl_set_payload = self['admin'].command("replSetGetStatus")
         return self._get_rs_deployment_from_status_payload(repl_set_payload, cluster_role=None)
