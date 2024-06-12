@@ -6,7 +6,7 @@
 
 ***Added***:
 
-* Update confluent_kafka and librdkafka ([#17726](https://github.com/DataDog/integrations-core/pull/17726))
+* Update `confluent_kafka` and `librdkafka` ([#17726](https://github.com/DataDog/integrations-core/pull/17726))
 
 ## 4.3.0 / 2024-03-22 / Agent 7.53.0
 
