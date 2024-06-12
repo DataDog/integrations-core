@@ -17,8 +17,17 @@ if six.PY3:
         model: Optional[str] = None
         version: Optional[str] = None
         serial: Optional[str] = None
-        vendor: Optional[str] = Field(default='cisco_aci')
+        vendor: Optional[str] = Field(default='cisco-aci')
         namespace: Optional[str] = Field(default='default')
+
+        @computed_field
+        @property
+        def device_type(self) -> str:
+            if self.role in ['leaf', 'spine']:
+                return 'switch'
+            if self.role in ['controller', 'vleaf', 'vip', 'protection-chain']:
+                return 'cisco_aci'
+            return 'other'
 
     class Node(BaseModel):
         attributes: NodeAttributes
@@ -44,6 +53,8 @@ if six.PY3:
         vendor: Optional[str] = Field(default=None)
         version: Optional[str] = Field(default=None)
         serial_number: Optional[str] = Field(default=None)
+        device_type: Optional[str] = Field(default=None)
+        integration: Optional[str] = Field(default='cisco-aci')
 
         @computed_field
         @property

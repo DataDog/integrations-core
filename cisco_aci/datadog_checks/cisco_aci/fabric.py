@@ -16,7 +16,7 @@ else:
 
 from . import aci_metrics, exceptions, helpers
 
-VENDOR_CISCO = 'cisco_aci'
+VENDOR_CISCO = 'cisco'
 
 
 class Fabric:
@@ -238,10 +238,10 @@ class Fabric:
             'hostname:{}'.format(node.attributes.dn),
             'system_ip:{}'.format(node.attributes.address),
             'device_ip:{}'.format(node.attributes.address),
-            'device_id:{}:{}'.format(self.namespace, node.attributes.address),
+            'id:{}:{}'.format(self.namespace, node.attributes.address),
         ]
         device = DeviceMetadata(
-            device_id='{}:{}'.format(self.namespace, node.attributes.address),
+            id='{}:{}'.format(self.namespace, node.attributes.address),
             id_tags=id_tags,
             tags=device_tags + tags,
             name=node.attributes.dn,
@@ -251,6 +251,7 @@ class Fabric:
             vendor=VENDOR_CISCO,
             version=node.attributes.version,
             serial_number=node.attributes.serial,
+            device_type=node.attributes.device_type,
         )
         self.ndm_metadata(json.dumps(device.model_dump()))
 
