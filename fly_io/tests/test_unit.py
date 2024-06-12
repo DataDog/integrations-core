@@ -2,11 +2,8 @@
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
 
-import logging
 import os
 
-from datadog_checks.base.stubs.aggregator import AggregatorStub  # noqa: F401
-from datadog_checks.dev.utils import get_metadata_metrics
 from datadog_checks.fly_io import FlyIoCheck
 
 from .common import MOCKED_METRICS
@@ -28,6 +25,4 @@ def test_check(dd_run_check, aggregator, instance, mock_http_response, caplog):
         aggregator.assert_metric(metric, at_least=1, hostname="20976671ha2292")
         aggregator.assert_metric(metric, at_least=1, hostname="119dc024cbf534s")
 
-
     aggregator.assert_all_metrics_covered()
-
