@@ -1409,16 +1409,16 @@ flags:
     paths:
     - teamcity/datadog_checks/teamcity
     - teamcity/tests
-  teleport:
-    carryforward: true
-    paths:
-    - teleport/datadog_checks/teleport
-    - teleport/tests
   tekton:
     carryforward: true
     paths:
     - tekton/datadog_checks/tekton
     - tekton/tests
+  teleport:
+    carryforward: true
+    paths:
+    - teleport/datadog_checks/teleport
+    - teleport/tests
   temporal:
     carryforward: true
     paths:
