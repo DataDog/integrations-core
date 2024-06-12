@@ -46,9 +46,6 @@
     },
     "dashboards": {
       "Sidekiq Overview": "assets/dashboards/overview.json"
-    },
-    "logs": {
-      "source": "sidekiq"
     }
   }
 }

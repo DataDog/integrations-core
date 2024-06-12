@@ -67,9 +67,6 @@
     },
     "saved_views": {
       "elasticsearch_processes": "assets/saved_views/elasticsearch_processes.json"
-    },
-    "logs": {
-      "source": "elasticsearch"
     }
   }
 }

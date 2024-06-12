@@ -88,6 +88,14 @@ class MongoApi(object):
     def list_database_names(self, session=None):
         return self._cli.list_database_names(session)
 
+    def current_op(self, session=None):
+        # Use $currentOp stage to get all users and idle sessions.
+        # Note: Why not use the `currentOp` command?
+        # Because the currentOp command and db.currentOp() helper method return the results in a single document,
+        # the total size of the currentOp result set is subject to the maximum 16MB BSON size limit for documents.
+        # The $currentOp stage returns a cursor over a stream of documents, each of which reports a single operation.
+        return self["admin"].aggregate([{'$currentOp': {'allUsers': True}}], session=session)
+
     def _is_arbiter(self, options):
         cli = MongoClient(**options)
         is_master_payload = cli['admin'].command('isMaster')
@@ -103,20 +111,24 @@ class MongoApi(object):
         # getCmdLineOpts is the runtime configuration of the mongo instance. Helpful to know whether the node is
         # a mongos or mongod, if the mongod is in a shard, if it's in a replica set, etc.
         try:
-            options = self['admin'].command("getCmdLineOpts")['parsed']
+            self.deployment_type = self._get_default_deployment_type()
         except Exception as e:
             self._log.debug(
-                "Unable to run `getCmdLineOpts`, got: %s. Assuming this is an Alibaba ApsaraDB instance.", str(e)
+                "Unable to run `getCmdLineOpts`, got: %s. Treating this as an Alibaba ApsaraDB instance.", str(e)
             )
-            # `getCmdLineOpts` is forbidden on Alibaba ApsaraDB
-            self.deployment_type = self._get_alibaba_deployment_type()
-            return
+            try:
+                self.deployment_type = self._get_alibaba_deployment_type()
+            except Exception as e:
+                self._log.debug("Unable to run `shardingState`, so switching to AWS DocumentDB, got error %s", str(e))
+                self.deployment_type = self._get_documentdb_deployment_type()
+
+    def _get_default_deployment_type(self):
+        options = self['admin'].command("getCmdLineOpts")['parsed']
         cluster_role = None
         if 'sharding' in options:
             if 'configDB' in options['sharding']:
                 self._log.debug("Detected MongosDeployment. Node is principal.")
-                self.deployment_type = MongosDeployment(shard_map=self.refresh_shards())
-                return
+                return MongosDeployment(shard_map=self.refresh_shards())
             elif 'clusterRole' in options['sharding']:
                 cluster_role = options['sharding']['clusterRole']
 
@@ -127,11 +139,10 @@ class MongoApi(object):
             is_principal = replica_set_deployment.is_principal()
             is_principal_log = "" if is_principal else "not "
             self._log.debug("Detected ReplicaSetDeployment. Node is %sprincipal.", is_principal_log)
-            self.deployment_type = replica_set_deployment
-            return
+            return replica_set_deployment
 
         self._log.debug("Detected StandaloneDeployment. Node is principal.")
-        self.deployment_type = StandaloneDeployment()
+        return StandaloneDeployment()
 
     def _get_alibaba_deployment_type(self):
         is_master_payload = self['admin'].command('isMaster')
@@ -149,6 +160,15 @@ class MongoApi(object):
         else:
             cluster_role = None
         return self._get_rs_deployment_from_status_payload(repl_set_payload, cluster_role)
+
+    def _get_documentdb_deployment_type(self):
+        """
+        Deployment type for AWS DocumentDB.
+
+        We connect to "Instance Based Clusters". In MongoDB terms, these are unsharded replicasets.
+        """
+        repl_set_payload = self['admin'].command("replSetGetStatus")
+        return self._get_rs_deployment_from_status_payload(repl_set_payload, cluster_role=None)
 
     def refresh_shards(self):
         try:

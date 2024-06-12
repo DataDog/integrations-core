@@ -98,7 +98,7 @@ class SQLServerConfig:
         )
         self.log_unobfuscated_queries: bool = is_affirmative(instance.get('log_unobfuscated_queries', False))
         self.log_unobfuscated_plans: bool = is_affirmative(instance.get('log_unobfuscated_plans', False))
-        self.database_instance_collection_interval: int = instance.get('database_instance_collection_interval', 1800)
+        self.database_instance_collection_interval: int = instance.get('database_instance_collection_interval', 300)
         self.stored_procedure_characters_limit: int = instance.get('stored_procedure_characters_limit', PROC_CHAR_LIMIT)
         self.connection_host: str = instance['host']
 

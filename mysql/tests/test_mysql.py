@@ -737,7 +737,7 @@ def test_database_instance_metadata(aggregator, dd_run_check, instance_complex, 
     assert event['dbms'] == "mysql"
     assert event['tags'].sort() == tags.METRIC_TAGS.sort()
     assert event['integration_version'] == __version__
-    assert event['collection_interval'] == 1800
+    assert event['collection_interval'] == 300
     assert event['metadata'] == {
         'dbm': dbm_enabled,
         'connection_host': instance_complex['host'],

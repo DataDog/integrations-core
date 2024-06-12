@@ -42,9 +42,6 @@
       },
       "source_type_id": 25,
       "auto_install": true
-    },
-    "logs": {
-      "source": "cacti"
     }
   }
 }

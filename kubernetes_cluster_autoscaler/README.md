@@ -19,6 +19,60 @@ No additional installation is needed on your server.
 
 2. [Restart the Agent][5].
 
+#### Metric collection
+
+Make sure that the Prometheus-formatted metrics are exposed in your `kubernetes_cluster_autoscaler` cluster. 
+For the Agent to start collecting metrics, the `kubernetes_cluster_autoscaler` pods need to be annotated.
+
+[Kubernetes Cluster Autoscaler][11] has metrics and livenessProbe endpoints that can be accessed on port `8085`. These endpoints are located under `/metrics` and `/health-check` and provide valuable information about the state of your cluster during scaling operations.
+
+**Note**: To change the default port, use the `--address` flag.
+
+To configure the Cluster Autoscaler to expose metrics, do the following:
+
+1. Enable access to the `/metrics` route and expose port `8085` for your Cluster Autoscaler deployment:
+
+```
+ports:
+--name: app
+containerPort: 8085
+``` 
+
+b) instruct your Prometheus to scrape it, by adding the following annotation to your Cluster Autoscaler service:
+```
+prometheus.io/scrape: true
+```
+
+**Note**: The listed metrics can only be collected if they are available. Some metrics are generated only when certain actions are performed. 
+
+The only parameter required for configuring the `kubernetes_cluster_autoscaler` check is `openmetrics_endpoint`. This parameter should be set to the location where the Prometheus-formatted metrics are exposed. The default port is `8085`. To configure a different port, use the `METRICS_PORT` [environment variable][10]. In containerized environments, `%%host%%` should be used for [host autodetection][3]. 
+
+```yaml
+apiVersion: v1
+kind: Pod
+# (...)
+metadata:
+  name: '<POD_NAME>'
+  annotations:
+    ad.datadoghq.com/controller.checks: |
+      {
+        "kubernetes_cluster_autoscaler": {
+          "init_config": {},
+          "instances": [
+            {
+              "openmetrics_endpoint": "http://%%host%%:8085/metrics"
+            }
+          ]
+        }
+      }
+    # (...)
+spec:
+  containers:
+    - name: 'controller'
+# (...)
+```
+
+
 ### Validation
 
 [Run the Agent's status subcommand][6] and look for `kubernetes_cluster_autoscaler` under the Checks section.
@@ -53,3 +107,5 @@ Need help? Contact [Datadog support][9].
 [7]: https://github.com/DataDog/integrations-core/blob/master/kubernetes_cluster_autoscaler/metadata.csv
 [8]: https://github.com/DataDog/integrations-core/blob/master/kubernetes_cluster_autoscaler/assets/service_checks.json
 [9]: https://docs.datadoghq.com/help/
+[10]: https://kubernetes.io/docs/tasks/inject-data-application/define-environment-variable-container/
+[11]: https://github.com/kubernetes/autoscaler/blob/master/cluster-autoscaler/FAQ.md#how-can-i-monitor-cluster-autoscaler

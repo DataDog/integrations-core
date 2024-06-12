@@ -46,9 +46,6 @@
     },
     "dashboards": {
       "Hive Overview": "assets/dashboards/overview.json"
-    },
-    "logs": {
-      "source": "hive"
     }
   }
 }

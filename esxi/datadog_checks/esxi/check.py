@@ -3,9 +3,12 @@
 # Licensed under a 3-clause BSD style license (see LICENSE)
 import logging
 import re
+import socket
 import ssl
 from collections import defaultdict
+from urllib.parse import urlparse
 
+import socks
 from pyVim import connect
 from pyVmomi import vim, vmodl
 from six import iteritems
@@ -25,7 +28,7 @@ from .constants import (
     SHORT_ROLLUP,
     VM_RESOURCE,
 )
-from .metrics import RESOURCE_NAME_TO_METRICS
+from .metrics import PERCENT_METRICS, RESOURCE_NAME_TO_METRICS
 from .resource_filters import create_resource_filter
 from .utils import (
     get_mapped_instance_tag,
@@ -34,6 +37,10 @@ from .utils import (
     is_resource_collected_by_filters,
     should_collect_per_instance_values,
 )
+
+
+def create_connection(address, timeout, source_address, proxy_host, proxy_port):
+    return socks.create_connection(address, timeout, source_address, socks.SOCKS5, proxy_host, proxy_port)
 
 
 class EsxiCheck(AgentCheck):
@@ -56,6 +63,17 @@ class EsxiCheck(AgentCheck):
         self.ssl_capath = self.instance.get("ssl_capath")
         self.ssl_cafile = self.instance.get("ssl_cafile")
         self.tags = [f"esxi_url:{self.host}"]
+        self.proxy_host = None
+        self.proxy_port = None
+        proxy = self.instance.get('proxy', init_config.get('proxy'))
+        if proxy:
+            parsed_proxy = urlparse(proxy)
+            proxy_scheme = parsed_proxy.scheme
+            if proxy_scheme != 'socks5':
+                self.log.warning('Proxy scheme %s not supported; ignoring', proxy_scheme)
+            else:
+                self.proxy_host = parsed_proxy.hostname
+                self.proxy_port = parsed_proxy.port
 
     def _validate_excluded_host_tags(self, excluded_host_tags):
         valid_excluded_host_tags = []
@@ -315,6 +333,9 @@ class EsxiCheck(AgentCheck):
                     continue
                 else:
                     most_recent_val = valid_values[-1]
+                    if metric_name in PERCENT_METRICS:
+                        # Convert the percentage to a float.
+                        most_recent_val /= 100.0
                     all_tags = metric_tags + additional_tags
 
                     self.log.debug(
@@ -344,7 +365,15 @@ class EsxiCheck(AgentCheck):
             else:
                 context.load_default_certs(ssl.Purpose.SERVER_AUTH)
 
+            create_connection_method = socket.create_connection
+            if self.proxy_host:
+                socket.create_connection = lambda address, timeout, source_address, **kwargs: create_connection(
+                    address, timeout, source_address, self.proxy_host, self.proxy_port
+                )
+
             connection = connect.SmartConnect(host=self.host, user=self.username, pwd=self.password, sslContext=context)
+            socket.create_connection = create_connection_method
+
             self.conn = connection
             self.content = connection.content
 

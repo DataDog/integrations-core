@@ -43,7 +43,7 @@ from .common import (
 from .utils import always_on, is_always_on, not_windows_ci
 
 INCR_FRACTION_METRICS = {'sqlserver.latches.latch_wait_time'}
-AUTODISCOVERY_DBS = ['master', 'msdb', 'datadog_test']
+AUTODISCOVERY_DBS = ['master', 'msdb', 'datadog_test-1']
 
 
 @pytest.mark.integration
@@ -140,7 +140,7 @@ def test_check_instance_metrics_autodiscovery(
                 hostname=sqlserver_check.resolved_hostname,
                 count=1,
             )
-        if db == 'datadog_test' and is_always_on():
+        if db == 'datadog_test-1' and is_always_on():
             for metric_name, _, _, _ in INSTANCE_METRICS_DATABASE_AO:
                 aggregator.assert_metric(
                     metric_name,
@@ -210,34 +210,34 @@ def test_check_index_usage_metrics(
     instance_docker_metrics,
     bob_conn,
 ):
-    instance_docker_metrics['database'] = 'datadog_test'
+    instance_docker_metrics['database'] = 'datadog_test-1'
     instance_docker_metrics['include_index_usage_metrics'] = True
     instance_docker_metrics['ignore_missing_database'] = True
 
     # Cause an index seek
     bob_conn.execute_with_retries(
-        query="SELECT * FROM datadog_test.dbo.ϑings WHERE name = 'foo'",
+        query="SELECT * FROM [datadog_test-1].dbo.ϑings WHERE name = 'foo'",
         database=instance_docker_metrics['database'],
         retries=1,
         return_result=False,
     )
     # Cause an index scan
     bob_conn.execute_with_retries(
-        query="SELECT * FROM datadog_test.dbo.ϑings WHERE name LIKE '%foo%'",
+        query="SELECT * FROM [datadog_test-1].dbo.ϑings WHERE name LIKE '%foo%'",
         database=instance_docker_metrics['database'],
         retries=1,
         return_result=False,
     )
     # Cause an index lookup
     bob_conn.execute_with_retries(
-        query="SELECT id FROM datadog_test.dbo.ϑings WHERE name = 'foo'",
+        query="SELECT id FROM [datadog_test-1].dbo.ϑings WHERE name = 'foo'",
         database=instance_docker_metrics['database'],
         retries=1,
         return_result=False,
     )
     # Cause an index update
     bob_conn.execute_with_retries(
-        query="UPDATE datadog_test.dbo.ϑings SET id = 1 WHERE name = 'foo'",
+        query="UPDATE [datadog_test-1].dbo.ϑings SET id = 1 WHERE name = 'foo'",
         database=instance_docker_metrics['database'],
         retries=1,
         return_result=False,
@@ -388,7 +388,7 @@ def test_check_incr_fraction_metrics(
     instance_docker_metrics,
     bob_conn_raw,
 ):
-    instance_docker_metrics['database'] = 'datadog_test'
+    instance_docker_metrics['database'] = 'datadog_test-1'
     instance_docker_metrics['ignore_missing_database'] = True
     sqlserver_check = SQLServer(CHECK_NAME, init_config, [instance_docker_metrics])
 
