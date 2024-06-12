@@ -146,5 +146,5 @@ files:
           This can help speed up the check completion.
         value:
           type: boolean
-          example: false
+          example: true
       - template: instances/default

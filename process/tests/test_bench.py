@@ -13,6 +13,7 @@ def test_run(benchmark, dd_run_check):
         'search_string': ['python'],
         'exact_match': False,
         'ignored_denied_access': True,
+        'use_oneshot': False,
         'thresholds': {'warning': [1, 10], 'critical': [1, 100]},
     }
     process = ProcessCheck(common.CHECK_NAME, {}, [instance])

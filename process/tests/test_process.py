@@ -256,6 +256,48 @@ def test_check_real_process(aggregator, dd_run_check):
         'exact_match': False,
         'ignored_denied_access': True,
         'thresholds': {'warning': [1, 10], 'critical': [1, 100]},
+        'use_oneshot': False,
+    }
+    process = ProcessCheck(common.CHECK_NAME, {}, [instance])
+    expected_tags = generate_expected_tags(instance)
+    dd_run_check(process)
+    for mname in common.PROCESS_METRIC:
+        # cases where we don't actually expect some metrics here:
+        #  - if io_counters() is not available
+        #  - if memory_info_ex() is not available
+        #  - first run so no `cpu.pct`
+        if (
+            (not _PSUTIL_IO_COUNTERS and '.io' in mname)
+            or (not _PSUTIL_MEM_SHARED and 'mem.real' in mname)
+            or mname == 'system.processes.cpu.pct'
+        ):
+            continue
+
+        if Platform.is_windows():
+            metric = common.UNIX_TO_WINDOWS_MAP.get(mname, mname)
+        else:
+            metric = mname
+        aggregator.assert_metric(metric, at_least=1, tags=expected_tags)
+
+    aggregator.assert_service_check('process.up', count=1, tags=expected_tags + ['process:py'])
+
+    # this requires another run
+    dd_run_check(process)
+    aggregator.assert_metric('system.processes.cpu.pct', count=1, tags=expected_tags)
+    aggregator.assert_metric('system.processes.cpu.normalized_pct', count=1, tags=expected_tags)
+
+
+def test_check_real_process_oneshot(aggregator, dd_run_check):
+    "Check that we detect python running (at least this process)"
+    from datadog_checks.base.utils.platform import Platform
+
+    instance = {
+        'name': 'py',
+        'search_string': ['python'],
+        'exact_match': False,
+        'ignored_denied_access': True,
+        'thresholds': {'warning': [1, 10], 'critical': [1, 100]},
+        'use_oneshot': True,
     }
     process = ProcessCheck(common.CHECK_NAME, {}, [instance])
     expected_tags = generate_expected_tags(instance)

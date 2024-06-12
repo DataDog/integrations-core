@@ -77,7 +77,7 @@ class ProcessCheck(AgentCheck):
         self.collect_children = is_affirmative(self.instance.get('collect_children', False))
         self.user = self.instance.get('user', False)
         self.try_sudo = self.instance.get('try_sudo', False)
-        self.use_oneshot = self.instance.get('use_oneshot', False)
+        self.use_oneshot = is_affirmative(self.instance.get('use_oneshot', True))
 
         # ad stands for access denied
         # We cache the PIDs getting this error and don't iterate on them more often than `access_denied_cache_duration``

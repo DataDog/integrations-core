@@ -53,4 +53,4 @@ def instance_try_sudo():
 
 
 def instance_use_oneshot():
-    return False
+    return True
