@@ -5,6 +5,7 @@ import copy
 import json
 import os
 import re
+import time
 from collections import namedtuple
 
 import mock
@@ -843,7 +844,7 @@ def test_fetch_throws(instance_docker):
         'datadog_checks.sqlserver.schemas.Schemas._query_schema_information', return_value={"id": 1}
     ), mock.patch('datadog_checks.sqlserver.schemas.Schemas._get_tables', return_value=[1, 2]):
         with pytest.raises(StopIteration):
-            schemas._fetch_schema_data("dummy_cursor", "my_db")
+            schemas._fetch_schema_data("dummy_cursor", time.time(), "my_db")
 
 
 def test_submit_is_called_if_too_many_columns(instance_docker):
@@ -857,7 +858,7 @@ def test_submit_is_called_if_too_many_columns(instance_docker):
         'datadog_checks.sqlserver.schemas.Schemas._get_tables_data', return_value=(1000_000, {"id": 1})
     ):
         with pytest.raises(StopIteration):
-            schemas._fetch_schema_data("dummy_cursor", "my_db")
+            schemas._fetch_schema_data("dummy_cursor", time.time(), "my_db")
             mocked_submit.called_once()
 
 
