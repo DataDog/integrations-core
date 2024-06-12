@@ -574,14 +574,14 @@ coverage:
         target: 75
         flags:
         - teamcity
-      Teleport:
-        target: 75
-        flags:
-        - teleport
       Tekton:
         target: 75
         flags:
         - tekton
+      Teleport:
+        target: 75
+        flags:
+        - teleport
       Temporal:
         target: 75
         flags:
@@ -1409,16 +1409,16 @@ flags:
     paths:
     - teamcity/datadog_checks/teamcity
     - teamcity/tests
-  teleport:
-    carryforward: true
-    paths:
-    - teleport/datadog_checks/teleport
-    - teleport/tests
   tekton:
     carryforward: true
     paths:
     - tekton/datadog_checks/tekton
     - tekton/tests
+  teleport:
+    carryforward: true
+    paths:
+    - teleport/datadog_checks/teleport
+    - teleport/tests
   temporal:
     carryforward: true
     paths:

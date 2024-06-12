@@ -6,7 +6,7 @@ import inspect
 from enum import Enum, unique
 from functools import wraps
 
-from requests.exceptions import HTTPError
+import requests
 
 from datadog_checks.base import AgentCheck
 
@@ -75,8 +75,8 @@ class Component:
                         tags = argument_value('tags', func, *args, **kwargs)
                         self.check.service_check(self.SERVICE_CHECK, AgentCheck.OK, tags=tags)
                     return result if result is not None else True
-                except HTTPError as e:
-                    self.check.log.error("HTTPError: %s", e.response)
+                except requests.exceptions.RequestException as e:
+                    self.check.log.debug("RequestException [%s]: %s", type(e), e)
                     if report_service_check:
                         self.check.service_check(self.SERVICE_CHECK, AgentCheck.CRITICAL, tags=tags)
                 except Exception as e:
