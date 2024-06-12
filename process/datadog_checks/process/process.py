@@ -295,6 +295,7 @@ class ProcessCheck(AgentCheck):
             p = self.process_cache[name][pid]
 
             if self.use_oneshot:
+                self.log.debug("Using psutil Process.oneshot()")
                 with p.oneshot():
                     st = self.run_psutil_methods(pid, p, st, new_process)
             else:
