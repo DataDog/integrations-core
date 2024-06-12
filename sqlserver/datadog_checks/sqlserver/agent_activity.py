@@ -41,7 +41,6 @@ SELECT
     sh.message AS Message
 FROM msdb.dbo.sysjobhistory sh
 INNER JOIN msdb.dbo.sysjobs sj ON sj.job_id = sh.job_id{last_instance_id_filter}
-GO
 """
 def agent_check_getter(self):
     return self._check
@@ -127,7 +126,7 @@ class SqlserverAgentActivity(DBMAsyncJob):
         }
         return event
     
-    def _create_agent_jobs_history_event(self, jobs_history_row):
+    def _create_agent_jobs_history_event(self, grouped_jobs_history_row):
         event = {
             "host": self._check.resolved_hostname,
             "ddagentversion": datadog_agent.get_version(),
@@ -139,7 +138,7 @@ class SqlserverAgentActivity(DBMAsyncJob):
             'sqlserver_version': self._check.static_info_cache.get(STATIC_INFO_VERSION, ""),
             'sqlserver_engine_edition': self._check.static_info_cache.get(STATIC_INFO_ENGINE_EDITION, ""),
             "cloud_metadata": self._config.cloud_metadata,
-            "sqlserver_job_history": jobs_history_row
+            "sqlserver_job_history": grouped_jobs_history_row
         }
         return event
 
@@ -157,8 +156,14 @@ class SqlserverAgentActivity(DBMAsyncJob):
                 # TODO see what topic is best for this
                 self._check.database_monitoring_query_activity(activity_payload)
                 history_rows = self._get_new_agent_job_history(cursor)
+                history_rows_grouped_by_instance = dict()
                 for history_row in history_rows:
-                    history_event = self._create_agent_jobs_history_event(history_row)
+                    if history_row['next_instance_id_with_step_0'] and history_row['next_instance_id_with_step_0'] not in history_rows_grouped_by_instance:
+                        history_rows_grouped_by_instance[history_row['next_instance_id_with_step_0']] = [history_row]
+                    elif history_row['next_instance_id_with_step_0']:
+                        history_rows_grouped_by_instance[history_row['next_instance_id_with_step_0']].append(history_row)
+                for group in history_rows_grouped_by_instance.values():
+                    history_event = self._create_agent_jobs_history_event(group)
                     history_payload = json.dumps(history_event, default=default_json_event_encoding)
                     # TODO see what topic is best for this
                     self._check.database_monitoring_query_activity(history_payload)
