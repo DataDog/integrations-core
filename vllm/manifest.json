@@ -33,7 +33,7 @@
       },
       "metrics": {
         "prefix": "vllm.",
-        "check": "",
+        "check": "vllm.num_requests_running",
         "metadata_path": "metadata.csv"
       },
       "service_checks": {
