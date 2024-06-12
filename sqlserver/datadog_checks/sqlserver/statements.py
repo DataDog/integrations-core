@@ -407,8 +407,12 @@ class SqlserverStatementMetrics(DBMAsyncJob):
         return normalized_rows
 
     def _collect_metrics_rows(self, cursor):
+        self._check._telemetry.start('load_raw_query_metrics_rows')
         rows = self._load_raw_query_metrics_rows(cursor)
+        self._check._telemetry.end('load_raw_query_metrics_rows', len(rows))
+        self._check._telemetry.start('normalize_queries')
         rows = self._normalize_queries(rows)
+        self._check._telemetry.end('normalize_queries', len(rows))
         if not rows:
             return []
         metric_columns = [c for c in rows[0].keys() if c.startswith("total_") or c == 'execution_count']

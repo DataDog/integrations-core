@@ -13,6 +13,7 @@ from cachetools import TTLCache
 from datadog_checks.base import AgentCheck
 from datadog_checks.base.config import is_affirmative
 from datadog_checks.base.utils.db import QueryExecutor, QueryManager
+from datadog_checks.base.utils.db.telemetry import Telemetry
 from datadog_checks.base.utils.db.utils import default_json_event_encoding, resolve_db_host, tracked_query
 from datadog_checks.base.utils.serialization import json
 from datadog_checks.sqlserver.activity import SqlserverActivity
@@ -158,6 +159,8 @@ class SQLServer(AgentCheck):
         self.sqlserver_incr_fraction_metric_previous_values = {}
 
         self._database_metrics = None
+
+        self._telemetry = Telemetry(self)
 
     def cancel(self):
         self.statement_metrics.cancel()
@@ -752,7 +755,9 @@ class SQLServer(AgentCheck):
             if self._config.proc:
                 self.do_stored_procedure_check()
             else:
+                self._telemetry.start('collect_metrics')
                 self.collect_metrics()
+                self._telemetry.end('collect_metrics')
             if self._config.autodiscovery and self._config.autodiscovery_db_service_check:
                 self._check_database_conns()
             if self._config.dbm_enabled:

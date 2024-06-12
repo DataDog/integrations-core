@@ -17,6 +17,7 @@ from six import PY3, iteritems, itervalues
 
 from datadog_checks.base import AgentCheck, is_affirmative
 from datadog_checks.base.utils.db import QueryExecutor, QueryManager
+from datadog_checks.base.utils.db.telemetry import Telemetry
 from datadog_checks.base.utils.db.utils import (
     default_json_event_encoding,
     tracked_query,
@@ -143,6 +144,7 @@ class MySql(AgentCheck):
         self._non_internal_tags = copy.deepcopy(self.tags)
         self.set_resource_tags()
         self._is_innodb_engine_enabled_cached = None
+        self._telemetry = Telemetry(self)
 
     def execute_query_raw(self, query):
         with closing(self._conn.cursor(CommenterSSCursor)) as cursor:
@@ -302,8 +304,12 @@ class MySql(AgentCheck):
 
                 # Metric collection
                 if not self._config.only_custom_queries:
+                    self._telemetry.start('collect_metrics')
                     self._collect_metrics(db, tags=tags)
+                    self._telemetry.end('collect_metrics')
+                    self._telemetry.start('collect_system_metrics')
                     self._collect_system_metrics(self._config.host, db, tags)
+                    self._telemetry.end('collect_system_metrics')
                     if self._get_runtime_queries(db):
                         self._get_runtime_queries(db).execute(extra_tags=tags)
 
