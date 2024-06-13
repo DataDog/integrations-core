@@ -3,7 +3,7 @@
 # Licensed under a 3-clause BSD style license (see LICENSE)
 import logging
 from time import time
-from typing import Dict, NamedTuple, Optional
+from typing import NamedTuple, Optional
 
 from datadog_checks.base.agent import datadog_agent
 from datadog_checks.base.checks.base import AgentCheck
@@ -28,11 +28,10 @@ class Telemetry:
     submission.
     """
 
-    _buffer: Dict[str, TelemetryOperation] = {}
-    _timers: Dict[str, float] = {}
-
     def __init__(self, check: AgentCheck, enabled=True):
         self._check = check
+        self._buffer = {}
+        self._timers = {}
 
         # Enabled allows seamless disabling of telemetry without updates to calling code
         self._enabled = enabled
