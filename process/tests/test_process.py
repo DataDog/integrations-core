@@ -237,7 +237,8 @@ def test_check_missing_process(aggregator, dd_run_check, caplog):
     aggregator.assert_service_check('process.up', count=1, status=process.CRITICAL)
     assert "Unable to find process named ['fooprocess', '/usr/bin/foo'] among processes" in caplog.text
 
-@pytest.mark.parametrize("oneshot",[True,False])
+
+@pytest.mark.parametrize("oneshot", [True, False])
 def test_check_real_process(aggregator, dd_run_check, oneshot):
     "Check that we detect python running (at least this process)"
     from datadog_checks.base.utils.platform import Platform
