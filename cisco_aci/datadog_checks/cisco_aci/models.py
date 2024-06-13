@@ -7,7 +7,7 @@ import six
 if six.PY3:
     from typing import Optional
 
-    from pydantic import BaseModel, Field, computed_field, field_validator
+    from pydantic import BaseModel, ConfigDict, Field, computed_field, field_validator
 
     class NodeAttributes(BaseModel):
         address: Optional[str] = None
@@ -32,15 +32,31 @@ if six.PY3:
     class Node(BaseModel):
         attributes: NodeAttributes
 
-    class EthAttributes(BaseModel):
+    class EthpmPhysIfAttributes(BaseModel):
+        oper_st: Optional[str] = Field(default=None, alias="operSt")
+        oper_router_mac: Optional[str] = Field(default=None, alias="operRouterMac")
+
+    class EthpmPhysIf(BaseModel):
+        attributes: EthpmPhysIfAttributes
+
+    class L1PhysIfAttributes(BaseModel):
         admin_st: Optional[str] = Field(default=None, alias="adminSt")
         id: Optional[str] = None
         name: Optional[str] = None
         desc: Optional[str] = None
         router_mac: Optional[str] = Field(default=None, alias="routerMac")
 
-    class Eth(BaseModel):
-        attributes: EthAttributes
+    class PhysIf(BaseModel):
+        attributes: L1PhysIfAttributes
+        children: Optional[list] = Field(default_factory=list)
+
+        @computed_field
+        @property
+        def ethpm_phys_if(self) -> Optional[EthpmPhysIf]:
+            for child in self.children:
+                if 'ethpmPhysIf' in child:
+                    return EthpmPhysIf(**child['ethpmPhysIf'])
+            return None
 
     class DeviceMetadata(BaseModel):
         id: Optional[str] = Field(default=None)
@@ -82,6 +98,8 @@ if six.PY3:
         mac_address: Optional[str] = Field(default=None)
         admin_status: Optional[int] = Field(default=None)
         oper_status: Optional[int] = Field(default=None)
+
+        model_config = ConfigDict(validate_assignment=True)
 
         @field_validator("admin_status", mode="before")
         @classmethod

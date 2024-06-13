@@ -7,7 +7,7 @@ from six import PY3, iteritems
 from datadog_checks.base.utils.serialization import json
 
 if PY3:
-    from datadog_checks.cisco_aci.models import DeviceMetadata, Eth, InterfaceMetadata, Node
+    from datadog_checks.cisco_aci.models import DeviceMetadata, InterfaceMetadata, Node, PhysIf
 else:
     DeviceMetadata = None
     Eth = None
@@ -111,7 +111,7 @@ class Fabric:
             eth_id = eth_attrs['id']
             tags = self.tagger.get_fabric_tags(e, 'l1PhysIf')
             if PY3:
-                self.submit_interface_metadata(eth_attrs, node['address'], tags)
+                self.submit_interface_metadata(e, node['address'], tags)
             try:
                 stats = self.api.get_eth_stats(pod_id, node['id'], eth_id)
                 self.submit_fabric_metric(stats, tags, 'l1PhysIf', hostname=hostname)
@@ -255,8 +255,8 @@ class Fabric:
         )
         self.ndm_metadata(json.dumps(device.model_dump()))
 
-    def submit_interface_metadata(self, eth_attr, address, tags):
-        eth = Eth(attributes=eth_attr)
+    def submit_interface_metadata(self, phys_if, address, tags):
+        eth = PhysIf(**phys_if.get('l1PhysIf', {}))
         interface = InterfaceMetadata(
             device_id='{}:{}'.format(self.namespace, address),
             id_tags=tags,
@@ -266,4 +266,6 @@ class Fabric:
             mac_address=eth.attributes.router_mac,
             admin_status=eth.attributes.admin_st,
         )
+        if eth.ethpm_phys_if:
+            interface.oper_status = eth.ethpm_phys_if.attributes.oper_st
         self.ndm_metadata(json.dumps(interface.model_dump(exclude_none=True)))
