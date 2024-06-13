@@ -52,11 +52,10 @@ def set_default_driver_conf():
         we do not override the ODBCSYSINI environment variable.
         """
         if pyodbc is None:
-            # If pyodbc is not installed, don't set ODBCSYSINI
             return
 
         if 'ODBCSYSINI' in os.environ:
-            # If ODBCSYSINI is already set, don't override it
+            # If ODBCSYSINI is already set in env, don't override it
             return
         
         if pyodbc.drivers() or pyodbc.dataSources():
@@ -64,11 +63,12 @@ def set_default_driver_conf():
             # This means user has copied odbcinst.ini and odbc.ini to the unixODBC sysconfig location
             return
         
-        # Use default `./driver_config/odbcinst.ini` to let the integration use embedded odbc driver.
+        # Use default `./driver_config/odbcinst.ini` to let the integration use agent embedded odbc driver.
         os.environ.setdefault('ODBCSYSINI', DRIVER_CONFIG_DIR)
 
         # required when using pyodbc with FreeTDS on Ubuntu 18.04
         # see https://stackoverflow.com/a/22988748/1258743
+        # TODO: remove once we deprecate the embedded FreeTDS driver
         os.environ.setdefault('TDSVER', '8.0')
 
 
