@@ -125,6 +125,7 @@ class MongoOperationSamples(DBMAsyncJob):
                     explain_plan_cache_key=(operation_metadata["dbname"], query_signature),
                 ):
                     yield activity, None
+                    continue
 
                 explain_plan = self._get_explain_plan(
                     op=operation.get("op"), command=command, dbname=operation_metadata["dbname"]
@@ -300,6 +301,7 @@ class MongoOperationSamples(DBMAsyncJob):
             "truncated": self._get_command_truncation_state(command),
             "client": self._get_operation_client(operation),
             "user": self._get_operation_user(operation),
+            "ns": namespace,
         }
 
     def _get_operation_stats(self, operation: dict) -> OperationSampleOperationStats:
@@ -361,6 +363,7 @@ class MongoOperationSamples(DBMAsyncJob):
                     "shard": operation_metadata["shard"],
                     "collection": operation_metadata["collection"],
                     "comment": operation_metadata["comment"],
+                    "ns": operation_metadata["ns"],
                 },
                 "query_truncated": operation_metadata["truncated"],
             },

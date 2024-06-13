@@ -59,6 +59,8 @@ class Win32EventLogCheck(AgentCheck, ConfigMixin):
         'event_format',
     )
 
+    NEW_PARAMS = ('dd_security_events',)
+
     # https://docs.microsoft.com/en-us/windows/win32/wes/eventmanifestschema-leveltype-complextype#remarks
     #
     # From
@@ -153,6 +155,10 @@ class Win32EventLogCheck(AgentCheck, ConfigMixin):
                 self.log.warning(
                     "%s config option is ignored unless running legacy mode. Please remove it", legacy_param
                 )
+
+        for new_param in self.NEW_PARAMS:
+            if new_param in self.instance:
+                self.warning("%s config option is ignored when running legacy_mode_v2. Please remove it", new_param)
 
     def check(self, _):
         for event in self.consume_events():

@@ -1,1 +1,0 @@
-Fix tag propagation of aurora `replication_role` tag. Prior to this change, the replication_role tag was not added as a host tag for mysql aurora instances.
