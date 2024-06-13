@@ -45,24 +45,25 @@ METRIC_MAP = {
     'workqueue_unfinished_work_seconds': 'workqueue.unfinished_work.seconds',
     'workqueue_work_duration_seconds': 'workqueue.work.duration.seconds',
     # Kyverno specific metrics:
-    'kyverno_policy_changes_total' : 'kyverno.policy.changes.total',
-    'kyverno_controller_requeue_total' : 'kyverno.controller.requeue.total',
-    'kyverno_controller_drop_total' : 'kyverno.controller.drop.total',
+    'kyverno_policy_changes_total' : 'kyverno.policy.changes',
+    'kyverno_controller_requeue_total' : 'kyverno.controller.requeue',
+    'kyverno_controller_reconcile_total' : 'kyverno.controller.reconcile',
+    'kyverno_controller_drop_total' : 'kyverno.controller.drop',
+    'kyverno_client_queries_total' : 'kyverno.client.queries',
     'kyverno_ttl_controller_errors' : 'kyverno.ttl.controller.errors',
     'kyverno_ttl_controller_deletedobjects' : 'kyverno.ttl.controller.deletedobjects',
-    'kyverno_cleanup_controller_deletedobjects_total' : 'kyverno.cleanup.controller.deletedobjects.total',
-    'kyverno_admission_requests_total' : 'kyverno.admission.requests.total',
+    'kyverno_cleanup_controller_deletedobjects_total' : 'kyverno.cleanup.controller.deletedobjects',
+    'kyverno_cleanup_controller_errors_total' : 'kyverno.cleanup.controller.errors',
+    'kyverno_admission_requests_total' : 'kyverno.admission.requests',
     'kyverno_admission_review_duration_seconds' : 'kyverno.admission.review.duration.seconds',
     'kyverno_policy_execution_duration_seconds' : 'kyverno.policy.execution.duration.seconds',
     'kyverno_http_requests_duration_seconds' : 'kyverno.http.requests.duration.seconds',
-    'kyverno_policy_results_total' : 'kyverno.policy.requests.total',
-    'kyverno_policy_rule_info_total' : 'kyverno.policy.rule.info.total',
+    'kyverno_http_requests_total' : 'kyverno.http.requests',
+    'kyverno_policy_results_total' : 'kyverno.policy.requests',
+    'kyverno_policy_rule_info_total' : 'kyverno.policy.rule.info',
 
 }
 
-#ARGO_ROLLOUT_VERSION = {'argo_rollouts_controller_info': {'type': 'metadata', 'label': 'version', 'name': 'version'}}
-
-#METRIC_MAP.update(ARGO_ROLLOUT_VERSION)
 
 RENAME_LABELS_MAP = {
     'name': 'kyverno_name',

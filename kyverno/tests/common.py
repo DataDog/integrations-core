@@ -11,3 +11,6 @@ OM_MOCKED_INSTANCE = {
     'openmetrics_endpoint': 'http://kyverno:8000/metrics',
     'tags': ['test:tag'],
 }
+
+def get_fixture_path(filename):
+    return os.path.join(HERE, 'fixtures', filename)

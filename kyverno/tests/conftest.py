@@ -16,10 +16,10 @@ HERE = get_here()
 def setup_kyverno():
     run_command(['kubectl', 'create', 'ns', 'kyverno'])
     run_command(
-        ['kubectl', 'apply', '-f', os.path.join(HERE, 'kind', 'kyverno_install.yaml')]
+        ['kubectl', 'create', '-f', os.path.join(HERE, 'kind', 'kyverno_install.yaml')]
     )
     run_command(
-        ['kubectl', 'apply', '-f', os.path.join(HERE, 'kind', 'kyverno-policies_install.yaml')]
+        ['kubectl', 'create', '-f', os.path.join(HERE, 'kind', 'kyverno-policies_install.yaml')]
     )
 
 
@@ -32,7 +32,7 @@ def setup_kyverno():
     ]
     for deployment in deployments:
         run_command(['kubectl', 'rollout', 'status', f'deployment/{deployment}', '-n', 'kyverno'])
-        
+
     run_command(['kubectl', 'wait', 'pods', '--all', '-n', 'kyverno', '--for=condition=Ready', '--timeout=600s'])
 
 
@@ -40,8 +40,22 @@ def setup_kyverno():
 @pytest.fixture(scope='session')
 def dd_environment():
     with kind_run(conditions=[setup_kyverno], sleep=30) as kubeconfig, ExitStack() as stack:
-        kyverno_host, kyverno_port = stack.enter_context(
-            port_forward(kubeconfig, 'kyverno', '8000', 'deployment', 'kyverno')
+        kyverno_host1, kyverno_port1 = stack.enter_context(
+            port_forward(kubeconfig, 'kyverno', 8000, 'deployment', 'kyverno-admission-controller'),
         )
-        instances = [{'openmentrics_endpoint': f'http://{kyverno_host}:{kyverno_port}/metrics'}]
+        kyverno_host2, kyverno_port2 = stack.enter_context(
+            port_forward(kubeconfig, 'kyverno', 8000, 'deployment', 'kyverno-background-controller'),
+        )
+        kyverno_host3, kyverno_port3 = stack.enter_context(
+            port_forward(kubeconfig, 'kyverno', 8000, 'deployment', 'kyverno-cleanup-controller'),
+        )
+        kyverno_host4, kyverno_port4 = stack.enter_context(
+            port_forward(kubeconfig, 'kyverno', 8000, 'deployment', 'kyverno-reports-controller'),
+        )
+        instances = [
+            {'openmetrics_endpoint': f'http://{kyverno_host1}:{kyverno_port1}/metrics'},
+            {'openmetrics_endpoint': f'http://{kyverno_host2}:{kyverno_port2}/metrics'},
+            {'openmetrics_endpoint': f'http://{kyverno_host3}:{kyverno_port3}/metrics'},
+            {'openmetrics_endpoint': f'http://{kyverno_host4}:{kyverno_port4}/metrics'},
+            ]
     yield {'instances': instances}
