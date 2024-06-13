@@ -1,1 +1,1 @@
-Excludes keys `'readConcern', 'writeConcern', 'needsMerge', 'fromMongos', 'let'` from sampled commands that cause explain to fail
+Excludes keys `'readConcern', 'writeConcern', 'needsMerge', 'fromMongos', 'let', 'mayBypassWriteBlocking'` from sampled commands that cause explain to fail

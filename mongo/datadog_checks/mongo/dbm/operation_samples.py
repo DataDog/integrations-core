@@ -52,6 +52,7 @@ COMMAND_EXCLUDE_KEYS = {
     'needsMerge',
     'fromMongos',
     'let',  # let set's the CLUSTER_TIME and NOW in mongos
+    'mayBypassWriteBlocking',
 }
 
 
