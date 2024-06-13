@@ -45,6 +45,15 @@ SAMPLE_EXCLUDE_KEYS = {
 
 SYSTEM_DATABASES = {"admin", "config", "local"}
 
+# exclude keys in sampled operation that cause issues with the explain command
+COMMAND_EXCLUDE_KEYS = {
+    'readConcern',
+    'writeConcern',
+    'needsMerge',
+    'fromMongos',
+    'let',  # let set's the CLUSTER_TIME and NOW in mongos
+}
+
 
 def agent_check_getter(self):
     return self._check
@@ -217,6 +226,8 @@ class MongoOperationSamples(DBMAsyncJob):
     def _get_explain_plan(self, op: Optional[str], command: dict, dbname: str) -> OperationSamplePlan:
         dbname = command.pop("$db", dbname)
         try:
+            for key in COMMAND_EXCLUDE_KEYS:
+                command.pop(key, None)
             explain_plan = self._check.api_client[dbname].command("explain", command, verbosity="executionStats")
             explain_plan = self._format_explain_plan(explain_plan)
             return {

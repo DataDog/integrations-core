@@ -68,7 +68,25 @@
             "sort": {
                 "user_id": 1
             },
+            "needsMerge": true,
+            "let": {
+                "CLUSTER_TIME": {
+                    "$literal": {
+                        "t": 1716215816,
+                        "i": 1
+                    }
+                },
+                "NOW": {
+                    "$literal": "2024-05-20T14:36:56.231+00:00"
+                }
+            },
+            "fromMongos": true,
             "singleBatch": false,
+            "writeConcern": {
+                "w": "majority",
+                "wtimeout": 0,
+                "provenance": "implicitDefault"
+            },
             "readConcern": {
                 "level": "local",
                 "provenance": "implicitDefault"
