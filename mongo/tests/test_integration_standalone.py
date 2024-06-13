@@ -216,22 +216,22 @@ def test_mongo_custom_query_with_string_list(aggregator, check, instance, dd_run
 
 
 @pytest.mark.parametrize(
-    'reported_hostname',
+    'reported_database_hostname',
     [
         pytest.param(None, id='default'),
         pytest.param('myhostname', id='custom'),
     ],
 )
-def test_metadata(check, instance, datadog_agent, reported_hostname):
-    instance['reported_hostname'] = reported_hostname
+def test_metadata(check, instance, datadog_agent, reported_database_hostname):
+    instance['reported_database_hostname'] = reported_database_hostname
     check = check(instance)
     check.check_id = 'test:123'
     major, minor = common.MONGODB_VERSION.split('.')[:2]
     version_metadata = {'version.scheme': 'semver', 'version.major': major, 'version.minor': minor}
 
     check.check(instance)
-    if reported_hostname:
-        assert check._resolved_hostname == reported_hostname
+    if reported_database_hostname:
+        assert check._resolved_hostname == reported_database_hostname
     datadog_agent.assert_metadata('test:123', version_metadata)
     datadog_agent.assert_metadata('test:123', {'resolved_hostname': check._resolved_hostname})
     datadog_agent.assert_metadata_count(len(version_metadata) + 3)

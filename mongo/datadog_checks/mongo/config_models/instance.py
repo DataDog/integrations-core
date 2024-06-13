@@ -77,7 +77,7 @@ class InstanceConfig(BaseModel):
     options: Optional[MappingProxyType[str, Any]] = None
     password: Optional[str] = None
     replica_check: Optional[bool] = None
-    reported_hostname: Optional[str] = None
+    reported_database_hostname: Optional[str] = None
     server: Optional[str] = None
     service: Optional[str] = None
     tags: Optional[tuple[str, ...]] = None

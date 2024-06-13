@@ -110,7 +110,7 @@ class MongoConfig(object):
             raise ConfigurationError('`cluster_name` must be set when `dbm` is enabled')
 
         # MongoDB instance hostname override
-        self.reported_hostname = instance.get('reported_hostname', None)
+        self.reported_database_hostname = instance.get('reported_database_hostname', None)
 
     def _get_clean_server_name(self):
         try:
