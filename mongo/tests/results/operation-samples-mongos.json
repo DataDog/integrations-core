@@ -756,7 +756,8 @@
             "shard": "shard04",
             "collection": "users",
             "comment": "sort",
-            "truncated": "not_truncated"
+            "truncated": "not_truncated",
+            "cursor": null
         }
     }
 ]

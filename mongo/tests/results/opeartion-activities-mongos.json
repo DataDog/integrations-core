@@ -62,6 +62,7 @@
                 "collection": "users",
                 "comment": "sort",
                 "truncated": "not_truncated",
+                "cursor": null,
                 "client": {
                     "hostname": "192.168.224.16:52298",
                     "driver": {
