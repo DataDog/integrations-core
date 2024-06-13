@@ -57,12 +57,12 @@ def set_default_driver_conf():
         if 'ODBCSYSINI' in os.environ:
             # If ODBCSYSINI is already set in env, don't override it
             return
-        
+
         if pyodbc.drivers() or pyodbc.dataSources():
             # If there are already drivers or dataSources installed, don't override the ODBCSYSINI
             # This means user has copied odbcinst.ini and odbc.ini to the unixODBC sysconfig location
             return
-        
+
         # Use default `./driver_config/odbcinst.ini` to let the integration use agent embedded odbc driver.
         os.environ.setdefault('ODBCSYSINI', DRIVER_CONFIG_DIR)
 

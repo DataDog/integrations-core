@@ -24,6 +24,11 @@ from datadog_checks.sqlserver.utils import (
 from .common import CHECK_NAME, DOCKER_SERVER, assert_metrics
 from .utils import windows_ci
 
+try:
+    import pyodbc
+except ImportError:
+    pyodbc = None
+
 # mark the whole module
 pytestmark = pytest.mark.unit
 
@@ -432,13 +437,21 @@ def test_set_default_driver_conf():
         set_default_driver_conf()
         assert os.environ['ODBCSYSINI'] == 'ABC'
 
-    with EnvVars({}, ignore=['ODBCSYSINI']):
-        set_default_driver_conf()
-        assert 'ODBCSYSINI' not in os.environ
+    with mock.patch("datadog_checks.base.utils.platform.Platform.is_linux", return_value=True):
+        with EnvVars({}):
+            set_default_driver_conf()
+            assert 'ODBCSYSINI' in os.environ
+            assert os.environ['ODBCSYSINI'].endswith(os.path.join('tests', 'odbc'))
 
-    with EnvVars({'ODBCSYSINI': 'ABC'}):
-        set_default_driver_conf()
-        assert os.environ['ODBCSYSINI'] == 'ABC'
+        with EnvVars({}, ignore=['ODBCSYSINI']):
+            set_default_driver_conf()
+            assert 'ODBCSYSINI' not in os.environ
+            if pyodbc is not None:
+                assert pyodbc.drivers() is not None
+
+        with EnvVars({'ODBCSYSINI': 'ABC'}):
+            set_default_driver_conf()
+            assert os.environ['ODBCSYSINI'] == 'ABC'
 
 
 @windows_ci
