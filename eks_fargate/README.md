@@ -1,7 +1,7 @@
 # Agent Check: eks_fargate
 
 ## Overview
-
+This is being edited by Kisung
 <div class="alert alert-warning"> This page describes the EKS Fargate integration. For ECS Fargate, see the documentation for Datadog's <a href="http://docs.datadoghq.com/integrations/ecs_fargate">ECS Fargate integration</a>.
 </div>
 
@@ -134,28 +134,6 @@ The setup below configures the Cluster Agent to communicate with the Agent sidec
 
 1. Install the Datadog Agent with the Cluster Agent and Admission Controller enabled:
 
-{{< tabs >}}
-{{% tab "Datadog Operator" %}}
-
-    ```yaml
-    apiVersion: datadoghq.com/v2alpha1
-    kind: DatadogAgent
-    metadata:
-      name: datadog
-    spec:
-      global:
-        credentials:
-          apiKey: <YOUR_DATADOG_API_KEY>
-      features:
-        admissionController:
-          agentSidecarInjection:
-            enabled: true
-            provider: fargate
-    ```
-   **Note**: Disabling node agent is not allowed in the Datadog operator. However, Deployment resource won't be deployed, unless it has EC2 host in the cluster.
-
-{{< tabs >}}
-{{% tab "Helm" %}}
    ```sh
    helm install datadog datadog/datadog -n datadog-agent \
        --set datadog.clusterName=cluster-name \
@@ -167,7 +145,7 @@ The setup below configures the Cluster Agent to communicate with the Agent sidec
    ```
    **Note**: Use `agents.enabled=false` for a Fargate-only cluster. On a mixed cluster, set `agents.enabled=true` to create a DaemonSet for monitoring workloads on EC2 instances.
 
-1. After the Cluster Agent reaches a running state and registers Admission Controller mutating webhooks, an Agent sidecar is automatically injected into any pod created with the label `agent.datadoghq.com/sidecar:fargate`. 
+2. After the Cluster Agent reaches a running state and registers Admission Controller mutating webhooks, an Agent sidecar is automatically injected into any pod created with the label `agent.datadoghq.com/sidecar:fargate`. 
    **The Admission Controller does not mutate pods that are already created**.
 
 **Example result**
@@ -208,47 +186,6 @@ The following is a `spec.containers` snippet from a Redis deployment where the A
 
 ###### Sidecar profiles and custom selectors
 
-{{< tabs >}}
-{{% tab "Datadog Operator" %}}
-To further configure the Agent or its container resources, use the DatadogOperator property spec.features.admissionController.agentSidecarInjection.profiles to add environment variable definitions and resource settings. Use the spec.features.admissionController.agentSidecarInjection.selectors property to configure a custom selector to target workload pods instead of updating the workload to add agent.datadoghq.com/sidecar:fargate labels.
-
-1. Create a custom resource configuration file that configures a sidecar profile and a custom pod selector.
-
-   **Example**
-
-   In the following example, a selector targets all pods with the label `"app": redis`. The sidecar profile configures a `DD_PROCESS_AGENT_PROCESS_COLLECTION_ENABLED` environment variable and resource settings. 
-
-   ```yaml
-  spec:
-    features:
-      admissionController:
-        agentSidecarInjection:
-          enabled: true
-          provider: fargate
-          selectors:
-            - objectSelector:
-                matchLabels:
-                  app: redis
-          profiles:
-            - env:
-              - name: DD_PROCESS_AGENT_PROCESS_COLLECTION_ENABLED
-                value: "true"
-              resources:
-                requests:
-                  cpu: "400m"
-                  memory: "256Mi"
-                limits:
-                  cpu: "800m"
-                  memory: "512Mi"
-   ```
-2. Apply the new configuration by using the following command:
-
-   ```shell
-kubectl apply -n $DD_NAMESPACE -f datadog-agent.yaml
-   ```
-
-{{< tabs >}}
-{{% tab "Helm" %}}
 To further configure the Agent or its container resources, use the Helm property `clusterAgent.admissionController.agentSidecarInjection.profiles` to add environment variable definitions and resource settings. Use the `clusterAgent.admissionController.agentSidecarInjection.selectors` property to configure a custom selector to target workload pods instead of updating the workload to add `agent.datadoghq.com/sidecar:fargate` labels.
 
 1. Create a Helm `datadog-values.yaml` file that configures a sidecar profile and a custom pod selector. 
@@ -337,7 +274,7 @@ containers:
 <!-- xxx tab "Manual" xxx -->
 ##### Manual
 
-To starts collecting data from your Fargate type pod, deploy the Datadog Agent v7.17+ as a sidecar of your application. This is the minimum configuration required to collect metrics from your application running in the pod, notice the addition of `DD_EKS_FARGATE=true` in the manifest to deploy your Datadog Agent sidecar.
+To start collecting data from your Fargate type pod, deploy the Datadog Agent v7.17+ as a sidecar of your application. This is the minimum configuration required to collect metrics from your application running in the pod, notice the addition of `DD_EKS_FARGATE=true` in the manifest to deploy your Datadog Agent sidecar.
 
 ```yaml
 apiVersion: apps/v1
