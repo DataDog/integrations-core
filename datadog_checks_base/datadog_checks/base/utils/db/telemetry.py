@@ -28,7 +28,7 @@ class Telemetry:
     submission.
     """
 
-    def __init__(self, check: AgentCheck, enabled=True):
+    def __init__(self, check, enabled=True):
         self._check = check
         self._buffer = {}
         self._timers = {}
