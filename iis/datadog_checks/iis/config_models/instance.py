@@ -21,7 +21,7 @@ from datadog_checks.base.utils.models import validation
 from . import defaults, validators
 
 
-class AppPool(BaseModel):
+class AppPools(BaseModel):
     model_config = ConfigDict(
         arbitrary_types_allowed=True,
         frozen=True,
@@ -30,7 +30,7 @@ class AppPool(BaseModel):
     include: Optional[tuple[str, ...]] = None
 
 
-class Counter(BaseModel):
+class Counters(BaseModel):
     model_config = ConfigDict(
         arbitrary_types_allowed=True,
         extra='allow',
@@ -58,7 +58,7 @@ class ExtraMetrics(BaseModel):
         arbitrary_types_allowed=True,
         frozen=True,
     )
-    counters: tuple[MappingProxyType[str, Union[str, Counter]], ...]
+    counters: tuple[MappingProxyType[str, Union[str, Counters]], ...]
     exclude: Optional[tuple[str, ...]] = None
     include: Optional[tuple[str, ...]] = None
     instance_counts: Optional[InstanceCounts] = None
@@ -81,7 +81,7 @@ class Metrics(BaseModel):
         arbitrary_types_allowed=True,
         frozen=True,
     )
-    counters: tuple[MappingProxyType[str, Union[str, Counter]], ...]
+    counters: tuple[MappingProxyType[str, Union[str, Counters]], ...]
     exclude: Optional[tuple[str, ...]] = None
     include: Optional[tuple[str, ...]] = None
     instance_counts: Optional[InstanceCounts] = None
@@ -90,7 +90,7 @@ class Metrics(BaseModel):
     use_localized_counters: Optional[bool] = None
 
 
-class Site(BaseModel):
+class Sites(BaseModel):
     model_config = ConfigDict(
         arbitrary_types_allowed=True,
         frozen=True,
@@ -106,7 +106,7 @@ class InstanceConfig(BaseModel):
         frozen=True,
     )
     additional_metrics: Optional[tuple[tuple[str, ...], ...]] = None
-    app_pools: Optional[Union[tuple[str, ...], AppPool]] = None
+    app_pools: Optional[Union[tuple[str, ...], AppPools]] = None
     counter_data_types: Optional[tuple[str, ...]] = None
     disable_generic_tags: Optional[bool] = None
     empty_default_hostname: Optional[bool] = None
@@ -121,7 +121,7 @@ class InstanceConfig(BaseModel):
     server: Optional[str] = None
     server_tag: Optional[str] = None
     service: Optional[str] = None
-    sites: Optional[Union[tuple[str, ...], Site]] = None
+    sites: Optional[Union[tuple[str, ...], Sites]] = None
     tags: Optional[tuple[str, ...]] = None
     use_legacy_check_version: Optional[bool] = None
     username: Optional[str] = None
