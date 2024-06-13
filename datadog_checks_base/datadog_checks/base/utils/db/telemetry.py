@@ -64,7 +64,7 @@ class Telemetry:
             return
         self._timers[operation] = time()
 
-    def end(self, operation, count = None):
+    def end(self, operation, count=None):
         """
         Finish a telemetry timer for a given operation and add the event with an optional count
 
