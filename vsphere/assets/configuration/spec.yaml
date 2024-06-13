@@ -313,15 +313,15 @@ files:
                 - <EVENT_OPTION_REGEX_CORRESPONDING_TO_EVENT_NAME_TO_EXCLUDE_1>
                 - <EVENT_OPTION_REGEX_CORRESPONDING_TO_EVENT_NAME_TO_EXCLUDE_2>
           type: array
-          display_default: [['AlarmStatusChangedEvent', [r'Gray to Green', r'Green to Gray']],
+          display_default: [['AlarmStatusChangedEvent', ['Gray to Green', 'Green to Gray']],
               ['TaskEvent', [
-                r'Initialize powering On',
-                r'Power Off virtual machine',
-                r'Power On virtual machine',
-                r'Reconfigure virtual machine',
-                r'Relocate virtual machine',
-                r'Suspend virtual machine',
-                r'Migrate virtual machine',
+                'Initialize powering On',
+                'Power Off virtual machine',
+                'Power On virtual machine',
+                'Reconfigure virtual machine',
+                'Relocate virtual machine',
+                'Suspend virtual machine',
+                'Migrate virtual machine',
               ]],
               ['VmBeingHotMigratedEvent', []],
               ['VmMessageEvent', []],

@@ -325,12 +325,7 @@ class VSphereAPI(object):
 
     @smart_retry
     def get_allowed_events(self):
-        if (
-            not isinstance(self.config, VSphereConfig)
-            or not self.config.include_events
-            or 'event' not in self.config.include_events
-            or 'options' not in self.config.include_events
-        ):
+        if not isinstance(self.config, VSphereConfig) or not self.config.include_events:
             exclude_filters = {
                 'AlarmStatusChangedEvent': [r'Gray to Green', r'Green to Gray'],
                 'TaskEvent': [
@@ -352,8 +347,7 @@ class VSphereAPI(object):
             }
         else:
             exclude_filters = {
-                event_object['event']: [r'{}'.format(elt) for elt in event_object['options']]
-                for event_object in self.config.include_events
+                event[0]: [r'{}'.format(elt) for elt in event[1]] for event in self.config.include_events
             }
         return [getattr(vim.event, event_type) for event_type in exclude_filters.keys()]
 
