@@ -1,11 +1,22 @@
 id: teleport
-# See app_id in your integration's manifest.json file to learn more:
-# https://docs.datadoghq.com/developers/integrations/check_references/#manifest-file
 metric_id: teleport
-# If for some reason id must be different than app_id, add the app_id in this field instead.
-# If id and app_id already match, this field can be left blank.
 backend_only: false
 facets:
+  - groups:
+      - Web Access
+    name: Browser
+    path: http.useragent_details.browser.family
+    source: log
+  - groups:
+      - Web Access
+    name: Device
+    path: http.useragent_details.device.family
+    source: log
+  - groups:
+      - Web Access
+    name: OS
+    path: http.useragent_details.os.family
+    source: log
   - description: Teleport cluster name
     facetType: list
     groups:
@@ -83,10 +94,10 @@ pipeline:
   name: Teleport
   enabled: true
   filter:
-    query: "source:teleport "
+    query: source:teleport
   processors:
     - type: grok-parser
-      name: Parse Teleport Logs
+      name: Parsing Teleport Logs
       enabled: true
       source: message
       samples:
@@ -156,7 +167,7 @@ pipeline:
 
           parse_common_prefix %{_log_prefix}.*
     - type: user-agent-parser
-      name: User Agent Processor
+      name: ""
       enabled: true
       sources:
         - http.useragent
@@ -164,7 +175,7 @@ pipeline:
       encoded: false
       combineVersionDetails: false
     - type: status-remapper
-      name: Status remapper
+      name: Define `log.level` as the official status of the log
       enabled: true
       sources:
         - log.level
