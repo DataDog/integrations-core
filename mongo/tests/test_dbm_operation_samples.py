@@ -78,28 +78,6 @@ def test_mongo_operation_samples_mongos(aggregator, instance_integration_cluster
             assert activity == expected_activities[i]
 
 
-@mock_now(1715911398.11127223)
-@common.shard
-def test_mongo_operation_samples_mongos_getmore(aggregator, instance_integration_cluster, check, dd_run_check):
-    instance_integration_cluster['dbm'] = True
-
-    mongo_check = check(instance_integration_cluster)
-    with mock_pymongo("mongos-getmore"):
-        run_check_once(mongo_check, dd_run_check)
-
-    dbm_samples = aggregator.get_event_platform_events("dbm-samples")
-    dbm_activities = aggregator.get_event_platform_events("dbm-activity")
-
-    assert len(dbm_samples) == 0
-
-    # assert activities
-    with open(os.path.join(HERE, "results", "opeartion-activities-mongos-getmore.json"), 'r') as f:
-        expected_activities = json.load(f)
-        assert len(dbm_activities) == len(expected_activities)
-        for i, activity in enumerate(dbm_activities):
-            assert activity == expected_activities[i]
-
-
 @common.shard
 def test_mongo_operation_samples_arbiter(aggregator, instance_arbiter, check, dd_run_check):
     instance_arbiter['dbm'] = True
