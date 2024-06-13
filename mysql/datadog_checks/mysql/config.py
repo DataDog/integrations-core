@@ -90,9 +90,6 @@ class MySQLConfig(object):
         self.log_unobfuscated_queries = is_affirmative(instance.get('log_unobfuscated_queries', False))
         self.log_unobfuscated_plans = is_affirmative(instance.get('log_unobfuscated_plans', False))
         self.database_instance_collection_interval = instance.get('database_instance_collection_interval', 300)
-        # Non-documented option for disabling if customers detect unexpected problems
-        self.enable_telemetry = instance.get('enable_telemetry', True)
-
         self.configuration_checks()
 
     def _build_tags(self, custom_tags):

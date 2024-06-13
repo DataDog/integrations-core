@@ -13,12 +13,6 @@
 * Changing the mysql.innodb.lock_structs metric type to gauge ([#17452](https://github.com/DataDog/integrations-core/pull/17452))
 * Fix tag propagation of aurora `replication_role` tag. Prior to this change, the replication_role tag was not added as a host tag for mysql aurora instances. ([#17555](https://github.com/DataDog/integrations-core/pull/17555))
 
-## 12.4.1 / 2024-06-11
-
-***Fixed***:
-
-* Bump the `pymysql` version to 1.1.1 on Python 3 ([#17696](https://github.com/DataDog/integrations-core/pull/17696))
-
 ## 12.4.0 / 2024-04-26 / Agent 7.54.0
 
 ***Added***:

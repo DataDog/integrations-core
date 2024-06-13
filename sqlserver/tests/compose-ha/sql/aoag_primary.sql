@@ -20,7 +20,7 @@ CREATE USER fred FOR LOGIN fred;
 GRANT CONNECT ANY DATABASE to fred;
 GO
 
-CREATE DATABASE [datadog_test-1];
+CREATE DATABASE datadog_test;
 GO
 
 -- create an offline database to have an unavailable database to test with
@@ -38,10 +38,10 @@ GO
 
 -- Create test database for integration tests
 -- only bob and fred have read/write access to this database
-USE [datadog_test-1];
-CREATE TABLE [datadog_test-1].dbo.ϑings (id int, name varchar(255));
-INSERT INTO [datadog_test-1].dbo.ϑings VALUES (1, 'foo'), (2, 'bar');
-CREATE CLUSTERED INDEX thingsindex ON [datadog_test-1].dbo.ϑings (name);
+USE datadog_test;
+CREATE TABLE datadog_test.dbo.ϑings (id int, name varchar(255));
+INSERT INTO datadog_test.dbo.ϑings VALUES (1, 'foo'), (2, 'bar');
+CREATE CLUSTERED INDEX thingsindex ON datadog_test.dbo.ϑings (name);
 CREATE USER bob FOR LOGIN bob;
 CREATE USER fred FOR LOGIN fred;
 GO
@@ -184,10 +184,10 @@ USE [master]
 GO
 
 --change recovery model and take full backup for db to meet requirements of AOAG
-ALTER DATABASE [datadog_test-1] SET RECOVERY FULL ;
+ALTER DATABASE datadog_test SET RECOVERY FULL ;
 GO
 
-BACKUP DATABASE [datadog_test-1] TO  DISK = N'/var/opt/mssql/backup/[datadog_test-1].bak' WITH NOFORMAT, NOINIT,  NAME = N'[datadog_test-1]-Full Database Backup', SKIP, NOREWIND, NOUNLOAD,  STATS = 10
+BACKUP DATABASE datadog_test TO  DISK = N'/var/opt/mssql/backup/datadog_test.bak' WITH NOFORMAT, NOINIT,  NAME = N'datadog_test-Full Database Backup', SKIP, NOREWIND, NOUNLOAD,  STATS = 10
 GO
 
 
@@ -271,5 +271,5 @@ USE [master]
 GO
 
 WAITFOR DELAY '00:00:10'
-ALTER AVAILABILITY GROUP [AG1] ADD DATABASE [datadog_test-1]
+ALTER AVAILABILITY GROUP [AG1] ADD DATABASE [datadog_test]
 GO

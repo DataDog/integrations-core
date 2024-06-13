@@ -134,9 +134,7 @@ class MySQLStatementMetrics(DBMAsyncJob):
             )
             return
 
-        self._check._telemetry.start('collect_per_statement_metrics')
         rows = self._collect_per_statement_metrics()
-        self._check._telemetry.end('collect_per_statement_metrics', len(rows))
         if not rows:
             return
         # Omit internal tags for dbm payloads since those are only relevant to metrics processed directly

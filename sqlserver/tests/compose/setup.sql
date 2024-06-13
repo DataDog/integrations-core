@@ -17,16 +17,16 @@ GO
 
 -- Create test database for integration tests
 -- only bob and fred have read/write access to this database
-CREATE DATABASE [datadog_test-1];
+CREATE DATABASE datadog_test;
 GO
-USE [datadog_test-1];
+USE datadog_test;
 -- This table is pronounced "things" except we've replaced "th" with the greek lower case "theta" to ensure we
 -- correctly support unicode throughout the integration.
-CREATE TABLE [datadog_test-1].dbo.ϑings (id int, name varchar(255));
-INSERT INTO [datadog_test-1].dbo.ϑings VALUES (1, 'foo'), (2, 'bar');
+CREATE TABLE datadog_test.dbo.ϑings (id int, name varchar(255));
+INSERT INTO datadog_test.dbo.ϑings VALUES (1, 'foo'), (2, 'bar');
 CREATE USER bob FOR LOGIN bob;
 CREATE USER fred FOR LOGIN fred;
-CREATE CLUSTERED INDEX thingsindex ON [datadog_test-1].dbo.ϑings (name);
+CREATE CLUSTERED INDEX thingsindex ON datadog_test.dbo.ϑings (name);
 GO
 
 EXEC sp_addrolemember 'db_datareader', 'bob'

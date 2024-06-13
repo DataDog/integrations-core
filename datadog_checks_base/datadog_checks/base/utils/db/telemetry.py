@@ -38,7 +38,7 @@ class Telemetry:
             self._check.log.warning("Telemetry disabled for ", self._check.__class__.__name__)
         self._last_flush = time()
 
-    def add(self, operation: str, elapsed: Optional[float], count: Optional[int]):
+    def add(self, operation, elapsed, count):
         """
         Add a telemetry event for a given integration and operation. Events can have a count and/or an elapsed time.
 
@@ -64,7 +64,7 @@ class Telemetry:
             return
         self._timers[operation] = time()
 
-    def end(self, operation: str, count: Optional[int] = None):
+    def end(self, operation, count = None):
         """
         Finish a telemetry timer for a given operation and add the event with an optional count
 

@@ -13,7 +13,6 @@ import pytest
 from datadog_checks.dev import WaitFor, docker_run
 from datadog_checks.dev.conditions import CheckDockerLogs
 from datadog_checks.dev.docker import using_windows_containers
-from datadog_checks.sqlserver.const import SWITCH_DB_STATEMENT
 
 from .common import (
     DOCKER_SERVER,
@@ -199,7 +198,7 @@ class SelfHealingConnection:
                 logging.info("executing query with retries. query='%s' params=%s attempt=%s", query, params, attempt)
                 with self.conn.cursor() as cursor:
                     if database:
-                        cursor.execute(SWITCH_DB_STATEMENT.format(database))
+                        cursor.execute("USE {}".format(database))
                     cursor.execute(query, params)
                     if return_result:
                         return cursor.fetchall()
