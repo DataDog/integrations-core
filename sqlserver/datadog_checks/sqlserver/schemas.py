@@ -80,11 +80,11 @@ class SubmitData:
             **self._base_event,
             "metadata": [],
             "timestamp": time.time() * 1000,
-            "collection_errors": {"error": "truncated", "message": ""},
+            "collection_errors": [{"error": "truncated", "message": ""}],
         }
         db_info = self.db_info[db_name]
         event["metadata"] = [{**(db_info)}]
-        event["collection_errors"]["message"] = (
+        event["collection_errors"][0]["message"] = (
             "Truncated after fetching {} columns, elapsed time is {}s, database is {}".format(
                 self._total_columns_sent, time_spent, db_name
             )
