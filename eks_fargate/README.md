@@ -2,12 +2,10 @@
 
 ## Overview
 
-rosa test
-
 <div class="alert alert-warning"> This page describes the EKS Fargate integration. For ECS Fargate, see the documentation for Datadog's <a href="http://docs.datadoghq.com/integrations/ecs_fargate">ECS Fargate integration</a>.
 </div>
 
-(This is test sample2) Amazon EKS on AWS Fargate is a managed Kubernetes service that automates certain aspects of deployment and maintenance for any standard Kubernetes environment. Kubernetes nodes are managed by AWS Fargate and abstracted away from the user.
+Amazon EKS on AWS Fargate is a managed Kubernetes service that automates certain aspects of deployment and maintenance for any standard Kubernetes environment. Kubernetes nodes are managed by AWS Fargate and abstracted away from the user.
 
 **Note**: Network Performance Monitoring (NPM) is not supported for EKS Fargate.
 
@@ -111,8 +109,14 @@ You can run the Agent as a sidecar by using the [Datadog Admission Controller][3
 With manual configuration, you must modify every workload manifest when adding or changing the Agent sidecar. Datadog recommends you use the Admission Controller.
 
 <!-- xxx tabs xxx -->
-<!-- xxx tab "Admission Controller" xxx -->
-##### Admission Controller
+<!-- xxx tab "Admission Controller (Operator)" xxx -->
+##### Admission Controller (Operator)
+
+This is for operator part. Thank you.
+
+<!-- xxx tabs xxx -->
+<!-- xxx tab "Admission Controller (Helm)" xxx -->
+##### Admission Controller (Helm)
 
 <div class="alert alert-warning">This feature requires Cluster Agent v7.52.0+ and the <a href="http://docs.datadoghq.com/integrations/ecs_fargate">ECS Fargate integration</a>.
 </div>
