@@ -6,7 +6,6 @@ from time import time
 from typing import NamedTuple, Optional
 
 from datadog_checks.base.agent import datadog_agent
-from datadog_checks.base.checks.base import AgentCheck
 from datadog_checks.base.utils.serialization import json
 
 from .utils import default_json_event_encoding
