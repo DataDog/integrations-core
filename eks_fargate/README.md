@@ -113,7 +113,7 @@ With manual configuration, you must modify every workload manifest when adding o
 <!-- xxx tab "Datadog Operator" xxx -->
 This is tabs for operator
 
-<!-- xxx tabs xxx -->
+<!-- xxx tab xxx -->
 <!-- xxx tab "Helm" xxx -->
 ##### Admission Controller
 
