@@ -28,11 +28,10 @@ class Telemetry:
     submission.
     """
 
-    _buffer: Dict[str, TelemetryOperation]
+    _buffer: Dict[str, TelemetryOperation] = {}
+    _timers: Dict[str, float] = {}
 
     def __init__(self, check: AgentCheck, enabled=True):
-        self._buffer = {}
-        self._timers = {}
         self._check = check
 
         # Enabled allows seamless disabling of telemetry without updates to calling code
