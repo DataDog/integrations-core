@@ -112,6 +112,14 @@ With manual configuration, you must modify every workload manifest when adding o
 <!-- xxx tabs xxx -->
 <!-- xxx tab "Datadog Operator" xxx -->
 This is tabs for operator
+<!-- xxx tabs xxx -->
+<!-- xxx tab "Nested tab 1" xxx -->
+this is nested tab 1
+<!-- xxz tab xxx -->
+<!-- xxx tab "Nested tab 2" xxx -->
+this is nested tab 2
+<!-- xxz tab xxx -->
+<!-- xxz tabs xxx -->
 
 <!-- xxz tab xxx -->
 <!-- xxx tab "Helm" xxx -->
