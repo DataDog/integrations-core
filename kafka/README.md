@@ -4,14 +4,9 @@
 
 ## Overview
 
-Connect Kafka to Datadog to:
+View Kafka broker metrics collected for a 360-view of the health and performance of your Kafka clusters in real time. With this integration, you can collect metrics and logs from your Kafka deployment to visualize telemetry and alert on the performance of your Kafka stack. 
 
-- Visualize the performance of your Kafka clusters in real time.
-- Correlate the performance of Kafka with the rest of your applications.
-
-If you would benefit from visualizing the topology of your streaming data pipelines, or from investigating localized bottlenecks within your data streams setup, check out [Data Streams Monitoring][24].
-
-[Data Streams Monitoring][24] is recommended for tracking and monitoring your streaming data pipelines containing Kafka, RabbitMQ, SQS, and additional message queues. Easily identify delays, visualize pipeline topology, and identify root causes of bottlenecks. [Get started today][25]. 
+If you would benefit from visualizing the topology of your streaming data pipelines and identifying the root cause of bottlenecks, learn more about [Data Streams Monitoring][24].
 
 **Note**: 
 - This check has a limit of 350 metrics per instance. The number of returned metrics is indicated in the Agent status output. Specify the metrics you are interested in by editing the configuration below. For more detailed instructions on customizing the metrics to collect, see the [JMX Checks documentation][2].
