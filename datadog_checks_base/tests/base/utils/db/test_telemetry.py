@@ -5,11 +5,19 @@ from datadog_checks.base.utils.db.telemetry import Telemetry
 
 
 class MockCheck(AgentCheck):
+    resolved_hostname = ''
+
     def __init__(self):
         self.events = []
 
     def database_monitoring_query_metrics(self, event):
         self.events.append(json.loads(event))
+
+    def _get_debug_tags(self):
+        return []
+
+    def count(self, _k, _c, **kwargs):
+        return None
 
 
 def test_telemetry():

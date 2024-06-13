@@ -16,14 +16,9 @@ logger = logging.getLogger(__name__)
 FLUSH_INTERVAL = 60
 
 
-class TelemetryOperation(NamedTuple):
-    """
-    Simple wrapper for telemetry operation data.
-    """
-
-    operation: str = ""
-    elapsed: Optional[float] = None
-    count: Optional[int] = None
+TelemetryOperation = NamedTuple(
+    'TelemetryOperation', [('operation', str), ('elapsed', Optional[float]), ('count', Optional[int])]
+)
 
 
 class Telemetry:
