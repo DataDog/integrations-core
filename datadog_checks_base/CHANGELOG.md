@@ -2,6 +2,12 @@
 
 <!-- towncrier release notes start -->
 
+## 36.7.1 / 2024-06-11
+
+***Fixed***:
+
+* Bump the `requests` version to 2.32.3 on Python 3 ([#17702](https://github.com/DataDog/integrations-core/pull/17702))
+
 ## 36.7.0 / 2024-05-31
 
 ***Added***:
