@@ -121,6 +121,7 @@ class OperationSampleOperationStatsCursor(TypedDict, total=False):
     tailable: bool
     await_data: bool
     originating_command: Optional[str]
+    plan_summary: Optional[str]
     operation_using_cursor_id: Optional[str]
 
 

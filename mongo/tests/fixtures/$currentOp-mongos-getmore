@@ -316,6 +316,7 @@
                 "mayBypassWriteBlocking": true,
                 "$db": "dbmorders_1"
             },
+            "planSummary": "COLLSCAN",
             "operationUsingCursorId": 155914227
         },
         "numYields": 1,

@@ -331,6 +331,7 @@ class MongoOperationSamples(DBMAsyncJob):
             "tailable": cursor.get("tailable", False),
             "await_data": cursor.get("awaitData", False),
             "originating_command": originating_command,
+            "plan_summary": cursor.get("planSummary"),
             "operation_using_cursor_id": cursor.get("operationUsingCursorId"),
         }
 
