@@ -83,6 +83,7 @@ class SqlserverAgentMetrics(SqlserverDatabaseMetricsBase):
         '''
         Returns the default interval in seconds at which to collect index usage metrics.
         '''
+        # TODO figure out what a good default collection interval should be
         return 5 * 60  # 5 minutes
     
     @property
