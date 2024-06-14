@@ -99,6 +99,7 @@ def test_statement_samples_enabled_config(dbm_instance, statement_samples_key, s
 def test_statement_metrics(
     aggregator, dd_run_check, dbm_instance, query, default_schema, datadog_agent, aurora_replication_role
 ):
+    dbm_instance['query_metrics']['collection_interval'] = 0.0000001
     mysql_check = MySql(common.CHECK_NAME, {}, [dbm_instance])
 
     def run_query(q):
@@ -301,6 +302,7 @@ def test_statement_metrics_cloud_metadata(
     if input_cloud_metadata:
         for k, v in input_cloud_metadata.items():
             dbm_instance[k] = v
+    dbm_instance['query_metrics']['collection_interval'] = 0.0000001
     mysql_check = MySql(common.CHECK_NAME, {}, [dbm_instance])
 
     def run_query(q):
@@ -400,6 +402,7 @@ def test_statement_samples_collect(
     caplog.set_level(logging.INFO, logger="datadog_checks.mysql.collection_utils")
     caplog.set_level(logging.DEBUG, logger="datadog_checks")
     caplog.set_level(logging.DEBUG, logger="tests.test_mysql")
+    dbm_instance['query_samples']['collection_interval'] = 0.0000001
 
     mysql_check = MySql(common.CHECK_NAME, {}, [dbm_instance])
     if explain_strategy:
