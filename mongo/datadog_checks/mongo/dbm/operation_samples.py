@@ -27,6 +27,7 @@ from .types import (
     OperationSampleEvent,
     OperationSampleOperationMetadata,
     OperationSampleOperationStats,
+    OperationSampleOperationStatsCursor,
     OperationSamplePlan,
 )
 
@@ -304,6 +305,36 @@ class MongoOperationSamples(DBMAsyncJob):
             "ns": namespace,
         }
 
+    def _get_operation_cursor(self, operation: dict) -> Optional[OperationSampleOperationStatsCursor]:
+        cursor = operation.get("cursor")
+        if not cursor:
+            return None
+
+        created_date = cursor.get("createdDate")
+        if created_date:
+            created_date = created_date.isoformat()
+        last_access_date = cursor.get("lastAccessDate")
+        if last_access_date:
+            last_access_date = last_access_date.isoformat()
+
+        originating_command = cursor.get("originatingCommand")
+        if originating_command:
+            originating_command = datadog_agent.obfuscate_mongodb_string(json_util.dumps(originating_command))
+
+        return {
+            "cursor_id": cursor.get("cursorId"),
+            "created_date": created_date,
+            "last_access_date": last_access_date,
+            "n_docs_returned": cursor.get("nDocsReturned", 0),
+            "n_batches_returned": cursor.get("nBatchesReturned", 0),
+            "no_cursor_timeout": cursor.get("noCursorTimeout", False),
+            "tailable": cursor.get("tailable", False),
+            "await_data": cursor.get("awaitData", False),
+            "originating_command": originating_command,
+            "plan_summary": cursor.get("planSummary"),
+            "operation_using_cursor_id": cursor.get("operationUsingCursorId"),
+        }
+
     def _get_operation_stats(self, operation: dict) -> OperationSampleOperationStats:
         return {
             "active": operation.get("active", False),  # bool
@@ -327,6 +358,8 @@ class MongoOperationSamples(DBMAsyncJob):
             "flow_control_stats": self._format_key_name(operation.get("flowControlStats", {})),  # dict
             # Latches
             "waiting_for_latch": operation.get("waitingForLatch", False),  # bool
+            # cursor
+            "cursor": self._get_operation_cursor(operation),  # dict
         }
 
     def _get_query_signature(self, obfuscated_command: str) -> str:
