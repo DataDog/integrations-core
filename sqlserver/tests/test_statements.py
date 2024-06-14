@@ -303,7 +303,6 @@ def test_statement_metrics_and_plans(
     if disable_secondary_tags:
         dbm_instance['query_metrics']['disable_secondary_tags'] = True
     dbm_instance['query_activity'] = {'enabled': True, 'collection_interval': 2}
-
     check = SQLServer(CHECK_NAME, {}, [dbm_instance])
 
     # the check must be run three times:
@@ -323,7 +322,6 @@ def test_statement_metrics_and_plans(
         for params in param_groups:
             bob_conn.execute_with_retries(query, params, database=database)
     dd_run_check(check)
-
 
     _conn_key_prefix = "dbm-"
     with check.connection.open_managed_default_connection(key_prefix=_conn_key_prefix):
