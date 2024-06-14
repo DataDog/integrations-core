@@ -974,7 +974,6 @@ def test_statement_with_embedded_characters(aggregator, datadog_agent, dd_run_ch
     check = SQLServer(CHECK_NAME, {}, [dbm_instance])
     query = "EXEC nullCharTest;"
 
-
     def _obfuscate_sql(sql_query, options=None):
         return json.dumps({'query': sql_query, 'metadata': {}})
 

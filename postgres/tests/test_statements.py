@@ -87,7 +87,7 @@ def test_statement_metrics_multiple_pgss_rows_single_query_signature(
     # don't need samples for this test
     dbm_instance['query_samples'] = {'enabled': False}
     dbm_instance['query_activity'] = {'enabled': False}
-    dbm_instance['query_metrics'] = {'enabled': True, 'run_sync': True, 'incremental_query_metrics': True}
+    dbm_instance['query_metrics'] = {'enabled': True, 'run_sync': True, 'incremental_query_metrics': True, 'collection_interval':0.0000001}
     connections = {}
 
     def normalize_query(q):
@@ -226,7 +226,7 @@ def test_statement_metrics(
     dbm_instance['query_samples'] = {'enabled': False}
     dbm_instance['query_activity'] = {'enabled': False}
     # very low collection interval for test purposes
-    dbm_instance['query_metrics'] = {'enabled': True, 'run_sync': True, 'collection_interval': 0.1}
+    dbm_instance['query_metrics'] = {'enabled': True, 'run_sync': True, 'collection_interval': 0.0000001}
     connections = {}
 
     def _run_queries():
@@ -860,6 +860,8 @@ def test_statement_metadata(
     dbm_instance['pg_stat_statements_view'] = pg_stat_statements_view
     dbm_instance['query_samples']['run_sync'] = True
     dbm_instance['query_metrics']['run_sync'] = True
+    dbm_instance['query_metrics']['collection_interval'] = 0.0000001
+    dbm_instance['query_samples']['collection_interval'] = 0.0000001
 
     # If query or normalized_query changes, the query_signatures for both will need to be updated as well.
     query = '''
@@ -944,6 +946,8 @@ def test_statement_reported_hostname(
 ):
     dbm_instance['query_samples']['run_sync'] = True
     dbm_instance['query_metrics']['run_sync'] = True
+    dbm_instance['query_metrics']['collection_interval'] = 0.0000001
+    dbm_instance['query_samples']['collection_interval'] = 0.0000001
     dbm_instance['reported_hostname'] = reported_hostname
 
     check = integration_check(dbm_instance)
@@ -1064,6 +1068,8 @@ def test_activity_snapshot_collection(
     # No need for query metrics here
     dbm_instance['query_metrics']['enabled'] = False
     dbm_instance['collect_resources']['enabled'] = False
+    dbm_instance['query_metrics']['collection_interval'] = 0.0000001
+    dbm_instance['collect_resources']['collection_interval'] = 0.0000001
     check = integration_check(dbm_instance)
     check._connect()
 
