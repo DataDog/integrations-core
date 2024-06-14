@@ -143,6 +143,7 @@ class MySql(AgentCheck):
         self._non_internal_tags = copy.deepcopy(self.tags)
         self.set_resource_tags()
         self._is_innodb_engine_enabled_cached = None
+        self._is_checking = False
 
     def execute_query_raw(self, query):
         with closing(self._conn.cursor(CommenterSSCursor)) as cursor:
@@ -270,6 +271,10 @@ class MySql(AgentCheck):
         return {'pymysql': pymysql.__version__}
 
     def check(self, _):
+        if self._is_checking:
+            self.log.warning('mysql integration attempted double check')
+            return
+        self._is_checking = True
         if self.instance.get('user'):
             self._log_deprecation('_config_renamed', 'user', 'username')
 
@@ -326,6 +331,7 @@ class MySql(AgentCheck):
             finally:
                 self._conn = None
                 self._report_warnings()
+                self._is_checking = False
 
     # _set_database_instance_tags sets the tag list for the `database_instance` resource
     # based on metadata that is collected on check start. This ensures that we see tags such as
