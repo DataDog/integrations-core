@@ -325,7 +325,7 @@ class VSphereAPI(object):
 
     @smart_retry
     def get_allowed_events(self):
-        if not isinstance(self.config, VSphereConfig) or not self.config.include_events:
+        if not isinstance(self.config, VSphereConfig) or self.config.include_events is None:
             exclude_filters = {
                 'AlarmStatusChangedEvent': [r'Gray to Green', r'Green to Gray'],
                 'TaskEvent': [

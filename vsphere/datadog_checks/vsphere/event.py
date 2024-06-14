@@ -55,7 +55,7 @@ class VSphereEvent(object):
             self.event_config = {}
         else:
             self.event_config = event_config
-        if not include_events:
+        if include_events is None:
             self.exclude_filters = EXCLUDE_FILTERS
         else:
             self.exclude_filters = {}
