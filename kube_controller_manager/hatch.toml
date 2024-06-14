@@ -7,11 +7,10 @@ base-package-features = [
 [envs.default]
 dependencies = [
   "requests-mock==1.4.0",
-  "requests-oauthlib==1.3.1; python_version < '3.0'",
 ]
 
 [[envs.default.matrix]]
-python = ["2.7", "3.11"]
+python = ["3.11"]
 
 [envs.default.env-vars]
 DDEV_SKIP_GENERIC_TAGS_CHECK = "true"
