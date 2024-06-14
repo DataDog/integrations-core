@@ -52,7 +52,7 @@ ldap3 @ https://agent-int-packages.datadoghq.com/external/ldap3/ldap3-2.9.1-py2.
 lxml @ https://agent-int-packages.datadoghq.com/external/lxml/lxml-4.9.2-cp311-cp311-manylinux_2_17_x86_64.manylinux2014_x86_64.manylinux_2_24_x86_64.whl#sha256=d6b430a9938a5a5d85fc107d852262ddcd48602c120e3dbb02137c83d212b380
 lz4 @ https://agent-int-packages.datadoghq.com/external/lz4/lz4-4.3.3-cp311-cp311-manylinux_2_17_x86_64.manylinux2014_x86_64.whl#sha256=0e9c410b11a31dbdc94c05ac3c480cb4b222460faf9231f12538d0074e56c563
 mmh3 @ https://agent-int-packages.datadoghq.com/external/mmh3/mmh3-4.1.0-cp311-cp311-manylinux_2_5_x86_64.manylinux1_x86_64.manylinux_2_17_x86_64.manylinux2014_x86_64.whl#sha256=f6f02576a4d106d7830ca90278868bf0983554dd69183b7bbe09f2fcd51cf54f
-msal @ https://agent-int-packages.datadoghq.com/external/msal/msal-1.28.0-py3-none-any.whl#sha256=3064f80221a21cd535ad8c3fafbb3a3582cd9c7e9af0bb789ae14f726a0ca99b
+msal @ https://agent-int-packages.datadoghq.com/external/msal/msal-1.28.1-py3-none-any.whl#sha256=563c2d70de77a2ca9786aab84cb4e133a38a6897e6676774edc23d610bfc9e7b
 msal-extensions @ https://agent-int-packages.datadoghq.com/external/msal-extensions/msal_extensions-1.1.0-py3-none-any.whl#sha256=01be9711b4c0b1a151450068eeb2c4f0997df3bba085ac299de3a66f585e382f
 netifaces @ https://agent-int-packages.datadoghq.com/built/netifaces/netifaces-0.11.0-20240530234024-cp311-cp311-manylinux2014_x86_64.manylinux_2_17_x86_64.whl#sha256=c14c341901db58fc94047538a20340513bd3271ec8a4d4c5bf3a35e453583cb1
 oauthlib @ https://agent-int-packages.datadoghq.com/external/oauthlib/oauthlib-3.2.2-py3-none-any.whl#sha256=8139f29aac13e25d502680e9e19963e83f16838d48a0d71c287fe40e7067fbca
@@ -89,7 +89,7 @@ pysmi @ https://agent-int-packages.datadoghq.com/external/pysmi/pysmi-0.3.4-py2.
 pysnmp @ https://agent-int-packages.datadoghq.com/external/pysnmp/pysnmp-4.4.9-py2.py3-none-any.whl#sha256=128a4832ce170213a59b82e7eeb886fc07d4b2e6eb638db8049af03f1014b0f8
 pysnmp-mibs @ https://agent-int-packages.datadoghq.com/external/pysnmp-mibs/pysnmp_mibs-0.1.6-py2.py3-none-any.whl#sha256=5e153ebe8e767c07940cea435f866c623ff6b2376155c7da75085b08d3774d48
 pysocks @ https://agent-int-packages.datadoghq.com/external/pysocks/PySocks-1.7.1-py3-none-any.whl#sha256=2725bd0a9925919b9b51739eea5f9e2bae91e83288108a9ad338b2e3a4435ee5
-pyspnego @ https://agent-int-packages.datadoghq.com/external/pyspnego/pyspnego-0.10.2-py3-none-any.whl#sha256=3d5c5c28dbd0cd6a679acf45219630254db3c0e5ad4a16de521caa0585b088c0
+pyspnego @ https://agent-int-packages.datadoghq.com/external/pyspnego/pyspnego-0.11.0-py3-none-any.whl#sha256=cdfe9af7b19749d692e02fd4bd1b4b71d44ecb8dd9b2474abb0f3d90f6154e7e
 python-binary-memcached @ https://agent-int-packages.datadoghq.com/external/python-binary-memcached/python_binary_memcached-0.31.2-py3-none-any.whl#sha256=e5b93d54429e835cab7d5b33988649f9748344aa49adaed8eed94b37e714d562
 python-dateutil @ https://agent-int-packages.datadoghq.com/external/python-dateutil/python_dateutil-2.9.0.post0-py2.py3-none-any.whl#sha256=a8b2bc7bffae282281c8140a97d3aa9c14da0b136dfe83f850eea9a5f7470427
 python3-gearman @ https://agent-int-packages.datadoghq.com/external/python3-gearman/python3_gearman-0.1.0-py3-none-any.whl#sha256=4a5808d3a0bfc6c243548ad57e7aab4bee62c9cba2b1c3a860fdd292d46a112d
