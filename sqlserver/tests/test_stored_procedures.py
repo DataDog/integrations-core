@@ -221,6 +221,7 @@ def test_procedure_metrics(
     datadog_agent,
 ):
     caplog.set_level(logging.INFO)
+    dbm_instance['procedure_metrics']['collection_interval'] = 0.0000001
     check = SQLServer(CHECK_NAME, {}, [dbm_instance])
 
     # the check must be run three times:
@@ -289,6 +290,7 @@ def test_procedure_metrics(
 @pytest.mark.usefixtures('dd_environment')
 def test_procedure_metrics_limit(aggregator, dd_run_check, dbm_instance, bob_conn):
     dbm_instance['procedure_metrics']['max_procedures'] = 2
+    dbm_instance['procedure_metrics']['collection_interval'] = 0.0000001
     check = SQLServer(CHECK_NAME, {}, [dbm_instance])
 
     # the check must be run three times:

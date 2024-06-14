@@ -45,7 +45,7 @@ SELF_HOSTED_ENGINE_EDITIONS = {
     ENGINE_EDITION_ENTERPRISE,
     ENGINE_EDITION_EXPRESS,
 }
-
+import pdb
 
 @pytest.fixture(autouse=True)
 def stop_orphaned_threads():
@@ -279,7 +279,6 @@ test_statement_metrics_and_plans_parameterized = (
     ],
 )
 
-
 @pytest.mark.integration
 @pytest.mark.usefixtures('dd_environment')
 @pytest.mark.parametrize(*test_statement_metrics_and_plans_parameterized)
@@ -302,7 +301,9 @@ def test_statement_metrics_and_plans(
     caplog.set_level(logging.INFO)
     if disable_secondary_tags:
         dbm_instance['query_metrics']['disable_secondary_tags'] = True
+        dbm_instance['query_metrics']['collection_interval']
     dbm_instance['query_activity'] = {'enabled': True, 'collection_interval': 2}
+
     check = SQLServer(CHECK_NAME, {}, [dbm_instance])
 
     # the check must be run three times:
@@ -311,15 +312,18 @@ def test_statement_metrics_and_plans(
     # 2) load the test queries into the StatementMetrics state
     # 3) emit the query metrics based on the diff of current and last state
     dd_run_check(check)
+    time.sleep(2)
     for _ in range(0, exe_count):
         for params in param_groups:
             bob_conn.execute_with_retries(query, params, database=database)
     dd_run_check(check)
+    time.sleep(2)
     aggregator.reset()
     for _ in range(0, exe_count):
         for params in param_groups:
             bob_conn.execute_with_retries(query, params, database=database)
     dd_run_check(check)
+
 
     _conn_key_prefix = "dbm-"
     with check.connection.open_managed_default_connection(key_prefix=_conn_key_prefix):
@@ -459,6 +463,7 @@ def test_statement_metrics_limit(
     aggregator, dd_run_check, dbm_instance, bob_conn, database, query, expected_queries_patterns
 ):
     dbm_instance['query_metrics']['max_queries'] = 5
+    dbm_instance['query_metrics']['collection_interval'] = 0.0000001
     check = SQLServer(CHECK_NAME, {}, [dbm_instance])
 
     # the check must be run three times:
@@ -504,6 +509,7 @@ def test_statement_metrics_limit(
 def test_statement_metadata(
     aggregator, dd_run_check, dbm_instance, bob_conn, datadog_agent, metadata, expected_metadata_payload
 ):
+    dbm_instance['query_metrics']['collection_interval'] = 0.0000001
     check = SQLServer(CHECK_NAME, {}, [dbm_instance])
 
     query = "select * from sys.databases /* service='datadog-agent' */"
@@ -630,6 +636,7 @@ def test_statement_cloud_metadata(
     if input_cloud_metadata:
         for k, v in input_cloud_metadata.items():
             dbm_instance[k] = v
+    dbm_instance['query_metrics']['collection_interval'] = 0.0000001
     check = SQLServer(CHECK_NAME, {}, [dbm_instance])
 
     query = 'SELECT * FROM ϑings'
@@ -676,7 +683,9 @@ def test_statement_cloud_metadata(
 def test_statement_reported_hostname(
     aggregator, dd_run_check, dbm_instance, bob_conn, datadog_agent, reported_hostname, expected_hostname
 ):
+
     dbm_instance['reported_hostname'] = reported_hostname
+    dbm_instance['query_metrics']['collection_interval'] = 0.0000001
     check = SQLServer(CHECK_NAME, {}, [dbm_instance])
 
     dd_run_check(check)
@@ -882,6 +891,7 @@ def test_statement_conditional_stored_procedure_with_temp_table(
     # have not been executed. We simulate the case by running the stored procedure with a parameter that
     # only executes the first branch of the conditional. The second branch will not be executed and the
     # plan will be NULL. That being said, ALL executed statements in the stored procedure will have NULL plan.
+    dbm_instance['query_metrics']['collection_interval'] = 0.0000001
     check = SQLServer(CHECK_NAME, {}, [dbm_instance])
 
     dd_run_check(check)
@@ -925,6 +935,7 @@ def test_statement_conditional_stored_procedure_with_temp_table(
 def test_statement_stored_procedure_characters_limit(
     aggregator, datadog_agent, dd_run_check, dbm_instance, bob_conn, stored_procedure_characters_limit
 ):
+    dbm_instance['query_metrics']['collection_interval'] = 0.0000001
     dbm_instance['stored_procedure_characters_limit'] = stored_procedure_characters_limit
     check = SQLServer(CHECK_NAME, {}, [dbm_instance])
     query = "EXEC procedureWithLargeCommment;"
@@ -961,8 +972,10 @@ def test_statement_stored_procedure_characters_limit(
 @pytest.mark.integration
 @pytest.mark.usefixtures('dd_environment')
 def test_statement_with_embedded_characters(aggregator, datadog_agent, dd_run_check, dbm_instance, bob_conn):
+    dbm_instance['query_metrics']['collection_interval'] = 0.0000001
     check = SQLServer(CHECK_NAME, {}, [dbm_instance])
     query = "EXEC nullCharTest;"
+
 
     def _obfuscate_sql(sql_query, options=None):
         return json.dumps({'query': sql_query, 'metadata': {}})
@@ -1046,6 +1059,7 @@ def test_statement_with_metrics_azure_sql_filtered_to_configured_database(
 ):
     if configured_database:
         dbm_instance['database'] = configured_database
+    dbm_instance['query_metrics']['collection_interval'] = 0.0000001
     check = SQLServer(CHECK_NAME, {}, [dbm_instance])
 
     if engine_edition:
