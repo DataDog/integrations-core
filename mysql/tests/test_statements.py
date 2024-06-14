@@ -37,8 +37,9 @@ def dbm_instance(instance_complex):
     instance_complex['disable_generic_tags'] = False
     # set the default for tests to run sychronously to ensure we don't have orphaned threads running around
     instance_complex['query_samples'] = {'enabled': True, 'run_sync': True, 'collection_interval': 1}
-    # set a very small collection interval so the tests go fast
-    instance_complex['query_metrics'] = {'enabled': True, 'run_sync': True, 'collection_interval': 0.1}
+    # collection_interval close to 0 is needed if test runs the check several times
+    # Otherwise, DBMAsync would skip a job execution. 
+    instance_complex['query_metrics'] = {'enabled': True, 'run_sync': True, 'collection_interval': 0.0000001}
     # don't need query activity for these tests
     instance_complex['query_activity'] = {'enabled': False}
     instance_complex['collect_settings'] = {'enabled': False}
@@ -99,7 +100,6 @@ def test_statement_samples_enabled_config(dbm_instance, statement_samples_key, s
 def test_statement_metrics(
     aggregator, dd_run_check, dbm_instance, query, default_schema, datadog_agent, aurora_replication_role
 ):
-    dbm_instance['query_metrics']['collection_interval'] = 0.0000001
     mysql_check = MySql(common.CHECK_NAME, {}, [dbm_instance])
 
     def run_query(q):
@@ -302,7 +302,6 @@ def test_statement_metrics_cloud_metadata(
     if input_cloud_metadata:
         for k, v in input_cloud_metadata.items():
             dbm_instance[k] = v
-    dbm_instance['query_metrics']['collection_interval'] = 0.0000001
     mysql_check = MySql(common.CHECK_NAME, {}, [dbm_instance])
 
     def run_query(q):
@@ -666,7 +665,6 @@ def test_statement_reported_hostname(
 ):
     dbm_instance['reported_hostname'] = reported_hostname
     dbm_instance['query_samples']['collection_interval'] = 0.0000001
-    dbm_instance['query_metrics']['collection_interval'] = 0.0000001
     mysql_check = MySql(common.CHECK_NAME, {}, [dbm_instance])
 
     dd_run_check(mysql_check)
