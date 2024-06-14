@@ -45,7 +45,6 @@ SELF_HOSTED_ENGINE_EDITIONS = {
     ENGINE_EDITION_ENTERPRISE,
     ENGINE_EDITION_EXPRESS,
 }
-import pdb
 
 @pytest.fixture(autouse=True)
 def stop_orphaned_threads():
