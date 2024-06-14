@@ -110,7 +110,7 @@ With manual configuration, you must modify every workload manifest when adding o
 
 <!-- xxx tabs xxx -->
 <!-- xxx tab "Datadog Operator" xxx -->
-##### Admission Controller
+##### Admission Controller using Datadog Operator
 
 <div class="alert alert-warning">This feature requires Cluster Agent v7.52.0+.
 </div>
@@ -281,7 +281,7 @@ containers:
 
 <!-- xxz tab xxx -->
 <!-- xxx tab "Helm" xxx -->
-##### Admission Controller
+##### Admission Controller using Helm
 
 <div class="alert alert-warning">This feature requires Cluster Agent v7.52.0+.
 </div>
