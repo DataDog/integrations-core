@@ -132,7 +132,7 @@ The setup below configures the Cluster Agent to communicate with the Agent sidec
 
 ###### Setup
 
-1. Prepare the `DatadogAgent` custom resource in your `datadog-agent.yaml` with Admission Controller enabled:
+1. Prepare the `DatadogAgent` custom resource in the `datadog-agent.yaml` with Admission Controller enabled:
 
    ```yaml
     apiVersion: datadoghq.com/v2alpha1
@@ -203,7 +203,7 @@ The following is a `spec.containers` snippet from a Redis deployment where the A
 
 To further configure the Agent or its container resources, use the properties in your `DatadogAgent` resource. Use the `spec.features.admissionController.agentSidecarInjection.profiles` to add environment variable definitions and resource settings. Use the `spec.features.admissionController.agentSidecarInjection.selectors` property to configure a custom selector to target workload pods instead of updating the workload to add `agent.datadoghq.com/sidecar:fargate` labels.
 
-  1. Create a 'DatadogAgent' custom resource in 'datadog-values.yaml' file that configures a sidecar profile and a custom pod selector.
+  1. Create a `DatadogAgent` custom resource in `datadog-values.yaml` file that configures a sidecar profile and a custom pod selector.
 
    **Example**
 
