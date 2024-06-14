@@ -9,6 +9,7 @@ name = "datadog-{project_name}"
 description = "The {integration_name} check"
 readme = "README.md"
 license = "BSD-3-Clause"
+requires-python = ">=3.11"
 keywords = [
     "datadog",
     "datadog agent",

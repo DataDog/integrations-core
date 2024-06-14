@@ -10,7 +10,7 @@ name = "datadog-dcgm"
 description = "The dcgm-exporter check"
 readme = "README.md"
 license = "BSD-3-Clause"
-requires-python = ">=3.9"
+requires-python = ">=3.11"
 keywords = [
     "datadog",
     "datadog agent",

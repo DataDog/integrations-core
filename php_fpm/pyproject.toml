@@ -11,6 +11,7 @@ name = "datadog-php-fpm"
 description = "The PHP-FPM check"
 readme = "README.md"
 license = "BSD-3-Clause"
+requires-python = ">=3.11"
 keywords = [
     "datadog",
     "datadog agent",

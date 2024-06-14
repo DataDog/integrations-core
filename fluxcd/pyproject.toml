@@ -9,6 +9,7 @@ name = "datadog-fluxcd"
 description = "The fluxcd check"
 readme = "README.md"
 license = {text = "BSD-3-Clause"}
+requires-python = ">=3.11"
 keywords = [
     "datadog",
     "datadog agent",

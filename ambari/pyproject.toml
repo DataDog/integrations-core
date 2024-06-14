@@ -11,6 +11,7 @@ name = "datadog-ambari"
 description = "The Ambari check"
 readme = "README.md"
 license = "BSD-3-Clause"
+requires-python = ">=3.11"
 keywords = [
     "datadog",
     "datadog agent",

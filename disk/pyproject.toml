@@ -10,6 +10,7 @@ build-backend = "hatchling.build"
 name = "datadog-disk"
 description = "The Disk check"
 readme = "README.md"
+requires-python = ">=3.11"
 keywords = [
     "datadog",
     "datadog agent",

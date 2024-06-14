@@ -10,6 +10,7 @@ build-backend = "hatchling.build"
 name = "datadog-airflow"
 description = "The Airflow check"
 readme = "README.md"
+requires-python = ">=3.11"
 license = "BSD-3-Clause"
 keywords = [
     "datadog",

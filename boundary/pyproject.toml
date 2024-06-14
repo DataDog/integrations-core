@@ -8,6 +8,7 @@ description = "The Boundary check"
 readme = "README.md"
 requires-python = ">=3.8"
 license = "BSD-3-Clause"
+requires-python = ">=3.11"
 keywords = [
     "datadog",
     "datadog agent",

@@ -10,6 +10,7 @@ build-backend = "hatchling.build"
 name = "datadog-snmp"
 description = "The SNMP check"
 readme = "README.md"
+requires-python = ">=3.11"
 keywords = [
     "datadog",
     "datadog agent",

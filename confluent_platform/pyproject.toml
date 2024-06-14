@@ -11,6 +11,7 @@ name = "datadog-confluent-platform"
 description = "The Confluent Platform check"
 readme = "README.md"
 license = "BSD-3-Clause"
+requires-python = ">=3.11"
 keywords = [
     "datadog",
     "datadog agent",

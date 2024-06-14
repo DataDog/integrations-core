@@ -11,6 +11,7 @@ name = "datadog-kube-apiserver-metrics"
 description = "The Kubernetes API server metrics check"
 readme = "README.md"
 license = "BSD-3-Clause"
+requires-python = ">=3.11"
 keywords = [
     "datadog",
     "datadog agent",

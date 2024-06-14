@@ -43,7 +43,7 @@ PYTHON_VERSION = '{OLD_PYTHON_VERSION}'
         f"""[env.collectors.datadog-checks]
 
 [[envs.default.matrix]]
-python = ["2.7", "{OLD_PYTHON_VERSION}"]
+python = ["3.11", "{OLD_PYTHON_VERSION}"]
 
 """,
     )
@@ -68,7 +68,7 @@ dummy.metric,gauge,,,,description,0,dummy,,""",
         "License :: OSI Approved :: BSD License",
         "Natural Language :: English",
         "Operating System :: OS Independent",
-        "Programming Language :: Python :: 2.7",
+        "Programming Language :: Python :: 3.11",
         "Programming Language :: Python :: {OLD_PYTHON_VERSION}",
     ]
     """,
@@ -86,7 +86,7 @@ dummy.metric,gauge,,,,description,0,dummy,,""",
         "License :: OSI Approved :: BSD License",
         "Natural Language :: English",
         "Operating System :: OS Independent",
-        "Programming Language :: Python :: 2.7",
+        "Programming Language :: Python :: 3.11",
         "Programming Language :: Python :: {OLD_PYTHON_VERSION}",
     ]
     """,
@@ -134,7 +134,7 @@ classifiers = [
     "License :: OSI Approved :: BSD License",
     "Natural Language :: English",
     "Operating System :: OS Independent",
-    "Programming Language :: Python :: 2.7",
+    "Programming Language :: Python :: 3.11",
     "Programming Language :: Python :: {OLD_PYTHON_VERSION}",
 ]
 """,
