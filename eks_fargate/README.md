@@ -1,7 +1,6 @@
 # Agent Check: eks_fargate
 
 ## Overview
-** THIS IS BEING EDITED BY KISUNG
 
 <div class="alert alert-warning"> This page describes the EKS Fargate integration. For ECS Fargate, see the documentation for Datadog's <a href="http://docs.datadoghq.com/integrations/ecs_fargate">ECS Fargate integration</a>.
 </div>
@@ -155,11 +154,11 @@ The setup below configures the Cluster Agent to communicate with the Agent sidec
             enabled: true
             provider: fargate
    ```
-Then apply the new configuration:
-
-```shell
-kubectl apply -n datadog-agent -f datadog-agent.yaml
-```
+  Then apply the new configuration:
+  
+  ```shell
+  kubectl apply -n datadog-agent -f datadog-agent.yaml
+  ```
 
 2. After the Cluster Agent reaches a running state and registers Admission Controller mutating webhooks, an Agent sidecar is automatically injected into any pod created with the label `agent.datadoghq.com/sidecar:fargate`. 
    **The Admission Controller does not mutate pods that are already created**.
@@ -234,11 +233,11 @@ Use the `spec.features.admissionController.agentSidecarInjection.selectors` prop
                   memory: "512Mi"
    ```
 
-Then apply the new configuration:
-
-```shell
-kubectl apply -n datadog-agent -f datadog-agent.yaml
-```
+  Then apply the new configuration:
+  
+  ```shell
+  kubectl apply -n datadog-agent -f datadog-agent.yaml
+  ```
 
 2. After the Cluster Agent reaches a running state and registers Admission Controller mutating webhooks, an Agent sidecar is automatically injected into any pod created with the label `app:redis`. 
    **The Admission Controller does not mutate pods that are already created**.
