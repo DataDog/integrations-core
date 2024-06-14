@@ -349,7 +349,7 @@ class VSphereAPI(object):
             exclude_filters = {}
             for item in self.config.include_events:
                 event_name = item["event"]
-                excluded_messages = [rf"{msg}" for msg in item["excluded_messages"]]
+                excluded_messages = [r'{}'.format(msg) for msg in item["excluded_messages"]]
                 exclude_filters[event_name] = excluded_messages
         return [getattr(vim.event, event_type) for event_type in exclude_filters.keys()]
 
