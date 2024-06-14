@@ -1,8 +1,10 @@
 import pytest
+import pyodbc
 import sys
 from datadog_checks.sqlserver import SQLServer
 
 from .common import CHECK_NAME
+from .conftest import DEFAULT_TIMEOUT
 
 AGENT_HISTORY_QUERY = """\
 SELECT 
@@ -120,6 +122,51 @@ AGENT_ACTIVITY_STEPS_QUERY = """\
         AND aj.last_executed_step_id = cs.step_id
 """
 
+JOB_CREATION_QUERY="""\
+EXEC msdb.dbo.sp_add_job
+    @job_name = 'Job 1'
+EXEC msdb.dbo.sp_add_job
+    @job_name = 'Job 2'
+"""
+
+HISTORY_INSERTION_QUERY="""\
+INSERT INTO msdb.dbo.sysjobhistory (
+    job_id,
+    step_id,
+    step_name,
+    sql_message_id,
+    sql_severity,
+    message,
+    run_status,
+    run_date,
+    run_time,
+    run_duration,
+    operator_id_emailed,
+    operator_id_netsent,
+    operator_id_paged,
+    retries_attempted,
+    server
+)
+VALUES (
+    -- Replace these values with actual data
+    (SELECT job_id FROM msdb.dbo.sysjobs WHERE name = 'Job {job_number}'),
+    {step_id}, -- step_id
+    'Step {step_id}', -- step_name
+    0, -- sql_message_id
+    0, -- sql_severity
+    'Job executed successfully.', -- message
+    1, -- run_status (1 = Succeeded, 0 = Failed, 3 = Canceled, 4 = In Progress)
+    1, -- run_date in YYYYMMDD format
+    1, -- run_time in HHMMSS format
+    0, -- run_duration in HHMMSS format (e.g., 10100 for 1 hour 1 minute 0 seconds)
+    0, -- operator_id_emailed
+    0, -- operator_id_netsent
+    0, -- operator_id_paged
+    0, -- retries_attempted
+    @@SERVERNAME -- server name
+);
+"""
+
 @pytest.mark.usefixtures('dd_environment')
 def test_connection_with_agent_history(instance_docker):
     check = SQLServer(CHECK_NAME, {}, [instance_docker])
@@ -156,4 +203,41 @@ def test_connection_with_agent_activity_steps(instance_docker):
             cursor.execute(AGENT_ACTIVITY_STEPS_QUERY)
             result = cursor.fetchall()
             assert 1 == 1
+    check.cancel()
+
+@pytest.mark.usefixtures('dd_environment')
+def test_history_output(instance_docker):
+    check = SQLServer(CHECK_NAME, {}, [instance_docker])
+
+    conn_str = 'DRIVER={};Server={};Database=master;UID={};PWD={};TrustServerCertificate=yes;'.format(
+        instance_docker['driver'], instance_docker['host'], "sa", "Password123"
+    )
+    conn = pyodbc.connect(conn_str, timeout=DEFAULT_TIMEOUT, autocommit=True)
+    sacursor = conn.cursor()
+    sacursor.execute(JOB_CREATION_QUERY)
+    sacursor.execute("SELECT * FROM msdb.dbo.sysjobs")
+    results = sacursor.fetchall()
+    assert len(results) == 2
+    job_and_step_series = [(1, 1), (1, 2), (2, 1), (1, 0), (2, 0), (1, 1), (2, 1), (2, 0)]
+    for (job_number, step_id) in (job_and_step_series):
+        query = HISTORY_INSERTION_QUERY.format(job_number=job_number, step_id=step_id)
+        sacursor.execute(query)
+
+    check.initialize_connection()
+    with check.connection.open_managed_default_connection():
+        with check.connection.get_managed_cursor() as cursor:
+            # instances start from 1
+            last_instance_id_filter="\n\t\tHAVING MIN(sjh2.instance_id) > 0"
+            query = AGENT_HISTORY_QUERY.format(last_instance_id_filter=last_instance_id_filter)
+            cursor.execute(query)
+            results = cursor.fetchall()
+            assert len(results) == 7 # querying all completed job step entries
+            assert len(results[0]) == 10 # 10 columns associated with this event 
+            assert results[0][4] == 4 # completion instance of first entry
+            assert results[0][3] == 1 # instance of first entry
+            last_instance_id_filter="\n\t\tHAVING MIN(sjh2.instance_id) > 4"
+            query = AGENT_HISTORY_QUERY.format(last_instance_id_filter=last_instance_id_filter)
+            cursor.execute(query)
+            results = cursor.fetchall()
+            assert len(results) == 4 # querying all steps from jobs completed after instance 4
     check.cancel()
