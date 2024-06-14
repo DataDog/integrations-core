@@ -298,7 +298,7 @@ files:
 
           Each event is an object represented with the event name itself as a key.
           However, while the keys should be events to include, the value should be an
-          array of event option regexes to exclude/filter out. For example, if the key
+          array of message regexes to exclude/filter out. For example, if the key
           is 'AlarmStatusChangedEvent' and the values for this key are 'Gray to Green' and 'Green to Gray',
           then all events name 'AlarmStatusChangedEvent' that don't have the option of 'Gray to Green'
           and 'Green to Gray' will be included.
@@ -309,9 +309,9 @@ files:
         value:
           example:
             - event: <EVENT_NAME_TO_INCLUDE>
-            - messages:
-                - <EVENT_OPTION_REGEX_CORRESPONDING_TO_EVENT_NAME_TO_EXCLUDE_1>
-                - <EVENT_OPTION_REGEX_CORRESPONDING_TO_EVENT_NAME_TO_EXCLUDE_2>
+              excluded_messages:
+                - <EVENT_MESSAGE_REGEX_CORRESPONDING_TO_EVENT_NAME_TO_EXCLUDE_1>
+                - <EVENT_MESSAGE_REGEX_CORRESPONDING_TO_EVENT_NAME_TO_EXCLUDE_2>
           type: array
           display_default: [['AlarmStatusChangedEvent', ['Gray to Green', 'Green to Gray']],
               ['TaskEvent', [
@@ -336,7 +336,7 @@ files:
             properties:
               - name: event
                 type: string
-              - name: messages
+                name: excluded_messages
                 type: array
                 items:
                   type: string

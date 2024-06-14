@@ -58,7 +58,11 @@ class VSphereEvent(object):
         if not include_events:
             self.exclude_filters = EXCLUDE_FILTERS
         else:
-            self.exclude_filters = {event[0]: [r'{}'.format(elt) for elt in event[1]] for event in include_events}
+            self.exclude_filters = {}
+            for item in include_events:
+                event_name = item["event"]
+                excluded_messages = [rf"{msg}" for msg in item["excluded_messages"]]
+                self.exclude_filters[event_name] = excluded_messages
         self.allowed_events = [getattr(vim.event, event_type) for event_type in self.exclude_filters.keys()]
         self.event_resource_filters = event_resource_filters
 

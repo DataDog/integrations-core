@@ -194,7 +194,9 @@ def test_events_collection(aggregator, realtime_instance):
 
 @pytest.mark.usefixtures('mock_type', 'mock_threadpool', 'mock_api', 'mock_rest_api')
 def test_include_events_ok(aggregator, realtime_instance):
-    realtime_instance['include_events'] = [['AlarmStatusChangedEvent', [r'Gray to Green', r'Green to Gray']]]
+    realtime_instance['include_events'] = [
+        {"event": "AlarmStatusChangedEvent", "excluded_messages": ["Gray to Green", "Green to Gray"]}
+    ]
     check = VSphereCheck(
         'vsphere',
         {},
@@ -218,11 +220,14 @@ def test_include_events_ok(aggregator, realtime_instance):
     check.api.mock_events = [event1]
     check.check(None)
     assert len(aggregator.events) == 1
+    assert aggregator.events[0]['msg_title'] == "[Triggered] alarm1 on VM vm1 is now red"
 
 
 @pytest.mark.usefixtures('mock_type', 'mock_threadpool', 'mock_api', 'mock_rest_api')
 def test_include_events_filtered(aggregator, realtime_instance):
-    realtime_instance['include_events'] = [['AlarmStatusChangedEvent', [r'Gray to Green', r'Green to Gray']]]
+    realtime_instance['include_events'] = [
+        {"event": "AlarmStatusChangedEvent", "excluded_messages": ["Gray to Green", "Green to Gray"]}
+    ]
     check = VSphereCheck(
         'vsphere',
         {},
@@ -249,8 +254,10 @@ def test_include_events_filtered(aggregator, realtime_instance):
 
 
 @pytest.mark.usefixtures('mock_type', 'mock_threadpool', 'mock_api', 'mock_rest_api')
-def test_include_events_incorrectly_formatted_filter(aggregator, realtime_instance):
-    realtime_instance['include_events'] = [['Incorrect_Filter_Name', [r'Gray to Green', r'Green to Gray']]]
+def test_include_events_incorrectly_formatted_event(aggregator, realtime_instance):
+    realtime_instance['include_events'] = [
+        {"event": "IncorrectlyFormattedEvent", "excluded_messages": ["Gray to Green", "Green to Gray"]}
+    ]
     check = VSphereCheck(
         'vsphere',
         {},

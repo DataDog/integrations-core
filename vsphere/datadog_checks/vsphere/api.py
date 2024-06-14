@@ -346,9 +346,11 @@ class VSphereAPI(object):
                 'VmSuspendedEvent': [],
             }
         else:
-            exclude_filters = {
-                event[0]: [r'{}'.format(elt) for elt in event[1]] for event in self.config.include_events
-            }
+            exclude_filters = {}
+            for item in self.config.include_events:
+                event_name = item["event"]
+                excluded_messages = [rf"{msg}" for msg in item["excluded_messages"]]
+                exclude_filters[event_name] = excluded_messages
         return [getattr(vim.event, event_type) for event_type in exclude_filters.keys()]
 
     @smart_retry
