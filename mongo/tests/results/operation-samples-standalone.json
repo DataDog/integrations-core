@@ -174,7 +174,8 @@
             "shard": null,
             "collection": "products",
             "comment": "find",
-            "truncated": "not_truncated"
+            "truncated": "not_truncated",
+            "cursor": null
         }
     }
 ]

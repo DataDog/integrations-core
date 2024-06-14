@@ -111,6 +111,20 @@ class OperationSampleOperationStatsWaitingForLatch(TypedDict, total=False):
     backtrace: List[str]
 
 
+class OperationSampleOperationStatsCursor(TypedDict, total=False):
+    cursor_id: int
+    created_date: Optional[str]
+    last_access_date: Optional[str]
+    n_docs_returned: int
+    n_batches_returned: int
+    no_cursor_timeout: bool
+    tailable: bool
+    await_data: bool
+    originating_command: Optional[str]
+    plan_summary: Optional[str]
+    operation_using_cursor_id: Optional[str]
+
+
 class OperationSampleOperationStats(TypedDict, total=False):
     active: bool
     desc: Optional[str]
@@ -129,6 +143,7 @@ class OperationSampleOperationStats(TypedDict, total=False):
     waiting_for_flow_control: bool
     flow_control_stats: Optional[OperationSampleOperationStatsFlowControlStats]
     waiting_for_latch: Optional[OperationSampleOperationStatsWaitingForLatch]
+    cursor = Optional[OperationSampleOperationStatsCursor]
 
 
 class OperationSampleActivityBase(TypedDict, total=False):
