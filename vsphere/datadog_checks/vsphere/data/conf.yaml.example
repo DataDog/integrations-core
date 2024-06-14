@@ -259,7 +259,7 @@ instances:
     #   - datacenter
     #   - cluster
 
-    ## @param include_events - list of mappings - optional - default: [['AlarmStatusChangedEvent', ['Gray to Green', 'Green to Gray']], ['TaskEvent', ['Initialize powering On', 'Power Off virtual machine', 'Power On virtual machine', 'Reconfigure virtual machine', 'Relocate virtual machine', 'Suspend virtual machine', 'Migrate virtual machine']], ['VmBeingHotMigratedEvent', []], ['VmMessageEvent', []], ['VmMigratedEvent', []], ['VmPoweredOnEvent', []], ['VmPoweredOffEvent', []], ['VmReconfiguredEvent', []], ['VmSuspendedEvent', []]]
+    ## @param include_events - list of mappings - optional
     ## The events that should be collected by the vSphere integration.
     ##
     ## Each event is an object represented with the event name itself as a key.
