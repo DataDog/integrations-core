@@ -302,7 +302,7 @@ def test_statement_metrics_cloud_metadata(
     if input_cloud_metadata:
         for k, v in input_cloud_metadata.items():
             dbm_instance[k] = v
-    dbm_instance['query_metrics']['collection_interval'] = 0.0000001
+    dbm_instance['collect_settings']['collection_interval'] = 0.0000001
     mysql_check = MySql(common.CHECK_NAME, {}, [dbm_instance])
 
     def run_query(q):
@@ -665,6 +665,8 @@ def test_statement_reported_hostname(
     aggregator, dd_run_check, dbm_instance, datadog_agent, reported_hostname, expected_hostname
 ):
     dbm_instance['reported_hostname'] = reported_hostname
+    dbm_instance['query_samples']['collection_interval'] = 0.0000001
+    dbm_instance['query_metrics']['collection_interval'] = 0.0000001
     mysql_check = MySql(common.CHECK_NAME, {}, [dbm_instance])
 
     dd_run_check(mysql_check)
