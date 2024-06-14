@@ -132,7 +132,7 @@ The setup below configures the Cluster Agent to communicate with the Agent sidec
 
 ###### Setup
 
-1. Deploy the Datadog Agent with the Cluster Agent in your `datadog-agent.yaml` and Admission Controller enabled:
+1. Prepare the DatadogAgent custom resource in your `datadog-agent.yaml` and Admission Controller enabled:
 
    ```yaml
     apiVersion: datadoghq.com/v2alpha1
