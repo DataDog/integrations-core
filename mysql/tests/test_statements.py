@@ -38,7 +38,7 @@ def dbm_instance(instance_complex):
     # set the default for tests to run sychronously to ensure we don't have orphaned threads running around
     instance_complex['query_samples'] = {'enabled': True, 'run_sync': True, 'collection_interval': 1}
     # collection_interval close to 0 is needed if test runs the check several times
-    # Otherwise, DBMAsync would skip a job execution. 
+    # Otherwise, DBMAsync would skip a job execution.
     instance_complex['query_metrics'] = {'enabled': True, 'run_sync': True, 'collection_interval': 0.0000001}
     # don't need query activity for these tests
     instance_complex['query_activity'] = {'enabled': False}
