@@ -295,7 +295,7 @@ The setup below configures the Cluster Agent to communicate with the Agent sidec
 
    ```shell
    kubectl create secret generic datadog-secret -n datadog-agent \
-           --from-literal api-key=<YOUR_DATADOG_API_KEY> --from-literal token=<CLUSTER_AGENT_ TOKEN>
+           --from-literal api-key=<YOUR_DATADOG_API_KEY> --from-literal token=<CLUSTER_AGENT_TOKEN>
    kubectl create secret generic datadog-secret -n fargate \
            --from-literal api-key=<YOUR_DATADOG_API_KEY> --from-literal token=<CLUSTER_AGENT_TOKEN>
    ```
