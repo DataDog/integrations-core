@@ -46,6 +46,7 @@ SELF_HOSTED_ENGINE_EDITIONS = {
     ENGINE_EDITION_EXPRESS,
 }
 
+
 @pytest.fixture(autouse=True)
 def stop_orphaned_threads():
     # make sure we shut down any orphaned threads and create a new Executor for each test
@@ -278,6 +279,7 @@ test_statement_metrics_and_plans_parameterized = (
     ],
 )
 
+
 @pytest.mark.integration
 @pytest.mark.usefixtures('dd_environment')
 @pytest.mark.parametrize(*test_statement_metrics_and_plans_parameterized)
@@ -300,7 +302,6 @@ def test_statement_metrics_and_plans(
     caplog.set_level(logging.INFO)
     if disable_secondary_tags:
         dbm_instance['query_metrics']['disable_secondary_tags'] = True
-        dbm_instance['query_metrics']['collection_interval']
     dbm_instance['query_activity'] = {'enabled': True, 'collection_interval': 2}
 
     check = SQLServer(CHECK_NAME, {}, [dbm_instance])
