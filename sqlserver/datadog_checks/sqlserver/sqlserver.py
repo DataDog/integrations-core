@@ -22,6 +22,7 @@ from datadog_checks.sqlserver.database_metrics import (
     SqlserverDatabaseBackupMetrics,
     SqlserverDBFragmentationMetrics,
     SqlserverIndexUsageMetrics,
+    SqlserverAgentMetrics,
 )
 from datadog_checks.sqlserver.metadata import SqlserverMetadata
 from datadog_checks.sqlserver.schemas import Schemas
@@ -861,10 +862,18 @@ class SQLServer(AgentCheck):
             databases=db_names,
         )
 
+        database_agent_metrics = SqlserverAgentMetrics(
+            instance_config=self.instance,
+            new_query_executor=self._new_query_executor,
+            server_static_info=self.static_info_cache,
+            execute_query_handler=self.execute_query_raw,
+        )
+
         # create a list of dynamic queries to execute
         self._database_metrics = [
             # instance level metrics
             database_backup_metrics,
+            database_agent_metrics,
             # database level metrics
             index_usage_metrics,
             db_fragmentation_metrics,

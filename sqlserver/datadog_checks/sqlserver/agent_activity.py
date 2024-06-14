@@ -14,33 +14,34 @@ except ImportError:
 
 DEFAULT_COLLECTION_INTERVAL = 10
 
-AGENT_ACTIVITY_QUERY = """\
-SELECT
-    sj.name AS Name,
-    sa.job_id AS JobID,
-    sa.start_execution_date AS StartTime,
-    sa.last_executed_step_id AS LastFinishedStep,
-    sa.last_executed_step_date AS LastFinishedStepStartTime,
-    sa.stop_execution_date AS StopTime
-FROM (msdb.dbo.sysjobs sj
-INNER JOIN msdb.dbo.sysjobactivity sa ON sj.job_id = sa.job_id)
-WHERE  sa.start_execution_date is not NULL AND sa.stop_execution_date is NULL
-"""
-
 AGENT_HISTORY_QUERY = """\
-SELECT
-    sj.name AS Name,
-    sj.job_id AS JobID,
-    sh.run_status AS Status,
-    sh.run_date AS StartDate,
-    sh.run_time AS StartTime,
-    sh.step_name AS StepName,
-    sh.step_id AS StepID,
-    sh.run_duration AS Duration,
-    sh.instance_id AS Instance,
-    sh.message AS Message
-FROM msdb.dbo.sysjobhistory sh
-INNER JOIN msdb.dbo.sysjobs sj ON sj.job_id = sh.job_id{last_instance_id_filter}
+SELECT 
+    sjh1.job_id,
+    sjh1.step_id,
+    sjh1.step_name,
+    sjh1.instance_id AS step_instance_id,
+    (
+        SELECT MIN(sjh2.instance_id)
+        FROM msdb.dbo.sysjobhistory AS sjh2
+        WHERE sjh2.job_id = sjh1.job_id
+        AND sjh2.step_id = 0
+        AND sjh2.instance_id >= sjh1.instance_id
+    ) AS completion_instance_id,
+    sjh1.run_date,
+    sjh1.run_time,
+    sjh1.run_duration,
+    sjh1.run_status,
+    sjh1.message
+FROM 
+    msdb.dbo.sysjobhistory AS sjh1
+WHERE 
+    EXISTS (
+        SELECT 1
+        FROM msdb.dbo.sysjobhistory AS sjh2
+        WHERE sjh2.job_id = sjh1.job_id
+        AND sjh2.step_id = 0
+        AND sjh2.instance_id >= sjh1.instance_id{last_instance_id_filter}
+    )
 """
 def agent_check_getter(self):
     return self._check
@@ -79,22 +80,22 @@ class SqlserverAgentActivity(DBMAsyncJob):
     def run_job(self):
         self.collect_agent_activity()
 
-    @tracked_method(agent_check_getter=agent_check_getter)
-    def _get_active_jobs(self, cursor):
-        self.log.debug("collecting sql server active agent jobs")
-        self.log.debug("Running query [%s]", AGENT_ACTIVITY_QUERY)
-        cursor.execute(AGENT_ACTIVITY_QUERY)
-        columns = [i[0] for i in cursor.description]
-        # construct row dicts manually as there's no DictCursor for pyodbc
-        rows = [dict(zip(columns, row)) for row in cursor.fetchall()]
-        self.log.debug("loaded sql server active agent jobs len(rows)=%s", len(rows))
-        return rows
+    # @tracked_method(agent_check_getter=agent_check_getter)
+    # def _get_active_jobs(self, cursor):
+    #     self.log.debug("collecting sql server active agent jobs")
+    #     self.log.debug("Running query [%s]", AGENT_ACTIVITY_QUERY)
+    #     cursor.execute(AGENT_ACTIVITY_QUERY)
+    #     columns = [i[0] for i in cursor.description]
+    #     # construct row dicts manually as there's no DictCursor for pyodbc
+    #     rows = [dict(zip(columns, row)) for row in cursor.fetchall()]
+    #     self.log.debug("loaded sql server active agent jobs len(rows)=%s", len(rows))
+    #     return rows
     
     @tracked_method(agent_check_getter=agent_check_getter)
     def _get_new_agent_job_history(self, cursor):
         last_instance_id_filter = ""
         if self._last_history_id:
-            last_instance_id_filter = "\nWHERE sh.instance_id > {last_history_id}".format(last_history_id = self._last_history_id)
+            last_instance_id_filter = "\n\t\tHAVING MIN(sjh2.instance_id) > {last_history_id}".format(last_history_id = self._last_history_id)
         query = AGENT_HISTORY_QUERY.format(last_instance_id_filter=last_instance_id_filter)
         self.log.debug("collecting sql server agent jobs history")
         self.log.debug("Running query [%s]", query)
@@ -102,31 +103,32 @@ class SqlserverAgentActivity(DBMAsyncJob):
         columns = [i[0] for i in cursor.description]
         # construct row dicts manually as there's no DictCursor for pyodbc
         rows = [dict(zip(columns, row)) for row in cursor.fetchall()]
+
         for row in rows:
             if self._last_history_id is None or (
-                row['Instance'] and row['Instance'] > self._last_history_id 
+                row['completion_instance_id'] > self._last_history_id 
             ):
-                self._last_history_id = row['Instance']
+                self._last_history_id = row['completion_instance_id']
         self.log.debug("loaded sql server agent jobs history len(rows)=%s", len(rows))
         return rows
 
-    def _create_active_agent_jobs_event(self, active_jobs):
-        event = {
-            "host": self._check.resolved_hostname,
-            "ddagentversion": datadog_agent.get_version(),
-            "ddsource": "sqlserver",
-            "dbm_type": "activity",
-            "collection_interval": self.collection_interval,
-            "ddtags": self.tags,
-            "timestamp": time.time() * 1000,
-            'sqlserver_version': self._check.static_info_cache.get(STATIC_INFO_VERSION, ""),
-            'sqlserver_engine_edition': self._check.static_info_cache.get(STATIC_INFO_ENGINE_EDITION, ""),
-            "cloud_metadata": self._config.cloud_metadata,
-            "sqlserver_active_jobs": active_jobs
-        }
-        return event
+    # def _create_active_agent_jobs_event(self, active_jobs):
+    #     event = {
+    #         "host": self._check.resolved_hostname,
+    #         "ddagentversion": datadog_agent.get_version(),
+    #         "ddsource": "sqlserver",
+    #         "dbm_type": "activity",
+    #         "collection_interval": self.collection_interval,
+    #         "ddtags": self.tags,
+    #         "timestamp": time.time() * 1000,
+    #         'sqlserver_version': self._check.static_info_cache.get(STATIC_INFO_VERSION, ""),
+    #         'sqlserver_engine_edition': self._check.static_info_cache.get(STATIC_INFO_ENGINE_EDITION, ""),
+    #         "cloud_metadata": self._config.cloud_metadata,
+    #         "sqlserver_active_jobs": active_jobs
+    #     }
+    #     return event
     
-    def _create_agent_jobs_history_event(self, grouped_jobs_history_row):
+    def _create_agent_jobs_history_event(self, grouped_jobs_history_rows):
         event = {
             "host": self._check.resolved_hostname,
             "ddagentversion": datadog_agent.get_version(),
@@ -138,7 +140,7 @@ class SqlserverAgentActivity(DBMAsyncJob):
             'sqlserver_version': self._check.static_info_cache.get(STATIC_INFO_VERSION, ""),
             'sqlserver_engine_edition': self._check.static_info_cache.get(STATIC_INFO_ENGINE_EDITION, ""),
             "cloud_metadata": self._config.cloud_metadata,
-            "sqlserver_job_history": grouped_jobs_history_row
+            "sqlserver_job_history": grouped_jobs_history_rows
         }
         return event
 
@@ -150,11 +152,10 @@ class SqlserverAgentActivity(DBMAsyncJob):
         """
         with self._check.connection.open_managed_default_connection(key_prefix=self._conn_key_prefix):
             with self._check.connection.get_managed_cursor(key_prefix=self._conn_key_prefix) as cursor:
-                activity_rows = self._get_active_jobs(cursor)
-                activity_event = self._create_active_agent_jobs_event(activity_rows)
-                activity_payload = json.dumps(activity_event, default=default_json_event_encoding)
-                # TODO see what topic is best for this
-                self._check.database_monitoring_query_activity(activity_payload)
+                # activity_rows = self._get_active_jobs(cursor)
+                # activity_event = self._create_active_agent_jobs_event(activity_rows)
+                # activity_payload = json.dumps(activity_event, default=default_json_event_encoding)
+                # self._check.database_monitoring_query_activity(activity_payload)
                 history_rows = self._get_new_agent_job_history(cursor)
                 history_rows_grouped_by_instance = dict()
                 for history_row in history_rows:
@@ -165,6 +166,6 @@ class SqlserverAgentActivity(DBMAsyncJob):
                 for group in history_rows_grouped_by_instance.values():
                     history_event = self._create_agent_jobs_history_event(group)
                     history_payload = json.dumps(history_event, default=default_json_event_encoding)
-                    # TODO see what topic is best for this
+                    # TODO figure out where this payload should go
                     self._check.database_monitoring_query_activity(history_payload)
 
