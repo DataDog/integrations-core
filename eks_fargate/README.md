@@ -207,7 +207,7 @@ To further configure the Agent or its container resources, use the properties in
 
    **Example**
 
-   In the following example, a selector targets all pods with the label `"app": redis`. The sidecar profile configures a `DD_PROCESS_AGENT_PROCESS_COLLECTION_ENABLED` environment variable and resource settings. 
+     In the following example, a selector targets all pods with the label `"app": redis`. The sidecar profile configures a `DD_PROCESS_AGENT_PROCESS_COLLECTION_ENABLED` environment variable and resource settings. 
 
    ```yaml
     spec:
