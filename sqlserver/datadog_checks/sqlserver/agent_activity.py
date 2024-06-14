@@ -159,10 +159,10 @@ class SqlserverAgentActivity(DBMAsyncJob):
                 history_rows = self._get_new_agent_job_history(cursor)
                 history_rows_grouped_by_instance = dict()
                 for history_row in history_rows:
-                    if history_row['next_instance_id_with_step_0'] and history_row['next_instance_id_with_step_0'] not in history_rows_grouped_by_instance:
-                        history_rows_grouped_by_instance[history_row['next_instance_id_with_step_0']] = [history_row]
-                    elif history_row['next_instance_id_with_step_0']:
-                        history_rows_grouped_by_instance[history_row['next_instance_id_with_step_0']].append(history_row)
+                    if history_row['completion_instance_id'] not in history_rows_grouped_by_instance:
+                        history_rows_grouped_by_instance[history_row['completion_instance_id']] = [history_row]
+                    else:
+                        history_rows_grouped_by_instance[history_row['completion_instance_id']].append(history_row)
                 for group in history_rows_grouped_by_instance.values():
                     history_event = self._create_agent_jobs_history_event(group)
                     history_payload = json.dumps(history_event, default=default_json_event_encoding)
