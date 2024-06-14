@@ -156,7 +156,7 @@ The setup below configures the Cluster Agent to communicate with the Agent sidec
    ```
    Then apply the new configuration:
   
-  ```shell
+   ```shell
   kubectl apply -n datadog-agent -f datadog-agent.yaml
   ```
 
