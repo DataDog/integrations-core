@@ -56,4 +56,6 @@ MOCKED_METRICS = {
     "fly_io.instance.net.sent_fifo",
     "fly_io.instance.net.sent_packets",
     "fly_io.instance.up",
+    "fly_io.instance.memory.pressure_full",
+    "fly_io.instance.memory.pressure_some",
 }

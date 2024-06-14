@@ -3,23 +3,23 @@
 # Licensed under a 3-clause BSD style license (see LICENSE)
 
 FLY_EDGE_METRICS = {
-    'fly_edge_http_responses_count': {'name': 'edge.http_responses.count', 'type': 'counter'},
-    'fly_edge_http_response_time_seconds': {'name': 'edge.http_response_time', 'type': 'gauge'},
-    'fly_edge_tcp_connects_count': {'name': 'edge.tcp_connects.count', 'type': 'counter'},
-    'fly_edge_tcp_disconnects_count': {'name': 'edge.tcp_disconnects.count', 'type': 'counter'},
+    'fly_edge_http_responses_count': {'name': 'edge.http_responses.count', 'type': 'gauge'},
+    'fly_edge_http_response_time_seconds': {'name': 'edge.http_response_time', 'type': 'histogram'},
+    'fly_edge_tcp_connects_count': {'name': 'edge.tcp_connects.count', 'type': 'gauge'},
+    'fly_edge_tcp_disconnects_count': {'name': 'edge.tcp_disconnects.count', 'type': 'gauge'},
     'fly_edge_data_out': {'name': 'edge.data_out', 'type': 'gauge'},
     'fly_edge_data_in': {'name': 'edge.data_in', 'type': 'gauge'},
     'fly_edge_tls_handshake_errors': {'name': 'edge.tls_handshake_errors', 'type': 'gauge'},
-    'fly_edge_tls_handshake_time_seconds': {'name': 'edge.tls_handshake_time', 'type': 'gauge'},
+    'fly_edge_tls_handshake_time_seconds': {'name': 'edge.tls_handshake_time', 'type': 'histogram'},
 }
 
 FLY_APP_METRICS = {
     'fly_app_concurrency': {'name': 'app.concurrency', 'type': 'gauge'},
-    'fly_app_http_responses_count': {'name': 'app.http_responses.count', 'type': 'counter'},
-    'fly_app_http_response_time_seconds': {'name': 'app.http_response_time', 'type': 'gauge'},
-    'fly_app_connect_time_seconds': {'name': 'app.connect_time', 'type': 'gauge'},
-    'fly_app_tcp_connects_count': {'name': 'app.tcp_connects.count', 'type': 'counter'},
-    'fly_app_tcp_disconnects_count': {'name': 'app.tcp_disconnects.count', 'type': 'counter'},
+    'fly_app_http_responses_count': {'name': 'app.http_responses.count', 'type': 'gauge'},
+    'fly_app_http_response_time_seconds': {'name': 'app.http_response_time', 'type': 'histogram'},
+    'fly_app_connect_time_seconds': {'name': 'app.connect_time', 'type': 'histogram'},
+    'fly_app_tcp_connects_count': {'name': 'app.tcp_connects.count', 'type': 'gauge'},
+    'fly_app_tcp_disconnects_count': {'name': 'app.tcp_disconnects.count', 'type': 'gauge'},
 }
 
 FLY_INSTANCE_METRICS = {
@@ -46,6 +46,8 @@ FLY_INSTANCE_MEMORY_METRICS = {
     'fly_instance_memory_vmalloc_total': {'name': 'instance.memory.vmalloc_total', 'type': 'gauge'},
     'fly_instance_memory_vmalloc_used': {'name': 'instance.memory.vmalloc_used', 'type': 'gauge'},
     'fly_instance_memory_vmalloc_chunk': {'name': 'instance.memory.vmalloc_chunk', 'type': 'gauge'},
+    'fly_instance_memory_pressure_full': {'name': 'instance.memory.pressure_full', 'type': 'gauge'},
+    'fly_instance_memory_pressure_some': {'name': 'instance.memory.pressure_some', 'type': 'gauge'},
 }
 
 FLY_INSTANCE_DISK_METRICS = {
@@ -99,10 +101,10 @@ FLY_INSTANCE_VOLUME_METRICS = {
 }
 
 FLY_POSTGRES_METRICS = {
-    'pg_stat_activity_count': {'name': 'pg_stat.activity.count', 'type': 'counter'},
+    'pg_stat_activity_count': {'name': 'pg_stat.activity_count', 'type': 'gauge'},
     'pg_stat_activity_max_tx_duration': {'name': 'pg_stat.activity.max_tx_duration', 'type': 'gauge'},
-    'pg_stat_archiver_archived_count': {'name': 'pg_stat.archiver.archived_count', 'type': 'counter'},
-    'pg_stat_archiver_failed_count': {'name': 'pg_stat.archiver.failed_count', ' type': 'counter'},
+    'pg_stat_archiver_archived_count': {'name': 'pg_stat.archiver.archived_count', 'type': 'gauge'},
+    'pg_stat_archiver_failed_count': {'name': 'pg_stat.archiver.failed_count', ' type': 'gauge'},
     'pg_stat_bgwriter_buffers_alloc': {'name': 'pg_stat.bgwriter.buffers_alloc', 'type': 'gauge'},
     'pg_stat_bgwriter_buffers_backend_fsync': {'name': 'pg_stat.bgwriter.buffers_backend_fsync', 'type': 'gauge'},
     'pg_stat_bgwriter_buffers_backend': {'name': 'pg_stat.bgwriter.buffers_backend', 'type': 'gauge'},
@@ -122,9 +124,15 @@ FLY_POSTGRES_METRICS = {
         'name': 'pg_stat.database.conflicts_confl_bufferpin',
         'type': 'gauge',
     },
-    'pg_stat_database_conflicts_confl_deadlock': {'name': 'pg_stat.database.conflicts_confl_deadlock', 'type': 'gauge'},
+    'pg_stat_database_conflicts_confl_deadlock': {
+        'name': 'pg_stat.database.conflicts_confl_deadlock',
+        'type': 'gauge',
+    },
     'pg_stat_database_conflicts_confl_lock': {'name': 'pg_stat.database.conflicts_confl_lock', 'type': 'gauge'},
-    'pg_stat_database_conflicts_confl_snapshot': {'name': 'pg_stat.database.conflicts_confl_snapshot', 'type': 'gauge'},
+    'pg_stat_database_conflicts_confl_snapshot': {
+        'name': 'pg_stat.database.conflicts_confl_snapshot',
+        'type': 'gauge',
+    },
     'pg_stat_database_conflicts_confl_tablespace': {
         'name': 'pg_stat.database.conflicts_confl_tablespace',
         'type': 'gauge',
