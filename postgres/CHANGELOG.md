@@ -2,6 +2,12 @@
 
 <!-- towncrier release notes start -->
 
+## 18.3.1 / 2024-06-15
+
+***Fixed***:
+
+* Update config model names ([#17802](https://github.com/DataDog/integrations-core/pull/17802))
+
 ## 18.3.0 / 2024-05-31
 
 ***Added***:
