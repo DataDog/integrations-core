@@ -72,7 +72,7 @@ class SqlserverAgentActivity(DBMAsyncJob):
             shutdown_callback=self._close_db_conn,
         )
         # same questions as job_name
-        self._conn_key_prefix = "dbm-activity-"
+        self._conn_key_prefix = "dbm-agent-jobs-"
 
     def _close_db_conn(self):
         pass

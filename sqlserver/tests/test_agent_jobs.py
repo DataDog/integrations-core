@@ -125,6 +125,29 @@ AGENT_ACTIVITY_STEPS_QUERY = """\
 JOB_CREATION_QUERY="""\
 EXEC msdb.dbo.sp_add_job
     @job_name = 'Job 1'
+EXEC msdb.dbo.sp_add_jobstep
+    @job_name = 'Job 1',
+    @step_name = 'Wait for time 1',
+    @subsystem = 'TSQL',
+    @command = 'BEGIN  
+                    WAITFOR DELAY ''00:00:15'';  
+                    EXECUTE sp_helpdb;  
+                END;';
+EXEC msdb.dbo.sp_add_schedule  
+    @schedule_name = 'Job 1 Schedule',  
+    @freq_type = 4,
+    @freq_interval = 1,
+    @freq_subday_type = 4,
+    @freq_subday_interval = 1;
+
+EXEC msdb.dbo.sp_attach_schedule
+   @job_name = 'Job 1',
+   @schedule_name = 'Job 1 Schedule';
+
+EXEC msdb.dbo.sp_add_jobserver
+    @job_name = 'Job 1';
+EXEC msdb.dbo.sp_start_job
+    @job_name = 'Job 1'
 EXEC msdb.dbo.sp_add_job
     @job_name = 'Job 2'
 """
@@ -164,6 +187,21 @@ VALUES (
     0, -- operator_id_paged
     0, -- retries_attempted
     @@SERVERNAME -- server name
+);
+"""
+
+ACTIVITY_INSERTION_QUERY="""\
+INSERT INTO msdb.dbo.sysjobactivity (
+    session_id,
+    job_id,
+    start_execution_date,
+    stop_execution_date
+)
+VALUES (
+    1, -- New session_id
+    (SELECT job_id FROM msdb.dbo.sysjobs WHERE name = 'Job 1'), -- Replace with the actual job_history_id or NULL
+    GETDATE(), -- start_execution_date
+    NULL -- stop_execution_date (NULL for an active job)
 );
 """
 
@@ -241,3 +279,25 @@ def test_history_output(instance_docker):
             results = cursor.fetchall()
             assert len(results) == 4 # querying all steps from jobs completed after instance 4
     check.cancel()
+
+def test_agent_jobs_integration(aggregator, dd_run_check, instance_docker):
+    instance_docker['dbm'] = True
+    instance_docker['include_agent_jobs'] = True
+    check = SQLServer(CHECK_NAME, {}, [instance_docker])
+    # conn_str = 'DRIVER={};Server={};Database=master;UID={};PWD={};TrustServerCertificate=yes;'.format(
+    #     instance_docker['driver'], instance_docker['host'], "sa", "Password123"
+    # )
+    # conn = pyodbc.connect(conn_str, timeout=DEFAULT_TIMEOUT, autocommit=True)
+    # sacursor = conn.cursor()
+    # sacursor.execute("SELECT * FROM msdb.dbo.syssessions")
+    # results = sacursor.fetchall()
+    # assert len(results) == 1
+    # sacursor.execute(ACTIVITY_INSERTION_QUERY)
+    # sacursor.execute("SELECT * FROM msdb.dbo.sysjobactivity")
+    # results = sacursor.fetchall()
+    # assert len(results) == 1
+    dd_run_check(check)
+    dd_run_check(check)
+    dbm_activity = aggregator.get_event_platform_events("dbm-activity")
+    job_events = [e for e in dbm_activity if (e.get('sqlserver_job_history', None) is not None)]
+    assert len(job_events) == 3

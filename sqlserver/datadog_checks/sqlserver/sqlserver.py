@@ -185,6 +185,23 @@ class SQLServer(AgentCheck):
                 "Autodiscovery is disabled, autodiscovery_include and autodiscovery_exclude will be ignored"
             )
 
+        if not self._config.dbm_enabled:
+            self.log.warning(
+                "dbm disabled"
+            )
+        else:
+            self.log.warning(
+                "dbm enabled"
+            )
+        if not self.instance.get("include_agent_jobs", False):
+            self.log.warning(
+                "agent jobs disabled"
+            )
+        else:
+            self.log.warning(
+                "agent jobs enabled"
+            )
+
     def _new_query_executor(self, queries, executor, extra_tags=None, track_operation_time=False):
         tags = self.tags + (extra_tags or [])
         return QueryExecutor(
@@ -775,6 +792,10 @@ class SQLServer(AgentCheck):
             if self._config.dbm_enabled:
                 if is_affirmative(self.instance.get("TODO create config change", False)):
                     self.agent_activity.run_job_loop(self.tags)
+                else:
+                    self.log.warning(
+                        "agent jobs disbaled"
+                    )
                 self.statement_metrics.run_job_loop(self.tags)
                 self.procedure_metrics.run_job_loop(self.tags)
                 self.activity.run_job_loop(self.tags)
