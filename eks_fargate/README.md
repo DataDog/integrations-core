@@ -158,7 +158,6 @@ The setup below configures the Cluster Agent to communicate with the Agent sidec
   
    ```shell
    kubectl apply -n datadog-agent -f datadog-agent.yaml
-  ```
 
 2. After the Cluster Agent reaches a running state and registers Admission Controller mutating webhooks, an Agent sidecar is automatically injected into any pod created with the label `agent.datadoghq.com/sidecar:fargate`. 
    **The Admission Controller does not mutate pods that are already created**.
