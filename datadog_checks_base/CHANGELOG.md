@@ -2,6 +2,12 @@
 
 <!-- towncrier release notes start -->
 
+## 36.8.0 / 2024-06-15
+
+***Security***:
+
+* Update pydantic to 2.7.3 to address CVE-2024-3772 ([#17802](https://github.com/DataDog/integrations-core/pull/17802))
+
 ## 36.7.1 / 2024-06-11
 
 ***Fixed***:
