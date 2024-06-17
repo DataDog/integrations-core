@@ -27,7 +27,7 @@ The Mimecast integration does not include any metrics.
 
 ### Service Checks
 
-The Mimecast integration does not include any metrics.
+The Mimecast integration does not include any service checks.
 
 ### Events
 
