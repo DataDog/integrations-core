@@ -535,7 +535,7 @@ class MySql(AgentCheck):
             # report size of tables in MiB to Datadog
             self.log.debug("Collecting Table Row Stats Metrics.")
             with tracked_query(self, operation="table_rows_stats_metrics"):
-                (rows_read_total, rows_changed_total) = self._query_rows_stats_per_table(db) or (None, None)
+                (rows_read_total, rows_changed_total) = self._query_rows_stats_per_table(db)
             results['information_table_rows_read_total'] = rows_read_total
             results['information_table_rows_changed_total'] = rows_changed_total
             metrics.update(TABLE_ROWS_STATS_VARS)
@@ -543,7 +543,7 @@ class MySql(AgentCheck):
         if is_affirmative(self._config.options.get('table_size_metrics', False)):
             # report size of tables in MiB to Datadog
             with tracked_query(self, operation="table_size_metrics"):
-                (table_index_size, table_data_size) = self._query_size_per_table(db) or (None, None)
+                (table_index_size, table_data_size) = self._query_size_per_table(db)
             results['information_table_index_size'] = table_index_size
             results['information_table_data_size'] = table_data_size
             metrics.update(TABLE_VARS)
@@ -551,7 +551,7 @@ class MySql(AgentCheck):
         if is_affirmative(self._config.options.get('system_table_size_metrics', False)):
             # report size of tables in MiB to Datadog
             with tracked_query(self, operation="system_table_size_metrics"):
-                (table_index_size, table_data_size) = self._query_size_per_table(db, system_tables=True) or (None, None)
+                (table_index_size, table_data_size) = self._query_size_per_table(db, system_tables=True)
             if results.get('information_table_index_size'):
                 results['information_table_index_size'].update(table_index_size)
             else:
@@ -1165,7 +1165,7 @@ class MySql(AgentCheck):
 
                 if cursor.rowcount < 1:
                     self.warning("Failed to fetch records from the information schema 'tables' table.")
-                    return None
+                    return None, None
 
                 table_index_size = {}
                 table_data_size = {}
@@ -1183,7 +1183,7 @@ class MySql(AgentCheck):
         except (pymysql.err.InternalError, pymysql.err.OperationalError) as e:
             self.warning("Size of tables metrics unavailable at this time: %s", e)
 
-            return None
+            return None, None
 
     def _query_size_per_schema(self, db):
         # Fetches the avg query execution time per schema and returns the
@@ -1217,7 +1217,7 @@ class MySql(AgentCheck):
 
                 if cursor.rowcount < 1:
                     self.warning("Failed to fetch records from the tables rows stats 'tables' table.")
-                    return None
+                    return None, None
 
                 table_rows_read_total = {}
                 table_rows_changed_total = {}
@@ -1234,7 +1234,7 @@ class MySql(AgentCheck):
         except (pymysql.err.InternalError, pymysql.err.OperationalError) as e:
             self.warning("Tables rows stats metrics unavailable at this time: %s", e)
 
-        return {}
+        return None, None
 
     def _compute_synthetic_results(self, results):
         if ('Qcache_hits' in results) and ('Qcache_inserts' in results) and ('Qcache_not_cached' in results):
