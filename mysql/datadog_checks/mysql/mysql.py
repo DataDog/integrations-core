@@ -143,7 +143,6 @@ class MySql(AgentCheck):
         self._non_internal_tags = copy.deepcopy(self.tags)
         self.set_resource_tags()
         self._is_innodb_engine_enabled_cached = None
-        self._is_checking = False
 
     def execute_query_raw(self, query):
         with closing(self._conn.cursor(CommenterSSCursor)) as cursor:
@@ -271,10 +270,6 @@ class MySql(AgentCheck):
         return {'pymysql': pymysql.__version__}
 
     def check(self, _):
-        if self._is_checking:
-            self.log.warning('mysql integration attempted double check')
-            return
-        self._is_checking = True
         if self.instance.get('user'):
             self._log_deprecation('_config_renamed', 'user', 'username')
 
@@ -282,29 +277,22 @@ class MySql(AgentCheck):
             self._log_deprecation('_config_renamed', 'pass', 'password')
 
         tags = list(self.tags)
-        self.log.info("timing: _set_qcache_stats s")
         self._set_qcache_stats()
-        self.log.info("timing: _set_qcache_stats e")
         try:
-            self.log.info("timing: _connect s")
+
             with self._connect() as db:
-                self.log.info("timing: _connect e")
                 self._conn = db
 
-                self.log.info("timing: _get_is_aurora s")
                 # Update tag set with relevant information
                 if self._get_is_aurora(db):
                     aurora_tags = self._get_runtime_aurora_tags(db)
                     self.tags = tags + aurora_tags
                     self._non_internal_tags = self._set_database_instance_tags(aurora_tags)
-                self.log.info("timing: _get_is_aurora e")
 
-                self.log.info("timing: version s")
                 # version collection
                 self.version = get_version(db)
                 self._send_metadata()
                 self._send_database_instance_metadata()
-                self.log.info("timing: version e")
 
                 self.is_mariadb = self.version.flavor == "MariaDB"
 
@@ -313,7 +301,6 @@ class MySql(AgentCheck):
                 if self._config.table_rows_stats_enabled:
                     self.check_userstat_enabled(db)
 
-                self.log.info("timing: metric s")
                 # Metric collection
                 if not self._config.only_custom_queries:
                     self._collect_metrics(db, tags=tags)
@@ -321,8 +308,6 @@ class MySql(AgentCheck):
                     if self._get_runtime_queries(db):
                         self._get_runtime_queries(db).execute(extra_tags=tags)
 
-                self.log.info("timing: metric e")
-                self.log.info("timing: dbm s")
                 if self._config.dbm_enabled:
                     dbm_tags = list(set(self.service_check_tags) | set(tags))
                     self._statement_metrics.run_job_loop(dbm_tags)
@@ -330,25 +315,19 @@ class MySql(AgentCheck):
                     self._query_activity.run_job_loop(dbm_tags)
                     self._mysql_metadata.run_job_loop(dbm_tags)
 
-                self.log.info("timing: dbm e")
-                self.log.info("timing: _put_qcache_stats s")
                 # keeping track of these:
                 self._put_qcache_stats()
-                self.log.info("timing: _put_qcache_stats e")
 
-                self.log.info("timing: _custom_query s")
                 # Custom queries
                 self._query_manager.execute(extra_tags=tags)
-                self.log.info("timing: _custom_query e")
+
         except Exception as e:
             self.log.exception("error!")
             raise e
         finally:
-            self.log.info("timing: finally s")
+
             self._conn = None
             self._report_warnings()
-            self._is_checking = False
-            self.log.info("timing: finally e")
 
     # _set_database_instance_tags sets the tag list for the `database_instance` resource
     # based on metadata that is collected on check start. This ensures that we see tags such as
@@ -459,7 +438,6 @@ class MySql(AgentCheck):
         db = None
         try:
             connect_args = self._get_connection_args()
-            self.log.info("connecting with args {}".format(connect_args))
             db = connect_with_autocommit(**connect_args)
             self.log.debug("Connected to MySQL")
             self.service_check_tags = list(set(service_check_tags))
