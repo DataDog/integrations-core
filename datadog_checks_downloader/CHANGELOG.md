@@ -2,6 +2,12 @@
 
 <!-- towncrier release notes start -->
 
+## 4.7.0 / 2024-06-15
+
+***Security***:
+
+* Bump TUF dependency to address GHSA-77hh-43cm-v8j6 ([#17848](https://github.com/DataDog/integrations-core/pull/17848))
+
 ## 4.6.0 / 2024-04-26 / Agent 7.54.0
 
 ***Added***:
