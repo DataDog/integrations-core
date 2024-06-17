@@ -324,43 +324,13 @@ class VSphereAPI(object):
         return values
 
     @smart_retry
-    def get_allowed_events(self):
-        if not isinstance(self.config, VSphereConfig) or self.config.include_events is None:
-            exclude_filters = {
-                'AlarmStatusChangedEvent': [r'Gray to Green', r'Green to Gray'],
-                'TaskEvent': [
-                    r'Initialize powering On',
-                    r'Power Off virtual machine',
-                    r'Power On virtual machine',
-                    r'Reconfigure virtual machine',
-                    r'Relocate virtual machine',
-                    r'Suspend virtual machine',
-                    r'Migrate virtual machine',
-                ],
-                'VmBeingHotMigratedEvent': [],
-                'VmMessageEvent': [],
-                'VmMigratedEvent': [],
-                'VmPoweredOnEvent': [],
-                'VmPoweredOffEvent': [],
-                'VmReconfiguredEvent': [],
-                'VmSuspendedEvent': [],
-            }
-        else:
-            exclude_filters = {}
-            for item in self.config.include_events:
-                event_name = item["event"]
-                excluded_messages = [r'{}'.format(msg) for msg in item["excluded_messages"]]
-                exclude_filters[event_name] = excluded_messages
-        return [getattr(vim.event, event_type) for event_type in exclude_filters.keys()]
-
-    @smart_retry
     def get_new_events(self, start_time):
         # type: (dt.datetime) -> List[vim.event.Event]
         event_manager = self._conn.content.eventManager
         query_filter = vim.event.EventFilterSpec()
         time_filter = vim.event.EventFilterSpec.ByTime(beginTime=start_time)
         query_filter.time = time_filter
-        query_filter.type = self.get_allowed_events()
+        query_filter.type = [getattr(vim.event, event_type) for event_type in self.config.exclude_filters.keys()]
         try:
             events = event_manager.QueryEvents(query_filter)
         except KeyError as e:

@@ -300,11 +300,14 @@ files:
           However, while the keys should be events to include, the value should be an
           array of message regexes to exclude/filter out. For example, if the key
           is 'AlarmStatusChangedEvent' and the values for this key are 'Gray to Green' and 'Green to Gray',
-          then all events name 'AlarmStatusChangedEvent' that don't have the option of 'Gray to Green'
+          then all events named 'AlarmStatusChangedEvent' that don't have the message 'Gray to Green'
           and 'Green to Gray' will be included.
           
           Currently, events can only be collected from the following resources:
           VMs, hosts, datacenters, datastores, and clusters.
+
+          The default events reported are listed here:
+          https://github.com/DataDog/integrations-core/tree/master/vsphere#events
 
         value:
           example:

@@ -37,7 +37,7 @@ EXCLUDE_FILTERS = {
 class VSphereEvent(object):
     UNKNOWN = 'unknown'
 
-    def __init__(self, raw_event, event_config, tags, event_resource_filters, include_events=None):
+    def __init__(self, raw_event, event_config, tags, event_resource_filters, exclude_filters=EXCLUDE_FILTERS):
         self.raw_event = raw_event
         if self.raw_event and self.raw_event.__class__.__name__.startswith('vim.event'):
             self.event_type = self.raw_event.__class__.__name__[10:]
@@ -55,15 +55,8 @@ class VSphereEvent(object):
             self.event_config = {}
         else:
             self.event_config = event_config
-        if include_events is None:
-            self.exclude_filters = EXCLUDE_FILTERS
-        else:
-            self.exclude_filters = {}
-            for item in include_events:
-                event_name = item["event"]
-                excluded_messages = [r'{}'.format(msg) for msg in item["excluded_messages"]]
-                self.exclude_filters[event_name] = excluded_messages
-        self.allowed_events = [getattr(vim.event, event_type) for event_type in self.exclude_filters.keys()]
+        self.exclude_filters = exclude_filters
+        self.allowed_events = [getattr(vim.event, event_type) for event_type in exclude_filters.keys()]
         self.event_resource_filters = event_resource_filters
 
     def _is_filtered(self):

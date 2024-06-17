@@ -8,6 +8,7 @@ import pytest
 from pyVmomi import vim
 
 from datadog_checks.vsphere import VSphereCheck
+from datadog_checks.vsphere.event import EXCLUDE_FILTERS
 
 
 def test_allowed_event_list():
@@ -22,25 +23,6 @@ def test_allowed_event_list():
         vim.event.VmReconfiguredEvent,
         vim.event.VmSuspendedEvent,
     ]
-    EXCLUDE_FILTERS = {
-        'AlarmStatusChangedEvent': [r'Gray to Green', r'Green to Gray'],
-        'TaskEvent': [
-            r'Initialize powering On',
-            r'Power Off virtual machine',
-            r'Power On virtual machine',
-            r'Reconfigure virtual machine',
-            r'Relocate virtual machine',
-            r'Suspend virtual machine',
-            r'Migrate virtual machine',
-        ],
-        'VmBeingHotMigratedEvent': [],
-        'VmMessageEvent': [],
-        'VmMigratedEvent': [],
-        'VmPoweredOnEvent': [],
-        'VmPoweredOffEvent': [],
-        'VmReconfiguredEvent': [],
-        'VmSuspendedEvent': [],
-    }
     allowed_events = [getattr(vim.event, event_type) for event_type in EXCLUDE_FILTERS.keys()]
     assert sorted(str(e) for e in expected_events) == sorted(str(e) for e in allowed_events)
 
@@ -281,3 +263,31 @@ def test_include_events_incorrectly_formatted_event(aggregator, realtime_instanc
     check.api.mock_events = [event1]
     check.check(None)
     assert len(aggregator.events) == 0
+
+
+@pytest.mark.usefixtures('mock_type', 'mock_threadpool', 'mock_api', 'mock_rest_api')
+def test_include_events_ok_new_event_type(aggregator, realtime_instance):
+    realtime_instance['include_events'] = [{"event": "AlarmAcknowledgedEvent", "excluded_messages": ["Remove Alarm"]}]
+    check = VSphereCheck(
+        'vsphere',
+        {},
+        [realtime_instance],
+    )
+    check.initiate_api_connection()
+
+    event1 = vim.event.AlarmAcknowledgedEvent()
+    event1.createdTime = dt.datetime.now()
+    event1.entity = vim.event.ManagedEntityEventArgument()
+    event1.entity.entity = vim.VirtualMachine(moId="vm1")
+    event1.entity.name = "vm1"
+    event1.alarm = vim.event.AlarmEventArgument()
+    event1.alarm.name = "alarm1"
+    event1.datacenter = vim.event.DatacenterEventArgument()
+    event1.datacenter.name = "dc1"
+    event1.fullFormattedMessage = "The Alarm was acknowledged"
+    aggregator.reset()
+    check.api.mock_events = [event1]
+    check.check(None)
+    assert len(aggregator.events) == 1
+    assert "The Alarm was acknowledged" in aggregator.events[0]['msg_text']
+    assert aggregator.events[0]['msg_title'] == "AlarmAcknowledgedEvent"

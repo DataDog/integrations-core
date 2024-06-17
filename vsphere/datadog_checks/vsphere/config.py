@@ -126,6 +126,32 @@ class VSphereConfig(object):
             instance.get("event_resource_filters", DEFAULT_EVENT_RESOURCES)
         )
         self.include_events = instance.get("include_events", None)
+        if self.include_events is None:
+            self.exclude_filters = {
+                'AlarmStatusChangedEvent': [r'Gray to Green', r'Green to Gray'],
+                'TaskEvent': [
+                    r'Initialize powering On',
+                    r'Power Off virtual machine',
+                    r'Power On virtual machine',
+                    r'Reconfigure virtual machine',
+                    r'Relocate virtual machine',
+                    r'Suspend virtual machine',
+                    r'Migrate virtual machine',
+                ],
+                'VmBeingHotMigratedEvent': [],
+                'VmMessageEvent': [],
+                'VmMigratedEvent': [],
+                'VmPoweredOnEvent': [],
+                'VmPoweredOffEvent': [],
+                'VmReconfiguredEvent': [],
+                'VmSuspendedEvent': [],
+            }
+        else:
+            self.exclude_filters = {}
+            for item in self.include_events:
+                event_name = item["event"]
+                excluded_messages = [r'{}'.format(msg) for msg in item["excluded_messages"]]
+                self.exclude_filters[event_name] = excluded_messages
 
         # Since `collect_per_instance_filters` have the same structure as `metric_filters` we use the same parser
         self.collect_per_instance_filters = self._parse_metric_regex_filters(
