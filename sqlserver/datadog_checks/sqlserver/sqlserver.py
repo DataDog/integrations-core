@@ -794,7 +794,7 @@ class SQLServer(AgentCheck):
                     self.agent_activity.run_job_loop(self.tags)
                 else:
                     self.log.warning(
-                        "agent jobs disbaled"
+                        "agent jobs disabled"
                     )
                 self.statement_metrics.run_job_loop(self.tags)
                 self.procedure_metrics.run_job_loop(self.tags)

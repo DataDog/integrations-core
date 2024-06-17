@@ -98,6 +98,7 @@ class SqlserverAgentActivity(DBMAsyncJob):
                 row['completion_instance_id'] > self._last_history_id 
             ):
                 self._last_history_id = row['completion_instance_id']
+
         self.log.debug("loaded sql server agent jobs history len(rows)=%s", len(rows))
         return rows
     
@@ -106,7 +107,7 @@ class SqlserverAgentActivity(DBMAsyncJob):
             "host": self._check.resolved_hostname,
             "ddagentversion": datadog_agent.get_version(),
             "ddsource": "sqlserver",
-            "dbm_type": "activity",
+            "dbm_type": "samples",
             "collection_interval": self.collection_interval,
             "ddtags": self.tags,
             "timestamp": time.time() * 1000,
@@ -136,5 +137,5 @@ class SqlserverAgentActivity(DBMAsyncJob):
                     history_event = self._create_agent_jobs_history_event(group)
                     history_payload = json.dumps(history_event, default=default_json_event_encoding)
                     # TODO figure out where this payload should go
-                    self._check.database_monitoring_query_activity(history_payload)
+                    self._check.database_monitoring_query_sample(history_payload)
 
