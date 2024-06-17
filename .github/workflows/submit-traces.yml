@@ -49,7 +49,7 @@ jobs:
       if: ${{ hashFiles('captured-traces') != '' }}
       run: docker exec $(docker ps --format "{{.ID}}") agent status
 
-    - uses: geekyeggo/delete-artifact@v2
+    - uses: geekyeggo/delete-artifact@v5
       if: steps.download.outcome == 'success'
       with:
         name: "${{ inputs.artifact-name }}"
