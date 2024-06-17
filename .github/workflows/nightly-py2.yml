@@ -4,6 +4,7 @@ on:
   schedule:
   # 4 AM UTC
   - cron: "0 4 * * *"
+  workflow_dispatch:
 
 jobs:
   test:
@@ -15,6 +16,7 @@ jobs:
       standard: true
       test-py2: true
       test-py3: false
+      branch: "agent-v6"
     secrets: inherit
 
   submit-traces:
