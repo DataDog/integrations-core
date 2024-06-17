@@ -209,75 +209,75 @@ To further configure the Agent or its container resources, use the properties in
 
      In the following example, a selector targets all pods with the label `"app": redis`. The sidecar profile configures a `DD_PROCESS_AGENT_PROCESS_COLLECTION_ENABLED` environment variable and resource settings. 
 
-   ```yaml
-      spec:
-        features:
-          admissionController:
-            agentSidecarInjection:
-              enabled: true
-              provider: fargate
-              selectors:
-              - objectSelector:
-                  matchLabels:
-                    "app": redis
-              profiles:
-              - env:
-                - name: DD_PROCESS_AGENT_PROCESS_COLLECTION_ENABLED
-                  value: "true"
-                resources:
-                  requests:
-                    cpu: "400m"
-                    memory: "256Mi"
-                  limits:
-                    cpu: "800m"
-                    memory: "512Mi"
-   ```
+     ```yaml
+        spec:
+          features:
+            admissionController:
+              agentSidecarInjection:
+                enabled: true
+                provider: fargate
+                selectors:
+                - objectSelector:
+                    matchLabels:
+                      "app": redis
+                profiles:
+                - env:
+                  - name: DD_PROCESS_AGENT_PROCESS_COLLECTION_ENABLED
+                    value: "true"
+                  resources:
+                    requests:
+                      cpu: "400m"
+                      memory: "256Mi"
+                    limits:
+                      cpu: "800m"
+                      memory: "512Mi"
+     ```
 
-  Then apply the new configuration:
-  
-  ```shell
-  kubectl apply -n datadog-agent -f datadog-agent.yaml
-  ```
+     Then apply the new configuration:
+     
+     ```shell
+     kubectl apply -n datadog-agent -f datadog-agent.yaml
+     ```
 
   2. After the Cluster Agent reaches a running state and registers Admission Controller mutating webhooks, an Agent sidecar is automatically injected into any pod created with the label `app:redis`.
    **The Admission Controller does not mutate pods that are already created**.
 
-**Example result**
+     **Example result**
 
-  The following is a `spec.containers` snippet from a Redis deployment where the Admission Controller injected an Agent sidecar. The environment variables and resource settings from `datadog-values.yaml` are automatically applied.
-  
-  {{< highlight yaml "hl_lines=12-30" >}}
-  labels:
-    app: redis
-    eks.amazonaws.com/fargate-profile: fp-fargate
-    pod-template-hash: 7b86c456c4
-  # ...
-  containers:
-  - args:
-    - redis-server
-    image: redis:latest
-  # ...
-  - env:
-    - name: DD_API_KEY
-      valueFrom:
-        secretKeyRef:
-          key: api-key
-          name: datadog-secret
-    # ...
-    - name: DD_PROCESS_AGENT_PROCESS_COLLECTION_ENABLED
-      value: "true"
-    # ...
-    image: gcr.io/datadoghq/agent:7.51.0
-    imagePullPolicy: IfNotPresent
-    name: datadog-agent-injected
-    resources:
-      limits:
-        cpu: 800m
-        memory: 512Mi
-      requests:
-        cpu: 400m
-        memory: 256Mi
-  {{< /highlight >}}
+     The following is a `spec.containers` snippet from a Redis deployment where the Admission Controller injected an Agent sidecar. The environment variables and resource settings from `datadog-values.yaml` are automatically applied.
+     
+     {{< highlight yaml "hl_lines=12-30" >}}
+     labels:
+       app: redis
+       eks.amazonaws.com/fargate-profile: fp-fargate
+       pod-template-hash: 7b86c456c4
+     # ...
+     containers:
+     - args:
+       - redis-server
+       image: redis:latest
+     # ...
+     - env:
+       - name: DD_API_KEY
+         valueFrom:
+           secretKeyRef:
+             key: api-key
+             name: datadog-secret
+       # ...
+       - name: DD_PROCESS_AGENT_PROCESS_COLLECTION_ENABLED
+         value: "true"
+       # ...
+       image: gcr.io/datadoghq/agent:7.51.0
+       imagePullPolicy: IfNotPresent
+       name: datadog-agent-injected
+       resources:
+         limits:
+           cpu: 800m
+           memory: 512Mi
+         requests:
+           cpu: 400m
+           memory: 256Mi
+     {{< /highlight >}}
 
 <!-- xxz tab xxx -->
 <!-- xxx tab "Helm" xxx -->
