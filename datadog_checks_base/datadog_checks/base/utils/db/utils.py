@@ -299,7 +299,6 @@ class DBMAsyncJob(object):
         self._job_tags = self._tags + ["job:{}".format(self._job_name)]
         self._job_tags_str = ','.join(self._job_tags)
         self._last_check_run = time.time()
-        self._is_check_running = False
         if self._run_sync or is_affirmative(os.environ.get('DBM_THREADED_JOB_RUN_SYNC', "false")):
             self._log.debug("Running threaded job synchronously. job=%s", self._job_name)
             self._run_sync_job_rate_limited()
@@ -322,12 +321,6 @@ class DBMAsyncJob(object):
                         "dd.{}.async_job.inactive_stop".format(self._dbms), 1, tags=self._job_tags, raw=True
                     )
                     break
-                if self._is_check_running:
-                    self._log.warn("[%s] Job loop attempted double run", self._job_tags_str)
-                    self._check.increment("dd.{}.double_async_job".format(self._dbms), tags=self._job_tags)
-                    continue
-                
-                self._is_check_running = True
                 if self._check.should_profile_memory():
                     self._check.profile_memory(
                         self._run_job_rate_limited,
@@ -336,7 +329,6 @@ class DBMAsyncJob(object):
                     )
                 else:
                     self._run_job_rate_limited()
-                self._is_check_running = False
         except Exception as e:
             if self._cancel_event.isSet():
                 # canceling can cause exceptions if the connection is closed the middle of the check run
