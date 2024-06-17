@@ -541,7 +541,7 @@ class MySql(AgentCheck):
             # report size of tables in MiB to Datadog
             self.log.debug("Collecting Table Row Stats Metrics.")
             with tracked_query(self, operation="table_rows_stats_metrics"):
-                (rows_read_total, rows_changed_total) = self._query_rows_stats_per_table(db)
+                (rows_read_total, rows_changed_total) = self._query_rows_stats_per_table(db) or (None, None)
             results['information_table_rows_read_total'] = rows_read_total
             results['information_table_rows_changed_total'] = rows_changed_total
             metrics.update(TABLE_ROWS_STATS_VARS)
@@ -549,7 +549,7 @@ class MySql(AgentCheck):
         if is_affirmative(self._config.options.get('table_size_metrics', False)):
             # report size of tables in MiB to Datadog
             with tracked_query(self, operation="table_size_metrics"):
-                (table_index_size, table_data_size) = self._query_size_per_table(db)
+                (table_index_size, table_data_size) = self._query_size_per_table(db) or (None, None)
             results['information_table_index_size'] = table_index_size
             results['information_table_data_size'] = table_data_size
             metrics.update(TABLE_VARS)
@@ -557,7 +557,7 @@ class MySql(AgentCheck):
         if is_affirmative(self._config.options.get('system_table_size_metrics', False)):
             # report size of tables in MiB to Datadog
             with tracked_query(self, operation="system_table_size_metrics"):
-                (table_index_size, table_data_size) = self._query_size_per_table(db, system_tables=True)
+                (table_index_size, table_data_size) = self._query_size_per_table(db, system_tables=True) or (None, None)
             if results.get('information_table_index_size'):
                 results['information_table_index_size'].update(table_index_size)
             else:
