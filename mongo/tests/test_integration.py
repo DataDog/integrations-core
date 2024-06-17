@@ -100,7 +100,7 @@ def test_integration_mongos(instance_integration_cluster, aggregator, check, dd_
             'jumbo',
             'sessions',
         ],
-        ['sharding_cluster_role:mongos'],
+        ['sharding_cluster_role:mongos', 'clustername:my_cluster'],
     )
 
     aggregator.assert_all_metrics_covered()
