@@ -1,6 +1,6 @@
 {
     "manifest_version": "2.0.0",
-    "app_uuid": "9f98de10-9c98-4601-ae36-cbe25c4be018",
+    "app_uuid": "9636c2eb-34f6-4aa4-a236-c39e47b21c79",
     "app_id": "cisco-secure-endpoint",
     "display_on_public_website": false,
     "tile": {
@@ -9,11 +9,10 @@
         "support": "README.md#Support",
         "changelog": "CHANGELOG.md",
         "description": "Gain insights into Cisco Secure Endpoint logs",
-        "title": "Cisco Secure Endpoint",
+        "title": "cisco_secure_endpoint",
         "media": [],
         "classifier_tags": [
             "Category::Log Collection",
-            "Category::Network",
             "Category::Security",
             "Submitted Data Type::Logs"
         ]
@@ -21,7 +20,7 @@
     "assets": {
         "integration": {
             "auto_install": false,
-            "source_type_id": 10441,
+            "source_type_id": 18601889,
             "source_type_name": "cisco_secure_endpoint",
             "events": {
                 "creates_events": false
