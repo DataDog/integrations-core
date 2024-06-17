@@ -1,1 +1,1 @@
-Avoid simultaneous check runs with MySQL integration
+Fixed the MySQL integration to correctly catch and handle errors raised by the connection attempt
