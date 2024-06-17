@@ -1,1 +1,1 @@
-SELECT count(*) from msdb.dbo.syssessions;
+SELECT * from msdb.dbo.syssessions;
