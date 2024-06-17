@@ -460,6 +460,7 @@ class MySql(AgentCheck):
         db = None
         try:
             connect_args = self._get_connection_args()
+            self.log.info("connecting with args {}".format(connect_args))
             db = connect_with_autocommit(**connect_args)
             self.log.debug("Connected to MySQL")
             self.service_check_tags = list(set(service_check_tags))
