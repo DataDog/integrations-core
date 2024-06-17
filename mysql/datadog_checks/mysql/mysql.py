@@ -285,10 +285,10 @@ class MySql(AgentCheck):
         self.log.info("timing: _set_qcache_stats s")
         self._set_qcache_stats()
         self.log.info("timing: _set_qcache_stats e")
-        self.log.info("timing: _connect s")
-        with self._connect() as db:
-            self.log.info("timing: _connect e")
-            try:
+        try:
+            self.log.info("timing: _connect s")
+            with self._connect() as db:
+                self.log.info("timing: _connect e")
                 self._conn = db
 
                 self.log.info("timing: _get_is_aurora s")
@@ -340,16 +340,15 @@ class MySql(AgentCheck):
                 # Custom queries
                 self._query_manager.execute(extra_tags=tags)
                 self.log.info("timing: _custom_query e")
-
-            except Exception as e:
-                self.log.exception("error!")
-                raise e
-            finally:
-                self.log.info("timing: finally s")
-                self._conn = None
-                self._report_warnings()
-                self._is_checking = False
-                self.log.info("timing: finally e")
+        except Exception as e:
+            self.log.exception("error!")
+            raise e
+        finally:
+            self.log.info("timing: finally s")
+            self._conn = None
+            self._report_warnings()
+            self._is_checking = False
+            self.log.info("timing: finally e")
 
     # _set_database_instance_tags sets the tag list for the `database_instance` resource
     # based on metadata that is collected on check start. This ensures that we see tags such as
