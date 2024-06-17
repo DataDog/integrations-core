@@ -73,6 +73,21 @@ AGENT_ACTIVITY_STEPS_QUERY = {
     ],
 }
 
+AGENT_ACTIVE_SESSION_DURATION_QUERY = {
+    "name": "msdb.dbo.syssessions",
+    "query": """\
+        SELECT TOP 1 
+            session_id, 
+            DATEDIFF(SECOND, agent_start_date, GETDATE()) AS duration_seconds
+        FROM msdb.dbo.syssessions
+        ORDER BY session_id DESC;
+    """,
+    "columns": [
+        {"name": "session_id", "type": "tag"},
+        {"name": "agent.active_session.duration", "type": "gauge"},
+    ],
+}
+
 class SqlserverAgentMetrics(SqlserverDatabaseMetricsBase):
     @property
     def include_agent_metrics(self) -> bool:
@@ -105,11 +120,13 @@ class SqlserverAgentMetrics(SqlserverDatabaseMetricsBase):
     def queries(self):
         # make a copy of the query to avoid modifying the original
         # in case different instances have different collection intervals
-        duration_query = AGENT_ACTIVITY_DURATION_QUERY.copy()
-        duration_query['collection_interval'] = self.collection_interval
-        step_info_query = AGENT_ACTIVITY_STEPS_QUERY.copy()
-        step_info_query['collection_interval'] = self.collection_interval
-        return [duration_query, step_info_query]
+        active_job_duration_query = AGENT_ACTIVITY_DURATION_QUERY.copy()
+        active_job_duration_query['collection_interval'] = self.collection_interval
+        active_job_step_info_query = AGENT_ACTIVITY_STEPS_QUERY.copy()
+        active_job_step_info_query['collection_interval'] = self.collection_interval
+        active_session_duration_query = AGENT_ACTIVE_SESSION_DURATION_QUERY.copy()
+        active_session_duration_query['collection_interval'] = self.collection_interval
+        return [active_job_duration_query, active_job_step_info_query, active_session_duration_query]
     
     def __repr__(self) -> str:
         return (

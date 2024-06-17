@@ -287,7 +287,7 @@ def test_agent_jobs_integration(aggregator, dd_run_check, instance_docker):
     )
     conn = pyodbc.connect(conn_str, timeout=DEFAULT_TIMEOUT, autocommit=True)
     sacursor = conn.cursor()
-    # time.sleep(3)
+    # time.sleep(2)
     sacursor.execute("SELECT * FROM msdb.dbo.syssessions")
     results = sacursor.fetchall()
     assert len(results) == 1
@@ -308,10 +308,12 @@ def test_agent_jobs_integration(aggregator, dd_run_check, instance_docker):
     assert len(job_events) == 3
     aggregator.assert_metric("sqlserver.agent.active_jobs.duration", count=1)
     aggregator.assert_metric("sqlserver.agent.active_jobs.step_info", count=1)
+    aggregator.assert_metric("sqlserver.agent.active_session.duration", count=1)
     time.sleep(2)
     dd_run_check(check)
     aggregator.assert_metric("sqlserver.agent.active_jobs.duration", count=2)
     aggregator.assert_metric("sqlserver.agent.active_jobs.step_info", count=2)
+    aggregator.assert_metric("sqlserver.agent.active_session.duration", count=2)
     dbm_activity = aggregator.get_event_platform_events("dbm-samples")
     job_events = [e for e in dbm_activity if (e.get('sqlserver_job_history', None) is not None)]
     assert len(job_events) == 3 # successive checks should not create new events for same history entries
