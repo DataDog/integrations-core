@@ -1,0 +1,1 @@
+Add cursor object to sampled activities and explain plan payload. cursor contains the cursor information for idleCursor and getmore operations.
