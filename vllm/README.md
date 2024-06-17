@@ -6,7 +6,7 @@ This check monitors [vLLM][1] through the Datadog Agent.
 
 ## Setup
 
-Follow the instructions below to install and configure this check for an Agent running on a host. For containerized environments, see the [Autodiscovery Integration Templates][3] for guidance on applying these instructions.
+Follow the instructions below to install and configure this check for an Agent running on a host. 
 
 ### Installation
 
@@ -15,19 +15,19 @@ No additional installation is needed on your server.
 
 ### Configuration
 
-1. Edit the `vllm.d/conf.yaml` file, in the `conf.d/` folder at the root of your Agent's configuration directory to start collecting your vllm performance data. See the [sample vllm.d/conf.yaml][4] for all available configuration options.
+1. Edit the `vllm.d/conf.yaml` file, in the `conf.d/` folder at the root of your Agent's configuration directory to start collecting your vllm performance data. See the [sample vllm.d/conf.yaml][3] for all available configuration options.
 
-2. [Restart the Agent][5].
+2. [Restart the Agent][4].
 
 ### Validation
 
-[Run the Agent's status subcommand][6] and look for `vllm` under the Checks section.
+[Run the Agent's status subcommand][5] and look for `vllm` under the Checks section.
 
 ## Data Collected
 
 ### Metrics
 
-See [metadata.csv][7] for a list of metrics provided by this integration.
+See [metadata.csv][6] for a list of metrics provided by this integration.
 
 ### Events
 
@@ -37,7 +37,7 @@ The vLLM integration does not include any events.
 
 The vLLM integration does not include any service checks.
 
-See [service_checks.json][8] for a list of service checks provided by this integration.
+See [service_checks.json][7] for a list of service checks provided by this integration.
 
 ## Troubleshooting
 
@@ -46,10 +46,9 @@ Need help? Contact [Datadog support][9].
 
 [1]: **LINK_TO_INTEGRATION_SITE**
 [2]: https://app.datadoghq.com/account/settings/agent/latest
-[3]: https://docs.datadoghq.com/agent/kubernetes/integrations/
-[4]: https://github.com/DataDog/integrations-core/blob/master/vllm/datadog_checks/vllm/data/conf.yaml.example
-[5]: https://docs.datadoghq.com/agent/guide/agent-commands/#start-stop-and-restart-the-agent
-[6]: https://docs.datadoghq.com/agent/guide/agent-commands/#agent-status-and-information
-[7]: https://github.com/DataDog/integrations-core/blob/master/vllm/metadata.csv
-[8]: https://github.com/DataDog/integrations-core/blob/master/vllm/assets/service_checks.json
+[3]: https://github.com/DataDog/integrations-core/blob/master/vllm/datadog_checks/vllm/data/conf.yaml.example
+[4]: https://docs.datadoghq.com/agent/guide/agent-commands/#start-stop-and-restart-the-agent
+[5]: https://docs.datadoghq.com/agent/guide/agent-commands/#agent-status-and-information
+[6]: https://github.com/DataDog/integrations-core/blob/master/vllm/metadata.csv
+[7]: https://github.com/DataDog/integrations-core/blob/master/vllm/assets/service_checks.json
 [9]: https://docs.datadoghq.com/help/
