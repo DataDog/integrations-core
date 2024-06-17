@@ -1,5 +1,6 @@
 import pytest
 import pyodbc
+import time
 import sys
 from datadog_checks.sqlserver import SQLServer
 
@@ -146,8 +147,6 @@ EXEC msdb.dbo.sp_attach_schedule
 
 EXEC msdb.dbo.sp_add_jobserver
     @job_name = 'Job 1';
-EXEC msdb.dbo.sp_start_job
-    @job_name = 'Job 1'
 EXEC msdb.dbo.sp_add_job
     @job_name = 'Job 2'
 """
@@ -195,12 +194,14 @@ INSERT INTO msdb.dbo.sysjobactivity (
     session_id,
     job_id,
     start_execution_date,
+    last_executed_step_id,
     stop_execution_date
 )
 VALUES (
     1, -- New session_id
-    (SELECT job_id FROM msdb.dbo.sysjobs WHERE name = 'Job 1'), -- Replace with the actual job_history_id or NULL
-    GETDATE(), -- start_execution_date
+    (SELECT job_id FROM msdb.dbo.sysjobs WHERE name = 'Job 2'), -- Replace with the actual job_history_id or NULL
+    GETDATE(), -- start_execution_date,.
+    1,
     NULL -- stop_execution_date (NULL for an active job)
 );
 """
@@ -215,7 +216,6 @@ def test_connection_with_agent_history(instance_docker):
             last_instance_id_filter="\n\t\tHAVING MIN(sjh2.instance_id) > 26220"
             query = AGENT_HISTORY_QUERY.format(last_instance_id_filter=last_instance_id_filter)
             cursor.execute(query)
-            result = cursor.fetchone()
             assert query == FORMATTED_HISTORY_QUERY
     check.cancel()
 
@@ -227,8 +227,6 @@ def test_connection_with_agent_activity_duration(instance_docker):
     with check.connection.open_managed_default_connection():
         with check.connection.get_managed_cursor() as cursor:
             cursor.execute(AGENT_ACTIVITY_DURATION_QUERY)
-            result = cursor.fetchall()
-            assert 1 == 1
     check.cancel()
 
 @pytest.mark.usefixtures('dd_environment')
@@ -239,8 +237,6 @@ def test_connection_with_agent_activity_steps(instance_docker):
     with check.connection.open_managed_default_connection():
         with check.connection.get_managed_cursor() as cursor:
             cursor.execute(AGENT_ACTIVITY_STEPS_QUERY)
-            result = cursor.fetchall()
-            assert 1 == 1
     check.cancel()
 
 @pytest.mark.usefixtures('dd_environment')
@@ -256,7 +252,9 @@ def test_history_output(instance_docker):
     sacursor.execute("SELECT * FROM msdb.dbo.sysjobs")
     results = sacursor.fetchall()
     assert len(results) == 2
-    job_and_step_series = [(1, 1), (1, 2), (2, 1), (1, 0), (2, 0), (1, 1), (2, 1), (2, 0)]
+    # job 1 completes once, job 2 completes twice, an instance of job 1 is still in progress
+    # should result in 3 job history events to submit
+    job_and_step_series = [(1, 1), (1, 2), (2, 1), (1, 0), (2, 0), (1, 1), (2, 1), (2, 0), (2, 1)]
     for (job_number, step_id) in (job_and_step_series):
         query = HISTORY_INSERTION_QUERY.format(job_number=job_number, step_id=step_id)
         sacursor.execute(query)
@@ -284,20 +282,36 @@ def test_agent_jobs_integration(aggregator, dd_run_check, instance_docker):
     instance_docker['dbm'] = True
     instance_docker['include_agent_jobs'] = True
     check = SQLServer(CHECK_NAME, {}, [instance_docker])
-    # conn_str = 'DRIVER={};Server={};Database=master;UID={};PWD={};TrustServerCertificate=yes;'.format(
-    #     instance_docker['driver'], instance_docker['host'], "sa", "Password123"
-    # )
-    # conn = pyodbc.connect(conn_str, timeout=DEFAULT_TIMEOUT, autocommit=True)
-    # sacursor = conn.cursor()
-    # sacursor.execute("SELECT * FROM msdb.dbo.syssessions")
-    # results = sacursor.fetchall()
-    # assert len(results) == 1
-    # sacursor.execute(ACTIVITY_INSERTION_QUERY)
-    # sacursor.execute("SELECT * FROM msdb.dbo.sysjobactivity")
-    # results = sacursor.fetchall()
-    # assert len(results) == 1
+    conn_str = 'DRIVER={};Server={};Database=master;UID={};PWD={};TrustServerCertificate=yes;'.format(
+        instance_docker['driver'], instance_docker['host'], "sa", "Password123"
+    )
+    conn = pyodbc.connect(conn_str, timeout=DEFAULT_TIMEOUT, autocommit=True)
+    sacursor = conn.cursor()
+    # time.sleep(3)
+    sacursor.execute("SELECT * FROM msdb.dbo.syssessions")
+    results = sacursor.fetchall()
+    assert len(results) == 1
+    sacursor.execute("SELECT job_id FROM msdb.dbo.sysjobs WHERE name = 'Job 2'")
+    job2_id = sacursor.fetchone()[0]
+    sacursor.execute(ACTIVITY_INSERTION_QUERY)
+    sacursor.execute("SELECT * FROM msdb.dbo.sysjobactivity")
+    results = sacursor.fetchall()
+    assert len(results) == 2
+    for activity in results:
+        if activity[1] != job2_id:
+            continue
+        assert activity[6] == 1
+        
     dd_run_check(check)
-    dd_run_check(check)
-    dbm_activity = aggregator.get_event_platform_events("dbm-activity")
+    dbm_activity = aggregator.get_event_platform_events("dbm-samples")
     job_events = [e for e in dbm_activity if (e.get('sqlserver_job_history', None) is not None)]
     assert len(job_events) == 3
+    aggregator.assert_metric("sqlserver.agent.active_jobs.duration", count=1)
+    aggregator.assert_metric("sqlserver.agent.active_jobs.step_info", count=1)
+    time.sleep(2)
+    dd_run_check(check)
+    aggregator.assert_metric("sqlserver.agent.active_jobs.duration", count=2)
+    aggregator.assert_metric("sqlserver.agent.active_jobs.step_info", count=2)
+    dbm_activity = aggregator.get_event_platform_events("dbm-samples")
+    job_events = [e for e in dbm_activity if (e.get('sqlserver_job_history', None) is not None)]
+    assert len(job_events) == 3 # successive checks should not create new events for same history entries
