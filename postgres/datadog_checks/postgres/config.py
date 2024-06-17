@@ -3,7 +3,6 @@
 # Licensed under Simplified BSD License (see LICENSE)
 # https://www.postgresql.org/docs/current/libpq-connect.html#LIBPQ-PARAMKEYWORDS
 from typing import Optional
-#test
 from six import PY2, PY3, iteritems
 
 try:
@@ -30,7 +29,7 @@ class PostgresConfig:
     RATE = AgentCheck.rate
     GAUGE = AgentCheck.gauge
     MONOTONIC = AgentCheck.monotonic_count
-
+    #test
     def __init__(self, instance, init_config):
         self.host = instance.get('host', '')
         if not self.host:
