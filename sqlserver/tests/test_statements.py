@@ -62,8 +62,8 @@ def dbm_instance(instance_docker):
     instance_docker['procedure_metrics'] = {'enabled': False}
     instance_docker['collect_settings'] = {'enabled': False}
     instance_docker['query_activity'] = {'enabled': False}
-    # Set collection_interval close to 0. This is needed if the test runs the check multiple times. 
-    # This prevents DBMAsync from skipping job executions, as it is designed 
+    # Set collection_interval close to 0. This is needed if the test runs the check multiple times.
+    # This prevents DBMAsync from skipping job executions, as it is designed
     # to not execute jobs more frequently than their collection period.
     instance_docker['query_metrics'] = {
         'enabled': True,

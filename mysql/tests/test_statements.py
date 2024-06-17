@@ -32,14 +32,15 @@ DEFAULT_FQ_SUCCESS_QUERY = "SELECT * FROM information_schema.TABLES"
 
 CLOSE_TO_ZERO_INTERVAL = 0.0000001
 
+
 @pytest.fixture
 def dbm_instance(instance_complex):
     instance_complex['dbm'] = True
     instance_complex['disable_generic_tags'] = False
     # set the default for tests to run sychronously to ensure we don't have orphaned threads running around
     instance_complex['query_samples'] = {'enabled': True, 'run_sync': True, 'collection_interval': 1}
-    # Set collection_interval close to 0. This is needed if the test runs the check multiple times. 
-    # This prevents DBMAsync from skipping job executions, as it is designed 
+    # Set collection_interval close to 0. This is needed if the test runs the check multiple times.
+    # This prevents DBMAsync from skipping job executions, as it is designed
     # to not execute jobs more frequently than their collection period.
     instance_complex['query_metrics'] = {
         'enabled': True,
