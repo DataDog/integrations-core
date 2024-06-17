@@ -66,11 +66,10 @@ def stop_orphaned_threads():
     DBMAsyncJob.executor.shutdown(wait=True)
     DBMAsyncJob.executor = ThreadPoolExecutor()
 
-import pdb
+
 @pytest.mark.parametrize("dbm_enabled_key", dbm_enabled_keys)
 @pytest.mark.parametrize("dbm_enabled", [True, False])
 def test_dbm_enabled_config(integration_check, dbm_instance, dbm_enabled_key, dbm_enabled):
-    #pdb.set_trace()
     # test to make sure we continue to support the old key
     for k in dbm_enabled_keys:
         dbm_instance.pop(k, None)

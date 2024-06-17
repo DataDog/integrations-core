@@ -33,7 +33,6 @@ from datadog_checks.sqlserver.const import (
 from datadog_checks.sqlserver.statements import SQL_SERVER_QUERY_METRICS_COLUMNS, obfuscate_xml_plan
 
 from .common import CHECK_NAME, OPERATION_TIME_METRIC_NAME
-
 from .utils import CLOSE_TO_ZERO_INTERVAL
 
 try:

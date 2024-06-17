@@ -21,7 +21,6 @@ from datadog_checks.sqlserver.const import (
 from datadog_checks.sqlserver.stored_procedures import SQL_SERVER_PROCEDURE_METRICS_COLUMNS
 
 from .common import CHECK_NAME, OPERATION_TIME_METRIC_NAME
-
 from .utils import CLOSE_TO_ZERO_INTERVAL
 
 try:
