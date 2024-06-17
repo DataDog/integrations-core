@@ -279,7 +279,6 @@ class MySql(AgentCheck):
         tags = list(self.tags)
         self._set_qcache_stats()
         try:
-
             with self._connect() as db:
                 self._conn = db
 
@@ -325,7 +324,6 @@ class MySql(AgentCheck):
             self.log.exception("error!")
             raise e
         finally:
-
             self._conn = None
             self._report_warnings()
 
