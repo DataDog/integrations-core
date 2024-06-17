@@ -47,10 +47,6 @@ on:
         required: false
         default: ""
         type: string
-      branch:
-        required: false
-        default: "master"
-        type: string
 
 jobs:
   jd316aba:
