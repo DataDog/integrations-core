@@ -34,6 +34,8 @@ from datadog_checks.sqlserver.statements import SQL_SERVER_QUERY_METRICS_COLUMNS
 
 from .common import CHECK_NAME, OPERATION_TIME_METRIC_NAME
 
+from .utils import CLOSE_TO_ZERO_INTERVAL
+
 try:
     import pyodbc
 except ImportError:
@@ -61,11 +63,13 @@ def dbm_instance(instance_docker):
     instance_docker['procedure_metrics'] = {'enabled': False}
     instance_docker['collect_settings'] = {'enabled': False}
     instance_docker['query_activity'] = {'enabled': False}
-    # set a very small collection interval so the tests go fast
+    # Set collection_interval close to 0 if the test runs the check multiple times.
+    # This prevents DBMAsync from skipping job executions, as a job should not be executed
+    # more frequently than its collection period.
     instance_docker['query_metrics'] = {
         'enabled': True,
         'run_sync': True,
-        'collection_interval': 0.1,
+        'collection_interval': CLOSE_TO_ZERO_INTERVAL,
         # in tests sometimes things can slow down so we don't want this short deadline causing some events
         # to fail to be collected on time
         'enforce_collection_interval_deadline': False,
@@ -461,7 +465,6 @@ def test_statement_metrics_limit(
     aggregator, dd_run_check, dbm_instance, bob_conn, database, query, expected_queries_patterns
 ):
     dbm_instance['query_metrics']['max_queries'] = 5
-    dbm_instance['query_metrics']['collection_interval'] = 0.0000001
     check = SQLServer(CHECK_NAME, {}, [dbm_instance])
 
     # the check must be run three times:
@@ -507,7 +510,6 @@ def test_statement_metrics_limit(
 def test_statement_metadata(
     aggregator, dd_run_check, dbm_instance, bob_conn, datadog_agent, metadata, expected_metadata_payload
 ):
-    dbm_instance['query_metrics']['collection_interval'] = 0.0000001
     check = SQLServer(CHECK_NAME, {}, [dbm_instance])
 
     query = "select * from sys.databases /* service='datadog-agent' */"
@@ -634,7 +636,6 @@ def test_statement_cloud_metadata(
     if input_cloud_metadata:
         for k, v in input_cloud_metadata.items():
             dbm_instance[k] = v
-    dbm_instance['query_metrics']['collection_interval'] = 0.0000001
     check = SQLServer(CHECK_NAME, {}, [dbm_instance])
 
     query = 'SELECT * FROM ϑings'
@@ -683,7 +684,6 @@ def test_statement_reported_hostname(
 ):
 
     dbm_instance['reported_hostname'] = reported_hostname
-    dbm_instance['query_metrics']['collection_interval'] = 0.0000001
     check = SQLServer(CHECK_NAME, {}, [dbm_instance])
 
     dd_run_check(check)
@@ -889,7 +889,6 @@ def test_statement_conditional_stored_procedure_with_temp_table(
     # have not been executed. We simulate the case by running the stored procedure with a parameter that
     # only executes the first branch of the conditional. The second branch will not be executed and the
     # plan will be NULL. That being said, ALL executed statements in the stored procedure will have NULL plan.
-    dbm_instance['query_metrics']['collection_interval'] = 0.0000001
     check = SQLServer(CHECK_NAME, {}, [dbm_instance])
 
     dd_run_check(check)
@@ -933,7 +932,6 @@ def test_statement_conditional_stored_procedure_with_temp_table(
 def test_statement_stored_procedure_characters_limit(
     aggregator, datadog_agent, dd_run_check, dbm_instance, bob_conn, stored_procedure_characters_limit
 ):
-    dbm_instance['query_metrics']['collection_interval'] = 0.0000001
     dbm_instance['stored_procedure_characters_limit'] = stored_procedure_characters_limit
     check = SQLServer(CHECK_NAME, {}, [dbm_instance])
     query = "EXEC procedureWithLargeCommment;"
@@ -970,7 +968,6 @@ def test_statement_stored_procedure_characters_limit(
 @pytest.mark.integration
 @pytest.mark.usefixtures('dd_environment')
 def test_statement_with_embedded_characters(aggregator, datadog_agent, dd_run_check, dbm_instance, bob_conn):
-    dbm_instance['query_metrics']['collection_interval'] = 0.0000001
     check = SQLServer(CHECK_NAME, {}, [dbm_instance])
     query = "EXEC nullCharTest;"
 
@@ -1056,7 +1053,6 @@ def test_statement_with_metrics_azure_sql_filtered_to_configured_database(
 ):
     if configured_database:
         dbm_instance['database'] = configured_database
-    dbm_instance['query_metrics']['collection_interval'] = 0.0000001
     check = SQLServer(CHECK_NAME, {}, [dbm_instance])
 
     if engine_edition:

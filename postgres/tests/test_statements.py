@@ -39,6 +39,7 @@ from .utils import _get_conn, _get_superconn, requires_over_10, requires_over_13
 
 pytestmark = [pytest.mark.integration, pytest.mark.usefixtures('dd_environment')]
 
+CLOSE_TO_ZERO_INTERVAL = 0.0000001
 
 SAMPLE_QUERIES = [
     # (username, password, dbname, query, arg)
@@ -65,10 +66,11 @@ def stop_orphaned_threads():
     DBMAsyncJob.executor.shutdown(wait=True)
     DBMAsyncJob.executor = ThreadPoolExecutor()
 
-
+import pdb
 @pytest.mark.parametrize("dbm_enabled_key", dbm_enabled_keys)
 @pytest.mark.parametrize("dbm_enabled", [True, False])
 def test_dbm_enabled_config(integration_check, dbm_instance, dbm_enabled_key, dbm_enabled):
+    #pdb.set_trace()
     # test to make sure we continue to support the old key
     for k in dbm_enabled_keys:
         dbm_instance.pop(k, None)
@@ -87,12 +89,7 @@ def test_statement_metrics_multiple_pgss_rows_single_query_signature(
     # don't need samples for this test
     dbm_instance['query_samples'] = {'enabled': False}
     dbm_instance['query_activity'] = {'enabled': False}
-    dbm_instance['query_metrics'] = {
-        'enabled': True,
-        'run_sync': True,
-        'incremental_query_metrics': True,
-        'collection_interval': 0.0000001,
-    }
+    dbm_instance['incremental_query_metrics'] = True
     connections = {}
 
     def normalize_query(q):
@@ -230,8 +227,6 @@ def test_statement_metrics(
     # don't need samples for this test
     dbm_instance['query_samples'] = {'enabled': False}
     dbm_instance['query_activity'] = {'enabled': False}
-    # very low collection interval for test purposes
-    dbm_instance['query_metrics'] = {'enabled': True, 'run_sync': True, 'collection_interval': 0.0000001}
     connections = {}
 
     def _run_queries():
@@ -537,7 +532,10 @@ def dbm_instance(pg_instance):
     pg_instance['pg_stat_activity_view'] = "datadog.pg_stat_activity()"
     pg_instance['query_samples'] = {'enabled': True, 'run_sync': True, 'collection_interval': 0.2}
     pg_instance['query_activity'] = {'enabled': True, 'collection_interval': 0.2}
-    pg_instance['query_metrics'] = {'enabled': True, 'run_sync': True, 'collection_interval': 0.2}
+    # Set collection_interval close to 0 if the test runs the check multiple times.
+    # This ensures that DBMAsync does not skip job executions, as a job should not be executed
+    # more frequently than its collection period.
+    pg_instance['query_metrics'] = {'enabled': True, 'run_sync': True, 'collection_interval': CLOSE_TO_ZERO_INTERVAL}
     pg_instance['collect_resources'] = {'enabled': False}
     return pg_instance
 
@@ -865,8 +863,9 @@ def test_statement_metadata(
     dbm_instance['pg_stat_statements_view'] = pg_stat_statements_view
     dbm_instance['query_samples']['run_sync'] = True
     dbm_instance['query_metrics']['run_sync'] = True
-    dbm_instance['query_metrics']['collection_interval'] = 0.0000001
-    dbm_instance['query_samples']['collection_interval'] = 0.0000001
+    # This prevents DBMAsync from skipping job executions, as a job should not be executed
+    # more frequently than its collection period.
+    dbm_instance['query_samples']['collection_interval'] = CLOSE_TO_ZERO_INTERVAL
 
     # If query or normalized_query changes, the query_signatures for both will need to be updated as well.
     query = '''
@@ -951,7 +950,8 @@ def test_statement_reported_hostname(
 ):
     dbm_instance['query_samples']['run_sync'] = True
     dbm_instance['query_metrics']['run_sync'] = True
-    dbm_instance['query_metrics']['collection_interval'] = 0.0000001
+    # This prevents DBMAsync from skipping job executions, as a job should not be executed
+    # more frequently than its collection period.
     dbm_instance['query_samples']['collection_interval'] = 0.0000001
     dbm_instance['reported_hostname'] = reported_hostname
 
@@ -1073,8 +1073,6 @@ def test_activity_snapshot_collection(
     # No need for query metrics here
     dbm_instance['query_metrics']['enabled'] = False
     dbm_instance['collect_resources']['enabled'] = False
-    dbm_instance['query_metrics']['collection_interval'] = 0.0000001
-    dbm_instance['collect_resources']['collection_interval'] = 0.0000001
     check = integration_check(dbm_instance)
     check._connect()
 

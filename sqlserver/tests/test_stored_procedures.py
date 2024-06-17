@@ -22,6 +22,8 @@ from datadog_checks.sqlserver.stored_procedures import SQL_SERVER_PROCEDURE_METR
 
 from .common import CHECK_NAME, OPERATION_TIME_METRIC_NAME
 
+from .utils import CLOSE_TO_ZERO_INTERVAL
+
 try:
     import pyodbc
 except ImportError:
@@ -55,11 +57,13 @@ def dbm_instance(instance_docker):
     instance_docker['query_metrics'] = {'enabled': False}
     instance_docker['query_activity'] = {'enabled': False}
     instance_docker['collect_settings'] = {'enabled': False}
-    # set a very small collection interval so the tests go fast
+    # Set collection_interval close to 0 if the test runs the check multiple times.
+    # This ensures that DBMAsync does not skip job executions, as a job should not be executed
+    # more frequently than its collection period.
     instance_docker['procedure_metrics'] = {
         'enabled': True,
         'run_sync': True,
-        'collection_interval': 0.1,
+        'collection_interval': CLOSE_TO_ZERO_INTERVAL,
     }
     return copy(instance_docker)
 
@@ -221,7 +225,6 @@ def test_procedure_metrics(
     datadog_agent,
 ):
     caplog.set_level(logging.INFO)
-    dbm_instance['procedure_metrics']['collection_interval'] = 0.0000001
     check = SQLServer(CHECK_NAME, {}, [dbm_instance])
 
     # the check must be run three times:
@@ -290,7 +293,6 @@ def test_procedure_metrics(
 @pytest.mark.usefixtures('dd_environment')
 def test_procedure_metrics_limit(aggregator, dd_run_check, dbm_instance, bob_conn):
     dbm_instance['procedure_metrics']['max_procedures'] = 2
-    dbm_instance['procedure_metrics']['collection_interval'] = 0.0000001
     check = SQLServer(CHECK_NAME, {}, [dbm_instance])
 
     # the check must be run three times:
