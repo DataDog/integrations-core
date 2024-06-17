@@ -143,7 +143,6 @@ class MySql(AgentCheck):
         self._non_internal_tags = copy.deepcopy(self.tags)
         self.set_resource_tags()
         self._is_innodb_engine_enabled_cached = None
-        self._is_checking = False
 
     def execute_query_raw(self, query):
         with closing(self._conn.cursor(CommenterSSCursor)) as cursor:
@@ -271,10 +270,6 @@ class MySql(AgentCheck):
         return {'pymysql': pymysql.__version__}
 
     def check(self, _):
-        if self._is_checking:
-            self.log.warning('mysql integration attempted double check')
-            return
-        self._is_checking = True
         if self.instance.get('user'):
             self._log_deprecation('_config_renamed', 'user', 'username')
 
@@ -331,7 +326,6 @@ class MySql(AgentCheck):
             finally:
                 self._conn = None
                 self._report_warnings()
-                self._is_checking = False
 
     # _set_database_instance_tags sets the tag list for the `database_instance` resource
     # based on metadata that is collected on check start. This ensures that we see tags such as
@@ -541,7 +535,7 @@ class MySql(AgentCheck):
             # report size of tables in MiB to Datadog
             self.log.debug("Collecting Table Row Stats Metrics.")
             with tracked_query(self, operation="table_rows_stats_metrics"):
-                (rows_read_total, rows_changed_total) = self._query_rows_stats_per_table(db) or (None, None)
+                (rows_read_total, rows_changed_total) = self._query_rows_stats_per_table(db)
             results['information_table_rows_read_total'] = rows_read_total
             results['information_table_rows_changed_total'] = rows_changed_total
             metrics.update(TABLE_ROWS_STATS_VARS)
@@ -549,7 +543,7 @@ class MySql(AgentCheck):
         if is_affirmative(self._config.options.get('table_size_metrics', False)):
             # report size of tables in MiB to Datadog
             with tracked_query(self, operation="table_size_metrics"):
-                (table_index_size, table_data_size) = self._query_size_per_table(db) or (None, None)
+                (table_index_size, table_data_size) = self._query_size_per_table(db)
             results['information_table_index_size'] = table_index_size
             results['information_table_data_size'] = table_data_size
             metrics.update(TABLE_VARS)
@@ -557,7 +551,7 @@ class MySql(AgentCheck):
         if is_affirmative(self._config.options.get('system_table_size_metrics', False)):
             # report size of tables in MiB to Datadog
             with tracked_query(self, operation="system_table_size_metrics"):
-                (table_index_size, table_data_size) = self._query_size_per_table(db, system_tables=True) or (None, None)
+                (table_index_size, table_data_size) = self._query_size_per_table(db, system_tables=True)
             if results.get('information_table_index_size'):
                 results['information_table_index_size'].update(table_index_size)
             else:
