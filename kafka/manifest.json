@@ -9,7 +9,7 @@
     "support": "README.md#Support",
     "changelog": "CHANGELOG.md",
     "description": "Collect metrics for producers and consumers, replication, max lag, and more.",
-    "title": "Kafka",
+    "title": "Kafka Broker",
     "media": [],
     "classifier_tags": [
       "Category::Log Collection",
