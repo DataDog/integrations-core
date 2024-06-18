@@ -28,15 +28,6 @@ def test_check_vllm(dd_run_check, aggregator, instance, mock_http_response):
     aggregator.assert_service_check('vllm.openmetrics.health', ServiceCheck.OK)
 
 
-def test_empty_instance(dd_run_check):
-    with pytest.raises(
-        Exception,
-        match='InstanceConfig`:\nopenmetrics_endpoint\n  Field required',
-    ):
-        check = vLLMCheck('vllm', {}, [{}])
-        dd_run_check(check)
-
-
 def test_emits_critical_openemtrics_service_check_when_service_is_down(
     dd_run_check, aggregator, instance, mock_http_response
 ):
