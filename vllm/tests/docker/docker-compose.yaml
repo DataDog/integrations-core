@@ -7,4 +7,5 @@ services:
       - "8000:8000"
     volumes:
       - ./Caddyfile:/etc/caddy/Caddyfile
-      - ../fixtures/vllm_metrics.txt:/metrics/metrics
+      - ../fixtures/vllm_metrics.txt:/usr/share/caddy/metrics
+      - ../fixtures/vllm_version.json:/usr/share/caddy/version

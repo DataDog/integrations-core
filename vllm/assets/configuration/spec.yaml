@@ -14,3 +14,18 @@ files:
         openmetrics_endpoint.description: |
           Endpoint exposing the vLLM's Prometheus metrics. For more information refer to:
           https://docs.vllm.ai/en/stable/serving/metrics.html
+    - name: collect_server_info
+      display_priority: 1
+      description: |
+        Whether to collect server status and version from the HTTP endpoint of vLLM.
+      value:
+        display_default: true
+        example: true
+        type: boolean
+    - name: server_port
+      description: |
+        The port exposing the HTTP Endpoint of the vLLM.
+        This will be ignored if `collect_server_info` is false.
+      value:
+        display_default: 8000
+        type: integer

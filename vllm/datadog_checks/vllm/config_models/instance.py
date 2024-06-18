@@ -93,6 +93,7 @@ class InstanceConfig(BaseModel):
     cache_shared_labels: Optional[bool] = None
     collect_counters_with_distributions: Optional[bool] = None
     collect_histogram_buckets: Optional[bool] = None
+    collect_server_info: Optional[bool] = None
     connect_timeout: Optional[float] = None
     disable_generic_tags: Optional[bool] = None
     empty_default_hostname: Optional[bool] = None
@@ -132,6 +133,7 @@ class InstanceConfig(BaseModel):
     read_timeout: Optional[float] = None
     rename_labels: Optional[MappingProxyType[str, Any]] = None
     request_size: Optional[float] = None
+    server_port: Optional[int] = None
     service: Optional[str] = None
     share_labels: Optional[MappingProxyType[str, Union[bool, ShareLabels]]] = None
     skip_proxy: Optional[bool] = None

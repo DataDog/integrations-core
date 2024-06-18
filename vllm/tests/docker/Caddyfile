@@ -1,4 +1,21 @@
 :8000 {
-  root * /metrics
-  file_server
+  # Respond with a 200 OK for /health
+  route /health {
+    respond "OK" 200
+  }
+
+  # Serve static files for other routes
+  route /metrics {
+    rewrite * /metrics
+    file_server {
+      root /usr/share/caddy
+    }
+  }
+
+  route /version {
+    rewrite * /version
+    file_server {
+      root /usr/share/caddy
+    }
+  }
 }

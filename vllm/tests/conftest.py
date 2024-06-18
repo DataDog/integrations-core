@@ -8,7 +8,7 @@ import pytest
 from datadog_checks.dev import docker_run
 from datadog_checks.dev.conditions import CheckDockerLogs, CheckEndpoints
 
-from .common import COMPOSE_FILE, MOCKED_INSTANCE
+from .common import COMPOSE_FILE, MOCKED_INSTANCE, MOCKED_VERSION_ENDPOINT
 
 
 @pytest.fixture(scope='session')
@@ -17,6 +17,7 @@ def dd_environment():
     conditions = [
         CheckDockerLogs(identifier='caddy', patterns=['server running']),
         CheckEndpoints(MOCKED_INSTANCE["openmetrics_endpoint"]),
+        CheckEndpoints(MOCKED_VERSION_ENDPOINT),
     ]
     with docker_run(compose_file, conditions=conditions):
         yield {

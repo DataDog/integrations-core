@@ -40,6 +40,10 @@ def instance_collect_histogram_buckets():
     return True
 
 
+def instance_collect_server_info():
+    return True
+
+
 def instance_disable_generic_tags():
     return False
 
@@ -90,6 +94,10 @@ def instance_persist_connections():
 
 def instance_request_size():
     return 16
+
+
+def instance_server_port():
+    return 8000
 
 
 def instance_skip_proxy():

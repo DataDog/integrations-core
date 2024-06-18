@@ -45,11 +45,17 @@ init_config:
 #
 instances:
 
+  -
+    ## @param collect_server_info - boolean - optional - default: true
+    ## Whether to collect server status and version from the HTTP endpoint of vLLM.
+    #
+    # collect_server_info: true
+
     ## @param openmetrics_endpoint - string - required
     ## Endpoint exposing the vLLM's Prometheus metrics. For more information refer to:
     ## https://docs.vllm.ai/en/stable/serving/metrics.html
     #
-  - openmetrics_endpoint: http://localhost:8000/metrics
+    openmetrics_endpoint: http://localhost:8000/metrics
 
     ## @param raw_metric_prefix - string - optional
     ## A prefix that is removed from all exposed metric names, if present.
@@ -624,3 +630,9 @@ instances:
     #   - <INCLUDE_REGEX>
     #   exclude:
     #   - <EXCLUDE_REGEX>
+
+    ## @param server_port - integer - optional - default: 8000
+    ## The port exposing the HTTP Endpoint of the vLLM.
+    ## This will be ignored if `collect_server_info` is false.
+    #
+    # server_port: <SERVER_PORT>
