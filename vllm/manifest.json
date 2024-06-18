@@ -8,7 +8,7 @@
     "configuration": "README.md#Setup",
     "support": "README.md#Support",
     "changelog": "CHANGELOG.md",
-    "description": "vLLM is a fast and easy-to-use library for LLM inference and serving",
+    "description": "vLLM is a library for LLM inference and serving",
     "title": "vLLM",
     "media": [],
     "classifier_tags": [
@@ -39,9 +39,6 @@
       "service_checks": {
         "metadata_path": "assets/service_checks.json"
       }
-    },
-    "dashboards": {
-
     },
     "monitors": {},
     "saved_views": {}
