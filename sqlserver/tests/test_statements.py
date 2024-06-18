@@ -314,12 +314,10 @@ def test_statement_metrics_and_plans(
     # 2) load the test queries into the StatementMetrics state
     # 3) emit the query metrics based on the diff of current and last state
     dd_run_check(check)
-    time.sleep(2)
     for _ in range(0, exe_count):
         for params in param_groups:
             bob_conn.execute_with_retries(query, params, database=database)
     dd_run_check(check)
-    time.sleep(2)
     aggregator.reset()
     for _ in range(0, exe_count):
         for params in param_groups:
