@@ -94,7 +94,8 @@ files:
         example: False
     - name: namespace
       description: |
-        Namespace to be used for devices, interfaces, metrics. If none is specified, will use 'default'.
+        Namespace for differentiating between devices that share the same IP.
+        If not specified, the namespace will be 'default'.
       value:
         type: string
         example: default
