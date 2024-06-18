@@ -8,7 +8,7 @@
     "configuration": "README.md#Setup",
     "support": "README.md#Support",
     "changelog": "CHANGELOG.md",
-    "description": "Monitor the performance, reliability, and costs of your Apache Spark and Databricks jobs.",
+    "description": "Monitor the performance, reliability, and cost of your Apache Spark and Databricks jobs.",
     "title": "Databricks",
     "media": [],
     "classifier_tags": [
