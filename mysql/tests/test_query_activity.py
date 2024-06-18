@@ -372,6 +372,7 @@ def test_activity_collection_rate_limit(aggregator, dd_run_check, dbm_instance):
     # test the activity collection loop rate limit
     aggregator.reset()
     collection_interval = 0.1
+    dbm_instance['min_collection_interval'] = 15
     dbm_instance['query_activity']['collection_interval'] = collection_interval
     dbm_instance['query_activity']['run_sync'] = False
     check = MySql(CHECK_NAME, {}, [dbm_instance])
