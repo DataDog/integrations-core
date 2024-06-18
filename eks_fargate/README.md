@@ -119,7 +119,7 @@ The setup below configures the Cluster Agent to communicate with the Agent sidec
 
 **Prerequisites**
 
-* The Operator creates the necessary RBACs and deploys the Cluster Agent.
+* Deploying RBAC is not required as the Operator creates the necessary RBACs and deploys the Cluster Agent.
 * Create a Kubernetes secret containing your Datadog API key and Cluster Agent token in the Datadog installation and application namespaces:
 
    ```shell
@@ -165,7 +165,7 @@ The setup below configures the Cluster Agent to communicate with the Agent sidec
 
 **Example result**
   
-   The following is a `spec.containers` snippet from a Redis deployment where the Admission Controller injected an Agent sidecar. The sidecar is automatically configured using internal defaults, with additional settings to run in an EKS Fargate environment. The sidecar uses the image repository and tags set in the Helm values. Communication between Cluster Agent and sidecars is enabled by default. 
+   The following is a `spec.containers` snippet from a Redis deployment where the Admission Controller injected an Agent sidecar. The sidecar is automatically configured using internal defaults, with additional settings to run in an EKS Fargate environment. The sidecar uses the image repository and tags set in `datadog-agent.yaml`. Communication between Cluster Agent and sidecars is enabled by default. 
   
    {{< highlight yaml "hl_lines=7-29" >}}
      containers:
@@ -244,40 +244,40 @@ To further configure the Agent or its container resources, use the properties in
 
      **Example result**
 
-     The following is a `spec.containers` snippet from a Redis deployment where the Admission Controller injected an Agent sidecar. The environment variables and resource settings from `datadog-values.yaml` are automatically applied.
+     The following is a `spec.containers` snippet from a Redis deployment where the Admission Controller injected an Agent sidecar. The environment variables and resource settings from `datadog-agent.yaml` are automatically applied.
      
-    {{< highlight yaml "hl_lines=12-30" >}}
-    labels:
-      app: redis
-      eks.amazonaws.com/fargate-profile: fp-fargate
-      pod-template-hash: 7b86c456c4
-    # ...
-    containers:
-    - args:
-      - redis-server
-      image: redis:latest
-    # ...
-    - env:
-      - name: DD_API_KEY
-        valueFrom:
-          secretKeyRef:
-            key: api-key
-            name: datadog-secret
-      # ...
-      - name: DD_PROCESS_AGENT_PROCESS_COLLECTION_ENABLED
-        value: "true"
-      # ...
-      image: gcr.io/datadoghq/agent:7.51.0
-      imagePullPolicy: IfNotPresent
-      name: datadog-agent-injected
-      resources:
-        limits:
-          cpu: 800m
-          memory: 512Mi
-        requests:
-          cpu: 400m
-          memory: 256Mi
-    {{< /highlight >}}
+     {{< highlight yaml "hl_lines=12-30" >}}
+     labels:
+       app: redis
+       eks.amazonaws.com/fargate-profile: fp-fargate
+       pod-template-hash: 7b86c456c4
+     # ...
+     containers:
+     - args:
+       - redis-server
+       image: redis:latest
+     # ...
+     - env:
+       - name: DD_API_KEY
+         valueFrom:
+           secretKeyRef:
+             key: api-key
+             name: datadog-secret
+       # ...
+       - name: DD_PROCESS_AGENT_PROCESS_COLLECTION_ENABLED
+         value: "true"
+       # ...
+       image: gcr.io/datadoghq/agent:7.51.0
+       imagePullPolicy: IfNotPresent
+       name: datadog-agent-injected
+       resources:
+         limits:
+           cpu: 800m
+           memory: 512Mi
+         requests:
+           cpu: 400m
+           memory: 256Mi
+     {{< /highlight >}}
 
 <!-- xxz tab xxx -->
 <!-- xxx tab "Helm" xxx -->
