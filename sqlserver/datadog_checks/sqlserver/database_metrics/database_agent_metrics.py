@@ -99,7 +99,7 @@ class SqlserverAgentMetrics(SqlserverDatabaseMetricsBase):
         Returns the default interval in seconds at which to collect index usage metrics.
         '''
         # TODO figure out what a good default collection interval should be
-        return 1  # 5 minutes
+        return 10  # 10 seconds
     
     @property
     def collection_interval(self) -> int:
@@ -120,13 +120,19 @@ class SqlserverAgentMetrics(SqlserverDatabaseMetricsBase):
     def queries(self):
         # make a copy of the query to avoid modifying the original
         # in case different instances have different collection intervals
+        query_list = []
         active_job_duration_query = AGENT_ACTIVITY_DURATION_QUERY.copy()
         active_job_duration_query['collection_interval'] = self.collection_interval
+        query_list.append(active_job_duration_query)
         active_job_step_info_query = AGENT_ACTIVITY_STEPS_QUERY.copy()
         active_job_step_info_query['collection_interval'] = self.collection_interval
-        active_session_duration_query = AGENT_ACTIVE_SESSION_DURATION_QUERY.copy()
-        active_session_duration_query['collection_interval'] = self.collection_interval
-        return [active_job_duration_query, active_job_step_info_query, active_session_duration_query]
+        query_list.append(active_job_step_info_query)
+        # better/more formal way to check if aws
+        if self.instance_config.get("aws") is None:
+            active_session_duration_query = AGENT_ACTIVE_SESSION_DURATION_QUERY.copy()
+            active_session_duration_query['collection_interval'] = self.collection_interval
+            query_list.append(active_session_duration_query)
+        return query_list
     
     def __repr__(self) -> str:
         return (

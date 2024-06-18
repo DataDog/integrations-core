@@ -128,6 +128,7 @@ class SQLServer(AgentCheck):
         self._index_usage_last_check_ts = 0
         self._sql_counter_types = {}
         self.proc_type_mapping = {"gauge": self.gauge, "rate": self.rate, "histogram": self.histogram}
+        self._last_history_id = 0
 
         # DBM
         self.statement_metrics = SqlserverStatementMetrics(self, self._config)
@@ -183,23 +184,6 @@ class SQLServer(AgentCheck):
         ):
             self.log.warning(
                 "Autodiscovery is disabled, autodiscovery_include and autodiscovery_exclude will be ignored"
-            )
-
-        if not self._config.dbm_enabled:
-            self.log.warning(
-                "dbm disabled"
-            )
-        else:
-            self.log.warning(
-                "dbm enabled"
-            )
-        if not self.instance.get("include_agent_jobs", False):
-            self.log.warning(
-                "agent jobs disabled"
-            )
-        else:
-            self.log.warning(
-                "agent jobs enabled"
             )
 
     def _new_query_executor(self, queries, executor, extra_tags=None, track_operation_time=False):
