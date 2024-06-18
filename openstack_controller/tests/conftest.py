@@ -919,7 +919,7 @@ def connection_swift(request, mock_responses):
 
     def containers(account_id, limit=None):
         if http_error and 'containers' in http_error and account_id in http_error['containers']:
-            raise requests.exceptions.HTTPError(response=http_error['containers'])
+            raise requests.exceptions.HTTPError(response=http_error['containers'][account_id])
         return [
             mock.MagicMock(
                 to_dict=mock.MagicMock(
