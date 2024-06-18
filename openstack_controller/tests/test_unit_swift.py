@@ -136,26 +136,37 @@ def test_response_time_exception(aggregator, check, dd_run_check, mock_http_get)
 
 
 @pytest.mark.parametrize(
-    ('instance', 'api_type'),
+    ('mock_http_get', 'instance'),
     [
         pytest.param(
+            {'elapsed_total_seconds': {'/v1/AUTH_1e6e233e637d4d55a50a62b63398ad15': 0.30706}},
             configs.REST,
-            ApiType.REST,
             id='api rest',
         ),
         pytest.param(
+            {'elapsed_total_seconds': {'/v1/AUTH_1e6e233e637d4d55a50a62b63398ad15': 0.30706}},
             configs.SDK,
-            ApiType.SDK,
             id='api sdk',
         ),
     ],
+    indirect=['mock_http_get'],
 )
 @pytest.mark.usefixtures('mock_http_get', 'mock_http_post', 'openstack_connection')
-def test_response_time(aggregator, check, dd_run_check, mock_http_get, api_type):
+def test_response_time(aggregator, check, dd_run_check, mock_http_get):
     dd_run_check(check)
+    aggregator.assert_service_check(
+        'openstack.swift.api.up',
+        status=AgentCheck.UNKNOWN,
+        count=0,
+    )
+    aggregator.assert_service_check(
+        'openstack.swift.api.up',
+        status=AgentCheck.CRITICAL,
+        count=0,
+    )
     aggregator.assert_metric(
         'openstack.swift.response_time',
-        count=1,
+        value=307.06,
         tags=['keystone_server:http://127.0.0.1:8080/identity'],
     )
     aggregator.assert_service_check(
