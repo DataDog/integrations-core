@@ -58,7 +58,7 @@ class SqlserverAgentActivity(DBMAsyncJob):
         if collection_interval <= 0:
             collection_interval = DEFAULT_COLLECTION_INTERVAL
         self.collection_interval = collection_interval
-        self._last_history_id = None
+        self._last_history_id = check._last_history_id
         super(SqlserverAgentActivity, self).__init__(
             check,
             run_sync=True,
@@ -94,10 +94,8 @@ class SqlserverAgentActivity(DBMAsyncJob):
         rows = [dict(zip(columns, row)) for row in cursor.fetchall()]
 
         for row in rows:
-            if self._last_history_id is None or (
-                row['completion_instance_id'] > self._last_history_id 
-            ):
-                self._last_history_id = row['completion_instance_id']
+            if row['completion_instance_id'] > self._last_history_id:
+                self._check._last_history_id = row['completion_instance_id']
 
         self.log.debug("loaded sql server agent jobs history len(rows)=%s", len(rows))
         return rows

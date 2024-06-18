@@ -13,7 +13,6 @@ do
     fi
 done
 
-#some cases where this loops breaks out before all iterations, but agent still is not running
 for i in {1..120};
 do
     /opt/mssql-tools/bin/sqlcmd -S localhost -U sa -P $SA_PASSWORD -d master -i is_agent_running.sql -b | grep -q '1'
