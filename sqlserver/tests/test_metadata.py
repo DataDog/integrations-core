@@ -96,10 +96,10 @@ def test_sqlserver_collect_settings(aggregator, dd_run_check, dbm_instance):
 
 def test_collect_schemas(aggregator, dd_run_check, dbm_instance):
 
-    databases_to_find = ['datadog_test_schemas', 'datadog_test']
+    databases_to_find = ['datadog_test_schemas', 'datadog_test-1']
     exp_datadog_test = {
         'id': '6',
-        'name': 'datadog_test',
+        'name': 'datadog_test-1',
         "collation": "SQL_Latin1_General_CP1_CI_AS",
         'owner': 'dbo',
         'schemas': [
@@ -322,10 +322,10 @@ def test_collect_schemas(aggregator, dd_run_check, dbm_instance):
             }
         ],
     }
-    expected_data_for_db = {'datadog_test': exp_datadog_test, 'datadog_test_schemas': exp_datadog_test_schemas}
+    expected_data_for_db = {'datadog_test-1': exp_datadog_test, 'datadog_test_schemas': exp_datadog_test_schemas}
 
     dbm_instance['database_autodiscovery'] = True
-    dbm_instance['autodiscovery_include'] = ['datadog_test_schemas', 'datadog_test']
+    dbm_instance['autodiscovery_include'] = ['datadog_test_schemas', 'datadog_test-1']
     dbm_instance['dbm'] = True
     dbm_instance['schemas_collection'] = {"enabled": True}
 

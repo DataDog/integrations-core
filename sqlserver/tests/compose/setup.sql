@@ -78,7 +78,7 @@ GO
 USE [datadog_test-1];
 -- This table is pronounced "things" except we've replaced "th" with the greek lower case "theta" to ensure we
 -- correctly support unicode throughout the integration.
-CREATE TABLE [datadog_test-1].dbo.ϑings (id int, name varchar(255));
+CREATE TABLE [datadog_test-1].dbo.ϑings (id int DEFAULT 0, name varchar(255));
 INSERT INTO [datadog_test-1].dbo.ϑings VALUES (1, 'foo'), (2, 'bar');
 CREATE USER bob FOR LOGIN bob;
 CREATE USER fred FOR LOGIN fred;
