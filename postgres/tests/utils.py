@@ -121,10 +121,11 @@ def run_vacuum_thread(pg_instance, vacuum_query, application_name='test'):
     return run_query_thread(pg_instance, vacuum_query, application_name, init_stmts)
 
 
-def run_one_check(check, db_instance, cancel=True):
+def run_one_check(check, db_instance, cancel=True, blocking=False):
     """
     Run check and immediately cancel.
     Waits for all threads to close before continuing.
+    Blocking is used to wait for the min_collection_interval to pass.
     """
     check.check(db_instance)
     if cancel:
@@ -135,3 +136,5 @@ def run_one_check(check, db_instance, cancel=True):
         check.statement_metrics._job_loop_future.result()
     if check.metadata_samples._job_loop_future is not None:
         check.metadata_samples._job_loop_future.result()
+    if blocking:
+        time.sleep(db_instance.get('min_collection_interval', 0))

@@ -88,6 +88,7 @@ def instance_basic():
 @pytest.fixture
 def instance_complex():
     return {
+        'min_collection_interval': 0.2,
         'host': common.HOST,
         'username': common.USER,
         'password': common.PASS,

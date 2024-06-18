@@ -2,6 +2,7 @@
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
 import os
+import time
 from sys import maxsize
 
 import pytest
@@ -39,3 +40,9 @@ requires_static_version = pytest.mark.skipif(
 requires_classic_replication = pytest.mark.skipif(
     MYSQL_REPLICATION != 'classic', reason='Classic replication not active, skipping'
 )
+
+
+def run_one_check(dd_run_check, check, blocking=False):
+    dd_run_check(check)
+    if blocking:
+        time.sleep(check.instance.get('min_collection_interval', 0))

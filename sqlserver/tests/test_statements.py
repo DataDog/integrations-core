@@ -33,6 +33,7 @@ from datadog_checks.sqlserver.const import (
 from datadog_checks.sqlserver.statements import SQL_SERVER_QUERY_METRICS_COLUMNS, obfuscate_xml_plan
 
 from .common import CHECK_NAME, OPERATION_TIME_METRIC_NAME
+from .utils import run_one_check
 
 try:
     import pyodbc
@@ -310,16 +311,16 @@ def test_statement_metrics_and_plans(
     # interval is correct)
     # 2) load the test queries into the StatementMetrics state
     # 3) emit the query metrics based on the diff of current and last state
-    dd_run_check(check)
+    run_one_check(dd_run_check, check, blocking=True)
     for _ in range(0, exe_count):
         for params in param_groups:
             bob_conn.execute_with_retries(query, params, database=database)
-    dd_run_check(check)
+    run_one_check(dd_run_check, check, blocking=True)
     aggregator.reset()
     for _ in range(0, exe_count):
         for params in param_groups:
             bob_conn.execute_with_retries(query, params, database=database)
-    dd_run_check(check)
+    run_one_check(dd_run_check, check, blocking=True)
 
     _conn_key_prefix = "dbm-"
     with check.connection.open_managed_default_connection(key_prefix=_conn_key_prefix):
@@ -466,12 +467,12 @@ def test_statement_metrics_limit(
     # interval is correct)
     # 2) load the test queries into the StatementMetrics state
     # 3) emit the query metrics based on the diff of current and last state
-    dd_run_check(check)
+    run_one_check(dd_run_check, check, blocking=True)
     bob_conn.execute_with_retries(query, (), database=database)
-    dd_run_check(check)
+    run_one_check(dd_run_check, check, blocking=True)
     aggregator.reset()
     bob_conn.execute_with_retries(query, (), database=database)
-    dd_run_check(check)
+    run_one_check(dd_run_check, check, blocking=True)
 
     # dbm-metrics
     dbm_metrics = aggregator.get_event_platform_events("dbm-metrics")
@@ -519,9 +520,9 @@ def test_statement_metadata(
     with mock.patch.object(datadog_agent, 'obfuscate_sql', passthrough=True) as mock_agent:
         mock_agent.side_effect = _obfuscate_sql
         _run_query()
-        dd_run_check(check)
+        run_one_check(dd_run_check, check, blocking=True)
         _run_query()
-        dd_run_check(check)
+        run_one_check(dd_run_check, check, blocking=True)
 
     dbm_samples = aggregator.get_event_platform_events("dbm-samples")
     assert dbm_samples, "should have collected at least one sample"
@@ -643,12 +644,12 @@ def test_statement_cloud_metadata(
     # 2) load the test queries into the StatementMetrics state
     # 3) emit the query metrics based on the diff of current and last state
     _run_query()
-    dd_run_check(check)
+    run_one_check(dd_run_check, check, blocking=True)
     _run_query()
-    dd_run_check(check)
+    run_one_check(dd_run_check, check, blocking=True)
     aggregator.reset()
     _run_query()
-    dd_run_check(check)
+    run_one_check(dd_run_check, check, blocking=True)
 
     dbm_metrics = aggregator.get_event_platform_events("dbm-metrics")
     assert len(dbm_metrics) == 1, "should have collected exactly one metrics payload"
@@ -679,8 +680,8 @@ def test_statement_reported_hostname(
     dbm_instance['reported_hostname'] = reported_hostname
     check = SQLServer(CHECK_NAME, {}, [dbm_instance])
 
-    dd_run_check(check)
-    dd_run_check(check)
+    run_one_check(dd_run_check, check, blocking=True)
+    run_one_check(dd_run_check, check, blocking=True)
 
     samples = aggregator.get_event_platform_events("dbm-samples")
     assert samples, "should have collected at least one sample"
@@ -763,7 +764,7 @@ def test_plan_collection_deadline(aggregator, dd_run_check, dbm_instance, slow_p
 
     with mock.patch.object(check.statement_metrics, '_load_plan', passthrough=True) as mock_obj:
         mock_obj.side_effect = _mock_slow_load_plan
-        dd_run_check(check)
+        run_one_check(dd_run_check, check, blocking=True)
 
     expected_debug_tags = ['agent_hostname:stubbed.hostname'] + _expected_dbm_instance_tags(dbm_instance)
 
@@ -822,7 +823,7 @@ def _expected_dbm_instance_tags(dbm_instance):
 def test_async_job_enabled(dd_run_check, dbm_instance, statement_metrics_enabled):
     dbm_instance['query_metrics'] = {'enabled': statement_metrics_enabled, 'run_sync': False}
     check = SQLServer(CHECK_NAME, {}, [dbm_instance])
-    dd_run_check(check)
+    run_one_check(dd_run_check, check, blocking=True)
     check.cancel()
     if statement_metrics_enabled:
         assert check.statement_metrics._job_loop_future is not None
@@ -836,7 +837,7 @@ def test_async_job_enabled(dd_run_check, dbm_instance, statement_metrics_enabled
 def test_async_job_inactive_stop(aggregator, dd_run_check, dbm_instance):
     dbm_instance['query_metrics']['run_sync'] = False
     check = SQLServer(CHECK_NAME, {}, [dbm_instance])
-    dd_run_check(check)
+    run_one_check(dd_run_check, check, blocking=True)
     check.statement_metrics._job_loop_future.result()
     aggregator.assert_metric(
         "dd.sqlserver.async_job.inactive_stop",
@@ -850,7 +851,7 @@ def test_async_job_inactive_stop(aggregator, dd_run_check, dbm_instance):
 def test_async_job_cancel_cancel(aggregator, dd_run_check, dbm_instance):
     dbm_instance['query_metrics']['run_sync'] = False
     check = SQLServer(CHECK_NAME, {}, [dbm_instance])
-    dd_run_check(check)
+    run_one_check(dd_run_check, check, blocking=True)
     check.cancel()
     # wait for it to stop and make sure it doesn't throw any exceptions
     check.statement_metrics._job_loop_future.result()
@@ -884,12 +885,12 @@ def test_statement_conditional_stored_procedure_with_temp_table(
     # plan will be NULL. That being said, ALL executed statements in the stored procedure will have NULL plan.
     check = SQLServer(CHECK_NAME, {}, [dbm_instance])
 
-    dd_run_check(check)
+    run_one_check(dd_run_check, check, blocking=True)
     bob_conn.execute_with_retries(query, (), database=database)
-    dd_run_check(check)
+    run_one_check(dd_run_check, check, blocking=True)
     aggregator.reset()
     bob_conn.execute_with_retries(query, (), database=database)
-    dd_run_check(check)
+    run_one_check(dd_run_check, check, blocking=True)
 
     # dbm-metrics
     dbm_metrics = aggregator.get_event_platform_events("dbm-metrics")
@@ -937,12 +938,12 @@ def test_statement_stored_procedure_characters_limit(
     # Execute the query with the mocked obfuscate_sql. The result should produce an event payload with the metadata.
     with mock.patch.object(datadog_agent, 'obfuscate_sql', passthrough=True) as mock_agent:
         mock_agent.side_effect = _obfuscate_sql
-        dd_run_check(check)
+        run_one_check(dd_run_check, check, blocking=True)
         bob_conn.execute_with_retries(query, (), database="datadog_test-1")
-        dd_run_check(check)
+        run_one_check(dd_run_check, check, blocking=True)
         aggregator.reset()
         bob_conn.execute_with_retries(query, (), database="datadog_test-1")
-        dd_run_check(check)
+        run_one_check(dd_run_check, check, blocking=True)
 
     # dbm-metrics
     dbm_metrics = aggregator.get_event_platform_events("dbm-metrics")
@@ -970,12 +971,12 @@ def test_statement_with_embedded_characters(aggregator, datadog_agent, dd_run_ch
     # Execute the query with the mocked obfuscate_sql. The result should produce an event payload with the metadata.
     with mock.patch.object(datadog_agent, 'obfuscate_sql', passthrough=True) as mock_agent:
         mock_agent.side_effect = _obfuscate_sql
-        dd_run_check(check)
+        run_one_check(dd_run_check, check, blocking=True)
         bob_conn.execute_with_retries(query, (), database="datadog_test-1")
-        dd_run_check(check)
+        run_one_check(dd_run_check, check, blocking=True)
         aggregator.reset()
         bob_conn.execute_with_retries(query, (), database="datadog_test-1")
-        dd_run_check(check)
+        run_one_check(dd_run_check, check, blocking=True)
 
     # dbm-metrics
     dbm_metrics = aggregator.get_event_platform_events("dbm-metrics")
@@ -1055,12 +1056,12 @@ def test_statement_with_metrics_azure_sql_filtered_to_configured_database(
         bob_conn.execute_with_retries("SELECT * FROM ϑings", (), database="datadog_test-1")
         bob_conn.execute_with_retries("SELECT count(*) from sys.databases", (), database="master")
 
-    dd_run_check(check)
+    run_one_check(dd_run_check, check, blocking=True)
     _execute_queries()
-    dd_run_check(check)
+    run_one_check(dd_run_check, check, blocking=True)
     aggregator.reset()
     _execute_queries()
-    dd_run_check(check)
+    run_one_check(dd_run_check, check, blocking=True)
 
     # dbm-metrics
     dbm_metrics = aggregator.get_event_platform_events("dbm-metrics")

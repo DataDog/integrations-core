@@ -20,7 +20,7 @@ from datadog_checks.mysql import MySql, statements
 from datadog_checks.mysql.statement_samples import StatementTruncationState
 
 from . import common
-from .common import MYSQL_VERSION_PARSED
+from .common import MYSQL_VERSION_PARSED, run_one_check
 
 logger = logging.getLogger(__name__)
 
@@ -36,7 +36,7 @@ def dbm_instance(instance_complex):
     instance_complex['dbm'] = True
     instance_complex['disable_generic_tags'] = False
     # set the default for tests to run sychronously to ensure we don't have orphaned threads running around
-    instance_complex['query_samples'] = {'enabled': True, 'run_sync': True, 'collection_interval': 1}
+    instance_complex['query_samples'] = {'enabled': True, 'run_sync': True, 'collection_interval': 0.1}
     # set a very small collection interval so the tests go fast
     instance_complex['query_metrics'] = {'enabled': True, 'run_sync': True, 'collection_interval': 0.1}
     # don't need query activity for these tests
@@ -122,11 +122,11 @@ def test_statement_metrics(
 
         # Run a query
         run_query(query)
-        dd_run_check(mysql_check)
+        run_one_check(dd_run_check, mysql_check, blocking=True)
 
         # Run the query and check a second time so statement metrics are computed from the previous run
         run_query(query)
-        dd_run_check(mysql_check)
+        run_one_check(dd_run_check, mysql_check, blocking=True)
 
     events = aggregator.get_event_platform_events("dbm-metrics")
     assert len(events) == 1
@@ -203,13 +203,13 @@ def test_statement_metrics_with_duplicates(aggregator, dd_run_check, dbm_instanc
         # Run two queries that map to the same normalized one
         run_query(query_one)
         run_query(query_two)
-        dd_run_check(mysql_check)
+        run_one_check(dd_run_check, mysql_check, blocking=True)
 
         # Run the queries again and check a second time so statement metrics are computed from the previous run using
         # the merged stats of the two queries
         run_query(query_one)
         run_query(query_two)
-        dd_run_check(mysql_check)
+        run_one_check(dd_run_check, mysql_check, blocking=True)
 
     events = aggregator.get_event_platform_events("dbm-metrics")
     assert len(events) == 1
@@ -312,11 +312,11 @@ def test_statement_metrics_cloud_metadata(
 
     # Run a query
     run_query(query)
-    dd_run_check(mysql_check)
+    run_one_check(dd_run_check, mysql_check, blocking=True)
 
     # Run the query and check a second time so statement metrics are computed from the previous run
     run_query(query)
-    dd_run_check(mysql_check)
+    run_one_check(dd_run_check, mysql_check, blocking=True)
 
     events = aggregator.get_event_platform_events("dbm-metrics")
     assert len(events) == 1, "should produce exactly one metrics payload"
@@ -419,7 +419,7 @@ def test_statement_samples_collect(
             m_get_runtime_aurora_tags.return_value = ["replication_role:" + aurora_replication_role]
 
         logger.debug("running first check")
-        dd_run_check(mysql_check)
+        run_one_check(dd_run_check, mysql_check, blocking=True)
         aggregator.reset()
         mysql_check._statement_samples._init_caches()
 
@@ -537,7 +537,7 @@ def test_missing_explain_procedure(dbm_instance, dd_run_check, aggregator, state
     }
 
     mysql_check._statement_samples._collect_plan_for_statement(row)
-    dd_run_check(mysql_check)
+    run_one_check(dd_run_check, mysql_check, blocking=True)
 
     assert mysql_check.warnings == expected_warnings
 
@@ -559,7 +559,7 @@ def test_performance_schema_disabled(dbm_instance, dd_run_check):
     mysql_check._statement_metrics.collect_per_statement_metrics()
 
     # Run the check only so that recorded warnings are actually added
-    dd_run_check(mysql_check)
+    run_one_check(dd_run_check, mysql_check, blocking=True)
 
     assert mysql_check.warnings == [
         'Unable to collect statement metrics because the performance schema is disabled. See '
@@ -577,7 +577,7 @@ def test_performance_schema_disabled(dbm_instance, dd_run_check):
     mysql_check.warnings.clear()
     mysql_check._statement_metrics.collect_per_statement_metrics()
     mysql_check._statement_metrics.collect_per_statement_metrics()
-    dd_run_check(mysql_check)
+    run_one_check(dd_run_check, mysql_check, blocking=True)
     assert mysql_check.warnings == []
 
 
@@ -621,9 +621,9 @@ def test_statement_metadata(
     with mock.patch.object(datadog_agent, 'obfuscate_sql', passthrough=True) as mock_agent:
         mock_agent.side_effect = obfuscate_sql
         run_query(test_query)
-        dd_run_check(mysql_check)
+        run_one_check(dd_run_check, mysql_check, blocking=True)
         run_query(test_query)
-        dd_run_check(mysql_check)
+        run_one_check(dd_run_check, mysql_check, blocking=True)
 
     samples = aggregator.get_event_platform_events("dbm-samples")
     matching = [s for s in samples if s['db']['query_signature'] == query_signature and s.get('dbm_type') != 'fqt']
@@ -664,8 +664,8 @@ def test_statement_reported_hostname(
     dbm_instance['reported_hostname'] = reported_hostname
     mysql_check = MySql(common.CHECK_NAME, {}, [dbm_instance])
 
-    dd_run_check(mysql_check)
-    dd_run_check(mysql_check)
+    run_one_check(dd_run_check, mysql_check, blocking=True)
+    run_one_check(dd_run_check, mysql_check, blocking=True)
 
     samples = aggregator.get_event_platform_events("dbm-samples")
     assert samples, "should have at least one sample"
@@ -711,7 +711,7 @@ def test_statement_samples_failed_explain_handling(
 ):
     mysql_check = MySql(common.CHECK_NAME, {}, [dbm_instance])
 
-    dd_run_check(mysql_check)
+    run_one_check(dd_run_check, mysql_check, blocking=True)
 
     total_error_states = []
     with closing(mysql_check._statement_samples._get_db_connection().cursor()) as cursor:
@@ -746,7 +746,7 @@ def test_statement_samples_main_collection_rate_limit(aggregator, dd_run_check, 
     dbm_instance['query_samples']['collection_interval'] = collection_interval
     dbm_instance['query_samples']['run_sync'] = False
     mysql_check = MySql(common.CHECK_NAME, {}, [dbm_instance])
-    dd_run_check(mysql_check)
+    run_one_check(dd_run_check, mysql_check, blocking=True)
     sleep_time = 1
     time.sleep(sleep_time)
     max_collections = int(1 / collection_interval * sleep_time) + 1
@@ -777,7 +777,7 @@ def test_statement_samples_unique_plans_rate_limits(aggregator, dd_run_check, bo
             # repeat the same set of queries multiple times to ensure we're testing the per-query TTL rate limit
             for q in queries:
                 cursor.execute(q)
-                dd_run_check(mysql_check)
+                run_one_check(dd_run_check, mysql_check, blocking=True)
 
     def _sample_key(e):
         return e['db']['query_signature'], e['db'].get('plan', {}).get('signature')
@@ -806,7 +806,7 @@ def test_async_job_inactive_stop(aggregator, dd_run_check, dbm_instance):
     # low collection interval for a faster test
     dbm_instance['min_collection_interval'] = 1
     mysql_check = MySql(common.CHECK_NAME, {}, [dbm_instance])
-    dd_run_check(mysql_check)
+    run_one_check(dd_run_check, mysql_check, blocking=True)
     # make sure there were no unhandled exceptions
     mysql_check._statement_samples._job_loop_future.result()
     mysql_check._statement_metrics._job_loop_future.result()
@@ -823,7 +823,7 @@ def test_async_job_cancel(aggregator, dd_run_check, dbm_instance):
     dbm_instance['query_samples']['run_sync'] = False
     dbm_instance['query_metrics']['run_sync'] = False
     mysql_check = MySql(common.CHECK_NAME, {}, [dbm_instance])
-    dd_run_check(mysql_check)
+    run_one_check(dd_run_check, mysql_check, blocking=True)
     mysql_check.cancel()
     # wait for it to stop and make sure it doesn't throw any exceptions
     mysql_check._statement_samples._job_loop_future.result()
@@ -859,7 +859,7 @@ def test_async_job_enabled(dd_run_check, dbm_instance, statement_samples_enabled
     dbm_instance['query_samples'] = {'enabled': statement_samples_enabled, 'run_sync': False}
     dbm_instance['query_metrics'] = {'enabled': statement_metrics_enabled, 'run_sync': False}
     mysql_check = MySql(common.CHECK_NAME, {}, [dbm_instance])
-    dd_run_check(mysql_check)
+    run_one_check(dd_run_check, mysql_check, blocking=True)
     mysql_check.cancel()
     if statement_samples_enabled:
         assert mysql_check._statement_samples._job_loop_future is not None
@@ -879,7 +879,7 @@ def test_async_job_enabled(dd_run_check, dbm_instance, statement_samples_enabled
 def test_statement_samples_invalid_explain_procedure(aggregator, dd_run_check, dbm_instance, bob_conn):
     dbm_instance['query_samples']['explain_procedure'] = 'hello'
     mysql_check = MySql(common.CHECK_NAME, {}, [dbm_instance])
-    dd_run_check(mysql_check)
+    run_one_check(dd_run_check, mysql_check, blocking=True)
     aggregator.assert_metric_has_tag_prefix("dd.mysql.query_samples.error", "error:explain-")
 
 
@@ -906,7 +906,7 @@ def test_statement_samples_enable_consumers(dd_run_check, dbm_instance, root_con
     original_enabled_consumers = mysql_check._statement_samples._get_enabled_performance_schema_consumers()
     assert consumer_to_disable not in original_enabled_consumers
 
-    dd_run_check(mysql_check)
+    run_one_check(dd_run_check, mysql_check, blocking=True)
 
     enabled_consumers = mysql_check._statement_samples._get_enabled_performance_schema_consumers()
     if events_statements_enable_procedure == "datadog.enable_events_statements_consumers":

@@ -21,6 +21,7 @@ from datadog_checks.sqlserver.const import (
 from datadog_checks.sqlserver.stored_procedures import SQL_SERVER_PROCEDURE_METRICS_COLUMNS
 
 from .common import CHECK_NAME, OPERATION_TIME_METRIC_NAME
+from .utils import run_one_check
 
 try:
     import pyodbc
@@ -51,7 +52,7 @@ def stop_orphaned_threads():
 @pytest.fixture
 def dbm_instance(instance_docker):
     instance_docker['dbm'] = True
-    instance_docker['min_collection_interval'] = 1
+    instance_docker['min_collection_interval'] = 0.2
     instance_docker['query_metrics'] = {'enabled': False}
     instance_docker['query_activity'] = {'enabled': False}
     instance_docker['collect_settings'] = {'enabled': False}
@@ -229,18 +230,18 @@ def test_procedure_metrics(
     # 2) load the test queries into the StatementMetrics state
     # 3) emit the procedure metrics based on the diff of current and last state
     logger.warning('dd_run_check')
-    dd_run_check(check)
+    run_one_check(dd_run_check, check, blocking=True)
     for _ in range(0, execution_count):
         for params in param_groups:
             bob_conn.execute_with_retries(query, params, database=database)
     logger.warning('dd_run_check')
-    dd_run_check(check)
+    run_one_check(dd_run_check, check, blocking=True)
     aggregator.reset()
     for _ in range(0, execution_count):
         for params in param_groups:
             bob_conn.execute_with_retries(query, params, database=database)
     logger.warning('dd_run_check')
-    dd_run_check(check)
+    run_one_check(dd_run_check, check, blocking=True)
 
     _conn_key_prefix = "dbm-test-procedures"
     with check.connection.open_managed_default_connection(key_prefix=_conn_key_prefix):
@@ -296,16 +297,16 @@ def test_procedure_metrics_limit(aggregator, dd_run_check, dbm_instance, bob_con
     # interval is correct)
     # 2) load the test queries into the StatementMetrics state
     # 3) emit the procedure metrics based on the diff of current and last state
-    dd_run_check(check)
+    run_one_check(dd_run_check, check, blocking=True)
     bob_conn.execute_with_retries('EXEC multiQueryProc', (), database='master')
     bob_conn.execute_with_retries('EXEC encryptedProc', (), database='master')
     bob_conn.execute_with_retries('EXEC bobProc', (), database='datadog_test-1')
-    dd_run_check(check)
+    run_one_check(dd_run_check, check, blocking=True)
     aggregator.reset()
     bob_conn.execute_with_retries('EXEC multiQueryProc', (), database='master')
     bob_conn.execute_with_retries('EXEC encryptedProc', (), database='master')
     bob_conn.execute_with_retries('EXEC bobProc', (), database='datadog_test-1')
-    dd_run_check(check)
+    run_one_check(dd_run_check, check, blocking=True)
 
     # dbm-metrics
     dbm_metrics = aggregator.get_event_platform_events("dbm-metrics")
@@ -324,7 +325,7 @@ def test_procedure_metrics_limit(aggregator, dd_run_check, dbm_instance, bob_con
 def test_async_job_enabled(dd_run_check, dbm_instance, procedure_metrics_enabled):
     dbm_instance['procedure_metrics'] = {'enabled': procedure_metrics_enabled, 'run_sync': False}
     check = SQLServer(CHECK_NAME, {}, [dbm_instance])
-    dd_run_check(check)
+    run_one_check(dd_run_check, check)
     check.cancel()
     if procedure_metrics_enabled:
         assert check.procedure_metrics._job_loop_future is not None
@@ -338,7 +339,7 @@ def test_async_job_enabled(dd_run_check, dbm_instance, procedure_metrics_enabled
 def test_async_job_inactive_stop(aggregator, dd_run_check, dbm_instance):
     dbm_instance['procedure_metrics']['run_sync'] = False
     check = SQLServer(CHECK_NAME, {}, [dbm_instance])
-    dd_run_check(check)
+    run_one_check(dd_run_check, check)
     check.procedure_metrics._job_loop_future.result()
     aggregator.assert_metric(
         "dd.sqlserver.async_job.inactive_stop",
@@ -352,7 +353,7 @@ def test_async_job_inactive_stop(aggregator, dd_run_check, dbm_instance):
 def test_async_job_cancel_cancel(aggregator, dd_run_check, dbm_instance):
     dbm_instance['procedure_metrics']['run_sync'] = False
     check = SQLServer(CHECK_NAME, {}, [dbm_instance])
-    dd_run_check(check)
+    run_one_check(dd_run_check, check)
     check.cancel()
     # wait for it to stop and make sure it doesn't throw any exceptions
     check.procedure_metrics._job_loop_future.result()

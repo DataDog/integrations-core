@@ -4,6 +4,7 @@
 import os
 import string
 import threading
+import time
 from copy import copy
 from random import choice, randint, shuffle
 
@@ -220,3 +221,9 @@ class HighCardinalityQueries:
     @staticmethod
     def _create_rand_string(length=5):
         return ''.join(choice(string.ascii_lowercase + string.digits) for _ in range(length))
+
+
+def run_one_check(dd_run_check, check, blocking=False):
+    dd_run_check(check)
+    if blocking:
+        time.sleep(check.instance.get('min_collection_interval', 0))
