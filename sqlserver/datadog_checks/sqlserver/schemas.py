@@ -80,7 +80,7 @@ class SubmitData:
             **self._base_event,
             "metadata": [],
             "timestamp": time.time() * 1000,
-            "collection_errors": [{"error": "truncated", "message": ""}],
+            "collection_errors": [{"error_type": "truncated", "message": ""}],
         }
         db_info = self.db_info[db_name]
         event["metadata"] = [{**(db_info)}]

@@ -10,7 +10,6 @@ e2e-env = false
 dependencies = [
   "pyyaml",
   "vcrpy",
-  "deepdiff",
 ]
 # TODO: remove this when the old CLI is gone
 pre-install-commands = [
