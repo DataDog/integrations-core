@@ -260,3 +260,23 @@ def test__extract_common_name(check):
     # Check one cn
     dn = "cn=Max File Descriptors"
     assert check._extract_common_name(dn) == "max_file_descriptors"
+
+
+def test_check_search_response_failure(check, mocker):
+    instance = {
+        "url": "ldap://localhost",
+        "username": "admin",
+        "password": "password",
+        "ssl_verify": False,
+    }
+
+    mocker.patch("ldap3.Server")
+    conn_mock = mocker.patch("ldap3.Connection", return_value=mocker.MagicMock())
+
+    conn_mock.return_value.bind.return_value = True
+    conn_mock.return_value.search.return_value = False
+
+    mocker.patch.object(check.log, "debug", return_value=None)
+    check.check(instance)
+
+    check.log.debug.assert_called_once()
