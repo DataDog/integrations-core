@@ -14,6 +14,7 @@ from deepdiff import DeepDiff
 from datadog_checks.sqlserver import SQLServer
 
 from .common import CHECK_NAME
+from .utils import normalize_ids
 
 try:
     import pyodbc
@@ -104,11 +105,11 @@ def test_collect_schemas(aggregator, dd_run_check, dbm_instance):
         'schemas': [
             {
                 'name': 'dbo',
-                'id': '1',
+                'id': 'normalized_value',
                 'owner_name': 'dbo',
                 'tables': [
                     {
-                        'id': '885578193',
+                        'id': 'normalized_value',
                         'name': 'ϑings',
                         'columns': [
                             {
@@ -151,11 +152,11 @@ def test_collect_schemas(aggregator, dd_run_check, dbm_instance):
         'schemas': [
             {
                 'name': 'test_schema',
-                'id': '5',
+                'id': 'normalized_value',
                 'owner_name': 'dbo',
                 'tables': [
                     {
-                        'id': '885578193',
+                        'id': 'normalized_value',
                         'name': 'cities',
                         'columns': [
                             {
@@ -221,7 +222,7 @@ def test_collect_schemas(aggregator, dd_run_check, dbm_instance):
                         ],
                     },
                     {
-                        'id': '949578421',
+                        'id': 'normalized_value',
                         'name': 'landmarks',
                         'columns': [
                             {
@@ -242,7 +243,7 @@ def test_collect_schemas(aggregator, dd_run_check, dbm_instance):
                         'partitions': {'partition_count': 1},
                     },
                     {
-                        'id': '1029578706',
+                        'id': 'normalized_value',
                         'name': 'RestaurantReviews',
                         'columns': [
                             {
@@ -270,7 +271,7 @@ def test_collect_schemas(aggregator, dd_run_check, dbm_instance):
                         'partitions': {'partition_count': 1},
                     },
                     {
-                        'id': '997578592',
+                        'id': 'normalized_value',
                         'name': 'Restaurants',
                         'columns': [
                             {
@@ -361,8 +362,8 @@ def test_collect_schemas(aggregator, dd_run_check, dbm_instance):
 
         assert db_name in databases_to_find
 
-        # database id's a re different in different test envs
-        actual_payload['id'] = 'normalized_value'
+        normalize_ids(actual_payload)
+
         difference = DeepDiff(actual_payload, expected_data_for_db[db_name], ignore_order=True)
 
         diff_keys = list(difference.keys())

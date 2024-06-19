@@ -220,3 +220,11 @@ class HighCardinalityQueries:
     @staticmethod
     def _create_rand_string(length=5):
         return ''.join(choice(string.ascii_lowercase + string.digits) for _ in range(length))
+
+
+def normalize_ids(actual_payload):
+    actual_payload['id'] = 'normalized_value'
+    for schema in actual_payload['schemas']:
+        schema['id'] = 'normalized_value'
+        for table in schema['tables']:
+            table['id'] = 'normalized_value'
