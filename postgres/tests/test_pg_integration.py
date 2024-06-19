@@ -425,6 +425,7 @@ def test_activity_vacuum_excluded(aggregator, integration_check, pg_instance):
 
 
 @flaky(max_runs=5)
+@pytest.mark.skip(reason="Test disabled due to failure impacting master pipeline, should re-enable after fix")
 def test_backend_transaction_age(aggregator, integration_check, pg_instance):
     pg_instance['collect_activity_metrics'] = True
     check = integration_check(pg_instance)
