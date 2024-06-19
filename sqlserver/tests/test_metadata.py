@@ -97,7 +97,7 @@ def test_sqlserver_collect_settings(aggregator, dd_run_check, dbm_instance):
 def test_collect_schemas(aggregator, dd_run_check, dbm_instance):
     databases_to_find = ['datadog_test_schemas', 'datadog_test_schemas_second']
     exp_datadog_test = {
-        'id': '6',
+        'id': 'normalized_value',
         'name': 'datadog_test_schemas_second',
         "collation": "SQL_Latin1_General_CP1_CI_AS",
         'owner': 'dbo',
@@ -144,7 +144,7 @@ def test_collect_schemas(aggregator, dd_run_check, dbm_instance):
         ],
     }
     exp_datadog_test_schemas = {
-        'id': '5',
+        'id': 'normalized_value',
         'name': 'datadog_test_schemas',
         "collation": "SQL_Latin1_General_CP1_CI_AS",
         'owner': 'dbo',
@@ -361,6 +361,8 @@ def test_collect_schemas(aggregator, dd_run_check, dbm_instance):
 
         assert db_name in databases_to_find
 
+        #database id's a re different in different test envs
+        actual_payload['id'] = 'normalized_value'
         difference = DeepDiff(actual_payload, expected_data_for_db[db_name], ignore_order=True)
 
         diff_keys = list(difference.keys())
