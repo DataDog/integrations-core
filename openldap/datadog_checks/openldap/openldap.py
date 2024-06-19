@@ -52,6 +52,8 @@ class OpenLDAP(AgentCheck):
 
             # Get additional custom metrics
             self._perform_custom_queries(conn, custom_queries, tags, instance)
+        except ldap3.core.exceptions.LDAPAdminLimitExceededException as e:
+            self.log.exception("LDAP Admin Response Size Limit Exceeded: %s", e)
         finally:
             conn.unbind()
 
