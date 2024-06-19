@@ -2,7 +2,7 @@
 
 [Suricata][4] is a high performance, open source network analysis and threat detection software used by most private and public organizations, and embedded by major vendors to protect their assets.
 
-This integration provides enrichment and visulization for Alert, Anomaly, HTTP, DNS, FTP, FTP_DATA, TLS, TFTP, SMB, SSH, Flow, RDP, DHCP and ARP log types. It helps to visualize detailed insights into Alerts, Anomaly, network connections, DNS and DHCP activity, detailed network protocol analysis through the out-of-the-box dashboards.
+This integration provides enrichment and visualization for Alert, Anomaly, HTTP, DNS, FTP, FTP_DATA, TLS, TFTP, SMB, SSH, Flow, RDP, DHCP and ARP log types. It helps to visualize detailed insights into Alerts, Anomaly, network connections, DNS and DHCP activity, detailed network protocol analysis through the out-of-the-box dashboards.
 
 ## Setup
 

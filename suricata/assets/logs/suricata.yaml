@@ -1,5 +1,6 @@
 id: suricata
 metric_id: suricata
+backend_only: false
 facets:
   - groups:
       - Web Access
@@ -24,23 +25,23 @@ facets:
   - facetType: range
     groups:
       - Web Access
-    name: Recieved Bytes
+    name: Network Bytes Read
     path: network.bytes_read
     source: log
-    type: integer
+    type: double
     unit:
-      name: byte
       family: bytes
+      name: byte
   - facetType: range
     groups:
       - Web Access
-    name: Sent Bytes
+    name: Bytes Written
     path: network.bytes_written
     source: log
-    type: integer
+    type: double
     unit:
-      name: byte
       family: bytes
+      name: byte
   - groups:
       - Web Access
     name: URL Host
@@ -138,8 +139,8 @@ facets:
     source: log
     type: integer
     unit:
-      name: second
       family: time
+      name: second
   - facetType: range
     groups:
       - Suricata
@@ -148,8 +149,8 @@ facets:
     source: log
     type: integer
     unit:
-      name: byte
       family: bytes
+      name: byte
   - facetType: range
     groups:
       - Suricata
@@ -158,8 +159,8 @@ facets:
     source: log
     type: integer
     unit:
-      name: second
       family: time
+      name: second
   - facetType: range
     groups:
       - Suricata
@@ -403,7 +404,7 @@ pipeline:
             3,Info
           type: lookup-processor
         - type: status-remapper
-          name: Define `alert_severity` as official status of the log
+          name: Define `alert_severity` as the official status of the log
           enabled: true
           sources:
             - alert_severity
