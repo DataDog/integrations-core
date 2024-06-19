@@ -361,7 +361,7 @@ def test_collect_schemas(aggregator, dd_run_check, dbm_instance):
 
         assert db_name in databases_to_find
 
-        #database id's a re different in different test envs
+        # database id's a re different in different test envs
         actual_payload['id'] = 'normalized_value'
         difference = DeepDiff(actual_payload, expected_data_for_db[db_name], ignore_order=True)
 
