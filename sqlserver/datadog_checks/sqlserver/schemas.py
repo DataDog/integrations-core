@@ -28,7 +28,7 @@ from datadog_checks.sqlserver.queries import (
     SCHEMA_QUERY,
     TABLES_IN_SCHEMA_QUERY,
 )
-from datadog_checks.sqlserver.utils import execute_query, get_list_chunks, is_azure_sql_database
+from datadog_checks.sqlserver.utils import convert_to_bool, execute_query, get_list_chunks, is_azure_sql_database
 
 
 class SubmitData:
@@ -397,7 +397,12 @@ class Schemas(DBMAsyncJob):
             table_id = row.pop("id", None)
             table_id_str = str(table_id)
             table_id_to_table_data[table_id_str].setdefault("indexes", [])
-            table_id_to_table_data[table_id_str]["indexes"].append(row)
+            if "is_unique" in row:
+                row["is_unique"] = convert_to_bool(row["is_unique"])
+            if "is_primary_key" in row:
+                row["is_primary_key"] = convert_to_bool(row["is_primary_key"])
+            if "is_disabled" in row:
+                row["is_disabled"] = convert_to_bool(row["is_disabled"])
 
     @tracked_method(agent_check_getter=agent_check_getter, track_result_length=True)
     def _populate_with_foreign_keys_data(self, table_ids, table_id_to_table_data, cursor):

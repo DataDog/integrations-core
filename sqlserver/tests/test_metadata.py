@@ -11,6 +11,7 @@ from copy import copy
 import pytest
 from deepdiff import DeepDiff
 
+from datadog_checks.dev.utils import running_on_windows_ci
 from datadog_checks.sqlserver import SQLServer
 
 from .common import CHECK_NAME
@@ -322,6 +323,11 @@ def test_collect_schemas(aggregator, dd_run_check, dbm_instance):
             }
         ],
     }
+
+    if running_on_windows_ci():
+        exp_datadog_test['owner'] = 'None'
+        exp_datadog_test_schemas['owner'] = 'None'
+
     expected_data_for_db = {
         'datadog_test_schemas_second': exp_datadog_test,
         'datadog_test_schemas': exp_datadog_test_schemas,

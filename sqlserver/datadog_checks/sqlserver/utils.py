@@ -158,3 +158,8 @@ def get_list_chunks(lst, n):
     """Yield successive n-sized chunks from lst."""
     for i in range(0, len(lst), n):
         yield lst[i : i + n]
+
+
+def convert_to_bool(value):
+    if isinstance(value, int):
+        return bool(value)
