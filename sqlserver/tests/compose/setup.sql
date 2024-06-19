@@ -15,7 +15,7 @@ CREATE USER fred FOR LOGIN fred;
 GRANT CONNECT ANY DATABASE to fred;
 GO
 
-
+-- Create test database for integration schema tests
 CREATE DATABASE datadog_test_schemas;
 GO
 USE datadog_test_schemas;
@@ -69,6 +69,19 @@ CREATE TABLE datadog_test_schemas.test_schema.RestaurantReviews (
     Review VARCHAR(MAX),
     CONSTRAINT FK_RestaurantNameDistrict FOREIGN KEY (RestaurantName, District) REFERENCES datadog_test_schemas.test_schema.Restaurants(RestaurantName, District)
 );
+GO
+
+-- Create second test database for integration schema tests
+CREATE DATABASE datadog_test_schemas_second;
+GO
+USE datadog_test_schemas_second;
+-- This table is pronounced "things" except we've replaced "th" with the greek lower case "theta" to ensure we
+-- correctly support unicode throughout the integration.
+CREATE TABLE datadog_test_schemas_second.dbo.ϑings (id int DEFAULT 0, name varchar(255));
+INSERT INTO datadog_test_schemas_second.dbo.ϑings VALUES (1, 'foo'), (2, 'bar');
+CREATE USER bob FOR LOGIN bob;
+CREATE USER fred FOR LOGIN fred;
+CREATE CLUSTERED INDEX thingsindex ON datadog_test_schemas_second.dbo.ϑings (name);
 GO
 
 -- Create test database for integration tests

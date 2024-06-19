@@ -93,13 +93,11 @@ def test_sqlserver_collect_settings(aggregator, dd_run_check, dbm_instance):
     assert event['kind'] == "sqlserver_configs"
     assert len(event["metadata"]) > 0
 
-
 def test_collect_schemas(aggregator, dd_run_check, dbm_instance):
-
-    databases_to_find = ['datadog_test_schemas', 'datadog_test-1']
+    databases_to_find = ['datadog_test_schemas', 'datadog_test_schemas_second']
     exp_datadog_test = {
         'id': '6',
-        'name': 'datadog_test-1',
+        'name': 'datadog_test_schemas_second',
         "collation": "SQL_Latin1_General_CP1_CI_AS",
         'owner': 'dbo',
         'schemas': [
@@ -322,10 +320,10 @@ def test_collect_schemas(aggregator, dd_run_check, dbm_instance):
             }
         ],
     }
-    expected_data_for_db = {'datadog_test-1': exp_datadog_test, 'datadog_test_schemas': exp_datadog_test_schemas}
+    expected_data_for_db = {'datadog_test_schemas_second': exp_datadog_test, 'datadog_test_schemas': exp_datadog_test_schemas}
 
     dbm_instance['database_autodiscovery'] = True
-    dbm_instance['autodiscovery_include'] = ['datadog_test_schemas', 'datadog_test-1']
+    dbm_instance['autodiscovery_include'] = ['datadog_test_schemas', 'datadog_test_schemas_second']
     dbm_instance['dbm'] = True
     dbm_instance['schemas_collection'] = {"enabled": True}
 
@@ -352,6 +350,7 @@ def test_collect_schemas(aggregator, dd_run_check, dbm_instance):
             actual_payloads[db_name]['schemas'] = actual_payloads[db_name]['schemas'] + database_metadata[0]['schemas']
         else:
             actual_payloads[db_name] = database_metadata[0]
+ 
     assert len(actual_payloads) == len(expected_data_for_db)
 
     for db_name, actual_payload in actual_payloads.items():
