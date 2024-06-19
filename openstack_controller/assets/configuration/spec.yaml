@@ -354,8 +354,6 @@ files:
                           - type: boolean
                           - type: object
                             properties:
-                              - name: all_projects
-                                type: boolean
                               - name: limit
                                 description: |
                                   Maximum number of servers to be processed.

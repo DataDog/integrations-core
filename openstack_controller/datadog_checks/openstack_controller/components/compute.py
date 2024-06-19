@@ -294,7 +294,7 @@ class Compute(Component):
         if isinstance(config_servers, bool):
             report_servers = config_servers
             config_servers = {}
-        if report_servers and config_servers.get('all_projects', config.get('all_projects', False)):
+        if report_servers and self.check.config.all_projects:
             self._report_servers(self.check.api.get_compute_all_servers(), tags, config_servers)
 
     @Component.register_project_metrics(ID)
@@ -305,7 +305,7 @@ class Compute(Component):
         if isinstance(config_servers, bool):
             report_servers = config_servers
             config_servers = {}
-        if report_servers and not config_servers.get('all_projects', config.get('all_projects', False)):
+        if report_servers and not self.check.config.all_projects:
             self._report_servers(self.check.api.get_compute_servers(project_id), tags, config_servers)
 
     @Component.http_error()

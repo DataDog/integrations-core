@@ -110,7 +110,6 @@ class Servers(BaseModel):
         arbitrary_types_allowed=True,
         frozen=True,
     )
-    all_projects: Optional[bool] = None
     exclude: Optional[tuple[str, ...]] = None
     include: Optional[tuple[Union[str, Include2], ...]] = None
     interval: Optional[int] = None
