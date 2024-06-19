@@ -2,6 +2,12 @@
 
 <!-- towncrier release notes start -->
 
+## 1.12.1-beta.0 / 2024-06-19
+
+***Added***:
+
+* Add exception message when admin response size limit is breached ([#17888](https://github.com/DataDog/integrations-core/pull/17888))
+
 ## 1.12.0 / 2024-01-05 / Agent 7.51.0
 
 ***Added***:
