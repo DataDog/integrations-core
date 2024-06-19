@@ -47,7 +47,9 @@ class OpenLDAP(AgentCheck):
 
         try:
             # Search Monitor database to get all metrics
-            conn.search(self.SEARCH_BASE, self.SEARCH_FILTER, attributes=self.ATTRS)
+            search_response = conn.search(self.SEARCH_BASE, self.SEARCH_FILTER, attributes=self.ATTRS)
+            if not search_response:
+                self.log.debug("Unsuccessful search. Result: %s", conn.result.get('result', conn.result))
             self._collect_monitor_metrics(conn, tags)
 
             # Get additional custom metrics
