@@ -163,3 +163,5 @@ def get_list_chunks(lst, n):
 def convert_to_bool(value):
     if isinstance(value, int):
         return bool(value)
+    else:
+        return value
