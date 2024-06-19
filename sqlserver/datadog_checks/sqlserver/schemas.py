@@ -402,6 +402,8 @@ class Schemas(DBMAsyncJob):
                 row["is_primary_key"] = convert_to_bool(row["is_primary_key"])
             if "is_disabled" in row:
                 row["is_disabled"] = convert_to_bool(row["is_disabled"])
+            if "is_unique_constraint" in row:
+                row["is_unique_constraint"] = convert_to_bool(row["is_unique_constraint"])
             table_id_to_table_data[table_id_str].setdefault("indexes", [])
             table_id_to_table_data[table_id_str]["indexes"].append(row)
 

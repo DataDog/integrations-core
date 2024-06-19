@@ -228,3 +228,15 @@ def normalize_ids(actual_payload):
         schema['id'] = 'normalized_value'
         for table in schema['tables']:
             table['id'] = 'normalized_value'
+
+
+def normalize_indexes_columns(actual_payload):
+    for schema in actual_payload['schemas']:
+        schema['id'] = 'normalized_value'
+        for table in schema['tables']:
+            if 'indexes' in table:
+                for index in table['indexes']:
+                    column_names = index['column_names']
+                    columns = column_names.split(',')
+                    sorted_columns = sorted(columns)
+                    index['column_names'] = ','.join(sorted_columns)

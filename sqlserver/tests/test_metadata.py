@@ -15,7 +15,7 @@ from datadog_checks.dev.utils import running_on_windows_ci
 from datadog_checks.sqlserver import SQLServer
 
 from .common import CHECK_NAME
-from .utils import normalize_ids
+from .utils import normalize_ids, normalize_indexes_columns
 
 try:
     import pyodbc
@@ -209,7 +209,7 @@ def test_collect_schemas(aggregator, dd_run_check, dbm_instance):
                                 'is_primary_key': False,
                                 'is_unique_constraint': False,
                                 'is_disabled': False,
-                                'column_names': 'population,id',
+                                'column_names': 'id,population',
                             },
                             {
                                 'name': 'two_columns_index',
@@ -315,7 +315,7 @@ def test_collect_schemas(aggregator, dd_run_check, dbm_instance):
                                 'is_primary_key': False,
                                 'is_unique_constraint': True,
                                 'is_disabled': False,
-                                'column_names': 'RestaurantName,District',
+                                'column_names': 'District,RestaurantName',
                             }
                         ],
                     },
@@ -368,7 +368,11 @@ def test_collect_schemas(aggregator, dd_run_check, dbm_instance):
 
         assert db_name in databases_to_find
 
+        # id's are env dependant
         normalize_ids(actual_payload)
+
+        # index columns may be in any order
+        normalize_indexes_columns(actual_payload)
 
         difference = DeepDiff(actual_payload, expected_data_for_db[db_name], ignore_order=True)
 
