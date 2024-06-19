@@ -1,0 +1,21 @@
+id: suricata
+tests:
+  - sample: '{"timestamp":"2024-04-25T03:06:32.258446+0530","flow_id":2192789171815790,"in_iface":"ens160","event_type":"alert","src_ip":"10.10.10.10","src_port":39952,"dest_ip":"20.20.20.20","dest_port":80,"proto":"TCP","pkt_src":"wire/pcap","community_id":"1:l3GiQDaN0AKDeOe6TVIqMakFW98=","tx_id":0,"alert":{"action":"allowed","gid":1,"signature_id":2013504,"rev":6,"signature":"ET
+      POLICY GNU/Linux APT User-Agent Outbound likely related to package
+      management","category":"Not Suspicious
+      Traffic","severity":3,"metadata":{"created_at":["2011_08_31"],"former_category":["POLICY"],"updated_at":["2020_04_22"]}},"http":{"hostname":"in.archive.ubuntu.com","url":"/ubuntu/pool/main/u/util-linux/bsdutils_2.34-0.1ubuntu9.6_amd64.deb","http_user_agent":"Debian
+      APT-HTTP/1.3 (2.0.9)
+      non-interactive","http_content_type":"application/vnd.debian.binary-package","http_method":"GET","protocol":"HTTP/1.1","status":200,"length":1158},"app_proto":"http","direction":"to_server","flow":{"pkts_toserver":4,"pkts_toclient":10,"bytes_toserver":442,"bytes_toclient":12252,"start":"2024-04-25T03:06:31.576084+0530","src_ip":"10.10.10.10","dest_ip":"20.20.20.20","src_port":39952,"dest_port":80}}'
+    result: null
+  - sample: '{"timestamp":"2024-04-25T03:06:41.058582+0530","flow_id":674704251484567,"in_iface":"ens160","event_type":"flow","src_ip":"10.10.10.10","src_port":138,"dest_ip":"20.20.20.20","dest_port":138,"proto":"UDP","app_proto":"failed","flow":{"pkts_toserver":1,"pkts_toclient":0,"bytes_toserver":243,"bytes_toclient":0,"start":"2024-04-25T03:06:02.353699+0530","end":"2024-04-25T03:06:02.353699+0530","age":0,"state":"new","reason":"timeout","alerted":false},"community_id":"1:2ae4Z1d+/DRATT+AKFH+qkii5YE="}'
+    result: null
+  - sample: '{"timestamp":"2024-04-25T03:06:53.130838+0530","flow_id":891677046600244,"in_iface":"ens160","event_type":"http","src_ip":"10.10.10.10","src_port":44182,"dest_ip":"20.20.20.20","dest_port":80,"proto":"TCP","pkt_src":"wire/pcap","community_id":"1:E5ndQkn6JkiIdEaXeLRB6yJO7Ps=","tx_id":0,"http":{"hostname":"in.archive.ubuntu.com","url":"/ubuntu/pool/main/k/klibc/klibc-utils_2.0.7-1ubuntu5.2_amd64.deb","http_user_agent":"Debian
+      APT-HTTP/1.3 (2.0.9)
+      non-interactive","http_content_type":"application/vnd.debian.binary-package","http_method":"GET","protocol":"HTTP/1.1","status":200,"length":95188}}'
+    result: null
+  - sample: '{"timestamp":"2024-04-25T03:10:41.151776+0530","flow_id":370400192513559,"in_iface":"ens160","event_type":"dns","src_ip":"10.10.10.10","src_port":36980,"dest_ip":"20.20.20.20","dest_port":53,"proto":"UDP","pkt_src":"wire/pcap","community_id":"1:mRIoKCzYJvKosz+YNdT+SWSclHg=","dns":{"version":2,"type":"answer","id":51436,"flags":"8180","qr":true,"rd":true,"ra":true,"opcode":0,"rrname":"_http._tcp.in.archive.ubuntu.com","rrtype":"SRV","rcode":"NOERROR","authorities":[{"rrname":"ubuntu.com","rrtype":"SOA","ttl":412,"soa":{"mname":"ns1.canonical.com","rname":"hostmaster.canonical.com","serial":2018058001,"refresh":10800,"retry":3600,"expire":604800,"minimum":3600}}]}}'
+    result: null
+  - sample: '{"timestamp":"2024-04-25T06:09:30.777536+0530","flow_id":806218797870847,"in_iface":"ens160","event_type":"dhcp","src_ip":"10.10.10.10","src_port":67,"dest_ip":"20.20.20.20","dest_port":68,"proto":"UDP","pkt_src":"wire/pcap","community_id":"1:8WHSuznco6czcpxAeRFNW/Rlq88=","dhcp":{"type":"reply","id":609205267,"client_mac":"00:00:00:00:00:00","assigned_ip":"0.0.0.0","dhcp_type":"ack"}}'
+    result: null
+  - sample: '{"in_iface":"ens160","src_ip":"10.10.10.10","src_port":55315,"event_type":"smb","flow_id":1171333647135642,"dest_ip":"20.20.20.20","proto":"UDP","dest_port":53,"pkt_src":"wire/pcap","smb":{"id":1,"dialect":"unknown","command":"SMB2_COMMAND_CREATE","status":"STATUS_SUCCESS","status_code":"0x0","session_id":4398046511201,"tree_id":1,"filename":"atsvc","disposition":"FILE_OPEN","access":"normal","created":0,"accessed":0,"modified":0,"changed":0,"size":0,"fuid":"0000004d-0000-0000-0005-0000ffffffff"}}'
+    result: null
