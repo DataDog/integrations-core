@@ -2,6 +2,12 @@
 
 <!-- towncrier release notes start -->
 
+## 1.12.1-beta.1 / 2024-06-19
+
+***Added***:
+
+* Log search result in case of failure ([#17892](https://github.com/DataDog/integrations-core/pull/17892))
+
 ## 1.12.0 / 2024-01-05 / Agent 7.51.0
 
 ***Added***:
