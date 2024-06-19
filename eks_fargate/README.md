@@ -242,9 +242,9 @@ To further configure the Agent or its container resources, use the properties in
   2. After the Cluster Agent reaches a running state and registers Admission Controller mutating webhooks, an Agent sidecar is automatically injected into any pod created with the label `app:redis`.
    **The Admission Controller does not mutate pods that are already created**.
 
-     **Example result**
+ **Example result**
 
-     The following is a `spec.containers` snippet from a Redis deployment where the Admission Controller injected an Agent sidecar. The environment variables and resource settings from `datadog-agent.yaml` are automatically applied.
+ The following is a `spec.containers` snippet from a Redis deployment where the Admission Controller injected an Agent sidecar. The environment variables and resource settings from `datadog-agent.yaml` are automatically applied.
      
    {{< highlight yaml "hl_lines=12-30" >}}
    labels:
