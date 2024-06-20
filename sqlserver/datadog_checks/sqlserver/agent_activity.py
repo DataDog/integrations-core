@@ -16,6 +16,7 @@ DEFAULT_COLLECTION_INTERVAL = 10
 
 AGENT_HISTORY_QUERY = """\
 SELECT 
+    j.name,
     sjh1.job_id,
     sjh1.step_id,
     sjh1.step_name,
@@ -34,6 +35,8 @@ SELECT
     sjh1.message
 FROM 
     msdb.dbo.sysjobhistory AS sjh1
+INNER JOIN msdb.dbo.sysjobs AS j
+ON j.job_id = sjh1.job_id
 WHERE 
     EXISTS (
         SELECT 1
