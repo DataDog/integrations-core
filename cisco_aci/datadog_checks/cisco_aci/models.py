@@ -125,7 +125,6 @@ if six.PY3:
         interface_metadata: list = Field(default_factory=list)
 
     class NetworkDevicesMetadata(BaseModel):
-        subnet: Optional[str] = None
         namespace: str = None
         devices: Optional[list[DeviceMetadata]] = Field(default_factory=list)
         interfaces: Optional[list[InterfaceMetadata]] = Field(default_factory=list)

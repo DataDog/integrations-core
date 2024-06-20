@@ -7,7 +7,10 @@ from six import PY3, iteritems
 from datadog_checks.base.utils.serialization import json
 
 if PY3:
-    from datadog_checks.cisco_aci.models import DeviceMetadata, InterfaceMetadata, Node, PhysIf
+    import time
+
+    from datadog_checks.cisco_aci.models import DeviceMetadata, InterfaceMetadata, NetworkDevicesMetadata, Node, PhysIf
+
 else:
     DeviceMetadata = None
     Eth = None
@@ -17,6 +20,7 @@ else:
 from . import aci_metrics, exceptions, helpers
 
 VENDOR_CISCO = 'cisco'
+PAYLOAD_METADATA_BATCH_SIZE = 100
 
 
 class Fabric:
@@ -45,7 +49,12 @@ class Fabric:
         fabric_nodes = self.api.get_fabric_nodes()
         self.log.info("%s pods and %s nodes computed", len(fabric_nodes), len(fabric_pods))
         pods = self.submit_pod_health(fabric_pods)
-        self.submit_nodes_health(fabric_nodes, pods)
+        devices, interfaces = self.submit_nodes_health_and_metadata(fabric_nodes, pods)
+        if PY3:
+            collect_timestamp = time.time() * 1000
+            batches = self.batch_payloads(devices, interfaces, collect_timestamp)
+            for batch in batches:
+                self.ndm_metadata(json.dumps(batch.model_dump(exclude_none=True)))
 
     def submit_pod_health(self, pods):
         pods_dict = {}
@@ -67,7 +76,9 @@ class Fabric:
 
         return pods_dict
 
-    def submit_nodes_health(self, nodes, pods):
+    def submit_nodes_health_and_metadata(self, nodes, pods):
+        device_metadata = []
+        interface_metadata = []
         for n in nodes:
             hostname = helpers.get_fabric_hostname(n)
 
@@ -85,7 +96,7 @@ class Fabric:
             self.log.info("processing node %s on pod %s", node_id, pod_id)
             try:
                 if PY3:
-                    self.submit_node_metadata(node_attrs, tags)
+                    device_metadata.append(self.submit_node_metadata(node_attrs, tags))
                 self.submit_process_metric(n, tags + self.check_tags + user_tags, hostname=hostname)
             except (exceptions.APIConnectionException, exceptions.APIParsingException):
                 pass
@@ -93,10 +104,12 @@ class Fabric:
                 try:
                     stats = self.api.get_node_stats(pod_id, node_id)
                     self.submit_fabric_metric(stats, tags, 'fabricNode', hostname=hostname)
-                    self.process_eth(node_attrs)
+                    if PY3:
+                        interface_metadata.extend(self.process_eth(node_attrs))
                 except (exceptions.APIConnectionException, exceptions.APIParsingException):
                     pass
             self.log.info("finished processing node %s", node_id)
+        return device_metadata, interface_metadata
 
     def process_eth(self, node):
         self.log.info("processing ethernet ports for %s", node.get('id'))
@@ -106,18 +119,20 @@ class Fabric:
             eth_list = self.api.get_eth_list(pod_id, node['id'])
         except (exceptions.APIConnectionException, exceptions.APIParsingException):
             pass
+        interfaces = []
         for e in eth_list:
             eth_attrs = helpers.get_attributes(e)
             eth_id = eth_attrs['id']
             tags = self.tagger.get_fabric_tags(e, 'l1PhysIf')
             if PY3:
-                self.submit_interface_metadata(e, node['address'], tags)
+                interfaces.append(self.create_interface_metadata(e, node['address'], tags))
             try:
                 stats = self.api.get_eth_stats(pod_id, node['id'], eth_id)
                 self.submit_fabric_metric(stats, tags, 'l1PhysIf', hostname=hostname)
             except (exceptions.APIConnectionException, exceptions.APIParsingException):
                 pass
         self.log.info("finished processing ethernet ports for %s", node['id'])
+        return interfaces
 
     def submit_fabric_metric(self, stats, tags, obj_type, hostname=None):
         for s in stats:
@@ -228,6 +243,34 @@ class Fabric:
         if obj_type == 'l1PhysIf':
             return 'port'
 
+    def batch_payloads(self, devices, interfaces, collect_ts):
+        payloads = []
+
+        for device in devices:
+            payloads.append(
+                NetworkDevicesMetadata(namespace=self.namespace, devices=[device], collect_timestamp=collect_ts)
+            )
+
+        cur_resource_count = 0
+        cur_resources = []
+        for interface in interfaces:
+            if cur_resource_count == PAYLOAD_METADATA_BATCH_SIZE:
+                payloads.append(
+                    NetworkDevicesMetadata(
+                        namespace=self.namespace, interfaces=cur_resources, collect_timestamp=collect_ts
+                    )
+                )
+                cur_resources = []
+                cur_resource_count = 0
+            cur_resources.append(interface)
+            cur_resource_count += 1
+        if cur_resources:
+            payloads.append(
+                NetworkDevicesMetadata(namespace=self.namespace, interfaces=cur_resources, collect_timestamp=collect_ts)
+            )
+
+        return payloads
+
     def submit_node_metadata(self, node_attrs, tags):
         node = Node(attributes=node_attrs)
         id_tags = ['namespace:{}'.format(self.namespace), 'system_ip:{}'.format(node.attributes.address)]
@@ -253,9 +296,9 @@ class Fabric:
             serial_number=node.attributes.serial,
             device_type=node.attributes.device_type,
         )
-        self.ndm_metadata(json.dumps(device.model_dump()))
+        return device.model_dump(exclude_none=True)
 
-    def submit_interface_metadata(self, phys_if, address, tags):
+    def create_interface_metadata(self, phys_if, address, tags):
         eth = PhysIf(**phys_if.get('l1PhysIf', {}))
         interface = InterfaceMetadata(
             device_id='{}:{}'.format(self.namespace, address),
@@ -268,4 +311,4 @@ class Fabric:
         )
         if eth.ethpm_phys_if:
             interface.oper_status = eth.ethpm_phys_if.attributes.oper_st
-        self.ndm_metadata(json.dumps(interface.model_dump(exclude_none=True)))
+        return interface.model_dump(exclude_none=True)

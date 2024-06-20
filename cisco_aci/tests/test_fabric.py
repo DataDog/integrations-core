@@ -9,10 +9,12 @@ from datadog_checks.cisco_aci import CiscoACICheck
 from datadog_checks.cisco_aci.api import Api
 
 if six.PY3:
-    from .fixtures.metadata import EXPECTED_DEVICE_METADATA_RESULT, EXPECTED_INTERFACE_METADATA_RESULT
+    from .fixtures.metadata import EXPECTED_DEVICE_METADATA_EVENTS, EXPECTED_INTERFACE_METADATA_EVENTS
 else:
     EXPECTED_DEVICE_METADATA_RESULT = None
     EXPECTED_INTERFACE_METADATA_RESULT = None
+
+from freezegun import freeze_time
 
 from . import common
 
@@ -23,14 +25,18 @@ def test_fabric_mocked(aggregator):
     api.wrapper_factory = common.FakeFabricSessionWrapper
     check._api_cache[hash_mutable(common.CONFIG_WITH_TAGS)] = api
 
-    check.check({})
+    with freeze_time("2012-01-14 03:21:34"):
+        check.check({})
 
-    if six.PY3:
-        ndm_metadata = aggregator.get_event_platform_events("ndm")
-        device_metadata = [dm for dm in ndm_metadata if 'serial_number' in dm]
-        interface_metadata = [im for im in ndm_metadata if 'serial_number' not in im]
-        assert device_metadata == EXPECTED_DEVICE_METADATA_RESULT.device_metadata
-        assert interface_metadata == EXPECTED_INTERFACE_METADATA_RESULT.interface_metadata
+        if six.PY3:
+            ndm_metadata = aggregator.get_event_platform_events("ndm")
+            device_metadata = [dm for dm in ndm_metadata if 'devices' in dm and len(dm['devices']) > 0]
+            interface_metadata = [im for im in ndm_metadata if 'interfaces' in im and len(im['interfaces']) > 0]
+
+            assert device_metadata == [event.model_dump() for event in EXPECTED_DEVICE_METADATA_EVENTS]
+            assert interface_metadata == [
+                event.model_dump(exclude_none=True) for event in EXPECTED_INTERFACE_METADATA_EVENTS
+            ]
 
     tags000 = ['cisco', 'project:cisco_aci', 'medium:broadcast', 'snmpTrapSt:enable', 'fabric_pod_id:1']
     tags101 = tags000 + ['node_id:101']
