@@ -26,6 +26,7 @@ from datadog_checks.vsphere.constants import (
     DEFAULT_THREAD_COUNT,
     DEFAULT_VSPHERE_ATTR_PREFIX,
     DEFAULT_VSPHERE_TAG_PREFIX,
+    EXCLUDE_FILTERS,
     EXTRA_FILTER_PROPERTIES_FOR_VMS,
     HISTORICAL,
     MOR_TYPE_AS_STRING,
@@ -127,25 +128,7 @@ class VSphereConfig(object):
         )
         self.include_events = instance.get("include_events", None)
         if self.include_events is None:
-            self.exclude_filters = {
-                'AlarmStatusChangedEvent': [r'Gray to Green', r'Green to Gray'],
-                'TaskEvent': [
-                    r'Initialize powering On',
-                    r'Power Off virtual machine',
-                    r'Power On virtual machine',
-                    r'Reconfigure virtual machine',
-                    r'Relocate virtual machine',
-                    r'Suspend virtual machine',
-                    r'Migrate virtual machine',
-                ],
-                'VmBeingHotMigratedEvent': [],
-                'VmMessageEvent': [],
-                'VmMigratedEvent': [],
-                'VmPoweredOnEvent': [],
-                'VmPoweredOffEvent': [],
-                'VmReconfiguredEvent': [],
-                'VmSuspendedEvent': [],
-            }
+            self.exclude_filters = EXCLUDE_FILTERS
         else:
             self.exclude_filters = {}
             for item in self.include_events:
