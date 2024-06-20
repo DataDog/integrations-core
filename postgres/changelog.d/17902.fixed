@@ -1,0 +1,1 @@
+Filter out `PREPARE dd_` statements in query metrics. This query is used by postgres integration internally to collect explain plan for queries using extended protocol. 
