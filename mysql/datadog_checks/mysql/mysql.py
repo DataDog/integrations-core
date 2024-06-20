@@ -278,8 +278,8 @@ class MySql(AgentCheck):
 
         tags = list(self.tags)
         self._set_qcache_stats()
-        with self._connect() as db:
-            try:
+        try:
+            with self._connect() as db:
                 self._conn = db
 
                 # Update tag set with relevant information
@@ -320,12 +320,12 @@ class MySql(AgentCheck):
                 # Custom queries
                 self._query_manager.execute(extra_tags=tags)
 
-            except Exception as e:
-                self.log.exception("error!")
-                raise e
-            finally:
-                self._conn = None
-                self._report_warnings()
+        except Exception as e:
+            self.log.exception("error!")
+            raise e
+        finally:
+            self._conn = None
+            self._report_warnings()
 
     # _set_database_instance_tags sets the tag list for the `database_instance` resource
     # based on metadata that is collected on check start. This ensures that we see tags such as
