@@ -80,7 +80,7 @@ class Component:
                     if report_service_check:
                         self.check.service_check(self.SERVICE_CHECK, AgentCheck.CRITICAL, tags=tags)
                 except Exception as e:
-                    self.check.log.error("Exception: %s", e)
+                    self.check.log.debug("Exception [%s]: %s", type(e), e)
                 return None
 
             return wrapper
