@@ -1,6 +1,7 @@
 # (C) Datadog, Inc. 2023-present
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
+import time
 import psycopg2
 import pytest
 
@@ -15,6 +16,7 @@ pytestmark = [pytest.mark.integration, pytest.mark.usefixtures('dd_environment')
 @requires_over_10
 def test_physical_replication_slots(aggregator, integration_check, pg_instance):
     check = integration_check(pg_instance)
+    time.sleep(1)
     redo_lsn_age = 0
     xmin_age_higher_bound = 1
     with psycopg2.connect(host=HOST, dbname=DB_NAME, user="postgres", password="datad0g") as conn:
