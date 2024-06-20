@@ -168,8 +168,7 @@ tests:
     status: "info"
     tags:
      - "source:LOGS_SOURCE"
-    timestamp: 1713994592258  - sample: '{"timestamp":"2024-04-25T03:06:41.058582+0530","flow_id":674704251484567,"in_iface":"ens160","event_type":"flow","src_ip":"10.10.10.10","src_port":138,"dest_ip":"20.20.20.20","dest_port":138,"proto":"UDP","app_proto":"failed","flow":{"pkts_toserver":1,"pkts_toclient":0,"bytes_toserver":243,"bytes_toclient":0,"start":"2024-04-25T03:06:02.353699+0530","end":"2024-04-25T03:06:02.353699+0530","age":0,"state":"new","reason":"timeout","alerted":false},"community_id":"1:2ae4Z1d+/DRATT+AKFH+qkii5YE="}'
-    result: null
+    timestamp: 1713994592258
  -
   sample: |-
     {
@@ -608,6 +607,7 @@ tests:
         proto: "UDP"
         smb:
           size: 0
+      timestamp: "2024-04-25T06:09:30.777536+0530"
     message: |-
       {
         "in_iface" : "ens160",
@@ -636,7 +636,8 @@ tests:
           "changed" : 0
         },
         "dest_port" : 53,
-        "pkt_src" : "wire/pcap"
+        "pkt_src" : "wire/pcap",
+        "timestamp": "2024-04-25T06:09:30.777536+0530"
       }
     service: "smb"
     tags:
