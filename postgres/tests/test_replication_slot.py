@@ -3,7 +3,6 @@
 # Licensed under a 3-clause BSD style license (see LICENSE)
 import psycopg2
 import pytest
-from flaky import flaky
 
 from datadog_checks.postgres.util import QUERY_PG_REPLICATION_SLOTS_STATS
 
@@ -13,7 +12,6 @@ from .utils import requires_over_10, requires_over_14
 pytestmark = [pytest.mark.integration, pytest.mark.usefixtures('dd_environment')]
 
 
-@flaky(max_runs=5)
 @requires_over_10
 def test_physical_replication_slots(aggregator, integration_check, pg_instance):
     check = integration_check(pg_instance)
