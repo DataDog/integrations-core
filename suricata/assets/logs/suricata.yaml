@@ -250,8 +250,7 @@ pipeline:
       preserveSource: false
       overrideOnConflict: false
     - type: pipeline
-      name: Processing for http logs and Standard attribute remapping for HTTP
-        requests
+      name: Processing for Alert and HTTP logs
       enabled: true
       filter:
         query: "service:(alert OR http) "
@@ -389,7 +388,7 @@ pipeline:
           preserveSource: false
           overrideOnConflict: false
     - type: pipeline
-      name: Processing for alert logs
+      name: Processing for Alert logs
       enabled: true
       filter:
         query: "service:alert "
