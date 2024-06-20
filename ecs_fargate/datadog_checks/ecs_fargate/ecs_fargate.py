@@ -4,7 +4,6 @@
 from __future__ import division
 
 import os
-from datetime import datetime, timezone
 
 import requests
 from dateutil import parser
@@ -12,6 +11,7 @@ from six import iteritems
 
 from datadog_checks.base import AgentCheck
 from datadog_checks.base.utils.common import round_value
+from datadog_checks.base.utils.time import ensure_aware_datetime, get_current_datetime
 
 try:
     from tagger import get_tags
@@ -179,7 +179,11 @@ class FargateCheck(AgentCheck):
                 self.gauge('ecs.fargate.cpu.limit', container['Limits']['CPU'], container_tags[c_id])
 
             if container.get('StartedAt', '') != '' and container.get('FinishedAt', '') == '':
-                uptime = int((datetime.now(timezone.utc) - parser.isoparse(container['StartedAt'])).total_seconds())
+                uptime = int(
+                    (
+                        get_current_datetime() - ensure_aware_datetime(parser.isoparse(container['StartedAt']))
+                    ).total_seconds()
+                )
                 self.gauge('ecs.fargate.uptime', uptime, container_tags[c_id])
 
         # Create task tags
