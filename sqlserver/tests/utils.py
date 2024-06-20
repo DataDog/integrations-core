@@ -12,6 +12,9 @@ import pytest
 
 from datadog_checks.dev.utils import running_on_windows_ci
 
+# Used in tests as 0 is converted to the default collectio interval.
+CLOSE_TO_ZERO_INTERVAL = 0.0000001
+
 
 def is_always_on():
     return os.environ["COMPOSE_FOLDER"] == 'compose-ha'
