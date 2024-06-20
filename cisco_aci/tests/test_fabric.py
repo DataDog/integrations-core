@@ -9,7 +9,11 @@ from datadog_checks.cisco_aci import CiscoACICheck
 from datadog_checks.cisco_aci.api import Api
 
 if six.PY3:
-    from .fixtures.metadata import EXPECTED_DEVICE_METADATA_EVENTS, EXPECTED_INTERFACE_METADATA_EVENTS
+    from .fixtures.metadata import (
+        EXPECTED_DEVICE_METADATA_EVENTS,
+        EXPECTED_INTERFACE_METADATA_EVENTS,
+        INTERFACE_METADATA,
+    )
 else:
     EXPECTED_DEVICE_METADATA_RESULT = None
     EXPECTED_INTERFACE_METADATA_RESULT = None
@@ -25,19 +29,6 @@ def test_fabric_mocked(aggregator):
     api.wrapper_factory = common.FakeFabricSessionWrapper
     check._api_cache[hash_mutable(common.CONFIG_WITH_TAGS)] = api
 
-    with freeze_time("2012-01-14 03:21:34"):
-        check.check({})
-
-        if six.PY3:
-            ndm_metadata = aggregator.get_event_platform_events("ndm")
-            device_metadata = [dm for dm in ndm_metadata if 'devices' in dm and len(dm['devices']) > 0]
-            interface_metadata = [im for im in ndm_metadata if 'interfaces' in im and len(im['interfaces']) > 0]
-
-            assert device_metadata == [event.model_dump() for event in EXPECTED_DEVICE_METADATA_EVENTS]
-            assert interface_metadata == [
-                event.model_dump(exclude_none=True) for event in EXPECTED_INTERFACE_METADATA_EVENTS
-            ]
-
     tags000 = ['cisco', 'project:cisco_aci', 'medium:broadcast', 'snmpTrapSt:enable', 'fabric_pod_id:1']
     tags101 = tags000 + ['node_id:101']
     tags102 = tags000 + ['node_id:102']
@@ -52,6 +43,24 @@ def test_fabric_mocked(aggregator):
     hn102 = 'pod-1-node-102'
     hn201 = 'pod-1-node-201'
     hn202 = 'pod-1-node-202'
+
+    with freeze_time("2012-01-14 03:21:34"):
+        check.check({})
+
+        if six.PY3:
+            ndm_metadata = aggregator.get_event_platform_events("ndm")
+            device_metadata = [dm for dm in ndm_metadata if 'devices' in dm and len(dm['devices']) > 0]
+            interface_metadata = [im for im in ndm_metadata if 'interfaces' in im and len(im['interfaces']) > 0]
+
+            assert device_metadata == [event.model_dump() for event in EXPECTED_DEVICE_METADATA_EVENTS]
+            assert interface_metadata == [
+                event.model_dump(exclude_none=True) for event in EXPECTED_INTERFACE_METADATA_EVENTS
+            ]
+            for interface in INTERFACE_METADATA:
+                id_tags = interface.get("id_tags", {})
+                hn = "pod-{}-node-{}".format(id_tags[4].split(":")[1], id_tags[3].split(":")[1])
+                aggregator.assert_metric('cisco_aci.fabric.node.interface.status', value=1.0, tags=id_tags, hostname=hn)
+
     metric_name = 'cisco_aci.fabric.port.ingr_total.bytes.cum'
     aggregator.assert_metric(metric_name, value=0.0, tags=tags101 + ['port:eth101/1/43'], hostname=hn101)
     aggregator.assert_metric(metric_name, value=0.0, tags=tags101 + ['port:eth101/1/44'], hostname=hn101)

@@ -125,7 +125,7 @@ class Fabric:
             eth_id = eth_attrs['id']
             tags = self.tagger.get_fabric_tags(e, 'l1PhysIf')
             if PY3:
-                interfaces.append(self.create_interface_metadata(e, node['address'], tags))
+                interfaces.append(self.create_interface_metadata(e, node['address'], tags, hostname))
             try:
                 stats = self.api.get_eth_stats(pod_id, node['id'], eth_id)
                 self.submit_fabric_metric(stats, tags, 'l1PhysIf', hostname=hostname)
@@ -298,7 +298,7 @@ class Fabric:
         )
         return device.model_dump(exclude_none=True)
 
-    def create_interface_metadata(self, phys_if, address, tags):
+    def create_interface_metadata(self, phys_if, address, tags, hostname):
         eth = PhysIf(**phys_if.get('l1PhysIf', {}))
         interface = InterfaceMetadata(
             device_id='{}:{}'.format(self.namespace, address),
@@ -311,4 +311,14 @@ class Fabric:
         )
         if eth.ethpm_phys_if:
             interface.oper_status = eth.ethpm_phys_if.attributes.oper_st
+        if interface.status:
+            new_tags = tags.copy()
+            new_tags.extend(
+                [
+                    "device_ip:{}".format(address),
+                    "device_namespace:{}".format(self.namespace),
+                    "interface.status:{}".format(interface.status),
+                ]
+            )
+            self.gauge('cisco_aci.fabric.node.interface.status', 1, tags=tags, hostname=hostname)
         return interface.model_dump(exclude_none=True)

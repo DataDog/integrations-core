@@ -121,6 +121,23 @@ if six.PY3:
                 return 1
             return 2
 
+        @computed_field
+        @property
+        def status(self) -> str:
+            if self.admin_status == 1:
+                if self.oper_status == 1:
+                    return "up"
+                if self.oper_status == 2:
+                    return "down"
+                return "warning"
+            if self.admin_status == 2:
+                if self.oper_status == 1:
+                    return "down"
+                if self.oper_status == 2:
+                    return "off"
+                return "warning"
+            return "down"
+
     class InterfaceMetadataList(BaseModel):
         interface_metadata: list = Field(default_factory=list)
 
