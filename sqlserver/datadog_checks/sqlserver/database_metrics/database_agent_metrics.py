@@ -6,9 +6,12 @@ AGENT_ACTIVITY_DURATION_QUERY = {
     "name": "msdb.dbo.sysjobactivity",
     "query": """\
         SELECT
+            sj.name,
             ja.job_id,
             DATEDIFF(SECOND, ja.start_execution_date, GETDATE()) AS duration_seconds
         FROM msdb.dbo.sysjobactivity AS ja
+        INNER JOIN msdb.dbo.sysjobs AS sj
+        ON ja.job_id = sj.job_id
         WHERE ja.start_execution_date IS NOT NULL
             AND ja.stop_execution_date IS NULL
             AND session_id = (
@@ -17,6 +20,7 @@ AGENT_ACTIVITY_DURATION_QUERY = {
             )
     """,
     "columns": [
+        {"name": "job_name", "type": "tag"},
         {"name": "job_id", "type": "tag"},
         {"name": "agent.active_jobs.duration", "type": "gauge"},
     ],
@@ -53,6 +57,7 @@ AGENT_ACTIVITY_STEPS_QUERY = {
                 )
         )
         SELECT
+            j.name,
             aj.job_id,
             cs.step_name,
             cs.step_id,
@@ -62,8 +67,11 @@ AGENT_ACTIVITY_STEPS_QUERY = {
         INNER JOIN CompletedSteps AS cs
         ON aj.job_id = cs.job_id
             AND aj.last_executed_step_id = cs.step_id
+        INNER JOIN msdb.dbo.sysjobs AS j
+        ON j.job_id = aj.job_id
     """,
     "columns": [
+        {"name": "job_name", "type": "tag"},
         {"name": "job_id", "type": "tag"},
         {"name": "step_name", "type": "tag"},
         {"name": "step_id", "type": "tag"},
@@ -128,7 +136,7 @@ class SqlserverAgentMetrics(SqlserverDatabaseMetricsBase):
         active_job_step_info_query['collection_interval'] = self.collection_interval
         query_list.append(active_job_step_info_query)
         # better/more formal way to check if aws
-        if self.instance_config.get("aws") is None:
+        if self.instance_config.get("cloud_metadata") is None or self.instance_config.cloud_metadata.get("aws") is None:
             active_session_duration_query = AGENT_ACTIVE_SESSION_DURATION_QUERY.copy()
             active_session_duration_query['collection_interval'] = self.collection_interval
             query_list.append(active_session_duration_query)
