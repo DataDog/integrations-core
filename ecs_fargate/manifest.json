@@ -59,6 +59,10 @@
       {
         "resource_type": "blog",
         "url": "https://www.datadoghq.com/blog/monitor-fargate-processes/"
+      },
+      {
+        "resource_type": "blog",
+        "url": "https://www.datadoghq.com/blog/monitor-aws-batch-on-fargate/"
       }
     ]
   },
