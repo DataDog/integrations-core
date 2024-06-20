@@ -104,8 +104,9 @@ class Fabric:
                 try:
                     stats = self.api.get_node_stats(pod_id, node_id)
                     self.submit_fabric_metric(stats, tags, 'fabricNode', hostname=hostname)
+                    eth_metadata = self.process_eth(node_attrs)
                     if PY3:
-                        interface_metadata.extend(self.process_eth(node_attrs))
+                        interface_metadata.extend(eth_metadata)
                 except (exceptions.APIConnectionException, exceptions.APIParsingException):
                     pass
             self.log.info("finished processing node %s", node_id)
