@@ -43,6 +43,7 @@ SELECT {cols}
          ON pg_stat_statements.dbid = pg_database.oid
   WHERE query != '<insufficient privilege>'
   AND query NOT LIKE 'EXPLAIN %%'
+  AND query NOT LIKE '%%PREPARE dd_%%'
   {queryid_filter}
   {filters}
   {extra_clauses}
