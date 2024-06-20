@@ -8,7 +8,7 @@ import pytest
 from pyVmomi import vim
 
 from datadog_checks.vsphere import VSphereCheck
-from datadog_checks.vsphere.event import EXCLUDE_FILTERS
+from datadog_checks.vsphere.constants import EXCLUDE_FILTERS
 
 
 def test_allowed_event_list():

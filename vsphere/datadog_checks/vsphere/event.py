@@ -11,27 +11,7 @@ from pyVmomi import vim
 
 from datadog_checks.base import ensure_unicode
 
-from .constants import DEFAULT_EVENT_RESOURCES, MOR_TYPE_AS_STRING, SOURCE_TYPE
-
-EXCLUDE_FILTERS = {
-    'AlarmStatusChangedEvent': [r'Gray to Green', r'Green to Gray'],
-    'TaskEvent': [
-        r'Initialize powering On',
-        r'Power Off virtual machine',
-        r'Power On virtual machine',
-        r'Reconfigure virtual machine',
-        r'Relocate virtual machine',
-        r'Suspend virtual machine',
-        r'Migrate virtual machine',
-    ],
-    'VmBeingHotMigratedEvent': [],
-    'VmMessageEvent': [],
-    'VmMigratedEvent': [],
-    'VmPoweredOnEvent': [],
-    'VmPoweredOffEvent': [],
-    'VmReconfiguredEvent': [],
-    'VmSuspendedEvent': [],
-}
+from .constants import DEFAULT_EVENT_RESOURCES, EXCLUDE_FILTERS, MOR_TYPE_AS_STRING, SOURCE_TYPE
 
 
 class VSphereEvent(object):
@@ -56,7 +36,6 @@ class VSphereEvent(object):
         else:
             self.event_config = event_config
         self.exclude_filters = exclude_filters
-        self.allowed_events = [getattr(vim.event, event_type) for event_type in exclude_filters.keys()]
         self.event_resource_filters = event_resource_filters
 
     def _is_filtered(self):
