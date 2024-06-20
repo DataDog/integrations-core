@@ -292,10 +292,11 @@ def test_dbm_sync_job_rate_limit(aggregator):
 
 
 def test_dbm_sync_long_job_rate_limit(aggregator):
-    rate_limit = 2
-    job = TestJob(AgentCheck(), run_sync=True, rate_limit=rate_limit, job_execution_time=1)
+    collection_interval = 0.5
+    rate_limit = 1 / collection_interval
+    job = TestJob(AgentCheck(), run_sync=True, rate_limit=rate_limit, job_execution_time=2 * collection_interval)
     job.run_job_loop([])
-    # despite jobs being executed one after another rate limiter shouldnt block
+    # despite jobs being executed one after another rate limiter shouldn't block execution
     # as jobs are slower than the collection interval
     job.run_job_loop([])
     assert job.count_executed == 2
