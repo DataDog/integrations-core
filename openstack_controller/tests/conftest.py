@@ -519,17 +519,34 @@ def connection_compute(request, mock_responses):
             )
         )
 
-    def servers(project_id, details, limit=None):
+    def servers(project_id, details=True, all_tenants=False, limit=None):
         if http_error and 'servers' in http_error and project_id in http_error['servers']:
             raise requests.exceptions.HTTPError(response=http_error['servers'][project_id])
-        return [
-            mock.MagicMock(
-                to_dict=mock.MagicMock(
-                    return_value=server,
+        return (
+            [
+                mock.MagicMock(
+                    to_dict=mock.MagicMock(
+                        return_value=server,
+                    )
                 )
+                for server in mock_responses('GET', f'/compute/v2.1/servers/detail?project_id={project_id}')['servers']
+            ]
+            if project_id
+            else (
+                [
+                    mock.MagicMock(
+                        to_dict=mock.MagicMock(
+                            return_value=server,
+                        )
+                    )
+                    for server in mock_responses('GET', f'/compute/v2.1/servers/detail?all_tenants={all_tenants}')[
+                        'servers'
+                    ]
+                ]
+                if all_tenants
+                else []
             )
-            for server in mock_responses('GET', f'/compute/v2.1/servers/detail?project_id={project_id}')['servers']
-        ]
+        )
 
     def get_flavor(flavor_id):
         if http_error and 'flavors' in http_error and flavor_id in http_error['flavors']:
