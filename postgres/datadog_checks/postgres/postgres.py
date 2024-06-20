@@ -13,6 +13,7 @@ from six import iteritems
 
 from datadog_checks.base import AgentCheck
 from datadog_checks.base.utils.db import QueryExecutor
+from datadog_checks.base.utils.db.telemetry import Telemetry
 from datadog_checks.base.utils.db.utils import (
     default_json_event_encoding,
     tracked_query,
@@ -140,6 +141,7 @@ class PostgreSql(AgentCheck):
             maxsize=1,
             ttl=self._config.database_instance_collection_interval,
         )  # type: TTLCache
+        self._telemetry = Telemetry(self, self._config.enable_telemetry)
 
     def _build_autodiscovery(self):
         if not self._config.discovery_config['enabled']:
@@ -663,6 +665,7 @@ class PostgreSql(AgentCheck):
         on top of that.
         If custom_metrics is not an empty list, gather custom metrics defined in postgres.yaml
         """
+        self._telemetry.start("collect_stats")
         db_instance_metrics = self.metrics_cache.get_instance_metrics(self.version)
         bgw_instance_metrics = self.metrics_cache.get_bgw_metrics(self.version)
         archiver_instance_metrics = self.metrics_cache.get_archiver_metrics(self.version)
@@ -762,6 +765,7 @@ class PostgreSql(AgentCheck):
         if self.dynamic_queries:
             for dynamic_query in self.dynamic_queries:
                 dynamic_query.execute()
+        self._telemetry.end("collect_stats")
 
     def _new_connection(self, dbname):
         if self._config.host == 'localhost' and self._config.password == '':

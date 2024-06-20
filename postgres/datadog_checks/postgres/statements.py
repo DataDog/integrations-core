@@ -256,7 +256,9 @@ class PostgresStatementMetrics(DBMAsyncJob):
         # all databases on the host. For metrics the "db" tag is added during ingestion based on which database
         # each query came from.
         try:
+            self._check._telemetry.start("collect_metrics_rows")
             rows = self._collect_metrics_rows()
+            self._check._telemetry.end("collect_metrics_rows", len(rows))
             if not rows:
                 return
             for event in self._rows_to_fqt_events(rows):

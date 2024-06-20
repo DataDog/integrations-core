@@ -169,6 +169,8 @@ class PostgresConfig:
             self.statement_metrics_config.get('incremental_query_metrics', False)
         )
         self.baseline_metrics_expiry = self.statement_metrics_config.get('baseline_metrics_expiry', 300)
+        # Non-documented option for disabling if customers detect unexpected problems
+        self.enable_telemetry = instance.get('enable_telemetry', True)
 
     def _build_tags(self, custom_tags, agent_tags, propagate_agent_tags=True):
         # Clean up tags in case there was a None entry in the instance
