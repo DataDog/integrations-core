@@ -22,7 +22,8 @@ def test_physical_replication_slots(aggregator, integration_check, pg_instance):
             cur.execute("select pg_wal_lsn_diff(pg_current_wal_lsn(), redo_lsn) from pg_control_checkpoint();")
             redo_lsn_age = int(cur.fetchall()[0][0])
             cur.execute('select age(xmin) FROM pg_replication_slots;')
-            xmin_age_higher_bound += int(cur.fetchall()[0][0])
+            rows = cur.fetchall()
+            xmin_age_higher_bound += int(rows[0][0]) if rows is not None else 0
 
             cur.execute("select * from pg_create_physical_replication_slot('phys_1');")
             cur.execute("select * from pg_create_physical_replication_slot('phys_2', true);")
