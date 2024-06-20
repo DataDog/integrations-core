@@ -1,14 +1,15 @@
 {
     "hosts": [
-        "shard01a:27018",
-        "shard01b:27018"
+        "replset-data-0.mongo.default.svc.cluster.local:27017",
+        "replset-data-1.mongo.default.svc.cluster.local:27017"
     ],
-    "setName": "shard01",
+    "arbiters": ["replset-arbiter-0.mongo.default.svc.cluster.local:27017"],
+    "setName": "replset",
     "setVersion": 1,
     "ismaster": true,
     "secondary": false,
-    "primary": "shard01a:27018",
-    "me": "shard01a:27018",
+    "primary": "replset-data-0.mongo.default.svc.cluster.local:27017",
+    "me": "replset-data-0.mongo.default.svc.cluster.local:27017",
     "electionId": {
         "$oid": "7fffffff000000000000000b"
     },
