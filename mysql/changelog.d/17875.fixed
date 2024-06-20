@@ -1,1 +1,1 @@
-Fix MySQL integration metadata table source
+Fix metadata table source for MySQL 5.6
