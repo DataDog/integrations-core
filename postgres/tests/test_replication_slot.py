@@ -17,6 +17,8 @@ pytestmark = [pytest.mark.integration, pytest.mark.usefixtures('dd_environment')
 @requires_over_10
 def test_physical_replication_slots(aggregator, integration_check, pg_instance):
     check = integration_check(pg_instance)
+    # It seemingly can take a small amount of time for the pg_replication_slots to be saturated
+    # TODO: Poll for its existence as a ready check
     time.sleep(1)
     redo_lsn_age = 0
     xmin_age_higher_bound = 1
