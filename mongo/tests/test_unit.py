@@ -669,6 +669,7 @@ def test_parse_mongo_version_with_suffix(check, instance, dd_run_check, datadog_
         {},  # isMaster
         OperationFailure('shardingState is not supported'),  # shardingState
         {'configsvr': False, 'set': 'replset', "myState": 1},  # replSetGetStatus
+        {},  # isMaster
     ],
 )
 @mock.patch('pymongo.mongo_client.MongoClient.server_info', return_value={'version': '5.0.0'})
