@@ -1,0 +1,49 @@
+# This workflow claims package names on PyPI for our integrations by publishing empty packages.
+# The working packages can be found here:
+# https://dd-integrations-core-wheels-build-stable.datadoghq.com/targets/simple/index.html
+# This is a work-around until PyPI adds support for namespaces and we claim an entire namespace for Datadog.
+name: Build Placeholder PyPI Packages
+
+on:
+  workflow_dispatch:
+  schedule:
+    # At 3AM UTC
+    # Running this every night strikes a good balance between claiming names fast without spamming PyPI with requests.
+    - cron: "0 3 * * *"
+
+defaults:
+  run:
+    shell: bash
+
+
+jobs:
+  python-artifacts:
+    name: Build wheel
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+
+    - name: Set up Python 3.11
+      uses: actions/setup-python@v5
+      with:
+        python-version: 3.11
+
+    - name: Install Build Deps
+      run: pip install -U build[virtualenv] hatchling
+
+    - name: Build Packages
+      run: |
+        bash .github/workflows/scripts/build_placeholders.sh
+
+    - name: Push Python artifacts to PyPI
+      uses: pypa/gh-action-pypi-publish@release/v1
+      with:
+        # We don't mind invalid metadata, we only want to claim the package name.
+        verify-metadata: false
+        verbose: true
+        # Only uploading the missing wheels makes this job idempotent and reduces its complexity.
+        skip-existing: true
+        user: __token__
+        password: ${{ secrets.INTEGRATIONS_PYPI_NAME_CLAIM }}

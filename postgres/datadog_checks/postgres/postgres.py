@@ -898,7 +898,7 @@ class PostgreSql(AgentCheck):
                             check=self, operation='custom_queries', tags=['metric_prefix:{}'.format(metric_prefix)]
                         ):
                             cursor.execute(query)
-                    except (psycopg2.ProgrammingError, psycopg2.errors.QueryCanceled) as e:
+                    except Exception as e:
                         self.log.error("Error executing query for metric_prefix %s: %s", metric_prefix, str(e))
                         continue
 

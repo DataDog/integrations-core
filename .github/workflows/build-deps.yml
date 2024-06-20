@@ -168,6 +168,11 @@ jobs:
         python .builders/build.py ${{ matrix.job.image }} --python 3 ${{ env.OUT_DIR }}/py3 --digest $digest
         python .builders/build.py ${{ matrix.job.image }} --python 2 ${{ env.OUT_DIR }}/py2 --digest $digest
 
+    - name: Change permissions
+      if: matrix.job.image == 'linux-aarch64'
+      run: |
+        sudo chmod 777 ${{ env.OUT_DIR }}
+
     - name: Publish image
       if: github.event_name == 'push' && steps.changed-files.outputs.builders_any_changed == 'true'
       run: ${DOCKER} push ${{ env.BUILDER_IMAGE }}

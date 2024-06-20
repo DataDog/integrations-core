@@ -1,0 +1,3 @@
+CheckEndpoints lets its clients pass alternative to `urllib.requests.urlopen` which:
+1. exposes the external dependency more clearly
+2. supports deterministic testing

@@ -64,4 +64,16 @@ files:
             value:
               type: boolean
               example: false
+          - name: collect_display_name_as_tag
+            description: |
+              Whether or not to submit the Windows Service Display Name as the `display_name` tag.
+              `display_name` will be formatted according to Datadog's tagging requirements:
+              https://docs.datadoghq.com/getting_started/tagging/#define-tags
+
+              Example of the default `windows_service` tag and `display_name` tag:
+              windows_service:wuauserv
+              display_name:windows_update
+            value:
+              type: boolean
+              example: false
           - template: instances/default

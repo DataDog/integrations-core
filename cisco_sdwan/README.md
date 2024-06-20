@@ -32,6 +32,14 @@ Credentials should have the "Device monitoring" permission group.
 
 See [metadata.csv][6] for a list of metrics provided by this integration.
 
+### Events
+
+The Cisco SD-WAN check does not include any events.
+
+### Service Checks
+
+The Cisco SD-WAN check does not include any service checks.
+
 ## Troubleshooting
 
 Need help? Contact [Datadog support][7].

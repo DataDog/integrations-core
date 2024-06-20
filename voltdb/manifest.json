@@ -56,9 +56,6 @@
     },
     "saved_views": {
       "voltdb_processes": "assets/saved_views/voltdb_processes.json"
-    },
-    "logs": {
-      "source": "voltdb"
     }
   }
 }

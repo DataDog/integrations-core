@@ -25,7 +25,6 @@ from .ssh_tunnel import socks_proxy
 from .terraform import terraform_run
 
 USE_OPENSTACK_GCP = os.environ.get('USE_OPENSTACK_GCP')
-OPENSTACK_E2E_LEGACY = os.environ.get('OPENSTACK_E2E_LEGACY')
 
 
 @pytest.fixture(scope='session')
@@ -74,22 +73,6 @@ def dd_environment():
                 socks_ip, socks_port = socks
                 agent_config = {'proxy': {'http': 'socks5://{}:{}'.format(socks_ip, socks_port)}}
                 yield instance, agent_config
-    elif OPENSTACK_E2E_LEGACY:
-        compose_file = os.path.join(get_here(), 'legacy', 'docker', 'docker-compose.yaml')
-        conditions = [
-            CheckDockerLogs(identifier='openstack-keystone', patterns=['server running']),
-            CheckDockerLogs(identifier='openstack-nova', patterns=['server running']),
-            CheckDockerLogs(identifier='openstack-neutron', patterns=['server running']),
-            CheckDockerLogs(identifier='openstack-ironic', patterns=['server running']),
-        ]
-        with docker_run(compose_file, conditions=conditions):
-            instance = {
-                'name': 'test',
-                'keystone_server_url': 'http://127.0.0.1:8080/identity/v3',
-                'user': {'name': 'admin', 'password': 'labstack', 'domain': {'id': 'default'}},
-                'ssl_verify': False,
-            }
-            yield instance
     else:
         compose_file = os.path.join(get_here(), 'docker', 'docker-compose.yaml')
         conditions = [
@@ -188,7 +171,7 @@ def mock_responses(microversion_headers):
 def mock_http_call(mock_responses):
     def call(method, url, file='response', headers=None, params=None):
         response = mock_responses(method, url, file=file, headers=headers, params=params)
-        if response:
+        if response is not None:
             return response
         http_response = requests.models.Response()
         http_response.status_code = 404
@@ -200,30 +183,42 @@ def mock_http_call(mock_responses):
 
 
 @pytest.fixture
-def session_auth(request, mock_responses):
+def openstack_v3_password(request, mock_responses):
     param = request.param if hasattr(request, 'param') and request.param is not None else {}
     catalog = param.get('catalog')
+    password_project_id = None
+    password_system_scope = None
 
     def get_access(session):
-        project_id = session.return_value.project_id if session.return_value.project_id else 'unscoped'
+        project_id = password_project_id if password_project_id else 'system' if password_system_scope else 'unscoped'
         token = mock_responses('POST', '/identity/v3/auth/tokens', project_id)['token']
         return mock.MagicMock(
             service_catalog=mock.MagicMock(catalog=catalog if catalog is not None else token.get('catalog', [])),
             project_id=token.get('project', {}).get('id'),
-            role_names=[role.get('name') for role in token.get('roles', [])],
         )
 
-    return mock.MagicMock(get_access=mock.MagicMock(side_effect=get_access))
+    def password(
+        auth_url, username, password, user_domain_name, system_scope=None, project_id=None, project_domain_name=None
+    ):
+        nonlocal password_system_scope, password_project_id
+        password_system_scope = system_scope
+        password_project_id = project_id
+        return mock.MagicMock(
+            get_access=mock.MagicMock(side_effect=get_access),
+        )
+
+    with mock.patch('keystoneauth1.identity.v3.Password', side_effect=password) as mock_password:
+        yield mock_password
 
 
 @pytest.fixture
-def openstack_session(session_auth, microversion_headers):
+def openstack_session(openstack_v3_password, microversion_headers):
     def session(auth, session):
         microversion_headers[0] = session.headers.get('X-OpenStack-Nova-API-Version')
         microversion_headers[1] = session.headers.get('X-OpenStack-Ironic-API-Version')
         return mock.MagicMock(
-            return_value=mock.MagicMock(project_id=auth.project_id),
-            auth=session_auth,
+            project_id=auth.project_id,
+            auth=auth,
         )
 
     with mock.patch('keystoneauth1.session.Session', side_effect=session) as mock_session:
@@ -234,14 +229,10 @@ def openstack_session(session_auth, microversion_headers):
 def connection_authorize(request, mock_responses):
     param = request.param if hasattr(request, 'param') and request.param is not None else {}
     http_error = param.get('http_error')
-    exception = param.get('exception')
 
     def authorize():
-        if exception is not None:
-            raise exception
         if http_error is not None:
             raise requests.exceptions.HTTPError(response=http_error)
-        return mock.MagicMock(return_value=["test_token"])
 
     return mock.MagicMock(side_effect=authorize)
 
@@ -528,17 +519,34 @@ def connection_compute(request, mock_responses):
             )
         )
 
-    def servers(project_id, details, limit=None):
+    def servers(project_id, details=True, all_tenants=False, limit=None):
         if http_error and 'servers' in http_error and project_id in http_error['servers']:
             raise requests.exceptions.HTTPError(response=http_error['servers'][project_id])
-        return [
-            mock.MagicMock(
-                to_dict=mock.MagicMock(
-                    return_value=server,
+        return (
+            [
+                mock.MagicMock(
+                    to_dict=mock.MagicMock(
+                        return_value=server,
+                    )
                 )
+                for server in mock_responses('GET', f'/compute/v2.1/servers/detail?project_id={project_id}')['servers']
+            ]
+            if project_id
+            else (
+                [
+                    mock.MagicMock(
+                        to_dict=mock.MagicMock(
+                            return_value=server,
+                        )
+                    )
+                    for server in mock_responses('GET', f'/compute/v2.1/servers/detail?all_tenants={all_tenants}')[
+                        'servers'
+                    ]
+                ]
+                if all_tenants
+                else []
             )
-            for server in mock_responses('GET', f'/compute/v2.1/servers/detail?project_id={project_id}')['servers']
-        ]
+        )
 
     def get_flavor(flavor_id):
         if http_error and 'flavors' in http_error and flavor_id in http_error['flavors']:
@@ -922,6 +930,26 @@ def connection_heat(request, mock_responses):
 
 
 @pytest.fixture
+def connection_swift(request, mock_responses):
+    param = request.param if hasattr(request, 'param') and request.param is not None else {}
+    http_error = param.get('http_error')
+
+    def containers(account_id, limit=None):
+        if http_error and 'containers' in http_error and account_id in http_error['containers']:
+            raise requests.exceptions.HTTPError(response=http_error['containers'][account_id])
+        return [
+            mock.MagicMock(
+                to_dict=mock.MagicMock(
+                    return_value=node,
+                )
+            )
+            for node in mock_responses('GET', f'/v1/AUTH_{account_id}/format=json')
+        ]
+
+    return mock.MagicMock(containers=mock.MagicMock(side_effect=containers))
+
+
+@pytest.fixture
 def openstack_connection(
     openstack_session,
     connection_authorize,
@@ -933,6 +961,7 @@ def openstack_connection(
     connection_load_balancer,
     connection_image,
     connection_heat,
+    connection_swift,
 ):
     def connection(cloud, session, region_name):
         return mock.MagicMock(
@@ -946,6 +975,7 @@ def openstack_connection(
             load_balancer=connection_load_balancer,
             image=connection_image,
             heat=connection_heat,
+            swift=connection_swift,
         )
 
     with mock.patch('openstack.connection.Connection', side_effect=connection) as mock_connection:
@@ -962,18 +992,21 @@ def mock_http_get(request, monkeypatch, mock_http_call):
     param = request.param if hasattr(request, 'param') and request.param is not None else {}
     http_error = param.pop('http_error', {})
     data = param.pop('mock_data', {})
+    elapsed_total_seconds = param.pop('elapsed_total_seconds', {})
 
     def get(url, *args, **kwargs):
         method = 'GET'
         url = get_url_path(url)
         if http_error and url in http_error:
-            raise requests.exceptions.HTTPError(response=http_error[url])
-
+            return http_error[url]
         if data and url in data:
             return MockResponse(json_data=data[url], status_code=200)
-
-        json_data = mock_http_call(method, url, headers=kwargs.get('headers'), params=kwargs.get('params'))
-        return MockResponse(json_data=json_data, status_code=200)
+        headers = kwargs.get('headers')
+        params = kwargs.get('params')
+        mock_elapsed = mock.MagicMock(total_seconds=mock.MagicMock(return_value=elapsed_total_seconds.get(url, 0.0)))
+        mock_json = mock.MagicMock(return_value=mock_http_call(method, url, headers=headers, params=params))
+        mock_status_code = mock.MagicMock(return_value=200)
+        return mock.MagicMock(elapsed=mock_elapsed, json=mock_json, status_code=mock_status_code)
 
     mock_get = mock.MagicMock(side_effect=get)
     monkeypatch.setattr('requests.get', mock_get)
@@ -984,23 +1017,23 @@ def mock_http_get(request, monkeypatch, mock_http_call):
 def mock_http_post(request, monkeypatch, mock_http_call):
     param = request.param if hasattr(request, 'param') and request.param is not None else {}
     replace = param.get('replace')
-    exception = param.get('exception')
     http_error = param.get('http_error')
 
     def post(url, *args, **kwargs):
         method = 'POST'
         url = get_url_path(url)
-        if exception and url in exception:
-            raise exception[url]
         if http_error and url in http_error:
-            raise requests.exceptions.HTTPError(response=http_error[url])
+            return http_error[url]
         if url == '/identity/v3/auth/tokens':
             data = kwargs['json']
-            scope = data.get('auth', {}).get('scope', 'unscoped')
-            if isinstance(scope, dict):
-                scope = scope.get('project', {}).get('id')
-            json_data = mock_http_call(method, url, scope, headers=kwargs.get('headers'))
-            headers = {'X-Subject-Token': f'token_{scope}'}
+            file = data.get('auth', {}).get('scope', 'unscoped')
+            if isinstance(file, dict):
+                if 'system' in file:
+                    file = 'system'
+                else:
+                    file = file.get('project', {}).get('id')
+            json_data = mock_http_call(method, url, file, headers=kwargs.get('headers'))
+            headers = {'X-Subject-Token': f'token_{file}'}
         else:
             json_data = mock_http_call(method, url)
         if replace and url in replace:

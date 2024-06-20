@@ -1,4 +1,5 @@
 [env.collectors.datadog-checks]
+base-package-features = ["deps", "db", "json"]
 
 [envs.default]
 dependencies = [
