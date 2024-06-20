@@ -572,7 +572,7 @@ tests:
       },
       "dest_port" : 53,
       "pkt_src" : "wire/pcap",
-      "timestamp": "2024-04-25T06:09:30.777536+0530"
+      "timestamp" : "2024-04-25T06:09:30.777536+0530"
     }
   result:
     custom:
@@ -637,7 +637,7 @@ tests:
         },
         "dest_port" : 53,
         "pkt_src" : "wire/pcap",
-        "timestamp": "2024-04-25T06:09:30.777536+0530"
+        "timestamp" : "2024-04-25T06:09:30.777536+0530"
       }
     service: "smb"
     tags:

@@ -105,8 +105,8 @@ facets:
     source: log
     type: integer
     unit:
-      name: byte
       family: bytes
+      name: byte
   - facetType: range
     groups:
       - Suricata
@@ -115,8 +115,8 @@ facets:
     source: log
     type: integer
     unit:
-      name: byte
       family: bytes
+      name: byte
   - facetType: range
     groups:
       - Suricata
