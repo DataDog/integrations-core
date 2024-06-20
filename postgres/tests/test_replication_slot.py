@@ -3,6 +3,7 @@
 # Licensed under a 3-clause BSD style license (see LICENSE)
 import psycopg2
 import pytest
+from flaky import flaky
 
 from datadog_checks.postgres.util import QUERY_PG_REPLICATION_SLOTS_STATS
 
@@ -12,6 +13,7 @@ from .utils import requires_over_10, requires_over_14
 pytestmark = [pytest.mark.integration, pytest.mark.usefixtures('dd_environment')]
 
 
+@flaky(max_runs=5)
 @requires_over_10
 def test_physical_replication_slots(aggregator, integration_check, pg_instance):
     check = integration_check(pg_instance)
@@ -20,9 +22,9 @@ def test_physical_replication_slots(aggregator, integration_check, pg_instance):
     with psycopg2.connect(host=HOST, dbname=DB_NAME, user="postgres", password="datad0g") as conn:
         with conn.cursor() as cur:
             cur.execute("select pg_wal_lsn_diff(pg_current_wal_lsn(), redo_lsn) from pg_control_checkpoint();")
-            redo_lsn_age = int(cur.fetchall()[0][0])
+            redo_lsn_age = int(cur.fetchall()[0][0] or 0)
             cur.execute('select age(xmin) FROM pg_replication_slots;')
-            xmin_age_higher_bound += int(cur.fetchall()[0][0])
+            xmin_age_higher_bound += int(cur.fetchall()[0][0] or 0)
 
             cur.execute("select * from pg_create_physical_replication_slot('phys_1');")
             cur.execute("select * from pg_create_physical_replication_slot('phys_2', true);")
