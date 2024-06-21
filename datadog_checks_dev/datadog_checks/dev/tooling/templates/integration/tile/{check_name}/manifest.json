@@ -43,7 +43,6 @@
       "<FILL IN dashboard short_name>": "assets/dashboards/<FILL IN>.json"
     }},
     "monitors": {{}},
-    "logs": {{}},
     "saved_views": {{}}
   }},{pricing_plan}{terms}{author_info}
 }}

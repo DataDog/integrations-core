@@ -16,6 +16,7 @@ from datadog_checks.openstack_controller.api.type import ApiType
 from tests.common import remove_service_from_catalog
 from tests.metrics import (
     IMAGES_METRICS_GLANCE,
+    MEMBERS_METRICS_GLANCE,
 )
 
 pytestmark = [
@@ -79,7 +80,7 @@ def test_disable_glance_images_metrics(aggregator, dd_run_check, instance, opens
 
 
 @pytest.mark.parametrize(
-    ('mock_http_post', 'session_auth', 'instance', 'api_type'),
+    ('mock_http_post', 'openstack_v3_password', 'instance', 'api_type'),
     [
         pytest.param(
             {'replace': {'/identity/v3/auth/tokens': lambda d: remove_service_from_catalog(d, ['image'])}},
@@ -96,10 +97,10 @@ def test_disable_glance_images_metrics(aggregator, dd_run_check, instance, opens
             id='api sdk',
         ),
     ],
-    indirect=['mock_http_post', 'session_auth'],
+    indirect=['mock_http_post', 'openstack_v3_password'],
 )
-@pytest.mark.usefixtures('mock_http_get', 'mock_http_post', 'openstack_connection')
-def test_not_in_catalog(aggregator, check, dd_run_check, caplog, mock_http_post, session_auth, api_type):
+@pytest.mark.usefixtures('mock_http_get', 'mock_http_post')
+def test_not_in_catalog(aggregator, check, dd_run_check, caplog, mock_http_post, openstack_connection, api_type):
     with caplog.at_level(logging.DEBUG):
         dd_run_check(check)
 
@@ -124,7 +125,7 @@ def test_not_in_catalog(aggregator, check, dd_run_check, caplog, mock_http_post,
             args_list += list(args)
         assert args_list.count('http://127.0.0.1:8080/identity/v3/auth/tokens') == 4
     if api_type == ApiType.SDK:
-        assert session_auth.get_access.call_count == 4
+        assert openstack_connection.call_count == 4
     assert '`image` component not found in catalog' in caplog.text
 
 
@@ -160,28 +161,41 @@ def test_response_time_exception(aggregator, check, dd_run_check, mock_http_get)
     for call in mock_http_get.call_args_list:
         args, kwargs = call
         args_list += list(args)
-    assert args_list.count('http://127.0.0.1:9292/image') == 2
+    assert args_list.count('http://127.0.0.1:9292/image') == 3
 
 
 @pytest.mark.parametrize(
-    ('instance'),
+    ('mock_http_get', 'instance'),
     [
         pytest.param(
+            {'elapsed_total_seconds': {'/image': 0.30706}},
             configs.REST,
             id='api rest',
         ),
         pytest.param(
+            {'elapsed_total_seconds': {'/image': 0.30706}},
             configs.SDK,
             id='api sdk',
         ),
     ],
+    indirect=['mock_http_get'],
 )
 @pytest.mark.usefixtures('mock_http_get', 'mock_http_post', 'openstack_connection')
 def test_response_time(aggregator, check, dd_run_check, mock_http_get):
     dd_run_check(check)
+    aggregator.assert_service_check(
+        'openstack.glance.api.up',
+        status=AgentCheck.UNKNOWN,
+        count=0,
+    )
+    aggregator.assert_service_check(
+        'openstack.glance.api.up',
+        status=AgentCheck.CRITICAL,
+        count=0,
+    )
     aggregator.assert_metric(
         'openstack.glance.response_time',
-        count=1,
+        value=307.06,
         tags=['keystone_server:http://127.0.0.1:8080/identity'],
     )
     aggregator.assert_service_check(
@@ -228,9 +242,9 @@ def test_images_exception(aggregator, check, dd_run_check, mock_http_get, connec
         for call in mock_http_get.call_args_list:
             args, _ = call
             args_list += list(args)
-        assert args_list.count('http://127.0.0.1:9292/image/v2/images') == 2
+        assert args_list.count('http://127.0.0.1:9292/image/v2/images') == 3
     if api_type == ApiType.SDK:
-        assert connection_image.images.call_count == 2
+        assert connection_image.images.call_count == 3
 
 
 @pytest.mark.parametrize(
@@ -326,6 +340,62 @@ def test_images_pagination(
     else:
         assert connection_image.images.call_count == 1
         assert connection_image.images.call_args_list.count(mock.call(limit=paginated_limit)) == 1
+    for metric in metrics:
+        aggregator.assert_metric(
+            metric['name'],
+            count=metric['count'],
+            value=metric['value'],
+            tags=metric['tags'],
+            hostname=metric.get('hostname'),
+        )
+
+
+@pytest.mark.parametrize(
+    ('instance'),
+    [
+        pytest.param(
+            configs.REST,
+            id='api rest',
+        ),
+        pytest.param(
+            configs.SDK,
+            id='api sdk',
+        ),
+    ],
+)
+@pytest.mark.usefixtures('mock_http_get', 'mock_http_post', 'openstack_connection')
+def test_disable_glance_members_metrics(aggregator, dd_run_check, instance, openstack_controller_check):
+    instance = instance | {
+        "components": {
+            "image": {
+                "members": False,
+            }
+        },
+    }
+    check = openstack_controller_check(instance)
+    dd_run_check(check)
+    for metric in aggregator.metric_names:
+        assert not metric.startswith('openstack.glance.image.member')
+
+
+@pytest.mark.parametrize(
+    ('instance', 'metrics'),
+    [
+        pytest.param(
+            configs.REST,
+            MEMBERS_METRICS_GLANCE,
+            id='api rest',
+        ),
+        pytest.param(
+            configs.SDK,
+            MEMBERS_METRICS_GLANCE,
+            id='api sdk',
+        ),
+    ],
+)
+@pytest.mark.usefixtures('mock_http_get', 'mock_http_post', 'openstack_connection')
+def test_images_members_metrics(aggregator, check, dd_run_check, metrics):
+    dd_run_check(check)
     for metric in metrics:
         aggregator.assert_metric(
             metric['name'],

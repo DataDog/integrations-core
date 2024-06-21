@@ -23,6 +23,7 @@ from datadog_checks.sqlserver.database_metrics import (
     SqlserverIndexUsageMetrics,
 )
 from datadog_checks.sqlserver.metadata import SqlserverMetadata
+from datadog_checks.sqlserver.schemas import Schemas
 from datadog_checks.sqlserver.statements import SqlserverStatementMetrics
 from datadog_checks.sqlserver.stored_procedures import SqlserverProcedureMetrics
 from datadog_checks.sqlserver.utils import Database, construct_use_statement, parse_sqlserver_major_version
@@ -144,7 +145,7 @@ class SQLServer(AgentCheck):
         )  # type: TTLCache
         # Keep a copy of the tags before the internal resource tags are set so they can be used for paths that don't
         # go through the agent internal metrics submission processing those tags
-        self._non_internal_tags = copy.deepcopy(self.tags)
+        self.non_internal_tags = copy.deepcopy(self.tags)
         self.check_initializations.append(self.initialize_connection)
         self.check_initializations.append(self.set_resolved_hostname)
         self.check_initializations.append(self.set_resolved_hostname_metadata)
@@ -159,11 +160,14 @@ class SQLServer(AgentCheck):
 
         self._database_metrics = None
 
+        self._schemas = Schemas(self, self._config)
+
     def cancel(self):
         self.statement_metrics.cancel()
         self.procedure_metrics.cancel()
         self.activity.cancel()
         self.sql_metadata.cancel()
+        self._schemas.cancel()
 
     def config_checks(self):
         if self._config.autodiscovery and self.instance.get("database"):
@@ -234,7 +238,6 @@ class SQLServer(AgentCheck):
         )
 
     def set_resolved_hostname(self):
-        # load static information cache
         self.load_static_information()
         if self._resolved_hostname is None:
             if self._config.reported_hostname:
@@ -725,6 +728,16 @@ class SQLServer(AgentCheck):
                 # Switch DB back to MASTER
                 cursor.execute(SWITCH_DB_STATEMENT.format(self.connection.DEFAULT_DATABASE))
 
+    def get_databases(self):
+        engine_edition = self.static_info_cache.get(STATIC_INFO_ENGINE_EDITION)
+        if not is_azure_sql_database(engine_edition):
+            db_names = [d.name for d in self.databases] or [
+                self.instance.get('database', self.connection.DEFAULT_DATABASE)
+            ]
+        else:
+            db_names = [self.instance.get('database', self.connection.DEFAULT_DATABASE)]
+        return db_names
+
     def _check_database_conns(self):
         engine_edition = self.static_info_cache.get(STATIC_INFO_ENGINE_EDITION)
         if is_azure_sql_database(engine_edition):
@@ -735,6 +748,7 @@ class SQLServer(AgentCheck):
 
     def check(self, _):
         if self.do_check:
+            self.load_static_information()
             # configure custom queries for the check
             if self._query_manager is None:
                 # use QueryManager to process custom queries
@@ -747,18 +761,20 @@ class SQLServer(AgentCheck):
                     [QUERY_SERVER_STATIC_INFO], executor=self.execute_query_raw
                 )
                 self.server_state_queries.compile_queries()
+
+            self._send_database_instance_metadata()
             if self._config.proc:
                 self.do_stored_procedure_check()
             else:
                 self.collect_metrics()
             if self._config.autodiscovery and self._config.autodiscovery_db_service_check:
                 self._check_database_conns()
-            self._send_database_instance_metadata()
             if self._config.dbm_enabled:
                 self.statement_metrics.run_job_loop(self.tags)
                 self.procedure_metrics.run_job_loop(self.tags)
                 self.activity.run_job_loop(self.tags)
                 self.sql_metadata.run_job_loop(self.tags)
+                self._schemas.run_job_loop(self.tags)
         else:
             self.log.debug("Skipping check")
 
@@ -1023,7 +1039,7 @@ class SQLServer(AgentCheck):
                     self.static_info_cache.get(STATIC_INFO_ENGINE_EDITION, ""),
                 ),
                 "integration_version": __version__,
-                "tags": self._non_internal_tags,
+                "tags": self.non_internal_tags,
                 "timestamp": time.time() * 1000,
                 "cloud_metadata": self._config.cloud_metadata,
                 "metadata": {

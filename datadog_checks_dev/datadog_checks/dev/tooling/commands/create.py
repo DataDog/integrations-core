@@ -169,7 +169,7 @@ def create(ctx, name, integration_type, location, non_interactive, quiet, dry_ru
             eula = 'assets/eula.pdf'
             template_fields['terms'] = f'\n  "terms": {{\n    "eula": "{eula}"\n  }},'
             template_fields['author_info'] = (
-                f'\n  "author": {{\n    "name": "{author_name}",\n    "homepage": "{homepage}",\n    "vendor_id": "{TODO_FILL_IN}",\n    "sales_email": "{sales_email}",\n    "support_email": "{support_email}"\n  }},'  # noqa
+                f'\n  "author": {{\n    "name": "{author_name}",\n    "homepage": "{homepage}",\n    "vendor_id": "{TODO_FILL_IN}",\n    "sales_email": "{sales_email}",\n    "support_email": "{support_email}"\n  }}'  # noqa
             )
 
             template_fields['pricing_plan'] = '\n  "pricing": [],'
@@ -189,7 +189,7 @@ def create(ctx, name, integration_type, location, non_interactive, quiet, dry_ru
     "name": "Datadog",
     "homepage": "https://www.datadoghq.com",
     "sales_email": "info@datadoghq.com"
-  },"""
+  }"""
             else:
                 prompt_and_update_if_missing(template_fields, 'email', 'Email used for support requests')
                 prompt_and_update_if_missing(template_fields, 'author', 'Your name')
@@ -201,7 +201,7 @@ def create(ctx, name, integration_type, location, non_interactive, quiet, dry_ru
     "name": "{template_fields['author']}",
     "homepage": "",
     "sales_email": ""
-  }},"""
+  }}"""
             template_fields['terms'] = ''
             template_fields['integration_id'] = kebab_case_name(name)
             template_fields['package_url'] = (

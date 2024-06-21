@@ -1,3 +1,5 @@
+# "target" refers to the integration (a.k.a. check) that we want to test.
+# This action is a template that we reuse in other actions such as test-all or pr-test.
 name: Test target
 
 on:
@@ -137,7 +139,7 @@ jobs:
 
     - name: Restore cache
       if: inputs.repo == 'core'
-      uses: actions/cache/restore@v3
+      uses: actions/cache/restore@v4
       with:
         path: ${{ runner.os == 'Windows' && '~\AppData\Local\pip\Cache' || runner.os == 'macOS' && '~/Library/Caches/pip' || '~/.cache/pip' }}
         key: >-
@@ -244,9 +246,9 @@ jobs:
 
     - name: Upload captured traces
       if: inputs.repo == 'core' && always()
-      uses: actions/upload-artifact@v3
+      uses: actions/upload-artifact@v4
       with:
-        name: "${{ inputs.traces-artifact-name }}"
+        name: "${{ inputs.traces-artifact-name }}-${{ inputs.target }}-${{ inputs.platform }}"
         path: "${{ env.TRACE_CAPTURE_FILE }}"
 
     - name: Finalize test results
@@ -259,14 +261,15 @@ jobs:
 
     - name: Upload test results
       if: always()
-      uses: actions/upload-artifact@v3
+      uses: actions/upload-artifact@v4
       with:
-        name: test-results
+        name: "test-results-${{ inputs.target }}-${{ inputs.platform }}"
         path: "${{ env.TEST_RESULTS_BASE_DIR }}"
 
     - name: Upload coverage data
       if: inputs.standard && !github.event.repository.private && always()
-      uses: codecov/codecov-action@v3
+      uses: codecov/codecov-action@v4
       with:
+        token: ${{ secrets.CODECOV_TOKEN }}
         files: "${{ inputs.target }}/coverage.xml"
         flags: "${{ inputs.target }}"

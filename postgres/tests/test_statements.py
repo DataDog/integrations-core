@@ -39,6 +39,7 @@ from .utils import _get_conn, _get_superconn, requires_over_10, requires_over_13
 
 pytestmark = [pytest.mark.integration, pytest.mark.usefixtures('dd_environment')]
 
+CLOSE_TO_ZERO_INTERVAL = 0.0000001
 
 SAMPLE_QUERIES = [
     # (username, password, dbname, query, arg)
@@ -75,6 +76,93 @@ def test_dbm_enabled_config(integration_check, dbm_instance, dbm_enabled_key, db
     dbm_instance[dbm_enabled_key] = dbm_enabled
     check = integration_check(dbm_instance)
     assert check._config.dbm_enabled == dbm_enabled
+
+
+@requires_over_10
+def test_statement_metrics_multiple_pgss_rows_single_query_signature(
+    aggregator,
+    integration_check,
+    dbm_instance,
+    datadog_agent,
+):
+    # don't need samples for this test
+    dbm_instance['query_samples'] = {'enabled': False}
+    dbm_instance['query_activity'] = {'enabled': False}
+    dbm_instance['query_metrics']['incremental_query_metrics'] = True
+    connections = {}
+
+    def normalize_query(q):
+        # Remove the quotes from below:
+        normalized = ""
+        for s in ["'one'", "'two'"]:
+            if s in q:
+                normalized = q.replace(s, "?")
+                break
+
+        return normalized
+
+    def obfuscate_sql(query, options=None):
+        if query.startswith('SET application_name'):
+            return json.dumps({'query': normalize_query(query), 'metadata': {}})
+        return json.dumps({'query': query, 'metadata': {}})
+
+    queries = ["SET application_name = %s", "SET application_name = %s"]
+
+    # These queries will have the same query signature but different queryids in pg_stat_statements
+    def _run_query(idx):
+        query = queries[idx]
+        user = "bob"
+        password = "bob"
+        dbname = "datadog_test"
+        if dbname not in connections:
+            connections[dbname] = psycopg2.connect(host=HOST, dbname=dbname, user=user, password=password)
+
+        args = ('two',)
+        if idx == 1:
+            args = ('one',)
+
+        connections[dbname].cursor().execute(query, args)
+
+    check = integration_check(dbm_instance)
+    check._connect()
+    # Execute the query with the mocked obfuscate_sql. The result should produce an event payload with the metadata.
+    with mock.patch.object(datadog_agent, 'obfuscate_sql', passthrough=True) as mock_agent:
+        mock_agent.side_effect = obfuscate_sql
+
+        check = integration_check(dbm_instance)
+        check._connect()
+
+        # Seed a bunch of calls into pg_stat_statements
+        for _ in range(10):
+            _run_query(1)
+
+        _run_query(0)
+        run_one_check(check, dbm_instance, cancel=False)
+
+        # Call one query
+        _run_query(0)
+        run_one_check(check, dbm_instance, cancel=False)
+        aggregator.reset()
+
+        # Call other query that maps to same query signature
+        _run_query(1)
+        run_one_check(check, dbm_instance, cancel=False)
+
+        obfuscated_param = '?'
+        query0 = queries[0] % (obfuscated_param,)
+        query_signature = compute_sql_signature(query0)
+        events = aggregator.get_event_platform_events("dbm-metrics")
+
+        assert len(events) > 0
+
+        matching_rows = [r for r in events[0]['postgres_rows'] if r['query_signature'] == query_signature]
+
+        assert len(matching_rows) == 1
+
+        assert matching_rows[0]['calls'] == 1
+
+    for conn in connections.values():
+        conn.close()
 
 
 statement_samples_keys = ["query_samples", "statement_samples"]
@@ -138,8 +226,6 @@ def test_statement_metrics(
     # don't need samples for this test
     dbm_instance['query_samples'] = {'enabled': False}
     dbm_instance['query_activity'] = {'enabled': False}
-    # very low collection interval for test purposes
-    dbm_instance['query_metrics'] = {'enabled': True, 'run_sync': True, 'collection_interval': 0.1}
     connections = {}
 
     def _run_queries():
@@ -445,7 +531,10 @@ def dbm_instance(pg_instance):
     pg_instance['pg_stat_activity_view'] = "datadog.pg_stat_activity()"
     pg_instance['query_samples'] = {'enabled': True, 'run_sync': True, 'collection_interval': 0.2}
     pg_instance['query_activity'] = {'enabled': True, 'collection_interval': 0.2}
-    pg_instance['query_metrics'] = {'enabled': True, 'run_sync': True, 'collection_interval': 0.2}
+    # Set collection_interval close to 0. This is needed if the test runs the check multiple times.
+    # This prevents DBMAsync from skipping job executions, as it is designed
+    # to not execute jobs more frequently than their collection period.
+    pg_instance['query_metrics'] = {'enabled': True, 'run_sync': True, 'collection_interval': CLOSE_TO_ZERO_INTERVAL}
     pg_instance['collect_resources'] = {'enabled': False}
     return pg_instance
 
@@ -635,10 +724,10 @@ def test_failed_explain_handling(
                 "datadog.explain_statement exists in the database. See "
                 "https://docs.datadoghq.com/database_monitoring/setup_postgres/troubleshooting#undefined-explain-function"
                 " for more details: function datadog.explain_statement(unknown) does not exist\nLINE 1: "
-                "/* service='datadog-agent' */ SELECT datadog.explain_stateme...\n"
-                "                                             ^\nHINT:  No function matches the given name"
-                " and argument types. You might need to add explicit type casts.\n\ncode=undefined-explain-function "
-                "dbname=dogs_nofunc host=stubbed.hostname",
+                "... DDIGNORE */ /* service='datadog-agent' */ SELECT datadog.ex...\n"
+                "                                                             ^\nHINT:  No function matches the given "
+                "name and argument types. You might need to add explicit type casts.\n\ncode=undefined-explain-function"
+                " dbname=dogs_nofunc host=stubbed.hostname",
             ],
         ),
         (
@@ -773,6 +862,9 @@ def test_statement_metadata(
     dbm_instance['pg_stat_statements_view'] = pg_stat_statements_view
     dbm_instance['query_samples']['run_sync'] = True
     dbm_instance['query_metrics']['run_sync'] = True
+    # This prevents DBMAsync from skipping job executions, as a job should not be executed
+    # more frequently than its collection period.
+    dbm_instance['query_samples']['collection_interval'] = CLOSE_TO_ZERO_INTERVAL
 
     # If query or normalized_query changes, the query_signatures for both will need to be updated as well.
     query = '''
@@ -857,6 +949,9 @@ def test_statement_reported_hostname(
 ):
     dbm_instance['query_samples']['run_sync'] = True
     dbm_instance['query_metrics']['run_sync'] = True
+    # This prevents DBMAsync from skipping job executions, as a job should not be executed
+    # more frequently than its collection period.
+    dbm_instance['query_samples']['collection_interval'] = 0.0000001
     dbm_instance['reported_hostname'] = reported_hostname
 
     check = integration_check(dbm_instance)

@@ -2,6 +2,12 @@
 
 <!-- towncrier release notes start -->
 
+## 2.2.2 / 2024-04-26 / Agent 7.54.0
+
+***Fixed***:
+
+* Do not fail if no tags are provided in the config ([#17336](https://github.com/DataDog/integrations-core/pull/17336))
+
 ## 2.2.1 / 2024-01-10 / Agent 7.51.0
 
 ***Fixed***:

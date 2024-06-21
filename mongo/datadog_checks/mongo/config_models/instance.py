@@ -59,11 +59,14 @@ class InstanceConfig(BaseModel):
     )
     add_node_tag_to_events: Optional[bool] = None
     additional_metrics: Optional[tuple[str, ...]] = None
+    cluster_name: Optional[str] = None
     collections: Optional[tuple[str, ...]] = None
     collections_indexes_stats: Optional[bool] = None
     connection_scheme: Optional[str] = None
     custom_queries: Optional[tuple[CustomQuery, ...]] = None
     database: Optional[str] = None
+    database_instance_collection_interval: Optional[float] = None
+    dbm: Optional[bool] = None
     dbnames: Optional[tuple[str, ...]] = None
     dbstats_tag_dbname: Optional[bool] = None
     disable_generic_tags: Optional[bool] = None
@@ -74,6 +77,7 @@ class InstanceConfig(BaseModel):
     options: Optional[MappingProxyType[str, Any]] = None
     password: Optional[str] = None
     replica_check: Optional[bool] = None
+    reported_database_hostname: Optional[str] = None
     server: Optional[str] = None
     service: Optional[str] = None
     tags: Optional[tuple[str, ...]] = None

@@ -2,7 +2,62 @@
 
 <!-- towncrier release notes start -->
 
-## 18.1.1 / 2024-04-17
+## 18.3.0 / 2024-05-31
+
+***Added***:
+
+* Added the following metrics from `pg_stat_io` when DBM is enabled. Only available with PostgreSQL 16 and newer
+  - postgresql.io.evictions
+  - postgresql.io.extends
+  - postgresql.io.extend_time
+  - postgresql.io.fsyncs
+  - postgresql.io.fsync_time
+  - postgresql.io.hits
+  - postgresql.io.reads
+  - postgresql.io.read_time
+  - postgresql.io.writes
+  - postgresql.io.write_time ([#17423](https://github.com/DataDog/integrations-core/pull/17423))
+* Update dependencies ([#17424](https://github.com/DataDog/integrations-core/pull/17424)), ([#17519](https://github.com/DataDog/integrations-core/pull/17519))
+
+***Fixed***:
+
+* This un-reverts https://github.com/DataDog/integrations-core/pull/17187, which was reverted due to a flaw in the logic that could result in improper metric counts. The fixed version caches an initial state of pg_stat_statements and updates it with incremental partial query data. This allows the agent to only fetch full rows for queries that were called between check runs, while also accounting for queryids that can map to the same query_signature. ([#17554](https://github.com/DataDog/integrations-core/pull/17554))
+* Send database instance metadata prior to check queries. This prevents a scenario where exceptions thrown during check execution can cause the database_instance resource to not be emitted. When the resource is not emitted, this can cause flapping in host tags. For example, a customer might see dbms:N/A for a period of time until a new database_instance resource is created. Moving this means it will always be sent, even if an unexepected exception is thrown during check execution. ([#17590](https://github.com/DataDog/integrations-core/pull/17590))
+* Adds debug info for exceptions in custom queries and preserves running of the remaining queries ([#17679](https://github.com/DataDog/integrations-core/pull/17679))
+
+## 18.2.2 / 2024-05-09 / Agent 7.54.0
+
+***Fixed***:
+
+* Decreased database instance collection interval from 1800 seconds to 300 seconds to improve reliability ([#17535](https://github.com/DataDog/integrations-core/pull/17535))
+
+## 18.2.1 / 2024-04-30
+
+***Fixed***:
+
+* Fixed a bug where schemas with tables of the same name were incorrectly reporting indexes of those tables multiple times ([#17480](https://github.com/DataDog/integrations-core/pull/17480))
+
+## 18.2.0 / 2024-04-26
+
+***Added***:
+
+* Added collect_checksum_metrics option to collect Postgres failed checksum counts for databases with it enabled. ([#17203](https://github.com/DataDog/integrations-core/pull/17203))
+* Collect postgres setting parameter `source`, `sourcefile` and `pending_restart` from pg_settings ([#17250](https://github.com/DataDog/integrations-core/pull/17250))
+* Collect the postgres table owner field in postgres schema payloads, which will be displayed in the database-monitoring schemas feature. ([#17314](https://github.com/DataDog/integrations-core/pull/17314))
+* Update dependencies ([#17319](https://github.com/DataDog/integrations-core/pull/17319))
+* Upgrade boto dependencies ([#17332](https://github.com/DataDog/integrations-core/pull/17332))
+* Add new postgresql.running metric ([#17418](https://github.com/DataDog/integrations-core/pull/17418))
+* Add fastpath tag to lock metrics ([#17451](https://github.com/DataDog/integrations-core/pull/17451))
+
+***Fixed***:
+
+* Fixed bug where `statement_timeout` setting incorrectly reflected integration connection value instead of database level
+  - Adjusted `statement_timeout` to apply at the session level post-database connection.
+  - Modified the `pg_settings` query to select `reset_val` when sourced from 'session', guaranteeing the retrieval of the accurate server-level setting. ([#17264](https://github.com/DataDog/integrations-core/pull/17264))
+* Improved performance of database schema collection. ([#17381](https://github.com/DataDog/integrations-core/pull/17381))
+* Fix default value for pg_stat_statements_view ([#17400](https://github.com/DataDog/integrations-core/pull/17400))
+
+## 18.1.1 / 2024-04-17 / Agent 7.53.0
 
 ***Fixed***:
 

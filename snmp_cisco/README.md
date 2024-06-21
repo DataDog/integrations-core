@@ -14,17 +14,19 @@ Collect SNMP metrics from Cisco appliances, including:
 - Cisco ISR
 - Cisco UC Virtual Machines
 
-For details of monitored metrics see the [SNMP integration tile][2]
-
 ## Setup
 
 To install and configure the SNMP integration, see the [Network Device Monitoring][3] documentation.
+
+## Vendor profiles
+
+Specific supported vendor profiles for this integration can be found on the [network vendors][6] page.
 
 ## Data Collected
 
 ### Metrics
 
-For details of monitored metrics see the [SNMP integration tile][2]
+For details of monitored metrics see the [SNMP integration tile][2].
 
 ### Service Checks
 
@@ -49,3 +51,4 @@ Need help? Contact [Datadog support][5].
 [3]: https://docs.datadoghq.com/network_performance_monitoring/devices/setup
 [4]: https://www.datadoghq.com/blog/monitor-snmp-with-datadog/
 [5]: https://docs.datadoghq.com/help/
+[6]: https://docs.datadoghq.com/network_monitoring/devices/#vendor-profiles

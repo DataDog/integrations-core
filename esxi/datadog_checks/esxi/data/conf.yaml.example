@@ -9,6 +9,11 @@ init_config:
     #
     # service: <SERVICE>
 
+    ## @param proxy - string - optional - default: 
+    ## SOCKS Proxy to use for all instances.
+    #
+    # proxy: socks5://<PROXY_SERVER>:<PORT>
+
 ## Every instance is scheduled independently of the others.
 #
 instances:
@@ -28,6 +33,14 @@ instances:
     #
     password: <PASSWORD>
 
+    ## @param empty_default_hostname - boolean - required
+    ## The ESXi integration is a check where metrics are usually unrelated to the host
+    ## on which the Agent runs. Setting this parameter to true, prevents the Agent from attaching the hostname
+    ## (and the host tags) to the metrics. It is especially important to leave this parameter to "true" when you are
+    ## running the agent inside a vSphere VM as the VM tags are going to be unrelated to other metrics.
+    #
+    empty_default_hostname: true
+
     ## @param use_guest_hostname - boolean - optional - default: false
     ## If true, the check will use the guest hostname for VMs instead of the VM name.
     ## This requires the VM to have VMware tools installed. If the guest hostname is
@@ -38,6 +51,13 @@ instances:
     ##       https://docs.datadoghq.com/integrations/faq/troubleshooting-duplicated-hosts-with-vsphere/.
     #
     # use_guest_hostname: false
+
+    ## @param use_configured_hostname - boolean - optional - default: true
+    ## If true, the check will use the configured `host` parameter for ESXi hostnames instead of the Host name.
+    ## You may need to use this if you install both the vSphere check and ESXi check to avoid duplicate entries
+    ## for hosts in the web application UI.
+    #
+    # use_configured_hostname: true
 
     ## @param collect_per_instance_filters - mapping - optional
     ## Use this option to collect metrics tagged with instance values.
@@ -101,8 +121,8 @@ instances:
     ## @param excluded_host_tags - list of strings - optional - default: []
     ## Use this option to send a subset of host tags as metric tags.
     ## The ESXi integration collects tags for every ESXi host or VM in your environment.
-    ## Those tags can be `esxi_url`, esxi_type`, `esxi_host`, `esxi_folder`, `esxi_cluster`
-    ## `esxi_compute`, `esxi_datacenter`, `esxi_datastore` and are attached to the ESXi metrics by default.
+    ## Those tags can be `esxi_url`, esxi_type`, `esxi_host`, and `esxi_datastore`
+    ## and are attached to the ESXi metrics by default.
     ## By default these tags are submitted as host tags, but you can submit them as metric tags instead by using
     ## this configuration option, see: https://docs.datadoghq.com/tagging/using_tags/
     ## You will lose the ability to filter your hosts on the tags you specify but they will appear faster
@@ -112,6 +132,11 @@ instances:
     #
     # excluded_host_tags:
     #   - <HOST_TAG>
+
+    ## @param proxy - string - optional - default: 
+    ## SOCKS Proxy to use for this instance. Overrides the `proxy` setting in `init_config`.
+    #
+    # proxy: socks5://<PROXY_SERVER>:<PORT>
 
     ## @param ssl_verify - boolean - optional - default: true
     ## Set to false to disable SSL verification when connecting to the ESXi host
@@ -150,13 +175,6 @@ instances:
     ## https://docs.datadoghq.com/developers/write_agent_check/#collection-interval
     #
     # min_collection_interval: 15
-
-    ## @param empty_default_hostname - boolean - optional - default: false
-    ## This forces the check to send metrics with no hostname.
-    ##
-    ## This is useful for cluster-level checks.
-    #
-    # empty_default_hostname: false
 
     ## @param metric_patterns - mapping - optional
     ## A mapping of metrics to include or exclude, with each entry being a regular expression.

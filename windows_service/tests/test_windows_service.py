@@ -221,6 +221,45 @@ def test_startup_type_tag(aggregator, check, instance_basic):
     )
 
 
+def test_display_name_tag(aggregator, check, instance_basic):
+    instance_basic['collect_display_name_as_tag'] = True
+    c = check(instance_basic)
+    c.check(instance_basic)
+    aggregator.assert_service_check(
+        c.SERVICE_CHECK_NAME,
+        status=c.OK,
+        tags=[
+            'service:EventLog',
+            'windows_service:EventLog',
+            'display_name:Windows Event Log',
+            'optional:tag1',
+        ],
+        count=1,
+    )
+    aggregator.assert_service_check(
+        c.SERVICE_CHECK_NAME,
+        status=c.OK,
+        tags=[
+            'service:Dnscache',
+            'windows_service:Dnscache',
+            'display_name:DNS Client',
+            'optional:tag1',
+        ],
+        count=1,
+    )
+    aggregator.assert_service_check(
+        c.SERVICE_CHECK_NAME,
+        status=c.UNKNOWN,
+        tags=[
+            'service:NonExistentService',
+            'windows_service:NonExistentService',
+            'display_name:Not_Found',
+            'optional:tag1',
+        ],
+        count=1,
+    )
+
+
 def test_openservice_failure(aggregator, check, instance_basic_dict, caplog):
     # dict type
     instance_basic_dict['services'].append({'startup_type': 'automatic'})

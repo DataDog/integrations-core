@@ -15,7 +15,6 @@
       "Supported OS::Linux",
       "Supported OS::macOS",
       "Supported OS::Windows",
-      "Category::Web",
       "Category::Network"
     ]
   },

@@ -43,9 +43,6 @@
       },
       "source_type_id": 10086,
       "auto_install": true
-    },
-    "logs": {
-      "source": "statsd"
     }
   }
 }

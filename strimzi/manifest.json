@@ -16,7 +16,9 @@
       "Category::Kubernetes",
       "Supported OS::Linux",
       "Supported OS::Windows",
-      "Supported OS::macOS"
+      "Supported OS::macOS",
+      "Submitted Data Type::Logs",
+      "Submitted Data Type::Metrics"
     ]
   },
   "assets": {
@@ -54,9 +56,6 @@
     },
     "dashboards": {
       "strimzi": "assets/dashboards/overview.json"
-    },
-    "logs": {
-      "source": "strimzi"
     }
   },
   "author": {

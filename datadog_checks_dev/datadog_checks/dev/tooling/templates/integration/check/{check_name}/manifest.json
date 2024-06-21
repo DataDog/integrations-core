@@ -46,7 +46,6 @@
       "<FILL IN DASHBOARD NAME>": "assets/dashboards/<FILL IN>.json"
     }},
     "monitors": {{}},
-    "logs": {{}},
     "saved_views": {{}}
   }},{pricing_plan}{terms}{author_info}
 }}
