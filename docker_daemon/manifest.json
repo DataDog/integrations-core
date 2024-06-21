@@ -42,18 +42,6 @@
       {
         "resource_type": "documentation",
         "url": "https://www.datadoghq.com/docker-adoption"
-      },
-      {
-        "resource_type": "blog",
-        "url": "https://www.datadoghq.com/blog/monitor-docker-on-aws-ecs"
-      },
-      {
-        "resource_type": "blog",
-        "url": "https://www.datadoghq.com/blog/docker-performance-datadog"
-      },
-      {
-        "resource_type": "blog",
-        "url": "https://www.datadoghq.com/blog/monitor-docker-datadog"
       }
     ]
   },

@@ -17,6 +17,20 @@
       "Supported OS::Windows",
       "Category::Data Stores",
       "Category::Log Collection"
+    ],
+    "resources": [
+      {
+        "resource_type": "docs",
+        "url": "https://docs.datadoghq.com/agent/kubernetes/integrations/"
+      },
+      {
+        "resource_type": "docs",
+        "url": "https://docs.datadoghq.com/agent/kubernetes/log/"
+      },
+      {
+        "resource_type": "docs",
+        "url": "https://docs.datadoghq.com/agent/guide/agent-commands/"
+      }
     ]
   },
   "author": {

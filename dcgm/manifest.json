@@ -16,6 +16,16 @@
       "Supported OS::Linux",
       "Supported OS::Windows",
       "Supported OS::macOS"
+    ],
+    "resources": [
+      {
+        "resource_type": "docs",
+        "url": "https://docs.datadoghq.com/agent/kubernetes/integrations/"
+      },
+      {
+        "resource_type": "docs",
+        "url": "https://docs.datadoghq.com/integrations/nvml/#metrics"
+      }
     ]
   },
   "assets": {

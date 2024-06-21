@@ -46,10 +46,6 @@
       {
         "resource_type": "blog",
         "url": "https://www.datadoghq.com/blog/consul-datadog/"
-      },
-      {
-        "resource_type": "blog",
-        "url": "https://www.datadoghq.com/blog/monitor-consul-with-datadog-npm/"
       }
     ]
   },
