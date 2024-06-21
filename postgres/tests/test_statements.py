@@ -724,10 +724,10 @@ def test_failed_explain_handling(
                 "datadog.explain_statement exists in the database. See "
                 "https://docs.datadoghq.com/database_monitoring/setup_postgres/troubleshooting#undefined-explain-function"
                 " for more details: function datadog.explain_statement(unknown) does not exist\nLINE 1: "
-                "/* service='datadog-agent' */ SELECT datadog.explain_stateme...\n"
-                "                                             ^\nHINT:  No function matches the given name"
-                " and argument types. You might need to add explicit type casts.\n\ncode=undefined-explain-function "
-                "dbname=dogs_nofunc host=stubbed.hostname",
+                "... DDIGNORE */ /* service='datadog-agent' */ SELECT datadog.ex...\n"
+                "                                                             ^\nHINT:  No function matches the given "
+                "name and argument types. You might need to add explicit type casts.\n\ncode=undefined-explain-function"
+                " dbname=dogs_nofunc host=stubbed.hostname",
             ],
         ),
         (
