@@ -38,8 +38,11 @@
       },
       "service_checks": {
         "metadata_path": "assets/service_checks.json"
-      }
-    },
+      },
+    "process_signatures": [
+      "cluster-autoscaler"
+    ]
+  },
     "dashboards": {
       "Kubernetes Cluster Autoscaler Overview": "assets/dashboards/kubernetes_cluster_autoscaler_overview.json"
     },

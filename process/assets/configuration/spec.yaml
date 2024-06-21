@@ -140,4 +140,11 @@ files:
         value:
           type: integer
           example: 120
+      - name: use_oneshot
+        description: |
+          If set to `true`, the check uses `psutil.Process().oneshot()` to collect and cache process metrics. 
+          This can help speed up the check completion.
+        value:
+          type: boolean
+          example: true
       - template: instances/default
