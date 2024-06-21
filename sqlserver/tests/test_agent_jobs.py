@@ -299,9 +299,9 @@ def test_agent_jobs_integration(aggregator, dd_run_check, instance_docker):
         assert activity[6] == 1
         
     dd_run_check(check)
-    dbm_activity = aggregator.get_event_platform_events("dbm-samples")
+    dbm_activity = aggregator.get_event_platform_events("dbm-activity")
     job_events = [e for e in dbm_activity if (e.get('sqlserver_job_history', None) is not None)]
-    assert len(job_events) == 3
+    assert len(job_events) == 1
     aggregator.assert_metric("sqlserver.agent.active_jobs.duration", count=1)
     aggregator.assert_metric("sqlserver.agent.active_jobs.step_info", count=1)
     aggregator.assert_metric("sqlserver.agent.active_session.duration", count=1)
@@ -310,6 +310,6 @@ def test_agent_jobs_integration(aggregator, dd_run_check, instance_docker):
     # aggregator.assert_metric("sqlserver.agent.active_jobs.duration", count=2)
     # aggregator.assert_metric("sqlserver.agent.active_jobs.step_info", count=2)
     # aggregator.assert_metric("sqlserver.agent.active_session.duration", count=2)
-    dbm_activity = aggregator.get_event_platform_events("dbm-samples")
+    dbm_activity = aggregator.get_event_platform_events("dbm-activity")
     job_events = [e for e in dbm_activity if (e.get('sqlserver_job_history', None) is not None)]
-    assert len(job_events) == 3 # successive checks should not create new events for same history entries
+    assert len(job_events) == 1 # successive checks should not create new events for same history entries
