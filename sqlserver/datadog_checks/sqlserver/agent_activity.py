@@ -108,7 +108,7 @@ class SqlserverAgentActivity(DBMAsyncJob):
             "host": self._check.resolved_hostname,
             "ddagentversion": datadog_agent.get_version(),
             "ddsource": "sqlserver",
-            "dbm_type": "fkdsajfkljas",
+            "dbm_type": "activity",
             "collection_interval": self.collection_interval,
             "ddtags": self.tags,
             "timestamp": time.time() * 1000,
