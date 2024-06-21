@@ -18,14 +18,20 @@ def test_integration_connection_with_commenter_cursor(integration_check, pg_inst
         # verify CommenterCursor and CommenterDictCursor prepend the query with /* service='datadog-agent' */
         with conn.cursor(cursor_factory=CommenterCursor) as cursor:
             cursor.execute(
-                'SELECT name, setting FROM pg_settings where name = %s', ('pg_stat_statements.max',), ignore=ignore
+                'SELECT name, setting FROM pg_settings where name = %s',
+                ('pg_stat_statements.max',),
+                ignore_query_metric=ignore,
             )
             result = cursor.fetchone()
             assert result[0] == 'pg_stat_statements.max'
         __check_prepand_sql_comment(pg_instance, ignore)
 
         with conn.cursor(cursor_factory=CommenterDictCursor) as cursor:
-            cursor.execute('SELECT name, setting FROM pg_settings where name = %s', ('max_connections',), ignore=ignore)
+            cursor.execute(
+                'SELECT name, setting FROM pg_settings where name = %s',
+                ('max_connections',),
+                ignore_query_metric=ignore,
+            )
             result = cursor.fetchone()
             assert result['name'] == 'max_connections'
         __check_prepand_sql_comment(pg_instance, ignore)
