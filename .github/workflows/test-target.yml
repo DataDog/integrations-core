@@ -77,7 +77,7 @@ on:
         required: false
         default: ""
         type: string
-      pytest_args:
+      pytest-args:
         description: "Arguments to pass to pytest"
         required: false
         type: string
