@@ -1,0 +1,1 @@
+Added handling for new exception: 'CatalogEndPointFailure' and clearer log messages for exception handling
