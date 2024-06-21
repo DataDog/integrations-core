@@ -5,9 +5,6 @@ from datadog_checks.base import AgentCheck, OpenMetricsBaseCheckV2  # noqa: F401
 
 from .metrics import METRIC_MAP, RENAME_LABELS_MAP
 
-DEFAULT_VERSION_ENDPOINT = "/version"
-DEFAULT_HEALTH_ENDPOINT = "/health"
-
 
 class vLLMCheck(OpenMetricsBaseCheckV2):
 
