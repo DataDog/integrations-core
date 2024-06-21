@@ -17,7 +17,7 @@ METRIC_MAP = {
     'vllm:num_requests_running': 'num_requests.running',
     'vllm:num_requests_waiting': 'num_requests.waiting',
     'vllm:num_requests_swapped': 'num_requests.swapped',
-    'vllm:gpu_cache_usage_perc': 'cache_usage_perc',
+    'vllm:gpu_cache_usage_perc': 'gpu_cache_usage_perc',
     'vllm:cpu_cache_usage_perc': 'cpu_cache_usage_perc',
     'vllm:num_preemptions': 'num_preemptions',
     'vllm:prompt_tokens': 'prompt_tokens',
