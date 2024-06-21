@@ -1,9 +1,9 @@
-name: Master
+name: Daily Flaky Tests (every 8 hours)
 
 on:
-  push:
-    branches:
-    - master
+  schedule:
+  # 4 AM, 12 PM, 8 PM UTC
+  - cron: "0 4,12,20 * * *"
 
 jobs:
   cache:
@@ -19,7 +19,7 @@ jobs:
 
       # Options
       standard: true
-      pytest-args: '-m "not flaky"'
+      pytest-args: '-m "flaky"'
     secrets: inherit
 
   publish-test-results:
