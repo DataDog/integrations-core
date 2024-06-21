@@ -425,6 +425,7 @@ def test_activity_vacuum_excluded(aggregator, integration_check, pg_instance):
 
 
 @flaky(max_runs=5)
+@pytest.mark.flaky
 def test_backend_transaction_age(aggregator, integration_check, pg_instance):
     pg_instance['collect_activity_metrics'] = True
     check = integration_check(pg_instance)
@@ -560,6 +561,7 @@ def test_state_clears_on_connection_error(integration_check, pg_instance):
     [True, False],
 )
 @flaky(max_runs=5)
+@pytest.mark.flaky
 def test_wal_stats(aggregator, integration_check, pg_instance, is_aurora):
     conn = _get_superconn(pg_instance)
     with conn.cursor() as cur:

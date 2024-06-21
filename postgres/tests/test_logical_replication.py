@@ -34,6 +34,7 @@ pytestmark = [pytest.mark.integration, pytest.mark.usefixtures('dd_environment')
 
 @requires_over_11
 @flaky(max_runs=5)
+@pytest.mark.flaky
 def test_common_logical_replica_metrics(aggregator, integration_check, pg_replica_logical):
     check = integration_check(pg_replica_logical)
     check._connect()
