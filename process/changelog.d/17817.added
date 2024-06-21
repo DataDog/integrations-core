@@ -1,1 +1,1 @@
-adding `use_oneshot` parameter to speed up check runs with `psutil.Process().oneshot()`
+Add `use_oneshot` parameter to speed up check runs with `psutil.Process().oneshot()`
