@@ -307,6 +307,7 @@ Need help? Contact [Datadog support][17].
 [9]: https://docs.snowflake.com/en/user-guide/private-snowflake-service.html
 [10]: https://docs.snowflake.com/en/user-guide/admin-security-privatelink.html
 [11]: https://docs.snowflake.com/en/sql-reference/account-usage/query_history.html
+[12]: https://docs.datadoghq.com/metrics/summary/
 [13]: https://raw.githubusercontent.com/DataDog/integrations-core/master/snowflake/images/custom_query.png
 [14]: https://docs.datadoghq.com/agent/guide/agent-commands/#agent-status-and-information
 [15]: https://github.com/DataDog/integrations-core/blob/master/snowflake/metadata.csv

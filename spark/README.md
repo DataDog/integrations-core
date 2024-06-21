@@ -140,4 +140,5 @@ The Spark integration only collects metrics about running apps. If you have no c
 [10]: https://github.com/DataDog/integrations-core/blob/master/spark/metadata.csv
 [11]: https://github.com/DataDog/integrations-core/blob/master/spark/assets/service_checks.json
 [12]: https://docs.aws.amazon.com/emr/latest/ManagementGuide/emr-plan-bootstrap.html
+[13]: https://docs.datadoghq.com/agent/
 [14]: https://docs.aws.amazon.com/emr/latest/ManagementGuide/emr-connect-master-node-ssh.html

@@ -241,6 +241,7 @@ attribute:
 [6]: https://docs.datadoghq.com/agent/guide/agent-commands/#start-stop-and-restart-the-agent
 [7]: https://docs.datadoghq.com/agent/guide/autodiscovery-with-jmx/?tab=containerizedagent
 [8]: https://lucene.apache.org/solr/guide/configuring-logging.html#permanent-logging-settings
+[9]: https://logging.apache.org/log4j/2.x/manual/layouts.html#Patterns
 [10]: https://docs.datadoghq.com/logs/processing/#integration-pipelines
 [11]: https://docs.datadoghq.com/agent/docker/log/
 [12]: https://docs.datadoghq.com/agent/guide/agent-commands/#agent-status-and-information
