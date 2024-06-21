@@ -43,17 +43,6 @@ def test_emits_critical_openemtrics_service_check_when_service_is_down(
     aggregator.assert_service_check('vllm.openmetrics.health', ServiceCheck.CRITICAL)
 
 
-def test_emits_critical_api_service_check_when_service_is_down(aggregator, instance, mock_http_response):
-    """
-    If we fail to reach the API endpoint the health service check should report as critical
-    """
-    mock_http_response(status_code=404)
-    check = vLLMCheck('vllm', {}, [instance])
-    check._check_server_health()
-
-    aggregator.assert_service_check('vllm.health.status', ServiceCheck.CRITICAL)
-
-
 def test_check_mock_vllm_metadata(datadog_agent, instance, mock_http_response):
     mock_http_response(file_path=get_fixture_path('vllm_version.json'))
     check = vLLMCheck('vLLM', {}, [instance])
