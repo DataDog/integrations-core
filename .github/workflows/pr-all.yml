@@ -29,7 +29,7 @@ jobs:
       # To avoid this, using -- syntax, 
       # which tells the command that everything following it 
       # should be treated as positional arguments, not options
-      pytest-args: '-- -m flaky'
+      pytest-args: '-m flaky'
     secrets: inherit
 
   save-event:

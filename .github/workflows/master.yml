@@ -25,7 +25,7 @@ jobs:
       # To avoid this, using -- syntax, 
       # which tells the command that everything following it 
       # should be treated as positional arguments, not options
-      pytest-args: '-- -m "not flaky"'
+      pytest-args: '-m "not flaky"'
     secrets: inherit
 
   publish-test-results:
