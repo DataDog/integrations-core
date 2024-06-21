@@ -9,7 +9,7 @@ name = "datadog-argo-workflows"
 description = "The Argo Workflows check"
 readme = "README.md"
 license = "BSD-3-Clause"
-requires-python = ">=3.9"
+requires-python = ">=3.11"
 keywords = [
     "datadog",
     "datadog agent",

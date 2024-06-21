@@ -1,8 +1,8 @@
 [build-system]
 requires = [
     "hatchling>=0.13.0",
-    "setuptools>=66; python_version > '3.0'",
-    "setuptools; python_version < '3.0'",
+    "setuptools>=66",
+    
 ]
 build-backend = "hatchling.build"
 
@@ -11,7 +11,7 @@ name = "datadog-cloudera"
 description = "The Cloudera check"
 readme = "README.md"
 license = "BSD-3-Clause"
-requires-python = ">=3.8"
+requires-python = ">=3.11"
 keywords = [
     "datadog",
     "datadog agent",

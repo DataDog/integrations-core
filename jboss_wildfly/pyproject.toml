@@ -1,8 +1,8 @@
 [build-system]
 requires = [
     "hatchling>=0.11.2",
-    "setuptools>=66; python_version > '3.0'",
-    "setuptools; python_version < '3.0'",
+    "setuptools>=66",
+    
 ]
 build-backend = "hatchling.build"
 
@@ -11,6 +11,7 @@ name = "datadog-jboss-wildfly"
 description = "The JBoss/WildFly check"
 readme = "README.md"
 license = "BSD-3-Clause"
+requires-python = ">=3.11"
 keywords = [
     "datadog",
     "datadog agent",

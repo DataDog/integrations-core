@@ -1,8 +1,8 @@
 [build-system]
 requires = [
     "hatchling>=0.11.2",
-    "setuptools>=66; python_version > '3.0'",
-    "setuptools; python_version < '3.0'",
+    "setuptools>=66",
+    
 ]
 build-backend = "hatchling.build"
 
@@ -10,6 +10,7 @@ build-backend = "hatchling.build"
 name = "datadog-airflow"
 description = "The Airflow check"
 readme = "README.md"
+requires-python = ">=3.11"
 license = "BSD-3-Clause"
 keywords = [
     "datadog",
