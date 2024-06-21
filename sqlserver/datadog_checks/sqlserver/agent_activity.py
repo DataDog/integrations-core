@@ -15,7 +15,7 @@ except ImportError:
 DEFAULT_COLLECTION_INTERVAL = 10
 
 AGENT_HISTORY_QUERY = """\
-SELECT 
+SELECT TOP 10
     j.name,
     sjh1.job_id,
     sjh1.step_id,
@@ -141,7 +141,5 @@ class SqlserverAgentActivity(DBMAsyncJob):
                 payload = json.dumps(history_event, default=default_json_event_encoding)
                     # TODO figure out where this payload should go
                 self.log.info(payload)
-                self.log.warning(payload)
-                self.log.debug(payload)
                 self._check.database_monitoring_query_activity(payload)
 
