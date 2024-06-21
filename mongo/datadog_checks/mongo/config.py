@@ -97,8 +97,6 @@ class MongoConfig(object):
         self.custom_queries = instance.get("custom_queries", [])
 
         self._base_tags = list(set(instance.get('tags', [])))
-        self.service_check_tags = self._compute_service_check_tags()
-        self.metric_tags = self._compute_metric_tags()
 
         # DBM config options
         self.dbm_enabled = is_affirmative(instance.get('dbm', False))
@@ -111,6 +109,10 @@ class MongoConfig(object):
 
         # MongoDB instance hostname override
         self.reported_database_hostname = instance.get('reported_database_hostname', None)
+
+        # Generate tags for service checks and metrics
+        self.service_check_tags = self._compute_service_check_tags()
+        self.metric_tags = self._compute_metric_tags()
 
     def _get_clean_server_name(self):
         try:
@@ -143,7 +145,10 @@ class MongoConfig(object):
         return service_check_tags
 
     def _compute_metric_tags(self):
-        return self._base_tags + ['server:%s' % self.clean_server_name]
+        tags = self._base_tags + ['server:%s' % self.clean_server_name]
+        if self.cluster_name:
+            tags.append('clustername:%s' % self.cluster_name)
+        return tags
 
     @property
     def operation_samples(self):
