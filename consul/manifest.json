@@ -32,8 +32,8 @@
         "url": "https://www.datadoghq.com/blog/monitor-consul-health-and-performance-with-datadog"
       },
       {
-        "resource_type": "other",
-        "url": "https://engineering.datadoghq.com/consul-at-datadog"
+        "resource_type": "blog",
+        "url": "https://www.datadoghq.com/blog/engineering/consul-at-datadog/"
       },
       {
         "resource_type": "blog",
