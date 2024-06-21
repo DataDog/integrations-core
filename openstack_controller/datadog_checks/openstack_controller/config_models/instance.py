@@ -387,6 +387,7 @@ class InstanceConfig(BaseModel):
         arbitrary_types_allowed=True,
         frozen=True,
     )
+    all_projects: Optional[bool] = None
     allow_redirects: Optional[bool] = None
     auth_token: Optional[AuthToken] = None
     auth_type: Optional[str] = None
