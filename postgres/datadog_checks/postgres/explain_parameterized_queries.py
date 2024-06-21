@@ -185,12 +185,12 @@ class ExplainParameterizedQueries:
         with self._check.db_pool.get_connection(dbname, self._check._config.idle_connection_timeout) as conn:
             with conn.cursor(cursor_factory=CommenterDictCursor) as cursor:
                 logger.debug('Executing query=[%s]', query)
-                cursor.execute(query)
+                cursor.execute(query, ignore_query_metric=True)
 
     def _execute_query_and_fetch_rows(self, dbname, query):
         with self._check.db_pool.get_connection(dbname, self._check._config.idle_connection_timeout) as conn:
             with conn.cursor(cursor_factory=CommenterDictCursor) as cursor:
-                cursor.execute(query)
+                cursor.execute(query, ignore_query_metric=True)
                 return cursor.fetchall()
 
     def _is_parameterized_query(self, statement: str) -> bool:
