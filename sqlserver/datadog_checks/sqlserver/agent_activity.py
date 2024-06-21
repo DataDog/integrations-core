@@ -108,7 +108,7 @@ class SqlserverAgentActivity(DBMAsyncJob):
             "host": self._check.resolved_hostname,
             "ddagentversion": datadog_agent.get_version(),
             "ddsource": "sqlserver",
-            "dbm_type": "samples",
+            "dbm_type": "activity",
             "collection_interval": self.collection_interval,
             "ddtags": self.tags,
             "timestamp": time.time() * 1000,
@@ -128,15 +128,17 @@ class SqlserverAgentActivity(DBMAsyncJob):
         with self._check.connection.open_managed_default_connection(key_prefix=self._conn_key_prefix):
             with self._check.connection.get_managed_cursor(key_prefix=self._conn_key_prefix) as cursor:
                 history_rows = self._get_new_agent_job_history(cursor)
-                history_rows_grouped_by_instance = dict()
-                for history_row in history_rows:
-                    if history_row['completion_instance_id'] not in history_rows_grouped_by_instance:
-                        history_rows_grouped_by_instance[history_row['completion_instance_id']] = [history_row]
-                    else:
-                        history_rows_grouped_by_instance[history_row['completion_instance_id']].append(history_row)
-                for group in history_rows_grouped_by_instance.values():
-                    history_event = self._create_agent_jobs_history_event(group)
-                    history_payload = json.dumps(history_event, default=default_json_event_encoding)
+                # history_rows_grouped_by_instance = dict()
+                # for history_row in history_rows:
+                #     if history_row['completion_instance_id'] not in history_rows_grouped_by_instance:
+                #         history_rows_grouped_by_instance[history_row['completion_instance_id']] = [history_row]
+                #     else:
+                #         history_rows_grouped_by_instance[history_row['completion_instance_id']].append(history_row)
+                # for group in history_rows_grouped_by_instance.values():
+                #     history_event = self._create_agent_jobs_history_event(group)
+                #     history_payload = json.dumps(history_event, default=default_json_event_encoding)
+                history_event = self._create_agent_jobs_history_event(history_rows)
+                payload = json.dumps(history_event, default=default_json_event_encoding)
                     # TODO figure out where this payload should go
-                    self._check.database_monitoring_query_sample(history_payload)
+                self._check.database_monitoring_query_activity(payload)
 
