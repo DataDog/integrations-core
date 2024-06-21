@@ -22,7 +22,7 @@
     ],
     "resources": [
       {
-        "resource_type": "docs",
+        "resource_type": "documentation",
         "url": "https://docs.datadoghq.com/integrations/faq/postgres-custom-metric-collection-explained/"
       },
       {

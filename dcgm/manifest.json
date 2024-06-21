@@ -19,11 +19,11 @@
     ],
     "resources": [
       {
-        "resource_type": "docs",
+        "resource_type": "documentation",
         "url": "https://docs.datadoghq.com/agent/kubernetes/integrations/"
       },
       {
-        "resource_type": "docs",
+        "resource_type": "documentation",
         "url": "https://docs.datadoghq.com/integrations/nvml/#metrics"
       }
     ]
