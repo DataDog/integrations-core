@@ -812,6 +812,8 @@ See [service_checks.json][45] for a list of service checks provided by this inte
 
 Need help? Contact [Datadog support][18].
 
+## Further Reading
+
 {{< partial name="whats-next/whats-next.html" >}}
 
 [1]: http://docs.datadoghq.com/integrations/eks_fargate

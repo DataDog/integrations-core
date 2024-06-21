@@ -210,8 +210,6 @@ The `datadog-agent jmx` command was added in version 4.1.0.
 - Start the collection of metrics based on your current configuration and display them in the console:
   `sudo datadog-agent jmx collect`
 
-{{< partial name="whats-next/whats-next.html" >}}
-
 ### Parsing a string value into a number
 
 If your jmxfetch returns only string values like **false** and **true** and you want to transform it into a Datadog gauge metric for advanced usages. For instance if you want the following equivalence for your jmxfetch:

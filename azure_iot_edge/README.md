@@ -116,6 +116,8 @@ See [service_checks.json][9] for a list of service checks provided by this integ
 
 Need help? Contact [Datadog support][10].
 
+## Further Reading
+
 {{< partial name="whats-next/whats-next.html" >}}
 
 [1]: https://azure.microsoft.com/en-us/services/iot-edge/

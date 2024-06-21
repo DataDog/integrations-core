@@ -112,6 +112,8 @@ See [service_checks.json][9] for a list of service checks provided by this integ
 
 Need help? Contact [Datadog support][10].
 
+## Further Reading
+
 {{< partial name="whats-next/whats-next.html" >}}
 
 [1]: https://app.datadoghq.com/account/settings/agent/latest

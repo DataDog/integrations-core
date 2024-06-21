@@ -292,6 +292,8 @@ See [service_checks.json][16] for a list of service checks provided by this inte
 
 Need help? Contact [Datadog support][17].
 
+## Further Reading
+
 {{< partial name="whats-next/whats-next.html" >}}
 
 [1]: https://www.snowflake.com/

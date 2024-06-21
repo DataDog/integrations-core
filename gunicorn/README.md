@@ -151,6 +151,8 @@ ubuntu   18462 18457  0 20:26 pts/0    00:00:00 gunicorn: worker [my_app]
 ubuntu   18463 18457  0 20:26 pts/0    00:00:00 gunicorn: worker [my_app]
 ```
 
+## Further Reading
+
 {{< partial name="whats-next/whats-next.html" >}}
 
 [1]: https://raw.githubusercontent.com/DataDog/integrations-core/master/gunicorn/images/gunicorn-dash.png

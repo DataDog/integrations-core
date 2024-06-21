@@ -74,6 +74,8 @@ See [service_checks.json][10] for a list of service checks provided by this inte
 
 Need help? Contact [Datadog support][11].
 
+## Further Reading
+
 {{< partial name="whats-next/whats-next.html" >}}
 
 [1]: https://raw.githubusercontent.com/DataDog/integrations-core/master/cassandra_nodetool/images/cassandra_dashboard_2.png

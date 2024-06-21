@@ -146,6 +146,8 @@ See [service_checks.json][15] for a list of service checks provided by this inte
 - [Troubleshooting and Deep Dive for Kafka][16]
 - [Agent failed to retrieve RMIServer stub][17]
 
+## Further Reading
+
 {{< partial name="whats-next/whats-next.html" >}}
 
 [1]: https://raw.githubusercontent.com/DataDog/integrations-core/master/kafka/images/kafka_dashboard.png

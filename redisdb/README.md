@@ -359,6 +359,8 @@ Check that the connection info in `redisdb.yaml` is correct.
 
 Configure a `password` in `redisdb.yaml`.
 
+## Further Reading
+
 {{< partial name="whats-next/whats-next.html" >}}
 
 [1]: https://app.datadoghq.com/account/settings/agent/latest

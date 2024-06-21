@@ -76,6 +76,8 @@ The PANOS integration does not send any events.
 
 The PANOS integration does not include any service checks.
 
+## Further Reading
+
 {{< partial name="whats-next/whats-next.html" >}}
 
 ## Troubleshooting

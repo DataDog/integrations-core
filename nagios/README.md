@@ -107,6 +107,8 @@ The Nagios check does not include any service checks.
 
 Need help? Contact [Datadog support][9].
 
+## Further Reading
+
 {{< partial name="whats-next/whats-next.html" >}}
 
 [1]: https://app.datadoghq.com/account/settings/agent/latest

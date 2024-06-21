@@ -72,6 +72,8 @@ The Temporal integration can collect logs from the Temporal Cluster and forward 
 
 Need help? Contact [Datadog support][9].
 
+## Further Reading
+
 {{< partial name="whats-next/whats-next.html" >}}
 
 [1]: https://temporal.io/

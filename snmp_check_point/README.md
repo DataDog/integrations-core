@@ -20,6 +20,8 @@ For details of monitored metrics see the [SNMP Data Collected][1] section.
 
 Need help? Contact [Datadog support][4].
 
+## Further Reading
+
 {{< partial name="whats-next/whats-next.html" >}}
 
 [1]: https://docs.datadoghq.com/network_performance_monitoring/devices/data

@@ -123,6 +123,8 @@ sudo systemctl restart datadog-agent.service
 sudo service datadog-agent restart
 ```
 
+## Further Reading
+
 {{< partial name="whats-next/whats-next.html" >}}
 
 [1]: https://raw.githubusercontent.com/DataDog/integrations-core/master/kafka_consumer/images/kafka_dashboard.png

@@ -119,6 +119,8 @@ The Network check does not include any service checks.
 
 - [Send TCP/UDP host metrics to the Datadog API][9]
 
+## Further Reading
+
 {{< partial name="whats-next/whats-next.html" >}}
 
 [1]: https://raw.githubusercontent.com/DataDog/integrations-core/master/network/images/netdashboard.png

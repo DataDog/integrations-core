@@ -298,6 +298,8 @@ you can potentially reduce the scope of the check by trying the following:
 Need help? Contact [Datadog support][12].
 
 
+## Further Reading
+
 {{< partial name="whats-next/whats-next.html" >}}
 
 [1]: https://www.ibm.com/products/mq

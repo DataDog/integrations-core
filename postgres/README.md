@@ -460,18 +460,10 @@ See [service_checks.json][18] for a list of service checks provided by this inte
 
 Need help? Contact [Datadog support][21].
 
+## Further Reading
+
 {{< partial name="whats-next/whats-next.html" >}}
 
-### FAQ
-
-- [PostgreSQL custom metric collection explained][22]
-
-### Blog posts
-
-- [100x faster Postgres performance by changing 1 line][23]
-- [Key metrics for PostgreSQL monitoring][24]
-- [Collecting metrics with PostgreSQL monitoring tools][25]
-- [How to collect and monitor PostgreSQL data with Datadog][26]
 
 [1]: https://raw.githubusercontent.com/DataDog/integrations-core/master/postgres/images/postgresql_dashboard.png
 [2]: https://app.datadoghq.com/account/settings/agent/latest

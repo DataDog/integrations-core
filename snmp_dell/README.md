@@ -32,6 +32,8 @@ The Dell integration does not include any service checks.
 
 The Dell integration does not include any events.
 
+## Further Reading
+
 {{< partial name="whats-next/whats-next.html" >}}
 
 ## Troubleshooting

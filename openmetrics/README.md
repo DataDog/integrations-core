@@ -98,6 +98,8 @@ instances:
 
 Need help? Contact [Datadog support][8].
 
+## Further Reading
+
 {{< partial name="whats-next/whats-next.html" >}}
 
 [1]: https://docs.datadoghq.com/agent/kubernetes/integrations/

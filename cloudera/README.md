@@ -203,6 +203,8 @@ You need to change the ownership of the `conf.yaml` to `dd-agent`:
 
 Need help? Contact [Datadog support][9].
 
+## Further Reading
+
 {{< partial name="whats-next/whats-next.html" >}}
 
 [1]: https://www.cloudera.com/products/cloudera-data-platform.html

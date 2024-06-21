@@ -251,6 +251,8 @@ If you are having issues with your Apache integration, it is mostly like due to 
 
 - [Apache SSL certificate issues][18]
 
+## Further Reading
+
 {{< partial name="whats-next/whats-next.html" >}}
 
 [1]: https://raw.githubusercontent.com/DataDog/integrations-core/master/apache/images/apache_dashboard.png

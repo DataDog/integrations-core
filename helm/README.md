@@ -132,6 +132,8 @@ See [service_checks.json][5] for a list of service checks provided by this integ
 
 Need help? Contact [Datadog support][6].
 
+## Further Reading
+
 {{< partial name="whats-next/whats-next.html" >}}
 
 [1]: https://docs.datadoghq.com/agent/kubernetes/integrations/

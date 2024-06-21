@@ -119,6 +119,8 @@ See [service_checks.json][11] for a list of service checks provided by this inte
 
 Need help? Contact [Datadog support][5].
 
+## Further Reading
+
 {{< partial name="whats-next/whats-next.html" >}}
 
 [1]: https://www.hivemq.com/hivemq/

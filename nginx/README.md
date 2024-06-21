@@ -426,6 +426,8 @@ See [service_checks.json][18] for a list of service checks provided by this inte
 
 Need help? Contact [Datadog support][20].
 
+## Further Reading
+
 {{< partial name="whats-next/whats-next.html" >}}
 
 [1]: https://raw.githubusercontent.com/DataDog/integrations-core/master/nginx/images/nginx_dashboard.png

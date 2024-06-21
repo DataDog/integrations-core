@@ -15,6 +15,8 @@ Additionally, OKE node pools are supported.
 
 Need help? Contact [Datadog support][1].
 
+## Further Reading
+
 {{< partial name="whats-next/whats-next.html" >}}
 
 [1]: https://docs.datadoghq.com/help/

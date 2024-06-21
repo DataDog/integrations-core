@@ -184,6 +184,8 @@ For more information, see [Tagging RabbitMQ queues by tag family][18].
 
 Need help? Contact [Datadog support][13].
 
+## Further Reading
+
 {{< partial name="whats-next/whats-next.html" >}}
 
 [1]: https://raw.githubusercontent.com/DataDog/integrations-core/master/rabbitmq/images/rabbitmq_dashboard.png

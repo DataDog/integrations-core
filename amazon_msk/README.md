@@ -59,6 +59,8 @@ See [service_checks.json][14] for a list of service checks provided by this inte
 
 Need help? Contact [Datadog support][15].
 
+## Further Reading
+
 {{< partial name="whats-next/whats-next.html" >}}
 
 [1]: https://aws.amazon.com/msk

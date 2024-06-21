@@ -111,6 +111,8 @@ If a service is present and matches the configuration, but the Datadog Agent doe
 ```
 If the service is present in the output, permissions are the issue. To give the Datadog Agent permission [grant `Read` access on the service][14] to the [Datadog Agent User][15]. We recommend [granting `Read` access with Group Policy][16] to ensure the permissions persist through Windows Updates.
 
+## Further Reading
+
 {{< partial name="whats-next/whats-next.html" >}}
 
 [1]: https://app.datadoghq.com/account/settings/agent/latest

@@ -39,6 +39,8 @@ Follow the [container log collection steps][10] to learn more about those enviro
 
 Need help? Contact [Datadog support][11].
 
+## Further Reading
+
 {{< partial name="whats-next/whats-next.html" >}}
 
 [1]: https://raw.githubusercontent.com/DataDog/integrations-core/master/amazon_eks/images/amazon_eks_dashboard.png

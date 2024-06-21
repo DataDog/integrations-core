@@ -188,6 +188,8 @@ Loading Errors
 
 This is fixed in version 15.2.0 of the check and in Agent versions 7.49.1 and above.
 
+## Further Reading
+
 {{< partial name="whats-next/whats-next.html" >}}
 
 [1]: https://raw.githubusercontent.com/DataDog/integrations-core/master/sqlserver/images/sqlserver_dashboard_02_2024.png

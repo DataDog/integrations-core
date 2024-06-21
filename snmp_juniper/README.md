@@ -32,6 +32,8 @@ Juniper does not include any service checks.
 
 Juniper does not include any events.
 
+## Further Reading
+
 {{< partial name="whats-next/whats-next.html" >}}
 
 ## Troubleshooting

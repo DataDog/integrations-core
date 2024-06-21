@@ -69,6 +69,8 @@ JMeter does not include any events.
 
 Need help? Contact [Datadog support][3].
 
+## Further Reading
+
 {{< partial name="whats-next/whats-next.html" >}}
 
 [1]: https://github.com/DataDog/jmeter-datadog-backend-listener

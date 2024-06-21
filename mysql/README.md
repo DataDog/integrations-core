@@ -561,6 +561,8 @@ See [service_checks.json][22] for a list of service checks provided by this inte
 - [Database user lacks privileges][29]
 - [How to collect metrics with a SQL Stored Procedure?][30]
 
+## Further Reading
+
 {{< partial name="whats-next/whats-next.html" >}}
 
 [1]: https://raw.githubusercontent.com/DataDog/integrations-core/master/mysql/images/mysql-dash-dd-2.png

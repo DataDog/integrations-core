@@ -26,6 +26,8 @@ There are no service checks included with the F5 integration.
 
 No additional events are sent to Datadog from any component of the F5 platform.
 
+## Further Reading
+
 {{< partial name="whats-next/whats-next.html" >}}
 
 ## Troubleshooting

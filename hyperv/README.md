@@ -40,6 +40,8 @@ Hyper-V does not include any events.
 
 Need help? Contact [Datadog support][7].
 
+## Further Reading
+
 {{< partial name="whats-next/whats-next.html" >}}
 
 [1]: https://docs.microsoft.com/en-us/windows-server/virtualization/hyper-v/hyper-v-on-windows-server

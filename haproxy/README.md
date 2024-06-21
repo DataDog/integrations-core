@@ -396,6 +396,8 @@ This is happening because, by default, syslog is listening on port 514. To resol
 
 Need help? Contact [Datadog support][20].
 
+## Further Reading
+
 {{< partial name="whats-next/whats-next.html" >}}
 
 [1]: https://raw.githubusercontent.com/DataDog/integrations-core/master/haproxy/images/haproxy-dash.png

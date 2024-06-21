@@ -650,6 +650,8 @@ eks_fargate does not include any events.
 
 Need help? Contact [Datadog support][20].
 
+## Further Reading
+
 {{< partial name="whats-next/whats-next.html" >}}
 
 [1]: http://docs.datadoghq.com/integrations/ecs_fargate/

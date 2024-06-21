@@ -75,6 +75,8 @@ The Go-Expvar check does not include any service checks.
 
 Need help? Contact [Datadog support][11].
 
+## Further Reading
+
 {{< partial name="whats-next/whats-next.html" >}}
 
 [1]: https://raw.githubusercontent.com/DataDog/integrations-core/master/go_expvar/images/go_graph.png
