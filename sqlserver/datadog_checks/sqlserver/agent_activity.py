@@ -140,5 +140,8 @@ class SqlserverAgentActivity(DBMAsyncJob):
                 history_event = self._create_agent_jobs_history_event(history_rows)
                 payload = json.dumps(history_event, default=default_json_event_encoding)
                     # TODO figure out where this payload should go
+                self.log.info(payload)
+                self.log.warning(payload)
+                self.log.debug(payload)
                 self._check.database_monitoring_query_activity(payload)
 
