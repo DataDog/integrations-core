@@ -29,7 +29,7 @@ class AuthToken(BaseModel):
     writer: Optional[MappingProxyType[str, Any]] = None
 
 
-class IncludeItem(BaseModel):
+class Include(BaseModel):
     model_config = ConfigDict(
         arbitrary_types_allowed=True,
         frozen=True,
@@ -38,19 +38,19 @@ class IncludeItem(BaseModel):
     uptime: Optional[bool] = None
 
 
-class Node(BaseModel):
+class Nodes(BaseModel):
     model_config = ConfigDict(
         arbitrary_types_allowed=True,
         frozen=True,
     )
     exclude: Optional[tuple[str, ...]] = None
-    include: Optional[tuple[Union[str, IncludeItem], ...]] = None
+    include: Optional[tuple[Union[str, Include], ...]] = None
     interval: Optional[int] = None
     limit: Optional[int] = Field(None, description='Maximum number of nodes to be processed.\n')
     portgroups: Optional[Union[bool, MappingProxyType[str, Any]]] = None
 
 
-class Volume(BaseModel):
+class Volumes(BaseModel):
     model_config = ConfigDict(
         arbitrary_types_allowed=True,
         frozen=True,
@@ -59,7 +59,7 @@ class Volume(BaseModel):
     targets: Optional[bool] = None
 
 
-class BaremetalItem(BaseModel):
+class Baremetal(BaseModel):
     model_config = ConfigDict(
         arbitrary_types_allowed=True,
         frozen=True,
@@ -67,12 +67,12 @@ class BaremetalItem(BaseModel):
     allocations: Optional[bool] = None
     conductors: Optional[bool] = None
     drivers: Optional[bool] = None
-    nodes: Optional[Union[bool, Node]] = None
+    nodes: Optional[Union[bool, Nodes]] = None
     ports: Optional[bool] = None
-    volumes: Optional[Union[bool, Volume]] = None
+    volumes: Optional[Union[bool, Volumes]] = None
 
 
-class BlockStorageItem(BaseModel):
+class BlockStorage(BaseModel):
     model_config = ConfigDict(
         arbitrary_types_allowed=True,
         frozen=True,
@@ -84,18 +84,18 @@ class BlockStorageItem(BaseModel):
     volumes: Optional[bool] = None
 
 
-class Hypervisor(BaseModel):
+class Hypervisors(BaseModel):
     model_config = ConfigDict(
         arbitrary_types_allowed=True,
         frozen=True,
     )
     exclude: Optional[tuple[str, ...]] = None
-    include: Optional[tuple[Union[str, IncludeItem], ...]] = None
+    include: Optional[tuple[Union[str, Include], ...]] = None
     interval: Optional[int] = None
     limit: Optional[int] = Field(None, description='Maximum number of hypervisors to be processed.\n')
 
 
-class IncludeItem2(BaseModel):
+class Include2(BaseModel):
     model_config = ConfigDict(
         arbitrary_types_allowed=True,
         frozen=True,
@@ -105,31 +105,31 @@ class IncludeItem2(BaseModel):
     name: Optional[str] = None
 
 
-class Server(BaseModel):
+class Servers(BaseModel):
     model_config = ConfigDict(
         arbitrary_types_allowed=True,
         frozen=True,
     )
     exclude: Optional[tuple[str, ...]] = None
-    include: Optional[tuple[Union[str, IncludeItem2], ...]] = None
+    include: Optional[tuple[Union[str, Include2], ...]] = None
     interval: Optional[int] = None
     limit: Optional[int] = Field(None, description='Maximum number of servers to be processed.\n')
 
 
-class ComputeItem(BaseModel):
+class Compute(BaseModel):
     model_config = ConfigDict(
         arbitrary_types_allowed=True,
         frozen=True,
     )
     flavors: Optional[bool] = None
-    hypervisors: Optional[Union[bool, Hypervisor]] = None
+    hypervisors: Optional[Union[bool, Hypervisors]] = None
     limits: Optional[bool] = None
     quota_sets: Optional[bool] = None
-    servers: Optional[Union[bool, Server]] = None
+    servers: Optional[Union[bool, Servers]] = None
     services: Optional[bool] = None
 
 
-class HeatItem(BaseModel):
+class Heat(BaseModel):
     model_config = ConfigDict(
         arbitrary_types_allowed=True,
         frozen=True,
@@ -137,7 +137,7 @@ class HeatItem(BaseModel):
     stacks: Optional[bool] = None
 
 
-class IdentityItem(BaseModel):
+class Identity(BaseModel):
     model_config = ConfigDict(
         arbitrary_types_allowed=True,
         frozen=True,
@@ -151,7 +151,7 @@ class IdentityItem(BaseModel):
     users: Optional[bool] = None
 
 
-class Image(BaseModel):
+class Images(BaseModel):
     model_config = ConfigDict(
         arbitrary_types_allowed=True,
         frozen=True,
@@ -159,15 +159,15 @@ class Image(BaseModel):
     members: Optional[bool] = None
 
 
-class ImageItem(BaseModel):
+class Image(BaseModel):
     model_config = ConfigDict(
         arbitrary_types_allowed=True,
         frozen=True,
     )
-    images: Optional[Union[bool, Image]] = None
+    images: Optional[Union[bool, Images]] = None
 
 
-class IncludeItem3(BaseModel):
+class Include3(BaseModel):
     model_config = ConfigDict(
         arbitrary_types_allowed=True,
         frozen=True,
@@ -176,18 +176,18 @@ class IncludeItem3(BaseModel):
     stats: Optional[bool] = None
 
 
-class AmphoraeItem(BaseModel):
+class Amphorae(BaseModel):
     model_config = ConfigDict(
         arbitrary_types_allowed=True,
         frozen=True,
     )
     exclude: Optional[tuple[str, ...]] = None
-    include: Optional[tuple[Union[str, IncludeItem3], ...]] = None
+    include: Optional[tuple[Union[str, Include3], ...]] = None
     interval: Optional[int] = None
     limit: Optional[int] = Field(None, description='Maximum number of amphorae to be processed.\n')
 
 
-class IncludeItem4(BaseModel):
+class Include4(BaseModel):
     model_config = ConfigDict(
         arbitrary_types_allowed=True,
         frozen=True,
@@ -195,18 +195,18 @@ class IncludeItem4(BaseModel):
     name: Optional[str] = None
 
 
-class Healthmonitor(BaseModel):
+class Healthmonitors(BaseModel):
     model_config = ConfigDict(
         arbitrary_types_allowed=True,
         frozen=True,
     )
     exclude: Optional[tuple[str, ...]] = None
-    include: Optional[tuple[Union[str, IncludeItem4], ...]] = None
+    include: Optional[tuple[Union[str, Include4], ...]] = None
     interval: Optional[int] = None
     limit: Optional[int] = Field(None, description='Maximum number of healthmonitors to be processed.\n')
 
 
-class IncludeItem5(BaseModel):
+class Include5(BaseModel):
     model_config = ConfigDict(
         arbitrary_types_allowed=True,
         frozen=True,
@@ -215,29 +215,29 @@ class IncludeItem5(BaseModel):
     stats: Optional[bool] = None
 
 
-class Listener(BaseModel):
+class Listeners(BaseModel):
     model_config = ConfigDict(
         arbitrary_types_allowed=True,
         frozen=True,
     )
     exclude: Optional[tuple[str, ...]] = None
-    include: Optional[tuple[Union[str, IncludeItem5], ...]] = None
+    include: Optional[tuple[Union[str, Include5], ...]] = None
     interval: Optional[int] = None
     limit: Optional[int] = Field(None, description='Maximum number of listeners to be processed.\n')
 
 
-class Loadbalancer(BaseModel):
+class Loadbalancers(BaseModel):
     model_config = ConfigDict(
         arbitrary_types_allowed=True,
         frozen=True,
     )
     exclude: Optional[tuple[str, ...]] = None
-    include: Optional[tuple[Union[str, IncludeItem5], ...]] = None
+    include: Optional[tuple[Union[str, Include5], ...]] = None
     interval: Optional[int] = None
     limit: Optional[int] = Field(None, description='Maximum number of loadbalancers to be processed.\n')
 
 
-class IncludeItem8(BaseModel):
+class Include8(BaseModel):
     model_config = ConfigDict(
         arbitrary_types_allowed=True,
         frozen=True,
@@ -245,36 +245,36 @@ class IncludeItem8(BaseModel):
     name: Optional[str] = None
 
 
-class Member(BaseModel):
+class Members(BaseModel):
     model_config = ConfigDict(
         arbitrary_types_allowed=True,
         frozen=True,
     )
     exclude: Optional[tuple[str, ...]] = None
-    include: Optional[tuple[Union[str, IncludeItem8], ...]] = None
+    include: Optional[tuple[Union[str, Include8], ...]] = None
     interval: Optional[int] = None
     limit: Optional[int] = Field(None, description='Maximum number of members to be processed.\n')
 
 
-class IncludeItem7(BaseModel):
+class Include7(BaseModel):
     model_config = ConfigDict(
         arbitrary_types_allowed=True,
         frozen=True,
     )
-    members: Optional[Union[bool, Member]] = None
+    members: Optional[Union[bool, Members]] = None
     name: Optional[str] = None
 
 
-class Pool(BaseModel):
+class Pools(BaseModel):
     model_config = ConfigDict(
         arbitrary_types_allowed=True,
         frozen=True,
     )
-    include: Optional[tuple[Union[str, IncludeItem7], ...]] = None
+    include: Optional[tuple[Union[str, Include7], ...]] = None
     limit: Optional[int] = Field(None, description='Maximum number of pools to be processed.\n')
 
 
-class IncludeItem9(BaseModel):
+class Include9(BaseModel):
     model_config = ConfigDict(
         arbitrary_types_allowed=True,
         frozen=True,
@@ -282,28 +282,39 @@ class IncludeItem9(BaseModel):
     name: Optional[str] = None
 
 
-class Quota(BaseModel):
+class Quotas(BaseModel):
     model_config = ConfigDict(
         arbitrary_types_allowed=True,
         frozen=True,
     )
     exclude: Optional[tuple[str, ...]] = None
-    include: Optional[tuple[Union[str, IncludeItem9], ...]] = None
+    include: Optional[tuple[Union[str, Include9], ...]] = None
     interval: Optional[int] = None
     limit: Optional[int] = Field(None, description='Maximum number of quotas to be processed.\n')
 
 
-class LoadBalancerItem(BaseModel):
+class LoadBalancer(BaseModel):
     model_config = ConfigDict(
         arbitrary_types_allowed=True,
         frozen=True,
     )
-    amphorae: Optional[Union[bool, AmphoraeItem]] = None
-    healthmonitors: Optional[Union[bool, Healthmonitor]] = None
-    listeners: Optional[Union[bool, Listener]] = None
-    loadbalancers: Optional[Union[bool, Loadbalancer]] = None
-    pools: Optional[Union[bool, Pool]] = None
-    quotas: Optional[Union[bool, Quota]] = None
+    amphorae: Optional[Union[bool, Amphorae]] = None
+    healthmonitors: Optional[Union[bool, Healthmonitors]] = None
+    listeners: Optional[Union[bool, Listeners]] = None
+    loadbalancers: Optional[Union[bool, Loadbalancers]] = None
+    pools: Optional[Union[bool, Pools]] = None
+    quotas: Optional[Union[bool, Quotas]] = None
+
+
+class Networks(BaseModel):
+    model_config = ConfigDict(
+        arbitrary_types_allowed=True,
+        frozen=True,
+    )
+    exclude: Optional[tuple[str, ...]] = None
+    include: Optional[tuple[Union[str, Include9], ...]] = None
+    interval: Optional[int] = None
+    limit: Optional[int] = Field(None, description='Maximum number of networks to be processed.\n')
 
 
 class Network(BaseModel):
@@ -311,23 +322,12 @@ class Network(BaseModel):
         arbitrary_types_allowed=True,
         frozen=True,
     )
-    exclude: Optional[tuple[str, ...]] = None
-    include: Optional[tuple[Union[str, IncludeItem9], ...]] = None
-    interval: Optional[int] = None
-    limit: Optional[int] = Field(None, description='Maximum number of networks to be processed.\n')
-
-
-class NetworkItem(BaseModel):
-    model_config = ConfigDict(
-        arbitrary_types_allowed=True,
-        frozen=True,
-    )
     agents: Optional[bool] = None
-    networks: Optional[Union[bool, Network]] = None
+    networks: Optional[Union[bool, Networks]] = None
     quotas: Optional[bool] = None
 
 
-class SwiftItem(BaseModel):
+class Swift(BaseModel):
     model_config = ConfigDict(
         arbitrary_types_allowed=True,
         frozen=True,
@@ -340,15 +340,15 @@ class Components(BaseModel):
         arbitrary_types_allowed=True,
         frozen=True,
     )
-    baremetal: Optional[Union[bool, BaremetalItem]] = None
-    block_storage: Optional[Union[bool, BlockStorageItem]] = Field(None, alias='block-storage')
-    compute: Optional[Union[bool, ComputeItem]] = None
-    heat: Optional[Union[bool, HeatItem]] = None
-    identity: Optional[Union[bool, IdentityItem]] = None
-    image: Optional[Union[bool, ImageItem]] = None
-    load_balancer: Optional[Union[bool, LoadBalancerItem]] = Field(None, alias='load-balancer')
-    network: Optional[Union[bool, NetworkItem]] = None
-    swift: Optional[Union[bool, SwiftItem]] = None
+    baremetal: Optional[Union[bool, Baremetal]] = None
+    block_storage: Optional[Union[bool, BlockStorage]] = Field(None, alias='block-storage')
+    compute: Optional[Union[bool, Compute]] = None
+    heat: Optional[Union[bool, Heat]] = None
+    identity: Optional[Union[bool, Identity]] = None
+    image: Optional[Union[bool, Image]] = None
+    load_balancer: Optional[Union[bool, LoadBalancer]] = Field(None, alias='load-balancer')
+    network: Optional[Union[bool, Network]] = None
+    swift: Optional[Union[bool, Swift]] = None
 
 
 class MetricPatterns(BaseModel):
@@ -387,6 +387,7 @@ class InstanceConfig(BaseModel):
         arbitrary_types_allowed=True,
         frozen=True,
     )
+    all_projects: Optional[bool] = None
     allow_redirects: Optional[bool] = None
     auth_token: Optional[AuthToken] = None
     auth_type: Optional[str] = None

@@ -261,6 +261,16 @@ class ApiRest(Api):
         response.raise_for_status()
         return response.json().get('quota_set', {})
 
+    def get_compute_all_servers(self):
+        params = {'all_tenants': True}
+        return self.make_paginated_request(
+            '{}/servers/detail'.format(self._catalog.get_endpoint_by_type(Component.Types.COMPUTE.value)),
+            'servers',
+            'id',
+            next_signifier='servers_links',
+            params=params,
+        )
+
     def get_compute_servers(self, project_id):
         params = {'project_id': project_id}
         return self.make_paginated_request(
@@ -473,12 +483,6 @@ class ApiRest(Api):
         return response.json().get('drivers', [])
 
     def get_baremetal_allocations(self):
-        if float(self.config.ironic_microversion) < 1.52:
-            self.log.info(
-                "Ironic microversion is below 1.52 and set to %s, cannot collect allocations",
-                self.config.ironic_microversion,
-            )
-            return []
         return self.make_paginated_request(
             '{}/v1/allocations'.format(self._catalog.get_endpoint_by_type(Component.Types.BAREMETAL.value)),
             'allocations',

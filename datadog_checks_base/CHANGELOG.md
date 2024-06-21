@@ -2,6 +2,18 @@
 
 <!-- towncrier release notes start -->
 
+## 36.8.0 / 2024-06-13
+
+***Added***:
+
+* Improve throttling in sync jobs of `DBMAsyncJob` class. Instead of putting a thread to sleep check if the job is too early to run. ([#17716](https://github.com/DataDog/integrations-core/pull/17716))
+
+## 36.7.1 / 2024-06-11
+
+***Fixed***:
+
+* Bump the `requests` version to 2.32.3 on Python 3 ([#17702](https://github.com/DataDog/integrations-core/pull/17702))
+
 ## 36.7.0 / 2024-05-31
 
 ***Added***:

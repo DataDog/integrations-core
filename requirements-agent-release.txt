@@ -18,14 +18,14 @@ datadog-avi-vantage==4.2.1
 datadog-azure-iot-edge==4.2.1
 datadog-boundary==2.2.2
 datadog-btrfs==2.3.0; sys_platform != 'win32'
-datadog-cacti==2.1.0; sys_platform == 'linux2'
+datadog-cacti==2.1.1; sys_platform == 'linux2'
 datadog-calico==2.2.1
 datadog-cassandra-nodetool==1.13.0
 datadog-cassandra==1.18.0
 datadog-ceph==2.10.0; sys_platform != 'win32'
 datadog-cert-manager==4.1.1
 datadog-checkpoint-quantum-firewall==1.0.0
-datadog-checks-base==36.7.0
+datadog-checks-base==36.8.0
 datadog-checks-dependency-provider==1.4.0
 datadog-checks-downloader==4.6.0
 datadog-cilium==3.5.0
@@ -34,7 +34,7 @@ datadog-cisco-secure-firewall==1.0.0
 datadog-citrix-hypervisor==3.2.1
 datadog-clickhouse==3.5.0
 datadog-cloud-foundry-api==3.3.1
-datadog-cloudera==2.1.0
+datadog-cloudera==2.2.0
 datadog-cockroachdb==3.3.1
 datadog-confluent-platform==1.10.2
 datadog-consul==2.6.1
@@ -88,7 +88,7 @@ datadog-impala==2.2.1
 datadog-istio==6.1.1
 datadog-jboss-wildfly==2.2.0
 datadog-journald==1.2.0
-datadog-kafka-consumer==4.3.0
+datadog-kafka-consumer==4.4.0
 datadog-kafka==2.16.0
 datadog-karpenter==1.4.0
 datadog-kong==3.2.1
@@ -112,8 +112,8 @@ datadog-marklogic==4.2.1
 datadog-mcache==4.1.0; sys_platform != 'win32'
 datadog-mesos-master==3.3.1; sys_platform != 'win32'
 datadog-mesos-slave==3.3.1; sys_platform != 'win32'
-datadog-mongo==6.5.0
-datadog-mysql==12.5.0
+datadog-mongo==6.6.0
+datadog-mysql==12.5.1
 datadog-nagios==1.13.0
 datadog-network==3.3.0
 datadog-nfsstat==1.13.0; sys_platform == 'linux2'
@@ -122,7 +122,7 @@ datadog-nginx==6.3.1
 datadog-nvidia-triton==1.2.1
 datadog-openldap==1.12.0
 datadog-openmetrics==4.2.1
-datadog-openstack-controller==6.6.0
+datadog-openstack-controller==6.7.0
 datadog-openstack==2.0.0
 datadog-oracle==5.2.0
 datadog-palo-alto-panorama==1.0.0
@@ -136,7 +136,7 @@ datadog-powerdns-recursor==2.5.1
 datadog-presto==2.8.0
 datadog-process==3.3.0
 datadog-prometheus==3.6.0
-datadog-proxysql==5.1.0
+datadog-proxysql==5.1.1
 datadog-pulsar==2.2.1
 datadog-rabbitmq==5.3.1
 datadog-ray==1.2.1
@@ -148,8 +148,8 @@ datadog-sap-hana==3.2.0
 datadog-scylla==2.7.1
 datadog-sidekiq==1.4.0
 datadog-silk==2.2.1
-datadog-singlestore==2.2.0
-datadog-snmp==7.3.0
+datadog-singlestore==2.2.1
+datadog-snmp==7.3.1
 datadog-snowflake==5.6.0
 datadog-solr==1.13.0
 datadog-sonarqube==3.2.2

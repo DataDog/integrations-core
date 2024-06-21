@@ -220,11 +220,24 @@ class ApiSdk(Api):
             project_id,
         ).to_dict(original_names=True)
 
+    def get_compute_all_servers(self):
+        return [
+            server.to_dict(original_names=True)
+            for server in self.call_paginated_api(
+                self.connection.compute.servers,
+                project_id=None,
+                all_tenants=True,
+                limit=self.config.paginated_limit,
+            )
+        ]
+
     def get_compute_servers(self, project_id):
         return [
             server.to_dict(original_names=True)
             for server in self.call_paginated_api(
-                self.connection.compute.servers, details=True, project_id=project_id, limit=self.config.paginated_limit
+                self.connection.compute.servers,
+                project_id=project_id,
+                limit=self.config.paginated_limit,
             )
         ]
 
@@ -298,12 +311,6 @@ class ApiSdk(Api):
         return [driver.to_dict(original_names=True) for driver in self.connection.baremetal.drivers()]
 
     def get_baremetal_allocations(self):
-        if float(self.config.ironic_microversion) < 1.52:
-            self.log.info(
-                "Ironic microversion is below 1.52 and set to %s, cannot collect allocations",
-                self.config.ironic_microversion,
-            )
-            return []
         return [
             allocation.to_dict(original_names=True)
             for allocation in self.call_paginated_api(

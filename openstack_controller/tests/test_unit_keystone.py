@@ -308,7 +308,7 @@ def test_disable_keystone_limit_metrics(aggregator, dd_run_check, instance, open
 
 
 @pytest.mark.parametrize(
-    ('mock_http_post', 'session_auth', 'instance', 'api_type'),
+    ('mock_http_post', 'openstack_v3_password', 'instance', 'api_type'),
     [
         pytest.param(
             {'replace': {'/identity/v3/auth/tokens': lambda d: remove_service_from_catalog(d, ['identity'])}},
@@ -325,10 +325,10 @@ def test_disable_keystone_limit_metrics(aggregator, dd_run_check, instance, open
             id='api sdk',
         ),
     ],
-    indirect=['mock_http_post', 'session_auth'],
+    indirect=['mock_http_post', 'openstack_v3_password'],
 )
-@pytest.mark.usefixtures('mock_http_get', 'mock_http_post', 'openstack_connection')
-def test_not_in_catalog(aggregator, check, dd_run_check, caplog, mock_http_post, session_auth, api_type):
+@pytest.mark.usefixtures('mock_http_get', 'mock_http_post')
+def test_not_in_catalog(aggregator, check, dd_run_check, caplog, mock_http_post, openstack_connection, api_type):
     with caplog.at_level(logging.DEBUG):
         dd_run_check(check)
 
@@ -363,7 +363,7 @@ def test_not_in_catalog(aggregator, check, dd_run_check, caplog, mock_http_post,
             args_list += list(args)
         assert args_list.count('http://127.0.0.1:8080/identity/v3/auth/tokens') == 4
     if api_type == ApiType.SDK:
-        assert session_auth.get_access.call_count == 4
+        assert openstack_connection.call_count == 4
     assert '`identity` component not found in catalog' in caplog.text
 
 
@@ -447,21 +447,24 @@ def test_response_time_exception(aggregator, check, dd_run_check, mock_http_get)
     for call in mock_http_get.call_args_list:
         args, _ = call
         args_list += list(args)
-    assert args_list.count('http://127.0.0.1:8080/identity') == 2
+    assert args_list.count('http://127.0.0.1:8080/identity') == 3
 
 
 @pytest.mark.parametrize(
-    ('instance'),
+    ('mock_http_get', 'instance'),
     [
         pytest.param(
+            {'elapsed_total_seconds': {'/identity': 0.30706}},
             configs.REST,
             id='api rest',
         ),
         pytest.param(
+            {'elapsed_total_seconds': {'/identity': 0.30706}},
             configs.SDK,
             id='api sdk',
         ),
     ],
+    indirect=['mock_http_get'],
 )
 @pytest.mark.usefixtures('mock_http_get', 'mock_http_post', 'openstack_connection')
 def test_response_time(aggregator, check, dd_run_check, mock_http_get):
@@ -478,7 +481,7 @@ def test_response_time(aggregator, check, dd_run_check, mock_http_get):
     )
     aggregator.assert_metric(
         'openstack.keystone.response_time',
-        count=1,
+        value=307.06,
         tags=['keystone_server:http://127.0.0.1:8080/identity'],
     )
     aggregator.assert_service_check(
@@ -529,9 +532,9 @@ def test_regions_exception(aggregator, check, dd_run_check, mock_http_get, conne
         for call in mock_http_get.call_args_list:
             args, _ = call
             args_list += list(args)
-        assert args_list.count('http://127.0.0.1:8080/identity/v3/regions') == 2
+        assert args_list.count('http://127.0.0.1:8080/identity/v3/regions') == 3
     if api_type == ApiType.SDK:
-        assert connection_identity.regions.call_count == 2
+        assert connection_identity.regions.call_count == 3
 
 
 @pytest.mark.parametrize(
@@ -604,9 +607,9 @@ def test_domains_exception(aggregator, check, dd_run_check, mock_http_get, conne
         for call in mock_http_get.call_args_list:
             args, _ = call
             args_list += list(args)
-        assert args_list.count('http://127.0.0.1:8080/identity/v3/domains') == 2
+        assert args_list.count('http://127.0.0.1:8080/identity/v3/domains') == 3
     if api_type == ApiType.SDK:
-        assert connection_identity.domains.call_count == 2
+        assert connection_identity.domains.call_count == 3
 
 
 @pytest.mark.parametrize(
@@ -699,9 +702,9 @@ def test_projects_exception(aggregator, check, dd_run_check, mock_http_get, conn
         for call in mock_http_get.call_args_list:
             args, _ = call
             args_list += list(args)
-        assert args_list.count('http://127.0.0.1:8080/identity/v3/projects') == 2
+        assert args_list.count('http://127.0.0.1:8080/identity/v3/projects') == 3
     if api_type == ApiType.SDK:
-        assert connection_identity.projects.call_count == 2
+        assert connection_identity.projects.call_count == 3
 
 
 @pytest.mark.parametrize(
@@ -854,9 +857,9 @@ def test_users_exception(aggregator, check, dd_run_check, mock_http_get, connect
         for call in mock_http_get.call_args_list:
             args, _ = call
             args_list += list(args)
-        assert args_list.count('http://127.0.0.1:8080/identity/v3/users') == 2
+        assert args_list.count('http://127.0.0.1:8080/identity/v3/users') == 3
     if api_type == ApiType.SDK:
-        assert connection_identity.users.call_count == 2
+        assert connection_identity.users.call_count == 3
 
 
 @pytest.mark.parametrize(
@@ -1049,9 +1052,9 @@ def test_groups_exception(aggregator, check, dd_run_check, mock_http_get, connec
         for call in mock_http_get.call_args_list:
             args, _ = call
             args_list += list(args)
-        assert args_list.count('http://127.0.0.1:8080/identity/v3/groups') == 2
+        assert args_list.count('http://127.0.0.1:8080/identity/v3/groups') == 3
     if api_type == ApiType.SDK:
-        assert connection_identity.groups.call_count == 2
+        assert connection_identity.groups.call_count == 3
 
 
 @pytest.mark.parametrize(
@@ -1224,9 +1227,9 @@ def test_services_exception(aggregator, check, dd_run_check, mock_http_get, conn
         for call in mock_http_get.call_args_list:
             args, kwargs = call
             args_list += list(args)
-        assert args_list.count('http://127.0.0.1:8080/identity/v3/services') == 2
+        assert args_list.count('http://127.0.0.1:8080/identity/v3/services') == 3
     if api_type == ApiType.SDK:
-        assert connection_identity.services.call_count == 2
+        assert connection_identity.services.call_count == 3
 
 
 @pytest.mark.parametrize(
@@ -1376,9 +1379,9 @@ def test_registered_limits_exception(aggregator, check, dd_run_check, mock_http_
         for call in mock_http_get.call_args_list:
             args, kwargs = call
             args_list += list(args)
-        assert args_list.count('http://127.0.0.1:8080/identity/v3/registered_limits') == 2
+        assert args_list.count('http://127.0.0.1:8080/identity/v3/registered_limits') == 3
     if api_type == ApiType.SDK:
-        assert connection_identity.registered_limits.call_count == 2
+        assert connection_identity.registered_limits.call_count == 3
 
 
 @pytest.mark.parametrize(
@@ -1420,9 +1423,9 @@ def test_limits_exception(aggregator, check, dd_run_check, mock_http_get, connec
         for call in mock_http_get.call_args_list:
             args, kwargs = call
             args_list += list(args)
-        assert args_list.count('http://127.0.0.1:8080/identity/v3/limits') == 2
+        assert args_list.count('http://127.0.0.1:8080/identity/v3/limits') == 3
     if api_type == ApiType.SDK:
-        assert connection_identity.limits.call_count == 2
+        assert connection_identity.limits.call_count == 3
 
 
 @pytest.mark.parametrize(

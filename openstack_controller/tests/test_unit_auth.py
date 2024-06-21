@@ -20,32 +20,6 @@ pytestmark = [
     ('mock_http_post', 'connection_authorize', 'instance'),
     [
         pytest.param(
-            {'exception': {'/identity/v3/auth/tokens': Exception()}},
-            None,
-            configs.REST,
-            id='api rest',
-        ),
-        pytest.param(
-            None,
-            {'exception': Exception()},
-            configs.SDK,
-            id='api sdk',
-        ),
-    ],
-    indirect=['mock_http_post', 'connection_authorize'],
-)
-@pytest.mark.usefixtures('mock_http_get', 'mock_http_post', 'openstack_connection')
-def test_auth_exception(check, dd_run_check, caplog):
-    caplog.set_level(logging.INFO)
-    dd_run_check(check)
-    assert 'Error while authorizing user' in caplog.text
-    assert 'User successfully authorized' not in caplog.text
-
-
-@pytest.mark.parametrize(
-    ('mock_http_post', 'connection_authorize', 'instance'),
-    [
-        pytest.param(
             {'http_error': {'/identity/v3/auth/tokens': MockResponse(status_code=500)}},
             None,
             configs.REST,

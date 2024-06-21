@@ -27,6 +27,7 @@ from .types import (
     OperationSampleEvent,
     OperationSampleOperationMetadata,
     OperationSampleOperationStats,
+    OperationSampleOperationStatsCursor,
     OperationSamplePlan,
 )
 
@@ -44,6 +45,16 @@ SAMPLE_EXCLUDE_KEYS = {
 }
 
 SYSTEM_DATABASES = {"admin", "config", "local"}
+
+# exclude keys in sampled operation that cause issues with the explain command
+COMMAND_EXCLUDE_KEYS = {
+    'readConcern',
+    'writeConcern',
+    'needsMerge',
+    'fromMongos',
+    'let',  # let set's the CLUSTER_TIME and NOW in mongos
+    'mayBypassWriteBlocking',
+}
 
 
 def agent_check_getter(self):
@@ -125,6 +136,7 @@ class MongoOperationSamples(DBMAsyncJob):
                     explain_plan_cache_key=(operation_metadata["dbname"], query_signature),
                 ):
                     yield activity, None
+                    continue
 
                 explain_plan = self._get_explain_plan(
                     op=operation.get("op"), command=command, dbname=operation_metadata["dbname"]
@@ -216,6 +228,8 @@ class MongoOperationSamples(DBMAsyncJob):
     def _get_explain_plan(self, op: Optional[str], command: dict, dbname: str) -> OperationSamplePlan:
         dbname = command.pop("$db", dbname)
         try:
+            for key in COMMAND_EXCLUDE_KEYS:
+                command.pop(key, None)
             explain_plan = self._check.api_client[dbname].command("explain", command, verbosity="executionStats")
             explain_plan = self._format_explain_plan(explain_plan)
             return {
@@ -300,6 +314,37 @@ class MongoOperationSamples(DBMAsyncJob):
             "truncated": self._get_command_truncation_state(command),
             "client": self._get_operation_client(operation),
             "user": self._get_operation_user(operation),
+            "ns": namespace,
+        }
+
+    def _get_operation_cursor(self, operation: dict) -> Optional[OperationSampleOperationStatsCursor]:
+        cursor = operation.get("cursor")
+        if not cursor:
+            return None
+
+        created_date = cursor.get("createdDate")
+        if created_date:
+            created_date = created_date.isoformat()
+        last_access_date = cursor.get("lastAccessDate")
+        if last_access_date:
+            last_access_date = last_access_date.isoformat()
+
+        originating_command = cursor.get("originatingCommand")
+        if originating_command:
+            originating_command = datadog_agent.obfuscate_mongodb_string(json_util.dumps(originating_command))
+
+        return {
+            "cursor_id": cursor.get("cursorId"),
+            "created_date": created_date,
+            "last_access_date": last_access_date,
+            "n_docs_returned": cursor.get("nDocsReturned", 0),
+            "n_batches_returned": cursor.get("nBatchesReturned", 0),
+            "no_cursor_timeout": cursor.get("noCursorTimeout", False),
+            "tailable": cursor.get("tailable", False),
+            "await_data": cursor.get("awaitData", False),
+            "originating_command": originating_command,
+            "plan_summary": cursor.get("planSummary"),
+            "operation_using_cursor_id": cursor.get("operationUsingCursorId"),
         }
 
     def _get_operation_stats(self, operation: dict) -> OperationSampleOperationStats:
@@ -325,6 +370,8 @@ class MongoOperationSamples(DBMAsyncJob):
             "flow_control_stats": self._format_key_name(operation.get("flowControlStats", {})),  # dict
             # Latches
             "waiting_for_latch": operation.get("waitingForLatch", False),  # bool
+            # cursor
+            "cursor": self._get_operation_cursor(operation),  # dict
         }
 
     def _get_query_signature(self, obfuscated_command: str) -> str:
@@ -361,6 +408,7 @@ class MongoOperationSamples(DBMAsyncJob):
                     "shard": operation_metadata["shard"],
                     "collection": operation_metadata["collection"],
                     "comment": operation_metadata["comment"],
+                    "ns": operation_metadata["ns"],
                 },
                 "query_truncated": operation_metadata["truncated"],
             },

@@ -137,6 +137,11 @@ instances:
     #
     # endpoint_region_id: <ENDPOINT_REGION_ID>
 
+    ## @param all_projects - boolean - optional - default: false
+    ## List compute servers across all projects (admin only).
+    #
+    # all_projects: false
+
     ## @param components - mapping - optional
     ## General configuration that we want to apply to each of the components and their different metric blocks.
     #
