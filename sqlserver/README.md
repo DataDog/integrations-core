@@ -195,7 +195,6 @@ This is fixed in version 15.2.0 of the check and in Agent versions 7.49.1 and ab
 [1]: https://raw.githubusercontent.com/DataDog/integrations-core/master/sqlserver/images/sqlserver_dashboard_02_2024.png
 [2]: https://app.datadoghq.com/account/settings/agent/latest
 [3]: https://docs.microsoft.com/en-us/sql/t-sql/statements/grant-server-permissions-transact-sql?view=sql-server-ver15
-[4]: https://docs.microsoft.com/en-us/sql/tools/configuration-manager/tcp-ip-properties-ip-addresses-tab
 [5]: https://docs.datadoghq.com/agent/guide/agent-configuration-files/#agent-configuration-directory
 [6]: https://github.com/DataDog/integrations-core/blob/master/sqlserver/datadog_checks/sqlserver/data/conf.yaml.example
 [7]: https://docs.microsoft.com/en-us/sql/connect/oledb/oledb-driver-for-sql-server?view=sql-server-2017
@@ -209,10 +208,3 @@ This is fixed in version 15.2.0 of the check and in Agent versions 7.49.1 and ab
 [15]: https://github.com/DataDog/integrations-core/blob/master/sqlserver/metadata.csv
 [16]: https://github.com/DataDog/integrations-core/blob/master/sqlserver/assets/service_checks.json
 [17]: https://docs.datadoghq.com/help/
-[18]: https://www.datadoghq.com/blog/monitor-azure-sql-databases-datadog
-[19]: https://www.datadoghq.com/blog/sql-server-monitoring
-[20]: https://www.datadoghq.com/blog/sql-server-monitoring-tools
-[21]: https://www.datadoghq.com/blog/sql-server-performance
-[22]: https://www.datadoghq.com/blog/sql-server-metrics
-[23]: https://www.datadoghq.com/blog/migrate-sql-workloads-to-azure-with-datadog/
-[24]: https://www.datadoghq.com/blog/optimize-sql-server-performance-with-datadog/

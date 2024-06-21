@@ -179,12 +179,3 @@ Need help? Contact [Datadog support][22].
 [20]: https://github.com/DataDog/integrations-core/blob/master/docker_daemon/assets/service_checks.json
 [21]: https://github.com/DataDog/integrations-core/blob/7.39.0/docker_daemon/datadog_checks/docker_daemon/data/conf.yaml.example#L151-L154
 [22]: https://docs.datadoghq.com/help
-[23]: https://docs.datadoghq.com/agent/guide/compose-and-the-datadog-agent
-[24]: https://docs.datadoghq.com/integrations/faq/dogstatsd-and-docker
-[25]: https://www.datadoghq.com/blog/the-docker-monitoring-problem
-[26]: https://www.datadoghq.com/blog/how-to-monitor-docker-resource-metrics
-[27]: https://www.datadoghq.com/blog/how-to-collect-docker-metrics
-[28]: https://www.datadoghq.com/docker-adoption
-[29]: https://www.datadoghq.com/blog/monitor-docker-on-aws-ecs
-[30]: https://www.datadoghq.com/blog/docker-performance-datadog
-[31]: https://www.datadoghq.com/blog/monitor-docker-datadog

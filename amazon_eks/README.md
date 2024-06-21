@@ -54,8 +54,4 @@ Need help? Contact [Datadog support][11].
 [9]: https://docs.datadoghq.com/agent/basic_agent_usage/kubernetes/#container-installation
 [10]: https://docs.datadoghq.com/logs/log_collection/docker/#option-2-container-installation
 [11]: https://docs.datadoghq.com/help/
-[12]: https://www.datadoghq.com/blog/announcing-eks
-[13]: https://www.datadoghq.com/blog/eks-cluster-metrics
-[14]: https://docs.datadoghq.com/integrations/eks_fargate/
-[15]: https://aws.amazon.com/eks/eks-anywhere/
 [16]: https://docs.datadoghq.com/integrations/eks_anywhere/

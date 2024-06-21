@@ -89,7 +89,4 @@ Need help? Contact [Datadog support][11].
 [9]: https://github.com/DataDog/integrations-core/blob/master/cassandra_nodetool/metadata.csv
 [10]: https://github.com/DataDog/integrations-core/blob/master/cassandra_nodetool/assets/service_checks.json
 [11]: https://docs.datadoghq.com/help/
-[12]: https://www.datadoghq.com/blog/how-to-monitor-cassandra-performance-metrics
-[13]: https://www.datadoghq.com/blog/how-to-collect-cassandra-metrics
-[14]: https://www.datadoghq.com/blog/monitoring-cassandra-with-datadog
 [15]: https://github.com/prometheus/jmx_exporter

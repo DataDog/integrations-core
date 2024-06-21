@@ -91,15 +91,8 @@ Need help? Contact [Datadog support][4].
 [5]: https://github.com/DataDog/integrations-core/blob/master/cassandra/datadog_checks/cassandra/data/conf.yaml.example
 [6]: https://docs.datadoghq.com/agent/guide/agent-commands/#start-stop-and-restart-the-agent
 [7]: https://docs.datadoghq.com/agent/logs/advanced_log_collection/?tab=exclude_at_match#multi-line-aggregation
-[8]: https://docs.datadoghq.com/agent/kubernetes/integrations/
-[9]: https://docs.datadoghq.com/agent/guide/autodiscovery-with-jmx/?tab=containerizedagent
-[10]: https://docs.datadoghq.com/agent/kubernetes/log/
 [11]: https://docs.datadoghq.com/agent/guide/agent-commands/#agent-status-and-information
 [12]: https://github.com/DataDog/integrations-core/blob/master/cassandra/metadata.csv
 [13]: https://github.com/DataDog/integrations-core/blob/master/cassandra/assets/service_checks.json
-[14]: https://www.datadoghq.com/blog/how-to-monitor-cassandra-performance-metrics
-[15]: https://www.datadoghq.com/blog/how-to-collect-cassandra-metrics
-[16]: https://www.datadoghq.com/blog/monitoring-cassandra-with-datadog
-[17]: https://docs.datadoghq.com/agent/guide/autodiscovery-with-jmx/?tab=containeragent#autodiscovery-annotations
 [18]: https://docs.datadoghq.com/containers/kubernetes/log/
 [19]: https://docs.datadoghq.com/containers/docker/log/

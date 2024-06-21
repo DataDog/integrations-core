@@ -232,7 +232,6 @@ Need help? Contact [Datadog support][12].
 [10]: https://docs.datadoghq.com/agent/kubernetes/log/
 [11]: https://docs.datadoghq.com/agent/guide/agent-commands/#agent-status-and-information
 [12]: https://docs.datadoghq.com/help/
-[13]: https://www.datadoghq.com/blog/track-performance-impact-of-code-changes-with-teamcity-and-datadog
 [14]: https://github.com/DataDog/integrations-core/blob/master/teamcity/metadata.csv
 [15]: https://github.com/DataDog/integrations-core/blob/master/teamcity/assets/service_checks.json
 [16]: https://github.com/OpenObservability/OpenMetrics/blob/main/specification/OpenMetrics.md

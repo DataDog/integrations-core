@@ -138,7 +138,3 @@ Need help? Contact [Datadog support][11].
 [9]: https://github.com/DataDog/integrations-core/blob/master/yarn/metadata.csv
 [10]: https://github.com/DataDog/integrations-core/blob/master/yarn/assets/service_checks.json
 [11]: https://docs.datadoghq.com/help/
-[12]: https://www.datadoghq.com/blog/hadoop-architecture-overview
-[13]: https://www.datadoghq.com/blog/monitor-hadoop-metrics
-[14]: https://www.datadoghq.com/blog/collecting-hadoop-metrics
-[15]: https://www.datadoghq.com/blog/monitor-hadoop-metrics-datadog

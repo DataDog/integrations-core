@@ -225,16 +225,15 @@ Need help? Contact [Datadog support][5].
 
 {{< partial name="whats-next/whats-next.html" >}}
 
+[8]: https://datadoghq.dev/dd-trace-js/interfaces/plugins.openai.html
+[9]: https://github.com/DataDog/dd-trace-js
+[3]: https://ddtrace.readthedocs.io/en/stable/integrations.html#openai
 [1]: https://openai.com/
 [2]: https://ddtrace.readthedocs.io/en/stable/installation_quickstart.html
 [3]: https://ddtrace.readthedocs.io/en/stable/integrations.html#openai
 [4]: https://github.com/DataDog/integrations-core/blob/master/openai/metadata.csv
 [5]: https://docs.datadoghq.com/help/
-[6]: https://www.datadoghq.com/blog/monitor-openai-with-datadog/
-[7]: https://www.datadoghq.com/blog/monitor-azure-openai-with-datadog/
 [10]: https://platform.openai.com/
 [11]: https://app.datadoghq.com/integrations/openai
-[12]: https://app.datadoghq.com/monitors/recommended?q=integration%3AOpenAI&only_installed=false&p=1
-[13]: https://docs.datadoghq.com/getting_started/site/#access-the-datadog-site
 [14]: https://app.datadoghq.com/cost
 [15]: https://docs.datadoghq.com/cloud_cost_management/saas_costs/?tab=openai#data-collected

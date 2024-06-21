@@ -236,7 +236,6 @@ Need help? Contact [Datadog support][9].
 [7]: https://github.com/DataDog/integrations-core/blob/master/strimzi/metadata.csv
 [8]: https://github.com/DataDog/integrations-core/blob/master/strimzi/assets/service_checks.json
 [9]: https://docs.datadoghq.com/help/
-[10]: https://docs.datadoghq.com/integrations/openmetrics/
 [11]: https://docs.datadoghq.com/integrations/kafka/
 [12]: https://docs.datadoghq.com/integrations/zk/
 [13]: https://github.com/strimzi/strimzi-kafka-operator/blob/release-0.34.x/install/cluster-operator/060-Deployment-strimzi-cluster-operator.yaml
@@ -244,4 +243,3 @@ Need help? Contact [Datadog support][9].
 [15]: https://strimzi.io/docs/operators/0.20.0/full/using.html#assembly-jmx-options-deployment-configuration-kafka
 [16]: https://docs.datadoghq.com/agent/kubernetes/log/
 [17]: https://docs.datadoghq.com/integrations/kafka/?tab=host#kafka-consumer-integration
-[18]: https://www.datadoghq.com/blog/container-native-integrations/#messaging-and-streaming-with-strimzi

@@ -99,4 +99,3 @@ Need help? Contact [Datadog support][9].
 [9]: https://docs.datadoghq.com/help/
 [10]: https://karpenter.sh/docs/reference/metrics/
 [11]: https://docs.datadoghq.com/agent/kubernetes/log/
-[12]: https://www.datadoghq.com/blog/container-native-integrations/#autoscaling-and-resource-utilization-with-karpenter

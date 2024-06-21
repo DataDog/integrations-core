@@ -110,8 +110,6 @@ Need help? Contact [Datadog support][8].
 [6]: https://docs.datadoghq.com/agent/guide/agent-commands/#agent-status-and-information
 [7]: https://docs.datadoghq.com/getting_started/integrations/prometheus/
 [8]: https://docs.datadoghq.com/help/
-[9]: https://docs.datadoghq.com/agent/openmetrics/
-[10]: https://docs.datadoghq.com/developers/openmetrics/
 [11]: https://github.com/OpenObservability/OpenMetrics/blob/main/specification/OpenMetrics.md#suffixes
 [12]: https://prometheus.io/docs/instrumenting/exposition_formats/#text-based-format
 [13]: https://github.com/OpenObservability/OpenMetrics/blob/main/specification/OpenMetrics.md#suffixes

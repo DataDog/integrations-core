@@ -134,4 +134,3 @@ Need help? Contact [Datadog support][5].
 [9]: https://docs.datadoghq.com/agent/guide/agent-commands/#agent-status-and-information
 [10]: https://github.com/DataDog/integrations-core/blob/master/hivemq/metadata.csv
 [11]: https://github.com/DataDog/integrations-core/blob/master/hivemq/assets/service_checks.json
-[12]: https://www.datadoghq.com/blog/hivemq-opentelemetry-monitor-iot-applications/

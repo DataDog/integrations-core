@@ -387,4 +387,3 @@ Configure a `password` in `redisdb.yaml`.
 [22]: https://docs.datadoghq.com/agent/guide/agent-commands/#agent-status-and-information
 [23]: https://github.com/DataDog/integrations-core/blob/master/redisdb/metadata.csv
 [24]: https://github.com/DataDog/integrations-core/blob/master/redisdb/assets/service_checks.json
-[26]: https://www.datadoghq.com/blog/how-to-monitor-redis-performance-metrics

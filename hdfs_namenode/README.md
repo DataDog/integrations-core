@@ -123,7 +123,3 @@ Need help? Contact [Datadog support][10].
 [8]: https://github.com/DataDog/integrations-core/blob/master/hdfs_namenode/metadata.csv
 [9]: https://github.com/DataDog/integrations-core/blob/master/hdfs_namenode/assets/service_checks.json
 [10]: https://docs.datadoghq.com/help/
-[11]: https://www.datadoghq.com/blog/hadoop-architecture-overview
-[12]: https://www.datadoghq.com/blog/monitor-hadoop-metrics
-[13]: https://www.datadoghq.com/blog/collecting-hadoop-metrics
-[14]: https://www.datadoghq.com/blog/monitor-hadoop-metrics-datadog

@@ -152,9 +152,6 @@ Need help? Contact [Datadog support][8].
 [7]: https://github.com/DataDog/integrations-core/blob/master/calico/assets/service_checks.json
 [8]: https://docs.datadoghq.com/help/
 [9]: https://docs.tigera.io/calico/3.25/operations/monitor/monitor-component-metrics
-[10]: https://docs.datadoghq.com/developers/integrations/python/
-[11]: https://app.datadoghq.com/account/settings/agent/latest
 [12]: https://docs.datadoghq.com/agent/kubernetes
 [13]: https://docs.datadoghq.com/agent/docker/integrations/?tab=docker
 [14]: https://docs.datadoghq.com/agent/kubernetes/log/?tab=containerinstallation#setup
-[15]: https://www.datadoghq.com/blog/monitor-calico-with-datadog/

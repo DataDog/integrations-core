@@ -95,11 +95,9 @@ Need help? Contact [Datadog support][9].
 [2]: https://app.datadoghq.com/account/settings/agent/latest
 [3]: https://docs.datadoghq.com/agent/kubernetes/integrations/
 [4]: https://github.com/DataDog/integrations-core/blob/7.51.x/fluxcd/datadog_checks/fluxcd/data/conf.yaml.example
-[5]: https://docs.datadoghq.com/agent/guide/agent-commands/#start-stop-and-restart-the-agent
 [6]: https://docs.datadoghq.com/agent/guide/agent-commands/#agent-status-and-information
 [7]: https://github.com/DataDog/integrations-core/blob/master/fluxcd/metadata.csv
 [8]: https://github.com/DataDog/integrations-core/blob/master/fluxcd/assets/service_checks.json
 [9]: https://docs.datadoghq.com/help/
 [10]: https://docs.datadoghq.com/agent/guide/use-community-integrations/?tab=agentv721v621#installation
-[11]: https://www.datadoghq.com/blog/container-native-integrations/#cicd-with-flux
 [12]: https://docs.datadoghq.com/agent/kubernetes/log/

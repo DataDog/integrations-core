@@ -122,4 +122,3 @@ Need help? Contact [Datadog support][10].
 [8]: https://github.com/DataDog/integrations-core/blob/master/couchbase/metadata.csv
 [9]: https://github.com/DataDog/integrations-core/blob/master/couchbase/assets/service_checks.json
 [10]: https://docs.datadoghq.com/help/
-[11]: https://www.datadoghq.com/blog/monitoring-couchbase-performance-datadog

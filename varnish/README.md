@@ -123,12 +123,7 @@ Need help? Contact [Datadog support][11].
 [3]: https://docs.datadoghq.com/agent/guide/agent-configuration-files/#agent-configuration-directory
 [4]: https://github.com/DataDog/integrations-core/blob/master/varnish/datadog_checks/varnish/data/conf.yaml.example
 [5]: https://docs.datadoghq.com/agent/guide/agent-commands/#start-stop-and-restart-the-agent
-[6]: https://github.com/jib/libvmod-statsd
-[7]: https://github.com/jonnenauha/prometheus_varnish_exporter
 [8]: https://docs.datadoghq.com/agent/guide/agent-commands/#agent-status-and-information
 [9]: https://github.com/DataDog/integrations-core/blob/master/varnish/metadata.csv
 [10]: https://github.com/DataDog/integrations-core/blob/master/varnish/assets/service_checks.json
 [11]: https://docs.datadoghq.com/help/
-[12]: https://www.datadoghq.com/blog/top-varnish-performance-metrics
-[13]: https://www.datadoghq.com/blog/how-to-collect-varnish-metrics
-[14]: https://www.datadoghq.com/blog/monitor-varnish-using-datadog

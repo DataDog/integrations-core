@@ -261,6 +261,3 @@ The `datadog-agent jmx list` has a number of available subcommands:
 [12]: https://docs.datadoghq.com/agent/guide/agent-commands/#agent-status-and-information
 [13]: https://github.com/DataDog/integrations-core/blob/master/tomcat/metadata.csv
 [14]: https://github.com/DataDog/integrations-core/blob/master/tomcat/assets/service_checks.json
-[15]: https://www.datadoghq.com/blog/monitor-tomcat-metrics
-[16]: https://www.datadoghq.com/blog/tomcat-architecture-and-performance
-[17]: https://www.datadoghq.com/blog/analyzing-tomcat-logs-and-metrics-with-datadog

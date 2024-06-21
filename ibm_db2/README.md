@@ -268,7 +268,6 @@ Need help? Contact [Datadog support][12].
 [10]: https://github.com/DataDog/integrations-core/blob/master/ibm_db2/metadata.csv
 [11]: https://github.com/DataDog/integrations-core/blob/master/ibm_db2/assets/service_checks.json
 [12]: https://docs.datadoghq.com/help/
-[13]: https://www.datadoghq.com/blog/monitor-db2-with-datadog
 [14]: https://pypi.org/project/ibm-db/#files
 [15]: https://docs.datadoghq.com/developers/guide/custom-python-package/?tab=linux
 [16]: https://public.dhe.ibm.com/ibmdl/export/pub/software/data/db2/drivers/odbc_cli/

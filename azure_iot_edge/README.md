@@ -130,4 +130,3 @@ Need help? Contact [Datadog support][10].
 [8]: https://github.com/DataDog/integrations-core/blob/master/azure_iot_edge/metadata.csv
 [9]: https://github.com/DataDog/integrations-core/blob/master/azure_iot_edge/assets/service_checks.json
 [10]: https://docs.datadoghq.com/help/
-[11]: https://www.datadoghq.com/blog/monitor-azure-iot-edge-with-datadog/

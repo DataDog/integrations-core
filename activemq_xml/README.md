@@ -100,4 +100,3 @@ Need help? Contact [Datadog support][6].
 [8]: https://docs.datadoghq.com/agent/guide/autodiscovery-with-jmx/?tab=containerizedagent
 [9]: https://docs.datadoghq.com/agent/guide/agent-commands/#agent-status-and-information
 [10]: https://github.com/DataDog/integrations-core/blob/master/activemq_xml/metadata.csv
-[11]: https://www.datadoghq.com/blog/monitor-activemq-metrics-performance

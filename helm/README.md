@@ -142,4 +142,3 @@ Need help? Contact [Datadog support][6].
 [4]: https://github.com/DataDog/integrations-core/blob/master/helm/metadata.csv
 [5]: https://github.com/DataDog/integrations-core/blob/master/helm/assets/service_checks.json
 [6]: https://docs.datadoghq.com/help/
-[7]: https://www.datadoghq.com/blog/monitor-helm-kubernetes-with-datadog/

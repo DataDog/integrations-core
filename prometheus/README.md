@@ -103,6 +103,3 @@ Need help? Contact [Datadog support][7].
 [5]: https://github.com/DataDog/integrations-core/blob/master/prometheus/datadog_checks/prometheus/data/conf.yaml.example
 [6]: https://docs.datadoghq.com/agent/guide/agent-commands/#agent-status-and-information
 [7]: https://docs.datadoghq.com/help/
-[8]: https://www.datadoghq.com/blog/monitor-prometheus-metrics
-[9]: https://docs.datadoghq.com/agent/prometheus/
-[10]: https://docs.datadoghq.com/developers/prometheus/

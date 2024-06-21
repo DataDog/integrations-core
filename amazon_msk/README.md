@@ -78,7 +78,6 @@ Need help? Contact [Datadog support][15].
 [13]: https://github.com/DataDog/integrations-core/blob/master/amazon_msk/metadata.csv
 [14]: https://github.com/DataDog/integrations-core/blob/master/amazon_msk/assets/service_checks.json
 [15]: https://docs.datadoghq.com/help/
-[16]: https://www.datadoghq.com/blog/monitor-amazon-msk/
 [17]: https://docs.datadoghq.com/getting_started/tagging/
 [18]: https://docs.datadoghq.com/integrations/amazon_msk
 [19]: https://docs.datadoghq.com/integrations/guide/versions-for-openmetrics-based-integrations

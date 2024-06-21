@@ -816,7 +816,12 @@ Need help? Contact [Datadog support][18].
 
 {{< partial name="whats-next/whats-next.html" >}}
 
-[1]: http://docs.datadoghq.com/integrations/eks_fargate
+[4]: https://aws.amazon.com/console
+[12]: http://docs.datadoghq.com/integrations/faq/integration-setup-ecs-fargate
+[41]: https://app.datadoghq.com/organization-settings/api-keys
+[41]: https://app.datadoghq.com/organization-settings/api-keys
+[41]: https://app.datadoghq.com/organization-settings/api-keys
+[24]: https://docs.datadoghq.com/integrations/fluentbit/#configuration-parameters
 [2]: https://docs.aws.amazon.com/AmazonECS/latest/developerguide/task-metadata-endpoint.html
 [3]: https://docs.docker.com/engine/api/v1.30/#operation/ContainerStats
 [4]: https://aws.amazon.com/console
@@ -849,13 +854,6 @@ Need help? Contact [Datadog support][18].
 [31]: https://docs.datadoghq.com/logs/guide/forwarder/
 [32]: https://docs.datadoghq.com/tracing/setup/
 [33]: https://docs.datadoghq.com/getting_started/tagging/assigning_tags/?tab=containerizedenvironments#environment-variables
-[34]: https://www.datadoghq.com/blog/monitor-aws-fargate
-[35]: https://www.datadoghq.com/blog/collect-fargate-logs-with-firelens/
-[36]: https://www.datadoghq.com/blog/aws-fargate-metrics/
-[37]: https://www.datadoghq.com/blog/tools-for-collecting-aws-fargate-metrics/
-[38]: https://www.datadoghq.com/blog/aws-fargate-monitoring-with-datadog/
-[39]: https://www.datadoghq.com/blog/aws-fargate-on-graviton2-monitoring/
-[40]: https://www.datadoghq.com/blog/aws-fargate-windows-containers-support/
 [41]: https://app.datadoghq.com/organization-settings/api-keys
 [42]: https://docs.datadoghq.com/resources/json/datadog-agent-ecs-fargate.json
 [43]: https://docs.aws.amazon.com/AWSCloudFormation/latest/UserGuide/aws-resource-ecs-taskdefinition.html
@@ -873,9 +871,4 @@ Need help? Contact [Datadog support][18].
 [55]: https://docs.datadoghq.com/tracing/trace_collection/dd_libraries/dotnet-framework?tab=containers#custom-instrumentation
 [56]: https://app.datadoghq.com/process
 [57]: https://docs.aws.amazon.com/AmazonECS/latest/developerguide/task_definition_parameters.html#other_task_definition_params
-[58]: https://www.datadoghq.com/blog/monitor-fargate-processes/
-[59]: https://docs.aws.amazon.com/batch/latest/userguide/create-compute-environment.html
-[60]: https://docs.aws.amazon.com/batch/latest/userguide/create-job-queue-fargate.html
-[61]: https://docs.datadoghq.com/resources/json/datadog-agent-aws-batch-ecs-fargate.json
 [62]: https://docs.datadoghq.com/containers/guide/aws-batch-ecs-fargate
-[63]: https://www.datadoghq.com/blog/monitor-aws-batch-on-fargate/

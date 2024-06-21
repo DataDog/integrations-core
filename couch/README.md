@@ -133,4 +133,3 @@ Need help? Contact [Datadog support][11].
 [9]: https://github.com/DataDog/integrations-core/blob/master/couch/metadata.csv
 [10]: https://github.com/DataDog/integrations-core/blob/master/couch/assets/service_checks.json
 [11]: https://docs.datadoghq.com/help/
-[12]: https://www.datadoghq.com/blog/monitoring-couchdb-with-datadog

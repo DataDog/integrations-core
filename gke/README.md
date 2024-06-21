@@ -67,6 +67,8 @@ Because Autopilot does not allow `socket` mode, Datadog recommends using `servic
 
 {{< partial name="whats-next/whats-next.html" >}}
 
+[102]: https://docs.datadoghq.com/containers/cluster_agent/admission_controller/?tab=operator
+[103]: https://github.com/DataDog/helm-charts/blob/main/charts/datadog/values.yaml#L1046
 [1]: https://cloud.google.com/resource-manager/docs/creating-managing-projects
 [2]: https://console.cloud.google.com/apis/api/container.googleapis.com
 [3]: https://cloud.google.com/sdk/docs/
@@ -75,9 +77,4 @@ Because Autopilot does not allow `socket` mode, Datadog recommends using `servic
 [6]: https://app.datadoghq.com/screen/integration/gce
 [7]: https://app.datadoghq.com/account/settings/agent/latest?platform=kubernetes
 [8]: https://docs.datadoghq.com/containers/kubernetes/installation?tab=operator
-[9]: https://github.com/DataDog/helm-charts/tree/master/charts/datadog#values
-[10]: https://www.datadoghq.com/blog/gke-autopilot-monitoring/
-[11]: https://www.datadoghq.com/blog/monitor-google-kubernetes-engine/
-[12]: https://www.datadoghq.com/blog/monitor-tau-t2a-gke-workloads-with-datadog-arm-support/
-[13]: https://www.datadoghq.com/blog/gke-dashboards-integration-improvements/
 [14]: https://docs.datadoghq.com/containers/kubernetes/distributions/?tab=helm#autopilot

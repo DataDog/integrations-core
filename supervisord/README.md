@@ -155,4 +155,3 @@ Need help? Contact [Datadog support][10].
 [8]: https://github.com/DataDog/integrations-core/blob/master/supervisord/metadata.csv
 [9]: https://github.com/DataDog/integrations-core/blob/master/supervisord/assets/service_checks.json
 [10]: https://docs.datadoghq.com/help/
-[11]: https://www.datadoghq.com/blog/supervisor-monitors-your-processes-datadog-monitors-supervisor

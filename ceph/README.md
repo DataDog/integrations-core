@@ -94,4 +94,3 @@ Need help? Contact [Datadog support][9].
 [7]: https://github.com/DataDog/integrations-core/blob/master/ceph/metadata.csv
 [8]: https://github.com/DataDog/integrations-core/blob/master/ceph/assets/service_checks.json
 [9]: https://docs.datadoghq.com/help/
-[10]: https://www.datadoghq.com/blog/monitor-ceph-datadog

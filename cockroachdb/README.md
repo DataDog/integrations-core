@@ -130,7 +130,5 @@ Need help? Contact [Datadog support][10].
 [8]: https://docs.datadoghq.com/agent/guide/agent-commands/#agent-status-and-information
 [9]: https://github.com/DataDog/integrations-core/blob/master/cockroachdb/metadata.csv
 [10]: https://docs.datadoghq.com/help/
-[11]: https://www.datadoghq.com/blog/monitor-cockroachdb-performance-metrics-with-datadog
-[12]: https://docs.datadoghq.com/integrations/openmetrics/
 [13]: https://github.com/DataDog/integrations-core/blob/7.33.x/cockroachdb/datadog_checks/cockroachdb/data/conf.yaml.example
 [14]: https://docs.datadoghq.com/integrations/guide/versions-for-openmetrics-based-integrations

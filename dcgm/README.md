@@ -387,7 +387,6 @@ Contact [Datadog support][8].
 {{< partial name="whats-next/whats-next.html" >}}
 
 [1]: https://app.datadoghq.com/account/settings/agent/latest
-[2]: https://docs.datadoghq.com/agent/kubernetes/integrations/
 [3]: https://github.com/DataDog/integrations-core/blob/master/dcgm/datadog_checks/dcgm/data/conf.yaml.example
 [4]: https://docs.datadoghq.com/agent/guide/agent-commands/#start-stop-and-restart-the-agent
 [5]: https://docs.datadoghq.com/agent/guide/agent-commands/#agent-status-and-information
@@ -402,4 +401,3 @@ Contact [Datadog support][8].
 [14]: https://github.com/NVIDIA/dcgm-exporter/issues/163#issuecomment-1577506512
 [15]: https://developer.nvidia.com/dcgm
 [16]: https://github.com/NVIDIA/dcgm-exporter
-[17]: https://docs.datadoghq.com/integrations/nvml/#metrics

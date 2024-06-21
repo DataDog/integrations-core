@@ -457,17 +457,10 @@ Need help? Contact [Datadog support][10].
 [2]: https://docs.datadoghq.com/integrations/spark/?tab=host
 [3]: https://app.datadoghq.com/integrations/spark
 [4]: https://app.datadoghq.com/account/settings/agent/latest
-[6]: https://docs.databricks.com/clusters/init-scripts.html#configure-a-cluster-scoped-init-script-using-the-ui
-[7]: https://docs.datadoghq.com/agent/guide/agent-commands/?#agent-status-and-information
 [8]: https://docs.datadoghq.com/integrations/spark/#metrics
 [9]: https://docs.datadoghq.com/integrations/spark/#service-checks
 [10]: https://docs.datadoghq.com/help/
-[12]: https://docs.databricks.com/notebooks/ipywidgets.html#requirements
-[13]: https://github.com/DataDog/datadog-agent/blob/7.43.x/pkg/config/config_template.yaml#L1262-L1266
-[14]: https://docs.databricks.com/notebooks/ipywidgets.html
-[15]: https://docs.datadoghq.com/getting_started/site/
 [16]: https://docs.databricks.com/clusters/init-scripts.html#global-init-scripts
-[17]: https://docs.databricks.com/clusters/init-scripts.html#cluster-scoped-init-scripts
 [18]: https://docs.databricks.com/en/clusters/web-terminal.html
 [19]: https://docs.databricks.com/en/notebooks/index.html
 [20]: https://docs.datadoghq.com/agent/troubleshooting/

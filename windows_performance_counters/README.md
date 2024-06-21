@@ -57,4 +57,3 @@ Need help? Contact [Datadog support][10].
 [8]: https://docs.datadoghq.com/account_management/billing/custom_metrics/
 [9]: https://github.com/DataDog/integrations-core/blob/master/windows_performance_counters/assets/service_checks.json
 [10]: https://docs.datadoghq.com/help/
-[11]: https://www.datadoghq.com/blog/windows-performance-counters-datadog/

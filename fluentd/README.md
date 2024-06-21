@@ -204,4 +204,3 @@ Need help? Contact [Datadog support][17].
 [15]: https://github.com/DataDog/integrations-core/blob/master/fluentd/metadata.csv
 [16]: https://github.com/DataDog/integrations-core/blob/master/fluentd/assets/service_checks.json
 [17]: https://docs.datadoghq.com/help/
-[18]: https://www.datadoghq.com/blog/monitor-fluentd-datadog

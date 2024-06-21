@@ -93,4 +93,3 @@ Need help? Contact [Datadog support][11].
 [12]: https://docs.datadoghq.com/agent/kubernetes/integrations/
 [13]: https://docs.datadoghq.com/agent/guide/agent-commands/#agent-status-and-information
 [14]: https://github.com/DataDog/integrations-core/blob/master/go_expvar/metadata.csv
-[15]: https://www.datadoghq.com/blog/instrument-go-apps-expvar-datadog

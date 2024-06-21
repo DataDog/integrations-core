@@ -85,4 +85,3 @@ Need help? Contact [Datadog support][10].
 [8]: https://github.com/basho/riak_cs/wiki/Riak-cs-and-stanchion-metrics
 [9]: https://github.com/DataDog/integrations-core/blob/master/riakcs/assets/service_checks.json
 [10]: https://docs.datadoghq.com/help/
-[11]: https://www.datadoghq.com/blog/monitor-riak-cs-performance-and-availability

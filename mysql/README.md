@@ -593,6 +593,5 @@ See [service_checks.json][22] for a list of service checks provided by this inte
 [28]: https://docs.datadoghq.com/integrations/faq/how-can-i-collect-more-metrics-from-my-sql-server-integration/
 [29]: https://docs.datadoghq.com/integrations/faq/database-user-lacks-privileges/
 [30]: https://docs.datadoghq.com/integrations/guide/collect-sql-server-custom-metrics/#collecting-metrics-from-a-custom-procedure
-[31]: https://www.datadoghq.com/blog/monitoring-mysql-performance-metrics
 [32]: https://docs.datadoghq.com/database_monitoring/
 [33]: https://docs.datadoghq.com/database_monitoring/#mysql

@@ -458,6 +458,5 @@ See [service_checks.json][26] for a list of service checks provided by this inte
 [25]: https://github.com/DataDog/integrations-core/blob/master/elastic/metadata.csv
 [26]: https://github.com/DataDog/integrations-core/blob/master/elastic/assets/service_checks.json
 [27]: https://docs.datadoghq.com/integrations/faq/elastic-agent-can-t-connect/
-[28]: https://www.datadoghq.com/blog/monitor-elasticsearch-performance-metrics
 [29]: https://www.elastic.co/guide/en/elasticsearch/reference/current/security-api-put-role.html
 [30]: https://www.elastic.co/guide/en/elasticsearch/reference/current/security-api-put-user.html

@@ -87,4 +87,3 @@ Need help? Contact [Datadog support][9].
 [9]: https://docs.datadoghq.com/help/
 [10]: https://docs.temporal.io/references/configuration#prometheus
 [11]: https://docs.temporal.io/references/configuration#log
-[12]: https://www.datadoghq.com/blog/temporal-server-integration/

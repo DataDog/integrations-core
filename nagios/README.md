@@ -120,4 +120,3 @@ Need help? Contact [Datadog support][9].
 [7]: https://docs.datadoghq.com/agent/kubernetes/integrations/
 [8]: https://docs.datadoghq.com/agent/guide/agent-commands/#agent-status-and-information
 [9]: https://docs.datadoghq.com/help/
-[10]: https://www.datadoghq.com/blog/nagios-monitoring

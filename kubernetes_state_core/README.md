@@ -309,7 +309,5 @@ Need help? Contact [Datadog support][9].
 [4]: /agent/cluster_agent/
 [5]: https://github.com/DataDog/integrations-core/blob/master/kubernetes_state_core/metadata.csv
 [6]: /getting_started/tagging/unified_service_tagging/#configuration
-[7]: https://github.com/DataDog/integrations-core/blob/master/kubernetes/assets/service_checks.json
 [8]: /agent/guide/agent-commands/#agent-status-and-information
 [9]: /help/
-[10]: https://www.datadoghq.com/blog/engineering/our-journey-taking-kubernetes-state-metrics-to-the-next-level/

@@ -137,6 +137,3 @@ Need help? Contact [Datadog support][13].
 [11]: https://github.com/DataDog/integrations-core/blob/master/mcache/metadata.csv
 [12]: https://github.com/DataDog/integrations-core/blob/master/mcache/assets/service_checks.json
 [13]: https://docs.datadoghq.com/help/
-[14]: https://www.datadoghq.com/blog/speed-up-web-applications-memcached
-[15]: https://www.datadoghq.com/blog/instrument-memcached-performance-metrics-dogstatsd
-[16]: https://www.datadoghq.com/blog/monitoring-elasticache-performance-metrics-with-redis-or-memcached

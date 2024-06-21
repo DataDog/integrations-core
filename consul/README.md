@@ -252,10 +252,3 @@ Need help? Contact [Datadog support][16].
 [14]: https://www.consul.io/docs/internals/coordinates.html
 [15]: https://github.com/DataDog/integrations-core/blob/master/consul/assets/service_checks.json
 [16]: https://docs.datadoghq.com/help/
-[17]: https://docs.datadoghq.com/integrations/guide/hcp-consul
-[18]: https://www.datadoghq.com/blog/monitor-consul-health-and-performance-with-datadog
-[19]: https://engineering.datadoghq.com/consul-at-datadog
-[20]: https://www.datadoghq.com/blog/consul-metrics/
-[21]: https://www.datadoghq.com/blog/consul-monitoring-tools/
-[22]: https://www.datadoghq.com/blog/consul-datadog/
-[23]: https://www.datadoghq.com/blog/monitor-consul-with-datadog-npm/

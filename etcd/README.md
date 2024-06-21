@@ -117,8 +117,3 @@ Need help? Contact [Datadog support][11].
 [9]: https://github.com/DataDog/integrations-core/blob/master/etcd/metadata.csv
 [10]: https://github.com/DataDog/integrations-core/blob/master/etcd/assets/service_checks.json
 [11]: https://docs.datadoghq.com/help/
-[12]: https://www.datadoghq.com/blog/monitor-etcd-performance
-[13]: https://docs.datadoghq.com/agent/kubernetes/control_plane/?tab=helm
-[14]: https://www.datadoghq.com/blog/monitor-etcd-with-datadog/
-[15]: https://www.datadoghq.com/blog/etcd-monitoring-tools/
-[16]: https://www.datadoghq.com/blog/etcd-key-metrics/

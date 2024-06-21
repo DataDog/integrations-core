@@ -51,5 +51,4 @@ Need help? Contact [Datadog support][7].
 [5]: https://docs.datadoghq.com/agent/guide/agent-commands/#agent-status-and-information
 [6]: https://github.com/DataDog/integrations-core/blob/master/hyperv/metadata.csv
 [7]: https://docs.datadoghq.com/help/
-[8]: https://www.datadoghq.com/blog/monitor-microsoft-hyperv-with-datadog
 [9]: https://github.com/DataDog/integrations-core/blob/7.33.x/hyperv/datadog_checks/hyperv/data/conf.yaml.example

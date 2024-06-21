@@ -186,4 +186,3 @@ Need help? Contact [Datadog support][9].
 [7]: https://docs.datadoghq.com/agent/guide/agent-commands/#agent-status-and-information
 [8]: https://github.com/DataDog/integrations-core/blob/master/postfix/metadata.csv
 [9]: https://docs.datadoghq.com/help/
-[10]: https://www.datadoghq.com/blog/monitor-postfix-queues

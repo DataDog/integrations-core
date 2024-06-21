@@ -202,9 +202,6 @@ Need help? Contact [Datadog support][13].
 [12]: https://github.com/DataDog/integrations-core/blob/master/rabbitmq/metadata.csv
 [13]: https://docs.datadoghq.com/help/
 [14]: https://github.com/DataDog/integrations-core/blob/master/rabbitmq/assets/service_checks.json
-[15]: https://www.datadoghq.com/blog/rabbitmq-monitoring
-[16]: https://www.datadoghq.com/blog/rabbitmq-monitoring-tools
-[17]: https://www.datadoghq.com/blog/monitoring-rabbitmq-performance-with-datadog
 [18]: https://docs.datadoghq.com/integrations/faq/tagging-rabbitmq-queues-by-tag-family/
 [19]: https://www.rabbitmq.com/prometheus.html
 [20]: https://www.rabbitmq.com/prometheus.html#default-endpoint

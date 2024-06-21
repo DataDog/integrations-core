@@ -117,4 +117,3 @@ The docker_daemon check ignores them through a default exclusion list, but they 
 [7]: https://github.com/DataDog/integrations-core/blob/master/kubernetes/metadata.csv
 [8]: https://blog.kubernetes.io/2017/03/advanced-scheduling-in-kubernetes.html
 [9]: https://github.com/DataDog/dd-agent/pull/3051
-[10]: https://www.datadoghq.com/blog/monitoring-kubernetes-era

@@ -542,9 +542,6 @@ To troubleshoot your log processing rules:
 [5]: https://docs.datadoghq.com/logs/processing/pipelines/#integration-pipelines
 [6]: https://docs.datadoghq.com/agent/guide/agent-commands/#agent-status-and-information
 [7]: https://docs.datadoghq.com/help/
-[9]: https://www.datadoghq.com/blog/monitoring-windows-server-2012
-[10]: https://www.datadoghq.com/blog/collect-windows-server-2012-metrics
-[11]: https://www.datadoghq.com/blog/windows-server-monitoring
 [12]: https://docs.datadoghq.com/agent/logs/advanced_log_collection/?tab=configurationfile#filter-logs
 [13]: https://docs.microsoft.com/en-us/windows/win32/eventlog/event-logging
 [14]: https://learn.microsoft.com/en-us/windows/win32/wes/eventschema-systempropertiestype-complextype
@@ -555,12 +552,9 @@ To troubleshoot your log processing rules:
 [19]: https://raw.githubusercontent.com/DataDog/integrations-core/master/win32_event_log/images/windows-defender-operational-event-log-properties.png
 [20]: https://github.com/DataDog/integrations-core/blob/10296a69722b75098ed0b45ce55f0309a1800afd/win32_event_log/datadog_checks/win32_event_log/data/conf.yaml.example#L74-L89
 [21]: https://learn.microsoft.com/en-us/windows/win32/wes/consuming-events
-[22]: https://github.com/DataDog/integrations-core/blob/master/win32_event_log/datadog_checks/win32_event_log/data/conf.yaml.example#L87C32-L87C32
 [23]: https://raw.githubusercontent.com/DataDog/integrations-core/master/win32_event_log/images/filter-event-viewer.png
 [24]: https://raw.githubusercontent.com/DataDog/integrations-core/master/win32_event_log/images/xml-query-event-viewer.png
 [25]: https://docs.datadoghq.com/agent/troubleshooting/send_a_flare/?tab=agentv6v7
-[26]: https://docs.datadoghq.com/agent/logs/advanced_log_collection/?tab=configurationfile
-[27]: https://www.datadoghq.com/blog/monitor-windows-event-logs-with-datadog/
 [28]: https://docs.datadoghq.com/integrations/guide/add-event-log-files-to-the-win32-ntlogevent-wmi-class/
 [29]: https://docs.datadoghq.com/security/cloud_siem/
 [30]: https://github.com/DataDog/datadog-agent/blob/main/cmd/agent/dist/conf.d/win32_event_log.d/profiles/dd_security_events_low.yaml.example

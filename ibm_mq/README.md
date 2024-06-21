@@ -314,7 +314,6 @@ Need help? Contact [Datadog support][12].
 [10]: https://github.com/DataDog/integrations-core/blob/master/ibm_mq/metadata.csv
 [11]: https://github.com/DataDog/integrations-core/blob/master/ibm_mq/assets/service_checks.json
 [12]: https://docs.datadoghq.com/help/
-[13]: https://www.datadoghq.com/blog/monitor-ibmmq-with-datadog
 [14]: https://www.ibm.com/docs/en/ibm-mq/9.1?topic=formats-reset-queue-statistics
 [15]: https://www.ibm.com/docs/en/ibm-mq/9.2?topic=reference-setmqaut-grant-revoke-authority
 [16]: https://www.ibm.com/docs/en/ibm-mq/9.2?topic=queues-dynamic-model
