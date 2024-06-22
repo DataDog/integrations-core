@@ -179,3 +179,8 @@ pipeline:
       enabled: true
       sources:
         - log.level
+    - type: date-remapper
+      name: Define `date` as the official date of the log
+      enabled: true
+      sources:
+        - date
