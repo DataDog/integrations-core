@@ -77,10 +77,13 @@ class MongoApi(object):
     def connect(self):
         try:
             # The ping command is cheap and does not require auth.
-            self['admin'].command('ping')
+            self.ping()
         except ConnectionFailure as e:
             self._log.debug('ConnectionFailure: %s', e)
             raise
+
+    def ping(self):
+        return self['admin'].command('ping')
 
     def server_info(self, session=None):
         return self._cli.server_info(session)
@@ -140,8 +143,17 @@ class MongoApi(object):
                 self._log.debug("Unable to run `shardingState`, so switching to AWS DocumentDB, got error %s", str(e))
                 self.deployment_type = self._get_documentdb_deployment_type()
 
+    def get_cmdline_opts(self):
+        return self["admin"].command("getCmdLineOpts")["parsed"]
+
+    def replset_get_status(self):
+        return self["admin"].command("replSetGetStatus")
+
+    def is_master(self):
+        return self["admin"].command("isMaster")
+
     def _get_default_deployment_type(self):
-        options = self['admin'].command("getCmdLineOpts")['parsed']
+        options = self.get_cmdline_opts()
         cluster_role = None
         if 'sharding' in options:
             if 'configDB' in options['sharding']:
@@ -152,8 +164,8 @@ class MongoApi(object):
 
         replication_options = options.get('replication', {})
         if 'replSetName' in replication_options or 'replSet' in replication_options:
-            repl_set_payload = self['admin'].command("replSetGetStatus")
-            is_master_payload = self['admin'].command('isMaster')
+            repl_set_payload = self.replset_get_status()
+            is_master_payload = self.is_master()
             replica_set_deployment = self._get_rs_deployment_from_status_payload(
                 repl_set_payload, is_master_payload, cluster_role
             )
@@ -166,15 +178,15 @@ class MongoApi(object):
         return StandaloneDeployment()
 
     def _get_alibaba_deployment_type(self):
-        is_master_payload = self['admin'].command('isMaster')
+        is_master_payload = self.is_master()
         if is_master_payload.get('msg') == 'isdbgrid':
             return MongosDeployment(shard_map=self.refresh_shards())
 
         # On alibaba cloud, a mongo node is either a mongos or part of a replica set.
-        repl_set_payload = self['admin'].command("replSetGetStatus")
+        repl_set_payload = self.replset_get_status()
         if repl_set_payload.get('configsvr') is True:
             cluster_role = 'configsvr'
-        elif self['admin'].command('shardingState').get('enabled') is True:
+        elif self.sharding_state_is_enabled() is True:
             # Use `shardingState` command to know whether or not the replicaset
             # is a shard or not.
             cluster_role = 'shardsvr'
@@ -182,19 +194,25 @@ class MongoApi(object):
             cluster_role = None
         return self._get_rs_deployment_from_status_payload(repl_set_payload, is_master_payload, cluster_role)
 
+    def sharding_state_is_enabled(self):
+        return self["admin"].command("shardingState").get("enabled", False)
+
     def _get_documentdb_deployment_type(self):
         """
         Deployment type for AWS DocumentDB.
 
         We connect to "Instance Based Clusters". In MongoDB terms, these are unsharded replicasets.
         """
-        repl_set_payload = self['admin'].command("replSetGetStatus")
-        is_master_payload = self['admin'].command('isMaster')
-        return self._get_rs_deployment_from_status_payload(repl_set_payload, is_master_payload, cluster_role=None)
+        return self._get_rs_deployment_from_status_payload(
+            self.replset_get_status(), self.is_master(), cluster_role=None
+        )
+
+    def get_shard_map(self):
+        return self['admin'].command('getShardMap')
 
     def refresh_shards(self):
         try:
-            shard_map = self['admin'].command('getShardMap')
+            shard_map = self.get_shard_map()
             self._log.debug('Get shard map: %s', shard_map)
             return shard_map
         except Exception as e:
