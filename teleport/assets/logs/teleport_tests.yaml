@@ -17,6 +17,7 @@ tests:
       status: "warn"
       tags:
         - "source:LOGS_SOURCE"
+      timestamp: 1716906101000
   - sample: >
       2024-05-28T14:21:52Z INFO [AUDIT]     session.start
       addr.local:172.29.245.165:443 addr.remote:90.118.178.162:41482
@@ -69,6 +70,7 @@ tests:
       status: "info"
       tags:
         - "source:LOGS_SOURCE"
+      timestamp: 1716906112000
   - sample: >
       2024-05-28T14:21:56Z INFO [AUDIT]     session.leave
       cluster_name:teleport-plint code:T2003I ei:20 event:session.leave
@@ -102,6 +104,7 @@ tests:
       status: "info"
       tags:
         - "source:LOGS_SOURCE"
+      timestamp: 1716906116000
   - sample: >
       2024-05-28T14:22:01Z INFO [AUDIT]     session.end
       addr.remote:90.118.178.162:41482 cluster_name:teleport-plint code:T2004I
@@ -156,6 +159,7 @@ tests:
       status: "info"
       tags:
         - "source:LOGS_SOURCE"
+      timestamp: 1716906121000
   - sample: >
       2024-05-28T14:37:32Z INFO [AUDIT]     user.login
       addr.remote:90.118.178.162:37044 cluster_name:teleport-plint code:T1000I
@@ -214,3 +218,4 @@ tests:
       status: "info"
       tags:
         - "source:LOGS_SOURCE"
+      timestamp: 1716907052000
