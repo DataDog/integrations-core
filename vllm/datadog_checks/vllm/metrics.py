@@ -24,7 +24,7 @@ METRIC_MAP = {
     'vllm:generation_tokens': 'generation_tokens',
     'vllm:time_to_first_token_seconds': 'time_to_first_token.seconds',
     'vllm:time_per_output_token_seconds': 'time_per_output_token.seconds',
-    'vllm:e2e_request_latency_seconds': 'e2e.request_latency.seconds',
+    'vllm:e2e_request_latency_seconds': 'e2e_request_latency.seconds',
     'vllm:request_prompt_tokens': 'request.prompt_tokens',
     'vllm:request_generation_tokens': 'request.generation_tokens',
     'vllm:request_params_best_of': 'request.params.best_of',
