@@ -5,6 +5,7 @@
 import six
 
 if six.PY3:
+    from enum import Enum, IntEnum
     from typing import Optional
 
     from pydantic import BaseModel, ConfigDict, Field, computed_field, field_validator
@@ -76,16 +77,30 @@ if six.PY3:
             mapping = {
                 'active': 1,
                 'inactive': 2,
-                'disabled': 5,
+                'disabled': 2,
                 'discovering': 2,
                 'undiscovered': 2,
                 'unsupported': 2,
-                'unknown': 4,
+                'unknown': 2,
             }
-            return mapping.get(self.fabric_st, 7)
+            return mapping.get(self.fabric_st, 2)
 
     class DeviceMetadataList(BaseModel):
         device_metadata: list = Field(default_factory=list)
+
+    class AdminStatus(IntEnum):
+        UP = 1
+        DOWN = 2
+
+    class OperStatus(IntEnum):
+        UP = 1
+        DOWN = 2
+
+    class Status(str, Enum):
+        UP = "up"
+        DOWN = "down"
+        WARNING = "warning"
+        OFF = "off"
 
     class InterfaceMetadata(BaseModel):
         device_id: Optional[str] = Field(default=None)
@@ -94,47 +109,47 @@ if six.PY3:
         name: Optional[str] = Field(default=None)
         description: Optional[str] = Field(default=None)
         mac_address: Optional[str] = Field(default=None)
-        admin_status: Optional[int] = Field(default=None)
-        oper_status: Optional[int] = Field(default=None)
+        admin_status: Optional[AdminStatus] = Field(default=None)
+        oper_status: Optional[OperStatus] = Field(default=None)
 
         model_config = ConfigDict(validate_assignment=True)
 
         @field_validator("admin_status", mode="before")
         @classmethod
-        def parse_admin_status(cls, admin_status: int | None) -> int | None:
+        def parse_admin_status(cls, admin_status: AdminStatus | None) -> AdminStatus | None:
             if not admin_status:
                 return None
 
             if admin_status == "up":
-                return 1
-            return 2
+                return AdminStatus.UP
+            return AdminStatus.DOWN
 
         @field_validator("oper_status", mode="before")
         @classmethod
-        def parse_oper_status(cls, oper_status: int | None) -> int | None:
+        def parse_oper_status(cls, oper_status: OperStatus | None) -> OperStatus | None:
             if not oper_status:
                 return None
 
             if oper_status == "up":
-                return 1
-            return 2
+                return OperStatus.UP
+            return OperStatus.DOWN
 
         @computed_field
         @property
         def status(self) -> str:
-            if self.admin_status == 1:
-                if self.oper_status == 1:
-                    return "up"
-                if self.oper_status == 2:
-                    return "down"
-                return "warning"
-            if self.admin_status == 2:
-                if self.oper_status == 1:
-                    return "down"
-                if self.oper_status == 2:
-                    return "off"
-                return "warning"
-            return "down"
+            if self.admin_status == AdminStatus.UP:
+                if self.oper_status == OperStatus.UP:
+                    return Status.UP
+                if self.oper_status == OperStatus.DOWN:
+                    return Status.DOWN
+                return Status.WARNING
+            if self.admin_status == AdminStatus.DOWN:
+                if self.oper_status == OperStatus.UP:
+                    return Status.DOWN
+                if self.oper_status == OperStatus.DOWN:
+                    return Status.OFF
+                return Status.WARNING
+            return Status.DOWN
 
     class InterfaceMetadataList(BaseModel):
         interface_metadata: list = Field(default_factory=list)
