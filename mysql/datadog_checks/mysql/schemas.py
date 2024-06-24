@@ -151,8 +151,9 @@ class Schemas:
         }
         self._data_submitter = SubmitData(self._check.database_monitoring_metadata, base_event, self._log)
 
-    def shut_down(self):
-        self._data_submitter.submit()
+    # TODO may be we need to hook it to metadata shut down.
+    #def shut_down(self):
+    #    self._data_submitter.submit()
 
     def _cursor_run(self, cursor, query, params=None):
         """
@@ -278,7 +279,6 @@ class Schemas:
         databases = [dict(row) for row in rows]
         return databases
 
-
     @tracked_method(agent_check_getter=agent_check_getter, track_result_length=True)
     def _get_tables(self, db_name, cursor):
         """returns a list of tables for schema with their names and empty column array
@@ -341,6 +341,7 @@ class Schemas:
                 key/value:
                     "partition_count": int
         """
+        pdb.set_trace()
         if len(table_list) == 0:
             return
         #check for special characters as we don't have ids

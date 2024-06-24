@@ -448,7 +448,7 @@ def populate_database():
     conn = pymysql.connect(
         host=common.HOST, port=common.PORT, user='root', password='mypass' if MYSQL_REPLICATION == 'group' else None
     )
-
+#TODO add  with may be ?
     cur = conn.cursor()
 
     cur.execute("USE mysql;")
@@ -463,6 +463,54 @@ def populate_database():
     cur.close()
     _create_explain_procedure(conn, "testdb")
 
+def add_schema_test_databases(cursor):
+    cursor.execute("USE mysql;")
+    cursor.execute("CREATE DATABASE datadog_test_schemas;")
+    cursor.execute("USE datadog_test_schemas;")
+    cursor.execute(
+    """CREATE TABLE datadog_test_schemas_test_schema_cities (
+    id INT NOT NULL DEFAULT 0,
+    name VARCHAR(255),
+    population INT NOT NULL DEFAULT 0,
+    CONSTRAINT PK_Cities PRIMARY KEY (id))
+
+    PARTITION BY RANGE (id) (
+    PARTITION p0 VALUES LESS THAN (100),
+    PARTITION p1 VALUES LESS THAN (200),
+    PARTITION p2 VALUES LESS THAN (300),
+    PARTITION p3 VALUES LESS THAN MAXVALUE);
+    """)
+#TODO there can also be a partition by hash     PARTITION BY HASH(id) PARTITIONS 4; 
+# check in partitions 
+
+    # create one column index 
+    cursor.execute("CREATE INDEX single_column_index ON datadog_test_schemas_test_schema_cities (population);")
+    # create two column index
+    cursor.execute("CREATE INDEX two_columns_index ON datadog_test_schemas_test_schema_cities (id, name);")
+
+   #Create the landmarks table with foreign key constraint
+    cursor.execute(""" 
+    CREATE TABLE datadog_test_schemas_test_schema_landmarks (
+    name VARCHAR(255),
+    city_id INT DEFAULT 0,
+    CONSTRAINT FK_CityId FOREIGN KEY (city_id) REFERENCES datadog_test_schemas_test_schema_cities(id)
+)     ;
+   """)
+
+    cursor.execute("""
+        CREATE TABLE datadog_test_schemas_test_schema.RestaurantReviews (
+            RestaurantName TEXT,
+            District TEXT,
+            Review TEXT, 
+            CONSTRAINT FK_RestaurantNameDistrict FOREIGN KEY (RestaurantName, District)
+            REFERENCES datadog_test_schemas_test_schema.Restaurants(RestaurantName, District)
+        );"""
+    )
+    cursor.execute("CREATE DATABASE datadog_test_schemas_second;")
+    cursor.execute("USE datadog_test_schemas_second;")
+    cursor.execute("CREATE TABLE IF NOT EXISTS ϑings (id INT DEFAULT 0, name VARCHAR(255));")
+    cursor.execute("INSERT INTO ϑings (id, name) VALUES (1, 'foo'), (2, 'bar');")
+    cursor.execute("CREATE UNIQUE INDEX thingsindex ON ϑings (name);")
 
 def _wait_for_it_script():
     """
