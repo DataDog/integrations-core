@@ -1,5 +1,7 @@
 from datadog_checks.base.config import is_affirmative
 
+from datadog_checks.sqlserver.const import  AWS_RDS_HOSTNAME_SUFFIX
+
 from .base import SqlserverDatabaseMetricsBase
 
 AGENT_ACTIVITY_DURATION_QUERY = {
@@ -136,7 +138,7 @@ class SqlserverAgentMetrics(SqlserverDatabaseMetricsBase):
         active_job_step_info_query['collection_interval'] = self.collection_interval
         query_list.append(active_job_step_info_query)
         # better/more formal way to check if aws
-        if self.instance_config.get("cloud_metadata") is None or self.instance_config.cloud_metadata.get("aws") is None:
+        if self.instance_config.get("cloud_metadata") is None or self.instance_config.cloud_metadata.get("aws") is None or AWS_RDS_HOSTNAME_SUFFIX in self.instance_config.get("reported_hostname", ""):
             active_session_duration_query = AGENT_ACTIVE_SESSION_DURATION_QUERY.copy()
             active_session_duration_query['collection_interval'] = self.collection_interval
             query_list.append(active_session_duration_query)
