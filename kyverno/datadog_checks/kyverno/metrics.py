@@ -45,28 +45,29 @@ METRIC_MAP = {
     'workqueue_unfinished_work_seconds': 'workqueue.unfinished_work.seconds',
     'workqueue_work_duration_seconds': 'workqueue.work.duration.seconds',
     # Kyverno specific metrics:
-    'kyverno_policy_changes_total' : 'kyverno.policy.changes',
-    'kyverno_controller_requeue_total' : 'kyverno.controller.requeue',
-    'kyverno_controller_reconcile_total' : 'kyverno.controller.reconcile',
-    'kyverno_controller_drop_total' : 'kyverno.controller.drop',
-    'kyverno_client_queries_total' : 'kyverno.client.queries',
-    'kyverno_ttl_controller_errors' : 'kyverno.ttl.controller.errors',
-    'kyverno_ttl_controller_deletedobjects' : 'kyverno.ttl.controller.deletedobjects',
-    'kyverno_cleanup_controller_deletedobjects_total' : 'kyverno.cleanup.controller.deletedobjects',
-    'kyverno_cleanup_controller_errors_total' : 'kyverno.cleanup.controller.errors',
-    'kyverno_admission_requests_total' : 'kyverno.admission.requests',
-    'kyverno_admission_review_duration_seconds' : 'kyverno.admission.review.duration.seconds',
-    'kyverno_policy_execution_duration_seconds' : 'kyverno.policy.execution.duration.seconds',
-    'kyverno_http_requests_duration_seconds' : 'kyverno.http.requests.duration.seconds',
-    'kyverno_http_requests_total' : 'kyverno.http.requests',
-    'kyverno_policy_results_total' : 'kyverno.policy.requests',
-    'kyverno_policy_rule_info_total' : 'kyverno.policy.rule.info',
-
+    'kyverno_policy_changes': 'policy.changes',
+    'kyverno_controller_requeue': 'controller.requeue',
+    'kyverno_controller_reconcile': 'controller.reconcile',
+    'kyverno_controller_drop': 'controller.drop',
+    'kyverno_client_queries': 'client.queries',
+    'kyverno_ttl_controller_errors': 'ttl.controller.errors',
+    'kyverno_ttl_controller_deletedobjects': 'ttl.controller.deletedobjects',
+    'kyverno_cleanup_controller_deletedobjects': 'cleanup.controller.deletedobjects',
+    'kyverno_cleanup_controller_errors': 'cleanup.controller.errors',
+    'kyverno_admission_requests': 'admission.requests',
+    'kyverno_admission_review_duration_seconds': 'admission.review.duration.seconds',
+    'kyverno_policy_execution_duration_seconds': 'policy.execution.duration.seconds',
+    'kyverno_http_requests_duration_seconds': 'http.requests.duration.seconds',
+    'kyverno_http_requests': 'http.requests',
+    'kyverno_policy_results': 'policy.requests',
+    'kyverno_policy_rule_info': 'policy.rule.info',
 }
 
 
 RENAME_LABELS_MAP = {
+    'version': 'go_version',
+    # These don't actually exist, but in the off chance they do we should remap them to not conflict with
+    # regular generic tags.
     'name': 'kyverno_name',
     'namespace': 'kyverno_namespace',
-    'version': 'go_version',
 }

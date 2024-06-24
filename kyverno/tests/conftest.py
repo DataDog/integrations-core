@@ -13,28 +13,23 @@ from datadog_checks.dev.subprocess import run_command
 
 HERE = get_here()
 
+
 def setup_kyverno():
     run_command(['kubectl', 'create', 'ns', 'kyverno'])
-    run_command(
-        ['kubectl', 'create', '-f', os.path.join(HERE, 'kind', 'kyverno_install.yaml')]
-    )
-    run_command(
-        ['kubectl', 'create', '-f', os.path.join(HERE, 'kind', 'kyverno-policies_install.yaml')]
-    )
-
+    run_command(['kubectl', 'create', '-f', os.path.join(HERE, 'kind', 'kyverno_install.yaml')])
+    run_command(['kubectl', 'create', '-f', os.path.join(HERE, 'kind', 'kyverno-policies_install.yaml')])
 
     # Tries to ensure that the Kubernetes resources are deployed and ready before we do anything else
     deployments = [
         'kyverno-admission-controller',
         'kyverno-background-controller',
         'kyverno-cleanup-controller',
-        'kyverno-reports-controller'
+        'kyverno-reports-controller',
     ]
     for deployment in deployments:
         run_command(['kubectl', 'rollout', 'status', f'deployment/{deployment}', '-n', 'kyverno'])
 
     run_command(['kubectl', 'wait', 'pods', '--all', '-n', 'kyverno', '--for=condition=Ready', '--timeout=600s'])
-
 
 
 @pytest.fixture(scope='session')
@@ -57,5 +52,6 @@ def dd_environment():
             {'openmetrics_endpoint': f'http://{kyverno_host2}:{kyverno_port2}/metrics'},
             {'openmetrics_endpoint': f'http://{kyverno_host3}:{kyverno_port3}/metrics'},
             {'openmetrics_endpoint': f'http://{kyverno_host4}:{kyverno_port4}/metrics'},
-            ]
-    yield {'instances': instances}
+        ]
+
+        yield {'instances': instances}
