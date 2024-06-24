@@ -17,7 +17,7 @@ if six.PY3:
         model: Optional[str] = None
         version: Optional[str] = None
         serial: Optional[str] = None
-        vendor: Optional[str] = Field(default='cisco-aci')
+        vendor: Optional[str] = Field(default='cisco')
         namespace: Optional[str] = Field(default='default')
 
         @computed_field
@@ -25,8 +25,6 @@ if six.PY3:
         def device_type(self) -> str:
             if self.role in ['leaf', 'spine']:
                 return 'switch'
-            if self.role in ['controller', 'vleaf', 'vip', 'protection-chain']:
-                return 'cisco_aci'
             return 'other'
 
     class Node(BaseModel):

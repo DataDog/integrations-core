@@ -245,32 +245,19 @@ class Fabric:
             return 'port'
 
     def batch_payloads(self, devices, interfaces, collect_ts):
-        payloads = []
-
         for device in devices:
-            payloads.append(
-                NetworkDevicesMetadata(namespace=self.namespace, devices=[device], collect_timestamp=collect_ts)
-            )
+            yield NetworkDevicesMetadata(namespace=self.namespace, devices=[device], collect_timestamp=collect_ts)
 
-        cur_resource_count = 0
-        cur_resources = []
+        payloads = []
         for interface in interfaces:
-            if cur_resource_count == PAYLOAD_METADATA_BATCH_SIZE:
-                payloads.append(
-                    NetworkDevicesMetadata(
-                        namespace=self.namespace, interfaces=cur_resources, collect_timestamp=collect_ts
-                    )
+            if len(payloads) == PAYLOAD_METADATA_BATCH_SIZE:
+                yield NetworkDevicesMetadata(
+                    namespace=self.namespace, interfaces=payloads, collect_timestamp=collect_ts
                 )
-                cur_resources = []
-                cur_resource_count = 0
-            cur_resources.append(interface)
-            cur_resource_count += 1
-        if cur_resources:
-            payloads.append(
-                NetworkDevicesMetadata(namespace=self.namespace, interfaces=cur_resources, collect_timestamp=collect_ts)
-            )
-
-        return payloads
+                payloads = []
+            payloads.append(interface)
+        if payloads:
+            yield NetworkDevicesMetadata(namespace=self.namespace, interfaces=payloads, collect_timestamp=collect_ts)
 
     def submit_node_metadata(self, node_attrs, tags):
         node = Node(attributes=node_attrs)

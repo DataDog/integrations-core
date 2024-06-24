@@ -96,7 +96,7 @@ DEVICE_METADATA = [
         'id': 'default:10.0.200.3',
         'id_tags': ['namespace:default', 'system_ip:10.0.200.3'],
         'integration': 'cisco-aci',
-        'device_type': 'cisco_aci',
+        'device_type': 'other',
         'tags': [
             'device_vendor:cisco',
             'device_namespace:default',
@@ -122,7 +122,7 @@ DEVICE_METADATA = [
         'id': 'default:10.0.200.4',
         'id_tags': ['namespace:default', 'system_ip:10.0.200.4'],
         'integration': 'cisco-aci',
-        'device_type': 'cisco_aci',
+        'device_type': 'other',
         'tags': [
             'device_vendor:cisco',
             'device_namespace:default',
@@ -175,7 +175,7 @@ DEVICE_METADATA = [
         'id': 'default:10.0.200.6',
         'id_tags': ['namespace:default', 'system_ip:10.0.200.6'],
         'integration': 'cisco-aci',
-        'device_type': 'cisco_aci',
+        'device_type': 'other',
         'tags': [
             'device_vendor:cisco',
             'device_namespace:default',
