@@ -1,9 +1,5 @@
 # Agent Check: Teleport
 
-<div class="alert alert-warning">
-This integration is in public beta and should be enabled on production workloads with caution.
-</div>
-
 ## Overview
 
 This check monitors [Teleport][1] through the Datadog Agent.
@@ -34,8 +30,6 @@ These endpoints aren't activated by default. To enable the diagnostic HTTP endpo
 2. [Restart the Agent][5].
 
 ##### Log collection
-
-_Available for Agent versions >6.0_
 
 1. Collecting logs is disabled by default in the Datadog Agent, enable it in your `datadog.yaml` file:
 

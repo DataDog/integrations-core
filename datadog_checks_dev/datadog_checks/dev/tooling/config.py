@@ -53,7 +53,7 @@ DEFAULT_CONFIG = {
             'app_key': os.getenv('DD_APP_KEY'),
             'site': os.getenv('DD_SITE'),
             'dd_url': os.getenv('DD_DD_URL', 'https://app.datadoghq.com'),
-            'log_url': os.getenv('DD_LOGS_CONFIG_DD_URL'),
+            'log_url': os.getenv('DD_LOGS_CONFIG_LOGS_DD_URL'),
         }
     },
 }
