@@ -198,7 +198,7 @@ EXCLUDE_FILTERS = {
     'VmSuspendedEvent': [],
 }
 
-EVENTS_FILTERABLE_BY_RESOURCE = [
+PER_RESOURCE_EVENTS = [
     'AlarmAcknowledgedEvent',
     'AlarmActionTriggeredEvent',
     'AlarmClearedEvent',

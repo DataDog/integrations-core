@@ -349,3 +349,30 @@ def test_include_events_excluded_message_new_resource(aggregator, realtime_insta
     check.api.mock_events = [event1]
     check.check(None)
     assert len(aggregator.events) == 0
+
+
+@pytest.mark.usefixtures('mock_type', 'mock_threadpool', 'mock_api', 'mock_rest_api')
+def test_include_events_empty_event_resource_filters(aggregator, realtime_instance):
+    realtime_instance['include_events'] = [{"event": "AlarmAcknowledgedEvent", "excluded_messages": ["Remove Alarm"]}]
+    realtime_instance['event_resource_filters'] = []
+    check = VSphereCheck(
+        'vsphere',
+        {},
+        [realtime_instance],
+    )
+    check.initiate_api_connection()
+
+    event1 = vim.event.AlarmAcknowledgedEvent()
+    event1.createdTime = dt.datetime.now()
+    event1.entity = vim.event.ManagedEntityEventArgument()
+    event1.entity.entity = vim.VirtualMachine(moId="vm1")
+    event1.entity.name = "vm1"
+    event1.alarm = vim.event.AlarmEventArgument()
+    event1.alarm.name = "alarm1"
+    event1.datacenter = vim.event.DatacenterEventArgument()
+    event1.datacenter.name = "dc1"
+    event1.fullFormattedMessage = "The Alarm was acknowledged"
+    aggregator.reset()
+    check.api.mock_events = [event1]
+    check.check(None)
+    assert len(aggregator.events) == 0
