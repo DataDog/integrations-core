@@ -213,3 +213,4 @@ esxi.virtualDisk.writeLatencyUS.latest,gauge,,microsecond,,Write latency in micr
 esxi.virtualDisk.writeLoadMetric.latest,gauge,,,,Storage DRS virtual disk metric for the write workload model,0,esxi,virtualdisk writeLoadMetric latest,
 esxi.virtualDisk.writeOIO.latest,gauge,,request,,Average number of outstanding write requests to the virtual disk,0,esxi,virtualdisk writeOIO latest,
 esxi.vm.count,gauge,,,,Timeseries with value 1 for each VM. Make 'sum by {X}' queries to count all the VMs with the tag X.,0,esxi,vm count,
+esxi.host.can_connect,gauge,,,,Whether the check can connect to the ESXi host or not.,0,esxi,host connect,

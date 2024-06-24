@@ -113,10 +113,10 @@ class EsxiCheck(AgentCheck):
                 )
 
             self.log.info("Connected to ESXi host %s: %s", self.host, self.content.about.fullName)
-            self.count("host.can_connect", 1, tags=self.tags)
+            self.gauge("host.can_connect", 1, tags=self.tags)
         except Exception as e:
             self.log.exception("Cannot connect to ESXi host %s: %s", self.host, str(e))
-            self.count("host.can_connect", 0, tags=self.tags)
+            self.gauge("host.can_connect", 0, tags=self.tags)
             raise
 
     def _validate_excluded_host_tags(self, excluded_host_tags):
@@ -397,13 +397,16 @@ class EsxiCheck(AgentCheck):
         self.set_metadata('version', f'{esxi_version}+{build_version}')
 
     def check(self, _):
+        try:
+            self.set_version_metadata()
+            self.gauge("host.can_connect", 1, tags=self.tags)
 
-        if self.conn is None or self.content is None:
+        except Exception as e:
             self.conn = None
             self.content = None
+            self.log.debug("Failed to get version metadata; attempting to reconnect to the ESXi host: %s", str(e))
             self.initiate_api_connection()
 
-        self.set_version_metadata()
         resources = self.get_resources()
         resource_map = {
             obj_content.obj: {prop.name: prop.val for prop in obj_content.propSet}
