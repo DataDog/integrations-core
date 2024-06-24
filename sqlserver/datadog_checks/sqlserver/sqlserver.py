@@ -777,9 +777,7 @@ class SQLServer(AgentCheck):
                 if is_affirmative(self.instance.get("include_agent_jobs", False)):
                     self.agent_history.run_job_loop(self.tags)
                 else:
-                    self.log.warning(
-                        "agent jobs disabled"
-                    )
+                    self.log.warning("agent jobs disabled")
                 self.statement_metrics.run_job_loop(self.tags)
                 self.procedure_metrics.run_job_loop(self.tags)
                 self.activity.run_job_loop(self.tags)
