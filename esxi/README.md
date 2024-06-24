@@ -2,7 +2,7 @@
 
 ## Overview
 
-This check monitors your vSphere [ESXi][1] hosts and the virtual machines running on them in a distributed manner. To monitor your entire vSphere deployment in a centralized way via your vCenter, see the [vSphere integration][11].
+This check monitors your vSphere [ESXi][1] hosts and the virtual machines running on them in a distributed manner. To monitor your entire vSphere deployment in a centralized way through your vCenter, see the [vSphere integration][11].
 
 ## Setup
 
