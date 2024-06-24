@@ -10,7 +10,7 @@ Follow the instructions below to install and configure this check for an Agent r
 
 ### Installation
 
-The ESXi check is included in the [Datadog Agent][2] package. 
+The ESXi check is included in the [Datadog Agent][2] package.
 No additional installation is needed on your server.
 
 ### Configuration
@@ -32,7 +32,7 @@ See [metadata.csv][7] for a list of metrics provided by this integration.
 
 #### Collecting per-instance metrics
 
-**Note**: The ESXi integration has the ability to collect both per-resource metrics (such as those related to CPUs), and per-instance metrics (such as those related to CPU cores). As such, there are metrics that are only per-resource, per-instance, or both. 
+**Note**: The ESXi integration has the ability to collect both per-resource metrics (such as those related to CPUs), and per-instance metrics (such as those related to CPU cores). As such, there are metrics that are only per-resource, per-instance, or both.
 A resource represents a physical or virtual representation of a machine. This can be represented by vm, host, datastore, cluster in vSphere.
 An instance represents individual entities found within a resource. More information on vSphere resources can be found in the [VMWare Infrastructure Architecture Overview white paper][10].
 
