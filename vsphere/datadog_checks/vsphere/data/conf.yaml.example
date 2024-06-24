@@ -258,6 +258,8 @@ instances:
     #   - datastore
     #   - datacenter
     #   - cluster
+    #   - storage_pod
+    #   - vcenter_object_manager
 
     ## @param include_events - list of mappings - optional
     ## The events that should be collected by the vSphere integration.
