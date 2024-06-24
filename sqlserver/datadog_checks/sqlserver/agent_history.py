@@ -49,7 +49,7 @@ WHERE
 def agent_check_getter(self):
     return self._check
 
-class SqlserverAgentActivity(DBMAsyncJob):
+class SqlserverAgentHistory(DBMAsyncJob):
     def __init__(self, check, config: SQLServerConfig):
         # do not emit any dd.internal metrics for DBM specific check code
         self.tags = [t for t in check.tags if not t.startswith('dd.internal')]
@@ -62,7 +62,7 @@ class SqlserverAgentActivity(DBMAsyncJob):
             collection_interval = DEFAULT_COLLECTION_INTERVAL
         self.collection_interval = collection_interval
         self._last_history_id = check._last_history_id
-        super(SqlserverAgentActivity, self).__init__(
+        super(SqlserverAgentHistory, self).__init__(
             check,
             run_sync=True,
             enabled=is_affirmative(self._config.activity_config.get('enabled', True)),
@@ -81,11 +81,12 @@ class SqlserverAgentActivity(DBMAsyncJob):
         pass
 
     def run_job(self):
-        self.collect_agent_activity()
+        self.collect_agent_history()
     
     @tracked_method(agent_check_getter=agent_check_getter)
     def _get_new_agent_job_history(self, cursor):
         last_instance_id_filter = ""
+        self._last_history_id = self._check._last_history_id
         if self._last_history_id:
             last_instance_id_filter = "\n\t\tHAVING MIN(sjh2.instance_id) > {last_history_id}".format(last_history_id = self._last_history_id)
         query = AGENT_HISTORY_QUERY.format(last_instance_id_filter=last_instance_id_filter)
@@ -120,7 +121,7 @@ class SqlserverAgentActivity(DBMAsyncJob):
         return event
 
     @tracked_method(agent_check_getter=agent_check_getter)
-    def collect_agent_activity(self):
+    def collect_agent_history(self):
         """
         Collects all current agent activity for the SQLServer intance.
         :return:
@@ -128,18 +129,8 @@ class SqlserverAgentActivity(DBMAsyncJob):
         with self._check.connection.open_managed_default_connection(key_prefix=self._conn_key_prefix):
             with self._check.connection.get_managed_cursor(key_prefix=self._conn_key_prefix) as cursor:
                 history_rows = self._get_new_agent_job_history(cursor)
-                # history_rows_grouped_by_instance = dict()
-                # for history_row in history_rows:
-                #     if history_row['completion_instance_id'] not in history_rows_grouped_by_instance:
-                #         history_rows_grouped_by_instance[history_row['completion_instance_id']] = [history_row]
-                #     else:
-                #         history_rows_grouped_by_instance[history_row['completion_instance_id']].append(history_row)
-                # for group in history_rows_grouped_by_instance.values():
-                #     history_event = self._create_agent_jobs_history_event(group)
-                #     history_payload = json.dumps(history_event, default=default_json_event_encoding)
                 history_event = self._create_agent_jobs_history_event(history_rows)
                 payload = json.dumps(history_event, default=default_json_event_encoding)
-                    # TODO figure out where this payload should go
                 self.log.info(payload)
+                # TODO figure out where this payload should go
                 self._check.database_monitoring_query_activity(payload)
-
