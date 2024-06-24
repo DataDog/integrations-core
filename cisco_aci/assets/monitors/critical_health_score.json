@@ -16,7 +16,6 @@
 				"warning": 90
 			},
 			"notify_audit": false,
-			"on_missing_data": "show_no_data",
 			"include_tags": true,
 			"new_group_delay": 60
 		}
