@@ -4,6 +4,7 @@ backend_only: false
 installation_sources:
   - traefik
   - traefik_mesh
+  - mesh
 facets:
   - facetType: range
     groups:
@@ -80,7 +81,7 @@ pipeline:
   name: Traefik Mesh
   enabled: true
   filter:
-    query: source:(traefik_mesh OR traefik)
+    query: source:(traefik OR traefik_mesh OR mesh)
   processors:
     - type: grok-parser
       name: Parsing Traefik logs
