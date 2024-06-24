@@ -1,0 +1,409 @@
+# (C) Datadog, Inc. 2024-present
+# All rights reserved
+# Licensed under a 3-clause BSD style license (see LICENSE)
+
+try:
+    import datadog_agent
+except ImportError:
+    from ..stubs import datadog_agent
+
+import json
+import time
+from contextlib import closing
+
+from datadog_checks.base import is_affirmative
+from datadog_checks.base.utils.db.utils import DBMAsyncJob, default_json_event_encoding
+from datadog_checks.base.utils.tracking import tracked_method
+#TODO which one is to use CommenterCursor or CommenterDictCursor
+from datadog_checks.mysql.cursor import CommenterCursor, CommenterDictCursor
+
+
+from datadog_checks.mysql.queries import (
+    SQL_DATABASES,
+    SQL_TABLES,
+    SQL_COLUMNS,
+)
+
+import pdb
+
+#TODO
+DEFAULT_SCHEMAS_COLLECTION_INTERVAL = 600
+
+#TODO unify with postgres make then uniform.
+#from datadog_checks.sqlserver.utils import get_list_chunks
+
+def get_list_chunks(lst, n):
+    """Yield successive n-sized chunks from lst."""
+    for i in range(0, len(lst), n):
+        yield lst[i : i + n]
+
+import pymysql
+
+class SubmitData:
+
+    def __init__(self, submit_data_function, base_event, logger):
+        self._submit_to_agent_queue = submit_data_function
+        self._base_event = base_event
+        self._log = logger
+
+        self._columns_count = 0
+        self._total_columns_sent = 0
+        self.db_to_schemas = {}  # dbname : { id : schema }
+        self.db_info = {}  # name to info
+
+    def set_base_event_data(self, hostname, tags, cloud_metadata, dbms_version):
+        self._base_event["host"] = hostname
+        self._base_event["tags"] = tags
+        self._base_event["cloud_metadata"] = cloud_metadata
+        self._base_event["dbms_version"] = dbms_version
+
+    def reset(self):
+        self._total_columns_sent = 0
+        self._columns_count = 0
+        self.db_to_schemas.clear()
+        self.db_info.clear()
+
+    def store_db_infos(self, db_infos):
+        for db_info in db_infos:
+            self.db_info[db_info['name']] = db_info
+
+    def store(self, db_name, tables, columns_count):
+        self._columns_count += columns_count
+        known_tables = self.db_info[db_name].setdefault("tables", [])
+        known_tables.extend(tables)
+
+    def columns_since_last_submit(self):
+        return self._columns_count
+
+    def truncate(self, json_event):
+        max_length = 1000
+        if len(json_event) > max_length:
+            return json_event[:max_length] + " ... (truncated)"
+        else:
+            return json_event
+
+    def send_truncated_msg(self, db_name, time_spent):
+        event = {
+            **self._base_event,
+            "metadata": [],
+            "timestamp": time.time() * 1000,
+            "collection_errors": [{"error_type": "truncated", "message": ""}],
+        }
+        db_info = self.db_info[db_name]
+        event["metadata"] = [{**(db_info)}]
+        event["collection_errors"][0]["message"] = (
+            "Truncated after fetching {} columns, elapsed time is {}s, database is {}".format(
+                self._total_columns_sent, time_spent, db_name
+            )
+        )
+        json_event = json.dumps(event, default=default_json_event_encoding)
+        self._log.debug("Reporting truncation of schema collection: {}".format(self.truncate(json_event)))
+        self._submit_to_agent_queue(json_event)
+
+    def submit(self):
+        if not self.db_to_schemas:
+            return
+        self._total_columns_sent += self._columns_count
+        self._columns_count = 0
+        event = {**self._base_event, "metadata": [], "timestamp": time.time() * 1000}
+        for db, schemas_by_id in self.db_to_schemas.items():
+            db_info = {}
+            db_info = self.db_info[db]
+            event["metadata"] = event["metadata"] + [{**(db_info), "schemas": list(schemas_by_id.values())}]
+        json_event = json.dumps(event, default=default_json_event_encoding)
+        self._log.debug("Reporting the following payload for schema collection: {}".format(self.truncate(json_event)))
+        self._submit_to_agent_queue(json_event)
+        self.db_to_schemas.clear()
+
+
+def agent_check_getter(self):
+    return self._check
+
+
+class Schemas:
+
+    TABLES_CHUNK_SIZE = 500
+    # Note: in async mode execution time also cannot exceed 2 checks.
+    DEFAULT_MAX_EXECUTION_TIME = 10
+    MAX_COLUMNS_PER_EVENT = 100_000
+
+    def __init__(self, mysql_metadata, check, config):
+        self._metadata = mysql_metadata
+        self._check = check
+        self._log = check.log
+        self.schemas_per_db = {}
+        self._last_schemas_collect_time = None
+
+        collection_interval = config.schema_config.get('collection_interval', DEFAULT_SCHEMAS_COLLECTION_INTERVAL)
+        self._max_execution_time = min(
+            config.schema_config.get('max_execution_time', self.DEFAULT_MAX_EXECUTION_TIME), collection_interval
+        )
+
+        base_event = {
+            "host": None,
+            "agent_version": datadog_agent.get_version(),
+            "dbms": "mysql",
+            "kind": "mysql_databases",
+            "collection_interval": collection_interval,
+            "dbms_version": None,
+            "tags": [],
+            "cloud_metadata": self._check._config.cloud_metadata,
+        }
+        self._data_submitter = SubmitData(self._check.database_monitoring_metadata, base_event, self._log)
+
+    def shut_down(self):
+        self._data_submitter.submit()
+
+    def _cursor_run(self, cursor, query, params=None):
+        """
+        Run and log the query. If provided, obfuscated params are logged in place of the regular params.
+        """
+        try:
+            self._log.debug("Running query [{}] params={}".format(query, params))
+            cursor.execute(query, params)
+        except pymysql.DatabaseError as e:
+            #TODO check this exception path
+            self._check.count(
+                "dd.mysql.db.error",
+                1,
+                tags=self._tags + ["error:{}".format(type(e))] + self._check._get_debug_tags(),
+                hostname=self._check.resolved_hostname,
+            )
+            raise    
+#TODO put get_list_chunks in common and import from there to postgres        
+#TODO query logs and what is tracked data what is not !
+    @tracked_method(agent_check_getter=agent_check_getter)
+    def _fetch_database_data(self, cursor, start_time, db_name):
+
+        tables = self._get_tables(db_name, cursor)
+        tables_chunks = list(get_list_chunks(tables, self.TABLES_CHUNK_SIZE))
+        for tables_chunk in tables_chunks:
+            schema_collection_elapsed_time = time.time() - start_time
+            if schema_collection_elapsed_time > self._max_execution_time:
+                #TODO continue is here to allow debugging remove aftewards
+                continue
+                self._data_submitter.submit()
+                self._data_submitter.send_truncated_msg(db_name, schema_collection_elapsed_time)
+                raise StopIteration(
+                    """Schema collection took {}s which is longer than allowed limit of {}s,
+                    stopped while collecting for db - {}""".format(
+                        schema_collection_elapsed_time, self._max_execution_time, db_name
+                    )
+                )
+            columns_count, tables_info = self._get_tables_data(tables_chunk, db_name, cursor)
+            pdb.set_trace()
+            self._data_submitter.store(db_name, tables_info, columns_count)
+            if self._data_submitter.columns_since_last_submit() > self.MAX_COLUMNS_PER_EVENT:
+                self._data_submitter.submit()
+        self._data_submitter.submit()
+        return False
+
+
+    @tracked_method(agent_check_getter=agent_check_getter)
+    def _collect_schemas_data(self, tags):
+        """Collects database information and schemas and submits to the agent's queue as dictionaries
+        schema dict
+        key/value:
+            "name": str
+            "id": str
+            "owner_name": str
+            "tables" : list of tables dicts
+                table
+                key/value:
+                    "id" : str
+                    "name" : str
+                    columns: list of columns dicts
+                        columns
+                        key/value:
+                            "name": str
+                            "data_type": str
+                            "default": str
+                            "nullable": bool
+                indexes : list of index dicts
+                    index
+                    key/value:
+                        "name": str
+                        "type": str
+                        "is_unique": bool
+                        "is_primary_key": bool
+                        "is_unique_constraint": bool
+                        "is_disabled": bool,
+                        "column_names": str
+                foreign_keys : list of foreign key dicts
+                    foreign_key
+                    key/value:
+                        "foreign_key_name": str
+                        "referencing_table": str
+                        "referencing_column": str
+                        "referenced_table": str
+                        "referenced_column": str
+                partitions: partition dict
+                    partition
+                    key/value:
+                        "partition_count": int
+        """
+        self._data_submitter.reset()
+
+        # TODO 
+        #self._data_submitter.set_base_event_data(
+        #    self._check.resolved_hostname,
+        #    tags,
+        #    self._check._config.cloud_metadata,
+        #    "{},{}".format(
+        #        self._check.static_info_cache.get(STATIC_INFO_VERSION, ""),
+        #        self._check.static_info_cache.get(STATIC_INFO_ENGINE_EDITION, ""),
+        #    ),
+        #)
+
+        with closing(self._metadata.get_db_connection().cursor(CommenterDictCursor)) as cursor:
+            # set tags here tags
+            db_infos = self._query_db_information(cursor)
+            self._data_submitter.store_db_infos(db_infos)
+            self._fetch_for_databases(db_infos, cursor)
+            self._data_submitter.submit()
+            self._log.debug("Finished collect_schemas_data")
+
+    def _fetch_for_databases(self, db_infos, cursor):
+        start_time = time.time()
+        for db_info in db_infos:
+            self._fetch_database_data(cursor, start_time, db_info['name'])
+
+    def _query_db_information(self, cursor):
+        #do we need to open/close the cursor ?
+        self._cursor_run(
+            cursor,
+            SQL_DATABASES,
+        )
+        rows = cursor.fetchall()
+        databases = [dict(row) for row in rows]
+        return databases
+
+
+    @tracked_method(agent_check_getter=agent_check_getter, track_result_length=True)
+    def _get_tables(self, db_name, cursor):
+        """returns a list of tables for schema with their names and empty column array
+        list of table dicts
+        "id": str
+        "name": str
+        "columns": []
+        """
+        #tables_info = execute_query(SQL_TABLES, cursor, convert_results_to_str=True, parameter=schema["id"])
+        #TODO add convert to string to cursor run and make it common or may be make common execute query
+        self._cursor_run(
+            cursor,
+            SQL_TABLES.format(db_name), #TODO try to pass into driver
+        )
+        tables_info = cursor.fetchall()
+        #rows = [dict(zip(columns, [str(item) for item in row])) for row in cursor.fetchall()]
+        #pdb.set_trace()
+        #May be rows are different ? 
+        #tables_info = [dict(row) for row in rows]
+
+        for table in tables_info:
+            table.setdefault("columns", [])
+        return tables_info
+
+    @tracked_method(agent_check_getter=agent_check_getter, track_result_length=True)
+    def _get_tables_data(self, table_list, db_name, cursor):
+        """returns extracted column numbers and a list of tables
+        "tables" : list of tables dicts
+        table
+        key/value:
+            "id" : str
+            "name" : str
+            columns: list of columns dicts
+                columns
+                key/value:
+                    "name": str
+                    "data_type": str
+                    "default": str
+                    "nullable": bool
+            indexes : list of index dicts
+                index
+                key/value:
+                    "name": str
+                    "type": str
+                    "is_unique": bool
+                    "is_primary_key": bool
+                    "is_unique_constraint": bool
+                    "is_disabled": bool,
+                    "column_names": str
+            foreign_keys : list of foreign key dicts
+                foreign_key
+                key/value:
+                    "foreign_key_name": str
+                    "referencing_table": str
+                    "referencing_column": str
+                    "referenced_table": str
+                    "referenced_column": str
+            partitions: partition dict
+                partition
+                key/value:
+                    "partition_count": int
+        """
+        if len(table_list) == 0:
+            return
+        #check for special characters as we don't have ids
+        table_name_to_table_index = {}
+        table_names = ""
+        for i, table in enumerate(table_list):
+            table_name_to_table_index[table["name"]] = i
+            table_names += '"'+str(table["name"])+'",'
+        #remove the last coma
+        table_names = table_names[:-1]
+        total_columns_number = self._populate_with_columns_data(
+            table_name_to_table_index, table_list, table_names, db_name, cursor
+        )
+        #self._populate_with_partitions_data(table_ids, id_to_table_data, cursor)
+        #self._populate_with_foreign_keys_data(table_ids, id_to_table_data, cursor)
+        #self._populate_with_index_data(table_ids, id_to_table_data, cursor)
+        return total_columns_number, table_list
+
+    @tracked_method(agent_check_getter=agent_check_getter)
+    def _populate_with_columns_data(self, table_name_to_table_index, table_list, table_names, db_name, cursor):
+        #tables_info = execute_query(SQL_TABLES, cursor, convert_results_to_str=True, parameter=schema["id"])
+        #TODO add convert to string to cursor run and make it common or may be make common execute query
+
+        #TODO can we pass a first argument directly to driver or also need format ?
+
+        self._cursor_run(
+            cursor,
+        query = SQL_COLUMNS.format(db_name, table_names)
+        )
+        rows = cursor.fetchall()
+        #rows = [dict(zip(columns, [str(item) for item in row])) for row in cursor.fetchall()]
+        #May be rows are different ? 
+        #columns = [dict(row) for row in rows]
+        for row in rows:
+            #TODO for others check if we need to convert to string so to be like in sqlserver
+            table_name = str(row.pop("table_name"))
+            table_list[table_name_to_table_index[table_name]]["columns"] = row
+            if "nullable" in row:
+                if row["nullable"].lower() == "YES":
+                    row["nullable"] = True
+                else:
+                    row["nullable"] = False
+        return len(rows)
+            
+        cursor.execute(SQL_COLUMNS.format(table_ids, schema["name"]))
+        data = cursor.fetchall()
+        # AS default - cannot be used in sqlserver query as this word is reserved
+        #columns = [
+        #    "default" if str(i[0]).lower() == "column_default" else str(i[0]).lower() for i in cursor.description
+        #]
+        rows = [dict(zip(columns, [str(item) for item in row])) for row in data]
+        for row in rows:
+            table_name = str(row.get("table_name"))
+            table_id = name_to_id.get(table_name)
+            row.pop("table_name", None)
+            if "nullable" in row:
+                if row["nullable"].lower() == "no" or row["nullable"].lower() == "false":
+                    row["nullable"] = False
+                else:
+                    row["nullable"] = True
+            id_to_table_data.get(table_id)["columns"] = id_to_table_data.get(table_id).get("columns", []) + [row]
+        return len(data)
+
+
+
+
