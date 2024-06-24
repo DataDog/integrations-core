@@ -85,6 +85,22 @@ SQL_GROUP_REPLICATION_PLUGIN_STATUS = """\
 SELECT plugin_status
 FROM information_schema.plugins WHERE plugin_name='group_replication'"""
 
+#TODO check 'mysql', 'performance_schema', 'information_schema' - is this correct
+SQL_DATABASES = """
+SELECT schema_name as `name`,default_character_set_name,default_collation_name FROM information_schema.SCHEMATA
+WHERE schema_name not in ('mysql', 'performance_schema', 'information_schema')"""
+
+SQL_TABLES = """\
+SELECT table_name as `name` FROM information_schema.TABLES WHERE TABLE_SCHEMA = "{}"
+"""
+
+#do we have ? that can be replaced by the driver
+SQL_COLUMNS = """\
+SELECT table_name, column_name as `name`, data_type, column_default as `default` , is_nullable as `nullable` ,ordinal_position
+FROM information_schema.COLUMNS
+WHERE TABLE_SCHEMA = "{}" AND TABLE_NAME IN ({});
+"""
+
 QUERY_DEADLOCKS = {
     'name': 'information_schema.INNODB_METRICS.lock_deadlocks',
     'query': """

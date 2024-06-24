@@ -10,7 +10,7 @@ import pymysql
 from datadog_checks.mysql.cursor import CommenterDictCursor
 
 from .util import connect_with_autocommit
-
+from datadog_checks.mysql.schemas import Schemas
 try:
     import datadog_agent
 except ImportError:
@@ -66,8 +66,9 @@ class MySQLMetadata(DBMAsyncJob):
         self._connection_args = connection_args
         self._db = None
         self._check = check
+        self._schemas = Schemas(self, check, config)
 
-    def _get_db_connection(self):
+    def get_db_connection(self):
         """
         lazy reconnect db
         pymysql connections are not thread safe so we can't reuse the same connection from the main check
@@ -104,6 +105,8 @@ class MySQLMetadata(DBMAsyncJob):
 
     def run_job(self):
         self.report_mysql_metadata()
+        #Tags are set in DBMAsync by a call to run_job_loop in MySQL
+        self._schemas._collect_schemas_data(self._tags, )
 
     @tracked_method(agent_check_getter=attrgetter('_check'))
     def report_mysql_metadata(self):
@@ -114,7 +117,7 @@ class MySQLMetadata(DBMAsyncJob):
             else MARIADB_TABLE_NAME
         )
         query = SETTINGS_QUERY.format(table_name=table_name)
-        with closing(self._get_db_connection().cursor(CommenterDictCursor)) as cursor:
+        with closing(self.get_db_connection().cursor(CommenterDictCursor)) as cursor:
             self._cursor_run(
                 cursor,
                 query,

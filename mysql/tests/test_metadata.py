@@ -6,7 +6,7 @@ import pytest
 from datadog_checks.mysql import MySql
 
 from . import common
-
+import pdb
 
 @pytest.fixture
 def dbm_instance(instance_complex):
@@ -22,6 +22,7 @@ def dbm_instance(instance_complex):
 @pytest.mark.usefixtures('dd_environment')
 def test_collect_mysql_settings(aggregator, dbm_instance, dd_run_check):
     # test to make sure we continue to support the old key
+    pdb.set_trace()
     mysql_check = MySql(common.CHECK_NAME, {}, instances=[dbm_instance])
     dd_run_check(mysql_check)
     dbm_metadata = aggregator.get_event_platform_events("dbm-metadata")
