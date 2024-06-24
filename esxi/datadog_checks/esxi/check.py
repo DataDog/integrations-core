@@ -15,7 +15,6 @@ from six import iteritems
 
 from datadog_checks.base import AgentCheck, is_affirmative
 from datadog_checks.base.utils.common import to_string
-from datadog_checks.base.utils.time import get_timestamp
 
 from .constants import (
     ALL_RESOURCES,
@@ -77,8 +76,6 @@ class EsxiCheck(AgentCheck):
                 self.proxy_port = parsed_proxy.port
         self.conn = None
         self.content = None
-        self.last_connection_time = get_timestamp()
-
         self.check_initializations.append(self.initiate_api_connection)
 
     def initiate_api_connection(self):
