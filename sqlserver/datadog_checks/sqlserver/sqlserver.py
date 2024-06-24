@@ -135,7 +135,7 @@ class SQLServer(AgentCheck):
         self.procedure_metrics = SqlserverProcedureMetrics(self, self._config)
         self.sql_metadata = SqlserverMetadata(self, self._config)
         self.activity = SqlserverActivity(self, self._config)
-        self.agent_activity = SqlserverAgentHistory(self, self._config)
+        self.agent_history = SqlserverAgentHistory(self, self._config)
 
         self.static_info_cache = TTLCache(
             maxsize=100,
@@ -774,8 +774,8 @@ class SQLServer(AgentCheck):
             if self._config.autodiscovery and self._config.autodiscovery_db_service_check:
                 self._check_database_conns()
             if self._config.dbm_enabled:
-                if is_affirmative(self.instance.get("TODO create config change", False)):
-                    self.agent_activity.run_job_loop(self.tags)
+                if is_affirmative(self.instance.get("include_agent_jobs", False)):
+                    self.agent_history.run_job_loop(self.tags)
                 else:
                     self.log.warning(
                         "agent jobs disabled"
