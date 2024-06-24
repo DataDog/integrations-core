@@ -1,7 +1,5 @@
 import pytest
-import pyodbc
 import time
-import sys
 from datadog_checks.sqlserver import SQLServer
 
 from .common import (
@@ -127,7 +125,7 @@ AGENT_ACTIVITY_STEPS_QUERY = """\
         AND aj.last_executed_step_id = cs.step_id
 """
 
-JOB_CREATION_QUERY="""\
+JOB_CREATION_QUERY = """\
 EXEC msdb.dbo.sp_add_job
     @job_name = 'Job 1'
 EXEC msdb.dbo.sp_add_jobstep
@@ -155,7 +153,7 @@ EXEC msdb.dbo.sp_add_job
     @job_name = 'Job 2'
 """
 
-HISTORY_INSERTION_QUERY="""\
+HISTORY_INSERTION_QUERY = """\
 INSERT INTO msdb.dbo.sysjobhistory (
     job_id,
     step_id,
@@ -193,7 +191,7 @@ VALUES (
 );
 """
 
-ACTIVITY_INSERTION_QUERY="""\
+ACTIVITY_INSERTION_QUERY = """\
 INSERT INTO msdb.dbo.sysjobactivity (
     session_id,
     job_id,
@@ -210,6 +208,7 @@ VALUES (
 );
 """
 
+
 @pytest.mark.usefixtures('dd_environment')
 def test_connection_with_agent_history(instance_docker):
     check = SQLServer(CHECK_NAME, {}, [instance_docker])
@@ -217,11 +216,12 @@ def test_connection_with_agent_history(instance_docker):
 
     with check.connection.open_managed_default_connection():
         with check.connection.get_managed_cursor() as cursor:
-            last_instance_id_filter="\n\t\tHAVING MIN(sjh2.instance_id) > 10"
+            last_instance_id_filter = "\n\t\tHAVING MIN(sjh2.instance_id) > 10"
             query = AGENT_HISTORY_QUERY.format(last_instance_id_filter=last_instance_id_filter)
             cursor.execute(query)
             assert query == FORMATTED_HISTORY_QUERY
     check.cancel()
+
 
 @pytest.mark.usefixtures('dd_environment')
 def test_connection_with_agent_activity_duration(instance_docker):
@@ -233,6 +233,7 @@ def test_connection_with_agent_activity_duration(instance_docker):
             cursor.execute(AGENT_ACTIVITY_DURATION_QUERY)
     check.cancel()
 
+
 @pytest.mark.usefixtures('dd_environment')
 def test_connection_with_agent_activity_steps(instance_docker):
     check = SQLServer(CHECK_NAME, {}, [instance_docker])
@@ -242,6 +243,7 @@ def test_connection_with_agent_activity_steps(instance_docker):
         with check.connection.get_managed_cursor() as cursor:
             cursor.execute(AGENT_ACTIVITY_STEPS_QUERY)
     check.cancel()
+
 
 @pytest.mark.usefixtures('dd_environment')
 def test_history_output(instance_docker, sa_conn):
@@ -254,7 +256,7 @@ def test_history_output(instance_docker, sa_conn):
             # job 1 completes once, job 2 completes twice, an instance of job 1 is still in progress
             # should result in 7 steps of job history events to submit
             job_and_step_series = [(1, 1), (1, 2), (2, 1), (1, 0), (2, 0), (1, 1), (2, 1), (2, 0), (2, 1)]
-            for (job_number, step_id) in (job_and_step_series):
+            for job_number, step_id in job_and_step_series:
                 query = HISTORY_INSERTION_QUERY.format(job_number=job_number, step_id=step_id)
                 cursor.execute(query)
 
@@ -262,7 +264,7 @@ def test_history_output(instance_docker, sa_conn):
     check.initialize_connection()
     with check.connection.open_managed_default_connection():
         with check.connection.get_managed_cursor() as cursor:
-            last_instance_id_filter="\n\t\tHAVING MIN(sjh2.instance_id) > 0"
+            last_instance_id_filter = "\n\t\tHAVING MIN(sjh2.instance_id) > 0"
             query = AGENT_HISTORY_QUERY.format(last_instance_id_filter=last_instance_id_filter)
             cursor.execute(query)
             results = cursor.fetchall()
@@ -272,8 +274,11 @@ def test_history_output(instance_docker, sa_conn):
             query = AGENT_HISTORY_QUERY.format(last_instance_id_filter=last_instance_id_filter)
             cursor.execute(query)
             results = cursor.fetchall()
-            assert len(results) == 4, "should only have 4 steps associated with completed jobs when filtering with minimum instance_id, all steps from a job that started before filter instance should be collected if it finished after the filter instance"
+            assert (
+                len(results) == 4
+                ), "should only have 4 steps associated with completed jobs when filtering with minimum instance_id, all steps from a job that started before filter instance should be collected if it finished after the filter instance"
     check.cancel()
+
 
 def test_agent_jobs_integration(aggregator, dd_run_check, instance_docker, sa_conn):
     with sa_conn as conn:
@@ -290,12 +295,20 @@ def test_agent_jobs_integration(aggregator, dd_run_check, instance_docker, sa_co
                 assert activity[6] == 1
     instance_docker['dbm'] = True
     instance_docker['include_agent_jobs'] = True
-    check = SQLServer(CHECK_NAME, {}, [instance_docker])        
+    instance_tags = set(instance_docker.get('tags', []))
+    expected_instance_tags = {t for t in instance_tags if not t.startswith('dd.internal')}
+    check = SQLServer(CHECK_NAME, {}, [instance_docker])
     dd_run_check(check)
     dbm_activity = aggregator.get_event_platform_events("dbm-activity")
     job_events = [e for e in dbm_activity if (e.get('sqlserver_job_history', None) is not None)]
     assert len(job_events) == 1, "should have exactly one job history event"
     job_event = job_events[0]
+    assert job_event['host'] == "stubbed.hostname", "wrong hostname"
+    assert job_event['dbm_type'] == "activity", "wrong dbm_type"
+    assert job_event['ddsource'] == "sqlserver", "wrong source"
+    assert job_event['ddagentversion'], "missing ddagentversion"
+    assert set(job_event['ddtags']) == expected_instance_tags, "wrong instance tags activity"
+    assert type(job_event['collection_interval']) in (float, int), "invalid collection_interval"
     history_rows = job_event['sqlserver_job_history']
     assert len(history_rows) == 7, "should have 7 rows of history associated with new completed jobs"
     job_1_step_1_history = history_rows[0]
@@ -320,7 +333,7 @@ def test_agent_jobs_integration(aggregator, dd_run_check, instance_docker, sa_co
     assert len(job_events) == 1, "successive checks should not create new events for same history entries"
     with sa_conn as conn:
         with conn.cursor() as cursor:
-            query = HISTORY_INSERTION_QUERY.format(job_number=2, step_id=0)            
+            query = HISTORY_INSERTION_QUERY.format(job_number=2, step_id=0) 
             cursor.execute(query)
     time.sleep(10)
     dd_run_check(check)
@@ -330,3 +343,5 @@ def test_agent_jobs_integration(aggregator, dd_run_check, instance_docker, sa_co
     new_job_event = job_events[1]
     new_history_rows = new_job_event['sqlserver_job_history']
     assert len(new_history_rows) == 2, "should have 2 rows of history associated with new completed jobs"
+    check.cancel()
+    

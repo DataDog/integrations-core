@@ -134,3 +134,4 @@ class SqlserverAgentHistory(DBMAsyncJob):
                 self.log.info(payload)
                 # TODO figure out where this payload should go
                 self._check.database_monitoring_query_activity(payload)
+                
