@@ -17,7 +17,7 @@ from datadog_checks.base.utils.db.utils import default_json_event_encoding, reso
 from datadog_checks.base.utils.serialization import json
 from datadog_checks.sqlserver.activity import SqlserverActivity
 from datadog_checks.sqlserver.config import SQLServerConfig
-from datadog_checks.sqlserver.agent_activity import SqlserverAgentActivity
+from datadog_checks.sqlserver.agent_history import SqlserverAgentHistory
 from datadog_checks.sqlserver.database_metrics import (
     SqlserverDatabaseBackupMetrics,
     SqlserverDBFragmentationMetrics,
@@ -135,7 +135,7 @@ class SQLServer(AgentCheck):
         self.procedure_metrics = SqlserverProcedureMetrics(self, self._config)
         self.sql_metadata = SqlserverMetadata(self, self._config)
         self.activity = SqlserverActivity(self, self._config)
-        self.agent_activity = SqlserverAgentActivity(self, self._config)
+        self.agent_activity = SqlserverAgentHistory(self, self._config)
 
         self.static_info_cache = TTLCache(
             maxsize=100,
