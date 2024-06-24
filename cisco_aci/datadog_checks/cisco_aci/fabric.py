@@ -270,6 +270,7 @@ class Fabric:
             'system_ip:{}'.format(node.attributes.address),
             'device_ip:{}'.format(node.attributes.address),
             'id:{}:{}'.format(self.namespace, node.attributes.address),
+            "source:cisco-aci",
         ]
         device = DeviceMetadata(
             id='{}:{}'.format(self.namespace, node.attributes.address),
