@@ -28,9 +28,9 @@ def test_allowed_event_list():
 
 
 @pytest.mark.usefixtures('mock_type', 'mock_threadpool', 'mock_api', 'mock_rest_api')
-def test_events_collection(aggregator, realtime_instance):
+def test_events_collection(aggregator, realtime_instance, dd_run_check):
     check = VSphereCheck('vsphere', {}, [realtime_instance])
-    check.initiate_api_connection()
+    dd_run_check(check)
     time_initial = check.latest_event_query
 
     time1 = dt.datetime.now()
@@ -123,7 +123,7 @@ def test_events_collection(aggregator, realtime_instance):
     aggregator.reset()
     realtime_instance['event_resource_filters'] = ['vm', 'host', 'DATAcenter', 'Cluster', 'datastore']
     check = VSphereCheck('vsphere', {}, [realtime_instance])
-    check.initiate_api_connection()
+    dd_run_check(check)
 
     check.api.mock_events = [event2, event3, event3, event4]
     check.check(None)
@@ -143,7 +143,7 @@ def test_events_collection(aggregator, realtime_instance):
     aggregator.reset()
     realtime_instance['event_resource_filters'] = ['host', 'datacenter', 'cluster', 'datastore']
     check = VSphereCheck('vsphere', {}, [realtime_instance])
-    check.initiate_api_connection()
+    dd_run_check(check)
 
     check.api.mock_events = [event2, event3, event3, event4]
     check.check(None)
@@ -162,7 +162,7 @@ def test_events_collection(aggregator, realtime_instance):
     aggregator.reset()
     realtime_instance['event_resource_filters'] = []
     check = VSphereCheck('vsphere', {}, [realtime_instance])
-    check.initiate_api_connection()
+    dd_run_check(check)
 
     check.api.mock_events = [event2, event3, event3, event4]
     check.check(None)
@@ -175,7 +175,7 @@ def test_events_collection(aggregator, realtime_instance):
 
 
 @pytest.mark.usefixtures('mock_type', 'mock_threadpool', 'mock_api', 'mock_rest_api')
-def test_include_events_ok(aggregator, realtime_instance):
+def test_include_events_ok(aggregator, realtime_instance, dd_run_check):
     realtime_instance['include_events'] = [
         {"event": "AlarmStatusChangedEvent", "excluded_messages": ["Gray to Green", "Green to Gray"]}
     ]
@@ -184,7 +184,7 @@ def test_include_events_ok(aggregator, realtime_instance):
         {},
         [realtime_instance],
     )
-    check.initiate_api_connection()
+    dd_run_check(check)
 
     event1 = vim.event.AlarmStatusChangedEvent()
     event1.createdTime = dt.datetime.now()
@@ -206,7 +206,7 @@ def test_include_events_ok(aggregator, realtime_instance):
 
 
 @pytest.mark.usefixtures('mock_type', 'mock_threadpool', 'mock_api', 'mock_rest_api')
-def test_include_events_filtered(aggregator, realtime_instance):
+def test_include_events_filtered(aggregator, realtime_instance, dd_run_check):
     realtime_instance['include_events'] = [
         {"event": "AlarmStatusChangedEvent", "excluded_messages": ["Gray to Green", "Green to Gray"]}
     ]
@@ -215,7 +215,7 @@ def test_include_events_filtered(aggregator, realtime_instance):
         {},
         [realtime_instance],
     )
-    check.initiate_api_connection()
+    dd_run_check(check)
 
     event1 = vim.event.AlarmStatusChangedEvent()
     event1.createdTime = dt.datetime.now()
@@ -236,7 +236,7 @@ def test_include_events_filtered(aggregator, realtime_instance):
 
 
 @pytest.mark.usefixtures('mock_type', 'mock_threadpool', 'mock_api', 'mock_rest_api')
-def test_include_events_incorrectly_formatted_event(aggregator, realtime_instance):
+def test_include_events_incorrectly_formatted_event(aggregator, realtime_instance, dd_run_check):
     realtime_instance['include_events'] = [
         {"event": "IncorrectlyFormattedEvent", "excluded_messages": ["Gray to Green", "Green to Gray"]}
     ]
@@ -245,7 +245,7 @@ def test_include_events_incorrectly_formatted_event(aggregator, realtime_instanc
         {},
         [realtime_instance],
     )
-    check.initiate_api_connection()
+    dd_run_check(check)
 
     event1 = vim.event.AlarmStatusChangedEvent()
     event1.createdTime = dt.datetime.now()
@@ -266,14 +266,14 @@ def test_include_events_incorrectly_formatted_event(aggregator, realtime_instanc
 
 
 @pytest.mark.usefixtures('mock_type', 'mock_threadpool', 'mock_api', 'mock_rest_api')
-def test_include_events_ok_new_event_type(aggregator, realtime_instance):
+def test_include_events_ok_new_event_type(aggregator, realtime_instance, dd_run_check):
     realtime_instance['include_events'] = [{"event": "AlarmAcknowledgedEvent", "excluded_messages": ["Remove Alarm"]}]
     check = VSphereCheck(
         'vsphere',
         {},
         [realtime_instance],
     )
-    check.initiate_api_connection()
+    dd_run_check(check)
 
     event1 = vim.event.AlarmAcknowledgedEvent()
     event1.createdTime = dt.datetime.now()
@@ -294,7 +294,7 @@ def test_include_events_ok_new_event_type(aggregator, realtime_instance):
 
 
 @pytest.mark.usefixtures('mock_type', 'mock_threadpool', 'mock_api', 'mock_rest_api')
-def test_include_events_ok_new_resource(aggregator, realtime_instance):
+def test_include_events_ok_new_resource(aggregator, realtime_instance, dd_run_check):
     realtime_instance['include_events'] = [{"event": "AlarmAcknowledgedEvent", "excluded_messages": ["Remove Alarm"]}]
     realtime_instance['event_resource_filters'] = ['storage_pod']
     check = VSphereCheck(
@@ -302,7 +302,7 @@ def test_include_events_ok_new_resource(aggregator, realtime_instance):
         {},
         [realtime_instance],
     )
-    check.initiate_api_connection()
+    dd_run_check(check)
 
     event1 = vim.event.AlarmAcknowledgedEvent()
     event1.createdTime = dt.datetime.now()
@@ -323,7 +323,7 @@ def test_include_events_ok_new_resource(aggregator, realtime_instance):
 
 
 @pytest.mark.usefixtures('mock_type', 'mock_threadpool', 'mock_api', 'mock_rest_api')
-def test_include_events_excluded_message_new_resource(aggregator, realtime_instance):
+def test_include_events_excluded_message_new_resource(aggregator, realtime_instance, dd_run_check):
     realtime_instance['include_events'] = [
         {"event": "AlarmAcknowledgedEvent", "excluded_messages": ["The Alarm was acknowledged"]}
     ]
@@ -333,7 +333,7 @@ def test_include_events_excluded_message_new_resource(aggregator, realtime_insta
         {},
         [realtime_instance],
     )
-    check.initiate_api_connection()
+    dd_run_check(check)
 
     event1 = vim.event.AlarmAcknowledgedEvent()
     event1.createdTime = dt.datetime.now()
@@ -352,7 +352,7 @@ def test_include_events_excluded_message_new_resource(aggregator, realtime_insta
 
 
 @pytest.mark.usefixtures('mock_type', 'mock_threadpool', 'mock_api', 'mock_rest_api')
-def test_include_events_empty_event_resource_filters(aggregator, realtime_instance):
+def test_include_events_empty_event_resource_filters(aggregator, realtime_instance, dd_run_check):
     realtime_instance['include_events'] = [{"event": "AlarmAcknowledgedEvent", "excluded_messages": ["Remove Alarm"]}]
     realtime_instance['event_resource_filters'] = []
     check = VSphereCheck(
@@ -360,7 +360,7 @@ def test_include_events_empty_event_resource_filters(aggregator, realtime_instan
         {},
         [realtime_instance],
     )
-    check.initiate_api_connection()
+    dd_run_check(check)
 
     event1 = vim.event.AlarmAcknowledgedEvent()
     event1.createdTime = dt.datetime.now()
