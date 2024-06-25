@@ -1,5 +1,3 @@
-
-
 networks:
   network:
 services:

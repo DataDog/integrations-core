@@ -1,5 +1,3 @@
-
-
 volumes:
     kong_data: {}
 
