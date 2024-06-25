@@ -135,6 +135,9 @@ def get_response(check, resource, **kwargs):
             check.log.error("Access denied. Enable guest authentication or check user permissions.")
         check.log.exception("Couldn't fetch resource %s, got code %s", resource_name, resp.status_code)
         raise
+    except requests.exceptions.HTTPError: 
+        if resp.status_code == 404: 
+            check.log.exception("Resource %s not found, got code %s", resource_name, resp.status_code)
     except Exception as e:
         check.log.exception("Couldn't fetch resource %s, unhandled exception %s", resource_name, str(e))
         raise
