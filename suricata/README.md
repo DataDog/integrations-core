@@ -38,9 +38,9 @@ Linux command
        service: suricata
        source: suricata
    ```
-   **NOTE**: Make sure you have `eve-log` output logging enabled in `suricata.yaml` file of suricata product and ensure to address the below points.
+   **NOTE**: Make sure you have `eve-log` output logging enabled in the `suricata.yaml` file of suricata product and ensure to address the below points.
    1. In `suricata.yaml`, Keep `filetype` parameter as `regular` in `eve-log` configurations.
-   2. The default path of suricata's output would be `/var/log/suricata` and `filename` would be `eve.json`. If you have changed default path and filename then update the `path` parameter in `conf.yaml` accordingly.
+   2. The default path of suricata's output would be `/var/log/suricata` and `filename` would be `eve.json`. If you have changed the default path and filename then update the `path` parameter in `conf.yaml` accordingly.
 
 3. [Restart the Agent][3].
 
@@ -52,11 +52,12 @@ Linux command
 
 ### Logs
 
-The Suricata integration collects following log-types.
+The Suricata integration collects the following log-types.
 
 | Format     | Event Types    |
 | ---------  | -------------- |
 | JSON | alert, anomaly, http, dns, ftp, ftp_data, tls. tftp, smb, ssh, flow, rdp, dhcp, arp|
+
 ### Metrics
 
 The Suricata does not include any metrics.

@@ -15,6 +15,41 @@
         "caption": "Suricata - Overview",
         "image_url": "images/suricata_overview.png",
         "media_type": "image"
+      },
+      {
+        "caption": "Suricata - Alert",
+        "image_url": "images/suricata_alert.png",
+        "media_type": "image"
+      },
+      {
+        "caption": "Suricata - Anomaly",
+        "image_url": "images/suricata_anomaly.png",
+        "media_type": "image"
+      },
+      {
+        "caption": "Suricata - Flow",
+        "image_url": "images/suricata_flow.png",
+        "media_type": "image"
+      },
+      {
+        "caption": "Suricata - DNS",
+        "image_url": "images/suricata_dns.png",
+        "media_type": "image"
+      },
+      {
+        "caption": "Suricata - DHCP",
+        "image_url": "images/suricata_dhcp.png",
+        "media_type": "image"
+      },
+      {
+        "caption": "Suricata - Network Protocols",
+        "image_url": "images/suricata_network_protocols.png",
+        "media_type": "image"
+      },
+      {
+        "caption": "Suricata - SMB (DCERPC, NTLMSSP, Kerberos)",
+        "image_url": "images/suricata_smb.png",
+        "media_type": "image"
       }
     ],
     "classifier_tags": [
