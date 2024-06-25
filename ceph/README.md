@@ -83,7 +83,7 @@ Need help? Contact [Datadog support][9].
 
 ## Further Reading
 
-- [Monitor Ceph: From node status to cluster-wide performance][10]
+{{< partial name="whats-next/whats-next.html" >}}
 
 [1]: https://raw.githubusercontent.com/DataDog/integrations-core/master/ceph/images/ceph_dashboard.png
 [2]: https://app.datadoghq.com/account/settings/agent/latest
@@ -94,4 +94,3 @@ Need help? Contact [Datadog support][9].
 [7]: https://github.com/DataDog/integrations-core/blob/master/ceph/metadata.csv
 [8]: https://github.com/DataDog/integrations-core/blob/master/ceph/assets/service_checks.json
 [9]: https://docs.datadoghq.com/help/
-[10]: https://www.datadoghq.com/blog/monitor-ceph-datadog

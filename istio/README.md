@@ -207,11 +207,7 @@ Need help? Contact [Datadog support][17].
 
 ## Further Reading
 
-Additional helpful documentation, links, and articles:
-
-- [Monitor your Istio service mesh with Datadog][18]
-- [Learn how Datadog collects key metrics to monitor Istio][19]
-- [How to monitor Istio with Datadog][3]
+{{< partial name="whats-next/whats-next.html" >}}
 
 [1]: https://www.datadoghq.com/blog/monitor-istio-with-npm/
 [2]: https://docs.datadoghq.com/tracing/setup_overview/proxy_setup/?tab=istio
@@ -230,10 +226,7 @@ Additional helpful documentation, links, and articles:
 [15]: https://github.com/DataDog/integrations-core/blob/master/istio/metadata.csv
 [16]: https://github.com/DataDog/integrations-core/blob/master/istio/assets/service_checks.json
 [17]: https://docs.datadoghq.com/help/
-[18]: https://www.datadoghq.com/blog/monitor-istio-with-datadog
-[19]: https://www.datadoghq.com/blog/istio-metrics/
 [20]: https://docs.datadoghq.com/integrations/openmetrics/
-[21]: https://github.com/DataDog/integrations-core/blob/7.32.x/istio/datadog_checks/istio/data/conf.yaml.example
 [22]: https://istio.io/latest/docs/setup/install/
 [23]: https://istio.io/latest/docs/ops/deployment/architecture/
 [24]: https://docs.datadoghq.com/agent/kubernetes/integrations/?tab=file#configuration

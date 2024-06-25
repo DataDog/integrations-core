@@ -74,10 +74,7 @@ Need help? Contact [Datadog support][9].
 
 ## Further Reading
 
-Additional helpful documentation, links, and articles:
-
-- [Monitor the health of your Temporal Server with Datadog][12]
-
+{{< partial name="whats-next/whats-next.html" >}}
 
 [1]: https://temporal.io/
 [2]: https://app.datadoghq.com/account/settings/agent/latest
@@ -90,4 +87,3 @@ Additional helpful documentation, links, and articles:
 [9]: https://docs.datadoghq.com/help/
 [10]: https://docs.temporal.io/references/configuration#prometheus
 [11]: https://docs.temporal.io/references/configuration#log
-[12]: https://www.datadoghq.com/blog/temporal-server-integration/

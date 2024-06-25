@@ -652,13 +652,8 @@ Need help? Contact [Datadog support][20].
 
 ## Further Reading
 
-Additional helpful documentation, links, and articles:
+{{< partial name="whats-next/whats-next.html" >}}
 
-- [Key metrics for monitoring AWS Fargate][32]
-- [How to collect metrics and logs from AWS Fargate workloads][27]
-- [AWS Fargate monitoring with Datadog][28]
-
-[1]: http://docs.datadoghq.com/integrations/ecs_fargate/
 [2]: http://docs.datadoghq.com/integrations/amazon_eks/
 [3]: http://docs.datadoghq.com/integrations/system
 [4]: https://docs.datadoghq.com/getting_started/agent/autodiscovery/
@@ -684,12 +679,9 @@ Additional helpful documentation, links, and articles:
 [24]: http://docs.datadoghq.com/tracing/#send-traces-to-datadog
 [25]: http://docs.datadoghq.com/agent/cluster_agent/setup/
 [26]: https://docs.datadoghq.com/agent/kubernetes/daemonset_setup/?tab=k8sfile#process-collection
-[27]: https://www.datadoghq.com/blog/tools-for-collecting-aws-fargate-metrics/
-[28]: https://www.datadoghq.com/blog/aws-fargate-monitoring-with-datadog/
 [29]: https://docs.datadoghq.com/agent/kubernetes/?tab=helm#event-collection
 [30]: https://docs.datadoghq.com/infrastructure/livecontainers/#kubernetes-resources-view
 [31]: https://docs.datadoghq.com/agent/cluster_agent/clusterchecks/#overview
-[32]: https://www.datadoghq.com/blog/aws-fargate-metrics/
 [33]: https://github.com/kubernetes/kube-state-metrics
 [34]: https://docs.datadoghq.com/containers/guide/clustercheckrunners
 [35]: http://docs.datadoghq.com/agent/cluster_agent

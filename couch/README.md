@@ -120,7 +120,7 @@ Need help? Contact [Datadog support][11].
 
 ## Further Reading
 
-- [Monitoring CouchDB performance with Datadog][12]
+{{< partial name="whats-next/whats-next.html" >}}
 
 [1]: https://raw.githubusercontent.com/DataDog/integrations-core/master/couch/images/couchdb_dashboard.png
 [2]: https://app.datadoghq.com/account/settings/agent/latest
@@ -133,4 +133,3 @@ Need help? Contact [Datadog support][11].
 [9]: https://github.com/DataDog/integrations-core/blob/master/couch/metadata.csv
 [10]: https://github.com/DataDog/integrations-core/blob/master/couch/assets/service_checks.json
 [11]: https://docs.datadoghq.com/help/
-[12]: https://www.datadoghq.com/blog/monitoring-couchdb-with-datadog

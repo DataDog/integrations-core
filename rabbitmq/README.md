@@ -186,11 +186,7 @@ Need help? Contact [Datadog support][13].
 
 ## Further Reading
 
-Additional helpful documentation, links, and articles:
-
-- [Key metrics for RabbitMQ monitoring][15]
-- [Collecting metrics with RabbitMQ monitoring tools][16]
-- [Monitoring RabbitMQ performance with Datadog][17]
+{{< partial name="whats-next/whats-next.html" >}}
 
 [1]: https://raw.githubusercontent.com/DataDog/integrations-core/master/rabbitmq/images/rabbitmq_dashboard.png
 [2]: https://www.rabbitmq.com
@@ -206,9 +202,6 @@ Additional helpful documentation, links, and articles:
 [12]: https://github.com/DataDog/integrations-core/blob/master/rabbitmq/metadata.csv
 [13]: https://docs.datadoghq.com/help/
 [14]: https://github.com/DataDog/integrations-core/blob/master/rabbitmq/assets/service_checks.json
-[15]: https://www.datadoghq.com/blog/rabbitmq-monitoring
-[16]: https://www.datadoghq.com/blog/rabbitmq-monitoring-tools
-[17]: https://www.datadoghq.com/blog/monitoring-rabbitmq-performance-with-datadog
 [18]: https://docs.datadoghq.com/integrations/faq/tagging-rabbitmq-queues-by-tag-family/
 [19]: https://www.rabbitmq.com/prometheus.html
 [20]: https://www.rabbitmq.com/prometheus.html#default-endpoint

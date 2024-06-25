@@ -91,8 +91,7 @@ The Datadog vSphere integration collects metrics and events from your [TKG][13] 
 
 ## Further Reading
 
-- [Monitor vSphere with Datadog][16]
-
+{{< partial name="whats-next/whats-next.html" >}}
 
 [1]: https://raw.githubusercontent.com/DataDog/integrations-core/master/vsphere/images/vsphere_graph.png
 [2]: https://app.datadoghq.com/account/settings/agent/latest
@@ -108,4 +107,3 @@ The Datadog vSphere integration collects metrics and events from your [TKG][13] 
 [13]: https://tanzu.vmware.com/kubernetes-grid
 [14]: https://docs.datadoghq.com/containers/kubernetes/installation/?tab=operator
 [15]: https://docs.datadoghq.com/containers/kubernetes/distributions/?tab=operator#TKG
-[16]: https://www.datadoghq.com/blog/unified-vsphere-app-monitoring-datadog/#auto-discovery-across-vm-and-app-layers

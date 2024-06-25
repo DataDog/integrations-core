@@ -428,11 +428,7 @@ Need help? Contact [Datadog support][20].
 
 ## Further Reading
 
-Additional helpful documentation, links, and articles:
-
-- [How to monitor NGINX][21]
-- [How to collect NGINX metrics][22]
-- [How to monitor NGINX with Datadog][23]
+{{< partial name="whats-next/whats-next.html" >}}
 
 [1]: https://raw.githubusercontent.com/DataDog/integrations-core/master/nginx/images/nginx_dashboard.png
 [2]: https://nginx.org/en/docs/http/ngx_http_stub_status_module.html
@@ -454,6 +450,3 @@ Additional helpful documentation, links, and articles:
 [18]: https://github.com/DataDog/integrations-core/blob/master/nginx/assets/service_checks.json
 [19]: https://docs.datadoghq.com/logs/faq/why-do-my-logs-not-have-the-expected-timestamp/
 [20]: https://docs.datadoghq.com/help/
-[21]: https://www.datadoghq.com/blog/how-to-monitor-nginx
-[22]: https://www.datadoghq.com/blog/how-to-collect-nginx-metrics/index.html
-[23]: https://www.datadoghq.com/blog/how-to-monitor-nginx-with-datadog/index.html

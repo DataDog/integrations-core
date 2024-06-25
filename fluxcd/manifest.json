@@ -19,6 +19,12 @@
       "Supported OS::macOS",
       "Submitted Data Type::Metrics",
       "Submitted Data Type::Logs"
+    ],
+    "resources": [
+      {
+        "resource_type": "blog",
+        "url": "https://www.datadoghq.com/blog/container-native-integrations/#cicd-with-flux"
+      }
     ]
   },
   "author": {

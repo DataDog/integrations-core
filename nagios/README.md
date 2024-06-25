@@ -109,7 +109,7 @@ Need help? Contact [Datadog support][9].
 
 ## Further Reading
 
-- [Understand your Nagios alerts with Datadog][10]
+{{< partial name="whats-next/whats-next.html" >}}
 
 [1]: https://app.datadoghq.com/account/settings/agent/latest
 [2]: https://docs.datadoghq.com/agent/guide/agent-configuration-files/#agent-configuration-directory
@@ -120,4 +120,3 @@ Need help? Contact [Datadog support][9].
 [7]: https://docs.datadoghq.com/agent/kubernetes/integrations/
 [8]: https://docs.datadoghq.com/agent/guide/agent-commands/#agent-status-and-information
 [9]: https://docs.datadoghq.com/help/
-[10]: https://www.datadoghq.com/blog/nagios-monitoring

@@ -95,7 +95,7 @@ Need help? Contact [Datadog support][8].
 
 ## Further Reading
 
-- [Installing Datadog on Mesos with DC/OS][9]
+{{< partial name="whats-next/whats-next.html" >}}
 
 [1]: https://docs.datadoghq.com/integrations/mesos/#mesos-slave-integration
 [2]: https://raw.githubusercontent.com/DataDog/integrations-core/master/mesos_master/images/mesos_dashboard.png
@@ -105,4 +105,3 @@ Need help? Contact [Datadog support][8].
 [6]: https://github.com/DataDog/integrations-core/blob/master/mesos_master/metadata.csv
 [7]: https://github.com/DataDog/integrations-core/blob/master/mesos_master/assets/service_checks.json
 [8]: https://docs.datadoghq.com/help/
-[9]: https://www.datadoghq.com/blog/deploy-datadog-dcos

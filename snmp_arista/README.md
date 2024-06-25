@@ -26,15 +26,9 @@ Need help? Contact [Datadog support][4].
 
 ## Further Reading
 
-Additional helpful documentation, links, and articles:
-
-* [Monitor SNMP with Datadog][5]
-
+{{< partial name="whats-next/whats-next.html" >}}
 
 [1]: https://docs.datadoghq.com/network_performance_monitoring/devices/data
 [2]: https://docs.datadoghq.com/network_performance_monitoring/devices/setup
-[3]: https://github.com/DataDog/integrations-core/blob/master/snmp_arista/assets/service_checks.json
 [4]: https://docs.datadoghq.com/help/
-[5]: https://www.datadoghq.com/blog/monitor-snmp-with-datadog/
 [6]: https://docs.datadoghq.com/network_monitoring/devices/#vendor-profiles
-

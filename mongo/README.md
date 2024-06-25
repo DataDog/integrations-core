@@ -485,10 +485,7 @@ Need help? Contact [Datadog support][25].
 
 ## Further Reading
 
-Additional helpful documentation, links, and articles:
-
-- [Monitoring MongoDB performance metrics (WiredTiger)][26]
-- [Monitoring MongoDB performance metrics (MMAP)][27]
+{{< partial name="whats-next/whats-next.html" >}}
 
 [1]: https://raw.githubusercontent.com/DataDog/integrations-core/master/mongo/images/mongo_dashboard.png
 [2]: https://app.datadoghq.com/account/settings/agent/latest
@@ -515,5 +512,3 @@ Additional helpful documentation, links, and articles:
 [23]: https://docs.mongodb.org/manual/reference/command/dbStats
 [24]: https://github.com/DataDog/integrations-core/blob/master/mongo/assets/service_checks.json
 [25]: https://docs.datadoghq.com/help/
-[26]: https://www.datadoghq.com/blog/monitoring-mongodb-performance-metrics-wiredtiger
-[27]: https://www.datadoghq.com/blog/monitoring-mongodb-performance-metrics-mmap

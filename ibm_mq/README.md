@@ -300,9 +300,7 @@ Need help? Contact [Datadog support][12].
 
 ## Further Reading
 
-Additional helpful documentation, links, and articles:
-
-- [Monitor IBM MQ metrics and logs with Datadog][13]
+{{< partial name="whats-next/whats-next.html" >}}
 
 [1]: https://www.ibm.com/products/mq
 [2]: https://app.datadoghq.com/account/settings/agent/latest
@@ -316,7 +314,6 @@ Additional helpful documentation, links, and articles:
 [10]: https://github.com/DataDog/integrations-core/blob/master/ibm_mq/metadata.csv
 [11]: https://github.com/DataDog/integrations-core/blob/master/ibm_mq/assets/service_checks.json
 [12]: https://docs.datadoghq.com/help/
-[13]: https://www.datadoghq.com/blog/monitor-ibmmq-with-datadog
 [14]: https://www.ibm.com/docs/en/ibm-mq/9.1?topic=formats-reset-queue-statistics
 [15]: https://www.ibm.com/docs/en/ibm-mq/9.2?topic=reference-setmqaut-grant-revoke-authority
 [16]: https://www.ibm.com/docs/en/ibm-mq/9.2?topic=queues-dynamic-model

@@ -115,9 +115,7 @@ If the service is present in the output, permissions are the issue. To give the 
 
 ## Further Reading
 
-- [Monitoring Windows Server 2012][8]
-- [How to collect Windows Server 2012 metrics][9]
-- [Monitoring Windows Server 2012 with Datadog][10]
+{{< partial name="whats-next/whats-next.html" >}}
 
 [1]: https://app.datadoghq.com/account/settings/agent/latest
 [2]: https://docs.datadoghq.com/agent/guide/agent-configuration-files/#agent-configuration-directory
@@ -126,9 +124,6 @@ If the service is present in the output, permissions are the issue. To give the 
 [5]: https://docs.datadoghq.com/agent/guide/agent-commands/#agent-status-and-information
 [6]: https://github.com/DataDog/integrations-core/blob/master/windows_service/assets/service_checks.json
 [7]: https://docs.datadoghq.com/help/
-[8]: https://www.datadoghq.com/blog/monitoring-windows-server-2012
-[9]: https://www.datadoghq.com/blog/collect-windows-server-2012-metrics
-[10]: https://www.datadoghq.com/blog/windows-server-monitoring
 [11]: https://docs.python.org/3/howto/regex.html#regex-howto
 [12]: https://docs.datadoghq.com/getting_started/tagging/
 [13]: https://docs.datadoghq.com/getting_started/tagging/assigning_tags/

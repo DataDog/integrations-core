@@ -249,12 +249,7 @@ Need help? Contact [Datadog support][16].
 
 ## Further Reading
 
-Additional helpful documentation, links, and articles:
-
-- [Key metrics for CoreDNS monitoring][21]
-- [Tools for collecting metrics and logs from CoreDNS][22]
-- [How to monitor CoreDNS with Datadog][23]
-
+{{< partial name="whats-next/whats-next.html" >}}
 
 [1]: https://app.datadoghq.com/account/settings/agent/latest
 [2]: http://docs.datadoghq.com/agent/docker/integrations/?tab=docker
@@ -272,11 +267,7 @@ Additional helpful documentation, links, and articles:
 [14]: https://github.com/DataDog/integrations-core/blob/master/coredns/metadata.csv
 [15]: https://github.com/DataDog/integrations-core/blob/master/coredns/assets/service_checks.json
 [16]: http://docs.datadoghq.com/help
-[17]: https://docs.datadoghq.com/integrations/openmetrics
 [18]: https://github.com/DataDog/integrations-core/blob/7.32.x/coredns/datadog_checks/coredns/data/conf.yaml.example
 [19]: https://github.com/DataDog/integrations-core/blob/master/coredns/datadog_checks/coredns/data/auto_conf.yaml
 [20]: https://github.com/DataDog/integrations-core/blob/master/coredns/datadog_checks/coredns/data/conf.yaml.example
-[21]: https://www.datadoghq.com/blog/coredns-metrics/
-[22]: https://www.datadoghq.com/blog/coredns-monitoring-tools/
-[23]: https://www.datadoghq.com/blog/monitoring-coredns-with-datadog/
 [24]: https://docs.datadoghq.com/integrations/guide/versions-for-openmetrics-based-integrations

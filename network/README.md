@@ -121,7 +121,7 @@ The Network check does not include any service checks.
 
 ## Further Reading
 
-- [Build a network monitor on an HTTP check][10]
+{{< partial name="whats-next/whats-next.html" >}}
 
 [1]: https://raw.githubusercontent.com/DataDog/integrations-core/master/network/images/netdashboard.png
 [2]: https://app.datadoghq.com/account/settings/agent/latest
@@ -132,6 +132,4 @@ The Network check does not include any service checks.
 [7]: https://github.com/DataDog/integrations-core/blob/master/network/metadata.csv
 [8]: https://github.com/DataDog/integrations-core/blob/master/network/CHANGELOG.md#1110--2019-05-14
 [9]: https://docs.datadoghq.com/integrations/guide/send-tcp-udp-host-metrics-to-the-datadog-api/
-[10]: https://docs.datadoghq.com/monitors/monitor_types/network/
 [11]: https://docs.datadoghq.com/containers/kubernetes/installation/?tab=helm#installation
-[12]: https://docs.aws.amazon.com/AWSEC2/latest/UserGuide/monitoring-network-performance-ena.html

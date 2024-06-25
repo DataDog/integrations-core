@@ -76,9 +76,7 @@ Need help? Contact [Datadog support][11].
 
 ## Further Reading
 
-- [How to monitor Cassandra performance metrics][12]
-- [How to collect Cassandra metrics][13]
-- [Monitoring Cassandra with Datadog][14]
+{{< partial name="whats-next/whats-next.html" >}}
 
 [1]: https://raw.githubusercontent.com/DataDog/integrations-core/master/cassandra_nodetool/images/cassandra_dashboard_2.png
 [2]: https://github.com/DataDog/integrations-core/tree/master/cassandra
@@ -91,7 +89,4 @@ Need help? Contact [Datadog support][11].
 [9]: https://github.com/DataDog/integrations-core/blob/master/cassandra_nodetool/metadata.csv
 [10]: https://github.com/DataDog/integrations-core/blob/master/cassandra_nodetool/assets/service_checks.json
 [11]: https://docs.datadoghq.com/help/
-[12]: https://www.datadoghq.com/blog/how-to-monitor-cassandra-performance-metrics
-[13]: https://www.datadoghq.com/blog/how-to-collect-cassandra-metrics
-[14]: https://www.datadoghq.com/blog/monitoring-cassandra-with-datadog
 [15]: https://github.com/prometheus/jmx_exporter

@@ -58,7 +58,7 @@ Need help? Contact [Datadog support][8].
 
 ## Further Reading
 
-- [Built a network monitor on an http check][9]
+{{< partial name="whats-next/whats-next.html" >}}
 
 [1]: http://man7.org/linux/man-pages/man8/nfsiostat.8.html
 [2]: https://app.datadoghq.com/account/settings/agent/latest
@@ -68,4 +68,3 @@ Need help? Contact [Datadog support][8].
 [6]: https://docs.datadoghq.com/agent/guide/agent-commands/#agent-status-and-information
 [7]: https://github.com/DataDog/integrations-core/blob/master/nfsstat/metadata.csv
 [8]: https://docs.datadoghq.com/help/
-[9]: https://docs.datadoghq.com/monitors/monitor_types/network/

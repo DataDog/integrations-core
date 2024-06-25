@@ -114,7 +114,7 @@ Need help? Contact [Datadog support][10].
 
 ## Further Reading
 
-- [Monitor key TokuMX metrics for MongoDB applications][11].
+{{< partial name="whats-next/whats-next.html" >}}
 
 [1]: https://app.datadoghq.com/account/settings/agent/latest
 [2]: https://docs.mongodb.com/manual/security/
@@ -126,4 +126,3 @@ Need help? Contact [Datadog support][10].
 [8]: https://github.com/DataDog/integrations-core/blob/master/tokumx/metadata.csv
 [9]: https://github.com/DataDog/integrations-core/blob/master/tokumx/assets/service_checks.json
 [10]: https://docs.datadoghq.com/help/
-[11]: https://www.datadoghq.com/blog/monitor-key-tokumx-metrics-mongodb-applications

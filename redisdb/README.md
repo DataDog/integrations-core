@@ -361,9 +361,7 @@ Configure a `password` in `redisdb.yaml`.
 
 ## Further Reading
 
-Additional helpful documentation, links, and articles:
-
-- [How to monitor Redis performance metrics][26]
+{{< partial name="whats-next/whats-next.html" >}}
 
 [1]: https://app.datadoghq.com/account/settings/agent/latest
 [2]: https://docs.datadoghq.com/agent/guide/agent-configuration-files/#agent-configuration-directory
@@ -389,4 +387,3 @@ Additional helpful documentation, links, and articles:
 [22]: https://docs.datadoghq.com/agent/guide/agent-commands/#agent-status-and-information
 [23]: https://github.com/DataDog/integrations-core/blob/master/redisdb/metadata.csv
 [24]: https://github.com/DataDog/integrations-core/blob/master/redisdb/assets/service_checks.json
-[26]: https://www.datadoghq.com/blog/how-to-monitor-redis-performance-metrics

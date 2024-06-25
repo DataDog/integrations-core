@@ -15,6 +15,12 @@
       "Category::Log Collection",
       "Supported OS::Linux",
       "Supported OS::macOS"
+    ],
+    "resources": [
+      {
+        "resource_type": "blog",
+        "url": "https://www.datadoghq.com/blog/monitor-gunicorn-performance"
+      }
     ]
   },
   "author": {

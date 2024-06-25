@@ -16,6 +16,16 @@
       "Supported OS::Linux",
       "Supported OS::Windows",
       "Supported OS::macOS"
+    ],
+    "resources": [
+      {
+        "resource_type": "blog",
+        "url": "https://www.datadoghq.com/blog/statsd"
+      },
+      {
+        "resource_type": "blog",
+        "url": "https://www.datadoghq.com/blog/visualize-statsd-metrics-counts-graphing"
+      }
     ]
   },
   "author": {

@@ -19,6 +19,28 @@
       "Category::Containers",
       "Category::Configuration & Deployment",
       "Category::Log Collection"
+    ],
+    "resources": [
+      {
+        "resource_type": "documentation",
+        "url": "https://docs.datadoghq.com/agent/kubernetes/control_plane/?tab=helm"
+      },
+      {
+        "resource_type": "blog",
+        "url": "https://www.datadoghq.com/blog/monitor-etcd-performance"
+      },
+      {
+        "resource_type": "blog",
+        "url": "https://www.datadoghq.com/blog/monitor-etcd-with-datadog/"
+      },
+      {
+        "resource_type": "blog",
+        "url": "https://www.datadoghq.com/blog/etcd-monitoring-tools/"
+      },
+      {
+        "resource_type": "blog",
+        "url": "https://www.datadoghq.com/blog/etcd-key-metrics/"
+      }
     ]
   },
   "author": {

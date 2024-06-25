@@ -212,12 +212,7 @@ Need help? Contact [Datadog support][16].
 
 ## Further Reading
 
-Additional helpful documentation, links, and articles:
-
-- [Monitor HashiCorp Vault with Datadog][17]
-- [Monitor HashiCorp Vault metrics and logs][18]
-- [Tools for HashiCorp Vault monitoring][19]
-- [How to monitor HashiCorp Vault with Datadog][20]
+{{< partial name="whats-next/whats-next.html" >}}
 
 [1]: https://www.vaultproject.io
 [2]: https://app.datadoghq.com/account/settings/agent/latest
@@ -235,9 +230,4 @@ Additional helpful documentation, links, and articles:
 [14]: https://github.com/DataDog/integrations-core/blob/master/vault/metadata.csv
 [15]: https://github.com/DataDog/integrations-core/blob/master/vault/assets/service_checks.json
 [16]: https://docs.datadoghq.com/help/
-[17]: https://www.datadoghq.com/blog/monitor-hashicorp-vault-with-datadog
-[18]: https://www.datadoghq.com/blog/monitor-vault-metrics-and-logs/
-[19]: https://www.datadoghq.com/blog/vault-monitoring-tools
-[20]: https://www.datadoghq.com/blog/vault-monitoring-with-datadog
-[21]: https://docs.datadoghq.com/integrations/openmetrics/
 [22]: https://docs.datadoghq.com/integrations/guide/versions-for-openmetrics-based-integrations

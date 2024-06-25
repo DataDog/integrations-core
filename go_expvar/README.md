@@ -77,7 +77,7 @@ Need help? Contact [Datadog support][11].
 
 ## Further Reading
 
-- [Instrument your Go apps with Expvar and Datadog][15]
+{{< partial name="whats-next/whats-next.html" >}}
 
 [1]: https://raw.githubusercontent.com/DataDog/integrations-core/master/go_expvar/images/go_graph.png
 [2]: https://github.com/DataDog/datadog-go
@@ -93,4 +93,3 @@ Need help? Contact [Datadog support][11].
 [12]: https://docs.datadoghq.com/agent/kubernetes/integrations/
 [13]: https://docs.datadoghq.com/agent/guide/agent-commands/#agent-status-and-information
 [14]: https://github.com/DataDog/integrations-core/blob/master/go_expvar/metadata.csv
-[15]: https://www.datadoghq.com/blog/instrument-go-apps-expvar-datadog

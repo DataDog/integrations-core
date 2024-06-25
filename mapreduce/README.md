@@ -103,10 +103,7 @@ Need help? Contact [Datadog support][11].
 
 ## Further Reading
 
-- [Hadoop architectural overview][12]
-- [How to monitor Hadoop metrics][13]
-- [How to collect Hadoop metrics][14]
-- [How to monitor Hadoop with Datadog][15]
+{{< partial name="whats-next/whats-next.html" >}}
 
 [1]: https://raw.githubusercontent.com/DataDog/integrations-core/master/mapreduce/images/mapreduce_dashboard.png
 [2]: https://app.datadoghq.com/account/settings/agent/latest
@@ -119,8 +116,4 @@ Need help? Contact [Datadog support][11].
 [9]: https://github.com/DataDog/integrations-core/blob/master/mapreduce/metadata.csv
 [10]: https://github.com/DataDog/integrations-core/blob/master/mapreduce/assets/service_checks.json
 [11]: https://docs.datadoghq.com/help/
-[12]: https://www.datadoghq.com/blog/hadoop-architecture-overview
-[13]: https://www.datadoghq.com/blog/monitor-hadoop-metrics
-[14]: https://www.datadoghq.com/blog/collecting-hadoop-metrics
-[15]: https://www.datadoghq.com/blog/monitor-hadoop-metrics-datadog
 [16]: https://docs.datadoghq.com/agent/docker/log/?tab=containerinstallation#log-integrations

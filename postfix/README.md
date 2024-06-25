@@ -175,9 +175,7 @@ Need help? Contact [Datadog support][9].
 
 ## Further Reading
 
-Additional helpful documentation, links, and articles:
-
-- [Monitor Postfix queue performance][10]
+{{< partial name="whats-next/whats-next.html" >}}
 
 [1]: https://raw.githubusercontent.com/DataDog/integrations-core/master/postfix/images/postfixgraph.png
 [2]: https://app.datadoghq.com/account/settings/agent/latest
@@ -188,4 +186,3 @@ Additional helpful documentation, links, and articles:
 [7]: https://docs.datadoghq.com/agent/guide/agent-commands/#agent-status-and-information
 [8]: https://github.com/DataDog/integrations-core/blob/master/postfix/metadata.csv
 [9]: https://docs.datadoghq.com/help/
-[10]: https://www.datadoghq.com/blog/monitor-postfix-queues

@@ -125,7 +125,7 @@ Need help? Contact [Datadog support][10].
 
 ## Further Reading
 
-- [Monitor Kong with the Datadog integration][11]
+{{< partial name="whats-next/whats-next.html" >}}
 
 [1]: https://app.datadoghq.com/account/settings/agent/latest
 [2]: https://docs.datadoghq.com/agent/guide/agent-configuration-files/#agent-configuration-directory

@@ -17,6 +17,16 @@
       "Supported OS::Windows",
       "Category::Data Stores",
       "Category::Log Collection"
+    ],
+    "resources": [
+      {
+        "resource_type": "blog",
+        "url": "https://www.datadoghq.com/blog/monitoring-mongodb-performance-metrics-wiredtiger"
+      },
+      {
+        "resource_type": "blog",
+        "url": "https://www.datadoghq.com/blog/monitoring-mongodb-performance-metrics-mmap"
+      }
     ]
   },
   "author": {

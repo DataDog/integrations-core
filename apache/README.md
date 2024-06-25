@@ -253,12 +253,7 @@ If you are having issues with your Apache integration, it is mostly like due to 
 
 ## Further Reading
 
-Additional helpful documentation, links, and articles:
-
-- [Deploying and configuring Datadog with CloudFormation][19]
-- [Monitoring Apache web server performance][20]
-- [How to collect Apache performance metrics][21]
-- [How to monitor Apache web server with Datadog][22]
+{{< partial name="whats-next/whats-next.html" >}}
 
 [1]: https://raw.githubusercontent.com/DataDog/integrations-core/master/apache/images/apache_dashboard.png
 [2]: https://app.datadoghq.com/account/settings/agent/latest
@@ -278,7 +273,3 @@ Additional helpful documentation, links, and articles:
 [16]: https://github.com/DataDog/integrations-core/blob/master/apache/metadata.csv
 [17]: https://github.com/DataDog/integrations-core/blob/master/apache/assets/service_checks.json
 [18]: https://docs.datadoghq.com/integrations/faq/apache-ssl-certificate-issues/
-[19]: https://www.datadoghq.com/blog/deploying-datadog-with-cloudformation
-[20]: https://www.datadoghq.com/blog/monitoring-apache-web-server-performance
-[21]: https://www.datadoghq.com/blog/collect-apache-performance-metrics
-[22]: https://www.datadoghq.com/blog/monitor-apache-web-server-datadog

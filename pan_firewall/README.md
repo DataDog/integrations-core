@@ -78,22 +78,17 @@ The PANOS integration does not include any service checks.
 
 ## Further Reading
 
-Additional helpful documentation, links, and articles:
-
-- [Log types and fields][5]
-- [Logs Collection documentation][6]
+{{< partial name="whats-next/whats-next.html" >}}
 
 ## Troubleshooting
 
 Need help? Contact [Datadog support][7].
 
+
 [1]: https://app.datadoghq.com/account/settings/agent/latest
 [2]: https://www.youtube.com/watch?v=LOPXg0oCMPs
 [3]: https://docs.datadoghq.com/agent/guide/agent-configuration-files/?tab=agentv6v7
 [4]: https://docs.datadoghq.com/agent/guide/agent-commands/#start-stop-and-restart-the-agent
-[5]: https://docs.paloaltonetworks.com/pan-os/9-1/pan-os-admin/monitoring/use-syslog-for-monitoring/syslog-field-descriptions
-[6]: https://docs.datadoghq.com/logs/log_collection/?tab=tailexistingfiles#getting-started-with-the-agent
 [7]: https://docs.datadoghq.com/help/
 [8]: https://docs.paloaltonetworks.com/pan-os/10-1/pan-os-admin/monitoring/use-syslog-for-monitoring/syslog-field-descriptions
 [9]: https://docs.datadoghq.com/network_monitoring/devices/#vendor-profiles
-

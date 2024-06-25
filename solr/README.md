@@ -210,8 +210,6 @@ The `datadog-agent jmx` command was added in version 4.1.0.
 - Start the collection of metrics based on your current configuration and display them in the console:
   `sudo datadog-agent jmx collect`
 
-## Further Reading
-
 ### Parsing a string value into a number
 
 If your jmxfetch returns only string values like **false** and **true** and you want to transform it into a Datadog gauge metric for advanced usages. For instance if you want the following equivalence for your jmxfetch:
@@ -233,6 +231,7 @@ attribute:
       "false": 0
       "true": 1
 ```
+
 
 [1]: https://raw.githubusercontent.com/DataDog/integrations-core/master/solr/images/solrgraph.png
 [2]: https://app.datadoghq.com/account/settings/agent/latest

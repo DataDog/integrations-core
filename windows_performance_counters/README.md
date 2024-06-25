@@ -45,9 +45,7 @@ Need help? Contact [Datadog support][10].
 
 ## Further Reading
 
-Additional helpful documentation, links, and articles:
-
-- [Monitor Windows Performance Counters with Datadog][11]
+{{< partial name="whats-next/whats-next.html" >}}
 
 [1]: https://docs.microsoft.com/en-us/windows/win32/perfctrs/about-performance-counters
 [2]: https://app.datadoghq.com/account/settings/agent/latest
@@ -59,4 +57,3 @@ Additional helpful documentation, links, and articles:
 [8]: https://docs.datadoghq.com/account_management/billing/custom_metrics/
 [9]: https://github.com/DataDog/integrations-core/blob/master/windows_performance_counters/assets/service_checks.json
 [10]: https://docs.datadoghq.com/help/
-[11]: https://www.datadoghq.com/blog/windows-performance-counters-datadog/

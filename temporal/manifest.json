@@ -19,6 +19,12 @@
       "Category::Developer Tools",
       "Submitted Data Type::Metrics",
       "Submitted Data Type::Logs"
+    ],
+    "resources": [
+      {
+        "resource_type": "blog",
+        "url": "https://www.datadoghq.com/blog/temporal-server-integration/"
+      }
     ]
   },
   "assets": {

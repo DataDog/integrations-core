@@ -17,6 +17,12 @@
       "Supported OS::Windows",
       "Category::Data Stores",
       "Category::Log Collection"
+    ],
+    "resources": [
+      {
+        "resource_type": "blog",
+        "url": "https://www.datadoghq.com/blog/monitor-db2-with-datadog"
+      }
     ]
   },
   "author": {

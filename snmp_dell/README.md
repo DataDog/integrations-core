@@ -34,16 +34,14 @@ The Dell integration does not include any events.
 
 ## Further Reading
 
-Additional helpful documentation, links, and articles:
-
-* [Monitor SNMP with Datadog][3]
+{{< partial name="whats-next/whats-next.html" >}}
 
 ## Troubleshooting
 
 Need help? Contact [Datadog support][4].
 
+
 [1]: https://docs.datadoghq.com/network_performance_monitoring/devices/data
 [2]: https://docs.datadoghq.com/network_performance_monitoring/devices/setup
-[3]: https://www.datadoghq.com/blog/monitor-snmp-with-datadog/
 [4]: https://docs.datadoghq.com/help/
 [5]: https://docs.datadoghq.com/network_monitoring/devices/#vendor-profiles

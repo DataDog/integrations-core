@@ -84,7 +84,7 @@ Need help? Contact [Datadog support][9].
 
 ## Further Reading
 
-To get a better idea of how (or why) to monitor process resource consumption with Datadog, check out this [series of blog posts][10] about it.
+{{< partial name="whats-next/whats-next.html" >}}
 
 [1]: https://docs.datadoghq.com/monitors/create/types/process_check/?tab=checkalert
 [2]: https://app.datadoghq.com/account/settings/agent/latest
@@ -95,6 +95,5 @@ To get a better idea of how (or why) to monitor process resource consumption wit
 [7]: https://github.com/DataDog/integrations-core/blob/master/process/metadata.csv
 [8]: https://github.com/DataDog/integrations-core/blob/master/process/assets/service_checks.json
 [9]: https://docs.datadoghq.com/help/
-[10]: https://www.datadoghq.com/blog/process-check-monitoring
 [11]: https://docs.datadoghq.com/integrations/wmi_check/
 [12]: https://docs.datadoghq.com/agent/guide/windows-agent-ddagent-user/#process-check

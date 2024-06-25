@@ -163,7 +163,7 @@ Need help? Contact [Datadog support][9].
 
 ## Further Reading
 
-- [Installing Datadog on Mesos with DC/OS][2]
+{{< partial name="whats-next/whats-next.html" >}}
 
 [1]: https://raw.githubusercontent.com/DataDog/integrations-core/master/mesos_slave/images/mesos_dashboard.png
 [2]: https://www.datadoghq.com/blog/deploy-datadog-dcos

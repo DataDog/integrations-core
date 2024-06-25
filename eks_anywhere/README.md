@@ -59,9 +59,7 @@ Need help? Contact [Datadog support][11].
 
 ## Further Reading
 
-- [Monitor Amazon EKS with Datadog][12]
-- [Key metrics for Amazon EKS monitoring][13]
-- [Amazon EKS on AWS Fargate][14]
+{{< partial name="whats-next/whats-next.html" >}}
 
 [1]: https://raw.githubusercontent.com/DataDog/integrations-core/master/amazon_eks/images/amazon_eks_dashboard.png
 [2]: https://docs.aws.amazon.com/eks/latest/userguide/managed-node-groups.html
@@ -74,8 +72,5 @@ Need help? Contact [Datadog support][11].
 [9]: https://docs.datadoghq.com/agent/basic_agent_usage/kubernetes/#container-installation
 [10]: https://docs.datadoghq.com/logs/log_collection/docker/#option-2-container-installation
 [11]: https://docs.datadoghq.com/help/
-[12]: https://www.datadoghq.com/blog/announcing-eks
-[13]: https://www.datadoghq.com/blog/eks-cluster-metrics
-[14]: https://docs.datadoghq.com/integrations/eks_fargate/
 [15]: https://aws.amazon.com/eks/eks-anywhere/
 [16]: https://docs.datadoghq.com/agent/kubernetes/?tab=helm#installation

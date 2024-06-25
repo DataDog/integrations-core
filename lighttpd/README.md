@@ -99,8 +99,7 @@ Need help? Contact [Datadog support][10].
 
 ## Further Reading
 
-- [Monitor Lighttpd web server metrics with Datadog][11].
-
+{{< partial name="whats-next/whats-next.html" >}}
 
 [1]: https://raw.githubusercontent.com/DataDog/integrations-core/master/lighttpd/images/lighttpddashboard_2.png
 [2]: https://app.datadoghq.com/account/settings/agent/latest
@@ -112,4 +111,3 @@ Need help? Contact [Datadog support][10].
 [8]: https://github.com/DataDog/integrations-core/blob/master/lighttpd/metadata.csv
 [9]: https://github.com/DataDog/integrations-core/blob/master/lighttpd/assets/service_checks.json
 [10]: https://docs.datadoghq.com/help/
-[11]: https://www.datadoghq.com/blog/monitor-lighttpd-web-server-metrics

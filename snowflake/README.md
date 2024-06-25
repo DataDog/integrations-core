@@ -294,10 +294,7 @@ Need help? Contact [Datadog support][17].
 
 ## Further Reading
 
-Additional helpful documentation, links, and articles:
-
-- [Monitor Snowflake with Datadog][18]
-
+{{< partial name="whats-next/whats-next.html" >}}
 
 [1]: https://www.snowflake.com/
 [2]: https://app.datadoghq.com/account/settings/agent/latest
@@ -316,4 +313,3 @@ Additional helpful documentation, links, and articles:
 [15]: https://github.com/DataDog/integrations-core/blob/master/snowflake/metadata.csv
 [16]: https://github.com/DataDog/integrations-core/blob/master/snowflake/assets/service_checks.json
 [17]: https://docs.datadoghq.com/help/
-[18]: https://www.datadoghq.com/blog/snowflake-monitoring-datadog/

@@ -42,9 +42,7 @@ Need help? Contact [Datadog support][7].
 
 ## Further Reading
 
-Additional helpful documentation, links, and articles:
-
-- [Monitor Microsoft Hyper-V with Datadog][8]
+{{< partial name="whats-next/whats-next.html" >}}
 
 [1]: https://docs.microsoft.com/en-us/windows-server/virtualization/hyper-v/hyper-v-on-windows-server
 [2]: https://app.datadoghq.com/account/settings/agent/latest
@@ -53,5 +51,4 @@ Additional helpful documentation, links, and articles:
 [5]: https://docs.datadoghq.com/agent/guide/agent-commands/#agent-status-and-information
 [6]: https://github.com/DataDog/integrations-core/blob/master/hyperv/metadata.csv
 [7]: https://docs.datadoghq.com/help/
-[8]: https://www.datadoghq.com/blog/monitor-microsoft-hyperv-with-datadog
 [9]: https://github.com/DataDog/integrations-core/blob/7.33.x/hyperv/datadog_checks/hyperv/data/conf.yaml.example

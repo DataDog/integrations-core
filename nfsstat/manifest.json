@@ -15,6 +15,12 @@
       "Supported OS::Linux",
       "Category::OS & System",
       "Category::Log Collection"
+    ],
+    "resources": [
+      {
+        "resource_type": "documentation",
+        "url": "https://docs.datadoghq.com/monitors/monitor_types/network/"
+      }
     ]
   },
   "author": {

@@ -71,14 +71,11 @@ Need help? Contact [Datadog support][3].
 
 ## Further Reading
 
-Additional helpful documentation, links, and articles:
-
-  - [Monitor JMeter test results with Datadog][4]
+{{< partial name="whats-next/whats-next.html" >}}
 
 [1]: https://github.com/DataDog/jmeter-datadog-backend-listener
 [2]: https://github.com/DataDog/integrations-core/blob/master/jmeter/metadata.csv
 [3]: https://docs.datadoghq.com/help/
-[4]: https://www.datadoghq.com/blog/monitor-jmeter-test-results-datadog/
 [5]: https://github.com/DataDog/jmeter-datadog-backend-listener/releases
 [6]: https://jmeter-plugins.org/wiki/PluginsManager/
 [7]: https://app.datadoghq.com/account/settings#api

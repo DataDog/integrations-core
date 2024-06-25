@@ -95,11 +95,7 @@ Need help? Contact [Datadog support][9].
 
 ## Further Reading
 
-Additional helpful documentation, links, and articles:
-
-- [StatsD, what it is and how it can help you][10]
-- [Visualize StatsD metrics with Counts Graphing][11]
-
+{{< partial name="whats-next/whats-next.html" >}}
 
 [1]: https://app.datadoghq.com/account/settings/agent/latest
 [2]: https://docs.datadoghq.com/agent/guide/agent-configuration-files/#agent-configuration-directory
@@ -110,5 +106,3 @@ Additional helpful documentation, links, and articles:
 [7]: https://github.com/DataDog/integrations-core/blob/master/statsd/metadata.csv
 [8]: https://github.com/DataDog/integrations-core/blob/master/statsd/assets/service_checks.json
 [9]: https://docs.datadoghq.com/help/
-[10]: https://www.datadoghq.com/blog/statsd
-[11]: https://www.datadoghq.com/blog/visualize-statsd-metrics-counts-graphing

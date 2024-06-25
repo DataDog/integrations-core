@@ -94,9 +94,7 @@ Need help? Contact [Datadog support][7].
 
 ## Further Reading
 
-- [Introducing Prometheus support for Datadog Agent 6][8]
-- [Configuring a Prometheus Check][9]
-- [Writing a custom Prometheus Check][10]
+{{< partial name="whats-next/whats-next.html" >}}
 
 [1]: https://docs.datadoghq.com/integrations/openmetrics/
 [2]: https://docs.datadoghq.com/getting_started/integrations/prometheus/
@@ -105,6 +103,3 @@ Need help? Contact [Datadog support][7].
 [5]: https://github.com/DataDog/integrations-core/blob/master/prometheus/datadog_checks/prometheus/data/conf.yaml.example
 [6]: https://docs.datadoghq.com/agent/guide/agent-commands/#agent-status-and-information
 [7]: https://docs.datadoghq.com/help/
-[8]: https://www.datadoghq.com/blog/monitor-prometheus-metrics
-[9]: https://docs.datadoghq.com/agent/prometheus/
-[10]: https://docs.datadoghq.com/developers/prometheus/

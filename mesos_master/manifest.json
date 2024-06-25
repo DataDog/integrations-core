@@ -18,6 +18,12 @@
       "Category::Containers",
       "Category::Orchestration",
       "Category::Log Collection"
+    ],
+    "resources": [
+      {
+        "resource_type": "blog",
+        "url": "https://www.datadoghq.com/blog/deploy-datadog-dcos"
+      }
     ]
   },
   "author": {

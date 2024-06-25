@@ -17,7 +17,6 @@ Need help? Contact [Datadog support][1].
 
 ## Further Reading
 
-- [How to monitor OKE with Datadog][2]
+{{< partial name="whats-next/whats-next.html" >}}
 
 [1]: https://docs.datadoghq.com/help/
-[2]: https://www.datadoghq.com/blog/monitor-oracle-kubernetes-engine/

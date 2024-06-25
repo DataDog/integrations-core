@@ -398,10 +398,7 @@ Need help? Contact [Datadog support][20].
 
 ## Further Reading
 
-- [Monitoring HAProxy performance metrics][21]
-- [How to collect HAProxy metrics][22]
-- [Monitor HAProxy with Datadog][23]
-- [HA Proxy Multi Process Configuration][24]
+{{< partial name="whats-next/whats-next.html" >}}
 
 [1]: https://raw.githubusercontent.com/DataDog/integrations-core/master/haproxy/images/haproxy-dash.png
 [2]: https://app.datadoghq.com/account/settings/agent/latest
@@ -423,10 +420,6 @@ Need help? Contact [Datadog support][20].
 [18]: https://github.com/DataDog/integrations-core/blob/master/haproxy/metadata.csv
 [19]: https://github.com/DataDog/integrations-core/blob/master/haproxy/assets/service_checks.json
 [20]: https://docs.datadoghq.com/help/
-[21]: https://www.datadoghq.com/blog/monitoring-haproxy-performance-metrics
-[22]: https://www.datadoghq.com/blog/how-to-collect-haproxy-metrics
-[23]: https://www.datadoghq.com/blog/monitor-haproxy-with-datadog
-[24]: https://docs.datadoghq.com/integrations/faq/haproxy-multi-process/
 [25]: https://github.com/DataDog/integrations-core/blob/7.34.x/haproxy/datadog_checks/haproxy/data/conf.yaml.example
 [26]: https://datadoghq.dev/integrations-core/base/openmetrics/
 [27]: https://docs.datadoghq.com/agent/guide/agent-v6-python-3/?tab=helm#use-python-3-with-datadog-agent-v6

@@ -134,10 +134,7 @@ Need help? Contact [Datadog support][6].
 
 ## Further Reading
 
-Additional helpful documentation, links, and articles:
-
-- [Blog: Monitor your Helm-managed Kubernetes applications with Datadog][7]
-
+{{< partial name="whats-next/whats-next.html" >}}
 
 [1]: https://docs.datadoghq.com/agent/kubernetes/integrations/
 [2]: https://docs.datadoghq.com/agent/cluster_agent/clusterchecks/
@@ -145,4 +142,3 @@ Additional helpful documentation, links, and articles:
 [4]: https://github.com/DataDog/integrations-core/blob/master/helm/metadata.csv
 [5]: https://github.com/DataDog/integrations-core/blob/master/helm/assets/service_checks.json
 [6]: https://docs.datadoghq.com/help/
-[7]: https://www.datadoghq.com/blog/monitor-helm-kubernetes-with-datadog/
