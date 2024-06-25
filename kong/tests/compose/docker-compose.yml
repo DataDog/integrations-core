@@ -1,4 +1,4 @@
-version: '2.1'
+
 
 volumes:
     kong_data: {}
