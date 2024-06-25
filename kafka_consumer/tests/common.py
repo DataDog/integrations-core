@@ -107,7 +107,6 @@ def assert_check_kafka(aggregator, consumer_groups):
                     for tag in tags:
                         aggregator.assert_metric_has_tag(mname, tag)
 
-
     aggregator.assert_all_metrics_covered()
     aggregator.assert_metrics_using_metadata(get_metadata_metrics())
 
