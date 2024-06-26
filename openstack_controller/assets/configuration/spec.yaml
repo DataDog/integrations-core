@@ -278,6 +278,13 @@ files:
            The region_id that will be used to filter the endpoints to use for each component.
           value:
             type: string
+        - name: all_projects
+          description: |
+           List compute servers across all projects (admin only).
+          value:
+            example: false
+            display_default: false
+            type: boolean
         - name: components
           description: |
             General configuration that we want to apply to each of the components and their different metric blocks.

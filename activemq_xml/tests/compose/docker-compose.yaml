@@ -1,5 +1,3 @@
-version: '3.5'
-
 services:
   activemq_xml:
     image: rmohr/activemq:${ACTIVEMQ_XML_VERSION}

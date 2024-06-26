@@ -8,7 +8,7 @@ import pytest
 from pyVmomi import vim
 
 from datadog_checks.vsphere import VSphereCheck
-from datadog_checks.vsphere.event import ALLOWED_EVENTS
+from datadog_checks.vsphere.constants import EXCLUDE_FILTERS
 
 
 def test_allowed_event_list():
@@ -23,7 +23,8 @@ def test_allowed_event_list():
         vim.event.VmReconfiguredEvent,
         vim.event.VmSuspendedEvent,
     ]
-    assert sorted(str(e) for e in expected_events) == sorted(str(e) for e in ALLOWED_EVENTS)
+    allowed_events = [getattr(vim.event, event_type) for event_type in EXCLUDE_FILTERS.keys()]
+    assert sorted(str(e) for e in expected_events) == sorted(str(e) for e in allowed_events)
 
 
 @pytest.mark.usefixtures('mock_type', 'mock_threadpool', 'mock_api', 'mock_rest_api')
@@ -171,3 +172,122 @@ def test_events_collection(aggregator, realtime_instance):
     with pytest.raises(Exception, match=r"Invalid resource type specified in `event_resource_filters`: hey."):
         realtime_instance['event_resource_filters'] = ['hey']
         check = VSphereCheck('vsphere', {}, [realtime_instance])
+
+
+@pytest.mark.usefixtures('mock_type', 'mock_threadpool', 'mock_api', 'mock_rest_api')
+def test_include_events_ok(aggregator, realtime_instance):
+    realtime_instance['include_events'] = [
+        {"event": "AlarmStatusChangedEvent", "excluded_messages": ["Gray to Green", "Green to Gray"]}
+    ]
+    check = VSphereCheck(
+        'vsphere',
+        {},
+        [realtime_instance],
+    )
+    check.initiate_api_connection()
+
+    event1 = vim.event.AlarmStatusChangedEvent()
+    event1.createdTime = dt.datetime.now()
+    event1.entity = vim.event.ManagedEntityEventArgument()
+    event1.entity.entity = vim.VirtualMachine(moId="vm1")
+    event1.entity.name = "vm1"
+    event1.alarm = vim.event.AlarmEventArgument()
+    event1.alarm.name = "alarm1"
+    setattr(event1, 'from', 'green')
+    event1.to = 'red'
+    event1.datacenter = vim.event.DatacenterEventArgument()
+    event1.datacenter.name = "dc1"
+    event1.fullFormattedMessage = "Green to Red"
+    aggregator.reset()
+    check.api.mock_events = [event1]
+    check.check(None)
+    assert len(aggregator.events) == 1
+    assert aggregator.events[0]['msg_title'] == "[Triggered] alarm1 on VM vm1 is now red"
+
+
+@pytest.mark.usefixtures('mock_type', 'mock_threadpool', 'mock_api', 'mock_rest_api')
+def test_include_events_filtered(aggregator, realtime_instance):
+    realtime_instance['include_events'] = [
+        {"event": "AlarmStatusChangedEvent", "excluded_messages": ["Gray to Green", "Green to Gray"]}
+    ]
+    check = VSphereCheck(
+        'vsphere',
+        {},
+        [realtime_instance],
+    )
+    check.initiate_api_connection()
+
+    event1 = vim.event.AlarmStatusChangedEvent()
+    event1.createdTime = dt.datetime.now()
+    event1.entity = vim.event.ManagedEntityEventArgument()
+    event1.entity.entity = vim.VirtualMachine(moId="vm1")
+    event1.entity.name = "vm1"
+    event1.alarm = vim.event.AlarmEventArgument()
+    event1.alarm.name = "alarm1"
+    setattr(event1, 'from', 'green')
+    event1.to = 'gray'
+    event1.datacenter = vim.event.DatacenterEventArgument()
+    event1.datacenter.name = "dc1"
+    event1.fullFormattedMessage = "Green to Gray"
+    aggregator.reset()
+    check.api.mock_events = [event1]
+    check.check(None)
+    assert len(aggregator.events) == 0
+
+
+@pytest.mark.usefixtures('mock_type', 'mock_threadpool', 'mock_api', 'mock_rest_api')
+def test_include_events_incorrectly_formatted_event(aggregator, realtime_instance):
+    realtime_instance['include_events'] = [
+        {"event": "IncorrectlyFormattedEvent", "excluded_messages": ["Gray to Green", "Green to Gray"]}
+    ]
+    check = VSphereCheck(
+        'vsphere',
+        {},
+        [realtime_instance],
+    )
+    check.initiate_api_connection()
+
+    event1 = vim.event.AlarmStatusChangedEvent()
+    event1.createdTime = dt.datetime.now()
+    event1.entity = vim.event.ManagedEntityEventArgument()
+    event1.entity.entity = vim.VirtualMachine(moId="vm1")
+    event1.entity.name = "vm1"
+    event1.alarm = vim.event.AlarmEventArgument()
+    event1.alarm.name = "alarm1"
+    setattr(event1, 'from', 'green')
+    event1.to = 'red'
+    event1.datacenter = vim.event.DatacenterEventArgument()
+    event1.datacenter.name = "dc1"
+    event1.fullFormattedMessage = "Green to Red"
+    aggregator.reset()
+    check.api.mock_events = [event1]
+    check.check(None)
+    assert len(aggregator.events) == 0
+
+
+@pytest.mark.usefixtures('mock_type', 'mock_threadpool', 'mock_api', 'mock_rest_api')
+def test_include_events_ok_new_event_type(aggregator, realtime_instance):
+    realtime_instance['include_events'] = [{"event": "AlarmAcknowledgedEvent", "excluded_messages": ["Remove Alarm"]}]
+    check = VSphereCheck(
+        'vsphere',
+        {},
+        [realtime_instance],
+    )
+    check.initiate_api_connection()
+
+    event1 = vim.event.AlarmAcknowledgedEvent()
+    event1.createdTime = dt.datetime.now()
+    event1.entity = vim.event.ManagedEntityEventArgument()
+    event1.entity.entity = vim.VirtualMachine(moId="vm1")
+    event1.entity.name = "vm1"
+    event1.alarm = vim.event.AlarmEventArgument()
+    event1.alarm.name = "alarm1"
+    event1.datacenter = vim.event.DatacenterEventArgument()
+    event1.datacenter.name = "dc1"
+    event1.fullFormattedMessage = "The Alarm was acknowledged"
+    aggregator.reset()
+    check.api.mock_events = [event1]
+    check.check(None)
+    assert len(aggregator.events) == 1
+    assert "The Alarm was acknowledged" in aggregator.events[0]['msg_text']
+    assert aggregator.events[0]['msg_title'] == "AlarmAcknowledgedEvent"

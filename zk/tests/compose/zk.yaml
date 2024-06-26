@@ -1,5 +1,3 @@
-version: '3.5'
-
 services:
   zk:
     image: "zookeeper:${ZK_VERSION}"
