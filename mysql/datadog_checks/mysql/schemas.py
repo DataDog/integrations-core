@@ -23,6 +23,7 @@ from datadog_checks.mysql.queries import (
     SQL_TABLES,
     SQL_COLUMNS,
     SQL_INDEXES,
+    SQL_FOREIGN_KEYS,
 )
 
 import pdb
@@ -400,12 +401,13 @@ class Schemas:
             table_list[table_name_to_table_index[table_name]].setdefault("indexes", [])
             table_list[table_name_to_table_index[table_name]]["indexes"].append(row)
 
-
+#TODO test exception in query
     @tracked_method(agent_check_getter=agent_check_getter, track_result_length=True)
     def _populate_with_foreign_keys_data(self, table_name_to_table_index, table_list, table_names, db_name, cursor):
+        pdb.set_trace()
         self._cursor_run(
             cursor,
-        query = SQL_INDEXES.format(db_name, table_names)
+        query = SQL_FOREIGN_KEYS.format(db_name, table_names)
         )
         rows = cursor.fetchall()
 
