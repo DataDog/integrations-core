@@ -460,6 +460,7 @@ def populate_database():
     cur.execute("GRANT SELECT ON testdb.users TO 'dog'@'%';")
     cur.execute("GRANT SELECT, UPDATE ON testdb.users TO 'bob'@'%';")
     cur.execute("GRANT SELECT, UPDATE ON testdb.users TO 'fred'@'%';")
+    add_schema_test_databases(cur)
     cur.close()
     _create_explain_procedure(conn, "testdb")
 
@@ -467,8 +468,14 @@ def add_schema_test_databases(cursor):
     cursor.execute("USE mysql;")
     cursor.execute("CREATE DATABASE datadog_test_schemas;")
     cursor.execute("USE datadog_test_schemas;")
-    cursor.execute(
-    """CREATE TABLE datadog_test_schemas_test_schema_cities (
+    cursor.execute("GRANT SELECT ON datadog_test_schemas.* TO 'dog'@'%';")
+    cursor.execute("""CREATE TABLE cities (
+    id INT NOT NULL DEFAULT 0,
+    name VARCHAR(255),
+    population INT NOT NULL DEFAULT 0,
+    CONSTRAINT PK_Cities PRIMARY KEY (id))
+    """)
+    cursor.execute("""CREATE TABLE cities_partitioned (
     id INT NOT NULL DEFAULT 0,
     name VARCHAR(255),
     population INT NOT NULL DEFAULT 0,
@@ -484,29 +491,36 @@ def add_schema_test_databases(cursor):
 # check in partitions 
 
     # create one column index 
-    cursor.execute("CREATE INDEX single_column_index ON datadog_test_schemas_test_schema_cities (population);")
+    cursor.execute("CREATE INDEX single_column_index ON cities (population);")
     # create two column index
-    cursor.execute("CREATE INDEX two_columns_index ON datadog_test_schemas_test_schema_cities (id, name);")
+    cursor.execute("CREATE INDEX two_columns_index ON cities (id, name);")
 
-   #Create the landmarks table with foreign key constraint
-    cursor.execute(""" 
-    CREATE TABLE datadog_test_schemas_test_schema_landmarks (
+    cursor.execute("""CREATE TABLE landmarks (
     name VARCHAR(255),
     city_id INT DEFAULT 0,
-    CONSTRAINT FK_CityId FOREIGN KEY (city_id) REFERENCES datadog_test_schemas_test_schema_cities(id)
-)     ;
+    CONSTRAINT FK_CityId FOREIGN KEY (city_id) REFERENCES cities(id));
    """)
 
-    cursor.execute("""
-        CREATE TABLE datadog_test_schemas_test_schema.RestaurantReviews (
-            RestaurantName TEXT,
-            District TEXT,
+
+    cursor.execute(""" CREATE TABLE Restaurants (
+    RestaurantName VARCHAR(255),
+    District VARCHAR(100),
+    Cuisine VARCHAR(100),
+    CONSTRAINT UC_RestaurantNameDistrict UNIQUE (RestaurantName, District)
+    );
+    """)
+
+    cursor.execute("""CREATE TABLE RestaurantReviews (
+            RestaurantName VARCHAR(255),
+            District VARCHAR(255),
             Review TEXT, 
             CONSTRAINT FK_RestaurantNameDistrict FOREIGN KEY (RestaurantName, District)
-            REFERENCES datadog_test_schemas_test_schema.Restaurants(RestaurantName, District)
+            REFERENCES Restaurants(RestaurantName, District)
         );"""
     )
+    # Second DB
     cursor.execute("CREATE DATABASE datadog_test_schemas_second;")
+    cursor.execute("GRANT SELECT ON datadog_test_schemas_second.* TO 'dog'@'%';")
     cursor.execute("USE datadog_test_schemas_second;")
     cursor.execute("CREATE TABLE IF NOT EXISTS ϑings (id INT DEFAULT 0, name VARCHAR(255));")
     cursor.execute("INSERT INTO ϑings (id, name) VALUES (1, 'foo'), (2, 'bar');")

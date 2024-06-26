@@ -22,6 +22,7 @@ from datadog_checks.mysql.queries import (
     SQL_DATABASES,
     SQL_TABLES,
     SQL_COLUMNS,
+    SQL_INDEXES,
 )
 
 import pdb
@@ -298,9 +299,6 @@ class Schemas:
         #pdb.set_trace()
         #May be rows are different ? 
         #tables_info = [dict(row) for row in rows]
-
-        for table in tables_info:
-            table.setdefault("columns", [])
         return tables_info
 
     @tracked_method(agent_check_getter=agent_check_getter, track_result_length=True)
@@ -341,7 +339,7 @@ class Schemas:
                 key/value:
                     "partition_count": int
         """
-        pdb.set_trace()
+
         if len(table_list) == 0:
             return
         #check for special characters as we don't have ids
@@ -356,8 +354,8 @@ class Schemas:
             table_name_to_table_index, table_list, table_names, db_name, cursor
         )
         #self._populate_with_partitions_data(table_ids, id_to_table_data, cursor)
-        #self._populate_with_foreign_keys_data(table_ids, id_to_table_data, cursor)
-        #self._populate_with_index_data(table_ids, id_to_table_data, cursor)
+        self._populate_with_foreign_keys_data(table_name_to_table_index, table_list, table_names, db_name, cursor)
+        self._populate_with_index_data(table_name_to_table_index, table_list, table_names, db_name, cursor)
         return total_columns_number, table_list
 
     @tracked_method(agent_check_getter=agent_check_getter)
@@ -377,34 +375,44 @@ class Schemas:
         #columns = [dict(row) for row in rows]
         for row in rows:
             #TODO for others check if we need to convert to string so to be like in sqlserver
-            table_name = str(row.pop("table_name"))
-            table_list[table_name_to_table_index[table_name]]["columns"] = row
             if "nullable" in row:
                 if row["nullable"].lower() == "YES":
                     row["nullable"] = True
                 else:
                     row["nullable"] = False
+            table_name = str(row.pop("table_name"))
+            table_list[table_name_to_table_index[table_name]].setdefault("columns", [])
+            table_list[table_name_to_table_index[table_name]]["columns"].append(row)
+
         return len(rows)
-            
-        cursor.execute(SQL_COLUMNS.format(table_ids, schema["name"]))
-        data = cursor.fetchall()
-        # AS default - cannot be used in sqlserver query as this word is reserved
-        #columns = [
-        #    "default" if str(i[0]).lower() == "column_default" else str(i[0]).lower() for i in cursor.description
-        #]
-        rows = [dict(zip(columns, [str(item) for item in row])) for row in data]
+
+    @tracked_method(agent_check_getter=agent_check_getter)
+    def _populate_with_index_data(self, table_name_to_table_index, table_list, table_names, db_name, cursor):
+        self._cursor_run(
+            cursor,
+        query = SQL_INDEXES.format(db_name, table_names)
+        )
+        rows = cursor.fetchall()
+
         for row in rows:
-            table_name = str(row.get("table_name"))
-            table_id = name_to_id.get(table_name)
-            row.pop("table_name", None)
-            if "nullable" in row:
-                if row["nullable"].lower() == "no" or row["nullable"].lower() == "false":
-                    row["nullable"] = False
-                else:
-                    row["nullable"] = True
-            id_to_table_data.get(table_id)["columns"] = id_to_table_data.get(table_id).get("columns", []) + [row]
-        return len(data)
+            #TODO treat may be yes to true etc , check if null is string type
+            table_name = str(row.pop("table_name"))
+            table_list[table_name_to_table_index[table_name]].setdefault("indexes", [])
+            table_list[table_name_to_table_index[table_name]]["indexes"].append(row)
 
 
+    @tracked_method(agent_check_getter=agent_check_getter, track_result_length=True)
+    def _populate_with_foreign_keys_data(self, table_name_to_table_index, table_list, table_names, db_name, cursor):
+        self._cursor_run(
+            cursor,
+        query = SQL_INDEXES.format(db_name, table_names)
+        )
+        rows = cursor.fetchall()
+
+        for row in rows:
+            #TODO treat may be yes to true etc , check if null is string type
+            table_name = str(row.pop("table_name"))
+            table_list[table_name_to_table_index[table_name]].setdefault("indexes", [])
+            table_list[table_name_to_table_index[table_name]]["indexes"].append(row)
 
 
