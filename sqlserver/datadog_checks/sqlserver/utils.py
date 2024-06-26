@@ -3,6 +3,7 @@
 # Licensed under a 3-clause BSD style license (see LICENSE)
 import os
 import re
+import sys
 from typing import Dict
 
 from datadog_checks.base.utils.platform import Platform
@@ -50,7 +51,10 @@ def set_default_driver_conf():
             # If ODBCSYSINI is already set in env, don't override it
             return
 
-        linux_unixodbc_sysconfig = '/opt/datadog-agent/embedded/etc'
+        # linux_unixodbc_sysconfig is set to the agent embedded /etc directory
+        # this is a hacky way to get the path to the etc directory
+        # by getting the path to the python executable and get the directory above /bin/python
+        linux_unixodbc_sysconfig = os.path.dirname(os.path.dirname(sys.executable))
         if os.path.exists(os.path.join(linux_unixodbc_sysconfig, 'odbcinst.ini')) or os.path.exists(
             os.path.join(linux_unixodbc_sysconfig, 'odbc.ini')
         ):

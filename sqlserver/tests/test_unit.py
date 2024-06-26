@@ -448,8 +448,14 @@ def test_set_default_driver_conf():
             assert os.environ['ODBCSYSINI'].endswith(os.path.join('tests', 'odbc'))
 
         with EnvVars({}, ignore=['ODBCSYSINI']):
+            with mock.patch("os.path.exists", return_value=True):
+                # odbcinst.ini or odbc.ini exists in agent embedded directory
+                set_default_driver_conf()
+                assert 'ODBCSYSINI' not in os.environ
+
+        with EnvVars({}, ignore=['ODBCSYSINI']):
             set_default_driver_conf()
-            assert 'ODBCSYSINI' not in os.environ
+            assert 'ODBCSYSINI' in os.environ  # ODBCSYSINI is set by the integration
             if pyodbc is not None:
                 assert pyodbc.drivers() is not None
 
