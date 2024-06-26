@@ -8,6 +8,11 @@ def monitor():
     """
 
 
+def _edit(text):
+    edited = click.edit(text=text, require_save=False)
+    return "" if edited is None else edited
+
+
 @monitor.command
 @click.argument("export_json", type=click.File())
 def create(export_json):
@@ -28,8 +33,8 @@ def create(export_json):
         "version": 2,
         "created_at": today,
         "last_updated_at": today,
-        "title": click.edit(text=exported["name"], require_save=False),
-        "description": click.edit(text="This monitor will alert you for XXX.", require_save=False),
+        "title": _edit(text=exported["name"]).strip(),
+        "description": _edit(text="This monitor will alert you for XXX.").strip(),
         "tags": exported["tags"],
         "definition": exported,
     }
