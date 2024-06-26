@@ -20,7 +20,7 @@ def mock_api_with_events(events):
 
     def get_perf_counter_by_level(_):
         return {}
-    
+
     def get_new_events(start_time):
         return events
 
