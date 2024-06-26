@@ -7,12 +7,6 @@ import re
 from datadog_checks.base.utils.platform import Platform
 from datadog_checks.sqlserver.const import ENGINE_EDITION_AZURE_MANAGED_INSTANCE, ENGINE_EDITION_SQL_DATABASE
 
-try:
-    import pyodbc
-except ImportError:
-    pyodbc = None
-
-
 CURRENT_DIR = os.path.dirname(os.path.abspath(__file__))
 DRIVER_CONFIG_DIR = os.path.join(CURRENT_DIR, 'data', 'driver_config')
 
@@ -51,14 +45,14 @@ def set_default_driver_conf():
         OR if the user has already created or copied the odbcinst.ini file in the unixODBC sysconfig location,
         we do not override the ODBCSYSINI environment variable.
         """
-        if pyodbc is None:
-            return
-
         if 'ODBCSYSINI' in os.environ:
             # If ODBCSYSINI is already set in env, don't override it
             return
 
-        if pyodbc.drivers() or pyodbc.dataSources():
+        linux_unixodbc_sysconfig = '/opt/datadog-agent/embedded/etc'
+        if os.path.exists(os.path.join(linux_unixodbc_sysconfig, 'odbcinst.ini')) or os.path.exists(
+            os.path.join(linux_unixodbc_sysconfig, 'odbc.ini')
+        ):
             # If there are already drivers or dataSources installed, don't override the ODBCSYSINI
             # This means user has copied odbcinst.ini and odbc.ini to the unixODBC sysconfig location
             return
