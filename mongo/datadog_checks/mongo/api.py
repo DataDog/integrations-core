@@ -11,12 +11,6 @@ from pymongo.errors import (
     ServerSelectionTimeoutError,
 )
 
-from datadog_checks.mongo.common import (
-    MongosDeployment,
-    ReplicaSetDeployment,
-    StandaloneDeployment,
-)
-
 # The name of the application that created this MongoClient instance. MongoDB 3.4 and newer will print this value in
 # the server log upon establishing each connection. It is also recorded in the slow query log and profile collections.
 DD_APP_NAME = 'datadog-agent'
@@ -69,7 +63,6 @@ class MongoApi(object):
                 options['authSource'] = self._config.auth_source
         self._log.debug("options: %s", options)
         self._cli = MongoClient(**options)
-        self.deployment_type = None
 
     def __getitem__(self, item):
         return self._cli[item]
@@ -121,28 +114,6 @@ class MongoApi(object):
         is_master_payload = cli['admin'].command('isMaster')
         return is_master_payload.get('arbiterOnly', False)
 
-    def _get_rs_deployment_from_status_payload(self, repl_set_payload, is_master_payload, cluster_role):
-        replset_name = repl_set_payload["set"]
-        replset_state = repl_set_payload["myState"]
-        hosts = [m['name'] for m in repl_set_payload.get("members", [])]
-        replset_me = is_master_payload.get('me')
-        return ReplicaSetDeployment(replset_name, replset_state, hosts, replset_me, cluster_role=cluster_role)
-
-    def refresh_deployment_type(self):
-        # getCmdLineOpts is the runtime configuration of the mongo instance. Helpful to know whether the node is
-        # a mongos or mongod, if the mongod is in a shard, if it's in a replica set, etc.
-        try:
-            self.deployment_type = self._get_default_deployment_type()
-        except Exception as e:
-            self._log.debug(
-                "Unable to run `getCmdLineOpts`, got: %s. Treating this as an Alibaba ApsaraDB instance.", str(e)
-            )
-            try:
-                self.deployment_type = self._get_alibaba_deployment_type()
-            except Exception as e:
-                self._log.debug("Unable to run `shardingState`, so switching to AWS DocumentDB, got error %s", str(e))
-                self.deployment_type = self._get_documentdb_deployment_type()
-
     def get_cmdline_opts(self):
         return self["admin"].command("getCmdLineOpts")["parsed"]
 
@@ -152,72 +123,11 @@ class MongoApi(object):
     def is_master(self):
         return self["admin"].command("isMaster")
 
-    def _get_default_deployment_type(self):
-        options = self.get_cmdline_opts()
-        cluster_role = None
-        if 'sharding' in options:
-            if 'configDB' in options['sharding']:
-                self._log.debug("Detected MongosDeployment. Node is principal.")
-                return MongosDeployment(shard_map=self.refresh_shards())
-            elif 'clusterRole' in options['sharding']:
-                cluster_role = options['sharding']['clusterRole']
-
-        replication_options = options.get('replication', {})
-        if 'replSetName' in replication_options or 'replSet' in replication_options:
-            repl_set_payload = self.replset_get_status()
-            is_master_payload = self.is_master()
-            replica_set_deployment = self._get_rs_deployment_from_status_payload(
-                repl_set_payload, is_master_payload, cluster_role
-            )
-            is_principal = replica_set_deployment.is_principal()
-            is_principal_log = "" if is_principal else "not "
-            self._log.debug("Detected ReplicaSetDeployment. Node is %sprincipal.", is_principal_log)
-            return replica_set_deployment
-
-        self._log.debug("Detected StandaloneDeployment. Node is principal.")
-        return StandaloneDeployment()
-
-    def _get_alibaba_deployment_type(self):
-        is_master_payload = self.is_master()
-        if is_master_payload.get('msg') == 'isdbgrid':
-            return MongosDeployment(shard_map=self.refresh_shards())
-
-        # On alibaba cloud, a mongo node is either a mongos or part of a replica set.
-        repl_set_payload = self.replset_get_status()
-        if repl_set_payload.get('configsvr') is True:
-            cluster_role = 'configsvr'
-        elif self.sharding_state_is_enabled() is True:
-            # Use `shardingState` command to know whether or not the replicaset
-            # is a shard or not.
-            cluster_role = 'shardsvr'
-        else:
-            cluster_role = None
-        return self._get_rs_deployment_from_status_payload(repl_set_payload, is_master_payload, cluster_role)
-
     def sharding_state_is_enabled(self):
         return self["admin"].command("shardingState").get("enabled", False)
 
-    def _get_documentdb_deployment_type(self):
-        """
-        Deployment type for AWS DocumentDB.
-
-        We connect to "Instance Based Clusters". In MongoDB terms, these are unsharded replicasets.
-        """
-        return self._get_rs_deployment_from_status_payload(
-            self.replset_get_status(), self.is_master(), cluster_role=None
-        )
-
     def get_shard_map(self):
         return self['admin'].command('getShardMap')
-
-    def refresh_shards(self):
-        try:
-            shard_map = self.get_shard_map()
-            self._log.debug('Get shard map: %s', shard_map)
-            return shard_map
-        except Exception as e:
-            self._log.error('Unable to get shard map for mongos: %s', e)
-            return {}
 
     def server_status(self):
         return self['admin'].command('serverStatus')

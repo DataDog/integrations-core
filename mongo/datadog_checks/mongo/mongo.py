@@ -29,7 +29,12 @@ from datadog_checks.mongo.collectors import (
 from datadog_checks.mongo.collectors.conn_pool_stats import ConnPoolStatsCollector
 from datadog_checks.mongo.collectors.jumbo_stats import JumboStatsCollector
 from datadog_checks.mongo.collectors.session_stats import SessionStatsCollector
-from datadog_checks.mongo.common import SERVICE_CHECK_NAME, MongosDeployment, ReplicaSetDeployment
+from datadog_checks.mongo.common import (
+    SERVICE_CHECK_NAME,
+    MongosDeployment,
+    ReplicaSetDeployment,
+    StandaloneDeployment,
+)
 from datadog_checks.mongo.config import MongoConfig
 from datadog_checks.mongo.dbm.operation_samples import MongoOperationSamples
 from datadog_checks.mongo.discovery import MongoDBDatabaseAutodiscovery
@@ -84,7 +89,7 @@ class MongoDb(AgentCheck):
         self.collectors = []
         self.last_states_by_server = {}
 
-        self._api_client = None
+        self.deployment_type = None
         self._mongo_version = None
         self._resolved_hostname = None
 
@@ -201,18 +206,16 @@ class MongoDb(AgentCheck):
 
     def _refresh_deployment(self):
         if (
-            self.api_client.deployment_type is None  # First run
-            or isinstance(
-                self.api_client.deployment_type, ReplicaSetDeployment
-            )  # Replica set members and state can change
-            or isinstance(self.api_client.deployment_type, MongosDeployment)  # Mongos shard map can change
+            self.deployment_type is None  # First run
+            or isinstance(self.deployment_type, ReplicaSetDeployment)  # Replica set members and state can change
+            or isinstance(self.deployment_type, MongosDeployment)  # Mongos shard map can change
         ):
-            deployment_type_before = self.api_client.deployment_type
+            deployment_type_before = self.deployment_type
             self.log.debug("Refreshing deployment type")
-            self.api_client.refresh_deployment_type()
-            if self.api_client.deployment_type != deployment_type_before:
+            self.refresh_deployment_type()
+            if self.deployment_type != deployment_type_before:
                 self.log.debug(
-                    "Deployment type has changed from %s to %s", deployment_type_before, self.api_client.deployment_type
+                    "Deployment type has changed from %s to %s", deployment_type_before, self.deployment_type
                 )
                 # database_instance metadata is tied to the deployment type
                 # so we need to reset it when the deployment type changes
@@ -231,7 +234,7 @@ class MongoDb(AgentCheck):
     def _get_tags(self, include_deployment_tags=False, include_internal_resource_tags=False):
         tags = deepcopy(self._config.metric_tags)
         if include_deployment_tags:
-            tags.extend(self.api_client.deployment_type.deployment_tags)
+            tags.extend(self.deployment_type.deployment_tags)
         if include_internal_resource_tags:
             tags.extend(self.internal_resource_tags)
         return tags
@@ -271,7 +274,7 @@ class MongoDb(AgentCheck):
         self._resolved_hostname = None
 
     def _collect_metrics(self):
-        deployment = self.api_client.deployment_type
+        deployment = self.deployment_type
         tags = self._get_tags(include_deployment_tags=True, include_internal_resource_tags=True)
 
         dbnames = self._get_db_names(tags)
@@ -321,7 +324,7 @@ class MongoDb(AgentCheck):
             )
 
     def _send_database_instance_metadata(self):
-        deployment = self.api_client.deployment_type
+        deployment = self.deployment_type
         if self._resolved_hostname not in self._database_instance_emitted:
             # DO NOT emit with internal resource tags, as the metadata event is used to CREATE the databse instance
             tags = self._get_tags(include_deployment_tags=True, include_internal_resource_tags=False)
@@ -349,3 +352,86 @@ class MongoDb(AgentCheck):
     def cancel(self):
         if self._config.dbm_enabled:
             self._operation_samples.cancel()
+
+    def _get_rs_deployment_from_status_payload(self, repl_set_payload, is_master_payload, cluster_role):
+        replset_name = repl_set_payload["set"]
+        replset_state = repl_set_payload["myState"]
+        hosts = [m['name'] for m in repl_set_payload.get("members", [])]
+        replset_me = is_master_payload.get('me')
+        return ReplicaSetDeployment(replset_name, replset_state, hosts, replset_me, cluster_role=cluster_role)
+
+    def refresh_deployment_type(self):
+        # getCmdLineOpts is the runtime configuration of the mongo instance. Helpful to know whether the node is
+        # a mongos or mongod, if the mongod is in a shard, if it's in a replica set, etc.
+        try:
+            self.deployment_type = self._get_default_deployment_type()
+        except Exception as e:
+            self.log.debug(
+                "Unable to run `getCmdLineOpts`, got: %s. Treating this as an Alibaba ApsaraDB instance.", str(e)
+            )
+            try:
+                self.deployment_type = self._get_alibaba_deployment_type()
+            except Exception as e:
+                self.log.debug("Unable to run `shardingState`, so switching to AWS DocumentDB, got error %s", str(e))
+                self.deployment_type = self._get_documentdb_deployment_type()
+
+    def _get_default_deployment_type(self):
+        options = self.api_client.get_cmdline_opts()
+        cluster_role = None
+        if 'sharding' in options:
+            if 'configDB' in options['sharding']:
+                self.log.debug("Detected MongosDeployment. Node is principal.")
+                return MongosDeployment(shard_map=self.refresh_shards())
+            elif 'clusterRole' in options['sharding']:
+                cluster_role = options['sharding']['clusterRole']
+
+        replication_options = options.get('replication', {})
+        if 'replSetName' in replication_options or 'replSet' in replication_options:
+            repl_set_payload = self.api_client.replset_get_status()
+            is_master_payload = self.api_client.is_master()
+            replica_set_deployment = self._get_rs_deployment_from_status_payload(
+                repl_set_payload, is_master_payload, cluster_role
+            )
+            is_principal = replica_set_deployment.is_principal()
+            is_principal_log = "" if is_principal else "not "
+            self.log.debug("Detected ReplicaSetDeployment. Node is %sprincipal.", is_principal_log)
+            return replica_set_deployment
+
+        self.log.debug("Detected StandaloneDeployment. Node is principal.")
+        return StandaloneDeployment()
+
+    def _get_alibaba_deployment_type(self):
+        is_master_payload = self.api_client.is_master()
+        if is_master_payload.get('msg') == 'isdbgrid':
+            return MongosDeployment(shard_map=self.refresh_shards())
+
+        # On alibaba cloud, a mongo node is either a mongos or part of a replica set.
+        repl_set_payload = self.api_client.replset_get_status()
+        if repl_set_payload.get('configsvr') is True:
+            cluster_role = 'configsvr'
+        elif self.api_client.sharding_state_is_enabled() is True:
+            # Use `shardingState` command to know whether or not the replicaset
+            # is a shard or not.
+            cluster_role = 'shardsvr'
+        else:
+            cluster_role = None
+        return self._get_rs_deployment_from_status_payload(repl_set_payload, is_master_payload, cluster_role)
+
+    def refresh_shards(self):
+        try:
+            shard_map = self.api_client.get_shard_map()
+            self.log.debug('Get shard map: %s', shard_map)
+            return shard_map
+        except Exception as e:
+            self.log.error('Unable to get shard map for mongos: %s', e)
+            return {}
+
+    def _get_documentdb_deployment_type(self):
+        """
+        Deployment type for AWS DocumentDB.
+
+        We connect to "Instance Based Clusters". In MongoDB terms, these are unsharded replicasets.
+        """
+        return self._get_rs_deployment_from_status_payload(
+            self.api_client.replset_get_status(), self.api_client.is_master(), cluster_role=None
+        )

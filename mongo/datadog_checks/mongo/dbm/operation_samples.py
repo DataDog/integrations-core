@@ -111,7 +111,7 @@ class MongoOperationSamples(DBMAsyncJob):
         self._last_sampled_timestamp = now
 
     def _should_collect_operation_samples(self) -> bool:
-        deployment = self._check.api_client.deployment_type
+        deployment = self._check.deployment_type
         if isinstance(deployment, ReplicaSetDeployment) and deployment.is_arbiter:
             self._check.log.debug("Skipping operation samples collection on arbiter node")
             return False
