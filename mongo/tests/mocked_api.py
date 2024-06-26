@@ -55,7 +55,7 @@ class MockedDB(object):
         elif command == "collstats":
             coll_name = args[0]
             filename += f"-{coll_name}"
-        elif command in ("getCmdLineOpts", "replSetGetStatus"):
+        elif command in ("getCmdLineOpts", "replSetGetStatus", "isMaster"):
             filename += f"-{self.deployment}"
         elif command in ("find", "count", "aggregate"):
             # At time of writing, those commands only are for custom queries.

@@ -104,12 +104,22 @@ def test_not_in_catalog(aggregator, check, dd_run_check, caplog, mock_http_post,
     ('mock_http_get', 'instance'),
     [
         pytest.param(
-            {'http_error': {'/v1/AUTH_1e6e233e637d4d55a50a62b63398ad15': MockResponse(status_code=500)}},
+            {
+                'http_error': {
+                    '/v1/AUTH_1e6e233e637d4d55a50a62b63398ad15': MockResponse(status_code=500),
+                    '/v1/AUTH_6e39099cccde4f809b003d9e0dd09304': MockResponse(status_code=500),
+                }
+            },
             configs.REST,
             id='api rest',
         ),
         pytest.param(
-            {'http_error': {'/v1/AUTH_1e6e233e637d4d55a50a62b63398ad15': MockResponse(status_code=500)}},
+            {
+                'http_error': {
+                    '/v1/AUTH_1e6e233e637d4d55a50a62b63398ad15': MockResponse(status_code=500),
+                    '/v1/AUTH_6e39099cccde4f809b003d9e0dd09304': MockResponse(status_code=500),
+                }
+            },
             configs.SDK,
             id='api sdk',
         ),
@@ -136,26 +146,37 @@ def test_response_time_exception(aggregator, check, dd_run_check, mock_http_get)
 
 
 @pytest.mark.parametrize(
-    ('instance', 'api_type'),
+    ('mock_http_get', 'instance'),
     [
         pytest.param(
+            {'elapsed_total_seconds': {'/v1/AUTH_1e6e233e637d4d55a50a62b63398ad15': 0.30706}},
             configs.REST,
-            ApiType.REST,
             id='api rest',
         ),
         pytest.param(
+            {'elapsed_total_seconds': {'/v1/AUTH_1e6e233e637d4d55a50a62b63398ad15': 0.30706}},
             configs.SDK,
-            ApiType.SDK,
             id='api sdk',
         ),
     ],
+    indirect=['mock_http_get'],
 )
 @pytest.mark.usefixtures('mock_http_get', 'mock_http_post', 'openstack_connection')
-def test_response_time(aggregator, check, dd_run_check, mock_http_get, api_type):
+def test_response_time(aggregator, check, dd_run_check, mock_http_get):
     dd_run_check(check)
+    aggregator.assert_service_check(
+        'openstack.swift.api.up',
+        status=AgentCheck.UNKNOWN,
+        count=0,
+    )
+    aggregator.assert_service_check(
+        'openstack.swift.api.up',
+        status=AgentCheck.CRITICAL,
+        count=0,
+    )
     aggregator.assert_metric(
         'openstack.swift.response_time',
-        count=1,
+        value=307.06,
         tags=['keystone_server:http://127.0.0.1:8080/identity'],
     )
     aggregator.assert_service_check(
@@ -174,7 +195,12 @@ def test_response_time(aggregator, check, dd_run_check, mock_http_get, api_type)
     ('mock_http_get', 'connection_swift', 'instance', 'api_type'),
     [
         pytest.param(
-            {'http_error': {'/v1/AUTH_1e6e233e637d4d55a50a62b63398ad15': MockResponse(status_code=500)}},
+            {
+                'http_error': {
+                    '/v1/AUTH_1e6e233e637d4d55a50a62b63398ad15': MockResponse(status_code=500),
+                    '/v1/AUTH_6e39099cccde4f809b003d9e0dd09304': MockResponse(status_code=500),
+                },
+            },
             None,
             configs.REST,
             ApiType.REST,
@@ -186,6 +212,7 @@ def test_response_time(aggregator, check, dd_run_check, mock_http_get, api_type)
                 'http_error': {
                     'containers': {
                         '1e6e233e637d4d55a50a62b63398ad15': MockResponse(status_code=500),
+                        '6e39099cccde4f809b003d9e0dd09304': MockResponse(status_code=500),
                     }
                 }
             },
@@ -209,16 +236,23 @@ def test_containers_exception(aggregator, check, dd_run_check, mock_http_get, co
         args_list += [(list(args), kwargs.get('params', None))]
     if api_type == ApiType.REST:
         assert (
+            args_list.count((['http://127.0.0.1:6002/v1/AUTH_6e39099cccde4f809b003d9e0dd09304'], {'format': 'json'}))
+            == 1
+        )
+        assert (
             args_list.count((['http://127.0.0.1:6002/v1/AUTH_1e6e233e637d4d55a50a62b63398ad15'], {'format': 'json'}))
             == 1
         )
     else:
-        assert connection_swift.containers.call_count == 1
+        assert connection_swift.containers.call_count == 2
         assert (
             connection_swift.containers.call_args_list.count(mock.call(account_id='1e6e233e637d4d55a50a62b63398ad15'))
             == 1
         )
-    assert args_list.count((['http://127.0.0.1:6002/v1/AUTH_1e6e233e637d4d55a50a62b63398ad15'], None)) == 1
+        assert (
+            connection_swift.containers.call_args_list.count(mock.call(account_id='6e39099cccde4f809b003d9e0dd09304'))
+            == 1
+        )
 
 
 @pytest.mark.parametrize(
@@ -250,49 +284,27 @@ def test_containers_metrics(aggregator, check, dd_run_check, metrics):
 
 
 @pytest.mark.parametrize(
-    ('instance', 'paginated_limit', 'api_type', 'expected_api_calls', 'metrics'),
+    ('instance', 'api_type', 'metrics'),
     [
         pytest.param(
             configs.REST,
-            1,
             ApiType.REST,
-            1,
             CONTAINERS_METRICS_SWIFT,
-            id='api rest small limit',
-        ),
-        pytest.param(
-            configs.REST,
-            1000,
-            ApiType.REST,
-            1,
-            CONTAINERS_METRICS_SWIFT,
-            id='api rest high limit',
+            id='api rest limit 1',
         ),
         pytest.param(
             configs.SDK,
-            1,
             ApiType.SDK,
-            1,
             CONTAINERS_METRICS_SWIFT,
-            id='api sdk small limit',
-        ),
-        pytest.param(
-            configs.SDK,
-            1000,
-            ApiType.SDK,
-            1,
-            CONTAINERS_METRICS_SWIFT,
-            id='api sdk high limit',
+            id='api sdk limit 1',
         ),
     ],
 )
 @pytest.mark.usefixtures('mock_http_get', 'connection_swift', 'mock_http_post', 'openstack_connection')
-def test_containers_pagination(
+def test_containers_pagination_limit_1(
     aggregator,
     instance,
     openstack_controller_check,
-    paginated_limit,
-    expected_api_calls,
     api_type,
     dd_run_check,
     mock_http_get,
@@ -300,7 +312,7 @@ def test_containers_pagination(
     metrics,
 ):
     paginated_instance = copy.deepcopy(instance)
-    paginated_instance['paginated_limit'] = paginated_limit
+    paginated_instance['paginated_limit'] = 1
     dd_run_check(openstack_controller_check(paginated_instance))
     if api_type == ApiType.REST:
         args_list = []
@@ -310,17 +322,86 @@ def test_containers_pagination(
             params = kwargs.get('params', {})
             limit = params.get('limit')
             args_list += [(args[0], limit)]
-        assert (
-            args_list.count(('http://127.0.0.1:6002/v1/AUTH_1e6e233e637d4d55a50a62b63398ad15', None))
-            == expected_api_calls
-        )
+        assert args_list.count(('http://127.0.0.1:6002/v1/AUTH_6e39099cccde4f809b003d9e0dd09304', 1)) == 2
+        assert args_list.count(('http://127.0.0.1:6002/v1/AUTH_1e6e233e637d4d55a50a62b63398ad15', 1)) == 3
     else:
-        assert connection_swift.containers.call_count == expected_api_calls
+        assert connection_swift.containers.call_count == 2
         assert (
             connection_swift.containers.call_args_list.count(
-                mock.call(account_id='1e6e233e637d4d55a50a62b63398ad15', limit=paginated_limit)
+                mock.call(account_id='1e6e233e637d4d55a50a62b63398ad15', limit=1)
             )
-            == expected_api_calls
+            == 1
+        )
+        assert (
+            connection_swift.containers.call_args_list.count(
+                mock.call(account_id='6e39099cccde4f809b003d9e0dd09304', limit=1)
+            )
+            == 1
+        )
+    for metric in metrics:
+        aggregator.assert_metric(
+            metric['name'],
+            count=metric['count'],
+            value=metric['value'],
+            tags=metric['tags'],
+            hostname=metric.get('hostname'),
+        )
+
+
+@pytest.mark.parametrize(
+    ('instance', 'api_type', 'metrics'),
+    [
+        pytest.param(
+            configs.REST,
+            ApiType.REST,
+            CONTAINERS_METRICS_SWIFT,
+            id='api rest limit 1000',
+        ),
+        pytest.param(
+            configs.SDK,
+            ApiType.SDK,
+            CONTAINERS_METRICS_SWIFT,
+            id='api sdk limit 1000',
+        ),
+    ],
+)
+@pytest.mark.usefixtures('mock_http_get', 'connection_swift', 'mock_http_post', 'openstack_connection')
+def test_containers_pagination_limit_1000(
+    aggregator,
+    instance,
+    openstack_controller_check,
+    api_type,
+    dd_run_check,
+    mock_http_get,
+    connection_swift,
+    metrics,
+):
+    paginated_instance = copy.deepcopy(instance)
+    paginated_instance['paginated_limit'] = 1000
+    dd_run_check(openstack_controller_check(paginated_instance))
+    if api_type == ApiType.REST:
+        args_list = []
+        for call in mock_http_get.call_args_list:
+            args, kwargs = call
+            args_list += list(args)
+            params = kwargs.get('params', {})
+            limit = params.get('limit')
+            args_list += [(args[0], limit)]
+        assert args_list.count(('http://127.0.0.1:6002/v1/AUTH_6e39099cccde4f809b003d9e0dd09304', 1000)) == 2
+        assert args_list.count(('http://127.0.0.1:6002/v1/AUTH_1e6e233e637d4d55a50a62b63398ad15', 1000)) == 2
+    else:
+        assert connection_swift.containers.call_count == 2
+        assert (
+            connection_swift.containers.call_args_list.count(
+                mock.call(account_id='1e6e233e637d4d55a50a62b63398ad15', limit=1000)
+            )
+            == 1
+        )
+        assert (
+            connection_swift.containers.call_args_list.count(
+                mock.call(account_id='6e39099cccde4f809b003d9e0dd09304', limit=1000)
+            )
+            == 1
         )
     for metric in metrics:
         aggregator.assert_metric(

@@ -640,7 +640,11 @@ class VSphereCheck(AgentCheck):
                     "Processing event with id:%s, type:%s: msg:%s", event.key, type(event), event.fullFormattedMessage
                 )
                 normalized_event = VSphereEvent(
-                    event, event_config, self._config.base_tags, self._config.event_resource_filters
+                    event,
+                    event_config,
+                    self._config.base_tags,
+                    self._config.event_resource_filters,
+                    self._config.exclude_filters,
                 )
                 # Can return None if the event if filtered out
                 event_payload = normalized_event.get_datadog_payload()

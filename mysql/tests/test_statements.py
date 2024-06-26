@@ -30,6 +30,8 @@ statement_samples_keys = ["query_samples", "statement_samples"]
 # depend on a default schema being set on the connection
 DEFAULT_FQ_SUCCESS_QUERY = "SELECT * FROM information_schema.TABLES"
 
+CLOSE_TO_ZERO_INTERVAL = 0.0000001
+
 
 @pytest.fixture
 def dbm_instance(instance_complex):
@@ -37,8 +39,14 @@ def dbm_instance(instance_complex):
     instance_complex['disable_generic_tags'] = False
     # set the default for tests to run sychronously to ensure we don't have orphaned threads running around
     instance_complex['query_samples'] = {'enabled': True, 'run_sync': True, 'collection_interval': 1}
-    # set a very small collection interval so the tests go fast
-    instance_complex['query_metrics'] = {'enabled': True, 'run_sync': True, 'collection_interval': 0.1}
+    # Set collection_interval close to 0. This is needed if the test runs the check multiple times.
+    # This prevents DBMAsync from skipping job executions, as it is designed
+    # to not execute jobs more frequently than their collection period.
+    instance_complex['query_metrics'] = {
+        'enabled': True,
+        'run_sync': True,
+        'collection_interval': CLOSE_TO_ZERO_INTERVAL,
+    }
     # don't need query activity for these tests
     instance_complex['query_activity'] = {'enabled': False}
     instance_complex['collect_settings'] = {'enabled': False}
@@ -400,6 +408,9 @@ def test_statement_samples_collect(
     caplog.set_level(logging.INFO, logger="datadog_checks.mysql.collection_utils")
     caplog.set_level(logging.DEBUG, logger="datadog_checks")
     caplog.set_level(logging.DEBUG, logger="tests.test_mysql")
+    # This prevents DBMAsync from skipping job executions, as a job should not be executed
+    # more frequently than its collection period.
+    dbm_instance['query_samples']['collection_interval'] = CLOSE_TO_ZERO_INTERVAL
 
     mysql_check = MySql(common.CHECK_NAME, {}, [dbm_instance])
     if explain_strategy:
@@ -662,6 +673,9 @@ def test_statement_reported_hostname(
     aggregator, dd_run_check, dbm_instance, datadog_agent, reported_hostname, expected_hostname
 ):
     dbm_instance['reported_hostname'] = reported_hostname
+    # This prevents DBMAsync from skipping job executions, as a job should not be executed
+    # more frequently than its collection period.
+    dbm_instance['query_samples']['collection_interval'] = CLOSE_TO_ZERO_INTERVAL
     mysql_check = MySql(common.CHECK_NAME, {}, [dbm_instance])
 
     dd_run_check(mysql_check)

@@ -1,6 +1,9 @@
 ## OpenTelemetry Collector
-
 ## Overview
+
+<div class="alert alert-danger">
+  <strong>Important:</strong> OpenTelemetry Collector Contrib v0.95.0 introduces a breaking change that disables Trace Metrics computation in the Datadog Exporter. Follow Datadog's <a href="https://docs.datadoghq.com/opentelemetry/guide/migration/">migration guide</a> when upgrading.
+</div>
 
 OpenTelemetry is a vendor-agnostic standard for telemetry data. Datadog supports ingesting OpenTelemetry data through the OpenTelemetry Collector and the Datadog Agent. This tile documents how to export data to Datadog through the OpenTelemetry Collector with Datadog Exporter [OpenTelemetry collector Datadog exporter][3]. Also see [OTLP ingest in Datadog Agent][7] for further information on ingesting OTLP traces with Datadog Agent.
 

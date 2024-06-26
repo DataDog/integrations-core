@@ -368,12 +368,8 @@ class DBMAsyncJob(object):
 
     def _run_sync_job_rate_limited(self):
         if self._rate_limiter.shall_execute():
-            try:
-                self._run_job_traced()
-            except:
-                raise
-            finally:
-                self._rate_limiter.update_last_time()
+            self._rate_limiter.update_last_time()
+            self._run_job_traced()
 
     def _run_job_rate_limited(self):
         try:
