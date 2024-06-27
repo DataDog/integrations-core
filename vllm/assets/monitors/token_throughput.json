@@ -23,7 +23,6 @@
             "notify_audit": false,
             "include_tags": false,
             "avalanche_window": 20,
-            "on_missing_data": "default",
             "new_host_delay": 300,
             "silenced": {}
         },
