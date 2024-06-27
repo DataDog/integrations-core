@@ -8,7 +8,7 @@
     "configuration": "README.md#Setup",
     "support": "README.md#Support",
     "changelog": "CHANGELOG.md",
-    "description": "<FILL IN>",
+    "description": "{description}",
     "title": "{integration_name}",
     "media": {media},
     "classifier_tags": [

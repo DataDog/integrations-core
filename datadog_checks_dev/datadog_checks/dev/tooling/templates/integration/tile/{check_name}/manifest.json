@@ -8,7 +8,7 @@
     "configuration": "README.md#Setup",
     "support": "README.md#Support",
     "changelog": "CHANGELOG.md",
-    "description": "<FILL IN>",
+    "description": "{description}",
     "title": "{integration_name}",
     "media": [
       {
@@ -27,7 +27,7 @@
         "image_url": "<FILL IN>"
       }
     ],
-    "classifier_tags": [ 
+    "classifier_tags": [
       "<Add relevant tags from this list: https://docs.datadoghq.com/developers/integrations/check_references/#classifier-tags>",
       "Supported OS::Linux",
       "Supported OS::Windows",

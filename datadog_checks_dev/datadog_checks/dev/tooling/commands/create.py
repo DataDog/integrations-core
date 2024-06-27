@@ -212,6 +212,7 @@ def create(ctx, name, integration_type, location, non_interactive, quiet, dry_ru
     template_fields['starting_version'] = '0.0.1' if repo_choice == 'core' else '1.0.0'
     template_fields['display_on_public_website'] = 'false' if repo_choice == 'core' else 'true'
     template_fields['media'] = '[]' if repo_choice == 'core' else MARKETPLACE_EXTRAS_MEDIA
+    template_fields['description'] = '<FILL IN - A brief description of what this offering provides>'
     config = construct_template_fields(name, repo_choice, integration_type, **template_fields)
 
     files = create_template_files(integration_type, root, config, repo_choice, read=not dry_run)
