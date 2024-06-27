@@ -337,6 +337,8 @@ integration/openstack_controller:
 - openstack_controller/**/*
 integration/oracle:
 - oracle/**/*
+integration/ossec:
+- ossec/**/*
 integration/otel:
 - otel/**/*
 integration/palo_alto_panorama:
