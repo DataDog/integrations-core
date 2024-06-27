@@ -1,5 +1,13 @@
 import click
 
+DESCRIPTION_SEED = """\
+This monitor will alert you on XXX...
+
+- Define the problem stated by the title.
+- Answer why this is an issue worth alerting on.
+- Describe the impact of the problem.
+"""
+
 
 @click.group
 def monitor():
@@ -34,7 +42,7 @@ def create(export_json):
         "created_at": today,
         "last_updated_at": today,
         "title": _edit(text=exported["name"]).strip(),
-        "description": _edit(text="This monitor will alert you for XXX.").strip(),
+        "description": _edit(text=DESCRIPTION_SEED).strip(),
         "tags": exported["tags"],
         "definition": exported,
     }
