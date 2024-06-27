@@ -1,0 +1,66 @@
+id: ping-one
+tests:
+  - sample: >-
+      {
+                      "_links": {
+                          "self": {
+                              "href": "https://api.pingone.ca/v1/environments/4ae6d71d-354c-4cd8-9b98-41699c259a5d/activities/97c7b3e7-4251-434b-8189-2edf3496c961"
+                          }
+                      },
+                      "id": "97c7b3e7-4251-434b-8189-2edf3ss496c961",
+                      "recordedAt": "2024-06-13T06:56:37.871Z",
+                      "createdAt": "2024-06-13T06:56:37.885Z",
+                      "correlationId": "ecddb9c9-eb27-40a0-99e8-c9384essefca10",
+                      "internalCorrelation": {
+                          "sessionId": "61bcccdd-184a-499f-aec7-bd2e9ss449ea59"
+                      },
+                      "actors": {
+                          "client": {
+                              "id": "adminui",
+                              "name": "adminui",
+                              "type": "CLIENT"
+                          },
+                          "user": {
+                              "id": "1e8f0520-81ed-4e7b-b09f-a2a1be54123977e",
+                              "name": "dummy_user",
+                              "environment": {
+                                  "id": "4ae6d71d-354c-4cd8-9b98-41699c212359a5d"
+                              },
+                              "population": {
+                                  "id": "7c2dcacd-adca-4491-be87-4def5123cb6d882"
+                              },
+                              "href": "https://api.pingone.ca/v1/environments/4ae6d71d-354c-4cd8-9b98-41699132c259a5d/users/1e8f0520-81ed-4e7b-b09f-a2a1142be54977e",
+                              "type": "USER"
+                          }
+                      },
+                      "source": {
+                          "userAgent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/124.0.0.0 Safari/537.36",
+                          "ipAddress": "0.0.0.0"
+                      },
+                      "action": {
+                          "type": "MEMBER_OF_GROUP.CREATED",
+                          "description": "Member Of Group Created"
+                      },
+                      "resources": [
+                          {
+                              "type": "MEMBER_OF_GROUP",
+                              "id": "31f79b65-59b6-4630-8c4e-0594e4d612346781f0",
+                              "name": "test group",
+                              "environment": {
+                                  "id": "4ae6d71d-354c-4cd8-9b98-41699c524725259a5d"
+                              },
+                              "href": "https://api.pingone.ca/v1/environments/4ae6d71d-354c-4cd8-9b98-41699c259a5d/users/31f79b65-59b6-4630-8c4e521732-0594e4d681f0/memberOfGroups/703b108871296-3de3-4156-999a-25e01e81be88"
+                          }
+                      ],
+                      "result": {
+                          "status": "SUCCESS",
+                          "description": "Created Member Of Group test group"
+                      },
+                      "id": "97c7b3e7-4251-434b-8189-2edf3ss496c961"
+                  }
+    result: null
+
+# The `result` field should be left blank to start. Once you submit your log asset files with
+# your integration pull-request in a Datadog GitHub repository, Datadog's validations will
+# run your raw logs against your pipeline and return the result. If the result output in the
+# validation is accurate, take the output and add it to the `result` field in your test YAML file.

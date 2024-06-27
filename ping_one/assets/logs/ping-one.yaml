@@ -1,0 +1,152 @@
+id: ping-one
+metric_id: ping-one
+backend_only: false
+facets:
+  - groups:
+      - Web Access
+    name: User-Agent
+    path: http.useragent
+    source: log
+  - groups:
+      - Web Access
+    name: Client IP
+    path: network.client.ip
+    source: log
+  - groups:
+      - User
+    name: User Name
+    path: usr.name
+    source: log
+  - groups:
+      - User
+    name: User ID
+    path: usr.id
+    source: log
+  - facetType: list
+    groups:
+      - Pingone
+    name: Client Id
+    path: actors.client.id
+    source: log
+    type: string
+  - facetType: list
+    groups:
+      - Pingone
+    name: Client Name
+    path: actors.client.name
+    source: log
+    type: string
+  - facetType: list
+    groups:
+      - Pingone
+    name: Client Type
+    path: actors.client.type
+    source: log
+    type: string
+  - facetType: list
+    groups:
+      - Pingone
+    name: Id
+    path: id
+    source: log
+    type: string
+  - facetType: list
+    groups:
+      - Pingone
+    name: Result Status
+    path: result.status
+    source: log
+    type: string
+  - facetType: list
+    groups:
+      - Pingone
+    name: User Id
+    path: actors.user.id
+    source: log
+    type: string
+  - facetType: list
+    groups:
+      - Pingone
+    name: User Name
+    path: actors.user.name
+    source: log
+    type: string
+  - facetType: list
+    groups:
+      - Pingone
+    name: User Type
+    path: actors.user.type
+    source: log
+    type: string
+pipeline:
+  type: pipeline
+  name: PingOne
+  enabled: true
+  filter:
+    query: "source:ping-one"
+  processors:
+    - type: date-remapper
+      name: Define `recordedAt` as the official date of the log
+      enabled: true
+      sources:
+        - recordedAt
+    - type: service-remapper
+      name: Mapping service to standard service attribute
+      enabled: true
+      sources:
+        - service
+    - type: attribute-remapper
+      name: Remapping source.userAgent to http.useragent
+      enabled: true
+      sources:
+        - source.userAgent
+      sourceType: attribute
+      target: http.useragent
+      targetType: attribute
+      preserveSource: true
+      overrideOnConflict: false
+    - type: user-agent-parser
+      name: Extracting useragent details from htttp.useragent
+      enabled: true
+      sources:
+        - http.useragent
+      target: http.useragent_details
+      encoded: false
+      combineVersionDetails: false
+    - type: attribute-remapper
+      name: Remapping `source.ipAddress` to `network.client.ip`
+      enabled: true
+      sources:
+        - source.ipAddress
+      sourceType: attribute
+      target: network.client.ip
+      targetType: attribute
+      preserveSource: false
+      overrideOnConflict: false
+    - type: geo-ip-parser
+      name: "Extracting Geo Location from IP Address "
+      enabled: true
+      sources:
+        - network.client.ip
+      target: network.client.geoip
+      ip_processing_behavior: do-nothing
+    - type: attribute-remapper
+      name: Remapping actors.user.name to usr.name
+      enabled: true
+      sources:
+        - actors.user.name
+      sourceType: attribute
+      target: usr.name
+      targetType: attribute
+      preserveSource: true
+      overrideOnConflict: false
+    - type: attribute-remapper
+      name: Remapping actors.user.id to usr.id
+      enabled: true
+      sources:
+        - actors.user.id
+      sourceType: attribute
+      target: usr.id
+      targetType: attribute
+      preserveSource: true
+      overrideOnConflict: false
