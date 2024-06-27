@@ -25,12 +25,12 @@ def generate_metrics(app: Application, integration: str, site: str, api_key: str
     You can provide the site and API key as options:
 
     \b
-    `$ ddev meta scripts generate-metrics ray --site <URL> --api-key <API_KEY>`
+    $ ddev meta scripts generate-metrics --site <URL> --api-key <API_KEY> <INTEGRATION>
 
     It's easier however to switch ddev's org setting temporarily:
 
     \b
-    `$ ddev -o <your-org> meta scripts generate-metrics ray`
+    $ ddev -o <ORG> meta scripts generate-metrics <INTEGRATION>
     """
 
     import random
