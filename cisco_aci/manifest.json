@@ -46,6 +46,10 @@
     },
     "dashboards": {
       "cisco_aci": "assets/dashboards/cisco_aci_dashboard.json"
+    },
+    "monitors": {
+      "[Cisco ACI] Average CPU usage high alert": "assets/monitors/cpu_high.json",
+      "[Cisco ACI] Critical health alert": "assets/monitors/critical_health_score.json"
     }
   }
 }
