@@ -12,7 +12,7 @@ try:
 except ImportError:
     from ..stubs import datadog_agent
 
-DEFAULT_COLLECTION_INTERVAL = 10
+DEFAULT_COLLECTION_INTERVAL = 15
 
 AGENT_HISTORY_QUERY = """\
 SELECT TOP 10
@@ -56,7 +56,7 @@ class SqlserverAgentHistory(DBMAsyncJob):
         self.log = check.log
         self._config = config
         collection_interval = float(
-            self._config.activity_config.get('collection_interval', DEFAULT_COLLECTION_INTERVAL)
+            self._config.agent_jobs_interval
         )
         if collection_interval <= 0:
             collection_interval = DEFAULT_COLLECTION_INTERVAL
@@ -65,7 +65,7 @@ class SqlserverAgentHistory(DBMAsyncJob):
         super(SqlserverAgentHistory, self).__init__(
             check,
             run_sync=True,
-            enabled=is_affirmative(self._config.activity_config.get('enabled', True)),
+            enabled=self._config.include_agent_jobs,
             expected_db_exceptions=(),
             min_collection_interval=self._config.min_collection_interval,
             dbms="sqlserver",

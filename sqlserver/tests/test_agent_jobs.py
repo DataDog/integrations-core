@@ -295,6 +295,8 @@ def test_agent_jobs_integration(aggregator, dd_run_check, instance_docker, sa_co
                 assert activity[6] == 1
     instance_docker['dbm'] = True
     instance_docker['include_agent_jobs'] = True
+    instance_docker['min_collection_interval'] = 1
+    instance_docker['agent_jobs_interval'] = 1
     instance_tags = set(instance_docker.get('tags', []))
     expected_instance_tags = {t for t in instance_tags if not t.startswith('dd.internal')}
     check = SQLServer(CHECK_NAME, {}, [instance_docker])
@@ -327,20 +329,22 @@ def test_agent_jobs_integration(aggregator, dd_run_check, instance_docker, sa_co
     for mname in EXPECTED_AGENT_JOBS_METRICS_COMMON:
         aggregator.assert_metric(mname, count=1)
     assert check._last_history_id == 8, "should update last history in to instance id of latest job completion step"
+    time.sleep(2)
     dd_run_check(check)
     dbm_activity = aggregator.get_event_platform_events("dbm-activity")
     job_events = [e for e in dbm_activity if (e.get('sqlserver_job_history', None) is not None)]
-    assert len(job_events) == 1, "successive checks should not create new events for same history entries"
+    assert len(job_events) == 2, "new sample taken"
+    assert len(job_events[1]['sqlserver_job_history']) == 0, "successive checks should not create new events for same history entries"
     with sa_conn as conn:
         with conn.cursor() as cursor:
             query = HISTORY_INSERTION_QUERY.format(job_number=2, step_id=0) 
             cursor.execute(query)
-    time.sleep(10)
+    time.sleep(2)
     dd_run_check(check)
     dbm_activity = aggregator.get_event_platform_events("dbm-activity")
     job_events = [e for e in dbm_activity if (e.get('sqlserver_job_history', None) is not None)]
-    assert len(job_events) == 2, "new event should be submitted based with new completed job in history"
-    new_job_event = job_events[1]
+    assert len(job_events) == 3, "new event should be submitted based with new completed job in history"
+    new_job_event = job_events[2]
     new_history_rows = new_job_event['sqlserver_job_history']
     assert len(new_history_rows) == 2, "should have 2 rows of history associated with new completed jobs"
     check.cancel()
