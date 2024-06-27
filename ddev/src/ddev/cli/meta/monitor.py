@@ -1,3 +1,5 @@
+import copy
+
 import click
 
 DESCRIPTION_SEED = """\
@@ -21,11 +23,19 @@ def _edit(text):
     return "" if edited is None else edited
 
 
+def _drop_fields(exported):
+    x = copy.deepcopy(exported)
+    x['options'].pop('on_missing_data', None)
+    return x
+
+
 @monitor.command
 @click.argument("export_json", type=click.File())
 def create(export_json):
     """
     Create monitor spec from the JSON export of the monitor in the UI.
+
+    The exported monitor cannot be committed as-is, we have to rename, add, and drop some fields.
 
     After you've copied the JSON in the UI you can either save it as a file or pipe it to STDIN:
 
@@ -44,7 +54,7 @@ def create(export_json):
         "title": _edit(text=exported["name"]).strip(),
         "description": _edit(text=DESCRIPTION_SEED).strip(),
         "tags": exported["tags"],
-        "definition": exported,
+        "definition": _drop_fields(exported),
     }
     click.echo(
         json.dumps(
