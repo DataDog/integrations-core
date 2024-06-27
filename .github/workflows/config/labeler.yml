@@ -485,6 +485,8 @@ integration/vault:
 - vault/**/*
 integration/vertica:
 - vertica/**/*
+integration/vllm:
+- vllm/**/*
 integration/voltdb:
 - voltdb/**/*
 integration/vsphere:

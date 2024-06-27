@@ -1,7 +1,5 @@
-version: '3'
 networks:
   pg-net:
-
 services:
   postgres:
     image: "postgres:${POSTGRES_IMAGE}"

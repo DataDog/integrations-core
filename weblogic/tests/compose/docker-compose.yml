@@ -1,5 +1,3 @@
-version: "3"
-
 services:
   weblogic-admin-server:
     build:

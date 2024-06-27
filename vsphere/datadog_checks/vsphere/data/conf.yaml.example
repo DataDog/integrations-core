@@ -247,7 +247,14 @@ instances:
     #   - <CLUSTER_REGEX>
 
     ## @param event_resource_filters - list of strings - optional - default: ['vm', 'host']
-    ## Which resource types to collect AlarmStatusChangedEvent events for.
+    ## For events that can be filtered by resources, specify which resources to collect these events for.
+    ##
+    ## The events that can be filtered by resource are as follows: AlarmAcknowledgedEvent,
+    ## AlarmActionTriggeredEvent, AlarmClearedEvent, AlarmCreatedEvent, AlarmEmailCompletedEvent,
+    ## AlarmEmailFailedEvent, AlarmReconfiguredEvent, AlarmRemovedEvent, AlarmScriptCompleteEvent,
+    ## AlarmScriptFailedEvent, AlarmSnmpCompletedEvent, AlarmSnmpFailedEvent, AlarmStatusChangedEvent,
+    ## CustomFieldValueChangedEvent, GeneralUserEvent, PermissionEvent, ScheduledTaskEvent
+    ##
     ## Available resource types are vm, host, datastore, datacenter, and cluster.
     ##
     ## By default, the integration will only collect these events for VMs and Hosts.
@@ -258,6 +265,29 @@ instances:
     #   - datastore
     #   - datacenter
     #   - cluster
+    #   - storage_pod
+    #   - vcenter_object_manager
+
+    ## @param include_events - list of mappings - optional
+    ## The events that should be collected by the vSphere integration.
+    ##
+    ## The "event" specifies the event type you want to include, and the "excluded_messages" is a list of
+    ## messages of that event type you do not want to collect. For example, if the key
+    ## is 'AlarmStatusChangedEvent' and the values for this key are 'Gray to Green' and 'Green to Gray',
+    ## then all events named 'AlarmStatusChangedEvent' that don't have the message 'Gray to Green'
+    ## and 'Green to Gray' will be included.
+    ##
+    ## Currently, events can only be collected from the following resources:
+    ## VMs, hosts, datacenters, datastores, and clusters.
+    ##
+    ## The default events reported are listed here:
+    ## https://github.com/DataDog/integrations-core/tree/master/vsphere#events
+    #
+    # include_events:
+    #   - event: <EVENT_NAME_TO_INCLUDE>
+    #     excluded_messages:
+    #     - <EVENT_MESSAGE_REGEX_CORRESPONDING_TO_EVENT_NAME_TO_EXCLUDE_1>
+    #     - <EVENT_MESSAGE_REGEX_CORRESPONDING_TO_EVENT_NAME_TO_EXCLUDE_2>
 
     ## @param collect_tags - boolean - optional - default: false
     ## If true, the vSphere Tags will be collected.

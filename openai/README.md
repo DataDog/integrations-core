@@ -6,7 +6,6 @@ Get cost estimation, prompt and completion sampling, error tracking, performance
 
 ## Setup
 
-
 <!-- xxx tabs xxx -->
 <!-- xxx tab "Python" xxx -->
 
@@ -14,9 +13,23 @@ Get cost estimation, prompt and completion sampling, error tracking, performance
 
 ### Installation
 
+#### Web: Get Account-level Usage and Cost Metrics
+
+**Note**: This setup method only collects `openai.api.usage*` metrics, and if you enable OpenAI in Cloud Cost Management, you will also get cost metrics, no additional permissions or setup required. Use the agent setup below for additional metrics.
+
+1. Login to your [OpenAI Account][10].
+2. Navigate to **View API Keys** under account settings.
+3. Click the **Create a new secret key** button.
+4. Copy the created API Key to your clipboard.
+5. Navigate to the configuration tab inside Datadog [OpenAI integration tile][11].
+6. Enter an account name and OpenAI API key copied above in the accounts configuration.
+7. If you use [Cloud Cost Management][14] and enable collecting cost data, it will be visible in Cloud Cost Management within 24 hours. ([collected data][15])
+
 <!-- NOTE: This section is overwritten by the OpenAI configuration component exported in -->
 <!-- web-ui. Make sure to update the markdown / code there to see any changes take -->
 <!-- effect on the tile. -->
+
+#### APM: Get Usage Metrics for Python and Node.js Applications
 
 1. Enable APM and StatsD in your Datadog Agent. For example, in Docker:
 
@@ -41,14 +54,14 @@ docker run -d
 pip install ddtrace
 ```
 
-
-3. Prefix your OpenAI Python application command with `ddtrace-run` and the following environment variables as shown below: 
+3. Prefix your OpenAI Python application command with `ddtrace-run` and the following environment variables as shown below:
 
 ```shell
 DD_SERVICE="my-service" DD_ENV="staging" ddtrace-run python <your-app>.py
 ```
 
 **Notes**:
+
 <!-- partial
 {{% site-region region="us3,us5,eu,gov,ap1" %}}
 - Non-US1 customers must set `DD_SITE` on the application command to the correct Datadog site parameter as specified in the table in the <a href="https://docs.datadoghq.com/getting_started/site/#access-the-datadog-site">Datadog Site</a> page (for example, `datadoghq.eu` for EU1 customers).{{% /site-region %}}
@@ -58,11 +71,9 @@ partial -->
 
 See the [APM Python library documentation][2] for more advanced usage.
 
-
 ### Configuration
 
 See the [APM Python library documentation][3] for all the available configuration options.
-
 
 #### Log Prompt & Completion Sampling
 
@@ -71,7 +82,6 @@ To enable log prompt and completion sampling, set the `DD_OPENAI_LOGS_ENABLED="t
 To adjust the log sample rate, see the [APM library documentation][3].
 
 **Note**: Logs submission requires `DD_API_KEY` to be specified when running `ddtrace-run`.
-
 
 ### Validation
 
@@ -149,7 +159,6 @@ See the [APM Node.js OpenAI documentation][8] for more advanced usage.
 
 See the [APM Node.js library documentation][9] for all the available configuration options.
 
-
 #### Log prompt and completion sampling
 
 To enable log prompt and completion sampling, set the `DD_OPENAI_LOGS_ENABLED=1` environment variable. By default, 10% of traced requests emit logs containing the prompts and completions.
@@ -157,7 +166,6 @@ To enable log prompt and completion sampling, set the `DD_OPENAI_LOGS_ENABLED=1`
 To adjust the log sample rate, see the [APM library documentation][3].
 
 **Note**: Logs submission requires `DD_API_KEY` to be specified.
-
 
 ### Validation
 
@@ -190,20 +198,6 @@ Validate that the APM Node.js library can communicate with your Agent by examini
 <!-- xxz tab xxx -->
 <!-- xxx tab "API Key" xxx -->
 
-**Note**: This setup method only collects `openai.api.usage.*` metrics. To collect all metrics provided by this integration, also follow the APM setup instructions.
-
-### Installation
-
-1. Login to your [OpenAI Account][10].
-2. Navigate to **View API Keys** under account settings.
-3. Click the **Create a new secret key** button.
-4. Copy the created API Key to your clipboard.
-
-### Configuration
-
-1. Navigate to the configuration tab inside Datadog [OpenAI integration tile][11].
-2. Enter an account name and OpenAI API key copied above in the accounts configuration.
-
 <!-- xxz tab xxx -->
 <!-- xxz tabs xxx -->
 
@@ -222,7 +216,6 @@ The OpenAI integration does not include any events.
 ### Service Checks
 
 The OpenAI integration does not include any service checks.
-
 
 ## Troubleshooting
 
@@ -247,3 +240,5 @@ Additional helpful documentation, links, and articles:
 [11]: https://app.datadoghq.com/integrations/openai
 [12]: https://app.datadoghq.com/monitors/recommended?q=integration%3AOpenAI&only_installed=false&p=1
 [13]: https://docs.datadoghq.com/getting_started/site/#access-the-datadog-site
+[14]: https://app.datadoghq.com/cost
+[15]: https://docs.datadoghq.com/cloud_cost_management/saas_costs/?tab=openai#data-collected

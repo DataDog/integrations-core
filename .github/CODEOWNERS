@@ -169,6 +169,7 @@ manifest.json         @DataDog/documentation @DataDog/agent-integrations
 /teleport/                              @DataDog/platform-integrations @DataDog/agent-integrations
 /teleport/manifest.json                 @DataDog/platform-integrations @DataDog/agent-integrations @DataDog/documentation
 /teleport/*.md                          @DataDog/platform-integrations @DataDog/agent-integrations @DataDog/documentation
+/teleport/assets/logs/                  @DataDog/platform-integrations @DataDog/agent-integrations @DataDog/documentation @DataDog/logs-backend
 /vsphere/                               @DataDog/platform-integrations @DataDog/agent-integrations
 /vsphere/manifest.json                  @DataDog/platform-integrations @DataDog/agent-integrations @DataDog/documentation
 /vsphere/*.md                           @DataDog/platform-integrations @DataDog/agent-integrations @DataDog/documentation

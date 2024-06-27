@@ -28,7 +28,7 @@ pytestmark = [
 def test_esxi_metric_up(vcsim_instance, dd_run_check, aggregator):
     check = EsxiCheck('esxi', {}, [vcsim_instance])
     dd_run_check(check)
-    aggregator.assert_metric('esxi.host.can_connect', 1, count=1, tags=["esxi_url:127.0.0.1:8989"])
+    aggregator.assert_metric('esxi.host.can_connect', 1, count=2, tags=["esxi_url:127.0.0.1:8989"])
 
 
 def test_esxi_perf_metrics(vcsim_instance, dd_run_check, aggregator, caplog):
@@ -73,7 +73,7 @@ def test_esxi_perf_metrics(vcsim_instance, dd_run_check, aggregator, caplog):
 
     aggregator.assert_metric("esxi.host.count")
     aggregator.assert_metric("esxi.vm.count")
-    aggregator.assert_metric("esxi.host.can_connect", 1, count=1, tags=base_tags)
+    aggregator.assert_metric("esxi.host.can_connect", 1, count=2, tags=base_tags)
 
     aggregator.assert_all_metrics_covered()
 
