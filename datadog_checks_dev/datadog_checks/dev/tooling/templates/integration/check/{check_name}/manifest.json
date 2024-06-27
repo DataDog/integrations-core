@@ -43,7 +43,7 @@
       }}
     }},
     "dashboards": {{
-      "<FILL IN DASHBOARD NAME>": "assets/dashboards/<FILL IN>.json"
+        "{example_dashboard_short_name}": "assets/dashboards/<FILL IN>.json"
     }},
     "monitors": {{}},
     "saved_views": {{}}
