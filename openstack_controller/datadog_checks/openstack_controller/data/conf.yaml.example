@@ -33,13 +33,6 @@ init_config:
 #
 instances:
 
-  -
-    ## @param use_legacy_check_version - boolean - optional - default: false
-    ## For backward compatibility reasons, it is possible to use a deprecated version of the Openstack Controller
-    ## integration by setting this field to "true".
-    #
-    # use_legacy_check_version: false
-
     ## @param username - string - optional
     ## The User name used to connect to Openstack.
     #
@@ -55,6 +48,12 @@ instances:
     ## use the "default" Domain ID
     #
     # domain_id: default
+
+    ## @param use_legacy_check_version - boolean - optional - default: false
+    ## For backward compatibility reasons, it is possible to use a deprecated version of the Openstack Controller
+    ## integration by setting this field to "true".
+    #
+    use_legacy_check_version: false
 
     ## @param use_agent_proxy - boolean - optional - default: true
     ## Whether the dd-agent proxy should also be used for openstack API requests (if set).
@@ -137,6 +136,11 @@ instances:
     ## The region_id that will be used to filter the endpoints to use for each component.
     #
     # endpoint_region_id: <ENDPOINT_REGION_ID>
+
+    ## @param all_projects - boolean - optional - default: false
+    ## List compute servers across all projects (admin only).
+    #
+    # all_projects: false
 
     ## @param components - mapping - optional
     ## General configuration that we want to apply to each of the components and their different metric blocks.

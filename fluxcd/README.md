@@ -36,7 +36,7 @@ kind: Pod
 metadata:
   name: '<POD_NAME>'
   annotations:
-    ad.datadoghq.com/fluxcd.checks: |-
+    ad.datadoghq.com/manager.checks: |-
       {
         "fluxcd": {
           "instances": [
@@ -49,7 +49,7 @@ metadata:
     # (...)
 spec:
   containers:
-    - name: 'fluxcd'
+    - name: 'manager'
 # (...)
 ```
 

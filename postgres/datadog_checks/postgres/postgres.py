@@ -898,7 +898,7 @@ class PostgreSql(AgentCheck):
                             check=self, operation='custom_queries', tags=['metric_prefix:{}'.format(metric_prefix)]
                         ):
                             cursor.execute(query)
-                    except (psycopg2.ProgrammingError, psycopg2.errors.QueryCanceled) as e:
+                    except Exception as e:
                         self.log.error("Error executing query for metric_prefix %s: %s", metric_prefix, str(e))
                         continue
 
@@ -1012,7 +1012,7 @@ class PostgreSql(AgentCheck):
     def check(self, _):
         tags = copy.copy(self.tags)
         self.tags_without_db = [t for t in copy.copy(self.tags) if not t.startswith("db:")]
-        # Collect metrics
+        tags_to_add = []
         try:
             # Check version
             self._connect()
@@ -1021,17 +1021,18 @@ class PostgreSql(AgentCheck):
 
             # Add raw version as a tag
             tags.append(f'postgresql_version:{self.raw_version}')
-            self.tags_without_db.append(f'postgresql_version:{self.raw_version}')
+            tags_to_add.append(f'postgresql_version:{self.raw_version}')
 
             # Add system identifier as a tag
             self.load_system_identifier()
             tags.append(f'system_identifier:{self.system_identifier}')
-            self.tags_without_db.append(f'system_identifier:{self.system_identifier}')
-
+            tags_to_add.append(f'system_identifier:{self.system_identifier}')
             if self._config.tag_replication_role:
                 replication_role_tag = "replication_role:{}".format(self._get_replication_role())
                 tags.append(replication_role_tag)
-                self.tags_without_db.append(replication_role_tag)
+                tags_to_add.append(replication_role_tag)
+            self._update_tag_sets(tags_to_add)
+            self._send_database_instance_metadata()
 
             self.log.debug("Running check against version %s: is_aurora: %s", str(self.version), str(self.is_aurora))
             self._emit_running_metric()
@@ -1044,7 +1045,6 @@ class PostgreSql(AgentCheck):
             if self._config.collect_wal_metrics:
                 # collect wal metrics for pg < 10, disabled by enabled
                 self._collect_wal_metrics()
-            self._send_database_instance_metadata()
         except Exception as e:
             self.log.exception("Unable to collect postgres metrics.")
             self._clean_state()
@@ -1069,3 +1069,7 @@ class PostgreSql(AgentCheck):
         finally:
             # Add the warnings saved during the execution of the check
             self._report_warnings()
+
+    def _update_tag_sets(self, tags):
+        self._non_internal_tags = list(set(self._non_internal_tags) | set(tags))
+        self.tags_without_db = list(set(self.tags_without_db) | set(tags))

@@ -91,7 +91,7 @@ def test_disable_block_storage_components_metrics(aggregator, dd_run_check, inst
 
 
 @pytest.mark.parametrize(
-    ('mock_http_post', 'session_auth', 'instance', 'api_type'),
+    ('mock_http_post', 'openstack_v3_password', 'instance', 'api_type'),
     [
         pytest.param(
             {
@@ -112,10 +112,10 @@ def test_disable_block_storage_components_metrics(aggregator, dd_run_check, inst
             id='api sdk',
         ),
     ],
-    indirect=['mock_http_post', 'session_auth'],
+    indirect=['mock_http_post', 'openstack_v3_password'],
 )
 @pytest.mark.usefixtures('mock_http_get', 'mock_http_post', 'openstack_connection')
-def test_not_in_catalog(aggregator, check, dd_run_check, caplog, mock_http_post, session_auth, api_type):
+def test_not_in_catalog(aggregator, check, dd_run_check, caplog, mock_http_post, openstack_connection, api_type):
     with caplog.at_level(logging.DEBUG):
         dd_run_check(check)
 
@@ -140,7 +140,7 @@ def test_not_in_catalog(aggregator, check, dd_run_check, caplog, mock_http_post,
             args_list += list(args)
         assert args_list.count('http://127.0.0.1:8080/identity/v3/auth/tokens') == 4
     if api_type == ApiType.SDK:
-        assert session_auth.get_access.call_count == 4
+        assert openstack_connection.call_count == 4
     assert '`block-storage` component not found in catalog' in caplog.text
 
 
@@ -278,6 +278,7 @@ def test_block_storage_metrics(aggregator, check, dd_run_check):
             'volume_id:9c762008-d70f-44d1-af02-98e1da79ee4b',
             'volume_name:first_volume',
             'volume_status:in-use',
+            'volume_type:lvmdriver-1',
             'keystone_server:http://127.0.0.1:8080/identity',
         ],
     )
@@ -292,6 +293,7 @@ def test_block_storage_metrics(aggregator, check, dd_run_check):
             'volume_id:259b16de-727f-4011-8388-84d17a9ae594',
             'volume_name:',
             'volume_status:in-use',
+            'volume_type:lvmdriver-1',
             'keystone_server:http://127.0.0.1:8080/identity',
         ],
     )
@@ -306,6 +308,7 @@ def test_block_storage_metrics(aggregator, check, dd_run_check):
             'volume_id:9c762008-d70f-44d1-af02-98e1da79ee4b',
             'volume_name:first_volume',
             'volume_status:in-use',
+            'volume_type:lvmdriver-1',
             'keystone_server:http://127.0.0.1:8080/identity',
         ],
     )
@@ -320,6 +323,7 @@ def test_block_storage_metrics(aggregator, check, dd_run_check):
             'volume_id:259b16de-727f-4011-8388-84d17a9ae594',
             'volume_name:',
             'volume_status:in-use',
+            'volume_type:lvmdriver-1',
             'keystone_server:http://127.0.0.1:8080/identity',
         ],
     )
@@ -647,6 +651,7 @@ def test_block_storage_volumes_pagination(
             'volume_id:9c762008-d70f-44d1-af02-98e1da79ee4b',
             'volume_name:first_volume',
             'volume_status:in-use',
+            'volume_type:lvmdriver-1',
             'keystone_server:http://127.0.0.1:8080/identity',
         ],
     )
@@ -661,6 +666,7 @@ def test_block_storage_volumes_pagination(
             'volume_id:259b16de-727f-4011-8388-84d17a9ae594',
             'volume_name:',
             'volume_status:in-use',
+            'volume_type:lvmdriver-1',
             'keystone_server:http://127.0.0.1:8080/identity',
         ],
     )
@@ -675,6 +681,7 @@ def test_block_storage_volumes_pagination(
             'volume_id:9c762008-d70f-44d1-af02-98e1da79ee4b',
             'volume_name:first_volume',
             'volume_status:in-use',
+            'volume_type:lvmdriver-1',
             'keystone_server:http://127.0.0.1:8080/identity',
         ],
     )
@@ -689,6 +696,7 @@ def test_block_storage_volumes_pagination(
             'volume_id:259b16de-727f-4011-8388-84d17a9ae594',
             'volume_name:',
             'volume_status:in-use',
+            'volume_type:lvmdriver-1',
             'keystone_server:http://127.0.0.1:8080/identity',
         ],
     )

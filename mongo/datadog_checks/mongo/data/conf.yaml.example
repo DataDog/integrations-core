@@ -84,19 +84,12 @@ instances:
     #   - one_database
     #   - other_database
 
-    ## @param dbm - boolean - optional - default: false
-    ## Set to `true` enable Database Monitoring.
+    ## @param reported_database_hostname - string - optional
+    ## Set the reported database hostname for the connected mongodb instance. This value overrides the mongodb hostname 
+    ## detected by the Agent from mongodb admin command serverStatus. It can be useful to set a custom hostname
+    ## when connecting to a remote database through a proxy.
     #
-    # dbm: false
-
-    ## @param cluster_name - string - optional
-    ## The name of the cluster to which the monitored MongoDB instance belongs.
-    ## Used to group MongoDB instances in a MongoDB cluster.
-    ## Please note that the cluster name must be unique for each MongoDB cluster.
-    ##
-    ## Required when `dbm` is enabled.
-    #
-    # cluster_name: <CLUSTER_NAME>
+    # reported_database_hostname: <REPORTED_DATABASE_HOSTNAME>
 
     ## @param replica_check - boolean - optional - default: true
     ## Whether or not to read from available replicas.

@@ -54,9 +54,6 @@
     },
     "saved_views": {
       "memcached_processes": "assets/saved_views/memcached_processes.json"
-    },
-    "logs": {
-      "source": "memcached"
     }
   }
 }

@@ -106,6 +106,7 @@ manifest.json         @DataDog/documentation @DataDog/agent-integrations
 /tcp_queue_length/manifest.json           @DataDog/container-integrations @DataDog/agent-integrations @DataDog/documentation
 
 # NDM
+/cisco_sdwan/                                                             @DataDog/network-device-monitoring @DataDog/agent-integrations
 /snmp/                                                             @DataDog/network-device-monitoring @DataDog/agent-integrations
 /snmp/*.md                                                         @DataDog/network-device-monitoring @DataDog/agent-integrations @DataDog/documentation
 /snmp_*/                                                           @DataDog/network-device-monitoring @DataDog/agent-integrations
@@ -180,6 +181,9 @@ datadog_checks_base/tests/**/test_db_statements.py  @DataDog/database-monitoring
 /oracle/                                            @DataDog/database-monitoring-agent @DataDog/agent-integrations
 /oracle/*.md                                        @DataDog/database-monitoring @DataDog/agent-integrations @DataDog/documentation
 /oracle/manifest.json                               @DataDog/database-monitoring @DataDog/agent-integrations @DataDog/documentation
+/mongo/                                             @DataDog/agent-integrations @DataDog/database-monitoring-agent
+/mongo/*.md                                         @DataDog/agent-integrations @DataDog/database-monitoring @DataDog/documentation
+/mongo/manifest.json                                @DataDog/agent-integrations @DataDog/database-monitoring @DataDog/documentation
 
 # APM Integrations
 /langchain/         @DataDog/ml-observability @DataDog/agent-integrations @DataDog/documentation

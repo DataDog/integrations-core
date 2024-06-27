@@ -182,12 +182,7 @@ def test_cisco_voice(aggregator):
     for cvp in cvp_gauges:
         aggregator.assert_metric('snmp.{}'.format(cvp), metric_type=aggregator.GAUGE, tags=tags)
 
-    ccms_counts = ["ccmRejectedPhones", "ccmUnregisteredPhones"]
-
-    ccms_gauges = ["ccmRegisteredGateways", "ccmRegisteredPhones"]
-
-    for ccm in ccms_counts:
-        aggregator.assert_metric('snmp.{}'.format(ccm), metric_type=aggregator.RATE, tags=tags)
+    ccms_gauges = ["ccmRegisteredGateways", "ccmRegisteredPhones", "ccmRejectedPhones", "ccmUnregisteredPhones"]
 
     for ccm in ccms_gauges:
         aggregator.assert_metric('snmp.{}'.format(ccm), metric_type=aggregator.GAUGE, tags=tags)

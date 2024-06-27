@@ -278,9 +278,15 @@ class MySql(AgentCheck):
 
         tags = list(self.tags)
         self._set_qcache_stats()
-        with self._connect() as db:
-            try:
+        try:
+            with self._connect() as db:
                 self._conn = db
+
+                # Update tag set with relevant information
+                if self._get_is_aurora(db):
+                    aurora_tags = self._get_runtime_aurora_tags(db)
+                    self.tags = tags + aurora_tags
+                    self._non_internal_tags = self._set_database_instance_tags(aurora_tags)
 
                 # version collection
                 self.version = get_version(db)
@@ -288,8 +294,6 @@ class MySql(AgentCheck):
                 self._send_database_instance_metadata()
 
                 self.is_mariadb = self.version.flavor == "MariaDB"
-                if self._get_is_aurora(db):
-                    tags = tags + self._get_runtime_aurora_tags(db)
 
                 self._check_database_configuration(db)
 
@@ -316,12 +320,19 @@ class MySql(AgentCheck):
                 # Custom queries
                 self._query_manager.execute(extra_tags=tags)
 
-            except Exception as e:
-                self.log.exception("error!")
-                raise e
-            finally:
-                self._conn = None
-                self._report_warnings()
+        except Exception as e:
+            self.log.exception("error!")
+            raise e
+        finally:
+            self._conn = None
+            self._report_warnings()
+
+    # _set_database_instance_tags sets the tag list for the `database_instance` resource
+    # based on metadata that is collected on check start. This ensures that we see tags such as
+    # `replication_role` appear on the database_instance as a host tag.
+    def _set_database_instance_tags(self, aurora_tags):
+        tags = copy.deepcopy(self._non_internal_tags)
+        return list(set(tags) | set(aurora_tags))
 
     def cancel(self):
         self._statement_samples.cancel()
@@ -1154,7 +1165,7 @@ class MySql(AgentCheck):
 
                 if cursor.rowcount < 1:
                     self.warning("Failed to fetch records from the information schema 'tables' table.")
-                    return None
+                    return None, None
 
                 table_index_size = {}
                 table_data_size = {}
@@ -1172,7 +1183,7 @@ class MySql(AgentCheck):
         except (pymysql.err.InternalError, pymysql.err.OperationalError) as e:
             self.warning("Size of tables metrics unavailable at this time: %s", e)
 
-            return None
+            return None, None
 
     def _query_size_per_schema(self, db):
         # Fetches the avg query execution time per schema and returns the
@@ -1206,7 +1217,7 @@ class MySql(AgentCheck):
 
                 if cursor.rowcount < 1:
                     self.warning("Failed to fetch records from the tables rows stats 'tables' table.")
-                    return None
+                    return None, None
 
                 table_rows_read_total = {}
                 table_rows_changed_total = {}
@@ -1223,7 +1234,7 @@ class MySql(AgentCheck):
         except (pymysql.err.InternalError, pymysql.err.OperationalError) as e:
             self.warning("Tables rows stats metrics unavailable at this time: %s", e)
 
-        return {}
+        return None, None
 
     def _compute_synthetic_results(self, results):
         if ('Qcache_hits' in results) and ('Qcache_inserts' in results) and ('Qcache_not_cached' in results):

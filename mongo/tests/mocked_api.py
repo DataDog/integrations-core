@@ -55,13 +55,22 @@ class MockedDB(object):
         elif command == "collstats":
             coll_name = args[0]
             filename += f"-{coll_name}"
-        elif command in ("getCmdLineOpts", "replSetGetStatus"):
+        elif command in ("getCmdLineOpts", "replSetGetStatus", "isMaster"):
             filename += f"-{self.deployment}"
         elif command in ("find", "count", "aggregate"):
             # At time of writing, those commands only are for custom queries.
             filename = f"custom-query-{command}"
+        elif command in ("explain"):
+            filename = f"explain-{self.deployment}"
         with open(os.path.join(HERE, "fixtures", filename), 'r') as f:
             return json.load(f, object_hook=json_util.object_hook)
+
+    def aggregate(self, pipeline, session=None, **kwargs):
+        if pipeline[0] == {'$currentOp': {'allUsers': True}}:
+            # mock the $currentOp aggregation used for operation sampling
+            with open(os.path.join(HERE, "fixtures", f"$currentOp-{self.deployment}"), 'r') as f:
+                return json.load(f, object_hook=json_util.object_hook)
+        return []
 
 
 class MockedPyMongoClient(object):

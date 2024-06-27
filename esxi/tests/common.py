@@ -1,13 +1,29 @@
 # (C) Datadog, Inc. 2024-present
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
+import os
+
 from pyVmomi import vim, vmodl
 
 HOST = "127.0.0.1"
 PORT = 8989
-VCSIM_INSTANCE = {'host': f"{HOST}:{str(PORT)}", 'username': 'test', 'password': 'test', 'ssl_verify': False}
+USE_VSPHERE_LAB = os.environ.get('USE_VSPHERE_LAB')
 
-BASE_INSTANCE = {'host': 'localhost', 'username': 'test', 'password': 'test', 'ssl_verify': False}
+VCSIM_INSTANCE = {
+    'host': f"{HOST}:{str(PORT)}",
+    'username': 'test',
+    'password': 'test',
+    'ssl_verify': False,
+    'empty_default_hostname': True,
+}
+
+BASE_INSTANCE = {
+    'host': 'localhost',
+    'username': 'test',
+    'password': 'test',
+    'ssl_verify': False,
+    'empty_default_hostname': True,
+}
 
 
 PERF_COUNTER_INFO = [

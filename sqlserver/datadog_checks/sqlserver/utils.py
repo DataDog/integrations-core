@@ -3,6 +3,7 @@
 # Licensed under a 3-clause BSD style license (see LICENSE)
 import os
 import re
+from typing import Dict
 
 from datadog_checks.base.utils.platform import Platform
 from datadog_checks.sqlserver.const import ENGINE_EDITION_AZURE_MANAGED_INSTANCE, ENGINE_EDITION_SQL_DATABASE
@@ -137,3 +138,30 @@ def is_azure_sql_database(engine_edition):
     :return: bool
     """
     return engine_edition == ENGINE_EDITION_SQL_DATABASE
+
+
+def execute_query(query, cursor, convert_results_to_str=False, parameter=None) -> Dict[str, str]:
+    if parameter is not None:
+        cursor.execute(query, (parameter,))
+    else:
+        cursor.execute(query)
+    columns = [str(column[0]).lower() for column in cursor.description]
+    rows = []
+    if convert_results_to_str:
+        rows = [dict(zip(columns, [str(item) for item in row])) for row in cursor.fetchall()]
+    else:
+        rows = [dict(zip(columns, row)) for row in cursor.fetchall()]
+    return rows
+
+
+def get_list_chunks(lst, n):
+    """Yield successive n-sized chunks from lst."""
+    for i in range(0, len(lst), n):
+        yield lst[i : i + n]
+
+
+def convert_to_bool(value):
+    if isinstance(value, int):
+        return bool(value)
+    else:
+        return value

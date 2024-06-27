@@ -97,6 +97,8 @@ integration/cisco_aci:
 - cisco_aci/**/*
 integration/cisco_duo:
 - cisco_duo/**/*
+integration/cisco_sdwan:
+- cisco_sdwan/**/*
 integration/cisco_secure_firewall:
 - cisco_secure_firewall/**/*
 integration/cisco_umbrella_dns:
@@ -267,6 +269,8 @@ integration/kubelet:
 - kubelet/**/*
 integration/kubernetes:
 - kubernetes/**/*
+integration/kubernetes_cluster_autoscaler:
+- kubernetes_cluster_autoscaler/**/*
 integration/kubernetes_state:
 - kubernetes_state/**/*
 integration/kubernetes_state_core:
@@ -465,6 +469,8 @@ integration/tomcat:
 - tomcat/**/*
 integration/torchserve:
 - torchserve/**/*
+integration/traefik_mesh:
+- traefik_mesh/**/*
 integration/traffic_server:
 - traffic_server/**/*
 integration/twemproxy:
@@ -477,6 +483,8 @@ integration/vault:
 - vault/**/*
 integration/vertica:
 - vertica/**/*
+integration/vllm:
+- vllm/**/*
 integration/voltdb:
 - voltdb/**/*
 integration/vsphere:

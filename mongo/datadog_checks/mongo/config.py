@@ -13,6 +13,7 @@ from datadog_checks.mongo.utils import build_connection_string, parse_mongo_uri
 class MongoConfig(object):
     def __init__(self, instance, log):
         self.log = log
+        self.min_collection_interval = int(instance.get('min_collection_interval', 15))
 
         # x.509 authentication
 
@@ -96,16 +97,22 @@ class MongoConfig(object):
         self.custom_queries = instance.get("custom_queries", [])
 
         self._base_tags = list(set(instance.get('tags', [])))
-        self.service_check_tags = self._compute_service_check_tags()
-        self.metric_tags = self._compute_metric_tags()
 
         # DBM config options
         self.dbm_enabled = is_affirmative(instance.get('dbm', False))
-        self.database_instance_collection_interval = instance.get('database_instance_collection_interval', 1800)
+        self.database_instance_collection_interval = instance.get('database_instance_collection_interval', 300)
         self.cluster_name = instance.get('cluster_name', None)
+        self._operation_samples_config = instance.get('operation_samples', {})
 
         if self.dbm_enabled and not self.cluster_name:
             raise ConfigurationError('`cluster_name` must be set when `dbm` is enabled')
+
+        # MongoDB instance hostname override
+        self.reported_database_hostname = instance.get('reported_database_hostname', None)
+
+        # Generate tags for service checks and metrics
+        self.service_check_tags = self._compute_service_check_tags()
+        self.metric_tags = self._compute_metric_tags()
 
     def _get_clean_server_name(self):
         try:
@@ -138,4 +145,25 @@ class MongoConfig(object):
         return service_check_tags
 
     def _compute_metric_tags(self):
-        return self._base_tags + ['server:%s' % self.clean_server_name]
+        tags = self._base_tags + ['server:%s' % self.clean_server_name]
+        if self.cluster_name:
+            tags.append('clustername:%s' % self.cluster_name)
+        return tags
+
+    @property
+    def operation_samples(self):
+        enabled = False
+        if self.dbm_enabled is True and self._operation_samples_config.get('enabled') is not False:
+            # if DBM is enabled and the operation samples config is not explicitly disabled, then it is enabled
+            enabled = True
+        return {
+            'enabled': enabled,
+            'collection_interval': self._operation_samples_config.get('collection_interval', 10),
+            'run_sync': is_affirmative(self._operation_samples_config.get('run_sync', False)),
+            'explained_operations_cache_maxsize': int(
+                self._operation_samples_config.get('explained_operations_cache_maxsize', 5000)
+            ),
+            'explained_operations_per_hour_per_query': int(
+                self._operation_samples_config.get('explained_operations_per_hour_per_query', 10)
+            ),
+        }

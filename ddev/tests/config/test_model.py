@@ -32,7 +32,7 @@ def test_default():
                 'app_key': os.getenv('DD_APP_KEY', ''),
                 'site': os.getenv('DD_SITE', 'datadoghq.com'),
                 'dd_url': os.getenv('DD_DD_URL', 'https://app.datadoghq.com'),
-                'log_url': os.getenv('DD_LOGS_CONFIG_DD_URL', ''),
+                'log_url': os.getenv('DD_LOGS_CONFIG_LOGS_DD_URL', ''),
             },
         },
         'github': {
@@ -331,7 +331,7 @@ class TestOrg:
             'app_key': os.getenv('DD_APP_KEY', ''),
             'site': os.getenv('DD_SITE', 'datadoghq.com'),
             'dd_url': os.getenv('DD_DD_URL', 'https://app.datadoghq.com'),
-            'log_url': os.getenv('DD_LOGS_CONFIG_DD_URL', ''),
+            'log_url': os.getenv('DD_LOGS_CONFIG_LOGS_DD_URL', ''),
         }
         assert config.org.name == config.org.name == 'default'
         assert config.org.config == config.org.config == org_config
@@ -417,7 +417,7 @@ class TestOrg:
                 'app_key': os.getenv('DD_APP_KEY', ''),
                 'site': os.getenv('DD_SITE', 'datadoghq.com'),
                 'dd_url': os.getenv('DD_DD_URL', 'https://app.datadoghq.com'),
-                'log_url': os.getenv('DD_LOGS_CONFIG_DD_URL', ''),
+                'log_url': os.getenv('DD_LOGS_CONFIG_LOGS_DD_URL', ''),
             },
         }
 
@@ -634,7 +634,7 @@ class TestOrgs:
                 'app_key': os.getenv('DD_APP_KEY', ''),
                 'site': os.getenv('DD_SITE', 'datadoghq.com'),
                 'dd_url': os.getenv('DD_DD_URL', 'https://app.datadoghq.com'),
-                'log_url': os.getenv('DD_LOGS_CONFIG_DD_URL', ''),
+                'log_url': os.getenv('DD_LOGS_CONFIG_LOGS_DD_URL', ''),
             },
         }
         assert config.orgs == orgs

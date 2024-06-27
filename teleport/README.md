@@ -10,22 +10,48 @@ Follow the instructions below to install and configure this check for an Agent r
 
 ### Installation
 
-The Teleport check is included in the [Datadog Agent][2] package.
-No additional installation is needed on your server.
+The Teleport integration is included in the Datadog Agent package. No additional installation is needed on your server.
 
 ### Prerequisites
 
 The Teleport check gathers Teleport's metrics and performance data using two distinct endpoints:
-   - The [Health endpoint](https://goteleport.com/docs/management/diagnostics/monitoring/#healthz) provides the overall health status of your Teleport instance.
-   - The [OpenMetrics endpoint](https://goteleport.com/docs/reference/metrics/#auth-service-and-backends) extracts metrics on the Teleport instance and the various services operating within that instance.
+
+- The [Health endpoint](https://goteleport.com/docs/management/diagnostics/monitoring/#healthz) provides the overall health status of your Teleport instance.
+- The [OpenMetrics endpoint](https://goteleport.com/docs/reference/metrics/#auth-service-and-backends) extracts metrics on the Teleport instance and the various services operating within that instance.
 
 These endpoints aren't activated by default. To enable the diagnostic HTTP endpoints in your Teleport instance, please refer to the public Teleport [documentation](https://goteleport.com/docs/management/diagnostics/monitoring/#enable-health-monitoring).
 
 ### Configuration
 
+##### Metric collection
+
 1. Edit the `teleport.d/conf.yaml` file, in the `conf.d/` folder at the root of your Agent's configuration directory to start collecting your teleport performance data. See the [sample teleport.d/conf.yaml][4] for all available configuration options.
 
 2. [Restart the Agent][5].
+
+##### Log collection
+
+1. Collecting logs is disabled by default in the Datadog Agent, enable it in your `datadog.yaml` file:
+
+   ```yaml
+   logs_enabled: true
+   ```
+
+2. Edit the `logs` section of your `teleport.d/conf.yaml` file to start collecting your Teleport logs:
+
+   ```yaml
+   logs:
+     - type: file
+       path: /var/log/teleport/teleport.log
+       source: teleport
+       service: telepor-service
+      log_processing_rules:
+         - type: multi_line
+         name: logs_start_with_date
+         pattern: \d{4}\-(0?[1-9]|1[012])\-(0?[1-9]|[12][0-9]|3[01])
+   ```
+
+3. [Restart the Agent][8].
 
 ### Validation
 
@@ -48,7 +74,6 @@ The Teleport integration does not include any service checks.
 ## Troubleshooting
 
 Need help? Contact [Datadog support][9].
-
 
 [1]: https://docs.datadoghq.com/integrations/teleport
 [2]: https://app.datadoghq.com/account/settings/agent/latest

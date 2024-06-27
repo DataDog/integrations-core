@@ -4,13 +4,14 @@
 
 ## Overview
 
-This Agent check only collects metrics for message offsets. If you want to collect JMX metrics from the Kafka brokers or Java-based consumers/producers, see the Kafka check.
+This Agent integration collects message offset metrics from your Kafka consumers. This check fetches the highwater offsets from the Kafka brokers, consumer offsets that are stored in Kafka (or Zookeeper for old-style consumers), and then calculates consumer lag (which is the difference between the broker offset and the consumer offset).
 
-If you would benefit from visualizing the topology of your streaming data pipelines, or from investigating localized bottlenecks within your data streams setup, check out [Data Streams Monitoring][16].
+If you would benefit from visualizing the topology of your streaming data pipelines and identifying the root cause of bottlenecks, learn more about [Data Streams Monitoring][16].
 
-This check fetches the highwater offsets from the Kafka brokers, consumer offsets that are stored in Kafka or Zookeeper (for old-style consumers), and the calculated consumer lag (which is the difference between the broker offset and the consumer offset).
+**Note:** 
+- This integration ensures that consumer offsets are checked before broker offsets; in the worst case, consumer lag may be a little overstated. Checking these offsets in the reverse order can understate consumer lag to the point of having negative values, which is a dire scenario usually indicating messages are being skipped.
+- If you want to collect JMX metrics from your Kafka brokers or Java-based consumers/producers, see the [Kafka Broker integration][19].
 
-**Note:** This integration ensures that consumer offsets are checked before broker offsets; in the worst case, consumer lag may be a little overstated. Checking these offsets in the reverse order can understate consumer lag to the point of having negative values, which is a dire scenario usually indicating messages are being skipped.
 
 ## Setup
 
@@ -25,7 +26,7 @@ The Agent's Kafka consumer check is included in the [Datadog Agent][2] package. 
 
 #### Host
 
-To configure this check for an Agent running on a host:
+To configure this check for an Agent running on a host running your Kafka consumers:
 
 ##### Metric collection
 
@@ -144,3 +145,5 @@ sudo service datadog-agent restart
 [15]: https://www.datadoghq.com/blog/monitor-kafka-with-datadog
 [16]: https://www.datadoghq.com/product/data-streams-monitoring/
 [17]: https://docs.datadoghq.com/containers/kubernetes/integrations/
+[18]: https://app.datadoghq.com/data-streams
+[19]: https://app.datadoghq.com/integrations/kafka?search=kafka

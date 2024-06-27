@@ -3,9 +3,12 @@
 # Licensed under a 3-clause BSD style license (see LICENSE)
 import logging
 import re
+import socket
 import ssl
 from collections import defaultdict
+from urllib.parse import urlparse
 
+import socks
 from pyVim import connect
 from pyVmomi import vim, vmodl
 from six import iteritems
@@ -25,7 +28,7 @@ from .constants import (
     SHORT_ROLLUP,
     VM_RESOURCE,
 )
-from .metrics import RESOURCE_NAME_TO_METRICS
+from .metrics import PERCENT_METRICS, RESOURCE_NAME_TO_METRICS
 from .resource_filters import create_resource_filter
 from .utils import (
     get_mapped_instance_tag,
@@ -36,6 +39,10 @@ from .utils import (
 )
 
 
+def create_connection(address, timeout, source_address, proxy_host, proxy_port):
+    return socks.create_connection(address, timeout, source_address, socks.SOCKS5, proxy_host, proxy_port)
+
+
 class EsxiCheck(AgentCheck):
     __NAMESPACE__ = 'esxi'
 
@@ -44,7 +51,8 @@ class EsxiCheck(AgentCheck):
         self.host = self.instance.get("host")
         self.username = self.instance.get("username")
         self.password = self.instance.get("password")
-        self.use_guest_hostname = self.instance.get("use_guest_hostname", False)
+        self.use_guest_hostname = is_affirmative(self.instance.get("use_guest_hostname", False))
+        self.use_configured_hostname = is_affirmative(self.instance.get("use_configured_hostname", False))
         self.excluded_host_tags = self._validate_excluded_host_tags(self.instance.get("excluded_host_tags", []))
         self.collect_per_instance_filters = self._parse_metric_regex_filters(
             self.instance.get("collect_per_instance_filters", {})
@@ -55,6 +63,58 @@ class EsxiCheck(AgentCheck):
         self.ssl_capath = self.instance.get("ssl_capath")
         self.ssl_cafile = self.instance.get("ssl_cafile")
         self.tags = [f"esxi_url:{self.host}"]
+        self.proxy_host = None
+        self.proxy_port = None
+        proxy = self.instance.get('proxy', init_config.get('proxy'))
+        if proxy:
+            parsed_proxy = urlparse(proxy)
+            proxy_scheme = parsed_proxy.scheme
+            if proxy_scheme != 'socks5':
+                self.log.warning('Proxy scheme %s not supported; ignoring', proxy_scheme)
+            else:
+                self.proxy_host = parsed_proxy.hostname
+                self.proxy_port = parsed_proxy.port
+        self.conn = None
+        self.content = None
+        self.check_initializations.append(self.initiate_api_connection)
+
+    def initiate_api_connection(self):
+        try:
+            context = ssl.SSLContext(protocol=ssl.PROTOCOL_TLS_CLIENT)
+            context.check_hostname = True if self.ssl_verify else False
+            context.verify_mode = ssl.CERT_REQUIRED if self.ssl_verify else ssl.CERT_NONE
+
+            if self.ssl_capath:
+                context.load_verify_locations(cafile=None, capath=self.ssl_capath, cadata=None)
+            elif self.ssl_cafile:
+                context.load_verify_locations(cafile=self.ssl_cafile, capath=None, cadata=None)
+            else:
+                context.load_default_certs(ssl.Purpose.SERVER_AUTH)
+
+            create_connection_method = socket.create_connection
+            if self.proxy_host:
+                socket.create_connection = lambda address, timeout, source_address, **kwargs: create_connection(
+                    address, timeout, source_address, self.proxy_host, self.proxy_port
+                )
+
+            connection = connect.SmartConnect(host=self.host, user=self.username, pwd=self.password, sslContext=context)
+            socket.create_connection = create_connection_method
+
+            self.conn = connection
+            self.content = connection.content
+
+            if self.content.about.apiType != "HostAgent":
+                raise Exception(
+                    f"{self.host} is not an ESXi host; please set the `host` config option to an ESXi host "
+                    "or use the vSphere integration to collect data from the vCenter",
+                )
+
+            self.log.info("Connected to ESXi host %s: %s", self.host, self.content.about.fullName)
+            self.gauge("host.can_connect", 1, tags=self.tags)
+        except Exception as e:
+            self.log.exception("Cannot connect to ESXi host %s: %s", self.host, str(e))
+            self.gauge("host.can_connect", 0, tags=self.tags)
+            raise
 
     def _validate_excluded_host_tags(self, excluded_host_tags):
         valid_excluded_host_tags = []
@@ -62,8 +122,7 @@ class EsxiCheck(AgentCheck):
             if excluded_host_tag not in AVAILABLE_HOST_TAGS:
                 self.log.warning(
                     "Unknown host tag `%s` cannot be excluded. Available host tags are: "
-                    "`esxi_url`, `esxi_type`, `esxi_host`, `esxi_folder`, `esxi_cluster` "
-                    "`esxi_compute`, `esxi_datacenter`, and `esxi_datastore`",
+                    "`esxi_url`, `esxi_type`, `esxi_host`, `esxi_compute`, and `esxi_datastore`",
                     excluded_host_tag,
                 )
             else:
@@ -238,7 +297,7 @@ class EsxiCheck(AgentCheck):
         metric_ids = [vim.PerformanceManager.MetricId(counterId=counter, instance="") for counter in counter_ids]
         return counter_keys_and_names, metric_ids
 
-    def collect_metrics_for_entity(self, metric_ids, counter_keys_and_names, entity, entity_name, metric_tags):
+    def collect_metrics_for_entity(self, metric_ids, counter_keys_and_names, entity, hostname, metric_tags):
         resource_type = type(entity)
         resource_name = RESOURCE_TYPE_TO_NAME[resource_type]
         for metric_id in metric_ids:
@@ -297,7 +356,7 @@ class EsxiCheck(AgentCheck):
                     self.log.debug(
                         "Skipping metric %s for %s because no value was returned by the %s",
                         metric_name,
-                        entity_name,
+                        hostname,
                         resource_name,
                     )
                     continue
@@ -308,23 +367,26 @@ class EsxiCheck(AgentCheck):
                         "Skipping metric %s for %s, because the value returned by the %s"
                         " is negative (i.e. the metric is not yet available). values: %s",
                         metric_name,
-                        entity_name,
+                        hostname,
                         resource_name,
                         list(metric_result.value),
                     )
                     continue
                 else:
                     most_recent_val = valid_values[-1]
+                    if metric_name in PERCENT_METRICS:
+                        # Convert the percentage to a float.
+                        most_recent_val /= 100.0
                     all_tags = metric_tags + additional_tags
 
                     self.log.debug(
                         "Submit metric: name=`%s`, value=`%s`, hostname=`%s`, tags=`%s`",
                         metric_name,
                         most_recent_val,
-                        entity_name,
+                        hostname,
                         all_tags,
                     )
-                    self.gauge(metric_name, most_recent_val, hostname=entity_name, tags=all_tags)
+                    self.gauge(metric_name, most_recent_val, hostname=hostname, tags=all_tags)
 
     def set_version_metadata(self):
         esxi_version = self.content.about.version
@@ -333,36 +395,15 @@ class EsxiCheck(AgentCheck):
 
     def check(self, _):
         try:
-            context = ssl.SSLContext(protocol=ssl.PROTOCOL_TLS_CLIENT)
-            context.check_hostname = True if self.ssl_verify else False
-            context.verify_mode = ssl.CERT_REQUIRED if self.ssl_verify else ssl.CERT_NONE
-
-            if self.ssl_capath:
-                context.load_verify_locations(cafile=None, capath=self.ssl_capath, cadata=None)
-            elif self.ssl_cafile:
-                context.load_verify_locations(cafile=self.ssl_cafile, capath=None, cadata=None)
-            else:
-                context.load_default_certs(ssl.Purpose.SERVER_AUTH)
-
-            connection = connect.SmartConnect(host=self.host, user=self.username, pwd=self.password, sslContext=context)
-            self.conn = connection
-            self.content = connection.content
-
-            if self.content.about.apiType != "HostAgent":
-                raise Exception(
-                    f"{self.host} is not an ESXi host; please set the `host` config option to an ESXi host "
-                    "or use the vSphere integration to collect data from the vCenter",
-                )
-
-            self.log.info("Connected to ESXi host %s: %s", self.host, self.content.about.fullName)
-            self.count("host.can_connect", 1, tags=self.tags)
+            self.set_version_metadata()
+            self.gauge("host.can_connect", 1, tags=self.tags)
 
         except Exception as e:
-            self.log.exception("Cannot connect to ESXi host %s: %s", self.host, str(e))
-            self.count("host.can_connect", 0, tags=self.tags)
-            raise
+            self.conn = None
+            self.content = None
+            self.log.debug("Failed to get version metadata; attempting to reconnect to the ESXi host: %s", str(e))
+            self.initiate_api_connection()
 
-        self.set_version_metadata()
         resources = self.get_resources()
         resource_map = {
             obj_content.obj: {prop.name: prop.val for prop in obj_content.propSet}
@@ -388,6 +429,8 @@ class EsxiCheck(AgentCheck):
         }
 
         for resource_obj, resource_props in all_resources_with_metrics.items():
+            resource_type = type(resource_obj)
+            resource_type_name = RESOURCE_TYPE_TO_NAME[resource_type]
 
             if not is_resource_collected_by_filters(resource_obj, all_resources_with_metrics, self.resource_filters):
                 self.log.debug(
@@ -397,16 +440,18 @@ class EsxiCheck(AgentCheck):
 
             hostname = resource_props.get("name")
 
-            resource_type = RESOURCE_TYPE_TO_NAME[type(resource_obj)]
-            if resource_type == "vm" and self.use_guest_hostname:
+            if resource_type == VM_RESOURCE and self.use_guest_hostname:
                 hostname = resource_props.get("guest.hostName", hostname)
+
+            if resource_type == HOST_RESOURCE and self.use_configured_hostname:
+                hostname = self.host
 
             self.log.debug("Collect metrics and host tags for hostname: %s, object: %s", hostname, resource_obj)
 
             tags = []
             parent = resource_props.get('parent')
 
-            if resource_type == "vm":
+            if resource_type == VM_RESOURCE:
                 runtime_host = resource_props.get('runtime.host')
                 runtime_host_props = {}
                 if runtime_host:
@@ -418,19 +463,14 @@ class EsxiCheck(AgentCheck):
                 runtime_hostname = to_string(runtime_host_props.get("name", "unknown"))
                 tags.append('esxi_host:{}'.format(runtime_hostname))
 
-                if runtime_host is not None:
-                    tags.extend(
-                        get_tags_recursively(
-                            runtime_host,
-                            resource_map,
-                            include_only=['esxi_cluster'],
-                        )
-                    )
-
             if parent is not None:
-                tags.extend(get_tags_recursively(parent, resource_map))
+                tags.extend(
+                    get_tags_recursively(
+                        parent, resource_map, include_only=["esxi_compute", "esxi_host", "esxi_datastore"]
+                    )
+                )
 
-            tags.append('esxi_type:{}'.format(resource_type))
+            tags.append('esxi_type:{}'.format(resource_type_name))
 
             metric_tags = self.tags
             if self.excluded_host_tags:
@@ -444,7 +484,7 @@ class EsxiCheck(AgentCheck):
             else:
                 self.log.debug("No host name found for %s; skipping external tag submission", resource_obj)
 
-            self.count(f"{resource_type}.count", 1, tags=tags, hostname=None)
+            self.count(f"{resource_type_name}.count", 1, tags=tags, hostname=None)
 
             counter_keys_and_names, metric_ids = self.get_available_metric_ids_for_entity(resource_obj)
             self.collect_metrics_for_entity(metric_ids, counter_keys_and_names, resource_obj, hostname, metric_tags)

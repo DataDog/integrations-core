@@ -2,6 +2,7 @@
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
 import copy
+import functools
 import os
 import time
 from contextlib import contextmanager
@@ -292,3 +293,20 @@ class InitializeAuthDB(LazyFunction):
             ],
         )
         auth_db.command("createUser", 'special test user', pwd='s3\\kr@t', roles=[{'role': 'read', 'db': 'test'}])
+
+
+def mock_now(static_time):
+    def decorator(func):
+        @functools.wraps(func)
+        def wrapper(*args, **kwargs):
+            monkeypatch = pytest.MonkeyPatch()
+            monkeypatch.setattr(time, 'time', lambda: static_time)
+            try:
+                result = func(*args, **kwargs)
+            finally:
+                monkeypatch.undo()
+            return result
+
+        return wrapper
+
+    return decorator

@@ -36,6 +36,26 @@ instances:
     #
   - api_url: <API_URL>
 
+    ## @param verify_ssl - boolean - optional - default: true
+    ## Enable SSL/TLS encryption for the check.
+    #
+    # verify_ssl: true
+
+    ## @param ssl_ca_cert - string - optional
+    ## Path to the file containing the CA certificates to trust.
+    #
+    # ssl_ca_cert: <CERT_PATH>
+
+    ## @param cert_file - string - optional
+    ## Path to the file from which the local certificates can be loaded.
+    #
+    # cert_file: <CERT_FILE_PATH>
+
+    ## @param key_file - string - optional
+    ## Path to the file from which to load the private key.
+    #
+    # key_file: <KEY_FILE_PATH>
+
     ## @param clusters - mapping - optional
     ## Optional configuration to indicate the clusters that we want to be processed. If not configured,
     ## all clusters will be processed.

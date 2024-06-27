@@ -23,6 +23,8 @@ from six import PY2, iteritems, string_types
 from six.moves.urllib.parse import quote, urlparse, urlunparse
 from wrapt import ObjectProxy
 
+from datadog_checks.base.agent import datadog_agent
+
 from ..config import is_affirmative
 from ..errors import ConfigurationError
 from .common import ensure_bytes, ensure_unicode
@@ -34,11 +36,6 @@ try:
     from contextlib import ExitStack
 except ImportError:
     from contextlib2 import ExitStack
-
-try:
-    import datadog_agent
-except ImportError:
-    from ..stubs import datadog_agent
 
 # Import lazily to reduce memory footprint and ease installation for development
 requests_aws = None

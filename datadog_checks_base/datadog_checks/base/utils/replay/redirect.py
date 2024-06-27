@@ -68,7 +68,7 @@ class ReplayLogger(logging.Logger):
         )
 
 
-base.using_stub_aggregator = False
+base.AGENT_RUNNING = True
 base.aggregator = ReplayAggregator()
 base.datadog_agent = core.datadog_agent = ReplayDatadogAgent()
 

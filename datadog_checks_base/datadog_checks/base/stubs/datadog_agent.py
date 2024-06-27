@@ -124,6 +124,10 @@ class DatadogAgentStub(object):
     def set_process_start_time(self, time):
         self._process_start_time = time
 
+    def obfuscate_mongodb_string(self, command):
+        # Passthrough stub: obfuscation implementation is in Go code.
+        return command
+
 
 # Use the stub as a singleton
 datadog_agent = DatadogAgentStub()

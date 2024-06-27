@@ -61,10 +61,7 @@ AVAILABLE_HOST_TAGS = [
     "esxi_url",
     "esxi_type",
     "esxi_host",
-    "esxi_folder",
-    "esxi_cluster",
     "esxi_compute",
-    "esxi_datacenter",
     "esxi_datastore",
 ]
 

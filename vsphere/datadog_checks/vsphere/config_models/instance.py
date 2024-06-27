@@ -31,6 +31,14 @@ class CollectPerInstanceFilters(BaseModel):
     vm: Optional[tuple[str, ...]] = None
 
 
+class IncludeEvent(BaseModel):
+    model_config = ConfigDict(
+        arbitrary_types_allowed=True,
+        frozen=True,
+    )
+    excluded_messages: Optional[tuple[str, ...]] = None
+
+
 class MetricFilters(BaseModel):
     model_config = ConfigDict(
         arbitrary_types_allowed=True,
@@ -147,6 +155,7 @@ class InstanceConfig(BaseModel):
     excluded_host_tags: Optional[tuple[str, ...]] = None
     host: str
     include_datastore_cluster_folder_tag: Optional[bool] = None
+    include_events: Optional[tuple[IncludeEvent, ...]] = None
     max_historical_metrics: Optional[int] = None
     metric_filters: Optional[MetricFilters] = None
     metric_patterns: Optional[MetricPatterns] = None
