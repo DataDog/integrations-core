@@ -8,6 +8,9 @@ This monitor will alert you on XXX...
 - Define the problem stated by the title.
 - Answer why this is an issue worth alerting on.
 - Describe the impact of the problem.
+
+Official guidelines:
+https://docs.datadoghq.com/developers/integrations/create-an-integration-recommended-monitor/#description
 """
 
 
