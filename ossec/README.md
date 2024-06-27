@@ -115,7 +115,7 @@ In order to change the timezone in OSSEC pipeline follow the below steps:
       - Hover over the `OSSEC` pipeline and click on the `clone`  button. This will clone the `OSSEC` pipeline which will be editable.
 
   4. Edit the Grok Parser using below steps:
-      - Find a processor with the name “Grok Parser: Parsing OSSEC alerts” and click on the `Edit` button by hovering over the pipeline.
+      - Find a processor with the name "Grok Parser: Parsing OSSEC alerts" and click on the `Edit` button by hovering over the pipeline.
       - Under the Define parsing rules,
         - Change the string `UTC` to the timezone of your OSSEC server. For example, if your timezone is IST then as per the timezone mentioned in the below reference link,you need to replace the value as `Asia/Calcutta`.
 
