@@ -38,6 +38,10 @@
         "check": "traefik_mesh.entrypoint.open_connections",
         "metadata_path": "metadata.csv"
       },
+      "process_signatures": [
+        "traefik",
+        "traefik-mesh"
+      ],
       "service_checks": {
         "metadata_path": "assets/service_checks.json"
       }

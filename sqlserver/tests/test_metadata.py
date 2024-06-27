@@ -183,15 +183,6 @@ def test_collect_schemas(aggregator, dd_run_check, dbm_instance):
                             },
                         ],
                         'partitions': {'partition_count': 12},
-                        'foreign_keys': [
-                            {
-                                'foreign_key_name': 'FK_CityId',
-                                'referencing_table': 'landmarks',
-                                'referencing_column': 'city_id',
-                                'referenced_table': 'cities',
-                                'referenced_column': 'id',
-                            }
-                        ],
                         'indexes': [
                             {
                                 'name': 'PK_Cities',
@@ -242,6 +233,15 @@ def test_collect_schemas(aggregator, dd_run_check, dbm_instance):
                             },
                         ],
                         'partitions': {'partition_count': 1},
+                        'foreign_keys': [
+                            {
+                                'foreign_key_name': 'FK_CityId',
+                                'referencing_table': 'landmarks',
+                                'referencing_column': 'city_id',
+                                'referenced_table': 'cities',
+                                'referenced_column': 'id',
+                            }
+                        ],
                     },
                     {
                         'id': 'normalized_value',
@@ -270,6 +270,15 @@ def test_collect_schemas(aggregator, dd_run_check, dbm_instance):
                             },
                         ],
                         'partitions': {'partition_count': 1},
+                        'foreign_keys': [
+                            {
+                                'foreign_key_name': 'FK_RestaurantNameDistrict',
+                                'referencing_table': 'RestaurantReviews',
+                                'referencing_column': 'RestaurantName,District',
+                                'referenced_table': 'Restaurants',
+                                'referenced_column': 'RestaurantName,District',
+                            }
+                        ],
                     },
                     {
                         'id': 'normalized_value',
@@ -298,15 +307,6 @@ def test_collect_schemas(aggregator, dd_run_check, dbm_instance):
                             },
                         ],
                         'partitions': {'partition_count': 2},
-                        'foreign_keys': [
-                            {
-                                'foreign_key_name': 'FK_RestaurantNameDistrict',
-                                'referencing_table': 'RestaurantReviews',
-                                'referencing_column': 'RestaurantName,District',
-                                'referenced_table': 'Restaurants',
-                                'referenced_column': 'RestaurantName,District',
-                            }
-                        ],
                         'indexes': [
                             {
                                 'name': 'UC_RestaurantNameDistrict',
