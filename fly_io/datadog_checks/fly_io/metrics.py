@@ -172,8 +172,9 @@ METRICS = {
 }
 
 RENAME_LABELS_MAP = {
-    'app': 'fly_app_name',
+    'app': 'app_name',
     'region': 'fly_region',
     'host': 'fly_hypervisor_id',
     'mount': 'fly_mount',
+    'instance': 'app_instance_id',
 }

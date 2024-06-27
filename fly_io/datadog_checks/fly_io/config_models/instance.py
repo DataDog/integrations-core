@@ -83,7 +83,6 @@ class InstanceConfig(BaseModel):
         arbitrary_types_allowed=True,
         frozen=True,
     )
-    access_token: Optional[str] = None
     allow_redirects: Optional[bool] = None
     auth_token: Optional[AuthToken] = None
     auth_type: Optional[str] = None
@@ -118,6 +117,7 @@ class InstanceConfig(BaseModel):
     kerberos_keytab: Optional[str] = None
     kerberos_principal: Optional[str] = None
     log_requests: Optional[bool] = None
+    match_string: Optional[str] = None
     metric_patterns: Optional[MetricPatterns] = None
     metrics: Optional[tuple[Union[str, MappingProxyType[str, Union[str, Metrics]]], ...]] = None
     min_collection_interval: Optional[float] = None
@@ -125,6 +125,7 @@ class InstanceConfig(BaseModel):
     non_cumulative_histogram_buckets: Optional[bool] = None
     ntlm_domain: Optional[str] = None
     openmetrics_endpoint: Optional[str] = None
+    org_slug: str
     password: Optional[str] = None
     persist_connections: Optional[bool] = None
     proxy: Optional[Proxy] = None

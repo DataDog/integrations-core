@@ -76,16 +76,16 @@ def instance_log_requests():
     return False
 
 
+def instance_match_string():
+    return '{__name__=~".+"}'
+
+
 def instance_min_collection_interval():
     return 15
 
 
 def instance_non_cumulative_histogram_buckets():
     return False
-
-
-def instance_openmetrics_endpoint():
-    return 'http://api.fly.io/prometheus/<ORG_NAME>/federate'
 
 
 def instance_persist_connections():

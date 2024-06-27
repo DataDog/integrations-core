@@ -8,15 +8,14 @@ from datadog_checks.base.constants import ServiceCheck
 from datadog_checks.dev.utils import get_metadata_metrics
 from datadog_checks.fly_io import FlyIoCheck
 
-from .common import MOCKED_METRICS
-from .conftest import HERE
+from .common import HERE, MOCKED_METRICS
 
 
 def get_fixture_path(filename):
     return os.path.join(HERE, 'fixtures', filename)
 
 
-def test_check(dd_run_check, aggregator, instance, mock_http_response, caplog):
+def test_check(dd_run_check, aggregator, instance, mock_http_response):
     mock_http_response(file_path=get_fixture_path('output.txt'))
 
     check = FlyIoCheck('fly_io', {}, [instance])

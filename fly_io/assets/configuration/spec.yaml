@@ -9,19 +9,38 @@ files:
     options:
     - template: instances/openmetrics
       overrides:
+        openmetrics_endpoint.hidden: true
         openmetrics_endpoint.required: false
-        openmetrics_endpoint.hidden: false
-        openmetrics_endpoint.display_priority: 2
-        openmetrics_endpoint.value.example: http://api.fly.io/prometheus/<ORG_NAME>/federate
-        openmetrics_endpoint.description: |
-          Fly.io's managed Prometheus endpoint. Replace <ORG_NAME> with your organization's name
-    - name: access_token
-      display_priority: 1
+        headers.display_priority: 3
+        headers.enabled: true
+        headers.description: |
+          Headers to use for every request. An Authorization header including the Fly.io access token is required
+          for authentication for both the openmetrics endpoint and REST API.
+          You can alternatively use the `auth_token` option.
+
+          You can create an access token with the command:
+            `TOKEN=$(flyctl auth token)`
+        headers.value.example:
+          Authorization: "Bearer <FLY_ACCESS_TOKEN>"
+        auth_token.display_priority: 2
+    - name: org_slug
+      display_priority: 4
+      enabled: true
+      required: true
       description: |
-        Fly.io access token. Used for authentication for both the openmetrics endpoint and REST API.
-        You can create one with the command:
-          `TOKEN=$(flyctl auth token)`
+        Fly.io org slug
+        For more information see: https://fly.io/docs/flyctl/orgs/
       value:
         display_default: null
-        example: <ACCESS_TOKEN>
+        example: <ORG_SLUG>
+        type: string
+    - name: match_string
+      display_priority: 1
+      description: |
+        Match string used to filter the Prometheus data requested from Fly.io.
+        For more information, see: https://prometheus.io/docs/prometheus/latest/federation/#configuring-federation
+        By default, we fetch everything.
+      value:
+        display_default: '{__name__=~".+"}'
+        example: '{__name__=~"example_app"}'
         type: string
