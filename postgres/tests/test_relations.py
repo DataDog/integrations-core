@@ -237,7 +237,6 @@ def test_index_metrics(aggregator, integration_check, pg_instance):
 @pytest.mark.integration
 @pytest.mark.usefixtures('dd_environment')
 @flaky(max_runs=5)
-@pytest.mark.flaky
 def test_vacuum_age(aggregator, integration_check, pg_instance):
     pg_instance['relations'] = ['persons']
     pg_instance['dbname'] = 'datadog_test'

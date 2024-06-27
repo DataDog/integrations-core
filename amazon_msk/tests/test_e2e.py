@@ -43,7 +43,6 @@ def test_node_check_legacy(dd_agent_check, instance_legacy, mock_e2e_client):
 
 
 @pytest.mark.skipif(PY2, reason='Test only available on Python 3')
-@pytest.mark.flaky
 def test_node_check(dd_agent_check, instance, mock_e2e_client):
     aggregator = dd_agent_check(instance, rate=True)
 
