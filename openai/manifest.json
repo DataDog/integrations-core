@@ -46,10 +46,6 @@
       {
         "resource_type": "blog",
         "url": "https://www.datadoghq.com/blog/monitor-azure-openai-with-datadog/"
-      },
-      {
-        "resource_type": "product_page",
-        "url": "https://app.datadoghq.com/monitors/recommended?q=integration%3AOpenAI&only_installed=false&p=1"
       }
     ]
   },

@@ -22,10 +22,6 @@
     ],
     "resources": [
       {
-        "resource_type": "documentation",
-        "url": "https://docs.datadoghq.com/agent/kubernetes/control_plane/?tab=helm"
-      },
-      {
         "resource_type": "blog",
         "url": "https://www.datadoghq.com/blog/monitor-etcd-performance"
       },

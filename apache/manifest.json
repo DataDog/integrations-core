@@ -20,10 +20,6 @@
     "resources": [
       {
         "resource_type": "blog",
-        "url": "https://www.datadoghq.com/blog/deploying-datadog-with-cloudformation"
-      },
-      {
-        "resource_type": "blog",
         "url": "https://www.datadoghq.com/blog/monitoring-apache-web-server-performance"
       },
       {
