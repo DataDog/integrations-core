@@ -61,7 +61,7 @@ class SqlserverAgentHistory(DBMAsyncJob):
         if collection_interval <= 0:
             collection_interval = DEFAULT_COLLECTION_INTERVAL
         self.collection_interval = collection_interval
-        self._last_history_id = check._last_history_id
+        self._last_history_id = 0
         super(SqlserverAgentHistory, self).__init__(
             check,
             run_sync=True,
@@ -86,7 +86,6 @@ class SqlserverAgentHistory(DBMAsyncJob):
     @tracked_method(agent_check_getter=agent_check_getter)
     def _get_new_agent_job_history(self, cursor):
         last_instance_id_filter = ""
-        self._last_history_id = self._check._last_history_id
         if self._last_history_id:
             last_instance_id_filter = "\n\t\tHAVING MIN(sjh2.instance_id) > {last_history_id}".format(last_history_id = self._last_history_id)
         query = AGENT_HISTORY_QUERY.format(last_instance_id_filter=last_instance_id_filter)
@@ -99,7 +98,7 @@ class SqlserverAgentHistory(DBMAsyncJob):
 
         for row in rows:
             if row['completion_instance_id'] > self._last_history_id:
-                self._check._last_history_id = row['completion_instance_id']
+                self._last_history_id = row['completion_instance_id']
 
         self.log.debug("loaded sql server agent jobs history len(rows)=%s", len(rows))
         return rows
