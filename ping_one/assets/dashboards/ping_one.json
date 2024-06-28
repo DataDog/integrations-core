@@ -336,7 +336,7 @@
                       },
                       "group_by": [
                         {
-                          "facet": "@actors.client.name",
+                          "facet": "@ping_one.actors.client.name",
                           "limit": 10,
                           "sort": {
                             "order": "desc",
@@ -1059,7 +1059,7 @@
                       },
                       "group_by": [
                         {
-                          "facet": "@result.status",
+                          "facet": "@ping_one.result.status",
                           "limit": 10,
                           "sort": {
                             "order": "desc",
@@ -1411,11 +1411,11 @@
                       "width": "auto"
                     },
                     {
-                      "field": "@actors.client.name",
+                      "field": "@ping_one.actors.client.name",
                       "width": "auto"
                     },
                     {
-                      "field": "@result.status",
+                      "field": "@ping_one.result.status",
                       "width": "auto"
                     }
                   ]

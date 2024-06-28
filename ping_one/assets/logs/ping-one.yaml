@@ -1,5 +1,6 @@
 id: ping-one
 metric_id: ping-one
+
 backend_only: false
 facets:
   - groups:
@@ -26,56 +27,42 @@ facets:
     groups:
       - Pingone
     name: Client Id
-    path: actors.client.id
+    path: ping_one.actors.client.id
     source: log
     type: string
   - facetType: list
     groups:
       - Pingone
     name: Client Name
-    path: actors.client.name
+    path: ping_one.actors.client.name
     source: log
     type: string
   - facetType: list
     groups:
       - Pingone
     name: Client Type
-    path: actors.client.type
+    path: ping_one.actors.client.type
     source: log
     type: string
   - facetType: list
     groups:
       - Pingone
     name: Id
-    path: id
+    path: ping_one.id
     source: log
     type: string
   - facetType: list
     groups:
       - Pingone
     name: Result Status
-    path: result.status
-    source: log
-    type: string
-  - facetType: list
-    groups:
-      - Pingone
-    name: User Id
-    path: actors.user.id
-    source: log
-    type: string
-  - facetType: list
-    groups:
-      - Pingone
-    name: User Name
-    path: actors.user.name
+    path: ping_one.result.status
     source: log
     type: string
   - facetType: list
     groups:
       - Pingone
     name: User Type
-    path: actors.user.type
+    path: ping_one.actors.user.type
     source: log
     type: string
 pipeline:
@@ -91,19 +78,19 @@ pipeline:
       sources:
         - recordedAt
     - type: service-remapper
-      name: Mapping service to standard service attribute
+      name: Define `service` as the official service of the log
       enabled: true
       sources:
         - service
     - type: attribute-remapper
-      name: Remapping source.userAgent to http.useragent
+      name: Map `source.userAgent` to `http.useragent`
       enabled: true
       sources:
         - source.userAgent
       sourceType: attribute
       target: http.useragent
       targetType: attribute
-      preserveSource: true
+      preserveSource: false
       overrideOnConflict: false
     - type: user-agent-parser
       name: Extracting useragent details from htttp.useragent
@@ -114,7 +101,7 @@ pipeline:
       encoded: false
       combineVersionDetails: false
     - type: attribute-remapper
-      name: Remapping `source.ipAddress` to `network.client.ip`
+      name: " Map `source.ipAddress` to `network.client.ip`"
       enabled: true
       sources:
         - source.ipAddress
@@ -131,22 +118,82 @@ pipeline:
       target: network.client.geoip
       ip_processing_behavior: do-nothing
     - type: attribute-remapper
-      name: Remapping actors.user.name to usr.name
+      name: Map `actors.user.name` to `usr.name`
       enabled: true
       sources:
         - actors.user.name
       sourceType: attribute
       target: usr.name
       targetType: attribute
-      preserveSource: true
+      preserveSource: false
       overrideOnConflict: false
     - type: attribute-remapper
-      name: Remapping actors.user.id to usr.id
+      name: Map `actors.user.id` to `usr.id`
       enabled: true
       sources:
         - actors.user.id
       sourceType: attribute
       target: usr.id
       targetType: attribute
-      preserveSource: true
+      preserveSource: false
+      overrideOnConflict: false
+    - type: attribute-remapper
+      name: Map `actors.client.id` to `ping_one.actors.client.id`
+      enabled: true
+      sources:
+        - actors.client.id
+      sourceType: attribute
+      target: ping_one.actors.client.id
+      targetType: attribute
+      preserveSource: false
+      overrideOnConflict: false
+    - type: attribute-remapper
+      name: Map `actors.client.type` to `ping_one.actors.client.type`
+      enabled: true
+      sources:
+        - actors.client.type
+      sourceType: attribute
+      target: ping_one.actors.client.type
+      targetType: attribute
+      preserveSource: false
+      overrideOnConflict: false
+    - type: attribute-remapper
+      name: Map `id` to `ping_one.id`
+      enabled: true
+      sources:
+        - id
+      sourceType: attribute
+      target: ping_one.id
+      targetType: attribute
+      preserveSource: false
+      overrideOnConflict: false
+    - type: attribute-remapper
+      name: Map `result.status` to `ping_one.result.status`
+      enabled: true
+      sources:
+        - result.status
+      sourceType: attribute
+      target: ping_one.result.status
+      targetType: attribute
+      preserveSource: false
+      overrideOnConflict: false
+    - type: attribute-remapper
+      name: Map `actors.user.type` to `ping_one.actors.user.type`
+      enabled: true
+      sources:
+        - actors.user.type
+      sourceType: attribute
+      target: ping_one.actors.user.type
+      targetType: attribute
+      preserveSource: false
+      overrideOnConflict: false
+    - type: attribute-remapper
+      name: Map `actors.client.name` to `ping_one.actors.client.name`
+      enabled: true
+      sources:
+        - actors.client.name
+      sourceType: attribute
+      target: ping_one.actors.client.name
+      targetType: attribute
+      preserveSource: false
       overrideOnConflict: false

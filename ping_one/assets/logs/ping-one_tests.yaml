@@ -2,62 +2,69 @@ id: ping-one
 tests:
   - sample: >-
       {
-                      "_links": {
-                          "self": {
-                              "href": "https://api.pingone.ca/v1/environments/4ae6d71d-354c-4cd8-9b98-41699c259a5d/activities/97c7b3e7-4251-434b-8189-2edf3496c961"
-                          }
-                      },
-                      "id": "97c7b3e7-4251-434b-8189-2edf3ss496c961",
-                      "recordedAt": "2024-06-13T06:56:37.871Z",
-                      "createdAt": "2024-06-13T06:56:37.885Z",
-                      "correlationId": "ecddb9c9-eb27-40a0-99e8-c9384essefca10",
-                      "internalCorrelation": {
-                          "sessionId": "61bcccdd-184a-499f-aec7-bd2e9ss449ea59"
-                      },
-                      "actors": {
-                          "client": {
-                              "id": "adminui",
-                              "name": "adminui",
-                              "type": "CLIENT"
-                          },
-                          "user": {
-                              "id": "1e8f0520-81ed-4e7b-b09f-a2a1be54123977e",
-                              "name": "dummy_user",
-                              "environment": {
-                                  "id": "4ae6d71d-354c-4cd8-9b98-41699c212359a5d"
-                              },
-                              "population": {
-                                  "id": "7c2dcacd-adca-4491-be87-4def5123cb6d882"
-                              },
-                              "href": "https://api.pingone.ca/v1/environments/4ae6d71d-354c-4cd8-9b98-41699132c259a5d/users/1e8f0520-81ed-4e7b-b09f-a2a1142be54977e",
-                              "type": "USER"
-                          }
-                      },
-                      "source": {
-                          "userAgent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/124.0.0.0 Safari/537.36",
-                          "ipAddress": "8.8.8.8"
-                      },
-                      "action": {
-                          "type": "MEMBER_OF_GROUP.CREATED",
-                          "description": "Member Of Group Created"
-                      },
-                      "resources": [
-                          {
-                              "type": "MEMBER_OF_GROUP",
-                              "id": "31f79b65-59b6-4630-8c4e-0594e4d612346781f0",
-                              "name": "test group",
-                              "environment": {
-                                  "id": "4ae6d71d-354c-4cd8-9b98-41699c524725259a5d"
-                              },
-                              "href": "https://api.pingone.ca/v1/environments/4ae6d71d-354c-4cd8-9b98-41699c259a5d/users/31f79b65-59b6-4630-8c4e521732-0594e4d681f0/memberOfGroups/703b108871296-3de3-4156-999a-25e01e81be88"
-                          }
-                      ],
-                      "result": {
-                          "status": "SUCCESS",
-                          "description": "Created Member Of Group test group"
-                      },
-                      "id": "97c7b3e7-4251-434b-8189-2edf3ss496c961"
-                  }
+        "_links": {
+          "self": {
+            "href": "https://api.pingone.ca/v1/environments/4ae6d71d-354c-4cd8-9b98-4169fasdf9c259a5d/activities/27a19hgsfd778-77ae-4cd0-b05f-1deb14269be5"
+          }
+        },
+        "id": "27a19778-77ae-4cd0-b05f-1deb1426dhfa9be5",
+        "recordedAt": "2024-06-28T12:07:03.468Z",
+        "createdAt": "2024-06-28T12:07:03.486Z",
+        "correlationId": "7a1ed149-60e0-4d98-a146-f86e607rgtwre27fb7",
+        "internalCorrelation": {
+          "transactionId": "6cefdaca-eed6-442a-b7e0-b880cdsqe06cee2",
+          "sessionId": "7542b215-e610-4fe3-a119-95fdbc1adsrg92b5e"
+        },
+        "actors": {
+          "client": {
+            "id": "b95e327b-7d22-4635-b862-cf74dfgertaec9aeb",
+            "name": "PingOne Admin Console",
+            "environment": {
+              "id": "4ae6d71d-354c-4cd8-9b98-41699srtwec259a5d"
+            },
+            "href": "https://api.pingone.ca/v1/environments/4ae6d71d-354c-4cd8-9b98-4169fag9c259a5d/applications/b95e327b-7d22-4635-b862-cf74daecrgea9aeb",
+            "type": "CLIENT"
+          },
+          "user": {
+            "id": "1e8f0520-81ed-4e7b-b09f-a2a1be5dgww4977e",
+            "name": "demo@crestdata.ai",
+            "environment": {
+              "id": "4ae6d71d-354c-4cd8-9b98-416jyf99c259a5d"
+            },
+            "population": {
+              "id": "7c2dcacd-adca-4491-be87-4def5cbdaf6d882"
+            },
+            "href": "https://api.pingone.ca/v1/environments/4ae6d71d-354c-4cd8-9b98-41699sdfgc259a5d/users/1e8f0520-81ed-4e7b-b09f-a2a1be5497ojs7e",
+            "type": "USER"
+          }
+        },
+        "source": {
+          "userAgent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/126.0.0.0 Safari/537.36",
+          "ipAddress": "185.64.148.0"
+        },
+        "action": {
+          "type": "PASSWORD.CHECK_SUCCEEDED",
+          "description": "Password Check Succeeded"
+        },
+        "resources": [
+          {
+            "type": "USER",
+            "id": "1e8f0520-81ed-4e7b-b09f-a2a1bebsdfg54977e",
+            "name": "demo@crestdata.ai",
+            "environment": {
+              "id": "4ae6d71d-354c-4cd8-9b98-4169sga9c259a5d"
+            },
+            "population": {
+              "id": "7c2dcacd-adca-4491-be87-4def5cb6jsrtad882"
+            },
+            "href": "https://api.pingone.ca/v1/environments/4ae6d71d-354c-4cd8-9b98-41699tyjydc259a5d/users/1e8f0520-81ed-4e7b-b09f-a2a1be54sdfhs977e"
+          }
+        ],
+        "result": {
+          "status": "SUCCESS",
+          "description": "Password check succeeded for User 1e8ghsf0520-81ed-4e7b-b09f-a2a1bjssdfe54977e"
+        }
+      }
     result: null
 
 # The `result` field should be left blank to start. Once you submit your log asset files with
