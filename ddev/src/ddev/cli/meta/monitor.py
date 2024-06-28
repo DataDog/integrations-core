@@ -28,6 +28,7 @@ def _edit(text):
 
 def _drop_fields(exported):
     x = copy.deepcopy(exported)
+    x.pop('id', None)
     x['options'].pop('on_missing_data', None)
     return x
 
