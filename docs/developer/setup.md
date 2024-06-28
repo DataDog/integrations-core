@@ -127,7 +127,7 @@ You have 4 options to install the CLI.
         1. Download the file using the `curl` command. The `-o` option specifies the file name that the downloaded package is written to. In this example, the file is written to `ddev-<docs-insert-ddev-version>.pkg` in the current directory.
 
             ```
-            curl -o ddev-<docs-insert-ddev-version>.pkg https://github.com/DataDog/integrations-core/releases/download/ddev-v<docs-insert-ddev-version>/ddev-<docs-insert-ddev-version>.pkg
+            curl -L -o ddev-<docs-insert-ddev-version>.pkg https://github.com/DataDog/integrations-core/releases/download/ddev-v<docs-insert-ddev-version>/ddev-<docs-insert-ddev-version>.pkg
             ```
         2. Run the standard macOS [`installer`](https://ss64.com/osx/installer.html) program, specifying the downloaded `.pkg` file as the source. Use the `-pkg` parameter to specify the name of the package to install, and the `-target /` parameter for the drive in which to install the package. The files are installed to `/usr/local/ddev`, and an entry is created at `/etc/paths.d/ddev` that instructs shells to add the `/usr/local/ddev` directory to. You must include sudo on the command to grant write permissions to those folders.
 

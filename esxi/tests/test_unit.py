@@ -21,7 +21,7 @@ def test_esxi_metric_up(instance, dd_run_check, aggregator, caplog):
     check = EsxiCheck('esxi', {}, [instance])
     caplog.set_level(logging.DEBUG)
     dd_run_check(check)
-    aggregator.assert_metric('esxi.host.can_connect', 1, count=1, tags=["esxi_url:localhost"])
+    aggregator.assert_metric('esxi.host.can_connect', 1, count=2, tags=["esxi_url:localhost"])
     assert "Connected to ESXi host localhost: VMware ESXi 6.5.0 build-123456789" in caplog.text
 
 
@@ -45,7 +45,7 @@ def test_none_properties_data(vcsim_instance, dd_run_check, aggregator, service_
     assert "No resources found; halting check execution" in caplog.text
 
     base_tags = ["esxi_url:127.0.0.1:8989"]
-    aggregator.assert_metric("esxi.host.can_connect", 1, count=1, tags=base_tags)
+    aggregator.assert_metric("esxi.host.can_connect", 1, count=2, tags=base_tags)
     aggregator.assert_all_metrics_covered()
 
 
@@ -67,7 +67,7 @@ def test_esxi_no_properties(vcsim_instance, dd_run_check, aggregator, service_in
     assert "No resources found; halting check execution" in caplog.text
 
     base_tags = ["esxi_url:127.0.0.1:8989"]
-    aggregator.assert_metric("esxi.host.can_connect", 1, count=1, tags=base_tags)
+    aggregator.assert_metric("esxi.host.can_connect", 1, count=2, tags=base_tags)
     aggregator.assert_all_metrics_covered()
 
 
@@ -129,7 +129,7 @@ def test_esxi_perf_metrics(vcsim_instance, dd_run_check, aggregator, caplog):
     base_tags = ["esxi_url:127.0.0.1:8989"]
     aggregator.assert_metric("esxi.cpu.usage.avg", value=0.26, tags=base_tags, hostname="localhost.localdomain")
     aggregator.assert_metric("esxi.mem.granted.avg", value=80, tags=base_tags, hostname="localhost.localdomain")
-    aggregator.assert_metric("esxi.host.can_connect", 1, count=1, tags=base_tags)
+    aggregator.assert_metric("esxi.host.can_connect", 1, count=2, tags=base_tags)
 
     assert "Skipping metric net.droppedRx.sum for localhost.localdomain, because the value "
     "returned by the host is negative (i.e. the metric is not yet available). values: [-1]" in caplog.text
@@ -513,7 +513,7 @@ def test_report_instance_metrics_invalid_metric_name_still_collect_metrics(aggre
     base_tags = ["esxi_url:127.0.0.1:8989"]
     aggregator.assert_metric("esxi.cpu.usage.avg", value=0.26, tags=base_tags, hostname="localhost.localdomain")
     aggregator.assert_metric("esxi.mem.granted.avg", value=80, tags=base_tags, hostname="localhost.localdomain")
-    aggregator.assert_metric("esxi.host.can_connect", 1, count=1, tags=base_tags)
+    aggregator.assert_metric("esxi.host.can_connect", 1, count=2, tags=base_tags)
 
 
 @pytest.mark.usefixtures("service_instance")
@@ -1206,7 +1206,7 @@ def test_use_configured_hostname(vcsim_instance, dd_run_check, aggregator, datad
     base_tags = ["esxi_url:127.0.0.1:8989"]
     aggregator.assert_metric("esxi.cpu.usage.avg", value=0.26, tags=base_tags, hostname="127.0.0.1:8989")
     aggregator.assert_metric("esxi.mem.granted.avg", value=80, tags=base_tags, hostname="127.0.0.1:8989")
-    aggregator.assert_metric("esxi.host.can_connect", 1, count=1, tags=base_tags)
+    aggregator.assert_metric("esxi.host.can_connect", 1, count=2, tags=base_tags)
 
     datadog_agent.assert_external_tags(
         '127.0.0.1:8989',
@@ -1237,7 +1237,7 @@ def test_use_socks_proxy(vcsim_instance, dd_run_check, caplog, aggregator):
     check = EsxiCheck('esxi', {}, [instance])
     dd_run_check(check)
     assert "Proxy scheme socks5 not supported; ignoring" not in caplog.text
-    aggregator.assert_metric("esxi.host.can_connect", 1, count=1)
+    aggregator.assert_metric("esxi.host.can_connect", 1, count=2)
 
 
 def test_use_socks_proxy_mocked(vcsim_instance, dd_run_check, caplog, aggregator):
@@ -1251,3 +1251,23 @@ def test_use_socks_proxy_mocked(vcsim_instance, dd_run_check, caplog, aggregator
             assert "Proxy scheme socks5 not supported; ignoring" not in caplog.text
             assert socks_connect.call_count == 1
             aggregator.assert_metric("esxi.host.can_connect", 0, count=1)
+
+
+@pytest.mark.usefixtures("service_instance")
+def test_cant_get_version(vcsim_instance, dd_run_check, caplog, service_instance, aggregator):
+    check = EsxiCheck('esxi', {}, [vcsim_instance])
+    # run check once to initialize
+    dd_run_check(check)
+    aggregator.reset()
+
+    service_instance.content.about = None
+    caplog.set_level(logging.DEBUG)
+
+    with pytest.raises(Exception):
+        dd_run_check(check)
+    assert (
+        "Failed to get version metadata; attempting to reconnect to the ESXi host: "
+        "'NoneType' object has no attribute 'version'" in caplog.text
+    )
+    aggregator.assert_metric('esxi.host.can_connect', 0, count=1)
+    aggregator.assert_all_metrics_covered()

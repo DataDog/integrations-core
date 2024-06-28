@@ -1,5 +1,3 @@
-version: '3.5'
-
 services:
   consul-leader:
     image: "consul:${CONSUL_VERSION}"

@@ -13,14 +13,24 @@ if TYPE_CHECKING:
 
 @click.command('generate-metrics', short_help='Generate metrics with fake values for an integration')
 @click.argument('integration')
-@click.option('--api-url', default="api.datadoghq.com", help='The API URL to use, e.g. "api.datadoghq.com"')
-@click.option('--api-key', required=True, help='Your API key')
+@click.option(
+    '--site',
+    help='The datadog SITE to use, e.g. "datadoghq.com". If not provided we will use ddev config org settings.',
+)
+@click.option('--api-key', help='The API key. If not provided we will use ddev config org settings.')
 @click.pass_obj
-def generate_metrics(app: Application, integration: str, api_url: str, api_key: str):
+def generate_metrics(app: Application, integration: str, site: str, api_key: str):
     """Generate metrics with fake values for an integration
 
+    You can provide the site and API key as options:
+
     \b
-    `$ ddev meta scripts generate-metrics ray --api-url <URL> --api-key <API_KEY>`
+    $ ddev meta scripts generate-metrics --site <URL> --api-key <API_KEY> <INTEGRATION>
+
+    It's easier however to switch ddev's org setting temporarily:
+
+    \b
+    $ ddev -o <ORG> meta scripts generate-metrics <INTEGRATION>
     """
 
     import random
@@ -41,14 +51,16 @@ def generate_metrics(app: Application, integration: str, api_url: str, api_key: 
     except OSError:
         app.abort(f'Unknown target: {intg}')
 
+    default_api_key = app.config.org.config['api_key']
+    default_site = app.config.org.config['site']
     configuration = Configuration()
     configuration.request_timeout = (5, 5)
     configuration.api_key = {
-        "apiKeyAuth": api_key,
+        "apiKeyAuth": default_api_key if api_key is None else api_key,
     }
     # We manually set the value to allow custom URLs
-    configuration.server_index = 1
-    configuration.server_variables["name"] = api_url
+    configuration.server_index = 2
+    configuration.server_variables["site"] = default_site if site is None else site
 
     # Update this map to avoid generating random values for a given metric
     overriden_values = {
