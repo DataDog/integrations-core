@@ -104,7 +104,6 @@ class SubmitData:
             event["metadata"] = event["metadata"] + [{**(db_info), "tables": tables}]
         json_event = json.dumps(event, default=default_json_event_encoding)
         self._log.debug("Reporting the following payload for schema collection: {}".format(self.truncate(json_event)))
-        pdb.set_trace()
         self._submit_to_agent_queue(json_event)
         self.db_to_tables.clear()
 
@@ -143,9 +142,10 @@ class Schemas:
         self._max_execution_time = min(
             config.schemas_config.get('max_execution_time', self.DEFAULT_MAX_EXECUTION_TIME), collection_interval
         )
-    # TODO may be we need to hook it to metadata shut down.
-    #def shut_down(self):
-    #    self._data_submitter.submit()
+
+    def shut_down(self):
+        self._data_submitter.submit()
+
 # we can pass a string instead of %s where string is gonna be a concatenation
     def _cursor_run(self, cursor, query, params=None):
         """
@@ -390,12 +390,16 @@ class Schemas:
             #TODO treat may be yes to true etc , check if null is string type
             table_name = str(row.pop("table_name"))
             table_list[table_name_to_table_index[table_name]].setdefault("indexes", [])
-            #TODO for others check if we need to convert to string so to be like in sqlserver
+            #TODO check when empty value its false or introduce None.
             if "nullables" in row:
-                if row["nullables"].lower() == "yes":
-                    row["nullables"] = True
-                else:
-                    row["nullables"] = False
+                nullables_arr = row["nullables"].split(',')
+                nullables_converted = ""
+                for s in nullables_arr:
+                    if s.lower() == "yes":
+                        nullables_converted += "true,"
+                    else:
+                        nullables_converted += "false,"
+                row["nullables"] = nullables_converted[:-1]
             table_list[table_name_to_table_index[table_name]]["indexes"].append(row)
 
 #TODO test exception in query

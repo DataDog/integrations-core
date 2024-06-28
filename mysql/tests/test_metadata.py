@@ -89,7 +89,7 @@ def test_collect_schemas(aggregator, dd_run_check, dbm_instance):
                             "columns":"RestaurantName,District",
                             "sub_parts":"None",
                             "packed":"None",
-                            "nullables":False,
+                            "nullables":"true,true",
                             "non_uniques":"1,1"
                         }
                     ]
@@ -129,7 +129,7 @@ def test_collect_schemas(aggregator, dd_run_check, dbm_instance):
                             "columns":"RestaurantName,District",
                             "sub_parts":"None",
                             "packed":"None",
-                            "nullables":False,
+                            "nullables":"true,true",
                             "non_uniques":"0,0"
                         }
                     ]
@@ -169,7 +169,7 @@ def test_collect_schemas(aggregator, dd_run_check, dbm_instance):
                             "columns":"id",
                             "sub_parts":"None",
                             "packed":"None",
-                            "nullables":False,
+                            "nullables":"false",
                             "non_uniques":"0"
                         },
                         {
@@ -181,7 +181,7 @@ def test_collect_schemas(aggregator, dd_run_check, dbm_instance):
                             "columns":"population",
                             "sub_parts":"None",
                             "packed":"None",
-                            "nullables":False,
+                            "nullables":"false",
                             "non_uniques":"1"
                         },
                         {
@@ -193,7 +193,7 @@ def test_collect_schemas(aggregator, dd_run_check, dbm_instance):
                             "columns":"id,name",
                             "sub_parts":"None",
                             "packed":"None",
-                            "nullables":False,
+                            "nullables":"false,true",
                             "non_uniques":"1,1"
                         }
                     ]
@@ -307,7 +307,7 @@ def test_collect_schemas(aggregator, dd_run_check, dbm_instance):
                             "columns":"id",
                             "sub_parts":"None",
                             "packed":"None",
-                            "nullables":False,
+                            "nullables":"false",
                             "non_uniques":"0"
                         }
                     ]
@@ -350,7 +350,7 @@ def test_collect_schemas(aggregator, dd_run_check, dbm_instance):
                             "columns":"city_id",
                             "sub_parts":"None",
                             "packed":"None",
-                            "nullables":True,
+                            "nullables":"true",
                             "non_uniques":"1"
                         }
                     ]
@@ -391,7 +391,7 @@ def test_collect_schemas(aggregator, dd_run_check, dbm_instance):
                     "columns":"name",
                     "sub_parts":"None",
                     "packed":"None",
-                    "nullables":True,
+                    "nullables":"true",
                     "non_uniques":"0"
                 }
             ]
