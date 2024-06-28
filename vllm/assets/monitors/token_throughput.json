@@ -10,8 +10,8 @@
     "definition": {
         "name": "vLLM application token usage is high",
         "type": "query alert",
-        "query": "sum(last_1d):avg:vllm.avg.generation_throughput.toks_per_s{*} >= 10000",
-        "message": "The number of tokens used by your vLLM application is above the threshold.",
+        "query": "avg(last_15m):avg:vllm.avg.generation_throughput.toks_per_s{*} >= 10000",
+        "message": "The average number of tokens generated every second by your vLLM application is high.",
         "tags": [
             "integration:vllm"
         ],
