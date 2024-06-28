@@ -526,6 +526,7 @@ class PostgresMetadata(DBMAsyncJob):
             table_name = table_name_lookup.get(str(row.get("id")))
             tables.get(table_name)["foreign_keys"] = tables.get(table_name).get("foreign_keys", []) + [dict(row)]
 
+
         # Get columns
         cursor.execute(COLUMNS_QUERY.format(table_ids=table_ids))
         rows = cursor.fetchall()

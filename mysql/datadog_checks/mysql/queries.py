@@ -139,32 +139,44 @@ GROUP BY table_name, index_name, collation, cardinality, index_type;
 # TODO this is only ofr foreign keys why not other constraints i.e REFERENCED_TABLE_NAME is null
 SQL_FOREIGN_KEYS = """\
 SELECT
-    CONSTRAINT_SCHEMA,
-    CONSTRAINT_NAME,
-    TABLE_NAME,
-    GROUP_CONCAT(COLUMN_NAME) AS COLUMN_NAMES,
-    REFERENCED_TABLE_SCHEMA,
-    GROUP_CONCAT(REFERENCED_TABLE_NAME) AS REFERENCED_TABLE_NAMES,
-    REFERENCED_COLUMN_NAME
+    constraint_schema,
+    constraint_name,
+    table_name,
+    group_concat(column_name) as column_names,
+    referenced_table_schema,
+    referenced_table_name,
+    group_concat(referenced_column_name) as referenced_column_names
 FROM
     INFORMATION_SCHEMA.KEY_COLUMN_USAGE
 WHERE
-    TABLE_SCHEMA = "{}" AND TABLE_NAME IN ({})
-    AND REFERENCED_TABLE_NAME IS NOT NULL;
-GROUP BY CONSTRAINT_SCHEMA, CONSTRAINT_NAME, TABLE_NAME, REFERENCED_COLUMN_NAME;
+    table_schema = "{}" and table_name in ({})
+    and referenced_table_name is not null
+GROUP BY constraint_schema, constraint_name, table_name, referenced_table_schema, referenced_table_name;
 """
 
-FOREIGN_KEY_QUERY = """
+SQL_PARTITION = """\
 SELECT
-    FK.referenced_object_id AS id, FK.name AS foreign_key_name,
-    OBJECT_NAME(FK.parent_object_id) AS referencing_table,
-    STRING_AGG(COL_NAME(FKC.parent_object_id, FKC.parent_column_id),',') AS referencing_column,
-    OBJECT_NAME(FK.referenced_object_id) AS referenced_table,
-    STRING_AGG(COL_NAME(FKC.referenced_object_id, FKC.referenced_column_id),',') AS referenced_column
-FROM
-    sys.foreign_keys AS FK JOIN sys.foreign_key_columns AS FKC ON FK.object_id = FKC.constraint_object_id
+    table_name,
+    partition_name, 
+    group_concat(subpartition_name order by subpartition_ordinal_position asc) as subpartition_names,
+    partition_ordinal_position,
+    group_concat(subpartition_ordinal_position order by subpartition_ordinal_position asc) as subpartition_ordinal_positions, 
+    partition_method, 
+    group_concat(subpartition_method order by subpartition_ordinal_position asc) as subpartition_ordinal_positions, 
+    partition_expression, 
+    group_concat(subpartition_expression order by subpartition_ordinal_position asc) as subpartition_expressions, 
+    partition_description, 
+    table_rows , 
+    group_concat(data_length order by subpartition_ordinal_position asc) as data_lengths, 
+    group_concat(max_data_length order by subpartition_ordinal_position asc) as max_data_lengths, 
+    group_concat(index_length order by subpartition_ordinal_position asc) as index_lengths, 
+    group_concat(data_free order by subpartition_ordinal_position asc) as data_free,
+    partition_comment, 
+    tablespace_name
+FROM INFORMATION_SCHEMA.PARTITIONS
 WHERE
-    FK.referenced_object_id IN ({}) GROUP BY FK.name, FK.parent_object_id, FK.referenced_object_id;
+    table_schema = "{}" and table_name in ({})
+GROUP BY table_name, partition_name, partition_ordinal_position, partition_method, partition_expression, partition_description, table_rows, partition_comment, tablespace_name
 """
 
 QUERY_DEADLOCKS = {

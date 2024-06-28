@@ -12,11 +12,12 @@ import time
 from contextlib import closing
 
 from datadog_checks.base import is_affirmative
-from datadog_checks.base.utils.db.utils import DBMAsyncJob, default_json_event_encoding
+from datadog_checks.base.utils.db.utils import default_json_event_encoding
 from datadog_checks.base.utils.tracking import tracked_method
-#TODO which one is to use CommenterCursor or CommenterDictCursor
-from datadog_checks.mysql.cursor import CommenterCursor, CommenterDictCursor
+from datadog_checks.mysql.cursor import CommenterDictCursor
+from .util import get_list_chunks
 
+import pymysql
 
 from datadog_checks.mysql.queries import (
     SQL_DATABASES,
@@ -24,22 +25,13 @@ from datadog_checks.mysql.queries import (
     SQL_COLUMNS,
     SQL_INDEXES,
     SQL_FOREIGN_KEYS,
+    SQL_PARTITION
 )
 
 import pdb
 
-#TODO
+
 DEFAULT_SCHEMAS_COLLECTION_INTERVAL = 600
-
-#TODO unify with postgres make then uniform.
-#from datadog_checks.sqlserver.utils import get_list_chunks
-
-def get_list_chunks(lst, n):
-    """Yield successive n-sized chunks from lst."""
-    for i in range(0, len(lst), n):
-        yield lst[i : i + n]
-
-import pymysql
 
 class SubmitData:
 
@@ -50,7 +42,7 @@ class SubmitData:
 
         self._columns_count = 0
         self._total_columns_sent = 0
-        self.db_to_schemas = {}  # dbname : { id : schema }
+        self.db_to_tables = {}  # dbname : {"tables" : []}
         self.db_info = {}  # name to info
 
     def set_base_event_data(self, hostname, tags, cloud_metadata, dbms_version):
@@ -62,7 +54,6 @@ class SubmitData:
     def reset(self):
         self._total_columns_sent = 0
         self._columns_count = 0
-        self.db_to_schemas.clear()
         self.db_info.clear()
 
     def store_db_infos(self, db_infos):
@@ -71,7 +62,8 @@ class SubmitData:
 
     def store(self, db_name, tables, columns_count):
         self._columns_count += columns_count
-        known_tables = self.db_info[db_name].setdefault("tables", [])
+        pdb.set_trace()
+        known_tables = self.db_to_tables.setdefault(db_name, [])
         known_tables.extend(tables)
 
     def columns_since_last_submit(self):
@@ -103,19 +95,20 @@ class SubmitData:
         self._submit_to_agent_queue(json_event)
 
     def submit(self):
-        if not self.db_to_schemas:
+        if not self.db_to_tables:
             return
         self._total_columns_sent += self._columns_count
         self._columns_count = 0
         event = {**self._base_event, "metadata": [], "timestamp": time.time() * 1000}
-        for db, schemas_by_id in self.db_to_schemas.items():
+        for db, tables in self.db_to_tables.items():
             db_info = {}
             db_info = self.db_info[db]
-            event["metadata"] = event["metadata"] + [{**(db_info), "schemas": list(schemas_by_id.values())}]
+            event["metadata"] = event["metadata"] + [{**(db_info), "tables": tables}]
         json_event = json.dumps(event, default=default_json_event_encoding)
+        pdb.set_trace()
         self._log.debug("Reporting the following payload for schema collection: {}".format(self.truncate(json_event)))
         self._submit_to_agent_queue(json_event)
-        self.db_to_schemas.clear()
+        self.db_to_tables.clear()
 
 
 def agent_check_getter(self):
@@ -135,12 +128,8 @@ class Schemas:
         self._log = check.log
         self.schemas_per_db = {}
         self._last_schemas_collect_time = None
-
-        collection_interval = config.schema_config.get('collection_interval', DEFAULT_SCHEMAS_COLLECTION_INTERVAL)
-        self._max_execution_time = min(
-            config.schema_config.get('max_execution_time', self.DEFAULT_MAX_EXECUTION_TIME), collection_interval
-        )
-
+        self._tags = []
+        collection_interval = config.schemas_config.get('collection_interval', DEFAULT_SCHEMAS_COLLECTION_INTERVAL)
         base_event = {
             "host": None,
             "agent_version": datadog_agent.get_version(),
@@ -152,11 +141,14 @@ class Schemas:
             "cloud_metadata": self._check._config.cloud_metadata,
         }
         self._data_submitter = SubmitData(self._check.database_monitoring_metadata, base_event, self._log)
-
+        
+        self._max_execution_time = min(
+            config.schemas_config.get('max_execution_time', self.DEFAULT_MAX_EXECUTION_TIME), collection_interval
+        )
     # TODO may be we need to hook it to metadata shut down.
     #def shut_down(self):
     #    self._data_submitter.submit()
-
+# we can pass a string instead of %s where string is gonna be a concatenation
     def _cursor_run(self, cursor, query, params=None):
         """
         Run and log the query. If provided, obfuscated params are logged in place of the regular params.
@@ -165,7 +157,7 @@ class Schemas:
             self._log.debug("Running query [{}] params={}".format(query, params))
             cursor.execute(query, params)
         except pymysql.DatabaseError as e:
-            #TODO check this exception path
+            #TODO check this exception path in tests
             self._check.count(
                 "dd.mysql.db.error",
                 1,
@@ -173,11 +165,10 @@ class Schemas:
                 hostname=self._check.resolved_hostname,
             )
             raise    
-#TODO put get_list_chunks in common and import from there to postgres        
+      
 #TODO query logs and what is tracked data what is not !
     @tracked_method(agent_check_getter=agent_check_getter)
     def _fetch_database_data(self, cursor, start_time, db_name):
-
         tables = self._get_tables(db_name, cursor)
         tables_chunks = list(get_list_chunks(tables, self.TABLES_CHUNK_SIZE))
         for tables_chunk in tables_chunks:
@@ -194,7 +185,6 @@ class Schemas:
                     )
                 )
             columns_count, tables_info = self._get_tables_data(tables_chunk, db_name, cursor)
-            pdb.set_trace()
             self._data_submitter.store(db_name, tables_info, columns_count)
             if self._data_submitter.columns_since_last_submit() > self.MAX_COLUMNS_PER_EVENT:
                 self._data_submitter.submit()
@@ -246,20 +236,14 @@ class Schemas:
                         "partition_count": int
         """
         self._data_submitter.reset()
-
-        # TODO 
-        #self._data_submitter.set_base_event_data(
-        #    self._check.resolved_hostname,
-        #    tags,
-        #    self._check._config.cloud_metadata,
-        #    "{},{}".format(
-        #        self._check.static_info_cache.get(STATIC_INFO_VERSION, ""),
-        #        self._check.static_info_cache.get(STATIC_INFO_ENGINE_EDITION, ""),
-        #    ),
-        #)
-
+        self._tags = tags
         with closing(self._metadata.get_db_connection().cursor(CommenterDictCursor)) as cursor:
-            # set tags here tags
+            self._data_submitter.set_base_event_data(
+                self._check.resolved_hostname,
+                self._tags,
+                self._check._config.cloud_metadata,
+                self._check.version,
+            )
             db_infos = self._query_db_information(cursor)
             self._data_submitter.store_db_infos(db_infos)
             self._fetch_for_databases(db_infos, cursor)
@@ -278,8 +262,8 @@ class Schemas:
             SQL_DATABASES,
         )
         rows = cursor.fetchall()
-        databases = [dict(row) for row in rows]
-        return databases
+        #databases = [dict(row) for row in rows]
+        return rows
 
     @tracked_method(agent_check_getter=agent_check_getter, track_result_length=True)
     def _get_tables(self, db_name, cursor):
@@ -354,7 +338,7 @@ class Schemas:
         total_columns_number = self._populate_with_columns_data(
             table_name_to_table_index, table_list, table_names, db_name, cursor
         )
-        #self._populate_with_partitions_data(table_ids, id_to_table_data, cursor)
+        self._populate_with_partitions_data(table_name_to_table_index, table_list, table_names, db_name, cursor)
         self._populate_with_foreign_keys_data(table_name_to_table_index, table_list, table_names, db_name, cursor)
         self._populate_with_index_data(table_name_to_table_index, table_list, table_names, db_name, cursor)
         return total_columns_number, table_list
@@ -404,7 +388,6 @@ class Schemas:
 #TODO test exception in query
     @tracked_method(agent_check_getter=agent_check_getter, track_result_length=True)
     def _populate_with_foreign_keys_data(self, table_name_to_table_index, table_list, table_names, db_name, cursor):
-        pdb.set_trace()
         self._cursor_run(
             cursor,
         query = SQL_FOREIGN_KEYS.format(db_name, table_names)
@@ -414,7 +397,18 @@ class Schemas:
         for row in rows:
             #TODO treat may be yes to true etc , check if null is string type
             table_name = str(row.pop("table_name"))
-            table_list[table_name_to_table_index[table_name]].setdefault("indexes", [])
-            table_list[table_name_to_table_index[table_name]]["indexes"].append(row)
+            table_list[table_name_to_table_index[table_name]].setdefault("foreign_keys", [])
+            table_list[table_name_to_table_index[table_name]]["foreign_keys"].append(row)
 
-
+    @tracked_method(agent_check_getter=agent_check_getter, track_result_length=True)
+    def _populate_with_partitions_data(self, table_name_to_table_index, table_list, table_names, db_name, cursor):
+        self._cursor_run(
+            cursor,
+        query = SQL_PARTITION.format(db_name, table_names)
+        )
+        rows = cursor.fetchall()
+        for row in rows:
+            #TODO treat may be yes to true etc , check if null is string type
+            table_name = str(row.pop("table_name"))
+            table_list[table_name_to_table_index[table_name]].setdefault("partitions", [])
+            table_list[table_name_to_table_index[table_name]]["partitions"].append(row)

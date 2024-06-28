@@ -10,7 +10,7 @@ import pymysql
 from datadog_checks.mysql.cursor import CommenterDictCursor
 
 from .util import connect_with_autocommit
-from datadog_checks.mysql.schemas import Schemas
+from datadog_checks.mysql.schemas import (DEFAULT_SCHEMAS_COLLECTION_INTERVAL, Schemas)
 try:
     import datadog_agent
 except ImportError:
@@ -38,22 +38,31 @@ FROM
     {table_name}
 """
 
-
+import pdb
 class MySQLMetadata(DBMAsyncJob):
     """
     Collects database metadata. Supports:
     1. collection of performance_schema.global_variables
     """
-
+#TODO puzzle why in postgres job can be running ? 
     def __init__(self, check, config, connection_args):
-        self.collection_interval = float(
+        #TODO may be add _ to some
+        self.schemas_enabled = is_affirmative(config.schemas_config.get("enabled", False))
+        self.schemas_collection_interval = config.schemas_config.get(
+            "collection_interval", DEFAULT_SCHEMAS_COLLECTION_INTERVAL
+        )
+        self.settings_enabled = is_affirmative(config.settings_config.get('enabled', False))
+
+        self.settings_collection_interval = float(
             config.settings_config.get('collection_interval', DEFAULT_SETTINGS_COLLECTION_INTERVAL)
         )
+        self.collection_interval = min(self.schemas_collection_interval, self.settings_collection_interval )
+
         super(MySQLMetadata, self).__init__(
             check,
             rate_limit=1 / self.collection_interval,
             run_sync=is_affirmative(config.settings_config.get('run_sync', False)),
-            enabled=is_affirmative(config.settings_config.get('enabled', False)),
+            enabled= self.schemas_enabled or self.settings_enabled,
             min_collection_interval=config.min_collection_interval,
             dbms="mysql",
             expected_db_exceptions=(pymysql.err.DatabaseError,),
@@ -67,6 +76,9 @@ class MySQLMetadata(DBMAsyncJob):
         self._db = None
         self._check = check
         self._schemas = Schemas(self, check, config)
+        self._last_settings_collection_time = 0
+        self._last_schemas_collection_time = 0
+
 
     def get_db_connection(self):
         """
@@ -104,9 +116,23 @@ class MySQLMetadata(DBMAsyncJob):
             raise
 
     def run_job(self):
-        self.report_mysql_metadata()
         #Tags are set in DBMAsync by a call to run_job_loop in MySQL
-        self._schemas._collect_schemas_data(self._tags, )
+        elapsed_time_settings = time.time() - self._last_settings_collection_time
+        if self.settings_enabled and elapsed_time_settings >= self.settings_collection_interval:
+            try: 
+                self.report_mysql_metadata() 
+            except:
+                raise
+            finally:
+                self._last_settings_collection_time = time.time()
+        elapsed_time_schemas = time.time() - self._last_schemas_collection_time
+        if self.schemas_enabled and elapsed_time_schemas >= self.schemas_collection_interval:
+            try: 
+                self._schemas._collect_schemas_data(self._tags) 
+            except:
+                raise
+            finally:
+                self._last_schemas_collection_time = time.time()
 
     @tracked_method(agent_check_getter=attrgetter('_check'))
     def report_mysql_metadata(self):
