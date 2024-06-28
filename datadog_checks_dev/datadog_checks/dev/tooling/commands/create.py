@@ -83,14 +83,29 @@ TOWNCRIER_BODY = """\
 """
 
 STATIC_CHANGELOG_BODY = """\
-## 1.0.0 / {today}
+## 1.0.0 / YYYY-MM-DD
 
 ***Added***:
 
 * Initial Release
-""".format(
-    today=date.today()
-)
+"""
+MARKETPLACE_EXTRAS_MEDIA = """[
+      {
+        "media_type": "image",
+        "caption": "FILL IN Image 1 caption",
+        "image_url": "<FILL IN>"
+      },
+      {
+        "media_type": "image",
+        "caption": "FILL IN Image 2 caption",
+        "image_url": "<FILL IN>"
+      },
+      {
+        "media_type": "image",
+        "caption": "FILL IN Image 3 caption",
+        "image_url": "<FILL IN>"
+      }
+    ]"""
 
 
 @click.command(context_settings=CONTEXT_SETTINGS, short_help='Create scaffolding for a new integration')
@@ -195,6 +210,10 @@ def create(ctx, name, integration_type, location, non_interactive, quiet, dry_ru
             )
     template_fields['changelog_body'] = STATIC_CHANGELOG_BODY if repo_choice != 'core' else TOWNCRIER_BODY
     template_fields['starting_version'] = '0.0.1' if repo_choice == 'core' else '1.0.0'
+    template_fields['display_on_public_website'] = 'false' if repo_choice == 'core' else 'true'
+    template_fields['media'] = '[]' if repo_choice == 'core' else MARKETPLACE_EXTRAS_MEDIA
+    template_fields['description'] = '<FILL IN - A brief description of what this offering provides>'
+    template_fields['example_dashboard_short_name'] = '<FILL IN dashboard short_name ex: integration name overview>'
     config = construct_template_fields(name, repo_choice, integration_type, **template_fields)
 
     files = create_template_files(integration_type, root, config, repo_choice, read=not dry_run)
