@@ -34,7 +34,7 @@
                         "id": 2544884479345034,
                         "definition": {
                             "type": "note",
-                            "content": "**Cisco ACI Overview Dashboard**\n\nThis dashboard provides a comprehensive overview of your Cisco ACI environment, allowing you to effortlessly monitor the status of your fabric, tenants, EPGs, and so on. Stay informed about network performance, traffic patterns, and potential issues, to ensure optimal network efficiency and reliability.\n\n**Further reading on NDM**\n\n- Our blog post on [Monitoring Datacenters and network devices with Datadog](https://www.datadoghq.com/blog/datacenter-monitoring-dashboards/)\n- Network Device Monitoring [docs](https://docs.datadoghq.com/network_performance_monitoring/devices) ",
+                            "content": "**Cisco ACI Overview Dashboard**\n\nThis dashboard provides a comprehensive overview of your Cisco ACI environment, allowing you to effortlessly monitor the status of your fabric, tenants, EPGs, and so on. Stay informed about network performance, traffic patterns, and potential issues, to ensure optimal network efficiency and reliability.\n\n**Further reading on NDM**\n\n- Datadog's blog post on [Monitoring data centers and network devices with Datadog](https://www.datadoghq.com/blog/datacenter-monitoring-dashboards/)\n- Network Device Monitoring [docs](https://docs.datadoghq.com/network_performance_monitoring/devices) ",
                             "background_color": "white",
                             "font_size": "14",
                             "text_align": "left",
