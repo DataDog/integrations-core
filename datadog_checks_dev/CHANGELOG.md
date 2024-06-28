@@ -2,6 +2,12 @@
 
 <!-- towncrier release notes start -->
 
+## 32.2.1 / 2024-06-28
+
+***Fixed***:
+
+* Update new integration template ([#17474](https://github.com/DataDog/integrations-core/pull/17474))
+
 ## 32.2.0 / 2024-06-25
 
 ***Security***:
