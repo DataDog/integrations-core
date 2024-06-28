@@ -520,11 +520,22 @@ def add_schema_test_databases(cursor):
     )
     # Second DB
     cursor.execute("CREATE DATABASE datadog_test_schemas_second;")
-    cursor.execute("GRANT SELECT ON datadog_test_schemas_second.* TO 'dog'@'%';")
     cursor.execute("USE datadog_test_schemas_second;")
+    cursor.execute("GRANT SELECT ON datadog_test_schemas_second.* TO 'dog'@'%';")
     cursor.execute("CREATE TABLE IF NOT EXISTS ϑings (id INT DEFAULT 0, name VARCHAR(255));")
     cursor.execute("INSERT INTO ϑings (id, name) VALUES (1, 'foo'), (2, 'bar');")
     cursor.execute("CREATE UNIQUE INDEX thingsindex ON ϑings (name);")
+
+    cursor.execute("""
+    CREATE TABLE ts (id INT, purchased DATE)
+        PARTITION BY RANGE( YEAR(purchased) )
+        SUBPARTITION BY HASH( TO_DAYS(purchased) )
+        SUBPARTITIONS 2 (
+            PARTITION p0 VALUES LESS THAN (1990),
+            PARTITION p1 VALUES LESS THAN (2000),
+            PARTITION p2 VALUES LESS THAN MAXVALUE
+        );
+                       """)
 
 def _wait_for_it_script():
     """
