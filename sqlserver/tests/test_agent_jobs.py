@@ -328,7 +328,7 @@ def test_agent_jobs_integration(aggregator, dd_run_check, instance_docker, sa_co
     assert job_1_step_1_history['message']
     for mname in EXPECTED_AGENT_JOBS_METRICS_COMMON:
         aggregator.assert_metric(mname, count=1)
-    assert check._last_history_id == 8, "should update last history in to instance id of latest job completion step"
+    assert check.agent_history._last_history_id == 8, "should update last history in to instance id of latest job completion step"
     time.sleep(2)
     dd_run_check(check)
     dbm_activity = aggregator.get_event_platform_events("dbm-activity")

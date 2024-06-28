@@ -128,7 +128,6 @@ class SQLServer(AgentCheck):
         self._index_usage_last_check_ts = 0
         self._sql_counter_types = {}
         self.proc_type_mapping = {"gauge": self.gauge, "rate": self.rate, "histogram": self.histogram}
-        self._last_history_id = 0
 
         # DBM
         self.statement_metrics = SqlserverStatementMetrics(self, self._config)
