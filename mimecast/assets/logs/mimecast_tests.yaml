@@ -1,0 +1,109 @@
+id: mimecast
+tests:
+  - sample: >-
+      {
+        "id": "eNoVjt0KgjAYQN9ltwXZSh1BF7LIBNNSXBrdmPua5l9MJ_3Qu2f353DOB3WQKQkFRyukYpdWKcmh21xmvdvQly3U8ZA7xE8O6cR-mxz0G6XKecd7VxmGGPIkOt2DwHR0S-z41jMZfw4qWtYeAPFlU5Z--tAmGgvZ1g4ExeH9XFwzdlyjKUoVL_qqFf_4XDfwEmtzMkWZ6vq2Bpm1HMYrGoXWglgYm6MygOyKthn57w_ksTyU",
+        "auditType": "Threat Intel Feed Download",
+        "user": "example1@dummy.net",
+        "eventTime": "2024-05-27T10:31:37+0000",
+        "eventInfo": "Threat intel multiple feeds download  - malware_grid_csv_20240527063137053.zip, Date: 2024-05-27, Time: 10:31:37+0000, IP: 172.217.22.14, Application: Hamilton General",
+        "category": "reporting_logs"
+      }
+    result: null
+  - sample: >-
+      {
+        "senderAddress": "example2@dummy.net",
+        "recipientAddress": "example3@dummy.net",
+        "subject": "Enron Mentions",
+        "eventTime": "2024-05-14T12:59:16+0000",
+        "route": "internal",
+        "policy": "Explicit Language",
+        "action": "notification",
+        "messageId": "<146078e340f55c28-240167@a42.one>"    
+      }
+    result: null
+  - sample: >-
+      {
+        "fromAddress": "example4@dummy.net",
+        "toAddress": "example5@a42.one",
+        "description": "Virus Signature Detection",
+        "type": 14030,
+        "info": "[bitd.Exploit.DDE-CmdCalc.Gen]",
+        "created": "2024-05-27T10:58:32+0000",
+        "toAddressPreCheck": "carry@a42.one",
+        "toAddressPostCheck": "",
+        "ipAddress": "172.217.22.14",
+        "remoteName": "dummy.net",
+        "remoteEhlo": "dummy.net",
+        "manageRecipient": false,
+        "id": "eNpVT2tPwjAU_S_9KsvoNtZC1GRuiS-CMpgKWbJ07QVG2IN2HRjjf7dI1Hg_3dxz7nl8IAVcSygEGqFm4W2G3S6U6jW1w4c2HpOCBc1Tg-tpsoR4d1ivRcQnJE72d2zaxTmNkuh-o4ty_ra5mDvVwO2WHTzyMrWB6Onz8VjFi1tWr25SOxfYr17GoZgctjs5Dq5QD0nYAm9P5j6lHqHYJT1UglJsDbOWtVrN3xsw0c5EEOanLatTWK1akCXG5sLNXpcgeS1O3DCZBS4NHIcYjBn57lzv7579umU_Mlm_72SXQx9TfwXcGpD-wPIwplZuxgIGzBe5C5jm10a1A6mKukIjbPJU367m3wB7DRqyf4U-vwBVJ29n",
+        "spamScore": 0,
+        "detectionLevel": ""
+      }
+    result: null
+  - sample: >-
+      {
+        "senderAddress": "example6@dummy.net",
+        "recipientAddress": "example7@dummy.net",
+        "fileName": "zero-day.pdf",
+        "fileType": "application/pdf",
+        "result": "malicious",
+        "actionTriggered": "none",
+        "date": "2024-05-27T09:04:25+0000",
+        "details": "[MALICIOUS_ACTIVITY: Exploit: Attempting to exploit CVE-2010-1240\r\nTime taken: 0 hrs, 0 min, 1 sec]",
+        "route": "internal",
+        "messageId": "\u003c17058b6ff8c197d1-183635@a42.one\u003e",
+        "subject": "RE",
+        "fileHash": "22a65c438289353d96c707cf55e26be723e3157f0aa00734843a9bdc8f98bab0",
+        "definition": "Default Attachment Protection Definition"
+      }
+    result: null
+  - sample: >-
+      {
+        "id": "MTOKEN:eNqrVkouLS7Jz00tSs5PSVWyUnIODXY0tnA0MjJX0lHKTFGyMjUyNLSwMNJRKkstKs7Mz1OyMtRRKskDKzYwMFOqBQCx4RMt",
+        "senderAddress": "chj@a42.one",
+        "recipientAddress": "jda@.dummy.net",
+        "subject": "Indicated Producers\u0027 testimony in support of the GIR Comprehensive Settlement",
+        "definition": "KPTPDP Hold",
+        "hits": 1,
+        "identifiers": [
+            "targeted_threat_dictionary"
+        ],
+        "action": "hold",
+        "taggedExternal": false,
+        "taggedMalicious": true,
+        "senderIpAddress": "172.217.22.14",
+        "eventTime": "2024-05-25T19:13:02+0000",
+        "impersonationResults": [
+            {
+                "impersonationDomainSource": "targeted_threat_dictionary",
+                "stringSimilarToDomain": "process,please"
+            }
+        ],
+        "messageId": "\u003c78e53a030f7fc3af-295571@a42.one\u003e"
+      }
+    result: null
+  - sample: >-
+      {
+        "userEmailAddress": "example8@dummy.net",
+        "fromUserEmailAddress": "example9@a42.one",
+        "url": "http://www.abc.com/",
+        "ttpDefinition": "Restrictive URL Definition",
+        "subject": "Will hackers make a fool of Larry Ellison?",
+        "action": "allow",
+        "adminOverride": "N/A",
+        "userOverride": "None",
+        "scanResult": "clean",
+        "category": "Computers \u0026 Technology",
+        "sendingIp": "172.217.22.14",
+        "userAwarenessAction": "N/A",
+        "date": "2024-05-27T09:03:18+0000",
+        "actions": "Allow",
+        "route": "inbound",
+        "creationMethod": "User Click",
+        "emailPartsDescription": [
+            "Body"
+        ],
+        "messageId": "\u003c052c3d1a1f94a2c2-176@a42.one\u003e"
+      }
+    result: null
