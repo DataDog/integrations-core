@@ -62,7 +62,6 @@ class SubmitData:
 
     def store(self, db_name, tables, columns_count):
         self._columns_count += columns_count
-        pdb.set_trace()
         known_tables = self.db_to_tables.setdefault(db_name, [])
         known_tables.extend(tables)
 
@@ -101,12 +100,11 @@ class SubmitData:
         self._columns_count = 0
         event = {**self._base_event, "metadata": [], "timestamp": time.time() * 1000}
         for db, tables in self.db_to_tables.items():
-            db_info = {}
             db_info = self.db_info[db]
             event["metadata"] = event["metadata"] + [{**(db_info), "tables": tables}]
         json_event = json.dumps(event, default=default_json_event_encoding)
-        pdb.set_trace()
         self._log.debug("Reporting the following payload for schema collection: {}".format(self.truncate(json_event)))
+        pdb.set_trace()
         self._submit_to_agent_queue(json_event)
         self.db_to_tables.clear()
 
@@ -169,27 +167,28 @@ class Schemas:
 #TODO query logs and what is tracked data what is not !
     @tracked_method(agent_check_getter=agent_check_getter)
     def _fetch_database_data(self, cursor, start_time, db_name):
+
         tables = self._get_tables(db_name, cursor)
         tables_chunks = list(get_list_chunks(tables, self.TABLES_CHUNK_SIZE))
         for tables_chunk in tables_chunks:
             schema_collection_elapsed_time = time.time() - start_time
             if schema_collection_elapsed_time > self._max_execution_time:
-                #TODO continue is here to allow debugging remove aftewards
-                continue
-                self._data_submitter.submit()
-                self._data_submitter.send_truncated_msg(db_name, schema_collection_elapsed_time)
-                raise StopIteration(
-                    """Schema collection took {}s which is longer than allowed limit of {}s,
-                    stopped while collecting for db - {}""".format(
-                        schema_collection_elapsed_time, self._max_execution_time, db_name
-                    )
-                )
+                #TODO remove coments
+                print("nothing")
+
+                #self._data_submitter.submit()
+                #self._data_submitter.send_truncated_msg(db_name, schema_collection_elapsed_time)
+                #raise StopIteration(
+                #    """Schema collection took {}s which is longer than allowed limit of {}s,
+                #    stopped while collecting for db - {}""".format(
+                #        schema_collection_elapsed_time, self._max_execution_time, db_name
+                #    )
+                #)
             columns_count, tables_info = self._get_tables_data(tables_chunk, db_name, cursor)
             self._data_submitter.store(db_name, tables_info, columns_count)
             if self._data_submitter.columns_since_last_submit() > self.MAX_COLUMNS_PER_EVENT:
                 self._data_submitter.submit()
         self._data_submitter.submit()
-        return False
 
 
     @tracked_method(agent_check_getter=agent_check_getter)
@@ -261,8 +260,15 @@ class Schemas:
             cursor,
             SQL_DATABASES,
         )
-        rows = cursor.fetchall()
+        rows = self.fetch_and_convert_to_str(cursor)
         #databases = [dict(row) for row in rows]
+        return rows
+#move to util
+    def fetch_and_convert_to_str(self, cursor):
+        rows = cursor.fetchall()
+        for row in rows:
+            for key in row.keys():
+                row[key] = str(row[key])
         return rows
 
     @tracked_method(agent_check_getter=agent_check_getter, track_result_length=True)
@@ -279,9 +285,9 @@ class Schemas:
             cursor,
             SQL_TABLES.format(db_name), #TODO try to pass into driver
         )
-        tables_info = cursor.fetchall()
+        tables_info = self.fetch_and_convert_to_str(cursor)
         #rows = [dict(zip(columns, [str(item) for item in row])) for row in cursor.fetchall()]
-        #pdb.set_trace()
+
         #May be rows are different ? 
         #tables_info = [dict(row) for row in rows]
         return tables_info
@@ -354,17 +360,18 @@ class Schemas:
             cursor,
         query = SQL_COLUMNS.format(db_name, table_names)
         )
-        rows = cursor.fetchall()
+        rows = self.fetch_and_convert_to_str(cursor)
         #rows = [dict(zip(columns, [str(item) for item in row])) for row in cursor.fetchall()]
         #May be rows are different ? 
         #columns = [dict(row) for row in rows]
         for row in rows:
             #TODO for others check if we need to convert to string so to be like in sqlserver
             if "nullable" in row:
-                if row["nullable"].lower() == "YES":
+                if row["nullable"].lower() == "yes":
                     row["nullable"] = True
                 else:
                     row["nullable"] = False
+# TODO convert YES,YES nullable everywhere .
             table_name = str(row.pop("table_name"))
             table_list[table_name_to_table_index[table_name]].setdefault("columns", [])
             table_list[table_name_to_table_index[table_name]]["columns"].append(row)
@@ -377,12 +384,18 @@ class Schemas:
             cursor,
         query = SQL_INDEXES.format(db_name, table_names)
         )
-        rows = cursor.fetchall()
+        rows = self.fetch_and_convert_to_str(cursor)
 
         for row in rows:
             #TODO treat may be yes to true etc , check if null is string type
             table_name = str(row.pop("table_name"))
             table_list[table_name_to_table_index[table_name]].setdefault("indexes", [])
+            #TODO for others check if we need to convert to string so to be like in sqlserver
+            if "nullables" in row:
+                if row["nullables"].lower() == "yes":
+                    row["nullables"] = True
+                else:
+                    row["nullables"] = False
             table_list[table_name_to_table_index[table_name]]["indexes"].append(row)
 
 #TODO test exception in query
@@ -392,7 +405,7 @@ class Schemas:
             cursor,
         query = SQL_FOREIGN_KEYS.format(db_name, table_names)
         )
-        rows = cursor.fetchall()
+        rows = self.fetch_and_convert_to_str(cursor)
 
         for row in rows:
             #TODO treat may be yes to true etc , check if null is string type
@@ -406,7 +419,7 @@ class Schemas:
             cursor,
         query = SQL_PARTITION.format(db_name, table_names)
         )
-        rows = cursor.fetchall()
+        rows = self.fetch_and_convert_to_str(cursor)
         for row in rows:
             #TODO treat may be yes to true etc , check if null is string type
             table_name = str(row.pop("table_name"))

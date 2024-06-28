@@ -175,7 +175,7 @@ SELECT
     tablespace_name
 FROM INFORMATION_SCHEMA.PARTITIONS
 WHERE
-    table_schema = "{}" and table_name in ({})
+    table_schema = "{}" AND table_name in ({}) AND partition_name IS NOT NULL
 GROUP BY table_name, partition_name, partition_ordinal_position, partition_method, partition_expression, partition_description, table_rows, partition_comment, tablespace_name
 """
 

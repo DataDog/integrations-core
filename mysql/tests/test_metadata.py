@@ -4,6 +4,7 @@
 import pytest
 
 from datadog_checks.mysql import MySql
+from deepdiff import DeepDiff
 
 from . import common
 import pdb
@@ -36,243 +37,451 @@ def dbm_instance(instance_complex):
 @pytest.mark.usefixtures('dd_environment')
 def test_collect_schemas(aggregator, dd_run_check, dbm_instance):
     databases_to_find = ['datadog_test_schemas', 'datadog_test_schemas_second']
-    exp_datadog_test = {
-        'id': 'normalized_value',
-        'name': 'datadog_test_schemas_second',
-        "collation": "SQL_Latin1_General_CP1_CI_AS",
-        'owner': 'dbo',
-        'schemas': [
-            {
-                'name': 'dbo',
-                'id': 'normalized_value',
-                'owner_name': 'dbo',
-                'tables': [
-                    {
-                        'id': 'normalized_value',
-                        'name': 'ϑings',
-                        'columns': [
-                            {
-                                'name': 'id',
-                                'data_type': 'int',
-                                'default': '((0))',
-                                'nullable': True,
-                                'ordinal_position': '1',
-                            },
-                            {
-                                'name': 'name',
-                                'data_type': 'varchar',
-                                'default': 'None',
-                                'nullable': True,
-                                'ordinal_position': '2',
-                            },
-                        ],
-                        'partitions': {'partition_count': 1},
-                        'indexes': [
-                            {
-                                'name': 'thingsindex',
-                                'type': 1,
-                                'is_unique': False,
-                                'is_primary_key': False,
-                                'is_unique_constraint': False,
-                                'is_disabled': False,
-                                'column_names': 'name',
-                            }
-                        ],
-                    }
-                ],
-            }
-        ],
-    }
+        
     exp_datadog_test_schemas = {
-        'id': 'normalized_value',
-        'name': 'datadog_test_schemas',
-        "collation": "SQL_Latin1_General_CP1_CI_AS",
-        'owner': 'dbo',
-        'schemas': [
-            {
-                'name': 'test_schema',
-                'id': 'normalized_value',
-                'owner_name': 'dbo',
-                'tables': [
-                    {
-                        'id': 'normalized_value',
-                        'name': 'cities',
-                        'columns': [
-                            {
-                                'name': 'id',
-                                'data_type': 'int',
-                                'default': '((0))',
-                                'nullable': False,
-                                'ordinal_position': '1',
-                            },
-                            {
-                                'name': 'name',
-                                'data_type': 'varchar',
-                                'default': 'None',
-                                'nullable': True,
-                                'ordinal_position': '2',
-                            },
-                            {
-                                'name': 'population',
-                                'data_type': 'int',
-                                'default': '((0))',
-                                'nullable': False,
-                                'ordinal_position': '3',
-                            },
-                        ],
-                        'partitions': {'partition_count': 12},
-                        'foreign_keys': [
-                            {
-                                'foreign_key_name': 'FK_CityId',
-                                'referencing_table': 'landmarks',
-                                'referencing_column': 'city_id',
-                                'referenced_table': 'cities',
-                                'referenced_column': 'id',
-                            }
-                        ],
-                        'indexes': [
-                            {
-                                'name': 'PK_Cities',
-                                'type': 1,
-                                'is_unique': True,
-                                'is_primary_key': True,
-                                'is_unique_constraint': False,
-                                'is_disabled': False,
-                                'column_names': 'id',
-                            },
-                            {
-                                'name': 'single_column_index',
-                                'type': 2,
-                                'is_unique': False,
-                                'is_primary_key': False,
-                                'is_unique_constraint': False,
-                                'is_disabled': False,
-                                'column_names': 'id,population',
-                            },
-                            {
-                                'name': 'two_columns_index',
-                                'type': 2,
-                                'is_unique': False,
-                                'is_primary_key': False,
-                                'is_unique_constraint': False,
-                                'is_disabled': False,
-                                'column_names': 'id,name',
-                            },
-                        ],
-                    },
-                    {
-                        'id': 'normalized_value',
-                        'name': 'landmarks',
-                        'columns': [
-                            {
-                                'name': 'name',
-                                'data_type': 'varchar',
-                                'default': 'None',
-                                'nullable': True,
-                                'ordinal_position': '1',
-                            },
-                            {
-                                'name': 'city_id',
-                                'data_type': 'int',
-                                'default': '((0))',
-                                'nullable': True,
-                                'ordinal_position': '2',
-                            },
-                        ],
-                        'partitions': {'partition_count': 1},
-                    },
-                    {
-                        'id': 'normalized_value',
-                        'name': 'RestaurantReviews',
-                        'columns': [
-                            {
-                                'name': 'RestaurantName',
-                                'data_type': 'varchar',
-                                'default': 'None',
-                                'nullable': True,
-                                'ordinal_position': '1',
-                            },
-                            {
-                                'name': 'District',
-                                'data_type': 'varchar',
-                                'default': 'None',
-                                'nullable': True,
-                                'ordinal_position': '2',
-                            },
-                            {
-                                'name': 'Review',
-                                'data_type': 'varchar',
-                                'default': 'None',
-                                'nullable': True,
-                                'ordinal_position': '3',
-                            },
-                        ],
-                        'partitions': {'partition_count': 1},
-                    },
-                    {
-                        'id': 'normalized_value',
-                        'name': 'Restaurants',
-                        'columns': [
-                            {
-                                'name': 'RestaurantName',
-                                'data_type': 'varchar',
-                                'default': 'None',
-                                'nullable': True,
-                                'ordinal_position': '1',
-                            },
-                            {
-                                'name': 'District',
-                                'data_type': 'varchar',
-                                'default': 'None',
-                                'nullable': True,
-                                'ordinal_position': '2',
-                            },
-                            {
-                                'name': 'Cuisine',
-                                'data_type': 'varchar',
-                                'default': 'None',
-                                'nullable': True,
-                                'ordinal_position': '3',
-                            },
-                        ],
-                        'partitions': {'partition_count': 2},
-                        'foreign_keys': [
-                            {
-                                'foreign_key_name': 'FK_RestaurantNameDistrict',
-                                'referencing_table': 'RestaurantReviews',
-                                'referencing_column': 'RestaurantName,District',
-                                'referenced_table': 'Restaurants',
-                                'referenced_column': 'RestaurantName,District',
-                            }
-                        ],
-                        'indexes': [
-                            {
-                                'name': 'UC_RestaurantNameDistrict',
-                                'type': 2,
-                                'is_unique': True,
-                                'is_primary_key': False,
-                                'is_unique_constraint': True,
-                                'is_disabled': False,
-                                'column_names': 'District,RestaurantName',
-                            }
-                        ],
-                    },
-                ],
-            }
-        ],
-    }
+            "name":"datadog_test_schemas",
+            "default_character_set_name":"latin1",
+            "default_collation_name":"latin1_swedish_ci",
+            "tables":[
+                {
+                    "name":"RestaurantReviews",
+                    "columns":[
+                        {
+                            "name":"RestaurantName",
+                            "data_type":"varchar",
+                            "default":"None",
+                            "nullable":True,
+                            "ordinal_position":"1"
+                        },
+                        {
+                            "name":"District",
+                            "data_type":"varchar",
+                            "default":"None",
+                            "nullable":True,
+                            "ordinal_position":"2"
+                        },
+                        {
+                            "name":"Review",
+                            "data_type":"text",
+                            "default":"None",
+                            "nullable":True,
+                            "ordinal_position":"3"
+                        }
+                    ],
+                    "foreign_keys":[
+                        {
+                            "constraint_schema":"datadog_test_schemas",
+                            "constraint_name":"FK_RestaurantNameDistrict",
+                            "column_names":"RestaurantName,District",
+                            "referenced_table_schema":"datadog_test_schemas",
+                            "referenced_table_name":"Restaurants",
+                            "referenced_column_names":"RestaurantName,District"
+                        }
+                    ],
+                    "indexes":[
+                        {
+                            "index_name":"FK_RestaurantNameDistrict",
+                            "collation":"A",
+                            "cardinality":"0",
+                            "index_type":"BTREE",
+                            "seq_in_index":"1,2",
+                            "columns":"RestaurantName,District",
+                            "sub_parts":"None",
+                            "packed":"None",
+                            "nullables":False,
+                            "non_uniques":"1,1"
+                        }
+                    ]
+                },
+                {
+                    "name":"Restaurants",
+                    "columns":[
+                        {
+                            "name":"RestaurantName",
+                            "data_type":"varchar",
+                            "default":"None",
+                            "nullable":True,
+                            "ordinal_position":"1"
+                        },
+                        {
+                            "name":"District",
+                            "data_type":"varchar",
+                            "default":"None",
+                            "nullable":True,
+                            "ordinal_position":"2"
+                        },
+                        {
+                            "name":"Cuisine",
+                            "data_type":"varchar",
+                            "default":"None",
+                            "nullable":True,
+                            "ordinal_position":"3"
+                        }
+                    ],
+                    "indexes":[
+                        {
+                            "index_name":"UC_RestaurantNameDistrict",
+                            "collation":"A",
+                            "cardinality":"0",
+                            "index_type":"BTREE",
+                            "seq_in_index":"1,2",
+                            "columns":"RestaurantName,District",
+                            "sub_parts":"None",
+                            "packed":"None",
+                            "nullables":False,
+                            "non_uniques":"0,0"
+                        }
+                    ]
+                },
+                {
+                    "name":"cities",
+                    "columns":[
+                        {
+                            "name":"id",
+                            "data_type":"int",
+                            "default":"0",
+                            "nullable":False,
+                            "ordinal_position":"1"
+                        },
+                        {
+                            "name":"name",
+                            "data_type":"varchar",
+                            "default":"None",
+                            "nullable":True,
+                            "ordinal_position":"2"
+                        },
+                        {
+                            "name":"population",
+                            "data_type":"int",
+                            "default":"0",
+                            "nullable":False,
+                            "ordinal_position":"3"
+                        }
+                    ],
+                    "indexes":[
+                        {
+                            "index_name":"PRIMARY",
+                            "collation":"A",
+                            "cardinality":"0",
+                            "index_type":"BTREE",
+                            "seq_in_index":"1",
+                            "columns":"id",
+                            "sub_parts":"None",
+                            "packed":"None",
+                            "nullables":False,
+                            "non_uniques":"0"
+                        },
+                        {
+                            "index_name":"single_column_index",
+                            "collation":"A",
+                            "cardinality":"0",
+                            "index_type":"BTREE",
+                            "seq_in_index":"1",
+                            "columns":"population",
+                            "sub_parts":"None",
+                            "packed":"None",
+                            "nullables":False,
+                            "non_uniques":"1"
+                        },
+                        {
+                            "index_name":"two_columns_index",
+                            "collation":"A",
+                            "cardinality":"0",
+                            "index_type":"BTREE",
+                            "seq_in_index":"1,2",
+                            "columns":"id,name",
+                            "sub_parts":"None",
+                            "packed":"None",
+                            "nullables":False,
+                            "non_uniques":"1,1"
+                        }
+                    ]
+                },
+                {
+                    "name":"cities_partitioned",
+                    "columns":[
+                        {
+                            "name":"id",
+                            "data_type":"int",
+                            "default":"0",
+                            "nullable":False,
+                            "ordinal_position":"1"
+                        },
+                        {
+                            "name":"name",
+                            "data_type":"varchar",
+                            "default":"None",
+                            "nullable":True,
+                            "ordinal_position":"2"
+                        },
+                        {
+                            "name":"population",
+                            "data_type":"int",
+                            "default":"0",
+                            "nullable":False,
+                            "ordinal_position":"3"
+                        }
+                    ],
+                    "partitions":[
+                        {
+                            "partition_name":"p0",
+                            "subpartition_names":"None",
+                            "partition_ordinal_position":"1",
+                            "subpartition_ordinal_positions":"None",
+                            "partition_method":"RANGE",
+                            ".subpartition_ordinal_positions":"None",
+                            "partition_expression":"id",
+                            "subpartition_expressions":"None",
+                            "partition_description":"100",
+                            "table_rows":"0",
+                            "data_lengths":"16384",
+                            "max_data_lengths":"None",
+                            "index_lengths":"0",
+                            "data_free":"0",
+                            "partition_comment":"",
+                            "tablespace_name":"None"
+                        },
+                        {
+                            "partition_name":"p1",
+                            "subpartition_names":"None",
+                            "partition_ordinal_position":"2",
+                            "subpartition_ordinal_positions":"None",
+                            "partition_method":"RANGE",
+                            ".subpartition_ordinal_positions":"None",
+                            "partition_expression":"id",
+                            "subpartition_expressions":"None",
+                            "partition_description":"200",
+                            "table_rows":"0",
+                            "data_lengths":"16384",
+                            "max_data_lengths":"None",
+                            "index_lengths":"0",
+                            "data_free":"0",
+                            "partition_comment":"",
+                            "tablespace_name":"None"
+                        },
+                        {
+                            "partition_name":"p2",
+                            "subpartition_names":"None",
+                            "partition_ordinal_position":"3",
+                            "subpartition_ordinal_positions":"None",
+                            "partition_method":"RANGE",
+                            ".subpartition_ordinal_positions":"None",
+                            "partition_expression":"id",
+                            "subpartition_expressions":"None",
+                            "partition_description":"300",
+                            "table_rows":"0",
+                            "data_lengths":"16384",
+                            "max_data_lengths":"None",
+                            "index_lengths":"0",
+                            "data_free":"0",
+                            "partition_comment":"",
+                            "tablespace_name":"None"
+                        },
+                        {
+                            "partition_name":"p3",
+                            "subpartition_names":"None",
+                            "partition_ordinal_position":"4",
+                            "subpartition_ordinal_positions":"None",
+                            "partition_method":"RANGE",
+                            ".subpartition_ordinal_positions":"None",
+                            "partition_expression":"id",
+                            "subpartition_expressions":"None",
+                            "partition_description":"MAXVALUE",
+                            "table_rows":"0",
+                            "data_lengths":"16384",
+                            "max_data_lengths":"None",
+                            "index_lengths":"0",
+                            "data_free":"0",
+                            "partition_comment":"",
+                            "tablespace_name":"None"
+                        }
+                    ],
+                    "indexes":[
+                        {
+                            "index_name":"PRIMARY",
+                            "collation":"A",
+                            "cardinality":"0",
+                            "index_type":"BTREE",
+                            "seq_in_index":"1",
+                            "columns":"id",
+                            "sub_parts":"None",
+                            "packed":"None",
+                            "nullables":False,
+                            "non_uniques":"0"
+                        }
+                    ]
+                },
+                {
+                    "name":"landmarks",
+                    "columns":[
+                        {
+                            "name":"name",
+                            "data_type":"varchar",
+                            "default":"None",
+                            "nullable":True,
+                            "ordinal_position":"1"
+                        },
+                        {
+                            "name":"city_id",
+                            "data_type":"int",
+                            "default":"0",
+                            "nullable":True,
+                            "ordinal_position":"2"
+                        }
+                    ],
+                    "foreign_keys":[
+                        {
+                            "constraint_schema":"datadog_test_schemas",
+                            "constraint_name":"FK_CityId",
+                            "column_names":"city_id",
+                            "referenced_table_schema":"datadog_test_schemas",
+                            "referenced_table_name":"cities",
+                            "referenced_column_names":"id"
+                        }
+                    ],
+                    "indexes":[
+                        {
+                            "index_name":"FK_CityId",
+                            "collation":"A",
+                            "cardinality":"0",
+                            "index_type":"BTREE",
+                            "seq_in_index":"1",
+                            "columns":"city_id",
+                            "sub_parts":"None",
+                            "packed":"None",
+                            "nullables":True,
+                            "non_uniques":"1"
+                        }
+                    ]
+                }
+            ]
+        }
+    exp_datadog_test_schemas_second = {
+    "name":"datadog_test_schemas_second",
+    "default_character_set_name":"latin1",
+    "default_collation_name":"latin1_swedish_ci",
+    "tables":[
+        {
+            #TODO conversion to proper ?  May be on the backend andalso check sqlserver ? 
+            "name":"ϑings",
+            "columns":[
+                {
+                    "name":"id",
+                    "data_type":"int",
+                    "default":"0",
+                    "nullable":True,
+                    "ordinal_position":"1"
+                },
+                {
+                    "name":"name",
+                    "data_type":"varchar",
+                    "default":"None",
+                    "nullable":True,
+                    "ordinal_position":"2"
+                }
+            ],
+            "indexes":[
+                {
+                    "index_name":"thingsindex",
+                    "collation":"A",
+                    "cardinality":"2",
+                    "index_type":"BTREE",
+                    "seq_in_index":"1",
+                    "columns":"name",
+                    "sub_parts":"None",
+                    "packed":"None",
+                    "nullables":True,
+                    "non_uniques":"0"
+                }
+            ]
+        },
+        {
+            "name":"ts",
+            "columns":[
+                {
+                    "name":"id",
+                    "data_type":"int",
+                    "default":"None",
+                    "nullable":True,
+                    "ordinal_position":"1"
+                },
+                {
+                    "name":"purchased",
+                    "data_type":"date",
+                    "default":"None",
+                    "nullable":True,
+                    "ordinal_position":"2"
+                }
+            ],
+            "partitions":[
+                {
+                    "partition_name":"p0",
+                    "subpartition_names":"p0sp0,p0sp1",
+                    "partition_ordinal_position":"1",
+                    "subpartition_ordinal_positions":"1,2",
+                    "partition_method":"RANGE",
+                    ".subpartition_ordinal_positions":"HASH,HASH",
+                    "partition_expression":" YEAR(purchased)",
+                    "subpartition_expressions":" TO_DAYS(purchased), TO_DAYS(purchased)",
+                    "partition_description":"1990",
+                    "table_rows":"0",
+                    "data_lengths":"16384,16384",
+                    "max_data_lengths":"None",
+                    "index_lengths":"0,0",
+                    "data_free":"0,0",
+                    "partition_comment":"",
+                    "tablespace_name":"None"
+                },
+                {
+                    "partition_name":"p1",
+                    "subpartition_names":"p1sp0,p1sp1",
+                    "partition_ordinal_position":"2",
+                    "subpartition_ordinal_positions":"1,2",
+                    "partition_method":"RANGE",
+                    ".subpartition_ordinal_positions":"HASH,HASH",
+                    "partition_expression":" YEAR(purchased)",
+                    "subpartition_expressions":" TO_DAYS(purchased), TO_DAYS(purchased)",
+                    "partition_description":"2000",
+                    "table_rows":"0",
+                    "data_lengths":"16384,16384",
+                    "max_data_lengths":"None",
+                    "index_lengths":"0,0",
+                    "data_free":"0,0",
+                    "partition_comment":"",
+                    "tablespace_name":"None"
+                },
+                {
+                    "partition_name":"p2",
+                    "subpartition_names":"p2sp0,p2sp1",
+                    "partition_ordinal_position":"3",
+                    "subpartition_ordinal_positions":"1,2",
+                    "partition_method":"RANGE",
+                    ".subpartition_ordinal_positions":"HASH,HASH",
+                    "partition_expression":" YEAR(purchased)",
+                    "subpartition_expressions":" TO_DAYS(purchased), TO_DAYS(purchased)",
+                    "partition_description":"MAXVALUE",
+                    "table_rows":"0",
+                    "data_lengths":"16384,16384",
+                    "max_data_lengths":"None",
+                    "index_lengths":"0,0",
+                    "data_free":"0,0",
+                    "partition_comment":"",
+                    "tablespace_name":"None"
+                }
+            ]
+        }
+    ]
+}
 
     #if running_on_windows_ci():
     #    exp_datadog_test['owner'] = 'None'
     #    exp_datadog_test_schemas['owner'] = 'None'
 
     expected_data_for_db = {
-        'datadog_test_schemas_second': exp_datadog_test,
         'datadog_test_schemas': exp_datadog_test_schemas,
+        'datadog_test_schemas_second': exp_datadog_test_schemas_second,
     }
 
-    #dbm_instance['database_autodiscovery'] = True
-    #dbm_instance['autodiscovery_include'] = ['datadog_test_schemas', 'datadog_test_schemas_second']
     dbm_instance['schemas_collection'] = {"enabled": True}
 
     mysql_check = MySql(common.CHECK_NAME, {}, instances=[dbm_instance])
@@ -281,9 +490,8 @@ def test_collect_schemas(aggregator, dd_run_check, dbm_instance):
     dbm_metadata = aggregator.get_event_platform_events("dbm-metadata")
 
     actual_payloads = {}
-    pdb.set_trace()
+
     for schema_event in (e for e in dbm_metadata if e['kind'] == 'mysql_databases'):
-        pdb.set_trace()
         assert schema_event.get("timestamp") is not None
         assert schema_event["host"] == "stubbed.hostname"
         assert schema_event["agent_version"] == "0.0.0"
@@ -294,6 +502,8 @@ def test_collect_schemas(aggregator, dd_run_check, dbm_instance):
         database_metadata = schema_event['metadata']
         assert len(database_metadata) == 1
         db_name = database_metadata[0]['name']
+        if db_name not in databases_to_find:
+            continue
 
         if db_name in actual_payloads:
             actual_payloads[db_name]['schemas'] = actual_payloads[db_name]['schemas'] + database_metadata[0]['schemas']
@@ -311,9 +521,9 @@ def test_collect_schemas(aggregator, dd_run_check, dbm_instance):
 
         # index columns may be in any order
         #normalize_indexes_columns(actual_payload)
-
+        pdb.set_trace()
         difference = DeepDiff(actual_payload, expected_data_for_db[db_name], ignore_order=True)
-
+        #TODO seems for this diff just should be the empty array.
         diff_keys = list(difference.keys())
         # schema data also collects certain builtin default schemas which are ignored in the test
         if len(diff_keys) > 0 and diff_keys != ['iterable_item_removed']:
