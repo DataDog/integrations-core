@@ -18,7 +18,7 @@ def dbm_instance(instance_complex):
     instance_complex['collect_settings'] = {'enabled': True, 'run_sync': True, 'collection_interval': 0.1}
     return instance_complex
 
-
+#TODO uncoment this
 #@pytest.mark.integration
 #@pytest.mark.usefixtures('dd_environment')
 #def test_collect_mysql_settings(aggregator, dbm_instance, dd_run_check):
@@ -33,6 +33,7 @@ def dbm_instance(instance_complex):
 #    assert event['dbms'] == "mysql"
 #    assert len(event["metadata"]) > 0
 
+#TODO add more tests
 @pytest.mark.integration
 @pytest.mark.usefixtures('dd_environment')
 def test_collect_schemas(aggregator, dd_run_check, dbm_instance):

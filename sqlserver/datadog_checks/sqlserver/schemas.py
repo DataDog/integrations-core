@@ -31,7 +31,6 @@ from datadog_checks.sqlserver.queries import (
 from datadog_checks.sqlserver.utils import convert_to_bool, execute_query, get_list_chunks, is_azure_sql_database
 
 
-
 class SubmitData:
 
     def __init__(self, submit_data_function, base_event, logger):
