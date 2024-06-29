@@ -1,0 +1,3 @@
+Drop name from excluded tags.
+Updated Hazelcast and Management Center to use version 5.x.
+Updated the status to reflect health of Management Center (Not Hazelcast cluster state).
