@@ -6,7 +6,70 @@ on:
   - cron: "0 5 * * 1"
 
 jobs:
-  test:
+  test-common:
+    uses: ./.github/workflows/test-common.yml
+    with:
+      repo: core
+
+      # Options
+      latest: true
+    secrets: inherit
+
+  test-dbm-integrations:
+    uses: ./.github/workflows/test-dbm-integrations.yml
+    with:
+      repo: core
+
+      # Options
+      latest: true
+    secrets: inherit
+
+  test-container-integrations:
+    uses: ./.github/workflows/test-container-integrations.yml
+    with:
+      repo: core
+
+      # Options
+      latest: true
+    secrets: inherit
+
+  test-ndm-integrations:
+    uses: ./.github/workflows/test-ndm-integrations.yml
+    with:
+      repo: core
+
+      # Options
+      latest: true
+    secrets: inherit
+
+  test-platform-integrations:
+    uses: ./.github/workflows/test-platform-integrations.yml
+    with:
+      repo: core
+
+      # Options
+      latest: true
+    secrets: inherit
+
+  test-windows-integrations:
+    uses: ./.github/workflows/test-windows-integrations.yml
+    with:
+      repo: core
+
+      # Options
+      latest: true
+    secrets: inherit
+
+  test-windows-integrations:
+    uses: ./.github/workflows/test-windows-integrations.yml
+    with:
+      repo: core
+
+      # Options
+      latest: true
+    secrets: inherit
+  
+  test-integrations:
     uses: ./.github/workflows/test-all.yml
     with:
       repo: core
@@ -17,7 +80,13 @@ jobs:
 
   submit-traces:
     needs:
-    - test
+    - test-common
+    - test-dbm-integrations
+    - test-container-integrations
+    - test-ndm-integrations
+    - test-platform-integrations
+    - test-windows-integrations
+    - test-integrations
     if: success() || failure()
 
     uses: ./.github/workflows/submit-traces.yml
