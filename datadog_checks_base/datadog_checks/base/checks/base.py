@@ -666,7 +666,9 @@ class AgentCheck(object):
         # type: (str) -> None
         if raw_event is None:
             return
-        aggregator.submit_event_platform_event(self, self.check_id, to_native_string(raw_event), "ndm")
+        aggregator.submit_event_platform_event(
+            self, self.check_id, to_native_string(raw_event), "network-devices-metadata"
+        )
 
     def should_send_metric(self, metric_name):
         return not self._metric_excluded(metric_name) and self._metric_included(metric_name)

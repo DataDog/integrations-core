@@ -48,7 +48,7 @@ def test_fabric_mocked(aggregator):
         check.check({})
 
         if six.PY3:
-            ndm_metadata = aggregator.get_event_platform_events("ndm")
+            ndm_metadata = aggregator.get_event_platform_events("network-devices-metadata")
             device_metadata = [dm for dm in ndm_metadata if 'devices' in dm and len(dm['devices']) > 0]
             interface_metadata = [im for im in ndm_metadata if 'interfaces' in im and len(im['interfaces']) > 0]
 
