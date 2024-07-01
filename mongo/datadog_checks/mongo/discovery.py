@@ -1,3 +1,8 @@
+# (C) Datadog, Inc. 2024-present
+# All rights reserved
+# Licensed under a 3-clause BSD style license (see LICENSE)
+
+
 from datadog_checks.base.utils.discovery import Discovery
 from datadog_checks.mongo.common import ReplicaSetDeployment
 
