@@ -82,21 +82,21 @@ tests:
   -
     sample: |-
       {
-        "fromAddress": "alerts@a42.one",
-        "toAddress": "example1@dummy.net",
-        "description": "Manual Envelope Rejection",
-        "type": 13015,
-        "info": "User level block list in force",
-        "created": "2024-05-25T19:58:18+0000",
-        "toAddressPreCheck": "example1@dummy.net",
-        "toAddressPostCheck": "example1@dummy.net"",
-        "ipAddress": "172.217.22.14",
+        "fromAddress": "dummy12@dummy.net",
+        "toAddress": "example12@example.net",
+        "description": "Virus Signature Detection",
+        "type": 14030,
+        "info": "[clam.Eicar-Test-Signature, bitd.EICAR-Test-File (not a virus), soph.EICAR-AV-Test, clam.Eicar-Test-Signature, soph.EICAR-AV-Test, bitd.EICAR-Test-File (not a virus)]",
+        "created": "2024-05-25T18:56:08+0000",
+        "toAddressPreCheck": "example12a@example.net",
+        "toAddressPostCheck": "",
+        "ipAddress": "172.217.12.12",
         "remoteName": "dummy.net",
         "remoteEhlo": "dummy.net",
-        "manageRecipient": false,
-        "id":"eNpVT1tPgzAU_i993YgtbLQsakLQ4RIdcwi7xIR07YGNBTaBos743y0uanw7-e7nA9UgVAU7iUYoCuiNz9w8Tm-X69eeQ_xsMXy-2E5YsJrxnn-iEoap56nJaflwr2w7a7eraJHP53QydLM7OZ7SWL61KhoUUwAWVOV-H_Aj7uE4jMf-PPPMMF_vNiJ-vEJ9VEEOoumqbcZMMiAO7qMC6ppnEDa8UfXT-xH0sLMQpPY0RdlNVXUDVUGIRoS-DwVU4iA7rReFrsVc06Sa4zq-PT_3hye_bclPTIKxnVw6mBOGqTBoKixjQEhqOJaFDckBm0TQDUjzWqe2UNW7Q4lGRO8pv1u1XxMvChQk_x76_AKJJ2vG",
-        "spamScore": 0,
-        "detectionLevel": ""
+        "manageRecipient": "false",
+        "id": "eNpVT1tPwjAU_i99hSW7dh1RE5iK0SGwOQ28LNCeDcwurF03wPjf7SRqfDv57ucDCaCSw56hEQonbDVYkO7ID2HmU0ocvLKEjOZ1OrmF2kzt0CjjQGbVYve6XQfrZTXeVf6pzk9Rx0JR-m97Hi_N47N8mN6f0_zx7Dx17aChd_FkIHZcsUFezNLp7BoNEYd3oE3fjAmxMXEte4gKEGKTQdRsGileTgdQuy5CYMrTFGW_VIoGeGEYCqHqrgrgtGK91o-jsUXGpukqbqPi28tvf3jy25b8xCS67iRXjgcWYE_X3BS2mo110DwXDM0kDHsec5iV4huV2gIX-6pEI0PtKb9blV8RtQQJyb-HPr8AlJFunw",
+        "spamScore": 61,
+        "detectionLevel": "aggressive"
       }
     service: "rejection"
     result: null
