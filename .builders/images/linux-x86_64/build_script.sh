@@ -15,12 +15,12 @@ if [[ "${DD_BUILD_PYTHON_VERSION}" == "3" ]]; then
     # thus we extract the version from the requirements file.
     kafka_version=$(grep 'confluent-kafka==' /home/requirements.in | sed -E 's/^.*([[:digit:]]+\.[[:digit:]]+\.[[:digit:]]+).*$/\1/')
     # Libraries need to be explicitly specified for static linking to work properly
-    LDFLAGS="${LDFLAGS} -L${DD_PREFIX_PATH}/lib -L/usr/local/lib -lkrb5 -lgssapi_krb5 -llmdb" \
+    LDFLAGS="${LDFLAGS} -L/usr/local/lib -lkrb5 -lgssapi_krb5 -llmdb" \
     DOWNLOAD_URL="https://github.com/confluentinc/librdkafka/archive/refs/tags/v{{version}}.tar.gz" \
         VERSION="${kafka_version}" \
         SHA256="d645e47d961db47f1ead29652606a502bdd2a880c85c1e060e94eea040f1a19a" \
         RELATIVE_PATH="librdkafka-{{version}}" \
-        bash install-from-source.sh --enable-sasl --enable-curl
+        bash install-from-source.sh --prefix="${DD_PREFIX_PATH}" --enable-sasl --enable-curl
     always_build+=("confluent-kafka")
 
     # The version of pyodbc is dynamically linked against a version of the odbc which doesn't come included in the wheel

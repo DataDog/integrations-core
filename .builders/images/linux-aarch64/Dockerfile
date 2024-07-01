@@ -137,7 +137,7 @@ RUN \
  RELATIVE_PATH="lmdb-LMDB_{{version}}/libraries/liblmdb" \
  # No ./configure, use a NOOP
  CONFIGURE_SCRIPT="true" \
- bash install-from-source.sh 
+ bash install-from-source.sh --prefix="${DD_PREFIX_PATH}"
 RUN \
  DOWNLOAD_URL="https://mirrors.edge.kernel.org/pub/linux/kernel/people/tytso/e2fsprogs/v{{version}}/e2fsprogs-{{version}}.tar.gz" \
  VERSION="1.47.0" \
@@ -148,13 +148,13 @@ RUN \
  # Add -fPIC to let librdkafka link against it statically
  CFLAGS="${CFLAGS} -fPIC" \
  # Explicitly ask the linker to use gssapi_krb5, otherwise static compilation fails
- LDFLAGS="${LDFLAGS} -L${DD_PREFIX_PATH}/lib -L/usr/local/lib -lgssapi_krb5" \
+ LDFLAGS="${LDFLAGS} -L/usr/local/lib -lgssapi_krb5" \
  DOWNLOAD_URL="https://github.com/cyrusimap/cyrus-sasl/releases/download/cyrus-sasl-{{version}}/cyrus-sasl-{{version}}.tar.gz" \
  VERSION="2.1.28" \
  SHA256="7ccfc6abd01ed67c1a0924b353e526f1b766b21f42d4562ee635a8ebfc5bb38c" \
  RELATIVE_PATH="cyrus-sasl-{{version}}" \
  bash install-from-source.sh --with-dblib=lmdb --enable-gssapi=/usr/local \
-    --enable-static --disable-shared
+    --enable-static --disable-shared --prefix="${DD_PREFIX_PATH}"
 # curl
 RUN \
  DOWNLOAD_URL="https://curl.haxx.se/download/curl-{{version}}.tar.gz" \
