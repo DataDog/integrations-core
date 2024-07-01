@@ -96,8 +96,12 @@ def test_external_host_tags(instance, datadog_agent, dd_run_check):
         '32601eaad60025',
         {
             'fly_io': [
+                'fly_org:test',
+                'app_name:example-app-1',
+                'app_id:o7vx1kl85749k3f1',
                 'instance_id:01AP4Y49KSI6PG1H7KPKJN5GF',
                 'machine_region:ewr',
+                'fly_platform_version:v2',
             ]
         },
     )
@@ -105,8 +109,12 @@ def test_external_host_tags(instance, datadog_agent, dd_run_check):
         '09201eeed60025',
         {
             'fly_io': [
+                'fly_org:test',
+                'app_name:example-app-1',
+                'app_id:o7vx1kl85749k3f1',
                 'instance_id:POSJ7Y49KSI6PG1H7KPKJN5IK',
                 'machine_region:ewr',
+                'fly_platform_version:v2',
             ]
         },
     )

@@ -46,7 +46,7 @@ class FlyIoCheck(OpenMetricsBaseCheckV2, ConfigMixin):
         app_status = app.get("status")
         return app_status
 
-    def _collect_machines_for_app(self, app_name):
+    def _collect_machines_for_app(self, app_name, app_tags):
         self.log.debug("Getting machines for app %s in org %s", app_name, self.org_slug)
         machines_endpoint = f"{self.machines_api_endpoint}/v1/apps/{app_name}/machines"
         response = self.http.get(machines_endpoint)
@@ -63,15 +63,19 @@ class FlyIoCheck(OpenMetricsBaseCheckV2, ConfigMixin):
             machine_id = machine.get("id")
             instance_id = machine.get("instance_id")
             machine_region = machine.get("region")
+            config = machine.get("config")
+            metadata = config.get("metadata")
+            fly_platform_version = metadata.get("fly_platform_version")
 
             machine_tags = [
                 f"instance_id:{instance_id}",
                 f"machine_region:{machine_region}",
+                f"fly_platform_version:{fly_platform_version}",
             ]
 
             self.gauge(MACHINE_COUNT_METRIC, 1, tags=self.tags, hostname=machine_id)
 
-            external_host_tags.append((machine_id, {self.__NAMESPACE__: machine_tags}))
+            external_host_tags.append((machine_id, {self.__NAMESPACE__: self.tags + machine_tags + app_tags}))
 
         if len(external_host_tags) > 0:
             self.set_external_tags(external_host_tags)
@@ -91,15 +95,16 @@ class FlyIoCheck(OpenMetricsBaseCheckV2, ConfigMixin):
             app_id = app.get("id")
             app_network = app.get("network")
             app_status = self._get_app_status(app_name)
-
-            app_tags = [
+            app_base_tags = [
                 f"app_id:{app_id}",
                 f"app_name:{app_name}",
-                f"app_network:{app_network}",
-                f"app_status:{app_status}",
             ]
-            self.gauge(APP_COUNT_METRIC, 1, tags=self.tags + app_tags)
-            self._collect_machines_for_app(app_name)
+            app_tags = [
+                f"app_status:{app_status}",
+                f"app_network:{app_network}",
+            ]
+            self.gauge(APP_COUNT_METRIC, 1, tags=self.tags + app_base_tags + app_tags)
+            self._collect_machines_for_app(app_name, app_base_tags)
 
     def _collect_machines_api_metrics(self):
         self.log.debug("Collecting metrics from machines api %s", self.machines_api_endpoint)
