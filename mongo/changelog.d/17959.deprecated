@@ -1,0 +1,1 @@
+Deprecate configuration option `dbnames`. Use `database_autodiscovery` instead.
