@@ -1,24 +1,7 @@
 id: mimecast
 tests:
   -
-  sample: |-
-    {
-      "eventInfo" : "Threat intel multiple feeds download  - malware_grid_csv_20240527063137053.zip, Date: 2024-05-27, Time: 10:31:37+0000, IP: 172.217.22.14, Application: Hamilton General",
-      "eventTime" : "2024-05-27T10:31:37+0000",
-      "id" : "eNoVjt0KgjAYQN9ltwXZSh1BF7LIBNNSXBrdmPua5l9MJ_3Qu2f353DOB3WQKQkFRyukYpdWKcmh21xmvdvQly3U8ZA7xE8O6cR-mxz0G6XKecd7VxmGGPIkOt2DwHR0S-z41jMZfw4qWtYeAPFlU5Z--tAmGgvZ1g4ExeH9XFwzdlyjKUoVL_qqFf_4XDfwEmtzMkWZ6vq2Bpm1HMYrGoXWglgYm6MygOyKthn57w_ksTyU",
-      "auditType" : "Threat Intel Feed Download",
-      "category" : "reporting_logs",
-      "user" : "example1@dummy.net"
-    }
-  result:
-    custom:
-      auditType: "Threat Intel Feed Download"
-      category: "reporting_logs"
-      eventInfo: "Threat intel multiple feeds download  - malware_grid_csv_20240527063137053.zip, Date: 2024-05-27, Time: 10:31:37+0000, IP: 172.217.22.14, Application: Hamilton General"
-      eventTime: "2024-05-27T10:31:37+0000"
-      id: "eNoVjt0KgjAYQN9ltwXZSh1BF7LIBNNSXBrdmPua5l9MJ_3Qu2f353DOB3WQKQkFRyukYpdWKcmh21xmvdvQly3U8ZA7xE8O6cR-mxz0G6XKecd7VxmGGPIkOt2DwHR0S-z41jMZfw4qWtYeAPFlU5Z--tAmGgvZ1g4ExeH9XFwzdlyjKUoVL_qqFf_4XDfwEmtzMkWZ6vq2Bpm1HMYrGoXWglgYm6MygOyKthn57w_ksTyU"
-      user: "example1@dummy.net"
-    message: |-
+    sample: |-
       {
         "eventInfo" : "Threat intel multiple feeds download  - malware_grid_csv_20240527063137053.zip, Date: 2024-05-27, Time: 10:31:37+0000, IP: 172.217.22.14, Application: Hamilton General",
         "eventTime" : "2024-05-27T10:31:37+0000",
@@ -27,31 +10,28 @@ tests:
         "category" : "reporting_logs",
         "user" : "example1@dummy.net"
       }
-    tags:
-     - "source:LOGS_SOURCE"
+    service: "audit"
+    result:
+      custom:
+        auditType: "Threat Intel Feed Download"
+        category: "reporting_logs"
+        eventInfo: "Threat intel multiple feeds download  - malware_grid_csv_20240527063137053.zip, Date: 2024-05-27, Time: 10:31:37+0000, IP: 172.217.22.14, Application: Hamilton General"
+        eventTime: "2024-05-27T10:31:37+0000"
+        id: "eNoVjt0KgjAYQN9ltwXZSh1BF7LIBNNSXBrdmPua5l9MJ_3Qu2f353DOB3WQKQkFRyukYpdWKcmh21xmvdvQly3U8ZA7xE8O6cR-mxz0G6XKecd7VxmGGPIkOt2DwHR0S-z41jMZfw4qWtYeAPFlU5Z--tAmGgvZ1g4ExeH9XFwzdlyjKUoVL_qqFf_4XDfwEmtzMkWZ6vq2Bpm1HMYrGoXWglgYm6MygOyKthn57w_ksTyU"
+        user: "example1@dummy.net"
+      message: |-
+        {
+          "eventInfo" : "Threat intel multiple feeds download  - malware_grid_csv_20240527063137053.zip, Date: 2024-05-27, Time: 10:31:37+0000, IP: 172.217.22.14, Application: Hamilton General",
+          "eventTime" : "2024-05-27T10:31:37+0000",
+          "id" : "eNoVjt0KgjAYQN9ltwXZSh1BF7LIBNNSXBrdmPua5l9MJ_3Qu2f353DOB3WQKQkFRyukYpdWKcmh21xmvdvQly3U8ZA7xE8O6cR-mxz0G6XKecd7VxmGGPIkOt2DwHR0S-z41jMZfw4qWtYeAPFlU5Z--tAmGgvZ1g4ExeH9XFwzdlyjKUoVL_qqFf_4XDfwEmtzMkWZ6vq2Bpm1HMYrGoXWglgYm6MygOyKthn57w_ksTyU",
+          "auditType" : "Threat Intel Feed Download",
+          "category" : "reporting_logs",
+          "user" : "example1@dummy.net"
+        }
+      tags:
+      - "source:LOGS_SOURCE"
   -
-  sample: |-
-    {
-      "senderAddress" : "example2@dummy.net",
-      "route" : "internal",
-      "subject" : "Enron Mentions",
-      "eventTime" : "2024-05-14T12:59:16+0000",
-      "action" : "notification",
-      "messageId" : "<146078e340f55c28-240167@a42.one>",
-      "recipientAddress" : "example3@dummy.net",
-      "policy" : "Explicit Language"
-    }
-  result:
-    custom:
-      action: "notification"
-      eventTime: "2024-05-14T12:59:16+0000"
-      messageId: "<146078e340f55c28-240167@a42.one>"
-      policy: "Explicit Language"
-      recipientAddress: "example3@dummy.net"
-      route: "internal"
-      senderAddress: "example2@dummy.net"
-      subject: "Enron Mentions"
-    message: |-
+    sample: |-
       {
         "senderAddress" : "example2@dummy.net",
         "route" : "internal",
@@ -62,97 +42,53 @@ tests:
         "recipientAddress" : "example3@dummy.net",
         "policy" : "Explicit Language"
       }
-    tags:
-     - "source:LOGS_SOURCE"
+    service: "dlp"
+    result:
+      custom:
+        action: "notification"
+        eventTime: "2024-05-14T12:59:16+0000"
+        messageId: "<146078e340f55c28-240167@a42.one>"
+        policy: "Explicit Language"
+        recipientAddress: "example3@dummy.net"
+        route: "internal"
+        senderAddress: "example2@dummy.net"
+        subject: "Enron Mentions"
+      message: |-
+        {
+          "senderAddress" : "example2@dummy.net",
+          "route" : "internal",
+          "subject" : "Enron Mentions",
+          "eventTime" : "2024-05-14T12:59:16+0000",
+          "action" : "notification",
+          "messageId" : "<146078e340f55c28-240167@a42.one>",
+          "recipientAddress" : "example3@dummy.net",
+          "policy" : "Explicit Language"
+        }
+      tags:
+      - "source:LOGS_SOURCE"
   -
-  sample: |-
-    {
-      "created" : "2024-05-27T10:58:32+0000",
-      "remoteEhlo" : "dummy.net",
-      "detectionLevel" : "",
-      "ipAddress" : "172.217.22.14",
-      "description" : "Virus Signature Detection",
-      "type" : 14030,
-      "toAddress" : "example5@a42.one",
-      "toAddressPreCheck" : "carry@a42.one",
-      "manageRecipient" : false,
-      "spamScore" : 0,
-      "fromAddress" : "example4@dummy.net",
-      "id" : "eNpVT2tPwjAU_S_9KsvoNtZC1GRuiS-CMpgKWbJ07QVG2IN2HRjjf7dI1Hg_3dxz7nl8IAVcSygEGqFm4W2G3S6U6jW1w4c2HpOCBc1Tg-tpsoR4d1ivRcQnJE72d2zaxTmNkuh-o4ty_ra5mDvVwO2WHTzyMrWB6Onz8VjFi1tWr25SOxfYr17GoZgctjs5Dq5QD0nYAm9P5j6lHqHYJT1UglJsDbOWtVrN3xsw0c5EEOanLatTWK1akCXG5sLNXpcgeS1O3DCZBS4NHIcYjBn57lzv7579umU_Mlm_72SXQx9TfwXcGpD-wPIwplZuxgIGzBe5C5jm10a1A6mKukIjbPJU367m3wB7DRqyf4U-vwBVJ29n",
-      "toAddressPostCheck" : "",
-      "info" : "[bitd.Exploit.DDE-CmdCalc.Gen]",
-      "remoteName" : "dummy.net"
-    }
-  result:
-    custom:
-      created: "2024-05-27T10:58:32+0000"
-      description: "Virus Signature Detection"
-      detectionLevel: ""
-      fromAddress: "example4@dummy.net"
-      id: "eNpVT2tPwjAU_S_9KsvoNtZC1GRuiS-CMpgKWbJ07QVG2IN2HRjjf7dI1Hg_3dxz7nl8IAVcSygEGqFm4W2G3S6U6jW1w4c2HpOCBc1Tg-tpsoR4d1ivRcQnJE72d2zaxTmNkuh-o4ty_ra5mDvVwO2WHTzyMrWB6Onz8VjFi1tWr25SOxfYr17GoZgctjs5Dq5QD0nYAm9P5j6lHqHYJT1UglJsDbOWtVrN3xsw0c5EEOanLatTWK1akCXG5sLNXpcgeS1O3DCZBS4NHIcYjBn57lzv7579umU_Mlm_72SXQx9TfwXcGpD-wPIwplZuxgIGzBe5C5jm10a1A6mKukIjbPJU367m3wB7DRqyf4U-vwBVJ29n"
-      info: "[bitd.Exploit.DDE-CmdCalc.Gen]"
-      ipAddress: "172.217.22.14"
-      manageRecipient: false
-      remoteEhlo: "dummy.net"
-      remoteName: "dummy.net"
-      spamScore: 0
-      toAddress: "example5@a42.one"
-      toAddressPostCheck: ""
-      toAddressPreCheck: "carry@a42.one"
-      type: 14030
-    message: |-
+    sample: |-
       {
-        "created" : "2024-05-27T10:58:32+0000",
-        "remoteEhlo" : "dummy.net",
-        "detectionLevel" : "",
-        "ipAddress" : "172.217.22.14",
-        "description" : "Virus Signature Detection",
-        "type" : 14030,
-        "toAddress" : "example5@a42.one",
-        "toAddressPreCheck" : "carry@a42.one",
-        "manageRecipient" : false,
-        "spamScore" : 0,
-        "fromAddress" : "example4@dummy.net",
-        "id" : "eNpVT2tPwjAU_S_9KsvoNtZC1GRuiS-CMpgKWbJ07QVG2IN2HRjjf7dI1Hg_3dxz7nl8IAVcSygEGqFm4W2G3S6U6jW1w4c2HpOCBc1Tg-tpsoR4d1ivRcQnJE72d2zaxTmNkuh-o4ty_ra5mDvVwO2WHTzyMrWB6Onz8VjFi1tWr25SOxfYr17GoZgctjs5Dq5QD0nYAm9P5j6lHqHYJT1UglJsDbOWtVrN3xsw0c5EEOanLatTWK1akCXG5sLNXpcgeS1O3DCZBS4NHIcYjBn57lzv7579umU_Mlm_72SXQx9TfwXcGpD-wPIwplZuxgIGzBe5C5jm10a1A6mKukIjbPJU367m3wB7DRqyf4U-vwBVJ29n",
-        "toAddressPostCheck" : "",
-        "info" : "[bitd.Exploit.DDE-CmdCalc.Gen]",
-        "remoteName" : "dummy.net"
+        "fromAddress": "alerts@a42.one",
+        "toAddress": "example1@dummy.net",
+        "description": "Manual Envelope Rejection",
+        "type": 13015,
+        "info": "User level block list in force",
+        "created": "2024-05-25T19:58:18+0000",
+        "toAddressPreCheck": "example1@dummy.net",
+        "toAddressPostCheck": "example1@dummy.net"",
+        "ipAddress": "172.217.22.14",
+        "remoteName": "dummy.net",
+        "remoteEhlo": "dummy.net",
+        "manageRecipient": false,
+        "id": "eNpVT1tPgzAU_i993YgtbLQsakLQ4RIdcwi7xIR07YGNBTaBos743y0uanw7-e7nA9UgVAU7iUYoCuiNz9w8Tm-X69eeQ_xsMXy-2E5YsJrxnn-iEoap56nJaflwr2w7a7eraJHP53QydLM7OZ7SWL61KhoUUwAWVOV-H_Aj7uE4jMf-PPPMMF_vNiJ-vEJ9VEEOoumqbcZMMiAO7qMC6ppnEDa8UfXT-xH0sLMQpPY0RdlNVXUDVUGIRoS-DwVU4iA7rReFrsVc06Sa4zq-PT_3hye_bclPTIKxnVw6mBOGqTBoKixjQEhqOJaFDckBm0TQDUjzWqe2UNW7Q4lGRO8pv1u1XxMvChQk_x76_AKJJ2vG",
+        "spamScore": 0,
+        "detectionLevel": ""
       }
-    tags:
-     - "source:LOGS_SOURCE"
+    service: "rejection"
+    result: null
   -
-  sample: |-
-    {
-      "date" : "2024-05-27T09:04:25+0000",
-      "senderAddress" : "example6@dummy.net",
-      "fileName" : "zero-day.pdf",
-      "actionTriggered" : "none",
-      "subject" : "RE",
-      "messageId" : "<17058b6ff8c197d1-183635@a42.one>",
-      "fileHash" : "22a65c438289353d96c707cf55e26be723e3157f0aa00734843a9bdc8f98bab0",
-      "result" : "malicious",
-      "route" : "internal",
-      "details" : "[MALICIOUS_ACTIVITY: Exploit: Attempting to exploit CVE-2010-1240\r\nTime taken: 0 hrs, 0 min, 1 sec]",
-      "definition" : "Default Attachment Protection Definition",
-      "recipientAddress" : "example7@dummy.net",
-      "fileType" : "application/pdf"
-    }
-  result:
-    custom:
-      actionTriggered: "none"
-      date: "2024-05-27T09:04:25+0000"
-      definition: "Default Attachment Protection Definition"
-      details: "[MALICIOUS_ACTIVITY: Exploit: Attempting to exploit CVE-2010-1240\r\nTime taken: 0 hrs, 0 min, 1 sec]"
-      fileHash: "22a65c438289353d96c707cf55e26be723e3157f0aa00734843a9bdc8f98bab0"
-      fileName: "zero-day.pdf"
-      fileType: "application/pdf"
-      messageId: "<17058b6ff8c197d1-183635@a42.one>"
-      recipientAddress: "example7@dummy.net"
-      result: "malicious"
-      route: "internal"
-      senderAddress: "example6@dummy.net"
-      subject: "RE"
-    message: |-
+    sample: |-
       {
         "date" : "2024-05-27T09:04:25+0000",
         "senderAddress" : "example6@dummy.net",
@@ -168,50 +104,42 @@ tests:
         "recipientAddress" : "example7@dummy.net",
         "fileType" : "application/pdf"
       }
-    tags:
-     - "source:LOGS_SOURCE"
+    service: "ttp-attachment-protection"
+    result:
+      custom:
+        actionTriggered: "none"
+        date: "2024-05-27T09:04:25+0000"
+        definition: "Default Attachment Protection Definition"
+        details: "[MALICIOUS_ACTIVITY: Exploit: Attempting to exploit CVE-2010-1240\r\nTime taken: 0 hrs, 0 min, 1 sec]"
+        fileHash: "22a65c438289353d96c707cf55e26be723e3157f0aa00734843a9bdc8f98bab0"
+        fileName: "zero-day.pdf"
+        fileType: "application/pdf"
+        messageId: "<17058b6ff8c197d1-183635@a42.one>"
+        recipientAddress: "example7@dummy.net"
+        result: "malicious"
+        route: "internal"
+        senderAddress: "example6@dummy.net"
+        subject: "RE"
+      message: |-
+        {
+          "date" : "2024-05-27T09:04:25+0000",
+          "senderAddress" : "example6@dummy.net",
+          "fileName" : "zero-day.pdf",
+          "actionTriggered" : "none",
+          "subject" : "RE",
+          "messageId" : "<17058b6ff8c197d1-183635@a42.one>",
+          "fileHash" : "22a65c438289353d96c707cf55e26be723e3157f0aa00734843a9bdc8f98bab0",
+          "result" : "malicious",
+          "route" : "internal",
+          "details" : "[MALICIOUS_ACTIVITY: Exploit: Attempting to exploit CVE-2010-1240\r\nTime taken: 0 hrs, 0 min, 1 sec]",
+          "definition" : "Default Attachment Protection Definition",
+          "recipientAddress" : "example7@dummy.net",
+          "fileType" : "application/pdf"
+        }
+      tags:
+      - "source:LOGS_SOURCE"
   -
-  sample: |-
-    {
-      "taggedMalicious" : true,
-      "senderAddress" : "chj@a42.one",
-      "subject" : "Indicated Producers' testimony in support of the GIR Comprehensive Settlement",
-      "identifiers" : [ "targeted_threat_dictionary" ],
-      "messageId" : "<78e53a030f7fc3af-295571@a42.one>",
-      "hits" : 1,
-      "senderIpAddress" : "172.217.22.14",
-      "eventTime" : "2024-05-25T19:13:02+0000",
-      "impersonationResults" : [ {
-        "impersonationDomainSource" : "targeted_threat_dictionary",
-        "stringSimilarToDomain" : "process,please"
-      } ],
-      "action" : "hold",
-      "definition" : "KPTPDP Hold",
-      "id" : "MTOKEN:eNqrVkouLS7Jz00tSs5PSVWyUnIODXY0tnA0MjJX0lHKTFGyMjUyNLSwMNJRKkstKs7Mz1OyMtRRKskDKzYwMFOqBQCx4RMt",
-      "recipientAddress" : "jda@.dummy.net",
-      "taggedExternal" : false
-    }
-  result:
-    custom:
-      action: "hold"
-      definition: "KPTPDP Hold"
-      eventTime: "2024-05-25T19:13:02+0000"
-      hits: 1
-      id: "MTOKEN:eNqrVkouLS7Jz00tSs5PSVWyUnIODXY0tnA0MjJX0lHKTFGyMjUyNLSwMNJRKkstKs7Mz1OyMtRRKskDKzYwMFOqBQCx4RMt"
-      identifiers:
-       - "targeted_threat_dictionary"
-      impersonationResults:
-       -
-        impersonationDomainSource: "targeted_threat_dictionary"
-        stringSimilarToDomain: "process,please"
-      messageId: "<78e53a030f7fc3af-295571@a42.one>"
-      recipientAddress: "jda@.dummy.net"
-      senderAddress: "chj@a42.one"
-      senderIpAddress: "172.217.22.14"
-      subject: "Indicated Producers' testimony in support of the GIR Comprehensive Settlement"
-      taggedExternal: false
-      taggedMalicious: true
-    message: |-
+    sample: |-
       {
         "taggedMalicious" : true,
         "senderAddress" : "chj@a42.one",
@@ -231,52 +159,51 @@ tests:
         "recipientAddress" : "jda@.dummy.net",
         "taggedExternal" : false
       }
-    tags:
-     - "source:LOGS_SOURCE"
+    service: "ttp-impersonation"
+    result:
+      custom:
+        action: "hold"
+        definition: "KPTPDP Hold"
+        eventTime: "2024-05-25T19:13:02+0000"
+        hits: 1
+        id: "MTOKEN:eNqrVkouLS7Jz00tSs5PSVWyUnIODXY0tnA0MjJX0lHKTFGyMjUyNLSwMNJRKkstKs7Mz1OyMtRRKskDKzYwMFOqBQCx4RMt"
+        identifiers:
+        - "targeted_threat_dictionary"
+        impersonationResults:
+        -
+          impersonationDomainSource: "targeted_threat_dictionary"
+          stringSimilarToDomain: "process,please"
+        messageId: "<78e53a030f7fc3af-295571@a42.one>"
+        recipientAddress: "jda@.dummy.net"
+        senderAddress: "chj@a42.one"
+        senderIpAddress: "172.217.22.14"
+        subject: "Indicated Producers' testimony in support of the GIR Comprehensive Settlement"
+        taggedExternal: false
+        taggedMalicious: true
+      message: |-
+        {
+          "taggedMalicious" : true,
+          "senderAddress" : "chj@a42.one",
+          "subject" : "Indicated Producers' testimony in support of the GIR Comprehensive Settlement",
+          "identifiers" : [ "targeted_threat_dictionary" ],
+          "messageId" : "<78e53a030f7fc3af-295571@a42.one>",
+          "hits" : 1,
+          "senderIpAddress" : "172.217.22.14",
+          "eventTime" : "2024-05-25T19:13:02+0000",
+          "impersonationResults" : [ {
+            "impersonationDomainSource" : "targeted_threat_dictionary",
+            "stringSimilarToDomain" : "process,please"
+          } ],
+          "action" : "hold",
+          "definition" : "KPTPDP Hold",
+          "id" : "MTOKEN:eNqrVkouLS7Jz00tSs5PSVWyUnIODXY0tnA0MjJX0lHKTFGyMjUyNLSwMNJRKkstKs7Mz1OyMtRRKskDKzYwMFOqBQCx4RMt",
+          "recipientAddress" : "jda@.dummy.net",
+          "taggedExternal" : false
+        }
+      tags:
+      - "source:LOGS_SOURCE"
   -
-  sample: |-
-    {
-      "sendingIp" : "172.217.22.14",
-      "date" : "2024-05-27T09:03:18+0000",
-      "userAwarenessAction" : "N/A",
-      "ttpDefinition" : "Restrictive URL Definition",
-      "subject" : "Will hackers make a fool of Larry Ellison?",
-      "userOverride" : "None",
-      "userEmailAddress" : "example8@dummy.net",
-      "messageId" : "<052c3d1a1f94a2c2-176@a42.one>",
-      "url" : "http://www.abc.com/",
-      "creationMethod" : "User Click",
-      "emailPartsDescription" : [ "Body" ],
-      "fromUserEmailAddress" : "example9@a42.one",
-      "route" : "inbound",
-      "action" : "allow",
-      "adminOverride" : "N/A",
-      "scanResult" : "clean",
-      "category" : "Computers & Technology",
-      "actions" : "Allow"
-    }
-  result:
-    custom:
-      action: "allow"
-      actions: "Allow"
-      adminOverride: "N/A"
-      category: "Computers & Technology"
-      creationMethod: "User Click"
-      date: "2024-05-27T09:03:18+0000"
-      emailPartsDescription:
-       - "Body"
-      fromUserEmailAddress: "example9@a42.one"
-      messageId: "<052c3d1a1f94a2c2-176@a42.one>"
-      route: "inbound"
-      scanResult: "clean"
-      sendingIp: "172.217.22.14"
-      subject: "Will hackers make a fool of Larry Ellison?"
-      ttpDefinition: "Restrictive URL Definition"
-      url: "http://www.abc.com/"
-      userAwarenessAction: "N/A"
-      userEmailAddress: "example8@dummy.net"
-      userOverride: "None"
-    message: |-
+    sample: |-
       {
         "sendingIp" : "172.217.22.14",
         "date" : "2024-05-27T09:03:18+0000",
@@ -297,5 +224,48 @@ tests:
         "category" : "Computers & Technology",
         "actions" : "Allow"
       }
-    tags:
-     - "source:LOGS_SOURCE"
+    service: "ttp-url"
+    result:
+      custom:
+        action: "allow"
+        actions: "Allow"
+        adminOverride: "N/A"
+        category: "Computers & Technology"
+        creationMethod: "User Click"
+        date: "2024-05-27T09:03:18+0000"
+        emailPartsDescription:
+        - "Body"
+        fromUserEmailAddress: "example9@a42.one"
+        messageId: "<052c3d1a1f94a2c2-176@a42.one>"
+        route: "inbound"
+        scanResult: "clean"
+        sendingIp: "172.217.22.14"
+        subject: "Will hackers make a fool of Larry Ellison?"
+        ttpDefinition: "Restrictive URL Definition"
+        url: "http://www.abc.com/"
+        userAwarenessAction: "N/A"
+        userEmailAddress: "example8@dummy.net"
+        userOverride: "None"
+      message: |-
+        {
+          "sendingIp" : "172.217.22.14",
+          "date" : "2024-05-27T09:03:18+0000",
+          "userAwarenessAction" : "N/A",
+          "ttpDefinition" : "Restrictive URL Definition",
+          "subject" : "Will hackers make a fool of Larry Ellison?",
+          "userOverride" : "None",
+          "userEmailAddress" : "example8@dummy.net",
+          "messageId" : "<052c3d1a1f94a2c2-176@a42.one>",
+          "url" : "http://www.abc.com/",
+          "creationMethod" : "User Click",
+          "emailPartsDescription" : [ "Body" ],
+          "fromUserEmailAddress" : "example9@a42.one",
+          "route" : "inbound",
+          "action" : "allow",
+          "adminOverride" : "N/A",
+          "scanResult" : "clean",
+          "category" : "Computers & Technology",
+          "actions" : "Allow"
+        }
+      tags:
+      - "source:LOGS_SOURCE"
