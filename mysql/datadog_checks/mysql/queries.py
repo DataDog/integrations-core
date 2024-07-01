@@ -91,32 +91,17 @@ SELECT schema_name as `name`,default_character_set_name,default_collation_name F
 WHERE schema_name not in ('mysql', 'performance_schema', 'information_schema')"""
 
 SQL_TABLES = """\
-SELECT table_name as `name` FROM information_schema.TABLES WHERE TABLE_SCHEMA = "{}"
+SELECT table_name as `name` FROM information_schema.TABLES WHERE TABLE_SCHEMA = %s
 """
 
 #do we have ? that can be replaced by the driver
 SQL_COLUMNS = """\
 SELECT table_name, column_name as `name`, data_type, column_default as `default` , is_nullable as `nullable` ,ordinal_position
 FROM INFORMATION_SCHEMA.COLUMNS
-WHERE TABLE_SCHEMA = "{}" AND TABLE_NAME IN ({});
+WHERE TABLE_SCHEMA = %s AND TABLE_NAME IN ({});
 """
 
 #TODO cardinality is a dinamic property - number of unique values for an index. 
-SQL_INDEXES_2 = """\
-SELECT TABLE_NAME, NON_UNIQUE, INDEX_NAME, 
-GROUP_CONCAT(SEQ_IN_INDEX ORDER BY SEQ_IN_INDEX ASC) as SEQ_IN_INDEX, 
-GROUP_CONCAT(COLUMN_NAME ORDER BY SEQ_IN_INDEX ASC) AS COLUMNS, 
-GROUP_CONCAT(SUB_PART ORDER BY SEQ_IN_INDEX ASC) AS SUB_PARTS, 
-GROUP_CONCAT(PACKED ORDER BY SEQ_IN_INDEX ASC) AS PACKED, 
-GROUP_CONCAT(NULLABLE ORDER BY SEQ_IN_INDEX ASC) AS NULLABLES, 
-COLLATION, 
-CARDINALITY, 
-INDEX_TYPE,
-FROM INFORMATION_SCHEMA.STATISTICS
-WHERE TABLE_SCHEMA = "{}" AND TABLE_NAME IN ({});
-GROUP BY TABLE_NAME, NON_UNIQUE, INDEX_NAME, COLLATION, CARDINALITY, INDEX_TYPE
-"""
-
 SQL_INDEXES = """\
 SELECT 
     table_name, 
@@ -131,7 +116,7 @@ SELECT
     group_concat(nullable order by seq_in_index asc) as nullables,  
     group_concat(non_unique order by seq_in_index asc) as non_uniques
 FROM INFORMATION_SCHEMA.STATISTICS 
-WHERE TABLE_SCHEMA = "{}" AND TABLE_NAME IN ({})
+WHERE TABLE_SCHEMA = %s AND TABLE_NAME IN ({})
 GROUP BY table_name, index_name, collation, cardinality, index_type;
 """
 
@@ -149,7 +134,7 @@ SELECT
 FROM
     INFORMATION_SCHEMA.KEY_COLUMN_USAGE
 WHERE
-    table_schema = "{}" and table_name in ({})
+    table_schema = %s and table_name in ({})
     and referenced_table_name is not null
 GROUP BY constraint_schema, constraint_name, table_name, referenced_table_schema, referenced_table_name;
 """
@@ -175,7 +160,7 @@ SELECT
     tablespace_name
 FROM INFORMATION_SCHEMA.PARTITIONS
 WHERE
-    table_schema = "{}" AND table_name in ({}) AND partition_name IS NOT NULL
+    table_schema = %s AND table_name in ({}) AND partition_name IS NOT NULL
 GROUP BY table_name, partition_name, partition_ordinal_position, partition_method, partition_expression, partition_description, table_rows, partition_comment, tablespace_name
 """
 

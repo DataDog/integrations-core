@@ -163,8 +163,7 @@ class Schemas:
                 hostname=self._check.resolved_hostname,
             )
             raise    
-      
-#TODO query logs and what is tracked data what is not !
+
     @tracked_method(agent_check_getter=agent_check_getter)
     def _fetch_database_data(self, cursor, start_time, db_name):
 
@@ -254,11 +253,12 @@ class Schemas:
         for db_info in db_infos:
             self._fetch_database_data(cursor, start_time, db_info['name'])
 
+    @tracked_method(agent_check_getter=agent_check_getter)
     def _query_db_information(self, cursor):
         #do we need to open/close the cursor ?
         self._cursor_run(
             cursor,
-            SQL_DATABASES,
+            query = SQL_DATABASES
         )
         rows = self.fetch_and_convert_to_str(cursor)
         #databases = [dict(row) for row in rows]
@@ -283,7 +283,8 @@ class Schemas:
         #TODO add convert to string to cursor run and make it common or may be make common execute query
         self._cursor_run(
             cursor,
-            SQL_TABLES.format(db_name), #TODO try to pass into driver
+            query = SQL_TABLES,
+            params = db_name
         )
         tables_info = self.fetch_and_convert_to_str(cursor)
         #rows = [dict(zip(columns, [str(item) for item in row])) for row in cursor.fetchall()]
@@ -351,27 +352,20 @@ class Schemas:
 
     @tracked_method(agent_check_getter=agent_check_getter)
     def _populate_with_columns_data(self, table_name_to_table_index, table_list, table_names, db_name, cursor):
-        #tables_info = execute_query(SQL_TABLES, cursor, convert_results_to_str=True, parameter=schema["id"])
-        #TODO add convert to string to cursor run and make it common or may be make common execute query
-
         #TODO can we pass a first argument directly to driver or also need format ?
 
         self._cursor_run(
             cursor,
-        query = SQL_COLUMNS.format(db_name, table_names)
+        query = SQL_COLUMNS.format(table_names),
+        params = db_name
         )
         rows = self.fetch_and_convert_to_str(cursor)
-        #rows = [dict(zip(columns, [str(item) for item in row])) for row in cursor.fetchall()]
-        #May be rows are different ? 
-        #columns = [dict(row) for row in rows]
         for row in rows:
-            #TODO for others check if we need to convert to string so to be like in sqlserver
             if "nullable" in row:
                 if row["nullable"].lower() == "yes":
                     row["nullable"] = True
                 else:
                     row["nullable"] = False
-# TODO convert YES,YES nullable everywhere .
             table_name = str(row.pop("table_name"))
             table_list[table_name_to_table_index[table_name]].setdefault("columns", [])
             table_list[table_name_to_table_index[table_name]]["columns"].append(row)
@@ -382,12 +376,12 @@ class Schemas:
     def _populate_with_index_data(self, table_name_to_table_index, table_list, table_names, db_name, cursor):
         self._cursor_run(
             cursor,
-        query = SQL_INDEXES.format(db_name, table_names)
+        query = SQL_INDEXES.format(table_names),
+        params = db_name
         )
         rows = self.fetch_and_convert_to_str(cursor)
 
         for row in rows:
-            #TODO treat may be yes to true etc , check if null is string type
             table_name = str(row.pop("table_name"))
             table_list[table_name_to_table_index[table_name]].setdefault("indexes", [])
             #TODO check when empty value its false or introduce None.
@@ -407,12 +401,12 @@ class Schemas:
     def _populate_with_foreign_keys_data(self, table_name_to_table_index, table_list, table_names, db_name, cursor):
         self._cursor_run(
             cursor,
-        query = SQL_FOREIGN_KEYS.format(db_name, table_names)
+        query = SQL_FOREIGN_KEYS.format(table_names),
+        params=db_name
         )
         rows = self.fetch_and_convert_to_str(cursor)
 
         for row in rows:
-            #TODO treat may be yes to true etc , check if null is string type
             table_name = str(row.pop("table_name"))
             table_list[table_name_to_table_index[table_name]].setdefault("foreign_keys", [])
             table_list[table_name_to_table_index[table_name]]["foreign_keys"].append(row)
@@ -421,11 +415,11 @@ class Schemas:
     def _populate_with_partitions_data(self, table_name_to_table_index, table_list, table_names, db_name, cursor):
         self._cursor_run(
             cursor,
-        query = SQL_PARTITION.format(db_name, table_names)
+        query = SQL_PARTITION.format(table_names),
+        params = db_name
         )
         rows = self.fetch_and_convert_to_str(cursor)
         for row in rows:
-            #TODO treat may be yes to true etc , check if null is string type
             table_name = str(row.pop("table_name"))
             table_list[table_name_to_table_index[table_name]].setdefault("partitions", [])
             table_list[table_name_to_table_index[table_name]]["partitions"].append(row)

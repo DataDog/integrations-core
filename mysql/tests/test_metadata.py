@@ -363,7 +363,7 @@ def test_collect_schemas(aggregator, dd_run_check, dbm_instance):
     "default_collation_name":"latin1_swedish_ci",
     "tables":[
         {
-            #TODO conversion to proper ?  May be on the backend andalso check sqlserver ? 
+            #TODO May be on the backend and also check sqlserver ? 
             "name":"ϑings",
             "columns":[
                 {
@@ -414,6 +414,7 @@ def test_collect_schemas(aggregator, dd_run_check, dbm_instance):
                     "ordinal_position":"2"
                 }
             ],
+            #TODO ask team collapse all these stuff ?
             "partitions":[
                 {
                     "partition_name":"p0",
@@ -524,8 +525,10 @@ def test_collect_schemas(aggregator, dd_run_check, dbm_instance):
         #normalize_indexes_columns(actual_payload)
         pdb.set_trace()
         difference = DeepDiff(actual_payload, expected_data_for_db[db_name], ignore_order=True)
-        #TODO seems for this diff just should be the empty array.
-        diff_keys = list(difference.keys())
-        # schema data also collects certain builtin default schemas which are ignored in the test
-        if len(diff_keys) > 0 and diff_keys != ['iterable_item_removed']:
+
+        if difference:
             raise AssertionError(Exception("found the following diffs: " + str(difference)))
+        #diff_keys = list(difference.keys())
+        # schema data also collects certain builtin default schemas which are ignored in the test
+        #if len(diff_keys) > 0 and diff_keys != ['iterable_item_removed']:
+        #    raise AssertionError(Exception("found the following diffs: " + str(difference)))
