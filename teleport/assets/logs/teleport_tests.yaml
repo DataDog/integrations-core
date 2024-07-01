@@ -284,9 +284,35 @@ tests:
         },
         Message_: \"The conditional request failed\"
       } (count=2, closing=false)." inventory/controller.go:510
-    result: null
+    result:
+      custom:
+        date: 1719415513000
+        log:
+          level: "WARN"
+      message: |-
+        2024-06-26T15:25:13Z WARN             "Failed to keep alive ssh server \"b05b3c10-c35a-4f25-b6c4-3b315a1d4ec1\": ConditionalCheckFailedException: The conditional request failed
+        {
+          RespMetadata: {
+            StatusCode: 400,
+            RequestID: \"5LUDO9VEIGQ436RMP6HEDM0D6FVV4KQNSO5AEMVJF66Q9ASUAAJG\"
+          },
+          Message_: \"The conditional request failed\"
+        } (count=2, closing=false)." inventory/controller.go:510
+      status: "warn"
+      tags:
+        - "source:LOGS_SOURCE"
+      timestamp: 1719415513000
   - sample:
       "2024-06-26T15:00:36Z WARN             Restarting watch on error after
       waiting 208.931858ms. Error: watcher closed.
       local/headlessauthn_watcher.go:158"
-    result: null
+    result:
+      custom:
+        date: 1719414036000
+        log:
+          level: "WARN"
+      message: "2024-06-26T15:00:36Z WARN             Restarting watch on error after waiting 208.931858ms. Error: watcher closed. local/headlessauthn_watcher.go:158"
+      status: "warn"
+      tags:
+        - "source:LOGS_SOURCE"
+      timestamp: 1719414036000
