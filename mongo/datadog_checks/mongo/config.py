@@ -189,27 +189,17 @@ class MongoConfig(object):
                 )
         if self.db_names:
             # dbnames is deprecated and will be removed in a future version
-            # we use it to set the include list for database autodiscovery for backwards compatibility
+            self.log.warning(
+                "The `dbnames` parameter is deprecated and will be removed in a future version. "
+                "To monitor more databases, enable `database_autodiscovery` and use "
+                "`database_autodiscovery.include` instead."
+            )
+            include_list = [f"{db}$" for db in self.db_names]  # Append $ to each db name for exact match
             if not database_autodiscovery_config['enabled']:
-                # if database_autodiscovery is not enabled, we should enable it and set the include list
-                self.log.warning(
-                    "The `dbnames` parameter is deprecated and will be removed in a future version. "
-                    "To monitor more databases, enable `database_autodiscovery`."
-                )
+                # if database_autodiscovery is not enabled, we should enable it
                 database_autodiscovery_config['enabled'] = True
-                # we use the dbnames list to set the include list. append $ to each db name for exact match
-                database_autodiscovery_config['include'] = [f"{db}$" for db in self.db_names]
             else:
                 if not database_autodiscovery_config.get('include'):
-                    self.log.warning(
-                        "The `dbnames` parameter is deprecated and will be removed in a future version. "
-                        "Please remove it and use `database_autodiscovery.include` instead."
-                    )
-                    database_autodiscovery_config['include'] = self.db_names
-                else:
-                    self.log.warning(
-                        "The `dbnames` parameter is deprecated and will be removed in a future version. "
-                        "Please remove it and use `database_autodiscovery.include` instead. "
-                        "The `dbnames` parameter will be ignored."
-                    )
+                    # if database_autodiscovery is enabled but include list is not set, set the include list
+                    database_autodiscovery_config['include'] = include_list
         return database_autodiscovery_config
