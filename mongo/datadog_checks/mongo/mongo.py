@@ -127,8 +127,8 @@ class MongoDb(AgentCheck):
 
         dbstats_tag_dbname = self._config.dbstats_tag_dbname
         for db_name in all_dbs:
-            # DbStatCollector is always collected on all databases (filtered by db_names config option)
-            # For backward compatibility, we keep collecting from all databases
+            # DbStatCollector is always collected on all monitored databases (filtered by db_names config option)
+            # For backward compatibility, we keep collecting from all monitored databases
             # regardless of the auto-discovery settings.
             potential_collectors.append(DbStatCollector(self, db_name, dbstats_tag_dbname, tags))
 
@@ -137,7 +137,7 @@ class MongoDb(AgentCheck):
         # Otherwise, we collect collstats and indexstats for the database specified in the configuration
         for db_name in monitored_dbs:
             # For backward compatibility, coll_names is ONLY applied when autodiscovery is not enabled
-            # Otherwise, we collect collstats and indexstats for all auto-discovered databases and all collections
+            # Otherwise, we collect collstats & indexstats for all auto-discovered databases and authorized collections
             coll_names = None if self._database_autodiscovery.autodiscovery_enabled else self._config.coll_names
             potential_collectors.append(CollStatsCollector(self, db_name, tags, coll_names=coll_names))
             if self._config.collections_indexes_stats:

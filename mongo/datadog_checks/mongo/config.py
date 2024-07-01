@@ -198,8 +198,7 @@ class MongoConfig(object):
             if not database_autodiscovery_config['enabled']:
                 # if database_autodiscovery is not enabled, we should enable it
                 database_autodiscovery_config['enabled'] = True
-            else:
-                if not database_autodiscovery_config.get('include'):
-                    # if database_autodiscovery is enabled but include list is not set, set the include list
-                    database_autodiscovery_config['include'] = include_list
+            if not database_autodiscovery_config.get('include'):
+                # if database_autodiscovery is enabled but include list is not set, set the include list
+                database_autodiscovery_config['include'] = include_list
         return database_autodiscovery_config
