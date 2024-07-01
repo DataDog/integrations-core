@@ -99,7 +99,50 @@ tests:
         "detectionLevel": "aggressive"
       }
     service: "rejection"
-    result: null
+    result:
+      custom:
+        created: "2024-05-25T18:56:08+0000"
+        description: "Virus Signature Detection"
+        detectionLevel: "aggressive"
+        fromAddress: "dummy12@dummy.net"
+        id: "eNpVT1tPwjAU_i99hSW7dh1RE5iK0SGwOQ28LNCeDcwurF03wPjf7SRqfDv57ucDCaCSw56hEQonbDVYkO7ID2HmU0ocvLKEjOZ1OrmF2kzt0CjjQGbVYve6XQfrZTXeVf6pzk9Rx0JR-m97Hi_N47N8mN6f0_zx7Dx17aChd_FkIHZcsUFezNLp7BoNEYd3oE3fjAmxMXEte4gKEGKTQdRsGileTgdQuy5CYMrTFGW_VIoGeGEYCqHqrgrgtGK91o-jsUXGpukqbqPi28tvf3jy25b8xCS67iRXjgcWYE_X3BS2mo110DwXDM0kDHsec5iV4huV2gIX-6pEI0PtKb9blV8RtQQJyb-HPr8AlJFunw"
+        info: "[clam.Eicar-Test-Signature, bitd.EICAR-Test-File (not a virus), soph.EICAR-AV-Test, clam.Eicar-Test-Signature, soph.EICAR-AV-Test, bitd.EICAR-Test-File (not a virus)]"
+        manageRecipient: "false"
+        network:
+          client:
+            geoip: {}
+            ip: "172.217.12.12"
+        remoteEhlo: "dummy.net"
+        remoteName: "dummy.net"
+        spamScore: 61
+        toAddress: "example12@example.net"
+        toAddressPostCheck: ""
+        toAddressPreCheck: "example12a@example.net"
+        type: 14030
+        usr:
+          email: "example12@example.net"
+      message: |-
+        {
+          "created" : "2024-05-25T18:56:08+0000",
+          "remoteEhlo" : "dummy.net",
+          "detectionLevel" : "aggressive",
+          "ipAddress" : "172.217.12.12",
+          "description" : "Virus Signature Detection",
+          "type" : 14030,
+          "toAddress" : "example12@example.net",
+          "toAddressPreCheck" : "example12a@example.net",
+          "manageRecipient" : "false",
+          "spamScore" : 61,
+          "fromAddress" : "dummy12@dummy.net",
+          "id" : "eNpVT1tPwjAU_i99hSW7dh1RE5iK0SGwOQ28LNCeDcwurF03wPjf7SRqfDv57ucDCaCSw56hEQonbDVYkO7ID2HmU0ocvLKEjOZ1OrmF2kzt0CjjQGbVYve6XQfrZTXeVf6pzk9Rx0JR-m97Hi_N47N8mN6f0_zx7Dx17aChd_FkIHZcsUFezNLp7BoNEYd3oE3fjAmxMXEte4gKEGKTQdRsGileTgdQuy5CYMrTFGW_VIoGeGEYCqHqrgrgtGK91o-jsUXGpukqbqPi28tvf3jy25b8xCS67iRXjgcWYE_X3BS2mo110DwXDM0kDHsec5iV4huV2gIX-6pEI0PtKb9blV8RtQQJyb-HPr8AlJFunw",
+          "toAddressPostCheck" : "",
+          "info" : "[clam.Eicar-Test-Signature, bitd.EICAR-Test-File (not a virus), soph.EICAR-AV-Test, clam.Eicar-Test-Signature, soph.EICAR-AV-Test, bitd.EICAR-Test-File (not a virus)]",
+          "remoteName" : "dummy.net"
+        }
+      service: "rejection"
+      tags:
+      - "source:LOGS_SOURCE"
+      timestamp: 1716663368000
   -
     sample: |-
       {
