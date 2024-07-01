@@ -290,9 +290,9 @@ class MongoDb(AgentCheck):
                 )
 
     def _get_db_names(self, tags):
-        dbnames, server_databases = self._database_autodiscovery.databases
-        if server_databases:
-            self.gauge('mongodb.dbs', len(server_databases), tags=tags)
+        dbnames, database_count = self._database_autodiscovery.get_databases_and_count()
+        if database_count:
+            self.gauge('mongodb.dbs', database_count, tags=tags)
         return dbnames
 
     def _diagnose_tls(self):

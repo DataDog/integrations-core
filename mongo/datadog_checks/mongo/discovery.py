@@ -16,7 +16,7 @@ class MongoDBDatabaseAutodiscovery(Discovery):
         self.autodiscovery_enabled = self._autodiscovery_config.get("enabled", False)
 
         super(MongoDBDatabaseAutodiscovery, self).__init__(
-            self._get_databases,
+            self._list_databases,
             include={db: 0 for db in self._autodiscovery_config.get("include", [".*"])},
             exclude=self._autodiscovery_config.get("exclude"),
             interval=self._autodiscovery_config.get('refresh_interval', DEFAULT_REFRESH_INTERVAL),
@@ -25,9 +25,9 @@ class MongoDBDatabaseAutodiscovery(Discovery):
         self._log = self._check.log
         self._max_databases = self._autodiscovery_config.get("max_databases", DEFAULT_MAX_DATABASES)
 
-        self._server_databases = []  # discovered databases from the server before filtering
+        self.database_count = 0  # total number of databases on the server
 
-    def _get_databases(self):
+    def _list_databases(self):
         deployment = self._check.api_client.deployment_type
 
         databases = []
@@ -37,16 +37,17 @@ class MongoDBDatabaseAutodiscovery(Discovery):
             self._log.debug("Replicaset is in recovering state, will skip reading database names")
         else:
             databases = self._check.api_client.list_database_names()
-            self._server_databases = databases
+            self.database_count = len(databases)
         return databases
 
     @property
     def databases(self):
         '''
-        The databases property returns a tuple of two lists:
-        1. dbnames: a list of database names to be monitored
-        2. server_databases: a list of all databases discovered on the server
+        The databases property returns a list of database names to monitor, capped at the max_databases limit.
         '''
         dbnames = [database[1] for database in self.get_items()]
-        dbnames = dbnames[: self._max_databases]
-        return dbnames, self._server_databases
+        dbnames = dbnames[: self._max_databases]  # limit the number of databases to monitor
+        return dbnames
+
+    def get_databases_and_count(self):
+        return self.databases, self.database_count
