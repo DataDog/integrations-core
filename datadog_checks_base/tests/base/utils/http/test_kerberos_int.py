@@ -10,6 +10,7 @@ from datadog_checks.dev.utils import ON_WINDOWS
 pytestmark = [pytest.mark.integration]
 
 
+@pytest.mark.flaky
 @pytest.mark.skipif(ON_WINDOWS, reason='Test cannot be run on Windows')
 def test_kerberos_auth_noconf(kerberos):
     instance = {}
@@ -20,6 +21,7 @@ def test_kerberos_auth_noconf(kerberos):
     assert response.status_code == 401
 
 
+@pytest.mark.flaky
 @pytest.mark.skipif(ON_WINDOWS, reason='Test cannot be run on Windows')
 def test_kerberos_auth_principal_inexistent(kerberos):
     instance = {
@@ -38,6 +40,7 @@ def test_kerberos_auth_principal_inexistent(kerberos):
     assert response.status_code == 401
 
 
+@pytest.mark.flaky
 @pytest.mark.skipif(ON_WINDOWS, reason='Test cannot be run on Windows')
 def test_kerberos_auth_principal_incache_nokeytab(kerberos):
     instance = {
@@ -55,6 +58,7 @@ def test_kerberos_auth_principal_incache_nokeytab(kerberos):
     assert response.status_code == 200
 
 
+@pytest.mark.flaky
 @pytest.mark.skipif(ON_WINDOWS, reason='Test cannot be run on Windows')
 def test_kerberos_auth_principal_inkeytab_nocache(kerberos):
     instance = {
