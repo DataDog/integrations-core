@@ -213,7 +213,7 @@ To configure this check for an Agent running on a host:
 ##### Database Autodiscovery
 
 Starting from Datadog Agent v7.56, you can enable database autodiscovery to automatically collect metrics from all your databases on the MongoDB instance. 
-Please note that database autodiscovery is disabled by default. Read access to the auto-discovered databases is required to collect metrics from them.
+Please note that database autodiscovery is disabled by default. Read access to the autodiscovered databases is required to collect metrics from them.
 To enable it, add the following configuration to your `mongo.d/conf.yaml` file:
 
 ```yaml
@@ -237,7 +237,7 @@ To enable it, add the following configuration to your `mongo.d/conf.yaml` file:
        ## @param password - string - optional
        ## The password to use for authentication.
        #
-       password: <UNIQUEPASSWORD>
+       password: <UNIQUE_PASSWORD>
 
        ## @param options - mapping - optional
        ## Connection options. For a complete list, see:
@@ -266,7 +266,7 @@ To enable it, add the following configuration to your `mongo.d/conf.yaml` file:
          ## @param exclude - list of strings - optional
          ## List of databases to exclude from the autodiscovery. Use regular expressions to match multiple databases.
          ## For example, to exclude all databases starting with "mydb", use "^mydb.*".
-         ## When exclude list conflicts with include list, exclude list takes precedence.
+         ## When the exclude list conflicts with include list, the exclude list takes precedence.
          #
          exclude:
             - "^mydb2.*"
