@@ -46,7 +46,7 @@
             "id": 8368599417296782,
             "definition": {
                 "type": "note",
-                "content": "## Widgets\n1. Total Alerts\n2. Count of High Alerts\n3. Count of Medium Alerts\n4. Count of Low Alerts\n5. Severity Over Time\n6. Total Actionable Alerts\n7. Top 10 Sources\n8. Distribution by Endpoint and IP\n9. Endpoint Type Over Time\n10. Distribution by Endpoint OS\n11. Distribution by Type\n12. Top 10 Threats\n13. Distribution by Threat Status\n14. Distribution by Threat Cleanable Status\n15. Alerts by Country\n16. Health Status\n17. OS Details\n18. Isolation Status\n19. Lockdown Status\n20. Log Details",
+                "content": "## Widgets\n1. Total Alerts\n2. Count of High Alerts\n3. Count of Medium Alerts\n4. Count of Low Alerts\n5. Severity Over Time\n6. Total Actionable Alerts\n7. Top 10 Sources\n8. Distribution by Endpoint and IP\n9. Endpoint Type Over Time\n10. Distribution by Endpoint OS\n11. Distribution by Type\n12. Top 10 Threats\n13. Distribution by Threat Status\n14. Distribution by Threat Cleanable Status\n15. Alerts by Country\n16. Health Status\n17. OS Details\n18. Isolation and Lockdown Status\n19. Log Details",
                 "background_color": "white",
                 "font_size": "14",
                 "text_align": "left",

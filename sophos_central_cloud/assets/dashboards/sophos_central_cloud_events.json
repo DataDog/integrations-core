@@ -46,7 +46,7 @@
             "id": 5427042204724260,
             "definition": {
                 "type": "note",
-                "content": "## Widgets\n1. Total Events\n2. Severity Over Time\n3. Count of Critical Events\n4. Count of High Events\n5. Count of Medium Events\n6. Count of Low Events\n7. Distribution by Type\n8. Distribution by Endpoint Type\n9. Distribution by Endpoint and IP\n10. Distribution by Group\n11. Top 10 Sources\n12. IPS Threat Details\n13. Events by Country\n14. Health Status\n15. OS Details\n16. Isolation Status\n17. Lockdown Status\n18. Log Details",
+                "content": "## Widgets\n1. Total Events\n2. Severity Over Time\n3. Count of Critical Events\n4. Count of High Events\n5. Count of Medium Events\n6. Count of Low Events\n7. Distribution by Type\n8. Distribution by Endpoint Type\n9. Distribution by Endpoint and IP\n10. Distribution by Group\n11. Top 10 Sources\n12. IPS Threat Details\n13. Events by Country\n14. Health Status\n15. OS Details\n16. Isolation and Lockdown Status\n17. Log Details",
                 "background_color": "white",
                 "font_size": "14",
                 "text_align": "left",
