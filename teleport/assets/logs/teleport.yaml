@@ -155,7 +155,7 @@ pipeline:
       grok:
         supportRules: >-
           _log_prefix
-          %{date("yyyy-MM-dd'T'HH:mm:ssZZ"):date}\s+%{word:log.level}\s+\[%{notSpace:teleport.component}\]\s+%{notSpace}
+          %{date("yyyy-MM-dd'T'HH:mm:ssZZ"):date}\s+%{word:log.level}\s+(\[%{notSpace:teleport.component}\])?\s+%{notSpace}
 
 
           _log_common_attr %{_log_prefix}\s+(addr.local:%{ipOrHost:network.client.ip}:%{port:network.client.port}\s+)?(addr.remote:%{ipOrHost:network.destination.ip}:%{port:network.destination.port}\s+)?+cluster_name:%{notSpace:teleport.cluster_name}\s+code:%{notSpace:teleport.code}\s+ei:%{notSpace:teleport.eid}
