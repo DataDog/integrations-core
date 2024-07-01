@@ -248,6 +248,9 @@ instances:
     ##  * `db:<DB_NAME>` e.g. `db:<DB_NAME>`
     ##  * `collection:<COLLECTION_NAME>` e.g. `collection:<COLLECTION_NAME>`
     ## Each collection generates many metrics, up to 8 + the number of indices on the collection for each collection.
+    ##
+    ## NOTE: This option is ignored when database_autodiscovery is enabled. 
+    ## Metrics are collected for all authorized collections on autodiscovered databases.
     #
     # collections:
     #   - <COLLECTION_NAME>
