@@ -274,7 +274,6 @@ class MongoDb(AgentCheck):
         tags = self._get_tags(include_deployment_tags=True, include_internal_resource_tags=True)
 
         dbnames = self._get_db_names(tags)
-        print(dbnames)
         self.refresh_collectors(deployment, dbnames, tags)
         for collector in self.collectors:
             try:
