@@ -54,9 +54,11 @@ def mock_responses():
 
     def process_files(dir, response_parent):
         for file in dir.rglob('*'):
-            if file.is_file():
+            if file.is_file() and file.stem != ".slash":
                 relative_dir_path = (
-                    "/" + str(file.parent.relative_to(dir)) + ("/" if (file.parent / ".slash").is_file() else "")
+                    "/"
+                    + (str(file.parent.relative_to(dir)) if str(file.parent.relative_to(dir)) != "." else "")
+                    + ("/" if (file.parent / ".slash").is_file() else "")
                 )
                 if relative_dir_path not in response_parent:
                     response_parent[relative_dir_path] = {}
@@ -74,7 +76,6 @@ def mock_responses():
             process_dir(method_subdir, responses_map)
 
     def method(method, url, file='response', headers=None, params=None):
-
         filename = file
         request_path = url
         request_path = request_path.replace('?', '/')
@@ -82,7 +83,6 @@ def mock_responses():
             param_string = '/'.join(f'{key}={str(val)}' for key, val in params.items())
             request_path = f'{url}/{param_string}'
 
-        print(request_path)
         response = responses_map.get(method, {}).get(request_path, {}).get(filename)
         return response
 

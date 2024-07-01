@@ -7,6 +7,7 @@ from six.moves.urllib.parse import quote_plus
 from datadog_checks.base import OpenMetricsBaseCheckV2
 
 from .config_models import ConfigMixin
+from .constants import APP_COUNT_METRIC, MACHINE_COUNT_METRIC, MACHINE_UP_STATE
 from .metrics import METRICS, RENAME_LABELS_MAP
 
 
@@ -55,7 +56,7 @@ class FlyIoCheck(OpenMetricsBaseCheckV2, ConfigMixin):
         for machine in machines:
             machine_name = machine.get("name")
             machine_state = machine.get("state")
-            if machine_state != "started":
+            if machine_state != MACHINE_UP_STATE:
                 self.log.info("Skipping machine %s for app %s: state is %s", machine_name, app_name, machine_state)
                 continue
 
@@ -64,16 +65,18 @@ class FlyIoCheck(OpenMetricsBaseCheckV2, ConfigMixin):
             machine_region = machine.get("region")
 
             machine_tags = [
-                f"machine_id:{machine_id}",
                 f"instance_id:{instance_id}",
                 f"machine_region:{machine_region}",
             ]
 
-            self.gauge("machine.count", 1, tags=self.tags, hostname=machine_id)
+            self.gauge(MACHINE_COUNT_METRIC, 1, tags=self.tags, hostname=machine_id)
 
-            external_host_tags.append((instance_id, {self.__NAMESPACE__: machine_tags}))
+            external_host_tags.append((machine_id, {self.__NAMESPACE__: machine_tags}))
 
-    def _collect_machines_api_metrics(self):
+        if len(external_host_tags) > 0:
+            self.set_external_tags(external_host_tags)
+
+    def _collect_app_metrics(self):
         self.log.debug("Getting apps for org %s", self.org_slug)
         apps_endpoint = f"{self.machines_api_endpoint}/v1/apps"
         params = {'org_slug': self.org_slug}
@@ -83,21 +86,31 @@ class FlyIoCheck(OpenMetricsBaseCheckV2, ConfigMixin):
         apps = response.json().get("apps", [])
         for app in apps:
             app_name = app.get("name")
-            self.log.debug("processing app %s", app_name)
+            self.log.debug("Processing app %s", app_name)
+
             app_id = app.get("id")
             app_network = app.get("network")
-
             app_status = self._get_app_status(app_name)
 
             app_tags = [
                 f"app_id:{app_id}",
                 f"app_name:{app_name}",
                 f"app_network:{app_network}",
-                f"app_statsus:{app_status}",
+                f"app_status:{app_status}",
             ]
-            self.gauge("app.count", 1, tags=self.tags + app_tags)
-
+            self.gauge(APP_COUNT_METRIC, 1, tags=self.tags + app_tags)
             self._collect_machines_for_app(app_name)
+
+    def _collect_machines_api_metrics(self):
+        self.log.debug("Collecting metrics from machines api %s", self.machines_api_endpoint)
+        response = self.http.get(f"{self.machines_api_endpoint}/")
+        try:
+            response.raise_for_status()
+        except Exception as e:
+            self.gauge("machines_api.up", 0, tags=self.tags)
+            self.log.error("Encountered an error hitting machines REST API %s: %s", self.machines_api_endpoint, str(e))
+            raise
+        self._collect_app_metrics()
 
     def check(self, instance):
         super().check(instance)

@@ -7,6 +7,7 @@ import copy
 import pytest
 
 from datadog_checks.base.constants import ServiceCheck
+from datadog_checks.dev.http import MockResponse
 from datadog_checks.dev.utils import get_metadata_metrics
 from datadog_checks.fly_io import FlyIoCheck
 
@@ -67,3 +68,45 @@ def test_rest_api_app_metrics(dd_run_check, aggregator, instance, caplog):
         aggregator.assert_metric(
             metric['name'], metric['value'], count=metric['count'], tags=metric['tags'], hostname=metric['hostname']
         )
+
+
+@pytest.mark.parametrize(
+    ('mock_http_get'),
+    [
+        pytest.param(
+            {'http_error': {'/': MockResponse(status_code=500)}},
+            id='api rest',
+        )
+    ],
+    indirect=['mock_http_get'],
+)
+@pytest.mark.usefixtures('mock_http_get')
+def test_rest_api_exception(dd_run_check, instance, aggregator):
+    check = FlyIoCheck('fly_io', {}, [instance])
+    with pytest.raises(Exception, match=r'500 Server Error'):
+        dd_run_check(check)
+        aggregator.assert_metric("fly_io.machines_api.up", value=1)
+
+
+@pytest.mark.usefixtures("mock_http_get")
+def test_external_host_tags(instance, datadog_agent, dd_run_check):
+    check = FlyIoCheck('fly_io', {}, [instance])
+    dd_run_check(check)
+    datadog_agent.assert_external_tags(
+        '32601eaad60025',
+        {
+            'fly_io': [
+                'instance_id:01AP4Y49KSI6PG1H7KPKJN5GF',
+                'machine_region:ewr',
+            ]
+        },
+    )
+    datadog_agent.assert_external_tags(
+        '09201eeed60025',
+        {
+            'fly_io': [
+                'instance_id:POSJ7Y49KSI6PG1H7KPKJN5IK',
+                'machine_region:ewr',
+            ]
+        },
+    )
