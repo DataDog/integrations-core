@@ -80,6 +80,12 @@ files:
         type: object
         properties: []
     - name: dbnames
+      deprecation:
+        Agent version: "7.56.0"
+        Migration: |
+          dbnames is deprecated. Set database_autodiscovery.enabled to true to enable database autodiscovery.
+          Use database_autodiscovery.include or database_autodiscovery.exclude to include or exclude
+          specific databases to collect metrics from.
       description: |
         Set a list of the names of all databases to collect metrics from.
         If this key does not exist, all metrics from all databases on the server will be collected.
@@ -136,11 +142,13 @@ files:
             items:
               type: string
             example:
-              - "config"
-              - "local"
+              - "admin$"
+              - "config$"
+              - "local$"
             display_default:
-              - "config"
-              - "local"
+              - "admin$"
+              - "config$"
+              - "local$"
         - name: refresh_interval
           description: Frequency in seconds of scans for new databases. Defaults to 10 minutes.
           value:

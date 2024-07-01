@@ -197,7 +197,8 @@ class MongoConfig(object):
                     "To monitor more databases, enable `database_autodiscovery`."
                 )
                 database_autodiscovery_config['enabled'] = True
-                database_autodiscovery_config['include'] = self.db_names
+                # we use the dbnames list to set the include list. append $ to each db name for exact match
+                database_autodiscovery_config['include'] = [f"{db}$" for db in self.db_names]
             else:
                 if not database_autodiscovery_config.get('include'):
                     self.log.warning(

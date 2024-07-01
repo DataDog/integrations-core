@@ -1082,3 +1082,44 @@ def test_integration_reemit_mongodb_instance_on_deployment_change(
     mongo_check.api_client.deployment_type.replset_state = SECONDARY_STATE_ID
     dd_run_check(mongo_check)
     assert _get_mongodb_instance_event(aggregator) is not None
+
+
+def test_integration_database_autodiscovery(instance_integration_autodiscovery, aggregator, check, dd_run_check):
+    mongo_check = check(instance_integration_autodiscovery)
+
+    with mock_pymongo("replica-primary"):
+        dd_run_check(mongo_check)
+
+    replica_tags = [
+        'replset_name:replset',
+        'replset_state:primary',
+        'replset_me:replset-data-0.mongo.default.svc.cluster.local:27017',
+    ]
+    metrics_categories = [
+        'count-dbs',
+        'serverStatus',
+        'custom-queries',
+        'oplog',
+        'replset-primary',
+        'top',
+        'dbstats-local',
+        'fsynclock',
+        'dbstats',
+        'indexes-stats-autodiscover',
+        'collection-autodiscover',
+    ]
+    _assert_metrics(mongo_check, aggregator, metrics_categories, replica_tags)
+    # Lag metrics are tagged with the state of the member and not with the current one.
+    _assert_metrics(mongo_check, aggregator, ['replset-lag-from-primary'])
+
+    aggregator.assert_all_metrics_covered()
+    aggregator.assert_metrics_using_metadata(
+        get_metadata_metrics(),
+        exclude=[
+            'dd.custom.mongo.aggregate.total',
+            'dd.custom.mongo.count',
+            'dd.custom.mongo.query_a.amount',
+            'dd.custom.mongo.query_a.el',
+        ],
+        check_submission_type=True,
+    )

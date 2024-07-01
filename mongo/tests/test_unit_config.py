@@ -123,3 +123,29 @@ def test_mongo_operation_samples_enabled(
 
     mongo_check = check(instance_integration_cluster)
     assert mongo_check._config.operation_samples.get('enabled') == operation_samples_enabled
+
+
+def test_database_autodiscovery_disabled(instance_user):
+    config = MongoConfig(instance_user, mock.Mock())
+    assert config.database_autodiscovery_config is not None
+    assert config.database_autodiscovery_config['enabled'] is False
+
+
+def test_database_autodiscovery_enabled(instance_user):
+    instance_user['database_autodiscovery'] = {'enabled': True, 'include': ['test.*'], 'exclude': ['admin']}
+    config = MongoConfig(instance_user, mock.Mock())
+    assert config.database_autodiscovery_config is not None
+    assert config.database_autodiscovery_config['enabled'] is True
+    assert config.database_autodiscovery_config['include'] == ['test.*']
+    assert config.database_autodiscovery_config['exclude'] == ['admin']
+
+
+def test_database_autodiscovery_dbnames_deprecation(instance_user):
+    # dbnames is deprecated in favor of database_autodiscovery
+    # for backwards compatibility, we implicitly enable database_autodiscovery if dbnames is set
+    # and set the include list to the dbnames list
+    instance_user['dbnames'] = ['test', 'integration']
+    config = MongoConfig(instance_user, mock.Mock())
+    assert config.database_autodiscovery_config is not None
+    assert config.database_autodiscovery_config['enabled'] is True
+    assert config.database_autodiscovery_config['include'] == ['test$', 'integration$']

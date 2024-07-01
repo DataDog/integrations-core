@@ -2,6 +2,8 @@
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
 
+from pymongo.errors import OperationFailure
+
 from datadog_checks.mongo.collectors.base import MongoCollector
 
 
@@ -17,14 +19,29 @@ class IndexStatsCollector(MongoCollector):
         # Can only be run once per cluster.
         return deployment.is_principal()
 
-    def _collections(self, db):
+    def _get_collections(self, db):
         if self.coll_names:
             return self.coll_names
         return db.list_collection_names()
 
     def collect(self, api):
         db = api[self.db_name]
-        for coll_name in self._collections(db):
+
+        try:
+            # Get the list of collections in the db
+            # If the user is not authorized to run 'listCollections' on the db,
+            # an OperationFailure will be raised and the metrics will not be collected
+            coll_names = self._get_collections(db)
+        except OperationFailure:
+            self.log.warning(
+                "Not authorized to run 'listCollections' on db %s, "
+                "please make sure the user has read access on the database or "
+                "add the database to the `database_autodiscovery.exclude` list in the configuration file",
+                self.db_name,
+            )
+            return
+
+        for coll_name in coll_names:
             try:
                 for stats in db[coll_name].aggregate([{"$indexStats": {}}], cursor={}):
                     idx_tags = self.base_tags + [
