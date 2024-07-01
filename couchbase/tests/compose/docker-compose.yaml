@@ -1,5 +1,3 @@
-version: '3.5'
-
 services:
   couchbase-standalone:
     image: "couchbase/server:${COUCHBASE_VERSION}"

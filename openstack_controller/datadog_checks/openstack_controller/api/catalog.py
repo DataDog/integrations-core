@@ -3,6 +3,14 @@
 # Licensed under a 3-clause BSD style license (see LICENSE)
 
 
+class CatalogEndPointFailure(Exception):
+    def __init__(self, service_types, interface, region_id):
+        self.message = (
+            f'No endpoint found in catalog for services={service_types} interface={interface} region_id={region_id}'
+        )
+        super().__init__(self.message)
+
+
 class Catalog:
     def __init__(self, catalog, endpoint_interface, endpoint_region_id):
         self.catalog = catalog
@@ -30,4 +38,4 @@ class Catalog:
                         matched_region_id = not self.endpoint_region_id or endpoint_region_id == self.endpoint_region_id
                         if matched_interface and matched_region_id:
                             return endpoint['url']
-        return None
+        raise CatalogEndPointFailure(service_types, self.endpoint_interface, self.endpoint_region_id)

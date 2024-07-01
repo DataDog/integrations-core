@@ -1,5 +1,3 @@
-version: '3.5'
-
 services:
   memcached:
     image: datadog/docker-library:memcached_SASL

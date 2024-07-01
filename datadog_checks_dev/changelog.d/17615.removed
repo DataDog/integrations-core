@@ -1,0 +1,1 @@
+Remove `ddev release trello ...` commands. We no longer interact with trello during agent release QA.

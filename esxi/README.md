@@ -2,7 +2,7 @@
 
 ## Overview
 
-This check monitors [ESXi][1] hosts and the virtual machines running on them through the Datadog Agent.
+This check monitors your vSphere [ESXi][1] hosts and the virtual machines running on them in a distributed manner. To monitor your entire vSphere deployment in a centralized way through your vCenter, see the [vSphere integration][11].
 
 ## Setup
 
@@ -15,7 +15,7 @@ No additional installation is needed on your server.
 
 ### Configuration
 
-1. Edit the `esxi.d/conf.yaml` file, in the `conf.d/` folder at the root of your Agent's configuration directory to start collecting your esxi performance data. See the [sample esxi.d/conf.yaml][4] for all available configuration options.
+1. Edit the `esxi.d/conf.yaml` file, in the `conf.d/` folder at the root of your Agent's configuration directory to start collecting your ESXi performance data. See the [sample esxi.d/conf.yaml][4] for all available configuration options.
 
 2. [Restart the Agent][5].
 
@@ -28,6 +28,25 @@ No additional installation is needed on your server.
 ### Metrics
 
 See [metadata.csv][7] for a list of metrics provided by this integration.
+
+
+#### Collecting per-instance metrics
+
+**Note**: The ESXi integration has the ability to collect both per-resource metrics (such as those related to CPUs), and per-instance metrics (such as those related to CPU cores). As such, there are metrics that are only per-resource, per-instance, or both.
+A resource represents a physical or virtual representation of a machine. This can be represented by vm, host, datastore, cluster in vSphere.
+An instance represents individual entities found within a resource. More information on vSphere resources can be found in the [VMWare Infrastructure Architecture Overview white paper][10].
+
+By default, the ESXi integration only collects per-resource metrics, which causes some metrics that are per-instance to be ignored. These can be configured using the `collect_per_instance_filters` option. See below for an example:
+
+```
+collect_per_instance_filters:
+  host:
+    - 'disk\.totalLatency\.avg'
+    - 'disk\.deviceReadLatency\.avg'
+```
+
+`disk` metrics are specific for each disk on the host, therefore these metrics need to be enabled using `collect_per_instance_filters` to be collected.
+
 
 ### Events
 
@@ -51,3 +70,5 @@ Need help? Contact [Datadog support][9].
 [7]: https://github.com/DataDog/integrations-core/blob/master/esxi/metadata.csv
 [8]: https://github.com/DataDog/integrations-core/blob/master/esxi/assets/service_checks.json
 [9]: https://docs.datadoghq.com/help/
+[10]: https://www.vmware.com/pdf/vi_architecture_wp.pdf
+[11]: https://docs.datadoghq.com/integrations/vsphere/
