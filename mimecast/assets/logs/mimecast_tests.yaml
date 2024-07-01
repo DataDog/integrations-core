@@ -13,12 +13,19 @@ tests:
     service: "audit"
     result:
       custom:
+        Application: "Hamilton General"
+        Date: "2024-05-27"
         auditType: "Threat Intel Feed Download"
         category: "reporting_logs"
         eventInfo: "Threat intel multiple feeds download  - malware_grid_csv_20240527063137053.zip, Date: 2024-05-27, Time: 10:31:37+0000, IP: 172.217.22.14, Application: Hamilton General"
         eventTime: "2024-05-27T10:31:37+0000"
         id: "eNoVjt0KgjAYQN9ltwXZSh1BF7LIBNNSXBrdmPua5l9MJ_3Qu2f353DOB3WQKQkFRyukYpdWKcmh21xmvdvQly3U8ZA7xE8O6cR-mxz0G6XKecd7VxmGGPIkOt2DwHR0S-z41jMZfw4qWtYeAPFlU5Z--tAmGgvZ1g4ExeH9XFwzdlyjKUoVL_qqFf_4XDfwEmtzMkWZ6vq2Bpm1HMYrGoXWglgYm6MygOyKthn57w_ksTyU"
-        user: "example1@dummy.net"
+        network:
+          client:
+            geoip: {}
+            ip: "172.217.22.14"
+        usr:
+          name: "example1@dummy.net"
       message: |-
         {
           "eventInfo" : "Threat intel multiple feeds download  - malware_grid_csv_20240527063137053.zip, Date: 2024-05-27, Time: 10:31:37+0000, IP: 172.217.22.14, Application: Hamilton General",
@@ -28,8 +35,10 @@ tests:
           "category" : "reporting_logs",
           "user" : "example1@dummy.net"
         }
+      service: "audit"
       tags:
       - "source:LOGS_SOURCE"
+      timestamp: 1716805897000
   -
     sample: |-
       {
@@ -53,6 +62,8 @@ tests:
         route: "internal"
         senderAddress: "example2@dummy.net"
         subject: "Enron Mentions"
+        usr:
+          email: "example3@dummy.net"
       message: |-
         {
           "senderAddress" : "example2@dummy.net",
@@ -64,8 +75,10 @@ tests:
           "recipientAddress" : "example3@dummy.net",
           "policy" : "Explicit Language"
         }
+      service: "dlp"
       tags:
       - "source:LOGS_SOURCE"
+      timestamp: 1715691556000
   -
     sample: |-
       {
@@ -81,7 +94,7 @@ tests:
         "remoteName": "dummy.net",
         "remoteEhlo": "dummy.net",
         "manageRecipient": false,
-        "id": "eNpVT1tPgzAU_i993YgtbLQsakLQ4RIdcwi7xIR07YGNBTaBos743y0uanw7-e7nA9UgVAU7iUYoCuiNz9w8Tm-X69eeQ_xsMXy-2E5YsJrxnn-iEoap56nJaflwr2w7a7eraJHP53QydLM7OZ7SWL61KhoUUwAWVOV-H_Aj7uE4jMf-PPPMMF_vNiJ-vEJ9VEEOoumqbcZMMiAO7qMC6ppnEDa8UfXT-xH0sLMQpPY0RdlNVXUDVUGIRoS-DwVU4iA7rReFrsVc06Sa4zq-PT_3hye_bclPTIKxnVw6mBOGqTBoKixjQEhqOJaFDckBm0TQDUjzWqe2UNW7Q4lGRO8pv1u1XxMvChQk_x76_AKJJ2vG",
+        "id":"eNpVT1tPgzAU_i993YgtbLQsakLQ4RIdcwi7xIR07YGNBTaBos743y0uanw7-e7nA9UgVAU7iUYoCuiNz9w8Tm-X69eeQ_xsMXy-2E5YsJrxnn-iEoap56nJaflwr2w7a7eraJHP53QydLM7OZ7SWL61KhoUUwAWVOV-H_Aj7uE4jMf-PPPMMF_vNiJ-vEJ9VEEOoumqbcZMMiAO7qMC6ppnEDa8UfXT-xH0sLMQpPY0RdlNVXUDVUGIRoS-DwVU4iA7rReFrsVc06Sa4zq-PT_3hye_bclPTIKxnVw6mBOGqTBoKixjQEhqOJaFDckBm0TQDUjzWqe2UNW7Q4lGRO8pv1u1XxMvChQk_x76_AKJJ2vG",
         "spamScore": 0,
         "detectionLevel": ""
       }
@@ -120,6 +133,8 @@ tests:
         route: "internal"
         senderAddress: "example6@dummy.net"
         subject: "RE"
+        usr:
+          email: "example7@dummy.net"
       message: |-
         {
           "date" : "2024-05-27T09:04:25+0000",
@@ -136,8 +151,10 @@ tests:
           "recipientAddress" : "example7@dummy.net",
           "fileType" : "application/pdf"
         }
+      service: "ttp-attachment-protection"
       tags:
       - "source:LOGS_SOURCE"
+      timestamp: 1716800665000
   -
     sample: |-
       {
@@ -174,12 +191,17 @@ tests:
           impersonationDomainSource: "targeted_threat_dictionary"
           stringSimilarToDomain: "process,please"
         messageId: "<78e53a030f7fc3af-295571@a42.one>"
+        network:
+          client:
+            geoip: {}
+            ip: "172.217.22.14"
         recipientAddress: "jda@.dummy.net"
         senderAddress: "chj@a42.one"
-        senderIpAddress: "172.217.22.14"
         subject: "Indicated Producers' testimony in support of the GIR Comprehensive Settlement"
         taggedExternal: false
         taggedMalicious: true
+        usr:
+          email: "jda@.dummy.net"
       message: |-
         {
           "taggedMalicious" : true,
@@ -200,8 +222,10 @@ tests:
           "recipientAddress" : "jda@.dummy.net",
           "taggedExternal" : false
         }
+      service: "ttp-impersonation"
       tags:
       - "source:LOGS_SOURCE"
+      timestamp: 1716664382000
   -
     sample: |-
       {
@@ -236,16 +260,22 @@ tests:
         emailPartsDescription:
         - "Body"
         fromUserEmailAddress: "example9@a42.one"
+        http:
+          url: "http://www.abc.com/"
         messageId: "<052c3d1a1f94a2c2-176@a42.one>"
+        network:
+          client:
+            geoip: {}
+            ip: "172.217.22.14"
         route: "inbound"
         scanResult: "clean"
-        sendingIp: "172.217.22.14"
         subject: "Will hackers make a fool of Larry Ellison?"
         ttpDefinition: "Restrictive URL Definition"
-        url: "http://www.abc.com/"
         userAwarenessAction: "N/A"
         userEmailAddress: "example8@dummy.net"
         userOverride: "None"
+        usr:
+          email: "example8@dummy.net"
       message: |-
         {
           "sendingIp" : "172.217.22.14",
@@ -267,5 +297,7 @@ tests:
           "category" : "Computers & Technology",
           "actions" : "Allow"
         }
+      service: "ttp-url"
       tags:
       - "source:LOGS_SOURCE"
+      timestamp: 1716800598000
