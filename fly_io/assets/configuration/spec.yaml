@@ -11,7 +11,7 @@ files:
       overrides:
         openmetrics_endpoint.hidden: true
         openmetrics_endpoint.required: false
-        headers.display_priority: 3
+        headers.display_priority: 4
         headers.enabled: true
         headers.description: |
           Headers to use for every request. An Authorization header including the Fly.io access token is required
@@ -24,7 +24,7 @@ files:
           Authorization: "Bearer <FLY_ACCESS_TOKEN>"
         auth_token.display_priority: 2
     - name: org_slug
-      display_priority: 4
+      display_priority: 5
       enabled: true
       required: true
       description: |
@@ -33,6 +33,18 @@ files:
       value:
         display_default: null
         example: <ORG_SLUG>
+        type: string
+    - name: machines_api_endpoint
+      display_priority: 3
+      enabled: true
+      description: |
+        Endpoint of the Fly.io Machines Restful API.
+        For more information, see: https://fly.io/docs/machines/api/working-with-machines-api/
+        If running the check inside your Fly.io environment, use http://_api.internal:4280,
+        otherwise use https://api.machines.dev.
+      value:
+        display_default: null
+        example: http://_api.internal:4280
         type: string
     - name: match_string
       display_priority: 1

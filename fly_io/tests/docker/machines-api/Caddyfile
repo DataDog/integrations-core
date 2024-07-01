@@ -1,0 +1,24 @@
+{
+    debug
+    admin :2019
+}
+:80 {
+    root * /usr/share/caddy/
+    @get_apps {
+        method GET
+        path /v1/apps/
+    }
+    route @get_apps {
+        rewrite * /GET{http.request.uri.path}/response.json
+        file_server
+    }
+    @get_apps_1 {
+        method GET
+        path /v1/apps/example-app-1
+    }
+    route @get_apps_1 {
+        rewrite * /GET/v1/apps/example-app-1/response.json
+        file_server
+    }
+    file_server browse
+}

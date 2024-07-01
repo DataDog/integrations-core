@@ -62,6 +62,14 @@ instances:
     headers:
       Authorization: Bearer <FLY_ACCESS_TOKEN>
 
+    ## @param machines_api_endpoint - string - optional
+    ## Endpoint of the Fly.io Machines Restful API.
+    ## For more information, see: https://fly.io/docs/machines/api/working-with-machines-api/
+    ## If running the check inside your Fly.io environment, use http://_api.internal:4280,
+    ## otherwise use https://api.machines.dev.
+    #
+    machines_api_endpoint: http://_api.internal:4280
+
     ## @param auth_token - mapping - optional
     ## This allows for the use of authentication information from dynamic sources.
     ## Both a reader and writer must be configured.

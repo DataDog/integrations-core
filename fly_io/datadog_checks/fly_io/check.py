@@ -22,6 +22,8 @@ class FlyIoCheck(OpenMetricsBaseCheckV2, ConfigMixin):
         encoded_match_string = quote_plus(self.match_string)
         default_endpoint = f"https://api.fly.io/prometheus/{self.org_slug}/federate?match[]={encoded_match_string}"
         self.openmetrics_endpoint = self.instance.get('openmetrics_endpoint', default_endpoint)
+        self.machines_api_endpoint = self.instance.get('machines_api_endpoint')
+        self.tags = [f"fly_org:{self.org_slug}"]
 
         # bypass required openmetrics_endpoint
         self.instance['openmetrics_endpoint'] = self.openmetrics_endpoint
@@ -33,3 +35,71 @@ class FlyIoCheck(OpenMetricsBaseCheckV2, ConfigMixin):
             'rename_labels': RENAME_LABELS_MAP,
             'hostname_label': 'instance',
         }
+
+    def _get_app_status(self, app_name):
+        self.log.debug("Getting apps for org %s", self.org_slug)
+        app_details_endpoint = f"{self.machines_api_endpoint}/v1/apps/{app_name}"
+        response = self.http.get(app_details_endpoint)
+        response.raise_for_status()
+        app = response.json()
+        app_status = app.get("status")
+        return app_status
+
+    def _collect_machines_for_app(self, app_name):
+        self.log.debug("Getting machines for app %s in org %s", app_name, self.org_slug)
+        machines_endpoint = f"{self.machines_api_endpoint}/v1/apps/{app_name}/machines"
+        response = self.http.get(machines_endpoint)
+        response.raise_for_status()
+        machines = response.json()
+        external_host_tags = []
+        for machine in machines:
+            machine_name = machine.get("name")
+            machine_state = machine.get("state")
+            if machine_state != "started":
+                self.log.info("Skipping machine %s for app %s: state is %s", machine_name, app_name, machine_state)
+                continue
+
+            machine_id = machine.get("id")
+            instance_id = machine.get("instance_id")
+            machine_region = machine.get("region")
+
+            machine_tags = [
+                f"machine_id:{machine_id}",
+                f"instance_id:{instance_id}",
+                f"machine_region:{machine_region}",
+            ]
+
+            self.gauge("machine.count", 1, tags=self.tags, hostname=machine_id)
+
+            external_host_tags.append((instance_id, {self.__NAMESPACE__: machine_tags}))
+
+    def _collect_machines_api_metrics(self):
+        self.log.debug("Getting apps for org %s", self.org_slug)
+        apps_endpoint = f"{self.machines_api_endpoint}/v1/apps"
+        params = {'org_slug': self.org_slug}
+
+        response = self.http.get(apps_endpoint, params=params)
+        response.raise_for_status()
+        apps = response.json().get("apps", [])
+        for app in apps:
+            app_name = app.get("name")
+            self.log.debug("processing app %s", app_name)
+            app_id = app.get("id")
+            app_network = app.get("network")
+
+            app_status = self._get_app_status(app_name)
+
+            app_tags = [
+                f"app_id:{app_id}",
+                f"app_name:{app_name}",
+                f"app_network:{app_network}",
+                f"app_statsus:{app_status}",
+            ]
+            self.gauge("app.count", 1, tags=self.tags + app_tags)
+
+            self._collect_machines_for_app(app_name)
+
+    def check(self, instance):
+        super().check(instance)
+        if self.machines_api_endpoint:
+            self._collect_machines_api_metrics()

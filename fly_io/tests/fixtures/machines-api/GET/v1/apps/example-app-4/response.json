@@ -1,0 +1,9 @@
+{
+    "id": "z4k69d4wp2n5js93",
+    "name": "example-app-4",
+    "status": "deployed",
+    "organization": {
+        "name": "Test",
+        "slug": "test"
+    }
+}
