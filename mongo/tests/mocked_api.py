@@ -35,9 +35,6 @@ class MockedCollection(object):
             with open(os.path.join(HERE, "fixtures", "system.replset"), 'r') as f:
                 content = json.load(f, object_hook=json_util.object_hook)
                 self.find_one = MagicMock(return_value=content)
-        # else:
-        #     with open(os.path.join(HERE, "fixtures", f"indexStats-{coll_name}"), 'r') as f:
-        #         self.aggregate = MagicMock(return_value=json.load(f, object_hook=json_util.object_hook))
 
     def aggregate(self, pipeline, session=None, **kwargs):
         if '$indexStats' in pipeline[0]:
