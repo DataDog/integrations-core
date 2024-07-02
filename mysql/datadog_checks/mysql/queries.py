@@ -123,7 +123,7 @@ GROUP BY table_name, index_name, collation, cardinality, index_type;
 SQL_FOREIGN_KEYS = """\
 SELECT
     constraint_schema,
-    constraint_name,
+    constraint_name as `name`,
     table_name,
     group_concat(column_name) as column_names,
     referenced_table_schema,

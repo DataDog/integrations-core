@@ -72,7 +72,7 @@ def test_collect_schemas(aggregator, dd_run_check, dbm_instance):
                     "foreign_keys":[
                         {
                             "constraint_schema":"datadog_test_schemas",
-                            "constraint_name":"FK_RestaurantNameDistrict",
+                            "name":"FK_RestaurantNameDistrict",
                             "column_names":"RestaurantName,District",
                             "referenced_table_schema":"datadog_test_schemas",
                             "referenced_table_name":"Restaurants",
@@ -333,7 +333,7 @@ def test_collect_schemas(aggregator, dd_run_check, dbm_instance):
                     "foreign_keys":[
                         {
                             "constraint_schema":"datadog_test_schemas",
-                            "constraint_name":"FK_CityId",
+                            "name":"FK_CityId",
                             "column_names":"city_id",
                             "referenced_table_schema":"datadog_test_schemas",
                             "referenced_table_name":"cities",
