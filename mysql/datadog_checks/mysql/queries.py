@@ -96,7 +96,11 @@ SELECT table_name as `name` FROM information_schema.TABLES WHERE TABLE_SCHEMA = 
 
 #do we have ? that can be replaced by the driver
 SQL_COLUMNS = """\
-SELECT table_name, column_name as `name`, data_type, column_default as `default` , is_nullable as `nullable` ,ordinal_position
+SELECT table_name, 
+       column_name as `name`, 
+       data_type, column_default as `default`, 
+       is_nullable as `nullable`,
+       ordinal_position
 FROM INFORMATION_SCHEMA.COLUMNS
 WHERE TABLE_SCHEMA = %s AND TABLE_NAME IN ({});
 """
@@ -140,7 +144,7 @@ GROUP BY constraint_schema, constraint_name, table_name, referenced_table_schema
 SQL_PARTITION = """\
 SELECT
     table_name,
-    partition_name, 
+    partition_name as `name`, 
     group_concat(subpartition_name order by subpartition_ordinal_position asc) as subpartition_names,
     partition_ordinal_position,
     group_concat(subpartition_ordinal_position order by subpartition_ordinal_position asc) as subpartition_ordinal_positions, 

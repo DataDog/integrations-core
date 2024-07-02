@@ -225,7 +225,7 @@ def test_collect_schemas(aggregator, dd_run_check, dbm_instance):
                     ],
                     "partitions":[
                         {
-                            "partition_name":"p0",
+                            "name":"p0",
                             "subpartition_names":"None",
                             "partition_ordinal_position":"1",
                             "subpartition_ordinal_positions":"None",
@@ -243,7 +243,7 @@ def test_collect_schemas(aggregator, dd_run_check, dbm_instance):
                             "tablespace_name":"None"
                         },
                         {
-                            "partition_name":"p1",
+                            "name":"p1",
                             "subpartition_names":"None",
                             "partition_ordinal_position":"2",
                             "subpartition_ordinal_positions":"None",
@@ -261,7 +261,7 @@ def test_collect_schemas(aggregator, dd_run_check, dbm_instance):
                             "tablespace_name":"None"
                         },
                         {
-                            "partition_name":"p2",
+                            "name":"p2",
                             "subpartition_names":"None",
                             "partition_ordinal_position":"3",
                             "subpartition_ordinal_positions":"None",
@@ -279,7 +279,7 @@ def test_collect_schemas(aggregator, dd_run_check, dbm_instance):
                             "tablespace_name":"None"
                         },
                         {
-                            "partition_name":"p3",
+                            "name":"p3",
                             "subpartition_names":"None",
                             "partition_ordinal_position":"4",
                             "subpartition_ordinal_positions":"None",
@@ -417,7 +417,7 @@ def test_collect_schemas(aggregator, dd_run_check, dbm_instance):
             #TODO ask team collapse all these stuff ?
             "partitions":[
                 {
-                    "partition_name":"p0",
+                    "name":"p0",
                     "subpartition_names":"p0sp0,p0sp1",
                     "partition_ordinal_position":"1",
                     "subpartition_ordinal_positions":"1,2",
@@ -435,7 +435,7 @@ def test_collect_schemas(aggregator, dd_run_check, dbm_instance):
                     "tablespace_name":"None"
                 },
                 {
-                    "partition_name":"p1",
+                    "name":"p1",
                     "subpartition_names":"p1sp0,p1sp1",
                     "partition_ordinal_position":"2",
                     "subpartition_ordinal_positions":"1,2",
@@ -453,7 +453,7 @@ def test_collect_schemas(aggregator, dd_run_check, dbm_instance):
                     "tablespace_name":"None"
                 },
                 {
-                    "partition_name":"p2",
+                    "name":"p2",
                     "subpartition_names":"p2sp0,p2sp1",
                     "partition_ordinal_position":"3",
                     "subpartition_ordinal_positions":"1,2",
