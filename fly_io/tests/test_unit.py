@@ -75,15 +75,20 @@ def test_rest_api_app_metrics(dd_run_check, aggregator, instance, caplog):
     [
         pytest.param(
             {'http_error': {'/': MockResponse(status_code=500)}},
-            id='api rest',
-        )
+            id='500',
+        ),
+        pytest.param(
+            {'http_error': {'/': MockResponse(status_code=404)}},
+            id='404',
+        ),
     ],
     indirect=['mock_http_get'],
 )
 @pytest.mark.usefixtures('mock_http_get')
 def test_rest_api_exception(dd_run_check, instance, aggregator):
+
     check = FlyIoCheck('fly_io', {}, [instance])
-    with pytest.raises(Exception, match=r'500 Server Error'):
+    with pytest.raises(Exception, match=r'requests.exceptions.HTTPError'):
         dd_run_check(check)
         aggregator.assert_metric("fly_io.machines_api.up", value=1)
 
