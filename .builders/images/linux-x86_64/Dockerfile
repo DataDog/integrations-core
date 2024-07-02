@@ -26,7 +26,7 @@ RUN yum install -y openssl-devel && \
  RELATIVE_PATH=Python-{{version}} \
  bash install-from-source.sh \
  --prefix=/opt/python/${PYTHON2_VERSION} --with-ensurepip=yes --enable-ipv6 --enable-unicode=ucs4 \
- && yum remove -y openssl-devel
+ && yum remove -y openssl-devel --debug
 
 # Set up virtual environment for Python 2
 RUN /opt/python/${PYTHON2_VERSION}/bin/python -m pip install --no-warn-script-location virtualenv \
@@ -110,7 +110,7 @@ RUN \
  RELATIVE_PATH="lmdb-LMDB_{{version}}/libraries/liblmdb" \
  # No ./configure, use a NOOP
  CONFIGURE_SCRIPT="true" \
- bash install-from-source.sh --prefix="${DD_PREFIX_PATH}"
+ bash install-from-source.sh
 RUN \
  DOWNLOAD_URL="https://mirrors.edge.kernel.org/pub/linux/kernel/people/tytso/e2fsprogs/v{{version}}/e2fsprogs-{{version}}.tar.gz" \
  VERSION="1.47.0" \
@@ -127,7 +127,7 @@ RUN \
  SHA256="7ccfc6abd01ed67c1a0924b353e526f1b766b21f42d4562ee635a8ebfc5bb38c" \
  RELATIVE_PATH="cyrus-sasl-{{version}}" \
  bash install-from-source.sh --with-dblib=lmdb --enable-gssapi=/usr/local \
-    --enable-static --disable-shared --prefix="${DD_PREFIX_PATH}"
+    --enable-static --disable-shared
 # curl
 RUN \
  DOWNLOAD_URL="https://curl.haxx.se/download/curl-{{version}}.tar.gz" \
