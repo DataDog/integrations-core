@@ -112,7 +112,7 @@ With manual configuration, you must modify every workload manifest when adding o
 <!-- xxx tab "Admission Controller" xxx -->
 ##### Admission Controller
 
-<div class="alert alert-warning">This feature requires Cluster Agent v7.52.0+ and the <a href="http://docs.datadoghq.com/integrations/ecs_fargate">ECS Fargate integration</a>.
+<div class="alert alert-warning">This feature requires Cluster Agent v7.52.0+ and the <a href="https://docs.datadoghq.com/integrations/eks_fargate">EKS Fargate integration</a>.
 </div>
 
 The setup below configures the Cluster Agent to communicate with the Agent sidecars, allowing access to features such as [events collection][29], [Kubernetes resources view][30], and [cluster checks][31].
