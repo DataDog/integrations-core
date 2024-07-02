@@ -1,0 +1,9 @@
+{
+    "id": "4840jpkjkxo1ei63",
+    "name": "example-app-2",
+    "status": "deployed",
+    "organization": {
+        "name": "Test",
+        "slug": "test"
+    }
+}

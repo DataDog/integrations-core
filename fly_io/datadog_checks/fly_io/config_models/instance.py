@@ -95,7 +95,7 @@ class InstanceConfig(BaseModel):
     collect_histogram_buckets: Optional[bool] = None
     connect_timeout: Optional[float] = None
     disable_generic_tags: Optional[bool] = None
-    empty_default_hostname: Optional[bool] = None
+    empty_default_hostname: bool
     enable_health_service_check: Optional[bool] = None
     exclude_labels: Optional[tuple[str, ...]] = None
     exclude_metrics: Optional[tuple[str, ...]] = None
@@ -117,6 +117,7 @@ class InstanceConfig(BaseModel):
     kerberos_keytab: Optional[str] = None
     kerberos_principal: Optional[str] = None
     log_requests: Optional[bool] = None
+    machines_api_endpoint: Optional[str] = None
     match_string: Optional[str] = None
     metric_patterns: Optional[MetricPatterns] = None
     metrics: Optional[tuple[Union[str, MappingProxyType[str, Union[str, Metrics]]], ...]] = None

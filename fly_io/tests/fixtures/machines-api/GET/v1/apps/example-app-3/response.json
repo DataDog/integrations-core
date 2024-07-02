@@ -1,0 +1,9 @@
+{
+    "id": "zg90akwdv84qvd47",
+    "name": "example-app-3",
+    "status": "deployed",
+    "organization": {
+        "name": "Test",
+        "slug": "test"
+    }
+}

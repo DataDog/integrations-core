@@ -44,10 +44,6 @@ def instance_disable_generic_tags():
     return False
 
 
-def instance_empty_default_hostname():
-    return False
-
-
 def instance_enable_health_service_check():
     return True
 
