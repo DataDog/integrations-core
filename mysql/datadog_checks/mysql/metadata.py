@@ -114,7 +114,7 @@ class MySQLMetadata(DBMAsyncJob):
                 hostname=self._check.resolved_hostname,
             )
             raise
-    
+
     def run_job(self):
         elapsed_time_settings = time.time() - self._last_settings_collection_time
         if self._settings_enabled and elapsed_time_settings >= self._settings_collection_interval:
