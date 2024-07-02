@@ -5,6 +5,7 @@ import pytest
 
 from datadog_checks.mysql import MySql
 from deepdiff import DeepDiff
+import re
 
 from . import common
 import pdb
@@ -33,7 +34,6 @@ def dbm_instance(instance_complex):
 #    assert event['dbms'] == "mysql"
 #    assert len(event["metadata"]) > 0
 
-#TODO add more tests
 @pytest.mark.integration
 @pytest.mark.usefixtures('dd_environment')
 def test_collect_schemas(aggregator, dd_run_check, dbm_instance):
@@ -494,12 +494,14 @@ def test_collect_schemas(aggregator, dd_run_check, dbm_instance):
     actual_payloads = {}
 
     for schema_event in (e for e in dbm_metadata if e['kind'] == 'mysql_databases'):
+        #pdb.set_trace()
         assert schema_event.get("timestamp") is not None
         assert schema_event["host"] == "stubbed.hostname"
         assert schema_event["agent_version"] == "0.0.0"
         assert schema_event["dbms"] == "mysql"
         assert schema_event.get("collection_interval") is not None
         assert schema_event.get("dbms_version") is not None
+        assert sorted(schema_event["tags"]) == ['dd.internal.resource:database_instance:stubbed.hostname', 'port:13306', 'tag1:value1', 'tag2:value2']
 
         database_metadata = schema_event['metadata']
         assert len(database_metadata) == 1
@@ -518,17 +520,25 @@ def test_collect_schemas(aggregator, dd_run_check, dbm_instance):
 
         assert db_name in databases_to_find
 
-        # id's are env dependant
-       # normalize_ids(actual_payload)
-
-        # index columns may be in any order
-        #normalize_indexes_columns(actual_payload)
-        pdb.set_trace()
         difference = DeepDiff(actual_payload, expected_data_for_db[db_name], ignore_order=True)
 
         if difference:
             raise AssertionError(Exception("found the following diffs: " + str(difference)))
-        #diff_keys = list(difference.keys())
-        # schema data also collects certain builtin default schemas which are ignored in the test
-        #if len(diff_keys) > 0 and diff_keys != ['iterable_item_removed']:
-        #    raise AssertionError(Exception("found the following diffs: " + str(difference)))
+
+def test_schemas_collection_truncated(aggregator, dd_run_check, dbm_instance):
+
+    dbm_instance['dbm'] = True
+    dbm_instance['schemas_collection'] = {"enabled": True, "max_execution_time": 0}
+    expected_pattern = r"^Truncated after fetching \d+ columns, elapsed time is \d+(\.\d+)?s, database is .*"
+    check = MySql(common.CHECK_NAME, {}, instances=[dbm_instance])
+    dd_run_check(check)
+    
+    dbm_metadata = aggregator.get_event_platform_events("dbm-metadata")
+    found = False
+    for schema_event in (e for e in dbm_metadata if e['kind'] == 'mysql_databases'):
+        if "collection_errors" in schema_event:
+            if schema_event["collection_errors"][0]["error_type"] == "truncated" and re.fullmatch(
+                expected_pattern, schema_event["collection_errors"][0]["message"]
+            ):
+                found = True
+    assert found

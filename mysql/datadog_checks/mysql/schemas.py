@@ -111,7 +111,10 @@ class SubmitData:
 def agent_check_getter(self):
     return self._check
 
-
+#TODO - it's a bit messy betwean databses and schemas. what do we choose ? Especially in spec yaml
+# arg for schemas - logically it is closer as one can do cross schema foreign keys 
+# for db - easier to remove an intermediate layer, we can imagine not having schemas but its hard to imagine 
+# not to have databases. 
 class Schemas:
 
     TABLES_CHUNK_SIZE = 500
@@ -146,7 +149,6 @@ class Schemas:
     def shut_down(self):
         self._data_submitter.submit()
 
-# we can pass a string instead of %s where string is gonna be a concatenation
     def _cursor_run(self, cursor, query, params=None):
         """
         Run and log the query. If provided, obfuscated params are logged in place of the regular params.
@@ -155,7 +157,6 @@ class Schemas:
             self._log.debug("Running query [{}] params={}".format(query, params))
             cursor.execute(query, params)
         except pymysql.DatabaseError as e:
-            #TODO check this exception path in tests
             self._check.count(
                 "dd.mysql.db.error",
                 1,
@@ -166,23 +167,19 @@ class Schemas:
 
     @tracked_method(agent_check_getter=agent_check_getter)
     def _fetch_database_data(self, cursor, start_time, db_name):
-
         tables = self._get_tables(db_name, cursor)
         tables_chunks = list(get_list_chunks(tables, self.TABLES_CHUNK_SIZE))
         for tables_chunk in tables_chunks:
             schema_collection_elapsed_time = time.time() - start_time
             if schema_collection_elapsed_time > self._max_execution_time:
-                #TODO remove coments
-                print("nothing")
-
-                #self._data_submitter.submit()
-                #self._data_submitter.send_truncated_msg(db_name, schema_collection_elapsed_time)
-                #raise StopIteration(
-                #    """Schema collection took {}s which is longer than allowed limit of {}s,
-                #    stopped while collecting for db - {}""".format(
-                #        schema_collection_elapsed_time, self._max_execution_time, db_name
-                #    )
-                #)
+                self._data_submitter.submit()
+                self._data_submitter.send_truncated_msg(db_name, schema_collection_elapsed_time)
+                raise StopIteration(
+                    """Schema collection took {}s which is longer than allowed limit of {}s,
+                    stopped while collecting for db - {}""".format(
+                        schema_collection_elapsed_time, self._max_execution_time, db_name
+                    )
+                )
             columns_count, tables_info = self._get_tables_data(tables_chunk, db_name, cursor)
             self._data_submitter.store(db_name, tables_info, columns_count)
             if self._data_submitter.columns_since_last_submit() > self.MAX_COLUMNS_PER_EVENT:
@@ -251,7 +248,22 @@ class Schemas:
     def _fetch_for_databases(self, db_infos, cursor):
         start_time = time.time()
         for db_info in db_infos:
-            self._fetch_database_data(cursor, start_time, db_info['name'])
+            try:
+                self._fetch_database_data(cursor, start_time, db_info['name'])
+            except StopIteration as e:
+                self._log.error(
+                    "While executing fetch schemas for databse {}, the following exception occured {}".format(
+                        db_info['name'], e
+                    )
+                )
+                return
+            #TODO fix this return in sqlserver as it should switch to the original DB
+            except Exception as e:
+                self._log.error(
+                    "While executing fetch schemas for databse {}, the following exception occured {}".format(
+                        db_info['name'], e
+                    )
+                )
 
     @tracked_method(agent_check_getter=agent_check_getter)
     def _query_db_information(self, cursor):
@@ -261,7 +273,6 @@ class Schemas:
             query = SQL_DATABASES
         )
         rows = self.fetch_and_convert_to_str(cursor)
-        #databases = [dict(row) for row in rows]
         return rows
 #move to util
     def fetch_and_convert_to_str(self, cursor):
@@ -279,18 +290,12 @@ class Schemas:
         "name": str
         "columns": []
         """
-        #tables_info = execute_query(SQL_TABLES, cursor, convert_results_to_str=True, parameter=schema["id"])
-        #TODO add convert to string to cursor run and make it common or may be make common execute query
         self._cursor_run(
             cursor,
             query = SQL_TABLES,
             params = db_name
         )
         tables_info = self.fetch_and_convert_to_str(cursor)
-        #rows = [dict(zip(columns, [str(item) for item in row])) for row in cursor.fetchall()]
-
-        #May be rows are different ? 
-        #tables_info = [dict(row) for row in rows]
         return tables_info
 
     @tracked_method(agent_check_getter=agent_check_getter, track_result_length=True)
@@ -352,12 +357,10 @@ class Schemas:
 
     @tracked_method(agent_check_getter=agent_check_getter)
     def _populate_with_columns_data(self, table_name_to_table_index, table_list, table_names, db_name, cursor):
-        #TODO can we pass a first argument directly to driver or also need format ?
-
         self._cursor_run(
             cursor,
         query = SQL_COLUMNS.format(table_names),
-        params = db_name
+        params = db_name,
         )
         rows = self.fetch_and_convert_to_str(cursor)
         for row in rows:
