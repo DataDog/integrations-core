@@ -53,11 +53,11 @@ sudo -u dd-agent -- datadog-agent integration install datadog-trend_micro_email_
 
 4. Configure Trend Micro Email Security to send data to Datadog:
    1. Login into Trend Micro Email Security administrator console.
-   2. Configure syslog server firewall to accept connections from the IP addresses or CIDR blocks listed in [link][5], allowing Trend Micro Email Security to forward syslog messages.
+   2. Configure syslog server's firewall to accept connections from the IP addresses or CIDR blocks listed in [link][5], allowing Trend Micro Email Security to forward syslog messages.
    3. Follow the [Add New Syslog Server Profiles][6] steps.
       1. In Steps 4 of the Syslog Server Profiles instructions, please use `CEF` format for the `syslog messages`.
    4. Then, Follow the [Syslog Forwarding][7] steps.
-      1. In Steps 2 to 5 of the Syslog Forwarding instructions, select the syslog server created in Step 3.
+      1. In Steps 2 to 5 of the Syslog Forwarding instructions, select the syslog server created in above Step iii.
 
 ### Validation
 
@@ -67,7 +67,7 @@ sudo -u dd-agent -- datadog-agent integration install datadog-trend_micro_email_
 
 ### Logs
 
-The Trend Micro Email Security integration collects following log-types.
+The Trend Micro Email Security integration collects the following log-types.
 
 | Format     | Event Types                                                            |
 | ---------- | ---------------------------------------------------------------------- |
