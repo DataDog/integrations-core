@@ -51,7 +51,7 @@ class Fabric:
         pods = self.submit_pod_health(fabric_pods)
         devices, interfaces = self.submit_nodes_health_and_metadata(fabric_nodes, pods)
         if PY3:
-            collect_timestamp = time.time() * 1000
+            collect_timestamp = int(time.time())
             batches = self.batch_payloads(devices, interfaces, collect_timestamp)
             for batch in batches:
                 self.ndm_metadata(json.dumps(batch.model_dump(exclude_none=True)))
@@ -269,7 +269,7 @@ class Fabric:
             'hostname:{}'.format(node.attributes.dn),
             'system_ip:{}'.format(node.attributes.address),
             'device_ip:{}'.format(node.attributes.address),
-            'id:{}:{}'.format(self.namespace, node.attributes.address),
+            'device_id:{}:{}'.format(self.namespace, node.attributes.address),
             "source:cisco-aci",
         ]
         device = DeviceMetadata(

@@ -23,7 +23,7 @@ DEVICE_METADATA = [
             'hostname:topology/pod-1/node-101',
             'system_ip:10.0.200.0',
             'device_ip:10.0.200.0',
-            'id:default:10.0.200.0',
+            'device_id:default:10.0.200.0',
             'source:cisco-aci',
             'switch_role:leaf',
             'apic_role:leaf',
@@ -51,7 +51,7 @@ DEVICE_METADATA = [
             'hostname:topology/pod-1/node-102',
             'system_ip:10.0.200.1',
             'device_ip:10.0.200.1',
-            'id:default:10.0.200.1',
+            'device_id:default:10.0.200.1',
             'source:cisco-aci',
             'switch_role:leaf',
             'apic_role:leaf',
@@ -79,7 +79,7 @@ DEVICE_METADATA = [
             'hostname:topology/pod-1/node-202',
             'system_ip:10.0.200.2',
             'device_ip:10.0.200.2',
-            'id:default:10.0.200.2',
+            'device_id:default:10.0.200.2',
             'source:cisco-aci',
             'switch_role:spine',
             'apic_role:spine',
@@ -107,7 +107,7 @@ DEVICE_METADATA = [
             'hostname:topology/pod-1/node-3',
             'system_ip:10.0.200.3',
             'device_ip:10.0.200.3',
-            'id:default:10.0.200.3',
+            'device_id:default:10.0.200.3',
             'source:cisco-aci',
             'apic_role:controller',
             'node_id:3',
@@ -134,7 +134,7 @@ DEVICE_METADATA = [
             'hostname:topology/pod-1/node-1',
             'system_ip:10.0.200.4',
             'device_ip:10.0.200.4',
-            'id:default:10.0.200.4',
+            'device_id:default:10.0.200.4',
             'source:cisco-aci',
             'apic_role:controller',
             'node_id:1',
@@ -161,7 +161,7 @@ DEVICE_METADATA = [
             'hostname:topology/pod-1/node-201',
             'system_ip:10.0.200.5',
             'device_ip:10.0.200.5',
-            'id:default:10.0.200.5',
+            'device_id:default:10.0.200.5',
             'source:cisco-aci',
             'switch_role:spine',
             'apic_role:spine',
@@ -189,7 +189,7 @@ DEVICE_METADATA = [
             'hostname:topology/pod-1/node-2',
             'system_ip:10.0.200.6',
             'device_ip:10.0.200.6',
-            'id:default:10.0.200.6',
+            'device_id:default:10.0.200.6',
             'source:cisco-aci',
             'apic_role:controller',
             'node_id:2',
@@ -3628,8 +3628,8 @@ INTERFACE_METADATA = [
 
 EXPECTED_DEVICE_METADATA_RESULT = DeviceMetadataList(device_metadata=DEVICE_METADATA)
 
-# "2012-01-14 03:21:34" in milliseconds
-MOCK_TIME_EPOCH = 1326511294000.0
+# "2012-01-14 03:21:34" in seconds
+MOCK_TIME_EPOCH = 1326511294
 
 
 EXPECTED_DEVICE_METADATA_EVENTS = [

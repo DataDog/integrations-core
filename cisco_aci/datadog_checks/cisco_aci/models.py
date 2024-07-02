@@ -158,4 +158,4 @@ if six.PY3:
         namespace: str = None
         devices: Optional[list[DeviceMetadata]] = Field(default_factory=list)
         interfaces: Optional[list[InterfaceMetadata]] = Field(default_factory=list)
-        collect_timestamp: Optional[float] = None
+        collect_timestamp: Optional[int] = None
