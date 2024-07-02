@@ -1,0 +1,1 @@
+[tcp_checks] If dns-resolve failed don't report metrics.
