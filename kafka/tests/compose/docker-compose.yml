@@ -1,5 +1,3 @@
-version: '3.5'
-
 services:
   zookeeper:
     image: bitnami/zookeeper:3.8.0

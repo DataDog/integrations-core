@@ -160,6 +160,7 @@ NOVA_SERVER_TAGS = {
     'id': 'server_id',
     'name': 'server_name',
     'status': 'server_status',
+    'tenant_id': 'project_id',
     'OS-EXT-SRV-ATTR:hypervisor_hostname': 'hypervisor',
     'OS-EXT-SRV-ATTR:instance_name': 'instance_name',
     'OS-EXT-SRV-ATTR:hostname': 'instance_hostname',
