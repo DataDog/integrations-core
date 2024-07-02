@@ -8,9 +8,10 @@ from operator import attrgetter
 import pymysql
 
 from datadog_checks.mysql.cursor import CommenterDictCursor
+from datadog_checks.mysql.schemas import DEFAULT_SCHEMAS_COLLECTION_INTERVAL, Schemas
 
 from .util import connect_with_autocommit
-from datadog_checks.mysql.schemas import (DEFAULT_SCHEMAS_COLLECTION_INTERVAL, Schemas)
+
 try:
     import datadog_agent
 except ImportError:
@@ -38,7 +39,7 @@ FROM
     {table_name}
 """
 
-import pdb
+
 class MySQLMetadata(DBMAsyncJob):
     """
     Collects database metadata. Supports:
@@ -56,13 +57,13 @@ class MySQLMetadata(DBMAsyncJob):
         self._settings_collection_interval = float(
             config.settings_config.get('collection_interval', DEFAULT_SETTINGS_COLLECTION_INTERVAL)
         )
-        self.collection_interval = min(self._schemas_collection_interval, self._settings_collection_interval )
+        self.collection_interval = min(self._schemas_collection_interval, self._settings_collection_interval)
 
         super(MySQLMetadata, self).__init__(
             check,
             rate_limit=1 / self.collection_interval,
             run_sync=is_affirmative(config.settings_config.get('run_sync', False)),
-            enabled= self._schemas_enabled or self._settings_enabled,
+            enabled=self._schemas_enabled or self._settings_enabled,
             min_collection_interval=config.min_collection_interval,
             dbms="mysql",
             expected_db_exceptions=(pymysql.err.DatabaseError,),
@@ -78,7 +79,6 @@ class MySQLMetadata(DBMAsyncJob):
         self._schemas = Schemas(self, check, config)
         self._last_settings_collection_time = 0
         self._last_databases_collection_time = 0
-
 
     def get_db_connection(self):
         """
@@ -116,19 +116,18 @@ class MySQLMetadata(DBMAsyncJob):
             raise
 
     def run_job(self):
-        #Tags are set in DBMAsync by a call to run_job_loop in MySQL
         elapsed_time_settings = time.time() - self._last_settings_collection_time
         if self._settings_enabled and elapsed_time_settings >= self._settings_collection_interval:
-            try: 
-                self.report_mysql_metadata() 
+            try:
+                self.report_mysql_metadata()
             except:
                 raise
             finally:
                 self._last_settings_collection_time = time.time()
         elapsed_time_schemas = time.time() - self._last_databases_collection_time
         if self._schemas_enabled and elapsed_time_schemas >= self._schemas_collection_interval:
-            try: 
-                self._schemas._collect_databases_data(self._tags) 
+            try:
+                self._schemas._collect_databases_data(self._tags)
             except:
                 raise
             finally:

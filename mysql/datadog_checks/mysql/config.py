@@ -7,7 +7,7 @@ from datadog_checks.base.utils.aws import rds_parse_tags_from_endpoint
 
 DEFAULT_MAX_CUSTOM_QUERIES = 20
 
-import pdb
+
 class MySQLConfig(object):
     def __init__(self, instance):
         self.log = get_check_logger()
@@ -43,7 +43,7 @@ class MySQLConfig(object):
         self.settings_config = instance.get('collect_settings', {}) or {}
         self.activity_config = instance.get('query_activity', {}) or {}
         self.schemas_config: dict = instance.get('schemas_collection', {}) or {}
-        
+
         self.cloud_metadata = {}
         aws = instance.get('aws', {})
         gcp = instance.get('gcp', {})

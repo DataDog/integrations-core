@@ -1,15 +1,14 @@
 # (C) Datadog, Inc. 2021-present
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
-import subprocess
-
 import json
+import subprocess
+import time
+
 import mock
 import psutil
 import pymysql
 import pytest
-import time
-
 from deepdiff import DeepDiff
 
 from datadog_checks.mysql import MySql
@@ -348,7 +347,12 @@ def test_submit_data():
 
     dataSubmitter, submitted_data = set_up_submitter_unit_test()
 
-    dataSubmitter.store_db_infos([{"name": "test_db1",  "default_character_set_name":"latin1"}, {"name": "test_db2",  "default_character_set_name":"latin1"}])
+    dataSubmitter.store_db_infos(
+        [
+            {"name": "test_db1", "default_character_set_name": "latin1"},
+            {"name": "test_db2", "default_character_set_name": "latin1"},
+        ]
+    )
 
     dataSubmitter.store("test_db1", [1, 2], 5)
     dataSubmitter.store("test_db2", [1, 2], 5)
@@ -369,8 +373,8 @@ def test_submit_data():
         "tags": "some",
         "cloud_metadata": "some",
         "metadata": [
-            {"name": "test_db1", "default_character_set_name":"latin1", "tables": [1, 2]},
-            {"name": "test_db2",  "default_character_set_name":"latin1", "tables": [1, 2]},
+            {"name": "test_db1", "default_character_set_name": "latin1", "tables": [1, 2]},
+            {"name": "test_db2", "default_character_set_name": "latin1", "tables": [1, 2]},
         ],
         "timestamp": 1.1,
     }
@@ -393,20 +397,19 @@ def test_fetch_throws():
 def test_submit_is_called_if_too_many_columns():
     check = MySql(common.CHECK_NAME, {}, instances=[{'server': 'localhost', 'user': 'datadog'}])
     schemas = Schemas({}, check, check._config)
-    with mock.patch('time.time', side_effect=[0, 0]), mock.patch('datadog_checks.mysql.schemas.Schemas._get_tables', 
-                                                                 return_value=[1, 2]), mock.patch(
-        'datadog_checks.mysql.schemas.SubmitData.submit'
-    ) as mocked_submit, mock.patch(
+    with mock.patch('time.time', side_effect=[0, 0]), mock.patch(
+        'datadog_checks.mysql.schemas.Schemas._get_tables', return_value=[1, 2]
+    ), mock.patch('datadog_checks.mysql.schemas.SubmitData.submit') as mocked_submit, mock.patch(
         'datadog_checks.mysql.schemas.Schemas._get_tables_data', return_value=(1000_000, {"name": "my_table"})
     ):
         schemas._fetch_database_data("dummy_cursor", time.time(), "my_db")
         assert mocked_submit.call_count == 2
 
+
 def test_exception_handling_by_do_for_dbs():
     check = MySql(common.CHECK_NAME, {}, instances=[{'server': 'localhost', 'user': 'datadog'}])
     schemas = Schemas({}, check, check._config)
-    mock_cursor = mock.MagicMock()
     with mock.patch(
         'datadog_checks.mysql.schemas.Schemas._fetch_database_data', side_effect=Exception("Can't connect to DB")
     ):
-        schemas._fetch_for_databases([{"name":"my_db"}],"dummy_cursor")
+        schemas._fetch_for_databases([{"name": "my_db"}], "dummy_cursor")

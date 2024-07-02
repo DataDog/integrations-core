@@ -58,7 +58,16 @@ def connect_with_autocommit(**connect_args):
 
     return db
 
+
 def get_list_chunks(lst, n):
     """Yield successive n-sized chunks from lst."""
     for i in range(0, len(lst), n):
         yield lst[i : i + n]
+
+
+def fetch_and_convert_to_str(cursor):
+    rows = cursor.fetchall()
+    for row in rows:
+        for key in row.keys():
+            row[key] = str(row[key])
+    return rows

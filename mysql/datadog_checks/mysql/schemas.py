@@ -11,27 +11,24 @@ import json
 import time
 from contextlib import closing
 
-from datadog_checks.base import is_affirmative
+import pymysql
+
 from datadog_checks.base.utils.db.utils import default_json_event_encoding
 from datadog_checks.base.utils.tracking import tracked_method
 from datadog_checks.mysql.cursor import CommenterDictCursor
-from .util import get_list_chunks
-
-import pymysql
-
 from datadog_checks.mysql.queries import (
-    SQL_DATABASES,
-    SQL_TABLES,
     SQL_COLUMNS,
-    SQL_INDEXES,
+    SQL_DATABASES,
     SQL_FOREIGN_KEYS,
-    SQL_PARTITION
+    SQL_INDEXES,
+    SQL_PARTITION,
+    SQL_TABLES,
 )
 
-import pdb
-
+from .util import fetch_and_convert_to_str, get_list_chunks
 
 DEFAULT_SCHEMAS_COLLECTION_INTERVAL = 600
+
 
 class SubmitData:
 
@@ -112,11 +109,12 @@ class SubmitData:
 def agent_check_getter(self):
     return self._check
 
+
 class Schemas:
 
     TABLES_CHUNK_SIZE = 500
     # Note: in async mode execution time also cannot exceed 2 checks.
-    DEFAULT_MAX_EXECUTION_TIME = 10
+    DEFAULT_MAX_EXECUTION_TIME = 60
     MAX_COLUMNS_PER_EVENT = 100_000
 
     def __init__(self, mysql_metadata, check, config):
@@ -136,7 +134,7 @@ class Schemas:
             "cloud_metadata": self._check._config.cloud_metadata,
         }
         self._data_submitter = SubmitData(self._check.database_monitoring_metadata, base_event, self._log)
-        
+
         self._max_execution_time = min(
             config.schemas_config.get('max_execution_time', self.DEFAULT_MAX_EXECUTION_TIME), collection_interval
         )
@@ -158,7 +156,7 @@ class Schemas:
                 tags=self._tags + ["error:{}".format(type(e))] + self._check._get_debug_tags(),
                 hostname=self._check.resolved_hostname,
             )
-            raise    
+            raise
 
     @tracked_method(agent_check_getter=agent_check_getter)
     def _fetch_database_data(self, cursor, start_time, db_name):
@@ -180,7 +178,6 @@ class Schemas:
             if self._data_submitter.columns_since_last_submit() > self.MAX_COLUMNS_PER_EVENT:
                 self._data_submitter.submit()
         self._data_submitter.submit()
-
 
     @tracked_method(agent_check_getter=agent_check_getter)
     def _collect_databases_data(self, tags):
@@ -233,7 +230,7 @@ class Schemas:
                 self._tags,
                 self._check._config.cloud_metadata,
                 self._check.version.version,
-                self._check.version.flavor
+                self._check.version.flavor,
             )
             db_infos = self._query_db_information(cursor)
             self._data_submitter.store_db_infos(db_infos)
@@ -262,19 +259,8 @@ class Schemas:
 
     @tracked_method(agent_check_getter=agent_check_getter)
     def _query_db_information(self, cursor):
-        #do we need to open/close the cursor ?
-        self._cursor_run(
-            cursor,
-            query = SQL_DATABASES
-        )
-        rows = self.fetch_and_convert_to_str(cursor)
-        return rows
-#move to util
-    def fetch_and_convert_to_str(self, cursor):
-        rows = cursor.fetchall()
-        for row in rows:
-            for key in row.keys():
-                row[key] = str(row[key])
+        self._cursor_run(cursor, query=SQL_DATABASES)
+        rows = fetch_and_convert_to_str(cursor)
         return rows
 
     @tracked_method(agent_check_getter=agent_check_getter, track_result_length=True)
@@ -285,12 +271,8 @@ class Schemas:
         "name": str
         "columns": []
         """
-        self._cursor_run(
-            cursor,
-            query = SQL_TABLES,
-            params = db_name
-        )
-        tables_info = self.fetch_and_convert_to_str(cursor)
+        self._cursor_run(cursor, query=SQL_TABLES, params=db_name)
+        tables_info = fetch_and_convert_to_str(cursor)
         return tables_info
 
     @tracked_method(agent_check_getter=agent_check_getter, track_result_length=True)
@@ -338,7 +320,7 @@ class Schemas:
         table_names = ""
         for i, table in enumerate(table_list):
             table_name_to_table_index[table["name"]] = i
-            table_names += '"'+str(table["name"])+'",'
+            table_names += '"' + str(table["name"]) + '",'
         table_names = table_names[:-1]
         total_columns_number = self._populate_with_columns_data(
             table_name_to_table_index, table_list, table_names, db_name, cursor
@@ -352,10 +334,10 @@ class Schemas:
     def _populate_with_columns_data(self, table_name_to_table_index, table_list, table_names, db_name, cursor):
         self._cursor_run(
             cursor,
-        query = SQL_COLUMNS.format(table_names),
-        params = db_name,
+            query=SQL_COLUMNS.format(table_names),
+            params=db_name,
         )
-        rows = self.fetch_and_convert_to_str(cursor)
+        rows = fetch_and_convert_to_str(cursor)
         for row in rows:
             if "nullable" in row:
                 if row["nullable"].lower() == "yes":
@@ -370,12 +352,8 @@ class Schemas:
 
     @tracked_method(agent_check_getter=agent_check_getter)
     def _populate_with_index_data(self, table_name_to_table_index, table_list, table_names, db_name, cursor):
-        self._cursor_run(
-            cursor,
-        query = SQL_INDEXES.format(table_names),
-        params = db_name
-        )
-        rows = self.fetch_and_convert_to_str(cursor)
+        self._cursor_run(cursor, query=SQL_INDEXES.format(table_names), params=db_name)
+        rows = fetch_and_convert_to_str(cursor)
         for row in rows:
             table_name = str(row.pop("table_name"))
             table_list[table_name_to_table_index[table_name]].setdefault("indexes", [])
@@ -392,12 +370,8 @@ class Schemas:
 
     @tracked_method(agent_check_getter=agent_check_getter, track_result_length=True)
     def _populate_with_foreign_keys_data(self, table_name_to_table_index, table_list, table_names, db_name, cursor):
-        self._cursor_run(
-            cursor,
-        query = SQL_FOREIGN_KEYS.format(table_names),
-        params=db_name
-        )
-        rows = self.fetch_and_convert_to_str(cursor)
+        self._cursor_run(cursor, query=SQL_FOREIGN_KEYS.format(table_names), params=db_name)
+        rows = fetch_and_convert_to_str(cursor)
 
         for row in rows:
             table_name = str(row.pop("table_name"))
@@ -406,12 +380,8 @@ class Schemas:
 
     @tracked_method(agent_check_getter=agent_check_getter, track_result_length=True)
     def _populate_with_partitions_data(self, table_name_to_table_index, table_list, table_names, db_name, cursor):
-        self._cursor_run(
-            cursor,
-        query = SQL_PARTITION.format(table_names),
-        params = db_name
-        )
-        rows = self.fetch_and_convert_to_str(cursor)
+        self._cursor_run(cursor, query=SQL_PARTITION.format(table_names), params=db_name)
+        rows = fetch_and_convert_to_str(cursor)
         for row in rows:
             table_name = str(row.pop("table_name"))
             table_list[table_name_to_table_index[table_name]].setdefault("partitions", [])

@@ -448,9 +448,8 @@ def populate_database():
     conn = pymysql.connect(
         host=common.HOST, port=common.PORT, user='root', password='mypass' if MYSQL_REPLICATION == 'group' else None
     )
-#TODO add  with may be ?
-    cur = conn.cursor()
 
+    cur = conn.cursor()
     cur.execute("USE mysql;")
     cur.execute("CREATE DATABASE testdb;")
     cur.execute("USE testdb;")
@@ -464,18 +463,22 @@ def populate_database():
     cur.close()
     _create_explain_procedure(conn, "testdb")
 
+
 def add_schema_test_databases(cursor):
     cursor.execute("USE mysql;")
     cursor.execute("CREATE DATABASE datadog_test_schemas;")
     cursor.execute("USE datadog_test_schemas;")
     cursor.execute("GRANT SELECT ON datadog_test_schemas.* TO 'dog'@'%';")
-    cursor.execute("""CREATE TABLE cities (
+    cursor.execute(
+        """CREATE TABLE cities (
     id INT NOT NULL DEFAULT 0,
     name VARCHAR(255),
     population INT NOT NULL DEFAULT 0,
     CONSTRAINT PK_Cities PRIMARY KEY (id))
-    """)
-    cursor.execute("""CREATE TABLE cities_partitioned (
+    """
+    )
+    cursor.execute(
+        """CREATE TABLE cities_partitioned (
     id INT NOT NULL DEFAULT 0,
     name VARCHAR(255),
     population INT NOT NULL DEFAULT 0,
@@ -486,34 +489,34 @@ def add_schema_test_databases(cursor):
     PARTITION p1 VALUES LESS THAN (200),
     PARTITION p2 VALUES LESS THAN (300),
     PARTITION p3 VALUES LESS THAN MAXVALUE);
-    """)
-#TODO there can also be a partition by hash     PARTITION BY HASH(id) PARTITIONS 4; 
-# check in partitions 
+    """
+    )
 
-    # create one column index 
+    # create one column index
     cursor.execute("CREATE INDEX single_column_index ON cities (population);")
     # create two column index
     cursor.execute("CREATE INDEX two_columns_index ON cities (id, name);")
 
-    cursor.execute("""CREATE TABLE landmarks (
+    cursor.execute(
+        """CREATE TABLE landmarks (
     name VARCHAR(255),
     city_id INT DEFAULT 0,
-    CONSTRAINT FK_CityId FOREIGN KEY (city_id) REFERENCES cities(id));
-   """)
+    CONSTRAINT FK_CityId FOREIGN KEY (city_id) REFERENCES cities(id));"""
+    )
 
-
-    cursor.execute(""" CREATE TABLE Restaurants (
+    cursor.execute(
+        """ CREATE TABLE Restaurants (
     RestaurantName VARCHAR(255),
     District VARCHAR(100),
     Cuisine VARCHAR(100),
-    CONSTRAINT UC_RestaurantNameDistrict UNIQUE (RestaurantName, District)
-    );
-    """)
+    CONSTRAINT UC_RestaurantNameDistrict UNIQUE (RestaurantName, District)); """
+    )
 
-    cursor.execute("""CREATE TABLE RestaurantReviews (
+    cursor.execute(
+        """CREATE TABLE RestaurantReviews (
             RestaurantName VARCHAR(255),
             District VARCHAR(255),
-            Review TEXT, 
+            Review TEXT,
             CONSTRAINT FK_RestaurantNameDistrict FOREIGN KEY (RestaurantName, District)
             REFERENCES Restaurants(RestaurantName, District)
         );"""
@@ -526,16 +529,17 @@ def add_schema_test_databases(cursor):
     cursor.execute("INSERT INTO ϑings (id, name) VALUES (1, 'foo'), (2, 'bar');")
     cursor.execute("CREATE UNIQUE INDEX thingsindex ON ϑings (name);")
 
-    cursor.execute("""
+    cursor.execute(
+        """
     CREATE TABLE ts (id INT, purchased DATE)
         PARTITION BY RANGE( YEAR(purchased) )
         SUBPARTITION BY HASH( TO_DAYS(purchased) )
         SUBPARTITIONS 2 (
             PARTITION p0 VALUES LESS THAN (1990),
             PARTITION p1 VALUES LESS THAN (2000),
-            PARTITION p2 VALUES LESS THAN MAXVALUE
-        );
-                       """)
+            PARTITION p2 VALUES LESS THAN MAXVALUE);"""
+    )
+
 
 def _wait_for_it_script():
     """
