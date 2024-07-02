@@ -121,7 +121,7 @@ RUN \
  # Add -fPIC to let librdkafka link against it statically
  CFLAGS="${CFLAGS} -fPIC" \
  # Explicitly ask the linker to use gssapi_krb5, otherwise static compilation fails
- LDFLAGS="${LDFLAGS}  -L/usr/local/lib -lgssapi_krb5" \
+ LDFLAGS="${LDFLAGS} -L/usr/local/lib -lgssapi_krb5" \
  DOWNLOAD_URL="https://github.com/cyrusimap/cyrus-sasl/releases/download/cyrus-sasl-{{version}}/cyrus-sasl-{{version}}.tar.gz" \
  VERSION="2.1.28" \
  SHA256="7ccfc6abd01ed67c1a0924b353e526f1b766b21f42d4562ee635a8ebfc5bb38c" \
