@@ -351,6 +351,8 @@ integration/php_fpm:
 - php_fpm/**/*
 integration/pivotal_pks:
 - pivotal_pks/**/*
+integration/ping_federate:
+- ping_federate/**/*
 integration/podman:
 - podman/**/*
 integration/postfix:
