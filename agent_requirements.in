@@ -78,7 +78,6 @@ python-binary-memcached==0.26.1; sys_platform != 'win32' and python_version < '3
 python-binary-memcached==0.31.2; sys_platform != 'win32' and python_version > '3.0'
 python-dateutil==2.9.0.post0
 python3-gearman==0.1.0; sys_platform != 'win32' and python_version > '3.0'
-pyvmomi==8.0.0.1; python_version < '3.0'
 pyvmomi==8.0.3.0.1; python_version > '3.0'
 pywin32==228; sys_platform == 'win32' and python_version < '3.0'
 pywin32==306; sys_platform == 'win32' and python_version > '3.0'
