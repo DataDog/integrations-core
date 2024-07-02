@@ -16,4 +16,4 @@ services:
       - "4280:8080"
     volumes:
       - ./machines-api/Caddyfile:/etc/caddy/Caddyfile
-      - ../fixtures:/usr/share/caddy
+      - ../fixtures/machines-api:/usr/share/caddy

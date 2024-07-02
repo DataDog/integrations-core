@@ -24,7 +24,9 @@ def dd_environment():
     if not USE_FLY_LAB:
         compose_file = COMPOSE_FILE
         conditions = [
-            CheckDockerLogs(identifier='caddy', patterns=['server running']),
+            CheckDockerLogs(identifier='prometheus', patterns=['server running']),
+            CheckDockerLogs(identifier='machines-api', patterns=['server running']),
+            CheckEndpoints(INSTANCE["machines_api_endpoint"]),
             CheckEndpoints(INSTANCE["openmetrics_endpoint"]),
         ]
         with docker_run(compose_file, conditions=conditions):
