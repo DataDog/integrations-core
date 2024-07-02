@@ -3,7 +3,7 @@
     "created_at": "2024-06-26",
     "last_updated_at": "2024-06-26",
     "title": "vLLM application token usage is high",
-    "description": "The more tokens a language model generates per second, the more work it is doing. This monitor will alert you if a model that vLLM is serving is generating a lot of tokens, this indicates high load. This can result in lower response times and more resource consumption.",
+    "description": "The more tokens a language model generates per second, the more work it is doing. This monitor alerts you if a model that vLLM is serving is generating a lot of tokens, which indicates high load. This can result in lower response times and more resource consumption.",
     "tags": [
         "integration:vllm"
     ],
