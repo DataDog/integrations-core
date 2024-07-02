@@ -51,7 +51,7 @@ tests:
       message: "2024-06-24T15:36:48Z INFO [AUDIT]     user.login addr.remote:90.118.178.162:19954 cluster_name:teleport-plint code:T1000W ei:0 error:[invalid username, password or second factor] event:user.login method:local success:false time:2024-06-24T15:36:48.688Z uid:f9ec53d9-0263-43a3-a5e6-fc41351e63bb user:teleport-admin user_agent:Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/126.0.0.0 Safari/537.36 events/emitter.go:288"
       status: "info"
       tags:
-       - "source:LOGS_SOURCE"
+        - "source:LOGS_SOURCE"
       timestamp: 1719243408000
   - sample: >
       2024-05-28T14:21:41Z WARN [PROXY:1:C] Cache was forced to load session
@@ -272,3 +272,47 @@ tests:
       tags:
         - "source:LOGS_SOURCE"
       timestamp: 1716907052000
+  - sample: >-
+      2024-06-26T15:25:13Z WARN             "Failed to keep alive ssh server
+      \"b05b3c10-c35a-4f25-b6c4-3b315a1d4ec1\": ConditionalCheckFailedException:
+      The conditional request failed
+
+      {
+        RespMetadata: {
+          StatusCode: 400,
+          RequestID: \"5LUDO9VEIGQ436RMP6HEDM0D6FVV4KQNSO5AEMVJF66Q9ASUAAJG\"
+        },
+        Message_: \"The conditional request failed\"
+      } (count=2, closing=false)." inventory/controller.go:510
+    result:
+      custom:
+        date: 1719415513000
+        log:
+          level: "WARN"
+      message: |-
+        2024-06-26T15:25:13Z WARN             "Failed to keep alive ssh server \"b05b3c10-c35a-4f25-b6c4-3b315a1d4ec1\": ConditionalCheckFailedException: The conditional request failed
+        {
+          RespMetadata: {
+            StatusCode: 400,
+            RequestID: \"5LUDO9VEIGQ436RMP6HEDM0D6FVV4KQNSO5AEMVJF66Q9ASUAAJG\"
+          },
+          Message_: \"The conditional request failed\"
+        } (count=2, closing=false)." inventory/controller.go:510
+      status: "warn"
+      tags:
+        - "source:LOGS_SOURCE"
+      timestamp: 1719415513000
+  - sample:
+      "2024-06-26T15:00:36Z WARN             Restarting watch on error after
+      waiting 208.931858ms. Error: watcher closed.
+      local/headlessauthn_watcher.go:158"
+    result:
+      custom:
+        date: 1719414036000
+        log:
+          level: "WARN"
+      message: "2024-06-26T15:00:36Z WARN             Restarting watch on error after waiting 208.931858ms. Error: watcher closed. local/headlessauthn_watcher.go:158"
+      status: "warn"
+      tags:
+        - "source:LOGS_SOURCE"
+      timestamp: 1719414036000
