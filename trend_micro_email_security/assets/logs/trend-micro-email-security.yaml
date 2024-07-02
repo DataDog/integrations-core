@@ -595,7 +595,7 @@ pipeline:
       sources:
         - status
     - type: attribute-remapper
-      name: Remap `cs1Label` to `attributeLabels.cs1Label`
+      name: Map `cs1Label` to `attributeLabels.cs1Label`
       enabled: true
       sources:
         - cs1Label
@@ -605,7 +605,7 @@ pipeline:
       preserveSource: false
       overrideOnConflict: false
     - type: attribute-remapper
-      name: Remap `cs2Label` to `attributeLabels.cs2Label`
+      name: Map `cs2Label` to `attributeLabels.cs2Label`
       enabled: true
       sources:
         - cs2Label
@@ -615,7 +615,7 @@ pipeline:
       preserveSource: false
       overrideOnConflict: false
     - type: attribute-remapper
-      name: Remap `cs3Label` to `attributeLabels.cs3Label`
+      name: Map `cs3Label` to `attributeLabels.cs3Label`
       enabled: true
       sources:
         - cs3Label
@@ -625,7 +625,7 @@ pipeline:
       preserveSource: false
       overrideOnConflict: false
     - type: attribute-remapper
-      name: Remap `cs4Label` to `attributeLabels.cs4Label`
+      name: Map `cs4Label` to `attributeLabels.cs4Label`
       enabled: true
       sources:
         - cs4Label
@@ -635,7 +635,7 @@ pipeline:
       preserveSource: false
       overrideOnConflict: false
     - type: attribute-remapper
-      name: Remap `cs5Label` to `attributeLabels.cs5Label`
+      name: Map `cs5Label` to `attributeLabels.cs5Label`
       enabled: true
       sources:
         - cs5Label
@@ -645,7 +645,7 @@ pipeline:
       preserveSource: false
       overrideOnConflict: false
     - type: attribute-remapper
-      name: Remap `cs6Label` to `attributeLabels.cs6Label`
+      name: Map `cs6Label` to `attributeLabels.cs6Label`
       enabled: true
       sources:
         - cs6Label
@@ -655,7 +655,7 @@ pipeline:
       preserveSource: false
       overrideOnConflict: false
     - type: attribute-remapper
-      name: Remap `cn1Label` to `attributeLabels.cn1Label`
+      name: Map `cn1Label` to `attributeLabels.cn1Label`
       enabled: true
       sources:
         - cn1Label
