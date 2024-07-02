@@ -322,7 +322,7 @@ class DockerInterface(object):
             env_vars['DD_DD_URL'] = self.dd_url
         if self.log_url:
             # Set custom agent log intake
-            env_vars['DD_LOGS_CONFIG_DD_URL'] = self.log_url
+            env_vars['DD_LOGS_CONFIG_LOGS_DD_URL'] = self.log_url
         env_vars.update(self.env_vars)
 
         volumes = [

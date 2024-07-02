@@ -60,45 +60,6 @@ SELECT mode,
     'name': 'lock_metrics',
 }
 
-# The pg_stat_all_tables contain one row for each table in the current database,
-# showing statistics about accesses to that specific table.
-# pg_stat_user_tables contains the same as pg_stat_all_tables, except that only user tables are shown.
-REL_METRICS = {
-    'descriptors': [('relname', 'table'), ('schemaname', 'schema')],
-    'metrics': {
-        'seq_scan': ('postgresql.seq_scans', AgentCheck.rate),
-        'seq_tup_read': ('postgresql.seq_rows_read', AgentCheck.rate),
-        'idx_scan': ('postgresql.index_rel_scans', AgentCheck.rate),
-        'idx_tup_fetch': ('postgresql.index_rel_rows_fetched', AgentCheck.rate),
-        'n_tup_ins': ('postgresql.rows_inserted', AgentCheck.rate),
-        'n_tup_upd': ('postgresql.rows_updated', AgentCheck.rate),
-        'n_tup_del': ('postgresql.rows_deleted', AgentCheck.rate),
-        'n_tup_hot_upd': ('postgresql.rows_hot_updated', AgentCheck.rate),
-        'n_live_tup': ('postgresql.live_rows', AgentCheck.gauge),
-        'n_dead_tup': ('postgresql.dead_rows', AgentCheck.gauge),
-        'vacuum_count': ('postgresql.vacuumed', AgentCheck.monotonic_count),
-        'autovacuum_count': ('postgresql.autovacuumed', AgentCheck.monotonic_count),
-        'analyze_count': ('postgresql.analyzed', AgentCheck.monotonic_count),
-        'autoanalyze_count': ('postgresql.autoanalyzed', AgentCheck.monotonic_count),
-        'EXTRACT(EPOCH FROM age(CURRENT_TIMESTAMP, last_vacuum))': ('postgresql.last_vacuum_age', AgentCheck.gauge),
-        'EXTRACT(EPOCH FROM age(CURRENT_TIMESTAMP, last_autovacuum))': (
-            'postgresql.last_autovacuum_age',
-            AgentCheck.gauge,
-        ),
-        'EXTRACT(EPOCH FROM age(CURRENT_TIMESTAMP, last_analyze))': ('postgresql.last_analyze_age', AgentCheck.gauge),
-        'EXTRACT(EPOCH FROM age(CURRENT_TIMESTAMP, last_autoanalyze))': (
-            'postgresql.last_autoanalyze_age',
-            AgentCheck.gauge,
-        ),
-    },
-    'query': """
-SELECT relname,schemaname,{metrics_columns}
-  FROM pg_stat_user_tables
- WHERE {relations}""",
-    'relation': True,
-    'name': 'rel_metrics',
-}
-
 
 # The pg_stat_all_indexes view will contain one row for each index in the current database,
 # showing statistics about accesses to that specific index.
@@ -144,8 +105,8 @@ SELECT relname,
 # contains index and toast table, the filter was redundant with relkind = 'r'
 #
 # We also filter out tables with an AccessExclusiveLock to avoid query timeouts.
-QUERY_PG_CLASS = {
-    'name': 'pg_class',
+QUERY_PG_CLASS_SIZE = {
+    'name': 'pg_class_size',
     'query': """
 SELECT current_database(),
        s.schemaname, s.table, s.partition_of,
@@ -185,6 +146,94 @@ FROM
         {'name': 'postgresql.index_size', 'type': 'gauge'},
         {'name': 'postgresql.toast_size', 'type': 'gauge'},
         {'name': 'postgresql.total_size', 'type': 'gauge'},
+    ],
+}
+
+# We used to rely on pg_stat_user_tables to get tuples and scan metrics
+# However, using this view is inefficient as it groups by aggregation on oid and schema
+# behind the hood, leading to possible temporary bytes being written to handle the sort.
+# To avoid this, we need to directly call the pg_stat_* functions
+QUERY_PG_CLASS = {
+    'name': 'pg_class',
+    'query': """
+SELECT
+  current_database(),
+  N.nspname,
+  C.relname,
+  pg_stat_get_numscans(C.oid),
+  pg_stat_get_tuples_returned(C.oid),
+  I.idx_scan,
+  I.idx_tup_fetch,
+  pg_stat_get_tuples_inserted(C.oid),
+  pg_stat_get_tuples_updated(C.oid),
+  pg_stat_get_tuples_deleted(C.oid),
+  pg_stat_get_tuples_hot_updated(C.oid),
+  pg_stat_get_live_tuples(C.oid),
+  pg_stat_get_dead_tuples(C.oid),
+  pg_stat_get_vacuum_count(C.oid),
+  pg_stat_get_autovacuum_count(C.oid),
+  pg_stat_get_analyze_count(C.oid),
+  pg_stat_get_autoanalyze_count(C.oid),
+  EXTRACT(EPOCH FROM age(CURRENT_TIMESTAMP, pg_stat_get_last_vacuum_time(C.oid))),
+  EXTRACT(EPOCH FROM age(CURRENT_TIMESTAMP, pg_stat_get_last_autovacuum_time(C.oid))),
+  EXTRACT(EPOCH FROM age(CURRENT_TIMESTAMP, pg_stat_get_last_analyze_time(C.oid))),
+  EXTRACT(EPOCH FROM age(CURRENT_TIMESTAMP, pg_stat_get_last_autoanalyze_time(C.oid))),
+  pg_stat_get_numscans(idx_toast.indexrelid),
+  pg_stat_get_tuples_fetched(idx_toast.indexrelid),
+  pg_stat_get_tuples_inserted(C.reltoastrelid),
+  pg_stat_get_tuples_deleted(C.reltoastrelid),
+  pg_stat_get_live_tuples(C.reltoastrelid),
+  pg_stat_get_dead_tuples(C.reltoastrelid),
+  pg_stat_get_vacuum_count(C.reltoastrelid),
+  pg_stat_get_autovacuum_count(C.reltoastrelid),
+  EXTRACT(EPOCH FROM age(CURRENT_TIMESTAMP, pg_stat_get_last_vacuum_time(C.reltoastrelid))),
+  EXTRACT(EPOCH FROM age(CURRENT_TIMESTAMP, pg_stat_get_last_autovacuum_time(C.reltoastrelid)))
+FROM pg_class C
+LEFT JOIN pg_namespace N ON (N.oid = C.relnamespace)
+LEFT JOIN pg_locks L ON C.oid = L.relation AND L.locktype = 'relation'
+LEFT JOIN pg_index idx_toast ON (idx_toast.indrelid = C.reltoastrelid)
+LEFT JOIN LATERAL (
+    SELECT sum(pg_stat_get_numscans(indexrelid))::bigint AS idx_scan,
+           sum(pg_stat_get_tuples_fetched(indexrelid))::bigint AS idx_tup_fetch
+      FROM pg_index
+     WHERE pg_index.indrelid = C.oid) I ON true
+WHERE C.relkind = 'r'
+    AND NOT (nspname = ANY('{{pg_catalog,information_schema}}'))
+    AND (L.relation IS NULL OR L.mode <> 'AccessExclusiveLock' OR NOT L.granted)
+    AND {relations} {limits}
+""",
+    'columns': [
+        {'name': 'db', 'type': 'tag'},
+        {'name': 'schema', 'type': 'tag'},
+        {'name': 'table', 'type': 'tag'},
+        {'name': 'postgresql.seq_scans', 'type': 'rate'},
+        {'name': 'postgresql.seq_rows_read', 'type': 'rate'},
+        {'name': 'postgresql.index_rel_scans', 'type': 'rate'},
+        {'name': 'postgresql.index_rel_rows_fetched', 'type': 'rate'},
+        {'name': 'postgresql.rows_inserted', 'type': 'rate'},
+        {'name': 'postgresql.rows_updated', 'type': 'rate'},
+        {'name': 'postgresql.rows_deleted', 'type': 'rate'},
+        {'name': 'postgresql.rows_hot_updated', 'type': 'rate'},
+        {'name': 'postgresql.live_rows', 'type': 'gauge'},
+        {'name': 'postgresql.dead_rows', 'type': 'gauge'},
+        {'name': 'postgresql.vacuumed', 'type': 'monotonic_count'},
+        {'name': 'postgresql.autovacuumed', 'type': 'monotonic_count'},
+        {'name': 'postgresql.analyzed', 'type': 'monotonic_count'},
+        {'name': 'postgresql.autoanalyzed', 'type': 'monotonic_count'},
+        {'name': 'postgresql.last_vacuum_age', 'type': 'gauge'},
+        {'name': 'postgresql.last_autovacuum_age', 'type': 'gauge'},
+        {'name': 'postgresql.last_analyze_age', 'type': 'gauge'},
+        {'name': 'postgresql.last_autoanalyze_age', 'type': 'gauge'},
+        {'name': 'postgresql.toast.index_scans', 'type': 'monotonic_count'},
+        {'name': 'postgresql.toast.rows_fetched', 'type': 'monotonic_count'},
+        {'name': 'postgresql.toast.rows_inserted', 'type': 'monotonic_count'},
+        {'name': 'postgresql.toast.rows_deleted', 'type': 'monotonic_count'},
+        {'name': 'postgresql.toast.live_rows', 'type': 'monotonic_count'},
+        {'name': 'postgresql.toast.dead_rows', 'type': 'monotonic_count'},
+        {'name': 'postgresql.toast.vacuumed', 'type': 'monotonic_count'},
+        {'name': 'postgresql.toast.autovacuumed', 'type': 'monotonic_count'},
+        {'name': 'postgresql.toast.last_vacuum_age', 'type': 'gauge'},
+        {'name': 'postgresql.toast.last_autovacuum_age', 'type': 'gauge'},
     ],
 }
 
@@ -323,8 +372,8 @@ INDEX_BLOAT = {
     'name': 'index_bloat_metrics',
 }
 
-RELATION_METRICS = [LOCK_METRICS, REL_METRICS, IDX_METRICS, STATIO_METRICS]
-DYNAMIC_RELATION_QUERIES = [QUERY_PG_CLASS]
+RELATION_METRICS = [LOCK_METRICS, IDX_METRICS, STATIO_METRICS]
+DYNAMIC_RELATION_QUERIES = [QUERY_PG_CLASS, QUERY_PG_CLASS_SIZE]
 
 
 class RelationsManager(object):

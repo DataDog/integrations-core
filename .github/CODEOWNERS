@@ -16,10 +16,10 @@ manifest.json         @DataDog/documentation @DataDog/agent-integrations
 **/assets/logs        @DataDog/logs-backend @DataDog/documentation @DataDog/agent-integrations
 
 # Dependencies
-/.deps/                            @DataDog/agent-integrations @DataDog/agent-build-and-releases
-/.builders/                        @DataDog/agent-build-and-releases
-/.builders/images/                 @DataDog/agent-integrations @DataDog/agent-build-and-releases
-/.builders/patches/                @DataDog/agent-integrations @DataDog/agent-build-and-releases
+/.deps/                            @DataDog/agent-integrations @DataDog/agent-delivery
+/.builders/                        @DataDog/agent-delivery
+/.builders/images/                 @DataDog/agent-integrations @DataDog/agent-delivery
+/.builders/patches/                @DataDog/agent-integrations @DataDog/agent-delivery
 
 # Checks base
 /datadog_checks_base/                                          @DataDog/agent-integrations
@@ -169,6 +169,7 @@ manifest.json         @DataDog/documentation @DataDog/agent-integrations
 /teleport/                              @DataDog/platform-integrations @DataDog/agent-integrations
 /teleport/manifest.json                 @DataDog/platform-integrations @DataDog/agent-integrations @DataDog/documentation
 /teleport/*.md                          @DataDog/platform-integrations @DataDog/agent-integrations @DataDog/documentation
+/teleport/assets/logs/                  @DataDog/platform-integrations @DataDog/agent-integrations @DataDog/documentation @DataDog/logs-backend
 /vsphere/                               @DataDog/platform-integrations @DataDog/agent-integrations
 /vsphere/manifest.json                  @DataDog/platform-integrations @DataDog/agent-integrations @DataDog/documentation
 /vsphere/*.md                           @DataDog/platform-integrations @DataDog/agent-integrations @DataDog/documentation
@@ -298,6 +299,11 @@ datadog_checks_base/datadog_checks/base/checks/windows/              @DataDog/wi
 /cisco_duo/manifest.json                                             @DataDog/saas-integrations @DataDog/documentation
 /cisco_duo/assets/logs/                                              @DataDog/saas-integrations @DataDog/documentation @DataDog/logs-backend
 
+/ping_one/                                                          @DataDog/saas-integrations
+/ping_one/*.md                                                      @DataDog/saas-integrations @DataDog/documentation
+/ping_one/manifest.json                                             @DataDog/saas-integrations @DataDog/documentation
+/ping_one/assets/logs/                                              @DataDog/saas-integrations @DataDog/documentation @DataDog/logs-backend
+
 # To keep Security up-to-date with changes to the signing tool.
 /datadog_checks_dev/datadog_checks/dev/tooling/signing.py             @DataDog/software-integrity-and-trust @DataDog/agent-integrations @trishankatdatadog
 # As well as the secure downloader.
@@ -305,7 +311,7 @@ datadog_checks_base/datadog_checks/base/checks/windows/              @DataDog/wi
 docs/developer/process/integration-release.md                         @DataDog/software-integrity-and-trust @DataDog/agent-integrations @trishankatdatadog
 # As well as the pipelines.
 /.github/workflows/                                                   @DataDog/agent-integrations
-/.github/workflows/build-deps.yml                                     @DataDog/agent-build-and-releases
+/.github/workflows/build-deps.yml                                     @DataDog/agent-delivery
 /.gitlab-ci.yml                                                       @DataDog/agent-integrations
 /.gitlab/software_composition_analysis.yaml                           @DataDog/software-integrity-and-trust
 # Dev container
