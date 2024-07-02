@@ -1,0 +1,574 @@
+{
+    "title": "Mimecast - Audit",
+    "description": "This log details shows you the activity performed by user via Mimecast UI.",
+    "widgets": [
+        {
+            "id": 6950570389408240,
+            "definition": {
+                "type": "image",
+                "url": "https://primasecure.com/wp-content/uploads/2021/07/Mimecast_M_2015.png",
+                "sizing": "contain",
+                "margin": "md",
+                "has_background": false,
+                "has_border": true,
+                "vertical_align": "center",
+                "horizontal_align": "center"
+            },
+            "layout": {
+                "x": 0,
+                "y": 0,
+                "width": 4,
+                "height": 2
+            }
+        },
+        {
+            "id": 3838915416297262,
+            "definition": {
+                "type": "note",
+                "content": "## Overview\n\nThis log details shows you the activity performed by user via Mimecast UI.  ",
+                "background_color": "white",
+                "font_size": "14",
+                "text_align": "left",
+                "vertical_align": "top",
+                "show_tick": false,
+                "tick_pos": "50%",
+                "tick_edge": "left",
+                "has_padding": true
+            },
+            "layout": {
+                "x": 4,
+                "y": 0,
+                "width": 4,
+                "height": 2
+            }
+        },
+        {
+            "id": 5796081619089508,
+            "definition": {
+                "type": "note",
+                "content": "## Widgets:\n1. Total Audit Logs \n2. Total Successful Logins\n3. Total Unsuccessful Logins\n4. Audit Log Distribution by Type \n5. Most Active Users \n6. Failed Authentication Attempts Details \n7. Failed Authentication Attempts by Country \n8. Log Details",
+                "background_color": "white",
+                "font_size": "14",
+                "text_align": "left",
+                "vertical_align": "top",
+                "show_tick": false,
+                "tick_pos": "50%",
+                "tick_edge": "left",
+                "has_padding": true
+            },
+            "layout": {
+                "x": 8,
+                "y": 0,
+                "width": 4,
+                "height": 2
+            }
+        },
+        {
+            "id": 8627945511171804,
+            "definition": {
+                "title": "Total Audit Logs",
+                "title_size": "16",
+                "title_align": "left",
+                "type": "query_value",
+                "requests": [
+                    {
+                        "formulas": [
+                            {
+                                "formula": "a"
+                            }
+                        ],
+                        "queries": [
+                            {
+                                "name": "a",
+                                "data_source": "logs",
+                                "compute": {
+                                    "aggregation": "count"
+                                },
+                                "search": {
+                                    "query": "service:audit source:mimecast $User $Application $Audit-Type"
+                                },
+                                "indexes": [
+                                    "*"
+                                ],
+                                "group_by": [],
+                                "storage": "hot"
+                            }
+                        ],
+                        "response_format": "scalar"
+                    }
+                ],
+                "autoscale": true,
+                "precision": 2,
+                "timeseries_background": {
+                    "type": "area"
+                }
+            },
+            "layout": {
+                "x": 0,
+                "y": 2,
+                "width": 4,
+                "height": 3
+            }
+        },
+        {
+            "id": 809763544384340,
+            "definition": {
+                "title": "Total Successful Logins",
+                "title_size": "16",
+                "title_align": "left",
+                "time": {},
+                "type": "query_value",
+                "requests": [
+                    {
+                        "formulas": [
+                            {
+                                "formula": "a"
+                            }
+                        ],
+                        "queries": [
+                            {
+                                "name": "a",
+                                "data_source": "logs",
+                                "compute": {
+                                    "aggregation": "count"
+                                },
+                                "search": {
+                                    "query": "service:audit source:mimecast @auditType:\"User Logged On\" $User $Application $Audit-Type"
+                                },
+                                "indexes": [
+                                    "*"
+                                ],
+                                "group_by": [],
+                                "storage": "hot"
+                            }
+                        ],
+                        "response_format": "scalar"
+                    }
+                ],
+                "autoscale": true,
+                "precision": 2,
+                "timeseries_background": {
+                    "type": "area"
+                }
+            },
+            "layout": {
+                "x": 4,
+                "y": 2,
+                "width": 4,
+                "height": 3
+            }
+        },
+        {
+            "id": 7494164110444002,
+            "definition": {
+                "title": "Total Unsuccessful Logins",
+                "title_size": "16",
+                "title_align": "left",
+                "time": {},
+                "type": "query_value",
+                "requests": [
+                    {
+                        "formulas": [
+                            {
+                                "formula": "a"
+                            }
+                        ],
+                        "queries": [
+                            {
+                                "data_source": "logs",
+                                "name": "a",
+                                "indexes": [
+                                    "*"
+                                ],
+                                "compute": {
+                                    "aggregation": "count"
+                                },
+                                "group_by": [],
+                                "search": {
+                                    "query": "service:audit source:mimecast @auditType:\"Logon Authentication Failed\" $User $Application $Audit-Type"
+                                },
+                                "storage": "hot"
+                            }
+                        ],
+                        "response_format": "scalar"
+                    }
+                ],
+                "autoscale": true,
+                "precision": 2,
+                "timeseries_background": {
+                    "type": "area"
+                }
+            },
+            "layout": {
+                "x": 8,
+                "y": 2,
+                "width": 4,
+                "height": 3
+            }
+        },
+        {
+            "id": 3248616221841198,
+            "definition": {
+                "title": "Audit Log Distribution by Type",
+                "title_size": "16",
+                "title_align": "left",
+                "requests": [
+                    {
+                        "response_format": "scalar",
+                        "queries": [
+                            {
+                                "name": "a",
+                                "data_source": "logs",
+                                "compute": {
+                                    "aggregation": "count"
+                                },
+                                "search": {
+                                    "query": "service:audit source:mimecast $User $Application $Audit-Type"
+                                },
+                                "indexes": [
+                                    "*"
+                                ],
+                                "group_by": [
+                                    {
+                                        "facet": "@auditType",
+                                        "limit": 10,
+                                        "should_exclude_missing": true,
+                                        "sort": {
+                                            "aggregation": "count",
+                                            "order": "desc"
+                                        }
+                                    }
+                                ],
+                                "storage": "hot"
+                            }
+                        ],
+                        "formulas": [
+                            {
+                                "formula": "a"
+                            }
+                        ],
+                        "sort": {
+                            "count": 10,
+                            "order_by": [
+                                {
+                                    "type": "formula",
+                                    "index": 0,
+                                    "order": "desc"
+                                }
+                            ]
+                        }
+                    }
+                ],
+                "type": "sunburst",
+                "legend": {
+                    "type": "table"
+                }
+            },
+            "layout": {
+                "x": 0,
+                "y": 5,
+                "width": 12,
+                "height": 4
+            }
+        },
+        {
+            "id": 5934419857886150,
+            "definition": {
+                "title": "Most Active Users",
+                "title_size": "16",
+                "title_align": "left",
+                "type": "toplist",
+                "requests": [
+                    {
+                        "queries": [
+                            {
+                                "data_source": "logs",
+                                "name": "query1",
+                                "indexes": [
+                                    "*"
+                                ],
+                                "compute": {
+                                    "aggregation": "count"
+                                },
+                                "group_by": [
+                                    {
+                                        "facet": "@usr.name",
+                                        "limit": 10,
+                                        "sort": {
+                                            "order": "desc",
+                                            "aggregation": "count"
+                                        }
+                                    }
+                                ],
+                                "search": {
+                                    "query": "service:audit source:mimecast $User $Application $Audit-Type"
+                                },
+                                "storage": "hot"
+                            }
+                        ],
+                        "response_format": "scalar",
+                        "formulas": [
+                            {
+                                "formula": "query1"
+                            }
+                        ],
+                        "sort": {
+                            "count": 10,
+                            "order_by": [
+                                {
+                                    "type": "formula",
+                                    "index": 0,
+                                    "order": "desc"
+                                }
+                            ]
+                        }
+                    }
+                ],
+                "style": {
+                    "display": {
+                        "type": "stacked",
+                        "legend": "automatic"
+                    },
+                    "scaling": "relative"
+                }
+            },
+            "layout": {
+                "x": 0,
+                "y": 9,
+                "width": 4,
+                "height": 4
+            }
+        },
+        {
+            "id": 8470112434854576,
+            "definition": {
+                "title": "Failed Authentication Attempts Details",
+                "title_size": "16",
+                "title_align": "left",
+                "type": "query_table",
+                "requests": [
+                    {
+                        "queries": [
+                            {
+                                "data_source": "logs",
+                                "name": "query1",
+                                "indexes": [
+                                    "*"
+                                ],
+                                "compute": {
+                                    "aggregation": "count"
+                                },
+                                "group_by": [
+                                    {
+                                        "facet": "@usr.name",
+                                        "limit": 10,
+                                        "sort": {
+                                            "order": "desc",
+                                            "aggregation": "count"
+                                        }
+                                    },
+                                    {
+                                        "facet": "@network.client.ip",
+                                        "limit": 10,
+                                        "sort": {
+                                            "order": "desc",
+                                            "aggregation": "count"
+                                        }
+                                    },
+                                    {
+                                        "facet": "@Application",
+                                        "limit": 10,
+                                        "sort": {
+                                            "order": "desc",
+                                            "aggregation": "count"
+                                        }
+                                    }
+                                ],
+                                "search": {
+                                    "query": "service:audit source:mimecast @auditType:\"Logon Authentication Failed\" $User $Application $Audit-Type"
+                                },
+                                "storage": "hot"
+                            }
+                        ],
+                        "response_format": "scalar",
+                        "sort": {
+                            "count": 1000,
+                            "order_by": [
+                                {
+                                    "type": "formula",
+                                    "index": 0,
+                                    "order": "desc"
+                                }
+                            ]
+                        },
+                        "formulas": [
+                            {
+                                "cell_display_mode": "bar",
+                                "alias": "Count",
+                                "formula": "query1"
+                            }
+                        ]
+                    }
+                ],
+                "has_search_bar": "auto"
+            },
+            "layout": {
+                "x": 4,
+                "y": 9,
+                "width": 8,
+                "height": 4
+            }
+        },
+        {
+            "id": 16233632803130,
+            "definition": {
+                "title": "Failed Authentication Attempts by Country",
+                "title_size": "16",
+                "title_align": "left",
+                "type": "geomap",
+                "requests": [
+                    {
+                        "queries": [
+                            {
+                                "data_source": "logs",
+                                "name": "query1",
+                                "indexes": [
+                                    "*"
+                                ],
+                                "compute": {
+                                    "aggregation": "count"
+                                },
+                                "group_by": [
+                                    {
+                                        "facet": "@network.client.geoip.country.iso_code",
+                                        "limit": 250,
+                                        "sort": {
+                                            "order": "desc",
+                                            "aggregation": "count"
+                                        }
+                                    }
+                                ],
+                                "search": {
+                                    "query": "service:audit source:mimecast @auditType:\"Logon Authentication Failed\" $Application $User $Audit-Type"
+                                },
+                                "storage": "hot"
+                            }
+                        ],
+                        "response_format": "scalar",
+                        "formulas": [
+                            {
+                                "formula": "query1"
+                            }
+                        ],
+                        "sort": {
+                            "count": 250,
+                            "order_by": [
+                                {
+                                    "type": "formula",
+                                    "index": 0,
+                                    "order": "desc"
+                                }
+                            ]
+                        }
+                    }
+                ],
+                "style": {
+                    "palette": "hostmap_blues",
+                    "palette_flip": false
+                },
+                "view": {
+                    "focus": "WORLD"
+                }
+            },
+            "layout": {
+                "x": 0,
+                "y": 13,
+                "width": 12,
+                "height": 4
+            }
+        },
+        {
+            "id": 1512808421598612,
+            "definition": {
+                "title": "Log Details",
+                "title_size": "16",
+                "title_align": "left",
+                "requests": [
+                    {
+                        "response_format": "event_list",
+                        "query": {
+                            "data_source": "logs_stream",
+                            "query_string": "service:audit source:mimecast $User $Application $Audit-Type",
+                            "indexes": [],
+                            "storage": "hot",
+                            "sort": {
+                                "order": "desc",
+                                "column": "timestamp"
+                            }
+                        },
+                        "columns": [
+                            {
+                                "field": "status_line",
+                                "width": "auto"
+                            },
+                            {
+                                "field": "timestamp",
+                                "width": "auto"
+                            },
+                            {
+                                "field": "service",
+                                "width": "auto"
+                            },
+                            {
+                                "field": "usr.name",
+                                "width": "auto"
+                            },
+                            {
+                                "field": "category",
+                                "width": "auto"
+                            },
+                            {
+                                "field": "auditType",
+                                "width": "auto"
+                            },
+                            {
+                                "field": "Application",
+                                "width": "auto"
+                            }
+                        ]
+                    }
+                ],
+                "type": "list_stream"
+            },
+            "layout": {
+                "x": 0,
+                "y": 17,
+                "width": 12,
+                "height": 4
+            }
+        }
+    ],
+    "template_variables": [
+        {
+            "name": "User",
+            "prefix": "@usr.name",
+            "available_values": [],
+            "default": "*"
+        },
+        {
+            "name": "Application",
+            "prefix": "@Application",
+            "available_values": [],
+            "default": "*"
+        },
+        {
+            "name": "Audit-Type",
+            "prefix": "@auditType",
+            "available_values": [],
+            "default": "*"
+        }
+    ],
+    "layout_type": "ordered",
+    "notify_list": [],
+    "reflow_type": "fixed"
+}

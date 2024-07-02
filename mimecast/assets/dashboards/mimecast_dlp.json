@@ -1,0 +1,531 @@
+{
+    "title": "Mimecast - DLP",
+    "description": "This log shows details about data loss prevention logs.",
+    "widgets": [
+        {
+            "id": 7399283575783072,
+            "definition": {
+                "type": "image",
+                "url": "https://primasecure.com/wp-content/uploads/2021/07/Mimecast_M_2015.png",
+                "sizing": "contain",
+                "margin": "md",
+                "has_background": false,
+                "has_border": true,
+                "vertical_align": "center",
+                "horizontal_align": "center"
+            },
+            "layout": {
+                "x": 0,
+                "y": 0,
+                "width": 4,
+                "height": 2
+            }
+        },
+        {
+            "id": 6853991069257570,
+            "definition": {
+                "type": "note",
+                "content": "## Overview\n\nThis log shows details about data loss prevention logs.",
+                "background_color": "white",
+                "font_size": "14",
+                "text_align": "left",
+                "vertical_align": "top",
+                "show_tick": false,
+                "tick_pos": "50%",
+                "tick_edge": "left",
+                "has_padding": true
+            },
+            "layout": {
+                "x": 4,
+                "y": 0,
+                "width": 4,
+                "height": 2
+            }
+        },
+        {
+            "id": 3560049356281028,
+            "definition": {
+                "type": "note",
+                "content": "## Widgets:\n1. Total DLP Logs \n2. Event Distribution by Direction \n3. Top 10 Senders \n4. Top 10 Recipients \n5. Event Distribution by DLP Configuration \n6. Top 10 Action Performed \n7. Log Details",
+                "background_color": "white",
+                "font_size": "14",
+                "text_align": "left",
+                "vertical_align": "top",
+                "show_tick": false,
+                "tick_pos": "50%",
+                "tick_edge": "left",
+                "has_padding": true
+            },
+            "layout": {
+                "x": 8,
+                "y": 0,
+                "width": 4,
+                "height": 2
+            }
+        },
+        {
+            "id": 1325205887931160,
+            "definition": {
+                "title": "Total DLP Logs",
+                "title_size": "16",
+                "title_align": "left",
+                "type": "query_value",
+                "requests": [
+                    {
+                        "response_format": "scalar",
+                        "queries": [
+                            {
+                                "data_source": "logs",
+                                "name": "query1",
+                                "indexes": [
+                                    "*"
+                                ],
+                                "compute": {
+                                    "aggregation": "count"
+                                },
+                                "group_by": [],
+                                "search": {
+                                    "query": "service:dlp source:mimecast $Sender-Address $Route $Action"
+                                },
+                                "storage": "hot"
+                            }
+                        ],
+                        "formulas": [
+                            {
+                                "formula": "query1"
+                            }
+                        ]
+                    }
+                ],
+                "autoscale": true,
+                "precision": 2,
+                "timeseries_background": {
+                    "type": "bars"
+                }
+            },
+            "layout": {
+                "x": 0,
+                "y": 2,
+                "width": 4,
+                "height": 3
+            }
+        },
+        {
+            "id": 6780381387665548,
+            "definition": {
+                "title": "Event Distribution by Direction",
+                "title_size": "16",
+                "title_align": "left",
+                "requests": [
+                    {
+                        "response_format": "scalar",
+                        "queries": [
+                            {
+                                "data_source": "logs",
+                                "name": "a",
+                                "indexes": [
+                                    "*"
+                                ],
+                                "compute": {
+                                    "aggregation": "count"
+                                },
+                                "group_by": [
+                                    {
+                                        "facet": "@route",
+                                        "limit": 10,
+                                        "sort": {
+                                            "order": "desc",
+                                            "aggregation": "count"
+                                        },
+                                        "should_exclude_missing": true
+                                    }
+                                ],
+                                "search": {
+                                    "query": "service:dlp source:mimecast $Sender-Address $Route $Action"
+                                },
+                                "storage": "hot"
+                            }
+                        ],
+                        "formulas": [
+                            {
+                                "formula": "a"
+                            }
+                        ],
+                        "sort": {
+                            "count": 10,
+                            "order_by": [
+                                {
+                                    "type": "formula",
+                                    "index": 0,
+                                    "order": "desc"
+                                }
+                            ]
+                        }
+                    }
+                ],
+                "type": "sunburst",
+                "legend": {
+                    "type": "table"
+                }
+            },
+            "layout": {
+                "x": 4,
+                "y": 2,
+                "width": 8,
+                "height": 3
+            }
+        },
+        {
+            "id": 1862595521600606,
+            "definition": {
+                "title": "Top 10 Senders",
+                "title_size": "16",
+                "title_align": "left",
+                "type": "toplist",
+                "requests": [
+                    {
+                        "response_format": "scalar",
+                        "queries": [
+                            {
+                                "data_source": "logs",
+                                "name": "a",
+                                "indexes": [
+                                    "*"
+                                ],
+                                "compute": {
+                                    "aggregation": "count"
+                                },
+                                "group_by": [
+                                    {
+                                        "facet": "@senderAddress",
+                                        "limit": 10,
+                                        "sort": {
+                                            "order": "desc",
+                                            "aggregation": "count"
+                                        },
+                                        "should_exclude_missing": true
+                                    }
+                                ],
+                                "search": {
+                                    "query": "service:dlp source:mimecast $Sender-Address $Route $Action"
+                                },
+                                "storage": "hot"
+                            }
+                        ],
+                        "formulas": [
+                            {
+                                "formula": "a"
+                            }
+                        ],
+                        "sort": {
+                            "count": 10,
+                            "order_by": [
+                                {
+                                    "type": "formula",
+                                    "index": 0,
+                                    "order": "desc"
+                                }
+                            ]
+                        }
+                    }
+                ],
+                "style": {
+                    "scaling": "relative"
+                }
+            },
+            "layout": {
+                "x": 0,
+                "y": 5,
+                "width": 6,
+                "height": 4
+            }
+        },
+        {
+            "id": 3949536515018568,
+            "definition": {
+                "title": "Top 10 Recipients",
+                "title_size": "16",
+                "title_align": "left",
+                "type": "toplist",
+                "requests": [
+                    {
+                        "response_format": "scalar",
+                        "queries": [
+                            {
+                                "data_source": "logs",
+                                "name": "a",
+                                "indexes": [
+                                    "*"
+                                ],
+                                "compute": {
+                                    "aggregation": "count"
+                                },
+                                "group_by": [
+                                    {
+                                        "facet": "@recipientAddress",
+                                        "limit": 10,
+                                        "sort": {
+                                            "order": "desc",
+                                            "aggregation": "count"
+                                        },
+                                        "should_exclude_missing": true
+                                    }
+                                ],
+                                "search": {
+                                    "query": "service:dlp source:mimecast $Sender-Address $Route $Action"
+                                },
+                                "storage": "hot"
+                            }
+                        ],
+                        "formulas": [
+                            {
+                                "formula": "a"
+                            }
+                        ],
+                        "sort": {
+                            "count": 10,
+                            "order_by": [
+                                {
+                                    "type": "formula",
+                                    "index": 0,
+                                    "order": "desc"
+                                }
+                            ]
+                        }
+                    }
+                ],
+                "style": {
+                    "scaling": "relative"
+                }
+            },
+            "layout": {
+                "x": 6,
+                "y": 5,
+                "width": 6,
+                "height": 4
+            }
+        },
+        {
+            "id": 8752737191529132,
+            "definition": {
+                "title": "Event Distribution by DLP Configuration",
+                "title_size": "16",
+                "title_align": "left",
+                "requests": [
+                    {
+                        "response_format": "scalar",
+                        "queries": [
+                            {
+                                "data_source": "logs",
+                                "name": "a",
+                                "indexes": [
+                                    "*"
+                                ],
+                                "compute": {
+                                    "aggregation": "count"
+                                },
+                                "group_by": [
+                                    {
+                                        "facet": "@policy",
+                                        "limit": 10,
+                                        "sort": {
+                                            "order": "desc",
+                                            "aggregation": "count"
+                                        },
+                                        "should_exclude_missing": true
+                                    }
+                                ],
+                                "search": {
+                                    "query": "service:dlp source:mimecast $Sender-Address $Route $Action"
+                                },
+                                "storage": "hot"
+                            }
+                        ],
+                        "formulas": [
+                            {
+                                "formula": "a"
+                            }
+                        ],
+                        "sort": {
+                            "count": 10,
+                            "order_by": [
+                                {
+                                    "type": "formula",
+                                    "index": 0,
+                                    "order": "desc"
+                                }
+                            ]
+                        }
+                    }
+                ],
+                "type": "sunburst",
+                "legend": {
+                    "type": "table"
+                }
+            },
+            "layout": {
+                "x": 0,
+                "y": 9,
+                "width": 6,
+                "height": 4
+            }
+        },
+        {
+            "id": 3830992600666480,
+            "definition": {
+                "title": "Top 10 Action Performed",
+                "title_size": "16",
+                "title_align": "left",
+                "type": "toplist",
+                "requests": [
+                    {
+                        "response_format": "scalar",
+                        "queries": [
+                            {
+                                "data_source": "logs",
+                                "name": "a",
+                                "indexes": [
+                                    "*"
+                                ],
+                                "compute": {
+                                    "aggregation": "count"
+                                },
+                                "group_by": [
+                                    {
+                                        "facet": "@action",
+                                        "limit": 10,
+                                        "sort": {
+                                            "order": "desc",
+                                            "aggregation": "count"
+                                        },
+                                        "should_exclude_missing": true
+                                    }
+                                ],
+                                "search": {
+                                    "query": "service:dlp source:mimecast $Sender-Address $Route $Action"
+                                },
+                                "storage": "hot"
+                            }
+                        ],
+                        "formulas": [
+                            {
+                                "formula": "a"
+                            }
+                        ],
+                        "sort": {
+                            "count": 10,
+                            "order_by": [
+                                {
+                                    "type": "formula",
+                                    "index": 0,
+                                    "order": "desc"
+                                }
+                            ]
+                        }
+                    }
+                ],
+                "style": {
+                    "scaling": "relative"
+                }
+            },
+            "layout": {
+                "x": 6,
+                "y": 9,
+                "width": 6,
+                "height": 4
+            }
+        },
+        {
+            "id": 2279515057017156,
+            "definition": {
+                "title": "Log Details",
+                "title_size": "16",
+                "title_align": "left",
+                "time": {},
+                "requests": [
+                    {
+                        "response_format": "event_list",
+                        "query": {
+                            "data_source": "logs_stream",
+                            "query_string": "service:dlp source:mimecast $Sender-Address $Route $Action",
+                            "indexes": [],
+                            "storage": "hot",
+                            "sort": {
+                                "order": "desc",
+                                "column": "timestamp"
+                            }
+                        },
+                        "columns": [
+                            {
+                                "field": "status_line",
+                                "width": "auto"
+                            },
+                            {
+                                "field": "timestamp",
+                                "width": "auto"
+                            },
+                            {
+                                "field": "service",
+                                "width": "auto"
+                            },
+                            {
+                                "field": "senderAddress",
+                                "width": "auto"
+                            },
+                            {
+                                "field": "recipientAddress",
+                                "width": "auto"
+                            },
+                            {
+                                "field": "action",
+                                "width": "auto"
+                            },
+                            {
+                                "field": "policy",
+                                "width": "auto"
+                            },
+                            {
+                                "field": "route",
+                                "width": "auto"
+                            },
+                            {
+                                "field": "subject",
+                                "width": "auto"
+                            }
+                        ]
+                    }
+                ],
+                "type": "list_stream"
+            },
+            "layout": {
+                "x": 0,
+                "y": 13,
+                "width": 12,
+                "height": 3
+            }
+        }
+    ],
+    "template_variables": [
+        {
+            "name": "Sender-Address",
+            "prefix": "@senderAddress",
+            "available_values": [],
+            "default": "*"
+        },
+        {
+            "name": "Route",
+            "prefix": "@route",
+            "available_values": [],
+            "default": "*"
+        },
+        {
+            "name": "Action",
+            "prefix": "@action",
+            "available_values": [],
+            "default": "*"
+        }
+    ],
+    "layout_type": "ordered",
+    "notify_list": [],
+    "reflow_type": "fixed"
+}
