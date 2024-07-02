@@ -102,7 +102,7 @@ SELECT table_name,
        is_nullable as `nullable`,
        ordinal_position
 FROM INFORMATION_SCHEMA.COLUMNS
-WHERE TABLE_SCHEMA = %s AND TABLE_NAME IN ({});
+WHERE table_schema = %s AND table_name IN ({});
 """
 
 #TODO cardinality is a dinamic property - number of unique values for an index. 
@@ -149,7 +149,7 @@ SELECT
     partition_ordinal_position,
     group_concat(subpartition_ordinal_position order by subpartition_ordinal_position asc) as subpartition_ordinal_positions, 
     partition_method, 
-    group_concat(subpartition_method order by subpartition_ordinal_position asc) as subpartition_ordinal_positions, 
+    group_concat(subpartition_method order by subpartition_ordinal_position asc) as subpartition_methods, 
     partition_expression, 
     group_concat(subpartition_expression order by subpartition_ordinal_position asc) as subpartition_expressions, 
     partition_description, 
@@ -163,7 +163,9 @@ SELECT
 FROM INFORMATION_SCHEMA.PARTITIONS
 WHERE
     table_schema = %s AND table_name in ({}) AND partition_name IS NOT NULL
-GROUP BY table_name, partition_name, partition_ordinal_position, partition_method, partition_expression, partition_description, table_rows, partition_comment, tablespace_name
+GROUP BY table_name, partition_name, partition_ordinal_position, partition_method, 
+         partition_expression, partition_description, table_rows, partition_comment, 
+         tablespace_name
 """
 
 QUERY_DEADLOCKS = {

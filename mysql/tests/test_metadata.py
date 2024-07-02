@@ -34,6 +34,22 @@ def dbm_instance(instance_complex):
 #    assert event['dbms'] == "mysql"
 #    assert len(event["metadata"]) > 0
 
+def sort_names_split_by_coma(names):
+    names_arr = names.split(',')
+    sorted_columns = sorted(names_arr)
+    return ','.join(sorted_columns)
+
+def normalize_unordered_aggregated_values(actual_payload):
+    for table in actual_payload['tables']:
+        #if 'indexes' in table:
+        #    for index in table['indexes']:
+        #        index['column_names'] = sort_names_split_by_coma(index['column_names'])
+        if 'foreign_keys' in table:
+            for f_key in table['foreign_keys']:
+                f_key["column_names"] = sort_names_split_by_coma(f_key["column_names"])  
+                f_key["referenced_column_names"] = sort_names_split_by_coma(f_key["referenced_column_names"]) 
+        
+
 @pytest.mark.integration
 @pytest.mark.usefixtures('dd_environment')
 def test_collect_schemas(aggregator, dd_run_check, dbm_instance):
@@ -73,10 +89,10 @@ def test_collect_schemas(aggregator, dd_run_check, dbm_instance):
                         {
                             "constraint_schema":"datadog_test_schemas",
                             "name":"FK_RestaurantNameDistrict",
-                            "column_names":"RestaurantName,District",
+                            "column_names":"District,RestaurantName",
                             "referenced_table_schema":"datadog_test_schemas",
                             "referenced_table_name":"Restaurants",
-                            "referenced_column_names":"RestaurantName,District"
+                            "referenced_column_names":"District,RestaurantName"
                         }
                     ],
                     "indexes":[
@@ -230,7 +246,7 @@ def test_collect_schemas(aggregator, dd_run_check, dbm_instance):
                             "partition_ordinal_position":"1",
                             "subpartition_ordinal_positions":"None",
                             "partition_method":"RANGE",
-                            ".subpartition_ordinal_positions":"None",
+                            "subpartition_methods":"None",
                             "partition_expression":"id",
                             "subpartition_expressions":"None",
                             "partition_description":"100",
@@ -248,7 +264,7 @@ def test_collect_schemas(aggregator, dd_run_check, dbm_instance):
                             "partition_ordinal_position":"2",
                             "subpartition_ordinal_positions":"None",
                             "partition_method":"RANGE",
-                            ".subpartition_ordinal_positions":"None",
+                            "subpartition_methods":"None",
                             "partition_expression":"id",
                             "subpartition_expressions":"None",
                             "partition_description":"200",
@@ -266,7 +282,7 @@ def test_collect_schemas(aggregator, dd_run_check, dbm_instance):
                             "partition_ordinal_position":"3",
                             "subpartition_ordinal_positions":"None",
                             "partition_method":"RANGE",
-                            ".subpartition_ordinal_positions":"None",
+                            "subpartition_methods":"None",
                             "partition_expression":"id",
                             "subpartition_expressions":"None",
                             "partition_description":"300",
@@ -284,7 +300,7 @@ def test_collect_schemas(aggregator, dd_run_check, dbm_instance):
                             "partition_ordinal_position":"4",
                             "subpartition_ordinal_positions":"None",
                             "partition_method":"RANGE",
-                            ".subpartition_ordinal_positions":"None",
+                            "subpartition_methods":"None",
                             "partition_expression":"id",
                             "subpartition_expressions":"None",
                             "partition_description":"MAXVALUE",
@@ -414,7 +430,6 @@ def test_collect_schemas(aggregator, dd_run_check, dbm_instance):
                     "ordinal_position":"2"
                 }
             ],
-            #TODO ask team collapse all these stuff ?
             "partitions":[
                 {
                     "name":"p0",
@@ -422,7 +437,7 @@ def test_collect_schemas(aggregator, dd_run_check, dbm_instance):
                     "partition_ordinal_position":"1",
                     "subpartition_ordinal_positions":"1,2",
                     "partition_method":"RANGE",
-                    ".subpartition_ordinal_positions":"HASH,HASH",
+                    "subpartition_methods":"HASH,HASH",
                     "partition_expression":" YEAR(purchased)",
                     "subpartition_expressions":" TO_DAYS(purchased), TO_DAYS(purchased)",
                     "partition_description":"1990",
@@ -440,7 +455,7 @@ def test_collect_schemas(aggregator, dd_run_check, dbm_instance):
                     "partition_ordinal_position":"2",
                     "subpartition_ordinal_positions":"1,2",
                     "partition_method":"RANGE",
-                    ".subpartition_ordinal_positions":"HASH,HASH",
+                    "subpartition_methods":"HASH,HASH",
                     "partition_expression":" YEAR(purchased)",
                     "subpartition_expressions":" TO_DAYS(purchased), TO_DAYS(purchased)",
                     "partition_description":"2000",
@@ -458,7 +473,7 @@ def test_collect_schemas(aggregator, dd_run_check, dbm_instance):
                     "partition_ordinal_position":"3",
                     "subpartition_ordinal_positions":"1,2",
                     "partition_method":"RANGE",
-                    ".subpartition_ordinal_positions":"HASH,HASH",
+                    "subpartition_methods":"HASH,HASH",
                     "partition_expression":" YEAR(purchased)",
                     "subpartition_expressions":" TO_DAYS(purchased), TO_DAYS(purchased)",
                     "partition_description":"MAXVALUE",
@@ -517,6 +532,8 @@ def test_collect_schemas(aggregator, dd_run_check, dbm_instance):
     assert len(actual_payloads) == len(expected_data_for_db)
 
     for db_name, actual_payload in actual_payloads.items():
+
+        normalize_unordered_aggregated_values(actual_payload)
 
         assert db_name in databases_to_find
 
