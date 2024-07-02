@@ -105,7 +105,7 @@ WHERE TABLE_SCHEMA = %s AND TABLE_NAME IN ({});
 SQL_INDEXES = """\
 SELECT 
     table_name, 
-    index_name, 
+    index_name as `name`, 
     collation,  
     cardinality,  
     index_type, 
@@ -116,12 +116,10 @@ SELECT
     group_concat(nullable order by seq_in_index asc) as nullables,  
     group_concat(non_unique order by seq_in_index asc) as non_uniques
 FROM INFORMATION_SCHEMA.STATISTICS 
-WHERE TABLE_SCHEMA = %s AND TABLE_NAME IN ({})
+WHERE table_schema = %s AND table_name IN ({})
 GROUP BY table_name, index_name, collation, cardinality, index_type;
 """
 
-#TODO can CONSTRAINT_SCHEMA be not equal to TABLE_SCHEMA
-# TODO this is only ofr foreign keys why not other constraints i.e REFERENCED_TABLE_NAME is null
 SQL_FOREIGN_KEYS = """\
 SELECT
     constraint_schema,
@@ -134,8 +132,8 @@ SELECT
 FROM
     INFORMATION_SCHEMA.KEY_COLUMN_USAGE
 WHERE
-    table_schema = %s and table_name in ({})
-    and referenced_table_name is not null
+    table_schema = %s AND table_name in ({})
+    AND referenced_table_name is not null
 GROUP BY constraint_schema, constraint_name, table_name, referenced_table_schema, referenced_table_name;
 """
 

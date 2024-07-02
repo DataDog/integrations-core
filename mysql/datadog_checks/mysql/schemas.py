@@ -112,10 +112,6 @@ class SubmitData:
 def agent_check_getter(self):
     return self._check
 
-#TODO - it's a bit messy betwean databses and schemas. what do we choose ? Especially in spec yaml
-# arg for schemas - logically it is closer as one can do cross schema foreign keys 
-# for db - easier to remove an intermediate layer, we can imagine not having schemas but its hard to imagine 
-# not to have databases. 
 class Schemas:
 
     TABLES_CHUNK_SIZE = 500
@@ -127,8 +123,6 @@ class Schemas:
         self._metadata = mysql_metadata
         self._check = check
         self._log = check.log
-        self.schemas_per_db = {}
-        self._last_schemas_collect_time = None
         self._tags = []
         collection_interval = config.schemas_config.get('collection_interval', DEFAULT_SCHEMAS_COLLECTION_INTERVAL)
         base_event = {
@@ -191,15 +185,14 @@ class Schemas:
     @tracked_method(agent_check_getter=agent_check_getter)
     def _collect_databases_data(self, tags):
         """Collects database information and schemas and submits to the agent's queue as dictionaries
-        schema dict
+        database dict
         key/value:
             "name": str
-            "id": str
-            "owner_name": str
+            "default_character_set_name": str
+            "default_collation_name": str
             "tables" : list of tables dicts
                 table
                 key/value:
-                    "id" : str
                     "name" : str
                     columns: list of columns dicts
                         columns
@@ -208,6 +201,7 @@ class Schemas:
                             "data_type": str
                             "default": str
                             "nullable": bool
+                            "ordinal_position": str
                 indexes : list of index dicts
                     index
                     key/value:
@@ -259,7 +253,6 @@ class Schemas:
                     )
                 )
                 return
-            #TODO fix this return in sqlserver as it should switch to the original DB
             except Exception as e:
                 self._log.error(
                     "While executing fetch database data for databse {}, the following exception occured {}".format(
@@ -341,13 +334,11 @@ class Schemas:
 
         if len(table_list) == 0:
             return
-        #check for special characters as we don't have ids
         table_name_to_table_index = {}
         table_names = ""
         for i, table in enumerate(table_list):
             table_name_to_table_index[table["name"]] = i
             table_names += '"'+str(table["name"])+'",'
-        #remove the last coma
         table_names = table_names[:-1]
         total_columns_number = self._populate_with_columns_data(
             table_name_to_table_index, table_list, table_names, db_name, cursor
@@ -385,11 +376,9 @@ class Schemas:
         params = db_name
         )
         rows = self.fetch_and_convert_to_str(cursor)
-
         for row in rows:
             table_name = str(row.pop("table_name"))
             table_list[table_name_to_table_index[table_name]].setdefault("indexes", [])
-            #TODO check when empty value its false or introduce None.
             if "nullables" in row:
                 nullables_arr = row["nullables"].split(',')
                 nullables_converted = ""
@@ -401,7 +390,6 @@ class Schemas:
                 row["nullables"] = nullables_converted[:-1]
             table_list[table_name_to_table_index[table_name]]["indexes"].append(row)
 
-#TODO test exception in query
     @tracked_method(agent_check_getter=agent_check_getter, track_result_length=True)
     def _populate_with_foreign_keys_data(self, table_name_to_table_index, table_list, table_names, db_name, cursor):
         self._cursor_run(

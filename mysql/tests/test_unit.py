@@ -399,20 +399,10 @@ def test_submit_is_called_if_too_many_columns():
     ) as mocked_submit, mock.patch(
         'datadog_checks.mysql.schemas.Schemas._get_tables_data', return_value=(1000_000, {"name": "my_table"})
     ):
-        #with pytest.raises(StopIteration):
         schemas._fetch_database_data("dummy_cursor", time.time(), "my_db")
         assert mocked_submit.call_count == 2
 
 def test_exception_handling_by_do_for_dbs():
-    check = MySql(common.CHECK_NAME, {}, instances=[{'server': 'localhost', 'user': 'datadog'}])
-    schemas = Schemas({}, check, check._config)
-    mock_cursor = mock.MagicMock()
-    with mock.patch(
-        'datadog_checks.mysql.schemas.Schemas._fetch_database_data', side_effect=Exception("Can't connect to DB")
-    ):
-        schemas._fetch_for_databases([{"name":"my_db"}],"dummy_cursor")
-
-def test_exception_handling_by_
     check = MySql(common.CHECK_NAME, {}, instances=[{'server': 'localhost', 'user': 'datadog'}])
     schemas = Schemas({}, check, check._config)
     mock_cursor = mock.MagicMock()
