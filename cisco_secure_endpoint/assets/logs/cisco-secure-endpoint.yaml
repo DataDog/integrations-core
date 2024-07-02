@@ -27,67 +27,53 @@ facets:
     name: User ID
     path: usr.id
     source: log
-  - facetType: list
-    groups:
+  - groups:
       - Geoip
     name: City Name
     path: network.client.geoip.city.name
     source: log
-    type: string
-  - facetType: list
-    groups:
+  - groups:
       - Geoip
     name: Continent Code
     path: network.client.geoip.continent.code
     source: log
-    type: string
-  - facetType: list
-    groups:
+  - groups:
       - Geoip
     name: Continent Name
     path: network.client.geoip.continent.name
     source: log
-    type: string
-  - facetType: list
-    groups:
+  - groups:
       - Geoip
     name: Country ISO Code
     path: network.client.geoip.country.iso_code
     source: log
-    type: string
-  - facetType: list
-    groups:
+  - groups:
       - Geoip
     name: Country Name
     path: network.client.geoip.country.name
     source: log
-    type: string
-  - facetType: list
-    groups:
+  - groups:
       - Geoip
     name: Subdivision ISO Code
     path: network.client.geoip.subdivision.iso_code
     source: log
-    type: string
-  - facetType: list
-    groups:
+  - groups:
       - Geoip
     name: Subdivision Name
     path: network.client.geoip.subdivision.name
     source: log
-    type: string
 pipeline:
   type: pipeline
   name: Cisco Secure Endpoint
   enabled: true
   filter:
-    query: "source:cisco-secure-endpoint "
+    query: "source:cisco-secure-endpoint"
   processors:
     - type: pipeline
       name: "Cisco Secure Endpoint: Events"
       enabled: true
       filter:
-        query: "service:event "
+        query: "service:event"
       processors:
         - type: date-remapper
           name: Define `date` as the official date of the log
@@ -170,7 +156,7 @@ pipeline:
       name: "Cisco Secure Endpoint : Audit"
       enabled: true
       filter:
-        query: "service:audit "
+        query: "service:audit"
       processors:
         - type: date-remapper
           name: Define `created_at` as the official date of the log
