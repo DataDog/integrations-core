@@ -313,6 +313,7 @@ TOP_METRICS = {
 }
 
 COLLECTION_METRICS = {
+    # collection storage stats
     'collection.size': GAUGE,
     'collection.avgObjSize': GAUGE,
     'collection.count': GAUGE,
@@ -321,6 +322,19 @@ COLLECTION_METRICS = {
     'collection.maxSize': GAUGE,
     'collection.storageSize': GAUGE,
     'collection.nindexes': GAUGE,
+    'collection.totalIndexSize': GAUGE,
+    # collection latency stats
+    'collection.reads.latency': GAUGE,
+    'collection.reads.ops': RATE,
+    'collection.writes.ops': RATE,
+    'collection.writes.latency': GAUGE,
+    'collection.commands.latency': GAUGE,
+    'collection.commands.ops': RATE,
+    'collection.transactions.latency': GAUGE,
+    'collection.transactions.ops': RATE,
+    # collection query exec stats
+    'collection.collectionScans.total': GAUGE,
+    'collection.collectionScans.nonTailable': GAUGE,
 }
 
 """
