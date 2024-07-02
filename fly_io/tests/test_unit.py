@@ -29,6 +29,7 @@ def test_check(dd_run_check, aggregator, instance):
         aggregator.assert_metric(metric)
 
     aggregator.assert_service_check('fly_io.openmetrics.health', ServiceCheck.OK, count=1)
+    aggregator.assert_metric('fly_io.machines_api.up', value=1, count=1)
 
     aggregator.assert_all_metrics_covered()
     aggregator.assert_metrics_using_metadata(get_metadata_metrics())
@@ -88,7 +89,13 @@ def test_rest_api_exception(dd_run_check, instance, aggregator):
     check = FlyIoCheck('fly_io', {}, [instance])
     with pytest.raises(Exception, match=r'requests.exceptions.HTTPError'):
         dd_run_check(check)
-        aggregator.assert_metric("fly_io.machines_api.up", value=1)
+
+    aggregator.assert_metric("fly_io.machines_api.up", value=0)
+
+    for metric in MOCKED_PROMETHEUS_METRICS:
+        aggregator.assert_metric(metric, at_least=1, hostname="708725eaa12297")
+        aggregator.assert_metric(metric, at_least=1, hostname="20976671ha2292")
+        aggregator.assert_metric(metric, at_least=1, hostname="119dc024cbf534")
 
 
 @pytest.mark.usefixtures("mock_http_get")

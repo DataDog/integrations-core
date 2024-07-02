@@ -7,7 +7,7 @@ from six.moves.urllib.parse import quote_plus
 from datadog_checks.base import OpenMetricsBaseCheckV2
 
 from .config_models import ConfigMixin
-from .constants import APP_COUNT_METRIC, MACHINE_COUNT_METRIC, MACHINE_UP_STATE
+from .constants import APP_COUNT_METRIC, MACHINE_COUNT_METRIC, MACHINE_UP_STATE, MACHINES_API_UP_METRIC
 from .metrics import METRICS, RENAME_LABELS_MAP
 
 
@@ -38,7 +38,7 @@ class FlyIoCheck(OpenMetricsBaseCheckV2, ConfigMixin):
         }
 
     def _get_app_status(self, app_name):
-        self.log.debug("Getting apps for org %s", self.org_slug)
+        self.log.debug("Getting app status for %s", app_name)
         app_details_endpoint = f"{self.machines_api_endpoint}/v1/apps/{app_name}"
         response = self.http.get(app_details_endpoint)
         response.raise_for_status()
@@ -89,6 +89,7 @@ class FlyIoCheck(OpenMetricsBaseCheckV2, ConfigMixin):
         response = self.http.get(apps_endpoint, params=params)
         response.raise_for_status()
         apps = response.json().get("apps", [])
+
         for app in apps:
             app_name = app.get("name")
             self.log.debug("Processing app %s", app_name)
@@ -113,9 +114,11 @@ class FlyIoCheck(OpenMetricsBaseCheckV2, ConfigMixin):
         try:
             response.raise_for_status()
         except Exception as e:
-            self.gauge("machines_api.up", 0, tags=self.tags)
+            self.gauge(MACHINES_API_UP_METRIC, 0, tags=self.tags)
             self.log.error("Encountered an error hitting machines REST API %s: %s", self.machines_api_endpoint, str(e))
             raise
+        self.log.debug("Connected to the machines API %s", self.machines_api_endpoint)
+        self.gauge(MACHINES_API_UP_METRIC, 1, tags=self.tags)
         self._collect_app_metrics()
 
     def check(self, instance):

@@ -13,6 +13,7 @@ ORG_SLUG = os.environ.get('FLY_ORG_SLUG')
 
 INSTANCE = {
     'org_slug': 'test',
+    'empty_default_hostname': True,
     'openmetrics_endpoint': 'http://localhost:8080/metrics',
     'machines_api_endpoint': 'http://localhost:4280',
     'headers': {'Authorization': 'Bearer Test'},

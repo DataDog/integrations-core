@@ -72,6 +72,7 @@ fly_io.instance.up,gauge,,,,Reports 1 if the VM is reporting correctly,-1,fly_io
 fly_io.instance.volume.size,gauge,,byte,,Volume size in bytes.,-1,fly_io,fly_io instance vol size,,
 fly_io.instance.volume.used,gauge,,byte,,Percentage of volume used.,-1,fly_io,fly_io instance vol used,,
 fly_io.machine.count,gauge,,,,Count of running machines,-1,fly_io,fly_io machine ct,,
+fly_io.machines_api.up,gauge,,,,Whether the check can access the machines API or not,-1,fly_io,fly_io machine api,,
 fly_io.pg.database.size,gauge,,byte,,Database size,-1,fly_io,fly_io pg db size,,
 fly_io.pg.replication.lag,gauge,,,,Replication lag,-1,fly_io,fly_io pg rep lag,,
 fly_io.pg_stat.activity.count,gauge,,,,number of connections in this state,-1,fly_io,fly_io pg activity ct,,

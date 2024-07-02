@@ -56,7 +56,7 @@ MOCKED_PROMETHEUS_METRICS = {
     "fly_io.instance.memory.pressure_some",
 }
 
-ALL_REST_METRICS = ['fly_io.app.count', 'fly_io.machine.count']
+ALL_REST_METRICS = ['fly_io.app.count', 'fly_io.machine.count', 'fly_io.machines_api.up']
 
 APP_UP_METRICS = [
     {
