@@ -72,10 +72,11 @@ class FlyIoCheck(OpenMetricsBaseCheckV2, ConfigMixin):
                 f"machine_region:{machine_region}",
                 f"fly_platform_version:{fly_platform_version}",
             ]
+            all_machine_tags = self.tags + machine_tags + app_tags
 
-            self.gauge(MACHINE_COUNT_METRIC, 1, tags=self.tags, hostname=machine_id)
+            self.gauge(MACHINE_COUNT_METRIC, 1, tags=all_machine_tags)
 
-            external_host_tags.append((machine_id, {self.__NAMESPACE__: self.tags + machine_tags + app_tags}))
+            external_host_tags.append((machine_id, {self.__NAMESPACE__: all_machine_tags}))
 
         if len(external_host_tags) > 0:
             self.set_external_tags(external_host_tags)

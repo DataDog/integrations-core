@@ -65,9 +65,7 @@ def test_rest_api_app_metrics(dd_run_check, aggregator, instance, caplog):
         aggregator.assert_metric(metric['name'], metric['value'], count=metric['count'], tags=metric['tags'])
 
     for metric in MACHINE_COUNT_METRICS:
-        aggregator.assert_metric(
-            metric['name'], metric['value'], count=metric['count'], tags=metric['tags'], hostname=metric['hostname']
-        )
+        aggregator.assert_metric(metric['name'], metric['value'], count=metric['count'], tags=metric['tags'])
 
 
 @pytest.mark.parametrize(

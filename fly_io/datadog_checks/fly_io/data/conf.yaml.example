@@ -109,6 +109,14 @@ instances:
     #     <OPTION_1>: <VALUE_1>
     #     <OPTION_2>: <VALUE_2>
 
+    ## @param empty_default_hostname - boolean - required
+    ## The Fly.io integration is a check where metrics are usually unrelated to the host
+    ## on which the Agent runs. Setting this parameter to true, prevents the Agent from attaching the hostname
+    ## (and the host tags) to the metrics. It is especially important to leave this parameter to "true" when you are
+    ## running the agent inside a Fly.io app as the host tags are going to be unrelated to other metrics.
+    #
+    empty_default_hostname: true
+
     ## @param match_string - string - optional - default: {__name__=~".+"}
     ## Match string used to filter the Prometheus data requested from Fly.io.
     ## For more information, see: https://prometheus.io/docs/prometheus/latest/federation/#configuring-federation
@@ -621,13 +629,6 @@ instances:
     ## https://docs.datadoghq.com/developers/write_agent_check/#collection-interval
     #
     # min_collection_interval: 15
-
-    ## @param empty_default_hostname - boolean - optional - default: false
-    ## This forces the check to send metrics with no hostname.
-    ##
-    ## This is useful for cluster-level checks.
-    #
-    # empty_default_hostname: false
 
     ## @param metric_patterns - mapping - optional
     ## A mapping of metrics to include or exclude, with each entry being a regular expression.

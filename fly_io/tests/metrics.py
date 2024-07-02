@@ -110,6 +110,30 @@ APP_UP_METRICS = [
 ]
 
 MACHINE_COUNT_METRICS = [
-    {'name': 'fly_io.machine.count', 'count': 1, 'value': 1, 'tags': ['fly_org:test'], 'hostname': '32601eaad60025'},
-    {'name': 'fly_io.machine.count', 'count': 1, 'value': 1, 'tags': ['fly_org:test'], 'hostname': '09201eeed60025'},
+    {
+        'name': 'fly_io.machine.count',
+        'count': 1,
+        'value': 1,
+        'tags': [
+            'app_id:o7vx1kl85749k3f1',
+            'app_name:example-app-1',
+            'fly_org:test',
+            'fly_platform_version:v2',
+            'instance_id:POSJ7Y49KSI6PG1H7KPKJN5IK',
+            'machine_region:ewr',
+        ],
+    },
+    {
+        'name': 'fly_io.machine.count',
+        'count': 1,
+        'value': 1,
+        'tags': [
+            'app_id:o7vx1kl85749k3f1',
+            'app_name:example-app-1',
+            'fly_org:test',
+            'fly_platform_version:v2',
+            'instance_id:01AP4Y49KSI6PG1H7KPKJN5GF',
+            'machine_region:ewr',
+        ],
+    },
 ]

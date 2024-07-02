@@ -23,6 +23,14 @@ files:
         headers.value.example:
           Authorization: "Bearer <FLY_ACCESS_TOKEN>"
         auth_token.display_priority: 2
+        empty_default_hostname.display_priority: 1
+        empty_default_hostname.required: true
+        empty_default_hostname.value.example: true
+        empty_default_hostname.description: |
+          The Fly.io integration is a check where metrics are usually unrelated to the host
+          on which the Agent runs. Setting this parameter to true, prevents the Agent from attaching the hostname
+          (and the host tags) to the metrics. It is especially important to leave this parameter to "true" when you are
+          running the agent inside a Fly.io app as the host tags are going to be unrelated to other metrics.
     - name: org_slug
       display_priority: 5
       enabled: true
