@@ -47,7 +47,6 @@ class MySQLMetadata(DBMAsyncJob):
     """
 
     def __init__(self, check, config, connection_args):
-        #TODO may be add _ to some
         self._schemas_enabled = is_affirmative(config.schemas_config.get("enabled", False))
         self._schemas_collection_interval = config.schemas_config.get(
             "collection_interval", DEFAULT_SCHEMAS_COLLECTION_INTERVAL
@@ -78,7 +77,7 @@ class MySQLMetadata(DBMAsyncJob):
         self._check = check
         self._schemas = Schemas(self, check, config)
         self._last_settings_collection_time = 0
-        self._last_schemas_collection_time = 0
+        self._last_databases_collection_time = 0
 
 
     def get_db_connection(self):
@@ -126,14 +125,14 @@ class MySQLMetadata(DBMAsyncJob):
                 raise
             finally:
                 self._last_settings_collection_time = time.time()
-        elapsed_time_schemas = time.time() - self._last_schemas_collection_time
+        elapsed_time_schemas = time.time() - self._last_databases_collection_time
         if self._schemas_enabled and elapsed_time_schemas >= self._schemas_collection_interval:
             try: 
-                self._schemas._collect_schemas_data(self._tags) 
+                self._schemas._collect_databases_data(self._tags) 
             except:
                 raise
             finally:
-                self._last_schemas_collection_time = time.time()
+                self._last_databases_collection_time = time.time()
 
     def shut_down(self):
         self._schemas.shut_down()

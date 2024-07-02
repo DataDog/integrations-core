@@ -494,15 +494,15 @@ def test_collect_schemas(aggregator, dd_run_check, dbm_instance):
     actual_payloads = {}
 
     for schema_event in (e for e in dbm_metadata if e['kind'] == 'mysql_databases'):
-        #pdb.set_trace()
         assert schema_event.get("timestamp") is not None
         assert schema_event["host"] == "stubbed.hostname"
         assert schema_event["agent_version"] == "0.0.0"
         assert schema_event["dbms"] == "mysql"
         assert schema_event.get("collection_interval") is not None
         assert schema_event.get("dbms_version") is not None
+        assert (schema_event.get("flavor") == "MariaDB") or (schema_event.get("flavor") == "MySQL")
         assert sorted(schema_event["tags"]) == ['dd.internal.resource:database_instance:stubbed.hostname', 'port:13306', 'tag1:value1', 'tag2:value2']
-
+        #pdb.set_trace()
         database_metadata = schema_event['metadata']
         assert len(database_metadata) == 1
         db_name = database_metadata[0]['name']

@@ -45,11 +45,12 @@ class SubmitData:
         self.db_to_tables = {}  # dbname : {"tables" : []}
         self.db_info = {}  # name to info
 
-    def set_base_event_data(self, hostname, tags, cloud_metadata, dbms_version):
+    def set_base_event_data(self, hostname, tags, cloud_metadata, dbms_version, flavor):
         self._base_event["host"] = hostname
         self._base_event["tags"] = tags
         self._base_event["cloud_metadata"] = cloud_metadata
         self._base_event["dbms_version"] = dbms_version
+        self._base_event["flavor"] = flavor
 
     def reset(self):
         self._total_columns_sent = 0
@@ -188,7 +189,7 @@ class Schemas:
 
 
     @tracked_method(agent_check_getter=agent_check_getter)
-    def _collect_schemas_data(self, tags):
+    def _collect_databases_data(self, tags):
         """Collects database information and schemas and submits to the agent's queue as dictionaries
         schema dict
         key/value:
@@ -237,7 +238,8 @@ class Schemas:
                 self._check.resolved_hostname,
                 self._tags,
                 self._check._config.cloud_metadata,
-                self._check.version,
+                self._check.version.version,
+                self._check.version.flavor
             )
             db_infos = self._query_db_information(cursor)
             self._data_submitter.store_db_infos(db_infos)
@@ -252,7 +254,7 @@ class Schemas:
                 self._fetch_database_data(cursor, start_time, db_info['name'])
             except StopIteration as e:
                 self._log.error(
-                    "While executing fetch schemas for databse {}, the following exception occured {}".format(
+                    "While executing fetch database data for databse {}, the following exception occured {}".format(
                         db_info['name'], e
                     )
                 )
@@ -260,7 +262,7 @@ class Schemas:
             #TODO fix this return in sqlserver as it should switch to the original DB
             except Exception as e:
                 self._log.error(
-                    "While executing fetch schemas for databse {}, the following exception occured {}".format(
+                    "While executing fetch database data for databse {}, the following exception occured {}".format(
                         db_info['name'], e
                     )
                 )
