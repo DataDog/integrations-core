@@ -21,4 +21,6 @@ INSTANCE = {
 LAB_INSTANCE = {
     'org_slug': ORG_SLUG,
     'headers': {'Authorization': f'Bearer {FLY_ACCESS_TOKEN}'},
+    'machines_api_endpoint': 'https://api.machines.dev',
+    'empty_default_hostname': True,
 }
