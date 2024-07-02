@@ -241,7 +241,11 @@ def dep(check, require_base_check_version, min_base_check_version):
             message = (
                 f'Mismatch for dependency `{name}`:\n'
                 f'    Agent: {" | ".join(sorted(agent_dependency_definitions))}\n'
-                f'    Checks: {" | ".join(sorted(check_dependency_definitions))}'
+                f'    Checks: {" | ".join(sorted(check_dependency_definitions))}\n'
+                'If you think the Agent requirements are correct, run:\n'
+                'ddev dep sync\n'
+                'If you think the Checks requirements are correct, run:\n'
+                'ddev dep freeze'
             )
             echo_failure(message)
             annotate_error(agent_dependencies_file, message)
