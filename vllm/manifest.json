@@ -41,7 +41,8 @@
       }
     },
     "monitors": {
-        "token_throughput": "assets/monitors/token_throughput.json"
+        "token_throughput": "assets/monitors/token_throughput.json",
+        "latency": "assets/monitors/latency.json"
     }
   },
   "author": {
