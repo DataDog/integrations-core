@@ -472,25 +472,25 @@ def add_schema_test_databases(cursor):
     cursor.execute("GRANT SELECT ON datadog_test_schemas.* TO 'dog'@'%';")
     cursor.execute(
         """CREATE TABLE cities (
-    id INT NOT NULL DEFAULT 0,
-    name VARCHAR(255),
-    population INT NOT NULL DEFAULT 0,
-    CONSTRAINT PK_Cities PRIMARY KEY (id))
-    """
+           id INT NOT NULL DEFAULT 0,
+           name VARCHAR(255),
+           population INT NOT NULL DEFAULT 0,
+           CONSTRAINT PK_Cities PRIMARY KEY (id))
+        """
     )
     cursor.execute(
         """CREATE TABLE cities_partitioned (
-    id INT NOT NULL DEFAULT 0,
-    name VARCHAR(255),
-    population INT NOT NULL DEFAULT 0,
-    CONSTRAINT PK_Cities PRIMARY KEY (id))
+           id INT NOT NULL DEFAULT 0,
+           name VARCHAR(255),
+           population INT NOT NULL DEFAULT 0,
+           CONSTRAINT PK_Cities PRIMARY KEY (id))
 
-    PARTITION BY RANGE (id) (
-    PARTITION p0 VALUES LESS THAN (100),
-    PARTITION p1 VALUES LESS THAN (200),
-    PARTITION p2 VALUES LESS THAN (300),
-    PARTITION p3 VALUES LESS THAN MAXVALUE);
-    """
+           PARTITION BY RANGE (id) (
+           PARTITION p0 VALUES LESS THAN (100),
+           PARTITION p1 VALUES LESS THAN (200),
+           PARTITION p2 VALUES LESS THAN (300),
+           PARTITION p3 VALUES LESS THAN MAXVALUE);
+        """
     )
 
     # create one column index
@@ -500,17 +500,19 @@ def add_schema_test_databases(cursor):
 
     cursor.execute(
         """CREATE TABLE landmarks (
-    name VARCHAR(255),
-    city_id INT DEFAULT 0,
-    CONSTRAINT FK_CityId FOREIGN KEY (city_id) REFERENCES cities(id));"""
+           name VARCHAR(255),
+           city_id INT DEFAULT 0,
+           CONSTRAINT FK_CityId FOREIGN KEY (city_id) REFERENCES cities(id));
+        """
     )
 
     cursor.execute(
         """ CREATE TABLE Restaurants (
-    RestaurantName VARCHAR(255),
-    District VARCHAR(100),
-    Cuisine VARCHAR(100),
-    CONSTRAINT UC_RestaurantNameDistrict UNIQUE (RestaurantName, District)); """
+            RestaurantName VARCHAR(255),
+            District VARCHAR(100),
+            Cuisine VARCHAR(100),
+            CONSTRAINT UC_RestaurantNameDistrict UNIQUE (RestaurantName, District));
+        """
     )
 
     cursor.execute(
@@ -519,8 +521,8 @@ def add_schema_test_databases(cursor):
             District VARCHAR(255),
             Review TEXT,
             CONSTRAINT FK_RestaurantNameDistrict FOREIGN KEY (RestaurantName, District)
-            REFERENCES Restaurants(RestaurantName, District)
-        );"""
+            REFERENCES Restaurants(RestaurantName, District));
+        """
     )
     # Second DB
     cursor.execute("CREATE DATABASE datadog_test_schemas_second;")
@@ -531,14 +533,14 @@ def add_schema_test_databases(cursor):
     cursor.execute("CREATE UNIQUE INDEX thingsindex ON ϑings (name);")
 
     cursor.execute(
+        """CREATE TABLE ts (id INT, purchased DATE)
+           PARTITION BY RANGE( YEAR(purchased) )
+           SUBPARTITION BY HASH( TO_DAYS(purchased) )
+           SUBPARTITIONS 2 (
+               PARTITION p0 VALUES LESS THAN (1990),
+               PARTITION p1 VALUES LESS THAN (2000),
+               PARTITION p2 VALUES LESS THAN MAXVALUE);
         """
-    CREATE TABLE ts (id INT, purchased DATE)
-        PARTITION BY RANGE( YEAR(purchased) )
-        SUBPARTITION BY HASH( TO_DAYS(purchased) )
-        SUBPARTITIONS 2 (
-            PARTITION p0 VALUES LESS THAN (1990),
-            PARTITION p1 VALUES LESS THAN (2000),
-            PARTITION p2 VALUES LESS THAN MAXVALUE);"""
     )
 
 
