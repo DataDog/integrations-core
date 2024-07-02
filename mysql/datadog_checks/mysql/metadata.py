@@ -8,6 +8,7 @@ from operator import attrgetter
 import pymysql
 
 from datadog_checks.mysql.cursor import CommenterDictCursor
+from datadog_checks.mysql.schemas import DEFAULT_SCHEMAS_COLLECTION_INTERVAL, Schemas
 
 from .util import connect_with_autocommit
 
@@ -43,17 +44,26 @@ class MySQLMetadata(DBMAsyncJob):
     """
     Collects database metadata. Supports:
     1. collection of performance_schema.global_variables
+    2. collection of databases(schemas) data
     """
 
     def __init__(self, check, config, connection_args):
-        self.collection_interval = float(
+        self._schemas_enabled = is_affirmative(config.schemas_config.get("enabled", False))
+        self._schemas_collection_interval = config.schemas_config.get(
+            "collection_interval", DEFAULT_SCHEMAS_COLLECTION_INTERVAL
+        )
+        self._settings_enabled = is_affirmative(config.settings_config.get('enabled', False))
+
+        self._settings_collection_interval = float(
             config.settings_config.get('collection_interval', DEFAULT_SETTINGS_COLLECTION_INTERVAL)
         )
+        self.collection_interval = min(self._schemas_collection_interval, self._settings_collection_interval)
+
         super(MySQLMetadata, self).__init__(
             check,
             rate_limit=1 / self.collection_interval,
             run_sync=is_affirmative(config.settings_config.get('run_sync', False)),
-            enabled=is_affirmative(config.settings_config.get('enabled', False)),
+            enabled=self._schemas_enabled or self._settings_enabled,
             min_collection_interval=config.min_collection_interval,
             dbms="mysql",
             expected_db_exceptions=(pymysql.err.DatabaseError,),
@@ -66,8 +76,11 @@ class MySQLMetadata(DBMAsyncJob):
         self._connection_args = connection_args
         self._db = None
         self._check = check
+        self._schemas = Schemas(self, check, config)
+        self._last_settings_collection_time = 0
+        self._last_databases_collection_time = 0
 
-    def _get_db_connection(self):
+    def get_db_connection(self):
         """
         lazy reconnect db
         pymysql connections are not thread safe so we can't reuse the same connection from the main check
@@ -103,7 +116,18 @@ class MySQLMetadata(DBMAsyncJob):
             raise
 
     def run_job(self):
-        self.report_mysql_metadata()
+        elapsed_time_settings = time.time() - self._last_settings_collection_time
+        if self._settings_enabled and elapsed_time_settings >= self._settings_collection_interval:
+            self._last_settings_collection_time = time.time()
+            self.report_mysql_metadata()
+
+        elapsed_time_databases = time.time() - self._last_databases_collection_time
+        if self._schemas_enabled and elapsed_time_databases >= self._schemas_collection_interval:
+            self._last_databases_collection_time = time.time()
+            self._schemas._collect_databases_data(self._tags)
+
+    def shut_down(self):
+        self._schemas.shut_down()
 
     @tracked_method(agent_check_getter=attrgetter('_check'))
     def report_mysql_metadata(self):
@@ -114,7 +138,7 @@ class MySQLMetadata(DBMAsyncJob):
             else MARIADB_TABLE_NAME
         )
         query = SETTINGS_QUERY.format(table_name=table_name)
-        with closing(self._get_db_connection().cursor(CommenterDictCursor)) as cursor:
+        with closing(self.get_db_connection().cursor(CommenterDictCursor)) as cursor:
             self._cursor_run(
                 cursor,
                 query,

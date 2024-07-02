@@ -42,6 +42,8 @@ class MySQLConfig(object):
         self.statement_metrics_config = instance.get('query_metrics', {}) or {}
         self.settings_config = instance.get('collect_settings', {}) or {}
         self.activity_config = instance.get('query_activity', {}) or {}
+        self.schemas_config: dict = instance.get('schemas_collection', {}) or {}
+
         self.cloud_metadata = {}
         aws = instance.get('aws', {})
         gcp = instance.get('gcp', {})

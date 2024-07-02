@@ -74,6 +74,87 @@ SQL_GROUP_REPLICATION_PLUGIN_STATUS = """\
 SELECT plugin_status
 FROM information_schema.plugins WHERE plugin_name='group_replication'"""
 
+SQL_DATABASES = """
+SELECT schema_name as `name`,default_character_set_name,default_collation_name FROM information_schema.SCHEMATA
+WHERE schema_name not in ('mysql', 'performance_schema', 'information_schema')"""
+
+SQL_TABLES = """\
+SELECT table_name as `name` FROM information_schema.TABLES WHERE TABLE_SCHEMA = %s
+"""
+
+SQL_COLUMNS = """\
+SELECT table_name,
+       column_name as `name`,
+       data_type, column_default as `default`,
+       is_nullable as `nullable`,
+       ordinal_position
+FROM INFORMATION_SCHEMA.COLUMNS
+WHERE table_schema = %s AND table_name IN ({});
+"""
+
+SQL_INDEXES = """\
+SELECT
+    table_name,
+    index_name as `name`,
+    collation,
+    cardinality,
+    index_type,
+    group_concat(seq_in_index order by seq_in_index asc) as seq_in_index,
+    group_concat(column_name order by seq_in_index asc) as columns,
+    group_concat(sub_part order by seq_in_index asc) as sub_parts,
+    group_concat(packed order by seq_in_index asc) as packed,
+    group_concat(nullable order by seq_in_index asc) as nullables,
+    group_concat(non_unique order by seq_in_index asc) as non_uniques
+FROM INFORMATION_SCHEMA.STATISTICS
+WHERE table_schema = %s AND table_name IN ({})
+GROUP BY table_name, index_name, collation, cardinality, index_type;
+"""
+
+SQL_FOREIGN_KEYS = """\
+SELECT
+    constraint_schema,
+    constraint_name as `name`,
+    table_name,
+    group_concat(column_name) as column_names,
+    referenced_table_schema,
+    referenced_table_name,
+    group_concat(referenced_column_name) as referenced_column_names
+FROM
+    INFORMATION_SCHEMA.KEY_COLUMN_USAGE
+WHERE
+    table_schema = %s AND table_name in ({})
+    AND referenced_table_name is not null
+GROUP BY constraint_schema, constraint_name, table_name, referenced_table_schema, referenced_table_name;
+"""
+
+SQL_PARTITION = """\
+SELECT
+    table_name,
+    partition_name as `name`,
+    group_concat(subpartition_name order by subpartition_ordinal_position asc) as subpartition_names,
+    partition_ordinal_position,
+    group_concat(subpartition_ordinal_position order by subpartition_ordinal_position asc)
+        as subpartition_ordinal_positions,
+    partition_method,
+    group_concat(subpartition_method order by subpartition_ordinal_position asc) as subpartition_methods,
+    partition_expression,
+    group_concat(subpartition_expression order by subpartition_ordinal_position asc) as subpartition_expressions,
+    partition_description,
+    table_rows ,
+    group_concat(data_length order by subpartition_ordinal_position asc) as data_lengths,
+    group_concat(max_data_length order by subpartition_ordinal_position asc) as max_data_lengths,
+    group_concat(index_length order by subpartition_ordinal_position asc) as index_lengths,
+    group_concat(data_free order by subpartition_ordinal_position asc) as data_free,
+    partition_comment,
+    tablespace_name
+FROM INFORMATION_SCHEMA.PARTITIONS
+WHERE
+    table_schema = %s AND table_name in ({}) AND partition_name IS NOT NULL
+GROUP BY table_name, partition_name, partition_ordinal_position, partition_method,
+         partition_expression, partition_description, table_rows, partition_comment,
+         tablespace_name
+"""
+
 QUERY_DEADLOCKS = {
     'name': 'information_schema.INNODB_METRICS.lock_deadlocks',
     'query': """

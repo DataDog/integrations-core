@@ -153,6 +153,16 @@ class QuerySamples(BaseModel):
     seen_samples_cache_maxsize: Optional[int] = None
 
 
+class SchemasCollection(BaseModel):
+    model_config = ConfigDict(
+        arbitrary_types_allowed=True,
+        frozen=True,
+    )
+    collection_interval: Optional[float] = None
+    enabled: Optional[bool] = None
+    max_execution_time: Optional[float] = None
+
+
 class Ssl(BaseModel):
     model_config = ConfigDict(
         arbitrary_types_allowed=True,
@@ -201,6 +211,7 @@ class InstanceConfig(BaseModel):
     query_samples: Optional[QuerySamples] = None
     read_timeout: Optional[float] = None
     reported_hostname: Optional[str] = None
+    schemas_collection: Optional[SchemasCollection] = None
     service: Optional[str] = None
     sock: Optional[str] = None
     ssl: Optional[Ssl] = None
