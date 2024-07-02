@@ -41,10 +41,14 @@ class FlyIoCheck(OpenMetricsBaseCheckV2, ConfigMixin):
         self.log.debug("Getting app status for %s", app_name)
         app_details_endpoint = f"{self.machines_api_endpoint}/v1/apps/{app_name}"
         response = self.http.get(app_details_endpoint)
-        response.raise_for_status()
-        app = response.json()
-        app_status = app.get("status")
-        return app_status
+        try:
+            response.raise_for_status()
+            app = response.json()
+            app_status = app.get("status")
+            return app_status
+        except Exception:
+            self.log.info("Failed to collect app status for app %s", app_name)
+            return None
 
     def _collect_machines_for_app(self, app_name, app_tags):
         self.log.debug("Getting machines for app %s in org %s", app_name, self.org_slug)

@@ -3,6 +3,7 @@
 # Licensed under a 3-clause BSD style license (see LICENSE)
 
 import copy
+import logging
 
 import pytest
 
@@ -128,3 +129,57 @@ def test_external_host_tags(instance, datadog_agent, dd_run_check):
             ]
         },
     )
+
+
+@pytest.mark.parametrize(
+    ('mock_http_get, log_lines'),
+    [
+        pytest.param(
+            {'http_error': {'/v1/apps/example-app-2': MockResponse(status_code=404)}},
+            ['Failed to collect app status for app example-app-2'],
+            id='one app',
+        ),
+        pytest.param(
+            {
+                'http_error': {
+                    '/v1/apps/example-app-1': MockResponse(status_code=404),
+                    '/v1/apps/example-app-2': MockResponse(status_code=404),
+                }
+            },
+            [
+                'Failed to collect app status for app example-app-2',
+                'Failed to collect app status for app example-app-1',
+            ],
+            id='two apps',
+        ),
+    ],
+    indirect=['mock_http_get'],
+)
+@pytest.mark.usefixtures('mock_http_get')
+def test_app_status_failed(dd_run_check, aggregator, instance, caplog, log_lines):
+
+    check = FlyIoCheck('fly_io', {}, [instance])
+    caplog.set_level(logging.DEBUG)
+    dd_run_check(check)
+    aggregator.assert_metric(
+        'fly_io.app.count',
+        tags=[
+            'app_id:4840jpkjkxo1ei63',
+            'app_name:example-app-2',
+            'app_network:default',
+            'app_status:None',
+            'fly_org:test',
+        ],
+    )
+
+    app_1_tags = ['app_id:o7vx1kl85749k3f1', 'app_name:example-app-1', 'app_network:default', 'fly_org:test']
+
+    if len(log_lines) == 2:
+        app_1_tags.append('app_status:None')
+    else:
+        app_1_tags.append('app_status:deployed')
+
+    aggregator.assert_metric('fly_io.app.count', tags=app_1_tags)
+
+    for log_line in log_lines:
+        assert log_line in caplog.text
