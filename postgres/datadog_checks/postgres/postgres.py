@@ -41,6 +41,7 @@ from .util import (
     ANALYZE_PROGRESS_METRICS,
     AWS_RDS_HOSTNAME_SUFFIX,
     AZURE_DEPLOYMENT_TYPE_TO_RESOURCE_TYPE,
+    BUFFERCACHE_METRICS,
     CLUSTER_VACUUM_PROGRESS_METRICS,
     CONNECTION_METRICS,
     COUNT_METRICS,
@@ -301,6 +302,8 @@ class PostgreSql(AgentCheck):
                 if self._config.collect_wal_metrics is not False:
                     # collect wal metrics for pg >= 10 only if the user has not explicitly disabled it
                     queries.append(WAL_FILE_METRICS)
+            if self._config.collect_buffercache_metrics:
+                queries.append(BUFFERCACHE_METRICS)
             queries.append(QUERY_PG_REPLICATION_SLOTS)
             queries.append(VACUUM_PROGRESS_METRICS)
             queries.append(STAT_SUBSCRIPTION_METRICS)

@@ -256,6 +256,13 @@ files:
         example:
           - application_name
         default: []
+    - name: collect_buffercache_metrics
+      description: |
+        If set to true, collects metrics regarding buffer cache usage from pg_buffercache.
+        pg_buffercache extension must be installed.
+      value:
+        type: boolean
+        example: false
     - name: collect_database_size_metrics
       description: Collect database size metrics.
       value:
