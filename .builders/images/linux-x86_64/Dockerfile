@@ -26,7 +26,7 @@ RUN yum install -y openssl-devel && \
  RELATIVE_PATH=Python-{{version}} \
  bash install-from-source.sh \
  --prefix=/opt/python/${PYTHON2_VERSION} --with-ensurepip=yes --enable-ipv6 --enable-unicode=ucs4 \
- && yum remove -y openssl-devel --debug
+ && yum remove -y openssl-devel
 
 # Set up virtual environment for Python 2
 RUN /opt/python/${PYTHON2_VERSION}/bin/python -m pip install --no-warn-script-location virtualenv \
