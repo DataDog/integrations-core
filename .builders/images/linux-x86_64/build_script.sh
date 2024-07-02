@@ -20,7 +20,7 @@ if [[ "${DD_BUILD_PYTHON_VERSION}" == "3" ]]; then
         VERSION="${kafka_version}" \
         SHA256="d645e47d961db47f1ead29652606a502bdd2a880c85c1e060e94eea040f1a19a" \
         RELATIVE_PATH="librdkafka-{{version}}" \
-        bash install-from-source.sh --prefix="${DD_PREFIX_PATH}" --enable-sasl --enable-curl
+        bash install-from-source.sh --with-ssl=/usr/local --enable-sasl --enable-curl
     always_build+=("confluent-kafka")
 
     # The version of pyodbc is dynamically linked against a version of the odbc which doesn't come included in the wheel
