@@ -1,4 +1,4 @@
-id: cisco_secure_endpoint
+id: cisco-secure-endpoint
 metric_id: cisco-secure-endpoint
 backend_only: false
 facets:

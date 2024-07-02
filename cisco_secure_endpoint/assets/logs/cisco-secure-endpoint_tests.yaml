@@ -1,0 +1,262 @@
+id: cisco-secure-endpoint
+tests:
+  - sample: |-
+      {
+        "item" : "abc@xyz.com",
+        "audit_log_type" : "User",
+        "created_at" : "2024-06-19T10:16:22Z",
+        "audit_log_user" : "abc@xyz.com",
+        "event" : "sso_login",
+        "message" : "SCSO",
+        "audit_log_id" : "10bfd8f2-8569-4b78-8996-19acc900f4fc"
+      }
+    result:
+      custom:
+        audit_log_id: "10bfd8f2-8569-4b78-8996-19acc900f4fc"
+        audit_log_type: "User"
+        audit_log_user: "abc@xyz.com"
+        created_at: "2024-06-19T10:16:22Z"
+        event: "sso_login"
+        item: "abc@xyz.com"
+      message: "SCSO"
+      tags:
+      - "source:LOGS_SOURCE"
+
+  - sample: |-
+      {
+        "item" : "f_00020c",
+        "new_attributes" : {
+          "analysis_state" : "threat_analyses.threat_analysis.failed.description"
+        },
+        "audit_log_type" : "FetchedFile",
+        "created_at" : "2024-06-19T06:38:50Z",
+        "event" : "update"
+      }
+    result:
+      custom:
+        audit_log_type: "FetchedFile"
+        created_at: "2024-06-19T06:38:50Z"
+        event: "update"
+        item: "f_00020c"
+        new_attributes:
+          analysis_state: "threat_analyses.threat_analysis.failed.description"
+      message: |-
+        {
+          "item" : "f_00020c",
+          "new_attributes" : {
+            "analysis_state" : "threat_analyses.threat_analysis.failed.description"
+          },
+          "audit_log_type" : "FetchedFile",
+          "created_at" : "2024-06-19T06:38:50Z",
+          "event" : "update"
+        }
+      tags:
+      - "source:LOGS_SOURCE"
+  - sample: |-
+      {
+        "item" : "Unconfirmed 61021.crdownload",
+        "new_attributes" : {
+          "original_filename" : "f_000253",
+          "state" : "processing"
+        },
+        "audit_log_type" : "FetchedFile",
+        "created_at" : "2024-06-19T06:28:17Z",
+        "event" : "update",
+        "old_attributes" : {
+          "state" : "requested"
+        }
+      }
+    result:
+      custom:
+        audit_log_type: "FetchedFile"
+        created_at: "2024-06-19T06:28:17Z"
+        event: "update"
+        item: "Unconfirmed 61021.crdownload"
+        new_attributes:
+          original_filename: "f_000253"
+          state: "processing"
+        old_attributes:
+          state: "requested"
+      message: |-
+        {
+          "item" : "Unconfirmed 61021.crdownload",
+          "new_attributes" : {
+            "original_filename" : "f_000253",
+            "state" : "processing"
+          },
+          "audit_log_type" : "FetchedFile",
+          "created_at" : "2024-06-19T06:28:17Z",
+          "event" : "update",
+          "old_attributes" : {
+            "state" : "requested"
+          }
+        }
+      tags:
+      - "source:LOGS_SOURCE"
+  - sample: |2-
+      {
+        "id": 7381460803565650000,
+        "timestamp": 1718630270,
+        "timestamp_nanoseconds": 659000000,
+        "date": "2024-06-17T13:17:50+00:00",
+        "event_type": "Threat Detected",
+        "event_type_id": 1090519054,
+        "detection": "a10.6C795DAE2F-100.SBX.TG",
+        "detection_id": "1001460803565649962",
+        "connector_guid": "1e00608f-a921-485b-bbdf-32c59ae60e21",
+        "group_guids": [
+          "187e0cf4-6a83-4ebf-a126-7bd16f6942d7"
+        ],
+        "severity": "Medium",
+        "computer": {
+          "connector_guid": "1e00608f-a921-485b-bbdf-32c59ae60e21",
+          "hostname": "AssetTag-EID-New",
+          "external_ip": "0.0.0.0",
+          "user": "ABC@ASSETTAG-EID-NE",
+          "active": true,
+          "operating_system": "Windows 11, SP 0.0 (Build 22631.3593)",
+          "internal_ips": [
+            "0.0.0.0"
+          ],
+          "is_compromised": true,
+          "policy": {
+            "guid": "eb5fcfe1-11cd-4d0f-8c29-4c436d341000",
+            "name": "ABC Windows"
+          },
+          "isolation": {
+            "available": true,
+            "status": "not_isolated"
+          },
+          "risk_score": 100,
+          "network_addresses": [
+            {
+              "ip": "0.0.0.0",
+              "mac": "a0:b0:10:10:ab:10"
+            }
+          ],
+          "links": {
+            "computer": "https://api.xyz.amp.cisco.com/v1/computers/1e62608f-a921-485b-bbdf-32c59ae60e21",
+            "trajectory": "https://api.xyz.amp.cisco.com/v1/computers/1e62608f-a921-485b-bbdf-32c59ae60e21/trajectory",
+            "group": "https://api.xyz.amp.cisco.com/v1/groups/187e0cf4-6a83-4ebf-a126-7bd16f6942d7"
+          }
+        },
+        "file": {
+          "disposition": "Malicious",
+          "file_name": "Unconfirmed 245595.crdownload",
+          "file_path": "\\\\?\\C:\\Users\\Downloads\\Unconfirmed 245595.crdownload",
+          "identity": {
+            "sha256": "1c005dae2f80a493657ed336cad9745332258944331be5edaa7bb970070aee41",
+            "sha1": "dd1006ac22294bf25e1eb89cf13d2a5edad36711",
+            "md5": "2edc100998e26c12eb8922a37760110c"
+          },
+          "parent": {
+            "process_id": 9584,
+            "disposition": "Blocklisted",
+            "file_name": "chrome.exe",
+            "identity": {
+              "sha256": "b100000dd4cc4bde76d3c9dd6ee14606fc72cbff57c757543d9ab511ac112c242",
+              "sha1": "f1000100be1c100f97d9717f216b40d641c8add8",
+              "md5": "bb0f1d1f1b0e100a1000000d1e100a1e"
+            }
+          }
+        },
+        "tactics": [
+          "TA0002",
+          "TA0011",
+          "TA0042"
+        ],`
+        "techniques": [
+          "T1105",
+          "T1204",
+          "T1204.003",
+          "T1569"
+        ]
+      }
+    result:
+      custom: {}
+      message: |2-
+        {
+          "id": 7381460803565650000,
+          "timestamp": 1718630270,
+          "timestamp_nanoseconds": 659000000,
+          "date": "2024-06-17T13:17:50+00:00",
+          "event_type": "Threat Detected",
+          "event_type_id": 1090519054,
+          "detection": "a10.6C795DAE2F-100.SBX.TG",
+          "detection_id": "1001460803565649962",
+          "connector_guid": "1e00608f-a921-485b-bbdf-32c59ae60e21",
+          "group_guids": [
+            "187e0cf4-6a83-4ebf-a126-7bd16f6942d7"
+          ],
+          "severity": "Medium",
+          "computer": {
+            "connector_guid": "1e00608f-a921-485b-bbdf-32c59ae60e21",
+            "hostname": "AssetTag-EID-New",
+            "external_ip": "0.0.0.0",
+            "user": "ABC@ASSETTAG-EID-NE",
+            "active": true,
+            "operating_system": "Windows 11, SP 0.0 (Build 22631.3593)",
+            "internal_ips": [
+              "0.0.0.0"
+            ],
+            "is_compromised": true,
+            "policy": {
+              "guid": "eb5fcfe1-11cd-4d0f-8c29-4c436d341000",
+              "name": "ABC Windows"
+            },
+            "isolation": {
+              "available": true,
+              "status": "not_isolated"
+            },
+            "risk_score": 100,
+            "network_addresses": [
+              {
+                "ip": "0.0.0.0",
+                "mac": "a0:b0:10:10:ab:10"
+              }
+            ],
+            "links": {
+              "computer": "https://api.xyz.amp.cisco.com/v1/computers/1e62608f-a921-485b-bbdf-32c59ae60e21",
+              "trajectory": "https://api.xyz.amp.cisco.com/v1/computers/1e62608f-a921-485b-bbdf-32c59ae60e21/trajectory",
+              "group": "https://api.xyz.amp.cisco.com/v1/groups/187e0cf4-6a83-4ebf-a126-7bd16f6942d7"
+            }
+          },
+          "file": {
+            "disposition": "Malicious",
+            "file_name": "Unconfirmed 245595.crdownload",
+            "file_path": "\\\\?\\C:\\Users\\Downloads\\Unconfirmed 245595.crdownload",
+            "identity": {
+              "sha256": "1c005dae2f80a493657ed336cad9745332258944331be5edaa7bb970070aee41",
+              "sha1": "dd1006ac22294bf25e1eb89cf13d2a5edad36711",
+              "md5": "2edc100998e26c12eb8922a37760110c"
+            },
+            "parent": {
+              "process_id": 9584,
+              "disposition": "Blocklisted",
+              "file_name": "chrome.exe",
+              "identity": {
+                "sha256": "b100000dd4cc4bde76d3c9dd6ee14606fc72cbff57c757543d9ab511ac112c242",
+                "sha1": "f1000100be1c100f97d9717f216b40d641c8add8",
+                "md5": "bb0f1d1f1b0e100a1000000d1e100a1e"
+              }
+            }
+          },
+          "tactics": [
+            "TA0002",
+            "TA0011",
+            "TA0042"
+          ],`
+          "techniques": [
+            "T1105",
+            "T1204",
+            "T1204.003",
+            "T1569"
+          ]
+        }
+      tags:
+      - "source:LOGS_SOURCE"
+
+# The `result` field should be left blank to start. Once you submit your log asset files with
+# your integration pull-request in a Datadog GitHub repository, Datadog's validations will
+# run your raw logs against your pipeline and return the result. If the result output in the
+# validation is accurate, take the output and add it to the `result` field in your test YAML file.
