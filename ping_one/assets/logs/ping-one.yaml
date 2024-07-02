@@ -247,3 +247,8 @@ pipeline:
       targetType: attribute
       preserveSource: false
       overrideOnConflict: false
+    - type: message-remapper
+      name: Define `result.description` as the official message attribute of the log
+      enabled: true
+      sources:
+        - result.description
