@@ -53,7 +53,7 @@ Query OK, 0 rows affected, 1 warning (0.00 sec)
 For MySQL 8.0 or greater, grant `replication client` and set `max_user_connections` with the following commands:
 
 ```shell
-mysql> GRANT REPLICATION CLIENT ON *.* TO 'datadog'@'%'
+mysql> GRANT REPLICATION CLIENT ON *.* TO 'datadog'@'%';
 Query OK, 0 rows affected (0.00 sec)
 mysql> ALTER USER 'datadog'@'%' WITH MAX_USER_CONNECTIONS 5;
 Query OK, 0 rows affected (0.00 sec)
