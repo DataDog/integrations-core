@@ -1,0 +1,12 @@
+version: "3.9"
+
+services:
+
+  caddy:
+    image: caddy:2.7
+    container_name: caddy
+    ports:
+      - "8080:8080"
+    volumes:
+      - ./Caddyfile:/etc/caddy/Caddyfile
+      - ../fixtures/output.txt:/metrics/metrics
