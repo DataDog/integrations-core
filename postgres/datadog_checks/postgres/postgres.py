@@ -5,6 +5,7 @@ import contextlib
 import copy
 import functools
 import os
+import threading
 from time import time
 
 import psycopg2
@@ -81,6 +82,8 @@ except ImportError:
 MAX_CUSTOM_RESULTS = 100
 
 PG_SETTINGS_QUERY = "SELECT name, setting FROM pg_settings WHERE name IN (%s, %s, %s)"
+
+CANCEL_TIMEOUT = 0.5  # the default timeout for cancelling a check run
 
 
 class PostgreSql(AgentCheck):
@@ -348,10 +351,7 @@ class PostgreSql(AgentCheck):
 
         return self._dynamic_queries
 
-    def cancel(self):
-        """
-        Cancels and sends cancel signal to all threads.
-        """
+    def _cancel(self):
         if self._config.dbm_enabled:
             self.statement_samples.cancel()
             self.statement_metrics.cancel()
@@ -359,6 +359,20 @@ class PostgreSql(AgentCheck):
         self._close_db_pool()
         if self._db:
             self._db.close()
+
+    def cancel(self):
+        """
+        cancel check within timeout
+        """
+        cancel_timeout = datadog_agent.get_config('check_cancel_timeout', CANCEL_TIMEOUT)
+        cancel_thread = threading.Thread(target=self._cancel)
+        cancel_thread.start()
+        # This is a hacky way to make sure check is canceled within timeout
+        # 0.8 is a "magic" number that was chosen to make sure we give it some room when
+        # check cancel is called from the agent, mainly for accquiring the GIL
+        cancel_thread.join(timeout=cancel_timeout * 0.8)
+        if cancel_thread.is_alive():
+            self.log.warning("Timeout while cancelling check, database connections may not be closed gracefully.")
 
     def _clean_state(self):
         self.log.debug("Cleaning state")
