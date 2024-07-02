@@ -12,9 +12,6 @@ from datadog_checks.mongo.metrics import COLLECTION_METRICS
 class CollStatsCollector(MongoCollector):
     """Collects metrics from the 'collstats' command.
     Note: Collecting those metrics requires that 'collection' is set in the 'additional_metrics' section of the config.
-    Also, the collections to be monitored have to be explicitly listed in the config as well.
-    Finally, it is currently not possible to monitor collections from multiple databases using a single check instance.
-    The check will always use the main database name defined in the configuration (or 'admin' by default).
     """
 
     def __init__(self, check, db_name, tags, coll_names=None):
@@ -26,11 +23,17 @@ class CollStatsCollector(MongoCollector):
         # Can only be run once per cluster.
         return deployment.is_principal()
 
+    def _get_collections(self, api):
+        if self.coll_names:
+            return self.coll_names
+        return api.list_authorized_collections(self.db_name)
+
     def collect(self, api):
         # Ensure that you're on the right db
         db = api[self.db_name]
-        # Loop through the collections
-        for coll_name in self.coll_names:
+        coll_names = self._get_collections(api)
+
+        for coll_name in coll_names:
             # Grab the stats from the collection
             payload = {'collection': db.command("collstats", coll_name)}
             additional_tags = ["db:%s" % self.db_name, "collection:%s" % coll_name]

@@ -6,7 +6,8 @@
         "tags": [
             "server:mongodb://testUser2:*****@localhost:27017/test",
             "name:_id_",
-            "collection:foo"
+            "collection:foo",
+            "db:test"
         ]
     },
     {
@@ -16,7 +17,8 @@
         "tags": [
             "server:mongodb://testUser2:*****@localhost:27017/test",
             "name:_id_",
-            "collection:bar"
+            "collection:bar",
+            "db:test"
         ]
     }
 ]

@@ -1,0 +1,4 @@
+Support auto-discover available databases (up to 100 databases) for the monitored mongodb instance. 
+By default, database autodiscovery is disabled. Set `database_autodiscovery.enabled` to true to enable database autodiscovery. 
+When enabled, the integration will automatically discover the databases available in the monitored mongodb instance and refresh the list of databases every 10 minutes.
+Use `database_autodiscovery.include` and `database_autodiscovery.exclude` to filter the list of databases to monitor.

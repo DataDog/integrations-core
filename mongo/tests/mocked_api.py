@@ -65,6 +65,10 @@ class MockedDB(object):
         with open(os.path.join(HERE, "fixtures", filename), 'r') as f:
             return json.load(f, object_hook=json_util.object_hook)
 
+    def list_collection_names(self, session=None, filter=None, comment=None, **kwargs):
+        with open(os.path.join(HERE, "fixtures", "list_collection_names"), 'r') as f:
+            return json.load(f)
+
     def aggregate(self, pipeline, session=None, **kwargs):
         if pipeline[0] == {'$currentOp': {'allUsers': True}}:
             # mock the $currentOp aggregation used for operation sampling

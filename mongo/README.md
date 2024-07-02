@@ -44,7 +44,12 @@ db.createUser({
   "roles": [
     { role: "read", db: "admin" },
     { role: "clusterMonitor", db: "admin" },
-    { role: "read", db: "local" }
+    { role: "read", db: "local" },
+    # Grant additional read-only access to the database you want to collect collection/index statistics from.
+    { role: "read", db: "mydb" },
+    { role: "read", db: "myanotherdb" },
+    # Alternatively, grant read-only access to all databases.
+    { role: "readAnyDatabase", db: "admin" }
   ]
 })
 ```
@@ -72,7 +77,12 @@ db.createUser({
   "roles": [
     { role: "read", db: "admin" },
     { role: "clusterMonitor", db: "admin" },
-    { role: "read", db: "local" }
+    { role: "read", db: "local" },
+    # Grant additional read-only access to the database you want to collect collection/index statistics from.
+    { role: "read", db: "mydb" },
+    { role: "read", db: "myanotherdb" },
+    # Alternatively, grant read-only access to all databases.
+    { role: "readAnyDatabase", db: "admin" }
   ]
 })
 ```
@@ -196,6 +206,81 @@ To configure this check for an Agent running on a host:
        #
        options:
          authSource: admin
+   ```
+
+2. [Restart the Agent][6].
+
+##### Database Autodiscovery
+
+Starting from Datadog Agent v7.56, you can enable database autodiscovery to automatically collect metrics from all your databases on the MongoDB instance. 
+Please note that database autodiscovery is disabled by default. Read access to the autodiscovered databases is required to collect metrics from them.
+To enable it, add the following configuration to your `mongo.d/conf.yaml` file:
+
+```yaml
+   init_config:
+
+   instances:
+       ## @param hosts - list of strings - required
+       ## Hosts to collect metrics from, as is appropriate for your deployment topology.
+       ## E.g. for a standalone deployment, specify the hostname and port of the mongod instance.
+       ## For replica sets or sharded clusters, see instructions in the sample conf.yaml.
+       ## Only specify multiple hosts when connecting through mongos
+       #
+     - hosts:
+         - <HOST>:<PORT>
+
+       ## @param username - string - optional
+       ## The username to use for authentication.
+       #
+       username: datadog
+
+       ## @param password - string - optional
+       ## The password to use for authentication.
+       #
+       password: <UNIQUE_PASSWORD>
+
+       ## @param options - mapping - optional
+       ## Connection options. For a complete list, see:
+       ## https://docs.mongodb.com/manual/reference/connection-string/#connections-connection-options
+       #
+       options:
+         authSource: admin
+
+       ## @param database_autodiscovery - mapping - optional
+       ## Enable database autodiscovery to automatically collect metrics from all your MongoDB databases.
+       #
+       database_autodiscovery:
+         ## @param enabled - boolean - required
+         ## Enable database autodiscovery.
+         #
+         enabled: true
+
+         ## @param include - list of strings - optional
+         ## List of databases to include in the autodiscovery. Use regular expressions to match multiple databases.
+         ## For example, to include all databases starting with "mydb", use "^mydb.*".
+         ## By default, include is set to ".*" and all databases are included.
+         #
+         include:
+            - "^mydb.*"
+
+         ## @param exclude - list of strings - optional
+         ## List of databases to exclude from the autodiscovery. Use regular expressions to match multiple databases.
+         ## For example, to exclude all databases starting with "mydb", use "^mydb.*".
+         ## When the exclude list conflicts with include list, the exclude list takes precedence.
+         #
+         exclude:
+            - "^mydb2.*"
+            - "admin$"
+
+         ## @param max_databases - integer - optional
+         ## Maximum number of databases to collect metrics from. The default value is 100.
+         #
+         max_databases: 100
+
+         ## @param refresh_interval - integer - optional
+         ## Interval in seconds to refresh the list of databases. The default value is 600 seconds.
+         #
+         refresh_interval: 600
    ```
 
 2. [Restart the Agent][6].

@@ -280,7 +280,7 @@
         "secs_running": 0,
         "microsecs_running": 26789,
         "op": "getmore",
-        "ns": "dbmorders_1.movies",
+        "ns": "integration.movies",
         "redacted": false,
         "command": {
             "getMore": 7153547462305880513,
@@ -340,7 +340,7 @@
                     },
                     {
                         "role": "readWrite",
-                        "db": "dbmorders_1"
+                        "db": "integration"
                     }
                 ]
             },
@@ -369,7 +369,7 @@
                 }
             },
             "mayBypassWriteBlocking": true,
-            "$db": "dbmorders_1"
+            "$db": "integration"
         },
         "queryFramework": "classic",
         "planSummary": "COLLSCAN",
@@ -508,7 +508,7 @@
                         },
                         {
                             "role": "readWrite",
-                            "db": "dbmorders_1"
+                            "db": "integration"
                         }
                     ]
                 },
@@ -537,7 +537,7 @@
                     }
                 },
                 "mayBypassWriteBlocking": true,
-                "$db": "dbmorders_1"
+                "$db": "integration"
             },
             "planSummary": "COLLSCAN",
             "operationUsingCursorId": 155914227
