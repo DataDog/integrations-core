@@ -74,11 +74,7 @@ pipeline:
               USER | LOGIN_ATTEMPT | testevdentdetailid | Login was successful
           grok:
             supportRules: ""
-            matchRules: admin_log_parser %{date("yyyy-MM-dd' 'HH:mm:ss,SSS"):timestamp} \|
-              %{regex("[^|]*"):usr.name} \| (%{data:roles:array("[]",",")})? \|
-              (%{ip:network.client.ip})? \| (%{regex("[^|]*"):component})? \|
-              (%{regex("[^|]*"):evt.name}) \| (%{regex("[^|]*"):evt.id})? \|
-              (%{regex("[^|]*"):description})?
+            matchRules: admin_log_parser %{date("yyyy-MM-dd' 'HH:mm:ss,SSS"):timestamp} \| %{regex("[^|]*"):usr.name} \| (%{data:roles:array("[]",",")})? \| (%{ip:network.client.ip})? \| (%{regex("[^|]*"):component})? \| (%{regex("[^|]*"):evt.name}) \| (%{regex("[^|]*"):evt.id})? \| (%{regex("[^|]*"):description})?
         - type: geo-ip-parser
           name: Extracting Geo Location from IP Address
           enabled: true
@@ -86,6 +82,11 @@ pipeline:
             - network.client.ip
           target: network.client.geoip
           ip_processing_behavior: do-nothing
+        - type: message-remapper
+          name: Define `description` as the official message of the log
+          enabled: true
+          sources:
+            - description
     - type: pipeline
       name: audit logs
       enabled: true
@@ -131,6 +132,11 @@ pipeline:
             - network.client.ip
           target: network.client.geoip
           ip_processing_behavior: do-nothing
+        - type: message-remapper
+          name: Define `description.details` as the official message of the log
+          enabled: true
+          sources:
+            - description.details
     - type: date-remapper
       name: Define `timestamp` as the official date of the log
       enabled: true
