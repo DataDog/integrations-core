@@ -100,7 +100,7 @@ def test_integration_mongos(instance_integration_cluster, aggregator, check, dd_
             'jumbo',
             'sessions',
         ],
-        ['sharding_cluster_role:mongos'],
+        ['sharding_cluster_role:mongos', 'clustername:my_cluster'],
     )
 
     aggregator.assert_all_metrics_covered()
@@ -159,6 +159,7 @@ def test_integration_replicaset_primary_in_shard(instance_integration, aggregato
     replica_tags = [
         'replset_name:mongo-mongodb-sharded-shard-0',
         'replset_state:primary',
+        'replset_me:mongo-mongodb-sharded-shard0-data-0.mongo-mongodb-sharded-headless.default.svc.cluster.local:27017',
         'sharding_cluster_role:shardsvr',
     ]
     metrics_categories = [
@@ -257,6 +258,7 @@ def test_integration_replicaset_secondary_in_shard(instance_integration, aggrega
     replica_tags = [
         'replset_name:mongo-mongodb-sharded-shard-0',
         'replset_state:secondary',
+        'replset_me:mongo-mongodb-sharded-shard0-data-1.mongo-mongodb-sharded-headless.default.svc.cluster.local:27017',
         'sharding_cluster_role:shardsvr',
     ]
     metrics_categories = [
@@ -318,6 +320,7 @@ def test_integration_replicaset_arbiter_in_shard(instance_integration, aggregato
     replica_tags = [
         'replset_name:mongo-mongodb-sharded-shard-0',
         'replset_state:arbiter',
+        'replset_me:mongo-mongodb-sharded-shard0-arbiter-0.mongo-mongodb-sharded-headless.default.svc.cluster.local:27017',
         'sharding_cluster_role:shardsvr',
     ]
     metrics_categories = ['serverStatus', 'replset-arbiter']
@@ -368,6 +371,7 @@ def test_integration_configsvr_primary(instance_integration, aggregator, check, 
     replica_tags = [
         'replset_name:mongo-mongodb-sharded-configsvr',
         'replset_state:primary',
+        'replset_me:mongo-mongodb-sharded-configsvr-0.mongo-mongodb-sharded-headless.default.svc.cluster.local:27017',
         'sharding_cluster_role:configsvr',
     ]
     metrics_categories = [
@@ -464,6 +468,7 @@ def test_integration_configsvr_secondary(instance_integration, aggregator, check
     replica_tags = [
         'replset_name:mongo-mongodb-sharded-configsvr',
         'replset_state:secondary',
+        'replset_me:mongo-mongodb-sharded-configsvr-1.mongo-mongodb-sharded-headless.default.svc.cluster.local:27017',
         'sharding_cluster_role:configsvr',
     ]
     metrics_categories = [
@@ -518,7 +523,11 @@ def test_integration_replicaset_primary(instance_integration, aggregator, check,
     with mock_pymongo("replica-primary"):
         dd_run_check(mongo_check)
 
-    replica_tags = ['replset_name:replset', 'replset_state:primary']
+    replica_tags = [
+        'replset_name:replset',
+        'replset_state:primary',
+        'replset_me:replset-data-0.mongo.default.svc.cluster.local:27017',
+    ]
     metrics_categories = [
         'count-dbs',
         'serverStatus',
@@ -614,7 +623,11 @@ def test_integration_replicaset_primary_config(instance_integration, aggregator,
     with mock_pymongo("replica-primary"):
         dd_run_check(mongo_check)
 
-    replica_tags = ['replset_name:replset', 'replset_state:primary']
+    replica_tags = [
+        'replset_name:replset',
+        'replset_state:primary',
+        'replset_me:replset-data-0.mongo.default.svc.cluster.local:27017',
+    ]
     metrics_categories = [
         'count-dbs',
         'serverStatus',
@@ -718,7 +731,11 @@ def test_integration_replicaset_secondary(
     with mock_pymongo("replica-secondary"):
         dd_run_check(mongo_check)
 
-    replica_tags = ['replset_name:replset', 'replset_state:secondary']
+    replica_tags = [
+        'replset_name:replset',
+        'replset_state:secondary',
+        'replset_me:replset-data-1.mongo.default.svc.cluster.local:27017',
+    ]
     metrics_categories = [
         'count-dbs',
         'serverStatus',
@@ -777,7 +794,11 @@ def test_integration_replicaset_arbiter(instance_integration, aggregator, check,
     with mock_pymongo("replica-arbiter"):
         dd_run_check(mongo_check)
 
-    replica_tags = ['replset_name:replset', 'replset_state:arbiter']
+    replica_tags = [
+        'replset_name:replset',
+        'replset_state:arbiter',
+        'replset_me:replset-arbiter-0.mongo.default.svc.cluster.local:27017',
+    ]
     metrics_categories = ['serverStatus', 'replset-arbiter']
 
     _assert_metrics(mongo_check, aggregator, metrics_categories, replica_tags)

@@ -108,7 +108,11 @@ class MySQLMetadata(DBMAsyncJob):
     @tracked_method(agent_check_getter=attrgetter('_check'))
     def report_mysql_metadata(self):
         settings = []
-        table_name = MYSQL_TABLE_NAME if not self._check.is_mariadb else MARIADB_TABLE_NAME
+        table_name = (
+            MYSQL_TABLE_NAME
+            if not self._check.is_mariadb and self._check.version.version_compatible((5, 7, 0))
+            else MARIADB_TABLE_NAME
+        )
         query = SETTINGS_QUERY.format(table_name=table_name)
         with closing(self._get_db_connection().cursor(CommenterDictCursor)) as cursor:
             self._cursor_run(

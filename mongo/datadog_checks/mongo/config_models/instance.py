@@ -51,6 +51,15 @@ class MetricPatterns(BaseModel):
     include: Optional[tuple[str, ...]] = None
 
 
+class OperationSamples(BaseModel):
+    model_config = ConfigDict(
+        arbitrary_types_allowed=True,
+        frozen=True,
+    )
+    collection_interval: Optional[float] = None
+    enabled: Optional[bool] = None
+
+
 class InstanceConfig(BaseModel):
     model_config = ConfigDict(
         validate_default=True,
@@ -74,6 +83,7 @@ class InstanceConfig(BaseModel):
     hosts: Optional[Union[str, tuple[str, ...]]] = None
     metric_patterns: Optional[MetricPatterns] = None
     min_collection_interval: Optional[float] = None
+    operation_samples: Optional[OperationSamples] = None
     options: Optional[MappingProxyType[str, Any]] = None
     password: Optional[str] = None
     replica_check: Optional[bool] = None
