@@ -6,7 +6,7 @@ This check monitors [vLLM][1] through the Datadog Agent.
 
 ## Setup
 
-Follow the instructions below to install and configure this check for an Agent running on a host. 
+Follow the instructions below to install and configure this check for an Agent running on a host.
 
 ### Installation
 
@@ -39,6 +39,11 @@ The vLLM integration does not include any service checks.
 
 See [service_checks.json][7] for a list of service checks provided by this integration.
 
+### Logs
+
+Log collection is disabled by default in the Datadog Agent. If you are running your agent as a container, [here's how to enable log collection][10]. If you are running a host agent, [follow these steps instead][11].
+In both cases make sure that the `source` value for your logs is `vllm`. This will make sure the built-in processing pipeline finds your logs. [This is how to set your logs configuration for a container][12].
+
 ## Troubleshooting
 
 Need help? Contact [Datadog support][9].
@@ -52,3 +57,6 @@ Need help? Contact [Datadog support][9].
 [6]: https://github.com/DataDog/integrations-core/blob/master/vllm/metadata.csv
 [7]: https://github.com/DataDog/integrations-core/blob/master/vllm/assets/service_checks.json
 [9]: https://docs.datadoghq.com/help/
+[10]: https://docs.datadoghq.com/containers/docker/log/?tab=containerinstallation#installation
+[11]: https://docs.datadoghq.com/containers/docker/log/?tab=hostagent#installation
+[12]: https://docs.datadoghq.com/containers/docker/log/?tab=dockerfile#log-integrations

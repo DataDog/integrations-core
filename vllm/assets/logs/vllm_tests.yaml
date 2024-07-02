@@ -1,0 +1,17 @@
+id: "vllm"
+tests:
+ -
+  sample: |-
+    INFO 06-11 21:02:01 cpu_executor.py:72] # CPU blocks: 7281
+  result:
+    custom:
+      level: "INFO"
+      timestamp: 1709652524902
+      logger:
+        lineno: 72
+        name: "cpu_executor.py"
+    message: '# CPU blocks: 7281'
+    status: "info"
+    tags:
+     - "source:LOGS_SOURCE"
+    timestamp: 1705489717330
