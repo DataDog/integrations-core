@@ -1932,7 +1932,7 @@
     },
     {
       "name": "Detection",
-      "prefix": "detection",
+      "prefix": "@detection",
       "available_values": [],
       "default": "*"
     },
