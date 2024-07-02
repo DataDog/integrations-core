@@ -77,8 +77,8 @@ instances:
     # options: {}
 
     ## @param dbnames - list of strings - optional
-    ## Set a list of the names of all databases to collect metrics from.
-    ## If this key does not exist, all metrics from all databases on the server will be collected.
+    ## Set a list of the names of all databases to collect dbstats metrics from.
+    ## If this key does not exist, all dbstats metrics from all databases on the server will be collected.
     ##
     ##
     ## <<< DEPRECATED >>>

@@ -87,8 +87,8 @@ files:
           Use database_autodiscovery.include or database_autodiscovery.exclude to include or exclude
           specific databases to collect metrics from.
       description: |
-        Set a list of the names of all databases to collect metrics from.
-        If this key does not exist, all metrics from all databases on the server will be collected.
+        Set a list of the names of all databases to collect dbstats metrics from.
+        If this key does not exist, all dbstats metrics from all databases on the server will be collected.
       value:
         type: array
         items:
