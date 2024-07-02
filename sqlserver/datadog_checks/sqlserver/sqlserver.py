@@ -773,10 +773,7 @@ class SQLServer(AgentCheck):
             if self._config.autodiscovery and self._config.autodiscovery_db_service_check:
                 self._check_database_conns()
             if self._config.dbm_enabled:
-                if is_affirmative(self.instance.get("include_agent_jobs", False)):
-                    self.agent_history.run_job_loop(self.tags)
-                else:
-                    self.log.warning("agent jobs disabled")
+                self.agent_history.run_job_loop(self.tags)
                 self.statement_metrics.run_job_loop(self.tags)
                 self.procedure_metrics.run_job_loop(self.tags)
                 self.activity.run_job_loop(self.tags)

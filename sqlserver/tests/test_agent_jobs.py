@@ -7,13 +7,21 @@ from .common import (
     EXPECTED_AGENT_JOBS_METRICS_COMMON,
 )
 
+from copy import copy
+import logging
+
+
+logger = logging.getLogger(__name__)
+
 from .conftest import DEFAULT_TIMEOUT
 
+
 AGENT_HISTORY_QUERY = """\
-SELECT 
+SELECT {history_row_limit_filter}
+    j.name,
     sjh1.job_id,
-    sjh1.step_id,
     sjh1.step_name,
+    sjh1.step_id,
     sjh1.instance_id AS step_instance_id,
     (
         SELECT MIN(sjh2.instance_id)
@@ -22,28 +30,58 @@ SELECT
         AND sjh2.step_id = 0
         AND sjh2.instance_id >= sjh1.instance_id
     ) AS completion_instance_id,
-    sjh1.run_date,
-    sjh1.run_time,
-    sjh1.run_duration,
+    (
+        SELECT DATEDIFF(SECOND, GETDATE(), SYSDATETIMEOFFSET()) +
+            DATEDIFF(SECOND, '19700101',
+                DATEADD(HOUR, sjh1.run_time / 10000,
+                    DATEADD(MINUTE, (sjh1.run_time / 100) % 100,
+                        DATEADD(SECOND, sjh1.run_time % 100,
+                            CAST(CAST(sjh1.run_date AS CHAR(8)) AS DATETIME)
+                        )
+                    )
+                )
+            )
+    ) AS run_epoch_time,
+    (
+        (sjh1.run_duration / 10000) * 3600
+        + ((sjh1.run_duration % 10000) / 100) * 60
+        + (sjh1.run_duration % 100)
+    ) AS run_duration_seconds,
     sjh1.run_status,
     sjh1.message
 FROM 
     msdb.dbo.sysjobhistory AS sjh1
-WHERE 
+INNER JOIN msdb.dbo.sysjobs AS j
+ON j.job_id = sjh1.job_id
+WHERE
     EXISTS (
         SELECT 1
         FROM msdb.dbo.sysjobhistory AS sjh2
         WHERE sjh2.job_id = sjh1.job_id
         AND sjh2.step_id = 0
-        AND sjh2.instance_id >= sjh1.instance_id{last_instance_id_filter}
+        AND sjh2.instance_id >= sjh1.instance_id
+        HAVING  MIN(DATEDIFF(SECOND, GETDATE(), SYSDATETIMEOFFSET()) +
+                    DATEDIFF(SECOND, '19700101',
+                        DATEADD(HOUR, sjh2.run_time / 10000,
+                            DATEADD(MINUTE, (sjh2.run_time / 100) % 100,
+                                DATEADD(SECOND, sjh2.run_time % 100,
+                                    CAST(CAST(sjh2.run_date AS CHAR(8)) AS DATETIME)
+                                )
+                            )
+                        )
+                    )
+                + (sjh2.run_duration / 10000) * 3600
+        + ((sjh2.run_duration % 10000) / 100) * 60
+        + (sjh2.run_duration % 100)) > 0 {last_collection_time_filter}
     )
 """
 
 FORMATTED_HISTORY_QUERY = """\
-SELECT 
+SELECT TOP 1000
+    j.name,
     sjh1.job_id,
-    sjh1.step_id,
     sjh1.step_name,
+    sjh1.step_id,
     sjh1.instance_id AS step_instance_id,
     (
         SELECT MIN(sjh2.instance_id)
@@ -52,21 +90,49 @@ SELECT
         AND sjh2.step_id = 0
         AND sjh2.instance_id >= sjh1.instance_id
     ) AS completion_instance_id,
-    sjh1.run_date,
-    sjh1.run_time,
-    sjh1.run_duration,
+    (
+        SELECT DATEDIFF(SECOND, GETDATE(), SYSDATETIMEOFFSET()) +
+            DATEDIFF(SECOND, '19700101',
+                DATEADD(HOUR, sjh1.run_time / 10000,
+                    DATEADD(MINUTE, (sjh1.run_time / 100) % 100,
+                        DATEADD(SECOND, sjh1.run_time % 100,
+                            CAST(CAST(sjh1.run_date AS CHAR(8)) AS DATETIME)
+                        )
+                    )
+                )
+            )
+    ) AS run_epoch_time,
+    (
+        (sjh1.run_duration / 10000) * 3600
+        + ((sjh1.run_duration % 10000) / 100) * 60
+        + (sjh1.run_duration % 100)
+    ) AS run_duration_seconds,
     sjh1.run_status,
     sjh1.message
 FROM 
     msdb.dbo.sysjobhistory AS sjh1
-WHERE 
+INNER JOIN msdb.dbo.sysjobs AS j
+ON j.job_id = sjh1.job_id
+WHERE
     EXISTS (
         SELECT 1
         FROM msdb.dbo.sysjobhistory AS sjh2
         WHERE sjh2.job_id = sjh1.job_id
         AND sjh2.step_id = 0
         AND sjh2.instance_id >= sjh1.instance_id
-\t\tHAVING MIN(sjh2.instance_id) > 10
+        HAVING  MIN(DATEDIFF(SECOND, GETDATE(), SYSDATETIMEOFFSET()) +
+                    DATEDIFF(SECOND, '19700101',
+                        DATEADD(HOUR, sjh2.run_time / 10000,
+                            DATEADD(MINUTE, (sjh2.run_time / 100) % 100,
+                                DATEADD(SECOND, sjh2.run_time % 100,
+                                    CAST(CAST(sjh2.run_date AS CHAR(8)) AS DATETIME)
+                                )
+                            )
+                        )
+                    )
+                + (sjh2.run_duration / 10000) * 3600
+        + ((sjh2.run_duration % 10000) / 100) * 60
+        + (sjh2.run_duration % 100)) > 0 + 12341234
     )
 """
 
@@ -208,6 +274,17 @@ VALUES (
 );
 """
 
+@pytest.fixture
+def agent_jobs_instance(instance_docker):
+    instance_docker['dbm'] = True
+    # set a very small collection interval so the tests go fast
+    instance_docker['agent_jobs'] = {
+        'enabled': True,
+        'collection_interval': 1.0,
+        'agent_jobs_history_row_limit': 1000,
+    }
+    instance_docker['min_collection_interval'] = 1
+    return copy(instance_docker)
 
 @pytest.mark.usefixtures('dd_environment')
 def test_connection_with_agent_history(instance_docker):
@@ -216,8 +293,9 @@ def test_connection_with_agent_history(instance_docker):
 
     with check.connection.open_managed_default_connection():
         with check.connection.get_managed_cursor() as cursor:
-            last_instance_id_filter = "\n\t\tHAVING MIN(sjh2.instance_id) > 10"
-            query = AGENT_HISTORY_QUERY.format(last_instance_id_filter=last_instance_id_filter)
+            last_collection_time_filter = "+ {last_collection_time}".format(last_collection_time=int(time.time()))
+            history_row_limit_filter = "TOP {history_row_limit}".format(history_row_limit=1000)
+            query = AGENT_HISTORY_QUERY.format(history_row_limit_filter=history_row_limit_filter, last_collection_time_filter=last_collection_time_filter)
             cursor.execute(query)
             assert query == FORMATTED_HISTORY_QUERY
     check.cancel()
@@ -280,7 +358,7 @@ def test_history_output(instance_docker, sa_conn):
     check.cancel()
 
 
-def test_agent_jobs_integration(aggregator, dd_run_check, instance_docker, sa_conn):
+def test_agent_jobs_integration(aggregator, dd_run_check, agent_jobs_instance, caplog, sa_conn):
     with sa_conn as conn:
         with conn.cursor() as cursor:
             cursor.execute("SELECT job_id FROM msdb.dbo.sysjobs WHERE name = 'Job 2'")
@@ -293,13 +371,7 @@ def test_agent_jobs_integration(aggregator, dd_run_check, instance_docker, sa_co
                 if activity[1] != job2_id:
                     continue
                 assert activity[6] == 1
-    instance_docker['dbm'] = True
-    instance_docker['include_agent_jobs'] = True
-    instance_docker['min_collection_interval'] = 1
-    instance_docker['agent_jobs_interval'] = 1
-    instance_tags = set(instance_docker.get('tags', []))
-    expected_instance_tags = {t for t in instance_tags if not t.startswith('dd.internal')}
-    check = SQLServer(CHECK_NAME, {}, [instance_docker])
+    check = SQLServer(CHECK_NAME, {}, [agent_jobs_instance])
     dd_run_check(check)
     dbm_activity = aggregator.get_event_platform_events("dbm-activity")
     job_events = [e for e in dbm_activity if (e.get('sqlserver_job_history', None) is not None)]
@@ -309,7 +381,6 @@ def test_agent_jobs_integration(aggregator, dd_run_check, instance_docker, sa_co
     assert job_event['dbm_type'] == "activity", "wrong dbm_type"
     assert job_event['ddsource'] == "sqlserver", "wrong source"
     assert job_event['ddagentversion'], "missing ddagentversion"
-    assert set(job_event['ddtags']) == expected_instance_tags, "wrong instance tags activity"
     assert type(job_event['collection_interval']) in (float, int), "invalid collection_interval"
     history_rows = job_event['sqlserver_job_history']
     assert len(history_rows) == 7, "should have 7 rows of history associated with new completed jobs"

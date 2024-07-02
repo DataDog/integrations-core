@@ -13,13 +13,47 @@ except ImportError:
     from ..stubs import datadog_agent
 
 DEFAULT_COLLECTION_INTERVAL = 15
+DEFAULT_ROW_LIMIT = 1000
+
+# AGENT_HISTORY_QUERY = """\
+# SELECT
+#     j.name,
+#     sjh1.job_id,
+#     sjh1.step_id,
+#     sjh1.step_name,
+#     sjh1.instance_id AS step_instance_id,
+#     (
+#         SELECT MIN(sjh2.instance_id)
+#         FROM msdb.dbo.sysjobhistory AS sjh2
+#         WHERE sjh2.job_id = sjh1.job_id
+#         AND sjh2.step_id = 0
+#         AND sjh2.instance_id >= sjh1.instance_id
+#     ) AS completion_instance_id,
+#     sjh1.run_date,
+#     sjh1.run_time,
+#     sjh1.run_duration,
+#     sjh1.run_status,
+#     sjh1.message
+# FROM 
+#     msdb.dbo.sysjobhistory AS sjh1
+# INNER JOIN msdb.dbo.sysjobs AS j
+# ON j.job_id = sjh1.job_id
+# WHERE 
+#     EXISTS (
+#         SELECT 1
+#         FROM msdb.dbo.sysjobhistory AS sjh2
+#         WHERE sjh2.job_id = sjh1.job_id
+#         AND sjh2.step_id = 0
+#         AND sjh2.instance_id >= sjh1.instance_id{last_instance_id_filter}
+#     )
+# """
 
 AGENT_HISTORY_QUERY = """\
-SELECT TOP 10
+SELECT {history_row_limit_filter}
     j.name,
     sjh1.job_id,
-    sjh1.step_id,
     sjh1.step_name,
+    sjh1.step_id,
     sjh1.instance_id AS step_instance_id,
     (
         SELECT MIN(sjh2.instance_id)
@@ -28,22 +62,49 @@ SELECT TOP 10
         AND sjh2.step_id = 0
         AND sjh2.instance_id >= sjh1.instance_id
     ) AS completion_instance_id,
-    sjh1.run_date,
-    sjh1.run_time,
-    sjh1.run_duration,
+    (
+        SELECT DATEDIFF(SECOND, GETDATE(), SYSDATETIMEOFFSET()) +
+            DATEDIFF(SECOND, '19700101',
+                DATEADD(HOUR, sjh1.run_time / 10000,
+                    DATEADD(MINUTE, (sjh1.run_time / 100) % 100,
+                        DATEADD(SECOND, sjh1.run_time % 100,
+                            CAST(CAST(sjh1.run_date AS CHAR(8)) AS DATETIME)
+                        )
+                    )
+                )
+            )
+    ) AS run_epoch_time,
+    (
+        (sjh1.run_duration / 10000) * 3600
+        + ((sjh1.run_duration % 10000) / 100) * 60
+        + (sjh1.run_duration % 100)
+    ) AS run_duration_seconds,
     sjh1.run_status,
     sjh1.message
 FROM 
     msdb.dbo.sysjobhistory AS sjh1
 INNER JOIN msdb.dbo.sysjobs AS j
 ON j.job_id = sjh1.job_id
-WHERE 
+WHERE
     EXISTS (
         SELECT 1
         FROM msdb.dbo.sysjobhistory AS sjh2
         WHERE sjh2.job_id = sjh1.job_id
         AND sjh2.step_id = 0
-        AND sjh2.instance_id >= sjh1.instance_id{last_instance_id_filter}
+        AND sjh2.instance_id >= sjh1.instance_id
+        HAVING  MIN(DATEDIFF(SECOND, GETDATE(), SYSDATETIMEOFFSET()) +
+                    DATEDIFF(SECOND, '19700101',
+                        DATEADD(HOUR, sjh2.run_time / 10000,
+                            DATEADD(MINUTE, (sjh2.run_time / 100) % 100,
+                                DATEADD(SECOND, sjh2.run_time % 100,
+                                    CAST(CAST(sjh2.run_date AS CHAR(8)) AS DATETIME)
+                                )
+                            )
+                        )
+                    )
+                + (sjh2.run_duration / 10000) * 3600
+        + ((sjh2.run_duration % 10000) / 100) * 60
+        + (sjh2.run_duration % 100)) > 0 {last_collection_time_filter}
     )
 """
 def agent_check_getter(self):
@@ -56,22 +117,26 @@ class SqlserverAgentHistory(DBMAsyncJob):
         self.log = check.log
         self._config = config
         collection_interval = float(
-            self._config.agent_jobs_interval
+            self._config.agent_jobs_config.get('collection_interval', 15)
         )
         if collection_interval <= 0:
             collection_interval = DEFAULT_COLLECTION_INTERVAL
         self.collection_interval = collection_interval
-        self._last_history_id = 0
+        history_row_limit = self._config.agent_jobs_config.get('agent_jobs_history_row_limit', 1000)
+        if history_row_limit <= 0:
+            history_row_limit = DEFAULT_ROW_LIMIT
+        self.history_row_limit = history_row_limit
+        self._last_collection_time = int(time.time())
         super(SqlserverAgentHistory, self).__init__(
             check,
             run_sync=True,
-            enabled=self._config.include_agent_jobs,
+            enabled=self._config.agent_jobs_config.get('enabled', False),
             expected_db_exceptions=(),
             min_collection_interval=self._config.min_collection_interval,
             dbms="sqlserver",
             rate_limit=1 / float(collection_interval),
             # is this used as identification information? if so where. is there a convention to follow
-            job_name="agent-jobs-activity",
+            job_name="agent-jobs-history",
             shutdown_callback=self._close_db_conn,
         )
         # same questions as job_name
@@ -85,10 +150,9 @@ class SqlserverAgentHistory(DBMAsyncJob):
     
     @tracked_method(agent_check_getter=agent_check_getter)
     def _get_new_agent_job_history(self, cursor):
-        last_instance_id_filter = ""
-        if self._last_history_id:
-            last_instance_id_filter = "\n\t\tHAVING MIN(sjh2.instance_id) > {last_history_id}".format(last_history_id = self._last_history_id)
-        query = AGENT_HISTORY_QUERY.format(last_instance_id_filter=last_instance_id_filter)
+        last_collection_time_filter = "+ {last_collection_time}".format(last_collection_time = self._last_collection_time)
+        history_row_limit_filter = "TOP {history_row_limit}".format(history_row_limit=self.history_row_limit)
+        query = AGENT_HISTORY_QUERY.format(history_row_limit_filter=history_row_limit_filter, last_collection_time_filter=last_collection_time_filter)
         self.log.debug("collecting sql server agent jobs history")
         self.log.debug("Running query [%s]", query)
         cursor.execute(query)
