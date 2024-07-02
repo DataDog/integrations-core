@@ -1,4 +1,4 @@
-id: cisco-secure-endpoint
+id: cisco_secure_endpoint
 metric_id: cisco-secure-endpoint
 backend_only: false
 facets:
@@ -27,22 +27,70 @@ facets:
     name: User ID
     path: usr.id
     source: log
+  - facetType: list
+    groups:
+      - Geoip
+    name: City Name
+    path: network.client.geoip.city.name
+    source: log
+    type: string
+  - facetType: list
+    groups:
+      - Geoip
+    name: Continent Code
+    path: network.client.geoip.continent.code
+    source: log
+    type: string
+  - facetType: list
+    groups:
+      - Geoip
+    name: Continent Name
+    path: network.client.geoip.continent.name
+    source: log
+    type: string
+  - facetType: list
+    groups:
+      - Geoip
+    name: Country ISO Code
+    path: network.client.geoip.country.iso_code
+    source: log
+    type: string
+  - facetType: list
+    groups:
+      - Geoip
+    name: Country Name
+    path: network.client.geoip.country.name
+    source: log
+    type: string
+  - facetType: list
+    groups:
+      - Geoip
+    name: Subdivision ISO Code
+    path: network.client.geoip.subdivision.iso_code
+    source: log
+    type: string
+  - facetType: list
+    groups:
+      - Geoip
+    name: Subdivision Name
+    path: network.client.geoip.subdivision.name
+    source: log
+    type: string
 pipeline:
   type: pipeline
   name: Cisco Secure Endpoint
   enabled: true
   filter:
-    query: "source:cisco-secure-endpoint"
+    query: "source:cisco-secure-endpoint "
   processors:
     - type: pipeline
       name: "Cisco Secure Endpoint: Events"
       enabled: true
       filter:
-        query: "service:event"
+        query: "service:event "
       processors:
         - type: date-remapper
-          name: Define 'date' attribute as the official ingestion timestamp of the event
-            log
+          name: Define `date` as the official date of the log
           enabled: true
           sources:
             - date
@@ -57,12 +105,12 @@ pipeline:
             Critical,critical
           type: lookup-processor
         - type: status-remapper
-          name: Define 'status' attribute as the official status remapper of the event log
+          name: Define `status` as the official status of the log
           enabled: true
           sources:
             - status
         - type: attribute-remapper
-          name: Map 'computer.external_ip' to 'network.client.ip'
+          name: Map `computer.external_ip` to `network.client.ip`
           enabled: true
           sources:
             - computer.external_ip
@@ -79,7 +127,7 @@ pipeline:
           target: network.client.geoip
           ip_processing_behavior: do-nothing
         - type: attribute-remapper
-          name: Map 'event_type' to 'evt.name'
+          name: Map `event_type` to `evt.name`
           enabled: true
           sources:
             - event_type
@@ -89,7 +137,7 @@ pipeline:
           preserveSource: false
           overrideOnConflict: false
         - type: attribute-remapper
-          name: Map 'computer.user' to 'usr.name'
+          name: Map `computer.user` to `usr.name`
           enabled: true
           sources:
             - computer.user
@@ -99,7 +147,7 @@ pipeline:
           preserveSource: false
           overrideOnConflict: false
         - type: attribute-remapper
-          name: Map 'error.error_code' to 'error.kind'
+          name: Map `error.error_code` to `error.kind`
           enabled: true
           sources:
             - error.error_code
@@ -109,7 +157,7 @@ pipeline:
           preserveSource: false
           overrideOnConflict: false
         - type: attribute-remapper
-          name: Map 'error.description' to 'error.message'
+          name: Map `error.description` to `error.message`
           enabled: true
           sources:
             - error.description
@@ -122,16 +170,15 @@ pipeline:
       name: "Cisco Secure Endpoint : Audit"
       enabled: true
       filter:
-        query: "service:audit"
+        query: "service:audit "
       processors:
         - type: date-remapper
-          name: Define 'created_at' attribute as the official ingestion timestamp of the
-            event log
+          name: Define `created_at` as the official date of the log
           enabled: true
           sources:
             - created_at
         - type: attribute-remapper
-          name: Map 'audit_log_user' to 'usr.name'
+          name: Map `audit_log_user` to `usr.name`
           enabled: true
           sources:
             - audit_log_user
@@ -141,7 +188,7 @@ pipeline:
           preserveSource: false
           overrideOnConflict: false
         - type: attribute-remapper
-          name: Map 'event' to 'evt.name'
+          name: Map `event` to `evt.name`
           enabled: true
           sources:
             - event
@@ -151,7 +198,7 @@ pipeline:
           preserveSource: false
           overrideOnConflict: false
         - type: attribute-remapper
-          name: Map 'audit_log_id' to 'usr.id'
+          name: Map `audit_log_id` to `usr.id`
           enabled: true
           sources:
             - audit_log_id
@@ -161,7 +208,7 @@ pipeline:
           preserveSource: false
           overrideOnConflict: false
     - type: service-remapper
-      name: Define 'service' attribute as official service of the log
+      name: Define `service` as the official service of the log
       enabled: true
       sources:
         - service
