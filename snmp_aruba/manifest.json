@@ -17,6 +17,12 @@
       "Supported OS::macOS",
       "Category::Notifications",
       "Category::Network"
+    ],
+    "resources": [
+      {
+        "resource_type": "blog",
+        "url": "https://www.datadoghq.com/blog/monitor-snmp-with-datadog/"
+      }
     ]
   },
   "assets": {
