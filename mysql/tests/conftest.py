@@ -450,6 +450,7 @@ def populate_database():
     )
 
     cur = conn.cursor()
+
     cur.execute("USE mysql;")
     cur.execute("CREATE DATABASE testdb;")
     cur.execute("USE testdb;")

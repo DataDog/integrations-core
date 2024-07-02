@@ -113,7 +113,6 @@ def agent_check_getter(self):
 class Schemas:
 
     TABLES_CHUNK_SIZE = 500
-    # Note: in async mode execution time also cannot exceed 2 checks.
     DEFAULT_MAX_EXECUTION_TIME = 60
     MAX_COLUMNS_PER_EVENT = 100_000
 
@@ -202,25 +201,44 @@ class Schemas:
                 indexes : list of index dicts
                     index
                     key/value:
-                        "name": str
-                        "type": str
-                        "is_unique": bool
-                        "is_primary_key": bool
-                        "is_unique_constraint": bool
-                        "is_disabled": bool,
-                        "column_names": str
+                        "name": str,
+                        "collation": str
+                        "cardinality": str
+                        "index_type": str
+                        "seq_in_index": str
+                        "columns": str
+                        "sub_parts": str
+                        "packed": str
+                        "nullables": str
+                        "non_uniques": str
                 foreign_keys : list of foreign key dicts
                     foreign_key
                     key/value:
-                        "foreign_key_name": str
-                        "referencing_table": str
-                        "referencing_column": str
-                        "referenced_table": str
-                        "referenced_column": str
-                partitions: partition dict
-                    partition
+                        "constraint_schema": str
+                        "name": str
+                        "column_names": str
+                        "referenced_table_schema": str
+                        "referenced_table_name": str
+                        "referenced_column_names": str
+                partitions: list of partitions dict
+                    partitions
                     key/value:
-                        "partition_count": int
+                        "name": str
+                        "subpartition_names": str
+                        "partition_ordinal_position": str
+                        "subpartition_ordinal_positions": str
+                        "partition_method": str
+                        "subpartition_methods": str
+                        "partition_expression": str
+                        "subpartition_expressions": str
+                        "partition_description": str
+                        "table_rows": str
+                        "data_lengths": str
+                        "max_data_lengths": str
+                        "index_lengths": str
+                        "data_free": str
+                        "partition_comment": str
+                        "tablespace_name": str
         """
         self._data_submitter.reset()
         self._tags = tags
@@ -267,9 +285,7 @@ class Schemas:
     def _get_tables(self, db_name, cursor):
         """returns a list of tables for schema with their names and empty column array
         list of table dicts
-        "id": str
         "name": str
-        "columns": []
         """
         self._cursor_run(cursor, query=SQL_TABLES, params=db_name)
         tables_info = fetch_and_convert_to_str(cursor)
@@ -277,42 +293,6 @@ class Schemas:
 
     @tracked_method(agent_check_getter=agent_check_getter, track_result_length=True)
     def _get_tables_data(self, table_list, db_name, cursor):
-        """returns extracted column numbers and a list of tables
-        "tables" : list of tables dicts
-        table
-        key/value:
-            "id" : str
-            "name" : str
-            columns: list of columns dicts
-                columns
-                key/value:
-                    "name": str
-                    "data_type": str
-                    "default": str
-                    "nullable": bool
-            indexes : list of index dicts
-                index
-                key/value:
-                    "name": str
-                    "type": str
-                    "is_unique": bool
-                    "is_primary_key": bool
-                    "is_unique_constraint": bool
-                    "is_disabled": bool,
-                    "column_names": str
-            foreign_keys : list of foreign key dicts
-                foreign_key
-                key/value:
-                    "foreign_key_name": str
-                    "referencing_table": str
-                    "referencing_column": str
-                    "referenced_table": str
-                    "referenced_column": str
-            partitions: partition dict
-                partition
-                key/value:
-                    "partition_count": int
-        """
 
         if len(table_list) == 0:
             return

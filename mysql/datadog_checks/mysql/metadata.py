@@ -114,24 +114,17 @@ class MySQLMetadata(DBMAsyncJob):
                 hostname=self._check.resolved_hostname,
             )
             raise
-
+    
     def run_job(self):
         elapsed_time_settings = time.time() - self._last_settings_collection_time
         if self._settings_enabled and elapsed_time_settings >= self._settings_collection_interval:
-            try:
-                self.report_mysql_metadata()
-            except:
-                raise
-            finally:
-                self._last_settings_collection_time = time.time()
-        elapsed_time_schemas = time.time() - self._last_databases_collection_time
-        if self._schemas_enabled and elapsed_time_schemas >= self._schemas_collection_interval:
-            try:
-                self._schemas._collect_databases_data(self._tags)
-            except:
-                raise
-            finally:
-                self._last_databases_collection_time = time.time()
+            self._last_settings_collection_time = time.time()
+            self.report_mysql_metadata()
+
+        elapsed_time_databases = time.time() - self._last_databases_collection_time
+        if self._schemas_enabled and elapsed_time_databases >= self._schemas_collection_interval:
+            self._last_databases_collection_time = time.time()
+            self._schemas._collect_databases_data(self._tags)
 
     def shut_down(self):
         self._schemas.shut_down()
