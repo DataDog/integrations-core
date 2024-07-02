@@ -2,7 +2,7 @@
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
 
-MOCKED_PROMETHEUS_METRICS = {
+MOCKED_PROMETHEUS_METRICS = [
     "fly_io.instance.cpu",
     "fly_io.instance.disk.io_in_progress",
     "fly_io.instance.disk.reads_completed",
@@ -58,7 +58,7 @@ MOCKED_PROMETHEUS_METRICS = {
     "fly_io.instance.up",
     "fly_io.instance.memory.pressure_full",
     "fly_io.instance.memory.pressure_some",
-}
+]
 
 ALL_REST_METRICS = ['fly_io.app.count', 'fly_io.machine.count', 'fly_io.machines_api.up']
 

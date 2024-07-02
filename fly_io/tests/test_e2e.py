@@ -13,7 +13,7 @@ from .metrics import ALL_REST_METRICS, MOCKED_PROMETHEUS_METRICS
 
 @pytest.mark.e2e
 @pytest.mark.skipif(USE_FLY_LAB, reason='Only run tests on one environment')
-def test_e2e_openmetrics(dd_agent_check):
+def test_e2e(dd_agent_check):
     instance = INSTANCE
     aggregator = dd_agent_check(instance, rate=True)
 
