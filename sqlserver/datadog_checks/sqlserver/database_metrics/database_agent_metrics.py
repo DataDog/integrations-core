@@ -101,7 +101,10 @@ AGENT_ACTIVE_SESSION_DURATION_QUERY = {
 class SqlserverAgentMetrics(SqlserverDatabaseMetricsBase):
     @property
     def include_agent_metrics(self) -> bool:
-        return is_affirmative(self.instance_config.get('include_agent_jobs', False))
+        agent_jobs_config = self.instance_config.get('agent_jobs', {})
+        if agent_jobs_config:
+            return is_affirmative(agent_jobs_config.get('enabled', False))
+        return False
     
     @property
     def _default_collection_interval(self) -> int:
@@ -109,7 +112,7 @@ class SqlserverAgentMetrics(SqlserverDatabaseMetricsBase):
         Returns the default interval in seconds at which to collect index usage metrics.
         '''
         # TODO figure out what a good default collection interval should be
-        return 10  # 10 seconds
+        return 60  # 60 seconds
     
     @property
     def collection_interval(self) -> int:
@@ -118,7 +121,11 @@ class SqlserverAgentMetrics(SqlserverDatabaseMetricsBase):
         Note: The index usage metrics query can be expensive, so it is recommended to set a higher interval.
         '''
         # TODO make a good name for config and add it to the config
-        return int(self.instance_config.get('agent_jobs_interval', self._default_collection_interval))
+        agent_jobs_config = self.instance_config.get('agent_jobs', {})
+        if agent_jobs_config:
+            return int(agent_jobs_config.get('collection_interval', 60))
+        # TODO figure out what a good default collection interval should be
+        return 60  # 60 seconds
     
     @property
     def enabled(self):

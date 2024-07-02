@@ -26,8 +26,6 @@ class SQLServerConfig:
         self.autodiscovery_interval: int = instance.get('autodiscovery_interval', DEFAULT_AUTODISCOVERY_INTERVAL)
         self._include_patterns = self._compile_valid_patterns(self.autodiscovery_include)
         self._exclude_patterns = self._compile_valid_patterns(self.autodiscovery_exclude)
-        self.include_agent_jobs: bool = is_affirmative(instance.get('include_agent_jobs', False))
-        self.agent_jobs_interval: int = instance.get('agent_jobs_interval', 15)
 
         self.proc: str = instance.get('stored_procedure')
         self.custom_metrics: list[dict] = init_config.get('custom_metrics', []) or []
@@ -47,6 +45,7 @@ class SQLServerConfig:
         # DBM
         self.dbm_enabled: bool = is_affirmative(instance.get('dbm', False))
         self.statement_metrics_config: dict = instance.get('query_metrics', {}) or {}
+        self.agent_jobs_config: dict = instance.get('agent_jobs', {}) or {}
         self.procedure_metrics_config: dict = instance.get('procedure_metrics', {}) or {}
         self.settings_config: dict = instance.get('collect_settings', {}) or {}
         self.activity_config: dict = instance.get('query_activity', {}) or {}
