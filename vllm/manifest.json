@@ -39,6 +39,10 @@
       "service_checks": {
         "metadata_path": "assets/service_checks.json"
       }
+    },
+    "monitors": {
+        "token_throughput": "assets/monitors/token_throughput.json",
+        "latency": "assets/monitors/latency.json"
     }
   },
   "author": {

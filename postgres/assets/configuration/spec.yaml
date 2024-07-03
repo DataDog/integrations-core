@@ -7,7 +7,7 @@ files:
     - name: propagate_agent_tags
       description: |
         Set to `true` to propagate the tags from `datadog.yaml` to the check.
-        When set to `true`, the tags from `datadog.yaml` are added to the check's tags for all instances.        
+        When set to `true`, the tags from `datadog.yaml` are added to the check's tags for all instances.
       value:
         example: false
         type: boolean
@@ -275,7 +275,7 @@ files:
     - name: collect_wal_metrics
       description: |
         Collect metrics about WAL file age.
-        NOTE: 
+        NOTE:
         For Postgres 9.6 and below, you must run the check local to your database if you want to enable this option.
         Starting Postgres 10, WAL file metrics are enabled by default using `pg_ls_waldir` and don't need local access.
       value:
@@ -527,7 +527,7 @@ files:
             type: number
             example: 3500
     - name: collect_settings
-      description: Configure collection of pg_settings. This is an alpha feature.
+      description: Configure collection of pg_settings.
       options:
         - name: enabled
           description: |
@@ -544,7 +544,7 @@ files:
             example: 600
         - name: ignored_settings_patterns
           description: |
-            A list of setting patterns to ignore. Any setting key matching one of the value in this list will 
+            A list of setting patterns to ignore. Any setting key matching one of the value in this list will
             not be collected. This uses the traditional LIKE pattern-matching approach.
           value:
               type: array

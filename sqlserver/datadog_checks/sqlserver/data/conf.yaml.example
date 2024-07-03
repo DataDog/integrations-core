@@ -217,10 +217,10 @@ instances:
     # include_index_usage_metrics_tempdb: false
 
     ## @param index_usage_metrics_interval - integer - optional - default: 300
-    ## Configure the interval (in seconds) for the collection of index usage statistics from the 
-    ## `sys.dm_db_index_usage_stats` DMV. 
+    ## Configure the interval (in seconds) for the collection of index usage statistics from the
+    ## `sys.dm_db_index_usage_stats` DMV.
     ## Defaults to 300 seconds (5 minutes). If you intend on updating this value, it is strongly recommended
-    ## to use a consistent value throughout all SQL Server agent deployments. 
+    ## to use a consistent value throughout all SQL Server agent deployments.
     #
     # index_usage_metrics_interval: 300
 
@@ -280,7 +280,7 @@ instances:
     #
     # dbm: false
 
-    ## Configure collection of sys.configurations. This is an alpha feature.
+    ## Configure collection of sys.configurations.
     #
     # collect_settings:
 
@@ -659,7 +659,7 @@ instances:
     #
     # ignore_missing_database: false
 
-    ## Configure collection of schemas. If `database_autodiscovery` is not enabled, data is collected 
+    ## Configure collection of schemas. If `database_autodiscovery` is not enabled, data is collected
     ## only for the database configured with `database` parameter.
     #
     # schemas_collection:
@@ -675,7 +675,7 @@ instances:
         # collection_interval: 600
 
         ## @param max_execution_time - number - optional - default: 10
-        ## Set the maximum time for schema collection (in seconds). Defaults to 10 seconds. 
+        ## Set the maximum time for schema collection (in seconds). Defaults to 10 seconds.
         ## Capped by `schemas_collection.collection_interval`
         #
         # max_execution_time: 10
