@@ -38,6 +38,10 @@
         "check": "traefik_mesh.entrypoint.open_connections",
         "metadata_path": "metadata.csv"
       },
+      "process_signatures": [
+        "traefik",
+        "traefik-mesh"
+      ],
       "service_checks": {
         "metadata_path": "assets/service_checks.json"
       }
@@ -48,8 +52,9 @@
     "monitors": {
       "High Request Count": "assets/monitors/high_request_count.json"
     },
-    "logs": {
-      "source": "traefik_mesh"
+    "saved_views": {
+      "Traefik Mesh Logs Overview": "assets/saved_views/traefik_mesh_log_overview.json",
+      "Traefik Mesh Error Logs Overview": "assets/saved_views/traefik_mesh_error_overview.json"
     }
   },
   "author": {

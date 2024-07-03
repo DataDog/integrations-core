@@ -1,5 +1,3 @@
-version: '3.5'
-
 services:
   powerdns_3_7_3:
     image: "${POWERDNS_IMAGE}"

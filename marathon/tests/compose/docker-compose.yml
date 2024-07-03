@@ -1,4 +1,3 @@
-version: '3'
 # References:
 # - https://github.com/fbelzunc/mesos-marathon-docker-example/blob/master/docker-compose.yml
 # - https://github.com/uzyexe/mesos-marathon-demo/blob/master/docker-compose.yml

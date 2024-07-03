@@ -1,3 +1,10 @@
+## Datadog Agent version [7.54.1](https://github.com/DataDog/datadog-agent/blob/master/CHANGELOG.rst#7541)
+
+* Cacti [2.1.1](https://github.com/DataDog/integrations-core/blob/master/cacti/CHANGELOG.md)
+* MySQL [12.4.1](https://github.com/DataDog/integrations-core/blob/master/mysql/CHANGELOG.md)
+* ProxySQL [5.1.1](https://github.com/DataDog/integrations-core/blob/master/proxysql/CHANGELOG.md)
+* SingleStore [2.2.1](https://github.com/DataDog/integrations-core/blob/master/singlestore/CHANGELOG.md)
+
 ## Datadog Agent version [7.54.0](https://github.com/DataDog/datadog-agent/blob/master/CHANGELOG.rst#7540)
 
 * Amazon Kafka [4.7.0](https://github.com/DataDog/integrations-core/blob/master/amazon_msk/CHANGELOG.md)

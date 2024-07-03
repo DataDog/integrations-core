@@ -136,6 +136,12 @@ instances:
     #
     # pid_cache_duration: 120
 
+    ## @param use_oneshot - boolean - optional - default: true
+    ## If set to `true`, the check uses `psutil.Process().oneshot()` to collect and cache process metrics. 
+    ## This can help speed up the check completion.
+    #
+    # use_oneshot: true
+
     ## @param tags - list of strings - optional
     ## A list of tags to attach to every metric and service check emitted by this instance.
     ##

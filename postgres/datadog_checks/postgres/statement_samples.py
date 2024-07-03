@@ -556,7 +556,8 @@ class PostgresStatementSamples(DBMAsyncJob):
                 cursor.execute(
                     """SELECT {explain_function}($stmt${statement}$stmt$)""".format(
                         explain_function=self._explain_function, statement=statement
-                    )
+                    ),
+                    ignore_query_metric=True,
                 )
                 result = cursor.fetchone()
                 self._check.histogram(
