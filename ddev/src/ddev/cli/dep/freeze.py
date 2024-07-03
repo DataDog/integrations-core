@@ -10,10 +10,14 @@ from ddev.cli.dep.common import (
 )
 
 
-@click.command(short_help="Combine all dependencies for the Agent's static environment")
+@click.command()
 @click.pass_obj
 def freeze(app):
-    """Combine all dependencies for the Agent's static environment."""
+    """
+    Combine all dependencies for the Agent's static environment.
+
+    This reads and merges the dependency specs from individual integrations and writes them to agent_requirements.in
+    """
     dependencies, errors = read_check_dependencies(app.repo)
 
     if errors:
@@ -22,5 +26,5 @@ def freeze(app):
 
         app.abort()
 
-    app.display_info(f'Static file: {app.repo.agent_requirements}')
+    app.display_info(f'Writing combined requirements to: {app.repo.agent_requirements}')
     update_agent_dependencies(app.repo, dependencies)

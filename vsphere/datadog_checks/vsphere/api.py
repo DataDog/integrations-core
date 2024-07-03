@@ -19,7 +19,6 @@ from datadog_checks.vsphere.constants import (
     MOR_TYPE_AS_STRING,
     UNLIMITED_HIST_METRICS_PER_QUERY,
 )
-from datadog_checks.vsphere.event import ALLOWED_EVENTS
 from datadog_checks.vsphere.types import InfrastructureData
 from datadog_checks.vsphere.utils import properties_to_collect
 
@@ -331,7 +330,7 @@ class VSphereAPI(object):
         query_filter = vim.event.EventFilterSpec()
         time_filter = vim.event.EventFilterSpec.ByTime(beginTime=start_time)
         query_filter.time = time_filter
-        query_filter.type = ALLOWED_EVENTS
+        query_filter.type = [getattr(vim.event, event_type) for event_type in self.config.exclude_filters.keys()]
         try:
             events = event_manager.QueryEvents(query_filter)
         except KeyError as e:

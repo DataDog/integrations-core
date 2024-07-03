@@ -1,5 +1,3 @@
-version: '3.5'
-
 services:
   elastic:
     image: "${ELASTIC_REGISTRY}:${ELASTIC_IMAGE}"

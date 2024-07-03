@@ -391,7 +391,7 @@ def test_env_vars_override_config(ddev, helpers, data_dir, write_result_file, mo
         '-e',
         'DD_DD_URL=url',
         '-e',
-        'DD_LOGS_CONFIG_DD_URL=log_config_url',
+        'DD_LOGS_CONFIG_LOGS_DD_URL=log_config_url',
     )
 
     assert result.exit_code == 0, result.output
@@ -420,7 +420,7 @@ def test_env_vars_override_config(ddev, helpers, data_dir, write_result_file, mo
             'DD_SITE': 'site',
             'FOO': 'BAR',
             'BAZ': 'BAR',
-            'DD_LOGS_CONFIG_DD_URL': 'log_config_url',
+            'DD_LOGS_CONFIG_LOGS_DD_URL': 'log_config_url',
             'DD_API_KEY': 'key',
         },
     )

@@ -101,11 +101,12 @@ class MongoApi(object):
         is_master_payload = cli['admin'].command('isMaster')
         return is_master_payload.get('arbiterOnly', False)
 
-    def _get_rs_deployment_from_status_payload(self, repl_set_payload, cluster_role):
+    def _get_rs_deployment_from_status_payload(self, repl_set_payload, is_master_payload, cluster_role):
         replset_name = repl_set_payload["set"]
         replset_state = repl_set_payload["myState"]
         hosts = [m['name'] for m in repl_set_payload.get("members", [])]
-        return ReplicaSetDeployment(replset_name, replset_state, hosts, cluster_role=cluster_role)
+        replset_me = is_master_payload.get('me')
+        return ReplicaSetDeployment(replset_name, replset_state, hosts, replset_me, cluster_role=cluster_role)
 
     def refresh_deployment_type(self):
         # getCmdLineOpts is the runtime configuration of the mongo instance. Helpful to know whether the node is
@@ -135,7 +136,10 @@ class MongoApi(object):
         replication_options = options.get('replication', {})
         if 'replSetName' in replication_options or 'replSet' in replication_options:
             repl_set_payload = self['admin'].command("replSetGetStatus")
-            replica_set_deployment = self._get_rs_deployment_from_status_payload(repl_set_payload, cluster_role)
+            is_master_payload = self['admin'].command('isMaster')
+            replica_set_deployment = self._get_rs_deployment_from_status_payload(
+                repl_set_payload, is_master_payload, cluster_role
+            )
             is_principal = replica_set_deployment.is_principal()
             is_principal_log = "" if is_principal else "not "
             self._log.debug("Detected ReplicaSetDeployment. Node is %sprincipal.", is_principal_log)
@@ -159,7 +163,7 @@ class MongoApi(object):
             cluster_role = 'shardsvr'
         else:
             cluster_role = None
-        return self._get_rs_deployment_from_status_payload(repl_set_payload, cluster_role)
+        return self._get_rs_deployment_from_status_payload(repl_set_payload, is_master_payload, cluster_role)
 
     def _get_documentdb_deployment_type(self):
         """
@@ -168,7 +172,8 @@ class MongoApi(object):
         We connect to "Instance Based Clusters". In MongoDB terms, these are unsharded replicasets.
         """
         repl_set_payload = self['admin'].command("replSetGetStatus")
-        return self._get_rs_deployment_from_status_payload(repl_set_payload, cluster_role=None)
+        is_master_payload = self['admin'].command('isMaster')
+        return self._get_rs_deployment_from_status_payload(repl_set_payload, is_master_payload, cluster_role=None)
 
     def refresh_shards(self):
         try:
