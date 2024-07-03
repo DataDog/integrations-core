@@ -57,7 +57,9 @@ class KafkaConfig:
         self._sasl_kerberos_keytab = instance.get('sasl_kerberos_keytab', os.environ.get("KRB5_CLIENT_KTNAME"))
         self._sasl_kerberos_principal = instance.get('sasl_kerberos_principal', 'kafkaclient')
         self._sasl_oauth_token_provider = instance.get('sasl_oauth_token_provider')
-        self._tls_ca_cert = instance.get("tls_ca_cert", default_ca_cert_path) or instance.get("ssl_cafile", default_ca_cert_path)
+        self._tls_ca_cert = instance.get("tls_ca_cert", default_ca_cert_path) or instance.get(
+            "ssl_cafile", default_ca_cert_path
+        )
         self._tls_cert = instance.get("tls_cert") or instance.get("ssl_certfile")
         self._tls_private_key = instance.get("tls_private_key") or instance.get("ssl_keyfile")
         self._tls_private_key_password = instance.get("tls_private_key_password") or instance.get("ssl_password")
