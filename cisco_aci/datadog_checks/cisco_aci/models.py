@@ -111,6 +111,7 @@ if six.PY3:
         mac_address: Optional[str] = Field(default=None)
         admin_status: Optional[AdminStatus] = Field(default=None)
         oper_status: Optional[OperStatus] = Field(default=None)
+        integration: Optional[str] = Field(default='cisco-aci')
 
         model_config = ConfigDict(validate_assignment=True)
 
