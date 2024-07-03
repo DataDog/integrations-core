@@ -206,7 +206,9 @@ def test_obfuscate_sql_with_metadata_replace_null_character(input_query, expecte
 
 
 class TestJob(DBMAsyncJob):
-    def __init__(self, check, run_sync=False, enabled=True, rate_limit=10, min_collection_interval=15):
+    def __init__(
+        self, check, run_sync=False, enabled=True, rate_limit=10, min_collection_interval=15, job_execution_time=0
+    ):
         super(TestJob, self).__init__(
             check,
             run_sync=run_sync,
@@ -219,12 +221,16 @@ class TestJob(DBMAsyncJob):
             job_name="test-job",
             shutdown_callback=self.test_shutdown,
         )
+        self._job_execution_time = job_execution_time
+        self.count_executed = 0
 
     def test_shutdown(self):
         self._check.count("dbm.async_job_test.shutdown", 1)
 
     def run_job(self):
         self._check.count("dbm.async_job_test.run_job", 1)
+        self.count_executed += 1
+        time.sleep(self._job_execution_time)
 
 
 def test_dbm_async_job():
@@ -271,6 +277,29 @@ def test_dbm_async_job_run_sync(aggregator):
     job.run_job_loop([])
     assert job._job_loop_future is None
     aggregator.assert_metric("dbm.async_job_test.run_job")
+
+
+def test_dbm_sync_job_rate_limit(aggregator):
+    rate_limit = 1
+    job = TestJob(AgentCheck(), run_sync=True, rate_limit=rate_limit)
+    for _ in range(0, 2):
+        # 2 runs out of 3 should be skipped
+        job.run_job_loop([])
+    time.sleep(1 / rate_limit)
+    # this run should be allowed
+    job.run_job_loop([])
+    assert job.count_executed == 2
+
+
+def test_dbm_sync_long_job_rate_limit(aggregator):
+    collection_interval = 0.5
+    rate_limit = 1 / collection_interval
+    job = TestJob(AgentCheck(), run_sync=True, rate_limit=rate_limit, job_execution_time=2 * collection_interval)
+    job.run_job_loop([])
+    # despite jobs being executed one after another rate limiter shouldn't block execution
+    # as jobs are slower than the collection interval
+    job.run_job_loop([])
+    assert job.count_executed == 2
 
 
 def test_dbm_async_job_rate_limit(aggregator):

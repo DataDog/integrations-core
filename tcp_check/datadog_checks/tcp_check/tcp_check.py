@@ -116,8 +116,13 @@ class TCPCheck(AgentCheck):
         start = get_precise_time()  # Avoid initialisation warning
 
         if self.should_resolve_ips():
-            self.resolve_ips()
-            self.ip_cache_last_ts = start
+            try:
+                self.resolve_ips()
+                self.ip_cache_last_ts = start
+            except CheckException as e:
+                self.log.error("DNS resolution failed: %s", str(e))
+                self.report_as_service_check(AgentCheck.CRITICAL, "DNS resolution failed", str(e))
+                return  # The dns-resolve failed
 
         self.log.debug("Connecting to %s on port %d", self.host, self.port)
 

@@ -51,6 +51,7 @@ class InstanceConfig(BaseModel):
     tags: Optional[tuple[str, ...]] = None
     thresholds: Optional[MappingProxyType[str, Any]] = None
     try_sudo: Optional[bool] = None
+    use_oneshot: Optional[bool] = None
     user: Optional[str] = None
 
     @model_validator(mode='before')

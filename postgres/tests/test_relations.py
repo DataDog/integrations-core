@@ -7,42 +7,60 @@ import pytest
 from flaky import flaky
 
 from datadog_checks.base import ConfigurationError
-from datadog_checks.postgres.relationsmanager import QUERY_PG_CLASS, RelationsManager
+from datadog_checks.postgres.relationsmanager import (
+    QUERY_PG_CLASS,
+    QUERY_PG_CLASS_SIZE,
+    STATIO_METRICS,
+    RelationsManager,
+)
 
 from .common import DB_NAME, HOST, _get_expected_tags, _iterate_metric_name, assert_metric_at_least
 from .utils import _get_superconn, _wait_for_value, requires_over_11
-
-RELATION_METRICS = [
-    'postgresql.seq_scans',
-    'postgresql.seq_rows_read',
-    'postgresql.rows_inserted',
-    'postgresql.rows_updated',
-    'postgresql.rows_deleted',
-    'postgresql.rows_hot_updated',
-    'postgresql.live_rows',
-    'postgresql.dead_rows',
-    'postgresql.heap_blocks_read',
-    'postgresql.heap_blocks_hit',
-    'postgresql.toast_blocks_read',
-    'postgresql.toast_blocks_hit',
-    'postgresql.toast_index_blocks_read',
-    'postgresql.toast_index_blocks_hit',
-    'postgresql.vacuumed',
-    'postgresql.autovacuumed',
-    'postgresql.analyzed',
-    'postgresql.autoanalyzed',
-]
 
 RELATION_INDEX_METRICS = [
     'postgresql.index_scans',
     'postgresql.index_rows_fetched',  # deprecated
     'postgresql.index_rel_rows_fetched',
+    'postgresql.index_rel_scans',
+    'postgresql.individual_index_size',
+    # From STATIO_METRICS
     'postgresql.index_blocks_read',
     'postgresql.index_blocks_hit',
-    'postgresql.individual_index_size',
+]
+
+MAINTENANCE_METRICS = [
+    'postgresql.last_vacuum_age',
+    'postgresql.last_analyze_age',
+    'postgresql.last_autovacuum_age',
+    'postgresql.last_autoanalyze_age',
+    'postgresql.toast.last_vacuum_age',
+    'postgresql.toast.last_autovacuum_age',
 ]
 
 IDX_METRICS = ['postgresql.index_scans', 'postgresql.index_rows_read', 'postgresql.index_rows_fetched']
+
+
+def _check_metrics_for_relation_wo_index(aggregator, expected_tags):
+    for name in _iterate_metric_name(QUERY_PG_CLASS):
+        # Skip vacuum metrics since autovacuum can make the state unpredictable
+        if name in MAINTENANCE_METRICS:
+            continue
+        # 'persons' db doesn't have any indexes so no index metrics should be generated
+        if name in RELATION_INDEX_METRICS:
+            aggregator.assert_metric(name, count=0, tags=expected_tags)
+        else:
+            aggregator.assert_metric(name, count=1, tags=expected_tags)
+
+    # Check metrics from QUERY_PG_CLASS_SIZE
+    for name in _iterate_metric_name(QUERY_PG_CLASS_SIZE):
+        aggregator.assert_metric(name, count=1, tags=expected_tags)
+
+    # And metrics from STATIO_METRICS
+    for name in _iterate_metric_name(STATIO_METRICS):
+        if name in RELATION_INDEX_METRICS:
+            aggregator.assert_metric(name, count=0, tags=expected_tags)
+        else:
+            aggregator.assert_metric(name, count=1, tags=expected_tags)
 
 
 @pytest.mark.integration
@@ -53,14 +71,7 @@ def test_relations_metrics(aggregator, integration_check, pg_instance):
     check.check(pg_instance)
 
     expected_tags = _get_expected_tags(check, pg_instance, db=pg_instance['dbname'], table='persons', schema='public')
-
-    for name in RELATION_METRICS:
-        aggregator.assert_metric(name, count=1, tags=expected_tags)
-    # 'persons' db don't have any indexes
-    for name in RELATION_INDEX_METRICS:
-        aggregator.assert_metric(name, count=0, tags=expected_tags)
-    for name in _iterate_metric_name(QUERY_PG_CLASS):
-        aggregator.assert_metric(name, count=1, tags=expected_tags)
+    _check_metrics_for_relation_wo_index(aggregator, expected_tags)
 
 
 @pytest.mark.integration
@@ -183,17 +194,8 @@ def test_relations_metrics_regex(aggregator, integration_check, pg_instance):
         expected_tags[relation] = _get_expected_tags(
             check, pg_instance, db=pg_instance['dbname'], table=relation.lower(), schema='public'
         )
-
     for relation in relations:
-        for name in RELATION_METRICS:
-            aggregator.assert_metric(name, count=1, tags=expected_tags[relation])
-
-        # 'persons' db don't have any indexes
-        for name in RELATION_INDEX_METRICS:
-            aggregator.assert_metric(name, count=0, tags=expected_tags[relation])
-
-    for name in _iterate_metric_name(QUERY_PG_CLASS):
-        aggregator.assert_metric(name, count=1, tags=expected_tags[relation])
+        _check_metrics_for_relation_wo_index(aggregator, expected_tags[relation])
 
 
 @pytest.mark.integration
@@ -203,19 +205,31 @@ def test_max_relations(aggregator, integration_check, pg_instance):
     check = integration_check(pg_instance)
     check.check(pg_instance)
 
-    for name in RELATION_METRICS:
+    def _metric_name_to_relation_list(metric_name):
         relation_metrics = []
-        for m in aggregator._metrics[name]:
+        for m in aggregator._metrics[metric_name]:
             if any('table:' in tag for tag in m.tags):
                 relation_metrics.append(m)
-        assert len(relation_metrics) == 1
+        return relation_metrics
 
     for name in _iterate_metric_name(QUERY_PG_CLASS):
-        relation_metrics = []
-        for m in aggregator._metrics[name]:
-            if any('table:' in tag for tag in m.tags):
-                relation_metrics.append(m)
-        assert len(relation_metrics) == 1
+        if name in RELATION_INDEX_METRICS + MAINTENANCE_METRICS:
+            continue
+        relation_metrics = _metric_name_to_relation_list(name)
+        assert len(relation_metrics) == 1, f'Expected 1 results for {name}'
+
+    # Also check PG_CLASS_SIZE
+    for name in _iterate_metric_name(QUERY_PG_CLASS_SIZE):
+        relation_metrics = _metric_name_to_relation_list(name)
+        assert len(relation_metrics) == 1, f'Expected 1 results for {name}'
+
+    # And STATIO metrics
+    for name in _iterate_metric_name(STATIO_METRICS):
+        if name in RELATION_INDEX_METRICS:
+            # pg_statio_user_tables returns NULL if the relation doesn't have an index. Skip the index metrics
+            continue
+        relation_metrics = _metric_name_to_relation_list(name)
+        assert len(relation_metrics) == 1, f'Expected 1 results for {name}'
 
 
 @pytest.mark.integration
@@ -257,7 +271,7 @@ def test_vacuum_age(aggregator, integration_check, pg_instance):
     check.check(pg_instance)
 
     expected_tags = _get_expected_tags(check, pg_instance, db='datadog_test', table='persons', schema='public')
-    for name in ['postgresql.last_vacuum_age', 'postgresql.last_analyze_age']:
+    for name in ['postgresql.last_vacuum_age', 'postgresql.last_analyze_age', 'postgresql.toast.last_vacuum_age']:
         assert_metric_at_least(
             aggregator,
             name,
