@@ -72,7 +72,7 @@ class KafkaConfig:
         else:
             self._tls_verify = "true" if is_affirmative(instance.get("tls_verify", True)) else "false"
 
-        if not self._tls_ca_cert and os.name != 'nt':
+        if not self._tls_ca_cert and os.name != 'nt' and os.path.exists('/opt/datadog-agent/embedded/ssl/certs/cacert.pem'):
             self._tls_ca_cert = '/opt/datadog-agent/embedded/ssl/certs/cacert.pem'
 
     def validate_config(self):
