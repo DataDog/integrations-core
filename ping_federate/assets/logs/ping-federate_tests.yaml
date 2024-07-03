@@ -1,6 +1,7 @@
 id: ping-federate
 tests:
-  - sample: "2024-06-04 11:19:53,283 | Administrator | UserAdmin,Admin,CryptoAdmin,ExpressionAdmin | 185.64.148.0 | USER | LOGIN_ATTEMPT | testevdentdetailid | Login was successful"
+  -
+    sample: "2024-06-04 11:19:53,283 | Administrator | UserAdmin,Admin,CryptoAdmin,ExpressionAdmin | 185.64.148.0 | USER | LOGIN_ATTEMPT | testevdentdetailid | Login was successful"
     service: admin
     result:
       custom:
@@ -41,7 +42,7 @@ tests:
       service: "admin"
       tags:
       - "source:LOGS_SOURCE"
-    timestamp: 1717499993283
+      timestamp: 1717499993283
   - sample: "2024-06-04 11:19:53,284 | Administrator | UserAdmin,Admin,CryptoAdmin,ExpressionAdmin | 185.64.148.0 | USER | ROLE_CHANGE | 5af978f8-80a2-44d6-ad56-ehjje0ecbe392af | testuser | CryptoAdmin | UserAdmin,Admin,CryptoAdmin"
     service: admin
     result:
