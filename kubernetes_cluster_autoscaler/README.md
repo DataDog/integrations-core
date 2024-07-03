@@ -10,7 +10,7 @@ Follow the instructions below to install and configure this check for an Agent r
 
 ### Installation
 
-The Kubernetes Cluster Autoscaler check is included in the [Datadog Agent][2] package.
+The Kubernetes Cluster Autoscaler check is included in the [Datadog Agent][2] package. (Agent >= 7.55.x)
 No additional installation is needed on your server.
 
 ### Configuration
