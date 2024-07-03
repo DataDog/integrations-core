@@ -1,10 +1,14 @@
 id: ping-federate
 tests:
-  - sample: "2024-06-04 11:19:53,283 | Administrator | UserAdmin,Admin,CryptoAdmin,ExpressionAdmin | 172.20.240.155 | USER | LOGIN_ATTEMPT | testevdentdetailid | Login was successful"
+  - sample: "2024-06-04 11:19:53,283 | Administrator | UserAdmin,Admin,CryptoAdmin,ExpressionAdmin | 142.251.46.174 | USER | LOGIN_ATTEMPT | testevdentdetailid | Login was successful"
+    service: admin
     result: null
-  - sample: "2024-06-27 11:48:43,342 | Administrator | UserAdmin,Admin,CryptoAdmin,ExpressionAdmin | 142.251.46.174 | USER | LOGIN_ATTEMPT |  | Login was successful"
+  - sample: "2024-06-04 11:19:53,284 | Administrator | UserAdmin,Admin,CryptoAdmin,ExpressionAdmin | 142.251.46.174 | USER | ROLE_CHANGE | 5af978f8-80a2-44d6-ad56-ehjje0ecbe392af | testuser | CryptoAdmin | UserAdmin,Admin,CryptoAdmin"
+    service: admin
     result: null
-  - sample: "2024-06-17 11:04:19,341| tid:LFcUz_Kyuqp4RcRrdnB2YS72Z3g| AUTHN_ATTEMPT| analyst| 142.251.46.174 | PingApp| connection1| SAML20| crest-pingfederate.com| IdP| success| OpenLDAP| Authentication successful| 200"
+  - sample: "2024-06-17 11:04:19,342| tid:LFcUz_Kyuqp4RcRrdnB2YS72Z3g| AUTHN_ATTEMPT| analyst| 142.251.46.174 | PingApp| connection1| SAML20| crest-pingfederate.com| IdP| success| OpenLDAP| Authentication successful| 200"
+    service: audit
     result: null
   - sample: "2024-06-17 11:04:19,341| tid:LFcUz_Kyuqp4RcRrdnB2YS72Z3g| AUTHN_ATTEMPT| analyst| 125.201.81.31 | PingApp| connection1| SAML20| crest-pingfederate.com| IdP| success| OpenLDAP| Authentication successful| 200| qwerty-1234-asdfgh-5678| email=john.doe@example.com, name=John Doe, role=admin| authorization_code| SP| Request| response-123456| john.doe| req-abcdef123456| 1617692015000| resp-7890ghijkl| sts-processor-1234| [spAdapter.SAML2, spConnection.PartnerSP]| [adapter.HTMLFormSimplePCV, idpConnection.IdP, localIdentity.A8me9rySDn1aIM48]| pcv-ldap| virtualserver-01| MyOAuthClient| req-1234567890abcdef"
+    service: audit
     result: null

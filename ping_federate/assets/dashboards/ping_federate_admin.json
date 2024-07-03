@@ -36,7 +36,7 @@
       "id": 7057520287547330,
       "definition": {
         "type": "note",
-        "content": "## Widgets\n1. Total Logs \n 2. Traffic Over Time \n 3. Total Users \n 4. Top Users with Roles \n 5. Top IPs With Failed Login Attempts \n 6. Distribution of Events by Name \n 7. Distribution of Events by Component \n 8. Distribution of Events by Login Status \n 9. Distribution of Events by Location \n 10. Log Details",
+        "content": "## Widgets\n1. Total Logs \n 2. Traffic Over Time \n 3. Total Users \n 4. Top Users with Roles \n 5. Top IPs With Failed Login Attempts by User\n 6. Distribution of Events by Name \n 7. Distribution of Events by Component \n 8. Distribution of Events by Login Status \n 9. Distribution of Events by Location \n 10. Event Details",
         "background_color": "white",
         "font_size": "14",
         "text_align": "left",
@@ -224,7 +224,7 @@
     {
       "id": 8144103561585696,
       "definition": {
-        "title": "Top IP's With Failed Login Attempts",
+        "title": "Top IP's With Failed Login Attempts by User",
         "title_size": "16",
         "title_align": "left",
         "type": "toplist",
@@ -241,6 +241,11 @@
                     "facet": "@network.client.ip",
                     "limit": 10,
                     "sort": { "order": "desc", "aggregation": "count" }
+                  },
+                  {
+                    "facet": "@usr.name",
+                    "limit": 10,
+                    "sort": { "order": "desc", "aggregation": "count" }
                   }
                 ],
                 "search": {
@@ -252,7 +257,7 @@
             "response_format": "scalar",
             "formulas": [{ "formula": "query1" }],
             "sort": {
-              "count": 10,
+              "count": 100,
               "order_by": [{ "type": "formula", "index": 0, "order": "desc" }]
             }
           }
@@ -431,7 +436,7 @@
     {
       "id": 4026262965481334,
       "definition": {
-        "title": "Log Details",
+        "title": "Event Details",
         "title_size": "16",
         "title_align": "left",
         "requests": [

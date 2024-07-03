@@ -80,7 +80,7 @@ Default Log Format:
 
 Additional field Log Format: 
 
-```<pattern>%d| %X{trackingid}| %X{event}| %X{subject}| %X{ip} | %X{app}| %X{connectionid}| %X{protocol}| %X{host}| %X{role}| %X{status}| %X{adapterid}| %X{description}| %X{responsetime}| %X{attrackingid}| %X{attributes}| %X{granttype}| %X{initiator}| %X{inmessagetype}|%X{inresponseto}| %X{localuserid}| %X{requestid}| %X{requeststarttime}| %X{responseid}| %X{stspluginid}| %X{targetsessionid}| %X{authenticationsourceid}| %X{validatorid}| %X{virtualserverid}| %X{connectionname}| %X{httprequestid}%n</pattern>```
+```<pattern>%d| %X{trackingid}| %X{event}| %X{subject}| %X{ip} | %X{app}| %X{connectionid}| %X{protocol}| %X{host}| %X{role}| %X{status}| %X{adapterid}| %X{description}| %X{responsetime}| %X{attrackingid}| %X{attributes}| %X{granttype}| %X{initiator}| %X{inmessagetype}| %X{inresponseto}| %X{localuserid}| %X{requestid}| %X{requeststarttime}| %X{responseid}| %X{stspluginid}| %X{targetsessionid}| %X{authenticationsourceid}| %X{validatorid}| %X{virtualserverid}| %X{connectionname}| %X{httprequestid}%n</pattern>```
 
 
 **Note**: Additional fields supported only if configured in above sequence also if any field is not configured then integration will not support the additional fields.

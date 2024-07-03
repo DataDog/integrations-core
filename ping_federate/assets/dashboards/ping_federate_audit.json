@@ -36,7 +36,7 @@
       "id": 1888570171007648,
       "definition": {
         "type": "note",
-        "content": "## Widgets\n1. Total Transactions \n2.  Total Successful Transactions \n3.   Total In Progress Transactions \n4.   Total Failure Transactions \n5.   Traffic By Event Type \n6.   About Count of Events by Name Panel\n7.   Distribution by Event Name \n8.   About Count of Events by Role Panel \n9.  Distribution by Role \n10.  Top Connections \n11.  Top Ips With Failed Login Attempts \n12.  Top Ips With Successful Login Attempts \n13.  Event Distribution by Location \n14.  Event Details \n ",
+        "content": "## Widgets\n1. Total Transactions \n2.  Total Successful Transactions \n3.   Total Inprogress Transactions \n4.   Total Failure Transactions \n5.   Traffic Over Time \n6.   About Count of Events by Name Panel\n7.   Distribution by Event Name \n8.   Distribution by Role \n9.  Top Connections \n10.  Top Applications\n11.  Top IP's With Failed Login Attempts \n12.  Top IP's With Successful Login Attempts \n13.  Event Distribution by Location \n14.  Event Details \n ",
         "background_color": "white",
         "font_size": "14",
         "text_align": "left",
@@ -134,7 +134,7 @@
     {
       "id": 6694727501370314,
       "definition": {
-        "title": "Total In Progress Transactions",
+        "title": "Total Inprogress Transactions",
         "title_size": "16",
         "title_align": "left",
         "type": "query_value",
@@ -214,7 +214,7 @@
     {
       "id": 7510231128731448,
       "definition": {
-        "title": "Traffic By Event Type",
+        "title": "Traffic Over Time",
         "title_size": "16",
         "title_align": "left",
         "show_legend": true,
@@ -225,19 +225,8 @@
           {
             "formulas": [
               {
-                "style": { "palette": "green", "palette_index": 0 },
-                "alias": "Successful Transactions",
+                "style": { "palette": "classic", "palette_index": 1 },
                 "formula": "query1"
-              },
-              {
-                "style": { "palette": "classic", "palette_index": 0 },
-                "alias": "In Progress Transaction",
-                "formula": "query2"
-              },
-              {
-                "style": { "palette": "orange", "palette_index": 4 },
-                "alias": "Failure Transaction",
-                "formula": "query3"
               }
             ],
             "queries": [
@@ -248,29 +237,7 @@
                 "compute": { "aggregation": "count" },
                 "group_by": [],
                 "search": {
-                  "query": "source:ping-federate service:audit @evt.outcome:success $event_name $status $role"
-                },
-                "storage": "hot"
-              },
-              {
-                "data_source": "logs",
-                "name": "query2",
-                "indexes": ["*"],
-                "compute": { "aggregation": "count" },
-                "group_by": [],
-                "search": {
-                  "query": "source:ping-federate service:audit @evt.outcome:inprogress $event_name $status $role"
-                },
-                "storage": "hot"
-              },
-              {
-                "data_source": "logs",
-                "name": "query3",
-                "indexes": ["*"],
-                "compute": { "aggregation": "count" },
-                "group_by": [],
-                "search": {
-                  "query": "source:ping-federate service:audit @evt.outcome:failure $event_name $status $role"
+                  "query": "source:ping-federate service:audit $event_name $status $role"
                 },
                 "storage": "hot"
               }
@@ -282,7 +249,7 @@
               "line_type": "solid",
               "line_width": "normal"
             },
-            "display_type": "bars"
+            "display_type": "line"
           }
         ]
       },
@@ -302,64 +269,7 @@
         "tick_edge": "left",
         "has_padding": false
       },
-      "layout": { "x": 0, "y": 12, "width": 4, "height": 4 }
-    },
-    {
-      "id": 61845613565368,
-      "definition": {
-        "title": "Distribution by Event Name",
-        "title_size": "16",
-        "title_align": "left",
-        "requests": [
-          {
-            "response_format": "scalar",
-            "formulas": [{ "formula": "query1" }],
-            "queries": [
-              {
-                "data_source": "logs",
-                "name": "query1",
-                "indexes": ["*"],
-                "compute": { "aggregation": "count" },
-                "group_by": [
-                  {
-                    "facet": "@evt.name",
-                    "limit": 10,
-                    "sort": { "order": "desc", "aggregation": "count" }
-                  }
-                ],
-                "search": {
-                  "query": "source:ping-federate service:audit $event_name $status $role"
-                },
-                "storage": "hot"
-              }
-            ],
-            "style": { "palette": "datadog16" },
-            "sort": {
-              "count": 10,
-              "order_by": [{ "type": "formula", "index": 0, "order": "desc" }]
-            }
-          }
-        ],
-        "type": "sunburst",
-        "legend": { "type": "table" }
-      },
-      "layout": { "x": 4, "y": 12, "width": 8, "height": 4 }
-    },
-    {
-      "id": 4507135015220380,
-      "definition": {
-        "type": "note",
-        "content": "\n## About Count of Events by Role Panel\n\n- To filter out the dashboard for respective event role, follow the below mentioned step.\n  - Click on the desired 'Event-Role' and select the 'Set Event-Role'\n  - Alternatively, user can add the filters value manually via filters given on the top of the dashboard.",
-        "background_color": "transparent",
-        "font_size": "14",
-        "text_align": "left",
-        "vertical_align": "top",
-        "show_tick": false,
-        "tick_pos": "50%",
-        "tick_edge": "left",
-        "has_padding": false
-      },
-      "layout": { "x": 0, "y": 16, "width": 4, "height": 3 }
+      "layout": { "x": 0, "y": 12, "width": 6, "height": 2 }
     },
     {
       "id": 3081339105298010,
@@ -400,7 +310,48 @@
         "type": "sunburst",
         "legend": { "type": "table" }
       },
-      "layout": { "x": 4, "y": 16, "width": 8, "height": 4 }
+      "layout": { "x": 6, "y": 12, "width": 6, "height": 5 }
+    },
+    {
+      "id": 61845613565368,
+      "definition": {
+        "title": "Distribution by Event Name",
+        "title_size": "16",
+        "title_align": "left",
+        "requests": [
+          {
+            "response_format": "scalar",
+            "formulas": [{ "formula": "query1" }],
+            "queries": [
+              {
+                "data_source": "logs",
+                "name": "query1",
+                "indexes": ["*"],
+                "compute": { "aggregation": "count" },
+                "group_by": [
+                  {
+                    "facet": "@evt.name",
+                    "limit": 10,
+                    "sort": { "order": "desc", "aggregation": "count" }
+                  }
+                ],
+                "search": {
+                  "query": "source:ping-federate service:audit $event_name $status $role"
+                },
+                "storage": "hot"
+              }
+            ],
+            "style": { "palette": "datadog16" },
+            "sort": {
+              "count": 10,
+              "order_by": [{ "type": "formula", "index": 0, "order": "desc" }]
+            }
+          }
+        ],
+        "type": "sunburst",
+        "legend": { "type": "table" }
+      },
+      "layout": { "x": 0, "y": 14, "width": 6, "height": 3 }
     },
     {
       "id": 6533545900710002,
@@ -440,7 +391,47 @@
         ],
         "style": { "display": { "type": "stacked", "legend": "automatic" } }
       },
-      "layout": { "x": 0, "y": 20, "width": 12, "height": 3 }
+      "layout": { "x": 0, "y": 17, "width": 6, "height": 3 }
+    },
+    {
+      "id": 6980042197681004,
+      "definition": {
+        "title": "Top Applications",
+        "title_size": "16",
+        "title_align": "left",
+        "type": "toplist",
+        "requests": [
+          {
+            "queries": [
+              {
+                "data_source": "logs",
+                "name": "query1",
+                "indexes": ["*"],
+                "compute": { "aggregation": "count" },
+                "group_by": [
+                  {
+                    "facet": "@app",
+                    "limit": 10,
+                    "sort": { "order": "desc", "aggregation": "count" }
+                  }
+                ],
+                "search": {
+                  "query": "source:ping-federate service:audit $event_name $status $role"
+                },
+                "storage": "hot"
+              }
+            ],
+            "response_format": "scalar",
+            "formulas": [{ "formula": "query1" }],
+            "sort": {
+              "count": 10,
+              "order_by": [{ "type": "formula", "index": 0, "order": "desc" }]
+            }
+          }
+        ],
+        "style": { "display": { "type": "stacked", "legend": "automatic" } }
+      },
+      "layout": { "x": 6, "y": 17, "width": 6, "height": 3 }
     },
     {
       "id": 4253102102479480,
@@ -480,7 +471,7 @@
         ],
         "style": { "display": { "type": "stacked", "legend": "automatic" } }
       },
-      "layout": { "x": 0, "y": 23, "width": 6, "height": 3 }
+      "layout": { "x": 0, "y": 20, "width": 6, "height": 3 }
     },
     {
       "id": 2506249302957548,
@@ -520,7 +511,7 @@
         ],
         "style": { "display": { "type": "stacked", "legend": "automatic" } }
       },
-      "layout": { "x": 6, "y": 23, "width": 6, "height": 3 }
+      "layout": { "x": 6, "y": 20, "width": 6, "height": 3 }
     },
     {
       "id": 3668730193307290,
@@ -561,7 +552,7 @@
         "style": { "palette": "hostmap_blues", "palette_flip": false },
         "view": { "focus": "WORLD" }
       },
-      "layout": { "x": 0, "y": 26, "width": 12, "height": 5 }
+      "layout": { "x": 0, "y": 23, "width": 12, "height": 5 }
     },
     {
       "id": 1325464047476426,
@@ -592,7 +583,7 @@
         ],
         "type": "list_stream"
       },
-      "layout": { "x": 0, "y": 31, "width": 12, "height": 4 }
+      "layout": { "x": 0, "y": 28, "width": 12, "height": 4 }
     }
   ],
   "template_variables": [
