@@ -131,7 +131,7 @@ class SqlserverAgentHistory(DBMAsyncJob):
         self.log.debug("loaded sql server agent jobs history len(rows)=%s", len(rows))
         return rows
     
-    def _create_agent_jobs_history_event(self, grouped_jobs_history_rows):
+    def _create_agent_jobs_history_event(self, history_rows):
         event = {
             "host": self._check.resolved_hostname,
             "ddagentversion": datadog_agent.get_version(),
@@ -143,7 +143,7 @@ class SqlserverAgentHistory(DBMAsyncJob):
             'sqlserver_version': self._check.static_info_cache.get(STATIC_INFO_VERSION, ""),
             'sqlserver_engine_edition': self._check.static_info_cache.get(STATIC_INFO_ENGINE_EDITION, ""),
             "cloud_metadata": self._config.cloud_metadata,
-            "sqlserver_job_history": grouped_jobs_history_rows
+            "sqlserver_job_history": history_rows
         }
         return event
 
