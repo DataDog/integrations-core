@@ -73,7 +73,7 @@ pipeline:
             - 2024-07-03 11:57:16,661 | Administrator | UserAdmin,Admin,CryptoAdmin,ExpressionAdmin | 142.251.46.174 | USER | ROLE_CHANGE | 5af978fkj8-80a2-44d6-ad56-ee0ecbe392af | testuser | CryptoAdmin | UserAdmin,Admin,CryptoAdmin
           grok:
             supportRules: ""
-            matchRules: admin_log_parser %{date("yyyy-MM-dd' 'HH:mm:ss,SSS"):timestamp} \| %{regex("[^|]*"):usr.name} \| (%{data:roles:array("[]",",")})? \| (%{ip:network.client.ip})? \| (%{regex("[^|]*"):component})? \| (%{regex("[^|]*"):evt.name}) \| (%{regex("[^|]*"):evt.id})? \| (%{regex(".+"):description})?
+            matchRules: admin_log_parser %{date("yyyy-MM-dd' 'HH:mm:ss,SSS"):timestamp} \| %{regex("[^|]*"):usr.name} \| (%{regex("[^|]*"):roles:array("[]",",")})? \| (%{ip:network.client.ip})? \| (%{regex("[^|]*"):component})? \| (%{regex("[^|]*"):evt.name}) \| (%{regex("[^|]*"):evt.id})? \| (%{regex(".+"):description})?
         - type: geo-ip-parser
           name: Extracting Geo Location from IP Address
           enabled: true
