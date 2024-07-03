@@ -57,13 +57,21 @@ class MySQLMetadata(DBMAsyncJob):
         self._settings_collection_interval = float(
             config.settings_config.get('collection_interval', DEFAULT_SETTINGS_COLLECTION_INTERVAL)
         )
-        self.collection_interval = min(self._schemas_collection_interval, self._settings_collection_interval)
+
+        if self._schemas_enabled and not self._settings_enabled:
+            self.collection_interval = self._schemas_collection_interval
+        elif not self._schemas_enabled and self._settings_enabled:
+            self.collection_interval = self._settings_collection_interval
+        else:
+            self.collection_interval = min(self._schemas_collection_interval, self._settings_collection_interval)
+
+        self.enabled = self._schemas_enabled or self._settings_enabled
 
         super(MySQLMetadata, self).__init__(
             check,
             rate_limit=1 / self.collection_interval,
             run_sync=is_affirmative(config.settings_config.get('run_sync', False)),
-            enabled=self._schemas_enabled or self._settings_enabled,
+            enabled=self.enabled,
             min_collection_interval=config.min_collection_interval,
             dbms="mysql",
             expected_db_exceptions=(pymysql.err.DatabaseError,),
@@ -119,12 +127,20 @@ class MySQLMetadata(DBMAsyncJob):
         elapsed_time_settings = time.time() - self._last_settings_collection_time
         if self._settings_enabled and elapsed_time_settings >= self._settings_collection_interval:
             self._last_settings_collection_time = time.time()
-            self.report_mysql_metadata()
+            try:
+               self.report_mysql_metadata()
+            except Exception as e:
+                self._log.error(
+                    "While executing report_mysql_metadata, the following exception occured {}".format(e))
 
         elapsed_time_databases = time.time() - self._last_databases_collection_time
         if self._schemas_enabled and elapsed_time_databases >= self._schemas_collection_interval:
             self._last_databases_collection_time = time.time()
-            self._schemas._collect_databases_data(self._tags)
+            try:
+               self._schemas._collect_databases_data(self._tags)
+            except Exception as e:
+                self._log.error(
+                    "While executing _collect_databases_data, the following exception occured {}".format(e))
 
     def shut_down(self):
         self._schemas.shut_down()

@@ -10,7 +10,6 @@ from datadog_checks.mysql import MySql
 
 from . import common
 
-
 @pytest.fixture
 def dbm_instance(instance_complex):
     instance_complex['dbm'] = True
@@ -48,6 +47,34 @@ def test_collect_mysql_settings(aggregator, dbm_instance, dd_run_check):
     assert event['dbms'] == "mysql"
     assert len(event["metadata"]) > 0
 
+@pytest.mark.integration
+@pytest.mark.usefixtures('dd_environment')
+def test_metadata_collection_interval_and_enabled(dbm_instance):
+
+    dbm_instance['schemas_collection'] = {"enabled": True, "collection_interval": 101}
+    dbm_instance['collect_settings'] = {"enabled": False, "collection_interval": 100}
+    
+    mysql_check = MySql(common.CHECK_NAME, {}, instances=[dbm_instance])
+    assert mysql_check._mysql_metadata.enabled
+    assert mysql_check._mysql_metadata.collection_interval == 101
+    dbm_instance['schemas_collection'] = {"enabled": False, "collection_interval": 101}
+    dbm_instance['collect_settings'] = {"enabled": True, "collection_interval": 102}
+
+    
+    mysql_check = MySql(common.CHECK_NAME, {}, instances=[dbm_instance])
+    assert mysql_check._mysql_metadata.enabled
+    assert mysql_check._mysql_metadata.collection_interval == 102
+
+    dbm_instance['schemas_collection'] = {"enabled": True, "collection_interval": 101}
+    dbm_instance['collect_settings'] = {"enabled": True, "collection_interval": 102}
+
+    mysql_check = MySql(common.CHECK_NAME, {}, instances=[dbm_instance])
+    assert mysql_check._mysql_metadata.enabled
+    assert mysql_check._mysql_metadata.collection_interval == 101
+    dbm_instance['schemas_collection'] = {"enabled": False}
+    dbm_instance['collect_settings'] = {"enabled": False}    
+    mysql_check = MySql(common.CHECK_NAME, {}, instances=[dbm_instance])
+    assert not mysql_check._mysql_metadata.enabled
 
 @pytest.mark.integration
 @pytest.mark.usefixtures('dd_environment')
