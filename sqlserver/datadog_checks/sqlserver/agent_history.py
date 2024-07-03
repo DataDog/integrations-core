@@ -15,42 +15,9 @@ except ImportError:
 DEFAULT_COLLECTION_INTERVAL = 15
 DEFAULT_ROW_LIMIT = 1000
 
-# AGENT_HISTORY_QUERY = """\
-# SELECT
-#     j.name,
-#     sjh1.job_id,
-#     sjh1.step_id,
-#     sjh1.step_name,
-#     sjh1.instance_id AS step_instance_id,
-#     (
-#         SELECT MIN(sjh2.instance_id)
-#         FROM msdb.dbo.sysjobhistory AS sjh2
-#         WHERE sjh2.job_id = sjh1.job_id
-#         AND sjh2.step_id = 0
-#         AND sjh2.instance_id >= sjh1.instance_id
-#     ) AS completion_instance_id,
-#     sjh1.run_date,
-#     sjh1.run_time,
-#     sjh1.run_duration,
-#     sjh1.run_status,
-#     sjh1.message
-# FROM 
-#     msdb.dbo.sysjobhistory AS sjh1
-# INNER JOIN msdb.dbo.sysjobs AS j
-# ON j.job_id = sjh1.job_id
-# WHERE 
-#     EXISTS (
-#         SELECT 1
-#         FROM msdb.dbo.sysjobhistory AS sjh2
-#         WHERE sjh2.job_id = sjh1.job_id
-#         AND sjh2.step_id = 0
-#         AND sjh2.instance_id >= sjh1.instance_id{last_instance_id_filter}
-#     )
-# """
-
 AGENT_HISTORY_QUERY = """\
 SELECT {history_row_limit_filter}
-    j.name,
+    j.name AS job_name,
     sjh1.job_id,
     sjh1.step_name,
     sjh1.step_id,
@@ -151,6 +118,7 @@ class SqlserverAgentHistory(DBMAsyncJob):
     @tracked_method(agent_check_getter=agent_check_getter)
     def _get_new_agent_job_history(self, cursor):
         last_collection_time_filter = "+ {last_collection_time}".format(last_collection_time = self._last_collection_time)
+        self._last_collection_time = time.time()
         history_row_limit_filter = "TOP {history_row_limit}".format(history_row_limit=self.history_row_limit)
         query = AGENT_HISTORY_QUERY.format(history_row_limit_filter=history_row_limit_filter, last_collection_time_filter=last_collection_time_filter)
         self.log.debug("collecting sql server agent jobs history")
@@ -159,10 +127,6 @@ class SqlserverAgentHistory(DBMAsyncJob):
         columns = [i[0] for i in cursor.description]
         # construct row dicts manually as there's no DictCursor for pyodbc
         rows = [dict(zip(columns, row)) for row in cursor.fetchall()]
-
-        for row in rows:
-            if row['completion_instance_id'] > self._last_history_id:
-                self._last_history_id = row['completion_instance_id']
 
         self.log.debug("loaded sql server agent jobs history len(rows)=%s", len(rows))
         return rows
