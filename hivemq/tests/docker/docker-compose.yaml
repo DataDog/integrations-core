@@ -1,5 +1,3 @@
-version: "3"
-
 services:
   hivemq1:
     image: hivemq/hivemq4:${HIVEMQ_VERSION}

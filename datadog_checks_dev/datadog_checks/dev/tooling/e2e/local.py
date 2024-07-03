@@ -70,7 +70,7 @@ class LocalAgentInterface(object):
         if self.dd_url:
             self.env_vars['DD_DD_URL'] = str(self.dd_url)
         if self.log_url:
-            self.env_vars['DD_LOGS_CONFIG_DD_URL'] = str(self.log_url)
+            self.env_vars['DD_LOGS_CONFIG_LOGS_DD_URL'] = str(self.log_url)
 
     @property
     def platform(self):

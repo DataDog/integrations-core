@@ -9,7 +9,7 @@
     "support": "README.md#Support",
     "changelog": "CHANGELOG.md",
     "description": "Monitor key metrics for credit usage, storage, query, user history and more.",
-    "title": "Snowflake",
+    "title": "Snowflake - Agent based (Deprecated)",
     "media": [],
     "classifier_tags": [
       "Supported OS::Linux",
@@ -55,3 +55,4 @@
     }
   }
 }
+

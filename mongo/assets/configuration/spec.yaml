@@ -90,7 +90,6 @@ files:
         example:
           [ one_database, other_database ]
     - name: dbm
-      hidden: true
       description: |
         Set to `true` enable Database Monitoring.
         
@@ -102,7 +101,6 @@ files:
         example: false
         display_default: false
     - name: cluster_name
-      hidden: true
       description: |
         The name of the cluster to which the monitored MongoDB instance belongs.
         Used to group MongoDB instances in a MongoDB cluster.
@@ -128,6 +126,22 @@ files:
         type: number
         example: 1800
         display_default: false
+    - name: operation_samples
+      description: Configure collection of MongoDB operation samples and explain plans.
+      options:
+        - name: enabled
+          description: |
+            Enable collection of operation samples. Requires `dbm: true`.
+          value:
+            type: boolean
+            example: true
+        - name: collection_interval
+          description: |
+            Set the operation samples collection interval in seconds. Each collection involves capturing
+            current operations with $currentOp aggregation pipeline and explain plans for each operation.
+          value:
+            type: number
+            example: 10
     - name: replica_check
       description: |
         Whether or not to read from available replicas.

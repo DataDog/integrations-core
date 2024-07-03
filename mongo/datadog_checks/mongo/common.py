@@ -138,10 +138,11 @@ class MongosDeployment(Deployment):
 
 
 class ReplicaSetDeployment(Deployment):
-    def __init__(self, replset_name, replset_state, hosts, cluster_role=None):
+    def __init__(self, replset_name, replset_state, hosts, replset_me, cluster_role=None):
         super(ReplicaSetDeployment, self).__init__()
         self.replset_name = replset_name
         self.replset_state = replset_state
+        self.replset_me = replset_me
         self.replset_state_name = get_state_name(replset_state).lower()
         self.use_shards = cluster_role is not None
         self.cluster_role = cluster_role
@@ -164,6 +165,9 @@ class ReplicaSetDeployment(Deployment):
         tags = [
             "replset_name:{}".format(self.replset_name),
             "replset_state:{}".format(self.replset_state_name),
+            # in a replica set, the 'me' field is the [hostname]:[port]
+            # of the node responding to this command.
+            "replset_me:{}".format(self.replset_me),
         ]
         if self.use_shards:
             tags.append('sharding_cluster_role:{}'.format(self.cluster_role))

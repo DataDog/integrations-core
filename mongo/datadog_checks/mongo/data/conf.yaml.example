@@ -84,12 +84,44 @@ instances:
     #   - one_database
     #   - other_database
 
+    ## @param dbm - boolean - optional - default: false
+    ## Set to `true` enable Database Monitoring.
+    ##
+    ## NOTE: Database Monitoring for MongoDB is currently in private beta.
+    ## If you are interested in participating, please reach out to your Datadog Customer Success Manager.
+    #
+    # dbm: false
+
+    ## @param cluster_name - string - optional
+    ## The name of the cluster to which the monitored MongoDB instance belongs.
+    ## Used to group MongoDB instances in a MongoDB cluster.
+    ## Please note that the cluster name must be unique for each MongoDB cluster.
+    ##
+    ## Required when `dbm` is enabled.
+    #
+    # cluster_name: <CLUSTER_NAME>
+
     ## @param reported_database_hostname - string - optional
     ## Set the reported database hostname for the connected mongodb instance. This value overrides the mongodb hostname 
     ## detected by the Agent from mongodb admin command serverStatus. It can be useful to set a custom hostname
     ## when connecting to a remote database through a proxy.
     #
     # reported_database_hostname: <REPORTED_DATABASE_HOSTNAME>
+
+    ## Configure collection of MongoDB operation samples and explain plans.
+    #
+    # operation_samples:
+
+        ## @param enabled - boolean - optional - default: true
+        ## Enable collection of operation samples. Requires `dbm: true`.
+        #
+        # enabled: true
+
+        ## @param collection_interval - number - optional - default: 10
+        ## Set the operation samples collection interval in seconds. Each collection involves capturing
+        ## current operations with $currentOp aggregation pipeline and explain plans for each operation.
+        #
+        # collection_interval: 10
 
     ## @param replica_check - boolean - optional - default: true
     ## Whether or not to read from available replicas.
