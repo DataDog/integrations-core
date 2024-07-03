@@ -38,7 +38,10 @@
       },
       "service_checks": {
         "metadata_path": "assets/service_checks.json"
-      }
+      },
+      "process_signatures": [
+        "python3 -m vllm.entrypoints.openai.api_server"
+      ],
     },
     "monitors": {
         "token_throughput": "assets/monitors/token_throughput.json",
