@@ -62,7 +62,7 @@
     {
         "name": "mongodb.collection.capped",
         "type": 0,
-        "value": 0.0,
+        "value": 1.0,
         "tags": [
             "server:mongodb://testUser2:*****@localhost:27017/test",
             "db:test",
@@ -72,7 +72,7 @@
     {
         "name": "mongodb.collection.capped",
         "type": 0,
-        "value": 0.0,
+        "value": 1.0,
         "tags": [
             "server:mongodb://testUser2:*****@localhost:27017/test",
             "db:test",
@@ -179,6 +179,226 @@
             "db:test",
             "collection:bar",
             "index:_id_"
+        ]
+    },
+    {
+        "name": "mongodb.collection.totalindexsize",
+        "type": 0,
+        "value": 16384.0,
+        "tags": [
+            "server:mongodb://testUser2:*****@localhost:27017/test",
+            "db:test",
+            "collection:foo"
+        ]
+    },
+    {
+        "name": "mongodb.collection.totalindexsize",
+        "type": 0,
+        "value": 16384.0,
+        "tags": [
+            "server:mongodb://testUser2:*****@localhost:27017/test",
+            "db:test",
+            "collection:bar"
+        ]
+    },
+    {
+        "name": "mongodb.collection.reads.latency",
+        "type": 0,
+        "value": 13165.0,
+        "tags": [
+            "server:mongodb://testUser2:*****@localhost:27017/test",
+            "db:test",
+            "collection:foo"
+        ]
+    },
+    {
+        "name": "mongodb.collection.reads.latency",
+        "type": 0,
+        "value": 13165.0,
+        "tags": [
+            "server:mongodb://testUser2:*****@localhost:27017/test",
+            "db:test",
+            "collection:bar"
+        ]
+    },
+    {
+        "name": "mongodb.collection.reads.opsps",
+        "type": 1,
+        "value": 10.0,
+        "tags": [
+            "server:mongodb://testUser2:*****@localhost:27017/test",
+            "db:test",
+            "collection:foo"
+        ]
+    },
+    {
+        "name": "mongodb.collection.reads.opsps",
+        "type": 1,
+        "value": 10.0,
+        "tags": [
+            "server:mongodb://testUser2:*****@localhost:27017/test",
+            "db:test",
+            "collection:bar"
+        ]
+    },
+    {
+        "name": "mongodb.collection.writes.latency",
+        "type": 0,
+        "value": 8542.0,
+        "tags": [
+            "server:mongodb://testUser2:*****@localhost:27017/test",
+            "db:test",
+            "collection:foo"
+        ]
+    },
+    {
+        "name": "mongodb.collection.writes.latency",
+        "type": 0,
+        "value": 8542.0,
+        "tags": [
+            "server:mongodb://testUser2:*****@localhost:27017/test",
+            "db:test",
+            "collection:bar"
+        ]
+    },
+    {
+        "name": "mongodb.collection.writes.opsps",
+        "type": 1,
+        "value": 1.0,
+        "tags": [
+            "server:mongodb://testUser2:*****@localhost:27017/test",
+            "db:test",
+            "collection:foo"
+        ]
+    },
+    {
+        "name": "mongodb.collection.writes.opsps",
+        "type": 1,
+        "value": 1.0,
+        "tags": [
+            "server:mongodb://testUser2:*****@localhost:27017/test",
+            "db:test",
+            "collection:bar"
+        ]
+    },
+    {
+        "name": "mongodb.collection.commands.latency",
+        "type": 0,
+        "value": 0.0,
+        "tags": [
+            "server:mongodb://testUser2:*****@localhost:27017/test",
+            "db:test",
+            "collection:foo"
+        ]
+    },
+    {
+        "name": "mongodb.collection.commands.latency",
+        "type": 0,
+        "value": 0.0,
+        "tags": [
+            "server:mongodb://testUser2:*****@localhost:27017/test",
+            "db:test",
+            "collection:bar"
+        ]
+    },
+    {
+        "name": "mongodb.collection.commands.opsps",
+        "type": 1,
+        "value": 0.0,
+        "tags": [
+            "server:mongodb://testUser2:*****@localhost:27017/test",
+            "db:test",
+            "collection:foo"
+        ]
+    },
+    {
+        "name": "mongodb.collection.commands.opsps",
+        "type": 1,
+        "value": 0.0,
+        "tags": [
+            "server:mongodb://testUser2:*****@localhost:27017/test",
+            "db:test",
+            "collection:bar"
+        ]
+    },
+    {
+        "name": "mongodb.collection.transactions.latency",
+        "type": 0,
+        "value": 0.0,
+        "tags": [
+            "server:mongodb://testUser2:*****@localhost:27017/test",
+            "db:test",
+            "collection:foo"
+        ]
+    },
+    {
+        "name": "mongodb.collection.transactions.latency",
+        "type": 0,
+        "value": 0.0,
+        "tags": [
+            "server:mongodb://testUser2:*****@localhost:27017/test",
+            "db:test",
+            "collection:bar"
+        ]
+    },
+    {
+        "name": "mongodb.collection.transactions.opsps",
+        "type": 1,
+        "value": 0.0,
+        "tags": [
+            "server:mongodb://testUser2:*****@localhost:27017/test",
+            "db:test",
+            "collection:foo"
+        ]
+    },
+    {
+        "name": "mongodb.collection.transactions.opsps",
+        "type": 1,
+        "value": 0.0,
+        "tags": [
+            "server:mongodb://testUser2:*****@localhost:27017/test",
+            "db:test",
+            "collection:bar"
+        ]
+    },
+    {
+        "name": "mongodb.collection.collectionscans.nontailable",
+        "type": 0,
+        "value": 0.0,
+        "tags": [
+            "server:mongodb://testUser2:*****@localhost:27017/test",
+            "db:test",
+            "collection:foo"
+        ]
+    },
+    {
+        "name": "mongodb.collection.collectionscans.nontailable",
+        "type": 0,
+        "value": 0.0,
+        "tags": [
+            "server:mongodb://testUser2:*****@localhost:27017/test",
+            "db:test",
+            "collection:bar"
+        ]
+    },
+    {
+        "name": "mongodb.collection.collectionscans.total",
+        "type": 0,
+        "value": 0.0,
+        "tags": [
+            "server:mongodb://testUser2:*****@localhost:27017/test",
+            "db:test",
+            "collection:foo"
+        ]
+    },
+    {
+        "name": "mongodb.collection.collectionscans.total",
+        "type": 0,
+        "value": 0.0,
+        "tags": [
+            "server:mongodb://testUser2:*****@localhost:27017/test",
+            "db:test",
+            "collection:bar"
         ]
     },
     {
@@ -244,7 +464,7 @@
     {
         "name": "mongodb.collection.capped",
         "type": 0,
-        "value": 0.0,
+        "value": 1.0,
         "tags": [
             "server:mongodb://testUser2:*****@localhost:27017/test",
             "db:admin",
@@ -254,7 +474,7 @@
     {
         "name": "mongodb.collection.capped",
         "type": 0,
-        "value": 0.0,
+        "value": 1.0,
         "tags": [
             "server:mongodb://testUser2:*****@localhost:27017/test",
             "db:admin",
@@ -361,6 +581,226 @@
             "db:admin",
             "collection:bar",
             "index:_id_"
+        ]
+    },
+    {
+        "name": "mongodb.collection.totalindexsize",
+        "type": 0,
+        "value": 16384.0,
+        "tags": [
+            "server:mongodb://testUser2:*****@localhost:27017/test",
+            "db:admin",
+            "collection:foo"
+        ]
+    },
+    {
+        "name": "mongodb.collection.totalindexsize",
+        "type": 0,
+        "value": 16384.0,
+        "tags": [
+            "server:mongodb://testUser2:*****@localhost:27017/test",
+            "db:admin",
+            "collection:bar"
+        ]
+    },
+    {
+        "name": "mongodb.collection.reads.latency",
+        "type": 0,
+        "value": 13165.0,
+        "tags": [
+            "server:mongodb://testUser2:*****@localhost:27017/test",
+            "db:admin",
+            "collection:foo"
+        ]
+    },
+    {
+        "name": "mongodb.collection.reads.latency",
+        "type": 0,
+        "value": 13165.0,
+        "tags": [
+            "server:mongodb://testUser2:*****@localhost:27017/test",
+            "db:admin",
+            "collection:bar"
+        ]
+    },
+    {
+        "name": "mongodb.collection.reads.opsps",
+        "type": 1,
+        "value": 10.0,
+        "tags": [
+            "server:mongodb://testUser2:*****@localhost:27017/test",
+            "db:admin",
+            "collection:foo"
+        ]
+    },
+    {
+        "name": "mongodb.collection.reads.opsps",
+        "type": 1,
+        "value": 10.0,
+        "tags": [
+            "server:mongodb://testUser2:*****@localhost:27017/test",
+            "db:admin",
+            "collection:bar"
+        ]
+    },
+    {
+        "name": "mongodb.collection.writes.latency",
+        "type": 0,
+        "value": 8542.0,
+        "tags": [
+            "server:mongodb://testUser2:*****@localhost:27017/test",
+            "db:admin",
+            "collection:foo"
+        ]
+    },
+    {
+        "name": "mongodb.collection.writes.latency",
+        "type": 0,
+        "value": 8542.0,
+        "tags": [
+            "server:mongodb://testUser2:*****@localhost:27017/test",
+            "db:admin",
+            "collection:bar"
+        ]
+    },
+    {
+        "name": "mongodb.collection.writes.opsps",
+        "type": 1,
+        "value": 1.0,
+        "tags": [
+            "server:mongodb://testUser2:*****@localhost:27017/test",
+            "db:admin",
+            "collection:foo"
+        ]
+    },
+    {
+        "name": "mongodb.collection.writes.opsps",
+        "type": 1,
+        "value": 1.0,
+        "tags": [
+            "server:mongodb://testUser2:*****@localhost:27017/test",
+            "db:admin",
+            "collection:bar"
+        ]
+    },
+    {
+        "name": "mongodb.collection.commands.latency",
+        "type": 0,
+        "value": 0.0,
+        "tags": [
+            "server:mongodb://testUser2:*****@localhost:27017/test",
+            "db:admin",
+            "collection:foo"
+        ]
+    },
+    {
+        "name": "mongodb.collection.commands.latency",
+        "type": 0,
+        "value": 0.0,
+        "tags": [
+            "server:mongodb://testUser2:*****@localhost:27017/test",
+            "db:admin",
+            "collection:bar"
+        ]
+    },
+    {
+        "name": "mongodb.collection.commands.opsps",
+        "type": 1,
+        "value": 0.0,
+        "tags": [
+            "server:mongodb://testUser2:*****@localhost:27017/test",
+            "db:admin",
+            "collection:foo"
+        ]
+    },
+    {
+        "name": "mongodb.collection.commands.opsps",
+        "type": 1,
+        "value": 0.0,
+        "tags": [
+            "server:mongodb://testUser2:*****@localhost:27017/test",
+            "db:admin",
+            "collection:bar"
+        ]
+    },
+    {
+        "name": "mongodb.collection.transactions.latency",
+        "type": 0,
+        "value": 0.0,
+        "tags": [
+            "server:mongodb://testUser2:*****@localhost:27017/test",
+            "db:admin",
+            "collection:foo"
+        ]
+    },
+    {
+        "name": "mongodb.collection.transactions.latency",
+        "type": 0,
+        "value": 0.0,
+        "tags": [
+            "server:mongodb://testUser2:*****@localhost:27017/test",
+            "db:admin",
+            "collection:bar"
+        ]
+    },
+    {
+        "name": "mongodb.collection.transactions.opsps",
+        "type": 1,
+        "value": 0.0,
+        "tags": [
+            "server:mongodb://testUser2:*****@localhost:27017/test",
+            "db:admin",
+            "collection:foo"
+        ]
+    },
+    {
+        "name": "mongodb.collection.transactions.opsps",
+        "type": 1,
+        "value": 0.0,
+        "tags": [
+            "server:mongodb://testUser2:*****@localhost:27017/test",
+            "db:admin",
+            "collection:bar"
+        ]
+    },
+    {
+        "name": "mongodb.collection.collectionscans.nontailable",
+        "type": 0,
+        "value": 0.0,
+        "tags": [
+            "server:mongodb://testUser2:*****@localhost:27017/test",
+            "db:admin",
+            "collection:foo"
+        ]
+    },
+    {
+        "name": "mongodb.collection.collectionscans.nontailable",
+        "type": 0,
+        "value": 0.0,
+        "tags": [
+            "server:mongodb://testUser2:*****@localhost:27017/test",
+            "db:admin",
+            "collection:bar"
+        ]
+    },
+    {
+        "name": "mongodb.collection.collectionscans.total",
+        "type": 0,
+        "value": 0.0,
+        "tags": [
+            "server:mongodb://testUser2:*****@localhost:27017/test",
+            "db:admin",
+            "collection:foo"
+        ]
+    },
+    {
+        "name": "mongodb.collection.collectionscans.total",
+        "type": 0,
+        "value": 0.0,
+        "tags": [
+            "server:mongodb://testUser2:*****@localhost:27017/test",
+            "db:admin",
+            "collection:bar"
         ]
     },
     {
@@ -426,7 +866,7 @@
     {
         "name": "mongodb.collection.capped",
         "type": 0,
-        "value": 0.0,
+        "value": 1.0,
         "tags": [
             "server:mongodb://testUser2:*****@localhost:27017/test",
             "db:local",
@@ -436,7 +876,7 @@
     {
         "name": "mongodb.collection.capped",
         "type": 0,
-        "value": 0.0,
+        "value": 1.0,
         "tags": [
             "server:mongodb://testUser2:*****@localhost:27017/test",
             "db:local",
@@ -543,6 +983,226 @@
             "db:local",
             "collection:bar",
             "index:_id_"
+        ]
+    },
+    {
+        "name": "mongodb.collection.totalindexsize",
+        "type": 0,
+        "value": 16384.0,
+        "tags": [
+            "server:mongodb://testUser2:*****@localhost:27017/test",
+            "db:local",
+            "collection:foo"
+        ]
+    },
+    {
+        "name": "mongodb.collection.totalindexsize",
+        "type": 0,
+        "value": 16384.0,
+        "tags": [
+            "server:mongodb://testUser2:*****@localhost:27017/test",
+            "db:local",
+            "collection:bar"
+        ]
+    },
+    {
+        "name": "mongodb.collection.reads.latency",
+        "type": 0,
+        "value": 13165.0,
+        "tags": [
+            "server:mongodb://testUser2:*****@localhost:27017/test",
+            "db:local",
+            "collection:foo"
+        ]
+    },
+    {
+        "name": "mongodb.collection.reads.latency",
+        "type": 0,
+        "value": 13165.0,
+        "tags": [
+            "server:mongodb://testUser2:*****@localhost:27017/test",
+            "db:local",
+            "collection:bar"
+        ]
+    },
+    {
+        "name": "mongodb.collection.reads.opsps",
+        "type": 1,
+        "value": 10.0,
+        "tags": [
+            "server:mongodb://testUser2:*****@localhost:27017/test",
+            "db:local",
+            "collection:foo"
+        ]
+    },
+    {
+        "name": "mongodb.collection.reads.opsps",
+        "type": 1,
+        "value": 10.0,
+        "tags": [
+            "server:mongodb://testUser2:*****@localhost:27017/test",
+            "db:local",
+            "collection:bar"
+        ]
+    },
+    {
+        "name": "mongodb.collection.writes.latency",
+        "type": 0,
+        "value": 8542.0,
+        "tags": [
+            "server:mongodb://testUser2:*****@localhost:27017/test",
+            "db:local",
+            "collection:foo"
+        ]
+    },
+    {
+        "name": "mongodb.collection.writes.latency",
+        "type": 0,
+        "value": 8542.0,
+        "tags": [
+            "server:mongodb://testUser2:*****@localhost:27017/test",
+            "db:local",
+            "collection:bar"
+        ]
+    },
+    {
+        "name": "mongodb.collection.writes.opsps",
+        "type": 1,
+        "value": 1.0,
+        "tags": [
+            "server:mongodb://testUser2:*****@localhost:27017/test",
+            "db:local",
+            "collection:foo"
+        ]
+    },
+    {
+        "name": "mongodb.collection.writes.opsps",
+        "type": 1,
+        "value": 1.0,
+        "tags": [
+            "server:mongodb://testUser2:*****@localhost:27017/test",
+            "db:local",
+            "collection:bar"
+        ]
+    },
+    {
+        "name": "mongodb.collection.commands.latency",
+        "type": 0,
+        "value": 0.0,
+        "tags": [
+            "server:mongodb://testUser2:*****@localhost:27017/test",
+            "db:local",
+            "collection:foo"
+        ]
+    },
+    {
+        "name": "mongodb.collection.commands.latency",
+        "type": 0,
+        "value": 0.0,
+        "tags": [
+            "server:mongodb://testUser2:*****@localhost:27017/test",
+            "db:local",
+            "collection:bar"
+        ]
+    },
+    {
+        "name": "mongodb.collection.commands.opsps",
+        "type": 1,
+        "value": 0.0,
+        "tags": [
+            "server:mongodb://testUser2:*****@localhost:27017/test",
+            "db:local",
+            "collection:foo"
+        ]
+    },
+    {
+        "name": "mongodb.collection.commands.opsps",
+        "type": 1,
+        "value": 0.0,
+        "tags": [
+            "server:mongodb://testUser2:*****@localhost:27017/test",
+            "db:local",
+            "collection:bar"
+        ]
+    },
+    {
+        "name": "mongodb.collection.transactions.latency",
+        "type": 0,
+        "value": 0.0,
+        "tags": [
+            "server:mongodb://testUser2:*****@localhost:27017/test",
+            "db:local",
+            "collection:foo"
+        ]
+    },
+    {
+        "name": "mongodb.collection.transactions.latency",
+        "type": 0,
+        "value": 0.0,
+        "tags": [
+            "server:mongodb://testUser2:*****@localhost:27017/test",
+            "db:local",
+            "collection:bar"
+        ]
+    },
+    {
+        "name": "mongodb.collection.transactions.opsps",
+        "type": 1,
+        "value": 0.0,
+        "tags": [
+            "server:mongodb://testUser2:*****@localhost:27017/test",
+            "db:local",
+            "collection:foo"
+        ]
+    },
+    {
+        "name": "mongodb.collection.transactions.opsps",
+        "type": 1,
+        "value": 0.0,
+        "tags": [
+            "server:mongodb://testUser2:*****@localhost:27017/test",
+            "db:local",
+            "collection:bar"
+        ]
+    },
+    {
+        "name": "mongodb.collection.collectionscans.nontailable",
+        "type": 0,
+        "value": 0.0,
+        "tags": [
+            "server:mongodb://testUser2:*****@localhost:27017/test",
+            "db:local",
+            "collection:foo"
+        ]
+    },
+    {
+        "name": "mongodb.collection.collectionscans.nontailable",
+        "type": 0,
+        "value": 0.0,
+        "tags": [
+            "server:mongodb://testUser2:*****@localhost:27017/test",
+            "db:local",
+            "collection:bar"
+        ]
+    },
+    {
+        "name": "mongodb.collection.collectionscans.total",
+        "type": 0,
+        "value": 0.0,
+        "tags": [
+            "server:mongodb://testUser2:*****@localhost:27017/test",
+            "db:local",
+            "collection:foo"
+        ]
+    },
+    {
+        "name": "mongodb.collection.collectionscans.total",
+        "type": 0,
+        "value": 0.0,
+        "tags": [
+            "server:mongodb://testUser2:*****@localhost:27017/test",
+            "db:local",
+            "collection:bar"
         ]
     },
     {
@@ -608,7 +1268,7 @@
     {
         "name": "mongodb.collection.capped",
         "type": 0,
-        "value": 0.0,
+        "value": 1.0,
         "tags": [
             "server:mongodb://testUser2:*****@localhost:27017/test",
             "db:integration",
@@ -618,7 +1278,7 @@
     {
         "name": "mongodb.collection.capped",
         "type": 0,
-        "value": 0.0,
+        "value": 1.0,
         "tags": [
             "server:mongodb://testUser2:*****@localhost:27017/test",
             "db:integration",
@@ -725,6 +1385,226 @@
             "db:integration",
             "collection:bar",
             "index:_id_"
+        ]
+    },
+    {
+        "name": "mongodb.collection.totalindexsize",
+        "type": 0,
+        "value": 16384.0,
+        "tags": [
+            "server:mongodb://testUser2:*****@localhost:27017/test",
+            "db:integration",
+            "collection:foo"
+        ]
+    },
+    {
+        "name": "mongodb.collection.totalindexsize",
+        "type": 0,
+        "value": 16384.0,
+        "tags": [
+            "server:mongodb://testUser2:*****@localhost:27017/test",
+            "db:integration",
+            "collection:bar"
+        ]
+    },
+    {
+        "name": "mongodb.collection.reads.latency",
+        "type": 0,
+        "value": 13165.0,
+        "tags": [
+            "server:mongodb://testUser2:*****@localhost:27017/test",
+            "db:integration",
+            "collection:foo"
+        ]
+    },
+    {
+        "name": "mongodb.collection.reads.latency",
+        "type": 0,
+        "value": 13165.0,
+        "tags": [
+            "server:mongodb://testUser2:*****@localhost:27017/test",
+            "db:integration",
+            "collection:bar"
+        ]
+    },
+    {
+        "name": "mongodb.collection.reads.opsps",
+        "type": 1,
+        "value": 10.0,
+        "tags": [
+            "server:mongodb://testUser2:*****@localhost:27017/test",
+            "db:integration",
+            "collection:foo"
+        ]
+    },
+    {
+        "name": "mongodb.collection.reads.opsps",
+        "type": 1,
+        "value": 10.0,
+        "tags": [
+            "server:mongodb://testUser2:*****@localhost:27017/test",
+            "db:integration",
+            "collection:bar"
+        ]
+    },
+    {
+        "name": "mongodb.collection.writes.latency",
+        "type": 0,
+        "value": 8542.0,
+        "tags": [
+            "server:mongodb://testUser2:*****@localhost:27017/test",
+            "db:integration",
+            "collection:foo"
+        ]
+    },
+    {
+        "name": "mongodb.collection.writes.latency",
+        "type": 0,
+        "value": 8542.0,
+        "tags": [
+            "server:mongodb://testUser2:*****@localhost:27017/test",
+            "db:integration",
+            "collection:bar"
+        ]
+    },
+    {
+        "name": "mongodb.collection.writes.opsps",
+        "type": 1,
+        "value": 1.0,
+        "tags": [
+            "server:mongodb://testUser2:*****@localhost:27017/test",
+            "db:integration",
+            "collection:foo"
+        ]
+    },
+    {
+        "name": "mongodb.collection.writes.opsps",
+        "type": 1,
+        "value": 1.0,
+        "tags": [
+            "server:mongodb://testUser2:*****@localhost:27017/test",
+            "db:integration",
+            "collection:bar"
+        ]
+    },
+    {
+        "name": "mongodb.collection.commands.latency",
+        "type": 0,
+        "value": 0.0,
+        "tags": [
+            "server:mongodb://testUser2:*****@localhost:27017/test",
+            "db:integration",
+            "collection:foo"
+        ]
+    },
+    {
+        "name": "mongodb.collection.commands.latency",
+        "type": 0,
+        "value": 0.0,
+        "tags": [
+            "server:mongodb://testUser2:*****@localhost:27017/test",
+            "db:integration",
+            "collection:bar"
+        ]
+    },
+    {
+        "name": "mongodb.collection.commands.opsps",
+        "type": 1,
+        "value": 0.0,
+        "tags": [
+            "server:mongodb://testUser2:*****@localhost:27017/test",
+            "db:integration",
+            "collection:foo"
+        ]
+    },
+    {
+        "name": "mongodb.collection.commands.opsps",
+        "type": 1,
+        "value": 0.0,
+        "tags": [
+            "server:mongodb://testUser2:*****@localhost:27017/test",
+            "db:integration",
+            "collection:bar"
+        ]
+    },
+    {
+        "name": "mongodb.collection.transactions.latency",
+        "type": 0,
+        "value": 0.0,
+        "tags": [
+            "server:mongodb://testUser2:*****@localhost:27017/test",
+            "db:integration",
+            "collection:foo"
+        ]
+    },
+    {
+        "name": "mongodb.collection.transactions.latency",
+        "type": 0,
+        "value": 0.0,
+        "tags": [
+            "server:mongodb://testUser2:*****@localhost:27017/test",
+            "db:integration",
+            "collection:bar"
+        ]
+    },
+    {
+        "name": "mongodb.collection.transactions.opsps",
+        "type": 1,
+        "value": 0.0,
+        "tags": [
+            "server:mongodb://testUser2:*****@localhost:27017/test",
+            "db:integration",
+            "collection:foo"
+        ]
+    },
+    {
+        "name": "mongodb.collection.transactions.opsps",
+        "type": 1,
+        "value": 0.0,
+        "tags": [
+            "server:mongodb://testUser2:*****@localhost:27017/test",
+            "db:integration",
+            "collection:bar"
+        ]
+    },
+    {
+        "name": "mongodb.collection.collectionscans.nontailable",
+        "type": 0,
+        "value": 0.0,
+        "tags": [
+            "server:mongodb://testUser2:*****@localhost:27017/test",
+            "db:integration",
+            "collection:foo"
+        ]
+    },
+    {
+        "name": "mongodb.collection.collectionscans.nontailable",
+        "type": 0,
+        "value": 0.0,
+        "tags": [
+            "server:mongodb://testUser2:*****@localhost:27017/test",
+            "db:integration",
+            "collection:bar"
+        ]
+    },
+    {
+        "name": "mongodb.collection.collectionscans.total",
+        "type": 0,
+        "value": 0.0,
+        "tags": [
+            "server:mongodb://testUser2:*****@localhost:27017/test",
+            "db:integration",
+            "collection:foo"
+        ]
+    },
+    {
+        "name": "mongodb.collection.collectionscans.total",
+        "type": 0,
+        "value": 0.0,
+        "tags": [
+            "server:mongodb://testUser2:*****@localhost:27017/test",
+            "db:integration",
+            "collection:bar"
         ]
     }
 ]

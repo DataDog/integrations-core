@@ -96,6 +96,23 @@ class MongoApi(object):
         # The $currentOp stage returns a cursor over a stream of documents, each of which reports a single operation.
         return self["admin"].aggregate([{'$currentOp': {'allUsers': True}}], session=session)
 
+    def coll_stats(self, db_name, coll_name, session=None):
+        return self[db_name][coll_name].aggregate(
+            [
+                {
+                    "$collStats": {
+                        "latencyStats": {},
+                        "storageStats": {},
+                        "queryExecStats": {},
+                    }
+                },
+            ],
+            session=session,
+        )
+
+    def index_stats(self, db_name, coll_name, session=None):
+        return self[db_name][coll_name].aggregate([{"$indexStats": {}}], session=session)
+
     def _is_arbiter(self, options):
         cli = MongoClient(**options)
         is_master_payload = cli['admin'].command('isMaster')

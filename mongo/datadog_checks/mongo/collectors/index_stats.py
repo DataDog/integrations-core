@@ -23,12 +23,10 @@ class IndexStatsCollector(MongoCollector):
         return api.list_authorized_collections(self.db_name)
 
     def collect(self, api):
-        db = api[self.db_name]
         coll_names = self._get_collections(api)
-
         for coll_name in coll_names:
             try:
-                for stats in db[coll_name].aggregate([{"$indexStats": {}}], cursor={}):
+                for stats in api.index_stats(self.db_name, coll_name):
                     idx_tags = self.base_tags + [
                         "name:{0}".format(stats.get('name', 'unknown')),
                         "collection:{0}".format(coll_name),
