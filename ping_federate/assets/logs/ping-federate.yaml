@@ -69,9 +69,7 @@ pipeline:
           enabled: true
           source: message
           samples:
-            - 2024-06-04 11:19:53,283 | Administrator |
-              UserAdmin,Admin,CryptoAdmin,ExpressionAdmin | 142.251.46.174 |
-              USER | LOGIN_ATTEMPT | testevdentdetailid | Login was successful
+            - 2024-06-04 11:19:53,283 | Administrator | UserAdmin,Admin,CryptoAdmin,ExpressionAdmin | 142.251.46.174 | USER | LOGIN_ATTEMPT | testevdentdetailid | Login was successful
           grok:
             supportRules: ""
             matchRules: admin_log_parser %{date("yyyy-MM-dd' 'HH:mm:ss,SSS"):timestamp} \| %{regex("[^|]*"):usr.name} \| (%{data:roles:array("[]",",")})? \| (%{ip:network.client.ip})? \| (%{regex("[^|]*"):component})? \| (%{regex("[^|]*"):evt.name}) \| (%{regex("[^|]*"):evt.id})? \| (%{regex("[^|]*"):description})?
@@ -82,11 +80,6 @@ pipeline:
             - network.client.ip
           target: network.client.geoip
           ip_processing_behavior: do-nothing
-        - type: message-remapper
-          name: Define `description` as the official message of the log
-          enabled: true
-          sources:
-            - description
     - type: pipeline
       name: audit logs
       enabled: true
@@ -98,21 +91,8 @@ pipeline:
           enabled: true
           source: message
           samples:
-            - "2024-06-17 11:04:19,341| tid:LFcUz_Kyuqp4RcRrdnB2YS72Z3g|
-              AUTHN_ATTEMPT| analyst| 142.251.46.174 | PingApp| connection1|
-              SAML20| crest-pingfederate.com| IdP| success| OpenLDAP|
-              Authentication successful| 200| qwerty-1234-asdfgh-5678|
-              email=john.doe@example.com, name=John Doe, role=admin|
-              authorization_code| SP| Request| response-123456| john.doe|
-              req-abcdef123456| 1617692015000| resp-7890ghijkl|
-              sts-processor-1234| [spAdapter.SAML2, spConnection.PartnerSP]|
-              [adapter.HTMLFormSimplePCV, idpConnection.IdP,
-              localIdentity.A8me9rySDn1aIM48]| pcv-ldap| virtualserver-01|
-              MyOAuthClient| req-1234567890abcdef"
-            - "2024-06-17 11:04:19,341| tid:LFcUz_Kyuqp4RcRrdnB2YS72Z3g|
-              AUTHN_ATTEMPT| analyst| 142.251.46.174 | PingApp| connection1|
-              SAML20| crest-pingfederate.com| IdP| success| OpenLDAP|
-              Authentication successful| 200"
+            - 2024-06-17 11:04:19,341| tid:LFcUz_Kyuqp4RcRrdnB2YS72Z3g| AUTHN_ATTEMPT| analyst| 142.251.46.174 | PingApp| connection1| SAML20| crest-pingfederate.com| IdP| success| OpenLDAP| Authentication successful| 200| qwerty-1234-asdfgh-5678| email=john.doe@example.com, name=John Doe, role=admin| authorization_code| SP| Request| response-123456| john.doe| req-abcdef123456| 1617692015000| resp-7890ghijkl| sts-processor-1234| [spAdapter.SAML2, spConnection.PartnerSP]| [adapter.HTMLFormSimplePCV, idpConnection.IdP, localIdentity.A8me9rySDn1aIM48]| pcv-ldap| virtualserver-01| MyOAuthClient| req-1234567890abcdef
+            - 2024-06-17 11:04:19,341| tid:LFcUz_Kyuqp4RcRrdnB2YS72Z3g| AUTHN_ATTEMPT| analyst| 142.251.46.174 | PingApp| connection1| SAML20| crest-pingfederate.com| IdP| success| OpenLDAP| Authentication successful| 200
           grok:
             supportRules: >-
               parse_optional_source
@@ -132,11 +112,6 @@ pipeline:
             - network.client.ip
           target: network.client.geoip
           ip_processing_behavior: do-nothing
-        - type: message-remapper
-          name: Define `description.details` as the official message of the log
-          enabled: true
-          sources:
-            - description.details
     - type: date-remapper
       name: Define `timestamp` as the official date of the log
       enabled: true
