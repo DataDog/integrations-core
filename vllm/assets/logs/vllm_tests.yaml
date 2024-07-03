@@ -6,7 +6,7 @@ tests:
   result:
     custom:
       level: "INFO"
-      timestamp: 1709652524902
+      timestamp: 1718132521
       logger:
         lineno: 72
         name: "cpu_executor.py"
@@ -14,4 +14,4 @@ tests:
     status: "info"
     tags:
      - "source:LOGS_SOURCE"
-    timestamp: 1705489717330
+    timestamp: 1718132521
