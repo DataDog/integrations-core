@@ -136,7 +136,7 @@ class SqlserverAgentHistory(DBMAsyncJob):
             "host": self._check.resolved_hostname,
             "ddagentversion": datadog_agent.get_version(),
             "ddsource": "sqlserver",
-            "dbm_type": "activity",
+            "dbm_type": "agent_jobs",
             "collection_interval": self.collection_interval,
             "ddtags": self.tags,
             "timestamp": time.time() * 1000,
