@@ -204,7 +204,7 @@ class Schemas(DBMAsyncJob):
                                 db_name, e
                             )
                         )
-                        return
+                        break
                     except Exception as e:
                         self._log.error(
                             "While executing fetch schemas for databse {}, the following exception occured {}".format(
