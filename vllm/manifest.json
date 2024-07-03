@@ -49,7 +49,12 @@
       "latency": "assets/monitors/latency.json"
     },
     "dashboards": {
-      "vLLM Overview": "assets/dashboards/overview.json"
+      "vLLM Overview": "assets/dashboards/overview.json",
+      "token_throughput": "assets/monitors/token_throughput.json",
+      "latency": "assets/monitors/latency.json"
+    },
+    "saved_views": {
+      "errors": "assets/saved_views/errors.json"
     }
   },
   "author": {
