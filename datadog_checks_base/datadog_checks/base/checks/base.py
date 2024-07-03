@@ -662,12 +662,12 @@ class AgentCheck(object):
 
         aggregator.submit_event_platform_event(self, self.check_id, to_native_string(raw_event), "dbm-metadata")
 
-    def ndm_metadata(self, raw_event):
-        # type: (str) -> None
+    def event_platform_event(self, raw_event, event_track_type):
+        # type: (str, str) -> None
         if raw_event is None:
             return
         aggregator.submit_event_platform_event(
-            self, self.check_id, to_native_string(raw_event), "network-devices-metadata"
+            self, self.check_id, to_native_string(raw_event), event_track_type
         )
 
     def should_send_metric(self, metric_name):

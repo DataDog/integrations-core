@@ -42,7 +42,7 @@ class Fabric:
         self.submit_metrics = check.submit_metrics
         self.tagger = self.check.tagger
         self.external_host_tags = self.check.external_host_tags
-        self.ndm_metadata = check.ndm_metadata
+        self.event_platform_event = check.event_platform_event
 
     def collect(self):
         fabric_pods = self.api.get_fabric_pods()
@@ -54,7 +54,7 @@ class Fabric:
             collect_timestamp = int(time.time())
             batches = self.batch_payloads(devices, interfaces, collect_timestamp)
             for batch in batches:
-                self.ndm_metadata(json.dumps(batch.model_dump(exclude_none=True)))
+                self.event_platform_event(json.dumps(batch.model_dump(exclude_none=True)), "network-devices-metadata")
 
     def submit_pod_health(self, pods):
         pods_dict = {}
