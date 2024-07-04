@@ -9,7 +9,127 @@ jobs:
   cache:
     uses: ./.github/workflows/cache-shared-deps.yml
 
-  test:
+  test-common:
+    needs:
+    - cache
+
+    uses: ./.github/workflows/test-common.yml
+    with:
+      repo: core
+
+      # Options
+      standard: true
+    secrets: inherit
+
+  test-dbm-integrations:
+    needs:
+    - cache
+
+    uses: ./.github/workflows/test-dbm-integrations.yml
+    with:
+      repo: core
+
+      # Options
+      standard: true
+    secrets: inherit
+
+  test-container-integrations:
+    needs:
+    - cache
+
+    uses: ./.github/workflows/test-container-integrations.yml
+    with:
+      repo: core
+
+      # Options
+      standard: true
+    secrets: inherit
+
+  test-ndm-integrations:
+    needs:
+    - cache
+
+    uses: ./.github/workflows/test-ndm-integrations.yml
+    with:
+      repo: core
+
+      # Options
+      standard: true
+    secrets: inherit
+
+  test-platform-integrations:
+    needs:
+    - cache
+
+    uses: ./.github/workflows/test-platform-integrations.yml
+    with:
+      repo: core
+
+      # Options
+      standard: true
+    secrets: inherit
+
+  test-windows-integrations:
+    needs:
+    - cache
+
+    uses: ./.github/workflows/test-windows-integrations.yml
+    with:
+      repo: core
+
+      # Options
+      standard: true
+    secrets: inherit
+      
+  test-integrations:
+    needs:
+    - cache
+
+    uses: ./.github/workflows/tests/test-common.yml
+    with:
+      repo: core
+
+      # Options
+      standard: true
+    secrets: inherit
+
+  test-dbm:
+    needs:
+    - cache
+
+    uses: ./.github/workflows/test-dbm-integrations.yml
+    with:
+      repo: core
+
+      # Options
+      standard: true
+    secrets: inherit
+
+  test-container-integrations:
+    needs:
+    - cache
+
+    uses: ./.github/workflows/test-container-integrations.yml
+    with:
+      repo: core
+
+      # Options
+      standard: true
+    secrets: inherit
+
+  test-windows-integrations:
+    needs:
+    - cache
+
+    uses: ./.github/workflows/test-windows-integrations.yml
+    with:
+      repo: core
+
+      # Options
+      standard: true
+    secrets: inherit
+      
+  test-integrations:
     needs:
     - cache
 
@@ -23,7 +143,13 @@ jobs:
 
   publish-test-results:
     needs:
-    - test
+    - test-common
+    - test-dbm-integrations
+    - test-container-integrations
+    - test-ndm-integrations
+    - test-platform-integrations
+    - test-windows-integrations
+    - test-integrations
     if: success() || failure()
     concurrency:
       group: test-results
@@ -33,7 +159,13 @@ jobs:
 
   submit-traces:
     needs:
-    - test
+    - test-common
+    - test-dbm-integrations
+    - test-container-integrations
+    - test-ndm-integrations
+    - test-platform-integrations
+    - test-windows-integrations
+    - test-integrations
     if: success() || failure()
 
     uses: ./.github/workflows/submit-traces.yml

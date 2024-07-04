@@ -35,7 +35,112 @@ on:
         type: string
 
 jobs:
-  test:
+  test-common:
+    uses: ./.github/workflows/test-common.yml
+    with:
+      repo: core
+
+      # Options
+      standard: true
+      test-py2: ${{ inputs.test-py2 }}
+      test-py3: ${{ inputs.test-py3 }}
+      agent-image: "${{ inputs.agent-image }}"
+      agent-image-py2: "${{ inputs.agent-image-py2 }}"
+      agent-image-windows: "${{ inputs.agent-image-windows }}"
+      agent-image-windows-py2: "${{ inputs.agent-image-windows-py2 }}"
+    secrets: inherit
+  
+  test-dbm-integrations:
+    uses: ./.github/workflows/test-dbm-integrations.yml
+    with:
+      repo: core
+
+      # Options
+      standard: true
+      test-py2: ${{ inputs.test-py2 }}
+      test-py3: ${{ inputs.test-py3 }}
+      agent-image: "${{ inputs.agent-image }}"
+      agent-image-py2: "${{ inputs.agent-image-py2 }}"
+      agent-image-windows: "${{ inputs.agent-image-windows }}"
+      agent-image-windows-py2: "${{ inputs.agent-image-windows-py2 }}"
+    secrets: inherit
+  
+  test-container-integrations:
+    uses: ./.github/workflows/test-container-integrations.yml
+    with:
+      repo: core
+
+      # Options
+      standard: true
+      test-py2: ${{ inputs.test-py2 }}
+      test-py3: ${{ inputs.test-py3 }}
+      agent-image: "${{ inputs.agent-image }}"
+      agent-image-py2: "${{ inputs.agent-image-py2 }}"
+      agent-image-windows: "${{ inputs.agent-image-windows }}"
+      agent-image-windows-py2: "${{ inputs.agent-image-windows-py2 }}"
+    secrets: inherit
+  
+  test-ndm-integrations:
+    uses: ./.github/workflows/test-ndm-integrations.yml
+    with:
+      repo: core
+
+      # Options
+      standard: true
+      test-py2: ${{ inputs.test-py2 }}
+      test-py3: ${{ inputs.test-py3 }}
+      agent-image: "${{ inputs.agent-image }}"
+      agent-image-py2: "${{ inputs.agent-image-py2 }}"
+      agent-image-windows: "${{ inputs.agent-image-windows }}"
+      agent-image-windows-py2: "${{ inputs.agent-image-windows-py2 }}"
+    secrets: inherit
+  
+  test-platform-integrations:
+    uses: ./.github/workflows/test-platform-integrations.yml
+    with:
+      repo: core
+
+      # Options
+      standard: true
+      test-py2: ${{ inputs.test-py2 }}
+      test-py3: ${{ inputs.test-py3 }}
+      agent-image: "${{ inputs.agent-image }}"
+      agent-image-py2: "${{ inputs.agent-image-py2 }}"
+      agent-image-windows: "${{ inputs.agent-image-windows }}"
+      agent-image-windows-py2: "${{ inputs.agent-image-windows-py2 }}"
+    secrets: inherit
+  
+  test-windows-integrations:
+    uses: ./.github/workflows/test-windows-integrations.yml
+    with:
+      repo: core
+
+      # Options
+      standard: true
+      test-py2: ${{ inputs.test-py2 }}
+      test-py3: ${{ inputs.test-py3 }}
+      agent-image: "${{ inputs.agent-image }}"
+      agent-image-py2: "${{ inputs.agent-image-py2 }}"
+      agent-image-windows: "${{ inputs.agent-image-windows }}"
+      agent-image-windows-py2: "${{ inputs.agent-image-windows-py2 }}"
+    secrets: inherit
+  
+  test-windows-integrations:
+    uses: ./.github/workflows/test-windows-integrations.yml
+    with:
+      repo: core
+
+      # Options
+      standard: true
+      test-py2: ${{ inputs.test-py2 }}
+      test-py3: ${{ inputs.test-py3 }}
+      agent-image: "${{ inputs.agent-image }}"
+      agent-image-py2: "${{ inputs.agent-image-py2 }}"
+      agent-image-windows: "${{ inputs.agent-image-windows }}"
+      agent-image-windows-py2: "${{ inputs.agent-image-windows-py2 }}"
+    secrets: inherit
+  
+  test-integrations:
     uses: ./.github/workflows/test-all.yml
     with:
       repo: core
@@ -52,7 +157,13 @@ jobs:
 
   submit-traces:
     needs:
-    - test
+    - test-common
+    - test-dbm-integrations
+    - test-container-integrations
+    - test-ndm-integrations
+    - test-platform-integrations
+    - test-windows-integrations
+    - test-integrations
     if: success() || failure()
 
     uses: ./.github/workflows/submit-traces.yml
