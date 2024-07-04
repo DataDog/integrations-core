@@ -61,6 +61,8 @@ if AGENT_RUNNING:
 else:
     from ..stubs.log import CheckLoggingAdapter, init_logging
 
+
+# TODO: remove this
 init_logging()
 
 if datadog_agent.get_config('disable_unsafe_yaml'):
