@@ -307,6 +307,8 @@ integration/nagios:
 - nagios/**/*
 integration/network:
 - network/**/*
+integration/network_path:
+- network_path/**/*
 integration/nfsstat:
 - nfsstat/**/*
 integration/nginx:
