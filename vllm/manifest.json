@@ -41,7 +41,7 @@
       },
       "process_signatures": [
         "python3 -m vllm.entrypoints.openai.api_server"
-      ],
+      ]
     },
     "monitors": {
         "token_throughput": "assets/monitors/token_throughput.json",
