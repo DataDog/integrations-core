@@ -17,7 +17,7 @@
                 "banner_img": "/static/images/logos/vllm_large.svg",
                 "layout_type": "ordered",
                 "show_title": true,
-                "title": "vLLM",
+                "title": "",
                 "type": "group",
                 "widgets": [
                     {
@@ -238,7 +238,7 @@
                                     ],
                                     "queries": [
                                         {
-                                            "aggregator": "last",
+                                            "aggregator": "sum",
                                             "data_source": "metrics",
                                             "name": "query1",
                                             "query": "sum:vllm.request.success.count{$model_name}.as_count()"
@@ -284,7 +284,7 @@
                     {
                         "definition": {
                             "background_color": "blue",
-                            "content": "How are your models generating text?\nHere you can see token-level performance as well as overall request latency.",
+                            "content": "Here you can see token-level performance as well as overall request latency.",
                             "font_size": "14",
                             "has_padding": true,
                             "show_tick": false,
@@ -316,12 +316,6 @@
                                 {
                                     "display_type": "line",
                                     "formulas": [
-                                        {
-                                            "formula": "query1"
-                                        },
-                                        {
-                                            "formula": "query2"
-                                        },
                                         {
                                             "formula": "query1 / query2"
                                         }
@@ -422,12 +416,6 @@
                                     "display_type": "line",
                                     "formulas": [
                                         {
-                                            "formula": "query1"
-                                        },
-                                        {
-                                            "formula": "query2"
-                                        },
-                                        {
                                             "formula": "query1 / query2"
                                         }
                                     ],
@@ -479,12 +467,6 @@
                                 {
                                     "display_type": "line",
                                     "formulas": [
-                                        {
-                                            "formula": "query1"
-                                        },
-                                        {
-                                            "formula": "query2"
-                                        },
                                         {
                                             "formula": "query1 / query2"
                                         }
@@ -590,12 +572,6 @@
                                 {
                                     "display_type": "line",
                                     "formulas": [
-                                        {
-                                            "formula": "query1"
-                                        },
-                                        {
-                                            "formula": "query2"
-                                        },
                                         {
                                             "formula": "query1 / query2"
                                         }
@@ -742,7 +718,7 @@
                                         {
                                             "data_source": "metrics",
                                             "name": "query1",
-                                            "query": "avg:vllm.cpu_cache_usage_perc{$model_name} by {model_name}"
+                                            "query": "avg:vllm.gpu_cache_usage_perc{$model_name} by {model_name}"
                                         }
                                     ],
                                     "response_format": "timeseries",
@@ -1194,7 +1170,7 @@
                         },
                         "id": 2489993328338580,
                         "layout": {
-                            "height": 2,
+                            "height": 4,
                             "width": 12,
                             "x": 0,
                             "y": 0
@@ -1204,7 +1180,7 @@
             },
             "id": 7174398085271826,
             "layout": {
-                "height": 3,
+                "height": 5,
                 "width": 12,
                 "x": 0,
                 "y": 23
