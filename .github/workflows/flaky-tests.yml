@@ -1,6 +1,7 @@
 name: Daily Flaky Tests (every 8 hours)
 
 on:
+  workflow_dispatch:
   schedule:
   # 4 AM, 12 PM, 8 PM UTC
   - cron: "0 4,12,20 * * *"
