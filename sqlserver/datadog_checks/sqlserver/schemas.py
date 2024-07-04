@@ -193,27 +193,29 @@ class Schemas(DBMAsyncJob):
         engine_edition = self._check.static_info_cache.get(STATIC_INFO_ENGINE_EDITION)
         with self._check.connection.open_managed_default_connection():
             with self._check.connection.get_managed_cursor() as cursor:
-                for db_name in databases:
-                    try:
-                        if not is_azure_sql_database(engine_edition):
-                            cursor.execute(SWITCH_DB_STATEMENT.format(db_name))
-                        self._fetch_schema_data(cursor, start_time, db_name)
-                    except StopIteration as e:
-                        self._log.error(
-                            "While executing fetch schemas for databse {}, the following exception occured {}".format(
-                                db_name, e
+                try:
+                    for db_name in databases:
+                        try:
+                            if not is_azure_sql_database(engine_edition):
+                                cursor.execute(SWITCH_DB_STATEMENT.format(db_name))
+                            self._fetch_schema_data(cursor, start_time, db_name)
+                        except StopIteration as e:
+                            self._log.error(
+                                "While executing fetch schemas for databse {}, the following exception occured {}".format(
+                                    db_name, e
+                                )
                             )
-                        )
-                        break
-                    except Exception as e:
-                        self._log.error(
-                            "While executing fetch schemas for databse {}, the following exception occured {}".format(
-                                db_name, e
+                            break
+                        except Exception as e:
+                            self._log.error(
+                                "While executing fetch schemas for databse {}, the following exception occured {}".format(
+                                    db_name, e
+                                )
                             )
-                        )
-                # Switch DB back to MASTER
-                if not is_azure_sql_database(engine_edition):
-                    cursor.execute(SWITCH_DB_STATEMENT.format(self._check.connection.DEFAULT_DATABASE))
+                finally:
+                    # Switch DB back to MASTER
+                    if not is_azure_sql_database(engine_edition):
+                        cursor.execute(SWITCH_DB_STATEMENT.format(self._check.connection.DEFAULT_DATABASE))
 
     @tracked_method(agent_check_getter=agent_check_getter)
     def _collect_schemas_data(self):
