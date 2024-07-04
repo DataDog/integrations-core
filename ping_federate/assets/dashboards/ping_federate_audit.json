@@ -595,7 +595,7 @@
     },
     {
       "name": "role",
-      "prefix": "@transaction.role",
+      "prefix": "@ping_federate.transaction.role",
       "available_values": ["IdP", "SP"],
       "default": "*"
     },

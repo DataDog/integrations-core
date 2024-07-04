@@ -471,7 +471,7 @@
       "name": "event_name",
       "prefix": "@evt.name",
       "available_values": [
-        "LOGING_ATTEMPT",
+        "LOGIN_ATTEMPT",
         "ACTIVATE",
         "DEACTIVATE",
         "CREATE",
