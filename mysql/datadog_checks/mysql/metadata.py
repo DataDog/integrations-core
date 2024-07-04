@@ -128,19 +128,17 @@ class MySQLMetadata(DBMAsyncJob):
         if self._settings_enabled and elapsed_time_settings >= self._settings_collection_interval:
             self._last_settings_collection_time = time.time()
             try:
-               self.report_mysql_metadata()
+                self.report_mysql_metadata()
             except Exception as e:
-                self._log.error(
-                    "While executing report_mysql_metadata, the following exception occured {}".format(e))
+                self._log.error("While executing report_mysql_metadata, the following exception occured {}".format(e))
 
         elapsed_time_databases = time.time() - self._last_databases_collection_time
         if self._databases_data_enabled and elapsed_time_databases >= self._databases_data_collection_interval:
             self._last_databases_collection_time = time.time()
             try:
-               self._databases_data._collect_databases_data(self._tags)
+                self._databases_data._collect_databases_data(self._tags)
             except Exception as e:
-                self._log.error(
-                    "While executing _collect_databases_data, the following exception occured {}".format(e))
+                self._log.error("While executing _collect_databases_data, the following exception occured {}".format(e))
 
     def shut_down(self):
         self._databases_data.shut_down()

@@ -388,7 +388,8 @@ def test_fetch_throws():
     check = MySql(common.CHECK_NAME, {}, instances=[{'server': 'localhost', 'user': 'datadog'}])
     databases_data = DatabasesData({}, check, check._config)
     with mock.patch('time.time', side_effect=[0, 9999999]), mock.patch(
-        'datadog_checks.mysql.databases_data.DatabasesData._get_tables', return_value=[{"name": "mytable1"}, {"name": "mytable2"}]
+        'datadog_checks.mysql.databases_data.DatabasesData._get_tables',
+        return_value=[{"name": "mytable1"}, {"name": "mytable2"}],
     ), mock.patch('datadog_checks.mysql.databases_data.DatabasesData._get_tables', return_value=[1, 2]):
         with pytest.raises(StopIteration):
             databases_data._fetch_database_data("dummy_cursor", time.time(), "my_db")
@@ -400,7 +401,8 @@ def test_submit_is_called_if_too_many_columns():
     with mock.patch('time.time', side_effect=[0, 0]), mock.patch(
         'datadog_checks.mysql.databases_data.DatabasesData._get_tables', return_value=[1, 2]
     ), mock.patch('datadog_checks.mysql.databases_data.SubmitData.submit') as mocked_submit, mock.patch(
-        'datadog_checks.mysql.databases_data.DatabasesData._get_tables_data', return_value=(1000_000, {"name": "my_table"})
+        'datadog_checks.mysql.databases_data.DatabasesData._get_tables_data',
+        return_value=(1000_000, {"name": "my_table"}),
     ):
         databases_data._fetch_database_data("dummy_cursor", time.time(), "my_db")
         assert mocked_submit.call_count == 2
@@ -410,6 +412,7 @@ def test_exception_handling_by_do_for_dbs():
     check = MySql(common.CHECK_NAME, {}, instances=[{'server': 'localhost', 'user': 'datadog'}])
     databases_data = DatabasesData({}, check, check._config)
     with mock.patch(
-        'datadog_checks.mysql.databases_data.DatabasesData._fetch_database_data', side_effect=Exception("Can't connect to DB")
+        'datadog_checks.mysql.databases_data.DatabasesData._fetch_database_data',
+        side_effect=Exception("Can't connect to DB"),
     ):
         databases_data._fetch_for_databases([{"name": "my_db"}], "dummy_cursor")
