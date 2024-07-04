@@ -107,6 +107,7 @@ jobs:
       TRACE_CAPTURE_BASE_DIR: ".trace-captures"
       TRACE_CAPTURE_FILE: ".trace-captures/${{ inputs.job-name }}"
       TRACE_CAPTURE_LOG: ".trace-captures/output.log"
+      BRANCH: "${{ inputs.branch }}"
 
     steps:
     - name: Set up Windows
@@ -116,10 +117,15 @@ jobs:
         diskperf -y
 
     - uses: actions/checkout@v4
+      with:
+        ref: ${{ env.BRANCH }}
 
     - name: Set up Python 2.7
       if: inputs.test-py2
       run: |
+        echo "Setting up Python 2.7..."
+        echo "env branch: ${{ env.BRANCH }}"
+        echo "git branch: $(git branch)"
         if [ "$RUNNER_OS" == "Linux" ]; then
           sudo apt update
           sudo apt install python2 python2-dev

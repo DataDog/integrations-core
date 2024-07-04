@@ -9,6 +9,7 @@ from datadog_checks.base import AgentCheck, ConfigurationError
 from datadog_checks.base.errors import CheckException
 
 
+# Verify test trigger for py2 removal
 class Apache(AgentCheck):
     """Tracks basic connection/requests/workers metrics
 
