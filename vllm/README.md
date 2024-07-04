@@ -41,8 +41,8 @@ See [service_checks.json][7] for a list of service checks provided by this integ
 
 ### Logs
 
-Log collection is disabled by default in the Datadog Agent. If you are running your agent as a container, [here's how to enable log collection][10]. If you are running a host agent, [follow these steps instead][11].
-In both cases make sure that the `source` value for your logs is `vllm`. This will make sure the built-in processing pipeline finds your logs. [This is how to set your logs configuration for a container][12].
+Log collection is disabled by default in the Datadog Agent. If you are running your Agent as a container, see [container installation][10] to enable log collection. If you are running a host Agent, see [host Agent][11] instead.
+In either case, make sure that the `source` value for your logs is `vllm`. This setting ensures that the built-in processing pipeline finds your logs. To set your log configuration for a container, see [log integrations][12].
 
 ## Troubleshooting
 
