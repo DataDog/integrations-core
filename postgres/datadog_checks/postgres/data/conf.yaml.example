@@ -197,6 +197,12 @@ instances:
     # activity_metrics_excluded_aggregations:
     #   - application_name
 
+    ## @param collect_buffercache_metrics - boolean - optional - default: false
+    ## If set to true, collects metrics regarding buffer cache usage from pg_buffercache.
+    ## pg_buffercache extension must be installed.
+    #
+    # collect_buffercache_metrics: false
+
     ## @param collect_database_size_metrics - boolean - optional - default: true
     ## Collect database size metrics.
     #
