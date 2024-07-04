@@ -284,7 +284,7 @@
                     {
                         "definition": {
                             "background_color": "blue",
-                            "content": "How are your models are generating text?\nHere you can see token-level performance as long as overall request latency.",
+                            "content": "How are your models generating text?\nHere you can see token-level performance as well as overall request latency.",
                             "font_size": "14",
                             "has_padding": true,
                             "show_tick": false,
@@ -788,7 +788,7 @@
                     {
                         "definition": {
                             "background_color": "blue",
-                            "content": "Dive deeper to see how vLLM is using the CPU",
+                            "content": "Dive deeper to see how vLLM is using the CPU.",
                             "font_size": "14",
                             "has_padding": true,
                             "show_tick": false,
