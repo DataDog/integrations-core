@@ -47,7 +47,7 @@
             "id": 968580111834588,
             "definition": {
                 "type": "note",
-                "content": "## Widgets\n1. Total DHCP Requests\n2. Timeline by DHCP Requests\n3. Total DHCP Responses\n4. Timeline by DHCP Responses\n5. Distribution by DHCP Message Types\n6. Top Client Host Name\n7. Top 10 Requested IP Address\n8. Top 10 Leased IP Address\n9. Leased IP Duration by Client IP and Client MAC\n10. DHCP Log Details",
+                "content": "## Widgets\n1. Total DHCP Requests\n2. Timeline by DHCP Requests\n3. Total DHCP Responses\n4. Timeline by DHCP Responses\n5. Distribution by DHCP Message Types\n6. Client Host Names\n7. Top 10 Requested IP Address\n8. Top 10 Leased IP Address\n9. Leased IP Duration by Client IP and Client MAC\n10. DHCP Log Details",
                 "background_color": "white",
                 "font_size": "14",
                 "text_align": "left",
@@ -350,7 +350,7 @@
                     {
                         "id": 4936861736205544,
                         "definition": {
-                            "title": "Top Client Host Name",
+                            "title": "Client Host Names",
                             "title_size": "16",
                             "title_align": "left",
                             "requests": [
