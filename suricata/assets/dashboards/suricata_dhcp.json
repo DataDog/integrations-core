@@ -1,6 +1,6 @@
 {
     "title": "Suricata - DHCP",
-    "description": "- This dashboard provides information of DHCP logs generated in Suricata.",
+    "description": "- This dashboard provides information about DHCP logs generated in Suricata.",
     "widgets": [
         {
             "id": 4000160402704450,
@@ -26,7 +26,7 @@
             "id": 7296852491781326,
             "definition": {
                 "type": "note",
-                "content": "## Overview\n- This dashboard provides information of DHCP logs generated in Suricata.\n",
+                "content": "## Overview\n- This dashboard provides information about DHCP logs generated in Suricata.\n",
                 "background_color": "white",
                 "font_size": "14",
                 "text_align": "left",

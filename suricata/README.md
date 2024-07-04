@@ -2,17 +2,17 @@
 
 [Suricata][4] is a high performance, open source network analysis and threat detection software used by most private and public organizations, and embedded by major vendors to protect their assets.
 
-This integration provides enrichment and visualization for Alert, Anomaly, HTTP, DNS, FTP, FTP_DATA, TLS, TFTP, SMB, SSH, Flow, RDP, DHCP and ARP log types. It helps to visualize detailed insights into Alerts, Anomaly, network connections, DNS and DHCP activity, detailed network protocol analysis through the out-of-the-box dashboards.
+This integration provides enrichment and visualization for Alert, Anomaly, HTTP, DNS, FTP, FTP_DATA, TLS, TFTP, SMB, SSH, Flow, RDP, DHCP, and ARP log types. It helps to visualize detailed insights into Alerts, Anomaly, network connections, DNS, and DHCP activity, as well as detailed network protocol analysis in the integration's out-of-the-box dashboards.
 
 ## Setup
 
 ### Installation
 
-To install the Suricata integration, run the following Agent installation command and the steps below. For more information, see the [Integration Management][5] documentation.
+To install the Suricata integration, run the following Agent installation command and follow the steps below. For more information, see the [Integration Management][5] documentation.
 
-**Note**: This step is not necessary for Agent version >= 7.54.0.
+**Note**: This step is not necessary for Agent versions >= 7.54.0.
 
-Linux command
+For Linux, run:
   ```shell
   sudo -u dd-agent -- datadog-agent integration install datadog-suricata==1.0.0
   ```
@@ -38,9 +38,9 @@ Linux command
        service: suricata
        source: suricata
    ```
-   **NOTE**: Make sure you have `eve-log` output logging enabled in the `suricata.yaml` file of suricata product and ensure to address the below points.
-   1. In `suricata.yaml`, Keep `filetype` parameter as `regular` in `eve-log` configurations.
-   2. The default path of suricata's output would be `/var/log/suricata` and `filename` would be `eve.json`. If you have changed the default path and filename then update the `path` parameter in `conf.yaml` accordingly.
+   **Note**: Make sure you have `eve-log` output logging enabled in the `suricata.yaml` file of the Suricata application, and that you've address the following points:
+   1. In the `suricata.yaml` file, keep `filetype` parameter as `regular` in `eve-log` configurations.
+   2. The default path of Suricata's output files is `/var/log/suricata`, and the default filename is `eve.json`. If you have changed the default path and filename, update the `path` parameter in your `conf.yaml` file accordingly.
 
 3. [Restart the Agent][3].
 

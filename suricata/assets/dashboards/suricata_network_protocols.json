@@ -1,6 +1,6 @@
 {
     "title": "Suricata - Network Protocols",
-    "description": "- This dashboard provides insights into network protocols such as HTTP, FTP, TLS, TFTP, SSH, RDP and ARP.",
+    "description": "- This dashboard provides insights into network protocols such as HTTP, FTP, TLS, TFTP, SSH, RDP, and ARP.",
     "widgets": [
         {
             "id": 4000160402704450,
@@ -26,7 +26,7 @@
             "id": 7296852491781326,
             "definition": {
                 "type": "note",
-                "content": "## Overview\n- This dashboard provides insights into network protocols such as HTTP, FTP, TLS, TFTP, SSH, RDP and ARP.",
+                "content": "## Overview\n- This dashboard provides insights into network protocols such as HTTP, FTP, TLS, TFTP, SSH, RDP, and ARP.",
                 "background_color": "white",
                 "font_size": "14",
                 "text_align": "left",

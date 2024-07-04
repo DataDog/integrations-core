@@ -1,6 +1,6 @@
 {
     "title": "Suricata - Flow",
-    "description": "- This dashboard provides the insights into network flow data processed by Suricata",
+    "description": "- This dashboard provides the insights into network flow data processed by Suricata.",
     "widgets": [
         {
             "id": 4000160402704450,
