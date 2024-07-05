@@ -77,12 +77,12 @@ def test_metadata_collection_interval_and_enabled(dbm_instance):
     mysql_check = MySql(common.CHECK_NAME, {}, instances=[dbm_instance])
     assert not mysql_check._mysql_metadata.enabled
 
-
+import pdb
 @pytest.mark.integration
 @pytest.mark.usefixtures('dd_environment')
 def test_collect_schemas(aggregator, dd_run_check, dbm_instance):
     databases_to_find = ['datadog_test_schemas', 'datadog_test_schemas_second']
-
+    pdb.set_trace()
     exp_datadog_test_schemas = {
         "name": "datadog_test_schemas",
         "default_character_set_name": "latin1",
@@ -97,6 +97,9 @@ def test_collect_schemas(aggregator, dd_run_check, dbm_instance):
                         "default": "None",
                         "nullable": True,
                         "ordinal_position": "1",
+                        "column_type":"varchar(255)",
+                        "column_key":"MUL",
+                        "extra":"",
                     },
                     {
                         "name": "District",
@@ -104,6 +107,9 @@ def test_collect_schemas(aggregator, dd_run_check, dbm_instance):
                         "default": "None",
                         "nullable": True,
                         "ordinal_position": "2",
+                        "column_type":"varchar(255)",
+                        "column_key":"",
+                        "extra":"",
                     },
                     {
                         "name": "Review",
@@ -111,6 +117,9 @@ def test_collect_schemas(aggregator, dd_run_check, dbm_instance):
                         "default": "None",
                         "nullable": True,
                         "ordinal_position": "3",
+                        "column_type":"text",
+                        "column_key":"",
+                        "extra":"",
                     },
                 ],
                 "foreign_keys": [
@@ -147,6 +156,9 @@ def test_collect_schemas(aggregator, dd_run_check, dbm_instance):
                         "default": "None",
                         "nullable": True,
                         "ordinal_position": "1",
+                        "column_type":"varchar(255)",
+                        "column_key":"MUL",
+                        "extra":"",
                     },
                     {
                         "name": "District",
@@ -154,6 +166,9 @@ def test_collect_schemas(aggregator, dd_run_check, dbm_instance):
                         "default": "None",
                         "nullable": True,
                         "ordinal_position": "2",
+                        "column_type":"varchar(100)",
+                        "column_key":"",
+                        "extra":""
                     },
                     {
                         "name": "Cuisine",
@@ -161,6 +176,9 @@ def test_collect_schemas(aggregator, dd_run_check, dbm_instance):
                         "default": "None",
                         "nullable": True,
                         "ordinal_position": "3",
+                        "column_type":"varchar(100)",
+                        "column_key":"",
+                        "extra":""
                     },
                 ],
                 "indexes": [
@@ -181,13 +199,25 @@ def test_collect_schemas(aggregator, dd_run_check, dbm_instance):
             {
                 "name": "cities",
                 "columns": [
-                    {"name": "id", "data_type": "int", "default": "0", "nullable": False, "ordinal_position": "1"},
+                    {
+                        "name": "id", 
+                        "data_type": "int", 
+                        "default": "0", 
+                        "nullable": False, 
+                        "ordinal_position": "1",
+                        "column_type":"int(11)",
+                        "column_key":"PRI",
+                        "extra":""
+                    },
                     {
                         "name": "name",
                         "data_type": "varchar",
                         "default": "None",
                         "nullable": True,
                         "ordinal_position": "2",
+                        "column_type":"varchar(255)",
+                        "column_key":"",
+                        "extra":"",
                     },
                     {
                         "name": "population",
@@ -195,6 +225,9 @@ def test_collect_schemas(aggregator, dd_run_check, dbm_instance):
                         "default": "0",
                         "nullable": False,
                         "ordinal_position": "3",
+                        "column_type":"int(11)",
+                        "column_key":"MUL",
+                        "extra":"",
                     },
                 ],
                 "indexes": [
@@ -239,13 +272,25 @@ def test_collect_schemas(aggregator, dd_run_check, dbm_instance):
             {
                 "name": "cities_partitioned",
                 "columns": [
-                    {"name": "id", "data_type": "int", "default": "0", "nullable": False, "ordinal_position": "1"},
+                    {
+                        "name": "id", 
+                        "data_type": "int", 
+                        "default": "0", 
+                        "nullable": False,
+                        "ordinal_position": "1",
+                        "column_type":"int(11)",
+                        "column_key":"PRI",
+                        "extra":"",
+                    },
                     {
                         "name": "name",
                         "data_type": "varchar",
                         "default": "None",
                         "nullable": True,
                         "ordinal_position": "2",
+                        "column_type":"varchar(255)",
+                        "column_key":"",
+                        "extra":"",
                     },
                     {
                         "name": "population",
@@ -253,6 +298,9 @@ def test_collect_schemas(aggregator, dd_run_check, dbm_instance):
                         "default": "0",
                         "nullable": False,
                         "ordinal_position": "3",
+                        "column_type":"int(11)",
+                        "column_key":"",
+                        "extra":"",
                     },
                 ],
                 "partitions": [
@@ -353,8 +401,20 @@ def test_collect_schemas(aggregator, dd_run_check, dbm_instance):
                         "default": "None",
                         "nullable": True,
                         "ordinal_position": "1",
+                        "column_type":"varchar(255)",
+                        "column_key":"",
+                        "extra":"",
                     },
-                    {"name": "city_id", "data_type": "int", "default": "0", "nullable": True, "ordinal_position": "2"},
+                    {
+                        "name": "city_id", 
+                        "data_type": "int", 
+                        "default": "0", 
+                        "nullable": True, 
+                        "ordinal_position": "2",
+                        "column_type":"int(11)",
+                        "column_key":"MUL",
+                        "extra":"",
+                    },
                 ],
                 "foreign_keys": [
                     {
@@ -391,13 +451,25 @@ def test_collect_schemas(aggregator, dd_run_check, dbm_instance):
             {
                 "name": "ϑings",
                 "columns": [
-                    {"name": "id", "data_type": "int", "default": "0", "nullable": True, "ordinal_position": "1"},
+                    {
+                        "name": "id", 
+                        "data_type": "int", 
+                        "default": "0", 
+                        "nullable": True, 
+                        "ordinal_position": "1",
+                        "column_type":"int(11)",
+                        "column_key":"",
+                        "extra":""
+                    },
                     {
                         "name": "name",
                         "data_type": "varchar",
                         "default": "None",
                         "nullable": True,
                         "ordinal_position": "2",
+                        "column_type":"varchar(255)",
+                        "column_key":"UNI",
+                        "extra":""
                     },
                 ],
                 "indexes": [
@@ -418,13 +490,25 @@ def test_collect_schemas(aggregator, dd_run_check, dbm_instance):
             {
                 "name": "ts",
                 "columns": [
-                    {"name": "id", "data_type": "int", "default": "None", "nullable": True, "ordinal_position": "1"},
+                    {
+                        "name": "id", 
+                        "data_type": "int", 
+                        "default": "None", 
+                        "nullable": True, 
+                        "ordinal_position": "1",
+                        "column_type":"int(11)",
+                        "column_key":"",
+                        "extra":""
+                    },
                     {
                         "name": "purchased",
                         "data_type": "date",
                         "default": "None",
                         "nullable": True,
                         "ordinal_position": "2",
+                        "column_type":"date",
+                        "column_key":"",
+                        "extra":""
                     },
                 ],
                 "partitions": [
