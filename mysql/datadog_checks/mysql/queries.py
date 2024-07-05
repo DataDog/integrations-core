@@ -85,22 +85,22 @@ SQL_GROUP_REPLICATION_PLUGIN_STATUS = """\
 SELECT plugin_status
 FROM information_schema.plugins WHERE plugin_name='group_replication'"""
 
+# Alisases add to homogenize fields across different database types like SQLServer, PostgreSQL
 SQL_DATABASES = """
 SELECT schema_name as `name`,default_character_set_name,default_collation_name FROM information_schema.SCHEMATA
 WHERE schema_name not in ('sys', 'mysql', 'performance_schema', 'information_schema')"""
 
 SQL_TABLES = """\
-SELECT table_name as `name` FROM information_schema.TABLES WHERE TABLE_SCHEMA = %s
+SELECT table_name as `name`, engine, row_format, create_time FROM information_schema.TABLES WHERE TABLE_SCHEMA = %s
 """
 
 SQL_COLUMNS = """\
 SELECT table_name,
        column_name as `name`,
-       data_type,
+       column_type as `data_type`,
        column_default as `default`,
        is_nullable as `nullable`,
        ordinal_position,
-       column_type,
        column_key,
        extra
 FROM INFORMATION_SCHEMA.COLUMNS

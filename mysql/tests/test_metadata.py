@@ -1,6 +1,7 @@
 # (C) Datadog, Inc. 2023-present
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
+import pdb
 import re
 
 import pytest
@@ -27,8 +28,9 @@ def sort_names_split_by_coma(names):
     return ','.join(sorted_columns)
 
 
-def normalize_unordered_aggregated_values(actual_payload):
+def normalize_values(actual_payload):
     for table in actual_payload['tables']:
+        table['create_time'] = "normalized_value"
         if 'foreign_keys' in table:
             for f_key in table['foreign_keys']:
                 f_key["column_names"] = sort_names_split_by_coma(f_key["column_names"])
@@ -90,24 +92,25 @@ def test_collect_schemas(aggregator, dd_run_check, dbm_instance):
         "tables": [
             {
                 "name": "RestaurantReviews",
+                "engine": "InnoDB",
+                "row_format": "Dynamic",
+                "create_time": "normalized_value",
                 "columns": [
                     {
                         "name": "RestaurantName",
-                        "data_type": "varchar",
+                        "data_type": "varchar(255)",
                         "default": "None",
                         "nullable": True,
                         "ordinal_position": "1",
-                        "column_type": "varchar(255)",
                         "column_key": "MUL",
                         "extra": "",
                     },
                     {
                         "name": "District",
-                        "data_type": "varchar",
+                        "data_type": "varchar(255)",
                         "default": "None",
                         "nullable": True,
                         "ordinal_position": "2",
-                        "column_type": "varchar(255)",
                         "column_key": "",
                         "extra": "",
                     },
@@ -117,7 +120,6 @@ def test_collect_schemas(aggregator, dd_run_check, dbm_instance):
                         "default": "None",
                         "nullable": True,
                         "ordinal_position": "3",
-                        "column_type": "text",
                         "column_key": "",
                         "extra": "",
                     },
@@ -149,34 +151,34 @@ def test_collect_schemas(aggregator, dd_run_check, dbm_instance):
             },
             {
                 "name": "Restaurants",
+                "engine": "InnoDB",
+                "row_format": "Dynamic",
+                "create_time": "normalized_value",
                 "columns": [
                     {
                         "name": "RestaurantName",
-                        "data_type": "varchar",
+                        "data_type": "varchar(255)",
                         "default": "None",
                         "nullable": True,
                         "ordinal_position": "1",
-                        "column_type": "varchar(255)",
                         "column_key": "MUL",
                         "extra": "",
                     },
                     {
                         "name": "District",
-                        "data_type": "varchar",
+                        "data_type": "varchar(100)",
                         "default": "None",
                         "nullable": True,
                         "ordinal_position": "2",
-                        "column_type": "varchar(100)",
                         "column_key": "",
                         "extra": "",
                     },
                     {
                         "name": "Cuisine",
-                        "data_type": "varchar",
+                        "data_type": "varchar(100)",
                         "default": "None",
                         "nullable": True,
                         "ordinal_position": "3",
-                        "column_type": "varchar(100)",
                         "column_key": "",
                         "extra": "",
                     },
@@ -198,34 +200,34 @@ def test_collect_schemas(aggregator, dd_run_check, dbm_instance):
             },
             {
                 "name": "cities",
+                "engine": "InnoDB",
+                "row_format": "Dynamic",
+                "create_time": "normalized_value",
                 "columns": [
                     {
                         "name": "id",
-                        "data_type": "int",
+                        "data_type": "int(11)",
                         "default": "0",
                         "nullable": False,
                         "ordinal_position": "1",
-                        "column_type": "int(11)",
                         "column_key": "PRI",
                         "extra": "",
                     },
                     {
                         "name": "name",
-                        "data_type": "varchar",
+                        "data_type": "varchar(255)",
                         "default": "None",
                         "nullable": True,
                         "ordinal_position": "2",
-                        "column_type": "varchar(255)",
                         "column_key": "",
                         "extra": "",
                     },
                     {
                         "name": "population",
-                        "data_type": "int",
+                        "data_type": "int(11)",
                         "default": "0",
                         "nullable": False,
                         "ordinal_position": "3",
-                        "column_type": "int(11)",
                         "column_key": "MUL",
                         "extra": "",
                     },
@@ -271,34 +273,34 @@ def test_collect_schemas(aggregator, dd_run_check, dbm_instance):
             },
             {
                 "name": "cities_partitioned",
+                "engine": "InnoDB",
+                "row_format": "Dynamic",
+                "create_time": "normalized_value",
                 "columns": [
                     {
                         "name": "id",
-                        "data_type": "int",
+                        "data_type": "int(11)",
                         "default": "0",
                         "nullable": False,
                         "ordinal_position": "1",
-                        "column_type": "int(11)",
                         "column_key": "PRI",
                         "extra": "",
                     },
                     {
                         "name": "name",
-                        "data_type": "varchar",
+                        "data_type": "varchar(255)",
                         "default": "None",
                         "nullable": True,
                         "ordinal_position": "2",
-                        "column_type": "varchar(255)",
                         "column_key": "",
                         "extra": "",
                     },
                     {
                         "name": "population",
-                        "data_type": "int",
+                        "data_type": "int(11)",
                         "default": "0",
                         "nullable": False,
                         "ordinal_position": "3",
-                        "column_type": "int(11)",
                         "column_key": "",
                         "extra": "",
                     },
@@ -394,24 +396,25 @@ def test_collect_schemas(aggregator, dd_run_check, dbm_instance):
             },
             {
                 "name": "landmarks",
+                "engine": "InnoDB",
+                "row_format": "Dynamic",
+                "create_time": "normalized_value",
                 "columns": [
                     {
                         "name": "name",
-                        "data_type": "varchar",
+                        "data_type": "varchar(255)",
                         "default": "None",
                         "nullable": True,
                         "ordinal_position": "1",
-                        "column_type": "varchar(255)",
                         "column_key": "",
                         "extra": "",
                     },
                     {
                         "name": "city_id",
-                        "data_type": "int",
+                        "data_type": "int(11)",
                         "default": "0",
                         "nullable": True,
                         "ordinal_position": "2",
-                        "column_type": "int(11)",
                         "column_key": "MUL",
                         "extra": "",
                     },
@@ -450,24 +453,25 @@ def test_collect_schemas(aggregator, dd_run_check, dbm_instance):
         "tables": [
             {
                 "name": "ϑings",
+                "engine": "InnoDB",
+                "row_format": "Dynamic",
+                "create_time": "normalized_value",
                 "columns": [
                     {
                         "name": "id",
-                        "data_type": "int",
+                        "data_type": "int(11)",
                         "default": "0",
                         "nullable": True,
                         "ordinal_position": "1",
-                        "column_type": "int(11)",
                         "column_key": "",
                         "extra": "",
                     },
                     {
                         "name": "name",
-                        "data_type": "varchar",
+                        "data_type": "varchar(255)",
                         "default": "None",
                         "nullable": True,
                         "ordinal_position": "2",
-                        "column_type": "varchar(255)",
                         "column_key": "UNI",
                         "extra": "",
                     },
@@ -489,14 +493,16 @@ def test_collect_schemas(aggregator, dd_run_check, dbm_instance):
             },
             {
                 "name": "ts",
+                "engine": "InnoDB",
+                "row_format": "Dynamic",
+                "create_time": "normalized_value",
                 "columns": [
                     {
                         "name": "id",
-                        "data_type": "int",
+                        "data_type": "int(11)",
                         "default": "None",
                         "nullable": True,
                         "ordinal_position": "1",
-                        "column_type": "int(11)",
                         "column_key": "",
                         "extra": "",
                     },
@@ -506,7 +512,6 @@ def test_collect_schemas(aggregator, dd_run_check, dbm_instance):
                         "default": "None",
                         "nullable": True,
                         "ordinal_position": "2",
-                        "column_type": "date",
                         "column_key": "",
                         "extra": "",
                     },
@@ -668,10 +673,10 @@ def test_collect_schemas(aggregator, dd_run_check, dbm_instance):
 
     for db_name, actual_payload in actual_payloads.items():
 
-        normalize_unordered_aggregated_values(actual_payload)
+        normalize_values(actual_payload)
 
         assert db_name in databases_to_find
-
+        pdb.set_trace()
         difference = DeepDiff(actual_payload, expected_data_for_db[db_name], ignore_order=True)
 
         if difference:
