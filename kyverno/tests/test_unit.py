@@ -40,7 +40,7 @@ def test_kyverno_mock_metrics(dd_run_check, aggregator, mock_http_response, fixt
 
 def test_kyverno_mock_invalid_endpoint(dd_run_check, aggregator, mock_http_response):
     mock_http_response(status_code=503)
-    check = KyvernoCheck('argo_rollouts', {}, [OM_MOCKED_INSTANCE])
+    check = KyvernoCheck('kyverno', {}, [OM_MOCKED_INSTANCE])
     with pytest.raises(Exception):
         dd_run_check(check)
 
