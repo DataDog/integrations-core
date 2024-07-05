@@ -164,7 +164,7 @@ datadog-system-core==2.4.0
 datadog-system-swap==1.18.0
 datadog-tcp-check==4.9.0
 datadog-teamcity==4.3.0
-datadog-tekton==1.0.1
+datadog-tekton==1.0.2
 datadog-teleport==1.0.0
 datadog-temporal==2.2.1
 datadog-tenable==1.5.0
