@@ -52,7 +52,7 @@ datadog-druid==2.5.1
 datadog-ecs-fargate==4.3.1
 datadog-eks-fargate==4.2.1
 datadog-elastic==6.3.1
-datadog-envoy==3.5.0
+datadog-envoy==3.5.1
 datadog-esxi==1.1.0
 datadog-etcd==6.2.1
 datadog-exchange-server==2.1.0; sys_platform == 'win32'
