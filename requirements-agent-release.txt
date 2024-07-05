@@ -134,7 +134,7 @@ datadog-postfix==1.14.0; sys_platform != 'win32'
 datadog-postgres==19.0.0
 datadog-powerdns-recursor==2.5.1
 datadog-presto==2.8.0
-datadog-process==3.3.0
+datadog-process==3.4.0
 datadog-prometheus==3.6.0
 datadog-proxysql==5.1.1
 datadog-pulsar==2.2.1
