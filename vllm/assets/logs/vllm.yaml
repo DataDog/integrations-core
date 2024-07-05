@@ -10,7 +10,7 @@ pipeline:
     query: source:vllm
   processors:
     - type: grok-parser
-      name: Parse timestamp, level, logger, and message.
+      name: Parse timestamp, level, logger, and message
       enabled: true
       source: message
       samples:
