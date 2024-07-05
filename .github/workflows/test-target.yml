@@ -263,7 +263,7 @@ jobs:
             exit $exit_code
           fi
         else
-          ddev env test --base --new-env --junit ${{ inputs.target }} ${{ inputs.pytest-args != '' && format('-- all {0}', inputs.pytest-args) || '' }}
+          ddev env test --base --new-env --junit ${{ inputs.target }} ${{ inputs.pytest-args != '' && format('-- all {0}', inputs.pytest-args) || '-- all' }}
         fi
 
     - name: Run E2E tests
@@ -283,7 +283,7 @@ jobs:
             exit $exit_code
           fi
         else
-          ddev env test --new-env --junit ${{ inputs.target }} ${{ inputs.pytest-args != '' && format('-- all {0}', inputs.pytest-args) || '' }}
+          ddev env test --new-env --junit ${{ inputs.target }} ${{ inputs.pytest-args != '' && format('-- all {0}', inputs.pytest-args) || '-- all' }}
         fi
 
     - name: Run benchmarks
@@ -312,7 +312,7 @@ jobs:
             exit $exit_code
           fi
         else
-          ddev env test --base --new-env --junit ${{ inputs.target }}:latest ${{ inputs.pytest-args != '' && format('-- all {0}', inputs.pytest-args) || '' }}
+          ddev env test --base --new-env --junit ${{ inputs.target }}:latest ${{ inputs.pytest-args != '' && format('-- all {0}', inputs.pytest-args) || '-- all' }}
         fi
 
     - name: View trace log
