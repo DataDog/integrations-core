@@ -201,14 +201,16 @@ class Schemas(DBMAsyncJob):
                             self._fetch_schema_data(cursor, start_time, db_name)
                         except StopIteration as e:
                             self._log.error(
-                                "While executing fetch schemas for databse {}, the following exception occured {}".format(
+                                """While executing fetch schemas for databse {},
+                                   the following exception occured {}""".format(
                                     db_name, e
                                 )
                             )
                             break
                         except Exception as e:
                             self._log.error(
-                                "While executing fetch schemas for databse {}, the following exception occured {}".format(
+                                """While executing fetch schemas for databse {},
+                                   the following exception occured {}""".format(
                                     db_name, e
                                 )
                             )
