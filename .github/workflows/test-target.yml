@@ -212,23 +212,23 @@ jobs:
       if: inputs.standard && !inputs.minimum-base-package
       env:
         DDEV_TEST_ENABLE_TRACING: "${{ inputs.repo == 'core' && '1' || '0' }}"
-      run: ddev test --cov --junit ${{ inputs.target }} ${{ inputs.pytest-args != '' && format('-- {0}', inputs.pytest-args) || '' }}
+      run: ddev test --cov --junit ${{ inputs.target }} ${{ inputs.pytest-args != '' && format('--no-tests-exit-code=0 -- {0}', inputs.pytest-args) || '' }}
 
     - name: Run Unit & Integration tests with minimum version of base package
       if: inputs.standard && inputs.minimum-base-package
-      run: ddev test --compat --recreate --junit ${{ inputs.target }} ${{ inputs.pytest-args != '' && format('-- {0}', inputs.pytest-args) || '' }}
+      run: ddev test --compat --recreate --junit ${{ inputs.target }} ${{ inputs.pytest-args != '' && format('--no-tests-exit-code=0 -- {0}', inputs.pytest-args) || '' }}
 
     - name: Run E2E tests with latest base package
       if: inputs.standard && inputs.repo == 'core' && !inputs.minimum-base-package
       env:
         DD_API_KEY: "${{ secrets.DD_API_KEY }}"
-      run: ddev env test --base --new-env --junit ${{ inputs.target }} ${{ inputs.pytest-args != '' && format('-- all {0}', inputs.pytest-args) || '' }}
+      run: ddev env test --base --new-env --junit ${{ inputs.target }} ${{ inputs.pytest-args != '' && format('--no-tests-exit-code=0 -- all {0}', inputs.pytest-args) || '' }}
 
     - name: Run E2E tests
       if: inputs.standard && inputs.repo != 'core'
       env:
         DD_API_KEY: "${{ secrets.DD_API_KEY }}"
-      run: ddev env test --new-env --junit ${{ inputs.target }} ${{ inputs.pytest-args != '' && format('-- all {0}', inputs.pytest-args) || '' }}
+      run: ddev env test --new-env --junit ${{ inputs.target }} ${{ inputs.pytest-args != '' && format('--no-tests-exit-code=0 -- all {0}', inputs.pytest-args) || '' }}
 
     - name: Run benchmarks
       if: inputs.benchmark
@@ -243,7 +243,7 @@ jobs:
       env:
         DD_API_KEY: "${{ secrets.DD_API_KEY }}"
         DDEV_TEST_ENABLE_TRACING: "${{ inputs.repo == 'core' && '1' || '0' }}"
-      run: ddev env test --base --new-env --junit ${{ inputs.target }}:latest ${{ inputs.pytest-args != '' && format('-- all {0}', inputs.pytest-args) || '' }}
+      run: ddev env test --base --new-env --junit ${{ inputs.target }}:latest ${{ inputs.pytest-args != '' && format('--no-tests-exit-code=0 -- all {0}', inputs.pytest-args) || '' }}
 
     - name: View trace log
       if: inputs.repo == 'core' && always()
