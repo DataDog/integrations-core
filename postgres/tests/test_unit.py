@@ -17,7 +17,6 @@ from datadog_checks.postgres import PostgreSql, util
 pytestmark = pytest.mark.unit
 
 
-@pytest.mark.flaky
 def test_get_instance_metrics_lt_92(integration_check, pg_instance):
     """
     check output when 9.2+

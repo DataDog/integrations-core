@@ -213,11 +213,12 @@ jobs:
       env:
         DDEV_TEST_ENABLE_TRACING: "${{ inputs.repo == 'core' && '1' || '0' }}"
       run: |
-        if [ -n "${{ inputs.pytest-args }}" ]; then
+        if [ "${{ inputs.pytest-args }}" = "-m flaky" ]; then
           set +e # Disable immediate exit
           ddev test --cov --junit ${{ inputs.target }} -- ${{ inputs.pytest-args }}
           exit_code=$?
           if [ $exit_code -eq 5 ]; then
+            # Flaky test count can be zero, this is done to avoid pipeline failure
             echo "No tests were collected."
             exit 0
           else
@@ -230,11 +231,12 @@ jobs:
     - name: Run Unit & Integration tests with minimum version of base package
       if: inputs.standard && inputs.minimum-base-package
       run: |
-        if [ -n "${{ inputs.pytest-args }}" ]; then
-          set +e
+        if [ "${{ inputs.pytest-args }}" = "-m flaky" ]; then
+          set +e # Disable immediate exit
           ddev test --compat --recreate --junit ${{ inputs.target }} -- ${{ inputs.pytest-args }}
           exit_code=$?
           if [ $exit_code -eq 5 ]; then
+            # Flaky test count can be zero, this is done to avoid pipeline failure
             echo "No tests were collected."
             exit 0
           else
@@ -249,11 +251,12 @@ jobs:
       env:
         DD_API_KEY: "${{ secrets.DD_API_KEY }}"
       run: |
-        if [ -n "${{ inputs.pytest-args }}" ]; then
-          set +e
+        if [ "${{ inputs.pytest-args }}" = "-m flaky" ]; then
+          set +e # Disable immediate exit
           ddev env test --base --new-env --junit ${{ inputs.target }} -- all ${{ inputs.pytest-args }}
           exit_code=$?
           if [ $exit_code -eq 5 ]; then
+            # Flaky test count can be zero, this is done to avoid pipeline failure
             echo "No tests were collected."
             exit 0
           else
@@ -268,11 +271,12 @@ jobs:
       env:
         DD_API_KEY: "${{ secrets.DD_API_KEY }}"
       run: |
-        if [ -n "${{ inputs.pytest-args }}" ]; then
-          set +e
+        if [ "${{ inputs.pytest-args }}" = "-m flaky" ]; then
+          set +e # Disable immediate exit
           ddev env test --new-env --junit ${{ inputs.target }} -- all ${{ inputs.pytest-args }}
           exit_code=$?
           if [ $exit_code -eq 5 ]; then
+            # Flaky test count can be zero, this is done to avoid pipeline failure
             echo "No tests were collected."
             exit 0
           else
@@ -296,11 +300,12 @@ jobs:
         DD_API_KEY: "${{ secrets.DD_API_KEY }}"
         DDEV_TEST_ENABLE_TRACING: "${{ inputs.repo == 'core' && '1' || '0' }}"
       run: |
-        if [ -n "${{ inputs.pytest-args }}" ]; then
-          set +e
+        if [ "${{ inputs.pytest-args }}" = "-m flaky" ]; then
+          set +e # Disable immediate exit
           ddev env test --base --new-env --junit ${{ inputs.target }}:latest -- all ${{ inputs.pytest-args }}
           exit_code=$?
           if [ $exit_code -eq 5 ]; then
+            # Flaky test count can be zero, this is done to avoid pipeline failure
             echo "No tests were collected."
             exit 0
           else
@@ -337,7 +342,12 @@ jobs:
         path: "${{ env.TEST_RESULTS_BASE_DIR }}"
 
     - name: Upload coverage data
-      if: inputs.standard && !github.event.repository.private && always() && inputs.pytest-args != '-m flaky'
+      if: >
+        inputs.standard && 
+        !github.event.repository.private && 
+        always() && 
+        inputs.pytest-args != '-m flaky'
+      # Flaky tests will have low coverage, don't upload it to avoid pipeline failure
       uses: codecov/codecov-action@v4
       with:
         token: ${{ secrets.CODECOV_TOKEN }}
