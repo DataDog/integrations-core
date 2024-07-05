@@ -16,7 +16,7 @@ datadog-argocd==2.4.2
 datadog-aspdotnet==2.1.1; sys_platform == 'win32'
 datadog-avi-vantage==4.2.2
 datadog-azure-iot-edge==4.2.1
-datadog-boundary==2.2.2
+datadog-boundary==2.2.3
 datadog-btrfs==2.3.0; sys_platform != 'win32'
 datadog-cacti==2.1.1; sys_platform == 'linux2'
 datadog-calico==2.2.1
