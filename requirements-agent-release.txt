@@ -23,7 +23,7 @@ datadog-calico==2.2.2
 datadog-cassandra-nodetool==1.13.0
 datadog-cassandra==1.18.0
 datadog-ceph==2.10.0; sys_platform != 'win32'
-datadog-cert-manager==4.1.1
+datadog-cert-manager==4.1.2
 datadog-checkpoint-quantum-firewall==1.0.0
 datadog-checks-base==36.8.0
 datadog-checks-dependency-provider==1.4.0
