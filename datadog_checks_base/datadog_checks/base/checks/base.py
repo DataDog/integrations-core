@@ -664,6 +664,15 @@ class AgentCheck(object):
 
     def event_platform_event(self, raw_event, event_track_type):
         # type: (str, str) -> None
+        """Send an event platform event.
+
+        Parameters:
+
+            raw_event (str):
+                JSON formatted string representing the event to send
+            event_track_type (str):
+                type of event ingested and processed by the event platform
+        """
         if raw_event is None:
             return
         aggregator.submit_event_platform_event(
