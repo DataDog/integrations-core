@@ -48,7 +48,14 @@ SELECT {history_row_limit_filter}
         + ((sjh1.run_duration % 10000) / 100) * 60
         + (sjh1.run_duration % 100)
     ) AS run_duration_seconds,
-    sjh1.run_status,
+    CASE sjh1.run_status
+        WHEN 0 THEN 'Failed'
+        WHEN 1 THEN 'Succeeded'
+        WHEN 2 THEN 'Retry'
+        WHEN 3 THEN 'Canceled'
+        WHEN 4 THEN 'In Progress'
+        ELSE 'Unknown'
+    END AS step_run_status,
     sjh1.message
 FROM 
     msdb.dbo.sysjobhistory AS sjh1
@@ -108,7 +115,14 @@ SELECT TOP 1000
         + ((sjh1.run_duration % 10000) / 100) * 60
         + (sjh1.run_duration % 100)
     ) AS run_duration_seconds,
-    sjh1.run_status,
+    CASE sjh1.run_status
+        WHEN 0 THEN 'Failed'
+        WHEN 1 THEN 'Succeeded'
+        WHEN 2 THEN 'Retry'
+        WHEN 3 THEN 'Canceled'
+        WHEN 4 THEN 'In Progress'
+        ELSE 'Unknown'
+    END AS step_run_status,
     sjh1.message
 FROM 
     msdb.dbo.sysjobhistory AS sjh1
@@ -390,7 +404,7 @@ def test_agent_jobs_integration(aggregator, dd_run_check, agent_jobs_instance, s
     assert len(job_events) == 1, "should have exactly one job history event"
     job_event = job_events[0]
     assert job_event['host'] == "stubbed.hostname", "wrong hostname"
-    assert job_event['dbm_type'] == "activity", "wrong dbm_type"
+    assert job_event['dbm_type'] == "agent_jobs", "wrong dbm_type"
     assert job_event['ddsource'] == "sqlserver", "wrong source"
     assert job_event['ddagentversion'], "missing ddagentversion"
     assert type(job_event['collection_interval']) in (float, int), "invalid collection_interval"
@@ -406,7 +420,7 @@ def test_agent_jobs_integration(aggregator, dd_run_check, agent_jobs_instance, s
     assert job_1_step_1_history['completion_instance_id'] == 4
     assert job_1_step_1_history['run_epoch_time']
     assert job_1_step_1_history['run_duration_seconds'] is not None
-    assert job_1_step_1_history['run_status'] == 1
+    assert job_1_step_1_history['step_run_status'] == "Succeeded"
     assert job_1_step_1_history['message']
     for mname in EXPECTED_AGENT_JOBS_METRICS_COMMON:
         aggregator.assert_metric(mname, count=1)

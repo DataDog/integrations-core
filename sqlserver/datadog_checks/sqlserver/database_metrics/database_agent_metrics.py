@@ -50,20 +50,26 @@ AGENT_ACTIVITY_STEPS_QUERY = {
                 sjh1.step_name,
                 sjh1.run_status
             FROM msdb.dbo.sysjobhistory AS sjh1
-            WHERE NOT EXISTS (
-                SELECT 1
-                FROM msdb.dbo.sysjobhistory AS sjh2
-                WHERE sjh2.job_id = sjh1.job_id
-                    AND sjh2.step_id = 0
-                    AND sjh2.instance_id > sjh1.instance_id
-                )
+            WHERE sjh1.instance_id = (
+                SELECT MAX(instance_id)
+                FROM msdb.dbo.sysjobhistory
+                WHERE job_id = sjh1.job_id
+                AND step_id = sjh1.step_id
+            )
         )
         SELECT
             j.name,
             aj.job_id,
             cs.step_name,
             cs.step_id,
-            cs.run_status AS step_run_status,
+            CASE cs.run_status
+                WHEN 0 THEN 'Failed'
+                WHEN 1 THEN 'Succeeded'
+                WHEN 2 THEN 'Retry'
+                WHEN 3 THEN 'Canceled'
+                WHEN 4 THEN 'In Progress'
+                ELSE 'Unknown'
+            END AS step_run_status,
             1 AS step_info
         FROM ActiveJobs AS aj
         INNER JOIN CompletedSteps AS cs
