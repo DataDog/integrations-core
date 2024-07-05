@@ -10,7 +10,7 @@ datadog-amazon-msk==4.9.0
 datadog-ambari==4.2.1; sys_platform != 'win32'
 datadog-apache==4.5.1
 datadog-arangodb==2.2.2
-datadog-argo-rollouts==1.0.1
+datadog-argo-rollouts==1.0.2
 datadog-argo-workflows==1.0.1
 datadog-argocd==2.4.1
 datadog-aspdotnet==2.1.0; sys_platform == 'win32'
