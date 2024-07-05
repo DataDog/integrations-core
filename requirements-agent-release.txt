@@ -180,6 +180,7 @@ datadog-twistlock==3.6.1
 datadog-varnish==2.1.0
 datadog-vault==4.2.0
 datadog-vertica==4.5.0
+datadog-vllm==1.0.0
 datadog-voltdb==3.2.1
 datadog-vsphere==7.5.3
 datadog-weaviate==2.3.2
