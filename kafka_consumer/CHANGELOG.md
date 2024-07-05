@@ -2,6 +2,12 @@
 
 <!-- towncrier release notes start -->
 
+## 4.5.0 / 2024-07-05
+
+***Added***:
+
+* Kafka consumer : add consumer group state as tag ([#17686](https://github.com/DataDog/integrations-core/pull/17686))
+
 ## 4.4.0 / 2024-06-11
 
 ***Added***:
