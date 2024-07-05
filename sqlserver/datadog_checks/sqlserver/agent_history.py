@@ -46,7 +46,14 @@ SELECT {history_row_limit_filter}
         + ((sjh1.run_duration % 10000) / 100) * 60
         + (sjh1.run_duration % 100)
     ) AS run_duration_seconds,
-    sjh1.run_status,
+    CASE sjh1.run_status
+        WHEN 0 THEN 'Failed'
+        WHEN 1 THEN 'Succeeded'
+        WHEN 2 THEN 'Retry'
+        WHEN 3 THEN 'Canceled'
+        WHEN 4 THEN 'In Progress'
+        ELSE 'Unknown'
+    END AS step_run_status,
     sjh1.message
 FROM 
     msdb.dbo.sysjobhistory AS sjh1
