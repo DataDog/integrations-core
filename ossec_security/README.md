@@ -1,4 +1,4 @@
-# Agent Integration: ossec
+# Agent Integration: ossec-security
 
 ## Overview
 
@@ -20,13 +20,13 @@ Visualize detailed insights into Firewall, FTPD, System, Syslog, SSHD, Pam, Wind
 
 ### Installation
 
-To install the OSSEC integration, run the following Agent installation command and the steps below. For more information, see the [Integration Management][6] documentation.
+To install the OSSEC Security integration, run the following Agent installation command and the steps below. For more information, see the [Integration Management][6] documentation.
 
 **Note**: This step is not necessary for Agent version >= 7.54.0.
 
 Linux command
   ```shell
-  sudo -u dd-agent -- datadog-agent integration install datadog-ossec==1.0.0
+  sudo -u dd-agent -- datadog-agent integration install datadog-ossec_security==1.0.0
   ```
 
 ### Configuration
@@ -38,17 +38,17 @@ Linux command
     ```shell
     logs_enabled: true
     ```
-2. Add this configuration block to your `ossec.d/conf.yaml` file to start collecting your logs.
+2. Add this configuration block to your `ossec_security.d/conf.yaml` file to start collecting your logs.
 
     We will be using the UDP method to collect the OSSEC alerts data.
-    See the [sample ossec.d/conf.yaml][8] for available configuration options.
+    See the [sample ossec_security.d/conf.yaml][8] for available configuration options.
 
     ```yaml
       logs:
       - type: udp
         port: <PORT>
-        service: ossec
-        source: ossec
+        source: ossec-security
+        service: ossec-security
     ```
     **Note**: It is recommended not to change the service and source values as these parameters are integral to the pipeline's operation.
 
@@ -70,7 +70,7 @@ Linux command
 
       *PORT(8080): port on which your datadog-agent is listening.
 
-      Note: Using JSON format is required since OSSEC pipeline parses JSON formatted logs only.
+      Note: Using JSON format is required since OSSEC Security pipeline parses JSON formatted logs only.
 
   2. After this change is made, the client-syslog process should be enabled:
       ```shell
@@ -100,19 +100,19 @@ Since OSSEC server does not forward the firewall alert logs via syslog by defaul
   /var/ossec/bin/ossec-control restart
   ```
 
-#### Changes in OSSEC pipeline for timezone other than UTC
+#### Changes in OSSEC Security Datadog log pipeline for timezone other than UTC
 
-Since Datadog expects all the logs in UTC timezone by default, If the timezone of your OSSEC logs is other than UTC, please specify it in the OSSEC datadog pipeline.
+Since Datadog expects all the logs in UTC timezone by default, If the timezone of your OSSEC logs is other than UTC, please specify it in the OSSEC Security datadog pipeline.
 
-In order to change the timezone in OSSEC pipeline follow the below steps:
+In order to change the timezone in OSSEC Security pipeline follow the below steps:
 
   1. Navigate to Pipelines in the datadog cloud account. 
       - Go to Logs -> Log Stream -> Pipelines.
 
-  2. Search for `OSSEC` using Filter Pipelines.
+  2. Search for `OSSEC Security` using Filter Pipelines.
 
-  3. Clone `OSSEC` pipeline in order to change the timezone.
-      - Hover over the `OSSEC` pipeline and click on the `clone`  button. This will clone the `OSSEC` pipeline which will be editable.
+  3. Clone `OSSEC Security` pipeline in order to change the timezone.
+      - Hover over the `OSSEC Security` pipeline and click on the `clone`  button. This will clone the `OSSEC Security` pipeline which will be editable.
 
   4. Edit the Grok Parser using below steps:
       - Find a processor with the name "Grok Parser: Parsing OSSEC alerts" and click on the `Edit` button by hovering over the pipeline.
@@ -126,7 +126,7 @@ In order to change the timezone in OSSEC pipeline follow the below steps:
 
 ### Validation
 
-[Run the Agent's status subcommand][7] and look for `ossec` under the Checks section.
+[Run the Agent's status subcommand][7] and look for `ossec_security` under the Checks section.
 
 ## Data Collected
 
@@ -138,15 +138,15 @@ In order to change the timezone in OSSEC pipeline follow the below steps:
 
 ### Metrics
 
-The OSSEC does not include any metrics.
+The OSSEC Security does not include any metrics.
 
 ### Events
 
-The OSSEC integration does not include any events.
+The OSSEC Security integration does not include any events.
 
 ### Service Checks
 
-The OSSEC integration does not include any service checks.
+The OSSEC Security integration does not include any service checks.
 
 ## Troubleshooting
 
@@ -197,8 +197,8 @@ For any further assistance, contact [Datadog support][1].
 [2]: https://app.datadoghq.com/account/settings/agent/latest
 [3]: https://docs.datadoghq.com/agent/guide/agent-commands/#start-stop-and-restart-the-agent
 [4]: https://www.ossec.net/
-[5]: https://github.com/DataDog/integrations-core/blob/master/ossec/assets/service_checks.json
+[5]: https://github.com/DataDog/integrations-core/blob/master/ossec_security/assets/service_checks.json
 [6]: https://docs.datadoghq.com/agent/guide/integration-management/?tab=linux#install
 [7]: https://docs.datadoghq.com/agent/guide/agent-commands/#agent-status-and-information
-[8]: https://github.com/DataDog/integrations-core/blob/master/ossec/datadog_checks/ossec/data/conf.yaml.example
+[8]: https://github.com/DataDog/integrations-core/blob/master/ossec_security/datadog_checks/ossec_security/data/conf.yaml.example
 [9]: https://en.wikipedia.org/wiki/List_of_tz_database_time_zones

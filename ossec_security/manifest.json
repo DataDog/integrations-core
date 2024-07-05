@@ -1,7 +1,7 @@
 {
   "manifest_version": "2.0.0",
-  "app_uuid": "f6259a57-956e-45b3-a4cd-2ce6073d141b",
-  "app_id": "ossec",
+  "app_uuid": "595fcf0f-a306-43bf-a282-a729764961fa",
+  "app_id": "ossec-security",
   "display_on_public_website": false,
   "tile": {
     "overview": "README.md#Overview",
@@ -9,7 +9,7 @@
     "support": "README.md#Support",
     "changelog": "CHANGELOG.md",
     "description": "Gain insights into OSSEC alerts.",
-    "title": "ossec",
+    "title": "ossec-security",
     "media": [
       {
         "caption": "OSSEC - Audit Internal",
@@ -66,8 +66,8 @@
   "assets": {
     "integration": {
       "auto_install": true,
-      "source_type_id": 17480411,
-      "source_type_name": "ossec",
+      "source_type_id": 19889856,
+      "source_type_name": "ossec-security",
       "configuration": {
         "spec": "assets/configuration/spec.yaml"
       },
@@ -90,7 +90,7 @@
       "OSSEC - Web": "assets/dashboards/ossec_web.json"
     },
     "logs": {
-      "source": "ossec"
+      "source": "ossec-security"
     }
   },
   "author": {

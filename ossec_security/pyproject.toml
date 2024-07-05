@@ -5,15 +5,15 @@ requires = [
 build-backend = "hatchling.build"
 
 [project]
-name = "datadog-ossec"
-description = "The ossec check"
+name = "datadog-ossec-security"
+description = "The ossec-security check"
 readme = "README.md"
 license = "BSD-3-Clause"
 keywords = [
     "datadog",
     "datadog agent",
     "datadog check",
-    "ossec",
+    "ossec_security",
 ]
 authors = [
     { name = "Datadog", email = "packages@datadoghq.com" },
@@ -41,7 +41,7 @@ deps = []
 Source = "https://github.com/DataDog/integrations-core"
 
 [tool.hatch.version]
-path = "datadog_checks/ossec/__about__.py"
+path = "datadog_checks/ossec_security/__about__.py"
 
 [tool.hatch.build.targets.sdist]
 include = [
@@ -52,7 +52,7 @@ include = [
 
 [tool.hatch.build.targets.wheel]
 include = [
-    "/datadog_checks/ossec",
+    "/datadog_checks/ossec_security",
 ]
 dev-mode-dirs = [
     ".",

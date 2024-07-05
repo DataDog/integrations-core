@@ -1,5 +1,5 @@
-id: ossec
-metric_id: ossec
+id: ossec-security
+metric_id: ossec-security
 backend_only: false
 facets:
   - groups:
@@ -139,10 +139,10 @@ facets:
     source: log
 pipeline:
   type: pipeline
-  name: OSSEC
+  name: OSSEC Security
   enabled: true
   filter:
-    query: "source:ossec"
+    query: "source:ossec-security"
   processors:
     - type: grok-parser
       name: Parsing OSSEC alerts

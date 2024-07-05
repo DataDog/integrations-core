@@ -16,5 +16,5 @@
 # logs:
 #   - type: udp
 #     port: <PORT>
-#     source: ossec
-#     service: ossec
+#     source: ossec-security
+#     service: ossec-security

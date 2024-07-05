@@ -1,4 +1,4 @@
-id: ossec
+id: ossec-security
 tests:
   -
     sample: "<132>Jun 19 11:56:43 ub20 ossec: {\"crit\":2,\"id\":1002,\"component\":\"ub20->/var/log/syslog\",\"classification\":\" syslog,errors,\",\"description\":\"Unknown problem somewhere in the system.\",\"message\":\"Jun 19 11:56:42 ub20 multipathd[740]: sda: failed to get sysfs uid: Invalid argument\"}"
