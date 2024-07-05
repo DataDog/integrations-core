@@ -337,7 +337,7 @@ jobs:
         path: "${{ env.TEST_RESULTS_BASE_DIR }}"
 
     - name: Upload coverage data
-      if: inputs.standard && !github.event.repository.private && always()
+      if: inputs.standard && !github.event.repository.private && always() && inputs.pytest-args != ''
       uses: codecov/codecov-action@v4
       with:
         token: ${{ secrets.CODECOV_TOKEN }}
