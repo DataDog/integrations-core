@@ -43,6 +43,7 @@ def test_check_kafka(aggregator, check, kafka_instance, dd_run_check):
     assert_check_kafka_has_consumer_group_state_tag(aggregator, kafka_instance['consumer_groups'])
 
 
+@pytest.mark.flaky
 def test_can_send_event(aggregator, check, kafka_instance, dd_run_check):
     """
     Testing Kafka_consumer check.

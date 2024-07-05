@@ -63,6 +63,7 @@ def ci(app: Application, sync: bool):
     jobs_workflow_path = app.repo.path / '.github' / 'workflows' / 'test-all.yml'
     original_jobs_workflow = jobs_workflow_path.read_text() if jobs_workflow_path.is_file() else ''
 
+    # TODO: Remove this once verification is done for all tests
     jobs = {}
     for data in construct_job_matrix(app.repo.path, get_all_targets(app.repo.path)):
         python_restriction = data.get('python-support', '')

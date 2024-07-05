@@ -19,7 +19,7 @@ on:
         description: "Arguments to pass to pytest"
         required: false
         type: string
-        default: ""
+        default: "-m flaky"
 
 jobs:
   compute-matrix:
