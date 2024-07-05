@@ -225,7 +225,7 @@ jobs:
             exit $exit_code
           fi
         else
-          ddev test --cov --junit ${{ inputs.target }}
+          ddev test --cov --junit ${{ inputs.target }} ${{ inputs.pytest-args != '' && format('-- {0}', inputs.pytest-args) || '' }}
         fi
 
     - name: Run Unit & Integration tests with minimum version of base package
@@ -243,7 +243,7 @@ jobs:
             exit $exit_code
           fi
         else
-          ddev test --compat --recreate --junit ${{ inputs.target }}
+          ddev test --compat --recreate --junit ${{ inputs.target }} ${{ inputs.pytest-args != '' && format('-- {0}', inputs.pytest-args) || '' }}
         fi
 
     - name: Run E2E tests with latest base package
@@ -263,7 +263,7 @@ jobs:
             exit $exit_code
           fi
         else
-          ddev env test --base --new-env --junit ${{ inputs.target }} -- all
+          ddev env test --base --new-env --junit ${{ inputs.target }} ${{ inputs.pytest-args != '' && format('-- all {0}', inputs.pytest-args) || '' }}
         fi
 
     - name: Run E2E tests
@@ -283,7 +283,7 @@ jobs:
             exit $exit_code
           fi
         else
-          ddev env test --new-env --junit ${{ inputs.target }} -- all
+          ddev env test --new-env --junit ${{ inputs.target }} ${{ inputs.pytest-args != '' && format('-- all {0}', inputs.pytest-args) || '' }}
         fi
 
     - name: Run benchmarks
@@ -312,7 +312,7 @@ jobs:
             exit $exit_code
           fi
         else
-          ddev env test --base --new-env --junit ${{ inputs.target }}:latest -- all
+          ddev env test --base --new-env --junit ${{ inputs.target }}:latest ${{ inputs.pytest-args != '' && format('-- all {0}', inputs.pytest-args) || '' }}
         fi
 
     - name: View trace log
