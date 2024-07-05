@@ -178,7 +178,7 @@ datadog-traffic-server==2.2.1
 datadog-twemproxy==1.15.0
 datadog-twistlock==3.6.1
 datadog-varnish==2.1.0
-datadog-vault==4.2.0
+datadog-vault==4.2.1
 datadog-vertica==4.5.0
 datadog-vllm==1.0.0
 datadog-voltdb==3.2.1
