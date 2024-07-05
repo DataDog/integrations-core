@@ -80,17 +80,82 @@ files:
         type: object
         properties: []
     - name: dbnames
+      deprecation:
+        Agent version: "7.56.0"
+        Migration: |
+          dbnames is deprecated. Set database_autodiscovery.enabled to true to enable database autodiscovery.
+          Use database_autodiscovery.include or database_autodiscovery.exclude to include or exclude
+          specific databases to collect metrics from.
       description: |
-        Set a list of the names of all databases to collect metrics from.
-        If this key does not exist, all metrics from all databases on the server will be collected.
+        Set a list of the names of all databases to collect dbstats metrics from.
+        If this key does not exist, all dbstats metrics from all databases on the server will be collected.
       value:
         type: array
         items:
           type: string
         example:
           [ one_database, other_database ]
+    - name: database_autodiscovery
+      description: |
+        Define the configuration for database autodiscovery.
+        Complete this section if you want to auto-discover databases on this MongoDB instance.
+      options:
+        - name: enabled
+          description: Enable database autodiscovery.
+          value:
+            type: boolean
+            example: false
+            display_default: false
+        - name: max_databases
+          description: The maximum number of databases this host should monitor.
+          value:
+            type: integer
+            example: 100
+            display_default: 100
+        - name: include
+          description: |
+            Regular expression for database names to include as part of
+            database autodiscovery.
+            Will report metrics for databases that are found in this instance,
+            ignores databases listed but not found.
+            Character casing is ignored. The regular expressions start matching from
+            the beginning, so to match anywhere, prepend `.*`. For exact matches append `$`.
+            Defaults to `.*` to include everything.
+          value:
+            type: array
+            items:
+              type: string
+            example:
+              - "mydatabase$"
+              - "orders.*"
+            display_default:
+              - ".*"
+        - name: exclude
+          description: |
+            Regular expression for database names to exclude as part of `database_autodiscovery`.
+            Character casing is ignored. The regular expressions start matching from the beginning,
+            so to match anywhere, prepend `.*`. For exact matches append `$`.
+            In case of conflicts, database exclusion via `exclude` takes precedence over
+            those found via `include`
+          value:
+            type: array
+            items:
+              type: string
+            example:
+              - "admin$"
+              - "config$"
+              - "local$"
+            display_default:
+              - "admin$"
+              - "config$"
+              - "local$"
+        - name: refresh_interval
+          description: Frequency in seconds of scans for new databases. Defaults to 10 minutes.
+          value:
+            type: integer
+            example: 600
+            display_default: 600
     - name: dbm
-      hidden: true
       description: |
         Set to `true` enable Database Monitoring.
         
@@ -102,7 +167,6 @@ files:
         example: false
         display_default: false
     - name: cluster_name
-      hidden: true
       description: |
         The name of the cluster to which the monitored MongoDB instance belongs.
         Used to group MongoDB instances in a MongoDB cluster.
@@ -128,6 +192,22 @@ files:
         type: number
         example: 1800
         display_default: false
+    - name: operation_samples
+      description: Configure collection of MongoDB operation samples and explain plans.
+      options:
+        - name: enabled
+          description: |
+            Enable collection of operation samples. Requires `dbm: true`.
+          value:
+            type: boolean
+            example: true
+        - name: collection_interval
+          description: |
+            Set the operation samples collection interval in seconds. Each collection involves capturing
+            current operations with $currentOp aggregation pipeline and explain plans for each operation.
+          value:
+            type: number
+            example: 10
     - name: replica_check
       description: |
         Whether or not to read from available replicas.
@@ -204,6 +284,9 @@ files:
          * `db:<DB_NAME>` e.g. `db:<DB_NAME>`
          * `collection:<COLLECTION_NAME>` e.g. `collection:<COLLECTION_NAME>`
         Each collection generates many metrics, up to 8 + the number of indices on the collection for each collection.
+
+        NOTE: This option is ignored when database_autodiscovery is enabled. 
+        Metrics are collected for all authorized collections on autodiscovered databases.
       value:
         type: array
         items:

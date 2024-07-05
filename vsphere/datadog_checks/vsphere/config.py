@@ -26,6 +26,7 @@ from datadog_checks.vsphere.constants import (
     DEFAULT_THREAD_COUNT,
     DEFAULT_VSPHERE_ATTR_PREFIX,
     DEFAULT_VSPHERE_TAG_PREFIX,
+    EXCLUDE_FILTERS,
     EXTRA_FILTER_PROPERTIES_FOR_VMS,
     HISTORICAL,
     MOR_TYPE_AS_STRING,
@@ -125,6 +126,15 @@ class VSphereConfig(object):
         self.event_resource_filters = self._normalize_event_resource_filters(
             instance.get("event_resource_filters", DEFAULT_EVENT_RESOURCES)
         )
+        self.include_events = instance.get("include_events", None)
+        if self.include_events is None:
+            self.exclude_filters = EXCLUDE_FILTERS
+        else:
+            self.exclude_filters = {}
+            for item in self.include_events:
+                event_name = item["event"]
+                excluded_messages = [r'{}'.format(msg) for msg in item["excluded_messages"]]
+                self.exclude_filters[event_name] = excluded_messages
 
         # Since `collect_per_instance_filters` have the same structure as `metric_filters` we use the same parser
         self.collect_per_instance_filters = self._parse_metric_regex_filters(

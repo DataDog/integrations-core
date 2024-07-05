@@ -69,6 +69,7 @@ esxi.disk.write.avg,gauge,,kibibyte,second,Average number of kilobytes written t
 esxi.hbr.hbrNetRx.avg,gauge,,kibibyte,second,Kilobytes per second of outgoing host-based replication network traffic (for this virtual machine or host).,0,esxi,hbr net rx,
 esxi.hbr.hbrNetTx.avg,gauge,,kibibyte,second,Average amount of data transmitted per second,0,esxi,hbr net tx,
 esxi.hbr.hbrNumVms.avg,gauge,,,,Number of powered-on virtual machines running on this host that currently have host-based replication protection enabled.,0,esxi,hbr num vms,
+esxi.host.can_connect,gauge,,,,Whether the check can connect to the ESXi host or not.,0,esxi,host connect,
 esxi.host.count,gauge,,,,Timeseries with value 1 for each ESXi Host. Make 'sum by {X}' queries to count all the Hosts with the tag X.,0,esxi,host count,
 esxi.mem.active.avg,gauge,,kibibyte,,"Amount of memory that is actively used, as estimated by VMkernel based on recently touched memory pages",-1,esxi,mem active avg,
 esxi.mem.activewrite.avg,gauge,,kibibyte,,Estimate for the amount of memory actively being written to by the virtual machine,-1,esxi,mem activewrite avg,

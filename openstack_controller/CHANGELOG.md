@@ -2,6 +2,12 @@
 
 <!-- towncrier release notes start -->
 
+## 6.8.0 / 2024-06-21
+
+***Added***:
+
+* Added handling for new exception: 'CatalogEndPointFailure' and clearer log messages for exception handling ([#17904](https://github.com/DataDog/integrations-core/pull/17904))
+
 ## 6.7.0 / 2024-06-20
 
 ***Added***:

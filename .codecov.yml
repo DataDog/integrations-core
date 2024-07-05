@@ -678,6 +678,10 @@ coverage:
         target: 75
         flags:
         - fluxcd
+      vLLM:
+        target: 75
+        flags:
+        - vllm
       kyverno:
         target: 75
         flags:
@@ -1488,6 +1492,11 @@ flags:
     paths:
     - vertica/datadog_checks/vertica
     - vertica/tests
+  vllm:
+    carryforward: true
+    paths:
+    - vllm/datadog_checks/vllm
+    - vllm/tests
   voltdb:
     carryforward: true
     paths:
