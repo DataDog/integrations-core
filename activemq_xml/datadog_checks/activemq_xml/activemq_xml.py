@@ -26,6 +26,10 @@ MAX_ELEMENTS = 300
 
 
 class ActiveMQXML(AgentCheck):
+    """
+    Dummy doc string to trigger tests
+    """
+
     def check(self, _):
         url = self.instance.get("url")
         custom_tags = self.instance.get('tags', [])

@@ -1382,5 +1382,3 @@ class AgentCheck(object):
 
         for m in metrics:
             self.gauge(m.name, m.value, tags=tags, raw=True)
-
-# Trigger all test runs

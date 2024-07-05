@@ -104,6 +104,10 @@ set_default_driver_conf()
 
 
 class SQLServer(AgentCheck):
+    """
+    Dummy docstring to trigger tests
+    """
+
     __NAMESPACE__ = "sqlserver"
 
     def __init__(self, name, init_config, instances):
