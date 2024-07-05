@@ -2,6 +2,18 @@
 
 <!-- towncrier release notes start -->
 
+## 12.6.0 / 2024-07-05
+
+***Added***:
+
+* Update dependencies ([#17817](https://github.com/DataDog/integrations-core/pull/17817))
+
+***Fixed***:
+
+* Fixed the MySQL integration to correctly catch and handle errors raised by the connection attempt ([#17872](https://github.com/DataDog/integrations-core/pull/17872))
+* Fixed a bug in MySQL integration when trying to deconstruct None return ([#17873](https://github.com/DataDog/integrations-core/pull/17873))
+* Fix metadata table source for MySQL 5.6 ([#17875](https://github.com/DataDog/integrations-core/pull/17875))
+
 ## 12.5.1 / 2024-06-11
 
 ***Fixed***:
