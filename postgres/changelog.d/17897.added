@@ -1,1 +1,0 @@
-Add toast metrics to relation metrics and remove usage of pg_stat_user_tables
