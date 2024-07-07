@@ -25,7 +25,7 @@ class ManagedAuthentication(BaseModel):
         arbitrary_types_allowed=True,
         frozen=True,
     )
-    enabled: Optional[bool] = Field(None, examples=[False])
+    enabled: Optional[bool] = Field(None, example=False)
 
 
 class Aws(BaseModel):
@@ -44,8 +44,8 @@ class ManagedAuthentication1(BaseModel):
         frozen=True,
     )
     client_id: Optional[str] = None
-    enabled: Optional[bool] = Field(None, examples=[False])
-    identity_scope: Optional[str] = Field(None, examples=['https://ossrdbms-aad.database.windows.net/.default'])
+    enabled: Optional[bool] = Field(None, example=False)
+    identity_scope: Optional[str] = Field(None, example='https://ossrdbms-aad.database.windows.net/.default')
 
 
 class Azure(BaseModel):
@@ -176,7 +176,7 @@ class QuerySamples(BaseModel):
     seen_samples_cache_maxsize: Optional[int] = None
 
 
-class Relations(BaseModel):
+class Relation(BaseModel):
     model_config = ConfigDict(
         arbitrary_types_allowed=True,
         frozen=True,
@@ -238,7 +238,7 @@ class InstanceConfig(BaseModel):
     query_metrics: Optional[QueryMetrics] = None
     query_samples: Optional[QuerySamples] = None
     query_timeout: Optional[int] = None
-    relations: Optional[tuple[Union[str, Relations], ...]] = None
+    relations: Optional[tuple[Union[str, Relation], ...]] = None
     reported_hostname: Optional[str] = None
     service: Optional[str] = None
     ssl: Optional[str] = None
@@ -249,6 +249,7 @@ class InstanceConfig(BaseModel):
     table_count_limit: Optional[int] = None
     tag_replication_role: Optional[bool] = None
     tags: Optional[tuple[str, ...]] = None
+    use_global_custom_queries: Optional[str] = None
     username: str
 
     @model_validator(mode='before')

@@ -119,7 +119,7 @@ def test_only_global_custom_queries(aggregator, pg_instance):
                     'tags': ['query:custom'],
                 },
             ],
-            'use_global_custom_queries': 'true'
+            'use_global_custom_queries': 'true',
         }
     )
     pg_init_config = {
@@ -158,7 +158,7 @@ def test_only_instance_custom_queries(aggregator, pg_instance):
                     'tags': ['query:custom'],
                 },
             ],
-            'use_global_custom_queries': 'false'
+            'use_global_custom_queries': 'false',
         }
     )
     pg_init_config = {
