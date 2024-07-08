@@ -16,6 +16,14 @@ from .constants import (
     MACHINE_SWAP_SIZE_METRIC,
     MACHINE_UP_STATE,
     MACHINES_API_UP_METRIC,
+    VOLUME_BLOCK_SIZE_METRIC,
+    VOLUME_BLOCKS_AVAIL_METRIC,
+    VOLUME_BLOCKS_FREE_METRIC,
+    VOLUME_BLOCKS_METRIC,
+    VOLUME_CREATED_METRIC,
+    VOLUME_CREATED_STATE,
+    VOLUME_ENCRYPTED_METRIC,
+    VOLUME_SIZE_METRIC,
 )
 from .metrics import METRICS, RENAME_LABELS_MAP
 
@@ -83,6 +91,57 @@ class FlyIoCheck(OpenMetricsBaseCheckV2, ConfigMixin):
         if swap_size_mb is not None:
             self.gauge(MACHINE_SWAP_SIZE_METRIC, value=swap_size_mb, tags=tags, hostname=machine_id)
 
+    def _collect_volumes_for_app(self, app_name, app_tags):
+        self.log.debug("Getting volumes for app %s in org %s", app_name, self.org_slug)
+        volumes_endpoint = f"{self.machines_api_endpoint}/v1/apps/{app_name}/volumes"
+        response = self.http.get(volumes_endpoint)
+        response.raise_for_status()
+        volumes = response.json()
+        self.log.debug("Collected %s volumes for app %s in org %s", len(volumes), app_name, self.org_slug)
+        for volume in volumes:
+            volume_id = volume.get("id")
+            region = volume.get("region")
+            zone = volume.get("zone")
+            fstype = volume.get("fstype")
+            attached_machine_id = volume.get("attached_machine_id")
+            volume_tags = [
+                f"volume_id:{volume_id}",
+                f"fly_region:{region}",
+                f"fly_zone:{zone}",
+                f"fstype:{fstype}",
+                f"attached_machine_id:{attached_machine_id}",
+                f"app_name:{app_name}",
+            ]
+            all_tags = self.tags + volume_tags
+
+            state = volume.get("state")
+            size_gb = volume.get("size_gb")
+            encrypted = volume.get("encrypted")
+            blocks = volume.get("blocks")
+            block_size = volume.get("block_size")
+            blocks_free = volume.get("blocks_free")
+            blocks_avail = volume.get("blocks_avail")
+
+            was_created = 1 if state == VOLUME_CREATED_STATE else 0
+            self.gauge(VOLUME_CREATED_METRIC, value=was_created, tags=all_tags)
+
+            encrypted = int(encrypted) if encrypted is not None else 0
+            self.gauge(VOLUME_ENCRYPTED_METRIC, value=encrypted, tags=all_tags)
+
+            if size_gb is not None:
+                self.gauge(VOLUME_SIZE_METRIC, value=size_gb, tags=all_tags)
+
+            if blocks is not None:
+                self.gauge(VOLUME_BLOCKS_METRIC, value=blocks, tags=all_tags)
+
+            if block_size is not None:
+                self.gauge(VOLUME_BLOCK_SIZE_METRIC, value=block_size, tags=all_tags)
+
+            if blocks_free is not None:
+                self.gauge(VOLUME_BLOCKS_FREE_METRIC, value=blocks_free, tags=all_tags)
+
+            if blocks_avail is not None:
+                self.gauge(VOLUME_BLOCKS_AVAIL_METRIC, value=blocks_avail, tags=all_tags)
 
     def _collect_machines_for_app(self, app_name, app_tags):
         self.log.debug("Getting machines for app %s in org %s", app_name, self.org_slug)
@@ -91,6 +150,8 @@ class FlyIoCheck(OpenMetricsBaseCheckV2, ConfigMixin):
         response.raise_for_status()
         machines = response.json()
         external_host_tags = []
+        self.log.debug("Collected %s machines for app %s in org %s", len(machines), app_name, self.org_slug)
+
         for machine in machines:
             machine_name = machine.get("name")
             machine_state = machine.get("state")
@@ -149,6 +210,7 @@ class FlyIoCheck(OpenMetricsBaseCheckV2, ConfigMixin):
             ]
             self.gauge(APP_COUNT_METRIC, 1, tags=self.tags + app_base_tags + app_tags)
             self._collect_machines_for_app(app_name, app_base_tags)
+            self._collect_volumes_for_app(app_name, app_base_tags)
 
     def _collect_machines_api_metrics(self):
         self.log.debug("Collecting metrics from machines api %s", self.machines_api_endpoint)
