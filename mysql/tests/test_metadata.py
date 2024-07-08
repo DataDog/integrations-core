@@ -1,7 +1,7 @@
 # (C) Datadog, Inc. 2023-present
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
-import pdb
+
 import re
 
 import pytest
@@ -98,7 +98,7 @@ def test_collect_schemas(aggregator, dd_run_check, dbm_instance):
                 "columns": [
                     {
                         "name": "RestaurantName",
-                        "data_type": "varchar(255)",
+                        "column_type": "varchar(255)",
                         "default": "None",
                         "nullable": True,
                         "ordinal_position": "1",
@@ -107,7 +107,7 @@ def test_collect_schemas(aggregator, dd_run_check, dbm_instance):
                     },
                     {
                         "name": "District",
-                        "data_type": "varchar(255)",
+                        "column_type": "varchar(255)",
                         "default": "None",
                         "nullable": True,
                         "ordinal_position": "2",
@@ -116,7 +116,7 @@ def test_collect_schemas(aggregator, dd_run_check, dbm_instance):
                     },
                     {
                         "name": "Review",
-                        "data_type": "text",
+                        "column_type": "text",
                         "default": "None",
                         "nullable": True,
                         "ordinal_position": "3",
@@ -157,7 +157,7 @@ def test_collect_schemas(aggregator, dd_run_check, dbm_instance):
                 "columns": [
                     {
                         "name": "RestaurantName",
-                        "data_type": "varchar(255)",
+                        "column_type": "varchar(255)",
                         "default": "None",
                         "nullable": True,
                         "ordinal_position": "1",
@@ -166,7 +166,7 @@ def test_collect_schemas(aggregator, dd_run_check, dbm_instance):
                     },
                     {
                         "name": "District",
-                        "data_type": "varchar(100)",
+                        "column_type": "varchar(100)",
                         "default": "None",
                         "nullable": True,
                         "ordinal_position": "2",
@@ -175,7 +175,7 @@ def test_collect_schemas(aggregator, dd_run_check, dbm_instance):
                     },
                     {
                         "name": "Cuisine",
-                        "data_type": "varchar(100)",
+                        "column_type": "varchar(100)",
                         "default": "None",
                         "nullable": True,
                         "ordinal_position": "3",
@@ -206,7 +206,7 @@ def test_collect_schemas(aggregator, dd_run_check, dbm_instance):
                 "columns": [
                     {
                         "name": "id",
-                        "data_type": "int(11)",
+                        "column_type": "int(11)",
                         "default": "0",
                         "nullable": False,
                         "ordinal_position": "1",
@@ -215,7 +215,7 @@ def test_collect_schemas(aggregator, dd_run_check, dbm_instance):
                     },
                     {
                         "name": "name",
-                        "data_type": "varchar(255)",
+                        "column_type": "varchar(255)",
                         "default": "None",
                         "nullable": True,
                         "ordinal_position": "2",
@@ -224,7 +224,7 @@ def test_collect_schemas(aggregator, dd_run_check, dbm_instance):
                     },
                     {
                         "name": "population",
-                        "data_type": "int(11)",
+                        "column_type": "int(11)",
                         "default": "0",
                         "nullable": False,
                         "ordinal_position": "3",
@@ -279,7 +279,7 @@ def test_collect_schemas(aggregator, dd_run_check, dbm_instance):
                 "columns": [
                     {
                         "name": "id",
-                        "data_type": "int(11)",
+                        "column_type": "int(11)",
                         "default": "0",
                         "nullable": False,
                         "ordinal_position": "1",
@@ -288,7 +288,7 @@ def test_collect_schemas(aggregator, dd_run_check, dbm_instance):
                     },
                     {
                         "name": "name",
-                        "data_type": "varchar(255)",
+                        "column_type": "varchar(255)",
                         "default": "None",
                         "nullable": True,
                         "ordinal_position": "2",
@@ -297,7 +297,7 @@ def test_collect_schemas(aggregator, dd_run_check, dbm_instance):
                     },
                     {
                         "name": "population",
-                        "data_type": "int(11)",
+                        "column_type": "int(11)",
                         "default": "0",
                         "nullable": False,
                         "ordinal_position": "3",
@@ -402,7 +402,7 @@ def test_collect_schemas(aggregator, dd_run_check, dbm_instance):
                 "columns": [
                     {
                         "name": "name",
-                        "data_type": "varchar(255)",
+                        "column_type": "varchar(255)",
                         "default": "None",
                         "nullable": True,
                         "ordinal_position": "1",
@@ -411,7 +411,7 @@ def test_collect_schemas(aggregator, dd_run_check, dbm_instance):
                     },
                     {
                         "name": "city_id",
-                        "data_type": "int(11)",
+                        "column_type": "int(11)",
                         "default": "0",
                         "nullable": True,
                         "ordinal_position": "2",
@@ -459,7 +459,7 @@ def test_collect_schemas(aggregator, dd_run_check, dbm_instance):
                 "columns": [
                     {
                         "name": "id",
-                        "data_type": "int(11)",
+                        "column_type": "int(11)",
                         "default": "0",
                         "nullable": True,
                         "ordinal_position": "1",
@@ -468,7 +468,7 @@ def test_collect_schemas(aggregator, dd_run_check, dbm_instance):
                     },
                     {
                         "name": "name",
-                        "data_type": "varchar(255)",
+                        "column_type": "varchar(255)",
                         "default": "None",
                         "nullable": True,
                         "ordinal_position": "2",
@@ -499,7 +499,7 @@ def test_collect_schemas(aggregator, dd_run_check, dbm_instance):
                 "columns": [
                     {
                         "name": "id",
-                        "data_type": "int(11)",
+                        "column_type": "int(11)",
                         "default": "None",
                         "nullable": True,
                         "ordinal_position": "1",
@@ -508,7 +508,7 @@ def test_collect_schemas(aggregator, dd_run_check, dbm_instance):
                     },
                     {
                         "name": "purchased",
-                        "data_type": "date",
+                        "column_type": "date",
                         "default": "None",
                         "nullable": True,
                         "ordinal_position": "2",
@@ -676,7 +676,7 @@ def test_collect_schemas(aggregator, dd_run_check, dbm_instance):
         normalize_values(actual_payload)
 
         assert db_name in databases_to_find
-        pdb.set_trace()
+
         difference = DeepDiff(actual_payload, expected_data_for_db[db_name], ignore_order=True)
 
         if difference:

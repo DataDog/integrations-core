@@ -182,65 +182,63 @@ class DatabasesData:
 
     @tracked_method(agent_check_getter=agent_check_getter)
     def _collect_databases_data(self, tags):
-        """Collects database information and schemas and submits to the agent's queue as dictionaries
-        database dict
-        key/value:
-            "name": str
-            "default_character_set_name": str
-            "default_collation_name": str
-            "tables" : list of tables dicts
-                table
-                key/value:
-                    "name" : str
-                    columns: list of columns dicts
-                        columns
-                        key/value:
-                            "name": str
-                            "data_type": str
-                            "default": str
-                            "nullable": bool
-                            "ordinal_position": str
-                indexes : list of index dicts
-                    index
-                    key/value:
-                        "name": str,
-                        "collation": str
-                        "cardinality": str
-                        "index_type": str
-                        "seq_in_index": str
-                        "columns": str
-                        "sub_parts": str
-                        "packed": str
-                        "nullables": str
-                        "non_uniques": str
-                foreign_keys : list of foreign key dicts
-                    foreign_key
-                    key/value:
-                        "constraint_schema": str
-                        "name": str
-                        "column_names": str
-                        "referenced_table_schema": str
-                        "referenced_table_name": str
-                        "referenced_column_names": str
-                partitions: list of partitions dict
-                    partitions
-                    key/value:
-                        "name": str
-                        "subpartition_names": str
-                        "partition_ordinal_position": str
-                        "subpartition_ordinal_positions": str
-                        "partition_method": str
-                        "subpartition_methods": str
-                        "partition_expression": str
-                        "subpartition_expressions": str
-                        "partition_description": str
-                        "table_rows": str
-                        "data_lengths": str
-                        "max_data_lengths": str
-                        "index_lengths": str
-                        "data_free": str
-                        "partition_comment": str
-                        "tablespace_name": str
+        """
+        Collects database information and schemas and submits them to the agent's queue as dictionaries.
+
+        A submitted dictionary:
+            dict: A dictionary representing the database information.
+
+            - name (str): The name of the database.
+            - default_character_set_name (str): The default character set name.
+            - default_collation_name (str): The default collation name.
+            - tables (list): A list of table dictionaries.
+                - table (dict): A dictionary representing a table.
+                    - name (str): The name of the table.
+                    - columns (list): A list of column dictionaries.
+                        - column (dict): A dictionary representing a column.
+                            - name (str): The name of the column.
+                            - data_type (str): The data type of the column.
+                            - default (str): The default value of the column.
+                            - nullable (bool): Whether the column is nullable.
+                            - ordinal_position (str): The ordinal position of the column.
+                    - indexes (list): A list of index dictionaries.
+                        - index (dict): A dictionary representing an index.
+                            - name (str): The name of the index.
+                            - collation (str): The collation of the index.
+                            - cardinality (str): The cardinality of the index.
+                            - index_type (str): The type of the index.
+                            - seq_in_index (str): The sequence in index.
+                            - columns (str): The columns in the index.
+                            - sub_parts (str): The sub-parts of the index.
+                            - packed (str): Whether the index is packed.
+                            - nullables (str): The nullable columns in the index.
+                            - non_uniques (str): Whether the index is non-unique.
+                    - foreign_keys (list): A list of foreign key dictionaries.
+                        - foreign_key (dict): A dictionary representing a foreign key.
+                            - constraint_schema (str): The schema of the constraint.
+                            - name (str): The name of the foreign key.
+                            - column_names (str): The column names in the foreign key.
+                            - referenced_table_schema (str): The schema of the referenced table.
+                            - referenced_table_name (str): The name of the referenced table.
+                            - referenced_column_names (str): The column names in the referenced table.
+                    - partitions (list): A list of partition dictionaries.
+                        - partition (dict): A dictionary representing a partition.
+                            - name (str): The name of the partition.
+                            - subpartition_names (str): The names of the subpartitions.
+                            - partition_ordinal_position (str): The ordinal position of the partition.
+                            - subpartition_ordinal_positions (str): The ordinal positions of the subpartitions.
+                            - partition_method (str): The partition method.
+                            - subpartition_methods (str): The subpartition methods.
+                            - partition_expression (str): The partition expression.
+                            - subpartition_expressions (str): The subpartition expressions.
+                            - partition_description (str): The description of the partition.
+                            - table_rows (str): The number of rows in the partition.
+                            - data_lengths (str): The data lengths in the partition.
+                            - max_data_lengths (str): The maximum data lengths in the partition.
+                            - index_lengths (str): The index lengths in the partition.
+                            - data_free (str): The free data space in the partition.
+                            - partition_comment (str): The comment on the partition.
+                            - tablespace_name (str): The tablespace name.
         """
         self._data_submitter.reset()
         self._tags = tags

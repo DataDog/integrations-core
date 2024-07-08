@@ -97,7 +97,7 @@ SELECT table_name as `name`, engine, row_format, create_time FROM information_sc
 SQL_COLUMNS = """\
 SELECT table_name,
        column_name as `name`,
-       column_type as `data_type`,
+       column_type as `column_type`,
        column_default as `default`,
        is_nullable as `nullable`,
        ordinal_position,
