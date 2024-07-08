@@ -99,6 +99,8 @@ integration/cisco_duo:
 - cisco_duo/**/*
 integration/cisco_sdwan:
 - cisco_sdwan/**/*
+integration/cisco_secure_endpoint:
+- cisco_secure_endpoint/**/*
 integration/cisco_secure_firewall:
 - cisco_secure_firewall/**/*
 integration/cisco_umbrella_dns:
