@@ -1,12 +1,12 @@
 {
-    "version": 1,
+    "version": 2,
     "created_at": "2024-07-08",
     "last_updated_at": "2024-07-08",
     "title": "Istio Proxy Requests Error Percentage",
     "tags": [
         "integration:istio"
     ],
-    "description": "The requests count metric indicates the overall throughput of requests between services in your mesh and increments whenever an Envoy sidecar receives an HTTP or gRPC request. This monitor alerts you when the error percentage of requests is high, indicating that more than 40% of requests are receiving a status code of 5xx, 4xx, or 0 in the last 15 minutes. This could indicate issues with the services in your mesh, such as misconfigurations, network problems, or service failures.",
+    "description": "The request count metric shows throughput between services in your mesh, incrementing with each HTTP or gRPC request an Envoy sidecar receives. This monitor alerts if over 40% of requests get 5xx, 4xx, or 0 status codes in the last 15 minutes, indicating possible issues.",
     "definition": {
         "message": "{{#is_alert}}\n\nIstio Proxy requests are reporting a high error percentage in {{cluster_name.name}}. This indicates that greater than 40% of requests are getting a status code of 5xx, 4xx or 0 in the last 15 minutes.\n\n{{/is_alert}}",
         "name": "[Istio] Proxy Requests Error Percentage",
@@ -15,7 +15,6 @@
                 "critical": 40
             },
             "notify_audit": false,
-            "on_missing_data": "default",
             "include_tags": true,
             "new_group_delay": 60,
             "silenced": {},
