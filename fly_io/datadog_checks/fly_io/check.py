@@ -100,12 +100,14 @@ class FlyIoCheck(OpenMetricsBaseCheckV2, ConfigMixin):
         self.log.debug("Collected %s volumes for app %s in org %s", len(volumes), app_name, self.org_slug)
         for volume in volumes:
             volume_id = volume.get("id")
+            volume_name = volume.get("name")
             region = volume.get("region")
             zone = volume.get("zone")
             fstype = volume.get("fstype")
             attached_machine_id = volume.get("attached_machine_id")
             volume_tags = [
                 f"volume_id:{volume_id}",
+                f"volume_name:{volume_name}",
                 f"fly_region:{region}",
                 f"fly_zone:{zone}",
                 f"fstype:{fstype}",

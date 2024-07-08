@@ -209,6 +209,7 @@ VOLUME_METRICS = [
             'fly_zone:4bb3',
             'fstype:ext4',
             'volume_id:vol_vtuasw00k2xpkxyv',
+            'volume_name:my_app_vol',
         ],
     },
     {
@@ -223,6 +224,7 @@ VOLUME_METRICS = [
             'fly_zone:4bb3',
             'fstype:ext4',
             'volume_id:vol_vtuasw00k2xpkxyv',
+            'volume_name:my_app_vol',
         ],
     },
     {
@@ -237,6 +239,22 @@ VOLUME_METRICS = [
             'fly_zone:4bb3',
             'fstype:ext4',
             'volume_id:vol_vtuasw00k2xpkxyv',
+            'volume_name:my_app_vol',
+        ],
+    },
+    {
+        'name': 'fly_io.volume.created',
+        'count': 1,
+        'value': 0,
+        'tags': [
+            'app_name:example-app-1',
+            'attached_machine_id:None',
+            'fly_org:test',
+            'fly_region:ewr',
+            'fly_zone:4bb3',
+            'fstype:None',
+            'volume_id:vol_vtuasw00k2xuai',
+            'volume_name:my_app_vol1',
         ],
     },
     {
@@ -251,6 +269,22 @@ VOLUME_METRICS = [
             'fly_zone:4bb3',
             'fstype:None',
             'volume_id:vol_vtuasw00k2xuai',
+            'volume_name:my_app_vol1',
+        ],
+    },
+    {
+        'name': 'fly_io.volume.encrypted',
+        'count': 1,
+        'value': 0,
+        'tags': [
+            'app_name:example-app-1',
+            'attached_machine_id:None',
+            'fly_org:test',
+            'fly_region:ewr',
+            'fly_zone:4bb3',
+            'fstype:None',
+            'volume_id:vol_vtuasw00k2xuai',
+            'volume_name:my_app_vol1',
         ],
     },
     {
@@ -265,6 +299,7 @@ VOLUME_METRICS = [
             'fly_zone:4bb3',
             'fstype:ext4',
             'volume_id:vol_vtuasw00k2xpkxyv',
+            'volume_name:my_app_vol',
         ],
     },
     {
@@ -279,6 +314,7 @@ VOLUME_METRICS = [
             'fly_zone:4bb3',
             'fstype:ext4',
             'volume_id:vol_vtuasw00k2xpkxyv',
+            'volume_name:my_app_vol',
         ],
     },
     {
@@ -293,6 +329,7 @@ VOLUME_METRICS = [
             'fly_zone:4bb3',
             'fstype:ext4',
             'volume_id:vol_vtuasw00k2xpkxyv',
+            'volume_name:my_app_vol',
         ],
     },
 ]
