@@ -78,5 +78,37 @@
         rewrite * /GET/v1/apps/example-app-4/machines/response.json
         file_server
     }
+    @get_apps_volumes_1 {
+        method GET
+        path /v1/apps/example-app-1/volumes
+    }
+    route @get_apps_volumes_1 {
+        rewrite * /GET/v1/apps/example-app-1/volumes/response.json
+        file_server
+    }
+    @get_apps_volumes_2 {
+        method GET
+        path /v1/apps/example-app-2/volumes
+    }
+    route @get_apps_volumes_2 {
+        rewrite * /GET/v1/apps/example-app-2/volumes/response.json
+        file_server
+    }
+    @get_apps_volumes_3 {
+        method GET
+        path /v1/apps/example-app-3/volumes
+    }
+    route @get_apps_volumes_3 {
+        rewrite * /GET/v1/apps/example-app-3/volumes/response.json
+        file_server
+    }
+    @get_apps_volumes_4 {
+        method GET
+        path /v1/apps/example-app-4/volumes
+    }
+    route @get_apps_volumes_4 {
+        rewrite * /GET/v1/apps/example-app-4/volumes/response.json
+        file_server
+    }
     file_server browse
 }
