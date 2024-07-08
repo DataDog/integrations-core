@@ -352,9 +352,8 @@ class DatabasesData:
     def _populate_with_foreign_keys_data(self, table_name_to_table_index, table_list, table_names, db_name, cursor):
         self._cursor_run(cursor, query=SQL_FOREIGN_KEYS.format(table_names), params=db_name)
         rows = fetch_and_convert_to_str(cursor)
-
         for row in rows:
-            table_name = str(row.pop("table_name"))
+            table_name = row["table_name"]
             table_list[table_name_to_table_index[table_name]].setdefault("foreign_keys", [])
             table_list[table_name_to_table_index[table_name]]["foreign_keys"].append(row)
 

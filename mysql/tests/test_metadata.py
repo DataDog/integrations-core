@@ -126,8 +126,9 @@ def test_collect_schemas(aggregator, dd_run_check, dbm_instance):
                 ],
                 "foreign_keys": [
                     {
-                        "constraint_schema": "datadog_test_schemas",
                         "name": "FK_RestaurantNameDistrict",
+                        "constraint_schema": "datadog_test_schemas",
+                        "table_name": "RestaurantReviews",
                         "column_names": "District,RestaurantName",
                         "referenced_table_schema": "datadog_test_schemas",
                         "referenced_table_name": "Restaurants",
@@ -421,8 +422,9 @@ def test_collect_schemas(aggregator, dd_run_check, dbm_instance):
                 ],
                 "foreign_keys": [
                     {
-                        "constraint_schema": "datadog_test_schemas",
                         "name": "FK_CityId",
+                        "constraint_schema": "datadog_test_schemas",
+                        "table_name": "landmarks",
                         "column_names": "city_id",
                         "referenced_table_schema": "datadog_test_schemas",
                         "referenced_table_name": "cities",
@@ -677,7 +679,7 @@ def test_collect_schemas(aggregator, dd_run_check, dbm_instance):
 
         assert db_name in databases_to_find
 
-        difference = DeepDiff(actual_payload, expected_data_for_db[db_name], ignore_order=True)
+        difference = DeepDiff(expected_data_for_db[db_name], actual_payload, ignore_order=True)
 
         if difference:
             raise AssertionError(Exception("found the following diffs: " + str(difference)))
