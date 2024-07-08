@@ -1,1 +1,0 @@
-Replace deprecated collStats command with $collStats aggregation stage to collect collection metrics
