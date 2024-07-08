@@ -155,7 +155,7 @@
                     {
                         "definition": {
                             "background_color": "blue",
-                            "content": "Istio Overview show a quick summary of all reporting Istio instances and related monitors and their status.",
+                            "content": "Istio Overview shows a summary of all reporting Istio instances, as well as related monitors and their statuses.",
                             "font_size": "14",
                             "has_padding": true,
                             "show_tick": false,
