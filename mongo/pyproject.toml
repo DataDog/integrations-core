@@ -38,7 +38,7 @@ license = "BSD-3-Clause"
 
 [project.optional-dependencies]
 deps = [
-    "pymongo[srv]==4.7.1; python_version >= '3.9'",
+    "pymongo[srv]==4.8.0; python_version >= '3.9'",
 ]
 
 [project.urls]

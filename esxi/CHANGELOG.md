@@ -2,6 +2,17 @@
 
 <!-- towncrier release notes start -->
 
+## 1.2.0 / 2024-07-05
+
+***Added***:
+
+* Update dependencies ([#17953](https://github.com/DataDog/integrations-core/pull/17953))
+
+***Fixed***:
+
+* Properly submit percent metrics ([#17745](https://github.com/DataDog/integrations-core/pull/17745))
+* Maintain a long lived connection to ESXi host. ([#17919](https://github.com/DataDog/integrations-core/pull/17919))
+
 ## 1.1.0 / 2024-05-31
 
 ***Added***:

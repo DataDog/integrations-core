@@ -17,14 +17,20 @@ class IndexStatsCollector(MongoCollector):
         # Can only be run once per cluster.
         return deployment.is_principal()
 
+    def _get_collections(self, api):
+        if self.coll_names:
+            return self.coll_names
+        return api.list_authorized_collections(self.db_name)
+
     def collect(self, api):
-        db = api[self.db_name]
-        for coll_name in self.coll_names:
+        coll_names = self._get_collections(api)
+        for coll_name in coll_names:
             try:
-                for stats in db[coll_name].aggregate([{"$indexStats": {}}], cursor={}):
+                for stats in api.index_stats(self.db_name, coll_name):
                     idx_tags = self.base_tags + [
                         "name:{0}".format(stats.get('name', 'unknown')),
                         "collection:{0}".format(coll_name),
+                        "db:{0}".format(self.db_name),
                     ]
                     val = int(stats.get('accesses', {}).get('ops', 0))
                     self.gauge('mongodb.collection.indexes.accesses.ops', val, idx_tags)
