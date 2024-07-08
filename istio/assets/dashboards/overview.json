@@ -95,7 +95,7 @@
                     {
                         "definition": {
                             "background_color": "transparent",
-                            "content": "Istio is an Kubernetes based open-source service mesh that provides advanced networking, security, and observability features for microservices in a cloud-native environment. This dashboard is crafted to provide you with an overview and detailed information and performances of your Istio services.",
+                            "content": "Istio is a Kubernetes-based, open source service mesh that provides advanced networking, security, and observability features for microservices in a cloud-native environment. This dashboard is crafted to provide you with an overview of, detailed information about, and performance data for your Istio services.",
                             "font_size": "14",
                             "has_padding": true,
                             "show_tick": false,
