@@ -12,7 +12,13 @@ from datadog_checks.dev.http import MockResponse
 from datadog_checks.dev.utils import get_metadata_metrics
 from datadog_checks.fly_io import FlyIoCheck
 
-from .metrics import ALL_REST_METRICS, APP_UP_METRICS, MACHINE_COUNT_METRICS, MOCKED_PROMETHEUS_METRICS
+from .metrics import (
+    ALL_REST_METRICS,
+    APP_UP_METRICS,
+    MACHINE_COUNT_METRICS,
+    MACHINE_GUEST_METRICS,
+    MOCKED_PROMETHEUS_METRICS,
+)
 
 
 @pytest.mark.usefixtures('mock_http_get')
@@ -183,3 +189,14 @@ def test_app_status_failed(dd_run_check, aggregator, instance, caplog, log_lines
 
     for log_line in log_lines:
         assert log_line in caplog.text
+
+
+@pytest.mark.usefixtures('mock_http_get')
+def test_rest_api_machine_guest_metrics(dd_run_check, aggregator, instance):
+
+    check = FlyIoCheck('fly_io', {}, [instance])
+    dd_run_check(check)
+    for metric in MACHINE_GUEST_METRICS:
+        aggregator.assert_metric(
+            metric['name'], metric['value'], count=metric['count'], tags=metric['tags'], hostname=metric['hostname']
+        )

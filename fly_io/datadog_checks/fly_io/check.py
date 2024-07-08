@@ -7,7 +7,15 @@ from six.moves.urllib.parse import quote_plus
 from datadog_checks.base import OpenMetricsBaseCheckV2
 
 from .config_models import ConfigMixin
-from .constants import APP_COUNT_METRIC, MACHINE_COUNT_METRIC, MACHINE_UP_STATE, MACHINES_API_UP_METRIC
+from .constants import (
+    APP_COUNT_METRIC,
+    MACHINE_COUNT_METRIC,
+    MACHINE_CPUS_METRIC,
+    MACHINE_GPUS_METRIC,
+    MACHINE_MEM_METRIC,
+    MACHINE_UP_STATE,
+    MACHINES_API_UP_METRIC,
+)
 from .metrics import METRICS, RENAME_LABELS_MAP
 
 
@@ -50,6 +58,24 @@ class FlyIoCheck(OpenMetricsBaseCheckV2, ConfigMixin):
             self.log.info("Failed to collect app status for app %s", app_name)
             return None
 
+    def _submit_machine_guest_metrics(self, guest, tags, machine_id):
+        self.log.debug("Getting machine guest metrics for %s", machine_id)
+        num_cpus = guest.get("cpus")
+        cpu_kind = guest.get("cpu_kind")
+        num_gpus = guest.get("gpus")
+        gpu_kind = guest.get("gpu_kind")
+        memory = guest.get("memory_mb")
+        if num_cpus is not None:
+            additional_tags = [f"cpu_kind:{cpu_kind}"]
+            self.gauge(MACHINE_CPUS_METRIC, value=num_cpus, tags=additional_tags + tags, hostname=machine_id)
+
+        if num_gpus is not None:
+            additional_tags = [f"gpu_kind:{gpu_kind}"]
+            self.gauge(MACHINE_GPUS_METRIC, value=num_gpus, tags=additional_tags + tags, hostname=machine_id)
+
+        if memory is not None:
+            self.gauge(MACHINE_MEM_METRIC, value=memory, tags=tags, hostname=machine_id)
+
     def _collect_machines_for_app(self, app_name, app_tags):
         self.log.debug("Getting machines for app %s in org %s", app_name, self.org_slug)
         machines_endpoint = f"{self.machines_api_endpoint}/v1/apps/{app_name}/machines"
@@ -67,8 +93,9 @@ class FlyIoCheck(OpenMetricsBaseCheckV2, ConfigMixin):
             machine_id = machine.get("id")
             instance_id = machine.get("instance_id")
             machine_region = machine.get("region")
-            config = machine.get("config")
-            metadata = config.get("metadata")
+            config = machine.get("config", {})
+            metadata = config.get("metadata", {})
+            guest = config.get("guest", {})
             fly_platform_version = metadata.get("fly_platform_version")
 
             machine_tags = [
@@ -79,6 +106,7 @@ class FlyIoCheck(OpenMetricsBaseCheckV2, ConfigMixin):
             all_machine_tags = self.tags + machine_tags + app_tags
 
             self.gauge(MACHINE_COUNT_METRIC, 1, tags=all_machine_tags)
+            self._submit_machine_guest_metrics(guest, self.tags, machine_id)
 
             external_host_tags.append((machine_id, {self.__NAMESPACE__: all_machine_tags}))
 

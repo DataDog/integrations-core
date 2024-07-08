@@ -60,7 +60,14 @@ MOCKED_PROMETHEUS_METRICS = [
     "fly_io.instance.memory.pressure_some",
 ]
 
-ALL_REST_METRICS = ['fly_io.app.count', 'fly_io.machine.count', 'fly_io.machines_api.up']
+ALL_REST_METRICS = [
+    'fly_io.app.count',
+    'fly_io.machine.count',
+    'fly_io.machines_api.up',
+    'fly_io.machine.cpus.count',
+    'fly_io.machine.gpus.count',
+    'fly_io.machine.memory',
+]
 
 APP_UP_METRICS = [
     {
@@ -139,5 +146,32 @@ MACHINE_COUNT_METRICS = [
             'instance_id:01AP4Y49KSI6PG1H7KPKJN5GF',
             'machine_region:ewr',
         ],
+    },
+]
+
+
+MACHINE_GUEST_METRICS = [
+    {
+        'name': 'fly_io.machine.cpus.count',
+        'count': 1,
+        'value': 1,
+        'tags': ['fly_org:test', 'cpu_kind:shared'],
+        'hostname': '32601eaad60025',
+    },
+    {
+        'name': 'fly_io.machine.gpus.count',
+        'count': 1,
+        'value': 2,
+        'tags': ['fly_org:test', 'gpu_kind:shared'],
+        'hostname': '09201eeed60025',
+    },
+    {
+        'name': 'fly_io.machine.memory',
+        'count': 1,
+        'value': 1024,
+        'tags': [
+            'fly_org:test',
+        ],
+        'hostname': '32601eaad60025',
     },
 ]
