@@ -1,5 +1,3 @@
-version: '3'
-
 services:
   # Runs at startup to build certs and exit
   cert-builder:
