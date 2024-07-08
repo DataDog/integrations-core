@@ -1,6 +1,10 @@
-import pytest
-import time
 import datetime
+import logging
+import time
+from copy import copy
+
+import pytest
+
 from datadog_checks.sqlserver import SQLServer
 
 from .common import (
@@ -8,13 +12,7 @@ from .common import (
     EXPECTED_AGENT_JOBS_METRICS_COMMON,
 )
 
-from copy import copy
-import logging
-
-
 logger = logging.getLogger(__name__)
-
-from .conftest import DEFAULT_TIMEOUT
 
 
 AGENT_HISTORY_QUERY = """\
@@ -57,7 +55,7 @@ SELECT {history_row_limit_filter}
         ELSE 'Unknown'
     END AS step_run_status,
     sjh1.message
-FROM 
+FROM
     msdb.dbo.sysjobhistory AS sjh1
 INNER JOIN msdb.dbo.sysjobs AS j
 ON j.job_id = sjh1.job_id
@@ -124,7 +122,7 @@ SELECT TOP 1000
         ELSE 'Unknown'
     END AS step_run_status,
     sjh1.message
-FROM 
+FROM
     msdb.dbo.sysjobhistory AS sjh1
 INNER JOIN msdb.dbo.sysjobs AS j
 ON j.job_id = sjh1.job_id
@@ -162,7 +160,7 @@ AGENT_ACTIVITY_DURATION_QUERY = """\
     WHERE ja.start_execution_date IS NOT NULL
         AND ja.stop_execution_date IS NULL
         AND session_id = (
-            SELECT MAX(session_id) 
+            SELECT MAX(session_id)
             FROM msdb.dbo.sysjobactivity
         )
 """
@@ -176,7 +174,7 @@ AGENT_ACTIVITY_STEPS_QUERY = """\
         WHERE ja.start_execution_date IS NOT NULL
             AND ja.stop_execution_date IS NULL
             AND session_id = (
-                SELECT MAX(session_id) 
+                SELECT MAX(session_id)
                 FROM msdb.dbo.sysjobactivity
             )
     ),
@@ -214,12 +212,12 @@ EXEC msdb.dbo.sp_add_jobstep
     @job_name = 'Job 1',
     @step_name = 'Wait for time 1',
     @subsystem = 'TSQL',
-    @command = 'BEGIN  
-                    WAITFOR DELAY ''00:00:15'';  
-                    EXECUTE sp_helpdb;  
+    @command = 'BEGIN
+                    WAITFOR DELAY ''00:00:15'';
+                    EXECUTE sp_helpdb;
                 END;';
-EXEC msdb.dbo.sp_add_schedule  
-    @schedule_name = 'Job 1 Schedule',  
+EXEC msdb.dbo.sp_add_schedule
+    @schedule_name = 'Job 1 Schedule',
     @freq_type = 4,
     @freq_interval = 1,
     @freq_subday_type = 4,
@@ -292,6 +290,7 @@ VALUES (
 
 now = time.time()
 
+
 @pytest.fixture
 def agent_jobs_instance(instance_docker):
     instance_docker['dbm'] = True
@@ -304,6 +303,7 @@ def agent_jobs_instance(instance_docker):
     instance_docker['min_collection_interval'] = 1
     return copy(instance_docker)
 
+
 @pytest.mark.usefixtures('dd_environment')
 def test_connection_with_agent_history(instance_docker):
     check = SQLServer(CHECK_NAME, {}, [instance_docker])
@@ -313,7 +313,10 @@ def test_connection_with_agent_history(instance_docker):
         with check.connection.get_managed_cursor() as cursor:
             last_collection_time_filter = "+ {last_collection_time}".format(last_collection_time=1000)
             history_row_limit_filter = "TOP {history_row_limit}".format(history_row_limit=1000)
-            query = AGENT_HISTORY_QUERY.format(history_row_limit_filter=history_row_limit_filter, last_collection_time_filter=last_collection_time_filter)
+            query = AGENT_HISTORY_QUERY.format(
+                history_row_limit_filter=history_row_limit_filter,
+                last_collection_time_filter=last_collection_time_filter,
+            )
             cursor.execute(query)
             assert query == FORMATTED_HISTORY_QUERY
     check.cancel()
@@ -340,6 +343,7 @@ def test_connection_with_agent_activity_steps(instance_docker):
             cursor.execute(AGENT_ACTIVITY_STEPS_QUERY)
     check.cancel()
 
+
 @pytest.mark.usefixtures('dd_environment')
 def test_history_output(instance_docker, sa_conn):
     later = now + 10
@@ -356,30 +360,40 @@ def test_history_output(instance_docker, sa_conn):
             run_date_now, run_time_now = history_date_time_from_time(now)
             run_date_later, run_time_later = history_date_time_from_time(later)
             for job_number, step_id in job_and_step_series_now:
-                query = HISTORY_INSERTION_QUERY.format(job_number=job_number, step_id=step_id, run_date=run_date_now, run_time=run_time_now)
+                query = HISTORY_INSERTION_QUERY.format(
+                    job_number=job_number, step_id=step_id, run_date=run_date_now, run_time=run_time_now
+                )
                 cursor.execute(query)
             for job_number, step_id in job_and_step_series_later:
-                query = HISTORY_INSERTION_QUERY.format(job_number=job_number, step_id=step_id, run_date=run_date_later, run_time=run_time_later)
+                query = HISTORY_INSERTION_QUERY.format(
+                    job_number=job_number, step_id=step_id, run_date=run_date_later, run_time=run_time_later
+                )
                 cursor.execute(query)
     check = SQLServer(CHECK_NAME, {}, [instance_docker])
     check.initialize_connection()
     with check.connection.open_managed_default_connection():
         with check.connection.get_managed_cursor() as cursor:
-            last_collection_time_filter = "+ {last_collection_time}".format(last_collection_time=now-1)
+            last_collection_time_filter = "+ {last_collection_time}".format(last_collection_time=now - 1)
             history_row_limit_filter = "TOP {history_row_limit}".format(history_row_limit=1000)
-            query = AGENT_HISTORY_QUERY.format(history_row_limit_filter=history_row_limit_filter, last_collection_time_filter=last_collection_time_filter)
+            query = AGENT_HISTORY_QUERY.format(
+                history_row_limit_filter=history_row_limit_filter,
+                last_collection_time_filter=last_collection_time_filter,
+            )
             cursor.execute(query)
             results = cursor.fetchall()
             assert len(results) == 7, "should have 7 steps associated with completed jobs"
             assert len(results[0]) == 10, "should have 10 columns per step"
-            last_collection_time_filter = "+ {last_collection_time}".format(last_collection_time=now+1)
+            last_collection_time_filter = "+ {last_collection_time}".format(last_collection_time=now + 1)
             history_row_limit_filter = "TOP {history_row_limit}".format(history_row_limit=1000)
-            query = AGENT_HISTORY_QUERY.format(history_row_limit_filter=history_row_limit_filter, last_collection_time_filter=last_collection_time_filter)
+            query = AGENT_HISTORY_QUERY.format(
+                history_row_limit_filter=history_row_limit_filter,
+                last_collection_time_filter=last_collection_time_filter,
+            )
             cursor.execute(query)
             results = cursor.fetchall()
             assert (
                 len(results) == 4
-                ), "should only have 4 steps associated with completed jobs when filtering with last collection time, all steps from a job that started before filter instance should be collected if it finished after the filter instance"
+            ), "should only have 4 steps associated with completed jobs when filtering with last collection time"
     check.cancel()
 
 
@@ -430,11 +444,13 @@ def test_agent_jobs_integration(aggregator, dd_run_check, agent_jobs_instance, s
     dbm_activity = aggregator.get_event_platform_events("dbm-activity")
     job_events = [e for e in dbm_activity if (e.get('sqlserver_job_history', None) is not None)]
     assert len(job_events) == 2, "new sample taken"
-    assert len(job_events[1]['sqlserver_job_history']) == 0, "successive checks should not collect new rows for same history entries"
+    assert (
+        len(job_events[1]['sqlserver_job_history']) == 0
+    ), "successive checks should not collect new rows for same history entries"
     with sa_conn as conn:
         with conn.cursor() as cursor:
-            run_date, run_time = history_date_time_from_time(time.time()+10)
-            query = HISTORY_INSERTION_QUERY.format(job_number=2, step_id=0, run_date=run_date, run_time=run_time) 
+            run_date, run_time = history_date_time_from_time(time.time() + 10)
+            query = HISTORY_INSERTION_QUERY.format(job_number=2, step_id=0, run_date=run_date, run_time=run_time)
             cursor.execute(query)
     time.sleep(2)
     dd_run_check(check)
@@ -445,7 +461,7 @@ def test_agent_jobs_integration(aggregator, dd_run_check, agent_jobs_instance, s
     new_history_rows = new_job_event['sqlserver_job_history']
     assert len(new_history_rows) == 2, "should have 2 rows of history associated with new completed jobs"
     check.cancel()
-    
+
 
 def history_date_time_from_time(now):
     datetimestr = str(datetime.datetime.fromtimestamp(now))
