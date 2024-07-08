@@ -127,12 +127,28 @@ class MySQLMetadata(DBMAsyncJob):
         elapsed_time_settings = time.time() - self._last_settings_collection_time
         if self._settings_enabled and elapsed_time_settings >= self._settings_collection_interval:
             self._last_settings_collection_time = time.time()
-            self.report_mysql_metadata()
+            try:
+                self.report_mysql_metadata()
+            except Exception as e:
+                self._log.error(
+                    """An error occurred while collecting database settings.
+                                These may be unavailable until the error is resolved. The error - {}""".format(
+                        e
+                    )
+                )
 
         elapsed_time_databases = time.time() - self._last_databases_collection_time
         if self._databases_data_enabled and elapsed_time_databases >= self._databases_data_collection_interval:
             self._last_databases_collection_time = time.time()
-            self._databases_data._collect_databases_data(self._tags)
+            try:
+                self._databases_data._collect_databases_data(self._tags)
+            except Exception as e:
+                self._log.error(
+                    """An error occurred while collecting schema data.
+                                These may be unavailable until the error is resolved. The error - {}""".format(
+                        e
+                    )
+                )
 
     def shut_down(self):
         self._databases_data.shut_down()
