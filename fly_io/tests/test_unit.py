@@ -16,6 +16,7 @@ from .metrics import (
     ALL_REST_METRICS,
     APP_UP_METRICS,
     MACHINE_COUNT_METRICS,
+    MACHINE_INIT_METRICS,
     MACHINE_GUEST_METRICS,
     MOCKED_PROMETHEUS_METRICS,
 )
@@ -197,6 +198,16 @@ def test_rest_api_machine_guest_metrics(dd_run_check, aggregator, instance):
     check = FlyIoCheck('fly_io', {}, [instance])
     dd_run_check(check)
     for metric in MACHINE_GUEST_METRICS:
+        aggregator.assert_metric(
+            metric['name'], metric['value'], count=metric['count'], tags=metric['tags'], hostname=metric['hostname']
+        )
+
+@pytest.mark.usefixtures('mock_http_get')
+def test_rest_api_machine_init_metrics(dd_run_check, aggregator, instance):
+
+    check = FlyIoCheck('fly_io', {}, [instance])
+    dd_run_check(check)
+    for metric in MACHINE_INIT_METRICS:
         aggregator.assert_metric(
             metric['name'], metric['value'], count=metric['count'], tags=metric['tags'], hostname=metric['hostname']
         )

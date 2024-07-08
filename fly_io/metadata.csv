@@ -75,6 +75,7 @@ fly_io.machine.count,gauge,,,,Count of running machines,-1,fly_io,fly_io machine
 fly_io.machine.cpus.count,gauge,,,,Number of cpus,-1,fly_io,fly_io machine cpu ct,,
 fly_io.machine.gpus.count,gauge,,,,Number of gpus,-1,fly_io,fly_io machine gpu ct,,
 fly_io.machine.memory,gauge,,megabyte,,Memory of a machine,-1,fly_io,fly_io machine ct,,
+fly_io.machine.swap_size,gauge,,megabyte,,Swap space to reserve for the Fly Machine,-1,fly_io,fly_io machine swap,,
 fly_io.machines_api.up,gauge,,,,Whether the check can access the machines API or not,-1,fly_io,fly_io machine api,,
 fly_io.pg.database.size,gauge,,byte,,Database size,-1,fly_io,fly_io pg db size,,
 fly_io.pg.replication.lag,gauge,,,,Replication lag,-1,fly_io,fly_io pg rep lag,,

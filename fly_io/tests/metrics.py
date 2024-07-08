@@ -67,6 +67,7 @@ ALL_REST_METRICS = [
     'fly_io.machine.cpus.count',
     'fly_io.machine.gpus.count',
     'fly_io.machine.memory',
+    'fly_io.machine.swap_size',
 ]
 
 APP_UP_METRICS = [
@@ -174,4 +175,16 @@ MACHINE_GUEST_METRICS = [
         ],
         'hostname': '32601eaad60025',
     },
+]
+
+MACHINE_INIT_METRICS = [
+{
+        'name': 'fly_io.machine.swap_size',
+        'count': 1,
+        'value': 30,
+        'tags': [
+            'fly_org:test',
+        ],
+        'hostname': '09201eeed60025',
+    }
 ]

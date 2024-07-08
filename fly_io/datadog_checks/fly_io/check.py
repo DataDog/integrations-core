@@ -13,6 +13,7 @@ from .constants import (
     MACHINE_CPUS_METRIC,
     MACHINE_GPUS_METRIC,
     MACHINE_MEM_METRIC,
+    MACHINE_SWAP_SIZE_METRIC,
     MACHINE_UP_STATE,
     MACHINES_API_UP_METRIC,
 )
@@ -76,6 +77,13 @@ class FlyIoCheck(OpenMetricsBaseCheckV2, ConfigMixin):
         if memory is not None:
             self.gauge(MACHINE_MEM_METRIC, value=memory, tags=tags, hostname=machine_id)
 
+    def _submit_machine_init_metrics(self, machine_init, tags, machine_id):
+        self.log.debug("Getting machine init metrics for %s", machine_id)
+        swap_size_mb = machine_init.get("swap_size_mb")
+        if swap_size_mb is not None:
+            self.gauge(MACHINE_SWAP_SIZE_METRIC, value=swap_size_mb, tags=tags, hostname=machine_id)
+
+
     def _collect_machines_for_app(self, app_name, app_tags):
         self.log.debug("Getting machines for app %s in org %s", app_name, self.org_slug)
         machines_endpoint = f"{self.machines_api_endpoint}/v1/apps/{app_name}/machines"
@@ -96,6 +104,7 @@ class FlyIoCheck(OpenMetricsBaseCheckV2, ConfigMixin):
             config = machine.get("config", {})
             metadata = config.get("metadata", {})
             guest = config.get("guest", {})
+            machine_init = config.get("init", {})
             fly_platform_version = metadata.get("fly_platform_version")
 
             machine_tags = [
@@ -107,6 +116,7 @@ class FlyIoCheck(OpenMetricsBaseCheckV2, ConfigMixin):
 
             self.gauge(MACHINE_COUNT_METRIC, 1, tags=all_machine_tags)
             self._submit_machine_guest_metrics(guest, self.tags, machine_id)
+            self._submit_machine_init_metrics(machine_init, self.tags, machine_id)
 
             external_host_tags.append((machine_id, {self.__NAMESPACE__: all_machine_tags}))
 

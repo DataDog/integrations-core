@@ -78,7 +78,9 @@
             "env": {
                 "FLY_PROCESS_GROUP": "app"
             },
-            "init": {},
+            "init": {
+                "swap_size_mb": 30
+            },
             "guest": {
                 "gpu_kind": "shared",
                 "gpus": 2
