@@ -158,6 +158,9 @@ manifest.json         @DataDog/documentation @DataDog/agent-integrations
 /esxi/                                  @DataDog/platform-integrations @DataDog/agent-integrations
 /esxi/manifest.json                     @DataDog/platform-integrations @DataDog/agent-integrations @DataDog/documentation
 /esxi/*.md                              @DataDog/platform-integrations @DataDog/agent-integrations @DataDog/documentation
+/fly_io/                                @DataDog/platform-integrations @DataDog/agent-integrations
+/fly_io/manifest.json                   @DataDog/platform-integrations @DataDog/agent-integrations @DataDog/documentation
+/fly_io/*.md                            @DataDog/platform-integrations @DataDog/agent-integrations @DataDog/documentation
 /openstack/                             @DataDog/platform-integrations @DataDog/agent-integrations
 /openstack/*.md                         @DataDog/platform-integrations @DataDog/agent-integrations @DataDog/documentation
 /openstack/manifest.json                @DataDog/platform-integrations @DataDog/agent-integrations @DataDog/documentation
