@@ -2,7 +2,7 @@
 
 ## Using the media gallery
 
-To use the media gallery, you must upload a minimum of one image. The gallery
+Please upload images to use the media gallery. Integrations require a minimum of 3 images. Images should highlight your product, your integration, and a full image of the Datadog integration dashboard. The gallery
 can hold a maximum of 8 pieces of media total, and one of these pieces of media
 can be a video (guidelines and submission steps below). Images should be
 added to your /images directory and referenced in the manifest.json file.

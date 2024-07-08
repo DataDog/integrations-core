@@ -1,4 +1,3 @@
-version: '3'
 # Inspired from
 # https://github.com/big-data-europe/docker-hadoop
 services:

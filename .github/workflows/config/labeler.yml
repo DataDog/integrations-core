@@ -351,6 +351,8 @@ integration/pgbouncer:
 - pgbouncer/**/*
 integration/php_fpm:
 - php_fpm/**/*
+integration/ping_one:
+- ping_one/**/*
 integration/pivotal_pks:
 - pivotal_pks/**/*
 integration/podman:
@@ -485,6 +487,8 @@ integration/vault:
 - vault/**/*
 integration/vertica:
 - vertica/**/*
+integration/vllm:
+- vllm/**/*
 integration/voltdb:
 - voltdb/**/*
 integration/vsphere:

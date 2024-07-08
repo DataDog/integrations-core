@@ -6,6 +6,7 @@
         "tags": [
             "server:mongodb://testUser2:*****@localhost:27017/test",
             "member:mongo-mongodb-sharded-configsvr-0.mongo-mongodb-sharded-headless.default.svc.cluster.local:27017",
+            "replset_me:mongo-mongodb-sharded-configsvr-0.mongo-mongodb-sharded-headless.default.svc.cluster.local:27017",
             "replset_name:mongo-mongodb-sharded-configsvr",
             "replset_state:primary",
             "sharding_cluster_role:configsvr"
@@ -18,6 +19,7 @@
         "tags": [
             "server:mongodb://testUser2:*****@localhost:27017/test",
             "member:mongo-mongodb-sharded-configsvr-1.mongo-mongodb-sharded-headless.default.svc.cluster.local:27017",
+            "replset_me:mongo-mongodb-sharded-configsvr-0.mongo-mongodb-sharded-headless.default.svc.cluster.local:27017",
             "replset_name:mongo-mongodb-sharded-configsvr",
             "replset_state:secondary",
             "sharding_cluster_role:configsvr"
@@ -30,6 +32,7 @@
         "tags": [
             "server:mongodb://testUser2:*****@localhost:27017/test",
             "member:mongo-mongodb-sharded-configsvr-2.mongo-mongodb-sharded-headless.default.svc.cluster.local:27017",
+            "replset_me:mongo-mongodb-sharded-configsvr-0.mongo-mongodb-sharded-headless.default.svc.cluster.local:27017",
             "replset_name:mongo-mongodb-sharded-configsvr",
             "replset_state:secondary",
             "sharding_cluster_role:configsvr"

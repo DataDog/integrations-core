@@ -74,6 +74,47 @@ class EsxiCheck(AgentCheck):
             else:
                 self.proxy_host = parsed_proxy.hostname
                 self.proxy_port = parsed_proxy.port
+        self.conn = None
+        self.content = None
+        self.check_initializations.append(self.initiate_api_connection)
+
+    def initiate_api_connection(self):
+        try:
+            context = ssl.SSLContext(protocol=ssl.PROTOCOL_TLS_CLIENT)
+            context.check_hostname = True if self.ssl_verify else False
+            context.verify_mode = ssl.CERT_REQUIRED if self.ssl_verify else ssl.CERT_NONE
+
+            if self.ssl_capath:
+                context.load_verify_locations(cafile=None, capath=self.ssl_capath, cadata=None)
+            elif self.ssl_cafile:
+                context.load_verify_locations(cafile=self.ssl_cafile, capath=None, cadata=None)
+            else:
+                context.load_default_certs(ssl.Purpose.SERVER_AUTH)
+
+            create_connection_method = socket.create_connection
+            if self.proxy_host:
+                socket.create_connection = lambda address, timeout, source_address, **kwargs: create_connection(
+                    address, timeout, source_address, self.proxy_host, self.proxy_port
+                )
+
+            connection = connect.SmartConnect(host=self.host, user=self.username, pwd=self.password, sslContext=context)
+            socket.create_connection = create_connection_method
+
+            self.conn = connection
+            self.content = connection.content
+
+            if self.content.about.apiType != "HostAgent":
+                raise Exception(
+                    f"{self.host} is not an ESXi host; please set the `host` config option to an ESXi host "
+                    "or use the vSphere integration to collect data from the vCenter",
+                )
+
+            self.log.info("Connected to ESXi host %s: %s", self.host, self.content.about.fullName)
+            self.gauge("host.can_connect", 1, tags=self.tags)
+        except Exception as e:
+            self.log.exception("Cannot connect to ESXi host %s: %s", self.host, str(e))
+            self.gauge("host.can_connect", 0, tags=self.tags)
+            raise
 
     def _validate_excluded_host_tags(self, excluded_host_tags):
         valid_excluded_host_tags = []
@@ -354,44 +395,15 @@ class EsxiCheck(AgentCheck):
 
     def check(self, _):
         try:
-            context = ssl.SSLContext(protocol=ssl.PROTOCOL_TLS_CLIENT)
-            context.check_hostname = True if self.ssl_verify else False
-            context.verify_mode = ssl.CERT_REQUIRED if self.ssl_verify else ssl.CERT_NONE
-
-            if self.ssl_capath:
-                context.load_verify_locations(cafile=None, capath=self.ssl_capath, cadata=None)
-            elif self.ssl_cafile:
-                context.load_verify_locations(cafile=self.ssl_cafile, capath=None, cadata=None)
-            else:
-                context.load_default_certs(ssl.Purpose.SERVER_AUTH)
-
-            create_connection_method = socket.create_connection
-            if self.proxy_host:
-                socket.create_connection = lambda address, timeout, source_address, **kwargs: create_connection(
-                    address, timeout, source_address, self.proxy_host, self.proxy_port
-                )
-
-            connection = connect.SmartConnect(host=self.host, user=self.username, pwd=self.password, sslContext=context)
-            socket.create_connection = create_connection_method
-
-            self.conn = connection
-            self.content = connection.content
-
-            if self.content.about.apiType != "HostAgent":
-                raise Exception(
-                    f"{self.host} is not an ESXi host; please set the `host` config option to an ESXi host "
-                    "or use the vSphere integration to collect data from the vCenter",
-                )
-
-            self.log.info("Connected to ESXi host %s: %s", self.host, self.content.about.fullName)
-            self.count("host.can_connect", 1, tags=self.tags)
+            self.set_version_metadata()
+            self.gauge("host.can_connect", 1, tags=self.tags)
 
         except Exception as e:
-            self.log.exception("Cannot connect to ESXi host %s: %s", self.host, str(e))
-            self.count("host.can_connect", 0, tags=self.tags)
-            raise
+            self.conn = None
+            self.content = None
+            self.log.debug("Failed to get version metadata; attempting to reconnect to the ESXi host: %s", str(e))
+            self.initiate_api_connection()
 
-        self.set_version_metadata()
         resources = self.get_resources()
         resource_map = {
             obj_content.obj: {prop.name: prop.val for prop in obj_content.propSet}

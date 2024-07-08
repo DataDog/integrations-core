@@ -1,5 +1,3 @@
-version: '3'
-
 services:
   postgres:
     image: "postgres:${POSTGRES_IMAGE}"
