@@ -21,7 +21,7 @@
     "integration": {
       "auto_install": false,
       "source_type_id": 18598661,
-      "source_type_name": "SophosCentralCloud",
+      "source_type_name": "Sophos Central Cloud",
       "events": {
         "creates_events": false
       },
