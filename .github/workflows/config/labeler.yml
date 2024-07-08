@@ -277,6 +277,8 @@ integration/kubernetes_state_core:
 - kubernetes_state_core/**/*
 integration/kyototycoon:
 - kyototycoon/**/*
+integration/kyverno:
+- kyverno/**/*
 integration/langchain:
 - langchain/**/*
 integration/lighttpd:
