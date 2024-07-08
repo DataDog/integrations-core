@@ -1,6 +1,5 @@
 import time
 
-from datadog_checks.base import is_affirmative
 from datadog_checks.base.utils.db.utils import DBMAsyncJob, default_json_event_encoding
 from datadog_checks.base.utils.serialization import json
 from datadog_checks.base.utils.tracking import tracked_method
@@ -56,7 +55,7 @@ WITH HISTORY_ENTRIES AS (
             ELSE 'Unknown'
         END AS step_run_status,
         sjh1.message
-    FROM 
+    FROM
         msdb.dbo.sysjobhistory AS sjh1
     INNER JOIN msdb.dbo.sysjobs AS j
     ON j.job_id = sjh1.job_id
@@ -83,8 +82,11 @@ WHERE
         + (sjh2.run_duration % 100)) > 0 + {last_collection_time_filter}
     )
 """
+
+
 def agent_check_getter(self):
     return self._check
+
 
 class SqlserverAgentHistory(DBMAsyncJob):
     def __init__(self, check, config: SQLServerConfig):
@@ -92,9 +94,7 @@ class SqlserverAgentHistory(DBMAsyncJob):
         self.tags = [t for t in check.tags if not t.startswith('dd.internal')]
         self.log = check.log
         self._config = config
-        collection_interval = float(
-            self._config.agent_jobs_config.get('collection_interval', 15)
-        )
+        collection_interval = float(self._config.agent_jobs_config.get('collection_interval', 15))
         if collection_interval <= 0:
             collection_interval = DEFAULT_COLLECTION_INTERVAL
         self.collection_interval = collection_interval
@@ -123,13 +123,15 @@ class SqlserverAgentHistory(DBMAsyncJob):
 
     def run_job(self):
         self.collect_agent_history()
-    
+
     @tracked_method(agent_check_getter=agent_check_getter)
     def _get_new_agent_job_history(self, cursor):
-        last_collection_time_filter = "+ {last_collection_time}".format(last_collection_time = self._last_collection_time)
+        last_collection_time_filter = "+ {last_collection_time}".format(last_collection_time=self._last_collection_time)
         self._last_collection_time = time.time()
         history_row_limit_filter = "TOP {history_row_limit}".format(history_row_limit=self.history_row_limit)
-        query = AGENT_HISTORY_QUERY.format(history_row_limit_filter=history_row_limit_filter, last_collection_time_filter=last_collection_time_filter)
+        query = AGENT_HISTORY_QUERY.format(
+            history_row_limit_filter=history_row_limit_filter, last_collection_time_filter=last_collection_time_filter
+        )
         self.log.debug("collecting sql server agent jobs history")
         self.log.debug("Running query [%s]", query)
         cursor.execute(query)
@@ -139,7 +141,7 @@ class SqlserverAgentHistory(DBMAsyncJob):
 
         self.log.debug("loaded sql server agent jobs history len(rows)=%s", len(rows))
         return rows
-    
+
     def _create_agent_jobs_history_event(self, history_rows):
         event = {
             "host": self._check.resolved_hostname,
@@ -152,7 +154,7 @@ class SqlserverAgentHistory(DBMAsyncJob):
             'sqlserver_version': self._check.static_info_cache.get(STATIC_INFO_VERSION, ""),
             'sqlserver_engine_edition': self._check.static_info_cache.get(STATIC_INFO_ENGINE_EDITION, ""),
             "cloud_metadata": self._config.cloud_metadata,
-            "sqlserver_job_history": history_rows
+            "sqlserver_job_history": history_rows,
         }
         return event
 
@@ -170,4 +172,3 @@ class SqlserverAgentHistory(DBMAsyncJob):
                 self.log.info(payload)
                 # TODO figure out where this payload should go
                 self._check.database_monitoring_query_activity(payload)
-                

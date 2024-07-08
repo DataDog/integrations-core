@@ -1,6 +1,5 @@
 from datadog_checks.base.config import is_affirmative
-
-from datadog_checks.sqlserver.const import  AWS_RDS_HOSTNAME_SUFFIX
+from datadog_checks.sqlserver.const import AWS_RDS_HOSTNAME_SUFFIX
 
 from .base import SqlserverDatabaseMetricsBase
 
@@ -17,7 +16,7 @@ AGENT_ACTIVITY_DURATION_QUERY = {
         WHERE ja.start_execution_date IS NOT NULL
             AND ja.stop_execution_date IS NULL
             AND session_id = (
-                SELECT MAX(session_id) 
+                SELECT MAX(session_id)
                 FROM msdb.dbo.sysjobactivity
             )
     """,
@@ -39,7 +38,7 @@ AGENT_ACTIVITY_STEPS_QUERY = {
             WHERE ja.start_execution_date IS NOT NULL
                 AND ja.stop_execution_date IS NULL
                 AND session_id = (
-                    SELECT MAX(session_id) 
+                    SELECT MAX(session_id)
                     FROM msdb.dbo.sysjobactivity
                 )
         ),
@@ -85,15 +84,14 @@ AGENT_ACTIVITY_STEPS_QUERY = {
         {"name": "step_id", "type": "tag"},
         {"name": "step_run_status", "type": "tag"},
         {"name": "agent.active_jobs.step_info", "type": "gauge"},
-
     ],
 }
 
 AGENT_ACTIVE_SESSION_DURATION_QUERY = {
     "name": "msdb.dbo.syssessions",
     "query": """\
-        SELECT TOP 1 
-            session_id, 
+        SELECT TOP 1
+            session_id,
             DATEDIFF(SECOND, agent_start_date, GETDATE()) AS duration_seconds
         FROM msdb.dbo.syssessions
         ORDER BY session_id DESC;
@@ -104,6 +102,7 @@ AGENT_ACTIVE_SESSION_DURATION_QUERY = {
     ],
 }
 
+
 class SqlserverAgentMetrics(SqlserverDatabaseMetricsBase):
     @property
     def include_agent_metrics(self) -> bool:
@@ -111,7 +110,7 @@ class SqlserverAgentMetrics(SqlserverDatabaseMetricsBase):
         if agent_jobs_config:
             return is_affirmative(agent_jobs_config.get('enabled', False))
         return False
-    
+
     @property
     def _default_collection_interval(self) -> int:
         '''
@@ -119,7 +118,7 @@ class SqlserverAgentMetrics(SqlserverDatabaseMetricsBase):
         '''
         # TODO figure out what a good default collection interval should be
         return 60  # 60 seconds
-    
+
     @property
     def collection_interval(self) -> int:
         '''
@@ -132,13 +131,13 @@ class SqlserverAgentMetrics(SqlserverDatabaseMetricsBase):
             return int(agent_jobs_config.get('collection_interval', 60))
         # TODO figure out what a good default collection interval should be
         return 60  # 60 seconds
-    
+
     @property
     def enabled(self):
         if not self.include_agent_metrics:
             return False
         return True
-    
+
     @property
     def queries(self):
         # make a copy of the query to avoid modifying the original
@@ -160,8 +159,7 @@ class SqlserverAgentMetrics(SqlserverDatabaseMetricsBase):
             active_session_duration_query['collection_interval'] = self.collection_interval
             query_list.append(active_session_duration_query)
         return query_list
-    
-    
+
     def __repr__(self) -> str:
         return (
             f"{self.__class__.__name__}("
@@ -169,4 +167,3 @@ class SqlserverAgentMetrics(SqlserverDatabaseMetricsBase):
             f"include_agent_metrics={self.include_agent_metrics}), "
             f"collection_interval={self.collection_interval})"
         )
-    
