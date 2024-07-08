@@ -112,7 +112,6 @@ SELECT
     table_name,
     index_name as `name`,
     collation,
-    cardinality,
     index_type,
     group_concat(seq_in_index order by seq_in_index asc) as seq_in_index,
     group_concat(column_name order by seq_in_index asc) as columns,
@@ -122,7 +121,7 @@ SELECT
     group_concat(non_unique order by seq_in_index asc) as non_uniques
 FROM INFORMATION_SCHEMA.STATISTICS
 WHERE table_schema = %s AND table_name IN ({})
-GROUP BY table_name, index_name, collation, cardinality, index_type;
+GROUP BY table_name, index_name, collation, index_type;
 """
 
 SQL_FOREIGN_KEYS = """\

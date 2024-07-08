@@ -139,7 +139,6 @@ def test_collect_schemas(aggregator, dd_run_check, dbm_instance):
                     {
                         "name": "FK_RestaurantNameDistrict",
                         "collation": "A",
-                        "cardinality": "0",
                         "index_type": "BTREE",
                         "seq_in_index": "1,2",
                         "columns": "RestaurantName,District",
@@ -188,7 +187,6 @@ def test_collect_schemas(aggregator, dd_run_check, dbm_instance):
                     {
                         "name": "UC_RestaurantNameDistrict",
                         "collation": "A",
-                        "cardinality": "0",
                         "index_type": "BTREE",
                         "seq_in_index": "1,2",
                         "columns": "RestaurantName,District",
@@ -237,7 +235,6 @@ def test_collect_schemas(aggregator, dd_run_check, dbm_instance):
                     {
                         "name": "PRIMARY",
                         "collation": "A",
-                        "cardinality": "0",
                         "index_type": "BTREE",
                         "seq_in_index": "1",
                         "columns": "id",
@@ -249,7 +246,6 @@ def test_collect_schemas(aggregator, dd_run_check, dbm_instance):
                     {
                         "name": "single_column_index",
                         "collation": "A",
-                        "cardinality": "0",
                         "index_type": "BTREE",
                         "seq_in_index": "1",
                         "columns": "population",
@@ -261,7 +257,6 @@ def test_collect_schemas(aggregator, dd_run_check, dbm_instance):
                     {
                         "name": "two_columns_index",
                         "collation": "A",
-                        "cardinality": "0",
                         "index_type": "BTREE",
                         "seq_in_index": "1,2",
                         "columns": "id,name",
@@ -384,7 +379,6 @@ def test_collect_schemas(aggregator, dd_run_check, dbm_instance):
                     {
                         "name": "PRIMARY",
                         "collation": "A",
-                        "cardinality": "0",
                         "index_type": "BTREE",
                         "seq_in_index": "1",
                         "columns": "id",
@@ -435,7 +429,6 @@ def test_collect_schemas(aggregator, dd_run_check, dbm_instance):
                     {
                         "name": "FK_CityId",
                         "collation": "A",
-                        "cardinality": "0",
                         "index_type": "BTREE",
                         "seq_in_index": "1",
                         "columns": "city_id",
@@ -482,7 +475,6 @@ def test_collect_schemas(aggregator, dd_run_check, dbm_instance):
                     {
                         "name": "thingsindex",
                         "collation": "A",
-                        "cardinality": "2",
                         "index_type": "BTREE",
                         "seq_in_index": "1",
                         "columns": "name",
