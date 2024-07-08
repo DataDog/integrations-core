@@ -43,6 +43,7 @@ class ApiRest(Api):
         self.log.debug("getting response time for `%s`", endpoint)
         response = self.http.get(endpoint)
         response.raise_for_status()
+        self.log.debug(response.json())
         return response.elapsed.total_seconds() * 1000
 
     def get_auth_projects(self):
