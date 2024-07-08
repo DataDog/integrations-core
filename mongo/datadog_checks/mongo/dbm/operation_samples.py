@@ -368,7 +368,7 @@ class MongoOperationSamples(DBMAsyncJob):
             "waiting_for_flow_control": operation.get("waitingForFlowControl", False),  # bool
             "flow_control_stats": self._format_key_name(operation.get("flowControlStats", {})),  # dict
             # Latches
-            "waiting_for_latch": operation.get("waitingForLatch", {}),  # dict
+            "waiting_for_latch": self._format_key_name(operation.get("waitingForLatch", {})),  # dict
             # cursor
             "cursor": self._get_operation_cursor(operation),  # dict
         }
