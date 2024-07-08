@@ -1,1 +1,0 @@
-Fixed the MySQL integration to correctly catch and handle errors raised by the connection attempt
