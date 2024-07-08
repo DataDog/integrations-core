@@ -40,6 +40,7 @@ Configure the Datadog endpoint to forward Cisco Secure Endpoint logs to Datadog.
 | API Host URL                |The API Host URL for Cisco Secure Endpoint Cloud is "https://api.\<region\>.apm.cisco.com". Adjust the "region" part based on the region of the Cisco Secure Endpoint server. If Cisco Secure Endpoint is hosted on VPC(Virtual Private Cloud), directly provide the API Host URL. |
 | Client ID      | Client ID from Cisco Secure Endpoint.    |
 | API Key           | API Key from Cisco Secure Endpoint.         |
+| Get Endpoint Details    | Keep it "true" to collect endpoint metadata  for Cisco Secure Endpoint Event Logs, otherwise "false". |
 
 
 ## Data Collected
