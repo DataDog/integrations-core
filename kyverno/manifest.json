@@ -8,7 +8,7 @@
     "configuration": "README.md#Setup",
     "support": "README.md#Support",
     "changelog": "CHANGELOG.md",
-    "description": "",
+    "description": "Monitor the health and performance of Kyverno",
     "title": "kyverno",
     "media": [],
     "classifier_tags": [
@@ -17,7 +17,7 @@
       "Supported OS::macOS",
       "Category::Metrics",
       "Category::Kubernetes",
-      "Category: :Security",
+      "Category::Security",
       "Submitted Data Type::Metrics"
     ]
   },
