@@ -60,7 +60,8 @@
     "dashboards": {
       "Istio base dashboard": "assets/dashboards/istio_overview.json",
       "Istio Overview 1.5": "assets/dashboards/istio_1_5_overview.json",
-      "Istio Overview 1.5 (OpenMetrics)": "assets/dashboards/istio_1_5_openmetrics_overview.json"
+      "Istio Overview 1.5 (OpenMetrics)": "assets/dashboards/istio_1_5_openmetrics_overview.json",
+      "Istio Overview": "assets/dashboards/overview.json"
     },
     "monitors": {
       "Failed sidecar injections": "assets/monitors/failed_sidecar_injection.json"
