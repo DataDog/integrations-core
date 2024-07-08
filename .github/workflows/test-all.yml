@@ -1332,6 +1332,7 @@ jobs:
       test-py2: ${{ inputs.test-py2 }}
       test-py3: ${{ inputs.test-py3 }}
       minimum-base-package: ${{ inputs.minimum-base-package }}
+      pytest-args: ${{ inputs.pytest-args }}
     secrets: inherit
   jc364450:
     uses: ./.github/workflows/test-target.yml
