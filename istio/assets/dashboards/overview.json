@@ -60,7 +60,7 @@
         {
             "available_values": [],
             "default": "*",
-            "name": "status_code",
+            "name": "response_code",
             "prefix": "status_code"
         }
     ],
@@ -189,7 +189,7 @@
                                             "aggregator": "last",
                                             "data_source": "metrics",
                                             "name": "query1",
-                                            "query": "count:kubernetes.containers.running{$istiod_image ,$cluster_name}"
+                                            "query": "count:kubernetes.containers.running{$istiod_image,$cluster_name}"
                                         }
                                     ],
                                     "response_format": "scalar"
@@ -224,7 +224,7 @@
                                             "aggregator": "last",
                                             "data_source": "metrics",
                                             "name": "query1",
-                                            "query": "count:kubernetes.containers.running{$istio_proxy_image, $cluster_name}"
+                                            "query": "count:kubernetes.containers.running{$istio_proxy_image,$cluster_name}"
                                         }
                                     ],
                                     "response_format": "scalar"
@@ -873,7 +873,7 @@
                                         {
                                             "data_source": "metrics",
                                             "name": "query1",
-                                            "query": "sum:istio.pilot.xds.pushes.count{$cluster_name,$istiod_image, type:*senderr} by {kube_cluster_name,type}.as_count()"
+                                            "query": "sum:istio.pilot.xds.pushes.count{$cluster_name,$istiod_image,type:*senderr} by {kube_cluster_name,type}.as_count()"
                                         }
                                     ],
                                     "response_format": "timeseries",
@@ -927,7 +927,7 @@
                                         {
                                             "data_source": "metrics",
                                             "name": "query2",
-                                            "query": "sum:istio.pilot.xds.pushes.count{$cluster_name,$istiod_image, type:*senderr} by {kube_cluster_name}.as_count()"
+                                            "query": "sum:istio.pilot.xds.pushes.count{$cluster_name,$istiod_image,type:*senderr} by {kube_cluster_name}.as_count()"
                                         },
                                         {
                                             "data_source": "metrics",
@@ -2228,7 +2228,7 @@
                                             "aggregator": "sum",
                                             "data_source": "metrics",
                                             "name": "query1",
-                                            "query": "sum:istio.mesh.request.count.total{$cluster_name,$istio_proxy_image,$destination_service_name,$destination_service,$destination_workload_namespace,$destination_workload,$source_workload,$source_workload_namespace,$status_code} by {destination_service,source_workload,source_workload_namespace,destination_workload,destination_workload_namespace,response_code,destination_service_name,destination_service_namespace,destination_version}.as_count()"
+                                            "query": "sum:istio.mesh.request.count.total{$cluster_name,$istio_proxy_image,$destination_service_name,$destination_service,$destination_workload_namespace,$destination_workload,$source_workload,$source_workload_namespace,$response_code} by {destination_service,source_workload,source_workload_namespace,destination_workload,destination_workload_namespace,response_code,destination_service_name,destination_service_namespace,destination_version}.as_count()"
                                         }
                                     ],
                                     "response_format": "scalar",
@@ -2293,12 +2293,12 @@
                                         {
                                             "data_source": "metrics",
                                             "name": "query1",
-                                            "query": "sum:istio.mesh.request.count.total{(response_code:2* OR response_code:3*) AND $cluster_name AND $istio_proxy_image AND $destination_service_name AND $destination_service AND $destination_workload_namespace AND $destination_workload AND $source_workload AND $source_workload_namespace AND $status_code} by {destination_service,source_workload,source_workload_namespace,destination_workload,destination_workload_namespace,response_code,destination_service_name,destination_service_namespace,destination_version}.as_count()"
+                                            "query": "sum:istio.mesh.request.count.total{(response_code:2* OR response_code:3*) AND $cluster_name AND $istio_proxy_image AND $destination_service_name AND $destination_service AND $destination_workload_namespace AND $destination_workload AND $source_workload AND $source_workload_namespace AND $response_code} by {destination_service,source_workload,source_workload_namespace,destination_workload,destination_workload_namespace,response_code,destination_service_name,destination_service_namespace,destination_version}.as_count()"
                                         },
                                         {
                                             "data_source": "metrics",
                                             "name": "query2",
-                                            "query": "sum:istio.mesh.request.count.total{(response_code:4* OR response_code:5* OR response_code:0) AND $cluster_name AND $istio_proxy_image AND $destination_service_name AND $destination_service AND $destination_workload_namespace AND $destination_workload AND $source_workload AND $source_workload_namespace AND $status_code} by {destination_service,source_workload,source_workload_namespace,destination_workload,destination_workload_namespace,response_code,destination_service_name,destination_service_namespace,destination_version}.as_count()"
+                                            "query": "sum:istio.mesh.request.count.total{(response_code:4* OR response_code:5* OR response_code:0) AND $cluster_name AND $istio_proxy_image AND $destination_service_name AND $destination_service AND $destination_workload_namespace AND $destination_workload AND $source_workload AND $source_workload_namespace AND $response_code} by {destination_service,source_workload,source_workload_namespace,destination_workload,destination_workload_namespace,response_code,destination_service_name,destination_service_namespace,destination_version}.as_count()"
                                         }
                                     ],
                                     "response_format": "timeseries",
@@ -2347,7 +2347,7 @@
                                         {
                                             "data_source": "metrics",
                                             "name": "query1",
-                                            "query": "sum:istio.mesh.request.count.total{(response_code:4* OR response_code:5* OR response_code:0) AND $cluster_name AND $istio_proxy_image AND $destination_service_name AND $destination_service AND $destination_workload_namespace AND $destination_workload AND $source_workload AND $source_workload_namespace AND $status_code} by {destination_service,source_workload,source_workload_namespace,destination_workload,destination_workload_namespace,response_code,destination_service_name,destination_service_namespace,destination_version}.as_count()"
+                                            "query": "sum:istio.mesh.request.count.total{(response_code:4* OR response_code:5* OR response_code:0) AND $cluster_name AND $istio_proxy_image AND $destination_service_name AND $destination_service AND $destination_workload_namespace AND $destination_workload AND $source_workload AND $source_workload_namespace AND $response_code} by {destination_service,source_workload,source_workload_namespace,destination_workload,destination_workload_namespace,response_code,destination_service_name,destination_service_namespace,destination_version}.as_count()"
                                         }
                                     ],
                                     "response_format": "timeseries",
@@ -2402,12 +2402,12 @@
                                         {
                                             "data_source": "metrics",
                                             "name": "query2",
-                                            "query": "sum:istio.mesh.request.count.total{(response_code:4* OR response_code:5* OR response_code:0) AND $cluster_name AND $istio_proxy_image AND $destination_service_name AND $destination_service AND $destination_workload_namespace AND $destination_workload AND $source_workload AND $source_workload_namespace AND $status_code}.as_count()"
+                                            "query": "sum:istio.mesh.request.count.total{(response_code:4* OR response_code:5* OR response_code:0) AND $cluster_name AND $istio_proxy_image AND $destination_service_name AND $destination_service AND $destination_workload_namespace AND $destination_workload AND $source_workload AND $source_workload_namespace AND $response_code}.as_count()"
                                         },
                                         {
                                             "data_source": "metrics",
                                             "name": "query1",
-                                            "query": "sum:istio.mesh.request.count.total{$cluster_name,$istio_proxy_image,$destination_service_name,$destination_service,$destination_workload_namespace,$destination_workload,$source_workload,$source_workload_namespace,$status_code}.as_count()"
+                                            "query": "sum:istio.mesh.request.count.total{$cluster_name,$istio_proxy_image,$destination_service_name,$destination_service,$destination_workload_namespace,$destination_workload,$source_workload,$source_workload_namespace,$response_code}.as_count()"
                                         }
                                     ],
                                     "response_format": "timeseries",
@@ -2456,12 +2456,12 @@
                                         {
                                             "data_source": "metrics",
                                             "name": "query1",
-                                            "query": "sum:istio.mesh.request.size.sum.total{$cluster_name,$istio_proxy_image,$destination_service_name,$destination_service,$destination_workload_namespace,$destination_workload,$source_workload,$source_workload_namespace,$status_code} by {destination_service,source_workload,source_workload_namespace,destination_workload,destination_workload_namespace,response_code,destination_service_name,destination_service_namespace,destination_version}.as_count()"
+                                            "query": "sum:istio.mesh.request.size.sum.total{$cluster_name,$istio_proxy_image,$destination_service_name,$destination_service,$destination_workload_namespace,$destination_workload,$source_workload,$source_workload_namespace,$response_code} by {destination_service,source_workload,source_workload_namespace,destination_workload,destination_workload_namespace,response_code,destination_service_name,destination_service_namespace,destination_version}.as_count()"
                                         },
                                         {
                                             "data_source": "metrics",
                                             "name": "query2",
-                                            "query": "sum:istio.mesh.request.size.count.total{$cluster_name,upper_bound:none,$istio_proxy_image,$destination_service_name,$destination_service,$destination_workload_namespace,$destination_workload,$source_workload,$source_workload_namespace,$status_code} by {destination_service,source_workload,source_workload_namespace,destination_workload,destination_workload_namespace,response_code,destination_service_name,destination_service_namespace,destination_version}.as_count()"
+                                            "query": "sum:istio.mesh.request.size.count.total{$cluster_name,upper_bound:none,$istio_proxy_image,$destination_service_name,$destination_service,$destination_workload_namespace,$destination_workload,$source_workload,$source_workload_namespace,$response_code} by {destination_service,source_workload,source_workload_namespace,destination_workload,destination_workload_namespace,response_code,destination_service_name,destination_service_namespace,destination_version}.as_count()"
                                         }
                                     ],
                                     "response_format": "timeseries",
@@ -2516,12 +2516,12 @@
                                         {
                                             "data_source": "metrics",
                                             "name": "query1",
-                                            "query": "sum:istio.mesh.request.duration.milliseconds.sum.total{$cluster_name,$istio_proxy_image,$destination_service_name,$destination_service,$destination_workload_namespace,$destination_workload,$source_workload,$source_workload_namespace,$status_code} by {destination_service,source_workload,source_workload_namespace,destination_workload,destination_workload_namespace,response_code,destination_service_name,destination_service_namespace,destination_version}.as_count()"
+                                            "query": "sum:istio.mesh.request.duration.milliseconds.sum.total{$cluster_name,$istio_proxy_image,$destination_service_name,$destination_service,$destination_workload_namespace,$destination_workload,$source_workload,$source_workload_namespace,$response_code} by {destination_service,source_workload,source_workload_namespace,destination_workload,destination_workload_namespace,response_code,destination_service_name,destination_service_namespace,destination_version}.as_count()"
                                         },
                                         {
                                             "data_source": "metrics",
                                             "name": "query2",
-                                            "query": "sum:istio.mesh.request.duration.milliseconds.count.total{$cluster_name,upper_bound:none,$istio_proxy_image,$destination_service_name,$destination_service,$destination_workload_namespace,$destination_workload,$source_workload,$source_workload_namespace,$status_code} by {destination_service,source_workload,source_workload_namespace,destination_workload,destination_workload_namespace,response_code,destination_service_name,destination_service_namespace,destination_version}.as_count()"
+                                            "query": "sum:istio.mesh.request.duration.milliseconds.count.total{$cluster_name,upper_bound:none,$istio_proxy_image,$destination_service_name,$destination_service,$destination_workload_namespace,$destination_workload,$source_workload,$source_workload_namespace,$response_code} by {destination_service,source_workload,source_workload_namespace,destination_workload,destination_workload_namespace,response_code,destination_service_name,destination_service_namespace,destination_version}.as_count()"
                                         }
                                     ],
                                     "response_format": "timeseries",
@@ -2570,12 +2570,12 @@
                                         {
                                             "data_source": "metrics",
                                             "name": "query1",
-                                            "query": "sum:istio.mesh.response.size.sum.total{$cluster_name,$istio_proxy_image,$destination_service_name,$destination_service,$destination_workload_namespace,$destination_workload,$source_workload,$source_workload_namespace,$status_code} by {destination_service,source_workload,source_workload_namespace,destination_workload,destination_workload_namespace,response_code,destination_service_name,destination_service_namespace,destination_version}.as_count()"
+                                            "query": "sum:istio.mesh.response.size.sum.total{$cluster_name,$istio_proxy_image,$destination_service_name,$destination_service,$destination_workload_namespace,$destination_workload,$source_workload,$source_workload_namespace,$response_code} by {destination_service,source_workload,source_workload_namespace,destination_workload,destination_workload_namespace,response_code,destination_service_name,destination_service_namespace,destination_version}.as_count()"
                                         },
                                         {
                                             "data_source": "metrics",
                                             "name": "query2",
-                                            "query": "sum:istio.mesh.response.size.count.total{$cluster_name,upper_bound:none,$istio_proxy_image,$destination_service_name,$destination_service,$destination_workload_namespace,$destination_workload,$source_workload,$source_workload_namespace,$status_code} by {destination_service,source_workload,source_workload_namespace,destination_workload,destination_workload_namespace,response_code,destination_service_name,destination_service_namespace,destination_version}.as_count()"
+                                            "query": "sum:istio.mesh.response.size.count.total{$cluster_name,upper_bound:none,$istio_proxy_image,$destination_service_name,$destination_service,$destination_workload_namespace,$destination_workload,$source_workload,$source_workload_namespace,$response_code} by {destination_service,source_workload,source_workload_namespace,destination_workload,destination_workload_namespace,response_code,destination_service_name,destination_service_namespace,destination_version}.as_count()"
                                         }
                                     ],
                                     "response_format": "timeseries",
@@ -2645,7 +2645,7 @@
                                         {
                                             "data_source": "metrics",
                                             "name": "query1",
-                                            "query": "sum:istio.mesh.tcp.connections_opened.total.total{$cluster_name,$istio_proxy_image,$destination_service_name,$destination_service,$destination_workload_namespace,$destination_workload,$source_workload,$source_workload_namespace,$status_code} by {destination_service,source_workload,source_workload_namespace,destination_workload,destination_workload_namespace,response_code,destination_service_name,destination_service_namespace,destination_version,host}.as_count()"
+                                            "query": "sum:istio.mesh.tcp.connections_opened.total.total{$cluster_name,$istio_proxy_image,$destination_service_name,$destination_service,$destination_workload_namespace,$destination_workload,$source_workload,$source_workload_namespace} by {destination_service,source_workload,source_workload_namespace,destination_workload,destination_workload_namespace,destination_service_name,destination_service_namespace,destination_version,host}.as_count()"
                                         }
                                     ],
                                     "response_format": "timeseries",
@@ -2694,7 +2694,7 @@
                                         {
                                             "data_source": "metrics",
                                             "name": "query1",
-                                            "query": "sum:istio.mesh.tcp.connections_closed.total.total{$cluster_name,$istio_proxy_image,$destination_service_name,$destination_service,$destination_workload_namespace,$destination_workload,$source_workload,$source_workload_namespace,$status_code} by {destination_service,source_workload,source_workload_namespace,destination_workload,destination_workload_namespace,response_code,destination_service_name,destination_service_namespace,destination_version,host}.as_count()"
+                                            "query": "sum:istio.mesh.tcp.connections_closed.total.total{$cluster_name,$istio_proxy_image,$destination_service_name,$destination_service,$destination_workload_namespace,$destination_workload,$source_workload,$source_workload_namespace} by {destination_service,source_workload,source_workload_namespace,destination_workload,destination_workload_namespace,destination_service_name,destination_service_namespace,destination_version,host}.as_count()"
                                         }
                                     ],
                                     "response_format": "timeseries",
@@ -2743,7 +2743,7 @@
                                         {
                                             "data_source": "metrics",
                                             "name": "query1",
-                                            "query": "sum:istio.mesh.tcp.received_bytes.total.total{$cluster_name,$istio_proxy_image,$destination_service_name,$destination_service,$destination_workload_namespace,$destination_workload,$source_workload,$source_workload_namespace,$status_code} by {destination_service,source_workload,source_workload_namespace,destination_workload,destination_workload_namespace,response_code,destination_service_name,destination_service_namespace,destination_version,host}.as_count()"
+                                            "query": "sum:istio.mesh.tcp.received_bytes.total.total{$cluster_name,$istio_proxy_image,$destination_service_name,$destination_service,$destination_workload_namespace,$destination_workload,$source_workload,$source_workload_namespace} by {destination_service,source_workload,source_workload_namespace,destination_workload,destination_workload_namespace,destination_service_name,destination_service_namespace,destination_version,host}.as_count()"
                                         }
                                     ],
                                     "response_format": "timeseries",
@@ -2792,7 +2792,7 @@
                                         {
                                             "data_source": "metrics",
                                             "name": "query1",
-                                            "query": "sum:istio.mesh.tcp.send_bytes.total.total{$cluster_name,$istio_proxy_image,$destination_service_name,$destination_service,$destination_workload_namespace,$destination_workload,$source_workload,$source_workload_namespace,$status_code} by {destination_service,source_workload,source_workload_namespace,destination_workload,destination_workload_namespace,response_code,destination_service_name,destination_service_namespace,destination_version,host}.as_count()"
+                                            "query": "sum:istio.mesh.tcp.send_bytes.total.total{$cluster_name,$istio_proxy_image,$destination_service_name,$destination_service,$destination_workload_namespace,$destination_workload,$source_workload,$source_workload_namespace} by {destination_service,source_workload,source_workload_namespace,destination_workload,destination_workload_namespace,destination_service_name,destination_service_namespace,destination_version,host}.as_count()"
                                         }
                                     ],
                                     "response_format": "timeseries",
