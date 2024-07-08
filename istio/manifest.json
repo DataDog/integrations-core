@@ -64,7 +64,9 @@
       "Istio Overview": "assets/dashboards/overview.json"
     },
     "monitors": {
-      "Failed sidecar injections": "assets/monitors/failed_sidecar_injection.json"
+      "Failed sidecar injections": "assets/monitors/failed_sidecar_injection.json",
+      "xDS Push Error Rate": "assets/monitors/xds_push_error_rate.json",
+      "Istio Proxy Requests Error Percentage": "assets/monitors/request_error_rate.json"
     },
     "saved_views": {
       "Istio Overview": "assets/saved_views/istio_overview.json",
