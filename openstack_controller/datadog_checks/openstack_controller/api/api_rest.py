@@ -30,11 +30,15 @@ class ApiRest(Api):
     def component_in_catalog(self, component_types):
         return self._catalog.has_component(component_types)
 
-    def get_response_time(self, endpoint_types, remove_project_id=True):
+    def get_response_time(self, endpoint_types, remove_project_id=True, is_heat=False):
         endpoint = (
-            self._catalog.get_endpoint_by_type(endpoint_types).replace(self._current_project_id, "")
-            if self._current_project_id and remove_project_id
-            else self._catalog.get_endpoint_by_type(endpoint_types)
+            self._catalog.get_endpoint_by_type(endpoint_types).replace("/v1/" + self._current_project_id, "")
+            if is_heat
+            else (
+                self._catalog.get_endpoint_by_type(endpoint_types).replace(self._current_project_id, "")
+                if self._current_project_id and remove_project_id
+                else self._catalog.get_endpoint_by_type(endpoint_types)
+            )
         )
         self.log.debug("getting response time for `%s`", endpoint)
         response = self.http.get(endpoint)
@@ -604,7 +608,7 @@ class ApiRest(Api):
 
     def get_heat_stacks(self, project_id):
         return self.make_paginated_request(
-            '{}/v1/{}/stacks'.format(self._catalog.get_endpoint_by_type(Component.Types.HEAT.value), project_id),
+            '{}/stacks'.format(self._catalog.get_endpoint_by_type(Component.Types.HEAT.value)),
             'stacks',
             'id',
             next_signifier='links',
