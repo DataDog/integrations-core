@@ -32,7 +32,7 @@ class ApiRest(Api):
 
     def get_response_time(self, endpoint_types, remove_project_id=True, is_heat=False):
         endpoint = (
-            self._catalog.get_endpoint_by_type(endpoint_types).replace("/v1/" + self._current_project_id, "")
+            self._catalog.get_endpoint_by_type(endpoint_types).replace(f"/v1/{self._current_project_id}", "")  
             if is_heat
             else (
                 self._catalog.get_endpoint_by_type(endpoint_types).replace(self._current_project_id, "")
@@ -43,7 +43,6 @@ class ApiRest(Api):
         self.log.debug("getting response time for `%s`", endpoint)
         response = self.http.get(endpoint)
         response.raise_for_status()
-        self.log.debug(response.json())
         return response.elapsed.total_seconds() * 1000
 
     def get_auth_projects(self):

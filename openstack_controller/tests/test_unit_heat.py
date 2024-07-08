@@ -101,25 +101,23 @@ def test_not_in_catalog(aggregator, check, dd_run_check, caplog, mock_http_post,
 
 
 @pytest.mark.parametrize(
-    ('mock_http_get', 'instance', 'expected_api_calls'),
+    ('mock_http_get', 'instance'),
     [
         pytest.param(
             {'http_error': {'/heat-api': MockResponse(status_code=500)}},
             configs.REST,
-            2,
             id='api rest',
         ),
         pytest.param(
             {'http_error': {'/heat-api': MockResponse(status_code=500)}},
             configs.SDK,
-            3,
             id='api sdk',
         ),
     ],
     indirect=['mock_http_get'],
 )
 @pytest.mark.usefixtures('mock_http_get', 'mock_http_post', 'openstack_connection')
-def test_response_time_exception(aggregator, check, dd_run_check, mock_http_get, expected_api_calls):
+def test_response_time_exception(aggregator, check, dd_run_check, mock_http_get):
     dd_run_check(check)
     aggregator.assert_metric(
         'openstack.heat.response_time',
@@ -134,7 +132,7 @@ def test_response_time_exception(aggregator, check, dd_run_check, mock_http_get,
     for call in mock_http_get.call_args_list:
         args, kwargs = call
         args_list += list(args)
-    assert args_list.count('http://127.0.0.1:8004/heat-api') == expected_api_calls
+    assert args_list.count('http://127.0.0.1:8004/heat-api') == 3
 
 
 @pytest.mark.parametrize(
