@@ -71,6 +71,12 @@ The Teleport integration does not include any events.
 
 The Teleport integration does not include any service checks.
 
+## Further reading
+
+Additional helpful documentation, links, and articles:
+
+- [Monitor Teleport with Datadog][10]
+
 ## Troubleshooting
 
 Need help? Contact [Datadog support][9].
@@ -84,3 +90,4 @@ Need help? Contact [Datadog support][9].
 [7]: https://github.com/DataDog/integrations-core/blob/master/teleport/metadata.csv
 [8]: https://github.com/DataDog/integrations-core/blob/master/teleport/assets/service_checks.json
 [9]: https://docs.datadoghq.com/help/
+[10]: https://www.datadoghq.com/blog/teleport-integration/

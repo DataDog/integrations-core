@@ -287,7 +287,7 @@ instances:
         ## Note that this runs a heavy query against your database to compute the relevant metrics
         ## for all your existing schemas. Due to the nature of these calls, if you have a
         ## high number of tables and schemas, this may have a negative impact on your database performance.
-        ## Only tables and schemas for which the user has been granted SELECT privileges are collected. 
+        ## Only tables and schemas for which the user has been granted SELECT privileges are collected.
         ##
         ## See also the MySQL metrics listing: https://docs.datadoghq.com/integrations/mysql/#metrics
         #
@@ -350,7 +350,7 @@ instances:
     #
     # dbm: false
 
-    ## Configure collection of performance_schema.global_variables. This is an alpha feature.
+    ## Configure collection of performance_schema.global_variables.
     #
     # collect_settings:
 
@@ -478,10 +478,10 @@ instances:
         #
         # collection_interval: 10
 
-    ## This block defines the configuration for AWS RDS and Aurora instances. 
+    ## This block defines the configuration for AWS RDS and Aurora instances.
     ##
-    ## Complete this section if you have installed the Datadog AWS Integration 
-    ## (https://docs.datadoghq.com/integrations/amazon_web_services) to enrich instances 
+    ## Complete this section if you have installed the Datadog AWS Integration
+    ## (https://docs.datadoghq.com/integrations/amazon_web_services) to enrich instances
     ## with MySQL integration telemetry.
     ##
     ## These values are only applied when `dbm: true` option is set.
@@ -489,18 +489,18 @@ instances:
     # aws:
 
         ## @param instance_endpoint - string - optional - default: mydb.cfxgae8cilcf.us-east-1.rds.amazonaws.com
-        ## Equal to the Endpoint.Address of the instance the agent is connecting to. 
+        ## Equal to the Endpoint.Address of the instance the agent is connecting to.
         ## This value is optional if the value of `host` is already configured to the instance endpoint.
         ##
-        ## For more information on instance endpoints, 
+        ## For more information on instance endpoints,
         ## see the AWS docs https://docs.aws.amazon.com/AmazonRDS/latest/APIReference/API_Endpoint.html
         #
         # instance_endpoint: mydb.cfxgae8cilcf.us-east-1.rds.amazonaws.com
 
     ## This block defines the configuration for Google Cloud SQL instances.
     ##
-    ## Complete this section if you have installed the Datadog GCP Integration 
-    ## (https://docs.datadoghq.com/integrations/google_cloud_platform) to enrich instances 
+    ## Complete this section if you have installed the Datadog GCP Integration
+    ## (https://docs.datadoghq.com/integrations/google_cloud_platform) to enrich instances
     ## with MySQL integration telemetry.
     ##
     ## These values are only applied when `dbm: true` option is set.
@@ -525,8 +525,8 @@ instances:
 
     ## This block defines the configuration for Azure Database for MySQL.
     ##
-    ## Complete this section if you have installed the Datadog Azure Integration 
-    ## (https://docs.datadoghq.com/integrations/azure) to enrich instances 
+    ## Complete this section if you have installed the Datadog Azure Integration
+    ## (https://docs.datadoghq.com/integrations/azure) to enrich instances
     ## with MySQL integration telemetry.
     ##
     ## These values are only applied when `dbm: true` option is set.
@@ -534,14 +534,14 @@ instances:
     # azure:
 
         ## @param deployment_type - string - optional - default: flexible_server
-        ## Equal to the deployment type for the managed database. 
+        ## Equal to the deployment type for the managed database.
         ##
         ## Acceptable values are:
-        ##   - `flexible_server` 
+        ##   - `flexible_server`
         ##   - `single_server`
         ##   - `virtual_machine`
         ##
-        ## For more information on deployment types, 
+        ## For more information on deployment types,
         ## see the Azure docs https://docs.microsoft.com/en-us/azure/mysql/select-right-deployment-type
         #
         # deployment_type: flexible_server

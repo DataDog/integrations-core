@@ -124,7 +124,7 @@ class ExplainParameterizedQueries:
             logged_statement = obfuscated_statement
             if self._config.log_unobfuscated_plans:
                 logged_statement = statement
-            logger.warning(
+            logger.debug(
                 'Failed to create prepared statement when explaining statement(%s)=[%s] | err=[%s]',
                 query_signature,
                 logged_statement,
@@ -159,7 +159,7 @@ class ExplainParameterizedQueries:
             logged_statement = obfuscated_statement
             if self._config.log_unobfuscated_plans:
                 logged_statement = statement
-            logger.warning(
+            logger.debug(
                 'Failed to explain parameterized statement(%s)=[%s] | err=[%s]',
                 query_signature,
                 logged_statement,
@@ -173,7 +173,7 @@ class ExplainParameterizedQueries:
                 dbname, "DEALLOCATE PREPARE dd_{query_signature}".format(query_signature=query_signature)
             )
         except Exception as e:
-            logger.warning(
+            logger.debug(
                 'Failed to deallocate prepared statement query_signature=[%s] | err=[%s]',
                 query_signature,
                 e,

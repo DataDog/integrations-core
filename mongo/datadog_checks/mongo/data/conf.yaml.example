@@ -77,12 +77,65 @@ instances:
     # options: {}
 
     ## @param dbnames - list of strings - optional
-    ## Set a list of the names of all databases to collect metrics from.
-    ## If this key does not exist, all metrics from all databases on the server will be collected.
+    ## Set a list of the names of all databases to collect dbstats metrics from.
+    ## If this key does not exist, all dbstats metrics from all databases on the server will be collected.
+    ##
+    ##
+    ## <<< DEPRECATED >>>
+    ##
+    ## Agent version: 7.56.0
+    ## Migration: dbnames is deprecated. Set database_autodiscovery.enabled to true to enable database autodiscovery.
+    ##            Use database_autodiscovery.include or database_autodiscovery.exclude to include or exclude
+    ##            specific databases to collect metrics from.
     #
     # dbnames:
     #   - one_database
     #   - other_database
+
+    ## Define the configuration for database autodiscovery.
+    ## Complete this section if you want to auto-discover databases on this MongoDB instance.
+    #
+    # database_autodiscovery:
+
+        ## @param enabled - boolean - optional - default: false
+        ## Enable database autodiscovery.
+        #
+        # enabled: false
+
+        ## @param max_databases - integer - optional - default: 100
+        ## The maximum number of databases this host should monitor.
+        #
+        # max_databases: 100
+
+        ## @param include - list of strings - optional - default: ['.*']
+        ## Regular expression for database names to include as part of
+        ## database autodiscovery.
+        ## Will report metrics for databases that are found in this instance,
+        ## ignores databases listed but not found.
+        ## Character casing is ignored. The regular expressions start matching from
+        ## the beginning, so to match anywhere, prepend `.*`. For exact matches append `$`.
+        ## Defaults to `.*` to include everything.
+        #
+        # include:
+        #   - mydatabase$
+        #   - orders.*
+
+        ## @param exclude - list of strings - optional - default: ['admin$', 'config$', 'local$']
+        ## Regular expression for database names to exclude as part of `database_autodiscovery`.
+        ## Character casing is ignored. The regular expressions start matching from the beginning,
+        ## so to match anywhere, prepend `.*`. For exact matches append `$`.
+        ## In case of conflicts, database exclusion via `exclude` takes precedence over
+        ## those found via `include`
+        #
+        # exclude:
+        #   - admin$
+        #   - config$
+        #   - local$
+
+        ## @param refresh_interval - integer - optional - default: 600
+        ## Frequency in seconds of scans for new databases. Defaults to 10 minutes.
+        #
+        # refresh_interval: 600
 
     ## @param dbm - boolean - optional - default: false
     ## Set to `true` enable Database Monitoring.
@@ -195,6 +248,9 @@ instances:
     ##  * `db:<DB_NAME>` e.g. `db:<DB_NAME>`
     ##  * `collection:<COLLECTION_NAME>` e.g. `collection:<COLLECTION_NAME>`
     ## Each collection generates many metrics, up to 8 + the number of indices on the collection for each collection.
+    ##
+    ## NOTE: This option is ignored when database_autodiscovery is enabled. 
+    ## Metrics are collected for all authorized collections on autodiscovered databases.
     #
     # collections:
     #   - <COLLECTION_NAME>

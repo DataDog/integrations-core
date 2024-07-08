@@ -4,7 +4,7 @@ init_config:
 
     ## @param propagate_agent_tags - boolean - optional - default: false
     ## Set to `true` to propagate the tags from `datadog.yaml` to the check.
-    ## When set to `true`, the tags from `datadog.yaml` are added to the check's tags for all instances.        
+    ## When set to `true`, the tags from `datadog.yaml` are added to the check's tags for all instances.
     #
     # propagate_agent_tags: false
 
@@ -197,6 +197,12 @@ instances:
     # activity_metrics_excluded_aggregations:
     #   - application_name
 
+    ## @param collect_buffercache_metrics - boolean - optional - default: false
+    ## If set to true, collects metrics regarding buffer cache usage from pg_buffercache.
+    ## pg_buffercache extension must be installed.
+    #
+    # collect_buffercache_metrics: false
+
     ## @param collect_database_size_metrics - boolean - optional - default: true
     ## Collect database size metrics.
     #
@@ -214,7 +220,7 @@ instances:
 
     ## @param collect_wal_metrics - boolean - optional - default: false
     ## Collect metrics about WAL file age.
-    ## NOTE: 
+    ## NOTE:
     ## For Postgres 9.6 and below, you must run the check local to your database if you want to enable this option.
     ## Starting Postgres 10, WAL file metrics are enabled by default using `pg_ls_waldir` and don't need local access.
     #
@@ -405,7 +411,7 @@ instances:
         #
         # payload_row_limit: 3500
 
-    ## Configure collection of pg_settings. This is an alpha feature.
+    ## Configure collection of pg_settings.
     #
     # collect_settings:
 
@@ -421,7 +427,7 @@ instances:
         # collection_interval: 600
 
         ## @param ignored_settings_patterns - list of strings - optional
-        ## A list of setting patterns to ignore. Any setting key matching one of the value in this list will 
+        ## A list of setting patterns to ignore. Any setting key matching one of the value in this list will
         ## not be collected. This uses the traditional LIKE pattern-matching approach.
         #
         # ignored_settings_patterns:
