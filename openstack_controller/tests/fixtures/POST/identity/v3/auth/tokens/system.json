@@ -106,6 +106,20 @@
         {
           "endpoints": [
             {
+              "id": "168f02a638de42f6b66b60b01f905830",
+              "interface": "public",
+              "region_id": "RegionOne",
+              "url": "http://127.0.0.1:8004/heat-api",
+              "region": "RegionOne"
+            }
+          ],
+          "id": "36f45c02edba4500adc2bc5974d22bf0",
+          "type": "orchestration",
+          "name": "heat"
+        },
+        {
+          "endpoints": [
+            {
               "id": "7e6cdeb2744345b7953d7b356245afec",
               "interface": "admin",
               "region_id": "RegionOne",
