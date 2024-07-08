@@ -1,6 +1,6 @@
 ## Overview
 
-[Trend Micro Email Security][4] is a cloud-based solution that stops more phishing, ransomware, and Business Email Compromise (BEC) attacks. Solution uses an optimum blend of cross-generational threat techniques, like machine learning, sandbox analysis, data loss prevention (DLP), and other methods to stop all types of email threats.
+[Trend Micro Email Security][4] is a cloud-based solution that stops phishing, ransomware, and Business Email Compromise (BEC) attacks. This solution uses an optimum blend of cross-generational threat techniques, like machine learning, sandbox analysis, data loss prevention (DLP), and other methods to stop all types of email threats.
 
 This integration ingests the following logs:
 
@@ -9,7 +9,7 @@ This integration ingests the following logs:
 - URL Click Tracking
 - Audit logs
 
-Visualize detailed insights into Email traffic analysis, URL click analysis and real time threat detection, security detection and observation, compliance monitoring through the out-of-the-box dashboards.
+Using out-of-the-box dashboards, you can visualize detailed insights into email traffic analysis, URL click analysis, real time threat detection, security detection and observation, and compliance monitoring.
 
 ## Setup
 
@@ -53,11 +53,11 @@ sudo -u dd-agent -- datadog-agent integration install datadog-trend_micro_email_
 
 4. Configure Trend Micro Email Security to send data to Datadog:
    1. Login into Trend Micro Email Security administrator console.
-   2. Configure syslog server's firewall to accept connections from the IP addresses or CIDR blocks listed in [link][5], allowing Trend Micro Email Security to forward syslog messages.
+   2. Configure syslog server's firewall to accept connections from the IP addresses or CIDR blocks listed in [Configuring Syslog Settings][5], allowing Trend Micro Email Security to forward syslog messages.
    3. Follow the [Syslog Server Profiles][6] steps.
-      1. In Steps 4 of the `Syslog Server Profiles` instructions, please use `CEF` format for the `syslog messages`.
-   4. Then, Follow the [Syslog Forwarding][7] steps.
-      1. In Steps 2 to 5 of the `Syslog Forwarding` instructions, select the syslog server created in above Step iii.
+      1. In step 4 of the `Syslog Server Profiles` instructions, please use the `CEF` format for the `syslog messages`.
+   4. Follow the [Syslog Forwarding][7] steps.
+      1. In steps 2 to 5 of the `Syslog Forwarding` instructions, select the syslog server created in above step iii.
 
 ### Validation
 
