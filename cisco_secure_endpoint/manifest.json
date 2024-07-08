@@ -21,7 +21,7 @@
         "integration": {
             "auto_install": false,
             "source_type_id": 18601889,
-            "source_type_name": "cisco_secure_endpoint",
+            "source_type_name": "Cisco Secure Endpoint",
             "events": {
                 "creates_events": false
             },
