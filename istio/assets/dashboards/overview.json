@@ -1,6 +1,6 @@
 {
     "author_name": "Datadog",
-    "description": "Istio is an Kubernetes based open-source service mesh that provides advanced networking, security, and observability features for microservices in a cloud-native environment. This dashboard is crafted to provide you with an overview and detailed information and performances of your Istio services.\n\n**Further reading:**\n\n- [Datadog Istio Integration Documentation](https://docs.datadoghq.com/integrations/istio/)\n- [Istio Docs](https://istio.io/latest/)\n- [Istio Metrics Docs](https://istio.io/latest/docs/reference/config/metrics/)",
+    "description": "Istio is a Kubernetes-based, open source service mesh that provides advanced networking, security, and observability features for microservices in a cloud-native environment. This dashboard is crafted to provide you with an overview of, detailed information about, and performance data for your Istio services.\n\n**Further reading:**\n\n- [Datadog Istio Integration Documentation](https://docs.datadoghq.com/integrations/istio/)\n- [Istio Docs](https://istio.io/latest/)\n- [Istio Metrics Docs](https://istio.io/latest/docs/reference/config/metrics/)",
     "layout_type": "ordered",
     "template_variables": [
         {
