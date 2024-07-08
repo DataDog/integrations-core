@@ -143,7 +143,7 @@ pipeline:
           preserveSource: true
           overrideOnConflict: false
     - type: pipeline
-      name: " TTP Impersonation"
+      name: TTP Impersonation
       enabled: true
       filter:
         query: "service:ttp-impersonation"
