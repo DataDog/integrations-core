@@ -4,7 +4,7 @@
 
 [PingOne][1] is an identity-as-a-service (IDaaS) offering by Ping Identity. It's a cloud-based identity platform that provides a range of services related to identity and access management (IAM), including single sign-on (SSO), multi-factor authentication (MFA), user management, and more.
 
-The PingOne integration collects Audit logs and sends them to Datadog. Using the out-of-the-box logs pipeline, the logs are parsed and enriched for easy searching and analysis. This integration includes several dashboards visualizing total Audit events, total successful/failed login attempts, total successful/failed kerberos login attempts, and more.
+The PingOne integration collects Audit logs and sends them to Datadog. Using the out-of-the-box logs pipeline, the logs are parsed and enriched for easy searching and analysis. This integration includes several dashboards visualizing total Audit events, total successful and total failed login attempts, total successful and total failed kerberos login attempts, and more.
 
 ## Setup
 
