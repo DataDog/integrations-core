@@ -3,7 +3,7 @@
 [PingFederate][3] is an enterprise-grade identity federation server that provides secure single sign-on (SSO), multi-factor authentication (MFA), and federated identity management across various applications and services.
 
 
-This integration provides enrichment and visulization for admin and audit logs. It helps to visualize detailed insights into admin and audit log analysis through the out-of-the-box dashboards.
+This integration provides enrichment and visulization for admin and audit logs. It helps to visualize detailed insights into admin and audit log analysis using out-of-the-box dashboards.
 
 ## Setup
 
@@ -46,7 +46,7 @@ Linux command
 
     **NOTE**: Make sure to address the below points.
 
-    1. Change the <pf_install> to the location of your PingFederate installation.
+    1. Change the `<pf_install>` to the location of your PingFederate installation.
 
     2. The default path of PingFederate's output would be `/pingfederate/log` and `filenames` would be `admin.log` and `audit.log`. If you have changed default path and filename then update the `path` parameter in `conf.yaml` accordingly.
 
@@ -60,7 +60,7 @@ Linux command
 
 ### Logs
 
-The Ping Federate integration collects following log-types.
+The Ping Federate integration collects the following log types.
 
 | Format     | Event Types    |
 | ---------  | -------------- |
@@ -69,21 +69,21 @@ The Ping Federate integration collects following log-types.
 ### Supported Log Formats
 
 #### Admin
-Default Log Format: 
+Default log format: 
 
 ```<pattern>%d | %X{user} | %X{roles} | %X{ip} | %X{component} | %X{event} | %X{eventdetailid} | %m%n</pattern>```
 
 #### Audit
-Default Log Format: 
+Default log format: 
 
 ```<pattern>%d| %X{trackingid}| %X{event}| %X{subject}| %X{ip} | %X{app}| %X{connectionid}| %X{protocol}| %X{host}| %X{role}| %X{status}| %X{adapterid}| %X{description}| %X{responsetime} %n</pattern>```
 
-Additional field Log Format: 
+Additional field log format: 
 
 ```<pattern>%d| %X{trackingid}| %X{event}| %X{subject}| %X{ip} | %X{app}| %X{connectionid}| %X{protocol}| %X{host}| %X{role}| %X{status}| %X{adapterid}| %X{description}| %X{responsetime}| %X{attrackingid}| %X{attributes}| %X{granttype}| %X{initiator}| %X{inmessagetype}| %X{inresponseto}| %X{localuserid}| %X{requestid}| %X{requeststarttime}| %X{responseid}| %X{stspluginid}| %X{targetsessionid}| %X{authenticationsourceid}| %X{validatorid}| %X{virtualserverid}| %X{connectionname}| %X{httprequestid}%n</pattern>```
 
 
-**Note**: Additional fields supported only if configured in above sequence also if any field is not configured then integration will not support the additional fields.
+**Note**: Additional fields are supported only if they are configured in above sequence. Also, if any field is not configured, then integration will not support the additional fields.
 
 ### Metrics
 
