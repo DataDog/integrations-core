@@ -12,7 +12,7 @@ The PingOne integration collects Audit logs and sends them to Datadog. Using the
 
 #### PingOne Configuration
 
-1. Login to [**PingOne**][2] with your credentials.
+1. Login to [PingOne][2] with your credentials.
 2. From the navigation sidebar, expand the **Applications** section and select **Applications**.
 3. Click + to begin creating a new application.
 4. Enter an **Application Name**.
