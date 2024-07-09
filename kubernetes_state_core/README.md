@@ -106,7 +106,8 @@ The Kubernetes State Metrics Core check is not backward compatible, be sure to r
 : The metric is not tagged with `host` anymore. It aggregates the nodes count by `kernel_version` `os_image` `container_runtime_version` `kubelet_version`.
 
 `kubernetes_state.container.waiting` and `kubernetes_state.container.status_report.count.waiting`
-: These metrics no longer emit a 0 value if no pods are waiting. They only report non-zero values.
+`kubernetes_state.container.terminated` and `kubernetes_state.container.status_report.count.terminated`
+: These metrics no longer emit a 0 value if no pods are waiting or terminated. They only report non-zero values.
 
 `kube_job`
 : In `kubernetes_state`, the `kube_job` tag value is the `CronJob` name if the `Job` had `CronJob` as an owner, otherwise it is the `Job` name. In `kubernetes_state_core`, the `kube_job` tag value is always the `Job` name, and a new `kube_cronjob` tag key is added with the `CronJob` name as the tag value. When migrating to `kubernetes_state_core`, it's recommended to use the new tag or `kube_job:foo*`, where `foo` is the `CronJob` name, for query filters.
