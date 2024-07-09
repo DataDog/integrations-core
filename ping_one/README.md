@@ -26,7 +26,7 @@ The PingOne integration collects Audit logs and sends them to Datadog. Using the
 
 #### PingOne Datadog Integration Configuration
 
-Configure the Datadog endpoint to forward PingOne events as logs to Datadog.
+Configure the Datadog endpoint to forward PingOne events as logs to Datadog:
 
 1. Navigate to `PingOne`.
 2. Add your PingOne credentials.
