@@ -35,10 +35,14 @@ def test_fabric_mocked(aggregator):
     tags201 = tags000 + ['node_id:201']
     tags202 = tags000 + ['node_id:202']
     tags = ['fabric_state:active', 'fabric_pod_id:1', 'cisco', 'project:cisco_aci']
-    tagsleaf101 = tags + ['switch_role:leaf', 'apic_role:leaf', 'node_id:101']
-    tagsleaf102 = tags + ['switch_role:leaf', 'apic_role:leaf', 'node_id:102']
-    tagsspine201 = tags + ['switch_role:spine', 'apic_role:spine', 'node_id:201']
-    tagsspine202 = tags + ['switch_role:spine', 'apic_role:spine', 'node_id:202']
+    leaf101 = ['switch_role:leaf', 'apic_role:leaf', 'node_id:101']
+    leaf102 = ['switch_role:leaf', 'apic_role:leaf', 'node_id:102']
+    leaf201 = ['switch_role:spine', 'apic_role:spine', 'node_id:201']
+    leaf202 = ['switch_role:spine', 'apic_role:spine', 'node_id:202']
+    tagsleaf101 = tags + leaf101
+    tagsleaf102 = tags + leaf102
+    tagsspine201 = tags + leaf201
+    tagsspine202 = tags + leaf202
     hn101 = 'pod-1-node-101'
     hn102 = 'pod-1-node-102'
     hn201 = 'pod-1-node-201'
@@ -56,10 +60,24 @@ def test_fabric_mocked(aggregator):
             assert interface_metadata == [
                 event.model_dump(exclude_none=True) for event in EXPECTED_INTERFACE_METADATA_EVENTS
             ]
+            interface_tag_mapping = {
+                'default:10.0.200.0': hn101,
+                'default:10.0.200.1': hn102,
+                'default:10.0.200.2': hn201,
+                'default:10.0.200.5': hn202,
+            }
             for interface in INTERFACE_METADATA:
-                id_tags = interface.get("id_tags", {})
-                hn = "pod-{}-node-{}".format(id_tags[4].split(":")[1], id_tags[3].split(":")[1])
-                aggregator.assert_metric('cisco_aci.fabric.node.interface.status', value=1.0, tags=id_tags, hostname=hn)
+                hn = interface_tag_mapping.get(interface['device_id'])
+                interface_tags = [
+                    'port:{}'.format(interface['index']),
+                    'medium:broadcast',
+                    'snmpTrapSt:enable',
+                    'node_id:{}'.format(hn.split('-')[-1]),
+                    'fabric_pod_id:1',
+                ]
+                aggregator.assert_metric(
+                    'cisco_aci.fabric.node.interface.status', value=1.0, tags=interface_tags, hostname=hn
+                )
 
     metric_name = 'cisco_aci.fabric.port.ingr_total.bytes.cum'
     aggregator.assert_metric(metric_name, value=0.0, tags=tags101 + ['port:eth101/1/43'], hostname=hn101)

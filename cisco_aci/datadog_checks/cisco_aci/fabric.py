@@ -261,13 +261,12 @@ class Fabric:
 
     def submit_node_metadata(self, node_attrs, tags):
         node = Node(attributes=node_attrs)
-        id_tags = ['namespace:{}'.format(self.namespace), 'system_ip:{}'.format(node.attributes.address)]
+        id_tags = ['namespace:{}'.format(self.namespace)]
         device_tags = [
             'device_vendor:{}'.format(VENDOR_CISCO),
             'device_namespace:{}'.format(self.namespace),
             'device_hostname:{}'.format(node.attributes.dn),
             'hostname:{}'.format(node.attributes.dn),
-            'system_ip:{}'.format(node.attributes.address),
             'device_ip:{}'.format(node.attributes.address),
             'device_id:{}:{}'.format(self.namespace, node.attributes.address),
             "source:cisco-aci",
@@ -291,7 +290,7 @@ class Fabric:
         eth = PhysIf(**phys_if.get('l1PhysIf', {}))
         interface = InterfaceMetadata(
             device_id='{}:{}'.format(self.namespace, address),
-            id_tags=tags,
+            id_tags=['interface:{}'.format(eth.attributes.name)],
             index=eth.attributes.id,
             name=eth.attributes.name,
             description=eth.attributes.desc,
