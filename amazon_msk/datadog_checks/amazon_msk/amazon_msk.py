@@ -22,6 +22,7 @@ class AmazonMskCheck(OpenMetricsBaseCheck):
     This is a legacy implementation that will be removed at some point, refer to check.py for the new implementation.
     """
 
+    # Trigger tests
     SERVICE_CHECK_CONNECT = 'aws.msk.can_connect'
     DEFAULT_METRIC_LIMIT = 0
 

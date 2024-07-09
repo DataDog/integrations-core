@@ -9,6 +9,7 @@ from .metrics import DEFAULT_COUNTERS
 
 
 class ActiveDirectoryCheck(PDHBaseCheck):
+    # Trigger tests
     def __new__(cls, name, init_config, instances):
         if PY3 and not is_affirmative(instances[0].get('use_legacy_check_version', False)):
             from .check import ActiveDirectoryCheckV2
