@@ -5,7 +5,7 @@
 import six
 
 if six.PY3:
-    from datadog_checks.cisco_aci.models import DeviceMetadataList, NetworkDevicesMetadata
+    from datadog_checks.cisco_aci.models import DeviceMetadataList, InterfaceMetadata, NetworkDevicesMetadata
 else:
     DeviceMetadataList = None
     NetworkDevicesMetadata = None
@@ -2711,6 +2711,7 @@ EXPECTED_DEVICE_METADATA_RESULT = DeviceMetadataList(device_metadata=DEVICE_META
 # "2012-01-14 03:21:34" in seconds
 MOCK_TIME_EPOCH = 1326511294
 
+EXPECTED_INTERFACE_METADATA = [InterfaceMetadata(**im) for im in INTERFACE_METADATA]
 
 EXPECTED_DEVICE_METADATA_EVENTS = [
     NetworkDevicesMetadata(namespace='default', devices=[ndm_meta], collect_timestamp=MOCK_TIME_EPOCH)

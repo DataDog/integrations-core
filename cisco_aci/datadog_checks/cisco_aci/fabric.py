@@ -308,5 +308,5 @@ class Fabric:
                     "interface.status:{}".format(interface.status),
                 ]
             )
-            self.gauge('cisco_aci.fabric.node.interface.status', 1, tags=tags, hostname=hostname)
+            self.gauge('cisco_aci.fabric.node.interface.status', 1, tags=new_tags, hostname=hostname)
         return interface.model_dump(exclude_none=True)

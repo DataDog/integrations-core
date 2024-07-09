@@ -5,7 +5,7 @@
 import six
 
 if six.PY3:
-    from enum import Enum, IntEnum
+    from enum import IntEnum, StrEnum
     from typing import Optional
 
     from pydantic import BaseModel, ConfigDict, Field, computed_field, field_validator
@@ -96,7 +96,7 @@ if six.PY3:
         UP = 1
         DOWN = 2
 
-    class Status(str, Enum):
+    class Status(StrEnum):
         UP = "up"
         DOWN = "down"
         WARNING = "warning"
@@ -113,15 +113,14 @@ if six.PY3:
         oper_status: Optional[OperStatus] = Field(default=None)
         integration: Optional[str] = Field(default='cisco-aci')
 
-        model_config = ConfigDict(validate_assignment=True)
+        model_config = ConfigDict(validate_assignment=True, use_enum_values=True)
 
         @field_validator("admin_status", mode="before")
         @classmethod
         def parse_admin_status(cls, admin_status: AdminStatus | None) -> AdminStatus | None:
             if not admin_status:
                 return None
-
-            if admin_status == "up":
+            if admin_status == "up" or admin_status == 1:
                 return AdminStatus.UP
             return AdminStatus.DOWN
 
@@ -130,14 +129,13 @@ if six.PY3:
         def parse_oper_status(cls, oper_status: OperStatus | None) -> OperStatus | None:
             if not oper_status:
                 return None
-
-            if oper_status == "up":
+            if oper_status == "up" or oper_status == 1:
                 return OperStatus.UP
             return OperStatus.DOWN
 
         @computed_field
         @property
-        def status(self) -> str:
+        def status(self) -> Status:
             if self.admin_status == AdminStatus.UP:
                 if self.oper_status == OperStatus.UP:
                     return Status.UP

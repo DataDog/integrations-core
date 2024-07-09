@@ -11,8 +11,8 @@ from datadog_checks.cisco_aci.api import Api
 if six.PY3:
     from .fixtures.metadata import (
         EXPECTED_DEVICE_METADATA_EVENTS,
+        EXPECTED_INTERFACE_METADATA,
         EXPECTED_INTERFACE_METADATA_EVENTS,
-        INTERFACE_METADATA,
     )
 else:
     EXPECTED_DEVICE_METADATA_RESULT = None
@@ -56,24 +56,32 @@ def test_fabric_mocked(aggregator):
             device_metadata = [dm for dm in ndm_metadata if 'devices' in dm and len(dm['devices']) > 0]
             interface_metadata = [im for im in ndm_metadata if 'interfaces' in im and len(im['interfaces']) > 0]
 
-            assert device_metadata == [event.model_dump() for event in EXPECTED_DEVICE_METADATA_EVENTS]
-            assert interface_metadata == [
-                event.model_dump(exclude_none=True) for event in EXPECTED_INTERFACE_METADATA_EVENTS
-            ]
+            expected_devices = [event.model_dump() for event in EXPECTED_DEVICE_METADATA_EVENTS]
+            expected_interfaces = [event.model_dump(exclude_none=True) for event in EXPECTED_INTERFACE_METADATA_EVENTS]
+
+            assert device_metadata == expected_devices
+            assert interface_metadata == expected_interfaces
+
             interface_tag_mapping = {
                 'default:10.0.200.0': hn101,
                 'default:10.0.200.1': hn102,
-                'default:10.0.200.2': hn201,
-                'default:10.0.200.5': hn202,
+                'default:10.0.200.5': hn201,
+                'default:10.0.200.2': hn202,
             }
-            for interface in INTERFACE_METADATA:
-                hn = interface_tag_mapping.get(interface['device_id'])
+
+            for interface in EXPECTED_INTERFACE_METADATA:
+                print(interface)
+                hn = interface_tag_mapping.get(interface.device_id)
+                device_namespace, device_ip = interface.device_id.split(':')
                 interface_tags = [
-                    'port:{}'.format(interface['index']),
+                    'port:{}'.format(interface.index),
                     'medium:broadcast',
                     'snmpTrapSt:enable',
                     'node_id:{}'.format(hn.split('-')[-1]),
                     'fabric_pod_id:1',
+                    'device_ip:{}'.format(device_ip),
+                    'device_namespace:{}'.format(device_namespace),
+                    'interface.status:{}'.format(interface.status),
                 ]
                 aggregator.assert_metric(
                     'cisco_aci.fabric.node.interface.status', value=1.0, tags=interface_tags, hostname=hn
