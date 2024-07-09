@@ -251,6 +251,13 @@ jobs:
       env:
         DD_API_KEY: "${{ secrets.DD_API_KEY }}"
       run: |
+        # '-- all' is passed for e2e tests if pytest args are provided
+        # This is done to avoid ddev from interpreting the arguments as environments
+        #   instead of pytest-args, because by default if no environment is provided
+        #   after -- it will run all environments. So when pytests args are provided
+        #   ddev will interpret '-m' as an environment to run the e2e test on and fails
+        # This is not required when no pytest args are provided and it will run all environments
+        #   by default
         if [ '${{ inputs.pytest-args }}' = '-m flaky' ]; then
           set +e # Disable immediate exit
           ddev env test --base --new-env --junit ${{ inputs.target }} -- all ${{ inputs.pytest-args }}
@@ -271,6 +278,13 @@ jobs:
       env:
         DD_API_KEY: "${{ secrets.DD_API_KEY }}"
       run: |
+        # '-- all' is passed for e2e tests if pytest args are provided
+        # This is done to avoid ddev from interpreting the arguments as environments
+        #   instead of pytest-args, because by default if no environment is provided
+        #   after -- it will run all environments. So when pytests args are provided
+        #   ddev will interpret '-m' as an environment to run the e2e test on and fails
+        # This is not required when no pytest args are provided and it will run all environments
+        #   by default
         if [ '${{ inputs.pytest-args }}' = '-m flaky' ]; then
           set +e # Disable immediate exit
           ddev env test --new-env --junit ${{ inputs.target }} -- all ${{ inputs.pytest-args }}
@@ -300,6 +314,13 @@ jobs:
         DD_API_KEY: "${{ secrets.DD_API_KEY }}"
         DDEV_TEST_ENABLE_TRACING: "${{ inputs.repo == 'core' && '1' || '0' }}"
       run: |
+        # '-- all' is passed for e2e tests if pytest args are provided
+        # This is done to avoid ddev from interpreting the arguments as environments
+        #   instead of pytest-args, because by default if no environment is provided
+        #   after -- it will run all environments. So when pytests args are provided
+        #   ddev will interpret '-m' as an environment to run the e2e test on and fails
+        # This is not required when no pytest args are provided and it will run all environments
+        #   by default
         if [ '${{ inputs.pytest-args }}' = '-m flaky' ]; then
           set +e # Disable immediate exit
           ddev env test --base --new-env --junit ${{ inputs.target }}:latest -- all ${{ inputs.pytest-args }}
