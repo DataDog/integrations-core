@@ -1,6 +1,6 @@
 {
     "title": "Mimecast - TTP Impersonation Protect",
-    "description": "This log provides details about all events that was flagged by impersonation protection configuration.",
+    "description": "This log provides details about all events that are flagged by the impersonation protection configuration.",
     "widgets": [
         {
             "id": 5605173174503620,
@@ -25,7 +25,7 @@
             "id": 3899484433440670,
             "definition": {
                 "type": "note",
-                "content": "## Overview\n\nThis log provides details about all events that was flagged by impersonation protection configuration.",
+                "content": "## Overview\n\nThis log provides details about all events that are flagged by the protection configuration.",
                 "background_color": "white",
                 "font_size": "14",
                 "text_align": "left",

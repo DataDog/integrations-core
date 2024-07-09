@@ -1,6 +1,6 @@
 {
     "title": "Mimecast - TTP URL",
-    "description": "This log shows the details of events which were generated and flagged by TTP URL configuration because the user clicks on a malicious link.",
+    "description": "This log shows the details of events which were generated and flagged by TTP URL configuration because the user clicked on a malicious link.",
     "widgets": [
         {
             "id": 4947291615075058,
@@ -25,7 +25,7 @@
             "id": 1004363650832560,
             "definition": {
                 "type": "note",
-                "content": "## Overview\n\nThis log shows the details of events which were generated and flagged by TTP URL configuration because the user clicks on a malicious link.",
+                "content": "## Overview\n\nThis log shows the details of events which were generated and flagged by TTP URL configuration because the user clicked on a malicious link.",
                 "background_color": "white",
                 "font_size": "14",
                 "text_align": "left",

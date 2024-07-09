@@ -1,6 +1,6 @@
 {
     "title": "Mimecast - Audit",
-    "description": "This log details shows you the activity performed by user via Mimecast UI.",
+    "description": "These logs show the activity performed by users via the Mimecast UI.",
     "widgets": [
         {
             "id": 6950570389408240,
@@ -25,7 +25,7 @@
             "id": 3838915416297262,
             "definition": {
                 "type": "note",
-                "content": "## Overview\n\nThis log details shows you the activity performed by user via Mimecast UI.  ",
+                "content": "## Overview\n\nThese logs show the activity performed by users via the Mimecast UI.  ",
                 "background_color": "white",
                 "font_size": "14",
                 "text_align": "left",

@@ -1,6 +1,6 @@
 {
     "title": "Mimecast - TTP Attachment",
-    "description": "This log shows the details about attachment which are detected as a threat by mimecast.",
+    "description": "This log shows the details about attachments which are detected as a threat by mimecast.",
     "widgets": [
         {
             "id": 4950117374449528,
@@ -25,7 +25,7 @@
             "id": 6566850902297990,
             "definition": {
                 "type": "note",
-                "content": "## Overview\n\nThis log shows the details about attachment which are detected as a threat by mimecast.",
+                "content": "## Overview\n\nThis log shows the details about attachments which are detected as a threat by mimecast.",
                 "background_color": "white",
                 "font_size": "14",
                 "text_align": "left",
