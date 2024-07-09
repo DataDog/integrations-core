@@ -17,7 +17,7 @@ The PingOne integration collects Audit logs and sends them to Datadog. Using the
 3. Click **+** (plus) to begin creating a new application.
 4. Enter an **Application Name**.
 5. Select **Worker** as the application type.
-6. On the application flyout, ensure that the toggle switch in the header is activated, in order to enable the application.
+6. On the application flyout, ensure that the toggle switch in the header is activated in order to enable the application.
 7. Select the **Roles** tab of the application flyout.
 8. Click the **Grant** Roles button.
 9. Under **Available responsibilities**, in the **Environment Admin section**, select the environment(s) to grant access to, then click **Save**.
