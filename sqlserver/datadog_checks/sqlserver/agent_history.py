@@ -139,7 +139,7 @@ class SqlserverAgentHistory(DBMAsyncJob):
         rows = [dict(zip(columns, row)) for row in cursor.fetchall()]
         for row in rows:
             row_completion_time = row['run_epoch_time'] + row['run_duration_seconds']
-            if row_completion_time  > self._last_collection_time:
+            if row_completion_time > self._last_collection_time:
                 self._last_collection_time = row_completion_time
 
         self.log.debug("loaded sql server agent jobs history len(rows)=%s", len(rows))
