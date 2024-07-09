@@ -14,7 +14,6 @@ from .common import INSTANCE, INSTANCE_LEGACY, assert_jmx_metrics
 
 
 @pytest.mark.usefixtures('mock_data')
-@pytest.mark.flaky
 def test_node_check_legacy(aggregator, instance_legacy, mock_client):
     c = AmazonMskCheck('amazon_msk', {}, [instance_legacy])
     assert not c.run()

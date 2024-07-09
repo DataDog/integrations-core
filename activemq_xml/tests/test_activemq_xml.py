@@ -24,7 +24,6 @@ def test_integration(aggregator, dd_run_check):
 
 
 @pytest.mark.e2e
-@pytest.mark.flaky
 def test_e2e(dd_agent_check):
     aggregator = dd_agent_check(CONFIG)
 
