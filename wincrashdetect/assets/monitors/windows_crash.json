@@ -1,0 +1,35 @@
+{
+    "version": 2,
+    "created_at": "2024-07-09",
+    "last_updated_at": "2024-07-09",
+    "title": "Windows Crash Detection",
+    "tags": [
+        "integration:wincrashdetect"
+    ],
+    "description": "The Windows Crash Detection check sends an event if a new crash dump file is detected on Agent startup.  This monitor alerts when a crash is detected.",
+    "definition": {
+        "name": "A Windows system crash has been detected",
+        "type": "event-v2 alert",
+        "query": "events(\"source:windows_crash_detection\").rollup(\"count\").by(\"host\").last(\"10m\") > 0",
+        "message": "{{#is_alert}}\n\nThe Windows Crash Detection integration is reporting that a system crash occurred on Windows host {{host.name}}\n\n{{/is_alert}}",
+        "tags": [
+            "integration:wincrashdetect"
+        ],
+        "options": {
+            "thresholds": {
+                "critical": 0
+            },
+            "enable_logs_sample": false,
+            "notify_audit": false,
+            "include_tags": true,
+            "new_group_delay": 60,
+            "groupby_simple_monitor": false,
+            "silenced": {},
+            "avalanche_window": 20
+        },
+        "priority": 2,
+        "restriction_policy": {
+            "bindings": []
+        }
+    }
+}
