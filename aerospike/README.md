@@ -63,7 +63,7 @@ To configure this check for an Agent running on a host:
 
 #### Containerized
 
-For containerized environments, see the [Autodiscovery Integration Templates][5] for guidance on applying the parameters below.
+For containerized environments, See [Configure integrations with Autodiscovery on Kubernetes][5] or [Configure integrations with Autodiscovery on Docker][14] for guidance on applying the parameters below. See the [sample aerospike.d/conf.yaml][3] for all available configuration options.
 
 ##### Metric collection
 
@@ -71,7 +71,22 @@ For containerized environments, see the [Autodiscovery Integration Templates][5]
 | -------------------- | ------------------------------------ |
 | `<INTEGRATION_NAME>` | `aerospike`                          |
 | `<INIT_CONFIG>`      | blank or `{}`                        |
-| `<INSTANCE_CONFIG>`  | `{"openmetrics_endpoint": "http://%%host%%:9145/metrics"}` |
+| `<INSTANCES_CONFIG>`  | `{"openmetrics_endpoint": "http://%%host%%:9145/metrics"}` |
+
+**Example**
+
+Apply the following annotation to your pod, where `<CONTAINER_IDENTIFIER>` is the Aerospike container image name or a [custom identifier][15]:
+
+```
+ad.datadoghq.com/<CONTAINER_IDENTIFIER>.checks: |
+  {
+    "aerospike": {
+      "init_config": {},
+      "instances": [{"openmetrics_endpoint": "http://%%host%%:9145/metrics"}]
+    }
+  } 
+```
+
 
 ##### Log collection
 
@@ -83,6 +98,20 @@ Collecting logs is disabled by default in the Datadog Agent. To enable it, see [
 | -------------- | --------------------------------------------------- |
 | `<LOG_CONFIG>` | `{"source": "aerospike", "service": "<SERVICE_NAME>"}` |
 
+**Example**
+
+Apply the following annotation to your pod, where `<CONTAINER_IDENTIFIER>` is the Aerospike container image name or a [custom identifier][15]:
+
+```
+ad.datadoghq.com/<CONTAINER_IDENTIFIER>.logs: |
+  [
+    {
+      "type": "file",
+      "path": "/var/log/aerospike/aerospike.log",
+      "source": "aerospike"
+    } 
+  ]
+```
 <!-- xxz tab xxx -->
 <!-- xxz tabs xxx -->
 
@@ -113,7 +142,7 @@ Need help? Contact [Datadog support][9].
 [2]: https://app.datadoghq.com/account/settings/agent/latest
 [3]: https://github.com/DataDog/integrations-core/blob/master/aerospike/datadog_checks/aerospike/data/conf.yaml.example
 [4]: https://docs.datadoghq.com/agent/guide/agent-commands/#start-stop-and-restart-the-agent
-[5]: https://docs.datadoghq.com/agent/kubernetes/integrations/
+[5]: https://docs.datadoghq.com/containers/kubernetes/integrations/
 [6]: https://docs.datadoghq.com/agent/kubernetes/log/
 [7]: https://docs.datadoghq.com/agent/guide/agent-commands/#agent-status-and-information
 [8]: https://github.com/DataDog/integrations-core/blob/master/aerospike/metadata.csv
@@ -122,3 +151,5 @@ Need help? Contact [Datadog support][9].
 [11]: https://docs.aerospike.com/monitorstack/new/installing-components
 [12]: https://docs.datadoghq.com/integrations/openmetrics/
 [13]: https://github.com/DataDog/integrations-core/blob/7.36.x/aerospike/datadog_checks/aerospike/data/conf.yaml.example
+[14]: https://docs.datadoghq.com/containers/docker/integrations/
+[15]: https://docs.datadoghq.com/containers/guide/ad_identifiers/
