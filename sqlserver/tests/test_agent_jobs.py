@@ -16,57 +16,59 @@ logger = logging.getLogger(__name__)
 
 
 AGENT_HISTORY_QUERY = """\
-SELECT {history_row_limit_filter}
-    j.name AS job_name,
-    sjh1.job_id,
-    sjh1.step_name,
-    sjh1.step_id,
-    sjh1.instance_id AS step_instance_id,
-    (
-        SELECT MIN(sjh2.instance_id)
-        FROM msdb.dbo.sysjobhistory AS sjh2
-        WHERE sjh2.job_id = sjh1.job_id
-        AND sjh2.step_id = 0
-        AND sjh2.instance_id >= sjh1.instance_id
-    ) AS completion_instance_id,
-    (
-        SELECT DATEDIFF(SECOND, GETDATE(), SYSDATETIMEOFFSET()) +
-            DATEDIFF(SECOND, '19700101',
-                DATEADD(HOUR, sjh1.run_time / 10000,
-                    DATEADD(MINUTE, (sjh1.run_time / 100) % 100,
-                        DATEADD(SECOND, sjh1.run_time % 100,
-                            CAST(CAST(sjh1.run_date AS CHAR(8)) AS DATETIME)
+WITH HISTORY_ENTRIES AS (
+    SELECT {history_row_limit_filter}
+        j.name AS job_name,
+        sjh1.job_id,
+        sjh1.step_name,
+        sjh1.step_id,
+        sjh1.instance_id AS step_instance_id,
+        (
+            SELECT MIN(sjh2.instance_id)
+            FROM msdb.dbo.sysjobhistory AS sjh2
+            WHERE sjh2.job_id = sjh1.job_id
+            AND sjh2.step_id = 0
+            AND sjh2.instance_id >= sjh1.instance_id
+        ) AS completion_instance_id,
+        (
+            SELECT DATEDIFF(SECOND, GETDATE(), SYSDATETIMEOFFSET()) +
+                DATEDIFF(SECOND, '19700101',
+                    DATEADD(HOUR, sjh1.run_time / 10000,
+                        DATEADD(MINUTE, (sjh1.run_time / 100) % 100,
+                            DATEADD(SECOND, sjh1.run_time % 100,
+                                CAST(CAST(sjh1.run_date AS CHAR(8)) AS DATETIME)
+                            )
                         )
                     )
                 )
-            )
-    ) AS run_epoch_time,
-    (
-        (sjh1.run_duration / 10000) * 3600
-        + ((sjh1.run_duration % 10000) / 100) * 60
-        + (sjh1.run_duration % 100)
-    ) AS run_duration_seconds,
-    CASE sjh1.run_status
-        WHEN 0 THEN 'Failed'
-        WHEN 1 THEN 'Succeeded'
-        WHEN 2 THEN 'Retry'
-        WHEN 3 THEN 'Canceled'
-        WHEN 4 THEN 'In Progress'
-        ELSE 'Unknown'
-    END AS step_run_status,
-    sjh1.message
-FROM
-    msdb.dbo.sysjobhistory AS sjh1
-INNER JOIN msdb.dbo.sysjobs AS j
-ON j.job_id = sjh1.job_id
+        ) AS run_epoch_time,
+        (
+            (sjh1.run_duration / 10000) * 3600
+            + ((sjh1.run_duration % 10000) / 100) * 60
+            + (sjh1.run_duration % 100)
+        ) AS run_duration_seconds,
+        CASE sjh1.run_status
+            WHEN 0 THEN 'Failed'
+            WHEN 1 THEN 'Succeeded'
+            WHEN 2 THEN 'Retry'
+            WHEN 3 THEN 'Canceled'
+            WHEN 4 THEN 'In Progress'
+            ELSE 'Unknown'
+        END AS step_run_status,
+        sjh1.message
+    FROM
+        msdb.dbo.sysjobhistory AS sjh1
+    INNER JOIN msdb.dbo.sysjobs AS j
+    ON j.job_id = sjh1.job_id
+    ORDER BY completion_instance_id DESC
+)
+SELECT * FROM HISTORY_ENTRIES
 WHERE
     EXISTS (
         SELECT 1
         FROM msdb.dbo.sysjobhistory AS sjh2
-        WHERE sjh2.job_id = sjh1.job_id
-        AND sjh2.step_id = 0
-        AND sjh2.instance_id >= sjh1.instance_id
-        HAVING  MIN(DATEDIFF(SECOND, GETDATE(), SYSDATETIMEOFFSET()) +
+        WHERE sjh2.instance_id = HISTORY_ENTRIES.completion_instance_id
+        AND (DATEDIFF(SECOND, GETDATE(), SYSDATETIMEOFFSET()) +
                     DATEDIFF(SECOND, '19700101',
                         DATEADD(HOUR, sjh2.run_time / 10000,
                             DATEADD(MINUTE, (sjh2.run_time / 100) % 100,
@@ -83,57 +85,59 @@ WHERE
 """
 
 FORMATTED_HISTORY_QUERY = """\
-SELECT TOP 1000
-    j.name AS job_name,
-    sjh1.job_id,
-    sjh1.step_name,
-    sjh1.step_id,
-    sjh1.instance_id AS step_instance_id,
-    (
-        SELECT MIN(sjh2.instance_id)
-        FROM msdb.dbo.sysjobhistory AS sjh2
-        WHERE sjh2.job_id = sjh1.job_id
-        AND sjh2.step_id = 0
-        AND sjh2.instance_id >= sjh1.instance_id
-    ) AS completion_instance_id,
-    (
-        SELECT DATEDIFF(SECOND, GETDATE(), SYSDATETIMEOFFSET()) +
-            DATEDIFF(SECOND, '19700101',
-                DATEADD(HOUR, sjh1.run_time / 10000,
-                    DATEADD(MINUTE, (sjh1.run_time / 100) % 100,
-                        DATEADD(SECOND, sjh1.run_time % 100,
-                            CAST(CAST(sjh1.run_date AS CHAR(8)) AS DATETIME)
+WITH HISTORY_ENTRIES AS (
+    SELECT TOP 10000
+        j.name AS job_name,
+        sjh1.job_id,
+        sjh1.step_name,
+        sjh1.step_id,
+        sjh1.instance_id AS step_instance_id,
+        (
+            SELECT MIN(sjh2.instance_id)
+            FROM msdb.dbo.sysjobhistory AS sjh2
+            WHERE sjh2.job_id = sjh1.job_id
+            AND sjh2.step_id = 0
+            AND sjh2.instance_id >= sjh1.instance_id
+        ) AS completion_instance_id,
+        (
+            SELECT DATEDIFF(SECOND, GETDATE(), SYSDATETIMEOFFSET()) +
+                DATEDIFF(SECOND, '19700101',
+                    DATEADD(HOUR, sjh1.run_time / 10000,
+                        DATEADD(MINUTE, (sjh1.run_time / 100) % 100,
+                            DATEADD(SECOND, sjh1.run_time % 100,
+                                CAST(CAST(sjh1.run_date AS CHAR(8)) AS DATETIME)
+                            )
                         )
                     )
                 )
-            )
-    ) AS run_epoch_time,
-    (
-        (sjh1.run_duration / 10000) * 3600
-        + ((sjh1.run_duration % 10000) / 100) * 60
-        + (sjh1.run_duration % 100)
-    ) AS run_duration_seconds,
-    CASE sjh1.run_status
-        WHEN 0 THEN 'Failed'
-        WHEN 1 THEN 'Succeeded'
-        WHEN 2 THEN 'Retry'
-        WHEN 3 THEN 'Canceled'
-        WHEN 4 THEN 'In Progress'
-        ELSE 'Unknown'
-    END AS step_run_status,
-    sjh1.message
-FROM
-    msdb.dbo.sysjobhistory AS sjh1
-INNER JOIN msdb.dbo.sysjobs AS j
-ON j.job_id = sjh1.job_id
+        ) AS run_epoch_time,
+        (
+            (sjh1.run_duration / 10000) * 3600
+            + ((sjh1.run_duration % 10000) / 100) * 60
+            + (sjh1.run_duration % 100)
+        ) AS run_duration_seconds,
+        CASE sjh1.run_status
+            WHEN 0 THEN 'Failed'
+            WHEN 1 THEN 'Succeeded'
+            WHEN 2 THEN 'Retry'
+            WHEN 3 THEN 'Canceled'
+            WHEN 4 THEN 'In Progress'
+            ELSE 'Unknown'
+        END AS step_run_status,
+        sjh1.message
+    FROM
+        msdb.dbo.sysjobhistory AS sjh1
+    INNER JOIN msdb.dbo.sysjobs AS j
+    ON j.job_id = sjh1.job_id
+    ORDER BY completion_instance_id DESC
+)
+SELECT * FROM HISTORY_ENTRIES
 WHERE
     EXISTS (
         SELECT 1
         FROM msdb.dbo.sysjobhistory AS sjh2
-        WHERE sjh2.job_id = sjh1.job_id
-        AND sjh2.step_id = 0
-        AND sjh2.instance_id >= sjh1.instance_id
-        HAVING  MIN(DATEDIFF(SECOND, GETDATE(), SYSDATETIMEOFFSET()) +
+        WHERE sjh2.instance_id = HISTORY_ENTRIES.completion_instance_id
+        AND (DATEDIFF(SECOND, GETDATE(), SYSDATETIMEOFFSET()) +
                     DATEDIFF(SECOND, '19700101',
                         DATEADD(HOUR, sjh2.run_time / 10000,
                             DATEADD(MINUTE, (sjh2.run_time / 100) % 100,
@@ -145,7 +149,7 @@ WHERE
                     )
                 + (sjh2.run_duration / 10000) * 3600
         + ((sjh2.run_duration % 10000) / 100) * 60
-        + (sjh2.run_duration % 100)) > 0 + 1000
+        + (sjh2.run_duration % 100)) > 0 + 10000
     )
 """
 
@@ -298,7 +302,7 @@ def agent_jobs_instance(instance_docker):
     instance_docker['agent_jobs'] = {
         'enabled': True,
         'collection_interval': 1.0,
-        'agent_jobs_history_row_limit': 1000,
+        'agent_jobs_history_row_limit': 10000,
     }
     instance_docker['min_collection_interval'] = 1
     return copy(instance_docker)
@@ -311,8 +315,8 @@ def test_connection_with_agent_history(instance_docker):
 
     with check.connection.open_managed_default_connection():
         with check.connection.get_managed_cursor() as cursor:
-            last_collection_time_filter = "+ {last_collection_time}".format(last_collection_time=1000)
-            history_row_limit_filter = "TOP {history_row_limit}".format(history_row_limit=1000)
+            last_collection_time_filter = "+ {last_collection_time}".format(last_collection_time=10000)
+            history_row_limit_filter = "TOP {history_row_limit}".format(history_row_limit=10000)
             query = AGENT_HISTORY_QUERY.format(
                 history_row_limit_filter=history_row_limit_filter,
                 last_collection_time_filter=last_collection_time_filter,
@@ -374,7 +378,7 @@ def test_history_output(instance_docker, sa_conn):
     with check.connection.open_managed_default_connection():
         with check.connection.get_managed_cursor() as cursor:
             last_collection_time_filter = "+ {last_collection_time}".format(last_collection_time=now - 1)
-            history_row_limit_filter = "TOP {history_row_limit}".format(history_row_limit=1000)
+            history_row_limit_filter = "TOP {history_row_limit}".format(history_row_limit=10000)
             query = AGENT_HISTORY_QUERY.format(
                 history_row_limit_filter=history_row_limit_filter,
                 last_collection_time_filter=last_collection_time_filter,
@@ -384,7 +388,7 @@ def test_history_output(instance_docker, sa_conn):
             assert len(results) == 7, "should have 7 steps associated with completed jobs"
             assert len(results[0]) == 10, "should have 10 columns per step"
             last_collection_time_filter = "+ {last_collection_time}".format(last_collection_time=now + 1)
-            history_row_limit_filter = "TOP {history_row_limit}".format(history_row_limit=1000)
+            history_row_limit_filter = "TOP {history_row_limit}".format(history_row_limit=10000)
             query = AGENT_HISTORY_QUERY.format(
                 history_row_limit_filter=history_row_limit_filter,
                 last_collection_time_filter=last_collection_time_filter,

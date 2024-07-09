@@ -126,26 +126,20 @@ instances:
     #
     # include_ao_metrics: false
 
-    ## Configure collection of sqlserver agent jobs events and metrics
+    ## Configure collection of agent jobs events and metrics
     #
-    # agent_jobs: 
+    # agent_jobs:
 
-        ## @param enabled - boolean - optional - default: false
-        ## Enable collection of agent jobs event and metrics. Requires `dbm: true`.
-        #
-        # enabled: false
-
-        ## @param collection_interval - integer - optional - default: 60
+        ## @param collection_interval - number - optional - default: 60
         ## Configure the interval (in seconds) for the collection of agent jobs events and metrics.
-        ## Defaults to 60 seconds (1 minute). If you intend on updating this value, it is strongly recommended
-        ## to use a consistent value throughout all SQL Server agent deployments. 
+        ## Set the query metric collection interval (in seconds).
         #
         # collection_interval: 60
 
-        ## @param agent_jobs_history_row_limit - integer - optional - default: 1000
+        ## @param agent_jobs_history_row_limit - integer - optional - default: 10000
         ## Set the maximum number of job step rows that can be retrieved in a single check run.
         #
-        # agent_jobs_history_row_limit: 1000
+        # agent_jobs_history_row_limit: 10000
 
     ## @param availability_group - string - optional
     ## You can specify an availability group when `include_ao_metrics`
