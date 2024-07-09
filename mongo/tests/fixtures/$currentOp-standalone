@@ -118,6 +118,12 @@
             }
         },
         "waitingForFlowControl": false,
-        "flowControlStats": {}
+        "flowControlStats": {},
+        "waitingForLatch": {
+            "timestamp": {
+                "$date": "2024-05-16T18:06:38.419Z"
+            },
+            "captureName": "FutureResolution"
+        }
     }
 ]
