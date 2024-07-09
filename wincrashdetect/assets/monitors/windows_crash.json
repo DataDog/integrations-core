@@ -6,7 +6,7 @@
     "tags": [
         "integration:wincrashdetect"
     ],
-    "description": "The Windows Crash Detection check will send an event if, on Agent startup, a new crash dump file is detected.  This monitor alerts when a crash is detected.",
+    "description": "The Windows Crash Detection check sends an event if a new crash dump file is detected on Agent startup.  This monitor alerts when a crash is detected.",
     "definition": {
         "name": "A Windows system crash has been detected",
         "type": "event-v2 alert",
