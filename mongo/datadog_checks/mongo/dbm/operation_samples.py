@@ -96,7 +96,9 @@ class MongoOperationSamples(DBMAsyncJob):
 
         activities = []
 
-        for activity, sample in self._get_operation_samples(now):
+        for activity, sample in self._get_operation_samples(
+            now, databases_monitored=self._check._database_autodiscovery.databases
+        ):
             if sample:
                 self._check.log.debug("Sending operation sample: %s", sample)
                 self._check.database_monitoring_query_sample(json_util.dumps(sample))
@@ -115,10 +117,10 @@ class MongoOperationSamples(DBMAsyncJob):
             return False
         return True
 
-    def _get_operation_samples(self, now):
+    def _get_operation_samples(self, now, databases_monitored: List[str]):
         for operation in self._get_current_op():
             try:
-                if not self._should_include_operation(operation):
+                if not self._should_include_operation(operation, databases_monitored):
                     continue
 
                 command = operation.get("command")
@@ -155,7 +157,7 @@ class MongoOperationSamples(DBMAsyncJob):
             self._check.log.debug("Found operation: %s", operation)
             yield operation
 
-    def _should_include_operation(self, operation: dict) -> bool:
+    def _should_include_operation(self, operation: dict, databases_monitored: List[str]) -> bool:
         # Skip operations from db that are not configured to be monitored
         namespace = operation.get("ns")
         if not namespace:
@@ -163,12 +165,9 @@ class MongoOperationSamples(DBMAsyncJob):
             return False
 
         db, _ = namespace.split(".", 1)
-        if self._check._config.db_names is not None:
-            if db not in self._check._config.db_names:
-                self._check.log.debug(
-                    "Skipping operation for database %s because it is not configured to be monitored", db
-                )
-                return False
+        if db not in databases_monitored:
+            self._check.log.debug("Skipping operation for database %s because it is not configured to be monitored", db)
+            return False
 
         if db in SYSTEM_DATABASES:
             self._check.log.debug("Skipping operation for system database %s", db)
@@ -369,7 +368,7 @@ class MongoOperationSamples(DBMAsyncJob):
             "waiting_for_flow_control": operation.get("waitingForFlowControl", False),  # bool
             "flow_control_stats": self._format_key_name(operation.get("flowControlStats", {})),  # dict
             # Latches
-            "waiting_for_latch": operation.get("waitingForLatch", False),  # bool
+            "waiting_for_latch": self._format_key_name(operation.get("waitingForLatch", {})),  # dict
             # cursor
             "cursor": self._get_operation_cursor(operation),  # dict
         }

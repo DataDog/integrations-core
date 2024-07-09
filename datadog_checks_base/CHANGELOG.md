@@ -2,6 +2,20 @@
 
 <!-- towncrier release notes start -->
 
+## 36.9.0 / 2024-07-05
+
+***Security***:
+
+* Update pydantic to 2.7.3 to address CVE-2024-3772 ([#17802](https://github.com/DataDog/integrations-core/pull/17802))
+
+***Added***:
+
+* Update dependencies ([#17817](https://github.com/DataDog/integrations-core/pull/17817)), ([#17953](https://github.com/DataDog/integrations-core/pull/17953))
+
+***Fixed***:
+
+* Fix rate limiter in sync mode of DBMAsync job. Prior to this change, the DBMAsync job would not take into account the time of the job execution when throttling by the collection interval. ([#17893](https://github.com/DataDog/integrations-core/pull/17893))
+
 ## 36.8.0 / 2024-06-13
 
 ***Added***:
