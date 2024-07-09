@@ -98,7 +98,7 @@ class SqlserverAgentHistory(DBMAsyncJob):
         if collection_interval <= 0:
             collection_interval = DEFAULT_COLLECTION_INTERVAL
         self.collection_interval = collection_interval
-        history_row_limit = self._config.agent_jobs_config.get('agent_jobs_history_row_limit', 1000)
+        history_row_limit = self._config.agent_jobs_config.get('agent_jobs_history_row_limit', DEFAULT_ROW_LIMIT)
         if history_row_limit <= 0:
             history_row_limit = DEFAULT_ROW_LIMIT
         self.history_row_limit = history_row_limit
@@ -127,7 +127,6 @@ class SqlserverAgentHistory(DBMAsyncJob):
     @tracked_method(agent_check_getter=agent_check_getter)
     def _get_new_agent_job_history(self, cursor):
         last_collection_time_filter = "+ {last_collection_time}".format(last_collection_time=self._last_collection_time)
-        self._last_collection_time = time.time()
         history_row_limit_filter = "TOP {history_row_limit}".format(history_row_limit=self.history_row_limit)
         query = AGENT_HISTORY_QUERY.format(
             history_row_limit_filter=history_row_limit_filter, last_collection_time_filter=last_collection_time_filter
@@ -138,6 +137,10 @@ class SqlserverAgentHistory(DBMAsyncJob):
         columns = [i[0] for i in cursor.description]
         # construct row dicts manually as there's no DictCursor for pyodbc
         rows = [dict(zip(columns, row)) for row in cursor.fetchall()]
+        for row in rows:
+            row_completion_time = row['run_epoch_time'] + row['run_duration_seconds']
+            if row_completion_time  > self._last_collection_time:
+                self._last_collection_time = row_completion_time
 
         self.log.debug("loaded sql server agent jobs history len(rows)=%s", len(rows))
         return rows

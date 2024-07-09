@@ -141,8 +141,7 @@ files:
         - name: collection_interval
           description: |
             Configure the interval (in seconds) for the collection of agent jobs events and metrics.
-            Set the query metric collection interval (in seconds). If you intend on updating this value, it is strongly recommended
-            to use a consistent value throughout all SQL Server agent deployments. 
+            Set the query metric collection interval (in seconds).
           value:
             type: number
             example: 60
@@ -151,7 +150,7 @@ files:
             Set the maximum number of job step rows that can be retrieved in a single check run.
           value:
             type: integer
-            example: 1000
+            example: 10000
     - name: availability_group
       description: |
         You can specify an availability group when `include_ao_metrics`
