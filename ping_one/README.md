@@ -14,7 +14,7 @@ The PingOne integration collects Audit logs and sends them to Datadog. Using the
 
 1. Login to [PingOne][2] with your credentials.
 2. From the navigation sidebar, expand the **Applications** section and select **Applications**.
-3. Click + to begin creating a new application.
+3. Click **+** (plus) to begin creating a new application.
 4. Enter an **Application Name**.
 5. Select **Worker** as the application type.
 6. On the application flyout, ensure that the toggle switch in the header is activated, in order to enable the application.
