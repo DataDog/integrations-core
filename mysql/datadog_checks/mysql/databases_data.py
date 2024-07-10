@@ -317,14 +317,16 @@ class DatabasesData:
             query=SQL_COLUMNS.format(table_names),
             params=db_name,
         )
-        #rows = cursor.fetchall()
-        rows = fetch_and_convert_to_str(cursor)
+        rows = cursor.fetchall()
         for row in rows:
             if "nullable" in row:
                 if row["nullable"].lower() == "yes":
                     row["nullable"] = True
                 else:
                     row["nullable"] = False
+            if "default" in row:
+                if row["default"] is not None:
+                    row["default"] = str(row["default"])
             table_name = str(row.pop("table_name"))
             table_list[table_name_to_table_index[table_name]].setdefault("columns", [])
             table_list[table_name_to_table_index[table_name]]["columns"].append(row)
