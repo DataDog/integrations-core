@@ -25,7 +25,7 @@ from datadog_checks.mysql.queries import (
     SQL_TABLES,
 )
 
-from .util import fetch_and_convert_to_str, get_list_chunks
+from .util import get_list_chunks
 
 DEFAULT_DATABASES_DATA_COLLECTION_INTERVAL = 600
 
@@ -278,7 +278,7 @@ class DatabasesData:
     @tracked_method(agent_check_getter=agent_check_getter)
     def _query_db_information(self, cursor):
         self._cursor_run(cursor, query=SQL_DATABASES)
-        rows = fetch_and_convert_to_str(cursor)
+        rows = cursor.fetchall()
         return rows
 
     @tracked_method(agent_check_getter=agent_check_getter, track_result_length=True)
@@ -288,7 +288,7 @@ class DatabasesData:
         "name": str
         """
         self._cursor_run(cursor, query=SQL_TABLES, params=db_name)
-        tables_info = fetch_and_convert_to_str(cursor)
+        tables_info = cursor.fetchall()
         return tables_info
 
     @tracked_method(agent_check_getter=agent_check_getter, track_result_length=True)
@@ -336,7 +336,7 @@ class DatabasesData:
     @tracked_method(agent_check_getter=agent_check_getter)
     def _populate_with_index_data(self, table_name_to_table_index, table_list, table_names, db_name, cursor):
         self._cursor_run(cursor, query=SQL_INDEXES.format(table_names), params=db_name)
-        rows = fetch_and_convert_to_str(cursor)
+        rows = cursor.fetchall()
         for row in rows:
             table_name = str(row.pop("table_name"))
             table_list[table_name_to_table_index[table_name]].setdefault("indexes", [])
@@ -354,7 +354,7 @@ class DatabasesData:
     @tracked_method(agent_check_getter=agent_check_getter, track_result_length=True)
     def _populate_with_foreign_keys_data(self, table_name_to_table_index, table_list, table_names, db_name, cursor):
         self._cursor_run(cursor, query=SQL_FOREIGN_KEYS.format(table_names), params=db_name)
-        rows = fetch_and_convert_to_str(cursor)
+        rows = cursor.fetchall()
         for row in rows:
             table_name = row["table_name"]
             table_list[table_name_to_table_index[table_name]].setdefault("foreign_keys", [])
