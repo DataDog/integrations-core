@@ -14,7 +14,7 @@
 * Fixed a bug in MySQL integration when trying to deconstruct None return ([#17873](https://github.com/DataDog/integrations-core/pull/17873))
 * Fix metadata table source for MySQL 5.6 ([#17875](https://github.com/DataDog/integrations-core/pull/17875))
 
-## 12.5.1 / 2024-06-11
+## 12.5.1 / 2024-06-11 / Agent 7.55.0
 
 ***Fixed***:
 
