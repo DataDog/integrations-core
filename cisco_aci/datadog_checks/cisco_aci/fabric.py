@@ -305,8 +305,8 @@ class Fabric:
                 [
                     "device_ip:{}".format(address),
                     "device_namespace:{}".format(self.namespace),
-                    "interface.status:{}".format(interface.status),
+                    "port.status:{}".format(interface.status),
                 ]
             )
-            self.gauge('cisco_aci.fabric.node.interface.status', 1, tags=new_tags, hostname=hostname)
+            self.gauge('cisco_aci.fabric.port.status', 1, tags=new_tags, hostname=hostname)
         return interface.model_dump(exclude_none=True)

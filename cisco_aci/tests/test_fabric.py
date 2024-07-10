@@ -70,7 +70,6 @@ def test_fabric_mocked(aggregator):
             }
 
             for interface in EXPECTED_INTERFACE_METADATA:
-                print(interface)
                 hn = interface_tag_mapping.get(interface.device_id)
                 device_namespace, device_ip = interface.device_id.split(':')
                 interface_tags = [
@@ -81,11 +80,9 @@ def test_fabric_mocked(aggregator):
                     'fabric_pod_id:1',
                     'device_ip:{}'.format(device_ip),
                     'device_namespace:{}'.format(device_namespace),
-                    'interface.status:{}'.format(interface.status),
+                    'port.status:{}'.format(interface.status),
                 ]
-                aggregator.assert_metric(
-                    'cisco_aci.fabric.node.interface.status', value=1.0, tags=interface_tags, hostname=hn
-                )
+                aggregator.assert_metric('cisco_aci.fabric.port.status', value=1.0, tags=interface_tags, hostname=hn)
 
     metric_name = 'cisco_aci.fabric.port.ingr_total.bytes.cum'
     aggregator.assert_metric(metric_name, value=0.0, tags=tags101 + ['port:eth101/1/43'], hostname=hn101)
