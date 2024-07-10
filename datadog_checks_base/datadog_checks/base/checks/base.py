@@ -5,7 +5,6 @@ import copy
 import functools
 import importlib
 import inspect
-import json
 import logging
 import re
 import traceback
@@ -51,6 +50,7 @@ from ..utils.http import RequestsWrapper
 from ..utils.limiter import Limiter
 from ..utils.metadata import MetadataManager
 from ..utils.secrets import SecretsSanitizer
+from ..utils.serialization import from_json, to_json
 from ..utils.tagging import GENERIC_TAGS
 from ..utils.tls import TlsContextWrapper
 from ..utils.tracing import traced_class
@@ -309,6 +309,9 @@ class AgentCheck(object):
         if not PY2:
             self.check_initializations.append(self.load_configuration_models)
 
+        self.__formatted_tags = None
+        self.__logs_enabled = None
+
     def _create_metrics_pattern(self, metric_patterns, option_name):
         all_patterns = metric_patterns.get(option_name, [])
 
@@ -397,6 +400,36 @@ class AgentCheck(object):
             self._http = RequestsWrapper(self.instance or {}, self.init_config, self.HTTP_CONFIG_REMAPPER, self.log)
 
         return self._http
+
+    @property
+    def logs_enabled(self):
+        # type: () -> bool
+        """
+        Returns True if logs are enabled, False otherwise.
+        """
+        if self.__logs_enabled is None:
+            self.__logs_enabled = bool(datadog_agent.get_config('logs_enabled'))
+
+        return self.__logs_enabled
+
+    @property
+    def formatted_tags(self):
+        # type: () -> str
+        if self.__formatted_tags is None:
+            normalized_tags = set()
+            for tag in self.instance.get('tags', []):
+                key, _, value = tag.partition(':')
+                if not value:
+                    continue
+
+                if self.disable_generic_tags and key in GENERIC_TAGS:
+                    key = '{}_{}'.format(self.name, key)
+
+                normalized_tags.add('{}:{}'.format(key, value))
+
+            self.__formatted_tags = ','.join(sorted(normalized_tags))
+
+        return self.__formatted_tags
 
     @property
     def diagnosis(self):
@@ -945,6 +978,34 @@ class AgentCheck(object):
             self, self.check_id, self._format_namespace(name, raw), status, tags, hostname, message
         )
 
+    def send_log(self, data, cursor=None, stream='default'):
+        # type: (dict[str, str], dict[str, Any] | None, str) -> None
+        """Send a log for submission.
+
+        Parameters:
+
+            data (dict[str, str]):
+                the log data to send.
+            cursor (dict[str, Any] or None):
+                metadata associated with the log which will be saved to disk. the most recent value may be
+                retrieved with the `get_log_cursor` method.
+            stream (str):
+                the stream associated with this log, used for accurate cursor persistence.
+        """
+        attributes = data.copy()
+        if 'ddtags' not in attributes and self.formatted_tags:
+            attributes['ddtags'] = self.formatted_tags
+
+        datadog_agent.send_log(to_json(attributes), self.check_id)
+        if cursor is not None:
+            self.write_persistent_cache('log_cursor_{}'.format(stream), to_json(cursor))
+
+    def get_log_cursor(self, stream='default'):
+        # type: (str) -> dict[str, Any] | None
+        """Returns the most recent log cursor from disk."""
+        data = self.read_persistent_cache('log_cursor_{}'.format(stream))
+        return from_json(data) if data else None
+
     def _log_deprecation(self, deprecation_key, *args):
         # type: (str, *str) -> None
         """
@@ -1118,7 +1179,7 @@ class AgentCheck(object):
         The agent calls this method to retrieve diagnostics from integrations. This method
         runs explicit diagnostics if available.
         """
-        return json.dumps([d._asdict() for d in (self.diagnosis.diagnoses + self.diagnosis.run_explicit())])
+        return to_json([d._asdict() for d in (self.diagnosis.diagnoses + self.diagnosis.run_explicit())])
 
     def _get_requests_proxy(self):
         # type: () -> ProxySettings
@@ -1231,7 +1292,7 @@ class AgentCheck(object):
         except Exception as e:
             message = self.sanitize(str(e))
             tb = self.sanitize(traceback.format_exc())
-            error_report = json.dumps([{'message': message, 'traceback': tb}])
+            error_report = to_json([{'message': message, 'traceback': tb}])
         finally:
             if self.metric_limiter:
                 if is_affirmative(self.debug_metrics.get('metric_contexts', False)):
