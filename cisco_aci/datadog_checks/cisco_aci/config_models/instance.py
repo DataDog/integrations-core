@@ -82,6 +82,7 @@ class InstanceConfig(BaseModel):
     log_requests: Optional[bool] = None
     metric_patterns: Optional[MetricPatterns] = None
     min_collection_interval: Optional[float] = None
+    namespace: Optional[str] = None
     ntlm_domain: Optional[str] = None
     password: Optional[str] = None
     persist_connections: Optional[bool] = None
