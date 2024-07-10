@@ -43,7 +43,6 @@
         "metadata_path": "assets/service_checks.json"
       },
       "process_signatures": [
-        "python supervisord",
         "supervisord"
       ],
       "source_type_id": 116,
