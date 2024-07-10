@@ -18,7 +18,8 @@
       "Category::Metrics",
       "Category::Kubernetes",
       "Category::Security",
-      "Submitted Data Type::Metrics"
+      "Submitted Data Type::Metrics",
+      "Offering::Integration"
     ]
   },
   "assets": {
