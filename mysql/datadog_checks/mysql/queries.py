@@ -91,7 +91,12 @@ SELECT schema_name as `name`,default_character_set_name,default_collation_name F
 WHERE schema_name not in ('sys', 'mysql', 'performance_schema', 'information_schema')"""
 
 SQL_TABLES = """\
-SELECT table_name as `name`, engine, row_format, create_time FROM information_schema.TABLES WHERE TABLE_SCHEMA = %s
+SELECT table_name as `name`, 
+       engine,
+       row_format, 
+       create_time 
+       FROM information_schema.TABLES 
+       WHERE TABLE_SCHEMA = %s AND TABLE_TYPE="BASE TABLE"
 """
 
 SQL_COLUMNS = """\
