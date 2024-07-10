@@ -4,7 +4,7 @@
 
 [PingOne][1] is an identity-as-a-service (IDaaS) offering by Ping Identity. It's a cloud-based identity platform that provides a range of services related to identity and access management (IAM), including single sign-on (SSO), multi-factor authentication (MFA), user management, and more.
 
-The PingOne integration collects Audit logs and sends them to Datadog. Using the out-of-the-box logs pipeline, the logs are parsed and enriched for easy searching and analysis. This integration includes several dashboards visualizing total Audit events, total successful/failed login attempts, total successful/failed kerberos login attempts, and more.
+The PingOne integration collects Audit logs and sends them to Datadog. Using the out-of-the-box logs pipeline, the logs are parsed and enriched for easy searching and analysis. This integration includes several dashboards visualizing total Audit events, total successful and total failed login attempts, total successful and total failed kerberos login attempts, and more.
 
 ## Setup
 
@@ -12,21 +12,21 @@ The PingOne integration collects Audit logs and sends them to Datadog. Using the
 
 #### PingOne Configuration
 
-1. Login to [**PingOne**][2] with your credentials.
+1. Login to [PingOne][2] with your credentials.
 2. From the navigation sidebar, expand the **Applications** section and select **Applications**.
-3. Click + to begin creating a new application.
+3. Click **+** (plus) to begin creating a new application.
 4. Enter an **Application Name**.
 5. Select **Worker** as the application type.
-6. On the application flyout, ensure that the toggle switch in the header is activated, in order to enable the application.
+6. On the application flyout, ensure that the toggle switch in the header is activated in order to enable the application.
 7. Select the **Roles** tab of the application flyout.
-8. Click the **Grant** Roles button.
-9. Under **Available responsibilities**, in the **Environment Admin section**, select the environment(s) to grant access to, then click **Save**.
+8. Click the **Grant Roles** button.
+9. Under **Available responsibilities**, in the **Environment Admin section**, select the environments to grant access to, then click **Save**.
 10. Select the **Configuration** tab of the application flyout.
 11. From the General section, copy the **Client ID**, **Client Secret** and **Environment ID**.
 
-#### PingOne DataDog Integration Configuration
+#### PingOne Datadog Integration Configuration
 
-Configure the Datadog endpoint to forward PingOne events as logs to Datadog.
+Configure the Datadog endpoint to forward PingOne events as logs to Datadog:
 
 1. Navigate to `PingOne`.
 2. Add your PingOne credentials.

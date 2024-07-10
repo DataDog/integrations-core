@@ -1,0 +1,3 @@
+Drop explain plan errors to debug level.
+
+Explain plan collection can fail for any number of legitimate reasons, so avoid polluting the logs by logging them at the debug level.
