@@ -134,7 +134,7 @@ SELECT
     constraint_schema,
     constraint_name as `name`,
     table_name,
-    group_concat(column_name) as column_names,
+    group_concat(column_name order by ordinal_position asc) as column_names,
     referenced_table_schema,
     referenced_table_name,
     group_concat(referenced_column_name) as referenced_column_names

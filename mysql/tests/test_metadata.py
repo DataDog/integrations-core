@@ -33,7 +33,6 @@ def normalize_values(actual_payload):
         table['create_time'] = "normalized_value"
         if 'foreign_keys' in table:
             for f_key in table['foreign_keys']:
-                f_key["column_names"] = sort_names_split_by_coma(f_key["column_names"])
                 f_key["referenced_column_names"] = sort_names_split_by_coma(f_key["referenced_column_names"])
 
 
@@ -79,7 +78,7 @@ def test_metadata_collection_interval_and_enabled(dbm_instance):
     mysql_check = MySql(common.CHECK_NAME, {}, instances=[dbm_instance])
     assert not mysql_check._mysql_metadata.enabled
 
-
+import pdb
 @pytest.mark.integration
 @pytest.mark.usefixtures('dd_environment')
 def test_collect_schemas(aggregator, dd_run_check, dbm_instance):
@@ -129,7 +128,7 @@ def test_collect_schemas(aggregator, dd_run_check, dbm_instance):
                         "name": "FK_RestaurantNameDistrict",
                         "constraint_schema": "datadog_test_schemas",
                         "table_name": "RestaurantReviews",
-                        "column_names": "District,RestaurantName",
+                        "column_names": "RestaurantName,District",
                         "referenced_table_schema": "datadog_test_schemas",
                         "referenced_table_name": "Restaurants",
                         "referenced_column_names": "District,RestaurantName",
@@ -662,7 +661,7 @@ def test_collect_schemas(aggregator, dd_run_check, dbm_instance):
             actual_payloads[db_name]['schemas'] = actual_payloads[db_name]['schemas'] + database_metadata[0]['schemas']
         else:
             actual_payloads[db_name] = database_metadata[0]
-
+    pdb.set_trace()
     assert len(actual_payloads) == len(expected_data_for_db)
 
     for db_name, actual_payload in actual_payloads.items():
