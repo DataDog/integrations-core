@@ -330,7 +330,7 @@
                     {
                         "id": 9,
                         "definition": {
-                            "title": "Bandwidth by Tenant (ingress is negative)",
+                            "title": "Bandwidth by Tenant (egress)",
                             "title_size": "16",
                             "title_align": "left",
                             "show_legend": true,
@@ -364,11 +364,41 @@
                                         "line_width": "normal"
                                     },
                                     "display_type": "line"
-                                },
+                                }
+                            ],
+                            "yaxis": {
+                                "include_zero": false
+                            },
+                            "custom_links": []
+                        },
+                        "layout": {
+                            "x": 0,
+                            "y": 2,
+                            "width": 6,
+                            "height": 3
+                        }
+                    },
+                    {
+                        "id": 7114376680227872,
+                        "definition": {
+                            "title": "Bandwidth by Tenant (ingress)",
+                            "title_size": "16",
+                            "title_align": "left",
+                            "show_legend": true,
+                            "legend_layout": "vertical",
+                            "legend_columns": [
+                                "avg",
+                                "min",
+                                "max",
+                                "value",
+                                "sum"
+                            ],
+                            "type": "timeseries",
+                            "requests": [
                                 {
                                     "formulas": [
                                         {
-                                            "formula": "query1 * -1"
+                                            "formula": "query1"
                                         }
                                     ],
                                     "queries": [
@@ -380,9 +410,9 @@
                                     ],
                                     "response_format": "timeseries",
                                     "style": {
-                                        "palette": "cool",
-                                        "line_type": "dotted",
-                                        "line_width": "thick"
+                                        "palette": "dog_classic",
+                                        "line_type": "solid",
+                                        "line_width": "normal"
                                     },
                                     "display_type": "line"
                                 }
@@ -393,9 +423,9 @@
                             "custom_links": []
                         },
                         "layout": {
-                            "x": 0,
+                            "x": 6,
                             "y": 2,
-                            "width": 12,
+                            "width": 6,
                             "height": 3
                         }
                     }
@@ -752,7 +782,7 @@
                     {
                         "id": 10,
                         "definition": {
-                            "title": "Bandwidth by Switch (ingress is negative)",
+                            "title": "Bandwidth by Switch (egress)",
                             "title_size": "16",
                             "title_align": "left",
                             "show_legend": true,
@@ -786,11 +816,38 @@
                                         "line_width": "normal"
                                     },
                                     "display_type": "line"
-                                },
+                                }
+                            ],
+                            "custom_links": []
+                        },
+                        "layout": {
+                            "x": 0,
+                            "y": 2,
+                            "width": 6,
+                            "height": 3
+                        }
+                    },
+                    {
+                        "id": 4676643676192110,
+                        "definition": {
+                            "title": "Bandwidth by Switch (ingress)",
+                            "title_size": "16",
+                            "title_align": "left",
+                            "show_legend": true,
+                            "legend_layout": "vertical",
+                            "legend_columns": [
+                                "avg",
+                                "min",
+                                "max",
+                                "value",
+                                "sum"
+                            ],
+                            "type": "timeseries",
+                            "requests": [
                                 {
                                     "formulas": [
                                         {
-                                            "formula": "query1 * -1"
+                                            "formula": "query1"
                                         }
                                     ],
                                     "queries": [
@@ -802,8 +859,8 @@
                                     ],
                                     "response_format": "timeseries",
                                     "style": {
-                                        "palette": "cool",
-                                        "line_type": "dotted",
+                                        "palette": "dog_classic",
+                                        "line_type": "solid",
                                         "line_width": "normal"
                                     },
                                     "display_type": "line"
@@ -812,9 +869,9 @@
                             "custom_links": []
                         },
                         "layout": {
-                            "x": 0,
+                            "x": 6,
                             "y": 2,
-                            "width": 12,
+                            "width": 6,
                             "height": 3
                         }
                     }
@@ -868,7 +925,7 @@
                                         {
                                             "name": "query3",
                                             "data_source": "metrics",
-                                            "query": "avg:cisco_aci.fabric.port.egr_total.bytes.cum{apic_role:leaf, $pod} by {fabric_pod_id,node_id,port}",
+                                            "query": "avg:cisco_aci.fabric.port.ingr_total.bytes.cum{apic_role:leaf, $pod} by {fabric_pod_id,node_id,port}",
                                             "aggregator": "avg"
                                         },
                                         {
@@ -976,7 +1033,7 @@
                                         {
                                             "name": "query3",
                                             "data_source": "metrics",
-                                            "query": "avg:cisco_aci.fabric.port.egr_total.bytes.cum{apic_role:spine, $pod} by {fabric_pod_id,node_id,port}",
+                                            "query": "avg:cisco_aci.fabric.port.ingr_total.bytes.cum{apic_role:spine, $pod} by {fabric_pod_id,node_id,port}",
                                             "aggregator": "avg"
                                         },
                                         {
