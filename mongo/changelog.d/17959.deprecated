@@ -1,2 +1,0 @@
-Configuration option `dbnames` is deprecated and will be removed in a future release.
-To monitor multiple databases, set `database_autodiscovery.enabled` to true and configure `database_autodiscovery.include` and `database_autodiscovery.exclude` filters instead.
