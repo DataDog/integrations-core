@@ -78,7 +78,7 @@ def test_metadata_collection_interval_and_enabled(dbm_instance):
     mysql_check = MySql(common.CHECK_NAME, {}, instances=[dbm_instance])
     assert not mysql_check._mysql_metadata.enabled
 
-import pdb
+
 @pytest.mark.integration
 @pytest.mark.usefixtures('dd_environment')
 def test_collect_schemas(aggregator, dd_run_check, dbm_instance):
@@ -136,6 +136,7 @@ def test_collect_schemas(aggregator, dd_run_check, dbm_instance):
                 ],
                 "indexes": [
                     {
+                        "index_schema":"datadog_test_schemas",
                         "name": "FK_RestaurantNameDistrict",
                         "collation": "A",
                         "index_type": "BTREE",
@@ -184,6 +185,7 @@ def test_collect_schemas(aggregator, dd_run_check, dbm_instance):
                 ],
                 "indexes": [
                     {
+                        "index_schema":"datadog_test_schemas",
                         "name": "UC_RestaurantNameDistrict",
                         "collation": "A",
                         "index_type": "BTREE",
@@ -232,6 +234,7 @@ def test_collect_schemas(aggregator, dd_run_check, dbm_instance):
                 ],
                 "indexes": [
                     {
+                        "index_schema":"datadog_test_schemas",
                         "name": "PRIMARY",
                         "collation": "A",
                         "index_type": "BTREE",
@@ -243,6 +246,7 @@ def test_collect_schemas(aggregator, dd_run_check, dbm_instance):
                         "non_uniques": "0",
                     },
                     {
+                        "index_schema":"datadog_test_schemas",
                         "name": "single_column_index",
                         "collation": "A",
                         "index_type": "BTREE",
@@ -254,6 +258,7 @@ def test_collect_schemas(aggregator, dd_run_check, dbm_instance):
                         "non_uniques": "1",
                     },
                     {
+                        "index_schema":"datadog_test_schemas",
                         "name": "two_columns_index",
                         "collation": "A",
                         "index_type": "BTREE",
@@ -376,6 +381,7 @@ def test_collect_schemas(aggregator, dd_run_check, dbm_instance):
                 ],
                 "indexes": [
                     {
+                        "index_schema":"datadog_test_schemas",
                         "name": "PRIMARY",
                         "collation": "A",
                         "index_type": "BTREE",
@@ -426,6 +432,7 @@ def test_collect_schemas(aggregator, dd_run_check, dbm_instance):
                 ],
                 "indexes": [
                     {
+                        "index_schema":"datadog_test_schemas",
                         "name": "FK_CityId",
                         "collation": "A",
                         "index_type": "BTREE",
@@ -472,6 +479,7 @@ def test_collect_schemas(aggregator, dd_run_check, dbm_instance):
                 ],
                 "indexes": [
                     {
+                        "index_schema":"datadog_test_schemas_second",
                         "name": "thingsindex",
                         "collation": "A",
                         "index_type": "BTREE",
@@ -661,7 +669,7 @@ def test_collect_schemas(aggregator, dd_run_check, dbm_instance):
             actual_payloads[db_name]['schemas'] = actual_payloads[db_name]['schemas'] + database_metadata[0]['schemas']
         else:
             actual_payloads[db_name] = database_metadata[0]
-    pdb.set_trace()
+
     assert len(actual_payloads) == len(expected_data_for_db)
 
     for db_name, actual_payload in actual_payloads.items():
