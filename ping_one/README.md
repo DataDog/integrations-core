@@ -33,10 +33,10 @@ Configure the Datadog endpoint to forward PingOne events as logs to Datadog.
 
 | PingOne Parameters | Description                                                                |
 | ----------------------------- | -------------------------------------------------------------------------- |
+| Domain                          | The Top level domain from PingOne.                                        |
+| Environment Id                  | The Environment Id from PingOne.                                        |
 | Client Id                       | The Client Id from PingOne.                                           |
 | Client Secret                   | The Client Secret from PingOne.                                        |
-| Environment Id                  | The Environment Id from PingOne.                                        |
-| Domain                          | The Top level domain from PingOne.                                        |
 
 ## Data Collected
 
