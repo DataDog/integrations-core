@@ -75,7 +75,6 @@ pipeline:
           source: severity
           target: status
           lookupTable: |-
-            informational, info
             low, info
             medium, warning
             high, critical
@@ -116,7 +115,6 @@ pipeline:
           source: severity
           target: status
           lookupTable: |-
-            informational, info
             low, info
             medium, warning
             high, critical
