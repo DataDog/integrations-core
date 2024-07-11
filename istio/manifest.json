@@ -20,7 +20,8 @@
       "Supported OS::macOS",
       "Submitted Data Type::Metrics",
       "Submitted Data Type::Logs",
-      "Submitted Data Type::Traces"
+      "Submitted Data Type::Traces",
+      "Offering::Integration"
     ],
     "resources": [
       {

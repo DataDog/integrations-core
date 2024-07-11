@@ -20,7 +20,7 @@
 * Upgrade `azure-identity` dependency ([#17862](https://github.com/DataDog/integrations-core/pull/17862))
 * Move sqlserver schema foreign key information to the dependent table. ([#17933](https://github.com/DataDog/integrations-core/pull/17933))
 
-## 17.3.0 / 2024-05-31
+## 17.3.0 / 2024-05-31 / Agent 7.55.0
 
 ***Added***:
 

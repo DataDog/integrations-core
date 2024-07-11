@@ -21,7 +21,8 @@
       "Category::Orchestration",
       "Category::Configuration & Deployment",
       "Submitted Data Type::Metrics",
-      "Submitted Data Type::Logs"
+      "Submitted Data Type::Logs",
+      "Offering::Integration"
     ],
     "resources": [
       {

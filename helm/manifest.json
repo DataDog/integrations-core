@@ -16,7 +16,8 @@
       "Supported OS::macOS",
       "Supported OS::Windows",
       "Category::Configuration & Deployment",
-      "Category::Containers"
+      "Category::Containers",
+      "Offering::Integration"
     ],
     "resources": [
       {

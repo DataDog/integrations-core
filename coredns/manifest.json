@@ -17,7 +17,8 @@
       "Category::Kubernetes",
       "Category::Log Collection",
       "Category::Network",
-      "Supported OS::Linux"
+      "Supported OS::Linux",
+      "Offering::Integration"
     ],
     "resources": [
       {

@@ -16,7 +16,8 @@
       "Supported OS::macOS",
       "Category::Containers",
       "Category::Log Collection",
-      "Category::Network"
+      "Category::Network",
+      "Offering::Integration"
     ],
     "resources": [
       {

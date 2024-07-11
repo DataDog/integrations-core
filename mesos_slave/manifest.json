@@ -18,7 +18,8 @@
       "Category::Network",
       "Category::Orchestration",
       "Supported OS::Linux",
-      "Supported OS::macOS"
+      "Supported OS::macOS",
+      "Offering::Integration"
     ],
     "resources": [
       {
