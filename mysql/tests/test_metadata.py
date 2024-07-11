@@ -29,11 +29,28 @@ def sort_names_split_by_coma(names):
 
 
 def normalize_values(actual_payload):
+    actual_payload["default_character_set_name"] = "normalized_value"
+    actual_payload["default_collation_name"] = "normalized_value"
     for table in actual_payload['tables']:
         table['create_time'] = "normalized_value"
         if 'foreign_keys' in table:
             for f_key in table['foreign_keys']:
                 f_key["referenced_column_names"] = sort_names_split_by_coma(f_key["referenced_column_names"])
+        if 'columns' in table:
+            for column in table['columns']:
+                if column['column_type'] == 'int':
+                    #11 is omitted in certain versions
+                    #if its not 11 i.e. not default we keep it
+                    column['column_type'] = 'int(11)'
+        if 'partitions' in table:
+            for partition in table['partitions']:
+                if partition["partition_expression"] is not None:
+                    partition["partition_expression"] = partition["partition_expression"].replace("`", "").lower().strip()
+                if partition["subpartition_expression"] is not None:
+                    partition["subpartition_expression"] = partition["subpartition_expression"].replace("`", "").lower().strip()
+                if partition["max_data_length"] is None:
+                    partition["max_data_length"] = 0
+
 
 
 @pytest.mark.integration
@@ -86,8 +103,8 @@ def test_collect_schemas(aggregator, dd_run_check, dbm_instance):
 
     exp_datadog_test_schemas = {
         "name": "datadog_test_schemas",
-        "default_character_set_name": "latin1",
-        "default_collation_name": "latin1_swedish_ci",
+        "default_character_set_name": "normalized_value",
+        "default_collation_name": "normalized_value",
         "tables": [
             {
                 "name": "RestaurantReviews",
@@ -318,7 +335,7 @@ def test_collect_schemas(aggregator, dd_run_check, dbm_instance):
                         "partition_description": "100",
                         "table_rows": 0,
                         "data_length": 16384,
-                        "max_data_length": None,
+                        "max_data_length": 0,
                         "index_length": 0,
                         "data_free": 0,
                         "partition_comment": "",
@@ -336,7 +353,7 @@ def test_collect_schemas(aggregator, dd_run_check, dbm_instance):
                         "partition_description": "200",
                         "table_rows": 0,
                         "data_length": 16384,
-                        "max_data_length": None,
+                        "max_data_length": 0,
                         "index_length": 0,
                         "data_free": 0,
                         "partition_comment": "",
@@ -354,7 +371,7 @@ def test_collect_schemas(aggregator, dd_run_check, dbm_instance):
                         "partition_description": "300",
                         "table_rows": 0,
                         "data_length": 16384,
-                        "max_data_length": None,
+                        "max_data_length": 0,
                         "index_length": 0,
                         "data_free": 0,
                         "partition_comment": "",
@@ -372,7 +389,7 @@ def test_collect_schemas(aggregator, dd_run_check, dbm_instance):
                         "partition_description": "MAXVALUE",
                         "table_rows": 0,
                         "data_length": 16384,
-                        "max_data_length": None,
+                        "max_data_length": 0,
                         "index_length": 0,
                         "data_free": 0,
                         "partition_comment": "",
@@ -449,8 +466,8 @@ def test_collect_schemas(aggregator, dd_run_check, dbm_instance):
     }
     exp_datadog_test_schemas_second = {
         "name": "datadog_test_schemas_second",
-        "default_character_set_name": "latin1",
-        "default_collation_name": "latin1_swedish_ci",
+        "default_character_set_name": "normalized_value",
+        "default_collation_name": "normalized_value",
         "tables": [
             {
                 "name": "ϑings",
@@ -525,12 +542,12 @@ def test_collect_schemas(aggregator, dd_run_check, dbm_instance):
                         "subpartition_ordinal_position": 1,
                         "partition_method": "RANGE",
                         "subpartition_method": "HASH",
-                        "partition_expression": " YEAR(purchased)",
-                        "subpartition_expression": " TO_DAYS(purchased)",
+                        "partition_expression": "year(purchased)",
+                        "subpartition_expression": "to_days(purchased)",
                         "partition_description": "1990",
                         "table_rows": 0,
                         "data_length": 16384,
-                        "max_data_length": None,
+                        "max_data_length": 0,
                         "index_length": 0,
                         "data_free": 0,
                         "partition_comment": "",
@@ -543,12 +560,12 @@ def test_collect_schemas(aggregator, dd_run_check, dbm_instance):
                         "subpartition_ordinal_position": 2,
                         "partition_method": "RANGE",
                         "subpartition_method": "HASH",
-                        "partition_expression": " YEAR(purchased)",
-                        "subpartition_expression": " TO_DAYS(purchased)",
+                        "partition_expression": "year(purchased)",
+                        "subpartition_expression": "to_days(purchased)",
                         "partition_description": "1990",
                         "table_rows": 0,
                         "data_length": 16384,
-                        "max_data_length": None,
+                        "max_data_length": 0,
                         "index_length": 0,
                         "data_free": 0,
                         "partition_comment": "",
@@ -561,12 +578,12 @@ def test_collect_schemas(aggregator, dd_run_check, dbm_instance):
                         "subpartition_ordinal_position": 1,
                         "partition_method": "RANGE",
                         "subpartition_method": "HASH",
-                        "partition_expression": " YEAR(purchased)",
-                        "subpartition_expression": " TO_DAYS(purchased)",
+                        "partition_expression": "year(purchased)",
+                        "subpartition_expression": "to_days(purchased)",
                         "partition_description": "2000",
                         "table_rows": 0,
                         "data_length": 16384,
-                        "max_data_length": None,
+                        "max_data_length": 0,
                         "index_length": 0,
                         "data_free": 0,
                         "partition_comment": "",
@@ -579,12 +596,12 @@ def test_collect_schemas(aggregator, dd_run_check, dbm_instance):
                         "subpartition_ordinal_position": 2,
                         "partition_method": "RANGE",
                         "subpartition_method": "HASH",
-                        "partition_expression": " YEAR(purchased)",
-                        "subpartition_expression": " TO_DAYS(purchased)",
+                        "partition_expression": "year(purchased)",
+                        "subpartition_expression": "to_days(purchased)",
                         "partition_description": "2000",
                         "table_rows": 0,
                         "data_length": 16384,
-                        "max_data_length": None,
+                        "max_data_length": 0,
                         "index_length": 0,
                         "data_free": 0,
                         "partition_comment": "",
@@ -597,12 +614,12 @@ def test_collect_schemas(aggregator, dd_run_check, dbm_instance):
                         "subpartition_ordinal_position": 1,
                         "partition_method": "RANGE",
                         "subpartition_method": "HASH",
-                        "partition_expression": " YEAR(purchased)",
-                        "subpartition_expression": " TO_DAYS(purchased)",
+                        "partition_expression": "year(purchased)",
+                        "subpartition_expression": "to_days(purchased)",
                         "partition_description": "MAXVALUE",
                         "table_rows": 0,
                         "data_length": 16384,
-                        "max_data_length": None,
+                        "max_data_length": 0,
                         "index_length": 0,
                         "data_free": 0,
                         "partition_comment": "",
@@ -615,12 +632,12 @@ def test_collect_schemas(aggregator, dd_run_check, dbm_instance):
                         "subpartition_ordinal_position": 2,
                         "partition_method": "RANGE",
                         "subpartition_method": "HASH",
-                        "partition_expression": " YEAR(purchased)",
-                        "subpartition_expression": " TO_DAYS(purchased)",
+                        "partition_expression": "year(purchased)",
+                        "subpartition_expression": "to_days(purchased)",
                         "partition_description": "MAXVALUE",
                         "table_rows": 0,
                         "data_length": 16384,
-                        "max_data_length": None,
+                        "max_data_length": 0,
                         "index_length": 0,
                         "data_free": 0,
                         "partition_comment": "",
