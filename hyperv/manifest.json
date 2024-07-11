@@ -16,6 +16,12 @@
       "Category::OS & System",
       "Supported OS::Windows",
       "Offering::Integration"
+    ],
+    "resources": [
+      {
+        "resource_type": "blog",
+        "url": "https://www.datadoghq.com/blog/monitor-microsoft-hyperv-with-datadog"
+      }
     ]
   },
   "author": {

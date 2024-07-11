@@ -20,6 +20,16 @@
       "Supported OS::Windows",
       "Supported OS::macOS",
       "Offering::Integration"
+    ],
+    "resources": [
+      {
+        "resource_type": "documentation",
+        "url": "https://docs.paloaltonetworks.com/pan-os/9-1/pan-os-admin/monitoring/use-syslog-for-monitoring/syslog-field-descriptions"
+      },
+      {
+        "resource_type": "documentation",
+        "url": "https://docs.datadoghq.com/logs/log_collection/?tab=tailexistingfiles#getting-started-with-the-agent"
+      }
     ]
   },
   "author": {

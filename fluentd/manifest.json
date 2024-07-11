@@ -18,6 +18,12 @@
       "Category::Metrics",
       "Supported OS::macOS",
       "Offering::Integration"
+    ],
+    "resources": [
+      {
+        "resource_type": "blog",
+        "url": "https://www.datadoghq.com/blog/monitor-fluentd-datadog"
+      }
     ]
   },
   "author": {

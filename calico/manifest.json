@@ -23,6 +23,12 @@
       "Submitted Data Type::Metrics",
       "Submitted Data Type::Logs",
       "Offering::Integration"
+    ],
+    "resources": [
+      {
+        "resource_type": "blog",
+        "url": "https://www.datadoghq.com/blog/monitor-calico-with-datadog/"
+      }
     ]
   },
   "author": {

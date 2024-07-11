@@ -18,6 +18,24 @@
       "Supported OS::Windows",
       "Supported OS::macOS",
       "Offering::Integration"
+    ],
+    "resources": [
+      {
+        "resource_type": "blog",
+        "url": "https://www.datadoghq.com/blog/monitor-hashicorp-vault-with-datadog"
+      },
+      {
+        "resource_type": "blog",
+        "url": "https://www.datadoghq.com/blog/monitor-vault-metrics-and-logs/"
+      },
+      {
+        "resource_type": "blog",
+        "url": "https://www.datadoghq.com/blog/vault-monitoring-tools"
+      },
+      {
+        "resource_type": "blog",
+        "url": "https://www.datadoghq.com/blog/vault-monitoring-with-datadog"
+      }
     ]
   },
   "author": {

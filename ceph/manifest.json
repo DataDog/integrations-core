@@ -18,6 +18,12 @@
       "Category::OS & System",
       "Category::Log Collection",
       "Offering::Integration"
+    ],
+    "resources": [
+      {
+        "resource_type": "blog",
+        "url": "https://www.datadoghq.com/blog/monitor-ceph-datadog"
+      }
     ]
   },
   "author": {

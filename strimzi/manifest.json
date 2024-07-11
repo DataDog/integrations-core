@@ -20,6 +20,12 @@
       "Submitted Data Type::Logs",
       "Submitted Data Type::Metrics",
       "Offering::Integration"
+    ],
+    "resources": [
+      {
+        "resource_type": "blog",
+        "url": "https://www.datadoghq.com/blog/container-native-integrations/#messaging-and-streaming-with-strimzi"
+      }
     ]
   },
   "assets": {

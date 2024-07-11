@@ -20,6 +20,28 @@
       "Supported OS::Windows",
       "Supported OS::macOS",
       "Offering::Integration"
+    ],
+    "resources": [
+      {
+        "resource_type": "documentation",
+        "url": "https://docs.datadoghq.com/integrations/faq/postgres-custom-metric-collection-explained/"
+      },
+      {
+        "resource_type": "blog",
+        "url": "https://www.datadoghq.com/blog/100x-faster-postgres-performance-by-changing-1-line"
+      },
+      {
+        "resource_type": "blog",
+        "url": "https://www.datadoghq.com/blog/postgresql-monitoring"
+      },
+      {
+        "resource_type": "blog",
+        "url": "https://www.datadoghq.com/blog/postgresql-monitoring-tools"
+      },
+      {
+        "resource_type": "blog",
+        "url": "https://www.datadoghq.com/blog/collect-postgresql-data-with-datadog"
+      }
     ]
   },
   "author": {
