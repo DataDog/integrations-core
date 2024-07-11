@@ -39,18 +39,21 @@ def normalize_values(actual_payload):
         if 'columns' in table:
             for column in table['columns']:
                 if column['column_type'] == 'int':
-                    #11 is omitted in certain versions
-                    #if its not 11 i.e. not default we keep it
+                    # 11 is omitted in certain versions
+                    # if its not 11 i.e. not default we keep it
                     column['column_type'] = 'int(11)'
         if 'partitions' in table:
             for partition in table['partitions']:
                 if partition["partition_expression"] is not None:
-                    partition["partition_expression"] = partition["partition_expression"].replace("`", "").lower().strip()
+                    partition["partition_expression"] = (
+                        partition["partition_expression"].replace("`", "").lower().strip()
+                    )
                 if partition["subpartition_expression"] is not None:
-                    partition["subpartition_expression"] = partition["subpartition_expression"].replace("`", "").lower().strip()
+                    partition["subpartition_expression"] = (
+                        partition["subpartition_expression"].replace("`", "").lower().strip()
+                    )
                 if partition["max_data_length"] is None:
                     partition["max_data_length"] = 0
-
 
 
 @pytest.mark.integration

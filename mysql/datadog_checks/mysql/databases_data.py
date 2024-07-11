@@ -6,7 +6,6 @@ try:
     import datadog_agent
 except ImportError:
     from ..stubs import datadog_agent
-import pdb
 import json
 import time
 from contextlib import closing
@@ -318,7 +317,6 @@ class DatabasesData:
             params=db_name,
         )
         rows = cursor.fetchall()
-        #pdb.set_trace()
         for row in rows:
             if "nullable" in row:
                 if row["nullable"].lower() == "yes":
