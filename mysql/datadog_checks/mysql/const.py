@@ -290,6 +290,9 @@ GROUP_REPLICATION_VARS = {
     'Transactions_check': ('mysql.replication.group.transactions_check', GAUGE),
     'Conflict_detected': ('mysql.replication.group.conflicts_detected', GAUGE),
     'Transactions_row_validating': ('mysql.replication.group.transactions_validating', GAUGE),
+}
+
+EXTRA_GROUP_REPLICATION_VARS = {
     'Transactions_remote_applier_queue': ('mysql.replication.group.transactions_in_applier_queue', GAUGE),
     'Transactions_remote_applied': ('mysql.replication.group.transactions_applied', GAUGE),
     'Transactions_local_proposed': ('mysql.replication.group.transactions_proposed', GAUGE),
