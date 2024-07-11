@@ -285,7 +285,7 @@ CloudFormation example (YAML):
               Value: "{\"com.docker.compose.service\":\"service_name\"}"
 ```
 
-**Note**: You should not use `DD_HOSTNAME` since there is no concept of a host to the user in Fargate. Using this tag can cause your tasks to appear as APM Hosts in the Infrastructure list, potentially impacting your billing. Instead, `DD_TAGS` is traditionally used to assign host tags. As of Datadog Agent version 6.13.0, you can also use this environment variable to set global tags on your integration metrics.
+**Note**: You should not use `DD_HOSTNAME` since there is no concept of a host to the user in Fargate. Using this tag can cause your tasks to appear as APM Hosts in the Infrastructure list, potentially impacting your billing. Instead, `DD_TAGS` is traditionally used to assign host tags. As of Datadog Agent version 6.13.0, you can also use the `DD_TAGS` environment variable to set global tags on your integration metrics.
 
 ### Crawler-based metrics
 
