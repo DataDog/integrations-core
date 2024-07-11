@@ -60,7 +60,22 @@ MOCKED_PROMETHEUS_METRICS = [
     "fly_io.instance.memory.pressure_some",
 ]
 
-ALL_REST_METRICS = ['fly_io.app.count', 'fly_io.machine.count', 'fly_io.machines_api.up']
+ALL_REST_METRICS = [
+    'fly_io.app.count',
+    'fly_io.machine.count',
+    'fly_io.machines_api.up',
+    'fly_io.machine.cpus.count',
+    'fly_io.machine.gpus.count',
+    'fly_io.machine.memory',
+    'fly_io.machine.swap_size',
+    'fly_io.volume.created',
+    'fly_io.volume.size',
+    'fly_io.volume.encrypted',
+    'fly_io.volume.blocks.count',
+    'fly_io.volume.block_size',
+    'fly_io.volume.blocks_free',
+    'fly_io.volume.blocks_avail',
+]
 
 APP_UP_METRICS = [
     {
@@ -138,6 +153,183 @@ MACHINE_COUNT_METRICS = [
             'fly_platform_version:v2',
             'instance_id:01AP4Y49KSI6PG1H7KPKJN5GF',
             'machine_region:ewr',
+        ],
+    },
+]
+
+
+MACHINE_GUEST_METRICS = [
+    {
+        'name': 'fly_io.machine.cpus.count',
+        'count': 1,
+        'value': 1,
+        'tags': ['fly_org:test', 'cpu_kind:shared'],
+        'hostname': '32601eaad60025',
+    },
+    {
+        'name': 'fly_io.machine.gpus.count',
+        'count': 1,
+        'value': 2,
+        'tags': ['fly_org:test', 'gpu_kind:shared'],
+        'hostname': '09201eeed60025',
+    },
+    {
+        'name': 'fly_io.machine.memory',
+        'count': 1,
+        'value': 1024,
+        'tags': [
+            'fly_org:test',
+        ],
+        'hostname': '32601eaad60025',
+    },
+]
+
+MACHINE_INIT_METRICS = [
+    {
+        'name': 'fly_io.machine.swap_size',
+        'count': 1,
+        'value': 30,
+        'tags': [
+            'fly_org:test',
+        ],
+        'hostname': '09201eeed60025',
+    }
+]
+
+VOLUME_METRICS = [
+    {
+        'name': 'fly_io.volume.created',
+        'count': 1,
+        'value': 1,
+        'tags': [
+            'app_name:example-app-1',
+            'attached_machine_id:None',
+            'fly_org:test',
+            'fly_region:ewr',
+            'fly_zone:4bb3',
+            'fstype:ext4',
+            'volume_id:vol_vtuasw00k2xpkxyv',
+            'volume_name:my_app_vol',
+        ],
+    },
+    {
+        'name': 'fly_io.volume.size',
+        'count': 1,
+        'value': 1,
+        'tags': [
+            'app_name:example-app-1',
+            'attached_machine_id:None',
+            'fly_org:test',
+            'fly_region:ewr',
+            'fly_zone:4bb3',
+            'fstype:ext4',
+            'volume_id:vol_vtuasw00k2xpkxyv',
+            'volume_name:my_app_vol',
+        ],
+    },
+    {
+        'name': 'fly_io.volume.encrypted',
+        'count': 1,
+        'value': 1,
+        'tags': [
+            'app_name:example-app-1',
+            'attached_machine_id:None',
+            'fly_org:test',
+            'fly_region:ewr',
+            'fly_zone:4bb3',
+            'fstype:ext4',
+            'volume_id:vol_vtuasw00k2xpkxyv',
+            'volume_name:my_app_vol',
+        ],
+    },
+    {
+        'name': 'fly_io.volume.created',
+        'count': 1,
+        'value': 0,
+        'tags': [
+            'app_name:example-app-1',
+            'attached_machine_id:None',
+            'fly_org:test',
+            'fly_region:ewr',
+            'fly_zone:4bb3',
+            'fstype:None',
+            'volume_id:vol_vtuasw00k2xuai',
+            'volume_name:my_app_vol1',
+        ],
+    },
+    {
+        'name': 'fly_io.volume.blocks.count',
+        'count': 1,
+        'value': 0,
+        'tags': [
+            'app_name:example-app-1',
+            'attached_machine_id:None',
+            'fly_org:test',
+            'fly_region:ewr',
+            'fly_zone:4bb3',
+            'fstype:None',
+            'volume_id:vol_vtuasw00k2xuai',
+            'volume_name:my_app_vol1',
+        ],
+    },
+    {
+        'name': 'fly_io.volume.encrypted',
+        'count': 1,
+        'value': 0,
+        'tags': [
+            'app_name:example-app-1',
+            'attached_machine_id:None',
+            'fly_org:test',
+            'fly_region:ewr',
+            'fly_zone:4bb3',
+            'fstype:None',
+            'volume_id:vol_vtuasw00k2xuai',
+            'volume_name:my_app_vol1',
+        ],
+    },
+    {
+        'name': 'fly_io.volume.block_size',
+        'count': 1,
+        'value': 0,
+        'tags': [
+            'app_name:example-app-1',
+            'attached_machine_id:None',
+            'fly_org:test',
+            'fly_region:ewr',
+            'fly_zone:4bb3',
+            'fstype:ext4',
+            'volume_id:vol_vtuasw00k2xpkxyv',
+            'volume_name:my_app_vol',
+        ],
+    },
+    {
+        'name': 'fly_io.volume.blocks_free',
+        'count': 1,
+        'value': 0,
+        'tags': [
+            'app_name:example-app-1',
+            'attached_machine_id:None',
+            'fly_org:test',
+            'fly_region:ewr',
+            'fly_zone:4bb3',
+            'fstype:ext4',
+            'volume_id:vol_vtuasw00k2xpkxyv',
+            'volume_name:my_app_vol',
+        ],
+    },
+    {
+        'name': 'fly_io.volume.blocks_avail',
+        'count': 1,
+        'value': 0,
+        'tags': [
+            'app_name:example-app-1',
+            'attached_machine_id:None',
+            'fly_org:test',
+            'fly_region:ewr',
+            'fly_zone:4bb3',
+            'fstype:ext4',
+            'volume_id:vol_vtuasw00k2xpkxyv',
+            'volume_name:my_app_vol',
         ],
     },
 ]

@@ -78,11 +78,12 @@
             "env": {
                 "FLY_PROCESS_GROUP": "app"
             },
-            "init": {},
+            "init": {
+                "swap_size_mb": 30
+            },
             "guest": {
-                "cpu_kind": "shared",
-                "cpus": 1,
-                "memory_mb": 1024
+                "gpu_kind": "shared",
+                "gpus": 2
             },
             "metadata": {
                 "fly_flyctl_version": "0.2.60",
