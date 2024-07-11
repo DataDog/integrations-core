@@ -17,7 +17,8 @@
       "Supported OS::Windows",
       "Supported OS::macOS",
       "Category::Data Stores",
-      "Submitted Data Type::Metrics"
+      "Submitted Data Type::Metrics",
+      "Offering::Integration"
     ]
   },
   "assets": {

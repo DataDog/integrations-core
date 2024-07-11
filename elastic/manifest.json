@@ -21,7 +21,8 @@
       "Submitted Data Type::Metrics",
       "Submitted Data Type::Logs",
       "Submitted Data Type::Traces",
-      "Submitted Data Type::Events"
+      "Submitted Data Type::Events",
+      "Offering::Integration"
     ]
   },
   "author": {

@@ -17,7 +17,8 @@
       "Supported OS::Windows",
       "Category::Cloud",
       "Category::Data Stores",
-      "Category::Cost Management"
+      "Category::Cost Management",
+      "Offering::Integration"
     ]
   },
   "author": {
@@ -55,4 +56,3 @@
     }
   }
 }
-

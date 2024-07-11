@@ -17,7 +17,8 @@
       "Supported OS::macOS",
       "Category::Log Collection",
       "Category::AI/ML",
-      "Submitted Data Type::Metrics"
+      "Submitted Data Type::Metrics",
+      "Offering::Integration"
     ]
   },
   "assets": {
