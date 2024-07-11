@@ -22,7 +22,7 @@
 
 * Fix rate limiter in sync mode of DBMAsync job. Prior to this change, the DBMAsync job would not take into account the time of the job execution when throttling by the collection interval. ([#17893](https://github.com/DataDog/integrations-core/pull/17893))
 
-## 36.8.0 / 2024-06-13
+## 36.8.0 / 2024-06-13 / Agent 7.55.0
 
 ***Added***:
 
