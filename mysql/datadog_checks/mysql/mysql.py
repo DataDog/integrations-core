@@ -39,7 +39,7 @@ from .const import (
     GALERA_VARS,
     GAUGE,
     GROUP_REPLICATION_VARS,
-    EXTRA_GROUP_REPLICATION_VARS,
+    GROUP_REPLICATION_VARS_8_0_2,
     INNODB_VARS,
     MONOTONIC,
     OPTIONAL_STATUS_VARS,
@@ -63,9 +63,9 @@ from .queries import (
     SQL_95TH_PERCENTILE,
     SQL_AVG_QUERY_RUN_TIME,
     SQL_GROUP_REPLICATION_MEMBER,
-    SQL_GROUP_REPLICATION_MEMBER_EXTENDED,
+    SQL_GROUP_REPLICATION_MEMBER_8_0_2,
     SQL_GROUP_REPLICATION_METRICS,
-    SQL_GROUP_REPLICATION_METRICS_EXTENDED,
+    SQL_GROUP_REPLICATION_METRICS_8_0_2,
     SQL_GROUP_REPLICATION_PLUGIN_STATUS,
     SQL_INNODB_ENGINES,
     SQL_PROCESS_LIST,
@@ -657,12 +657,8 @@ class MySql(AgentCheck):
         try:
             with closing(db.cursor(CommenterCursor)) as cursor:
                 # Version 8.0.2 introduced new columns to replication_group_members and replication_group_member_stats
-                extended_group_replication_metrics = self.version.version_compatible((8, 0, 2))
-
-                query_to_execute = SQL_GROUP_REPLICATION_MEMBER
-                if extended_group_replication_metrics:
-                    query_to_execute = SQL_GROUP_REPLICATION_MEMBER_EXTENDED
-                
+                above_802 = self.version.version_compatible((8, 0, 2))
+                query_to_execute = SQL_GROUP_REPLICATION_MEMBER_8_0_2 if above_802 else SQL_GROUP_REPLICATION_MEMBER
                 cursor.execute(query_to_execute)
                 replica_results = cursor.fetchone()
                 status = self.OK
@@ -678,9 +674,8 @@ class MySql(AgentCheck):
                         'channel_name:{}'.format(replica_results[0]),
                         'member_state:{}'.format(replica_results[1]),
                     ]
-                    if extended_group_replication_metrics and len(replica_results) > 2:
+                    if above_802 and len(replica_results) > 2:
                         additional_tags.append('member_role:{}'.format(replica_results[2]))
-
                     self.gauge('mysql.replication.group.member_status', 1, tags=additional_tags + self.tags)
 
                 self.service_check(
@@ -689,9 +684,7 @@ class MySql(AgentCheck):
                     tags=self._service_check_tags() + additional_tags,
                 )
 
-                metrics_to_fetch = SQL_GROUP_REPLICATION_METRICS
-                if extended_group_replication_metrics:
-                    metrics_to_fetch = SQL_GROUP_REPLICATION_METRICS_EXTENDED
+                metrics_to_fetch = SQL_GROUP_REPLICATION_METRICS_8_0_2 if above_802 else SQL_GROUP_REPLICATION_METRICS
 
                 cursor.execute(metrics_to_fetch)
                 r = cursor.fetchone()
@@ -706,13 +699,13 @@ class MySql(AgentCheck):
                     'Conflict_detected': r[3],
                     'Transactions_row_validating': r[4],
                 }
-                vars_to_submit = GROUP_REPLICATION_VARS
-                if extended_group_replication_metrics:
+                vars_to_submit = copy.deepcopy(GROUP_REPLICATION_VARS)
+                if above_802:
                     results['Transactions_remote_applier_queue'] = r[5]
                     results['Transactions_remote_applied'] = r[6]
                     results['Transactions_local_proposed'] = r[7]
                     results['Transactions_local_rollback'] = r[8]
-                    vars_to_submit.update(EXTRA_GROUP_REPLICATION_VARS)
+                    vars_to_submit.update(GROUP_REPLICATION_VARS_8_0_2)
 
                 # Submit metrics now, so it's possible to attach `channel_name` tag
                 self._submit_metrics(vars_to_submit, results, self.tags + ['channel_name:{}'.format(r[0])])

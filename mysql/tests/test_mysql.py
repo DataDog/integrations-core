@@ -17,6 +17,7 @@ from datadog_checks.mysql.const import (
     BINLOG_VARS,
     GALERA_VARS,
     GROUP_REPLICATION_VARS,
+    GROUP_REPLICATION_VARS_8_0_2,
     INNODB_VARS,
     OPTIONAL_STATUS_VARS,
     OPTIONAL_STATUS_VARS_5_6_6,
@@ -167,16 +168,11 @@ def _assert_complex_config(aggregator, service_check_tags, metric_tags, hostname
 
     if MYSQL_REPLICATION == 'group':
 
-        extended_group_replication_metrics = MYSQL_VERSION_PARSED >= parse_version('8.0.2')
-
         testable_metrics.extend(variables.GROUP_REPLICATION_VARS)
-        if extended_group_replication_metrics:
-            testable_metrics.extend(variables.EXTRA_GROUP_REPLICATION_VARS)
-
         additional_tags = ['channel_name:group_replication_applier', 'member_state:ONLINE']
-        if extended_group_replication_metrics:
+        if MYSQL_VERSION_PARSED >= parse_version('8.0'):
+            testable_metrics.extend(variables.GROUP_REPLICATION_VARS_8_0_2)
             additional_tags.append('member_role:PRIMARY')
-
         aggregator.assert_service_check(
             'mysql.replication.group.status',
             status=MySql.OK,
@@ -542,7 +538,7 @@ def test_only_custom_queries(aggregator, dd_run_check, instance_custom_queries):
     ]
 
     if MYSQL_VERSION_PARSED >= parse_version('8.0.2'):
-        standard_metric_sets.append(variables.EXTRA_GROUP_REPLICATION_VARS)  
+        standard_metric_sets.append(GROUP_REPLICATION_VARS_8_0_2)
 
     for metric_set in standard_metric_sets:
         for metric_def in metric_set.values():

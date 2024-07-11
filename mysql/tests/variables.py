@@ -271,7 +271,7 @@ GROUP_REPLICATION_VARS = [
     'mysql.replication.group.transactions_validating',
 ]
 
-EXTRA_GROUP_REPLICATION_VARS= [
+GROUP_REPLICATION_VARS_8_0_2 = [
     'mysql.replication.group.transactions_in_applier_queue',
     'mysql.replication.group.transactions_applied',
     'mysql.replication.group.transactions_proposed',

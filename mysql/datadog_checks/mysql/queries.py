@@ -63,7 +63,7 @@ SELECT channel_name, member_state
 FROM performance_schema.replication_group_members
 WHERE member_id = @@server_uuid"""
 
-SQL_GROUP_REPLICATION_MEMBER_EXTENDED = """\
+SQL_GROUP_REPLICATION_MEMBER_8_0_2 = """\
 SELECT channel_name, member_state, member_role
 FROM performance_schema.replication_group_members
 WHERE member_id = @@server_uuid"""
@@ -74,7 +74,7 @@ count_transactions_rows_validating
 FROM performance_schema.replication_group_member_stats
 WHERE channel_name IN ('group_replication_applier', 'group_replication_recovery') AND member_id = @@server_uuid"""
 
-SQL_GROUP_REPLICATION_METRICS_EXTENDED = """\
+SQL_GROUP_REPLICATION_METRICS_8_0_2 = """\
 SELECT channel_name,count_transactions_in_queue,count_transactions_checked,count_conflicts_detected,
 count_transactions_rows_validating,count_transactions_remote_in_applier_queue,count_transactions_remote_applied,
 count_transactions_local_proposed,count_transactions_local_rollback
