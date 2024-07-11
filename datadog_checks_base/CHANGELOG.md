@@ -2,6 +2,12 @@
 
 <!-- towncrier release notes start -->
 
+## 36.10.0 / 2024-07-11
+
+***Added***:
+
+* [NDM] Add NDM metadata support for Cisco ACI ([#17735](https://github.com/DataDog/integrations-core/pull/17735))
+
 ## 36.9.0 / 2024-07-05
 
 ***Security***:
