@@ -529,7 +529,6 @@ def add_schema_test_databases(cursor):
     cursor.execute("USE datadog_test_schemas_second;")
     cursor.execute("GRANT SELECT ON datadog_test_schemas_second.* TO 'dog'@'%';")
     cursor.execute("CREATE TABLE IF NOT EXISTS ϑings (id INT DEFAULT 0, name VARCHAR(255));")
-    cursor.execute("INSERT INTO ϑings (id, name) VALUES (1, 'foo'), (2, 'bar');")
     cursor.execute("CREATE UNIQUE INDEX thingsindex ON ϑings (name);")
 
     cursor.execute(
