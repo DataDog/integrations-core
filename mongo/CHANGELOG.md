@@ -51,7 +51,7 @@
 
 * Skip emitting mongodb samples on unexplainable operations ([#17785](https://github.com/DataDog/integrations-core/pull/17785))
 
-## 6.5.0 / 2024-05-31
+## 6.5.0 / 2024-05-31 / Agent 7.55.0
 
 ***Added***:
 
