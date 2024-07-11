@@ -16,7 +16,8 @@
       "Supported OS::Windows",
       "Supported OS::macOS",
       "Category::Notifications",
-      "Category::Network"
+      "Category::Network",
+      "Offering::Integration"
     ]
   },
   "assets": {

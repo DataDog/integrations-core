@@ -59,7 +59,8 @@
       "Category::Network",
       "Category::Security",
       "Category::Log Collection",
-      "Submitted Data Type::Logs"
+      "Submitted Data Type::Logs",
+      "Offering::Integration"
     ]
   },
   "assets": {
