@@ -75,7 +75,7 @@ class MongoOperationSamples(DBMAsyncJob):
         super(MongoOperationSamples, self).__init__(
             check,
             rate_limit=1 / self._collection_interval,
-            run_sync=self._operation_samples_config.get("run_sync", False),  # Default to running sync
+            run_sync=self._operation_samples_config.get("run_sync", False),
             enabled=self._operation_samples_config["enabled"],
             dbms="mongodb",
             min_collection_interval=check._config.min_collection_interval,
@@ -91,7 +91,6 @@ class MongoOperationSamples(DBMAsyncJob):
     def collect_operation_samples(self):
         if not self._should_collect_operation_samples():
             return
-
         now = time.time()
 
         activities = []
@@ -103,7 +102,6 @@ class MongoOperationSamples(DBMAsyncJob):
                 self._check.log.debug("Sending operation sample: %s", sample)
                 self._check.database_monitoring_query_sample(json_util.dumps(sample))
             activities.append(activity)
-
         activities_payload = self._create_activities_payload(now, activities)
         self._check.log.debug("Sending activities payload: %s", activities_payload)
         self._check.database_monitoring_query_activity(json_util.dumps(activities_payload))

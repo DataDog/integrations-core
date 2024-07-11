@@ -125,6 +125,28 @@ def test_mongo_operation_samples_enabled(
     assert mongo_check._config.operation_samples.get('enabled') == operation_samples_enabled
 
 
+@pytest.mark.parametrize(
+    'dbm_enabled, operation_metrics_config, operation_metrics_enabled',
+    [
+        pytest.param(True, None, True, id='dbm_enabled_default'),
+        pytest.param(True, {'enabled': True}, True, id='operation_metrics_enabled'),
+        pytest.param(True, {'enabled': False}, False, id='operation_metrics_disabled'),
+        pytest.param(False, None, False, id='dbm_disabled_default'),
+        pytest.param(False, {'enabled': True}, False, id='operation_metrics_enabled_dbm_disabled'),
+        pytest.param(False, {'enabled': False}, False, id='operation_metrics_disabled_dbm_disabled'),
+    ],
+)
+def test_mongo_operation_metrics_enabled(
+    instance_integration_cluster, check, dbm_enabled, operation_metrics_config, operation_metrics_enabled
+):
+    instance_integration_cluster['dbm'] = dbm_enabled
+    if operation_metrics_config:
+        instance_integration_cluster['operation_metrics'] = operation_metrics_config
+
+    mongo_check = check(instance_integration_cluster)
+    assert mongo_check._config.operation_metrics.get('enabled') == operation_metrics_enabled
+
+
 def test_database_autodiscovery_disabled(instance_user):
     config = MongoConfig(instance_user, mock.Mock())
     assert config.database_autodiscovery_config is not None

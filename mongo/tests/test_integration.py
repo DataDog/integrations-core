@@ -80,6 +80,7 @@ def _assert_mongodb_instance_event(
 def test_integration_mongos(instance_integration_cluster, aggregator, check, dd_run_check, dbm):
     instance_integration_cluster['dbm'] = dbm
     instance_integration_cluster['operation_samples'] = {'enabled': False}
+    instance_integration_cluster['operation_metrics'] = {'enabled': False}
     mongos_check = check(instance_integration_cluster)
     mongos_check._last_states_by_server = {0: 1, 1: 2, 2: 2}
 

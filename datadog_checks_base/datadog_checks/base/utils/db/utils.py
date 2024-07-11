@@ -377,6 +377,7 @@ class DBMAsyncJob(object):
         except:
             raise
         finally:
+            print(self._cancel_event.isSet(), self._job_name, self._rate_limiter.last_event, self._rate_limiter.period_s)
             if not self._cancel_event.isSet():
                 self._rate_limiter.update_last_time_and_sleep()
             else:
