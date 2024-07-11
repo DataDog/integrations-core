@@ -10,7 +10,7 @@
 * Added more events/resource to be filtered in vSphere with event_resource_filters ([#17917](https://github.com/DataDog/integrations-core/pull/17917))
 * Update dependencies ([#17953](https://github.com/DataDog/integrations-core/pull/17953))
 
-## 7.5.3 / 2024-05-31
+## 7.5.3 / 2024-05-31 / Agent 7.55.0
 
 ***Fixed***:
 

@@ -2,6 +2,12 @@
 
 <!-- towncrier release notes start -->
 
+## 36.10.0 / 2024-07-11
+
+***Added***:
+
+* [NDM] Add NDM metadata support for Cisco ACI ([#17735](https://github.com/DataDog/integrations-core/pull/17735))
+
 ## 36.9.0 / 2024-07-05
 
 ***Security***:
@@ -16,7 +22,7 @@
 
 * Fix rate limiter in sync mode of DBMAsync job. Prior to this change, the DBMAsync job would not take into account the time of the job execution when throttling by the collection interval. ([#17893](https://github.com/DataDog/integrations-core/pull/17893))
 
-## 36.8.0 / 2024-06-13
+## 36.8.0 / 2024-06-13 / Agent 7.55.0
 
 ***Added***:
 

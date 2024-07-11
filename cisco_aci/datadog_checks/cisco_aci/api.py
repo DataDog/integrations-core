@@ -286,8 +286,8 @@ class Api:
         return self._parse_response(response)
 
     def get_eth_list(self, pod, node):
-        query = 'query-target=subtree&target-subtree-class=l1PhysIf'
-        path = '/api/mo/topology/pod-{}/node-{}/sys.json?{}'.format(pod, node, query)
+        query = 'rsp-subtree=children&rsp-subtree-class=ethpmPhysIf'
+        path = '/api/node/class/topology/pod-{}/node-{}/l1PhysIf.json?{}'.format(pod, node, query)
         response = self.make_request(path)
         return self._parse_response(response)
 

@@ -19,7 +19,8 @@
       "Supported OS::macOS",
       "Category::Network",
       "Submitted Data Type::Metrics",
-      "Submitted Data Type::Logs"
+      "Submitted Data Type::Logs",
+      "Offering::Integration"
     ]
   },
   "author": {
