@@ -18,6 +18,24 @@
       "Category::Containers",
       "Category::Orchestration",
       "Offering::Integration"
+    ],
+    "resources": [
+      {
+        "resource_type": "blog",
+        "url": "https://www.datadoghq.com/blog/gke-autopilot-monitoring/"
+      },
+      {
+        "resource_type": "blog",
+        "url": "https://www.datadoghq.com/blog/monitor-google-kubernetes-engine/"
+      },
+      {
+        "resource_type": "blog",
+        "url": "https://www.datadoghq.com/blog/monitor-tau-t2a-gke-workloads-with-datadog-arm-support/"
+      },
+      {
+        "resource_type": "blog",
+        "url": "https://www.datadoghq.com/blog/gke-dashboards-integration-improvements/"
+      }
     ]
   },
   "author": {

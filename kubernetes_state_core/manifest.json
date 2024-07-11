@@ -18,6 +18,12 @@
       "Supported OS::macOS",
       "Supported OS::Windows",
       "Offering::Integration"
+    ],
+    "resources": [
+      {
+        "resource_type": "blog",
+        "url": "https://www.datadoghq.com/blog/engineering/our-journey-taking-kubernetes-state-metrics-to-the-next-level/"
+      }
     ]
   },
   "author": {

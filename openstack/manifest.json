@@ -23,6 +23,20 @@
       "Submitted Data Type::Metrics",
       "Submitted Data Type::Logs",
       "Offering::Integration"
+    ],
+    "resources": [
+      {
+        "resource_type": "blog",
+        "url": "https://www.datadoghq.com/blog/openstack-monitoring-nova"
+      },
+      {
+        "resource_type": "blog",
+        "url": "https://www.datadoghq.com/blog/install-openstack-in-two-commands"
+      },
+      {
+        "resource_type": "blog",
+        "url": "https://www.datadoghq.com/blog/openstack-host-aggregates-flavors-availability-zones"
+      }
     ]
   },
   "author": {

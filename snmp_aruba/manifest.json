@@ -18,6 +18,12 @@
       "Category::Notifications",
       "Category::Network",
       "Offering::Integration"
+    ],
+    "resources": [
+      {
+        "resource_type": "blog",
+        "url": "https://www.datadoghq.com/blog/monitor-snmp-with-datadog/"
+      }
     ]
   },
   "assets": {

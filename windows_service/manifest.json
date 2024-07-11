@@ -15,6 +15,20 @@
       "Supported OS::Windows",
       "Category::OS & System",
       "Offering::Integration"
+    ],
+    "resources": [
+      {
+        "resource_type": "blog",
+        "url": "https://www.datadoghq.com/blog/monitoring-windows-server-2012"
+      },
+      {
+        "resource_type": "blog",
+        "url": "https://www.datadoghq.com/blog/collect-windows-server-2012-metrics"
+      },
+      {
+        "resource_type": "blog",
+        "url": "https://www.datadoghq.com/blog/windows-server-monitoring"
+      }
     ]
   },
   "author": {

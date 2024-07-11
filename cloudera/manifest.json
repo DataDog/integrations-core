@@ -19,6 +19,12 @@
       "Category::Data Stores",
       "Submitted Data Type::Metrics",
       "Offering::Integration"
+    ],
+    "resources": [
+      {
+        "resource_type": "blog",
+        "url": "https://www.datadoghq.com/blog/cloudera-integration-announcement/"
+      }
     ]
   },
   "assets": {
