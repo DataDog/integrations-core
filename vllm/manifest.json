@@ -40,8 +40,7 @@
         "metadata_path": "assets/service_checks.json"
       },
       "process_signatures": [
-        "python3 -m vllm.entrypoints.openai.api_server",
-        "python -m vllm.entrypoints.openai.api_server"
+        "vllm.entrypoints.openai.api_server"
       ]
     },
     "monitors": {
