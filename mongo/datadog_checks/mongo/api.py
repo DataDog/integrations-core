@@ -96,6 +96,23 @@ class MongoApi(object):
         # The $currentOp stage returns a cursor over a stream of documents, each of which reports a single operation.
         return self["admin"].aggregate([{'$currentOp': {'allUsers': True}}], session=session)
 
+    def coll_stats(self, db_name, coll_name, session=None):
+        return self[db_name][coll_name].aggregate(
+            [
+                {
+                    "$collStats": {
+                        "latencyStats": {},
+                        "storageStats": {},
+                        "queryExecStats": {},
+                    }
+                },
+            ],
+            session=session,
+        )
+
+    def index_stats(self, db_name, coll_name, session=None):
+        return self[db_name][coll_name].aggregate([{"$indexStats": {}}], session=session)
+
     def _is_arbiter(self, options):
         cli = MongoClient(**options)
         is_master_payload = cli['admin'].command('isMaster')
@@ -186,6 +203,23 @@ class MongoApi(object):
 
     def server_status(self):
         return self['admin'].command('serverStatus')
+
+    def list_authorized_collections(self, db_name):
+        try:
+            return self[db_name].list_collection_names(
+                filter={"type": "collection"},  # Only return collections, not views
+                authorizedCollections=True,
+            )
+        except OperationFailure:
+            # The user is not authorized to run listCollections on this database.
+            # This is NOT a critical error, so we log it as a warning.
+            self._log.warning(
+                "Not authorized to run 'listCollections' on db %s, "
+                "please make sure the user has read access on the database or "
+                "add the database to the `database_autodiscovery.exclude` list in the configuration file",
+                db_name,
+            )
+            return []
 
     @property
     def hostname(self):

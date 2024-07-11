@@ -34,6 +34,9 @@
       },
       "source_type_id": 10389,
       "auto_install": true
+    },
+    "monitors": {
+      "windows_crash":  "assets/monitors/windows_crash.json"
     }
   }
 }

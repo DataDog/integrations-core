@@ -60,6 +60,10 @@ def instance_min_collection_interval():
     return 15
 
 
+def instance_namespace():
+    return 'default'
+
+
 def instance_persist_connections():
     return False
 

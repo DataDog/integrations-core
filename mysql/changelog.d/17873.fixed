@@ -1,1 +1,0 @@
-Fixed a bug in MySQL integration when trying to deconstruct None return

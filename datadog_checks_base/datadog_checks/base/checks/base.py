@@ -662,6 +662,21 @@ class AgentCheck(object):
 
         aggregator.submit_event_platform_event(self, self.check_id, to_native_string(raw_event), "dbm-metadata")
 
+    def event_platform_event(self, raw_event, event_track_type):
+        # type: (str, str) -> None
+        """Send an event platform event.
+
+        Parameters:
+
+            raw_event (str):
+                JSON formatted string representing the event to send
+            event_track_type (str):
+                type of event ingested and processed by the event platform
+        """
+        if raw_event is None:
+            return
+        aggregator.submit_event_platform_event(self, self.check_id, to_native_string(raw_event), event_track_type)
+
     def should_send_metric(self, metric_name):
         return not self._metric_excluded(metric_name) and self._metric_included(metric_name)
 
