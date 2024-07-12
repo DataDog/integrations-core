@@ -14,7 +14,7 @@ The Fly.io check is included in the [Datadog Agent][2] package. We recommend run
 
 ### Deploying the agent as a Fly.io application
 
-1. Create a new application in Fly.io with the image set as the [datadog agent][15] when launching or provide it in the `fly.toml`:
+1. Create a new application in Fly.io with the image set as the [Datadog Agent][15] when launching or provide it in the `fly.toml`:
 
     ```
     [build]
