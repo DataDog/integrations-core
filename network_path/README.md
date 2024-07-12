@@ -2,7 +2,7 @@
 
 ## Overview
 
-Network Path integration collects traceroute-like data.
+Network Path integration collects traceroute data.
 
 ## Setup
 
