@@ -9,7 +9,7 @@ Network Path integration collects traceroute-like data.
 ### Installation
 
 The Network Path check is included in the [Datadog Agent][1] package.
-No additional installation is needed on your server.
+No additional installation is needed.
 
 ### Configuration
 
