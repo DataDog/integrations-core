@@ -2,8 +2,8 @@
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
 
-from os import environ
 import re
+from os import environ
 
 import pytest
 from deepdiff import DeepDiff
