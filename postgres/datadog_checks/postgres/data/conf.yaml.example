@@ -344,15 +344,15 @@ instances:
         #
         # enabled: false
 
-        ## @param max_databases - integer - optional - default: 100
-        ## The maximum number of databases this host should monitor.
-        #
-        # max_databases: 100
-
         ## @param global_view_db - string - optional - default: postgres
         ## Database the agent connects to perform autodiscovery operations
         #
         # global_view_db: postgres
+
+        ## @param max_databases - integer - optional - default: 100
+        ## The maximum number of databases this host should monitor.
+        #
+        # max_databases: 100
 
         ## @param include - list of strings - optional - default: ['.*']
         ## Regular expression for database names to include as part of

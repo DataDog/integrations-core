@@ -156,7 +156,6 @@ class PostgreSql(AgentCheck):
                 "Database autodiscovery is enabled, but relation-level metrics are not being collected."
                 "All metrics will be gathered from global view."
             )
-            return None
 
         discovery = PostgresAutodiscovery(
             self,
