@@ -2,6 +2,7 @@
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
 
+from os import environ
 import re
 
 import pytest
@@ -104,6 +105,7 @@ def test_metadata_collection_interval_and_enabled(dbm_instance):
 def test_collect_schemas(aggregator, dd_run_check, dbm_instance):
     databases_to_find = ['datadog_test_schemas', 'datadog_test_schemas_second']
 
+    is_maria_db = environ.get('MYSQL_FLAVOR') == 'mariadb'
     exp_datadog_test_schemas = {
         "name": "datadog_test_schemas",
         "default_character_set_name": "normalized_value",
@@ -118,7 +120,7 @@ def test_collect_schemas(aggregator, dd_run_check, dbm_instance):
                     {
                         "name": "RestaurantName",
                         "column_type": "varchar(255)",
-                        "default": None,
+                        "default": "NULL" if is_maria_db else None,
                         "nullable": True,
                         "ordinal_position": 1,
                         "column_key": "MUL",
@@ -127,7 +129,7 @@ def test_collect_schemas(aggregator, dd_run_check, dbm_instance):
                     {
                         "name": "District",
                         "column_type": "varchar(255)",
-                        "default": None,
+                        "default": "NULL" if is_maria_db else None,
                         "nullable": True,
                         "ordinal_position": 2,
                         "column_key": "",
@@ -136,7 +138,7 @@ def test_collect_schemas(aggregator, dd_run_check, dbm_instance):
                     {
                         "name": "Review",
                         "column_type": "text",
-                        "default": None,
+                        "default": "NULL" if is_maria_db else None,
                         "nullable": True,
                         "ordinal_position": 3,
                         "column_key": "",
@@ -178,7 +180,7 @@ def test_collect_schemas(aggregator, dd_run_check, dbm_instance):
                     {
                         "name": "RestaurantName",
                         "column_type": "varchar(255)",
-                        "default": None,
+                        "default": "NULL" if is_maria_db else None,
                         "nullable": True,
                         "ordinal_position": 1,
                         "column_key": "MUL",
@@ -187,7 +189,7 @@ def test_collect_schemas(aggregator, dd_run_check, dbm_instance):
                     {
                         "name": "District",
                         "column_type": "varchar(100)",
-                        "default": None,
+                        "default": "NULL" if is_maria_db else None,
                         "nullable": True,
                         "ordinal_position": 2,
                         "column_key": "",
@@ -196,7 +198,7 @@ def test_collect_schemas(aggregator, dd_run_check, dbm_instance):
                     {
                         "name": "Cuisine",
                         "column_type": "varchar(100)",
-                        "default": None,
+                        "default": "NULL" if is_maria_db else None,
                         "nullable": True,
                         "ordinal_position": 3,
                         "column_key": "",
@@ -236,7 +238,7 @@ def test_collect_schemas(aggregator, dd_run_check, dbm_instance):
                     {
                         "name": "name",
                         "column_type": "varchar(255)",
-                        "default": None,
+                        "default": "NULL" if is_maria_db else None,
                         "nullable": True,
                         "ordinal_position": 2,
                         "column_key": "",
@@ -309,7 +311,7 @@ def test_collect_schemas(aggregator, dd_run_check, dbm_instance):
                     {
                         "name": "name",
                         "column_type": "varchar(255)",
-                        "default": None,
+                        "default": "NULL" if is_maria_db else None,
                         "nullable": True,
                         "ordinal_position": 2,
                         "column_key": "",
@@ -423,7 +425,7 @@ def test_collect_schemas(aggregator, dd_run_check, dbm_instance):
                     {
                         "name": "name",
                         "column_type": "varchar(255)",
-                        "default": None,
+                        "default": "NULL" if is_maria_db else None,
                         "nullable": True,
                         "ordinal_position": 1,
                         "column_key": "",
@@ -490,7 +492,7 @@ def test_collect_schemas(aggregator, dd_run_check, dbm_instance):
                     {
                         "name": "name",
                         "column_type": "varchar(255)",
-                        "default": None,
+                        "default": "NULL" if is_maria_db else None,
                         "nullable": True,
                         "ordinal_position": 2,
                         "column_key": "UNI",
@@ -521,7 +523,7 @@ def test_collect_schemas(aggregator, dd_run_check, dbm_instance):
                     {
                         "name": "id",
                         "column_type": "int(11)",
-                        "default": None,
+                        "default": "NULL" if is_maria_db else None,
                         "nullable": True,
                         "ordinal_position": 1,
                         "column_key": "",
@@ -530,7 +532,7 @@ def test_collect_schemas(aggregator, dd_run_check, dbm_instance):
                     {
                         "name": "purchased",
                         "column_type": "date",
-                        "default": None,
+                        "default": "NULL" if is_maria_db else None,
                         "nullable": True,
                         "ordinal_position": 2,
                         "column_key": "",
