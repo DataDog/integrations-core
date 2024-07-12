@@ -349,6 +349,11 @@ instances:
         #
         # max_databases: 100
 
+        ## @param global_view_db - string - optional - default: postgres
+        ## Database the agent connects to perform autodiscovery operations
+        #
+        # global_view_db: postgres
+
         ## @param include - list of strings - optional - default: ['.*']
         ## Regular expression for database names to include as part of
         ## database autodiscovery.

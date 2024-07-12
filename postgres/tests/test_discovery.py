@@ -97,6 +97,23 @@ def test_autodiscovery_simple(integration_check, pg_instance):
     expected_len = NUM_DOGS_DATABASES - len(DISCOVERY_CONFIG["exclude"])
     assert len(databases) == expected_len
 
+@pytest.mark.integration
+@pytest.mark.usefixtures('dd_environment')
+def test_autodiscovery_global_view_db_specified(integration_check, pg_instance):
+    """
+    Test autodiscovery with global view db specified.
+    """
+    pg_instance["database_autodiscovery"] = copy.deepcopy(DISCOVERY_CONFIG)
+    pg_instance["database_autodiscovery"]["global_view_db"] = "dogs_0"
+    pg_instance['relations'] = ['pg_index']
+    del pg_instance['dbname']
+    check = integration_check(pg_instance)
+    run_one_check(check, pg_instance)
+
+    assert check.autodiscovery is not None
+    databases = check.autodiscovery.get_items()
+    expected_len = NUM_DOGS_DATABASES - len(DISCOVERY_CONFIG["exclude"])
+    assert len(databases) == expected_len
 
 @pytest.mark.integration
 @pytest.mark.usefixtures('dd_environment')
