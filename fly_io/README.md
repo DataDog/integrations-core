@@ -102,29 +102,19 @@ Follow these steps to collect traces for an application in your Fly.io environme
 
 ### Log collection
 
-Use the [fly_logs_shipper][10] to collect logs from your Fly.io applications.
+Use the [Fly Log Shipper][10] to collect logs from all of your Fly.io applications.
 
-1. Clone the logs shipper [project][10].
-
-2. Modify the `vector-configs/vector.toml` file to remap logs to set the machine instance ID as the hostname and app name as the service:
-
+1. Create a new app based on the Fly Log Shipper docker image:
     ```
-    [transforms.log_json]
-    type = "remap"
-    inputs = ["nats"]
-    source  = '''
-    . = parse_json!(.message)
-    .host = .fly.app.instance
-    .service = .fly.app.name
-    '''
+    fly launch --image flyio/log-shipper:latest
     ```
 
-3. Set [secrets][17] for [NATS][18]:
+2. Set [secrets][17] for [NATS][18]:
 `ORG` and `ACCESS_TOKEN`
 
-4. Set [secrets][17] for [Datadog][3]: `DATADOG_API_KEY` and `DATADOG_SITE`
+3. Set [secrets][17] for [Datadog][3]: `DATADOG_API_KEY` and `DATADOG_SITE`
 
-5. [Deploy][6] the logs shipper app.
+4. [Deploy][6] the logs shipper app.
 
 ## Troubleshooting
 
