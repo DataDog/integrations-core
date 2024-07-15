@@ -1,6 +1,12 @@
 #!/bin/bash
 set -e
 
+# Create extension for settings testing
+psql -v ON_ERROR_STOP=1 --username "$POSTGRES_USER" datadog_test <<-EOSQL
+    CREATE EXTENSION IF NOT EXISTS pg_trgm;
+
+EOSQL
+
 psql -v ON_ERROR_STOP=1 --username "$POSTGRES_USER" datadog_test <<-EOSQL
     CREATE TABLE cities (city VARCHAR(255), country VARCHAR(255), PRIMARY KEY(city));
     INSERT INTO cities VALUES ('New York', 'USA'), ('Beautiful city of lights', 'France');

@@ -42,6 +42,17 @@ pending_restart
 FROM pg_settings
 """
 
+PG_EXTENSIONS_QUERY = """
+SELECT extname FROM pg_extension;
+"""
+
+PG_EXTENSION_LOADER_QUERY = {
+    'pg_trgm': "SELECT word_similarity('foo', 'bar');",
+    'plpgsql': "DO $$ BEGIN PERFORM 1; END$$;",
+    'pgcrypto': "SELECT armor('foo');",
+    'hstore': "SELECT 'a=>1'::hstore;",
+}
+
 DATABASE_INFORMATION_QUERY = """
 SELECT db.oid                        AS id,
        datname                       AS NAME,
@@ -549,11 +560,21 @@ class PostgresMetadata(DBMAsyncJob):
     def _collect_postgres_settings(self):
         with self._check._get_main_db() as conn:
             with conn.cursor(cursor_factory=CommenterDictCursor) as cursor:
+                # Get loaded extensions
+                cursor.execute(PG_EXTENSIONS_QUERY)
+                rows = cursor.fetchall()
+                query = PG_SETTINGS_QUERY
+                for row in rows:
+                    extension = row['extname']
+                    if extension in PG_EXTENSION_LOADER_QUERY:
+                        query = PG_EXTENSION_LOADER_QUERY[extension] + "\n" + query
+                    else:
+                        self._log.warning("unable to collect settings for unknown extension %s", extension)
+
                 if self.pg_settings_ignored_patterns:
-                    query = PG_SETTINGS_QUERY + " WHERE name NOT LIKE ALL(%s)"
-                else:
-                    query = PG_SETTINGS_QUERY
-                self._log.debug(
+                    query = query + " WHERE name NOT LIKE ALL(%s)"
+
+                self._log.warning(
                     "Running query [%s] and patterns are %s",
                     query,
                     self.pg_settings_ignored_patterns,
