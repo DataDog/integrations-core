@@ -1,3 +1,6 @@
+# (C) Datadog, Inc. 2024-present
+# All rights reserved
+# Licensed under a 3-clause BSD style license (see LICENSE)
 import time
 
 from datadog_checks.base.utils.db.utils import DBMAsyncJob, default_json_event_encoding
