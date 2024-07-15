@@ -47,7 +47,7 @@
             "id": 4200103750194852,
             "definition": {
                 "type": "note",
-                "content": "## Widgets\n1. Total Mails\n2. Total Incoming Mails\n3. Total Outgoing Mails\n4. Mails Over Time by Direction\n5. Top 10 Senders\n6. Top 10 Recipients\n7. Top Actions\n8. Top 10 Sender IPs\n9. Top 10 Recipient IPs\n10. Email Senders by Country\n11. Mail Tracking Log Details\n12. Total Size\n13. Total Size of Quarantined Emails\n14. Total Size of Non-Quarantined Emails\n15. Size Over Time\n16. Message Size by Subject",
+                "content": "## Widgets\n1. Total Mails\n2. Total Incoming Mails\n3. Total Outgoing Mails\n4. Mails Over Time by Direction\n5. Total Accepted Mails\n6. Total Blocked Mails\n7. % of Blocked Mails\n8. % of Blocked Mail Over Time\n9. Top Actions\n10. Top Blocked Reasons\n11. Top 10 Senders\n12. Top 10 Recipients\n13. Top 10 Sender IPs\n14. Top 10 Recipient IPs\n15. Email Senders by Country\n16. Accepted Mail Tracking Log Details\n17. Blocked Mail Tracking Log Details\n18. Total Size\n19. Total Size of Quarantined Emails\n20. Total Size of Non-Quarantined Emails\n21. Size Over Time\n22. Message Size by Subject",
                 "background_color": "white",
                 "font_size": "14",
                 "text_align": "left",
@@ -86,7 +86,7 @@
                                 },
                                 "group_by": [],
                                 "search": {
-                                    "query": "source:trend-micro-email-security service:tracking $Direction $Sender $Recipient"
+                                    "query": "source:trend-micro-email-security service:mail-tracking $Direction $Sender $Recipient $Traffic-Type"
                                 },
                                 "storage": "hot"
                             }
@@ -138,7 +138,7 @@
                                 },
                                 "group_by": [],
                                 "search": {
-                                    "query": "source:trend-micro-email-security service:tracking @direction:incoming $Direction $Sender $Recipient"
+                                    "query": "source:trend-micro-email-security service:mail-tracking @direction:incoming $Direction $Sender $Recipient $Traffic-Type"
                                 },
                                 "storage": "hot"
                             }
@@ -190,7 +190,7 @@
                                 },
                                 "group_by": [],
                                 "search": {
-                                    "query": "source:trend-micro-email-security service:tracking @direction:outgoing $Direction $Sender $Recipient"
+                                    "query": "source:trend-micro-email-security service:mail-tracking @direction:outgoing $Direction $Sender $Recipient $Traffic-Type"
                                 },
                                 "storage": "hot"
                             }
@@ -264,7 +264,7 @@
                                     }
                                 ],
                                 "search": {
-                                    "query": "source:trend-micro-email-security service:tracking $Direction $Sender $Recipient"
+                                    "query": "source:trend-micro-email-security service:mail-tracking $Direction $Sender $Recipient $Traffic-Type"
                                 },
                                 "storage": "hot"
                             }
@@ -284,6 +284,409 @@
                 "x": 0,
                 "y": 4,
                 "width": 12,
+                "height": 4
+            }
+        },
+        {
+            "id": 6358022640254048,
+            "definition": {
+                "title": "Total Accepted Mails",
+                "title_size": "16",
+                "title_align": "left",
+                "type": "query_value",
+                "requests": [
+                    {
+                        "response_format": "scalar",
+                        "queries": [
+                            {
+                                "data_source": "logs",
+                                "name": "query1",
+                                "indexes": [
+                                    "*"
+                                ],
+                                "compute": {
+                                    "aggregation": "count"
+                                },
+                                "group_by": [],
+                                "search": {
+                                    "query": "source:trend-micro-email-security service:mail-tracking @type:accepted_traffic $Traffic-Type $Direction $Sender $Recipient"
+                                },
+                                "storage": "hot"
+                            }
+                        ],
+                        "formulas": [
+                            {
+                                "formula": "query1"
+                            }
+                        ],
+                        "conditional_formats": [
+                            {
+                                "comparator": ">",
+                                "value": 0,
+                                "palette": "custom_bg",
+                                "custom_bg_color": "#fff6e3"
+                            }
+                        ]
+                    }
+                ],
+                "autoscale": true,
+                "precision": 0
+            },
+            "layout": {
+                "x": 0,
+                "y": 8,
+                "width": 4,
+                "height": 2
+            }
+        },
+        {
+            "id": 670695942040460,
+            "definition": {
+                "title": "Total Blocked Mails",
+                "title_size": "16",
+                "title_align": "left",
+                "type": "query_value",
+                "requests": [
+                    {
+                        "response_format": "scalar",
+                        "queries": [
+                            {
+                                "data_source": "logs",
+                                "name": "query1",
+                                "indexes": [
+                                    "*"
+                                ],
+                                "compute": {
+                                    "aggregation": "count"
+                                },
+                                "group_by": [],
+                                "search": {
+                                    "query": "source:trend-micro-email-security service:mail-tracking @type:blocked_traffic $Direction $Sender $Recipient $Traffic-Type"
+                                },
+                                "storage": "hot"
+                            }
+                        ],
+                        "formulas": [
+                            {
+                                "formula": "query1"
+                            }
+                        ],
+                        "conditional_formats": [
+                            {
+                                "comparator": ">",
+                                "value": 0,
+                                "palette": "custom_bg",
+                                "custom_bg_color": "#fdebed"
+                            }
+                        ]
+                    }
+                ],
+                "autoscale": true,
+                "precision": 0
+            },
+            "layout": {
+                "x": 4,
+                "y": 8,
+                "width": 4,
+                "height": 2
+            }
+        },
+        {
+            "id": 2642533623863942,
+            "definition": {
+                "title": "% of Blocked Mails",
+                "title_size": "16",
+                "title_align": "left",
+                "type": "query_value",
+                "requests": [
+                    {
+                        "response_format": "scalar",
+                        "queries": [
+                            {
+                                "data_source": "logs",
+                                "name": "query2",
+                                "indexes": [
+                                    "*"
+                                ],
+                                "compute": {
+                                    "aggregation": "count"
+                                },
+                                "group_by": [],
+                                "search": {
+                                    "query": "source:trend-micro-email-security service:mail-tracking @type:blocked_traffic $Direction $Sender $Recipient $Traffic-Type"
+                                },
+                                "storage": "hot"
+                            },
+                            {
+                                "data_source": "logs",
+                                "name": "query1",
+                                "indexes": [
+                                    "*"
+                                ],
+                                "compute": {
+                                    "aggregation": "count"
+                                },
+                                "group_by": [],
+                                "search": {
+                                    "query": "source:trend-micro-email-security service:mail-tracking $Direction $Sender $Recipient $Traffic-Type"
+                                },
+                                "storage": "hot"
+                            }
+                        ],
+                        "formulas": [
+                            {
+                                "number_format": {
+                                    "unit": {
+                                        "type": "canonical_unit",
+                                        "unit_name": "percent"
+                                    }
+                                },
+                                "formula": "query2 / query1 * 100"
+                            }
+                        ],
+                        "conditional_formats": [
+                            {
+                                "comparator": ">",
+                                "value": 0,
+                                "palette": "red_on_white",
+                                "custom_bg_color": "#fda5a5"
+                            }
+                        ]
+                    }
+                ],
+                "autoscale": true,
+                "precision": 2
+            },
+            "layout": {
+                "x": 8,
+                "y": 8,
+                "width": 4,
+                "height": 2
+            }
+        },
+        {
+            "id": 1136262149476140,
+            "definition": {
+                "title": "% of Blocked Mail Over Time",
+                "title_size": "16",
+                "title_align": "left",
+                "show_legend": true,
+                "legend_layout": "horizontal",
+                "legend_columns": [
+                    "avg",
+                    "min",
+                    "max",
+                    "value",
+                    "sum"
+                ],
+                "type": "timeseries",
+                "requests": [
+                    {
+                        "formulas": [
+                            {
+                                "alias": "% of Blocked Mail",
+                                "number_format": {
+                                    "unit": {
+                                        "type": "canonical_unit",
+                                        "unit_name": "percent"
+                                    }
+                                },
+                                "formula": "query2 / query1 * 100"
+                            }
+                        ],
+                        "queries": [
+                            {
+                                "data_source": "logs",
+                                "name": "query2",
+                                "indexes": [
+                                    "*"
+                                ],
+                                "compute": {
+                                    "aggregation": "count",
+                                    "interval": 3600000
+                                },
+                                "group_by": [],
+                                "search": {
+                                    "query": "source:trend-micro-email-security service:mail-tracking @type:blocked_traffic $Direction $Sender $Recipient $Traffic-Type"
+                                },
+                                "storage": "hot"
+                            },
+                            {
+                                "data_source": "logs",
+                                "name": "query1",
+                                "indexes": [
+                                    "*"
+                                ],
+                                "compute": {
+                                    "aggregation": "count",
+                                    "interval": 3600000
+                                },
+                                "group_by": [],
+                                "search": {
+                                    "query": "source:trend-micro-email-security service:mail-tracking $Direction $Sender $Recipient $Traffic-Type"
+                                },
+                                "storage": "hot"
+                            }
+                        ],
+                        "response_format": "timeseries",
+                        "style": {
+                            "palette": "semantic",
+                            "order_by": "values",
+                            "order_reverse": false,
+                            "line_type": "solid",
+                            "line_width": "normal"
+                        },
+                        "display_type": "bars"
+                    }
+                ],
+                "yaxis": {
+                    "include_zero": true,
+                    "min": "0",
+                    "max": "100"
+                }
+            },
+            "layout": {
+                "x": 0,
+                "y": 10,
+                "width": 12,
+                "height": 4
+            }
+        },
+        {
+            "id": 3688846618520538,
+            "definition": {
+                "title": "Top Actions",
+                "title_size": "16",
+                "title_align": "left",
+                "type": "toplist",
+                "requests": [
+                    {
+                        "queries": [
+                            {
+                                "data_source": "logs",
+                                "name": "query1",
+                                "indexes": [
+                                    "*"
+                                ],
+                                "compute": {
+                                    "aggregation": "count"
+                                },
+                                "group_by": [
+                                    {
+                                        "facet": "@action",
+                                        "limit": 10,
+                                        "sort": {
+                                            "order": "desc",
+                                            "aggregation": "count"
+                                        }
+                                    }
+                                ],
+                                "search": {
+                                    "query": "source:trend-micro-email-security service:mail-tracking $Direction $Sender $Recipient $Traffic-Type"
+                                },
+                                "storage": "hot"
+                            }
+                        ],
+                        "response_format": "scalar",
+                        "formulas": [
+                            {
+                                "formula": "query1"
+                            }
+                        ],
+                        "sort": {
+                            "count": 10,
+                            "order_by": [
+                                {
+                                    "type": "formula",
+                                    "index": 0,
+                                    "order": "desc"
+                                }
+                            ]
+                        }
+                    }
+                ],
+                "style": {
+                    "display": {
+                        "type": "stacked",
+                        "legend": "automatic"
+                    },
+                    "palette": "dog_classic",
+                    "scaling": "relative"
+                }
+            },
+            "layout": {
+                "x": 0,
+                "y": 14,
+                "width": 6,
+                "height": 4
+            }
+        },
+        {
+            "id": 6482582560161942,
+            "definition": {
+                "title": "Top Blocked Reasons",
+                "title_size": "16",
+                "title_align": "left",
+                "type": "toplist",
+                "requests": [
+                    {
+                        "queries": [
+                            {
+                                "data_source": "logs",
+                                "name": "query1",
+                                "indexes": [
+                                    "*"
+                                ],
+                                "compute": {
+                                    "aggregation": "count"
+                                },
+                                "group_by": [
+                                    {
+                                        "facet": "@reason",
+                                        "limit": 10,
+                                        "sort": {
+                                            "order": "desc",
+                                            "aggregation": "count"
+                                        }
+                                    }
+                                ],
+                                "search": {
+                                    "query": "source:trend-micro-email-security service:mail-tracking $Direction $Sender $Recipient $Traffic-Type"
+                                },
+                                "storage": "hot"
+                            }
+                        ],
+                        "response_format": "scalar",
+                        "formulas": [
+                            {
+                                "formula": "query1"
+                            }
+                        ],
+                        "sort": {
+                            "count": 10,
+                            "order_by": [
+                                {
+                                    "type": "formula",
+                                    "index": 0,
+                                    "order": "desc"
+                                }
+                            ]
+                        }
+                    }
+                ],
+                "style": {
+                    "display": {
+                        "type": "stacked",
+                        "legend": "automatic"
+                    },
+                    "palette": "dog_classic",
+                    "scaling": "relative"
+                }
+            },
+            "layout": {
+                "x": 6,
+                "y": 14,
+                "width": 6,
                 "height": 4
             }
         },
@@ -317,7 +720,7 @@
                                     }
                                 ],
                                 "search": {
-                                    "query": "source:trend-micro-email-security service:tracking $Direction $Sender $Recipient"
+                                    "query": "source:trend-micro-email-security service:mail-tracking $Direction $Sender $Recipient $Traffic-Type"
                                 },
                                 "storage": "hot"
                             }
@@ -350,7 +753,7 @@
             },
             "layout": {
                 "x": 0,
-                "y": 8,
+                "y": 18,
                 "width": 6,
                 "height": 4
             }
@@ -385,7 +788,7 @@
                                     }
                                 ],
                                 "search": {
-                                    "query": "source:trend-micro-email-security service:tracking $Direction $Sender $Recipient"
+                                    "query": "source:trend-micro-email-security service:mail-tracking $Direction $Sender $Recipient $Traffic-Type"
                                 },
                                 "storage": "hot"
                             }
@@ -418,77 +821,8 @@
             },
             "layout": {
                 "x": 6,
-                "y": 8,
+                "y": 18,
                 "width": 6,
-                "height": 4
-            }
-        },
-        {
-            "id": 3688846618520538,
-            "definition": {
-                "title": "Top Actions",
-                "title_size": "16",
-                "title_align": "left",
-                "type": "toplist",
-                "requests": [
-                    {
-                        "queries": [
-                            {
-                                "data_source": "logs",
-                                "name": "query1",
-                                "indexes": [
-                                    "*"
-                                ],
-                                "compute": {
-                                    "aggregation": "count"
-                                },
-                                "group_by": [
-                                    {
-                                        "facet": "@action",
-                                        "limit": 10,
-                                        "sort": {
-                                            "order": "desc",
-                                            "aggregation": "count"
-                                        }
-                                    }
-                                ],
-                                "search": {
-                                    "query": "source:trend-micro-email-security service:tracking $Direction $Sender $Recipient"
-                                },
-                                "storage": "hot"
-                            }
-                        ],
-                        "response_format": "scalar",
-                        "formulas": [
-                            {
-                                "formula": "query1"
-                            }
-                        ],
-                        "sort": {
-                            "count": 10,
-                            "order_by": [
-                                {
-                                    "type": "formula",
-                                    "index": 0,
-                                    "order": "desc"
-                                }
-                            ]
-                        }
-                    }
-                ],
-                "style": {
-                    "display": {
-                        "type": "stacked",
-                        "legend": "automatic"
-                    },
-                    "palette": "dog_classic",
-                    "scaling": "relative"
-                }
-            },
-            "layout": {
-                "x": 0,
-                "y": 12,
-                "width": 12,
                 "height": 4
             }
         },
@@ -522,7 +856,7 @@
                                     }
                                 ],
                                 "search": {
-                                    "query": "source:trend-micro-email-security service:tracking $Direction $Sender $Recipient"
+                                    "query": "source:trend-micro-email-security service:mail-tracking $Direction $Sender $Recipient $Traffic-Type"
                                 },
                                 "storage": "hot"
                             }
@@ -555,7 +889,7 @@
             },
             "layout": {
                 "x": 0,
-                "y": 16,
+                "y": 22,
                 "width": 6,
                 "height": 4
             }
@@ -590,7 +924,7 @@
                                     }
                                 ],
                                 "search": {
-                                    "query": "source:trend-micro-email-security service:tracking $Direction $Sender $Recipient"
+                                    "query": "source:trend-micro-email-security service:mail-tracking $Direction $Sender $Recipient $Traffic-Type"
                                 },
                                 "storage": "hot"
                             }
@@ -623,7 +957,7 @@
             },
             "layout": {
                 "x": 6,
-                "y": 16,
+                "y": 22,
                 "width": 6,
                 "height": 4
             }
@@ -659,7 +993,7 @@
                                     }
                                 ],
                                 "search": {
-                                    "query": "source:trend-micro-email-security service:tracking $Direction $Sender $Recipient"
+                                    "query": "source:trend-micro-email-security service:mail-tracking $Direction $Sender $Recipient $Traffic-Type"
                                 },
                                 "storage": "hot"
                             }
@@ -691,15 +1025,15 @@
             },
             "layout": {
                 "x": 0,
-                "y": 20,
+                "y": 26,
                 "width": 12,
                 "height": 5
             }
         },
         {
-            "id": 4414127431040911,
+            "id": 2739686602532948,
             "definition": {
-                "title": "Mail Tracking Log Details",
+                "title": "Accepted Mail Tracking Log Details",
                 "title_size": "16",
                 "title_align": "left",
                 "requests": [
@@ -707,7 +1041,7 @@
                         "response_format": "event_list",
                         "query": {
                             "data_source": "logs_stream",
-                            "query_string": "source:trend-micro-email-security service:tracking $Direction $Sender $Recipient",
+                            "query_string": "source:trend-micro-email-security service:mail-tracking @type:accepted_traffic $Direction $Sender $Recipient $Traffic-Type",
                             "indexes": [],
                             "storage": "hot",
                             "sort": {
@@ -767,7 +1101,71 @@
             },
             "layout": {
                 "x": 0,
-                "y": 25,
+                "y": 31,
+                "width": 12,
+                "height": 5
+            }
+        },
+        {
+            "id": 8988297914269202,
+            "definition": {
+                "title": "Blocked Mail Tracking Log Details",
+                "title_size": "16",
+                "title_align": "left",
+                "requests": [
+                    {
+                        "response_format": "event_list",
+                        "query": {
+                            "data_source": "logs_stream",
+                            "query_string": "source:trend-micro-email-security service:mail-tracking @type:blocked_traffic $Direction $Sender $Recipient $Traffic-Type",
+                            "indexes": [],
+                            "storage": "hot",
+                            "sort": {
+                                "order": "desc",
+                                "column": "timestamp"
+                            }
+                        },
+                        "columns": [
+                            {
+                                "field": "status_line",
+                                "width": "auto"
+                            },
+                            {
+                                "field": "timestamp",
+                                "width": "auto"
+                            },
+                            {
+                                "field": "sender",
+                                "width": "auto"
+                            },
+                            {
+                                "field": "recipient",
+                                "width": "auto"
+                            },
+                            {
+                                "field": "direction",
+                                "width": "auto"
+                            },
+                            {
+                                "field": "reason",
+                                "width": "auto"
+                            },
+                            {
+                                "field": "@network.client.geoip.country.name",
+                                "width": "auto"
+                            },
+                            {
+                                "field": "@network.client.ip",
+                                "width": "auto"
+                            }
+                        ]
+                    }
+                ],
+                "type": "list_stream"
+            },
+            "layout": {
+                "x": 0,
+                "y": 36,
                 "width": 12,
                 "height": 5
             }
@@ -804,7 +1202,7 @@
                                             },
                                             "group_by": [],
                                             "search": {
-                                                "query": "source:trend-micro-email-security service:tracking $Direction $Sender $Recipient"
+                                                "query": "source:trend-micro-email-security service:mail-tracking $Direction $Sender $Recipient $Traffic-Type"
                                             },
                                             "storage": "hot"
                                         }
@@ -857,7 +1255,7 @@
                                             },
                                             "group_by": [],
                                             "search": {
-                                                "query": "source:trend-micro-email-security service:tracking @action:Quarantined $Direction $Sender $Recipient"
+                                                "query": "source:trend-micro-email-security service:mail-tracking @action:Quarantined $Direction $Sender $Recipient $Traffic-Type"
                                             },
                                             "storage": "hot"
                                         }
@@ -910,7 +1308,7 @@
                                             },
                                             "group_by": [],
                                             "search": {
-                                                "query": "source:trend-micro-email-security service:tracking -@action:Quarantined $Direction $Sender $Recipient"
+                                                "query": "source:trend-micro-email-security service:mail-tracking -@action:Quarantined $Direction $Sender $Recipient $Traffic-Type"
                                             },
                                             "storage": "hot"
                                         }
@@ -979,7 +1377,7 @@
                                             },
                                             "group_by": [],
                                             "search": {
-                                                "query": "source:trend-micro-email-security service:tracking @action:Quarantined $Direction $Sender $Recipient"
+                                                "query": "source:trend-micro-email-security service:mail-tracking @action:Quarantined $Direction $Sender $Recipient $Traffic-Type"
                                             },
                                             "storage": "hot"
                                         },
@@ -995,7 +1393,7 @@
                                             },
                                             "group_by": [],
                                             "search": {
-                                                "query": "source:trend-micro-email-security service:tracking -@action:Quarantined $Direction $Sender $Recipient"
+                                                "query": "source:trend-micro-email-security service:mail-tracking -@action:Quarantined $Direction $Sender $Recipient $Traffic-Type"
                                             },
                                             "storage": "hot"
                                         }
@@ -1053,7 +1451,7 @@
                                                 }
                                             ],
                                             "search": {
-                                                "query": "source:trend-micro-email-security service:tracking $Direction $Sender $Recipient"
+                                                "query": "source:trend-micro-email-security service:mail-tracking $Direction $Sender $Recipient $Traffic-Type"
                                             },
                                             "storage": "hot"
                                         }
@@ -1091,7 +1489,7 @@
             },
             "layout": {
                 "x": 0,
-                "y": 30,
+                "y": 41,
                 "width": 12,
                 "height": 11
             }
@@ -1101,6 +1499,12 @@
         {
             "name": "Direction",
             "prefix": "@direction",
+            "available_values": [],
+            "default": "*"
+        },
+        {
+            "name": "Traffic-Type",
+            "prefix": "@type",
             "available_values": [],
             "default": "*"
         },

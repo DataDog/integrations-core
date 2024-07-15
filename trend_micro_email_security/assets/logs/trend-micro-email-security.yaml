@@ -82,11 +82,6 @@ facets:
     name: Destination IP
     path: network.destination.ip
     source: log
-  - groups:
-      - User
-    name: User Name
-    path: usr.name
-    source: log
   - facetType: range
     groups:
       - Trend Micro Email Security
@@ -97,13 +92,6 @@ facets:
     unit:
       family: bytes
       name: byte
-  - facetType: list
-    groups:
-      - Trend Micro Email Security
-    name: URL
-    path: trend_micro_email_security.url
-    source: log
-    type: string
 pipeline:
   type: pipeline
   name: Trend Micro Email Security
@@ -111,87 +99,6 @@ pipeline:
   filter:
     query: "source:trend-micro-email-security"
   processors:
-    - type: grok-parser
-      name: Parsing the log of Trend Micro Email Security
-      enabled: true
-      source: message
-      samples:
-        - '<14> 2024-01-01T01:01:01Z forwarder.tmes.trendmicro.com tmes[1]:
-          CEF:0|Trend
-          Micro|TMES|1.0.0.0|400101|TRACKING|4|rt=2024-01-01T01:01:01.001Z
-          suser=user1@example1.com duser=user2@example2.com msg=Test Virus
-          src=1.1.1.1
-          deviceTranslatedAddress=alt1.gmail-smtp-in.l.google.com[2.2.2.2]:25
-          cs1Label=mailUuid cs1=bd07c714-8fbc-4f2b-8683-66ced16b12c0
-          cs2Label=direction cs2=outgoing cs3Label=messageId
-          cs3=<20180-20615585+817.72031@example.com> cn1Label=messageSize
-          cn1=2770 act=Temporary delivery error cs4Label=attachments
-          cs4=[{"fileName":"noname"},{"fileName":"noname"}] cs5Label=tlsInfo
-          cs5=upstreamTLS: TLS 1.3; downstreamTLS: TLS 1.3'
-        - '<14> 2024-01-01T01:01:01Z forwarder.tmes.trendmicro.com tmes[1]:
-          CEF:0|Trend
-          Micro|TMES|1.0.0.0|400101|TRACKING|4|rt=2024-01-01T01:01:01.001Z
-          duser=user2@example2.com suser=user=1+2@example1.com msg=Test Virus
-          src=1.1.1.1
-          deviceTranslatedAddress=alt1.gmail-smtp-in.l.google.com[2.2.2.2]:25
-          cs1Label=mailUuid cs1=bd07c714-8fbc-4f2b-8683-66ced16b12c0
-          cs2Label=direction cs2=outgoing cs3Label=messageId
-          cs3=<20180-20615585+817.72031@example.com> cn1Label=messageSize
-          cn1=2770 act=Temporary delivery error cs4Label=attachments
-          cs4=[{"fileName":"noname"},{"fileName":"noname"}] cs5Label=tlsInfo
-          cs5=upstreamTLS: TLS 1.3; downstreamTLS: TLS 1.3'
-        - "<14> 2024-01-01T01:01:01Z forwarder.tmes.trendmicro.com tmes[1]:
-          CEF:0|Trend
-          Micro|TMES|1.0.0.0|100101|DETECTION|6|rt=2024-01-01T01:01:01.001Z
-          cs1Label=eventType cs1=web_reputation cs2Label=domainName
-          cs2=example2.com suser=user1@example1.com duser=user2@example2.com
-          cs3Label=direction cs3=incoming cs4Label=messageId
-          cs4=<201802061558581772031@example.com> msg=, here's your PIN
-          cn1Label=messageSize cn1=15304 cs5Label=policyName cs5=Organization:
-          Spam or Phish act=Quarantine cs6Label=details
-          cs6={\"threatNames\":\"Eicar_test_file\",\"fileInfo\":[{\"fileName\":\
-          \"noname\",\"threatName\":\"Eicar_test_file\"}]}"
-        - "<14> 2024-01-01T01:01:01Z forwarder.tmes.trendmicro.com tmes[1]:
-          CEF:0|Trend
-          Micro|TMES|1.0.0.0|100101|DETECTION|6|rt=2024-01-01T01:01:01.001Z
-          cs1Label=eventType cs1=web_reputation cs2Label=domainName
-          cs2=example2.com suser=user1@example1.com duser=user2@example2.com
-          cs3Label=direction cs3=incoming cs4Label=messageId
-          cs4=<201802061558.581-772031@example.com> msg=Test, here's your PIN
-          cn1Label=messageSize cn1=15320 cs5Label=policyName cs5=Organization:
-          Spam or Phish act=Quarantine cs6Label=details
-          cs6={\"urlInfo\":[{\"url\":\"https://a01d4b-linkedin.securesupportclo\
-          ud.com/760f952a6a?t\\=Y2FtcGFpZ25HVUlEPTkzMGNjYThkLWI2NDMtNGM1Yy1hOTR\
-          jLTcyMDM3NzVmMzEyMSZ0ZW5hbnRJRD1lMjkxOTkyNy0zYWY0LTRjZjItODRlMS0zM2Y3\
-          M2ZlZjYyZjcmdGFyZ2V0RW1haWw9a3VzaGFsLnNoYWhAY2RzeXMuaW4mZVR5cGU9Q2FuS\
-          VBoaXNoJmVVUkw9TkEmcmVwbHlUbz1O&p\\=4\",\"extractType\":\"body\"}]}"
-      grok:
-        supportRules: >-
-          skip_data %{regex("[^|]*")}
-
-          extract_cs6 cs6=\{%{data:cs6}\}( %{extract_key_value_pair})?
-
-          extract_suser suser=%{notSpace:suser}( %{extract_key_value_pair})?
-
-          extract_duser duser=%{notSpace:duser}( %{extract_key_value_pair})?
-
-          extract_key_value_pair %{data::keyvalue("=", "\\]\\[{}\"\" :;,/!''\\(\\)*~#&$%^?")}
-        matchRules: trend_micro_email_security_rule
-          %{skip_data}\|%{skip_data}\|%{skip_data}\|%{skip_data}\|%{number:eventid}\|%{word:service:lowercase}\|%{integer:severity}\|%{extract_key_value_pair}
-          (%{extract_suser}( %{extract_duser})?|(%{extract_duser}
-          )?%{extract_suser})?( %{extract_cs6})?
-    - type: grok-parser
-      name: Parsing the `rt` attribute to convert it into milliseconds
-      enabled: true
-      source: rt
-      samples:
-        - 2024-10-10 10:10:10
-        - 2024-10-10T10:10:10.100Z
-        - 2024-10-10T10:10:10Z
-      grok:
-        supportRules: ""
-        matchRules: convert_to_millisecond %{date("yyyy-MM-dd
-          HH:mm:ss"):genTime}|%{date("yyyy-MM-dd'T'HH:mm:ss.SSSZ"):genTime}|%{date("yyyy-MM-dd'T'HH:mm:ssZ"):genTime}
     - type: service-remapper
       name: Define `service` as the official service of the log
       enabled: true
@@ -203,147 +110,56 @@ pipeline:
       sources:
         - genTime
     - type: attribute-remapper
-      name: Map `severity` to `syslog.severity`
+      name: Map `size` to `trend_micro_email_security.messageSize`
       enabled: true
       sources:
-        - severity
+        - size
       sourceType: attribute
-      target: syslog.severity
+      target: trend_micro_email_security.messageSize
       targetType: attribute
       preserveSource: false
       overrideOnConflict: false
-    - type: attribute-remapper
-      name: Map `act` to `action`
+    - name: Lookup for `direction` to `direction` field
       enabled: true
-      sources:
-        - act
-      sourceType: attribute
-      target: action
-      targetType: attribute
-      preserveSource: false
-      overrideOnConflict: false
-    - type: attribute-remapper
-      name: Map `duser` to `recipient`
-      enabled: true
-      sources:
-        - duser
-      sourceType: attribute
-      target: recipient
-      targetType: attribute
-      preserveSource: false
-      overrideOnConflict: false
-    - type: attribute-remapper
-      name: Map `msg` to `subject`
-      enabled: true
-      sources:
-        - msg
-      sourceType: attribute
-      target: subject
-      targetType: attribute
-      preserveSource: false
-      overrideOnConflict: false
-    - name: Lookup for `syslog.severity` to `status` field
-      enabled: true
-      source: syslog.severity
-      target: status
+      source: direction
+      target: direction
       lookupTable: |-
-        4,info
-        6,critical
+        in,incoming
+        out,outgoing
       type: lookup-processor
     - type: pipeline
-      name: Remap attributes for tracking logs
+      name: Remap attributes for mail tracking logs
       enabled: true
       filter:
-        query: "service:tracking"
+        query: "service:mail-tracking"
       processors:
         - type: attribute-remapper
-          name: Map `src` to `network.client.ip`
+          name: Map `senderIP` to `network.client.ip`
           enabled: true
           sources:
-            - src
+            - senderIP
           sourceType: attribute
           target: network.client.ip
           targetType: attribute
           preserveSource: false
           overrideOnConflict: false
         - type: grok-parser
-          name: Extract IP from `deviceTranslatedAddress`
+          name: Extract IP from `deliveredTo`
           enabled: true
-          source: deviceTranslatedAddress
+          source: deliveredTo
           samples:
             - aspmx.l.google.com[2.2.2.2]:25
             - 1.1.1.1
           grok:
             supportRules: ""
-            matchRules: extract_ip
-              (%{regex("[^\\[]*")}\[)?%{ip:deviceTranslatedAddress}(\]%{data:})?
+            matchRules: extract_ip (%{regex("[^\\[]*")}\[)?%{ip:deliveredTo}(\]%{data:})?
         - type: attribute-remapper
-          name: Map `deviceTranslatedAddress` to `network.destination.ip`
+          name: Map `deliveredTo` to `network.destination.ip`
           enabled: true
           sources:
-            - deviceTranslatedAddress
+            - deliveredTo
           sourceType: attribute
           target: network.destination.ip
-          targetType: attribute
-          preserveSource: false
-          overrideOnConflict: false
-        - type: attribute-remapper
-          name: Map `cs1` to `mailID`
-          enabled: true
-          sources:
-            - cs1
-          sourceType: attribute
-          target: mailID
-          targetType: attribute
-          preserveSource: false
-          overrideOnConflict: false
-        - type: attribute-remapper
-          name: Map `cs2` to `direction`
-          enabled: true
-          sources:
-            - cs2
-          sourceType: attribute
-          target: direction
-          targetType: attribute
-          preserveSource: false
-          overrideOnConflict: false
-        - type: attribute-remapper
-          name: Map `cs3` to `messageID`
-          enabled: true
-          sources:
-            - cs3
-          sourceType: attribute
-          target: messageID
-          targetType: attribute
-          preserveSource: false
-          overrideOnConflict: false
-        - type: attribute-remapper
-          name: Map `cs4` to `attachments`
-          enabled: true
-          sources:
-            - cs4
-          sourceType: attribute
-          target: attachments
-          targetType: attribute
-          preserveSource: false
-          overrideOnConflict: false
-        - type: attribute-remapper
-          name: Map `cs5` to `tlsInfo`
-          enabled: true
-          sources:
-            - cs5
-          sourceType: attribute
-          target: tlsInfo
-          targetType: attribute
-          preserveSource: false
-          overrideOnConflict: false
-        - type: attribute-remapper
-          name: Map `cn1` to `trend_micro_email_security.messageSize`
-          enabled: true
-          sources:
-            - cn1
-          sourceType: attribute
-          target: trend_micro_email_security.messageSize
           targetType: attribute
           preserveSource: false
           overrideOnConflict: false
@@ -361,306 +177,3 @@ pipeline:
             - network.destination.ip
           target: network.destination.geoip
           ip_processing_behavior: do-nothing
-        - type: grok-parser
-          name: Convert `attachments` field into an array
-          enabled: true
-          source: attachments
-          samples:
-            - '[{"fileName":"noname"},{"fileName":"noname"}]'
-          grok:
-            supportRules: ""
-            matchRules: attachments_rule %{data:attachments:array}
-    - type: pipeline
-      name: Remap attributes for detection logs
-      enabled: true
-      filter:
-        query: "service:detection"
-      processors:
-        - type: attribute-remapper
-          name: Map `cs2` to `domainName`
-          enabled: true
-          sources:
-            - cs2
-          sourceType: attribute
-          target: domainName
-          targetType: attribute
-          preserveSource: false
-          overrideOnConflict: false
-        - type: attribute-remapper
-          name: Map `cs3` to `direction`
-          enabled: true
-          sources:
-            - cs3
-          sourceType: attribute
-          target: direction
-          targetType: attribute
-          preserveSource: false
-          overrideOnConflict: false
-        - type: attribute-remapper
-          name: Map `cs4` to `messageID`
-          enabled: true
-          sources:
-            - cs4
-          sourceType: attribute
-          target: messageID
-          targetType: attribute
-          preserveSource: false
-          overrideOnConflict: false
-        - type: attribute-remapper
-          name: Map `cs5` to `policyName`
-          enabled: true
-          sources:
-            - cs5
-          sourceType: attribute
-          target: policyName
-          targetType: attribute
-          preserveSource: false
-          overrideOnConflict: false
-        - type: attribute-remapper
-          name: Map `cs6` to `details`
-          enabled: true
-          sources:
-            - cs6
-          sourceType: attribute
-          target: details
-          targetType: attribute
-          preserveSource: false
-          overrideOnConflict: false
-        - type: attribute-remapper
-          name: Map `cn1` to `trend_micro_email_security.messageSize`
-          enabled: true
-          sources:
-            - cn1
-          sourceType: attribute
-          target: trend_micro_email_security.messageSize
-          targetType: attribute
-          preserveSource: false
-          overrideOnConflict: false
-        - name: Lookup for `cs1` to `eventType` field
-          enabled: true
-          source: cs1
-          target: eventType
-          lookupTable: |-
-            anti_spoof,Domain-based Authentication
-            ransomware,Ransomware
-            apt,Advanced Persistent Threat
-            virus,Malware
-            ctd,Suspicious Objects
-            scan_limitation,Scan Exception
-            spam,Spam
-            bec,Business Email Compromise (BEC)
-            phishing,Phishing
-            graymail,Graymail
-            web_reputation,Web Reputation
-            unusual_signal,Unusual Signal
-            content,Content
-            attachment,Attachment
-            dlp,Data Loss Prevention
-          type: lookup-processor
-        - type: attribute-remapper
-          name: Map `recipient` to `recipients`
-          enabled: true
-          sources:
-            - recipient
-          sourceType: attribute
-          target: recipients
-          targetType: attribute
-          preserveSource: false
-          overrideOnConflict: false
-        - type: grok-parser
-          name: Convert `recipients` field into an array
-          enabled: true
-          source: recipients
-          samples:
-            - user1@example.com
-            - user1@example.com;user2@example.com
-          grok:
-            supportRules: ""
-            matchRules: recipients_rule %{data:recipients:array("", ";")}
-    - type: pipeline
-      name: Remap attributes for URL Click Tracking logs
-      enabled: true
-      filter:
-        query: "service:ctp_detection"
-      processors:
-        - type: attribute-remapper
-          name: Map `cs1` to `messageId`
-          enabled: true
-          sources:
-            - cs1
-          sourceType: attribute
-          target: messageId
-          targetType: attribute
-          preserveSource: false
-          overrideOnConflict: false
-        - type: attribute-remapper
-          name: Map `cs2` to `timeOfClick`
-          enabled: true
-          sources:
-            - cs2
-          sourceType: attribute
-          target: timeOfClick
-          targetType: attribute
-          preserveSource: false
-          overrideOnConflict: false
-        - type: attribute-remapper
-          name: Map `request` to `trend_micro_email_security.url`
-          enabled: true
-          sources:
-            - request
-          sourceType: attribute
-          target: trend_micro_email_security.url
-          targetType: attribute
-          preserveSource: false
-          overrideOnConflict: false
-        - name: Lookup for `syslog.severity` to `email_severity` field
-          enabled: true
-          source: syslog.severity
-          target: email_severity
-          lookupTable: |-
-            2,Safe
-            4,Suspicious
-            6,Highly suspicious
-            8,Dangerous
-          type: lookup-processor
-        - name: Lookup for `email_severity` to `status` field
-          enabled: true
-          source: email_severity
-          target: status
-          lookupTable: |-
-            Safe,ok
-            Suspicious,warning
-            Highly suspicious,critical
-            Dangerous,emerg
-          type: lookup-processor
-    - type: pipeline
-      name: Remap attributes for audit logs
-      enabled: true
-      filter:
-        query: "service:audit"
-      processors:
-        - type: attribute-remapper
-          name: Map `cs1` to `accountType`
-          enabled: true
-          sources:
-            - cs1
-          sourceType: attribute
-          target: accountType
-          targetType: attribute
-          preserveSource: false
-          overrideOnConflict: false
-        - type: attribute-remapper
-          name: Map `cs2` to `eventType`
-          enabled: true
-          sources:
-            - cs2
-          sourceType: attribute
-          target: eventType
-          targetType: attribute
-          preserveSource: false
-          overrideOnConflict: false
-        - type: attribute-remapper
-          name: Map `cs3` to `affectedDomains`
-          enabled: true
-          sources:
-            - cs3
-          sourceType: attribute
-          target: affectedDomains
-          targetType: attribute
-          preserveSource: false
-          overrideOnConflict: false
-        - type: attribute-remapper
-          name: Map `suser` to `usr.name`
-          enabled: true
-          sources:
-            - suser
-          sourceType: attribute
-          target: usr.name
-          targetType: attribute
-          preserveSource: false
-          overrideOnConflict: false
-    - type: attribute-remapper
-      name: Map `suser` to `sender`
-      enabled: true
-      sources:
-        - suser
-      sourceType: attribute
-      target: sender
-      targetType: attribute
-      preserveSource: false
-      overrideOnConflict: false
-    - type: status-remapper
-      name: Define `status` as the official status of the log
-      enabled: true
-      sources:
-        - status
-    - type: attribute-remapper
-      name: Map `cs1Label` to `attributeLabels.cs1Label`
-      enabled: true
-      sources:
-        - cs1Label
-      sourceType: attribute
-      target: attributeLabels.cs1Label
-      targetType: attribute
-      preserveSource: false
-      overrideOnConflict: false
-    - type: attribute-remapper
-      name: Map `cs2Label` to `attributeLabels.cs2Label`
-      enabled: true
-      sources:
-        - cs2Label
-      sourceType: attribute
-      target: attributeLabels.cs2Label
-      targetType: attribute
-      preserveSource: false
-      overrideOnConflict: false
-    - type: attribute-remapper
-      name: Map `cs3Label` to `attributeLabels.cs3Label`
-      enabled: true
-      sources:
-        - cs3Label
-      sourceType: attribute
-      target: attributeLabels.cs3Label
-      targetType: attribute
-      preserveSource: false
-      overrideOnConflict: false
-    - type: attribute-remapper
-      name: Map `cs4Label` to `attributeLabels.cs4Label`
-      enabled: true
-      sources:
-        - cs4Label
-      sourceType: attribute
-      target: attributeLabels.cs4Label
-      targetType: attribute
-      preserveSource: false
-      overrideOnConflict: false
-    - type: attribute-remapper
-      name: Map `cs5Label` to `attributeLabels.cs5Label`
-      enabled: true
-      sources:
-        - cs5Label
-      sourceType: attribute
-      target: attributeLabels.cs5Label
-      targetType: attribute
-      preserveSource: false
-      overrideOnConflict: false
-    - type: attribute-remapper
-      name: Map `cs6Label` to `attributeLabels.cs6Label`
-      enabled: true
-      sources:
-        - cs6Label
-      sourceType: attribute
-      target: attributeLabels.cs6Label
-      targetType: attribute
-      preserveSource: false
-      overrideOnConflict: false
-    - type: attribute-remapper
-      name: Map `cn1Label` to `attributeLabels.cn1Label`
-      enabled: true
-      sources:
-        - cn1Label
-      sourceType: attribute
-      target: attributeLabels.cn1Label
-      targetType: attribute
-      preserveSource: false
-      overrideOnConflict: false
