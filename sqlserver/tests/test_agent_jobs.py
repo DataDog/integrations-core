@@ -404,6 +404,9 @@ def test_history_output(instance_docker, sa_conn):
 def test_agent_jobs_integration(aggregator, dd_run_check, agent_jobs_instance, sa_conn):
     with sa_conn as conn:
         with conn.cursor() as cursor:
+            cursor.execute("SELECT * FROM msdb.dbo.syssessions")
+            results = cursor.fetchall()
+            assert len(results) >= 1, "should have a session of the agent"
             cursor.execute("SELECT job_id FROM msdb.dbo.sysjobs WHERE name = 'Job 2'")
             job2_id = cursor.fetchone()[0]
             cursor.execute(ACTIVITY_INSERTION_QUERY)
