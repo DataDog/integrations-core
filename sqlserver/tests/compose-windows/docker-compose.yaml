@@ -10,4 +10,4 @@ services:
     ports:
       - "1433:1433"
     environment:
-      - MSSQL_AGENT_ENABLED: true
+      - MSSQL_AGENT_ENABLED=true
