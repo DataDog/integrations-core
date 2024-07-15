@@ -20,6 +20,16 @@ from datadog_checks.base.utils.models import validation
 from . import defaults, validators
 
 
+class AgentJobs(BaseModel):
+    model_config = ConfigDict(
+        arbitrary_types_allowed=True,
+        frozen=True,
+    )
+    agent_jobs_history_row_limit: Optional[int] = None
+    collection_interval: Optional[float] = None
+    enabled: Optional[bool] = None
+
+
 class Aws(BaseModel):
     model_config = ConfigDict(
         arbitrary_types_allowed=True,
@@ -156,6 +166,7 @@ class InstanceConfig(BaseModel):
         frozen=True,
     )
     adoprovider: Optional[str] = None
+    agent_jobs: Optional[AgentJobs] = None
     ao_database: Optional[str] = None
     autodiscovery_db_service_check: Optional[bool] = None
     autodiscovery_exclude: Optional[tuple[str, ...]] = None
