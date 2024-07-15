@@ -34,13 +34,13 @@ class CollStatsCollector(MongoCollector):
         for coll_name in coll_names:
             # Grab the stats from the collection
             try:
-                coll_stats = api.coll_stats(self.db_name, coll_name)
+                collection_stats = api.coll_stats(self.db_name, coll_name)
             except OperationFailure as e:
                 # Atlas restricts $collStats on system collections
                 self.log.warning("Could not collect stats for collection %s: %s", coll_name, e)
                 continue
 
-            for coll_stats in coll_stats:
+            for coll_stats in collection_stats:
                 # Submit the metrics
                 storage_stats = coll_stats.get('storageStats', {})
                 latency_stats = coll_stats.get('latencyStats', {})
