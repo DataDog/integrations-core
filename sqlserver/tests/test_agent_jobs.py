@@ -356,7 +356,7 @@ def test_history_output(instance_docker, sa_conn):
             cursor.execute(JOB_CREATION_QUERY)
             cursor.execute("SELECT * FROM msdb.dbo.sysjobs")
             results = cursor.fetchall()
-            assert len(results) >= 2, "ensure that jobs create, default history purging job may or may not populate so not checking for strict equality"
+            assert len(results) >= 2, "should have 2 created jobs, default job may or may not populate"
             # job 1 completes once, job 2 completes twice, an instance of job 1 is still in progress
             # should result in 7 steps of job history events to submit
             job_and_step_series_now = [(1, 1), (1, 2), (2, 1), (1, 0)]
