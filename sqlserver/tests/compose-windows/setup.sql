@@ -11,11 +11,6 @@ GRANT SELECT on sys.dm_os_performance_counters to datadog;
 GRANT VIEW SERVER STATE to datadog;
 GRANT VIEW ANY DEFINITION to datadog;
 
-USE msdb;
-CREATE USER datadog FOR LOGIN datadog;
-GRANT SELECT to datadog;
-
-USE master;
 
 -- test users
 CREATE LOGIN bob WITH PASSWORD = 'Password12!';
@@ -34,6 +29,7 @@ GO
 USE msdb;
 GO
 CREATE USER datadog FOR LOGIN datadog;
+GRANT SELECT to datadog;
 GO
 
 -- Create test database for integration schema tests
