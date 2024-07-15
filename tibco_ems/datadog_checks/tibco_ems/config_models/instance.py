@@ -41,6 +41,7 @@ class InstanceConfig(BaseModel):
     min_collection_interval: Optional[float] = None
     password: Optional[str] = None
     port: Optional[int] = None
+    script_path: Optional[str] = None
     service: Optional[str] = None
     tags: Optional[tuple[str, ...]] = None
     tibemsadmin: Optional[str] = None

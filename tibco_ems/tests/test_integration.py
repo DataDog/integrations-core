@@ -10,3 +10,10 @@ from datadog_checks.dev.utils import get_metadata_metrics
 from datadog_checks.tibco_ems import TibcoEMSCheck
 
 
+def test_check(dd_run_check, aggregator, instance):
+    
+    check = TibcoEMSCheck('tibco_ems', {}, [instance])
+    dd_run_check(check)
+
+    aggregator.assert_metrics_using_metadata(get_metadata_metrics())
+    aggregator.assert_all_metrics_covered()

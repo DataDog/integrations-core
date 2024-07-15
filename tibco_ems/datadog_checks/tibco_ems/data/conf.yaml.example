@@ -31,18 +31,23 @@ instances:
     # port: 7222
 
     ## @param username - string - optional
-    ## Username from the credentials needed to connect to the host. These are the credentials for the server.
-    ## For the check to work, this user must have a read/write access so that the Datadog Tibeco EMS
-    ## check can execute the `status` command
+    ## Username from the credentials needed to connect to the host. These are the credentials for the Tibco EMS server.
+    ## For the check to work, this user must have access so that the Datadog Tibeco EMS
+    ## check can execute the `show` command
     #
     # username: <USERNAME>
 
     ## @param password - string - optional
-    ## Password from the credentials needed to connect to the host. These are the credentials for the JMX server.
-    ## For the check to work, this user must have a read/write access so that the Datadog Tibeco EMS
-    ## check can execute the `status` command
+    ## Password from the credentials needed to connect to the host. These are the credentials for the Tibco EMS server.
+    ## For the check to work, this user must have access so that the Datadog Tibeco EMS
+    ## check can execute the `show` command
     #
     # password: <PASSWORD>
+
+    ## @param script_path - string - optional
+    ## The path to the script that will be executed to collect metrics.
+    #
+    # script_path: <SCRIPT_PATH>
 
     ## @param tibemsadmin - string - optional
     ## The command or path to tibemsadmin (for example /usr/bin/tibemsadmin or docker exec <container> tibemsadmin)

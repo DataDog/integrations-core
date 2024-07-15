@@ -22,6 +22,7 @@ SERVER_METRIC_KEYS = [
     'storage_read_rate_size',
     'storage_write_rate_count',
     'storage_write_rate_size',
+    'uptime',
 ]
 
 unit_pattern = re.compile(r'(?P<value>\d+\.?\d*)\s*(?P<unit>\S+)')
@@ -60,8 +61,8 @@ SHOW_METRIC_DATA = {
             r'(?P<snfgeibctm>[-+*]*)\s+'
             r'(?P<subsciptions>\d+\*?)\s+'
             r'(?P<durable_subscriptions>\d+)\s+'
-            r'(?P<pending_message>\d+)\s+'
-            r'(?P<pending_message_size>\d+\.?\d*\s*\S+)\s+'
+            r'(?P<pending_messages>\d+)\s+'
+            r'(?P<pending_messages_size>\d+\.?\d*\s*\S+)\s+'
             r'(?P<pending_persistent_messages>\d+)\s+'
             r'(?P<pending_persistent_messages_size>\d+\.?\d*\s*\S+)\s*$'
         ),
@@ -80,7 +81,7 @@ SHOW_METRIC_DATA = {
         'regex': re.compile(
             r'^\s*(?P<user>\S+)\s+'
             r'(?P<conn>\d+)\s+'
-            r'(?P<type>\S)\s+'
+            r'(?P<component_type>\S)\s+'
             r'(?P<destination>\S+)\s+'
             r'(?P<total_messages>\d+)\s+'
             r'(?P<total_messages_size>\d+\.?\d*\s*\S+)\s+'
@@ -94,13 +95,13 @@ SHOW_METRIC_DATA = {
             'messages_rate',
             'messages_rate_size',
         ],
-        'tags': ['destination', 'user', 'type', 'conn', 'destination'],
+        'tags': ['destination', 'user', 'component_type', 'conn', 'destination'],
     },
     'show stat producers': {
         'regex': re.compile(
             r'^\s*(?P<user>\S+)\s+'
             r'(?P<conn>\d+)\s+'
-            r'(?P<type>\S)\s+'
+            r'(?P<component_type>\S)\s+'
             r'(?P<destination>\S+)\s+'
             r'(?P<total_messages>\d+)\s+'
             r'(?P<total_messages_size>\d+\.?\d*\s*\S+)\s+'
@@ -114,7 +115,7 @@ SHOW_METRIC_DATA = {
             'messages_rate',
             'messages_rate_size',
         ],
-        'tags': ['destination', 'user', 'type', 'conn', 'destination'],
+        'tags': ['destination', 'user', 'component_type', 'conn', 'destination'],
     },
     'show connections full': {
         'regex': re.compile(
@@ -146,7 +147,7 @@ SHOW_METRIC_DATA = {
             'temporary_queues',
             'uncommitted_transactions',
             'uncommitted_transactions_size',
-            # 'uptime',
+            'uptime',
         ],
         'tags': ['client_type', 'tibco_host', 'ip_address', 'port', 'user', 'client_id'],
     },
