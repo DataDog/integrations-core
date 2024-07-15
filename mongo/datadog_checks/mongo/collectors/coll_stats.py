@@ -2,6 +2,7 @@
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
 
+from pymongo.errors import OperationFailure
 from six import iteritems
 
 from datadog_checks.base import AgentCheck
@@ -32,7 +33,14 @@ class CollStatsCollector(MongoCollector):
         coll_names = self._get_collections(api)
         for coll_name in coll_names:
             # Grab the stats from the collection
-            for coll_stats in api.coll_stats(self.db_name, coll_name):
+            try:
+                coll_stats = api.coll_stats(self.db_name, coll_name)
+            except OperationFailure as e:
+                # Atlas restricts $collStats on system collections
+                self.log.warning("Could not collect stats for collection %s: %s", coll_name, e)
+                continue
+
+            for coll_stats in coll_stats:
                 # Submit the metrics
                 storage_stats = coll_stats.get('storageStats', {})
                 latency_stats = coll_stats.get('latencyStats', {})
