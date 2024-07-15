@@ -49,7 +49,7 @@ The Trend Micro Email Security integration does not include any metrics.
 
 The Trend Micro Email Security integration does not include any events.
 
-### Support
+## Support
 
 For any further assistance, contact [Datadog support][2].
 
