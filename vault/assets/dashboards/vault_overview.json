@@ -1113,9 +1113,8 @@
                             "content": "You can gain an even deeper understanding of Vault\u2019s activity by collecting and analyzing logs from your Vault clusters. Vault produces two types of logs: server logs and audit logs. Server logs record all activities that occur on each server, and they are the first place to look when troubleshooting an error. Log entries include a timestamp, log level, log source (e.g., core, storage), and log message. They are also grouped by pattern for ease of overview.",
                             "font_size": "14",
                             "has_padding": true,
-                            "show_tick": true,
+                            "show_tick": false,
                             "text_align": "left",
-                            "tick_edge": "bottom",
                             "tick_pos": "50%",
                             "type": "note",
                             "vertical_align": "center"
