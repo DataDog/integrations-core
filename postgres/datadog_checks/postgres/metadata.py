@@ -574,7 +574,7 @@ class PostgresMetadata(DBMAsyncJob):
                 if self.pg_settings_ignored_patterns:
                     query = query + " WHERE name NOT LIKE ALL(%s)"
 
-                self._log.warning(
+                self._log.debug(
                     "Running query [%s] and patterns are %s",
                     query,
                     self.pg_settings_ignored_patterns,
