@@ -284,7 +284,7 @@ INSERT INTO msdb.dbo.sysjobactivity (
     stop_execution_date
 )
 VALUES (
-    1, -- New session_id
+    (SELECT MAX(session_id) FROM msdb.dbo.syssessions), -- New session_id
     (SELECT job_id FROM msdb.dbo.sysjobs WHERE name = 'Job 2'), -- Replace with the actual job_history_id or NULL
     GETDATE(), -- start_execution_date,.
     1,
@@ -356,7 +356,7 @@ def test_history_output(instance_docker, sa_conn):
             cursor.execute(JOB_CREATION_QUERY)
             cursor.execute("SELECT * FROM msdb.dbo.sysjobs")
             results = cursor.fetchall()
-            assert len(results) == 2
+            assert len(results) >= 2, "ensure that jobs create, default history purging job may or may not populate so not checking for strict equality"
             # job 1 completes once, job 2 completes twice, an instance of job 1 is still in progress
             # should result in 7 steps of job history events to submit
             job_and_step_series_now = [(1, 1), (1, 2), (2, 1), (1, 0)]
