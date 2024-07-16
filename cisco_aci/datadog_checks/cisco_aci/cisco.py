@@ -6,13 +6,12 @@ from six import iteritems
 from datadog_checks.base import AgentCheck, ConfigurationError
 from datadog_checks.base.config import _is_affirmative
 from datadog_checks.base.utils.containers import hash_mutable
-
-from . import aci_metrics
-from .api import Api
-from .capacity import Capacity
-from .fabric import Fabric
-from .tags import CiscoTags
-from .tenant import Tenant
+from datadog_checks.cisco_aci.aci_metrics import make_tenant_metrics
+from datadog_checks.cisco_aci.api import Api
+from datadog_checks.cisco_aci.capacity import Capacity
+from datadog_checks.cisco_aci.fabric import Fabric
+from datadog_checks.cisco_aci.tags import CiscoTags
+from datadog_checks.cisco_aci.tenant import Tenant
 
 SOURCE_TYPE = 'cisco_aci'
 
@@ -25,7 +24,7 @@ class CiscoACICheck(AgentCheck):
 
     def __init__(self, name, init_config, instances):
         super(CiscoACICheck, self).__init__(name, init_config, instances)
-        self.tenant_metrics = aci_metrics.make_tenant_metrics()
+        self.tenant_metrics = make_tenant_metrics()
         self.last_events_ts = {}
         self.external_host_tags = {}
         self._api_cache = {}
@@ -109,7 +108,7 @@ class CiscoACICheck(AgentCheck):
             raise
 
         try:
-            fabric = Fabric(self, api, self.instance)
+            fabric = Fabric(self, api, self.instance, self.instance.get('namespace', 'default'))
             fabric.collect()
         except Exception as e:
             self.log.error('fabric collection failed: %s', e)

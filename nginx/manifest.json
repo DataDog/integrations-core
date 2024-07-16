@@ -16,7 +16,22 @@
       "Category::Log Collection",
       "Supported OS::Linux",
       "Supported OS::Windows",
-      "Supported OS::macOS"
+      "Supported OS::macOS",
+      "Offering::Integration"
+    ],
+    "resources": [
+      {
+        "resource_type": "blog",
+        "url": "https://www.datadoghq.com/blog/how-to-monitor-nginx"
+      },
+      {
+        "resource_type": "blog",
+        "url": "https://www.datadoghq.com/blog/how-to-collect-nginx-metrics/index.html"
+      },
+      {
+        "resource_type": "blog",
+        "url": "https://www.datadoghq.com/blog/how-to-monitor-nginx-with-datadog/index.html"
+      }
     ]
   },
   "author": {
