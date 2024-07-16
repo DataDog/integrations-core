@@ -2,6 +2,8 @@
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
 
+from pymongo.errors import OperationFailure
+
 from datadog_checks.mongo.collectors.base import MongoCollector
 
 
@@ -34,6 +36,9 @@ class IndexStatsCollector(MongoCollector):
                     ]
                     val = int(stats.get('accesses', {}).get('ops', 0))
                     self.gauge('mongodb.collection.indexes.accesses.ops', val, idx_tags)
+            except OperationFailure as e:
+                # Atlas restricts $indexStats on system collections
+                self.log.warning("Could not collect index stats for collection %s: %s", coll_name, e)
             except Exception as e:
                 self.log.error("Could not fetch indexes stats for collection %s: %s", coll_name, e)
                 raise e
