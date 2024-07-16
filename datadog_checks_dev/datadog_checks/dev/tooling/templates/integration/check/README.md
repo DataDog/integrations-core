@@ -1,6 +1,6 @@
 # Python Agent Check
 
-Also known as "Agent Integration", choose this template type if you need to write Python code to collect data (metrics, events, logs etc.) and submit them to Datadog via the Agent.
+Also known as an "Agent integration", choose this template type if you need to write Python code to collect data (such as metrics, events, and logs) and submit it to Datadog through the Agent.
 
-It's as a Python package that one can install in the Agent.
-We manage the Changelog with towncrier in integrations-core and by hand in other repositories.
+It creates a Python package that can be installed on the Agent.
+The changelog is managed with towncrier in integrations-core and manually in other repositories.
