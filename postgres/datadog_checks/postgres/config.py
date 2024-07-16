@@ -31,7 +31,7 @@ class PostgresConfig:
     GAUGE = AgentCheck.gauge
     MONOTONIC = AgentCheck.monotonic_count
 
-    def __init__(self, instance, init_config):
+    def __init__(self, instance, init_config, check):
         self.host = instance.get('host', '')
         if not self.host:
             raise ConfigurationError('Specify a Postgres host to connect to.')
@@ -75,7 +75,11 @@ class PostgresConfig:
         ssl = instance.get('ssl', "allow")
         if ssl in SSL_MODES:
             self.ssl_mode = ssl
+        else:
+            check.warning(f"Invalid ssl option '{ssl}', should be one of {SSL_MODES}. Defaulting to 'allow'.")
+            self.ssl_mode = "allow"
 
+        
         self.ssl_cert = instance.get('ssl_cert', None)
         self.ssl_root_cert = instance.get('ssl_root_cert', None)
         self.ssl_key = instance.get('ssl_key', None)
