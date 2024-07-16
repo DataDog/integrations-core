@@ -47,16 +47,16 @@ instances:
 
     ## @param org_slug - string - required
     ## Fly.io org slug
-    ## For more information see: https://fly.io/docs/flyctl/orgs/
+    ## For more information, see https://fly.io/docs/flyctl/orgs/
     #
   - org_slug: <ORG_SLUG>
 
     ## @param headers - mapping - optional
     ## Headers to use for every request. An Authorization header including the Fly.io access token is required
-    ## for authentication for both the openmetrics endpoint and REST API.
+    ## for authentication for both the OpenMetrics endpoint and REST API.
     ## You can alternatively use the `auth_token` option.
     ##
-    ## You can create an access token with the command:
+    ## You can create an access token with this command:
     ##   `TOKEN=$(flyctl auth token)`
     #
     headers:
@@ -64,7 +64,7 @@ instances:
 
     ## @param machines_api_endpoint - string - optional
     ## Endpoint of the Fly.io Machines Restful API.
-    ## For more information, see: https://fly.io/docs/machines/api/working-with-machines-api/
+    ## For more information, see https://fly.io/docs/machines/api/working-with-machines-api/
     ## If running the check inside your Fly.io environment, use http://_api.internal:4280,
     ## otherwise use https://api.machines.dev.
     #
@@ -119,8 +119,8 @@ instances:
 
     ## @param match_string - string - optional - default: {__name__=~".+"}
     ## Match string used to filter the Prometheus data requested from Fly.io.
-    ## For more information, see: https://prometheus.io/docs/prometheus/latest/federation/#configuring-federation
-    ## By default, we fetch everything.
+    ## For more information, see https://prometheus.io/docs/prometheus/latest/federation/#configuring-federation
+    ## By default, all metrics for all apps are collected.
     #
     # match_string: '{__name__=~"example_app"}'
 

@@ -59,7 +59,7 @@ files:
       description: |
         Match string used to filter the Prometheus data requested from Fly.io.
         For more information, see https://prometheus.io/docs/prometheus/latest/federation/#configuring-federation
-        By default, we fetch everything.
+        By default, all metrics for all apps are collected.
       value:
         display_default: '{__name__=~".+"}'
         example: '{__name__=~"example_app"}'
