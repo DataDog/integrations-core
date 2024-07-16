@@ -7,9 +7,7 @@ from datadog_checks.dev.testing import requires_py3
 
 from ..utils import get_check
 
-pytestmark = [
-    requires_py3,
-]
+pytestmark = [requires_py3]
 
 
 @pytest.mark.parametrize(
@@ -62,11 +60,11 @@ def test_untyped_counter(aggregator, dd_run_check, mock_http_response, metric_ty
         {
             'metrics': [
                 {
-                    'foo': {'name': 'foo', 'type': f'{metric_type}'},
-                    'bar_total': {'name': 'bar', 'type': f'{metric_type}'},
-                    'baz_total': {'name': 'baz', 'type': f'{metric_type}'},
-                    'fiz': {'name': 'fiz', 'type': f'{metric_type}'},
-                    'bux': {'name': 'bux', 'type': f'{metric_type}'},
+                    'foo': {'name': 'foo', 'type': '{}'.format(metric_type)},
+                    'bar_total': {'name': 'bar', 'type': '{}'.format(metric_type)},
+                    'baz_total': {'name': 'baz', 'type': '{}'.format(metric_type)},
+                    'fiz': {'name': 'fiz', 'type': '{}'.format(metric_type)},
+                    'bux': {'name': 'bux', 'type': '{}'.format(metric_type)},
                 }
             ]
         }
