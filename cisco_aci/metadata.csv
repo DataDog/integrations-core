@@ -126,7 +126,7 @@ cisco_aci.fabric.port.ingr_total.bytes.cum,gauge,,byte,,the cumulative bytes sen
 cisco_aci.fabric.port.ingr_total.bytes.rate,gauge,,byte,second,the bytes per second sent to the port,0,cisco_aci,,
 cisco_aci.fabric.port.ingr_total.pkts,gauge,,packet,,the packets sent to the port,0,cisco_aci,,
 cisco_aci.fabric.port.ingr_total.pkts.rate,gauge,,packet,second,the packets per second sent to the port,0,cisco_aci,,
-cisco_aci.fabric.port.interface.status,gauge,,,,"For each interface of each monitored Cisco ACI device, this metric reports always 1 with the status a tag, as long as a 'combined' status that can be used for monitors.",0,cisco_aci,,
+cisco_aci.fabric.port.status,gauge,,,,"For each interface of each monitored Cisco ACI device, this metric reports always 1 with the status a tag, as long as a 'combined' status that can be used for monitors.",0,cisco_aci,,
 cisco_aci.tenant.application.endpoint.fault_counter,gauge,,fault,,represents the warning Fault. This is the average value read by the counter during the collection interval. Note that this value resets to 0 at the beginning of each interval,0,cisco_aci,,
 cisco_aci.tenant.application.endpoint.health,gauge,,percent,,represents the most current statistics for the endpoint health,0,cisco_aci,,
 cisco_aci.tenant.application.endpoint.overall_health,gauge,,percent,,represents the statistics for the overall endpoint health,0,cisco_aci,,
