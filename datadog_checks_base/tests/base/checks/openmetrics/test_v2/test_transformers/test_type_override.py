@@ -27,7 +27,7 @@ def test_untyped_counter(aggregator, dd_run_check, mock_http_response, metric_ty
 
     1. The metricset and metric sample does not end in '_total' and is untyped.
     2. The metricset and metric sample does end in '_total' and is untyped.
-    3. The metricset  does not end in '_total' and metric sample end in '_total' and is untyped.
+    3. The metricset does not end in '_total' and metric sample end in '_total' and is untyped.
     4. The metricset and metric samples don't match
     5. The metricset and metric samples are a non counter/gauge type
 
