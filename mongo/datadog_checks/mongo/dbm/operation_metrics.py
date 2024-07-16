@@ -160,6 +160,10 @@ class MongoOperationMetrics(DBMAsyncJob):
         command = query_metrics['command']
         obfuscated_command = datadog_agent.obfuscate_mongodb_string(json_util.dumps(command))
         query_signature = compute_exec_plan_signature(obfuscated_command)
+        originating_command = query_metrics.get('originatingCommand')
+        if originating_command:
+            # Obfuscate the originating command for getMore operations
+            query_metrics['originatingCommand'] = datadog_agent.obfuscate_mongodb_string(json_util.dumps(originating_command))
         query_metrics['dbname'] = db_name
         query_metrics['command'] = obfuscated_command
         query_metrics['query_signature'] = query_signature
