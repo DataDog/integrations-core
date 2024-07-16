@@ -16,7 +16,14 @@
       "Supported OS::macOS",
       "Supported OS::Windows",
       "Category::Log Collection",
-      "Category::Testing"
+      "Category::Testing",
+      "Offering::Integration"
+    ],
+    "resources": [
+      {
+        "resource_type": "blog",
+        "url": "https://www.datadoghq.com/blog/monitor-jmeter-test-results-datadog/"
+      }
     ]
   },
   "author": {

@@ -16,7 +16,8 @@
       "Supported OS::Windows",
       "Supported OS::macOS",
       "Category::Log Collection",
-      "Category::Developer Tools"
+      "Category::Developer Tools",
+      "Offering::Integration"
     ]
   },
   "assets": {

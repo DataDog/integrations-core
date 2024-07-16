@@ -39,6 +39,7 @@ from .const import (
     GALERA_VARS,
     GAUGE,
     GROUP_REPLICATION_VARS,
+    GROUP_REPLICATION_VARS_8_0_2,
     INNODB_VARS,
     MONOTONIC,
     OPTIONAL_STATUS_VARS,
@@ -62,7 +63,9 @@ from .queries import (
     SQL_95TH_PERCENTILE,
     SQL_AVG_QUERY_RUN_TIME,
     SQL_GROUP_REPLICATION_MEMBER,
+    SQL_GROUP_REPLICATION_MEMBER_8_0_2,
     SQL_GROUP_REPLICATION_METRICS,
+    SQL_GROUP_REPLICATION_METRICS_8_0_2,
     SQL_GROUP_REPLICATION_PLUGIN_STATUS,
     SQL_INNODB_ENGINES,
     SQL_PROCESS_LIST,
@@ -653,11 +656,14 @@ class MySql(AgentCheck):
     def _collect_group_replica_metrics(self, db, results):
         try:
             with closing(db.cursor(CommenterCursor)) as cursor:
-                cursor.execute(SQL_GROUP_REPLICATION_MEMBER)
+                # Version 8.0.2 introduced new columns to replication_group_members and replication_group_member_stats
+                above_802 = self.version.version_compatible((8, 0, 2))
+                query_to_execute = SQL_GROUP_REPLICATION_MEMBER_8_0_2 if above_802 else SQL_GROUP_REPLICATION_MEMBER
+                cursor.execute(query_to_execute)
                 replica_results = cursor.fetchone()
                 status = self.OK
                 additional_tags = []
-                if replica_results is None or len(replica_results) < 3:
+                if replica_results is None or len(replica_results) < 2:
                     self.log.warning(
                         'Unable to get group replica status, setting mysql.replication.group.status as CRITICAL'
                     )
@@ -667,8 +673,9 @@ class MySql(AgentCheck):
                     additional_tags = [
                         'channel_name:{}'.format(replica_results[0]),
                         'member_state:{}'.format(replica_results[1]),
-                        'member_role:{}'.format(replica_results[2]),
                     ]
+                    if above_802 and len(replica_results) > 2:
+                        additional_tags.append('member_role:{}'.format(replica_results[2]))
                     self.gauge('mysql.replication.group.member_status', 1, tags=additional_tags + self.tags)
 
                 self.service_check(
@@ -677,7 +684,9 @@ class MySql(AgentCheck):
                     tags=self._service_check_tags() + additional_tags,
                 )
 
-                cursor.execute(SQL_GROUP_REPLICATION_METRICS)
+                metrics_to_fetch = SQL_GROUP_REPLICATION_METRICS_8_0_2 if above_802 else SQL_GROUP_REPLICATION_METRICS
+
+                cursor.execute(metrics_to_fetch)
                 r = cursor.fetchone()
 
                 if r is None:
@@ -689,15 +698,19 @@ class MySql(AgentCheck):
                     'Transactions_check': r[2],
                     'Conflict_detected': r[3],
                     'Transactions_row_validating': r[4],
-                    'Transactions_remote_applier_queue': r[5],
-                    'Transactions_remote_applied': r[6],
-                    'Transactions_local_proposed': r[7],
-                    'Transactions_local_rollback': r[8],
                 }
-                # Submit metrics now, so it's possible to attach `channel_name` tag
-                self._submit_metrics(GROUP_REPLICATION_VARS, results, self.tags + ['channel_name:{}'.format(r[0])])
+                vars_to_submit = copy.deepcopy(GROUP_REPLICATION_VARS)
+                if above_802:
+                    results['Transactions_remote_applier_queue'] = r[5]
+                    results['Transactions_remote_applied'] = r[6]
+                    results['Transactions_local_proposed'] = r[7]
+                    results['Transactions_local_rollback'] = r[8]
+                    vars_to_submit.update(GROUP_REPLICATION_VARS_8_0_2)
 
-                return GROUP_REPLICATION_VARS
+                # Submit metrics now, so it's possible to attach `channel_name` tag
+                self._submit_metrics(vars_to_submit, results, self.tags + ['channel_name:{}'.format(r[0])])
+
+                return vars_to_submit
         except Exception as e:
             self.warning("Internal error happened during the group replication check: %s", e)
             return {}
