@@ -2,7 +2,7 @@
 
 ## Overview
 
-This check monitors [Temporal][1] through the Datadog Agent.
+This check monitors [Temporal][1] through the Datadog Agent. Please note that this check can only be installed if you are self-hosting Temporal and is not supported for the managed Temporal Cloud offering. 
 
 ## Setup
 
