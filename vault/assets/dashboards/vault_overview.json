@@ -204,9 +204,11 @@
                             "count": 50,
                             "display_format": "countsAndList",
                             "hide_zero_counts": true,
+                            "last_triggered_format": "relative",
                             "query": "integration:vault",
                             "show_last_triggered": false,
                             "show_priority": false,
+                            "show_status": true,
                             "sort": "status,asc",
                             "start": 0,
                             "summary_type": "monitors",
@@ -264,7 +266,7 @@
                                         {
                                             "data_source": "metrics",
                                             "name": "query5",
-                                            "query": "sum:vault.vault.core.handle.login_request.count{$vault_cluster,$api_url} by {vault_cluster,api_url}.as_count()"
+                                            "query": "sum:vault.vault.core.handle.login_request.count{$vault_cluster,$api_url} by {vault_cluster,api_url}.as_count().rollup(sum)"
                                         }
                                     ],
                                     "response_format": "timeseries",
@@ -279,7 +281,7 @@
                                     "formulas": [
                                         {
                                             "alias": "Week Before",
-                                            "formula": "week_before(query0)"
+                                            "formula": "2 * week_before(query0)"
                                         }
                                     ],
                                     "on_right_yaxis": false,
@@ -287,7 +289,7 @@
                                         {
                                             "data_source": "metrics",
                                             "name": "query0",
-                                            "query": "sum:vault.vault.core.handle.login_request.count{$vault_cluster,$api_url} by {vault_cluster,api_url}.as_count()"
+                                            "query": "sum:vault.vault.core.handle.login_request.count{$vault_cluster,$api_url}.as_count().fill(null).rollup(sum)"
                                         }
                                     ],
                                     "response_format": "timeseries",
@@ -344,7 +346,7 @@
                                         {
                                             "data_source": "metrics",
                                             "name": "query4",
-                                            "query": "sum:vault.vault.core.handle.request.count{$vault_cluster,$api_url} by {vault_cluster,api_url}.as_count()"
+                                            "query": "sum:vault.vault.core.handle.request.count{$vault_cluster,$api_url} by {vault_cluster,api_url}.as_count().rollup(sum)"
                                         }
                                     ],
                                     "response_format": "timeseries",
@@ -359,7 +361,7 @@
                                     "formulas": [
                                         {
                                             "alias": "Week Before",
-                                            "formula": "week_before(query0)"
+                                            "formula": "2 * week_before(query0)"
                                         }
                                     ],
                                     "on_right_yaxis": false,
@@ -367,7 +369,7 @@
                                         {
                                             "data_source": "metrics",
                                             "name": "query0",
-                                            "query": "sum:vault.vault.core.handle.request.count{$vault_cluster,$api_url} by {vault_cluster,api_url}.as_count()"
+                                            "query": "sum:vault.vault.core.handle.request.count{$vault_cluster,$api_url}.as_count().fill(null).rollup(sum)"
                                         }
                                     ],
                                     "response_format": "timeseries",
@@ -1115,6 +1117,7 @@
                             "has_padding": true,
                             "show_tick": false,
                             "text_align": "left",
+                            "tick_edge": "bottom",
                             "tick_pos": "50%",
                             "type": "note",
                             "vertical_align": "center"
