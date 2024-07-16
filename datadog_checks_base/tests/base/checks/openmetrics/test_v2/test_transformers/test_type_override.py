@@ -77,7 +77,7 @@ def test_untyped_counter(aggregator, dd_run_check, mock_http_response, metric_ty
         for metric in metrics:
             # add the .count suffix to the metric name
             aggregator.assert_metric(
-                f'{metric}.count', metrics.index(metric), metric_type=aggregator.MONOTONIC_COUNT, tags=['endpoint:test']
+                '{}.count'.format(metric), metrics.index(metric), metric_type=aggregator.MONOTONIC_COUNT, tags=['endpoint:test']
             )
     else:
         for metric in metrics:
