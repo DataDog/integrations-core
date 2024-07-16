@@ -21,9 +21,12 @@ pytestmark = [
 )
 def test_untyped_counter(aggregator, dd_run_check, mock_http_response, metric_type):
     """
-    When we encounter an untyped metric, we can force the agent to collect it as a specific type.
-    In this scenario, the agent will ignore the metadata lines # HELP and # TYPE and will instead
-    only look at the metric sample name. Below are some of the scenarios that we might encounter:
+    The Agent's OpenMetrics parser uses the # TYPE line to determine the type of a metric. However, when it encounters
+    an untyped metric, the Agent won't be able to derive the metric type, and the metric will be skipped. We can,
+    however, force the Agent to collect it as a specific type. In this scenario, the Agent will ignore the metadata
+    lines # HELP and # TYPE and will instead only look at the metric sample name.
+    Below are some of the scenarios we might encounter:
+
     1. The metricset and metric sample does not end in '_total' and is untyped.
     2. The metricset and metric sample does end in '_total' and is untyped.
     3. The metricset  does not end in '_total' and metric sample end in '_total' and is untyped.
