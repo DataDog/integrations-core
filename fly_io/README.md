@@ -10,20 +10,20 @@ Follow the instructions below to install and configure this check for an Agent r
 
 ### Installation
 
-The Fly.io check is included in the [Datadog Agent][2] package. We recommend running the Fly.io check on the Datadog Agent in a Fly.io application. This agent will collect [Prometheus metrics][19] as well as some additional data from the [Machines API][20]. Additionally, you can configure your agent to recieve [traces](#Application-Traces) and custom metrics from all of your Fly.io applications inside the organization.
+The Fly.io check is included in the [Datadog Agent][2] package. We recommend running the Fly.io check on the Datadog Agent in a Fly.io application. The Agent collects [Prometheus metrics][19] as well as some additional data from the [Machines API][20]. Additionally, you can configure the Agent to receive [traces](#Application-Traces) and custom metrics from all of your Fly.io applications inside the organization.
 
-### Deploying the agent as a Fly.io application
+#### Deploying the Agent as a Fly.io application
 
-1. Create a new application in Fly.io with the image set as the [Datadog Agent][15] when launching or provide it in the `fly.toml`:
+1. Create a new application in Fly.io with the image set as the [Datadog Agent][15] when launching, or provide the image in the `fly.toml` file:
 
     ```
     [build]
         image = 'gcr.io/datadoghq/agent:7'
     ```
 
-2. Set a [secret][17] for your Datadog API key: `DD_API_KEY` and optionally your [site][14]: `DD_SITE`.
+2. Set a [secret][17] for your Datadog API key called `DD_API_KEY`, and optionally your [site][14] as `DD_SITE`.
 
-3. In your app's directory, create a `conf.yaml` file for the Fly.io integration, [configure](#Configuration) the integration, and mount it in the agent's `conf.d/fly_io.d/` directory as `conf.yaml`:
+3. In your app's directory, create a `conf.yaml` file for the Fly.io integration, [configure](#Configuration) the integration, and mount it in the Agent's `conf.d/fly_io.d/` directory as `conf.yaml`:
 
     ```
     instances:
@@ -37,11 +37,11 @@ The Fly.io check is included in the [Datadog Agent][2] package. We recommend run
 
 4. [Deploy][16] your app.
 
-*Note: Follow additional [steps](#Application-Traces) to collect Traces and Custom Metrics from your applications.*
+**Note**: To collect traces and custom metrics from your applications, see [Application traces](#Application-traces).
 
 ### Configuration
 
-1. Edit the `fly_io.d/conf.yaml` file, in the `conf.d/` folder at the root of your Agent's configuration directory to start collecting your Fly.io performance data. See the [sample fly_io.d/conf.yaml][4] for all available configuration options.
+1. Edit the `fly_io.d/conf.yaml` file, located in the `conf.d/` folder at the root of your Agent's configuration directory, to start collecting your Fly.io performance data. See the [sample fly_io.d/conf.yaml][4] for all available configuration options.
 
 2. [Restart the Agent][5].
 
@@ -63,7 +63,7 @@ The Fly.io integration does not include any events.
 
 The Fly.io integration does not include any service checks.
 
-### Application Traces
+### Application traces
 
 Follow these steps to collect traces for an application in your Fly.io environment.
 
@@ -78,7 +78,7 @@ Follow these steps to collect traces for an application in your Fly.io environme
 
     To utilize [unified service tagging][13], set these environment variables:
     ```
-    ENV DD_SERVICE= "APP_NAME"
+    ENV DD_SERVICE="APP_NAME"
     ENV DD_ENV="ENV_NAME"
     ENV DD_VERSION="VERSION"
     ```
@@ -94,25 +94,25 @@ Follow these steps to collect traces for an application in your Fly.io environme
     [env]
         DD_APM_ENABLED = 'true'
         DD_APM_NON_LOCAL_TRAFFIC = 'true'
-        DD_DOGSTATSD_NON_LOCAL_TRAFFIC='true'
+        DD_DOGSTATSD_NON_LOCAL_TRAFFIC = 'true'
         DD_BIND_HOST = 'fly-global-services'
     ```
 
-*Note: Ensure that the settings on your Fly.io instances do not publicly expose the ports for APM and DogStatsD if enabled.*
+**Note**: Ensure that the settings on your Fly.io instances do not publicly expose the ports for APM and DogStatsD, if enabled.
 
 ### Log collection
 
 Use the [Fly Log Shipper][10] to collect logs from all of your Fly.io applications.
 
-1. Create a new app based on the Fly Log Shipper docker image:
+1. Create a new app based on the Fly Log Shipper Docker image:
     ```
     fly launch --image flyio/log-shipper:latest
     ```
 
 2. Set [secrets][17] for [NATS][18]:
-`ORG` and `ACCESS_TOKEN`
+`ORG` and `ACCESS_TOKEN`.
 
-3. Set [secrets][17] for [Datadog][3]: `DATADOG_API_KEY` and `DATADOG_SITE`
+3. Set [secrets][17] for [Datadog][3]: `DATADOG_API_KEY` and `DATADOG_SITE`.
 
 4. [Deploy][6] the logs shipper app.
 
