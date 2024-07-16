@@ -28,5 +28,10 @@ Restart-Service -Name MSSQLSERVER
 (Get-Service MSSQLSERVER).WaitForStatus('Running')
 echo "INFO: MSSQLSERVER running."
 
+echo "INFO: restarting SQLSERVERAGENT"
+Restart-Service -Name SQLSERVERAGENT
+(Get-Service SQLSERVERAGENT).WaitForStatus('Running')
+echo "INFO: SQLSERVERAGENT running."
+
 echo "INFO: Container initialization complete."
 ping -t localhost | out-null
