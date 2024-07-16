@@ -79,7 +79,6 @@ class PostgresConfig:
             check.warning(f"Invalid ssl option '{ssl}', should be one of {SSL_MODES}. Defaulting to 'allow'.")
             self.ssl_mode = "allow"
 
-        
         self.ssl_cert = instance.get('ssl_cert', None)
         self.ssl_root_cert = instance.get('ssl_root_cert', None)
         self.ssl_key = instance.get('ssl_key', None)
