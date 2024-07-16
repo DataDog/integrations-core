@@ -8,7 +8,7 @@
 
 * Using constant values instead of reassigning variables in each check run ([#17749](https://github.com/DataDog/integrations-core/pull/17749))
 
-## 4.9.0 / 2024-05-31
+## 4.9.0 / 2024-05-31 / Agent 7.55.0
 
 ***Added***:
 

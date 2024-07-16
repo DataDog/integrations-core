@@ -46,6 +46,7 @@ def test_collect_metadata(integration_check, dbm_instance, aggregator):
     assert len(event["metadata"]) > 0
     assert set(event["metadata"][0].keys()) == {'name', 'setting', 'source', 'sourcefile', 'pending_restart'}
     assert all(not k['name'].startswith('max_wal') for k in event['metadata'])
+    assert next((k for k in event['metadata'] if k['name'].startswith('pg_trgm')), None) is not None
     statement_timeout_setting = next((k for k in event['metadata'] if k['name'] == 'statement_timeout'), None)
     assert statement_timeout_setting is not None
     # statement_timeout should be server level setting not session level

@@ -13,7 +13,7 @@
 * Properly submit percent metrics ([#17745](https://github.com/DataDog/integrations-core/pull/17745))
 * Maintain a long lived connection to ESXi host. ([#17919](https://github.com/DataDog/integrations-core/pull/17919))
 
-## 1.1.0 / 2024-05-31
+## 1.1.0 / 2024-05-31 / Agent 7.55.0
 
 ***Added***:
 
