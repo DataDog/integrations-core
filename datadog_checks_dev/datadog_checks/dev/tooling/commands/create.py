@@ -107,16 +107,43 @@ MARKETPLACE_EXTRAS_MEDIA = """[
       }
     ]"""
 
+VALID_TEMPLATES = get_valid_templates()
 
-@click.command(context_settings=CONTEXT_SETTINGS, short_help='Create scaffolding for a new integration')
+
+def _valid_template_description():
+    title = 'Types of Integrations'
+    surround = '#' * len(title)
+    # Dashed line long enough to separate, short enough not to get wrapped in terminals.
+    section_sep = '\n\n{}\n\n'.format('-' * 20)
+    return '\n{surround} {title} {surround}\n\n{body}'.format(
+        surround=surround,
+        title=title,
+        body=section_sep.join(
+            '{}: {}'.format(
+                tpl_type.name,
+                # Assuming we only have one Markdown header at the begining of the description, we remove it
+                # for terminal display.
+                tpl_type.description.lstrip("# "),
+            )
+            for tpl_type in VALID_TEMPLATES
+        ),
+    ).rstrip()
+
+
+@click.command(
+    context_settings=CONTEXT_SETTINGS,
+    # Since we generate the set of valid templates at runtime, describing this set in static docstrings is not ideal.
+    # Click provides a way to generate the description at runtime via the `epilog` option.
+    epilog=_valid_template_description(),
+)
 @click.argument('name')
 @click.option(
     '--type',
     '-t',
     'integration_type',
-    type=click.Choice(get_valid_templates()),
+    type=click.Choice(t.name for t in VALID_TEMPLATES),
     default='check',
-    help='The type of integration to create',
+    help='The type of integration to create. See below for more details.',
 )
 @click.option('--location', '-l', help='The directory where files will be written')
 @click.option('--non-interactive', '-ni', is_flag=True, help='Disable prompting for fields')
