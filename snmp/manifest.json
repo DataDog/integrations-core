@@ -17,7 +17,18 @@
       "Category::SNMP",
       "Supported OS::Linux",
       "Supported OS::Windows",
-      "Supported OS::macOS"
+      "Supported OS::macOS",
+      "Offering::Integration"
+    ],
+    "resources": [
+      {
+        "resource_type": "blog",
+        "url": "https://www.datadoghq.com/blog/monitor-snmp-with-datadog/"
+      },
+      {
+        "resource_type": "guide",
+        "url": "https://datadoghq.dev/integrations-core/tutorials/snmp/introduction/"
+      }
     ]
   },
   "author": {

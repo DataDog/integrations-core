@@ -36,7 +36,7 @@ metadata:
           "init_config": {},
           "instances": [
             {
-              "openmetrics_endpoint": "http://%%host%%:8090/metrics",
+              "openmetrics_endpoint": "http://%%host%%:8090/metrics"
             }
           ]
         }

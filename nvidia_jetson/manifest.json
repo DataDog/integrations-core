@@ -13,7 +13,8 @@
     "media": [],
     "classifier_tags": [
       "Supported OS::Linux",
-      "Category::IoT"
+      "Category::IoT",
+      "Offering::Integration"
     ]
   },
   "author": {

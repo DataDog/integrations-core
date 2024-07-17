@@ -108,7 +108,7 @@ app_controller_histograms = [
     'redis.request.duration.sum',
 ]
 
-appset_controller_counters = ['reconcile.errors.total', 'runtime.reconcile.total']
+appset_controller_counters = ['reconcile.errors.count', 'runtime.reconcile.count']
 
 appset_controller_gauges = [
     'active.workers',
@@ -163,8 +163,6 @@ NOT_EXPOSED_METRICS = [
     'argocd.app_controller.cluster.api.resources',
     'argocd.app_controller.cluster.cache.age.seconds',
     'argocd.app_controller.redis.request.duration',
-    'argocd.appset_controller.reconcile.errors.total',
-    'argocd.appset_controller.runtime.reconcile.total',
 ]
 
 # Additional metrics that aren't exposed in the E2E environment

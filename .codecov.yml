@@ -682,6 +682,10 @@ coverage:
         target: 75
         flags:
         - vllm
+      kyverno:
+        target: 75
+        flags:
+        - kyverno
       vSphere:
         target: 75
         flags:
@@ -1128,6 +1132,11 @@ flags:
     paths:
     - kyototycoon/datadog_checks/kyototycoon
     - kyototycoon/tests
+  kyverno:
+    carryforward: true
+    paths:
+    - kyverno/datadog_checks/kyverno
+    - kyverno/tests
   lighttpd:
     carryforward: true
     paths:
