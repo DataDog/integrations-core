@@ -1,0 +1,1 @@
+Fix coll or index stats metrics failure when the agent user is not authorized to perform $collStats or $indexStats aggregation on a collection. This fix prevents check to fail when an OperationFailure is raised to run $collStats or $indexStats on system collections such as system.replset on local database.

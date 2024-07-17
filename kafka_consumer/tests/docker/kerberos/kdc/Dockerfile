@@ -3,6 +3,12 @@ FROM centos:7
 ENV container docker
 
 # 1. Installing Kerberos server, admin and client
+# mirrorlist.contos.org does not exits anymore, the below stack exchange post suggests a workaround
+# https://serverfault.com/questions/1161816/mirrorlist-centos-org-no-longer-resolve
+
+RUN sed -i s/mirror.centos.org/vault.centos.org/g /etc/yum.repos.d/*.repo && \
+    sed -i s/^#.*baseurl=http/baseurl=http/g /etc/yum.repos.d/*.repo && \
+    sed -i s/^mirrorlist=http/#mirrorlist=http/g /etc/yum.repos.d/*.repo
 RUN yum install -y krb5-server krb5-libs krb5-auth-dialog
 RUN yum install -y krb5-workstation krb5-libs
 

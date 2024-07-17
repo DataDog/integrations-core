@@ -1,1 +1,0 @@
-Add config option to use reported_database_hostname to override the mongodb instance hostname detected from admin command serverStatus.host
