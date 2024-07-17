@@ -1,4 +1,4 @@
-id: fly_io
+id: fly-io
 tests:
   - sample: >
       {"ddsource":"fly_io","env":"flyenv","event":{"provider":"app"},"fly":{"app":{"instance":"32882401c3294","name":"datadog-agent-example"},"region":"ewr"},"host":"32882401c3294","log":{"level":"info"},"message":"2024-07-17
