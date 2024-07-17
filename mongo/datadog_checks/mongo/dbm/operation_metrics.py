@@ -50,7 +50,6 @@ EXPECTED_METADATA = {
     "ns",
     "planSummary",
     "command",
-    # "originatingCommand",
     "replanReason",
     "query_signature",
 }
@@ -102,7 +101,7 @@ class MongoOperationMetrics(DBMAsyncJob):
         self._last_collection_timestamp = time.time()
 
         for db_name in self._check._database_autodiscovery.databases:
-            if not is_mongos and self._check.api_client.is_profiling_enabled(db_name):
+            if not is_mongos and self._is_profiling_enabled(db_name):
                 self._collect_operation_metrics_from_profiler(db_name, last_ts=last_collection_timestamp)
             else:
                 metrics_from_logs.add(db_name)
@@ -118,6 +117,18 @@ class MongoOperationMetrics(DBMAsyncJob):
             self._check.log.debug("Skipping operation metrics collection on arbiter node")
             return False
         return True
+
+    def _is_profiling_enabled(self, db_name):
+        profiling_level = self._check.api_client.get_profiling_level(db_name)
+        level = profiling_level.get("was", 0)  # profiling by default is disabled
+        slowms = profiling_level.get("slowms", 100)  # slowms threshold is 100ms by default
+        tags = self._check._get_tags(include_deployment_tags=True, include_internal_resource_tags=True)
+        tags.append("db:%s" % db_name)
+        # Emit the profiling level and slowms as raw metrics
+        # raw ensures that level = 0 is also emitted
+        self._check.gauge('mongodb.profiling.level', level, tags=tags, raw=True)
+        self._check.gauge('mongodb.profiling.slowms', slowms, tags=tags, raw=True)
+        return level > 0
 
     def _collect_operation_metrics_from_profiler(self, db_name, last_ts):
         """
@@ -160,10 +171,6 @@ class MongoOperationMetrics(DBMAsyncJob):
         command = query_metrics['command']
         obfuscated_command = datadog_agent.obfuscate_mongodb_string(json_util.dumps(command))
         query_signature = compute_exec_plan_signature(obfuscated_command)
-        originating_command = query_metrics.get('originatingCommand')
-        if originating_command:
-            # Obfuscate the originating command for getMore operations
-            query_metrics['originatingCommand'] = datadog_agent.obfuscate_mongodb_string(json_util.dumps(originating_command))
         query_metrics['dbname'] = db_name
         query_metrics['command'] = obfuscated_command
         query_metrics['query_signature'] = query_signature

@@ -9,7 +9,8 @@ import pytest
 
 from . import common
 from .common import HERE
-from .conftest import mock_now, mock_pymongo, run_check_once
+from .conftest import mock_now, mock_pymongo
+from .utils import assert_metrics, run_check_once
 
 pytestmark = [pytest.mark.usefixtures('dd_environment'), pytest.mark.integration]
 
@@ -17,6 +18,7 @@ pytestmark = [pytest.mark.usefixtures('dd_environment'), pytest.mark.integration
 @mock_now(1715911398.1112723)
 @common.standalone
 def test_mongo_operation_metrics_standalone(aggregator, instance_integration_cluster, check, dd_run_check):
+    instance_integration_cluster['reported_database_hostname'] = "mongohost"
     instance_integration_cluster['dbm'] = True
     instance_integration_cluster['operation_metrics'] = {'enabled': True, 'run_sync': True}
     instance_integration_cluster['database_autodiscovery'] = {'enabled': True, 'include': ['integration$', 'test$']}
@@ -32,10 +34,17 @@ def test_mongo_operation_metrics_standalone(aggregator, instance_integration_clu
         expected_metrics = json.load(f)
         assert dbm_metrics == expected_metrics
 
+    assert_metrics(
+        mongo_check,
+        aggregator,
+        ["profiling"],
+    )
+
 
 @mock_now(1715911398.1112723)
 @common.shard
 def test_mongo_operation_metrics_mongos(aggregator, instance_integration_cluster, check, dd_run_check):
+    instance_integration_cluster['reported_database_hostname'] = "mongohost"
     instance_integration_cluster['dbm'] = True
     instance_integration_cluster['operation_metrics'] = {'enabled': True, 'run_sync': True}
     instance_integration_cluster['database_autodiscovery'] = {'enabled': True, 'include': ['integration$', 'test$']}

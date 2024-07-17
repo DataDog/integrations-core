@@ -328,13 +328,3 @@ def mock_now(static_time):
         return wrapper
 
     return decorator
-
-
-def run_check_once(mongo_check, dd_run_check, cancel=True):
-    dd_run_check(mongo_check)
-    if cancel:
-        mongo_check.cancel()
-    if mongo_check._operation_metrics._job_loop_future is not None:
-        mongo_check._operation_metrics._job_loop_future.result()
-    if mongo_check._operation_samples._job_loop_future is not None:
-        mongo_check._operation_samples._job_loop_future.result()

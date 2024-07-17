@@ -1,6 +1,6 @@
 [
     {
-        "host": "d4c6071697ea:27017",
+        "host": "mongohost",
         "ddagentversion": "0.0.0",
         "timestamp": 1715911398111.2722,
         "min_collection_interval": 10,
@@ -10,7 +10,6 @@
         ],
         "mongodb_rows": [
             {
-                "originating_command": null,
                 "dbname": "integration",
                 "plan_summary": "IXSCAN { age: -1 }",
                 "query_signature": "1f6ad13d7f6175f0",
@@ -77,7 +76,6 @@
                 "nreturned": null
             },
             {
-                "originating_command": null,
                 "dbname": "integration",
                 "plan_summary": "IXSCAN { name: 1 }",
                 "query_signature": "6fef821a212dde0b",
@@ -120,7 +118,6 @@
                 "nreturned": null
             },
             {
-                "originating_command": null,
                 "dbname": "integration",
                 "plan_summary": "IXSCAN { age: -1 }",
                 "query_signature": "3719fe0a5548dd23",
@@ -187,7 +184,6 @@
                 "nreturned": null
             },
             {
-                "originating_command": null,
                 "dbname": "test",
                 "plan_summary": "IXSCAN { age: -1 }",
                 "query_signature": "a81f9d3c17192d68",
@@ -252,7 +248,6 @@
                 "nreturned": null
             },
             {
-                "originating_command": null,
                 "dbname": "test",
                 "plan_summary": null,
                 "query_signature": "c5b7bcd45c4d9e9",
@@ -319,7 +314,6 @@
                 "nreturned": null
             },
             {
-                "originating_command": null,
                 "dbname": "test",
                 "plan_summary": "IXSCAN { age: -1 }",
                 "query_signature": "ec24a2e9aacce5a0",
@@ -384,7 +378,6 @@
                 "nreturned": null
             },
             {
-                "originating_command": null,
                 "dbname": "test",
                 "plan_summary": "IXSCAN { name: 1 }",
                 "query_signature": "55e31aa78c5bbf26",
@@ -427,7 +420,6 @@
                 "nreturned": 101
             },
             {
-                "originating_command": null,
                 "dbname": "test",
                 "plan_summary": "IXSCAN { name: 1 }",
                 "query_signature": "70f67e80ce895c57",

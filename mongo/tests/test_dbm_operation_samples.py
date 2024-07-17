@@ -9,7 +9,8 @@ import pytest
 
 from . import common
 from .common import HERE
-from .conftest import mock_now, mock_pymongo, run_check_once
+from .conftest import mock_now, mock_pymongo
+from .utils import run_check_once
 
 pytestmark = [pytest.mark.usefixtures('dd_environment'), pytest.mark.integration]
 

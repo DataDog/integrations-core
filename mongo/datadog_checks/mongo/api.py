@@ -113,8 +113,8 @@ class MongoApi(object):
     def index_stats(self, db_name, coll_name, session=None):
         return self[db_name][coll_name].aggregate([{"$indexStats": {}}], session=session)
 
-    def is_profiling_enabled(self, db_name, session=None):
-        return self[db_name].command('profile', -1, session=session).get('was', 0) != 0
+    def get_profiling_level(self, db_name, session=None):
+        return self[db_name].command('profile', -1, session=session)
 
     def get_profiling_data(self, db_name, ts, session=None):
         filter = {'ts': {'$gt': ts}}
