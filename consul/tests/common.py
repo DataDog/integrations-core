@@ -45,13 +45,8 @@ PROMETHEUS_HIST_METRICS = [
     'consul.memberlist.gossip.',
     'consul.memberlist.probenode.',
     'consul.memberlist.probenode.',
-    'consul.memberlist.pushpullnode.',
-    'consul.raft.commitTime.',
-    'consul.raft.leader.dispatchLog.',
     'consul.runtime.gc_pause_ns.',
     'consul.serf.coordinate.adjustment_ms.',
-    'consul.serf.msgs.sent.',
-    'consul.serf.msgs.received.',
 ]
 
 PROMETHEUS_HIST_METRICS_1_9 = [
