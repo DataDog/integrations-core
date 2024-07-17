@@ -28,13 +28,3 @@ pipeline:
       enabled: true
       sources:
         - log.level
-    - type: attribute-remapper
-      name: Map `fly.app.instance` to `hostname`
-      enabled: true
-      sources:
-        - fly.app.instance
-      sourceType: attribute
-      target: hostname
-      targetType: attribute
-      preserveSource: true
-      overrideOnConflict: false
