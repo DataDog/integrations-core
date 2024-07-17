@@ -102,19 +102,32 @@ Follow these steps to collect traces for an application in your Fly.io environme
 
 ### Log collection
 
-Use the [Fly Log Shipper][10] to collect logs from all of your Fly.io applications.
+Use the [fly_logs_shipper][10] to collect logs from your Fly.io applications.
 
-1. Create a new app based on the Fly Log Shipper Docker image:
+1. Clone the logs shipper [project][10].
+
+2. Modify the `vector-configs/vector.toml` file to set the logs source as `fly_io`:
+
     ```
-    fly launch --image flyio/log-shipper:latest
+    [transforms.log_json]
+    type = "remap"
+    inputs = ["nats"]
+    source  = '''
+    . = parse_json!(.message)
+    .ddsource = 'fly_io'
+    .host = .fly.app.instance
+    .env = <YOUR_ENV_NAME>
+    '''
     ```
 
-2. Set [secrets][17] for [NATS][18]:
-`ORG` and `ACCESS_TOKEN`.
+This configuration will parse basic fly-specific log attributes. To fully parse all log attributes, set `ddsource` to a [known logs integration][21] on a per-app basic using [vector transforms][22].
 
-3. Set [secrets][17] for [Datadog][3]: `DATADOG_API_KEY` and `DATADOG_SITE`.
+3. Set [secrets][17] for [NATS][18]:
+`ORG` and `ACCESS_TOKEN`
 
-4. [Deploy][6] the logs shipper app.
+4. Set [secrets][17] for [Datadog][3]: `DATADOG_API_KEY` and `DATADOG_SITE`
+
+5. [Deploy][6] the logs shipper app.
 
 ## Troubleshooting
 
@@ -141,3 +154,5 @@ Need help? Contact [Datadog support][9].
 [18]: https://github.com/superfly/fly-log-shipper?tab=readme-ov-file#nats-source-configuration
 [19]: https://fly.io/docs/metrics-and-logs/metrics/#prometheus-on-fly-io
 [20]: https://fly.io/docs/machines/api/
+[21]: https://docs.datadoghq.com/logs/log_configuration/pipelines/?tab=source#integration-pipeline-library
+[22]: https://vector.dev/docs/reference/configuration/transforms/lua/
