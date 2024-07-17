@@ -91,9 +91,9 @@ def mocked_requests_get_linux(*args, **kwargs):
 
 
 def mocked_requests_get_linux_v4(*args, **kwargs):
-    if args[0].endswith("/task"):
+    if args[0].endswith("/task") or args[0].endswith("/metadata"):
         return MockResponse(file_path=os.path.join(HERE, 'fixtures', 'metadata_v4.json'))
-    elif args[0].endswith("/task/stats"):
+    elif args[0].endswith("/task/stats") or args[0].endswith("/stats"):
         return MockResponse(file_path=os.path.join(HERE, 'fixtures', LINUX_STATS_FIXTURE_V4))
     else:
         return MockResponse(status_code=404)
