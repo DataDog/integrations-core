@@ -7,10 +7,10 @@ pipeline:
   name: Fly.io
   enabled: true
   filter:
-    query: "source:fly_io "
+    query: "source:fly_io"
   processors:
     - type: attribute-remapper
-      name: Adding env as a tag key
+      name: Map attribute `env` to a tag
       enabled: true
       sources:
         - env
@@ -20,17 +20,17 @@ pipeline:
       preserveSource: true
       overrideOnConflict: false
     - type: service-remapper
-      name: Remapping app name to service
+      name: Define `fly.app.name` as the official service of the log
       enabled: true
       sources:
         - fly.app.name
     - type: status-remapper
-      name: Remapping log level as the status
+      name: Define `log.level` as the official status of the log
       enabled: true
       sources:
         - log.level
     - type: attribute-remapper
-      name: Remapping app instance as the host
+      name: Map `fly.app.instance` to `hostname`
       enabled: true
       sources:
         - fly.app.instance
