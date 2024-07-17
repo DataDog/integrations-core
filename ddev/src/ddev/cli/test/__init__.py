@@ -205,12 +205,19 @@ def test(
             # Initialize a list to hold indices of '-m' options and their values to be removed
             indices_to_remove = []
             marker_values = []
+            e2e_provided_in_pytest_args = False
 
             # Iterate over pytest_args_list to find '-m' or '--markers' options and their values
             for i, arg in enumerate(pytest_args_list):
                 if arg in ('-m', '--markers') and i + 1 < len(pytest_args_list):
                     indices_to_remove.extend([i, i + 1])
                     marker_values.append(pytest_args_list[i + 1])
+                    if 'e2e' in pytest_args_list[i + 1].split():
+                        e2e_provided_in_pytest_args = True
+
+            if not e2e_provided_in_pytest_args:
+                # If 'e2e' is not provided in pytest_args, add it to the list of marker values
+                marker_values.append('e2e')
 
             # Reverse sort indices_to_remove to avoid index shifting issues during removal
             indices_to_remove.sort(reverse=True)
@@ -224,7 +231,7 @@ def test(
             pytest_args = tuple(pytest_args_list)
 
             # Construct the combined marker expression with extracted marker values and 'e2e'
-            combined_marker = " and ".join(marker_values) + " and e2e" if marker_values else "e2e"
+            combined_marker = " and ".join(marker_values)
             base_command.extend(('-m', combined_marker))
             global_env_vars[EndToEndEnvVars.PARENT_PYTHON] = sys.executable
 
