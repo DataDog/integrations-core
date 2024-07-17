@@ -50,7 +50,7 @@ EXPECTED_METADATA = {
     "ns",
     "planSummary",
     "command",
-    "originatingCommand",
+    # "originatingCommand",
     "replanReason",
     "query_signature",
 }
