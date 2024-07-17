@@ -9,7 +9,7 @@
         "support": "README.md#Support",
         "changelog": "CHANGELOG.md",
         "description": "Gain insights into Cisco Secure Endpoint logs",
-        "title": "cisco_secure_endpoint",
+        "title": "cisco-secure-endpoint",
         "media": [],
         "classifier_tags": [
             "Category::Log Collection",
