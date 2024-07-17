@@ -16,7 +16,22 @@
       "Category::Log Collection",
       "Category::Tracing",
       "Supported OS::Linux",
-      "Supported OS::macOS"
+      "Supported OS::macOS",
+      "Offering::Integration"
+    ],
+    "resources": [
+      {
+        "resource_type": "blog",
+        "url": "https://www.datadoghq.com/blog/speed-up-web-applications-memcached"
+      },
+      {
+        "resource_type": "blog",
+        "url": "https://www.datadoghq.com/blog/instrument-memcached-performance-metrics-dogstatsd"
+      },
+      {
+        "resource_type": "blog",
+        "url": "https://www.datadoghq.com/blog/monitoring-elasticache-performance-metrics-with-redis-or-memcached"
+      }
     ]
   },
   "author": {

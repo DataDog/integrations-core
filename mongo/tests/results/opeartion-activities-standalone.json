@@ -47,7 +47,12 @@
                 },
                 "waiting_for_flow_control": false,
                 "flow_control_stats": {},
-                "waiting_for_latch": false,
+                "waiting_for_latch": {
+                    "timestamp": {
+                        "$date": "2024-05-16T18:06:38.419Z"
+                    },
+                    "capture_name": "FutureResolution"
+                },
                 "type": "op",
                 "op": "query",
                 "shard": null,

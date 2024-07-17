@@ -2,7 +2,7 @@
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
 
-from typing import List, Optional, TypedDict
+from typing import Dict, List, Optional, TypedDict
 
 
 class OperationSampleClientDriver(TypedDict, total=False):
@@ -106,9 +106,9 @@ class OperationSampleOperationStatsFlowControlStats(TypedDict, total=False):
 
 
 class OperationSampleOperationStatsWaitingForLatch(TypedDict, total=False):
-    timestamp: str
-    captureName: str
-    backtrace: List[str]
+    timestamp: Optional[Dict[str, str]]
+    capture_name: Optional[str]
+    backtrace: Optional[List[str]]
 
 
 class OperationSampleOperationStatsCursor(TypedDict, total=False):

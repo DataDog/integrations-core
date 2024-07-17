@@ -18,7 +18,14 @@
       "Category::Tracing",
       "Supported OS::Linux",
       "Supported OS::Windows",
-      "Supported OS::macOS"
+      "Supported OS::macOS",
+      "Offering::Integration"
+    ],
+    "resources": [
+      {
+        "resource_type": "blog",
+        "url": "https://www.datadoghq.com/blog/how-to-monitor-redis-performance-metrics"
+      }
     ]
   },
   "author": {

@@ -106,13 +106,13 @@ def pg_replica_logical():
 
 @pytest.fixture
 def metrics_cache(pg_instance):
-    config = PostgresConfig(instance=pg_instance, init_config={})
+    config = PostgresConfig(instance=pg_instance, init_config={}, check={'warning': print})
     return PostgresMetricsCache(config)
 
 
 @pytest.fixture
 def metrics_cache_replica(pg_replica_instance):
-    config = PostgresConfig(instance=pg_replica_instance, init_config={})
+    config = PostgresConfig(instance=pg_replica_instance, init_config={}, check={'warning': print})
     return PostgresMetricsCache(config)
 
 
