@@ -1,0 +1,41 @@
+id: fly_io
+metric_id: fly-io
+backend_only: false
+facets: null
+pipeline:
+  type: pipeline
+  name: Fly.io
+  enabled: true
+  filter:
+    query: "source:fly_io "
+  processors:
+    - type: attribute-remapper
+      name: Adding env as a tag key
+      enabled: true
+      sources:
+        - env
+      sourceType: attribute
+      target: env
+      targetType: tag
+      preserveSource: true
+      overrideOnConflict: false
+    - type: service-remapper
+      name: Remapping app name to service
+      enabled: true
+      sources:
+        - fly.app.name
+    - type: status-remapper
+      name: Remapping log level as the status
+      enabled: true
+      sources:
+        - log.level
+    - type: attribute-remapper
+      name: Remapping app instance as the host
+      enabled: true
+      sources:
+        - fly.app.instance
+      sourceType: attribute
+      target: hostname
+      targetType: attribute
+      preserveSource: true
+      overrideOnConflict: false
