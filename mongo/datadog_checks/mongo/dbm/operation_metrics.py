@@ -257,4 +257,5 @@ class MongoOperationMetrics(DBMAsyncJob):
             'mongodb_rows': list(self.query_signature_to_metrics.values()),
             'mongodb_version': self._check._mongo_version,
         }
+        self._check.log.debug("Submitting operation metrics payload: %s", payload)
         self._check.database_monitoring_query_metrics(json_util.dumps(payload))
