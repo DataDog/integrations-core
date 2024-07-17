@@ -61,10 +61,10 @@ def test_untyped_counter(aggregator, dd_run_check, mock_http_response, metric_ty
             'metrics': [
                 {
                     'foo': {'name': 'foo', 'type': metric_type},
-                    'bar_total': {'name': 'bar', 'type': metric_type}},
-                    'baz_total': {'name': 'baz', 'type': metric_type}},
-                    'fiz': {'name': 'fiz', 'type': metric_type}},
-                    'bux': {'name': 'bux', 'type': metric_type}},
+                    'bar_total': {'name': 'bar', 'type': metric_type},
+                    'baz_total': {'name': 'baz', 'type': metric_type},
+                    'fiz': {'name': 'fiz', 'type': metric_type},
+                    'bux': {'name': 'bux', 'type': metric_type},
                 }
             ]
         }
@@ -75,10 +75,10 @@ def test_untyped_counter(aggregator, dd_run_check, mock_http_response, metric_ty
 
     for metric in metrics:
         aggregator.assert_metric(
-           '{}.count'.format(metric) if metric_type == 'counter' else metric,
+            '{}.count'.format(metric) if metric_type == 'counter' else metric,
             metrics.index(metric),
             metric_type=aggregator.MONOTONIC_COUNT if metric_type == 'counter' else aggregator.GAUGE,
-            tags=['endpoint:test'], 
+            tags=['endpoint:test'],
         )
 
     aggregator.assert_all_metrics_covered()
