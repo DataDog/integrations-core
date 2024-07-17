@@ -240,17 +240,14 @@ class TeamCityRest(AgentCheck):
     def _collect_new_builds(self, project_id):
         last_build_id = self.bc_store.get_last_build_id(project_id, self.current_build_config)
         if not last_build_id:
-            self.log.debug('Checking for initial builds...')
-            initial_builds = get_response(
-                self, 'last_build', build_conf=self.current_build_config, project_id=project_id
-            )
-            return initial_builds
+            self.log.debug('No builds for project {} and build config {}, checking again'.format(project_id, self.current_build_config))
+            ressource = "last_build"
+            options = {"project_id":project_id}
         else:
             self.log.debug('Checking for new builds...')
-            new_builds = get_response(
-                self, 'new_builds', build_conf=self.current_build_config, since_build=last_build_id
-            )
-            return new_builds
+            ressource = "new_builds"
+            options = {"since_build":project_id}
+        return get_response(self, ressource, build_conf=self.current_build_config, **options)
 
     def _get_build_config_type(self, build_config):
         if self.is_deployment:
