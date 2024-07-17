@@ -289,6 +289,12 @@ def test_uptime_skip_http(check, aggregator):
     check = check(config)
     check.check(config)
 
+    metrics_to_assert = [BACKEND_HOSTS_METRIC, BACKEND_STATUS_METRIC]
+    for metric_name, _ in FRONTEND_CHECK + BACKEND_CHECK:
+        metrics_to_assert.append(metric_name)
+
+    for metric in metrics_to_assert:
+        aggregator.assert_metric(metric, at_least=1)
     aggregator.assert_all_metrics_covered()
 
 
@@ -340,6 +346,18 @@ def test_uptime_skip_tcp(aggregator, check, dd_environment):
     config['startup_grace_seconds'] = 20
     check = check(config)
     check.check(config)
+
+    metrics_to_assert = [
+        BACKEND_HOSTS_METRIC, 
+        BACKEND_STATUS_METRIC, 
+        'haproxy.sticktable.size', 
+        'haproxy.sticktable.used'
+    ]
+    for metric_name, _ in FRONTEND_CHECK + BACKEND_CHECK:
+        metrics_to_assert.append(metric_name)
+
+    for metric in metrics_to_assert:
+        aggregator.assert_metric(metric, at_least=0)
 
     aggregator.assert_all_metrics_covered()
 
