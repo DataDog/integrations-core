@@ -13,8 +13,8 @@ pytestmark = [requires_py3]
 @pytest.mark.parametrize(
     'metric_type',
     [
-        ('counter'),
-        ('gauge'),
+        'counter',
+        'gauge',
     ],
 )
 def test_untyped_counter(aggregator, dd_run_check, mock_http_response, metric_type):
