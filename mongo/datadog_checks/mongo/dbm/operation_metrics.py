@@ -5,6 +5,7 @@
 
 import time
 from collections import defaultdict
+from datetime import datetime
 
 from bson import json_util
 
@@ -134,7 +135,7 @@ class MongoOperationMetrics(DBMAsyncJob):
         """
         Collect operation metrics from database profiler collections
         """
-        profiling_data = self._check.api_client.get_profiling_data(db_name, last_ts)
+        profiling_data = self._check.api_client.get_profiling_data(db_name, datetime.fromtimestamp(last_ts))
 
         for profile in profiling_data:
             if 'command' not in profile:
