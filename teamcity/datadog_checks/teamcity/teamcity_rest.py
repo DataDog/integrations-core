@@ -242,14 +242,14 @@ class TeamCityRest(AgentCheck):
         if not last_build_id:
             # We want to handle the case of an unbuilt build config by checking for any last builds
             self.log.debug(
-                'No builds for project %d and build config %d checking again', project_id, self.current_build_config
+                'No builds for project %d and build config %d, checking again', project_id, self.current_build_config
             )
             ressource = "last_build"
             options = {"project_id": project_id}
         else:
             self.log.debug('Checking for new builds...')
             ressource = "new_builds"
-            options = {"since_build": project_id}
+            options = {"since_build": last_build_id}
         return get_response(self, ressource, build_conf=self.current_build_config, **options)
 
     def _get_build_config_type(self, build_config):
