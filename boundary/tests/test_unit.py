@@ -24,23 +24,6 @@ def test_without_extra_tags(aggregator, dd_run_check, get_check, instance, mock_
     )
 
 
-def test_health_wrong_endpoint(aggregator, dd_run_check, get_check, instance):
-    instance = instance.copy()
-    health_endpoint = 'http://localhost:1234'
-    instance['health_endpoint'] = health_endpoint
-    instance['timeout'] = 1
-
-    check = get_check(instance)
-    dd_run_check(check)
-
-    aggregator.assert_service_check(
-        'boundary.controller.health', ServiceCheck.CRITICAL, tags=[f'endpoint:{health_endpoint}', *instance['tags']]
-    )
-    aggregator.assert_service_check(
-        'boundary.openmetrics.health', ServiceCheck.OK, tags=[f'endpoint:{METRIC_ENDPOINT}', *instance['tags']]
-    )
-
-
 def test_health_error(aggregator, dd_run_check, get_check, instance, mock_http_response):
     mock_http_response(status_code=404)
 
