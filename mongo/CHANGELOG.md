@@ -2,6 +2,12 @@
 
 <!-- towncrier release notes start -->
 
+## 6.7.1 / 2024-07-17
+
+***Fixed***:
+
+* Fix coll or index stats metrics failure when the agent user is not authorized to perform $collStats or $indexStats aggregation on a collection. This fix prevents check to fail when an OperationFailure is raised to run $collStats or $indexStats on system collections such as system.replset on local database. ([#18044](https://github.com/DataDog/integrations-core/pull/18044))
+
 ## 6.7.0 / 2024-07-05
 
 ***Deprecated***:
@@ -51,7 +57,7 @@
 
 * Skip emitting mongodb samples on unexplainable operations ([#17785](https://github.com/DataDog/integrations-core/pull/17785))
 
-## 6.5.0 / 2024-05-31
+## 6.5.0 / 2024-05-31 / Agent 7.55.0
 
 ***Added***:
 

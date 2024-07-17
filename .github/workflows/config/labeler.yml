@@ -279,6 +279,8 @@ integration/kubernetes_state_core:
 - kubernetes_state_core/**/*
 integration/kyototycoon:
 - kyototycoon/**/*
+integration/kyverno:
+- kyverno/**/*
 integration/langchain:
 - langchain/**/*
 integration/lighttpd:
@@ -309,6 +311,8 @@ integration/nagios:
 - nagios/**/*
 integration/network:
 - network/**/*
+integration/network_path:
+- network_path/**/*
 integration/nfsstat:
 - nfsstat/**/*
 integration/nginx:

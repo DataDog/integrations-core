@@ -132,7 +132,7 @@ def test_response_time_exception(aggregator, check, dd_run_check, mock_http_get)
     for call in mock_http_get.call_args_list:
         args, kwargs = call
         args_list += list(args)
-    assert args_list.count('http://127.0.0.1:8004/heat-api') == 2
+    assert args_list.count('http://127.0.0.1:8004/heat-api') == 3
 
 
 @pytest.mark.parametrize(
