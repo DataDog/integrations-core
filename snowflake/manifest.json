@@ -54,8 +54,8 @@
       "auto_install": true
     },
     "dashboards": {
-      "Snowflake": "assets/dashboards/snowflake.json",
-      "Snowflake Organization Metrics": "assets/dashboards/organization_metrics.json"
+      "Snowflake": "assets/dashboards/snowflake_agent.json",
+      "Snowflake Organization Metrics": "assets/dashboards/organization_metrics_agent.json"
     },
     "monitors": {
       "Snowflake failed logins": "assets/monitors/snowflake_failed_logins.json"
