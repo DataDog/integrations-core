@@ -17,6 +17,7 @@
       "Supported OS::macOS",
       "Category::OS & System",
       "Category::Cloud",
+      "Category::Log Collection",
       "Submitted Data Type::Metrics",
       "Submitted Data Type::Traces",
       "Submitted Data Type::Logs"
