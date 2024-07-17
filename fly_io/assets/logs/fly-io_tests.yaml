@@ -1,6 +1,7 @@
 id: fly-io
 tests:
-  - sample: |-
+  -
+   sample: |-
     {
       "fly" : {
         "app" : {
@@ -42,7 +43,8 @@ tests:
     tags:
      - "source:LOGS_SOURCE"
      - "env:flyenv"
-  - sample: |-
+  -
+   sample: |-
     {
       "fly" : {
         "app" : {
