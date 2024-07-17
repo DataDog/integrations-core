@@ -60,7 +60,7 @@ def test_untyped_counter(aggregator, dd_run_check, mock_http_response, metric_ty
         {
             'metrics': [
                 {
-                    'foo': {'name': 'foo', 'type': '{}'.format(metric_type)},
+                    'foo': {'name': 'foo', 'type': metric_type},
                     'bar_total': {'name': 'bar', 'type': '{}'.format(metric_type)},
                     'baz_total': {'name': 'baz', 'type': '{}'.format(metric_type)},
                     'fiz': {'name': 'fiz', 'type': '{}'.format(metric_type)},
