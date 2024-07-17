@@ -50,7 +50,7 @@ EXPECTED_METADATA = {
     "op",
     "ns",
     "planSummary",
-    "command",
+    "statement",
     "replanReason",
     "query_signature",
 }
@@ -173,7 +173,7 @@ class MongoOperationMetrics(DBMAsyncJob):
         obfuscated_command = datadog_agent.obfuscate_mongodb_string(json_util.dumps(command))
         query_signature = compute_exec_plan_signature(obfuscated_command)
         query_metrics['dbname'] = db_name
-        query_metrics['command'] = obfuscated_command
+        query_metrics['statement'] = obfuscated_command
         query_metrics['query_signature'] = query_signature
         query_metrics['calls'] = 1
 
