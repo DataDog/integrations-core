@@ -32,6 +32,8 @@ echo "INFO: restarting SQLSERVERAGENT"
 Restart-Service -Name SQLSERVERAGENT
 (Get-Service SQLSERVERAGENT).WaitForStatus('Running')
 echo "INFO: SQLSERVERAGENT running."
+Stop-Service -Name SQLSERVERAGENT
+echo "INFO: SQLSERVERAGENT stoppped."
 
 echo "INFO: Container initialization complete."
 ping -t localhost | out-null
