@@ -1,1 +1,1 @@
-[AGENT-11701] Fix handling of projects with no builds
+Fix handling of projects with no builds. We used to refresh all the projects whenever we encountered a build config that didn't have any builds associated with it. Now we refresh only the specific build config that's lacking builds.
