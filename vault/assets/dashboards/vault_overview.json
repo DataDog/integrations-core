@@ -205,7 +205,7 @@
                             "display_format": "countsAndList",
                             "hide_zero_counts": true,
                             "last_triggered_format": "relative",
-                            "query": "integration:vault",
+                            "query": "tag:(integration:vault)",
                             "show_last_triggered": false,
                             "show_priority": false,
                             "show_status": true,
