@@ -137,14 +137,13 @@ files:
           value:
             type: boolean
             example: false
-          hidden: true
         - name: collection_interval
           description: |
             Configure the interval (in seconds) for the collection of agent jobs events and metrics.
             Set the query metric collection interval (in seconds).
           value:
             type: number
-            example: 60
+            example: 15
         - name: agent_jobs_history_row_limit
           description: |
             Set the maximum number of job step rows that can be retrieved in a single check run.

@@ -130,11 +130,16 @@ instances:
     #
     # agent_jobs:
 
-        ## @param collection_interval - number - optional - default: 60
+        ## @param enabled - boolean - optional - default: false
+        ## Enable collection of agent jobs events and metrics. Requires `dbm: true`.
+        #
+        # enabled: false
+
+        ## @param collection_interval - number - optional - default: 15
         ## Configure the interval (in seconds) for the collection of agent jobs events and metrics.
         ## Set the query metric collection interval (in seconds).
         #
-        # collection_interval: 60
+        # collection_interval: 15
 
         ## @param agent_jobs_history_row_limit - integer - optional - default: 10000
         ## Set the maximum number of job step rows that can be retrieved in a single check run.
