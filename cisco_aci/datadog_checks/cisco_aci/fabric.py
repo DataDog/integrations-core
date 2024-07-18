@@ -82,13 +82,14 @@ class Fabric:
         for n in nodes:
             hostname = helpers.get_fabric_hostname(n)
 
-            user_tags = self.instance.get('tags', [])
-            tags = self.tagger.get_fabric_tags(n, 'fabricNode')
-            self.external_host_tags[hostname] = tags + self.check_tags + user_tags
-
             node = n.get('fabricNode', {})
             node_attrs = node.get('attributes', {})
             node_id = node_attrs.get('id', {})
+
+            user_tags = self.instance.get('tags', [])
+            tags = self.tagger.get_fabric_tags(n, 'fabricNode')
+            tags.extend(self.ndm_common_tags(node_attrs.get('address', ''), hostname, self.namespace))
+            self.external_host_tags[hostname] = tags + self.check_tags + user_tags
 
             pod_id = helpers.get_pod_from_dn(node_attrs['dn'])
             if not node_id or not pod_id:
@@ -116,6 +117,7 @@ class Fabric:
         self.log.info("processing ethernet ports for %s", node.get('id'))
         hostname = helpers.get_fabric_hostname(node)
         pod_id = helpers.get_pod_from_dn(node['dn'])
+        common_tags = self.ndm_common_tags(node.get('address', ''), hostname, self.namespace)
         try:
             eth_list = self.api.get_eth_list(pod_id, node['id'])
         except (exceptions.APIConnectionException, exceptions.APIParsingException):
@@ -125,8 +127,9 @@ class Fabric:
             eth_attrs = helpers.get_attributes(e)
             eth_id = eth_attrs['id']
             tags = self.tagger.get_fabric_tags(e, 'l1PhysIf')
+            tags.extend(common_tags)
             if PY3:
-                interfaces.append(self.create_interface_metadata(e, node['address'], tags, hostname))
+                interfaces.append(self.create_interface_metadata(e, node.get('address', ''), tags, hostname))
             try:
                 stats = self.api.get_eth_stats(pod_id, node['id'], eth_id)
                 self.submit_fabric_metric(stats, tags, 'l1PhysIf', hostname=hostname)
@@ -261,21 +264,17 @@ class Fabric:
 
     def submit_node_metadata(self, node_attrs, tags):
         node = Node(attributes=node_attrs)
-        id_tags = ['namespace:{}'.format(self.namespace)]
+        hostname = helpers.get_hostname_from_dn(node.attributes.dn)
+        id_tags = self.ndm_common_tags(node.attributes.address, hostname, self.namespace)
         device_tags = [
             'device_vendor:{}'.format(VENDOR_CISCO),
-            'device_namespace:{}'.format(self.namespace),
-            'device_hostname:{}'.format(node.attributes.dn),
-            'hostname:{}'.format(node.attributes.dn),
-            'device_ip:{}'.format(node.attributes.address),
-            'device_id:{}:{}'.format(self.namespace, node.attributes.address),
             "source:cisco-aci",
         ]
         device = DeviceMetadata(
             id='{}:{}'.format(self.namespace, node.attributes.address),
             id_tags=id_tags,
             tags=device_tags + tags,
-            name=node.attributes.dn,
+            name=hostname,
             ip_address=node.attributes.address,
             model=node.attributes.model,
             fabric_st=node.attributes.fabric_st,
@@ -301,12 +300,14 @@ class Fabric:
             interface.oper_status = eth.ethpm_phys_if.attributes.oper_st
         if interface.status:
             new_tags = tags.copy()
-            new_tags.extend(
-                [
-                    "device_ip:{}".format(address),
-                    "device_namespace:{}".format(self.namespace),
-                    "interface.status:{}".format(interface.status),
-                ]
-            )
-            self.gauge('cisco_aci.fabric.node.interface.status', 1, tags=new_tags, hostname=hostname)
+            new_tags.extend(["port.status:{}".format(interface.status)])
+            self.gauge('cisco_aci.fabric.port.status', 1, tags=new_tags, hostname=hostname)
         return interface.model_dump(exclude_none=True)
+
+    def ndm_common_tags(self, address, hostname, namespace):
+        return [
+            'device_ip:{}'.format(address),
+            'device_namespace:{}'.format(namespace),
+            'device_hostname:{}'.format(hostname),
+            'device_id:{}:{}'.format(namespace, address),
+        ]

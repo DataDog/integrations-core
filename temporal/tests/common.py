@@ -106,6 +106,7 @@ MOCKED_METRICS = [
     "temporal.server.activity_info.size.count",
     "temporal.server.activity_info.size.sum",
     "temporal.server.activity_info.sum",
+    "temporal.server.add_search_attributes.workflow_failure",
     "temporal.server.add_search_attributes.workflow_failure.count",
     "temporal.server.add_search_attributes.workflow_success.count",
     "temporal.server.buffered_events.bucket",
