@@ -121,7 +121,7 @@ def test_python_package_changelog_missing(fake_repo, validate_version):
     result = validate_version('dummy')
 
     assert result.exit_code == 1, result.output
-    assert 'This looks like a Python package, but dummy/CHANGELOG.md is missing.' in result.output
+    assert f'This looks like a Python package, but {Path("dummy/CHANGELOG.md")} is missing.' in result.output
 
 
 def test_python_package_manual_changelog(fake_repo, validate_version):
@@ -207,4 +207,4 @@ def test_tile_only_integration_missing_version(fake_repo, validate_version):
     result = validate_version('dummy')
 
     assert result.exit_code == 1, result.output
-    assert 'Missing a version in dummy/CHANGELOG.md, please add one.' in result.output
+    assert f'Missing a version in {Path("dummy/CHANGELOG.md")}, please add one.' in result.output
