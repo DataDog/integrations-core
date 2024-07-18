@@ -1,6 +1,14 @@
 echo "INFO: waiting for SQL Server to come up"
 (Get-Service MSSQLSERVER).WaitForStatus('Running')
 
+echo "INFO: restarting SQLSERVERAGENT"
+Restart-Service -Name SQLSERVERAGENT
+(Get-Service SQLSERVERAGENT).WaitForStatus('Running')
+echo "INFO: SQLSERVERAGENT running."
+Stop-Service -Name SQLSERVERAGENT
+(Get-Service SQLSERVERAGENT).WaitForStatus('Stopped')
+echo "INFO: SQLSERVERAGENT stoppped."
+
 echo "INFO: enabling TCP"
 # https://docs.microsoft.com/en-us/sql/powershell/how-to-enable-tcp-sqlps?view=sql-server-ver15
 [reflection.assembly]::LoadWithPartialName("Microsoft.SqlServer.SqlWmiManagement")
@@ -27,13 +35,6 @@ echo "INFO: restarting MSSQLSERVER"
 Restart-Service -Name MSSQLSERVER
 (Get-Service MSSQLSERVER).WaitForStatus('Running')
 echo "INFO: MSSQLSERVER running."
-
-echo "INFO: restarting SQLSERVERAGENT"
-Restart-Service -Name SQLSERVERAGENT
-(Get-Service SQLSERVERAGENT).WaitForStatus('Running')
-echo "INFO: SQLSERVERAGENT running."
-Stop-Service -Name SQLSERVERAGENT
-echo "INFO: SQLSERVERAGENT stoppped."
 
 echo "INFO: Container initialization complete."
 ping -t localhost | out-null
