@@ -2,7 +2,7 @@
     {
         "host": "d4c6071697ea:27017",
         "ddagentversion": "0.0.0",
-        "ddsource": "mongodb",
+        "ddsource": "mongo",
         "dbm_type": "activity",
         "collection_interval": 10,
         "ddtags": ["server:mongodb://testUser2:*****@localhost:27017/test", "clustername:my_cluster"],
