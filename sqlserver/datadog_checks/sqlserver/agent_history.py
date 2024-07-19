@@ -15,7 +15,7 @@ except ImportError:
     from ..stubs import datadog_agent
 
 DEFAULT_COLLECTION_INTERVAL = 15
-DEFAULT_ROW_LIMIT = 10000
+DEFAULT_ROW_LIMIT = 1000
 
 AGENT_HISTORY_QUERY = """\
 WITH HISTORY_ENTRIES AS (
