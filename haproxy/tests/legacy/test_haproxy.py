@@ -348,10 +348,10 @@ def test_uptime_skip_tcp(aggregator, check, dd_environment):
     check.check(config)
 
     metrics_to_assert = [
-        BACKEND_HOSTS_METRIC, 
-        BACKEND_STATUS_METRIC, 
-        'haproxy.sticktable.size', 
-        'haproxy.sticktable.used'
+        BACKEND_HOSTS_METRIC,
+        BACKEND_STATUS_METRIC,
+        'haproxy.sticktable.size',
+        'haproxy.sticktable.used',
     ]
     for metric_name, _ in FRONTEND_CHECK + BACKEND_CHECK:
         metrics_to_assert.append(metric_name)
