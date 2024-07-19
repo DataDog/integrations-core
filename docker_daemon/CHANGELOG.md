@@ -1,7 +1,5 @@
 # CHANGELOG - docker_daemon
 
-<!-- towncrier release notes start -->
-
 ## 1.12.0 / 2020-01-13
 
 ***Added***:
