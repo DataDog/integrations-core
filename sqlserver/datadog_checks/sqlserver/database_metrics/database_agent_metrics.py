@@ -93,11 +93,19 @@ AGENT_ACTIVITY_STEPS_QUERY = {
 AGENT_ACTIVE_SESSION_DURATION_QUERY = {
     "name": "msdb.dbo.syssessions",
     "query": """\
-        SELECT TOP 1
-            session_id,
-            DATEDIFF(SECOND, agent_start_date, GETDATE()) AS duration_seconds
-        FROM msdb.dbo.syssessions
-        ORDER BY session_id DESC;
+        IF NOT EXISTS (SELECT name FROM sys.databases WHERE name = 'rdsadmin')
+        BEGIN
+            SELECT TOP 1
+                session_id,
+                DATEDIFF(SECOND, agent_start_date, GETDATE()) AS duration_seconds
+            FROM msdb.dbo.syssessions
+            WHERE NOT EXISTS (SELECT name FROM sys.databases WHERE name = 'rdsadmin')
+            ORDER BY session_id DESC
+        END
+        ELSE
+        BEGIN
+            SELECT 0, 0
+        END
     """,
     "columns": [
         {"name": "session_id", "type": "tag"},
