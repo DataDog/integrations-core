@@ -2,6 +2,12 @@
 
 <!-- towncrier release notes start -->
 
+## 6.7.2 / 2024-07-19
+
+***Fixed***:
+
+* Rename dbms from `mongodb` to `mongo` so that dbms is consistent with integration name. ([#18067](https://github.com/DataDog/integrations-core/pull/18067))
+
 ## 6.7.1 / 2024-07-17
 
 ***Fixed***:
