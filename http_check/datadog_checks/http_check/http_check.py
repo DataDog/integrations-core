@@ -52,6 +52,11 @@ class HTTPCheck(AgentCheck):
 
     TLS_CONFIG_REMAPPER = {
         "check_hostname": {"name": "tls_validate_hostname"},
+        "disable_ssl_validation": {
+            "name": "tls_verify",
+            "invert": True,
+            "default": True,
+        },
     }
 
     def __init__(self, name, init_config, instances):
