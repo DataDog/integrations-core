@@ -98,6 +98,19 @@ def test_check_cert_expiration_bad_hostname(http_check):
 
 
 @pytest.mark.usefixtures("dd_environment")
+def test_check_cert_expiration_bad_hostname_but_verification_disabled(http_check):
+    cert_path = os.path.join(HERE, 'fixtures', 'cacert.pem')
+    instance = {'url': 'https://wronghost.mock/', 'tls_verify': False}
+    http_check.instance = instance
+    status, days_left, seconds_left, msg = http_check.check_cert_expiration(instance, 10, cert_path)
+    # TODO: which status makes sense here?
+    # assert status == AgentCheck.CRITICAL
+    assert days_left == 100
+    assert seconds_left == 100
+    assert 'Hostname mismatch' in msg or "doesn't match" in msg
+
+
+@pytest.mark.usefixtures("dd_environment")
 def test_check_cert_expiration_site_down(http_check):
     cert_path = os.path.join(HERE, 'fixtures', 'cacert.pem')
     instance = {'url': 'https://this.does.not.exist.foo'}
