@@ -12,15 +12,15 @@ from datadog_checks.kubevirt_api import KubevirtApiCheck
 
 def test_check(dd_run_check, aggregator, instance):
     # type: (Callable[[AgentCheck, bool], None], AggregatorStub, Dict[str, Any]) -> None
-    check = KubevirtApiCheck('kubevirt_api', {}, [instance])
+    check = KubevirtApiCheck("kubevirt_api", {}, [instance])
     dd_run_check(check)
 
     aggregator.assert_all_metrics_covered()
     aggregator.assert_metrics_using_metadata(get_metadata_metrics())
 
 
-def test_emits_critical_service_check_when_service_is_down(dd_run_check, aggregator, instance):
+def test_emits_zero_can_connect_when_service_is_down(dd_run_check, aggregator, instance):
     # type: (Callable[[AgentCheck, bool], None], AggregatorStub, Dict[str, Any]) -> None
-    check = KubevirtApiCheck('kubevirt_api', {}, [instance])
+    check = KubevirtApiCheck("kubevirt_api", {}, [instance])
     dd_run_check(check)
-    aggregator.assert_service_check('kubevirt_api.can_connect', KubevirtApiCheck.CRITICAL)
+    aggregator.assert_metric("kubevirt_api.can_connect", value=0)
