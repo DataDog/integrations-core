@@ -8,6 +8,7 @@ from contextlib import ExitStack
 import pytest
 
 from datadog_checks.dev import get_here, run_command
+from datadog_checks.dev.http import MockResponse
 from datadog_checks.dev.kind import kind_run
 from datadog_checks.dev.kube_port_forward import port_forward
 
@@ -63,4 +64,27 @@ def dd_environment():
 
 @pytest.fixture
 def instance():
-    return {}
+    return {
+        "kubevirt_api_url": "https://virt-api.kubevirt.svc/metrics",
+        "health_url": "https://virt-api.kubevirt.svc/healthz",
+    }
+
+
+@pytest.fixture
+def healthz_path():
+    return os.path.join(get_here(), "fixtures", "healthz.txt")
+
+
+def mock_http_responses(url, **_params):
+    mapping = {
+        "https://virt-api.kubevirt.svc/healthz": "healthz.txt",
+        "https://virt-api.kubevirt.svc/metrics": "metrics.txt",
+    }
+
+    fixtures_file = mapping.get(url)
+
+    if not fixtures_file:
+        raise Exception(f"url `{url}` not registered")
+
+    with open(os.path.join(HERE, "fixtures", fixtures_file)) as f:
+        return MockResponse(content=f.read())

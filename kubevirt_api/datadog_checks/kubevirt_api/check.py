@@ -3,96 +3,47 @@
 # Licensed under a 3-clause BSD style license (see LICENSE)
 from typing import Any  # noqa: F401
 
-from datadog_checks.base import AgentCheck  # noqa: F401
+from datadog_checks.base import OpenMetricsBaseCheckV2
 
 # from datadog_checks.base.utils.db import QueryManager
 # from requests.exceptions import ConnectionError, HTTPError, InvalidURL, Timeout
 # from json import JSONDecodeError
 
 
-class KubevirtApiCheck(AgentCheck):
-
+class KubevirtApiCheck(OpenMetricsBaseCheckV2):
     # This will be the prefix of every metric and service check the integration sends
-    __NAMESPACE__ = 'kubevirt_api'
+    __NAMESPACE__ = "kubevirt_api"
+    DEFAULT_METRIC_LIMIT = 0
 
     def __init__(self, name, init_config, instances):
         super(KubevirtApiCheck, self).__init__(name, init_config, instances)
-
-        # Use self.instance to read the check configuration
-        # self.url = self.instance.get("url")
-
-        # If the check is going to perform SQL queries you should define a query manager here.
-        # More info at
-        # https://datadoghq.dev/integrations-core/base/databases/#datadog_checks.base.utils.db.core.QueryManager
-        # sample_query = {
-        #     "name": "sample",
-        #     "query": "SELECT * FROM sample_table",
-        #     "columns": [
-        #         {"name": "metric", "type": "gauge"}
-        #     ],
-        # }
-        # self._query_manager = QueryManager(self, self.execute_query, queries=[sample_query])
-        # self.check_initializations.append(self._query_manager.compile_queries)
+        self.check_initializations.appendleft(self._parse_config)
 
     def check(self, _):
         # type: (Any) -> None
-        # The following are useful bits of code to help new users get started.
+        if self.health_url:
+            url = self.health_url
+            try:
+                response = self.http.get(url)
+                response.raise_for_status()
+                self.count("can_connect", 1)
+            except Exception as e:
+                self.log.error(
+                    "Cannot connect to KubeVirt API HTTP  endpoint '%s': %s.\n",
+                    url,
+                    str(e),
+                )
+                self.count("can_connect", 0)
+                raise
+        super().check(_)
 
-        # Perform HTTP Requests with our HTTP wrapper.
-        # More info at https://datadoghq.dev/integrations-core/base/http/
-        # try:
-        #     response = self.http.get(self.url)
-        #     response.raise_for_status()
-        #     response_json = response.json()
+    def _parse_config(self):
+        self.kubevirt_api_url = self.instance.get("kubevirt_api_url")
+        self.health_url = self.instance.get("health_url")
 
-        # except Timeout as e:
-        #     self.service_check(
-        #         "can_connect",
-        #         AgentCheck.CRITICAL,
-        #         message="Request timeout: {}, {}".format(self.url, e),
-        #     )
-        #     raise
+        if "/metrics" not in self.kubevirt_api_url:
+            self.kubevirt_api_url = "{}/metrics".format(self.kubevirt_api_url)
 
-        # except (HTTPError, InvalidURL, ConnectionError) as e:
-        #     self.service_check(
-        #         "can_connect",
-        #         AgentCheck.CRITICAL,
-        #         message="Request failed: {}, {}".format(self.url, e),
-        #     )
-        #     raise
-
-        # except JSONDecodeError as e:
-        #     self.service_check(
-        #         "can_connect",
-        #         AgentCheck.CRITICAL,
-        #         message="JSON Parse failed: {}, {}".format(self.url, e),
-        #     )
-        #     raise
-
-        # except ValueError as e:
-        #     self.service_check(
-        #         "can_connect", AgentCheck.CRITICAL, message=str(e)
-        #     )
-        #     raise
-
-        # This is how you submit metrics
-        # There are different types of metrics that you can submit (gauge, event).
-        # More info at https://datadoghq.dev/integrations-core/base/api/#datadog_checks.base.checks.base.AgentCheck
-        # self.gauge("test", 1.23, tags=['foo:bar'])
-
-        # Perform database queries using the Query Manager
-        # self._query_manager.execute()
-
-        # This is how you use the persistent cache. This cache file based and persists across agent restarts.
-        # If you need an in-memory cache that is persisted across runs
-        # You can define a dictionary in the __init__ method.
-        # self.write_persistent_cache("key", "value")
-        # value = self.read_persistent_cache("key")
-
-        # If your check ran successfully, you can send the status.
-        # More info at
-        # https://datadoghq.dev/integrations-core/base/api/#datadog_checks.base.checks.base.AgentCheck.service_check
-        # self.service_check("can_connect", AgentCheck.OK)
-
-        # If it didn't then it should send a critical service check
-        self.service_check("can_connect", AgentCheck.CRITICAL)
+        self.instance.setdefault("openmetrics_endpoint", self.kubevirt_api_url)
+        self.instance.setdefault("enable_health_service_check", False)
+        self.instance.setdefault("rename_labels", {"version": "kubevirt_api_version"})

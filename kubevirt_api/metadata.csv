@@ -1,1 +1,2 @@
 metric_name,metric_type,interval,unit_name,per_unit_name,description,orientation,integration,short_name,curated_metric,sample_tags
+kubevirt_api.can_connect,gauge,,,,"Whether the check can connect to the Kubevirt API or not.",0,kubevirt_api,api connect,,
