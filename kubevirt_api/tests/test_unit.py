@@ -32,3 +32,11 @@ def test_emits_zero_can_connect_when_service_is_down(dd_run_check, aggregator, i
     with pytest.raises(Exception):
         dd_run_check(check)
         aggregator.assert_metric("kubevirt_api.can_connect", value=0)
+
+
+def test_emits_one_can_connect_when_service_is_up(dd_run_check, aggregator, instance, mocker):
+    mocker.patch("requests.get", wraps=mock_http_responses)
+
+    check = KubevirtApiCheck("kubevirt_api", {}, [instance])
+    dd_run_check(check)
+    aggregator.assert_metric("kubevirt_api.can_connect", value=1)

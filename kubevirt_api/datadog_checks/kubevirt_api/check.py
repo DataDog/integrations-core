@@ -26,14 +26,14 @@ class KubevirtApiCheck(OpenMetricsBaseCheckV2):
             try:
                 response = self.http.get(url)
                 response.raise_for_status()
-                self.count("can_connect", 1)
+                self.gauge("can_connect", 1)
             except Exception as e:
                 self.log.error(
                     "Cannot connect to KubeVirt API HTTP  endpoint '%s': %s.\n",
                     url,
                     str(e),
                 )
-                self.count("can_connect", 0)
+                self.gauge("can_connect", 0)
                 raise
         super().check(_)
 
