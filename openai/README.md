@@ -2,7 +2,7 @@
 
 ## Overview
 
-Get cost estimation, prompt and completion sampling, error tracking, performance metrics, and more out of [OpenAI][1] account-level, Python, and Node.js library requests using Datadog metrics, APM, and logs.
+Get cost estimation, prompt and completion sampling, error tracking, performance metrics, and more out of [OpenAI][1] account-level, Python, Node.js, and PHP library requests using Datadog metrics, APM, and logs.
 
 ## Setup
 
@@ -196,6 +196,61 @@ Validate that the APM Node.js library can communicate with your Agent by examini
 [3]: https://ddtrace.readthedocs.io/en/stable/integrations.html#openai
 
 <!-- xxz tab xxx -->
+<!-- xxx tab "PHP" xxx -->
+
+**Note**: This setup method does not collect `openai.api.usage.*` metrics. To collect these metrics, also follow the API key setup instructions.
+
+### Installation
+
+1. Enable APM and StatsD in your Datadog Agent. For example, in Docker:
+
+```shell
+docker run -d
+  --cgroupns host \
+  --pid host \
+  -v /var/run/docker.sock:/var/run/docker.sock:ro \
+  -v /proc/:/host/proc/:ro \
+  -v /sys/fs/cgroup/:/host/sys/fs/cgroup:ro \
+  -e DD_API_KEY=<DATADOG_API_KEY> \
+  -p 127.0.0.1:8126:8126/tcp \
+  -p 127.0.0.1:8125:8125/udp \
+  -e DD_DOGSTATSD_NON_LOCAL_TRAFFIC=true \
+  -e DD_APM_ENABLED=true \
+  gcr.io/datadoghq/agent:latest
+```
+
+2. [Install the Datadog APM PHP library][16].
+
+3. The library is automatically injected into your OpenAI PHP application.
+
+**Notes**:
+
+<!-- partial
+{{% site-region region="us3,us5,eu,gov,ap1" %}}
+- Non-US1 customers must set `DD_SITE` on the application command to the correct Datadog site parameter as specified in the table in the <a href="https://docs.datadoghq.com/getting_started/site/#access-the-datadog-site">Datadog Site</a> page (for example, `datadoghq.eu` for EU1 customers).{{% /site-region %}}
+partial -->
+
+- If the Agent is using a non-default hostname or port, be sure to also set `DD_AGENT_HOST`, `DD_TRACE_AGENT_PORT`, or `DD_DOGSTATSD_PORT`.
+
+See the [APM PHP library documentation][17] for more advanced usage.
+
+### Configuration
+
+See the [APM PHP library documentation][17] for all the available configuration options.
+
+#### (beta) Log Prompt & Completion Sampling
+
+To enable log prompt and completion sampling, set the `DD_OPENAI_LOGS_ENABLED="true"` environment variable. By default, 10% of traced requests will emit logs containing the prompts and completions.
+
+To adjust the log sample rate, see the [APM library documentation][17].
+
+**Note**: It is recommended to enable `DD_LOGS_INJECTION` to ensure logs are correlated with traces.
+
+### Validation
+
+Validate that the APM PHP library can communicate with your Agent by examining the phpinfo output of your service. Under the `ddtrace` section, `Diagnostic checks` should be `passed`.
+
+<!-- xxz tab xxx -->
 <!-- xxx tab "API Key" xxx -->
 
 <!-- xxz tab xxx -->
@@ -241,4 +296,6 @@ Additional helpful documentation, links, and articles:
 [12]: https://app.datadoghq.com/monitors/recommended?q=integration%3AOpenAI&only_installed=false&p=1
 [13]: https://docs.datadoghq.com/getting_started/site/#access-the-datadog-site
 [14]: https://app.datadoghq.com/cost
-[15]: https://docs.datadoghq.com/cloud_cost_management/saas_costs/?tab=openai#data-collected
+[15]: https://docs.datadoghq.com/cloud_cost_management/saas_costs/?tab=openai#data-
+[16]:https://docs.datadoghq.com/tracing/trace_collection/automatic_instrumentation/dd_libraries/php/#install-the-extension
+[17]:https://docs.datadoghq.com/tracing/trace_collection/library_config/php/
