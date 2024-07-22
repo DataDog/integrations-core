@@ -71,17 +71,13 @@ class CheckSSH(AgentCheck):
         connect_kwargs = (
             {'password': self.password} if private_key is None else {'passphrase': self.password, 'pkey': private_key}
         )
+        # Passing all kwargs together is needed to stay compatible with Python 2.
         connect_kwargs.update(self._connection_settings_to_force_sha1)
 
         try:
             # Try to connect to check status of SSH
             try:
-                client.connect(
-                    self.host,
-                    port=self.port,
-                    username=self.username,
-                    **connect_kwargs,
-                )
+                client.connect(self.host, port=self.port, username=self.username, **connect_kwargs)
                 self.service_check(self.SSH_SERVICE_CHECK_NAME, AgentCheck.OK, tags=self.base_tags)
 
             except Exception as e:
