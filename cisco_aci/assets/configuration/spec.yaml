@@ -99,6 +99,13 @@ files:
       value:
         type: string
         example: default
+    - name: enable_ndm
+      description: |
+        Set to `true` to enable Network Device Monitoring.
+      value:
+        type: boolean
+        example: False
+        display_default: False
     - template: instances/http
       overrides:
         username.display_priority: 9
