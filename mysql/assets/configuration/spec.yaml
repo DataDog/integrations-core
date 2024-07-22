@@ -86,10 +86,11 @@ files:
           - name: read_timeout
             description: |
               The timeout for reading from the connection in seconds.
-              The default read timeout is 10 seconds.
+              By default, no read timeout is set.
             value:
               type: number
               example: 10
+              display_default: null
 
           - name: ssl
             description: |

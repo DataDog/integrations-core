@@ -75,9 +75,9 @@ instances:
     #
     # connect_timeout: 10
 
-    ## @param read_timeout - number - optional - default: 10
+    ## @param read_timeout - number - optional
     ## The timeout for reading from the connection in seconds.
-    ## The default read timeout is 10 seconds.
+    ## By default, no read timeout is set.
     #
     # read_timeout: 10
 
