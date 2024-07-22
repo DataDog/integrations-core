@@ -78,7 +78,7 @@ class MongoOperationSamples(DBMAsyncJob):
             rate_limit=1 / self._collection_interval,
             run_sync=self._operation_samples_config.get("run_sync", False),
             enabled=self._operation_samples_config["enabled"],
-            dbms="mongodb",
+            dbms="mongo",
             min_collection_interval=check._config.min_collection_interval,
             job_name="operation-samples",
         )
@@ -388,7 +388,7 @@ class MongoOperationSamples(DBMAsyncJob):
             "host": self._check._resolved_hostname,
             "dbm_type": "plan",
             "ddagentversion": datadog_agent.get_version(),
-            "ddsource": "mongodb",
+            "ddsource": "mongo",
             "ddtags": ",".join(self._check._get_tags(include_deployment_tags=True)),
             "timestamp": now * 1000,
             "network": {
@@ -440,7 +440,7 @@ class MongoOperationSamples(DBMAsyncJob):
         return {
             "host": self._check._resolved_hostname,
             "ddagentversion": datadog_agent.get_version(),
-            "ddsource": "mongodb",
+            "ddsource": "mongo",
             "dbm_type": "activity",
             "collection_interval": self._collection_interval,
             "ddtags": self._check._get_tags(include_deployment_tags=True),

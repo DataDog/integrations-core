@@ -43,7 +43,7 @@ def _assert_mongodb_instance_event(
     assert mongodb_instance_event is not None
     assert mongodb_instance_event['host'] == check._resolved_hostname
     assert mongodb_instance_event['host'] == check._resolved_hostname
-    assert mongodb_instance_event['dbms'] == "mongodb"
+    assert mongodb_instance_event['dbms'] == "mongo"
     assert mongodb_instance_event['tags'].sort() == expected_tags.sort()
 
     expected_instance_metadata = {

@@ -332,7 +332,7 @@ class MongoDb(AgentCheck):
             database_instance = {
                 "host": self._resolved_hostname,
                 "agent_version": datadog_agent.get_version(),
-                "dbms": "mongodb",
+                "dbms": "mongo",
                 "kind": "mongodb_instance",
                 "collection_interval": self._config.database_instance_collection_interval,
                 'dbms_version': self._mongo_version,

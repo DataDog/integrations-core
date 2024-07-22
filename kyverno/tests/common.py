@@ -63,7 +63,7 @@ REPORTS_METRICS = [
     'kyverno.policy.execution.duration.seconds.bucket',
     'kyverno.policy.execution.duration.seconds.count',
     'kyverno.policy.execution.duration.seconds.sum',
-    'kyverno.policy.requests.count',
+    'kyverno.policy.results.count',
 ]
 
 BACKGROUND_METRICS = [
