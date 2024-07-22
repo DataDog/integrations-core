@@ -135,7 +135,7 @@ def _setup_check_with_mock_client(settings, connect_mock_result):
 def test_force_sha1_disabled(aggregator, dd_run_check, settings):
     client, ssh = _setup_check_with_mock_client(settings, paramiko.ssh_exception.AuthenticationException)
 
-    with pytest.raises(Exception, match='paramiko.ssh_exception.AuthenticationException'):
+    with pytest.raises(Exception, match='AuthenticationException'):
         dd_run_check(ssh)
 
     aggregator.assert_service_check(CheckSSH.SSH_SERVICE_CHECK_NAME, CheckSSH.CRITICAL)
