@@ -2,7 +2,7 @@
     "version": 2,
     "created_at": "2024-07-22",
     "last_updated_at": "2024-07-22",
-    "title": "[Kyverno] Controller Element Drops",
+    "title": "Controller element is dropped",
     "description": "Dropping occurs when the controller tries to process an item several times and fails each time.  This usually indicates an unrecoverable error. This monitor alerts when a controller reports a dropped element.",
     "definition": {
         "name": "[Kyverno] Controller Element Drops",
