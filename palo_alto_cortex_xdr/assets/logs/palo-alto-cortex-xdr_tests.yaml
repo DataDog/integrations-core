@@ -2,7 +2,7 @@ id: "palo-alto-cortex-xdr"
 tests:
  -
   sample: |-
-   {
+    {
       "creation_time" : 1720170253000,
       "notes" : "null",
       "wildfire_hits" : 16,
@@ -614,6 +614,5 @@ tests:
         "category" : "Malware",
         "host_name" : "AssetTag-EID-New"
       }
-    service: "alert"
     tags:
      - "source:LOGS_SOURCE"
