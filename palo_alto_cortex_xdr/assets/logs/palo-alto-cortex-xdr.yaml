@@ -57,6 +57,11 @@ facets:
     name: User Name
     path: usr.name
     source: log
+  - groups:
+      - DNS
+    name: Question Name
+    path: dns.question.name
+    source: log
 pipeline:
   type: pipeline
   name: Palo Alto Cortex XDR
@@ -160,6 +165,26 @@ pipeline:
             - malicious_urls
           sourceType: attribute
           target: http.url
+          targetType: attribute
+          preserveSource: false
+          overrideOnConflict: false
+        - type: attribute-remapper
+          name: Map `user_name` to `usr.name`
+          enabled: true
+          sources:
+            - user_name
+          sourceType: attribute
+          target: usr.name
+          targetType: attribute
+          preserveSource: false
+          overrideOnConflict: false
+        - type: attribute-remapper
+          name: Map `dns_query_name` to `dns.question.name`
+          enabled: true
+          sources:
+            - dns_query_name
+          sourceType: attribute
+          target: dns.question.name
           targetType: attribute
           preserveSource: false
           overrideOnConflict: false
