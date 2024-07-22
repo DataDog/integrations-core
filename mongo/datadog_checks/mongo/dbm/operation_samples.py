@@ -361,13 +361,19 @@ class MongoOperationSamples(DBMAsyncJob):
             "num_yields": operation.get("numYields", 0),  # int
             # Locks
             "waiting_for_lock": operation.get("waitingForLock", False),  # bool
-            "locks": format_key_name(operation.get("locks", {})),  # dict
-            "lock_stats": format_key_name(operation.get("lockStats", {})),  # dict
+            "locks": format_key_name(self._check.convert_to_underscore_separated, operation.get("locks", {})),  # dict
+            "lock_stats": format_key_name(
+                self._check.convert_to_underscore_separated, operation.get("lockStats", {})
+            ),  # dict
             # Flow control
             "waiting_for_flow_control": operation.get("waitingForFlowControl", False),  # bool
-            "flow_control_stats": format_key_name(operation.get("flowControlStats", {})),  # dict
+            "flow_control_stats": format_key_name(
+                self._check.convert_to_underscore_separated, operation.get("flowControlStats", {})
+            ),  # dict
             # Latches
-            "waiting_for_latch": format_key_name(operation.get("waitingForLatch", {})),  # dict
+            "waiting_for_latch": format_key_name(
+                self._check.convert_to_underscore_separated, operation.get("waitingForLatch", {})
+            ),  # dict
             # cursor
             "cursor": self._get_operation_cursor(operation),  # dict
         }

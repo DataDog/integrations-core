@@ -174,6 +174,16 @@ class MongoSlowOperations(DBMAsyncJob):
         return left
 
     def _submit_slow_query_payload(self, slow_query):
+        # Create plan object when profiling is enabled
+        plan = None
+        exec_stats = slow_query.get("execStats")
+        if exec_stats:
+            definition = {"execStats": exec_stats}
+            plan = {
+                "definition": definition,
+                "signature": compute_exec_plan_signature(json_util.dumps(definition)),
+            }
+
         event = {
             "host": self._check._resolved_hostname,
             "dbm_type": "slow_query",
@@ -193,6 +203,7 @@ class MongoSlowOperations(DBMAsyncJob):
                 "user": slow_query.get("user"),  # only available with profiling
                 "application": slow_query.get("appName"),  # only available with profiling
                 "statement": slow_query.get("command"),
+                "plan": plan,
             },
             "mongodb": {
                 # metadata
@@ -228,8 +239,10 @@ class MongoSlowOperations(DBMAsyncJob):
                 "from_multi_planner": slow_query.get("fromMultiPlanner", False),
                 "replanned": slow_query.get("replanned", False),
                 "replan_reason": slow_query.get("replanReason"),
-                "lock_stats": format_key_name(self._check, slow_query.get("locks", {})),
-                "flow_control_stats": format_key_name(self._check, slow_query.get("flowControl", {})),
+                "lock_stats": format_key_name(self._check.convert_to_underscore_separated, slow_query.get("locks", {})),
+                "flow_control_stats": format_key_name(
+                    self._check.convert_to_underscore_separated, slow_query.get("flowControl", {})
+                ),
             },
         }
         self._check.database_monitoring_query_sample(json_util.dumps(event))

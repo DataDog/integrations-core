@@ -17,7 +17,8 @@
             "query_signature": "a81f9d3c17192d68",
             "user": null,
             "application": null,
-            "statement": "{\"q\": {\"age\": {\"$gt\": 18}}, \"u\": {\"$set\": {\"subscribed\": false}}, \"multi\": true, \"upsert\": false, \"comment\": \"update customers subscription status by age\"}"
+            "statement": "{\"q\": {\"age\": {\"$gt\": 18}}, \"u\": {\"$set\": {\"subscribed\": false}}, \"multi\": true, \"upsert\": false, \"comment\": \"update customers subscription status by age\"}",
+            "plan": null
         },
         "mongodb": {
             "op": null,
@@ -106,7 +107,8 @@
             "query_signature": "c5b7bcd45c4d9e9",
             "user": null,
             "application": null,
-            "statement": "{\"update\": \"customers\", \"ordered\": true, \"comment\": \"update customers subscription status by age\", \"$db\": \"test\"}"
+            "statement": "{\"update\": \"customers\", \"ordered\": true, \"comment\": \"update customers subscription status by age\", \"$db\": \"test\"}",
+            "plan": null
         },
         "mongodb": {
             "op": null,
@@ -197,7 +199,8 @@
             "query_signature": "ec24a2e9aacce5a0",
             "user": null,
             "application": null,
-            "statement": "{\"q\": {\"age\": {\"$gt\": 35}}, \"u\": {\"$set\": {\"subscribed\": true}}, \"multi\": true, \"upsert\": false, \"comment\": \"update customers subscription status by age\"}"
+            "statement": "{\"q\": {\"age\": {\"$gt\": 35}}, \"u\": {\"$set\": {\"subscribed\": true}}, \"multi\": true, \"upsert\": false, \"comment\": \"update customers subscription status by age\"}",
+            "plan": null
         },
         "mongodb": {
             "op": null,
@@ -286,7 +289,8 @@
             "query_signature": "c5b7bcd45c4d9e9",
             "user": null,
             "application": null,
-            "statement": "{\"update\": \"customers\", \"ordered\": true, \"comment\": \"update customers subscription status by age\", \"$db\": \"test\"}"
+            "statement": "{\"update\": \"customers\", \"ordered\": true, \"comment\": \"update customers subscription status by age\", \"$db\": \"test\"}",
+            "plan": null
         },
         "mongodb": {
             "op": null,
@@ -377,7 +381,8 @@
             "query_signature": "a81f9d3c17192d68",
             "user": null,
             "application": null,
-            "statement": "{\"q\": {\"age\": {\"$gt\": 18}}, \"u\": {\"$set\": {\"subscribed\": false}}, \"multi\": true, \"upsert\": false, \"comment\": \"update customers subscription status by age\"}"
+            "statement": "{\"q\": {\"age\": {\"$gt\": 18}}, \"u\": {\"$set\": {\"subscribed\": false}}, \"multi\": true, \"upsert\": false, \"comment\": \"update customers subscription status by age\"}",
+            "plan": null
         },
         "mongodb": {
             "op": null,
@@ -466,7 +471,8 @@
             "query_signature": "c5b7bcd45c4d9e9",
             "user": null,
             "application": null,
-            "statement": "{\"update\": \"customers\", \"ordered\": true, \"comment\": \"update customers subscription status by age\", \"$db\": \"test\"}"
+            "statement": "{\"update\": \"customers\", \"ordered\": true, \"comment\": \"update customers subscription status by age\", \"$db\": \"test\"}",
+            "plan": null
         },
         "mongodb": {
             "op": null,
@@ -557,7 +563,8 @@
             "query_signature": "55e31aa78c5bbf26",
             "user": null,
             "application": null,
-            "statement": "{\"find\": \"customers\", \"filter\": {\"subscribed\": false}, \"sort\": {\"name\": 1}, \"comment\": \"query customers by subscription status\", \"limit\": 151, \"$db\": \"test\"}"
+            "statement": "{\"find\": \"customers\", \"filter\": {\"subscribed\": false}, \"sort\": {\"name\": 1}, \"comment\": \"query customers by subscription status\", \"limit\": 151, \"$db\": \"test\"}",
+            "plan": null
         },
         "mongodb": {
             "op": null,
@@ -624,7 +631,8 @@
             "query_signature": "70f67e80ce895c57",
             "user": null,
             "application": null,
-            "statement": "{\"find\": \"customers\", \"filter\": {\"subscribed\": true}, \"sort\": {\"name\": 1}, \"comment\": \"query customers by subscription status\", \"limit\": 183, \"$db\": \"test\"}"
+            "statement": "{\"find\": \"customers\", \"filter\": {\"subscribed\": true}, \"sort\": {\"name\": 1}, \"comment\": \"query customers by subscription status\", \"limit\": 183, \"$db\": \"test\"}",
+            "plan": null
         },
         "mongodb": {
             "op": null,
@@ -691,7 +699,8 @@
             "query_signature": "a81f9d3c17192d68",
             "user": null,
             "application": null,
-            "statement": "{\"q\": {\"age\": {\"$gt\": 18}}, \"u\": {\"$set\": {\"subscribed\": false}}, \"multi\": true, \"upsert\": false, \"comment\": \"update customers subscription status by age\"}"
+            "statement": "{\"q\": {\"age\": {\"$gt\": 18}}, \"u\": {\"$set\": {\"subscribed\": false}}, \"multi\": true, \"upsert\": false, \"comment\": \"update customers subscription status by age\"}",
+            "plan": null
         },
         "mongodb": {
             "op": null,
@@ -780,7 +789,8 @@
             "query_signature": "3583b3bc9478cec2",
             "user": null,
             "application": null,
-            "statement": "{\"update\": \"customers\", \"ordered\": true, \"comment\": \"update customers subscription status by age\", \"$db\": \"integration\"}"
+            "statement": "{\"update\": \"customers\", \"ordered\": true, \"comment\": \"update customers subscription status by age\", \"$db\": \"integration\"}",
+            "plan": null
         },
         "mongodb": {
             "op": null,
@@ -871,7 +881,8 @@
             "query_signature": "ec24a2e9aacce5a0",
             "user": null,
             "application": null,
-            "statement": "{\"q\": {\"age\": {\"$gt\": 35}}, \"u\": {\"$set\": {\"subscribed\": true}}, \"multi\": true, \"upsert\": false, \"comment\": \"update customers subscription status by age\"}"
+            "statement": "{\"q\": {\"age\": {\"$gt\": 35}}, \"u\": {\"$set\": {\"subscribed\": true}}, \"multi\": true, \"upsert\": false, \"comment\": \"update customers subscription status by age\"}",
+            "plan": null
         },
         "mongodb": {
             "op": null,
@@ -960,7 +971,8 @@
             "query_signature": "3583b3bc9478cec2",
             "user": null,
             "application": null,
-            "statement": "{\"update\": \"customers\", \"ordered\": true, \"comment\": \"update customers subscription status by age\", \"$db\": \"integration\"}"
+            "statement": "{\"update\": \"customers\", \"ordered\": true, \"comment\": \"update customers subscription status by age\", \"$db\": \"integration\"}",
+            "plan": null
         },
         "mongodb": {
             "op": null,
@@ -1051,7 +1063,8 @@
             "query_signature": "a81f9d3c17192d68",
             "user": null,
             "application": null,
-            "statement": "{\"q\": {\"age\": {\"$gt\": 18}}, \"u\": {\"$set\": {\"subscribed\": false}}, \"multi\": true, \"upsert\": false, \"comment\": \"update customers subscription status by age\"}"
+            "statement": "{\"q\": {\"age\": {\"$gt\": 18}}, \"u\": {\"$set\": {\"subscribed\": false}}, \"multi\": true, \"upsert\": false, \"comment\": \"update customers subscription status by age\"}",
+            "plan": null
         },
         "mongodb": {
             "op": null,
@@ -1140,7 +1153,8 @@
             "query_signature": "3583b3bc9478cec2",
             "user": null,
             "application": null,
-            "statement": "{\"update\": \"customers\", \"ordered\": true, \"comment\": \"update customers subscription status by age\", \"$db\": \"integration\"}"
+            "statement": "{\"update\": \"customers\", \"ordered\": true, \"comment\": \"update customers subscription status by age\", \"$db\": \"integration\"}",
+            "plan": null
         },
         "mongodb": {
             "op": null,
@@ -1231,7 +1245,8 @@
             "query_signature": "e414c665b38186b4",
             "user": null,
             "application": null,
-            "statement": "{\"find\": \"customers\", \"filter\": {\"subscribed\": false}, \"sort\": {\"name\": 1}, \"comment\": \"query customers by subscription status\", \"limit\": 151, \"$db\": \"integration\"}"
+            "statement": "{\"find\": \"customers\", \"filter\": {\"subscribed\": false}, \"sort\": {\"name\": 1}, \"comment\": \"query customers by subscription status\", \"limit\": 151, \"$db\": \"integration\"}",
+            "plan": null
         },
         "mongodb": {
             "op": null,
@@ -1298,7 +1313,8 @@
             "query_signature": "b290163c261f2b46",
             "user": null,
             "application": null,
-            "statement": "{\"find\": \"customers\", \"filter\": {\"subscribed\": true}, \"sort\": {\"name\": 1}, \"comment\": \"query customers by subscription status\", \"limit\": 183, \"$db\": \"integration\"}"
+            "statement": "{\"find\": \"customers\", \"filter\": {\"subscribed\": true}, \"sort\": {\"name\": 1}, \"comment\": \"query customers by subscription status\", \"limit\": 183, \"$db\": \"integration\"}",
+            "plan": null
         },
         "mongodb": {
             "op": null,
