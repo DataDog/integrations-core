@@ -30,8 +30,6 @@ tests:
     tags:
      - "source:LOGS_SOURCE"
     timestamp: 1721677386000
-id: "kyverno"
-tests:
  -
   sample: '2024-07-17T21:49:24Z	INFO	ttl-controller-manager	controller/run.go:58	starting ...	{"gvr": "admissionregistration.k8s.io/v1, Resource=validatingwebhookconfigurations"}'
   result:
