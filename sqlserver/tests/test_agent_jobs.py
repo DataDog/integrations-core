@@ -479,6 +479,7 @@ def test_agent_jobs_integration(aggregator, dd_run_check, agent_jobs_instance, s
     new_job_event = job_events[2]
     new_history_rows = new_job_event['sqlserver_job_history']
     assert len(new_history_rows) >= 2, "should have at least 2 rows of history associated with new completed jobs"
+    check.cancel()
     aggregator.reset()
 
 
