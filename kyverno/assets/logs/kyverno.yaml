@@ -54,3 +54,8 @@ pipeline:
       enabled: true
       sources:
         - logger
+      target: logger.name
+      preserveSource: false
+      overrideOnConflict: false
+      sourceType: attribute
+      targetType: attribute
