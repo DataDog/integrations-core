@@ -200,12 +200,15 @@ class MongoSlowOperations(DBMAsyncJob):
                 "ns": slow_query.get("ns"),
                 "plan_summary": slow_query.get("planSummary"),
                 "exec_stats": slow_query.get("execStats"),
-                "originating_command": slow_query.get("originatingCommand"),
                 "query_hash": slow_query.get("queryHash"),  # only available with profiling
                 "plan_cache_key": slow_query.get("planCacheKey"),  # only available with profiling
                 "query_framework": slow_query.get("queryFramework"),
+                "cursor": {
+                    "cursor_id": slow_query.get("cursorid"),
+                    "originating_command": slow_query.get("originatingCommand"),
+                },
                 # metrics
-                "duration": slow_query.get("millis", slow_query.get("durationMillis")),
+                "microsecs_running": slow_query.get("millis", slow_query.get("durationMillis", 0)) * 1000,
                 "num_yield": slow_query.get("numYield"),
                 "response_length": slow_query.get("responseLength"),
                 "nreturned": slow_query.get("nreturned"),
@@ -224,9 +227,9 @@ class MongoSlowOperations(DBMAsyncJob):
                 "used_disk": slow_query.get("usedDisk", False),
                 "from_multi_planner": slow_query.get("fromMultiPlanner", False),
                 "replanned": slow_query.get("replanned", False),
-                "storage": format_key_name(self._check, slow_query.get("storage", {})),
-                "locks": format_key_name(self._check, slow_query.get("locks", {})),
-                "flow_control": format_key_name(self._check, slow_query.get("flowControl", {})),
+                "replan_reason": slow_query.get("replanReason"),
+                "lock_stats": format_key_name(self._check, slow_query.get("locks", {})),
+                "flow_control_stats": format_key_name(self._check, slow_query.get("flowControl", {})),
             },
         }
         self._check.database_monitoring_query_sample(json_util.dumps(event))

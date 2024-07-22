@@ -24,11 +24,14 @@
             "ns": "test.customers",
             "plan_summary": "IXSCAN { age: -1 }",
             "exec_stats": null,
-            "originating_command": null,
             "query_hash": null,
             "plan_cache_key": null,
             "query_framework": null,
-            "duration": 74,
+            "cursor": {
+                "cursor_id": null,
+                "originating_command": null
+            },
+            "microsecs_running": 74000,
             "num_yield": null,
             "response_length": null,
             "nreturned": null,
@@ -47,8 +50,8 @@
             "used_disk": false,
             "from_multi_planner": false,
             "replanned": false,
-            "storage": {},
-            "locks": {
+            "replan_reason": null,
+            "lock_stats": {
                 "parallel_batch_writer_mode": {
                     "acquire_count": {
                         "r": 5
@@ -80,7 +83,7 @@
                     }
                 }
             },
-            "flow_control": {
+            "flow_control_stats": {
                 "acquire_count": 5
             }
         }
@@ -110,11 +113,14 @@
             "ns": "test.$cmd",
             "plan_summary": null,
             "exec_stats": null,
-            "originating_command": null,
             "query_hash": null,
             "plan_cache_key": null,
             "query_framework": null,
-            "duration": 74,
+            "cursor": {
+                "cursor_id": null,
+                "originating_command": null
+            },
+            "microsecs_running": 74000,
             "num_yield": null,
             "response_length": null,
             "nreturned": null,
@@ -133,8 +139,8 @@
             "used_disk": false,
             "from_multi_planner": false,
             "replanned": false,
-            "storage": {},
-            "locks": {
+            "replan_reason": null,
+            "lock_stats": {
                 "parallel_batch_writer_mode": {
                     "acquire_count": {
                         "r": 6
@@ -168,7 +174,7 @@
                     }
                 }
             },
-            "flow_control": {
+            "flow_control_stats": {
                 "acquire_count": 5
             }
         }
@@ -198,11 +204,14 @@
             "ns": "test.customers",
             "plan_summary": "IXSCAN { age: -1 }",
             "exec_stats": null,
-            "originating_command": null,
             "query_hash": null,
             "plan_cache_key": null,
             "query_framework": null,
-            "duration": 27,
+            "cursor": {
+                "cursor_id": null,
+                "originating_command": null
+            },
+            "microsecs_running": 27000,
             "num_yield": null,
             "response_length": null,
             "nreturned": null,
@@ -221,8 +230,8 @@
             "used_disk": false,
             "from_multi_planner": false,
             "replanned": false,
-            "storage": {},
-            "locks": {
+            "replan_reason": null,
+            "lock_stats": {
                 "parallel_batch_writer_mode": {
                     "acquire_count": {
                         "r": 3
@@ -254,7 +263,7 @@
                     }
                 }
             },
-            "flow_control": {
+            "flow_control_stats": {
                 "acquire_count": 3
             }
         }
@@ -284,11 +293,14 @@
             "ns": "test.$cmd",
             "plan_summary": null,
             "exec_stats": null,
-            "originating_command": null,
             "query_hash": null,
             "plan_cache_key": null,
             "query_framework": null,
-            "duration": 27,
+            "cursor": {
+                "cursor_id": null,
+                "originating_command": null
+            },
+            "microsecs_running": 27000,
             "num_yield": null,
             "response_length": null,
             "nreturned": null,
@@ -307,8 +319,8 @@
             "used_disk": false,
             "from_multi_planner": false,
             "replanned": false,
-            "storage": {},
-            "locks": {
+            "replan_reason": null,
+            "lock_stats": {
                 "parallel_batch_writer_mode": {
                     "acquire_count": {
                         "r": 4
@@ -342,7 +354,7 @@
                     }
                 }
             },
-            "flow_control": {
+            "flow_control_stats": {
                 "acquire_count": 3
             }
         }
@@ -372,11 +384,14 @@
             "ns": "test.customers",
             "plan_summary": "IXSCAN { age: -1 }",
             "exec_stats": null,
-            "originating_command": null,
             "query_hash": null,
             "plan_cache_key": null,
             "query_framework": null,
-            "duration": 14,
+            "cursor": {
+                "cursor_id": null,
+                "originating_command": null
+            },
+            "microsecs_running": 14000,
             "num_yield": null,
             "response_length": null,
             "nreturned": null,
@@ -395,8 +410,8 @@
             "used_disk": false,
             "from_multi_planner": false,
             "replanned": false,
-            "storage": {},
-            "locks": {
+            "replan_reason": null,
+            "lock_stats": {
                 "parallel_batch_writer_mode": {
                     "acquire_count": {
                         "r": 1
@@ -428,7 +443,7 @@
                     }
                 }
             },
-            "flow_control": {
+            "flow_control_stats": {
                 "acquire_count": 1
             }
         }
@@ -458,11 +473,14 @@
             "ns": "test.$cmd",
             "plan_summary": null,
             "exec_stats": null,
-            "originating_command": null,
             "query_hash": null,
             "plan_cache_key": null,
             "query_framework": null,
-            "duration": 15,
+            "cursor": {
+                "cursor_id": null,
+                "originating_command": null
+            },
+            "microsecs_running": 15000,
             "num_yield": null,
             "response_length": null,
             "nreturned": null,
@@ -481,8 +499,8 @@
             "used_disk": false,
             "from_multi_planner": false,
             "replanned": false,
-            "storage": {},
-            "locks": {
+            "replan_reason": null,
+            "lock_stats": {
                 "parallel_batch_writer_mode": {
                     "acquire_count": {
                         "r": 2
@@ -516,7 +534,7 @@
                     }
                 }
             },
-            "flow_control": {
+            "flow_control_stats": {
                 "acquire_count": 1
             }
         }
@@ -546,11 +564,14 @@
             "ns": "test.customers",
             "plan_summary": "IXSCAN { name: 1 }",
             "exec_stats": null,
-            "originating_command": null,
             "query_hash": "A9774B9D",
             "plan_cache_key": "0D12DCDF",
             "query_framework": "classic",
-            "duration": 12,
+            "cursor": {
+                "cursor_id": 5170666760900931828,
+                "originating_command": null
+            },
+            "microsecs_running": 12000,
             "num_yield": null,
             "response_length": null,
             "nreturned": 101,
@@ -569,8 +590,8 @@
             "used_disk": false,
             "from_multi_planner": false,
             "replanned": false,
-            "storage": {},
-            "locks": {
+            "replan_reason": null,
+            "lock_stats": {
                 "feature_compatibility_version": {
                     "acquire_count": {
                         "r": 1
@@ -582,7 +603,7 @@
                     }
                 }
             },
-            "flow_control": {}
+            "flow_control_stats": {}
         }
     },
     {
@@ -610,11 +631,14 @@
             "ns": "test.customers",
             "plan_summary": "IXSCAN { name: 1 }",
             "exec_stats": null,
-            "originating_command": null,
             "query_hash": "A9774B9D",
             "plan_cache_key": "0D12DCDF",
             "query_framework": "classic",
-            "duration": 14,
+            "cursor": {
+                "cursor_id": null,
+                "originating_command": null
+            },
+            "microsecs_running": 14000,
             "num_yield": null,
             "response_length": null,
             "nreturned": 0,
@@ -633,8 +657,8 @@
             "used_disk": false,
             "from_multi_planner": false,
             "replanned": false,
-            "storage": {},
-            "locks": {
+            "replan_reason": null,
+            "lock_stats": {
                 "feature_compatibility_version": {
                     "acquire_count": {
                         "r": 1
@@ -646,7 +670,7 @@
                     }
                 }
             },
-            "flow_control": {}
+            "flow_control_stats": {}
         }
     },
     {
@@ -674,11 +698,14 @@
             "ns": "integration.customers",
             "plan_summary": "IXSCAN { age: -1 }",
             "exec_stats": null,
-            "originating_command": null,
             "query_hash": null,
             "plan_cache_key": null,
             "query_framework": null,
-            "duration": 74,
+            "cursor": {
+                "cursor_id": null,
+                "originating_command": null
+            },
+            "microsecs_running": 74000,
             "num_yield": null,
             "response_length": null,
             "nreturned": null,
@@ -697,8 +724,8 @@
             "used_disk": false,
             "from_multi_planner": false,
             "replanned": false,
-            "storage": {},
-            "locks": {
+            "replan_reason": null,
+            "lock_stats": {
                 "parallel_batch_writer_mode": {
                     "acquire_count": {
                         "r": 5
@@ -730,7 +757,7 @@
                     }
                 }
             },
-            "flow_control": {
+            "flow_control_stats": {
                 "acquire_count": 5
             }
         }
@@ -760,11 +787,14 @@
             "ns": "integration.$cmd",
             "plan_summary": null,
             "exec_stats": null,
-            "originating_command": null,
             "query_hash": null,
             "plan_cache_key": null,
             "query_framework": null,
-            "duration": 74,
+            "cursor": {
+                "cursor_id": null,
+                "originating_command": null
+            },
+            "microsecs_running": 74000,
             "num_yield": null,
             "response_length": null,
             "nreturned": null,
@@ -783,8 +813,8 @@
             "used_disk": false,
             "from_multi_planner": false,
             "replanned": false,
-            "storage": {},
-            "locks": {
+            "replan_reason": null,
+            "lock_stats": {
                 "parallel_batch_writer_mode": {
                     "acquire_count": {
                         "r": 6
@@ -818,7 +848,7 @@
                     }
                 }
             },
-            "flow_control": {
+            "flow_control_stats": {
                 "acquire_count": 5
             }
         }
@@ -848,11 +878,14 @@
             "ns": "integration.customers",
             "plan_summary": "IXSCAN { age: -1 }",
             "exec_stats": null,
-            "originating_command": null,
             "query_hash": null,
             "plan_cache_key": null,
             "query_framework": null,
-            "duration": 27,
+            "cursor": {
+                "cursor_id": null,
+                "originating_command": null
+            },
+            "microsecs_running": 27000,
             "num_yield": null,
             "response_length": null,
             "nreturned": null,
@@ -871,8 +904,8 @@
             "used_disk": false,
             "from_multi_planner": false,
             "replanned": false,
-            "storage": {},
-            "locks": {
+            "replan_reason": null,
+            "lock_stats": {
                 "parallel_batch_writer_mode": {
                     "acquire_count": {
                         "r": 3
@@ -904,7 +937,7 @@
                     }
                 }
             },
-            "flow_control": {
+            "flow_control_stats": {
                 "acquire_count": 3
             }
         }
@@ -934,11 +967,14 @@
             "ns": "integration.$cmd",
             "plan_summary": null,
             "exec_stats": null,
-            "originating_command": null,
             "query_hash": null,
             "plan_cache_key": null,
             "query_framework": null,
-            "duration": 27,
+            "cursor": {
+                "cursor_id": null,
+                "originating_command": null
+            },
+            "microsecs_running": 27000,
             "num_yield": null,
             "response_length": null,
             "nreturned": null,
@@ -957,8 +993,8 @@
             "used_disk": false,
             "from_multi_planner": false,
             "replanned": false,
-            "storage": {},
-            "locks": {
+            "replan_reason": null,
+            "lock_stats": {
                 "parallel_batch_writer_mode": {
                     "acquire_count": {
                         "r": 4
@@ -992,7 +1028,7 @@
                     }
                 }
             },
-            "flow_control": {
+            "flow_control_stats": {
                 "acquire_count": 3
             }
         }
@@ -1022,11 +1058,14 @@
             "ns": "integration.customers",
             "plan_summary": "IXSCAN { age: -1 }",
             "exec_stats": null,
-            "originating_command": null,
             "query_hash": null,
             "plan_cache_key": null,
             "query_framework": null,
-            "duration": 14,
+            "cursor": {
+                "cursor_id": null,
+                "originating_command": null
+            },
+            "microsecs_running": 14000,
             "num_yield": null,
             "response_length": null,
             "nreturned": null,
@@ -1045,8 +1084,8 @@
             "used_disk": false,
             "from_multi_planner": false,
             "replanned": false,
-            "storage": {},
-            "locks": {
+            "replan_reason": null,
+            "lock_stats": {
                 "parallel_batch_writer_mode": {
                     "acquire_count": {
                         "r": 1
@@ -1078,7 +1117,7 @@
                     }
                 }
             },
-            "flow_control": {
+            "flow_control_stats": {
                 "acquire_count": 1
             }
         }
@@ -1108,11 +1147,14 @@
             "ns": "integration.$cmd",
             "plan_summary": null,
             "exec_stats": null,
-            "originating_command": null,
             "query_hash": null,
             "plan_cache_key": null,
             "query_framework": null,
-            "duration": 15,
+            "cursor": {
+                "cursor_id": null,
+                "originating_command": null
+            },
+            "microsecs_running": 15000,
             "num_yield": null,
             "response_length": null,
             "nreturned": null,
@@ -1131,8 +1173,8 @@
             "used_disk": false,
             "from_multi_planner": false,
             "replanned": false,
-            "storage": {},
-            "locks": {
+            "replan_reason": null,
+            "lock_stats": {
                 "parallel_batch_writer_mode": {
                     "acquire_count": {
                         "r": 2
@@ -1166,7 +1208,7 @@
                     }
                 }
             },
-            "flow_control": {
+            "flow_control_stats": {
                 "acquire_count": 1
             }
         }
@@ -1196,11 +1238,14 @@
             "ns": "integration.customers",
             "plan_summary": "IXSCAN { name: 1 }",
             "exec_stats": null,
-            "originating_command": null,
             "query_hash": "A9774B9D",
             "plan_cache_key": "0D12DCDF",
             "query_framework": "classic",
-            "duration": 12,
+            "cursor": {
+                "cursor_id": 5170666760900931828,
+                "originating_command": null
+            },
+            "microsecs_running": 12000,
             "num_yield": null,
             "response_length": null,
             "nreturned": 101,
@@ -1219,8 +1264,8 @@
             "used_disk": false,
             "from_multi_planner": false,
             "replanned": false,
-            "storage": {},
-            "locks": {
+            "replan_reason": null,
+            "lock_stats": {
                 "feature_compatibility_version": {
                     "acquire_count": {
                         "r": 1
@@ -1232,7 +1277,7 @@
                     }
                 }
             },
-            "flow_control": {}
+            "flow_control_stats": {}
         }
     },
     {
@@ -1260,11 +1305,14 @@
             "ns": "integration.customers",
             "plan_summary": "IXSCAN { name: 1 }",
             "exec_stats": null,
-            "originating_command": null,
             "query_hash": "A9774B9D",
             "plan_cache_key": "0D12DCDF",
             "query_framework": "classic",
-            "duration": 14,
+            "cursor": {
+                "cursor_id": null,
+                "originating_command": null
+            },
+            "microsecs_running": 14000,
             "num_yield": null,
             "response_length": null,
             "nreturned": 0,
@@ -1283,8 +1331,8 @@
             "used_disk": false,
             "from_multi_planner": false,
             "replanned": false,
-            "storage": {},
-            "locks": {
+            "replan_reason": null,
+            "lock_stats": {
                 "feature_compatibility_version": {
                     "acquire_count": {
                         "r": 1
@@ -1296,7 +1344,7 @@
                     }
                 }
             },
-            "flow_control": {}
+            "flow_control_stats": {}
         }
     }
 ]
