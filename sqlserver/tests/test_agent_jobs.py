@@ -243,7 +243,7 @@ EXEC msdb.dbo.sp_add_job
 SESSION_INSERTION_QUERY = """\
 IF NOT EXISTS (SELECT * FROM msdb.dbo.syssessions)
 BEGIN
-    INSERT INTO msdb.dbo.sysessions (
+    INSERT INTO msdb.dbo.syssessions (
         agent_start_date
     )
     VALUES (
