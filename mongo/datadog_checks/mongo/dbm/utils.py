@@ -3,12 +3,10 @@
 # Licensed under a 3-clause BSD style license (see LICENSE)
 
 
-from typing import Dict
-
 from datadog_checks.base.utils.common import to_native_string
 
 
-def format_key_name(check, metric_dict: Dict) -> dict:
+def format_key_name(check, metric_dict: dict) -> dict:
     # convert camelCase to snake_case
     formatted = {}
     for key, value in metric_dict.items():
@@ -17,7 +15,7 @@ def format_key_name(check, metric_dict: Dict) -> dict:
             # If the formatted_key already exists (conflict), use the original key
             formatted_key = key
         if isinstance(value, dict):
-            formatted[formatted_key] = format_key_name(value)
+            formatted[formatted_key] = format_key_name(check, value)
         else:
             formatted[formatted_key] = value
     return formatted

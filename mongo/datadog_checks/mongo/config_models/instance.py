@@ -63,7 +63,7 @@ class MetricPatterns(BaseModel):
     include: Optional[tuple[str, ...]] = None
 
 
-class OperationMetrics(BaseModel):
+class OperationSamples(BaseModel):
     model_config = ConfigDict(
         arbitrary_types_allowed=True,
         frozen=True,
@@ -72,7 +72,7 @@ class OperationMetrics(BaseModel):
     enabled: Optional[bool] = None
 
 
-class OperationSamples(BaseModel):
+class SlowOperations(BaseModel):
     model_config = ConfigDict(
         arbitrary_types_allowed=True,
         frozen=True,
@@ -105,7 +105,6 @@ class InstanceConfig(BaseModel):
     hosts: Optional[Union[str, tuple[str, ...]]] = None
     metric_patterns: Optional[MetricPatterns] = None
     min_collection_interval: Optional[float] = None
-    operation_metrics: Optional[OperationMetrics] = None
     operation_samples: Optional[OperationSamples] = None
     options: Optional[MappingProxyType[str, Any]] = None
     password: Optional[str] = None
@@ -113,6 +112,7 @@ class InstanceConfig(BaseModel):
     reported_database_hostname: Optional[str] = None
     server: Optional[str] = None
     service: Optional[str] = None
+    slow_operations: Optional[SlowOperations] = None
     tags: Optional[tuple[str, ...]] = None
     timeout: Optional[int] = None
     tls: Optional[bool] = None

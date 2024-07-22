@@ -17,10 +17,10 @@ pytestmark = [pytest.mark.usefixtures('dd_environment'), pytest.mark.integration
 
 @mock_now(1715911398.1112723)
 @common.standalone
-def test_mongo_operation_metrics_standalone(aggregator, instance_integration_cluster, check, dd_run_check):
+def test_mongo_slow_operations_standalone(aggregator, instance_integration_cluster, check, dd_run_check):
     instance_integration_cluster['reported_database_hostname'] = "mongohost"
     instance_integration_cluster['dbm'] = True
-    instance_integration_cluster['operation_metrics'] = {'enabled': True, 'run_sync': True}
+    instance_integration_cluster['slow_operations'] = {'enabled': True, 'run_sync': True}
     instance_integration_cluster['database_autodiscovery'] = {'enabled': True, 'include': ['integration$', 'test$']}
 
     mongo_check = check(instance_integration_cluster)
@@ -28,11 +28,13 @@ def test_mongo_operation_metrics_standalone(aggregator, instance_integration_clu
     with mock_pymongo("standalone"):
         run_check_once(mongo_check, dd_run_check)
 
-    dbm_metrics = aggregator.get_event_platform_events("dbm-metrics")
+    events = aggregator.get_event_platform_events("dbm-samples")
+    slow_operations = [event for event in events if event['dbm_type'] == 'slow_query']
+    print(json.dumps(slow_operations))
 
-    with open(os.path.join(HERE, "results", "operation-metrics-standalone.json"), 'r') as f:
-        expected_metrics = json.load(f)
-        assert dbm_metrics == expected_metrics
+    with open(os.path.join(HERE, "results", "slow-operations-standalone.json"), 'r') as f:
+        expected_slow_operations = json.load(f)
+        assert slow_operations == expected_slow_operations
 
     assert_metrics(
         mongo_check,
@@ -43,10 +45,10 @@ def test_mongo_operation_metrics_standalone(aggregator, instance_integration_clu
 
 @mock_now(1715911398.1112723)
 @common.shard
-def test_mongo_operation_metrics_mongos(aggregator, instance_integration_cluster, check, dd_run_check):
+def test_mongo_slow_operations_mongos(aggregator, instance_integration_cluster, check, dd_run_check):
     instance_integration_cluster['reported_database_hostname'] = "mongohost"
     instance_integration_cluster['dbm'] = True
-    instance_integration_cluster['operation_metrics'] = {'enabled': True, 'run_sync': True}
+    instance_integration_cluster['slow_operations'] = {'enabled': True, 'run_sync': True}
     instance_integration_cluster['database_autodiscovery'] = {'enabled': True, 'include': ['integration$', 'test$']}
 
     mongo_check = check(instance_integration_cluster)
@@ -54,25 +56,26 @@ def test_mongo_operation_metrics_mongos(aggregator, instance_integration_cluster
     with mock_pymongo("mongos"):
         run_check_once(mongo_check, dd_run_check)
 
-    dbm_metrics = aggregator.get_event_platform_events("dbm-metrics")
+    events = aggregator.get_event_platform_events("dbm-samples")
+    slow_operations = [event for event in events if event['dbm_type'] == 'slow_query']
 
-    # assert metrics
-    with open(os.path.join(HERE, "results", "operation-metrics-mongos.json"), 'r') as f:
-        expected_metrics = json.load(f)
-        assert dbm_metrics == expected_metrics
+    with open(os.path.join(HERE, "results", "slow-operations-mongos.json"), 'r') as f:
+        expected_slow_operations = json.load(f)
+        assert slow_operations == expected_slow_operations
 
 
 @common.shard
-def test_mongo_operation_metrics_arbiter(aggregator, instance_arbiter, check, dd_run_check):
+def test_mongo_slow_operations_arbiter(aggregator, instance_arbiter, check, dd_run_check):
     instance_arbiter['dbm'] = True
     instance_arbiter['cluster_name'] = 'my_cluster'
-    instance_arbiter['operation_metrics'] = {'enabled': True, 'run_sync': True}
+    instance_arbiter['slow_operations'] = {'enabled': True, 'run_sync': True}
 
     mongo_check = check(instance_arbiter)
     aggregator.reset()
     with mock_pymongo("replica-arbiter"):
         dd_run_check(mongo_check)
 
-    dbm_metrics = aggregator.get_event_platform_events("dbm-metrics")
+    events = aggregator.get_event_platform_events("dbm-samples")
+    slow_operations = [event for event in events if event['dbm_type'] == 'slow_query']
 
-    assert len(dbm_metrics) == 0
+    assert len(slow_operations) == 0

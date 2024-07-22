@@ -176,17 +176,17 @@ instances:
         #
         # collection_interval: 10
 
-    ## Configure collection of MongoDB slow operation metrics.
+    ## Configure collection of MongoDB slow operations.
     #
-    # operation_metrics:
+    # slow_operations:
 
         ## @param enabled - boolean - optional - default: true
-        ## Enable collection of operation metrics. Requires `dbm: true`.
+        ## Enable collection of slow operations. Requires `dbm: true`.
         #
         # enabled: true
 
         ## @param collection_interval - number - optional - default: 10
-        ## Set the operation metrics collection interval in seconds. Each collection involves capturing
+        ## Set the slow operations collection interval in seconds. Each collection involves capturing
         ## profiled slow operations from sys.profile collection or from the Slow Query log.
         #
         # collection_interval: 10

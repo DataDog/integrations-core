@@ -103,7 +103,7 @@ class MongoConfig(object):
         self.database_instance_collection_interval = instance.get('database_instance_collection_interval', 300)
         self.cluster_name = instance.get('cluster_name', None)
         self._operation_samples_config = instance.get('operation_samples', {})
-        self._operation_metrics_config = instance.get('operation_metrics', {})
+        self._slow_operations_config = instance.get('slow_operations', {})
 
         if self.dbm_enabled and not self.cluster_name:
             raise ConfigurationError('`cluster_name` must be set when `dbm` is enabled')
@@ -174,15 +174,15 @@ class MongoConfig(object):
         }
 
     @property
-    def operation_metrics(self):
+    def slow_operations(self):
         enabled = False
-        if self.dbm_enabled is True and self._operation_metrics_config.get('enabled') is not False:
+        if self.dbm_enabled is True and self._slow_operations_config.get('enabled') is not False:
             # if DBM is enabled and the operation metrics config is not explicitly disabled, then it is enabled
             enabled = True
         return {
             'enabled': enabled,
-            'collection_interval': self._operation_metrics_config.get('collection_interval', 10),
-            'run_sync': is_affirmative(self._operation_metrics_config.get('run_sync', False)),
+            'collection_interval': self._slow_operations_config.get('collection_interval', 10),
+            'run_sync': is_affirmative(self._slow_operations_config.get('run_sync', False)),
         }
 
     def _get_database_autodiscovery_config(self, instance):

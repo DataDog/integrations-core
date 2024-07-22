@@ -5,9 +5,10 @@
 
 import time
 from datetime import datetime
-from typing import Dict, List, Optional, Tuple
+from typing import List, Optional, Tuple
 
 from bson import json_util
+
 from datadog_checks.mongo.dbm.utils import format_key_name
 
 try:
@@ -15,7 +16,6 @@ try:
 except ImportError:
     from datadog_checks.base.stubs import datadog_agent
 
-from datadog_checks.base.utils.common import to_native_string
 from datadog_checks.base.utils.db.sql import compute_exec_plan_signature
 from datadog_checks.base.utils.db.utils import DBMAsyncJob, RateLimitingTTLCache
 from datadog_checks.base.utils.tracking import tracked_method

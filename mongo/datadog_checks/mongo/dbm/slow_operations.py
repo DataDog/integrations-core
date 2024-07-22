@@ -4,10 +4,10 @@
 
 
 import time
-from collections import defaultdict
 from datetime import datetime
 
 from bson import json_util
+
 from datadog_checks.mongo.dbm.utils import format_key_name
 
 try:
@@ -15,7 +15,6 @@ try:
 except ImportError:
     from datadog_checks.base.stubs import datadog_agent
 
-from datadog_checks.base.utils.common import to_native_string
 from datadog_checks.base.utils.db.sql import compute_exec_plan_signature
 from datadog_checks.base.utils.db.utils import DBMAsyncJob
 from datadog_checks.base.utils.tracking import tracked_method
@@ -26,16 +25,16 @@ def agent_check_getter(self):
     return self._check
 
 
-class MongoOperationMetrics(DBMAsyncJob):
+class MongoSlowOperations(DBMAsyncJob):
     def __init__(self, check):
-        self._operation_metrics_config = check._config.operation_metrics
-        self._collection_interval = self._operation_metrics_config["collection_interval"]
+        self._slow_operations_config = check._config.slow_operations
+        self._collection_interval = self._slow_operations_config["collection_interval"]
 
-        super(MongoOperationMetrics, self).__init__(
+        super(MongoSlowOperations, self).__init__(
             check,
             rate_limit=1 / self._collection_interval,
-            run_sync=self._operation_metrics_config.get("run_sync", False),
-            enabled=self._operation_metrics_config["enabled"],
+            run_sync=self._slow_operations_config.get("run_sync", False),
+            enabled=self._slow_operations_config["enabled"],
             dbms="mongo",
             min_collection_interval=check._config.min_collection_interval,
             job_name="operation-metricss",
@@ -63,13 +62,17 @@ class MongoOperationMetrics(DBMAsyncJob):
 
         for db_name in self._check._database_autodiscovery.databases:
             if not is_mongos and self._is_profiling_enabled(db_name):
-                for slow_query in self._collect_operation_metrics_from_profiler(db_name, last_ts=last_collection_timestamp):
+                for slow_query in self._collect_operation_metrics_from_profiler(
+                    db_name, last_ts=last_collection_timestamp
+                ):
                     self._submit_slow_query_payload(slow_query)
             else:
                 metrics_from_logs.add(db_name)
 
         if metrics_from_logs:
-            for slow_query in self._collect_operation_metrics_from_logs(metrics_from_logs, last_ts=last_collection_timestamp):
+            for slow_query in self._collect_operation_metrics_from_logs(
+                metrics_from_logs, last_ts=last_collection_timestamp
+            ):
                 self._submit_slow_query_payload(slow_query)
 
     def _should_collect_operation_metrics(self) -> bool:
@@ -139,9 +142,11 @@ class MongoOperationMetrics(DBMAsyncJob):
         slow_query['query_signature'] = query_signature
 
         if slow_query.get('originatingCommand'):
-            slow_query['originatingCommand'] = datadog_agent.obfuscate_mongodb_string(json_util.dumps(slow_query['originatingCommand']))
+            slow_query['originatingCommand'] = datadog_agent.obfuscate_mongodb_string(
+                json_util.dumps(slow_query['originatingCommand'])
+            )
 
-        yield slow_query
+        return slow_query
 
     def _get_db_name(self, command, ns):
         return command.get('$db') or ns.split('.', 1)[0]
@@ -167,7 +172,7 @@ class MongoOperationMetrics(DBMAsyncJob):
             else:
                 return mid + 1
         return left
-    
+
     def _submit_slow_query_payload(self, slow_query):
         event = {
             "host": self._check._resolved_hostname,
@@ -178,14 +183,15 @@ class MongoOperationMetrics(DBMAsyncJob):
             "timestamp": slow_query["ts"],
             "network": {
                 "client": {
-                    "ip": slow_query.get("client"),
+                    "ip": slow_query.get("client"),  # only available with profiling
+                    "hostname": slow_query.get("remote"),  # only available with logs
                 }
             },
             "db": {
                 "instance": slow_query["dbname"],
                 "query_signature": slow_query["query_signature"],
-                "user": slow_query.get("user"),
-                "application": slow_query.get("appName"),
+                "user": slow_query.get("user"),  # only available with profiling
+                "application": slow_query.get("appName"),  # only available with profiling
                 "statement": slow_query.get("command"),
             },
             "mongodb": {
@@ -212,7 +218,7 @@ class MongoOperationMetrics(DBMAsyncJob):
                 "keys_inserted": slow_query.get("keysInserted"),
                 "write_conflicts": slow_query.get("writeConflicts"),
                 "cpu_nanos": slow_query.get("cpuNanos"),
-                "planning_time_micros": slow_query.get("planningTimeMicros"),
+                "planning_time_micros": slow_query.get("planningTimeMicros"),  # only available with profiling
                 "upsert": slow_query.get("upsert", False),
                 "has_sort_stage": slow_query.get("hasSortStage", False),
                 "used_disk": slow_query.get("usedDisk", False),

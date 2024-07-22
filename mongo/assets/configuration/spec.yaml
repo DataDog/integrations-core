@@ -208,18 +208,18 @@ files:
           value:
             type: number
             example: 10
-    - name: operation_metrics
-      description: Configure collection of MongoDB slow operation metrics.
+    - name: slow_operations
+      description: Configure collection of MongoDB slow operations.
       options:
         - name: enabled
           description: |
-            Enable collection of operation metrics. Requires `dbm: true`.
+            Enable collection of slow operations. Requires `dbm: true`.
           value:
             type: boolean
             example: true
         - name: collection_interval
           description: |
-            Set the operation metrics collection interval in seconds. Each collection involves capturing
+            Set the slow operations collection interval in seconds. Each collection involves capturing
             profiled slow operations from sys.profile collection or from the Slow Query log.
           value:
             type: number
