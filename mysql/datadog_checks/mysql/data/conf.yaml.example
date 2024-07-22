@@ -365,6 +365,26 @@ instances:
         #
         # collection_interval: 600
 
+    ## Configure collection of schemas (databases).
+    #
+    # schemas_collection:
+
+        ## @param enabled - boolean - optional - default: false
+        ## Enable schema collection. Requires `dbm: true`. Defaults to false.
+        #
+        # enabled: false
+
+        ## @param collection_interval - number - optional - default: 600
+        ## Set the database schema collection interval (in seconds). Defaults to 600 seconds.
+        #
+        # collection_interval: 600
+
+        ## @param max_execution_time - number - optional - default: 60
+        ## Set the maximum time for schema collection (in seconds). Defaults to 60 seconds. 
+        ## Capped by `schemas_collection.collection_interval`
+        #
+        # max_execution_time: 60
+
     ## Configure collection of query metrics
     #
     # query_metrics:
