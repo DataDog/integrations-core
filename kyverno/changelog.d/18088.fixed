@@ -1,1 +1,0 @@
-Rename the mistakenly named `kyverno.policy.requests.count` to `kyverno.policy.results.count`
