@@ -88,7 +88,6 @@ Additional helpful documentation, links, and articles:
 
 - [Monitoring the health and performance of your container-native CI/CD pipelines][11]
 
-
 [1]: https://argoproj.github.io/rollouts/
 [2]: https://app.datadoghq.com/account/settings/agent/latest
 [3]: https://docs.datadoghq.com/agent/kubernetes/integrations/
