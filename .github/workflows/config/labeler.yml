@@ -339,6 +339,8 @@ integration/oracle:
 - oracle/**/*
 integration/otel:
 - otel/**/*
+integration/palo_alto_cortex_xdr:
+- palo_alto_cortex_xdr/**/*
 integration/palo_alto_panorama:
 - palo_alto_panorama/**/*
 integration/pan_firewall:
