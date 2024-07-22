@@ -2,6 +2,11 @@ id: kyverno
 metric_id: kyverno
 backend_only: false
 facets:
+  - groups:
+      - Source Code
+    name: Logger Name
+    path: logger.name
+    source: log
 pipeline:
   type: pipeline
   name: kyverno
@@ -44,3 +49,8 @@ pipeline:
       enabled: true
       sources:
         - msg
+    - type: attribute-remapper
+      name: Map `logger` to `logger.name`
+      enabled: true
+      sources:
+        - logger

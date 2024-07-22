@@ -44,10 +44,6 @@
       "service_checks": {
         "metadata_path": "assets/service_checks.json"
       }
-    },
-    "saved_views": {
-      "Kyverno Logs Overview": "assets/saved_views/logs_overview.json",
-      "Kyverno Error Logs Overview": "assets/saved_views/error_logs_overview.json"
     }
   },
   "author": {
