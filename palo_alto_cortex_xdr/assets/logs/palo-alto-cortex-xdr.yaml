@@ -77,7 +77,7 @@ pipeline:
         query: "service:alert"
       processors:
         - type: date-remapper
-          name: Define `detection_timestamp` as the official ingestion date of the log
+          name: Define `detection_timestamp` as the official date of the log
           enabled: true
           sources:
             - detection_timestamp
