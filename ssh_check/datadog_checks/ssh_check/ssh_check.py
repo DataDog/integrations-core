@@ -68,9 +68,10 @@ class CheckSSH(AgentCheck):
         exception_message = "No errors occurred"
         # If the private key is not valid and we pass password instead of passphrase it will attempt to connect
         # using the password and the error will be misleading
-        auth_kwargs = (
+        connect_kwargs = (
             {'password': self.password} if private_key is None else {'passphrase': self.password, 'pkey': private_key}
         )
+        connect_kwargs.update(self._connection_settings_to_force_sha1)
 
         try:
             # Try to connect to check status of SSH
@@ -79,8 +80,7 @@ class CheckSSH(AgentCheck):
                     self.host,
                     port=self.port,
                     username=self.username,
-                    **auth_kwargs,
-                    **self._connection_settings_to_force_sha1
+                    **connect_kwargs,
                 )
                 self.service_check(self.SSH_SERVICE_CHECK_NAME, AgentCheck.OK, tags=self.base_tags)
 
