@@ -3,6 +3,16 @@ metric_id: palo-alto-cortex-xdr
 backend_only: false
 facets:
   - groups:
+      - Web Access
+    name: URL Path
+    path: http.url
+    source: log
+  - groups:
+        - Web Access
+    name: Client IP
+    path: network.client.ip
+    source: log
+  - groups:
       - User
     name: User Email
     path: usr.email
@@ -11,16 +21,6 @@ facets:
       - User
     name: User Name
     path: usr.name
-    source: log
-  - groups:
-      - Web Access
-    name: URL Path
-    path: http.url
-    source: log
-  - groups:
-      - Web Access
-    name: Client IP
-    path: network.client.ip
     source: log
 pipeline:
   type: pipeline
@@ -36,7 +36,7 @@ pipeline:
         query: "service:incident"
       processors:
         - type: date-remapper
-          name: Define `modification_time`  as the official date of the log
+          name: Define `modification_time` as the official date of the log
           enabled: true
           sources:
             - modification_time
@@ -77,7 +77,7 @@ pipeline:
         query: "service:alert"
       processors:
         - type: date-remapper
-          name: Define ‘detection_timestamp’ as the official ingestion date of the log
+          name: Define `detection_timestamp` as the official ingestion date of the log
           enabled: true
           sources:
             - detection_timestamp
@@ -94,7 +94,7 @@ pipeline:
             unknown, unknown
           type: lookup-processor
         - type: status-remapper
-          name: Define ‘status’ as the official status of the log
+          name: Define `status` as the official status of the log
           enabled: true
           sources:
             - status
