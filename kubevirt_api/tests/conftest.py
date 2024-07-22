@@ -22,6 +22,21 @@ def setup_kubevirt():
     # deploy the KubeVirt operator
     run_command(["kubectl", "create", "-f", os.path.join(HERE, "kind", "kubevirt-operator.yaml"), "-n", "kubevirt"])
 
+    # enable nested virtualization
+    run_command(
+        [
+            "kubectl",
+            "-n",
+            "kubevirt",
+            "patch",
+            "kubevirt",
+            "kubevirt",
+            "--type=merge",
+            "--patch",
+            '{"spec":{"configuration":{"developerConfiguration":{"useEmulation":true}}}}',
+        ]
+    )
+
     time.sleep(5)
 
     # deploy the KubeVirt custom resource definitions
@@ -30,25 +45,25 @@ def setup_kubevirt():
     run_command(["kubectl", "wait", "pods", "--all", "--for=condition=Ready", "--timeout=300s", "-n", "kubevirt"])
 
     # # deploy a Kubevirt VM
-    # run_command(["kubectl", "create", "-f", os.path.join(HERE, "kind", "vm.yaml"), "-n", "kubevirt"])
+    run_command(["kubectl", "create", "-f", os.path.join(HERE, "kind", "vm.yaml"), "-n", "kubevirt"])
 
-    # time.sleep(60)
+    time.sleep(30)
 
-    # # start the virtual machine
-    # run_command(
-    #     [
-    #         "kubectl",
-    #         "-n",
-    #         "kubevirt",
-    #         "patch",
-    #         "virtualmachine",
-    #         "testvm",
-    #         "--type",
-    #         "merge",
-    #         "-p",
-    #         '{"spec":{"running":true}}',
-    #     ]
-    # )
+    # start the virtual machine
+    run_command(
+        [
+            "kubectl",
+            "-n",
+            "kubevirt",
+            "patch",
+            "virtualmachine",
+            "testvm",
+            "--type",
+            "merge",
+            "-p",
+            '{"spec":{"running":true}}',
+        ]
+    )
 
 
 @pytest.fixture(scope="session")
