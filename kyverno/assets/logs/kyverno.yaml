@@ -21,7 +21,14 @@ pipeline:
         - '2024-07-17T21:49:10Z	INFO	setup.flag	internal/flag.go:260		{"webhookTimeout": "10"}'
       grok:
         matchRules: |
-          argo_common time="%{_date}" level=%{_level} msg="%{_msg}" ?%{data::keyvalue("=","/:")}Kyverno %{date("yyyy-MM-dd'T'HH:mm:ssZ"):date}\s+%{word:status}\s+%{notSpace:logger}\s+%{notSpace:caller}?\s+%{data:msg}?\s+\{%{data:test:keyvalue}\}
+          Kyverno %{_date}\s+%{_level}\s+%{_logger}\s+%{_caller}\s+%{_msg}\t%{data::json}
+          Kyverno_with_json %{_date}\s+%{_level}\s+%{_logger}\s+%{_caller}\s+%{_msg}
+        supportRules: |
+          _date %{date("yyyy-MM-dd'T'HH:mm:ssZ"):timestamp}
+          _msg %{data:msg}
+          _level %{word:level}
+          _logger %{notSpace:logger}
+          _caller %{notSpace:caller}
     - type: date-remapper
       name: Define `timestamp` as the official date of the log
       enabled: true
