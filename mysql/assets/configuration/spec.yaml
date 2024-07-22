@@ -362,6 +362,29 @@ files:
                 value:
                   type: number
                   example: 600
+          - name: schemas_collection 
+            description: |
+              Configure collection of schemas (databases).
+            options:
+              - name: enabled
+                description: |
+                  Enable schema collection. Requires `dbm: true`. Defaults to false.
+                value:
+                  type: boolean
+                  example: false
+              - name: collection_interval
+                description: |
+                  Set the database schema collection interval (in seconds). Defaults to 600 seconds.
+                value:
+                  type: number
+                  example: 600
+              - name: max_execution_time
+                description: |
+                  Set the maximum time for schema collection (in seconds). Defaults to 60 seconds. 
+                  Capped by `schemas_collection.collection_interval`
+                value:
+                  type: number
+                  example: 60         
           - name: query_metrics
             description: Configure collection of query metrics
             options:
