@@ -35,6 +35,9 @@ class Fabric:
         self.check_tags = check.check_tags
         self.namespace = namespace
 
+        # Config for submitting to NDM
+        self.enable_ndm = self.instance.get('enable_ndm', False)
+
         # grab some functions from the check
         self.gauge = check.gauge
         self.rate = check.rate
@@ -50,7 +53,7 @@ class Fabric:
         self.log.info("%s pods and %s nodes computed", len(fabric_nodes), len(fabric_pods))
         pods = self.submit_pod_health(fabric_pods)
         devices, interfaces = self.submit_nodes_health_and_metadata(fabric_nodes, pods)
-        if PY3:
+        if PY3 and self.enable_ndm:
             collect_timestamp = int(time.time())
             batches = self.batch_payloads(devices, interfaces, collect_timestamp)
             for batch in batches:
@@ -96,7 +99,7 @@ class Fabric:
                 continue
             self.log.info("processing node %s on pod %s", node_id, pod_id)
             try:
-                if PY3:
+                if PY3 and self.enable_ndm:
                     device_metadata.append(self.submit_node_metadata(node_attrs, tags))
                 self.submit_process_metric(n, tags + self.check_tags + user_tags, hostname=hostname)
             except (exceptions.APIConnectionException, exceptions.APIParsingException):
@@ -106,7 +109,7 @@ class Fabric:
                     stats = self.api.get_node_stats(pod_id, node_id)
                     self.submit_fabric_metric(stats, tags, 'fabricNode', hostname=hostname)
                     eth_metadata = self.process_eth(node_attrs)
-                    if PY3:
+                    if PY3 and self.enable_ndm:
                         interface_metadata.extend(eth_metadata)
                 except (exceptions.APIConnectionException, exceptions.APIParsingException):
                     pass
@@ -128,7 +131,7 @@ class Fabric:
             eth_id = eth_attrs['id']
             tags = self.tagger.get_fabric_tags(e, 'l1PhysIf')
             tags.extend(common_tags)
-            if PY3:
+            if PY3 and self.enable_ndm:
                 interfaces.append(self.create_interface_metadata(e, node.get('address', ''), tags, hostname))
             try:
                 stats = self.api.get_eth_stats(pod_id, node['id'], eth_id)
