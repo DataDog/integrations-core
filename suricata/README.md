@@ -52,7 +52,7 @@ For Linux, run:
 
 ### Logs
 
-The Suricata integration collects the following log-types.
+The Suricata integration collects the following log types.
 
 | Format     | Event Types    |
 | ---------  | -------------- |
@@ -60,7 +60,7 @@ The Suricata integration collects the following log-types.
 
 ### Metrics
 
-The Suricata does not include any metrics.
+The Suricata integration does not include any metrics.
 
 ### Events
 
