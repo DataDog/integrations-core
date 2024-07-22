@@ -8,6 +8,7 @@ from collections import defaultdict
 from datetime import datetime
 
 from bson import json_util
+from datadog_checks.mongo.dbm.utils import format_key_name
 
 try:
     import datadog_agent
@@ -19,45 +20,6 @@ from datadog_checks.base.utils.db.sql import compute_exec_plan_signature
 from datadog_checks.base.utils.db.utils import DBMAsyncJob
 from datadog_checks.base.utils.tracking import tracked_method
 from datadog_checks.mongo.common import MongosDeployment, ReplicaSetDeployment
-
-EXPECTED_METRICS = {
-    "keysExamined",
-    "docsExamined",
-    "ndeleted",
-    "ninserted",
-    "nMatched",
-    "nModified",
-    "keysInserted",
-    "writeConflicts",
-    "numYield",
-    "nreturned",
-    "responseLength",
-    "cpuNanos",
-    "millis",
-    "planningTimeMicros",
-    "calls",
-    "locks",
-    "flowControl",
-    "storage",
-    "hasSortStage",  # true when the query has a sort stage
-    "usedDisk",  # true when any stage wrote to temp files
-    "fromMultiPlanner",  # true when the query planner evaluated multiple plans
-    "replanned",  # true when the query system evicted cached plan
-}
-
-EXPECTED_METADATA = {
-    "dbname",
-    "op",
-    "ns",
-    "planSummary",
-    "statement",
-    "replanReason",
-    "query_signature",
-}
-
-REMAPPED_METRICS = {
-    'durationMillis': 'millis',  # log uses durationMillis, profiler uses millis
-}
 
 
 def agent_check_getter(self):
@@ -80,7 +42,6 @@ class MongoOperationMetrics(DBMAsyncJob):
         )
 
         self._last_collection_timestamp = None
-        self.query_signature_to_metrics = defaultdict(dict)
 
     def run_job(self):
         self.collect_operation_metricss()
@@ -92,7 +53,6 @@ class MongoOperationMetrics(DBMAsyncJob):
 
         is_mongos = isinstance(self._check.api_client.deployment_type, MongosDeployment)
 
-        self.query_signature_to_metrics.clear()
         metrics_from_logs = set()
 
         last_collection_timestamp = self._last_collection_timestamp
@@ -103,14 +63,14 @@ class MongoOperationMetrics(DBMAsyncJob):
 
         for db_name in self._check._database_autodiscovery.databases:
             if not is_mongos and self._is_profiling_enabled(db_name):
-                self._collect_operation_metrics_from_profiler(db_name, last_ts=last_collection_timestamp)
+                for slow_query in self._collect_operation_metrics_from_profiler(db_name, last_ts=last_collection_timestamp):
+                    self._submit_slow_query_payload(slow_query)
             else:
                 metrics_from_logs.add(db_name)
 
         if metrics_from_logs:
-            self._collect_operation_metrics_from_logs(metrics_from_logs, last_ts=last_collection_timestamp)
-
-        self._submit_metrics_payload()
+            for slow_query in self._collect_operation_metrics_from_logs(metrics_from_logs, last_ts=last_collection_timestamp):
+                self._submit_slow_query_payload(slow_query)
 
     def _should_collect_operation_metrics(self) -> bool:
         deployment = self._check.api_client.deployment_type
@@ -140,7 +100,8 @@ class MongoOperationMetrics(DBMAsyncJob):
         for profile in profiling_data:
             if 'command' not in profile:
                 continue
-            self._obfuscate_and_aggregate_metrics(profile, db_name)
+            profile["ts"] = profile["ts"].timestamp()  # convert datetime to timestamp
+            yield self._obfuscate_slow_query(profile, db_name)
 
     def _collect_operation_metrics_from_logs(self, db_names, last_ts):
         logs = self._check.api_client.get_log_data()
@@ -166,69 +127,21 @@ class MongoOperationMetrics(DBMAsyncJob):
                 db_name = self._get_db_name(log_attr.get("command"), log_attr.get("ns"))
                 if db_name not in db_names:
                     continue
-                self._obfuscate_and_aggregate_metrics(log_attr, db_name)
+                log_attr["ts"] = ts
+                yield self._obfuscate_slow_query(log_attr, db_name)
 
-    def _obfuscate_and_aggregate_metrics(self, query_metrics, db_name):
-        command = query_metrics['command']
+    def _obfuscate_slow_query(self, slow_query, db_name):
+        command = slow_query['command']
         obfuscated_command = datadog_agent.obfuscate_mongodb_string(json_util.dumps(command))
         query_signature = compute_exec_plan_signature(obfuscated_command)
-        query_metrics['dbname'] = db_name
-        query_metrics['statement'] = obfuscated_command
-        query_metrics['query_signature'] = query_signature
-        query_metrics['calls'] = 1
+        slow_query['dbname'] = db_name
+        slow_query['command'] = obfuscated_command
+        slow_query['query_signature'] = query_signature
 
-        key = (
-            db_name,
-            query_metrics.get("op"),
-            query_metrics.get("ns"),
-            query_metrics.get("planSummary"),
-            query_signature,
-        )
-        self._aggregate_metrics_by_signature(key=key, query_metrics=query_metrics)
+        if slow_query.get('originatingCommand'):
+            slow_query['originatingCommand'] = datadog_agent.obfuscate_mongodb_string(json_util.dumps(slow_query['originatingCommand']))
 
-    def _aggregate_metrics_by_signature(self, key, query_metrics):
-        if key not in self.query_signature_to_metrics:
-            # Initialize the dictionary with the metadata fields
-            for metadata_name in EXPECTED_METADATA:
-                formatted_metadata_name = to_native_string(self._check.convert_to_underscore_separated(metadata_name))
-                self.query_signature_to_metrics[key][formatted_metadata_name] = query_metrics.get(metadata_name)
-
-        for metric_name in REMAPPED_METRICS:
-            if metric_name in query_metrics:
-                query_metrics[REMAPPED_METRICS[metric_name]] = query_metrics.pop(metric_name)
-
-        for metric_name in EXPECTED_METRICS:
-            # Loop through the expected metrics and aggregate them by the query key
-            formatted_metric_name = to_native_string(self._check.convert_to_underscore_separated(metric_name))
-            self.query_signature_to_metrics[key][formatted_metric_name] = self._merge_metrics(
-                self.query_signature_to_metrics[key].get(formatted_metric_name),
-                query_metrics.get(metric_name),
-            )
-
-    def _merge_metrics(self, prev_metrics, new_metrics):
-        # Merge the metrics from the previous with the new metrics
-        # if prev_metrics or new_metrics is a dict, recursively merge the values
-        if not new_metrics:
-            return prev_metrics
-
-        if isinstance(new_metrics, dict):
-            if not prev_metrics:
-                prev_metrics = {}
-            for key in new_metrics:
-                formatted_key = to_native_string(self._check.convert_to_underscore_separated(key))
-                if isinstance(new_metrics[key], dict):
-                    prev_metrics[formatted_key] = self._merge_metrics(
-                        prev_metrics.get(formatted_key, {}), new_metrics[key]
-                    )
-                else:
-                    prev_metrics[formatted_key] = prev_metrics.get(formatted_key, 0) + new_metrics[key]
-        elif isinstance(new_metrics, bool):
-            # For metrics with boolean value, e.g. hasSortStage, usedDisk, replanned, etc.
-            # We keep the true value if any of behavior happened for the normalized query over the collection interval
-            prev_metrics = bool(new_metrics or prev_metrics)
-        else:
-            prev_metrics = new_metrics + (prev_metrics or 0)
-        return prev_metrics
+        yield slow_query
 
     def _get_db_name(self, command, ns):
         return command.get('$db') or ns.split('.', 1)[0]
@@ -254,16 +167,60 @@ class MongoOperationMetrics(DBMAsyncJob):
             else:
                 return mid + 1
         return left
-
-    def _submit_metrics_payload(self):
-        payload = {
-            'host': self._check._resolved_hostname,
-            'ddagentversion': datadog_agent.get_version(),
-            'timestamp': time.time() * 1000,
-            'min_collection_interval': self._collection_interval,
-            'tags': self._check._get_tags(include_deployment_tags=True),
-            'mongodb_rows': list(self.query_signature_to_metrics.values()),
-            'mongodb_version': self._check._mongo_version,
+    
+    def _submit_slow_query_payload(self, slow_query):
+        event = {
+            "host": self._check._resolved_hostname,
+            "dbm_type": "slow_query",
+            "ddagentversion": datadog_agent.get_version(),
+            "ddsource": "mongo",
+            "ddtags": ",".join(self._check._get_tags(include_deployment_tags=True)),
+            "timestamp": slow_query["ts"],
+            "network": {
+                "client": {
+                    "ip": slow_query.get("client"),
+                }
+            },
+            "db": {
+                "instance": slow_query["dbname"],
+                "query_signature": slow_query["query_signature"],
+                "user": slow_query.get("user"),
+                "application": slow_query.get("appName"),
+                "statement": slow_query.get("command"),
+            },
+            "mongodb": {
+                # metadata
+                "op": slow_query.get("op"),
+                "ns": slow_query.get("ns"),
+                "plan_summary": slow_query.get("planSummary"),
+                "exec_stats": slow_query.get("execStats"),
+                "originating_command": slow_query.get("originatingCommand"),
+                "query_hash": slow_query.get("queryHash"),  # only available with profiling
+                "plan_cache_key": slow_query.get("planCacheKey"),  # only available with profiling
+                "query_framework": slow_query.get("queryFramework"),
+                # metrics
+                "duration": slow_query.get("millis", slow_query.get("durationMillis")),
+                "num_yield": slow_query.get("numYield"),
+                "response_length": slow_query.get("responseLength"),
+                "nreturned": slow_query.get("nreturned"),
+                "nmatched": slow_query.get("nMatched"),
+                "nmodified": slow_query.get("nModified"),
+                "ninserted": slow_query.get("ninserted"),
+                "ndeleted": slow_query.get("ndeleted"),
+                "keys_examined": slow_query.get("keysExamined"),
+                "docs_examined": slow_query.get("docsExamined"),
+                "keys_inserted": slow_query.get("keysInserted"),
+                "write_conflicts": slow_query.get("writeConflicts"),
+                "cpu_nanos": slow_query.get("cpuNanos"),
+                "planning_time_micros": slow_query.get("planningTimeMicros"),
+                "upsert": slow_query.get("upsert", False),
+                "has_sort_stage": slow_query.get("hasSortStage", False),
+                "used_disk": slow_query.get("usedDisk", False),
+                "from_multi_planner": slow_query.get("fromMultiPlanner", False),
+                "replanned": slow_query.get("replanned", False),
+                "storage": format_key_name(self._check, slow_query.get("storage", {})),
+                "locks": format_key_name(self._check, slow_query.get("locks", {})),
+                "flow_control": format_key_name(self._check, slow_query.get("flowControl", {})),
+            },
         }
-        self._check.log.debug("Submitting operation metrics payload: %s", payload)
-        self._check.database_monitoring_query_metrics(json_util.dumps(payload))
+        self._check.database_monitoring_query_sample(json_util.dumps(event))
