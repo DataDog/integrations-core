@@ -1,4 +1,4 @@
-id: palo-alto-cortex-xdr
+id: "palo-alto-cortex-xdr"
 tests:
  - 
   sample: |-
