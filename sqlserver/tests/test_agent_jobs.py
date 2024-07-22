@@ -240,6 +240,18 @@ EXEC msdb.dbo.sp_add_job
     @job_name = 'Job 2'
 """
 
+SESSION_INSERTION_QUERY = """\
+IF NOT EXISTS (SELECT * FROM msdb.dbo.syssessions)
+BEGIN
+    INSERT INTO msdb.dbo.sysessions (
+        agent_start_date
+    )
+    VALUES (
+        GETDATE()
+    )
+END
+"""
+
 HISTORY_INSERTION_QUERY = """\
 INSERT INTO msdb.dbo.sysjobhistory (
     job_id,
@@ -408,6 +420,7 @@ def test_history_output(instance_docker, sa_conn):
 def test_agent_jobs_integration(aggregator, dd_run_check, agent_jobs_instance, sa_conn):
     with sa_conn as conn:
         with conn.cursor() as cursor:
+            cursor.execute(SESSION_INSERTION_QUERY)
             cursor.execute("SELECT * FROM msdb.dbo.syssessions")
             results = cursor.fetchall()
             assert len(results) >= 1, "should have a session of the agent"

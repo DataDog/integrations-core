@@ -2,7 +2,6 @@
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
 from datadog_checks.base.config import is_affirmative
-from datadog_checks.sqlserver.const import AWS_RDS_HOSTNAME_SUFFIX
 
 from .base import SqlserverDatabaseMetricsBase
 
@@ -127,8 +126,7 @@ class SqlserverAgentMetrics(SqlserverDatabaseMetricsBase):
         '''
         Returns the default interval in seconds at which to collect index usage metrics.
         '''
-        # TODO figure out what a good default collection interval should be
-        return 60  # 60 seconds
+        return 15  # 15 seconds
 
     @property
     def collection_interval(self) -> int:
@@ -136,12 +134,10 @@ class SqlserverAgentMetrics(SqlserverDatabaseMetricsBase):
         Returns the interval in seconds at which to collect index usage metrics.
         Note: The index usage metrics query can be expensive, so it is recommended to set a higher interval.
         '''
-        # TODO make a good name for config and add it to the config
         agent_jobs_config = self.instance_config.get('agent_jobs', {})
         if agent_jobs_config:
-            return int(agent_jobs_config.get('collection_interval', 60))
-        # TODO figure out what a good default collection interval should be
-        return 60  # 60 seconds
+            return int(agent_jobs_config.get('collection_interval', 15))
+        return 15  # 15 seconds
 
     @property
     def enabled(self):
@@ -160,15 +156,9 @@ class SqlserverAgentMetrics(SqlserverDatabaseMetricsBase):
         active_job_step_info_query = AGENT_ACTIVITY_STEPS_QUERY.copy()
         active_job_step_info_query['collection_interval'] = self.collection_interval
         query_list.append(active_job_step_info_query)
-        # better/more formal way to check if aws
-        if (
-            self.instance_config.get("cloud_metadata") is None
-            or self.instance_config.cloud_metadata.get("aws") is None
-            or AWS_RDS_HOSTNAME_SUFFIX in self.instance_config.get("reported_hostname", "")
-        ):
-            active_session_duration_query = AGENT_ACTIVE_SESSION_DURATION_QUERY.copy()
-            active_session_duration_query['collection_interval'] = self.collection_interval
-            query_list.append(active_session_duration_query)
+        active_session_duration_query = AGENT_ACTIVE_SESSION_DURATION_QUERY.copy()
+        active_session_duration_query['collection_interval'] = self.collection_interval
+        query_list.append(active_session_duration_query)
         return query_list
 
     def __repr__(self) -> str:
