@@ -303,6 +303,8 @@ integration/mesos_master:
 - mesos_master/**/*
 integration/mesos_slave:
 - mesos_slave/**/*
+integration/mimecast:
+- mimecast/**/*
 integration/mongo:
 - mongo/**/*
 integration/mysql:
