@@ -41,6 +41,9 @@
       "service_checks": {
         "metadata_path": "assets/service_checks.json"
       }
+    },
+    "monitors": {
+      "metadata_path": "assets/monitors/controller_drops.json"
     }
   },
   "author": {
