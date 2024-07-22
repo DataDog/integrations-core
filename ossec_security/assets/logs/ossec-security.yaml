@@ -548,7 +548,7 @@ pipeline:
               status %{notSpace:operation} %{data:package_name}
 
 
-              dpkg_package_parse_rule %{date("yyyy-MM-dd HH:mm:ss")} %{notSpace:operation} %{notSpace:package_name}%{data}
+              dpkg_package_parse_rule %{date("yyyy-MM-dd HH:mm:ss")} %{notSpace:operation} %{notSpace:package_name} %{notSpace}( %{notSpace})?
     - type: pipeline
       name: Processing of Yum Logs
       enabled: true
