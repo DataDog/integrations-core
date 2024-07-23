@@ -33,7 +33,7 @@ kyverno.go.memstats.mcache.inuse_bytes,gauge,,byte,,The number of bytes in use b
 kyverno.go.memstats.mcache.sys_bytes,gauge,,byte,,The number of bytes used for mcache structures obtained from system in the Kyverno instance,0,kyverno,kyverno go memstats mcache sys_bytes,,
 kyverno.go.memstats.mspan.inuse_bytes,gauge,,byte,,The number of bytes in use by mspan structures in the Kyverno instance,0,kyverno,kyverno go memstats mspan inuse_use,,
 kyverno.go.memstats.mspan.sys_bytes,gauge,,byte,,The number of bytes used for mspan structures obtained from system in the Kyverno instance,0,kyverno,kyverno go memstats mspan sys_bytes,,
-kyverno.go.memstats.next.gc_bytes,gauge,,byte,,The number of heap bytes when next garbage collection takes place in the Kyverno instance,0,kyverno,kyverno go memstats next gc_bytes,,
+kyverno.go.memstats.next.gc_bytes,gauge,,byte,,The number of heap bytes when the next garbage collection takes place in the Kyverno instance,0,kyverno,kyverno go memstats next gc_bytes,,
 kyverno.go.memstats.other.sys_bytes,gauge,,byte,,The number of bytes used for other system allocations in the Kyverno instance,0,kyverno,kyverno go memstats other sys_bytes,,
 kyverno.go.memstats.stack.inuse_bytes,gauge,,byte,,The number of bytes in use by the stack allocator in the Kyverno instance,0,kyverno,kyverno go memstats stack inuse_bytes,,
 kyverno.go.memstats.stack.sys_bytes,gauge,,byte,,The number of bytes obtained from system for stack allocator in the Kyverno instance,0,kyverno,kyverno go memstats stack sys_bytes,,
