@@ -23,6 +23,24 @@ def test_check(dd_run_check, aggregator, instance, mocker):
     dd_run_check(check)
 
     aggregator.assert_metric("kubevirt_api.can_connect", value=1)
+
+    aggregator.assert_metric("kubevirt.process.cpu_seconds.count")  # counter
+    aggregator.assert_metric("kubevirt.process.max_fds")  # gauge
+    aggregator.assert_metric("kubevirt.process.open_fds")  # gauge
+    aggregator.assert_metric("kubevirt.process.resident_memory_bytes")  # gauge
+    aggregator.assert_metric("kubevirt.process.start_time_seconds")  # gauge
+    aggregator.assert_metric("kubevirt.process.virtual_memory_bytes")  # gauge
+    aggregator.assert_metric("kubevirt.process.virtual_memory_max_bytes")  # gauge
+    aggregator.assert_metric("kubevirt.promhttp.metric_handler_requests_in_flight")  # gauge
+    aggregator.assert_metric("kubevirt.promhttp.metric_handler_requests.count")  # counter
+    aggregator.assert_metric("kubevirt.rest.client_rate_limiter_duration_seconds.bucket")  # histogram
+    aggregator.assert_metric("kubevirt.rest.client_rate_limiter_duration_seconds.count")  # histogram
+    aggregator.assert_metric("kubevirt.rest.client_rate_limiter_duration_seconds.sum")  # histogram
+    aggregator.assert_metric("kubevirt.rest.client_request_latency_seconds.bucket")  # histogram
+    aggregator.assert_metric("kubevirt.rest.client_request_latency_seconds.count")  # histogram
+    aggregator.assert_metric("kubevirt.rest.client_request_latency_seconds.sum")  # histogram
+    aggregator.assert_metric("kubevirt.rest.client_requests.count")  # counter
+
     aggregator.assert_all_metrics_covered()
     aggregator.assert_metrics_using_metadata(get_metadata_metrics())
 
