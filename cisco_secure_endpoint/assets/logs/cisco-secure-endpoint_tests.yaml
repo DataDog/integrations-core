@@ -13,15 +13,19 @@ tests:
     service: "audit"
     result:
       custom:
-        audit_log_id: "10bfd8f2-8569-4b78-8996-19acc900f4fc"
         audit_log_type: "User"
-        audit_log_user: "abc@xyz.com"
         created_at: "2024-06-19T10:16:22Z"
-        event: "sso_login"
+        evt:
+          name: "sso_login"
         item: "abc@xyz.com"
+        usr:
+          id: "10bfd8f2-8569-4b78-8996-19acc900f4fc"
+          name: "abc@xyz.com"
       message: "SCSO"
+      service: "audit"
       tags:
       - "source:LOGS_SOURCE"
+      timestamp: 1718792182000
 
   - sample: |-
       {
@@ -38,7 +42,8 @@ tests:
       custom:
         audit_log_type: "FetchedFile"
         created_at: "2024-06-19T06:38:50Z"
-        event: "update"
+        evt:
+          name: "update"
         item: "f_00020c"
         new_attributes:
           analysis_state: "threat_analyses.threat_analysis.failed.description"
@@ -52,8 +57,10 @@ tests:
           "created_at" : "2024-06-19T06:38:50Z",
           "event" : "update"
         }
+      service: "audit"
       tags:
       - "source:LOGS_SOURCE"
+      timestamp: 1718779130000
   - sample: |-
       {
         "item" : "Unconfirmed 61021.crdownload",
@@ -73,7 +80,8 @@ tests:
       custom:
         audit_log_type: "FetchedFile"
         created_at: "2024-06-19T06:28:17Z"
-        event: "update"
+        evt:
+          name: "update"
         item: "Unconfirmed 61021.crdownload"
         new_attributes:
           original_filename: "f_000253"
@@ -94,8 +102,10 @@ tests:
             "state" : "requested"
           }
         }
+      service: "audit"
       tags:
       - "source:LOGS_SOURCE"
+      timestamp: 1718778497000
   - sample: |-
       {
         "id": 7381460803565650000,
@@ -257,5 +267,7 @@ tests:
             "T1569"
           ]
         }
+      service: "event"
       tags:
       - "source:LOGS_SOURCE"
+      timestamp: 1
