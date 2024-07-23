@@ -57,7 +57,7 @@ def setup_kubevirt():
     time.sleep(10)
 
     # deploy a VirtualMachine instance
-    run_command(["kubectl", "apply", "-f", os.path.join(HERE, "vm.yaml")])
+    run_command(["kubectl", "apply", "-f", os.path.join(HERE, "kind", "vm.yaml")])
     run_command(["kubectl", "patch", "virtualmachine", "testvm", "--type", "merge", "-p", '{"spec":{"running":true}}'])
 
 
