@@ -1,0 +1,1 @@
+Revert the default 10s mysql connection read_timeout
