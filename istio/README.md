@@ -259,4 +259,3 @@ Additional helpful documentation, links, and articles:
 [24]: https://docs.datadoghq.com/agent/kubernetes/integrations/?tab=file#configuration
 [25]: https://docs.datadoghq.com/integrations/guide/versions-for-openmetrics-based-integrations
 [26]: https://docs.datadoghq.com/containers/docker/integrations/
-[27]: https://docs.datadoghq.com/containers/guide/auto_conf/
