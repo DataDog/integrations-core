@@ -185,8 +185,8 @@ tests:
           "T1569"
         ]
       }
-  service: "event"
-  result: null
+    service: "event"
+    result: null
   - sample: |-
       {
         "id": 7374372033058046037,
