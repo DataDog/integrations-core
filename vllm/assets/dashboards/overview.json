@@ -1,6 +1,6 @@
 {
     "author_name": "Datadog",
-    "description": "**This dashboard provides observability for your vLLM deployment with the vLLM Integration.**\n\n# Useful Links\n- [vLLM Integration&nbsp;\u2197](https://docs.datadoghq.com/integrations/vllm)\n- [vLLM Metrics&nbsp;\u2197](https://docs.vllm.ai/en/latest/serving/metrics.html)\n- [vLLM Documentation&nbsp;\u2197](https://docs.vllm.ai/en/stable/)",
+    "description": "## vLLM\n\nThis dashboard provides observability for your vLLM deployments with the vLLM Integration.\n\nIt shows information about how many tokens your model is generating per second as well as exposing low-level details such as GPU/CPU usage and Python memory management.\n\n## Useful Links\n- [vLLM Integration&nbsp;\u2197](https://docs.datadoghq.com/integrations/vllm)\n- [vLLM Metrics&nbsp;\u2197](https://docs.vllm.ai/en/latest/serving/metrics.html)\n- [vLLM Documentation&nbsp;\u2197](https://docs.vllm.ai/en/stable/)",
     "layout_type": "ordered",
     "template_variables": [
         {
@@ -8,6 +8,18 @@
             "default": "*",
             "name": "model_name",
             "prefix": "model_name"
+        },
+        {
+            "available_values": [],
+            "default": "*",
+            "name": "process",
+            "prefix": "process"
+        },
+        {
+            "available_values": [],
+            "default": "*",
+            "name": "host",
+            "prefix": "host"
         }
     ],
     "title": "vLLM Overview",
@@ -23,11 +35,11 @@
                     {
                         "definition": {
                             "background_color": "white",
-                            "content": "**This dashboard provides observability for your vLLM deployments with the vLLM Integration.**\n",
+                            "content": "## vLLM\n\nThis dashboard provides observability for your vLLM deployments with the vLLM Integration.\n\nIt shows information about how many tokens your model is generating per second as well as exposing low-level details such as GPU/CPU usage and Python memory management.",
                             "font_size": "14",
                             "has_padding": true,
                             "show_tick": false,
-                            "text_align": "center",
+                            "text_align": "left",
                             "tick_edge": "left",
                             "tick_pos": "50%",
                             "type": "note",
@@ -83,11 +95,11 @@
                     {
                         "definition": {
                             "background_color": "orange",
-                            "content": "Here you can see an overview of your vLLM performance.",
+                            "content": "Here you can see an overview of your vLLM of your system activity and any vLLM alerts. The service checks on the left speak to the health of your vLLM environment, while the ones on the right report on the Readiness of various vllm Dependencies.\n",
                             "font_size": "14",
                             "has_padding": true,
                             "show_tick": false,
-                            "text_align": "left",
+                            "text_align": "center",
                             "tick_edge": "left",
                             "tick_pos": "50%",
                             "type": "note",
@@ -96,9 +108,28 @@
                         "id": 4528647613111842,
                         "layout": {
                             "height": 1,
-                            "width": 2,
+                            "width": 6,
                             "x": 0,
                             "y": 0
+                        }
+                    },
+                    {
+                        "definition": {
+                            "check": "vllm.openmetrics.health",
+                            "group_by": [],
+                            "grouping": "check",
+                            "tags": [],
+                            "title": "vLLM Health Check",
+                            "title_align": "left",
+                            "title_size": "16",
+                            "type": "check_status"
+                        },
+                        "id": 4975142618182494,
+                        "layout": {
+                            "height": 1,
+                            "width": 2,
+                            "x": 0,
+                            "y": 1
                         }
                     },
                     {
@@ -139,10 +170,10 @@
                         },
                         "id": 5175941643906344,
                         "layout": {
-                            "height": 2,
+                            "height": 1,
                             "width": 2,
                             "x": 2,
-                            "y": 0
+                            "y": 1
                         }
                     },
                     {
@@ -151,9 +182,11 @@
                             "count": 50,
                             "display_format": "countsAndList",
                             "hide_zero_counts": true,
+                            "last_triggered_format": "relative",
                             "query": "tag:(integration:vllm)",
                             "show_last_triggered": false,
                             "show_priority": false,
+                            "show_status": true,
                             "sort": "status,asc",
                             "start": 0,
                             "summary_type": "monitors",
@@ -162,29 +195,48 @@
                         },
                         "id": 7873059155305294,
                         "layout": {
-                            "height": 4,
+                            "height": 3,
                             "width": 2,
                             "x": 4,
-                            "y": 0
+                            "y": 1
                         }
                     },
                     {
                         "definition": {
-                            "check": "vllm.openmetrics.health",
-                            "group_by": [],
-                            "grouping": "check",
-                            "tags": [],
-                            "title": "vLLM Health Check",
+                            "autoscale": true,
+                            "precision": 2,
+                            "requests": [
+                                {
+                                    "formulas": [
+                                        {
+                                            "formula": "query1"
+                                        }
+                                    ],
+                                    "queries": [
+                                        {
+                                            "aggregator": "sum",
+                                            "data_source": "metrics",
+                                            "name": "query1",
+                                            "query": "sum:vllm.request.success.count{$model_name}.as_count()"
+                                        }
+                                    ],
+                                    "response_format": "scalar"
+                                }
+                            ],
+                            "timeseries_background": {
+                                "type": "bars"
+                            },
+                            "title": "Successful Requests",
                             "title_align": "left",
                             "title_size": "16",
-                            "type": "check_status"
+                            "type": "query_value"
                         },
-                        "id": 4975142618182494,
+                        "id": 3037068311385910,
                         "layout": {
                             "height": 2,
                             "width": 2,
                             "x": 0,
-                            "y": 1
+                            "y": 2
                         }
                     },
                     {
@@ -224,44 +276,6 @@
                             "x": 2,
                             "y": 2
                         }
-                    },
-                    {
-                        "definition": {
-                            "autoscale": true,
-                            "precision": 2,
-                            "requests": [
-                                {
-                                    "formulas": [
-                                        {
-                                            "formula": "query1"
-                                        }
-                                    ],
-                                    "queries": [
-                                        {
-                                            "aggregator": "sum",
-                                            "data_source": "metrics",
-                                            "name": "query1",
-                                            "query": "sum:vllm.request.success.count{$model_name}.as_count()"
-                                        }
-                                    ],
-                                    "response_format": "scalar"
-                                }
-                            ],
-                            "timeseries_background": {
-                                "type": "bars"
-                            },
-                            "title": "Successful Requests",
-                            "title_align": "left",
-                            "title_size": "16",
-                            "type": "query_value"
-                        },
-                        "id": 3037068311385910,
-                        "layout": {
-                            "height": 1,
-                            "width": 2,
-                            "x": 0,
-                            "y": 3
-                        }
                     }
                 ]
             },
@@ -284,7 +298,7 @@
                     {
                         "definition": {
                             "background_color": "blue",
-                            "content": "Here you can see token-level performance as well as overall request latency.",
+                            "content": "Here you can see how vLLM is performing its main task: generating text.\n\nThis ranges from how long an entire request takes to breaking it down into time spent on each token.\nFrom time spent preparing generate the first token to how many tokens your models produce once they really get going.",
                             "font_size": "14",
                             "has_padding": true,
                             "show_tick": false,
@@ -369,53 +383,6 @@
                                     "display_type": "line",
                                     "formulas": [
                                         {
-                                            "formula": "query1"
-                                        }
-                                    ],
-                                    "queries": [
-                                        {
-                                            "data_source": "metrics",
-                                            "name": "query1",
-                                            "query": "avg:vllm.avg.generation_throughput.toks_per_s{$model_name} by {model_name}"
-                                        }
-                                    ],
-                                    "response_format": "timeseries",
-                                    "style": {
-                                        "line_type": "solid",
-                                        "line_width": "normal",
-                                        "palette": "dog_classic"
-                                    }
-                                }
-                            ],
-                            "show_legend": true,
-                            "title": "Throughput in Tokens/Second",
-                            "title_align": "left",
-                            "title_size": "16",
-                            "type": "timeseries"
-                        },
-                        "id": 6615213229327010,
-                        "layout": {
-                            "height": 2,
-                            "width": 4,
-                            "x": 4,
-                            "y": 1
-                        }
-                    },
-                    {
-                        "definition": {
-                            "legend_columns": [
-                                "avg",
-                                "min",
-                                "max",
-                                "value",
-                                "sum"
-                            ],
-                            "legend_layout": "auto",
-                            "requests": [
-                                {
-                                    "display_type": "line",
-                                    "formulas": [
-                                        {
                                             "formula": "query1 / query2"
                                         }
                                     ],
@@ -446,6 +413,56 @@
                             "type": "timeseries"
                         },
                         "id": 7057133142091754,
+                        "layout": {
+                            "height": 2,
+                            "width": 4,
+                            "x": 4,
+                            "y": 1
+                        }
+                    },
+                    {
+                        "definition": {
+                            "autoscale": true,
+                            "precision": 2,
+                            "requests": [
+                                {
+                                    "formulas": [
+                                        {
+                                            "formula": "query2 / query1 * 100",
+                                            "number_format": {
+                                                "unit": {
+                                                    "type": "canonical_unit",
+                                                    "unit_name": "percent"
+                                                }
+                                            }
+                                        }
+                                    ],
+                                    "queries": [
+                                        {
+                                            "aggregator": "avg",
+                                            "data_source": "metrics",
+                                            "name": "query2",
+                                            "query": "avg:vllm.avg.generation_throughput.toks_per_s{$model_name}"
+                                        },
+                                        {
+                                            "aggregator": "avg",
+                                            "data_source": "metrics",
+                                            "name": "query1",
+                                            "query": "avg:vllm.avg.generation_throughput.toks_per_s{$model_name}"
+                                        }
+                                    ],
+                                    "response_format": "scalar"
+                                }
+                            ],
+                            "timeseries_background": {
+                                "type": "area"
+                            },
+                            "title": "Percentage of Tokens from Prefill",
+                            "title_align": "left",
+                            "title_size": "16",
+                            "type": "query_value"
+                        },
+                        "id": 6615213229327010,
                         "layout": {
                             "height": 2,
                             "width": 4,
@@ -520,59 +537,6 @@
                                     "display_type": "line",
                                     "formulas": [
                                         {
-                                            "formula": "query1"
-                                        }
-                                    ],
-                                    "queries": [
-                                        {
-                                            "data_source": "metrics",
-                                            "name": "query1",
-                                            "query": "avg:vllm.avg.prompt.throughput.toks_per_s{$model_name} by {model_name}"
-                                        }
-                                    ],
-                                    "response_format": "timeseries",
-                                    "style": {
-                                        "line_type": "solid",
-                                        "line_width": "normal",
-                                        "palette": "dog_classic"
-                                    }
-                                }
-                            ],
-                            "show_legend": true,
-                            "title": "Prefill Throughput in Tokens/Second",
-                            "title_align": "left",
-                            "title_size": "16",
-                            "type": "timeseries",
-                            "yaxis": {
-                                "include_zero": true,
-                                "max": "auto",
-                                "min": "auto",
-                                "scale": "linear"
-                            }
-                        },
-                        "id": 6324603340965236,
-                        "layout": {
-                            "height": 2,
-                            "width": 4,
-                            "x": 4,
-                            "y": 3
-                        }
-                    },
-                    {
-                        "definition": {
-                            "legend_columns": [
-                                "avg",
-                                "min",
-                                "max",
-                                "value",
-                                "sum"
-                            ],
-                            "legend_layout": "auto",
-                            "requests": [
-                                {
-                                    "display_type": "line",
-                                    "formulas": [
-                                        {
                                             "formula": "query1 / query2"
                                         }
                                     ],
@@ -606,6 +570,59 @@
                         "layout": {
                             "height": 2,
                             "width": 4,
+                            "x": 4,
+                            "y": 3
+                        }
+                    },
+                    {
+                        "definition": {
+                            "legend_columns": [
+                                "avg",
+                                "min",
+                                "max",
+                                "value",
+                                "sum"
+                            ],
+                            "legend_layout": "auto",
+                            "requests": [
+                                {
+                                    "display_type": "line",
+                                    "formulas": [
+                                        {
+                                            "formula": "query1"
+                                        }
+                                    ],
+                                    "queries": [
+                                        {
+                                            "data_source": "metrics",
+                                            "name": "query1",
+                                            "query": "avg:vllm.avg.generation_throughput.toks_per_s{$model_name} by {model_name}"
+                                        }
+                                    ],
+                                    "response_format": "timeseries",
+                                    "style": {
+                                        "line_type": "solid",
+                                        "line_width": "normal",
+                                        "palette": "dog_classic"
+                                    }
+                                }
+                            ],
+                            "show_legend": true,
+                            "title": "Throughput in Tokens/Second",
+                            "title_align": "left",
+                            "title_size": "16",
+                            "type": "timeseries",
+                            "yaxis": {
+                                "include_zero": true,
+                                "max": "auto",
+                                "min": "auto",
+                                "scale": "linear"
+                            }
+                        },
+                        "id": 6324603340965236,
+                        "layout": {
+                            "height": 2,
+                            "width": 4,
                             "x": 8,
                             "y": 3
                         }
@@ -625,13 +642,190 @@
                 "background_color": "vivid_orange",
                 "layout_type": "ordered",
                 "show_title": true,
-                "title": "GPU Usage",
+                "title": "Process",
                 "type": "group",
                 "widgets": [
                     {
                         "definition": {
                             "background_color": "orange",
-                            "content": "Dive deeper to see how vLLM is using the GPU.",
+                            "content": "todo",
+                            "font_size": "14",
+                            "has_padding": true,
+                            "show_tick": false,
+                            "text_align": "left",
+                            "tick_edge": "left",
+                            "tick_pos": "50%",
+                            "type": "note",
+                            "vertical_align": "top"
+                        },
+                        "id": 8311894006548314,
+                        "layout": {
+                            "height": 1,
+                            "width": 12,
+                            "x": 0,
+                            "y": 0
+                        }
+                    },
+                    {
+                        "definition": {
+                            "autoscale": true,
+                            "precision": 2,
+                            "requests": [
+                                {
+                                    "formulas": [
+                                        {
+                                            "formula": "query1 / query2"
+                                        }
+                                    ],
+                                    "queries": [
+                                        {
+                                            "aggregator": "sum",
+                                            "data_source": "metrics",
+                                            "name": "query1",
+                                            "query": "sum:vllm.process.open_fds{$model_name}"
+                                        },
+                                        {
+                                            "aggregator": "sum",
+                                            "data_source": "metrics",
+                                            "name": "query2",
+                                            "query": "sum:vllm.process.max_fds{$model_name}"
+                                        }
+                                    ],
+                                    "response_format": "scalar"
+                                }
+                            ],
+                            "timeseries_background": {
+                                "type": "area"
+                            },
+                            "title": "Open File Descriptors over Maximum File Descriptors",
+                            "title_align": "left",
+                            "title_size": "16",
+                            "type": "query_value"
+                        },
+                        "id": 6634587704880988,
+                        "layout": {
+                            "height": 2,
+                            "width": 4,
+                            "x": 0,
+                            "y": 1
+                        }
+                    },
+                    {
+                        "definition": {
+                            "legend_columns": [
+                                "avg",
+                                "min",
+                                "max",
+                                "value",
+                                "sum"
+                            ],
+                            "legend_layout": "auto",
+                            "requests": [
+                                {
+                                    "display_type": "line",
+                                    "formulas": [
+                                        {
+                                            "formula": "query1"
+                                        }
+                                    ],
+                                    "queries": [
+                                        {
+                                            "data_source": "metrics",
+                                            "name": "query1",
+                                            "query": "avg:vllm.process.virtual_memory_bytes{$model_name}"
+                                        }
+                                    ],
+                                    "response_format": "timeseries",
+                                    "style": {
+                                        "line_type": "solid",
+                                        "line_width": "normal",
+                                        "palette": "dog_classic"
+                                    }
+                                }
+                            ],
+                            "show_legend": true,
+                            "title": "Virtual Memory",
+                            "title_align": "left",
+                            "title_size": "16",
+                            "type": "timeseries"
+                        },
+                        "id": 289938027327656,
+                        "layout": {
+                            "height": 2,
+                            "width": 4,
+                            "x": 4,
+                            "y": 1
+                        }
+                    },
+                    {
+                        "definition": {
+                            "legend_columns": [
+                                "avg",
+                                "min",
+                                "max",
+                                "value",
+                                "sum"
+                            ],
+                            "legend_layout": "auto",
+                            "requests": [
+                                {
+                                    "display_type": "line",
+                                    "formulas": [
+                                        {
+                                            "formula": "query1"
+                                        }
+                                    ],
+                                    "queries": [
+                                        {
+                                            "data_source": "metrics",
+                                            "name": "query1",
+                                            "query": "avg:vllm.process.resident_memory_bytes{$model_name}"
+                                        }
+                                    ],
+                                    "response_format": "timeseries",
+                                    "style": {
+                                        "line_type": "solid",
+                                        "line_width": "normal",
+                                        "palette": "dog_classic"
+                                    }
+                                }
+                            ],
+                            "show_legend": true,
+                            "title": "Resident Memory",
+                            "title_align": "left",
+                            "title_size": "16",
+                            "type": "timeseries"
+                        },
+                        "id": 2577004928803106,
+                        "layout": {
+                            "height": 2,
+                            "width": 4,
+                            "x": 8,
+                            "y": 1
+                        }
+                    }
+                ]
+            },
+            "id": 4578138506018774,
+            "layout": {
+                "height": 4,
+                "width": 12,
+                "x": 0,
+                "y": 11
+            }
+        },
+        {
+            "definition": {
+                "background_color": "vivid_blue",
+                "layout_type": "ordered",
+                "show_title": true,
+                "title": "GPU Usage",
+                "type": "group",
+                "widgets": [
+                    {
+                        "definition": {
+                            "background_color": "blue",
+                            "content": "The GPU is the workhorse of vLLM. It is also expensive to run. See here how many requests your GPU is running and how much you are taking advantage of its caching mechanisms.",
                             "font_size": "14",
                             "has_padding": true,
                             "show_tick": false,
@@ -750,12 +944,12 @@
                 "height": 3,
                 "width": 12,
                 "x": 0,
-                "y": 11
+                "y": 15
             }
         },
         {
             "definition": {
-                "background_color": "vivid_blue",
+                "background_color": "vivid_orange",
                 "layout_type": "ordered",
                 "show_title": true,
                 "title": "CPU Usage",
@@ -763,8 +957,8 @@
                 "widgets": [
                     {
                         "definition": {
-                            "background_color": "blue",
-                            "content": "Dive deeper to see how vLLM is using the CPU.",
+                            "background_color": "orange",
+                            "content": "You can save on some infrastructure costs by doing some of the work on CPUs instead of GPUs. In this section you can see how much of your vLLM load ends up sent to CPU for processing.",
                             "font_size": "14",
                             "has_padding": true,
                             "show_tick": false,
@@ -777,104 +971,59 @@
                         "id": 6489544283872094,
                         "layout": {
                             "height": 1,
-                            "width": 3,
+                            "width": 12,
                             "x": 0,
                             "y": 0
                         }
                     },
                     {
                         "definition": {
-                            "legend_columns": [
-                                "avg",
-                                "min",
-                                "max",
-                                "value",
-                                "sum"
-                            ],
-                            "legend_layout": "auto",
+                            "autoscale": true,
+                            "precision": 2,
                             "requests": [
                                 {
-                                    "display_type": "line",
                                     "formulas": [
                                         {
-                                            "formula": "query1"
+                                            "formula": "query1 / query2 * 100",
+                                            "number_format": {
+                                                "unit": {
+                                                    "type": "canonical_unit",
+                                                    "unit_name": "percent"
+                                                }
+                                            }
                                         }
                                     ],
                                     "queries": [
                                         {
+                                            "aggregator": "avg",
                                             "data_source": "metrics",
                                             "name": "query1",
-                                            "query": "avg:vllm.cpu_cache_usage_perc{$model_name} by {model_name}"
-                                        }
-                                    ],
-                                    "response_format": "timeseries",
-                                    "style": {
-                                        "line_type": "solid",
-                                        "line_width": "normal",
-                                        "palette": "dog_classic"
-                                    }
-                                }
-                            ],
-                            "show_legend": true,
-                            "title": "Usage of KV cache",
-                            "title_align": "left",
-                            "title_size": "16",
-                            "type": "timeseries"
-                        },
-                        "id": 8233513825565042,
-                        "layout": {
-                            "height": 3,
-                            "width": 5,
-                            "x": 3,
-                            "y": 0
-                        }
-                    },
-                    {
-                        "definition": {
-                            "legend_columns": [
-                                "avg",
-                                "min",
-                                "max",
-                                "value",
-                                "sum"
-                            ],
-                            "legend_layout": "auto",
-                            "requests": [
-                                {
-                                    "display_type": "line",
-                                    "formulas": [
+                                            "query": "avg:vllm.num_requests.swapped{$model_name}"
+                                        },
                                         {
-                                            "formula": "query1"
-                                        }
-                                    ],
-                                    "queries": [
-                                        {
+                                            "aggregator": "avg",
                                             "data_source": "metrics",
-                                            "name": "query1",
-                                            "query": "sum:vllm.process.cpu_seconds.count{$model_name}.as_count()"
+                                            "name": "query2",
+                                            "query": "avg:vllm.num_requests.running{$model_name}"
                                         }
                                     ],
-                                    "response_format": "timeseries",
-                                    "style": {
-                                        "line_type": "solid",
-                                        "line_width": "normal",
-                                        "order_by": "values",
-                                        "palette": "dog_classic"
-                                    }
+                                    "response_format": "scalar"
                                 }
                             ],
-                            "show_legend": true,
-                            "title": "Total Time Spent on CPU",
+                            "timeseries_background": {
+                                "type": "area"
+                            },
+                            "title": "Percent Requests Swapped to CPU",
                             "title_align": "left",
                             "title_size": "16",
-                            "type": "timeseries"
+                            "type": "query_value"
                         },
-                        "id": 6022598621252250,
+                        "id": 743399441164048,
                         "layout": {
-                            "height": 3,
-                            "width": 4,
-                            "x": 8,
-                            "y": 0
+                            "height": 2,
+                            "width": 3,
+                            "x": 0,
+                            "y": 1
                         }
                     },
                     {
@@ -919,25 +1068,120 @@
                         "id": 7837306976982316,
                         "layout": {
                             "height": 2,
-                            "width": 3,
-                            "x": 0,
+                            "width": 9,
+                            "x": 3,
                             "y": 1
+                        }
+                    },
+                    {
+                        "definition": {
+                            "legend_columns": [
+                                "avg",
+                                "min",
+                                "max",
+                                "value",
+                                "sum"
+                            ],
+                            "legend_layout": "auto",
+                            "requests": [
+                                {
+                                    "display_type": "line",
+                                    "formulas": [
+                                        {
+                                            "formula": "query1"
+                                        }
+                                    ],
+                                    "queries": [
+                                        {
+                                            "data_source": "metrics",
+                                            "name": "query1",
+                                            "query": "sum:vllm.process.cpu_seconds.count{$model_name}.as_count()"
+                                        }
+                                    ],
+                                    "response_format": "timeseries",
+                                    "style": {
+                                        "line_type": "solid",
+                                        "line_width": "normal",
+                                        "order_by": "values",
+                                        "palette": "dog_classic"
+                                    }
+                                }
+                            ],
+                            "show_legend": true,
+                            "title": "Total Time Spent on CPU",
+                            "title_align": "left",
+                            "title_size": "16",
+                            "type": "timeseries"
+                        },
+                        "id": 6022598621252250,
+                        "layout": {
+                            "height": 2,
+                            "width": 6,
+                            "x": 0,
+                            "y": 3
+                        }
+                    },
+                    {
+                        "definition": {
+                            "legend_columns": [
+                                "avg",
+                                "min",
+                                "max",
+                                "value",
+                                "sum"
+                            ],
+                            "legend_layout": "auto",
+                            "requests": [
+                                {
+                                    "display_type": "line",
+                                    "formulas": [
+                                        {
+                                            "formula": "query1"
+                                        }
+                                    ],
+                                    "queries": [
+                                        {
+                                            "data_source": "metrics",
+                                            "name": "query1",
+                                            "query": "avg:vllm.cpu_cache_usage_perc{$model_name} by {model_name}"
+                                        }
+                                    ],
+                                    "response_format": "timeseries",
+                                    "style": {
+                                        "line_type": "solid",
+                                        "line_width": "normal",
+                                        "palette": "dog_classic"
+                                    }
+                                }
+                            ],
+                            "show_legend": true,
+                            "title": "Usage of KV cache",
+                            "title_align": "left",
+                            "title_size": "16",
+                            "type": "timeseries"
+                        },
+                        "id": 8233513825565042,
+                        "layout": {
+                            "height": 2,
+                            "width": 6,
+                            "x": 6,
+                            "y": 3
                         }
                     }
                 ]
             },
             "id": 624342162789462,
             "layout": {
-                "height": 4,
+                "height": 6,
                 "is_column_break": true,
                 "width": 12,
                 "x": 0,
-                "y": 14
+                "y": 0
             }
         },
         {
             "definition": {
-                "background_color": "vivid_orange",
+                "background_color": "vivid_blue",
                 "layout_type": "ordered",
                 "show_title": true,
                 "title": "Python Garbage Collector",
@@ -945,8 +1189,8 @@
                 "widgets": [
                     {
                         "definition": {
-                            "background_color": "orange",
-                            "content": "vLLM runs in Python, a language with a garbage collector to reclaim memory. This garbage collector collects objects in generations. You can see how each generation of objects gets processed.",
+                            "background_color": "blue",
+                            "content": "This section helps explore how vLLM uses memory. vLLM runs in Python, a language with a garbage collector to reclaim memory. This garbage collector collects objects in generations. You can see how each generation of objects gets processed.",
                             "font_size": "14",
                             "has_padding": true,
                             "show_tick": false,
@@ -962,6 +1206,55 @@
                             "width": 12,
                             "x": 0,
                             "y": 0
+                        }
+                    },
+                    {
+                        "definition": {
+                            "legend": {
+                                "type": "automatic"
+                            },
+                            "requests": [
+                                {
+                                    "formulas": [
+                                        {
+                                            "formula": "query1"
+                                        }
+                                    ],
+                                    "queries": [
+                                        {
+                                            "aggregator": "avg",
+                                            "data_source": "metrics",
+                                            "name": "query1",
+                                            "query": "sum:vllm.python.gc.objects.uncollectable.count{$model_name} by {generation}.as_count()"
+                                        }
+                                    ],
+                                    "response_format": "scalar",
+                                    "sort": {
+                                        "count": 500,
+                                        "order_by": [
+                                            {
+                                                "index": 0,
+                                                "order": "desc",
+                                                "type": "formula"
+                                            }
+                                        ]
+                                    },
+                                    "style": {
+                                        "palette": "datadog16"
+                                    }
+                                }
+                            ],
+                            "title": "All Uncollectable Objects by Generation",
+                            "title_align": "left",
+                            "title_size": "16",
+                            "type": "sunburst"
+                        },
+                        "id": 618634135416196,
+                        "layout": {
+                            "height": 3,
+                            "width": 6,
+                            "x": 0,
+                            "y": 1
                         }
                     },
                     {
@@ -1007,8 +1300,8 @@
                         "id": 4400803113146958,
                         "layout": {
                             "height": 3,
-                            "width": 4,
-                            "x": 0,
+                            "width": 6,
+                            "x": 6,
                             "y": 1
                         }
                     },
@@ -1054,9 +1347,9 @@
                         "id": 5270613800707436,
                         "layout": {
                             "height": 3,
-                            "width": 4,
-                            "x": 4,
-                            "y": 1
+                            "width": 6,
+                            "x": 0,
+                            "y": 4
                         }
                     },
                     {
@@ -1101,24 +1394,24 @@
                         "id": 5699420889371520,
                         "layout": {
                             "height": 3,
-                            "width": 4,
-                            "x": 8,
-                            "y": 1
+                            "width": 6,
+                            "x": 6,
+                            "y": 4
                         }
                     }
                 ]
             },
             "id": 3331850504686986,
             "layout": {
-                "height": 5,
+                "height": 8,
                 "width": 12,
                 "x": 0,
-                "y": 18
+                "y": 6
             }
         },
         {
             "definition": {
-                "background_color": "vivid_blue",
+                "background_color": "vivid_orange",
                 "layout_type": "ordered",
                 "show_title": true,
                 "title": "Logs",
@@ -1183,7 +1476,7 @@
                 "height": 5,
                 "width": 12,
                 "x": 0,
-                "y": 23
+                "y": 14
             }
         }
     ]
