@@ -39,7 +39,7 @@ kyverno.go.memstats.stack.inuse_bytes,gauge,,byte,,The number of bytes in use by
 kyverno.go.memstats.stack.sys_bytes,gauge,,byte,,The number of bytes obtained from system for stack allocator in the Kyverno instance,0,kyverno,kyverno go memstats stack sys_bytes,,
 kyverno.go.memstats.sys_bytes,gauge,,byte,,The number of bytes obtained from system in the Kyverno instance,0,kyverno,kyverno go memstats sys_bytes,,
 kyverno.go.threads,gauge,,thread,,The number of OS threads created in the Kyverno instance,0,kyverno,kyverno go threads,,
-kyverno.http.requests.count,count,,,,Number of http requests which were triggered as a part of Kyverno,0,kyverno,kyverno http requests count,,
+kyverno.http.requests.count,count,,,,Number of HTTP requests which were triggered as a part of Kyverno,0,kyverno,kyverno http requests count,,
 kyverno.http.requests.duration.seconds.bucket,count,,,,The bucket aggregation shows the number of observations within each distribution bucket in the HTTP requests latency histogram,0,kyverno,kyverno http requests duration seconds bucket,,
 kyverno.http.requests.duration.seconds.count,count,,,,The count aggregation shows the number of observations in the HTTP requests latency histogram,0,kyverno,kyverno http requests duration seconds count,,
 kyverno.http.requests.duration.seconds.sum,count,,second,,The sum aggregation of the HTTP requests represents the total amount of seconds spent on HTTP requests,0,kyverno,kyverno http requests duration seconds sum,,
