@@ -198,7 +198,7 @@ Validate that the APM Node.js library can communicate with your Agent by examini
 <!-- xxz tab xxx -->
 <!-- xxx tab "PHP" xxx -->
 
-**Note**: To collect `openai.api.usage.*` metrics, follow the [API key setup instructions][X].
+**Note**: To collect `openai.api.usage.*` metrics, follow the API key setup instructions.
 
 ### Installation
 
