@@ -198,7 +198,7 @@ Validate that the APM Node.js library can communicate with your Agent by examini
 <!-- xxz tab xxx -->
 <!-- xxx tab "PHP" xxx -->
 
-**Note**: This setup method does not collect `openai.api.usage.*` metrics. To collect these metrics, also follow the API key setup instructions.
+**Note**: To collect `openai.api.usage.*` metrics, follow the [API key setup instructions][X].
 
 ### Installation
 
@@ -230,7 +230,7 @@ docker run -d
 - Non-US1 customers must set `DD_SITE` on the application command to the correct Datadog site parameter as specified in the table in the <a href="https://docs.datadoghq.com/getting_started/site/#access-the-datadog-site">Datadog Site</a> page (for example, `datadoghq.eu` for EU1 customers).{{% /site-region %}}
 partial -->
 
-- If the Agent is using a non-default hostname or port, be sure to also set `DD_AGENT_HOST`, `DD_TRACE_AGENT_PORT`, or `DD_DOGSTATSD_PORT`.
+- If the Agent is using a non-default hostname or port, set `DD_AGENT_HOST`, `DD_TRACE_AGENT_PORT`, or `DD_DOGSTATSD_PORT`.
 
 See the [APM PHP library documentation][17] for more advanced usage.
 
@@ -238,17 +238,17 @@ See the [APM PHP library documentation][17] for more advanced usage.
 
 See the [APM PHP library documentation][17] for all the available configuration options.
 
-#### (beta) Log Prompt & Completion Sampling
+#### Log prompt and completion sampling (Beta) 
 
 To enable log prompt and completion sampling, set the `DD_OPENAI_LOGS_ENABLED="true"` environment variable. By default, 10% of traced requests will emit logs containing the prompts and completions.
 
 To adjust the log sample rate, see the [APM library documentation][17].
 
-**Note**: It is recommended to enable `DD_LOGS_INJECTION` to ensure logs are correlated with traces.
+**Note**: To ensure logs are correlated with traces, Datadog recommends you enable `DD_LOGS_INJECTION`.
 
 ### Validation
 
-Validate that the APM PHP library can communicate with your Agent by examining the phpinfo output of your service. Under the `ddtrace` section, `Diagnostic checks` should be `passed`.
+To validate that the APM PHP library can communicate with your Agent, examine the phpinfo output of your service. Under the `ddtrace` section, `Diagnostic checks` should be `passed`.
 
 <!-- xxz tab xxx -->
 <!-- xxx tab "API Key" xxx -->
