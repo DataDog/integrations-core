@@ -1,7 +1,6 @@
 id: ping-federate
 tests:
-  -
-    sample: "2024-06-04 11:19:53,283 | Administrator | UserAdmin,Admin,CryptoAdmin,ExpressionAdmin | 185.64.148.0 | USER | LOGIN_ATTEMPT | testevdentdetailid | Login was successful"
+  - sample: "2024-06-04 11:19:53,283 | Administrator | UserAdmin,Admin,CryptoAdmin,ExpressionAdmin | 185.64.148.0 | USER | LOGIN_ATTEMPT | testevdentdetailid | Login was successful"
     service: admin
     result:
       custom:
@@ -94,7 +93,7 @@ tests:
         app: "PingApp"
         description:
           details: "Authentication successful"
-        duration: 200.0
+        duration: 2.0E8
         evt:
           name: "AUTHN_ATTEMPT"
           outcome: "success"
@@ -123,7 +122,8 @@ tests:
             ip: "185.64.148.0"
         ping_federate:
           transaction:
-            connectionid: "connection1"
+            connection:
+              id: "connection1"
             role: "IdP"
             subject: "analyst"
         protocol: "SAML20"
@@ -154,7 +154,7 @@ tests:
           - " spConnection.PartnerSP"
         description:
           details: "Authentication successful"
-        duration: 200.0
+        duration: 2.0E8
         evt:
           name: "AUTHN_ATTEMPT"
           outcome: "success"
@@ -190,7 +190,9 @@ tests:
           track_id: "qwerty-1234-asdfgh-5678"
         ping_federate:
           transaction:
-            connectionid: "connection1"
+            connection:
+              id: "connection1"
+              name: "MyOAuthClient"
             connectionname: "MyOAuthClient"
             intiated_by: "SP"
             role: "IdP"
