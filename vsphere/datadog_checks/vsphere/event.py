@@ -11,35 +11,19 @@ from pyVmomi import vim
 
 from datadog_checks.base import ensure_unicode
 
-from .constants import DEFAULT_EVENT_RESOURCES, MOR_TYPE_AS_STRING, SOURCE_TYPE
-
-EXCLUDE_FILTERS = {
-    'AlarmStatusChangedEvent': [r'Gray to Green', r'Green to Gray'],
-    'TaskEvent': [
-        r'Initialize powering On',
-        r'Power Off virtual machine',
-        r'Power On virtual machine',
-        r'Reconfigure virtual machine',
-        r'Relocate virtual machine',
-        r'Suspend virtual machine',
-        r'Migrate virtual machine',
-    ],
-    'VmBeingHotMigratedEvent': [],
-    'VmMessageEvent': [],
-    'VmMigratedEvent': [],
-    'VmPoweredOnEvent': [],
-    'VmPoweredOffEvent': [],
-    'VmReconfiguredEvent': [],
-    'VmSuspendedEvent': [],
-}
-
-ALLOWED_EVENTS = [getattr(vim.event, event_type) for event_type in EXCLUDE_FILTERS.keys()]
+from .constants import (
+    DEFAULT_EVENT_RESOURCES,
+    EXCLUDE_FILTERS,
+    MOR_TYPE_AS_STRING,
+    PER_RESOURCE_EVENTS,
+    SOURCE_TYPE,
+)
 
 
 class VSphereEvent(object):
     UNKNOWN = 'unknown'
 
-    def __init__(self, raw_event, event_config, tags, event_resource_filters):
+    def __init__(self, raw_event, event_config, tags, event_resource_filters, exclude_filters=EXCLUDE_FILTERS):
         self.raw_event = raw_event
         if self.raw_event and self.raw_event.__class__.__name__.startswith('vim.event'):
             self.event_type = self.raw_event.__class__.__name__[10:]
@@ -57,12 +41,12 @@ class VSphereEvent(object):
             self.event_config = {}
         else:
             self.event_config = event_config
-
+        self.exclude_filters = exclude_filters
         self.event_resource_filters = event_resource_filters
 
     def _is_filtered(self):
         # Filter the unwanted types
-        if self.event_type == 'AlarmStatusChangedEvent':
+        if self.event_type in PER_RESOURCE_EVENTS:
             # Get the entity type/name
             self.entity_type = self.raw_event.entity.entity.__class__
 
@@ -70,10 +54,10 @@ class VSphereEvent(object):
             if self.host_type not in self.event_resource_filters:
                 return True
 
-        if self.event_type not in EXCLUDE_FILTERS:
+        if self.event_type not in self.exclude_filters:
             return True
 
-        filters = EXCLUDE_FILTERS[self.event_type]
+        filters = self.exclude_filters[self.event_type]
         for f in filters:
             if re.search(f, self.raw_event.fullFormattedMessage):
                 return True

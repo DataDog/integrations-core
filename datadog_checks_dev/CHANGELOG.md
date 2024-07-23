@@ -2,6 +2,29 @@
 
 <!-- towncrier release notes start -->
 
+## 32.2.1 / 2024-06-28
+
+***Fixed***:
+
+* Update new integration template ([#17474](https://github.com/DataDog/integrations-core/pull/17474))
+
+## 32.2.0 / 2024-06-25
+
+***Security***:
+
+* Update pydantic to 2.7.3 to address CVE-2024-3772 ([#17802](https://github.com/DataDog/integrations-core/pull/17802))
+
+***Added***:
+
+* Add license override for requests-unixsocket2 ([#17702](https://github.com/DataDog/integrations-core/pull/17702))
+
+***Fixed***:
+
+* CheckEndpoints lets its clients pass alternative to `urllib.requests.urlopen` which:
+  1. exposes the external dependency more clearly
+  2. supports deterministic testing ([#17614](https://github.com/DataDog/integrations-core/pull/17614))
+* Replace DD_LOGS_CONFIG_DD_URL with DD_LOGS_CONFIG_LOGS_DD_URL ([#17890](https://github.com/DataDog/integrations-core/pull/17890))
+
 ## 32.1.1 / 2024-05-09
 
 ***Fixed***:

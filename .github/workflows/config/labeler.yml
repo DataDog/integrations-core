@@ -279,6 +279,8 @@ integration/kubernetes_state_core:
 - kubernetes_state_core/**/*
 integration/kyototycoon:
 - kyototycoon/**/*
+integration/kyverno:
+- kyverno/**/*
 integration/langchain:
 - langchain/**/*
 integration/lighttpd:
@@ -301,6 +303,8 @@ integration/mesos_master:
 - mesos_master/**/*
 integration/mesos_slave:
 - mesos_slave/**/*
+integration/mimecast:
+- mimecast/**/*
 integration/mongo:
 - mongo/**/*
 integration/mysql:
@@ -309,6 +313,8 @@ integration/nagios:
 - nagios/**/*
 integration/network:
 - network/**/*
+integration/network_path:
+- network_path/**/*
 integration/nfsstat:
 - nfsstat/**/*
 integration/nginx:
@@ -351,6 +357,8 @@ integration/pgbouncer:
 - pgbouncer/**/*
 integration/php_fpm:
 - php_fpm/**/*
+integration/ping_one:
+- ping_one/**/*
 integration/pivotal_pks:
 - pivotal_pks/**/*
 integration/podman:
@@ -485,6 +493,8 @@ integration/vault:
 - vault/**/*
 integration/vertica:
 - vertica/**/*
+integration/vllm:
+- vllm/**/*
 integration/voltdb:
 - voltdb/**/*
 integration/vsphere:

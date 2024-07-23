@@ -635,6 +635,7 @@ def test_when_version_lower_than_3_6_then_no_session_metrics_reported(aggregator
 
 @pytest.mark.parametrize("error_cls", CRITICAL_FAILURE)
 def test_service_check_critical_when_connection_dies(error_cls, aggregator, check, instance, dd_run_check):
+    instance['database_autodiscovery'] = {'enabled': True, 'refresh_interval': 0}  # force refresh on every run
     check = check(instance)
     with mock_pymongo('standalone') as mocked_client:
         dd_run_check(check)
@@ -669,6 +670,7 @@ def test_parse_mongo_version_with_suffix(check, instance, dd_run_check, datadog_
         {},  # isMaster
         OperationFailure('shardingState is not supported'),  # shardingState
         {'configsvr': False, 'set': 'replset', "myState": 1},  # replSetGetStatus
+        {},  # isMaster
     ],
 )
 @mock.patch('pymongo.mongo_client.MongoClient.server_info', return_value={'version': '5.0.0'})

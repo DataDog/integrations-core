@@ -124,6 +124,12 @@ instances:
     #
     # appcenter: false
 
+    ## @param namespace - string - optional - default: default
+    ## Namespace for differentiating between devices that share the same IP.
+    ## If not specified, the namespace will be 'default'.
+    #
+    # namespace: default
+
     ## @param proxy - mapping - optional
     ## This overrides the `proxy` setting in `init_config`.
     ##
