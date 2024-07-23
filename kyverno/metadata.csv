@@ -60,7 +60,7 @@ kyverno.ttl.controller.deletedobjects.count,count,,,,Number of objects deleted b
 kyverno.ttl.controller.errors.count,count,,,,Number of errors encountered by the cleanup TTL controller while trying to delete objects,0,kyverno,kyverno ttl controller errors count,,
 kyverno.workqueue.adds.count,count,,,,The total number of adds handled by the workqueue,0,kyverno,kyverno workqueue adds,,
 kyverno.workqueue.depth,gauge,,,,The current depth of the workqueue,0,kyverno,kyverno workqueue depth,,
-kyverno.workqueue.longest.running_processor.seconds,gauge,,second,,The number of seconds the longest running worqueue processor has been running,0,kyverno,kyverno workqueue longest running_processor seconds,,
+kyverno.workqueue.longest.running_processor.seconds,gauge,,second,,The number of seconds the longest running workqueue processor has been running,0,kyverno,kyverno workqueue longest running_processor seconds,,
 kyverno.workqueue.queue.duration.seconds.bucket,count,,,,The number of events in a specific histogram bucket in the workqueue before being requested,0,kyverno,kyverno workqueue queue duration seconds bucket,,
 kyverno.workqueue.queue.duration.seconds.count,count,,,,The total number of events in the workqueue duration histogram,0,kyverno,kyverno workqueue queue duration seconds count,,
 kyverno.workqueue.queue.duration.seconds.sum,count,,second,,The sum the of events counted in the workqueue duration histogram,0,kyverno,kyverno workqueue queue duration seconds sum,,
