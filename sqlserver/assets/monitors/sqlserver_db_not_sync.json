@@ -6,7 +6,7 @@
   "tags": [
     "integration:sql-server"
   ],
-  "description": "Backups are essential for data protection, disaster recovery, and maintenance operations. This monitor tracks how synchronized your database is with its backup. Alerts help to avoid scenarios where backups are are incomplete, leaving your data at risk.",
+  "description": "Backups are essential for data protection, disaster recovery, and maintenance operations. This monitor checks if you database is marked for replication sync. Alerts help to avoid scenarios where databases are not synced, leaving your data at risk.",
   "definition": {
     "message": "SQLServer database is not marked for replication sync. It may not be synced with its backup.",
     "name": "[SQLServer] Database is not marked for replication sync",
