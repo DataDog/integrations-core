@@ -5,6 +5,8 @@ from typing import Any  # noqa: F401
 
 from datadog_checks.base import OpenMetricsBaseCheckV2
 
+from .metrics import METRICS_MAP
+
 # from datadog_checks.base.utils.db import QueryManager
 # from requests.exceptions import ConnectionError, HTTPError, InvalidURL, Timeout
 # from json import JSONDecodeError
@@ -46,4 +48,5 @@ class KubevirtApiCheck(OpenMetricsBaseCheckV2):
 
         self.instance.setdefault("openmetrics_endpoint", self.kubevirt_api_url)
         self.instance.setdefault("enable_health_service_check", False)
-        self.instance.setdefault("rename_labels", {"version": "kubevirt_api_version"})
+        self.instance.setdefault("metrics", [METRICS_MAP])
+        self.instance.setdefault("rename_labels", {"version": "kubevirt_api_version", "host": "kubevirt_host"})
