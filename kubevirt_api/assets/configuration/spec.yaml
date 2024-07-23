@@ -1,10 +1,27 @@
 name: Kubevirt API
 files:
-- name: kubevirt_api.yaml
-  options:
-  - template: init_config
+  - name: kubevirt_api.yaml
     options:
-    - template: init_config/default
-  - template: instances
-    options:
-    - template: instances/default
+      - template: init_config
+        options:
+          - template: init_config/openmetrics
+      - template: instances
+        options:
+          - name: kubevirt_api_url
+            description: |
+              URL to the KubeVirt API Service.
+            value:
+              display_default: null
+              example: https://virt-api.kubevirt.svc:443
+              type: string
+          - name: health_url
+            description: |
+              URL to check the health of the KubeVirt API.
+            value:
+              display_default: null
+              example: https://virt-api.kubevirt.svc:443/healthz
+              type: string
+          - template: instances/openmetrics
+            overrides:
+              openmetrics_endpoint.required: false
+              openmetrics_endpoint.hidden: true
