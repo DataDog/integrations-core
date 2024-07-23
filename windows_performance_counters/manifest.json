@@ -14,7 +14,14 @@
     "classifier_tags": [
       "Supported OS::Windows",
       "Category::IoT",
-      "Category::OS & System"
+      "Category::OS & System",
+      "Offering::Integration"
+    ],
+    "resources": [
+      {
+        "resource_type": "blog",
+        "url": "https://www.datadoghq.com/blog/windows-performance-counters-datadog/"
+      }
     ]
   },
   "author": {

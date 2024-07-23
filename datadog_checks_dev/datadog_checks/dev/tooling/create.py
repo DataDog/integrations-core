@@ -3,6 +3,7 @@
 # Licensed under a 3-clause BSD style license (see LICENSE)
 import os
 from datetime import datetime
+from operator import attrgetter
 from uuid import uuid4
 
 from ..fs import (
@@ -30,9 +31,25 @@ SIMPLE_NAME = r'^\w+$'
 EXCLUDE_TEMPLATES = {"marketplace"}
 
 
+class TemplateType(object):
+    def __init__(self, name, templates_dir):
+        self.name = name
+        self.path = os.path.join(templates_dir, name)
+        readme_path = os.path.join(self.path, "README.md")
+        if os.path.exists(readme_path):
+            with open(readme_path) as fh:
+                self.description = fh.read().strip()
+        else:
+            self.description = "No description yet. Please reach out to agent-integrations to add one."
+
+
 def get_valid_templates():
-    templates = [template for template in os.listdir(TEMPLATES_DIR) if template not in EXCLUDE_TEMPLATES]
-    return sorted(templates)
+    templates = [
+        TemplateType(template, TEMPLATES_DIR)
+        for template in os.listdir(TEMPLATES_DIR)
+        if template not in EXCLUDE_TEMPLATES
+    ]
+    return sorted(templates, key=attrgetter('name'))
 
 
 def construct_template_fields(integration_name, repo_choice, integration_type, **kwargs):

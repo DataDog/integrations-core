@@ -16,7 +16,34 @@
       "Supported OS::macOS",
       "Supported OS::Windows",
       "Category::Data Stores",
-      "Category::Log Collection"
+      "Category::Log Collection",
+      "Offering::Integration"
+    ],
+    "resources": [
+      {
+        "resource_type": "blog",
+        "url": "https://www.datadoghq.com/blog/monitor-azure-sql-databases-datadog"
+      },
+      {
+        "resource_type": "blog",
+        "url": "https://www.datadoghq.com/blog/sql-server-monitoring"
+      },
+      {
+        "resource_type": "blog",
+        "url": "https://www.datadoghq.com/blog/sql-server-monitoring-tools"
+      },
+      {
+        "resource_type": "blog",
+        "url": "https://www.datadoghq.com/blog/sql-server-performance"
+      },
+      {
+        "resource_type": "blog",
+        "url": "https://www.datadoghq.com/blog/sql-server-metrics"
+      },
+      {
+        "resource_type": "blog",
+        "url": "https://www.datadoghq.com/blog/migrate-sql-workloads-to-azure-with-datadog/"
+      }
     ]
   },
   "author": {

@@ -2,6 +2,16 @@
 
 <!-- towncrier release notes start -->
 
+## 4.3.0 / 2024-07-05
+
+***Added***:
+
+* Add support for TeamCity 2023.05.4 ([#17695](https://github.com/DataDog/integrations-core/pull/17695))
+
+***Fixed***:
+
+* Update config model names ([#17802](https://github.com/DataDog/integrations-core/pull/17802))
+
 ## 4.2.1 / 2024-05-23
 
 ***Fixed***:

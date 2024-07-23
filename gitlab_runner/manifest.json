@@ -18,7 +18,8 @@
       "Category::Collaboration",
       "Category::Source Control",
       "Category::Issue Tracking",
-      "Category::Log Collection"
+      "Category::Log Collection",
+      "Offering::Integration"
     ]
   },
   "author": {
