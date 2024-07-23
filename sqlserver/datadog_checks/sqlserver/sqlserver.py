@@ -80,6 +80,7 @@ from datadog_checks.sqlserver.queries import (
     QUERY_LOG_SHIPPING_PRIMARY,
     QUERY_LOG_SHIPPING_SECONDARY,
     QUERY_SERVER_STATIC_INFO,
+    DEADLOCK_QUERY,
     get_query_ao_availability_groups,
     get_query_file_stats,
 )
@@ -756,6 +757,16 @@ class SQLServer(AgentCheck):
         else:
             self._check_connections_by_use_db()
 
+    # do we need to send like new deadlocks or the whiole table whats the retention ?  
+    # lets assume we send all        
+    def detect_deadlocks(self):
+        # send query here 
+        with self.connection.open_managed_default_connection():
+            with self.connection.get_managed_cursor() as cursor:
+                quey = cursor.execute(DEADLOCK_QUERY)
+                result = cursor.fetchone()
+                print(result)
+
     def check(self, _):
         if self.do_check:
             # configure custom queries for the check
@@ -785,6 +796,7 @@ class SQLServer(AgentCheck):
                 self.activity.run_job_loop(self.tags)
                 self.sql_metadata.run_job_loop(self.tags)
                 self._schemas.run_job_loop(self.tags)
+                self.detect_deadlocks()
         else:
             self.log.debug("Skipping check")
 

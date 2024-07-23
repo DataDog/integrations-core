@@ -69,7 +69,6 @@ def test_check_dbm_enabled_config(aggregator, dd_run_check, init_config, instanc
     sqlserver_check = SQLServer(CHECK_NAME, init_config, [instance_docker])
     assert isinstance(sqlserver_check._config.dbm_enabled, bool)
 
-
 @pytest.mark.integration
 @pytest.mark.usefixtures('dd_environment')
 @pytest.mark.parametrize(

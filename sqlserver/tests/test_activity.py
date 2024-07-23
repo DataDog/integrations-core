@@ -906,3 +906,122 @@ def test_sanitize_activity_row(dbm_instance, row):
     row = check.activity._obfuscate_and_sanitize_row(row)
     assert isinstance(row['query_hash'], str)
     assert isinstance(row['query_plan_hash'], str)
+
+
+@pytest.mark.integration
+@pytest.mark.usefixtures('dd_environment')
+def test_deadlocks(aggregator, dd_run_check, init_config, instance_docker, dbm_enabled):
+
+    instance_docker['dbm'] = True
+    sqlserver_check = SQLServer(CHECK_NAME, init_config, [instance_docker])
+
+#--session 1
+BEGIN TRAN foo;
+UPDATE t2 SET b = b+ 10 WHERE a = 1;
+
+    first_query = "SELECT * FROM testdb.users WHERE id = 1 FOR UPDATE;"
+    second_query = "SELECT * FROM testdb.users WHERE id = 2 FOR UPDATE;"
+    def run_first_deadlock_query(conn, event1, event2):
+        conn.begin()
+        try:
+            conn.cursor().execute("BEGIN TRAN foo;")
+            conn.cursor().execute("UPDATE t2 SET b = b+ 10 WHERE a = 1;")
+            event1.set()
+            event2.wait()
+            conn.cursor().execute(second_query)
+            conn.cursor().execute("COMMIT;")
+        except Exception as e:
+            # Exception is expected due to a deadlock
+            print(e)
+            pass
+        conn.commit()
+    def run_second_deadlock_query(conn, event1, event2):
+        conn.begin()
+        try:
+            event1.wait()
+            conn.cursor().execute("START TRANSACTION;")
+            conn.cursor().execute(second_query)
+            event2.set()
+            conn.cursor().execute(first_query)
+            conn.cursor().execute("COMMIT;")
+        except Exception as e:
+            # Exception is expected due to a deadlock
+            print(e)
+            pass
+        conn.commit()
+        bob_conn = _get_conn_for_user('bob')
+        fred_conn = _get_conn_for_user('fred')
+@pytest.mark.skipif(
+    environ.get('MYSQL_FLAVOR') == 'mariadb' or MYSQL_VERSION_PARSED < parse_version('8.0'),
+    reason='Deadock count is not updated in MariaDB or older MySQL versions',
+)
+@pytest.mark.integration
+@pytest.mark.usefixtures('dd_environment')
+def test_deadlocks(aggregator, dd_run_check, dbm_instance):
+    check = MySql(CHECK_NAME, {}, [dbm_instance])
+    dd_run_check(check)
+    deadlocks_start = 0
+    deadlock_metric_start = aggregator.metrics("mysql.innodb.deadlocks")
+
+    assert len(deadlock_metric_start) == 1, "there should be one deadlock metric"
+
+    deadlocks_start = deadlock_metric_start[0].value
+
+    first_query = "SELECT * FROM testdb.users WHERE id = 1 FOR UPDATE;"
+    second_query = "SELECT * FROM testdb.users WHERE id = 2 FOR UPDATE;"
+
+    def run_first_deadlock_query(conn, event1, event2):
+        conn.begin()
+        try:
+            conn.cursor().execute("START TRANSACTION;")
+            conn.cursor().execute(first_query)
+            event1.set()
+            event2.wait()
+            conn.cursor().execute(second_query)
+            conn.cursor().execute("COMMIT;")
+        except Exception as e:
+            # Exception is expected due to a deadlock
+            print(e)
+            pass
+        conn.commit()
+
+    def run_second_deadlock_query(conn, event1, event2):
+        conn.begin()
+        try:
+            event1.wait()
+            conn.cursor().execute("START TRANSACTION;")
+            conn.cursor().execute(second_query)
+            event2.set()
+            conn.cursor().execute(first_query)
+            conn.cursor().execute("COMMIT;")
+        except Exception as e:
+            # Exception is expected due to a deadlock
+            print(e)
+            pass
+        conn.commit()
+
+    bob_conn = _get_conn_for_user('bob')
+    fred_conn = _get_conn_for_user('fred')
+
+    executor = concurrent.futures.thread.ThreadPoolExecutor(2)
+
+    event1 = Event()
+    event2 = Event()
+
+    futures_first_query = executor.submit(run_first_deadlock_query, bob_conn, event1, event2)
+    futures_second_query = executor.submit(run_second_deadlock_query, fred_conn, event1, event2)
+    futures_first_query.result()
+    futures_second_query.result()
+    # Make sure innodb is updated.
+    time.sleep(0.3)
+    bob_conn.close()
+    fred_conn.close()
+    executor.shutdown()
+
+    dd_run_check(check)
+
+    deadlock_metric_end = aggregator.metrics("mysql.innodb.deadlocks")
+
+    assert (
+        len(deadlock_metric_end) == 2 and deadlock_metric_end[1].value - deadlocks_start == 1
+    ), "there should be one new deadlock"
