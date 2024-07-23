@@ -62,6 +62,10 @@ The Mimecast integration collects and forwards Mimecast Audit, DLP, Rejection, T
 
 The Mimecast integration does not include any metrics.
 
+### Service Checks
+
+The Mimecast integration does not include any service checks.
+
 ### Events
 
 The Mimecast integration does not include any events.

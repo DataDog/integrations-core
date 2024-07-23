@@ -9,7 +9,7 @@
     "support": "README.md#Support",
     "changelog": "CHANGELOG.md",
     "description": "Gain insights into mimecast logs",
-    "title": "Mimecast",
+    "title": "mimecast",
     "media": [
       {
         "caption": "Mimecast - Audit",

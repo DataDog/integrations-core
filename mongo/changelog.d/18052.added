@@ -1,0 +1,4 @@
+Collects 3 additional WiredTiger cache metrics from serverStatus
+- wiredtiger.cache.bytes_read_into_cache
+- wiredtiger.cache.bytes_written_from_cache
+- wiredtiger.cache.pages_requested_from_cache

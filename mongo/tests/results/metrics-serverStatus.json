@@ -1216,6 +1216,22 @@
         ]
     },
     {
+        "name": "mongodb.wiredtiger.cache.bytes_read_into_cache",
+        "type": 0,
+        "value": 12.0,
+        "tags": [
+            "server:mongodb://testUser2:*****@localhost:27017/test"
+        ]
+    },
+    {
+        "name": "mongodb.wiredtiger.cache.bytes_written_from_cache",
+        "type": 0,
+        "value": 12.0,
+        "tags": [
+            "server:mongodb://testUser2:*****@localhost:27017/test"
+        ]
+    },
+    {
         "name": "mongodb.wiredtiger.cache.failed_eviction_of_pages_exceeding_the_in_memory_maximumps",
         "type": 1,
         "value": 12.0,
@@ -1257,6 +1273,14 @@
     },
     {
         "name": "mongodb.wiredtiger.cache.pages_read_into_cache",
+        "type": 0,
+        "value": 12.0,
+        "tags": [
+            "server:mongodb://testUser2:*****@localhost:27017/test"
+        ]
+    },
+    {
+        "name": "mongodb.wiredtiger.cache.pages_requested_from_cache",
         "type": 0,
         "value": 12.0,
         "tags": [

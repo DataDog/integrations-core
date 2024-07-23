@@ -77,7 +77,7 @@ class MongoOperationSamples(DBMAsyncJob):
             rate_limit=1 / self._collection_interval,
             run_sync=self._operation_samples_config.get("run_sync", False),  # Default to running sync
             enabled=self._operation_samples_config["enabled"],
-            dbms="mongodb",
+            dbms="mongo",
             min_collection_interval=check._config.min_collection_interval,
             job_name="operation-samples",
         )
@@ -368,7 +368,7 @@ class MongoOperationSamples(DBMAsyncJob):
             "waiting_for_flow_control": operation.get("waitingForFlowControl", False),  # bool
             "flow_control_stats": self._format_key_name(operation.get("flowControlStats", {})),  # dict
             # Latches
-            "waiting_for_latch": operation.get("waitingForLatch", False),  # bool
+            "waiting_for_latch": self._format_key_name(operation.get("waitingForLatch", {})),  # dict
             # cursor
             "cursor": self._get_operation_cursor(operation),  # dict
         }
@@ -389,7 +389,7 @@ class MongoOperationSamples(DBMAsyncJob):
             "host": self._check._resolved_hostname,
             "dbm_type": "plan",
             "ddagentversion": datadog_agent.get_version(),
-            "ddsource": "mongodb",
+            "ddsource": "mongo",
             "ddtags": ",".join(self._check._get_tags(include_deployment_tags=True)),
             "timestamp": now * 1000,
             "network": {
@@ -441,7 +441,7 @@ class MongoOperationSamples(DBMAsyncJob):
         return {
             "host": self._check._resolved_hostname,
             "ddagentversion": datadog_agent.get_version(),
-            "ddsource": "mongodb",
+            "ddsource": "mongo",
             "dbm_type": "activity",
             "collection_interval": self._collection_interval,
             "ddtags": self._check._get_tags(include_deployment_tags=True),

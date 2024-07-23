@@ -115,10 +115,16 @@ class ApiSdk(Api):
         self.connection.authorize()
         self.http.options['headers']['X-Auth-Token'] = self.connection.session.auth.get_token(self.connection.session)
 
-    def get_response_time(self, endpoint_types, remove_project_id=True):
+    def get_response_time(self, endpoint_types, remove_project_id=True, is_heat=False):
         endpoint = self._catalog.get_endpoint_by_type(endpoint_types)
         endpoint = (
-            endpoint.replace(self._access.project_id, "") if self._access.project_id and remove_project_id else endpoint
+            self._catalog.get_endpoint_by_type(endpoint_types).replace(f"/v1/{self._access.project_id}", "")
+            if is_heat
+            else (
+                endpoint.replace(self._access.project_id, "")
+                if self._access.project_id and remove_project_id
+                else endpoint
+            )
         )
         response = self.http.get(endpoint)
         response.raise_for_status()

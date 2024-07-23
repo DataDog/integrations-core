@@ -28,6 +28,7 @@ from ddev.cli.validate.licenses import licenses
 from ddev.cli.validate.manifest import manifest
 from ddev.cli.validate.metadata import metadata
 from ddev.cli.validate.openmetrics import openmetrics
+from ddev.cli.validate.version import version
 
 
 @click.group(short_help='Verify certain aspects of the repo')
@@ -62,3 +63,4 @@ validate.add_command(readmes)
 validate.add_command(saved_views)
 validate.add_command(service_checks)
 validate.add_command(typos)
+validate.add_command(version)
