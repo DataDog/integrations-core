@@ -81,7 +81,6 @@ class SqlserverDatabaseMetricsBase:
             f"major_version={self.major_version}, "
             f"engine_edition={self.engine_edition})"
             f"is_rds={self.is_rds})"
-
         )
 
     def metric_names(self) -> List[str]:

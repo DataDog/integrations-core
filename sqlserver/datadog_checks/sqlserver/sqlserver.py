@@ -65,8 +65,8 @@ from datadog_checks.sqlserver.const import (
     SERVICE_CHECK_NAME,
     STATIC_INFO_ENGINE_EDITION,
     STATIC_INFO_MAJOR_VERSION,
-    STATIC_INFO_VERSION,
     STATIC_INFO_RDS,
+    STATIC_INFO_VERSION,
     SWITCH_DB_STATEMENT,
     TASK_SCHEDULER_METRICS,
     TEMPDB_FILE_SPACE_USAGE_METRICS,
@@ -316,8 +316,6 @@ class SQLServer(AgentCheck):
                             self.static_info_cache[STATIC_INFO_RDS] = True
                         else:
                             self.static_info_cache[STATIC_INFO_RDS] = False
-                            
-
             # re-initialize resolved_hostname to ensure we take into consideration the static information
             # after it's loaded
             self._resolved_hostname = None
