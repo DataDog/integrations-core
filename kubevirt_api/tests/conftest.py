@@ -64,12 +64,13 @@ def setup_kubevirt():
 @pytest.fixture(scope="session")
 def dd_environment():
     with kind_run(conditions=[setup_kubevirt], sleep=60) as kubeconfig, ExitStack() as stack:
-        instances = {}
+        instance = {}
 
         host, port = stack.enter_context(port_forward(kubeconfig, "kubevirt", 443, "service", "virt-api"))
-        instances["kubevirt_controller_endpoint"] = f"https://{host}:{port}/metrics"
+        instance["kubevirt_api_url"] = f"https://{host}:{port}/metrics"
+        instance["health_url"] = f"https://{host}:{port}/healthz"
 
-        yield {"instances": [instances]}
+        yield {"instances": [instance]}
 
 
 @pytest.fixture
