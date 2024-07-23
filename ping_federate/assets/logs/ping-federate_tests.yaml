@@ -193,7 +193,6 @@ tests:
             connection:
               id: "connection1"
               name: "MyOAuthClient"
-            connectionname: "MyOAuthClient"
             intiated_by: "SP"
             role: "IdP"
             stspluginid: "sts-processor-1234"
