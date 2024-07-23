@@ -250,6 +250,9 @@ To adjust the log sample rate, see the [APM library documentation][17].
 
 To validate that the APM PHP library can communicate with your Agent, examine the phpinfo output of your service. Under the `ddtrace` section, `Diagnostic checks` should be `passed`.
 
+[16]:https://docs.datadoghq.com/tracing/trace_collection/automatic_instrumentation/dd_libraries/php/#install-the-extension
+[17]:https://docs.datadoghq.com/tracing/trace_collection/library_config/php/
+
 <!-- xxz tab xxx -->
 <!-- xxx tab "API Key" xxx -->
 
@@ -296,6 +299,4 @@ Additional helpful documentation, links, and articles:
 [12]: https://app.datadoghq.com/monitors/recommended?q=integration%3AOpenAI&only_installed=false&p=1
 [13]: https://docs.datadoghq.com/getting_started/site/#access-the-datadog-site
 [14]: https://app.datadoghq.com/cost
-[15]: https://docs.datadoghq.com/cloud_cost_management/saas_costs/?tab=openai#data-
-[16]:https://docs.datadoghq.com/tracing/trace_collection/automatic_instrumentation/dd_libraries/php/#install-the-extension
-[17]:https://docs.datadoghq.com/tracing/trace_collection/library_config/php/
+[15]: https://docs.datadoghq.com/cloud_cost_management/saas_costs/?tab=openai#data-collected
