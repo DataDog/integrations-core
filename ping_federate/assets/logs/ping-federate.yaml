@@ -37,6 +37,16 @@ facets:
     name: Subdivision Name
     path: network.client.geoip.subdivision.name
     source: log
+  - facetType: range
+    groups:
+      - Measure
+    name: Duration
+    path: duration
+    source: log
+    type: double
+    unit:
+      family: time
+      name: nanosecond
   - facetType: list
     groups:
       - PingFederate
@@ -101,11 +111,11 @@ pipeline:
 
               parse_description_field (%{parse_optional_source}%{regex("[^|]*"):description.details})?
 
-              parse_default_audit_log %{date("yyyy-MM-dd' 'HH:mm:ss,SSS"):timestamp}\| tid:%{regex("[^|]*"):trackingid}\| (%{regex("[^|]*"):evt.name})?\| (%{word:ping_federate.transaction.subject})?\| (%{ip:network.client.ip})? \| %{regex("[^|]*"):app}\| (%{word:ping_federate.transaction.connectionid})?\| (%{word:protocol})?\| (%{hostname:http.url_details.host})?\| (%{word:ping_federate.transaction.role})?\| (%{word:evt.outcome})?\| %{regex("[^|]*"):adapterid}\| %{parse_description_field}\|( %{number:duration})?
+              parse_default_audit_log %{date("yyyy-MM-dd' 'HH:mm:ss,SSS"):timestamp}\| tid:%{regex("[^|]*"):trackingid}\| (%{regex("[^|]*"):evt.name})?\| (%{word:ping_federate.transaction.subject})?\| (%{ip:network.client.ip})? \| %{regex("[^|]*"):app}\| (%{word:ping_federate.transaction.connection.id})?\| (%{word:protocol})?\| (%{hostname:http.url_details.host})?\| (%{word:ping_federate.transaction.role})?\| (%{word:evt.outcome})?\| %{regex("[^|]*"):adapterid}\| %{parse_description_field}\|( %{number:duration})?
             matchRules: >
               default_audit_log_parser %{parse_default_audit_log}
 
-              additional_fields_audit_log_parser %{parse_default_audit_log}\| %{regex("[^|]*"):oauth.track_id}\| %{regex("[^|]*"):attributes:keyvalue("=",",")}\| %{regex("[^|]*"):oauth.grant_type}\| %{regex("[^|]*"):ping_federate.transaction.intiated_by}\| %{regex("[^|]*"):inmessagetype}\| %{regex("[^|]*"):inresponseto}\| %{regex("[^|]*"):usr.id}\| %{regex("[^|]*"):saml.requestid}\| %{regex("[^|]*"):http.requeststarttime}\| %{regex("[^|]*"):saml.responseid}\| %{regex("[^|]*"):ping_federate.transaction.stspluginid}\| %{regex("[^|]*"):authentication.target_id:array("[]",",")}\| %{regex("[^|]*"):authentication.source_id:array("[]",",")}\| %{regex("[^|]*"):validatorid}\| %{regex("[^|]*"): virtualserverid}\| %{regex("[^|]*"):ping_federate.transaction.connectionname}\|( %{regex("[^|]*"):http.request_id})?
+              additional_fields_audit_log_parser %{parse_default_audit_log}\| %{regex("[^|]*"):oauth.track_id}\| %{regex("[^|]*"):attributes:keyvalue("=",",")}\| %{regex("[^|]*"):oauth.grant_type}\| %{regex("[^|]*"):ping_federate.transaction.intiated_by}\| %{regex("[^|]*"):inmessagetype}\| %{regex("[^|]*"):inresponseto}\| %{regex("[^|]*"):usr.id}\| %{regex("[^|]*"):saml.requestid}\| %{regex("[^|]*"):http.requeststarttime}\| %{regex("[^|]*"):saml.responseid}\| %{regex("[^|]*"):ping_federate.transaction.stspluginid}\| %{regex("[^|]*"):authentication.target_id:array("[]",",")}\| %{regex("[^|]*"):authentication.source_id:array("[]",",")}\| %{regex("[^|]*"):validatorid}\| %{regex("[^|]*"): virtualserverid}\| %{regex("[^|]*"):ping_federate.transaction.connection.name}\|( %{regex("[^|]*"):http.request_id})?
         - type: geo-ip-parser
           name: Extracting Geo Location from IP Address
           enabled: true
@@ -113,6 +123,12 @@ pipeline:
             - network.client.ip
           target: network.client.geoip
           ip_processing_behavior: do-nothing
+        - type: arithmetic-processor
+          name: Convert the total duration of a request in nanoseconds
+          enabled: true
+          expression: duration*1000000
+          target: duration
+          replaceMissing: false
     - type: date-remapper
       name: Define `timestamp` as the official date of the log
       enabled: true
