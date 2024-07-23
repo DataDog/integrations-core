@@ -1,1 +1,0 @@
-Add tag `clustername` to mongo metrics. This tag is set only when `cluster_name` is provided in the integration configuration.

@@ -1068,6 +1068,7 @@
              "pages currently held in the cache": 12,
              "pages read into cache": 12,
              "pages read into cache requiring lookaside entries": 12,
+             "pages requested from the cache": 12,
              "pages written from cache": 12,
              "page written requiring lookaside records": 12,
              "pages written requiring in-memory restoration": 12
