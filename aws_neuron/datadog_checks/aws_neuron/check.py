@@ -1,40 +1,28 @@
 # (C) Datadog, Inc. 2024-present
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
-from typing import Any  # noqa: F401
-
-from datadog_checks.base import AgentCheck  # noqa: F401
-
-# from datadog_checks.base.utils.db import QueryManager
-# from requests.exceptions import ConnectionError, HTTPError, InvalidURL, Timeout
-# from json import JSONDecodeError
+from datadog_checks.aws_neuron.metrics import METRIC_MAP, RENAME_LABELS_MAP
+from datadog_checks.base import OpenMetricsBaseCheckV2
 
 
-class AwsNeuronCheck(AgentCheck):
-
-    # This will be the prefix of every metric and service check the integration sends
+class AwsNeuronCheck(OpenMetricsBaseCheckV2):
     __NAMESPACE__ = 'aws_neuron'
 
-    def __init__(self, name, init_config, instances):
-        super(AwsNeuronCheck, self).__init__(name, init_config, instances)
+    def __init__(self, name, init_config, instances=None):
 
-        # Use self.instance to read the check configuration
-        # self.url = self.instance.get("url")
+        super(AwsNeuronCheck, self).__init__(
+            name,
+            init_config,
+            instances,
+        )
 
-        # If the check is going to perform SQL queries you should define a query manager here.
-        # More info at
-        # https://datadoghq.dev/integrations-core/base/databases/#datadog_checks.base.utils.db.core.QueryManager
-        # sample_query = {
-        #     "name": "sample",
-        #     "query": "SELECT * FROM sample_table",
-        #     "columns": [
-        #         {"name": "metric", "type": "gauge"}
-        #     ],
-        # }
-        # self._query_manager = QueryManager(self, self.execute_query, queries=[sample_query])
-        # self.check_initializations.append(self._query_manager.compile_queries)
+    def get_default_config(self):
+        return {
+            'metrics': [METRIC_MAP],
+            'rename_labels': RENAME_LABELS_MAP,
+        }
 
-    def check(self, _):
+    # def check(self, _):
         # type: (Any) -> None
         # The following are useful bits of code to help new users get started.
 
@@ -95,4 +83,4 @@ class AwsNeuronCheck(AgentCheck):
         # self.service_check("can_connect", AgentCheck.OK)
 
         # If it didn't then it should send a critical service check
-        self.service_check("can_connect", AgentCheck.CRITICAL)
+        # self.service_check("can_connect", AgentCheck.CRITICAL)
