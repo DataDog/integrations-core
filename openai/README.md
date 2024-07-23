@@ -211,9 +211,6 @@ Validate that the APM Node.js library can communicate with your Agent by examini
 1. Navigate to the configuration tab inside Datadog [OpenAI integration tile][11].
 2. Enter an account name and OpenAI API key copied above in the accounts configuration.
 
-[10]: https://platform.openai.com/docs/overview
-[11]: https://app.datadoghq.com/integrations/openai
-
 <!-- xxz tab xxx -->
 <!-- xxz tabs xxx -->
 
