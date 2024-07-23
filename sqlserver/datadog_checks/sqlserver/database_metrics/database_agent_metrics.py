@@ -92,19 +92,11 @@ AGENT_ACTIVITY_STEPS_QUERY = {
 AGENT_ACTIVE_SESSION_DURATION_QUERY = {
     "name": "msdb.dbo.syssessions",
     "query": """\
-        IF NOT EXISTS (SELECT name FROM sys.databases WHERE name = 'rdsadmin')
-        BEGIN
-            SELECT TOP 1
-                session_id,
-                DATEDIFF(SECOND, agent_start_date, GETDATE()) AS duration_seconds
-            FROM msdb.dbo.syssessions
-            WHERE NOT EXISTS (SELECT name FROM sys.databases WHERE name = 'rdsadmin')
-            ORDER BY session_id DESC
-        END
-        ELSE
-        BEGIN
-            SELECT 0, 0
-        END
+        SELECT TOP 1
+            session_id,
+            DATEDIFF(SECOND, agent_start_date, GETDATE()) AS duration_seconds
+        FROM msdb.dbo.syssessions
+        ORDER BY session_id DESC
     """,
     "columns": [
         {"name": "session_id", "type": "tag"},
@@ -156,9 +148,10 @@ class SqlserverAgentMetrics(SqlserverDatabaseMetricsBase):
         active_job_step_info_query = AGENT_ACTIVITY_STEPS_QUERY.copy()
         active_job_step_info_query['collection_interval'] = self.collection_interval
         query_list.append(active_job_step_info_query)
-        active_session_duration_query = AGENT_ACTIVE_SESSION_DURATION_QUERY.copy()
-        active_session_duration_query['collection_interval'] = self.collection_interval
-        query_list.append(active_session_duration_query)
+        if not self.is_rds:
+            active_session_duration_query = AGENT_ACTIVE_SESSION_DURATION_QUERY.copy()
+            active_session_duration_query['collection_interval'] = self.collection_interval
+            query_list.append(active_session_duration_query)
         return query_list
 
     def __repr__(self) -> str:
@@ -166,5 +159,6 @@ class SqlserverAgentMetrics(SqlserverDatabaseMetricsBase):
             f"{self.__class__.__name__}("
             f"enabled={self.enabled}, "
             f"include_agent_metrics={self.include_agent_metrics}), "
+            f"is_rds={self.is_rds}, "
             f"collection_interval={self.collection_interval})"
         )

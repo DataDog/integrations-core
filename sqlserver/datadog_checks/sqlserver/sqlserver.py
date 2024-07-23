@@ -66,6 +66,7 @@ from datadog_checks.sqlserver.const import (
     STATIC_INFO_ENGINE_EDITION,
     STATIC_INFO_MAJOR_VERSION,
     STATIC_INFO_VERSION,
+    STATIC_INFO_RDS,
     SWITCH_DB_STATEMENT,
     TASK_SCHEDULER_METRICS,
     TEMPDB_FILE_SPACE_USAGE_METRICS,
@@ -277,7 +278,7 @@ class SQLServer(AgentCheck):
         return self._resolved_hostname
 
     def load_static_information(self):
-        expected_keys = {STATIC_INFO_VERSION, STATIC_INFO_MAJOR_VERSION, STATIC_INFO_ENGINE_EDITION}
+        expected_keys = {STATIC_INFO_VERSION, STATIC_INFO_MAJOR_VERSION, STATIC_INFO_ENGINE_EDITION, STATIC_INFO_RDS}
         missing_keys = expected_keys - set(self.static_info_cache.keys())
         if missing_keys:
             with self.connection.open_managed_default_connection():
@@ -308,6 +309,14 @@ class SQLServer(AgentCheck):
                             self.static_info_cache[STATIC_INFO_ENGINE_EDITION] = result[0]
                         else:
                             self.log.warning("failed to load version static information due to empty results")
+                    if STATIC_INFO_RDS not in self.static_info_cache:
+                        cursor.execute("SELECT name FROM sys.databases WHERE name = 'rdsadmin'")
+                        result = cursor.fetchone()
+                        if result:
+                            self.static_info_cache[STATIC_INFO_RDS] = True
+                        else:
+                            self.static_info_cache[STATIC_INFO_RDS] = False
+                            
 
             # re-initialize resolved_hostname to ensure we take into consideration the static information
             # after it's loaded
