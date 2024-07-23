@@ -3,7 +3,7 @@
 # Licensed under a 3-clause BSD style license (see LICENSE)
 from typing import Any  # noqa: F401
 
-from datadog_checks.base import OpenMetricsBaseCheckV2
+from datadog_checks.base import OpenMetricsBaseCheckV2, is_affirmative
 
 from .metrics import METRICS_MAP
 
@@ -26,12 +26,12 @@ class KubevirtApiCheck(OpenMetricsBaseCheckV2):
         if self.health_url:
             url = self.health_url
             try:
-                response = self.http.get(url)
+                response = self.http.get(url, verify=is_affirmative(self.tls_verify))
                 response.raise_for_status()
                 self.gauge("can_connect", 1)
             except Exception as e:
                 self.log.error(
-                    "Cannot connect to KubeVirt API HTTP  endpoint '%s': %s.\n",
+                    "Cannot connect to KubeVirt API HTTP endpoint '%s': %s.\n",
                     url,
                     str(e),
                 )
@@ -42,11 +42,20 @@ class KubevirtApiCheck(OpenMetricsBaseCheckV2):
     def _parse_config(self):
         self.kubevirt_api_url = self.instance.get("kubevirt_api_url")
         self.health_url = self.instance.get("health_url")
+        self.tls_verify = self.instance.get("tls_verify")
 
         if "/metrics" not in self.kubevirt_api_url:
             self.kubevirt_api_url = "{}/metrics".format(self.kubevirt_api_url)
 
-        self.instance.setdefault("openmetrics_endpoint", self.kubevirt_api_url)
-        self.instance.setdefault("enable_health_service_check", False)
-        self.instance.setdefault("metrics", [METRICS_MAP])
-        self.instance.setdefault("rename_labels", {"version": "kubevirt_api_version", "host": "kubevirt_host"})
+        self.scraper_configs = []
+
+        instance = {
+            "openmetrics_endpoint": self.kubevirt_api_url,
+            "metrics": [METRICS_MAP],
+            "namespace": self.__NAMESPACE__,
+            "enable_health_service_check": False,
+            "rename_labels": {"version": "kubevirt_api_version", "host": "kubevirt_host"},
+            "tls_verify": self.tls_verify,
+        }
+
+        self.scraper_configs.append(instance)
