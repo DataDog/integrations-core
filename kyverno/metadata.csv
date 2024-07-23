@@ -53,7 +53,7 @@ kyverno.process.cpu.seconds.count,count,,second,,The total user and system CPU t
 kyverno.process.max_fds,gauge,,,,The maximum number of open file descriptors in the Kyverno instance,0,kyverno,kyverno process max_fds,,
 kyverno.process.open_fds,gauge,,,,The number of open file descriptors in the Kyverno instance,0,kyverno,kyverno process open_fds,,
 kyverno.process.resident_memory.bytes,gauge,,byte,,The resident memory size in bytes in the Kyverno instance,0,kyverno,kyverno process resident_memory bytes,,
-kyverno.process.start_time.seconds,gauge,,second,,The start time of the process since unix epoch in seconds in the Kyverno instance,0,kyverno,kyverno process start_time seconds,,
+kyverno.process.start_time.seconds,gauge,,second,,The start time of the process since the Unix epoch in seconds in the Kyverno instance,0,kyverno,kyverno process start_time seconds,,
 kyverno.process.virtual_memory.bytes,gauge,,byte,,The virtual memory size in bytes in the Kyverno instance,0,kyverno,kyverno process virtual_memory bytes,,
 kyverno.process.virtual_memory.max_bytes,gauge,,byte,,The maximum amount of virtual memory available in bytes in the Kyverno instance,0,kyverno,kyverno process virtual_memory max_byte,,
 kyverno.ttl.controller.deletedobjects.count,count,,,,Number of objects deleted by the cleanup TTL controller,0,kyverno,kyverno ttl controller deletedobjects count,,
