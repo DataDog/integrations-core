@@ -63,7 +63,7 @@ To configure this check for an Agent running on a host:
 
 #### Containerized
 
-For containerized environments, See [Configure integrations with Autodiscovery on Kubernetes][5] or [Configure integrations with Autodiscovery on Docker][14] for guidance on applying the parameters below. See the [sample aerospike.d/conf.yaml][3] for all available configuration options.
+For containerized environments, see [Configure integrations with Autodiscovery on Kubernetes][5] or [Configure integrations with Autodiscovery on Docker][14] for guidance on applying the parameters below. See the [sample aerospike.d/conf.yaml][3] for all available configuration options.
 
 ##### Metric collection
 

@@ -42,7 +42,7 @@ These are both run as `istio` Agent checks, but they have different responsibili
 
 The default [`istio.d/auto_conf.yaml`][9] file automatically sets up monitoring for each of the `istio-proxy` sidecar containers. The Agent initializes this check for each sidecar container that it detects automatically. This configuration enables the reporting of `istio.mesh.*` metrics for the data exposed by each of these sidecar containers.
 
-To customize data plane portion of the integration: 
+To customize the data plane portion of the integration: 
 
 1. Create a `conf.d/istio.d/conf.yaml` file on your host. This file must contain:
 
