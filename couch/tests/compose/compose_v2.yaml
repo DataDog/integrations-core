@@ -1,8 +1,5 @@
-version: "3.5"
-
 networks:
   network:
-
 services:
   couchdb-1:
     container_name: couchdb-1

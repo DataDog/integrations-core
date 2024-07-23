@@ -1,0 +1,34 @@
+#
+# A Sample Teleport configuration file.
+#
+# Things to update:
+#  1. license.pem: Retrieve a license from your Teleport account https://teleport.sh
+#     if you are an Enterprise customer.
+#
+version: v3
+teleport:
+  nodename: teleport-nodename
+  data_dir: /var/lib/teleport
+  log:
+    output: stderr
+    severity: INFO
+    format:
+      output: text
+  ca_pin: ""
+  diag_addr: ""
+auth_service:
+  enabled: "yes"
+  listen_addr: 0.0.0.0:3025
+  proxy_listener_mode: multiplex
+ssh_service:
+  enabled: "yes"
+  commands:
+  - name: hostname
+    command: [hostname]
+    period: 1m0s
+proxy_service:
+  enabled: "yes"
+  https_keypairs: []
+  https_keypairs_reload_interval: 0s
+  acme: {}
+

@@ -29,8 +29,11 @@ def test_e2e_profile_hpe_bladesystem_enclosure(dd_agent_check):
     common_tags = [
         'snmp_profile:hpe-bladesystem-enclosure',
         'snmp_host:hpe-bladesystem-enclosure.device.name',
+        'device_hostname:hpe-bladesystem-enclosure.device.name',
         'device_namespace:default',
         'snmp_device:' + ip_address,
+        'device_ip:' + ip_address,
+        'device_id:default:' + ip_address,
     ]
 
     # --- TEST EXTENDED METRICS ---

@@ -18,7 +18,14 @@
       "Category::Network",
       "Supported OS::Linux",
       "Supported OS::Windows",
-      "Supported OS::macOS"
+      "Supported OS::macOS",
+      "Offering::Integration"
+    ],
+    "resources": [
+      {
+        "resource_type": "blog",
+        "url": "https://www.datadoghq.com/blog/monitor-azure-iot-edge-with-datadog/"
+      }
     ]
   },
   "author": {
@@ -55,9 +62,6 @@
       "Memory usage": "assets/monitors/memory_usage.json",
       "IoT Hub syncs": "assets/monitors/iothub_syncs.json",
       "Edge Hub retries": "assets/monitors/edgehub_retries.json"
-    },
-    "logs": {
-      "source": "azure.iot_edge"
     }
   }
 }

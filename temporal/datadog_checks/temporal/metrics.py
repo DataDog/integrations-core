@@ -43,7 +43,10 @@ METRIC_MAP = {
     'wf_too_many_pending_external_workflow_signals': 'wf_too_many_pending.external_workflow_signals',
     # Frontend
     'add_search_attributes_workflow_success': 'add_search_attributes.workflow_success',
-    'add_search_attributes_workflow_failure': 'add_search_attributes.workflow_failure',
+    'add_search_attributes_workflow_failure': {
+        'name': 'add_search_attributes.workflow_failure',
+        'type': 'native_dynamic',
+    },
     'delete_namespace_workflow_success': 'delete_namespace.workflow_success',
     'delete_namespace_workflow_failure': 'delete_namespace.workflow_failure',
     'version_check_success': 'version_check.success',

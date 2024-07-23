@@ -2,6 +2,18 @@
 
 <!-- towncrier release notes start -->
 
+## 4.9.1 / 2024-07-05
+
+***Fixed***:
+
+* Using constant values instead of reassigning variables in each check run ([#17749](https://github.com/DataDog/integrations-core/pull/17749))
+
+## 4.9.0 / 2024-05-31 / Agent 7.55.0
+
+***Added***:
+
+* Add optional display_name tag ([#17657](https://github.com/DataDog/integrations-core/pull/17657))
+
 ## 4.8.0 / 2024-01-05 / Agent 7.51.0
 
 ***Added***:

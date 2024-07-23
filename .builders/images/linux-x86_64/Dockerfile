@@ -35,8 +35,8 @@ RUN /opt/python/${PYTHON2_VERSION}/bin/python -m pip install --no-warn-script-lo
 # openssl
 RUN yum install -y perl-IPC-Cmd && \
  DOWNLOAD_URL="https://www.openssl.org/source/openssl-{{version}}.tar.gz" \
- VERSION="3.0.12" \
- SHA256="f93c9e8edde5e9166119de31755fc87b4aa34863662f67ddfcba14d0b6b69b61" \
+ VERSION="3.0.13" \
+ SHA256="88525753f79d3bec27d2fa7c66aa0b92b3aa9498dafd93d7cfa4b3780cdae313" \
  RELATIVE_PATH="openssl-{{version}}" \
  # https://docs.python.org/3/using/unix.html#custom-openssl
  INSTALL_COMMAND="make install_sw" \
@@ -98,7 +98,9 @@ RUN \
  VERSION="2.3.9" \
  SHA256="52833eac3d681c8b0c9a5a65f2ebd745b3a964f208fc748f977e44015a31b207" \
  RELATIVE_PATH=unixODBC-{{version}} \
- bash install-from-source.sh --disable-readline --with-included-ltdl --enable-ltdl-install
+ bash install-from-source.sh --disable-readline --with-included-ltdl --enable-ltdl-install \
+ # This is the folder where unixODBC searches for driver config and where we ask customers to copy their config to
+ --sysconfdir=/opt/datadog-agent/embedded/etc
 
 # Dependencies needed to build librdkafka (and thus, confluent-kafka) with kerberos support
 RUN \
@@ -129,8 +131,8 @@ RUN \
 # curl
 RUN \
  DOWNLOAD_URL="https://curl.haxx.se/download/curl-{{version}}.tar.gz" \
- VERSION="8.4.0" \
- SHA256="816e41809c043ff285e8c0f06a75a1fa250211bbfb2dc0a037eeef39f1a9e427" \
+ VERSION="8.7.1" \
+ SHA256="f91249c87f68ea00cf27c44fdfa5a78423e41e71b7d408e5901a9896d905c495" \
  RELATIVE_PATH="curl-{{version}}" \
   bash install-from-source.sh \
     --disable-manual \

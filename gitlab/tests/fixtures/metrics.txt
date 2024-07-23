@@ -10519,3 +10519,93 @@ promhttp_metric_handler_requests_in_flight 1
 promhttp_metric_handler_requests_total{code="200"} 48
 promhttp_metric_handler_requests_total{code="500"} 0
 promhttp_metric_handler_requests_total{code="503"} 0
+# HELP geo_group_wiki_repositories Multiprocess metric
+# TYPE geo_group_wiki_repositories gauge
+geo_group_wiki_repositories{name="aws_eu_north_1",url="aws_eu_north_1"} 0
+# HELP geo_group_wiki_repositories_checksum_total Multiprocess metric
+# TYPE geo_group_wiki_repositories_checksum_total gauge
+geo_group_wiki_repositories_checksum_total 10
+# HELP geo_group_wiki_repositories_checksummed Multiprocess metric
+# TYPE geo_group_wiki_repositories_checksummed gauge
+geo_group_wiki_repositories_checksummed 10
+# HELP geo_group_wiki_repositories_checksum_failed Multiprocess metric
+# TYPE geo_group_wiki_repositories_checksum_failed gauge
+geo_group_wiki_repositories_checksum_failed 10
+# HELP geo_group_wiki_repositories_failed Multiprocess metric
+# TYPE geo_group_wiki_repositories_failed gauge
+geo_group_wiki_repositories_failed{name="aws_eu_north_1",url="aws_eu_north_1"} 0
+# HELP geo_group_wiki_repositories_registry Multiprocess metric
+# TYPE geo_group_wiki_repositories_registry gauge
+geo_group_wiki_repositories_registry{name="aws_eu_north_1",url="aws_eu_north_1"} 0
+# HELP geo_group_wiki_repositories_synced Multiprocess metric
+# TYPE geo_group_wiki_repositories_synced gauge
+geo_group_wiki_repositories_synced{name="aws_eu_north_1",url="aws_eu_north_1"} 0
+# HELP geo_group_wiki_repositories_verification_failed Multiprocess metric
+# TYPE geo_group_wiki_repositories_verification_failed gauge
+geo_group_wiki_repositories_verification_failed{name="aws_eu_north_1",url="aws_eu_north_1"} 0
+# HELP geo_group_wiki_repositories_verification_total Multiprocess metric
+# TYPE geo_group_wiki_repositories_verification_total gauge
+geo_group_wiki_repositories_verification_total{name="aws_eu_north_1",url="aws_eu_north_1"} 0
+# HELP geo_group_wiki_repositories_verified Multiprocess metric
+# TYPE geo_group_wiki_repositories_verified gauge
+geo_group_wiki_repositories_verified{name="aws_eu_north_1",url="aws_eu_north_1"} 0
+# HELP geo_project_repositories Multiprocess metric
+# TYPE geo_project_repositories gauge
+geo_project_repositories{name="aws_eu_north_1",url="aws_eu_north_1"} 3
+# HELP geo_project_repositories_checksum_total Multiprocess metric
+# TYPE geo_project_repositories_checksum_total gauge
+geo_project_repositories_checksum_total 5
+# HELP geo_project_repositories_checksummed Multiprocess metric
+# TYPE geo_project_repositories_checksummed gauge
+geo_project_repositories_checksummed 5
+# HELP geo_project_repositories_checksum_failed Multiprocess metric
+# TYPE geo_project_repositories_checksum_failed gauge
+geo_project_repositories_checksum_failed 5
+# HELP geo_project_repositories_failed Multiprocess metric
+# TYPE geo_project_repositories_failed gauge
+geo_project_repositories_failed{name="aws_eu_north_1",url="aws_eu_north_1"} 0
+# HELP geo_project_repositories_registry Multiprocess metric
+# TYPE geo_project_repositories_registry gauge
+geo_project_repositories_registry{name="aws_eu_north_1",url="aws_eu_north_1"} 3
+# HELP geo_project_repositories_synced Multiprocess metric
+# TYPE geo_project_repositories_synced gauge
+geo_project_repositories_synced{name="aws_eu_north_1",url="aws_eu_north_1"} 3
+# HELP geo_project_repositories_verification_failed Multiprocess metric
+# TYPE geo_project_repositories_verification_failed gauge
+geo_project_repositories_verification_failed{name="aws_eu_north_1",url="aws_eu_north_1"} 0
+# HELP geo_project_repositories_verification_total Multiprocess metric
+# TYPE geo_project_repositories_verification_total gauge
+geo_project_repositories_verification_total{name="aws_eu_north_1",url="aws_eu_north_1"} 3
+# HELP geo_project_repositories_verified Multiprocess metric
+# TYPE geo_project_repositories_verified gauge
+geo_project_repositories_verified{name="aws_eu_north_1",url="aws_eu_north_1"} 3
+# HELP geo_project_wiki_repositories Multiprocess metric
+# TYPE geo_project_wiki_repositories gauge
+geo_project_wiki_repositories{name="aws_eu_north_1",url="aws_eu_north_1"} 3
+# HELP geo_project_wiki_repositories_checksum_total Multiprocess metric
+# TYPE geo_project_wiki_repositories_checksum_total gauge
+geo_project_wiki_repositories_checksum_total 5
+# HELP geo_project_wiki_repositories_checksummed Multiprocess metric
+# TYPE geo_project_wiki_repositories_checksummed gauge
+geo_project_wiki_repositories_checksummed 5
+# HELP geo_project_wiki_repositories_checksum_failed Multiprocess metric
+# TYPE geo_project_wiki_repositories_checksum_failed gauge
+geo_project_wiki_repositories_checksum_failed 5
+# HELP geo_project_wiki_repositories_failed Multiprocess metric
+# TYPE geo_project_wiki_repositories_failed gauge
+geo_project_wiki_repositories_failed{name="aws_eu_north_1",url="aws_eu_north_1"} 0
+# HELP geo_project_wiki_repositories_registry Multiprocess metric
+# TYPE geo_project_wiki_repositories_registry gauge
+geo_project_wiki_repositories_registry{name="aws_eu_north_1",url="aws_eu_north_1"} 3
+# HELP geo_project_wiki_repositories_synced Multiprocess metric
+# TYPE geo_project_wiki_repositories_synced gauge
+geo_project_wiki_repositories_synced{name="aws_eu_north_1",url="aws_eu_north_1"} 2
+# HELP geo_project_wiki_repositories_verification_failed Multiprocess metric
+# TYPE geo_project_wiki_repositories_verification_failed gauge
+geo_project_wiki_repositories_verification_failed{name="aws_eu_north_1",url="aws_eu_north_1"} 0
+# HELP geo_project_wiki_repositories_verification_total Multiprocess metric
+# TYPE geo_project_wiki_repositories_verification_total gauge
+geo_project_wiki_repositories_verification_total{name="aws_eu_north_1",url="aws_eu_north_1"} 2
+# HELP geo_project_wiki_repositories_verified Multiprocess metric
+# TYPE geo_project_wiki_repositories_verified gauge
+geo_project_wiki_repositories_verified{name="aws_eu_north_1",url="aws_eu_north_1"} 2

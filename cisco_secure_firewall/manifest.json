@@ -59,7 +59,8 @@
       "Category::Network",
       "Category::Security",
       "Category::Log Collection",
-      "Submitted Data Type::Logs"
+      "Submitted Data Type::Logs",
+      "Offering::Integration"
     ]
   },
   "assets": {
@@ -92,9 +93,6 @@
       "Cisco Secure Firewall - Resource Manager": "assets/dashboards/cisco_secure_firewall_resource_manager.json",
       "Cisco Secure Firewall - VPN Failover": "assets/dashboards/cisco_secure_firewall_vpn_failover.json",
       "Cisco Secure Firewall - Intrusion Protection System": "assets/dashboards/cisco_secure_firewall_intrusion_protection_system.json"
-    },
-    "logs": {
-      "source": "cisco-secure-firewall"
     }
   },
   "author": {

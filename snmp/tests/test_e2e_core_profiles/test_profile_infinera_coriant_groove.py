@@ -28,8 +28,11 @@ def test_e2e_profile_infinera_coriant_groove(dd_agent_check):
     common_tags = [
         'snmp_profile:infinera-coriant-groove',
         'snmp_host:infinera-coriant-groove.device.name',
+        'device_hostname:infinera-coriant-groove.device.name',
         'device_namespace:default',
         'snmp_device:' + ip_address,
+        'device_ip:' + ip_address,
+        'device_id:default:' + ip_address,
     ] + []
 
     # --- TEST EXTENDED METRICS ---

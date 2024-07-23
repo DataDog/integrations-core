@@ -8,7 +8,7 @@
     "configuration": "README.md#Setup",
     "support": "README.md#Support",
     "changelog": "CHANGELOG.md",
-    "description": "Argo CD",
+    "description": "Monitor the health and performance of Argo CD",
     "title": "Argo CD",
     "media": [],
     "classifier_tags": [
@@ -16,7 +16,12 @@
       "Category::Log Collection",
       "Supported OS::Linux",
       "Supported OS::Windows",
-      "Supported OS::macOS"
+      "Supported OS::macOS",
+      "Category::Kubernetes",
+      "Category::Configuration & Deployment",
+      "Submitted Data Type::Metrics",
+      "Submitted Data Type::Logs",
+      "Offering::Integration"
     ]
   },
   "assets": {
@@ -51,9 +56,6 @@
       ],
       "source_type_id": 10314,
       "auto_install": true
-    },
-    "logs": {
-      "source": "argocd"
     },
     "dashboards": {
       "Argo CD Overview": "assets/dashboards/argo_cd_overview.json"

@@ -2,7 +2,13 @@
 
 <!-- towncrier release notes start -->
 
-## 2.2.0 / 2024-03-22
+## 2.2.1 / 2024-06-11 / Agent 7.54.1
+
+***Fixed***:
+
+* Bump the `pymysql` version to 1.1.1 on Python 3 ([#17696](https://github.com/DataDog/integrations-core/pull/17696))
+
+## 2.2.0 / 2024-03-22 / Agent 7.53.0
 
 ***Added***:
 

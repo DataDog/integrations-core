@@ -21,7 +21,7 @@ from datadog_checks.postgres.cursor import CommenterCursor, CommenterDictCursor
 
 from .query_calls_cache import QueryCallsCache
 from .util import DatabaseConfigurationError, payload_pg_version, warning_with_tags
-from .version_utils import V9_4, V14
+from .version_utils import V9_4, V10, V14
 
 try:
     import datadog_agent
@@ -41,11 +41,34 @@ SELECT {cols}
          ON pg_stat_statements.userid = pg_roles.oid
   LEFT JOIN pg_database
          ON pg_stat_statements.dbid = pg_database.oid
-  WHERE query NOT LIKE 'EXPLAIN %%'
-  AND queryid = ANY('{{ {called_queryids} }}'::bigint[])
+  WHERE query != '<insufficient privilege>'
+  AND query NOT LIKE '/* DDIGNORE */%%'
+  {queryid_filter}
   {filters}
   {extra_clauses}
 """
+
+
+def statements_query(**kwargs):
+    pg_stat_statements_view = kwargs.get('pg_stat_statements_view', 'pg_stat_statements')
+    cols = kwargs.get('cols', '*')
+    filters = kwargs.get('filters', '')
+    extra_clauses = kwargs.get('extra_clauses', '')
+    called_queryids = kwargs.get('called_queryids', [])
+
+    queryid_filter = ""
+    if len(called_queryids) > 0:
+        queryid_filter = f"AND queryid = ANY('{{ {called_queryids} }}'::bigint[])"
+
+    return STATEMENTS_QUERY.format(
+        cols=cols,
+        pg_stat_statements_view=pg_stat_statements_view,
+        filters=filters,
+        extra_clauses=extra_clauses,
+        queryid_filter=queryid_filter,
+        called_queryids=called_queryids,
+    )
+
 
 # Use pg_stat_statements(false) when available as an optimization to avoid pulling SQL text from disk
 PG_STAT_STATEMENTS_COUNT_QUERY = "SELECT COUNT(*) FROM pg_stat_statements(false)"
@@ -154,6 +177,8 @@ class PostgresStatementMetrics(DBMAsyncJob):
         self._state = StatementMetrics()
         self._stat_column_cache = []
         self._query_calls_cache = QueryCallsCache()
+        self._baseline_metrics = {}
+        self._last_baseline_metrics_expiry = None
         self._track_io_timing_cache = None
         self._obfuscate_options = to_native_string(json.dumps(self._config.obfuscator_options))
         # full_statement_text_cache: limit the ingestion rate of full statement text events per query_signature
@@ -184,12 +209,10 @@ class PostgresStatementMetrics(DBMAsyncJob):
             return self._stat_column_cache
 
         # Querying over '*' with limit 0 allows fetching only the column names from the cursor without data
-        query = STATEMENTS_QUERY.format(
+        query = statements_query(
             cols='*',
             pg_stat_statements_view=self._config.pg_stat_statements_view,
             extra_clauses="LIMIT 0",
-            filters="",
-            called_queryids="",
         )
         with self._check._get_main_db() as conn:
             with conn.cursor(cursor_factory=CommenterCursor) as cursor:
@@ -208,28 +231,18 @@ class PostgresStatementMetrics(DBMAsyncJob):
             pgss_view_without_query_text = "pg_stat_statements(false)"
 
         with self._check._get_main_db() as conn:
-            with conn.cursor(cursor_factory=CommenterCursor) as cursor:
-                called_queryids = []
+            with conn.cursor(cursor_factory=CommenterDictCursor) as cursor:
                 query = QUERYID_TO_CALLS_QUERY.format(pg_stat_statements_view=pgss_view_without_query_text)
                 rows = self._execute_query(cursor, query, params=(self._config.dbname,))
-                for row in rows:
-                    queryid = row[0]
-                    if queryid is None:
-                        continue
-
-                    calls = row[1]
-                    calls_changed = self._query_calls_cache.set_calls(queryid, calls)
-                    if calls_changed:
-                        called_queryids.append(queryid)
-                self._query_calls_cache.end_query_call_snapshot()
+                self._query_calls_cache.set_calls(rows)
                 self._check.gauge(
                     "dd.postgresql.pg_stat_statements.calls_changed",
-                    len(called_queryids),
+                    len(self._query_calls_cache.called_queryids),
                     tags=self.tags,
                     hostname=self._check.resolved_hostname,
                 )
 
-                return called_queryids
+                return self._query_calls_cache.called_queryids
 
     def run_job(self):
         # do not emit any dd.internal metrics for DBM specific check code
@@ -267,7 +280,6 @@ class PostgresStatementMetrics(DBMAsyncJob):
     @tracked_method(agent_check_getter=agent_check_getter, track_result_length=True)
     def _load_pg_stat_statements(self):
         try:
-            called_queryids = self._check_called_queries()
             available_columns = set(self._get_pg_stat_statements_columns())
             missing_columns = PG_STAT_STATEMENTS_REQUIRED_COLUMNS - available_columns
             if len(missing_columns) > 0:
@@ -296,7 +308,10 @@ class PostgresStatementMetrics(DBMAsyncJob):
             if self._check.pg_settings.get("track_io_timing") != "on":
                 desired_columns -= PG_STAT_STATEMENTS_TIMING_COLUMNS
 
-            pg_stat_statements_max = int(self._check.pg_settings.get("pg_stat_statements.max"))
+            pg_stat_statements_max_setting = self._check.pg_settings.get("pg_stat_statements.max")
+            pg_stat_statements_max = int(
+                pg_stat_statements_max_setting if pg_stat_statements_max_setting is not None else 0
+            )
             if pg_stat_statements_max > self._pg_stat_statements_max_warning_threshold:
                 self._check.record_warning(
                     DatabaseConfigurationError.high_pg_stat_statements_max,
@@ -335,17 +350,27 @@ class PostgresStatementMetrics(DBMAsyncJob):
                 params = params + tuple(self._config.ignore_databases)
             with self._check._get_main_db() as conn:
                 with conn.cursor(cursor_factory=CommenterDictCursor) as cursor:
-                    return self._execute_query(
-                        cursor,
-                        STATEMENTS_QUERY.format(
-                            cols=', '.join(query_columns),
-                            pg_stat_statements_view=self._config.pg_stat_statements_view,
-                            filters=filters,
-                            extra_clauses="",
-                            called_queryids=', '.join([str(i) for i in called_queryids]),
-                        ),
-                        params=params,
-                    )
+                    if len(self._query_calls_cache.cache) > 0:
+                        return self._execute_query(
+                            cursor,
+                            statements_query(
+                                cols=', '.join(query_columns),
+                                pg_stat_statements_view=self._config.pg_stat_statements_view,
+                                filters=filters,
+                                called_queryids=', '.join([str(i) for i in self._query_calls_cache.called_queryids]),
+                            ),
+                            params=params,
+                        )
+                    else:
+                        return self._execute_query(
+                            cursor,
+                            statements_query(
+                                cols=', '.join(query_columns),
+                                pg_stat_statements_view=self._config.pg_stat_statements_view,
+                                filters=filters,
+                            ),
+                            params=params,
+                        )
         except psycopg2.Error as e:
             error_tag = "error:database-{}".format(type(e).__name__)
 
@@ -453,18 +478,88 @@ class PostgresStatementMetrics(DBMAsyncJob):
         except psycopg2.Error as e:
             self._log.warning("Failed to query for pg_stat_statements count: %s", e)
 
+    def _baseline_metrics_query_key(self, row):
+        return _row_key(row) + (row['queryid'],)
+
+    # _apply_called_queries expects normalized rows before any merging of duplicates.
+    # It takes the incremental pg_stat_statements rows and constructs the full set of rows
+    # by adding the existing values in the baseline_metrics cache. This is equivalent to
+    # fetching the full set of rows from pg_stat_statements, but we avoid paying the price of
+    # actually querying the rows.
+    def _apply_called_queries(self, rows):
+        # Apply called queries to baseline_metrics
+        for row in rows:
+            baseline_row = copy.copy(row)
+            key = self._baseline_metrics_query_key(row)
+
+            # To avoid high memory usage, don't cache the query text since it can be large.
+            del baseline_row['query']
+            self._baseline_metrics[key] = baseline_row
+
+        # Apply query text for called queries since it is not cached and uncalled queries won't get result
+        # in sent metrics.
+        query_text = {row['query_signature']: row['query'] for row in rows}
+        applied_rows = []
+        for row in self._baseline_metrics.values():
+            query_signature = row['query_signature']
+            if query_signature in query_text:
+                applied_rows.append({**row, 'query': query_text[query_signature]})
+            else:
+                applied_rows.append(copy.copy(row))
+
+        return applied_rows
+
+    # To prevent the baseline metrics cache from growing indefinitely (as can happen) because of
+    # pg_stat_statements eviction), we clear it out periodically to force a full refetch.
+    def _check_baseline_metrics_expiry(self):
+        if (
+            self._last_baseline_metrics_expiry is None
+            or self._last_baseline_metrics_expiry + self._config.baseline_metrics_expiry < time.time()
+            or len(self._baseline_metrics) > 3 * int(self._check.pg_settings.get("pg_stat_statements.max"))
+        ):
+            self._baseline_metrics = {}
+            self._query_calls_cache = QueryCallsCache()
+            self._last_baseline_metrics_expiry = time.time()
+
+            self._check.count(
+                "dd.postgres.statement_metrics.baseline_metrics_cache_reset",
+                1,
+                tags=self.tags + self._check._get_debug_tags(),
+                hostname=self._check.resolved_hostname,
+            )
+
     @tracked_method(agent_check_getter=agent_check_getter, track_result_length=True)
     def _collect_metrics_rows(self):
         self._emit_pg_stat_statements_metrics()
         self._emit_pg_stat_statements_dealloc()
-        rows = self._load_pg_stat_statements()
 
-        rows = self._normalize_queries(rows)
+        self._check_baseline_metrics_expiry()
+        rows = []
+        if (not self._config.incremental_query_metrics) or self._check.version < V10:
+            rows = self._load_pg_stat_statements()
+            rows = self._normalize_queries(rows)
+        elif len(self._baseline_metrics) == 0:
+            # When we don't have baseline metrics (either on the first run or after cache expiry),
+            # we fetch all rows from pg_stat_statements, and update the initial state of relevant
+            # caches.
+            rows = self._load_pg_stat_statements()
+            rows = self._normalize_queries(rows)
+            self._query_calls_cache.set_calls(rows)
+            self._apply_called_queries(rows)
+        else:
+            # When we do have baseline metrics, use them to construct the full set of rows
+            # so that compute_derivative_rows can merge duplicates and calculate deltas.
+            self._check_called_queries()
+            rows = self._load_pg_stat_statements()
+            rows = self._normalize_queries(rows)
+            rows = self._apply_called_queries(rows)
+
         if not rows:
             return []
 
         available_columns = set(rows[0].keys())
         metric_columns = available_columns & PG_STAT_STATEMENTS_METRICS_COLUMNS
+
         rows = self._state.compute_derivative_rows(rows, metric_columns, key=_row_key)
         self._check.gauge(
             'dd.postgres.queries.query_rows_raw',
@@ -472,6 +567,7 @@ class PostgresStatementMetrics(DBMAsyncJob):
             tags=self.tags + self._check._get_debug_tags(),
             hostname=self._check.resolved_hostname,
         )
+
         return rows
 
     def _normalize_queries(self, rows):

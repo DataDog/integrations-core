@@ -14,7 +14,8 @@
     "classifier_tags": [
       "Supported OS::Linux",
       "Category::Data Stores",
-      "Category::Log Collection"
+      "Category::Log Collection",
+      "Offering::Integration"
     ]
   },
   "author": {
@@ -37,7 +38,7 @@
         "check": [
           "aerospike.uptime",
           "aerospike.namespace.memory_free_pct"
-        ],    
+        ],
         "metadata_path": "metadata.csv"
       },
       "service_checks": {
@@ -48,9 +49,6 @@
     },
     "dashboards": {
       "Aerospike Overview": "assets/dashboards/overview.json"
-    },
-    "logs": {
-      "source": "aerospike"
     }
   }
 }

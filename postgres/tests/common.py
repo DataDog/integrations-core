@@ -20,6 +20,7 @@ from datadog_checks.postgres.util import (
     REPLICATION_STATS_METRICS,
     SLRU_METRICS,
     SNAPSHOT_TXID_METRICS,
+    STAT_IO_METRICS,
     STAT_SUBSCRIPTION_METRICS,
     STAT_SUBSCRIPTION_STATS_METRICS,
     STAT_WAL_METRICS,
@@ -118,10 +119,13 @@ requires_static_version = pytest.mark.skipif(USING_LATEST, reason='Version `late
 
 def _iterate_metric_name(query):
     if 'columns' in query:
+        metric_prefix = ''
+        if 'metric_prefix' in query:
+            metric_prefix = f'{query["metric_prefix"]}.'
         for column in query['columns']:
             if column['type'].startswith('tag'):
                 continue
-            yield column['name']
+            yield f'{metric_prefix}{column["name"]}'
     else:
         for metric in query['metrics'].values():
             yield metric[0]
@@ -203,6 +207,7 @@ def check_common_metrics(aggregator, expected_tags, count=1):
         if POSTGRES_VERSION is None or float(POSTGRES_VERSION) >= 14.0:
             for metric_name, _ in NEWER_14_METRICS.values():
                 aggregator.assert_metric(metric_name, count=count, tags=db_tags)
+    aggregator.assert_metric('postgresql.running', count=count, value=1, tags=expected_tags)
 
 
 def check_db_count(aggregator, expected_tags, count=1):
@@ -418,3 +423,15 @@ def check_checksum_metrics(aggregator, expected_tags, count=1):
         return
     for metric_name in _iterate_metric_name(CHECKSUM_METRICS):
         aggregator.assert_metric(metric_name, count=count, tags=expected_tags + ['db:{}'.format(DB_NAME)])
+
+
+def check_stat_io_metrics(aggregator, expected_tags, count=1):
+    if float(POSTGRES_VERSION) < 16:
+        return
+    expected_stat_io_tags = expected_tags + [
+        'backend_type:walsender',
+        'context:normal',
+        'object:relation',
+    ]
+    for metric_name in _iterate_metric_name(STAT_IO_METRICS):
+        aggregator.assert_metric(metric_name, count=count, tags=expected_stat_io_tags)

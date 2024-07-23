@@ -1,1 +1,0 @@
-Fix zero value bug for `sqlserver.replica.transaction_delay` metric due to integration wrongly pulling transaction delay performance counter from `SQLServer:Database Mirroring` instead of the the correct object_name `SQLServer:Database Replica`

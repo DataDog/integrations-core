@@ -28,8 +28,11 @@ def test_e2e_profile_riverbed_interceptor(dd_agent_check):
     common_tags = [
         'snmp_profile:riverbed-interceptor',
         'snmp_host:riverbed-interceptor.device.name',
+        'device_hostname:riverbed-interceptor.device.name',
         'device_namespace:default',
         'snmp_device:' + ip_address,
+        'device_ip:' + ip_address,
+        'device_id:default:' + ip_address,
     ] + [
         'riverbed_interceptor_model:kept zombies Jaded but driving their but',
         'riverbed_interceptor_serial_number:but zombies quaintly acted but',

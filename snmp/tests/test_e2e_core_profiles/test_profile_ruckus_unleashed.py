@@ -28,8 +28,11 @@ def test_e2e_profile_ruckus_unleashed(dd_agent_check):
     common_tags = [
         'snmp_profile:ruckus-unleashed',
         'snmp_host:ruckus-unleashed.device.name',
+        'device_hostname:ruckus-unleashed.device.name',
         'device_namespace:default',
         'snmp_device:' + ip_address,
+        'device_ip:' + ip_address,
+        'device_id:default:' + ip_address,
     ] + [
         'ruckus_unleashed_system_licensed_aps:34750',
         'ruckus_unleashed_system_serial_number:acted but',

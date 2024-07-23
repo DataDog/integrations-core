@@ -13,12 +13,15 @@
     "media": [],
     "classifier_tags": [
       "Category::AI/ML",
+      "Category::Developer Tools",
+      "Category::Cost Management",
       "Submitted Data Type::Metrics",
       "Submitted Data Type::Logs",
       "Submitted Data Type::Traces",
       "Supported OS::Linux",
       "Supported OS::Windows",
-      "Supported OS::macOS"
+      "Supported OS::macOS",
+      "Offering::Integration"
     ]
   },
   "assets": {

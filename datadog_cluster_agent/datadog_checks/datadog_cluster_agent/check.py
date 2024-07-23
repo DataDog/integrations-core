@@ -6,6 +6,8 @@ from datadog_checks.base import OpenMetricsBaseCheck
 
 DEFAULT_METRICS = {
     'admission_webhooks_certificate_expiry': 'admission_webhooks.certificate_expiry',
+    'admission_webhooks_cws_exec_instrumentation_attempts': 'admission_webhooks.cws_exec_instrumentation_attempts',
+    'admission_webhooks_cws_pod_instrumentation_attempts': 'admission_webhooks.cws_pod_instrumentation_attempts',
     'admission_webhooks_library_injection_attempts': 'admission_webhooks.library_injection_attempts',
     'admission_webhooks_library_injection_errors': 'admission_webhooks.library_injection_errors',
     'admission_webhooks_mutation_attempts': 'admission_webhooks.mutation_attempts',
@@ -55,6 +57,12 @@ DEFAULT_METRICS = {
     'rate_limit_queries_remaining_min': 'datadog.rate_limit_queries.remaining_min',
     'rate_limit_queries_reset': 'datadog.rate_limit_queries.reset',
     'secret_backend__elapsed_ms': 'secret_backend.elapsed',
+    'tagger_stored_entities': 'tagger.stored_entities',
+    'tagger_updated_entities': 'tagger.updated_entities',
+    'workloadmeta_events_received': 'workloadmeta.events_received',
+    'workloadmeta_notifications_sent': 'workloadmeta.notifications_sent',
+    'workloadmeta_stored_entities': 'workloadmeta.stored_entities',
+    'workloadmeta_subscribers': 'workloadmeta.subscribers',
 }
 
 

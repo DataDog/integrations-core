@@ -21,7 +21,8 @@ from .common import (
     INSTANCES,
     LOCAL_RATE_LIMIT_METRICS,
     RATE_LIMIT_STAT_PREFIX_TAG,
-    RBAC_METRICS,
+    RBAC_ENFORCE_METRICS,
+    RBAC_SHADOW_METRICS,
 )
 
 CHECK_NAME = 'envoy'
@@ -256,7 +257,7 @@ def test_metadata_not_collected(datadog_agent, check):
 
 
 @pytest.mark.parametrize(
-    ('fixture_file', 'metrics', 'standard_tags', 'additional_tags'),
+    ('fixture_file', 'metrics', 'standard_tags', 'optional_tags'),
     [
         (
             './legacy/stat_prefix',
@@ -265,15 +266,22 @@ def test_metadata_not_collected(datadog_agent, check):
             ['stat_prefix:bar'],
         ),
         (
-            './legacy/rbac_metric.txt',
-            RBAC_METRICS,
-            ['stat_prefix:foo_buz_112'],
+            './legacy/rbac_enforce_metrics.txt',
+            RBAC_ENFORCE_METRICS,
+            ['stat_prefix:foo_buz_enforce'],
+            ['rule_prefix:rule_prefix'],
+        ),
+        (
+            './legacy/rbac_shadow_metrics.txt',
+            RBAC_SHADOW_METRICS,
+            ['stat_prefix:foo_buz_shadow'],
             ['shadow_rule_prefix:shadow_rule_prefix'],
         ),
     ],
     ids=[
         "stats_prefix_ext_auth",
-        "rbac_prefix_shadow",
+        "rbac_enforce_metrics",
+        "rbac_shadow_metrics",
     ],
 )
 def test_stats_prefix_optional_tags(
@@ -285,25 +293,26 @@ def test_stats_prefix_optional_tags(
     fixture_file,
     metrics,
     standard_tags,
-    additional_tags,
+    optional_tags,
 ):
     instance = INSTANCES['main']
     standard_tags.append('endpoint:{}'.format(instance["stats_url"]))
-    tags_prefix = standard_tags + additional_tags
     c = check(instance)
     mock_http_response(file_path=fixture_path(fixture_file))
     dd_run_check(c)
 
-    # To ensure that this change didn't break the old behavior, both the value and the tags are asserted.
-    # The fixture is created with a specific value and the EXT_METRICS list is done in alphabetical order
-    # allowing for value to also be asserted
+    # To test the absence and presence of the optional tags, both the value and the tags are asserted.
+    # The fixtures must list all metrics, first without and then with the optional tags.
     for index, metric in enumerate(metrics):
+        # Without optional tags.
+        aggregator.assert_metric(metric, value=index, tags=standard_tags)
+
+        # With optional tags.
         aggregator.assert_metric(
             metric,
             value=index + len(metrics),
-            tags=tags_prefix,
+            tags=standard_tags + optional_tags,
         )
-        aggregator.assert_metric(metric, value=index, tags=standard_tags)
 
 
 def test_local_rate_limit_metrics(aggregator, fixture_path, mock_http_response, check, dd_run_check):

@@ -28,8 +28,11 @@ def test_e2e_profile_fortinet_fortiswitch(dd_agent_check):
     common_tags = [
         'snmp_profile:fortinet-fortiswitch',
         'snmp_host:fortinet.fortiswitch.example',
+        'device_hostname:fortinet.fortiswitch.example',
         'device_namespace:default',
         'snmp_device:' + ip_address,
+        'device_ip:' + ip_address,
+        'device_id:default:' + ip_address,
     ] + [
         'fs_sys_serial:their acted quaintly Jaded zombies forward oxen but driving',
         'fs_sys_version:but forward quaintly zombies forward kept quaintly',

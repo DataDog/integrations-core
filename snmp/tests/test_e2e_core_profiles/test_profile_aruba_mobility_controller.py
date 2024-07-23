@@ -28,8 +28,11 @@ def test_e2e_profile_aruba_mobility_controller(dd_agent_check):
     common_tags = [
         'snmp_profile:aruba-mobility-controller',
         'snmp_host:aruba-mobility-controller.device.name',
+        'device_hostname:aruba-mobility-controller.device.name',
         'device_namespace:default',
         'snmp_device:' + ip_address,
+        'device_ip:' + ip_address,
+        'device_id:default:' + ip_address,
     ] + []
 
     # --- TEST EXTENDED METRICS ---

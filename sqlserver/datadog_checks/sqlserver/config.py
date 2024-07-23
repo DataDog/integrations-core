@@ -7,7 +7,10 @@ import re
 
 from datadog_checks.base.config import is_affirmative
 from datadog_checks.base.utils.common import to_native_string
-from datadog_checks.sqlserver.const import DEFAULT_AUTODISCOVERY_INTERVAL, PROC_CHAR_LIMIT
+from datadog_checks.sqlserver.const import (
+    DEFAULT_AUTODISCOVERY_INTERVAL,
+    PROC_CHAR_LIMIT,
+)
 
 
 class SQLServerConfig:
@@ -16,8 +19,8 @@ class SQLServerConfig:
         self.tags: list[str] = instance.get("tags", [])
         self.reported_hostname: str = instance.get('reported_hostname')
         self.autodiscovery: bool = is_affirmative(instance.get('database_autodiscovery'))
-        self.autodiscovery_include: list[str] = instance.get('autodiscovery_include', ['.*'])
-        self.autodiscovery_exclude: list[str] = instance.get('autodiscovery_exclude', ['model'])
+        self.autodiscovery_include: list[str] = instance.get('autodiscovery_include', ['.*']) or ['.*']
+        self.autodiscovery_exclude: list[str] = instance.get('autodiscovery_exclude', ['model']) or ['model']
         self.autodiscovery_db_service_check: bool = is_affirmative(instance.get('autodiscovery_db_service_check', True))
         self.min_collection_interval: int = instance.get('min_collection_interval', 15)
         self.autodiscovery_interval: int = instance.get('autodiscovery_interval', DEFAULT_AUTODISCOVERY_INTERVAL)
@@ -25,7 +28,7 @@ class SQLServerConfig:
         self._exclude_patterns = self._compile_valid_patterns(self.autodiscovery_exclude)
 
         self.proc: str = instance.get('stored_procedure')
-        self.custom_metrics: list[dict] = init_config.get('custom_metrics', [])
+        self.custom_metrics: list[dict] = init_config.get('custom_metrics', []) or []
         self.include_index_usage_metrics_tempdb: bool = is_affirmative(
             instance.get('include_index_usage_metrics_tempdb', False)
         )
@@ -45,10 +48,11 @@ class SQLServerConfig:
         self.procedure_metrics_config: dict = instance.get('procedure_metrics', {}) or {}
         self.settings_config: dict = instance.get('collect_settings', {}) or {}
         self.activity_config: dict = instance.get('query_activity', {}) or {}
+        self.schema_config: dict = instance.get('schemas_collection', {}) or {}
         self.cloud_metadata: dict = {}
-        aws: dict = instance.get('aws', {})
-        gcp: dict = instance.get('gcp', {})
-        azure: dict = instance.get('azure', {})
+        aws: dict = instance.get('aws', {}) or {}
+        gcp: dict = instance.get('gcp', {}) or {}
+        azure: dict = instance.get('azure', {}) or {}
         # Remap fully_qualified_domain_name to name
         azure = {k if k != 'fully_qualified_domain_name' else 'name': v for k, v in azure.items()}
         if aws:
@@ -98,7 +102,7 @@ class SQLServerConfig:
         )
         self.log_unobfuscated_queries: bool = is_affirmative(instance.get('log_unobfuscated_queries', False))
         self.log_unobfuscated_plans: bool = is_affirmative(instance.get('log_unobfuscated_plans', False))
-        self.database_instance_collection_interval: int = instance.get('database_instance_collection_interval', 1800)
+        self.database_instance_collection_interval: int = instance.get('database_instance_collection_interval', 300)
         self.stored_procedure_characters_limit: int = instance.get('stored_procedure_characters_limit', PROC_CHAR_LIMIT)
         self.connection_host: str = instance['host']
 

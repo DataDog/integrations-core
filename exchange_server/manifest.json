@@ -13,7 +13,8 @@
     "media": [],
     "classifier_tags": [
       "Category::Log Collection",
-      "Supported OS::Windows"
+      "Supported OS::Windows",
+      "Offering::Integration"
     ]
   },
   "author": {
@@ -44,9 +45,6 @@
     },
     "dashboards": {
       "Exchange Server Overview": "assets/dashboards/overview.json"
-    },
-    "logs": {
-      "source": "exchange_server"
     }
   }
 }

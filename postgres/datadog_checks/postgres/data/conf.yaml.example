@@ -4,9 +4,26 @@ init_config:
 
     ## @param propagate_agent_tags - boolean - optional - default: false
     ## Set to `true` to propagate the tags from `datadog.yaml` to the check.
-    ## When set to `true`, the tags from `datadog.yaml` are added to the check's tags for all instances.        
+    ## When set to `true`, the tags from `datadog.yaml` are added to the check's tags for all instances.
     #
     # propagate_agent_tags: false
+
+    ## @param global_custom_queries - list of mappings - optional
+    ## See `custom_queries` defined below.
+    ##
+    ## Global custom queries can be applied to all instances using the
+    ## `use_global_custom_queries` setting at the instance level.
+    #
+    # global_custom_queries:
+    #   - metric_prefix: postgresql
+    #     query: <QUERY>
+    #     columns:
+    #     - name: <COLUNMS_1_NAME>
+    #       type: <COLUMNS_1_TYPE>
+    #     - name: <COLUNMS_2_NAME>
+    #       type: <COLUMNS_2_TYPE>
+    #     tags:
+    #     - <TAG_KEY>:<TAG_VALUE>
 
     ## @param service - string - optional
     ## Attach the tag `service:<SERVICE>` to every metric, event, and service check emitted by this integration.
@@ -197,6 +214,12 @@ instances:
     # activity_metrics_excluded_aggregations:
     #   - application_name
 
+    ## @param collect_buffercache_metrics - boolean - optional - default: false
+    ## If set to true, collects metrics regarding buffer cache usage from pg_buffercache.
+    ## pg_buffercache extension must be installed.
+    #
+    # collect_buffercache_metrics: false
+
     ## @param collect_database_size_metrics - boolean - optional - default: true
     ## Collect database size metrics.
     #
@@ -214,7 +237,7 @@ instances:
 
     ## @param collect_wal_metrics - boolean - optional - default: false
     ## Collect metrics about WAL file age.
-    ## NOTE: 
+    ## NOTE:
     ## For Postgres 9.6 and below, you must run the check local to your database if you want to enable this option.
     ## Starting Postgres 10, WAL file metrics are enabled by default using `pg_ls_waldir` and don't need local access.
     #
@@ -251,6 +274,15 @@ instances:
     #       type: <COLUMNS_2_TYPE>
     #     tags:
     #     - <TAG_KEY>:<TAG_VALUE>
+
+    ## @param use_global_custom_queries - string - optional - default: extend
+    ## How `global_custom_queries` should be used for this instance. There are 3 options:
+    ##
+    ## 1. true - `global_custom_queries` override `custom_queries`.
+    ## 2. false - `custom_queries` override `global_custom_queries`.
+    ## 3. extend - `global_custom_queries` are used in addition to any `custom_queries`.
+    #
+    # use_global_custom_queries: extend
 
     ## Define the configuration for database autodiscovery.
     ## Complete this section if you want to auto-discover databases on this host
@@ -311,7 +343,7 @@ instances:
     #
     # dbm: false
 
-    ## @param pg_stat_statements_view - string - optional - default: show_pg_stat_statements()
+    ## @param pg_stat_statements_view - string - optional - default: pg_stat_statements
     ## Set this value if you want to define a custom view or function to allow the datadog user to query the
     ## `pg_stat_statements` table, which is useful for restricting the permissions given to the datadog agent.
     ## Please note this is an ALPHA feature and is subject to change or deprecation without notice.
@@ -405,7 +437,7 @@ instances:
         #
         # payload_row_limit: 3500
 
-    ## Configure collection of pg_settings. This is an alpha feature.
+    ## Configure collection of pg_settings.
     #
     # collect_settings:
 
@@ -421,7 +453,7 @@ instances:
         # collection_interval: 600
 
         ## @param ignored_settings_patterns - list of strings - optional
-        ## A list of setting patterns to ignore. Any setting key matching one of the value in this list will 
+        ## A list of setting patterns to ignore. Any setting key matching one of the value in this list will
         ## not be collected. This uses the traditional LIKE pattern-matching approach.
         #
         # ignored_settings_patterns:

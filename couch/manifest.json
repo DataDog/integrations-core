@@ -17,7 +17,14 @@
       "Category::Log Collection",
       "Supported OS::Linux",
       "Supported OS::Windows",
-      "Supported OS::macOS"
+      "Supported OS::macOS",
+      "Offering::Integration"
+    ],
+    "resources": [
+      {
+        "resource_type": "blog",
+        "url": "https://www.datadoghq.com/blog/monitoring-couchdb-with-datadog"
+      }
     ]
   },
   "author": {
@@ -58,9 +65,6 @@
     },
     "saved_views": {
       "couchdb_processes": "assets/saved_views/couchdb_processes.json"
-    },
-    "logs": {
-      "source": "couchdb"
     }
   }
 }

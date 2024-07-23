@@ -2,7 +2,48 @@
 
 <!-- towncrier release notes start -->
 
-## 12.3.0 / 2024-03-22
+## 12.6.0 / 2024-07-05
+
+***Added***:
+
+* Update dependencies ([#17817](https://github.com/DataDog/integrations-core/pull/17817))
+
+***Fixed***:
+
+* Fixed the MySQL integration to correctly catch and handle errors raised by the connection attempt ([#17872](https://github.com/DataDog/integrations-core/pull/17872))
+* Fixed a bug in MySQL integration when trying to deconstruct None return ([#17873](https://github.com/DataDog/integrations-core/pull/17873))
+* Fix metadata table source for MySQL 5.6 ([#17875](https://github.com/DataDog/integrations-core/pull/17875))
+
+## 12.5.1 / 2024-06-11 / Agent 7.55.0
+
+***Fixed***:
+
+* Bump the `pymysql` version to 1.1.1 on Python 3 ([#17696](https://github.com/DataDog/integrations-core/pull/17696))
+
+## 12.5.0 / 2024-05-31
+
+***Added***:
+
+* Update dependencies ([#17519](https://github.com/DataDog/integrations-core/pull/17519))
+
+***Fixed***:
+
+* Changing the mysql.innodb.lock_structs metric type to gauge ([#17452](https://github.com/DataDog/integrations-core/pull/17452))
+* Fix tag propagation of aurora `replication_role` tag. Prior to this change, the replication_role tag was not added as a host tag for mysql aurora instances. ([#17555](https://github.com/DataDog/integrations-core/pull/17555))
+
+## 12.4.1 / 2024-06-11 / Agent 7.54.1
+
+***Fixed***:
+
+* Bump the `pymysql` version to 1.1.1 on Python 3 ([#17696](https://github.com/DataDog/integrations-core/pull/17696))
+
+## 12.4.0 / 2024-04-26 / Agent 7.54.0
+
+***Added***:
+
+* Update dependencies ([#17319](https://github.com/DataDog/integrations-core/pull/17319))
+
+## 12.3.0 / 2024-03-22 / Agent 7.53.0
 
 ***Added***:
 

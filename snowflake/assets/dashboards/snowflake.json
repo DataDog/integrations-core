@@ -14,7 +14,7 @@
             "prefix": "account"
         }
     ],
-    "title": "Snowflake Overview",
+    "title": "Snowflake Overview (Agent-based)",
     "widgets": [
         {
             "definition": {

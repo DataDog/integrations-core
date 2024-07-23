@@ -29,8 +29,11 @@ def test_e2e_profile_extreme_switching(dd_agent_check):
     common_tags = [
         'snmp_profile:extreme-switching',
         'snmp_host:extreme-switching.device.name',
+        'device_hostname:extreme-switching.device.name',
         'device_namespace:default',
         'snmp_device:' + ip_address,
+        'device_ip:' + ip_address,
+        'device_id:default:' + ip_address,
     ]
 
     # --- TEST EXTENDED METRICS ---

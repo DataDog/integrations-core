@@ -28,8 +28,11 @@ def test_e2e_profile_3com(dd_agent_check):
     common_tags = [
         'snmp_profile:3com',
         'snmp_host:3com.device.name',
+        'device_hostname:3com.device.name',
         'device_namespace:default',
         'snmp_device:' + ip_address,
+        'device_ip:' + ip_address,
+        'device_id:default:' + ip_address,
     ]
 
     # --- TEST METRICS ---
@@ -47,9 +50,12 @@ def test_e2e_profile_3com(dd_agent_check):
         'status': 1,
         'sys_object_id': '1.3.6.1.4.1.43.1.999',
         'tags': [
+            'device_id:default:' + ip_address,
+            'device_ip:' + ip_address,
             'device_namespace:default',
             'snmp_device:' + ip_address,
             'snmp_host:3com.device.name',
+            'device_hostname:3com.device.name',
             'snmp_profile:3com',
         ],
         'vendor': '3com',

@@ -695,6 +695,52 @@ ACTIVITY_METRICS_10 = [
     "max(age(backend_xmin))",
 ]
 
+# pg_buffercache is implemented with a function scan. Thus, the planner doesn't
+# have much reliable estimation on the number of rows returned by pg_buffercache.
+# The function's pgproc.prorows is used and 1000 is used as a default value.
+# On top of that, the function is volatile, preventing possible inlining and
+# optimisation.
+# It is very likely that we have way more buffers than relations: 16GB of shared_buffers
+# will have 2097152 buffers returned by pg_buffercache while pg_class will mostly be
+# around thousands of rows. Therefore, we write the query as a CTE aggregating on reldatabase
+# and relfilenode. Given that the function is volatile, this will force the CTE to be
+# materialized and we should have less or the same cardinality as output as pg_class's
+# rows.
+# This is more efficient than the cte-less version which will rely on a merge join and thus
+# sort the output of pg_buffercache.
+BUFFERCACHE_METRICS = {
+    'name': 'buffercache_metrics',
+    'query': """
+WITH buffer_by_relfilenode AS (
+    SELECT reldatabase, relfilenode,
+        NULLIF(COUNT(CASE WHEN relfilenode IS NOT NULL THEN 1 END), 0) as used,
+        COUNT(CASE WHEN relfilenode IS NULL THEN 1 END) as unused,
+        SUM(usagecount) as sum_usagecount,
+        NULLIF(SUM(isdirty::int), 0) as sum_dirty,
+        NULLIF(SUM(pinning_backends), 0) as sum_pinning
+    FROM pg_buffercache
+    GROUP BY reldatabase, relfilenode
+)
+SELECT COALESCE(d.datname, 'shared'), n.nspname, c.relname,
+       used, unused, sum_usagecount, sum_dirty, sum_pinning
+  FROM buffer_by_relfilenode b
+  LEFT JOIN pg_database d ON b.reldatabase = d.oid
+  LEFT JOIN pg_class c ON b.relfilenode = pg_relation_filenode(c.oid)
+  LEFT JOIN pg_namespace n ON n.oid = c.relnamespace;
+""",
+    'columns': [
+        {'name': 'db', 'type': 'tag'},
+        {'name': 'schema', 'type': 'tag_not_null'},
+        {'name': 'relation', 'type': 'tag_not_null'},
+        {'name': 'used_buffers', 'type': 'gauge'},
+        {'name': 'unused_buffers', 'type': 'gauge'},
+        {'name': 'usage_count', 'type': 'gauge'},
+        {'name': 'dirty_buffers', 'type': 'gauge'},
+        {'name': 'pinning_backends', 'type': 'gauge'},
+    ],
+    'metric_prefix': 'postgresql.buffercache',
+}
+
 # The metrics we retrieve from pg_stat_activity when the postgres version >= 9.6
 ACTIVITY_METRICS_9_6 = [
     "SUM(CASE WHEN xact_start IS NOT NULL THEN 1 ELSE 0 END)",
@@ -839,5 +885,43 @@ FROM pg_stat_subscription_stats
         {'name': 'subscription_name', 'type': 'tag'},
         {'name': 'postgresql.subscription.apply_error', 'type': 'monotonic_count'},
         {'name': 'postgresql.subscription.sync_error', 'type': 'monotonic_count'},
+    ],
+}
+
+# Requires PG16+
+# Capping at 200 rows for caution. This should always return less data points than that. Adjust if needed
+STAT_IO_METRICS = {
+    'name': 'stat_io_metrics',
+    'query': """
+SELECT backend_type,
+       object,
+       context,
+       evictions,
+       extend_time,
+       extends,
+       fsync_time,
+       fsyncs,
+       hits,
+       read_time,
+       reads,
+       write_time,
+       writes
+FROM pg_stat_io
+LIMIT 200
+""",
+    'columns': [
+        {'name': 'backend_type', 'type': 'tag'},
+        {'name': 'object', 'type': 'tag'},
+        {'name': 'context', 'type': 'tag'},
+        {'name': 'postgresql.io.evictions', 'type': 'monotonic_count'},
+        {'name': 'postgresql.io.extend_time', 'type': 'monotonic_count'},
+        {'name': 'postgresql.io.extends', 'type': 'monotonic_count'},
+        {'name': 'postgresql.io.fsync_time', 'type': 'monotonic_count'},
+        {'name': 'postgresql.io.fsyncs', 'type': 'monotonic_count'},
+        {'name': 'postgresql.io.hits', 'type': 'monotonic_count'},
+        {'name': 'postgresql.io.read_time', 'type': 'monotonic_count'},
+        {'name': 'postgresql.io.reads', 'type': 'monotonic_count'},
+        {'name': 'postgresql.io.write_time', 'type': 'monotonic_count'},
+        {'name': 'postgresql.io.writes', 'type': 'monotonic_count'},
     ],
 }

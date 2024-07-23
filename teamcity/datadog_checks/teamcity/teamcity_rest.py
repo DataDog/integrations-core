@@ -46,6 +46,7 @@ class TeamCityRest(AgentCheck):
         self.basic_http_auth = is_affirmative(
             self.instance.get('basic_http_authentication', bool(self.instance.get('password', False)))
         )
+        self.token_auth = is_affirmative(self.instance.get('auth_token'))
 
         self.monitored_projects = self.instance.get('projects', {})
         self.default_build_configs_limit = self.instance.get('default_build_configs_limit', DEFAULT_BUILD_CONFIGS_LIMIT)
@@ -67,7 +68,9 @@ class TeamCityRest(AgentCheck):
 
         server = self.instance.get('server')
         self.server_url = normalize_server_url(server)
-        self.base_url = "{}/{}".format(self.server_url, self.auth_type)
+        self.base_url = self.server_url
+        if not self.token_auth:
+            self.base_url = "{}/{}".format(self.server_url, self.auth_type)
 
         instance_tags = [
             'server:{}'.format(sanitize_server_url(self.server_url)),
@@ -237,13 +240,17 @@ class TeamCityRest(AgentCheck):
     def _collect_new_builds(self, project_id):
         last_build_id = self.bc_store.get_last_build_id(project_id, self.current_build_config)
         if not last_build_id:
-            self._initialize()
+            # We want to handle the case of an unbuilt build config by checking for any last builds
+            self.log.debug(
+                'No builds for project %d and build config %d, checking again', project_id, self.current_build_config
+            )
+            ressource = "last_build"
+            options = {"project_id": project_id}
         else:
             self.log.debug('Checking for new builds...')
-            new_builds = get_response(
-                self, 'new_builds', build_conf=self.current_build_config, since_build=last_build_id
-            )
-            return new_builds
+            ressource = "new_builds"
+            options = {"since_build": last_build_id}
+        return get_response(self, ressource, build_conf=self.current_build_config, **options)
 
     def _get_build_config_type(self, build_config):
         if self.is_deployment:

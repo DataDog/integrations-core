@@ -2,6 +2,23 @@
 
 <!-- towncrier release notes start -->
 
+## 4.3.0 / 2024-07-05
+
+***Added***:
+
+* Add support for TeamCity 2023.05.4 ([#17695](https://github.com/DataDog/integrations-core/pull/17695))
+
+***Fixed***:
+
+* Update config model names ([#17802](https://github.com/DataDog/integrations-core/pull/17802))
+
+## 4.2.1 / 2024-05-23
+
+***Fixed***:
+
+* Update the description for the `tls_ca_cert` config option to use `openssl rehash` instead of `c_rehash` ([#16981](https://github.com/DataDog/integrations-core/pull/16981))
+* Check for auth_token key and skip adding guestAuth or httpAuth to url if present ([#17478](https://github.com/DataDog/integrations-core/pull/17478))
+
 ## 4.2.0 / 2024-02-16 / Agent 7.52.0
 
 ***Added***:

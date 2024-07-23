@@ -99,9 +99,9 @@ def test_mongo_dbstats_tag(aggregator, check, instance_dbstats_tag_dbname, dd_ru
     }
     expected_tags = [
         'server:mongodb://localhost:27017/',
-    ]
+    ] + check.internal_resource_tags
     for metric, value in expected_metrics.items():
-        aggregator.assert_metric(metric, value, expected_tags, count=1)
+        aggregator.assert_metric(metric, value, expected_tags)
 
 
 def test_mongo_1valid_and_1invalid_custom_queries(
@@ -215,12 +215,23 @@ def test_mongo_custom_query_with_string_list(aggregator, check, instance, dd_run
     aggregator.assert_metric_has_tag("dd.custom.mongo.string.result", 'collection:orders', count=4)
 
 
-def test_metadata(check, instance, datadog_agent):
+@pytest.mark.parametrize(
+    'reported_database_hostname',
+    [
+        pytest.param(None, id='default'),
+        pytest.param('myhostname', id='custom'),
+    ],
+)
+def test_metadata(check, instance, datadog_agent, reported_database_hostname):
+    instance['reported_database_hostname'] = reported_database_hostname
     check = check(instance)
     check.check_id = 'test:123'
     major, minor = common.MONGODB_VERSION.split('.')[:2]
     version_metadata = {'version.scheme': 'semver', 'version.major': major, 'version.minor': minor}
 
     check.check(instance)
+    if reported_database_hostname:
+        assert check._resolved_hostname == reported_database_hostname
     datadog_agent.assert_metadata('test:123', version_metadata)
-    datadog_agent.assert_metadata_count(len(version_metadata) + 2)
+    datadog_agent.assert_metadata('test:123', {'resolved_hostname': check._resolved_hostname})
+    datadog_agent.assert_metadata_count(len(version_metadata) + 3)

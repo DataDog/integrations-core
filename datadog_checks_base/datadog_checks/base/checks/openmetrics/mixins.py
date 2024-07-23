@@ -14,17 +14,14 @@ import requests
 from prometheus_client.samples import Sample
 from six import PY3, iteritems, string_types
 
+from datadog_checks.base.agent import datadog_agent
+
 from ...config import is_affirmative
 from ...errors import CheckException
 from ...utils.common import to_native_string
 from ...utils.http import RequestsWrapper
 from .. import AgentCheck
 from ..libs.prometheus import text_fd_to_metric_families
-
-try:
-    import datadog_agent
-except ImportError:
-    from datadog_checks.base.stubs import datadog_agent
 
 if PY3:
     long = int

@@ -41,6 +41,7 @@ from .util import (
     ANALYZE_PROGRESS_METRICS,
     AWS_RDS_HOSTNAME_SUFFIX,
     AZURE_DEPLOYMENT_TYPE_TO_RESOURCE_TYPE,
+    BUFFERCACHE_METRICS,
     CLUSTER_VACUUM_PROGRESS_METRICS,
     CONNECTION_METRICS,
     COUNT_METRICS,
@@ -57,6 +58,7 @@ from .util import (
     SLRU_METRICS,
     SNAPSHOT_TXID_METRICS,
     SNAPSHOT_TXID_METRICS_LT_13,
+    STAT_IO_METRICS,
     STAT_SUBSCRIPTION_METRICS,
     STAT_SUBSCRIPTION_STATS_METRICS,
     STAT_WAL_METRICS,
@@ -70,7 +72,7 @@ from .util import (
     payload_pg_version,
     warning_with_tags,
 )
-from .version_utils import V9, V9_2, V10, V12, V13, V14, V15, VersionUtils
+from .version_utils import V9, V9_2, V10, V12, V13, V14, V15, V16, VersionUtils
 
 try:
     import datadog_agent
@@ -110,7 +112,7 @@ class PostgreSql(AgentCheck):
                 "DEPRECATION NOTICE: The managed_identity option is deprecated and will be removed in a future version."
                 " Please use the new azure.managed_authentication option instead."
             )
-        self._config = PostgresConfig(self.instance, self.init_config)
+        self._config = PostgresConfig(self.instance, self.init_config, self)
         self.cloud_metadata = self._config.cloud_metadata
         self.tags = self._config.tags
         # Keep a copy of the tags without the internal resource tags so they can be used for paths that don't
@@ -300,6 +302,8 @@ class PostgreSql(AgentCheck):
                 if self._config.collect_wal_metrics is not False:
                     # collect wal metrics for pg >= 10 only if the user has not explicitly disabled it
                     queries.append(WAL_FILE_METRICS)
+            if self._config.collect_buffercache_metrics:
+                queries.append(BUFFERCACHE_METRICS)
             queries.append(QUERY_PG_REPLICATION_SLOTS)
             queries.append(VACUUM_PROGRESS_METRICS)
             queries.append(STAT_SUBSCRIPTION_METRICS)
@@ -320,6 +324,9 @@ class PostgreSql(AgentCheck):
             queries.append(SUBSCRIPTION_STATE_METRICS)
         if self.version >= V15:
             queries.append(STAT_SUBSCRIPTION_STATS_METRICS)
+        if self.version >= V16:
+            if self._config.dbm_enabled:
+                queries.append(STAT_IO_METRICS)
 
         if not queries:
             self.log.debug("no dynamic queries defined")
@@ -650,6 +657,9 @@ class PostgreSql(AgentCheck):
             )
             self._dynamic_queries.append(self._new_query_executor(queries, db=db))
 
+    def _emit_running_metric(self):
+        self.gauge("postgresql.running", 1, tags=self.tags_without_db, hostname=self.resolved_hostname)
+
     def _collect_stats(self, instance_tags):
         """Query pg_stat_* for various metrics
         If relations is not an empty list, gather per-relation metrics
@@ -891,7 +901,7 @@ class PostgreSql(AgentCheck):
                             check=self, operation='custom_queries', tags=['metric_prefix:{}'.format(metric_prefix)]
                         ):
                             cursor.execute(query)
-                    except (psycopg2.ProgrammingError, psycopg2.errors.QueryCanceled) as e:
+                    except Exception as e:
                         self.log.error("Error executing query for metric_prefix %s: %s", metric_prefix, str(e))
                         continue
 
@@ -1005,7 +1015,7 @@ class PostgreSql(AgentCheck):
     def check(self, _):
         tags = copy.copy(self.tags)
         self.tags_without_db = [t for t in copy.copy(self.tags) if not t.startswith("db:")]
-        # Collect metrics
+        tags_to_add = []
         try:
             # Check version
             self._connect()
@@ -1014,19 +1024,21 @@ class PostgreSql(AgentCheck):
 
             # Add raw version as a tag
             tags.append(f'postgresql_version:{self.raw_version}')
-            self.tags_without_db.append(f'postgresql_version:{self.raw_version}')
+            tags_to_add.append(f'postgresql_version:{self.raw_version}')
 
             # Add system identifier as a tag
             self.load_system_identifier()
             tags.append(f'system_identifier:{self.system_identifier}')
-            self.tags_without_db.append(f'system_identifier:{self.system_identifier}')
-
+            tags_to_add.append(f'system_identifier:{self.system_identifier}')
             if self._config.tag_replication_role:
                 replication_role_tag = "replication_role:{}".format(self._get_replication_role())
                 tags.append(replication_role_tag)
-                self.tags_without_db.append(replication_role_tag)
+                tags_to_add.append(replication_role_tag)
+            self._update_tag_sets(tags_to_add)
+            self._send_database_instance_metadata()
 
             self.log.debug("Running check against version %s: is_aurora: %s", str(self.version), str(self.is_aurora))
+            self._emit_running_metric()
             self._collect_stats(tags)
             self._collect_custom_queries(tags)
             if self._config.dbm_enabled:
@@ -1036,7 +1048,6 @@ class PostgreSql(AgentCheck):
             if self._config.collect_wal_metrics:
                 # collect wal metrics for pg < 10, disabled by enabled
                 self._collect_wal_metrics()
-            self._send_database_instance_metadata()
         except Exception as e:
             self.log.exception("Unable to collect postgres metrics.")
             self._clean_state()
@@ -1061,3 +1072,7 @@ class PostgreSql(AgentCheck):
         finally:
             # Add the warnings saved during the execution of the check
             self._report_warnings()
+
+    def _update_tag_sets(self, tags):
+        self._non_internal_tags = list(set(self._non_internal_tags) | set(tags))
+        self.tags_without_db = list(set(self.tags_without_db) | set(tags))

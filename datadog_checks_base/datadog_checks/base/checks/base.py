@@ -30,6 +30,8 @@ from typing import (  # noqa: F401
 import yaml
 from six import PY2, binary_type, iteritems, raise_from, text_type
 
+from datadog_checks.base.agent import AGENT_RUNNING, aggregator, datadog_agent
+
 from ..config import is_affirmative
 from ..constants import ServiceCheck
 from ..errors import ConfigurationError
@@ -53,32 +55,34 @@ from ..utils.tagging import GENERIC_TAGS
 from ..utils.tls import TlsContextWrapper
 from ..utils.tracing import traced_class
 
-try:
-    import datadog_agent
-
+if AGENT_RUNNING:
     from ..log import CheckLoggingAdapter, init_logging
 
-    init_logging()
-except ImportError:
-    from ..stubs import datadog_agent
+else:
     from ..stubs.log import CheckLoggingAdapter, init_logging
 
-    init_logging()
-
-try:
-    import aggregator
-
-    using_stub_aggregator = False
-except ImportError:
-    from ..stubs import aggregator
-
-    using_stub_aggregator = True
-
+init_logging()
 
 if datadog_agent.get_config('disable_unsafe_yaml'):
     from ..ddyaml import monkey_patch_pyyaml
 
     monkey_patch_pyyaml()
+
+if datadog_agent.get_config('integration_tracing'):
+    from ddtrace import patch
+
+    # handle thread monitoring as an additional option
+    # See: http://pypi.datadoghq.com/trace/docs/other_integrations.html#futures
+    if datadog_agent.get_config('integration_tracing_futures'):
+        patch(logging=True, requests=True, futures=True)
+    else:
+        patch(logging=True, requests=True)
+
+if is_affirmative(datadog_agent.get_config('integration_profiling')):
+    from ddtrace.profiling import Profiler
+
+    prof = Profiler(service='datadog-agent-integrations')
+    prof.start()
 
 if not PY2:
     from pydantic import BaseModel, ValidationError
@@ -430,7 +434,7 @@ class AgentCheck(object):
         Used for sending metadata via Go bindings.
         """
         if not hasattr(self, '_metadata_manager'):
-            if not self.check_id and not using_stub_aggregator:
+            if not self.check_id and AGENT_RUNNING:
                 raise RuntimeError('Attribute `check_id` must be set')
 
             self._metadata_manager = MetadataManager(self.name, self.check_id, self.log, self.METADATA_TRANSFORMERS)
@@ -608,7 +612,7 @@ class AgentCheck(object):
             err_msg = 'Histogram: {} has non integer value: {}. Only integer are valid bucket values (count).'.format(
                 repr(name), repr(value)
             )
-            if using_stub_aggregator:
+            if not AGENT_RUNNING:
                 raise ValueError(err_msg)
             self.warning(err_msg)
             return
@@ -658,6 +662,21 @@ class AgentCheck(object):
 
         aggregator.submit_event_platform_event(self, self.check_id, to_native_string(raw_event), "dbm-metadata")
 
+    def event_platform_event(self, raw_event, event_track_type):
+        # type: (str, str) -> None
+        """Send an event platform event.
+
+        Parameters:
+
+            raw_event (str):
+                JSON formatted string representing the event to send
+            event_track_type (str):
+                type of event ingested and processed by the event platform
+        """
+        if raw_event is None:
+            return
+        aggregator.submit_event_platform_event(self, self.check_id, to_native_string(raw_event), event_track_type)
+
     def should_send_metric(self, metric_name):
         return not self._metric_excluded(metric_name) and self._metric_included(metric_name)
 
@@ -706,7 +725,7 @@ class AgentCheck(object):
             err_msg = 'Metric: {} has non float value: {}. Only float values can be submitted as metrics.'.format(
                 repr(name), repr(value)
             )
-            if using_stub_aggregator:
+            if not AGENT_RUNNING:
                 raise ValueError(err_msg)
             self.warning(err_msg)
             return

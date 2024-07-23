@@ -1637,6 +1637,289 @@ COMPUTE_SERVERS_NOVA_MICROVERSION_2_93 = [
     },
 ]
 
+COMPUTE_SERVERS_ALL_PROJECTS_NOVA_MICROVERSION_DEFAULT = [
+    {
+        'name': 'openstack.nova.server.count',
+        'count': 1,
+        'value': 1,
+        'tags': [
+            'keystone_server:http://127.0.0.1:8080/identity',
+            'project_id:6e39099cccde4f809b003d9e0dd09304',
+            'server_id:5102fbbf-7156-48dc-8355-af7ab992266f',
+            'server_name:admin-1',
+            'server_status:ACTIVE',
+            'hypervisor:agent-integrations-openstack-default',
+            'instance_name:instance-0000004a',
+        ],
+        'hostname': '5102fbbf-7156-48dc-8355-af7ab992266f',
+    },
+    {
+        'name': 'openstack.nova.server.active',
+        'count': 1,
+        'value': 1,
+        'tags': [
+            'keystone_server:http://127.0.0.1:8080/identity',
+            'project_id:6e39099cccde4f809b003d9e0dd09304',
+            'server_id:5102fbbf-7156-48dc-8355-af7ab992266f',
+            'server_name:admin-1',
+            'server_status:ACTIVE',
+            'hypervisor:agent-integrations-openstack-default',
+            'instance_name:instance-0000004a',
+        ],
+        'hostname': '5102fbbf-7156-48dc-8355-af7ab992266f',
+    },
+    {
+        'name': 'openstack.nova.server.flavor.vcpus',
+        'count': 1,
+        'value': 1,
+        'tags': [
+            'keystone_server:http://127.0.0.1:8080/identity',
+            'project_id:6e39099cccde4f809b003d9e0dd09304',
+            'server_id:5102fbbf-7156-48dc-8355-af7ab992266f',
+            'server_name:admin-1',
+            'server_status:ACTIVE',
+            'hypervisor:agent-integrations-openstack-default',
+            'instance_name:instance-0000004a',
+            'flavor_id:c1',
+            'flavor_name:cirros256',
+        ],
+        'hostname': '5102fbbf-7156-48dc-8355-af7ab992266f',
+    },
+    {
+        'name': 'openstack.nova.server.diagnostic.cpu0_time',
+        'count': 1,
+        'value': 7211540000000,
+        'tags': [
+            'keystone_server:http://127.0.0.1:8080/identity',
+            'project_id:6e39099cccde4f809b003d9e0dd09304',
+            'server_id:5102fbbf-7156-48dc-8355-af7ab992266f',
+            'server_name:admin-1',
+            'server_status:ACTIVE',
+            'hypervisor:agent-integrations-openstack-default',
+            'instance_name:instance-0000004a',
+        ],
+        'hostname': '5102fbbf-7156-48dc-8355-af7ab992266f',
+    },
+    {
+        'name': 'openstack.nova.server.count',
+        'count': 1,
+        'value': 1,
+        'tags': [
+            'keystone_server:http://127.0.0.1:8080/identity',
+            'project_id:6e39099cccde4f809b003d9e0dd09304',
+            'server_id:954441a8-552a-476c-985e-6564e6fe93d6',
+            'server_name:admin-2',
+            'server_status:ACTIVE',
+            'hypervisor:agent-integrations-openstack-default',
+            'instance_name:instance-00000049',
+        ],
+        'hostname': '954441a8-552a-476c-985e-6564e6fe93d6',
+    },
+    {
+        'name': 'openstack.nova.server.active',
+        'count': 1,
+        'value': 1,
+        'tags': [
+            'keystone_server:http://127.0.0.1:8080/identity',
+            'project_id:6e39099cccde4f809b003d9e0dd09304',
+            'server_id:954441a8-552a-476c-985e-6564e6fe93d6',
+            'server_name:admin-2',
+            'server_status:ACTIVE',
+            'hypervisor:agent-integrations-openstack-default',
+            'instance_name:instance-00000049',
+        ],
+        'hostname': '954441a8-552a-476c-985e-6564e6fe93d6',
+    },
+    {
+        'name': 'openstack.nova.server.flavor.vcpus',
+        'count': 1,
+        'value': 1,
+        'tags': [
+            'keystone_server:http://127.0.0.1:8080/identity',
+            'project_id:6e39099cccde4f809b003d9e0dd09304',
+            'server_id:954441a8-552a-476c-985e-6564e6fe93d6',
+            'server_name:admin-2',
+            'server_status:ACTIVE',
+            'hypervisor:agent-integrations-openstack-default',
+            'instance_name:instance-00000049',
+            'flavor_id:c1',
+            'flavor_name:cirros256',
+        ],
+        'hostname': '954441a8-552a-476c-985e-6564e6fe93d6',
+    },
+    {
+        'name': 'openstack.nova.server.diagnostic.cpu0_time',
+        'count': 1,
+        'value': 6970750000000,
+        'tags': [
+            'keystone_server:http://127.0.0.1:8080/identity',
+            'project_id:6e39099cccde4f809b003d9e0dd09304',
+            'server_id:954441a8-552a-476c-985e-6564e6fe93d6',
+            'server_name:admin-2',
+            'server_status:ACTIVE',
+            'hypervisor:agent-integrations-openstack-default',
+            'instance_name:instance-00000049',
+        ],
+        'hostname': '954441a8-552a-476c-985e-6564e6fe93d6',
+    },
+    {
+        'name': 'openstack.nova.server.count',
+        'count': 1,
+        'value': 1,
+        'tags': [
+            'keystone_server:http://127.0.0.1:8080/identity',
+            'project_id:6e39099cccde4f809b003d9e0dd09304',
+            'server_id:2c653a68-b520-4582-a05d-41a68067d76c',
+            'server_name:dev-1',
+            'server_status:ACTIVE',
+            'hypervisor:agent-integrations-openstack-default',
+            'instance_name:instance-00000004',
+        ],
+        'hostname': '2c653a68-b520-4582-a05d-41a68067d76c',
+    },
+    {
+        'name': 'openstack.nova.server.active',
+        'count': 1,
+        'value': 1,
+        'tags': [
+            'keystone_server:http://127.0.0.1:8080/identity',
+            'project_id:6e39099cccde4f809b003d9e0dd09304',
+            'server_id:2c653a68-b520-4582-a05d-41a68067d76c',
+            'server_name:dev-1',
+            'server_status:ACTIVE',
+            'hypervisor:agent-integrations-openstack-default',
+            'instance_name:instance-00000004',
+        ],
+        'hostname': '2c653a68-b520-4582-a05d-41a68067d76c',
+    },
+    {
+        'name': 'openstack.nova.server.flavor.vcpus',
+        'count': 1,
+        'value': 1,
+        'tags': [
+            'keystone_server:http://127.0.0.1:8080/identity',
+            'project_id:6e39099cccde4f809b003d9e0dd09304',
+            'server_id:2c653a68-b520-4582-a05d-41a68067d76c',
+            'server_name:dev-1',
+            'server_status:ACTIVE',
+            'hypervisor:agent-integrations-openstack-default',
+            'instance_name:instance-00000004',
+            'flavor_id:c1',
+            'flavor_name:cirros256',
+        ],
+        'hostname': '2c653a68-b520-4582-a05d-41a68067d76c',
+    },
+    {
+        'name': 'openstack.nova.server.diagnostic.cpu0_time',
+        'count': 1,
+        'value': 18614670000000,
+        'tags': [
+            'keystone_server:http://127.0.0.1:8080/identity',
+            'project_id:6e39099cccde4f809b003d9e0dd09304',
+            'server_id:2c653a68-b520-4582-a05d-41a68067d76c',
+            'server_name:dev-1',
+            'server_status:ACTIVE',
+            'hypervisor:agent-integrations-openstack-default',
+            'instance_name:instance-00000004',
+        ],
+        'hostname': '2c653a68-b520-4582-a05d-41a68067d76c',
+    },
+    {
+        'name': 'openstack.nova.server.count',
+        'count': 1,
+        'value': 1,
+        'tags': [
+            'keystone_server:http://127.0.0.1:8080/identity',
+            'project_id:1e6e233e637d4d55a50a62b63398ad15',
+            'server_id:67ca710a-e73f-4801-a12f-d0c55ccb8955',
+            'server_name:demo-1',
+            'server_status:ACTIVE',
+            'hypervisor:agent-integrations-openstack-default',
+            'instance_name:instance-0000004c',
+        ],
+        'hostname': '67ca710a-e73f-4801-a12f-d0c55ccb8955',
+    },
+    {
+        'name': 'openstack.nova.server.active',
+        'count': 1,
+        'value': 1,
+        'tags': [
+            'keystone_server:http://127.0.0.1:8080/identity',
+            'project_id:1e6e233e637d4d55a50a62b63398ad15',
+            'server_id:67ca710a-e73f-4801-a12f-d0c55ccb8955',
+            'server_name:demo-1',
+            'server_status:ACTIVE',
+            'hypervisor:agent-integrations-openstack-default',
+            'instance_name:instance-0000004c',
+        ],
+        'hostname': '67ca710a-e73f-4801-a12f-d0c55ccb8955',
+    },
+    {
+        'name': 'openstack.nova.server.flavor.vcpus',
+        'count': 1,
+        'value': 1,
+        'tags': [
+            'keystone_server:http://127.0.0.1:8080/identity',
+            'project_id:1e6e233e637d4d55a50a62b63398ad15',
+            'server_id:67ca710a-e73f-4801-a12f-d0c55ccb8955',
+            'server_name:demo-1',
+            'server_status:ACTIVE',
+            'hypervisor:agent-integrations-openstack-default',
+            'instance_name:instance-0000004c',
+            'flavor_id:c1',
+            'flavor_name:cirros256',
+        ],
+        'hostname': '67ca710a-e73f-4801-a12f-d0c55ccb8955',
+    },
+    {
+        'name': 'openstack.nova.server.diagnostic.cpu0_time',
+        'count': 1,
+        'value': 6866230000000,
+        'tags': [
+            'keystone_server:http://127.0.0.1:8080/identity',
+            'project_id:1e6e233e637d4d55a50a62b63398ad15',
+            'server_id:67ca710a-e73f-4801-a12f-d0c55ccb8955',
+            'server_name:demo-1',
+            'server_status:ACTIVE',
+            'hypervisor:agent-integrations-openstack-default',
+            'instance_name:instance-0000004c',
+        ],
+        'hostname': '67ca710a-e73f-4801-a12f-d0c55ccb8955',
+    },
+    {
+        'name': 'openstack.nova.server.diagnostic.rx',
+        'count': 1,
+        'value': 73628,
+        'tags': [
+            'keystone_server:http://127.0.0.1:8080/identity',
+            'project_id:1e6e233e637d4d55a50a62b63398ad15',
+            'server_id:67ca710a-e73f-4801-a12f-d0c55ccb8955',
+            'server_name:demo-1',
+            'server_status:ACTIVE',
+            'hypervisor:agent-integrations-openstack-default',
+            'instance_name:instance-0000004c',
+            'interface:tap455c2c46-84',
+        ],
+        'hostname': '67ca710a-e73f-4801-a12f-d0c55ccb8955',
+    },
+    {
+        'name': 'openstack.nova.server.diagnostic.tx_errors',
+        'count': 1,
+        'value': 0,
+        'tags': [
+            'keystone_server:http://127.0.0.1:8080/identity',
+            'project_id:1e6e233e637d4d55a50a62b63398ad15',
+            'server_id:67ca710a-e73f-4801-a12f-d0c55ccb8955',
+            'server_name:demo-1',
+            'server_status:ACTIVE',
+            'hypervisor:agent-integrations-openstack-default',
+            'instance_name:instance-0000004c',
+            'interface:tap455c2c46-84',
+        ],
+        'hostname': '67ca710a-e73f-4801-a12f-d0c55ccb8955',
+    },
+]
+
 COMPUTE_SERVERS_EXCLUDING_DEMO_PROJECT_NOVA_MICROVERSION_DEFAULT = [
     {
         'name': 'openstack.nova.server.count',
@@ -4521,6 +4804,120 @@ NODES_METRICS_IRONIC_MICROVERSION_1_80 = [
     },
 ]
 
+PORT_METRICS_IRONIC_MICROVERSION_DEFAULT = [
+    {
+        'name': 'openstack.ironic.port.count',
+        'count': 1,
+        'value': 1,
+        'tags': [
+            'keystone_server:http://127.0.0.1:8080/identity',
+            'portgroup_uuid:e43c722c-248e-4c6e-8ce8-0d8ff129387a',
+            'port_uuid:d2b30520-907d-46c8-bfee-c5586e6fb3a1',
+            'port_address:11:11:11:11:11:11',
+            'node_uuid:6d85703a-565d-469a-96ce-30b6de53079d',
+            'port_name:port1',
+        ],
+    },
+    {
+        'name': 'openstack.ironic.port.count',
+        'count': 1,
+        'value': 1,
+        'tags': [
+            'keystone_server:http://127.0.0.1:8080/identity',
+            'portgroup_uuid:e43c722c-248e-4c6e-8ce8-0d8ff129387a',
+            'port_uuid:6ee9bd2f-2598-4e0d-938b-e72e95aaa785',
+            'port_address:52:54:00:d0:cf:77',
+            'node_uuid:a27588a6-518d-49b4-a23c-3d51255a7e8b',
+            'port_name:port2',
+        ],
+    },
+]
+
+PORTGROUPS_METRICS_IRONIC = [
+    {
+        'name': 'openstack.ironic.node.portgroup.count',
+        'count': 1,
+        'value': 1,
+        'tags': [
+            'keystone_server:http://127.0.0.1:8080/identity',
+            'portgroup_uuid:9d72cf53-19c8-4942-9314-005fa5d2a6a0',
+            'node_uuid:9d72cf53-19c8-4942-9314-005fa5d2a6a0',
+            'portgroup_address:22:22:22:22:22:22',
+            'portgroup_mode:active-backup',
+            'portgroup_name:test_portgroup',
+        ],
+        'hostname': '9d72cf53-19c8-4942-9314-005fa5d2a6a0',
+    },
+    {
+        'name': 'openstack.ironic.node.portgroup.count',
+        'count': 1,
+        'value': 1,
+        'tags': [
+            'keystone_server:http://127.0.0.1:8080/identity',
+            'portgroup_uuid:032ce3fb-8181-4d6f-8b8e-f2adaa913f28',
+            'node_uuid:bd7a61bb-5fe0-4c93-9628-55e312f9ef0e',
+            'portgroup_address:11:11:11:11:11:11',
+            'portgroup_mode:active-backup',
+            'portgroup_name:portgroup-1',
+        ],
+        'hostname': '032ce3fb-8181-4d6f-8b8e-f2adaa913f28',
+    },
+]
+
+VOLUME_CONNECTOR_METRICS_IRONIC_MICROVERSION_1_80 = [
+    {
+        'name': 'openstack.ironic.volume.connector.count',
+        'count': 1,
+        'value': 1,
+        'tags': [
+            'keystone_server:http://127.0.0.1:8080/identity',
+            'connector_uuid:9bf93e01-d728-47a3-ad4b-5e66a835037c',
+            'node_uuid:6d85703a-565d-469a-96ce-30b6de53079d',
+            'connector_id:iqn.2017-07.org.openstack:01:d9a51732c3f',
+            'connector_type:iqn',
+        ],
+    },
+    {
+        'name': 'openstack.ironic.volume.connector.count',
+        'count': 1,
+        'value': 1,
+        'tags': [
+            'keystone_server:http://127.0.0.1:8080/identity',
+            'connector_uuid:4e7b162e-0241-40dd-8069-345e751f8708',
+            'node_uuid:a27588a6-518d-49b4-a23c-3d51255a7e8b',
+            'connector_id:iqn.2017-07.org.openstack:01:d9a51732c3f',
+            'connector_type:iqn',
+        ],
+    },
+]
+
+VOLUME_TARGET_METRICS_IRONIC_MICROVERSION_1_80 = [
+    {
+        'name': 'openstack.ironic.volume.target.count',
+        'count': 1,
+        'value': 1,
+        'tags': [
+            'keystone_server:http://127.0.0.1:8080/identity',
+            'target_uuid:bd4d008c-7d31-463d-abf9-6c23d9d55f7f',
+            'node_uuid:6d85703a-565d-469a-96ce-30b6de53079d',
+            'volume_id:04452bed-5367-4202-8bf5-de4335ac56d2',
+            'volume_type:iscsi',
+        ],
+    },
+    {
+        'name': 'openstack.ironic.volume.target.count',
+        'count': 1,
+        'value': 1,
+        'tags': [
+            'keystone_server:http://127.0.0.1:8080/identity',
+            'target_uuid:8fea1a69-3e0d-4825-9776-a10bf2815b75',
+            'node_uuid:a27588a6-518d-49b4-a23c-3d51255a7e8b',
+            'volume_id:04452bed-5367-4202-8bf5-de4335ac56d2',
+            'volume_type:iscsi',
+        ],
+    },
+]
+
 CONDUCTORS_METRICS_IRONIC_MICROVERSION_DEFAULT = []
 
 CONDUCTORS_METRICS_IRONIC_MICROVERSION_1_80 = [
@@ -4546,6 +4943,41 @@ CONDUCTORS_METRICS_IRONIC_MICROVERSION_1_80 = [
     },
 ]
 
+DRIVERS_METRICS_IRONIC_MICROVERSION_1_80 = [
+    {
+        'name': 'openstack.ironic.driver.count',
+        'count': 1,
+        'value': 1,
+        'tags': ['keystone_server:http://127.0.0.1:8080/identity', 'driver_name:agent_ipmitool', 'driver_type:classic'],
+    },
+]
+
+ALLOCATIONS_METRICS_IRONIC_MICROVERSION_1_80 = [
+    {
+        'name': 'openstack.ironic.allocation.count',
+        'count': 1,
+        'value': 1,
+        'tags': [
+            'keystone_server:http://127.0.0.1:8080/identity',
+            'allocation_uuid:5344a3e2-978a-444e-990a-cbf47c62ef88',
+            'node_uuid:6d85703a-565d-469a-96ce-30b6de53079d',
+            'allocation_name:allocation-1',
+            'allocation_state:active',
+        ],
+    },
+    {
+        'name': 'openstack.ironic.allocation.count',
+        'count': 1,
+        'value': 1,
+        'tags': [
+            'keystone_server:http://127.0.0.1:8080/identity',
+            'allocation_uuid:2c9eb88e-cb83-4125-9e82-6fc0312818a7',
+            'node_uuid:5344a3e2-978a-444e-990a-cbf47c62ef88',
+            'allocation_name:allocation-2',
+            'allocation_state:error',
+        ],
+    },
+]
 
 IMAGES_METRICS_GLANCE = [
     {
@@ -4555,9 +4987,145 @@ IMAGES_METRICS_GLANCE = [
         'hostname': '',
         'tags': [
             'container_format:bare',
-            'image_name:cirros-1.5.2-x86_64-disk',
+            'image_id:28c293db-48c5-4c8b-a711-09b2c11fa8e5',
+            'image_name:cirros-0.5.2-x86_64-disk',
             'status:active',
             'keystone_server:http://127.0.0.1:8080/identity',
+        ],
+    },
+    {
+        'name': 'openstack.glance.image.size',
+        'count': 1,
+        'value': 16300544,
+        'hostname': '',
+        'tags': [
+            'container_format:bare',
+            'image_id:28c293db-48c5-4c8b-a711-09b2c11fa8e5',
+            'image_name:cirros-0.5.2-x86_64-disk',
+            'status:active',
+            'keystone_server:http://127.0.0.1:8080/identity',
+        ],
+    },
+    {
+        'name': 'openstack.glance.image.up',
+        'count': 1,
+        'value': 1,
+        'hostname': '',
+        'tags': [
+            'container_format:bare',
+            'image_id:28c293db-48c5-4c8b-a711-09b2c11fa8e5',
+            'image_name:cirros-0.5.2-x86_64-disk',
+            'status:active',
+            'keystone_server:http://127.0.0.1:8080/identity',
+        ],
+    },
+]
+
+MEMBERS_METRICS_GLANCE = [
+    {
+        'name': 'openstack.glance.image.member.count',
+        'count': 1,
+        'value': 1,
+        'hostname': '',
+        'tags': [
+            'member_id:123456789',
+            'image_id:28c293db-48c5-4c8b-a711-09b2c11fa8e5',
+            'status:pending',
+            'keystone_server:http://127.0.0.1:8080/identity',
+        ],
+    },
+    {
+        'name': 'openstack.glance.image.member.count',
+        'count': 1,
+        'value': 1,
+        'hostname': '',
+        'tags': [
+            'member_id:987654321',
+            'image_id:28c293db-48c5-4c8b-a711-09b2c11fa8e5',
+            'status:accepted',
+            'keystone_server:http://127.0.0.1:8080/identity',
+        ],
+    },
+]
+
+STACKS_METRICS_HEAT = [
+    {
+        'name': 'openstack.heat.stack.count',
+        'count': 1,
+        'value': 1,
+        'tags': [
+            'stack_id:36004d0b-715c-442b-a0b9-605111f381c2',
+            'stack_name:teststack',
+            'stack_status:CREATE_FAILED',
+            'keystone_server:http://127.0.0.1:8080/identity',
+            'domain_id:default',
+            'project_id:1e6e233e637d4d55a50a62b63398ad15',
+            'project_name:demo',
+        ],
+    },
+    {
+        'name': 'openstack.heat.stack.count',
+        'count': 1,
+        'value': 1,
+        'tags': [
+            'stack_id:0a90fd9f-b411-440d-9e75-960c0bc88c54',
+            'stack_name:teststack1',
+            'stack_status:CREATE_FAILED',
+            'keystone_server:http://127.0.0.1:8080/identity',
+            'domain_id:default',
+            'project_id:1e6e233e637d4d55a50a62b63398ad15',
+            'project_name:demo',
+        ],
+    },
+]
+
+CONTAINERS_METRICS_SWIFT = [
+    {
+        'name': 'openstack.swift.container.count',
+        'count': 1,
+        'value': 1,
+        'tags': [
+            'container_name:container_1',
+            'keystone_server:http://127.0.0.1:8080/identity',
+            'domain_id:default',
+            'project_id:1e6e233e637d4d55a50a62b63398ad15',
+            'project_name:demo',
+        ],
+    },
+    {
+        'name': 'openstack.swift.container.count',
+        'count': 1,
+        'value': 1,
+        'tags': [
+            'container_name:container_2',
+            'keystone_server:http://127.0.0.1:8080/identity',
+            'domain_id:default',
+            'project_id:1e6e233e637d4d55a50a62b63398ad15',
+            'project_name:demo',
+        ],
+    },
+    {
+        'name': 'openstack.swift.container.bytes',
+        'count': 1,
+        'value': 490,
+        'tags': [
+            'container_name:container_1',
+            'keystone_server:http://127.0.0.1:8080/identity',
+            'domain_id:default',
+            'project_id:1e6e233e637d4d55a50a62b63398ad15',
+            'project_name:demo',
+        ],
+    },
+    {
+        'name': 'openstack.swift.container.bytes',
+        'count': 1,
+        'value': 0,
+        'tags': [
+            'container_name:container_2',
+            'keystone_server:http://127.0.0.1:8080/identity',
+            'domain_id:default',
+            'project_id:1e6e233e637d4d55a50a62b63398ad15',
+            'project_name:demo',
         ],
     },
 ]

@@ -27,8 +27,11 @@ def test_e2e_profile_avtech_roomalert_3s(dd_agent_check):
     common_tags = [
         'snmp_profile:avtech-roomalert-3s',
         'snmp_host:avtech-roomalert-3s.device.name',
+        'device_hostname:avtech-roomalert-3s.device.name',
         'device_namespace:default',
         'snmp_device:' + ip_address,
+        'device_ip:' + ip_address,
+        'device_id:default:' + ip_address,
     ] + []
 
     # --- TEST EXTENDED METRICS ---

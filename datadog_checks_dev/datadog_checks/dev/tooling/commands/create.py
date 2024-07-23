@@ -83,25 +83,67 @@ TOWNCRIER_BODY = """\
 """
 
 STATIC_CHANGELOG_BODY = """\
-## 1.0.0 / {today}
+## 1.0.0 / YYYY-MM-DD
 
 ***Added***:
 
 * Initial Release
-""".format(
-    today=date.today()
+"""
+MARKETPLACE_EXTRAS_MEDIA = """[
+      {
+        "media_type": "image",
+        "caption": "FILL IN Image 1 caption",
+        "image_url": "<FILL IN>"
+      },
+      {
+        "media_type": "image",
+        "caption": "FILL IN Image 2 caption",
+        "image_url": "<FILL IN>"
+      },
+      {
+        "media_type": "image",
+        "caption": "FILL IN Image 3 caption",
+        "image_url": "<FILL IN>"
+      }
+    ]"""
+
+VALID_TEMPLATES = get_valid_templates()
+
+
+def _valid_template_description():
+    title = 'Types of Integrations'
+    surround = '#' * len(title)
+    # Dashed line long enough to separate, short enough not to get wrapped in terminals.
+    section_sep = '\n\n{}\n\n'.format('-' * 20)
+    return '\n{surround} {title} {surround}\n\n{body}'.format(
+        surround=surround,
+        title=title,
+        body=section_sep.join(
+            '{}: {}'.format(
+                tpl_type.name,
+                # Assuming we only have one Markdown header at the begining of the description, we remove it
+                # for terminal display.
+                tpl_type.description.lstrip("# "),
+            )
+            for tpl_type in VALID_TEMPLATES
+        ),
+    ).rstrip()
+
+
+@click.command(
+    context_settings=CONTEXT_SETTINGS,
+    # Since we generate the set of valid templates at runtime, describing this set in static docstrings is not ideal.
+    # Click provides a way to generate the description at runtime via the `epilog` option.
+    epilog=_valid_template_description(),
 )
-
-
-@click.command(context_settings=CONTEXT_SETTINGS, short_help='Create scaffolding for a new integration')
 @click.argument('name')
 @click.option(
     '--type',
     '-t',
     'integration_type',
-    type=click.Choice(get_valid_templates()),
+    type=click.Choice(t.name for t in VALID_TEMPLATES),
     default='check',
-    help='The type of integration to create',
+    help='The type of integration to create. See below for more details.',
 )
 @click.option('--location', '-l', help='The directory where files will be written')
 @click.option('--non-interactive', '-ni', is_flag=True, help='Disable prompting for fields')
@@ -154,7 +196,7 @@ def create(ctx, name, integration_type, location, non_interactive, quiet, dry_ru
             eula = 'assets/eula.pdf'
             template_fields['terms'] = f'\n  "terms": {{\n    "eula": "{eula}"\n  }},'
             template_fields['author_info'] = (
-                f'\n  "author": {{\n    "name": "{author_name}",\n    "homepage": "{homepage}",\n    "vendor_id": "{TODO_FILL_IN}",\n    "sales_email": "{sales_email}",\n    "support_email": "{support_email}"\n  }},'  # noqa
+                f'\n  "author": {{\n    "name": "{author_name}",\n    "homepage": "{homepage}",\n    "vendor_id": "{TODO_FILL_IN}",\n    "sales_email": "{sales_email}",\n    "support_email": "{support_email}"\n  }}'  # noqa
             )
 
             template_fields['pricing_plan'] = '\n  "pricing": [],'
@@ -174,7 +216,7 @@ def create(ctx, name, integration_type, location, non_interactive, quiet, dry_ru
     "name": "Datadog",
     "homepage": "https://www.datadoghq.com",
     "sales_email": "info@datadoghq.com"
-  },"""
+  }"""
             else:
                 prompt_and_update_if_missing(template_fields, 'email', 'Email used for support requests')
                 prompt_and_update_if_missing(template_fields, 'author', 'Your name')
@@ -186,7 +228,7 @@ def create(ctx, name, integration_type, location, non_interactive, quiet, dry_ru
     "name": "{template_fields['author']}",
     "homepage": "",
     "sales_email": ""
-  }},"""
+  }}"""
             template_fields['terms'] = ''
             template_fields['integration_id'] = kebab_case_name(name)
             template_fields['package_url'] = (
@@ -195,6 +237,10 @@ def create(ctx, name, integration_type, location, non_interactive, quiet, dry_ru
             )
     template_fields['changelog_body'] = STATIC_CHANGELOG_BODY if repo_choice != 'core' else TOWNCRIER_BODY
     template_fields['starting_version'] = '0.0.1' if repo_choice == 'core' else '1.0.0'
+    template_fields['display_on_public_website'] = 'false' if repo_choice == 'core' else 'true'
+    template_fields['media'] = '[]' if repo_choice == 'core' else MARKETPLACE_EXTRAS_MEDIA
+    template_fields['description'] = '<FILL IN - A brief description of what this offering provides>'
+    template_fields['example_dashboard_short_name'] = '<FILL IN dashboard short_name ex: integration name overview>'
     config = construct_template_fields(name, repo_choice, integration_type, **template_fields)
 
     files = create_template_files(integration_type, root, config, repo_choice, read=not dry_run)

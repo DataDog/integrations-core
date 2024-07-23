@@ -15,7 +15,26 @@
       "Category::Log Collection",
       "Supported OS::Linux",
       "Supported OS::Windows",
-      "Supported OS::macOS"
+      "Supported OS::macOS",
+      "Offering::Integration"
+    ],
+    "resources": [
+      {
+        "resource_type": "blog",
+        "url": "https://www.datadoghq.com/blog/monitoring-haproxy-performance-metrics"
+      },
+      {
+        "resource_type": "blog",
+        "url": "https://www.datadoghq.com/blog/how-to-collect-haproxy-metrics"
+      },
+      {
+        "resource_type": "blog",
+        "url": "https://www.datadoghq.com/blog/monitor-haproxy-with-datadog"
+      },
+      {
+        "resource_type": "documentation",
+        "url": "https://docs.datadoghq.com/integrations/faq/haproxy-multi-process/"
+      }
     ]
   },
   "author": {
@@ -78,9 +97,6 @@
       "bot_errors": "assets/saved_views/bot_errors.json",
       "response_time_overview": "assets/saved_views/response_time.json",
       "haproxy_processes": "assets/saved_views/haproxy_processes.json"
-    },
-    "logs": {
-      "source": "haproxy"
     }
   }
 }

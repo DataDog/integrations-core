@@ -1,5 +1,3 @@
-version: "3"
-
 services:
   cacti:
     container_name: cacti

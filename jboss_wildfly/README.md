@@ -98,9 +98,9 @@ The JBoss/WildFly integration does not include any events.
 
 See [service_checks.json][13] for a list of service checks provided by this integration.
 
-### Collecting Metrics with JMXFetch
+### Collecting metrics with JMXFetch
 
-You can configure the Datadog agent to collect Java application metrics through [JMXFetch][14]. To collect the default metrics configured for the JBoss/Wildfly Datadog integration, set the system property
+You can configure the Datadog Agent to collect Java application metrics through [JMXFetch][14]. To collect the default metrics configured for the JBoss/Wildfly Datadog integration, set the system property
 `Ddd.jmxfetch.jboss_wildfly.enabled=true`. 
 
 ## Troubleshooting

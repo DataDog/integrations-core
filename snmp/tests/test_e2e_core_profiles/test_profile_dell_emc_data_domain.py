@@ -28,8 +28,11 @@ def test_e2e_profile_dell_emc_data_domain(dd_agent_check):
     common_tags = [
         'snmp_profile:dell-emc-data-domain',
         'snmp_host:dell-emc-data-domain.device.name',
+        'device_hostname:dell-emc-data-domain.device.name',
         'device_namespace:default',
         'snmp_device:' + ip_address,
+        'device_ip:' + ip_address,
+        'device_id:default:' + ip_address,
     ] + []
 
     # --- TEST EXTENDED METRICS ---

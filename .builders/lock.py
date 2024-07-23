@@ -16,7 +16,7 @@ BUILDER_DIR = Path(__file__).parent
 REPO_DIR = BUILDER_DIR.parent
 RESOLUTION_DIR = REPO_DIR / '.deps'
 LOCK_FILE_DIR = RESOLUTION_DIR / 'resolved'
-DIRECT_DEP_FILE = REPO_DIR / 'datadog_checks_base' / 'datadog_checks' / 'base' / 'data' / 'agent_requirements.in'
+DIRECT_DEP_FILE = REPO_DIR / 'agent_requirements.in'
 CONSTANTS_FILE = REPO_DIR / 'ddev' / 'src' / 'ddev' / 'repo' / 'constants.py'
 TARGET_TAG_PATTERNS = {
     'linux-x86_64': 'manylinux.*_x86_64|linux_x86_64',

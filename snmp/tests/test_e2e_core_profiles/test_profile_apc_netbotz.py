@@ -27,8 +27,11 @@ def test_e2e_profile_apc_netbotz(dd_agent_check):
     common_tags = [
         'snmp_profile:apc-netbotz',
         'snmp_host:apc-netbotz.device.name',
+        'device_hostname:apc-netbotz.device.name',
         'device_namespace:default',
         'snmp_device:' + ip_address,
+        'device_ip:' + ip_address,
+        'device_id:default:' + ip_address,
     ]
 
     # --- TEST METRICS ---

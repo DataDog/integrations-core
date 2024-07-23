@@ -7,10 +7,31 @@ files:
     - name: propagate_agent_tags
       description: |
         Set to `true` to propagate the tags from `datadog.yaml` to the check.
-        When set to `true`, the tags from `datadog.yaml` are added to the check's tags for all instances.        
+        When set to `true`, the tags from `datadog.yaml` are added to the check's tags for all instances.
       value:
         example: false
         type: boolean
+    - name: global_custom_queries
+      description: |
+        See `custom_queries` defined below.
+
+        Global custom queries can be applied to all instances using the
+        `use_global_custom_queries` setting at the instance level.
+      value:
+        type: array
+        items:
+          type: object
+          properties: []
+        example:
+            - metric_prefix: postgresql
+              query: <QUERY>
+              columns:
+                - name: <COLUNMS_1_NAME>
+                  type: <COLUMNS_1_TYPE>
+                - name: <COLUNMS_2_NAME>
+                  type: <COLUMNS_2_TYPE>
+              tags:
+                - <TAG_KEY>:<TAG_VALUE>
     - template: init_config/default
   - template: instances
     options:
@@ -256,6 +277,13 @@ files:
         example:
           - application_name
         default: []
+    - name: collect_buffercache_metrics
+      description: |
+        If set to true, collects metrics regarding buffer cache usage from pg_buffercache.
+        pg_buffercache extension must be installed.
+      value:
+        type: boolean
+        example: false
     - name: collect_database_size_metrics
       description: Collect database size metrics.
       value:
@@ -275,7 +303,7 @@ files:
     - name: collect_wal_metrics
       description: |
         Collect metrics about WAL file age.
-        NOTE: 
+        NOTE:
         For Postgres 9.6 and below, you must run the check local to your database if you want to enable this option.
         Starting Postgres 10, WAL file metrics are enabled by default using `pg_ls_waldir` and don't need local access.
       value:
@@ -319,6 +347,16 @@ files:
                   type: <COLUMNS_2_TYPE>
               tags:
                 - <TAG_KEY>:<TAG_VALUE>
+    - name: use_global_custom_queries
+      description: |
+        How `global_custom_queries` should be used for this instance. There are 3 options:
+
+        1. true - `global_custom_queries` override `custom_queries`.
+        2. false - `custom_queries` override `global_custom_queries`.
+        3. extend - `global_custom_queries` are used in addition to any `custom_queries`.
+      value:
+        type: string
+        example: extend
     - name: database_autodiscovery
       description: |
         Define the configuration for database autodiscovery.
@@ -402,6 +440,7 @@ files:
       value:
         type: string
         example: show_pg_stat_statements()
+        display_default: pg_stat_statements
     - name: query_metrics
       description: Configure collection of query metrics
       options:
@@ -427,6 +466,24 @@ files:
           value:
             type: number
             example: 10000
+        - name: incremental_query_metrics
+          hidden: true
+          description: |
+            Enable an experimental performance optimization that reduces the amount of data queried from `pg_stat_statements`
+            when calculating query metrics. This option is only available for PostgreSQL 10.0 and above.
+          value:
+            type: boolean
+            display_default: false
+            example: false
+        - name: baseline_metrics_expiry
+          hidden: true
+          description: |
+            Set the cache expiry time (in seconds) for the baseline for query metrics. This option is only available when
+            `incremental_query_metrics` is enabled.
+          value:
+            type: number
+            display_default: 300
+            example: 300
     - name: query_samples
       description: Configure collection of query samples
       options:
@@ -508,7 +565,7 @@ files:
             type: number
             example: 3500
     - name: collect_settings
-      description: Configure collection of pg_settings. This is an alpha feature.
+      description: Configure collection of pg_settings.
       options:
         - name: enabled
           description: |
@@ -525,7 +582,7 @@ files:
             example: 600
         - name: ignored_settings_patterns
           description: |
-            A list of setting patterns to ignore. Any setting key matching one of the value in this list will 
+            A list of setting patterns to ignore. Any setting key matching one of the value in this list will
             not be collected. This uses the traditional LIKE pattern-matching approach.
           value:
               type: array
@@ -875,7 +932,7 @@ files:
         This collection does not involve any additional queries to the database.
       value:
         type: number
-        example: 1800
+        example: 300
         display_default: false
     - name: propagate_agent_tags
       description: |

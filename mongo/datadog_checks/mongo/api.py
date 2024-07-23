@@ -11,7 +11,11 @@ from pymongo.errors import (
     ServerSelectionTimeoutError,
 )
 
-from datadog_checks.mongo.common import MongosDeployment, ReplicaSetDeployment, StandaloneDeployment
+from datadog_checks.mongo.common import (
+    MongosDeployment,
+    ReplicaSetDeployment,
+    StandaloneDeployment,
+)
 
 # The name of the application that created this MongoClient instance. MongoDB 3.4 and newer will print this value in
 # the server log upon establishing each connection. It is also recorded in the slow query log and profile collections.
@@ -84,55 +88,87 @@ class MongoApi(object):
     def list_database_names(self, session=None):
         return self._cli.list_database_names(session)
 
+    def current_op(self, session=None):
+        # Use $currentOp stage to get all users and idle sessions.
+        # Note: Why not use the `currentOp` command?
+        # Because the currentOp command and db.currentOp() helper method return the results in a single document,
+        # the total size of the currentOp result set is subject to the maximum 16MB BSON size limit for documents.
+        # The $currentOp stage returns a cursor over a stream of documents, each of which reports a single operation.
+        return self["admin"].aggregate([{'$currentOp': {'allUsers': True}}], session=session)
+
+    def coll_stats(self, db_name, coll_name, session=None):
+        return self[db_name][coll_name].aggregate(
+            [
+                {
+                    "$collStats": {
+                        "latencyStats": {},
+                        "storageStats": {},
+                        "queryExecStats": {},
+                    }
+                },
+            ],
+            session=session,
+        )
+
+    def index_stats(self, db_name, coll_name, session=None):
+        return self[db_name][coll_name].aggregate([{"$indexStats": {}}], session=session)
+
     def _is_arbiter(self, options):
         cli = MongoClient(**options)
         is_master_payload = cli['admin'].command('isMaster')
         return is_master_payload.get('arbiterOnly', False)
 
-    @staticmethod
-    def _get_rs_deployment_from_status_payload(repl_set_payload, cluster_role):
+    def _get_rs_deployment_from_status_payload(self, repl_set_payload, is_master_payload, cluster_role):
         replset_name = repl_set_payload["set"]
         replset_state = repl_set_payload["myState"]
-        return ReplicaSetDeployment(replset_name, replset_state, cluster_role=cluster_role)
+        hosts = [m['name'] for m in repl_set_payload.get("members", [])]
+        replset_me = is_master_payload.get('me')
+        return ReplicaSetDeployment(replset_name, replset_state, hosts, replset_me, cluster_role=cluster_role)
 
     def refresh_deployment_type(self):
         # getCmdLineOpts is the runtime configuration of the mongo instance. Helpful to know whether the node is
         # a mongos or mongod, if the mongod is in a shard, if it's in a replica set, etc.
         try:
-            options = self['admin'].command("getCmdLineOpts")['parsed']
+            self.deployment_type = self._get_default_deployment_type()
         except Exception as e:
             self._log.debug(
-                "Unable to run `getCmdLineOpts`, got: %s. Assuming this is an Alibaba ApsaraDB instance.", str(e)
+                "Unable to run `getCmdLineOpts`, got: %s. Treating this as an Alibaba ApsaraDB instance.", str(e)
             )
-            # `getCmdLineOpts` is forbidden on Alibaba ApsaraDB
-            self.deployment_type = self._get_alibaba_deployment_type()
-            return
+            try:
+                self.deployment_type = self._get_alibaba_deployment_type()
+            except Exception as e:
+                self._log.debug("Unable to run `shardingState`, so switching to AWS DocumentDB, got error %s", str(e))
+                self.deployment_type = self._get_documentdb_deployment_type()
+
+    def _get_default_deployment_type(self):
+        options = self['admin'].command("getCmdLineOpts")['parsed']
         cluster_role = None
         if 'sharding' in options:
             if 'configDB' in options['sharding']:
                 self._log.debug("Detected MongosDeployment. Node is principal.")
-                self.deployment_type = MongosDeployment()
-                return
+                return MongosDeployment(shard_map=self.refresh_shards())
             elif 'clusterRole' in options['sharding']:
                 cluster_role = options['sharding']['clusterRole']
 
         replication_options = options.get('replication', {})
         if 'replSetName' in replication_options or 'replSet' in replication_options:
             repl_set_payload = self['admin'].command("replSetGetStatus")
-            replica_set_deployment = self._get_rs_deployment_from_status_payload(repl_set_payload, cluster_role)
+            is_master_payload = self['admin'].command('isMaster')
+            replica_set_deployment = self._get_rs_deployment_from_status_payload(
+                repl_set_payload, is_master_payload, cluster_role
+            )
             is_principal = replica_set_deployment.is_principal()
             is_principal_log = "" if is_principal else "not "
             self._log.debug("Detected ReplicaSetDeployment. Node is %sprincipal.", is_principal_log)
-            self.deployment_type = replica_set_deployment
-            return
+            return replica_set_deployment
 
         self._log.debug("Detected StandaloneDeployment. Node is principal.")
-        self.deployment_type = StandaloneDeployment()
+        return StandaloneDeployment()
 
     def _get_alibaba_deployment_type(self):
         is_master_payload = self['admin'].command('isMaster')
         if is_master_payload.get('msg') == 'isdbgrid':
-            return MongosDeployment()
+            return MongosDeployment(shard_map=self.refresh_shards())
 
         # On alibaba cloud, a mongo node is either a mongos or part of a replica set.
         repl_set_payload = self['admin'].command("replSetGetStatus")
@@ -144,4 +180,56 @@ class MongoApi(object):
             cluster_role = 'shardsvr'
         else:
             cluster_role = None
-        return self._get_rs_deployment_from_status_payload(repl_set_payload, cluster_role)
+        return self._get_rs_deployment_from_status_payload(repl_set_payload, is_master_payload, cluster_role)
+
+    def _get_documentdb_deployment_type(self):
+        """
+        Deployment type for AWS DocumentDB.
+
+        We connect to "Instance Based Clusters". In MongoDB terms, these are unsharded replicasets.
+        """
+        repl_set_payload = self['admin'].command("replSetGetStatus")
+        is_master_payload = self['admin'].command('isMaster')
+        return self._get_rs_deployment_from_status_payload(repl_set_payload, is_master_payload, cluster_role=None)
+
+    def refresh_shards(self):
+        try:
+            shard_map = self['admin'].command('getShardMap')
+            self._log.debug('Get shard map: %s', shard_map)
+            return shard_map
+        except Exception as e:
+            self._log.error('Unable to get shard map for mongos: %s', e)
+            return {}
+
+    def server_status(self):
+        return self['admin'].command('serverStatus')
+
+    def list_authorized_collections(self, db_name):
+        try:
+            return self[db_name].list_collection_names(
+                filter={"type": "collection"},  # Only return collections, not views
+                authorizedCollections=True,
+            )
+        except OperationFailure:
+            # The user is not authorized to run listCollections on this database.
+            # This is NOT a critical error, so we log it as a warning.
+            self._log.warning(
+                "Not authorized to run 'listCollections' on db %s, "
+                "please make sure the user has read access on the database or "
+                "add the database to the `database_autodiscovery.exclude` list in the configuration file",
+                db_name,
+            )
+            return []
+
+    @property
+    def hostname(self):
+        try:
+            hostname = self.server_status()['host'].split(':')
+            if len(hostname) == 1:
+                # If there is no port, we assume the default port
+                return "{}:27017".format(hostname[0])
+            else:
+                return "{}:{}".format(hostname[0], hostname[1])
+        except Exception as e:
+            self._log.error('Unable to get hostname: %s', e)
+            return None

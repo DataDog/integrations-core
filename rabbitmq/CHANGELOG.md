@@ -2,7 +2,25 @@
 
 <!-- towncrier release notes start -->
 
-## 5.2.1 / 2024-03-22
+## 5.3.2 / 2024-07-05 / Agent 7.55.0
+
+***Fixed***:
+
+* Update config model names ([#17802](https://github.com/DataDog/integrations-core/pull/17802))
+
+## 5.3.1 / 2024-05-31
+
+***Fixed***:
+
+* Update the description for the `tls_ca_cert` config option to use `openssl rehash` instead of `c_rehash` ([#16981](https://github.com/DataDog/integrations-core/pull/16981))
+
+## 5.3.0 / 2024-04-26 / Agent 7.54.0
+
+***Added***:
+
+* Add details on default node/queue/exchange maximums to the configuration example ([#17344](https://github.com/DataDog/integrations-core/pull/17344))
+
+## 5.2.1 / 2024-03-22 / Agent 7.53.0
 
 ***Fixed***:
 

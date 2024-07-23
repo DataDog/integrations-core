@@ -17,7 +17,18 @@
       "Category::Network",
       "Supported OS::Linux",
       "Supported OS::Windows",
-      "Supported OS::macOS"
+      "Supported OS::macOS",
+      "Category::Security",
+      "Category::Kubernetes",
+      "Submitted Data Type::Metrics",
+      "Submitted Data Type::Logs",
+      "Offering::Integration"
+    ],
+    "resources": [
+      {
+        "resource_type": "blog",
+        "url": "https://www.datadoghq.com/blog/monitor-calico-with-datadog/"
+      }
     ]
   },
   "author": {
@@ -51,9 +62,6 @@
     },
     "dashboards": {
       "[calico] dashboard overview": "./assets/dashboards/calico_overview.json"
-    },
-    "logs": {
-      "source": "calico"
     },
     "monitors": {
       "[calico] monitor ipsets error": "assets/monitors/ipset_error.json",

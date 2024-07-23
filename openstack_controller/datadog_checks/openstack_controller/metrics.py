@@ -160,6 +160,7 @@ NOVA_SERVER_TAGS = {
     'id': 'server_id',
     'name': 'server_name',
     'status': 'server_status',
+    'tenant_id': 'project_id',
     'OS-EXT-SRV-ATTR:hypervisor_hostname': 'hypervisor',
     'OS-EXT-SRV-ATTR:instance_name': 'instance_name',
     'OS-EXT-SRV-ATTR:hostname': 'instance_hostname',
@@ -353,7 +354,32 @@ NEUTRON_PROJECT_METRICS = NEUTRON_NETWORK_METRICS | NEUTRON_QUOTA_METRICS
 
 CINDER_METRICS_PREFIX = "openstack.cinder"
 CINDER_SERVICE_CHECK = f"{CINDER_METRICS_PREFIX}.api.up"
+CINDER_POOL_PREFIX = f"{CINDER_METRICS_PREFIX}.pool"
+CINDER_POOL_COUNT = f"{CINDER_POOL_PREFIX}.count"
+CINDER_POOL_METRICS = {
+    f"{CINDER_POOL_PREFIX}.capabilities.total_capacity_gb": {},
+    f"{CINDER_POOL_PREFIX}.capabilities.free_capacity_gb": {},
+    f"{CINDER_POOL_PREFIX}.capabilities.reserved_percentage": {},
+}
+CINDER_POOL_TAGS = {
+    'name': 'pool_name',
+    'capabilities.volume_backend_name': 'pool_volume_backend_name',
+}
 CINDER_RESPONSE_TIME = f"{CINDER_METRICS_PREFIX}.response_time"
+CINDER_CLUSTER_PREFIX = f"{CINDER_METRICS_PREFIX}.cluster"
+CINDER_CLUSTER_COUNT = f"{CINDER_CLUSTER_PREFIX}.count"
+CINDER_CLUSTER_METRICS = {f"{CINDER_CLUSTER_PREFIX}.num_hosts": {}, f"{CINDER_CLUSTER_PREFIX}.num_down_hosts": {}}
+CINDER_CLUSTER_TAGS = {'name': 'cluster-name'}
+CINDER_SNAPSHOT_PREFIX = f"{CINDER_METRICS_PREFIX}.snapshot"
+CINDER_SNAPSHOT_COUNT = f"{CINDER_SNAPSHOT_PREFIX}.count"
+CINDER_SNAPSHOT_METRICS = {f"{CINDER_SNAPSHOT_PREFIX}.size": {}}
+CINDER_SNAPSHOT_TAGS = {'id': 'snapshot_id', 'volume_id': 'volume_id'}
+CINDER_TRANSFER_COUNT = f"{CINDER_METRICS_PREFIX}.volume.transfer.count"
+CINDER_TRANSFER_TAGS = {'id': 'transfer_id', 'volume_id': 'volume_id', 'name': 'volume_name'}
+CINDER_VOLUME_PREFIX = f"{CINDER_METRICS_PREFIX}.volume"
+CINDER_VOLUME_COUNT = f"{CINDER_VOLUME_PREFIX}.count"
+CINDER_VOLUME_METRICS = {f"{CINDER_VOLUME_PREFIX}.size": {}}
+CINDER_VOLUME_TAGS = {'id': 'volume_id', 'name': 'volume_name', 'status': 'volume_status', 'volume_type': 'volume_type'}
 
 IRONIC_METRICS_PREFIX = "openstack.ironic"
 IRONIC_SERVICE_CHECK = f"{IRONIC_METRICS_PREFIX}.api.up"
@@ -373,6 +399,41 @@ IRONIC_NODE_TAGS = {
 IRONIC_NODE_METRICS = {
     f"{IRONIC_NODE_METRICS_PREFIX}.up": {},
 }
+IRONIC_NODE_PORTGROUP_PREFIX = f"{IRONIC_NODE_METRICS_PREFIX}.portgroup"
+IRONIC_NODE_PORTGROUP_COUNT = f"{IRONIC_NODE_PORTGROUP_PREFIX}.count"
+IRONIC_NODE_PORTGROUP_TAGS = {
+    'uuid': 'portgroup_uuid',
+    'node_uuid': 'node_uuid',
+    'address': 'portgroup_address',
+    'mode': 'portgroup_mode',
+    'name': 'portgroup_name',
+}
+
+IRONIC_PORT_PREFIX = f"{IRONIC_METRICS_PREFIX}.port"
+IRONIC_PORT_COUNT = f"{IRONIC_PORT_PREFIX}.count"
+IRONIC_PORT_TAGS = {
+    'uuid': 'port_uuid',
+    'node_uuid': 'node_uuid',
+    'portgroup_uuid': 'portgroup_uuid',
+    'address': 'port_address',
+    'name': 'port_name',
+}
+
+IRONIC_DRIVER_PREFIX = f"{IRONIC_METRICS_PREFIX}.driver"
+IRONIC_DRIVER_TAGS = {
+    'name': 'driver_name',
+    'type': 'driver_type',
+}
+IRONIC_DRIVER_COUNT = f"{IRONIC_DRIVER_PREFIX}.count"
+
+IRONIC_ALLOCATION_PREFIX = f"{IRONIC_METRICS_PREFIX}.allocation"
+IRONIC_ALLOCATION_TAGS = {
+    'uuid': 'allocation_uuid',
+    'node_uuid': 'node_uuid',
+    'name': 'allocation_name',
+    'state': 'allocation_state',
+}
+IRONIC_ALLOCATION_COUNT = f"{IRONIC_ALLOCATION_PREFIX}.count"
 
 IRONIC_CONDUCTOR_METRICS_PREFIX = f"{IRONIC_METRICS_PREFIX}.conductor"
 IRONIC_CONDUCTOR_COUNT = f"{IRONIC_CONDUCTOR_METRICS_PREFIX}.count"
@@ -383,6 +444,25 @@ IRONIC_CONDUCTOR_TAGS = {
 IRONIC_CONDUCTOR_METRICS = {
     f"{IRONIC_CONDUCTOR_METRICS_PREFIX}.up": {},
 }
+
+IRONIC_VOLUME_PREFIX = f"{IRONIC_METRICS_PREFIX}.volume"
+IRONIC_VOLUME_CONNECTOR_PREFIX = f"{IRONIC_VOLUME_PREFIX}.connector"
+IRONIC_VOLUME_CONNECTOR_TAGS = {
+    'uuid': 'connector_uuid',
+    'node_uuid': 'node_uuid',
+    'connector_id': 'connector_id',
+    'type': 'connector_type',
+}
+IRONIC_VOLUME_CONNECTOR_COUNT = f"{IRONIC_VOLUME_CONNECTOR_PREFIX}.count"
+
+IRONIC_VOLUME_TARGET_PREFIX = f"{IRONIC_VOLUME_PREFIX}.target"
+IRONIC_VOLUME_TARGET_TAGS = {
+    'uuid': 'target_uuid',
+    'node_uuid': 'node_uuid',
+    'volume_id': 'volume_id',
+    'volume_type': 'volume_type',
+}
+IRONIC_VOLUME_TARGET_COUNT = f"{IRONIC_VOLUME_TARGET_PREFIX}.count"
 
 OCTAVIA_METRICS_PREFIX = "openstack.octavia"
 OCTAVIA_SERVICE_CHECK = f"{OCTAVIA_METRICS_PREFIX}.api.up"
@@ -535,11 +615,47 @@ OCTAVIA_AMPHORA_STATS_METRICS = {
 GLANCE_METRICS_PREFIX = "openstack.glance"
 GLANCE_SERVICE_CHECK = f"{GLANCE_METRICS_PREFIX}.api.up"
 GLANCE_RESPONSE_TIME = f"{GLANCE_METRICS_PREFIX}.response_time"
-GLANCE_IMAGE_COUNT = f"{GLANCE_METRICS_PREFIX}.image.count"
+GLANCE_IMAGE_PREFIX = f"{GLANCE_METRICS_PREFIX}.image"
+GLANCE_IMAGE_COUNT = f"{GLANCE_IMAGE_PREFIX}.count"
+GLANCE_IMAGE_METRICS = {
+    f"{GLANCE_IMAGE_PREFIX}.up": {},
+    f"{GLANCE_IMAGE_PREFIX}.size": {},
+}
 GLANCE_IMAGE_TAGS = {
+    'id': 'image_id',
     'name': 'image_name',
     'status': 'status',
     'container_format': 'container_format',
+}
+GLANCE_MEMBER_PREFIX = f"{GLANCE_IMAGE_PREFIX}.member"
+GLANCE_MEMBER_COUNT = f"{GLANCE_MEMBER_PREFIX}.count"
+GLANCE_MEMBER_TAGS = {
+    'member_id': 'member_id',
+    'image_id': 'image_id',
+    'status': 'status',
+}
+
+HEAT_METRICS_PREFIX = "openstack.heat"
+HEAT_SERVICE_CHECK = f"{HEAT_METRICS_PREFIX}.api.up"
+HEAT_RESPONSE_TIME = f"{HEAT_METRICS_PREFIX}.response_time"
+HEAT_STACK_PREFIX = f"{HEAT_METRICS_PREFIX}.stack"
+HEAT_STACK_COUNT = f"{HEAT_STACK_PREFIX}.count"
+HEAT_STACK_TAGS = {
+    'id': 'stack_id',
+    'stack_name': 'stack_name',
+    'stack_status': 'stack_status',
+}
+
+SWIFT_METRICS_PREFIX = "openstack.swift"
+SWIFT_SERVICE_CHECK = f"{SWIFT_METRICS_PREFIX}.api.up"
+SWIFT_RESPONSE_TIME = f"{SWIFT_METRICS_PREFIX}.response_time"
+SWIFT_CONTAINER_PREFIX = f"{SWIFT_METRICS_PREFIX}.container"
+SWIFT_CONTAINER_COUNT = f"{SWIFT_CONTAINER_PREFIX}.count"
+SWIFT_CONTAINER_METRICS = {
+    f"{SWIFT_CONTAINER_PREFIX}.bytes": {},
+}
+SWIFT_CONTAINER_TAGS = {
+    'name': 'container_name',
 }
 
 

@@ -8,14 +8,23 @@
     "configuration": "README.md#Setup",
     "support": "README.md#Support",
     "changelog": "CHANGELOG.md",
-    "description": "Weaviate",
+    "description": "Open-source vector database for building AI-powered applications.",
     "title": "Weaviate",
     "media": [],
     "classifier_tags": [
       "Category::AI/ML",
+      "Category::Data Stores",
       "Supported OS::Linux",
       "Supported OS::Windows",
-      "Supported OS::macOS"
+      "Supported OS::macOS",
+      "Submitted Data Type::Metrics",
+      "Offering::Integration"
+    ],
+    "resources": [
+      {
+        "resource_type": "blog",
+        "url": "https://www.datadoghq.com/blog/ai-integrations/"
+      }
     ]
   },
   "assets": {

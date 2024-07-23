@@ -1,1 +1,0 @@
-Add a new config option include_db_fragmentation_metrics_tempdb to skip index fragmentation metrics for tempdb. By default, index fragmentation metrics are NOT be collected for tempdb.

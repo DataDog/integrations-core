@@ -21,8 +21,12 @@ def instance_empty_default_hostname():
 
 
 def instance_max_parallel_requests():
-    return 100
+    return 4
 
 
 def instance_min_collection_interval():
     return 15
+
+
+def instance_verify_ssl():
+    return True

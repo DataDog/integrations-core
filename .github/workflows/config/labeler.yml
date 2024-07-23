@@ -11,7 +11,7 @@ changelog/no-changelog:
 ddev:
 - ddev/**/*
 dependencies:
-- datadog_checks_base/datadog_checks/base/data/agent_requirements.in
+- agent_requirements.in
 dependency_provider:
 - datadog_checks_dependency_provider/**/*
 dev/testing:
@@ -97,6 +97,10 @@ integration/cisco_aci:
 - cisco_aci/**/*
 integration/cisco_duo:
 - cisco_duo/**/*
+integration/cisco_sdwan:
+- cisco_sdwan/**/*
+integration/cisco_secure_endpoint:
+- cisco_secure_endpoint/**/*
 integration/cisco_secure_firewall:
 - cisco_secure_firewall/**/*
 integration/cisco_umbrella_dns:
@@ -163,6 +167,8 @@ integration/elastic:
 - elastic/**/*
 integration/envoy:
 - envoy/**/*
+integration/esxi:
+- esxi/**/*
 integration/etcd:
 - etcd/**/*
 integration/exchange_server:
@@ -265,12 +271,16 @@ integration/kubelet:
 - kubelet/**/*
 integration/kubernetes:
 - kubernetes/**/*
+integration/kubernetes_cluster_autoscaler:
+- kubernetes_cluster_autoscaler/**/*
 integration/kubernetes_state:
 - kubernetes_state/**/*
 integration/kubernetes_state_core:
 - kubernetes_state_core/**/*
 integration/kyototycoon:
 - kyototycoon/**/*
+integration/kyverno:
+- kyverno/**/*
 integration/langchain:
 - langchain/**/*
 integration/lighttpd:
@@ -293,6 +303,8 @@ integration/mesos_master:
 - mesos_master/**/*
 integration/mesos_slave:
 - mesos_slave/**/*
+integration/mimecast:
+- mimecast/**/*
 integration/mongo:
 - mongo/**/*
 integration/mysql:
@@ -301,6 +313,8 @@ integration/nagios:
 - nagios/**/*
 integration/network:
 - network/**/*
+integration/network_path:
+- network_path/**/*
 integration/nfsstat:
 - nfsstat/**/*
 integration/nginx:
@@ -333,16 +347,18 @@ integration/oracle:
 - oracle/**/*
 integration/otel:
 - otel/**/*
-integration/pan_firewall:
-- pan_firewall/**/*
 integration/palo_alto_panorama:
 - palo_alto_panorama/**/*
+integration/pan_firewall:
+- pan_firewall/**/*
 integration/pdh_check:
 - pdh_check/**/*
 integration/pgbouncer:
 - pgbouncer/**/*
 integration/php_fpm:
 - php_fpm/**/*
+integration/ping_one:
+- ping_one/**/*
 integration/pivotal_pks:
 - pivotal_pks/**/*
 integration/podman:
@@ -445,6 +461,8 @@ integration/teamcity:
 - teamcity/**/*
 integration/tekton:
 - tekton/**/*
+integration/teleport:
+- teleport/**/*
 integration/temporal:
 - temporal/**/*
 integration/tenable:
@@ -461,6 +479,8 @@ integration/tomcat:
 - tomcat/**/*
 integration/torchserve:
 - torchserve/**/*
+integration/traefik_mesh:
+- traefik_mesh/**/*
 integration/traffic_server:
 - traffic_server/**/*
 integration/twemproxy:
@@ -473,6 +493,8 @@ integration/vault:
 - vault/**/*
 integration/vertica:
 - vertica/**/*
+integration/vllm:
+- vllm/**/*
 integration/voltdb:
 - voltdb/**/*
 integration/vsphere:

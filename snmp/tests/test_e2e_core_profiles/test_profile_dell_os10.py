@@ -29,8 +29,11 @@ def test_e2e_profile_dell_os10(dd_agent_check):
     common_tags = [
         'snmp_profile:dell-os10',
         'snmp_host:dell-os10.device.name',
+        'device_hostname:dell-os10.device.name',
         'device_namespace:default',
         'snmp_device:' + ip_address,
+        'device_ip:' + ip_address,
+        'device_id:default:' + ip_address,
     ] + []
 
     # --- TEST EXTENDED METRICS ---

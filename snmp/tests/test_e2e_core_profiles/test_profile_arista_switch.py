@@ -31,8 +31,11 @@ def test_e2e_profile_arista_switch(dd_agent_check):
     common_tags = [
         'snmp_profile:arista-switch',
         'snmp_host:arista-switch.device.name',
+        'device_hostname:arista-switch.device.name',
         'device_namespace:default',
         'snmp_device:' + ip_address,
+        'device_ip:' + ip_address,
+        'device_id:default:' + ip_address,
     ]
 
     # --- TEST EXTENDED METRICS ---

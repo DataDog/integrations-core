@@ -78,7 +78,7 @@ supervisor @ https://agent-int-packages.datadoghq.com/external/supervisor/superv
 typing @ https://agent-int-packages.datadoghq.com/external/typing/typing-3.10.0.0-py2-none-any.whl#sha256=c7219ef20c5fbf413b4567092adfc46fa6203cb8454eda33c3fc1afe1398a308
 tzlocal @ https://agent-int-packages.datadoghq.com/external/tzlocal/tzlocal-2.1-py2.py3-none-any.whl#sha256=e2cb6c6b5b604af38597403e9852872d7f534962ae2954c7f35efcb1ccacf4a4
 uptime @ https://agent-int-packages.datadoghq.com/built/uptime/uptime-3.0.1-20240402154758-cp27-cp27m-win_amd64.whl#sha256=17de4b3fd5f8831fd0f4d54cf2a614daf5475d1a3cd050830440548d9af91d18
-urllib3 @ https://agent-int-packages.datadoghq.com/external/urllib3/urllib3-1.26.18-py2.py3-none-any.whl#sha256=34b97092d7e0a3a8cf7cd10e386f401b3737364026c45e622aa02903dffe0f07
+urllib3 @ https://agent-int-packages.datadoghq.com/external/urllib3/urllib3-1.26.19-py2.py3-none-any.whl#sha256=37a0344459b199fce0e80b0d3569837ec6b6937435c5244e7fd73fa6006830f3
 vertica-python @ https://agent-int-packages.datadoghq.com/external/vertica-python/vertica_python-1.2.0-py2.py3-none-any.whl#sha256=4c6bc271e871e4935874cc4556832ff9a2330894e2e9516eddd6a7344b9f514b
 websocket-client @ https://agent-int-packages.datadoghq.com/external/websocket-client/websocket_client-0.59.0-py2.py3-none-any.whl#sha256=2e50d26ca593f70aba7b13a489435ef88b8fc3b5c5643c1ce8808ff9b40f0b32
 win-inet-pton @ https://agent-int-packages.datadoghq.com/external/win-inet-pton/win_inet_pton-1.1.0-py2.py3-none-any.whl#sha256=eaf0193cbe7152ac313598a0da7313fb479f769343c0c16c5308f64887dc885b

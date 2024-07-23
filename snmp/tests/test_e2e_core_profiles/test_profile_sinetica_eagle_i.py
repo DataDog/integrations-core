@@ -27,8 +27,11 @@ def test_e2e_profile_sinetica_eagle_i(dd_agent_check):
     common_tags = [
         'snmp_profile:sinetica-eagle-i',
         'snmp_host:sinetica-eagle-i.device.name',
+        'device_hostname:sinetica-eagle-i.device.name',
         'device_namespace:default',
         'snmp_device:' + ip_address,
+        'device_ip:' + ip_address,
+        'device_id:default:' + ip_address,
     ] + [
         'hawk_i2_inv_fw_revision:oxen Jaded',
         'hawk_i2_inv_hw_revision:acted',

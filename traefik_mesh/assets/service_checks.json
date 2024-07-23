@@ -1,0 +1,32 @@
+[
+    {
+        "agent_version": "7.55.0",
+        "integration": "Traefik Mesh",
+        "check": "traefik_mesh.openmetrics.health",
+        "statuses": [
+            "ok",
+            "critical"
+        ],
+        "groups": [
+            "host",
+            "endpoint"
+        ],
+        "name": "Traefik Mesh OpenMetrics endpoint health",
+        "description": "Returns `CRITICAL` if the Agent is unable to connect to the Traefik Mesh OpenMetrics endpoint, otherwise returns `OK`."
+    },
+    {
+        "agent_version": "7.55.0",
+        "integration": "Traefik Mesh",
+        "check": "traefik_mesh.controller.ready",
+        "statuses": [
+            "ok",
+            "critical"
+        ],
+        "groups": [
+            "host",
+            "endpoint"
+        ],
+        "name": "Traefik Mesh Controller Ready",
+        "description": "Returns `OK` if the `/api/status/readiness` for the Mesh Controller returns 200, otherwise returns `CRITICAL`."
+    }
+]

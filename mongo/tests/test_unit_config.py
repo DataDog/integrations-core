@@ -95,3 +95,57 @@ def test_custom_replicaSet_is_not_allowed(instance):
     instance['options'] = {'replicaSet': 'foo'}
     with pytest.raises(ConfigurationError, match='replicaSet'):
         MongoConfig(instance, mock.Mock())
+
+
+def test_dbm_cluster_name(instance):
+    instance['dbm'] = True
+    with pytest.raises(ConfigurationError, match='`cluster_name` must be set when `dbm` is enabled'):
+        MongoConfig(instance, mock.Mock())
+
+
+@pytest.mark.parametrize(
+    'dbm_enabled, operation_samples_config, operation_samples_enabled',
+    [
+        pytest.param(True, None, True, id='dbm_enabled_default'),
+        pytest.param(True, {'enabled': True}, True, id='operation_samples_enabled'),
+        pytest.param(True, {'enabled': False}, False, id='operation_samples_disabled'),
+        pytest.param(False, None, False, id='dbm_disabled_default'),
+        pytest.param(False, {'enabled': True}, False, id='operation_samples_enabled_dbm_disabled'),
+        pytest.param(False, {'enabled': False}, False, id='operation_samples_disabled_dbm_disabled'),
+    ],
+)
+def test_mongo_operation_samples_enabled(
+    instance_integration_cluster, check, dbm_enabled, operation_samples_config, operation_samples_enabled
+):
+    instance_integration_cluster['dbm'] = dbm_enabled
+    if operation_samples_config:
+        instance_integration_cluster['operation_samples'] = operation_samples_config
+
+    mongo_check = check(instance_integration_cluster)
+    assert mongo_check._config.operation_samples.get('enabled') == operation_samples_enabled
+
+
+def test_database_autodiscovery_disabled(instance_user):
+    config = MongoConfig(instance_user, mock.Mock())
+    assert config.database_autodiscovery_config is not None
+    assert config.database_autodiscovery_config['enabled'] is False
+
+
+def test_database_autodiscovery_enabled(instance_user):
+    instance_user['database_autodiscovery'] = {'enabled': True, 'include': ['test.*'], 'exclude': ['admin']}
+    config = MongoConfig(instance_user, mock.Mock())
+    assert config.database_autodiscovery_config is not None
+    assert config.database_autodiscovery_config['enabled'] is True
+    assert config.database_autodiscovery_config['include'] == ['test.*']
+    assert config.database_autodiscovery_config['exclude'] == ['admin']
+
+
+def test_database_autodiscovery_dbnames_deprecation(instance_user):
+    # dbnames is deprecated in favor of database_autodiscovery
+    # for backwards compatibility, we implicitly enable database_autodiscovery if dbnames is set
+    # and set the include list to the dbnames list
+    instance_user['dbnames'] = ['test', 'integration']
+    config = MongoConfig(instance_user, mock.Mock())
+    assert config.database_autodiscovery_config is not None
+    assert config.database_autodiscovery_config['enabled'] is True
+    assert config.database_autodiscovery_config['include'] == ['test$', 'integration$']

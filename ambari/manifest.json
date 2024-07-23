@@ -15,7 +15,8 @@
       "Category::Log Collection",
       "Category::Network",
       "Supported OS::Linux",
-      "Supported OS::macOS"
+      "Supported OS::macOS",
+      "Offering::Integration"
     ]
   },
   "author": {
@@ -46,9 +47,6 @@
     },
     "dashboards": {
       "Ambari base dashboard": "assets/dashboards/base_dashboard.json"
-    },
-    "logs": {
-      "source": "ambari"
     }
   }
 }

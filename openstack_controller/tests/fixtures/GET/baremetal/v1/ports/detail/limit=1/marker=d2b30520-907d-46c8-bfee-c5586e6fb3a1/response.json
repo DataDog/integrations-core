@@ -1,0 +1,26 @@
+{
+    "ports": [
+        {
+            "uuid": "6ee9bd2f-2598-4e0d-938b-e72e95aaa785",
+            "created_at": "2023-09-30T15:36:38+00:00",
+            "updated_at": "2023-09-30T15:43:34+00:00",
+            "address": "52:54:00:d0:cf:77",
+            "extra": {},
+            "links": [
+                {
+                    "href": "http://127.0.0.1/baremetal/v1/ports/6ee9bd2f-2598-4e0d-938b-e72e95aaa785",
+                    "rel": "self"
+                },
+                {
+                    "href": "http://127.0.0.1/baremetal/ports/6ee9bd2f-2598-4e0d-938b-e72e95aaa785",
+                    "rel": "bookmark"
+                }
+            ],
+            "name": "port2",
+            "node_uuid": "a27588a6-518d-49b4-a23c-3d51255a7e8b",
+            "physical_network": "physnet1",
+            "portgroup_uuid": "e43c722c-248e-4c6e-8ce8-0d8ff129387a"
+        }
+    ],
+    "previous": "http://127.0.0.1/baremetal/v1/ports/detail?sort_key=id&sort_dir=asc&limit=1&marker=e43c722c-248e-4c6e-8ce8-0d8ff129387a"
+}

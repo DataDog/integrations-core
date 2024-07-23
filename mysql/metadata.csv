@@ -1,5 +1,5 @@
 metric_name,metric_type,interval,unit_name,per_unit_name,description,orientation,integration,short_name,curated_metric
-mysql.binlog.cache_disk_use,gauge,,transaction,,The number of transactions that used the temporary binary log cache but that exceeded the value of binlog_cache_size and used a temporary file to store statements from the transaction.,0,mysql,mysql binlog cache_disk_use,
+mysql.binlog.cache_disk_use,gauge,,transaction,,The number of transactions that used the temporary binary log cache but that exceeded the value of `binlog_cache_size` and used a temporary file to store statements from the transaction.,0,mysql,mysql binlog cache_disk_use,
 mysql.binlog.cache_use,gauge,,transaction,,The number of transactions that used the binary log cache.,0,mysql,mysql binlog cache_use,
 mysql.binlog.disk_use,gauge,,byte,,Total binary log file size.,0,mysql,mysql binlog disk,
 mysql.galera.wsrep_cert_deps_distance,gauge,,,,"Shows the average distance between the lowest and highest sequence number, or seqno, values that the node can possibly apply in parallel.",0,mysql,mysql galera wsrep_cert_deps_distance,
@@ -127,7 +127,7 @@ mysql.myisam.key_buffer_bytes_unflushed,gauge,,byte,,MyISAM key buffer bytes unf
 mysql.myisam.key_buffer_bytes_used,gauge,,byte,,MyISAM key buffer bytes used.,0,mysql,mysql myisam key buffer bytes used,
 mysql.myisam.key_buffer_size,gauge,,byte,,Size of the buffer used for index blocks.,0,mysql,mysql myisam key_buffer_size,memory
 mysql.myisam.key_read_requests,gauge,,read,second,The number of requests to read a key block from the MyISAM key cache.,0,mysql,mysql myisam key_read_requests,
-mysql.myisam.key_reads,gauge,,read,second,"The number of physical reads of a key block from disk into the MyISAM key cache. If Key_reads is large, then your key_buffer_size value is probably too small. The cache miss rate can be calculated as Key_reads/Key_read_requests.",0,mysql,mysql myisam key_reads,
+mysql.myisam.key_reads,gauge,,read,second,"The number of physical reads of a key block from disk into the MyISAM key cache. If `key_reads` is large, then your key_buffer_size value is probably too small. The cache miss rate can be calculated as `key_reads`/`key_read_requests`.",0,mysql,mysql myisam key_reads,
 mysql.myisam.key_write_requests,gauge,,write,second,The number of requests to write a key block to the MyISAM key cache.,0,mysql,mysql myisam key_write_requests,
 mysql.myisam.key_writes,gauge,,write,second,The number of physical writes of a key block from the MyISAM key cache to disk.,0,mysql,mysql myisam key_writes,
 mysql.net.aborted_clients,gauge,,connection,second,The number of connections that were aborted because the client died without closing the connection properly.,0,mysql,mysql net aborted_clients,
@@ -169,7 +169,7 @@ mysql.performance.key_cache_utilization,gauge,,fraction,,The key cache utilizati
 mysql.performance.max_prepared_stmt_count,gauge,,,,The maximum allowed prepared statements on the server.,0,mysql,max prepared statements,
 mysql.performance.open_files,gauge,,file,,The number of open files.,0,mysql,open files,
 mysql.performance.open_tables,gauge,,table,,The number of of tables that are open.,0,mysql,open tables,
-mysql.performance.opened_tables,gauge,,table,second,"The number of tables that have been opened. If Opened_tables is big, your table_open_cache value is probably too small.",0,mysql,mysql performance opened_tables,
+mysql.performance.opened_tables,gauge,,table,second,"The number of tables that have been opened. If `opened_tables` is big, your `table_open_cache` value is probably too small.",0,mysql,mysql performance opened_tables,
 mysql.performance.prepared_stmt_count,gauge,,query,second,The current number of prepared statements.,0,mysql,current prepared statements,
 mysql.performance.qcache.utilization,gauge,,fraction,,Fraction of the query cache memory currently being used.,0,mysql,mysql performance qcache utilization,
 mysql.performance.qcache_free_blocks,gauge,,block,,The number of free memory blocks in the query cache.,0,mysql,mysql performance qcache_free_blocks,
@@ -177,7 +177,7 @@ mysql.performance.qcache_free_memory,gauge,,byte,,The amount of free memory for 
 mysql.performance.qcache_hits,gauge,,hit,second,The rate of query cache hits.,0,mysql,query cache hits,
 mysql.performance.qcache_inserts,gauge,,query,second,The number of queries added to the query cache.,0,mysql,mysql performance qcache_inserts,
 mysql.performance.qcache_lowmem_prunes,gauge,,query,second,The number of queries that were deleted from the query cache because of low memory.,0,mysql,mysql performance qcache_lowmem_prunes,
-mysql.performance.qcache_not_cached,gauge,,query,second,"The number of noncached queries (not cacheable, or not cached due to the query_cache_type setting).",0,mysql,mysql performance qcache_not_cached,
+mysql.performance.qcache_not_cached,gauge,,query,second,"The number of noncached queries (not cacheable, or not cached due to the `query_cache_type` setting).",0,mysql,mysql performance qcache_not_cached,
 mysql.performance.qcache_queries_in_cache,gauge,,query,,The number of queries registered in the query cache.,0,mysql,mysql performance qcache_queries_in_cache,
 mysql.performance.qcache_size,gauge,,byte,,The amount of memory allocated for caching query results.,0,mysql,mysql performance qcache_size,
 mysql.performance.qcache_total_blocks,gauge,,block,,The total number of blocks in the query cache.,0,mysql,mysql performance qcache_total_blocks,
@@ -190,7 +190,7 @@ mysql.performance.select_range,gauge,,operation,second,The number of joins that 
 mysql.performance.select_range_check,gauge,,operation,second,"The number of joins without keys that check for key usage after each row. If this is not 0, you should carefully check the indexes of your tables.",0,mysql,mysql performance select_range_check,
 mysql.performance.select_scan,gauge,,operation,second,The number of joins that did a full scan of the first table.,0,mysql,mysql performance select_scan,
 mysql.performance.slow_queries,gauge,,query,second,The rate of slow queries (log queries that exceed a particular execution time).,-1,mysql,slow queries,
-mysql.performance.sort_merge_passes,gauge,,operation,second,"The number of merge passes that the sort algorithm has had to do. If this value is large, you should consider increasing the value of the sort_buffer_size system variable.",0,mysql,mysql performance sort_merge_passes,
+mysql.performance.sort_merge_passes,gauge,,operation,second,"The number of merge passes that the sort algorithm has had to do. If this value is large, you should consider increasing the value of the `sort_buffer_size` system variable.",0,mysql,mysql performance sort_merge_passes,
 mysql.performance.sort_range,gauge,,operation,second,The number of sorts that were done using ranges.,0,mysql,mysql performance sort_range,
 mysql.performance.sort_rows,gauge,,operation,second,The number of sorted rows.,0,mysql,mysql performance sort_rows,
 mysql.performance.sort_scan,gauge,,operation,second,The number of sorts that were done by scanning the table.,0,mysql,mysql performance sort_scan,
@@ -201,12 +201,12 @@ mysql.performance.table_locks_immediate.rate,gauge,,,,The rate of times that a r
 mysql.performance.table_locks_waited,gauge,,,,The total number of times that a request for a table lock could not be granted immediately and a wait was needed.,-1,mysql,table locks waited,
 mysql.performance.table_locks_waited.rate,gauge,,,,The rate of times that a request for a table lock could not be granted immediately and a wait was needed.,0,mysql,table locks waited rate,
 mysql.performance.table_open_cache,gauge,,,,The number of open tables for all threads. Increasing this value increases the number of file descriptors that mysqld requires.,0,mysql,mysql performance table_open_cache,
-mysql.performance.thread_cache_size,gauge,,byte,,"How many threads the server should cache for reuse. When a client disconnects, the client's threads are put in the cache if there are fewer than thread_cache_size threads there.",0,mysql,mysql performance thread_cache_size,memory
+mysql.performance.thread_cache_size,gauge,,byte,,"How many threads the server should cache for reuse. When a client disconnects, the client's threads are put in the cache if there are fewer than `thread_cache_size` threads there.",0,mysql,mysql performance thread_cache_size,memory
 mysql.performance.threads_cached,gauge,,thread,,The number of threads in the thread cache.,0,mysql,mysql performance threads_cached,
 mysql.performance.threads_connected,gauge,,connection,,The number of currently open connections.,0,mysql,threads connected,cpu
-mysql.performance.threads_created,count,,thread,,"The number of threads created to handle connections. If Threads_created is big, you may want to increase the thread_cache_size value.",0,mysql,mysql performance threads_created,memory
+mysql.performance.threads_created,count,,thread,,"The number of threads created to handle connections. If `threads_created` is big, you may want to increase the `thread_cache_size` value.",0,mysql,mysql performance threads_created,memory
 mysql.performance.threads_running,gauge,,thread,,The number of threads that are not sleeping.,0,mysql,threads running,
-mysql.performance.user_connections,gauge,,connection,,"The number of user connections. Tags: processlist_db, processlist_host, processlist_state, processlist_user",0,mysql,user conns,
+mysql.performance.user_connections,gauge,,connection,,"The number of user connections. Tags: `processlist_db`, `processlist_host`, `processlist_state`, `processlist_user`",0,mysql,user conns,
 mysql.performance.user_time,gauge,,percent,,Percentage of CPU time spent in user space by MySQL.,-1,mysql,cpu user,
 mysql.queries.count,count,,query,,The total count of executed queries per normalized query and schema. (DBM only),0,mysql,mysql queries count,cpu
 mysql.queries.errors,count,,error,,The total count of queries run with an error per normalized query and schema. (DBM only),0,mysql,mysql query errors,
@@ -232,4 +232,4 @@ mysql.replication.replicas_connected,gauge,,,,Number of replicas connected to a 
 mysql.replication.seconds_behind_master,gauge,,second,,The lag in seconds between the master and the slave.,-1,mysql,replication lag,
 mysql.replication.seconds_behind_source,gauge,,second,,The lag in seconds between the source and the replica.,-1,mysql,replication lag,
 mysql.replication.slave_running,gauge,,,,Deprecated. Use service check mysql.replication.replica_running instead. A boolean showing if this server is a replication slave / master that is running.,0,mysql,slave running,
-mysql.replication.slaves_connected,gauge,,,,Deprecated. Use mysql.replication.replicas_connected instead. Number of slaves connected to a replication master.,0,mysql,slaves connected,
+mysql.replication.slaves_connected,gauge,,,,Deprecated. Use `mysql.replication.replicas_connected` instead. Number of slaves connected to a replication master.,0,mysql,slaves connected,

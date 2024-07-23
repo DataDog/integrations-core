@@ -86,10 +86,11 @@ files:
           - name: read_timeout
             description: |
               The timeout for reading from the connection in seconds.
-              The default read timeout is 10 seconds.
+              By default, no read timeout is set.
             value:
               type: number
               example: 10
+              display_default: null
 
           - name: ssl
             description: |
@@ -270,7 +271,7 @@ files:
                   Note that this runs a heavy query against your database to compute the relevant metrics
                   for all your existing schemas. Due to the nature of these calls, if you have a
                   high number of tables and schemas, this may have a negative impact on your database performance.
-                  Only tables and schemas for which the user has been granted SELECT privileges are collected. 
+                  Only tables and schemas for which the user has been granted SELECT privileges are collected.
 
                   See also the MySQL metrics listing: https://docs.datadoghq.com/integrations/mysql/#metrics
                 value:
@@ -346,7 +347,7 @@ files:
               example: false
               display_default: false
           - name: collect_settings
-            description: Configure collection of performance_schema.global_variables. This is an alpha feature.
+            description: Configure collection of performance_schema.global_variables.
             options:
               - name: enabled
                 description: |
@@ -361,6 +362,29 @@ files:
                 value:
                   type: number
                   example: 600
+          - name: schemas_collection 
+            description: |
+              Configure collection of schemas (databases).
+            options:
+              - name: enabled
+                description: |
+                  Enable schema collection. Requires `dbm: true`. Defaults to false.
+                value:
+                  type: boolean
+                  example: false
+              - name: collection_interval
+                description: |
+                  Set the database schema collection interval (in seconds). Defaults to 600 seconds.
+                value:
+                  type: number
+                  example: 600
+              - name: max_execution_time
+                description: |
+                  Set the maximum time for schema collection (in seconds). Defaults to 60 seconds. 
+                  Capped by `schemas_collection.collection_interval`
+                value:
+                  type: number
+                  example: 60         
           - name: query_metrics
             description: Configure collection of query metrics
             options:
@@ -490,20 +514,20 @@ files:
                   example: 10
           - name: aws
             description: |
-              This block defines the configuration for AWS RDS and Aurora instances. 
-              
-              Complete this section if you have installed the Datadog AWS Integration 
-              (https://docs.datadoghq.com/integrations/amazon_web_services) to enrich instances 
+              This block defines the configuration for AWS RDS and Aurora instances.
+
+              Complete this section if you have installed the Datadog AWS Integration
+              (https://docs.datadoghq.com/integrations/amazon_web_services) to enrich instances
               with MySQL integration telemetry.
-              
+
               These values are only applied when `dbm: true` option is set.
             options:
               - name: instance_endpoint
                 description: |
-                  Equal to the Endpoint.Address of the instance the agent is connecting to. 
+                  Equal to the Endpoint.Address of the instance the agent is connecting to.
                   This value is optional if the value of `host` is already configured to the instance endpoint.
-                  
-                  For more information on instance endpoints, 
+
+                  For more information on instance endpoints,
                   see the AWS docs https://docs.aws.amazon.com/AmazonRDS/latest/APIReference/API_Endpoint.html
                 value:
                   type: string
@@ -512,17 +536,17 @@ files:
           - name: gcp
             description: |
               This block defines the configuration for Google Cloud SQL instances.
-              
-              Complete this section if you have installed the Datadog GCP Integration 
-              (https://docs.datadoghq.com/integrations/google_cloud_platform) to enrich instances 
+
+              Complete this section if you have installed the Datadog GCP Integration
+              (https://docs.datadoghq.com/integrations/google_cloud_platform) to enrich instances
               with MySQL integration telemetry.
-              
+
               These values are only applied when `dbm: true` option is set.
             options:
               - name: project_id
                 description: |
                   Equal to the GCP resource's project ID.
-                  
+
                   For more information on project IDs,
                   See the GCP docs https://cloud.google.com/resource-manager/docs/creating-managing-projects
                 value:
@@ -531,7 +555,7 @@ files:
               - name: instance_id
                 description: |
                   Equal to the GCP resource's instance ID.
-                  
+
                   For more information on instance IDs,
                   See the GCP docs https://cloud.google.com/sql/docs/mysql/instance-settings#instance-id-2ndgen
                 value:
@@ -541,23 +565,23 @@ files:
           - name: azure
             description: |
               This block defines the configuration for Azure Database for MySQL.
-              
-              Complete this section if you have installed the Datadog Azure Integration 
-              (https://docs.datadoghq.com/integrations/azure) to enrich instances 
+
+              Complete this section if you have installed the Datadog Azure Integration
+              (https://docs.datadoghq.com/integrations/azure) to enrich instances
               with MySQL integration telemetry.
-              
+
               These values are only applied when `dbm: true` option is set.
             options:
               - name: deployment_type
                 description: |
-                  Equal to the deployment type for the managed database. 
-                  
+                  Equal to the deployment type for the managed database.
+
                   Acceptable values are:
-                    - `flexible_server` 
+                    - `flexible_server`
                     - `single_server`
                     - `virtual_machine`
-                  
-                  For more information on deployment types, 
+
+                  For more information on deployment types,
                   see the Azure docs https://docs.microsoft.com/en-us/azure/mysql/select-right-deployment-type
                 value:
                   type: string
@@ -565,7 +589,7 @@ files:
               - name: fully_qualified_domain_name
                 description: |
                   Equal to the full qualified domain name of the Azure MySQL database.
-                  
+
                   This value is optional if the value of `host` is already configured to the fully qualified domain name.
                 value:
                   type: string
@@ -698,7 +722,7 @@ files:
             hidden: true
             description: |
               Set the database instance collection interval (in seconds). The database instance collection sends
-              basic information about the database instance along with a signal that it still exists. 
+              basic information about the database instance along with a signal that it still exists.
               This collection does not involve any additional queries to the database.
             value:
               type: number

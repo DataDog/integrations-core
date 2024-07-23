@@ -30,8 +30,11 @@ def test_e2e_profile_nvidia_cumulus_linux_switch(dd_agent_check):
     common_tags = [
         'snmp_profile:nvidia-cumulus-linux-switch',
         'snmp_host:nvidia-cumulus-linux-switch.device.name',
+        'device_hostname:nvidia-cumulus-linux-switch.device.name',
         'device_namespace:default',
         'snmp_device:' + ip_address,
+        'device_ip:' + ip_address,
+        'device_id:default:' + ip_address,
     ] + []
 
     # --- TEST EXTENDED METRICS ---

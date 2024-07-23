@@ -16,7 +16,8 @@
       "Supported OS::macOS",
       "Supported OS::Windows",
       "Category::Data Stores",
-      "Category::Log Collection"
+      "Category::Log Collection",
+      "Offering::Integration"
     ]
   },
   "author": {
@@ -50,9 +51,6 @@
     },
     "monitors": {
       "[Vertica] Nodes down above K-safety level": "assets/monitors/vertica_replication_safety.json"
-    },
-    "logs": {
-      "source": "vertica"
     }
   }
 }

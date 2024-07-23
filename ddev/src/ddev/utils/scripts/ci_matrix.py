@@ -54,7 +54,7 @@ TESTABLE_FILE_PATTERN = re.compile(
     """,
     re.VERBOSE,
 )
-AGENT_REQUIREMENTS_FILE = 'datadog_checks_base/datadog_checks/base/data/agent_requirements.in'
+AGENT_REQUIREMENTS_FILE = 'agent_requirements.in'
 NON_TESTABLE_FILES = {'auto_conf.yaml'}
 DISPLAY_ORDER_OVERRIDE = {
     _d: _i

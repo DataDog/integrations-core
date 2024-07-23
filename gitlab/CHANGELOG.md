@@ -2,6 +2,24 @@
 
 <!-- towncrier release notes start -->
 
+## 7.3.2 / 2024-07-05 / Agent 7.55.0
+
+***Fixed***:
+
+* Update config model names ([#17802](https://github.com/DataDog/integrations-core/pull/17802))
+
+## 7.3.1 / 2024-05-31
+
+***Fixed***:
+
+* Update the description for the `tls_ca_cert` config option to use `openssl rehash` instead of `c_rehash` ([#16981](https://github.com/DataDog/integrations-core/pull/16981))
+
+## 7.3.0 / 2024-04-26 / Agent 7.54.0
+
+***Added***:
+
+* Adds additional Geo metrics. *Note: Some metrics are only available depending on your Gitlab version: refer to the Metrics sub-section in Data Collected available in our [documentation](https://docs.datadoghq.com/integrations/gitlab/) to see the minimum required version (indicated within brackets). For instance, `gitlab.geo.group.wiki.repositories` requires at least `13.10`.* ([#17420](https://github.com/DataDog/integrations-core/pull/17420))
+
 ## 7.2.0 / 2024-02-16 / Agent 7.52.0
 
 ***Added***:

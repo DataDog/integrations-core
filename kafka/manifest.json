@@ -9,14 +9,35 @@
     "support": "README.md#Support",
     "changelog": "CHANGELOG.md",
     "description": "Collect metrics for producers and consumers, replication, max lag, and more.",
-    "title": "Kafka",
+    "title": "Kafka Broker",
     "media": [],
     "classifier_tags": [
       "Category::Log Collection",
       "Category::Message Queues",
       "Supported OS::Linux",
       "Supported OS::Windows",
-      "Supported OS::macOS"
+      "Supported OS::macOS",
+      "Submitted Data Type::Metrics",
+      "Submitted Data Type::Logs",
+      "Offering::Integration"
+    ],
+    "resources": [
+      {
+        "resource_type": "blog",
+        "url": "https://www.datadoghq.com/blog/monitoring-kafka-performance-metrics"
+      },
+      {
+        "resource_type": "blog",
+        "url": "https://www.datadoghq.com/blog/collecting-kafka-performance-metrics"
+      },
+      {
+        "resource_type": "blog",
+        "url": "https://www.datadoghq.com/blog/monitor-kafka-with-datadog"
+      },
+      {
+        "resource_type": "other",
+        "url": "https://www.datadoghq.com/knowledge-center/apache-kafka/"
+      }
     ]
   },
   "author": {
@@ -64,9 +85,6 @@
       "kafka_patterns": "assets/saved_views/kafka_patterns.json",
       "logger_overview": "assets/saved_views/logger_overview.json",
       "kafka_processes": "assets/saved_views/kafka_processes.json"
-    },
-    "logs": {
-      "source": "kafka"
     }
   }
 }

@@ -29,8 +29,11 @@ def test_e2e_profile_avaya_aura_media_server(dd_agent_check):
     common_tags = [
         'snmp_profile:avaya-aura-media-server',
         'snmp_host:avaya-aura-media-server.device.name',
+        'device_hostname:avaya-aura-media-server.device.name',
         'device_namespace:default',
         'snmp_device:' + ip_address,
+        'device_ip:' + ip_address,
+        'device_id:default:' + ip_address,
     ] + []
 
     # --- TEST EXTENDED METRICS ---

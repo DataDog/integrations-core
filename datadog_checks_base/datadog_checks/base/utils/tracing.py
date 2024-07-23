@@ -7,13 +7,10 @@ import os
 
 from six import PY2, PY3
 
+from datadog_checks.base.agent import datadog_agent
+
 from ..config import is_affirmative
 from ..utils.common import to_native_string
-
-try:
-    import datadog_agent
-except ImportError:
-    from ..stubs import datadog_agent
 
 EXCLUDED_MODULES = ['threading']
 

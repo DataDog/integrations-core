@@ -51,6 +51,10 @@ class ApiSdk(Api):
             self.log.debug("adding X-OpenStack-Ironic-API-Version header to `%s`", self.config.ironic_microversion)
             self.http.options['headers']['X-OpenStack-Ironic-API-Version'] = self.config.ironic_microversion
 
+        if self.config.cinder_microversion:
+            self.log.debug("adding OpenStack-API-Version header to `%s`", self.config.cinder_microversion)
+            self.http.options['headers']['OpenStack-API-Version'] = self.config.cinder_microversion
+
     def auth_url(self):
         return self.cloud_config.get_auth_args().get('auth_url')
 
@@ -111,9 +115,17 @@ class ApiSdk(Api):
         self.connection.authorize()
         self.http.options['headers']['X-Auth-Token'] = self.connection.session.auth.get_token(self.connection.session)
 
-    def get_response_time(self, endpoint_types):
+    def get_response_time(self, endpoint_types, remove_project_id=True, is_heat=False):
         endpoint = self._catalog.get_endpoint_by_type(endpoint_types)
-        endpoint = endpoint.replace(self._access.project_id, "") if self._access.project_id else endpoint
+        endpoint = (
+            self._catalog.get_endpoint_by_type(endpoint_types).replace(f"/v1/{self._access.project_id}", "")
+            if is_heat
+            else (
+                endpoint.replace(self._access.project_id, "")
+                if self._access.project_id and remove_project_id
+                else endpoint
+            )
+        )
         response = self.http.get(endpoint)
         response.raise_for_status()
         return response.elapsed.total_seconds() * 1000
@@ -154,6 +166,39 @@ class ApiSdk(Api):
     def get_identity_limits(self):
         return [limit.to_dict(original_names=True) for limit in self.connection.identity.limits()]
 
+    def get_block_storage_volumes(self, project_id):
+        return [
+            volume.to_dict(original_names=True)
+            for volume in self.call_paginated_api(
+                self.connection.block_storage.volumes, project_id=project_id, limit=self.config.paginated_limit
+            )
+        ]
+
+    def get_block_storage_transfers(self, project_id):
+        return [
+            transfer.to_dict(original_names=True)
+            for transfer in self.connection.block_storage.transfers(project_id, details=True)
+        ]
+
+    def get_block_storage_snapshots(self, project_id):
+        return [
+            snapshot.to_dict(original_names=True)
+            for snapshot in self.call_paginated_api(
+                self.connection.block_storage.snapshots, project_id=project_id, limit=self.config.paginated_limit
+            )
+        ]
+
+    def get_block_storage_pools(self, project_id):
+        return [
+            pool.to_dict(original_names=True) for pool in self.connection.block_storage.pools(project_id, details=True)
+        ]
+
+    def get_block_storage_clusters(self, project_id):
+        return [
+            cluster.to_dict(original_names=True)
+            for cluster in self.connection.block_storage.clusters(project_id, details=True)
+        ]
+
     def get_compute_limits(self, project_id):
         return self.connection.compute.get_limits(tenant_id=project_id).to_dict(original_names=True)
 
@@ -181,11 +226,24 @@ class ApiSdk(Api):
             project_id,
         ).to_dict(original_names=True)
 
+    def get_compute_all_servers(self):
+        return [
+            server.to_dict(original_names=True)
+            for server in self.call_paginated_api(
+                self.connection.compute.servers,
+                project_id=None,
+                all_tenants=True,
+                limit=self.config.paginated_limit,
+            )
+        ]
+
     def get_compute_servers(self, project_id):
         return [
             server.to_dict(original_names=True)
             for server in self.call_paginated_api(
-                self.connection.compute.servers, details=True, project_id=project_id, limit=self.config.paginated_limit
+                self.connection.compute.servers,
+                project_id=project_id,
+                limit=self.config.paginated_limit,
             )
         ]
 
@@ -217,11 +275,52 @@ class ApiSdk(Api):
             )
         ]
 
+    def get_baremetal_portgroups(self, node_id):
+        return [
+            portgroup.to_dict(original_names=True)
+            for portgroup in self.call_paginated_api(
+                self.connection.baremetal.portgroups, node_id, limit=self.config.paginated_limit
+            )
+        ]
+
+    def get_baremetal_ports(self):
+        return [
+            port.to_dict(original_names=True)
+            for port in self.call_paginated_api(self.connection.baremetal.ports, limit=self.config.paginated_limit)
+        ]
+
     def get_baremetal_conductors(self):
         return [
             conductor.to_dict(original_names=True)
             for conductor in self.call_paginated_api(
                 self.connection.baremetal.conductors, limit=self.config.paginated_limit
+            )
+        ]
+
+    def get_baremetal_volume_connectors(self):
+        return [
+            connector.to_dict(original_names=True)
+            for connector in self.call_paginated_api(
+                self.connection.baremetal.volume_connectors, limit=self.config.paginated_limit
+            )
+        ]
+
+    def get_baremetal_volume_targets(self):
+        return [
+            target.to_dict(original_names=True)
+            for target in self.call_paginated_api(
+                self.connection.baremetal.volume_targets, limit=self.config.paginated_limit
+            )
+        ]
+
+    def get_baremetal_drivers(self):
+        return [driver.to_dict(original_names=True) for driver in self.connection.baremetal.drivers()]
+
+    def get_baremetal_allocations(self):
+        return [
+            allocation.to_dict(original_names=True)
+            for allocation in self.call_paginated_api(
+                self.connection.baremetal.allocations, limit=self.config.paginated_limit
             )
         ]
 
@@ -298,4 +397,23 @@ class ApiSdk(Api):
         return [
             image.to_dict(original_names=True)
             for image in self.call_paginated_api(self.connection.image.images, limit=self.config.paginated_limit)
+        ]
+
+    def get_glance_members(self, image_id):
+        return [member.to_dict(original_names=True) for member in self.connection.image.members(image_id)]
+
+    def get_heat_stacks(self, project_id):
+        return [
+            stack.to_dict(original_names=True)
+            for stack in self.call_paginated_api(
+                self.connection.heat.stacks, project_id=project_id, limit=self.config.paginated_limit
+            )
+        ]
+
+    def get_swift_containers(self, account_id):
+        return [
+            container.to_dict(original_names=True)
+            for container in self.call_paginated_api(
+                self.connection.swift.containers, account_id=account_id, limit=self.config.paginated_limit
+            )
         ]

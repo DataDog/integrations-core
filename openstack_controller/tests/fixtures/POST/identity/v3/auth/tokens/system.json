@@ -1,0 +1,156 @@
+{
+    "token": {
+      "methods": [
+        "password"
+      ],
+      "user": {
+        "domain": {
+          "id": "default",
+          "name": "Default"
+        },
+        "id": "7f88df947ceb4897a49c0b7ceee6f34a",
+        "name": "admin",
+        "password_expires_at": null
+      },
+      "audit_ids": [
+        "iUTq4RXXTb6BbUvd9jnPIQ"
+      ],
+      "expires_at": "2024-06-06T09:21:08.000000Z",
+      "issued_at": "2024-06-06T08:21:08.000000Z",
+      "roles": [
+        {
+          "id": "e827e9cc6a6b42c8be8301624b5a8f69",
+          "name": "admin"
+        },
+        {
+          "id": "38b90b833cf646709c3ae675a1c42839",
+          "name": "member"
+        },
+        {
+          "id": "6b29573632584bf08245bff4a7316bd1",
+          "name": "reader"
+        }
+      ],
+      "system": {
+        "all": true
+      },
+      "catalog": [
+        {
+          "endpoints": [],
+          "id": "1505541a289c4b2299377b8c182a1380",
+          "type": "block-storage",
+          "name": "cinder"
+        },
+        {
+          "endpoints": [
+            {
+              "id": "40c3ec5ef78d41bf84567ce6556c919c",
+              "interface": "public",
+              "region_id": "RegionOne",
+              "url": "http://10.164.0.15/placement",
+              "region": "RegionOne"
+            }
+          ],
+          "id": "5239361cab4b45c3af5140b1b38ca8d8",
+          "type": "placement",
+          "name": "placement"
+        },
+        {
+          "endpoints": [
+            {
+              "id": "bdef52ccccea4a4d9ad92fef26093fd0",
+              "interface": "public",
+              "region_id": "RegionOne",
+              "url": "http://127.0.0.1:8080/identity",
+              "region": "RegionOne"
+            }
+          ],
+          "id": "62e0c75c643844cf86431b7550b5a899",
+          "type": "identity",
+          "name": "keystone"
+        },
+        {
+          "endpoints": [
+            {
+              "id": "ab89d60d58ea4142bf3ce19b00d1e191",
+              "interface": "public",
+              "region_id": "RegionOne",
+              "url": "http://127.0.0.1:9696/networking",
+              "region": "RegionOne"
+            }
+          ],
+          "id": "88b17bd5c9424347ad927621e0569e08",
+          "type": "network",
+          "name": "neutron"
+        },
+        {
+          "endpoints": [
+            {
+              "id": "f0f391c849b9406bbc0ccebd5ea67df2",
+              "interface": "public",
+              "region_id": "RegionOne",
+              "url": "http://127.0.0.1:8774/compute/v2.1",
+              "region": "RegionOne"
+            }
+          ],
+          "id": "a17d707525614d61abe039c4a7de5248",
+          "type": "compute",
+          "name": "nova"
+        },
+        {
+          "endpoints": [],
+          "id": "ac03850889fc4eb7a44f692359840bd3",
+          "type": "volumev3",
+          "name": "cinderv3"
+        },
+        {
+          "endpoints": [
+            {
+              "id": "168f02a638de42f6b66b60b01f905830",
+              "interface": "public",
+              "region_id": "RegionOne",
+              "url": "http://127.0.0.1:8004/heat-api",
+              "region": "RegionOne"
+            }
+          ],
+          "id": "36f45c02edba4500adc2bc5974d22bf0",
+          "type": "orchestration",
+          "name": "heat"
+        },
+        {
+          "endpoints": [
+            {
+              "id": "7e6cdeb2744345b7953d7b356245afec",
+              "interface": "admin",
+              "region_id": "RegionOne",
+              "url": "http://10.164.0.15:8080",
+              "region": "RegionOne"
+            }
+          ],
+          "id": "b69b0ea024814da3849d2b8c7e2dcc6e",
+          "type": "object-store",
+          "name": "swift"
+        },
+        {
+          "endpoints": [
+            {
+              "id": "2b8584df00b4430ebb4ac40b1b8e01b4",
+              "interface": "public",
+              "region_id": "RegionOne",
+              "url": "http://127.0.0.1:9292/image",
+              "region": "RegionOne"
+            }
+          ],
+          "id": "bc4c445268784a7a80da5fb8ce722bd5",
+          "type": "image",
+          "name": "glance"
+        },
+        {
+          "endpoints": [],
+          "id": "e6ac9200b3e4427ba50abf74c95bb2e4",
+          "type": "compute_legacy",
+          "name": "nova_legacy"
+        }
+      ]
+    }
+  }
