@@ -58,7 +58,7 @@ kyverno.process.virtual_memory.bytes,gauge,,byte,,The virtual memory size in byt
 kyverno.process.virtual_memory.max_bytes,gauge,,byte,,The maximum amount of virtual memory available in bytes in the Kyverno instance,0,kyverno,kyverno process virtual_memory max_byte,,
 kyverno.ttl.controller.deletedobjects.count,count,,,,Number of objects deleted by the cleanup TTL controller,0,kyverno,kyverno ttl controller deletedobjects count,,
 kyverno.ttl.controller.errors.count,count,,,,Number of errors encountered by the cleanup TTL controller while trying to delete objects,0,kyverno,kyverno ttl controller errors count,,
-kyverno.workqueue.adds.count,count,,,,The total number of adds handled by workqueue,0,kyverno,kyverno workqueue adds,,
+kyverno.workqueue.adds.count,count,,,,The total number of adds handled by the workqueue,0,kyverno,kyverno workqueue adds,,
 kyverno.workqueue.depth,gauge,,,,The current depth of the workqueue,0,kyverno,kyverno workqueue depth,,
 kyverno.workqueue.longest.running_processor.seconds,gauge,,second,,The number of seconds the longest running worqueue processor has been running,0,kyverno,kyverno workqueue longest running_processor seconds,,
 kyverno.workqueue.queue.duration.seconds.bucket,count,,,,The number of events in a specific histogram bucket in the workqueue before being requested,0,kyverno,kyverno workqueue queue duration seconds bucket,,
