@@ -95,7 +95,7 @@
                     {
                         "definition": {
                             "background_color": "orange",
-                            "content": "Here you can see an overview of your vLLM of your system activity and any vLLM alerts. The service checks on the left speak to the health of your vLLM environment, while the ones on the right report on the Readiness of various vllm Dependencies.\n",
+                            "content": "Here you can see an overview of your vLLM of your system activity and any vLLM alerts. The service checks on the left indicates the health of your vLLM environment, while the ones on the right report on the Readiness of various vllm Dependencies.\n",
                             "font_size": "14",
                             "has_padding": true,
                             "show_tick": false,
@@ -298,7 +298,7 @@
                     {
                         "definition": {
                             "background_color": "blue",
-                            "content": "Here you can see how vLLM is performing its main task: generating text.\n\nThis ranges from how long an entire request takes to breaking it down into time spent on each token.\nFrom time spent preparing generate the first token to how many tokens your models produce once they really get going.",
+                            "content": "Here you can see how vLLM is performing its main task: generating text.\n\nThis ranges from how long an entire request takes to how long it takes to break it down into time spent on each token.\nAnd from time spent preparing to generate the first token to how many tokens your models produce after they get going.",
                             "font_size": "14",
                             "has_padding": true,
                             "show_tick": false,
@@ -825,7 +825,7 @@
                     {
                         "definition": {
                             "background_color": "blue",
-                            "content": "The GPU is the workhorse of vLLM. It is also expensive to run. See here how many requests your GPU is running and how much you are taking advantage of its caching mechanisms.",
+                            "content": "The GPU is the workhorse of vLLM. It is also expensive to run. See here how many requests your GPU is running and how you are taking advantage of its caching mechanisms.",
                             "font_size": "14",
                             "has_padding": true,
                             "show_tick": false,
@@ -958,7 +958,7 @@
                     {
                         "definition": {
                             "background_color": "orange",
-                            "content": "You can save on some infrastructure costs by doing some of the work on CPUs instead of GPUs. In this section you can see how much of your vLLM load ends up sent to CPU for processing.",
+                            "content": "You can save on some infrastructure costs by doing some of the work on CPUs instead of GPUs. In this section, you can see how much of your vLLM load ends up being sent to the CPU for processing.",
                             "font_size": "14",
                             "has_padding": true,
                             "show_tick": false,
