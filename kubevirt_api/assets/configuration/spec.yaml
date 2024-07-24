@@ -7,19 +7,19 @@ files:
           - template: init_config/openmetrics
       - template: instances
         options:
-          - name: kubevirt_api_url
+          - name: kubevirt_api_metrics_endpoint
             description: |
-              URL to the KubeVirt API Service.
+              URL to the KubeVirt API Service /metrics endpoint.
             value:
               display_default: null
-              example: https://virt-api.kubevirt.svc:443
+              example: https://virt-api.kubevirt.svc/metrics
               type: string
-          - name: health_url
+          - name: kubevirt_api_healthz_endpoint
             description: |
-              URL to check the health of the KubeVirt API.
+              URL to check the KubeVirt API /healthz endpoint.
             value:
               display_default: null
-              example: https://virt-api.kubevirt.svc:443/healthz
+              example: https://virt-api.kubevirt.svc/healthz
               type: string
           - template: instances/openmetrics
             overrides:

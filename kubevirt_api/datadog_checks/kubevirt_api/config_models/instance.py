@@ -103,7 +103,6 @@ class InstanceConfig(BaseModel):
     extra_headers: Optional[MappingProxyType[str, Any]] = None
     extra_metrics: Optional[tuple[Union[str, MappingProxyType[str, Union[str, ExtraMetric]]], ...]] = None
     headers: Optional[MappingProxyType[str, Any]] = None
-    health_url: Optional[str] = None
     histogram_buckets_as_distributions: Optional[bool] = None
     hostname_format: Optional[str] = None
     hostname_label: Optional[str] = None
@@ -117,7 +116,8 @@ class InstanceConfig(BaseModel):
     kerberos_hostname: Optional[str] = None
     kerberos_keytab: Optional[str] = None
     kerberos_principal: Optional[str] = None
-    kubevirt_api_url: Optional[str] = None
+    kubevirt_api_healthz_endpoint: Optional[str] = None
+    kubevirt_api_metrics_endpoint: Optional[str] = None
     log_requests: Optional[bool] = None
     metric_patterns: Optional[MetricPatterns] = None
     metrics: Optional[tuple[Union[str, MappingProxyType[str, Union[str, Metric]]], ...]] = None

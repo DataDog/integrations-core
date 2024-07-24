@@ -10,7 +10,7 @@ from .metrics import METRICS_MAP
 
 class KubevirtApiCheck(OpenMetricsBaseCheckV2):
     # This will be the prefix of every metric and service check the integration sends
-    __NAMESPACE__ = "kubevirt_api"
+    __NAMESPACE__ = 'kubevirt_api'
     DEFAULT_METRIC_LIMIT = 0
 
     def __init__(self, name, init_config, instances):
@@ -19,8 +19,8 @@ class KubevirtApiCheck(OpenMetricsBaseCheckV2):
 
     def check(self, _):
         # type: (Any) -> None
-        if self.kubevirt_api_health_endpoint:
-            url = self.kubevirt_api_health_endpoint
+        if self.kubevirt_api_healthz_endpoint:
+            url = self.kubevirt_api_healthz_endpoint
             try:
                 response = self.http.get(url, verify=is_affirmative(self.tls_verify))
                 response.raise_for_status()
@@ -45,7 +45,7 @@ class KubevirtApiCheck(OpenMetricsBaseCheckV2):
 
     def _parse_config(self):
         self.kubevirt_api_metrics_endpoint = self.instance.get("kubevirt_api_metrics_endpoint")
-        self.kubevirt_api_health_endpoint = self.instance.get("kubevirt_api_health_endpoint")
+        self.kubevirt_api_healthz_endpoint = self.instance.get("kubevirt_api_healthz_endpoint")
         self.tls_verify = self.instance.get("tls_verify")
 
         if "/metrics" not in self.kubevirt_api_metrics_endpoint:

@@ -46,15 +46,15 @@ init_config:
 instances:
 
   -
-    ## @param kubevirt_api_url - string - optional
-    ## URL to the KubeVirt API Service.
+    ## @param kubevirt_api_metrics_endpoint - string - optional
+    ## URL to the KubeVirt API Service /metrics endpoint.
     #
-    # kubevirt_api_url: https://virt-api.kubevirt.svc:443
+    # kubevirt_api_metrics_endpoint: https://virt-api.kubevirt.svc/metrics
 
-    ## @param health_url - string - optional
-    ## URL to check the health of the KubeVirt API.
+    ## @param kubevirt_api_healthz_endpoint - string - optional
+    ## URL to check the KubeVirt API /healthz endpoint.
     #
-    # health_url: https://virt-api.kubevirt.svc:443/healthz
+    # kubevirt_api_healthz_endpoint: https://virt-api.kubevirt.svc/healthz
 
     ## @param raw_metric_prefix - string - optional
     ## A prefix that is removed from all exposed metric names, if present.
