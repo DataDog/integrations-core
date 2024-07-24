@@ -6,8 +6,9 @@ import functools
 import ssl
 from typing import Any, Callable, List, TypeVar, cast  # noqa: F401
 
+import vsanapiutils
 from pyVim import connect
-from pyVmomi import vim, vmodl
+from pyVmomi import SoapStubAdapter, vim, vmodl
 from six import itervalues
 
 from datadog_checks.base.log import CheckLoggingAdapter  # noqa: F401
@@ -99,6 +100,7 @@ class VSphereAPI(object):
         self.log = log
 
         self._conn = cast(vim.ServiceInstance, None)
+        self._vsan_stub = cast(SoapStubAdapter, None)
         self.smart_connect()
 
     def smart_connect(self):
@@ -151,6 +153,7 @@ class VSphereAPI(object):
             connect.Disconnect(self._conn)
 
         self._conn = conn
+        self._vsan_stub = vsanapiutils.GetVsanVcStub(conn._stub, context=context)
         self.log.debug("Connected to %s", version_info.fullName)
 
     @smart_retry
@@ -383,3 +386,23 @@ class VSphereAPI(object):
             return max_historical_metrics
         else:
             return UNLIMITED_HIST_METRICS_PER_QUERY
+
+    @smart_retry
+    def query_vsan_metrics(self):
+        # type: () -> List[vim.cluster.VsanPerfEntityMetricCSV]
+        # need to provide a config option to turn vsan metric collection on/off and specify query spec
+        self.log.debug("Querying vSAN metrics: %s", self._vsan_stub)
+        vsan_perf_manager = vim.cluster.VsanPerformanceManager('vsan-performance-manager', self._vsan_stub)
+        cluster_metrics = []
+        for datacenter in self._conn.content.rootFolder.childEntity:
+            for cluster in datacenter.hostFolder.childEntity:
+                if isinstance(cluster, vim.ClusterComputeResource):
+                    cluster_vsan_config = cluster.configurationEx.vsanConfigInfo
+                    if cluster_vsan_config and cluster_vsan_config.enabled:
+                        cluster_uuid = cluster_vsan_config.defaultConfig.uuid
+                        cluster_vsanPerfQuerySpec = [
+                            vim.cluster.VsanPerfQuerySpec(entityRefId=f'cluster-domclient:{cluster_uuid}'),
+                            vim.cluster.VsanPerfQuerySpec(entityRefId=f'vsan-cluster-capacity:{cluster_uuid}'),
+                        ]
+                        cluster_metrics.append(vsan_perf_manager.QueryVsanPerf(cluster_vsanPerfQuerySpec, cluster))
+        return cluster_metrics

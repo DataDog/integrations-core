@@ -4,14 +4,21 @@
 
 import datetime as dt
 
-import mock
 import pytest
+from mock import mock, patch
 from pyVmomi import vim
 
 from datadog_checks.vsphere import VSphereCheck
 from datadog_checks.vsphere.constants import EXCLUDE_FILTERS
 
 from .mocked_api import MockedAPI
+
+
+@pytest.fixture(autouse=True)
+def mock_vsan_stub():
+    with patch('vsanapiutils.GetVsanVcStub') as GetStub:
+        GetStub._stub.host = '0.0.0.0'
+        yield GetStub
 
 
 def mock_api_with_events(events):

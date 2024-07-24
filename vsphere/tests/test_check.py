@@ -7,9 +7,8 @@ import logging
 import os
 import time
 
-import mock
 import pytest
-from mock import MagicMock
+from mock import MagicMock, mock, patch
 from pyVmomi import vim, vmodl
 
 from datadog_checks.base import to_string
@@ -21,6 +20,13 @@ from tests.legacy.utils import mock_alarm_event
 
 from .common import HERE, VSPHERE_VERSION, build_rest_api_client
 from .mocked_api import MockedAPI
+
+
+@pytest.fixture(autouse=True)
+def mock_vsan_stub():
+    with patch('vsanapiutils.GetVsanVcStub') as GetStub:
+        GetStub._stub.host = '0.0.0.0'
+        yield GetStub
 
 
 @pytest.mark.usefixtures("mock_type", "mock_threadpool", "mock_api")
@@ -626,6 +632,7 @@ def test_no_infra_cache(aggregator, realtime_instance, dd_run_check, caplog):
         aggregator.assert_metric('datadog.vsphere.collect_events.time')
         aggregator.assert_metric('datadog.vsphere.refresh_metrics_metadata_cache.time')
         aggregator.assert_metric('datadog.vsphere.refresh_infrastructure_cache.time')
+        aggregator.assert_metric('vsphere.vsan.cluster.time')
 
         aggregator.assert_all_metrics_covered()
 
@@ -686,6 +693,7 @@ def test_no_infra_cache_events(aggregator, realtime_instance, dd_run_check, capl
         aggregator.assert_metric('datadog.vsphere.collect_events.time')
         aggregator.assert_metric('datadog.vsphere.refresh_metrics_metadata_cache.time')
         aggregator.assert_metric('datadog.vsphere.refresh_infrastructure_cache.time')
+        aggregator.assert_metric('vsphere.vsan.cluster.time')
 
         aggregator.assert_event(
             """datadog saved the new configuration:\n@@@\n""",
@@ -728,6 +736,7 @@ def test_no_infra_cache_no_perf_values(aggregator, realtime_instance, dd_run_che
         aggregator.assert_metric('datadog.vsphere.collect_events.time')
         aggregator.assert_metric('datadog.vsphere.refresh_metrics_metadata_cache.time')
         aggregator.assert_metric('datadog.vsphere.refresh_infrastructure_cache.time')
+        aggregator.assert_metric('vsphere.vsan.cluster.time')
 
         aggregator.assert_event(
             """datadog saved the new configuration:\n@@@\n""",

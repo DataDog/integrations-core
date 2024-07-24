@@ -474,6 +474,51 @@ class VSphereCheck(AgentCheck):
         )
         return metrics_values
 
+    def collect_vsan_metrics(self):
+        # type: () -> None
+        self.log.debug("Starting vsan metrics collection (query start time: %s).", self.latest_event_query)
+        latest_metric_time = None
+        collect_start_time = get_current_datetime()
+        try:
+            t0 = Timer()
+            new_metrics = self.api.query_vsan_metrics()
+            self.gauge(
+                'vsphere.vsan.cluster.time',
+                t0.total(),
+                tags=self._config.base_tags,
+                raw=True,
+                hostname=self._hostname,
+            )
+            self.log.debug("Got %s new VSan metrics from vCenter", len(new_metrics))
+            for cluster in new_metrics[0]:
+                cluster_uuid = cluster.entityRefId.split(":")[-1]
+                for given_metric in cluster.value:
+                    self.log.debug(
+                        "Processing metric with type:%s",
+                        type(given_metric),
+                    )
+                    if given_metric.values.split(',')[-1] != 'None':
+                        self.gauge(
+                            'vsphere.vsan.cluster.{}'.format(given_metric.metricId.label),
+                            int(given_metric.values.split(',')[-1]),
+                            tags=['vsphere_cluster:{}'.format(cluster_uuid)] + self._config.base_tags,
+                            raw=True,
+                            hostname=self._hostname,
+                        )
+                    if latest_metric_time is None:
+                        latest_metric_time = collect_start_time
+        except Exception as e:
+            # Don't get stuck on a failure to fetch a vsan metric
+            # Ignore them for next pass
+            self.log.warning("Unable to fetch Vsan metrics %s", e)
+
+        if latest_metric_time is not None:
+            self.latest_metric_query = latest_metric_time + dt.timedelta(seconds=1)
+        else:
+            # Let's set `self.latest_metric_query` to `collect_start_time` as safeguard in case no metrics are reported
+            # OR something bad happened (which might happen again indefinitely).
+            self.latest_metric_query = collect_start_time
+
     def make_query_specs(self):
         # type: () -> Iterable[List[vim.PerformanceManager.QuerySpec]]
         """
@@ -1027,3 +1072,5 @@ class VSphereCheck(AgentCheck):
         self.log.debug("Starting metric collection in %d threads.", self._config.threads_count)
         self.collect_metrics_async()
         self.log.debug("Metric collection completed.")
+
+        self.collect_vsan_metrics()

@@ -4,8 +4,8 @@
 import contextlib
 import logging
 
-import mock
 import pytest
+from mock import mock, patch
 from pyVmomi import vim, vmodl
 
 from datadog_checks.base import AgentCheck, ConfigurationError
@@ -26,6 +26,13 @@ pytestmark = [pytest.mark.unit]
 @contextlib.contextmanager
 def does_not_raise(enter_result=None):
     yield enter_result
+
+
+@pytest.fixture(autouse=True)
+def mock_vsan_stub():
+    with patch('vsanapiutils.GetVsanVcStub') as GetStub:
+        GetStub._stub.host = '0.0.0.0'
+        yield GetStub
 
 
 def test_log_deprecation_warning(dd_run_check, caplog, default_instance):
@@ -3023,6 +3030,7 @@ def test_property_metrics_metric_filters(
     aggregator.assert_metric('vsphere.cpu.totalmhz.avg')
     aggregator.assert_metric('vsphere.datastore.busResets.sum')
     aggregator.assert_metric('vsphere.vmop.numChangeDS.latest')
+    aggregator.assert_metric('vsphere.vsan.cluster.time')
     aggregator.assert_all_metrics_covered()
 
 
@@ -3087,6 +3095,7 @@ def test_property_metrics_expired_cache(
         aggregator.assert_metric('datadog.vsphere.collect_events.time')
         aggregator.assert_metric('datadog.vsphere.query_metrics.time')
         aggregator.assert_metric('vsphere.cpu.costop.sum')
+        aggregator.assert_metric('vsphere.vsan.cluster.time')
         aggregator.assert_all_metrics_covered()
 
         assert not check.infrastructure_cache.is_expired()

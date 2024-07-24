@@ -12,6 +12,13 @@ from datadog_checks.vsphere.api import APIConnectionError, VSphereAPI
 from datadog_checks.vsphere.config import VSphereConfig
 
 
+@pytest.fixture(autouse=True)
+def mock_vsan_stub():
+    with patch('vsanapiutils.GetVsanVcStub') as GetStub:
+        GetStub._stub.host = '0.0.0.0'
+        yield GetStub
+
+
 def test_ssl_verify_false(realtime_instance):
     realtime_instance['ssl_verify'] = False
 

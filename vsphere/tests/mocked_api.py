@@ -29,6 +29,7 @@ class MockedAPI(object):
         self.infrastructure_data = {}
         self.metrics_data = []
         self.mock_events = []
+        self.vsan_metrics_data = []
         self.server_time = dt.datetime.now()
 
     def get_current_time(self):
@@ -120,6 +121,9 @@ class MockedAPI(object):
 
     def get_new_events(self, start_time):
         return self.mock_events
+
+    def query_vsan_metrics(self):
+        return self.vsan_metrics_data
 
 
 class MockResponse(Response):

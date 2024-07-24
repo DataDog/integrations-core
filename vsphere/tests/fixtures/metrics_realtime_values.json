@@ -10929,5 +10929,8 @@
             "vsphere_folder:host",
             "vsphere_type:host"
         ]
+    },
+    {
+        "name": "vsphere.vsan.cluster.time"
     }
 ]
