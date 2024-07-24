@@ -12,7 +12,7 @@ Follow the instructions below to install and configure this check for an Agent r
 
 Starting from Agent release 7.53.0, the Argo Rollouts check is included in the [Datadog Agent][2] package. No additional installation is needed in your environment.
 
-This check uses [OpenMetrics][5] to collect metrics from the OpenMetrics endpoint that Karpenter exposes, which requires Python 3.
+This check uses [OpenMetrics][5] to collect metrics from the OpenMetrics endpoint that Argo Rollout exposes, which requires Python 3.
 
 ### Configuration
 
