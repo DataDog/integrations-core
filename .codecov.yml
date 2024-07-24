@@ -678,6 +678,10 @@ coverage:
         target: 75
         flags:
         - fluxcd
+      tibco_ems:
+        target: 75
+        flags:
+        - tibco_ems
       vSphere:
         target: 75
         flags:
@@ -1429,6 +1433,11 @@ flags:
     paths:
     - teradata/datadog_checks/teradata
     - teradata/tests
+  tibco_ems:
+    carryforward: true
+    paths:
+    - tibco_ems/datadog_checks/tibco_ems
+    - tibco_ems/tests
   tls:
     carryforward: true
     paths:
