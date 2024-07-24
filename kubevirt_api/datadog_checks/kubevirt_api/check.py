@@ -7,10 +7,6 @@ from datadog_checks.base import OpenMetricsBaseCheckV2, is_affirmative
 
 from .metrics import METRICS_MAP
 
-# from datadog_checks.base.utils.db import QueryManager
-# from requests.exceptions import ConnectionError, HTTPError, InvalidURL, Timeout
-# from json import JSONDecodeError
-
 
 class KubevirtApiCheck(OpenMetricsBaseCheckV2):
     # This will be the prefix of every metric and service check the integration sends
@@ -23,8 +19,8 @@ class KubevirtApiCheck(OpenMetricsBaseCheckV2):
 
     def check(self, _):
         # type: (Any) -> None
-        if self.health_url:
-            url = self.health_url
+        if self.kubevirt_api_health_endpoint:
+            url = self.kubevirt_api_health_endpoint
             try:
                 response = self.http.get(url, verify=is_affirmative(self.tls_verify))
                 response.raise_for_status()
@@ -48,17 +44,17 @@ class KubevirtApiCheck(OpenMetricsBaseCheckV2):
         super().check(_)
 
     def _parse_config(self):
-        self.kubevirt_api_url = self.instance.get("kubevirt_api_url")
-        self.health_url = self.instance.get("health_url")
+        self.kubevirt_api_metrics_endpoint = self.instance.get("kubevirt_api_metrics_endpoint")
+        self.kubevirt_api_health_endpoint = self.instance.get("kubevirt_api_health_endpoint")
         self.tls_verify = self.instance.get("tls_verify")
 
-        if "/metrics" not in self.kubevirt_api_url:
-            self.kubevirt_api_url = "{}/metrics".format(self.kubevirt_api_url)
+        if "/metrics" not in self.kubevirt_api_metrics_endpoint:
+            self.kubevirt_api_metrics_endpoint = "{}/metrics".format(self.kubevirt_api_metrics_endpoint)
 
         self.scraper_configs = []
 
         instance = {
-            "openmetrics_endpoint": self.kubevirt_api_url,
+            "openmetrics_endpoint": self.kubevirt_api_metrics_endpoint,
             "metrics": [METRICS_MAP],
             "namespace": self.__NAMESPACE__,
             "enable_health_service_check": False,
