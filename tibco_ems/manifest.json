@@ -31,7 +31,7 @@
       },
       "metrics": {
         "prefix": "tibco_ems.",
-        "check": "",
+        "check": "tibco_ems.server.uptime",
         "metadata_path": "metadata.csv"
       },
       "service_checks": {

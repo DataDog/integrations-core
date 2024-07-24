@@ -41,7 +41,7 @@ tibco_ems.server.storage_write_rate,gauge,,,,The number of storage writes on the
 tibco_ems.server.storage_write_rate_size,gauge,,byte,,The size of the  rate of storage writes on the server.,0,tibco_ems,,,
 tibco_ems.server.synchronous_storage,gauge,,,,The amount of storage used for synchronous message storage.,0,tibco_ems,,,
 tibco_ems.server.topics,gauge,,,,"The total number of topics, including the count of dynamic and temporary topics.",0,tibco_ems,,,
-tibco_ems.server.uptime,gauge,,,,The total time the server has been running since it was last started.,0,tibco_ems,,,
+tibco_ems.server.uptime,gauge,,second,,The total time the server has been running since it was last started.,0,tibco_ems,,,
 tibco_ems.topic.durable_subscriptions,gauge,,,,"The number of current subscriptions on the topic, including durable subscriptions.",0,tibco_ems,,,
 tibco_ems.topic.pending_messages,gauge,,,,The number of pending messages on the topic.,0,tibco_ems,,,
 tibco_ems.topic.pending_messages_size,gauge,,byte,,The total size of pending messages on the topic.,0,tibco_ems,,,
