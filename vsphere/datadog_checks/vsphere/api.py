@@ -388,9 +388,8 @@ class VSphereAPI(object):
             return UNLIMITED_HIST_METRICS_PER_QUERY
 
     @smart_retry
-    def query_vsan_metrics(self):
+    def query_vsan_cluster_metrics(self):
         # type: () -> List[vim.cluster.VsanPerfEntityMetricCSV]
-        # need to provide a config option to turn vsan metric collection on/off and specify query spec
         self.log.debug("Querying vSAN metrics: %s", self._vsan_stub)
         vsan_perf_manager = vim.cluster.VsanPerformanceManager('vsan-performance-manager', self._vsan_stub)
         cluster_metrics = []
@@ -404,5 +403,9 @@ class VSphereAPI(object):
                             vim.cluster.VsanPerfQuerySpec(entityRefId=f'cluster-domclient:{cluster_uuid}'),
                             vim.cluster.VsanPerfQuerySpec(entityRefId=f'vsan-cluster-capacity:{cluster_uuid}'),
                         ]
-                        cluster_metrics.append(vsan_perf_manager.QueryVsanPerf(cluster_vsanPerfQuerySpec, cluster))
+                        discovered_metrics = vsan_perf_manager.QueryVsanPerf(cluster_vsanPerfQuerySpec, cluster)
+                        for entity_type in discovered_metrics:
+                            for metric in entity_type.value:
+                                metric.metricId.name = cluster.name
+                        cluster_metrics.append(discovered_metrics)
         return cluster_metrics

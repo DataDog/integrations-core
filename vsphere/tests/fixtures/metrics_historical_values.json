@@ -1787,8 +1787,5 @@
     },
     {
         "name": "datadog.vsphere.refresh_infrastructure_cache.time"
-    },
-    {
-        "name": "vsphere.vsan.cluster.time"
     }
 ]

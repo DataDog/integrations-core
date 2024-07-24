@@ -632,7 +632,6 @@ def test_no_infra_cache(aggregator, realtime_instance, dd_run_check, caplog):
         aggregator.assert_metric('datadog.vsphere.collect_events.time')
         aggregator.assert_metric('datadog.vsphere.refresh_metrics_metadata_cache.time')
         aggregator.assert_metric('datadog.vsphere.refresh_infrastructure_cache.time')
-        aggregator.assert_metric('vsphere.vsan.cluster.time')
 
         aggregator.assert_all_metrics_covered()
 
@@ -693,7 +692,6 @@ def test_no_infra_cache_events(aggregator, realtime_instance, dd_run_check, capl
         aggregator.assert_metric('datadog.vsphere.collect_events.time')
         aggregator.assert_metric('datadog.vsphere.refresh_metrics_metadata_cache.time')
         aggregator.assert_metric('datadog.vsphere.refresh_infrastructure_cache.time')
-        aggregator.assert_metric('vsphere.vsan.cluster.time')
 
         aggregator.assert_event(
             """datadog saved the new configuration:\n@@@\n""",
@@ -736,7 +734,6 @@ def test_no_infra_cache_no_perf_values(aggregator, realtime_instance, dd_run_che
         aggregator.assert_metric('datadog.vsphere.collect_events.time')
         aggregator.assert_metric('datadog.vsphere.refresh_metrics_metadata_cache.time')
         aggregator.assert_metric('datadog.vsphere.refresh_infrastructure_cache.time')
-        aggregator.assert_metric('vsphere.vsan.cluster.time')
 
         aggregator.assert_event(
             """datadog saved the new configuration:\n@@@\n""",
@@ -746,3 +743,12 @@ def test_no_infra_cache_no_perf_values(aggregator, realtime_instance, dd_run_che
         )
 
         aggregator.assert_all_metrics_covered()
+
+
+@pytest.mark.usefixtures("mock_type", "mock_threadpool", "mock_api")
+def test_vsan_metrics_included_in_check(aggregator, realtime_instance, dd_run_check):
+    realtime_instance['collect_vsan_cluster_metrics'] = True
+    check = VSphereCheck('vsphere', {}, [realtime_instance])
+    dd_run_check(check)
+
+    aggregator.assert_metric('vsphere.vsan.cluster.time', metric_type=aggregator.GAUGE, count=1)

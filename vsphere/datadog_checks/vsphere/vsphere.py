@@ -474,14 +474,14 @@ class VSphereCheck(AgentCheck):
         )
         return metrics_values
 
-    def collect_vsan_metrics(self):
+    def collect_vsan_cluster_metrics(self):
         # type: () -> None
         self.log.debug("Starting vsan metrics collection (query start time: %s).", self.latest_event_query)
         latest_metric_time = None
         collect_start_time = get_current_datetime()
         try:
             t0 = Timer()
-            new_metrics = self.api.query_vsan_metrics()
+            new_metrics = self.api.query_vsan_cluster_metrics()
             self.gauge(
                 'vsphere.vsan.cluster.time',
                 t0.total(),
@@ -489,10 +489,8 @@ class VSphereCheck(AgentCheck):
                 raw=True,
                 hostname=self._hostname,
             )
-            self.log.debug("Got %s new VSan metrics from vCenter", len(new_metrics))
-            for cluster in new_metrics[0]:
-                cluster_uuid = cluster.entityRefId.split(":")[-1]
-                for given_metric in cluster.value:
+            for entity_type in new_metrics[0]:
+                for given_metric in entity_type.value:
                     self.log.debug(
                         "Processing metric with type:%s",
                         type(given_metric),
@@ -500,8 +498,9 @@ class VSphereCheck(AgentCheck):
                     if given_metric.values.split(',')[-1] != 'None':
                         self.gauge(
                             'vsphere.vsan.cluster.{}'.format(given_metric.metricId.label),
+                            # for now we only collect the latest value
                             int(given_metric.values.split(',')[-1]),
-                            tags=['vsphere_cluster:{}'.format(cluster_uuid)] + self._config.base_tags,
+                            tags=['vsphere_cluster:{}'.format(given_metric.metricId.name)] + self._config.base_tags,
                             raw=True,
                             hostname=self._hostname,
                         )
@@ -1073,4 +1072,5 @@ class VSphereCheck(AgentCheck):
         self.collect_metrics_async()
         self.log.debug("Metric collection completed.")
 
-        self.collect_vsan_metrics()
+        if self._config.collect_vsan_cluster_metrics:
+            self.collect_vsan_cluster_metrics()

@@ -387,6 +387,13 @@ files:
         value:
           type: boolean
           example: false
+      - name: get_vsan_cluster_metrics
+        description: |
+          If true, the vSphere integration will collect additional metrics about vSAN cluster metrics.
+          These metrics are collected at a frequency of `refresh_infrastructure_cache_interval`.
+        value:
+          type: boolean
+          example: false
       - name: attributes_prefix
         description: |
           Custom attributes attached to vSphere resources will be prefixed with this prefix when collected.

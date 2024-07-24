@@ -5,7 +5,6 @@ import copy
 import logging
 
 import pytest
-import vsanapiutils
 from mock import MagicMock, patch
 from pyVmomi import vim
 

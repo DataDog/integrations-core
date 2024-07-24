@@ -122,7 +122,7 @@ class MockedAPI(object):
     def get_new_events(self, start_time):
         return self.mock_events
 
-    def query_vsan_metrics(self):
+    def query_vsan_cluster_metrics(self):
         return self.vsan_metrics_data
 
 
