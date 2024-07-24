@@ -103,10 +103,9 @@ def assert_check_kafka(aggregator, consumer_groups):
 
                 for mname in CONSUMER_METRICS:
                     aggregator.assert_metric(mname)
-                    t = tags + [f"consumer_group:{name}"]
-                    if aggregator.assert_metric_has_tags(mname, t):
-                        # Check for the tag consumer_group_state
-                        aggregator.assert_metric_has_tag_prefix(mname, tag_prefix='consumer_group_state')
+                    tags = tags + [f"consumer_group:{name}"]
+                    for tag in tags:
+                        aggregator.assert_metric_has_tag(mname, tag)
 
     aggregator.assert_all_metrics_covered()
     aggregator.assert_metrics_using_metadata(get_metadata_metrics())

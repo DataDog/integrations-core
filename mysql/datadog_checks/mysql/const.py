@@ -290,6 +290,10 @@ GROUP_REPLICATION_VARS = {
     'Transactions_check': ('mysql.replication.group.transactions_check', GAUGE),
     'Conflict_detected': ('mysql.replication.group.conflicts_detected', GAUGE),
     'Transactions_row_validating': ('mysql.replication.group.transactions_validating', GAUGE),
+}
+
+# Metrics added to MySQL in 8.0.2
+GROUP_REPLICATION_VARS_8_0_2 = {
     'Transactions_remote_applier_queue': ('mysql.replication.group.transactions_in_applier_queue', GAUGE),
     'Transactions_remote_applied': ('mysql.replication.group.transactions_applied', GAUGE),
     'Transactions_local_proposed': ('mysql.replication.group.transactions_proposed', GAUGE),

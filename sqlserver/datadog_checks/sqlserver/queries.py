@@ -199,15 +199,19 @@ WHERE
 
 FOREIGN_KEY_QUERY = """
 SELECT
-    FK.referenced_object_id AS id, FK.name AS foreign_key_name,
+    FK.parent_object_id AS id,
+    FK.name AS foreign_key_name,
     OBJECT_NAME(FK.parent_object_id) AS referencing_table,
     STRING_AGG(COL_NAME(FKC.parent_object_id, FKC.parent_column_id),',') AS referencing_column,
     OBJECT_NAME(FK.referenced_object_id) AS referenced_table,
     STRING_AGG(COL_NAME(FKC.referenced_object_id, FKC.referenced_column_id),',') AS referenced_column
 FROM
-    sys.foreign_keys AS FK JOIN sys.foreign_key_columns AS FKC ON FK.object_id = FKC.constraint_object_id
+    sys.foreign_keys AS FK
+    JOIN sys.foreign_key_columns AS FKC ON FK.object_id = FKC.constraint_object_id
 WHERE
-    FK.referenced_object_id IN ({}) GROUP BY FK.name, FK.parent_object_id, FK.referenced_object_id;
+    FK.parent_object_id IN ({})
+GROUP BY
+    FK.name, FK.parent_object_id, FK.referenced_object_id;
 """
 
 

@@ -199,7 +199,33 @@ def test(
             base_command.append('--memray')
 
         if e2e:
-            base_command.extend(('-m', 'e2e'))
+            # Convert pytest_args to a list if it's a tuple
+            pytest_args_list = list(pytest_args) if isinstance(pytest_args, tuple) else pytest_args
+
+            # Initialize a list to hold indices of '-m' options and their values to be removed
+            indices_to_remove = []
+            marker_values = []
+
+            # Iterate over pytest_args_list to find '-m' or '--markers' options and their values
+            for i, arg in enumerate(pytest_args_list):
+                if arg in ('-m', '--markers') and i + 1 < len(pytest_args_list):
+                    indices_to_remove.extend([i, i + 1])
+                    marker_values.append(pytest_args_list[i + 1])
+
+            # Reverse sort indices_to_remove to avoid index shifting issues during removal
+            indices_to_remove.sort(reverse=True)
+
+            # Remove the '-m' options and their values from pytest_args_list
+            for index in indices_to_remove:
+                pytest_args_list.pop(index)
+
+            # After removing the '-m' options and their values
+            # Convert the modified pytest_args_list back to a tuple
+            pytest_args = tuple(pytest_args_list)
+
+            # Construct the combined marker expression with extracted marker values and 'e2e'
+            combined_marker = " and ".join(marker_values) + " and e2e" if marker_values else "e2e"
+            base_command.extend(('-m', combined_marker))
             global_env_vars[EndToEndEnvVars.PARENT_PYTHON] = sys.executable
 
     app.display_debug(f'Targets: {", ".join(targets)}')

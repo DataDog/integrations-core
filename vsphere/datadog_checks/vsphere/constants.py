@@ -29,6 +29,8 @@ MOR_TYPE_AS_STRING = {
     vim.Datacenter: 'datacenter',
     vim.Datastore: 'datastore',
     vim.ClusterComputeResource: 'cluster',
+    vim.StoragePod: 'storage_pod',
+    vim.vslm.vcenter.VStorageObjectManager: 'vstorage_object_manager',
 }
 
 ALL_RESOURCES = [
@@ -195,3 +197,23 @@ EXCLUDE_FILTERS = {
     'VmReconfiguredEvent': [],
     'VmSuspendedEvent': [],
 }
+
+PER_RESOURCE_EVENTS = [
+    'AlarmAcknowledgedEvent',
+    'AlarmActionTriggeredEvent',
+    'AlarmClearedEvent',
+    'AlarmCreatedEvent',
+    'AlarmEmailCompletedEvent',
+    'AlarmEmailFailedEvent',
+    'AlarmReconfiguredEvent',
+    'AlarmRemovedEvent',
+    'AlarmScriptCompleteEvent',
+    'AlarmScriptFailedEvent',
+    'AlarmSnmpCompletedEvent',
+    'AlarmSnmpFailedEvent',
+    'AlarmStatusChangedEvent',
+    'CustomFieldValueChangedEvent',
+    'GeneralUserEvent',
+    'PermissionEvent',
+    'ScheduledTaskEvent',
+]

@@ -1846,7 +1846,7 @@
                                             "aggregator": "avg",
                                             "data_source": "metrics",
                                             "name": "query1",
-                                            "query": "sum:datadog.netflow.aggregator.sequence.last{environment:mimic,$Netflow_Exporter} by {exporter_ip,flow_type}.fill(null)"
+                                            "query": "sum:datadog.netflow.aggregator.sequence.last{$Netflow_Exporter} by {exporter_ip,flow_type}.fill(null)"
                                         }
                                     ],
                                     "response_format": "scalar"
@@ -2672,12 +2672,12 @@
                                         {
                                             "data_source": "metrics",
                                             "name": "query1",
-                                            "query": "sum:datadog.netflow.aggregator.sequence.delta{environment:mimic,$Netflow_Exporter} by {exporter_ip}.as_count().fill(null)"
+                                            "query": "sum:datadog.netflow.aggregator.sequence.delta{$Netflow_Exporter} by {exporter_ip}.as_count().fill(null)"
                                         },
                                         {
                                             "data_source": "metrics",
                                             "name": "query2",
-                                            "query": "sum:datadog.netflow.processor.flowsets{environment:mimic,$Netflow_Exporter} by {exporter_ip}.as_count().fill(null)"
+                                            "query": "sum:datadog.netflow.processor.flowsets{$Netflow_Exporter} by {exporter_ip}.as_count().fill(null)"
                                         }
                                     ],
                                     "response_format": "timeseries",
@@ -2724,12 +2724,12 @@
                                         {
                                             "data_source": "metrics",
                                             "name": "query1",
-                                            "query": "sum:datadog.netflow.aggregator.sequence.delta{environment:mimic,$Netflow_Exporter} by {exporter_ip}.as_count().fill(null)"
+                                            "query": "sum:datadog.netflow.aggregator.sequence.delta{$Netflow_Exporter} by {exporter_ip}.as_count().fill(null)"
                                         },
                                         {
                                             "data_source": "metrics",
                                             "name": "query2",
-                                            "query": "sum:datadog.netflow.processor.processed{environment:mimic,$Netflow_Exporter} by {exporter_ip}.as_count().fill(null)"
+                                            "query": "sum:datadog.netflow.processor.processed{$Netflow_Exporter} by {exporter_ip}.as_count().fill(null)"
                                         }
                                     ],
                                     "response_format": "timeseries",
@@ -2776,7 +2776,7 @@
                                         {
                                             "data_source": "metrics",
                                             "name": "query1",
-                                            "query": "sum:datadog.netflow.aggregator.sequence.delta{environment:mimic,$Netflow_Exporter} by {exporter_ip,flow_type}.as_count().fill(null)"
+                                            "query": "sum:datadog.netflow.aggregator.sequence.delta{$Netflow_Exporter} by {exporter_ip,flow_type}.as_count().fill(null)"
                                         }
                                     ],
                                     "response_format": "timeseries",
@@ -2823,7 +2823,7 @@
                                         {
                                             "data_source": "metrics",
                                             "name": "query1",
-                                            "query": "sum:datadog.netflow.aggregator.sequence.reset{environment:mimic,$Netflow_Exporter} by {exporter_ip,flow_type}.fill(null)"
+                                            "query": "sum:datadog.netflow.aggregator.sequence.reset{$Netflow_Exporter} by {exporter_ip,flow_type}.fill(null)"
                                         }
                                     ],
                                     "response_format": "timeseries",

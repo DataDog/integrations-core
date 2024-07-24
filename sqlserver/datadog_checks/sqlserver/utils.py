@@ -3,6 +3,7 @@
 # Licensed under a 3-clause BSD style license (see LICENSE)
 import os
 import re
+import sys
 from typing import Dict
 
 from datadog_checks.base.utils.platform import Platform
@@ -36,9 +37,37 @@ def set_default_driver_conf():
         # Use default `./driver_config/odbcinst.ini` when Agent is running in docker.
         # `freetds` is shipped with the Docker Agent.
         os.environ.setdefault('ODBCSYSINI', DRIVER_CONFIG_DIR)
-    else:
+    elif Platform.is_linux():
+        """
+        The agent running on Linux has msodbcsql18 and FreeTDS installed.
+        The default driver is msodbcsql18.
+        To best leverage the default driver, we set the ODBCSYSINI environment variable to the directory
+        containing the pre-configured odbcinst.ini file.
+        However, if the user has already configured the ODBCSYSINI environment variable,
+        OR if the user has already created or copied the odbcinst.ini file in the unixODBC sysconfig location,
+        we do not override the ODBCSYSINI environment variable.
+        """
+        if 'ODBCSYSINI' in os.environ:
+            # If ODBCSYSINI is already set in env, don't override it
+            return
+
+        # linux_unixodbc_sysconfig is set to the agent embedded /etc directory
+        # this is a hacky way to get the path to the etc directory
+        # by getting the path to the python executable and get the directory above /bin/python
+        linux_unixodbc_sysconfig = os.path.dirname(os.path.dirname(sys.executable))
+        if os.path.exists(os.path.join(linux_unixodbc_sysconfig, 'odbcinst.ini')) or os.path.exists(
+            os.path.join(linux_unixodbc_sysconfig, 'odbc.ini')
+        ):
+            # If there are already drivers or dataSources installed, don't override the ODBCSYSINI
+            # This means user has copied odbcinst.ini and odbc.ini to the unixODBC sysconfig location
+            return
+
+        # Use default `./driver_config/odbcinst.ini` to let the integration use agent embedded odbc driver.
+        os.environ.setdefault('ODBCSYSINI', DRIVER_CONFIG_DIR)
+
         # required when using pyodbc with FreeTDS on Ubuntu 18.04
         # see https://stackoverflow.com/a/22988748/1258743
+        # TODO: remove once we deprecate the embedded FreeTDS driver
         os.environ.setdefault('TDSVER', '8.0')
 
 

@@ -9,7 +9,7 @@
     "support": "README.md#Support",
     "changelog": "CHANGELOG.md",
     "description": "Monitor key metrics for credit usage, storage, query, user history and more.",
-    "title": "Snowflake - Agent based",
+    "title": "Snowflake - Agent based (Deprecated)",
     "media": [],
     "classifier_tags": [
       "Supported OS::Linux",
@@ -17,7 +17,14 @@
       "Supported OS::Windows",
       "Category::Cloud",
       "Category::Data Stores",
-      "Category::Cost Management"
+      "Category::Cost Management",
+      "Offering::Integration"
+    ],
+    "resources": [
+      {
+        "resource_type": "blog",
+        "url": "https://www.datadoghq.com/blog/snowflake-monitoring-datadog/"
+      }
     ]
   },
   "author": {
@@ -55,4 +62,3 @@
     }
   }
 }
-

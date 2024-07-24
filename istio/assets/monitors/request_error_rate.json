@@ -1,0 +1,33 @@
+{
+    "version": 2,
+    "created_at": "2024-07-08",
+    "last_updated_at": "2024-07-08",
+    "title": "Istio Proxy Requests Error Percentage",
+    "tags": [
+        "integration:istio"
+    ],
+    "description": "The request count metric shows throughput between services in your mesh, incrementing with each HTTP or gRPC request an Envoy sidecar receives. This monitor alerts if over 40% of requests get 5xx, 4xx, or 0 status codes in the last 15 minutes, indicating possible issues.",
+    "definition": {
+        "message": "{{#is_alert}}\n\nIstio Proxy requests are reporting a high error percentage in {{cluster_name.name}}. This indicates that greater than 40% of requests are getting a status code of 5xx, 4xx or 0 in the last 15 minutes.\n\n{{/is_alert}}",
+        "name": "[Istio] Proxy Requests Error Percentage",
+        "options": {
+            "thresholds": {
+                "critical": 40
+            },
+            "notify_audit": false,
+            "include_tags": true,
+            "new_group_delay": 60,
+            "silenced": {},
+            "avalanche_window": 10,
+            "notify_no_data": false,
+            "renotify_interval": 0,
+            "require_full_window": false
+        },  
+        "priority": null,
+        "query": "sum(last_15m):sum:istio.mesh.request.count.total{(response_code:4* OR response_code:5* OR response_code:0)} by {cluster_name}.as_count() / sum:istio.mesh.request.count.total{*} by {cluster_name}.as_count() * 100 > 40",
+        "tags": [
+            "integration:istio"
+        ],
+        "type": "query alert"
+    }
+}

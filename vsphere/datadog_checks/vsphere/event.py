@@ -11,7 +11,13 @@ from pyVmomi import vim
 
 from datadog_checks.base import ensure_unicode
 
-from .constants import DEFAULT_EVENT_RESOURCES, EXCLUDE_FILTERS, MOR_TYPE_AS_STRING, SOURCE_TYPE
+from .constants import (
+    DEFAULT_EVENT_RESOURCES,
+    EXCLUDE_FILTERS,
+    MOR_TYPE_AS_STRING,
+    PER_RESOURCE_EVENTS,
+    SOURCE_TYPE,
+)
 
 
 class VSphereEvent(object):
@@ -40,7 +46,7 @@ class VSphereEvent(object):
 
     def _is_filtered(self):
         # Filter the unwanted types
-        if self.event_type == 'AlarmStatusChangedEvent':
+        if self.event_type in PER_RESOURCE_EVENTS:
             # Get the entity type/name
             self.entity_type = self.raw_event.entity.entity.__class__
 

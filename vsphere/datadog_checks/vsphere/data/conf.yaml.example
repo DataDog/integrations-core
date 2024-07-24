@@ -247,7 +247,14 @@ instances:
     #   - <CLUSTER_REGEX>
 
     ## @param event_resource_filters - list of strings - optional - default: ['vm', 'host']
-    ## Which resource types to collect AlarmStatusChangedEvent events for.
+    ## For events that can be filtered by resources, specify which resources to collect these events for.
+    ##
+    ## The events that can be filtered by resource are as follows: AlarmAcknowledgedEvent,
+    ## AlarmActionTriggeredEvent, AlarmClearedEvent, AlarmCreatedEvent, AlarmEmailCompletedEvent,
+    ## AlarmEmailFailedEvent, AlarmReconfiguredEvent, AlarmRemovedEvent, AlarmScriptCompleteEvent,
+    ## AlarmScriptFailedEvent, AlarmSnmpCompletedEvent, AlarmSnmpFailedEvent, AlarmStatusChangedEvent,
+    ## CustomFieldValueChangedEvent, GeneralUserEvent, PermissionEvent, ScheduledTaskEvent
+    ##
     ## Available resource types are vm, host, datastore, datacenter, and cluster.
     ##
     ## By default, the integration will only collect these events for VMs and Hosts.
@@ -258,6 +265,8 @@ instances:
     #   - datastore
     #   - datacenter
     #   - cluster
+    #   - storage_pod
+    #   - vcenter_object_manager
 
     ## @param include_events - list of mappings - optional
     ## The events that should be collected by the vSphere integration.
