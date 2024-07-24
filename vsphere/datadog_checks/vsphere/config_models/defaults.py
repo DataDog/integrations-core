@@ -60,6 +60,10 @@ def instance_excluded_host_tags():
     return []
 
 
+def instance_get_vsan_cluster_metrics():
+    return False
+
+
 def instance_include_datastore_cluster_folder_tag():
     return True
 

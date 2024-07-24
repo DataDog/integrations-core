@@ -153,6 +153,7 @@ class InstanceConfig(BaseModel):
     empty_default_hostname: bool
     event_resource_filters: Optional[tuple[str, ...]] = None
     excluded_host_tags: Optional[tuple[str, ...]] = None
+    get_vsan_cluster_metrics: Optional[bool] = None
     host: str
     include_datastore_cluster_folder_tag: Optional[bool] = None
     include_events: Optional[tuple[IncludeEvent, ...]] = None
