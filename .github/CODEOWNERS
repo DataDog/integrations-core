@@ -253,10 +253,16 @@ datadog_checks_base/datadog_checks/base/checks/windows/              @DataDog/wi
 /mimecast/manifest.json                                             @DataDog/saas-integrations @DataDog/documentation
 /mimecast/assets/logs/                                              @DataDog/saas-integrations @DataDog/documentation @DataDog/logs-backend
 
+/sophos_central_cloud/                                               @DataDog/saas-integrations
+/sophos_central_cloud/*.md                                           @DataDog/saas-integrations @DataDog/documentation
+/sophos_central_cloud/manifest.json                                  @DataDog/saas-integrations @DataDog/documentation
+/sophos_central_cloud/assets/logs/                                   @DataDog/saas-integrations @DataDog/documentation @DataDog/logs-backend
+
 /ping_one/                                                          @DataDog/saas-integrations
 /ping_one/*.md                                                      @DataDog/saas-integrations @DataDog/documentation
 /ping_one/manifest.json                                             @DataDog/saas-integrations @DataDog/documentation
 /ping_one/assets/logs/                                              @DataDog/saas-integrations @DataDog/documentation @DataDog/logs-backend
+
 
 # To keep Security up-to-date with changes to the signing tool.
 /datadog_checks_dev/datadog_checks/dev/tooling/signing.py             @DataDog/agent-integrations
