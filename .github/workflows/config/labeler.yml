@@ -435,6 +435,8 @@ integration/solr:
 - solr/**/*
 integration/sonarqube:
 - sonarqube/**/*
+integration/sophos_central_cloud:
+- sophos_central_cloud/**/*
 integration/spark:
 - spark/**/*
 integration/sqlserver:
