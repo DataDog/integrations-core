@@ -28,6 +28,10 @@
       "configuration": {
         "spec": "assets/configuration/spec.yaml"
       },
+      "process_signatures": [
+        "tekton-pipelines-controller",
+        "tekton-triggers-controller"
+      ],
       "events": {
         "creates_events": false
       },
