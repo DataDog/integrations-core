@@ -14,13 +14,13 @@ SERVER_METRIC_KEYS = [
     'message_memory_pooled',
     'synchronous_storage',
     'asynchronous_storage',
-    'inbound_message_rate_count',
+    'inbound_message_rate',
     'inbound_message_rate_size',
-    'outbound_message_rate_count',
+    'outbound_message_rate',
     'outbound_message_rate_size',
-    'storage_read_rate_count',
+    'storage_read_rate',
     'storage_read_rate_size',
-    'storage_write_rate_count',
+    'storage_write_rate',
     'storage_write_rate_size',
     'uptime',
 ]
@@ -36,7 +36,7 @@ SHOW_METRIC_DATA = {
     },
     'show queues': {
         'regex': re.compile(
-            r'^\s*(?P<queue_name>\S+)\s+'
+            r'^\s*[*\s]*(?P<queue_name>\S+)\s+'
             r'(?P<snfgxibct>[-+*]*)\s+'
             r'(?P<pre>\d+\*?)\s+'
             r'(?P<receivers>\d+)\s+'
@@ -57,7 +57,7 @@ SHOW_METRIC_DATA = {
     },
     'show topics': {
         'regex': re.compile(
-            r'^\s*(?P<topic_name>\S+)\s+'
+            r'^\s*[*\s]*(?P<topic_name>\S+)\s+'
             r'(?P<snfgeibctm>[-+*]*)\s+'
             r'(?P<subsciptions>\d+\*?)\s+'
             r'(?P<durable_subscriptions>\d+)\s+'
@@ -119,14 +119,14 @@ SHOW_METRIC_DATA = {
     },
     'show connections full': {
         'regex': re.compile(
-            r'^\s*(?P<client_type>[LC])\s+'
+            r'^\s*(?P<client_type>[JC])\s+'
             r'(?P<tibco_version>[\w.]+(?:\s+V\d+)?)\s+'
             r'(?P<id>\d+)\s+'
             r'(?P<fsxt>[-A]+)\s+'
             r'(?P<s>[+|-])\s+'
             r'(?P<tibco_host>\S+)\s+'
             r'(?P<ip_address>\S+)\s+'
-            r'(?P<port>\d+)\s+'
+            r'(?P<tibco_port>\d+)\s+'
             r'(?P<user>\S*)\s+'
             r'(?P<client_id>\S*)\s+'
             r'(?P<sessions>\d+)\s+'
@@ -147,9 +147,8 @@ SHOW_METRIC_DATA = {
             'temporary_queues',
             'uncommitted_transactions',
             'uncommitted_transactions_size',
-            'uptime',
         ],
-        'tags': ['client_type', 'tibco_host', 'ip_address', 'port', 'user', 'client_id'],
+        'tags': ['client_type', 'tibco_host', 'ip_address', 'tibco_port', 'user', 'client_id'],
     },
     'show durables': {
         'regex': re.compile(

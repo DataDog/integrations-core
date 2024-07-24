@@ -9,7 +9,11 @@ from datadog_checks.base.utils.subprocess_output import get_subprocess_output
 
 from .constants import SHOW_METRIC_DATA, unit_pattern
 
+DEFAULT_HOST = 'localhost'
+DEFAULT_PORT = 7222
 TO_BYTES = {'B': 1, 'Kb': 1e3, 'Mb': 1e6, 'Gb': 1e9, 'Tb': 1e12}
+CONNECTION_STRING = 'tcp://{}:{}'
+CONNECTION_STRING_SSL = 'ssl://{}:{}'
 
 
 class TibcoEMSCheck(AgentCheck):
@@ -21,20 +25,21 @@ class TibcoEMSCheck(AgentCheck):
         super(TibcoEMSCheck, self).__init__(name, init_config, instances)
         # Allow to specify a complete command for tibemsadmin such as `docker exec <container> tibemsadmin`
         # default_tibemsadmin_cmd = init_config.get('tibemsadmin', 'tibemsadmin')
-        default_tibemsadmin_cmd = init_config.get('tibemsadmin', 'docker container exec tibco tibemsadmin')
+        default_tibemsadmin_cmd = init_config.get('tibemsadmin', 'tibemsadmin')
         tibemsadmin_cmd = self.instance.get('tibemsadmin', default_tibemsadmin_cmd).split()
-        host = self.instance.get('host', 'localhost')
-        port = self.instance.get('port', 7222)
-        username = self.instance.get('username', 'admin')
-        password = self.instance.get('password', 'admin')
-        script_path = self.instance.get('script_path', '/opt/tibco/ems/10.1/show_stats')
+        host = self.instance.get('host', DEFAULT_HOST)
+        port = self.instance.get('port', DEFAULT_PORT)
+        username = self.instance.get('username', "")
+        password = self.instance.get('password', "")
+        script_path = self.instance.get('script_path')
+        server_string = CONNECTION_STRING.format(host, port)
+        ssl = self.instance.get('ssl', False)
         self.tags = self.instance.get("tags", [])
         self.parsed_data = {}
 
-        # Build the tibeamsadmin command
         self.cmd = tibemsadmin_cmd + [
             '-server',
-            f'tcp://{host}:{port}',
+            server_string,
             '-user',
             username,
             '-password',
@@ -42,10 +47,13 @@ class TibcoEMSCheck(AgentCheck):
             '-script',
             script_path,
         ]
+        # Build the tibeamsadmin command
+        if ssl:
+            server_string = CONNECTION_STRING_SSL.format(host, port)
+            self._get_ssl_params(self.instance)
 
     def check(self, _):
 
-        # Run the command
         output, err, code = get_subprocess_output(self.cmd, self.log)
         if err or 'Error:' in output or code != 0:
             self.log.error('Error running command: %s', err)
@@ -107,23 +115,41 @@ class TibcoEMSCheck(AgentCheck):
             elif key in ['topics', 'queues']:
                 server_data[key] = int(value.split(' ')[0])
             elif "rate" in key:
-                server_data[key] = parse_rate(value)
+                parse_rate(server_data, key, value)
+            elif key == 'uptime':
+                server_data[key] = parse_server_uptime(value)
             elif any(metric in key for metric in metrics_with_units):
                 server_data[key] = self.parse_unit(value)
             else:
                 server_data[key] = self.parse_generic(value)
 
-        def parse_rate(value):
-            rate_data = {}
+        def parse_rate(server_data, metric_key, value):
             rates = value.split(',')
             count_match = rate_pattern.match(rates[0].strip())
             unit_match = unit_pattern.match(rates[1].strip())
             if count_match and unit_match:
-                rate_data["count"] = float(count_match.group('value'))
-                rate_data["count_unit"] = count_match.group('unit')
-                rate_data["size"] = float(unit_match.group('value'))
-                rate_data["size_unit"] = unit_match.group('unit')
-            return rate_data
+                server_data[f"{key}"] = float(count_match.group('value'))
+                server_data[f"{key}_size"] = {}
+                server_data[f"{key}_size"]['value'] = float(unit_match.group('value'))
+                server_data[f"{key}_size"]['unit'] = unit_match.group('unit')
+            return server_data
+
+        def parse_server_uptime(uptime_str):
+            # Regex to extract days, hours, minutes, and seconds
+            uptime_pattern = re.compile(
+                r'(?:(?P<days>\d+)\s+days\s*)?(?:(?P<hours>\d+)\s+hours\s*)?(?:(?P<minutes>\d+)\s+minutes\s*)?(?:(?P<seconds>\d+)\s+seconds\s*)?'
+            )
+            match = uptime_pattern.match(uptime_str)
+            if not match:
+                return 0
+
+            days = int(match.group('days') or 0) * 86400
+            hours = int(match.group('hours') or 0) * 3600
+            minutes = int(match.group('minutes') or 0) * 60
+            seconds = int(match.group('seconds') or 0)
+
+            total_seconds = days + hours + minutes + seconds
+            return total_seconds
 
         metrics_with_units = [
             'pending_message_size',
@@ -131,6 +157,10 @@ class TibcoEMSCheck(AgentCheck):
             'message_memory_pooled',
             'synchronous_storage',
             'asynchronous_storage',
+            'inbound_message_rate_size',
+            'outbound_message_rate_size',
+            'storage_read_rate_size',
+            'storage_write_rate_size',
         ]
 
         for line in lines:
@@ -154,21 +184,24 @@ class TibcoEMSCheck(AgentCheck):
             'messages_rate_size',
         ]
 
+        def sanitize_name(name):
+            '''
+            Sanitize the metric values to get rid of special characters
+            except for underscores and dots.
+            '''
+            return re.sub(r'[^\w\._]', '', name)
+
         for line in lines[1:]:
             match = pattern.match(line)
             if match:
                 info = match.groupdict()
                 if info.get('queue_name') == '>' or info.get('topic_name') == '>':
                     continue
-                if info.get('user') == '<offline>':
-                    info['user'] = 'offline'
-
                 for key, value in info.items():
                     if key in metrics_with_units:
                         info[key] = self.parse_unit(value)
                     else:
-                        if '$' in value:
-                            value = value.replace('$', '')
+                        value = sanitize_name(value)
                         info[key] = self.parse_generic(value)
                 data.append(info)
         return data
@@ -197,6 +230,9 @@ class TibcoEMSCheck(AgentCheck):
                     self.gauge(f"{prefix}.{metric_name}", metric_info, tags=tags)
 
     def section_output(self, output):
+        '''
+        Split the output into sections based on the command
+        '''
         sections = {}
         current_command = None
         current_section = []

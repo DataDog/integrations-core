@@ -65,3 +65,11 @@ C  10.1.0 V4 10630 ---A  +  d3ce69f9df4f 127.0.0.1  46418 admin              1  
 Command: show durables
   Topic Name        Durable          Shared  User         Msgs    Size
   sample            sample.durable   N       <offline>       0     0.0 Kb
+Command: show stat consumers
+                                                      Total Count      Rate/Second
+  User       Conn  T  Destination                      Msgs   Size      Msgs   Size
+  admin         2  Q  $TMP$.tibemsd.1669EC51B3.1          1    2.4 Kb      0    0.6 Kb
+Command: show stat producers
+                                        Total Count      Rate/Second
+  User       Conn  T  Destination       Msgs   Size      Msgs   Size
+  admin         2  Q  $sys.admin           3    0.5 Kb      0    0.0 Kb
