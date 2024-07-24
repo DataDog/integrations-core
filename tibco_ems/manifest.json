@@ -8,14 +8,13 @@
     "configuration": "README.md#Setup",
     "support": "README.md#Support",
     "changelog": "CHANGELOG.md",
-    "description": "",
+    "description": "The Tibco EMS integration",
     "title": "tibco_ems",
     "media": [],
     "classifier_tags": [
       "Supported OS::Linux",
       "Supported OS::Windows",
       "Supported OS::macOS",
-      "Category::Log Collection",
       "Submitted Data Type::Metrics"
     ]
   },
