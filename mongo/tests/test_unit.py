@@ -12,10 +12,9 @@ from pymongo.errors import ConnectionFailure, OperationFailure
 
 from datadog_checks.base import ConfigurationError
 from datadog_checks.mongo import MongoDb, metrics
-from datadog_checks.mongo.api import CRITICAL_FAILURE, MongoApi
+from datadog_checks.mongo.api import CRITICAL_FAILURE
 from datadog_checks.mongo.collectors import MongoCollector
 from datadog_checks.mongo.common import MongosDeployment, ReplicaSetDeployment, get_state_name
-from datadog_checks.mongo.config import MongoConfig
 from datadog_checks.mongo.utils import parse_mongo_uri
 
 from . import common
@@ -492,23 +491,19 @@ def test_collector_submit_payload(check, aggregator):
     aggregator.assert_all_metrics_covered()
 
 
-def test_api_alibaba_mongos(aggregator):
-    log = mock.MagicMock()
-    config = MongoConfig(common.INSTANCE_BASIC, log)
+def test_api_alibaba_mongos(check, aggregator):
     payload = {'isMaster': {'msg': 'isdbgrid'}}
     mocked_client = mock.MagicMock()
     mocked_client.__getitem__ = mock.MagicMock(return_value=mock.MagicMock(command=payload.__getitem__))
+    mocked_client.get_cmdline_opts.side_effect = OperationFailure('getCmdLineOpts is not supported')
 
     with mock.patch('datadog_checks.mongo.api.MongoClient', mock.MagicMock(return_value=mocked_client)):
-        api = MongoApi(config, log)
-        deployment_type = api._get_alibaba_deployment_type()
-        assert isinstance(deployment_type, MongosDeployment)
+        check = check(common.INSTANCE_BASIC)
+        check.refresh_deployment_type()
+        assert isinstance(check.deployment_type, MongosDeployment)
 
 
-def test_api_alibaba_mongod_shard(aggregator):
-    log = mock.MagicMock()
-    config = MongoConfig(common.INSTANCE_BASIC, log)
-
+def test_api_alibaba_mongod_shard(check, aggregator):
     payload = {
         'isMaster': {},
         'replSetGetStatus': {'myState': 1, 'set': 'foo', 'configsvr': False},
@@ -516,10 +511,12 @@ def test_api_alibaba_mongod_shard(aggregator):
     }
     mocked_client = mock.MagicMock()
     mocked_client.__getitem__ = mock.MagicMock(return_value=mock.MagicMock(command=payload.__getitem__))
+    mocked_client.get_cmdline_opts.side_effect = OperationFailure('getCmdLineOpts is not supported')
 
     with mock.patch('datadog_checks.mongo.api.MongoClient', mock.MagicMock(return_value=mocked_client)):
-        api = MongoApi(config, log)
-        deployment_type = api._get_alibaba_deployment_type()
+        check = check(common.INSTANCE_BASIC)
+        check.refresh_deployment_type()
+        deployment_type = check.deployment_type
         assert isinstance(deployment_type, ReplicaSetDeployment)
         assert deployment_type.cluster_role == 'shardsvr'
         assert deployment_type.replset_state_name == 'primary'
@@ -531,17 +528,16 @@ def test_api_alibaba_mongod_shard(aggregator):
         assert deployment_type.replset_name == 'foo'
 
 
-def test_api_alibaba_configsvr(aggregator):
-    log = mock.MagicMock()
-    config = MongoConfig(common.INSTANCE_BASIC, log)
-
+def test_api_alibaba_configsvr(check, aggregator):
     payload = {'isMaster': {}, 'replSetGetStatus': {'myState': 2, 'set': 'config', 'configsvr': True}}
     mocked_client = mock.MagicMock()
     mocked_client.__getitem__ = mock.MagicMock(return_value=mock.MagicMock(command=payload.__getitem__))
+    mocked_client.get_cmdline_opts.side_effect = OperationFailure('getCmdLineOpts is not supported')
 
     with mock.patch('datadog_checks.mongo.api.MongoClient', mock.MagicMock(return_value=mocked_client)):
-        api = MongoApi(config, log)
-        deployment_type = api._get_alibaba_deployment_type()
+        check = check(common.INSTANCE_BASIC)
+        check.refresh_deployment_type()
+        deployment_type = check.deployment_type
         assert isinstance(deployment_type, ReplicaSetDeployment)
         assert deployment_type.cluster_role == 'configsvr'
         assert deployment_type.replset_state_name == 'secondary'
@@ -553,10 +549,7 @@ def test_api_alibaba_configsvr(aggregator):
         assert deployment_type.replset_name == 'config'
 
 
-def test_api_alibaba_mongod(aggregator):
-    log = mock.MagicMock()
-    config = MongoConfig(common.INSTANCE_BASIC, log)
-
+def test_api_alibaba_mongod(check, aggregator):
     payload = {
         'isMaster': {},
         'replSetGetStatus': {'myState': 1, 'set': 'foo', 'configsvr': False},
@@ -566,8 +559,9 @@ def test_api_alibaba_mongod(aggregator):
     mocked_client.__getitem__ = mock.MagicMock(return_value=mock.MagicMock(command=payload.__getitem__))
 
     with mock.patch('datadog_checks.mongo.api.MongoClient', mock.MagicMock(return_value=mocked_client)):
-        api = MongoApi(config, log)
-        deployment_type = api._get_alibaba_deployment_type()
+        check = check(common.INSTANCE_BASIC)
+        check.refresh_deployment_type()
+        deployment_type = check.deployment_type
         assert isinstance(deployment_type, ReplicaSetDeployment)
         assert deployment_type.cluster_role is None
         assert deployment_type.replset_state_name == 'primary'
