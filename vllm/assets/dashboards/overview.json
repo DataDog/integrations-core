@@ -648,7 +648,7 @@
                     {
                         "definition": {
                             "background_color": "orange",
-                            "content": "todo",
+                            "content": "As vLLM does its job it is important that it does not overload your operating system. Check that you are not exceeding the open file descriptor maximum. Inspect virtual and resident memory usage.",
                             "font_size": "14",
                             "has_padding": true,
                             "show_tick": false,
