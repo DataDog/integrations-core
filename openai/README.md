@@ -204,7 +204,7 @@ Validate that the APM Node.js library can communicate with your Agent by examini
 
 1. Login to your [OpenAI Account][10].
 2. Navigate to **View API Keys** under account settings.
-3. Click the **Create a new secret key** button.
+3. Click **Create a new secret key**.
 4. Copy the created API Key to your clipboard.
 
 ### Configuration
