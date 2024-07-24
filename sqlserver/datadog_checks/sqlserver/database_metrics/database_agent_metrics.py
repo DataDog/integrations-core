@@ -10,7 +10,7 @@ AGENT_ACTIVITY_DURATION_QUERY = {
     "query": """\
         SELECT
             sj.name,
-            ja.job_id,
+            CAST(ja.job_id AS char(36)) AS job_id,
             DATEDIFF(SECOND, ja.start_execution_date, GETDATE()) AS duration_seconds
         FROM msdb.dbo.sysjobactivity AS ja
         INNER JOIN msdb.dbo.sysjobs AS sj
@@ -60,7 +60,7 @@ AGENT_ACTIVITY_STEPS_QUERY = {
         )
         SELECT
             j.name,
-            aj.job_id,
+            CAST(aj.job_id AS char(36)) AS job_id,
             cs.step_name,
             cs.step_id,
             CASE cs.run_status

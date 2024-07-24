@@ -21,7 +21,7 @@ AGENT_HISTORY_QUERY = """\
 WITH HISTORY_ENTRIES AS (
     SELECT {history_row_limit_filter}
         j.name AS job_name,
-        sjh1.job_id,
+        CAST(sjh1.job_id AS char(36)) AS job_id,
         sjh1.step_name,
         sjh1.step_id,
         sjh1.instance_id AS step_instance_id,

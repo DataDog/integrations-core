@@ -22,7 +22,7 @@ AGENT_HISTORY_QUERY = """\
 WITH HISTORY_ENTRIES AS (
     SELECT {history_row_limit_filter}
         j.name AS job_name,
-        sjh1.job_id,
+        CAST(sjh1.job_id AS char(36)) AS job_id,
         sjh1.step_name,
         sjh1.step_id,
         sjh1.instance_id AS step_instance_id,
@@ -91,7 +91,7 @@ FORMATTED_HISTORY_QUERY = """\
 WITH HISTORY_ENTRIES AS (
     SELECT TOP 10000
         j.name AS job_name,
-        sjh1.job_id,
+        CAST(sjh1.job_id AS char(36)) AS job_id,
         sjh1.step_name,
         sjh1.step_id,
         sjh1.instance_id AS step_instance_id,
@@ -159,7 +159,7 @@ WHERE
 AGENT_ACTIVITY_DURATION_QUERY = """\
     SELECT
         sj.name,
-        ja.job_id,
+        CAST(ja.job_id AS char(36)) AS job_id,
         DATEDIFF(SECOND, ja.start_execution_date, GETDATE()) AS duration_seconds
     FROM msdb.dbo.sysjobactivity AS ja
     INNER JOIN msdb.dbo.sysjobs AS sj
@@ -175,7 +175,7 @@ AGENT_ACTIVITY_DURATION_QUERY = """\
 AGENT_ACTIVITY_STEPS_QUERY = """\
     WITH ActiveJobs AS (
         SELECT
-            ja.job_id,
+            CAST(ja.job_id AS char(36)) AS job_id,
             last_executed_step_id
         FROM msdb.dbo.sysjobactivity AS ja
         WHERE ja.start_execution_date IS NOT NULL
