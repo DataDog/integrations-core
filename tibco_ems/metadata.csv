@@ -1,4 +1,4 @@
-metric_name,metric_type,interval,unit_name,per_unit_name,description,orientation,integration,short_name,curated_metric
+metric_name,metric_type,interval,unit_name,per_unit_name,description,orientation,integration,short_name,curated_metric,sample_tags
 tibco_ems.connection.consumers,gauge,,,,The number of consumers on the connection.,0,tibco_ems,,,
 tibco_ems.connection.producers,gauge,,,,The number of producers on the connectio.,0,tibco_ems,,,
 tibco_ems.connection.sessions,gauge,,,,The number of sessions on the connection.,0,tibco_ems,,,
