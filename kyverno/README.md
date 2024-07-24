@@ -48,7 +48,7 @@ spec:
 # (...)
 ```
 
-To collect metrics from each Kyverno controller the above pod annotations can be applied to each Kyverno controller pod. Example pod annotations for the Reports controller:
+To collect metrics from each Kyverno controller, the above pod annotations can be applied to each Kyverno controller pod. Example pod annotations for the Reports controller:
 
 ```yaml
 # Pod manifest from a basic Helm chart deployment
