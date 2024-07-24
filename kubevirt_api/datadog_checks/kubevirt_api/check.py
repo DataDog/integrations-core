@@ -37,6 +37,14 @@ class KubevirtApiCheck(OpenMetricsBaseCheckV2):
                 )
                 self.gauge("can_connect", 0)
                 raise
+
+        """ TODO: Use The KubeAPI client to get tags from the following endpoints:
+        GET /apis/kubevirt.io/v1/namespaces/{namespace}/virtualmachineinstances
+        GET /apis/kubevirt.io/v1/virtualmachineinstances
+        GET /apis/kubevirt.io/v1/namespaces/{namespace}/virtualmachine
+        GET /apis/kubevirt.io/v1/virtualmachine
+        """
+
         super().check(_)
 
     def _parse_config(self):
