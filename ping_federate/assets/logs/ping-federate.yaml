@@ -102,14 +102,13 @@ pipeline:
           enabled: true
           source: message
           samples:
-            - 2024-06-17 11:04:19,341| tid:LFcUz_Kyuqp4RcRrdnB2YS72Z3g| AUTHN_ATTEMPT| analyst| 142.251.46.174 | PingApp| connection1| SAML20| crest-pingfederate.com| IdP| success| OpenLDAP| Authentication successful| 200| qwerty-1234-asdfgh-5678| email=john.doe@example.com, name=John Doe, role=admin| authorization_code| SP| Request| response-123456| john.doe| req-abcdef123456| 1617692015000| resp-7890ghijkl| sts-processor-1234| [spAdapter.SAML2, spConnection.PartnerSP]| [adapter.HTMLFormSimplePCV, idpConnection.IdP, localIdentity.A8me9rySDn1aIM48]| pcv-ldap| virtualserver-01| MyOAuthClient| req-1234567890abcdef
-            - 2024-06-17 11:04:19,341| tid:LFcUz_Kyuqp4RcRrdnB2YS72Z3g| AUTHN_ATTEMPT| analyst| 142.251.46.174 | PingApp| connection1| SAML20| crest-pingfederate.com| IdP| success| OpenLDAP| Authentication successful| 200
+            - 2024-04-18 07:25:22,936| tid:SKOWnnUHVF95L8Q9jN0fscZ0A3A| AUTHN_ATTEMPT| analyst| 142.251.46.174 | PingApp| connection1| SAML20| crest-pingfederate.com| IdP| inprogress| OpenLDAP| [source:LDAP-05C40EAB2BCCC297D747FBC293eE1DA554118DD9] Invalid Credentials| 8| qwerty-1234-asdfgh-5678| email=john.doe@example.com, name=John Doe, role=admin| authorization_code| SP| Request| response-123456| john.doe| req-abcdef123456| 1617692015000| resp-7890ghijkl| sts-processor-1234| [spAdapter.SAML2, spConnection.PartnerSP]| [adapter.HTMLFormSimplePCV, idpConnection.IdP, localIdentity.A8me9rySDn1aIM48]| pcv-ldap| virtualserver-01| MyOAuthClient| req-1234567890abcdef
+            - 2024-04-18 07:25:22,936| tid:SKOWnnUHVF95L8Q9jN0fscZ0A3A| AUTHN_ATTEMPT| analyst| 142.251.46.174 | PingApp| connection1| SAML20| crest-pingfederate.com| IdP| inprogress| OpenLDAP| [source:LDAP-05C40EAB2BCCC297D747FBC293eE1DA554118DD9] Invalid Credentials| 8
           grok:
             supportRules: >-
-              parse_optional_source
-              (\[source:%{regex("[^|]*")?:description.source}] )?
+              parse_optional_source (\[source:%{notSpace:description.source}]( )?)?
 
-              parse_description_field (%{parse_optional_source}%{regex("[^|]*"):description.details})?
+              parse_description_field (%{parse_optional_source}%{regex("[^|]*"):error.message})?
 
               parse_default_audit_log %{date("yyyy-MM-dd' 'HH:mm:ss,SSS"):timestamp}\| tid:%{regex("[^|]*"):trackingid}\| (%{regex("[^|]*"):evt.name})?\| (%{word:ping_federate.transaction.subject})?\| (%{ip:network.client.ip})? \| %{regex("[^|]*"):app}\| (%{word:ping_federate.transaction.connection.id})?\| (%{word:protocol})?\| (%{hostname:http.url_details.host})?\| (%{word:ping_federate.transaction.role})?\| (%{word:evt.outcome})?\| %{regex("[^|]*"):adapterid}\| %{parse_description_field}\|( %{number:duration})?
             matchRules: >
