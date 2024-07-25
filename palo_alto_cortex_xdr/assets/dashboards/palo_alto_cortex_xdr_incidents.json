@@ -85,7 +85,7 @@
                                 },
                                 "group_by": [],
                                 "search": {
-                                    "query": "service:incident source:palo-alto-cortex-xdr $Severity $Starred $Incident-Id $User"
+                                    "query": "service:incident source:palo-alto-cortex-xdr $Severity-Status $Starred $Incident-Id $User"
                                 },
                                 "storage": "hot"
                             }
@@ -158,7 +158,7 @@
                                     }
                                 ],
                                 "search": {
-                                    "query": "service:incident source:palo-alto-cortex-xdr $Severity $Starred $Incident-Id $User"
+                                    "query": "service:incident source:palo-alto-cortex-xdr $Severity-Status $Starred $Incident-Id $User"
                                 },
                                 "storage": "hot"
                             }
@@ -203,7 +203,7 @@
                                 },
                                 "group_by": [],
                                 "search": {
-                                    "query": "service:incident source:palo-alto-cortex-xdr @severity:critical $Severity $Starred $Incident-Id $User"
+                                    "query": "service:incident source:palo-alto-cortex-xdr @severity:critical $Severity-Status $Starred $Incident-Id $User"
                                 },
                                 "storage": "hot"
                             }
@@ -254,7 +254,7 @@
                                 },
                                 "group_by": [],
                                 "search": {
-                                    "query": "service:incident source:palo-alto-cortex-xdr @severity:high $Severity $Starred $Incident-Id $User"
+                                    "query": "service:incident source:palo-alto-cortex-xdr @severity:high $Severity-Status $Starred $Incident-Id $User"
                                 },
                                 "storage": "hot"
                             }
@@ -306,7 +306,7 @@
                                 },
                                 "group_by": [],
                                 "search": {
-                                    "query": "service:incident source:palo-alto-cortex-xdr @severity:medium $Severity $Starred $Incident-Id $User"
+                                    "query": "service:incident source:palo-alto-cortex-xdr @severity:medium $Severity-Status $Starred $Incident-Id $User"
                                 },
                                 "storage": "hot"
                             }
@@ -358,7 +358,7 @@
                                 },
                                 "group_by": [],
                                 "search": {
-                                    "query": "service:incident source:palo-alto-cortex-xdr @severity:low $Severity $Starred $Incident-Id $User"
+                                    "query": "service:incident source:palo-alto-cortex-xdr @severity:low $Severity-Status $Starred $Incident-Id $User"
                                 },
                                 "storage": "hot"
                             }
@@ -433,7 +433,7 @@
                                     }
                                 ],
                                 "search": {
-                                    "query": "service:incident source:palo-alto-cortex-xdr $Severity $Starred $Incident-Id $User"
+                                    "query": "service:incident source:palo-alto-cortex-xdr $Severity-Status $Starred $Incident-Id $User"
                                 },
                                 "storage": "hot"
                             }
@@ -551,7 +551,7 @@
                                     }
                                 ],
                                 "search": {
-                                    "query": "service:incident source:palo-alto-cortex-xdr $Severity $Starred $Incident-Id $User"
+                                    "query": "service:incident source:palo-alto-cortex-xdr $Severity-Status $Starred $Incident-Id $User"
                                 },
                                 "storage": "hot"
                             }
@@ -613,7 +613,7 @@
                                 },
                                 "group_by": [],
                                 "search": {
-                                    "query": "service:incident source:palo-alto-cortex-xdr @resolved_timestamp:null $Severity $Starred $Incident-Id $User"
+                                    "query": "service:incident source:palo-alto-cortex-xdr @resolved_timestamp:null $Severity-Status $Starred $Incident-Id $User"
                                 },
                                 "storage": "hot"
                             }
@@ -622,14 +622,18 @@
                             {
                                 "formula": "query1"
                             }
+                        ],
+                        "conditional_formats": [
+                            {
+                                "comparator": ">",
+                                "value": 0,
+                                "palette": "black_on_light_green"
+                            }
                         ]
                     }
                 ],
                 "autoscale": true,
-                "precision": 2,
-                "timeseries_background": {
-                    "type": "area"
-                }
+                "precision": 2
             },
             "layout": {
                 "x": 0,
@@ -670,7 +674,7 @@
                                     }
                                 ],
                                 "search": {
-                                    "query": "service:incident source:palo-alto-cortex-xdr $Severity $Starred $Incident-Id $User -@resolve_comment:null -@resolve_comment:\"\""
+                                    "query": "service:incident source:palo-alto-cortex-xdr $Severity-Status $Starred $Incident-Id $User -@resolve_comment:null -@resolve_comment:\"\""
                                 },
                                 "storage": "hot"
                             }
@@ -748,7 +752,7 @@
                                     }
                                 ],
                                 "search": {
-                                    "query": "service:incident source:palo-alto-cortex-xdr $Severity $Starred $Incident-Id $User"
+                                    "query": "service:incident source:palo-alto-cortex-xdr $Severity-Status $Starred $Incident-Id $User"
                                 },
                                 "storage": "hot"
                             }
@@ -817,7 +821,7 @@
                                     }
                                 ],
                                 "search": {
-                                    "query": "service:incident source:palo-alto-cortex-xdr $Severity $Starred $Incident-Id $User"
+                                    "query": "service:incident source:palo-alto-cortex-xdr $Severity-Status $Starred $Incident-Id $User"
                                 },
                                 "storage": "hot"
                             }
@@ -884,7 +888,7 @@
                                     }
                                 ],
                                 "search": {
-                                    "query": "service:incident source:palo-alto-cortex-xdr $Severity $Starred $Incident-Id $User"
+                                    "query": "service:incident source:palo-alto-cortex-xdr $Severity-Status $Starred $Incident-Id $User"
                                 },
                                 "storage": "hot"
                             }
@@ -984,7 +988,7 @@
                                     }
                                 ],
                                 "search": {
-                                    "query": "service:incident source:palo-alto-cortex-xdr $Severity $Starred $Incident-Id $User"
+                                    "query": "service:incident source:palo-alto-cortex-xdr $Severity-Status $Starred $Incident-Id $User"
                                 },
                                 "storage": "hot"
                             }
@@ -1029,7 +1033,7 @@
                         "response_format": "event_list",
                         "query": {
                             "data_source": "logs_stream",
-                            "query_string": "service:incident $Severity $Starred $Incident-Id $User",
+                            "query_string": "service:incident $Severity-Status $Starred $Incident-Id $User",
                             "indexes": [],
                             "storage": "hot",
                             "sort": {
@@ -1145,8 +1149,8 @@
     ],
     "template_variables": [
         {
-            "name": "Severity",
-            "prefix": "@severity",
+            "name": "Severity-Status",
+            "prefix": "@severity_status",
             "available_values": [],
             "default": "*"
         },

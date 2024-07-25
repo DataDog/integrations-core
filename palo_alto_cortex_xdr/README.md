@@ -20,7 +20,7 @@ Before ingestion of the data, it normalizes and enriches the logs, ensuring a co
 
 #### Steps to create API key
 
-1. Sign in into the [**Palo Alto Cortex XDR**][2]
+1. Sign in into your **Palo Alto Cortex XDR** instance
 2. Navigate to **Settings** > **Configurations** > **Integrations** > **API Keys**
 3. Click on **+ New Key**
 4. Choose the type of API Key based on your desired security level **Advanced** or **Standard**
@@ -69,8 +69,7 @@ The Palo Alto Cortex XDR integration does not include any events.
 
 ## Support
 
-For further assistance, contact [Datadog Support][3].
+For further assistance, contact [Datadog Support][2].
 
 [1]: https://docs-cortex.paloaltonetworks.com/p/XDR
-[2]: https://sso.paloaltonetworks.com/
-[3]: https://docs.datadoghq.com/help/
+[2]: https://docs.datadoghq.com/help/

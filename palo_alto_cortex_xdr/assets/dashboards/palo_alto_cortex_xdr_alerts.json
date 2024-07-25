@@ -1005,7 +1005,7 @@
                                 },
                                 "group_by": [
                                     {
-                                        "facet": "@user_name",
+                                        "facet": "@usr.name",
                                         "limit": 10,
                                         "sort": {
                                             "order": "desc",

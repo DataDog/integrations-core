@@ -80,6 +80,21 @@ pipeline:
           enabled: true
           sources:
             - modification_time
+        - name: Lookup on `severity` to `severity_status`
+          enabled: true
+          source: severity
+          target: severity_status
+          lookupTable: |-
+            low, info
+            medium, warning
+            high, critical
+            critical, critical
+          type: lookup-processor
+        - type: status-remapper
+          name: Define `severity_status` as the official status of the log
+          enabled: true
+          sources:
+            - severity_status
         - type: attribute-remapper
           name: Map `assigned_user_mail` to `usr.email`
           enabled: true
