@@ -158,7 +158,7 @@ class Vault(OpenMetricsBaseCheck):
         if self._previous_leader is not None:
             has_leader_tags = list(self._tags)
             has_leader_tags.extend(dynamic_tags)
-            has_leader_tags.append(f'current_leader:{current_leader}')
+            has_leader_tags.append('current_leader:{}'.format(current_leader))
             submission_queue.append(lambda tags: self.gauge('has_leader', int(has_leader), tags=has_leader_tags))
 
         if self._detect_leader and has_leader:
