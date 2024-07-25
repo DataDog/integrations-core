@@ -388,7 +388,7 @@ def test_disable_nova_quota_set_metrics(aggregator, dd_run_check, instance, open
 
 
 @pytest.mark.parametrize(
-    ('mock_http_post', 'session_auth', 'instance', 'api_type'),
+    ('mock_http_post', 'openstack_v3_password', 'instance', 'api_type'),
     [
         pytest.param(
             {'replace': {'/identity/v3/auth/tokens': lambda d: remove_service_from_catalog(d, ['compute'])}},
@@ -405,10 +405,10 @@ def test_disable_nova_quota_set_metrics(aggregator, dd_run_check, instance, open
             id='api sdk',
         ),
     ],
-    indirect=['mock_http_post', 'session_auth'],
+    indirect=['mock_http_post', 'openstack_v3_password'],
 )
-@pytest.mark.usefixtures('mock_http_get', 'mock_http_post', 'openstack_connection')
-def test_not_in_catalog(aggregator, check, dd_run_check, caplog, mock_http_post, session_auth, api_type):
+@pytest.mark.usefixtures('mock_http_get', 'mock_http_post')
+def test_not_in_catalog(aggregator, check, dd_run_check, caplog, mock_http_post, openstack_connection, api_type):
     with caplog.at_level(logging.DEBUG):
         dd_run_check(check)
 
@@ -433,7 +433,7 @@ def test_not_in_catalog(aggregator, check, dd_run_check, caplog, mock_http_post,
             args_list += list(args)
         assert args_list.count('http://127.0.0.1:8080/identity/v3/auth/tokens') == 4
     if api_type == ApiType.SDK:
-        assert session_auth.get_access.call_count == 4
+        assert openstack_connection.call_count == 4
     assert '`compute` component not found in catalog' in caplog.text
 
 
@@ -469,28 +469,41 @@ def test_response_time_exception(aggregator, check, dd_run_check, mock_http_get)
     for call in mock_http_get.call_args_list:
         args, _ = call
         args_list += list(args)
-    assert args_list.count('http://127.0.0.1:8774/compute/v2.1') == 2
+    assert args_list.count('http://127.0.0.1:8774/compute/v2.1') == 3
 
 
 @pytest.mark.parametrize(
-    ('instance'),
+    ('mock_http_get', 'instance'),
     [
         pytest.param(
+            {'elapsed_total_seconds': {'/compute/v2.1': 0.30706}},
             configs.REST,
             id='api rest',
         ),
         pytest.param(
+            {'elapsed_total_seconds': {'/compute/v2.1': 0.30706}},
             configs.SDK,
             id='api sdk',
         ),
     ],
+    indirect=['mock_http_get'],
 )
 @pytest.mark.usefixtures('mock_http_get', 'mock_http_post', 'openstack_connection')
 def test_response_time(aggregator, check, dd_run_check, mock_http_get):
     dd_run_check(check)
+    aggregator.assert_service_check(
+        'openstack.nova.api.up',
+        status=AgentCheck.UNKNOWN,
+        count=0,
+    )
+    aggregator.assert_service_check(
+        'openstack.nova.api.up',
+        status=AgentCheck.CRITICAL,
+        count=0,
+    )
     aggregator.assert_metric(
         'openstack.nova.response_time',
-        count=1,
+        value=307.06,
         tags=['keystone_server:http://127.0.0.1:8080/identity'],
     )
     aggregator.assert_service_check(
@@ -857,9 +870,9 @@ def test_services_exception(aggregator, check, dd_run_check, mock_http_get, conn
         for call in mock_http_get.call_args_list:
             args, _ = call
             args_list += list(args)
-        assert args_list.count('http://127.0.0.1:8774/compute/v2.1/os-services') == 2
+        assert args_list.count('http://127.0.0.1:8774/compute/v2.1/os-services') == 3
     if api_type == ApiType.SDK:
-        assert connection_compute.services.call_count == 2
+        assert connection_compute.services.call_count == 3
 
 
 @pytest.mark.parametrize(
@@ -931,9 +944,9 @@ def test_flavors_exception(aggregator, check, dd_run_check, mock_http_get, conne
         for call in mock_http_get.call_args_list:
             args, _ = call
             args_list += list(args)
-        assert args_list.count('http://127.0.0.1:8774/compute/v2.1/flavors/detail') == 2
+        assert args_list.count('http://127.0.0.1:8774/compute/v2.1/flavors/detail') == 3
     if api_type == ApiType.SDK:
-        assert connection_compute.flavors.call_count == 2
+        assert connection_compute.flavors.call_count == 3
 
 
 @pytest.mark.parametrize(
@@ -1210,9 +1223,9 @@ def test_hypervisors_exception(aggregator, check, dd_run_check, mock_http_get, c
         for call in mock_http_get.call_args_list:
             args, _ = call
             args_list += list(args)
-        assert args_list.count('http://127.0.0.1:8774/compute/v2.1/os-hypervisors/detail') == 2
+        assert args_list.count('http://127.0.0.1:8774/compute/v2.1/os-hypervisors/detail') == 3
     if api_type == ApiType.SDK:
-        assert connection_compute.hypervisors.call_count == 2
+        assert connection_compute.hypervisors.call_count == 3
 
 
 @pytest.mark.parametrize(
@@ -1729,15 +1742,11 @@ def test_servers_exception(aggregator, check, dd_run_check, mock_http_get, conne
     if api_type == ApiType.SDK:
         assert connection_compute.servers.call_count == 2
         assert (
-            connection_compute.servers.call_args_list.count(
-                mock.call(details=True, project_id='1e6e233e637d4d55a50a62b63398ad15')
-            )
+            connection_compute.servers.call_args_list.count(mock.call(project_id='1e6e233e637d4d55a50a62b63398ad15'))
             == 1
         )
         assert (
-            connection_compute.servers.call_args_list.count(
-                mock.call(details=True, project_id='6e39099cccde4f809b003d9e0dd09304')
-            )
+            connection_compute.servers.call_args_list.count(mock.call(project_id='6e39099cccde4f809b003d9e0dd09304'))
             == 1
         )
 
@@ -1807,15 +1816,11 @@ def test_servers_disable_call(aggregator, check, dd_run_check, mock_http_get, co
     if api_type == ApiType.SDK:
         assert connection_compute.servers.call_count == 1
         assert (
-            connection_compute.servers.call_args_list.count(
-                mock.call(details=True, project_id='1e6e233e637d4d55a50a62b63398ad15')
-            )
+            connection_compute.servers.call_args_list.count(mock.call(project_id='1e6e233e637d4d55a50a62b63398ad15'))
             == 0
         )
         assert (
-            connection_compute.servers.call_args_list.count(
-                mock.call(details=True, project_id='6e39099cccde4f809b003d9e0dd09304')
-            )
+            connection_compute.servers.call_args_list.count(mock.call(project_id='6e39099cccde4f809b003d9e0dd09304'))
             == 1
         )
 
@@ -1847,6 +1852,38 @@ def test_servers_disable_call(aggregator, check, dd_run_check, mock_http_get, co
 )
 @pytest.mark.usefixtures('mock_http_get', 'mock_http_post', 'openstack_connection')
 def test_servers_metrics(aggregator, check, dd_run_check, metrics):
+    dd_run_check(check)
+    for metric in metrics:
+        aggregator.assert_metric(
+            metric['name'],
+            count=metric.get('count'),
+            value=metric.get('value'),
+            tags=metric.get('tags'),
+            hostname=metric.get('hostname'),
+        )
+
+
+@pytest.mark.parametrize(
+    ('instance', 'metrics'),
+    [
+        pytest.param(
+            configs.REST,
+            metrics.COMPUTE_SERVERS_ALL_PROJECTS_NOVA_MICROVERSION_DEFAULT,
+            id='api rest no microversion',
+        ),
+        pytest.param(
+            configs.SDK,
+            metrics.COMPUTE_SERVERS_ALL_PROJECTS_NOVA_MICROVERSION_DEFAULT,
+            id='api sdk no microversion',
+        ),
+    ],
+)
+@pytest.mark.usefixtures('mock_http_get', 'mock_http_post', 'openstack_connection')
+def test_servers_all_projects_metrics(aggregator, dd_run_check, instance, openstack_controller_check, metrics):
+    instance = instance | {
+        "all_projects": True,
+    }
+    check = openstack_controller_check(instance)
     dd_run_check(check)
     for metric in metrics:
         aggregator.assert_metric(
@@ -1964,13 +2001,13 @@ def test_servers_pagination(
     if api_type == ApiType.SDK:
         assert (
             connection_compute.servers.call_args_list.count(
-                mock.call(project_id='6e39099cccde4f809b003d9e0dd09304', details=True, limit=paginated_limit)
+                mock.call(project_id='6e39099cccde4f809b003d9e0dd09304', limit=paginated_limit)
             )
             == expected_api_calls_proj1
         )
         assert (
             connection_compute.servers.call_args_list.count(
-                mock.call(project_id='1e6e233e637d4d55a50a62b63398ad15', details=True, limit=paginated_limit)
+                mock.call(project_id='1e6e233e637d4d55a50a62b63398ad15', limit=paginated_limit)
             )
             == expected_api_calls_proj2
         )

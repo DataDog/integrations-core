@@ -8,7 +8,7 @@ from urllib.parse import quote_plus
 
 import mock
 import pytest
-from pymongo.errors import ConnectionFailure
+from pymongo.errors import ConnectionFailure, OperationFailure
 
 from datadog_checks.base import ConfigurationError
 from datadog_checks.mongo import MongoDb, metrics
@@ -635,6 +635,7 @@ def test_when_version_lower_than_3_6_then_no_session_metrics_reported(aggregator
 
 @pytest.mark.parametrize("error_cls", CRITICAL_FAILURE)
 def test_service_check_critical_when_connection_dies(error_cls, aggregator, check, instance, dd_run_check):
+    instance['database_autodiscovery'] = {'enabled': True, 'refresh_interval': 0}  # force refresh on every run
     check = check(instance)
     with mock_pymongo('standalone') as mocked_client:
         dd_run_check(check)
@@ -659,3 +660,38 @@ def test_parse_mongo_version_with_suffix(check, instance, dd_run_check, datadog_
         mocked_client.server_info = mock.MagicMock(return_value={'version': '3.6.23-13.0'})
         dd_run_check(check)
     datadog_agent.assert_metadata('test:123', {'version.scheme': 'semver', 'version.major': '3', 'version.minor': '6'})
+
+
+@mock.patch(
+    'pymongo.database.Database.command',
+    side_effect=[
+        {'host': 'test-hostname'},  # serverStatus
+        OperationFailure('getCmdLineOpts is not supported'),  # getCmdLineOpts
+        {},  # isMaster
+        OperationFailure('shardingState is not supported'),  # shardingState
+        {'configsvr': False, 'set': 'replset', "myState": 1},  # replSetGetStatus
+        {},  # isMaster
+    ],
+)
+@mock.patch('pymongo.mongo_client.MongoClient.server_info', return_value={'version': '5.0.0'})
+@mock.patch('pymongo.mongo_client.MongoClient.list_database_names', return_value=[])
+def test_emits_ok_service_check_for_documentdb_deployment(
+    mock_list_database_names, mock_server_info, mock_command, dd_run_check, aggregator
+):
+    # Given
+    check = MongoDb('mongo', {}, [{'hosts': ['localhost']}])
+    check.refresh_collectors = mock.MagicMock()
+    # When
+    dd_run_check(check)
+    # Then
+    aggregator.assert_service_check('mongodb.can_connect', MongoDb.OK)
+    mock_command.assert_has_calls(
+        [
+            mock.call('serverStatus'),
+            mock.call('getCmdLineOpts'),
+            mock.call('isMaster'),
+            mock.call('replSetGetStatus'),
+        ]
+    )
+    mock_server_info.assert_called_once()
+    mock_list_database_names.assert_called_once()

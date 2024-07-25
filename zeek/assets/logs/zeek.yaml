@@ -415,6 +415,46 @@ pipeline:
       enabled: true
       sources:
         - _path
+    - type: attribute-remapper
+      name: Map `id.orig_h` to `network.client.ip`
+      enabled: true
+      sources:
+        - id.orig_h
+      sourceType: attribute
+      target: network.client.ip
+      targetType: attribute
+      preserveSource: false
+      overrideOnConflict: false
+    - type: attribute-remapper
+      name: Map `id.orig_p` to `network.client.port`
+      enabled: true
+      sources:
+        - id.orig_p
+      sourceType: attribute
+      target: network.client.port
+      targetType: attribute
+      preserveSource: false
+      overrideOnConflict: false
+    - type: attribute-remapper
+      name: Map `id.resp_h` to `network.destination.ip`
+      enabled: true
+      sources:
+        - id.resp_h
+      sourceType: attribute
+      target: network.destination.ip
+      targetType: attribute
+      preserveSource: false
+      overrideOnConflict: false
+    - type: attribute-remapper
+      name: Map `id.resp_p` to `network.destination.port`
+      enabled: true
+      sources:
+        - id.resp_p
+      sourceType: attribute
+      target: network.destination.port
+      targetType: attribute
+      preserveSource: false
+      overrideOnConflict: false
     - type: pipeline
       name: Datetime Remapper for other than files_red logs
       enabled: true
@@ -622,54 +662,8 @@ pipeline:
       name: Standard attribute remapping for Web Access
       enabled: true
       filter:
-        query: "@_path:(conn* OR dns OR dns_red OR files_red OR ftp OR http OR rdp OR
-          smtp OR socks OR ssh OR tunnel OR smb_files OR smb_mapping OR
-          smtp_links OR ssl_red OR ntp OR snmp OR ssl OR syslog OR files OR
-          intel OR notice OR dpd OR weird OR ldap OR ldap_search OR weird_red OR
-          kerberos) "
+        query: "@_path:(conn* OR http OR http_red) "
       processors:
-        - type: attribute-remapper
-          name: Map `id.orig_h`, `tx_hosts` to `network.client.ip`
-          enabled: true
-          sources:
-            - id.orig_h
-            - tx_hosts
-          sourceType: attribute
-          target: network.client.ip
-          targetType: attribute
-          preserveSource: false
-          overrideOnConflict: false
-        - type: attribute-remapper
-          name: Map `id.orig_p` to `network.client.port`
-          enabled: true
-          sources:
-            - id.orig_p
-          sourceType: attribute
-          target: network.client.port
-          targetType: attribute
-          preserveSource: false
-          overrideOnConflict: false
-        - type: attribute-remapper
-          name: Map `id.resp_h`, `rx_hosts` to `network.destination.ip`
-          enabled: true
-          sources:
-            - id.resp_h
-            - rx_hosts
-          sourceType: attribute
-          target: network.destination.ip
-          targetType: attribute
-          preserveSource: false
-          overrideOnConflict: false
-        - type: attribute-remapper
-          name: Map `id.resp_p` to `network.destination.port`
-          enabled: true
-          sources:
-            - id.resp_p
-          sourceType: attribute
-          target: network.destination.port
-          targetType: attribute
-          preserveSource: false
-          overrideOnConflict: false
         - type: attribute-remapper
           name: Map `orig_bytes`, `request_body_len` to `network.bytes_read`
           enabled: true
@@ -981,6 +975,28 @@ pipeline:
           targetType: attribute
           preserveSource: false
           overrideOnConflict: false
+        - type: attribute-remapper
+          name: Map `network.client.ip`, `rx_hosts` to `orig_host`
+          enabled: true
+          sources:
+            - network.client.ip
+            - rx_hosts
+          sourceType: attribute
+          target: orig_host
+          targetType: attribute
+          preserveSource: true
+          overrideOnConflict: false
+        - type: attribute-remapper
+          name: Map `network.destination.ip`, `tx_hosts` to `dest_host`
+          enabled: true
+          sources:
+            - network.destination.ip
+            - tx_hosts
+          sourceType: attribute
+          target: dest_host
+          targetType: attribute
+          preserveSource: true
+          overrideOnConflict: false
     - type: pipeline
       name: Remap attributes for capture loss logs
       enabled: true
@@ -1188,6 +1204,32 @@ pipeline:
             - x509_total
           sourceType: attribute
           target: zeek.x509_total
+          targetType: attribute
+          preserveSource: false
+          overrideOnConflict: false
+    - type: pipeline
+      name: Remapping etc_viz log attributes
+      enabled: true
+      filter:
+        query: "@_path:etc_viz "
+      processors:
+        - type: attribute-remapper
+          name: Map `server_a` to `network.client.ip`
+          enabled: true
+          sources:
+            - server_a
+          sourceType: attribute
+          target: network.client.ip
+          targetType: attribute
+          preserveSource: false
+          overrideOnConflict: false
+        - type: attribute-remapper
+          name: Map `server_p` to `network.client.port`
+          enabled: true
+          sources:
+            - server_p
+          sourceType: attribute
+          target: network.client.port
           targetType: attribute
           preserveSource: false
           overrideOnConflict: false

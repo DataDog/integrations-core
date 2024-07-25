@@ -17,7 +17,14 @@
       "Category::Network",
       "Supported OS::Linux",
       "Supported OS::Windows",
-      "Supported OS::macOS"
+      "Supported OS::macOS",
+      "Offering::Integration"
+    ],
+    "resources": [
+      {
+        "resource_type": "blog",
+        "url": "https://www.datadoghq.com/blog/monitor-ibmmq-with-datadog"
+      }
     ]
   },
   "author": {
@@ -48,9 +55,6 @@
     },
     "dashboards": {
       "IBM MQ": "assets/dashboards/overview.json"
-    },
-    "logs": {
-      "source": "ibm_mq"
     }
   }
 }

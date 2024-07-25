@@ -18,7 +18,8 @@
       "Category::Orchestration",
       "Supported OS::Linux",
       "Supported OS::Windows",
-      "Supported OS::macOS"
+      "Supported OS::macOS",
+      "Offering::Integration"
     ]
   },
   "author": {
@@ -49,9 +50,6 @@
     },
     "dashboards": {
       "kube_scheduler": "assets/dashboards/overview.json"
-    },
-    "logs": {
-      "source": "kube_scheduler"
     }
   }
 }

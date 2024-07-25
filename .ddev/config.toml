@@ -97,6 +97,10 @@ pymongo = ['Apache-2.0']
 requests-kerberos = ['ISC']
 # https://github.com/requests/requests-ntlm/blob/master/LICENSE
 requests-ntlm = ['ISC']
+# https://gitlab.com/thelabnyc/requests-unixsocket2/-/blob/master/LICENSE
+# For of the original. The license on PyPI is incorrect. Issue filed here:
+# https://gitlab.com/thelabnyc/requests-unixsocket2/-/issues/4
+requests-unixsocket2 = ['ISC']
 # https://github.com/rethinkdb/rethinkdb-python/blob/master/LICENSE
 rethinkdb = ['Apache-2.0']
 # https://github.com/simplejson/simplejson/blob/master/LICENSE.txt
@@ -181,9 +185,6 @@ exclude = [
     'psycopg2-binary',
     # 2.4.10 is broken on py2 and they did not yank the version
     'rethinkdb',
-    # Brings urllib 2.0.7 which breaks `test_uds_request` in the base check
-    # https://github.com/kubernetes-client/python/pull/2131
-    'kubernetes',
     'psutil',
 ]
 

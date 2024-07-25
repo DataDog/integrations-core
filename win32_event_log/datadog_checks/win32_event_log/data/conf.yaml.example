@@ -72,8 +72,22 @@ instances:
     ## channel (you cannot subscribe to Analytic or Debug channels).
     ##
     ## The path is required if `legacy_mode` is set to `false`.
+    ##
+    ## The `path` option cannot be used with the `dd_security_events` option.
     #
     # path: <PATH>
+
+    ## @param dd_security_events - string - optional
+    ## Starting with Agent 7.54, you can automatically send Security Events to Datadog as Logs
+    ## by using the `dd_security_events` option.
+    ##
+    ## Supported values:
+    ##   - `low`: sends only the most important and crtical Security events
+    ##   - `high`: sends a higher volume of Security events
+    ##
+    ## The `dd_security_events` option cannot be used with the `path` option.
+    #
+    # dd_security_events: high
 
     ## @param start - string - optional - default: now
     ## The point at which to start the event subscription.

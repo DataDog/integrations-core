@@ -19,7 +19,8 @@
       "Supported OS::macOS",
       "Category::Network",
       "Submitted Data Type::Metrics",
-      "Submitted Data Type::Logs"
+      "Submitted Data Type::Logs",
+      "Offering::Integration"
     ]
   },
   "author": {
@@ -54,9 +55,6 @@
     "dashboards": {
       "Envoy - Overview": "assets/dashboards/envoy_overview.json",
       "Envoy Openmetrics Overview": "assets/dashboards/openmetrics_overview.json"
-    },
-    "logs": {
-      "source": "envoy"
     },
     "monitors": {
       "Envoy - connected state": "assets/monitors/connected_state.json"

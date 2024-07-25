@@ -13,6 +13,8 @@ from prometheus_client.openmetrics.parser import text_fd_to_metric_families as p
 from prometheus_client.parser import text_fd_to_metric_families as parse_prometheus
 from requests.exceptions import ConnectionError
 
+from datadog_checks.base.agent import datadog_agent
+
 from ....config import is_affirmative
 from ....constants import ServiceCheck
 from ....errors import ConfigurationError
@@ -21,11 +23,6 @@ from ....utils.http import RequestsWrapper
 from .first_scrape_handler import first_scrape_handler
 from .labels import LabelAggregator, get_label_normalizer
 from .transform import MetricTransformer
-
-try:
-    import datadog_agent
-except ImportError:
-    from datadog_checks.base.stubs import datadog_agent
 
 
 class OpenMetricsScraper:

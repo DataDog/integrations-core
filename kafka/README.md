@@ -1,22 +1,18 @@
-# Agent Check: Kafka
+# Agent Check: Kafka Broker
 
 ![Kafka Dashboard][1]
 
 ## Overview
 
-Connect Kafka to Datadog to:
+View Kafka broker metrics collected for a 360-view of the health and performance of your Kafka clusters in real time. With this integration, you can collect metrics and logs from your Kafka deployment to visualize telemetry and alert on the performance of your Kafka stack. 
 
-- Visualize the performance of your cluster in real time.
-- Correlate the performance of Kafka with the rest of your applications.
+If you would benefit from visualizing the topology of your streaming data pipelines and identifying the root cause of bottlenecks, learn more about [Data Streams Monitoring][24].
 
-This check has a limit of 350 metrics per instance. The number of returned metrics is indicated in the Agent status output. Specify the metrics you are interested in by editing the configuration below. For more detailed instructions on customizing the metrics to collect, see the [JMX Checks documentation][2].
-
-To collect Kafka consumer metrics, see the [kafka_consumer check][3].
-
-If you would benefit from visualizing the topology of your streaming data pipelines, or from investigating localized bottlenecks within your data streams setup, check out [Data Streams Monitoring][24].
-
-**Note**: This integration attached sample configuration works only for Kafka >= 0.8.2.
+**Note**: 
+- This check has a limit of 350 metrics per instance. The number of returned metrics is indicated in the Agent status output. Specify the metrics you are interested in by editing the configuration below. For more detailed instructions on customizing the metrics to collect, see the [JMX Checks documentation][2].
+- This integration attached sample configuration works only for Kafka >= 0.8.2.
 If you are running a version older than that, see the [Agent v5.2.x released sample files][22].
+- To collect Kafka consumer metrics, see the [kafka_consumer check][3].
 
 ## Setup
 
@@ -180,3 +176,4 @@ See [service_checks.json][15] for a list of service checks provided by this inte
 [22]: https://raw.githubusercontent.com/DataDog/dd-agent/5.2.1/conf.d/kafka.yaml.example
 [23]: https://www.datadoghq.com/knowledge-center/apache-kafka/
 [24]: https://www.datadoghq.com/product/data-streams-monitoring/
+[25]: https://app.datadoghq.com/data-streams

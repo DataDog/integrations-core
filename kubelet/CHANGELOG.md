@@ -2,7 +2,13 @@
 
 <!-- towncrier release notes start -->
 
-## 7.13.1 / 2024-04-26
+## 7.13.2 / 2024-05-31 / Agent 7.55.0
+
+***Fixed***:
+
+* Update the description for the `tls_ca_cert` config option to use `openssl rehash` instead of `c_rehash` ([#16981](https://github.com/DataDog/integrations-core/pull/16981))
+
+## 7.13.1 / 2024-04-26 / Agent 7.54.0
 
 ***Fixed***:
 

@@ -72,6 +72,7 @@ class InstanceConfig(BaseModel):
     metric_patterns: Optional[MetricPatterns] = None
     min_collection_interval: Optional[float] = None
     password: str
+    proxy: Optional[str] = None
     resource_filters: Optional[tuple[ResourceFilter, ...]] = None
     service: Optional[str] = None
     ssl_cafile: Optional[str] = None

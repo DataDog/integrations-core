@@ -5,14 +5,11 @@ import logging
 
 from six import iteritems
 
+from datadog_checks.base.agent import datadog_agent
+
 from ..common import to_native_string
 from .utils import is_primitive
 from .version import parse_version
-
-try:
-    import datadog_agent
-except ImportError:
-    from ...stubs import datadog_agent
 
 LOGGER = logging.getLogger(__file__)
 

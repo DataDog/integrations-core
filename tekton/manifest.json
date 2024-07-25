@@ -2,7 +2,7 @@
   "manifest_version": "2.0.0",
   "app_uuid": "4e8f129e-1c9b-4078-a966-f0099dbf9465",
   "app_id": "tekton",
-  "display_on_public_website": false,
+  "display_on_public_website": true,
   "tile": {
     "overview": "README.md#Overview",
     "configuration": "README.md#Setup",
@@ -16,7 +16,8 @@
       "Supported OS::Windows",
       "Supported OS::macOS",
       "Category::Log Collection",
-      "Category::Developer Tools"
+      "Category::Developer Tools",
+      "Offering::Integration"
     ]
   },
   "assets": {
@@ -49,9 +50,6 @@
       "[Tekton] High number of throttled TaskRuns": "assets/monitors/throttled_taskruns.json",
       "[Tekton] Increasing number of failed TaskRuns": "assets/monitors/increasing_failed_taskruns.json",
       "[Tekton] Increasing number of failed PieplineRuns": "assets/monitors/increasing_failed_pipelineruns.json"
-    },
-    "logs": {
-      "source": "tekton"
     },
     "saved_views": {
       "tekton_overview": "assets/saved_views/tekton_overview.json",

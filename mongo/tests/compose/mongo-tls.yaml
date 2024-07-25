@@ -1,5 +1,3 @@
-version: '3'
-
 services:
   standalone-tls:
     image: mongo:$MONGO_VERSION

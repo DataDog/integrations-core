@@ -62,6 +62,7 @@ class BareMetal(Component):
         if isinstance(config_nodes, bool):
             report_nodes = config_nodes
             config_nodes = {}
+        discovered_nodes = []
         if report_nodes:
             nodes_discovery = None
             if config_nodes:
@@ -82,6 +83,7 @@ class BareMetal(Component):
                 discovered_nodes = [
                     (None, node.get('name'), node, None) for node in self.check.api.get_baremetal_nodes()
                 ]
+        self.check.log.debug("discovered_nodes: %s", discovered_nodes)
         for _pattern, _item_name, item, item_config in discovered_nodes:
             self.check.log.debug("item: %s", item)
             self.check.log.debug("item_config: %s", item_config)
@@ -199,8 +201,7 @@ class BareMetal(Component):
     @Component.register_global_metrics(ID)
     @Component.http_error()
     def _report_drivers(self, config, tags):
-        if 'drivers' not in config:
-            report_drivers = config.get('drivers', True)
+        report_drivers = config.get('drivers', True)
         if report_drivers:
             data = self.check.api.get_baremetal_drivers()
             for item in data:
@@ -216,8 +217,7 @@ class BareMetal(Component):
     @Component.register_global_metrics(ID)
     @Component.http_error()
     def _report_allocations(self, config, tags):
-        if 'allocations' not in config:
-            report_allocations = config.get('allocations', True)
+        report_allocations = config.get('allocations', True)
         if report_allocations:
             data = self.check.api.get_baremetal_allocations()
             for item in data:

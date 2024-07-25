@@ -42,7 +42,10 @@
         "metadata_path": "assets/service_checks.json"
       }
     },
-    "logs": {}
+    "logs": {},
+    "dashboards": {
+      "ESXi Overview": "assets/dashboards/overview.json"
+    }
   },
   "author": {
     "support_email": "help@datadoghq.com",

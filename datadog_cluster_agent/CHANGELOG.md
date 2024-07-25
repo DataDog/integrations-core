@@ -2,13 +2,19 @@
 
 <!-- towncrier release notes start -->
 
-## 3.1.0 / 2024-05-07
+## 3.1.1 / 2024-05-31 / Agent 7.55.0
+
+***Fixed***:
+
+* Update the description for the `tls_ca_cert` config option to use `openssl rehash` instead of `c_rehash` ([#16981](https://github.com/DataDog/integrations-core/pull/16981))
+
+## 3.1.0 / 2024-05-07 / Agent 7.54.0
 
 ***Added***:
 
 * [datadog-cluster-agent] Add CWS Instrumentation metrics ([#17530](https://github.com/DataDog/integrations-core/pull/17530))
 
-## 3.0.0 / 2024-03-22
+## 3.0.0 / 2024-03-22 / Agent 7.53.0
 
 ***Removed***:
 

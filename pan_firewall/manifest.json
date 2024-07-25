@@ -18,7 +18,18 @@
       "Category::Security",
       "Supported OS::Linux",
       "Supported OS::Windows",
-      "Supported OS::macOS"
+      "Supported OS::macOS",
+      "Offering::Integration"
+    ],
+    "resources": [
+      {
+        "resource_type": "documentation",
+        "url": "https://docs.paloaltonetworks.com/pan-os/9-1/pan-os-admin/monitoring/use-syslog-for-monitoring/syslog-field-descriptions"
+      },
+      {
+        "resource_type": "documentation",
+        "url": "https://docs.datadoghq.com/logs/log_collection/?tab=tailexistingfiles#getting-started-with-the-agent"
+      }
     ]
   },
   "author": {
@@ -48,9 +59,6 @@
     "saved_views": {
       "High Severity Issues": "assets/saved_views/all_high_severity_issues.json",
       "Authentication Protocol": "assets/saved_views/top_ips_flagged_in_high_severity_threats.json"
-    },
-    "logs": {
-      "source": "pan.firewall"
     }
   }
 }

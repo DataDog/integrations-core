@@ -1,0 +1,104 @@
+{
+    "hosts": [
+        "replset-data-0.mongo.default.svc.cluster.local:27017",
+        "replset-data-1.mongo.default.svc.cluster.local:27017"
+    ],
+    "arbiters": ["replset-arbiter-0.mongo.default.svc.cluster.local:27017"],
+    "setName": "replset",
+    "setVersion": 1,
+    "ismaster": false,
+    "secondary": false,
+    "arbiterOnly": true,
+    "primary": "replset-data-0.mongo.default.svc.cluster.local:27017",
+    "me": "replset-arbiter-0.mongo.default.svc.cluster.local:27017",
+    "electionId": {
+        "$oid": "7fffffff000000000000000b"
+    },
+    "lastWrite": {
+        "opTime": {
+            "ts": {
+                "$timestamp": {
+                    "t": 1600348939,
+                    "i": 85
+                }
+            },
+            "t": 11
+        },
+        "lastWriteDate": {
+            "$date": 1600348939000
+        },
+        "majorityOpTime": {
+            "ts": {
+                "$timestamp": {
+                    "t": 1600348939,
+                    "i": 85
+                }
+            },
+            "t": 11
+        },
+        "majorityWriteDate": {
+            "$date": 1600348939000
+        }
+    },
+    "maxBsonObjectSize": 16777216,
+    "maxMessageSizeBytes": 48000000,
+    "maxWriteBatchSize": 100000,
+    "localTime": {
+        "$date": 1600348939653
+    },
+    "logicalSessionTimeoutMinutes": 30,
+    "connectionId": 801,
+    "minWireVersion": 0,
+    "maxWireVersion": 8,
+    "readOnly": false,
+    "ok": 1.0,
+    "$gleStats": {
+        "lastOpTime": {
+            "$timestamp": {
+                "t": 0,
+                "i": 0
+            }
+        },
+        "electionId": {
+            "$oid": "7fffffff000000000000000b"
+        }
+    },
+    "lastCommittedOpTime": {
+        "$timestamp": {
+            "t": 1600348939,
+            "i": 85
+        }
+    },
+    "$configServerState": {
+        "opTime": {
+            "ts": {
+                "$timestamp": {
+                    "t": 1600348939,
+                    "i": 46
+                }
+            },
+            "t": 17
+        }
+    },
+    "$clusterTime": {
+        "clusterTime": {
+            "$timestamp": {
+                "t": 1600348939,
+                "i": 85
+            }
+        },
+        "signature": {
+            "hash": {
+                "$binary": "AAAAAAAAAAAAAAAAAAAAAAAAAAA=",
+                "$type": "00"
+            },
+            "keyId": 0
+        }
+    },
+    "operationTime": {
+        "$timestamp": {
+            "t": 1600348939,
+            "i": 85
+        }
+    }
+}

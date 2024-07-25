@@ -29,7 +29,7 @@ classifiers = [
     "Private :: Do Not Upload",
 ]
 dependencies = [
-    "datadog-checks-base>=32.7.0",
+    "datadog-checks-base>=36.7.0",
 ]
 dynamic = [
     "version",
@@ -38,7 +38,7 @@ license = "BSD-3-Clause"
 
 [project.optional-dependencies]
 deps = [
-    "pymongo[srv]==4.6.3; python_version >= '3.9'",
+    "pymongo[srv]==4.8.0; python_version >= '3.9'",
 ]
 
 [project.urls]

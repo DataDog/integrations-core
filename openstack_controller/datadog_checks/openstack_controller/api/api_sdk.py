@@ -115,9 +115,17 @@ class ApiSdk(Api):
         self.connection.authorize()
         self.http.options['headers']['X-Auth-Token'] = self.connection.session.auth.get_token(self.connection.session)
 
-    def get_response_time(self, endpoint_types):
+    def get_response_time(self, endpoint_types, remove_project_id=True, is_heat=False):
         endpoint = self._catalog.get_endpoint_by_type(endpoint_types)
-        endpoint = endpoint.replace(self._access.project_id, "") if self._access.project_id else endpoint
+        endpoint = (
+            self._catalog.get_endpoint_by_type(endpoint_types).replace(f"/v1/{self._access.project_id}", "")
+            if is_heat
+            else (
+                endpoint.replace(self._access.project_id, "")
+                if self._access.project_id and remove_project_id
+                else endpoint
+            )
+        )
         response = self.http.get(endpoint)
         response.raise_for_status()
         return response.elapsed.total_seconds() * 1000
@@ -218,11 +226,24 @@ class ApiSdk(Api):
             project_id,
         ).to_dict(original_names=True)
 
+    def get_compute_all_servers(self):
+        return [
+            server.to_dict(original_names=True)
+            for server in self.call_paginated_api(
+                self.connection.compute.servers,
+                project_id=None,
+                all_tenants=True,
+                limit=self.config.paginated_limit,
+            )
+        ]
+
     def get_compute_servers(self, project_id):
         return [
             server.to_dict(original_names=True)
             for server in self.call_paginated_api(
-                self.connection.compute.servers, details=True, project_id=project_id, limit=self.config.paginated_limit
+                self.connection.compute.servers,
+                project_id=project_id,
+                limit=self.config.paginated_limit,
             )
         ]
 
@@ -296,12 +317,6 @@ class ApiSdk(Api):
         return [driver.to_dict(original_names=True) for driver in self.connection.baremetal.drivers()]
 
     def get_baremetal_allocations(self):
-        if float(self.config.ironic_microversion) < 1.52:
-            self.log.info(
-                "Ironic microversion is below 1.52 and set to %s, cannot collect allocations",
-                self.config.ironic_microversion,
-            )
-            return []
         return [
             allocation.to_dict(original_names=True)
             for allocation in self.call_paginated_api(
@@ -392,5 +407,13 @@ class ApiSdk(Api):
             stack.to_dict(original_names=True)
             for stack in self.call_paginated_api(
                 self.connection.heat.stacks, project_id=project_id, limit=self.config.paginated_limit
+            )
+        ]
+
+    def get_swift_containers(self, account_id):
+        return [
+            container.to_dict(original_names=True)
+            for container in self.call_paginated_api(
+                self.connection.swift.containers, account_id=account_id, limit=self.config.paginated_limit
             )
         ]

@@ -1,6 +1,11 @@
 name: Nightly minimum base package test
 
 on:
+  # Triggering minimum base package tests can be useful outside of the schedule, for instance for PRs
+  # that add new integrations or ones that bump the Pydantic dependency in the base package.
+  # Until we figure out how best to trigger these automatically we're leaving the door open to easily
+  # trigger this manually with the right branch.
+  workflow_dispatch:
   schedule:
   # 5 AM UTC
   - cron: "0 5 * * *"

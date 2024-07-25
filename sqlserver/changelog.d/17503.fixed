@@ -1,1 +1,0 @@
-Fix Always-On metrics query for replica_failover_mode and replica_failover_readiness. Previously the query returned a cartesian product of rows which could result in incorrect metrics in some cases.

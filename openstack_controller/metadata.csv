@@ -272,3 +272,6 @@ openstack.octavia.quota.loadbalancer,gauge,,,,The configured load balancer quota
 openstack.octavia.quota.member,gauge,,,,The configured member quota limit,0,openstack_controller,octavia quota member,
 openstack.octavia.quota.pool,gauge,,,,The configured pool quota limit,0,openstack_controller,octavia quota pool,
 openstack.octavia.response_time,gauge,,millisecond,,Duration that an HTTP request takes to complete when making a request to octavia endpoint,0,openstack_controller,octavia response time,
+openstack.swift.container.bytes,gauge,,,,Number of bytes in a swift container,0,openstack_controller,swift container bytes,
+openstack.swift.container.count,gauge,,,,"Number of swift containers",0,openstack_controller,swift container ct,
+openstack.swift.response_time,gauge,,millisecond,,"Duration that an HTTP request takes to complete when making a request to swift endpoint",0,openstack_controller,swift response time,

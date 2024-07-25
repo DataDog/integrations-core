@@ -2,7 +2,37 @@
 
 <!-- towncrier release notes start -->
 
-## 17.2.0 / 2024-04-26
+## 17.4.0 / 2024-07-05
+
+***Added***:
+
+* Adding schema collection to sqlserver
+  Schema data includes information about the tables, their columns, indexes, foreign keys, and partitions. ([#17258](https://github.com/DataDog/integrations-core/pull/17258))
+* Set sqlserver integration default odbc driver to agent embedded msodbcsql18 on Linux platform ([#17729](https://github.com/DataDog/integrations-core/pull/17729))
+* Update embedded odbc driver config odbcinist.ini to use msodbcsql 18.3.3.1 ([#17765](https://github.com/DataDog/integrations-core/pull/17765))
+* Update dependencies ([#17817](https://github.com/DataDog/integrations-core/pull/17817))
+
+***Fixed***:
+
+* Filter query metrics by database_name if check is configured to a single non-master db ([#17717](https://github.com/DataDog/integrations-core/pull/17717))
+* [sqlserver] fix missing sqlserver_version ([#17750](https://github.com/DataDog/integrations-core/pull/17750))
+* Hyphen in database name support ([#17775](https://github.com/DataDog/integrations-core/pull/17775))
+* Upgrade `azure-identity` dependency ([#17862](https://github.com/DataDog/integrations-core/pull/17862))
+* Move sqlserver schema foreign key information to the dependent table. ([#17933](https://github.com/DataDog/integrations-core/pull/17933))
+
+## 17.3.0 / 2024-05-31 / Agent 7.55.0
+
+***Added***:
+
+* Update dependencies ([#17424](https://github.com/DataDog/integrations-core/pull/17424))
+
+***Fixed***:
+
+* Fix Always-On metrics query for replica_failover_mode and replica_failover_readiness. Previously the query returned a cartesian product of rows which could result in incorrect metrics in some cases. ([#17503](https://github.com/DataDog/integrations-core/pull/17503))
+* Emit database_instance metadata before collecting metrics
+  Decreased database instance collection interval from 1800 seconds to 300 seconds to improve reliability ([#17675](https://github.com/DataDog/integrations-core/pull/17675))
+
+## 17.2.0 / 2024-04-26 / Agent 7.54.0
 
 ***Added***:
 

@@ -19,11 +19,15 @@ def get_dependency_set(python_versions):
     }
 
 
-@click.command(
-    short_help="Update integrations' dependencies so that they match the Agent's static environment",
-)
+@click.command()
 @click.pass_obj
 def sync(app):
+    """
+    Synchronize integration dependency spec with that of the agent as a whole.
+
+    Reads dependency spec from agent_requirements.in and propagates it to all integrations.
+    For each integration we propagate only the relevant parts (i.e. its direct dependencies).
+    """
     agent_dependencies, errors = read_agent_dependencies(app.repo)
 
     if errors:

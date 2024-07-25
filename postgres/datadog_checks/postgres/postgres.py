@@ -41,6 +41,7 @@ from .util import (
     ANALYZE_PROGRESS_METRICS,
     AWS_RDS_HOSTNAME_SUFFIX,
     AZURE_DEPLOYMENT_TYPE_TO_RESOURCE_TYPE,
+    BUFFERCACHE_METRICS,
     CLUSTER_VACUUM_PROGRESS_METRICS,
     CONNECTION_METRICS,
     COUNT_METRICS,
@@ -111,7 +112,7 @@ class PostgreSql(AgentCheck):
                 "DEPRECATION NOTICE: The managed_identity option is deprecated and will be removed in a future version."
                 " Please use the new azure.managed_authentication option instead."
             )
-        self._config = PostgresConfig(self.instance, self.init_config)
+        self._config = PostgresConfig(self.instance, self.init_config, self)
         self.cloud_metadata = self._config.cloud_metadata
         self.tags = self._config.tags
         # Keep a copy of the tags without the internal resource tags so they can be used for paths that don't
@@ -301,6 +302,8 @@ class PostgreSql(AgentCheck):
                 if self._config.collect_wal_metrics is not False:
                     # collect wal metrics for pg >= 10 only if the user has not explicitly disabled it
                     queries.append(WAL_FILE_METRICS)
+            if self._config.collect_buffercache_metrics:
+                queries.append(BUFFERCACHE_METRICS)
             queries.append(QUERY_PG_REPLICATION_SLOTS)
             queries.append(VACUUM_PROGRESS_METRICS)
             queries.append(STAT_SUBSCRIPTION_METRICS)
@@ -898,7 +901,7 @@ class PostgreSql(AgentCheck):
                             check=self, operation='custom_queries', tags=['metric_prefix:{}'.format(metric_prefix)]
                         ):
                             cursor.execute(query)
-                    except (psycopg2.ProgrammingError, psycopg2.errors.QueryCanceled) as e:
+                    except Exception as e:
                         self.log.error("Error executing query for metric_prefix %s: %s", metric_prefix, str(e))
                         continue
 

@@ -322,6 +322,10 @@ coverage:
         target: 75
         flags:
         - kube_apiserver_metrics
+      Kubernetes_Cluster_Autoscaler:
+        target: 75
+        flags:
+        - kubernetes_cluster_autoscaler
       Kubernetes_Controller_Manager:
         target: 75
         flags:
@@ -570,14 +574,14 @@ coverage:
         target: 75
         flags:
         - teamcity
-      Teleport:
-        target: 75
-        flags:
-        - teleport
       Tekton:
         target: 75
         flags:
         - tekton
+      Teleport:
+        target: 75
+        flags:
+        - teleport
       Temporal:
         target: 75
         flags:
@@ -594,6 +598,10 @@ coverage:
         target: 75
         flags:
         - torchserve
+      Traefik_Mesh:
+        target: 75
+        flags:
+        - traefik_mesh
       Traffic_Server:
         target: 75
         flags:
@@ -670,6 +678,14 @@ coverage:
         target: 75
         flags:
         - fluxcd
+      vLLM:
+        target: 75
+        flags:
+        - vllm
+      kyverno:
+        target: 75
+        flags:
+        - kyverno
       vSphere:
         target: 75
         flags:
@@ -1101,6 +1117,11 @@ flags:
     paths:
     - kubelet/datadog_checks/kubelet
     - kubelet/tests
+  kubernetes_cluster_autoscaler:
+    carryforward: true
+    paths:
+    - kubernetes_cluster_autoscaler/datadog_checks/kubernetes_cluster_autoscaler
+    - kubernetes_cluster_autoscaler/tests
   kubernetes_state:
     carryforward: true
     paths:
@@ -1111,6 +1132,11 @@ flags:
     paths:
     - kyototycoon/datadog_checks/kyototycoon
     - kyototycoon/tests
+  kyverno:
+    carryforward: true
+    paths:
+    - kyverno/datadog_checks/kyverno
+    - kyverno/tests
   lighttpd:
     carryforward: true
     paths:
@@ -1396,16 +1422,16 @@ flags:
     paths:
     - teamcity/datadog_checks/teamcity
     - teamcity/tests
-  teleport:
-    carryforward: true
-    paths:
-    - teleport/datadog_checks/teleport
-    - teleport/tests
   tekton:
     carryforward: true
     paths:
     - tekton/datadog_checks/tekton
     - tekton/tests
+  teleport:
+    carryforward: true
+    paths:
+    - teleport/datadog_checks/teleport
+    - teleport/tests
   temporal:
     carryforward: true
     paths:
@@ -1431,6 +1457,11 @@ flags:
     paths:
     - torchserve/datadog_checks/torchserve
     - torchserve/tests
+  traefik_mesh:
+    carryforward: true
+    paths:
+    - traefik_mesh/datadog_checks/traefik_mesh
+    - traefik_mesh/tests
   traffic_server:
     carryforward: true
     paths:
@@ -1461,6 +1492,11 @@ flags:
     paths:
     - vertica/datadog_checks/vertica
     - vertica/tests
+  vllm:
+    carryforward: true
+    paths:
+    - vllm/datadog_checks/vllm
+    - vllm/tests
   voltdb:
     carryforward: true
     paths:

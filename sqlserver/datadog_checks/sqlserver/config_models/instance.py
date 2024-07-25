@@ -139,6 +139,16 @@ class QueryMetrics(BaseModel):
     samples_per_hour_per_query: Optional[int] = None
 
 
+class SchemasCollection(BaseModel):
+    model_config = ConfigDict(
+        arbitrary_types_allowed=True,
+        frozen=True,
+    )
+    collection_interval: Optional[float] = None
+    enabled: Optional[bool] = None
+    max_execution_time: Optional[float] = None
+
+
 class InstanceConfig(BaseModel):
     model_config = ConfigDict(
         validate_default=True,
@@ -199,6 +209,7 @@ class InstanceConfig(BaseModel):
     query_activity: Optional[QueryActivity] = None
     query_metrics: Optional[QueryMetrics] = None
     reported_hostname: Optional[str] = None
+    schemas_collection: Optional[SchemasCollection] = None
     server_version: Optional[str] = None
     service: Optional[str] = None
     stored_procedure: Optional[str] = None

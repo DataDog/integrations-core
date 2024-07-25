@@ -9,6 +9,11 @@ init_config:
     #
     # service: <SERVICE>
 
+    ## @param proxy - string - optional - default: 
+    ## SOCKS Proxy to use for all instances.
+    #
+    # proxy: socks5://<PROXY_SERVER>:<PORT>
+
 ## Every instance is scheduled independently of the others.
 #
 instances:
@@ -127,6 +132,11 @@ instances:
     #
     # excluded_host_tags:
     #   - <HOST_TAG>
+
+    ## @param proxy - string - optional - default: 
+    ## SOCKS Proxy to use for this instance. Overrides the `proxy` setting in `init_config`.
+    #
+    # proxy: socks5://<PROXY_SERVER>:<PORT>
 
     ## @param ssl_verify - boolean - optional - default: true
     ## Set to false to disable SSL verification when connecting to the ESXi host

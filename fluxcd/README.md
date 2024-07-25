@@ -36,7 +36,7 @@ kind: Pod
 metadata:
   name: '<POD_NAME>'
   annotations:
-    ad.datadoghq.com/fluxcd.checks: |-
+    ad.datadoghq.com/manager.checks: |-
       {
         "fluxcd": {
           "instances": [
@@ -49,7 +49,7 @@ metadata:
     # (...)
 spec:
   containers:
-    - name: 'fluxcd'
+    - name: 'manager'
 # (...)
 ```
 
@@ -92,6 +92,7 @@ Need help? Contact [Datadog support][9].
 Additional helpful documentation, links, and articles:
 
 - [Monitoring your container-native technologies][11]
+- [Monitoring the health and performance of your container-native CI/CD pipelines][13]
 
 
 [1]: https://fluxcd.io/
@@ -106,3 +107,4 @@ Additional helpful documentation, links, and articles:
 [10]: https://docs.datadoghq.com/agent/guide/use-community-integrations/?tab=agentv721v621#installation
 [11]: https://www.datadoghq.com/blog/container-native-integrations/#cicd-with-flux
 [12]: https://docs.datadoghq.com/agent/kubernetes/log/
+[13]: https://www.datadoghq.com/blog/container-native-ci-cd-integrations/

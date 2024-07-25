@@ -138,6 +138,7 @@ class KafkaCheck(AgentCheck):
         reported_contexts = 0
         self.log.debug("Reporting consumer offsets and lag metrics")
         for (consumer_group, topic, partition), consumer_offset in consumer_offsets.items():
+            consumer_group_state = self.client.get_consumer_group_state(consumer_group)
             if reported_contexts >= contexts_limit:
                 self.log.debug(
                     "Reported contexts number %s greater than or equal to contexts limit of %s, returning",
@@ -151,6 +152,7 @@ class KafkaCheck(AgentCheck):
                 'partition:%s' % partition,
                 'consumer_group:%s' % consumer_group,
                 'kafka_cluster_id:%s' % cluster_id,
+                'consumer_group_state:%s' % consumer_group_state,
             ]
             consumer_group_tags.extend(self.config._custom_tags)
 

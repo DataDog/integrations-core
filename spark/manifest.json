@@ -15,7 +15,18 @@
       "Category::Log Collection",
       "Supported OS::Linux",
       "Supported OS::Windows",
-      "Supported OS::macOS"
+      "Supported OS::macOS",
+      "Offering::Integration"
+    ],
+    "resources": [
+      {
+        "resource_type": "blog",
+        "url": "https://www.datadoghq.com/blog/monitoring-spark"
+      },
+      {
+        "resource_type": "blog",
+        "url": "https://www.datadoghq.com/blog/spark-emr-monitoring/"
+      }
     ]
   },
   "author": {
@@ -52,9 +63,6 @@
     "dashboards": {
       "spark": "assets/dashboards/spark_dashboard.json",
       "Databricks Spark Overview": "assets/dashboards/databricks_overview.json"
-    },
-    "logs": {
-      "source": "spark"
     }
   }
 }

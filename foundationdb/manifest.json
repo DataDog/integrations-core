@@ -16,7 +16,8 @@
       "Supported OS::macOS",
       "Supported OS::Windows",
       "Category::Data Stores",
-      "Category::Log Collection"
+      "Category::Log Collection",
+      "Offering::Integration"
     ]
   },
   "author": {
@@ -52,9 +53,6 @@
       "FoundationDB Latency Probe": "assets/dashboards/foundationdb_latency_probe.json",
       "FoundationDB Processes and Utilization": "assets/dashboards/foundationdb_processes_and_utilization.json",
       "FoundationDB Transactions and Queues": "assets/dashboards/foundationdb_transactions_and_queues.json"
-    },
-    "logs": {
-      "source": "foundationdb"
     },
     "monitors": {
       "FoundationDB Status Check": "assets/monitors/service_check.json",

@@ -1,6 +1,7 @@
 # (C) Datadog, Inc. 2024-present
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
+import copy
 import os
 
 import pytest
@@ -19,19 +20,42 @@ from .common import (
     PERF_METRIC_ID,
     PORT,
     PROPERTIES_EX,
+    USE_VSPHERE_LAB,
     VCSIM_INSTANCE,
 )
+from .ssh_tunnel import socks_proxy
 
 
 @pytest.fixture(scope='session')
 def dd_environment():
-    compose_file = os.path.join(get_here(), 'docker', 'docker-compose.yaml')
-    conditions = [
-        WaitForPortListening(HOST, PORT, wait=10),
-        CheckDockerLogs(compose_file, 'export GOVC_URL', wait=10),
-    ]
-    with docker_run(compose_file, conditions=conditions):
-        yield VCSIM_INSTANCE
+    if not USE_VSPHERE_LAB:
+        compose_file = os.path.join(get_here(), 'docker', 'docker-compose.yaml')
+        conditions = [
+            WaitForPortListening(HOST, PORT, wait=10),
+            CheckDockerLogs(compose_file, 'export GOVC_URL', wait=10),
+        ]
+        with docker_run(compose_file, conditions=conditions):
+            yield VCSIM_INSTANCE
+    else:
+        lab_public_ip = os.environ.get('VSPHERE_LAB_IP')
+        lab_private_key = os.environ.get('VSPHERE_LAB_PRIVATE_KEY_PATH')
+        lab_username = os.environ.get('VSPHERE_LAB_USERNAME')
+        with socks_proxy(
+            lab_public_ip,
+            lab_username,
+            lab_private_key,
+        ) as socks:
+
+            socks_ip, socks_port = socks
+            print(f"socks: {socks}")
+            instance = copy.deepcopy(VCSIM_INSTANCE)
+
+            instance['host'] = os.environ.get('ESXI_HOST_IP')
+            instance['username'] = os.environ.get('ESXI_HOST_USERNAME')
+            instance['password'] = os.environ.get('ESXI_HOST_PASSWORD')
+            instance['ssl_verify'] = 'false'
+            instance['proxy'] = 'socks5://{}:{}'.format(socks_ip, socks_port)
+            yield instance
 
 
 @pytest.fixture

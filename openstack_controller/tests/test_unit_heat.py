@@ -51,7 +51,7 @@ def test_disable_heat_metrics(aggregator, dd_run_check, instance, openstack_cont
 
 
 @pytest.mark.parametrize(
-    ('mock_http_post', 'session_auth', 'instance', 'api_type'),
+    ('mock_http_post', 'openstack_v3_password', 'instance', 'api_type'),
     [
         pytest.param(
             {'replace': {'/identity/v3/auth/tokens': lambda d: remove_service_from_catalog(d, ['orchestration'])}},
@@ -68,10 +68,10 @@ def test_disable_heat_metrics(aggregator, dd_run_check, instance, openstack_cont
             id='api sdk',
         ),
     ],
-    indirect=['mock_http_post', 'session_auth'],
+    indirect=['mock_http_post', 'openstack_v3_password'],
 )
-@pytest.mark.usefixtures('mock_http_get', 'mock_http_post', 'openstack_connection')
-def test_not_in_catalog(aggregator, check, dd_run_check, caplog, mock_http_post, session_auth, api_type):
+@pytest.mark.usefixtures('mock_http_get', 'mock_http_post')
+def test_not_in_catalog(aggregator, check, dd_run_check, caplog, mock_http_post, openstack_connection, api_type):
     with caplog.at_level(logging.DEBUG):
         dd_run_check(check)
 
@@ -96,7 +96,7 @@ def test_not_in_catalog(aggregator, check, dd_run_check, caplog, mock_http_post,
             args_list += list(args)
         assert args_list.count('http://127.0.0.1:8080/identity/v3/auth/tokens') == 4
     if api_type == ApiType.SDK:
-        assert session_auth.get_access.call_count == 4
+        assert openstack_connection.call_count == 4
     assert '`heat` component not found in catalog' in caplog.text
 
 
@@ -132,28 +132,41 @@ def test_response_time_exception(aggregator, check, dd_run_check, mock_http_get)
     for call in mock_http_get.call_args_list:
         args, kwargs = call
         args_list += list(args)
-    assert args_list.count('http://127.0.0.1:8004/heat-api') == 2
+    assert args_list.count('http://127.0.0.1:8004/heat-api') == 3
 
 
 @pytest.mark.parametrize(
-    ('instance'),
+    ('mock_http_get', 'instance'),
     [
         pytest.param(
+            {'elapsed_total_seconds': {'/heat-api': 0.30706}},
             configs.REST,
             id='api rest',
         ),
         pytest.param(
+            {'elapsed_total_seconds': {'/heat-api': 0.30706}},
             configs.SDK,
             id='api sdk',
         ),
     ],
+    indirect=['mock_http_get'],
 )
 @pytest.mark.usefixtures('mock_http_get', 'mock_http_post', 'openstack_connection')
 def test_response_time(aggregator, check, dd_run_check, mock_http_get):
     dd_run_check(check)
+    aggregator.assert_service_check(
+        'openstack.heat.api.up',
+        status=AgentCheck.UNKNOWN,
+        count=0,
+    )
+    aggregator.assert_service_check(
+        'openstack.heat.api.up',
+        status=AgentCheck.CRITICAL,
+        count=0,
+    )
     aggregator.assert_metric(
         'openstack.heat.response_time',
-        count=1,
+        value=307.06,
         tags=['keystone_server:http://127.0.0.1:8080/identity'],
     )
     aggregator.assert_service_check(
@@ -172,7 +185,12 @@ def test_response_time(aggregator, check, dd_run_check, mock_http_get):
     ('mock_http_get', 'connection_heat', 'instance', 'api_type'),
     [
         pytest.param(
-            {'http_error': {'/heat-api/v1/1e6e233e637d4d55a50a62b63398ad15/stacks': MockResponse(status_code=500)}},
+            {
+                'http_error': {
+                    '/heat-api/v1/1e6e233e637d4d55a50a62b63398ad15/stacks': MockResponse(status_code=500),
+                    '/heat-api/v1/6e39099cccde4f809b003d9e0dd09304/stacks': MockResponse(status_code=500),
+                }
+            },
             None,
             configs.REST,
             ApiType.REST,
@@ -184,6 +202,7 @@ def test_response_time(aggregator, check, dd_run_check, mock_http_get):
                 'http_error': {
                     'stacks': {
                         '1e6e233e637d4d55a50a62b63398ad15': MockResponse(status_code=500),
+                        '6e39099cccde4f809b003d9e0dd09304': MockResponse(status_code=500),
                     }
                 }
             },
