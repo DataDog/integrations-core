@@ -25,7 +25,7 @@ pipeline:
     query: "source:contentful"
   processors:
     - type: attribute-remapper
-      name: Map `event` to `evt.name` standard attribute
+      name: Map `event` to `evt.name`
       enabled: true
       sources:
         - event
@@ -35,7 +35,7 @@ pipeline:
       preserveSource: false
       overrideOnConflict: false
     - type: attribute-remapper
-      name: Map `user` to `usr.id` standard attribute
+      name: Map `user` to `usr.id`
       enabled: true
       sources:
         - user
@@ -45,7 +45,7 @@ pipeline:
       preserveSource: false
       overrideOnConflict: false
     - type: attribute-remapper
-      name: Map `details.userAgent` to `http.useragent` standard attribute
+      name: Map `details.userAgent` to `http.useragent`
       enabled: true
       sources:
         - details.userAgent
