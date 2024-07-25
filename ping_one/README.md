@@ -1,4 +1,4 @@
-# PingOne Integration for Datadog
+# PingOne Integration
 
 ## Overview
 
@@ -42,7 +42,7 @@ Configure the Datadog endpoint to forward PingOne events as logs to Datadog:
 
 ### Logs
 
-The integration collects and forwards PingOne logs to Datadog.
+This integration collects and forwards PingOne logs to Datadog.
 
 ### Metrics
 
