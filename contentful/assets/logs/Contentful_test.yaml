@@ -1,0 +1,163 @@
+id: contentful
+tests:
+  - sample: |-
+      {
+        "event": "ContentManagement.ScheduledAction.execute",
+        "user": "773OuToU7i9wGp14IHNTBl",
+        "details": {
+          "sys": {
+            "id": "3ygH6YUWJquS38QvhtUWnQ",
+            "type": "ScheduledAction",
+            "space": {
+              "sys": {
+                "type": "Link",
+                "linkType": "Space",
+                "id": "p2ebbgsjhykl"
+              }
+            },
+            "environment": {
+              "sys": {
+                "type": "Link",
+                "linkType": "Environment",
+                "id": "master"
+              }
+            },
+            "status": "failed",
+            "version": 4,
+            "createdAt": "2024-07-17T05:54:34.584Z",
+            "createdBy": {
+              "sys": {
+                "type": "Link",
+                "linkType": "User",
+                "id": "773OuToU7i9wGp14IHNTBl"
+              }
+            },
+            "updatedAt": "2024-07-17T05:57:01.863Z",
+            "updatedBy": {
+              "sys": {
+                "type": "Link",
+                "linkType": "User",
+                "id": "773OuToU7i9wGp14IHNTBl"
+              }
+            }
+          },
+          "entity": {
+            "sys": {
+              "type": "Link",
+              "linkType": "Entry",
+              "id": "5OcqKZsw7gRsXj2QNLiodg"
+            }
+          },
+          "environment": {
+            "sys": {
+              "type": "Link",
+              "linkType": "Environment",
+              "id": "master"
+            }
+          },
+          "scheduledFor": {
+            "datetime": "2024-07-17T11:27:00.000+05:30",
+            "timezone": "Asia/Calcutta"
+          },
+          "action": "publish",
+          "error": {
+            "sys": {
+              "type": "Error",
+              "id": "BadRequest"
+            },
+            "message": "Cannot publish archived",
+            "requestId": "b9ddd147-069f-4642-bd51-a951499c08fe"
+          }
+        }
+      }
+    result: null
+  - sample: >-
+      {
+        "event": "ContentManagement.Comment.create",
+        "details": {
+          "sys": {
+            "user": {
+              "sys": {
+                "type": "Link",
+                "linkType": "User",
+                "id": "773OuToU7i9wGp14IHNTBl"
+              }
+            },
+            "environment": {
+              "sys": {
+                "linkType": "Environment",
+                "type": "Link",
+                "id": "master"
+              }
+            },
+            "organization": {
+              "sys": {
+                "linkType": "Organization",
+                "type": "Link",
+                "id": "779vUcjRzKxebPT0ul79NR"
+              }
+            },
+            "space": {
+              "sys": {
+                "linkType": "Space",
+                "type": "Link",
+                "id": "p2ebbgsjhykl"
+              }
+            },
+            "newComment": {
+              "body": "This is test comment",
+              "status": "active",
+              "sys": {
+                "id": "xCd3WHibme0GZ1t2N4Lg3",
+                "type": "Comment",
+                "space": {
+                  "sys": {
+                    "type": "Link",
+                    "linkType": "Space",
+                    "id": "p2ebbgsjhykl"
+                  }
+                },
+                "environment": {
+                  "sys": {
+                    "type": "Link",
+                    "linkType": "Environment",
+                    "id": "master"
+                  }
+                },
+                "parentEntity": {
+                  "sys": {
+                    "type": "Link",
+                    "linkType": "Entry",
+                    "id": "2fh7DboJhjWwcRmWfZnC5R"
+                  }
+                },
+                "createdBy": {
+                  "sys": {
+                    "type": "Link",
+                    "linkType": "User",
+                    "id": "773OuToU7i9wGp14IHNTBl"
+                  }
+                },
+                "createdAt": "2024-07-23T06:11:37.489Z",
+                "updatedBy": {
+                  "sys": {
+                    "type": "Link",
+                    "linkType": "User",
+                    "id": "773OuToU7i9wGp14IHNTBl"
+                  }
+                },
+                "updatedAt": "2024-07-23T06:11:37.489Z",
+                "parent": null,
+                "version": 1
+              }
+            }
+          },
+          "userAgent": "app contentful.web-app; platform browser; sha c5e686e3167a0cd71437c4566dc95f642872c50e"
+        }
+      }
+    result: null
+
+# The `result` field should be left blank to start. Once you submit your log asset files with
+# your integration pull-request in a Datadog GitHub repository, Datadog's validations will
+# run your raw logs against your pipeline and return the result. If the result output in the
+# validation is accurate, take the output and add it to the `result` field in your test YAML file.

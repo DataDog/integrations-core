@@ -123,6 +123,8 @@ integration/container:
 - container/**/*
 integration/containerd:
 - containerd/**/*
+integration/contentful:
+- contentful/**/*
 integration/coredns:
 - coredns/**/*
 integration/couch:

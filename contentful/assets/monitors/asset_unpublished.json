@@ -1,0 +1,24 @@
+{
+	"id": 149525713,
+	"name": "Contentful: Asset is unpublished",
+	"type": "log alert",
+	"query": "logs(\"source:contentful @evt.name:ContentManagement.Asset.unpublish\").index(\"*\").rollup(\"count\").by(\"@details.sys.id,@details.sys.space.sys.id,@details.sys.environment.sys.id\").last(\"12h\") >= 1",
+	"message": "{{#is_alert}}\nAsset with ID: {{[@details.sys.id].name}} is unpublished, this might break your app(s).  \nSpace: {{[@details.sys.space.sys.id].name}}  \nEnvironment: {{[@details.sys.environment.sys.id].name}}\n{{/is_alert}}",
+	"tags": [],
+	"options": {
+		"thresholds": {
+			"critical": 1
+		},
+		"enable_logs_sample": false,
+		"notify_audit": false,
+		"on_missing_data": "default",
+		"include_tags": true,
+		"new_group_delay": 60,
+		"groupby_simple_monitor": false,
+		"silenced": {}
+	},
+	"priority": null,
+	"restriction_policy": {
+		"bindings": []
+	}
+}
