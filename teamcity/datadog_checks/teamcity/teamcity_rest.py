@@ -256,6 +256,9 @@ class TeamCityRest(AgentCheck):
         except HTTPError:
             # In the case where a build config has been deleted, no new builds should be returned and it will be removed
             # from the list of all build configs in the next re-initialization
+            self.log.debug(
+                'Failed to retrieve new builds for build config %s', self.current_build_config
+            )
             new_builds = {}
         return new_builds
 
