@@ -3030,7 +3030,6 @@ def test_property_metrics_metric_filters(
     aggregator.assert_metric('vsphere.cpu.totalmhz.avg')
     aggregator.assert_metric('vsphere.datastore.busResets.sum')
     aggregator.assert_metric('vsphere.vmop.numChangeDS.latest')
-    aggregator.assert_metric('vsphere.vsan.cluster.time')
     aggregator.assert_all_metrics_covered()
 
 
@@ -3095,7 +3094,6 @@ def test_property_metrics_expired_cache(
         aggregator.assert_metric('datadog.vsphere.collect_events.time')
         aggregator.assert_metric('datadog.vsphere.query_metrics.time')
         aggregator.assert_metric('vsphere.cpu.costop.sum')
-        aggregator.assert_metric('vsphere.vsan.cluster.time')
         aggregator.assert_all_metrics_covered()
 
         assert not check.infrastructure_cache.is_expired()

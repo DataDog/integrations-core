@@ -400,8 +400,8 @@ class VSphereAPI(object):
                     if cluster_vsan_config and cluster_vsan_config.enabled:
                         cluster_uuid = cluster_vsan_config.defaultConfig.uuid
                         cluster_vsanPerfQuerySpec = [
-                            vim.cluster.VsanPerfQuerySpec(entityRefId=f'cluster-domclient:{cluster_uuid}'),
-                            vim.cluster.VsanPerfQuerySpec(entityRefId=f'vsan-cluster-capacity:{cluster_uuid}'),
+                            vim.cluster.VsanPerfQuerySpec(entityRefId='cluster-domclient:%s' % (cluster_uuid)),
+                            vim.cluster.VsanPerfQuerySpec(entityRefId='vsan-cluster-capacity:%s' % (cluster_uuid)),
                         ]
                         discovered_metrics = vsan_perf_manager.QueryVsanPerf(cluster_vsanPerfQuerySpec, cluster)
                         for entity_type in discovered_metrics:
