@@ -68,7 +68,7 @@ def dd_environment():
 
         host, port = stack.enter_context(port_forward(kubeconfig, "kubevirt", 443, "service", "virt-api"))
         instance["kubevirt_api_metrics_endpoint"] = f"https://{host}:{port}/metrics"
-        instance["kubevirt_api_health_endpoint"] = f"https://{host}:{port}/healthz"
+        instance["kubevirt_api_healthz_endpoint"] = f"https://{host}:{port}/healthz"
         instance["tls_verify"] = False
 
         yield {"instances": [instance]}
@@ -78,7 +78,7 @@ def dd_environment():
 def instance():
     return {
         "kubevirt_api_metrics_endpoint": "https://virt-api.kubevirt.svc/metrics",
-        "kubevirt_api_health_endpoint": "https://virt-api.kubevirt.svc/healthz",
+        "kubevirt_api_healthz_endpoint": "https://virt-api.kubevirt.svc/healthz",
     }
 
 
