@@ -1,0 +1,1 @@
+Fix monitoring when vault is behind load balancer, add more assertive has_leader metric that works on all scenarios to assert if vault has a leader and remove the useless is_leader tag
