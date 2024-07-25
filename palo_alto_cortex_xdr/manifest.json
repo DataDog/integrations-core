@@ -9,7 +9,7 @@
       "support": "README.md#Support",
       "changelog": "CHANGELOG.md",
       "description": "Gain insights into palo alto cortex xdr logs",
-      "title": "palo-alto-cortex-xdr",
+      "title": "Palo Alto Cortex XDR",
       "media": [],
       "classifier_tags": [
         "Category::Log Collection",

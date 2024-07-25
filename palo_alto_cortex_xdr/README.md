@@ -17,7 +17,7 @@ No additional installation is needed on your server.
 
 ### Validation
 
-<Steps to validate integration is functioning as expected>
+Steps to validate integration is functioning as expected
 
 ## Data Collected
 
