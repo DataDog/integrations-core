@@ -3,8 +3,9 @@
 # Licensed under a 3-clause BSD style license (see LICENSE)
 from typing import Any  # noqa: F401
 
-# from kubernetes import config, dynamic
-# from kubernetes.client import api_client
+from kubernetes import config, dynamic
+from kubernetes.client import api_client
+
 from datadog_checks.base import OpenMetricsBaseCheckV2, is_affirmative
 
 from .metrics import METRICS_MAP
@@ -41,10 +42,23 @@ class KubevirtApiCheck(OpenMetricsBaseCheckV2):
         GET /apis/kubevirt.io/v1/virtualmachineinstances
         GET /apis/kubevirt.io/v1/namespaces/{namespace}/virtualmachine
         GET /apis/kubevirt.io/v1/virtualmachine
-
-        client = dynamic.DynamicClient(api_client.ApiClient(configuration=config.load_kube_config()))
-        vmi = client.resources.get(api_version="kubevirt.io/v1", kind="VirtualMachineInstance")
         """
+
+        # Creating a dynamic client
+        client = dynamic.DynamicClient(api_client.ApiClient(configuration=config.load_kube_config()))
+        api = client.resources.get(api_version="v1", kind="Node")
+
+        print("%s\t\t%s\t\t%s" % ("NAME", "STATUS", "VERSION"))
+        for item in api.get().items:
+            node = api.get(name=item.metadata.name)
+            print(
+                "%s\t%s\t\t%s\n"
+                % (
+                    node.metadata.name,
+                    node.status.conditions[3]["type"],
+                    node.status.nodeInfo.kubeProxyVersion,
+                )
+            )
 
         super().check(_)
 
