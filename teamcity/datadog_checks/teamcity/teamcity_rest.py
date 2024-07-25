@@ -2,6 +2,7 @@
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
 from copy import deepcopy
+from requests.exceptions import HTTPError
 
 from six import PY2
 
@@ -250,7 +251,13 @@ class TeamCityRest(AgentCheck):
             self.log.debug('Checking for new builds...')
             ressource = "new_builds"
             options = {"since_build": last_build_id}
-        return get_response(self, ressource, build_conf=self.current_build_config, **options)
+        try:
+            new_builds = get_response(self, ressource, build_conf=self.current_build_config, **options)
+        except HTTPError:
+            # In the case where a build config has been deleted, no new builds should be returned and it will be removed
+            # from the list of all build configs in the next re-initialization
+            new_builds = {}
+        return new_builds
 
     def _get_build_config_type(self, build_config):
         if self.is_deployment:
