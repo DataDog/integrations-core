@@ -99,6 +99,11 @@ class PostgresConfig:
         if is_affirmative(instance.get('collect_default_database', True)):
             self.ignore_databases = [d for d in self.ignore_databases if d != 'postgres']
         self.custom_queries = instance.get('custom_queries', [])
+        self.use_global_custom_queries = instance.get('use_global_custom_queries', 'extend')
+        if self.use_global_custom_queries == 'extend':
+            self.custom_queries.extend(init_config.get('global_custom_queries', []))
+        elif is_affirmative(self.use_global_custom_queries):
+            self.custom_queries = init_config.get('global_custom_queries', [])
         self.tag_replication_role = is_affirmative(instance.get('tag_replication_role', True))
         self.custom_metrics = self._get_custom_metrics(instance.get('custom_metrics', []))
         self.max_relations = int(instance.get('max_relations', 300))
