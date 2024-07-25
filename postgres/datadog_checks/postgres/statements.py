@@ -308,7 +308,10 @@ class PostgresStatementMetrics(DBMAsyncJob):
             if self._check.pg_settings.get("track_io_timing") != "on":
                 desired_columns -= PG_STAT_STATEMENTS_TIMING_COLUMNS
 
-            pg_stat_statements_max = int(self._check.pg_settings.get("pg_stat_statements.max"))
+            pg_stat_statements_max_setting = self._check.pg_settings.get("pg_stat_statements.max")
+            pg_stat_statements_max = int(
+                pg_stat_statements_max_setting if pg_stat_statements_max_setting is not None else 0
+            )
             if pg_stat_statements_max > self._pg_stat_statements_max_warning_threshold:
                 self._check.record_warning(
                     DatabaseConfigurationError.high_pg_stat_statements_max,
