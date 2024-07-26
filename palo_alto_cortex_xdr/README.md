@@ -2,15 +2,15 @@
 
 ## Overview
 
-[Palo Alto Cortex XDR][1] is a comprehensive detection and response platform that provides advanced threat protection across endpoints, networks, and cloud environments. It integrates endpoint protection, network security, and analytics to offer real-time visibility and response capabilities to combat sophisticated cyber threats effectively.
+[Palo Alto Cortex XDR][1] is a comprehensive detection and response platform that provides advanced threat protection across endpoints, networks, and cloud environments. It integrates endpoint protection, network security, and analytics to offer real-time visibility and response capabilities and combat sophisticated cyber threats effectively.
 
 This integration ingests the following logs:
 
 - Incident
 - Alert
 
-The Palo Alto Cortex XDR integration seamlessly collect the data of Palo Alto Cortex XDR logs using the REST APIs.
-Before ingestion of the data, it normalizes and enriches the logs, ensuring a consistent data format and enhancing information content for downstream processing and analysis. The integration provides insights into incidents and alerts through the out-of-the-box dashboards.
+The Palo Alto Cortex XDR integration seamlessly collect the data of Palo Alto Cortex XDR logs using REST APIs.
+Before ingesting the data, it normalizes and enriches the logs, ensuring a consistent data format and enhancing information content for downstream processing and analysis. The integration provides insights into incidents and alerts using out-of-the-box dashboards.
 
 ## Setup
 
@@ -20,14 +20,14 @@ Before ingestion of the data, it normalizes and enriches the logs, ensuring a co
 
 #### Steps to create API key
 
-1. Sign in into your **Palo Alto Cortex XDR** instance
-2. Navigate to **Settings** > **Configurations** > **Integrations** > **API Keys**
-3. Click on **+ New Key**
-4. Choose the type of API Key based on your desired security level **Advanced** or **Standard**
-5. If you want to define a time limit on the API key authentication, check **Enable Expiration Date** and select the **expiration date and time**. Navigate to **Settings** > **Configurations** > **Integrations** > **API Keys** to track the Expiration Time field for each API key
+1. Sign into your **Palo Alto Cortex XDR** instance.
+2. Navigate to **Settings** > **Configurations** > **Integrations** > **API Keys**.
+3. Click on **New Key**.
+4. Choose the type of API key based on your desired security level, **Advanced** or **Standard**.
+5. If you want to define a time limit on the API key authentication, check **Enable Expiration Date**, and then select the **expiration date and time**. Navigate to **Settings** > **Configurations** > **Integrations** > **API Keys** to track the **Expiration Time** setting for each API key.
 6. Provide a comment that describes the purpose for the API key, if desired.
-7. Select the desired level of access for this key from existing **Roles**, or you can select **Custom** to set the permissions on a more granular level
-8. Click on **Generate** to generate the API Key.
+7. Select the desired level of access for this key from existing **Roles**, or you can select **Custom** to set the permissions granularly.
+8. Click **Generate** to generate the API key.
 9. Copy the API key, and then click **Done**. This value represents your unique **Authorization:{key}**
 
 #### Steps to get Cortex XDR API Key ID
