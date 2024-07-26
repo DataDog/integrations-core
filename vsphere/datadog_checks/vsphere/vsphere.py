@@ -509,7 +509,7 @@ class VSphereCheck(AgentCheck):
                             latest_metric_time = collect_start_time
 
             for cluster in new_health_metrics:
-                for metric_name, metric_value in enumerate(cluster):
+                for metric_name, metric_value in cluster.items():
                     list_of_tags = [f"{key}:{value}" for key, value in metric_value.items()]
                     self.gauge(
                         metric_name,
