@@ -33,7 +33,7 @@
         "resource_type": "blog",
         "url": "https://www.datadoghq.com/blog/databricks-monitoring-datadog/"
       }
-    ],
+    ]
   },
   "author": {
     "support_email": "help@datadoghq.com",
