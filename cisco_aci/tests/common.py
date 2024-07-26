@@ -32,7 +32,7 @@ CONFIG_WITH_TAGS = {
     'pwd': PASSWORD,
     'tenant': ['DataDog'],
     "tags": ["project:cisco_aci"],
-    "enable_ndm": True,
+    "send_ndm_metadata": True,
 }
 
 # list of fixture names
