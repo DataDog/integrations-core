@@ -69,6 +69,7 @@ from .util import (
     DatabaseHealthCheckError,  # noqa: F401
     fmt,
     get_schema_field,
+    get_relation_field,
     payload_pg_version,
     warning_with_tags,
 )
@@ -336,7 +337,11 @@ class PostgreSql(AgentCheck):
         if self._config.relations:
             for query in DYNAMIC_RELATION_QUERIES:
                 query = copy.copy(query)
-                formatted_query = self._relations_manager.filter_relation_query(query['query'], 'nspname')
+                formatted_query = self._relations_manager.filter_relation_query(
+                    query['query'],
+                    get_schema_field(query['descriptors']),
+                    get_relation_field(query['descriptors']),
+                )
                 query['query'] = formatted_query
                 per_database_queries.append(query)
 
@@ -482,8 +487,11 @@ class PostgreSql(AgentCheck):
             with tracked_query(check=self, operation='custom_metrics' if is_custom_metrics else scope['name']):
                 # if this is a relation-specific query, we need to list all relations last
                 if is_relations:
-                    schema_field = get_schema_field(descriptors)
-                    formatted_query = self._relations_manager.filter_relation_query(query, schema_field)
+                    formatted_query = self._relations_manager.filter_relation_query(
+                        query,
+                        get_schema_field(scope['descriptors']),
+                        get_relation_field(scope['descriptors']),
+                    )
                     cursor.execute(formatted_query)
                 else:
                     self.log.debug("Running query: %s", str(query))
