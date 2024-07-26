@@ -67,8 +67,10 @@ def dd_environment():
         instance = {}
 
         host, port = stack.enter_context(port_forward(kubeconfig, "kubevirt", 443, "service", "virt-api"))
+
         instance["kubevirt_api_metrics_endpoint"] = f"https://{host}:{port}/metrics"
         instance["kubevirt_api_healthz_endpoint"] = f"https://{host}:{port}/healthz"
+
         instance["tls_verify"] = False
 
         yield {"instances": [instance]}
@@ -77,8 +79,8 @@ def dd_environment():
 @pytest.fixture
 def instance():
     return {
-        "kubevirt_api_metrics_endpoint": "https://virt-api.kubevirt.svc/metrics",
-        "kubevirt_api_healthz_endpoint": "https://virt-api.kubevirt.svc/healthz",
+        "kubevirt_api_metrics_endpoint": "https://10.96.0.1:443/metrics",
+        "kubevirt_api_healthz_endpoint": "https://10.96.0.1:443/healthz",
     }
 
 
@@ -89,8 +91,8 @@ def healthz_path():
 
 def mock_http_responses(url, **_params):
     mapping = {
-        "https://virt-api.kubevirt.svc/healthz": "healthz.txt",
-        "https://virt-api.kubevirt.svc/metrics": "metrics.txt",
+        "https://10.96.0.1:443/healthz": "healthz.txt",
+        "https://10.96.0.1:443/metrics": "metrics.txt",
     }
 
     fixtures_file = mapping.get(url)

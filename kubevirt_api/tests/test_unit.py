@@ -22,24 +22,48 @@ def test_check(dd_run_check, aggregator, instance, mocker):
     check = KubevirtApiCheck("kubevirt_api", {}, [instance])
     dd_run_check(check)
 
-    aggregator.assert_metric("kubevirt_api.can_connect", value=1)
+    aggregator.assert_metric(
+        "kubevirt_api.can_connect",
+        value=1,
+        tags=[
+            "kubevirt_service:virt-api",
+            "endpoint:https://10.96.0.1:443/healthz",
+            "kube_namespace:kubevirt",
+            "kube_cluster_name:test-cluster",
+            "pod_name:virt-api-7b4b4b4b4b-4b4b4",
+        ],
+    )
 
-    aggregator.assert_metric("kubevirt_api.process.cpu_seconds.count")  # counter
-    aggregator.assert_metric("kubevirt_api.process.max_fds")  # gauge
-    aggregator.assert_metric("kubevirt_api.process.open_fds")  # gauge
-    aggregator.assert_metric("kubevirt_api.process.resident_memory_bytes")  # gauge
-    aggregator.assert_metric("kubevirt_api.process.start_time_seconds")  # gauge
-    aggregator.assert_metric("kubevirt_api.process.virtual_memory_bytes")  # gauge
-    aggregator.assert_metric("kubevirt_api.process.virtual_memory_max_bytes")  # gauge
-    aggregator.assert_metric("kubevirt_api.promhttp.metric_handler_requests_in_flight")  # gauge
-    aggregator.assert_metric("kubevirt_api.promhttp.metric_handler_requests.count")  # counter
-    aggregator.assert_metric("kubevirt_api.rest.client_rate_limiter_duration_seconds.bucket")  # histogram
-    aggregator.assert_metric("kubevirt_api.rest.client_rate_limiter_duration_seconds.count")  # histogram
-    aggregator.assert_metric("kubevirt_api.rest.client_rate_limiter_duration_seconds.sum")  # histogram
-    aggregator.assert_metric("kubevirt_api.rest.client_request_latency_seconds.bucket")  # histogram
-    aggregator.assert_metric("kubevirt_api.rest.client_request_latency_seconds.count")  # histogram
-    aggregator.assert_metric("kubevirt_api.rest.client_request_latency_seconds.sum")  # histogram
-    aggregator.assert_metric("kubevirt_api.rest.client_requests.count")  # counter
+    metrics_tags = [
+        "kubevirt_service:virt-api",
+        "endpoint:https://10.96.0.1:443/metrics",
+        "kube_namespace:kubevirt",
+        "kube_cluster_name:test-cluster",
+        "pod_name:virt-api-7b4b4b4b4b-4b4b4",
+    ]
+
+    aggregator.assert_metric("kubevirt_api.process.cpu_seconds.count", tags=metrics_tags)  # counter
+    aggregator.assert_metric("kubevirt_api.process.max_fds", tags=metrics_tags)  # gauge
+    aggregator.assert_metric("kubevirt_api.process.open_fds", tags=metrics_tags)  # gauge
+    aggregator.assert_metric("kubevirt_api.process.resident_memory_bytes", tags=metrics_tags)  # gauge
+    aggregator.assert_metric("kubevirt_api.process.start_time_seconds", tags=metrics_tags)  # gauge
+    aggregator.assert_metric("kubevirt_api.process.virtual_memory_bytes", tags=metrics_tags)  # gauge
+    aggregator.assert_metric("kubevirt_api.process.virtual_memory_max_bytes", tags=metrics_tags)  # gauge
+    aggregator.assert_metric("kubevirt_api.promhttp.metric_handler_requests_in_flight", tags=metrics_tags)  # gauge
+    aggregator.assert_metric("kubevirt_api.promhttp.metric_handler_requests.count", tags=metrics_tags)  # counter
+    aggregator.assert_metric(
+        "kubevirt_api.rest.client_rate_limiter_duration_seconds.bucket", tags=metrics_tags
+    )  # histogram
+    aggregator.assert_metric(
+        "kubevirt_api.rest.client_rate_limiter_duration_seconds.count", tags=metrics_tags
+    )  # histogram
+    aggregator.assert_metric(
+        "kubevirt_api.rest.client_rate_limiter_duration_seconds.sum", tags=metrics_tags
+    )  # histogram
+    aggregator.assert_metric("kubevirt_api.rest.client_request_latency_seconds.bucket", tags=metrics_tags)  # histogram
+    aggregator.assert_metric("kubevirt_api.rest.client_request_latency_seconds.count", tags=metrics_tags)  # histogram
+    aggregator.assert_metric("kubevirt_api.rest.client_request_latency_seconds.sum", tags=metrics_tags)  # histogram
+    aggregator.assert_metric("kubevirt_api.rest.client_requests.count", tags=metrics_tags)  # counter
 
     aggregator.assert_all_metrics_covered()
     aggregator.assert_metrics_using_metadata(get_metadata_metrics())
