@@ -19,7 +19,7 @@
       "Supported OS::Windows",
       "Supported OS::macOS",
       "Offering::Integration"
-    ]
+    ],
     "resources": [
       {
         "resource_type": "blog",
