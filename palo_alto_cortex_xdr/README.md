@@ -13,7 +13,7 @@ No additional installation is needed on your server.
 
 ### Configuration
 
-1. <List of steps to configure this integration>
+1. List of steps to configure this integration
 
 ### Validation
 
