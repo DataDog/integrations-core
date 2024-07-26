@@ -1,1580 +1,814 @@
 [
     {
         "host": "mongohost",
-        "dbm_type": "slow_query",
         "ddagentversion": "0.0.0",
         "ddsource": "mongo",
-        "ddtags": "server:mongodb://testUser2:*****@localhost:27017/test,clustername:my_cluster",
-        "timestamp": 1720550483.298,
-        "network": {
-            "client": {
-                "ip": "192.168.65.1",
-                "hostname": null
-            }
-        },
-        "db": {
-            "instance": "integration",
-            "query_signature": "1f6ad13d7f6175f0",
-            "user": "",
-            "application": null,
-            "statement": "{\"q\": {\"age\": {\"$gt\": 20}}, \"u\": {\"$set\": {\"subscribed\": true}}, \"multi\": true, \"upsert\": false, \"comment\": \"update customers subscription status by age\"}",
-            "plan": {
-                "definition": {
-                    "execStats": {
-                        "stage": "UPDATE",
-                        "nReturned": 0,
-                        "executionTimeMillisEstimate": 4,
-                        "works": 432,
-                        "advanced": 0,
-                        "needTime": 431,
-                        "needYield": 0,
-                        "saveState": 0,
-                        "restoreState": 0,
-                        "isEOF": 1,
-                        "nMatched": 431,
-                        "nWouldModify": 431,
-                        "nWouldUpsert": 0,
-                        "inputStage": {
-                            "stage": "FETCH",
-                            "nReturned": 431,
-                            "executionTimeMillisEstimate": 0,
-                            "works": 432,
-                            "advanced": 431,
-                            "needTime": 0,
-                            "needYield": 0,
-                            "saveState": 431,
-                            "restoreState": 431,
-                            "isEOF": 1,
-                            "docsExamined": 431,
-                            "alreadyHasObj": 0,
-                            "inputStage": {
-                                "stage": "IXSCAN",
-                                "nReturned": 431,
-                                "executionTimeMillisEstimate": 0,
-                                "works": 432,
-                                "advanced": 431,
-                                "needTime": 0,
-                                "needYield": 0,
-                                "saveState": 431,
-                                "restoreState": 431,
-                                "isEOF": 1,
-                                "keyPattern": {
-                                    "age": -1
-                                },
-                                "indexName": "age_-1",
-                                "isMultiKey": false,
-                                "multiKeyPaths": {
-                                    "age": []
-                                },
-                                "isUnique": false,
-                                "isSparse": false,
-                                "isPartial": false,
-                                "indexVersion": 2,
-                                "direction": "forward",
-                                "indexBounds": {
-                                    "age": [
-                                        "[inf.0, 20)"
-                                    ]
-                                },
-                                "keysExamined": 431,
-                                "seeks": 1,
-                                "dupsTested": 0,
-                                "dupsDropped": 0
-                            }
+        "dbm_type": "slow_query",
+        "collection_interval": 10,
+        "ddtags": [
+            "server:mongodb://testUser2:*****@localhost:27017/test",
+            "clustername:my_cluster"
+        ],
+        "timestamp": 1715911398111.2722,
+        "mongodb_slow_queries": [
+            {
+                "timestamp": 1720550483298.0,
+                "dbname": "integration",
+                "op": "update",
+                "ns": "integration.customers",
+                "plan_summary": "IXSCAN { age: -1 }",
+                "query_signature": "1f6ad13d7f6175f0",
+                "user": "",
+                "application": null,
+                "statement": "{\"q\": {\"age\": {\"$gt\": 20}}, \"u\": {\"$set\": {\"subscribed\": true}}, \"multi\": true, \"upsert\": false, \"comment\": \"update customers subscription status by age\"}",
+                "query_hash": null,
+                "plan_cache_key": null,
+                "query_framework": null,
+                "cursor": {
+                    "cursor_id": null,
+                    "originating_command": null
+                },
+                "mills": 10,
+                "num_yield": 0,
+                "response_length": 0,
+                "nreturned": null,
+                "nmatched": 431,
+                "nmodified": 431,
+                "ninserted": null,
+                "ndeleted": null,
+                "keys_examined": 431,
+                "docs_examined": 431,
+                "keys_inserted": 431,
+                "write_conflicts": null,
+                "cpu_nanos": 10630666,
+                "planning_time_micros": null,
+                "upsert": false,
+                "has_sort_stage": false,
+                "used_disk": false,
+                "from_multi_planner": false,
+                "replanned": false,
+                "replan_reason": null,
+                "lock_stats": {
+                    "parallel_batch_writer_mode": {
+                        "acquire_count": {
+                            "r": 1
+                        }
+                    },
+                    "feature_compatibility_version": {
+                        "acquire_count": {
+                            "r": 1,
+                            "w": 1
+                        }
+                    },
+                    "replication_state_transition": {
+                        "acquire_count": {
+                            "w": 1
+                        }
+                    },
+                    "global": {
+                        "acquire_count": {
+                            "r": 1,
+                            "w": 1
+                        }
+                    },
+                    "database": {
+                        "acquire_count": {
+                            "w": 1
+                        }
+                    },
+                    "collection": {
+                        "acquire_count": {
+                            "w": 1
                         }
                     }
                 },
-                "signature": "746f8dc04fd3c6d9"
-            }
-        },
-        "mongodb": {
-            "op": "update",
-            "ns": "integration.customers",
-            "plan_summary": "IXSCAN { age: -1 }",
-            "exec_stats": {
-                "stage": "UPDATE",
-                "nReturned": 0,
-                "executionTimeMillisEstimate": 4,
-                "works": 432,
-                "advanced": 0,
-                "needTime": 431,
-                "needYield": 0,
-                "saveState": 0,
-                "restoreState": 0,
-                "isEOF": 1,
-                "nMatched": 431,
-                "nWouldModify": 431,
-                "nWouldUpsert": 0,
-                "inputStage": {
-                    "stage": "FETCH",
-                    "nReturned": 431,
-                    "executionTimeMillisEstimate": 0,
-                    "works": 432,
-                    "advanced": 431,
-                    "needTime": 0,
-                    "needYield": 0,
-                    "saveState": 431,
-                    "restoreState": 431,
-                    "isEOF": 1,
-                    "docsExamined": 431,
-                    "alreadyHasObj": 0,
-                    "inputStage": {
-                        "stage": "IXSCAN",
-                        "nReturned": 431,
-                        "executionTimeMillisEstimate": 0,
-                        "works": 432,
-                        "advanced": 431,
-                        "needTime": 0,
-                        "needYield": 0,
-                        "saveState": 431,
-                        "restoreState": 431,
-                        "isEOF": 1,
-                        "keyPattern": {
-                            "age": -1
-                        },
-                        "indexName": "age_-1",
-                        "isMultiKey": false,
-                        "multiKeyPaths": {
-                            "age": []
-                        },
-                        "isUnique": false,
-                        "isSparse": false,
-                        "isPartial": false,
-                        "indexVersion": 2,
-                        "direction": "forward",
-                        "indexBounds": {
-                            "age": [
-                                "[inf.0, 20)"
-                            ]
-                        },
-                        "keysExamined": 431,
-                        "seeks": 1,
-                        "dupsTested": 0,
-                        "dupsDropped": 0
-                    }
+                "flow_control_stats": {
+                    "acquire_count": 1
                 }
             },
-            "query_hash": null,
-            "plan_cache_key": null,
-            "query_framework": null,
-            "cursor": {
-                "cursor_id": null,
-                "originating_command": null
-            },
-            "microsecs_running": 10000,
-            "num_yield": 0,
-            "response_length": null,
-            "nreturned": null,
-            "nmatched": 431,
-            "nmodified": 431,
-            "ninserted": null,
-            "ndeleted": null,
-            "keys_examined": 431,
-            "docs_examined": 431,
-            "keys_inserted": 431,
-            "write_conflicts": null,
-            "cpu_nanos": 10630666,
-            "planning_time_micros": null,
-            "upsert": false,
-            "has_sort_stage": false,
-            "used_disk": false,
-            "from_multi_planner": false,
-            "replanned": false,
-            "replan_reason": null,
-            "lock_stats": {
-                "parallel_batch_writer_mode": {
-                    "acquire_count": {
-                        "r": 1
-                    }
+            {
+                "timestamp": 1720550476223.0,
+                "dbname": "integration",
+                "op": "query",
+                "ns": "integration.customers",
+                "plan_summary": "IXSCAN { name: 1 }",
+                "query_signature": "6fef821a212dde0b",
+                "user": "",
+                "application": null,
+                "statement": "{\"find\": \"customers\", \"filter\": {\"age\": {\"$gt\": 63}}, \"sort\": {\"name\": 1}, \"comment\": \"query customers by age\", \"limit\": 34, \"$db\": \"integration\"}",
+                "query_hash": "F286520C",
+                "plan_cache_key": "4AFF4016",
+                "query_framework": "classic",
+                "cursor": {
+                    "cursor_id": null,
+                    "originating_command": null
                 },
-                "feature_compatibility_version": {
-                    "acquire_count": {
-                        "r": 1,
-                        "w": 1
-                    }
-                },
-                "replication_state_transition": {
-                    "acquire_count": {
-                        "w": 1
-                    }
-                },
-                "global": {
-                    "acquire_count": {
-                        "r": 1,
-                        "w": 1
-                    }
-                },
-                "database": {
-                    "acquire_count": {
-                        "w": 1
-                    }
-                },
-                "collection": {
-                    "acquire_count": {
-                        "w": 1
-                    }
-                }
-            },
-            "flow_control_stats": {
-                "acquire_count": 1
-            }
-        }
-    },
-    {
-        "host": "mongohost",
-        "dbm_type": "slow_query",
-        "ddagentversion": "0.0.0",
-        "ddsource": "mongo",
-        "ddtags": "server:mongodb://testUser2:*****@localhost:27017/test,clustername:my_cluster",
-        "timestamp": 1720550476.223,
-        "network": {
-            "client": {
-                "ip": "192.168.65.1",
-                "hostname": null
-            }
-        },
-        "db": {
-            "instance": "integration",
-            "query_signature": "6fef821a212dde0b",
-            "user": "",
-            "application": null,
-            "statement": "{\"find\": \"customers\", \"filter\": {\"age\": {\"$gt\": 63}}, \"sort\": {\"name\": 1}, \"comment\": \"query customers by age\", \"limit\": 34, \"$db\": \"integration\"}",
-            "plan": {
-                "definition": {
-                    "execStats": {
-                        "stage": "CACHED_PLAN",
-                        "nReturned": 0,
-                        "executionTimeMillisEstimate": 84,
-                        "works": 1,
-                        "advanced": 0,
-                        "needTime": 0,
-                        "needYield": 0,
-                        "saveState": 1,
-                        "restoreState": 1,
-                        "isEOF": 1,
-                        "inputStage": {
-                            "stage": "LIMIT",
-                            "nReturned": 0,
-                            "executionTimeMillisEstimate": 84,
-                            "works": 418,
-                            "advanced": 0,
-                            "needTime": 417,
-                            "needYield": 0,
-                            "saveState": 1,
-                            "restoreState": 1,
-                            "isEOF": 1,
-                            "limitAmount": 34,
-                            "inputStage": {
-                                "stage": "FETCH",
-                                "filter": {
-                                    "age": {
-                                        "$gt": 63
-                                    }
-                                },
-                                "nReturned": 0,
-                                "executionTimeMillisEstimate": 84,
-                                "works": 418,
-                                "advanced": 0,
-                                "needTime": 417,
-                                "needYield": 0,
-                                "saveState": 1,
-                                "restoreState": 1,
-                                "isEOF": 1,
-                                "docsExamined": 417,
-                                "alreadyHasObj": 0,
-                                "inputStage": {
-                                    "stage": "IXSCAN",
-                                    "nReturned": 417,
-                                    "executionTimeMillisEstimate": 84,
-                                    "works": 418,
-                                    "advanced": 417,
-                                    "needTime": 0,
-                                    "needYield": 0,
-                                    "saveState": 1,
-                                    "restoreState": 1,
-                                    "isEOF": 1,
-                                    "keyPattern": {
-                                        "name": 1
-                                    },
-                                    "indexName": "name_1",
-                                    "isMultiKey": false,
-                                    "multiKeyPaths": {
-                                        "name": []
-                                    },
-                                    "isUnique": false,
-                                    "isSparse": false,
-                                    "isPartial": false,
-                                    "indexVersion": 2,
-                                    "direction": "forward",
-                                    "indexBounds": {
-                                        "name": [
-                                            "[MinKey, MaxKey]"
-                                        ]
-                                    },
-                                    "keysExamined": 417,
-                                    "seeks": 1,
-                                    "dupsTested": 0,
-                                    "dupsDropped": 0
-                                }
-                            }
+                "mills": 85,
+                "num_yield": 1,
+                "response_length": 110,
+                "nreturned": 0,
+                "nmatched": null,
+                "nmodified": null,
+                "ninserted": null,
+                "ndeleted": null,
+                "keys_examined": 417,
+                "docs_examined": 417,
+                "keys_inserted": null,
+                "write_conflicts": null,
+                "cpu_nanos": 85181501,
+                "planning_time_micros": 85096,
+                "upsert": false,
+                "has_sort_stage": false,
+                "used_disk": false,
+                "from_multi_planner": false,
+                "replanned": false,
+                "replan_reason": null,
+                "lock_stats": {
+                    "feature_compatibility_version": {
+                        "acquire_count": {
+                            "r": 3
+                        }
+                    },
+                    "global": {
+                        "acquire_count": {
+                            "r": 3
                         }
                     }
                 },
-                "signature": "4d5e4c2c344682a7"
-            }
-        },
-        "mongodb": {
-            "op": "query",
-            "ns": "integration.customers",
-            "plan_summary": "IXSCAN { name: 1 }",
-            "exec_stats": {
-                "stage": "CACHED_PLAN",
-                "nReturned": 0,
-                "executionTimeMillisEstimate": 84,
-                "works": 1,
-                "advanced": 0,
-                "needTime": 0,
-                "needYield": 0,
-                "saveState": 1,
-                "restoreState": 1,
-                "isEOF": 1,
-                "inputStage": {
-                    "stage": "LIMIT",
-                    "nReturned": 0,
-                    "executionTimeMillisEstimate": 84,
-                    "works": 418,
-                    "advanced": 0,
-                    "needTime": 417,
-                    "needYield": 0,
-                    "saveState": 1,
-                    "restoreState": 1,
-                    "isEOF": 1,
-                    "limitAmount": 34,
-                    "inputStage": {
-                        "stage": "FETCH",
-                        "filter": {
-                            "age": {
-                                "$gt": 63
-                            }
-                        },
-                        "nReturned": 0,
-                        "executionTimeMillisEstimate": 84,
-                        "works": 418,
-                        "advanced": 0,
-                        "needTime": 417,
-                        "needYield": 0,
-                        "saveState": 1,
-                        "restoreState": 1,
-                        "isEOF": 1,
-                        "docsExamined": 417,
-                        "alreadyHasObj": 0,
-                        "inputStage": {
-                            "stage": "IXSCAN",
-                            "nReturned": 417,
-                            "executionTimeMillisEstimate": 84,
-                            "works": 418,
-                            "advanced": 417,
-                            "needTime": 0,
-                            "needYield": 0,
-                            "saveState": 1,
-                            "restoreState": 1,
-                            "isEOF": 1,
-                            "keyPattern": {
-                                "name": 1
-                            },
-                            "indexName": "name_1",
-                            "isMultiKey": false,
-                            "multiKeyPaths": {
-                                "name": []
-                            },
-                            "isUnique": false,
-                            "isSparse": false,
-                            "isPartial": false,
-                            "indexVersion": 2,
-                            "direction": "forward",
-                            "indexBounds": {
-                                "name": [
-                                    "[MinKey, MaxKey]"
-                                ]
-                            },
-                            "keysExamined": 417,
-                            "seeks": 1,
-                            "dupsTested": 0,
-                            "dupsDropped": 0
-                        }
-                    }
-                }
+                "flow_control_stats": {}
             },
-            "query_hash": "F286520C",
-            "plan_cache_key": "4AFF4016",
-            "query_framework": "classic",
-            "cursor": {
-                "cursor_id": null,
-                "originating_command": null
-            },
-            "microsecs_running": 85000,
-            "num_yield": 1,
-            "response_length": 110,
-            "nreturned": 0,
-            "nmatched": null,
-            "nmodified": null,
-            "ninserted": null,
-            "ndeleted": null,
-            "keys_examined": 417,
-            "docs_examined": 417,
-            "keys_inserted": null,
-            "write_conflicts": null,
-            "cpu_nanos": 85181501,
-            "planning_time_micros": 85096,
-            "upsert": false,
-            "has_sort_stage": false,
-            "used_disk": false,
-            "from_multi_planner": false,
-            "replanned": false,
-            "replan_reason": null,
-            "lock_stats": {
-                "feature_compatibility_version": {
-                    "acquire_count": {
-                        "r": 3
-                    }
+            {
+                "timestamp": 1720550475716.0,
+                "dbname": "integration",
+                "op": "update",
+                "ns": "integration.customers",
+                "plan_summary": "IXSCAN { age: -1 }",
+                "query_signature": "3719fe0a5548dd23",
+                "user": "",
+                "application": null,
+                "statement": "{\"q\": {\"age\": {\"$gt\": 20}}, \"u\": {\"$set\": {\"subscribed\": false}}, \"multi\": true, \"upsert\": false, \"comment\": \"update customers subscription status by age\"}",
+                "query_hash": null,
+                "plan_cache_key": null,
+                "query_framework": null,
+                "cursor": {
+                    "cursor_id": null,
+                    "originating_command": null
                 },
-                "global": {
-                    "acquire_count": {
-                        "r": 3
-                    }
-                }
-            },
-            "flow_control_stats": {}
-        }
-    },
-    {
-        "host": "mongohost",
-        "dbm_type": "slow_query",
-        "ddagentversion": "0.0.0",
-        "ddsource": "mongo",
-        "ddtags": "server:mongodb://testUser2:*****@localhost:27017/test,clustername:my_cluster",
-        "timestamp": 1720550475.716,
-        "network": {
-            "client": {
-                "ip": "192.168.65.1",
-                "hostname": null
-            }
-        },
-        "db": {
-            "instance": "integration",
-            "query_signature": "3719fe0a5548dd23",
-            "user": "",
-            "application": null,
-            "statement": "{\"q\": {\"age\": {\"$gt\": 20}}, \"u\": {\"$set\": {\"subscribed\": false}}, \"multi\": true, \"upsert\": false, \"comment\": \"update customers subscription status by age\"}",
-            "plan": {
-                "definition": {
-                    "execStats": {
-                        "stage": "UPDATE",
-                        "nReturned": 0,
-                        "executionTimeMillisEstimate": 13,
-                        "works": 417,
-                        "advanced": 0,
-                        "needTime": 416,
-                        "needYield": 0,
-                        "saveState": 1,
-                        "restoreState": 1,
-                        "isEOF": 1,
-                        "nMatched": 416,
-                        "nWouldModify": 416,
-                        "nWouldUpsert": 0,
-                        "inputStage": {
-                            "stage": "FETCH",
-                            "nReturned": 416,
-                            "executionTimeMillisEstimate": 0,
-                            "works": 417,
-                            "advanced": 416,
-                            "needTime": 0,
-                            "needYield": 0,
-                            "saveState": 417,
-                            "restoreState": 417,
-                            "isEOF": 1,
-                            "docsExamined": 416,
-                            "alreadyHasObj": 0,
-                            "inputStage": {
-                                "stage": "IXSCAN",
-                                "nReturned": 416,
-                                "executionTimeMillisEstimate": 0,
-                                "works": 417,
-                                "advanced": 416,
-                                "needTime": 0,
-                                "needYield": 0,
-                                "saveState": 417,
-                                "restoreState": 417,
-                                "isEOF": 1,
-                                "keyPattern": {
-                                    "age": -1
-                                },
-                                "indexName": "age_-1",
-                                "isMultiKey": false,
-                                "multiKeyPaths": {
-                                    "age": []
-                                },
-                                "isUnique": false,
-                                "isSparse": false,
-                                "isPartial": false,
-                                "indexVersion": 2,
-                                "direction": "forward",
-                                "indexBounds": {
-                                    "age": [
-                                        "[inf.0, 18)"
-                                    ]
-                                },
-                                "keysExamined": 416,
-                                "seeks": 1,
-                                "dupsTested": 0,
-                                "dupsDropped": 0
-                            }
+                "mills": 21,
+                "num_yield": 1,
+                "response_length": 0,
+                "nreturned": null,
+                "nmatched": 416,
+                "nmodified": 416,
+                "ninserted": null,
+                "ndeleted": null,
+                "keys_examined": 416,
+                "docs_examined": 416,
+                "keys_inserted": 416,
+                "write_conflicts": null,
+                "cpu_nanos": 21290417,
+                "planning_time_micros": null,
+                "upsert": false,
+                "has_sort_stage": false,
+                "used_disk": false,
+                "from_multi_planner": false,
+                "replanned": false,
+                "replan_reason": null,
+                "lock_stats": {
+                    "parallel_batch_writer_mode": {
+                        "acquire_count": {
+                            "r": 2
+                        }
+                    },
+                    "feature_compatibility_version": {
+                        "acquire_count": {
+                            "r": 1,
+                            "w": 2
+                        }
+                    },
+                    "replication_state_transition": {
+                        "acquire_count": {
+                            "w": 2
+                        }
+                    },
+                    "global": {
+                        "acquire_count": {
+                            "r": 1,
+                            "w": 2
+                        }
+                    },
+                    "database": {
+                        "acquire_count": {
+                            "w": 2
+                        }
+                    },
+                    "collection": {
+                        "acquire_count": {
+                            "w": 2
                         }
                     }
                 },
-                "signature": "e9ebab395bd990c5"
-            }
-        },
-        "mongodb": {
-            "op": "update",
-            "ns": "integration.customers",
-            "plan_summary": "IXSCAN { age: -1 }",
-            "exec_stats": {
-                "stage": "UPDATE",
-                "nReturned": 0,
-                "executionTimeMillisEstimate": 13,
-                "works": 417,
-                "advanced": 0,
-                "needTime": 416,
-                "needYield": 0,
-                "saveState": 1,
-                "restoreState": 1,
-                "isEOF": 1,
-                "nMatched": 416,
-                "nWouldModify": 416,
-                "nWouldUpsert": 0,
-                "inputStage": {
-                    "stage": "FETCH",
-                    "nReturned": 416,
-                    "executionTimeMillisEstimate": 0,
-                    "works": 417,
-                    "advanced": 416,
-                    "needTime": 0,
-                    "needYield": 0,
-                    "saveState": 417,
-                    "restoreState": 417,
-                    "isEOF": 1,
-                    "docsExamined": 416,
-                    "alreadyHasObj": 0,
-                    "inputStage": {
-                        "stage": "IXSCAN",
-                        "nReturned": 416,
-                        "executionTimeMillisEstimate": 0,
-                        "works": 417,
-                        "advanced": 416,
-                        "needTime": 0,
-                        "needYield": 0,
-                        "saveState": 417,
-                        "restoreState": 417,
-                        "isEOF": 1,
-                        "keyPattern": {
-                            "age": -1
-                        },
-                        "indexName": "age_-1",
-                        "isMultiKey": false,
-                        "multiKeyPaths": {
-                            "age": []
-                        },
-                        "isUnique": false,
-                        "isSparse": false,
-                        "isPartial": false,
-                        "indexVersion": 2,
-                        "direction": "forward",
-                        "indexBounds": {
-                            "age": [
-                                "[inf.0, 18)"
-                            ]
-                        },
-                        "keysExamined": 416,
-                        "seeks": 1,
-                        "dupsTested": 0,
-                        "dupsDropped": 0
-                    }
+                "flow_control_stats": {
+                    "acquire_count": 2
                 }
             },
-            "query_hash": null,
-            "plan_cache_key": null,
-            "query_framework": null,
-            "cursor": {
-                "cursor_id": null,
-                "originating_command": null
-            },
-            "microsecs_running": 21000,
-            "num_yield": 1,
-            "response_length": null,
-            "nreturned": null,
-            "nmatched": 416,
-            "nmodified": 416,
-            "ninserted": null,
-            "ndeleted": null,
-            "keys_examined": 416,
-            "docs_examined": 416,
-            "keys_inserted": 416,
-            "write_conflicts": null,
-            "cpu_nanos": 21290417,
-            "planning_time_micros": null,
-            "upsert": false,
-            "has_sort_stage": false,
-            "used_disk": false,
-            "from_multi_planner": false,
-            "replanned": false,
-            "replan_reason": null,
-            "lock_stats": {
-                "parallel_batch_writer_mode": {
-                    "acquire_count": {
-                        "r": 2
-                    }
+            {
+                "timestamp": 1720550667336.0,
+                "dbname": "integration",
+                "op": "query",
+                "ns": "integration.customers",
+                "plan_summary": "IXSCAN { name: 1 }",
+                "query_signature": "6fef821a212dde0b",
+                "user": "",
+                "application": null,
+                "statement": "{\"find\": \"customers\", \"filter\": {\"age\": {\"$gt\": 63}}, \"sort\": {\"name\": 1}, \"comment\": \"query customers by age\", \"limit\": 34, \"$db\": \"integration\"}",
+                "query_hash": "F286520C",
+                "plan_cache_key": "4AFF4016",
+                "query_framework": "classic",
+                "cursor": {
+                    "cursor_id": null,
+                    "originating_command": null
                 },
-                "feature_compatibility_version": {
-                    "acquire_count": {
-                        "r": 1,
-                        "w": 2
-                    }
-                },
-                "replication_state_transition": {
-                    "acquire_count": {
-                        "w": 2
-                    }
-                },
-                "global": {
-                    "acquire_count": {
-                        "r": 1,
-                        "w": 2
-                    }
-                },
-                "database": {
-                    "acquire_count": {
-                        "w": 2
-                    }
-                },
-                "collection": {
-                    "acquire_count": {
-                        "w": 2
-                    }
-                }
-            },
-            "flow_control_stats": {
-                "acquire_count": 2
-            }
-        }
-    },
-    {
-        "host": "mongohost",
-        "dbm_type": "slow_query",
-        "ddagentversion": "0.0.0",
-        "ddsource": "mongo",
-        "ddtags": "server:mongodb://testUser2:*****@localhost:27017/test,clustername:my_cluster",
-        "timestamp": 1720550667.336,
-        "network": {
-            "client": {
-                "ip": "192.168.65.1",
-                "hostname": null
-            }
-        },
-        "db": {
-            "instance": "integration",
-            "query_signature": "6fef821a212dde0b",
-            "user": "",
-            "application": null,
-            "statement": "{\"find\": \"customers\", \"filter\": {\"age\": {\"$gt\": 63}}, \"sort\": {\"name\": 1}, \"comment\": \"query customers by age\", \"limit\": 34, \"$db\": \"integration\"}",
-            "plan": {
-                "definition": {
-                    "execStats": {
-                        "stage": "CACHED_PLAN",
-                        "nReturned": 0,
-                        "executionTimeMillisEstimate": 12,
-                        "works": 1,
-                        "advanced": 0,
-                        "needTime": 0,
-                        "needYield": 0,
-                        "saveState": 1,
-                        "restoreState": 1,
-                        "isEOF": 1,
-                        "inputStage": {
-                            "stage": "LIMIT",
-                            "nReturned": 0,
-                            "executionTimeMillisEstimate": 11,
-                            "works": 457,
-                            "advanced": 0,
-                            "needTime": 456,
-                            "needYield": 0,
-                            "saveState": 1,
-                            "restoreState": 1,
-                            "isEOF": 1,
-                            "limitAmount": 34,
-                            "inputStage": {
-                                "stage": "FETCH",
-                                "filter": {
-                                    "age": {
-                                        "$gt": 63
-                                    }
-                                },
-                                "nReturned": 0,
-                                "executionTimeMillisEstimate": 11,
-                                "works": 457,
-                                "advanced": 0,
-                                "needTime": 456,
-                                "needYield": 0,
-                                "saveState": 1,
-                                "restoreState": 1,
-                                "isEOF": 1,
-                                "docsExamined": 456,
-                                "alreadyHasObj": 0,
-                                "inputStage": {
-                                    "stage": "IXSCAN",
-                                    "nReturned": 456,
-                                    "executionTimeMillisEstimate": 0,
-                                    "works": 457,
-                                    "advanced": 456,
-                                    "needTime": 0,
-                                    "needYield": 0,
-                                    "saveState": 1,
-                                    "restoreState": 1,
-                                    "isEOF": 1,
-                                    "keyPattern": {
-                                        "name": 1
-                                    },
-                                    "indexName": "name_1",
-                                    "isMultiKey": false,
-                                    "multiKeyPaths": {
-                                        "name": []
-                                    },
-                                    "isUnique": false,
-                                    "isSparse": false,
-                                    "isPartial": false,
-                                    "indexVersion": 2,
-                                    "direction": "forward",
-                                    "indexBounds": {
-                                        "name": [
-                                            "[MinKey, MaxKey]"
-                                        ]
-                                    },
-                                    "keysExamined": 456,
-                                    "seeks": 1,
-                                    "dupsTested": 0,
-                                    "dupsDropped": 0
-                                }
-                            }
+                "mills": 14,
+                "num_yield": 1,
+                "response_length": 110,
+                "nreturned": 0,
+                "nmatched": null,
+                "nmodified": null,
+                "ninserted": null,
+                "ndeleted": null,
+                "keys_examined": 456,
+                "docs_examined": 456,
+                "keys_inserted": null,
+                "write_conflicts": null,
+                "cpu_nanos": 14135292,
+                "planning_time_micros": 13916,
+                "upsert": false,
+                "has_sort_stage": true,
+                "used_disk": false,
+                "from_multi_planner": false,
+                "replanned": true,
+                "replan_reason": null,
+                "lock_stats": {
+                    "feature_compatibility_version": {
+                        "acquire_count": {
+                            "r": 3
+                        }
+                    },
+                    "global": {
+                        "acquire_count": {
+                            "r": 3
                         }
                     }
                 },
-                "signature": "438dc790bc416d1e"
-            }
-        },
-        "mongodb": {
-            "op": "query",
-            "ns": "integration.customers",
-            "plan_summary": "IXSCAN { name: 1 }",
-            "exec_stats": {
-                "stage": "CACHED_PLAN",
-                "nReturned": 0,
-                "executionTimeMillisEstimate": 12,
-                "works": 1,
-                "advanced": 0,
-                "needTime": 0,
-                "needYield": 0,
-                "saveState": 1,
-                "restoreState": 1,
-                "isEOF": 1,
-                "inputStage": {
-                    "stage": "LIMIT",
-                    "nReturned": 0,
-                    "executionTimeMillisEstimate": 11,
-                    "works": 457,
-                    "advanced": 0,
-                    "needTime": 456,
-                    "needYield": 0,
-                    "saveState": 1,
-                    "restoreState": 1,
-                    "isEOF": 1,
-                    "limitAmount": 34,
-                    "inputStage": {
-                        "stage": "FETCH",
-                        "filter": {
-                            "age": {
-                                "$gt": 63
-                            }
-                        },
-                        "nReturned": 0,
-                        "executionTimeMillisEstimate": 11,
-                        "works": 457,
-                        "advanced": 0,
-                        "needTime": 456,
-                        "needYield": 0,
-                        "saveState": 1,
-                        "restoreState": 1,
-                        "isEOF": 1,
-                        "docsExamined": 456,
-                        "alreadyHasObj": 0,
-                        "inputStage": {
-                            "stage": "IXSCAN",
-                            "nReturned": 456,
-                            "executionTimeMillisEstimate": 0,
-                            "works": 457,
-                            "advanced": 456,
-                            "needTime": 0,
-                            "needYield": 0,
-                            "saveState": 1,
-                            "restoreState": 1,
-                            "isEOF": 1,
-                            "keyPattern": {
-                                "name": 1
-                            },
-                            "indexName": "name_1",
-                            "isMultiKey": false,
-                            "multiKeyPaths": {
-                                "name": []
-                            },
-                            "isUnique": false,
-                            "isSparse": false,
-                            "isPartial": false,
-                            "indexVersion": 2,
-                            "direction": "forward",
-                            "indexBounds": {
-                                "name": [
-                                    "[MinKey, MaxKey]"
-                                ]
-                            },
-                            "keysExamined": 456,
-                            "seeks": 1,
-                            "dupsTested": 0,
-                            "dupsDropped": 0
+                "flow_control_stats": {}
+            },
+            {
+                "timestamp": 32479987543991.0,
+                "dbname": "test",
+                "op": null,
+                "ns": "test.customers",
+                "plan_summary": "IXSCAN { age: -1 }",
+                "query_signature": "a81f9d3c17192d68",
+                "user": null,
+                "application": null,
+                "statement": "{\"q\": {\"age\": {\"$gt\": 18}}, \"u\": {\"$set\": {\"subscribed\": false}}, \"multi\": true, \"upsert\": false, \"comment\": \"update customers subscription status by age\"}",
+                "query_hash": null,
+                "plan_cache_key": null,
+                "query_framework": null,
+                "cursor": {
+                    "cursor_id": null,
+                    "originating_command": null
+                },
+                "mills": 74,
+                "num_yield": null,
+                "response_length": 0,
+                "nreturned": null,
+                "nmatched": 608,
+                "nmodified": 441,
+                "ninserted": null,
+                "ndeleted": null,
+                "keys_examined": 608,
+                "docs_examined": 608,
+                "keys_inserted": 441,
+                "write_conflicts": null,
+                "cpu_nanos": 74500749,
+                "planning_time_micros": null,
+                "upsert": false,
+                "has_sort_stage": false,
+                "used_disk": false,
+                "from_multi_planner": false,
+                "replanned": false,
+                "replan_reason": null,
+                "lock_stats": {
+                    "parallel_batch_writer_mode": {
+                        "acquire_count": {
+                            "r": 5
+                        }
+                    },
+                    "feature_compatibility_version": {
+                        "acquire_count": {
+                            "w": 5
+                        }
+                    },
+                    "replication_state_transition": {
+                        "acquire_count": {
+                            "w": 5
+                        }
+                    },
+                    "global": {
+                        "acquire_count": {
+                            "w": 5
+                        }
+                    },
+                    "database": {
+                        "acquire_count": {
+                            "w": 5
+                        }
+                    },
+                    "collection": {
+                        "acquire_count": {
+                            "w": 5
                         }
                     }
+                },
+                "flow_control_stats": {
+                    "acquire_count": 5
                 }
             },
-            "query_hash": "F286520C",
-            "plan_cache_key": "4AFF4016",
-            "query_framework": "classic",
-            "cursor": {
-                "cursor_id": null,
-                "originating_command": null
-            },
-            "microsecs_running": 14000,
-            "num_yield": 1,
-            "response_length": 110,
-            "nreturned": 0,
-            "nmatched": null,
-            "nmodified": null,
-            "ninserted": null,
-            "ndeleted": null,
-            "keys_examined": 456,
-            "docs_examined": 456,
-            "keys_inserted": null,
-            "write_conflicts": null,
-            "cpu_nanos": 14135292,
-            "planning_time_micros": 13916,
-            "upsert": false,
-            "has_sort_stage": true,
-            "used_disk": false,
-            "from_multi_planner": false,
-            "replanned": true,
-            "replan_reason": null,
-            "lock_stats": {
-                "feature_compatibility_version": {
-                    "acquire_count": {
-                        "r": 3
+            {
+                "timestamp": 32479987543991.0,
+                "dbname": "test",
+                "op": null,
+                "ns": "test.$cmd",
+                "plan_summary": null,
+                "query_signature": "c5b7bcd45c4d9e9",
+                "user": null,
+                "application": null,
+                "statement": "{\"update\": \"customers\", \"ordered\": true, \"comment\": \"update customers subscription status by age\", \"$db\": \"test\"}",
+                "query_hash": null,
+                "plan_cache_key": null,
+                "query_framework": null,
+                "cursor": {
+                    "cursor_id": null,
+                    "originating_command": null
+                },
+                "mills": 74,
+                "num_yield": null,
+                "response_length": 0,
+                "nreturned": null,
+                "nmatched": null,
+                "nmodified": null,
+                "ninserted": null,
+                "ndeleted": null,
+                "keys_examined": null,
+                "docs_examined": null,
+                "keys_inserted": null,
+                "write_conflicts": null,
+                "cpu_nanos": 74715957,
+                "planning_time_micros": null,
+                "upsert": false,
+                "has_sort_stage": false,
+                "used_disk": false,
+                "from_multi_planner": false,
+                "replanned": false,
+                "replan_reason": null,
+                "lock_stats": {
+                    "parallel_batch_writer_mode": {
+                        "acquire_count": {
+                            "r": 6
+                        }
+                    },
+                    "feature_compatibility_version": {
+                        "acquire_count": {
+                            "r": 1,
+                            "w": 6
+                        }
+                    },
+                    "replication_state_transition": {
+                        "acquire_count": {
+                            "w": 5
+                        }
+                    },
+                    "global": {
+                        "acquire_count": {
+                            "r": 1,
+                            "w": 6
+                        }
+                    },
+                    "database": {
+                        "acquire_count": {
+                            "w": 6
+                        }
+                    },
+                    "collection": {
+                        "acquire_count": {
+                            "w": 6
+                        }
                     }
                 },
-                "global": {
-                    "acquire_count": {
-                        "r": 3
-                    }
+                "flow_control_stats": {
+                    "acquire_count": 5
                 }
             },
-            "flow_control_stats": {}
-        }
-    },
-    {
-        "host": "mongohost",
-        "dbm_type": "slow_query",
-        "ddagentversion": "0.0.0",
-        "ddsource": "mongo",
-        "ddtags": "server:mongodb://testUser2:*****@localhost:27017/test,clustername:my_cluster",
-        "timestamp": 32479987543.991,
-        "network": {
-            "client": {
-                "ip": null,
-                "hostname": "192.168.65.1:58133"
-            }
-        },
-        "db": {
-            "instance": "test",
-            "query_signature": "a81f9d3c17192d68",
-            "user": null,
-            "application": null,
-            "statement": "{\"q\": {\"age\": {\"$gt\": 18}}, \"u\": {\"$set\": {\"subscribed\": false}}, \"multi\": true, \"upsert\": false, \"comment\": \"update customers subscription status by age\"}",
-            "plan": null
-        },
-        "mongodb": {
-            "op": null,
-            "ns": "test.customers",
-            "plan_summary": "IXSCAN { age: -1 }",
-            "exec_stats": null,
-            "query_hash": null,
-            "plan_cache_key": null,
-            "query_framework": null,
-            "cursor": {
-                "cursor_id": null,
-                "originating_command": null
-            },
-            "microsecs_running": 74000,
-            "num_yield": null,
-            "response_length": null,
-            "nreturned": null,
-            "nmatched": 608,
-            "nmodified": 441,
-            "ninserted": null,
-            "ndeleted": null,
-            "keys_examined": 608,
-            "docs_examined": 608,
-            "keys_inserted": 441,
-            "write_conflicts": null,
-            "cpu_nanos": 74500749,
-            "planning_time_micros": null,
-            "upsert": false,
-            "has_sort_stage": false,
-            "used_disk": false,
-            "from_multi_planner": false,
-            "replanned": false,
-            "replan_reason": null,
-            "lock_stats": {
-                "parallel_batch_writer_mode": {
-                    "acquire_count": {
-                        "r": 5
+            {
+                "timestamp": 32479987545007.0,
+                "dbname": "test",
+                "op": null,
+                "ns": "test.customers",
+                "plan_summary": "IXSCAN { age: -1 }",
+                "query_signature": "ec24a2e9aacce5a0",
+                "user": null,
+                "application": null,
+                "statement": "{\"q\": {\"age\": {\"$gt\": 35}}, \"u\": {\"$set\": {\"subscribed\": true}}, \"multi\": true, \"upsert\": false, \"comment\": \"update customers subscription status by age\"}",
+                "query_hash": null,
+                "plan_cache_key": null,
+                "query_framework": null,
+                "cursor": {
+                    "cursor_id": null,
+                    "originating_command": null
+                },
+                "mills": 27,
+                "num_yield": null,
+                "response_length": 0,
+                "nreturned": null,
+                "nmatched": 495,
+                "nmodified": 495,
+                "ninserted": null,
+                "ndeleted": null,
+                "keys_examined": 495,
+                "docs_examined": 495,
+                "keys_inserted": 495,
+                "write_conflicts": null,
+                "cpu_nanos": 27416375,
+                "planning_time_micros": null,
+                "upsert": false,
+                "has_sort_stage": false,
+                "used_disk": false,
+                "from_multi_planner": false,
+                "replanned": false,
+                "replan_reason": null,
+                "lock_stats": {
+                    "parallel_batch_writer_mode": {
+                        "acquire_count": {
+                            "r": 3
+                        }
+                    },
+                    "feature_compatibility_version": {
+                        "acquire_count": {
+                            "w": 3
+                        }
+                    },
+                    "replication_state_transition": {
+                        "acquire_count": {
+                            "w": 3
+                        }
+                    },
+                    "global": {
+                        "acquire_count": {
+                            "w": 3
+                        }
+                    },
+                    "database": {
+                        "acquire_count": {
+                            "w": 3
+                        }
+                    },
+                    "collection": {
+                        "acquire_count": {
+                            "w": 3
+                        }
                     }
                 },
-                "feature_compatibility_version": {
-                    "acquire_count": {
-                        "w": 5
-                    }
-                },
-                "replication_state_transition": {
-                    "acquire_count": {
-                        "w": 5
-                    }
-                },
-                "global": {
-                    "acquire_count": {
-                        "w": 5
-                    }
-                },
-                "database": {
-                    "acquire_count": {
-                        "w": 5
-                    }
-                },
-                "collection": {
-                    "acquire_count": {
-                        "w": 5
-                    }
+                "flow_control_stats": {
+                    "acquire_count": 3
                 }
             },
-            "flow_control_stats": {
-                "acquire_count": 5
-            }
-        }
-    },
-    {
-        "host": "mongohost",
-        "dbm_type": "slow_query",
-        "ddagentversion": "0.0.0",
-        "ddsource": "mongo",
-        "ddtags": "server:mongodb://testUser2:*****@localhost:27017/test,clustername:my_cluster",
-        "timestamp": 32479987543.991,
-        "network": {
-            "client": {
-                "ip": null,
-                "hostname": "192.168.65.1:58133"
-            }
-        },
-        "db": {
-            "instance": "test",
-            "query_signature": "c5b7bcd45c4d9e9",
-            "user": null,
-            "application": null,
-            "statement": "{\"update\": \"customers\", \"ordered\": true, \"comment\": \"update customers subscription status by age\", \"$db\": \"test\"}",
-            "plan": null
-        },
-        "mongodb": {
-            "op": null,
-            "ns": "test.$cmd",
-            "plan_summary": null,
-            "exec_stats": null,
-            "query_hash": null,
-            "plan_cache_key": null,
-            "query_framework": null,
-            "cursor": {
-                "cursor_id": null,
-                "originating_command": null
-            },
-            "microsecs_running": 74000,
-            "num_yield": null,
-            "response_length": null,
-            "nreturned": null,
-            "nmatched": null,
-            "nmodified": null,
-            "ninserted": null,
-            "ndeleted": null,
-            "keys_examined": null,
-            "docs_examined": null,
-            "keys_inserted": null,
-            "write_conflicts": null,
-            "cpu_nanos": 74715957,
-            "planning_time_micros": null,
-            "upsert": false,
-            "has_sort_stage": false,
-            "used_disk": false,
-            "from_multi_planner": false,
-            "replanned": false,
-            "replan_reason": null,
-            "lock_stats": {
-                "parallel_batch_writer_mode": {
-                    "acquire_count": {
-                        "r": 6
+            {
+                "timestamp": 32479987545008.0,
+                "dbname": "test",
+                "op": null,
+                "ns": "test.$cmd",
+                "plan_summary": null,
+                "query_signature": "c5b7bcd45c4d9e9",
+                "user": null,
+                "application": null,
+                "statement": "{\"update\": \"customers\", \"ordered\": true, \"comment\": \"update customers subscription status by age\", \"$db\": \"test\"}",
+                "query_hash": null,
+                "plan_cache_key": null,
+                "query_framework": null,
+                "cursor": {
+                    "cursor_id": null,
+                    "originating_command": null
+                },
+                "mills": 27,
+                "num_yield": null,
+                "response_length": 0,
+                "nreturned": null,
+                "nmatched": null,
+                "nmodified": null,
+                "ninserted": null,
+                "ndeleted": null,
+                "keys_examined": null,
+                "docs_examined": null,
+                "keys_inserted": null,
+                "write_conflicts": null,
+                "cpu_nanos": 27721625,
+                "planning_time_micros": null,
+                "upsert": false,
+                "has_sort_stage": false,
+                "used_disk": false,
+                "from_multi_planner": false,
+                "replanned": false,
+                "replan_reason": null,
+                "lock_stats": {
+                    "parallel_batch_writer_mode": {
+                        "acquire_count": {
+                            "r": 4
+                        }
+                    },
+                    "feature_compatibility_version": {
+                        "acquire_count": {
+                            "r": 1,
+                            "w": 4
+                        }
+                    },
+                    "replication_state_transition": {
+                        "acquire_count": {
+                            "w": 3
+                        }
+                    },
+                    "global": {
+                        "acquire_count": {
+                            "r": 1,
+                            "w": 4
+                        }
+                    },
+                    "database": {
+                        "acquire_count": {
+                            "w": 4
+                        }
+                    },
+                    "collection": {
+                        "acquire_count": {
+                            "w": 4
+                        }
                     }
                 },
-                "feature_compatibility_version": {
-                    "acquire_count": {
-                        "r": 1,
-                        "w": 6
-                    }
-                },
-                "replication_state_transition": {
-                    "acquire_count": {
-                        "w": 5
-                    }
-                },
-                "global": {
-                    "acquire_count": {
-                        "r": 1,
-                        "w": 6
-                    }
-                },
-                "database": {
-                    "acquire_count": {
-                        "w": 6
-                    }
-                },
-                "collection": {
-                    "acquire_count": {
-                        "w": 6
-                    }
+                "flow_control_stats": {
+                    "acquire_count": 3
                 }
             },
-            "flow_control_stats": {
-                "acquire_count": 5
-            }
-        }
-    },
-    {
-        "host": "mongohost",
-        "dbm_type": "slow_query",
-        "ddagentversion": "0.0.0",
-        "ddsource": "mongo",
-        "ddtags": "server:mongodb://testUser2:*****@localhost:27017/test,clustername:my_cluster",
-        "timestamp": 32479987545.007,
-        "network": {
-            "client": {
-                "ip": null,
-                "hostname": "192.168.65.1:58133"
-            }
-        },
-        "db": {
-            "instance": "test",
-            "query_signature": "ec24a2e9aacce5a0",
-            "user": null,
-            "application": null,
-            "statement": "{\"q\": {\"age\": {\"$gt\": 35}}, \"u\": {\"$set\": {\"subscribed\": true}}, \"multi\": true, \"upsert\": false, \"comment\": \"update customers subscription status by age\"}",
-            "plan": null
-        },
-        "mongodb": {
-            "op": null,
-            "ns": "test.customers",
-            "plan_summary": "IXSCAN { age: -1 }",
-            "exec_stats": null,
-            "query_hash": null,
-            "plan_cache_key": null,
-            "query_framework": null,
-            "cursor": {
-                "cursor_id": null,
-                "originating_command": null
-            },
-            "microsecs_running": 27000,
-            "num_yield": null,
-            "response_length": null,
-            "nreturned": null,
-            "nmatched": 495,
-            "nmodified": 495,
-            "ninserted": null,
-            "ndeleted": null,
-            "keys_examined": 495,
-            "docs_examined": 495,
-            "keys_inserted": 495,
-            "write_conflicts": null,
-            "cpu_nanos": 27416375,
-            "planning_time_micros": null,
-            "upsert": false,
-            "has_sort_stage": false,
-            "used_disk": false,
-            "from_multi_planner": false,
-            "replanned": false,
-            "replan_reason": null,
-            "lock_stats": {
-                "parallel_batch_writer_mode": {
-                    "acquire_count": {
-                        "r": 3
+            {
+                "timestamp": 32479987545040.0,
+                "dbname": "test",
+                "op": null,
+                "ns": "test.customers",
+                "plan_summary": "IXSCAN { age: -1 }",
+                "query_signature": "a81f9d3c17192d68",
+                "user": null,
+                "application": null,
+                "statement": "{\"q\": {\"age\": {\"$gt\": 18}}, \"u\": {\"$set\": {\"subscribed\": false}}, \"multi\": true, \"upsert\": false, \"comment\": \"update customers subscription status by age\"}",
+                "query_hash": null,
+                "plan_cache_key": null,
+                "query_framework": null,
+                "cursor": {
+                    "cursor_id": null,
+                    "originating_command": null
+                },
+                "mills": 14,
+                "num_yield": null,
+                "response_length": 0,
+                "nreturned": null,
+                "nmatched": 495,
+                "nmodified": 495,
+                "ninserted": null,
+                "ndeleted": null,
+                "keys_examined": 495,
+                "docs_examined": 495,
+                "keys_inserted": 495,
+                "write_conflicts": null,
+                "cpu_nanos": 14032417,
+                "planning_time_micros": null,
+                "upsert": false,
+                "has_sort_stage": false,
+                "used_disk": false,
+                "from_multi_planner": false,
+                "replanned": false,
+                "replan_reason": null,
+                "lock_stats": {
+                    "parallel_batch_writer_mode": {
+                        "acquire_count": {
+                            "r": 1
+                        }
+                    },
+                    "feature_compatibility_version": {
+                        "acquire_count": {
+                            "w": 1
+                        }
+                    },
+                    "replication_state_transition": {
+                        "acquire_count": {
+                            "w": 1
+                        }
+                    },
+                    "global": {
+                        "acquire_count": {
+                            "w": 1
+                        }
+                    },
+                    "database": {
+                        "acquire_count": {
+                            "w": 1
+                        }
+                    },
+                    "collection": {
+                        "acquire_count": {
+                            "w": 1
+                        }
                     }
                 },
-                "feature_compatibility_version": {
-                    "acquire_count": {
-                        "w": 3
-                    }
-                },
-                "replication_state_transition": {
-                    "acquire_count": {
-                        "w": 3
-                    }
-                },
-                "global": {
-                    "acquire_count": {
-                        "w": 3
-                    }
-                },
-                "database": {
-                    "acquire_count": {
-                        "w": 3
-                    }
-                },
-                "collection": {
-                    "acquire_count": {
-                        "w": 3
-                    }
+                "flow_control_stats": {
+                    "acquire_count": 1
                 }
             },
-            "flow_control_stats": {
-                "acquire_count": 3
-            }
-        }
-    },
-    {
-        "host": "mongohost",
-        "dbm_type": "slow_query",
-        "ddagentversion": "0.0.0",
-        "ddsource": "mongo",
-        "ddtags": "server:mongodb://testUser2:*****@localhost:27017/test,clustername:my_cluster",
-        "timestamp": 32479987545.008,
-        "network": {
-            "client": {
-                "ip": null,
-                "hostname": "192.168.65.1:58133"
-            }
-        },
-        "db": {
-            "instance": "test",
-            "query_signature": "c5b7bcd45c4d9e9",
-            "user": null,
-            "application": null,
-            "statement": "{\"update\": \"customers\", \"ordered\": true, \"comment\": \"update customers subscription status by age\", \"$db\": \"test\"}",
-            "plan": null
-        },
-        "mongodb": {
-            "op": null,
-            "ns": "test.$cmd",
-            "plan_summary": null,
-            "exec_stats": null,
-            "query_hash": null,
-            "plan_cache_key": null,
-            "query_framework": null,
-            "cursor": {
-                "cursor_id": null,
-                "originating_command": null
-            },
-            "microsecs_running": 27000,
-            "num_yield": null,
-            "response_length": null,
-            "nreturned": null,
-            "nmatched": null,
-            "nmodified": null,
-            "ninserted": null,
-            "ndeleted": null,
-            "keys_examined": null,
-            "docs_examined": null,
-            "keys_inserted": null,
-            "write_conflicts": null,
-            "cpu_nanos": 27721625,
-            "planning_time_micros": null,
-            "upsert": false,
-            "has_sort_stage": false,
-            "used_disk": false,
-            "from_multi_planner": false,
-            "replanned": false,
-            "replan_reason": null,
-            "lock_stats": {
-                "parallel_batch_writer_mode": {
-                    "acquire_count": {
-                        "r": 4
+            {
+                "timestamp": 32479987545041.0,
+                "dbname": "test",
+                "op": null,
+                "ns": "test.$cmd",
+                "plan_summary": null,
+                "query_signature": "c5b7bcd45c4d9e9",
+                "user": null,
+                "application": null,
+                "statement": "{\"update\": \"customers\", \"ordered\": true, \"comment\": \"update customers subscription status by age\", \"$db\": \"test\"}",
+                "query_hash": null,
+                "plan_cache_key": null,
+                "query_framework": null,
+                "cursor": {
+                    "cursor_id": null,
+                    "originating_command": null
+                },
+                "mills": 15,
+                "num_yield": null,
+                "response_length": 0,
+                "nreturned": null,
+                "nmatched": null,
+                "nmodified": null,
+                "ninserted": null,
+                "ndeleted": null,
+                "keys_examined": null,
+                "docs_examined": null,
+                "keys_inserted": null,
+                "write_conflicts": null,
+                "cpu_nanos": 15198542,
+                "planning_time_micros": null,
+                "upsert": false,
+                "has_sort_stage": false,
+                "used_disk": false,
+                "from_multi_planner": false,
+                "replanned": false,
+                "replan_reason": null,
+                "lock_stats": {
+                    "parallel_batch_writer_mode": {
+                        "acquire_count": {
+                            "r": 2
+                        }
+                    },
+                    "feature_compatibility_version": {
+                        "acquire_count": {
+                            "r": 1,
+                            "w": 2
+                        }
+                    },
+                    "replication_state_transition": {
+                        "acquire_count": {
+                            "w": 1
+                        }
+                    },
+                    "global": {
+                        "acquire_count": {
+                            "r": 1,
+                            "w": 2
+                        }
+                    },
+                    "database": {
+                        "acquire_count": {
+                            "w": 2
+                        }
+                    },
+                    "collection": {
+                        "acquire_count": {
+                            "w": 2
+                        }
                     }
                 },
-                "feature_compatibility_version": {
-                    "acquire_count": {
-                        "r": 1,
-                        "w": 4
-                    }
-                },
-                "replication_state_transition": {
-                    "acquire_count": {
-                        "w": 3
-                    }
-                },
-                "global": {
-                    "acquire_count": {
-                        "r": 1,
-                        "w": 4
-                    }
-                },
-                "database": {
-                    "acquire_count": {
-                        "w": 4
-                    }
-                },
-                "collection": {
-                    "acquire_count": {
-                        "w": 4
-                    }
+                "flow_control_stats": {
+                    "acquire_count": 1
                 }
             },
-            "flow_control_stats": {
-                "acquire_count": 3
+            {
+                "timestamp": 32479987545338.0,
+                "dbname": "test",
+                "op": null,
+                "ns": "test.customers",
+                "plan_summary": "IXSCAN { name: 1 }",
+                "query_signature": "55e31aa78c5bbf26",
+                "user": null,
+                "application": null,
+                "statement": "{\"find\": \"customers\", \"filter\": {\"subscribed\": false}, \"sort\": {\"name\": 1}, \"comment\": \"query customers by subscription status\", \"limit\": 151, \"$db\": \"test\"}",
+                "query_hash": "A9774B9D",
+                "plan_cache_key": "0D12DCDF",
+                "query_framework": "classic",
+                "cursor": {
+                    "cursor_id": 5170666760900931828,
+                    "originating_command": null
+                },
+                "mills": 12,
+                "num_yield": null,
+                "response_length": 0,
+                "nreturned": 101,
+                "nmatched": null,
+                "nmodified": null,
+                "ninserted": null,
+                "ndeleted": null,
+                "keys_examined": 540,
+                "docs_examined": 540,
+                "keys_inserted": null,
+                "write_conflicts": null,
+                "cpu_nanos": 12071416,
+                "planning_time_micros": 11891,
+                "upsert": false,
+                "has_sort_stage": false,
+                "used_disk": false,
+                "from_multi_planner": false,
+                "replanned": false,
+                "replan_reason": null,
+                "lock_stats": {
+                    "feature_compatibility_version": {
+                        "acquire_count": {
+                            "r": 1
+                        }
+                    },
+                    "global": {
+                        "acquire_count": {
+                            "r": 1
+                        }
+                    }
+                },
+                "flow_control_stats": {}
+            },
+            {
+                "timestamp": 32479987545521.0,
+                "dbname": "test",
+                "op": null,
+                "ns": "test.customers",
+                "plan_summary": "IXSCAN { name: 1 }",
+                "query_signature": "70f67e80ce895c57",
+                "user": null,
+                "application": null,
+                "statement": "{\"find\": \"customers\", \"filter\": {\"subscribed\": true}, \"sort\": {\"name\": 1}, \"comment\": \"query customers by subscription status\", \"limit\": 183, \"$db\": \"test\"}",
+                "query_hash": "A9774B9D",
+                "plan_cache_key": "0D12DCDF",
+                "query_framework": "classic",
+                "cursor": {
+                    "cursor_id": null,
+                    "originating_command": null
+                },
+                "mills": 14,
+                "num_yield": null,
+                "response_length": 0,
+                "nreturned": 0,
+                "nmatched": null,
+                "nmodified": null,
+                "ninserted": null,
+                "ndeleted": null,
+                "keys_examined": 612,
+                "docs_examined": 612,
+                "keys_inserted": null,
+                "write_conflicts": null,
+                "cpu_nanos": 14051708,
+                "planning_time_micros": 12443,
+                "upsert": false,
+                "has_sort_stage": false,
+                "used_disk": false,
+                "from_multi_planner": false,
+                "replanned": false,
+                "replan_reason": null,
+                "lock_stats": {
+                    "feature_compatibility_version": {
+                        "acquire_count": {
+                            "r": 1
+                        }
+                    },
+                    "global": {
+                        "acquire_count": {
+                            "r": 1
+                        }
+                    }
+                },
+                "flow_control_stats": {}
             }
-        }
-    },
-    {
-        "host": "mongohost",
-        "dbm_type": "slow_query",
-        "ddagentversion": "0.0.0",
-        "ddsource": "mongo",
-        "ddtags": "server:mongodb://testUser2:*****@localhost:27017/test,clustername:my_cluster",
-        "timestamp": 32479987545.04,
-        "network": {
-            "client": {
-                "ip": null,
-                "hostname": "192.168.65.1:58133"
-            }
-        },
-        "db": {
-            "instance": "test",
-            "query_signature": "a81f9d3c17192d68",
-            "user": null,
-            "application": null,
-            "statement": "{\"q\": {\"age\": {\"$gt\": 18}}, \"u\": {\"$set\": {\"subscribed\": false}}, \"multi\": true, \"upsert\": false, \"comment\": \"update customers subscription status by age\"}",
-            "plan": null
-        },
-        "mongodb": {
-            "op": null,
-            "ns": "test.customers",
-            "plan_summary": "IXSCAN { age: -1 }",
-            "exec_stats": null,
-            "query_hash": null,
-            "plan_cache_key": null,
-            "query_framework": null,
-            "cursor": {
-                "cursor_id": null,
-                "originating_command": null
-            },
-            "microsecs_running": 14000,
-            "num_yield": null,
-            "response_length": null,
-            "nreturned": null,
-            "nmatched": 495,
-            "nmodified": 495,
-            "ninserted": null,
-            "ndeleted": null,
-            "keys_examined": 495,
-            "docs_examined": 495,
-            "keys_inserted": 495,
-            "write_conflicts": null,
-            "cpu_nanos": 14032417,
-            "planning_time_micros": null,
-            "upsert": false,
-            "has_sort_stage": false,
-            "used_disk": false,
-            "from_multi_planner": false,
-            "replanned": false,
-            "replan_reason": null,
-            "lock_stats": {
-                "parallel_batch_writer_mode": {
-                    "acquire_count": {
-                        "r": 1
-                    }
-                },
-                "feature_compatibility_version": {
-                    "acquire_count": {
-                        "w": 1
-                    }
-                },
-                "replication_state_transition": {
-                    "acquire_count": {
-                        "w": 1
-                    }
-                },
-                "global": {
-                    "acquire_count": {
-                        "w": 1
-                    }
-                },
-                "database": {
-                    "acquire_count": {
-                        "w": 1
-                    }
-                },
-                "collection": {
-                    "acquire_count": {
-                        "w": 1
-                    }
-                }
-            },
-            "flow_control_stats": {
-                "acquire_count": 1
-            }
-        }
-    },
-    {
-        "host": "mongohost",
-        "dbm_type": "slow_query",
-        "ddagentversion": "0.0.0",
-        "ddsource": "mongo",
-        "ddtags": "server:mongodb://testUser2:*****@localhost:27017/test,clustername:my_cluster",
-        "timestamp": 32479987545.041,
-        "network": {
-            "client": {
-                "ip": null,
-                "hostname": "192.168.65.1:58133"
-            }
-        },
-        "db": {
-            "instance": "test",
-            "query_signature": "c5b7bcd45c4d9e9",
-            "user": null,
-            "application": null,
-            "statement": "{\"update\": \"customers\", \"ordered\": true, \"comment\": \"update customers subscription status by age\", \"$db\": \"test\"}",
-            "plan": null
-        },
-        "mongodb": {
-            "op": null,
-            "ns": "test.$cmd",
-            "plan_summary": null,
-            "exec_stats": null,
-            "query_hash": null,
-            "plan_cache_key": null,
-            "query_framework": null,
-            "cursor": {
-                "cursor_id": null,
-                "originating_command": null
-            },
-            "microsecs_running": 15000,
-            "num_yield": null,
-            "response_length": null,
-            "nreturned": null,
-            "nmatched": null,
-            "nmodified": null,
-            "ninserted": null,
-            "ndeleted": null,
-            "keys_examined": null,
-            "docs_examined": null,
-            "keys_inserted": null,
-            "write_conflicts": null,
-            "cpu_nanos": 15198542,
-            "planning_time_micros": null,
-            "upsert": false,
-            "has_sort_stage": false,
-            "used_disk": false,
-            "from_multi_planner": false,
-            "replanned": false,
-            "replan_reason": null,
-            "lock_stats": {
-                "parallel_batch_writer_mode": {
-                    "acquire_count": {
-                        "r": 2
-                    }
-                },
-                "feature_compatibility_version": {
-                    "acquire_count": {
-                        "r": 1,
-                        "w": 2
-                    }
-                },
-                "replication_state_transition": {
-                    "acquire_count": {
-                        "w": 1
-                    }
-                },
-                "global": {
-                    "acquire_count": {
-                        "r": 1,
-                        "w": 2
-                    }
-                },
-                "database": {
-                    "acquire_count": {
-                        "w": 2
-                    }
-                },
-                "collection": {
-                    "acquire_count": {
-                        "w": 2
-                    }
-                }
-            },
-            "flow_control_stats": {
-                "acquire_count": 1
-            }
-        }
-    },
-    {
-        "host": "mongohost",
-        "dbm_type": "slow_query",
-        "ddagentversion": "0.0.0",
-        "ddsource": "mongo",
-        "ddtags": "server:mongodb://testUser2:*****@localhost:27017/test,clustername:my_cluster",
-        "timestamp": 32479987545.338,
-        "network": {
-            "client": {
-                "ip": null,
-                "hostname": "192.168.65.1:58133"
-            }
-        },
-        "db": {
-            "instance": "test",
-            "query_signature": "55e31aa78c5bbf26",
-            "user": null,
-            "application": null,
-            "statement": "{\"find\": \"customers\", \"filter\": {\"subscribed\": false}, \"sort\": {\"name\": 1}, \"comment\": \"query customers by subscription status\", \"limit\": 151, \"$db\": \"test\"}",
-            "plan": null
-        },
-        "mongodb": {
-            "op": null,
-            "ns": "test.customers",
-            "plan_summary": "IXSCAN { name: 1 }",
-            "exec_stats": null,
-            "query_hash": "A9774B9D",
-            "plan_cache_key": "0D12DCDF",
-            "query_framework": "classic",
-            "cursor": {
-                "cursor_id": 5170666760900931828,
-                "originating_command": null
-            },
-            "microsecs_running": 12000,
-            "num_yield": null,
-            "response_length": null,
-            "nreturned": 101,
-            "nmatched": null,
-            "nmodified": null,
-            "ninserted": null,
-            "ndeleted": null,
-            "keys_examined": 540,
-            "docs_examined": 540,
-            "keys_inserted": null,
-            "write_conflicts": null,
-            "cpu_nanos": 12071416,
-            "planning_time_micros": 11891,
-            "upsert": false,
-            "has_sort_stage": false,
-            "used_disk": false,
-            "from_multi_planner": false,
-            "replanned": false,
-            "replan_reason": null,
-            "lock_stats": {
-                "feature_compatibility_version": {
-                    "acquire_count": {
-                        "r": 1
-                    }
-                },
-                "global": {
-                    "acquire_count": {
-                        "r": 1
-                    }
-                }
-            },
-            "flow_control_stats": {}
-        }
-    },
-    {
-        "host": "mongohost",
-        "dbm_type": "slow_query",
-        "ddagentversion": "0.0.0",
-        "ddsource": "mongo",
-        "ddtags": "server:mongodb://testUser2:*****@localhost:27017/test,clustername:my_cluster",
-        "timestamp": 32479987545.521,
-        "network": {
-            "client": {
-                "ip": null,
-                "hostname": "192.168.65.1:58133"
-            }
-        },
-        "db": {
-            "instance": "test",
-            "query_signature": "70f67e80ce895c57",
-            "user": null,
-            "application": null,
-            "statement": "{\"find\": \"customers\", \"filter\": {\"subscribed\": true}, \"sort\": {\"name\": 1}, \"comment\": \"query customers by subscription status\", \"limit\": 183, \"$db\": \"test\"}",
-            "plan": null
-        },
-        "mongodb": {
-            "op": null,
-            "ns": "test.customers",
-            "plan_summary": "IXSCAN { name: 1 }",
-            "exec_stats": null,
-            "query_hash": "A9774B9D",
-            "plan_cache_key": "0D12DCDF",
-            "query_framework": "classic",
-            "cursor": {
-                "cursor_id": null,
-                "originating_command": null
-            },
-            "microsecs_running": 14000,
-            "num_yield": null,
-            "response_length": null,
-            "nreturned": 0,
-            "nmatched": null,
-            "nmodified": null,
-            "ninserted": null,
-            "ndeleted": null,
-            "keys_examined": 612,
-            "docs_examined": 612,
-            "keys_inserted": null,
-            "write_conflicts": null,
-            "cpu_nanos": 14051708,
-            "planning_time_micros": 12443,
-            "upsert": false,
-            "has_sort_stage": false,
-            "used_disk": false,
-            "from_multi_planner": false,
-            "replanned": false,
-            "replan_reason": null,
-            "lock_stats": {
-                "feature_compatibility_version": {
-                    "acquire_count": {
-                        "r": 1
-                    }
-                },
-                "global": {
-                    "acquire_count": {
-                        "r": 1
-                    }
-                }
-            },
-            "flow_control_stats": {}
-        }
+        ]
     }
 ]

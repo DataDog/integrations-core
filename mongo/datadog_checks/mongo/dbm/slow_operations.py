@@ -52,7 +52,8 @@ class MongoSlowOperations(DBMAsyncJob):
 
         is_mongos = isinstance(self._check.api_client.deployment_type, MongosDeployment)
 
-        metrics_from_logs = set()
+        # set of db names for which we need to collect slow operations from logs
+        slow_operations_from_logs = set()
 
         last_collection_timestamp = self._last_collection_timestamp
         if not last_collection_timestamp:
@@ -60,20 +61,25 @@ class MongoSlowOperations(DBMAsyncJob):
             last_collection_timestamp = time.time() - 2 * self._collection_interval
         self._last_collection_timestamp = time.time()
 
+        slow_operation_events = []
+
         for db_name in self._check._database_autodiscovery.databases:
             if not is_mongos and self._is_profiling_enabled(db_name):
-                for slow_query in self._collect_operation_metrics_from_profiler(
+                for slow_operation in self._collect_slow_operations_from_profiler(
                     db_name, last_ts=last_collection_timestamp
                 ):
-                    self._submit_slow_query_payload(slow_query)
+                    slow_operation_events.append(self._create_slow_operation_event(slow_operation))
             else:
-                metrics_from_logs.add(db_name)
+                slow_operations_from_logs.add(db_name)
 
-        if metrics_from_logs:
-            for slow_query in self._collect_operation_metrics_from_logs(
-                metrics_from_logs, last_ts=last_collection_timestamp
+        if slow_operations_from_logs:
+            for slow_operation in self._collect_slow_operations_from_logs(
+                slow_operations_from_logs, last_ts=last_collection_timestamp
             ):
-                self._submit_slow_query_payload(slow_query)
+                slow_operation_events.append(self._create_slow_operation_event(slow_operation))
+
+        if slow_operation_events:
+            self._submit_slow_operation_payload(slow_operation_events)
 
     def _should_collect_operation_metrics(self) -> bool:
         deployment = self._check.api_client.deployment_type
@@ -94,7 +100,7 @@ class MongoSlowOperations(DBMAsyncJob):
         self._check.gauge('mongodb.profiling.slowms', slowms, tags=tags, raw=True)
         return level > 0
 
-    def _collect_operation_metrics_from_profiler(self, db_name, last_ts):
+    def _collect_slow_operations_from_profiler(self, db_name, last_ts):
         """
         Collect operation metrics from database profiler collections
         """
@@ -104,9 +110,9 @@ class MongoSlowOperations(DBMAsyncJob):
             if 'command' not in profile:
                 continue
             profile["ts"] = profile["ts"].timestamp()  # convert datetime to timestamp
-            yield self._obfuscate_slow_query(profile, db_name)
+            yield self._obfuscate_slow_operation(profile, db_name)
 
-    def _collect_operation_metrics_from_logs(self, db_names, last_ts):
+    def _collect_slow_operations_from_logs(self, db_names, last_ts):
         logs = self._check.api_client.get_log_data()
         log_entries = logs.get("log", [])
         start_index = self._binary_search(log_entries, last_ts)
@@ -131,22 +137,22 @@ class MongoSlowOperations(DBMAsyncJob):
                 if db_name not in db_names:
                     continue
                 log_attr["ts"] = ts
-                yield self._obfuscate_slow_query(log_attr, db_name)
+                yield self._obfuscate_slow_operation(log_attr, db_name)
 
-    def _obfuscate_slow_query(self, slow_query, db_name):
-        command = slow_query['command']
+    def _obfuscate_slow_operation(self, slow_operation, db_name):
+        command = slow_operation['command']
         obfuscated_command = datadog_agent.obfuscate_mongodb_string(json_util.dumps(command))
         query_signature = compute_exec_plan_signature(obfuscated_command)
-        slow_query['dbname'] = db_name
-        slow_query['command'] = obfuscated_command
-        slow_query['query_signature'] = query_signature
+        slow_operation['dbname'] = db_name
+        slow_operation['command'] = obfuscated_command
+        slow_operation['query_signature'] = query_signature
 
-        if slow_query.get('originatingCommand'):
-            slow_query['originatingCommand'] = datadog_agent.obfuscate_mongodb_string(
-                json_util.dumps(slow_query['originatingCommand'])
+        if slow_operation.get('originatingCommand'):
+            slow_operation['originatingCommand'] = datadog_agent.obfuscate_mongodb_string(
+                json_util.dumps(slow_operation['originatingCommand'])
             )
 
-        return slow_query
+        return slow_operation
 
     def _get_db_name(self, command, ns):
         return command.get('$db') or ns.split('.', 1)[0]
@@ -172,77 +178,62 @@ class MongoSlowOperations(DBMAsyncJob):
             else:
                 return mid + 1
         return left
-
-    def _submit_slow_query_payload(self, slow_query):
-        # Create plan object when profiling is enabled
-        plan = None
-        exec_stats = slow_query.get("execStats")
-        if exec_stats:
-            definition = {"execStats": exec_stats}
-            plan = {
-                "definition": definition,
-                "signature": compute_exec_plan_signature(json_util.dumps(definition)),
-            }
-
+    
+    def _create_slow_operation_event(self, slow_operation):
         event = {
+            "timestamp": slow_operation["ts"] * 1000,
+            "dbname": slow_operation["dbname"],
+            "op": slow_operation.get("op"),
+            "ns": slow_operation.get("ns"),
+            "plan_summary": slow_operation.get("planSummary"),
+            "query_signature": slow_operation["query_signature"],
+            "user": slow_operation.get("user"),  # only available with profiling
+            "application": slow_operation.get("appName"),  # only available with profiling
+            "statement": slow_operation.get("command"),
+            "query_hash": slow_operation.get("queryHash"),  # only available with profiling
+            "plan_cache_key": slow_operation.get("planCacheKey"),  # only available with profiling
+            "query_framework": slow_operation.get("queryFramework"),
+            "cursor": {
+                "cursor_id": slow_operation.get("cursorid"),
+                "originating_command": slow_operation.get("originatingCommand"),
+            },
+            # metrics
+            "mills": slow_operation.get("millis", slow_operation.get("durationMillis", 0)),
+            "num_yield": slow_operation.get("numYield"),
+            "response_length": slow_operation.get("responseLength", 0),
+            "nreturned": slow_operation.get("nreturned"),
+            "nmatched": slow_operation.get("nMatched"),
+            "nmodified": slow_operation.get("nModified"),
+            "ninserted": slow_operation.get("ninserted"),
+            "ndeleted": slow_operation.get("ndeleted"),
+            "keys_examined": slow_operation.get("keysExamined"),
+            "docs_examined": slow_operation.get("docsExamined"),
+            "keys_inserted": slow_operation.get("keysInserted"),
+            "write_conflicts": slow_operation.get("writeConflicts"),
+            "cpu_nanos": slow_operation.get("cpuNanos"),
+            "planning_time_micros": slow_operation.get("planningTimeMicros"),  # only available with profiling
+            "upsert": slow_operation.get("upsert", False),
+            "has_sort_stage": slow_operation.get("hasSortStage", False),
+            "used_disk": slow_operation.get("usedDisk", False),
+            "from_multi_planner": slow_operation.get("fromMultiPlanner", False),
+            "replanned": slow_operation.get("replanned", False),
+            "replan_reason": slow_operation.get("replanReason"),
+            "lock_stats": format_key_name(self._check.convert_to_underscore_separated, slow_operation.get("locks", {})),
+            "flow_control_stats": format_key_name(
+                self._check.convert_to_underscore_separated, slow_operation.get("flowControl", {})
+            ),
+        }
+        return event
+
+    def _submit_slow_operation_payload(self, slow_operation_events):
+        payload = {
             "host": self._check._resolved_hostname,
-            "dbm_type": "slow_query",
             "ddagentversion": datadog_agent.get_version(),
             "ddsource": "mongo",
-            "ddtags": ",".join(self._check._get_tags(include_deployment_tags=True)),
-            "timestamp": slow_query["ts"],
-            "network": {
-                "client": {
-                    "ip": slow_query.get("client"),  # only available with profiling
-                    "hostname": slow_query.get("remote"),  # only available with logs
-                }
-            },
-            "db": {
-                "instance": slow_query["dbname"],
-                "query_signature": slow_query["query_signature"],
-                "user": slow_query.get("user"),  # only available with profiling
-                "application": slow_query.get("appName"),  # only available with profiling
-                "statement": slow_query.get("command"),
-                "plan": plan,
-            },
-            "mongodb": {
-                # metadata
-                "op": slow_query.get("op"),
-                "ns": slow_query.get("ns"),
-                "plan_summary": slow_query.get("planSummary"),
-                "exec_stats": slow_query.get("execStats"),
-                "query_hash": slow_query.get("queryHash"),  # only available with profiling
-                "plan_cache_key": slow_query.get("planCacheKey"),  # only available with profiling
-                "query_framework": slow_query.get("queryFramework"),
-                "cursor": {
-                    "cursor_id": slow_query.get("cursorid"),
-                    "originating_command": slow_query.get("originatingCommand"),
-                },
-                # metrics
-                "microsecs_running": slow_query.get("millis", slow_query.get("durationMillis", 0)) * 1000,
-                "num_yield": slow_query.get("numYield"),
-                "response_length": slow_query.get("responseLength"),
-                "nreturned": slow_query.get("nreturned"),
-                "nmatched": slow_query.get("nMatched"),
-                "nmodified": slow_query.get("nModified"),
-                "ninserted": slow_query.get("ninserted"),
-                "ndeleted": slow_query.get("ndeleted"),
-                "keys_examined": slow_query.get("keysExamined"),
-                "docs_examined": slow_query.get("docsExamined"),
-                "keys_inserted": slow_query.get("keysInserted"),
-                "write_conflicts": slow_query.get("writeConflicts"),
-                "cpu_nanos": slow_query.get("cpuNanos"),
-                "planning_time_micros": slow_query.get("planningTimeMicros"),  # only available with profiling
-                "upsert": slow_query.get("upsert", False),
-                "has_sort_stage": slow_query.get("hasSortStage", False),
-                "used_disk": slow_query.get("usedDisk", False),
-                "from_multi_planner": slow_query.get("fromMultiPlanner", False),
-                "replanned": slow_query.get("replanned", False),
-                "replan_reason": slow_query.get("replanReason"),
-                "lock_stats": format_key_name(self._check.convert_to_underscore_separated, slow_query.get("locks", {})),
-                "flow_control_stats": format_key_name(
-                    self._check.convert_to_underscore_separated, slow_query.get("flowControl", {})
-                ),
-            },
+            "dbm_type": "slow_query",
+            "collection_interval": self._collection_interval,
+            "ddtags": self._check._get_tags(include_deployment_tags=True),
+            "timestamp": time.time() * 1000,
+            "mongodb_slow_queries": slow_operation_events
         }
-        self._check.database_monitoring_query_sample(json_util.dumps(event))
+        self._check.database_monitoring_query_activity(json_util.dumps(payload))

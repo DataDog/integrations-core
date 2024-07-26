@@ -30,6 +30,8 @@ def test_mongo_operation_samples_standalone(aggregator, instance_integration_clu
     # we will only assert the operation sample and activity events
     dbm_activities = aggregator.get_event_platform_events("dbm-activity")
     dbm_samples = aggregator.get_event_platform_events("dbm-samples")
+
+    activity_samples = [event for event in dbm_activities if event['dbm_type'] == 'activity']
     plan_samples = [event for event in dbm_samples if event['dbm_type'] == 'plan']
 
     # assert samples
@@ -42,8 +44,8 @@ def test_mongo_operation_samples_standalone(aggregator, instance_integration_clu
     # assert activities
     with open(os.path.join(HERE, "results", "opeartion-activities-standalone.json"), 'r') as f:
         expected_activities = json.load(f)
-        assert len(dbm_activities) == len(expected_activities)
-        for i, activity in enumerate(dbm_activities):
+        assert len(activity_samples) == len(expected_activities)
+        for i, activity in enumerate(activity_samples):
             # do not assert timestamp
             assert activity == expected_activities[i]
 
@@ -61,6 +63,8 @@ def test_mongo_operation_samples_mongos(aggregator, instance_integration_cluster
 
     dbm_activities = aggregator.get_event_platform_events("dbm-activity")
     dbm_samples = aggregator.get_event_platform_events("dbm-samples")
+
+    activity_samples = [event for event in dbm_activities if event['dbm_type'] == 'activity']
     plan_samples = [event for event in dbm_samples if event['dbm_type'] == 'plan']
 
     with open(os.path.join(HERE, "results", "operation-samples-mongos.json"), 'r') as f:
@@ -72,8 +76,8 @@ def test_mongo_operation_samples_mongos(aggregator, instance_integration_cluster
     # assert activities
     with open(os.path.join(HERE, "results", "opeartion-activities-mongos.json"), 'r') as f:
         expected_activities = json.load(f)
-        assert len(dbm_activities) == len(expected_activities)
-        for i, activity in enumerate(dbm_activities):
+        assert len(activity_samples) == len(expected_activities)
+        for i, activity in enumerate(activity_samples):
             assert activity == expected_activities[i]
 
 
