@@ -40,10 +40,6 @@ def instance_empty_default_hostname():
     return False
 
 
-def instance_enable_ndm():
-    return False
-
-
 def instance_kerberos_auth():
     return 'disabled'
 
@@ -74,6 +70,10 @@ def instance_persist_connections():
 
 def instance_request_size():
     return 16
+
+
+def instance_send_ndm_metadata():
+    return False
 
 
 def instance_skip_proxy():

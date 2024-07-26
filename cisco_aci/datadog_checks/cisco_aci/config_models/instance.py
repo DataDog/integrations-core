@@ -70,7 +70,6 @@ class InstanceConfig(BaseModel):
     connect_timeout: Optional[float] = None
     disable_generic_tags: Optional[bool] = None
     empty_default_hostname: Optional[bool] = None
-    enable_ndm: Optional[bool] = None
     extra_headers: Optional[MappingProxyType[str, Any]] = None
     headers: Optional[MappingProxyType[str, Any]] = None
     kerberos_auth: Optional[str] = None
@@ -91,6 +90,7 @@ class InstanceConfig(BaseModel):
     pwd: Optional[str] = None
     read_timeout: Optional[float] = None
     request_size: Optional[float] = None
+    send_ndm_metadata: Optional[bool] = None
     service: Optional[str] = None
     skip_proxy: Optional[bool] = None
     tags: Optional[tuple[str, ...]] = None

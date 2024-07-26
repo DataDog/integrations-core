@@ -130,10 +130,10 @@ instances:
     #
     # namespace: default
 
-    ## @param enable_ndm - boolean - optional - default: false
-    ## Set to `true` to enable Network Device Monitoring.
+    ## @param send_ndm_metadata - boolean - optional - default: false
+    ## Set to `true` to enable Network Device Monitoring metadata (for devices and interfaces) to be sent.
     #
-    # enable_ndm: false
+    # send_ndm_metadata: false
 
     ## @param proxy - mapping - optional
     ## This overrides the `proxy` setting in `init_config`.
