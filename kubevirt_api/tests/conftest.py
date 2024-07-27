@@ -42,7 +42,7 @@ def setup_kubevirt():
             '{"spec":{"configuration":{"developerConfiguration":{"useEmulation":true}}}}',
         ]
     )
-    time.sleep(15)
+    time.sleep(30)
 
     # wait for kubevirt deployment
     run_command(
@@ -57,7 +57,7 @@ def setup_kubevirt():
         ]
     )
 
-    time.sleep(10)
+    time.sleep(30)
 
     # deploy a VirtualMachine instance
     run_command(["kubectl", "apply", "-f", os.path.join(HERE, "kind", "vm.yaml")])

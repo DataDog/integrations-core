@@ -70,6 +70,14 @@ class KubevirtApiCheck(OpenMetricsBaseCheckV2):
             vm_tags = self._extract_vm_tags(vm)
             self.gauge("vm.count", value=1, tags=vm_tags)
 
+        # report vmi metrics
+        vmis = self.kube_client.get_vmis()
+        raise Exception("vmis: ", vmis)
+
+        for vmi in vmis:
+            vmi_tags = self._extract_vmi_tags(vmi)
+            self.gauge("vmi.count", value=1, tags=vmi_tags)
+
         super().check(_)
 
     def _extract_host_port(self, url):
@@ -107,6 +115,19 @@ class KubevirtApiCheck(OpenMetricsBaseCheckV2):
         for label, value in vm["spec"]["template"]["metadata"]["labels"].items():
             label_name = label.replace("kubevirt.io/", "")
             tags.append(f"vm_{label_name}:{value}")
+
+        return tags
+
+    def _extract_vmi_tags(self, vmi):
+        tags = []
+
+        tags.append(f"vmi_name:{vmi['metadata']['name']}")
+        tags.append(f"vmi_uid:{vmi['metadata']['uid']}")
+        tags.append(f"kube_namespace:{vmi['metadata']['namespace']}")
+
+        for label, value in vmi["spec"]["template"]["metadata"]["labels"].items():
+            label_name = label.replace("kubevirt.io/", "")
+            tags.append(f"vmi_{label_name}:{value}")
 
         return tags
 

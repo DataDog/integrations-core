@@ -12,7 +12,7 @@ from datadog_checks.dev.utils import get_metadata_metrics
 from datadog_checks.kubevirt_api import KubevirtApiCheck
 
 from .conftest import mock_http_responses
-from .mock_response import GET_PODS_RESPONSE_VIRT_API_POD, GET_VMS_RESPONSE
+from .mock_response import GET_PODS_RESPONSE_VIRT_API_POD, GET_VMIS_RESPONSE, GET_VMS_RESPONSE
 
 pytestmark = [pytest.mark.unit]
 
@@ -26,6 +26,7 @@ def test_check(dd_run_check, aggregator, instance, mocker):
     check.kube_client = MagicMock()
     check.kube_client.get_pods.return_value = GET_PODS_RESPONSE_VIRT_API_POD
     check.kube_client.get_vms.return_value = GET_VMS_RESPONSE
+    check.kube_client.get_vmis.return_value = GET_VMIS_RESPONSE["items"]
 
     dd_run_check(check)
 
@@ -77,6 +78,21 @@ def test_check(dd_run_check, aggregator, instance, mocker):
         tags=vm_tags,
     )
 
+    # VMI metrics
+    vmi_tags = [
+        "kube_namespace:default",
+        "vmi_domain:testvm",
+        "vmi_name:testvm-2",
+        "vmi_nodeName:dev-kubevirt-control-plane",
+        "vmi_size:small",
+        "vmi_uid:f1f3ae4b-f81f-406f-a574-f12e7e3ba4f2",
+    ]
+    aggregator.assert_metric(
+        "kubevirt_api.vmi.count",
+        value=1,
+        tags=vmi_tags,
+    )
+
     aggregator.assert_all_metrics_covered()
     aggregator.assert_metrics_using_metadata(get_metadata_metrics())
 
@@ -87,6 +103,7 @@ def test_emits_zero_can_connect_when_service_is_down(dd_run_check, aggregator, i
     check.kube_client = MagicMock()
     check.kube_client.get_pods.return_value = []
     check.kube_client.get_vms.return_value = []
+    check.kube_client.get_vmis.return_value = []
 
     with pytest.raises(Exception):
         dd_run_check(check)
@@ -107,6 +124,7 @@ def test_emits_one_can_connect_when_service_is_up(dd_run_check, aggregator, inst
     check.kube_client = MagicMock()
     check.kube_client.get_pods.return_value = GET_PODS_RESPONSE_VIRT_API_POD
     check.kube_client.get_vms.return_value = GET_VMS_RESPONSE
+    check.kube_client.get_vmis.return_value = GET_VMIS_RESPONSE["items"]
 
     dd_run_check(check)
     aggregator.assert_metric(

@@ -43,3 +43,18 @@ class KubernetesAPIClient:
             version="v1",
             plural="virtualmachines",
         )["items"]
+
+    def get_vmis(self, namespace=None):
+        if namespace:
+            return self.custom_obj_client.list_namespaced_custom_object(
+                group="kubevirt.io",
+                version="v1",
+                namespace=namespace,
+                plural="virtualmachineinstances",
+            )["items"]
+
+        return self.custom_obj_client.list_cluster_custom_object(
+            group="kubevirt.io",
+            version="v1",
+            plural="virtualmachineinstances",
+        )["items"]
