@@ -72,8 +72,6 @@ class KubevirtApiCheck(OpenMetricsBaseCheckV2):
 
         # report vmi metrics
         vmis = self.kube_client.get_vmis()
-        raise Exception("vmis: ", vmis)
-
         for vmi in vmis:
             vmi_tags = self._extract_vmi_tags(vmi)
             self.gauge("vmi.count", value=1, tags=vmi_tags)
@@ -125,7 +123,7 @@ class KubevirtApiCheck(OpenMetricsBaseCheckV2):
         tags.append(f"vmi_uid:{vmi['metadata']['uid']}")
         tags.append(f"kube_namespace:{vmi['metadata']['namespace']}")
 
-        for label, value in vmi["spec"]["template"]["metadata"]["labels"].items():
+        for label, value in vmi["metadata"]["labels"].items():
             label_name = label.replace("kubevirt.io/", "")
             tags.append(f"vmi_{label_name}:{value}")
 
