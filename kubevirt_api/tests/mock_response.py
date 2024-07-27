@@ -758,6 +758,8 @@ GET_VMIS_RESPONSE = {
                     "kubevirt.io/domain": "testvm",
                     "kubevirt.io/nodeName": "dev-kubevirt-control-plane",
                     "kubevirt.io/size": "small",
+                    "random-prefix/foo": "bar",
+                    "random-prefix/baz": "biz",
                 },
                 "managedFields": [
                     {

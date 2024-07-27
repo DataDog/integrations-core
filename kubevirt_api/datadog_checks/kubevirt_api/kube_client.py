@@ -6,7 +6,7 @@ from kubernetes import client, config
 
 
 class KubernetesAPIClient:
-    def __init__(self, tls_verify=True, kube_api_endpoint=None, kube_config_dict=None):
+    def __init__(self, tls_verify=True, kube_config_dict=None):
         self.tls_verify = tls_verify
 
         if kube_config_dict:

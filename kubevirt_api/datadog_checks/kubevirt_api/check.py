@@ -111,6 +111,8 @@ class KubevirtApiCheck(OpenMetricsBaseCheckV2):
         tags.append(f"kube_namespace:{vm['metadata']['namespace']}")
 
         for label, value in vm["spec"]["template"]["metadata"]["labels"].items():
+            if not label.startswith("kubevirt.io/"):
+                continue
             label_name = label.replace("kubevirt.io/", "")
             tags.append(f"vm_{label_name}:{value}")
 
@@ -124,6 +126,8 @@ class KubevirtApiCheck(OpenMetricsBaseCheckV2):
         tags.append(f"kube_namespace:{vmi['metadata']['namespace']}")
 
         for label, value in vmi["metadata"]["labels"].items():
+            if not label.startswith("kubevirt.io/"):
+                continue
             label_name = label.replace("kubevirt.io/", "")
             tags.append(f"vmi_{label_name}:{value}")
 
