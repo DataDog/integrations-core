@@ -42,18 +42,18 @@ class KubevirtApiCheck(OpenMetricsBaseCheckV2):
     def _setup_kube_client(self):
         self.kube_client = KubernetesAPIClient(tls_verify=self.tls_verify, kube_config_dict=self.kube_config_dict)
 
-    def _report_health_check(self, url):
+    def _report_health_check(self, health_endpoint):
         try:
-            response = self.http.get(url, verify=is_affirmative(self.tls_verify))
+            response = self.http.get(health_endpoint, verify=is_affirmative(self.tls_verify))
             response.raise_for_status()
-            self.gauge("can_connect", 1, tags=[f"endpoint:{self.kubevirt_api_healthz_endpoint}"])
+            self.gauge("can_connect", 1, tags=[f"endpoint:{health_endpoint}"])
         except Exception as e:
             self.log.error(
                 "Cannot connect to KubeVirt API HTTP endpoint '%s': %s.\n",
-                url,
+                health_endpoint,
                 str(e),
             )
-            self.gauge("can_connect", 0, tags=[f"endpoint:{self.kubevirt_api_healthz_endpoint}"])
+            self.gauge("can_connect", 0, tags=[f"endpoint:{health_endpoint}"])
             raise
 
     def _report_vm_metrics(self):
