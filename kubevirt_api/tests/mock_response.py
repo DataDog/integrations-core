@@ -6,6 +6,7 @@ import datetime
 
 from dateutil.tz import tzutc
 from kubernetes.client.models import V1ObjectMeta, V1Pod
+from munch import DefaultMunch
 
 annotations = {
     "kubevirt.io/install-strategy-identifier": "96d0fd48fa88abe041085474347e87222b076258",
@@ -566,5 +567,177 @@ GET_PODS_RESPONSE_VIRT_API_POD = [
                 "start_time": datetime.datetime(2024, 7, 24, 22, 15, 4, tzinfo=tzutc()),
             },
         },
+    )
+]
+
+
+GET_VMS_RESPONSE = [
+    DefaultMunch.fromDict(
+        {
+            "apiVersion": "kubevirt.io/v1",
+            "kind": "VirtualMachine",
+            "metadata": {
+                "annotations": {
+                    "kubectl.kubernetes.io/last-applied-configuration": '{"apiVersion":"kubevirt.io/v1","kind":"VirtualMachine","metadata":{"annotations":{},"name":"testvm","namespace":"default"},"spec":{"running":false,"template":{"metadata":{"labels":{"kubevirt.io/domain":"testvm","kubevirt.io/size":"small"}},"spec":{"domain":{"devices":{"disks":[{"disk":{"bus":"virtio"},"name":"containerdisk"},{"disk":{"bus":"virtio"},"name":"cloudinitdisk"}],"interfaces":[{"masquerade":{},"name":"default"}]},"resources":{"requests":{"memory":"64M"}}},"networks":[{"name":"default","pod":{}}],"volumes":[{"containerDisk":{"image":"quay.io/kubevirt/cirros-container-disk-demo"},"name":"containerdisk"},{"cloudInitNoCloud":{"userDataBase64":"SGkuXG4="},"name":"cloudinitdisk"}]}}}}\n',  # noqa: E501
+                    "kubevirt.io/latest-observed-api-version": "v1",
+                    "kubevirt.io/storage-observed-api-version": "v1",
+                },
+                "creationTimestamp": "2024-07-27T17:09:54Z",
+                "finalizers": ["kubevirt.io/virtualMachineControllerFinalize"],
+                "generation": 2,
+                "managedFields": [
+                    {
+                        "apiVersion": "kubevirt.io/v1",
+                        "fieldsType": "FieldsV1",
+                        "fieldsV1": {
+                            "f:metadata": {
+                                "f:annotations": {".": {}, "f:kubectl.kubernetes.io/last-applied-configuration": {}}
+                            },
+                            "f:spec": {
+                                ".": {},
+                                "f:template": {
+                                    ".": {},
+                                    "f:metadata": {
+                                        ".": {},
+                                        "f:labels": {".": {}, "f:kubevirt.io/domain": {}, "f:kubevirt.io/size": {}},
+                                    },
+                                    "f:spec": {
+                                        ".": {},
+                                        "f:domain": {
+                                            ".": {},
+                                            "f:devices": {".": {}, "f:disks": {}, "f:interfaces": {}},
+                                            "f:resources": {".": {}, "f:requests": {".": {}, "f:memory": {}}},
+                                        },
+                                        "f:networks": {},
+                                        "f:volumes": {},
+                                    },
+                                },
+                            },
+                        },
+                        "manager": "kubectl-client-side-apply",
+                        "operation": "Update",
+                        "time": "2024-07-27T17:09:54Z",
+                    },
+                    {
+                        "apiVersion": "kubevirt.io/v1",
+                        "fieldsType": "FieldsV1",
+                        "fieldsV1": {"f:spec": {"f:running": {}}},
+                        "manager": "kubectl-patch",
+                        "operation": "Update",
+                        "time": "2024-07-27T17:09:54Z",
+                    },
+                    {
+                        "apiVersion": "kubevirt.io/v1",
+                        "fieldsType": "FieldsV1",
+                        "fieldsV1": {
+                            "f:metadata": {
+                                "f:annotations": {
+                                    "f:kubevirt.io/latest-observed-api-version": {},
+                                    "f:kubevirt.io/storage-observed-api-version": {},
+                                },
+                                "f:finalizers": {".": {}, 'v:"kubevirt.io/virtualMachineControllerFinalize"': {}},
+                            }
+                        },
+                        "manager": "virt-controller",
+                        "operation": "Update",
+                        "time": "2024-07-27T17:09:54Z",
+                    },
+                    {
+                        "apiVersion": "kubevirt.io/v1",
+                        "fieldsType": "FieldsV1",
+                        "fieldsV1": {
+                            "f:status": {
+                                ".": {},
+                                "f:conditions": {},
+                                "f:desiredGeneration": {},
+                                "f:observedGeneration": {},
+                                "f:printableStatus": {},
+                                "f:runStrategy": {},
+                                "f:startFailure": {
+                                    ".": {},
+                                    "f:consecutiveFailCount": {},
+                                    "f:lastFailedVMIUID": {},
+                                    "f:retryAfterTimestamp": {},
+                                },
+                                "f:volumeSnapshotStatuses": {},
+                            }
+                        },
+                        "manager": "virt-controller",
+                        "operation": "Update",
+                        "subresource": "status",
+                        "time": "2024-07-27T18:27:09Z",
+                    },
+                ],
+                "name": "testvm",
+                "namespace": "default",
+                "resourceVersion": "17403",
+                "uid": "4103f114-cf9d-47ad-9af0-be237ce7d4a1",
+            },
+            "spec": {
+                "running": True,
+                "template": {
+                    "metadata": {
+                        "creationTimestamp": None,
+                        "labels": {"kubevirt.io/domain": "testvm", "kubevirt.io/size": "small"},
+                    },
+                    "spec": {
+                        "architecture": "arm64",
+                        "domain": {
+                            "devices": {
+                                "disks": [
+                                    {"disk": {"bus": "virtio"}, "name": "containerdisk"},
+                                    {"disk": {"bus": "virtio"}, "name": "cloudinitdisk"},
+                                ],
+                                "interfaces": [{"masquerade": {}, "name": "default"}],
+                            },
+                            "machine": {"type": "virt"},
+                            "resources": {"requests": {"memory": "64M"}},
+                        },
+                        "networks": [{"name": "default", "pod": {}}],
+                        "volumes": [
+                            {
+                                "containerDisk": {"image": "quay.io/kubevirt/cirros-container-disk-demo"},
+                                "name": "containerdisk",
+                            },
+                            {"cloudInitNoCloud": {"userDataBase64": "SGkuXG4="}, "name": "cloudinitdisk"},
+                        ],
+                    },
+                },
+            },
+            "status": {
+                "conditions": [
+                    {
+                        "lastProbeTime": "2024-07-27T18:27:09Z",
+                        "lastTransitionTime": "2024-07-27T18:27:09Z",
+                        "message": "VMI does not exist",
+                        "reason": "VMINotExists",
+                        "status": "False",
+                        "type": "Ready",
+                    },
+                    {"lastProbeTime": None, "lastTransitionTime": None, "status": "True", "type": "LiveMigratable"},
+                ],
+                "desiredGeneration": 2,
+                "observedGeneration": 2,
+                "printableStatus": "CrashLoopBackOff",
+                "runStrategy": "Always",
+                "startFailure": {
+                    "consecutiveFailCount": 18,
+                    "lastFailedVMIUID": "f0b6fc58-80b8-4d01-be12-7f029d297970",
+                    "retryAfterTimestamp": "2024-07-27T18:31:59Z",
+                },
+                "volumeSnapshotStatuses": [
+                    {
+                        "enabled": False,
+                        "name": "containerdisk",
+                        "reason": "Snapshot is not supported for this volumeSource type [containerdisk]",
+                    },
+                    {
+                        "enabled": False,
+                        "name": "cloudinitdisk",
+                        "reason": "Snapshot is not supported for this volumeSource type [cloudinitdisk]",
+                    },
+                ],
+            },
+        }
     )
 ]

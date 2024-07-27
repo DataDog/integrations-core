@@ -12,7 +12,7 @@ from datadog_checks.dev.utils import get_metadata_metrics
 from datadog_checks.kubevirt_api import KubevirtApiCheck
 
 from .conftest import mock_http_responses
-from .mock_response import GET_PODS_RESPONSE_VIRT_API_POD
+from .mock_response import GET_PODS_RESPONSE_VIRT_API_POD, GET_VMS_RESPONSE
 
 pytestmark = [pytest.mark.unit]
 
@@ -25,6 +25,7 @@ def test_check(dd_run_check, aggregator, instance, mocker):
     check._setup = lambda: None
     check.kube_client = MagicMock()
     check.kube_client.get_pods.return_value = GET_PODS_RESPONSE_VIRT_API_POD
+    check.kube_client.get_vms.return_value = GET_VMS_RESPONSE
 
     dd_run_check(check)
 
@@ -62,6 +63,20 @@ def test_check(dd_run_check, aggregator, instance, mocker):
     aggregator.assert_metric_has_tags("kubevirt_api.rest.client_request_latency_seconds.sum", tags=metrics_tags)
     aggregator.assert_metric_has_tags("kubevirt_api.rest.client_requests.count", tags=metrics_tags)
 
+    # VM metrics
+    vm_tags = [
+        "vm_name:testvm",
+        "vm_uid:4103f114-cf9d-47ad-9af0-be237ce7d4a1",
+        "vm_size:small",
+        "vm_domain:testvm",
+        "kube_namespace:default",
+    ]
+    aggregator.assert_metric(
+        "kubevirt_api.vm.count",
+        value=1,
+        tags=vm_tags,
+    )
+
     aggregator.assert_all_metrics_covered()
     aggregator.assert_metrics_using_metadata(get_metadata_metrics())
 
@@ -71,6 +86,7 @@ def test_emits_zero_can_connect_when_service_is_down(dd_run_check, aggregator, i
     check._setup = lambda: None
     check.kube_client = MagicMock()
     check.kube_client.get_pods.return_value = []
+    check.kube_client.get_vms.return_value = []
 
     with pytest.raises(Exception):
         dd_run_check(check)
@@ -90,6 +106,7 @@ def test_emits_one_can_connect_when_service_is_up(dd_run_check, aggregator, inst
     check._setup = lambda: None
     check.kube_client = MagicMock()
     check.kube_client.get_pods.return_value = GET_PODS_RESPONSE_VIRT_API_POD
+    check.kube_client.get_vms.return_value = GET_VMS_RESPONSE
 
     dd_run_check(check)
     aggregator.assert_metric(
