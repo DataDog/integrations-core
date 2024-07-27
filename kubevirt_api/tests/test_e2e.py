@@ -16,5 +16,5 @@ def test_e2e_check_collects_kubevirt_api_metrics(dd_agent_check):
     aggregator = dd_agent_check()
 
     aggregator.assert_metric("kubevirt_api.can_connect", value=1)
-    aggregator.assert_metric("kubevirt_api.process.open_fds")  # gauge
-    aggregator.assert_metric("kubevirt_api.promhttp.metric_handler_requests_in_flight")  # gauge
+    aggregator.assert_metric("kubevirt_api.process.open_fds")
+    aggregator.assert_metric("kubevirt_api.promhttp.metric_handler_requests_in_flight")

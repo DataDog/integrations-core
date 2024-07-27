@@ -22,6 +22,7 @@ def test_check(dd_run_check, aggregator, instance, mocker):
 
     check = KubevirtApiCheck("kubevirt_api", {}, [instance])
 
+    check._setup = lambda: None
     check.kube_client = MagicMock()
     check.kube_client.get_pods.return_value = GET_PODS_RESPONSE_VIRT_API_POD
 
@@ -42,38 +43,24 @@ def test_check(dd_run_check, aggregator, instance, mocker):
         "pod_name:virt-api-7976d99767-cbj7g",
     ]
 
-    aggregator.assert_metric("kubevirt_api.process.cpu_seconds.count", tags=metrics_tags)  # counter
-    aggregator.assert_metric("kubevirt_api.process.max_fds", tags=metrics_tags)  # gauge
-    aggregator.assert_metric("kubevirt_api.process.open_fds", tags=metrics_tags)  # gauge
-    aggregator.assert_metric("kubevirt_api.process.resident_memory_bytes", tags=metrics_tags)  # gauge
-    aggregator.assert_metric("kubevirt_api.process.start_time_seconds", tags=metrics_tags)  # gauge
-    aggregator.assert_metric("kubevirt_api.process.virtual_memory_bytes", tags=metrics_tags)  # gauge
-    aggregator.assert_metric("kubevirt_api.process.virtual_memory_max_bytes", tags=metrics_tags)  # gauge
-    aggregator.assert_metric_has_tags(
-        "kubevirt_api.promhttp.metric_handler_requests_in_flight", tags=metrics_tags
-    )  # gauge
-    aggregator.assert_metric_has_tags(
-        "kubevirt_api.promhttp.metric_handler_requests.count", tags=metrics_tags
-    )  # counter
+    aggregator.assert_metric("kubevirt_api.process.cpu_seconds.count", tags=metrics_tags)
+    aggregator.assert_metric("kubevirt_api.process.max_fds", tags=metrics_tags)
+    aggregator.assert_metric("kubevirt_api.process.open_fds", tags=metrics_tags)
+    aggregator.assert_metric("kubevirt_api.process.resident_memory_bytes", tags=metrics_tags)
+    aggregator.assert_metric("kubevirt_api.process.start_time_seconds", tags=metrics_tags)
+    aggregator.assert_metric("kubevirt_api.process.virtual_memory_bytes", tags=metrics_tags)
+    aggregator.assert_metric("kubevirt_api.process.virtual_memory_max_bytes", tags=metrics_tags)
+    aggregator.assert_metric_has_tags("kubevirt_api.promhttp.metric_handler_requests_in_flight", tags=metrics_tags)
+    aggregator.assert_metric_has_tags("kubevirt_api.promhttp.metric_handler_requests.count", tags=metrics_tags)
     aggregator.assert_metric_has_tags(
         "kubevirt_api.rest.client_rate_limiter_duration_seconds.bucket", tags=metrics_tags
-    )  # histogram
-    aggregator.assert_metric_has_tags(
-        "kubevirt_api.rest.client_rate_limiter_duration_seconds.count", tags=metrics_tags
-    )  # histogram
-    aggregator.assert_metric_has_tags(
-        "kubevirt_api.rest.client_rate_limiter_duration_seconds.sum", tags=metrics_tags
-    )  # histogram
-    aggregator.assert_metric_has_tags(
-        "kubevirt_api.rest.client_request_latency_seconds.bucket", tags=metrics_tags
-    )  # histogram
-    aggregator.assert_metric_has_tags(
-        "kubevirt_api.rest.client_request_latency_seconds.count", tags=metrics_tags
-    )  # histogram
-    aggregator.assert_metric_has_tags(
-        "kubevirt_api.rest.client_request_latency_seconds.sum", tags=metrics_tags
-    )  # histogram
-    aggregator.assert_metric_has_tags("kubevirt_api.rest.client_requests.count", tags=metrics_tags)  # counter
+    )
+    aggregator.assert_metric_has_tags("kubevirt_api.rest.client_rate_limiter_duration_seconds.count", tags=metrics_tags)
+    aggregator.assert_metric_has_tags("kubevirt_api.rest.client_rate_limiter_duration_seconds.sum", tags=metrics_tags)
+    aggregator.assert_metric_has_tags("kubevirt_api.rest.client_request_latency_seconds.bucket", tags=metrics_tags)
+    aggregator.assert_metric_has_tags("kubevirt_api.rest.client_request_latency_seconds.count", tags=metrics_tags)
+    aggregator.assert_metric_has_tags("kubevirt_api.rest.client_request_latency_seconds.sum", tags=metrics_tags)
+    aggregator.assert_metric_has_tags("kubevirt_api.rest.client_requests.count", tags=metrics_tags)
 
     aggregator.assert_all_metrics_covered()
     aggregator.assert_metrics_using_metadata(get_metadata_metrics())
@@ -81,6 +68,10 @@ def test_check(dd_run_check, aggregator, instance, mocker):
 
 def test_emits_zero_can_connect_when_service_is_down(dd_run_check, aggregator, instance):
     check = KubevirtApiCheck("kubevirt_api", {}, [instance])
+    check._setup = lambda: None
+    check.kube_client = MagicMock()
+    check.kube_client.get_pods.return_value = []
+
     with pytest.raises(Exception):
         dd_run_check(check)
         aggregator.assert_metric(
@@ -96,6 +87,10 @@ def test_emits_one_can_connect_when_service_is_up(dd_run_check, aggregator, inst
     mocker.patch("requests.get", wraps=mock_http_responses)
 
     check = KubevirtApiCheck("kubevirt_api", {}, [instance])
+    check._setup = lambda: None
+    check.kube_client = MagicMock()
+    check.kube_client.get_pods.return_value = GET_PODS_RESPONSE_VIRT_API_POD
+
     dd_run_check(check)
     aggregator.assert_metric(
         "kubevirt_api.can_connect",

@@ -6,6 +6,7 @@ import time
 from contextlib import ExitStack
 
 import pytest
+import yaml
 
 from datadog_checks.dev import get_here, run_command
 from datadog_checks.dev.http import MockResponse
@@ -13,6 +14,8 @@ from datadog_checks.dev.kind import kind_run
 from datadog_checks.dev.kube_port_forward import port_forward
 
 HERE = get_here()
+
+KUBE_CONFIG_PATH_E2E = "/home/.kube/config"
 
 
 KUBEVIRT_VERSION = "v1.2.2"
@@ -39,7 +42,7 @@ def setup_kubevirt():
             '{"spec":{"configuration":{"developerConfiguration":{"useEmulation":true}}}}',
         ]
     )
-    time.sleep(30)
+    time.sleep(15)
 
     # wait for kubevirt deployment
     run_command(
@@ -63,7 +66,12 @@ def setup_kubevirt():
 
 @pytest.fixture(scope="session")
 def dd_environment():
-    with kind_run(conditions=[setup_kubevirt], sleep=60) as kubeconfig, ExitStack() as stack:
+    with kind_run(conditions=[setup_kubevirt], sleep=10) as kubeconfig, ExitStack() as stack:
+        kubeconfig_content = None
+
+        with open(kubeconfig, "r") as f:
+            kubeconfig_content = yaml.safe_load(f)
+
         instance = {}
 
         host, port = stack.enter_context(port_forward(kubeconfig, "kubevirt", 443, "service", "virt-api"))
@@ -71,7 +79,7 @@ def dd_environment():
         instance["kubevirt_api_metrics_endpoint"] = f"https://{host}:{port}/metrics"
         instance["kubevirt_api_healthz_endpoint"] = f"https://{host}:{port}/healthz"
         instance["kube_cluster_name"] = "test-cluster-e2e"
-
+        instance["kube_config_dict"] = kubeconfig_content
         instance["tls_verify"] = False
 
         yield {"instances": [instance]}
