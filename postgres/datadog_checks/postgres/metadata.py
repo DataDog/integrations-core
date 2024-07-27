@@ -401,7 +401,7 @@ class PostgresMetadata(DBMAsyncJob):
         else:
             # Config error should catch the case where schema collection is enabled
             # and relation metrics aren't, but adding a warning here just in case
-            self._check.log.warning("Relation metrics are not configured for {dbname}, so tables cannot be collected")
+            self._check.log.warning("Relation metrics are not configured for %s, so tables cannot be collected", dbname)
 
     def _sort_and_limit_table_info(
         self, cursor, dbname, table_info: List[Dict[str, Union[str, bool]]], limit: int
