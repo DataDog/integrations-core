@@ -105,9 +105,10 @@ class KubevirtApiCheck(OpenMetricsBaseCheckV2):
     def _extract_pod_tags(self, pod):
         if not pod:
             return []
+
         tags = []
-        tags.append(f"pod_name:{pod.metadata.name}")
-        tags.append(f"kube_namespace:{pod.metadata.namespace}")
+        tags.append(f"pod_name:{pod['metadata']['name']}")
+        tags.append(f"kube_namespace:{pod['metadata']['namespace']}")
 
         if self.kube_cluster_name:
             tags.append(f"kube_cluster_name:{self.kube_cluster_name}")
@@ -117,8 +118,8 @@ class KubevirtApiCheck(OpenMetricsBaseCheckV2):
     def _extract_vm_tags(self, vm):
         if not vm:
             return []
-        tags = []
 
+        tags = []
         tags.append(f"vm_name:{vm['metadata']['name']}")
         tags.append(f"vm_uid:{vm['metadata']['uid']}")
         tags.append(f"kube_namespace:{vm['metadata']['namespace']}")
@@ -134,8 +135,8 @@ class KubevirtApiCheck(OpenMetricsBaseCheckV2):
     def _extract_vmi_tags(self, vmi):
         if not vmi:
             return []
-        tags = []
 
+        tags = []
         tags.append(f"vmi_name:{vmi['metadata']['name']}")
         tags.append(f"vmi_uid:{vmi['metadata']['uid']}")
         tags.append(f"kube_namespace:{vmi['metadata']['namespace']}")

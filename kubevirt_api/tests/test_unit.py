@@ -22,8 +22,8 @@ def test_check(dd_run_check, aggregator, instance, mocker):
 
     check._setup_kube_client = lambda: None
     check.kube_client = MagicMock()
-    check.kube_client.get_pods.return_value = GET_PODS_RESPONSE_VIRT_API_POD
-    check.kube_client.get_vms.return_value = GET_VMS_RESPONSE
+    check.kube_client.get_pods.return_value = GET_PODS_RESPONSE_VIRT_API_POD["items"]
+    check.kube_client.get_vms.return_value = GET_VMS_RESPONSE["items"]
     check.kube_client.get_vmis.return_value = GET_VMIS_RESPONSE["items"]
 
     dd_run_check(check)
@@ -40,7 +40,7 @@ def test_check(dd_run_check, aggregator, instance, mocker):
         "endpoint:https://10.244.0.38:443/metrics",
         "kube_namespace:kubevirt",
         "kube_cluster_name:test-cluster",
-        "pod_name:virt-api-7976d99767-cbj7g",
+        "pod_name:virt-api-98cf864cc-zkgcd",
     ]
 
     aggregator.assert_metric("kubevirt_api.process.cpu_seconds.count", tags=metrics_tags)
@@ -65,7 +65,7 @@ def test_check(dd_run_check, aggregator, instance, mocker):
     # VM metrics
     vm_tags = [
         "vm_name:testvm",
-        "vm_uid:4103f114-cf9d-47ad-9af0-be237ce7d4a1",
+        "vm_uid:46bc4e2b-d287-4408-8393-c7accdd73291",
         "vm_size:small",
         "vm_domain:testvm",
         "kube_namespace:default",
@@ -120,8 +120,8 @@ def test_emits_one_can_connect_when_service_is_up(dd_run_check, aggregator, inst
     check = KubevirtApiCheck("kubevirt_api", {}, [instance])
     check._setup_kube_client = lambda: None
     check.kube_client = MagicMock()
-    check.kube_client.get_pods.return_value = GET_PODS_RESPONSE_VIRT_API_POD
-    check.kube_client.get_vms.return_value = GET_VMS_RESPONSE
+    check.kube_client.get_pods.return_value = GET_PODS_RESPONSE_VIRT_API_POD["items"]
+    check.kube_client.get_vms.return_value = GET_VMS_RESPONSE["items"]
     check.kube_client.get_vmis.return_value = GET_VMIS_RESPONSE["items"]
 
     dd_run_check(check)

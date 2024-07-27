@@ -2,742 +2,558 @@
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
 
-import datetime
-
-from dateutil.tz import tzutc
-from kubernetes.client.models import V1ObjectMeta, V1Pod
-
-annotations = {
-    "kubevirt.io/install-strategy-identifier": "96d0fd48fa88abe041085474347e87222b076258",
-    "kubevirt.io/install-strategy-registry": "quay.io/kubevirt",
-    "kubevirt.io/install-strategy-version": "v1.3.0",
-}
-
-labels = {
-    "app.kubernetes.io/component": "kubevirt",
-    "app.kubernetes.io/managed-by": "virt-operator",
-    "app.kubernetes.io/version": "v1.3.0",
-    "kubevirt.io": "virt-api",
-    "pod-template-hash": "7976d99767",
-    "prometheus.kubevirt.io": "true",
-}
-
-metadata = V1ObjectMeta(
-    name="virt-api-7976d99767-cbj7g",
-    namespace="kubevirt",
-    annotations=annotations,
-    labels=labels,
-    uid="b2d68e35-47a1-43aa-a4fa-3b15d63e2a66",
-)
-
-GET_PODS_RESPONSE_VIRT_API_POD = [
-    V1Pod(
-        metadata=metadata,
-        **{
-            "api_version": None,
-            "kind": None,
+GET_PODS_RESPONSE_VIRT_API_POD = {
+    "apiVersion": "v1",
+    "items": [
+        {
+            "apiVersion": "v1",
+            "kind": "Pod",
+            "metadata": {
+                "annotations": {
+                    "kubevirt.io/install-strategy-identifier": "0b064fc3b679abc95fa0afd5190756cf1b5941ab",
+                    "kubevirt.io/install-strategy-registry": "quay.io/kubevirt",
+                    "kubevirt.io/install-strategy-version": "v1.2.2",
+                },
+                "creationTimestamp": "2024-07-23T13:29:12Z",
+                "generateName": "virt-api-98cf864cc-",
+                "labels": {
+                    "app.kubernetes.io/component": "kubevirt",
+                    "app.kubernetes.io/managed-by": "virt-operator",
+                    "app.kubernetes.io/version": "v1.2.2",
+                    "kubevirt.io": "virt-api",
+                    "pod-template-hash": "98cf864cc",
+                    "prometheus.kubevirt.io": "true",
+                },
+                "name": "virt-api-98cf864cc-zkgcd",
+                "namespace": "kubevirt",
+                "ownerReferences": [
+                    {
+                        "apiVersion": "apps/v1",
+                        "blockOwnerDeletion": True,
+                        "controller": True,
+                        "kind": "ReplicaSet",
+                        "name": "virt-api-98cf864cc",
+                        "uid": "46200147-a99b-49a1-82f1-220261c7a6dc",
+                    }
+                ],
+                "resourceVersion": "811",
+                "uid": "49e4e14d-7b20-4e21-a0c1-60bf35515cc1",
+            },
             "spec": {
-                "active_deadline_seconds": None,
                 "affinity": {
-                    "node_affinity": {
-                        "preferred_during_scheduling_ignored_during_execution": [
+                    "podAntiAffinity": {
+                        "preferredDuringSchedulingIgnoredDuringExecution": [
                             {
-                                "preference": {
-                                    "match_expressions": [
-                                        {
-                                            "key": "node-role.kubernetes.io/worker",
-                                            "operator": "DoesNotExist",
-                                            "values": None,
-                                        }
-                                    ],
-                                    "match_fields": None,
-                                },
-                                "weight": 100,
-                            }
-                        ],
-                        "required_during_scheduling_ignored_during_execution": {
-                            "node_selector_terms": [
-                                {
-                                    "match_expressions": [
-                                        {
-                                            "key": "node-role.kubernetes.io/control-plane",
-                                            "operator": "Exists",
-                                            "values": None,
-                                        }
-                                    ],
-                                    "match_fields": None,
-                                },
-                                {
-                                    "match_expressions": [
-                                        {"key": "node-role.kubernetes.io/master", "operator": "Exists", "values": None}
-                                    ],
-                                    "match_fields": None,
-                                },
-                            ]
-                        },
-                    },
-                    "pod_affinity": None,
-                    "pod_anti_affinity": {
-                        "preferred_during_scheduling_ignored_during_execution": [
-                            {
-                                "pod_affinity_term": {
-                                    "label_selector": {
-                                        "match_expressions": [
+                                "podAffinityTerm": {
+                                    "labelSelector": {
+                                        "matchExpressions": [
                                             {"key": "kubevirt.io", "operator": "In", "values": ["virt-api"]}
-                                        ],
-                                        "match_labels": None,
+                                        ]
                                     },
-                                    "match_label_keys": None,
-                                    "mismatch_label_keys": None,
-                                    "namespace_selector": None,
-                                    "namespaces": None,
-                                    "topology_key": "kubernetes.io/hostname",
+                                    "topologyKey": "kubernetes.io/hostname",
                                 },
                                 "weight": 1,
                             }
-                        ],
-                        "required_during_scheduling_ignored_during_execution": None,
-                    },
+                        ]
+                    }
                 },
-                "automount_service_account_token": None,
                 "containers": [
                     {
                         "args": ["--port", "8443", "--console-server-port", "8186", "--subresources-only", "-v", "2"],
                         "command": ["virt-api"],
-                        "env": None,
-                        "env_from": None,
-                        "image": "quay.io/kubevirt/virt-api:v1.3.0",
-                        "image_pull_policy": "IfNotPresent",
-                        "lifecycle": None,
-                        "liveness_probe": None,
+                        "image": "quay.io/kubevirt/virt-api:v1.2.2",
+                        "imagePullPolicy": "IfNotPresent",
                         "name": "virt-api",
                         "ports": [
-                            {
-                                "container_port": 8443,
-                                "host_ip": None,
-                                "host_port": None,
-                                "name": "virt-api",
-                                "protocol": "TCP",
-                            },
-                            {
-                                "container_port": 8443,
-                                "host_ip": None,
-                                "host_port": None,
-                                "name": "metrics",
-                                "protocol": "TCP",
-                            },
+                            {"containerPort": 8443, "name": "virt-api", "protocol": "TCP"},
+                            {"containerPort": 8443, "name": "metrics", "protocol": "TCP"},
                         ],
-                        "readiness_probe": {
-                            "_exec": None,
-                            "failure_threshold": 3,
-                            "grpc": None,
-                            "http_get": {
-                                "host": None,
-                                "http_headers": None,
+                        "readinessProbe": {
+                            "failureThreshold": 3,
+                            "httpGet": {
                                 "path": "/apis/subresources.kubevirt.io/v1/healthz",
                                 "port": 8443,
                                 "scheme": "HTTPS",
                             },
-                            "initial_delay_seconds": 15,
-                            "period_seconds": 10,
-                            "success_threshold": 1,
-                            "tcp_socket": None,
-                            "termination_grace_period_seconds": None,
-                            "timeout_seconds": 1,
+                            "initialDelaySeconds": 15,
+                            "periodSeconds": 10,
+                            "successThreshold": 1,
+                            "timeoutSeconds": 1,
                         },
-                        "resize_policy": None,
-                        "resources": {"claims": None, "limits": None, "requests": {"cpu": "5m", "memory": "500Mi"}},
-                        "restart_policy": None,
-                        "security_context": {
-                            "allow_privilege_escalation": False,
-                            "app_armor_profile": None,
-                            "capabilities": {"add": None, "drop": ["ALL"]},
-                            "privileged": None,
-                            "proc_mount": None,
-                            "read_only_root_filesystem": None,
-                            "run_as_group": None,
-                            "run_as_non_root": None,
-                            "run_as_user": None,
-                            "se_linux_options": None,
-                            "seccomp_profile": {"localhost_profile": None, "type": "RuntimeDefault"},
-                            "windows_options": None,
+                        "resources": {"requests": {"cpu": "5m", "memory": "500Mi"}},
+                        "securityContext": {
+                            "allowPrivilegeEscalation": False,
+                            "capabilities": {"drop": ["ALL"]},
+                            "seccompProfile": {"type": "RuntimeDefault"},
                         },
-                        "startup_probe": None,
-                        "stdin": None,
-                        "stdin_once": None,
-                        "termination_message_path": "/dev/termination-log",
-                        "termination_message_policy": "File",
-                        "tty": None,
-                        "volume_devices": None,
-                        "volume_mounts": [
+                        "terminationMessagePath": "/dev/termination-log",
+                        "terminationMessagePolicy": "File",
+                        "volumeMounts": [
                             {
-                                "mount_path": "/etc/virt-api/certificates",
-                                "mount_propagation": None,
+                                "mountPath": "/etc/virt-api/certificates",
                                 "name": "kubevirt-virt-api-certs",
-                                "read_only": True,
-                                "recursive_read_only": None,
-                                "sub_path": None,
-                                "sub_path_expr": None,
+                                "readOnly": True,
                             },
                             {
-                                "mount_path": "/etc/virt-handler/clientcertificates",
-                                "mount_propagation": None,
+                                "mountPath": "/etc/virt-handler/clientcertificates",
                                 "name": "kubevirt-virt-handler-certs",
-                                "read_only": True,
-                                "recursive_read_only": None,
-                                "sub_path": None,
-                                "sub_path_expr": None,
+                                "readOnly": True,
                             },
+                            {"mountPath": "/profile-data", "name": "profile-data"},
                             {
-                                "mount_path": "/profile-data",
-                                "mount_propagation": None,
-                                "name": "profile-data",
-                                "read_only": None,
-                                "recursive_read_only": None,
-                                "sub_path": None,
-                                "sub_path_expr": None,
-                            },
-                            {
-                                "mount_path": "/var/run/secrets/kubernetes.io/serviceaccount",
-                                "mount_propagation": None,
-                                "name": "kube-api-access-vht47",
-                                "read_only": True,
-                                "recursive_read_only": None,
-                                "sub_path": None,
-                                "sub_path_expr": None,
+                                "mountPath": "/var/run/secrets/kubernetes.io/serviceaccount",
+                                "name": "kube-api-access-72zdc",
+                                "readOnly": True,
                             },
                         ],
-                        "working_dir": None,
                     }
                 ],
-                "dns_config": None,
-                "dns_policy": "ClusterFirst",
-                "enable_service_links": True,
-                "ephemeral_containers": None,
-                "host_aliases": None,
-                "host_ipc": None,
-                "host_network": None,
-                "host_pid": None,
-                "host_users": None,
-                "hostname": None,
-                "image_pull_secrets": None,
-                "init_containers": None,
-                "node_name": "minikube",
-                "node_selector": {"kubernetes.io/os": "linux"},
-                "os": None,
-                "overhead": None,
-                "preemption_policy": "PreemptLowerPriority",
+                "dnsPolicy": "ClusterFirst",
+                "enableServiceLinks": True,
+                "nodeName": "dev-kubevirt-control-plane",
+                "nodeSelector": {"kubernetes.io/os": "linux"},
+                "preemptionPolicy": "PreemptLowerPriority",
                 "priority": 1000000000,
-                "priority_class_name": "kubevirt-cluster-critical",
-                "readiness_gates": None,
-                "resource_claims": None,
-                "restart_policy": "Always",
-                "runtime_class_name": None,
-                "scheduler_name": "default-scheduler",
-                "scheduling_gates": None,
-                "security_context": {
-                    "app_armor_profile": None,
-                    "fs_group": None,
-                    "fs_group_change_policy": None,
-                    "run_as_group": None,
-                    "run_as_non_root": True,
-                    "run_as_user": None,
-                    "se_linux_options": None,
-                    "seccomp_profile": {"localhost_profile": None, "type": "RuntimeDefault"},
-                    "supplemental_groups": None,
-                    "sysctls": None,
-                    "windows_options": None,
-                },
-                "service_account": "kubevirt-apiserver",
-                "service_account_name": "kubevirt-apiserver",
-                "set_hostname_as_fqdn": None,
-                "share_process_namespace": None,
-                "subdomain": None,
-                "termination_grace_period_seconds": 30,
+                "priorityClassName": "kubevirt-cluster-critical",
+                "restartPolicy": "Always",
+                "schedulerName": "default-scheduler",
+                "securityContext": {"runAsNonRoot": True, "seccompProfile": {"type": "RuntimeDefault"}},
+                "serviceAccount": "kubevirt-apiserver",
+                "serviceAccountName": "kubevirt-apiserver",
+                "terminationGracePeriodSeconds": 30,
                 "tolerations": [
-                    {
-                        "effect": None,
-                        "key": "CriticalAddonsOnly",
-                        "operator": "Exists",
-                        "toleration_seconds": None,
-                        "value": None,
-                    },
-                    {
-                        "effect": "NoSchedule",
-                        "key": "node-role.kubernetes.io/control-plane",
-                        "operator": "Exists",
-                        "toleration_seconds": None,
-                        "value": None,
-                    },
-                    {
-                        "effect": "NoSchedule",
-                        "key": "node-role.kubernetes.io/master",
-                        "operator": "Exists",
-                        "toleration_seconds": None,
-                        "value": None,
-                    },
+                    {"key": "CriticalAddonsOnly", "operator": "Exists"},
                     {
                         "effect": "NoExecute",
                         "key": "node.kubernetes.io/not-ready",
                         "operator": "Exists",
-                        "toleration_seconds": 300,
-                        "value": None,
+                        "tolerationSeconds": 300,
                     },
                     {
                         "effect": "NoExecute",
                         "key": "node.kubernetes.io/unreachable",
                         "operator": "Exists",
-                        "toleration_seconds": 300,
-                        "value": None,
+                        "tolerationSeconds": 300,
                     },
                 ],
-                "topology_spread_constraints": None,
                 "volumes": [
                     {
-                        "aws_elastic_block_store": None,
-                        "azure_disk": None,
-                        "azure_file": None,
-                        "cephfs": None,
-                        "cinder": None,
-                        "config_map": None,
-                        "csi": None,
-                        "downward_api": None,
-                        "empty_dir": None,
-                        "ephemeral": None,
-                        "fc": None,
-                        "flex_volume": None,
-                        "flocker": None,
-                        "gce_persistent_disk": None,
-                        "git_repo": None,
-                        "glusterfs": None,
-                        "host_path": None,
-                        "iscsi": None,
                         "name": "kubevirt-virt-api-certs",
-                        "nfs": None,
-                        "persistent_volume_claim": None,
-                        "photon_persistent_disk": None,
-                        "portworx_volume": None,
-                        "projected": None,
-                        "quobyte": None,
-                        "rbd": None,
-                        "scale_io": None,
-                        "secret": {
-                            "default_mode": 420,
-                            "items": None,
-                            "optional": True,
-                            "secret_name": "kubevirt-virt-api-certs",
-                        },
-                        "storageos": None,
-                        "vsphere_volume": None,
+                        "secret": {"defaultMode": 420, "optional": True, "secretName": "kubevirt-virt-api-certs"},
                     },
                     {
-                        "aws_elastic_block_store": None,
-                        "azure_disk": None,
-                        "azure_file": None,
-                        "cephfs": None,
-                        "cinder": None,
-                        "config_map": None,
-                        "csi": None,
-                        "downward_api": None,
-                        "empty_dir": None,
-                        "ephemeral": None,
-                        "fc": None,
-                        "flex_volume": None,
-                        "flocker": None,
-                        "gce_persistent_disk": None,
-                        "git_repo": None,
-                        "glusterfs": None,
-                        "host_path": None,
-                        "iscsi": None,
                         "name": "kubevirt-virt-handler-certs",
-                        "nfs": None,
-                        "persistent_volume_claim": None,
-                        "photon_persistent_disk": None,
-                        "portworx_volume": None,
-                        "projected": None,
-                        "quobyte": None,
-                        "rbd": None,
-                        "scale_io": None,
-                        "secret": {
-                            "default_mode": 420,
-                            "items": None,
-                            "optional": True,
-                            "secret_name": "kubevirt-virt-handler-certs",
-                        },
-                        "storageos": None,
-                        "vsphere_volume": None,
+                        "secret": {"defaultMode": 420, "optional": True, "secretName": "kubevirt-virt-handler-certs"},
                     },
+                    {"emptyDir": {}, "name": "profile-data"},
                     {
-                        "aws_elastic_block_store": None,
-                        "azure_disk": None,
-                        "azure_file": None,
-                        "cephfs": None,
-                        "cinder": None,
-                        "config_map": None,
-                        "csi": None,
-                        "downward_api": None,
-                        "empty_dir": {"medium": None, "size_limit": None},
-                        "ephemeral": None,
-                        "fc": None,
-                        "flex_volume": None,
-                        "flocker": None,
-                        "gce_persistent_disk": None,
-                        "git_repo": None,
-                        "glusterfs": None,
-                        "host_path": None,
-                        "iscsi": None,
-                        "name": "profile-data",
-                        "nfs": None,
-                        "persistent_volume_claim": None,
-                        "photon_persistent_disk": None,
-                        "portworx_volume": None,
-                        "projected": None,
-                        "quobyte": None,
-                        "rbd": None,
-                        "scale_io": None,
-                        "secret": None,
-                        "storageos": None,
-                        "vsphere_volume": None,
-                    },
-                    {
-                        "aws_elastic_block_store": None,
-                        "azure_disk": None,
-                        "azure_file": None,
-                        "cephfs": None,
-                        "cinder": None,
-                        "config_map": None,
-                        "csi": None,
-                        "downward_api": None,
-                        "empty_dir": None,
-                        "ephemeral": None,
-                        "fc": None,
-                        "flex_volume": None,
-                        "flocker": None,
-                        "gce_persistent_disk": None,
-                        "git_repo": None,
-                        "glusterfs": None,
-                        "host_path": None,
-                        "iscsi": None,
-                        "name": "kube-api-access-vht47",
-                        "nfs": None,
-                        "persistent_volume_claim": None,
-                        "photon_persistent_disk": None,
-                        "portworx_volume": None,
+                        "name": "kube-api-access-72zdc",
                         "projected": {
-                            "default_mode": 420,
+                            "defaultMode": 420,
                             "sources": [
+                                {"serviceAccountToken": {"expirationSeconds": 3607, "path": "token"}},
                                 {
-                                    "cluster_trust_bundle": None,
-                                    "config_map": None,
-                                    "downward_api": None,
-                                    "secret": None,
-                                    "service_account_token": {
-                                        "audience": None,
-                                        "expiration_seconds": 3607,
-                                        "path": "token",
-                                    },
-                                },
-                                {
-                                    "cluster_trust_bundle": None,
-                                    "config_map": {
-                                        "items": [{"key": "ca.crt", "mode": None, "path": "ca.crt"}],
+                                    "configMap": {
+                                        "items": [{"key": "ca.crt", "path": "ca.crt"}],
                                         "name": "kube-root-ca.crt",
-                                        "optional": None,
-                                    },
-                                    "downward_api": None,
-                                    "secret": None,
-                                    "service_account_token": None,
+                                    }
                                 },
                                 {
-                                    "cluster_trust_bundle": None,
-                                    "config_map": None,
-                                    "downward_api": {
+                                    "downwardAPI": {
                                         "items": [
                                             {
-                                                "field_ref": {"api_version": "v1", "field_path": "metadata.namespace"},
-                                                "mode": None,
+                                                "fieldRef": {"apiVersion": "v1", "fieldPath": "metadata.namespace"},
                                                 "path": "namespace",
-                                                "resource_field_ref": None,
                                             }
                                         ]
-                                    },
-                                    "secret": None,
-                                    "service_account_token": None,
+                                    }
                                 },
                             ],
                         },
-                        "quobyte": None,
-                        "rbd": None,
-                        "scale_io": None,
-                        "secret": None,
-                        "storageos": None,
-                        "vsphere_volume": None,
                     },
                 ],
             },
             "status": {
                 "conditions": [
                     {
-                        "last_probe_time": None,
-                        "last_transition_time": datetime.datetime(2024, 7, 25, 15, 16, 47, tzinfo=tzutc()),
-                        "message": None,
-                        "reason": None,
+                        "lastProbeTime": None,
+                        "lastTransitionTime": "2024-07-23T13:29:15Z",
                         "status": "True",
                         "type": "PodReadyToStartContainers",
                     },
                     {
-                        "last_probe_time": None,
-                        "last_transition_time": datetime.datetime(2024, 7, 24, 22, 15, 4, tzinfo=tzutc()),
-                        "message": None,
-                        "reason": None,
+                        "lastProbeTime": None,
+                        "lastTransitionTime": "2024-07-23T13:29:12Z",
                         "status": "True",
                         "type": "Initialized",
                     },
                     {
-                        "last_probe_time": None,
-                        "last_transition_time": datetime.datetime(2024, 7, 25, 15, 17, 6, tzinfo=tzutc()),
-                        "message": None,
-                        "reason": None,
+                        "lastProbeTime": None,
+                        "lastTransitionTime": "2024-07-23T13:29:32Z",
                         "status": "True",
                         "type": "Ready",
                     },
                     {
-                        "last_probe_time": None,
-                        "last_transition_time": datetime.datetime(2024, 7, 25, 15, 17, 6, tzinfo=tzutc()),
-                        "message": None,
-                        "reason": None,
+                        "lastProbeTime": None,
+                        "lastTransitionTime": "2024-07-23T13:29:32Z",
                         "status": "True",
                         "type": "ContainersReady",
                     },
                     {
-                        "last_probe_time": None,
-                        "last_transition_time": datetime.datetime(2024, 7, 24, 22, 15, 4, tzinfo=tzutc()),
-                        "message": None,
-                        "reason": None,
+                        "lastProbeTime": None,
+                        "lastTransitionTime": "2024-07-23T13:29:12Z",
                         "status": "True",
                         "type": "PodScheduled",
                     },
                 ],
-                "container_statuses": [
+                "containerStatuses": [
                     {
-                        "allocated_resources": None,
-                        "container_id": "docker://8ad97c811573006c67ad0aee2734feef886ac99db89b1be0cca4c7ce588b7806",
-                        "image": "quay.io/kubevirt/virt-api:v1.3.0",
-                        "image_id": "docker-pullable://quay.io/kubevirt/virt-api@sha256:3f1e97424b7563fbab544b128fb06d0b84efea1a209be09178722309f34b215e",
-                        "last_state": {
-                            "running": None,
-                            "terminated": {
-                                "container_id": "docker://8160bb0b4f3c0fa947151d958e931d009dd915f3c402ba877fd02ae93e996e9c",
-                                "exit_code": 0,
-                                "finished_at": datetime.datetime(2024, 7, 25, 14, 32, 13, tzinfo=tzutc()),
-                                "message": None,
-                                "reason": "Completed",
-                                "signal": None,
-                                "started_at": datetime.datetime(2024, 7, 24, 22, 15, 9, tzinfo=tzutc()),
-                            },
-                            "waiting": None,
-                        },
+                        "containerID": "containerd://c15e207c5d0a52b9c98e282bb7f7b7b97c1091febea4410ea402679d0fbfe0cb",
+                        "image": "quay.io/kubevirt/virt-api:v1.2.2",
+                        "imageID": "quay.io/kubevirt/virt-api@sha256:aeeae94c9dd3b352ff2fbcdba77a6b084fb4ebe0fed35fe7af9481e9e2b1f24c",  # noqa: E501
+                        "lastState": {},
                         "name": "virt-api",
                         "ready": True,
-                        "resources": None,
-                        "restart_count": 1,
+                        "restartCount": 0,
                         "started": True,
-                        "state": {
-                            "running": {"started_at": datetime.datetime(2024, 7, 25, 15, 16, 47, tzinfo=tzutc())},
-                            "terminated": None,
-                            "waiting": None,
-                        },
-                        "volume_mounts": None,
+                        "state": {"running": {"startedAt": "2024-07-23T13:29:14Z"}},
                     }
                 ],
-                "ephemeral_container_statuses": None,
-                "host_i_ps": [{"ip": "192.168.49.2"}],
-                "host_ip": "192.168.49.2",
-                "init_container_statuses": None,
-                "message": None,
-                "nominated_node_name": None,
+                "hostIP": "172.17.1.4",
+                "hostIPs": [{"ip": "172.17.1.4"}],
                 "phase": "Running",
-                "pod_i_ps": [{"ip": "10.244.0.38"}],
-                "pod_ip": "10.244.0.38",
-                "qos_class": "Burstable",
-                "reason": None,
-                "resize": None,
-                "resource_claim_statuses": None,
-                "start_time": datetime.datetime(2024, 7, 24, 22, 15, 4, tzinfo=tzutc()),
+                "podIP": "10.244.0.8",
+                "podIPs": [{"ip": "10.244.0.8"}],
+                "qosClass": "Burstable",
+                "startTime": "2024-07-23T13:29:12Z",
             },
-        },
-    )
-]
+        }
+    ],
+    "kind": "List",
+    "metadata": {"resourceVersion": ""},
+}
 
-
-GET_VMS_RESPONSE = [
-    {
-        "apiVersion": "kubevirt.io/v1",
-        "kind": "VirtualMachine",
-        "metadata": {
-            "annotations": {
-                "kubectl.kubernetes.io/last-applied-configuration": '{"apiVersion":"kubevirt.io/v1","kind":"VirtualMachine","metadata":{"annotations":{},"name":"testvm","namespace":"default"},"spec":{"running":false,"template":{"metadata":{"labels":{"kubevirt.io/domain":"testvm","kubevirt.io/size":"small"}},"spec":{"domain":{"devices":{"disks":[{"disk":{"bus":"virtio"},"name":"containerdisk"},{"disk":{"bus":"virtio"},"name":"cloudinitdisk"}],"interfaces":[{"masquerade":{},"name":"default"}]},"resources":{"requests":{"memory":"64M"}}},"networks":[{"name":"default","pod":{}}],"volumes":[{"containerDisk":{"image":"quay.io/kubevirt/cirros-container-disk-demo"},"name":"containerdisk"},{"cloudInitNoCloud":{"userDataBase64":"SGkuXG4="},"name":"cloudinitdisk"}]}}}}\n',  # noqa: E501
-                "kubevirt.io/latest-observed-api-version": "v1",
-                "kubevirt.io/storage-observed-api-version": "v1",
-            },
-            "creationTimestamp": "2024-07-27T17:09:54Z",
-            "finalizers": ["kubevirt.io/virtualMachineControllerFinalize"],
-            "generation": 2,
-            "managedFields": [
-                {
-                    "apiVersion": "kubevirt.io/v1",
-                    "fieldsType": "FieldsV1",
-                    "fieldsV1": {
-                        "f:metadata": {
-                            "f:annotations": {".": {}, "f:kubectl.kubernetes.io/last-applied-configuration": {}}
-                        },
-                        "f:spec": {
-                            ".": {},
-                            "f:template": {
+GET_VMS_RESPONSE = {
+    "apiVersion": "kubevirt.io/v1",
+    "items": [
+        {
+            "apiVersion": "kubevirt.io/v1",
+            "kind": "VirtualMachine",
+            "metadata": {
+                "annotations": {
+                    "kubectl.kubernetes.io/last-applied-configuration": '{"apiVersion":"kubevirt.io/v1","kind":"VirtualMachine","metadata":{"annotations":{},"name":"testvm","namespace":"default"},"spec":{"running":false,"template":{"metadata":{"labels":{"kubevirt.io/domain":"testvm","kubevirt.io/size":"small"}},"spec":{"domain":{"devices":{"disks":[{"disk":{"bus":"virtio"},"name":"containerdisk"},{"disk":{"bus":"virtio"},"name":"cloudinitdisk"}],"interfaces":[{"masquerade":{},"name":"default"}]},"resources":{"requests":{"memory":"64M"}}},"networks":[{"name":"default","pod":{}}],"volumes":[{"containerDisk":{"image":"quay.io/kubevirt/cirros-container-disk-demo"},"name":"containerdisk"},{"cloudInitNoCloud":{"userDataBase64":"SGkuXG4="},"name":"cloudinitdisk"}]}}}}\n',  # noqa: E501
+                    "kubevirt.io/latest-observed-api-version": "v1",
+                    "kubevirt.io/storage-observed-api-version": "v1",
+                },
+                "creationTimestamp": "2024-07-23T13:30:34Z",
+                "finalizers": ["kubevirt.io/virtualMachineControllerFinalize"],
+                "generation": 2,
+                "managedFields": [
+                    {
+                        "apiVersion": "kubevirt.io/v1",
+                        "fieldsType": "FieldsV1",
+                        "fieldsV1": {
+                            "f:metadata": {
+                                "f:annotations": {".": {}, "f:kubectl.kubernetes.io/last-applied-configuration": {}}
+                            },
+                            "f:spec": {
                                 ".": {},
-                                "f:metadata": {
+                                "f:template": {
                                     ".": {},
-                                    "f:labels": {".": {}, "f:kubevirt.io/domain": {}, "f:kubevirt.io/size": {}},
-                                },
-                                "f:spec": {
-                                    ".": {},
-                                    "f:domain": {
+                                    "f:metadata": {
                                         ".": {},
-                                        "f:devices": {".": {}, "f:disks": {}, "f:interfaces": {}},
-                                        "f:resources": {".": {}, "f:requests": {".": {}, "f:memory": {}}},
+                                        "f:labels": {".": {}, "f:kubevirt.io/domain": {}, "f:kubevirt.io/size": {}},
                                     },
-                                    "f:networks": {},
-                                    "f:volumes": {},
+                                    "f:spec": {
+                                        ".": {},
+                                        "f:domain": {
+                                            ".": {},
+                                            "f:devices": {".": {}, "f:disks": {}, "f:interfaces": {}},
+                                            "f:resources": {".": {}, "f:requests": {".": {}, "f:memory": {}}},
+                                        },
+                                        "f:networks": {},
+                                        "f:volumes": {},
+                                    },
                                 },
                             },
                         },
+                        "manager": "kubectl-client-side-apply",
+                        "operation": "Update",
+                        "time": "2024-07-23T13:30:34Z",
                     },
-                    "manager": "kubectl-client-side-apply",
-                    "operation": "Update",
-                    "time": "2024-07-27T17:09:54Z",
-                },
-                {
-                    "apiVersion": "kubevirt.io/v1",
-                    "fieldsType": "FieldsV1",
-                    "fieldsV1": {"f:spec": {"f:running": {}}},
-                    "manager": "kubectl-patch",
-                    "operation": "Update",
-                    "time": "2024-07-27T17:09:54Z",
-                },
-                {
-                    "apiVersion": "kubevirt.io/v1",
-                    "fieldsType": "FieldsV1",
-                    "fieldsV1": {
-                        "f:metadata": {
-                            "f:annotations": {
-                                "f:kubevirt.io/latest-observed-api-version": {},
-                                "f:kubevirt.io/storage-observed-api-version": {},
-                            },
-                            "f:finalizers": {".": {}, 'v:"kubevirt.io/virtualMachineControllerFinalize"': {}},
-                        }
+                    {
+                        "apiVersion": "kubevirt.io/v1",
+                        "fieldsType": "FieldsV1",
+                        "fieldsV1": {"f:spec": {"f:running": {}}},
+                        "manager": "kubectl-patch",
+                        "operation": "Update",
+                        "time": "2024-07-23T13:30:34Z",
                     },
-                    "manager": "virt-controller",
-                    "operation": "Update",
-                    "time": "2024-07-27T17:09:54Z",
-                },
-                {
-                    "apiVersion": "kubevirt.io/v1",
-                    "fieldsType": "FieldsV1",
-                    "fieldsV1": {
-                        "f:status": {
-                            ".": {},
-                            "f:conditions": {},
-                            "f:desiredGeneration": {},
-                            "f:observedGeneration": {},
-                            "f:printableStatus": {},
-                            "f:runStrategy": {},
-                            "f:startFailure": {
+                    {
+                        "apiVersion": "kubevirt.io/v1",
+                        "fieldsType": "FieldsV1",
+                        "fieldsV1": {
+                            "f:metadata": {
+                                "f:annotations": {
+                                    "f:kubevirt.io/latest-observed-api-version": {},
+                                    "f:kubevirt.io/storage-observed-api-version": {},
+                                },
+                                "f:finalizers": {".": {}, 'v:"kubevirt.io/virtualMachineControllerFinalize"': {}},
+                            }
+                        },
+                        "manager": "virt-controller",
+                        "operation": "Update",
+                        "time": "2024-07-23T13:30:34Z",
+                    },
+                    {
+                        "apiVersion": "kubevirt.io/v1",
+                        "fieldsType": "FieldsV1",
+                        "fieldsV1": {
+                            "f:status": {
                                 ".": {},
-                                "f:consecutiveFailCount": {},
-                                "f:lastFailedVMIUID": {},
-                                "f:retryAfterTimestamp": {},
+                                "f:conditions": {},
+                                "f:created": {},
+                                "f:desiredGeneration": {},
+                                "f:observedGeneration": {},
+                                "f:printableStatus": {},
+                                "f:ready": {},
+                                "f:runStrategy": {},
+                                "f:volumeSnapshotStatuses": {},
+                            }
+                        },
+                        "manager": "virt-controller",
+                        "operation": "Update",
+                        "subresource": "status",
+                        "time": "2024-07-23T13:30:51Z",
+                    },
+                ],
+                "name": "testvm",
+                "namespace": "default",
+                "resourceVersion": "1216",
+                "uid": "46bc4e2b-d287-4408-8393-c7accdd73291",
+            },
+            "spec": {
+                "running": True,
+                "template": {
+                    "metadata": {
+                        "creationTimestamp": None,
+                        "labels": {"kubevirt.io/domain": "testvm", "kubevirt.io/size": "small"},
+                    },
+                    "spec": {
+                        "architecture": "amd64",
+                        "domain": {
+                            "devices": {
+                                "disks": [
+                                    {"disk": {"bus": "virtio"}, "name": "containerdisk"},
+                                    {"disk": {"bus": "virtio"}, "name": "cloudinitdisk"},
+                                ],
+                                "interfaces": [{"masquerade": {}, "name": "default"}],
                             },
-                            "f:volumeSnapshotStatuses": {},
-                        }
-                    },
-                    "manager": "virt-controller",
-                    "operation": "Update",
-                    "subresource": "status",
-                    "time": "2024-07-27T18:27:09Z",
-                },
-            ],
-            "name": "testvm",
-            "namespace": "default",
-            "resourceVersion": "17403",
-            "uid": "4103f114-cf9d-47ad-9af0-be237ce7d4a1",
-        },
-        "spec": {
-            "running": True,
-            "template": {
-                "metadata": {
-                    "creationTimestamp": None,
-                    "labels": {"kubevirt.io/domain": "testvm", "kubevirt.io/size": "small"},
-                },
-                "spec": {
-                    "architecture": "arm64",
-                    "domain": {
-                        "devices": {
-                            "disks": [
-                                {"disk": {"bus": "virtio"}, "name": "containerdisk"},
-                                {"disk": {"bus": "virtio"}, "name": "cloudinitdisk"},
-                            ],
-                            "interfaces": [{"masquerade": {}, "name": "default"}],
+                            "machine": {"type": "q35"},
+                            "resources": {"requests": {"memory": "64M"}},
                         },
-                        "machine": {"type": "virt"},
-                        "resources": {"requests": {"memory": "64M"}},
+                        "networks": [{"name": "default", "pod": {}}],
+                        "volumes": [
+                            {
+                                "containerDisk": {"image": "quay.io/kubevirt/cirros-container-disk-demo"},
+                                "name": "containerdisk",
+                            },
+                            {"cloudInitNoCloud": {"userDataBase64": "SGkuXG4="}, "name": "cloudinitdisk"},
+                        ],
                     },
-                    "networks": [{"name": "default", "pod": {}}],
-                    "volumes": [
-                        {
-                            "containerDisk": {"image": "quay.io/kubevirt/cirros-container-disk-demo"},
-                            "name": "containerdisk",
-                        },
-                        {"cloudInitNoCloud": {"userDataBase64": "SGkuXG4="}, "name": "cloudinitdisk"},
-                    ],
                 },
             },
-        },
-        "status": {
-            "conditions": [
-                {
-                    "lastProbeTime": "2024-07-27T18:27:09Z",
-                    "lastTransitionTime": "2024-07-27T18:27:09Z",
-                    "message": "VMI does not exist",
-                    "reason": "VMINotExists",
-                    "status": "False",
-                    "type": "Ready",
-                },
-                {"lastProbeTime": None, "lastTransitionTime": None, "status": "True", "type": "LiveMigratable"},
-            ],
-            "desiredGeneration": 2,
-            "observedGeneration": 2,
-            "printableStatus": "CrashLoopBackOff",
-            "runStrategy": "Always",
-            "startFailure": {
-                "consecutiveFailCount": 18,
-                "lastFailedVMIUID": "f0b6fc58-80b8-4d01-be12-7f029d297970",
-                "retryAfterTimestamp": "2024-07-27T18:31:59Z",
+            "status": {
+                "conditions": [
+                    {
+                        "lastProbeTime": None,
+                        "lastTransitionTime": "2024-07-23T13:30:50Z",
+                        "status": "True",
+                        "type": "Ready",
+                    },
+                    {"lastProbeTime": None, "lastTransitionTime": None, "status": "True", "type": "LiveMigratable"},
+                ],
+                "created": True,
+                "desiredGeneration": 2,
+                "observedGeneration": 2,
+                "printableStatus": "Running",
+                "ready": True,
+                "runStrategy": "Always",
+                "volumeSnapshotStatuses": [
+                    {
+                        "enabled": False,
+                        "name": "containerdisk",
+                        "reason": "Snapshot is not supported for this volumeSource type [containerdisk]",
+                    },
+                    {
+                        "enabled": False,
+                        "name": "cloudinitdisk",
+                        "reason": "Snapshot is not supported for this volumeSource type [cloudinitdisk]",
+                    },
+                ],
             },
-            "volumeSnapshotStatuses": [
-                {
-                    "enabled": False,
-                    "name": "containerdisk",
-                    "reason": "Snapshot is not supported for this volumeSource type [containerdisk]",
-                },
-                {
-                    "enabled": False,
-                    "name": "cloudinitdisk",
-                    "reason": "Snapshot is not supported for this volumeSource type [cloudinitdisk]",
-                },
-            ],
         },
-    }
-]
+        {
+            "apiVersion": "kubevirt.io/v1",
+            "kind": "VirtualMachine",
+            "metadata": {
+                "annotations": {
+                    "kubectl.kubernetes.io/last-applied-configuration": '{"apiVersion":"kubevirt.io/v1","kind":"VirtualMachine","metadata":{"annotations":{},"name":"testvm-2","namespace":"default"},"spec":{"running":false,"template":{"metadata":{"labels":{"kubevirt.io/domain":"testvm","kubevirt.io/size":"small"}},"spec":{"domain":{"devices":{"disks":[{"disk":{"bus":"virtio"},"name":"containerdisk"},{"disk":{"bus":"virtio"},"name":"cloudinitdisk"}],"interfaces":[{"masquerade":{},"name":"default"}]},"resources":{"requests":{"memory":"64M"}}},"networks":[{"name":"default","pod":{}}],"volumes":[{"containerDisk":{"image":"quay.io/kubevirt/cirros-container-disk-demo"},"name":"containerdisk"},{"cloudInitNoCloud":{"userDataBase64":"SGkuXG4="},"name":"cloudinitdisk"}]}}}}\n',  # noqa: E501
+                    "kubevirt.io/latest-observed-api-version": "v1",
+                    "kubevirt.io/storage-observed-api-version": "v1",
+                },
+                "creationTimestamp": "2024-07-24T13:18:36Z",
+                "finalizers": ["kubevirt.io/virtualMachineControllerFinalize"],
+                "generation": 2,
+                "managedFields": [
+                    {
+                        "apiVersion": "kubevirt.io/v1",
+                        "fieldsType": "FieldsV1",
+                        "fieldsV1": {
+                            "f:metadata": {
+                                "f:annotations": {".": {}, "f:kubectl.kubernetes.io/last-applied-configuration": {}}
+                            },
+                            "f:spec": {
+                                ".": {},
+                                "f:template": {
+                                    ".": {},
+                                    "f:metadata": {
+                                        ".": {},
+                                        "f:labels": {".": {}, "f:kubevirt.io/domain": {}, "f:kubevirt.io/size": {}},
+                                    },
+                                    "f:spec": {
+                                        ".": {},
+                                        "f:domain": {
+                                            ".": {},
+                                            "f:devices": {".": {}, "f:disks": {}, "f:interfaces": {}},
+                                            "f:resources": {".": {}, "f:requests": {".": {}, "f:memory": {}}},
+                                        },
+                                        "f:networks": {},
+                                        "f:volumes": {},
+                                    },
+                                },
+                            },
+                        },
+                        "manager": "kubectl-client-side-apply",
+                        "operation": "Update",
+                        "time": "2024-07-24T13:18:36Z",
+                    },
+                    {
+                        "apiVersion": "kubevirt.io/v1",
+                        "fieldsType": "FieldsV1",
+                        "fieldsV1": {
+                            "f:metadata": {
+                                "f:annotations": {
+                                    "f:kubevirt.io/latest-observed-api-version": {},
+                                    "f:kubevirt.io/storage-observed-api-version": {},
+                                },
+                                "f:finalizers": {".": {}, 'v:"kubevirt.io/virtualMachineControllerFinalize"': {}},
+                            }
+                        },
+                        "manager": "virt-controller",
+                        "operation": "Update",
+                        "time": "2024-07-24T13:18:36Z",
+                    },
+                    {
+                        "apiVersion": "kubevirt.io/v1",
+                        "fieldsType": "FieldsV1",
+                        "fieldsV1": {"f:spec": {"f:running": {}}},
+                        "manager": "kubectl-patch",
+                        "operation": "Update",
+                        "time": "2024-07-24T13:18:55Z",
+                    },
+                    {
+                        "apiVersion": "kubevirt.io/v1",
+                        "fieldsType": "FieldsV1",
+                        "fieldsV1": {
+                            "f:status": {
+                                ".": {},
+                                "f:conditions": {},
+                                "f:created": {},
+                                "f:desiredGeneration": {},
+                                "f:observedGeneration": {},
+                                "f:printableStatus": {},
+                                "f:ready": {},
+                                "f:runStrategy": {},
+                                "f:volumeSnapshotStatuses": {},
+                            }
+                        },
+                        "manager": "virt-controller",
+                        "operation": "Update",
+                        "subresource": "status",
+                        "time": "2024-07-24T13:19:13Z",
+                    },
+                ],
+                "name": "testvm-2",
+                "namespace": "default",
+                "resourceVersion": "284129",
+                "uid": "2afae6da-dcdd-4749-a198-c48877b22662",
+            },
+            "spec": {
+                "running": True,
+                "template": {
+                    "metadata": {
+                        "creationTimestamp": None,
+                        "labels": {"kubevirt.io/domain": "testvm", "kubevirt.io/size": "small"},
+                    },
+                    "spec": {
+                        "architecture": "amd64",
+                        "domain": {
+                            "devices": {
+                                "disks": [
+                                    {"disk": {"bus": "virtio"}, "name": "containerdisk"},
+                                    {"disk": {"bus": "virtio"}, "name": "cloudinitdisk"},
+                                ],
+                                "interfaces": [{"masquerade": {}, "name": "default"}],
+                            },
+                            "machine": {"type": "q35"},
+                            "resources": {"requests": {"memory": "64M"}},
+                        },
+                        "networks": [{"name": "default", "pod": {}}],
+                        "volumes": [
+                            {
+                                "containerDisk": {"image": "quay.io/kubevirt/cirros-container-disk-demo"},
+                                "name": "containerdisk",
+                            },
+                            {"cloudInitNoCloud": {"userDataBase64": "SGkuXG4="}, "name": "cloudinitdisk"},
+                        ],
+                    },
+                },
+            },
+            "status": {
+                "conditions": [
+                    {
+                        "lastProbeTime": None,
+                        "lastTransitionTime": "2024-07-24T13:19:12Z",
+                        "status": "True",
+                        "type": "Ready",
+                    },
+                    {"lastProbeTime": None, "lastTransitionTime": None, "status": "True", "type": "LiveMigratable"},
+                ],
+                "created": True,
+                "desiredGeneration": 2,
+                "observedGeneration": 2,
+                "printableStatus": "Running",
+                "ready": True,
+                "runStrategy": "Always",
+                "volumeSnapshotStatuses": [
+                    {
+                        "enabled": False,
+                        "name": "containerdisk",
+                        "reason": "Snapshot is not supported for this volumeSource type [containerdisk]",
+                    },
+                    {
+                        "enabled": False,
+                        "name": "cloudinitdisk",
+                        "reason": "Snapshot is not supported for this volumeSource type [cloudinitdisk]",
+                    },
+                ],
+            },
+        },
+    ],
+    "kind": "VirtualMachineList",
+    "metadata": {"continue": "", "resourceVersion": "1246681"},
+}
 
 GET_VMIS_RESPONSE = {
     "apiVersion": "kubevirt.io/v1",

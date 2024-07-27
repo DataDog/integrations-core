@@ -25,9 +25,9 @@ class KubernetesAPIClient:
             kwargs["field_selector"] = f"status.podIP={ip}"
 
         if namespace:
-            return self.api_client.list_namespaced_pod(namespace, **kwargs).items
+            return self.api_client.list_namespaced_pod(namespace, **kwargs)["items"]
 
-        return self.api_client.list_pod_for_all_namespaces(**kwargs).items
+        return self.api_client.list_pod_for_all_namespaces(**kwargs)["items"]
 
     def get_vms(self, namespace=None):
         if namespace:
