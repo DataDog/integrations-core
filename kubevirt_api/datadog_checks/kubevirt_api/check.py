@@ -63,6 +63,13 @@ class KubevirtApiCheck(OpenMetricsBaseCheckV2):
                 self.gauge("can_connect", 0, tags=[f"endpoint:{self.kubevirt_api_healthz_endpoint}"])
                 raise
 
+        # report vm metrics
+        vms = self.kube_client.get_vms()
+
+        for vm in vms:
+            vm_tags = self._extract_vm_tags(vm)
+            self.gauge("vm.count", value=1, tags=vm_tags)
+
         super().check(_)
 
     def _extract_host_port(self, url):
@@ -87,6 +94,19 @@ class KubevirtApiCheck(OpenMetricsBaseCheckV2):
 
         if self.kube_cluster_name:
             tags.append(f"kube_cluster_name:{self.kube_cluster_name}")
+
+        return tags
+
+    def _extract_vm_tags(self, vm):
+        tags = []
+
+        tags.append(f"vm_name:{vm['metadata']['name']}")
+        tags.append(f"vm_uid:{vm['metadata']['uid']}")
+        tags.append(f"kube_namespace:{vm['metadata']['namespace']}")
+
+        for label, value in vm["spec"]["template"]["metadata"]["labels"].items():
+            label_name = label.replace("kubevirt.io/", "")
+            tags.append(f"vm_{label_name}:{value}")
 
         return tags
 
@@ -119,8 +139,6 @@ class KubevirtApiCheck(OpenMetricsBaseCheckV2):
 
     def configure_transformer_kubevirt_metrics(self):
         def transform(_metric, sample_data, _runtime_data):
-            # print("_metric: ", _metric.name)
-
             for sample, tags, hostname in sample_data:
                 metric_name = _metric.name
                 metric_type = _metric.type
@@ -128,8 +146,6 @@ class KubevirtApiCheck(OpenMetricsBaseCheckV2):
                 # ignore metrics we don't collect
                 if metric_name not in METRICS_MAP:
                     continue
-
-                # print("metric_name: ", metric_name, "metric_type: ", metric_type)
 
                 # add tags
                 tags = tags + self.pod_tags
@@ -142,7 +158,6 @@ class KubevirtApiCheck(OpenMetricsBaseCheckV2):
                 # send metric
                 metric_transformer = self.scrapers[self.kubevirt_api_metrics_endpoint].metric_transformer
 
-                print("new_metric_name: ", new_metric_name, "metric_type: ", metric_type)
                 if metric_type == "counter":
                     self.count(new_metric_name + ".count", sample.value, tags=tags, hostname=hostname)
                 elif metric_type == "gauge":
