@@ -45,6 +45,7 @@ class KubevirtApiCheck(OpenMetricsBaseCheckV2):
 
     def _report_health_check(self, health_endpoint):
         try:
+            self.log.debug("Checking health status at %s", health_endpoint)
             response = self.http.get(health_endpoint, verify=is_affirmative(self.tls_verify))
             response.raise_for_status()
             self.gauge("can_connect", 1, tags=[f"endpoint:{health_endpoint}"])
@@ -59,12 +60,14 @@ class KubevirtApiCheck(OpenMetricsBaseCheckV2):
 
     def _report_vm_metrics(self):
         vms = self.kube_client.get_vms()
+        self.log.debug("Reporting metrics for %d VMs", len(vms))
         for vm in vms:
             vm_tags = self._extract_vm_tags(vm)
             self.gauge("vm.count", value=1, tags=vm_tags)
 
     def _report_vmis_metrics(self):
         vmis = self.kube_client.get_vmis()
+        self.log.debug("Reporting metrics for %d VMIs", len(vmis))
         for vmi in vmis:
             vmi_tags = self._extract_vmi_tags(vmi)
             self.gauge("vmi.count", value=1, tags=vmi_tags)
@@ -73,8 +76,13 @@ class KubevirtApiCheck(OpenMetricsBaseCheckV2):
         target_pod = self.kube_client.get_pods(self.kube_namespace, ip=target_ip)
 
         if len(target_pod) == 0:
+            self.log.warning("No pods found with ip: %s.", target_ip)
+            self.log.info("Trying to find a target pod with 'virt-api'")
+
             target_pod = self.kube_client.get_pods(namespace="kubevirt")
-            virt_api_pods = [pod for pod in target_pod if "virt-api" in pod.metadata.name]
+
+            virt_api_pods = [pod for pod in target_pod if "virt-api" in pod["metadata"]["name"]]
+
             if len(virt_api_pods) == 0:
                 raise ValueError(
                     f"There are no pods with 'virt-api' in their name in the '{self.kube_namespace}' namespace"
@@ -85,6 +93,7 @@ class KubevirtApiCheck(OpenMetricsBaseCheckV2):
         else:
             raise ValueError(f"Target pod with ip: '{target_ip}' not found")
 
+        self.log.debug("Detected target pod: %s", target_pod["metadata"]["name"])
         return target_pod
 
     def _extract_host_port(self, url):
@@ -157,7 +166,12 @@ class KubevirtApiCheck(OpenMetricsBaseCheckV2):
         self.kube_config_dict = self.instance.get("kube_config_dict")
         self.tls_verify = self.instance.get("tls_verify")
 
-        if "/metrics" not in self.kubevirt_api_metrics_endpoint:
+        parsed_url = urlparse(self.kubevirt_api_metrics_endpoint)
+        if not parsed_url.path:
+            self.log.warning(
+                "The provided endpoint '%s' does not have the '/metrics' path. Adding it automatically.",
+                self.kubevirt_api_metrics_endpoint,
+            )
             self.kubevirt_api_metrics_endpoint = "{}/metrics".format(self.kubevirt_api_metrics_endpoint)
 
         self.scraper_configs = []
@@ -166,7 +180,7 @@ class KubevirtApiCheck(OpenMetricsBaseCheckV2):
             "openmetrics_endpoint": self.kubevirt_api_metrics_endpoint,
             "namespace": self.__NAMESPACE__,
             "enable_health_service_check": False,
-            "rename_labels": {"version": "kubevirt_api_version", "host": "kubevirt_host"},
+            "rename_labels": {"version": "kubevirt_api_version", "host": "kubevirt_api_host"},
             "tls_verify": self.tls_verify,
         }
 
