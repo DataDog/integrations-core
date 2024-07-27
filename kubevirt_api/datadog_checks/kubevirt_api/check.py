@@ -24,15 +24,16 @@ class KubevirtApiCheck(OpenMetricsBaseCheckV2):
     def check(self, _):
         # type: (Any) -> None
 
-        self._setup_kube_client()
-
-        self.target_pod = self._get_target_pod()
-        self.pod_tags = self._extract_pod_tags(self.target_pod)
-
         if self.kubevirt_api_healthz_endpoint:
             self._report_health_check(self.kubevirt_api_healthz_endpoint)
         else:
             self.log.warning("No health check endpoint provided. Skipping health check.")
+
+        self._setup_kube_client()
+
+        self.target_ip, _ = self._extract_host_port(self.kubevirt_api_metrics_endpoint)
+        self.target_pod = self._get_target_pod(self.target_ip)
+        self.pod_tags = self._extract_pod_tags(self.target_pod)
 
         self._report_vm_metrics()
         self._report_vmis_metrics()
@@ -68,8 +69,7 @@ class KubevirtApiCheck(OpenMetricsBaseCheckV2):
             vmi_tags = self._extract_vmi_tags(vmi)
             self.gauge("vmi.count", value=1, tags=vmi_tags)
 
-    def _get_target_pod(self):
-        target_ip, _ = self._extract_host_port(self.kubevirt_api_metrics_endpoint)
+    def _get_target_pod(self, target_ip):
         target_pod = self.kube_client.get_pods(self.kube_namespace, ip=target_ip)
 
         if len(target_pod) == 0:

@@ -132,3 +132,35 @@ def test_emits_one_can_connect_when_service_is_up(dd_run_check, aggregator, inst
             "endpoint:https://10.244.0.38:443/healthz",
         ],
     )
+
+
+BAD_METRICS_HOSTNAME_INSTANCE = {
+    "kubevirt_api_metrics_endpoint": "https://bad_endpoint:443/metrics",
+    "kubevirt_api_healthz_endpoint": "https://10.244.0.38:443/healthz",
+    "kube_cluster_name": "test-cluster",
+}
+
+
+def test_raise_exception_when_metrics_endpoint_is_bad(dd_run_check, aggregator, instance, mocker):
+    mocker.patch("requests.get", wraps=mock_http_responses)
+
+    check = KubevirtApiCheck("kubevirt_api", {}, [BAD_METRICS_HOSTNAME_INSTANCE])
+    check._setup_kube_client = lambda: None
+    check.kube_client = MagicMock()
+    check.kube_client.get_pods.return_value = GET_PODS_RESPONSE_VIRT_API_POD["items"]
+    check.kube_client.get_vms.return_value = GET_VMS_RESPONSE["items"]
+    check.kube_client.get_vmis.return_value = GET_VMIS_RESPONSE["items"]
+
+    with pytest.raises(
+        Exception,
+        match="Host 'bad_endpoint' must be a valid ip address: 'bad_endpoint' does not appear to be an IPv4 or IPv6 address",  # noqa: E501
+    ):
+        dd_run_check(check)
+
+    aggregator.assert_metric(
+        "kubevirt_api.can_connect",
+        value=1,
+        tags=[
+            "endpoint:https://10.244.0.38:443/healthz",
+        ],
+    )
