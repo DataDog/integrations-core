@@ -14,28 +14,39 @@ from .metrics import METRICS_MAP
 
 class KubevirtApiCheck(OpenMetricsBaseCheckV2):
     __NAMESPACE__ = "kubevirt_api"
-    # DEFAULT_METRIC_LIMIT = 2000
+    DEFAULT_METRIC_LIMIT = 0
 
     def __init__(self, name, init_config, instances):
         super(KubevirtApiCheck, self).__init__(name, init_config, instances)
         self.check_initializations.appendleft(self._parse_config)
         self.check_initializations.append(self._configure_additional_transformers)
 
+    def _setup(self):
+        self.kube_client = KubernetesAPIClient(tls_verify=self.tls_verify, kube_config_dict=self.kube_config_dict)
+
     def check(self, _):
         # type: (Any) -> None
 
-        self.kube_client = KubernetesAPIClient(self.tls_verify)
+        self._setup()
 
         target_ip, _ = self._extract_host_port(self.kubevirt_api_metrics_endpoint)
-        target_pod = self.kube_client.get_pods(namespace="kubevirt", ip=target_ip)
+        target_pod = self.kube_client.get_pods(self.kube_namespace, ip=target_ip)
 
-        if len(target_pod) > 0:
+        if len(target_pod) == 0:
+            target_pod = self.kube_client.get_pods(namespace="kubevirt")
+            virt_api_pods = [pod for pod in target_pod if "virt-api" in pod.metadata.name]
+            if len(virt_api_pods) == 0:
+                raise ValueError(
+                    f"There are no pods with 'virt-api' in their name in the '{self.kube_namespace}' namespace"
+                )
+            target_pod = virt_api_pods[0]
+        elif len(target_pod) > 0:
             target_pod = target_pod[0]
         else:
             raise ValueError(f"Target pod with ip: '{target_ip}' not found")
 
         self.target_pod = target_pod
-        self.pod_tags = self._extract_pod_tags(target_pod)
+        self.pod_tags = self._extract_pod_tags(self.target_pod)
 
         if self.kubevirt_api_healthz_endpoint:
             url = self.kubevirt_api_healthz_endpoint
@@ -83,7 +94,8 @@ class KubevirtApiCheck(OpenMetricsBaseCheckV2):
         self.kubevirt_api_metrics_endpoint = self.instance.get("kubevirt_api_metrics_endpoint")
         self.kubevirt_api_healthz_endpoint = self.instance.get("kubevirt_api_healthz_endpoint")
         self.kube_cluster_name = self.instance.get("kube_cluster_name")
-
+        self.kube_namespace = self.instance.get("kube_namespace")
+        self.kube_config_dict = self.instance.get("kube_config_dict")
         self.tls_verify = self.instance.get("tls_verify")
 
         if "/metrics" not in self.kubevirt_api_metrics_endpoint:
