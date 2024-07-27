@@ -20,7 +20,7 @@ def test_check(dd_run_check, aggregator, instance, mocker):
 
     check = KubevirtApiCheck("kubevirt_api", {}, [instance])
 
-    check._setup = lambda: None
+    check._setup_kube_client = lambda: None
     check.kube_client = MagicMock()
     check.kube_client.get_pods.return_value = GET_PODS_RESPONSE_VIRT_API_POD
     check.kube_client.get_vms.return_value = GET_VMS_RESPONSE
@@ -97,7 +97,7 @@ def test_check(dd_run_check, aggregator, instance, mocker):
 
 def test_emits_zero_can_connect_when_service_is_down(dd_run_check, aggregator, instance):
     check = KubevirtApiCheck("kubevirt_api", {}, [instance])
-    check._setup = lambda: None
+    check._setup_kube_client = lambda: None
     check.kube_client = MagicMock()
     check.kube_client.get_pods.return_value = []
     check.kube_client.get_vms.return_value = []
@@ -118,7 +118,7 @@ def test_emits_one_can_connect_when_service_is_up(dd_run_check, aggregator, inst
     mocker.patch("requests.get", wraps=mock_http_responses)
 
     check = KubevirtApiCheck("kubevirt_api", {}, [instance])
-    check._setup = lambda: None
+    check._setup_kube_client = lambda: None
     check.kube_client = MagicMock()
     check.kube_client.get_pods.return_value = GET_PODS_RESPONSE_VIRT_API_POD
     check.kube_client.get_vms.return_value = GET_VMS_RESPONSE
