@@ -41,7 +41,7 @@ class KubevirtApiCheck(OpenMetricsBaseCheckV2):
         super().check(_)
 
     def _setup_kube_client(self):
-        self.kube_client = KubernetesAPIClient(tls_verify=self.tls_verify, kube_config_dict=self.kube_config_dict)
+        self.kube_client = KubernetesAPIClient(log=self.log, kube_config_dict=self.kube_config_dict)
 
     def _report_health_check(self, health_endpoint):
         try:

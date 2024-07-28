@@ -6,14 +6,16 @@ from kubernetes import client, config
 
 
 class KubernetesAPIClient:
-    def __init__(self, tls_verify=True, kube_config_dict=None):
-        self.tls_verify = tls_verify
+    def __init__(self, log=None, kube_config_dict=None):
+        self.log = log
 
         if kube_config_dict:
+            self.log.debug("Using kube_config_dict to configure the kube client")
             api_client = config.new_client_from_config_dict(kube_config_dict)
             self.api_client = client.CoreV1Api(api_client=api_client)
             self.custom_obj_client = client.CustomObjectsApi(api_client=api_client)
         else:
+            self.log.debug("Using load_incluster_config to configure the kube client")
             config.load_incluster_config()
             self.api_client = client.CoreV1Api()
             self.custom_obj_client = client.CustomObjectsApi()
