@@ -15,7 +15,14 @@
       "Supported OS::Linux",
       "Supported OS::macOS",
       "Supported OS::Windows",
-      "Category::Data Stores"
+      "Category::Data Stores",
+      "Offering::Integration"
+    ],
+    "resources": [
+      {
+        "resource_type": "blog",
+        "url": "https://www.datadoghq.com/blog/monitor-riak-cs-performance-and-availability"
+      }
     ]
   },
   "author": {

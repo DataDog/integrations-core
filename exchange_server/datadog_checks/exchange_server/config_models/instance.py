@@ -21,7 +21,7 @@ from datadog_checks.base.utils.models import validation
 from . import defaults, validators
 
 
-class Counter(BaseModel):
+class Counters(BaseModel):
     model_config = ConfigDict(
         arbitrary_types_allowed=True,
         extra='allow',
@@ -49,7 +49,7 @@ class ExtraMetrics(BaseModel):
         arbitrary_types_allowed=True,
         frozen=True,
     )
-    counters: tuple[MappingProxyType[str, Union[str, Counter]], ...]
+    counters: tuple[MappingProxyType[str, Union[str, Counters]], ...]
     exclude: Optional[tuple[str, ...]] = None
     include: Optional[tuple[str, ...]] = None
     instance_counts: Optional[InstanceCounts] = None
@@ -72,7 +72,7 @@ class Metrics(BaseModel):
         arbitrary_types_allowed=True,
         frozen=True,
     )
-    counters: tuple[MappingProxyType[str, Union[str, Counter]], ...]
+    counters: tuple[MappingProxyType[str, Union[str, Counters]], ...]
     exclude: Optional[tuple[str, ...]] = None
     include: Optional[tuple[str, ...]] = None
     instance_counts: Optional[InstanceCounts] = None

@@ -117,7 +117,7 @@
                             "display_format": "countsAndList",
                             "color_preference": "text",
                             "hide_zero_counts": true,
-                            "query": "tag:integration:kubernetes_kubernetes_cluster_autoscaler",
+                            "query": "tag:integration:kubernetes_cluster_autoscaler",
                             "sort": "status,asc",
                             "count": 50,
                             "start": 0,
@@ -185,7 +185,7 @@
                                         {
                                             "name": "query1",
                                             "data_source": "metrics",
-                                            "query": "avg:kubernetes_cluster_autoscaler.cluster_cpu_current_cores{$kube_cluster_name,$env}",
+                                            "query": "avg:kubernetes_cluster_autoscaler.cluster.cpu.current.cores{$kube_cluster_name,$env}",
                                             "aggregator": "avg"
                                         }
                                     ],
@@ -233,13 +233,13 @@
                                         {
                                             "name": "query1",
                                             "data_source": "metrics",
-                                            "query": "avg:kubernetes_cluster_autoscaler.cluster_cpu_current_cores{$kube_cluster_name,$env} by {kube_cluster_name}",
+                                            "query": "avg:kubernetes_cluster_autoscaler.cluster.cpu.current.cores{$kube_cluster_name,$env} by {kube_cluster_name}",
                                             "aggregator": "avg"
                                         },
                                         {
                                             "name": "query2",
                                             "data_source": "metrics",
-                                            "query": "avg:kubernetes_cluster_autoscaler.cpu_limits_cores{$kube_cluster_name,$env} by {kube_cluster_name}",
+                                            "query": "avg:kubernetes_cluster_autoscaler.cpu.limits.cores{$kube_cluster_name,$env} by {kube_cluster_name}",
                                             "aggregator": "avg"
                                         }
                                     ],
@@ -290,13 +290,13 @@
                                         {
                                             "name": "query1",
                                             "data_source": "metrics",
-                                            "query": "avg:kubernetes_cluster_autoscaler.cluster_memory_current_bytes{$kube_cluster_name,$env} by {kube_cluster_name}",
+                                            "query": "avg:kubernetes_cluster_autoscaler.cluster.memory.current.bytes{$kube_cluster_name,$env} by {kube_cluster_name}",
                                             "aggregator": "avg"
                                         },
                                         {
                                             "name": "query2",
                                             "data_source": "metrics",
-                                            "query": "avg:kubernetes_cluster_autoscaler.memory_limits_bytes{$kube_cluster_name,$env} by {kube_cluster_name}",
+                                            "query": "avg:kubernetes_cluster_autoscaler.memory.limits.bytes{$kube_cluster_name,$env} by {kube_cluster_name}",
                                             "aggregator": "avg"
                                         }
                                     ],
@@ -348,7 +348,7 @@
                                         {
                                             "name": "query1",
                                             "data_source": "metrics",
-                                            "query": "avg:kubernetes_cluster_autoscaler.cluster_memory_current_bytes{$kube_cluster_name,$env}",
+                                            "query": "avg:kubernetes_cluster_autoscaler.cluster.memory.current.bytes{$kube_cluster_name,$env}",
                                             "aggregator": "avg"
                                         }
                                     ],
@@ -438,7 +438,7 @@
                                     ],
                                     "queries": [
                                         {
-                                            "query": "max:kubernetes_cluster_autoscaler.unneeded_nodes_count{$env,$kube_cluster_name} by {kubernetes_cluster}",
+                                            "query": "max:kubernetes_cluster_autoscaler.unneeded.nodes.count{$env,$kube_cluster_name} by {kubernetes_cluster}",
                                             "data_source": "metrics",
                                             "name": "query1",
                                             "aggregator": "max"
@@ -485,7 +485,7 @@
                                     ],
                                     "queries": [
                                         {
-                                            "query": "sum:kubernetes_cluster_autoscaler.evicted_pods_total{$env,$kube_cluster_name} by {kubernetes_cluster}.as_count()",
+                                            "query": "sum:kubernetes_cluster_autoscaler.evicted.pods.count{$env,$kube_cluster_name} by {kubernetes_cluster}.as_count()",
                                             "data_source": "metrics",
                                             "name": "query1"
                                         }
@@ -536,12 +536,12 @@
                                     ],
                                     "queries": [
                                         {
-                                            "query": "sum:kubernetes_cluster_autoscaler.unneeded_nodes_count{$kube_cluster_name,$env} by {kube_cluster_name}",
+                                            "query": "sum:kubernetes_cluster_autoscaler.unneeded.nodes.count{$kube_cluster_name,$env} by {kube_cluster_name}",
                                             "data_source": "metrics",
                                             "name": "query1"
                                         },
                                         {
-                                            "query": "sum:kubernetes_cluster_autoscaler.nodes_count{$kube_cluster_name,$env}",
+                                            "query": "sum:kubernetes_cluster_autoscaler.nodes.count{$kube_cluster_name,$env}",
                                             "data_source": "metrics",
                                             "name": "query2"
                                         }
@@ -594,7 +594,7 @@
                                     ],
                                     "queries": [
                                         {
-                                            "query": "sum:kubernetes_cluster_autoscaler.scaled_down_nodes_total{$kube_cluster_name,$env}.as_count()",
+                                            "query": "sum:kubernetes_cluster_autoscaler.scaled.down.nodes.count{$kube_cluster_name,$env}.as_count()",
                                             "data_source": "metrics",
                                             "name": "query3"
                                         }
@@ -678,7 +678,7 @@
                                     "response_format": "scalar",
                                     "queries": [
                                         {
-                                            "query": "sum:kubernetes_cluster_autoscaler.nodes_count{$env,$kube_cluster_name}",
+                                            "query": "sum:kubernetes_cluster_autoscaler.nodes.count{$env,$kube_cluster_name}",
                                             "data_source": "metrics",
                                             "name": "query1",
                                             "aggregator": "last"
@@ -733,7 +733,7 @@
                                     ],
                                     "queries": [
                                         {
-                                            "query": "avg:kubernetes_cluster_autoscaler.nodes_count{$env,$kube_cluster_name} by {state}",
+                                            "query": "avg:kubernetes_cluster_autoscaler.nodes.count{$env,$kube_cluster_name} by {state}",
                                             "data_source": "metrics",
                                             "name": "query1"
                                         }
@@ -778,7 +778,7 @@
                                     ],
                                     "queries": [
                                         {
-                                            "query": "max:kubernetes_cluster_autoscaler.nodes_count{$env,$kube_cluster_name} by {state}",
+                                            "query": "max:kubernetes_cluster_autoscaler.nodes.count{$env,$kube_cluster_name} by {state}",
                                             "data_source": "metrics",
                                             "name": "query2"
                                         }
@@ -870,7 +870,7 @@
                                     ],
                                     "queries": [
                                         {
-                                            "query": "avg:kubernetes_cluster_autoscaler.nodes_count{$env,!state:ready,$kube_cluster_name} by {state}",
+                                            "query": "avg:kubernetes_cluster_autoscaler.nodes.count{$env,!state:ready,$kube_cluster_name} by {state}",
                                             "data_source": "metrics",
                                             "name": "query1",
                                             "aggregator": "sum"
@@ -927,7 +927,7 @@
                                     ],
                                     "queries": [
                                         {
-                                            "query": "avg:kubernetes_cluster_autoscaler.nodes_count{$env,state:unready,$kube_cluster_name} by {kubernetes_cluster,env}",
+                                            "query": "avg:kubernetes_cluster_autoscaler.nodes.count{$env,state:unready,$kube_cluster_name} by {kubernetes_cluster,env}",
                                             "data_source": "metrics",
                                             "name": "query1"
                                         }
@@ -989,7 +989,7 @@
                                     ],
                                     "queries": [
                                         {
-                                            "query": "sum:kubernetes_cluster_autoscaler.cluster_safe_to_autoscale{$env,$kube_cluster_name} by {pod_name}",
+                                            "query": "sum:kubernetes_cluster_autoscaler.cluster.safe.to.autoscale{$env,$kube_cluster_name} by {pod_name}",
                                             "data_source": "metrics",
                                             "name": "query1"
                                         }
@@ -1048,7 +1048,7 @@
                                     ],
                                     "queries": [
                                         {
-                                            "query": "sum:kubernetes_cluster_autoscaler.errors_total{$env,$kube_cluster_name} by {type,kubernetes_cluster}.as_count()",
+                                            "query": "sum:kubernetes_cluster_autoscaler.errors.count{$env,$kube_cluster_name} by {type,kubernetes_cluster}.as_count()",
                                             "data_source": "metrics",
                                             "name": "query1"
                                         }
@@ -1136,7 +1136,7 @@
                                         {
                                             "name": "query1",
                                             "data_source": "metrics",
-                                            "query": "sum:kubernetes_cluster_autoscaler.function_duration_seconds.count{$kube_cluster_name,$env} by {kube_cluster_name}.as_count()",
+                                            "query": "sum:kubernetes_cluster_autoscaler.function.duration.seconds.count{$kube_cluster_name,$env} by {kube_cluster_name}.as_count()",
                                             "aggregator": "avg"
                                         }
                                     ],
@@ -1184,7 +1184,7 @@
                                         {
                                             "name": "query1",
                                             "data_source": "metrics",
-                                            "query": "avg:kubernetes_cluster_autoscaler.last_activity{$kube_cluster_name,$env} by {kube_cluster_name}",
+                                            "query": "avg:kubernetes_cluster_autoscaler.last.activity{$kube_cluster_name,$env} by {kube_cluster_name}",
                                             "aggregator": "avg"
                                         }
                                     ]
@@ -1225,7 +1225,7 @@
                                         {
                                             "name": "query1",
                                             "data_source": "metrics",
-                                            "query": "sum:kubernetes_cluster_autoscaler.function_duration_seconds.sum{$kube_cluster_name,$env} by {service}.as_count()"
+                                            "query": "sum:kubernetes_cluster_autoscaler.function.duration.seconds.sum{$kube_cluster_name,$env} by {service}.as_count()"
                                         }
                                     ],
                                     "response_format": "timeseries",
@@ -1308,7 +1308,7 @@
                                     ],
                                     "queries": [
                                         {
-                                            "query": "sum:kubernetes_cluster_autoscaler.scaled_up_nodes_total{$kube_cluster_name,$env}.as_count()",
+                                            "query": "sum:kubernetes_cluster_autoscaler.scaled.up.nodes.count{$kube_cluster_name,$env}.as_count()",
                                             "data_source": "metrics",
                                             "name": "query3"
                                         }
@@ -1329,7 +1329,7 @@
                                     ],
                                     "queries": [
                                         {
-                                            "query": "sum:kubernetes_cluster_autoscaler.scaled_down_nodes_total{$kube_cluster_name,$env}.as_count()",
+                                            "query": "sum:kubernetes_cluster_autoscaler.scaled.down.nodes.count{$kube_cluster_name,$env}.as_count()",
                                             "data_source": "metrics",
                                             "name": "query3"
                                         }
@@ -1387,7 +1387,7 @@
                                     ],
                                     "queries": [
                                         {
-                                            "query": "sum:kubernetes_cluster_autoscaler.unschedulable_pods_count{$env,$kube_cluster_name} by {pod_name}",
+                                            "query": "sum:kubernetes_cluster_autoscaler.unschedulable.pods.count{$env,$kube_cluster_name} by {pod_name}",
                                             "data_source": "metrics",
                                             "name": "query1"
                                         }
@@ -1439,7 +1439,7 @@
                                     ],
                                     "queries": [
                                         {
-                                            "query": "sum:kubernetes_cluster_autoscaler.failed_scale_ups_total{$env,$kube_cluster_name}.as_count()",
+                                            "query": "sum:kubernetes_cluster_autoscaler.failed.scale.ups.count{$env,$kube_cluster_name}.as_count()",
                                             "data_source": "metrics",
                                             "name": "query1"
                                         }
@@ -1538,7 +1538,7 @@
                                     ],
                                     "queries": [
                                         {
-                                            "query": "max:kubernetes_cluster_autoscaler.nodes_count{$env,$kube_cluster_name}",
+                                            "query": "max:kubernetes_cluster_autoscaler.nodes.count{$env,$kube_cluster_name}",
                                             "data_source": "metrics",
                                             "name": "query1"
                                         }
@@ -1560,7 +1560,7 @@
                                     ],
                                     "queries": [
                                         {
-                                            "query": "max:kubernetes_cluster_autoscaler.max_nodes_count{$env,$kube_cluster_name}",
+                                            "query": "max:kubernetes_cluster_autoscaler.max.nodes.count{$env,$kube_cluster_name}",
                                             "data_source": "metrics",
                                             "name": "query1"
                                         }

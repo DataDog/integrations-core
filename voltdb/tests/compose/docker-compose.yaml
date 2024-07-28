@@ -1,5 +1,3 @@
-version: '3'
-
 services:
   voltdb0:
     image: ${VOLTDB_IMAGE}

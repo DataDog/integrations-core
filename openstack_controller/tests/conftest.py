@@ -519,17 +519,34 @@ def connection_compute(request, mock_responses):
             )
         )
 
-    def servers(project_id, details, limit=None):
+    def servers(project_id, details=True, all_tenants=False, limit=None):
         if http_error and 'servers' in http_error and project_id in http_error['servers']:
             raise requests.exceptions.HTTPError(response=http_error['servers'][project_id])
-        return [
-            mock.MagicMock(
-                to_dict=mock.MagicMock(
-                    return_value=server,
+        return (
+            [
+                mock.MagicMock(
+                    to_dict=mock.MagicMock(
+                        return_value=server,
+                    )
                 )
+                for server in mock_responses('GET', f'/compute/v2.1/servers/detail?project_id={project_id}')['servers']
+            ]
+            if project_id
+            else (
+                [
+                    mock.MagicMock(
+                        to_dict=mock.MagicMock(
+                            return_value=server,
+                        )
+                    )
+                    for server in mock_responses('GET', f'/compute/v2.1/servers/detail?all_tenants={all_tenants}')[
+                        'servers'
+                    ]
+                ]
+                if all_tenants
+                else []
             )
-            for server in mock_responses('GET', f'/compute/v2.1/servers/detail?project_id={project_id}')['servers']
-        ]
+        )
 
     def get_flavor(flavor_id):
         if http_error and 'flavors' in http_error and flavor_id in http_error['flavors']:
@@ -919,7 +936,7 @@ def connection_swift(request, mock_responses):
 
     def containers(account_id, limit=None):
         if http_error and 'containers' in http_error and account_id in http_error['containers']:
-            raise requests.exceptions.HTTPError(response=http_error['containers'])
+            raise requests.exceptions.HTTPError(response=http_error['containers'][account_id])
         return [
             mock.MagicMock(
                 to_dict=mock.MagicMock(
@@ -975,18 +992,21 @@ def mock_http_get(request, monkeypatch, mock_http_call):
     param = request.param if hasattr(request, 'param') and request.param is not None else {}
     http_error = param.pop('http_error', {})
     data = param.pop('mock_data', {})
+    elapsed_total_seconds = param.pop('elapsed_total_seconds', {})
 
     def get(url, *args, **kwargs):
         method = 'GET'
         url = get_url_path(url)
         if http_error and url in http_error:
             return http_error[url]
-
         if data and url in data:
             return MockResponse(json_data=data[url], status_code=200)
-
-        json_data = mock_http_call(method, url, headers=kwargs.get('headers'), params=kwargs.get('params'))
-        return MockResponse(json_data=json_data, status_code=200)
+        headers = kwargs.get('headers')
+        params = kwargs.get('params')
+        mock_elapsed = mock.MagicMock(total_seconds=mock.MagicMock(return_value=elapsed_total_seconds.get(url, 0.0)))
+        mock_json = mock.MagicMock(return_value=mock_http_call(method, url, headers=headers, params=params))
+        mock_status_code = mock.MagicMock(return_value=200)
+        return mock.MagicMock(elapsed=mock_elapsed, json=mock_json, status_code=mock_status_code)
 
     mock_get = mock.MagicMock(side_effect=get)
     monkeypatch.setattr('requests.get', mock_get)

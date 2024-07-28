@@ -27,6 +27,7 @@ from .types import (
     OperationSampleEvent,
     OperationSampleOperationMetadata,
     OperationSampleOperationStats,
+    OperationSampleOperationStatsCursor,
     OperationSamplePlan,
 )
 
@@ -44,6 +45,16 @@ SAMPLE_EXCLUDE_KEYS = {
 }
 
 SYSTEM_DATABASES = {"admin", "config", "local"}
+
+# exclude keys in sampled operation that cause issues with the explain command
+COMMAND_EXCLUDE_KEYS = {
+    'readConcern',
+    'writeConcern',
+    'needsMerge',
+    'fromMongos',
+    'let',  # let set's the CLUSTER_TIME and NOW in mongos
+    'mayBypassWriteBlocking',
+}
 
 
 def agent_check_getter(self):
@@ -66,7 +77,7 @@ class MongoOperationSamples(DBMAsyncJob):
             rate_limit=1 / self._collection_interval,
             run_sync=self._operation_samples_config.get("run_sync", False),  # Default to running sync
             enabled=self._operation_samples_config["enabled"],
-            dbms="mongodb",
+            dbms="mongo",
             min_collection_interval=check._config.min_collection_interval,
             job_name="operation-samples",
         )
@@ -85,7 +96,9 @@ class MongoOperationSamples(DBMAsyncJob):
 
         activities = []
 
-        for activity, sample in self._get_operation_samples(now):
+        for activity, sample in self._get_operation_samples(
+            now, databases_monitored=self._check._database_autodiscovery.databases
+        ):
             if sample:
                 self._check.log.debug("Sending operation sample: %s", sample)
                 self._check.database_monitoring_query_sample(json_util.dumps(sample))
@@ -104,10 +117,10 @@ class MongoOperationSamples(DBMAsyncJob):
             return False
         return True
 
-    def _get_operation_samples(self, now):
+    def _get_operation_samples(self, now, databases_monitored: List[str]):
         for operation in self._get_current_op():
             try:
-                if not self._should_include_operation(operation):
+                if not self._should_include_operation(operation, databases_monitored):
                     continue
 
                 command = operation.get("command")
@@ -144,7 +157,7 @@ class MongoOperationSamples(DBMAsyncJob):
             self._check.log.debug("Found operation: %s", operation)
             yield operation
 
-    def _should_include_operation(self, operation: dict) -> bool:
+    def _should_include_operation(self, operation: dict, databases_monitored: List[str]) -> bool:
         # Skip operations from db that are not configured to be monitored
         namespace = operation.get("ns")
         if not namespace:
@@ -152,12 +165,9 @@ class MongoOperationSamples(DBMAsyncJob):
             return False
 
         db, _ = namespace.split(".", 1)
-        if self._check._config.db_names is not None:
-            if db not in self._check._config.db_names:
-                self._check.log.debug(
-                    "Skipping operation for database %s because it is not configured to be monitored", db
-                )
-                return False
+        if db not in databases_monitored:
+            self._check.log.debug("Skipping operation for database %s because it is not configured to be monitored", db)
+            return False
 
         if db in SYSTEM_DATABASES:
             self._check.log.debug("Skipping operation for system database %s", db)
@@ -217,6 +227,8 @@ class MongoOperationSamples(DBMAsyncJob):
     def _get_explain_plan(self, op: Optional[str], command: dict, dbname: str) -> OperationSamplePlan:
         dbname = command.pop("$db", dbname)
         try:
+            for key in COMMAND_EXCLUDE_KEYS:
+                command.pop(key, None)
             explain_plan = self._check.api_client[dbname].command("explain", command, verbosity="executionStats")
             explain_plan = self._format_explain_plan(explain_plan)
             return {
@@ -304,6 +316,36 @@ class MongoOperationSamples(DBMAsyncJob):
             "ns": namespace,
         }
 
+    def _get_operation_cursor(self, operation: dict) -> Optional[OperationSampleOperationStatsCursor]:
+        cursor = operation.get("cursor")
+        if not cursor:
+            return None
+
+        created_date = cursor.get("createdDate")
+        if created_date:
+            created_date = created_date.isoformat()
+        last_access_date = cursor.get("lastAccessDate")
+        if last_access_date:
+            last_access_date = last_access_date.isoformat()
+
+        originating_command = cursor.get("originatingCommand")
+        if originating_command:
+            originating_command = datadog_agent.obfuscate_mongodb_string(json_util.dumps(originating_command))
+
+        return {
+            "cursor_id": cursor.get("cursorId"),
+            "created_date": created_date,
+            "last_access_date": last_access_date,
+            "n_docs_returned": cursor.get("nDocsReturned", 0),
+            "n_batches_returned": cursor.get("nBatchesReturned", 0),
+            "no_cursor_timeout": cursor.get("noCursorTimeout", False),
+            "tailable": cursor.get("tailable", False),
+            "await_data": cursor.get("awaitData", False),
+            "originating_command": originating_command,
+            "plan_summary": cursor.get("planSummary"),
+            "operation_using_cursor_id": cursor.get("operationUsingCursorId"),
+        }
+
     def _get_operation_stats(self, operation: dict) -> OperationSampleOperationStats:
         return {
             "active": operation.get("active", False),  # bool
@@ -326,7 +368,9 @@ class MongoOperationSamples(DBMAsyncJob):
             "waiting_for_flow_control": operation.get("waitingForFlowControl", False),  # bool
             "flow_control_stats": self._format_key_name(operation.get("flowControlStats", {})),  # dict
             # Latches
-            "waiting_for_latch": operation.get("waitingForLatch", False),  # bool
+            "waiting_for_latch": self._format_key_name(operation.get("waitingForLatch", {})),  # dict
+            # cursor
+            "cursor": self._get_operation_cursor(operation),  # dict
         }
 
     def _get_query_signature(self, obfuscated_command: str) -> str:
@@ -345,7 +389,7 @@ class MongoOperationSamples(DBMAsyncJob):
             "host": self._check._resolved_hostname,
             "dbm_type": "plan",
             "ddagentversion": datadog_agent.get_version(),
-            "ddsource": "mongodb",
+            "ddsource": "mongo",
             "ddtags": ",".join(self._check._get_tags(include_deployment_tags=True)),
             "timestamp": now * 1000,
             "network": {
@@ -397,7 +441,7 @@ class MongoOperationSamples(DBMAsyncJob):
         return {
             "host": self._check._resolved_hostname,
             "ddagentversion": datadog_agent.get_version(),
-            "ddsource": "mongodb",
+            "ddsource": "mongo",
             "dbm_type": "activity",
             "collection_interval": self._collection_interval,
             "ddtags": self._check._get_tags(include_deployment_tags=True),

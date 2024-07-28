@@ -233,67 +233,80 @@ class Compute(Component):
             for metric, value in quota_set['metrics'].items():
                 self.check.gauge(metric, value, tags=tags + quota_set['tags'])
 
-    @Component.register_project_metrics(ID)
     @Component.http_error()
-    def _report_servers(self, project_id, tags, config):
+    def _report_servers(self, get_compute_servers_func, tags, config_servers):
+        servers_discovery = None
+        if config_servers:
+            config_servers_include = normalize_discover_config_include(config_servers, ["name"])
+            self.check.log.debug("config_servers_include: %s", config_servers_include)
+            if config_servers_include:
+                servers_discovery = Discovery(
+                    lambda: get_compute_servers_func,
+                    limit=config_servers.get('limit'),
+                    include=config_servers_include,
+                    exclude=config_servers.get('exclude'),
+                    interval=config_servers.get('interval'),
+                    key=lambda server: server.get('name'),
+                )
+        if servers_discovery:
+            discovered_servers = list(servers_discovery.get_items())
+        else:
+            discovered_servers = [(None, server.get('name'), server, None) for server in get_compute_servers_func]
+        aggregates = self.check.api.get_compute_aggregates()
+        self.check.log.debug("aggregates: %s", aggregates)
+        for _pattern, _item_name, item, item_config in discovered_servers:
+            self.check.log.debug("item: %s", item)
+            self.check.log.debug("item_config: %s", item_config)
+            server = get_metrics_and_tags(
+                item,
+                tags=NOVA_SERVER_TAGS,
+                prefix=NOVA_SERVER_METRICS_PREFIX,
+                metrics=NOVA_SERVER_METRICS,
+                lambda_name=lambda key, item=item: (
+                    'active'
+                    if key == 'status' and item['status'] == 'ACTIVE'
+                    else 'error' if key == 'status' and item['status'] == 'ERROR' else key
+                ),
+                lambda_value=lambda key, value, item=item: (
+                    1 if key == 'status' and (item['status'] == 'ACTIVE' or item['status'] == 'ERROR') else value
+                ),
+            )
+            self.check.log.debug("server: %s", server)
+            all_tags = list(set(tags + server['tags']))
+            self.check.gauge(NOVA_SERVER_COUNT, 1, tags=all_tags, hostname=item['id'])
+            for metric, value in server['metrics'].items():
+                self.check.gauge(metric, value, tags=all_tags, hostname=item['id'])
+            collect_flavors = item_config.get('flavors', True) if item_config else True
+            if collect_flavors:
+                self._report_server_flavor(item, all_tags)
+            collect_diagnostics = item_config.get('diagnostics', True) if item_config else True
+            if collect_diagnostics:
+                self._report_server_diagnostics(item, all_tags)
+            report_external_tags = item_config.get('external_tags', True) if item_config else True
+            if report_external_tags:
+                self._report_external_tags(item, aggregates)
+
+    @Component.register_global_metrics(ID)
+    @Component.http_error()
+    def _report_all_project_servers(self, config, tags):
         report_servers = True
         config_servers = config.get('servers', {})
         if isinstance(config_servers, bool):
             report_servers = config_servers
             config_servers = {}
-        if report_servers:
-            servers_discovery = None
-            if config_servers:
-                config_servers_include = normalize_discover_config_include(config_servers, ["name"])
-                self.check.log.debug("config_servers_include: %s", config_servers_include)
-                if config_servers_include:
-                    servers_discovery = Discovery(
-                        lambda: self.check.api.get_compute_servers(project_id),
-                        limit=config_servers.get('limit'),
-                        include=config_servers_include,
-                        exclude=config_servers.get('exclude'),
-                        interval=config_servers.get('interval'),
-                        key=lambda server: server.get('name'),
-                    )
-            if servers_discovery:
-                discovered_servers = list(servers_discovery.get_items())
-            else:
-                discovered_servers = [
-                    (None, server.get('name'), server, None)
-                    for server in self.check.api.get_compute_servers(project_id)
-                ]
-            aggregates = self.check.api.get_compute_aggregates()
-            self.check.log.debug("aggregates: %s", aggregates)
-            for _pattern, _item_name, item, item_config in discovered_servers:
-                self.check.log.debug("item: %s", item)
-                self.check.log.debug("item_config: %s", item_config)
-                server = get_metrics_and_tags(
-                    item,
-                    tags=NOVA_SERVER_TAGS,
-                    prefix=NOVA_SERVER_METRICS_PREFIX,
-                    metrics=NOVA_SERVER_METRICS,
-                    lambda_name=lambda key, item=item: (
-                        'active'
-                        if key == 'status' and item['status'] == 'ACTIVE'
-                        else 'error' if key == 'status' and item['status'] == 'ERROR' else key
-                    ),
-                    lambda_value=lambda key, value, item=item: (
-                        1 if key == 'status' and (item['status'] == 'ACTIVE' or item['status'] == 'ERROR') else value
-                    ),
-                )
-                self.check.log.debug("server: %s", server)
-                self.check.gauge(NOVA_SERVER_COUNT, 1, tags=tags + server['tags'], hostname=item['id'])
-                for metric, value in server['metrics'].items():
-                    self.check.gauge(metric, value, tags=tags + server['tags'], hostname=item['id'])
-                collect_flavors = item_config.get('flavors', True) if item_config else True
-                if collect_flavors:
-                    self._report_server_flavor(item, tags + server['tags'])
-                collect_diagnostics = item_config.get('diagnostics', True) if item_config else True
-                if collect_diagnostics:
-                    self._report_server_diagnostics(item, tags + server['tags'])
-                report_external_tags = item_config.get('external_tags', True) if item_config else True
-                if report_external_tags:
-                    self._report_external_tags(item, aggregates)
+        if report_servers and self.check.config.all_projects:
+            self._report_servers(self.check.api.get_compute_all_servers(), tags, config_servers)
+
+    @Component.register_project_metrics(ID)
+    @Component.http_error()
+    def _report_project_servers(self, project_id, tags, config):
+        report_servers = True
+        config_servers = config.get('servers', {})
+        if isinstance(config_servers, bool):
+            report_servers = config_servers
+            config_servers = {}
+        if report_servers and not self.check.config.all_projects:
+            self._report_servers(self.check.api.get_compute_servers(project_id), tags, config_servers)
 
     @Component.http_error()
     def _report_server_flavor(self, server, tags):

@@ -2,6 +2,38 @@
 
 <!-- towncrier release notes start -->
 
+## 36.10.0 / 2024-07-11
+
+***Added***:
+
+* [NDM] Add NDM metadata support for Cisco ACI ([#17735](https://github.com/DataDog/integrations-core/pull/17735))
+
+## 36.9.0 / 2024-07-05
+
+***Security***:
+
+* Update pydantic to 2.7.3 to address CVE-2024-3772 ([#17802](https://github.com/DataDog/integrations-core/pull/17802))
+
+***Added***:
+
+* Update dependencies ([#17817](https://github.com/DataDog/integrations-core/pull/17817)), ([#17953](https://github.com/DataDog/integrations-core/pull/17953))
+
+***Fixed***:
+
+* Fix rate limiter in sync mode of DBMAsync job. Prior to this change, the DBMAsync job would not take into account the time of the job execution when throttling by the collection interval. ([#17893](https://github.com/DataDog/integrations-core/pull/17893))
+
+## 36.8.0 / 2024-06-13 / Agent 7.55.0
+
+***Added***:
+
+* Improve throttling in sync jobs of `DBMAsyncJob` class. Instead of putting a thread to sleep check if the job is too early to run. ([#17716](https://github.com/DataDog/integrations-core/pull/17716))
+
+## 36.7.1 / 2024-06-11
+
+***Fixed***:
+
+* Bump the `requests` version to 2.32.3 on Python 3 ([#17702](https://github.com/DataDog/integrations-core/pull/17702))
+
 ## 36.7.0 / 2024-05-31
 
 ***Added***:

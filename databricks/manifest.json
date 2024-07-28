@@ -8,15 +8,17 @@
     "configuration": "README.md#Setup",
     "support": "README.md#Support",
     "changelog": "CHANGELOG.md",
-    "description": "Monitor Apache Spark in Databricks clusters.",
+    "description": "Monitor the performance, reliability, and cost of your Apache Spark and Databricks jobs.",
     "title": "Databricks",
     "media": [],
     "classifier_tags": [
       "Category::Cloud",
+      "Category::Cost Management",
       "Category::Log Collection",
       "Supported OS::Linux",
       "Supported OS::Windows",
-      "Supported OS::macOS"
+      "Supported OS::macOS",
+      "Offering::Integration"
     ]
   },
   "author": {

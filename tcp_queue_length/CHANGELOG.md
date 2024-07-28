@@ -1,3 +1,8 @@
 # CHANGELOG - TCP Queue Length
 
-<!-- towncrier release notes start -->
+
+## 1.0.0
+
+***Added***:
+
+* Initial release.

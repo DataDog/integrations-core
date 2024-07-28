@@ -41,6 +41,7 @@ def test_mongo_arbiter(aggregator, check, instance_arbiter, dd_run_check):
         'server:mongodb://localhost:27020/',
         'replset_name:shard01',
         'replset_state:arbiter',
+        'replset_me:shard01c:27020',
         'sharding_cluster_role:shardsvr',
     ] + check.internal_resource_tags
     for metric, value in expected_metrics.items():
@@ -64,12 +65,16 @@ def test_mongo_replset(instance_shard, aggregator, check, dd_run_check):
         "sharding_cluster_role:shardsvr",
     ] + mongo_check.internal_resource_tags
     for metric in replset_metrics:
-        aggregator.assert_metric(metric, tags=replset_common_tags + ['replset_state:primary'])
+        aggregator.assert_metric(
+            metric, tags=replset_common_tags + ['replset_state:primary', 'replset_me:shard01a:27018']
+        )
     aggregator.assert_metric(
-        'mongodb.replset.optime_lag', tags=replset_common_tags + ['replset_state:primary', 'member:shard01a:27018']
+        'mongodb.replset.optime_lag',
+        tags=replset_common_tags + ['replset_state:primary', 'member:shard01a:27018', 'replset_me:shard01a:27018'],
     )
     aggregator.assert_metric(
-        'mongodb.replset.optime_lag', tags=replset_common_tags + ['replset_state:secondary', 'member:shard01b:27019']
+        'mongodb.replset.optime_lag',
+        tags=replset_common_tags + ['replset_state:secondary', 'member:shard01b:27019', 'replset_me:shard01a:27018'],
     )
     aggregator.assert_metrics_using_metadata(get_metadata_metrics(), check_submission_type=True)
 
@@ -82,6 +87,7 @@ def test_refresh_role(instance_shard, aggregator, check, dd_run_check):
             "sharding01",
             9,
             ["sharding01a:27017", "sharding01b:27017", "sharding01c:27017"],
+            "sharding01a:27017",
             cluster_role="TEST",
         )
         get_deployment.return_value = mock_deployment_type

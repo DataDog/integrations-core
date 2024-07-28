@@ -127,9 +127,27 @@ def instance_integration(instance_custom_queries):
 
 
 @pytest.fixture
+def instance_integration_autodiscovery(instance_integration):
+    instance = copy.deepcopy(instance_integration)
+    instance["database_autodiscovery"] = {
+        "enabled": True,
+    }
+    return instance
+
+
+@pytest.fixture
 def instance_integration_cluster(instance_integration):
     instance = copy.deepcopy(instance_integration)
     instance["cluster_name"] = "my_cluster"
+    return instance
+
+
+@pytest.fixture
+def instance_integration_cluster_autodiscovery(instance_integration_cluster):
+    instance = copy.deepcopy(instance_integration_cluster)
+    instance["database_autodiscovery"] = {
+        "enabled": True,
+    }
     return instance
 
 

@@ -2,7 +2,7 @@
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
 
-from typing import List, Optional, TypedDict
+from typing import Dict, List, Optional, TypedDict
 
 
 class OperationSampleClientDriver(TypedDict, total=False):
@@ -106,9 +106,23 @@ class OperationSampleOperationStatsFlowControlStats(TypedDict, total=False):
 
 
 class OperationSampleOperationStatsWaitingForLatch(TypedDict, total=False):
-    timestamp: str
-    captureName: str
-    backtrace: List[str]
+    timestamp: Optional[Dict[str, str]]
+    capture_name: Optional[str]
+    backtrace: Optional[List[str]]
+
+
+class OperationSampleOperationStatsCursor(TypedDict, total=False):
+    cursor_id: int
+    created_date: Optional[str]
+    last_access_date: Optional[str]
+    n_docs_returned: int
+    n_batches_returned: int
+    no_cursor_timeout: bool
+    tailable: bool
+    await_data: bool
+    originating_command: Optional[str]
+    plan_summary: Optional[str]
+    operation_using_cursor_id: Optional[str]
 
 
 class OperationSampleOperationStats(TypedDict, total=False):
@@ -129,6 +143,7 @@ class OperationSampleOperationStats(TypedDict, total=False):
     waiting_for_flow_control: bool
     flow_control_stats: Optional[OperationSampleOperationStatsFlowControlStats]
     waiting_for_latch: Optional[OperationSampleOperationStatsWaitingForLatch]
+    cursor = Optional[OperationSampleOperationStatsCursor]
 
 
 class OperationSampleActivityBase(TypedDict, total=False):

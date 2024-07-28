@@ -46,7 +46,7 @@ def test_freeze(ddev, fake_repo):
     agent_requirements_path = fake_repo / 'agent_requirements.in'
 
     assert result.exit_code == 0
-    assert result.output == f'Static file: {agent_requirements_path}\n'
+    assert result.output == f'Writing combined requirements to: {agent_requirements_path}\n'
 
     requirements = agent_requirements_path.read_text()
 

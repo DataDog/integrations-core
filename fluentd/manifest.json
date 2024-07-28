@@ -16,7 +16,14 @@
       "Supported OS::Windows",
       "Category::Log Collection",
       "Category::Metrics",
-      "Supported OS::macOS"
+      "Supported OS::macOS",
+      "Offering::Integration"
+    ],
+    "resources": [
+      {
+        "resource_type": "blog",
+        "url": "https://www.datadoghq.com/blog/monitor-fluentd-datadog"
+      }
     ]
   },
   "author": {

@@ -1,0 +1,33 @@
+{
+    "version": 2,
+    "created_at": "2024-07-22",
+    "last_updated_at": "2024-07-22",
+    "title": "Controller element is dropped",
+    "description": "Dropping occurs when the controller tries to process an item several times and fails each time.  This usually indicates an unrecoverable error. This monitor alerts when a controller reports a dropped element.",
+    "definition": {
+        "name": "[Kyverno] Controller Element Drops",
+        "type": "query alert",
+        "query": "sum(last_5m):sum:kyverno.controller.drop.count{*} by {controller_name,kube_cluster_name}.as_count() >= 1",
+        "message": "{{#is_alert}}\n\nKyverno Controller: {{controller_name.name}} reported {{value}} dropped element in {{kube_cluster_name.name}} cluster.\n\nDropping usually indicates an unrecoverable error, the controller retried to process an item a couple of times and after failing every try drop the item.\n\n{{/is_alert}}",
+        "tags": [
+            "integration:kyverno"
+        ],
+        "options": {
+            "thresholds": {
+                "critical": 1
+            },
+            "notify_audit": false,
+            "include_tags": true,
+            "new_group_delay": 60,
+            "notify_no_data": false,
+            "silenced": {}
+        },
+        "priority": null,
+        "restriction_policy": {
+            "bindings": []
+        }
+    },
+    "tags": [
+        "integration:kyverno"
+    ]
+}

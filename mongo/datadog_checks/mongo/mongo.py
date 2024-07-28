@@ -32,6 +32,7 @@ from datadog_checks.mongo.collectors.session_stats import SessionStatsCollector
 from datadog_checks.mongo.common import SERVICE_CHECK_NAME, MongosDeployment, ReplicaSetDeployment
 from datadog_checks.mongo.config import MongoConfig
 from datadog_checks.mongo.dbm.operation_samples import MongoOperationSamples
+from datadog_checks.mongo.discovery import MongoDBDatabaseAutodiscovery
 
 from . import metrics
 
@@ -98,6 +99,9 @@ class MongoDb(AgentCheck):
         # DBM
         self._operation_samples = MongoOperationSamples(check=self)
 
+        # Database autodiscovery
+        self._database_autodiscovery = MongoDBDatabaseAutodiscovery(check=self)
+
     @cached_property
     def api_client(self):
         # This needs to be a property for our unit test mocks to work.
@@ -109,7 +113,6 @@ class MongoDb(AgentCheck):
             ConnPoolStatsCollector(self, tags),
             ReplicationOpLogCollector(self, tags),
             FsyncLockCollector(self, tags),
-            CollStatsCollector(self, self._config.db_name, tags, coll_names=self._config.coll_names),
             ServerStatusCollector(self, self._config.db_name, tags, tcmalloc=collect_tcmalloc_metrics),
         ]
         if self._config.replica_check:
@@ -121,20 +124,31 @@ class MongoDb(AgentCheck):
         assert self._mongo_version is not None, "No MongoDB version is set, make sure you refreshed the metadata."
         if self._mongo_version_parsed >= Version("3.6"):
             potential_collectors.append(SessionStatsCollector(self, tags))
-        if self._config.collections_indexes_stats:
-            if self._mongo_version_parsed >= Version("3.2"):
-                potential_collectors.append(
-                    IndexStatsCollector(self, self._config.db_name, tags, self._config.coll_names)
-                )
-            else:
-                self.log.debug(
-                    "'collections_indexes_stats' is only available starting from mongo 3.2: "
-                    "your mongo version is %s",
-                    self._mongo_version,
-                )
+
         dbstats_tag_dbname = self._config.dbstats_tag_dbname
         for db_name in all_dbs:
+            # DbStatCollector is always collected on all monitored databases (filtered by db_names config option)
+            # For backward compatibility, we keep collecting from all monitored databases
+            # regardless of the auto-discovery settings.
             potential_collectors.append(DbStatCollector(self, db_name, dbstats_tag_dbname, tags))
+
+        monitored_dbs = all_dbs if self._database_autodiscovery.autodiscovery_enabled else [self._config.db_name]
+        # When autodiscovery is enabled, we collect collstats and indexstats for all auto-discovered databases
+        # Otherwise, we collect collstats and indexstats for the database specified in the configuration
+        for db_name in monitored_dbs:
+            # For backward compatibility, coll_names is ONLY applied when autodiscovery is not enabled
+            # Otherwise, we collect collstats & indexstats for all auto-discovered databases and authorized collections
+            coll_names = None if self._database_autodiscovery.autodiscovery_enabled else self._config.coll_names
+            potential_collectors.append(CollStatsCollector(self, db_name, tags, coll_names=coll_names))
+            if self._config.collections_indexes_stats:
+                if self._mongo_version_parsed >= Version("3.2"):
+                    potential_collectors.append(IndexStatsCollector(self, db_name, tags, coll_names=coll_names))
+                else:
+                    self.log.debug(
+                        "'collections_indexes_stats' is only available starting from mongo 3.2: "
+                        "your mongo version is %s",
+                        self._mongo_version,
+                    )
 
         # Custom queries are always collected except if the node is a secondary or an arbiter in a replica set.
         # It is possible to collect custom queries from secondary nodes as well but this has to be explicitly
@@ -247,7 +261,7 @@ class MongoDb(AgentCheck):
             self.set_metadata('version', self._mongo_version)
             self.log.debug('version: %s', self._mongo_version)
         if self._resolved_hostname is None:
-            self._resolved_hostname = self.api_client.hostname
+            self._resolved_hostname = self._config.reported_database_hostname or self.api_client.hostname
             self.set_metadata('resolved_hostname', self._resolved_hostname)
             self.log.debug('resolved_hostname: %s', self._resolved_hostname)
 
@@ -260,7 +274,7 @@ class MongoDb(AgentCheck):
         deployment = self.api_client.deployment_type
         tags = self._get_tags(include_deployment_tags=True, include_internal_resource_tags=True)
 
-        dbnames = self._get_db_names(self.api_client, deployment, tags)
+        dbnames = self._get_db_names(tags)
         self.refresh_collectors(deployment, dbnames, tags)
         for collector in self.collectors:
             try:
@@ -275,34 +289,10 @@ class MongoDb(AgentCheck):
                     "Unable to collect logs from collector %s. Some metrics will be missing.", collector, exc_info=True
                 )
 
-    def _get_db_names(self, api, deployment, tags):
-        if isinstance(deployment, ReplicaSetDeployment) and deployment.is_arbiter:
-            self.log.debug("Replicaset and arbiter deployment, no databases will be checked")
-            dbnames = []
-        elif isinstance(deployment, ReplicaSetDeployment) and deployment.replset_state == 3:
-            self.log.debug("Replicaset is in recovering state, will skip reading database names")
-            dbnames = []
-        else:
-            server_databases = api.list_database_names()
-            self.gauge('mongodb.dbs', len(server_databases), tags=tags)
-            if self._config.db_names is None:
-                self.log.debug("No databases configured. Retrieving list of databases from the mongo server")
-                dbnames = server_databases
-            else:
-                self.log.debug("Collecting only from the configured databases: %s", self._config.db_names)
-                dbnames = []
-                self.log.debug("Checking the configured databases that exist on the mongo server")
-                for config_dbname in self._config.db_names:
-                    if config_dbname in server_databases:
-                        self.log.debug("'%s' database found on the mongo server", config_dbname)
-                        dbnames.append(config_dbname)
-                    else:
-                        self.log.warning(
-                            "'%s' database not found on the mongo server"
-                            ", will not append to list of databases to check",
-                            config_dbname,
-                        )
-        self.log.debug("List of databases to check: %s", dbnames)
+    def _get_db_names(self, tags):
+        dbnames, database_count = self._database_autodiscovery.get_databases_and_count()
+        if database_count:
+            self.gauge('mongodb.dbs', database_count, tags=tags)
         return dbnames
 
     def _diagnose_tls(self):
@@ -339,7 +329,7 @@ class MongoDb(AgentCheck):
             database_instance = {
                 "host": self._resolved_hostname,
                 "agent_version": datadog_agent.get_version(),
-                "dbms": "mongodb",
+                "dbms": "mongo",
                 "kind": "mongodb_instance",
                 "collection_interval": self._config.database_instance_collection_interval,
                 'dbms_version': self._mongo_version,
