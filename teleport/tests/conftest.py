@@ -8,9 +8,7 @@ import pytest
 from datadog_checks.dev import docker_run, get_here
 from datadog_checks.dev.conditions import CheckDockerLogs
 
-from .common import INSTANCE
-
-USE_TELEPORT_CADDY = os.environ.get("USE_TELEPORT_CADDY", False)
+from .common import INSTANCE, USE_TELEPORT_CADDY
 
 
 @pytest.fixture(scope="session")

@@ -2,6 +2,9 @@
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
 
+import os
+
+USE_TELEPORT_CADDY = os.environ.get("USE_TELEPORT_CADDY", False)
 
 INSTANCE = {"teleport_url": "http://127.0.0.1", "diag_port": "3000"}
 
