@@ -20,11 +20,10 @@ def dd_environment():
     if USE_TELEPORT_CADDY:
         compose_file = os.path.join(get_here(), "docker", "caddy", "docker-compose.yaml")
         conditions = [
-            CheckEndpoints(URL + ":3001/healthz", attempts=120),
+            CheckEndpoints(URL + ":3000/healthz", attempts=120),
         ]
-        with docker_run(compose_file, conditions=conditions):
-            instance = {"teleport_url": "http://127.0.0.1", "diag_port": "3001"}
-            yield instance
+        with docker_run(compose_file, conditions=conditions, sleep=5):
+            yield INSTANCE
     else:
         compose_file = os.path.join(get_here(), "docker", "teleport", "docker-compose.yaml")
         with docker_run(
