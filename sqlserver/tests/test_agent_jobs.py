@@ -338,7 +338,6 @@ def test_connection_with_agent_history(instance_docker):
             )
             cursor.execute(query)
             assert query == FORMATTED_HISTORY_QUERY
-    check.cancel()
 
 
 @pytest.mark.usefixtures('dd_environment')
@@ -349,7 +348,6 @@ def test_connection_with_agent_activity_duration(instance_docker):
     with check.connection.open_managed_default_connection():
         with check.connection.get_managed_cursor() as cursor:
             cursor.execute(AGENT_ACTIVITY_DURATION_QUERY)
-    check.cancel()
 
 
 @pytest.mark.usefixtures('dd_environment')
@@ -360,7 +358,6 @@ def test_connection_with_agent_activity_steps(instance_docker):
     with check.connection.open_managed_default_connection():
         with check.connection.get_managed_cursor() as cursor:
             cursor.execute(AGENT_ACTIVITY_STEPS_QUERY)
-    check.cancel()
 
 
 @pytest.mark.usefixtures('dd_environment')
@@ -413,7 +410,6 @@ def test_history_output(instance_docker, sa_conn):
             assert (
                 len(results) >= 4
             ), "should only have 4 steps associated with completed jobs when filtering with last collection time"
-    check.cancel()
 
 
 #  minimum length assertions rather than equality to avoid failures if sqlserver agent adds history/activity data
@@ -479,8 +475,6 @@ def test_agent_jobs_integration(aggregator, dd_run_check, agent_jobs_instance, s
     new_job_event = job_events[2]
     new_history_rows = new_job_event['sqlserver_job_history']
     assert len(new_history_rows) >= 2, "should have at least 2 rows of history associated with new completed jobs"
-    check.cancel()
-    aggregator.reset()
 
 
 def history_date_time_from_time(now):
