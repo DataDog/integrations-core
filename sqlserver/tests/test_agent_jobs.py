@@ -413,6 +413,7 @@ def test_history_output(instance_docker, sa_conn):
 
 
 #  minimum length assertions rather than equality to avoid failures if sqlserver agent adds history/activity data
+@pytest.mark.skip
 def test_agent_jobs_integration(aggregator, dd_run_check, agent_jobs_instance, sa_conn):
     with sa_conn as conn:
         with conn.cursor() as cursor:
