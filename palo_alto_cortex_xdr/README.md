@@ -1,14 +1,14 @@
-# Agent Check: Mimecast
+# Agent Check: palo_alto_cortex_xdr
 
 ## Overview
 
-This check monitors [Mimecast][1].
+This check monitors [Palo Alto Cortex XDR][1].
 
 ## Setup
 
 ### Installation
 
-The Mimecast check is included in the [Datadog Agent][2] package.
+The Palo Alto Cortex XDR check is included in the [Datadog Agent][2] package.
 No additional installation is needed on your server.
 
 ### Configuration
@@ -23,15 +23,15 @@ Steps to validate integration is functioning as expected
 
 ### Metrics
 
-The Mimecast integration does not include any metrics.
+The Palo Alto Cortex XDR integration does not include any metrics.
 
 ### Service Checks
 
-The Mimecast integration does not include any service checks.
+The Palo Alto Cortex XDR integration does not include any service checks.
 
 ### Events
 
-The Mimecast integration does not include any events.
+The Palo Alto Cortex XDR integration does not include any events.
 
 ## Troubleshooting
 
