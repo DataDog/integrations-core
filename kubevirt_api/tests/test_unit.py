@@ -84,6 +84,7 @@ def test_check_collects_all_metrics(dd_run_check, aggregator, instance, mocker):
         "vmi_nodeName:dev-kubevirt-control-plane",
         "vmi_size:small",
         "vmi_uid:f1f3ae4b-f81f-406f-a574-f12e7e3ba4f2",
+        "vmi_phase:Running",
     ]
     aggregator.assert_metric(
         "kubevirt_api.vmi.count",

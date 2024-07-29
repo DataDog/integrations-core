@@ -148,6 +148,7 @@ class KubevirtApiCheck(OpenMetricsBaseCheckV2):
         tags = []
         tags.append(f"vmi_name:{vmi['metadata']['name']}")
         tags.append(f"vmi_uid:{vmi['metadata']['uid']}")
+        tags.append(f"vmi_phase:{vmi['status']['phase']}")
         tags.append(f"kube_namespace:{vmi['metadata']['namespace']}")
 
         for label, value in vmi["metadata"]["labels"].items():
