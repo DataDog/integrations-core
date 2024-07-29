@@ -4,7 +4,7 @@ init_config:
 
     ## @param tibemsadmin - string - optional - default: /usr/bin/tibemsadmin
     ## The command or path to tibemsadmin (for example /usr/bin/tibemsadmin or docker exec <container> tibemsadmin)
-    ## can be overwritten on an instance.
+    ## , which can be overwritten on an instance.
     #
     # tibemsadmin: /usr/bin/tibemsadmin
 
@@ -26,21 +26,21 @@ instances:
     # host: localhost
 
     ## @param port - integer - optional - default: 7222
-    ## The port used to connect to Tibco EMS server.
+    ## The port used to connect to the Tibco EMS server.
     #
     # port: 7222
 
     ## @param username - string - optional
     ## Username from the credentials needed to connect to the host. These are the credentials for the Tibco EMS server.
     ## For the check to work, this user must have access so that the Datadog Tibeco EMS
-    ## check can execute the `show` command
+    ## check can execute the `show` command.
     #
     # username: <USERNAME>
 
     ## @param password - string - optional
     ## Password from the credentials needed to connect to the host. These are the credentials for the Tibco EMS server.
     ## For the check to work, this user must have access so that the Datadog Tibeco EMS
-    ## check can execute the `show` command
+    ## check can execute the `show` command.
     #
     # password: <PASSWORD>
 
@@ -51,9 +51,9 @@ instances:
 
     ## @param tibemsadmin - string - optional
     ## The command or path to tibemsadmin (for example /usr/bin/tibemsadmin or docker exec <container> tibemsadmin)
-    ## can be overwritten on an instance.
+    ## , which can be overwritten on an instance.
     ##
-    ## This overrides ` tibemsadmin` defined in `init_config`.
+    ## This overrides `ibemsadmin` defined in `init_config`.
     #
     # tibemsadmin: <TIBEMSADMIN>
 
