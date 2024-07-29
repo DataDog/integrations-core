@@ -822,7 +822,7 @@
                     {
                         "definition": {
                             "background_color": "blue",
-                            "content": "Clean Up Metrics",
+                            "content": "Cleanup Metrics",
                             "font_size": "18",
                             "has_padding": true,
                             "show_tick": false,
@@ -1131,7 +1131,7 @@
                                     "display_type": "bars",
                                     "formulas": [
                                         {
-                                            "alias": "Clean Up Errors",
+                                            "alias": "Cleanup Errors",
                                             "formula": "query1"
                                         }
                                     ],
@@ -1154,7 +1154,7 @@
                                     "display_type": "bars",
                                     "formulas": [
                                         {
-                                            "alias": "TTL Clean Up Errors",
+                                            "alias": "TTL Cleanup Errors",
                                             "formula": "query1"
                                         }
                                     ],
@@ -1175,7 +1175,7 @@
                                 }
                             ],
                             "show_legend": true,
-                            "title": "Clean Up Error",
+                            "title": "Cleanup Error",
                             "title_align": "left",
                             "title_size": "16",
                             "type": "timeseries"
