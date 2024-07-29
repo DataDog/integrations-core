@@ -2,7 +2,9 @@
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
 import copy
+import json
 import logging
+import os
 from contextlib import nullcontext  # type: ignore
 from urllib.parse import quote_plus
 
@@ -12,7 +14,7 @@ from pymongo.errors import ConnectionFailure, OperationFailure
 
 from datadog_checks.base import ConfigurationError
 from datadog_checks.mongo import MongoDb, metrics
-from datadog_checks.mongo.api import CRITICAL_FAILURE
+from datadog_checks.mongo.api import CRITICAL_FAILURE, MongoApi
 from datadog_checks.mongo.collectors import MongoCollector
 from datadog_checks.mongo.common import MongosDeployment, ReplicaSetDeployment, get_state_name
 from datadog_checks.mongo.utils import parse_mongo_uri
@@ -689,3 +691,50 @@ def test_emits_ok_service_check_for_documentdb_deployment(
     )
     mock_server_info.assert_called_once()
     mock_list_database_names.assert_called_once()
+
+
+@pytest.mark.debug
+def test_refresh_role(instance_shard, aggregator, check, dd_run_check):
+    """
+    Test that we refresh the role of a node in a replicaset cluster.
+
+    Ideally we should be asserting that we emit an event for a change of role. That's the behavior users care about.
+    It requires more mocking work though.
+    """
+    mongo_check = check(instance_shard)
+    mc = seed_mock_client()
+    mc.replset_get_status.return_value = load_json_fixture('replSetGetStatus-replica-primary-in-shard')
+    mc.is_master.return_value = load_json_fixture('isMaster-replica-primary-in-shard')
+    mc.get_cmdline_opts.return_value = load_json_fixture('getCmdLineOpts-replica-primary-in-shard')['parsed']
+    mongo_check.api_client = mc
+
+    dd_run_check(mongo_check)
+
+    assert isinstance(mongo_check.deployment_type, ReplicaSetDeployment)
+    assert mongo_check.deployment_type.cluster_role == 'shardsvr'
+
+    # Now we simulate a change in node role.
+    new_opts = load_json_fixture('getCmdLineOpts-replica-primary-in-shard')['parsed']
+    new_opts['sharding']['clusterRole'] = 'TEST'
+    mc.get_cmdline_opts.return_value = new_opts
+
+    dd_run_check(mongo_check)
+
+    assert isinstance(mongo_check.deployment_type, ReplicaSetDeployment)
+    assert mongo_check.deployment_type.cluster_role == 'TEST'
+
+
+def seed_mock_client():
+    """
+    Prepare mock client with most common responses.
+    """
+    c = mock.create_autospec(MongoApi)
+    c.ping.return_value = {"ok": 1}
+    c.server_info.return_value = load_json_fixture('server_info')
+    c.list_database_names.return_value = load_json_fixture('list_database_names')
+    return c
+
+
+def load_json_fixture(name):
+    with open(os.path.join(common.HERE, "fixtures", name), 'r') as f:
+        return json.load(f)

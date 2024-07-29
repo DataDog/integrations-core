@@ -6,7 +6,6 @@ from __future__ import division
 import json
 import time
 from copy import deepcopy
-from functools import cached_property
 
 from cachetools import TTLCache
 from packaging.version import Version
@@ -106,11 +105,17 @@ class MongoDb(AgentCheck):
 
         # Database autodiscovery
         self._database_autodiscovery = MongoDBDatabaseAutodiscovery(check=self)
+        self._api = None
 
-    @cached_property
+    @property
     def api_client(self):
-        # This needs to be a property for our unit test mocks to work.
-        return MongoApi(self._config, self.log)
+        if self._api is None:
+            self._api = MongoApi(self._config, self.log)
+        return self._api
+
+    @api_client.setter
+    def api_client(self, value):
+        self._api = value
 
     def refresh_collectors(self, deployment_type, all_dbs, tags):
         collect_tcmalloc_metrics = 'tcmalloc' in self._config.additional_metrics
