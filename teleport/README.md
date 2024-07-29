@@ -4,7 +4,7 @@
 
 This integration monitors the health and performance of [Teleport][1] through the Datadog Agent. Enable this integration to:
 
-- Quickly understand the operational status of your Teleport cluster including the Auth, Proxy, SSH, database, and Kubernetes services.
+- Quickly understand the operational status of your Teleport cluster, including the Auth, Proxy, SSH, database, and Kubernetes services.
 - Query and audit user sessions connecting to Kubernetes and database services to identify rogue or compromised users in an organization.
 - Cluster logs into patterns for faster investigation of abnormal infrastructure access, such as a high number of failed logins or attempts to access as many resources as possible in a short period of time.
 
