@@ -101,12 +101,12 @@ COMMON_DBS = ['dogs', 'postgres', 'dogs_nofunc', 'dogs_noschema', DB_NAME]
 CHECK_PERFORMANCE_METRICS = [
     'archiver_metrics',
     'bgw_metrics',
-    'connections_metrics',
+    'pg_stat_database_connections',
     'count_metrics',
     'instance_metrics',
     'replication_metrics',
     'replication_stats_metrics',
-    'slru_metrics',
+    'pg_stat_slru',
 ]
 
 requires_static_version = pytest.mark.skipif(USING_LATEST, reason='Version `latest` is ever-changing, skipping')
@@ -398,7 +398,7 @@ def check_performance_metrics(aggregator, expected_tags, count=1, is_aurora=Fals
     if is_aurora:
         expected_metrics = expected_metrics - {'replication_metrics'}
     if float(POSTGRES_VERSION) < 13.0:
-        expected_metrics = expected_metrics - {'slru_metrics'}
+        expected_metrics = expected_metrics - {'pg_stat_slru'}
     if float(POSTGRES_VERSION) < 10.0:
         expected_metrics = expected_metrics - {'replication_stats_metrics'}
     for name in expected_metrics:
