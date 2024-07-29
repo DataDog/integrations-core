@@ -45,6 +45,7 @@ class SQLServerConfig:
         # DBM
         self.dbm_enabled: bool = is_affirmative(instance.get('dbm', False))
         self.statement_metrics_config: dict = instance.get('query_metrics', {}) or {}
+        self.agent_jobs_config: dict = instance.get('agent_jobs', {}) or {}
         self.procedure_metrics_config: dict = instance.get('procedure_metrics', {}) or {}
         self.settings_config: dict = instance.get('collect_settings', {}) or {}
         self.activity_config: dict = instance.get('query_activity', {}) or {}

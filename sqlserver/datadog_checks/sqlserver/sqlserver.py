@@ -16,8 +16,10 @@ from datadog_checks.base.utils.db import QueryExecutor, QueryManager
 from datadog_checks.base.utils.db.utils import default_json_event_encoding, resolve_db_host, tracked_query
 from datadog_checks.base.utils.serialization import json
 from datadog_checks.sqlserver.activity import SqlserverActivity
+from datadog_checks.sqlserver.agent_history import SqlserverAgentHistory
 from datadog_checks.sqlserver.config import SQLServerConfig
 from datadog_checks.sqlserver.database_metrics import (
+    SqlserverAgentMetrics,
     SqlserverDatabaseBackupMetrics,
     SqlserverDBFragmentationMetrics,
     SqlserverIndexUsageMetrics,
@@ -132,6 +134,7 @@ class SQLServer(AgentCheck):
         self.procedure_metrics = SqlserverProcedureMetrics(self, self._config)
         self.sql_metadata = SqlserverMetadata(self, self._config)
         self.activity = SqlserverActivity(self, self._config)
+        self.agent_history = SqlserverAgentHistory(self, self._config)
 
         self.static_info_cache = TTLCache(
             maxsize=100,
@@ -770,6 +773,7 @@ class SQLServer(AgentCheck):
             if self._config.autodiscovery and self._config.autodiscovery_db_service_check:
                 self._check_database_conns()
             if self._config.dbm_enabled:
+                self.agent_history.run_job_loop(self.tags)
                 self.statement_metrics.run_job_loop(self.tags)
                 self.procedure_metrics.run_job_loop(self.tags)
                 self.activity.run_job_loop(self.tags)
@@ -857,10 +861,18 @@ class SQLServer(AgentCheck):
             databases=db_names,
         )
 
+        database_agent_metrics = SqlserverAgentMetrics(
+            instance_config=self.instance,
+            new_query_executor=self._new_query_executor,
+            server_static_info=self.static_info_cache,
+            execute_query_handler=self.execute_query_raw,
+        )
+
         # create a list of dynamic queries to execute
         self._database_metrics = [
             # instance level metrics
             database_backup_metrics,
+            database_agent_metrics,
             # database level metrics
             index_usage_metrics,
             db_fragmentation_metrics,

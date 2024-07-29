@@ -17,6 +17,12 @@ GRANT VIEW SERVER STATE to datadog;
 GRANT CONNECT ANY DATABASE to datadog;
 GRANT VIEW ANY DEFINITION to datadog;
 
+USE msdb;
+CREATE USER datadog FOR LOGIN datadog;
+GRANT SELECT to datadog;
+
+USE master;
+
 --create login for aoag
 -- this password could also be originate from an environemnt variable passed in to this script through SQLCMD
 -- it should however, match the password from the primary script
