@@ -1,8 +1,9 @@
 # Agent Check: Databricks
 
-<div class="alert alert-warning"><a href="https://docs.datadoghq.com/data_jobs/">Data Jobs Monitoring</a> helps you observe, troubleshoot, and cost-optimize your Spark and Databricks jobs and clusters.<br/><br/>
-
-This page is limited to documentation for ingesting Spark and Databricks cluster utliization metrics and logs. </div>
+<div class="alert alert-warning">
+<a href="https://docs.datadoghq.com/data_jobs/">Data Jobs Monitoring</a> helps you observe, troubleshoot, and cost-optimize your Spark and Databricks jobs and clusters.<br/><br/>
+This page is limited to documentation for ingesting Spark and Databricks cluster utilization metrics and logs. 
+</div>
 
 ![Databricks default dashboard][21]
 
