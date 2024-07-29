@@ -16,7 +16,14 @@
       "Supported OS::macOS",
       "Supported OS::Windows",
       "Category::Configuration & Deployment",
-      "Category::Containers"
+      "Category::Containers",
+      "Offering::Integration"
+    ],
+    "resources": [
+      {
+        "resource_type": "blog",
+        "url": "https://www.datadoghq.com/blog/monitor-helm-kubernetes-with-datadog/"
+      }
     ]
   },
   "author": {

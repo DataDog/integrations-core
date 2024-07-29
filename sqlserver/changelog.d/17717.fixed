@@ -1,1 +1,0 @@
-Filter query metrics by database_name if check is configured to a single non-master db

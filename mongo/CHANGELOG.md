@@ -2,6 +2,55 @@
 
 <!-- towncrier release notes start -->
 
+## 6.7.2 / 2024-07-19
+
+***Fixed***:
+
+* Rename dbms from `mongodb` to `mongo` so that dbms is consistent with integration name. ([#18067](https://github.com/DataDog/integrations-core/pull/18067))
+
+## 6.7.1 / 2024-07-17
+
+***Fixed***:
+
+* Fix coll or index stats metrics failure when the agent user is not authorized to perform $collStats or $indexStats aggregation on a collection. This fix prevents check to fail when an OperationFailure is raised to run $collStats or $indexStats on system collections such as system.replset on local database. ([#18044](https://github.com/DataDog/integrations-core/pull/18044))
+
+## 6.7.0 / 2024-07-05
+
+***Deprecated***:
+
+* Configuration option `dbnames` is deprecated and will be removed in a future release.
+  To monitor multiple databases, set `database_autodiscovery.enabled` to true and configure `database_autodiscovery.include` and `database_autodiscovery.exclude` filters instead. ([#17959](https://github.com/DataDog/integrations-core/pull/17959))
+
+***Added***:
+
+* Add config option to use reported_database_hostname to override the mongodb instance hostname detected from admin command serverStatus.host ([#17800](https://github.com/DataDog/integrations-core/pull/17800))
+* Update dependencies ([#17817](https://github.com/DataDog/integrations-core/pull/17817)), ([#17953](https://github.com/DataDog/integrations-core/pull/17953))
+* Add new `replset_me` tag to mongodb instances that belong to a replica set ([#17829](https://github.com/DataDog/integrations-core/pull/17829))
+* Add cursor object to sampled activities and explain plan payload. cursor contains the cursor information for idleCursor and getmore operations. ([#17840](https://github.com/DataDog/integrations-core/pull/17840))
+* Add tag `clustername` to mongo metrics. This tag is set only when `cluster_name` is provided in the integration configuration. ([#17876](https://github.com/DataDog/integrations-core/pull/17876))
+* Update mongo conf.yaml.example to include DBM for MongoDB config options. The new config options includes `dbm`, `cluster_name`, `operation_samples.enabled` & `operation_samples.collection_interval`. ([#17940](https://github.com/DataDog/integrations-core/pull/17940))
+* Support auto-discover available databases (up to 100 databases) for the monitored mongodb instance. 
+  By default, database autodiscovery is disabled. Set `database_autodiscovery.enabled` to true to enable database autodiscovery. 
+  When enabled, the integration will automatically discover the databases available in the monitored mongodb instance and refresh the list of databases every 10 minutes.
+  Use `database_autodiscovery.include` and `database_autodiscovery.exclude` to filter the list of databases to monitor. ([#17959](https://github.com/DataDog/integrations-core/pull/17959))
+* Added new collection latency and query execution stats metrics.
+  - mongodb.collection.totalindexsize
+  - mongodb.collection.collectionscans.nontailable
+  - mongodb.collection.collectionscans.total
+  - mongodb.collection.commands.latency
+  - mongodb.collection.commands.opsps
+  - mongodb.collection.reads.latency
+  - mongodb.collection.reads.opsps
+  - mongodb.collection.transactions.latency
+  - mongodb.collection.transactions.opsps
+  - mongodb.collection.writes.latency
+  - mongodb.collection.writes.opsps ([#17961](https://github.com/DataDog/integrations-core/pull/17961))
+
+***Fixed***:
+
+* Excludes keys `'readConcern', 'writeConcern', 'needsMerge', 'fromMongos', 'let', 'mayBypassWriteBlocking'` from sampled commands that cause explain to fail ([#17836](https://github.com/DataDog/integrations-core/pull/17836))
+* Replace deprecated collStats command with $collStats aggregation stage to collect collection metrics ([#17961](https://github.com/DataDog/integrations-core/pull/17961))
+
 ## 6.6.0 / 2024-06-13
 
 ***Added***:
@@ -14,7 +63,7 @@
 
 * Skip emitting mongodb samples on unexplainable operations ([#17785](https://github.com/DataDog/integrations-core/pull/17785))
 
-## 6.5.0 / 2024-05-31
+## 6.5.0 / 2024-05-31 / Agent 7.55.0
 
 ***Added***:
 
