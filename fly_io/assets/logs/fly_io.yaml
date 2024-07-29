@@ -7,7 +7,7 @@ pipeline:
   name: Fly.io
   enabled: true
   filter:
-    query: "source:fly-io"
+    query: "source:fly_io"
   processors:
     - type: attribute-remapper
       name: Map attribute `env` to a tag
