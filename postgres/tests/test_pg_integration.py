@@ -1192,3 +1192,33 @@ def test_pg_stat_io_metrics(aggregator, integration_check, pg_instance, dbm_enab
     expected_tags = _get_expected_tags(check, pg_instance)
     expected_count = 0 if dbm_enabled is False else 1
     check_stat_io_metrics(aggregator, expected_tags, count=expected_count)
+
+
+def test_collection_intervals(aggregator, integration_check, pg_instance):
+    pg_instance['collection_intervals'] = [
+        {'query_name': 'pg_control_checkpoint', 'collection_interval': 5},
+        {'query_name': 'pg_stat_database_conflicts', 'collection_interval': 1},
+        {'query_name': 'pg_current_snapshot', 'collection_interval': 0},
+    ]
+
+    # Run the check with custom intervals
+    check = integration_check(pg_instance)
+    check.check(pg_instance)
+
+    # First pass, all metrics should have been gathered
+    expected_tags = _get_expected_tags(check, pg_instance)
+    check_control_metrics(aggregator, expected_tags=expected_tags)
+    check_snapshot_txid_metrics(aggregator, expected_tags=expected_tags)
+    check_conflict_metrics(aggregator, expected_tags=expected_tags)
+
+    time.sleep(1)
+
+    # Reset and do another pass
+    aggregator.reset()
+    check.check(pg_instance)
+    # Skipped due to collection_interval > sleep time
+    check_control_metrics(aggregator, expected_tags=expected_tags, count=0)
+    # Executed since collection_interval < sleep time
+    check_snapshot_txid_metrics(aggregator, expected_tags=expected_tags)
+    # Executed since collection_interval = 0
+    check_conflict_metrics(aggregator, expected_tags=expected_tags)

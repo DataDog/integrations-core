@@ -89,6 +89,7 @@ class PostgresConfig:
         self.collect_database_size_metrics = is_affirmative(instance.get('collect_database_size_metrics', True))
         self.collect_wal_metrics = self._should_collect_wal_metrics(instance.get('collect_wal_metrics'))
         self.collect_bloat_metrics = is_affirmative(instance.get('collect_bloat_metrics', False))
+        self.collection_intervals = instance.get('collection_intervals', {}) or {}
         self.data_directory = instance.get('data_directory', None)
         self.ignore_databases = instance.get('ignore_databases', DEFAULT_IGNORE_DATABASES)
         if is_affirmative(instance.get('collect_default_database', True)):

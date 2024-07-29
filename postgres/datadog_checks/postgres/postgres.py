@@ -351,6 +351,20 @@ class PostgreSql(AgentCheck):
             self._collect_dynamic_queries_autodiscovery(per_database_queries)
         else:
             queries.extend(per_database_queries)
+
+        # Build query_name to collection interval mapping
+        query_to_intervals = {}
+        for el in self._config.collection_intervals:
+            query_name = el['query_name']
+            collection_interval = el['collection_interval']
+            query_to_intervals[query_name] = collection_interval
+
+        # Adjust query collection_interval time
+        for query in queries:
+            collection_interval = query_to_intervals.get(query['name'])
+            if collection_interval:
+                query['collection_interval'] = collection_interval
+
         self._dynamic_queries.append(self._new_query_executor(queries, db=self.db))
         for dynamic_query in self._dynamic_queries:
             dynamic_query.compile_queries()

@@ -239,6 +239,18 @@ instances:
     #
     # collect_wal_metrics: false
 
+    ## @param collection_intervals - list of mappings - optional
+    ## Per query configuration of collection interval (in seconds) of datadog agent's queries.
+    ## query_name is the name used in the query descriptor found in util.py and relationsmanager.py and should
+    ## match the source of the metric. For example, pg_class_size, pg_class, pg_stat_database...
+    ## This is only available for queries using QueryExecutor.
+    #
+    # collection_intervals:
+    #   - query_name: pg_class
+    #     collection_interval: 30
+    #   - query_name: pg_class_size
+    #     collection_interval: 360
+
     ## @param data_directory - string - optional - default: /usr/local/pgsql/data
     ## The data directory of your postgres installation
     ## Required when collecting WAL metrics.
