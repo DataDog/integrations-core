@@ -1,0 +1,14 @@
+{
+    "name": "Tibco EMS Pattern",
+    "query": "(source:tibco_ems OR source:tibco) status:error",
+    "visible_facets": [
+        "status",
+        "service",
+        "host"
+    ],
+    "type": "logs",
+    "timerange": {
+        "interval_ms": 3600000
+    },
+    "page": "patterns"
+}
