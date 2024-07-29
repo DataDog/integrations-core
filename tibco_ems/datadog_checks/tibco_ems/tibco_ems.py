@@ -13,7 +13,6 @@ DEFAULT_HOST = 'localhost'
 DEFAULT_PORT = 7222
 TO_BYTES = {'B': 1, 'Kb': 1e3, 'Mb': 1e6, 'Gb': 1e9, 'Tb': 1e12}
 CONNECTION_STRING = 'tcp://{}:{}'
-CONNECTION_STRING_SSL = 'ssl://{}:{}'
 
 
 class TibcoEMSCheck(AgentCheck):
@@ -33,7 +32,6 @@ class TibcoEMSCheck(AgentCheck):
         password = self.instance.get('password', "")
         script_path = self.instance.get('script_path')
         server_string = CONNECTION_STRING.format(host, port)
-        ssl = self.instance.get('ssl', False)
         self.tags = self.instance.get("tags", [])
         self.parsed_data = {}
 
@@ -47,10 +45,6 @@ class TibcoEMSCheck(AgentCheck):
             '-script',
             script_path,
         ]
-        # Build the tibeamsadmin command
-        if ssl:
-            server_string = CONNECTION_STRING_SSL.format(host, port)
-            self._get_ssl_params(self.instance)
 
     def check(self, _):
 
