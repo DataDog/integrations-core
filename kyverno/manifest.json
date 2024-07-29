@@ -45,12 +45,15 @@
         "metadata_path": "assets/service_checks.json"
       }
     },
-   "monitors": {
+    "monitors": {
       "metadata_path": "assets/monitors/controller_drops.json"
     },
     "saved_views": {
       "Kyverno Logs Overview": "assets/saved_views/logs_overview.json",
       "Kyverno Error Logs Overview": "assets/saved_views/error_logs_overview.json"
+    },
+    "dashboards": {
+      "Kyverno Overview": "assets/dashboards/overview.json"
     }
   },
   "author": {
