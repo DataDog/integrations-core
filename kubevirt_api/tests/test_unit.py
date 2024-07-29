@@ -15,7 +15,7 @@ from .mock_response import GET_PODS_RESPONSE_VIRT_API_POD, GET_VMIS_RESPONSE, GE
 pytestmark = [pytest.mark.unit]
 
 
-def test_check(dd_run_check, aggregator, instance, mocker):
+def test_check_collects_all_metrics(dd_run_check, aggregator, instance, mocker):
     mocker.patch("requests.get", wraps=mock_http_responses)
 
     check = KubevirtApiCheck("kubevirt_api", {}, [instance])
