@@ -181,6 +181,12 @@ See [service_checks.json][8] for a list of service checks provided by this integ
 
 Need help? Contact [Datadog support][9].
 
+## Further Reading
+
+Additional helpful documentation, links, and articles:
+
+- [Monitoring the health and performance of your container-native CI/CD pipelines][16]
+
 
 [1]: https://argo-cd.readthedocs.io/en/stable/
 [2]: https://app.datadoghq.com/account/settings/agent/latest
@@ -197,4 +203,5 @@ Need help? Contact [Datadog support][9].
 [13]: https://github.com/DataDog/integrations-core/blob/7.45.x/argocd/datadog_checks/argocd/data/conf.yaml.example#L164-L166
 [14]: https://argo-cd.readthedocs.io/en/stable/operator-manual/metrics/#exposing-application-labels-as-prometheus-metrics
 [15]: https://github.com/DataDog/integrations-core/blob/master/argocd/datadog_checks/argocd/data/conf.yaml.example#L45-L72
+[16]: https://www.datadoghq.com/blog/container-native-ci-cd-integrations/
 
