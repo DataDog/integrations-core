@@ -34,6 +34,9 @@
         "check": "tibco_ems.server.uptime",
         "metadata_path": "metadata.csv"
       },
+      "process_signatures": [
+        "tibemsd"
+      ],
       "service_checks": {
         "metadata_path": "assets/service_checks.json"
       }
