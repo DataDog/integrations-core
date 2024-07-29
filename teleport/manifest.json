@@ -18,6 +18,16 @@
       "Category::Cloud",
       "Category::Security",
       "Offering::Integration"
+    ],
+    "resources": [
+      {
+        "resource_type": "documentation",
+        "url": "https://docs.datadoghq.com/integrations/teleport/"
+      },
+      {
+        "resource_type": "blog",
+        "url": "https://www.datadoghq.com/blog/teleport-integration/"
+      }
     ]
   },
   "assets": {
