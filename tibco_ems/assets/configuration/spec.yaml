@@ -7,7 +7,7 @@ files:
       - name: tibemsadmin
         description: |
           The command or path to tibemsadmin (for example /usr/bin/tibemsadmin or docker exec <container> tibemsadmin)
-          can be overwritten on an instance.
+          , which can be overwritten on an instance.
         value:
           type: string
           example: /usr/bin/tibemsadmin
@@ -20,7 +20,7 @@ files:
         type: string
         example: localhost
     - name: port
-      description: The port used to connect to Tibco EMS server.
+      description: The port used to connect to the Tibco EMS server.
       value:
         type: integer
         example: 7222
@@ -28,14 +28,14 @@ files:
       description: |
         Username from the credentials needed to connect to the host. These are the credentials for the Tibco EMS server.
         For the check to work, this user must have access so that the Datadog Tibeco EMS
-        check can execute the `show` command
+        check can execute the `show` command.
       value:
         type: string
     - name: password
       description: |
         Password from the credentials needed to connect to the host. These are the credentials for the Tibco EMS server.
         For the check to work, this user must have access so that the Datadog Tibeco EMS
-        check can execute the `show` command
+        check can execute the `show` command.
       value:
         type: string
     - name: script_path
@@ -46,9 +46,9 @@ files:
     - name:  tibemsadmin
       description: |
         The command or path to tibemsadmin (for example /usr/bin/tibemsadmin or docker exec <container> tibemsadmin)
-        can be overwritten on an instance.
+        , which can be overwritten on an instance.
 
-        This overrides ` tibemsadmin` defined in `init_config`.
+        This overrides `ibemsadmin` defined in `init_config`.
       value:
         type: string
     - template: instances/default

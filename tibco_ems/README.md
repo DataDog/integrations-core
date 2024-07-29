@@ -2,7 +2,7 @@
 
 ## Overview
 
-This check monitors [tibco_ems][1] through the Datadog Agent.
+This check monitors [[TIBCO Enterprise Message Service][1] through the Datadog Agent. This integration allows you to do ...
 
 ## Setup
 
@@ -10,12 +10,12 @@ Follow the instructions below to install and configure this check for an Agent r
 
 ### Installation
 
-The tibco_ems check is included in the [Datadog Agent][2] package.
+The TIBCO EMS check is included in the [Datadog Agent][2] package.
 No additional installation is needed on your server.
 
 ### Configuration
 
-1. Edit the `tibco_ems.d/conf.yaml` file, in the `conf.d/` folder at the root of your Agent's configuration directory to start collecting your tibco_ems performance data. See the [sample tibco_ems.d/conf.yaml][4] for all available configuration options.
+1. Edit the `tibco_ems.d/conf.yaml` file, in the `conf.d/` folder at the root of your Agent's configuration directory to start collecting your TIBCO EMS performance data. See the [sample tibco_ems.d/conf.yaml][4] for all available configuration options.
 
 2. [Restart the Agent][5].
 
@@ -31,11 +31,9 @@ See [metadata.csv][7] for a list of metrics provided by this integration.
 
 ### Events
 
-The tibco_ems integration does not include any events.
+The TIBCO EMS integration does not include any events.
 
 ### Service Checks
-
-The tibco_ems integration does not include any service checks.
 
 See [service_checks.json][8] for a list of service checks provided by this integration.
 
