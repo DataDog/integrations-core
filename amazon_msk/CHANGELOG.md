@@ -2,6 +2,16 @@
 
 <!-- towncrier release notes start -->
 
+## 4.9.0 / 2024-07-05
+
+***Added***:
+
+* Update dependencies ([#17817](https://github.com/DataDog/integrations-core/pull/17817)), ([#17953](https://github.com/DataDog/integrations-core/pull/17953))
+
+***Fixed***:
+
+* Update config model names ([#17802](https://github.com/DataDog/integrations-core/pull/17802))
+
 ## 4.8.0 / 2024-05-31
 
 ***Added***:

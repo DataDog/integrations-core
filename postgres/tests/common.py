@@ -119,10 +119,13 @@ requires_static_version = pytest.mark.skipif(USING_LATEST, reason='Version `late
 
 def _iterate_metric_name(query):
     if 'columns' in query:
+        metric_prefix = ''
+        if 'metric_prefix' in query:
+            metric_prefix = f'{query["metric_prefix"]}.'
         for column in query['columns']:
             if column['type'].startswith('tag'):
                 continue
-            yield column['name']
+            yield f'{metric_prefix}{column["name"]}'
     else:
         for metric in query['metrics'].values():
             yield metric[0]

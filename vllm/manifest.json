@@ -17,7 +17,8 @@
       "Supported OS::macOS",
       "Category::Log Collection",
       "Category::AI/ML",
-      "Submitted Data Type::Metrics"
+      "Submitted Data Type::Metrics",
+      "Offering::Integration"
     ]
   },
   "assets": {
@@ -38,11 +39,17 @@
       },
       "service_checks": {
         "metadata_path": "assets/service_checks.json"
-      }
+      },
+      "process_signatures": [
+        "vllm.entrypoints.openai.api_server"
+      ]
     },
     "monitors": {
-        "token_throughput": "assets/monitors/token_throughput.json",
-        "latency": "assets/monitors/latency.json"
+      "token_throughput": "assets/monitors/token_throughput.json",
+      "latency": "assets/monitors/latency.json"
+    },
+    "dashboards": {
+      "vLLM Overview": "assets/dashboards/overview.json"
     }
   },
   "author": {

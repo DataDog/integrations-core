@@ -28,6 +28,10 @@ def instance_collect_bloat_metrics():
     return False
 
 
+def instance_collect_buffercache_metrics():
+    return False
+
+
 def instance_collect_checksum_metrics():
     return False
 
@@ -134,3 +138,7 @@ def instance_table_count_limit():
 
 def instance_tag_replication_role():
     return False
+
+
+def instance_use_global_custom_queries():
+    return 'extend'

@@ -1,0 +1,14 @@
+{
+    "name": "Kyverno Pattern",
+    "query": "source:kyverno OR source:reports-controller OR source:background-controller OR source:cleanup-controller",
+    "visible_facets": [
+        "status",
+        "service",
+        "host"
+    ],
+    "type": "logs",
+    "timerange": {
+        "interval_ms": 3600000
+    },
+    "page": "patterns"
+}

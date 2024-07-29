@@ -1,0 +1,1 @@
+Properly collect `temporal.add_search_attributes.workflow_failure` as a gauge

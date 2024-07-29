@@ -460,8 +460,87 @@ def populate_database():
     cur.execute("GRANT SELECT ON testdb.users TO 'dog'@'%';")
     cur.execute("GRANT SELECT, UPDATE ON testdb.users TO 'bob'@'%';")
     cur.execute("GRANT SELECT, UPDATE ON testdb.users TO 'fred'@'%';")
+    add_schema_test_databases(cur)
     cur.close()
     _create_explain_procedure(conn, "testdb")
+
+
+def add_schema_test_databases(cursor):
+    cursor.execute("USE mysql;")
+    cursor.execute("CREATE DATABASE datadog_test_schemas;")
+    cursor.execute("USE datadog_test_schemas;")
+    cursor.execute("GRANT SELECT ON datadog_test_schemas.* TO 'dog'@'%';")
+    cursor.execute(
+        """CREATE TABLE cities (
+           id INT NOT NULL DEFAULT 0,
+           name VARCHAR(255),
+           population INT NOT NULL DEFAULT 0,
+           CONSTRAINT PK_Cities PRIMARY KEY (id))
+        """
+    )
+    cursor.execute(
+        """CREATE TABLE cities_partitioned (
+           id INT NOT NULL DEFAULT 0,
+           name VARCHAR(255),
+           population INT NOT NULL DEFAULT 0,
+           CONSTRAINT PK_Cities PRIMARY KEY (id))
+
+           PARTITION BY RANGE (id) (
+           PARTITION p0 VALUES LESS THAN (100),
+           PARTITION p1 VALUES LESS THAN (200),
+           PARTITION p2 VALUES LESS THAN (300),
+           PARTITION p3 VALUES LESS THAN MAXVALUE);
+        """
+    )
+
+    # create one column index
+    cursor.execute("CREATE INDEX single_column_index ON cities (population);")
+    # create two column index
+    cursor.execute("CREATE INDEX two_columns_index ON cities (id, name);")
+
+    cursor.execute(
+        """CREATE TABLE landmarks (
+           name VARCHAR(255),
+           city_id INT DEFAULT 0,
+           CONSTRAINT FK_CityId FOREIGN KEY (city_id) REFERENCES cities(id));
+        """
+    )
+
+    cursor.execute(
+        """ CREATE TABLE Restaurants (
+            RestaurantName VARCHAR(255),
+            District VARCHAR(100),
+            Cuisine VARCHAR(100),
+            CONSTRAINT UC_RestaurantNameDistrict UNIQUE (RestaurantName, District));
+        """
+    )
+
+    cursor.execute(
+        """CREATE TABLE RestaurantReviews (
+            RestaurantName VARCHAR(255),
+            District VARCHAR(255),
+            Review TEXT,
+            CONSTRAINT FK_RestaurantNameDistrict FOREIGN KEY (RestaurantName, District)
+            REFERENCES Restaurants(RestaurantName, District));
+        """
+    )
+    # Second DB
+    cursor.execute("CREATE DATABASE datadog_test_schemas_second;")
+    cursor.execute("USE datadog_test_schemas_second;")
+    cursor.execute("GRANT SELECT ON datadog_test_schemas_second.* TO 'dog'@'%';")
+    cursor.execute("CREATE TABLE IF NOT EXISTS ϑings (id INT DEFAULT 0, name VARCHAR(255));")
+    cursor.execute("CREATE UNIQUE INDEX thingsindex ON ϑings (name);")
+
+    cursor.execute(
+        """CREATE TABLE ts (id INT, purchased DATE)
+           PARTITION BY RANGE( YEAR(purchased) )
+           SUBPARTITION BY HASH( TO_DAYS(purchased) )
+           SUBPARTITIONS 2 (
+               PARTITION p0 VALUES LESS THAN (1990),
+               PARTITION p1 VALUES LESS THAN (2000),
+               PARTITION p2 VALUES LESS THAN MAXVALUE);
+        """
+    )
 
 
 def _wait_for_it_script():

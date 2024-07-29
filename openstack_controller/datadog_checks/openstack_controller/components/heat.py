@@ -26,7 +26,7 @@ class Heat(Component):
     @Component.http_error(report_service_check=True)
     def _report_response_time(self, global_components_config, tags):
         self.check.log.debug("reporting `%s` response time", Heat.ID.value)
-        response_time = self.check.api.get_response_time(Heat.TYPES.value)
+        response_time = self.check.api.get_response_time(Heat.TYPES.value, is_heat=True)
         self.check.log.debug("`%s` response time: %s", Heat.ID.value, response_time)
         self.check.gauge(HEAT_RESPONSE_TIME, response_time, tags=tags)
 

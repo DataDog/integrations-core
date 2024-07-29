@@ -260,6 +260,8 @@ WiredTiger storage engine.
 """
 WIREDTIGER_METRICS = {
     "wiredTiger.cache.bytes currently in the cache": (GAUGE, "wiredTiger.cache.bytes_currently_in_cache"),
+    "wiredTiger.cache.bytes read into cache": GAUGE,
+    "wiredTiger.cache.bytes written from cache": GAUGE,
     "wiredTiger.cache.failed eviction of pages that exceeded the in-memory maximum": (
         RATE,
         "wiredTiger.cache.failed_eviction_of_pages_exceeding_the_in-memory_maximum",
@@ -270,6 +272,7 @@ WIREDTIGER_METRICS = {
     "wiredTiger.cache.modified pages evicted": GAUGE,
     "wiredTiger.cache.pages read into cache": GAUGE,
     "wiredTiger.cache.pages written from cache": GAUGE,
+    "wiredTiger.cache.pages requested from the cache": (GAUGE, "wiredTiger.cache.pages_requested_from_cache"),
     "wiredTiger.cache.pages currently held in the cache": (GAUGE, "wiredTiger.cache.pages_currently_held_in_cache"),
     "wiredTiger.cache.pages evicted because they exceeded the in-memory maximum": (
         RATE,
@@ -313,6 +316,7 @@ TOP_METRICS = {
 }
 
 COLLECTION_METRICS = {
+    # collection storage stats
     'collection.size': GAUGE,
     'collection.avgObjSize': GAUGE,
     'collection.count': GAUGE,
@@ -321,6 +325,19 @@ COLLECTION_METRICS = {
     'collection.maxSize': GAUGE,
     'collection.storageSize': GAUGE,
     'collection.nindexes': GAUGE,
+    'collection.totalIndexSize': GAUGE,
+    # collection latency stats
+    'collection.reads.latency': GAUGE,
+    'collection.reads.ops': RATE,
+    'collection.writes.ops': RATE,
+    'collection.writes.latency': GAUGE,
+    'collection.commands.latency': GAUGE,
+    'collection.commands.ops': RATE,
+    'collection.transactions.latency': GAUGE,
+    'collection.transactions.ops': RATE,
+    # collection query exec stats
+    'collection.collectionScans.total': GAUGE,
+    'collection.collectionScans.nonTailable': GAUGE,
 }
 
 """

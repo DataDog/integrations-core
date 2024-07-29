@@ -2,6 +2,26 @@
 
 <!-- towncrier release notes start -->
 
+## 19.0.0 / 2024-07-05
+
+***Changed***:
+
+* Drop explain plan errors to debug level.
+
+  Explain plan collection can fail for any number of legitimate reasons, so avoid polluting the logs by logging them at the debug level. ([#17974](https://github.com/DataDog/integrations-core/pull/17974))
+
+***Added***:
+
+* Update dependencies ([#17817](https://github.com/DataDog/integrations-core/pull/17817)), ([#17953](https://github.com/DataDog/integrations-core/pull/17953))
+* Add toast metrics to relation metrics and remove usage of pg_stat_user_tables ([#17897](https://github.com/DataDog/integrations-core/pull/17897))
+* Add collect of metrics for buffer cache usage ([#17960](https://github.com/DataDog/integrations-core/pull/17960))
+
+***Fixed***:
+
+* Update config model names ([#17802](https://github.com/DataDog/integrations-core/pull/17802))
+* Upgrade `azure-identity` dependency ([#17862](https://github.com/DataDog/integrations-core/pull/17862))
+* Ignore DBM explain plan collection queries in query metrics. ([#17903](https://github.com/DataDog/integrations-core/pull/17903))
+
 ## 18.3.0 / 2024-05-31
 
 ***Added***:
