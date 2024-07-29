@@ -9,5 +9,5 @@ services:
         - SQLSERVER_BASE_IMAGE=${SQLSERVER_BASE_IMAGE}
     ports:
       - "1433:1433"
-    # environment:
-    #   - MSSQL_AGENT_ENABLED=true
+    environment:
+      - MSSQL_AGENT_ENABLED=true
