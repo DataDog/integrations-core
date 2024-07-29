@@ -17,7 +17,9 @@
       "Supported OS::macOS",
       "Category::Cloud",
       "Category::Security",
-      "Offering::Integration"
+      "Offering::Integration", 
+      "Submitted Data Type::Metrics",
+      "Submitted Data Type::Logs"
     ],
     "resources": [
       {
