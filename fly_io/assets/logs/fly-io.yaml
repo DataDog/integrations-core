@@ -1,4 +1,5 @@
-id: fly-io
+id: fly_io
+metric_id: fly-io
 backend_only: false
 facets: null
 pipeline:
