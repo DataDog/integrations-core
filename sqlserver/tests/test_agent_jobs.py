@@ -320,6 +320,11 @@ def agent_jobs_instance(instance_docker):
         'agent_jobs_history_row_limit': 10000,
     }
     instance_docker['min_collection_interval'] = 1
+    # do not need other dbm metrics
+    instance_docker['query_activity'] = {'enabled': False}
+    instance_docker['query_metrics'] = {'enabled': False}
+    instance_docker['procedure_metrics'] = {'enabled': False}
+    instance_docker['collect_settings'] = {'enabled': False}
     return copy(instance_docker)
 
 
@@ -413,7 +418,6 @@ def test_history_output(instance_docker, sa_conn):
 
 
 #  minimum length assertions rather than equality to avoid failures if sqlserver agent adds history/activity data
-@pytest.mark.skip
 def test_agent_jobs_integration(aggregator, dd_run_check, agent_jobs_instance, sa_conn):
     with sa_conn as conn:
         with conn.cursor() as cursor:
