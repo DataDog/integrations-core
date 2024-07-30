@@ -390,7 +390,7 @@ def test_connection_failure(aggregator, dd_run_check, instance_docker):
     [
         (
             "unknown_adoprovider",
-            {'adoprovider': "fake"},
+            {'adoprovider': "fake", 'password': "test\1234"},
             {".*": "TCP-connection\\(OK\\).*Provider cannot be found. It may not be properly installed."},
             ConnectionErrorCode.driver_not_found,
         ),
@@ -504,6 +504,9 @@ def test_connection_error_reporting(
         assert expected_link.lower() in message or user_link.lower() in message
     else:
         assert expected_link.lower() in message
+
+    if driver == "adoprovider":
+        assert instance_docker["password"] not in message
 
 
 @pytest.mark.unit
