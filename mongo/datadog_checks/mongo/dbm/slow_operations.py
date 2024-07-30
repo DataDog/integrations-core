@@ -180,7 +180,7 @@ class MongoSlowOperations(DBMAsyncJob):
             else:
                 return mid + 1
         return left
-    
+
     def _create_slow_operation_event(self, slow_operation):
         event = {
             "timestamp": slow_operation["ts"] * 1000,
@@ -223,7 +223,7 @@ class MongoSlowOperations(DBMAsyncJob):
             "lock_stats": format_key_name(self._check.convert_to_underscore_separated, slow_operation.get("locks", {})),
             "flow_control_stats": format_key_name(
                 self._check.convert_to_underscore_separated, slow_operation.get("flowControl", {})
-            )
+            ),
         }
 
         calling_client_hostname = slow_operation.get("client") or slow_operation.get("remote")
@@ -241,6 +241,6 @@ class MongoSlowOperations(DBMAsyncJob):
             "collection_interval": self._collection_interval,
             "ddtags": self._check._get_tags(include_deployment_tags=True),
             "timestamp": time.time() * 1000,
-            "mongodb_slow_queries": slow_operation_events
+            "mongodb_slow_queries": slow_operation_events,
         }
         self._check.database_monitoring_query_activity(json_util.dumps(payload))
