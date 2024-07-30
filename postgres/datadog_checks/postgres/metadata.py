@@ -2,6 +2,7 @@
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
 import json
+import re
 import time
 from typing import Dict, List, Optional, Tuple, Union  # noqa: F401
 
@@ -82,7 +83,8 @@ FROM   pg_class c
               ON c.reltoastrelid = t.oid
 WHERE  c.relkind IN ( 'r', 'p' )
        AND c.relispartition != 't'
-       AND c.relnamespace = {schema_oid};
+       AND c.relnamespace = {schema_oid}
+       {filter};
 """
 
 PG_TABLES_QUERY_V9 = """
@@ -95,7 +97,8 @@ FROM   pg_class c
        left join pg_class t
               ON c.reltoastrelid = t.oid
 WHERE  c.relkind IN ( 'r' )
-       AND c.relnamespace = {schema_oid};
+       AND c.relnamespace = {schema_oid}
+       {filter};
 """
 
 
@@ -297,9 +300,15 @@ class PostgresMetadata(DBMAsyncJob):
 
             for database in schema_metadata:
                 dbname = database["name"]
+                if not self._should_include_metadata(dbname, "database"):
+                    continue
+
                 with self.db_pool.get_connection(dbname, self._config.idle_connection_timeout) as conn:
                     with conn.cursor(cursor_factory=psycopg2.extras.DictCursor) as cursor:
                         for schema in database["schemas"]:
+                            if not self._should_include_metadata(dbname, "schema"):
+                                continue
+
                             tables = self._query_tables_for_schema(cursor, schema["id"], dbname)
                             table_chunks = list(get_list_chunks(tables, chunk_size))
 
@@ -321,6 +330,24 @@ class PostgresMetadata(DBMAsyncJob):
                             if len(tables_buffer) > 0:
                                 self._flush_schema(base_event, database, schema, tables_buffer)
             self._is_schemas_collection_in_progress = False
+
+    def _should_include_database_metadata(self, name, metadata_type):
+        for re_str in self._config.schemas_metadata_config.get(
+            "exclude_{metadata_type}s".format(metadata_type=metadata_type), []
+        ):
+            regex = re.compile(re_str)
+            if regex.match(name):
+                return False
+        includes = self._config.schemas_metadata_config.get(
+            "include_{metadata_type}s".format(metadata_type=metadata_type), []
+        )
+        if len(includes) == 0:
+            return True
+        for re_str in includes:
+            regex = re.compile(re_str)
+            if regex.match(name):
+                return True
+        return False
 
     def _flush_schema(self, base_event, database, schema, tables):
         event = {
@@ -389,11 +416,13 @@ class PostgresMetadata(DBMAsyncJob):
         If any tables are partitioned, only the master paritition table name will be returned, and none of its children.
         """
         limit = self._config.schemas_metadata_config.get("max_tables", 300)
+        filter = self._get_tables_filter(self)
+
         if self._config.relations:
             if VersionUtils.transform_version(str(self._check.version))["version.major"] == "9":
-                cursor.execute(PG_TABLES_QUERY_V9.format(schema_oid=schema_id))
+                cursor.execute(PG_TABLES_QUERY_V9.format(schema_oid=schema_id, filter=filter))
             else:
-                cursor.execute(PG_TABLES_QUERY_V10_PLUS.format(schema_oid=schema_id))
+                cursor.execute(PG_TABLES_QUERY_V10_PLUS.format(schema_oid=schema_id, filter=filter))
             rows = cursor.fetchall()
             table_info = [dict(row) for row in rows]
             return self._sort_and_limit_table_info(cursor, dbname, table_info, limit)
@@ -402,6 +431,25 @@ class PostgresMetadata(DBMAsyncJob):
             # Config error should catch the case where schema collection is enabled
             # and relation metrics aren't, but adding a warning here just in case
             self._check.log.warning("Relation metrics are not configured for {dbname}, so tables cannot be collected")
+
+    def _get_tables_filter(self):
+        includes = self._config.schemas_metadata_config.get("include_tables", [])
+        excludes = self._config.schemas_metadata_config.get("exclude_tables", [])
+        if len(includes) == 0 and len(excludes) == 0:
+            return ""
+
+        fitler = ""
+        if len(includes) > 0:
+            fitler = "AND ("
+            fitler += " OR ".join("c.relname ~ '{r}'".format(r=r.replace("'", "''")) for r in includes)
+            fitler += ")"
+
+        if len(excludes) > 0:
+            fitler = "AND NOT ("
+            fitler += " OR ".join("c.relname ~ '{r}'".format(r=r.replace("'", "''")) for r in excludes)
+            fitler += ")"
+
+        return filter
 
     def _sort_and_limit_table_info(
         self, cursor, dbname, table_info: List[Dict[str, Union[str, bool]]], limit: int
