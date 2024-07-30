@@ -1,1 +1,1 @@
-Collect `kyverno.policy.rule.info` properly
+Fix the collection of `kyverno.policy.rule.info` metric
