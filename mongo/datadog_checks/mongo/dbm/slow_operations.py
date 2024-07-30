@@ -78,6 +78,8 @@ class MongoSlowOperations(DBMAsyncJob):
             ):
                 slow_operation_events.append(self._create_slow_operation_event(slow_operation))
 
+        self._check.log.debug("Collected %d slow operations", len(slow_operation_events))
+        self._check.log.debug("Sending slow operations: %s", slow_operation_events)
         if slow_operation_events:
             self._submit_slow_operation_payload(slow_operation_events)
 
