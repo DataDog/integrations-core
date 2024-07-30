@@ -22,6 +22,8 @@ jobs:
           app-id: ${{ secrets.app-id }}
           private-key: ${{ secrets.private-key }}
           repositories: integrations-core
+      - name: debug
+        run: curl https://api.github.com/repos/DataDog/integrations-core/issues/18153/labels
       - name: Add labels
         uses: actions/labeler@v4
         with:

@@ -70,5 +70,6 @@ RENAME_LABELS_MAP = {
     # These don't actually exist, but in the off chance they do we should remap them to not conflict with
     # regular generic tags.
     'name': 'kyverno_name',
-    'namespace': 'kyverno_namespace',
+    'namespace': 'kyverno_namespace'
+    #test change
 }
