@@ -64,11 +64,12 @@ def test_check_collects_all_metrics(dd_run_check, aggregator, instance, mocker):
 
     # VM metrics
     vm_tags = [
+        "kube_cluster_name:test-cluster",
+        "kube_namespace:default",
         "vm_name:testvm",
         "vm_uid:46bc4e2b-d287-4408-8393-c7accdd73291",
         "vm_size:small",
         "vm_domain:testvm",
-        "kube_namespace:default",
     ]
     aggregator.assert_metric(
         "kubevirt_api.vm.count",
@@ -78,6 +79,7 @@ def test_check_collects_all_metrics(dd_run_check, aggregator, instance, mocker):
 
     # VMI metrics
     vmi_tags = [
+        "kube_cluster_name:test-cluster",
         "kube_namespace:default",
         "vmi_domain:testvm",
         "vmi_name:testvm-2",

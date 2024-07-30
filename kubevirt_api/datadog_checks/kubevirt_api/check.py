@@ -133,6 +133,9 @@ class KubevirtApiCheck(OpenMetricsBaseCheckV2):
         tags.append(f"vm_uid:{vm['metadata']['uid']}")
         tags.append(f"kube_namespace:{vm['metadata']['namespace']}")
 
+        if self.kube_cluster_name:
+            tags.append(f"kube_cluster_name:{self.kube_cluster_name}")
+
         for label, value in vm["spec"]["template"]["metadata"]["labels"].items():
             if not label.startswith("kubevirt.io/"):
                 continue
@@ -150,6 +153,9 @@ class KubevirtApiCheck(OpenMetricsBaseCheckV2):
         tags.append(f"vmi_uid:{vmi['metadata']['uid']}")
         tags.append(f"vmi_phase:{vmi['status']['phase']}")
         tags.append(f"kube_namespace:{vmi['metadata']['namespace']}")
+
+        if self.kube_cluster_name:
+            tags.append(f"kube_cluster_name:{self.kube_cluster_name}")
 
         for label, value in vmi["metadata"]["labels"].items():
             if not label.startswith("kubevirt.io/"):
