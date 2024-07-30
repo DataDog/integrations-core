@@ -1,0 +1,57 @@
+{
+  "manifest_version": "2.0.0",
+  "app_uuid": "0db7b333-38a1-4e09-af1b-317da2f9f413",
+  "app_id": "kubeflow",
+  "display_on_public_website": false,
+  "tile": {
+    "overview": "README.md#Overview",
+    "configuration": "README.md#Setup",
+    "support": "README.md#Support",
+    "changelog": "CHANGELOG.md",
+    "description": "<FILL IN - A brief description of what this offering provides>",
+    "title": "Kubeflow",
+    "media": [],
+    "classifier_tags": [
+      "<Add relevant tags from this list: https://docs.datadoghq.com/developers/integrations/check_references/#classifier-tags>",
+      "Supported OS::Linux",
+      "Supported OS::Windows",
+      "Supported OS::macOS",
+      "Category::<FILL IN>",
+      "Offering::<FILL IN>",
+      "Queried Data Type::<FILL IN>",
+      "Submitted Data Type::<FILL IN>"
+    ]
+  },
+  "assets": {
+    "integration": {
+      "auto_install": true,
+      "source_type_id": 22259533,
+      "source_type_name": "Kubeflow",
+      "configuration": {
+        "spec": "assets/configuration/spec.yaml"
+      },
+      "events": {
+        "creates_events": false
+      },
+      "metrics": {
+        "prefix": "kubeflow.",
+        "check": "",
+        "metadata_path": "metadata.csv"
+      },
+      "service_checks": {
+        "metadata_path": "assets/service_checks.json"
+      }
+    },
+    "dashboards": {
+        "<FILL IN dashboard short_name ex: integration name overview>": "assets/dashboards/<FILL IN>.json"
+    },
+    "monitors": {},
+    "saved_views": {}
+  },
+  "author": {
+    "support_email": "help@datadoghq.com",
+    "name": "Datadog",
+    "homepage": "https://www.datadoghq.com",
+    "sales_email": "info@datadoghq.com"
+  }
+}
