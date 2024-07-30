@@ -714,6 +714,7 @@ files:
         example: 1800
         display_default: false
     - name: schemas_collection
+      hidden: True
       description: |
         Configure collection of schemas. If `database_autodiscovery` is not enabled, data is collected
         only for the database configured with `database` parameter.
