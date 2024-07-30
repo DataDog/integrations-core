@@ -381,7 +381,7 @@ def test_history_output(instance_docker, sa_conn):
             cursor.execute(JOB_CREATION_QUERY)
             cursor.execute("SELECT * FROM msdb.dbo.sysjobs")
             results = cursor.fetchall()
-            assert len(results) == 2, "should have 2 created jobs"
+            assert len(results) >= 2, "should have 2 created jobs and potentially built in job"
             # job 1 completes once, job 2 completes twice, an instance of job 1 is still in progress
             # should result in 7 steps of job history events to submit
             job_and_step_series_now = [(1, 1), (1, 2), (2, 1), (1, 0)]
@@ -435,10 +435,10 @@ def test_agent_jobs_integration(aggregator, dd_run_check, agent_jobs_instance, s
             cursor.execute(ACTIVITY_INSERTION_QUERY)
             cursor.execute("SELECT * FROM msdb.dbo.sysjobactivity")
             results = cursor.fetchall()
-            assert len(results) == 1, "should have 1 entry in activity"
+            assert len(results) >= 1, "should have 1 entry in activity and potentially built in job activity"
     check = SQLServer(CHECK_NAME, {}, [agent_jobs_instance])
     check.agent_history._last_collection_time = now - 1
-    time.sleep(0.1)
+    time.sleep(1)
     dd_run_check(check)
     dbm_activity = aggregator.get_event_platform_events("dbm-activity")
     job_events = [e for e in dbm_activity if (e.get('sqlserver_job_history', None) is not None)]
@@ -450,7 +450,7 @@ def test_agent_jobs_integration(aggregator, dd_run_check, agent_jobs_instance, s
     assert job_event['ddagentversion'], "missing ddagentversion"
     assert type(job_event['collection_interval']) in (float, int), "invalid collection_interval"
     history_rows = job_event['sqlserver_job_history']
-    assert len(history_rows) == 7, "should have at least 7 rows of history associated with new completed jobs"
+    assert len(history_rows) == 7, "should have 7 rows of history associated with new completed jobs"
     history_row = history_rows[0]
 
     # assert that all main fields are present
