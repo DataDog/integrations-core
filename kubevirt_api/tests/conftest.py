@@ -90,6 +90,7 @@ def instance():
     return {
         "kubevirt_api_metrics_endpoint": "https://10.244.0.38:443/metrics",
         "kubevirt_api_healthz_endpoint": "https://10.244.0.38:443/healthz",
+        "kube_namespace": "kubevirt",
         "kube_cluster_name": "test-cluster",
     }
 
