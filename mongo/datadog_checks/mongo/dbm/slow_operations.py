@@ -195,13 +195,9 @@ class MongoSlowOperations(DBMAsyncJob):
             "query_hash": slow_operation.get("queryHash"),  # only available with profiling
             "plan_cache_key": slow_operation.get("planCacheKey"),  # only available with profiling
             "query_framework": slow_operation.get("queryFramework"),
-            "cursor": {
-                "cursor_id": slow_operation.get("cursorid"),
-                "originating_command": slow_operation.get("originatingCommand"),
-            },
             # metrics
             "mills": slow_operation.get("millis", slow_operation.get("durationMillis", 0)),
-            "num_yield": slow_operation.get("numYield"),
+            "num_yields": slow_operation.get("numYield", 0),
             "response_length": slow_operation.get("responseLength", 0),
             "nreturned": slow_operation.get("nreturned"),
             "nmatched": slow_operation.get("nMatched"),
@@ -214,23 +210,41 @@ class MongoSlowOperations(DBMAsyncJob):
             "write_conflicts": slow_operation.get("writeConflicts"),
             "cpu_nanos": slow_operation.get("cpuNanos"),
             "planning_time_micros": slow_operation.get("planningTimeMicros"),  # only available with profiling
-            "upsert": slow_operation.get("upsert", False),
-            "has_sort_stage": slow_operation.get("hasSortStage", False),
-            "used_disk": slow_operation.get("usedDisk", False),
-            "from_multi_planner": slow_operation.get("fromMultiPlanner", False),
-            "replanned": slow_operation.get("replanned", False),
-            "replan_reason": slow_operation.get("replanReason"),
-            "lock_stats": format_key_name(self._check.convert_to_underscore_separated, slow_operation.get("locks", {})),
-            "flow_control_stats": format_key_name(
-                self._check.convert_to_underscore_separated, slow_operation.get("flowControl", {})
-            ),
+            "upsert": slow_operation.get("upsert"),  # only available with profiling
+            "has_sort_stage": slow_operation.get("hasSortStage"),  # only available with profiling
+            "used_disk": slow_operation.get("usedDisk"),  # only available with profiling
+            "from_multi_planner": slow_operation.get("fromMultiPlanner"),  # only available with profiling
+            "replanned": slow_operation.get("replanned"),  # only available with profiling
+            "replan_reason": slow_operation.get("replanReason"),  # only available with profiling
         }
 
         calling_client_hostname = slow_operation.get("client") or slow_operation.get("remote")
         if calling_client_hostname:
             event["client"] = {"hostname": calling_client_hostname}
 
-        return event
+        cursor_id = slow_operation.get("cursorid")
+        originating_command = slow_operation.get("originatingCommand")
+        if cursor_id or originating_command:
+            event["cursor"] = {
+                "cursor_id": cursor_id,
+                "originating_command": originating_command,
+            }
+
+        lock_stats = slow_operation.get("locks")
+        if lock_stats:
+            event["lock_stats"] = format_key_name(self._check.convert_to_underscore_separated, lock_stats)
+
+        flow_control_stats = slow_operation.get("flowControl")
+        if flow_control_stats:
+            event["flow_control_stats"] = format_key_name(
+                self._check.convert_to_underscore_separated, flow_control_stats
+            )
+
+        return self._sanitize_event(event)
+
+    def _sanitize_event(self, event):
+        # remove empty fields
+        return {k: v for k, v in event.items() if v is not None}
 
     def _submit_slow_operation_payload(self, slow_operation_events):
         payload = {
