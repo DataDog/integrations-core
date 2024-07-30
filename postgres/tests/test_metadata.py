@@ -137,6 +137,24 @@ def test_collect_schemas(integration_check, dbm_instance, aggregator):
     assert_not_fields(tables_got, tables_not_reported_set)
 
 
+def test_get_table_filter(integration_check, dbm_instance):
+    test_cases = [
+        [{'include_tables': ['cats']}, " AND (c.relname ~ 'cats')"],
+        [{'exclude_tables': ['dogs']}, " AND NOT (c.relname ~ 'dogs')"],
+        [
+            {'include_tables': ['cats', "'people'"], 'exclude_tables': ['dogs', 'iguanas\\d+']},
+            " AND (c.relname ~ 'cats' OR c.relname ~ '''people''')"
+            " AND NOT (c.relname ~ 'dogs' OR c.relname ~ 'iguanas\\d+')",
+        ],
+    ]
+    for tc in test_cases:
+        dbm_instance['collect_schemas'] = tc[0]
+        check = integration_check(dbm_instance)
+        metadata = check.metadata_samples
+        filter = metadata._get_tables_filter()
+        assert filter == tc[1]
+
+
 def assert_fields(keys: List[str], fields: List[str]):
     for field in fields:
         assert field in keys

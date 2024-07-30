@@ -438,18 +438,18 @@ class PostgresMetadata(DBMAsyncJob):
         if len(includes) == 0 and len(excludes) == 0:
             return ""
 
-        fitler = ""
+        sql = ""
         if len(includes) > 0:
-            fitler = "AND ("
-            fitler += " OR ".join("c.relname ~ '{r}'".format(r=r.replace("'", "''")) for r in includes)
-            fitler += ")"
+            sql += " AND ("
+            sql += " OR ".join("c.relname ~ '{r}'".format(r=r.replace("'", "''")) for r in includes)
+            sql += ")"
 
         if len(excludes) > 0:
-            fitler = "AND NOT ("
-            fitler += " OR ".join("c.relname ~ '{r}'".format(r=r.replace("'", "''")) for r in excludes)
-            fitler += ")"
+            sql += " AND NOT ("
+            sql += " OR ".join("c.relname ~ '{r}'".format(r=r.replace("'", "''")) for r in excludes)
+            sql += ")"
 
-        return filter
+        return sql
 
     def _sort_and_limit_table_info(
         self, cursor, dbname, table_info: List[Dict[str, Union[str, bool]]], limit: int
