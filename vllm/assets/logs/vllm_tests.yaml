@@ -16,7 +16,7 @@ tests:
      - "source:LOGS_SOURCE"
     timestamp: 1718132521
 
--
+ -
   sample: |-
     WARNING 06-11 21:01:50 ray_utils.py:46] Failed to import Ray with ModuleNotFoundError("No module named 'ray'"). For multi-node inference, please install Ray with `pip install ray`.
   result:
