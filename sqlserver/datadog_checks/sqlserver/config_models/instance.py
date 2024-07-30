@@ -25,9 +25,9 @@ class AgentJobs(BaseModel):
         arbitrary_types_allowed=True,
         frozen=True,
     )
-    history_row_limit: Optional[int] = None
     collection_interval: Optional[float] = None
     enabled: Optional[bool] = None
+    history_row_limit: Optional[int] = None
 
 
 class Aws(BaseModel):

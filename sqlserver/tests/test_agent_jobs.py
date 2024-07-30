@@ -315,6 +315,7 @@ VALUES (
 );
 """
 
+
 @pytest.fixture
 def agent_jobs_instance(instance_docker):
     instance_docker['dbm'] = True
@@ -368,7 +369,9 @@ def test_connection_with_agent_activity_steps(instance_docker):
         with check.connection.get_managed_cursor() as cursor:
             cursor.execute(AGENT_ACTIVITY_STEPS_QUERY)
 
+
 now = time.time()
+
 
 @pytest.mark.usefixtures('dd_environment')
 def test_history_output(instance_docker, sa_conn):
@@ -435,7 +438,7 @@ def test_agent_jobs_integration(aggregator, dd_run_check, agent_jobs_instance, s
             assert len(results) == 1, "should have at least 1 entry in activity"
     check = SQLServer(CHECK_NAME, {}, [agent_jobs_instance])
     check.agent_history._last_collection_time = now - 1
-    time.sleep(.1)
+    time.sleep(0.1)
     dd_run_check(check)
     dbm_activity = aggregator.get_event_platform_events("dbm-activity")
     job_events = [e for e in dbm_activity if (e.get('sqlserver_job_history', None) is not None)]
