@@ -39,6 +39,7 @@ METRIC_MAP = {
     'DCGM_FI_DEV_PSTATE': 'pstate',
     'DCGM_FI_DEV_SLOWDOWN_TEMP': 'slowdown_temperature',
     'DCGM_FI_PROF_DRAM_ACTIVE': 'dram.active',
+    # Test change
     'DCGM_FI_PROF_GR_ENGINE_ACTIVE': 'gr_engine_active',
     'DCGM_FI_PROF_PIPE_FP16_ACTIVE': 'pipe.fp16_active',
     'DCGM_FI_PROF_PIPE_FP32_ACTIVE': 'pipe.fp32_active',
