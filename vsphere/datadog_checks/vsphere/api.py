@@ -393,50 +393,68 @@ class VSphereAPI(object):
         vsan_perf_manager = vim.cluster.VsanPerformanceManager('vsan-performance-manager', self._vsan_stub)
         cluster_metrics = []
         cluster_health_metrics = []
-        for datacenter in self._conn.content.rootFolder.childEntity:
-            for cluster in datacenter.hostFolder.childEntity:
-                if isinstance(cluster, vim.ClusterComputeResource):
-                    cluster_vsan_config = cluster.configurationEx.vsanConfigInfo
-                    # only collect vsan metrics if the cluster has vsan enabled
-                    if cluster_vsan_config and cluster_vsan_config.enabled:
-                        unprocessed_health_metrics = vsan_perf_manager.QueryClusterHealth(cluster)
-                        processed_health_metrics = {}
-                        self.log.debug('hi hello there')
-                        group_id = unprocessed_health_metrics[0].groupId
-                        group_health = unprocessed_health_metrics[0].groupHealth
+        host_metrics = []
+        infra_data = self.get_infrastructure()
+        for resource, additional_info in infra_data.items():
+            if str(resource)[1:].split(':')[0] == 'vim.ClusterComputeResource':
+                cluster_vsan_config = resource.configurationEx.vsanConfigInfo
+                # only collect vsan metrics if the cluster has vsan enabled
+                if cluster_vsan_config and cluster_vsan_config.enabled:
+                    unprocessed_health_metrics = vsan_perf_manager.QueryClusterHealth(resource)
+                    processed_health_metrics = {}
+                    group_id = unprocessed_health_metrics[0].groupId
+                    group_health = unprocessed_health_metrics[0].groupHealth
+                    processed_health_metrics.update(
+                        {
+                            'vsphere.vsan.cluster.health.count': {
+                                'id': group_id,
+                                'status': group_health,
+                                'vsphere_cluster': resource.name,
+                            }
+                        }
+                    )
+                    for health_test in unprocessed_health_metrics[0].groupTests:
+                        test_name = health_test.testId.split('.')[-1]
                         processed_health_metrics.update(
                             {
-                                'vsphere.vsan.cluster.health.count': {
+                                f'vsphere.vsan.cluster.health.{test_name}.count': {
                                     'id': group_id,
                                     'status': group_health,
-                                    'vsphere_cluster': cluster.name,
+                                    'test_id': health_test.testId,
+                                    'test_status': health_test.testHealth,
+                                    'vsphere_cluster': resource.name,
                                 }
                             }
                         )
-                        for health_test in unprocessed_health_metrics[0].groupTests:
-                            test_name = health_test.testId.split('.')[-1]
-                            processed_health_metrics.update(
-                                {
-                                    f'vsphere.vsan.cluster.health.{test_name}.count': {
-                                        'id': group_id,
-                                        'status': group_health,
-                                        'test_id': health_test.testId,
-                                        'test_status': health_test.testHealth,
-                                        'vsphere_cluster': cluster.name,
-                                    }
-                                }
-                            )
-                        cluster_health_metrics.append(processed_health_metrics)
+                    cluster_health_metrics.append(processed_health_metrics)
 
-                        cluster_uuid = cluster_vsan_config.defaultConfig.uuid
-                        cluster_vsanPerfQuerySpec = [
-                            vim.cluster.VsanPerfQuerySpec(entityRefId='cluster-domclient:%s' % (cluster_uuid)),
-                            vim.cluster.VsanPerfQuerySpec(entityRefId='vsan-cluster-capacity:%s' % (cluster_uuid)),
+                    cluster_uuid = cluster_vsan_config.defaultConfig.uuid
+                    cluster_vsan_perf_query_spec = [
+                        vim.cluster.VsanPerfQuerySpec(entityRefId='cluster-domclient:%s' % (cluster_uuid)),
+                        vim.cluster.VsanPerfQuerySpec(entityRefId='vsan-cluster-capacity:%s' % (cluster_uuid)),
+                    ]
+                    discovered_metrics = vsan_perf_manager.QueryVsanPerf(cluster_vsan_perf_query_spec, resource)
+                    # setting the "name" value of every metric to the cluster name for tagging purposes
+                    for entity_type in discovered_metrics:
+                        for metric in entity_type.value:
+                            metric.metricId.name = resource.name
+                    cluster_metrics.append(discovered_metrics)
+            elif str(resource)[1:].split(':')[0] == 'vim.HostSystem':
+                if str(additional_info['parent'])[1:].split(':')[0] == 'vim.ClusterComputeResource':
+                    cluster_vsan_config = additional_info['parent'].configurationEx.vsanConfigInfo
+                    # only check hosts within a vsan cluster
+                    if cluster_vsan_config and cluster_vsan_config.enabled:
+                        host_uuid = resource.configManager.vsanSystem.config.clusterInfo.nodeUuid
+                        host_vsan_perf_query_spec = [
+                            vim.cluster.VsanPerfQuerySpec(entityRefId='host-domclient:%s' % (host_uuid)),
+                            vim.cluster.VsanPerfQuerySpec(entityRefId='host-cpu:%s' % (host_uuid)),
                         ]
-                        discovered_metrics = vsan_perf_manager.QueryVsanPerf(cluster_vsanPerfQuerySpec, cluster)
-                        # setting the "name" value of every metric to the cluster name for tagging purposes
+                        discovered_metrics = vsan_perf_manager.QueryVsanPerf(
+                            host_vsan_perf_query_spec, additional_info['parent']
+                        )
                         for entity_type in discovered_metrics:
                             for metric in entity_type.value:
-                                metric.metricId.name = cluster.name
-                        cluster_metrics.append(discovered_metrics)
-        return [cluster_metrics, cluster_health_metrics]
+                                metric.metricId.name = resource.name
+                                metric.metricId.description = additional_info['parent'].name
+                        host_metrics.append(discovered_metrics)
+        return [cluster_metrics, cluster_health_metrics, host_metrics]

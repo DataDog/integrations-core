@@ -96,11 +96,11 @@ class VSphereConfig(object):
         self.should_collect_attributes = is_affirmative(instance.get("collect_attributes", False))
         self.collect_property_metrics = is_affirmative(instance.get("collect_property_metrics", False))
         if sys.version_info[0] >= 3:
-            self.collect_vsan_cluster_metrics = is_affirmative(instance.get("collect_vsan_cluster_metrics", False))
+            self.collect_vsan_metrics = is_affirmative(instance.get("collect_vsan_metrics", False))
         else:
-            if is_affirmative(instance.get("collect_vsan_cluster_metrics", False)):
+            if is_affirmative(instance.get("collect_vsan_metrics", False)):
                 raise ConfigurationError("VSAN metrics collection is not supported in Python 2")
-            self.collect_vsan_cluster_metrics = False
+            self.collect_vsan_metrics = False
         self.attr_prefix = instance.get("attributes_prefix", DEFAULT_VSPHERE_ATTR_PREFIX)
         self.excluded_host_tags = instance.get("excluded_host_tags", [])
         self.base_tags = instance.get("tags", []) + ["vcenter_server:{}".format(self.hostname)]

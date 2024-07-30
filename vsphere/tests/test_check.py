@@ -747,7 +747,7 @@ def test_no_infra_cache_no_perf_values(aggregator, realtime_instance, dd_run_che
 
 @pytest.mark.usefixtures("mock_type", "mock_threadpool", "mock_api")
 def test_vsan_metrics_included_in_check(aggregator, realtime_instance, dd_run_check):
-    realtime_instance['collect_vsan_cluster_metrics'] = True
+    realtime_instance['collect_vsan_metrics'] = True
     check = VSphereCheck('vsphere', {}, [realtime_instance])
     dd_run_check(check)
 

@@ -474,14 +474,14 @@ class VSphereCheck(AgentCheck):
         )
         return metrics_values
 
-    def collect_vsan_cluster_metrics(self):
+    def collect_vsan_metrics(self):
         # type: () -> None
         self.log.debug("Starting vsan metrics collection (query start time: %s).", self.latest_event_query)
         latest_metric_time = None
         collect_start_time = get_current_datetime()
         try:
             t0 = Timer()
-            new_metrics, new_health_metrics = self.api.query_vsan_cluster_metrics()
+            new_cluster_metrics, new_cluster_health_metrics, new_host_metrics = self.api.query_vsan_cluster_metrics()
             self.gauge(
                 'vsphere.vsan.cluster.time',
                 t0.total(),
@@ -489,7 +489,7 @@ class VSphereCheck(AgentCheck):
                 raw=True,
                 hostname=self._hostname,
             )
-            for cluster in new_metrics:
+            for cluster in new_cluster_metrics:
                 for entity_type in cluster:
                     for given_metric in entity_type.value:
                         self.log.debug(
@@ -508,7 +508,7 @@ class VSphereCheck(AgentCheck):
                         if latest_metric_time is None:
                             latest_metric_time = collect_start_time
 
-            for cluster in new_health_metrics:
+            for cluster in new_cluster_health_metrics:
                 for metric_name, metric_value in cluster.items():
                     list_of_tags = [f"{key}:{value}" for key, value in metric_value.items()]
                     self.gauge(
@@ -518,6 +518,25 @@ class VSphereCheck(AgentCheck):
                         raw=True,
                         hostname=self._hostname,
                     )
+
+            for host in new_host_metrics:
+                for entity_type in host:
+                    for given_metric in entity_type.value:
+                        self.log.debug(
+                            "Processing metric with type:%s",
+                            type(given_metric),
+                        )
+                        if given_metric.values.split(',')[-1] != 'None':
+                            self.gauge(
+                                'vsphere.vsan.host.{}'.format(given_metric.metricId.label),
+                                # for now we only collect the latest value
+                                int(given_metric.values.split(',')[-1]),
+                                tags=['vsphere_host:{}'.format(given_metric.metricId.name)]
+                                + ['vsphere_cluster:{}'.format(given_metric.metricId.description)]
+                                + self._config.base_tags,
+                                raw=True,
+                                hostname=self._hostname,
+                            )
         except Exception as e:
             # Don't get stuck on a failure to fetch a vsan metric
             # Ignore them for next pass
@@ -1084,5 +1103,5 @@ class VSphereCheck(AgentCheck):
         self.collect_metrics_async()
         self.log.debug("Metric collection completed.")
 
-        if self._config.collect_vsan_cluster_metrics:
-            self.collect_vsan_cluster_metrics()
+        if self._config.collect_vsan_metrics:
+            self.collect_vsan_metrics()
