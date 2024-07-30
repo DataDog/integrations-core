@@ -376,7 +376,6 @@ files:
             display_default: 250
           hidden: true
     - name: procedure_metrics
-      hidden: true
       description: Configure collection of procedure metrics
       options:
         - name: enabled
@@ -714,6 +713,7 @@ files:
         example: 1800
         display_default: false
     - name: schemas_collection
+      hidden: True
       description: |
         Configure collection of schemas. If `database_autodiscovery` is not enabled, data is collected
         only for the database configured with `database` parameter.
@@ -736,8 +736,7 @@ files:
             Capped by `schemas_collection.collection_interval`
           value:
             type: number
-            example: 10
-      hidden: True  
+            example: 10 
     - template: instances/default
   - template: logs
     example:
