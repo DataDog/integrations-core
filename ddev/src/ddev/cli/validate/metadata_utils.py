@@ -216,6 +216,11 @@ VALID_UNIT_NAMES = {
     'alert',
     'token',
     'step',
+    'nanojoule',
+    'millijoule',
+    'joule',
+    'kilojoule',
+    'megajoule',
 }
 
 ALLOWED_PREFIXES = ('system.', 'jvm.', 'http.', 'datadog.', 'sftp.', 'process.', 'runtime.', 'otelcol_')
