@@ -2,7 +2,7 @@
 
 <div class="alert alert-warning">
 <a href="https://docs.datadoghq.com/data_jobs/">Data Jobs Monitoring</a> helps you observe, troubleshoot, and cost-optimize your Spark and Databricks jobs and clusters.<br/><br/>
-This page is limited to documentation for ingesting Spark metrics and logs. 
+This page only documents how to ingest Spark metrics and logs. 
 </div>
 
 ![Spark Graph][1]
