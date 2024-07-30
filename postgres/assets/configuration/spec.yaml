@@ -624,6 +624,24 @@ files:
           value:
             type: number
             example: 600
+        - name: include_databases
+          description: |
+            A list of regex patterns to include databases. If empty, all databases matching other filters are included.
+        - name: exclude_databases
+          description: |
+            A list of regex patterns to exclude databases. If empty, all databases matching other filters are included.
+        - name: include_schemas
+          description: |
+            A list of regex patterns to include schemas. If empty, all schemas matching other filters are included.
+        - name: exclude_schemas
+          description: |
+            A list of regex patterns to exclude schemas. If empty, all schemas matching other filters are included.
+        - name: include_tables
+          description: |
+            A list of regex patterns to include tables. If empty, all tables matching other filters are included.
+        - name: exclude_tables
+          description: |
+            A list of regex patterns to exclude tables. If empty, all tables matching other filters are included.
 
     - name: aws
       description: |
