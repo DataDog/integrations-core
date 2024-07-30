@@ -331,7 +331,7 @@ class PostgresMetadata(DBMAsyncJob):
                                 self._flush_schema(base_event, database, schema, tables_buffer)
             self._is_schemas_collection_in_progress = False
 
-    def _should_include_database_metadata(self, name, metadata_type):
+    def _should_include_metadata(self, name, metadata_type):
         for re_str in self._config.schemas_metadata_config.get(
             "exclude_{metadata_type}s".format(metadata_type=metadata_type), []
         ):
