@@ -37,7 +37,7 @@ class MongoSlowOperations(DBMAsyncJob):
             enabled=self._slow_operations_config["enabled"],
             dbms="mongo",
             min_collection_interval=check._config.min_collection_interval,
-            job_name="operation-metricss",
+            job_name="slow-operations",
         )
 
         self._last_collection_timestamp = None
