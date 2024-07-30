@@ -221,8 +221,13 @@ class MongoSlowOperations(DBMAsyncJob):
             "lock_stats": format_key_name(self._check.convert_to_underscore_separated, slow_operation.get("locks", {})),
             "flow_control_stats": format_key_name(
                 self._check.convert_to_underscore_separated, slow_operation.get("flowControl", {})
-            ),
+            )
         }
+
+        calling_client_hostname = slow_operation.get("client") or slow_operation.get("remote")
+        if calling_client_hostname:
+            event["client"] = {"hostname": calling_client_hostname}
+
         return event
 
     def _submit_slow_operation_payload(self, slow_operation_events):

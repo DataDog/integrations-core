@@ -83,6 +83,9 @@
                 },
                 "flow_control_stats": {
                     "acquire_count": 5
+                },
+                "client": {
+                    "hostname": "192.168.65.1:58133"
                 }
             },
             {
@@ -158,6 +161,9 @@
                 },
                 "flow_control_stats": {
                     "acquire_count": 5
+                },
+                "client": {
+                    "hostname": "192.168.65.1:58133"
                 }
             },
             {
@@ -231,6 +237,9 @@
                 },
                 "flow_control_stats": {
                     "acquire_count": 3
+                },
+                "client": {
+                    "hostname": "192.168.65.1:58133"
                 }
             },
             {
@@ -306,6 +315,9 @@
                 },
                 "flow_control_stats": {
                     "acquire_count": 3
+                },
+                "client": {
+                    "hostname": "192.168.65.1:58133"
                 }
             },
             {
@@ -379,6 +391,9 @@
                 },
                 "flow_control_stats": {
                     "acquire_count": 1
+                },
+                "client": {
+                    "hostname": "192.168.65.1:58133"
                 }
             },
             {
@@ -454,6 +469,9 @@
                 },
                 "flow_control_stats": {
                     "acquire_count": 1
+                },
+                "client": {
+                    "hostname": "192.168.65.1:58133"
                 }
             },
             {
@@ -505,7 +523,10 @@
                         }
                     }
                 },
-                "flow_control_stats": {}
+                "flow_control_stats": {},
+                "client": {
+                    "hostname": "192.168.65.1:58133"
+                }
             },
             {
                 "timestamp": 32479987545521.0,
@@ -556,7 +577,10 @@
                         }
                     }
                 },
-                "flow_control_stats": {}
+                "flow_control_stats": {},
+                "client": {
+                    "hostname": "192.168.65.1:58133"
+                }
             },
             {
                 "timestamp": 32479987543991.0,
@@ -629,6 +653,9 @@
                 },
                 "flow_control_stats": {
                     "acquire_count": 5
+                },
+                "client": {
+                    "hostname": "192.168.65.1:58133"
                 }
             },
             {
@@ -704,6 +731,9 @@
                 },
                 "flow_control_stats": {
                     "acquire_count": 5
+                },
+                "client": {
+                    "hostname": "192.168.65.1:58133"
                 }
             },
             {
@@ -777,6 +807,9 @@
                 },
                 "flow_control_stats": {
                     "acquire_count": 3
+                },
+                "client": {
+                    "hostname": "192.168.65.1:58133"
                 }
             },
             {
@@ -852,6 +885,9 @@
                 },
                 "flow_control_stats": {
                     "acquire_count": 3
+                },
+                "client": {
+                    "hostname": "192.168.65.1:58133"
                 }
             },
             {
@@ -925,6 +961,9 @@
                 },
                 "flow_control_stats": {
                     "acquire_count": 1
+                },
+                "client": {
+                    "hostname": "192.168.65.1:58133"
                 }
             },
             {
@@ -1000,6 +1039,9 @@
                 },
                 "flow_control_stats": {
                     "acquire_count": 1
+                },
+                "client": {
+                    "hostname": "192.168.65.1:58133"
                 }
             },
             {
@@ -1051,7 +1093,10 @@
                         }
                     }
                 },
-                "flow_control_stats": {}
+                "flow_control_stats": {},
+                "client": {
+                    "hostname": "192.168.65.1:58133"
+                }
             },
             {
                 "timestamp": 32479987545521.0,
@@ -1102,7 +1147,10 @@
                         }
                     }
                 },
-                "flow_control_stats": {}
+                "flow_control_stats": {},
+                "client": {
+                    "hostname": "192.168.65.1:58133"
+                }
             }
         ]
     }
