@@ -376,6 +376,7 @@ files:
             display_default: 250
           hidden: true
     - name: procedure_metrics
+      hidden: true
       description: Configure collection of procedure metrics
       options:
         - name: enabled
@@ -408,7 +409,6 @@ files:
             type: integer
             example: 250
             display_default: 250
-          hidden: true
     - name: query_activity
       description: Configure collection of active sessions monitoring
       options:
@@ -713,6 +713,31 @@ files:
         type: number
         example: 1800
         display_default: false
+    - name: schemas_collection
+      description: |
+        Configure collection of schemas. If `database_autodiscovery` is not enabled, data is collected
+        only for the database configured with `database` parameter.
+      options:
+        - name: enabled
+          description: |
+            Enable schema collection. Requires `dbm: true`. Defaults to false.
+          value:
+            type: boolean
+            example: false
+        - name: collection_interval
+          description: |
+            Set the database schema collection interval (in seconds). Defaults to 600 seconds.
+          value:
+            type: number
+            example: 600
+        - name: max_execution_time
+          description: |
+            Set the maximum time for schema collection (in seconds). Defaults to 10 seconds.
+            Capped by `schemas_collection.collection_interval`
+          value:
+            type: number
+            example: 10
+      hidden: True  
     - template: instances/default
   - template: logs
     example:
