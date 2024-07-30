@@ -24,6 +24,10 @@ class KubevirtApiCheck(OpenMetricsBaseCheckV2):
     def check(self, _):
         # type: (Any) -> None
 
+        self.base_tags = []
+        if self.kube_cluster_name:
+            self.base_tags.append(f"kube_cluster_name:{self.kube_cluster_name}")
+
         if self.kubevirt_api_healthz_endpoint:
             self._report_health_check(self.kubevirt_api_healthz_endpoint)
         else:
@@ -61,16 +65,22 @@ class KubevirtApiCheck(OpenMetricsBaseCheckV2):
     def _report_vm_metrics(self):
         vms = self.kube_client.get_vms()
         self.log.debug("Reporting metrics for %d VMs", len(vms))
-        for vm in vms:
-            vm_tags = self._extract_vm_tags(vm)
-            self.gauge("vm.count", value=1, tags=vm_tags)
+        if vms:
+            for vm in vms:
+                vm_tags = self._extract_vm_tags(vm)
+                self.gauge("vm.count", value=1, tags=vm_tags)
+        else:
+            self.gauge("vm.count", value=0, tags=self.base_tags)
 
     def _report_vmis_metrics(self):
         vmis = self.kube_client.get_vmis()
         self.log.debug("Reporting metrics for %d VMIs", len(vmis))
-        for vmi in vmis:
-            vmi_tags = self._extract_vmi_tags(vmi)
-            self.gauge("vmi.count", value=1, tags=vmi_tags)
+        if vmis:
+            for vmi in vmis:
+                vmi_tags = self._extract_vmi_tags(vmi)
+                self.gauge("vmi.count", value=1, tags=vmi_tags)
+        else:
+            self.gauge("vmi.count", value=0, tags=self.base_tags)
 
     def _get_target_pod(self, target_ip):
         target_pod = self.kube_client.get_pods(self.kube_namespace, ip=target_ip)

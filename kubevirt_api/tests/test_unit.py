@@ -98,6 +98,66 @@ def test_check_collects_all_metrics(dd_run_check, aggregator, instance, mocker):
     aggregator.assert_metrics_using_metadata(get_metadata_metrics())
 
 
+def test_check_sends_zero_count_for_vms(dd_run_check, aggregator, instance, mocker):
+    mocker.patch("requests.get", wraps=mock_http_responses)
+
+    check = KubevirtApiCheck("kubevirt_api", {}, [instance])
+
+    check._setup_kube_client = lambda: None
+    check.kube_client = MagicMock()
+    check.kube_client.get_pods.return_value = GET_PODS_RESPONSE_VIRT_API_POD["items"]
+    check.kube_client.get_vms.return_value = []
+    check.kube_client.get_vmis.return_value = []
+
+    dd_run_check(check)
+
+    aggregator.assert_metric(
+        "kubevirt_api.can_connect",
+        value=1,
+        tags=[
+            "endpoint:https://10.244.0.38:443/healthz",
+        ],
+    )
+
+    aggregator.assert_metric(
+        "kubevirt_api.vm.count",
+        value=0,
+        tags=[
+            "kube_cluster_name:test-cluster",
+        ],
+    )
+
+
+def test_check_sends_zero_count_for_vmis(dd_run_check, aggregator, instance, mocker):
+    mocker.patch("requests.get", wraps=mock_http_responses)
+
+    check = KubevirtApiCheck("kubevirt_api", {}, [instance])
+
+    check._setup_kube_client = lambda: None
+    check.kube_client = MagicMock()
+    check.kube_client.get_pods.return_value = GET_PODS_RESPONSE_VIRT_API_POD["items"]
+    check.kube_client.get_vms.return_value = []
+    check.kube_client.get_vmis.return_value = []
+
+    dd_run_check(check)
+
+    aggregator.assert_metric(
+        "kubevirt_api.can_connect",
+        value=1,
+        tags=[
+            "endpoint:https://10.244.0.38:443/healthz",
+        ],
+    )
+
+    aggregator.assert_metric(
+        "kubevirt_api.vmi.count",
+        value=0,
+        tags=[
+            "kube_cluster_name:test-cluster",
+        ],
+    )
+
+
 def test_emits_zero_can_connect_when_service_is_down(dd_run_check, aggregator, instance):
     check = KubevirtApiCheck("kubevirt_api", {}, [instance])
     check._setup_kube_client = lambda: None
