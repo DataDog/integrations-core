@@ -101,7 +101,7 @@ class SqlserverAgentHistory(DBMAsyncJob):
         if collection_interval <= 0:
             collection_interval = DEFAULT_COLLECTION_INTERVAL
         self.collection_interval = collection_interval
-        history_row_limit = self._config.agent_jobs_config.get('agent_jobs_history_row_limit', DEFAULT_ROW_LIMIT)
+        history_row_limit = self._config.agent_jobs_config.get('history_row_limit', DEFAULT_ROW_LIMIT)
         if history_row_limit <= 0:
             history_row_limit = DEFAULT_ROW_LIMIT
         self.history_row_limit = history_row_limit
@@ -129,7 +129,7 @@ class SqlserverAgentHistory(DBMAsyncJob):
 
     @tracked_method(agent_check_getter=agent_check_getter)
     def _get_new_agent_job_history(self, cursor):
-        last_collection_time_filter = "+ {last_collection_time}".format(last_collection_time=self._last_collection_time)
+        last_collection_time_filter = "{last_collection_time}".format(last_collection_time=self._last_collection_time)
         history_row_limit_filter = "TOP {history_row_limit}".format(history_row_limit=self.history_row_limit)
         query = AGENT_HISTORY_QUERY.format(
             history_row_limit_filter=history_row_limit_filter, last_collection_time_filter=last_collection_time_filter
@@ -176,5 +176,4 @@ class SqlserverAgentHistory(DBMAsyncJob):
                 history_event = self._create_agent_jobs_history_event(history_rows)
                 payload = json.dumps(history_event, default=default_json_event_encoding)
                 self.log.info(payload)
-                # TODO figure out where this payload should go
                 self._check.database_monitoring_query_activity(payload)

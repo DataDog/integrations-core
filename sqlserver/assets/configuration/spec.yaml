@@ -144,7 +144,7 @@ files:
           value:
             type: number
             example: 15
-        - name: agent_jobs_history_row_limit
+        - name: history_row_limit
           description: |
             Set the maximum number of job step rows that can be retrieved in a single check run.
           value:

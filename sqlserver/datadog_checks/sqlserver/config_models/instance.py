@@ -25,7 +25,7 @@ class AgentJobs(BaseModel):
         arbitrary_types_allowed=True,
         frozen=True,
     )
-    agent_jobs_history_row_limit: Optional[int] = None
+    history_row_limit: Optional[int] = None
     collection_interval: Optional[float] = None
     enabled: Optional[bool] = None
 

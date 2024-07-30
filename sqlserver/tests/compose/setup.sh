@@ -13,19 +13,6 @@ do
     fi
 done
 
-for i in {1..120};
-do
-    /opt/mssql-tools/bin/sqlcmd -S localhost -U sa -P $SA_PASSWORD -d master -i is_agent_running.sql -b | grep -q '1'
-    if [ $? -eq 0 ]
-    then
-        echo "INFO: sqlserver agent is running."
-        break
-    else
-        echo "INFO: sqlserver agent not running yet. Retrying in 1 second."
-        sleep 1
-    fi
-done
-
 /opt/mssql-tools/bin/sqlcmd -S localhost -U sa -P $SA_PASSWORD -d master -i setup.sql -b
 if [ $? -eq 0 ]
 then

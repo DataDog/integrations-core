@@ -141,10 +141,10 @@ instances:
         #
         # collection_interval: 15
 
-        ## @param agent_jobs_history_row_limit - integer - optional - default: 10000
+        ## @param history_row_limit - integer - optional - default: 10000
         ## Set the maximum number of job step rows that can be retrieved in a single check run.
         #
-        # agent_jobs_history_row_limit: 10000
+        # history_row_limit: 10000
 
     ## @param availability_group - string - optional
     ## You can specify an availability group when `include_ao_metrics`

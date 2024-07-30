@@ -34,7 +34,7 @@ AGENT_ACTIVITY_STEPS_QUERY = {
     "query": """\
         WITH ActiveJobs AS (
             SELECT
-                ja.job_id,
+                job_id,
                 last_executed_step_id
             FROM msdb.dbo.sysjobactivity AS ja
             WHERE ja.start_execution_date IS NOT NULL
