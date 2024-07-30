@@ -23,7 +23,7 @@ jobs:
           private-key: ${{ secrets.private-key }}
           repositories: integrations-core
       - name: debug
-        run: curl https://api.github.com/repos/DataDog/integrations-core/issues/18153/labels
+        run: curl -s https://api.github.com/repos/DataDog/integrations-core/issues/18153/labels | jq .
       - name: Add labels
         uses: actions/labeler@v4
         with:
