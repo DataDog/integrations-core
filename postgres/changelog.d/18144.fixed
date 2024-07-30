@@ -1,0 +1,1 @@
+Remove schema collection dependency on relation metrics. Instead a warning is issued when the missing metrics will impact which tables are collected.
