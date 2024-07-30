@@ -394,12 +394,12 @@ class PostgresMetadata(DBMAsyncJob):
             cursor.execute(PG_TABLES_QUERY_V10_PLUS.format(schema_oid=schema_id))
         rows = cursor.fetchall()
         table_info = [dict(row) for row in rows]
-        
+
         limit = self._config.schemas_metadata_config.get("max_tables", 300)
 
         if len(table_info) <= limit:
             return table_info
-        
+
         if not self._config.relations:
             self._check.log.warning(
                 "Number of tables exceeds limit of %d set by max_tables but "
@@ -412,7 +412,7 @@ class PostgresMetadata(DBMAsyncJob):
                 dbname,
             )
             return table_info[:limit]
-        
+
         return self._sort_and_limit_table_info(cursor, dbname, table_info, limit)
 
     def _sort_and_limit_table_info(
