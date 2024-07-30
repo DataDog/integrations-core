@@ -761,6 +761,8 @@ class SQLServer(AgentCheck):
     # lets assume we send all        
     def detect_deadlocks(self):
         # send query here 
+        #TODO here get the time of the deadlock and later discard in the query 
+        #all deadlocks that have occured earlier than this date
         with self.connection.open_managed_default_connection():
             with self.connection.get_managed_cursor() as cursor:
                 cursor.execute(DETECT_DEADLOCK_QUERY)
@@ -769,6 +771,7 @@ class SQLServer(AgentCheck):
                 print(result)
 
     def check(self, _):
+        pdb.set_trace()
         if self.do_check:
             # configure custom queries for the check
             if self._query_manager is None:

@@ -108,6 +108,15 @@ GO
 CREATE TABLE [datadog_test-1].dbo.deadlocks (a int PRIMARY KEY not null ,b int null); 
 
 INSERT INTO [datadog_test-1].dbo.deadlocks VALUES (1,10),(2,20),(3,30) 
+
+-- Grant permissions to bob and fred to update the deadlocks table
+GRANT INSERT ON [datadog_test-1].dbo.deadlocks TO bob;
+GRANT UPDATE ON [datadog_test-1].dbo.deadlocks TO bob;
+GRANT DELETE ON [datadog_test-1].dbo.deadlocks TO bob;
+
+GRANT INSERT ON [datadog_test-1].dbo.deadlocks TO fred;
+GRANT UPDATE ON [datadog_test-1].dbo.deadlocks TO fred;
+GRANT DELETE ON [datadog_test-1].dbo.deadlocks TO fred;
 GO
 
 EXEC sp_addrolemember 'db_datareader', 'bob'
