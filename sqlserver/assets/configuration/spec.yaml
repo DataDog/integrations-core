@@ -408,7 +408,7 @@ files:
             type: integer
             example: 250
             display_default: 250
-            hidden: true
+          hidden: true
     - name: query_activity
       description: Configure collection of active sessions monitoring
       options:
