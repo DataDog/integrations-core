@@ -43,10 +43,10 @@ class MongoSlowOperations(DBMAsyncJob):
         self._last_collection_timestamp = None
 
     def run_job(self):
-        self.collect_operation_metricss()
+        self.collect_slow_operations()
 
     @tracked_method(agent_check_getter=agent_check_getter)
-    def collect_operation_metricss(self):
+    def collect_slow_operations(self):
         if not self._should_collect_operation_metrics():
             return
 
