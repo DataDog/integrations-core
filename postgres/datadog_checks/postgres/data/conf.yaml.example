@@ -485,6 +485,30 @@ instances:
         #
         # collection_interval: 600
 
+        ## A list of regex patterns to include databases. If empty, all databases matching other filters are included.
+        #
+        # include_databases: {}
+
+        ## A list of regex patterns to exclude databases. If empty, all databases matching other filters are included.
+        #
+        # exclude_databases: {}
+
+        ## A list of regex patterns to include schemas. If empty, all schemas matching other filters are included.
+        #
+        # include_schemas: {}
+
+        ## A list of regex patterns to exclude schemas. If empty, all schemas matching other filters are included.
+        #
+        # exclude_schemas: {}
+
+        ## A list of regex patterns to include tables. If empty, all tables matching other filters are included.
+        #
+        # include_tables: {}
+
+        ## A list of regex patterns to exclude tables. If empty, all tables matching other filters are included.
+        #
+        # exclude_tables: {}
+
     ## This block defines the configuration for AWS RDS and Aurora instances.
     ##
     ## Complete this section if you have installed the Datadog AWS Integration
