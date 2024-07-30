@@ -79,6 +79,7 @@ class SlowOperations(BaseModel):
     )
     collection_interval: Optional[float] = None
     enabled: Optional[bool] = None
+    max_operations: Optional[float] = None
 
 
 class InstanceConfig(BaseModel):

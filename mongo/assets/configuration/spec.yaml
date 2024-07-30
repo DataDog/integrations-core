@@ -225,6 +225,12 @@ files:
           value:
             type: number
             example: 10
+        - name: max_operations
+          description: |
+            Set the maximum number of slow operations to collect per interval.
+          value:
+            type: number
+            example: 1000
     - name: replica_check
       description: |
         Whether or not to read from available replicas.

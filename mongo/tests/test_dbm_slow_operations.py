@@ -29,12 +29,11 @@ def test_mongo_slow_operations_standalone(aggregator, instance_integration_clust
         run_check_once(mongo_check, dd_run_check)
 
     events = aggregator.get_event_platform_events("dbm-activity")
-    slow_operations = [event for event in events if event['dbm_type'] == 'slow_query']
-    print(json.dumps(slow_operations))
+    slow_operation_payload = [event for event in events if event['dbm_type'] == 'slow_query']
 
     with open(os.path.join(HERE, "results", "slow-operations-standalone.json"), 'r') as f:
-        expected_slow_operations = json.load(f)
-        assert slow_operations == expected_slow_operations
+        expected_slow_operation_payload = json.load(f)
+        assert slow_operation_payload == expected_slow_operation_payload
 
     assert_metrics(
         mongo_check,
@@ -57,12 +56,11 @@ def test_mongo_slow_operations_mongos(aggregator, instance_integration_cluster, 
         run_check_once(mongo_check, dd_run_check)
 
     events = aggregator.get_event_platform_events("dbm-activity")
-    slow_operations = [event for event in events if event['dbm_type'] == 'slow_query']
-    print(json.dumps(slow_operations))
+    slow_operation_payload = [event for event in events if event['dbm_type'] == 'slow_query']
 
     with open(os.path.join(HERE, "results", "slow-operations-mongos.json"), 'r') as f:
-        expected_slow_operations = json.load(f)
-        assert slow_operations == expected_slow_operations
+        expected_slow_operation_payload = json.load(f)
+        assert slow_operation_payload == expected_slow_operation_payload
 
 
 @common.shard
@@ -80,3 +78,22 @@ def test_mongo_slow_operations_arbiter(aggregator, instance_arbiter, check, dd_r
     slow_operations = [event for event in events if event['dbm_type'] == 'slow_query']
 
     assert len(slow_operations) == 0
+
+
+@mock_now(1715911398.1112723)
+@common.standalone
+def test_mongo_slow_operations_standalone_with_limit(aggregator, instance_integration_cluster, check, dd_run_check):
+    instance_integration_cluster['reported_database_hostname'] = "mongohost"
+    instance_integration_cluster['dbm'] = True
+    instance_integration_cluster['slow_operations'] = {'enabled': True, 'run_sync': True, 'max_operations': 2}
+    instance_integration_cluster['database_autodiscovery'] = {'enabled': True, 'include': ['integration$', 'test$']}
+
+    mongo_check = check(instance_integration_cluster)
+    aggregator.reset()
+    with mock_pymongo("standalone"):
+        run_check_once(mongo_check, dd_run_check)
+
+    events = aggregator.get_event_platform_events("dbm-activity")
+    slow_operation_payload = [event for event in events if event['dbm_type'] == 'slow_query']
+    slow_operations = slow_operation_payload[0]['mongodb_slow_queries']
+    assert len(slow_operations) == 2

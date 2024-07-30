@@ -29,6 +29,7 @@ class MongoSlowOperations(DBMAsyncJob):
     def __init__(self, check):
         self._slow_operations_config = check._config.slow_operations
         self._collection_interval = self._slow_operations_config["collection_interval"]
+        self._max_operations = self._slow_operations_config["max_operations"]
 
         super(MongoSlowOperations, self).__init__(
             check,
@@ -69,16 +70,22 @@ class MongoSlowOperations(DBMAsyncJob):
                     db_name, last_ts=last_collection_timestamp
                 ):
                     slow_operation_events.append(self._create_slow_operation_event(slow_operation))
+                    if len(slow_operation_events) >= self._max_operations:
+                        break
             else:
                 slow_operations_from_logs.add(db_name)
 
-        if slow_operations_from_logs:
+        if slow_operations_from_logs and len(slow_operation_events) < self._max_operations:
             for slow_operation in self._collect_slow_operations_from_logs(
                 slow_operations_from_logs, last_ts=last_collection_timestamp
             ):
                 slow_operation_events.append(self._create_slow_operation_event(slow_operation))
+                if len(slow_operation_events) >= self._max_operations:
+                    break
 
-        self._check.log.debug("Collected %d slow operations", len(slow_operation_events))
+        self._check.log.debug(
+            "Collected %d slow operations, capped at %d", len(slow_operation_events), self._max_operations
+        )
         self._check.log.debug("Sending slow operations: %s", slow_operation_events)
         if slow_operation_events:
             self._submit_slow_operation_payload(slow_operation_events)

@@ -183,6 +183,7 @@ class MongoConfig(object):
             'enabled': enabled,
             'collection_interval': self._slow_operations_config.get('collection_interval', 10),
             'run_sync': is_affirmative(self._slow_operations_config.get('run_sync', False)),
+            'max_operations': int(self._slow_operations_config.get('max_operations', 1000)),
         }
 
     def _get_database_autodiscovery_config(self, instance):
