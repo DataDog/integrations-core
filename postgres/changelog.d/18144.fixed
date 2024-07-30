@@ -1,1 +1,1 @@
-Remove schema collection dependency on relation metrics. Instead a warning is issued when the missing metrics will impact which tables are collected.
+Remove schema collection and dependency on relation metrics. Instead a warning is issued when the missing metrics will impact which tables are collected. Also removed autodiscovery dependency on relation metrics.

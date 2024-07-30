@@ -55,13 +55,13 @@ def test_collect_metadata(integration_check, dbm_instance, aggregator):
 
 def test_collect_schemas(integration_check, dbm_instance, aggregator):
     dbm_instance["collect_schemas"] = {'enabled': True, 'collection_interval': 0.5}
-    dbm_instance['relations'] = [{'relation_regex': ".*"}]
+    dbm_instance['relations'] = []
     dbm_instance["database_autodiscovery"] = {"enabled": True, "include": ["datadog"]}
     del dbm_instance['dbname']
     check = integration_check(dbm_instance)
     run_one_check(check, dbm_instance)
     dbm_metadata = aggregator.get_event_platform_events("dbm-metadata")
-
+    
     # check that all expected tables are present
     tables_set = {
         'persons',
@@ -89,6 +89,8 @@ def test_collect_schemas(integration_check, dbm_instance, aggregator):
     tables_got = []
 
     for schema_event in (e for e in dbm_metadata if e['kind'] == 'pg_databases'):
+        print(schema_event)
+
         assert schema_event.get("timestamp") is not None
         # there should only be one database, datadog_test
         database_metadata = schema_event['metadata']
@@ -135,6 +137,20 @@ def test_collect_schemas(integration_check, dbm_instance, aggregator):
 
     assert_fields(tables_got, tables_set)
     assert_not_fields(tables_got, tables_not_reported_set)
+
+def test_collect_schemas_max_tables(integration_check, dbm_instance, aggregator):
+    dbm_instance["collect_schemas"] = {'enabled': True, 'collection_interval': 0.5, 'max_tables': 1}
+    dbm_instance['relations'] = []
+    dbm_instance["database_autodiscovery"] = {"enabled": True, "include": ["datadog"]}
+    del dbm_instance['dbname']
+    check = integration_check(dbm_instance)
+    run_one_check(check, dbm_instance)
+    dbm_metadata = aggregator.get_event_platform_events("dbm-metadata")
+
+    for schema_event in (e for e in dbm_metadata if e['kind'] == 'pg_databases'):
+        database_metadata = schema_event['metadata']
+        assert len(database_metadata[0]['schemas'][0]['tables']) == 1
+    
 
 
 def assert_fields(keys: List[str], fields: List[str]):
