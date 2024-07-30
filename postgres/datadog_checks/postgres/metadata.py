@@ -416,7 +416,7 @@ class PostgresMetadata(DBMAsyncJob):
         If any tables are partitioned, only the master paritition table name will be returned, and none of its children.
         """
         limit = self._config.schemas_metadata_config.get("max_tables", 300)
-        filter = self._get_tables_filter(self)
+        filter = self._get_tables_filter()
 
         if self._config.relations:
             if VersionUtils.transform_version(str(self._check.version))["version.major"] == "9":
