@@ -417,7 +417,7 @@ class VSphereAPI(object):
                         test_name = health_test.testId.split('.')[-1]
                         processed_health_metrics.update(
                             {
-                                f'vsphere.vsan.cluster.health.{test_name}.count': {
+                                'vsphere.vsan.cluster.health.{}.count'.format(test_name): {
                                     'id': group_id,
                                     'status': group_health,
                                     'test_id': health_test.testId,
