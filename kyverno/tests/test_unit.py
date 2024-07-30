@@ -5,7 +5,7 @@ import pytest
 
 from datadog_checks.base.constants import ServiceCheck
 
-# from datadog_checks.dev.utils import get_metadata_metrics
+from datadog_checks.dev.utils import get_metadata_metrics
 from datadog_checks.kyverno import KyvernoCheck
 
 from .common import (
@@ -35,6 +35,7 @@ def test_kyverno_mock_metrics(dd_run_check, aggregator, mock_http_response, fixt
     for metric in expected_metrics + COMMON_METRICS:
         aggregator.assert_metric(metric)
     aggregator.assert_all_metrics_covered()
+    aggregator.assert_metrics_using_metadata(get_metadata_metrics())
     aggregator.assert_service_check('kyverno.openmetrics.health', ServiceCheck.OK)
 
 

@@ -48,7 +48,7 @@ kyverno.policy.execution.duration.seconds.bucket,count,,,,The bucket aggregation
 kyverno.policy.execution.duration.seconds.count,count,,,,The count aggregation shows the number of observations in the policy rule execution latency histogram,0,kyverno,kyverno policy execution duration seconds count,,
 kyverno.policy.execution.duration.seconds.sum,count,,second,,The sum aggregation of the policy rule execution represents the total amount of seconds spent on the the execution and processing of the individual rules whenever they evaluate incoming resource requests or execute background scans,0,kyverno,kyverno policy execution duration seconds sum,,
 kyverno.policy.results.count,count,,,,Metric used to track the results associated with the rules executing as a part of incoming resource requests and even background scans. This metric can be further aggregated to track policy-level results as well,0,kyverno,kyverno policy results count,,
-kyverno.policy.rule.info,count,,,,Number of policies and rules present in the cluster. Includes both active and inactive policies and rules.,0,kyverno,kyverno policy rule info count,,
+kyverno.policy.rule.info,gauge,,,,Number of policies and rules present in the cluster. Includes both active and inactive policies and rules.,0,kyverno,kyverno policy rule info count,,
 kyverno.process.cpu.seconds.count,count,,second,,The total user and system CPU time spent in seconds in the Kyverno instance,0,kyverno,kyverno process cpu seconds,,
 kyverno.process.max_fds,gauge,,,,The maximum number of open file descriptors in the Kyverno instance,0,kyverno,kyverno process max_fds,,
 kyverno.process.open_fds,gauge,,,,The number of open file descriptors in the Kyverno instance,0,kyverno,kyverno process open_fds,,
