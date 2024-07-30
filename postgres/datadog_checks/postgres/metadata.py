@@ -404,7 +404,7 @@ class PostgresMetadata(DBMAsyncJob):
             self._check.log.warning(
                 "Number of tables exceeds limit of %d set by max_tables but "
                 "relation metrics are not configured for %s."
-                "Please configure relations to collect metrics for all tables."
+                "Please configure relation metrics for all tables to sort by most active."
                 "See https://docs.datadoghq.com/database_monitoring/setup_postgres/"
                 "selfhosted/?tab=postgres15#monitoring-relation-metrics-for-multiple-databases "
                 "for details on how to enable relation metrics.",
