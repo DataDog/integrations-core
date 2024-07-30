@@ -435,7 +435,7 @@ def test_agent_jobs_integration(aggregator, dd_run_check, agent_jobs_instance, s
             cursor.execute(ACTIVITY_INSERTION_QUERY)
             cursor.execute("SELECT * FROM msdb.dbo.sysjobactivity")
             results = cursor.fetchall()
-            assert len(results) == 1, "should have at least 1 entry in activity"
+            assert len(results) == 1, "should have 1 entry in activity"
     check = SQLServer(CHECK_NAME, {}, [agent_jobs_instance])
     check.agent_history._last_collection_time = now - 1
     time.sleep(0.1)

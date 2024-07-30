@@ -10,7 +10,6 @@ services:
         environment:
             SA_PASSWORD: "Password123"
             ACCEPT_EULA: "Y"
-            MSSQL_AGENT_ENABLED: "true"
             INIT_SCRIPT: "aoag_primary.sql"
             INIT_WAIT: 30
         ports:
