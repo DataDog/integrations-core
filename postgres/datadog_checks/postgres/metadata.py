@@ -388,20 +388,32 @@ class PostgresMetadata(DBMAsyncJob):
 
         If any tables are partitioned, only the master paritition table name will be returned, and none of its children.
         """
-        limit = self._config.schemas_metadata_config.get("max_tables", 300)
-        if self._config.relations:
-            if VersionUtils.transform_version(str(self._check.version))["version.major"] == "9":
-                cursor.execute(PG_TABLES_QUERY_V9.format(schema_oid=schema_id))
-            else:
-                cursor.execute(PG_TABLES_QUERY_V10_PLUS.format(schema_oid=schema_id))
-            rows = cursor.fetchall()
-            table_info = [dict(row) for row in rows]
-            return self._sort_and_limit_table_info(cursor, dbname, table_info, limit)
-
+        if VersionUtils.transform_version(str(self._check.version))["version.major"] == "9":
+            cursor.execute(PG_TABLES_QUERY_V9.format(schema_oid=schema_id))
         else:
-            # Config error should catch the case where schema collection is enabled
-            # and relation metrics aren't, but adding a warning here just in case
-            self._check.log.warning("Relation metrics are not configured for {dbname}, so tables cannot be collected")
+            cursor.execute(PG_TABLES_QUERY_V10_PLUS.format(schema_oid=schema_id))
+        rows = cursor.fetchall()
+        table_info = [dict(row) for row in rows]
+
+        limit = self._config.schemas_metadata_config.get("max_tables", 300)
+
+        if len(table_info) <= limit:
+            return table_info
+
+        if not self._config.relations:
+            self._check.log.warning(
+                "Number of tables exceeds limit of %d set by max_tables but "
+                "relation metrics are not configured for %s."
+                "Please configure relation metrics for all tables to sort by most active."
+                "See https://docs.datadoghq.com/database_monitoring/setup_postgres/"
+                "selfhosted/?tab=postgres15#monitoring-relation-metrics-for-multiple-databases "
+                "for details on how to enable relation metrics.",
+                limit,
+                dbname,
+            )
+            return table_info[:limit]
+
+        return self._sort_and_limit_table_info(cursor, dbname, table_info, limit)
 
     def _sort_and_limit_table_info(
         self, cursor, dbname, table_info: List[Dict[str, Union[str, bool]]], limit: int
@@ -426,10 +438,6 @@ class PostgresMetadata(DBMAsyncJob):
                 cursor.execute(PARTITION_ACTIVITY_QUERY.format(parent_oid=info["id"]))
                 row = cursor.fetchone()
                 return row.get("total_activity", 0) if row is not None else 0
-
-        # We only sort to filter by top so no need to waste resources if we're going to return everything
-        if len(table_info) <= limit:
-            return table_info
 
         # if relation metrics are enabled, sorted based on last activity information
         table_info = sorted(table_info, key=sort_tables, reverse=True)

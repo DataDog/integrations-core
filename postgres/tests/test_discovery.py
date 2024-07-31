@@ -169,7 +169,7 @@ def test_autodiscovery_refresh(integration_check, pg_instance):
 @pytest.mark.usefixtures('dd_environment')
 def test_autodiscovery_relations_disabled(integration_check, pg_instance):
     """
-    If no relation metrics are being collected, autodiscovery should not run.
+    If no relation metrics are being collected, autodiscovery should still run.
     """
     pg_instance["database_autodiscovery"] = DISCOVERY_CONFIG
     pg_instance['relations'] = []
@@ -177,7 +177,7 @@ def test_autodiscovery_relations_disabled(integration_check, pg_instance):
     check = integration_check(pg_instance)
     run_one_check(check, pg_instance)
 
-    assert check.autodiscovery is None
+    assert check.autodiscovery is not None
 
 
 @pytest.mark.integration
