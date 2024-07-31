@@ -37,16 +37,16 @@ class FlyIoCheck(OpenMetricsBaseCheckV2, ConfigMixin):
         self.org_slug = self.instance.get('org_slug')
         self.machines_api_endpoint = self.instance.get('machines_api_endpoint')
         self.tags = [f"fly_org:{self.org_slug}"]
+        match_string = self.instance.get('match_string', '{__name__=~".+"}')
+        encoded_match_string = quote_plus(match_string)
+        default_endpoint = f"https://api.fly.io/prometheus/{self.org_slug}/federate?match[]={encoded_match_string}"
+        self.openmetrics_endpoint = self.instance.get('openmetrics_endpoint', default_endpoint)
+        self.instance['openmetrics_endpoint'] = self.openmetrics_endpoint
 
     def get_default_config(self):
-        encoded_match_string = quote_plus(self.config.match_string)
-        default_endpoint = f"https://api.fly.io/prometheus/{self.org_slug}/federate?match[]={encoded_match_string}"
-        openmetrics_endpoint = (
-            default_endpoint if self.config.openmetrics_endpoint is None else self.config.openmetrics_endpoint
-        )
 
         return {
-            'openmetrics_endpoint': openmetrics_endpoint,
+            'openmetrics_endpoint': self.openmetrics_endpoint,
             'metrics': [METRICS],
             'rename_labels': RENAME_LABELS_MAP,
             'hostname_label': 'instance',
