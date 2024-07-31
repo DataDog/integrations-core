@@ -212,7 +212,6 @@ class TibcoEMSCheck(AgentCheck):
                     tags.append(f"{key}:{metric_data.get(key)}")
 
         tags.extend(self.tags)
-
         for metric_name in metric_names:
             metric_info = metric_data.get(metric_name)
             if metric_name in metric_data:

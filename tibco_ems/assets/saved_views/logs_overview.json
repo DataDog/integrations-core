@@ -1,6 +1,6 @@
 {
     "name": "Tibco EMS",
-    "query": "source:tibco_ems OR source:tibco",
+    "query": "source:tibco_ems OR source:ems",
     "visible_facets": [
         "status",
         "service",

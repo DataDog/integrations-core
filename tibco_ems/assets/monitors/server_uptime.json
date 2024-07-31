@@ -4,7 +4,7 @@
     "last_updated_at": "2024-07-29",
     "title": "Tibco EMS server uptime",
     "tags": [
-        "integration:tibco_ems"
+        "integration:tibco-ems"
         ],
     "description": "Alert if Tibco EMS server uptime is 0",
     "definition": {
@@ -24,7 +24,7 @@
         "query": "avg(last_5m):avg:tibco_ems.server.uptime{*} by {server_hostname} == 0",
         "restricted_roles": null,
         "tags": [
-            "integration:tibco_ems"
+            "integration:tibco-ems"
         ],
         "type": "query alert"
     }

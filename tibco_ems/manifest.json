@@ -8,14 +8,18 @@
     "configuration": "README.md#Setup",
     "support": "README.md#Support",
     "changelog": "CHANGELOG.md",
-    "description": "The Tibco EMS integration",
+    "description": "Track queue size, consumer count, unacknowledged messages, and more.",
     "title": "tibco_ems",
     "media": [],
     "classifier_tags": [
       "Supported OS::Linux",
       "Supported OS::Windows",
       "Supported OS::macOS",
-      "Submitted Data Type::Metrics"
+      "Submitted Data Type::Metrics",
+      "Offering::Integration",
+      "Category::Metrics",
+      "Category::Log Collection",
+      "Category::Message Queues"
     ]
   },
   "assets": {
