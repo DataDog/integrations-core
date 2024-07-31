@@ -128,6 +128,28 @@ files:
       value:
         type: boolean
         example: false
+    - name: agent_jobs
+      description: Configure collection of agent jobs events and metrics
+      options:
+        - name: enabled
+          description: |
+            Enable collection of agent jobs events and metrics. Requires `dbm: true`.
+          value:
+            type: boolean
+            example: false
+        - name: collection_interval
+          description: |
+            Configure the interval (in seconds) for the collection of agent jobs events and metrics.
+            Set the query metric collection interval (in seconds).
+          value:
+            type: number
+            example: 15
+        - name: history_row_limit
+          description: |
+            Set the maximum number of job step rows that can be retrieved in a single check run.
+          value:
+            type: integer
+            example: 10000
     - name: availability_group
       description: |
         You can specify an availability group when `include_ao_metrics`
