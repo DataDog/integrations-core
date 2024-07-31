@@ -13,6 +13,7 @@ if six.PY3:
         EXPECTED_DEVICE_METADATA_EVENTS,
         EXPECTED_INTERFACE_METADATA,
         EXPECTED_INTERFACE_METADATA_EVENTS,
+        EXPECTED_IP_ADDRESS_METADATA_EVENTS,
     )
 else:
     EXPECTED_DEVICE_METADATA_RESULT = None
@@ -86,12 +87,19 @@ def test_fabric_mocked(aggregator):
             ndm_metadata = aggregator.get_event_platform_events("network-devices-metadata")
             device_metadata = [dm for dm in ndm_metadata if 'devices' in dm and len(dm['devices']) > 0]
             interface_metadata = [im for im in ndm_metadata if 'interfaces' in im and len(im['interfaces']) > 0]
+            ip_address_metadata = [
+                ipm for ipm in ndm_metadata if 'ip_addresses' in ipm and len(ipm['ip_addresses']) > 0
+            ]
 
             expected_devices = [event.model_dump() for event in EXPECTED_DEVICE_METADATA_EVENTS]
             expected_interfaces = [event.model_dump(exclude_none=True) for event in EXPECTED_INTERFACE_METADATA_EVENTS]
+            expected_ip_addresses = [
+                event.model_dump(exclude_none=True) for event in EXPECTED_IP_ADDRESS_METADATA_EVENTS
+            ]
 
             assert device_metadata == expected_devices
             assert interface_metadata == expected_interfaces
+            assert ip_address_metadata == expected_ip_addresses
 
             interface_tag_mapping = {
                 'default:10.0.200.0': hn101,

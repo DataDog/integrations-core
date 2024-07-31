@@ -2734,6 +2734,16 @@ INTERFACE_METADATA = [
     },
 ]
 
+IP_ADDRESS_METADATA = [
+    {'device_id': 'default:10.0.200.0', 'ip_address': '1.1.0.101', 'prefix_len': '32'},
+    {'device_id': 'default:10.0.200.1', 'ip_address': '1.1.0.102', 'prefix_len': '32'},
+    {'device_id': 'default:10.0.200.2', 'ip_address': '1.1.0.202', 'prefix_len': '32'},
+    {'device_id': 'default:10.0.200.3', 'ip_address': '1.1.0.3', 'prefix_len': '32'},
+    {'device_id': 'default:10.0.200.4', 'ip_address': '1.1.0.1', 'prefix_len': '32'},
+    {'device_id': 'default:10.0.200.5', 'ip_address': '1.1.0.201', 'prefix_len': '32'},
+    {'device_id': 'default:10.0.200.6', 'ip_address': '1.1.0.2', 'prefix_len': '32'},
+]
+
 EXPECTED_DEVICE_METADATA_RESULT = DeviceMetadataList(device_metadata=DEVICE_METADATA)
 
 # "2012-01-14 03:21:34" in seconds
@@ -2755,4 +2765,8 @@ EXPECTED_INTERFACE_METADATA_EVENTS = [
     NetworkDevicesMetadata(
         namespace='default', interfaces=INTERFACE_METADATA[200::], collect_timestamp=MOCK_TIME_EPOCH
     ),
+]
+
+EXPECTED_IP_ADDRESS_METADATA_EVENTS = [
+    NetworkDevicesMetadata(namespace='default', ip_addresses=IP_ADDRESS_METADATA, collect_timestamp=MOCK_TIME_EPOCH)
 ]
