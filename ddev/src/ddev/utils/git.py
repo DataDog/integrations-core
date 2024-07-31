@@ -3,8 +3,6 @@
 # Licensed under a 3-clause BSD style license (see LICENSE)
 from __future__ import annotations
 
-from contextlib import suppress
-from functools import cached_property
 from typing import TYPE_CHECKING
 
 if TYPE_CHECKING:
@@ -25,7 +23,7 @@ class GitCommit:
         return self.__subject
 
 
-class GitManager:
+class GitRepository:
     def __init__(self, repo_root: Path):
         self.__repo_root = repo_root
 
@@ -35,42 +33,29 @@ class GitManager:
     def repo_root(self) -> Path:
         return self.__repo_root
 
-    @cached_property
     def current_branch(self) -> str:
         return self.capture('rev-parse', '--abbrev-ref', 'HEAD').strip()
 
-    def get_current_branch(self) -> str:
-        with suppress(AttributeError):
-            del self.current_branch
-
-        return self.current_branch
-
-    @cached_property
     def latest_commit(self) -> GitCommit:
         sha, subject = self.capture('log', '-1', '--format=%H%n%s').splitlines()
         return GitCommit(sha, subject=subject)
 
-    def get_latest_commit(self) -> GitCommit:
-        with suppress(AttributeError):
-            del self.latest_commit
+    def tags(self, glob_pattern=None) -> list[str]:
+        """
+        List the repo's tags and sort them.
 
-        return self.latest_commit
+        If provided, `glob_pattern` filters tags just like the pattern argument to `git tag --list`.
+        """
 
-    @cached_property
-    def tags(self) -> list[str]:
-        return sorted(set(self.capture('tag', '--list').splitlines()))
+        cmd = ['tag', '--list']
+        if glob_pattern is not None:
+            cmd.append(glob_pattern)
+        return sorted(set(self.capture(*cmd).splitlines()))
 
     def fetch_tags(self) -> None:
         # We force because, in very rare cases, we move tags
         self.capture('fetch', '--all', '--tags', '--force')
 
-    def get_tags(self) -> list[str]:
-        with suppress(AttributeError):
-            del self.tags
-
-        return self.tags
-
-    @cached_property
     def changed_files(self) -> list[str]:
         changed_files = set()
 
@@ -91,19 +76,13 @@ class GitManager:
 
         return sorted(changed_files, key=lambda relative_path: (-relative_path.count('/'), relative_path))
 
-    def get_changed_files(self) -> list[str]:
-        with suppress(AttributeError):
-            del self.changed_files
-
-        return self.changed_files
-
     def filter_tags(self, pattern: str) -> list[str]:
         import re
 
         if pattern in self.__filtered_tags:
             return self.__filtered_tags[pattern]
 
-        tags = self.__filtered_tags[pattern] = [tag for tag in self.tags if re.search(pattern, tag)]
+        tags = self.__filtered_tags[pattern] = [tag for tag in self.tags() if re.search(pattern, tag)]
         return tags
 
     def show_file(self, path: str, ref: str) -> str:

@@ -3,7 +3,6 @@
 # Licensed under a 3-clause BSD style license (see LICENSE)
 
 import pytest
-from flaky import flaky
 
 from datadog_checks.dev.utils import get_metadata_metrics
 
@@ -19,7 +18,7 @@ def test_e2e_legacy(dd_agent_check, legacy_config):
 
 
 @pytest.mark.parametrize('use_openmetrics', [True, False], indirect=True)
-@flaky(max_runs=5)
+@pytest.mark.flaky(max_runs=5)
 # GitLab can start returning 502s even if all the conditions were met in the e2e env.
 # Example:
 # tests/test_e2e.py::test_e2e[True] PASSED                                 [ 66%]
