@@ -2,7 +2,7 @@
 
 [Contentful][1] is a content (articles, photos, and videos) management platform that allows businesses to create, manage, and deliver digital content across various channels like websites and mobile apps through its intuitive interface and robust APIs or SDKs.
 
-Integrate with Datadog to gain insights into Contentful activities related to content and other actions as part of your Contenful spaces and environments.
+Integrate with Datadog to gain insights into Contentful activities related to content and other actions as part of your Contentful spaces and environments.
 
 ## Setup
 
@@ -18,19 +18,19 @@ Configure the Datadog endpoint to forward Contentful events as logs to Datadog. 
 3. Go to **Settings > Webhooks**.
 4. Click on **Add Webhook**.
 5. Add name and webhook URL generated from step 1.
-6. Ensure `POST` method is selected under **URL** and `Active` button is true.
-7. Select the type of Content and Action events which you want to be pushed into Datadog.
-8. Configure filters to trigger webhook for specific entities if required.
-9. Select `application/json` under **Content type**.
-10. Select `Customize the webhook payload` under **Payload** section and paste below json in the input:
-```
-{
-  "event": "{ /topic }",
-  "user": "{ /user/sys/id }",
-  "details": "{ /payload }"
-}
-```
-11. Click on **Save**.
+6. For **URL**, select the `POST` method, and for **Active**, select true.
+7. Select the type of Content and Action events that you want to push to Datadog.
+8. Configure filters to trigger the webhook for specific entities if required.
+9. Under **Content type**, select `application/json`.
+10. Under **Payload**, select `Customize the webhook payload`, then paste the following into the input field:
+    ```
+    {
+      "event": "{ /topic }",
+      "user": "{ /user/sys/id }",
+      "details": "{ /payload }"
+    }
+    ```
+11. Click **Save**.
 
 ## Data Collected
 
