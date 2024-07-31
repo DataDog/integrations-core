@@ -85,6 +85,95 @@ SQL_GROUP_REPLICATION_PLUGIN_STATUS = """\
 SELECT plugin_status
 FROM information_schema.plugins WHERE plugin_name='group_replication'"""
 
+# Alisases add to homogenize fields across different database types like SQLServer, PostgreSQL
+SQL_DATABASES = """
+SELECT schema_name as `name`,
+       default_character_set_name as `default_character_set_name`,
+       default_collation_name as `default_collation_name`
+       FROM information_schema.SCHEMATA
+       WHERE schema_name not in ('sys', 'mysql', 'performance_schema', 'information_schema')"""
+
+SQL_TABLES = """\
+SELECT table_name as `name`,
+       engine as `engine`,
+       row_format as `row_format`,
+       create_time as `create_time`
+       FROM information_schema.TABLES
+       WHERE TABLE_SCHEMA = %s AND TABLE_TYPE="BASE TABLE"
+"""
+
+SQL_COLUMNS = """\
+SELECT table_name as `table_name`,
+       column_name as `name`,
+       column_type as `column_type`,
+       column_default as `default`,
+       is_nullable as `nullable`,
+       ordinal_position as `ordinal_position`,
+       column_key as `column_key`,
+       extra as `extra`
+FROM INFORMATION_SCHEMA.COLUMNS
+WHERE table_schema = %s AND table_name IN ({});
+"""
+
+SQL_INDEXES = """\
+SELECT
+    table_name as `table_name`,
+    index_schema as `index_schema`,
+    index_name as `name`,
+    collation as `collation`,
+    index_type as `index_type`,
+    group_concat(seq_in_index order by seq_in_index asc) as seq_in_index,
+    group_concat(column_name order by seq_in_index asc) as columns,
+    group_concat(sub_part order by seq_in_index asc) as sub_parts,
+    group_concat(packed order by seq_in_index asc) as packed,
+    group_concat(nullable order by seq_in_index asc) as nullables,
+    group_concat(non_unique order by seq_in_index asc) as non_uniques
+FROM INFORMATION_SCHEMA.STATISTICS
+WHERE table_schema = %s AND table_name IN ({})
+GROUP BY table_name, index_schema, index_name, collation, index_type;
+"""
+
+SQL_FOREIGN_KEYS = """\
+SELECT
+    constraint_schema as `constraint_schema`,
+    constraint_name as `name`,
+    table_name as `table_name`,
+    group_concat(column_name order by ordinal_position asc) as column_names,
+    referenced_table_schema as `referenced_table_schema`,
+    referenced_table_name as `referenced_table_name`,
+    group_concat(referenced_column_name) as referenced_column_names
+FROM
+    INFORMATION_SCHEMA.KEY_COLUMN_USAGE
+WHERE
+    table_schema = %s AND table_name in ({})
+    AND referenced_table_name is not null
+GROUP BY constraint_schema, constraint_name, table_name, referenced_table_schema, referenced_table_name;
+"""
+
+SQL_PARTITION = """\
+SELECT
+    table_name as `table_name`,
+    partition_name as `name`,
+    subpartition_name as `subpartition_name`,
+    partition_ordinal_position as `partition_ordinal_position`,
+    subpartition_ordinal_position as `subpartition_ordinal_position`,
+    partition_method as `partition_method`,
+    subpartition_method as `subpartition_method`,
+    partition_expression as `partition_expression`,
+    subpartition_expression as `subpartition_expression`,
+    partition_description as `partition_description`,
+    table_rows as `table_rows`,
+    data_length as `data_length`,
+    max_data_length as `max_data_length`,
+    index_length as `index_length`,
+    data_free as `data_free`,
+    partition_comment as `partition_comment`,
+    tablespace_name as `tablespace_name`
+FROM INFORMATION_SCHEMA.PARTITIONS
+WHERE
+    table_schema = %s AND table_name in ({}) AND partition_name IS NOT NULL
+"""
+
 QUERY_DEADLOCKS = {
     'name': 'information_schema.INNODB_METRICS.lock_deadlocks',
     'query': """

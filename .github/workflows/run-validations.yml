@@ -102,6 +102,10 @@ on:
         required: false
         default: false
         type: boolean
+      version:
+        required: false
+        default: false
+        type: boolean
 
 defaults:
   run:
@@ -230,6 +234,10 @@ jobs:
     - name: Validate labeler configuration
       if: inputs.labeler
       run: ddev validate labeler
+
+    - name: Validate target version
+      if: inputs.version
+      run: ddev validate version $TARGET
 
     # Every validation below here is sorted by increasing runtime rather than alphabetically
     - name: Validate third-party license metadata
