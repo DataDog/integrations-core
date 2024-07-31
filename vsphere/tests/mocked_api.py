@@ -29,7 +29,7 @@ class MockedAPI(object):
         self.infrastructure_data = {}
         self.metrics_data = []
         self.mock_events = []
-        self.vsan_metrics_data = [[], [], []]
+        self.vsan_metrics_data = [[], [], [], []]
         self.server_time = dt.datetime.now()
 
     def get_current_time(self):
@@ -123,6 +123,45 @@ class MockedAPI(object):
         return self.mock_events
 
     def query_vsan_cluster_metrics(self):
+        mock_cluster_data = [
+            [
+                MagicMock(
+                    value=[
+                        MagicMock(metricId=MagicMock(label='example_cluster_metric', dynamicProperty=[{0: 'hello'}]))
+                    ]
+                )
+            ]
+        ]
+        mock_health_data = [
+            {
+                'vsphere.vsan.cluster.health.count': MagicMock(id='group_id', status='group_health'),
+            }
+        ]
+        mock_host_data = [
+            [
+                MagicMock(
+                    value=[
+                        MagicMock(
+                            metricId=MagicMock(label='example_host_metric', dynamicProperty=[{0: 'hello', 1: 'world'}])
+                        )
+                    ]
+                )
+            ]
+        ]
+        mock_disk_data = [
+            [
+                MagicMock(
+                    value=[
+                        MagicMock(
+                            metricId=MagicMock(
+                                label='example_disk_metric', dynamicProperty=[{0: 'hello', 1: 'world', 2: 'disk'}]
+                            )
+                        )
+                    ]
+                )
+            ]
+        ]
+        self.vsan_metrics_data = [mock_cluster_data, mock_health_data, mock_host_data, mock_disk_data]
         return self.vsan_metrics_data
 
 

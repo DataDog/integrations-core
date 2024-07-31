@@ -394,6 +394,7 @@ class VSphereAPI(object):
         cluster_metrics = []
         cluster_health_metrics = []
         host_metrics = []
+        disk_metrics = []
         infra_data = self.get_infrastructure()
         for resource, additional_info in infra_data.items():
             if str(resource)[1:].split(':')[0] == 'vim.ClusterComputeResource':
@@ -437,7 +438,7 @@ class VSphereAPI(object):
                     # setting the "name" value of every metric to the cluster name for tagging purposes
                     for entity_type in discovered_metrics:
                         for metric in entity_type.value:
-                            metric.metricId.name = resource.name
+                            metric.metricId.dynamicProperty.append({0: resource.name})
                     cluster_metrics.append(discovered_metrics)
             elif str(resource)[1:].split(':')[0] == 'vim.HostSystem':
                 if str(additional_info['parent'])[1:].split(':')[0] == 'vim.ClusterComputeResource':
@@ -454,7 +455,34 @@ class VSphereAPI(object):
                         )
                         for entity_type in discovered_metrics:
                             for metric in entity_type.value:
-                                metric.metricId.name = resource.name
-                                metric.metricId.description = additional_info['parent'].name
+                                metric.metricId.dynamicProperty.append(
+                                    {0: resource.name, 1: additional_info['parent'].name}
+                                )
                         host_metrics.append(discovered_metrics)
-        return [cluster_metrics, cluster_health_metrics, host_metrics]
+
+                        host_disks = resource.configManager.vsanSystem.QueryDisksForVsan()
+                        for disk in host_disks:
+                            disk_uuid = disk.vsanUuid
+                            if disk_uuid:
+                                discovered_metrics = []
+                                disk_vsanPerfQuerySpec = [
+                                    vim.cluster.VsanPerfQuerySpec(entityRefId=f'capacity-disk:{disk_uuid}')
+                                ]
+                                discovered_metrics = vsan_perf_manager.QueryVsanPerf(
+                                    disk_vsanPerfQuerySpec, additional_info['parent']
+                                )
+                                # A cache disk won't report any metric if queried as a capacity disk
+                                if len(discovered_metrics[0].value) == 0:
+                                    disk_vsanPerfQuerySpec = [
+                                        vim.cluster.VsanPerfQuerySpec(entityRefId=f'cache-disk:{disk_uuid}')
+                                    ]
+                                    discovered_metrics = vsan_perf_manager.QueryVsanPerf(
+                                        disk_vsanPerfQuerySpec, additional_info['parent']
+                                    )
+                                for entity_type in discovered_metrics:
+                                    for metric in entity_type.value:
+                                        metric.metricId.dynamicProperty.append(
+                                            {0: resource.name, 1: additional_info['parent'].name, 2: disk_uuid}
+                                        )
+                                disk_metrics.append(discovered_metrics)
+        return [cluster_metrics, cluster_health_metrics, host_metrics, disk_metrics]

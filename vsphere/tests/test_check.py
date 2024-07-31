@@ -752,3 +752,17 @@ def test_vsan_metrics_included_in_check(aggregator, realtime_instance, dd_run_ch
     dd_run_check(check)
 
     aggregator.assert_metric('vsphere.vsan.cluster.time', metric_type=aggregator.GAUGE, count=1)
+    aggregator.assert_metric('vsphere.vsan.cluster.health.count', count=1)
+    aggregator.assert_metric(
+        'vsphere.vsan.cluster.example_cluster_metric', count=1, tags=['vcenter_server:FAKE', 'vsphere_cluster:hello']
+    )
+    aggregator.assert_metric(
+        'vsphere.vsan.host.example_host_metric',
+        count=1,
+        tags=['vcenter_server:FAKE', 'vsphere_cluster:hello', 'vsphere_host:world'],
+    )
+    aggregator.assert_metric(
+        'vsphere.vsan.disk.example_disk_metric',
+        count=1,
+        tags=['vcenter_server:FAKE', 'vsphere_cluster:hello', 'vsphere_host:world', 'vsphere_disk:disk'],
+    )
