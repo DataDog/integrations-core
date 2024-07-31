@@ -155,6 +155,35 @@ def test_get_table_filter(integration_check, dbm_instance):
         assert filter == tc[1]
 
 
+def test_should_collect_metadata(integration_check, dbm_instance):
+    test_cases = [
+        [{'include_databases': ['d.*']}, "db", "database", True],
+        [{'include_databases': ['d.*']}, "db", "database", True],
+        [{'include_databases': ['c.*'], 'include_schemas': ['d.*']}, "db", "database", False],
+        [{'include_databases': ['d.*'], 'exclude_schemas': ['d.*']}, "db", "database", True],
+        [{'exclude_databases': ['c.*']}, "db", "database", True],
+        [{'exclude_databases': ['d.*']}, "db", "database", False],
+        [{'include_databases': ['d.*'], 'exclude_databases': ['c.*']}, "db", "database", True],
+        [{'include_databases': ['c.*'], 'exclude_databases': ['c.*']}, "db", "database", False],
+        [{'include_databases': ['d.*'], 'exclude_databases': ['b$']}, "db", "database", False],
+        [{'include_databases': ['c.*']}, "sch", "schema", True],
+        [{'exclude_databases': ['sc.*']}, "sch", "schema", True],
+        [{'include_schemas': ['p.*']}, "public", "schema", True],
+        [{'include_schemas': ['x.*']}, "public", "schema", False],
+        [{'exclude_schemas': ['z.*']}, "public", "schema", True],
+        [{'exclude_schemas': ['l.*']}, "public", "schema", False],
+        [{'include_schemas': ['p.*'], 'exclude_schemas': ['z.*']}, "public", "schema", True],
+        [{'include_schemas': ['z.*'], 'exclude_schemas': ['c$']}, "public", "schema", False],
+        [{'include_schemas': ['p.*'], 'exclude_schemas': ['b.*']}, "public", "schema", False],
+    ]
+    for tc in test_cases:
+        dbm_instance['collect_schemas'] = tc[0]
+        check = integration_check(dbm_instance)
+        metadata = check.metadata_samples
+
+        assert metadata._should_collect_metadata(tc[1], tc[2]) == tc[3], tc
+
+
 def assert_fields(keys: List[str], fields: List[str]):
     for field in fields:
         assert field in keys

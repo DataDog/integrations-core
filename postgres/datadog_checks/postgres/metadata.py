@@ -300,13 +300,13 @@ class PostgresMetadata(DBMAsyncJob):
 
             for database in schema_metadata:
                 dbname = database["name"]
-                if not self._should_include_metadata(dbname, "database"):
+                if not self._should_collect_metadata(dbname, "database"):
                     continue
 
                 with self.db_pool.get_connection(dbname, self._config.idle_connection_timeout) as conn:
                     with conn.cursor(cursor_factory=psycopg2.extras.DictCursor) as cursor:
                         for schema in database["schemas"]:
-                            if not self._should_include_metadata(dbname, "schema"):
+                            if not self._should_collect_metadata(schema, "schema"):
                                 continue
 
                             tables = self._query_tables_for_schema(cursor, schema["id"], dbname)
@@ -331,13 +331,18 @@ class PostgresMetadata(DBMAsyncJob):
                                 self._flush_schema(base_event, database, schema, tables_buffer)
             self._is_schemas_collection_in_progress = False
 
-    def _should_include_metadata(self, name, metadata_type):
+    def _should_collect_metadata(self, name, metadata_type):
         for re_str in self._config.schemas_metadata_config.get(
             "exclude_{metadata_type}s".format(metadata_type=metadata_type), []
         ):
             regex = re.compile(re_str)
-            if regex.match(name):
+            print(f"exclude? {regex} {name}")
+            if regex.search(name):
+                self._log.debug("Excluding {metadata_type} {name} from metadata collection "
+                                "because of {re_str}"
+                                .format(metadata_type=metadata_type, name=name, re_str=re_str))
                 return False
+            
         includes = self._config.schemas_metadata_config.get(
             "include_{metadata_type}s".format(metadata_type=metadata_type), []
         )
@@ -345,7 +350,10 @@ class PostgresMetadata(DBMAsyncJob):
             return True
         for re_str in includes:
             regex = re.compile(re_str)
-            if regex.match(name):
+            if regex.search(name):
+                self._log.debug("Including {metadata_type} {name} in metadata collection "
+                                "because of {re_str}"
+                                .format(metadata_type=metadata_type, name=name, re_str=re_str))
                 return True
         return False
 
