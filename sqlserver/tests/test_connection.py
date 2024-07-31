@@ -390,7 +390,7 @@ def test_connection_failure(aggregator, dd_run_check, instance_docker):
     [
         (
             "unknown_adoprovider",
-            {'adoprovider': "fake", 'password': "test\1234"},
+            {'adoprovider': "fake", 'password': r"test\\1234"},
             {".*": "TCP-connection\\(OK\\).*Provider cannot be found. It may not be properly installed."},
             ConnectionErrorCode.driver_not_found,
         ),
