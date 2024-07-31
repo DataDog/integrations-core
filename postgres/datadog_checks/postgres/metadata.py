@@ -336,7 +336,6 @@ class PostgresMetadata(DBMAsyncJob):
             "exclude_{metadata_type}s".format(metadata_type=metadata_type), []
         ):
             regex = re.compile(re_str)
-            print(f"exclude? {regex} {name}")
             if regex.search(name):
                 self._log.debug(
                     "Excluding {metadata_type} {name} from metadata collection "
