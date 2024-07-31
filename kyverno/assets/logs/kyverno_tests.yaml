@@ -5,7 +5,8 @@ tests:
   result:
     custom:
       caller: "webhook/controller.go:269"
-      error: "lease.coordination.k8s.io \"kyverno-health\" not found"
+      error:
+        message: "lease.coordination.k8s.io \"kyverno-health\" not found"
       level: "ERROR"
       logger:
         name: "webhook-controller"

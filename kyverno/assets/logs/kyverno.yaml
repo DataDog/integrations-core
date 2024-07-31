@@ -3,6 +3,11 @@ metric_id: kyverno
 backend_only: false
 facets:
   - groups:
+      - Error
+    name: Error Message
+    path: error.message
+    source: log
+  - groups:
       - Source Code
     name: Logger Name
     path: logger.name
@@ -55,6 +60,16 @@ pipeline:
       sources:
         - logger
       target: logger.name
+      preserveSource: false
+      overrideOnConflict: false
+      sourceType: attribute
+      targetType: attribute
+    - type: attribute-remapper
+      name: Map `error` to `error.message`
+      enabled: true
+      sources:
+        - error
+      target: error.message
       preserveSource: false
       overrideOnConflict: false
       sourceType: attribute
