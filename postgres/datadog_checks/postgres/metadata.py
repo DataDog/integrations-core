@@ -338,11 +338,12 @@ class PostgresMetadata(DBMAsyncJob):
             regex = re.compile(re_str)
             print(f"exclude? {regex} {name}")
             if regex.search(name):
-                self._log.debug("Excluding {metadata_type} {name} from metadata collection "
-                                "because of {re_str}"
-                                .format(metadata_type=metadata_type, name=name, re_str=re_str))
+                self._log.debug(
+                    "Excluding {metadata_type} {name} from metadata collection "
+                    "because of {re_str}".format(metadata_type=metadata_type, name=name, re_str=re_str)
+                )
                 return False
-            
+
         includes = self._config.schemas_metadata_config.get(
             "include_{metadata_type}s".format(metadata_type=metadata_type), []
         )
@@ -351,9 +352,10 @@ class PostgresMetadata(DBMAsyncJob):
         for re_str in includes:
             regex = re.compile(re_str)
             if regex.search(name):
-                self._log.debug("Including {metadata_type} {name} in metadata collection "
-                                "because of {re_str}"
-                                .format(metadata_type=metadata_type, name=name, re_str=re_str))
+                self._log.debug(
+                    "Including {metadata_type} {name} in metadata collection "
+                    "because of {re_str}".format(metadata_type=metadata_type, name=name, re_str=re_str)
+                )
                 return True
         return False
 
