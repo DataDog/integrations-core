@@ -345,7 +345,8 @@ def test_should_collect_metadata(integration_check, dbm_instance):
         metadata = check.metadata_samples
 
         assert metadata._should_collect_metadata(tc[1], tc[2]) == tc[3], tc
-        
+
+
 def test_collect_schemas_max_tables(integration_check, dbm_instance, aggregator):
     dbm_instance["collect_schemas"] = {'enabled': True, 'collection_interval': 0.5, 'max_tables': 1}
     dbm_instance['relations'] = []
