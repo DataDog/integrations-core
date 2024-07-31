@@ -2,6 +2,8 @@
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
 
+import ipaddress
+
 from six import PY3, iteritems
 
 from datadog_checks.base.utils.serialization import json
@@ -9,7 +11,15 @@ from datadog_checks.base.utils.serialization import json
 if PY3:
     import time
 
-    from datadog_checks.cisco_aci.models import DeviceMetadata, InterfaceMetadata, NetworkDevicesMetadata, Node, PhysIf
+    from datadog_checks.cisco_aci.models import (
+        DeviceMetadata,
+        InterfaceMetadata,
+        IPAddressMetadata,
+        NetflowExporterPol,
+        NetworkDevicesMetadata,
+        Node,
+        PhysIf,
+    )
 
 else:
     DeviceMetadata = None
@@ -58,10 +68,54 @@ class Fabric:
         pods = self.submit_pod_health(fabric_pods)
         devices, interfaces = self.submit_nodes_health_and_metadata(fabric_nodes, pods)
         if self.ndm_enabled():
+            ip_address_metadata = []
+            if self.enable_netflow:
+                ip_address_metadata = self.create_ip_address_metadata(devices)
             collect_timestamp = int(time.time())
-            batches = self.batch_payloads(devices, interfaces, collect_timestamp)
+            batches = self.batch_payloads(devices, interfaces, ip_address_metadata, collect_timestamp)
             for batch in batches:
                 self.event_platform_event(json.dumps(batch.model_dump(exclude_none=True)), "network-devices-metadata")
+
+    def create_ip_address_metadata(self, devices):
+        netflow_pols = self.api.get_netflow_exporter_policies()
+        src_addresses = []
+        for pol in netflow_pols:
+            netflow_exporter_pol = pol.get('netflowExporterPol', {})
+            nep = NetflowExporterPol(attributes=netflow_exporter_pol.get('attributes', {}))
+            src_addresses.append(nep.attributes.src_address)
+
+        # maybe this could just be a list comprehension with the tuples as elements tbh?
+        devices_list = [self.get_device_info(d) for d in devices]
+        # devices_map = {node_id: device_id for d in devices for device_id, node_id in self.get_device_info(d)}
+        # leaf_nodes = {d for d in devices if d.get('role') == 'leaf'}
+        for device_id, node_id in devices_list:
+            for src_address in src_addresses:
+                device_export_ip, max_prefixlen = self.get_node_exporter_ip(node_id, src_address)
+                ip_address_meta = IPAddressMetadata(
+                    device_id=device_id, ip_address=device_export_ip, prefix_len=max_prefixlen
+                )
+                yield ip_address_meta.model_dump(exclude_none=True)
+
+    def get_device_info(self, device):
+        device_tags = device.get('tags', [])
+        for tag in device_tags:
+            if tag.startswith('node_id'):
+                node_id = tag.split(':')[1]
+                break
+        return device.get('id'), node_id
+
+    def get_node_exporter_ip(self, node_id, src_address):
+        try:
+            network = ipaddress.ip_network(src_address)
+        except ValueError as e:
+            raise ValueError("Invalid IP address / network mask: {}".format(e))
+
+        # check if host number is within valid range
+        if int(node_id) > network.num_addresses:
+            raise ValueError("Node ID is out of range for the given network {}".format(src_address))
+
+        host_address = network.network_address + int(node_id)
+        return format(host_address), str(host_address.max_prefixlen)
 
     def submit_pod_health(self, pods):
         pods_dict = {}
@@ -254,7 +308,7 @@ class Fabric:
         if obj_type == 'l1PhysIf':
             return 'port'
 
-    def batch_payloads(self, devices, interfaces, collect_ts):
+    def batch_payloads(self, devices, interfaces, ip_addresses, collect_ts):
         for device in devices:
             yield NetworkDevicesMetadata(namespace=self.namespace, devices=[device], collect_timestamp=collect_ts)
 
@@ -268,6 +322,17 @@ class Fabric:
             payloads.append(interface)
         if payloads:
             yield NetworkDevicesMetadata(namespace=self.namespace, interfaces=payloads, collect_timestamp=collect_ts)
+
+        payloads = []
+        for ip_address in ip_addresses:
+            if len(payloads) == PAYLOAD_METADATA_BATCH_SIZE:
+                yield NetworkDevicesMetadata(
+                    namespace=self.namespace, interfaces=payloads, collect_timestamp=collect_ts
+                )
+                payloads = []
+            payloads.append(ip_address)
+        if payloads:
+            yield NetworkDevicesMetadata(namespace=self.namespace, ip_addresses=payloads, collect_timestamp=collect_ts)
 
     def submit_node_metadata(self, node_attrs, tags):
         node = Node(attributes=node_attrs)

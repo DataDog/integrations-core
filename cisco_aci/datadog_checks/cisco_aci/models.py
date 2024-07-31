@@ -10,6 +10,10 @@ if six.PY3:
 
     from pydantic import BaseModel, ConfigDict, Field, computed_field, field_validator
 
+    """
+    Cisco ACI Response Models
+    """
+
     class NodeAttributes(BaseModel):
         address: Optional[str] = None
         fabric_st: Optional[str] = Field(default=None, alias="fabricSt")
@@ -56,6 +60,18 @@ if six.PY3:
                 if 'ethpmPhysIf' in child:
                     return EthpmPhysIf(**child['ethpmPhysIf'])
             return None
+
+    class NetflowExporterPolAttributes(BaseModel):
+        dn: Optional[str] = None
+        src_address: Optional[str] = Field(default=None, alias="srcAddr")
+        ver: Optional[str] = None
+
+    class NetflowExporterPol(BaseModel):
+        attributes: NetflowExporterPolAttributes
+
+    """
+    NDM Models
+    """
 
     class DeviceMetadata(BaseModel):
         id: Optional[str] = Field(default=None)
@@ -153,8 +169,14 @@ if six.PY3:
     class InterfaceMetadataList(BaseModel):
         interface_metadata: list = Field(default_factory=list)
 
+    class IPAddressMetadata(BaseModel):
+        device_id: Optional[str] = Field(default=None)
+        ip_address: Optional[str] = Field(default=None)
+        prefix_len: Optional[str] = Field(default=None)
+
     class NetworkDevicesMetadata(BaseModel):
         namespace: str = None
         devices: Optional[list[DeviceMetadata]] = Field(default_factory=list)
         interfaces: Optional[list[InterfaceMetadata]] = Field(default_factory=list)
+        ip_addresses: Optional[list[IPAddressMetadata]] = Field(default_factory=list)
         collect_timestamp: Optional[int] = None
