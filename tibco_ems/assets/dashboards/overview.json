@@ -1,5 +1,5 @@
 {
-    "author": "Datadog",
+    "author_name": "Datadog",
     "title": "Tibco EMS Overview",
     "description": "## Tibco EMS Integration\n\nThis dashboard provides an overview of the health, performance, and usage metrics of the TIBCO Enterprise Message Service (EMS). It is designed to help administrators and operations teams monitor the EMS environment in real-time, ensuring the reliability, availability, and efficiency of messaging services. Key metrics such as server health, connection statuses, message rates, queue depths and memory usage are visualized to facilitate proactive management and troubleshooting.\n\nFor more information, please refer to:\n**Useful Links**\n\n* [Integration Docs](https://docs.datadoghq.com/integrations/tibco_ems/?tab=host)\n* [Tibco EMS Documentation](https://docs.tibco.com/products/tibco-enterprise-message-service)",
     "widgets": [
