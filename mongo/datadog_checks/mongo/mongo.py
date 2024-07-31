@@ -230,6 +230,7 @@ class MongoDb(AgentCheck):
 
     def _get_tags(self, include_deployment_tags=False, include_internal_resource_tags=False):
         tags = deepcopy(self._config.metric_tags)
+        print(self.api_client.deployment_type.deployment_tags, self.api_client.deployment_type.hosting_type)
         if include_deployment_tags:
             tags.extend(self.api_client.deployment_type.deployment_tags)
         if include_internal_resource_tags:
