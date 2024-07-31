@@ -15,6 +15,7 @@
             {
                 "timestamp": 32479987543991.0,
                 "dbname": "test",
+                "op": "update",
                 "ns": "test.customers",
                 "plan_summary": "IXSCAN { age: -1 }",
                 "query_signature": "a81f9d3c17192d68",
@@ -70,6 +71,7 @@
             {
                 "timestamp": 32479987543991.0,
                 "dbname": "test",
+                "op": "command",
                 "ns": "test.$cmd",
                 "query_signature": "c5b7bcd45c4d9e9",
                 "statement": "{\"update\": \"customers\", \"ordered\": true, \"comment\": \"update customers subscription status by age\", \"$db\": \"test\"}",
@@ -121,6 +123,7 @@
             {
                 "timestamp": 32479987545007.0,
                 "dbname": "test",
+                "op": "update",
                 "ns": "test.customers",
                 "plan_summary": "IXSCAN { age: -1 }",
                 "query_signature": "ec24a2e9aacce5a0",
@@ -176,6 +179,7 @@
             {
                 "timestamp": 32479987545008.0,
                 "dbname": "test",
+                "op": "command",
                 "ns": "test.$cmd",
                 "query_signature": "c5b7bcd45c4d9e9",
                 "statement": "{\"update\": \"customers\", \"ordered\": true, \"comment\": \"update customers subscription status by age\", \"$db\": \"test\"}",
@@ -227,6 +231,7 @@
             {
                 "timestamp": 32479987545040.0,
                 "dbname": "test",
+                "op": "update",
                 "ns": "test.customers",
                 "plan_summary": "IXSCAN { age: -1 }",
                 "query_signature": "a81f9d3c17192d68",
@@ -282,6 +287,7 @@
             {
                 "timestamp": 32479987545041.0,
                 "dbname": "test",
+                "op": "command",
                 "ns": "test.$cmd",
                 "query_signature": "c5b7bcd45c4d9e9",
                 "statement": "{\"update\": \"customers\", \"ordered\": true, \"comment\": \"update customers subscription status by age\", \"$db\": \"test\"}",
@@ -333,6 +339,7 @@
             {
                 "timestamp": 32479987545338.0,
                 "dbname": "test",
+                "op": "command",
                 "ns": "test.customers",
                 "plan_summary": "IXSCAN { name: 1 }",
                 "query_signature": "55e31aa78c5bbf26",
@@ -371,6 +378,7 @@
             {
                 "timestamp": 32479987545521.0,
                 "dbname": "test",
+                "op": "command",
                 "ns": "test.customers",
                 "plan_summary": "IXSCAN { name: 1 }",
                 "query_signature": "70f67e80ce895c57",
@@ -405,6 +413,7 @@
             {
                 "timestamp": 32479987543991.0,
                 "dbname": "integration",
+                "op": "update",
                 "ns": "integration.customers",
                 "plan_summary": "IXSCAN { age: -1 }",
                 "query_signature": "a81f9d3c17192d68",
@@ -460,6 +469,7 @@
             {
                 "timestamp": 32479987543991.0,
                 "dbname": "integration",
+                "op": "command",
                 "ns": "integration.$cmd",
                 "query_signature": "3583b3bc9478cec2",
                 "statement": "{\"update\": \"customers\", \"ordered\": true, \"comment\": \"update customers subscription status by age\", \"$db\": \"integration\"}",
@@ -511,6 +521,7 @@
             {
                 "timestamp": 32479987545007.0,
                 "dbname": "integration",
+                "op": "update",
                 "ns": "integration.customers",
                 "plan_summary": "IXSCAN { age: -1 }",
                 "query_signature": "ec24a2e9aacce5a0",
@@ -566,6 +577,7 @@
             {
                 "timestamp": 32479987545008.0,
                 "dbname": "integration",
+                "op": "command",
                 "ns": "integration.$cmd",
                 "query_signature": "3583b3bc9478cec2",
                 "statement": "{\"update\": \"customers\", \"ordered\": true, \"comment\": \"update customers subscription status by age\", \"$db\": \"integration\"}",
@@ -617,6 +629,7 @@
             {
                 "timestamp": 32479987545040.0,
                 "dbname": "integration",
+                "op": "update",
                 "ns": "integration.customers",
                 "plan_summary": "IXSCAN { age: -1 }",
                 "query_signature": "a81f9d3c17192d68",
@@ -672,6 +685,7 @@
             {
                 "timestamp": 32479987545041.0,
                 "dbname": "integration",
+                "op": "command",
                 "ns": "integration.$cmd",
                 "query_signature": "3583b3bc9478cec2",
                 "statement": "{\"update\": \"customers\", \"ordered\": true, \"comment\": \"update customers subscription status by age\", \"$db\": \"integration\"}",
@@ -723,6 +737,7 @@
             {
                 "timestamp": 32479987545338.0,
                 "dbname": "integration",
+                "op": "command",
                 "ns": "integration.customers",
                 "plan_summary": "IXSCAN { name: 1 }",
                 "query_signature": "e414c665b38186b4",
@@ -761,6 +776,7 @@
             {
                 "timestamp": 32479987545521.0,
                 "dbname": "integration",
+                "op": "command",
                 "ns": "integration.customers",
                 "plan_summary": "IXSCAN { name: 1 }",
                 "query_signature": "b290163c261f2b46",

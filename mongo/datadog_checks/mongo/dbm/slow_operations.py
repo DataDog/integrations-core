@@ -192,7 +192,7 @@ class MongoSlowOperations(DBMAsyncJob):
         event = {
             "timestamp": slow_operation["ts"] * 1000,
             "dbname": slow_operation["dbname"],
-            "op": slow_operation.get("op"),
+            "op": slow_operation.get("op") or slow_operation.get("type"),
             "ns": slow_operation.get("ns"),
             "plan_summary": slow_operation.get("planSummary"),
             "query_signature": slow_operation["query_signature"],
