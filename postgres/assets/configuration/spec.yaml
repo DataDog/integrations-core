@@ -600,7 +600,7 @@ files:
       options:
         - name: enabled
           description: |
-            Enable collection of database schemas. Requires `dbm: true` and relation metrics must be enabled.
+            Enable collection of database schemas. Requires `dbm: true`.
           value:
             type: boolean
             example: false

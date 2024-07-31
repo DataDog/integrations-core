@@ -466,7 +466,7 @@ instances:
     # collect_schemas:
 
         ## @param enabled - boolean - optional - default: false
-        ## Enable collection of database schemas. Requires `dbm: true` and relation metrics must be enabled.
+        ## Enable collection of database schemas. Requires `dbm: true`.
         #
         # enabled: false
 

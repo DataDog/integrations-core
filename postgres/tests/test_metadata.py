@@ -55,7 +55,7 @@ def test_collect_metadata(integration_check, dbm_instance, aggregator):
 
 def test_collect_schemas(integration_check, dbm_instance, aggregator):
     dbm_instance["collect_schemas"] = {'enabled': True, 'collection_interval': 600}
-    dbm_instance['relations'] = [{'relation_regex': ".*"}]
+    dbm_instance['relations'] = []
     dbm_instance["database_autodiscovery"] = {"enabled": True, "include": ["datadog"]}
     del dbm_instance['dbname']
     check = integration_check(dbm_instance)
@@ -345,6 +345,29 @@ def test_should_collect_metadata(integration_check, dbm_instance):
         metadata = check.metadata_samples
 
         assert metadata._should_collect_metadata(tc[1], tc[2]) == tc[3], tc
+        
+def test_collect_schemas_max_tables(integration_check, dbm_instance, aggregator):
+    dbm_instance["collect_schemas"] = {'enabled': True, 'collection_interval': 0.5, 'max_tables': 1}
+    dbm_instance['relations'] = []
+    dbm_instance["database_autodiscovery"] = {"enabled": True, "include": ["datadog"]}
+    del dbm_instance['dbname']
+    check = integration_check(dbm_instance)
+    run_one_check(check, dbm_instance)
+    dbm_metadata = aggregator.get_event_platform_events("dbm-metadata")
+
+    for schema_event in (e for e in dbm_metadata if e['kind'] == 'pg_databases'):
+        database_metadata = schema_event['metadata']
+        assert len(database_metadata[0]['schemas'][0]['tables']) == 1
+
+    # Rerun check with relations enabled
+    dbm_instance['relations'] = [{'relation_regex': '.*'}]
+    check = integration_check(dbm_instance)
+    run_one_check(check, dbm_instance)
+    dbm_metadata = aggregator.get_event_platform_events("dbm-metadata")
+
+    for schema_event in (e for e in dbm_metadata if e['kind'] == 'pg_databases'):
+        database_metadata = schema_event['metadata']
+        assert len(database_metadata[0]['schemas'][0]['tables']) == 1
 
 
 def assert_fields(keys: List[str], fields: List[str]):

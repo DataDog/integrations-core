@@ -306,7 +306,7 @@ class PostgresMetadata(DBMAsyncJob):
                 with self.db_pool.get_connection(dbname, self._config.idle_connection_timeout) as conn:
                     with conn.cursor(cursor_factory=psycopg2.extras.DictCursor) as cursor:
                         for schema in database["schemas"]:
-                            if not self._should_collect_metadata(schema, "schema"):
+                            if not self._should_collect_metadata(schema["name"], "schema"):
                                 continue
 
                             tables = self._query_tables_for_schema(cursor, schema["id"], dbname)
@@ -424,22 +424,33 @@ class PostgresMetadata(DBMAsyncJob):
 
         If any tables are partitioned, only the master paritition table name will be returned, and none of its children.
         """
-        limit = self._config.schemas_metadata_config.get("max_tables", 300)
         filter = self._get_tables_filter()
-
-        if self._config.relations:
-            if VersionUtils.transform_version(str(self._check.version))["version.major"] == "9":
-                cursor.execute(PG_TABLES_QUERY_V9.format(schema_oid=schema_id, filter=filter))
-            else:
-                cursor.execute(PG_TABLES_QUERY_V10_PLUS.format(schema_oid=schema_id, filter=filter))
-            rows = cursor.fetchall()
-            table_info = [dict(row) for row in rows]
-            return self._sort_and_limit_table_info(cursor, dbname, table_info, limit)
-
+        if VersionUtils.transform_version(str(self._check.version))["version.major"] == "9":
+            cursor.execute(PG_TABLES_QUERY_V9.format(schema_oid=schema_id, filter=filter))
         else:
-            # Config error should catch the case where schema collection is enabled
-            # and relation metrics aren't, but adding a warning here just in case
-            self._check.log.warning("Relation metrics are not configured for {dbname}, so tables cannot be collected")
+            cursor.execute(PG_TABLES_QUERY_V10_PLUS.format(schema_oid=schema_id, filter=filter))
+        rows = cursor.fetchall()
+        table_info = [dict(row) for row in rows]
+
+        limit = self._config.schemas_metadata_config.get("max_tables", 300)
+
+        if len(table_info) <= limit:
+            return table_info
+
+        if not self._config.relations:
+            self._check.log.warning(
+                "Number of tables exceeds limit of %d set by max_tables but "
+                "relation metrics are not configured for %s."
+                "Please configure relation metrics for all tables to sort by most active."
+                "See https://docs.datadoghq.com/database_monitoring/setup_postgres/"
+                "selfhosted/?tab=postgres15#monitoring-relation-metrics-for-multiple-databases "
+                "for details on how to enable relation metrics.",
+                limit,
+                dbname,
+            )
+            return table_info[:limit]
+
+        return self._sort_and_limit_table_info(cursor, dbname, table_info, limit)
 
     def _get_tables_filter(self):
         includes = self._config.schemas_metadata_config.get("include_tables", [])
@@ -483,10 +494,6 @@ class PostgresMetadata(DBMAsyncJob):
                 cursor.execute(PARTITION_ACTIVITY_QUERY.format(parent_oid=info["id"]))
                 row = cursor.fetchone()
                 return row.get("total_activity", 0) if row is not None else 0
-
-        # We only sort to filter by top so no need to waste resources if we're going to return everything
-        if len(table_info) <= limit:
-            return table_info
 
         # if relation metrics are enabled, sorted based on last activity information
         table_info = sorted(table_info, key=sort_tables, reverse=True)
