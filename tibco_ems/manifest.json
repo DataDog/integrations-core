@@ -45,6 +45,9 @@
         "metadata_path": "assets/service_checks.json"
       }
     },
+    "dashboards": {
+      "Tibco EMS Overview": "assets/dashboards/overview.json"
+    },
     "monitors": {
       "Server Uptime": "assets/monitors/server_uptime.json"
     },
