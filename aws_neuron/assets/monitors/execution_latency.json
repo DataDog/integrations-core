@@ -1,0 +1,16 @@
+{
+	"name": "Execution latency",
+	"type": "query alert",
+	"query": "avg(last_5m):avg:aws_neuron.execution.latency_seconds{*} > 1",
+	"message": "",
+	"tags": [],
+	"options": {
+		"thresholds": {
+			"critical": 1,
+			"warning": 0.5
+		},
+		"notify_audit": false,
+		"on_missing_data": "default",
+		"include_tags": false
+	}
+}

@@ -46,7 +46,9 @@
     "dashboards": {
         "AWS Neuron Overview": "assets/dashboards/aws_neuron_overview.json"
     },
-    "monitors": {},
+    "monitors": {
+      "execution latency": "assets/monitors/execution_latency.json"
+    },
     "saved_views": {}
   },
   "author": {
