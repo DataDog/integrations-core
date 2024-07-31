@@ -75,6 +75,7 @@ def test_e2e_profile_cisco(dd_agent_check):
         ],
         "vendor": "cisco",
         'device_type': 'other',
+        'integration': 'snmp',
     }
     assert_device_metadata(aggregator, device)
 

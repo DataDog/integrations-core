@@ -290,6 +290,7 @@ def test_e2e_core_metadata_cisco_catalyst(dd_agent_check):
         u'serial_number': u'SCA044001J9',
         u'device_type': u'switch',
         u'integration': u'snmp',
+        'integration': 'snmp',
     }
     assert_device_metadata(aggregator, device)
 
@@ -339,6 +340,7 @@ def test_e2e_core_metadata_hp_ilo4(dd_agent_check):
         u'serial_number': u'dXPEdPBE5yKtjW9xx3',
         u'device_type': u'server',
         u'integration': u'snmp',
+        'integration': 'snmp',
     }
     assert_device_metadata(aggregator, device)
 
@@ -388,6 +390,7 @@ def test_e2e_core_metadata_hpe_proliant(dd_agent_check):
         u'serial_number': u'dLPEdPBE5yKtjW9xx3',
         u'device_type': u'other',
         u'integration': u'snmp',
+        'integration': 'snmp',
     }
     assert_device_metadata(aggregator, device)
 
@@ -442,6 +445,7 @@ def test_e2e_core_metadata_apc_ups(dd_agent_check):
         'version': '2.0.3-test',
         u'device_type': u'ups',
         u'integration': u'snmp',
+        'integration': 'snmp',
     }
     assert_device_metadata(aggregator, device)
 
@@ -639,6 +643,7 @@ def test_e2e_core_metadata_aruba_switch(dd_agent_check):
         'version': '8.6.0.4',
         'device_type': 'switch',
         u'integration': u'snmp',
+        'integration': 'snmp',
     }
     assert_device_metadata(aggregator, device)
 
@@ -1175,6 +1180,7 @@ def test_e2e_core_metadata_cisco_asr_1001x(dd_agent_check):
         u'version': u'17.6.4',
         u'device_type': u'router',
         u'integration': u'snmp',
+        'integration': 'snmp',
     }
     assert_device_metadata(aggregator, device)
 
@@ -1219,6 +1225,7 @@ def test_e2e_core_metadata_cisco_asr_9001(dd_agent_check):
         u'version': u'6.4.2',
         u'device_type': u'router',
         u'integration': u'snmp',
+        'integration': 'snmp',
     }
     assert_device_metadata(aggregator, device)
 
@@ -1264,6 +1271,7 @@ def test_e2e_core_metadata_cisco_asr_9901(dd_agent_check):
         u'version': u'7.1.3',
         u'device_type': u'router',
         u'integration': u'snmp',
+        'integration': 'snmp',
     }
     assert_device_metadata(aggregator, device)
 
@@ -1410,5 +1418,6 @@ def test_e2e_core_metadata_cisco_wlc(dd_agent_check):
         u'vendor': u'cisco',
         u'device_type': u'wlc',
         u'integration': u'snmp',
+        'integration': 'snmp',
     }
     assert_device_metadata(aggregator, device)
