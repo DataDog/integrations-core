@@ -37,6 +37,7 @@ class Fabric:
 
         # Config for submitting device/interface metadata to NDM
         self.send_ndm_metadata = self.instance.get('send_ndm_metadata', False)
+        self.enable_netflow = self.instance.get('enable_netflow', False)
 
         # grab some functions from the check
         self.gauge = check.gauge
