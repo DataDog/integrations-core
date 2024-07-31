@@ -485,6 +485,54 @@ instances:
         #
         # collection_interval: 600
 
+        ## @param include_databases - list of strings - optional
+        ## A list of regex patterns to include databases. 
+        ## Any database whose name matches any one of these patterns will be included. 
+        ## If empty, all databases matching other filters are included.
+        #
+        # include_databases:
+        #   - mydb
+
+        ## @param exclude_databases - list of strings - optional
+        ## A list of regex patterns to exclude databases. 
+        ## Any database whose name matches any one of these patterns will be excluded.
+        ## If empty, all databases matching other filters are included.
+        #
+        # exclude_databases:
+        #   - privatedb.*
+
+        ## @param include_schemas - list of strings - optional
+        ## A list of regex patterns to include schemas. 
+        ## Any schema whose name matches any one of these patterns will be included.
+        ## If empty, all schemas matching other filters are included.
+        #
+        # include_schemas:
+        #   - myschema
+
+        ## @param exclude_schemas - list of strings - optional
+        ## A list of regex patterns to exclude schemas. 
+        ## Any schema whose name matches any one of these patterns will be excluded.
+        ## If empty, all schemas matching other filters are included.
+        #
+        # exclude_schemas:
+        #   - privateschema.*
+
+        ## @param include_tables - list of strings - optional
+        ## A list of regex patterns to include tables. 
+        ## Any table whose name matches any one of these patterns will be included.
+        ## If empty, all tables matching other filters are included.
+        #
+        # include_tables:
+        #   - users.*
+
+        ## @param exclude_tables - list of strings - optional
+        ## A list of regex patterns to exclude tables. 
+        ## Any table whose name matches any one of these patterns will be excluded.
+        ## If empty, all tables matching other filters are included.
+        #
+        # exclude_tables:
+        #   - customer.*
+
     ## This block defines the configuration for AWS RDS and Aurora instances.
     ##
     ## Complete this section if you have installed the Datadog AWS Integration
