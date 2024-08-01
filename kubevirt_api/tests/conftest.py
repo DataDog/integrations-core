@@ -80,7 +80,6 @@ def dd_environment():
         instance["kubevirt_api_healthz_endpoint"] = f"https://{host}:{port}/healthz"
         instance["kube_cluster_name"] = "test-cluster-e2e"
         instance["kube_config_dict"] = kubeconfig_content
-        instance["tls_verify"] = False
 
         yield {"instances": [instance]}
 

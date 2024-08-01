@@ -5,7 +5,7 @@ import ipaddress
 from typing import Any  # noqa: F401
 from urllib.parse import urlparse
 
-from datadog_checks.base import OpenMetricsBaseCheckV2, is_affirmative
+from datadog_checks.base import OpenMetricsBaseCheckV2
 from datadog_checks.base.checks.openmetrics.v2.transform import get_native_dynamic_transformer
 
 from .kube_client import KubernetesAPIClient
@@ -56,7 +56,7 @@ class KubevirtApiCheck(OpenMetricsBaseCheckV2):
     def _report_health_check(self, health_endpoint):
         try:
             self.log.debug("Checking health status at %s", health_endpoint)
-            response = self.http.get(health_endpoint, verify=is_affirmative(self.tls_verify))
+            response = self.http.get(health_endpoint)
             response.raise_for_status()
             self.gauge("can_connect", 1, tags=[f"endpoint:{health_endpoint}"])
         except Exception as e:
@@ -174,7 +174,6 @@ class KubevirtApiCheck(OpenMetricsBaseCheckV2):
         self.kube_cluster_name = self.instance.get("kube_cluster_name")
         self.kube_namespace = self.instance.get("kube_namespace")
         self.kube_config_dict = self.instance.get("kube_config_dict")
-        self.tls_verify = self.instance.get("tls_verify")
 
         parsed_url = urlparse(self.kubevirt_api_metrics_endpoint)
         if not parsed_url.path:
@@ -191,7 +190,6 @@ class KubevirtApiCheck(OpenMetricsBaseCheckV2):
             "namespace": self.__NAMESPACE__,
             "enable_health_service_check": False,
             "rename_labels": {"version": "kubevirt_api_version", "host": "kubevirt_api_host"},
-            "tls_verify": self.tls_verify,
         }
 
         self.scraper_configs.append(instance)
