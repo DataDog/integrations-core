@@ -13,7 +13,7 @@ SERVER_METRIC_KEYS = [
     'queues',
     'durables',
     'pending_messages',
-    'pending_messages_size',
+    'pending_message_size',
     'message_memory_pooled',
     'synchronous_storage',
     'asynchronous_storage',

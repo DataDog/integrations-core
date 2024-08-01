@@ -23,7 +23,6 @@ class TibcoEMSCheck(AgentCheck):
     def __init__(self, name, init_config, instances):
         super(TibcoEMSCheck, self).__init__(name, init_config, instances)
         # Allow to specify a complete command for tibemsadmin such as `docker exec <container> tibemsadmin`
-        # default_tibemsadmin_cmd = init_config.get('tibemsadmin', 'tibemsadmin')
         default_tibemsadmin_cmd = init_config.get('tibemsadmin', 'tibemsadmin')
         tibemsadmin_cmd = self.instance.get('tibemsadmin', default_tibemsadmin_cmd).split()
         host = self.instance.get('host', DEFAULT_HOST)
@@ -61,7 +60,7 @@ class TibcoEMSCheck(AgentCheck):
 
         # Parse the output
         for command, section in sections.items():
-            pattern = SHOW_METRIC_DATA.get(command)['regex']
+            pattern = SHOW_METRIC_DATA[command]['regex']
             if command == 'show server':
                 self.parsed_data[command] = self.parse_show_server(section, pattern)
             else:
@@ -72,9 +71,9 @@ class TibcoEMSCheck(AgentCheck):
                     continue
 
         for command, metric_info in self.parsed_data.items():
-            metric_keys = SHOW_METRIC_DATA.get(command)['metric_keys']
-            tag_keys = SHOW_METRIC_DATA.get(command)['tags']
-            metric_prefix = SHOW_METRIC_DATA.get(command)['metric_prefix']
+            metric_keys = SHOW_METRIC_DATA[command]['metric_keys']
+            tag_keys = SHOW_METRIC_DATA[command]['tags']
+            metric_prefix = SHOW_METRIC_DATA[command]['metric_prefix']
 
             if command == 'show server':
                 self.submit_metrics_factory(metric_prefix, metric_info, metric_keys, tag_keys)
@@ -206,14 +205,14 @@ class TibcoEMSCheck(AgentCheck):
         for key in tag_keys:
             if prefix == 'server':
                 # Add server tags to all metrics
-                self.tags.append(f"server_{key}:{metric_data.get(key)}")
+                self.tags.append(f"server_{key}:{metric_data[key]}")
             else:
                 if metric_data.get(key):
-                    tags.append(f"{key}:{metric_data.get(key)}")
+                    tags.append(f"{key}:{metric_data[key]}")
 
         tags.extend(self.tags)
         for metric_name in metric_names:
-            metric_info = metric_data.get(metric_name)
+            metric_info = metric_data[metric_name]
             if metric_name in metric_data:
                 if isinstance(metric_info, dict):
                     self.gauge(

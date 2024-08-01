@@ -51,6 +51,7 @@ METRIC_DATA = [
     'tibco_ems.server.outbound_message_rate',
     'tibco_ems.server.outbound_message_rate_size',
     'tibco_ems.server.pending_messages',
+    'tibco_ems.server.pending_message_size',
     'tibco_ems.server.producers',
     'tibco_ems.server.queues',
     'tibco_ems.server.sessions',
