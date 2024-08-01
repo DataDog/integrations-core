@@ -145,11 +145,11 @@ tests:
           name: "John"
           role: "admin"
         authentication:
-          source_id:
+          sourceid:
           - "adapter.HTMLFormSimplePCV"
           - " idpConnection.IdP"
           - " localIdentity.A8me9rySDn1aIM48"
-          target_id:
+          targetsessionid:
           - "spAdapter.SAML2"
           - " spConnection.PartnerSP"
         error:
@@ -186,14 +186,14 @@ tests:
               timezone: "Europe/Paris"
             ip: "185.64.148.0"
         oauth:
-          grant_type: "authorization_code"
-          track_id: "qwerty-1234-asdfgh-5678"
+          granttype: "authorization_code"
+          attrackingid: "qwerty-1234-asdfgh-5678"
         ping_federate:
           transaction:
             connection:
               id: "connection1"
               name: "MyOAuthClient"
-            intiated_by: "SP"
+            initiator: "SP"
             role: "IdP"
             stspluginid: "sts-processor-1234"
             subject: "analyst"
