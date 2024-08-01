@@ -1,16 +1,26 @@
 {
-	"name": "Execution latency",
-	"type": "query alert",
-	"query": "avg(last_5m):avg:aws_neuron.execution.latency_seconds{*} > 1",
-	"message": "",
-	"tags": [],
-	"options": {
-		"thresholds": {
-			"critical": 1,
-			"warning": 0.5
-		},
-		"notify_audit": false,
-		"on_missing_data": "default",
-		"include_tags": false
-	}
+	"version": 2,
+	"created_at": "2024-08-01",
+	"last_updated_at": "2024-08-01",
+	"title": "Execution latency",
+	"description": "FIll IN",
+	"definition": {
+		"name": "",
+		"type": "query alert",
+		"query": "avg(last_5m):avg:aws_neuron.execution.latency_seconds{*} > 2",
+		"message": "",
+		"tags": [],
+		"options": {
+			"thresholds": {
+				"critical": 2,
+				"warning": 0.5
+			},
+			"notify_audit": false,
+			"on_missing_data": "default",
+			"include_tags": false
+		}
+	},
+	"tags": [
+		"integration:aws_neuron"
+	]
 }
