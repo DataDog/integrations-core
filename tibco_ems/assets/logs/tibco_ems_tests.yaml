@@ -6,7 +6,6 @@ tests:
     custom:
       timestamp: 1722450732436
     message: "Set server properties 'large_destination_memory' and 'large_destination_count' respectively to alter these thresholds."
-    status: "info"
     tags:
      - "source:LOGS_SOURCE"
     timestamp: 1722450732436
@@ -16,7 +15,7 @@ tests:
     custom:
       level: "WARNING"
       timestamp: 1722447686135
-    message: "Processing completed"
+    message: "Route Warning: host of this name does not exist: /test"
     status: "warn"
     tags:
      - "source:LOGS_SOURCE"
@@ -30,7 +29,6 @@ tests:
         user: "admin"
       timestamp: 1722448955249
     message: "connect failed: not authorized to connect"
-    status: "info"
     tags:
      - "source:LOGS_SOURCE"
     timestamp: 1722448955249

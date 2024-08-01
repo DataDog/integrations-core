@@ -10,7 +10,7 @@ pipeline:
   name: Tibco EMS
   enabled: true
   filter:
-    query: source:(ems OR tibco_ems)
+    query: source:(tibco_ems OR ems)
   processors:
     - type: grok-parser
       name:  Tibco EMS Parser
