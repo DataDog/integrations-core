@@ -92,22 +92,9 @@ class KubevirtApiCheck(OpenMetricsBaseCheckV2):
         target_pod = self.kube_client.get_pods(self.kube_namespace, ip=target_ip)
 
         if len(target_pod) == 0:
-            self.log.warning("No pods found with ip: %s.", target_ip)
-            self.log.info("Trying to find a target pod with 'virt-api'")
-
-            target_pod = self.kube_client.get_pods(namespace="kubevirt")
-
-            virt_api_pods = [pod for pod in target_pod if "virt-api" in pod["metadata"]["name"]]
-
-            if len(virt_api_pods) == 0:
-                raise ValueError(
-                    f"There are no pods with 'virt-api' in their name in the '{self.kube_namespace}' namespace"
-                )
-            target_pod = virt_api_pods[0]
-        elif len(target_pod) > 0:
-            target_pod = target_pod[0]
+            raise ValueError(f"Pod with IP '{target_ip}' not found in namespace '{self.kube_namespace}'")
         else:
-            raise ValueError(f"Target pod with ip: '{target_ip}' not found")
+            target_pod = target_pod[0]
 
         self.log.debug("Detected target pod: %s", target_pod["metadata"]["name"])
         return target_pod

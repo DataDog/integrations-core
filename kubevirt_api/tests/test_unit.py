@@ -262,3 +262,18 @@ def test_log_warning_healthz_endpoint_not_provided(dd_run_check, aggregator, ins
         "Skipping health check. Please provide a `kubevirt_api_healthz_endpoint` to ensure the health of the KubeVirt API."  # noqa: E501
         in caplog.text
     )
+
+
+def test_raise_exception_no_target_pod_with_same_ip(dd_run_check, aggregator, instance, mocker, caplog):
+    mocker.patch("requests.get", wraps=mock_http_responses)
+
+    check = KubevirtApiCheck("kubevirt_api", {}, [instance])
+
+    check._setup_kube_client = lambda: None
+    check.kube_client = MagicMock()
+    check.kube_client.get_pods.return_value = []
+    check.kube_client.get_vms.return_value = GET_VMS_RESPONSE["items"]
+    check.kube_client.get_vmis.return_value = GET_VMIS_RESPONSE["items"]
+
+    with pytest.raises(Exception, match="Pod with IP '10.244.0.38' not found in namespace 'kubevirt'"):
+        dd_run_check(check)
