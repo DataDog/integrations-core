@@ -27,11 +27,11 @@ class TibcoEMSCheck(AgentCheck):
         tibemsadmin_cmd = self.instance.get('tibemsadmin', default_tibemsadmin_cmd).split()
         host = self.instance.get('host', DEFAULT_HOST)
         port = self.instance.get('port', DEFAULT_PORT)
-        username = self.instance.get('username', "")
-        password = self.instance.get('password', "")
+        username = self.instance.get('username')
+        password = self.instance.get('password')
         script_path = self.instance.get('script_path')
         server_string = CONNECTION_STRING.format(host, port)
-        self.tags = self.instance.get("tags", [])
+        self.tags = self.instance.get('tags', [])
         self.parsed_data = {}
 
         self.cmd = tibemsadmin_cmd + [

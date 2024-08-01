@@ -260,277 +260,6 @@
             }
         },
         {
-            "id": 3412626217094282,
-            "definition": {
-                "title": "Consumer metrics",
-                "background_color": "vivid_blue",
-                "show_title": true,
-                "type": "group",
-                "layout_type": "ordered",
-                "widgets": [
-                    {
-                        "id": 218491216894336,
-                        "definition": {
-                            "type": "note",
-                            "content": "This provides statistics for message consumers, focusing on metrics such as message count and size, as well as the rate of message consumption",
-                            "background_color": "blue",
-                            "font_size": "18",
-                            "text_align": "center",
-                            "vertical_align": "top",
-                            "show_tick": false,
-                            "tick_pos": "50%",
-                            "tick_edge": "left",
-                            "has_padding": true
-                        },
-                        "layout": {
-                            "x": 0,
-                            "y": 0,
-                            "width": 12,
-                            "height": 1
-                        }
-                    },
-                    {
-                        "id": 3257923575107055,
-                        "definition": {
-                            "title": "Message rate",
-                            "title_size": "16",
-                            "title_align": "left",
-                            "show_legend": true,
-                            "legend_layout": "horizontal",
-                            "legend_columns": [
-                                "avg",
-                                "min",
-                                "max",
-                                "value",
-                                "sum"
-                            ],
-                            "type": "timeseries",
-                            "requests": [
-                                {
-                                    "formulas": [
-                                        {
-                                            "formula": "a"
-                                        },
-                                        {
-                                            "formula": "query1"
-                                        }
-                                    ],
-                                    "queries": [
-                                        {
-                                            "data_source": "metrics",
-                                            "name": "a",
-                                            "query": "avg:tibco_ems.consumer.messages_rate{$host, $server_hostname, component_type:q, $queue_name}"
-                                        },
-                                        {
-                                            "data_source": "metrics",
-                                            "name": "query1",
-                                            "query": "avg:tibco_ems.consumer.messages_rate{$host, $server_hostname, component_type:t, $topic_name}"
-                                        }
-                                    ],
-                                    "response_format": "timeseries",
-                                    "style": {
-                                        "palette": "blue",
-                                        "line_type": "solid",
-                                        "line_width": "normal"
-                                    },
-                                    "display_type": "bars"
-                                }
-                            ]
-                        },
-                        "layout": {
-                            "x": 0,
-                            "y": 1,
-                            "width": 6,
-                            "height": 2
-                        }
-                    },
-                    {
-                        "id": 887373102888560,
-                        "definition": {
-                            "title": "Total Messages",
-                            "title_size": "16",
-                            "title_align": "left",
-                            "show_legend": true,
-                            "legend_layout": "horizontal",
-                            "legend_columns": [
-                                "avg",
-                                "min",
-                                "max",
-                                "value",
-                                "sum"
-                            ],
-                            "type": "timeseries",
-                            "requests": [
-                                {
-                                    "formulas": [
-                                        {
-                                            "formula": "a"
-                                        },
-                                        {
-                                            "formula": "query1"
-                                        }
-                                    ],
-                                    "queries": [
-                                        {
-                                            "data_source": "metrics",
-                                            "name": "a",
-                                            "query": "avg:tibco_ems.consumer.total_messages{$host,$server_hostname,component_type:q,$queue_name}"
-                                        },
-                                        {
-                                            "data_source": "metrics",
-                                            "name": "query1",
-                                            "query": "avg:tibco_ems.consumer.total_messages{$host,$server_hostname,component_type:t,$topic_name}"
-                                        }
-                                    ],
-                                    "response_format": "timeseries",
-                                    "style": {
-                                        "palette": "blue",
-                                        "line_type": "solid",
-                                        "line_width": "normal"
-                                    },
-                                    "display_type": "bars"
-                                }
-                            ]
-                        },
-                        "layout": {
-                            "x": 6,
-                            "y": 1,
-                            "width": 6,
-                            "height": 2
-                        }
-                    },
-                    {
-                        "id": 8173734642223534,
-                        "definition": {
-                            "title": "Message Size (rate)",
-                            "title_size": "16",
-                            "title_align": "left",
-                            "show_legend": true,
-                            "legend_layout": "horizontal",
-                            "legend_columns": [
-                                "avg",
-                                "min",
-                                "max",
-                                "value",
-                                "sum"
-                            ],
-                            "type": "timeseries",
-                            "requests": [
-                                {
-                                    "formulas": [
-                                        {
-                                            "formula": "a"
-                                        },
-                                        {
-                                            "formula": "query1"
-                                        }
-                                    ],
-                                    "queries": [
-                                        {
-                                            "data_source": "metrics",
-                                            "name": "a",
-                                            "query": "avg:tibco_ems.consumer.messages_rate_size{$host, $server_hostname, component_type:q, $queue_name}"
-                                        },
-                                        {
-                                            "data_source": "metrics",
-                                            "name": "query1",
-                                            "query": "avg:tibco_ems.consumer.messages_rate_size{$host, $server_hostname, component_type:q, $topic_name}"
-                                        }
-                                    ],
-                                    "response_format": "timeseries",
-                                    "style": {
-                                        "palette": "blue",
-                                        "line_type": "solid",
-                                        "line_width": "normal"
-                                    },
-                                    "display_type": "bars"
-                                }
-                            ]
-                        },
-                        "layout": {
-                            "x": 0,
-                            "y": 3,
-                            "width": 6,
-                            "height": 2
-                        }
-                    },
-                    {
-                        "id": 820762270100074,
-                        "definition": {
-                            "title": "Total Messages (rate)",
-                            "title_size": "16",
-                            "title_align": "left",
-                            "show_legend": true,
-                            "legend_layout": "horizontal",
-                            "legend_columns": [
-                                "avg",
-                                "min",
-                                "max",
-                                "value",
-                                "sum"
-                            ],
-                            "type": "timeseries",
-                            "requests": [
-                                {
-                                    "formulas": [
-                                        {
-                                            "formula": "a",
-                                            "number_format": {
-                                                "unit": {
-                                                    "type": "canonical_unit",
-                                                    "unit_name": "byte"
-                                                }
-                                            }
-                                        },
-                                        {
-                                            "formula": "query1",
-                                            "number_format": {
-                                                "unit": {
-                                                    "type": "canonical_unit",
-                                                    "unit_name": "byte"
-                                                }
-                                            }
-                                        }
-                                    ],
-                                    "queries": [
-                                        {
-                                            "data_source": "metrics",
-                                            "name": "a",
-                                            "query": "avg:tibco_ems.consumer.total_messages_size{$host,$server_hostname,component_type:q,$queue_name}"
-                                        },
-                                        {
-                                            "data_source": "metrics",
-                                            "name": "query1",
-                                            "query": "avg:tibco_ems.consumer.total_messages_size{$host,$server_hostname,component_type:t,$topic_name}"
-                                        }
-                                    ],
-                                    "response_format": "timeseries",
-                                    "style": {
-                                        "palette": "blue",
-                                        "line_type": "solid",
-                                        "line_width": "normal"
-                                    },
-                                    "display_type": "bars"
-                                }
-                            ]
-                        },
-                        "layout": {
-                            "x": 6,
-                            "y": 3,
-                            "width": 6,
-                            "height": 2
-                        }
-                    }
-                ]
-            },
-            "layout": {
-                "x": 0,
-                "y": 7,
-                "width": 12,
-                "height": 6
-            }
-        },
-        {
             "id": 6293817783537312,
             "definition": {
                 "title": "Producer metrics",
@@ -581,21 +310,13 @@
                                     "formulas": [
                                         {
                                             "formula": "a"
-                                        },
-                                        {
-                                            "formula": "query1"
                                         }
                                     ],
                                     "queries": [
                                         {
                                             "data_source": "metrics",
                                             "name": "a",
-                                            "query": "avg:tibco_ems.producer.messages_rate{$host,$server_hostname,component_type:q,$queue_name}"
-                                        },
-                                        {
-                                            "data_source": "metrics",
-                                            "name": "query1",
-                                            "query": "avg:tibco_ems.producer.messages_rate{$host,$server_hostname,component_type:t,$topic_name}"
+                                            "query": "avg:tibco_ems.producer.messages_rate{$host,$server_hostname, $destination, $component_type} by {destination}"
                                         }
                                     ],
                                     "response_format": "timeseries",
@@ -636,21 +357,13 @@
                                     "formulas": [
                                         {
                                             "formula": "a"
-                                        },
-                                        {
-                                            "formula": "query1"
                                         }
                                     ],
                                     "queries": [
                                         {
                                             "data_source": "metrics",
                                             "name": "a",
-                                            "query": "avg:tibco_ems.producer.total_messages{$host,$server_hostname,component_type:q,$queue_name}"
-                                        },
-                                        {
-                                            "data_source": "metrics",
-                                            "name": "query1",
-                                            "query": "avg:tibco_ems.producer.total_messages{$host,$server_hostname,component_type:t,$topic_name}"
+                                            "query": "avg:tibco_ems.producer.total_messages{$host,$server_hostname, $destination, $component_type} by {destination}"
                                         }
                                     ],
                                     "response_format": "timeseries",
@@ -673,7 +386,7 @@
                     {
                         "id": 1727801343577262,
                         "definition": {
-                            "title": "Message Size (rate)",
+                            "title": "Message Size",
                             "title_size": "16",
                             "title_align": "left",
                             "show_legend": true,
@@ -691,21 +404,13 @@
                                     "formulas": [
                                         {
                                             "formula": "a"
-                                        },
-                                        {
-                                            "formula": "query1"
                                         }
                                     ],
                                     "queries": [
                                         {
                                             "data_source": "metrics",
                                             "name": "a",
-                                            "query": "avg:tibco_ems.producer.messages_rate_size{$host,$server_hostname,component_type:q,$queue_name}"
-                                        },
-                                        {
-                                            "data_source": "metrics",
-                                            "name": "query1",
-                                            "query": "avg:tibco_ems.producer.messages_rate_size{$host,$server_hostname,component_type:q,$topic_name}"
+                                            "query": "avg:tibco_ems.producer.messages_rate_size{$host,$server_hostname, $destination, $component_type} by {destination}"
                                         }
                                     ],
                                     "response_format": "timeseries",
@@ -728,7 +433,7 @@
                     {
                         "id": 1991198941379034,
                         "definition": {
-                            "title": "Total Messages (rate)",
+                            "title": "Total Messages size",
                             "title_size": "16",
                             "title_align": "left",
                             "show_legend": true,
@@ -752,27 +457,13 @@
                                                 }
                                             },
                                             "formula": "a"
-                                        },
-                                        {
-                                            "number_format": {
-                                                "unit": {
-                                                    "type": "canonical_unit",
-                                                    "unit_name": "byte"
-                                                }
-                                            },
-                                            "formula": "query1"
                                         }
                                     ],
                                     "queries": [
                                         {
                                             "data_source": "metrics",
                                             "name": "a",
-                                            "query": "avg:tibco_ems.producer.total_messages_size{$host,$server_hostname,component_type:q,$queue_name}"
-                                        },
-                                        {
-                                            "data_source": "metrics",
-                                            "name": "query1",
-                                            "query": "avg:tibco_ems.producer.total_messages_size{$host,$server_hostname,component_type:t,$topic_name}"
+                                            "query": "avg:tibco_ems.producer.total_messages_size{$host,$server_hostname,$queue_name, $component_type} by {destination}"
                                         }
                                     ],
                                     "response_format": "timeseries",
@@ -796,9 +487,91 @@
             },
             "layout": {
                 "x": 0,
-                "y": 13,
+                "y": 7,
                 "width": 12,
                 "height": 6
+            }
+        },
+        {
+            "id": 5884419798717928,
+            "definition": {
+                "title": "Logs Overview",
+                "background_color": "vivid_blue",
+                "show_title": true,
+                "type": "group",
+                "layout_type": "ordered",
+                "widgets": [
+                    {
+                        "id": 7274166387149041,
+                        "definition": {
+                            "title": "EMS Log Patterns",
+                            "title_size": "16",
+                            "title_align": "left",
+                            "time": {
+                                "type": "live",
+                                "unit": "week",
+                                "value": 1
+                            },
+                            "requests": [
+                                {
+                                    "response_format": "event_list",
+                                    "query": {
+                                        "data_source": "logs_pattern_stream",
+                                        "query_string": "service:ems",
+                                        "indexes": [],
+                                        "group_by": [
+                                            {
+                                                "facet": "status"
+                                            },
+                                            {
+                                                "facet": "service"
+                                            }
+                                        ]
+                                    },
+                                    "columns": [
+                                        {
+                                            "field": "status_line",
+                                            "width": "auto"
+                                        },
+                                        {
+                                            "field": "matches",
+                                            "width": "auto"
+                                        },
+                                        {
+                                            "field": "volume",
+                                            "width": "auto"
+                                        },
+                                        {
+                                            "field": "status",
+                                            "width": "auto"
+                                        },
+                                        {
+                                            "field": "service",
+                                            "width": "auto"
+                                        },
+                                        {
+                                            "field": "message",
+                                            "width": "auto"
+                                        }
+                                    ]
+                                }
+                            ],
+                            "type": "list_stream"
+                        },
+                        "layout": {
+                            "x": 0,
+                            "y": 0,
+                            "width": 12,
+                            "height": 4
+                        }
+                    }
+                ]
+            },
+            "layout": {
+                "x": 0,
+                "y": 13,
+                "width": 12,
+                "height": 5
             }
         },
         {
@@ -972,7 +745,7 @@
                             "x": 7,
                             "y": 1,
                             "width": 5,
-                            "height": 4
+                            "height": 2
                         }
                     },
                     {
@@ -1068,6 +841,61 @@
                             "width": 4,
                             "height": 2
                         }
+                    },
+                    {
+                        "id": 2523190855526752,
+                        "definition": {
+                            "title": "Pending messages size",
+                            "title_size": "16",
+                            "title_align": "left",
+                            "show_legend": true,
+                            "legend_layout": "auto",
+                            "legend_columns": [
+                                "avg",
+                                "min",
+                                "max",
+                                "value",
+                                "sum"
+                            ],
+                            "type": "timeseries",
+                            "requests": [
+                                {
+                                    "formulas": [
+                                        {
+                                            "formula": "query1",
+                                            "number_format": {
+                                                "unit": {
+                                                    "type": "canonical_unit",
+                                                    "unit_name": "byte"
+                                                }
+                                            }
+                                        }
+                                    ],
+                                    "queries": [
+                                        {
+                                            "data_source": "metrics",
+                                            "name": "query1",
+                                            "query": "avg:tibco_ems.server.pending_message_size{$host,$server_hostname} by {host,server_hostname}"
+                                        }
+                                    ],
+                                    "response_format": "timeseries",
+                                    "style": {
+                                        "palette": "cool",
+                                        "order_by": "values",
+                                        "color_order": "shuffled",
+                                        "line_type": "solid",
+                                        "line_width": "normal"
+                                    },
+                                    "display_type": "bars"
+                                }
+                            ]
+                        },
+                        "layout": {
+                            "x": 7,
+                            "y": 3,
+                            "width": 5,
+                            "height": 2
+                        }
                     }
                 ]
             },
@@ -1077,6 +905,239 @@
                 "width": 12,
                 "height": 6,
                 "is_column_break": true
+            }
+        },
+        {
+            "id": 3412626217094282,
+            "definition": {
+                "title": "Consumer metrics",
+                "background_color": "vivid_blue",
+                "show_title": true,
+                "type": "group",
+                "layout_type": "ordered",
+                "widgets": [
+                    {
+                        "id": 218491216894336,
+                        "definition": {
+                            "type": "note",
+                            "content": "This provides statistics for message consumers, focusing on metrics such as message count and size, as well as the rate of message consumption",
+                            "background_color": "blue",
+                            "font_size": "18",
+                            "text_align": "center",
+                            "vertical_align": "top",
+                            "show_tick": false,
+                            "tick_pos": "50%",
+                            "tick_edge": "left",
+                            "has_padding": true
+                        },
+                        "layout": {
+                            "x": 0,
+                            "y": 0,
+                            "width": 12,
+                            "height": 1
+                        }
+                    },
+                    {
+                        "id": 3257923575107055,
+                        "definition": {
+                            "title": "Message rate",
+                            "title_size": "16",
+                            "title_align": "left",
+                            "show_legend": true,
+                            "legend_layout": "horizontal",
+                            "legend_columns": [
+                                "avg",
+                                "min",
+                                "max",
+                                "value",
+                                "sum"
+                            ],
+                            "type": "timeseries",
+                            "requests": [
+                                {
+                                    "formulas": [
+                                        {
+                                            "formula": "a"
+                                        }
+                                    ],
+                                    "queries": [
+                                        {
+                                            "data_source": "metrics",
+                                            "name": "a",
+                                            "query": "sum:tibco_ems.consumer.messages_rate{$host, $server_hostname, $destination, $component_type} by {destination}"
+                                        }
+                                    ],
+                                    "response_format": "timeseries",
+                                    "style": {
+                                        "palette": "blue",
+                                        "line_type": "solid",
+                                        "line_width": "normal"
+                                    },
+                                    "display_type": "bars"
+                                }
+                            ]
+                        },
+                        "layout": {
+                            "x": 0,
+                            "y": 1,
+                            "width": 6,
+                            "height": 2
+                        }
+                    },
+                    {
+                        "id": 887373102888560,
+                        "definition": {
+                            "title": "Total Messages",
+                            "title_size": "16",
+                            "title_align": "left",
+                            "show_legend": true,
+                            "legend_layout": "horizontal",
+                            "legend_columns": [
+                                "avg",
+                                "min",
+                                "max",
+                                "value",
+                                "sum"
+                            ],
+                            "type": "timeseries",
+                            "requests": [
+                                {
+                                    "formulas": [
+                                        {
+                                            "formula": "a"
+                                        }
+                                    ],
+                                    "queries": [
+                                        {
+                                            "data_source": "metrics",
+                                            "name": "a",
+                                            "query": "avg:tibco_ems.consumer.total_messages{$host,$server_hostname,$queue_name, $component_type} by {destination}"
+                                        }
+                                    ],
+                                    "response_format": "timeseries",
+                                    "style": {
+                                        "palette": "blue",
+                                        "line_type": "solid",
+                                        "line_width": "normal"
+                                    },
+                                    "display_type": "bars"
+                                }
+                            ]
+                        },
+                        "layout": {
+                            "x": 6,
+                            "y": 1,
+                            "width": 6,
+                            "height": 2
+                        }
+                    },
+                    {
+                        "id": 8173734642223534,
+                        "definition": {
+                            "title": "Message Size",
+                            "title_size": "16",
+                            "title_align": "left",
+                            "show_legend": true,
+                            "legend_layout": "horizontal",
+                            "legend_columns": [
+                                "avg",
+                                "min",
+                                "max",
+                                "value",
+                                "sum"
+                            ],
+                            "type": "timeseries",
+                            "requests": [
+                                {
+                                    "formulas": [
+                                        {
+                                            "formula": "a"
+                                        }
+                                    ],
+                                    "queries": [
+                                        {
+                                            "data_source": "metrics",
+                                            "name": "a",
+                                            "query": "avg:tibco_ems.consumer.messages_rate_size{$host, $server_hostname, $destination, $component_type} by {destination}"
+                                        }
+                                    ],
+                                    "response_format": "timeseries",
+                                    "style": {
+                                        "palette": "blue",
+                                        "line_type": "solid",
+                                        "line_width": "normal"
+                                    },
+                                    "display_type": "bars"
+                                }
+                            ]
+                        },
+                        "layout": {
+                            "x": 0,
+                            "y": 3,
+                            "width": 6,
+                            "height": 2
+                        }
+                    },
+                    {
+                        "id": 820762270100074,
+                        "definition": {
+                            "title": "Total Messages size",
+                            "title_size": "16",
+                            "title_align": "left",
+                            "show_legend": true,
+                            "legend_layout": "horizontal",
+                            "legend_columns": [
+                                "avg",
+                                "min",
+                                "max",
+                                "value",
+                                "sum"
+                            ],
+                            "type": "timeseries",
+                            "requests": [
+                                {
+                                    "formulas": [
+                                        {
+                                            "number_format": {
+                                                "unit": {
+                                                    "type": "canonical_unit",
+                                                    "unit_name": "byte"
+                                                }
+                                            },
+                                            "formula": "a"
+                                        }
+                                    ],
+                                    "queries": [
+                                        {
+                                            "data_source": "metrics",
+                                            "name": "a",
+                                            "query": "avg:tibco_ems.consumer.total_messages_size{$host,$server_hostname, $destination, $component_type} by {destination}"
+                                        }
+                                    ],
+                                    "response_format": "timeseries",
+                                    "style": {
+                                        "palette": "blue",
+                                        "line_type": "solid",
+                                        "line_width": "normal"
+                                    },
+                                    "display_type": "bars"
+                                }
+                            ]
+                        },
+                        "layout": {
+                            "x": 6,
+                            "y": 3,
+                            "width": 6,
+                            "height": 2
+                        }
+                    }
+                ]
+            },
+            "layout": {
+                "x": 0,
+                "y": 6,
+                "width": 12,
+                "height": 6
             }
         },
         {
@@ -1315,88 +1376,6 @@
             },
             "layout": {
                 "x": 0,
-                "y": 6,
-                "width": 12,
-                "height": 6
-            }
-        },
-        {
-            "id": 5884419798717928,
-            "definition": {
-                "title": "Logs Overview",
-                "background_color": "vivid_blue",
-                "show_title": true,
-                "type": "group",
-                "layout_type": "ordered",
-                "widgets": [
-                    {
-                        "id": 7274166387149041,
-                        "definition": {
-                            "title": "EMS Log Patterns",
-                            "title_size": "16",
-                            "title_align": "left",
-                            "time": {
-                                "type": "live",
-                                "unit": "week",
-                                "value": 1
-                            },
-                            "requests": [
-                                {
-                                    "response_format": "event_list",
-                                    "query": {
-                                        "data_source": "logs_pattern_stream",
-                                        "query_string": "service:ems",
-                                        "indexes": [],
-                                        "group_by": [
-                                            {
-                                                "facet": "status"
-                                            },
-                                            {
-                                                "facet": "service"
-                                            }
-                                        ]
-                                    },
-                                    "columns": [
-                                        {
-                                            "field": "status_line",
-                                            "width": "auto"
-                                        },
-                                        {
-                                            "field": "matches",
-                                            "width": "auto"
-                                        },
-                                        {
-                                            "field": "volume",
-                                            "width": "auto"
-                                        },
-                                        {
-                                            "field": "status",
-                                            "width": "auto"
-                                        },
-                                        {
-                                            "field": "service",
-                                            "width": "auto"
-                                        },
-                                        {
-                                            "field": "message",
-                                            "width": "auto"
-                                        }
-                                    ]
-                                }
-                            ],
-                            "type": "list_stream"
-                        },
-                        "layout": {
-                            "x": 0,
-                            "y": 0,
-                            "width": 12,
-                            "height": 5
-                        }
-                    }
-                ]
-            },
-            "layout": {
-                "x": 0,
                 "y": 12,
                 "width": 12,
                 "height": 6
@@ -1425,6 +1404,18 @@
         {
             "name": "topic_name",
             "prefix": "topic_name",
+            "available_values": [],
+            "default": "*"
+        },
+        {
+            "name": "destination",
+            "prefix": "destination",
+            "available_values": [],
+            "default": "*"
+        },
+        {
+            "name": "component_type",
+            "prefix": "component_type",
             "available_values": [],
             "default": "*"
         }
