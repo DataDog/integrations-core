@@ -53,6 +53,7 @@ def test_e2e_profile_netgear_access_point(dd_agent_check):
         'sys_object_id': '1.3.6.1.4.1.4526.100.7.1',
         'vendor': 'netgear',
         'device_type': 'access_point',
+        'integration': 'snmp',
     }
     device['tags'] = common_tags
     assert_device_metadata(aggregator, device)
