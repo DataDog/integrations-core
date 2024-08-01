@@ -71,6 +71,8 @@ COMMON_METRICS = [
     'postgresql.deadlocks.count',
     'postgresql.temp_bytes',
     'postgresql.temp_files',
+    'postgresql.blk_read_time',
+    'postgresql.blk_write_time',
 ]
 
 DBM_MIGRATED_METRICS = [

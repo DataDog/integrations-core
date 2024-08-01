@@ -156,6 +156,8 @@ NEWER_92_METRICS = {
     'deadlocks': ('postgresql.deadlocks', AgentCheck.rate),
     'temp_bytes': ('postgresql.temp_bytes', AgentCheck.rate),
     'temp_files': ('postgresql.temp_files', AgentCheck.rate),
+    'blk_read_time': ('postgresql.blk_read_time', AgentCheck.monotonic_count),
+    'blk_write_time': ('postgresql.blk_write_time', AgentCheck.monotonic_count),
 }
 
 CHECKSUM_METRICS = {'checksum_failures': ('postgresql.checksums.checksum_failures', AgentCheck.monotonic_count)}

@@ -127,6 +127,16 @@ class MongoApi(object):
         except:
             return True
 
+    def get_profiling_level(self, db_name, session=None):
+        return self[db_name].command('profile', -1, session=session)
+
+    def get_profiling_data(self, db_name, ts, session=None):
+        filter = {'ts': {'$gt': ts}}
+        return self[db_name]['system.profile'].find(filter, session=session).sort('ts', 1)
+
+    def get_log_data(self, session=None):
+        return self['admin'].command("getLog", "global", session=session)
+
     def _get_rs_deployment_from_status_payload(self, repl_set_payload, is_master_payload, cluster_role):
         replset_name = repl_set_payload["set"]
         replset_state = repl_set_payload["myState"]
