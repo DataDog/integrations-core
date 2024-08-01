@@ -68,7 +68,6 @@ def test_mongo_operation_samples_mongos(aggregator, instance_integration_cluster
         expected_samples = json.load(f)
         assert len(dbm_samples) == len(expected_samples)
         for i, sample in enumerate(dbm_samples):
-            print(json.dumps(sample))
             assert sample == expected_samples[i]
 
     # assert activities
@@ -76,7 +75,6 @@ def test_mongo_operation_samples_mongos(aggregator, instance_integration_cluster
         expected_activities = json.load(f)
         assert len(dbm_activities) == len(expected_activities)
         for i, activity in enumerate(dbm_activities):
-            print(json.dumps(activity))
             assert activity == expected_activities[i]
 
 

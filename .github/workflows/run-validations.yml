@@ -102,6 +102,10 @@ on:
         required: false
         default: false
         type: boolean
+      version:
+        required: false
+        default: false
+        type: boolean
 
 defaults:
   run:
@@ -231,6 +235,10 @@ jobs:
       if: inputs.labeler
       run: ddev validate labeler
 
+    - name: Validate target version
+      if: inputs.version
+      run: ddev validate version $TARGET
+
     # Every validation below here is sorted by increasing runtime rather than alphabetically
     - name: Validate third-party license metadata
       if: inputs.licenses
@@ -241,7 +249,7 @@ jobs:
 
     - name: Comment PR on failure
       if: ${{ failure() && github.event.pull_request.merged != true }}
-      uses: actions/github-script@0.3.0
+      uses: actions/github-script@v7
       continue-on-error: true
       with:
         github-token: ${{ secrets.GITHUB_TOKEN }}

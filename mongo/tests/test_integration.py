@@ -57,7 +57,7 @@ def _assert_mongodb_instance_event(
     assert mongodb_instance_event is not None
     assert mongodb_instance_event['host'] == check._resolved_hostname
     assert mongodb_instance_event['host'] == check._resolved_hostname
-    assert mongodb_instance_event['dbms'] == "mongodb"
+    assert mongodb_instance_event['dbms'] == "mongo"
     assert mongodb_instance_event['tags'].sort() == expected_tags.sort()
 
     expected_instance_metadata = {
@@ -100,7 +100,7 @@ def test_integration_mongos(instance_integration_cluster, aggregator, check, dd_
             'jumbo',
             'sessions',
         ],
-        ['sharding_cluster_role:mongos'],
+        ['sharding_cluster_role:mongos', 'clustername:my_cluster'],
     )
 
     aggregator.assert_all_metrics_covered()
@@ -159,6 +159,7 @@ def test_integration_replicaset_primary_in_shard(instance_integration, aggregato
     replica_tags = [
         'replset_name:mongo-mongodb-sharded-shard-0',
         'replset_state:primary',
+        'replset_me:mongo-mongodb-sharded-shard0-data-0.mongo-mongodb-sharded-headless.default.svc.cluster.local:27017',
         'sharding_cluster_role:shardsvr',
     ]
     metrics_categories = [
@@ -257,6 +258,7 @@ def test_integration_replicaset_secondary_in_shard(instance_integration, aggrega
     replica_tags = [
         'replset_name:mongo-mongodb-sharded-shard-0',
         'replset_state:secondary',
+        'replset_me:mongo-mongodb-sharded-shard0-data-1.mongo-mongodb-sharded-headless.default.svc.cluster.local:27017',
         'sharding_cluster_role:shardsvr',
     ]
     metrics_categories = [
@@ -318,6 +320,7 @@ def test_integration_replicaset_arbiter_in_shard(instance_integration, aggregato
     replica_tags = [
         'replset_name:mongo-mongodb-sharded-shard-0',
         'replset_state:arbiter',
+        'replset_me:mongo-mongodb-sharded-shard0-arbiter-0.mongo-mongodb-sharded-headless.default.svc.cluster.local:27017',
         'sharding_cluster_role:shardsvr',
     ]
     metrics_categories = ['serverStatus', 'replset-arbiter']
@@ -368,6 +371,7 @@ def test_integration_configsvr_primary(instance_integration, aggregator, check, 
     replica_tags = [
         'replset_name:mongo-mongodb-sharded-configsvr',
         'replset_state:primary',
+        'replset_me:mongo-mongodb-sharded-configsvr-0.mongo-mongodb-sharded-headless.default.svc.cluster.local:27017',
         'sharding_cluster_role:configsvr',
     ]
     metrics_categories = [
@@ -464,6 +468,7 @@ def test_integration_configsvr_secondary(instance_integration, aggregator, check
     replica_tags = [
         'replset_name:mongo-mongodb-sharded-configsvr',
         'replset_state:secondary',
+        'replset_me:mongo-mongodb-sharded-configsvr-1.mongo-mongodb-sharded-headless.default.svc.cluster.local:27017',
         'sharding_cluster_role:configsvr',
     ]
     metrics_categories = [
@@ -518,7 +523,11 @@ def test_integration_replicaset_primary(instance_integration, aggregator, check,
     with mock_pymongo("replica-primary"):
         dd_run_check(mongo_check)
 
-    replica_tags = ['replset_name:replset', 'replset_state:primary']
+    replica_tags = [
+        'replset_name:replset',
+        'replset_state:primary',
+        'replset_me:replset-data-0.mongo.default.svc.cluster.local:27017',
+    ]
     metrics_categories = [
         'count-dbs',
         'serverStatus',
@@ -614,7 +623,11 @@ def test_integration_replicaset_primary_config(instance_integration, aggregator,
     with mock_pymongo("replica-primary"):
         dd_run_check(mongo_check)
 
-    replica_tags = ['replset_name:replset', 'replset_state:primary']
+    replica_tags = [
+        'replset_name:replset',
+        'replset_state:primary',
+        'replset_me:replset-data-0.mongo.default.svc.cluster.local:27017',
+    ]
     metrics_categories = [
         'count-dbs',
         'serverStatus',
@@ -718,7 +731,11 @@ def test_integration_replicaset_secondary(
     with mock_pymongo("replica-secondary"):
         dd_run_check(mongo_check)
 
-    replica_tags = ['replset_name:replset', 'replset_state:secondary']
+    replica_tags = [
+        'replset_name:replset',
+        'replset_state:secondary',
+        'replset_me:replset-data-1.mongo.default.svc.cluster.local:27017',
+    ]
     metrics_categories = [
         'count-dbs',
         'serverStatus',
@@ -777,7 +794,11 @@ def test_integration_replicaset_arbiter(instance_integration, aggregator, check,
     with mock_pymongo("replica-arbiter"):
         dd_run_check(mongo_check)
 
-    replica_tags = ['replset_name:replset', 'replset_state:arbiter']
+    replica_tags = [
+        'replset_name:replset',
+        'replset_state:arbiter',
+        'replset_me:replset-arbiter-0.mongo.default.svc.cluster.local:27017',
+    ]
     metrics_categories = ['serverStatus', 'replset-arbiter']
 
     _assert_metrics(mongo_check, aggregator, metrics_categories, replica_tags)
@@ -1061,3 +1082,44 @@ def test_integration_reemit_mongodb_instance_on_deployment_change(
     mongo_check.api_client.deployment_type.replset_state = SECONDARY_STATE_ID
     dd_run_check(mongo_check)
     assert _get_mongodb_instance_event(aggregator) is not None
+
+
+def test_integration_database_autodiscovery(instance_integration_autodiscovery, aggregator, check, dd_run_check):
+    mongo_check = check(instance_integration_autodiscovery)
+
+    with mock_pymongo("replica-primary"):
+        dd_run_check(mongo_check)
+
+    replica_tags = [
+        'replset_name:replset',
+        'replset_state:primary',
+        'replset_me:replset-data-0.mongo.default.svc.cluster.local:27017',
+    ]
+    metrics_categories = [
+        'count-dbs',
+        'serverStatus',
+        'custom-queries',
+        'oplog',
+        'replset-primary',
+        'top',
+        'dbstats-local',
+        'fsynclock',
+        'dbstats',
+        'indexes-stats-autodiscover',
+        'collection-autodiscover',
+    ]
+    _assert_metrics(mongo_check, aggregator, metrics_categories, replica_tags)
+    # Lag metrics are tagged with the state of the member and not with the current one.
+    _assert_metrics(mongo_check, aggregator, ['replset-lag-from-primary'])
+
+    aggregator.assert_all_metrics_covered()
+    aggregator.assert_metrics_using_metadata(
+        get_metadata_metrics(),
+        exclude=[
+            'dd.custom.mongo.aggregate.total',
+            'dd.custom.mongo.count',
+            'dd.custom.mongo.query_a.amount',
+            'dd.custom.mongo.query_a.el',
+        ],
+        check_submission_type=True,
+    )

@@ -15,7 +15,8 @@
       "Supported OS::Linux",
       "Supported OS::macOS",
       "Supported OS::Windows",
-      "Category::Network"
+      "Category::Network",
+      "Offering::Integration"
     ]
   },
   "author": {

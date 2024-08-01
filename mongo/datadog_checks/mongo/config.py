@@ -97,8 +97,6 @@ class MongoConfig(object):
         self.custom_queries = instance.get("custom_queries", [])
 
         self._base_tags = list(set(instance.get('tags', [])))
-        self.service_check_tags = self._compute_service_check_tags()
-        self.metric_tags = self._compute_metric_tags()
 
         # DBM config options
         self.dbm_enabled = is_affirmative(instance.get('dbm', False))
@@ -111,6 +109,14 @@ class MongoConfig(object):
 
         # MongoDB instance hostname override
         self.reported_database_hostname = instance.get('reported_database_hostname', None)
+
+        # MongoDB database auto-discovery, disabled by default
+        self.database_autodiscovery_config = self._get_database_autodiscovery_config(instance)
+
+        # Generate tags for service checks and metrics
+        # TODO: service check and metric tags should be updated to be dynamic with auto-discovered databases
+        self.service_check_tags = self._compute_service_check_tags()
+        self.metric_tags = self._compute_metric_tags()
 
     def _get_clean_server_name(self):
         try:
@@ -143,7 +149,10 @@ class MongoConfig(object):
         return service_check_tags
 
     def _compute_metric_tags(self):
-        return self._base_tags + ['server:%s' % self.clean_server_name]
+        tags = self._base_tags + ['server:%s' % self.clean_server_name]
+        if self.cluster_name:
+            tags.append('clustername:%s' % self.cluster_name)
+        return tags
 
     @property
     def operation_samples(self):
@@ -162,3 +171,34 @@ class MongoConfig(object):
                 self._operation_samples_config.get('explained_operations_per_hour_per_query', 10)
             ),
         }
+
+    def _get_database_autodiscovery_config(self, instance):
+        database_autodiscovery_config = instance.get('database_autodiscovery', {"enabled": False})
+        if database_autodiscovery_config['enabled']:
+            if self.db_name != 'admin':
+                # If database_autodiscovery is enabled, the `database` parameter should not be set
+                # because we want to monitor all databases. Unless the `database` parameter is set to 'admin'.
+                self.log.warning(
+                    "The `database` parameter should not be set when `database_autodiscovery` is enabled. "
+                    "The `database` parameter will be ignored."
+                )
+            if self.coll_names:
+                self.log.warning(
+                    "The `collections` parameter should not be set when `database_autodiscovery` is enabled. "
+                    "The `collections` parameter will be ignored."
+                )
+        if self.db_names:
+            # dbnames is deprecated and will be removed in a future version
+            self.log.warning(
+                "The `dbnames` parameter is deprecated and will be removed in a future version. "
+                "To monitor more databases, enable `database_autodiscovery` and use "
+                "`database_autodiscovery.include` instead."
+            )
+            include_list = [f"{db}$" for db in self.db_names]  # Append $ to each db name for exact match
+            if not database_autodiscovery_config['enabled']:
+                # if database_autodiscovery is not enabled, we should enable it
+                database_autodiscovery_config['enabled'] = True
+            if not database_autodiscovery_config.get('include'):
+                # if database_autodiscovery is enabled but include list is not set, set the include list
+                database_autodiscovery_config['include'] = include_list
+        return database_autodiscovery_config

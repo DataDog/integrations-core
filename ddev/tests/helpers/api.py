@@ -26,7 +26,7 @@ def error(exception_class, message='', **kwargs):
 
 
 def changed_file_processes(files: list[str]):
-    # This returns subprocess calls used in `ddev.utils.git.GitManager.get_changed_files`
+    # This returns subprocess calls used in `ddev.utils.git.GitRepository.get_changed_files`
     # for tests that have to mock subprocess calls
     return [
         CompletedProcess([], 0, stdout='\n'.join(f'M {f}' for f in files)),

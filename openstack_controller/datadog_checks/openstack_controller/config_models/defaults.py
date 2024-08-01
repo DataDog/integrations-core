@@ -16,6 +16,10 @@ def shared_timeout():
     return 10
 
 
+def instance_all_projects():
+    return False
+
+
 def instance_allow_redirects():
     return True
 

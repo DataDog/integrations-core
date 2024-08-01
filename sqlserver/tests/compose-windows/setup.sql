@@ -11,6 +11,7 @@ GRANT SELECT on sys.dm_os_performance_counters to datadog;
 GRANT VIEW SERVER STATE to datadog;
 GRANT VIEW ANY DEFINITION to datadog;
 
+
 -- test users
 CREATE LOGIN bob WITH PASSWORD = 'Password12!';
 CREATE USER bob FOR LOGIN bob;
@@ -28,6 +29,76 @@ GO
 USE msdb;
 GO
 CREATE USER datadog FOR LOGIN datadog;
+GRANT SELECT to datadog;
+GO
+
+-- Create test database for integration schema tests
+CREATE DATABASE datadog_test_schemas;
+GO
+USE datadog_test_schemas;
+GO
+
+CREATE SCHEMA test_schema;
+GO
+
+-- Create the partition function
+CREATE PARTITION FUNCTION CityPartitionFunction (INT)
+AS RANGE LEFT FOR VALUES (100, 200, 300); -- Define your partition boundaries here
+
+-- Create the partition scheme
+CREATE PARTITION SCHEME CityPartitionScheme
+AS PARTITION CityPartitionFunction ALL TO ([PRIMARY]); -- Assign partitions to filegroups
+
+-- Create the partitioned table
+CREATE TABLE datadog_test_schemas.test_schema.cities (
+    id INT NOT NULL DEFAULT 0,
+    name VARCHAR(255),
+    population INT NOT NULL DEFAULT 0,
+    CONSTRAINT PK_Cities PRIMARY KEY (id)
+) ON CityPartitionScheme(id); -- Assign the partition scheme to the table
+
+-- Create indexes
+CREATE INDEX two_columns_index ON datadog_test_schemas.test_schema.cities (id, name);
+CREATE INDEX single_column_index ON datadog_test_schemas.test_schema.cities (population);
+
+INSERT INTO datadog_test_schemas.test_schema.cities  VALUES (1, 'yey', 100), (2, 'bar', 200);
+GO
+
+-- Create table with a foreign key
+CREATE TABLE datadog_test_schemas.test_schema.landmarks (name varchar(255), city_id int DEFAULT 0);
+GO
+ALTER TABLE datadog_test_schemas.test_schema.landmarks ADD CONSTRAINT FK_CityId FOREIGN KEY (city_id) REFERENCES datadog_test_schemas.test_schema.cities(id);
+GO
+
+-- Create table with unique constraint
+CREATE TABLE datadog_test_schemas.test_schema.Restaurants (
+    RestaurantName VARCHAR(255),
+    District VARCHAR(100),
+    Cuisine VARCHAR(100),
+    CONSTRAINT UC_RestaurantNameDistrict UNIQUE (RestaurantName, District)
+);
+GO
+
+-- Create table with a foreign key on two columns
+CREATE TABLE datadog_test_schemas.test_schema.RestaurantReviews (
+    RestaurantName VARCHAR(255),
+    District VARCHAR(100),
+    Review VARCHAR(MAX),
+    CONSTRAINT FK_RestaurantNameDistrict FOREIGN KEY (RestaurantName, District) REFERENCES datadog_test_schemas.test_schema.Restaurants(RestaurantName, District)
+);
+GO
+
+-- Create second test database for integration schema tests
+CREATE DATABASE datadog_test_schemas_second;
+GO
+USE datadog_test_schemas_second;
+-- This table is pronounced "things" except we've replaced "th" with the greek lower case "theta" to ensure we
+-- correctly support unicode throughout the integration.
+CREATE TABLE datadog_test_schemas_second.dbo.ϑings (id int DEFAULT 0, name varchar(255));
+INSERT INTO datadog_test_schemas_second.dbo.ϑings VALUES (1, 'foo'), (2, 'bar');
+CREATE USER bob FOR LOGIN bob;
+CREATE USER fred FOR LOGIN fred;
+CREATE CLUSTERED INDEX thingsindex ON datadog_test_schemas_second.dbo.ϑings (name);
 GO
 
 -- Create test database for integration tests
