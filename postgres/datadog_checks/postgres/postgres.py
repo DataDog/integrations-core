@@ -1012,6 +1012,10 @@ class PostgreSql(AgentCheck):
         }
 
     def check(self, _):
+        try:
+            self.log.info("natasha testing get host tags %s" str(datadog_agent.get_host_tags()))
+        except Exception as e:
+            self.log.info("natasha testing get host tags exception %s" str(e))
         tags = copy.copy(self.tags)
         self.tags_without_db = [t for t in copy.copy(self.tags) if not t.startswith("db:")]
         tags_to_add = []
