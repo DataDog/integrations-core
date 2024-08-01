@@ -4,10 +4,10 @@
 
 import pytest
 
-from datadog_checks.dev.utils import get_metadata_metrics
 from datadog_checks.aws_neuron import AwsNeuronCheck
+from datadog_checks.dev.utils import get_metadata_metrics
 
-from .common import TEST_METRICS, RENAMED_LABELS, get_fixture_path
+from .common import RENAMED_LABELS, TEST_METRICS, get_fixture_path
 
 
 def test_check(dd_run_check, aggregator, instance, mock_http_response):

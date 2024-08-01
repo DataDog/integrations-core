@@ -2,12 +2,12 @@
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
 import copy
+import logging
 
 import pytest
 
 from datadog_checks.dev import docker_run
 from datadog_checks.dev.conditions import CheckDockerLogs, CheckEndpoints
-import logging
 
 from . import common
 
