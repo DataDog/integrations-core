@@ -180,3 +180,15 @@ if six.PY3:
         interfaces: Optional[list[InterfaceMetadata]] = Field(default_factory=list)
         ip_addresses: Optional[list[IPAddressMetadata]] = Field(default_factory=list)
         collect_timestamp: Optional[int] = None
+        size: Optional[int] = Field(default=0, exclude=True)
+
+        model_config = ConfigDict(validate_assignment=True, use_enum_values=True)
+
+        def append_metadata(self, metadata: DeviceMetadata | InterfaceMetadata | IPAddressMetadata):
+            if isinstance(metadata, DeviceMetadata):
+                self.devices.append(metadata)
+            if isinstance(metadata, InterfaceMetadata):
+                self.interfaces.append(metadata)
+            if isinstance(metadata, IPAddressMetadata):
+                self.ip_addresses.append(metadata)
+            self.size += 1

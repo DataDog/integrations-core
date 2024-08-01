@@ -2,7 +2,6 @@
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
 
-import ipaddress
 
 from six import PY3, iteritems
 
@@ -11,23 +10,13 @@ from datadog_checks.base.utils.serialization import json
 if PY3:
     import time
 
-    from datadog_checks.cisco_aci.models import (
-        DeviceMetadata,
-        InterfaceMetadata,
-        IPAddressMetadata,
-        NetflowExporterPol,
-        NetworkDevicesMetadata,
-        Node,
-        PhysIf,
-    )
-
 else:
     DeviceMetadata = None
     Eth = None
     InterfaceMetadata = None
     Node = None
 
-from . import aci_metrics, exceptions, helpers
+from . import aci_metrics, exceptions, helpers, ndm
 
 VENDOR_CISCO = 'cisco'
 PAYLOAD_METADATA_BATCH_SIZE = 100
@@ -70,52 +59,12 @@ class Fabric:
         if self.ndm_enabled():
             ip_address_metadata = []
             if self.enable_netflow:
-                ip_address_metadata = self.create_ip_address_metadata(devices)
+                netflow_pols = self.api.get_netflow_exporter_policies()
+                ip_address_metadata = ndm.create_ip_address_metadata(netflow_pols, devices)
             collect_timestamp = int(time.time())
-            batches = self.batch_payloads(devices, interfaces, ip_address_metadata, collect_timestamp)
+            batches = ndm.batch_payloads(self.namespace, devices, interfaces, ip_address_metadata, collect_timestamp)
             for batch in batches:
                 self.event_platform_event(json.dumps(batch.model_dump(exclude_none=True)), "network-devices-metadata")
-
-    def create_ip_address_metadata(self, devices):
-        netflow_pols = self.api.get_netflow_exporter_policies()
-        src_addresses = []
-        for pol in netflow_pols:
-            netflow_exporter_pol = pol.get('netflowExporterPol', {})
-            nep = NetflowExporterPol(attributes=netflow_exporter_pol.get('attributes', {}))
-            src_addresses.append(nep.attributes.src_address)
-
-        # maybe this could just be a list comprehension with the tuples as elements tbh?
-        devices_list = [self.get_device_info(d) for d in devices]
-        # devices_map = {node_id: device_id for d in devices for device_id, node_id in self.get_device_info(d)}
-        # leaf_nodes = {d for d in devices if d.get('role') == 'leaf'}
-        for device_id, node_id in devices_list:
-            for src_address in src_addresses:
-                device_export_ip, max_prefixlen = self.get_node_exporter_ip(node_id, src_address)
-                ip_address_meta = IPAddressMetadata(
-                    device_id=device_id, ip_address=device_export_ip, prefix_len=max_prefixlen
-                )
-                yield ip_address_meta.model_dump(exclude_none=True)
-
-    def get_device_info(self, device):
-        device_tags = device.get('tags', [])
-        for tag in device_tags:
-            if tag.startswith('node_id'):
-                node_id = tag.split(':')[1]
-                break
-        return device.get('id'), node_id
-
-    def get_node_exporter_ip(self, node_id, src_address):
-        try:
-            network = ipaddress.ip_network(src_address)
-        except ValueError as e:
-            raise ValueError("Invalid IP address / network mask: {}".format(e))
-
-        # check if host number is within valid range
-        if int(node_id) > network.num_addresses:
-            raise ValueError("Node ID is out of range for the given network {}".format(src_address))
-
-        host_address = network.network_address + int(node_id)
-        return format(host_address), str(host_address.max_prefixlen)
 
     def submit_pod_health(self, pods):
         pods_dict = {}
@@ -149,7 +98,7 @@ class Fabric:
 
             user_tags = self.instance.get('tags', [])
             tags = self.tagger.get_fabric_tags(n, 'fabricNode')
-            tags.extend(self.ndm_common_tags(node_attrs.get('address', ''), hostname, self.namespace))
+            tags.extend(ndm.common_tags(node_attrs.get('address', ''), hostname, self.namespace))
             self.external_host_tags[hostname] = tags + self.check_tags + user_tags
 
             pod_id = helpers.get_pod_from_dn(node_attrs['dn'])
@@ -158,7 +107,7 @@ class Fabric:
             self.log.info("processing node %s on pod %s", node_id, pod_id)
             try:
                 if self.ndm_enabled():
-                    device_metadata.append(self.submit_node_metadata(node_attrs, tags))
+                    device_metadata.append(ndm.create_node_metadata(node_attrs, tags, self.namespace))
                 self.submit_process_metric(n, tags + self.check_tags + user_tags, hostname=hostname)
             except (exceptions.APIConnectionException, exceptions.APIParsingException):
                 pass
@@ -178,7 +127,7 @@ class Fabric:
         self.log.info("processing ethernet ports for %s", node.get('id'))
         hostname = helpers.get_fabric_hostname(node)
         pod_id = helpers.get_pod_from_dn(node['dn'])
-        common_tags = self.ndm_common_tags(node.get('address', ''), hostname, self.namespace)
+        common_tags = ndm.common_tags(node.get('address', ''), hostname, self.namespace)
         try:
             eth_list = self.api.get_eth_list(pod_id, node['id'])
         except (exceptions.APIConnectionException, exceptions.APIParsingException):
@@ -190,7 +139,9 @@ class Fabric:
             tags = self.tagger.get_fabric_tags(e, 'l1PhysIf')
             tags.extend(common_tags)
             if self.ndm_enabled():
-                interfaces.append(self.create_interface_metadata(e, node.get('address', ''), tags, hostname))
+                interface_metadata = ndm.create_interface_metadata(e, node.get('address', ''), self.namespace)
+                interfaces.append(interface_metadata)
+                self.submit_interface_status_metric(interface_metadata.status, tags, hostname)
             try:
                 stats = self.api.get_eth_stats(pod_id, node['id'], eth_id)
                 self.submit_fabric_metric(stats, tags, 'l1PhysIf', hostname=hostname)
@@ -308,78 +259,8 @@ class Fabric:
         if obj_type == 'l1PhysIf':
             return 'port'
 
-    def batch_payloads(self, devices, interfaces, ip_addresses, collect_ts):
-        for device in devices:
-            yield NetworkDevicesMetadata(namespace=self.namespace, devices=[device], collect_timestamp=collect_ts)
-
-        payloads = []
-        for interface in interfaces:
-            if len(payloads) == PAYLOAD_METADATA_BATCH_SIZE:
-                yield NetworkDevicesMetadata(
-                    namespace=self.namespace, interfaces=payloads, collect_timestamp=collect_ts
-                )
-                payloads = []
-            payloads.append(interface)
-        if payloads:
-            yield NetworkDevicesMetadata(namespace=self.namespace, interfaces=payloads, collect_timestamp=collect_ts)
-
-        payloads = []
-        for ip_address in ip_addresses:
-            if len(payloads) == PAYLOAD_METADATA_BATCH_SIZE:
-                yield NetworkDevicesMetadata(
-                    namespace=self.namespace, interfaces=payloads, collect_timestamp=collect_ts
-                )
-                payloads = []
-            payloads.append(ip_address)
-        if payloads:
-            yield NetworkDevicesMetadata(namespace=self.namespace, ip_addresses=payloads, collect_timestamp=collect_ts)
-
-    def submit_node_metadata(self, node_attrs, tags):
-        node = Node(attributes=node_attrs)
-        hostname = helpers.get_hostname_from_dn(node.attributes.dn)
-        id_tags = self.ndm_common_tags(node.attributes.address, hostname, self.namespace)
-        device_tags = [
-            'device_vendor:{}'.format(VENDOR_CISCO),
-            "source:cisco-aci",
-        ]
-        device = DeviceMetadata(
-            id='{}:{}'.format(self.namespace, node.attributes.address),
-            id_tags=id_tags,
-            tags=device_tags + tags,
-            name=hostname,
-            ip_address=node.attributes.address,
-            model=node.attributes.model,
-            fabric_st=node.attributes.fabric_st,
-            vendor=VENDOR_CISCO,
-            version=node.attributes.version,
-            serial_number=node.attributes.serial,
-            device_type=node.attributes.device_type,
-        )
-        return device.model_dump(exclude_none=True)
-
-    def create_interface_metadata(self, phys_if, address, tags, hostname):
-        eth = PhysIf(**phys_if.get('l1PhysIf', {}))
-        interface = InterfaceMetadata(
-            device_id='{}:{}'.format(self.namespace, address),
-            id_tags=['interface:{}'.format(eth.attributes.name)],
-            index=eth.attributes.id,
-            name=eth.attributes.name,
-            description=eth.attributes.desc,
-            mac_address=eth.attributes.router_mac,
-            admin_status=eth.attributes.admin_st,
-        )
-        if eth.ethpm_phys_if:
-            interface.oper_status = eth.ethpm_phys_if.attributes.oper_st
-        if interface.status:
+    def submit_interface_status_metric(self, status, tags, hostname):
+        if status:
             new_tags = tags.copy()
-            new_tags.extend(["port.status:{}".format(interface.status)])
+            new_tags.extend(["port.status:{}".format(status)])
             self.gauge('cisco_aci.fabric.port.status', 1, tags=new_tags, hostname=hostname)
-        return interface.model_dump(exclude_none=True)
-
-    def ndm_common_tags(self, address, hostname, namespace):
-        return [
-            'device_ip:{}'.format(address),
-            'device_namespace:{}'.format(namespace),
-            'device_hostname:{}'.format(hostname),
-            'device_id:{}:{}'.format(namespace, address),
-        ]
