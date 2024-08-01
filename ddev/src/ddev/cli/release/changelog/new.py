@@ -51,7 +51,7 @@ def new(app: Application, entry_type: str | None, targets: tuple[str], message: 
 def __get_create_command(app, entry_type, message):
     from ddev.release.constants import ENTRY_TYPES
 
-    latest_commit = app.repo.git.latest_commit
+    latest_commit = app.repo.git.latest_commit()
     pr = app.github.get_pull_request(latest_commit.sha)
     if pr is not None:
         pr_number = pr.number

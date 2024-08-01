@@ -9,6 +9,12 @@ GRANT VIEW SERVER STATE to datadog;
 GRANT CONNECT ANY DATABASE to datadog;
 GRANT VIEW ANY DEFINITION to datadog;
 
+USE msdb;
+CREATE USER datadog FOR LOGIN datadog;
+GRANT SELECT to datadog;
+
+USE master;
+
 -- test users
 CREATE LOGIN bob WITH PASSWORD = 'Password12!';
 CREATE USER bob FOR LOGIN bob;

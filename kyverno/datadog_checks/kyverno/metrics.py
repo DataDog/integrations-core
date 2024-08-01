@@ -59,8 +59,9 @@ METRIC_MAP = {
     'kyverno_policy_execution_duration_seconds': 'policy.execution.duration.seconds',
     'kyverno_http_requests_duration_seconds': 'http.requests.duration.seconds',
     'kyverno_http_requests': 'http.requests',
-    'kyverno_policy_results': 'policy.requests',
-    'kyverno_policy_rule_info': 'policy.rule.info',
+    'kyverno_policy_results': 'policy.results',
+    # Not a counter, but a gauge
+    'kyverno_policy_rule_info_total': 'policy.rule.info',
 }
 
 
