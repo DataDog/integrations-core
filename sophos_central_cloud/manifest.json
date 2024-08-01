@@ -8,7 +8,7 @@
     "configuration": "README.md#Setup",
     "support": "README.md#Support",
     "changelog": "CHANGELOG.md",
-    "description": "Gain insights into sophos central cloud logs",
+    "description": "Gain insights into sophos central cloud logs.",
     "title": "sophos-central-cloud",
     "media": [
       {
@@ -32,7 +32,7 @@
     "integration": {
       "auto_install": false,
       "source_type_id": 18598661,
-      "source_type_name": "SophosCentralCloud",
+      "source_type_name": "Sophos Central Cloud",
       "events": {
         "creates_events": false
       },
