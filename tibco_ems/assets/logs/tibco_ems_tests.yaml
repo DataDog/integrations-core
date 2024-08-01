@@ -1,47 +1,36 @@
 id: "tibco_ems"
 tests:
  -
-  sample: "time=\"2024-02-20T20:49:32Z\" level=info msg=\"Start processing\" resource=default/rollouts-demo"
+  sample: "2024-07-31 18:32:12.436 Set server properties 'large_destination_memory' and 'large_destination_count' respectively to alter these thresholds."
   result:
     custom:
-      argo_rollouts:
-        resource:
-          name: "default/rollouts-demo"
-      level: "info"
-      timestamp: 1708462172000
-    message: "Start processing"
+      timestamp: 1722450732436
+    message: "Set server properties 'large_destination_memory' and 'large_destination_count' respectively to alter these thresholds."
     status: "info"
     tags:
      - "source:LOGS_SOURCE"
-    timestamp: 1708462172000
+    timestamp: 1722450732436
  -
-  sample: "time=\"2024-02-20T20:49:32Z\" level=info msg=\"Processing completed\" resource=default/rollouts-demo"
+  sample: "2024-07-31 17:41:26.135 WARNING: Route Warning: host of this name does not exist: /test"
   result:
     custom:
-      argo_rollouts:
-        resource:
-          name: "default/rollouts-demo"
-      level: "info"
-      timestamp: 1708462172000
+      level: "WARNING"
+      timestamp: 1722447686135
     message: "Processing completed"
-    status: "info"
+    status: "warn"
     tags:
      - "source:LOGS_SOURCE"
-    timestamp: 1708462172000
+    timestamp: 1722447686135
  -
-  sample: "time=\"2024-02-20T20:49:32Z\" level=info msg=\"Started syncing rollout\" generation=4 namespace=default resourceVersion=24435167 rollout=rollouts-demo"
+  sample: "2024-07-31 18:02:35.249 [admin@d3ce69f9df4f]: connect failed: not authorized to connect"
   result:
     custom:
-      argo_rollouts:
-        name: "rollouts-demo"
-        namespace: "default"
-        resource:
-          version: 24435167
-      generation: 4
-      level: "info"
-      timestamp: 1708462172000
-    message: "Started syncing rollout"
+      tibco:
+        server_name: "d3ce69f9df4f"
+        user: "admin"
+      timestamp: 1722448955249
+    message: "connect failed: not authorized to connect"
     status: "info"
     tags:
      - "source:LOGS_SOURCE"
-    timestamp: 1708462172000
+    timestamp: 1722448955249

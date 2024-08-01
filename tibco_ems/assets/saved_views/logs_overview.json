@@ -1,5 +1,5 @@
 {
-    "name": "Tibco EMS",
+    "name": "Tibco EMS Logs Overview",
     "query": "source:tibco_ems OR source:ems",
     "visible_facets": [
         "status",
