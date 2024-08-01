@@ -48,7 +48,7 @@ class MongoSlowOperations(DBMAsyncJob):
 
     @tracked_method(agent_check_getter=agent_check_getter)
     def collect_slow_operations(self):
-        if not self._should_collect_operation_metrics():
+        if not self._should_collect_slow_operations():
             return
 
         is_mongos = isinstance(self._check.api_client.deployment_type, MongosDeployment)
@@ -90,10 +90,10 @@ class MongoSlowOperations(DBMAsyncJob):
         if slow_operation_events:
             self._submit_slow_operation_payload(slow_operation_events)
 
-    def _should_collect_operation_metrics(self) -> bool:
+    def _should_collect_slow_operations(self) -> bool:
         deployment = self._check.api_client.deployment_type
         if isinstance(deployment, ReplicaSetDeployment) and deployment.is_arbiter:
-            self._check.log.debug("Skipping operation metrics collection on arbiter node")
+            self._check.log.debug("Skipping slow operations collection on arbiter node")
             return False
         return True
 
@@ -110,9 +110,6 @@ class MongoSlowOperations(DBMAsyncJob):
         return level > 0
 
     def _collect_slow_operations_from_profiler(self, db_name, last_ts):
-        """
-        Collect operation metrics from database profiler collections
-        """
         profiling_data = self._check.api_client.get_profiling_data(db_name, datetime.fromtimestamp(last_ts))
 
         for profile in profiling_data:
