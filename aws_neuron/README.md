@@ -2,12 +2,7 @@
 
 ## Overview
 
-This check monitors [AWS Neuron][1] through the Datadog Agent. 
-
-Include a high level overview of what this integration does:
-- What does your product do (in 1-2 sentences)?
-- What value will customers get from this integration, and why is it valuable to them?
-- What specific data will your integration monitor, and what's the value of that data?
+This check monitors [AWS Neuron][1] through the Datadog Agent. It enables monitoring of the Inferentia and Trainium devices and delivers insights into your machine learning model's performance. 
 
 ## Setup
 
@@ -20,9 +15,11 @@ No additional installation is needed on your server.
 
 ### Configuration
 
-1. Edit the `aws_neuron.d/conf.yaml` file, in the `conf.d/` folder at the root of your Agent's configuration directory to start collecting your aws_neuron performance data. See the [sample aws_neuron.d/conf.yaml][4] for all available configuration options.
+1. Ensure [Neuron Monitor][10] is being used to expose the Prometheus endpoint on each node you wish to monitor. 
 
-2. [Restart the Agent][5].
+2. Edit the `aws_neuron.d/conf.yaml` file, in the `conf.d/` folder at the root of your Agent's configuration directory to start collecting your AWS Neuron performance data. See the [sample aws_neuron.d/conf.yaml][4] for all available configuration options.
+
+3. [Restart the Agent][5].
 
 ### Validation
 
@@ -49,7 +46,7 @@ See [service_checks.json][8] for a list of service checks provided by this integ
 Need help? Contact [Datadog support][9].
 
 
-[1]: **LINK_TO_INTEGRATION_SITE**
+[1]: https://awsdocs-neuron.readthedocs-hosted.com/en/latest/index.html
 [2]: https://app.datadoghq.com/account/settings/agent/latest
 [3]: https://docs.datadoghq.com/agent/kubernetes/integrations/
 [4]: https://github.com/DataDog/integrations-core/blob/master/aws_neuron/datadog_checks/aws_neuron/data/conf.yaml.example
@@ -58,3 +55,4 @@ Need help? Contact [Datadog support][9].
 [7]: https://github.com/DataDog/integrations-core/blob/master/aws_neuron/metadata.csv
 [8]: https://github.com/DataDog/integrations-core/blob/master/aws_neuron/assets/service_checks.json
 [9]: https://docs.datadoghq.com/help/
+[10]: https://awsdocs-neuron.readthedocs-hosted.com/en/latest/tools/neuron-sys-tools/neuron-monitor-user-guide.html#using-neuron-monitor-prometheus-py
