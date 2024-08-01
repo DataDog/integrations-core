@@ -2,6 +2,7 @@
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
 
+from copy import deepcopy
 from unittest.mock import MagicMock  # noqa: F401
 
 import pytest
@@ -226,4 +227,38 @@ def test_raise_exception_when_metrics_endpoint_is_bad(dd_run_check, aggregator, 
         tags=[
             "endpoint:https://10.244.0.38:443/healthz",
         ],
+    )
+
+
+def test_raise_exception_cannot_connect_to_kubernetes_api(dd_run_check, aggregator, instance, mocker, caplog):
+    mocker.patch("requests.get", wraps=mock_http_responses)
+
+    check = KubevirtApiCheck("kubevirt_api", {}, [instance])
+    with pytest.raises(
+        Exception,
+    ):
+        dd_run_check(check)
+
+    assert "Cannot connect to Kubernetes API:" in caplog.text
+
+
+def test_log_warning_healthz_endpoint_not_provided(dd_run_check, aggregator, instance, mocker, caplog):
+    mocker.patch("requests.get", wraps=mock_http_responses)
+
+    new_instance = deepcopy(instance)
+    new_instance.pop("kubevirt_api_healthz_endpoint")
+
+    check = KubevirtApiCheck("kubevirt_api", {}, [new_instance])
+
+    check._setup_kube_client = lambda: None
+    check.kube_client = MagicMock()
+    check.kube_client.get_pods.return_value = GET_PODS_RESPONSE_VIRT_API_POD["items"]
+    check.kube_client.get_vms.return_value = GET_VMS_RESPONSE["items"]
+    check.kube_client.get_vmis.return_value = GET_VMIS_RESPONSE["items"]
+
+    dd_run_check(check)
+
+    assert (
+        "Skipping health check. Please provide a `kubevirt_api_healthz_endpoint` to ensure the health of the KubeVirt API."  # noqa: E501
+        in caplog.text
     )

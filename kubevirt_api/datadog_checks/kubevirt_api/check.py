@@ -31,7 +31,9 @@ class KubevirtApiCheck(OpenMetricsBaseCheckV2):
         if self.kubevirt_api_healthz_endpoint:
             self._report_health_check(self.kubevirt_api_healthz_endpoint)
         else:
-            self.log.warning("No health check endpoint provided. Skipping health check.")
+            self.log.warning(
+                "Skipping health check. Please provide a `kubevirt_api_healthz_endpoint` to ensure the health of the KubeVirt API."  # noqa: E501
+            )
 
         self._setup_kube_client()
 
@@ -45,7 +47,11 @@ class KubevirtApiCheck(OpenMetricsBaseCheckV2):
         super().check(_)
 
     def _setup_kube_client(self):
-        self.kube_client = KubernetesAPIClient(log=self.log, kube_config_dict=self.kube_config_dict)
+        try:
+            self.kube_client = KubernetesAPIClient(log=self.log, kube_config_dict=self.kube_config_dict)
+        except Exception as e:
+            self.log.error("Cannot connect to Kubernetes API: %s", str(e))
+            raise
 
     def _report_health_check(self, health_endpoint):
         try:
