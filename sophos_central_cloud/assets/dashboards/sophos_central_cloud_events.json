@@ -105,13 +105,7 @@
                     }
                 ],
                 "autoscale": true,
-                "precision": 2,
-                "timeseries_background": {
-                    "type": "area",
-                    "yaxis": {
-                        "include_zero": true
-                    }
-                }
+                "precision": 2
             },
             "layout": {
                 "x": 0,
@@ -155,7 +149,7 @@
                                 },
                                 "group_by": [
                                     {
-                                        "facet": "@severity",
+                                        "facet": "@log_message.severity",
                                         "limit": 10,
                                         "sort": {
                                             "order": "desc",
@@ -209,7 +203,7 @@
                                 },
                                 "group_by": [],
                                 "search": {
-                                    "query": "source:sophos-central-cloud service:event @severity:critical $Endpoint $Group $Status $Endpoint-Type $IP"
+                                    "query": "source:sophos-central-cloud service:event @log_message.severity:critical $Endpoint $Group $Status $Endpoint-Type $IP"
                                 },
                                 "storage": "hot"
                             }
@@ -229,10 +223,7 @@
                     }
                 ],
                 "autoscale": true,
-                "precision": 2,
-                "timeseries_background": {
-                    "type": "area"
-                }
+                "precision": 2
             },
             "layout": {
                 "x": 0,
@@ -263,7 +254,7 @@
                                 },
                                 "group_by": [],
                                 "search": {
-                                    "query": "source:sophos-central-cloud service:event @severity:high $Endpoint $Group $Status $Endpoint-Type $IP"
+                                    "query": "source:sophos-central-cloud service:event @log_message.severity:high $Endpoint $Group $Status $Endpoint-Type $IP"
                                 },
                                 "storage": "hot"
                             }
@@ -283,10 +274,7 @@
                     }
                 ],
                 "autoscale": true,
-                "precision": 2,
-                "timeseries_background": {
-                    "type": "area"
-                }
+                "precision": 2
             },
             "layout": {
                 "x": 3,
@@ -317,7 +305,7 @@
                                 },
                                 "group_by": [],
                                 "search": {
-                                    "query": "source:sophos-central-cloud service:event @severity:medium $Endpoint $Group $Status $Endpoint-Type $IP"
+                                    "query": "source:sophos-central-cloud service:event @log_message.severity:medium $Endpoint $Group $Status $Endpoint-Type $IP"
                                 },
                                 "storage": "hot"
                             }
@@ -338,13 +326,7 @@
                     }
                 ],
                 "autoscale": true,
-                "precision": 2,
-                "timeseries_background": {
-                    "type": "area",
-                    "yaxis": {
-                        "include_zero": true
-                    }
-                }
+                "precision": 2
             },
             "layout": {
                 "x": 6,
@@ -375,7 +357,7 @@
                                 },
                                 "group_by": [],
                                 "search": {
-                                    "query": "source:sophos-central-cloud service:event @severity:low $Endpoint $Group $Status $Endpoint-Type $IP"
+                                    "query": "source:sophos-central-cloud service:event @log_message.severity:low $Endpoint $Group $Status $Endpoint-Type $IP"
                                 },
                                 "storage": "hot"
                             }
@@ -388,10 +370,7 @@
                     }
                 ],
                 "autoscale": true,
-                "precision": 2,
-                "timeseries_background": {
-                    "type": "area"
-                }
+                "precision": 2
             },
             "layout": {
                 "x": 9,
@@ -426,7 +405,7 @@
                                 },
                                 "group_by": [
                                     {
-                                        "facet": "@type",
+                                        "facet": "@log_message.type",
                                         "limit": 10,
                                         "sort": {
                                             "order": "desc",
@@ -502,7 +481,7 @@
                                 },
                                 "group_by": [
                                     {
-                                        "facet": "@endpoint_type",
+                                        "facet": "@log_message.endpoint_type",
                                         "limit": 10,
                                         "sort": {
                                             "order": "desc",
@@ -555,7 +534,7 @@
                                 },
                                 "group_by": [
                                     {
-                                        "facet": "@location",
+                                        "facet": "@log_message.location",
                                         "limit": 10,
                                         "sort": {
                                             "order": "desc",
@@ -627,7 +606,7 @@
                                 },
                                 "group_by": [
                                     {
-                                        "facet": "@group",
+                                        "facet": "@log_message.group",
                                         "limit": 10,
                                         "sort": {
                                             "order": "desc",
@@ -695,7 +674,7 @@
                                 },
                                 "group_by": [
                                     {
-                                        "facet": "@source",
+                                        "facet": "@log_message.source",
                                         "limit": 10,
                                         "sort": {
                                             "order": "desc",
@@ -762,7 +741,7 @@
                                 },
                                 "group_by": [
                                     {
-                                        "facet": "@ips_threat_data.remoteIp",
+                                        "facet": "@log_message.ips_threat_data.remoteIp",
                                         "limit": 10,
                                         "sort": {
                                             "order": "desc",
@@ -770,7 +749,7 @@
                                         }
                                     },
                                     {
-                                        "facet": "@ips_threat_data.remotePort",
+                                        "facet": "@log_message.ips_threat_data.remotePort",
                                         "limit": 10,
                                         "sort": {
                                             "order": "desc",
@@ -778,7 +757,7 @@
                                         }
                                     },
                                     {
-                                        "facet": "@ips_threat_data.detectionTypeName",
+                                        "facet": "@log_message.ips_threat_data.detectionTypeName",
                                         "limit": 10,
                                         "sort": {
                                             "order": "desc",
@@ -786,7 +765,7 @@
                                         }
                                     },
                                     {
-                                        "facet": "@ips_threat_data.localPort",
+                                        "facet": "@log_message.ips_threat_data.localPort",
                                         "limit": 10,
                                         "sort": {
                                             "order": "desc",
@@ -928,32 +907,32 @@
                                             },
                                             "group_by": [
                                                 {
-                                                    "facet": "@endpoint.hostname",
-                                                    "limit": 10,
+                                                    "facet": "@endpoint_details.hostname",
+                                                    "limit": 5,
                                                     "sort": {
                                                         "order": "desc",
                                                         "aggregation": "count"
                                                     }
                                                 },
                                                 {
-                                                    "facet": "@endpoint.health.overall",
-                                                    "limit": 10,
+                                                    "facet": "@endpoint_details.health.overall",
+                                                    "limit": 5,
                                                     "sort": {
                                                         "order": "desc",
                                                         "aggregation": "count"
                                                     }
                                                 },
                                                 {
-                                                    "facet": "@endpoint.health.services.status",
-                                                    "limit": 10,
+                                                    "facet": "@endpoint_details.health.services.status",
+                                                    "limit": 5,
                                                     "sort": {
                                                         "order": "desc",
                                                         "aggregation": "count"
                                                     }
                                                 },
                                                 {
-                                                    "facet": "@endpoint.health.threats.status",
-                                                    "limit": 10,
+                                                    "facet": "@endpoint_details.health.threats.status",
+                                                    "limit": 5,
                                                     "sort": {
                                                         "order": "desc",
                                                         "aggregation": "count"
@@ -1004,7 +983,7 @@
                                             },
                                             "group_by": [
                                                 {
-                                                    "facet": "@endpoint.hostname",
+                                                    "facet": "@endpoint_details.hostname",
                                                     "limit": 10,
                                                     "sort": {
                                                         "order": "desc",
@@ -1012,7 +991,7 @@
                                                     }
                                                 },
                                                 {
-                                                    "facet": "@endpoint.os.name",
+                                                    "facet": "@endpoint_details.os.name",
                                                     "limit": 10,
                                                     "sort": {
                                                         "order": "desc",
@@ -1020,7 +999,7 @@
                                                     }
                                                 },
                                                 {
-                                                    "facet": "@endpoint.os.platform",
+                                                    "facet": "@endpoint_details.os.platform",
                                                     "limit": 10,
                                                     "sort": {
                                                         "order": "desc",
@@ -1028,7 +1007,7 @@
                                                     }
                                                 },
                                                 {
-                                                    "facet": "@endpoint.os.isServer",
+                                                    "facet": "@endpoint_details.os.isServer",
                                                     "limit": 10,
                                                     "sort": {
                                                         "order": "desc",
@@ -1080,7 +1059,7 @@
                                             },
                                             "group_by": [
                                                 {
-                                                    "facet": "@endpoint.hostname",
+                                                    "facet": "@endpoint_details.hostname",
                                                     "limit": 2,
                                                     "sort": {
                                                         "order": "desc",
@@ -1088,7 +1067,7 @@
                                                     }
                                                 },
                                                 {
-                                                    "facet": "@endpoint.isolation.adminIsolated",
+                                                    "facet": "@endpoint_details.isolation.adminIsolated",
                                                     "limit": 2,
                                                     "sort": {
                                                         "order": "desc",
@@ -1096,7 +1075,7 @@
                                                     }
                                                 },
                                                 {
-                                                    "facet": "@endpoint.isolation.behaviorallyIsolated",
+                                                    "facet": "@endpoint_details.isolation.behaviorallyIsolated",
                                                     "limit": 2,
                                                     "sort": {
                                                         "order": "desc",
@@ -1104,7 +1083,7 @@
                                                     }
                                                 },
                                                 {
-                                                    "facet": "@endpoint.isolation.selfIsolated",
+                                                    "facet": "@endpoint_details.isolation.selfIsolated",
                                                     "limit": 2,
                                                     "sort": {
                                                         "order": "desc",
@@ -1112,7 +1091,7 @@
                                                     }
                                                 },
                                                 {
-                                                    "facet": "@endpoint.isolation.status",
+                                                    "facet": "@endpoint_details.isolation.status",
                                                     "limit": 2,
                                                     "sort": {
                                                         "order": "desc",
@@ -1120,7 +1099,7 @@
                                                     }
                                                 },
                                                 {
-                                                    "facet": "@endpoint.lockdown.status",
+                                                    "facet": "@endpoint_details.lockdown.status",
                                                     "limit": 2,
                                                     "sort": {
                                                         "order": "desc",
@@ -1188,31 +1167,31 @@
                                 "width": "auto"
                             },
                             {
-                                "field": "endpoint_type",
+                                "field": "log_message.endpoint_type",
                                 "width": "auto"
                             },
                             {
-                                "field": "group",
+                                "field": "log_message.group",
                                 "width": "auto"
                             },
                             {
-                                "field": "location",
+                                "field": "log_message.location",
                                 "width": "auto"
                             },
                             {
-                                "field": "@source",
+                                "field": "@log_message.source",
                                 "width": "auto"
                             },
                             {
-                                "field": "status",
+                                "field": "log_message.status",
                                 "width": "auto"
                             },
                             {
-                                "field": "threat",
+                                "field": "log_message.threat",
                                 "width": "auto"
                             },
                             {
-                                "field": "type",
+                                "field": "log_message.type",
                                 "width": "auto"
                             }
                         ]
@@ -1231,31 +1210,31 @@
     "template_variables": [
         {
             "name": "Endpoint",
-            "prefix": "@location",
+            "prefix": "@log_message.location",
             "available_values": [],
             "default": "*"
         },
         {
             "name": "Group",
-            "prefix": "@group",
+            "prefix": "@log_message.group",
             "available_values": [],
             "default": "*"
         },
         {
             "name": "Status",
-            "prefix": "@status",
+            "prefix": "@log_message.status",
             "available_values": [],
             "default": "*"
         },
         {
             "name": "Endpoint-Type",
-            "prefix": "@endpoint_type",
+            "prefix": "@log_message.endpoint_type",
             "available_values": [],
             "default": "*"
         },
         {
             "name": "IP",
-            "prefix": "@source_info.ip",
+            "prefix": "@network.client.ip",
             "available_values": [],
             "default": "*"
         }
