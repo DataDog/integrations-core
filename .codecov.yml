@@ -338,6 +338,10 @@ coverage:
         target: 75
         flags:
         - kubernetes_state
+      Kubevirt_API:
+        target: 75
+        flags:
+        - kubevirt_api
       Kyoto_Tycoon:
         target: 75
         flags:
@@ -678,14 +682,14 @@ coverage:
         target: 75
         flags:
         - fluxcd
-      vLLM:
-        target: 75
-        flags:
-        - vllm
       kyverno:
         target: 75
         flags:
         - kyverno
+      vLLM:
+        target: 75
+        flags:
+        - vllm
       vSphere:
         target: 75
         flags:
@@ -1127,6 +1131,11 @@ flags:
     paths:
     - kubernetes_state/datadog_checks/kubernetes_state
     - kubernetes_state/tests
+  kubevirt_api:
+    carryforward: true
+    paths:
+    - kubevirt_api/datadog_checks/kubevirt_api
+    - kubevirt_api/tests
   kyototycoon:
     carryforward: true
     paths:
