@@ -624,6 +624,72 @@ files:
           value:
             type: number
             example: 600
+        - name: include_databases
+          description: |
+            A list of regex patterns to include databases. 
+            Any database whose name matches any one of these patterns will be included. 
+            If empty, all databases matching other filters are included.
+          value:
+            type: array
+            items:
+              type: string
+            example:
+              - "mydb"
+        - name: exclude_databases
+          description: |
+            A list of regex patterns to exclude databases. 
+            Any database whose name matches any one of these patterns will be excluded.
+            If empty, all databases matching other filters are included.
+          value:
+            type: array
+            items:
+              type: string
+            example:
+              - "privatedb.*"
+        - name: include_schemas
+          description: |
+            A list of regex patterns to include schemas. 
+            Any schema whose name matches any one of these patterns will be included.
+            If empty, all schemas matching other filters are included.
+          value:
+            type: array
+            items:
+              type: string
+            example:
+              - "myschema"
+        - name: exclude_schemas
+          description: |
+            A list of regex patterns to exclude schemas. 
+            Any schema whose name matches any one of these patterns will be excluded.
+            If empty, all schemas matching other filters are included.
+          value:
+            type: array
+            items:
+              type: string
+            example:
+              - "privateschema.*"
+        - name: include_tables
+          description: |
+            A list of regex patterns to include tables. 
+            Any table whose name matches any one of these patterns will be included.
+            If empty, all tables matching other filters are included.
+          value:
+            type: array
+            items:
+              type: string
+            example:
+              - "users.*"
+        - name: exclude_tables
+          description: |
+            A list of regex patterns to exclude tables. 
+            Any table whose name matches any one of these patterns will be excluded.
+            If empty, all tables matching other filters are included.
+          value:
+            type: array
+            items:
+              type: string
+            example:
+              - "customer.*"
 
     - name: aws
       description: |

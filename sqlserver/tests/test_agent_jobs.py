@@ -17,6 +17,8 @@ from .common import (
 
 logger = logging.getLogger(__name__)
 
+pytestmark = [pytest.mark.integration]
+
 
 AGENT_HISTORY_QUERY = """\
 WITH HISTORY_ENTRIES AS (
@@ -425,6 +427,7 @@ def test_history_output(instance_docker, sa_conn):
             ), "should only have 4 steps associated with completed jobs when filtering with last collection time"
 
 
+@pytest.mark.flaky
 def test_agent_jobs_integration(aggregator, dd_run_check, agent_jobs_instance, sa_conn):
     with sa_conn as conn:
         with conn.cursor() as cursor:

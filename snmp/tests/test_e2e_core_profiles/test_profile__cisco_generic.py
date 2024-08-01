@@ -276,6 +276,7 @@ def test_e2e_profile__cisco_generic(dd_agent_check):
         'sys_object_id': '1.2.3.1005',
         'vendor': 'cisco',
         'device_type': 'other',
+        'integration': 'snmp',
     }
     device['tags'] = common_tags
     assert_device_metadata(aggregator, device)

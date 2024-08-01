@@ -123,6 +123,16 @@ class MongoApi(object):
     def index_stats(self, db_name, coll_name, session=None):
         return self[db_name][coll_name].aggregate([{"$indexStats": {}}], session=session)
 
+    def get_profiling_level(self, db_name, session=None):
+        return self[db_name].command('profile', -1, session=session)
+
+    def get_profiling_data(self, db_name, ts, session=None):
+        filter = {'ts': {'$gt': ts}}
+        return self[db_name]['system.profile'].find(filter, session=session).sort('ts', 1)
+
+    def get_log_data(self, session=None):
+        return self['admin'].command("getLog", "global", session=session)
+
     def _is_arbiter(self, options):
         cli = MongoClient(**options)
         is_master_payload = cli['admin'].command('isMaster')

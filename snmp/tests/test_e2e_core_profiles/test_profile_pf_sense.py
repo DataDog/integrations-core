@@ -57,6 +57,7 @@ def test_e2e_profile_pf_sense(dd_agent_check):
         'sys_object_id': '1.3.6.1.4.1.12325.999',
         'vendor': 'pfSense',
         'device_type': 'other',
+        'integration': 'snmp',
     }
     device['tags'] = common_tags
     assert_device_metadata(aggregator, device)

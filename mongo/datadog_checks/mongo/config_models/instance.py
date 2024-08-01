@@ -72,6 +72,16 @@ class OperationSamples(BaseModel):
     enabled: Optional[bool] = None
 
 
+class SlowOperations(BaseModel):
+    model_config = ConfigDict(
+        arbitrary_types_allowed=True,
+        frozen=True,
+    )
+    collection_interval: Optional[float] = None
+    enabled: Optional[bool] = None
+    max_operations: Optional[float] = None
+
+
 class InstanceConfig(BaseModel):
     model_config = ConfigDict(
         validate_default=True,
@@ -103,6 +113,7 @@ class InstanceConfig(BaseModel):
     reported_database_hostname: Optional[str] = None
     server: Optional[str] = None
     service: Optional[str] = None
+    slow_operations: Optional[SlowOperations] = None
     tags: Optional[tuple[str, ...]] = None
     timeout: Optional[int] = None
     tls: Optional[bool] = None
