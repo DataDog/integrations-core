@@ -41,6 +41,9 @@
       },
       "service_checks": {
         "metadata_path": "assets/service_checks.json"
+      },
+      "monitors": {
+	"Execution latency": "assets/monitors/execution_latency.json"
       }
     }
   },
