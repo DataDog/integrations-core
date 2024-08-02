@@ -131,7 +131,7 @@ class PostgreSql(AgentCheck):
         self.metadata_samples = PostgresMetadata(self, self._config, shutdown_callback=self._close_db_pool)
         self._relations_manager = RelationsManager(self._config.relations, self._config.max_relations)
         self._clean_state()
-        self._query_manager = QueryManager(self, self.execute_query_raw, queries=[])
+        self._query_manager = QueryManager(self, lambda _: None, queries=[])  # query executor is set later
         self.check_initializations.append(lambda: RelationsManager.validate_relations_config(self._config.relations))
         self.check_initializations.append(self.set_resolved_hostname_metadata)
         self.check_initializations.append(self._connect)
@@ -207,9 +207,7 @@ class PostgreSql(AgentCheck):
             track_operation_time=True,
         )
 
-    def execute_query_raw(self, query, db=None):
-        if db is None:
-            db = self.db
+    def execute_query_raw(self, query, db):
         with db() as conn:
             with conn.cursor(cursor_factory=CommenterCursor) as cursor:
                 cursor.execute(query)
@@ -948,7 +946,9 @@ class PostgreSql(AgentCheck):
             self.log.debug("Running check against version %s: is_aurora: %s", str(self.version), str(self.is_aurora))
             self._emit_running_metric()
             self._collect_stats(tags)
-            self._query_manager.execute(extra_tags=tags)
+            if self._query_manager.queries:
+                self._query_manager.executor = functools.partial(self.execute_query_raw, db=self.db)
+                self._query_manager.execute(extra_tags=tags)
             if self._config.dbm_enabled:
                 self.statement_metrics.run_job_loop(tags)
                 self.statement_samples.run_job_loop(tags)
