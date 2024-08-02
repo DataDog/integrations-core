@@ -7,7 +7,7 @@ tests:
   result:
     custom:
       level: "INFO"
-      timestamp: 1718139721
+      timestamp: 1718139721000
       logger:
         lineno: 72
         name: "cpu_executor.py"
@@ -15,7 +15,7 @@ tests:
     status: "info"
     tags:
      - "source:LOGS_SOURCE"
-    timestamp: 1718139721
+    timestamp: 1718139721000
 # Log entries in the wild don't include a year in their timestamp. This confuses the test framework.
 # Sample disabled until we address this.
 #  -
