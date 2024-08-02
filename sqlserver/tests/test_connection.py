@@ -535,8 +535,9 @@ def test_connection_error_reporting(
     else:
         assert expected_link.lower() in message
 
-    if driver == "adoprovider":
+    if "adoprovider" in driver:
         assert instance_docker["password"] in message, message
+        assert instance_docker["password"] not in message, message
 
 
 @pytest.mark.unit
