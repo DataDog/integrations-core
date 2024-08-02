@@ -58,10 +58,10 @@ instances:
     # add_missing_keys: false
 
     ## @param force_sha1 - boolean - optional - default: false
-    ## Some older ssh servers only support SHA1 encryption. Moreover some don't have the `server-sig-algs`
-    ## extension installed which means they don't tell their clients that they only support SHA1.
+    ## Some older ssh servers only support SHA1 encryption. Moreover, some don't have the `server-sig-algs`
+    ## extension installed, which means they don't tell their clients that they only support SHA1.
     ## The client we use assumes SHA2 encryption, so it crashes when connecting to such a server.
-    ## While it's strongly recommended to upgrade the ssh server to support the more secure SHA2 we can force
+    ## While it's strongly recommended to upgrade the SSH server to support the more secure SHA2, you can force
     ## the client to use SHA1 encryption by setting this option to 'true'.
     #
     # force_sha1: false
