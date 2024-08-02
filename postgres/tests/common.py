@@ -121,13 +121,13 @@ requires_static_version = pytest.mark.skipif(USING_LATEST, reason='Version `late
 
 def _iterate_metric_name(query):
     if 'columns' in query:
-        metric_prefix = ''
+        metric_prefix = 'postgresql'
         if 'metric_prefix' in query:
-            metric_prefix = f'{query["metric_prefix"]}.'
+            metric_prefix = f'{query["metric_prefix"]}'
         for column in query['columns']:
             if column['type'].startswith('tag'):
                 continue
-            yield f'{metric_prefix}{column["name"]}'
+            yield f'{metric_prefix}.{column["name"]}'
     else:
         for metric in query['metrics'].values():
             yield metric[0]
@@ -273,7 +273,7 @@ def check_wal_receiver_metrics(aggregator, expected_tags, count=1, connected=1):
         )
         return
     for metric_name in _iterate_metric_name(QUERY_PG_STAT_WAL_RECEIVER):
-        aggregator.assert_metric('postgresql.{0}'.format(metric_name), count=count, tags=expected_tags)
+        aggregator.assert_metric(metric_name, count=count, tags=expected_tags)
 
 
 def check_physical_replication_slots(aggregator, expected_tags):
@@ -301,7 +301,6 @@ def check_replication_slots(aggregator, expected_tags, count=1):
     if float(POSTGRES_VERSION) < 10.0:
         return
     for metric_name in _iterate_metric_name(QUERY_PG_REPLICATION_SLOTS):
-        metric_name = 'postgresql.{0}'.format(metric_name)
         if 'slot_type:physical' in expected_tags and metric_name in [
             'postgresql.replication_slot.confirmed_flush_delay_bytes',
         ]:
@@ -318,7 +317,7 @@ def check_replication_slots_stats(aggregator, expected_tags, count=1):
     if float(POSTGRES_VERSION) < 14.0:
         return
     for metric_name in _iterate_metric_name(QUERY_PG_REPLICATION_SLOTS_STATS):
-        aggregator.assert_metric('postgresql.{0}'.format(metric_name), count=count, tags=expected_tags)
+        aggregator.assert_metric(metric_name, count=count, tags=expected_tags)
 
 
 def check_replication_delay(aggregator, metrics_cache, expected_tags, count=1):
@@ -329,12 +328,12 @@ def check_replication_delay(aggregator, metrics_cache, expected_tags, count=1):
 
 def check_uptime_metrics(aggregator, expected_tags, count=1):
     for metric_name in _iterate_metric_name(QUERY_PG_UPTIME):
-        aggregator.assert_metric('postgresql.{0}'.format(metric_name), count=count, tags=expected_tags)
+        aggregator.assert_metric(metric_name, count=count, tags=expected_tags)
 
 
 def check_control_metrics(aggregator, expected_tags, count=1):
     for metric_name in _iterate_metric_name(QUERY_PG_CONTROL_CHECKPOINT):
-        aggregator.assert_metric('postgresql.{0}'.format(metric_name), count=count, tags=expected_tags)
+        aggregator.assert_metric(metric_name, count=count, tags=expected_tags)
 
 
 def check_conflict_metrics(aggregator, expected_tags, count=1):
@@ -371,7 +370,7 @@ def check_slru_metrics(aggregator, expected_tags, count=1):
 
 def check_snapshot_txid_metrics(aggregator, expected_tags, count=1):
     for metric_name in _iterate_metric_name(SNAPSHOT_TXID_METRICS):
-        aggregator.assert_metric('postgresql.{0}'.format(metric_name), count=count, tags=expected_tags)
+        aggregator.assert_metric(metric_name, count=count, tags=expected_tags)
 
 
 def check_file_wal_metrics(aggregator, expected_tags, count=1):
@@ -379,7 +378,7 @@ def check_file_wal_metrics(aggregator, expected_tags, count=1):
         return
 
     for metric_name in _iterate_metric_name(WAL_FILE_METRICS):
-        aggregator.assert_metric('postgresql.{0}'.format(metric_name), count=count, tags=expected_tags)
+        aggregator.assert_metric(metric_name, count=count, tags=expected_tags)
 
 
 def check_stat_wal_metrics(aggregator, expected_tags, count=1):
@@ -387,7 +386,7 @@ def check_stat_wal_metrics(aggregator, expected_tags, count=1):
         return
 
     for metric_name in _iterate_metric_name(STAT_WAL_METRICS):
-        aggregator.assert_metric('postgresql.{0}'.format(metric_name), count=count, tags=expected_tags)
+        aggregator.assert_metric(metric_name, count=count, tags=expected_tags)
 
 
 def check_performance_metrics(aggregator, expected_tags, count=1, is_aurora=False):
@@ -408,21 +407,21 @@ def check_subscription_metrics(aggregator, expected_tags, count=1):
     if float(POSTGRES_VERSION) < 10:
         return
     for metric_name in _iterate_metric_name(STAT_SUBSCRIPTION_METRICS):
-        aggregator.assert_metric('postgresql.{0}'.format(metric_name), count=count, tags=expected_tags)
+        aggregator.assert_metric(metric_name, count=count, tags=expected_tags)
 
 
 def check_subscription_state_metrics(aggregator, expected_tags, count=1):
     if float(POSTGRES_VERSION) < 14:
         return
     for metric_name in _iterate_metric_name(SUBSCRIPTION_STATE_METRICS):
-        aggregator.assert_metric('postgresql.{0}'.format(metric_name), count=count, tags=expected_tags)
+        aggregator.assert_metric(metric_name, count=count, tags=expected_tags)
 
 
 def check_subscription_stats_metrics(aggregator, expected_tags, count=1):
     if float(POSTGRES_VERSION) < 15:
         return
     for metric_name in _iterate_metric_name(STAT_SUBSCRIPTION_STATS_METRICS):
-        aggregator.assert_metric('postgresql.{0}'.format(metric_name), count=count, tags=expected_tags)
+        aggregator.assert_metric(metric_name, count=count, tags=expected_tags)
 
 
 def check_checksum_metrics(aggregator, expected_tags, count=1):
@@ -430,7 +429,7 @@ def check_checksum_metrics(aggregator, expected_tags, count=1):
         return
     for metric_name in _iterate_metric_name(CHECKSUM_METRICS):
         aggregator.assert_metric(
-            'postgresql.{0}'.format(metric_name), count=count, tags=expected_tags + ['db:{}'.format(DB_NAME)]
+            metric_name, count=count, tags=expected_tags + ['db:{}'.format(DB_NAME)]
         )
 
 
@@ -443,4 +442,4 @@ def check_stat_io_metrics(aggregator, expected_tags, count=1):
         'object:relation',
     ]
     for metric_name in _iterate_metric_name(STAT_IO_METRICS):
-        aggregator.assert_metric('postgresql.{0}'.format(metric_name), count=count, tags=expected_stat_io_tags)
+        aggregator.assert_metric(metric_name, count=count, tags=expected_stat_io_tags)
