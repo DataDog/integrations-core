@@ -42,7 +42,12 @@ def __check_prepand_sql_comment(pg_instance, ignore):
     # assert /* service='datadog-agent' */ is present in the query
     super_conn = _get_superconn(pg_instance)
     with super_conn.cursor() as cursor:
-        cursor.execute("SELECT query FROM pg_stat_activity where query like '%generate_series%'")
+        cursor.execute(
+            (
+                "SELECT query FROM pg_stat_activity where query like '%generate_series%' "
+                "and query not like '%%pg_stat_activity%%'"
+            )
+        )
         result = cursor.fetchall()
         assert len(result) > 0
         comment = '/* service=\'datadog-agent\' */'
