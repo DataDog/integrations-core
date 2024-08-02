@@ -11,5 +11,5 @@ version = ["2.0"]
 
 [envs.default.overrides]
 matrix.version.env-vars = [
-  { key = "SAP_HANA_VERSION", value = "2.00.072.00.20231123.1", if = ["2.0"] },
+  { key = "SAP_HANA_VERSION", value = "2.00.076.00.20240701.1", if = ["2.0"] },
 ]
