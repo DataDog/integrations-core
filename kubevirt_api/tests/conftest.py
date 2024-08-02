@@ -14,10 +14,6 @@ from datadog_checks.dev.kind import kind_run
 from datadog_checks.dev.kube_port_forward import port_forward
 
 HERE = get_here()
-
-KUBE_CONFIG_PATH_E2E = "/home/.kube/config"
-
-
 KUBEVIRT_VERSION = "v1.2.2"
 
 
