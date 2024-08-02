@@ -18,12 +18,16 @@ def dd_environment():
 
 @pytest.fixture
 def instance():
-    return {"kubevirt_controller_healthz_endpoint": "https://10.244.0.38:443/healthz"}
+    return {
+        "kubevirt_controller_healthz_endpoint": "https://10.244.0.38:443/healthz",
+        "kubevirt_controller_metrics_endpoint": "https://10.244.0.38:443/metrics",
+    }
 
 
 def mock_http_responses(url, **_params):
     mapping = {
         "https://10.244.0.38:443/healthz": "healthz.txt",
+        "https://10.244.0.38:443/metrics": "metrics.txt",
     }
 
     fixtures_file = mapping.get(url)
