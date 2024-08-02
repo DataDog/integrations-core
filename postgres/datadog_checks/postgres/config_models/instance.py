@@ -65,6 +65,12 @@ class CollectSchemas(BaseModel):
     )
     collection_interval: Optional[float] = None
     enabled: Optional[bool] = None
+    exclude_databases: Optional[tuple[str, ...]] = None
+    exclude_schemas: Optional[tuple[str, ...]] = None
+    exclude_tables: Optional[tuple[str, ...]] = None
+    include_databases: Optional[tuple[str, ...]] = None
+    include_schemas: Optional[tuple[str, ...]] = None
+    include_tables: Optional[tuple[str, ...]] = None
     max_columns: Optional[float] = None
     max_tables: Optional[float] = None
 
@@ -249,6 +255,7 @@ class InstanceConfig(BaseModel):
     table_count_limit: Optional[int] = None
     tag_replication_role: Optional[bool] = None
     tags: Optional[tuple[str, ...]] = None
+    use_global_custom_queries: Optional[str] = None
     username: str
 
     @model_validator(mode='before')

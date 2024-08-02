@@ -208,6 +208,29 @@ files:
           value:
             type: number
             example: 10
+    - name: slow_operations
+      description: Configure collection of MongoDB slow operations.
+      hidden: true
+      options:
+        - name: enabled
+          description: |
+            Enable collection of slow operations. Requires `dbm: true`.
+          value:
+            type: boolean
+            example: true
+        - name: collection_interval
+          description: |
+            Set the slow operations collection interval in seconds. Each collection involves capturing
+            profiled slow operations from sys.profile collection or from the Slow Query log.
+          value:
+            type: number
+            example: 10
+        - name: max_operations
+          description: |
+            Set the maximum number of slow operations to collect per interval.
+          value:
+            type: number
+            example: 1000
     - name: replica_check
       description: |
         Whether or not to read from available replicas.

@@ -102,7 +102,7 @@ datadog-kubelet==7.13.2
 datadog-kubernetes-cluster-autoscaler==1.0.1
 datadog-kubernetes-state==8.1.1
 datadog-kyototycoon==2.5.1
-datadog-kyverno==1.0.0
+datadog-kyverno==1.0.2
 datadog-lighttpd==3.5.1
 datadog-linkerd==4.2.2
 datadog-linux-proc-extras==2.5.0; sys_platform == 'linux2'
@@ -114,7 +114,7 @@ datadog-mcache==4.1.0; sys_platform != 'win32'
 datadog-mesos-master==3.3.1; sys_platform != 'win32'
 datadog-mesos-slave==3.3.1; sys_platform != 'win32'
 datadog-mongo==6.7.2
-datadog-mysql==12.6.0
+datadog-mysql==12.6.1
 datadog-nagios==1.13.0
 datadog-network==3.3.0
 datadog-nfsstat==1.13.0; sys_platform == 'linux2'
@@ -123,7 +123,7 @@ datadog-nginx==6.3.1
 datadog-nvidia-triton==1.2.2
 datadog-openldap==1.12.0
 datadog-openmetrics==4.2.2
-datadog-openstack-controller==6.8.0
+datadog-openstack-controller==6.8.1
 datadog-openstack==2.0.0
 datadog-oracle==5.2.0
 datadog-palo-alto-panorama==1.0.0
@@ -132,7 +132,7 @@ datadog-pdh-check==2.1.0; sys_platform == 'win32'
 datadog-pgbouncer==6.2.0; sys_platform != 'win32'
 datadog-php-fpm==3.3.1
 datadog-postfix==1.14.0; sys_platform != 'win32'
-datadog-postgres==19.0.0
+datadog-postgres==19.0.1
 datadog-powerdns-recursor==2.5.1
 datadog-presto==2.8.0
 datadog-process==3.4.0

@@ -160,6 +160,7 @@ def test_e2e_profile_fortinet_fortigate(dd_agent_check):
         'vendor': 'fortinet',
         'version': 'v5.6.4,build1575b1575,180425 (GA)',
         'device_type': 'other',
+        'integration': 'snmp',
     }
     device['tags'] = common_tags
     assert_device_metadata(aggregator, device)

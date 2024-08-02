@@ -1,0 +1,1 @@
+Fixed postgres check crash when pg_stat_statements was not yet loaded
