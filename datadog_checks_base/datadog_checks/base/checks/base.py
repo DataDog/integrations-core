@@ -231,6 +231,10 @@ class AgentCheck(object):
 
         # `self.hostname` is deprecated, use `datadog_agent.get_hostname()` instead
         self.hostname = datadog_agent.get_hostname()  # type: str
+        try:
+            self.log.info("natasha testing get host tags %s", str(datadog_agent.get_host_tags()))
+        except Exception as e:
+            self.log.info("natasha testing get host tags exception %s", str(e))
 
         logger = logging.getLogger('{}.{}'.format(__name__, self.name))
         self.log = CheckLoggingAdapter(logger, self)
