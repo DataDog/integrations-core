@@ -127,7 +127,7 @@ def test_stat_subscription(aggregator, integration_check, pg_replica_logical):
     for metric in _iterate_metric_name(STAT_SUBSCRIPTION_METRICS):
         assert_metric_at_least(
             aggregator,
-            metric,
+            'postgresql.{0}'.format(metric),
             lower_bound=0.001,
             tags=expected_subscription_tags,
             min_count=1,
