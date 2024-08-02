@@ -395,6 +395,36 @@ def test_connection_failure(aggregator, dd_run_check, instance_docker):
             ConnectionErrorCode.driver_not_found,
         ),
         (
+            "unknown_adoprovider_1",
+            {'adoprovider': "fake", 'password': r"test\1234"},
+            {".*": "TCP-connection\\(OK\\).*Provider cannot be found. It may not be properly installed."},
+            ConnectionErrorCode.driver_not_found,
+        ),
+        (
+            "unknown_adoprovider_2",
+            {'adoprovider': "fake", 'password': "test\\1234"},
+            {".*": "TCP-connection\\(OK\\).*Provider cannot be found. It may not be properly installed."},
+            ConnectionErrorCode.driver_not_found,
+        ),
+        (
+            "unknown_adoprovider_3",
+            {'adoprovider': "fake", 'password': "test\1234"},
+            {".*": "TCP-connection\\(OK\\).*Provider cannot be found. It may not be properly installed."},
+            ConnectionErrorCode.driver_not_found,
+        ),
+        (
+            "unknown_adoprovider_4",
+            {'adoprovider': "fake", 'password': r"test\\\1234"},
+            {".*": "TCP-connection\\(OK\\).*Provider cannot be found. It may not be properly installed."},
+            ConnectionErrorCode.driver_not_found,
+        ),
+        (
+            "unknown_adoprovider_5",
+            {'adoprovider': "fake", 'password': "test\\\1234"},
+            {".*": "TCP-connection\\(OK\\).*Provider cannot be found. It may not be properly installed."},
+            ConnectionErrorCode.driver_not_found,
+        ),
+        (
             "unknown_odbc_driver",
             {'driver': "{SQL Driver For Fake Tests 2022}"},
             {
@@ -506,7 +536,7 @@ def test_connection_error_reporting(
         assert expected_link.lower() in message
 
     if driver == "adoprovider":
-        assert instance_docker["password"] not in message
+        assert instance_docker["password"] in message, message
 
 
 @pytest.mark.unit
