@@ -425,7 +425,10 @@ class PostgresStatementSamples(DBMAsyncJob):
                 json.dumps(activity_event, default=default_json_event_encoding)
             )
             self._check.histogram(
-                "dd.postgres.collect_activity_snapshot.time", (time.time() - start_time) * 1000, tags=self.tags
+                "dd.postgres.collect_activity_snapshot.time",
+                (time.time() - start_time) * 1000,
+                tags=self.tags,
+                raw=True,
             )
         elapsed_ms = (time.time() - start_time) * 1000
         self._check.histogram(
