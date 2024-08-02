@@ -38,42 +38,6 @@ METRIC_MAP = {
     'system_vcpu_usage_ratio': 'system.vcpu.usage_ratio',
 }
 
-METRICS = [
-    'execution.errors_created',
-    'execution.errors.count',
-    'execution.latency_seconds',
-    'execution.status_created',
-    'execution.status.count',
-    'hardware_ecc_events_created',
-    'hardware_ecc_events.count',
-    'instance_info',
-    'neuron_hardware.info',
-    'neuron_runtime.memory_used_bytes',
-    'neuron_runtime.vcpu_usage_ratio',
-    'neuroncore.memory_usage.constants',
-    'neuroncore.memory_usage.model.code',
-    'neuroncore.memory_usage.model.shared_scratchpad',
-    'neuroncore.memory_usage.runtime_memory',
-    'neuroncore.memory_usage.tensors',
-    'neuroncore.utilization_ratio',
-    'process.cpu_seconds.count',
-    'process.max_fds',
-    'process.open_fds',
-    'process.resident_memory_bytes',
-    'process.start_time_seconds',
-    'process.virtual_memory_bytes',
-    'python_gc.collections.count',
-    'python_gc.objects_collected.count',
-    'python_gc.objects_uncollectable.count',
-    'python_info',
-    'system.memory.total_bytes',
-    'system.memory.used_bytes',
-    'system.swap.total_bytes',
-    'system.swap.used_bytes',
-    'system.vcpu.count',
-    'system.vcpu.usage_ratio',
-]
-
 RENAME_LABELS_MAP = {
     "version": "python_version",
 }
