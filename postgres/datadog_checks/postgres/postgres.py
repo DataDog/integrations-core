@@ -828,6 +828,10 @@ class PostgreSql(AgentCheck):
         The connection created here will be persistent. It will not be automatically
         evicted from the connection pool.
         """
+        try:
+            self.log.info("natasha testing get host tags %s", str(datadog_agent.get_host_tags()))
+        except Exception as e:
+            self.log.info("natasha testing get host tags exception %s", str(e))
         with self.db() as conn:
             self._connection_health_check(conn)
 
