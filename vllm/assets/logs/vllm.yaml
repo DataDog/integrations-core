@@ -23,7 +23,7 @@ pipeline:
           vllm %{word:level} (%{ts_no_year}|%{ts_year}) %{regex("[^\\:]+"):logger.name}:%{integer:logger.lineno}] %{data:message}
         supportRules: |
           ts_no_year %{date("MM-dd HH:mm:ss"):timestamp}
-          ts_year %{date("MM-dd-YYYY HH:mm:ss"):timestamp}
+          ts_year %{date("MM-dd-yyyy HH:mm:ss"):timestamp}
     - type: message-remapper
       name: Define `message` as the official message of the log
       enabled: true
