@@ -18,22 +18,20 @@ def test_integration_connection_with_commenter_cursor(integration_check, pg_inst
         # verify CommenterCursor and CommenterDictCursor prepend the query with /* service='datadog-agent' */
         with conn.cursor(cursor_factory=CommenterCursor) as cursor:
             cursor.execute(
-                'SELECT name, setting FROM pg_settings where name = %s',
-                ('pg_stat_statements.max',),
+                'SELECT generate_series(1, 10) AS number',
                 ignore_query_metric=ignore,
             )
             result = cursor.fetchone()
-            assert result[0] == 'pg_stat_statements.max'
+            assert isinstance(result[0], int)
         __check_prepand_sql_comment(pg_instance, ignore)
 
         with conn.cursor(cursor_factory=CommenterDictCursor) as cursor:
             cursor.execute(
-                'SELECT name, setting FROM pg_settings where name = %s',
-                ('max_connections',),
+                'SELECT generate_series(1, 10) AS number',
                 ignore_query_metric=ignore,
             )
             result = cursor.fetchone()
-            assert result['name'] == 'max_connections'
+            assert isinstance(result[0], int)
         __check_prepand_sql_comment(pg_instance, ignore)
 
     check.cancel()
@@ -44,7 +42,7 @@ def __check_prepand_sql_comment(pg_instance, ignore):
     # assert /* service='datadog-agent' */ is present in the query
     super_conn = _get_superconn(pg_instance)
     with super_conn.cursor() as cursor:
-        cursor.execute("SELECT query FROM pg_stat_activity where query like '%pg_settings%'")
+        cursor.execute("SELECT query FROM pg_stat_activity where query like '%generate_series%'")
         result = cursor.fetchall()
         assert len(result) > 0
         comment = '/* service=\'datadog-agent\' */'
