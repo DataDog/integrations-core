@@ -2,25 +2,30 @@
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
 
-from typing import Any, Callable, Dict  # noqa: F401
+import pytest
 
-from datadog_checks.base import AgentCheck  # noqa: F401
-from datadog_checks.base.stubs.aggregator import AggregatorStub  # noqa: F401
-from datadog_checks.dev.utils import get_metadata_metrics
 from datadog_checks.kubevirt_controller import KubevirtControllerCheck
 
+from .conftest import mock_http_responses
 
-def test_check(dd_run_check, aggregator, instance):
-    # type: (Callable[[AgentCheck, bool], None], AggregatorStub, Dict[str, Any]) -> None
-    check = KubevirtControllerCheck('kubevirt_controller', {}, [instance])
+
+def test_emits_can_connect_one_when_service_is_up(dd_run_check, aggregator, instance, mocker):
+    mocker.patch("requests.get", wraps=mock_http_responses)
+    check = KubevirtControllerCheck("kubevirt_controller", {}, [instance])
     dd_run_check(check)
+    aggregator.assert_metric(
+        "kubevirt_controller.can_connect",
+        value=1,
+        tags=[
+            "endpoint:https://10.244.0.38:443/healthz",
+        ],
+    )
 
-    aggregator.assert_all_metrics_covered()
-    aggregator.assert_metrics_using_metadata(get_metadata_metrics())
 
-
-def test_emits_critical_service_check_when_service_is_down(dd_run_check, aggregator, instance):
-    # type: (Callable[[AgentCheck, bool], None], AggregatorStub, Dict[str, Any]) -> None
-    check = KubevirtControllerCheck('kubevirt_controller', {}, [instance])
-    dd_run_check(check)
-    aggregator.assert_service_check('kubevirt_controller.can_connect', KubevirtControllerCheck.CRITICAL)
+def test_emits_can_connect_zero_when_service_is_down(dd_run_check, aggregator, instance):
+    check = KubevirtControllerCheck("kubevirt_controller", {}, [instance])
+    with pytest.raises(Exception):
+        dd_run_check(check)
+    aggregator.assert_metric(
+        "kubevirt_controller.can_connect", value=0, tags=["endpoint:https://10.244.0.38:443/healthz"]
+    )
