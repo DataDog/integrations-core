@@ -120,8 +120,8 @@ requires_static_version = pytest.mark.skipif(USING_LATEST, reason='Version `late
 
 
 def _iterate_metric_name(query):
+    metric_prefix = 'postgresql'
     if 'columns' in query:
-        metric_prefix = 'postgresql'
         if 'metric_prefix' in query:
             metric_prefix = f'{query["metric_prefix"]}'
         for column in query['columns']:
@@ -129,8 +129,9 @@ def _iterate_metric_name(query):
                 continue
             yield f'{metric_prefix}.{column["name"]}'
     else:
-        for metric in query['metrics'].values():
-            yield metric[0]
+        metrics = query['metrics'].values() if 'metrics' in query else query.values()
+        for metric in metrics:
+            yield f'{metric_prefix}.{metric[0]}'
 
 
 def _get_expected_replication_tags(check, pg_instance, with_host=True, with_db=False, with_version=True, **kwargs):
@@ -207,8 +208,8 @@ def check_common_metrics(aggregator, expected_tags, count=1):
         for name in COMMON_METRICS:
             aggregator.assert_metric(name, count=count, tags=db_tags)
         if POSTGRES_VERSION is None or float(POSTGRES_VERSION) >= 14.0:
-            for metric_name, _ in NEWER_14_METRICS.values():
-                aggregator.assert_metric('postgresql.{0}'.format(metric_name), count=count, tags=db_tags)
+            for metric_name in _iterate_metric_name(NEWER_14_METRICS):
+                aggregator.assert_metric(metric_name, count=count, tags=db_tags)
     aggregator.assert_metric('postgresql.running', count=count, value=1, tags=expected_tags)
 
 
@@ -260,8 +261,8 @@ def check_stat_replication(aggregator, expected_tags, count=1):
         'wal_state:streaming',
         'wal_sync_state:async',
     ]
-    for metric_name, _ in REPLICATION_STATS_METRICS['metrics'].values():
-        aggregator.assert_metric('postgresql.{0}'.format(metric_name), count=count, tags=replication_tags)
+    for metric_name in _iterate_metric_name(REPLICATION_STATS_METRICS):
+        aggregator.assert_metric(metric_name, count=count, tags=replication_tags)
 
 
 def check_wal_receiver_metrics(aggregator, expected_tags, count=1, connected=1):
@@ -322,8 +323,8 @@ def check_replication_slots_stats(aggregator, expected_tags, count=1):
 
 def check_replication_delay(aggregator, metrics_cache, expected_tags, count=1):
     replication_metrics = metrics_cache.get_replication_metrics(VersionUtils.parse_version(POSTGRES_VERSION), False)
-    for metric_name, _ in replication_metrics.values():
-        aggregator.assert_metric('postgresql.{0}'.format(metric_name), count=count, tags=expected_tags)
+    for metric_name in _iterate_metric_name(replication_metrics):
+        aggregator.assert_metric(metric_name, count=count, tags=expected_tags)
 
 
 def check_uptime_metrics(aggregator, expected_tags, count=1):
@@ -359,10 +360,10 @@ def check_slru_metrics(aggregator, expected_tags, count=1):
         return
 
     slru_caches = ['Subtrans', 'Serial', 'MultiXactMember', 'Xact', 'other', 'Notify', 'CommitTs', 'MultiXactOffset']
-    for metric_name, _ in SLRU_METRICS['metrics'].values():
+    for metric_name in _iterate_metric_name(SLRU_METRICS):
         for slru_cache in slru_caches:
             aggregator.assert_metric(
-                'postgresql.{0}'.format(metric_name),
+                metric_name,
                 count=count,
                 tags=expected_tags + ['slru_name:{}'.format(slru_cache)],
             )
