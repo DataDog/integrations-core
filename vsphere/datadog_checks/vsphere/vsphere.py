@@ -481,9 +481,7 @@ class VSphereCheck(AgentCheck):
         collect_start_time = get_current_datetime()
         try:
             t0 = Timer()
-            new_cluster_metrics, new_cluster_health_metrics, new_host_metrics, new_disk_metrics = (
-                self.api.query_vsan_cluster_metrics()
-            )
+            new_health_metrics, new_performance_metrics = self.api.query_vsan_metrics()
             self.gauge(
                 'vsphere.vsan.cluster.time',
                 t0.total(),
@@ -491,27 +489,8 @@ class VSphereCheck(AgentCheck):
                 raw=True,
                 hostname=self._hostname,
             )
-            for cluster in new_cluster_metrics:
-                for entity_type in cluster:
-                    for given_metric in entity_type.value:
-                        self.log.debug(
-                            "Processing metric with type:%s",
-                            type(given_metric),
-                        )
-                        if given_metric.values.split(',')[-1] != 'None':
-                            self.gauge(
-                                'vsphere.vsan.cluster.{}'.format(given_metric.metricId.label),
-                                # for now we only collect the latest value
-                                int(given_metric.values.split(',')[-1]),
-                                tags=['vsphere_cluster:{}'.format(given_metric.metricId.dynamicProperty[0][0])]
-                                + self._config.base_tags,
-                                raw=True,
-                                hostname=self._hostname,
-                            )
-                        if latest_metric_time is None:
-                            latest_metric_time = collect_start_time
 
-            for cluster in new_cluster_health_metrics:
+            for cluster in new_health_metrics:
                 for metric_name, metric_value in cluster.items():
                     list_of_tags = ["{}:{}".format(key, value) for key, value in metric_value.items()]
                     self.gauge(
@@ -522,44 +501,51 @@ class VSphereCheck(AgentCheck):
                         hostname=self._hostname,
                     )
 
-            for host in new_host_metrics:
-                for entity_type in host:
-                    for given_metric in entity_type.value:
-                        self.log.debug(
-                            "Processing metric with type:%s",
-                            type(given_metric),
-                        )
-                        if given_metric.values.split(',')[-1] != 'None':
-                            self.gauge(
-                                'vsphere.vsan.host.{}'.format(given_metric.metricId.label),
-                                # for now we only collect the latest value
-                                int(given_metric.values.split(',')[-1]),
-                                tags=['vsphere_cluster:{}'.format(given_metric.metricId.dynamicProperty[0][0])]
-                                + ['vsphere_host:{}'.format(given_metric.metricId.dynamicProperty[0][1])]
-                                + self._config.base_tags,
-                                raw=True,
-                                hostname=self._hostname,
+            for cluster in new_performance_metrics:
+                for entity_type in cluster:
+                    if len(entity_type.value) > 0:
+                        resource_type = entity_type.value[0].metricId.dynamicProperty[0][0]
+                        for given_metric in entity_type.value:
+                            self.log.debug(
+                                "Processing metric with type:%s",
+                                type(given_metric),
                             )
-
-            for disk in new_disk_metrics:
-                for entity_type in disk:
-                    for given_metric in entity_type.value:
-                        self.log.debug(
-                            "Processing metric with type:%s",
-                            type(given_metric),
-                        )
-                        if given_metric.values.split(',')[-1] != 'None':
-                            self.gauge(
-                                'vsphere.vsan.disk.{}'.format(given_metric.metricId.label),
-                                # for now we only collect the latest value
-                                int(given_metric.values.split(',')[-1]),
-                                tags=['vsphere_cluster:{}'.format(given_metric.metricId.dynamicProperty[0][0])]
-                                + ['vsphere_host:{}'.format(given_metric.metricId.dynamicProperty[0][1])]
-                                + ['vsphere_disk:{}'.format(given_metric.metricId.dynamicProperty[0][2])]
-                                + self._config.base_tags,
-                                raw=True,
-                                hostname=self._hostname,
-                            )
+                            if given_metric.values.split(',')[-1] != 'None':
+                                if resource_type == 'cluster':
+                                    self.gauge(
+                                        'vsphere.vsan.cluster.{}'.format(given_metric.metricId.label),
+                                        # for now we only collect the latest value
+                                        int(given_metric.values.split(',')[-1]),
+                                        tags=['vsphere_cluster:{}'.format(given_metric.metricId.dynamicProperty[0][1])]
+                                        + self._config.base_tags,
+                                        raw=True,
+                                        hostname=self._hostname,
+                                    )
+                                elif resource_type == 'host':
+                                    self.gauge(
+                                        'vsphere.vsan.host.{}'.format(given_metric.metricId.label),
+                                        # for now we only collect the latest value
+                                        int(given_metric.values.split(',')[-1]),
+                                        tags=['vsphere_cluster:{}'.format(given_metric.metricId.dynamicProperty[0][1])]
+                                        + ['vsphere_host:{}'.format(given_metric.metricId.dynamicProperty[0][2])]
+                                        + self._config.base_tags,
+                                        raw=True,
+                                        hostname=self._hostname,
+                                    )
+                                elif resource_type == 'disk':
+                                    self.gauge(
+                                        'vsphere.vsan.disk.{}'.format(given_metric.metricId.label),
+                                        # for now we only collect the latest value
+                                        int(given_metric.values.split(',')[-1]),
+                                        tags=['vsphere_cluster:{}'.format(given_metric.metricId.dynamicProperty[0][1])]
+                                        + ['vsphere_host:{}'.format(given_metric.metricId.dynamicProperty[0][2])]
+                                        + ['vsphere_disk:{}'.format(given_metric.metricId.dynamicProperty[0][3])]
+                                        + self._config.base_tags,
+                                        raw=True,
+                                        hostname=self._hostname,
+                                    )
+                        if latest_metric_time is None:
+                            latest_metric_time = collect_start_time
         except Exception as e:
             # Don't get stuck on a failure to fetch a vsan metric
             # Ignore them for next pass

@@ -388,16 +388,23 @@ class VSphereAPI(object):
             return UNLIMITED_HIST_METRICS_PER_QUERY
 
     @smart_retry
-    def query_vsan_cluster_metrics(self):
+    def query_vsan_metrics(self):
         self.log.debug("Querying vSAN metrics: %s", self._vsan_stub)
         vsan_perf_manager = vim.cluster.VsanPerformanceManager('vsan-performance-manager', self._vsan_stub)
-        cluster_metrics = []
-        cluster_health_metrics = []
-        host_metrics = []
-        disk_metrics = []
+        health_metrics = []
+        performance_metrics = []
         infra_data = self.get_infrastructure()
+        # we seek to make 1 call per cluster since the cluster id needs to be passed in the perf manager
+        # {cluster_reference: set([cluster_id, host1_id, host2_id, host1disk1_id, host1disk2_id, ...])}
+        cluster_nested_elts = {}
+        entity_ref_ids = {}
+        entity_ref_ids['cluster'] = ['cluster-domclient:', 'vsan-cluster-capacity:']
+        entity_ref_ids['host'] = ['host-domclient:', 'host-cpu:']
+        entity_ref_ids['disk'] = ['capacity-disk:', 'cache-disk:']
+        # {id: {0: type, 1: cluster_name, (optional)2: host_name, (optional)3: disk_id}}
+        id_to_tags = {}
         for resource, additional_info in infra_data.items():
-            if str(resource)[1:].split(':')[0] == 'vim.ClusterComputeResource':
+            if str(resource).replace("'", "").split(':')[0] == 'vim.ClusterComputeResource':
                 cluster_vsan_config = resource.configurationEx.vsanConfigInfo
                 # only collect vsan metrics if the cluster has vsan enabled
                 if cluster_vsan_config and cluster_vsan_config.enabled:
@@ -427,62 +434,46 @@ class VSphereAPI(object):
                                 }
                             }
                         )
-                    cluster_health_metrics.append(processed_health_metrics)
+                    health_metrics.append(processed_health_metrics)
 
                     cluster_uuid = cluster_vsan_config.defaultConfig.uuid
-                    cluster_vsan_perf_query_spec = [
-                        vim.cluster.VsanPerfQuerySpec(entityRefId='cluster-domclient:%s' % (cluster_uuid)),
-                        vim.cluster.VsanPerfQuerySpec(entityRefId='vsan-cluster-capacity:%s' % (cluster_uuid)),
-                    ]
-                    discovered_metrics = vsan_perf_manager.QueryVsanPerf(cluster_vsan_perf_query_spec, resource)
-                    # setting the "name" value of every metric to the cluster name for tagging purposes
-                    for entity_type in discovered_metrics:
-                        for metric in entity_type.value:
-                            metric.metricId.dynamicProperty.append({0: resource.name})
-                    cluster_metrics.append(discovered_metrics)
-            elif str(resource)[1:].split(':')[0] == 'vim.HostSystem':
-                if str(additional_info['parent'])[1:].split(':')[0] == 'vim.ClusterComputeResource':
+                    cluster_nested_elts[resource] = [cluster_uuid]
+                    id_to_tags[cluster_uuid] = {1: resource.name, 0: 'cluster'}
+            elif str(resource).replace("'", "").split(':')[0] == 'vim.HostSystem':
+                if str(additional_info['parent']).replace("'", "").split(':')[0] == 'vim.ClusterComputeResource':
                     cluster_vsan_config = additional_info['parent'].configurationEx.vsanConfigInfo
                     # only check hosts within a vsan cluster
                     if cluster_vsan_config and cluster_vsan_config.enabled:
                         host_uuid = resource.configManager.vsanSystem.config.clusterInfo.nodeUuid
-                        host_vsan_perf_query_spec = [
-                            vim.cluster.VsanPerfQuerySpec(entityRefId='host-domclient:%s' % (host_uuid)),
-                            vim.cluster.VsanPerfQuerySpec(entityRefId='host-cpu:%s' % (host_uuid)),
-                        ]
-                        discovered_metrics = vsan_perf_manager.QueryVsanPerf(
-                            host_vsan_perf_query_spec, additional_info['parent']
-                        )
-                        for entity_type in discovered_metrics:
-                            for metric in entity_type.value:
-                                metric.metricId.dynamicProperty.append(
-                                    {0: resource.name, 1: additional_info['parent'].name}
-                                )
-                        host_metrics.append(discovered_metrics)
-
+                        cluster_uuid = additional_info['parent'].configurationEx.vsanConfigInfo.defaultConfig.uuid
+                        if cluster_uuid not in cluster_nested_elts.keys():
+                            cluster_nested_elts[additional_info['parent']] = [cluster_uuid]
+                        cluster_nested_elts[additional_info['parent']].append(host_uuid)
+                        id_to_tags[host_uuid] = {1: additional_info['parent'].name, 2: resource.name, 0: 'host'}
                         host_disks = resource.configManager.vsanSystem.QueryDisksForVsan()
                         for disk in host_disks:
                             disk_uuid = disk.vsanUuid
                             if disk_uuid:
-                                discovered_metrics = []
-                                disk_vsanPerfQuerySpec = [
-                                    vim.cluster.VsanPerfQuerySpec(entityRefId=f'capacity-disk:{disk_uuid}')
-                                ]
-                                discovered_metrics = vsan_perf_manager.QueryVsanPerf(
-                                    disk_vsanPerfQuerySpec, additional_info['parent']
-                                )
-                                # A cache disk won't report any metric if queried as a capacity disk
-                                if len(discovered_metrics[0].value) == 0:
-                                    disk_vsanPerfQuerySpec = [
-                                        vim.cluster.VsanPerfQuerySpec(entityRefId=f'cache-disk:{disk_uuid}')
-                                    ]
-                                    discovered_metrics = vsan_perf_manager.QueryVsanPerf(
-                                        disk_vsanPerfQuerySpec, additional_info['parent']
-                                    )
-                                for entity_type in discovered_metrics:
-                                    for metric in entity_type.value:
-                                        metric.metricId.dynamicProperty.append(
-                                            {0: resource.name, 1: additional_info['parent'].name, 2: disk_uuid}
-                                        )
-                                disk_metrics.append(discovered_metrics)
-        return [cluster_metrics, cluster_health_metrics, host_metrics, disk_metrics]
+                                cluster_nested_elts[additional_info['parent']].append(disk_uuid)
+                                id_to_tags[disk_uuid] = {
+                                    1: additional_info['parent'].name,
+                                    2: resource.name,
+                                    3: disk_uuid,
+                                    0: 'disk',
+                                }
+
+        for cluster_reference, nested_ids in cluster_nested_elts.items():
+            vsan_perf_query_spec = []
+            for nested_id in nested_ids:
+                for entity_type in entity_ref_ids[id_to_tags[nested_id][0]]:
+                    vsan_perf_query_spec.append(
+                        vim.cluster.VsanPerfQuerySpec(entityRefId=(entity_type + str(nested_id)))
+                    )
+            discovered_metrics = vsan_perf_manager.QueryVsanPerf(vsan_perf_query_spec, cluster_reference)
+            for entity_type in discovered_metrics:
+                for metric in entity_type.value:
+                    metric.metricId.dynamicProperty.append(
+                        id_to_tags[entity_type.entityRefId.replace("'", "").split(':')[-1]]
+                    )
+            performance_metrics.append(discovered_metrics)
+        return [health_metrics, performance_metrics]

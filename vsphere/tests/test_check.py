@@ -764,5 +764,5 @@ def test_vsan_metrics_included_in_check(aggregator, realtime_instance, dd_run_ch
     aggregator.assert_metric(
         'vsphere.vsan.disk.example_disk_metric',
         count=1,
-        tags=['vcenter_server:FAKE', 'vsphere_cluster:hello', 'vsphere_host:world', 'vsphere_disk:disk'],
+        tags=['vcenter_server:FAKE', 'vsphere_cluster:hello', 'vsphere_host:new', 'vsphere_disk:world'],
     )
