@@ -428,9 +428,7 @@ def check_checksum_metrics(aggregator, expected_tags, count=1):
     if float(POSTGRES_VERSION) < 12:
         return
     for metric_name in _iterate_metric_name(CHECKSUM_METRICS):
-        aggregator.assert_metric(
-            metric_name, count=count, tags=expected_tags + ['db:{}'.format(DB_NAME)]
-        )
+        aggregator.assert_metric(metric_name, count=count, tags=expected_tags + ['db:{}'.format(DB_NAME)])
 
 
 def check_stat_io_metrics(aggregator, expected_tags, count=1):
