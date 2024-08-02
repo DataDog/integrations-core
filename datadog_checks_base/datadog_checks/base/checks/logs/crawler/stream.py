@@ -25,13 +25,23 @@ class LogStream(ABC):
 
     @property
     def check(self) -> AgentCheck:
+        """
+        The AgentCheck instance associated with this LogStream.
+        """
         return self.__check
 
     @property
     def name(self) -> str:
+        """
+        The name of this LogStream.
+        """
         return self.__name
 
     def construct_tags(self, tags: list[str]) -> list[str]:
+        """
+        Returns a formatted string of tags which may be used directly as the `ddtags` field of logs.
+        This will include the `tags` from the integration instance config.
+        """
         formatted_tags = ','.join(tags)
         return f'{self.check.formatted_tags},{formatted_tags}' if self.check.formatted_tags else formatted_tags
 

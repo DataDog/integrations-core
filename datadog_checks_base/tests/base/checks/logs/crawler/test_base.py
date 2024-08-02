@@ -15,10 +15,10 @@ def test_submission(dd_run_check, datadog_agent):
         def __init__(self, start, **kwargs):
             super().__init__(**kwargs)
 
-            self.cursor_counter = start
+            self.start = start
 
         def records(self, cursor=None):
-            start = cursor['counter'] + 1 if cursor is not None else self.cursor_counter
+            start = cursor['counter'] + 1 if cursor is not None else self.start
             for i in range(start, start + 2):
                 message = '{} {}'.format(self.name, i)
                 data = (
