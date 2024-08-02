@@ -1,6 +1,6 @@
 {
     "title": "OSSEC - Web",
-    "description": "-   This dashboard offers comprehensive insights into Web access events and activities like sql injection, web attacks, recon, invalid_access.\n",
+    "description": "-   This dashboard offers comprehensive insights into Web access events and activities like SQL injection, web attacks, recon, and invalid access.\n",
     "widgets": [
         {
             "id": 2594168224429834,
@@ -25,7 +25,7 @@
             "id": 2452730491029996,
             "definition": {
                 "type": "note",
-                "content": "## Overview\n- This dashboard offers comprehensive insights into Web access events and activities like sql injection, web attacks, recon, invalid_access.\n",
+                "content": "## Overview\n- This dashboard offers comprehensive insights into Web access events and activities like SQL injection, web attacks, recon, and invalid access.\n",
                 "background_color": "white",
                 "font_size": "14",
                 "text_align": "left",

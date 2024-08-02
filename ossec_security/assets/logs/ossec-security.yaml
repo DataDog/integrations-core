@@ -308,7 +308,7 @@ pipeline:
         query: "@rule_id:([4100 TO 4299] OR [40900 TO 40999]) "
       processors:
         - type: grok-parser
-          name: Parse firewall logs.
+          name: Parse firewall logs
           enabled: true
           source: log
           samples:
@@ -365,7 +365,7 @@ pipeline:
           preserveSource: false
           overrideOnConflict: false
     - type: pipeline
-      name: Processing of Adduser Logs
+      name: Process of adduser Logs
       enabled: true
       filter:
         query: "@rule_id:[5901 TO 5905] "
@@ -462,7 +462,7 @@ pipeline:
 
               connection_attempt_rule %{DATETIME} %{SKIPHEADER}: (connection from|FTP LOGIN FROM|connect from) %{ipOrHost:src_ip}( at %{data}|, %{notSpace:usr.name})?
     - type: pipeline
-      name: Processing of Syslog's  Authenticaiton Failed Logs
+      name: Processing of Syslog's Authentication Failed Logs
       enabled: true
       filter:
         query: "@rule_id:(2501 OR 2502) "
@@ -550,13 +550,13 @@ pipeline:
 
               dpkg_package_parse_rule %{date("yyyy-MM-dd HH:mm:ss")} %{notSpace:operation} %{notSpace:package_name} %{notSpace}( %{notSpace})?
     - type: pipeline
-      name: Processing of Yum Logs
+      name: Process of Yum Logs
       enabled: true
       filter:
         query: "@rule_id:[2930 TO 2945] "
       processors:
         - type: grok-parser
-          name: Parse yum logs
+          name: Parse Yum logs
           enabled: true
           source: log
           samples:
@@ -653,13 +653,13 @@ pipeline:
 
               log_file_change_parsing_rule ossec: File %{regex("[A-Za-z ]*"):action} (%{regex("[^)]*"):})\): '%{notSpace:file}'.
     - type: pipeline
-      name: Processing of Low-Disk Space Logs
+      name: Processing of Low Disk Space Logs
       enabled: true
       filter:
         query: "@rule_id:531 "
       processors:
         - type: grok-parser
-          name: Parser of Low-Disk Space logs
+          name: Parser of Low Disk Space logs
           enabled: true
           source: log
           samples:

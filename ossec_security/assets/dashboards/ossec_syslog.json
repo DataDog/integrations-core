@@ -1,6 +1,6 @@
 {
     "title": "OSSEC - Syslog",
-    "description": "-   This dashboard offers comprehensive insights into syslog events and activities conducted on systems like User operation, sudo/su, Linux Kernel, debian or yum packages.\n",
+    "description": "-   This dashboard offers comprehensive insights into syslog events and activities conducted on systems, like user operations, the use of sudo/su, Linux Kernel events, or installation and removal of debian or yum packages.\n",
     "widgets": [
         {
             "id": 7211624518798348,
@@ -25,7 +25,7 @@
             "id": 7511029720698206,
             "definition": {
                 "type": "note",
-                "content": "## Overview\n- This dashboard offers comprehensive insights into syslog events and activities conducted on systems like User operation, sudo/su, Linux Kernel, debian or yum packages.",
+                "content": "## Overview\n- This dashboard offers comprehensive insights into syslog events and activities conducted on systems, like user operations, the use of sudo/su, Linux Kernel events, or installation and removal of debian or yum packages.",
                 "background_color": "white",
                 "font_size": "14",
                 "text_align": "left",
@@ -46,7 +46,7 @@
             "id": 2278703194240386,
             "definition": {
                 "type": "note",
-                "content": "## Widgets\n1. Total Events Count\n2. Syslog Events by Level (Level>3)\n3. Syslog Events Over Time\n4. Illegal Port Connection by Source\n5. Top 10 Access Denied Source IP\n6. Top 10 LinuxKernel Events by Level\n7. Syslog Error Details\n8. Log Details of New User Added to System\n9. Top 10 Authentication Failed Events By Source IP\n10. Repeated Authentication Failed Alerts\n11. Total Events Count (Su)\n12. Total Authentication Event Details (Su)\n13. Log Details (Su)\n14. Total Events Count (Sudo)\n15. Events Count by Level (Sudo)\n16. Log Details (Sudo)\n17. Total Events Count (DPKG)\n18. Event List by Level (DPKG) (Level>3)\n19. Top 10 Debian Package Installed\n20. Top 10 Debian Package Removed\n21. Log Details (DPKG)\n22. Total Events Count (Yum)\n23. Event List by Level (Yum) (Level>3)\n24. Top 10 Yum Packages Installed\n25. Top 10 Yum Package Updated\n26. Top 10 Yum Package Removed\n27. Log Details (Syslog)",
+                "content": "## Widgets\n1. Total Events Count\n2. Syslog Events by Level (Level>3)\n3. Syslog Events Over Time\n4. Illegal Port Connection by Source\n5. Top 10 Access Denied Source IP\n6. Top 10 Linux Kernel Events by Level\n7. Syslog Error Details\n8. Log Details of New User Added to System\n9. Top 10 Authentication Failed Events By Source IP\n10. Repeated Authentication Failed Alerts\n11. Total Events Count (Su)\n12. Total Authentication Event Details (Su)\n13. Log Details (Su)\n14. Total Events Count (Sudo)\n15. Events Count by Level (Sudo)\n16. Log Details (Sudo)\n17. Total Events Count (DPKG)\n18. Event List by Level (DPKG) (Level>3)\n19. Top 10 Debian Package Installed\n20. Top 10 Debian Package Removed\n21. Log Details (DPKG)\n22. Total Events Count (Yum)\n23. Event List by Level (Yum) (Level>3)\n24. Top 10 Yum Packages Installed\n25. Top 10 Yum Package Updated\n26. Top 10 Yum Package Removed\n27. Log Details (Syslog)",
                 "background_color": "white",
                 "font_size": "14",
                 "text_align": "left",
@@ -85,7 +85,7 @@
                                 },
                                 "group_by": [],
                                 "search": {
-                                    "query": "source:ossec-security service:syslog $Level $Souce_IP $Group_List $Host_Name"
+                                    "query": "source:ossec-security service:syslog $Level $Source_IP $Group_List $Host_Name"
                                 },
                                 "storage": "hot"
                             }
@@ -144,7 +144,7 @@
                                     }
                                 ],
                                 "search": {
-                                    "query": "source:ossec-security service:syslog @level:>3 $Level $Souce_IP $Group_List $Host_Name"
+                                    "query": "source:ossec-security service:syslog @level:>3 $Level $Source_IP $Group_List $Host_Name"
                                 },
                                 "storage": "hot"
                             }
@@ -214,7 +214,7 @@
                                 },
                                 "group_by": [],
                                 "search": {
-                                    "query": "source:ossec-security service:syslog $Level $Souce_IP $Group_List $Host_Name"
+                                    "query": "source:ossec-security service:syslog $Level $Source_IP $Group_List $Host_Name"
                                 },
                                 "storage": "hot"
                             }
@@ -267,7 +267,7 @@
                                     }
                                 ],
                                 "search": {
-                                    "query": "source:ossec-security service:syslog @rule_id:2551 $Level $Souce_IP $Group_List $Host_Name"
+                                    "query": "source:ossec-security service:syslog @rule_id:2551 $Level $Source_IP $Group_List $Host_Name"
                                 },
                                 "storage": "hot"
                             }
@@ -334,7 +334,7 @@
                                     }
                                 ],
                                 "search": {
-                                    "query": "source:ossec-security service:syslog @rule_id:2503 $Level $Souce_IP $Group_List $Host_Name"
+                                    "query": "source:ossec-security service:syslog @rule_id:2503 $Level $Source_IP $Group_List $Host_Name"
                                 },
                                 "storage": "hot"
                             }
@@ -374,7 +374,7 @@
         {
             "id": 3156212087688860,
             "definition": {
-                "title": "Top 10 LinuxKernel Events by Level",
+                "title": "Top 10 Linux Kernel Events by Level",
                 "title_size": "16",
                 "title_align": "left",
                 "type": "toplist",
@@ -401,7 +401,7 @@
                                     }
                                 ],
                                 "search": {
-                                    "query": "source:ossec-security service:syslog @group_list:linuxkernel $Level $Souce_IP $Group_List $Host_Name"
+                                    "query": "source:ossec-security service:syslog @group_list:linuxkernel $Level $Source_IP $Group_List $Host_Name"
                                 },
                                 "storage": "hot"
                             }
@@ -449,7 +449,7 @@
                         "response_format": "event_list",
                         "query": {
                             "data_source": "logs_stream",
-                            "query_string": "source:ossec-security service:syslog @group_list:errors $Level $Souce_IP $Group_List $Host_Name",
+                            "query_string": "source:ossec-security service:syslog @group_list:errors $Level $Source_IP $Group_List $Host_Name",
                             "indexes": [],
                             "storage": "hot"
                         },
@@ -505,7 +505,7 @@
                         "response_format": "event_list",
                         "query": {
                             "data_source": "logs_stream",
-                            "query_string": "source:ossec-security service:syslog @rule_id:5902 $Level $Souce_IP $Group_List $Host_Name",
+                            "query_string": "source:ossec-security service:syslog @rule_id:5902 $Level $Source_IP $Group_List $Host_Name",
                             "indexes": [],
                             "storage": "hot"
                         },
@@ -576,7 +576,7 @@
                                     }
                                 ],
                                 "search": {
-                                    "query": "source:ossec-security service:syslog @rule_id:(2501 OR 5301) $Level $Souce_IP $Group_List $Host_Name"
+                                    "query": "source:ossec-security service:syslog @rule_id:(2501 OR 5301) $Level $Source_IP $Group_List $Host_Name"
                                 },
                                 "storage": "hot"
                             }
@@ -624,7 +624,7 @@
                         "response_format": "event_list",
                         "query": {
                             "data_source": "logs_stream",
-                            "query_string": "source:ossec-security service:syslog @rule_id:2502 $Level $Souce_IP $Group_List $Host_Name",
+                            "query_string": "source:ossec-security service:syslog @rule_id:2502 $Level $Source_IP $Group_List $Host_Name",
                             "indexes": [],
                             "storage": "hot"
                         },
@@ -700,7 +700,7 @@
                                             },
                                             "group_by": [],
                                             "search": {
-                                                "query": "source:ossec-security service:syslog @group_list:(\" su\" OR su) $Level $Souce_IP $Group_List $Host_Name"
+                                                "query": "source:ossec-security service:syslog @group_list:(\" su\" OR su) $Level $Source_IP $Group_List $Host_Name"
                                             },
                                             "storage": "hot"
                                         }
@@ -760,7 +760,7 @@
                                                 }
                                             ],
                                             "search": {
-                                                "query": "source:ossec-security service:syslog @group_list:(\" su\" OR su) @group_list:(authentication_success OR authentication_failed) $Level $Souce_IP $Group_List $Host_Name"
+                                                "query": "source:ossec-security service:syslog @group_list:(\" su\" OR su) @group_list:(authentication_success OR authentication_failed) $Level $Source_IP $Group_List $Host_Name"
                                             },
                                             "storage": "hot"
                                         }
@@ -794,7 +794,7 @@
                                     "response_format": "event_list",
                                     "query": {
                                         "data_source": "logs_stream",
-                                        "query_string": "source:ossec-security service:syslog @group_list:(\" su\" OR su) $Level $Souce_IP $Group_List $Host_Name",
+                                        "query_string": "source:ossec-security service:syslog @group_list:(\" su\" OR su) $Level $Source_IP $Group_List $Host_Name",
                                         "indexes": [],
                                         "storage": "hot"
                                     },
@@ -879,7 +879,7 @@
                                             },
                                             "group_by": [],
                                             "search": {
-                                                "query": "source:ossec-security service:syslog @group_list:sudo $Level $Souce_IP $Group_List $Host_Name"
+                                                "query": "source:ossec-security service:syslog @group_list:sudo $Level $Source_IP $Group_List $Host_Name"
                                             },
                                             "storage": "hot"
                                         }
@@ -931,7 +931,7 @@
                                                 }
                                             ],
                                             "search": {
-                                                "query": "source:ossec-security service:syslog @group_list:sudo $Level $Souce_IP $Group_List $Host_Name"
+                                                "query": "source:ossec-security service:syslog @group_list:sudo $Level $Source_IP $Group_List $Host_Name"
                                             },
                                             "storage": "hot"
                                         }
@@ -980,7 +980,7 @@
                                     "response_format": "event_list",
                                     "query": {
                                         "data_source": "logs_stream",
-                                        "query_string": "source:ossec-security service:syslog @group_list:sudo $Level $Souce_IP $Group_List $Host_Name",
+                                        "query_string": "source:ossec-security service:syslog @group_list:sudo $Level $Source_IP $Group_List $Host_Name",
                                         "indexes": [],
                                         "storage": "hot"
                                     },
@@ -1699,7 +1699,7 @@
                         "response_format": "event_list",
                         "query": {
                             "data_source": "logs_stream",
-                            "query_string": "source:ossec-security service:syslog $Level $Souce_IP $Group_List $Host_Name",
+                            "query_string": "source:ossec-security service:syslog $Level $Source_IP $Group_List $Host_Name",
                             "indexes": [],
                             "storage": "hot"
                         },
@@ -1768,7 +1768,7 @@
             "default": "*"
         },
         {
-            "name": "Souce_IP",
+            "name": "Source_IP",
             "prefix": "@network.client.ip",
             "available_values": [],
             "default": "*"

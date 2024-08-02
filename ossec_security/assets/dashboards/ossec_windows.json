@@ -1,6 +1,6 @@
 {
     "title": "OSSEC - Windows",
-    "description": "-   This dashboard offers comprehensive insights into Windows events and activities conducted on windows system.\n",
+    "description": "-   This dashboard offers comprehensive insights into Windows events and activities conducted on Windows systems.\n",
     "widgets": [
         {
             "id": 1833146593375790,
@@ -25,7 +25,7 @@
             "id": 2910086263322254,
             "definition": {
                 "type": "note",
-                "content": "## Overview\n- This dashboard offers comprehensive insights into Windows events and activities conducted on windows system.",
+                "content": "## Overview\n- This dashboard offers comprehensive insights into Windows events and activities conducted on Windows systems.",
                 "background_color": "white",
                 "font_size": "14",
                 "text_align": "left",
