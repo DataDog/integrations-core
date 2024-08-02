@@ -723,13 +723,12 @@ SELECT COALESCE(d.datname, 'shared'), n.nspname, c.relname,
         {'name': 'db', 'type': 'tag'},
         {'name': 'schema', 'type': 'tag_not_null'},
         {'name': 'relation', 'type': 'tag_not_null'},
-        {'name': 'used_buffers', 'type': 'gauge'},
-        {'name': 'unused_buffers', 'type': 'gauge'},
-        {'name': 'usage_count', 'type': 'gauge'},
-        {'name': 'dirty_buffers', 'type': 'gauge'},
-        {'name': 'pinning_backends', 'type': 'gauge'},
+        {'name': 'buffercache.used_buffers', 'type': 'gauge'},
+        {'name': 'buffercache.unused_buffers', 'type': 'gauge'},
+        {'name': 'buffercache.usage_count', 'type': 'gauge'},
+        {'name': 'buffercache.dirty_buffers', 'type': 'gauge'},
+        {'name': 'buffercache.pinning_backends', 'type': 'gauge'},
     ],
-    'metric_prefix': 'buffercache',
 }
 
 # The metrics we retrieve from pg_stat_activity when the postgres version >= 9.6
