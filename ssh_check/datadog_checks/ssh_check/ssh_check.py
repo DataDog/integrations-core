@@ -81,7 +81,6 @@ class CheckSSH(AgentCheck):
                 self.service_check(self.SSH_SERVICE_CHECK_NAME, AgentCheck.OK, tags=self.base_tags)
 
             except Exception as e:
-                # TODO: separate handling for authentication error: talk about "force_sha1"
                 exception_message = str(e)
                 status = AgentCheck.CRITICAL
                 self.service_check(self.SSH_SERVICE_CHECK_NAME, status, tags=self.base_tags, message=exception_message)
@@ -119,7 +118,7 @@ class CheckSSH(AgentCheck):
 
     def initialize_client(self):
         """
-        # TODO: this indirection is useful for swapping out client, for example for testing
+        This indirection is useful for swapping out the client for testing.
         """
 
         return paramiko.SSHClient()
