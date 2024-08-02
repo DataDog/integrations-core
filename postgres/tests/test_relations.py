@@ -41,6 +41,7 @@ IDX_METRICS = ['postgresql.index_scans', 'postgresql.index_rows_read', 'postgres
 
 def _check_metrics_for_relation_wo_index(aggregator, expected_tags):
     for name in _iterate_metric_name(QUERY_PG_CLASS):
+        name = 'postgresql.{0}'.format(name)
         # Skip vacuum metrics since autovacuum can make the state unpredictable
         if name in MAINTENANCE_METRICS:
             continue
@@ -52,10 +53,11 @@ def _check_metrics_for_relation_wo_index(aggregator, expected_tags):
 
     # Check metrics from QUERY_PG_CLASS_SIZE
     for name in _iterate_metric_name(QUERY_PG_CLASS_SIZE):
-        aggregator.assert_metric(name, count=1, tags=expected_tags)
+        aggregator.assert_metric('postgresql.{0}'.format(name), count=1, tags=expected_tags)
 
     # And metrics from STATIO_METRICS
     for name in _iterate_metric_name(STATIO_METRICS):
+        name = 'postgresql.{0}'.format(name)
         if name in RELATION_INDEX_METRICS:
             aggregator.assert_metric(name, count=0, tags=expected_tags)
         else:
@@ -212,6 +214,7 @@ def test_max_relations(aggregator, integration_check, pg_instance):
         return relation_metrics
 
     for name in _iterate_metric_name(QUERY_PG_CLASS):
+        name = 'postgresql.{0}'.format(name)
         if name in RELATION_INDEX_METRICS + MAINTENANCE_METRICS:
             continue
         relation_metrics = _metric_name_to_relation_list(name)
@@ -219,11 +222,13 @@ def test_max_relations(aggregator, integration_check, pg_instance):
 
     # Also check PG_CLASS_SIZE
     for name in _iterate_metric_name(QUERY_PG_CLASS_SIZE):
+        name = 'postgresql.{0}'.format(name)
         relation_metrics = _metric_name_to_relation_list(name)
         assert len(relation_metrics) == 1, f'Expected 1 results for {name}'
 
     # And STATIO metrics
     for name in _iterate_metric_name(STATIO_METRICS):
+        name = 'postgresql.{0}'.format(name)
         if name in RELATION_INDEX_METRICS:
             # pg_statio_user_tables returns NULL if the relation doesn't have an index. Skip the index metrics
             continue
