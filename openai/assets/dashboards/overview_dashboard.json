@@ -1526,7 +1526,7 @@
                   "response_format": "event_list",
                   "query": {
                     "data_source": "logs_stream",
-                    "query_string": "openai.request.endpoint:\"/v1/completions\" ",
+                    "query_string": "openai.request.endpoint:\"/v1/completions\" OR @openai.request.endpoint:\"/v1/completions\" ",
                     "indexes": [],
                     "storage": "hot",
                     "sort": {
@@ -1586,7 +1586,7 @@
                   "response_format": "event_list",
                   "query": {
                     "data_source": "logs_stream",
-                    "query_string": "openai.request.endpoint:\"/v1/chat/completions\" ",
+                    "query_string": "openai.request.endpoint:\"/v1/chat/completions\" OR @openai.request.endpoint:\"/v1/chat/completions\" ",
                     "indexes": [],
                     "storage": "hot",
                     "sort": {
@@ -1706,7 +1706,7 @@
                   "response_format": "event_list",
                   "query": {
                     "data_source": "logs_stream",
-                    "query_string": "openai.request.endpoint:/v1/images/* ",
+                    "query_string": "openai.request.endpoint:/v1/images/* OR @openai.request.endpoint:/v1/images/* ",
                     "indexes": [],
                     "storage": "hot",
                     "sort": {
@@ -1774,7 +1774,7 @@
                   "response_format": "event_list",
                   "query": {
                     "data_source": "logs_stream",
-                    "query_string": "openai.request.endpoint:/v1/audio/* ",
+                    "query_string": "openai.request.endpoint:/v1/audio/* OR @openai.request.endpoint:/v1/audio/* ",
                     "indexes": [],
                     "storage": "hot",
                     "sort": {
