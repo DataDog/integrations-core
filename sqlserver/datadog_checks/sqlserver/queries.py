@@ -428,10 +428,10 @@ def get_query_file_stats(sqlserver_major_version, sqlserver_engine_edition):
         ]
         + metric_columns,
     }
-
+#shell we limit the query , like if there 100 deadlocks ? 
 DETECT_DEADLOCK_QUERY = """
 SELECT xdr.value('@timestamp', 'datetime') AS [Date],
-    xdr.query('.') AS [Event_Data]
+       xdr.query('.') AS [Event_Data]
 FROM (SELECT CAST([target_data] AS XML) AS Target_Data
             FROM sys.dm_xe_session_targets AS xt
             INNER JOIN sys.dm_xe_sessions AS xs ON xs.address = xt.event_session_address
@@ -439,5 +439,6 @@ FROM (SELECT CAST([target_data] AS XML) AS Target_Data
               AND xt.target_name = N'ring_buffer'
     ) AS XML_Data
 CROSS APPLY Target_Data.nodes('RingBufferTarget/event[@name="xml_deadlock_report"]') AS XEventData(xdr)
+WHERE xdr.value('@timestamp', 'datetime') >= ?
 ORDER BY [Date] DESC;
 """

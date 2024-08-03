@@ -911,20 +911,25 @@ def test_sanitize_activity_row(dbm_instance, row):
 
 @pytest.mark.integration
 @pytest.mark.usefixtures('dd_environment')
-def test_deadlocks(dd_run_check, init_config, instance_docker):
+def test_deadlocks(dd_run_check, init_config, dbm_instance):
     pdb.set_trace()
-    instance_docker['dbm'] = True
-    sqlserver_check = SQLServer(CHECK_NAME, init_config, [instance_docker])
+    dbm_instance['deadlocks'] = {
+        'enabled': True,
+        'run_sync': True,  #TODO oups run_sync what should be the logic for 2 jobs ?
+        'collection_interval': 0.1,
+    }
+    dbm_instance['query_activity']['enabled'] = False
+
+    sqlserver_check = SQLServer(CHECK_NAME, init_config, [dbm_instance])
 
     def run_first_deadlock_query(conn, event1, event2):
         #conn.begin()
         try:
             conn.cursor().execute("BEGIN TRAN foo;")
-            conn.cursor().execute("UPDATE [datadog_test-1].dbo.deadlocks SET b = b+ 10 WHERE a = 1;")
+            conn.cursor().execute("UPDATE [datadog_test-1].dbo.deadlocks SET b = b + 10 WHERE a = 1;")
             event1.set()
             event2.wait()
             conn.cursor().execute("UPDATE [datadog_test-1].dbo.deadlocks SET b = b + 100 WHERE a = 2;")
-            #conn.cursor().execute("GO;")
         except Exception as e:
             # Exception is expected due to a deadlock
             print(e)
@@ -935,19 +940,16 @@ def test_deadlocks(dd_run_check, init_config, instance_docker):
         try:
             event1.wait()
             conn.cursor().execute("BEGIN TRAN bar;")
-            conn.cursor().execute("UPDATE [datadog_test-1].dbo.deadlocks SET b = b+ 10 WHERE a = 2;")
+            conn.cursor().execute("UPDATE [datadog_test-1].dbo.deadlocks SET b = b + 10 WHERE a = 2;")
             event2.set()
             conn.cursor().execute("UPDATE [datadog_test-1].dbo.deadlocks SET b = b + 20 WHERE a = 1;")
-            #may be Go ? 
-            #conn.cursor().execute("COMMIT;")
         except Exception as e:
             # Exception is expected due to a deadlock
             print(e)
             pass
         conn.commit()
-    pdb.set_trace()
-    bob_conn = _get_conn_for_user(instance_docker, 'bob')
-    fred_conn = _get_conn_for_user(instance_docker, 'fred')
+    bob_conn = _get_conn_for_user(dbm_instance, 'bob')
+    fred_conn = _get_conn_for_user(dbm_instance, 'fred')
     executor = concurrent.futures.thread.ThreadPoolExecutor(2)
     event1 = Event()
     event2 = Event()
@@ -958,8 +960,23 @@ def test_deadlocks(dd_run_check, init_config, instance_docker):
     futures_second_query.result()
     # Make sure deadlock is killed and db is updated
     time.sleep(1)
+
+    bob_conn.close()
+    fred_conn.close()
+    bob_conn = _get_conn_for_user(dbm_instance, 'bob')
+    fred_conn = _get_conn_for_user(dbm_instance, 'fred')
+    event3 = Event()
+    event4 = Event()
+    futures_first_query = executor.submit(run_first_deadlock_query, bob_conn, event3, event4)
+    futures_second_query = executor.submit(run_second_deadlock_query, fred_conn, event3, event4)
+    futures_first_query.result()
+    futures_second_query.result()
+
+    time.sleep(1)
+
     bob_conn.close()
     fred_conn.close()
     executor.shutdown()
-    pdb.set_trace()
     dd_run_check(sqlserver_check)
+    pdb.set_trace()
+    print("Set trace before end to keep sqlserver alive")

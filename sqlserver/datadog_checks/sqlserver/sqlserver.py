@@ -28,6 +28,7 @@ from datadog_checks.sqlserver.schemas import Schemas
 from datadog_checks.sqlserver.statements import SqlserverStatementMetrics
 from datadog_checks.sqlserver.stored_procedures import SqlserverProcedureMetrics
 from datadog_checks.sqlserver.utils import Database, construct_use_statement, parse_sqlserver_major_version
+from datadog_checks.base.utils.db.utils import obfuscate_sql_with_metadata
 import pdb
 try:
     import datadog_agent
@@ -763,6 +764,11 @@ class SQLServer(AgentCheck):
         # send query here 
         #TODO here get the time of the deadlock and later discard in the query 
         #all deadlocks that have occured earlier than this date
+        pdb.set_trace()
+        res1 = obfuscate_sql_with_metadata("\nunknown", self._config.obfuscator_options, replace_null_character=True)
+        print(res1)
+        res2 = obfuscate_sql_with_metadata("\nUPDATE [datadog_test-1].dbo.deadlocks SET b = b + 20 WHERE a = 1;", self._config.obfuscator_options, replace_null_character=True)
+        print(res2)
         with self.connection.open_managed_default_connection():
             with self.connection.get_managed_cursor() as cursor:
                 cursor.execute(DETECT_DEADLOCK_QUERY)
@@ -800,7 +806,7 @@ class SQLServer(AgentCheck):
                 self.activity.run_job_loop(self.tags)
                 self.sql_metadata.run_job_loop(self.tags)
                 self._schemas.run_job_loop(self.tags)
-                self.detect_deadlocks()
+                #self.detect_deadlocks()
         else:
             self.log.debug("Skipping check")
 

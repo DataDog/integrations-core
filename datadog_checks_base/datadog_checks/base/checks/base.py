@@ -687,6 +687,13 @@ class AgentCheck(object):
 
         aggregator.submit_event_platform_event(self, self.check_id, to_native_string(raw_event), "dbm-activity")
 
+    def database_monitoring_deadlocks(self, raw_event):
+        # type: (str) -> None
+        if raw_event is None:
+            return
+
+        aggregator.submit_event_platform_event(self, self.check_id, to_native_string(raw_event), "dbm-deadlocks")
+
     def database_monitoring_metadata(self, raw_event):
         # type: (str) -> None
         if raw_event is None:

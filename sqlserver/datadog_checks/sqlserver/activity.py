@@ -15,13 +15,15 @@ from datadog_checks.base.utils.tracking import tracked_method
 from datadog_checks.sqlserver.config import SQLServerConfig
 from datadog_checks.sqlserver.const import STATIC_INFO_ENGINE_EDITION, STATIC_INFO_VERSION
 from datadog_checks.sqlserver.utils import extract_sql_comments_and_procedure_name
-
+from datadog_checks.sqlserver.deadlocks import Deadlocks
+import pdb
 try:
     import datadog_agent
 except ImportError:
     from ..stubs import datadog_agent
 
-DEFAULT_COLLECTION_INTERVAL = 10
+DEFAULT_ACTIVITY_COLLECTION_INTERVAL = 10
+DEFAULT_DEADLOCKS_COLLECTION_INTERVAL = 5
 MAX_PAYLOAD_BYTES = 19e6
 
 CONNECTIONS_QUERY = """\
@@ -146,7 +148,24 @@ def _hash_to_hex(hash) -> str:
 
 def agent_check_getter(self):
     return self._check
+"""     self._databases_data_enabled = is_affirmative(config.schemas_config.get("enabled", False))
+        self._databases_data_collection_interval = config.schemas_config.get(
+            "collection_interval", DEFAULT_DATABASES_DATA_COLLECTION_INTERVAL
+        )
+        self._settings_enabled = is_affirmative(config.settings_config.get('enabled', False))
 
+        self._settings_collection_interval = float(
+            config.settings_config.get('collection_interval', DEFAULT_SETTINGS_COLLECTION_INTERVAL)
+        )
+
+        if self._databases_data_enabled and not self._settings_enabled:
+            self.collection_interval = self._databases_data_collection_interval
+        elif not self._databases_data_enabled and self._settings_enabled:
+            self.collection_interval = self._settings_collection_interval
+        else:
+            self.collection_interval = min(self._databases_data_collection_interval, self._settings_collection_interval)
+
+        self.enabled = self._databases_data_enabled or self._settings_enabled"""
 
 class SqlserverActivity(DBMAsyncJob):
     """Collects query metrics and plans"""
@@ -156,33 +175,88 @@ class SqlserverActivity(DBMAsyncJob):
         self.tags = [t for t in check.tags if not t.startswith('dd.internal')]
         self.log = check.log
         self._config = config
-        collection_interval = float(
-            self._config.activity_config.get('collection_interval', DEFAULT_COLLECTION_INTERVAL)
+
+        self._last_deadlocks_collection_time = 0
+        self._last_activity_collection_time = 0
+
+        self._deadlocks_collection_enabled = is_affirmative(config.deadlocks_config.get("enabled", False))
+        self._deadlocks_collection_interval = config.deadlocks_config.get(
+            "collection_interval", DEFAULT_DEADLOCKS_COLLECTION_INTERVAL
         )
-        if collection_interval <= 0:
-            collection_interval = DEFAULT_COLLECTION_INTERVAL
-        self.collection_interval = collection_interval
+        if self._deadlocks_collection_interval <= 0:
+            self._deadlocks_collection_interval = DEFAULT_DEADLOCKS_COLLECTION_INTERVAL
+
+        self._activity_collection_enabled = is_affirmative(config.activity_config.get("enabled", False))
+        self._activity_collection_interval = config.activity_config.get(
+            "collection_interval", DEFAULT_ACTIVITY_COLLECTION_INTERVAL
+        )
+        if self._activity_collection_enabled <= 0:
+            self._activity_collection_enabled = DEFAULT_ACTIVITY_COLLECTION_INTERVAL
+            
+        if self._deadlocks_collection_enabled and not self._activity_collection_enabled:
+            self.collection_interval = self._deadlocks_collection_interval
+        elif not self._deadlocks_collection_enabled and self._activity_collection_enabled:
+            self.collection_interval = self._activity_collection_interval
+        else:
+            self.collection_interval = min(self._deadlocks_collection_interval, self._activity_collection_interval)
+
+        self.enabled = self._deadlocks_collection_enabled or self._activity_collection_enabled
+
         super(SqlserverActivity, self).__init__(
             check,
             run_sync=is_affirmative(self._config.activity_config.get('run_sync', False)),
-            enabled=is_affirmative(self._config.activity_config.get('enabled', True)),
+            enabled=self.enabled,
             expected_db_exceptions=(),
             min_collection_interval=self._config.min_collection_interval,
             dbms="sqlserver",
-            rate_limit=1 / float(collection_interval),
+            rate_limit=1 / float(self.collection_interval),
             job_name="query-activity",
             shutdown_callback=self._close_db_conn,
         )
         self._conn_key_prefix = "dbm-activity-"
         self._activity_payload_max_bytes = MAX_PAYLOAD_BYTES
         self._exec_requests_cols_cached = None
+        obfuscate_sql = lambda sql: obfuscate_sql_with_metadata(sql, self._config.obfuscator_options, replace_null_character=True)
+        self._deadlocks = Deadlocks(check, config, self._conn_key_prefix, obfuscate_sql)
 
     def _close_db_conn(self):
         pass
 
     def run_job(self):
-        self.collect_activity()
+        elapsed_time_activity = time.time() - self._last_activity_collection_time
+        if self._activity_collection_enabled and elapsed_time_activity >= self._activity_collection_interval:
+            self._last_activity_collection_time = time.time()
+            try:
+                self.collect_activity()
+            except Exception as e:
+                self._log.error(
+                    """An error occurred while collecting sqlserver activity.
+                                This may be unavailable until the error is resolved. The error - {}""".format(
+                        e
+                    )
+                )
+        pdb.set_trace()
+        elapsed_time_deadlocks = time.time() - self._last_deadlocks_collection_time
+        if self._deadlocks_collection_enabled and elapsed_time_deadlocks >= self._deadlocks_collection_interval:
+            self._last_deadlocks_collection_time = time.time()
+            try:
+                self._collect_deadlocks()
+            except Exception as e:
+                self._log.error(
+                    """An error occurred while collecting sqlserver deadlocks.
+                                This may be unavailable until the error is resolved. The error - {}""".format(
+                        e
+                    )
+                )
 
+    @tracked_method(agent_check_getter=agent_check_getter)
+    def _collect_deadlocks(self):
+        pdb.set_trace()
+        deadlock_xmls = self._deadlocks.collect_deadlocks()
+        deadlocks_event = self._create_deadlock_event(deadlock_xmls)
+        payload = json.dumps(deadlocks_event, default=default_json_event_encoding)
+        self._check.database_monitoring_deadlocks(payload)
+        
     @tracked_method(agent_check_getter=agent_check_getter)
     def _get_active_connections(self, cursor):
         self.log.debug("collecting sql server current connections")
@@ -350,7 +424,7 @@ class SqlserverActivity(DBMAsyncJob):
             "ddagentversion": datadog_agent.get_version(),
             "ddsource": "sqlserver",
             "dbm_type": "activity",
-            "collection_interval": self.collection_interval,
+            "collection_interval": self._activity_collection_interval, #TODO is it important for whatever reason to have very precise int ?
             "ddtags": self.tags,
             "timestamp": time.time() * 1000,
             'sqlserver_version': self._check.static_info_cache.get(STATIC_INFO_VERSION, ""),
@@ -358,6 +432,22 @@ class SqlserverActivity(DBMAsyncJob):
             "cloud_metadata": self._config.cloud_metadata,
             "sqlserver_activity": active_sessions,
             "sqlserver_connections": active_connections,
+        }
+        return event
+
+    def _create_deadlock_event(self, deadlock_xmls):
+        event = {
+            "host": self._check.resolved_hostname,
+            "ddagentversion": datadog_agent.get_version(),
+            "ddsource": "sqlserver",
+            "dbm_type": "deadlocks",
+            "collection_interval": self._deadlocks_collection_interval,
+            "ddtags": self.tags,
+            "timestamp": time.time() * 1000,
+            'sqlserver_version': self._check.static_info_cache.get(STATIC_INFO_VERSION, ""),
+            'sqlserver_engine_edition': self._check.static_info_cache.get(STATIC_INFO_ENGINE_EDITION, ""),
+            "cloud_metadata": self._config.cloud_metadata,
+            "sqlserver_deadlocks": deadlock_xmls,
         }
         return event
 
