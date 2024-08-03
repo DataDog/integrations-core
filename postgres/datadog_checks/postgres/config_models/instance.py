@@ -85,6 +85,15 @@ class CollectSettings(BaseModel):
     ignored_settings_patterns: Optional[tuple[str, ...]] = None
 
 
+class CollectionInterval(BaseModel):
+    model_config = ConfigDict(
+        arbitrary_types_allowed=True,
+        frozen=True,
+    )
+    collection_interval: Optional[int] = None
+    query_name: Optional[str] = None
+
+
 class DatabaseAutodiscovery(BaseModel):
     model_config = ConfigDict(
         arbitrary_types_allowed=True,
@@ -215,6 +224,7 @@ class InstanceConfig(BaseModel):
     collect_schemas: Optional[CollectSchemas] = None
     collect_settings: Optional[CollectSettings] = None
     collect_wal_metrics: Optional[bool] = None
+    collection_intervals: Optional[tuple[CollectionInterval, ...]] = None
     custom_queries: Optional[tuple[MappingProxyType[str, Any], ...]] = None
     data_directory: Optional[str] = None
     database_autodiscovery: Optional[DatabaseAutodiscovery] = None
