@@ -110,6 +110,15 @@ def get_schema_field(descriptors):
     raise CheckException("The descriptors are missing a schema field")
 
 
+def get_relation_field(descriptors):
+    # type: (List[Tuple[Any, str]]) -> str
+    """Return column containing the relation name for that query."""
+    for column, name in descriptors:
+        if name == 'table':
+            return column
+    raise CheckException("The descriptors are missing a table field")
+
+
 def payload_pg_version(version):
     if not version:
         return ""
