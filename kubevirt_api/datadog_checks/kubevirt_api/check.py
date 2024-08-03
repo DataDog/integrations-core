@@ -24,9 +24,7 @@ class KubevirtApiCheck(OpenMetricsBaseCheckV2):
     def check(self, _):
         # type: (Any) -> None
 
-        self.base_tags = []
-        if self.kube_cluster_name:
-            self.base_tags.append(f"kube_cluster_name:{self.kube_cluster_name}")
+        self._init_base_tags()
 
         if self.kubevirt_api_healthz_endpoint:
             self._report_health_check(self.kubevirt_api_healthz_endpoint)
@@ -35,16 +33,28 @@ class KubevirtApiCheck(OpenMetricsBaseCheckV2):
                 "Skipping health check. Please provide a `kubevirt_api_healthz_endpoint` to ensure the health of the KubeVirt API."  # noqa: E501
             )
 
-        self._setup_kube_client()
+        self._validate_metrics_endpoint(self.kubevirt_api_metrics_endpoint)
 
-        self.target_ip, _ = self._extract_host_port(self.kubevirt_api_metrics_endpoint)
-        self.target_pod = self._get_target_pod(self.target_ip)
-        self.pod_tags = self._extract_pod_tags(self.target_pod)
+        self._setup_kube_client()
 
         self._report_vm_metrics()
         self._report_vmis_metrics()
 
         super().check(_)
+
+    def _init_base_tags(self):
+        self.base_vm_tags = []
+        self.base_pod_tags = []
+
+        if self.kube_cluster_name:
+            self.base_vm_tags.append(f"kube_cluster_name:{self.kube_cluster_name}")
+            self.base_pod_tags.append(f"kube_cluster_name:{self.kube_cluster_name}")
+
+        if self.kube_namespace:
+            self.base_pod_tags.append(f"kube_namespace:{self.kube_namespace}")
+
+        if self.kube_pod_name:
+            self.base_pod_tags.append(f"pod_name:{self.kube_pod_name}")
 
     def _setup_kube_client(self):
         try:
@@ -58,14 +68,14 @@ class KubevirtApiCheck(OpenMetricsBaseCheckV2):
             self.log.debug("Checking health status at %s", health_endpoint)
             response = self.http.get(health_endpoint)
             response.raise_for_status()
-            self.gauge("can_connect", 1, tags=[f"endpoint:{health_endpoint}"])
+            self.gauge("can_connect", 1, tags=[f"endpoint:{health_endpoint}", *self.base_pod_tags])
         except Exception as e:
             self.log.error(
                 "Cannot connect to KubeVirt API HTTP endpoint '%s': %s.\n",
                 health_endpoint,
                 str(e),
             )
-            self.gauge("can_connect", 0, tags=[f"endpoint:{health_endpoint}"])
+            self.gauge("can_connect", 0, tags=[f"endpoint:{health_endpoint}", *self.base_pod_tags])
             raise
 
     def _report_vm_metrics(self):
@@ -76,7 +86,7 @@ class KubevirtApiCheck(OpenMetricsBaseCheckV2):
                 vm_tags = self._extract_vm_tags(vm)
                 self.gauge("vm.count", value=1, tags=vm_tags)
         else:
-            self.gauge("vm.count", value=0, tags=self.base_tags)
+            self.gauge("vm.count", value=0, tags=self.base_vm_tags)
 
     def _report_vmis_metrics(self):
         vmis = self.kube_client.get_vmis()
@@ -86,46 +96,7 @@ class KubevirtApiCheck(OpenMetricsBaseCheckV2):
                 vmi_tags = self._extract_vmi_tags(vmi)
                 self.gauge("vmi.count", value=1, tags=vmi_tags)
         else:
-            self.gauge("vmi.count", value=0, tags=self.base_tags)
-
-    def _get_target_pod(self, target_ip):
-        target_pod = self.kube_client.get_pods(self.kube_namespace, ip=target_ip)
-
-        if len(target_pod) == 0:
-            raise ValueError(f"Pod with IP '{target_ip}' not found in namespace '{self.kube_namespace}'")
-        else:
-            target_pod = target_pod[0]
-
-        self.log.debug("Detected target pod: %s", target_pod["metadata"]["name"])
-        return target_pod
-
-    def _extract_host_port(self, url):
-        parsed_url = urlparse(url)
-
-        host = parsed_url.hostname
-        port = parsed_url.port
-
-        if host and port:
-            try:
-                host = ipaddress.ip_address(host)
-                return host, port
-            except Exception as e:
-                raise ValueError(f"Host '{host}' must be a valid ip address: {str(e)}")
-        else:
-            raise ValueError(f"URL '{url}' does not match the expected format `https://<host_ip>:<port>/<path>`")
-
-    def _extract_pod_tags(self, pod):
-        if not pod:
-            return []
-
-        tags = []
-        tags.append(f"pod_name:{pod['metadata']['name']}")
-        tags.append(f"kube_namespace:{pod['metadata']['namespace']}")
-
-        if self.kube_cluster_name:
-            tags.append(f"kube_cluster_name:{self.kube_cluster_name}")
-
-        return tags
+            self.gauge("vmi.count", value=0, tags=self.base_vm_tags)
 
     def _extract_vm_tags(self, vm):
         if not vm:
@@ -168,15 +139,32 @@ class KubevirtApiCheck(OpenMetricsBaseCheckV2):
 
         return tags
 
+    def _validate_metrics_endpoint(self, url):
+        parsed_url = urlparse(url)
+
+        host = parsed_url.hostname
+        port = parsed_url.port
+
+        if host and port:
+            try:
+                host = ipaddress.ip_address(host)
+                return host, port
+            except Exception as e:
+                raise ValueError(f"Host '{host}' must be a valid ip address: {str(e)}")
+        else:
+            raise ValueError(f"URL '{url}' does not match the expected format `https://<host_ip>:<port>/<path>`")
+
     def _parse_config(self):
         self.kubevirt_api_metrics_endpoint = self.instance.get("kubevirt_api_metrics_endpoint")
         self.kubevirt_api_healthz_endpoint = self.instance.get("kubevirt_api_healthz_endpoint")
         self.kube_cluster_name = self.instance.get("kube_cluster_name")
         self.kube_namespace = self.instance.get("kube_namespace")
+        self.kube_pod_name = self.instance.get("kube_pod_name")
+
         self.kube_config_dict = self.instance.get("kube_config_dict")
 
         parsed_url = urlparse(self.kubevirt_api_metrics_endpoint)
-        if not parsed_url.path:
+        if parsed_url.path != "/metrics":
             self.log.warning(
                 "The provided endpoint '%s' does not have the '/metrics' path. Adding it automatically.",
                 self.kubevirt_api_metrics_endpoint,
@@ -209,7 +197,7 @@ class KubevirtApiCheck(OpenMetricsBaseCheckV2):
                     continue
 
                 # add tags
-                tags = tags + self.pod_tags
+                tags = tags + self.base_pod_tags
 
                 # get mapped metric name
                 new_metric_name = METRICS_MAP[metric_name]
@@ -232,7 +220,7 @@ class KubevirtApiCheck(OpenMetricsBaseCheckV2):
                         [sample, tags, hostname] = sample
                         return [sample, tags + pod_tags, hostname]
 
-                    modified_sample_data = (add_tag_to_sample(x, self.pod_tags) for x in sample_data)
+                    modified_sample_data = (add_tag_to_sample(x, self.base_pod_tags) for x in sample_data)
                     native_transformer(_metric, modified_sample_data, _runtime_data)
 
         return transform
