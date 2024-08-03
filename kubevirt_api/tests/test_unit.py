@@ -169,13 +169,14 @@ def test_emits_zero_can_connect_when_service_is_down(dd_run_check, aggregator, i
 
     with pytest.raises(Exception):
         dd_run_check(check)
-        aggregator.assert_metric(
-            "kubevirt_api.can_connect",
-            value=0,
-            tags=[
-                "endpoint:https://10.244.0.38:443/healthz",
-            ],
-        )
+
+    aggregator.assert_metric(
+        "kubevirt_api.can_connect",
+        value=0,
+        tags=[
+            "endpoint:https://10.244.0.38:443/healthz",
+        ],
+    )
 
 
 def test_emits_one_can_connect_when_service_is_up(dd_run_check, aggregator, instance, mocker):
