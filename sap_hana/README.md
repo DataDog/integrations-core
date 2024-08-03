@@ -14,13 +14,13 @@ The SAP HANA check is included in the [Datadog Agent][2] package. To use this in
 For Unix:
 
 ```text
-sudo -Hu dd-agent /opt/datadog-agent/embedded/bin/pip install hdbcli==2.10.15
+sudo -Hu dd-agent /opt/datadog-agent/embedded/bin/pip install hdbcli==2.21.28
 ```
 
 For Windows:
 
 ```text
-"C:\Program Files\Datadog\Datadog Agent\embedded<PYTHON_MAJOR_VERSION>\python.exe" -m pip install hdbcli==2.10.15
+"C:\Program Files\Datadog\Datadog Agent\embedded<PYTHON_MAJOR_VERSION>\python.exe" -m pip install hdbcli==2.21.28
 ```
 
 #### Prepare HANA
