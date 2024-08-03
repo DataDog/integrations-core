@@ -21,6 +21,27 @@ files:
               display_default: null
               example: https://virt-api.kubevirt.svc/healthz
               type: string
+          - name: kube_cluster_name
+            description: |
+              The name of the Kubernetes cluster.
+            value:
+              display_default: null
+              example: dev-cluster
+              type: string
+          - name: kube_namespace
+            description: |
+              The namespace where the KubeVirt API is running.  (Provided via autodiscovery template variables)
+            value:
+              display_default: null
+              example: kubevirt
+              type: string
+          - name: kube_pod_name
+            description: |
+              The name of the KubeVirt API pod. (Provided via autodiscovery template variables)
+            value:
+              display_default: null
+              example: virt-api-id-1234
+              type: string
           - template: instances/openmetrics
             overrides:
               openmetrics_endpoint.required: false
