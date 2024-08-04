@@ -29,6 +29,8 @@ DEFAULT_METRICS = [
 HISTOGRAM_METRICS = [
     {'nginx_ingress_controller_response_duration_seconds': 'controller.response.duration'},
     {'nginx_ingress_controller_request_duration_seconds': 'controller.request.duration'},
+    {'nginx_ingress_controller_response_size': 'controller.response.size'},
+    {'nginx_ingress_controller_request_size': 'controller.request.size'},
 ]
 
 
