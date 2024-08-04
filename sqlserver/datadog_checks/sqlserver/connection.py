@@ -16,9 +16,9 @@ try:
     import adodbapi
 except ImportError:
     adodbapi = None
-
 try:
     import pyodbc
+    pyodbc.pooling = False
 except ImportError:
     pyodbc = None
 
