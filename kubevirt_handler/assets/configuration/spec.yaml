@@ -1,0 +1,10 @@
+name: Kubevirt Handler
+files:
+- name: kubevirt_handler.yaml
+  options:
+  - template: init_config
+    options:
+    - template: init_config/default
+  - template: instances
+    options:
+    - template: instances/default
