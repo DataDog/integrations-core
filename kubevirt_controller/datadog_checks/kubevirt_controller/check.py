@@ -61,6 +61,7 @@ class KubevirtControllerCheck(OpenMetricsBaseCheckV2):
             "openmetrics_endpoint": self.kubevirt_controller_metrics_endpoint,
             "namespace": self.__NAMESPACE__,
             "enable_health_service_check": False,
+            "tls_verify": False,
         }
 
         self.scraper_configs.append(instance)
