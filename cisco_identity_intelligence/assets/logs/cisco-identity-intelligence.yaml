@@ -1,0 +1,37 @@
+id: cisco-identity-intelligence
+metric_id: cisco-identity-intelligence
+backend_only: false
+facets: null
+pipeline:
+  type: pipeline
+  name: Cisco Identity Intelligence
+  enabled: true
+  filter:
+    query: "source:cisco-identity-intelligence"
+  processors:
+    - type: date-remapper
+      name: Define `detail.published` as the official date of the log
+      enabled: true
+      sources:
+        - detail.published
+    - name: Lookup on `detail.severity` to `status`
+      enabled: true
+      source: detail.severity
+      target: status
+      lookupTable: |-
+        critical, critical
+        high, critical
+        medium, warning
+        moderate, medium
+        low, info
+      type: lookup-processor
+    - type: status-remapper
+      name: Define `status` as the official status of the log
+      enabled: true
+      sources:
+        - status
+    - type: message-remapper
+      name: Define `detail.title` as the official message of the log
+      enabled: true
+      sources:
+        - detail.title

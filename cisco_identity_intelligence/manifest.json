@@ -1,0 +1,40 @@
+{
+  "manifest_version": "2.0.0",
+  "app_uuid": "3ff74387-4fdb-4af7-8615-a5e0e41fd36b",
+  "app_id": "cisco-identity-intelligence",
+  "display_on_public_website": true,
+  "tile": {
+    "overview": "README.md#Overview",
+    "configuration": "README.md#Setup",
+    "support": "README.md#Support",
+    "changelog": "CHANGELOG.md",
+    "description": "Gain insights into cisco identity intelligence logs",
+    "title": "cisco-identity-intelligence",
+    "media": [
+      {
+        "media_type": "image",
+        "caption": "Cisco Identity Intelligence - Failed Checks",
+        "image_url": "images/cisco_identity_intelligence_failed_checks.png"
+      }
+    ],
+    "classifier_tags": [
+      "Category::Log Collection",
+      "Category::Developer Tools",
+      "Submitted Data Type::Logs"
+    ]
+  },
+  "assets": {
+    "dashboards": {
+        "Cisco Identity Intelligence - Failed Checks": "assets/dashboards/cisco_identity_intelligence_failed_checks.json"
+    },
+    "logs": {
+      "source": "cisco-identity-intelligence"
+    }
+  },
+  "author": {
+    "support_email": "help@datadoghq.com",
+    "name": "Datadog",
+    "homepage": "https://www.datadoghq.com",
+    "sales_email": "info@datadoghq.com"
+  }
+}
