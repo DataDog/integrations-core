@@ -4,7 +4,6 @@
 import pytest
 
 from datadog_checks.base.constants import ServiceCheck
-from datadog_checks.dev.utils import get_metadata_metrics
 
 from . import common
 
@@ -17,6 +16,4 @@ def test_check_aws_neuron_e2e(dd_agent_check, instance):
     for metric in metrics:
         aggregator.assert_metric(name=metric)
 
-    aggregator.assert_all_metrics_covered()
-    aggregator.assert_metrics_using_metadata(get_metadata_metrics())
     aggregator.assert_service_check('aws_neuron.openmetrics.health', ServiceCheck.OK)

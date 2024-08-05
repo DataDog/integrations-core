@@ -34,14 +34,13 @@ def test_empty_instance(dd_run_check):
 
 
 def test_custom_validation(dd_run_check):
-    instance = {'openmetrics_endpoint': 'aws_neuron:2112/metrics'}
-    for k, v in instance.items():
-        with pytest.raises(
-            Exception,
-            match=f'{k}: {v} is incorrectly configured',
-        ):
-            check = AwsNeuronCheck('aws_neuron', {}, [instance])
-            dd_run_check(check)
+    endpoint = 'aws_neuron:2112/metrics'
+    with pytest.raises(
+        Exception,
+        match='openmetrics_endpoint: {} is incorrectly configured'.format(endpoint),
+    ):
+        check = AwsNeuronCheck('aws_neuron', {}, [{'openmetrics_endpoint': endpoint}])
+        dd_run_check(check)
 
 
 def test_rename_labels(dd_run_check, instance, aggregator, mock_http_response):
