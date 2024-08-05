@@ -11,27 +11,7 @@ files:
       value:
         example: false
         type: boolean
-    - name: global_custom_queries
-      description: |
-        See `custom_queries` defined below.
-
-        Global custom queries can be applied to all instances using the
-        `use_global_custom_queries` setting at the instance level.
-      value:
-        type: array
-        items:
-          type: object
-          properties: []
-        example:
-            - metric_prefix: postgresql
-              query: <QUERY>
-              columns:
-                - name: <COLUNMS_1_NAME>
-                  type: <COLUMNS_1_TYPE>
-                - name: <COLUNMS_2_NAME>
-                  type: <COLUMNS_2_TYPE>
-              tags:
-                - <TAG_KEY>:<TAG_VALUE>
+    - template: init_config/db
     - template: init_config/default
   - template: instances
     options:
@@ -327,36 +307,18 @@ files:
         type: integer
         display_default: 200
         example: 200
-    - name: custom_queries
-      description: |
-        Define custom queries to collect custom metrics from your PostgreSQL
-        See Datadog FAQ article for a guide on collecting custom metrics from PostgreSQL:
-        https://docs.datadoghq.com/integrations/faq/postgres-custom-metric-collection-explained/
-      value:
-        type: array
-        items:
-          type: object
-          properties: []
-        example:
-            - metric_prefix: postgresql
-              query: <QUERY>
-              columns:
-                - name: <COLUNMS_1_NAME>
-                  type: <COLUMNS_1_TYPE>
-                - name: <COLUNMS_2_NAME>
-                  type: <COLUMNS_2_TYPE>
-              tags:
-                - <TAG_KEY>:<TAG_VALUE>
-    - name: use_global_custom_queries
-      description: |
-        How `global_custom_queries` should be used for this instance. There are 3 options:
-
-        1. true - `global_custom_queries` override `custom_queries`.
-        2. false - `custom_queries` override `global_custom_queries`.
-        3. extend - `global_custom_queries` are used in addition to any `custom_queries`.
-      value:
-        type: string
-        example: extend
+    - template: instances/db
+      overrides:
+        custom_queries.value.example:
+          - query: "SELECT foo, COUNT(*) FROM table.events GROUP BY foo"
+            columns:
+              - name: foo
+                type: tag
+              - name: event.total
+                type: gauge
+            tags:
+              - test:postgresql
+            metric_prefix: postgresql
     - name: database_autodiscovery
       description: |
         Define the configuration for database autodiscovery.
