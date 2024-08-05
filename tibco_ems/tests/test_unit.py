@@ -84,6 +84,11 @@ def test_parse_show_server():
             SHOW_MAP['show connections full']['expected_metrics'],
             id="show connections full",
         ),
+        pytest.param(
+            mock_output('show_durables'),
+            SHOW_MAP['show durables']['expected_metrics'],
+            id="show durables",
+        ),
     ],
 )
 def test_show_metrics(dd_run_check, aggregator, instance, output, expected_metrics):
@@ -129,6 +134,12 @@ def test_show_metrics(dd_run_check, aggregator, instance, output, expected_metri
             SHOW_MAP['show connections full']['section'],
             SHOW_MAP['show connections full']['regex'],
             id="show connections full",
+        ),
+        pytest.param(
+            SHOW_MAP['show durables']['expected_result'],
+            SHOW_MAP['show durables']['section'],
+            SHOW_MAP['show durables']['regex'],
+            id="show durables",
         ),
     ],
 )

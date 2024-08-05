@@ -412,6 +412,27 @@ SHOW_MAP = {
             'tibco_ems.connection.uncommitted_transactions_size',
         ],
     },
+    'show durables': {
+        'section': mock_output('show_durables')[0],
+        'regex': SHOW_METRIC_DATA['show durables']['regex'],
+        'expected_result': [
+            {
+                'durable': 'sample.durable',
+                'pending_messages': 0,
+                'pending_messages_size': {
+                    'unit': 'Kb',
+                    'value': 0.0,
+                },
+                'shared': 'N',
+                'topic_name': 'sample',
+                'user': 'offline',
+            },
+        ],
+        'expected_metrics': [
+            'tibco_ems.durable.pending_messages',
+            'tibco_ems.durable.pending_messages_size',
+        ],
+    },
 }
 
 SECTION_RESULT = {

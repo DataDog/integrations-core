@@ -463,7 +463,7 @@
                                         {
                                             "data_source": "metrics",
                                             "name": "a",
-                                            "query": "avg:tibco_ems.producer.total_messages_size{$host,$server_hostname,$queue_name, $component_type} by {destination}"
+                                            "query": "avg:tibco_ems.producer.total_messages_size{$host,$server_hostname, $component_type} by {destination}"
                                         }
                                     ],
                                     "response_format": "timeseries",
