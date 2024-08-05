@@ -60,7 +60,7 @@ def instance_excluded_host_tags():
     return []
 
 
-def instance_get_vsan_metrics():
+def instance_get_vsan():
     return False
 
 

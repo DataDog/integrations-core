@@ -29,6 +29,7 @@ class MockedAPI(object):
         self.infrastructure_data = {}
         self.metrics_data = []
         self.mock_events = []
+        self.mock_vsan_events = []
         self.vsan_metrics_data = [[], []]
         self.server_time = dt.datetime.now()
 
@@ -122,7 +123,10 @@ class MockedAPI(object):
     def get_new_events(self, start_time):
         return self.mock_events
 
-    def query_vsan_metrics(self):
+    def get_vsan_events(self, start_time):
+        return self.mock_vsan_events
+
+    def get_vsan_metrics(self):
         mock_health_data = [
             {
                 'vsphere.vsan.cluster.health.count': MagicMock(id='group_id', status='group_health'),

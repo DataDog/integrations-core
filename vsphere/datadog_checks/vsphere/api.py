@@ -388,7 +388,16 @@ class VSphereAPI(object):
             return UNLIMITED_HIST_METRICS_PER_QUERY
 
     @smart_retry
-    def query_vsan_metrics(self):
+    def get_vsan_events(self, timestamp):
+        event_manager = self._conn.content.eventManager
+        entity_user = vim.event.EventFilterSpec.ByUsername(systemUser=False, userList=['vSAN Health'])
+        entity_time = vim.event.EventFilterSpec.ByTime(beginTime=timestamp)
+        query_filter = vim.event.EventFilterSpec(userName=entity_user, time=entity_time)
+        events = event_manager.QueryEvents(query_filter)
+        return events
+
+    @smart_retry
+    def get_vsan_metrics(self):
         self.log.debug("Querying vSAN metrics: %s", self._vsan_stub)
         vsan_perf_manager = vim.cluster.VsanPerformanceManager('vsan-performance-manager', self._vsan_stub)
         health_metrics = []

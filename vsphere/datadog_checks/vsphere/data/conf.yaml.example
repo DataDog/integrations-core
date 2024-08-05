@@ -339,11 +339,11 @@ instances:
     #
     # collect_property_metrics: false
 
-    ## @param get_vsan_metrics - boolean - optional - default: false
-    ## If true, the vSphere integration will collect additional metrics about vSAN cluster, host, and disk metrics.
-    ## These metrics are collected at a frequency of `refresh_infrastructure_cache_interval`.
+    ## @param get_vsan - boolean - optional - default: false
+    ## If true, the vSphere integration will collect additional metrics about vSAN cluster, host, and disk
+    ## metrics/events. These metrics/events are collected at a frequency of `refresh_infrastructure_cache_interval`.
     #
-    # get_vsan_metrics: false
+    # get_vsan: false
 
     ## @param attributes_prefix - string - optional
     ## Custom attributes attached to vSphere resources will be prefixed with this prefix when collected.

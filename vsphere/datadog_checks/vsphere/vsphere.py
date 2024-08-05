@@ -481,7 +481,7 @@ class VSphereCheck(AgentCheck):
         collect_start_time = get_current_datetime()
         try:
             t0 = Timer()
-            new_health_metrics, new_performance_metrics = self.api.query_vsan_metrics()
+            new_health_metrics, new_performance_metrics = self.api.get_vsan_metrics()
             self.gauge(
                 'vsphere.vsan.cluster.time',
                 t0.total(),
@@ -710,6 +710,8 @@ class VSphereCheck(AgentCheck):
         try:
             t0 = Timer()
             new_events = self.api.get_new_events(start_time=self.latest_event_query)
+            if self._config.collect_vsan:
+                new_events.extend(self.api.get_vsan_events(self.latest_event_query))
             self.gauge(
                 'datadog.vsphere.collect_events.time',
                 t0.total(),
@@ -1112,5 +1114,5 @@ class VSphereCheck(AgentCheck):
         self.collect_metrics_async()
         self.log.debug("Metric collection completed.")
 
-        if self._config.collect_vsan_metrics:
+        if self._config.collect_vsan:
             self.collect_vsan_metrics()
