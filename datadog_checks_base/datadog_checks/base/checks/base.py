@@ -1000,12 +1000,13 @@ class AgentCheck(object):
         Parameters:
 
             data (dict[str, str]):
-                the log data to send.
+                The log data to send.
             cursor (dict[str, Any] or None):
-                metadata associated with the log which will be saved to disk. the most recent value may be
+                Metadata associated with the log which will be saved to disk. The most recent value may be
                 retrieved with the `get_log_cursor` method.
             stream (str):
-                the stream associated with this log, used for accurate cursor persistence.
+                The stream associated with this log, used for accurate cursor persistence.
+                Has no effect if `cursor` argument is `None`.
         """
         attributes = data.copy()
         if 'ddtags' not in attributes and self.formatted_tags:
