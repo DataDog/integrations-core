@@ -68,7 +68,7 @@ class MongoApi(object):
             options['replicaSet'] = replicaset
         options.update(self._config.additional_options)
         options.update(self._config.tls_params)
-        if self._config.do_auth and not self._is_arbiter(options):
+        if self._config.do_auth and self._is_auth_required(options):
             self._log.info("Using '%s' as the authentication database", self._config.auth_source)
             if self._config.username:
                 options['username'] = self._config.username
@@ -123,6 +123,20 @@ class MongoApi(object):
     def index_stats(self, db_name, coll_name, session=None):
         return self[db_name][coll_name].aggregate([{"$indexStats": {}}], session=session)
 
+    def _is_auth_required(self, options):
+        # Check if the node is an arbiter. If it is, usually it does not require authentication.
+        # However this is a best-effort check as the replica set might focce authentication.
+        try:
+            # Try connect to the admin database to run the isMaster command without authentication.
+            cli = MongoClient(**options)
+            is_master_payload = cli['admin'].command('isMaster')
+            is_arbiter = is_master_payload.get('arbiterOnly', False)
+            # If the node is an arbiter and we are able to connect without authentication
+            # we can assume that the node does not require authentication.
+            return not is_arbiter
+        except:
+            return True
+
     def get_profiling_level(self, db_name, session=None):
         return self[db_name].command('profile', -1, session=session)
 
@@ -132,11 +146,6 @@ class MongoApi(object):
 
     def get_log_data(self, session=None):
         return self['admin'].command("getLog", "global", session=session)
-
-    def _is_arbiter(self, options):
-        cli = MongoClient(**options)
-        is_master_payload = cli['admin'].command('isMaster')
-        return is_master_payload.get('arbiterOnly', False)
 
     def _get_rs_deployment_from_status_payload(self, repl_set_payload, is_master_payload, cluster_role, hosting_type):
         replset_name = repl_set_payload["set"]

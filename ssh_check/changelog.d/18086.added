@@ -1,0 +1,1 @@
+Allow forcing SHA1 encryption for older SSH servers. Set `force_sha1: true` in conf.yaml.

@@ -632,6 +632,30 @@
         ]
     },
     {
+        "name": "mongodb.oplatencies.reads.latency.avg",
+        "type": 0,
+        "value": 2874788.0,
+        "tags": [
+            "server:mongodb://testUser2:*****@localhost:27017/test"
+        ]
+    },
+    {
+        "name": "mongodb.oplatencies.writes.latency.avg",
+        "type": 0,
+        "value": 611.3,
+        "tags": [
+            "server:mongodb://testUser2:*****@localhost:27017/test"
+        ]
+    },
+    {
+        "name": "mongodb.oplatencies.commands.latency.avg",
+        "type": 0,
+        "value": 8573.2,
+        "tags": [
+            "server:mongodb://testUser2:*****@localhost:27017/test"
+        ]
+    },
+    {
         "name": "mongodb.opcounters.commandps",
         "type": 1,
         "value": 7882.0,
