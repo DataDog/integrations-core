@@ -1,0 +1,154 @@
+id: cisco-secure-email-threat-defense
+tests:
+  - sample: |-
+      {
+        "action": {
+          "isAutoRemediated": false,
+          "timestamp": "2024-07-17T10:49:26Z",
+          "type": "move",
+          "folder": "trash",
+          "publicApiClientId": ""
+        },
+        "clientIP": "100.100.100.100",
+        "direction": "internal",
+        "domain": "abc.com",
+        "fromAddress": "rrr@abc.com",
+        "id": "0cdac345-c111-111c-a978-11162c0da557",
+        "mailboxes": [
+          "test.user@abc.com",
+          "rrr@abc.com"
+        ],
+        "internetMessageId": "<AAB-k2pWHpwdBQ0qH1FZGts+AUZyq0w3oMpShp_AAAu9P6JJnhA@mail.gmail.com>",
+        "returnPath": "rrr@abc.com",
+        "serverIP": "10.10.10.10",
+        "subject": "verdict override",
+        "toAddresses": [
+          "test.user@abc.com"
+        ],
+        "timestamp": "2024-07-17T05:57:23Z",
+        "urls": [
+          "http://ihaveabad.dffd/",
+          "https://sdfsd.cdf/"
+        ],
+        "verdict": {
+          "isManualVerdict": true,
+          "isRetroVerdict": false,
+          "techniques": [
+            {
+              "type": "Malicious URL",
+              "severity": "high",
+              "description": "http://ihaveabad.dffd/"
+            },
+            {
+              "type": "Rare sender domain for recipient domain",
+              "severity": "medium",
+              "description": "Sender domain crestdata.ai rarely communicates with recipient domain onmicrosoft.com"
+            },
+            {
+              "type": "Link visit request",
+              "severity": "medium",
+              "description": "Message segment 'http://ihaveabad.dffd/ https://sdfsd.cdf/ -- *Disclaimer:* The information contained in this electronic message and any attachments to this message are intended for the exclusive use of the addressee(s) and may contain confidential or privileged information. ' requests user to click a link"
+            },
+            {
+              "type": "Request for contact details",
+              "severity": "medium",
+              "description": "Message segment 'If you are not the intended recipient, please notify the sender at Crest Data Systems immediately and destroy all copies of this message and any attachments.' contains a request for contact"
+            },
+            {
+              "type": "Rare sender address",
+              "severity": "medium",
+              "description": "Sender address rrr@abc.com is rarely seen"
+            },
+            {
+              "type": "Internal email",
+              "severity": null,
+              "description": "Email is between internal entities"
+            }
+          ],
+          "userId": "11fa1d11-4f4d-4596-ab02-8dec27d4808e",
+          "originalVerdict": "malicious",
+          "publicApiClientId": "",
+          "latestVerdict": "neutral",
+          "category": "",
+          "timestamp": "2024-07-17T10:48:19Z",
+          "businessRisk": ""
+        },
+        "senderName": "abc",
+        "secureEmailGateway": {},
+        "envelopeTo": [
+          "test.user@abc.com"
+        ],
+        "deliveredTo": [
+          "test.user@abc.com"
+        ]
+      }
+    service: "message"
+    result: null
+  - sample: |-
+      {
+        "action": {
+          "isAutoRemediated": true,
+          "timestamp": "2024-07-18T13:57:06Z",
+          "type": "move",
+          "folder": "quarantine",
+          "publicApiClientId": ""
+        },
+        "ccAddresses": [
+          "test.user@abc.com",
+          "xyz@abc.in"
+        ],
+        "clientIP": "10.10.10.10",
+        "direction": "outgoing",
+        "fromAddress": "test.user@abc.com",
+        "id": "710ccc7c-fd18-473d-83a2-4eb57c37249f",
+        "mailboxes": [
+          "test.user@abc.com"
+        ],
+        "internetMessageId": "<PN0PR01MB9897111B5299D86EBF41459EDDAC2@PN0PR01MB9897.INDPRD01.AAAA.ABC.COM>",
+        "serverIP": "::1",
+        "subject": "Your Order Has Been Cancelled: Contact Customer Support",
+        "toAddresses": [
+          "may@abc.in"
+        ],
+        "timestamp": "2024-07-18T13:56:59Z",
+        "urls": [
+          "http://www.sfsf.cer/",
+          "http://www.didi.cer/"
+        ],
+        "verdict": {
+          "isManualVerdict": false,
+          "isRetroVerdict": false,
+          "techniques": [
+            {
+              "type": "Malicious URL",
+              "severity": "high",
+              "description": "http://www.sfsf.cer/"
+            },
+            {
+              "type": "Malicious URL",
+              "severity": "high",
+              "description": "http://www.didi.cer/"
+            },
+            {
+              "type": "Frequent sender for recipient",
+              "severity": null,
+              "description": "Sender test.user@abc.com communicates frequently with recipient xyz@abc.in"
+            }
+          ],
+          "userId": "",
+          "originalVerdict": "malicious",
+          "publicApiClientId": "",
+          "latestVerdict": "malicious",
+          "category": "malicious",
+          "timestamp": "2024-07-18T13:57:02Z",
+          "businessRisk": ""
+        },
+        "senderName": "Test User",
+        "secureEmailGateway": {},
+        "envelopeTo": [
+          "may@abc.in",
+          "xyz@abc.in"
+        ]
+      }
+    service: "message"
+    result: null
