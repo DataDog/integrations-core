@@ -2,11 +2,11 @@
 
 ## Overview
 
-This check monitors [AWS Neuron][1] through the Datadog Agent. It enables monitoring of the Inferentia and Trainium devices and delivers insights into your machine learning model's performance. 
+This check monitors [AWS Neuron][1] through the Datadog Agent. It enables monitoring of the Inferentia and Trainium devices and delivers insights into your machine learning model's performance.
 
 ## Setup
 
-Follow the instructions below to install and configure this check for an Agent running on a host. For containerized environments, see the [Autodiscovery Integration Templates][3] for guidance on applying these instructions.
+Follow the instructions below to install and configure this check for an Agent running on an EC2 instance. For containerized environments, see the [Autodiscovery Integration Templates][3] for guidance on applying these instructions.
 
 ### Installation
 
@@ -15,7 +15,7 @@ No additional installation is needed on your server.
 
 ### Configuration
 
-1. Ensure [Neuron Monitor][10] is being used to expose the Prometheus endpoint on each node you wish to monitor. 
+1. Ensure [Neuron Monitor][10] is being used to expose the Prometheus endpoint.
 
 2. Edit the `aws_neuron.d/conf.yaml` file, in the `conf.d/` folder at the root of your Agent's configuration directory to start collecting your AWS Neuron performance data. See the [sample aws_neuron.d/conf.yaml][4] for all available configuration options.
 
@@ -43,6 +43,7 @@ See [service_checks.json][8] for a list of service checks provided by this integ
 
 ## Troubleshooting
 
+In containerized environments, ensure that the Agent has network access to the endpoints specified in the `aws_neuron.d/conf.yaml` file.
 Need help? Contact [Datadog support][9].
 
 
