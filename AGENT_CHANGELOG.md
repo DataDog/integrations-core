@@ -1,3 +1,11 @@
+## Datadog Agent version [7.55.3](https://github.com/DataDog/datadog-agent/blob/master/CHANGELOG.rst#7553)
+
+* There were no integration updates for this version of the Agent.
+
+## Datadog Agent version [7.55.2](https://github.com/DataDog/datadog-agent/blob/master/CHANGELOG.rst#7552)
+
+* There were no integration updates for this version of the Agent.
+
 ## Datadog Agent version [7.55.1](https://github.com/DataDog/datadog-agent/blob/master/CHANGELOG.rst#7551)
 
 * There were no integration updates for this version of the Agent.

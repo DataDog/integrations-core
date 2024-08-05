@@ -12,6 +12,7 @@
     "title": "Datadog Operator",
     "media": [],
     "classifier_tags": [
+      "Category::Kubernetes",
       "Supported OS::Linux",
       "Supported OS::Windows",
       "Supported OS::macOS",

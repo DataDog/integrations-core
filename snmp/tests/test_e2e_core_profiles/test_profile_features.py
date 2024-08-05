@@ -56,6 +56,7 @@ def test_e2e_features(dd_agent_check):
         'status': 1,
         'sys_object_id': '1.2.3.20231012',
         'device_type': 'other',
+        'integration': 'snmp',
     }
     device['tags'] = common_tags
     assert_device_metadata(aggregator, device)

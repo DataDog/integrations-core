@@ -85,6 +85,7 @@ def test_e2e_profile_cradlepoint(dd_agent_check):
         'sys_object_id': '1.3.6.1.4.1.20992.2.46',
         'vendor': 'cradlepoint',
         'device_type': 'other',
+        'integration': 'snmp',
     }
     device['tags'] = common_tags
     assert_device_metadata(aggregator, device)
