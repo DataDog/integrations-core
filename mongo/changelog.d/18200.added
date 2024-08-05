@@ -1,0 +1,7 @@
+Add new database storage metrics collected from `dbStats`. The new metrics include
+- mongodb.stats.freestoragesize
+- mongodb.stats.fstotalsize
+- mongodb.stats.fsusedsize
+- mongodb.stats.indexfreestoragesize
+- mongodb.stats.totalfreestoragesize
+- mongodb.stats.totalsize
