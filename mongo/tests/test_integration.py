@@ -963,7 +963,7 @@ def test_mongod_auth_ok(check, dd_run_check, aggregator):
         'hosts': [f'{HOST}:{PORT1}'],
         'username': 'testUser',
         'password': 'testPass',
-        'options': {'authSource': 'authDB'},
+        'options': {'authSource': 'authDB', 'authMechanism': 'SCRAM-SHA-256'},
     }
     mongo_check = check(instance)
     dd_run_check(mongo_check)
