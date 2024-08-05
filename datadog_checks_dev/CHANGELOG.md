@@ -2,6 +2,23 @@
 
 <!-- towncrier release notes start -->
 
+## 33.0.0 / 2024-08-05
+
+***Removed***:
+
+* Remove `ddev release trello ...` commands. We no longer interact with trello during agent release QA. ([#17615](https://github.com/DataDog/integrations-core/pull/17615))
+
+***Added***:
+
+* Show descriptions of templates in ddev create help. ([#18039](https://github.com/DataDog/integrations-core/pull/18039))
+* Add an exception for Zabbix (Community Edition) to pass validations ([#18197](https://github.com/DataDog/integrations-core/pull/18197))
+
+***Fixed***:
+
+* Improve messages around dependency spec management ([#17969](https://github.com/DataDog/integrations-core/pull/17969))
+* [NDM] Pin pysmi version for breaking generate traps DB tests ([#18066](https://github.com/DataDog/integrations-core/pull/18066))
+* Pin towncrier to 23.11, subsequent release broke us. ([#18168](https://github.com/DataDog/integrations-core/pull/18168))
+
 ## 32.2.1 / 2024-06-28
 
 ***Fixed***:
