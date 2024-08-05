@@ -233,6 +233,7 @@ class AgentCheck(object):
         self.hostname = datadog_agent.get_hostname()  # type: str
         try:
             self.log.info("natasha testing get host tags %s", str(datadog_agent.get_host_tags()))
+            self.log.info("natasha testing get host tags a %s", str(datadog_agent.get_host_tags()))
             tags_str = datadog_agent.get_host_tags()
             tags = {}
             if tags_str:
