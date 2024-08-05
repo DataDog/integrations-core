@@ -830,6 +830,12 @@ class PostgreSql(AgentCheck):
         """
         try:
             self.log.info("natasha testing get host tags %s", str(datadog_agent.get_host_tags()))
+            self.log.info("natasha testing get host tags a %s", str(datadog_agent.get_host_tags()))
+            tags_str = datadog_agent.get_host_tags()
+            tags = {}
+            if tags_str:
+                tags = json.loads(tags_str)
+            self.log.info("natasha testing get host tags 2 %s", json.dumps(tags))
         except Exception as e:
             self.log.info("natasha testing get host tags exception %s", str(e))
         with self.db() as conn:
