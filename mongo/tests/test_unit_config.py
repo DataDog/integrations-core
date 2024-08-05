@@ -125,6 +125,28 @@ def test_mongo_operation_samples_enabled(
     assert mongo_check._config.operation_samples.get('enabled') == operation_samples_enabled
 
 
+@pytest.mark.parametrize(
+    'dbm_enabled, slow_operations_config, slow_operations_enabled',
+    [
+        pytest.param(True, None, True, id='dbm_enabled_default'),
+        pytest.param(True, {'enabled': True}, True, id='slow_operations_enabled'),
+        pytest.param(True, {'enabled': False}, False, id='slow_operations_disabled'),
+        pytest.param(False, None, False, id='dbm_disabled_default'),
+        pytest.param(False, {'enabled': True}, False, id='slow_operations_enabled_dbm_disabled'),
+        pytest.param(False, {'enabled': False}, False, id='slow_operations_disabled_dbm_disabled'),
+    ],
+)
+def test_mongo_slow_operations_enabled(
+    instance_integration_cluster, check, dbm_enabled, slow_operations_config, slow_operations_enabled
+):
+    instance_integration_cluster['dbm'] = dbm_enabled
+    if slow_operations_config:
+        instance_integration_cluster['slow_operations'] = slow_operations_config
+
+    mongo_check = check(instance_integration_cluster)
+    assert mongo_check._config.slow_operations.get('enabled') == slow_operations_enabled
+
+
 def test_database_autodiscovery_disabled(instance_user):
     config = MongoConfig(instance_user, mock.Mock())
     assert config.database_autodiscovery_config is not None

@@ -78,6 +78,7 @@ def test_e2e_profile_kyocera_printer(dd_agent_check):
         'sys_object_id': '1.3.6.1.4.1.1347.41',
         'vendor': 'kyocera',
         'device_type': 'printer',
+        'integration': 'snmp',
     }
     device['tags'] = common_tags
     assert_device_metadata(aggregator, device)

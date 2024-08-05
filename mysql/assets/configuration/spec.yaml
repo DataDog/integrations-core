@@ -363,6 +363,7 @@ files:
                   type: number
                   example: 600
           - name: schemas_collection 
+            hidden: true
             description: |
               Configure collection of schemas (databases).
             options:

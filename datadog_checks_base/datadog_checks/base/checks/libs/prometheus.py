@@ -11,11 +11,14 @@ from six.moves import zip
 
 def text_fd_to_metric_families(fd):
     raw_lines, input_lines = tee(fd, 2)
-    try:
-        for raw_line, metric_family in zip(raw_lines, _parse_payload(input_lines)):  # noqa: B007
+    # It's important to start parsing outside of the for-loop.
+    # This way we treat crashes before we yield the first parsed line differently than crashes while yielding.
+    parsed_lines = _parse_payload(input_lines)
+    for raw_line, metric_family in zip(raw_lines, parsed_lines):
+        try:
             yield metric_family
-    except Exception as e:
-        raise ValueError("Failed to parse the metric response '{}': {}".format(raw_line, e))
+        except Exception as e:
+            raise ValueError("Failed to parse the metric response '{}': {}".format(raw_line, e))
 
 
 # This copies most of the code from upstream at that version:

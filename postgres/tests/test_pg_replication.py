@@ -4,7 +4,6 @@
 import time
 
 import pytest
-from flaky import flaky
 
 from .common import (
     DB_NAME,
@@ -131,7 +130,7 @@ def test_conflicts_lock(aggregator, integration_check, pg_instance, pg_replica_i
 
 
 @requires_over_10
-@flaky(max_runs=5)
+@pytest.mark.flaky(max_runs=5)
 def test_conflicts_snapshot(aggregator, integration_check, pg_instance, pg_replica_instance2):
     check = integration_check(pg_replica_instance2)
 

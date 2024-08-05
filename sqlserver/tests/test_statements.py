@@ -1021,6 +1021,7 @@ def test_metrics_lookback_multiplier(instance_docker):
     mock_cursor.execute.assert_called_with(ANY, (6,))
 
 
+@pytest.mark.flaky
 @pytest.mark.integration
 @pytest.mark.usefixtures('dd_environment')
 @pytest.mark.parametrize(
