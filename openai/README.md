@@ -198,6 +198,19 @@ Validate that the APM Node.js library can communicate with your Agent by examini
 <!-- xxz tab xxx -->
 <!-- xxx tab "API Key" xxx -->
 
+**Note**: This setup method only collects `openai.api.usage.*` metrics. To collect all metrics provided by this integration, also follow the APM setup instructions.
+
+### Installation
+
+1. Login to your [OpenAI Account][10].
+2. Navigate to **View API Keys** under account settings.
+3. Click **Create a new secret key**.
+4. Copy the created API Key to your clipboard.
+
+### Configuration
+1. Navigate to the configuration tab inside Datadog [OpenAI integration tile][11].
+2. Enter an account name and OpenAI API key copied above in the accounts configuration.
+
 <!-- xxz tab xxx -->
 <!-- xxz tabs xxx -->
 

@@ -1,0 +1,2 @@
+Remove schema collection and dependency on relation metrics. Instead a warning is issued when the missing metrics will impact which tables are collected.
+Removed the autodiscovery dependency on relation metrics; autodiscovery should now work even if relation metrics are not configured.

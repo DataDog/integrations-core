@@ -99,6 +99,13 @@ files:
       value:
         type: string
         example: default
+    - name: send_ndm_metadata
+      description: |
+        Set to `true` to enable Network Device Monitoring metadata (for devices and interfaces) to be sent.
+      value:
+        type: boolean
+        example: False
+        display_default: False
     - template: instances/http
       overrides:
         username.display_priority: 9

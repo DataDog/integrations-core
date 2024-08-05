@@ -9,6 +9,7 @@ from .utils import _get_superconn
 
 
 @pytest.mark.integration
+@pytest.mark.flaky
 @pytest.mark.usefixtures('dd_environment')
 @pytest.mark.parametrize('ignore', [True, False])
 def test_integration_connection_with_commenter_cursor(integration_check, pg_instance, ignore):
