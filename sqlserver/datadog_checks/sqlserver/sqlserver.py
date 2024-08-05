@@ -758,26 +758,7 @@ class SQLServer(AgentCheck):
         else:
             self._check_connections_by_use_db()
 
-    # do we need to send like new deadlocks or the whiole table whats the retention ?  
-    # lets assume we send all        
-    def detect_deadlocks(self):
-        # send query here 
-        #TODO here get the time of the deadlock and later discard in the query 
-        #all deadlocks that have occured earlier than this date
-        pdb.set_trace()
-        res1 = obfuscate_sql_with_metadata("\nunknown", self._config.obfuscator_options, replace_null_character=True)
-        print(res1)
-        res2 = obfuscate_sql_with_metadata("\nUPDATE [datadog_test-1].dbo.deadlocks SET b = b + 20 WHERE a = 1;", self._config.obfuscator_options, replace_null_character=True)
-        print(res2)
-        with self.connection.open_managed_default_connection():
-            with self.connection.get_managed_cursor() as cursor:
-                cursor.execute(DETECT_DEADLOCK_QUERY)
-                pdb.set_trace()
-                result = cursor.fetchall()
-                print(result)
-
     def check(self, _):
-        pdb.set_trace()
         if self.do_check:
             # configure custom queries for the check
             if self._query_manager is None:
@@ -806,7 +787,6 @@ class SQLServer(AgentCheck):
                 self.activity.run_job_loop(self.tags)
                 self.sql_metadata.run_job_loop(self.tags)
                 self._schemas.run_job_loop(self.tags)
-                #self.detect_deadlocks()
         else:
             self.log.debug("Skipping check")
 

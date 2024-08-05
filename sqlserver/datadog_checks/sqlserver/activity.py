@@ -21,7 +21,7 @@ try:
     import datadog_agent
 except ImportError:
     from ..stubs import datadog_agent
-
+import pdb
 DEFAULT_ACTIVITY_COLLECTION_INTERVAL = 10
 DEFAULT_DEADLOCKS_COLLECTION_INTERVAL = 5
 MAX_PAYLOAD_BYTES = 19e6
@@ -235,7 +235,6 @@ class SqlserverActivity(DBMAsyncJob):
                         e
                     )
                 )
-        pdb.set_trace()
         elapsed_time_deadlocks = time.time() - self._last_deadlocks_collection_time
         if self._deadlocks_collection_enabled and elapsed_time_deadlocks >= self._deadlocks_collection_interval:
             self._last_deadlocks_collection_time = time.time()
@@ -251,10 +250,10 @@ class SqlserverActivity(DBMAsyncJob):
 
     @tracked_method(agent_check_getter=agent_check_getter)
     def _collect_deadlocks(self):
-        pdb.set_trace()
         deadlock_xmls = self._deadlocks.collect_deadlocks()
         deadlocks_event = self._create_deadlock_event(deadlock_xmls)
         payload = json.dumps(deadlocks_event, default=default_json_event_encoding)
+        pdb.set_trace()
         self._check.database_monitoring_deadlocks(payload)
         
     @tracked_method(agent_check_getter=agent_check_getter)
