@@ -75,4 +75,4 @@ jobs:
         github-token: ${{ secrets.GITHUB_TOKEN }}
         script: |
           const { issue: { number: issue_number }, repo: { owner, repo }  } = context;
-          github.issues.createComment({ issue_number, owner, repo, body: "The changelog type `changed` or `removed` was used in this Pull Request, so the next release will bump major version. Please make sure this is a breaking change, or use the `fixed` or `added` type instead." });
+          github.rest.issues.createComment({ issue_number, owner, repo, body: "The changelog type `changed` or `removed` was used in this Pull Request, so the next release will bump major version. Please make sure this is a breaking change, or use the `fixed` or `added` type instead." });
