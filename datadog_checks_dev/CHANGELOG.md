@@ -6,7 +6,7 @@
 
 ***Removed***:
 
-* Remove `ddev release trello ...` commands. We no longer interact with trello during agent release QA. ([#17615](https://github.com/DataDog/integrations-core/pull/17615))
+* Remove `ddev release trello ...` commands. We no longer interact with Trello during agent release QA. ([#17615](https://github.com/DataDog/integrations-core/pull/17615))
 
 ***Added***:
 
