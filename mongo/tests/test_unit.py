@@ -28,12 +28,7 @@ GAUGE = MongoDb.gauge
 DEFAULT_METRICS_LEN = len(
     {
         m_name: m_type
-        for d in [
-            metrics.BASE_METRICS,
-            metrics.DURABILITY_METRICS,
-            metrics.LOCKS_METRICS,
-            metrics.WIREDTIGER_METRICS,
-        ]
+        for d in [metrics.BASE_METRICS, metrics.DURABILITY_METRICS, metrics.LOCKS_METRICS, metrics.WIREDTIGER_METRICS]
         for m_name, m_type in d.items()
     }
 )
