@@ -16,12 +16,12 @@ from datadog_checks.sqlserver.config import SQLServerConfig
 from datadog_checks.sqlserver.const import STATIC_INFO_ENGINE_EDITION, STATIC_INFO_VERSION
 from datadog_checks.sqlserver.utils import extract_sql_comments_and_procedure_name
 from datadog_checks.sqlserver.deadlocks import Deadlocks
-import pdb
+
 try:
     import datadog_agent
 except ImportError:
     from ..stubs import datadog_agent
-import pdb
+
 DEFAULT_ACTIVITY_COLLECTION_INTERVAL = 10
 DEFAULT_DEADLOCKS_COLLECTION_INTERVAL = 5
 MAX_PAYLOAD_BYTES = 19e6
@@ -216,8 +216,7 @@ class SqlserverActivity(DBMAsyncJob):
         self._conn_key_prefix = "dbm-activity-"
         self._activity_payload_max_bytes = MAX_PAYLOAD_BYTES
         self._exec_requests_cols_cached = None
-        obfuscate_sql = lambda sql: obfuscate_sql_with_metadata(sql, self._config.obfuscator_options, replace_null_character=True)
-        self._deadlocks = Deadlocks(check, config, self._conn_key_prefix, obfuscate_sql)
+        self._deadlocks = Deadlocks(check, self._conn_key_prefix, self._config)
 
     def _close_db_conn(self):
         pass
@@ -230,7 +229,7 @@ class SqlserverActivity(DBMAsyncJob):
                 self.collect_activity()
             except Exception as e:
                 self._log.error(
-                    """An error occurred while collecting sqlserver activity.
+                    """An error occurred while collecting SQLServer activity.
                                 This may be unavailable until the error is resolved. The error - {}""".format(
                         e
                     )
@@ -242,7 +241,7 @@ class SqlserverActivity(DBMAsyncJob):
                 self._collect_deadlocks()
             except Exception as e:
                 self._log.error(
-                    """An error occurred while collecting sqlserver deadlocks.
+                    """An error occurred while collecting SQLServer deadlocks.
                                 This may be unavailable until the error is resolved. The error - {}""".format(
                         e
                     )
@@ -253,7 +252,6 @@ class SqlserverActivity(DBMAsyncJob):
         deadlock_xmls = self._deadlocks.collect_deadlocks()
         deadlocks_event = self._create_deadlock_event(deadlock_xmls)
         payload = json.dumps(deadlocks_event, default=default_json_event_encoding)
-        pdb.set_trace()
         self._check.database_monitoring_deadlocks(payload)
         
     @tracked_method(agent_check_getter=agent_check_getter)
