@@ -3,9 +3,9 @@
 # Licensed under a 3-clause BSD style license (see LICENSE)
 
 from typing import Any, Callable, Dict  # noqa: F401
+from unittest.mock import MagicMock
 
 import pytest
-from mock import patch
 
 from datadog_checks.base import AgentCheck  # noqa: F401
 from datadog_checks.base.stubs.aggregator import AggregatorStub  # noqa: F401
@@ -15,11 +15,11 @@ from datadog_checks.tibco_ems import TibcoEMSCheck
 from .common import METRIC_DATA, SECTION_OUTPUT_SHOW_ALL, SECTION_RESULT, SHOW_MAP, mock_output
 
 
+# Test the main check functionality
 def test_check(dd_run_check, aggregator, instance):
-
     check = TibcoEMSCheck('tibco_ems', {}, [instance])
-    with patch('datadog_checks.tibco_ems.tibco_ems.get_subprocess_output', return_value=mock_output('show_all')):
-        dd_run_check(check)
+    check.run_tibco_command = MagicMock(return_value=mock_output('show_all'))
+    dd_run_check(check)
 
     for metric in METRIC_DATA:
         aggregator.assert_metric(metric)
@@ -28,58 +28,120 @@ def test_check(dd_run_check, aggregator, instance):
     aggregator.assert_all_metrics_covered()
 
 
+# Test specific show server metrics
+def test_show_server_metrics(dd_run_check, aggregator, instance):
+    expected_metrics = SHOW_MAP['show server']['expected_metrics']
+
+    check = TibcoEMSCheck('tibco_ems', {}, [instance])
+    check.run_tibco_command = MagicMock(return_value=mock_output('show_server'))
+    dd_run_check(check)
+
+    for metric in expected_metrics:
+        aggregator.assert_metric(metric)
+    aggregator.assert_metrics_using_metadata(get_metadata_metrics())
+
+
+# Test the parse_show_server method
 def test_parse_show_server():
-    # Use the 0th index to get string output from the mock_output function
-    output = SHOW_MAP['show server']['output']
+    section = SHOW_MAP['show server']['section']
     regex = SHOW_MAP['show server']['regex']
+
     check = TibcoEMSCheck('tibco_ems', {}, [{}])
-    result = check.parse_show_server(output, regex)
+    output = check._section_output(section)['show server']
+    result = check._parse_show_server(output, regex)
 
     expected_result = SHOW_MAP['show server']['expected_result']
 
     assert result == expected_result
 
 
+# Parametrized test for different show commands
+@pytest.mark.parametrize(
+    "output, expected_metrics",
+    [
+        pytest.param(
+            mock_output('show_queues'),
+            SHOW_MAP['show queues']['expected_metrics'],
+            id="show queues",
+        ),
+        pytest.param(
+            mock_output('show_topics'),
+            SHOW_MAP['show topics']['expected_metrics'],
+            id="show topics",
+        ),
+        pytest.param(
+            mock_output('show_stat_consumers'),
+            SHOW_MAP['show stat consumers']['expected_metrics'],
+            id="show stat consumers",
+        ),
+        pytest.param(
+            mock_output('show_stat_producers'),
+            SHOW_MAP['show stat producers']['expected_metrics'],
+            id="show stat producers",
+        ),
+        pytest.param(
+            mock_output('show_connections'),
+            SHOW_MAP['show connections full']['expected_metrics'],
+            id="show connections full",
+        ),
+    ],
+)
+def test_show_metrics(dd_run_check, aggregator, instance, output, expected_metrics):
+    check = TibcoEMSCheck('tibco_ems', {}, [instance])
+    check.run_tibco_command = MagicMock(return_value=output)
+    dd_run_check(check)
+
+    for metric in expected_metrics:
+        aggregator.assert_metric(metric)
+    aggregator.assert_metrics_using_metadata(get_metadata_metrics())
+
+
+# Parametrized test for the parse_factory method
 @pytest.mark.parametrize(
     "expected_result, data, regex",
     [
-        [
+        pytest.param(
             SHOW_MAP['show queues']['expected_result'],
-            SHOW_MAP['show queues']['output'],
+            SHOW_MAP['show queues']['section'],
             SHOW_MAP['show queues']['regex'],
-        ],
-        [
+            id="show queues",
+        ),
+        pytest.param(
             SHOW_MAP['show topics']['expected_result'],
-            SHOW_MAP['show topics']['output'],
+            SHOW_MAP['show topics']['section'],
             SHOW_MAP['show topics']['regex'],
-        ],
-        [
+            id="show topics",
+        ),
+        pytest.param(
             SHOW_MAP['show stat consumers']['expected_result'],
-            SHOW_MAP['show stat consumers']['output'],
+            SHOW_MAP['show stat consumers']['section'],
             SHOW_MAP['show stat consumers']['regex'],
-        ],
-        [
+            id="show stat consumers",
+        ),
+        pytest.param(
             SHOW_MAP['show stat producers']['expected_result'],
-            SHOW_MAP['show stat producers']['output'],
+            SHOW_MAP['show stat producers']['section'],
             SHOW_MAP['show stat producers']['regex'],
-        ],
-        [
+            id="show stat producers",
+        ),
+        pytest.param(
             SHOW_MAP['show connections full']['expected_result'],
-            SHOW_MAP['show connections full']['output'],
+            SHOW_MAP['show connections full']['section'],
             SHOW_MAP['show connections full']['regex'],
-        ],
+            id="show connections full",
+        ),
     ],
 )
 def test_parse_factory(data, regex, expected_result):
-
     check = TibcoEMSCheck('tibco_ems', {}, [{}])
-    result = check.parse_factory(data, regex)
+    result = check._parse_factory(data, regex)
 
     assert result == expected_result
 
 
+# Test the section_output method
 def test_section_output():
     check = TibcoEMSCheck('tibco_ems', {}, [{}])
-    output = check.section_output(SECTION_OUTPUT_SHOW_ALL)
+    output = check._section_output(SECTION_OUTPUT_SHOW_ALL)
 
     assert output == SECTION_RESULT

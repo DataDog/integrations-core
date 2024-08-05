@@ -1,3 +1,4 @@
+Command: show queues
                                                               All Msgs            Persistent Msgs
   Queue Name                        SNFGXIBCT  Pre  Rcvrs     Msgs    Size        Msgs    Size
   >                                 ---------    5*     0        0     0.0 Kb        0     0.0 Kb

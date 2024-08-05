@@ -83,7 +83,7 @@ def mock_output(filename):
 
 SHOW_MAP = {
     'show server': {
-        'output': mock_output('show_server')[0],
+        'section': mock_output('show_server')[0],
         'regex': SHOW_METRIC_DATA['show server']['regex'],
         'expected_result': {
             'version': '10.1.0',
@@ -118,9 +118,33 @@ SHOW_MAP = {
             'storage_write_rate_size': {'value': 0.0, 'unit': 'Kb'},
             'uptime': 368340,
         },
+        'expected_metrics': [
+            'tibco_ems.server.admin_connections',
+            'tibco_ems.server.asynchronous_storage',
+            'tibco_ems.server.client_connections',
+            'tibco_ems.server.consumers',
+            'tibco_ems.server.durables',
+            'tibco_ems.server.inbound_message_rate',
+            'tibco_ems.server.inbound_message_rate_size',
+            'tibco_ems.server.message_memory_pooled',
+            'tibco_ems.server.outbound_message_rate',
+            'tibco_ems.server.outbound_message_rate_size',
+            'tibco_ems.server.pending_messages',
+            'tibco_ems.server.pending_message_size',
+            'tibco_ems.server.producers',
+            'tibco_ems.server.queues',
+            'tibco_ems.server.sessions',
+            'tibco_ems.server.synchronous_storage',
+            'tibco_ems.server.topics',
+            'tibco_ems.server.uptime',
+            'tibco_ems.server.storage_read_rate',
+            'tibco_ems.server.storage_read_rate_size',
+            'tibco_ems.server.storage_write_rate',
+            'tibco_ems.server.storage_write_rate_size',
+        ],
     },
     'show queues': {
-        'output': mock_output('show_queues')[0],
+        'section': mock_output('show_queues')[0],
         'regex': SHOW_METRIC_DATA['show queues']['regex'],
         'expected_result': [
             {
@@ -252,9 +276,16 @@ SHOW_MAP = {
                 'snfgxibct': '',
             },
         ],
+        'expected_metrics': [
+            'tibco_ems.queue.pending_messages',
+            'tibco_ems.queue.pending_messages_size',
+            'tibco_ems.queue.pending_persistent_messages',
+            'tibco_ems.queue.pending_persistent_messages_size',
+            'tibco_ems.queue.receivers',
+        ],
     },
     'show topics': {
-        'output': mock_output('show_topics')[0],
+        'section': mock_output('show_topics')[0],
         'regex': SHOW_METRIC_DATA['show topics']['regex'],
         'expected_result': [
             {
@@ -290,9 +321,17 @@ SHOW_MAP = {
                 'topic_name': 'topic.sample',
             },
         ],
+        'expected_metrics': [
+            'tibco_ems.topic.durable_subscriptions',
+            'tibco_ems.topic.pending_messages',
+            'tibco_ems.topic.pending_messages_size',
+            'tibco_ems.topic.pending_persistent_messages',
+            'tibco_ems.topic.pending_persistent_messages_size',
+            'tibco_ems.topic.subsciptions',
+        ],
     },
     'show stat consumers': {
-        'output': mock_output('show_stat_consumers')[0],
+        'section': mock_output('show_stat_consumers')[0],
         'regex': SHOW_METRIC_DATA['show stat consumers']['regex'],
         'expected_result': [
             {
@@ -306,9 +345,15 @@ SHOW_MAP = {
                 'messages_rate_size': {'value': 0.6, 'unit': 'Kb'},
             }
         ],
+        'expected_metrics': [
+            'tibco_ems.consumer.messages_rate',
+            'tibco_ems.consumer.messages_rate_size',
+            'tibco_ems.consumer.total_messages',
+            'tibco_ems.consumer.total_messages_size',
+        ],
     },
     'show stat producers': {
-        'output': mock_output('show_stat_producers')[0],
+        'section': mock_output('show_stat_producers')[0],
         'regex': SHOW_METRIC_DATA['show stat producers']['regex'],
         'expected_result': [
             {
@@ -322,9 +367,15 @@ SHOW_MAP = {
                 'messages_rate_size': {'value': 0.0, 'unit': 'Kb'},
             }
         ],
+        'expected_metrics': [
+            'tibco_ems.producer.messages_rate',
+            'tibco_ems.producer.messages_rate_size',
+            'tibco_ems.producer.total_messages',
+            'tibco_ems.producer.total_messages_size',
+        ],
     },
     'show connections full': {
-        'output': mock_output('show_connections')[0],
+        'section': mock_output('show_connections')[0],
         'regex': SHOW_METRIC_DATA['show connections full']['regex'],
         'expected_result': [
             {
@@ -350,6 +401,15 @@ SHOW_MAP = {
                 'uptime': 247,
                 'user': 'admin',
             },
+        ],
+        'expected_metrics': [
+            'tibco_ems.connection.consumers',
+            'tibco_ems.connection.producers',
+            'tibco_ems.connection.sessions',
+            'tibco_ems.connection.temporary_queues',
+            'tibco_ems.connection.temporary_topics',
+            'tibco_ems.connection.uncommitted_transactions',
+            'tibco_ems.connection.uncommitted_transactions_size',
         ],
     },
 }

@@ -47,7 +47,7 @@ class TibcoEMSCheck(AgentCheck):
 
     def check(self, _):
 
-        output, err, code = get_subprocess_output(self.cmd, self.log)
+        output, err, code = self.run_tibco_command()
         if err or 'Error:' in output or code != 0:
             self.log.error('Error running command: %s', err)
             return
@@ -56,16 +56,16 @@ class TibcoEMSCheck(AgentCheck):
         cleaned_data = output.replace('\r', '').strip()
 
         # Split the output into command sections
-        sections = self.section_output(cleaned_data)
+        sections = self._section_output(cleaned_data)
 
         # Parse the output
         for command, section in sections.items():
             pattern = SHOW_METRIC_DATA[command]['regex']
             if command == 'show server':
-                self.parsed_data[command] = self.parse_show_server(section, pattern)
+                self.parsed_data[command] = self._parse_show_server(section, pattern)
             else:
                 try:
-                    self.parsed_data[command] = self.parse_factory(section, pattern)
+                    self.parsed_data[command] = self._parse_factory(section, pattern)
                 except Exception as e:
                     self.log.error('Error parsing command %s: %s', command, e)
                     continue
@@ -76,24 +76,27 @@ class TibcoEMSCheck(AgentCheck):
             metric_prefix = SHOW_METRIC_DATA[command]['metric_prefix']
 
             if command == 'show server':
-                self.submit_metrics_factory(metric_prefix, metric_info, metric_keys, tag_keys)
+                self._submit_metrics_factory(metric_prefix, metric_info, metric_keys, tag_keys)
             else:
                 for metric_entry in metric_info:
-                    self.submit_metrics_factory(metric_prefix, metric_entry, metric_keys, tag_keys)
+                    self._submit_metrics_factory(metric_prefix, metric_entry, metric_keys, tag_keys)
 
-    def parse_unit(self, value):
+    def run_tibco_command(self):
+        return get_subprocess_output(self.cmd, self.log)
+
+    def _parse_unit(self, value):
         match = unit_pattern.match(value)
         if match:
             return {'value': float(match.group('value')), 'unit': match.group('unit')}
         return value
 
-    def parse_generic(self, value):
+    def _parse_generic(self, value):
         try:
             return int(value)
         except ValueError:
             return value
 
-    def parse_show_server(self, output, pattern):
+    def _parse_show_server(self, output, pattern):
         server_data = {}
         lines = output.strip().split('\n')
 
@@ -112,9 +115,9 @@ class TibcoEMSCheck(AgentCheck):
             elif key == 'uptime':
                 server_data[key] = parse_server_uptime(value)
             elif any(metric in key for metric in metrics_with_units):
-                server_data[key] = self.parse_unit(value)
+                server_data[key] = self._parse_unit(value)
             else:
-                server_data[key] = self.parse_generic(value)
+                server_data[key] = self._parse_generic(value)
 
         def parse_rate(server_data, metric_key, value):
             rates = value.split(',')
@@ -165,7 +168,7 @@ class TibcoEMSCheck(AgentCheck):
 
         return server_data
 
-    def parse_factory(self, output, pattern):
+    def _parse_factory(self, output, pattern):
         data = []
         lines = output.strip().split('\n')
 
@@ -192,14 +195,14 @@ class TibcoEMSCheck(AgentCheck):
                     continue
                 for key, value in info.items():
                     if key in metrics_with_units:
-                        info[key] = self.parse_unit(value)
+                        info[key] = self._parse_unit(value)
                     else:
                         value = sanitize_name(value)
-                        info[key] = self.parse_generic(value)
+                        info[key] = self._parse_generic(value)
                 data.append(info)
         return data
 
-    def submit_metrics_factory(self, prefix, metric_data, metric_names, tag_keys):
+    def _submit_metrics_factory(self, prefix, metric_data, metric_names, tag_keys):
 
         tags = []
         for key in tag_keys:
@@ -221,7 +224,7 @@ class TibcoEMSCheck(AgentCheck):
                 else:
                     self.gauge(f"{prefix}.{metric_name}", metric_info, tags=tags)
 
-    def section_output(self, output):
+    def _section_output(self, output):
         '''
         Split the output into sections based on the command
         '''
