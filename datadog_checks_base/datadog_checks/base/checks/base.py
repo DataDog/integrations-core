@@ -237,7 +237,7 @@ class AgentCheck(object):
             tags = {}
             if tags_str:
                 tags = json.loads(tags_str)
-            self.log.info("natasha testing get host tags 2 %s", tags)
+            self.log.info("natasha testing get host tags 2 %s", json.dumps(tags))
         except Exception as e:
             self.log.info("natasha testing get host tags exception %s", str(e))
 
