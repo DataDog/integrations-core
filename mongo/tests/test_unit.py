@@ -693,7 +693,6 @@ def test_emits_ok_service_check_for_documentdb_deployment(
     mock_list_database_names.assert_called_once()
 
 
-@pytest.mark.debug
 def test_refresh_role(instance_shard, aggregator, check, dd_run_check):
     """
     Test that we refresh the role of a node in a replicaset cluster.
