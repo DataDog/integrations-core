@@ -68,7 +68,7 @@ class PostgresConfig:
         self.max_connections = instance.get('max_connections', 30)
         self.tags = self._build_tags(
             custom_tags=instance.get('tags', []),
-            agent_tags=datadog_agent.get_config('tags') or [],
+            agent_tags=datadog_agent.get_host_tags() or [],
             propagate_agent_tags=self._should_propagate_agent_tags(instance, init_config),
         )
 
