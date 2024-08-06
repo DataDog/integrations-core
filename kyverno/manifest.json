@@ -9,7 +9,7 @@
     "support": "README.md#Support",
     "changelog": "CHANGELOG.md",
     "description": "Monitor the health and performance of Kyverno",
-    "title": "kyverno",
+    "title": "Kyverno",
     "media": [],
     "classifier_tags": [
       "Supported OS::Linux",

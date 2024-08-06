@@ -5,7 +5,7 @@
 # Also bump the LIBRDKAFKA_VERSION version in this file
 post-install-commands = [
   "python -m pip uninstall -y confluent-kafka",
-  "python -m pip install --no-binary confluent-kafka confluent-kafka==2.4.0",
+  "python -m pip install --no-binary confluent-kafka confluent-kafka==2.5.0",
 ]
 
 [envs.default.env-vars]
