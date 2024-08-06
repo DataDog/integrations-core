@@ -90,6 +90,7 @@ KNOWN_LICENSES = {
     'bsd': 'BSD-3-Clause',
     'bsd license': 'BSD-3-Clause',
     '3-clause bsd license': 'BSD-3-Clause',
+    'LICENSE.BSD3': 'BSD-3-Clause',
     'new bsd license': 'BSD-3-Clause',
     'mit license': 'MIT',
     'psf': 'PSF',

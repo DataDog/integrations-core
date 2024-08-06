@@ -591,11 +591,16 @@ def handle_kerberos_cache(cache_file_path):
 def should_bypass_proxy(url, no_proxy_uris):
     # Accepts a URL and a list of no_proxy URIs
     # Returns True if URL should bypass the proxy.
-    parsed_uri = urlparse(url).hostname
+    parsed_uri_parts = urlparse(url)
+    parsed_uri = parsed_uri_parts.hostname
 
     if '*' in no_proxy_uris:
         # A single * character is supported, which matches all hosts, and effectively disables the proxy.
         # See: https://curl.haxx.se/libcurl/c/CURLOPT_NOPROXY.html
+        return True
+
+    if parsed_uri_parts.scheme == "unix":
+        # Unix domain sockets semantically do not make sense to proxy
         return True
 
     for no_proxy_uri in no_proxy_uris:
