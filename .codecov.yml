@@ -342,10 +342,6 @@ coverage:
         target: 75
         flags:
         - kyototycoon
-      Kyverno:
-        target: 75
-        flags:
-        - kyverno
       Lighttpd:
         target: 75
         flags:
@@ -682,6 +678,10 @@ coverage:
         target: 75
         flags:
         - fluxcd
+      kyverno:
+        target: 75
+        flags:
+        - kyverno
       vLLM:
         target: 75
         flags:

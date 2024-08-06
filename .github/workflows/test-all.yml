@@ -2134,10 +2134,10 @@ jobs:
       minimum-base-package: ${{ inputs.minimum-base-package }}
       pytest-args: ${{ inputs.pytest-args }}
     secrets: inherit
-  jf0fdd7c:
+  j6900ead:
     uses: ./.github/workflows/test-target.yml
     with:
-      job-name: Kyverno
+      job-name: kyverno
       target: kyverno
       platform: linux
       runner: '["ubuntu-22.04"]'
