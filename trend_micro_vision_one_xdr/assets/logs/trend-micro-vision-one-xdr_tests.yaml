@@ -32,7 +32,7 @@ tests:
                             "guid": "B159820E-5BB3-49F2-AD98-75A4F2046547",
                             "name": "assettag-eid",
                             "ips": [
-                                "192.168.5.134"
+                                "10.10.10.10"
                             ]
                         },
                         "entityId": "B159820E-5BB3-49F2-AD98-75A4F2046547",
@@ -431,7 +431,7 @@ tests:
                             "field": "endpointIp",
                             "type": "ip",
                             "value": [
-                                "192.168.5.134"
+                                "10.10.10.10"
                             ]
                         }
                     ],
@@ -453,12 +453,11 @@ tests:
                 "customerId": "191648c0f65342",
                 "tags": [
                     "1",
-                    "2",
-                    ],
+                    "2"
+                ],
                 "receivedTime": "2024-07-31T07:01:44Z",
                 "productCode": "aad",
                 "packageTraceId": "3e4rr245",
-                "filterRiskLevel": "high",
                 "groupId": "3g35av3545",
                 "tenantGuid": "322434d344qd341",
                 "bitwiseFilterRiskLevel": 2,
@@ -511,14 +510,14 @@ tests:
                 "pname": "2345wwy48",
                 "actionName": "Sign Out",
                 "correlationId": "234r34r542w13",
-                "policyTreePath": "C:\\desktop\\malware.sys",
+                "policyTreePath": "C:\\desktop\\malware.sys"
             },
             "ingestedDateTime": "2024-07-31T05:00:49Z",
             "entityType": "endpoint",
-            "entityName": "ASSETTAG-EID(192.168.5.134)",
+            "entityName": "ASSETTAG-EID(10.10.10.10)",
             "endpoint": {
                 "ips": [
-                    "192.168.5.134"
+                    "10.10.10.10"
                 ],
                 "agentGuid": "b159820e-5bb3-49f2-ad98-75a4f2052282",
                 "endpointName": "ASSETTAG-EID"
@@ -583,7 +582,7 @@ tests:
                 "recipientAccountId": "1234567890",
                 "requestID": "1234567890abcdef",
                 "responseElements": "{\"User\":{\"UserName\":\"JohnDoe\"}}",
-                "sourceIPAddress": "192.0.2.1",
+                "sourceIPAddress": "10.10.10.10",
                 "userAgent": "aws-cli/2.7.24 Python/3.9.7 Linux/5.10.104-1-MANJARO",
                 "uuid": "1234567890abcdef"
             }
