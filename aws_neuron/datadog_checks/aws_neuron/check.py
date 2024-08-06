@@ -8,6 +8,8 @@ from datadog_checks.base import OpenMetricsBaseCheckV2
 class AwsNeuronCheck(OpenMetricsBaseCheckV2):
     __NAMESPACE__ = 'aws_neuron'
 
+    DEFAULT_METRIC_LIMIT = 0
+
     def __init__(self, name, init_config, instances=None):
 
         super(AwsNeuronCheck, self).__init__(
