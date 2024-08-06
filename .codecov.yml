@@ -342,6 +342,10 @@ coverage:
         target: 75
         flags:
         - kyototycoon
+      Kyverno:
+        target: 75
+        flags:
+        - kyverno
       Lighttpd:
         target: 75
         flags:
@@ -682,10 +686,6 @@ coverage:
         target: 75
         flags:
         - vllm
-      kyverno:
-        target: 75
-        flags:
-        - kyverno
       vSphere:
         target: 75
         flags:
