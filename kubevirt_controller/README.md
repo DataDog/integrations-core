@@ -15,13 +15,52 @@ No additional installation is needed on your server.
 
 ### Configuration
 
-1. Edit the `kubevirt_controller.d/conf.yaml` file, in the `conf.d/` folder at the root of your Agent's configuration directory to start collecting your kubevirt_controller performance data. See the [sample kubevirt_controller.d/conf.yaml][4] for all available configuration options.
+The main use case to run the `kubevirt_controller` check is as a [cluster level check][4].
 
-2. [Restart the Agent][5].
+In order to do that, you will need to update some RBAC permissions to give the datadog-agent read-only access to the`KubeVirt` resources by following the steps below:
+
+1. Bind the `kubevirt.io:view` ClusterRole to the `datadog-agent` service account:
+
+   ```yaml
+   apiVersion: rbac.authorization.k8s.io/v1
+   kind: ClusterRoleBinding
+   metadata:
+   name: datadog-agent-kubevirt
+   roleRef:
+   apiGroup: rbac.authorization.k8s.io
+   kind: ClusterRole
+   name: kubevirt.io:view
+   subjects:
+
+   - kind: ServiceAccount
+   name: datadog-agent
+   namespace: default
+   ```
+
+2. Annotate the pods template of your `virt-controller` deployment by patching the `KubeVirt` resource as follows:
+
+```yaml
+apiVersion: kubevirt.io/v1
+kind: KubeVirt
+metadata:
+  name: kubevirt
+  namespace: kubevirt
+spec:
+  certificateRotateStrategy: {}
+  configuration: {}
+  customizeComponents:
+    patches:
+    - resourceType: Deployment
+        resourceName: virt-controller
+        patch: '{"spec": {"template":{"metadata":{"annotations":{ "ad.datadoghq.com/virt-controller.check_names": "[\"kubevirt_controller\"]", "ad.datadoghq.com/virt-controller.init_configs": "[{}]", "ad.datadoghq.com/virt-controller.instances": "[{ \"kubevirt_controller_metrics_endpoint\": \"https://%%host%%:%%port%%/metrics\",\"kubevirt_controller_healthz_endpoint\": \"https://%%host%%:%%port%%/healthz\", \"kube_namespace\":\"%%kube_namespace%%\", \"kube_pod_name\":\"%%kube_pod_name%%\", \"kube_cluster_name\": \"<DD_CLUSTER_NAME>\", \"tls_verify\": \"false\"}]"}}}}}'
+        type: strategic
+```
+
+Replace `<DD_CLUSTER_NAME>` with the name you want for your cluster.
 
 ### Validation
 
-[Run the Agent's status subcommand][6] and look for `kubevirt_controller` under the Checks section.
+[Run the Cluster Agent's `clusterchecks` subcommand][7] inside your Cluster Agent container and look for the `kubevirt_api` check under the Checks section.
 
 ## Data Collected
 
@@ -37,12 +76,9 @@ The Kubevirt Controller integration does not include any events.
 
 The Kubevirt Controller integration does not include any service checks.
 
-See [service_checks.json][8] for a list of service checks provided by this integration.
-
 ## Troubleshooting
 
 Need help? Contact [Datadog support][9].
-
 
 [1]: **LINK_TO_INTEGRATION_SITE**
 [2]: https://app.datadoghq.com/account/settings/agent/latest
