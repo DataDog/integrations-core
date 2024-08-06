@@ -2,7 +2,7 @@
 # All rights reserved
 # Licensed under Simplified BSD License (see LICENSE)
 # https://www.postgresql.org/docs/current/libpq-connect.html#LIBPQ-PARAMKEYWORDS
-from typing import Optional
+from typing import Optional, List
 
 from six import PY2, PY3, iteritems
 
@@ -69,7 +69,7 @@ class PostgresConfig:
         self.max_connections = instance.get('max_connections', 30)
         self.tags = self._build_tags(
             custom_tags=instance.get('tags', []),
-            agent_tags=self._get_agent_tags(),
+            agent_tags=self._get_agent_tags(check),
             propagate_agent_tags=self._should_propagate_agent_tags(instance, init_config),
         )
 
@@ -288,14 +288,19 @@ class PostgresConfig:
         return None
 
     @staticmethod
-    def _get_agent_tags():
+    def _get_agent_tags(check) -> List[str]:
         '''
         Get the tags from the agent host and return them as a list of strings.
         '''
+        check.info("natasha test _get_agent_tags 1")
         tags = json.loads(datadog_agent.get_host_tags()) or {}
-        system_tags = tags.get('system', [])
-        gcp_tags = tags.get('google cloud platform', [])
-        return system_tags + gcp_tags
+        result = []
+        for key, value in tags.items():
+            if isinstance(value, list):
+                result.extend(value)
+            else:
+                check.warning(f"Agent host tags for '{key}' is not a list: {value}")
+        return result
 
     @staticmethod
     def _should_propagate_agent_tags(instance, init_config) -> bool:
