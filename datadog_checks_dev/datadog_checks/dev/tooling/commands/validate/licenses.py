@@ -496,6 +496,7 @@ def licenses(ctx, sync):
                     license_ids.add(known_spdx_licenses[normalized_license])
                 else:
                     license_ids.add(expanded_license)
+                    breakpoint()
                     package_license_errors[package_name].append(f'unknown license: {expanded_license}')
 
         for classifier in data['classifiers']:
