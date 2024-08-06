@@ -43,7 +43,9 @@
         "metadata_path": "assets/service_checks.json"
       },
       "monitors": {
-	"Execution latency": "assets/monitors/execution_latency.json"
+	"Execution latency": "assets/monitors/execution_latency.json",
+	"Execution errors":  "assets/monitors/execution_errors.json",
+	"Neuron Runtime vCPU usage":  "assets/monitors/neuron_runtime_vcpu.json"
       }
     }
   },
