@@ -433,6 +433,11 @@ class SqlserverActivity(DBMAsyncJob):
         return event
 
     def _create_deadlock_event(self, deadlock_xmls):
+        #TODO WHAT if deadlock xml is just too long ? 
+        #MAX_PAYLOAD_BYTES ? 
+        #TODO compression , couldnt reallly see it in Go code so far but may be its somewhere deeper. 
+        # may be 	flushAndSerializeInParallel FlushAndSerializeInParallel in aggregator.go ? 
+        # compression is Trade off CPU , network ?
         event = {
             "host": self._check.resolved_hostname,
             "ddagentversion": datadog_agent.get_version(),

@@ -12,7 +12,8 @@ from datadog_checks.sqlserver.queries import (
 )
 #TODO temp imports:
 import pdb
-import time
+
+MAX_DEADLOCKS = 100
 
 class Deadlocks:
 
@@ -22,37 +23,45 @@ class Deadlocks:
         self._conn_key_prefix = conn_prefix
         self._config = config
         self._last_deadlock_timestamp = '1900-01-01 01:01:01.111'
-        
+        self._max_deadlocks = config.deadlocks_config.get("max_deadlocks", MAX_DEADLOCKS)
+
+
+    def obfuscate_no_except_wrapper(self, sql_text):
+        try:
+            sql_text = obfuscate_sql_with_metadata(sql_text, self._config.obfuscator_options, replace_null_character=True)['query']
+        except Exception as e:
+            if self._config.log_unobfuscated_queries:
+                self.log.warning("Failed to obfuscate sql text within a deadlock=[%s] | err=[%s]", sql_text, e)
+            else:
+                self.log.debug("Failed to obfuscate sql text within a deadlock | err=[%s]", e)
+            sql_text = "ERROR: failed to obfuscate"
+        return sql_text
+
     def obfuscate_xml(self, root):
         # TODO put exception here if not found as this would signal in a format change
+        pdb.set_trace()
         process_list = root.find(".//process-list")
         for process in process_list.findall('process'):
             inputbuf = process.find('inputbuf')
-            inputbuf.text = obfuscate_sql_with_metadata(inputbuf.text, self._config.obfuscator_options, replace_null_character=True)['query']
+            #TODO inputbuf.text can be truncated, check when live ?
+            inputbuf.text = self.obfuscate_no_except_wrapper(inputbuf.text)
             for frame in process.findall('.//frame'):
-                frame.text = obfuscate_sql_with_metadata(frame.text, self._config.obfuscator_options, replace_null_character=True)['query']
+                frame.text = self.obfuscate_no_except_wrapper(frame.text)
 
     def collect_deadlocks(self):
         pdb.set_trace()
         with self._check.connection.open_managed_default_connection(key_prefix=self._conn_key_prefix):
             with self._check.connection.get_managed_cursor(key_prefix=self._conn_key_prefix) as cursor:
-                #Q test this query for 1000 deadlocks ? speed , truncation ? 
-                #Q shell we may be limit amount of data, 1000 deadlock is 4MB but do we need more than .. 50 ?(conf parameter)
-                cursor.execute(DETECT_DEADLOCK_QUERY, (self._last_deadlock_timestamp,))
+                cursor.execute(DETECT_DEADLOCK_QUERY, (self._max_deadlocks, self._last_deadlock_timestamp))
                 results = cursor.fetchall()
                 last_deadlock_datetime = datetime.strptime(self._last_deadlock_timestamp, '%Y-%m-%d %H:%M:%S.%f')
                 converted_xmls = []
                 for result in results:
-                    #TODO if this fails  what we do , can be obfuscate it or just drop and notify backend? 
-                    #TODO speed of serialization deciarialization
                     try:
                         root = ET.fromstring(result[1])
                     except Exception as e:
-                        #TODO notify backend ? try to check manually for process list tag and processes 
-                        # say if we can find <process> and </process> and <frame> and </frame> we could 
-                        # still try to do something but my feeling just to notify backend 
-
                         # Other thing do we want to suggest to set ring buffer to 1MB ? 
+                        # TODO notify backend ? How ? make a collection_errors array like in metadata json
                         self._log.error(
                         """An error occurred while collecting SQLServer deadlocks. 
                                 One of the deadlock XMLs couldn't be parsed. The error: {}""".format(e)
