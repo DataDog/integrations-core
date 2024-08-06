@@ -1,11 +1,6 @@
 import os
 from datetime import datetime, date
-
-ONE_YEAR = 365
-PATH = os.path.dirname(os.path.dirname(os.getcwd())) # ../../ this is the integrations-core top level directory
-RESULTS_TXT_FILE = "results.txt"
-RESULTS_JSON_FILE = "results.json"
-STATS_TXT_FILE = "stats.txt"
+from utilities import ONE_YEAR, PATH, INTEGRATIONS, RESULTS_TXT_FILE, RESULTS_JSON_FILE, STATS_TXT_FILE
 
 # all directories that include an 'assets/dashboards' directory
 def get_dashboard_directories(top_path):
@@ -28,23 +23,19 @@ def is_dashboard_outdated(modified_date, days_outdated):
 		return True
 	return False
 
-
-
 # store all last modified date, name, and pathname in a file
 def store_bash_calls_in_text_file(top_path, dirs, file_name):
-	file = open(file_name, 'w')
-
 	for f in dirs:
 		dashboards_path = f + "/assets/dashboards"
 		full_dashboards_path = os.path.join(top_path, dashboards_path)
 		for d in os.listdir(full_dashboards_path):
 			full_path = os.path.join(full_dashboards_path, d)
-			logAdd = 'git log -n 1 --pretty=format:\"%cd%ae&%an\" --date=format:"%Y-%m-%d&" ' + full_path + ' >> ./results.txt'
+			
+			logAdd = 'git log -n 1 --pretty=format:\"%cd%ae&%an\" --date=format:"%Y-%m-%d&" ' + full_path + ' >> ./' + file_name
 			os.system(logAdd)
 
 			path_for_json = os.path.join(dashboards_path, d)
 			os.system('echo \"&' + path_for_json + '\">> ./' + file_name)
-	file.close()
 
 
 
@@ -119,8 +110,7 @@ def store_dashboard_stats_in_text_file(stats, file_name):
 	file.close()
 
 def main(): 
-	files = get_dashboard_directories(PATH)
-	store_bash_calls_in_text_file(PATH, files, RESULTS_TXT_FILE)
+	store_bash_calls_in_text_file(PATH, INTEGRATIONS, RESULTS_TXT_FILE)
 	dict = get_sorted_dict_by_modified_date(RESULTS_TXT_FILE)
 	store_sorted_dict_in_json_file(dict, RESULTS_JSON_FILE)
 	stats = get_dashboard_stats(RESULTS_TXT_FILE)

@@ -1,6 +1,6 @@
 Results as of 2024-08-06
-Total 1 year: 160
-Total 2 years: 52
-Total: 275
-Dashboards outdated 1 year: 58.18181818181818%
-Dashboards outdated 2 years: 18.90909090909091%
+Total 1 year: 640
+Total 2 years: 208
+Total: 1099
+Dashboards outdated 1 year: 58.234758871701544%
+Dashboards outdated 2 years: 18.926296633303004%
