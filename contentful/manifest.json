@@ -35,7 +35,8 @@
     "classifier_tags": [
       "Category::Log Collection",
       "Category::Developer Tools",
-      "Submitted Data Type::Logs"
+      "Submitted Data Type::Logs",
+      "Offering::Integration"
     ]
   },
   "assets": {
