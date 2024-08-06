@@ -50,6 +50,9 @@
     },
     "dashboards": {
       "vLLM Overview": "assets/dashboards/overview.json"
+    },
+    "saved_views": {
+      "errors": "assets/saved_views/errors.json"
     }
   },
   "author": {
