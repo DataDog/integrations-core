@@ -1,6 +1,6 @@
 ## Overview
 
-[Trend Micro Vision One XDR][1] collects and automatically correlates data across multiple security layers – email, endpoint, server, cloud workload, and network. This allows for faster detection of threats and improved investigation and response times through security analysis.
+[Trend Micro Vision One XDR][1] collects and automatically correlates data across multiple security layers - email, endpoint, server, cloud workload, and network. This allows for faster detection of threats and improved investigation and response times through security analysis.
 
 This integration ingests the following logs:
 

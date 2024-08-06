@@ -10,7 +10,18 @@
     "changelog": "CHANGELOG.md",
     "description": "Gain insights into trend micro vision one xdr logs",
     "title": "Trend Micro Vision One XDR",
-    "media": [],
+    "media": [
+      {
+        "caption": "Trend Micro Vision One XDR - Workbench Alerts",
+        "image_url": "images/trend_micro_vision_one_xdr_workbench_alerts.png",
+        "media_type": "image"
+      },
+      {
+        "caption": "Trend Micro Vision One XDR - Observed Attack Techniques",
+        "image_url": "images/trend_micro_vision_one_xdr_oat.png",
+        "media_type": "image"
+      }
+    ],
     "classifier_tags": [
       "Category::Log Collection",
       "Category::Security",
