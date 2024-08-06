@@ -384,184 +384,144 @@ tests:
     result: null
   - sample: |-
         {
-            "source": "detections",
-            "uuid": "fdd69d98-58de-4249-9871-2e1b233b72ff",
+            "source": "identityActivityData",
+            "uuid": "31f42842-e527-443a-bb9d-1918c0f65342",
+            "detectedDateTime": "2024-07-31T05:00:44Z",
             "filters": [
                 {
-                    "id": "F4231",
-                    "name": "Service Execution via Service Control Manager",
-                    "description": "Service Control Manager (services.exe) has executed a process",
+                    "id": "F2140",
+                    "name": "Malicious Software",
+                    "description": "A malicious software was detected on an endpoint.",
+                    "highlightedObjects": [
+                        {
+                            "field": "fileHash",
+                            "type": "file_sha1",
+                            "value": "527a3b861f37d16d356250f9e9bad4c43a850ebf"
+                        },
+                        {
+                            "field": "fileName",
+                            "type": "filename",
+                            "value": [
+                                "Unconfirmed 667870.crdownload"
+                            ]
+                        },
+                        {
+                            "field": "fullPath",
+                            "type": "fullpath",
+                            "value": "\\Downloads\\Unconfirmed 667870.crdownload"
+                        },
+                        {
+                            "field": "malName",
+                            "type": "detection_name",
+                            "value": "TROJ_GEN.R03BC0PG624"
+                        },
+                        {
+                            "field": "actResult",
+                            "type": "text",
+                            "value": [
+                                "Encrypted"
+                            ]
+                        },
+                        {
+                            "field": "scanType",
+                            "type": "text",
+                            "value": "Real-time Scan"
+                        },
+                        {
+                            "field": "endpointIp",
+                            "type": "ip",
+                            "value": [
+                                "192.168.5.134"
+                            ]
+                        }
+                    ],
                     "mitreTacticIds": [
                         "TA0002"
                     ],
                     "mitreTechniqueIds": [
-                        "T1560.002"
+                        "T1204.002"
                     ],
-                    "highlightedObjects": [
-                        {
-                            "type": "port",
-                            "field": "objectPort",
-                            "value": 443
-                        }
-                    ],
-                    "riskLevel": "info",
-                    "type": "custom"
+                    "riskLevel": "medium",
+                    "type": "preset"
                 }
             ],
-            "endpoint": {
-                "endpointName": "LAB-Luwak-1048",
-                "agentGuid": "cedddc75-d673-4ba0-a1f6-cf6b05a84670",
-                "ips": [
-                    "20.20.20.20",
-                    "ks80::8763:af45:b465:35aj"
-                ]
-            },
-            "entityType": "endpoint",
-            "entityName": "desktop 1 (127.0.0.1) or 127.0.0.1 | xxxx@gmail.com | arn:aws:lambda:*:%s:function:%s | k8s_container-8c55678bd-8r7zt_default_4b291f63-c0e1-46e6-8503-ee2a834a876c_6411 | 6d7d30d2148a | -",
-            "detectedDateTime": "2020-06-01T02:12:56Z",
-            "ingestedDateTime": "2020-06-01T02:12:56Z",
             "detail": {
-                "act": [
-                    "Clean",
-                    "Delete"
-                ],
-                "actResult": [
-                    "File cleaned",
-                    "File deleted"
-                ],
-                "app": "HTTP",
-                "appGroup": "HTTP",
-                "aptRelated": "1",
-                "filterRiskLevel": "info"
-                "behaviorCat": "Grey-Detection",
-                "blocking": "Suspicious behavior",
-                "cat": "High",
-                "cccaDetection": "Yes",
-                "cccaDetectionSource": "GLOBAL_INTELLIGENCE",
-                "cccaRiskLevel": 3,
-                "clientFlag": "src",
-                "cnt": "10",
-                "component": [
-                    "Engine",
-                    "Scanner"
-                ],
-                "compressedFileSize": "1024",
-                "detectionType": "Malware",
-                "deviceDirection": "inbound",
-                "deviceGUID": "1234567890",
-                "deviceProcessName": "chrome.exe",
-                "deviceMacAddress": "00:11:22:33:44:55",
-                "dhost": "localhost",
-                "domainName": "example.com",
-                "dpt": 80,
-                "dst": [
-                    "20.20.20.20"
-                ],
-                "dstGroup": "Internal",
-                "end": "2022-01-01 12:00:00",
-                "endpointGUID": "1234567890",
-                "endpointHostName": "example-host",
-                "endpointIp": [
-                    "20.20.20.20"
-                ],
-                "endpointMacAddress": "00:11:22:33:44:55",
-                "engType": "Signature-based",
-                "engVer": "1.0",
-                "eventId": "1234567890",
-                "eventName": "Malware Detection",
-                "eventSubName": "Malware Detection",
-                "fileHash": "1234567890abcdef",
-                "fileName": [
-                    "malware.exe"
-                ],
-                "fileOperation": "Download",
-                "filePath": "/tmp/",
-                "filePathName": "/tmp/malware.exe",
-                "fileSize": "1024",
-                "firstAct": "Clean",
-                "firstActResult": "File cleaned",
-                "fullPath": "/tmp/malware.exe",
-                "hostName": "example-host",
-                "httpReferer": "https://example.com",
-                "interestedHost": "example-host",
-                "interestedIp": [
-                    "20.20.20.20"
-                ],
-                "interestedMacAddress": "00:11:22:33:44:55",
-                "malName": "Malware-123456",
-                "malType": "Trojan",
-                "mDevice": [
-                    "20.20.20.20"
-                ],
-                "mDeviceGUID": "1234567890",
-                "mitreMapping": [
-                    "T1055"
-                ],
-                "mitreVersion": "1.0",
-                "mpname": "Endpoint Security",
-                "mpver": "1.0",
-                "objectCmd": [
-                    "chrome.exe"
-                ],
-                "objectFileHashMd5": "1234567890abcdef",
-                "objectFileHashSha1": "1234567890abcdef",
-                "objectFileHashSha256": "1234567890abcdef",
-                "objectFileName": "malware.exe",
-                "objectFilePath": "/tmp/",
-                "objectName": "Malware-123456",
-                "objectPid": 1234,
-                "objectSigner": [
-                    "Unknown"
-                ],
-                "parentCmd": "chrome.exe",
-                "parentFileHashSha1": "1234567890abcdef",
-                "parentFileHashSha256": "1234567890abcdef",
-                "parentFilePath": "/tmp/",
-                "peerHost": "example-host",
-                "peerIp": [
-                    "20.20.20.20"
-                ],
-                "pname": "Endpoint Security",
-                "processCmd": "chrome.exe",
-                "processFileHashMd5": "1234567890abcdef",
-                "processFileHashSha1": "1234567890abcdef",
-                "processFileHashSha256": "1234567890abcdef",
-                "processFilePath": "/tmp/",
-                "processName": "chrome.exe",
-                "processPid": 1234,
-                "processSigner": "Unknown",
-                "productCode": "EPS",
-                "pver": "1.0",
-                "request": "https://example.com/malware.exe",
-                "requestClientApplication": "Mozilla/5.0",
-                "rt": "2022-01-01 12:00:00",
-                "rt_utc": "2022-01-01 12:00:00",
-                "spt": 1234,
-                "src": [
-                    "10.10.10.10"
-                ],
-                "srcGroup": "Internal",
-                "tacticId": [
-                    "T1055"
-                ],
+                "uuid": "31f42842-e527-443a-bb9d-1918c0f65342",
+                "version": "2.1",
+                "filterRiskLevel": "medium",
+                "eventSourceType": 3,
+                "customerId": "191648c0f65342",
                 "tags": [
-                    "Malware",
-                    "Trojan"
+                    "1",
+                    "2",
+                    ],
+                "receivedTime": "2024-07-31T07:01:44Z",
+                "productCode": "aad",
+                "packageTraceId": "3e4rr245",
+                "filterRiskLevel": "high",
+                "groupId": "3g35av3545",
+                "tenantGuid": "322434d344qd341",
+                "bitwiseFilterRiskLevel": 2,
+                "customFilterTags": "scan",
+                "mgmtInstanceId": "dsa92j2424e",
+                "eventId": "214sf3445",
+                "eventName": "The Detected Malware Scan",
+                "idpName": "GTPL",
+                "idpId": "2",
+                "locationCountry": "Sweden",
+                "locationCity": "Stockholm",
+                "locationState": "Gotland",
+                "locationLongitude": "59.3293",
+                "locationLatitude": "18.0686",
+                "clientId": "de249o34",
+                "clientDisplayName": "Microfost",
+                "clientOS": "Windows 11",
+                "clientBrowser": "Google Chrome",
+                "clientApp": "Outlook",
+                "ipAddress": "10.10.10.10",
+                "userId": "23fd34w4",
+                "userDisplayName": "Jordan",
+                "statusDetail": "Log In",
+                "status": "Open",
+                "statusReason": "Logged In",
+                "targetResourceId": "23e2t42w34",
+                "targetResourceDisplayName": "Facetime",
+                "requestMethod": "2 Way Authentication",
+                "eventAdditionalDetails": "This is test sentence.",
+                "eventCategory": "Media and Entertainment",
+                "initiatedByAppId": "33245",
+                "initiatedByAppDisplayName": "Outlook",
+                "initiatedByServicePrincipalId": "234eer345",
+                "initiatedByServicePrincipalName": "ETTES-ER",
+                "initiatedByUserId": "3424455d345",
+                "initiatedByUserDisplayName": "John",
+                "initiatedByUserHomeTenantId": "3245de344",
+                "initiatedByUserHomeTenantName": "Hugh",
+                "initiatedByUserIpAddress": "10.10.10.10",
+                "initiatedByUserPrincipalName": "FIGI-ED",
+                "loggedByService": "Microfost",
+                "operationType": "Scanning",
+                "result": "Fail",
+                "resultReason": "Malware Found.",
+                "targetResources": "Outlook Application.",
+                "userAgent": "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/51.0.2704.106 Safari/537.36 OPR/38.0.2220.41",
+                "partitionKey": "34787654324567890987",
+                "customFilterRiskLevel": "High",
+                "tmFilterRiskLevel": "High",
+                "pname": "2345wwy48",
+                "actionName": "Sign Out",
+                "correlationId": "234r34r542w13",
+                "policyTreePath": "C:\\desktop\\malware.sys",
+            },
+            "ingestedDateTime": "2024-07-31T05:00:49Z",
+            "entityType": "endpoint",
+            "entityName": "ASSETTAG-EID(192.168.5.134)",
+            "endpoint": {
+                "ips": [
+                    "192.168.5.134"
                 ],
-                "threatName": "Malware-123456",
-                "uuid": "1234567890",
-                "clusterId": "cluster-123",
-                "clusterName": "Cluster-123",
-                "k8sNamespace": "default",
-                "k8sPodName": "pod-123",
-                "k8sPodId": "pod-123",
-                "containerName": "container-123",
-                "containerId": "container-123",
-                "containerImage": "image-123",
-                "containerImageDigest": "digest-123",
-                "ruleIdStr": "rule-123",
-                "ruleSetName": "Rule Set-123",
-                "ruleSetId": "rule-set-123"
+                "agentGuid": "b159820e-5bb3-49f2-ad98-75a4f2052282",
+                "endpointName": "ASSETTAG-EID"
             }
         }
     service: "observed-attack-techniques"
