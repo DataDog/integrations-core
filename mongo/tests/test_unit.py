@@ -728,7 +728,7 @@ def test_emits_ok_service_check_for_mongodb_atlas_deployment(
     mock_server_info.assert_called_once()
     mock_list_database_names.assert_called_once()
     assert check.deployment_type.hosting_type == HostingType.ATLAS
-    assert check.hostname == 'xxxx.mongodb.net:27017'
+    assert check.api_client.hostname == 'xxxx.mongodb.net:27017'
 
 
 def test_refresh_role(instance_shard, aggregator, check, dd_run_check):
