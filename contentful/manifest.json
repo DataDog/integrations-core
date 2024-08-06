@@ -57,9 +57,6 @@
       "source": "contentful"
     },
     "monitors": {
-      "Contentful: Entry is unpublished": "assets/monitors/entry_unpublished.json",
-      "Contentful: Asset is unpublished": "assets/monitors/asset_unpublished.json",
-      "Contentful: Content Type is unpublished": "assets/monitors/content_type_unpublished.json",
       "Contentful: Scheduled Action has failed": "assets/monitors/scheduled_action_failed.json"
     }
   },

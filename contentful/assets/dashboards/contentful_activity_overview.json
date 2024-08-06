@@ -17,50 +17,72 @@
             "layout": {
                 "x": 0,
                 "y": 0,
-                "width": 4,
-                "height": 3
+                "width": 5,
+                "height": 2
             }
         },
         {
-            "id": 7477569248297666,
+            "id": 5644594118990436,
             "definition": {
-                "type": "note",
-                "content": "## Overview\n\n- This Dashboard provides a comprehensive analysis of the content and action events captured by the Contentful platform.",
-                "background_color": "white",
-                "font_size": "14",
-                "text_align": "left",
-                "vertical_align": "top",
-                "show_tick": false,
-                "tick_pos": "50%",
-                "tick_edge": "left",
-                "has_padding": true
+                "title": "Monitor Summary",
+                "background_color": "blue",
+                "show_title": true,
+                "type": "group",
+                "layout_type": "ordered",
+                "widgets": [
+                    {
+                        "id": 2512951455576992,
+                        "definition": {
+                            "title": "Monitor Summary",
+                            "type": "manage_status",
+                            "display_format": "countsAndList",
+                            "color_preference": "text",
+                            "hide_zero_counts": true,
+                            "show_status": true,
+                            "last_triggered_format": "relative",
+                            "query": "tag:contentful",
+                            "sort": "status,asc",
+                            "count": 50,
+                            "start": 0,
+                            "summary_type": "monitors",
+                            "show_priority": false,
+                            "show_last_triggered": false
+                        },
+                        "layout": {
+                            "x": 0,
+                            "y": 0,
+                            "width": 7,
+                            "height": 5
+                        }
+                    }
+                ]
             },
             "layout": {
-                "x": 4,
+                "x": 5,
                 "y": 0,
-                "width": 4,
-                "height": 3
+                "width": 7,
+                "height": 6
             }
         },
         {
-            "id": 4358576215573252,
+            "id": 5133744358051712,
             "definition": {
                 "type": "note",
-                "content": "## Widgets\n1. Total Events\n2. Frequent Events\n3. Infrequent Events\n4. Event List\n5. Entries Published\n6. Entries Unpublished\n7. Entries Archived\n8. Entries Unarchived\n9. Entries Published by Content Type\n10. Entry Activity Distribution\n11. Entry Event List\n12. Assets Published\n13. Assets Unpublished\n14. Assets Archived\n15. Assets Unarchived\n16. Asset Activity Distribution\n17. Asset Event List\n18. Content Types Published\n19. Content Types Unpublished\n20. Content Type Activity Distribution\n21. Content Type Event List\n22. Task Activity Distribution\n23. Task Event List\n24. Comment Activity Distribution\n25. Comment Event List\n26. Scheduled Actions Created\n27. Scheduled Actions Deleted\n28. Scheduled Action Status Distribution\n29. Failed Scheduled Action Details\n30. Scheduled Action Event List\n31. Bulk Action Status Distribution\n32. Failed Bulk Action Details\n33. Bulk Action Event List",
-                "background_color": "white",
+                "content": "[Contentful](https://www.contentful.com/products/platform/) is a content (articles, photos, and videos) management platform that allows businesses to create, manage, and deliver digital content across various channels like websites and mobile apps through its intuitive interface and robust APIs or SDKs.\n\nThis Dashboard provides a comprehensive analysis of the content and action events captured by the Contentful platform.\n\n**Tips**\n- Use the timeframe selector in the top right of the dashboard to change the default timeframe.\n- Clone this dashboard to rearrange, modify and add widgets and visualizations.",
+                "background_color": "blue",
                 "font_size": "14",
                 "text_align": "left",
-                "vertical_align": "top",
-                "show_tick": false,
+                "vertical_align": "center",
+                "show_tick": true,
                 "tick_pos": "50%",
-                "tick_edge": "left",
+                "tick_edge": "top",
                 "has_padding": true
             },
             "layout": {
-                "x": 8,
-                "y": 0,
-                "width": 4,
-                "height": 3
+                "x": 0,
+                "y": 2,
+                "width": 5,
+                "height": 4
             }
         },
         {
@@ -319,9 +341,9 @@
             },
             "layout": {
                 "x": 0,
-                "y": 3,
+                "y": 6,
                 "width": 12,
-                "height": 11
+                "height": 1
             }
         },
         {
@@ -759,9 +781,9 @@
             },
             "layout": {
                 "x": 0,
-                "y": 14,
+                "y": 7,
                 "width": 12,
-                "height": 16,
+                "height": 1,
                 "is_column_break": true
             }
         },
@@ -1130,9 +1152,9 @@
             },
             "layout": {
                 "x": 0,
-                "y": 30,
+                "y": 8,
                 "width": 12,
-                "height": 12
+                "height": 1
             }
         },
         {
@@ -1385,9 +1407,9 @@
             },
             "layout": {
                 "x": 0,
-                "y": 42,
+                "y": 9,
                 "width": 12,
-                "height": 9
+                "height": 1
             }
         },
         {
@@ -1641,9 +1663,9 @@
             },
             "layout": {
                 "x": 0,
-                "y": 51,
+                "y": 10,
                 "width": 12,
-                "height": 17
+                "height": 1
             }
         },
         {
@@ -2139,9 +2161,9 @@
             },
             "layout": {
                 "x": 0,
-                "y": 68,
+                "y": 11,
                 "width": 12,
-                "height": 20
+                "height": 1
             }
         }
     ],
