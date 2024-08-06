@@ -20,6 +20,10 @@ def instance_empty_default_hostname():
     return False
 
 
+def instance_force_sha1():
+    return False
+
+
 def instance_min_collection_interval():
     return 15
 

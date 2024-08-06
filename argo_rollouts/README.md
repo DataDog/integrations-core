@@ -12,13 +12,13 @@ Follow the instructions below to install and configure this check for an Agent r
 
 Starting from Agent release 7.53.0, the Argo Rollouts check is included in the [Datadog Agent][2] package. No additional installation is needed in your environment.
 
-This check uses [OpenMetrics][5] to collect metrics from the OpenMetrics endpoint that Karpenter exposes, which requires Python 3.
+This check uses [OpenMetrics][5] to collect metrics from the OpenMetrics endpoint that Argo Rollouts exposes, which requires Python 3.
 
 ### Configuration
 
 The Argo Rollouts controller has Prometheus-formatted metrics readily available at `/metrics` on port `8090`. For the Agent to start collecting metrics, the Argo Rollouts pods need to be annotated. For more information about annotations, refer to the [Autodiscovery Integration Templates][3] for guidance. You can find additional configuration options by reviewing the [sample argo_rollouts.d/conf.yaml][4].
 
-**Note**: The listed metrics can only be collected if they are available. Some metrics are generated only when certain actions are performed. For example, the `argo_rollout.info.replicas.updated` metric is exposed only after a replica is updated.
+**Note**: The listed metrics can only be collected if they are available. Some metrics are generated only when certain actions are performed. For example, the `argo_rollouts.info.replicas.updated` metric is exposed only after a replica is updated.
 
 The only parameter required for configuring the Argo Rollouts check is:
 - `openmetrics_endpoint`: This parameter should be set to the location where the Prometheus-formatted metrics are exposed. The default port is `8090`. In containerized environments, `%%host%%` should be used for [host autodetection][3]. 

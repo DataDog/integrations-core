@@ -26,7 +26,8 @@
       "Category::Log Collection",
       "Category::Security",
       "Category::Cloud",
-      "Submitted Data Type::Logs"
+      "Submitted Data Type::Logs",
+      "Offering::Integration"
     ]
   },
   "assets": {

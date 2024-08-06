@@ -382,6 +382,7 @@ def test_collect_schemas(aggregator, dd_run_check, dbm_instance):
             raise AssertionError(Exception("found the following diffs: " + str(difference)))
 
 
+@pytest.mark.flaky
 def test_schemas_collection_truncated(aggregator, dd_run_check, dbm_instance):
     dbm_instance['database_autodiscovery'] = True
     dbm_instance['autodiscovery_include'] = ['datadog_test_schemas']

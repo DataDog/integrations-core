@@ -13,21 +13,7 @@ from datadog_checks.mongo.common import SECONDARY_STATE_ID
 
 from .common import HERE, HOST, PORT1, TLS_CERTS_FOLDER, auth, tls
 from .conftest import mock_pymongo
-
-
-def _assert_metrics(check_instance, aggregator, metrics_categories, additional_tags=None):
-    if additional_tags is None:
-        additional_tags = []
-    for cat in metrics_categories:
-        with open(os.path.join(HERE, "results", f"metrics-{cat}.json"), 'r') as f:
-            for metric in json.load(f):
-                aggregator.assert_metric(
-                    metric['name'],
-                    value=metric['value'],
-                    count=1,
-                    tags=additional_tags + metric['tags'] + check_instance.internal_resource_tags,
-                    metric_type=metric['type'],
-                )
+from .utils import assert_metrics
 
 
 def _get_mongodb_instance_event(aggregator):
@@ -80,13 +66,14 @@ def _assert_mongodb_instance_event(
 def test_integration_mongos(instance_integration_cluster, aggregator, check, dd_run_check, dbm):
     instance_integration_cluster['dbm'] = dbm
     instance_integration_cluster['operation_samples'] = {'enabled': False}
+    instance_integration_cluster['slow_operations'] = {'enabled': False}
     mongos_check = check(instance_integration_cluster)
     mongos_check._last_states_by_server = {0: 1, 1: 2, 2: 2}
 
     with mock_pymongo("mongos"):
         dd_run_check(mongos_check)
 
-    _assert_metrics(
+    assert_metrics(
         mongos_check,
         aggregator,
         [
@@ -99,6 +86,7 @@ def test_integration_mongos(instance_integration_cluster, aggregator, check, dd_
             'connection-pool',
             'jumbo',
             'sessions',
+            'hostinfo',
         ],
         ['sharding_cluster_role:mongos', 'clustername:my_cluster'],
     )
@@ -173,10 +161,11 @@ def test_integration_replicaset_primary_in_shard(instance_integration, aggregato
         'dbstats-local',
         'dbstats',
         'fsynclock',
+        'hostinfo',
     ]
-    _assert_metrics(mongo_check, aggregator, metrics_categories, replica_tags)
+    assert_metrics(mongo_check, aggregator, metrics_categories, replica_tags)
     # Lag metrics are tagged with the state of the member and not with the current one.
-    _assert_metrics(mongo_check, aggregator, ['replset-lag-from-primary-in-shard'])
+    assert_metrics(mongo_check, aggregator, ['replset-lag-from-primary-in-shard'])
     aggregator.assert_all_metrics_covered()
     aggregator.assert_metrics_using_metadata(
         get_metadata_metrics(),
@@ -270,8 +259,9 @@ def test_integration_replicaset_secondary_in_shard(instance_integration, aggrega
         'dbstats-local',
         'fsynclock',
         'connection-pool',
+        'hostinfo',
     ]
-    _assert_metrics(mongo_check, aggregator, metrics_categories, replica_tags)
+    assert_metrics(mongo_check, aggregator, metrics_categories, replica_tags)
 
     aggregator.assert_all_metrics_covered()
     aggregator.assert_metrics_using_metadata(
@@ -323,9 +313,9 @@ def test_integration_replicaset_arbiter_in_shard(instance_integration, aggregato
         'replset_me:mongo-mongodb-sharded-shard0-arbiter-0.mongo-mongodb-sharded-headless.default.svc.cluster.local:27017',
         'sharding_cluster_role:shardsvr',
     ]
-    metrics_categories = ['serverStatus', 'replset-arbiter']
+    metrics_categories = ['serverStatus', 'replset-arbiter', 'hostinfo']
 
-    _assert_metrics(mongo_check, aggregator, metrics_categories, replica_tags)
+    assert_metrics(mongo_check, aggregator, metrics_categories, replica_tags)
 
     aggregator.assert_all_metrics_covered()
     aggregator.assert_metrics_using_metadata(
@@ -385,9 +375,10 @@ def test_integration_configsvr_primary(instance_integration, aggregator, check, 
         'dbstats-local',
         'dbstats',
         'fsynclock',
+        'hostinfo',
     ]
-    _assert_metrics(mongo_check, aggregator, metrics_categories, replica_tags)
-    _assert_metrics(mongo_check, aggregator, ['replset-lag-from-primary-configsvr'])
+    assert_metrics(mongo_check, aggregator, metrics_categories, replica_tags)
+    assert_metrics(mongo_check, aggregator, ['replset-lag-from-primary-configsvr'])
 
     aggregator.assert_all_metrics_covered()
     aggregator.assert_metrics_using_metadata(
@@ -480,8 +471,9 @@ def test_integration_configsvr_secondary(instance_integration, aggregator, check
         'dbstats-local',
         'fsynclock',
         'connection-pool',
+        'hostinfo',
     ]
-    _assert_metrics(mongo_check, aggregator, metrics_categories, replica_tags)
+    assert_metrics(mongo_check, aggregator, metrics_categories, replica_tags)
 
     aggregator.assert_all_metrics_covered()
     aggregator.assert_metrics_using_metadata(
@@ -540,10 +532,11 @@ def test_integration_replicaset_primary(instance_integration, aggregator, check,
         'dbstats',
         'indexes-stats',
         'collection',
+        'hostinfo',
     ]
-    _assert_metrics(mongo_check, aggregator, metrics_categories, replica_tags)
+    assert_metrics(mongo_check, aggregator, metrics_categories, replica_tags)
     # Lag metrics are tagged with the state of the member and not with the current one.
-    _assert_metrics(mongo_check, aggregator, ['replset-lag-from-primary'])
+    assert_metrics(mongo_check, aggregator, ['replset-lag-from-primary'])
 
     aggregator.assert_all_metrics_covered()
     aggregator.assert_metrics_using_metadata(
@@ -640,10 +633,11 @@ def test_integration_replicaset_primary_config(instance_integration, aggregator,
         'dbstats',
         'indexes-stats',
         'collection',
+        'hostinfo',
     ]
-    _assert_metrics(mongo_check, aggregator, metrics_categories, replica_tags)
+    assert_metrics(mongo_check, aggregator, metrics_categories, replica_tags)
     # Lag metrics are tagged with the state of the member and not with the current one.
-    _assert_metrics(mongo_check, aggregator, ['replset-lag-from-primary'])
+    assert_metrics(mongo_check, aggregator, ['replset-lag-from-primary'])
 
     aggregator.assert_all_metrics_covered()
     aggregator.assert_metrics_using_metadata(
@@ -744,11 +738,12 @@ def test_integration_replicaset_secondary(
         'top',
         'dbstats-local',
         'fsynclock',
+        'hostinfo',
     ]
     if collect_custom_queries:
         metrics_categories.append('custom-queries')
 
-    _assert_metrics(mongo_check, aggregator, metrics_categories, replica_tags)
+    assert_metrics(mongo_check, aggregator, metrics_categories, replica_tags)
 
     aggregator.assert_all_metrics_covered()
     aggregator.assert_metrics_using_metadata(
@@ -799,9 +794,9 @@ def test_integration_replicaset_arbiter(instance_integration, aggregator, check,
         'replset_state:arbiter',
         'replset_me:replset-arbiter-0.mongo.default.svc.cluster.local:27017',
     ]
-    metrics_categories = ['serverStatus', 'replset-arbiter']
+    metrics_categories = ['serverStatus', 'replset-arbiter', 'hostinfo']
 
-    _assert_metrics(mongo_check, aggregator, metrics_categories, replica_tags)
+    assert_metrics(mongo_check, aggregator, metrics_categories, replica_tags)
 
     aggregator.assert_all_metrics_covered()
     aggregator.assert_metrics_using_metadata(
@@ -854,8 +849,9 @@ def test_standalone(instance_integration, aggregator, check, dd_run_check):
         'dbstats',
         'indexes-stats',
         'collection',
+        'hostinfo',
     ]
-    _assert_metrics(mongo_check, aggregator, metrics_categories)
+    assert_metrics(mongo_check, aggregator, metrics_categories)
 
     aggregator.assert_all_metrics_covered()
     aggregator.assert_metrics_using_metadata(
@@ -919,8 +915,9 @@ def test_db_names_with_nonexistent_database(check, instance_integration, aggrega
         'dbstats',
         'indexes-stats',
         'collection',
+        'hostinfo',
     ]
-    _assert_metrics(mongo_check, aggregator, metrics_categories)
+    assert_metrics(mongo_check, aggregator, metrics_categories)
     aggregator.assert_all_metrics_covered()
     aggregator.assert_metrics_using_metadata(
         get_metadata_metrics(),
@@ -953,8 +950,9 @@ def test_db_names_missing_existent_database(check, instance_integration, aggrega
         'dbstats',
         'indexes-stats',
         'collection',
+        'hostinfo',
     ]
-    _assert_metrics(mongo_check, aggregator, metrics_categories)
+    assert_metrics(mongo_check, aggregator, metrics_categories)
     aggregator.assert_all_metrics_covered()
     aggregator.assert_metrics_using_metadata(
         get_metadata_metrics(),
@@ -976,7 +974,7 @@ def test_mongod_auth_ok(check, dd_run_check, aggregator):
         'hosts': [f'{HOST}:{PORT1}'],
         'username': 'testUser',
         'password': 'testPass',
-        'options': {'authSource': 'authDB'},
+        'options': {'authSource': 'authDB', 'authMechanism': 'SCRAM-SHA-256'},
     }
     mongo_check = check(instance)
     dd_run_check(mongo_check)
@@ -1107,10 +1105,11 @@ def test_integration_database_autodiscovery(instance_integration_autodiscovery, 
         'dbstats',
         'indexes-stats-autodiscover',
         'collection-autodiscover',
+        'hostinfo',
     ]
-    _assert_metrics(mongo_check, aggregator, metrics_categories, replica_tags)
+    assert_metrics(mongo_check, aggregator, metrics_categories, replica_tags)
     # Lag metrics are tagged with the state of the member and not with the current one.
-    _assert_metrics(mongo_check, aggregator, ['replset-lag-from-primary'])
+    assert_metrics(mongo_check, aggregator, ['replset-lag-from-primary'])
 
     aggregator.assert_all_metrics_covered()
     aggregator.assert_metrics_using_metadata(

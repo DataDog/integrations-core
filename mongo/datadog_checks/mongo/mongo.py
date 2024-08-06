@@ -20,6 +20,7 @@ from datadog_checks.mongo.collectors import (
     CustomQueriesCollector,
     DbStatCollector,
     FsyncLockCollector,
+    HostInfoCollector,
     IndexStatsCollector,
     ReplicaCollector,
     ReplicationOpLogCollector,
@@ -32,6 +33,7 @@ from datadog_checks.mongo.collectors.session_stats import SessionStatsCollector
 from datadog_checks.mongo.common import SERVICE_CHECK_NAME, MongosDeployment, ReplicaSetDeployment
 from datadog_checks.mongo.config import MongoConfig
 from datadog_checks.mongo.dbm.operation_samples import MongoOperationSamples
+from datadog_checks.mongo.dbm.slow_operations import MongoSlowOperations
 from datadog_checks.mongo.discovery import MongoDBDatabaseAutodiscovery
 
 from . import metrics
@@ -98,6 +100,7 @@ class MongoDb(AgentCheck):
 
         # DBM
         self._operation_samples = MongoOperationSamples(check=self)
+        self._slow_operations = MongoSlowOperations(check=self)
 
         # Database autodiscovery
         self._database_autodiscovery = MongoDBDatabaseAutodiscovery(check=self)
@@ -114,6 +117,7 @@ class MongoDb(AgentCheck):
             ReplicationOpLogCollector(self, tags),
             FsyncLockCollector(self, tags),
             ServerStatusCollector(self, self._config.db_name, tags, tcmalloc=collect_tcmalloc_metrics),
+            HostInfoCollector(self, tags),
         ]
         if self._config.replica_check:
             potential_collectors.append(ReplicaCollector(self, tags))
@@ -246,6 +250,7 @@ class MongoDb(AgentCheck):
             if self._config.dbm_enabled:
                 self._send_database_instance_metadata()
                 self._operation_samples.run_job_loop(tags=self._get_tags(include_deployment_tags=True))
+                self._slow_operations.run_job_loop(tags=self._get_tags(include_deployment_tags=True))
         except CRITICAL_FAILURE as e:
             self.service_check(SERVICE_CHECK_NAME, AgentCheck.CRITICAL, tags=self._config.service_check_tags)
             self._unset_metadata()
@@ -349,3 +354,4 @@ class MongoDb(AgentCheck):
     def cancel(self):
         if self._config.dbm_enabled:
             self._operation_samples.cancel()
+            self._slow_operations.cancel()

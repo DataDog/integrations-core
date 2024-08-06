@@ -2,6 +2,12 @@
 
 <!-- towncrier release notes start -->
 
+## 12.6.1 / 2024-07-24
+
+***Fixed***:
+
+* Revert the default 10s mysql connection read_timeout ([#18097](https://github.com/DataDog/integrations-core/pull/18097))
+
 ## 12.6.0 / 2024-07-05
 
 ***Added***:
