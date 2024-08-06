@@ -41,6 +41,7 @@ def test_mongo_arbiter(aggregator, check, instance_arbiter, dd_run_check):
         'replset_state:arbiter',
         'replset_me:shard01c:27020',
         'sharding_cluster_role:shardsvr',
+        'hosting_type:self-hosted',
     ] + check.internal_resource_tags
     for metric, value in expected_metrics.items():
         aggregator.assert_metric(metric, value, expected_tags, count=1)
@@ -61,6 +62,7 @@ def test_mongo_replset(instance_shard, aggregator, check, dd_run_check):
         "replset_name:shard01",
         "server:mongodb://localhost:27018/",
         "sharding_cluster_role:shardsvr",
+        'hosting_type:self-hosted',
     ] + mongo_check.internal_resource_tags
     for metric in replset_metrics:
         aggregator.assert_metric(

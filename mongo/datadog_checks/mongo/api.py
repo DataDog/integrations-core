@@ -2,6 +2,7 @@
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
 
+
 from pymongo import MongoClient, ReadPreference
 from pymongo.errors import (
     ConfigurationError,
@@ -63,6 +64,7 @@ class MongoApi(object):
                 options['authSource'] = self._config.auth_source
         self._log.debug("options: %s", options)
         self._cli = MongoClient(**options)
+        self.__hostname = None
 
     def __getitem__(self, item):
         return self._cli[item]
@@ -170,13 +172,14 @@ class MongoApi(object):
 
     @property
     def hostname(self):
+        if self.__hostname:
+            return self.__hostname
         try:
-            hostname = self.server_status()['host'].split(':')
-            if len(hostname) == 1:
+            self.__hostname = self.server_status()['host']
+            if ':' not in self.__hostname:
                 # If there is no port, we assume the default port
-                return "{}:27017".format(hostname[0])
-            else:
-                return "{}:{}".format(hostname[0], hostname[1])
+                self.__hostname += ':27017'
+            return self.__hostname
         except Exception as e:
             self._log.error('Unable to get hostname: %s', e)
             return None

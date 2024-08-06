@@ -19,6 +19,7 @@ from datadog_checks.mongo.collectors import (
     CustomQueriesCollector,
     DbStatCollector,
     FsyncLockCollector,
+    HostInfoCollector,
     IndexStatsCollector,
     ReplicaCollector,
     ReplicationOpLogCollector,
@@ -47,6 +48,14 @@ except ImportError:
     from ..stubs import datadog_agent
 
 long = int
+
+
+class HostingType:
+    ATLAS = "mongodb-atlas"
+    ALIBABA_APSARADB = "alibaba-apsaradb"
+    DOCUMENTDB = "amazon-documentdb"
+    SELF_HOSTED = "self-hosted"
+    UNKNOWN = "unknown"
 
 
 class MongoDb(AgentCheck):
@@ -126,6 +135,7 @@ class MongoDb(AgentCheck):
             ReplicationOpLogCollector(self, tags),
             FsyncLockCollector(self, tags),
             ServerStatusCollector(self, self._config.db_name, tags, tcmalloc=collect_tcmalloc_metrics),
+            HostInfoCollector(self, tags),
         ]
         if self._config.replica_check:
             potential_collectors.append(ReplicaCollector(self, tags))
@@ -362,12 +372,14 @@ class MongoDb(AgentCheck):
             self._operation_samples.cancel()
             self._slow_operations.cancel()
 
-    def _get_rs_deployment_from_status_payload(self, repl_set_payload, is_master_payload, cluster_role):
+    def _get_rs_deployment_from_status_payload(self, repl_set_payload, is_master_payload, cluster_role, hosting_type):
         replset_name = repl_set_payload["set"]
         replset_state = repl_set_payload["myState"]
         hosts = [m['name'] for m in repl_set_payload.get("members", [])]
         replset_me = is_master_payload.get('me')
-        return ReplicaSetDeployment(replset_name, replset_state, hosts, replset_me, cluster_role=cluster_role)
+        return ReplicaSetDeployment(
+            hosting_type, replset_name, replset_state, hosts, replset_me, cluster_role=cluster_role
+        )
 
     def refresh_deployment_type(self):
         # getCmdLineOpts is the runtime configuration of the mongo instance. Helpful to know whether the node is
@@ -387,10 +399,11 @@ class MongoDb(AgentCheck):
     def _get_default_deployment_type(self):
         options = self.api_client.get_cmdline_opts()
         cluster_role = None
+        hosting_type = HostingType.ATLAS if self._is_hosting_type_atlas() else HostingType.SELF_HOSTED
         if 'sharding' in options:
             if 'configDB' in options['sharding']:
                 self.log.debug("Detected MongosDeployment. Node is principal.")
-                return MongosDeployment(shard_map=self.refresh_shards())
+                return MongosDeployment(hosting_type=hosting_type, shard_map=self.refresh_shards())
             elif 'clusterRole' in options['sharding']:
                 cluster_role = options['sharding']['clusterRole']
 
@@ -399,7 +412,10 @@ class MongoDb(AgentCheck):
             repl_set_payload = self.api_client.replset_get_status()
             is_master_payload = self.api_client.is_master()
             replica_set_deployment = self._get_rs_deployment_from_status_payload(
-                repl_set_payload, is_master_payload, cluster_role
+                repl_set_payload,
+                is_master_payload,
+                cluster_role,
+                hosting_type,
             )
             is_principal = replica_set_deployment.is_principal()
             is_principal_log = "" if is_principal else "not "
@@ -407,12 +423,13 @@ class MongoDb(AgentCheck):
             return replica_set_deployment
 
         self.log.debug("Detected StandaloneDeployment. Node is principal.")
-        return StandaloneDeployment()
+        return StandaloneDeployment(hosting_type=hosting_type)
 
     def _get_alibaba_deployment_type(self):
+        hosting_type = HostingType.ALIBABA_APSARADB
         is_master_payload = self.api_client.is_master()
         if is_master_payload.get('msg') == 'isdbgrid':
-            return MongosDeployment(shard_map=self.refresh_shards())
+            return MongosDeployment(hosting_type=hosting_type, shard_map=self.refresh_shards())
 
         # On alibaba cloud, a mongo node is either a mongos or part of a replica set.
         repl_set_payload = self.api_client.replset_get_status()
@@ -424,7 +441,29 @@ class MongoDb(AgentCheck):
             cluster_role = 'shardsvr'
         else:
             cluster_role = None
-        return self._get_rs_deployment_from_status_payload(repl_set_payload, is_master_payload, cluster_role)
+        return self._get_rs_deployment_from_status_payload(
+            repl_set_payload, is_master_payload, cluster_role, hosting_type
+        )
+
+    def _get_documentdb_deployment_type(self):
+        """
+        Deployment type for AWS DocumentDB.
+
+        We connect to "Instance Based Clusters". In MongoDB terms, these are unsharded replicasets.
+        """
+        repl_set_payload = self.api_client.replset_get_status()
+        is_master_payload = self.api_client.is_master()
+        return self._get_rs_deployment_from_status_payload(
+            repl_set_payload, is_master_payload, cluster_role=None, hosting_type=HostingType.DOCUMENTDB
+        )
+
+    def _is_hosting_type_atlas(self):
+        # Atlas deployments have mongodb.net in the internal hostname
+        # DO NOT use the connection host because this can be a load balancer or proxy
+        # TODO: Is there a better way to detect MongoDB Atlas deployment?
+        if self.api_client.hostname and "mongodb.net" in self.api_client.hostname:
+            return True
+        return False
 
     def refresh_shards(self):
         try:
@@ -434,13 +473,3 @@ class MongoDb(AgentCheck):
         except Exception as e:
             self.log.error('Unable to get shard map for mongos: %s', e)
             return {}
-
-    def _get_documentdb_deployment_type(self):
-        """
-        Deployment type for AWS DocumentDB.
-
-        We connect to "Instance Based Clusters". In MongoDB terms, these are unsharded replicasets.
-        """
-        return self._get_rs_deployment_from_status_payload(
-            self.api_client.replset_get_status(), self.api_client.is_master(), cluster_role=None
-        )

@@ -13,10 +13,10 @@ import pytest
 from pymongo.errors import ConnectionFailure, OperationFailure
 
 from datadog_checks.base import ConfigurationError
-from datadog_checks.mongo import MongoDb, metrics
 from datadog_checks.mongo.api import CRITICAL_FAILURE, MongoApi
 from datadog_checks.mongo.collectors import MongoCollector
 from datadog_checks.mongo.common import MongosDeployment, ReplicaSetDeployment, get_state_name
+from datadog_checks.mongo.mongo import HostingType, MongoDb, metrics
 from datadog_checks.mongo.utils import parse_mongo_uri
 
 from . import common
@@ -147,6 +147,7 @@ def test_emits_ok_service_check_when_alibaba_mongos_deployment(
     mock_server_info.assert_called_once()
     mock_list_database_names.assert_called_once()
     assert check._resolved_hostname == 'test-hostname:27017'
+    assert check.deployment_type.hosting_type == HostingType.ALIBABA_APSARADB
 
 
 @mock.patch(
@@ -501,8 +502,10 @@ def test_api_alibaba_mongos(check, aggregator):
 
     with mock.patch('datadog_checks.mongo.api.MongoClient', mock.MagicMock(return_value=mocked_client)):
         check = check(common.INSTANCE_BASIC)
+        # check.api_client = MongoApi(config, log)
         check.refresh_deployment_type()
         assert isinstance(check.deployment_type, MongosDeployment)
+        assert check.deployment_type.hosting_type == HostingType.ALIBABA_APSARADB
 
 
 def test_api_alibaba_mongod_shard(check, aggregator):
@@ -528,6 +531,7 @@ def test_api_alibaba_mongod_shard(check, aggregator):
         assert deployment_type.is_arbiter is False
         assert deployment_type.replset_state == 1
         assert deployment_type.replset_name == 'foo'
+        assert deployment_type.hosting_type == HostingType.ALIBABA_APSARADB
 
 
 def test_api_alibaba_configsvr(check, aggregator):
@@ -549,6 +553,7 @@ def test_api_alibaba_configsvr(check, aggregator):
         assert deployment_type.is_arbiter is False
         assert deployment_type.replset_state == 2
         assert deployment_type.replset_name == 'config'
+        assert deployment_type.hosting_type == HostingType.ALIBABA_APSARADB
 
 
 def test_api_alibaba_mongod(check, aggregator):
@@ -573,6 +578,7 @@ def test_api_alibaba_mongod(check, aggregator):
         assert deployment_type.is_arbiter is False
         assert deployment_type.replset_state == 1
         assert deployment_type.replset_name == 'foo'
+        assert deployment_type.hosting_type == HostingType.ALIBABA_APSARADB
 
 
 def test_when_replica_check_flag_to_false_then_no_replset_metrics_reported(aggregator, check, instance, dd_run_check):
@@ -691,6 +697,38 @@ def test_emits_ok_service_check_for_documentdb_deployment(
     )
     mock_server_info.assert_called_once()
     mock_list_database_names.assert_called_once()
+    assert check.deployment_type.hosting_type == HostingType.DOCUMENTDB
+
+
+@mock.patch(
+    'pymongo.database.Database.command',
+    side_effect=[
+        {'host': 'xxxx.mongodb.net'},  # serverStatus
+        {'parsed': {}},  # getCmdLineOpts
+    ],
+)
+@mock.patch('pymongo.mongo_client.MongoClient.server_info', return_value={'version': '7.0.0'})
+@mock.patch('pymongo.mongo_client.MongoClient.list_database_names', return_value=[])
+def test_emits_ok_service_check_for_mongodb_atlas_deployment(
+    mock_list_database_names, mock_server_info, mock_command, dd_run_check, aggregator
+):
+    # Given
+    check = MongoDb('mongo', {}, [{'hosts': ['localhost']}])
+    check.refresh_collectors = mock.MagicMock()
+    # When
+    dd_run_check(check)
+    # Then
+    aggregator.assert_service_check('mongodb.can_connect', MongoDb.OK)
+    mock_command.assert_has_calls(
+        [
+            mock.call('serverStatus'),
+            mock.call('getCmdLineOpts'),
+        ]
+    )
+    mock_server_info.assert_called_once()
+    mock_list_database_names.assert_called_once()
+    assert check.deployment_type.hosting_type == HostingType.ATLAS
+    assert check.hostname == 'xxxx.mongodb.net:27017'
 
 
 def test_refresh_role(instance_shard, aggregator, check, dd_run_check):
