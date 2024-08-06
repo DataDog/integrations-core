@@ -14,7 +14,7 @@ python = ["2.7"]
 snmplistener = ["false"]
 
 [[envs.default.matrix]]
-python = ["3.11"]
+python = ["3.12"]
 snmplistener = ["false", "true"]
 
 [envs.default.overrides]

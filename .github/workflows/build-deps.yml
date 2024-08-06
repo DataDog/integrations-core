@@ -28,7 +28,7 @@ defaults:
 
 env:
   PYTHONUNBUFFERED: "1"
-  PYTHON_VERSION: "3.11"
+  PYTHON_VERSION: "3.12"
   DIRECT_DEPENDENCY_FILE: agent_requirements.in
   # https://reproducible-builds.org/specs/source-date-epoch/
   SOURCE_DATE_EPOCH: "1580601600"
