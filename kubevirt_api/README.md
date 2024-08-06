@@ -17,40 +17,9 @@ No additional installation is needed on your server.
 
 The main use case to run the `kubevirt_api` check is as a [cluster level check][4].
 
-In order to do that, you will need to update some RBAC permissions to give the datadog-agent read-only access to the `Pods` and `KubeVirt` resources by following the steps below:
+In order to do that, you will need to update some RBAC permissions to give the datadog-agent read-only access to the`KubeVirt` resources by following the steps below:
 
-1. Add the `get` and `list` pods permissions to the `datadog-agent` service account:
-
-   ```yaml
-   apiVersion: rbac.authorization.k8s.io/v1
-   kind: ClusterRole
-   metadata:
-   name: datadog-agent-pods
-   rules:
-   - apiGroups:
-       - ""
-       resources:
-       - pods
-       verbs:
-       - get
-       - list
-   ---
-   apiVersion: rbac.authorization.k8s.io/v1
-   kind: ClusterRoleBinding
-   metadata:
-   labels:
-   name: datadog-agent-pods-binding
-   roleRef:
-   apiGroup: rbac.authorization.k8s.io
-   kind: ClusterRole
-   name: datadog-agent-pods
-   subjects:
-   - kind: ServiceAccount
-       name: datadog-agent
-       namespace: default
-   ```
-
-2. Bind the `kubevirt.io:view` ClusterRole to the `datadog-agent` service account:
+1. Bind the `kubevirt.io:view` ClusterRole to the `datadog-agent` service account:
 
    ```yaml
    apiVersion: rbac.authorization.k8s.io/v1
@@ -68,18 +37,29 @@ In order to do that, you will need to update some RBAC permissions to give the d
    namespace: default
    ```
 
-3. Annotate the service of your `virt-api` with the following:
+2. Annotate the pods template of your `virt-api` deployment by patching the `KubeVirt` resource as follows:
 
-   Replace `DD_CLUSTER_NAME` with the name you want for your cluster and `KUBE_NAMESPACE` with the namespace where you have deployed KubeVirt.
+```yaml
+apiVersion: kubevirt.io/v1
+kind: KubeVirt
+metadata:
+  name: kubevirt
+  namespace: kubevirt
+spec:
+  certificateRotateStrategy: {}
+  configuration: {}
+  customizeComponents:
+    patches:
+      - resourceType: Deployment
+        resourceName: virt-api
+        patch: '{"spec": {"template":{"metadata":{"annotations": {
+        "ad.datadoghq.com/virt-api.check_names": "[\"kubevirt_api\"]",
+        "ad.datadoghq.com/virt-api.init_configs": "[{}]",
+        "ad.datadoghq.com/virt-api.instances": "[{ \"kube_cluster_name\": \"<DD_CLUSTER_NAME>\", \"kubevirt_api_metrics_endpoint\": \"https://%%host%%:%%port%%/metrics\",\"kubevirt_api_healthz_endpoint\": \"https://%%host%%:%%port%%/healthz\", \"kube_namespace\":%%kube_namespace%%, \"kube_pod_name\":\"%%kube_pod_name%%\"}]"}}}}}'
+        type: strategic
+```
 
-   ```yaml
-   annotations:
-   ad.datadoghq.com/endpoints.check_names: '["kubevirt_api"]'
-   ad.datadoghq.com/endpoints.init_configs: "[{}]"
-   ad.datadoghq.com/endpoints.instances: '[{ "kube_cluster_name": "<DD_CLUSTER_NAME>", "KUBE_NAMESPACE": "<kube_namespace>", "kubevirt_api_metrics_endpoint": "https://%%host%%:%%port%%/metrics", "kubevirt_api_healthz_endpoint": "https://%%host%%:%%port%%/healthz"}]'
-   ```
-
-Then the Datadog Cluster Agent schedules the check(s) for each endpoint onto Datadog Agent(s).
+Replace `<DD_CLUSTER_NAME>` with the name you want for your cluster.
 
 ### Validation
 
