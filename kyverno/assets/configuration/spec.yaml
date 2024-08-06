@@ -1,4 +1,4 @@
-name: kyverno
+name: Kyverno
 files:
 - name: kyverno.yaml
   options:

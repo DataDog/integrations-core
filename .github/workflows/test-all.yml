@@ -2137,7 +2137,7 @@ jobs:
   j6900ead:
     uses: ./.github/workflows/test-target.yml
     with:
-      job-name: kyverno
+      job-name: Kyverno
       target: kyverno
       platform: linux
       runner: '["ubuntu-22.04"]'

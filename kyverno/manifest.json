@@ -26,7 +26,7 @@
     "integration": {
       "auto_install": true,
       "source_type_id": 17459094,
-      "source_type_name": "kyverno",
+      "source_type_name": "Kyverno",
       "configuration": {
         "spec": "assets/configuration/spec.yaml"
       },
