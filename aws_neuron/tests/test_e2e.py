@@ -11,9 +11,8 @@ from . import common
 @pytest.mark.e2e
 def test_check_aws_neuron_e2e(dd_agent_check, instance):
     aggregator = dd_agent_check(instance, rate=True)
-    metrics = common.TEST_METRICS
 
-    for metric in metrics:
-        aggregator.assert_metric(name=metric)
+    for metric, metric_type in common.TEST_METRICS.items():
+        aggregator.assert_metric(name=metric, metric_type=metric_type)
 
     aggregator.assert_service_check('aws_neuron.openmetrics.health', ServiceCheck.OK)

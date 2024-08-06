@@ -16,8 +16,8 @@ def test_check(dd_run_check, aggregator, instance, mock_http_response):
     check = AwsNeuronCheck('aws_neuron', {}, [instance])
     dd_run_check(check)
 
-    for metric in TEST_METRICS:
-        aggregator.assert_metric(metric)
+    for metric, metric_type in TEST_METRICS.items():
+        aggregator.assert_metric(metric, metric_type=aggregator.METRIC_ENUM_MAP[metric_type])
         aggregator.assert_metric_has_tag(metric, 'test:tag')
 
     aggregator.assert_all_metrics_covered()
