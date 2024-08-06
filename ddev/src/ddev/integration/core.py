@@ -19,7 +19,11 @@ if TYPE_CHECKING:
 # The manifest.json file can contain the source_type_name field that the validation uses to validate different parts
 # of the integration. Zabbix was renamed to Zabbix (Community Version) in the manifest.json file, so we need to map
 # it back to Zabbix for validations to pass
-EXCEPTION_MAPPER = {'Zabbix (Community Version)': 'Zabbix'}
+EXCEPTION_MAPPER = {
+    'Zabbix (Community Version)': 'Zabbix',
+    'Scalr (Community Version)': 'Scalr',
+    'Zscaler (Community Version)': 'Zscaler',
+}
 
 
 class Integration:

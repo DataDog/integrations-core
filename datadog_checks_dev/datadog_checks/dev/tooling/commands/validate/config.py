@@ -33,11 +33,6 @@ IGNORE_DEFAULT_INSTANCE = {'ceph', 'dotnetclr', 'gunicorn', 'marathon', 'pgbounc
 
 TEMPLATES = ['default', 'openmetrics_legacy', 'openmetrics', 'jmx']
 
-# The manifest.json file can contain the source_type_name field that the validation uses to validate different parts
-# of the integration. Zabbix was renamed to Zabbix (Community Version) in the manifest.json file, so we need to map
-# it back to Zabbix for validations to pass
-EXCEPTION_MAPPINGS = {'Zabbix (Community Version)': 'Zabbix'}
-
 
 @click.command(context_settings=CONTEXT_SETTINGS, short_help='Validate default configuration files')
 @click.argument('check', shell_complete=complete_valid_checks, required=False)
@@ -105,7 +100,6 @@ def config(ctx, check, sync, verbose):
             version = None
         else:
             display_name = manifest.get_display_name()
-            display_name = EXCEPTION_MAPPINGS.get(display_name, display_name)
             source = check
             version = get_version_string(check)
 
