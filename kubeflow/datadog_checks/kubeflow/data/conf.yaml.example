@@ -46,7 +46,7 @@ init_config:
 instances:
 
     ## @param openmetrics_endpoint - string - required
-    ## Endpoint exposing the Kubeflow's Prometheus metrics. 
+    ## Endpoint exposing the Kubeflow's Prometheus metrics.
     #
   - openmetrics_endpoint: http://<prometheus-service>:9090/metrics
 

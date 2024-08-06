@@ -12,5 +12,5 @@ files:
             openmetrics_endpoint.required: true
             openmetrics_endpoint.value.example: http://<prometheus-service>:9090/metrics
             openmetrics_endpoint.description: |
-              Endpoint exposing the Kubeflow's Prometheus metrics. 
+              Endpoint exposing the Kubeflow's Prometheus metrics.
               
