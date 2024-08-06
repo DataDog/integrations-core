@@ -296,6 +296,7 @@ class PostgresConfig:
         tags = json.loads(datadog_agent.get_host_tags()) or {}
         result = []
         for key, value in tags.items():
+            check.info("natasha test _get_agent_tags key: %s, value: %s", key, value)
             if isinstance(value, list):
                 result.extend(value)
             else:
