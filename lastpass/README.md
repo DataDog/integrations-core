@@ -1,6 +1,6 @@
 ## Overview
 
-LastPass is a password management solution that securely store and manage passwords and other sensitive information. LastPass provides users with the ability to generate passwords, synchronize passwords across multiple devices, and add an extra layer of security through multi factor authentication.
+LastPass is a password management solution that securely stores and manages passwords and other sensitive information. LastPass provides users with the ability to generate passwords, synchronize passwords across multiple devices, and add an extra layer of security through multi-factor authentication.
 
 ## Setup
 
