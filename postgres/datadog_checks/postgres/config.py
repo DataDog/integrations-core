@@ -69,7 +69,7 @@ class PostgresConfig:
         self.max_connections = instance.get('max_connections', 30)
         self.tags = self._build_tags(
             custom_tags=instance.get('tags', []),
-            agent_tags=self._get_agent_tags(check),
+            agent_tags=self._get_agent_tags(),
             propagate_agent_tags=self._should_propagate_agent_tags(instance, init_config),
         )
 
@@ -288,21 +288,17 @@ class PostgresConfig:
         return None
 
     @staticmethod
-    def _get_agent_tags(check) -> List[str]:
+    def _get_agent_tags() -> List[str]:
         '''
         Get the tags from the agent host and return them as a list of strings.
         '''
-        check.info("natasha test _get_agent_tags 1")
-        check.info("natasha test _get_agent_tags 2 %s", datadog_agent.get_host_tags())
         tags = json.loads(datadog_agent.get_host_tags()) or {}
-        check.info("natasha test _get_agent_tags 3 %s", tags)
         result = []
         for key, value in tags.items():
-            check.info("natasha test _get_agent_tags key: %s, value: %s", key, value)
             if isinstance(value, list):
                 result.extend(value)
             else:
-                check.warning(f"Agent host tags for '{key}' is not a list: {value}")
+                pass
         return result
 
     @staticmethod
