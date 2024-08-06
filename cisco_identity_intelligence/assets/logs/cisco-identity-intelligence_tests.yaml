@@ -1,76 +1,52 @@
-id: cisco-identity-intelligence
+id: "cisco-identity-intelligence"
 tests:
-  - sample: |-
-      {
-            "detail-type": "FAILED_CHECK",
-            "id": "6290d486-904c-9d92-86fe-acecb39e252f",
-            "source": "a229bd52-608a-4225-bd01-b2214a3c4127__a7708c35",
-            "time": "2024-07-24T14:25:28Z",
-            "detail": {
-                "severity": "critical",
-                "loginDetails": [
-                    {
-                        "details": [
-                            {
-                                "value": "[\"providerFailingCheck-no-mfa-a229bd52-608a-4225-bd01-b2214a3c4127__DUO__6812fc67\"]",
-                                "key": "providersFailingChecks"
-                            }
-                        ],
-                        "login": "test@example.com"
-                    },
-                    {
-                        "details": [
-                            {
-                                "value": "[\"providerFailingCheck-no-mfa-a229bd52-608a-4225-bd01-b2214a3c4127__DUO__6812fc67\"]",
-                                "key": "providersFailingChecks"
-                            }
-                        ],
-                        "login": "hrms.serviceuser"
-                    },
-                    {
-                        "details": [
-                            {
-                                "value": "[\"providerFailingCheck-no-mfa-a229bd52-608a-4225-bd01-b2214a3c4127__DUO__6812fc67\"]",
-                                "key": "providersFailingChecks"
-                            }
-                        ],
-                        "login": "it.up@test.com"
-                    },
-                    {
-                        "details": [
-                            {
-                                "value": "[\"providerFailingCheck-no-mfa-a229bd52-608a-4225-bd01-b2214a3c4127__DUO__6812fc67\"]",
-                                "key": "providersFailingChecks"
-                            }
-                        ],
-                        "login": "pass.resetter"
-                    }
-                ],
-                "usersFailing": [
-                    "test@example.com",
-                    "hrms.serviceuser",
-                    "it.up@test.com",
-                    "pass.resetter"
-                ],
-                "description": [
-                    "Detects users with no Multi-Factor Authentication (MFA) enabled.",
-                    "MFA requires users to provide something you know, like a password or PIN, or something you have, like an out-of-band device or a one-time password provider. All users should be using MFA to gain access to the system.",
-                    "Users will not fail this check if they fall within the grace period of {{numberOfDays}} days.",
-                    "You can add known domains to either ignore or include list."
-                ],
-                "id": "b13fb22c-efc3-4764-b22a-b219d1efa27d",
-                "recommendedActions": [
-                    "Some system accounts may not have MFA. We recommend categorizing those for easy detection. Consider using solutions like expired passwords to block access to these accounts."
-                ],
-                "published": "2024-07-24T14:25:28.589Z",
-                "title": "No MFA Configured",
-                "checkId": "no-mfa"
-            },
-            "region": "us-east-2",
-            "version": "0",
-            "account": "988897525199"
-        }
-result: 
+ -
+  sample: |-
+    {
+      "detail-type" : "FAILED_CHECK",
+      "id" : "6290d486-904c-9d92-86fe-acecb39e252f",
+      "source" : "a229bd52-608a-4225-bd01-b2214a3c4127__a7708c35",
+      "time" : "2024-07-24T14:25:28Z",
+      "detail" : {
+        "severity" : "critical",
+        "loginDetails" : [ {
+          "details" : [ {
+            "value" : "[\"providerFailingCheck-no-mfa-a229bd52-608a-4225-bd01-b2214a3c4127__DUO__6812fc67\"]",
+            "key" : "providersFailingChecks"
+          } ],
+          "login" : "test@example.com"
+        }, {
+          "details" : [ {
+            "value" : "[\"providerFailingCheck-no-mfa-a229bd52-608a-4225-bd01-b2214a3c4127__DUO__6812fc67\"]",
+            "key" : "providersFailingChecks"
+          } ],
+          "login" : "hrms.serviceuser"
+        }, {
+          "details" : [ {
+            "value" : "[\"providerFailingCheck-no-mfa-a229bd52-608a-4225-bd01-b2214a3c4127__DUO__6812fc67\"]",
+            "key" : "providersFailingChecks"
+          } ],
+          "login" : "it.up@test.com"
+        }, {
+          "details" : [ {
+            "value" : "[\"providerFailingCheck-no-mfa-a229bd52-608a-4225-bd01-b2214a3c4127__DUO__6812fc67\"]",
+            "key" : "providersFailingChecks"
+          } ],
+          "login" : "pass.resetter"
+        } ],
+        "usersFailing" : [ "test@example.com", "hrms.serviceuser", "it.up@test.com", "pass.resetter" ],
+        "description" : [ "Detects users with no Multi-Factor Authentication (MFA) enabled.", "MFA requires users to provide something you know, like a password or PIN, or something you have, like an out-of-band device or a one-time password provider. All users should be using MFA to gain access to the system.", "Users will not fail this check if they fall within the grace period of {{numberOfDays}} days.", "You can add known domains to either ignore or include list." ],
+        "id" : "b13fb22c-efc3-4764-b22a-b219d1efa27d",
+        "recommendedActions" : [ "Some system accounts may not have MFA. We recommend categorizing those for easy detection. Consider using solutions like expired passwords to block access to these accounts." ],
+        "published" : "2024-07-24T14:25:28.589Z",
+        "title" : "No MFA Configured",
+        "checkId" : "no-mfa"
+      },
+      "region" : "us-east-2",
+      "version" : "0",
+      "account" : "988897525199"
+    }
+  result:
     custom:
       account: "988897525199"
       detail:
