@@ -678,14 +678,14 @@ coverage:
         target: 75
         flags:
         - fluxcd
-      vLLM:
-        target: 75
-        flags:
-        - vllm
       kyverno:
         target: 75
         flags:
         - kyverno
+      vLLM:
+        target: 75
+        flags:
+        - vllm
       vSphere:
         target: 75
         flags:
