@@ -176,7 +176,6 @@ def service_checks(check, sync):
                 display_queue.append((echo_failure, '  required list: groups'))
 
             # integration
-            # breakpoint()
             integration = service_check.get('integration')
             if integration is None or not isinstance(integration, str):
                 file_failed = True
