@@ -25,6 +25,7 @@ class ReplicaCollector(MongoCollector):
         super(ReplicaCollector, self).__init__(check, tags)
         self._last_states = check.last_states_by_server
         self.hostname = self.extract_hostname_for_event(self.check._config.clean_server_name)
+        self.deployment_type = self.check.deployment_type
 
     def compatible_with(self, deployment):
         # Can only be run on mongod that are part of a replica set.
@@ -112,10 +113,10 @@ class ReplicaCollector(MongoCollector):
         raising authentication errors. And because authenticating on an arbiter is not allowed, the workaround
         in that case is to run the command directly on the primary."""
 
-        if api.deployment_type.is_arbiter:
+        if self.deployment_type.is_arbiter:
             self.log.debug("Current node is arbiter. Collecting the replset from the primary instead.")
             try:
-                api = MongoApi(self.check._config, self.log, replicaset=api.deployment_type.replset_name)
+                api = MongoApi(self.check._config, self.log, replicaset=self.deployment_type.replset_name)
             except Exception as e:
                 self.log.debug(str(e))
                 self.log.warning(
@@ -126,8 +127,7 @@ class ReplicaCollector(MongoCollector):
         return api['local']['system.replset'].find_one()
 
     def collect(self, api):
-        db = api["admin"]
-        status = db.command('replSetGetStatus')
+        status = api.replset_get_status()
         result = {}
 
         # Find nodes: current node (ourself) and the primary
