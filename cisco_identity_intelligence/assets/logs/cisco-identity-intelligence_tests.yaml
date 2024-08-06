@@ -34,7 +34,7 @@ tests:
                                 "key": "providersFailingChecks"
                             }
                         ],
-                        "login": "it.up@crestdata.ai"
+                        "login": "it.up@test.com"
                     },
                     {
                         "details": [
@@ -49,7 +49,7 @@ tests:
                 "usersFailing": [
                     "test@example.com",
                     "hrms.serviceuser",
-                    "it.up@crestdata.ai",
+                    "it.up@test.com",
                     "pass.resetter"
                 ],
                 "description": [
@@ -70,9 +70,60 @@ tests:
             "version": "0",
             "account": "988897525199"
         }
-result: null
-
-# The `result` field should be left blank to start. Once you submit your log asset files with
-# your integration pull-request in a Datadog GitHub repository, Datadog's validations will
-# run your raw logs against your pipeline and return the result. If the result output in the
-# validation is accurate, take the output and add it to the `result` field in your test YAML file.
+result: 
+    custom:
+      account: "988897525199"
+      detail:
+        checkId: "no-mfa"
+        description:
+         - "Detects users with no Multi-Factor Authentication (MFA) enabled."
+         - "MFA requires users to provide something you know, like a password or PIN, or something you have, like an out-of-band device or a one-time password provider. All users should be using MFA to gain access to the system."
+         - "Users will not fail this check if they fall within the grace period of {{numberOfDays}} days."
+         - "You can add known domains to either ignore or include list."
+        id: "b13fb22c-efc3-4764-b22a-b219d1efa27d"
+        loginDetails:
+         -
+          details:
+           -
+            value: "[\"providerFailingCheck-no-mfa-a229bd52-608a-4225-bd01-b2214a3c4127__DUO__6812fc67\"]"
+            key: "providersFailingChecks"
+          login: "test@example.com"
+         -
+          details:
+           -
+            value: "[\"providerFailingCheck-no-mfa-a229bd52-608a-4225-bd01-b2214a3c4127__DUO__6812fc67\"]"
+            key: "providersFailingChecks"
+          login: "hrms.serviceuser"
+         -
+          details:
+           -
+            value: "[\"providerFailingCheck-no-mfa-a229bd52-608a-4225-bd01-b2214a3c4127__DUO__6812fc67\"]"
+            key: "providersFailingChecks"
+          login: "it.up@test.com"
+         -
+          details:
+           -
+            value: "[\"providerFailingCheck-no-mfa-a229bd52-608a-4225-bd01-b2214a3c4127__DUO__6812fc67\"]"
+            key: "providersFailingChecks"
+          login: "pass.resetter"
+        published: "2024-07-24T14:25:28.589Z"
+        recommendedActions:
+         - "Some system accounts may not have MFA. We recommend categorizing those for easy detection. Consider using solutions like expired passwords to block access to these accounts."
+        severity: "critical"
+        usersFailing:
+         - "test@example.com"
+         - "hrms.serviceuser"
+         - "it.up@test.com"
+         - "pass.resetter"
+      detail-type: "FAILED_CHECK"
+      id: "6290d486-904c-9d92-86fe-acecb39e252f"
+      region: "us-east-2"
+      source: "a229bd52-608a-4225-bd01-b2214a3c4127__a7708c35"
+      status: "critical"
+      time: "2024-07-24T14:25:28Z"
+      version: "0"
+    message: "No MFA Configured"
+    status: "critical"
+    tags:
+     - "source:LOGS_SOURCE"
+    timestamp: 1721831128589
