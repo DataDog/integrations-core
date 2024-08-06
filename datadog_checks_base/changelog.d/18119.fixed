@@ -1,1 +1,0 @@
-Ensures that 'should_bypass_proxy' correctly considers unix:/// URLs
