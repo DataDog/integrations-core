@@ -132,6 +132,7 @@ class MongoOperationSamples(DBMAsyncJob):
                 )
 
                 if not self._should_explain(
+                    namespace=operation.get("ns"),
                     op=operation.get("op"),
                     command=command,
                     explain_plan_cache_key=(operation_metadata["dbname"], query_signature),
@@ -168,10 +169,6 @@ class MongoOperationSamples(DBMAsyncJob):
             self._check.log.debug("Skipping operation for database %s because it is not configured to be monitored", db)
             return False
 
-        if db in SYSTEM_DATABASES:
-            self._check.log.debug("Skipping operation for system database %s", db)
-            return False
-
         # Skip operations without a command
         command = operation.get("command")
         if not command:
@@ -200,7 +197,9 @@ class MongoOperationSamples(DBMAsyncJob):
 
         return True
 
-    def _should_explain(self, op: Optional[str], command: dict, explain_plan_cache_key: Tuple[str, str]) -> bool:
+    def _should_explain(
+        self, namespace: str, op: Optional[str], command: dict, explain_plan_cache_key: Tuple[str, str]
+    ) -> bool:
         if not op or op == "none":
             # Skip operations that are not queries
             self._check.log.debug("Skipping explain operation without operation type: %s", command)
@@ -214,6 +213,11 @@ class MongoOperationSamples(DBMAsyncJob):
         if "getMore" in command or "insert" in command or "delete" in command or "update" in command:
             # Skip operations as they are not queries
             self._check.log.debug("Skipping operations that are not queries: %s", op, command)
+            return False
+
+        db, _ = namespace.split(".", 1)
+        if db in SYSTEM_DATABASES:
+            self._check.log.debug("Skipping operation for system database %s", db)
             return False
 
         if not self._explained_operations_ratelimiter.acquire(explain_plan_cache_key):
