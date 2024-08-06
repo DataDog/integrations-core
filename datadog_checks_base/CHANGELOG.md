@@ -2,6 +2,16 @@
 
 <!-- towncrier release notes start -->
 
+## 36.12.0 / 2024-08-06
+
+***Added***:
+
+* Enforce format of timestamp logs attribute ([#18218](https://github.com/DataDog/integrations-core/pull/18218))
+
+***Fixed***:
+
+* Ensures that 'should_bypass_proxy' correctly considers unix:/// URLs ([#18119](https://github.com/DataDog/integrations-core/pull/18119))
+
 ## 36.11.0 / 2024-08-06
 
 ***Added***:
