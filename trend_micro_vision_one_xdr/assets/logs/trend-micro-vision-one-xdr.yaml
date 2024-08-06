@@ -3,14 +3,39 @@ metric_id: trend-micro-vision-one-xdr
 backend_only: false
 facets:
   - groups:
-      - User
-    name: User Name
-    path: usr.name
+      - Geoip
+    name: City Name
+    path: network.client.geoip.city.name
     source: log
   - groups:
-      - User
-    name: User ID
-    path: usr.id
+      - Geoip
+    name: Continent Code
+    path: network.client.geoip.continent.code
+    source: log
+  - groups:
+      - Geoip
+    name: Continent Name
+    path: network.client.geoip.continent.name
+    source: log
+  - groups:
+      - Geoip
+    name: Country ISO Code
+    path: network.client.geoip.country.iso_code
+    source: log
+  - groups:
+      - Geoip
+    name: Country Name
+    path: network.client.geoip.country.name
+    source: log
+  - groups:
+      - Geoip
+    name: Subdivision ISO Code
+    path: network.client.geoip.subdivision.iso_code
+    source: log
+  - groups:
+      - Geoip
+    name: Subdivision Name
+    path: network.client.geoip.subdivision.name
     source: log
   - groups:
       - Web Access
@@ -37,6 +62,16 @@ facets:
     name: User Email
     path: usr.email
     source: log
+  - groups:
+      - User
+    name: User ID
+    path: usr.id
+    source: log
+  - groups:
+      - User
+    name: User Name
+    path: usr.name
+    source: log
   - facetType: range
     groups:
       - Trend Micro Vision One XDR
@@ -52,8 +87,7 @@ pipeline:
     query: "source:trend-micro-vision-one-xdr"
   processors:
     - type: date-remapper
-      name: "Define `updatedDateTime` and `detectedDateTime` as the official date of
-        the log"
+      name: "Define `updatedDateTime`, `detectedDateTime` as the official date of the log"
       enabled: true
       sources:
         - updatedDateTime
@@ -101,7 +135,7 @@ pipeline:
         query: "service:observed-attack-techniques"
       processors:
         - type: attribute-remapper
-          name: Remap `detail.userDisplayName` to `usr.name`
+          name: Map `detail.userDisplayName` to `usr.name`
           enabled: true
           sources:
             - detail.userDisplayName
@@ -111,7 +145,7 @@ pipeline:
           preserveSource: false
           overrideOnConflict: false
         - type: attribute-remapper
-          name: Remap `detail.userId` to `usr.id`
+          name: Map `detail.userId` to `usr.id`
           enabled: true
           sources:
             - detail.userId
@@ -121,7 +155,7 @@ pipeline:
           preserveSource: false
           overrideOnConflict: false
         - type: attribute-remapper
-          name: Remap `detail.src`, `detail.sourceIPAddress`, `detail.mailSenderIp`,
+          name: Map `detail.src`, `detail.sourceIPAddress`, `detail.mailSenderIp`,
             `detail.ipAddress` to `network.client.ip`
           enabled: true
           sources:
@@ -135,7 +169,7 @@ pipeline:
           preserveSource: false
           overrideOnConflict: false
         - type: attribute-remapper
-          name: Remap `detail.spt` to `network.client.port`
+          name: Map `detail.spt` to `network.client.port`
           enabled: true
           sources:
             - detail.spt
@@ -145,7 +179,7 @@ pipeline:
           preserveSource: false
           overrideOnConflict: false
         - type: attribute-remapper
-          name: Remap `detail.dst` to `network.destination.ip`
+          name: Map `detail.dst` to `network.destination.ip`
           enabled: true
           sources:
             - detail.dst
@@ -155,7 +189,7 @@ pipeline:
           preserveSource: false
           overrideOnConflict: false
         - type: attribute-remapper
-          name: Remap `detail.dpt` to `network.destination.port`
+          name: Map `detail.dpt` to `network.destination.port`
           enabled: true
           sources:
             - detail.dpt
@@ -165,7 +199,7 @@ pipeline:
           preserveSource: false
           overrideOnConflict: false
         - type: attribute-remapper
-          name: Remap `detail.mailToAddresses` to `usr.email`
+          name: Map `detail.mailToAddresses` to `usr.email`
           enabled: true
           sources:
             - detail.mailToAddresses
