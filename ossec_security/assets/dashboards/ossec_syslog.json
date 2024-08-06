@@ -1,6 +1,6 @@
 {
     "title": "OSSEC - Syslog",
-    "description": "-   This dashboard offers comprehensive insights into syslog events and activities conducted on systems, like user operations, the use of sudo/su, Linux Kernel events, or installation and removal of debian or yum packages.\n",
+    "description": "-   This dashboard offers comprehensive insights into syslog events and activities conducted on systems, like user operations, the use of sudo/su, Linux Kernel events, or installation and removal of Debian or Yum packages.\n",
     "widgets": [
         {
             "id": 7211624518798348,
@@ -25,7 +25,7 @@
             "id": 7511029720698206,
             "definition": {
                 "type": "note",
-                "content": "## Overview\n- This dashboard offers comprehensive insights into syslog events and activities conducted on systems, like user operations, the use of sudo/su, Linux Kernel events, or installation and removal of debian or yum packages.",
+                "content": "## Overview\n- This dashboard offers comprehensive insights into syslog events and activities conducted on systems, like user operations, the use of sudo/su, Linux Kernel events, or installation and removal of Debian or Yum packages.",
                 "background_color": "white",
                 "font_size": "14",
                 "text_align": "left",

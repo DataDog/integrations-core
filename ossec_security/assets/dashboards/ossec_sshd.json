@@ -1,6 +1,6 @@
 {
     "title": "OSSEC - SSHD",
-    "description": "-   This dashboard offers comprehensive insights into SSHD events and activities conducted through SSH-like connection attempts, authentication failure.",
+    "description": "-   This dashboard offers comprehensive insights into SSHD events and activities conducted through SSH-like connection attempts or authentication failure.",
     "widgets": [
         {
             "id": 6582953341186730,
@@ -25,7 +25,7 @@
             "id": 3742523071554850,
             "definition": {
                 "type": "note",
-                "content": "## Overview\n- This dashboard offers comprehensive insights into SSHD events and activities conducted through SSH-like connection attempts, authentication failure.\n",
+                "content": "## Overview\n- This dashboard offers comprehensive insights into SSHD events and activities conducted through SSH-like connection attempts or authentication failure.\n",
                 "background_color": "white",
                 "font_size": "14",
                 "text_align": "left",
