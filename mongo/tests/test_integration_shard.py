@@ -43,6 +43,7 @@ def test_mongo_arbiter(aggregator, check, instance_arbiter, dd_run_check):
         'replset_state:arbiter',
         'replset_me:shard01c:27020',
         'sharding_cluster_role:shardsvr',
+        'hosting_type:self-hosted',
     ] + check.internal_resource_tags
     for metric, value in expected_metrics.items():
         aggregator.assert_metric(metric, value, expected_tags, count=1)
@@ -63,6 +64,7 @@ def test_mongo_replset(instance_shard, aggregator, check, dd_run_check):
         "replset_name:shard01",
         "server:mongodb://localhost:27018/",
         "sharding_cluster_role:shardsvr",
+        'hosting_type:self-hosted',
     ] + mongo_check.internal_resource_tags
     for metric in replset_metrics:
         aggregator.assert_metric(
@@ -84,6 +86,7 @@ def test_refresh_role(instance_shard, aggregator, check, dd_run_check):
     dd_run_check(mongo_check)
     with mock.patch('datadog_checks.mongo.api.MongoApi._get_rs_deployment_from_status_payload') as get_deployment:
         mock_deployment_type = ReplicaSetDeployment(
+            "self-hosted",
             "sharding01",
             9,
             ["sharding01a:27017", "sharding01b:27017", "sharding01c:27017"],

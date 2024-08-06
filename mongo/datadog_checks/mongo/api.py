@@ -2,6 +2,7 @@
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
 
+
 from pymongo import MongoClient, ReadPreference
 from pymongo.errors import (
     ConfigurationError,
@@ -32,6 +33,14 @@ CRITICAL_FAILURE = (
     # Errors at the level of the protocol result in a lost/degraded connection. We can issue a CRITICAL check for this.
     ProtocolError,
 )
+
+
+class HostingType:
+    ATLAS = "mongodb-atlas"
+    ALIBABA_APSARADB = "alibaba-apsaradb"
+    DOCUMENTDB = "amazon-documentdb"
+    SELF_HOSTED = "self-hosted"
+    UNKNOWN = "unknown"
 
 
 class MongoApi(object):
@@ -70,6 +79,7 @@ class MongoApi(object):
         self._log.debug("options: %s", options)
         self._cli = MongoClient(**options)
         self.deployment_type = None
+        self.__hostname = None
 
     def __getitem__(self, item):
         return self._cli[item]
@@ -137,12 +147,14 @@ class MongoApi(object):
     def get_log_data(self, session=None):
         return self['admin'].command("getLog", "global", session=session)
 
-    def _get_rs_deployment_from_status_payload(self, repl_set_payload, is_master_payload, cluster_role):
+    def _get_rs_deployment_from_status_payload(self, repl_set_payload, is_master_payload, cluster_role, hosting_type):
         replset_name = repl_set_payload["set"]
         replset_state = repl_set_payload["myState"]
         hosts = [m['name'] for m in repl_set_payload.get("members", [])]
         replset_me = is_master_payload.get('me')
-        return ReplicaSetDeployment(replset_name, replset_state, hosts, replset_me, cluster_role=cluster_role)
+        return ReplicaSetDeployment(
+            hosting_type, replset_name, replset_state, hosts, replset_me, cluster_role=cluster_role
+        )
 
     def refresh_deployment_type(self):
         # getCmdLineOpts is the runtime configuration of the mongo instance. Helpful to know whether the node is
@@ -162,10 +174,11 @@ class MongoApi(object):
     def _get_default_deployment_type(self):
         options = self['admin'].command("getCmdLineOpts")['parsed']
         cluster_role = None
+        hosting_type = HostingType.ATLAS if self._is_hosting_type_atlas() else HostingType.SELF_HOSTED
         if 'sharding' in options:
             if 'configDB' in options['sharding']:
                 self._log.debug("Detected MongosDeployment. Node is principal.")
-                return MongosDeployment(shard_map=self.refresh_shards())
+                return MongosDeployment(hosting_type=hosting_type, shard_map=self.refresh_shards())
             elif 'clusterRole' in options['sharding']:
                 cluster_role = options['sharding']['clusterRole']
 
@@ -174,7 +187,10 @@ class MongoApi(object):
             repl_set_payload = self['admin'].command("replSetGetStatus")
             is_master_payload = self['admin'].command('isMaster')
             replica_set_deployment = self._get_rs_deployment_from_status_payload(
-                repl_set_payload, is_master_payload, cluster_role
+                repl_set_payload,
+                is_master_payload,
+                cluster_role,
+                hosting_type,
             )
             is_principal = replica_set_deployment.is_principal()
             is_principal_log = "" if is_principal else "not "
@@ -182,12 +198,13 @@ class MongoApi(object):
             return replica_set_deployment
 
         self._log.debug("Detected StandaloneDeployment. Node is principal.")
-        return StandaloneDeployment()
+        return StandaloneDeployment(hosting_type=hosting_type)
 
     def _get_alibaba_deployment_type(self):
+        hosting_type = HostingType.ALIBABA_APSARADB
         is_master_payload = self['admin'].command('isMaster')
         if is_master_payload.get('msg') == 'isdbgrid':
-            return MongosDeployment(shard_map=self.refresh_shards())
+            return MongosDeployment(hosting_type=hosting_type, shard_map=self.refresh_shards())
 
         # On alibaba cloud, a mongo node is either a mongos or part of a replica set.
         repl_set_payload = self['admin'].command("replSetGetStatus")
@@ -199,7 +216,9 @@ class MongoApi(object):
             cluster_role = 'shardsvr'
         else:
             cluster_role = None
-        return self._get_rs_deployment_from_status_payload(repl_set_payload, is_master_payload, cluster_role)
+        return self._get_rs_deployment_from_status_payload(
+            repl_set_payload, is_master_payload, cluster_role, hosting_type
+        )
 
     def _get_documentdb_deployment_type(self):
         """
@@ -209,7 +228,9 @@ class MongoApi(object):
         """
         repl_set_payload = self['admin'].command("replSetGetStatus")
         is_master_payload = self['admin'].command('isMaster')
-        return self._get_rs_deployment_from_status_payload(repl_set_payload, is_master_payload, cluster_role=None)
+        return self._get_rs_deployment_from_status_payload(
+            repl_set_payload, is_master_payload, cluster_role=None, hosting_type=HostingType.DOCUMENTDB
+        )
 
     def refresh_shards(self):
         try:
@@ -240,15 +261,24 @@ class MongoApi(object):
             )
             return []
 
+    def _is_hosting_type_atlas(self):
+        # Atlas deployments have mongodb.net in the internal hostname
+        # DO NOT use the connection host because this can be a load balancer or proxy
+        # TODO: Is there a better way to detect MongoDB Atlas deployment?
+        if self.hostname and "mongodb.net" in self.hostname:
+            return True
+        return False
+
     @property
     def hostname(self):
+        if self.__hostname:
+            return self.__hostname
         try:
-            hostname = self.server_status()['host'].split(':')
-            if len(hostname) == 1:
+            self.__hostname = self.server_status()['host']
+            if ':' not in self.__hostname:
                 # If there is no port, we assume the default port
-                return "{}:27017".format(hostname[0])
-            else:
-                return "{}:{}".format(hostname[0], hostname[1])
+                self.__hostname += ':27017'
+            return self.__hostname
         except Exception as e:
             self._log.error('Unable to get hostname: %s', e)
             return None
