@@ -325,7 +325,7 @@ However, Datadog recommends that you check to make sure these values suit your p
 
 ### Metrics
 
-See [metadata.csv][6] for a list of metrics that this integration provides.
+See [metadata.csv][6] for a list of metrics that this integration.
 
 ### Events
 
