@@ -19,14 +19,14 @@
                 "x": 0,
                 "y": 0,
                 "width": 4,
-                "height": 2
+                "height": 3
             }
         },
         {
             "id": 7296852491781326,
             "definition": {
                 "type": "note",
-                "content": "## Overview\n- This dashboard provides insights into anomaly logs of Suricata.",
+                "content": "The Suricata Anomaly dashboard offers a comprehensive view of unusual network activities detected by Suricata. \n\nBy visualizing patterns and anomalies, the dashboard aids in the early detection and response to potential threats, enhancing overall network security and situational awareness.\n\nFor more information, see the [Suricata Integration Documentation](https://docs.datadoghq.com/integrations/suricata).\n\n**Tips**\n- Use the timeframe selector in the top right of the dashboard to change the default timeframe.\n- Clone this dashboard to rearrange, modify and add widgets and visualizations.",
                 "background_color": "white",
                 "font_size": "14",
                 "text_align": "left",
@@ -39,29 +39,8 @@
             "layout": {
                 "x": 4,
                 "y": 0,
-                "width": 4,
-                "height": 2
-            }
-        },
-        {
-            "id": 968580111834588,
-            "definition": {
-                "type": "note",
-                "content": "## Widgets\n1. Total Anomalies Detected\n2. Top 10 Anomalous Event Names\n3. Distribution of Anomalies by Type\n4. Anomaly Log Details",
-                "background_color": "white",
-                "font_size": "14",
-                "text_align": "left",
-                "vertical_align": "top",
-                "show_tick": false,
-                "tick_pos": "50%",
-                "tick_edge": "left",
-                "has_padding": true
-            },
-            "layout": {
-                "x": 8,
-                "y": 0,
-                "width": 4,
-                "height": 2
+                "width": 8,
+                "height": 3
             }
         },
         {
@@ -191,7 +170,6 @@
                             "title": "Distribution of Anomalies by Type",
                             "title_size": "16",
                             "title_align": "left",
-                            "time": {},
                             "requests": [
                                 {
                                     "response_format": "scalar",
@@ -325,7 +303,7 @@
             },
             "layout": {
                 "x": 0,
-                "y": 2,
+                "y": 3,
                 "width": 12,
                 "height": 8
             }

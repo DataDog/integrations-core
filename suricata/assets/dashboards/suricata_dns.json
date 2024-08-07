@@ -19,14 +19,14 @@
                 "x": 0,
                 "y": 0,
                 "width": 4,
-                "height": 2
+                "height": 3
             }
         },
         {
             "id": 7296852491781326,
             "definition": {
                 "type": "note",
-                "content": "## Overview\n- This dashboard provides information about DNS logs generated in Suricata.",
+                "content": "The Suricata DNS dashboard provides a detailed view of DNS activity within the network. \n\nIt includes detailed DNS log information, helping users diagnose and investigate DNS-related problems or suspicious activity. This comprehensive view supports network administrators and security teams in monitoring DNS traffic, optimizing performance, and detecting potential threats.\n\nFor more information, see the [Suricata Integration Documentation](https://docs.datadoghq.com/integrations/suricata).\n\n**Tips**\n- Use the timeframe selector in the top right of the dashboard to change the default timeframe.\n- Clone this dashboard to rearrange, modify and add widgets and visualizations.",
                 "background_color": "white",
                 "font_size": "14",
                 "text_align": "left",
@@ -39,29 +39,8 @@
             "layout": {
                 "x": 4,
                 "y": 0,
-                "width": 4,
-                "height": 2
-            }
-        },
-        {
-            "id": 968580111834588,
-            "definition": {
-                "type": "note",
-                "content": "## Widgets\n1. Total DNS Requests\n2. Timeline by DNS Requests\n3. Total DNS Responses\n4. Timeline by DNS Responses\n5. Transport Layer Protocols of Connection\n6. Top 10 DNS Query Types\n7. Top 10 Response Codes\n8. Top 10 DNS Queried Domain\n9. DNS Log Details",
-                "background_color": "white",
-                "font_size": "14",
-                "text_align": "left",
-                "vertical_align": "top",
-                "show_tick": false,
-                "tick_pos": "50%",
-                "tick_edge": "left",
-                "has_padding": true
-            },
-            "layout": {
-                "x": 8,
-                "y": 0,
-                "width": 4,
-                "height": 2
+                "width": 8,
+                "height": 3
             }
         },
         {
@@ -633,7 +612,7 @@
             },
             "layout": {
                 "x": 0,
-                "y": 2,
+                "y": 3,
                 "width": 12,
                 "height": 19
             }

@@ -19,14 +19,14 @@
                 "x": 0,
                 "y": 0,
                 "width": 4,
-                "height": 2
+                "height": 3
             }
         },
         {
             "id": 7296852491781326,
             "definition": {
                 "type": "note",
-                "content": "## Overview\n- This dashboard provides the insights into network flow data processed by Suricata.\n",
+                "content": "The Suricata Flow dashboard provides a comprehensive overview of network flow activities. \n\nThis detailed view helps users analyze network behavior, troubleshoot connectivity issues, and detect anomalies or inefficiencies in network traffic.\n\nFor more information, see the [Suricata Integration Documentation](https://docs.datadoghq.com/integrations/suricata).\n\n**Tips**\n- Use the timeframe selector in the top right of the dashboard to change the default timeframe.\n- Clone this dashboard to rearrange, modify and add widgets and visualizations.",
                 "background_color": "white",
                 "font_size": "14",
                 "text_align": "left",
@@ -39,29 +39,8 @@
             "layout": {
                 "x": 4,
                 "y": 0,
-                "width": 4,
-                "height": 2
-            }
-        },
-        {
-            "id": 968580111834588,
-            "definition": {
-                "type": "note",
-                "content": "## Widgets\n1. Total Connections\n2. Total Alerts Seen\n3. Longest Flow Duration\n4. Distribution of Flow by State\n5. Top Reasons of Flow Termination\n6. Distribution of Flow by Application Protocol\n7. Bytes Transferred to Client\n8. Bytes Transferred over time\n9. Bytes Transferred to Server\n10. Packets Transferred to Client\n11. Packets Transferred over time\n12. Packets Transferred to Server\n13. Bypassed Bytes Transferred to Client\n14. Bypassed Bytes Transferred over time\n15. Bypassed Bytes Transferred to Server\n16. Bypassed Packets Transferred to Client\n17. Bypassed Packets Transferred over time\n18. Bypassed Packets Transferred to Server\n19. Flow Log Details",
-                "background_color": "white",
-                "font_size": "14",
-                "text_align": "left",
-                "vertical_align": "top",
-                "show_tick": false,
-                "tick_pos": "50%",
-                "tick_edge": "left",
-                "has_padding": true
-            },
-            "layout": {
-                "x": 8,
-                "y": 0,
-                "width": 4,
-                "height": 2
+                "width": 8,
+                "height": 3
             }
         },
         {
@@ -212,7 +191,6 @@
                             "title": "Distribution of Flow by State",
                             "title_size": "16",
                             "title_align": "left",
-                            "time": {},
                             "requests": [
                                 {
                                     "formulas": [
@@ -1271,7 +1249,7 @@
             },
             "layout": {
                 "x": 0,
-                "y": 2,
+                "y": 3,
                 "width": 12,
                 "height": 27
             }

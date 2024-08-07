@@ -19,14 +19,14 @@
                 "x": 0,
                 "y": 0,
                 "width": 4,
-                "height": 2
+                "height": 3
             }
         },
         {
             "id": 7296852491781326,
             "definition": {
                 "type": "note",
-                "content": "## Overview\n- This dashboard provides information about DHCP logs generated in Suricata.\n",
+                "content": "The Suricata DHCP dashboard is designed to provide visibility into DHCP-related network activities and events. \n\nThe dashboard helps users monitor for unusual patterns, such as unexpected spikes in DHCP requests or errors, which could indicate misconfigurations or potential security issues. By offering detailed insights into DHCP operations, the dashboard assists network administrators and security teams in troubleshooting issues, ensuring proper network configuration, and detecting unauthorized or suspicious devices.\n\nFor more information, see the [Suricata Integration Documentation](https://docs.datadoghq.com/integrations/suricata).\n\n**Tips**\n- Use the timeframe selector in the top right of the dashboard to change the default timeframe.\n- Clone this dashboard to rearrange, modify and add widgets and visualizations.",
                 "background_color": "white",
                 "font_size": "14",
                 "text_align": "left",
@@ -39,29 +39,8 @@
             "layout": {
                 "x": 4,
                 "y": 0,
-                "width": 4,
-                "height": 2
-            }
-        },
-        {
-            "id": 968580111834588,
-            "definition": {
-                "type": "note",
-                "content": "## Widgets\n1. Total DHCP Requests\n2. Timeline by DHCP Requests\n3. Total DHCP Responses\n4. Timeline by DHCP Responses\n5. Distribution by DHCP Message Types\n6. Client Host Names\n7. Top 10 Requested IP Address\n8. Top 10 Leased IP Address\n9. Leased IP Duration by Client IP and Client MAC\n10. DHCP Log Details",
-                "background_color": "white",
-                "font_size": "14",
-                "text_align": "left",
-                "vertical_align": "top",
-                "show_tick": false,
-                "tick_pos": "50%",
-                "tick_edge": "left",
-                "has_padding": true
-            },
-            "layout": {
-                "x": 8,
-                "y": 0,
-                "width": 4,
-                "height": 2
+                "width": 8,
+                "height": 3
             }
         },
         {
@@ -285,7 +264,6 @@
                             "title": "Distribution by DHCP Message Types",
                             "title_size": "16",
                             "title_align": "left",
-                            "time": {},
                             "requests": [
                                 {
                                     "response_format": "scalar",
@@ -558,7 +536,6 @@
                             "title": "Leased IP Duration by Client IP and Client MAC",
                             "title_size": "16",
                             "title_align": "left",
-                            "time": {},
                             "requests": [
                                 {
                                     "formulas": [
@@ -727,7 +704,7 @@
             },
             "layout": {
                 "x": 0,
-                "y": 2,
+                "y": 3,
                 "width": 12,
                 "height": 23
             }

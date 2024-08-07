@@ -19,14 +19,14 @@
                 "x": 0,
                 "y": 0,
                 "width": 4,
-                "height": 2
+                "height": 3
             }
         },
         {
             "id": 7296852491781326,
             "definition": {
                 "type": "note",
-                "content": "## Overview\n- This dashboard provides information about SMB logs generated in Suricata.\n",
+                "content": "The Suricata SMB dashboard provides a comprehensive view of Server Message Block (SMB) protocol activities within a network. \n\nThis dashboard helps users monitor and analyze SMB traffic, identify unauthorized access, and ensure compliance with security policies.\n\nFor more information, see the [Suricata Integration Documentation](https://docs.datadoghq.com/integrations/suricata).\n\n**Tips**\n- Use the timeframe selector in the top right of the dashboard to change the default timeframe.\n- Clone this dashboard to rearrange, modify and add widgets and visualizations.",
                 "background_color": "white",
                 "font_size": "14",
                 "text_align": "left",
@@ -39,29 +39,8 @@
             "layout": {
                 "x": 4,
                 "y": 0,
-                "width": 4,
-                "height": 2
-            }
-        },
-        {
-            "id": 968580111834588,
-            "definition": {
-                "type": "note",
-                "content": "## Widgets\n1. Avg. Size of Requested File\n2. Distribution by Share Types\n3. Maximum Size of Requested File\n4. Distribution of events by Protocol Version\n5. Top 10 Commands\n6. Top 10 SMB Status\n7. Distribution by File Access Type\n8. Top 10 Requested Disposition\n9. Top 10 File Names\n10. SMB Log Details\n11. Distribution by Commands\n12. Distribution by Replies\n13. DCERPC Log Details\n14. Top 10 Windows Domains\n15. Top 10 Users\n16. Top 10 Hosts\n17. Top 10 Client Versions\n18. NTLMSSP Log Details\n19. Total Kerberos Authentication Requests\n20. Top 10 Service Names\n21. Top 10 Kerberos Realms\n22. Kerberos Log Details",
-                "background_color": "white",
-                "font_size": "14",
-                "text_align": "left",
-                "vertical_align": "top",
-                "show_tick": false,
-                "tick_pos": "50%",
-                "tick_edge": "left",
-                "has_padding": true
-            },
-            "layout": {
-                "x": 8,
-                "y": 0,
-                "width": 4,
-                "height": 2
+                "width": 8,
+                "height": 3
             }
         },
         {
@@ -236,7 +215,6 @@
                             "title": "Distribution of events by Protocol Version",
                             "title_size": "16",
                             "title_align": "left",
-                            "time": {},
                             "requests": [
                                 {
                                     "formulas": [
@@ -738,7 +716,7 @@
             },
             "layout": {
                 "x": 0,
-                "y": 2,
+                "y": 3,
                 "width": 12,
                 "height": 17
             }
@@ -962,7 +940,7 @@
             },
             "layout": {
                 "x": 0,
-                "y": 19,
+                "y": 20,
                 "width": 12,
                 "height": 9
             }
@@ -1332,7 +1310,7 @@
             },
             "layout": {
                 "x": 0,
-                "y": 28,
+                "y": 29,
                 "width": 12,
                 "height": 9
             }
@@ -1602,7 +1580,7 @@
             },
             "layout": {
                 "x": 0,
-                "y": 37,
+                "y": 38,
                 "width": 12,
                 "height": 8
             }

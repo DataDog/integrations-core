@@ -19,14 +19,14 @@
                 "x": 0,
                 "y": 0,
                 "width": 4,
-                "height": 2
+                "height": 3
             }
         },
         {
             "id": 7296852491781326,
             "definition": {
                 "type": "note",
-                "content": "## Overview\n- This dashboard provides insights into network protocols such as HTTP, FTP, TLS, TFTP, SSH, RDP, and ARP.",
+                "content": "The Suricata Network Protocols dashboard provides an in-depth analysis of various network protocols, including HTTP, FTP, TLS, TFTP, SSH, RDP, and ARP. \n\nThis comprehensive overview helps users monitor network traffic, identify trends, and detect anomalies or security issues. It's a valuable tool for network administrators and security teams to understand protocol usage, troubleshoot issues, and enhance network security posture.\n\nFor more information, see the [Suricata Integration Documentation](https://docs.datadoghq.com/integrations/suricata).\n\n**Tips**\n- Use the timeframe selector in the top right of the dashboard to change the default timeframe.\n- Clone this dashboard to rearrange, modify and add widgets and visualizations.",
                 "background_color": "white",
                 "font_size": "14",
                 "text_align": "left",
@@ -39,29 +39,8 @@
             "layout": {
                 "x": 4,
                 "y": 0,
-                "width": 4,
-                "height": 2
-            }
-        },
-        {
-            "id": 968580111834588,
-            "definition": {
-                "type": "note",
-                "content": "## Widgets\n1. Top 10 HTTP Hostnames\n2. Top 10 URL Accessed\n3. Count of HTTP Events by User-Agents\n4. Top 10 HTTP Content Types\n5. Top 10 HTTP Status Categories by Status Code\n6. Host Breakdown by HTTP Method\n7. Host Breakdown by HTTP Status Code\n8. HTTP Log Details\n9. Top 10 Commands\n10. Distribution by FTP Connection Types\n11. Top Command Replies\n12. Top Reply Codes\n13. FTP Log Details\n14. Distribution by FTP Commands\n15. Top Files involved in File Transfer\n16. FTP_DATA Log Details\n17. Total TLS Certificates\n18. Distribution by TLS Versions\n19. Top 10 TLS Server Name Identification\n20. Top 10 Certificate Subjects\n21. TLS Log Details\n22. Distribution by Sender Operations Codes\n23. Distribution by Mode of Transfer\n24. Top 10 File Transported\n25. TFTP Log Details\n26. Count of Events by Client’s Protocol Version\n27. Count of Events by Server’s Protocol Version\n28. Top 10 Client’s Software Version\n29. Top 10 Server's Software Version\n30. SSH Log Details\n31. Distribution by Event Subtypes\n32. Top 10 Error Reason by Error Code\n33. Distribution of Events by Protocol Versions\n34. Distribution by Security Protocols\n35. Top 10 Requested Channels by Client\n36. Top 10 Client Computer Name\n37. Distribution by RDP Connection Hint\n38. RDP Log Details\n39. Distribution by Network Link Protocol Types\n40. Distribution by Internetwork Protocol Types\n41. Distribution by Sender Operations\n42. Source IP Address by MAC\n43. Destination IP Address by MAC\n44. ARP Log Details",
-                "background_color": "white",
-                "font_size": "14",
-                "text_align": "left",
-                "vertical_align": "top",
-                "show_tick": false,
-                "tick_pos": "50%",
-                "tick_edge": "left",
-                "has_padding": true
-            },
-            "layout": {
-                "x": 8,
-                "y": 0,
-                "width": 4,
-                "height": 2
+                "width": 8,
+                "height": 3
             }
         },
         {
@@ -661,9 +640,9 @@
             },
             "layout": {
                 "x": 0,
-                "y": 2,
+                "y": 3,
                 "width": 12,
-                "height": 17
+                "height": 1
             }
         },
         {
@@ -1026,9 +1005,9 @@
             },
             "layout": {
                 "x": 0,
-                "y": 19,
+                "y": 4,
                 "width": 12,
-                "height": 13
+                "height": 1
             }
         },
         {
@@ -1246,9 +1225,9 @@
             },
             "layout": {
                 "x": 0,
-                "y": 32,
+                "y": 5,
                 "width": 12,
-                "height": 9
+                "height": 1
             }
         },
         {
@@ -1593,9 +1572,9 @@
             },
             "layout": {
                 "x": 0,
-                "y": 41,
+                "y": 6,
                 "width": 12,
-                "height": 12
+                "height": 1
             }
         },
         {
@@ -1613,7 +1592,6 @@
                             "title": "Distribution by Sender Operations Codes",
                             "title_size": "16",
                             "title_align": "left",
-                            "time": {},
                             "requests": [
                                 {
                                     "response_format": "scalar",
@@ -1681,7 +1659,6 @@
                             "title": "Distribution by Mode of Transfer",
                             "title_size": "16",
                             "title_align": "left",
-                            "time": {},
                             "requests": [
                                 {
                                     "response_format": "scalar",
@@ -1888,9 +1865,9 @@
             },
             "layout": {
                 "x": 0,
-                "y": 53,
+                "y": 7,
                 "width": 12,
-                "height": 9
+                "height": 1
             }
         },
         {
@@ -1908,7 +1885,6 @@
                             "title": "Count of Events by Client’s Protocol Version",
                             "title_size": "16",
                             "title_align": "left",
-                            "time": {},
                             "requests": [
                                 {
                                     "formulas": [
@@ -1976,7 +1952,6 @@
                             "title": "Count of Events by Server’s Protocol Version",
                             "title_size": "16",
                             "title_align": "left",
-                            "time": {},
                             "requests": [
                                 {
                                     "formulas": [
@@ -2113,7 +2088,6 @@
                             "title": "Top 10 Server's Software Version",
                             "title_size": "16",
                             "title_align": "left",
-                            "time": {},
                             "type": "toplist",
                             "requests": [
                                 {
@@ -2257,9 +2231,9 @@
             },
             "layout": {
                 "x": 0,
-                "y": 62,
+                "y": 8,
                 "width": 12,
-                "height": 13
+                "height": 1
             }
         },
         {
@@ -2849,9 +2823,9 @@
             },
             "layout": {
                 "x": 0,
-                "y": 75,
+                "y": 9,
                 "width": 12,
-                "height": 17
+                "height": 1
             }
         },
         {
@@ -3003,7 +2977,6 @@
                             "title": "Distribution by Sender Operations",
                             "title_size": "16",
                             "title_align": "left",
-                            "time": {},
                             "requests": [
                                 {
                                     "response_format": "scalar",
@@ -3307,9 +3280,9 @@
             },
             "layout": {
                 "x": 0,
-                "y": 92,
+                "y": 10,
                 "width": 12,
-                "height": 17
+                "height": 1
             }
         }
     ],
