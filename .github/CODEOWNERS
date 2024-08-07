@@ -268,6 +268,10 @@ datadog_checks_base/datadog_checks/base/checks/windows/              @DataDog/wi
 /ping_one/manifest.json                                             @DataDog/saas-integrations @DataDog/documentation
 /ping_one/assets/logs/                                              @DataDog/saas-integrations @DataDog/documentation @DataDog/logs-backend
 
+/trend_micro_vision_one_xdr/                                        @DataDog/saas-integrations
+/trend_micro_vision_one_xdr/*.md                                    @DataDog/saas-integrations @DataDog/documentation
+/trend_micro_vision_one_xdr/manifest.json                           @DataDog/saas-integrations @DataDog/documentation
+/trend_micro_vision_one_xdr/assets/logs/                            @DataDog/saas-integrations @DataDog/documentation @DataDog/logs-backend
 
 # To keep Security up-to-date with changes to the signing tool.
 /datadog_checks_dev/datadog_checks/dev/tooling/signing.py             @DataDog/agent-integrations
