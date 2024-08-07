@@ -37,7 +37,6 @@ class HazelcastCheck(AgentCheck):
 
         try:
             response = self.http.get(self._mc_health_check_endpoint)
-            print(response.json())
             response.raise_for_status()
             status = response.json()
         except Exception:
