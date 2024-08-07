@@ -5,6 +5,7 @@ import datetime as dt
 import json
 import logging
 import os
+import sys
 import time
 
 import pytest
@@ -24,6 +25,8 @@ from .mocked_api import MockedAPI
 
 @pytest.fixture(autouse=True)
 def mock_vsan_stub():
+    if sys.version_info[0] < 3:
+        return
     with patch('vsanapiutils.GetVsanVcStub') as GetStub:
         GetStub._stub.host = '0.0.0.0'
         yield GetStub
@@ -745,6 +748,7 @@ def test_no_infra_cache_no_perf_values(aggregator, realtime_instance, dd_run_che
         aggregator.assert_all_metrics_covered()
 
 
+@pytest.mark.skipif(sys.version_info < (3, 0), reason="vSAN API is only available in Python 3")
 @pytest.mark.usefixtures("mock_type", "mock_threadpool", "mock_api")
 def test_vsan_metrics_included_in_check(aggregator, realtime_instance, dd_run_check):
     realtime_instance['get_vsan'] = True

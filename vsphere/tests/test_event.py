@@ -3,6 +3,7 @@
 # Licensed under Simplified BSD License (see LICENSE)
 
 import datetime as dt
+import sys
 
 import pytest
 from mock import mock, patch
@@ -16,6 +17,8 @@ from .mocked_api import MockedAPI
 
 @pytest.fixture(autouse=True)
 def mock_vsan_stub():
+    if sys.version_info[0] < 3:
+        return
     with patch('vsanapiutils.GetVsanVcStub') as GetStub:
         GetStub._stub.host = '0.0.0.0'
         yield GetStub
@@ -510,6 +513,7 @@ def test_include_events_empty_event_resource_filters(aggregator, realtime_instan
     assert len(aggregator.events) == 0
 
 
+@pytest.mark.skipif(sys.version_info < (3, 0), reason="vSAN API is only available in Python 3")
 @pytest.mark.usefixtures('mock_type', 'mock_threadpool', 'mock_rest_api')
 def test_vsan_event(aggregator, realtime_instance, dd_run_check, mock_api):
     realtime_instance['get_vsan'] = True

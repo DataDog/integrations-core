@@ -4,11 +4,14 @@
 import datetime as dt  # noqa: F401
 import functools
 import ssl
+import sys
 from typing import Any, Callable, List, TypeVar, cast  # noqa: F401
 
-import vsanapiutils
+if sys.version_info[0] >= 3:
+    import vsanapiutils
+    from pyVmomi import SoapStubAdapter
 from pyVim import connect
-from pyVmomi import SoapStubAdapter, vim, vmodl
+from pyVmomi import vim, vmodl
 from six import itervalues
 
 from datadog_checks.base.log import CheckLoggingAdapter  # noqa: F401
@@ -100,7 +103,8 @@ class VSphereAPI(object):
         self.log = log
 
         self._conn = cast(vim.ServiceInstance, None)
-        self._vsan_stub = cast(SoapStubAdapter, None)
+        if sys.version_info[0] >= 3:
+            self._vsan_stub = cast(SoapStubAdapter, None)
         self.smart_connect()
 
     def smart_connect(self):
@@ -153,7 +157,8 @@ class VSphereAPI(object):
             connect.Disconnect(self._conn)
 
         self._conn = conn
-        self._vsan_stub = vsanapiutils.GetVsanVcStub(conn._stub, context=context)
+        if sys.version_info[0] >= 3:
+            self._vsan_stub = vsanapiutils.GetVsanVcStub(conn._stub, context=context)
         self.log.debug("Connected to %s", version_info.fullName)
 
     @smart_retry
